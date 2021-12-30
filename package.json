@@ -1,0 +1,17 @@
+{
+  "name": "stump",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/aaronleopold/stump.git",
+  "author": "Aaron Leopold <36278431+aaronleopold@users.noreply.github.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "cd stump && cargo run --release",
+    "dev": "concurrently \"yarn server:dev\" \"yarn web:dev\"",
+    "server:dev": "cd stump && cargo watch -x run",
+    "web:dev": "cd stump-web && yarn dev"
+  },
+  "devDependencies": {
+    "concurrently": "^6.5.1"
+  }
+}

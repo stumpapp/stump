@@ -1,0 +1,17 @@
+target
+
+# web
+node_modules
+/web/build
+/web/.svelte-kit
+/web/package
+.env
+.env.*
+$houdini
+server/static/libraries/*
+*-error.log
+
+
+
+# os
+.DS_Store

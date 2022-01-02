@@ -2,16 +2,16 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use xml::{writer::XmlEvent, EventWriter};
 
-use super::util;
+use super::{link::OpdsLink, util};
 
 #[derive(Debug)]
 pub struct OpdsEntry {
     id: String,
     updated: DateTime<Utc>,
     title: String,
-    content: String,
+    content: Option<String>,
     authors: Vec<String>,
-    // links: Vec<OpdsLink>,
+    links: Vec<OpdsLink>,
 }
 
 impl OpdsEntry {
@@ -19,7 +19,7 @@ impl OpdsEntry {
         id: String,
         updated: DateTime<Utc>,
         title: String,
-        content: String,
+        content: Option<String>,
         authors: Vec<String>,
     ) -> Self {
         Self {
@@ -28,17 +28,23 @@ impl OpdsEntry {
             title,
             content,
             authors,
-            // links: Vec::new(),
+            links: Vec::new(),
         }
     }
 
     pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> Result<()> {
         writer.write(XmlEvent::start_element("entry"))?;
 
-        util::write_xml_element("title", &self.title, writer)?;
-        util::write_xml_element("id", &self.id, writer)?;
+        util::write_xml_element("title", self.title.as_str(), writer)?;
+        util::write_xml_element("id", self.id.as_str(), writer)?;
         util::write_xml_element("updated", &self.updated.to_rfc3339(), writer)?;
-        util::write_xml_content(&self.content, writer)?;
+
+        if let Some(content) = self.get_content() {
+            util::write_xml_element("content", content.as_str(), writer)?;
+        } else {
+            writer.write(XmlEvent::start_element("content"))?;
+            writer.write(XmlEvent::end_element())?;
+        }
 
         writer.write(XmlEvent::start_element("author"))?;
         for author in &self.authors {
@@ -46,10 +52,20 @@ impl OpdsEntry {
         }
         writer.write(XmlEvent::end_element())?; // end of author
 
-        // TODO: write links
+        for link in &self.links {
+            link.write(writer)?;
+        }
 
         writer.write(XmlEvent::end_element())?; // end of entry
 
         Ok(())
+    }
+
+    fn get_content(&self) -> Option<String> {
+        if let Some(content) = &self.content {
+            Some(content.clone().replace("\n", "<br/>"))
+        } else {
+            None
+        }
     }
 }

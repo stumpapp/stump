@@ -1,6 +1,10 @@
 use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
 
+pub trait OpdsEnumStr {
+    fn as_str(&self) -> &'static str;
+}
+
 pub fn tag_id_from_url(tag_authority: &str, url: &str) -> String {
     format!(
         "tag:{}:{}",

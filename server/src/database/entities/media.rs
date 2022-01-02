@@ -19,40 +19,43 @@ pub enum MediaStatus {
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-// #[graphql(concrete(name = "Media", params()))]
 #[sea_orm(table_name = "media")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    /// The id of the library this media belongs to.
-    pub library_id: i32,
-    /// name of the media. ex: "The Matrix"
+    /// The id of the series this media belongs to.
+    pub series_id: i32,
+    /// name of the media. ex: "The Amazing Spider-Man (2018) #69.cbz"
     pub name: String,
-    /// description of the media. ex: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers."
+    /// description of the media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
     pub description: Option<String>,
-    /// the year in which the media was released. ex: 1999
-    pub year: Option<i64>,
-    /// the date in which the media was added to the FS. ex: "2020-01-01"
-    pub added_at: Option<String>,
+    /// the size of the media in bytes.
+    pub size: i64,
+    /// the file extension of the media. ex: "cbz"
+    pub extension: String,
+    /// the number of pages in the media. ex: "69"
+    pub pages: i32,
+    /// the date in which the media was last updated in the FS. ex: "2020-01-01"
+    pub updated_at: Option<String>,
     /// whether or not the media is downloaded to the client. ex: true
     pub downloaded: bool,
-    /// the url of the media. ex: "/home/user/media/movies/The Matrix.mkv"
+    /// the url of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
     pub url: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::library::Entity",
-        from = "Column::LibraryId"
-        to="super::library::Column::Id"
+        belongs_to = "super::series::Entity",
+        from = "Column::SeriesId"
+        to="super::series::Column::Id"
     )]
-    Library,
+    Series,
 }
 
-impl Related<super::library::Entity> for Entity {
+impl Related<super::series::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Library.def()
+        Relation::Series.def()
     }
 }
 

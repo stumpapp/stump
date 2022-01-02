@@ -1,4 +1,6 @@
-use rocket::futures::executor::block_on;
+use rocket::{fs::NamedFile, futures::executor::block_on};
+use std::env;
+use std::path::{Path, PathBuf};
 
 #[macro_use]
 extern crate rocket;
@@ -17,37 +19,57 @@ pub type State = rocket::State<Database>;
 #[response(content_type = "xml")]
 struct XmlResponse(String);
 
+// #[get("/")]
+// fn index() -> &'static str {
+//     "Welcome to Stump (name TBD)"
+// }
+
+// #[get("/test")]
+// fn test() -> XmlResponse {
+//     let entries = vec![
+//         opds::entry::OpdsEntry::new(
+//             "eqrdfa2dvaca".to_string(),
+//             chrono::Utc::now(),
+//             "Spider-Man #69".to_string(),
+//             None,
+//             vec!["me".to_string()],
+//         ),
+//         opds::entry::OpdsEntry::new(
+//             "dafafafadfad".to_string(),
+//             chrono::Utc::now(),
+//             "Spider-Man #420".to_string(),
+//             None,
+//             vec!["me".to_string()],
+//         ),
+//     ];
+
+//     let feed = opds::feed::OpdsFeed::new(
+//         "root".to_string(),
+//         "Stump OPDS catalog".to_string(),
+//         entries,
+//     );
+
+//     XmlResponse(feed.build().unwrap())
+// }
+
 #[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+async fn index() -> Option<NamedFile> {
+    let page_directory_path = get_directory_path();
+    NamedFile::open(Path::new(&page_directory_path).join("index.html"))
+        .await
+        .ok()
 }
 
-#[get("/test")]
-fn test() -> XmlResponse {
-    let entries = vec![
-        opds::entry::OpdsEntry::new(
-            "eqrdfa2dvaca".to_string(),
-            chrono::Utc::now(),
-            "Spider-Man #69".to_string(),
-            None,
-            vec!["me".to_string()],
-        ),
-        opds::entry::OpdsEntry::new(
-            "dafafafadfad".to_string(),
-            chrono::Utc::now(),
-            "Spider-Man #420".to_string(),
-            None,
-            vec!["me".to_string()],
-        ),
-    ];
+#[get("/<file..>")]
+async fn files(file: PathBuf) -> Option<NamedFile> {
+    let page_directory_path = get_directory_path();
+    NamedFile::open(Path::new(&page_directory_path).join(file))
+        .await
+        .ok()
+}
 
-    let feed = opds::feed::OpdsFeed::new(
-        "root".to_string(),
-        "Stump OPDS catalog".to_string(),
-        entries,
-    );
-
-    XmlResponse(feed.build().unwrap())
+fn get_directory_path() -> String {
+    format!("{}/../web/build", env!("CARGO_MANIFEST_DIR"))
 }
 
 #[launch]
@@ -64,7 +86,7 @@ fn rocket() -> _ {
 
     rocket::build()
         .manage(db)
-        .mount("/", routes![index, test])
+        .mount("/", routes![index, files])
         .mount("/api", routes![routing::api::scan])
         .mount("/opds/v1.2", routes![routing::opds::catalog])
 }

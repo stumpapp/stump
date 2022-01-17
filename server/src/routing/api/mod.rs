@@ -1,3 +1,6 @@
+pub mod library_api;
+pub mod media_api;
+
 use sea_orm::EntityTrait;
 
 use crate::{
@@ -5,8 +8,9 @@ use crate::{
     fs, State,
 };
 
-/// BASE URL: /api
+// BASE URL: /api
 
+/// A handler for GET /api/scan. Scans the library for new media files and updates the database accordingly.
 #[get("/scan")]
 pub async fn scan(db: &State) -> Result<String, String> {
     let connection = db.get_connection();

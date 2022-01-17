@@ -15,9 +15,9 @@ use database::Database;
 
 pub type State = rocket::State<Database>;
 
-#[derive(Responder)]
-#[response(content_type = "xml")]
-struct XmlResponse(String);
+// #[derive(Responder)]
+// #[response(content_type = "xml")]
+// struct XmlResponse(String);
 
 // #[get("/")]
 // fn index() -> &'static str {
@@ -25,32 +25,7 @@ struct XmlResponse(String);
 // }
 
 // #[get("/test")]
-// fn test() -> XmlResponse {
-//     let entries = vec![
-//         opds::entry::OpdsEntry::new(
-//             "eqrdfa2dvaca".to_string(),
-//             chrono::Utc::now(),
-//             "Spider-Man #69".to_string(),
-//             None,
-//             vec!["me".to_string()],
-//         ),
-//         opds::entry::OpdsEntry::new(
-//             "dafafafadfad".to_string(),
-//             chrono::Utc::now(),
-//             "Spider-Man #420".to_string(),
-//             None,
-//             vec!["me".to_string()],
-//         ),
-//     ];
-
-//     let feed = opds::feed::OpdsFeed::new(
-//         "root".to_string(),
-//         "Stump OPDS catalog".to_string(),
-//         entries,
-//     );
-
-//     XmlResponse(feed.build().unwrap())
-// }
+// fn test()
 
 #[get("/")]
 async fn index() -> Option<NamedFile> {

@@ -1,12 +1,12 @@
 # Stump
 
-A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga). Name TBD.
+A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga).
 
 While I love Komga, I've found that it can be rather resource heavy on the little raspberry pi I host all my home media on. I thought it would be cool to learn what goes into making something like this, and opted to take advantage of the performance Rust has to hopefully, at the end of all this, create something just as convenient but with a smaller footprint.
 
 ## Roadmap
 
-TBD is extremely early in development, so there is a LOT to get started - gotta start somewhere though! These are my current end-goals:
+Stump is extremely early in development, so there is a LOT to get started - gotta start somewhere though! These are my current end-goals:
 
 - [ ] Install on server directly or using docker image
   - [ ] Get docker working
@@ -28,7 +28,7 @@ Contributions are **encouraged** and **welcome**! Please open an issue prior to 
 
 ## Getting Started
 
-As stated, TBD is in _very_ early development. The web interface is not yet functional, and the API is not remotely stable.
+As stated, Stump is in _very_ early development. The web interface is not yet functional, and the API is not remotely stable.
 
 To run the server:
 

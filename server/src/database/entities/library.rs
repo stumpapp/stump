@@ -7,7 +7,9 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    /// The location of the library in the fs. ex: "/home/user/media/comics"
+    /// The name of the library. ex: "Marvel Comics"
+    pub name: String,
+    /// The location of the library in the fs. ex: "/home/user/media/comics/marvel"
     pub path: String,
 }
 

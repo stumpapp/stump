@@ -7,9 +7,9 @@
   "license": "MIT",
   "scripts": {
     "start": "cd server && cargo run --release",
-    "dev": "concurrently \"yarn server:dev\" \"yarn web:dev\"",
+    "dev": "concurrently \"yarn server:dev\" \"yarn frontend:dev\"",
     "server:dev": "cd server && cargo watch -x run",
-    "web:dev": "cd web && yarn dev"
+    "frontend:dev": "cd frontend && yarn dev"
   },
   "devDependencies": {
     "concurrently": "^6.5.1"

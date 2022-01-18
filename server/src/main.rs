@@ -15,18 +15,6 @@ use database::Database;
 
 pub type State = rocket::State<Database>;
 
-// #[derive(Responder)]
-// #[response(content_type = "xml")]
-// struct XmlResponse(String);
-
-// #[get("/")]
-// fn index() -> &'static str {
-//     "Welcome to Stump (name TBD)"
-// }
-
-// #[get("/test")]
-// fn test()
-
 #[get("/")]
 async fn index() -> Option<NamedFile> {
     let page_directory_path = get_directory_path();
@@ -35,6 +23,7 @@ async fn index() -> Option<NamedFile> {
         .ok()
 }
 
+// FIXME: keeps matching annoyingly. Add prefix to this? like 'static'?
 #[get("/<file..>")]
 async fn files(file: PathBuf) -> Option<NamedFile> {
     let page_directory_path = get_directory_path();
@@ -62,6 +51,17 @@ fn rocket() -> _ {
     rocket::build()
         .manage(db)
         .mount("/", routes![index, files])
-        .mount("/api", routes![routing::api::scan])
+        .mount(
+            "/api",
+            routes![
+                // top level
+                routing::api::scan,
+                // library api
+                routing::api::library_api::get_libraries,
+                routing::api::library_api::insert_library,
+                routing::api::library_api::update_library,
+                routing::api::library_api::delete_library,
+            ],
+        )
         .mount("/opds/v1.2", routes![routing::opds::catalog])
 }

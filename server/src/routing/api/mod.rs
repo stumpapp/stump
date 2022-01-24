@@ -13,7 +13,7 @@ use crate::{
 // BASE URL: /api
 
 /// A handler for GET /api/scan. Scans the library for new media files and updates the database accordingly.
-// TODO: make subscription that returns progress updates?
+// TODO: make subscription that returns progress updates? https://rocket.rs/v0.5-rc/guide/responses/#async-streams
 #[get("/scan")]
 pub async fn scan(db: &State) -> Result<String, String> {
     let connection = db.get_connection();
@@ -35,6 +35,7 @@ pub async fn scan(db: &State) -> Result<String, String> {
 
     // fs::scan::scan(connection, libraries, media);
     let scanner = fs::scan::Scanner::new(connection, libraries, media);
+    // scanner.scan().on_data(|_| {}) etc ????
     scanner.scan();
 
     Ok(format!("{:?}", connection))

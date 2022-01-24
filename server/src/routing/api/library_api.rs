@@ -28,6 +28,29 @@ pub struct InsertLibrary<'r> {
 /// A handler for POST /api/library. Inserts a new library into the database.
 #[post("/library", data = "<lib>")]
 pub async fn insert_library(db: &State, lib: Json<InsertLibrary<'_>>) -> Result<String, String> {
+    let libraries = library::Entity::find()
+        .all(db.get_connection())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if libraries.iter().any(|l| {
+        // library and name must be unique
+        if l.name == lib.name || l.path == lib.path {
+            return true;
+        }
+        // FIXME: this fails an edge case, I need to grab the absolute path to do this in this manner
+        // path may not be a subpath or parent of another library
+        else if lib.path.starts_with(&l.path) || l.path.starts_with(&lib.path) {
+            return true;
+        }
+
+        false
+    }) {
+        return Err(
+            "Library already exists or is a child/parent to an existing library".to_string(),
+        );
+    }
+
     let new_lib = library::ActiveModel {
         name: Set(lib.name.to_string()),
         path: Set(lib.path.to_string()),

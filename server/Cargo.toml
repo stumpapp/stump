@@ -14,7 +14,7 @@ env_logger = "0.8.4"
 anyhow = "1.0.52"
 dirs = "4.0.0"
 derive_more = "0.99.17"
-unrar = "0.4.4"
+unrar = { git = "https://github.com/aaronleopold/unrar.rs" }
 zip = "0.5.13"
 xml-rs = "0.8.4"
 serde-xml-rs = "0.5.1"

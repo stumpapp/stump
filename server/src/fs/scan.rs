@@ -1,7 +1,10 @@
 use crate::{
     database::entities::library,
-    fs::checksum::Crc,
-    types::dto::{GetMediaQuery, GetMediaQueryResult},
+    fs::{checksum::Crc, media_file::MediaProcessor},
+    types::{
+        comic::ComicInfo,
+        dto::{GetMediaQuery, GetMediaQueryResult},
+    },
 };
 use sea_orm::DatabaseConnection;
 use std::{collections::HashMap, fs, path::PathBuf};
@@ -68,13 +71,28 @@ impl<'a> Scanner<'a> {
 
                 if !self.media.contains_key(&checksum) {
                     println!("New file found: {}", path.to_str().unwrap());
+                    println!("metadata: {:?}", file.metadata().unwrap());
+
+                    let processor = MediaProcessor::new(file);
+                    let res = processor.process_file();
+
+                    match res {
+                        Ok(res) => {
+                            let comic_info = res.0;
+
+                            // FIXME: move this inside the MediaProcessor
+                            if let Some(comic_info) = comic_info {
+                                let test: ComicInfo = serde_xml_rs::from_str(&comic_info).unwrap();
+                                println!("{:?}", test);
+                            }
+                        }
+                        Err(e) => println!("Error: {:?}", e),
+                    }
                 } else {
                     println!("Already present in database: {}", path.to_str().unwrap());
                 }
             }
         }
-
-        // generate a checksum for each file and check if it exists in the database
     }
 
     pub fn scan(&self) -> usize {

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use sea_orm::{ConnectionTrait, DatabaseConnection, DbBackend, ExecResult, Schema};
+use sea_orm::{ConnectionTrait, DatabaseConnection, DbBackend, Schema};
 
 pub mod connection;
 pub mod entities;
@@ -19,16 +19,38 @@ impl Database {
         let db_backend = DbBackend::Sqlite;
         let schema = Schema::new(db_backend);
 
-        // let media_creation_statement = db_backend.build(
-        //     schema
-        //         .create_table_from_entity(entities::media::Entity)
-        //         .if_not_exists(),
-        // );
+        let media_creation_statement = db_backend.build(
+            schema
+                .create_table_from_entity(entities::media::Entity)
+                .if_not_exists(),
+        );
 
-        // self.connection
-        //     .execute(media_creation_statement)
-        //     .await
-        //     .map_err(|e| e.to_string())?;
+        let series_creation_statement = db_backend.build(
+            schema
+                .create_table_from_entity(entities::series::Entity)
+                .if_not_exists(),
+        );
+
+        let library_creation_statement = db_backend.build(
+            schema
+                .create_table_from_entity(entities::library::Entity)
+                .if_not_exists(),
+        );
+
+        self.connection
+            .execute(media_creation_statement)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        self.connection
+            .execute(series_creation_statement)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        self.connection
+            .execute(library_creation_statement)
+            .await
+            .map_err(|e| e.to_string())?;
 
         Ok(())
     }

@@ -24,7 +24,7 @@ I am unsure how configurable this project will wind up being. Should there be us
 
 ## Contributing
 
-Contributions are **encouraged** and **welcome**! Please open an issue prior to working on a bug or feature to let me know what you're interested in working on. Thanks!
+Contributions are **encouraged** and **welcome**! Please open an issue prior to working on a bug or feature to let me know what you're interested in working on.Thanks!
 
 ## Getting Started
 

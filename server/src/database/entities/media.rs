@@ -39,8 +39,10 @@ pub struct Model {
     pub updated_at: Option<String>,
     /// whether or not the media is downloaded to the client. ex: true
     pub downloaded: bool,
-    /// the url of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
-    pub url: String,
+    /// the checksum hash of the file contents. Used to ensure only one instance of a file in the database
+    pub checksum: String,
+    /// the path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
+    pub path: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

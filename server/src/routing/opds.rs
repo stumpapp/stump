@@ -1,10 +1,10 @@
-use crate::{opds, types::XmlResponse, State};
+use crate::{opds, types::rocket::XmlResponse, State};
 
 // BASE URL: /opds/v1.2
 
 /// A handler for GET /opds/v1.2/catalog. Returns an OPDS catalog as an XML document
 #[get("/catalog")]
-pub fn catalog(db: &State) -> XmlResponse {
+pub fn catalog(_db: &State) -> XmlResponse {
     // TODO: media from database
     let entries = vec![
         opds::entry::OpdsEntry::new(

@@ -1,34 +1,41 @@
 pub mod library_api;
 pub mod media_api;
 
-use sea_orm::EntityTrait;
+use sea_orm::{EntityTrait, JoinType, QuerySelect, RelationTrait};
 
 use crate::{
     database::entities::{library, media, series},
-    fs, State,
+    fs,
+    types::dto::GetMediaQuery,
+    State,
 };
 
 // BASE URL: /api
 
 /// A handler for GET /api/scan. Scans the library for new media files and updates the database accordingly.
+// TODO: make subscription that returns progress updates?
 #[get("/scan")]
 pub async fn scan(db: &State) -> Result<String, String> {
     let connection = db.get_connection();
 
-    let media_folders = library::Entity::find()
-        // .find_with_related(media::Entity)
-        .all(connection)
-        .await
-        .expect("Could not find media folders");
+    let libraries = library::Entity::find().all(connection).await.unwrap();
 
-    // TODO: use hashmap?
-    let series_media = series::Entity::find()
-        .find_with_related(media::Entity)
-        .all(connection)
+    let media = media::Entity::find()
+        .column_as(library::Column::Id, "library_id")
+        .column_as(library::Column::Path, "library_path")
+        .column_as(series::Column::Path, "series_path")
+        .join(JoinType::InnerJoin, media::Relation::Series.def())
+        .group_by(series::Column::Id)
+        .join(JoinType::InnerJoin, series::Relation::Library.def())
+        .group_by(library::Column::Id)
+        .into_model::<GetMediaQuery>()
+        .all(db.get_connection())
         .await
-        .expect("Could not find media");
+        .map_err(|e| e.to_string())?;
 
-    let new_media_count = fs::scan(connection, media_folders);
+    // fs::scan::scan(connection, libraries, media);
+    let scanner = fs::scan::Scanner::new(connection, libraries, media);
+    scanner.scan();
 
     Ok(format!("{:?}", connection))
 }

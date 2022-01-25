@@ -63,5 +63,8 @@ fn rocket() -> _ {
                 routing::api::library_api::delete_library,
             ],
         )
-        .mount("/opds/v1.2", routes![routing::opds::catalog])
+        .mount(
+            "/opds/v1.2",
+            routes![routing::opds::catalog, routing::opds::series],
+        )
 }

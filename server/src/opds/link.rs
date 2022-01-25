@@ -1,7 +1,7 @@
 use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
 
-use super::util::{self, OpdsEnumStr};
+use super::util::OpdsEnumStr;
 
 #[derive(Debug)]
 pub enum OpdsLinkType {
@@ -29,6 +29,7 @@ impl OpdsEnumStr for OpdsLinkType {
 #[derive(Debug)]
 pub enum OpdsLinkRel {
     ItSelf,     // self
+    Subsection, // "subsection",
     Start,      // start
     Next,       // next
     Thumbnail,  // "http://opds-spec.org/image/thumbnail"
@@ -39,6 +40,7 @@ impl OpdsEnumStr for OpdsLinkRel {
     fn as_str(&self) -> &'static str {
         match self {
             OpdsLinkRel::ItSelf => "self",
+            OpdsLinkRel::Subsection => "subsection",
             OpdsLinkRel::Start => "start",
             OpdsLinkRel::Next => "next",
             OpdsLinkRel::Thumbnail => "http://opds-spec.org/image/thumbnail",
@@ -55,13 +57,21 @@ pub struct OpdsLink {
 }
 
 impl OpdsLink {
+    pub fn new(link_type: OpdsLinkType, rel: OpdsLinkRel, href: String) -> Self {
+        Self {
+            link_type,
+            rel,
+            href,
+        }
+    }
+
     pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> Result<()> {
-        writer.write(xml::writer::XmlEvent::start_element("link"))?;
+        let link = XmlEvent::start_element("link")
+            .attr("type", self.link_type.as_str())
+            .attr("rel", self.rel.as_str())
+            .attr("href", &self.href);
 
-        util::write_xml_element("type", self.link_type.as_str(), writer)?;
-        util::write_xml_element("rel", self.rel.as_str(), writer)?;
-        util::write_xml_element("href", &self.href, writer)?;
-
+        writer.write(link)?;
         writer.write(XmlEvent::end_element())?; // end of link
         Ok(())
     }

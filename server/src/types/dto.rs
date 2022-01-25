@@ -21,3 +21,21 @@ pub struct GetMediaQuery {
 }
 
 pub type GetMediaQueryResult = Vec<GetMediaQuery>;
+
+pub struct GetSeriesQuery {
+    pub id: i32,
+    pub path: String,
+    pub title: String,
+    pub book_count: i32,
+    // pub thumbnail: String,
+}
+
+pub struct SeriesWithThumbnail {
+    pub id: i32,
+    pub path: String,
+    pub title: String,
+    pub book_count: i32,
+    pub thumbnail: String,
+}
+
+pub type SeriesList = Vec<SeriesWithThumbnail>;

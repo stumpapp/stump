@@ -18,3 +18,17 @@ pub struct ComicInfo {
     #[serde(rename = "PageCount")]
     pub page_count: Option<usize>,
 }
+
+impl ComicInfo {
+    pub fn default() -> Self {
+        Self {
+            series: None,
+            number: None,
+            web: None,
+            summary: None,
+            publisher: None,
+            genre: None,
+            page_count: None,
+        }
+    }
+}

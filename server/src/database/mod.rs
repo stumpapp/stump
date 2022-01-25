@@ -1,5 +1,8 @@
 use anyhow::Result;
 use sea_orm::{ConnectionTrait, DatabaseConnection, DbBackend, Schema};
+// use walkdir::DirEntry;
+
+// use crate::types::comic::ComicInfo;
 
 pub mod connection;
 pub mod entities;
@@ -62,4 +65,6 @@ impl Database {
     pub fn get_connection(&self) -> &DatabaseConnection {
         &self.connection
     }
+
+    // pub async fn insert_media(&self, file: DirEntry, media: (Option<ComicInfo>, Vec<String>)) {}
 }

@@ -1,4 +1,6 @@
-use crate::{opds, types::rocket::XmlResponse, State};
+use sea_orm::EntityTrait;
+
+use crate::{database::entities, opds, types::rocket::XmlResponse, State};
 
 // BASE URL: /opds/v1.2
 
@@ -30,4 +32,26 @@ pub fn catalog(_db: &State) -> XmlResponse {
     );
 
     XmlResponse(feed.build().unwrap())
+}
+
+/// A handler for GET /opds/v1.2/series
+#[get("/series")]
+pub async fn series(db: &State) -> Result<XmlResponse, String> {
+    let res = entities::series::Entity::find()
+        .all(db.get_connection())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let entries = res
+        .into_iter()
+        .map(|s| opds::entry::OpdsEntry::from(s))
+        .collect();
+
+    let feed = opds::feed::OpdsFeed::new(
+        "root".to_string(),
+        "Stump OPDS All Series".to_string(),
+        entries,
+    );
+
+    Ok(XmlResponse(feed.build().unwrap()))
 }

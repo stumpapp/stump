@@ -2,7 +2,12 @@ use anyhow::Result;
 use chrono::{DateTime, Utc};
 use xml::{writer::XmlEvent, EventWriter};
 
-use super::{link::OpdsLink, util};
+use crate::database::entities::series;
+
+use super::{
+    link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
+    util,
+};
 
 #[derive(Debug)]
 pub struct OpdsEntry {
@@ -66,6 +71,32 @@ impl OpdsEntry {
             Some(content.clone().replace("\n", "<br/>"))
         } else {
             None
+        }
+    }
+}
+
+impl From<series::Model> for OpdsEntry {
+    fn from(s: series::Model) -> Self {
+        let mut links = Vec::new();
+        let mut authors = Vec::new();
+
+        let nav_link = OpdsLink::new(
+            OpdsLinkType::Navigation,
+            OpdsLinkRel::Subsection,
+            format!("/opds/v1.2/series/{}", s.id),
+        );
+
+        links.push(nav_link);
+
+        OpdsEntry {
+            id: s.id.to_string(),
+            // FIXME:
+            updated: chrono::Utc::now(),
+            title: s.title,
+            // FIXME:
+            content: None,
+            authors,
+            links,
         }
     }
 }

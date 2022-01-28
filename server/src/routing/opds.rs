@@ -1,6 +1,15 @@
-use sea_orm::EntityTrait;
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+extern crate base64;
 
-use crate::{database::entities, opds, types::rocket::XmlResponse, State};
+use crate::fs::media_file::get_zip_thumbnail;
+use crate::opds::feed::OpdsFeed;
+use crate::types::rocket::ImageResponse;
+use crate::{
+    database::entities::{self, media},
+    opds,
+    types::rocket::XmlResponse,
+    State,
+};
 
 // BASE URL: /opds/v1.2
 
@@ -14,14 +23,16 @@ pub fn catalog(_db: &State) -> XmlResponse {
             chrono::Utc::now(),
             "Spider-Man #69".to_string(),
             None,
-            vec!["me".to_string()],
+            Some(vec!["me".to_string()]),
+            None,
         ),
         opds::entry::OpdsEntry::new(
             "dafafafadfad".to_string(),
             chrono::Utc::now(),
             "Spider-Man #420".to_string(),
             None,
-            vec!["me".to_string()],
+            Some(vec!["me".to_string()]),
+            None,
         ),
     ];
 
@@ -54,4 +65,52 @@ pub async fn series(db: &State) -> Result<XmlResponse, String> {
     );
 
     Ok(XmlResponse(feed.build().unwrap()))
+}
+
+#[get("/series/<id>?<page>")]
+pub async fn series_by_id(
+    id: String,
+    page: Option<usize>,
+    db: &State,
+) -> Result<XmlResponse, String> {
+    let res = entities::series::Entity::find()
+        .filter(entities::series::Column::Id.eq(id))
+        .find_with_related(media::Entity)
+        .all(db.get_connection())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if res.len() != 1 {
+        return Err("Series not found".to_string());
+    }
+
+    let series_with_media: (entities::series::Model, Vec<media::Model>) = res[0].to_owned();
+
+    // I have to do this so I can pass the page into the conversion, so the 'next' link can be
+    // generated correctly
+    let payload = (series_with_media, page);
+
+    let feed = OpdsFeed::from(payload);
+
+    Ok(XmlResponse(feed.build().unwrap()))
+}
+
+// FIXME: this needs to actually return an image
+#[get("/books/<id>/thumbnail")]
+pub async fn book_thumbnail(id: String, db: &State) -> Result<String, String> {
+    let book: Option<media::Model> = media::Entity::find()
+        .filter(media::Column::Id.eq(id))
+        .one(db.get_connection())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if let Some(b) = book {
+        let buffer = get_zip_thumbnail(&b.path).map_err(|e| e.to_string())?;
+        // let encoded = base64::encode(&buffer);
+
+        // Ok(ImageResponse()
+        Ok("Ok".to_string())
+    } else {
+        Err("Book not found".to_string())
+    }
 }

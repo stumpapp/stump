@@ -1,3 +1,4 @@
+use crate::database::entities::{media, series};
 use sea_orm::FromQueryResult;
 
 // I wanted to flatten this query into one struct to simplify some of the fs indexing logic
@@ -37,5 +38,3 @@ pub struct SeriesWithThumbnail {
     pub book_count: i32,
     pub thumbnail: String,
 }
-
-pub type SeriesList = Vec<SeriesWithThumbnail>;

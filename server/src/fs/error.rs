@@ -10,6 +10,8 @@ pub enum ProcessFileError {
     ArchiveOpenError(#[from] std::io::Error),
     #[error("Could not read archive file")]
     ArchiveReadError(#[from] ZipError),
+    #[error("Archive contains no files")]
+    ArchiveEmptyError,
     #[error("Could not open rar file")]
     RarOpenError,
     #[error("Error reading file content in rar")]

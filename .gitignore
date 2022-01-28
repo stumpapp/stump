@@ -9,9 +9,10 @@ node_modules
 .env.*
 $houdini
 server/static/libraries/*
-*-error.log
-
-
+*.log
 
 # os
 .DS_Store
+
+# editors / idea
+.idea

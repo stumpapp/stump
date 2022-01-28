@@ -10,6 +10,7 @@ pub struct Model {
     /// The name of the library. ex: "Marvel Comics"
     pub name: String,
     /// The location of the library in the fs. ex: "/home/user/media/comics/marvel"
+    #[sea_orm(unique)]
     pub path: String,
 }
 

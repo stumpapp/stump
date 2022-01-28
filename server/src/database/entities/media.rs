@@ -40,6 +40,7 @@ pub struct Model {
     /// whether or not the media is downloaded to the client. ex: true
     pub downloaded: bool,
     /// the checksum hash of the file contents. Used to ensure only one instance of a file in the database
+    #[sea_orm(unique)]
     pub checksum: String,
     /// the path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
     pub path: String,

@@ -1,7 +1,10 @@
+use crate::opds::author::OpdsAuthor;
+use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{entry::OpdsEntry, util};
+use crate::types::alias::SeriesWithMedia;
 
 #[derive(Debug)]
 pub struct OpdsFeed {
@@ -44,5 +47,49 @@ impl OpdsFeed {
         writer.write(XmlEvent::end_element())?; // end of feed
 
         Ok(String::from_utf8(writer.into_inner())?)
+    }
+}
+
+impl From<(SeriesWithMedia, Option<usize>)> for OpdsFeed {
+    fn from(payload: (SeriesWithMedia, Option<usize>)) -> Self {
+        let (series_with_media, page) = payload;
+        // let series = series_with_media.0;
+        let (series, media) = series_with_media;
+
+        let id = series.id.to_string();
+        let title = series.title;
+
+        // // TODO: use this
+        // let author = OpdsAuthor::new(
+        //     "Stump".to_string(),
+        //     Some("https://github.com/aaronleopold/stump".to_string()),
+        // );
+
+        let next_page = match page {
+            Some(p) => p + 1,
+            None => 1,
+        };
+
+        let links = vec![
+            OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::ItSelf,
+                format!("/opds/v1.2/series/{}", id),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::Next,
+                format!("/opds/v1.2/series/{}?page={}", id, next_page),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::Start,
+                "/opds/v1.2/catalog".to_string(),
+            ),
+        ];
+
+        let mut entries = media.into_iter().map(OpdsEntry::from).collect();
+
+        Self::new(id, title, entries)
     }
 }

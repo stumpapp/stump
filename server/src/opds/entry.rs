@@ -1,8 +1,9 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
+use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::database::entities::series;
+use crate::database::entities::{media, series};
 
 use super::{
     link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
@@ -15,7 +16,7 @@ pub struct OpdsEntry {
     updated: DateTime<Utc>,
     title: String,
     content: Option<String>,
-    authors: Vec<String>,
+    authors: Option<Vec<String>>,
     links: Vec<OpdsLink>,
 }
 
@@ -25,15 +26,21 @@ impl OpdsEntry {
         updated: DateTime<Utc>,
         title: String,
         content: Option<String>,
-        authors: Vec<String>,
+        authors: Option<Vec<String>>,
+        links: Option<Vec<OpdsLink>>,
     ) -> Self {
+        let links = match links {
+            Some(links) => links,
+            None => vec![],
+        };
+
         Self {
             id,
             updated,
             title,
             content,
             authors,
-            links: Vec::new(),
+            links,
         }
     }
 
@@ -51,11 +58,15 @@ impl OpdsEntry {
             writer.write(XmlEvent::end_element())?;
         }
 
-        writer.write(XmlEvent::start_element("author"))?;
-        for author in &self.authors {
-            util::write_xml_element("name", &author, writer)?;
+        if let Some(authors) = &self.authors {
+            writer.write(XmlEvent::start_element("author"))?;
+
+            for author in authors {
+                util::write_xml_element("name", author.as_str(), writer)?;
+            }
+
+            writer.write(XmlEvent::end_element())?; // end of author
         }
-        writer.write(XmlEvent::end_element())?; // end of author
 
         for link in &self.links {
             link.write(writer)?;
@@ -78,7 +89,6 @@ impl OpdsEntry {
 impl From<series::Model> for OpdsEntry {
     fn from(s: series::Model) -> Self {
         let mut links = Vec::new();
-        let mut authors = Vec::new();
 
         let nav_link = OpdsLink::new(
             OpdsLinkType::Navigation,
@@ -95,8 +105,53 @@ impl From<series::Model> for OpdsEntry {
             title: s.title,
             // FIXME:
             content: None,
-            authors,
+            authors: None,
             links,
+        }
+    }
+}
+
+impl From<media::Model> for OpdsEntry {
+    fn from(m: media::Model) -> Self {
+        let base_url = format!("/opds/v1.2/books/{}", m.id);
+        let file_name = format!("{}.{}", m.name, m.extension);
+        let file_name_encoded = encode(&file_name);
+
+        let links = vec![
+            OpdsLink::new(
+                OpdsLinkType::Image,
+                OpdsLinkRel::Thumbnail,
+                format!("{}/thumbnail", base_url),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Image,
+                OpdsLinkRel::Image,
+                format!("{}/pages/1", base_url),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::Subsection,
+                format!("{}/file/{}", base_url, file_name_encoded),
+            ),
+        ];
+
+        let mib = m.size as f64 / (1024.0 * 1024.0);
+
+        let content = match m.description {
+            Some(description) => Some(format!(
+                "{:.1} MiB - {}<br/><br/>{}",
+                mib, m.extension, description
+            )),
+            None => Some(format!("{:.1} MiB - {}", mib, m.extension)),
+        };
+
+        OpdsEntry {
+            id: m.id.to_string(),
+            title: m.name,
+            updated: chrono::Utc::now(),
+            content,
+            links,
+            authors: None,
         }
     }
 }

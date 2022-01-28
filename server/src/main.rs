@@ -65,6 +65,13 @@ fn rocket() -> _ {
         )
         .mount(
             "/opds/v1.2",
-            routes![routing::opds::catalog, routing::opds::series],
+            routes![
+                routing::opds::catalog,
+                // series
+                routing::opds::series,
+                routing::opds::series_by_id,
+                // books
+                routing::opds::book_thumbnail
+            ],
         )
 }

@@ -33,6 +33,7 @@ pub enum OpdsLinkRel {
     Start,      // start
     Next,       // next
     Thumbnail,  // "http://opds-spec.org/image/thumbnail"
+    Image,      // "http://opds-spec.org/image"
     PageStream, // "http://vaemendis.net/opds-pse/stream"
 }
 
@@ -44,6 +45,7 @@ impl OpdsEnumStr for OpdsLinkRel {
             OpdsLinkRel::Start => "start",
             OpdsLinkRel::Next => "next",
             OpdsLinkRel::Thumbnail => "http://opds-spec.org/image/thumbnail",
+            OpdsLinkRel::Image => "http://opds-spec.org/image",
             OpdsLinkRel::PageStream => "http://vaemendis.net/opds-pse/stream",
         }
     }

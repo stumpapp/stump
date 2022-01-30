@@ -1,5 +1,5 @@
-use std::io::Read;
 use rocket::fs::NamedFile;
+use std::io::Read;
 
 use walkdir::DirEntry;
 use zip::read::ZipFile;
@@ -100,56 +100,39 @@ pub fn process_rar(file: &DirEntry) -> ProccessResult {
     }
 }
 
+pub fn get_zip_image_buffer(file: &str, page: usize) -> ThumbnailResult {
+    let zipfile = std::fs::File::open(file)?;
+    let mut archive = zip::ZipArchive::new(zipfile)?;
+
+    if archive.len() == 0 {
+        return Err(ProcessFileError::ArchiveEmptyError);
+    }
+
+    let mut contents = Vec::new();
+
+    let mut images_seen = 0;
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+
+        if images_seen + 1 == page && file.is_image() {
+            file.read_to_end(&mut contents)?;
+            break;
+        } else if file.is_image() {
+            images_seen += 1;
+        }
+    }
+
+    // FIXME: is this what I want to do when I can't find an image? I probably want to return a generic thumbnail based on
+    // the file type? Or should the frontend handle this? I don't know, I have to see what OPDS does in this case and fix.
+    Ok(contents)
+    // Err(ProcessFileError::NoImageError)
+}
+
 pub fn get_zip_thumbnail(file: &str) -> ThumbnailResult {
     info!("Grabbing Thumbnail for Zip: {}", file);
 
-    let zipfile = std::fs::File::open(file)?;
-    let mut archive = zip::ZipArchive::new(zipfile)?;
-
-    if archive.len() == 0 {
-        return Err(ProcessFileError::ArchiveEmptyError);
-    }
-
-    let mut contents = Vec::new();
-
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
-
-        if file.is_image() {
-            file.read_to_end(&mut contents)?;
-            break;
-        }
-    }
-
-    // FIXME: is this what I want to do when I can't find an image? I probably want to return a generic thumbnail based on
-    // the file type? Or should the frontend handle this? I don't know, I have to see what OPDS does in this case and fix.
-    Ok(contents)
-    // Err(ProcessFileError::NoImageError)
+    get_zip_image_buffer(file, 1)
 }
 
-pub fn get_zip_thumbnail_file(file: &str) -> ThumbnailResult {
-    info!("Grabbing Thumbnail for Zip: {}", file);
-
-    let zipfile = std::fs::File::open(file)?;
-    let mut archive = zip::ZipArchive::new(zipfile)?;
-
-    if archive.len() == 0 {
-        return Err(ProcessFileError::ArchiveEmptyError);
-    }
-
-    let mut contents = Vec::new();
-
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
-
-        if file.is_image() {
-            file.read_to_end(&mut contents)?;
-            break;
-        }
-    }
-
-    // FIXME: is this what I want to do when I can't find an image? I probably want to return a generic thumbnail based on
-    // the file type? Or should the frontend handle this? I don't know, I have to see what OPDS does in this case and fix.
-    Ok(contents)
-    // Err(ProcessFileError::NoImageError)
-}
+// TODO: make a generalized function that will call the appropriate function based on the file type
+// i.e. if it's a zip, call get_zip_*, if it's a rar, call get_rar_*, etc.

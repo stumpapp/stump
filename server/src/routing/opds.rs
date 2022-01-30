@@ -1,7 +1,8 @@
+use rocket::fs::NamedFile;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 extern crate base64;
 
-use crate::fs::media_file::get_zip_thumbnail;
+use crate::fs::media_file::{get_zip_image_buffer, get_zip_thumbnail};
 use crate::opds::feed::OpdsFeed;
 use crate::types::rocket::ImageResponse;
 use crate::{
@@ -95,9 +96,9 @@ pub async fn series_by_id(
     Ok(XmlResponse(feed.build().unwrap()))
 }
 
-// FIXME: this needs to actually return an image
+// TODO: generalize the function call
 #[get("/books/<id>/thumbnail")]
-pub async fn book_thumbnail(id: String, db: &State) -> Result<String, String> {
+pub async fn book_thumbnail(id: String, db: &State) -> Result<ImageResponse, String> {
     let book: Option<media::Model> = media::Entity::find()
         .filter(media::Column::Id.eq(id))
         .one(db.get_connection())
@@ -106,10 +107,24 @@ pub async fn book_thumbnail(id: String, db: &State) -> Result<String, String> {
 
     if let Some(b) = book {
         let buffer = get_zip_thumbnail(&b.path).map_err(|e| e.to_string())?;
-        // let encoded = base64::encode(&buffer);
+        Ok(ImageResponse(buffer))
+    } else {
+        Err("Book not found".to_string())
+    }
+}
 
-        // Ok(ImageResponse()
-        Ok("Ok".to_string())
+// TODO: generalize the function call
+#[get("/books/<id>/pages/<page>")]
+pub async fn book_page(id: String, page: usize, db: &State) -> Result<ImageResponse, String> {
+    let book: Option<media::Model> = media::Entity::find()
+        .filter(media::Column::Id.eq(id))
+        .one(db.get_connection())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if let Some(b) = book {
+        let buffer = get_zip_image_buffer(&b.path, page).map_err(|e| e.to_string())?;
+        Ok(ImageResponse(buffer))
     } else {
         Err("Book not found".to_string())
     }

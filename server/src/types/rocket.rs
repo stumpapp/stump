@@ -5,5 +5,5 @@
 pub struct XmlResponse(pub String);
 
 #[derive(Responder)]
-#[response(content_type = "image/png")]
-pub struct ImageResponse(pub String);
+#[response(content_type = "image/jpeg")]
+pub struct ImageResponse(pub Vec<u8>);

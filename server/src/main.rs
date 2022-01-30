@@ -71,7 +71,8 @@ fn rocket() -> _ {
                 routing::opds::series,
                 routing::opds::series_by_id,
                 // books
-                routing::opds::book_thumbnail
+                routing::opds::book_thumbnail,
+                routing::opds::book_page
             ],
         )
 }

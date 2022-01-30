@@ -88,7 +88,7 @@ impl From<(SeriesWithMedia, Option<usize>)> for OpdsFeed {
             ),
         ];
 
-        let mut entries = media.into_iter().map(OpdsEntry::from).collect();
+        let entries = media.into_iter().map(OpdsEntry::from).collect();
 
         Self::new(id, title, entries)
     }

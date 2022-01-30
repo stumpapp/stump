@@ -1,9 +1,12 @@
-use rocket::fs::NamedFile;
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 extern crate base64;
 
-use crate::fs::media_file::{get_zip_image_buffer, get_zip_thumbnail};
+use crate::database::queries;
+use crate::database::queries::series::{
+    get_lastest_series, get_series, get_series_by_id_with_media,
+};
+use crate::fs::media_file::get_zip_image;
 use crate::opds::feed::OpdsFeed;
+use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use crate::types::rocket::ImageResponse;
 use crate::{
     database::entities::{self, media},
@@ -20,21 +23,31 @@ pub fn catalog(_db: &State) -> XmlResponse {
     // TODO: media from database
     let entries = vec![
         opds::entry::OpdsEntry::new(
-            "eqrdfa2dvaca".to_string(),
+            "allseries".to_string(),
             chrono::Utc::now(),
-            "Spider-Man #69".to_string(),
+            "All Series".to_string(),
+            Some(String::from("Browse by series")),
             None,
-            Some(vec!["me".to_string()]),
-            None,
+            Some(vec![OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Subsection,
+                href: String::from("/opds/v1.2/series"),
+            }]),
         ),
         opds::entry::OpdsEntry::new(
-            "dafafafadfad".to_string(),
+            "latestseries".to_string(),
             chrono::Utc::now(),
-            "Spider-Man #420".to_string(),
+            "Latest Series".to_string(),
+            Some(String::from("Browse latest series")),
             None,
-            Some(vec!["me".to_string()]),
-            None,
+            Some(vec![OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Subsection,
+                href: String::from("/opds/v1.2/series/latest"),
+            }]),
         ),
+        // TODO: books/latest
+        // TODO: libraries
     ];
 
     let feed = opds::feed::OpdsFeed::new(
@@ -49,10 +62,25 @@ pub fn catalog(_db: &State) -> XmlResponse {
 /// A handler for GET /opds/v1.2/series
 #[get("/series")]
 pub async fn series(db: &State) -> Result<XmlResponse, String> {
-    let res = entities::series::Entity::find()
-        .all(db.get_connection())
-        .await
-        .map_err(|e| e.to_string())?;
+    let res = get_series(db.get_connection()).await?;
+
+    let entries = res
+        .into_iter()
+        .map(|s| opds::entry::OpdsEntry::from(s))
+        .collect();
+
+    let feed = opds::feed::OpdsFeed::new(
+        "root".to_string(),
+        "Stump OPDS All Series".to_string(),
+        entries,
+    );
+
+    Ok(XmlResponse(feed.build().unwrap()))
+}
+
+#[get("/series/latest")]
+pub async fn series_latest(db: &State) -> Result<XmlResponse, String> {
+    let res = get_lastest_series(db.get_connection()).await?;
 
     let entries = res
         .into_iter()
@@ -74,12 +102,7 @@ pub async fn series_by_id(
     page: Option<usize>,
     db: &State,
 ) -> Result<XmlResponse, String> {
-    let res = entities::series::Entity::find()
-        .filter(entities::series::Column::Id.eq(id))
-        .find_with_related(media::Entity)
-        .all(db.get_connection())
-        .await
-        .map_err(|e| e.to_string())?;
+    let res = get_series_by_id_with_media(db.get_connection(), id).await?;
 
     if res.len() != 1 {
         return Err("Series not found".to_string());
@@ -96,35 +119,33 @@ pub async fn series_by_id(
     Ok(XmlResponse(feed.build().unwrap()))
 }
 
-// TODO: generalize the function call
+// TODO: generalize the function call to `get_image` which will internally call `get_zip_image` or `get_rar_image`
 #[get("/books/<id>/thumbnail")]
 pub async fn book_thumbnail(id: String, db: &State) -> Result<ImageResponse, String> {
-    let book: Option<media::Model> = media::Entity::find()
-        .filter(media::Column::Id.eq(id))
-        .one(db.get_connection())
-        .await
-        .map_err(|e| e.to_string())?;
+    let book = queries::book::get_book_by_id(db.get_connection(), id).await?;
 
     if let Some(b) = book {
-        let buffer = get_zip_thumbnail(&b.path).map_err(|e| e.to_string())?;
-        Ok(ImageResponse(buffer))
+        match get_zip_image(&b.path, 1) {
+            Ok(res) => Ok(res),
+            Err(e) => Err(e.to_string()),
+        }
     } else {
         Err("Book not found".to_string())
     }
 }
 
 // TODO: generalize the function call
+// TODO: cache this? Look into this, I can send a cache-control header to the client, but not sure if I should
+// also cache on server.
 #[get("/books/<id>/pages/<page>")]
 pub async fn book_page(id: String, page: usize, db: &State) -> Result<ImageResponse, String> {
-    let book: Option<media::Model> = media::Entity::find()
-        .filter(media::Column::Id.eq(id))
-        .one(db.get_connection())
-        .await
-        .map_err(|e| e.to_string())?;
+    let book = queries::book::get_book_by_id(db.get_connection(), id).await?;
 
     if let Some(b) = book {
-        let buffer = get_zip_image_buffer(&b.path, page).map_err(|e| e.to_string())?;
-        Ok(ImageResponse(buffer))
+        match get_zip_image(&b.path, page) {
+            Ok(res) => Ok(res),
+            Err(e) => Err(e.to_string()),
+        }
     } else {
         Err("Book not found".to_string())
     }

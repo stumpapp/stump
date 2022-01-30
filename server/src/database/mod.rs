@@ -6,6 +6,7 @@ use sea_orm::{ConnectionTrait, DatabaseConnection, DbBackend, Schema};
 
 pub mod connection;
 pub mod entities;
+pub mod queries;
 
 pub struct Database {
     pub connection: DatabaseConnection,

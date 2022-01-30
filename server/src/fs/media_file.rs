@@ -1,16 +1,17 @@
-use rocket::fs::NamedFile;
+use rocket::http::ContentType;
 use std::io::Read;
 
 use walkdir::DirEntry;
 use zip::read::ZipFile;
 
 use crate::types::comic::ComicInfo;
+use crate::types::rocket::ImageResponse;
 
 use super::error::ProcessFileError;
 
-pub type ProccessResult = Result<(Option<ComicInfo>, Vec<String>), ProcessFileError>;
-pub type ThumbnailResult = Result<Vec<u8>, ProcessFileError>;
-pub type ThumbnailResultTEst = Result<NamedFile, ProcessFileError>;
+pub type ProcessResult = Result<(Option<ComicInfo>, Vec<String>), ProcessFileError>;
+pub type ImageResult = Result<ImageResponse, ProcessFileError>;
+// pub type ImageResultCached = Result<ImageResponseCached, ProcessFileError>;
 
 trait IsImage {
     fn is_image(&self) -> bool;
@@ -39,11 +40,11 @@ pub fn process_comic_info(buffer: String) -> Option<ComicInfo> {
 
 /// Processes a zip file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the zip.
-pub fn process_zip(file: &DirEntry) -> ProccessResult {
+pub fn process_zip(file: &DirEntry) -> ProcessResult {
     info!("Processing Zip: {}", file.path().display());
 
-    let zipfile = std::fs::File::open(file.path())?;
-    let mut archive = zip::ZipArchive::new(zipfile)?;
+    let zip_file = std::fs::File::open(file.path())?;
+    let mut archive = zip::ZipArchive::new(zip_file)?;
 
     let mut comic_info = None;
     let mut entries = Vec::new();
@@ -63,7 +64,7 @@ pub fn process_zip(file: &DirEntry) -> ProccessResult {
 
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
-pub fn process_rar(file: &DirEntry) -> ProccessResult {
+pub fn process_rar(file: &DirEntry) -> ProcessResult {
     info!("Processing Rar: {}", file.path().display());
 
     let path = file.path();
@@ -100,38 +101,44 @@ pub fn process_rar(file: &DirEntry) -> ProccessResult {
     }
 }
 
-pub fn get_zip_image_buffer(file: &str, page: usize) -> ThumbnailResult {
-    let zipfile = std::fs::File::open(file)?;
-    let mut archive = zip::ZipArchive::new(zipfile)?;
+fn get_content_type(file: &ZipFile) -> ContentType {
+    let file_name = file.name();
+    let file_name = file_name.to_lowercase();
+
+    if file_name.ends_with(".jpg") || file_name.ends_with(".jpeg") {
+        return ContentType::JPEG;
+    } else if file_name.ends_with(".png") {
+        return ContentType::PNG;
+    }
+
+    // FIXME: don't love this
+    ContentType::Any
+}
+
+pub fn get_zip_image(file: &str, page: usize) -> ImageResult {
+    let zip_file = std::fs::File::open(file)?;
+    let mut archive = zip::ZipArchive::new(zip_file)?;
 
     if archive.len() == 0 {
         return Err(ProcessFileError::ArchiveEmptyError);
     }
 
-    let mut contents = Vec::new();
-
     let mut images_seen = 0;
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
 
+        let mut contents = Vec::new();
+        let content_type = get_content_type(&file);
+
         if images_seen + 1 == page && file.is_image() {
             file.read_to_end(&mut contents)?;
-            break;
+            return Ok((content_type, contents));
         } else if file.is_image() {
             images_seen += 1;
         }
     }
 
-    // FIXME: is this what I want to do when I can't find an image? I probably want to return a generic thumbnail based on
-    // the file type? Or should the frontend handle this? I don't know, I have to see what OPDS does in this case and fix.
-    Ok(contents)
-    // Err(ProcessFileError::NoImageError)
-}
-
-pub fn get_zip_thumbnail(file: &str) -> ThumbnailResult {
-    info!("Grabbing Thumbnail for Zip: {}", file);
-
-    get_zip_image_buffer(file, 1)
+    Err(ProcessFileError::NoImageError)
 }
 
 // TODO: make a generalized function that will call the appropriate function based on the file type

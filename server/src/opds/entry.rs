@@ -4,6 +4,7 @@ use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
 use crate::database::entities::{media, series};
+use crate::opds::link::OpdsStreamLink;
 
 use super::{
     link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
@@ -18,6 +19,7 @@ pub struct OpdsEntry {
     content: Option<String>,
     authors: Option<Vec<String>>,
     links: Vec<OpdsLink>,
+    stream_link: Option<OpdsStreamLink>,
 }
 
 impl OpdsEntry {
@@ -28,6 +30,7 @@ impl OpdsEntry {
         content: Option<String>,
         authors: Option<Vec<String>>,
         links: Option<Vec<OpdsLink>>,
+        stream_link: Option<OpdsStreamLink>,
     ) -> Self {
         let links = match links {
             Some(links) => links,
@@ -41,6 +44,7 @@ impl OpdsEntry {
             content,
             authors,
             links,
+            stream_link,
         }
     }
 
@@ -70,6 +74,10 @@ impl OpdsEntry {
 
         for link in &self.links {
             link.write(writer)?;
+        }
+
+        if let Some(stream_link) = &self.stream_link {
+            stream_link.write(writer)?;
         }
 
         writer.write(XmlEvent::end_element())?; // end of entry
@@ -107,6 +115,7 @@ impl From<series::Model> for OpdsEntry {
             content: None,
             authors: None,
             links,
+            stream_link: None,
         }
     }
 }
@@ -129,11 +138,18 @@ impl From<media::Model> for OpdsEntry {
                 format!("{}/pages/1", base_url),
             ),
             OpdsLink::new(
-                OpdsLinkType::Navigation,
-                OpdsLinkRel::Subsection,
+                OpdsLinkType::Zip,
+                OpdsLinkRel::Acquisition,
                 format!("{}/file/{}", base_url, file_name_encoded),
             ),
         ];
+
+        let stream_link = OpdsStreamLink::new(
+            m.id.to_string(),
+            m.pages.to_string(),
+            // FIXME:
+            "image/jpeg".to_string(),
+        );
 
         let mib = m.size as f64 / (1024.0 * 1024.0);
 
@@ -152,6 +168,7 @@ impl From<media::Model> for OpdsEntry {
             content,
             links,
             authors: None,
+            stream_link: Some(stream_link),
         }
     }
 }

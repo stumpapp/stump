@@ -33,6 +33,7 @@ pub fn catalog(_db: &State) -> XmlResponse {
                 rel: OpdsLinkRel::Subsection,
                 href: String::from("/opds/v1.2/series"),
             }]),
+            None,
         ),
         opds::entry::OpdsEntry::new(
             "latestseries".to_string(),
@@ -45,6 +46,7 @@ pub fn catalog(_db: &State) -> XmlResponse {
                 rel: OpdsLinkRel::Subsection,
                 href: String::from("/opds/v1.2/series/latest"),
             }]),
+            None,
         ),
         // TODO: books/latest
         // TODO: libraries
@@ -136,13 +138,23 @@ pub async fn book_thumbnail(id: String, db: &State) -> Result<ImageResponse, Str
 
 // TODO: generalize the function call
 // TODO: cache this? Look into this, I can send a cache-control header to the client, but not sure if I should
-// also cache on server.
-#[get("/books/<id>/pages/<page>")]
-pub async fn book_page(id: String, page: usize, db: &State) -> Result<ImageResponse, String> {
+// also cache on server. Check my types::rocket crate
+#[get("/books/<id>/pages/<page>?<zero_based>")]
+pub async fn book_page(
+    id: String,
+    page: usize,
+    zero_based: Option<bool>,
+    db: &State,
+) -> Result<ImageResponse, String> {
     let book = queries::book::get_book_by_id(db.get_connection(), id).await?;
 
+    let correct_page = match zero_based {
+        Some(true) => page + 1,
+        _ => page,
+    };
+
     if let Some(b) = book {
-        match get_zip_image(&b.path, page) {
+        match get_zip_image(&b.path, correct_page) {
             Ok(res) => Ok(res),
             Err(e) => Err(e.to_string()),
         }

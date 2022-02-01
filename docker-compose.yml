@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  server:
+    image: rust
+    ports:
+      - "6969:6969"
+    volumes:
+      - ./server:/app/server:rw
+    working_dir: /app/server
+    environment:
+      ROCKET_PROFILE: debug
+    command: bash -c "cargo install cargo-watch && cargo watch -x run"
+
+  frontend:
+    image: node:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/frontend:rw
+    working_dir: /app/frontend
+    command: pnpm run dev

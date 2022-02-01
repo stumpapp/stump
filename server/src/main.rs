@@ -33,7 +33,7 @@ async fn files(file: PathBuf) -> Option<NamedFile> {
 }
 
 fn get_directory_path() -> String {
-    format!("{}/../web/build", env!("CARGO_MANIFEST_DIR"))
+    format!("{}/../frontend/build", env!("CARGO_MANIFEST_DIR"))
 }
 
 #[launch]
@@ -69,6 +69,7 @@ fn rocket() -> _ {
                 routing::opds::catalog,
                 // series
                 routing::opds::series,
+                routing::opds::series_latest,
                 routing::opds::series_by_id,
                 // books
                 routing::opds::book_thumbnail,

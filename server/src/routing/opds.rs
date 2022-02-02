@@ -4,7 +4,7 @@ use crate::database::queries;
 use crate::database::queries::series::{
     get_lastest_series, get_series, get_series_by_id_with_media,
 };
-use crate::fs::media_file::get_zip_image;
+use crate::fs::media_file;
 use crate::opds::feed::OpdsFeed;
 use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use crate::types::rocket::ImageResponse;
@@ -121,13 +121,12 @@ pub async fn series_by_id(
     Ok(XmlResponse(feed.build().unwrap()))
 }
 
-// TODO: generalize the function call to `get_image` which will internally call `get_zip_image` or `get_rar_image`
 #[get("/books/<id>/thumbnail")]
 pub async fn book_thumbnail(id: String, db: &State) -> Result<ImageResponse, String> {
     let book = queries::book::get_book_by_id(db.get_connection(), id).await?;
 
     if let Some(b) = book {
-        match get_zip_image(&b.path, 1) {
+        match media_file::get_image(&b.path, 1) {
             Ok(res) => Ok(res),
             Err(e) => Err(e.to_string()),
         }
@@ -154,7 +153,7 @@ pub async fn book_page(
     };
 
     if let Some(b) = book {
-        match get_zip_image(&b.path, correct_page) {
+        match media_file::get_image(&b.path, correct_page) {
             Ok(res) => Ok(res),
             Err(e) => Err(e.to_string()),
         }

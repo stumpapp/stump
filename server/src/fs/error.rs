@@ -1,5 +1,5 @@
 use thiserror::Error;
-use unrar::{archive::Entry, error::UnrarError};
+use unrar::error::UnrarError;
 use zip::result::ZipError;
 
 #[derive(Error, Debug)]
@@ -17,9 +17,11 @@ pub enum ProcessFileError {
     #[error("Could not open rar file")]
     RarOpenError,
     #[error("Error reading file content in rar")]
-    RarReadError(#[from] std::str::Utf8Error),
-    // #[error("Invalid file type")]
-    // UnsupportedFileType,
+    RarReadError,
+    #[error("Error reading bytes from rar")]
+    RarByteReadError(#[from] std::str::Utf8Error),
+    #[error("Invalid file type")]
+    UnsupportedFileType,
     // #[error("unknown error occurred")]
     // Unknown,
 }

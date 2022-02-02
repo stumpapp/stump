@@ -110,6 +110,7 @@ impl OpdsStreamLink {
         );
 
         // FIXME: the wstxns1 needs to be dynamic to wstxns{positionInXmlDocument} >:(
+        // or not?? https://vaemendis.net/opds-pse/
         let link = XmlEvent::start_element("link")
             .attr("xmlns:wstxns1", "http://vaemendis.net/opds-pse/ns")
             .attr("href", href.as_str())

@@ -2,15 +2,15 @@
 
 A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga).
 
-While I love Komga, I've found that it can be rather resource heavy on the little raspberry pi I host all my home media on. I thought it would be cool to learn what goes into making something like this, and opted to take advantage of the performance Rust has to hopefully, at the end of all this, create something just as convenient but with a smaller footprint.
+I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. *I also just want to practice Rust!*
 
 ## Roadmap / To-do List
 
-Stump is extremely early in development, so there is a LOT to get started - gotta start somewhere though! These are my current end-goals:
+Stump is early in development, so there is a LOT missing - gotta start somewhere though! These are my current end-goals with some current todos sprinkled in:
 
 - [ ] Create Stump docker image that can be used to run the server on my Raspberry Pi (or any other machine)
   - [ ] Create Dockerfile for prod
-    - [ ] make sure image is *small*, sitting at 2gb rn >:(
+    - make sure image is *small*, sitting at 2gb rn >:(
   - [ ] Create docker-compose.yml for dev
 - [ ] Filesystem indexing of libraries
   - [ ] Walk through libraries and sync media to DB
@@ -25,14 +25,17 @@ Stump is extremely early in development, so there is a LOT to get started - gott
         - [x] catalogs
         - [ ] libraries
         - [x] series
-        - [ ] books
       - [ ] can fetch book thumbnails
-        - [ ] cbr
+        - [x] cbr
         - [x] cbz
         - [ ] pdf
         - [ ] epub
-      - [ ] Page streaming support (**almost done!!**)
-- [ ] Develop frontend (Svelte) for:
+      - [ ] Page streaming support
+         - [x] cbr
+         - [x] cbz
+         - [ ] pdf
+         - [ ] epub
+- [ ] Develop frontend client (Svelte) for:
   - [ ] reading media (epub, pdf, cbr, cbz)
   - [ ] managing media
   - [ ] managing access
@@ -40,11 +43,11 @@ Stump is extremely early in development, so there is a LOT to get started - gott
 - [ ] P2P file sharing options somewhere?
 - [ ] Add authentication system
 
-I am unsure how configurable this project will wind up being. Should there be users and logins? Should there be access control features like IP whitelisting? I am very open to suggestions and ideas!
+I am very open to suggestions and ideas!
 
 ## Contributing
 
-Contributions are **encouraged** and **welcome**! Please open an issue prior to working on a bug or feature to let me know what you're interested in working on.Thanks!
+Contributions are very **encouraged** and **welcome**! Please open an issue prior to working on a bug or feature to let me know what you're interested in working on. Thanks!
 
 ## Getting Started
 
@@ -62,5 +65,5 @@ or just:
 
 ```bash
 # cargo install cargo-watch
-yarn dev:server
+yarn server:dev
 ```

@@ -1,5 +1,6 @@
 use rocket::http::ContentType;
 use std::io::Read;
+use unrar::archive::Entry;
 
 use walkdir::DirEntry;
 use zip::read::ZipFile;
@@ -13,6 +14,8 @@ pub type ProcessResult = Result<(Option<ComicInfo>, Vec<String>), ProcessFileErr
 pub type ImageResult = Result<ImageResponse, ProcessFileError>;
 // pub type ImageResultCached = Result<ImageResponseCached, ProcessFileError>;
 
+// FIXME: error handling is a mess
+
 trait IsImage {
     fn is_image(&self) -> bool;
 }
@@ -22,6 +25,19 @@ impl<'a> IsImage for ZipFile<'a> {
         if self.is_file() {
             let file_name = self.name();
             let file_name = file_name.to_lowercase();
+            return file_name.ends_with(".jpg")
+                || file_name.ends_with(".jpeg")
+                || file_name.ends_with(".png");
+        }
+
+        false
+    }
+}
+
+impl IsImage for Entry {
+    fn is_image(&self) -> bool {
+        if self.is_file() {
+            let file_name = self.filename.to_lowercase();
             return file_name.ends_with(".jpg")
                 || file_name.ends_with(".jpeg")
                 || file_name.ends_with(".png");
@@ -115,6 +131,45 @@ fn get_content_type(file: &ZipFile) -> ContentType {
     ContentType::Any
 }
 
+// FIXME: this is not an ideal solution and is potentially unsafe. unrar seems to open the archive
+// in a different order than the actual content. I am sorting by filename, *however* this really is *not* ideal.
+// If the files were to have any other naming scheme that would be a problem.
+pub fn get_rar_image(file: &str, page: usize) -> ImageResult {
+    let archive = unrar::Archive::new(file.to_string());
+
+    let mut filename: Option<String> = None;
+
+    match archive.list() {
+        Ok(open_archive) => {
+            let mut images_seen = 0;
+
+            let mut entries: Vec<_> = open_archive.into_iter().filter_map(|e| e.ok()).collect();
+            entries.sort_by(|a, b| a.filename.cmp(&b.filename));
+
+            for e in entries {
+                if images_seen + 1 == page && e.is_image() {
+                    filename = Some(e.filename);
+                    break;
+                } else if e.is_image() {
+                    images_seen += 1;
+                }
+            }
+        }
+        Err(e) => return Err(ProcessFileError::RarOpenError),
+    };
+
+    if filename.is_some() {
+        let archive = unrar::Archive::new(file.to_string());
+
+        match archive.read_bytes(&filename.unwrap()) {
+            Ok(bytes) => Ok((ContentType::JPEG, bytes)),
+            Err(e) => Err(ProcessFileError::RarOpenError),
+        }
+    } else {
+        Err(ProcessFileError::RarOpenError)
+    }
+}
+
 pub fn get_zip_image(file: &str, page: usize) -> ImageResult {
     let zip_file = std::fs::File::open(file)?;
     let mut archive = zip::ZipArchive::new(zip_file)?;
@@ -141,5 +196,21 @@ pub fn get_zip_image(file: &str, page: usize) -> ImageResult {
     Err(ProcessFileError::NoImageError)
 }
 
-// TODO: make a generalized function that will call the appropriate function based on the file type
-// i.e. if it's a zip, call get_zip_*, if it's a rar, call get_rar_*, etc.
+pub fn get_image(file: &str, page: usize) -> ImageResult {
+    let file_name = file.to_string();
+
+    match file_name.rfind('.') {
+        Some(index) => {
+            let extension = &file_name[index..];
+
+            if extension == ".cbr" {
+                return get_rar_image(file, page);
+            } else if extension == ".cbz" {
+                return get_zip_image(file, page);
+            }
+
+            return Err(ProcessFileError::UnsupportedFileType);
+        }
+        None => Err(ProcessFileError::UnsupportedFileType),
+    }
+}

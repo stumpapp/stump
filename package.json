@@ -8,12 +8,13 @@
   "scripts": {
     "start": "cd server && cargo run --release",
     "dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
-    "build:docker": "pnpm frontend:build && pnpm server:docker:build",
+    "build:docker": "pnpm frontend:build && pnpm server:build:docker",
     "server:dev": "cd server && cargo watch -x run",
     "server:build": "cd server && cargo build --release",
-    "server:build:docker": "cd server && docker build -t stump .",
+    "server:build:docker-debian": "echo 'FIXME: I AM BROKEN LOL' && cd server && docker build -f Dockerfile.debian -t stump-deb .",
+    "server:build:docker-alpine": "cd server && docker build -f Dockerfile.alpine -t stump .",
     "frontend:dev": "cd frontend && pnpm dev",
-    "frontend:build": "cd frontend && pnpm run build",
+    "frontend:build": "cd frontend && pnpm run build && mv build ../server/static",
     "frontend:build:docker": ""
   },
   "devDependencies": {

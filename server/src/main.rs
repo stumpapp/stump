@@ -33,7 +33,7 @@ async fn files(file: PathBuf) -> Option<NamedFile> {
 }
 
 fn get_directory_path() -> String {
-    format!("{}/../frontend/build", env!("CARGO_MANIFEST_DIR"))
+    format!("{}/static", env!("CARGO_MANIFEST_DIR"))
 }
 
 #[launch]

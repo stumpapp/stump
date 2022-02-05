@@ -1,0 +1,17 @@
+FROM rust as builder
+
+WORKDIR /stump
+COPY . .
+
+RUN cargo build --release
+
+FROM debian:buster-slim
+
+RUN apt-get update && apt-get install -y libc6 && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /stump
+
+COPY --from=builder /stump/target/release/stump .
+COPY Rocket.toml .
+
+CMD ["./stump"]

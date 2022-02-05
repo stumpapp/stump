@@ -8,8 +8,10 @@ node_modules
 .env
 .env.*
 $houdini
-server/static/libraries/*
 *.log
+
+# rust
+server/static
 
 # os
 .DS_Store

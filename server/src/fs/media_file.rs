@@ -199,18 +199,11 @@ pub fn get_zip_image(file: &str, page: usize) -> ImageResult {
 pub fn get_image(file: &str, page: usize) -> ImageResult {
     let file_name = file.to_string();
 
-    match file_name.rfind('.') {
-        Some(index) => {
-            let extension = &file_name[index..];
-
-            if extension == ".cbr" {
-                return get_rar_image(file, page);
-            } else if extension == ".cbz" {
-                return get_zip_image(file, page);
-            }
-
-            return Err(ProcessFileError::UnsupportedFileType);
-        }
-        None => Err(ProcessFileError::UnsupportedFileType),
+    if file_name.ends_with(".cbr") {
+        get_rar_image(file, page)
+    } else if file_name.ends_with(".cbz") {
+        get_zip_image(file, page)
+    } else {
+        Err(ProcessFileError::UnsupportedFileType)
     }
 }

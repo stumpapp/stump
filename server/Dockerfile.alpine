@@ -1,0 +1,41 @@
+# ------------------------------------------------------------------------------
+# Cargo Build Stage
+# ------------------------------------------------------------------------------
+
+FROM rust:1-alpine3.15 as builder
+
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+
+RUN apk add --no-cache --verbose musl-dev build-base sqlite openssl-dev
+
+WORKDIR /stump
+
+COPY . .
+
+RUN cargo build --release --target=x86_64-unknown-linux-musl
+
+# RUN rm -f target/x86_64-unknown-linux-musl/release/deps/stump*
+
+# ------------------------------------------------------------------------------
+# Final Stage
+# ------------------------------------------------------------------------------
+
+FROM alpine:latest
+
+RUN apk add --no-cache libstdc++
+
+RUN addgroup -g 1000 stump
+
+RUN adduser -D -s /bin/sh -u 1000 -G stump stump
+
+WORKDIR /home/stump/bin/
+
+COPY --from=builder /stump/target/x86_64-unknown-linux-musl/release/stump .
+COPY Rocket.toml .
+COPY static .
+
+RUN chown stump:stump stump
+
+USER stump
+
+CMD ["./stump"]

@@ -1,4 +1,3 @@
-// use async_graphql::*;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -36,7 +35,8 @@ pub struct Model {
     /// the number of pages in the media. ex: "69"
     pub pages: i32,
     /// the date in which the media was last updated in the FS. ex: "2020-01-01"
-    pub updated_at: Option<String>,
+    #[sea_orm(column_type = "DateTime")]
+    pub updated_at: Option<chrono::NaiveDateTime>,
     /// whether or not the media is downloaded to the client. ex: true
     pub downloaded: bool,
     /// the checksum hash of the file contents. Used to ensure only one instance of a file in the database

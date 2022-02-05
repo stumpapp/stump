@@ -1,4 +1,5 @@
 use rocket::http::ContentType;
+use std::fs;
 use std::io::Read;
 use unrar::archive::Entry;
 

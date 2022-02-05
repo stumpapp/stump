@@ -13,6 +13,7 @@
     "server:build": "cd server && cargo build --release",
     "server:build:docker-debian": "echo 'FIXME: I AM BROKEN LOL' && cd server && docker build -f Dockerfile.debian -t stump-deb .",
     "server:build:docker-alpine": "cd server && docker build -f Dockerfile.alpine -t stump .",
+    "frontend:install": "cd frontend && pnpm install",
     "frontend:dev": "cd frontend && pnpm dev",
     "frontend:build": "cd frontend && pnpm run build && mv build ../server/static",
     "frontend:build:docker": ""

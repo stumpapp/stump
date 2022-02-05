@@ -6,13 +6,10 @@ use crate::{
         dto::{GetMediaQuery, GetMediaQueryResult},
     },
 };
+use chrono::{DateTime, NaiveDateTime, Utc};
 use log::info;
-use rocket::futures::executor::block_on;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
-use std::{
-    collections::HashMap,
-    path::{Path, PathBuf},
-};
+use std::{collections::HashMap, path::Path};
 use walkdir::{DirEntry, WalkDir};
 
 use super::media_file::{process_rar, process_zip};
@@ -29,13 +26,9 @@ pub trait IgnoredFile {
 
 impl IgnoredFile for Path {
     fn should_ignore(&self) -> bool {
-        let path = self.to_str().unwrap();
-
-        if self.file_name().unwrap().to_str().unwrap().starts_with(".") {
+        if self.is_dir() {
             return true;
-        }
-
-        if path.ends_with(".DS_Store") {
+        } else if self.file_name().unwrap().to_str().unwrap().starts_with(".") {
             return true;
         }
 
@@ -43,6 +36,7 @@ impl IgnoredFile for Path {
     }
 }
 
+// TODO: maybe take in Vev<series::Model> ??
 impl<'a> Scanner<'a> {
     pub fn new(
         db: &'a DatabaseConnection,
@@ -62,16 +56,20 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    // TODO: this shouldn't really live in here probably.
-    async fn insert_new_media(
+    fn generate_model(
         &self,
         file: DirEntry,
         checksum: String,
         media: (Option<ComicInfo>, Vec<String>),
-    ) {
+    ) -> media::ActiveModel {
         let (info, entries) = media;
-        // TODO: determine series
+        // TODO: determine series ??
         let parent = file.path().parent().unwrap();
+
+        let metadata = match file.metadata() {
+            Ok(metadata) => Some(metadata),
+            _ => None,
+        };
 
         let path = file.path().to_str().unwrap().to_string();
         let name = file.file_name().to_str().unwrap().to_string();
@@ -88,87 +86,93 @@ impl<'a> Scanner<'a> {
             None => ComicInfo::default(),
         };
 
-        let model = media::ActiveModel {
+        let mut size: u64 = 0;
+        let mut modified: Option<NaiveDateTime> = None;
+
+        if let Some(metadata) = metadata {
+            size = metadata.len();
+
+            modified = match metadata.modified() {
+                Ok(st) => {
+                    let dt: DateTime<Utc> = st.clone().into();
+                    Some(dt.naive_utc())
+                }
+                Err(_) => Some(Utc::now().naive_utc()),
+            };
+        }
+
+        media::ActiveModel {
+            // FIXME: series_id is hard coded. Needs to be generated somehow,
             series_id: Set(2),
             name: Set(name),
             description: Set(comic_info.summary),
-            size: Set(0),
+            size: Set(size as i64),
             extension: Set(ext),
             pages: Set(match comic_info.page_count {
                 Some(count) => count as i32,
                 None => entries.len() as i32,
             }),
-            updated_at: Set(None),
+            updated_at: Set(modified),
             downloaded: Set(false),
             checksum: Set(checksum),
             path: Set(path),
             ..Default::default()
-        };
+        }
+    }
 
-        info!("Inserting new media: {:?}", model);
-
+    async fn insert_media(&self, model: media::ActiveModel) {
+        // TODO: handle me please
         info!(
-            "{:?}",
+            "Insertion Result: {:?}",
             model.insert(self.db).await.map_err(|e| e.to_string())
         );
     }
 
-    // FIXME: this is SUPER messy and inefficient. It isn't even 100% functional yet.
-    // Very very rough draft, the whole struct honestly - I don't even love committing this lol.
-    // I need to figure out how to do this MUCH MUCH better.
-    fn scan_library(&self, library_path: PathBuf, library: &library::Model) {
-        for entry in WalkDir::new(&library_path)
+    pub async fn do_scan(&mut self, library: &library::Model) {
+        for entry in WalkDir::new(&library.path)
             .into_iter()
             .filter_map(|e| e.ok())
         {
             let path = entry.path();
 
-            // check if path is equivalent to library path (ignore to avoid stack overflow)
-            if path.to_path_buf().eq(&library_path) {
+            if path.should_ignore() {
                 continue;
             }
 
-            if path.is_dir() {
-                info!("Scanning subfolder in library: {}", path.display());
-                self.scan_library(path.to_path_buf(), library);
-            } else if !path.should_ignore() {
-                let mut crc = Crc::new(path.to_str().unwrap());
-                // FIXME: terribly slow!
-                let checksum = crc.checksum();
+            let mut crc = Crc::new(path.to_str().unwrap());
 
-                if !self.media.contains_key(&checksum) {
-                    info!("New file found: {}", path.to_str().unwrap());
-                    info!("File metadata: {:?}", entry.metadata().unwrap());
+            let checksum = crc.checksum();
 
-                    let processed_info = match entry.file_name().to_str() {
-                        Some(name) if name.ends_with("cbr") => process_rar(&entry),
-                        Some(name) if name.ends_with("cbz") => process_zip(&entry),
-                        _ => {
-                            info!("Unsupported file: {}", entry.path().display());
-                            continue;
-                        }
-                    };
+            if self.media.contains_key(&checksum) {
+                continue;
+            }
 
-                    match processed_info {
-                        Ok(info) => {
-                            block_on(self.insert_new_media(entry, checksum, info));
-                        }
-                        Err(e) => {
-                            error!("Error processing file: {}", e);
-                        }
-                    }
-                } else {
-                    println!("Already present in database: {}", path.to_str().unwrap());
+            let processed_info = match entry.file_name().to_str() {
+                Some(name) if name.ends_with("cbr") => process_rar(&entry),
+                Some(name) if name.ends_with("cbz") => process_zip(&entry),
+                _ => {
+                    info!("Unsupported file: {}", entry.path().display());
+                    continue;
+                }
+            };
+
+            match processed_info {
+                Ok(info) => {
+                    let model = self.generate_model(entry, checksum, info);
+                    // self.insert_new_media(entry, checksum, info).await;
+                    self.insert_media(model).await;
+                }
+                Err(e) => {
+                    // error!("Error processing file: {}", e);
                 }
             }
         }
     }
 
-    pub fn scan(&self) -> usize {
-        for library in self.libraries.iter() {
-            let path = PathBuf::from(&library.path);
-            info!("Scanning library: {}", path.display());
-            self.scan_library(path, library);
+    pub async fn scan(&mut self) -> usize {
+        // FIXME: don't want to clone
+        for library in self.libraries.clone().iter() {
+            self.do_scan(library).await;
         }
 
         0

@@ -10,7 +10,7 @@ Stump is early in development, so there is a LOT missing - gotta start somewhere
 
 - [x] Create Stump docker image that can be used to run the server on my Raspberry Pi (or any other machine)
   - [x] Create Dockerfile for prod
-    - make sure image is *small*, sitting at 2gb rn >:(
+- [ ] Pass container config to stump, so it knows where the mount target is and can load the media
 - [ ] Filesystem indexing of libraries
   - [ ] Walk through libraries and sync media to DB
     - [ ] based on checksums or just urls? not sure, both have pros and cons
@@ -25,12 +25,12 @@ Stump is early in development, so there is a LOT missing - gotta start somewhere
         - [ ] libraries
         - [x] series
       - [ ] can fetch book thumbnails
-        - [x] cbr
+        - [x] cbr (iffy, see FIXME notes)
         - [x] cbz
         - [ ] pdf
         - [ ] epub
       - [ ] Page streaming support
-         - [x] cbr
+         - [x] cbr (iffy, see FIXME notes)
          - [x] cbz
          - [ ] pdf
          - [ ] epub
@@ -50,47 +50,50 @@ Contributions are very **encouraged** and **welcome**! Please open an issue prio
 
 ## Getting Started
 
-As stated, Stump is in _very_ early development. The web interface is not yet functional, and the API is not remotely stable.
-
-To run the server:
+There are no releases yet, so you'll have to clone the repo and build it yourself:
 
 ```bash
-# cargo install cargo-watch
-cd server
-cargo watch -x run
+git clone https://github.com/aaronleopold/stump.git
+cd stump
+pnpm frontend:install
+cargo install cargo-watch
 ```
 
-or just:
+## Running Stump
+
+### Development
+
+To start the application for development, simply run:
 
 ```bash
-# cargo install cargo-watch
-yarn server:dev
+pnpm dev
+```
+
+This will start both the svelte dev server and the rust server, watching for changes. You can also run the server and the frontend in separate processes:
+
+```bash
+pnpm server:dev # start the server
+pnpm frontend:dev # start the frontend
 ```
 
 ### Docker
 
-TODO: figure out indexing when in a docker container. Probably just need to mount the directory.
-TODO: publish image when ready :)
+- TODO: figure out indexing when in a docker container. Probably just need to mount the directory.
+- TODO: publish image to docker hub
 
-Once I publish an image, the following will get you up and running using docker:
+To create a docker image and corresponding container:
 
 ```bash
+pnpm server:build:docker-alpine # builds the image
 docker create \
   --name=stump \
   --user 1000:1000 \
   -p 6969:6969 \
-  -v ~/.stump:/home/stump/.stump \
+  --volume ~/.stump:/home/stump/.stump \
+  --mount type=bind,source=/path/to/data,target=/data \
   --restart unless-stopped \
-  aaronleopold/stump
+  stump # creates the container
+docker run stump # runs the container
 ```
 
-```bash
-docker run stump
-```
-
-Until then, if you want to build and run the image yourself, you can do so with:
-
-```bash
-pnpm server:build:docker-alpine
-docker run -v ~/.stump:/home/stump/.stump -p 6969:6969 stump
-```
+As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library/comics`, you'll need to mount `/Users/user/Library/comics` to both. This will eventually change to be more flexible.

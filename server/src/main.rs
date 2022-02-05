@@ -46,7 +46,7 @@ fn rocket() -> _ {
     let connection = block_on(database::connection::create_connection()).unwrap();
 
     let db = Database::new(connection);
-    // block_on(db.run_migration_up()).unwrap();
+    block_on(db.run_migration_up()).unwrap();
 
     rocket::build()
         .manage(db)
@@ -56,6 +56,7 @@ fn rocket() -> _ {
             routes![
                 // top level
                 routing::api::scan,
+                // routing::api::log_listener,
                 // library api
                 routing::api::library_api::get_libraries,
                 routing::api::library_api::insert_library,

@@ -8,7 +8,7 @@ ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 RUN apk add --no-cache --verbose musl-dev build-base sqlite openssl-dev
 
-WORKDIR /stump
+WORKDIR /home/stump
 
 COPY . .
 
@@ -28,11 +28,11 @@ RUN addgroup -g 1000 stump
 
 RUN adduser -D -s /bin/sh -u 1000 -G stump stump
 
-WORKDIR /home/stump/bin/
+WORKDIR /home/stump
 
-COPY --from=builder /stump/target/x86_64-unknown-linux-musl/release/stump .
+COPY --from=builder /home/stump/target/x86_64-unknown-linux-musl/release/stump .
 COPY Rocket.toml .
-COPY static .
+COPY static static
 
 RUN chown stump:stump stump
 

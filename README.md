@@ -8,10 +8,9 @@ I love Komga and use it at home, and I thought it would be cool to learn what go
 
 Stump is early in development, so there is a LOT missing - gotta start somewhere though! These are my current end-goals with some current todos sprinkled in:
 
-- [ ] Create Stump docker image that can be used to run the server on my Raspberry Pi (or any other machine)
-  - [ ] Create Dockerfile for prod
+- [x] Create Stump docker image that can be used to run the server on my Raspberry Pi (or any other machine)
+  - [x] Create Dockerfile for prod
     - make sure image is *small*, sitting at 2gb rn >:(
-  - [ ] Create docker-compose.yml for dev
 - [ ] Filesystem indexing of libraries
   - [ ] Walk through libraries and sync media to DB
     - [ ] based on checksums or just urls? not sure, both have pros and cons
@@ -66,4 +65,32 @@ or just:
 ```bash
 # cargo install cargo-watch
 yarn server:dev
+```
+
+### Docker
+
+TODO: figure out indexing when in a docker container. Probably just need to mount the directory.
+TODO: publish image when ready :)
+
+Once I publish an image, the following will get you up and running using docker:
+
+```bash
+docker create \
+  --name=stump \
+  --user 1000:1000 \
+  -p 6969:6969 \
+  -v ~/.stump:/home/stump/.stump \
+  --restart unless-stopped \
+  aaronleopold/stump
+```
+
+```bash
+docker run stump
+```
+
+Until then, if you want to build and run the image yourself, you can do so with:
+
+```bash
+pnpm server:build:docker-alpine
+docker run -v ~/.stump:/home/stump/.stump -p 6969:6969 stump
 ```

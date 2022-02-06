@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::database::entities::{media, series};
+use crate::database::entities::{library, media, series};
 use crate::opds::link::OpdsStreamLink;
 
 use super::{
@@ -90,6 +90,32 @@ impl OpdsEntry {
             Some(content.clone().replace("\n", "<br/>"))
         } else {
             None
+        }
+    }
+}
+
+impl From<library::Model> for OpdsEntry {
+    fn from(l: library::Model) -> Self {
+        let mut links = Vec::new();
+
+        let nav_link = OpdsLink::new(
+            OpdsLinkType::Navigation,
+            OpdsLinkRel::Subsection,
+            format!("/opds/v1.2/libraries/{}", l.id),
+        );
+
+        links.push(nav_link);
+
+        OpdsEntry {
+            id: l.id.to_string(),
+            // FIXME:
+            updated: chrono::Utc::now(),
+            title: l.name,
+            // FIXME:
+            content: None,
+            authors: None,
+            links,
+            stream_link: None,
         }
     }
 }

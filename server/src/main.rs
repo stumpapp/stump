@@ -1,3 +1,4 @@
+use rocket::tokio::sync::broadcast::{channel, Sender};
 use rocket::{fs::NamedFile, futures::executor::block_on};
 use std::env;
 use std::path::{Path, PathBuf};
@@ -7,13 +8,16 @@ extern crate rocket;
 
 mod database;
 mod fs;
+mod logging;
 mod opds;
 mod routing;
+mod state;
 mod types;
 
+use crate::logging::Log;
 use database::Database;
 
-pub type State = rocket::State<Database>;
+pub type State = state::State;
 
 #[get("/")]
 async fn index() -> Option<NamedFile> {
@@ -48,15 +52,18 @@ fn rocket() -> _ {
     let db = Database::new(connection);
     block_on(db.run_migration_up()).unwrap();
 
+    let state = state::AppState::new(db, channel::<Log>(1024).0);
+
     rocket::build()
-        .manage(db)
+        .manage(state)
         .mount("/", routes![index, files])
         .mount(
             "/api",
             routes![
                 // top level
                 routing::api::scan,
-                // routing::api::log_listener,
+                routing::api::log_listener,
+                routing::api::test_log_event,
                 // library api
                 routing::api::library_api::get_libraries,
                 routing::api::library_api::insert_library,
@@ -68,6 +75,9 @@ fn rocket() -> _ {
             "/opds/v1.2",
             routes![
                 routing::opds::catalog,
+                // libraries
+                routing::opds::libraries,
+                routing::opds::library_by_id,
                 // series
                 routing::opds::series,
                 routing::opds::series_latest,

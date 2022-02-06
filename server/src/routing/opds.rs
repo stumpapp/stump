@@ -19,7 +19,7 @@ use crate::{
 
 /// A handler for GET /opds/v1.2/catalog. Returns an OPDS catalog as an XML document
 #[get("/catalog")]
-pub fn catalog(_db: &State) -> XmlResponse {
+pub fn catalog(_state: &State) -> XmlResponse {
     // TODO: media from database
     let entries = vec![
         opds::entry::OpdsEntry::new(
@@ -55,16 +55,65 @@ pub fn catalog(_db: &State) -> XmlResponse {
     let feed = opds::feed::OpdsFeed::new(
         "root".to_string(),
         "Stump OPDS catalog".to_string(),
+        None,
         entries,
     );
 
     XmlResponse(feed.build().unwrap())
 }
 
+#[get("/libraries")]
+pub async fn libraries(state: &State) -> Result<XmlResponse, String> {
+    let conn = state.get_connection();
+
+    let libraries = queries::library::get_libraries(&conn).await?;
+
+    let entries = libraries
+        .into_iter()
+        .map(|l| opds::entry::OpdsEntry::from(l))
+        .collect();
+
+    let feed = opds::feed::OpdsFeed::new(
+        "allLibraries".to_string(),
+        "All libraries".to_string(),
+        Some(vec![
+            OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::ItSelf,
+                href: String::from("/opds/v1.2/libraries"),
+            },
+            OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Start,
+                href: String::from("/opds/v1.2/catalog"),
+            },
+        ]),
+        entries,
+    );
+
+    // FIXME: change unsafe unwrap
+    Ok(XmlResponse(feed.build().unwrap()))
+}
+
+#[get("/libraries/<id>")]
+pub async fn library_by_id(state: &State, id: String) -> Result<XmlResponse, String> {
+    let res = queries::library::get_library_by_id_with_series(state.get_connection(), id).await?;
+
+    if res.len() != 1 {
+        return Err("Library not found".to_string());
+    }
+
+    let library_with_series = res[0].to_owned();
+
+    let feed = OpdsFeed::from(library_with_series);
+
+    Ok(XmlResponse(feed.build().unwrap()))
+}
+
 /// A handler for GET /opds/v1.2/series
 #[get("/series")]
-pub async fn series(db: &State) -> Result<XmlResponse, String> {
-    let res = get_series(db.get_connection()).await?;
+pub async fn series(state: &State) -> Result<XmlResponse, String> {
+    let res = get_series(state.get_connection()).await?;
 
     let entries = res
         .into_iter()
@@ -74,6 +123,18 @@ pub async fn series(db: &State) -> Result<XmlResponse, String> {
     let feed = opds::feed::OpdsFeed::new(
         "root".to_string(),
         "Stump OPDS All Series".to_string(),
+        Some(vec![
+            OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::ItSelf,
+                href: String::from("/opds/v1.2/series"),
+            },
+            OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Start,
+                href: String::from("/opds/v1.2/catalog"),
+            },
+        ]),
         entries,
     );
 
@@ -81,8 +142,8 @@ pub async fn series(db: &State) -> Result<XmlResponse, String> {
 }
 
 #[get("/series/latest")]
-pub async fn series_latest(db: &State) -> Result<XmlResponse, String> {
-    let res = get_lastest_series(db.get_connection()).await?;
+pub async fn series_latest(state: &State) -> Result<XmlResponse, String> {
+    let res = get_lastest_series(state.get_connection()).await?;
 
     let entries = res
         .into_iter()
@@ -92,6 +153,18 @@ pub async fn series_latest(db: &State) -> Result<XmlResponse, String> {
     let feed = opds::feed::OpdsFeed::new(
         "root".to_string(),
         "Stump OPDS All Series".to_string(),
+        Some(vec![
+            OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::ItSelf,
+                href: String::from("/opds/v1.2/series/latest"),
+            },
+            OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Start,
+                href: String::from("/opds/v1.2/catalog"),
+            },
+        ]),
         entries,
     );
 
@@ -102,9 +175,9 @@ pub async fn series_latest(db: &State) -> Result<XmlResponse, String> {
 pub async fn series_by_id(
     id: String,
     page: Option<usize>,
-    db: &State,
+    state: &State,
 ) -> Result<XmlResponse, String> {
-    let res = get_series_by_id_with_media(db.get_connection(), id).await?;
+    let res = get_series_by_id_with_media(state.get_connection(), id).await?;
 
     if res.len() != 1 {
         return Err("Series not found".to_string());
@@ -122,8 +195,8 @@ pub async fn series_by_id(
 }
 
 #[get("/books/<id>/thumbnail")]
-pub async fn book_thumbnail(id: String, db: &State) -> Result<ImageResponse, String> {
-    let book = queries::book::get_book_by_id(db.get_connection(), id).await?;
+pub async fn book_thumbnail(id: String, state: &State) -> Result<ImageResponse, String> {
+    let book = queries::book::get_book_by_id(state.get_connection(), id).await?;
 
     if let Some(b) = book {
         match media_file::get_image(&b.path, 1) {
@@ -143,9 +216,9 @@ pub async fn book_page(
     id: String,
     page: usize,
     zero_based: Option<bool>,
-    db: &State,
+    state: &State,
 ) -> Result<ImageResponse, String> {
-    let book = queries::book::get_book_by_id(db.get_connection(), id).await?;
+    let book = queries::book::get_book_by_id(state.get_connection(), id).await?;
 
     let correct_page = match zero_based {
         Some(true) => page + 1,

@@ -1,15 +1,19 @@
-use crate::database::entities::series;
 use crate::{
-    database::entities::{library, media},
+    database::entities::{library, media, series},
     fs::checksum::Crc,
     types::{
         comic::ComicInfo,
         dto::{GetMediaQuery, GetMediaQueryResult},
     },
+    Log,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
 use log::info;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
+use rocket::tokio::sync::broadcast::Sender;
+use sea_orm::{
+    ActiveModelTrait, DatabaseConnection, EntityTrait, JoinType, QueryOrder, QuerySelect,
+    RelationTrait, Set,
+};
 use std::path::PathBuf;
 use std::{collections::HashMap, path::Path};
 use walkdir::{DirEntry, WalkDir};
@@ -18,6 +22,7 @@ use super::media_file::{process_rar, process_zip};
 
 pub struct Scanner<'a> {
     pub db: &'a DatabaseConnection,
+    pub event_queue: &'a Sender<Log>,
     pub libraries: Vec<library::Model>,
     // TODO: make hashmap of <String, series::Model> for faster lookup
     pub series: Vec<series::Model>,
@@ -44,6 +49,7 @@ impl IgnoredFile for Path {
 impl<'a> Scanner<'a> {
     pub fn new(
         db: &'a DatabaseConnection,
+        event_queue: &'a Sender<Log>,
         libraries: Vec<library::Model>,
         series: Vec<series::Model>,
         media: GetMediaQueryResult,
@@ -56,6 +62,7 @@ impl<'a> Scanner<'a> {
 
         Self {
             db,
+            event_queue,
             libraries,
             series,
             media: hashmap,
@@ -203,6 +210,8 @@ impl<'a> Scanner<'a> {
             let path = entry.path();
             let library_path = PathBuf::from(&library.path);
 
+            // FIXME: there is an edge case I did not account for here. If the user has a library called `ebooks` and no subfolders,
+            // I will actually want to add the library to the database as a series, as well.
             if path.to_path_buf().eq(&library_path) {
                 continue;
             } else if path.is_dir() && !self.series_exists(path) {
@@ -232,7 +241,12 @@ impl<'a> Scanner<'a> {
                 Some(name) if name.ends_with("cbr") => process_rar(&entry),
                 Some(name) if name.ends_with("cbz") => process_zip(&entry),
                 _ => {
-                    info!("Unsupported file: {}", entry.path().display());
+                    let message = format!("Unsupported file type: {:?}", path);
+                    info!("{}", &message);
+                    // TODO: store in db?
+                    let log = Log::warn(message);
+                    let _ = self.event_queue.send(log);
+
                     continue;
                 }
             };
@@ -244,7 +258,9 @@ impl<'a> Scanner<'a> {
                     self.insert_media(model).await;
                 }
                 Err(e) => {
-                    // error!("Error processing file: {}", e);
+                    // TODO: store in db?
+                    let log = Log::error(e.to_string());
+                    let _ = self.event_queue.send(log);
                 }
             }
         }
@@ -258,4 +274,49 @@ impl<'a> Scanner<'a> {
 
         0
     }
+}
+
+pub async fn scan(conn: &DatabaseConnection, queue: &Sender<Log>) -> Result<(), String> {
+    // TODO: optimize these queries to one if possible.
+    // TODO: use the new get_libraries_and_series function in queries::library
+
+    let series = series::Entity::find()
+        .all(conn)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let libraries = library::Entity::find()
+        .all(conn)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if libraries.is_empty() {
+        // This will error if there are no listeners (which is fine)
+        let _ = queue.send(Log::error(
+            "You cannot scan until you configure a library".to_owned(),
+        ));
+        return Err("No libraries configured".to_string());
+    }
+
+    let media: GetMediaQueryResult = media::Entity::find()
+        .column_as(library::Column::Id, "library_id")
+        .column_as(library::Column::Path, "library_path")
+        .column_as(series::Column::Path, "series_path")
+        .join(JoinType::InnerJoin, media::Relation::Series.def())
+        .group_by(series::Column::Id)
+        .join(JoinType::InnerJoin, series::Relation::Library.def())
+        .group_by(library::Column::Id)
+        .into_model::<GetMediaQuery>()
+        .all(conn)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let mut scanner = Scanner::new(conn, queue, libraries, series, media);
+    // Should I await this? Or should I just let it run maybe in a new thread and then
+    // return? I can maybe stream the progress updates to the client or something?. TODO:
+    // scanner.scan().on_data(|_| {}) etc ????
+    // https://api.rocket.rs/master/rocket/response/stream/struct.EventStream.html maybe?
+    scanner.scan().await;
+
+    Ok(())
 }

@@ -13,16 +13,17 @@ Stump is early in development, so there is a LOT missing - gotta start somewhere
 - [ ] Pass container config to stump, so it knows where the mount target is and can load the media
 - [ ] Filesystem indexing of libraries
   - [ ] Walk through libraries and sync media to DB
-    - [ ] based on checksums or just urls? not sure, both have pros and cons
+    - [x] based on checksums (FIXME: this is working but **vvv slow**)
     - [ ] log errors
 - [ ] Full OPDS support
+  - [ ] Implement paging for the applicable OPDS feeds (e.g. `/opds/v1.2/series/1?page=1`)
   - [ ] Test common OPDS clients like [Panels](https://panels.app), [Chunky](http://chunkyreader.com/), etc
     - [ ] Panels:
       - [x] can connect without authentication
       - [ ] can connect with authentication
-      - [ ] can generate OPDS feeds for:
+      - [x] can generate OPDS feeds for:
         - [x] catalogs
-        - [ ] libraries
+        - [x] libraries
         - [x] series
       - [ ] can fetch book thumbnails
         - [x] cbr (iffy, see FIXME notes)

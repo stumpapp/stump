@@ -4,23 +4,28 @@ use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{entry::OpdsEntry, util};
-use crate::types::alias::SeriesWithMedia;
+use crate::types::alias::{LibraryWithSeries, SeriesWithMedia};
 
 #[derive(Debug)]
 pub struct OpdsFeed {
     pub id: String,
     pub title: String,
     pub entries: Vec<OpdsEntry>,
-    // pub links: Vec<OpdsLink>,
+    pub links: Option<Vec<OpdsLink>>,
 }
 
 impl OpdsFeed {
-    pub fn new(id: String, title: String, entries: Vec<OpdsEntry>) -> Self {
+    pub fn new(
+        id: String,
+        title: String,
+        links: Option<Vec<OpdsLink>>,
+        entries: Vec<OpdsEntry>,
+    ) -> Self {
         Self {
             id,
             title,
             entries,
-            // links: Vec::new(),
+            links,
         }
     }
 
@@ -40,6 +45,12 @@ impl OpdsFeed {
         util::write_xml_element("title", &self.title, &mut writer)?;
         util::write_xml_element("updated", &chrono::Utc::now().to_rfc3339(), &mut writer)?;
 
+        if let Some(links) = &self.links {
+            for link in links {
+                link.write(&mut writer)?;
+            }
+        }
+
         for entry in &self.entries {
             entry.write(&mut writer)?;
         }
@@ -50,6 +61,7 @@ impl OpdsFeed {
     }
 }
 
+// FIXME: use page
 impl From<(SeriesWithMedia, Option<usize>)> for OpdsFeed {
     fn from(payload: (SeriesWithMedia, Option<usize>)) -> Self {
         let (series_with_media, page) = payload;
@@ -90,6 +102,32 @@ impl From<(SeriesWithMedia, Option<usize>)> for OpdsFeed {
 
         let entries = media.into_iter().map(OpdsEntry::from).collect();
 
-        Self::new(id, title, entries)
+        Self::new(id, title, Some(links), entries)
+    }
+}
+
+impl From<LibraryWithSeries> for OpdsFeed {
+    fn from(library_with_series: LibraryWithSeries) -> Self {
+        let (library, series) = library_with_series;
+
+        let id = library.id.to_string();
+        let title = library.name;
+
+        let links = vec![
+            OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::ItSelf,
+                format!("/opds/v1.2/libraries/{}", id),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::Start,
+                "/opds/v1.2/catalog".to_string(),
+            ),
+        ];
+
+        let entries = series.into_iter().map(OpdsEntry::from).collect();
+
+        Self::new(id, title, Some(links), entries)
     }
 }

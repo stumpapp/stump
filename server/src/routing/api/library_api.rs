@@ -9,10 +9,10 @@ use sea_orm::{sea_query::Expr, ActiveModelTrait, ColumnTrait, EntityTrait, Query
 type GetLibrary = Json<Vec<library::Model>>;
 
 #[get("/library")]
-// pub async fn get_libraries(db: &State) -> Result<Vec<library::Model>, String> {
-pub async fn get_libraries(db: &State) -> Result<GetLibrary, String> {
+// pub async fn get_libraries(state: &State) -> Result<Vec<library::Model>, String> {
+pub async fn get_libraries(state: &State) -> Result<GetLibrary, String> {
     let libraries = library::Entity::find()
-        .all(db.get_connection())
+        .all(state.get_connection())
         .await
         .map_err(|e| e.to_string())?;
 
@@ -27,9 +27,9 @@ pub struct InsertLibrary<'r> {
 
 /// A handler for POST /api/library. Inserts a new library into the database.
 #[post("/library", data = "<lib>")]
-pub async fn insert_library(db: &State, lib: Json<InsertLibrary<'_>>) -> Result<String, String> {
+pub async fn insert_library(state: &State, lib: Json<InsertLibrary<'_>>) -> Result<String, String> {
     let libraries = library::Entity::find()
-        .all(db.get_connection())
+        .all(state.get_connection())
         .await
         .map_err(|e| e.to_string())?;
 
@@ -58,7 +58,7 @@ pub async fn insert_library(db: &State, lib: Json<InsertLibrary<'_>>) -> Result<
     };
 
     let res = new_lib
-        .insert(db.get_connection())
+        .insert(state.get_connection())
         .await
         .map_err(|e| e.to_string())?;
 
@@ -69,7 +69,7 @@ pub async fn insert_library(db: &State, lib: Json<InsertLibrary<'_>>) -> Result<
 /// A handler for PUT /api/library/:id. Update an existing library in the database.
 #[put("/library/<id>", data = "<changes>")]
 pub async fn update_library(
-    db: &State,
+    state: &State,
     id: i32,
     changes: Json<InsertLibrary<'_>>,
 ) -> Result<(), String> {
@@ -77,19 +77,21 @@ pub async fn update_library(
         .col_expr(library::Column::Name, Expr::value(changes.name))
         .col_expr(library::Column::Path, Expr::value(changes.path))
         .filter(library::Column::Id.eq(id))
-        .exec(db.get_connection())
+        .exec(state.get_connection())
         .await
         .map_err(|e| e.to_string())?;
+
+    // TODO: index the new library path
 
     Ok(())
 }
 
 /// A handler for DELETE /api/library/:id. Deletes a library from the database.
 #[delete("/library/<id>")]
-pub async fn delete_library(db: &State, id: i32) -> Result<(), String> {
+pub async fn delete_library(state: &State, id: i32) -> Result<(), String> {
     library::Entity::delete_many()
         .filter(library::Column::Id.eq(id))
-        .exec(db.get_connection())
+        .exec(state.get_connection())
         .await
         .map_err(|e| e.to_string())?;
 

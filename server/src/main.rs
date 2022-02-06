@@ -6,6 +6,9 @@ use std::path::{Path, PathBuf};
 #[macro_use]
 extern crate rocket;
 
+#[macro_use]
+extern crate rocket_include_static_resources;
+
 mod database;
 mod fs;
 mod logging;
@@ -17,14 +20,29 @@ mod types;
 use crate::logging::Log;
 use database::Database;
 
+use rocket_include_static_resources::{EtagIfNoneMatch, StaticContextManager, StaticResponse};
+
 pub type State = state::State;
 
+static_response_handler! {
+    "/favicon.ico" => favicon => "favicon",
+    "/favicon-16.png" => favicon_png => "favicon-png",
+}
+
+// #[get("/")]
+// async fn index() -> Option<NamedFile> {
+//     let page_directory_path = get_directory_path();
+//     NamedFile::open(Path::new(&page_directory_path).join("index.html"))
+//         .await
+//         .ok()
+// }
+
 #[get("/")]
-async fn index() -> Option<NamedFile> {
-    let page_directory_path = get_directory_path();
-    NamedFile::open(Path::new(&page_directory_path).join("index.html"))
-        .await
-        .ok()
+fn index(
+    static_resources: &rocket::State<StaticContextManager>,
+    etag_if_none_match: EtagIfNoneMatch,
+) -> StaticResponse {
+    static_resources.build(&etag_if_none_match, "index.html")
 }
 
 // FIXME: keeps matching annoyingly. Add prefix to this? like 'static'?
@@ -55,8 +73,13 @@ fn rocket() -> _ {
     let state = state::AppState::new(db, channel::<Log>(1024).0);
 
     rocket::build()
+        .attach(static_resources_initializer!(
+            "favicon" => "static/favicon.ico",
+            "favicon-png" => "static/favicon.png",
+            "index.html" => "static/index.html",
+        ))
         .manage(state)
-        .mount("/", routes![index, files])
+        .mount("/", routes![index, favicon, favicon_png, files])
         .mount(
             "/api",
             routes![

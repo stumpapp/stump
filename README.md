@@ -1,5 +1,4 @@
-# Stump
-
+# ![Stump Icon icon](./.github/images/logo.png)
 A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga).
 
 I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. *I also just want to practice Rust!*

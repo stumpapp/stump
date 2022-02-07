@@ -4,7 +4,7 @@ use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{entry::OpdsEntry, util};
-use crate::types::alias::{LibraryWithSeries, SeriesWithMedia};
+use crate::types::alias::{FeedPages, LibraryWithSeries, SeriesWithMedia};
 
 #[derive(Debug)]
 pub struct OpdsFeed {
@@ -61,11 +61,11 @@ impl OpdsFeed {
     }
 }
 
-// FIXME: use page
-impl From<(SeriesWithMedia, Option<usize>)> for OpdsFeed {
-    fn from(payload: (SeriesWithMedia, Option<usize>)) -> Self {
-        let (series_with_media, page) = payload;
-        // let series = series_with_media.0;
+// FIXME: need to pass a (current_page:usize, next_page:Option<usize>)
+impl From<(SeriesWithMedia, FeedPages)> for OpdsFeed {
+    fn from(payload: (SeriesWithMedia, FeedPages)) -> Self {
+        let (series_with_media, pages) = payload;
+        let (current_page, next_page) = pages;
         let (series, media) = series_with_media;
 
         let id = series.id.to_string();
@@ -77,12 +77,12 @@ impl From<(SeriesWithMedia, Option<usize>)> for OpdsFeed {
         //     Some("https://github.com/aaronleopold/stump".to_string()),
         // );
 
-        let next_page = match page {
-            Some(p) => p + 1,
-            None => 1,
-        };
+        // let next_page = match page {
+        //     Some(p) => p + 1,
+        //     None => 1,
+        // };
 
-        let links = vec![
+        let mut links = vec![
             OpdsLink::new(
                 OpdsLinkType::Navigation,
                 OpdsLinkRel::ItSelf,
@@ -90,15 +90,26 @@ impl From<(SeriesWithMedia, Option<usize>)> for OpdsFeed {
             ),
             OpdsLink::new(
                 OpdsLinkType::Navigation,
-                OpdsLinkRel::Next,
-                format!("/opds/v1.2/series/{}?page={}", id, next_page),
-            ),
-            OpdsLink::new(
-                OpdsLinkType::Navigation,
                 OpdsLinkRel::Start,
                 "/opds/v1.2/catalog".to_string(),
             ),
         ];
+
+        if current_page > 0 {
+            links.push(OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::Previous,
+                format!("/opds/v1.2/series/{}?page={}", id, current_page - 1),
+            ));
+        }
+
+        if let Some(next_page) = next_page {
+            links.push(OpdsLink::new(
+                OpdsLinkType::Navigation,
+                OpdsLinkRel::Next,
+                format!("/opds/v1.2/series/{}?page={}", id, next_page),
+            ));
+        }
 
         let entries = media.into_iter().map(OpdsEntry::from).collect();
 

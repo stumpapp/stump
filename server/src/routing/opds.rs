@@ -4,7 +4,7 @@ use crate::database::queries;
 use crate::database::queries::series::{
     get_lastest_series, get_series, get_series_by_id_with_media,
 };
-use crate::fs::media_file;
+use crate::fs::{self, media_file};
 use crate::opds::feed::OpdsFeed;
 use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use crate::types::rocket::ImageResponse;
@@ -179,15 +179,32 @@ pub async fn series_by_id(
 ) -> Result<XmlResponse, String> {
     let res = get_series_by_id_with_media(state.get_connection(), id).await?;
 
+    // TODO: see comment for function `get_series_by_id_with_media`
+
     if res.len() != 1 {
         return Err("Series not found".to_string());
     }
 
-    let series_with_media: (entities::series::Model, Vec<media::Model>) = res[0].to_owned();
+    let (series, mut media) = res[0].to_owned();
 
-    // I have to do this so I can pass the page into the conversion, so the 'next' link can be
-    // generated correctly
-    let payload = (series_with_media, page);
+    // page size is 20
+    // take a slice of the media vector representing page
+    let corrected_page = page.unwrap_or(0);
+    let page_size = 20;
+    let start = corrected_page * page_size;
+    let end = (start + page_size) - 1;
+
+    let mut next_page = None;
+
+    if start > media.len() {
+        media = vec![];
+    } else if end < media.len() {
+        next_page = Some(page.unwrap_or(1));
+        media = media.get(start..end).ok_or("Invalid page")?.to_vec();
+    }
+
+    // FIXME: this type is kinda disgusting. Consider refactoring to a struct?
+    let payload = ((series, media), (page.unwrap_or(0), next_page));
 
     let feed = OpdsFeed::from(payload);
 
@@ -199,7 +216,7 @@ pub async fn book_thumbnail(id: String, state: &State) -> Result<ImageResponse, 
     let book = queries::book::get_book_by_id(state.get_connection(), id).await?;
 
     if let Some(b) = book {
-        match media_file::get_image(&b.path, 1) {
+        match media_file::get_page(&b.path, 1) {
             Ok(res) => Ok(res),
             Err(e) => Err(e.to_string()),
         }
@@ -220,13 +237,18 @@ pub async fn book_page(
 ) -> Result<ImageResponse, String> {
     let book = queries::book::get_book_by_id(state.get_connection(), id).await?;
 
-    let correct_page = match zero_based {
+    let mut correct_page = match zero_based {
         Some(true) => page + 1,
         _ => page,
     };
 
     if let Some(b) = book {
-        match media_file::get_image(&b.path, correct_page) {
+        // TODO: move this elsewhere?? Doing this to load the cover photo instead of page 1. Not ideal solution
+        if b.path.ends_with(".epub") && correct_page == 1 {
+            correct_page = 0;
+        }
+        // match media_file::get_page(&b.path, correct_page) {
+        match media_file::get_page(&b.path, correct_page) {
             Ok(res) => Ok(res),
             Err(e) => Err(e.to_string()),
         }

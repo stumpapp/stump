@@ -7,5 +7,6 @@ pub type LibraryModel = library::Model;
 pub type MediaModel = media::Model;
 
 pub type SeriesWithMedia = (SeriesModel, Vec<MediaModel>);
+pub type FeedPages = (usize, Option<usize>);
 pub type LibraryWithSeries = (LibraryModel, Vec<SeriesModel>);
 pub type SeriesWithLibraries = Vec<(SeriesModel, Vec<LibraryModel>)>;

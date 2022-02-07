@@ -9,7 +9,8 @@ pub enum OpdsLinkType {
     Image,       // "image/jpeg",
     Navigation,  // "application/atom+xml;profile=opds-catalog;kind=navigation",
     OctetStream, // "application/octet-stream",
-    Zip,         // application/zip
+    Zip,         // "application/zip"
+    Epub,        // "application/epub+zip"
 }
 
 impl OpdsEnumStr for OpdsLinkType {
@@ -22,6 +23,7 @@ impl OpdsEnumStr for OpdsLinkType {
             OpdsLinkType::Navigation => "application/atom+xml;profile=opds-catalog;kind=navigation",
             OpdsLinkType::OctetStream => "application/octet-stream",
             OpdsLinkType::Zip => "application/zip",
+            OpdsLinkType::Epub => "application/epub+zip",
         }
     }
 }
@@ -33,6 +35,7 @@ pub enum OpdsLinkRel {
     Acquisition, // "http://opds-spec.org/acquisition",
     Start,       // start
     Next,        // next
+    Previous,    // previous
     Thumbnail,   // "http://opds-spec.org/image/thumbnail"
     Image,       // "http://opds-spec.org/image"
     PageStream,  // "http://vaemendis.net/opds-pse/stream"
@@ -46,6 +49,7 @@ impl OpdsEnumStr for OpdsLinkRel {
             OpdsLinkRel::Acquisition => "http://opds-spec.org/acquisition",
             OpdsLinkRel::Start => "start",
             OpdsLinkRel::Next => "next",
+            OpdsLinkRel::Previous => "previous",
             OpdsLinkRel::Thumbnail => "http://opds-spec.org/image/thumbnail",
             OpdsLinkRel::Image => "http://opds-spec.org/image",
             OpdsLinkRel::PageStream => "http://vaemendis.net/opds-pse/stream",

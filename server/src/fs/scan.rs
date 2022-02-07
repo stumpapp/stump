@@ -11,14 +11,15 @@ use chrono::{DateTime, NaiveDateTime, Utc};
 use log::info;
 use rocket::tokio::sync::broadcast::Sender;
 use sea_orm::{
-    ActiveModelTrait, DatabaseConnection, EntityTrait, JoinType, QueryOrder, QuerySelect,
-    RelationTrait, Set,
+    ActiveModelTrait, DatabaseConnection, EntityTrait, JoinType, QuerySelect, RelationTrait, Set,
 };
 use std::path::PathBuf;
 use std::{collections::HashMap, path::Path};
 use walkdir::{DirEntry, WalkDir};
 
-use super::media_file::{process_rar, process_zip};
+use super::epub::process_epub;
+use super::rar::process_rar;
+use super::zip::process_zip;
 
 pub struct Scanner<'a> {
     pub db: &'a DatabaseConnection,
@@ -169,6 +170,20 @@ impl<'a> Scanner<'a> {
         }
     }
 
+    fn should_create_series(path: &Path) -> bool {
+        let items = std::fs::read_dir(path);
+
+        if items.is_err() {
+            return false;
+        }
+
+        let items = items.unwrap();
+
+        items
+            .filter_map(|item| item.ok())
+            .any(|f| f.path().is_file())
+    }
+
     async fn insert_media(&self, model: media::ActiveModel) {
         // TODO: handle me please
         info!(
@@ -212,9 +227,11 @@ impl<'a> Scanner<'a> {
 
             // FIXME: there is an edge case I did not account for here. If the user has a library called `ebooks` and no subfolders,
             // I will actually want to add the library to the database as a series, as well.
-            if path.to_path_buf().eq(&library_path) {
-                continue;
-            } else if path.is_dir() && !self.series_exists(path) {
+            if path.is_dir() && !self.series_exists(path) {
+                if path.to_path_buf().eq(&library_path) && !Self::should_create_series(path) {
+                    continue;
+                }
+
                 let series_active_model = Self::generate_series_model(path, library.id);
                 let res = self.insert_series(series_active_model).await;
 
@@ -240,6 +257,7 @@ impl<'a> Scanner<'a> {
             let processed_info = match entry.file_name().to_str() {
                 Some(name) if name.ends_with("cbr") => process_rar(&entry),
                 Some(name) if name.ends_with("cbz") => process_zip(&entry),
+                Some(name) if name.ends_with("epub") => process_epub(&entry),
                 _ => {
                     let message = format!("Unsupported file type: {:?}", path);
                     info!("{}", &message);

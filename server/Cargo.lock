@@ -683,6 +683,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "epub"
+version = "1.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f4086fc0bc91524e0a88bc13fa622e3b9fce38d5a91454e0667db97a4f39dc3"
+dependencies = [
+ "anyhow",
+ "percent-encoding",
+ "regex 1.5.4",
+ "xml-rs",
+ "zip",
+]
+
+[[package]]
 name = "event-listener"
 version = "2.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2574,6 +2587,7 @@ dependencies = [
  "derive_more",
  "dirs",
  "env_logger",
+ "epub",
  "log 0.4.14",
  "rocket",
  "rocket-include-static-resources",

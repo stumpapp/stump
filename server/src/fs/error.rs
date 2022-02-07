@@ -12,6 +12,8 @@ pub enum ProcessFileError {
     ArchiveReadError(#[from] ZipError),
     #[error("Archive contains no files")]
     ArchiveEmptyError,
+    #[error("Error while attempting to read .epub file")]
+    EpubReadError,
     #[error("Could not find an image")]
     NoImageError,
     #[error("Could not open rar file")]

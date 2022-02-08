@@ -1,4 +1,4 @@
-use crate::database::entities::{media, series};
+use crate::database::entities::series;
 use sea_orm::FromQueryResult;
 
 // I wanted to flatten this query into one struct to simplify some of the fs indexing logic
@@ -22,19 +22,3 @@ pub struct GetMediaQuery {
 }
 
 pub type GetMediaQueryResult = Vec<GetMediaQuery>;
-
-pub struct GetSeriesQuery {
-    pub id: i32,
-    pub path: String,
-    pub title: String,
-    pub book_count: i32,
-    // pub thumbnail: String,
-}
-
-pub struct SeriesWithThumbnail {
-    pub id: i32,
-    pub path: String,
-    pub title: String,
-    pub book_count: i32,
-    pub thumbnail: String,
-}

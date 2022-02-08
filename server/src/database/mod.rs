@@ -1,8 +1,5 @@
 use anyhow::Result;
 use sea_orm::{ConnectionTrait, DatabaseConnection, DbBackend, Schema};
-// use walkdir::DirEntry;
-
-// use crate::types::comic::ComicInfo;
 
 pub mod connection;
 pub mod entities;
@@ -41,6 +38,12 @@ impl Database {
                 .if_not_exists(),
         );
 
+        let logs_creation_statement = db_backend.build(
+            schema
+                .create_table_from_entity(entities::log::Entity)
+                .if_not_exists(),
+        );
+
         self.connection
             .execute(media_creation_statement)
             .await
@@ -53,6 +56,11 @@ impl Database {
 
         self.connection
             .execute(library_creation_statement)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        self.connection
+            .execute(logs_creation_statement)
             .await
             .map_err(|e| e.to_string())?;
 

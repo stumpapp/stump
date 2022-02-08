@@ -1,4 +1,4 @@
-use rocket::tokio::sync::broadcast::{channel, Sender};
+use rocket::tokio::sync::broadcast::channel;
 use rocket::{fs::NamedFile, futures::executor::block_on};
 use std::env;
 use std::path::{Path, PathBuf};
@@ -86,12 +86,13 @@ fn rocket() -> _ {
                 // top level
                 routing::api::scan,
                 routing::api::log_listener,
-                routing::api::test_log_event,
+                // logs api
+                routing::api::log::get_logs,
                 // library api
-                routing::api::library_api::get_libraries,
-                routing::api::library_api::insert_library,
-                routing::api::library_api::update_library,
-                routing::api::library_api::delete_library,
+                routing::api::library::get_libraries,
+                routing::api::library::insert_library,
+                routing::api::library::update_library,
+                routing::api::library::delete_library,
             ],
         )
         .mount(

@@ -26,3 +26,8 @@ urlencoding = "2.1.0"
 base64 = "0.13.0"
 rocket-include-static-resources = "0.10.0"
 epub = "1.2.3"
+# FIXME: introduced MAJOR compilation issues
+#pdf = { git = "https://github.com/pdf-rs/pdf" }
+#pdf_render = { git = "https://github.com/pdf-rs/pdf_render" }
+#pathfinder_rasterize = { git = "https://github.com/s3bk/pathfinder_rasterizer" }
+#pathfinder_geometry = { git = "https://github.com/servo/pathfinder" }

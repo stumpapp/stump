@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+// TODO: generalize to reuse this struct for epubs, pdfs, etc
+
 // TODO: more fields
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct ComicInfo {

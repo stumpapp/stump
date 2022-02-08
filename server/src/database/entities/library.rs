@@ -27,8 +27,3 @@ impl Related<super::series::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
-
-// #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-// pub enum Relation {}
-
-// impl ActiveModelBehavior for ActiveModel {}

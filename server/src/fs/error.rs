@@ -1,4 +1,6 @@
+// use pdf as pdf_rs;
 use thiserror::Error;
+
 use unrar::error::UnrarError;
 use zip::result::ZipError;
 
@@ -14,6 +16,8 @@ pub enum ProcessFileError {
     ArchiveEmptyError,
     #[error("Error while attempting to read .epub file")]
     EpubReadError,
+    // #[error("Error while attempting to read .pdf file")]
+    // PdfReadError(#[from] pdf_rs::PdfError),
     #[error("Could not find an image")]
     NoImageError,
     #[error("Could not open rar file")]

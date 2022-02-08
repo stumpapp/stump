@@ -1,3 +1,4 @@
+use crate::database::queries;
 use crate::{
     database::entities::{library, media, series},
     fs::checksum::Crc,
@@ -10,9 +11,7 @@ use crate::{
 use chrono::{DateTime, NaiveDateTime, Utc};
 use log::info;
 use rocket::tokio::sync::broadcast::Sender;
-use sea_orm::{
-    ActiveModelTrait, DatabaseConnection, EntityTrait, JoinType, QuerySelect, RelationTrait, Set,
-};
+use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
 use std::path::PathBuf;
 use std::{collections::HashMap, path::Path};
 use walkdir::{DirEntry, WalkDir};
@@ -284,50 +283,50 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    pub async fn scan(&mut self) -> usize {
+    pub async fn scan(&mut self) {
         // FIXME: don't want to clone
         for library in self.libraries.clone().iter() {
             self.do_scan(library).await;
         }
-
-        0
     }
 }
 
-pub async fn scan(conn: &DatabaseConnection, queue: &Sender<Log>) -> Result<(), String> {
+// TODO: implement Scanner::scan for a single library
+pub async fn scan(
+    conn: &DatabaseConnection,
+    queue: &Sender<Log>,
+    library_id: Option<String>,
+) -> Result<(), String> {
     // TODO: optimize these queries to one if possible.
     // TODO: use the new get_libraries_and_series function in queries::library
 
-    let series = series::Entity::find()
-        .all(conn)
-        .await
-        .map_err(|e| e.to_string())?;
+    let series = queries::series::get_series(conn).await?;
 
-    let libraries = library::Entity::find()
-        .all(conn)
-        .await
-        .map_err(|e| e.to_string())?;
+    let libraries: Vec<library::Model>;
 
-    if libraries.is_empty() {
-        // This will error if there are no listeners (which is fine)
-        let _ = queue.send(Log::error(
-            "You cannot scan until you configure a library".to_owned(),
-        ));
-        return Err("No libraries configured".to_string());
+    if let Some(library_id) = library_id.clone() {
+        libraries = queries::library::get_library_by_id(conn, library_id)
+            .await?
+            .map(|l| l.into())
+            .into_iter()
+            .collect();
+    } else {
+        libraries = queries::library::get_libraries(conn).await?;
     }
 
-    let media: GetMediaQueryResult = media::Entity::find()
-        .column_as(library::Column::Id, "library_id")
-        .column_as(library::Column::Path, "library_path")
-        .column_as(series::Column::Path, "series_path")
-        .join(JoinType::InnerJoin, media::Relation::Series.def())
-        .group_by(series::Column::Id)
-        .join(JoinType::InnerJoin, series::Relation::Library.def())
-        .group_by(library::Column::Id)
-        .into_model::<GetMediaQuery>()
-        .all(conn)
-        .await
-        .map_err(|e| e.to_string())?;
+    if libraries.is_empty() {
+        let mut message = "No libraries configured.".to_string();
+
+        if library_id.is_some() {
+            message = format!("No library with id: {}", library_id.unwrap());
+        }
+
+        // This will error if there are no listeners (which is fine)
+        let _ = queue.send(Log::error(message.clone()));
+        return Err(message);
+    }
+
+    let media = queries::media::get_media_with_library_and_series(conn).await?;
 
     let mut scanner = Scanner::new(conn, queue, libraries, series, media);
     // Should I await this? Or should I just let it run maybe in a new thread and then

@@ -5,7 +5,7 @@ I love Komga and use it at home, and I thought it would be cool to learn what go
 
 ## Roadmap / To-do List
 
-Stump is early in development, so there is a LOT missing - gotta start somewhere though! These are my current end-goals with some current todos sprinkled in:
+These are my current end-goals with some current todos sprinkled in:
 
 - [x] Create Stump docker image that can be used to run the server on my Raspberry Pi (or any other machine)
   - [x] Create Dockerfile for prod
@@ -15,7 +15,7 @@ Stump is early in development, so there is a LOT missing - gotta start somewhere
     - [x] based on checksums (FIXME: this is working but **vvv slow**)
     - [ ] log errors
 - [ ] Full OPDS support
-  - [ ] Implement paging for the applicable OPDS feeds (e.g. `/opds/v1.2/series/1?page=1`)
+  - [x] Implement paging for the applicable OPDS feeds (e.g. `/opds/v1.2/series/1?page=1`)
   - [ ] Test common OPDS clients like [Panels](https://panels.app), [Chunky](http://chunkyreader.com/), etc
     - [ ] Panels:
       - [x] can connect without authentication
@@ -28,12 +28,12 @@ Stump is early in development, so there is a LOT missing - gotta start somewhere
         - [x] cbr (iffy, see FIXME notes)
         - [x] cbz
         - [ ] pdf
-        - [ ] epub
+        - [ ] ~~epub~~ (not supported by Panels yet)
       - [ ] Page streaming support
          - [x] cbr (iffy, see FIXME notes)
          - [x] cbz
          - [ ] pdf
-         - [ ] epub
+         - [ ] ~~epub~~ (not supported by Panels yet)
 - [ ] Develop frontend client (Svelte) for:
   - [ ] reading media (epub, pdf, cbr, cbz)
   - [ ] managing media
@@ -43,10 +43,6 @@ Stump is early in development, so there is a LOT missing - gotta start somewhere
 - [ ] Add authentication system
 
 I am very open to suggestions and ideas!
-
-## Contributing
-
-Contributions are very **encouraged** and **welcome**! Please open an issue prior to working on a bug or feature to let me know what you're interested in working on. Thanks!
 
 ## Getting Started
 
@@ -93,7 +89,11 @@ docker create \
   --mount type=bind,source=/path/to/data,target=/data \
   --restart unless-stopped \
   stump # creates the container
-docker run stump # runs the container
+docker start stump # runs the container
 ```
 
 As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library/comics`, you'll need to mount `/Users/user/Library/comics` to both. This will eventually change to be more flexible.
+
+## Contributing
+
+Contributions are very **encouraged** and **welcome**! Please open an issue prior to working on a bug or feature to let me know what you're interested in working on. Thanks!

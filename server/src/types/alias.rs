@@ -1,7 +1,5 @@
 use crate::database::entities::{library, media, series};
 
-use crate::types::dto::SeriesWithThumbnail;
-
 pub type SeriesModel = series::Model;
 pub type LibraryModel = library::Model;
 pub type MediaModel = media::Model;

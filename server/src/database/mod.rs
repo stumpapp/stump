@@ -1,5 +1,8 @@
 use anyhow::Result;
-use sea_orm::{ConnectionTrait, DatabaseConnection, DbBackend, Schema};
+use sea_orm::{
+    ConnectionTrait, DatabaseConnection, DbBackend, DbErr, EntityTrait, ExecResult, Schema,
+    Statement,
+};
 
 pub mod connection;
 pub mod entities;
@@ -14,55 +17,33 @@ impl Database {
         Database { connection }
     }
 
-    // TODO: better error handling
-    // TODO: just make a sql file smh
-    pub async fn run_migration_up(&self) -> Result<(), String> {
+    pub fn get_seaorm_stmt<E: EntityTrait>(&self, e: E) -> Statement {
         let db_backend = DbBackend::Sqlite;
         let schema = Schema::new(db_backend);
 
-        let media_creation_statement = db_backend.build(
-            schema
-                .create_table_from_entity(entities::media::Entity)
-                .if_not_exists(),
-        );
+        db_backend.build(schema.create_table_from_entity(e).if_not_exists())
+    }
 
-        let series_creation_statement = db_backend.build(
-            schema
-                .create_table_from_entity(entities::series::Entity)
-                .if_not_exists(),
-        );
+    pub async fn run_seaorm_stmt(&self, stmt: Statement) -> Result<ExecResult, DbErr> {
+        self.connection.execute(stmt).await
+    }
 
-        let library_creation_statement = db_backend.build(
-            schema
-                .create_table_from_entity(entities::library::Entity)
-                .if_not_exists(),
-        );
+    // TODO: use new migration manager -> https://github.com/SeaQL/sea-orm/tree/master/examples/rocket_example
+    pub async fn run_migration_up(&self) -> Result<(), String> {
+        let mut stmts = vec![
+            self.get_seaorm_stmt(entities::user::Entity),
+            self.get_seaorm_stmt(entities::media::Entity),
+            self.get_seaorm_stmt(entities::read_progress::Entity),
+            self.get_seaorm_stmt(entities::series::Entity),
+            self.get_seaorm_stmt(entities::library::Entity),
+            self.get_seaorm_stmt(entities::log::Entity),
+        ];
 
-        let logs_creation_statement = db_backend.build(
-            schema
-                .create_table_from_entity(entities::log::Entity)
-                .if_not_exists(),
-        );
-
-        self.connection
-            .execute(media_creation_statement)
-            .await
-            .map_err(|e| e.to_string())?;
-
-        self.connection
-            .execute(series_creation_statement)
-            .await
-            .map_err(|e| e.to_string())?;
-
-        self.connection
-            .execute(library_creation_statement)
-            .await
-            .map_err(|e| e.to_string())?;
-
-        self.connection
-            .execute(logs_creation_statement)
-            .await
-            .map_err(|e| e.to_string())?;
+        for stmt in stmts.iter_mut() {
+            self.run_seaorm_stmt(stmt.to_owned())
+                .await
+                .map_err(|e| e.to_string())?;
+        }
 
         Ok(())
     }
@@ -74,6 +55,4 @@ impl Database {
     pub fn get_connection(&self) -> &DatabaseConnection {
         &self.connection
     }
-
-    // pub async fn insert_media(&self, file: DirEntry, media: (Option<ComicInfo>, Vec<String>)) {}
 }

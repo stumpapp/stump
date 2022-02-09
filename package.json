@@ -1,7 +1,6 @@
 {
   "name": "stump",
   "version": "1.0.0",
-  "main": "index.js",
   "repository": "https://github.com/aaronleopold/stump.git",
   "author": "Aaron Leopold <aaronleopold1221@gmail.com>",
   "license": "MIT",
@@ -9,11 +8,14 @@
     "start": "cd server && cargo run --release",
     "dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
     "build:docker": "pnpm frontend:build && pnpm server:build:docker",
+    "server:start": "cd server && cargo run",
     "server:dev": "cd server && cargo watch -x run",
     "server:build": "cd server && cargo build --release",
-    "server:build:docker-debian": "echo 'FIXME: I AM BROKEN LOL' && cd server && docker build -f Dockerfile.debian -t stump-deb .",
+    "server:build:docker-debian": "echo 'FIXME: I AM BROKEN --> run the following in /server: docker build -f Dockerfile.debian -t stump-deb .'",
     "server:build:docker-alpine": "cd server && docker build -f Dockerfile.alpine -t stump .",
+    "server:check": "cd server && cargo check",
     "frontend:install": "cd frontend && pnpm install",
+    "frontend:start": "cd frontend && pnpm run start",
     "frontend:dev": "cd frontend && pnpm dev",
     "frontend:build": "cd frontend && pnpm run build && mv build ../server/static",
     "frontend:build:docker": ""

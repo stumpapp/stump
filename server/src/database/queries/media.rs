@@ -1,5 +1,7 @@
-use crate::database::entities::{library, media, series};
-use crate::types::dto::{GetMediaQuery, GetMediaQueryResult};
+use crate::database::entities::{library, media, read_progress, series};
+use crate::types::dto::{
+    GetMedaWithProgress, GetMedaWithProgressRaw, GetMediaQuery, GetMediaQueryResult,
+};
 use sea_orm::{DatabaseConnection, EntityTrait, JoinType, QuerySelect, RelationTrait, Set};
 
 pub async fn get_media_with_library_and_series(
@@ -18,3 +20,18 @@ pub async fn get_media_with_library_and_series(
         .await
         .map_err(|e| e.to_string())?)
 }
+
+// pub async fn get_media_with_progres(
+//     conn: &DatabaseConnection,
+// ) -> Result<GetMedaWithProgress, String> {
+//     let res: GetMedaWithProgressRaw = media::Entity::find()
+//         .find_with_related(read_progress::Entity)
+//         .all(conn)
+//         .await
+//         .map_err(|e| e.to_string())?;
+
+//     Ok(res
+//         .into_iter()
+//         .map(|(media, progress)| (media, progress.into_iter().next()))
+//         .collect())
+// }

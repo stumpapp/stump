@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod library;
 pub mod log;
 pub mod media;

@@ -4,22 +4,18 @@ use crate::database::queries;
 use crate::database::queries::series::{
     get_lastest_series, get_series, get_series_by_id_with_media,
 };
-use crate::fs::{self, media_file};
+use crate::fs::media_file;
+use crate::guards::auth::OpdsAuth;
 use crate::opds::feed::OpdsFeed;
 use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use crate::types::rocket::ImageResponse;
-use crate::{
-    database::entities::{self, media},
-    opds,
-    types::rocket::XmlResponse,
-    State,
-};
+use crate::{opds, types::rocket::XmlResponse, State};
 
 // BASE URL: /opds/v1.2
 
 /// A handler for GET /opds/v1.2/catalog. Returns an OPDS catalog as an XML document
 #[get("/catalog")]
-pub fn catalog(_state: &State) -> XmlResponse {
+pub fn catalog(_state: &State, _auth: OpdsAuth) -> XmlResponse {
     // TODO: media from database
     let entries = vec![
         opds::entry::OpdsEntry::new(

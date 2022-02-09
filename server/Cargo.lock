@@ -310,6 +310,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
+name = "bcrypt"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f691e63585950d8c1c43644d11bab9073e40f5060dd2822734ae7c3dc69a3a80"
+dependencies = [
+ "base64",
+ "blowfish",
+ "getrandom",
+]
+
+[[package]]
 name = "binascii"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -348,6 +359,17 @@ dependencies = [
  "fastrand",
  "futures-lite",
  "once_cell",
+]
+
+[[package]]
+name = "blowfish"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe3ff3fc1de48c1ac2e3341c4df38b0d1bfb8fdf04632a187c8b75aaa319a7ab"
+dependencies = [
+ "byteorder",
+ "cipher",
+ "opaque-debug",
 ]
 
 [[package]]
@@ -419,6 +441,15 @@ dependencies = [
  "serde",
  "time 0.1.43",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "cipher"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ee52072ec15386f770805afd189a01c8841be8696bed250fa2f13c4c0d6dfb7"
+dependencies = [
+ "generic-array",
 ]
 
 [[package]]
@@ -2002,6 +2033,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "rocket-session-store"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ba33aad1d6e375db155bb07bffbda2d958693e73aa7f3e17042f654a247b53f"
+dependencies = [
+ "rand 0.8.4",
+ "rocket",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "rocket_codegen"
 version = "0.5.0-rc.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2125,9 +2169,9 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "sea-orm"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5452736ac11d11f9dcf1980897d3a6302d78ee2bfcb928b0f9c03569f2e6b12c"
+checksum = "dd24380b48dacd3ed1c3d467c7b17ffa5818555a2c04066f4a0a9e17d830abc9"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -2150,9 +2194,9 @@ dependencies = [
 
 [[package]]
 name = "sea-orm-macros"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8b7b6d423b591bf447685e9ea7cecd65e0c282e18dc5ddc7438425cd296faa8"
+checksum = "c199fa8630b1e195d7aef24ce8944af8f4ced67c4eccffd8926453b59f2565a1"
 dependencies = [
  "bae",
  "heck",
@@ -2163,9 +2207,9 @@ dependencies = [
 
 [[package]]
 name = "sea-query"
-version = "0.20.0"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d83e4a0dd79545b61c6ca453a28d0a88829487869a8559a35a3192f1b6aacad8"
+checksum = "9088ff96158860a75d98a85a654fdd9d97b10515773af6d87339bfc48258c800"
 dependencies = [
  "chrono",
  "rust_decimal",
@@ -2255,9 +2299,9 @@ checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
 name = "serde"
-version = "1.0.132"
+version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b9875c23cf305cd1fd7eb77234cbb705f21ea6a72c637a5c6db5fe4b8e7f008"
+checksum = "ce31e24b01e1e524df96f1c2fdd054405f8d7376249a5110886fb4b658484789"
 dependencies = [
  "serde_derive",
 ]
@@ -2276,9 +2320,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.132"
+version = "1.0.136"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecc0db5cb2556c0e558887d9bbdcf6ac4471e83ff66cf696e5419024d1606276"
+checksum = "08597e7152fcd306f41838ed3e37be9eaeed2b61c42e2117266a554fab4662f9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2287,9 +2331,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.73"
+version = "1.0.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcbd0344bc6533bc7ec56df11d42fb70f1b912351c0825ccb7211b59d8af7cf5"
+checksum = "d23c1ba4cf0efd44be32017709280b32d1cea5c3f1275c3b6d9e8bc54f758085"
 dependencies = [
  "indexmap",
  "itoa 1.0.1",
@@ -2583,6 +2627,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64",
+ "bcrypt",
  "chrono",
  "derive_more",
  "dirs",
@@ -2591,6 +2636,7 @@ dependencies = [
  "log 0.4.14",
  "rocket",
  "rocket-include-static-resources",
+ "rocket-session-store",
  "sea-orm",
  "serde",
  "serde-xml-rs",

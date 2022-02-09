@@ -1,7 +1,8 @@
 # ![Stump Icon icon](./.github/images/logo.png)
+
 A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga).
 
-I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. *I also just want to practice Rust!*
+I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want to practice Rust!_
 
 ## Roadmap / To-do List
 
@@ -11,15 +12,15 @@ These are my current end-goals with some current todos sprinkled in:
   - [x] Create Dockerfile for prod
 - [ ] Pass container config to stump, so it knows where the mount target is and can load the media
 - [ ] Filesystem indexing of libraries
-  - [ ] Walk through libraries and sync media to DB
+  - [ ] Walk through libraries and sync media to DB (done but reqs more testing)
     - [x] based on checksums (FIXME: this is working but **vvv slow**)
-    - [ ] log errors
+    - [x] log errors
 - [ ] Full OPDS support
   - [x] Implement paging for the applicable OPDS feeds (e.g. `/opds/v1.2/series/1?page=1`)
   - [ ] Test common OPDS clients like [Panels](https://panels.app), [Chunky](http://chunkyreader.com/), etc
     - [ ] Panels:
       - [x] can connect without authentication
-      - [ ] can connect with authentication
+      - [x] can connect with authentication (only tested on catalog)
       - [x] can generate OPDS feeds for:
         - [x] catalogs
         - [x] libraries
@@ -30,17 +31,17 @@ These are my current end-goals with some current todos sprinkled in:
         - [ ] pdf
         - [ ] ~~epub~~ (not supported by Panels yet)
       - [ ] Page streaming support
-         - [x] cbr (iffy, see FIXME notes)
-         - [x] cbz
-         - [ ] pdf
-         - [ ] ~~epub~~ (not supported by Panels yet)
+        - [x] cbr (iffy, see FIXME notes)
+        - [x] cbz
+        - [ ] pdf
+        - [ ] ~~epub~~ (not supported by Panels yet)
 - [ ] Develop frontend client (Svelte) for:
   - [ ] reading media (epub, pdf, cbr, cbz)
   - [ ] managing media
   - [ ] managing access
 - [x] Serve frontend with Stump server
 - [ ] P2P file sharing options somewhere?
-- [ ] Add authentication system
+- [ ] Add authentication system (disgusting solution started as proof of concept, will rewrite)
 
 I am very open to suggestions and ideas!
 

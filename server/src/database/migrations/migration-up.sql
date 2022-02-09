@@ -1,3 +1,9 @@
+CREATE TABLE IF NOT EXISTS `user` (
+  `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  `username` text NOT NULL UNIQUE,
+  `password` text NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS `library` (
     `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
     `name` text NOT NULL,
@@ -27,4 +33,21 @@ CREATE TABLE IF NOT EXISTS `media` (
   `checksum` text NOT NULL,
   `path` text NOT NULL,
   FOREIGN KEY (`series_id`) REFERENCES `series` (`id`)
+);
+
+CREATE TABLE IF NOT EXISTS `read_progress` (
+  `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  `media_id` integer NOT NULL,
+  `user_id` integer NOT NULL,
+  `page` integer NOT NULL,
+  FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
+  FOREIGN KEY (`media_id`) REFERENCES `media` (`id`),
+  UNIQUE(`media_id`,`user_id`)
+);
+
+CREATE TABLE IF NOT EXISTS `logs` (
+  `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  `level` text NOT NULL,
+  `message` text NOT NULL UNIQUE,
+  `created_at` text NOT NULL
 );

@@ -1,4 +1,4 @@
-use crate::database::entities::series;
+use crate::database::entities::{media, read_progress, series};
 use sea_orm::FromQueryResult;
 
 // I wanted to flatten this query into one struct to simplify some of the fs indexing logic
@@ -22,3 +22,6 @@ pub struct GetMediaQuery {
 }
 
 pub type GetMediaQueryResult = Vec<GetMediaQuery>;
+
+pub type GetMedaWithProgressRaw = Vec<(media::Model, Vec<read_progress::Model>)>;
+pub type GetMedaWithProgress = Vec<(media::Model, Option<read_progress::Model>)>;

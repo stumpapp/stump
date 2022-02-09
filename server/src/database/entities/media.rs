@@ -54,11 +54,20 @@ pub enum Relation {
         to="super::series::Column::Id"
     )]
     Series,
+
+    #[sea_orm(has_many = "super::read_progress::Entity")]
+    ReadProgress,
 }
 
 impl Related<super::series::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Series.def()
+    }
+}
+
+impl Related<super::read_progress::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::ReadProgress.def()
     }
 }
 

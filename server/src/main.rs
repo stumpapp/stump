@@ -1,62 +1,27 @@
-use rocket::tokio::sync::broadcast::channel;
-use rocket::{fs::NamedFile, futures::executor::block_on};
-use std::env;
-use std::path::{Path, PathBuf};
-
 #[macro_use]
 extern crate rocket;
 
-#[macro_use]
-extern crate rocket_include_static_resources;
+use rocket_session_store::{memory::MemoryStore, SessionStore};
+
+use rocket::tokio::sync::broadcast::channel;
+use rocket::{fs::FileServer, futures::executor::block_on};
+
+use std::time::Duration;
 
 mod database;
 mod fs;
+mod guards;
 mod logging;
 mod opds;
 mod routing;
 mod state;
 mod types;
 
+use crate::database::entities::user::AuthenticatedUser;
 use crate::logging::Log;
 use database::Database;
 
-use rocket_include_static_resources::{EtagIfNoneMatch, StaticContextManager, StaticResponse};
-
 pub type State = state::State;
-
-static_response_handler! {
-    "/favicon.ico" => favicon => "favicon",
-    "/favicon-16.png" => favicon_png => "favicon-png",
-}
-
-// #[get("/")]
-// async fn index() -> Option<NamedFile> {
-//     let page_directory_path = get_directory_path();
-//     NamedFile::open(Path::new(&page_directory_path).join("index.html"))
-//         .await
-//         .ok()
-// }
-
-#[get("/")]
-fn index(
-    static_resources: &rocket::State<StaticContextManager>,
-    etag_if_none_match: EtagIfNoneMatch,
-) -> StaticResponse {
-    static_resources.build(&etag_if_none_match, "index.html")
-}
-
-// FIXME: keeps matching annoyingly. Add prefix to this? like 'static'?
-#[get("/<file..>")]
-async fn files(file: PathBuf) -> Option<NamedFile> {
-    let page_directory_path = get_directory_path();
-    NamedFile::open(Path::new(&page_directory_path).join(file))
-        .await
-        .ok()
-}
-
-fn get_directory_path() -> String {
-    format!("{}/static", env!("CARGO_MANIFEST_DIR"))
-}
 
 #[launch]
 fn rocket() -> _ {
@@ -69,23 +34,34 @@ fn rocket() -> _ {
 
     let db = Database::new(connection);
     block_on(db.run_migration_up()).unwrap();
-
     let state = state::AppState::new(db, channel::<Log>(1024).0);
 
+    let session_name = std::env::var("SESSION_NAME").unwrap_or_else(|_| "stump-session".into());
+
+    // TODO: I am not sure if I like this implementation yet. I might want to use my sqlite connection
+    // to manage sessions. I did not want to deep dive into creating my own fairing for this *yet*,
+    // but will likely do so in the future.
+    let memory_store: MemoryStore<AuthenticatedUser> = MemoryStore::default();
+    let store: SessionStore<AuthenticatedUser> = SessionStore {
+        store: Box::new(memory_store),
+        name: session_name,
+        // duration: Duration::from_secs(3600 * 24 * 3),
+        duration: Duration::from_secs(60),
+    };
+
     rocket::build()
-        .attach(static_resources_initializer!(
-            "favicon" => "static/favicon.ico",
-            "favicon-png" => "static/favicon.png",
-            "index.html" => "static/index.html",
-        ))
         .manage(state)
-        .mount("/", routes![index, favicon, favicon_png, files])
+        .attach(store.fairing())
+        .mount("/", FileServer::from("static/"))
         .mount(
             "/api",
             routes![
                 // top level
                 routing::api::scan,
                 routing::api::log_listener,
+                // auth
+                routing::api::auth::login,
+                routing::api::auth::register,
                 // logs api
                 routing::api::log::get_logs,
                 // library api

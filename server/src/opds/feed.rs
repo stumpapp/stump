@@ -1,10 +1,12 @@
-use crate::opds::author::OpdsAuthor;
+// use crate::opds::author::OpdsAuthor;
 use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{entry::OpdsEntry, util};
-use crate::types::alias::{FeedPages, LibraryWithSeries, SeriesWithMedia};
+use crate::types::alias::{
+    FeedPages, LibraryWithSeries, SeriesWithMedia, SeriesWithMediaAndProgress,
+};
 
 #[derive(Debug)]
 pub struct OpdsFeed {
@@ -62,8 +64,8 @@ impl OpdsFeed {
 }
 
 // FIXME: need to pass a (current_page:usize, next_page:Option<usize>)
-impl From<(SeriesWithMedia, FeedPages)> for OpdsFeed {
-    fn from(payload: (SeriesWithMedia, FeedPages)) -> Self {
+impl From<(SeriesWithMediaAndProgress, FeedPages)> for OpdsFeed {
+    fn from(payload: (SeriesWithMediaAndProgress, FeedPages)) -> Self {
         let (series_with_media, pages) = payload;
         let (current_page, next_page) = pages;
         let (series, media) = series_with_media;

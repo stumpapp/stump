@@ -3,84 +3,99 @@ use rocket::{
     request::{FromRequest, Outcome, Request},
 };
 
+use crate::utils::auth::AuthError;
 use crate::{
     database::{entities::user::AuthenticatedUser, queries::user::get_user_by_username},
-    State,
+    utils, State,
 };
 
 type Session<'a> = rocket_session_store::Session<'a, AuthenticatedUser>;
 
-pub struct OpdsAuth;
+pub struct OpdsAuth(pub AuthenticatedUser);
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 
+// FIXME: This is still really gross, there must be a neater way to handle this with all the safety checks
+// than what I am doing here.
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for OpdsAuth {
-    type Error = ();
+    type Error = AuthError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let session: Session<'_> = req.guard().await.expect("TODO");
 
-        if let Some(user) = session.get().await.expect("TODO") {
-            return Outcome::Success(OpdsAuth {});
-        }
+        match session.get().await {
+            Ok(res) => {
+                if res.is_some() {
+                    println!("Session existed: {:?}", res);
+                    return Outcome::Success(OpdsAuth(res.unwrap()));
+                }
+            }
+            Err(e) => {
+                return Outcome::Failure((Status::Unauthorized, AuthError::InvalidSession(e)));
+            }
+        };
 
         let state: &State = req.guard().await.expect("TODO");
 
         let authorization = req.headers().get_one("authorization");
 
-        println!("{:?}", authorization);
-
         if authorization.is_none() {
-            println!("No authorization header");
-            return Outcome::Failure((Status::Unauthorized, ()));
+            Outcome::Failure((Status::Unauthorized, AuthError::BadRequest))
         } else {
-            let authorization = authorization.unwrap();
-            println!("{:?}", authorization);
-
+            let authorization = authorization.unwrap_or("");
             let token: String;
+
+            println!("Authorization: {}", authorization);
 
             if authorization.starts_with("Basic ") {
                 token = authorization.replace("Basic ", "");
             } else {
-                println!("Invalid authorization header");
-                return Outcome::Failure((Status::BadRequest, ()));
+                return Outcome::Failure((Status::BadRequest, AuthError::BadRequest));
             }
-
-            println!("{:?}", token);
 
             let decoded = base64::decode(token);
 
             if decoded.is_err() {
-                return Outcome::Failure((Status::Unauthorized, ()));
+                return Outcome::Failure((Status::Unauthorized, AuthError::BadRequest));
             }
 
             let bytes = decoded.unwrap();
-            let decoded = String::from_utf8(bytes).unwrap();
 
-            // Outcome::Success(decoded)
-            println!("{:?}", decoded);
+            let credentials = utils::auth::decode_base64_credentials(bytes);
 
-            let username = decoded.split(":").next().unwrap();
-            let password = decoded.split(":").skip(1).next().unwrap();
+            if credentials.is_err() {
+                return Outcome::Failure((Status::Unauthorized, credentials.err().unwrap()));
+            }
 
-            let user = get_user_by_username(username, state.get_connection())
-                .await
-                .expect("TODO");
+            let credentials = credentials.unwrap();
+
+            let user = get_user_by_username(&credentials.username, state.get_connection()).await;
+
+            if user.is_err() {
+                return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
+            }
+            let user = user.unwrap();
 
             if user.is_none() {
-                return Outcome::Failure((Status::Unauthorized, ()));
+                return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
             }
 
             let user = user.unwrap();
 
-            let matches = bcrypt::verify(password, &user.password).expect("TODO");
+            let matches = utils::auth::verify_password(&user.password, &credentials.password);
 
-            if matches {
-                session.set(user.into()).await.expect("TODO");
-                return Outcome::Success(OpdsAuth {});
+            if matches.is_err() {
+                Outcome::Failure((Status::Unauthorized, matches.err().unwrap()))
+            } else if matches.unwrap() {
+                let authed_user: AuthenticatedUser = user.into();
+                session
+                    .set(authed_user.clone())
+                    .await
+                    .expect("An error occurred while setting the session");
+                Outcome::Success(OpdsAuth(authed_user))
             } else {
-                return Outcome::Failure((Status::Unauthorized, ()));
+                Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized))
             }
         }
     }

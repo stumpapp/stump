@@ -5,6 +5,7 @@ use xml::{writer::XmlEvent, EventWriter};
 
 use crate::database::entities::{library, media, series};
 use crate::opds::link::OpdsStreamLink;
+use crate::types::alias::{MediaWithProgress, UserMediaWithProgress};
 
 use super::{
     link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
@@ -175,6 +176,66 @@ impl From<media::Model> for OpdsEntry {
             m.pages.to_string(),
             // FIXME:
             "image/jpeg".to_string(),
+            None,
+        );
+
+        let mib = m.size as f64 / (1024.0 * 1024.0);
+
+        let content = match m.description {
+            Some(description) => Some(format!(
+                "{:.1} MiB - {}<br/><br/>{}",
+                mib, m.extension, description
+            )),
+            None => Some(format!("{:.1} MiB - {}", mib, m.extension)),
+        };
+
+        OpdsEntry {
+            id: m.id.to_string(),
+            title: m.name,
+            updated: chrono::Utc::now(),
+            content,
+            links,
+            authors: None,
+            stream_link: Some(stream_link),
+        }
+    }
+}
+
+impl From<UserMediaWithProgress> for OpdsEntry {
+    fn from(m_p: UserMediaWithProgress) -> Self {
+        let (m, p) = m_p;
+
+        let base_url = format!("/opds/v1.2/books/{}", m.id);
+        let file_name = format!("{}.{}", m.name, m.extension);
+        let file_name_encoded = encode(&file_name);
+
+        // TODO: parse into function to reduce code duplication
+        let links = vec![
+            OpdsLink::new(
+                OpdsLinkType::Image,
+                OpdsLinkRel::Thumbnail,
+                format!("{}/thumbnail", base_url),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Image,
+                OpdsLinkRel::Image,
+                format!("{}/pages/1", base_url),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Zip,
+                OpdsLinkRel::Acquisition,
+                format!("{}/file/{}", base_url, file_name_encoded),
+            ),
+        ];
+
+        let current_page = p.map(|p| p.page.to_string());
+
+        let stream_link = OpdsStreamLink::new(
+            m.id.to_string(),
+            m.pages.to_string(),
+            // FIXME:
+            "image/jpeg".to_string(),
+            current_page,
         );
 
         let mib = m.size as f64 / (1024.0 * 1024.0);

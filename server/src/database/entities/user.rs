@@ -44,7 +44,7 @@ pub enum Relation {
 impl ActiveModelBehavior for ActiveModel {}
 
 // TODO: move me somewhere, it isn't an entity so I don't like it being here...
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct AuthenticatedUser {
     pub id: i32,
     pub username: String,

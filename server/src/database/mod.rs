@@ -28,9 +28,24 @@ impl Database {
         self.connection.execute(stmt).await
     }
 
+    async fn create_default_preferences(&self) -> Result<(), String> {
+        let db_backend = DbBackend::Sqlite;
+
+        let _: ExecResult = self
+            .connection
+            .execute(Statement::from_string(
+                db_backend,
+                "INSERT INTO `server_preferences` (`id`) SELECT 0 WHERE NOT EXISTS (SELECT * FROM `server_preferences`);".to_owned(),
+            ))
+            .await.map_err(|e| e.to_string())?;
+
+        Ok(())
+    }
+
     // TODO: use new migration manager -> https://github.com/SeaQL/sea-orm/tree/master/examples/rocket_example
     pub async fn run_migration_up(&self) -> Result<(), String> {
         let mut stmts = vec![
+            self.get_seaorm_stmt(entities::server_preferences::Entity),
             self.get_seaorm_stmt(entities::user::Entity),
             self.get_seaorm_stmt(entities::media::Entity),
             self.get_seaorm_stmt(entities::read_progress::Entity),
@@ -45,7 +60,7 @@ impl Database {
                 .map_err(|e| e.to_string())?;
         }
 
-        Ok(())
+        Ok(self.create_default_preferences().await?)
     }
 
     pub async fn run_migration_down(&self) {

@@ -22,6 +22,3 @@ pub struct GetMediaQuery {
 }
 
 pub type GetMediaQueryResult = Vec<GetMediaQuery>;
-
-pub type GetMedaWithProgressRaw = Vec<(media::Model, Vec<read_progress::Model>)>;
-pub type GetMedaWithProgress = Vec<(media::Model, Option<read_progress::Model>)>;

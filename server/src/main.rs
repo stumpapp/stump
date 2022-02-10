@@ -4,7 +4,7 @@ extern crate rocket;
 use rocket_session_store::{memory::MemoryStore, SessionStore};
 
 use rocket::tokio::sync::broadcast::channel;
-use rocket::{fs::FileServer, futures::executor::block_on};
+use rocket::{fs::FileServer, futures::executor::block_on, response};
 
 use std::time::Duration;
 
@@ -16,12 +16,20 @@ mod opds;
 mod routing;
 mod state;
 mod types;
+mod utils;
 
-use crate::database::entities::user::AuthenticatedUser;
-use crate::logging::Log;
-use database::Database;
+use crate::{
+    database::{entities::user::AuthenticatedUser, Database},
+    logging::Log,
+    types::rocket::UnauthorizedResponse,
+};
 
 pub type State = state::State;
+
+#[catch(401)]
+fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
+    UnauthorizedResponse {}
+}
 
 #[launch]
 fn rocket() -> _ {
@@ -45,8 +53,7 @@ fn rocket() -> _ {
     let store: SessionStore<AuthenticatedUser> = SessionStore {
         store: Box::new(memory_store),
         name: session_name,
-        // duration: Duration::from_secs(3600 * 24 * 3),
-        duration: Duration::from_secs(60),
+        duration: Duration::from_secs(3600 * 24 * 3),
     };
 
     rocket::build()
@@ -75,6 +82,7 @@ fn rocket() -> _ {
             "/opds/v1.2",
             routes![
                 routing::opds::catalog,
+                routing::opds::keep_reading,
                 // libraries
                 routing::opds::libraries,
                 routing::opds::library_by_id,
@@ -87,4 +95,5 @@ fn rocket() -> _ {
                 routing::opds::book_page
             ],
         )
+        .register("/opds/v1.2", catchers![opds_unauthorized])
 }

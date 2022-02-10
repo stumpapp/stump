@@ -96,14 +96,21 @@ pub struct OpdsStreamLink {
     pub count: String,
     // TODO: change to enum?
     pub mime_type: String,
+    pub last_read: Option<String>,
 }
 
 impl OpdsStreamLink {
-    pub fn new(book_id: String, count: String, mime_type: String) -> Self {
+    pub fn new(
+        book_id: String,
+        count: String,
+        mime_type: String,
+        last_read: Option<String>,
+    ) -> Self {
         Self {
             book_id,
             count,
             mime_type,
+            last_read,
         }
     }
 
@@ -115,12 +122,16 @@ impl OpdsStreamLink {
 
         // FIXME: the wstxns1 needs to be dynamic to wstxns{positionInXmlDocument} >:(
         // or not?? https://vaemendis.net/opds-pse/
-        let link = XmlEvent::start_element("link")
+        let mut link = XmlEvent::start_element("link")
             .attr("xmlns:wstxns1", "http://vaemendis.net/opds-pse/ns")
             .attr("href", href.as_str())
             .attr("wstxns1:count", &self.count)
             .attr("type", &self.mime_type)
             .attr("rel", "http://vaemendis.net/opds-pse/stream");
+
+        if let Some(last_read) = &self.last_read {
+            link = link.attr("wstxns1:lastRead", last_read);
+        }
 
         writer.write(link)?;
         writer.write(XmlEvent::end_element())?; // end of link

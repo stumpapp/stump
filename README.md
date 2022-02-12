@@ -4,45 +4,9 @@ A free and open source comics server with OPDS support, **heavily** inspired by 
 
 I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want to practice Rust!_
 
-## Roadmap / To-do List
+## Roadmap
 
-These are my current end-goals with some current todos sprinkled in:
-
-- [x] Create Stump docker image that can be used to run the server on my Raspberry Pi (or any other machine)
-  - [x] Create Dockerfile for prod
-- [ ] Pass container config to stump, so it knows where the mount target is and can load the media
-- [ ] Filesystem indexing of libraries
-  - [ ] Walk through libraries and sync media to DB (done but reqs more testing)
-    - [x] based on checksums (FIXME: this is working but **vvv slow**)
-    - [x] log errors
-- [ ] Full OPDS support
-  - [x] Implement paging for the applicable OPDS feeds (e.g. `/opds/v1.2/series/1?page=1`)
-  - [ ] Test common OPDS clients like [Panels](https://panels.app), [Chunky](http://chunkyreader.com/), etc
-    - [ ] Panels:
-      - [x] can connect without authentication
-      - [x] can connect with authentication
-      - [x] can generate OPDS feeds for:
-        - [x] catalogs
-        - [x] libraries
-        - [x] series
-      - [ ] can fetch book thumbnails
-        - [x] cbr (iffy, see FIXME notes)
-        - [x] cbz
-        - [ ] pdf
-        - [ ] ~~epub~~ (not supported by Panels yet)
-      - [ ] Page streaming support
-        - [x] cbr (iffy, see FIXME notes)
-        - [x] cbz
-        - [ ] pdf
-        - [ ] ~~epub~~ (not supported by Panels yet)
-- [ ] Develop frontend client (Svelte) for:
-  - [ ] reading media (epub, pdf, cbr, cbz)
-  - [ ] managing media
-  - [ ] managing server + server access
-- [x] Serve frontend with Stump server
-- [x] Add basic authentication system
-
-I am very open to suggestions and ideas!
+I moved my roadmap/todo list to a [GitHub Project](https://github.com/users/aaronleopold/projects/1) to keep it more organized since the codebase is growing. Have a look, I am very open to suggestions and ideas!
 
 ## Getting Started
 

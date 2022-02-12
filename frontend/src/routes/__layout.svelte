@@ -33,7 +33,7 @@
 	});
 </script>
 
-<div class="flex flex-row h-full">
+<div class="flex h-full flex-row">
 	<Sidebar bind:libraries />
 	<main class="flex-1 p-3">
 		<slot />

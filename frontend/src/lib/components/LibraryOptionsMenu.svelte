@@ -29,9 +29,9 @@
 	<Menu as="div" class="relative inline-block text-left">
 		<div>
 			<MenuButton
-				class="w-7 h-7 p-3 flex items-center justify-center dark:hover:bg-gray-800 rounded-full transition-colors duration-200"
+				class="flex h-7 w-7 items-center justify-center rounded-full p-3 transition-colors duration-200 dark:hover:bg-gray-800"
 			>
-				<Fa icon={faEllipsisVertical} class="w-5 h-5" aria-hidden="true" />
+				<Fa icon={faEllipsisVertical} class="h-5 w-5" aria-hidden="true" />
 			</MenuButton>
 		</div>
 
@@ -44,9 +44,9 @@
 			leaveTo="transform opacity-0 scale-95"
 		>
 			<MenuItems
-				class="z-50 absolute left-0 w-32 mt-2 origin-top-left bg-white dark:bg-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+				class="absolute left-0 z-50 mt-2 w-32 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-700"
 			>
-				<div class="p-1 flex flex-col space-y-1">
+				<div class="flex flex-col space-y-1 p-1">
 					<MenuItem let:active>
 						<button
 							class={`${

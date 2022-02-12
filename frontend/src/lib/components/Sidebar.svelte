@@ -34,21 +34,21 @@
 </script>
 
 <div
-	class="w-52 flex flex-col h-full border-r border-gray-200 pt-5 pb-4 bg-white dark:bg-gray-800 dark:border-gray-800 dark:text-gray-200"
+	class="flex h-full w-52 flex-col border-r border-gray-200 bg-white pt-5 pb-4 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200"
 >
-	<div class="flex items-center flex-shrink-0 px-4 space-x-4">
+	<div class="flex flex-shrink-0 items-center space-x-4 px-4">
 		<img class="h-12 w-auto" src="/favicon.png" alt="Stump" />
-		<h3 class="font-bold text-brand">Stump</h3>
+		<h3 class="text-brand font-bold">Stump</h3>
 	</div>
-	<div class="mt-5 flex-grow flex flex-col">
-		<nav class="flex-1 px-2 space-y-1 bg-white dark:bg-gray-800" aria-label="Sidebar">
+	<div class="mt-5 flex flex-grow flex-col">
+		<nav class="flex-1 space-y-1 bg-white px-2 dark:bg-gray-800" aria-label="Sidebar">
 			{#each navigation as item}
 				{#if !item.children}
 					<a
 						href={item.href}
 						class:disclosure-current={item.current}
 						class:disclosure-btn={!true}
-						class="group w-full flex items-center space-x-2 p-2 text-sm font-medium rounded-md"
+						class="group flex w-full items-center space-x-2 rounded-md p-2 text-sm font-medium"
 					>
 						<Fa icon={item.icon} />
 						<span>{item.name}</span>
@@ -95,7 +95,7 @@
 
 <style>
 	.open {
-		@apply text-gray-400 rotate-90;
+		@apply rotate-90 text-gray-400;
 	}
 
 	.closed {

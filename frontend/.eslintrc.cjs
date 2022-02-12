@@ -1,5 +1,5 @@
 module.exports = {
-	root: true,
+	root: false,
 	parser: '@typescript-eslint/parser',
 	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
 	plugins: ['svelte3', '@typescript-eslint'],

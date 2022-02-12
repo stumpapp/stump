@@ -1,5 +1,6 @@
-use crate::database::entities::{media, read_progress, series};
+use crate::database::entities::{library, media, read_progress, series};
 use sea_orm::FromQueryResult;
+use serde::Serialize;
 
 // I wanted to flatten this query into one struct to simplify some of the fs indexing logic
 // I need to write.
@@ -22,3 +23,18 @@ pub struct GetMediaQuery {
 }
 
 pub type GetMediaQueryResult = Vec<GetMediaQuery>;
+
+#[derive(Serialize, Debug)]
+pub struct GetLibraryWithSeriesQuery {
+    pub library: library::Model,
+    pub series: Vec<series::Model>,
+}
+
+impl Into<GetLibraryWithSeriesQuery> for (library::Model, Vec<series::Model>) {
+    fn into(self) -> GetLibraryWithSeriesQuery {
+        GetLibraryWithSeriesQuery {
+            library: self.0,
+            series: self.1,
+        }
+    }
+}

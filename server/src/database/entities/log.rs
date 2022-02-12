@@ -13,7 +13,6 @@ pub struct Model {
     /// The level of the log.
     pub level: LogLevel,
     /// The message of the log.
-    #[sea_orm(unique)]
     pub message: String,
     /// The timestamp of the log.
     #[sea_orm(column_type = "DateTime")]

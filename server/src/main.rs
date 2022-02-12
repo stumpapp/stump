@@ -4,7 +4,8 @@ extern crate rocket;
 use rocket_session_store::{memory::MemoryStore, SessionStore};
 
 use rocket::tokio::sync::broadcast::channel;
-use rocket::{fs::FileServer, futures::executor::block_on, response};
+use rocket::{fs::FileServer, futures::executor::block_on, http::Method};
+use rocket_cors::{AllowedHeaders, AllowedOrigins};
 
 use std::time::Duration;
 
@@ -38,6 +39,22 @@ fn rocket() -> _ {
         .is_test(true)
         .init();
 
+    // FIXME: restrict this
+    let allowed_origins = AllowedOrigins::all();
+
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins,
+        allowed_methods: vec![Method::Get, Method::Put, Method::Post, Method::Delete]
+            .into_iter()
+            .map(From::from)
+            .collect(),
+        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()
+    .expect("Could not instantiate CORS configuration.");
+
     let connection = block_on(database::connection::create_connection()).unwrap();
 
     let db = Database::new(connection);
@@ -59,6 +76,7 @@ fn rocket() -> _ {
     rocket::build()
         .manage(state)
         .attach(store.fairing())
+        .attach(cors)
         .mount("/", FileServer::from("static/"))
         .mount(
             "/api",
@@ -73,6 +91,7 @@ fn rocket() -> _ {
                 routing::api::log::get_logs,
                 // library api
                 routing::api::library::get_libraries,
+                routing::api::library::get_library,
                 routing::api::library::insert_library,
                 routing::api::library::update_library,
                 routing::api::library::delete_library,

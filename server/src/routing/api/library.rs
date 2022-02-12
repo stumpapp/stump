@@ -1,4 +1,8 @@
-use crate::{database::entities::library, State};
+use crate::{
+    database::entities::{library, series},
+    types::dto::GetLibraryWithSeriesQuery,
+    State,
+};
 
 use rocket::serde::{json::Json, Deserialize};
 use sea_orm::{sea_query::Expr, ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
@@ -6,17 +10,36 @@ use sea_orm::{sea_query::Expr, ActiveModelTrait, ColumnTrait, EntityTrait, Query
 // TODO: fix terrible error handling
 
 // type alias for the get_libraries return
-type GetLibrary = Json<Vec<library::Model>>;
+// type LibraryWithSeries = (library::Model, Vec<series::Model>);
+type GetLibraries = Json<Vec<library::Model>>;
+type GetLibrary = Json<Option<GetLibraryWithSeriesQuery>>;
 
 #[get("/library")]
-// pub async fn get_libraries(state: &State) -> Result<Vec<library::Model>, String> {
-pub async fn get_libraries(state: &State) -> Result<GetLibrary, String> {
+pub async fn get_libraries(state: &State) -> Result<GetLibraries, String> {
     let libraries = library::Entity::find()
         .all(state.get_connection())
         .await
         .map_err(|e| e.to_string())?;
 
     Ok(Json(libraries))
+}
+
+#[get("/library/<id>")]
+pub async fn get_library(state: &State, id: i32) -> Result<GetLibrary, String> {
+    let res = library::Entity::find()
+        .filter(library::Column::Id.eq(id))
+        .find_with_related(series::Entity)
+        .all(state.get_connection())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if res.is_empty() {
+        Ok(Json(None))
+    } else {
+        Ok(Json(Some(res[0].to_owned().into())))
+    }
+
+    // Ok(Json(library))
 }
 
 #[derive(Deserialize)]

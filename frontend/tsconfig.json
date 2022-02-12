@@ -19,13 +19,19 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"baseUrl": ".",
+		"baseUrl": "./",
 		"allowJs": true,
 		"checkJs": true,
+		// FIXME: NOT WORKING >:(
 		"paths": {
-			"$lib": ["src/lib"],
-			"$lib/*": ["src/lib/*"]
+			"@/*": ["src/*"],
+			"@lib/*": ["src/lib/*"],
+			"@components/*": ["src/components/*"],
+			"@util/*": ["src/lib/util/*"],
+			"@api/*": ["src/lib/api/*"],
+			"@store/*": ["src/store/*"]
 		}
 	},
-	"include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "src/**/*.svelte"]
+	"typeRoots": ["node_modules/@types", "@types"],
+	"include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "src/**/*.svelte", "@types"]
 }

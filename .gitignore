@@ -9,6 +9,7 @@ node_modules
 .env.*
 $houdini
 *.log
+.eslintcache
 
 # rust
 server/static

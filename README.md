@@ -20,7 +20,7 @@ These are my current end-goals with some current todos sprinkled in:
   - [ ] Test common OPDS clients like [Panels](https://panels.app), [Chunky](http://chunkyreader.com/), etc
     - [ ] Panels:
       - [x] can connect without authentication
-      - [x] can connect with authentication (only tested on catalog)
+      - [x] can connect with authentication
       - [x] can generate OPDS feeds for:
         - [x] catalogs
         - [x] libraries
@@ -38,10 +38,9 @@ These are my current end-goals with some current todos sprinkled in:
 - [ ] Develop frontend client (Svelte) for:
   - [ ] reading media (epub, pdf, cbr, cbz)
   - [ ] managing media
-  - [ ] managing access
+  - [ ] managing server + server access
 - [x] Serve frontend with Stump server
-- [ ] P2P file sharing options somewhere?
-- [ ] Add authentication system (disgusting solution started as proof of concept, will rewrite)
+- [x] Add basic authentication system
 
 I am very open to suggestions and ideas!
 
@@ -75,10 +74,7 @@ pnpm frontend:dev # start the frontend
 
 ### Docker
 
-- TODO: figure out indexing when in a docker container. Probably just need to mount the directory.
-- TODO: publish image to docker hub
-
-To create a docker image and corresponding container:
+No images have been published to dockerhub yet, so you'll have to build it yourself:
 
 ```bash
 pnpm server:build:docker-alpine # builds the image
@@ -93,7 +89,7 @@ docker create \
 docker start stump # runs the container
 ```
 
-As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library/comics`, you'll need to mount `/Users/user/Library/comics` to both. This will eventually change to be more flexible.
+As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library`, you'll need to bind `/Users/user/Library` to both `source` and `target`. This will eventually change to be more flexible.
 
 ## Contributing
 

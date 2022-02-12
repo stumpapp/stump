@@ -19,7 +19,9 @@ pub async fn get_library_by_id(
         .map_err(|e| e.to_string())?)
 }
 
-pub async fn get_libraries_and_series(conn: &DatabaseConnection) -> Result<Vec<(library::Model, Vec<series::Model>)>, String> {
+pub async fn get_libraries_and_series(
+    conn: &DatabaseConnection,
+) -> Result<Vec<(library::Model, Vec<series::Model>)>, String> {
     Ok(library::Entity::find()
         .find_with_related(series::Entity)
         .all(conn)

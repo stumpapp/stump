@@ -83,29 +83,3 @@ pub async fn get_user_media_with_progress(
         })
         .collect())
 }
-
-// pub async fn get_user_media_with_progress_for_series(
-//     conn: &DatabaseConnection,
-//     user_id: i32,
-//     series_id: i32,
-// ) -> Result<GetUserMediaWithProgress, String> {
-//     let res: GetMediaWithProgressRaw = media::Entity::find()
-//         .filter(media::Column::SeriesId.eq(series_id))
-//         .find_with_related(read_progress::Entity)
-//         .all(conn)
-//         .await
-//         .map_err(|e| e.to_string())?;
-//
-//     Ok(res
-//         .into_iter()
-//         .map(|(media, progress)| {
-//             let users_progress = progress.iter().find(|p| p.user_id == user_id);
-//
-//             if let Some(p) = users_progress {
-//                 (media, Some(p.to_owned()))
-//             } else {
-//                 (media, None)
-//             }
-//         })
-//         .collect())
-// }

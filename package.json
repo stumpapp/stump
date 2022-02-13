@@ -7,7 +7,7 @@
 	"scripts": {
 		"start": "cd server && cargo run --release",
 		"dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
-		"build:docker": "pnpm frontend:build && pnpm server:build:docker",
+		"build:docker": "rm -r server/static && pnpm frontend:build && pnpm server:build:docker-alpine",
 		"server:start": "cd server && cargo run",
 		"server:dev": "cd server && cargo watch -x run",
 		"server:build": "cd server && cargo build --release",

@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@rgossiaux/svelte-headlessui';
 	import Fa from 'svelte-fa';
-	import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+	// import * as icons from '@fortawesome/free-solid-svg-icons';
+	// FIXME: https://github.com/FortAwesome/Font-Awesome/issues/18677
+	// import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
+	import DotsThreeVertical from 'phosphor-svelte/lib/DotsThreeVertical';
 	import api, { baseUrl } from '@lib/api';
+
+	// const { faEllipsisVertical } = icons;
 
 	export let library: Library;
 
@@ -28,10 +33,14 @@
 <div class="">
 	<Menu as="div" class="relative inline-block text-left">
 		<div>
-			<MenuButton
+			<!-- <MenuButton
 				class="flex h-7 w-7 items-center justify-center rounded-full p-3 transition-colors duration-200 dark:hover:bg-gray-800"
+			> -->
+			<MenuButton
+				class="flex items-center justify-center rounded-full p-1 transition-colors duration-200 dark:hover:bg-gray-800"
 			>
-				<Fa icon={faEllipsisVertical} class="h-5 w-5" aria-hidden="true" />
+				<!-- <Fa icon={faEllipsisVertical} class="h-5 w-5" aria-hidden="true" /> -->
+				<DotsThreeVertical color="white" size={'1.25rem'} />
 			</MenuButton>
 		</div>
 

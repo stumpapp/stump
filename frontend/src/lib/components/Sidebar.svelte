@@ -2,8 +2,12 @@
 	import clsx from 'clsx';
 	import { page } from '$app/stores';
 	import { Disclosure, DisclosureButton, DisclosurePanel } from '@rgossiaux/svelte-headlessui';
-	import Fa from 'svelte-fa';
-	import { faHome, faBook, faCog } from '@fortawesome/free-solid-svg-icons';
+	// FIXME: https://github.com/FortAwesome/Font-Awesome/issues/18677
+	// import Fa from 'svelte-fa';
+	// import { faHome, faBook, faCog } from '@fortawesome/free-solid-svg-icons';
+	import House from 'phosphor-svelte/lib/House';
+	import Books from 'phosphor-svelte/lib/Books';
+	import Gear from 'phosphor-svelte/lib/Gear';
 	import LibraryOptionsMenu from './LibraryOptionsMenu.svelte';
 
 	export let libraries: Library[];
@@ -12,7 +16,14 @@
 	let pathname = $page.url.pathname;
 
 	const navigation = [
-		{ name: 'Home', href: '/', current: pathname === '/', icon: faHome },
+		{
+			name: 'Home',
+			href: '/',
+			current: pathname === '/',
+
+			// icon: faHome
+			icon: House
+		},
 		{
 			name: 'Libraries',
 			current: false,
@@ -22,13 +33,15 @@
 				current: current_library == String(library.id)
 			})),
 
-			icon: faBook
+			// icon: faBook
+			icon: Books
 		},
 		{
 			name: 'Server Settings',
 			current: pathname === '/settings',
 			href: '/settings',
-			icon: faCog
+			// icon: faCog
+			icon: Gear
 		}
 	];
 </script>
@@ -50,7 +63,8 @@
 						class:disclosure-btn={!true}
 						class="group flex w-full items-center space-x-2 rounded-md p-2 text-left text-sm font-medium"
 					>
-						<Fa icon={item.icon} />
+						<!-- <Fa icon={item.icon} /> -->
+						<svelte:component this={item.icon} size={'1.25rem'} />
 						<span>{item.name}</span>
 					</a>
 				{:else}
@@ -59,7 +73,8 @@
 							class="w-full flex items-center space-x-2 p-2 text-left text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
 						>
 							<div class="flex space-x-2 items-center flex-1 w-full">
-								<Fa icon={item.icon} />
+								<!-- <Fa icon={item.icon} /> -->
+								<svelte:component this={item.icon} size={'1.25rem'} />
 								<span>{item.name}</span>
 							</div>
 							<svg

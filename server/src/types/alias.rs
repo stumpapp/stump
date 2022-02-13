@@ -11,6 +11,7 @@ pub type LibraryWithSeries = (LibraryModel, Vec<SeriesModel>);
 pub type SeriesWithLibraries = Vec<(SeriesModel, Vec<LibraryModel>)>;
 
 pub type GetMediaWithProgressRaw = Vec<(media::Model, Vec<read_progress::Model>)>;
+pub type MediaWithMaybeProgress = (media::Model, Option<read_progress::Model>);
 pub type MediaWithProgress = (media::Model, read_progress::Model);
 pub type GetMediaWithProgress = Vec<MediaWithProgress>;
 pub type UserMediaWithProgress = (media::Model, Option<read_progress::Model>);

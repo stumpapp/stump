@@ -34,7 +34,7 @@
 </script>
 
 <div
-	class="flex h-full w-52 flex-col border-r border-gray-200 bg-white pt-5 pb-4 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200"
+	class="flex shrink-0 h-full w-52 flex-col border-r border-gray-200 bg-white pt-5 pb-4 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-200"
 >
 	<div class="flex flex-shrink-0 items-center space-x-4 px-4">
 		<img class="h-12 w-auto" src="/favicon.png" alt="Stump" />
@@ -48,7 +48,7 @@
 						href={item.href}
 						class:disclosure-current={item.current}
 						class:disclosure-btn={!true}
-						class="group flex w-full items-center space-x-2 rounded-md p-2 text-sm font-medium"
+						class="group flex w-full items-center space-x-2 rounded-md p-2 text-left text-sm font-medium"
 					>
 						<Fa icon={item.icon} />
 						<span>{item.name}</span>
@@ -58,8 +58,10 @@
 						<DisclosureButton
 							class="w-full flex items-center space-x-2 p-2 text-left text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
 						>
-							<Fa icon={item.icon} />
-							<span>{item.name}</span>
+							<div class="flex space-x-2 items-center flex-1 w-full">
+								<Fa icon={item.icon} />
+								<span>{item.name}</span>
+							</div>
 							<svg
 								class={clsx(
 									open

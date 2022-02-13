@@ -1,6 +1,6 @@
 use crate::database::entities::{library, media, read_progress, series};
 use crate::types::alias::{
-    GetMediaWithProgress, GetMediaWithProgressRaw, GetUserMediaWithProgress,
+    GetMediaWithProgress, GetMediaWithProgressRaw, GetUserMediaWithProgress, MediaWithMaybeProgress,
 };
 use crate::types::dto::{GetMediaQuery, GetMediaQueryResult};
 use sea_orm::{
@@ -22,6 +22,36 @@ pub async fn get_media_with_library_and_series(
         .all(conn)
         .await
         .map_err(|e| e.to_string())?)
+}
+
+pub async fn get_media_by_id(
+    conn: &DatabaseConnection,
+    id: i32,
+) -> Result<Option<media::Model>, String> {
+    let res = media::Entity::find()
+        .filter(media::Column::Id.eq(id))
+        .one(conn)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(res)
+}
+
+pub async fn get_media_by_id_with_progress(
+    conn: &DatabaseConnection,
+    id: i32,
+) -> Result<MediaWithMaybeProgress, String> {
+    let res = media::Entity::find()
+        .filter(media::Column::Id.eq(id))
+        .find_with_related(read_progress::Entity)
+        .one(conn)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    match res {
+        Some(m) => Ok(m),
+        None => Err("No media found".to_string()),
+    }
 }
 
 pub async fn get_user_keep_reading_media(

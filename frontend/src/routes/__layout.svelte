@@ -3,10 +3,10 @@
 
 	/** @type {import('@sveltejs/kit').Load} */
 	export async function load({ fetch }) {
-		const response = await fetch(`${baseUrl}/api/library`);
+		const response = await fetch(`${baseUrl}/api/library`).catch((err) => console.log(err));
 
 		return {
-			status: response.status,
+			// status: response.status,
 			props: {
 				libraries: response.ok && (await response.json())
 			}
@@ -14,13 +14,13 @@
 	}
 </script>
 
-<script>
+<script lang="ts">
 	import '@/app.css';
 	import { onMount } from 'svelte';
 	import { preferences } from '@store/preferences';
 	import Sidebar from '@components/Sidebar.svelte';
 
-	export let libraries;
+	export let libraries: Library[];
 
 	onMount(() => {
 		preferences.subscribe((current) => {

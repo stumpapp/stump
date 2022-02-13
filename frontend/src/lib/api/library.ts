@@ -4,11 +4,8 @@ import { baseUrl } from '.';
 export function scanLibrary(libraryId: number) {
 	return fetch(`${baseUrl}/api/library/${libraryId}/scan`)
 		.then((res) => res.json())
-		.then((res) => {
-			if (res.error) {
-				throw new Error(res.error);
-			}
-			return res;
+		.catch((err) => {
+			throw new Error(err);
 		});
 }
 
@@ -18,10 +15,7 @@ async function deleteLibrary(libraryId: number) {
 		method: 'DELETE'
 	})
 		.then((res) => res.json())
-		.then((res) => {
-			if (res.error) {
-				throw new Error(res.error);
-			}
-			return res;
+		.catch((err) => {
+			throw new Error(err);
 		});
 }

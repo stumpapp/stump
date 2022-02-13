@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-	import { baseUrl } from '@lib/api';
+	import api, { baseUrl } from '@lib/api';
 
 	// TODO: type this properly
 	interface GetLibraryReturn {
@@ -21,6 +21,8 @@
 </script>
 
 <script lang="ts">
+	import SeriesCard from '@components/SeriesCard.svelte';
+
 	export let library;
 	export let series;
 </script>
@@ -30,8 +32,13 @@
 {:else if !series}
 	<p>Library contains no series</p>
 {:else}
-	<code class="text-white">{JSON.stringify(library ?? {}, null, 2)}</code>
-	<br />
-	<br />
-	<code class="text-white">{JSON.stringify(series ?? [], null, 2)}</code>
+	<div class="flex flex-col space-y-4">
+		<h1 class="font-bold text-lg text-gray-100">{library.name}</h1>
+
+		<div class="flex flex-wrap gap-4">
+			{#each series as s}
+				<SeriesCard series={s} />
+			{/each}
+		</div>
+	</div>
 {/if}

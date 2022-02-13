@@ -95,6 +95,10 @@ fn rocket() -> _ {
                 routing::api::library::insert_library,
                 routing::api::library::update_library,
                 routing::api::library::delete_library,
+                // series api
+                routing::api::series::get_series,
+                routing::api::series::get_series_by_id,
+                routing::api::series::get_series_thumbnail
             ],
         )
         .mount(

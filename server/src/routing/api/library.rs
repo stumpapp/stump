@@ -38,8 +38,6 @@ pub async fn get_library(state: &State, id: i32) -> Result<GetLibrary, String> {
     } else {
         Ok(Json(Some(res[0].to_owned().into())))
     }
-
-    // Ok(Json(library))
 }
 
 #[derive(Deserialize)]

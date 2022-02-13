@@ -70,7 +70,7 @@
 					<MenuItem let:active>
 						<button
 							class={`${
-								active ? 'bg-red-500 text-white' : 'text-gray-900 dark:text-gray-100'
+								active ? 'bg-red-800 text-white' : 'text-gray-900 dark:text-gray-100'
 							} group flex rounded-md items-center w-full p-1 text-sm`}
 						>
 							Delete

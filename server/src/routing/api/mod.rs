@@ -2,6 +2,7 @@ pub mod auth;
 pub mod library;
 pub mod log;
 pub mod media;
+pub mod series;
 
 use rocket::response::stream::{Event, EventStream};
 use rocket::tokio::{select, sync::broadcast::error::RecvError};

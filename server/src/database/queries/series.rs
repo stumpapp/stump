@@ -31,7 +31,6 @@ pub async fn get_series_by_id(
         .map_err(|e| e.to_string())?)
 }
 
-// TODO: once sea_orm supports `.limit()` use it
 pub async fn get_series_by_id_with_media(
     conn: &DatabaseConnection,
     id: String,

@@ -1,20 +1,7 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "String(None)")]
-pub enum MediaStatus {
-    #[sea_orm(string_value = "UNKNOWN")]
-    Unknown,
-    #[sea_orm(string_value = "ERROR")]
-    Error,
-    #[sea_orm(string_value = "READY")]
-    Ready,
-    #[sea_orm(string_value = "UNSUPPORTED")]
-    Unsupported,
-    #[sea_orm(string_value = "OUTDATED")]
-    Outdated,
-}
+use crate::fs::FileStatus;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -44,6 +31,9 @@ pub struct Model {
     pub checksum: String,
     /// the path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
     pub path: String,
+    /// The status of the media since last scan or access
+    #[sea_orm(default_value = FileStatus::Ready)]
+    pub status: FileStatus,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -1,5 +1,6 @@
 use crate::{
     database::entities::{library, series},
+    fs::{new_scanner, scan},
     types::dto::GetLibraryWithSeriesQuery,
     State,
 };
@@ -8,9 +9,6 @@ use rocket::serde::{json::Json, Deserialize};
 use sea_orm::{sea_query::Expr, ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 
 // TODO: fix terrible error handling
-
-// type alias for the get_libraries return
-// type LibraryWithSeries = (library::Model, Vec<series::Model>);
 type GetLibraries = Json<Vec<library::Model>>;
 type GetLibrary = Json<Option<GetLibraryWithSeriesQuery>>;
 
@@ -38,6 +36,18 @@ pub async fn get_library(state: &State, id: i32) -> Result<GetLibrary, String> {
     } else {
         Ok(Json(Some(res[0].to_owned().into())))
     }
+}
+
+#[get("/library/<id>/scan")]
+pub async fn scan_library(state: &State, id: i32) -> Result<(), String> {
+    let connection = state.get_connection();
+    let queue = state.get_queue();
+
+    new_scanner::scan(connection, queue, Some(id))
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 #[derive(Deserialize)]

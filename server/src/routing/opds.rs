@@ -141,11 +141,7 @@ pub async fn libraries(state: &State, _auth: OpdsAuth) -> Result<XmlResponse, St
 }
 
 #[get("/libraries/<id>")]
-pub async fn library_by_id(
-    state: &State,
-    id: String,
-    _auth: OpdsAuth,
-) -> Result<XmlResponse, String> {
+pub async fn library_by_id(state: &State, id: i32, _auth: OpdsAuth) -> Result<XmlResponse, String> {
     let res = queries::library::get_library_by_id_with_series(state.get_connection(), id).await?;
 
     if res.len() != 1 {

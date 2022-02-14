@@ -1,6 +1,8 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::fs::FileStatus;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 #[sea_orm(table_name = "library")]
@@ -12,6 +14,9 @@ pub struct Model {
     /// The location of the library in the fs. ex: "/home/user/media/comics/marvel"
     #[sea_orm(unique)]
     pub path: String,
+    /// The status of the series since last scan or access
+    #[sea_orm(default_value = FileStatus::Ready)]
+    pub status: FileStatus,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

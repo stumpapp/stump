@@ -1,7 +1,7 @@
 pub mod media;
 pub mod series;
 
-use crate::database::entities::library;
+use crate::{database::entities::library, fs::FileStatus};
 use sea_orm::FromQueryResult;
 use serde::Serialize;
 
@@ -25,6 +25,7 @@ pub struct GetMediaQuery {
     pub downloaded: bool,
     pub checksum: String,
     pub path: String,
+    pub status: FileStatus,
 }
 
 pub type GetMediaQueryResult = Vec<GetMediaQuery>;

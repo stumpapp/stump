@@ -216,6 +216,11 @@ impl<'a> Scanner<'a> {
             .map(|series| series.id)
     }
 
+    // FIXME: this needs to be refactored to:
+    // - discover new series
+    // - discover new media
+    // - check existing media/series for changes
+    // - update existing media/series if changed
     pub async fn do_scan(&mut self, library: &library::Model) {
         for entry in WalkDir::new(&library.path)
             .into_iter()
@@ -224,8 +229,6 @@ impl<'a> Scanner<'a> {
             let path = entry.path();
             let library_path = PathBuf::from(&library.path);
 
-            // FIXME: there is an edge case I did not account for here. If the user has a library called `ebooks` and no subfolders,
-            // I will actually want to add the library to the database as a series, as well.
             if path.is_dir() && !self.series_exists(path) {
                 if path.to_path_buf().eq(&library_path) && !Self::should_create_series(path) {
                     continue;
@@ -250,6 +253,7 @@ impl<'a> Scanner<'a> {
             let checksum = crc.checksum();
 
             if self.media.contains_key(&checksum) {
+                // TODO: check if media has changed
                 continue;
             }
 
@@ -291,28 +295,24 @@ impl<'a> Scanner<'a> {
     }
 }
 
-// TODO: implement Scanner::scan for a single library
 pub async fn scan(
     conn: &DatabaseConnection,
     queue: &Sender<Log>,
-    library_id: Option<String>,
+    library_id: Option<i32>,
 ) -> Result<(), String> {
     // TODO: optimize these queries to one if possible.
     // TODO: use the new get_libraries_and_series function in queries::library
 
     let series = queries::series::get_series(conn).await?;
 
-    let libraries: Vec<library::Model>;
-
-    if let Some(library_id) = library_id.clone() {
-        libraries = queries::library::get_library_by_id(conn, library_id)
+    let libraries: Vec<library::Model> = match library_id {
+        Some(id) => queries::library::get_library_by_id(conn, id)
             .await?
             .map(|l| l.into())
             .into_iter()
-            .collect();
-    } else {
-        libraries = queries::library::get_libraries(conn).await?;
-    }
+            .collect(),
+        None => queries::library::get_libraries(conn).await?,
+    };
 
     if libraries.is_empty() {
         let mut message = "No libraries configured.".to_string();
@@ -326,13 +326,9 @@ pub async fn scan(
         return Err(message);
     }
 
-    let media = queries::media::get_media_with_library_and_series(conn).await?;
+    let media = queries::media::get_media_with_library_and_series(conn, library_id).await?;
 
     let mut scanner = Scanner::new(conn, queue, libraries, series, media);
-    // Should I await this? Or should I just let it run maybe in a new thread and then
-    // return? I can maybe stream the progress updates to the client or something?. TODO:
-    // scanner.scan().on_data(|_| {}) etc ????
-    // https://api.rocket.rs/master/rocket/response/stream/struct.EventStream.html maybe?
     scanner.scan().await;
 
     Ok(())

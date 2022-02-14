@@ -1,23 +1,32 @@
 use crate::database::entities::{library, media, read_progress, series};
+use crate::fs::FileStatus;
 use crate::types::alias::{
     GetMediaWithProgress, GetMediaWithProgressRaw, GetUserMediaWithProgress, MediaWithMaybeProgress,
 };
 use crate::types::dto::{GetMediaQuery, GetMediaQueryResult};
 use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QuerySelect, RelationTrait,
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter,
+    QuerySelect, RelationTrait, Set,
 };
 
 pub async fn get_media_with_library_and_series(
     conn: &DatabaseConnection,
+    id: Option<i32>,
 ) -> Result<GetMediaQueryResult, String> {
-    Ok(media::Entity::find()
+    let mut query = media::Entity::find()
         .column_as(library::Column::Id, "library_id")
         .column_as(library::Column::Path, "library_path")
         .column_as(series::Column::Path, "series_path")
         .join(JoinType::InnerJoin, media::Relation::Series.def())
         .group_by(series::Column::Id)
         .join(JoinType::InnerJoin, series::Relation::Library.def())
-        .group_by(library::Column::Id)
+        .group_by(library::Column::Id);
+
+    if let Some(id) = id {
+        query = query.filter(library::Column::Id.eq(id));
+    }
+
+    Ok(query
         .into_model::<GetMediaQuery>()
         .all(conn)
         .await
@@ -112,4 +121,22 @@ pub async fn get_user_media_with_progress(
             }
         })
         .collect())
+}
+
+pub async fn set_status(
+    conn: &DatabaseConnection,
+    id: i32,
+    status: FileStatus,
+) -> Result<(), String> {
+    let media = get_media_by_id(conn, id).await.map_err(|e| e.to_string())?;
+
+    match media {
+        Some(m) => {
+            let mut active_model: media::ActiveModel = m.into();
+            active_model.status = Set(status);
+            active_model.update(conn).await.map_err(|e| e.to_string())?;
+            Ok(())
+        }
+        None => return Err("No media found".to_string()),
+    }
 }

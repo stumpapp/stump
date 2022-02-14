@@ -10,7 +10,7 @@ pub async fn get_libraries(conn: &DatabaseConnection) -> Result<Vec<library::Mod
 
 pub async fn get_library_by_id(
     conn: &DatabaseConnection,
-    id: String,
+    id: i32,
 ) -> Result<Option<library::Model>, String> {
     Ok(library::Entity::find()
         .filter(library::Column::Id.eq(id))
@@ -31,7 +31,7 @@ pub async fn get_libraries_and_series(
 
 pub async fn get_library_by_id_with_series(
     conn: &DatabaseConnection,
-    id: String,
+    id: i32,
 ) -> Result<Vec<(library::Model, Vec<series::Model>)>, String> {
     Ok(library::Entity::find()
         .filter(library::Column::Id.eq(id))

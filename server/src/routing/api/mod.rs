@@ -15,7 +15,7 @@ use crate::{fs, State};
 /// A handler for GET /api/scan. Scans the library for new media files and updates the database accordingly.
 /// By default, it will scan all library folders. If a folder is specified, it will only scan that folder.
 #[get("/scan?<library_id>")]
-pub async fn scan(state: &State, library_id: Option<String>) -> Result<(), String> {
+pub async fn scan(state: &State, library_id: Option<i32>) -> Result<(), String> {
     let connection = state.get_connection();
     let queue = state.get_queue();
 

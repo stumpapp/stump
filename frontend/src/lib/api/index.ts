@@ -7,17 +7,17 @@ import { getMediaById, getMediaThumbnail, updateProgress } from './media';
 export const baseUrl: string = (import.meta.env.API_URI as string) ?? 'http://localhost:6969';
 
 export default {
-	library: {
-		getLibraries,
-		scanLibrary
-	},
-	series: {
-		getSeries,
-		getSeriesThumbnail
-	},
-	media: {
-		getMediaById,
-		getMediaThumbnail,
-		updateProgress
-	}
+    library: {
+        getLibraries,
+        scanLibrary
+    },
+    series: {
+        getSeries,
+        getSeriesThumbnail
+    },
+    media: {
+        getMediaById,
+        getMediaThumbnail,
+        updateProgress
+    }
 };

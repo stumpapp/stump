@@ -6,7 +6,7 @@ use crate::database::queries::series::{
     get_lastest_series, get_series, get_series_by_id, get_series_by_id_with_media,
 };
 use crate::fs::media_file;
-use crate::guards::auth::OpdsAuth;
+use crate::guards::auth::StumpAuth;
 use crate::opds::feed::OpdsFeed;
 use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use crate::types::rocket::ImageResponse;
@@ -19,7 +19,7 @@ use crate::{opds, types::rocket::XmlResponse, State};
 
 /// A handler for GET /opds/v1.2/catalog. Returns an OPDS catalog as an XML document
 #[get("/catalog")]
-pub fn catalog(_state: &State, _auth: OpdsAuth) -> XmlResponse {
+pub fn catalog(_state: &State, _auth: StumpAuth) -> XmlResponse {
     // TODO: media from database
     let entries = vec![
         opds::entry::OpdsEntry::new(
@@ -76,7 +76,7 @@ pub fn catalog(_state: &State, _auth: OpdsAuth) -> XmlResponse {
 }
 
 #[get("/keep-reading")]
-pub async fn keep_reading(state: &State, auth: OpdsAuth) -> Result<XmlResponse, String> {
+pub async fn keep_reading(state: &State, auth: StumpAuth) -> Result<XmlResponse, String> {
     let conn = state.get_connection();
 
     let media_with_progress = queries::media::get_user_keep_reading_media(&conn, auth.0.id).await?;
@@ -108,7 +108,7 @@ pub async fn keep_reading(state: &State, auth: OpdsAuth) -> Result<XmlResponse, 
 }
 
 #[get("/libraries")]
-pub async fn libraries(state: &State, _auth: OpdsAuth) -> Result<XmlResponse, String> {
+pub async fn libraries(state: &State, _auth: StumpAuth) -> Result<XmlResponse, String> {
     let conn = state.get_connection();
 
     let libraries = queries::library::get_libraries(&conn).await?;
@@ -141,7 +141,11 @@ pub async fn libraries(state: &State, _auth: OpdsAuth) -> Result<XmlResponse, St
 }
 
 #[get("/libraries/<id>")]
-pub async fn library_by_id(state: &State, id: i32, _auth: OpdsAuth) -> Result<XmlResponse, String> {
+pub async fn library_by_id(
+    state: &State,
+    id: i32,
+    _auth: StumpAuth,
+) -> Result<XmlResponse, String> {
     let res = queries::library::get_library_by_id_with_series(state.get_connection(), id).await?;
 
     if res.len() != 1 {
@@ -157,7 +161,7 @@ pub async fn library_by_id(state: &State, id: i32, _auth: OpdsAuth) -> Result<Xm
 
 /// A handler for GET /opds/v1.2/series
 #[get("/series")]
-pub async fn series(state: &State, _auth: OpdsAuth) -> Result<XmlResponse, String> {
+pub async fn series(state: &State, _auth: StumpAuth) -> Result<XmlResponse, String> {
     let res = get_series(state.get_connection()).await?;
 
     let entries = res
@@ -187,7 +191,7 @@ pub async fn series(state: &State, _auth: OpdsAuth) -> Result<XmlResponse, Strin
 }
 
 #[get("/series/latest")]
-pub async fn series_latest(state: &State, _auth: OpdsAuth) -> Result<XmlResponse, String> {
+pub async fn series_latest(state: &State, _auth: StumpAuth) -> Result<XmlResponse, String> {
     let res = get_lastest_series(state.get_connection()).await?;
 
     let entries = res
@@ -221,7 +225,7 @@ pub async fn series_by_id(
     id: String,
     page: Option<usize>,
     state: &State,
-    auth: OpdsAuth,
+    auth: StumpAuth,
 ) -> Result<XmlResponse, String> {
     let series = get_series_by_id(state.get_connection(), id).await?;
 
@@ -262,7 +266,7 @@ pub async fn series_by_id(
 pub async fn book_thumbnail(
     id: String,
     state: &State,
-    _auth: OpdsAuth,
+    _auth: StumpAuth,
 ) -> Result<ImageResponse, String> {
     let book = queries::book::get_book_by_id(state.get_connection(), id).await?;
 
@@ -285,7 +289,7 @@ pub async fn book_page(
     page: usize,
     zero_based: Option<bool>,
     state: &State,
-    _auth: OpdsAuth,
+    _auth: StumpAuth,
 ) -> Result<ImageResponse, String> {
     let book = queries::book::get_book_by_id(state.get_connection(), id).await?;
 

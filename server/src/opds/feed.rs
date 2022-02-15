@@ -1,4 +1,4 @@
-// use crate::opds::author::OpdsAuthor;
+// use crate::opds::author::StumpAuthor;
 use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
 use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
@@ -74,7 +74,7 @@ impl From<(SeriesWithMediaAndProgress, FeedPages)> for OpdsFeed {
         let title = series.title;
 
         // // TODO: use this
-        // let author = OpdsAuthor::new(
+        // let author = StumpAuthor::new(
         //     "Stump".to_string(),
         //     Some("https://github.com/aaronleopold/stump".to_string()),
         // );

@@ -123,6 +123,30 @@ pub async fn get_user_media_with_progress(
         .collect())
 }
 
+pub async fn get_media_progress(
+    conn: &DatabaseConnection,
+    media_id: i32,
+    user_id: i32,
+) -> Result<Option<read_progress::Model>, String> {
+    Ok(read_progress::Entity::find()
+        .filter(read_progress::Column::MediaId.eq(media_id))
+        .filter(read_progress::Column::UserId.eq(user_id))
+        .one(conn)
+        .await
+        .map_err(|e| e.to_string())?)
+}
+
+pub async fn update_media_progress(
+    conn: &DatabaseConnection,
+    mut active_model: read_progress::ActiveModel,
+    page: i32,
+) -> Result<(), String> {
+    active_model.page = Set(page);
+    active_model.update(conn).await.map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 pub async fn set_status(
     conn: &DatabaseConnection,
     id: i32,

@@ -99,7 +99,10 @@ fn rocket() -> _ {
                 // series api
                 routing::api::series::get_series,
                 routing::api::series::get_series_by_id,
-                routing::api::series::get_series_thumbnail
+                routing::api::series::get_series_thumbnail,
+                // media api
+                routing::api::media::get_media_thumbnail,
+                routing::api::media::update_media_progress,
             ],
         )
         .mount(

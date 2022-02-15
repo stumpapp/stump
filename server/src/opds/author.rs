@@ -3,14 +3,14 @@ use xml::EventWriter;
 
 use super::util;
 
-pub struct OpdsAuthor {
+pub struct StumpAuthor {
     pub name: String,
     pub uri: Option<String>,
 }
 
-impl OpdsAuthor {
-    pub fn new(name: String, uri: Option<String>) -> OpdsAuthor {
-        OpdsAuthor {
+impl StumpAuthor {
+    pub fn new(name: String, uri: Option<String>) -> StumpAuthor {
+        StumpAuthor {
             name: name,
             uri: uri,
         }

@@ -6,5 +6,12 @@ export function getMediaById(mediaId: number) {
 
 // this really just creates the url, the img tag handles the rest
 export function getMediaThumbnail(mediaId: number) {
-	return `${baseUrl}/api/series/${mediaId}/thumbnail`;
+	return `${baseUrl}/api/media/${mediaId}/thumbnail`;
+}
+
+export function updateProgress(mediaId: number, page: number) {
+	return fetch(`${baseUrl}/api/media/${mediaId}/progress`, {
+		method: 'PUT',
+		body: JSON.stringify({ page })
+	});
 }

@@ -11,14 +11,14 @@ use crate::{
 
 type Session<'a> = rocket_session_store::Session<'a, AuthenticatedUser>;
 
-pub struct OpdsAuth(pub AuthenticatedUser);
+pub struct StumpAuth(pub AuthenticatedUser);
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 
 // FIXME: This is still really gross, there must be a neater way to handle this with all the safety checks
 // than what I am doing here.
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for OpdsAuth {
+impl<'r> FromRequest<'r> for StumpAuth {
     type Error = AuthError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -28,7 +28,7 @@ impl<'r> FromRequest<'r> for OpdsAuth {
             Ok(res) => {
                 if res.is_some() {
                     println!("Session existed: {:?}", res);
-                    return Outcome::Success(OpdsAuth(res.unwrap()));
+                    return Outcome::Success(StumpAuth(res.unwrap()));
                 }
             }
             Err(e) => {
@@ -93,7 +93,7 @@ impl<'r> FromRequest<'r> for OpdsAuth {
                     .set(authed_user.clone())
                     .await
                     .expect("An error occurred while setting the session");
-                Outcome::Success(OpdsAuth(authed_user))
+                Outcome::Success(StumpAuth(authed_user))
             } else {
                 Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized))
             }

@@ -1,14 +1,14 @@
 <script context="module" lang="ts">
-	import { baseUrl } from '@lib/api';
+	import api, { baseUrl } from '@lib/api';
 
 	/** @type {import('@sveltejs/kit').Load} */
 	export async function load({ fetch }) {
 		const response = await fetch(`${baseUrl}/api/library`).catch((err) => console.log(err));
 
 		return {
-			// status: response.status,
+			status: response?.status ?? 502,
 			props: {
-				libraries: response.ok && (await response.json())
+				libraries: response?.ok && (await response.json())
 			}
 		};
 	}
@@ -16,11 +16,30 @@
 
 <script lang="ts">
 	import '@/app.css';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { page } from '$app/stores';
 	import { preferences } from '@store/preferences';
 	import Sidebar from '@components/Sidebar.svelte';
 
 	export let libraries: Library[];
+
+	async function beforeUnload(e) {
+		e.preventDefault();
+
+		let current_page = $page;
+		let reading_page = current_page.url.searchParams.get('page');
+		let current_media = current_page.params.id;
+
+		if (current_page.url.pathname.includes('/read') && reading_page && current_media) {
+			await api.media.updateProgress(parseInt(current_media, 10), parseInt(reading_page, 10));
+		} else {
+			await api.library.getLibraries();
+		}
+
+		// e.returnValue = '';
+		// return '...'
+		return null;
+	}
 
 	onMount(() => {
 		preferences.subscribe((current) => {
@@ -32,6 +51,8 @@
 		});
 	});
 </script>
+
+<svelte:window on:beforeunload={beforeUnload} />
 
 <div class="flex h-full flex-row">
 	<Sidebar bind:libraries />

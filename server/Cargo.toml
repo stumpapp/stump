@@ -5,9 +5,12 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = [".", "entity", "migration"]
+
 [dependencies]
 rocket =  { version = "0.5.0-rc.1", features =  ["json" ] }
-sea-orm = { version = "0.6.0", features = [ "sqlx-sqlite", "runtime-async-std-native-tls" ] }
+# sea-orm = { version = "0.6.0", features = [ "sqlx-sqlite", "runtime-async-std-native-tls" ] }
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4.0"
 env_logger = "0.8.4"

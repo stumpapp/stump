@@ -28,6 +28,8 @@ pub enum ApiError {
     BadGateway(String),
     #[error("{0}")]
     Unknown(String),
+    #[error("{0}")]
+    Redirect(String),
 }
 
 impl From<ApiError> for Status {
@@ -42,6 +44,8 @@ impl From<ApiError> for Status {
             ApiError::ServiceUnavailable(_) => Status::ServiceUnavailable,
             ApiError::BadGateway(_) => Status::BadGateway,
             ApiError::Unknown(_) => Status::InternalServerError,
+            // TODO: is this the right status? 308?
+            ApiError::Redirect(_) => Status::PermanentRedirect,
         }
     }
 }

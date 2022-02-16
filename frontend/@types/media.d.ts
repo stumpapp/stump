@@ -55,5 +55,9 @@ interface MediaWithProgress extends Media {
     /**
      * The page the viewing user is currently on for the associated media.
      */
-    current_page: number;
+    current_page?: number;
 }
+
+// interface MediaWithSeries extends MediaWithProgress {
+//     series_name: string;
+// }

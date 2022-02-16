@@ -90,6 +90,7 @@
                                 <path d="M6 6L14 10L6 14V6Z" fill="currentColor" />
                             </svg>
                         </DisclosureButton>
+                        <!-- TODO: animate me -->
                         <DisclosurePanel class="pt-1 space-y-1">
                             {#each item.children as child}
                                 <a
@@ -99,6 +100,7 @@
                                     <!-- TODO: get active state to work without the annoying rerender >:( -->
                                     <span class="flex-1 w-full">{child.name}</span>
 
+                                    <!-- FIXME: clicking twice clicks the parent link, I don't want that behavior -->
                                     <LibraryOptionsMenu library={child} />
                                 </a>
                             {/each}

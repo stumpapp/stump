@@ -20,6 +20,7 @@
             class="h-72 w-auto max-w-[12rem] object-scale-down"
             src={api.series.getSeriesThumbnail(series.id)}
             on:error={(err) => {
+                // TODO: does not work after reload. Will load the alt
                 // @ts-ignore: TODO add fallback
                 err.target.src = '/favicon.png';
             }}

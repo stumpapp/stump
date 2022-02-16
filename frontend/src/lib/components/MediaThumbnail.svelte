@@ -2,17 +2,14 @@
     import api from '@lib/api';
 
     export let media: MediaWithProgress;
+
+    $: readUrl = media ? `/book/${media.id}/read?page=${media.current_page || 1}` : '';
 </script>
 
-<!-- TODO: href based on next page -->
-<a href={`/book/${media.id}`} class="col-span-1 rounded-md bg-gray-800">
-    <!-- on:error={(err) => console.log({ series, err })} -->
-    <!-- on:error={(err) => loadError = true} -->
-    <!-- TODO: figure out why this was not working, causing multiple to fail
-      when in reality only one failed -->
-
-    <div
-        class="hover:border-brand rounded-t-md border border-transparent px-1.5 transition-all duration-200"
+<div class="flex">
+    <a
+        href={readUrl}
+        class="flex rounded-md bg-gray-800 hover:border-brand border border-transparent px-1.5 transition-all duration-200"
     >
         <!-- Trying to keep the 3:2 aspect ratio of comic books -->
         <img
@@ -26,9 +23,7 @@
                 err.target.src = '/favicon.png';
             }}
         />
-    </div>
+    </a>
 
-    <div class="p-2">
-        <h3 class="text-gray-100">{media.name}</h3>
-    </div>
-</a>
+    <!-- TODO: progress bar if has progress -->
+</div>

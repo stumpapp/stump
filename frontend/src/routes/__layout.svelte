@@ -56,7 +56,7 @@
 
 <div class="flex h-full flex-row">
     <Sidebar bind:libraries />
-    <main class="flex-1 p-3">
+    <main class="flex-1 p-4">
         <slot />
     </main>
 </div>

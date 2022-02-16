@@ -9,6 +9,10 @@ export function getMediaThumbnail(mediaId: number) {
     return `${baseUrl}/api/media/${mediaId}/thumbnail`;
 }
 
+export function getMediaPage(mediaId: number, page: number) {
+    return `${baseUrl}/api/media/${mediaId}/page/${page}`;
+}
+
 export function updateProgress(mediaId: number, page: number) {
     return fetch(`${baseUrl}/api/media/${mediaId}/progress`, {
         method: 'PUT',

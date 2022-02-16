@@ -19,8 +19,6 @@
 
     export let series: Series;
     export let media: MediaWithProgress[];
-
-    console.log(series, media);
 </script>
 
 {#if !series}

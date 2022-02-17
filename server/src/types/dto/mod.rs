@@ -1,9 +1,11 @@
 pub mod media;
 pub mod series;
+pub mod user;
 
-use crate::{database::entities::library, fs::FileStatus};
+use entity::sea_orm;
+use entity::{library, util::FileStatus};
+use rocket::serde::Serialize;
 use sea_orm::FromQueryResult;
-use serde::Serialize;
 
 use super::alias::SeriesModel;
 
@@ -31,6 +33,7 @@ pub struct GetMediaQuery {
 pub type GetMediaQueryResult = Vec<GetMediaQuery>;
 
 #[derive(Serialize, Debug)]
+#[serde(crate = "rocket::serde")]
 pub struct GetLibraryWithSeriesQuery {
     pub library: library::Model,
     pub series: Vec<SeriesModel>,

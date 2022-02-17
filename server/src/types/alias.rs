@@ -1,4 +1,4 @@
-use crate::database::entities::{library, media, read_progress, series};
+use entity::{library, media, read_progress, series};
 
 pub type SeriesModel = series::Model;
 pub type LibraryModel = library::Model;

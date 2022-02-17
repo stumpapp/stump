@@ -19,6 +19,7 @@ pub fn verify_password(hash: &str, password: &str) -> Result<bool, AuthError> {
     Ok(bcrypt::verify(password, hash)?)
 }
 
+#[derive(Debug)]
 pub struct DecodedCredentials {
     pub username: String,
     pub password: String,

@@ -17,8 +17,8 @@ pub struct Model {
     /// The number of media files in the series.
     pub book_count: i32,
     /// The date in which the series was last updated in the FS. ex: "2020-01-01"
-    // #[sea_orm(column_type = "DateTime")]
-    // pub updated_at: Option<chrono::NaiveDateTime>,
+    #[sea_orm(column_type = "DateTime")]
+    pub updated_at: Option<chrono::NaiveDateTime>,
     /// The url of the series. ex: "/home/user/media/comics/The Amazing Spider-Man"
     pub path: String,
     /// The status of the series since last scan or access

@@ -3,9 +3,9 @@ use chrono::{DateTime, Utc};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::database::entities::{library, media, series};
 use crate::opds::link::OpdsStreamLink;
 use crate::types::alias::{MediaWithProgress, UserMediaWithProgress};
+use entity::{library, media, series};
 
 use super::{
     link::{OpdsLink, OpdsLinkRel, OpdsLinkType},

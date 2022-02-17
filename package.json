@@ -14,6 +14,8 @@
 		"server:build:docker-debian": "echo 'FIXME: I AM BROKEN --> run the following in /server: docker build -f Dockerfile.debian -t stump-deb .'",
 		"server:build:docker-alpine": "cd server && docker build -f Dockerfile.alpine -t stump .",
 		"server:check": "cd server && cargo check",
+		"server:migrate-up": "cd server && sea-orm-cli migrate up",
+		"server:migrate-down": "cd server && sea-orm-cli migrate down",
 		"server:fmt": "cargo fmt --all --manifest-path=server/Cargo.toml",
 		"frontend:install": "cd frontend && pnpm install",
 		"frontend:start": "cd frontend && pnpm run start",

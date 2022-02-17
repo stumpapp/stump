@@ -1,4 +1,5 @@
-use crate::database::entities::{library, series};
+use entity::sea_orm;
+use entity::{library, series};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 pub async fn get_libraries(conn: &DatabaseConnection) -> Result<Vec<library::Model>, String> {

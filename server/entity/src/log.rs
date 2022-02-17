@@ -1,19 +1,7 @@
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
 
-#[derive(Debug, Clone, Serialize, Deserialize, EnumIter, DeriveActiveEnum, PartialEq)]
-#[serde(crate = "rocket::serde")]
-#[sea_orm(rs_type = "String", db_type = "String(None)")]
-pub enum LogLevel {
-    #[sea_orm(string_value = "error")]
-    Error,
-    #[sea_orm(string_value = "warn")]
-    Warn,
-    #[sea_orm(string_value = "info")]
-    Info,
-    #[sea_orm(string_value = "debug")]
-    Debug,
-}
+use crate::util::LogLevel;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -34,14 +22,3 @@ pub struct Model {
 pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
-
-// impl Into<ActiveModel> for Log {
-//     fn into(self) -> ActiveModel {
-//         ActiveModel {
-//             level: Set(self.level),
-//             message: Set(self.message),
-//             created_at: Set(self.created_at),
-//             ..Default::default()
-//         }
-//     }
-// }

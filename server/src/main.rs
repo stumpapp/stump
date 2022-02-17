@@ -6,8 +6,13 @@ use rocket_session_store::{memory::MemoryStore, SessionStore};
 use rocket::tokio::sync::broadcast::channel;
 use rocket::{fs::FileServer, futures::executor::block_on, http::Method};
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
+use types::dto::user::AuthenticatedUser;
 
+use std::path::PathBuf;
 use std::time::Duration;
+
+#[cfg(debug_assertions)]
+use dotenv::dotenv;
 
 mod database;
 mod fs;
@@ -19,11 +24,7 @@ mod state;
 mod types;
 mod utils;
 
-use crate::{
-    database::{entities::user::AuthenticatedUser, Database},
-    logging::Log,
-    types::rocket::UnauthorizedResponse,
-};
+use crate::{database::Database, logging::Log, types::rocket::UnauthorizedResponse};
 
 pub type State = state::State;
 
@@ -32,8 +33,34 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
     UnauthorizedResponse {}
 }
 
+fn home_dir() -> PathBuf {
+    dirs::home_dir().expect("Could not find home directory")
+}
+
+fn init_env() {
+    let config_dir = match std::env::var("STUMP_CONFIG_DIR") {
+        Ok(val) => PathBuf::from(val),
+        Err(_) => home_dir().join(".stump"),
+    };
+
+    std::fs::create_dir_all(&config_dir)
+        .map_err(|e| panic!("Could not create config directory: {}", e));
+
+    let database_url = format!(
+        "sqlite:{}?mode=rwc",
+        config_dir.join("stump.db").to_str().unwrap()
+    );
+
+    std::env::set_var("DATABASE_URL", database_url);
+}
+
 #[launch]
 fn rocket() -> _ {
+    #[cfg(debug_assertions)]
+    dotenv().ok();
+
+    init_env();
+
     env_logger::builder()
         .filter_level(log::LevelFilter::Debug)
         .is_test(true)
@@ -55,10 +82,7 @@ fn rocket() -> _ {
     .to_cors()
     .expect("Could not instantiate CORS configuration.");
 
-    let connection = block_on(database::connection::create_connection()).unwrap();
-
-    let db = Database::new(connection);
-    block_on(db.run_migration_up()).unwrap();
+    let db = block_on(Database::new());
     let state = state::AppState::new(db, channel::<Log>(1024).0);
 
     let session_name = std::env::var("SESSION_NAME").unwrap_or_else(|_| "stump-session".into());

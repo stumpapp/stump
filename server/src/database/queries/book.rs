@@ -1,6 +1,6 @@
+use entity::media;
+use entity::sea_orm;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-
-use crate::database::entities::media;
 
 pub async fn get_book_by_id(
     conn: &DatabaseConnection,

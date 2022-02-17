@@ -1,4 +1,5 @@
 use crate::{Database, Log};
+use entity::sea_orm;
 use rocket::tokio::sync::broadcast::Sender;
 use sea_orm::DatabaseConnection;
 

@@ -66,6 +66,7 @@ pub async fn get_media_page(state: &State, id: i32, page: i32) -> GetMediaPage {
 }
 
 #[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
 pub struct UpdateProgress {
     page: i32,
 }

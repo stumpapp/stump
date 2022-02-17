@@ -1,6 +1,6 @@
+use entity::sea_orm;
+use entity::user;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
-
-use crate::database::entities::user;
 
 pub async fn get_user_by_username(
     username: &str,

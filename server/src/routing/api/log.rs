@@ -1,9 +1,9 @@
 use rocket::serde::json::Json;
 
-use crate::database::{entities, queries};
+use crate::database::queries;
 use crate::State;
 
-type GetLogs = Json<Vec<entities::log::Model>>;
+type GetLogs = Json<Vec<entity::log::Model>>;
 
 #[get("/logs")]
 pub async fn get_logs(state: &State) -> Result<GetLogs, String> {

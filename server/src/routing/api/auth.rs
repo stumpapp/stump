@@ -1,12 +1,13 @@
+use entity::sea_orm;
+use entity::user::{self, UserRole};
 use rocket::serde::{json::Json, Deserialize};
-use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
 
-use crate::database::entities::user;
-use crate::database::entities::user::UserRole;
-use crate::{AuthenticatedUser, State};
+use crate::types::dto::user::AuthenticatedUser;
+use crate::State;
 
 #[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
 pub struct LoginRequest<'r> {
     username: &'r str,
     password: &'r str,

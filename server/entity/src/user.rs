@@ -43,21 +43,3 @@ pub enum Relation {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
-
-// TODO: move me somewhere, it isn't an entity so I don't like it being here...
-#[derive(Default, Clone, Debug)]
-pub struct AuthenticatedUser {
-    pub id: i32,
-    pub username: String,
-    pub role: UserRole,
-}
-
-impl Into<AuthenticatedUser> for Model {
-    fn into(self) -> AuthenticatedUser {
-        AuthenticatedUser {
-            id: self.id,
-            username: self.username,
-            role: self.role,
-        }
-    }
-}

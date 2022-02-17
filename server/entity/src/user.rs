@@ -1,8 +1,9 @@
+use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
-use serde::{Deserialize, Serialize};
 
 // TODO: should I have a 'Contributor' role? Where they would have read+insert permissions?
 #[derive(Debug, Clone, Serialize, Deserialize, EnumIter, DeriveActiveEnum, PartialEq)]
+#[serde(crate = "rocket::serde")]
 #[sea_orm(rs_type = "String", db_type = "String(None)")]
 pub enum UserRole {
     /// The user who 'owns' the OPDS server
@@ -42,21 +43,3 @@ pub enum Relation {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
-
-// TODO: move me somewhere, it isn't an entity so I don't like it being here...
-#[derive(Default, Clone, Debug)]
-pub struct AuthenticatedUser {
-    pub id: i32,
-    pub username: String,
-    pub role: UserRole,
-}
-
-impl Into<AuthenticatedUser> for Model {
-    fn into(self) -> AuthenticatedUser {
-        AuthenticatedUser {
-            id: self.id,
-            username: self.username,
-            role: self.role,
-        }
-    }
-}

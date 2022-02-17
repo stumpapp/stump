@@ -4,21 +4,18 @@ use std::{
 };
 
 use chrono::{DateTime, NaiveDateTime, Utc};
+use entity::sea_orm;
+use entity::{library, series, util::FileStatus};
 use sea_orm::{DatabaseConnection, Set};
 
 use rocket::tokio::sync::broadcast::Sender;
 use walkdir::WalkDir;
 
 use crate::{
-    database::{
-        entities::{library, series},
-        queries,
-    },
+    database::queries,
     logging::Log,
     types::dto::{GetMediaQuery, GetMediaQueryResult},
 };
-
-use super::FileStatus;
 
 pub trait IgnoredFile {
     fn should_ignore(&self) -> bool;

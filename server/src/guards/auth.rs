@@ -3,11 +3,8 @@ use rocket::{
     request::{FromRequest, Outcome, Request},
 };
 
-use crate::utils::auth::AuthError;
-use crate::{
-    database::{entities::user::AuthenticatedUser, queries::user::get_user_by_username},
-    utils, State,
-};
+use crate::{database::queries::user::get_user_by_username, utils, State};
+use crate::{types::dto::user::AuthenticatedUser, utils::auth::AuthError};
 
 type Session<'a> = rocket_session_store::Session<'a, AuthenticatedUser>;
 
@@ -70,12 +67,17 @@ impl<'r> FromRequest<'r> for StumpAuth {
 
             let credentials = credentials.unwrap();
 
+            println!("Credentials: {:?}", credentials);
+
             let user = get_user_by_username(&credentials.username, state.get_connection()).await;
 
             if user.is_err() {
+                println!("User error: {:?}", user.err().unwrap());
                 return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
             }
             let user = user.unwrap();
+
+            println!("User: {:?}", user);
 
             if user.is_none() {
                 return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));

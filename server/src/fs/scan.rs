@@ -1,6 +1,5 @@
 use crate::database::queries;
 use crate::{
-    database::entities::{library, media, series},
     fs::checksum::Crc,
     types::{
         comic::ComicInfo,
@@ -9,6 +8,8 @@ use crate::{
     Log,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
+use entity::sea_orm;
+use entity::{library, media, series};
 use log::info;
 use rocket::tokio::sync::broadcast::Sender;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};

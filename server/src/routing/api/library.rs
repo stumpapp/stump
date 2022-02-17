@@ -1,16 +1,17 @@
-use crate::{
-    database::entities::{library, series},
-    fs::new_scanner,
-    routing::error::{ApiError, ApiResult},
-    types::dto::GetLibraryWithSeriesQuery,
-    State,
-};
-
+use entity::sea_orm;
+use entity::{library, series};
 use rocket::{
     http::Status,
     serde::{json::Json, Deserialize},
 };
 use sea_orm::{sea_query::Expr, ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+
+use crate::{
+    fs::new_scanner,
+    routing::error::{ApiError, ApiResult},
+    types::dto::GetLibraryWithSeriesQuery,
+    State,
+};
 
 // TODO: fix terrible error handling
 type GetLibraries = Json<Vec<library::Model>>;
@@ -60,6 +61,7 @@ pub async fn scan_library(state: &State, id: i32) -> Result<(), String> {
 }
 
 #[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
 pub struct InsertLibrary<'r> {
     name: &'r str,
     path: &'r str,

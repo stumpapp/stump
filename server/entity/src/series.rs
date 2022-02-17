@@ -1,7 +1,9 @@
+use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
-use serde::{Deserialize, Serialize};
 
-use crate::fs::FileStatus;
+use crate::util::FileStatus;
+
+// use crate::fs::FileStatus;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 #[sea_orm(table_name = "series")]

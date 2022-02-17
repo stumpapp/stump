@@ -1,5 +1,5 @@
+use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]

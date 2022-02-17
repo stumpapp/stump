@@ -1,9 +1,9 @@
-use crate::database::entities::{library, media, read_progress, series};
-use crate::fs::FileStatus;
 use crate::types::alias::{
     GetMediaWithProgress, GetMediaWithProgressRaw, GetUserMediaWithProgress, MediaWithMaybeProgress,
 };
 use crate::types::dto::{GetMediaQuery, GetMediaQueryResult};
+use entity::sea_orm;
+use entity::{library, media, read_progress, series, util::FileStatus};
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter,
     QuerySelect, RelationTrait, Set,

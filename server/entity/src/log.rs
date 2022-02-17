@@ -1,8 +1,7 @@
-use crate::logging::LogLevel;
-use crate::Log;
+use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
-use sea_orm::ActiveValue::Set;
-use serde::{Deserialize, Serialize};
+
+use crate::util::LogLevel;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -23,14 +22,3 @@ pub struct Model {
 pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
-
-impl Into<ActiveModel> for Log {
-    fn into(self) -> ActiveModel {
-        ActiveModel {
-            level: Set(self.level),
-            message: Set(self.message),
-            created_at: Set(self.created_at),
-            ..Default::default()
-        }
-    }
-}

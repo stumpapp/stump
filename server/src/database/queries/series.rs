@@ -1,9 +1,9 @@
+use entity::sea_orm;
+use entity::{media, read_progress, series};
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QueryOrder, QuerySelect,
     RelationTrait,
 };
-
-use crate::database::entities::{media, read_progress, series, user};
 
 pub async fn get_series(conn: &DatabaseConnection) -> Result<Vec<series::Model>, String> {
     Ok(series::Entity::find()

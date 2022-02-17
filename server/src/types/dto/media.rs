@@ -1,9 +1,10 @@
 use chrono::NaiveDateTime;
-use serde::Serialize;
+use rocket::serde::Serialize;
 
 use crate::types::alias::{MediaWithMaybeProgress, SeriesModel};
 
 #[derive(Serialize, Debug)]
+#[serde(crate = "rocket::serde")]
 pub struct GetMediaByIdWithProgress {
     pub id: i32,
     pub series_id: i32,

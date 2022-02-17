@@ -1,40 +1,9 @@
+use entity::sea_orm::Set;
+use entity::util::LogLevel;
 use rocket::serde::{Deserialize, Serialize};
-use sea_orm::{DeriveActiveEnum, EnumIter};
 
-#[derive(Debug, Clone, Serialize, Deserialize, EnumIter, DeriveActiveEnum, PartialEq)]
-#[sea_orm(rs_type = "String", db_type = "String(None)")]
-pub enum LogLevel {
-    #[sea_orm(string_value = "error")]
-    Error,
-    #[sea_orm(string_value = "warn")]
-    Warn,
-    #[sea_orm(string_value = "info")]
-    Info,
-    #[sea_orm(string_value = "debug")]
-    Debug,
-}
-
-impl From<LogLevel> for String {
-    fn from(level: LogLevel) -> String {
-        match level {
-            LogLevel::Error => "error".to_string(),
-            LogLevel::Warn => "warn".to_string(),
-            LogLevel::Info => "info".to_string(),
-            LogLevel::Debug => "debug".to_string(),
-        }
-    }
-}
-
-impl From<&str> for LogLevel {
-    fn from(level: &str) -> LogLevel {
-        match level {
-            "error" => LogLevel::Error,
-            "warn" => LogLevel::Warn,
-            "info" => LogLevel::Info,
-            "debug" => LogLevel::Debug,
-            _ => LogLevel::Error,
-        }
-    }
+pub trait LogTrait {
+    fn into_active_model(&self) -> entity::log::ActiveModel;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,6 +12,17 @@ pub struct Log {
     pub level: LogLevel,
     pub message: String,
     pub created_at: chrono::NaiveDateTime,
+}
+
+impl LogTrait for Log {
+    fn into_active_model(&self) -> entity::log::ActiveModel {
+        entity::log::ActiveModel {
+            level: Set(self.level.to_owned()),
+            message: Set(self.message.to_owned()),
+            created_at: Set(self.created_at.to_owned()),
+            ..Default::default()
+        }
+    }
 }
 
 impl Log {

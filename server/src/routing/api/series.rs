@@ -1,11 +1,12 @@
+use entity::series;
+use rocket::serde::json::Json;
+
 use crate::{
-    database::{entities::series, queries},
+    database::queries,
     fs::media_file,
     types::{dto::series::GetSeriesById, rocket::ImageResponse},
     State,
 };
-
-use rocket::serde::json::Json;
 
 type GetSeriesList = Json<Vec<series::Model>>;
 

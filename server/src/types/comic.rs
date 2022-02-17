@@ -1,9 +1,10 @@
-use serde::{Deserialize, Serialize};
+use rocket::serde::{Deserialize, Serialize};
 
 // TODO: generalize to reuse this struct for epubs, pdfs, etc
 
 // TODO: more fields
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(crate = "rocket::serde")]
 pub struct ComicInfo {
     #[serde(rename = "Series")]
     pub series: Option<String>,

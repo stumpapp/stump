@@ -2052,8 +2052,7 @@ dependencies = [
 [[package]]
 name = "rocket-session-store"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ba33aad1d6e375db155bb07bffbda2d958693e73aa7f3e17042f654a247b53f"
+source = "git+https://github.com/aaronleopold/rocket-session-store.git#b896ca1425a2d563746a0913da40182c2593b009"
 dependencies = [
  "rand 0.8.4",
  "rocket",

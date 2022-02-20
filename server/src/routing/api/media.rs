@@ -21,7 +21,7 @@ type GetMediaResult = ApiResult<Json<GetMediaByIdWithProgress>>;
 
 // TODO: add auth
 #[get("/media/<id>")]
-pub async fn get_media(state: &State, id: i32) -> GetMediaResult {
+pub async fn get_media(state: &State, id: i32, _auth: StumpAuth) -> GetMediaResult {
     queries::media::get_media_by_id_with_progress(state.get_connection(), id)
         .await
         .map(|media| Ok(Json(media.into())))

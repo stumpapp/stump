@@ -1,7 +1,7 @@
 import { baseUrl } from '.';
 
 export function getMediaById(mediaId: number) {
-    return fetch(`${baseUrl}/api/media/${mediaId}`);
+    return fetch(`${baseUrl}/api/media/${mediaId}`, { credentials: 'include' });
 }
 
 // this really just creates the url, the img tag handles the rest

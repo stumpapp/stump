@@ -2,7 +2,8 @@
 extern crate rocket;
 
 use rocket::fs::NamedFile;
-use rocket_session_store::{memory::MemoryStore, SessionStore};
+use rocket::http::SameSite;
+use rocket_session_store::{memory::MemoryStore, CookieOptions, SessionStore};
 
 use rocket::tokio::sync::broadcast::channel;
 use rocket::{fs::FileServer, futures::executor::block_on, http::Method};
@@ -33,9 +34,9 @@ pub type State = state::State;
 fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
     UnauthorizedResponse {}
 }
-
-#[get("/", rank = 2)]
+#[get("/<_..>", rank = 2)]
 async fn index_fallback() -> Option<NamedFile> {
+    println!("index_fallback");
     NamedFile::open(Path::new("static").join("index.html"))
         .await
         .ok()
@@ -76,8 +77,8 @@ fn rocket() -> _ {
         .is_test(true)
         .init();
 
-    // FIXME: restrict this
-    let allowed_origins = AllowedOrigins::all();
+    let allowed_origins =
+        AllowedOrigins::some_exact(&["http://localhost:3000", "http://localhost:6969"]);
 
     let cors = rocket_cors::CorsOptions {
         allowed_origins,
@@ -85,7 +86,7 @@ fn rocket() -> _ {
             .into_iter()
             .map(From::from)
             .collect(),
-        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
+        // allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
         allow_credentials: true,
         ..Default::default()
     }
@@ -97,16 +98,19 @@ fn rocket() -> _ {
 
     let session_name = std::env::var("SESSION_NAME").unwrap_or_else(|_| "stump-session".into());
 
-    // TODO: I am not sure if I like this implementation yet. I might want to use my sqlite connection
-    // to manage sessions. I did not want to deep dive into creating my own fairing for this *yet*,
-    // but will likely do so in the future.
     let memory_store: MemoryStore<AuthenticatedUser> = MemoryStore::default();
     // TODO: https://github.com/Aurora2500/rocket-session-store/issues/1
-    // The cookie path defaults to the current path, which is not what we want. E.g. /api/auth
+    // Forked this temporarily to set the path
     let store: SessionStore<AuthenticatedUser> = SessionStore {
         store: Box::new(memory_store),
         name: session_name,
         duration: Duration::from_secs(3600 * 24 * 3),
+        cookie: CookieOptions {
+            path: Some("/".into()),
+            same_site: Some(SameSite::None),
+            secure: false,
+            http_only: true,
+        },
     };
 
     rocket::build()

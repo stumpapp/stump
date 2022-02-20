@@ -16,7 +16,8 @@ There are no releases yet, so you'll have to clone the repo and build it yoursel
 git clone https://github.com/aaronleopold/stump.git
 cd stump
 pnpm frontend:install
-cargo install cargo-watch
+cargo install cargo-watch sea-orm-cli
+pnpm server:migrate-up
 ```
 
 ## Running Stump
@@ -36,9 +37,19 @@ pnpm server:dev # start the server
 pnpm frontend:dev # start the frontend
 ```
 
+### Building the Frontend
+
+Because of the prerendering options, the backend needs to be running while the frontend is being built. I am working on a script to automate this, but for now you'll just need two separate processes:
+
+```bash
+pnpm server:start
+# once the server starts, delete the `static` folder.
+pnpm frontend:build # this will build and move the build to the `server/static` folder
+```
+
 ### Docker
 
-No images have been published to dockerhub yet, so you'll have to build it yourself:
+No images have been published to dockerhub yet, so you'll have to build it yourself (requires frontend to have been built first):
 
 ```bash
 pnpm server:build:docker-alpine # builds the image

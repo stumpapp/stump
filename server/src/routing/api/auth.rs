@@ -36,7 +36,8 @@ pub async fn login(state: &State, session: Session<'_>, credentials: Json<LoginR
             let matches = bcrypt::verify(credentials.password, &user.password).expect("TODO");
 
             if matches {
-                session.set(user.into()).await.expect("TODO")
+                session.set(user.into()).await.expect("TODO");
+                println!("{:?}", session.get().await.expect("TODO"));
             } else {
                 unimplemented!()
             }

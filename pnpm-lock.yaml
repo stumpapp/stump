@@ -1,6 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@types/nprogress': ^0.2.0
   concurrently: ^6.5.1
   eslint: ^8.7.0
   husky: ^7.0.2
@@ -8,6 +9,7 @@ specifiers:
   prettier: ^2.5.1
 
 devDependencies:
+  '@types/nprogress': 0.2.0
   concurrently: 6.5.1
   eslint: 8.8.0
   husky: 7.0.4
@@ -46,6 +48,10 @@ packages:
 
   /@humanwhocodes/object-schema/1.2.1:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
+    dev: true
+
+  /@types/nprogress/0.2.0:
+    resolution: {integrity: sha512-1cYJrqq9GezNFPsWTZpFut/d4CjpZqA0vhqDUPFWYKF1oIyBz5qnoYMzR+0C/T96t3ebLAC1SSnwrVOm5/j74A==}
     dev: true
 
   /acorn-jsx/5.3.2_acorn@8.7.0:

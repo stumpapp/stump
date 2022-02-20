@@ -8,7 +8,7 @@ use zip::result::ZipError;
 pub enum ProcessFileError {
     // #[error("Invalid Archive")]
     // InvalidArchive,
-    #[error("Could not open archive file")]
+    #[error("Could not open file")]
     ArchiveOpenError(#[from] std::io::Error),
     #[error("Could not read archive file")]
     ArchiveReadError(#[from] ZipError),

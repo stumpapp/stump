@@ -20,6 +20,7 @@
     import { page } from '$app/stores';
     import { preferences } from '@store/preferences';
     import Sidebar from '@components/Sidebar.svelte';
+    import NProgress from '@components/NProgress.svelte';
 
     export let libraries: Library[];
 
@@ -54,9 +55,11 @@
 
 <svelte:window on:beforeunload={beforeUnload} />
 
+<NProgress />
+
 <div class="flex h-full flex-row">
     <Sidebar bind:libraries />
-    <main class="flex-1 p-4">
+    <main class="flex-1 p-4 overflow-y-scroll scrollbar-hide">
         <slot />
     </main>
 </div>

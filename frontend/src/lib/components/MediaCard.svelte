@@ -28,7 +28,7 @@
         />
     </div>
 
-    <div class="p-2">
-        <h3 class="text-gray-100">{media.name}</h3>
+    <div class="p-2 max-w-[12rem]">
+        <h3 title={media.name} class="text-gray-100 truncate">{media.name}</h3>
     </div>
 </a>

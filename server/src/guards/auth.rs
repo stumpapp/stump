@@ -23,6 +23,7 @@ impl<'r> FromRequest<'r> for StumpAuth {
 
         match session.get().await {
             Ok(res) => {
+                println!("{:?}", res);
                 if res.is_some() {
                     println!("Session existed: {:?}", res);
                     return Outcome::Success(StumpAuth(res.unwrap()));

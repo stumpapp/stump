@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+use rocket::fs::NamedFile;
 use rocket_session_store::{memory::MemoryStore, SessionStore};
 
 use rocket::tokio::sync::broadcast::channel;
@@ -8,7 +9,7 @@ use rocket::{fs::FileServer, futures::executor::block_on, http::Method};
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use types::dto::user::AuthenticatedUser;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 #[cfg(debug_assertions)]
@@ -33,6 +34,13 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
     UnauthorizedResponse {}
 }
 
+#[get("/", rank = 2)]
+async fn index_fallback() -> Option<NamedFile> {
+    NamedFile::open(Path::new("static").join("index.html"))
+        .await
+        .ok()
+}
+
 fn home_dir() -> PathBuf {
     dirs::home_dir().expect("Could not find home directory")
 }
@@ -43,13 +51,15 @@ fn init_env() {
         Err(_) => home_dir().join(".stump"),
     };
 
-    std::fs::create_dir_all(&config_dir)
+    let _ = std::fs::create_dir_all(&config_dir)
         .map_err(|e| panic!("Could not create config directory: {}", e));
 
     let database_url = format!(
         "sqlite:{}?mode=rwc",
         config_dir.join("stump.db").to_str().unwrap()
     );
+
+    println!("Database URL: {}", database_url);
 
     std::env::set_var("DATABASE_URL", database_url);
 }
@@ -91,6 +101,8 @@ fn rocket() -> _ {
     // to manage sessions. I did not want to deep dive into creating my own fairing for this *yet*,
     // but will likely do so in the future.
     let memory_store: MemoryStore<AuthenticatedUser> = MemoryStore::default();
+    // TODO: https://github.com/Aurora2500/rocket-session-store/issues/1
+    // The cookie path defaults to the current path, which is not what we want. E.g. /api/auth
     let store: SessionStore<AuthenticatedUser> = SessionStore {
         store: Box::new(memory_store),
         name: session_name,
@@ -101,7 +113,8 @@ fn rocket() -> _ {
         .manage(state)
         .attach(store.fairing())
         .attach(cors)
-        .mount("/", FileServer::from("static/"))
+        .mount("/", FileServer::from("static/").rank(1))
+        .mount("/", routes![index_fallback])
         .mount(
             "/api",
             routes![
@@ -126,6 +139,7 @@ fn rocket() -> _ {
                 routing::api::series::get_series_thumbnail,
                 // media api
                 routing::api::media::get_media,
+                routing::api::media::get_media_file,
                 routing::api::media::get_media_page,
                 routing::api::media::get_media_thumbnail,
                 routing::api::media::update_media_progress,

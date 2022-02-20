@@ -40,3 +40,15 @@ pub fn get_epub_page(file: &str, page: usize) -> GetPageResult {
         Err(_) => Err(ProcessFileError::EpubReadError),
     }
 }
+
+pub fn get_container_xml(file: &str, resource: &str) -> Option<String> {
+    let res = EpubDoc::new(file);
+
+    match res {
+        Ok(doc) => {
+            println!("{:?}", doc.resources);
+            doc.resources.get(resource).map(|(path, s)| s.to_owned())
+        }
+        Err(_) => unimplemented!(),
+    }
+}

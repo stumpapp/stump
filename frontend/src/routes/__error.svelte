@@ -1,13 +1,18 @@
 <script context="module">
     /** @type {import('@sveltejs/kit').ErrorLoad} */
     export function load({ error, status }) {
-        console.log(error);
-
-        return {
-            props: {
-                status
-            }
-        };
+        if (status === 401) {
+            return {
+                status: 302,
+                redirect: '/login'
+            };
+        } else {
+            return {
+                props: {
+                    status
+                }
+            };
+        }
     }
 </script>
 

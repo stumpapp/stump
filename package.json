@@ -25,6 +25,7 @@
 		"prepare": "husky install"
 	},
 	"devDependencies": {
+		"@types/nprogress": "^0.2.0",
 		"concurrently": "^6.5.1",
 		"eslint": "^8.7.0",
 		"husky": "^7.0.2",

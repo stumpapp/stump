@@ -8,8 +8,8 @@ import * as auth from './auth';
 export const baseUrl: string = (import.meta.env.API_URI as string) ?? 'http://localhost:6969';
 
 export default {
-    auth,
-    library,
-    series,
-    media
+	auth,
+	library,
+	series,
+	media,
 };

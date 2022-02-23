@@ -8,11 +8,9 @@
 </script>
 
 <script lang="ts">
-    import MediaThumbnail from '@/lib/components/MediaThumbnail.svelte';
+    import MediaThumbnail from '@/lib/components/book/MediaThumbnail.svelte';
 
     export let media: MediaWithProgress;
-
-    console.log(media);
 </script>
 
 {#if !media}

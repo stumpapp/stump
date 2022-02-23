@@ -1,11 +1,11 @@
 import createWritableStore from './util';
 
 export interface Preferences {
-    darkMode: boolean;
+	darkMode: boolean;
 }
 
 const initalState: Preferences = {
-    darkMode: true
+	darkMode: true,
 };
 
-export const preferences = createWritableStore('preferences', initalState);
+export const preferences = createWritableStore<Preferences>('preferences', initalState);

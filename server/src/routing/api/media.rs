@@ -17,11 +17,28 @@ use crate::{
 //     .await
 //     .into()?;
 
+type GetAllMediaResult = ApiResult<Json<Vec<GetMediaByIdWithProgress>>>;
+
+#[get("/media")]
+pub async fn get_media(state: &State, auth: StumpAuth) -> GetAllMediaResult {
+    queries::media::get_user_media_with_progress(state.get_connection(), auth.0.id, None)
+        .await
+        .map(|media| {
+            let media = media
+                .into_iter()
+                .map(|m_w_p| m_w_p.into())
+                .collect::<Vec<_>>();
+
+            Ok(Json(media))
+        })
+        .map_err(|e| ApiError::InternalServerError(e.to_string()))?
+}
+
 type GetMediaResult = ApiResult<Json<GetMediaByIdWithProgress>>;
 
 // TODO: add auth
 #[get("/media/<id>")]
-pub async fn get_media(state: &State, id: i32, _auth: StumpAuth) -> GetMediaResult {
+pub async fn get_media_by_id(state: &State, id: i32, _auth: StumpAuth) -> GetMediaResult {
     queries::media::get_media_by_id_with_progress(state.get_connection(), id)
         .await
         .map(|media| Ok(Json(media.into())))

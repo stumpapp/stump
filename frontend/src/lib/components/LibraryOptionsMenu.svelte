@@ -6,33 +6,28 @@
         MenuItems,
         Transition
     } from '@rgossiaux/svelte-headlessui';
-    import Fa from 'svelte-fa';
-    // import * as icons from '@fortawesome/free-solid-svg-icons';
-    // FIXME: https://github.com/FortAwesome/Font-Awesome/issues/18677
-    // import { faEllipsisVertical } from '@fortawesome/free-solid-svg-icons';
     import DotsThreeVertical from 'phosphor-svelte/lib/DotsThreeVertical';
     import api, { baseUrl } from '@lib/api';
 
-    // const { faEllipsisVertical } = icons;
-
     export let library: Library;
 
-    async function scanLibrary() {
-        // watch for logs
-        const res = await api.library.scanLibrary(library.id);
+    async function handleScan() {
+        alert('TODO');
 
-        console.log(res);
+        // // watch for logs
+        // const res = await api.library.scanLibrary(library.id);
+        // console.log(res);
     }
 
-    async function deleteLibrary() {
-        const res = await fetch(`${baseUrl}/api/library/${library.id}`, {
-            method: 'DELETE'
-        });
-
-        if (!res.ok) {
-            // TODO: handle me
-            console.error(await res.text());
-        }
+    async function handleDelete() {
+        alert('TODO');
+        // const res = await fetch(`${baseUrl}/api/library/${library.id}`, {
+        //     method: 'DELETE'
+        // });
+        // if (!res.ok) {
+        //     // TODO: handle me
+        //     console.error(await res.text());
+        // }
     }
 </script>
 
@@ -64,6 +59,7 @@
                 <div class="flex flex-col space-y-1 p-1">
                     <MenuItem let:active>
                         <button
+                            on:click={handleScan}
                             class={`${
                                 active
                                     ? 'bg-gray-800 text-white'
@@ -88,6 +84,7 @@
 
                     <MenuItem let:active>
                         <button
+                            on:click={handleDelete}
                             class={`${
                                 active
                                     ? 'bg-red-800 text-white'

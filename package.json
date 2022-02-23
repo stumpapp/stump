@@ -21,7 +21,7 @@
 		"frontend:start": "cd frontend && pnpm run start",
 		"frontend:dev": "cd frontend && pnpm dev",
 		"frontend:build": "cd frontend && pnpm run build && mv build ../server/static",
-		"prettier": "prettier --plugin-search-dir=frontend  --write '**/*.{js,ts,svelte,css,html}'",
+		"prettier": "prettier --plugin-search-dir=frontend  --write '**/*.{js,ts,jsx,tsx,css,html}'",
 		"prepare": "husky install"
 	},
 	"devDependencies": {

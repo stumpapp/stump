@@ -21,7 +21,7 @@
 </script>
 
 <script lang="ts">
-    import SeriesCard from '@components/SeriesCard.svelte';
+    import SeriesCard from '@components/series/SeriesCard.svelte';
 
     export let library;
     export let series;

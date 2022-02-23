@@ -1,10 +1,11 @@
 <script context="module">
     /** @type {import('@sveltejs/kit').ErrorLoad} */
     export function load({ error, status }) {
+        console.log(error, status);
         if (status === 401) {
             return {
                 status: 302,
-                redirect: '/login'
+                redirect: '/auth/login'
             };
         } else {
             return {
@@ -17,6 +18,8 @@
 </script>
 
 <script>
+    import { goto } from '$app/navigation';
+
     export let status;
 </script>
 
@@ -29,4 +32,6 @@
     {:else}
         <h1>Something went wrong</h1>
     {/if}
+
+    <button on:click={() => goto('/')}>Go Home</button>
 </div>

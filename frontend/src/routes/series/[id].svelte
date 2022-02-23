@@ -15,7 +15,7 @@
 </script>
 
 <script lang="ts">
-    import MediaCard from '@/lib/components/MediaCard.svelte';
+    import MediaCard from '@/lib/components/book/MediaCard.svelte';
 
     export let series: Series;
     export let media: MediaWithProgress[];

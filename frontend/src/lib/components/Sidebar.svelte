@@ -1,14 +1,31 @@
+<script context="module" lang="ts">
+    import api from '@lib/api';
+
+    /** @type {import('@sveltejs/kit').Load} */
+    export async function load({ fetch, stuff }) {
+        // const res = await api.library.getLibraries(fetch);
+
+        console.log(stuff);
+
+        return {
+            status: 200,
+            props: {
+                libraries: stuff.libraries
+            }
+        };
+    }
+</script>
+
 <script lang="ts">
     import clsx from 'clsx';
     import { page } from '$app/stores';
     import { Disclosure, DisclosureButton, DisclosurePanel } from '@rgossiaux/svelte-headlessui';
-    // FIXME: https://github.com/FortAwesome/Font-Awesome/issues/18677
-    // import Fa from 'svelte-fa';
-    // import { faHome, faBook, faCog } from '@fortawesome/free-solid-svg-icons';
     import House from 'phosphor-svelte/lib/House';
     import Books from 'phosphor-svelte/lib/Books';
     import Gear from 'phosphor-svelte/lib/Gear';
+    import ArrowSquareOut from 'phosphor-svelte/lib/ArrowSquareOut';
     import LibraryOptionsMenu from './LibraryOptionsMenu.svelte';
+    import ThemeToggle from './ThemeToggle.svelte';
 
     export let libraries: Library[];
 
@@ -20,8 +37,6 @@
             name: 'Home',
             href: '/',
             current: pathname === '/',
-
-            // icon: faHome
             icon: House
         },
         {
@@ -32,18 +47,18 @@
                 href: `/libraries/${library.id}`,
                 current: current_library == String(library.id)
             })),
-
-            // icon: faBook
             icon: Books
         },
         {
             name: 'Server Settings',
             current: pathname === '/settings',
             href: '/settings',
-            // icon: faCog
             icon: Gear
         }
     ];
+
+    // @ts-ignore
+    let APP_VERSION = __APP_VERSION__;
 </script>
 
 <div
@@ -110,6 +125,22 @@
             {/each}
         </nav>
     </div>
+
+    <footer class="flex items-center justify-between px-2">
+        <a
+            href="https://github.com/aaronleopold/stump"
+            target="__blank"
+            rel="noopener noreferrer"
+            class="text-sm flex space-x-2 items-center"
+            title="View Stump on GitHub"
+        >
+            <!-- @ts-ignore -->
+            <span>v{APP_VERSION}</span>
+            <ArrowSquareOut />
+        </a>
+
+        <ThemeToggle />
+    </footer>
 </div>
 
 <style>

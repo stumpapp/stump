@@ -1,13 +1,13 @@
 #[macro_use]
 extern crate rocket;
 
+use redis::Client;
 use rocket::fs::NamedFile;
 use rocket::http::SameSite;
-use rocket_session_store::{memory::MemoryStore, CookieOptions, SessionStore};
-
 use rocket::tokio::sync::broadcast::channel;
 use rocket::{fs::FileServer, futures::executor::block_on, http::Method};
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
+use rocket_session_store::{memory::MemoryStore, redis::RedisStore, CookieConfig, SessionStore};
 use types::dto::user::AuthenticatedUser;
 
 use std::path::{Path, PathBuf};
@@ -86,7 +86,7 @@ fn rocket() -> _ {
             .into_iter()
             .map(From::from)
             .collect(),
-        // allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
+        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
         allow_credentials: true,
         ..Default::default()
     }
@@ -98,16 +98,20 @@ fn rocket() -> _ {
 
     let session_name = std::env::var("SESSION_NAME").unwrap_or_else(|_| "stump-session".into());
 
-    let memory_store: MemoryStore<AuthenticatedUser> = MemoryStore::default();
+    let client: Client = Client::open("redis://127.0.0.1").expect("Could not connect to redis");
+    let redis_store: RedisStore<AuthenticatedUser> = RedisStore::new(client);
+
+    // TODO: MAKE THIS THE USAGE, redis is temporary
+    // let memory_store: MemoryStore<AuthenticatedUser> = MemoryStore::default();
     // TODO: https://github.com/Aurora2500/rocket-session-store/issues/1
     // Forked this temporarily to set the path
     let store: SessionStore<AuthenticatedUser> = SessionStore {
-        store: Box::new(memory_store),
+        store: Box::new(redis_store),
         name: session_name,
         duration: Duration::from_secs(3600 * 24 * 3),
-        cookie: CookieOptions {
+        cookie: CookieConfig {
             path: Some("/".into()),
-            same_site: Some(SameSite::None),
+            same_site: Some(SameSite::Lax),
             secure: false,
             http_only: true,
         },
@@ -126,6 +130,7 @@ fn rocket() -> _ {
                 routing::api::scan,
                 routing::api::log_listener,
                 // auth
+                routing::api::auth::me,
                 routing::api::auth::login,
                 routing::api::auth::register,
                 // logs api
@@ -143,6 +148,7 @@ fn rocket() -> _ {
                 routing::api::series::get_series_thumbnail,
                 // media api
                 routing::api::media::get_media,
+                routing::api::media::get_media_by_id,
                 routing::api::media::get_media_file,
                 routing::api::media::get_media_page,
                 routing::api::media::get_media_thumbnail,

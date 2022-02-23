@@ -47,7 +47,7 @@
 
 <script lang="ts">
     import { beforeNavigate, goto } from '$app/navigation';
-    import ComicToolbar from '@/lib/components/ComicToolbar.svelte';
+    import ComicToolbar from '@/lib/components/book/ComicToolbar.svelte';
     import { hotkey } from 'svelte-gh-hotkey';
     import { portal } from 'svelte-portal';
 

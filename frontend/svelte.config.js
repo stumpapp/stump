@@ -6,7 +6,7 @@ import path from 'path';
 const config = {
 	// Consult https://github.com/sveltejs/svelte-preprocess
 	// for more information about preprocessors
-	preprocess: [preprocess({})],
+	preprocess: [preprocess({ postcss: true })],
 
 	kit: {
 		adapter: adapter(),
@@ -15,12 +15,10 @@ const config = {
 		// target: '#svelte',
 		vite: {
 			resolve: {
-				// FIXME: NOT WORKING >:(
 				alias: {
 					'@': path.resolve('./src'),
 					'@lib': path.resolve('./src/lib'),
 					'@components': path.resolve('./src/lib/components'),
-					// '@util': path.resolve('./src/lib/util'),
 					'@api': path.resolve('./src/lib/api'),
 					'@store': path.resolve('./src/store'),
 				},

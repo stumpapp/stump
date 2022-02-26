@@ -35,19 +35,14 @@ impl<'r> FromRequest<'r> for StumpAuth {
         };
 
         let cookies = req.cookies();
-        println!("{:?}", cookies);
         let cookie = cookies.get("stump-session");
 
-        // if cookie exists and is valid, refresh the session
+        // if cookie exists and is valid, refresh the session?
         if cookie.is_some() {
             let cookie = cookie.unwrap();
             let cookie_value = cookie.value();
 
             println!("COOKIE VALUE: {:?}", cookie_value);
-
-            println!("TOUCH: {:?}", session.touch().await);
-
-            println!("GET: {:?}", session.get().await);
 
             // let user = get_user_by_username(cookie_value, &req.guard().await.expect("TODO")).await;
 

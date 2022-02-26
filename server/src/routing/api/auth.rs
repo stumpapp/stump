@@ -4,6 +4,7 @@ use rocket::serde::{json::Json, Deserialize};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter};
 
 use crate::guards::auth::StumpAuth;
+use crate::routing::error::{ApiError, ApiResult};
 use crate::types::dto::user::AuthenticatedUser;
 use crate::State;
 
@@ -26,13 +27,18 @@ pub async fn me(session: Session<'_>, auth: StumpAuth) -> Option<Json<Authentica
     }
 }
 
+type LoginResult = ApiResult<Json<AuthenticatedUser>>;
+
 #[post("/auth/login", data = "<credentials>")]
-pub async fn login(state: &State, session: Session<'_>, credentials: Json<LoginRequest<'_>>) {
+pub async fn login(
+    state: &State,
+    session: Session<'_>,
+    credentials: Json<LoginRequest<'_>>,
+) -> LoginResult {
     let existing_session = session.get().await.expect("TODO");
 
-    if existing_session.is_some() {
-        println!("User already logged in: {:?}", existing_session.unwrap());
-        return;
+    if let Some(user) = existing_session {
+        return Ok(Json(user.into()));
     }
 
     let user: Option<user::Model> = user::Entity::find()
@@ -43,16 +49,20 @@ pub async fn login(state: &State, session: Session<'_>, credentials: Json<LoginR
 
     match user {
         Some(user) => {
-            let matches = bcrypt::verify(credentials.password, &user.password).expect("TODO");
+            let matches = bcrypt::verify(credentials.password, &user.password)
+                .expect("Error setting session");
 
             if matches {
-                session.set(user.into()).await.expect("TODO");
-                println!("{:?}", session.get().await.expect("TODO"));
+                session
+                    .set(user.clone().into())
+                    .await
+                    .expect("Error setting session");
+                Ok(Json(user.into()))
             } else {
-                unimplemented!()
+                Err(ApiError::Unauthorized("Invalid credentials".to_string()))
             }
         }
-        None => unimplemented!(),
+        None => Err(ApiError::Forbidden("Invalid credentials".to_string())),
     }
 }
 

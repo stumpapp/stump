@@ -34,7 +34,6 @@
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": [
-			"eslint --cache --fix",
 			"prettier  --plugin-search-dir=frontend --write"
 		]
 	}

@@ -1,31 +1,27 @@
 import { baseUrl } from '.';
 
-export function getMedia() {
-	return fetch(`${baseUrl}/api/media`, { credentials: 'include' });
-}
-
-export function getMediaById(mediaId: number) {
+export function getMediaById(mediaId: number): Promise<Response> {
 	return fetch(`${baseUrl}/api/media/${mediaId}`, { credentials: 'include' });
 }
 
 // this really just creates the url, the img tag handles the rest
-export function getMediaThumbnail(mediaId: number) {
+export function getMediaThumbnail(mediaId: number): string {
 	return `${baseUrl}/api/media/${mediaId}/thumbnail`;
 }
 
-export function getMediaPage(mediaId: number, page: number) {
+export function getMediaPage(mediaId: number, page: number): string {
 	return `${baseUrl}/api/media/${mediaId}/page/${page}`;
 }
 
-export function getMediaHtmlPage(mediaId: number, page: number) {
+export function getMediaHtmlPage(mediaId: number, page: number): Promise<Response> {
 	return fetch(`${baseUrl}/api/media/${mediaId}/page/${page}`);
 }
 
-export function getMediaFile(mediaId: number) {
+export function getMediaFile(mediaId: number): string {
 	return `${baseUrl}/api/media/${mediaId}/consume`;
 }
 
-export function updateProgress(mediaId: number, page: number) {
+export function updateProgress(mediaId: number, page: number): Promise<Response> {
 	return fetch(`${baseUrl}/api/media/${mediaId}/progress`, {
 		method: 'PUT',
 		body: JSON.stringify({ page }),

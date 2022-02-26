@@ -1,4 +1,8 @@
 /* Write your global styles here, in PostCSS syntax */
+
+@tailwind base;
+/* Write your global styles here, in PostCSS syntax */
+/* Write your global styles here, in PostCSS syntax */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,3 +13,5 @@
 #nprogress .bar {
 	@apply bg-brand-500 fixed top-0 left-0 z-50 h-0.5 w-full;
 }
+@tailwind components;
+@tailwind utilities;

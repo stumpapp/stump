@@ -1,29 +1,32 @@
 <script context="module" lang="ts">
 	/** @type {import('@sveltejs/kit').Load} */
-	export async function load({ url, stuff, session }) {
+	export async function load({ fetch }) {
 		const libraries = await api.library
 			.getLibraries()
-			.then((res) => res.json())
+			.then((res) => resolveResponse(res))
 			.catch((err) => {
-				console.log(err);
-				// TODO: DETECT 401 AND REDIRECT TO LOGIN
-				return [];
+				throw new Error(err);
 			});
 
-		const media = await api.media
-			.getMedia()
-			.then((res) => res.json())
+		const media = await fetch(`${baseUrl}/api/media`)
+			.then((res) => resolveResponse(res))
 			.catch((err) => {
-				console.log(err);
-				// TODO: DETECT 401 AND REDIRECT TO LOGIN
-				return [];
+				throw new Error(err);
 			});
+
+		const redirect = [media, libraries].find((item) => 'redirect' in item);
+
+		if (redirect) {
+			console.log('REDIRECT CAUGHT', redirect);
+			return redirect;
+		}
 
 		return {
 			status: 200,
 			props: {
 				libraries,
 			},
+			// TODO: should I use stuff or an actual store?
 			stuff: {
 				media,
 			},
@@ -32,13 +35,15 @@
 </script>
 
 <script lang="ts">
+	import '../app.css';
 	import '@/app.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { preferences } from '@store/preferences';
 	import Sidebar from '@components/Sidebar.svelte';
 	import NProgress from '@components/NProgress.svelte';
-	import api from '@/lib/api';
+	import api, { baseUrl } from '@/lib/api';
+	import { resolveResponse } from '@/lib/util/response';
 
 	export let libraries: Library[];
 
@@ -55,8 +60,6 @@
 			// await api.library.getLibraries();
 		}
 
-		// e.returnValue = '';
-		// return '...'
 		return null;
 	}
 
@@ -78,7 +81,7 @@
 <NProgress />
 
 <div class="flex h-full flex-row">
-	<Sidebar bind:libraries />
+	<Sidebar {libraries} />
 	<main class="flex-1 p-4 overflow-y-scroll scrollbar-hide">
 		<slot />
 	</main>

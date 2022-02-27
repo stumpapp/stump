@@ -6,12 +6,18 @@ import * as path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [react(), loadVersion()],
+	base: '/',
+	build: {
+		outDir: 'build',
+		manifest: true,
+	},
 	resolve: {
 		alias: {
 			'~': path.resolve('./src'),
 			'~components': path.resolve('./src/components'),
 			'~pages': path.resolve('./src/pages'),
 			'~api': path.resolve('./src/api'),
+			'~store': path.resolve('./src/store'),
 			'~util': path.resolve('./src/util'),
 		},
 	},

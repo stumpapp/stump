@@ -12,3 +12,5 @@ interface Library {
 	 */
 	path: string;
 }
+
+type GetLibrariesResponse = ApiResult<Library[], any>;

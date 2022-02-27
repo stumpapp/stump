@@ -1,8 +1,10 @@
 import clsx from 'clsx';
 import { AnimatePresence } from 'framer-motion';
-import { Books, CaretRight, House } from 'phosphor-react';
+import { Books, CaretRight, Gear, House } from 'phosphor-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import shallow from 'zustand/shallow';
+import { useMainStore } from '~store/mainStore';
 
 import {
 	Box,
@@ -16,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 
 import ApplicationVersion from './ApplicationVersion';
-// import LibraryOptionsMenu from './LibraryOptionsMenu';
+import LibraryOptionsMenu from './LibraryOptionsMenu';
 import ThemeToggle from './ThemeToggle';
 
 interface NavMenuItemProps {
@@ -47,7 +49,10 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 					</HStack>
 					<Box p={1} rounded="full">
 						<CaretRight
-							className={clsx(isOpen ? 'rotate-90' : 'rotate-270', 'transition-all duration-100')}
+							className={clsx(
+								isOpen ? 'rotate-90' : 'rotate-270',
+								'transition-all duration-100',
+							)}
 						/>
 					</Box>
 				</HStack>
@@ -55,7 +60,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 
 			<AnimatePresence>
 				{isOpen && (
-					<VStack spacing={2}>
+					<VStack mt={2} spacing={2}>
 						{items!.map((item) => (
 							<Box
 								key={item.id}
@@ -78,7 +83,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 										{item.name}
 									</a>
 
-									{/* <LibraryOptionsMenu /> */}
+									<LibraryOptionsMenu />
 								</HStack>
 							</Box>
 						))}
@@ -92,7 +97,13 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 function NavItem({ name, href, ...rest }: NavItemProps) {
 	return (
 		<Button w="full" variant="ghost" textAlign="left" p={2}>
-			<HStack as={'a'} href={href} w="full" alignItems="center" justifyContent="space-between">
+			<HStack
+				as={'a'}
+				href={href}
+				w="full"
+				alignItems="center"
+				justifyContent="space-between"
+			>
 				<HStack spacing="2">
 					{/* @ts-ignore */}
 					<rest.icon />
@@ -106,8 +117,7 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 function SidebarContent() {
 	const navigate = useNavigate();
 
-	// FIXME
-	const libraries: any[] = [];
+	const libraries = useMainStore((state) => state.libraries, shallow);
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
@@ -117,9 +127,10 @@ function SidebarContent() {
 				icon: Books,
 				items: libraries.map((library) => ({
 					...library,
-					href: `/library/${library.id}`,
+					href: `/libraries/${library.id}`,
 				})),
 			},
+			{ name: 'Settings', icon: Gear, href: '/settings' },
 		],
 		[libraries],
 	);

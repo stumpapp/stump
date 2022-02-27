@@ -2,7 +2,6 @@ import React from 'react';
 import { ArrowSquareOut } from 'phosphor-react';
 
 export default function ApplicationVersion() {
-	console.log(import.meta.env);
 	return (
 		<a
 			href="https://github.com/aaronleopold/stump"

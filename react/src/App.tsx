@@ -9,9 +9,11 @@ import Settings from '~pages/Settings';
 import theme from '~util/theme';
 import client from '~api/client';
 import ErrorBoundary from '~components/ErrorBoundary';
+import BaseLayout from '~components/layouts/BaseLayout';
 
 const Home = React.lazy(() => import('~pages/Home'));
-const Libraries = React.lazy(() => import('~pages/Libraries'));
+const Library = React.lazy(() => import('~pages/Library'));
+const Series = React.lazy(() => import('~pages/Series'));
 
 export default function App() {
 	return (
@@ -22,10 +24,13 @@ export default function App() {
 						<Routes>
 							<Route path="/" element={<MainLayout />}>
 								<Route path="" element={<Home />} />
-								<Route path="libraries/:id" element={<Libraries />} />
+								<Route path="libraries/:id" element={<Library />} />
+								<Route path="series/:id" element={<Series />} />
 							</Route>
 							<Route path="/settings" element={<Settings />} />
-							<Route path="/login" element={<Login />} />
+							<Route path="/auth" element={<BaseLayout />}>
+								<Route path="login" element={<Login />} />
+							</Route>
 							<Route path="*" element={<FourOhFour />} />
 						</Routes>
 					</BrowserRouter>

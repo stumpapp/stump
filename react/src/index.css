@@ -4,7 +4,11 @@
 
 /* Apply basic global styles to the body: */
 body {
-	@apply font-sans antialiased;
+	@apply font-sans antialiased min-h-screen;
+}
+
+main {
+	@apply min-h-screen;
 }
 
 /* Remove trailing margin from forms for some browsers: */

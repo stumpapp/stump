@@ -35,14 +35,22 @@ pub type GetMediaQueryResult = Vec<GetMediaQuery>;
 #[derive(Serialize, Debug)]
 #[serde(crate = "rocket::serde")]
 pub struct GetLibraryWithSeriesQuery {
-    pub library: library::Model,
+    // pub library: library::Model,
+    pub id: i32,
+    pub name: String,
+    pub path: String,
+    pub status: FileStatus,
     pub series: Vec<SeriesModel>,
 }
 
 impl Into<GetLibraryWithSeriesQuery> for (library::Model, Vec<SeriesModel>) {
     fn into(self) -> GetLibraryWithSeriesQuery {
         GetLibraryWithSeriesQuery {
-            library: self.0,
+            // library: self.0,
+            id: self.0.id,
+            name: self.0.name,
+            path: self.0.path,
+            status: self.0.status,
             series: self.1,
         }
     }

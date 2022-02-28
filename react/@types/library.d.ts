@@ -13,4 +13,9 @@ interface Library {
 	path: string;
 }
 
+interface LibraryWithSeries extends Library {
+	series: Series[];
+}
+
 type GetLibrariesResponse = ApiResult<Library[], any>;
+type GetLibraryWithSeries = ApiResult<LibraryWithSeries, any>;

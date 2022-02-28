@@ -1,3 +1,4 @@
+import { Box, useColorModeValue } from '@chakra-ui/react';
 import React from 'react';
 import { useQueries } from 'react-query';
 import { Outlet, useNavigate } from 'react-router-dom';
@@ -39,11 +40,11 @@ function Layout() {
 
 	return (
 		<Sidebar>
-			<main>
+			<Box bg={useColorModeValue('gray.100', 'gray.900')} as="main">
 				<React.Suspense fallback={<Lazy />}>
 					<Outlet />
 				</React.Suspense>
-			</main>
+			</Box>
 		</Sidebar>
 	);
 }

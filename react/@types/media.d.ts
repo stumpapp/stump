@@ -63,3 +63,4 @@ interface MediaWithProgress extends Media {
 // }
 
 type GetMediaResponse = ApiResult<MediaWithProgress[], any>;
+type GetMediaById = ApiResult<MediaWithProgress, any>;

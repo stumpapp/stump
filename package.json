@@ -7,12 +7,10 @@
 	"scripts": {
 		"start": "cd server && cargo run --release",
 		"dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
-		"build:docker": "rm -r server/static && pnpm frontend:build && pnpm server:build:docker-alpine",
+		"build:docker": "docker build -t stump .",
 		"server:start": "cd server && cargo run",
 		"server:dev": "cd server && cargo watch -x run",
 		"server:build": "cd server && cargo build --release",
-		"server:build:docker-debian": "echo 'FIXME: I AM BROKEN --> run the following in /server: docker build -f Dockerfile.debian -t stump-deb .'",
-		"server:build:docker-alpine": "cd server && docker build -f Dockerfile.alpine -t stump .",
 		"server:check": "cd server && cargo check",
 		"server:migrate-up": "cd server && sea-orm-cli migrate up",
 		"server:migrate-down": "cd server && sea-orm-cli migrate down",
@@ -20,7 +18,7 @@
 		"frontend:install": "cd frontend && pnpm install",
 		"frontend:start": "cd frontend && pnpm run start",
 		"frontend:dev": "cd frontend && pnpm dev",
-		"frontend:build": "cd frontend && pnpm run build && mv build ../server/static",
+		"frontend:build": "cd frontend && pnpm run build",
 		"prettier": "prettier --plugin-search-dir=frontend  --write '**/*.{js,ts,jsx,tsx,css,html}'",
 		"prepare": "husky install"
 	},

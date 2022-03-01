@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Books, CaretRight, Gear, House } from 'phosphor-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -63,6 +63,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 					<VStack mt={2} spacing={2}>
 						{items!.map((item) => (
 							<Box
+								// as={motion.div}
 								key={item.id}
 								// TODO: fix color differences
 								pl={6}

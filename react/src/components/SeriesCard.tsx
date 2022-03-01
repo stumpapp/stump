@@ -14,7 +14,7 @@ export default function SeriesCard({ ...series }: Props) {
 	return (
 		<a
 			href={`/series/${series.id}`}
-			className="hover:border-brand col-span-1 rounded-md rounded-t-md border border-transparent bg-gray-800 transition-all duration-200"
+			className="col-span-1 rounded-md rounded-t-md border border-transparent hover:border-brand  bg-gray-800 transition-all duration-200"
 			onMouseEnter={prefetchSeries}
 		>
 			<Box px={1.5}>

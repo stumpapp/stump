@@ -11,6 +11,7 @@ interface StoreMutations {
 interface MainStore extends StoreMutations {
 	user: User | null;
 	libraries: Library[];
+	// TODO: I don't think I am going to store this in the store
 	media: MediaWithProgress[];
 }
 
@@ -26,6 +27,8 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 	setMedia: (media: MediaWithProgress[]) => set(() => ({ media })),
 });
 
+// if development mode, use devtools middleware to expose the zustand store
+// to the redux chrome devtools extension
 if (import.meta.env.NODE_ENV !== 'production') {
 	store = devtools(store) as UseBoundStore<MainStore, StoreApi<MainStore>>;
 }

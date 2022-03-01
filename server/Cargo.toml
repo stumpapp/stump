@@ -27,15 +27,15 @@ urlencoding = "2.1.0"
 base64 = "0.13.0"
 rocket-include-static-resources = "0.10.0"
 epub = "1.2.3"
-rocket-session-store = { path = "../../clones/rocket-session-store", features=["redis"] }
-# rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store.git" }
-# rocket-session-store = "0.1.0"
+# rocket-session-store = { path = "../../clones/rocket-session-store", features=["redis"] }
+# rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git", branch = "develop", features=["redis"] }
+rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git", branch = "develop" }
+# redis = "0.21.5"
 bcrypt = "0.10.1"
 rocket_cors = "0.6.0-alpha1"
 dotenv = "0.15.0"
 entity = { path = "entity" }
 migration = { path = "migration" }
-redis = "0.21.5"
 # FIXME: introduced MAJOR compilation issues
 #pdf = { git = "https://github.com/pdf-rs/pdf" }
 #pdf_render = { git = "https://github.com/pdf-rs/pdf_render" }

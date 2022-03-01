@@ -1,4 +1,4 @@
-enum LogLevel {
+declare enum LogLevel {
 	Error = 'error',
 	Warn = 'warn',
 	Info = 'info',

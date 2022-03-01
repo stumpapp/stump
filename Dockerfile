@@ -1,4 +1,19 @@
 # ------------------------------------------------------------------------------
+# Frontend Build Stage
+# ------------------------------------------------------------------------------
+
+FROM node:16-alpine3.14 as frontend
+
+WORKDIR /home/stump
+
+COPY react/ .
+
+RUN npm install -g pnpm
+
+RUN pnpm install
+RUN pnpm run build
+
+# ------------------------------------------------------------------------------
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
@@ -10,11 +25,9 @@ RUN apk add --no-cache --verbose musl-dev build-base sqlite openssl-dev
 
 WORKDIR /home/stump
 
-COPY . .
+COPY server/ .
 
 RUN cargo build --release --target=x86_64-unknown-linux-musl
-
-# RUN rm -f target/x86_64-unknown-linux-musl/release/deps/stump*
 
 # ------------------------------------------------------------------------------
 # Final Stage
@@ -30,9 +43,13 @@ RUN adduser -D -s /bin/sh -u 1000 -G stump stump
 
 WORKDIR /home/stump
 
+# copy the binary
 COPY --from=builder /home/stump/target/x86_64-unknown-linux-musl/release/stump .
-COPY Rocket.toml .
-COPY static static
+
+# copy the react build
+COPY --from=frontend /home/stump/build static
+
+COPY server/Rocket.toml .
 
 RUN chown stump:stump stump
 

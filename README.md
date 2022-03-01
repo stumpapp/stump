@@ -30,7 +30,7 @@ To start the application for development, simply run:
 pnpm dev
 ```
 
-This will start both the svelte dev server and the rust server, watching for changes. You can also run the server and the frontend in separate processes:
+This will start both the vite dev server and the rust server, watching for changes. You can also run the server and the frontend in separate processes:
 
 ```bash
 pnpm server:dev # start the server

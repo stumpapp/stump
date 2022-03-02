@@ -31,3 +31,5 @@ interface SeriesWithMedia extends Series {
 	 */
 	media: Media[];
 }
+
+type GetSeriesWithMedia = ApiResult<SeriesWithMedia, any>;

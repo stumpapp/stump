@@ -1,37 +1,30 @@
 {
 	"compilerOptions": {
-		"moduleResolution": "node",
-		"module": "es2020",
-		"lib": ["es2020", "DOM"],
-		"target": "es2020",
-		/**
-			svelte-preprocess cannot figure out whether you have a value or a type, so tell TypeScript
-			to enforce using \`import type\` instead of \`import\` for Types.
-			*/
-		"importsNotUsedAsValues": "error",
-		"isolatedModules": true,
-		"resolveJsonModule": true,
-		/**
-			To have warnings/errors of the Svelte compiler at the correct position,
-			enable source maps by default.
-			*/
-		"sourceMap": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
+		"target": "ESNext",
+		"useDefineForClassFields": true,
+		"lib": ["DOM", "DOM.Iterable", "ESNext", "es2020"],
+		"allowJs": false,
+		"skipLibCheck": false,
+		"esModuleInterop": false,
+		"allowSyntheticDefaultImports": true,
+		"strict": true,
 		"forceConsistentCasingInFileNames": true,
+		"module": "ESNext",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"jsx": "react-jsx",
 		"baseUrl": "./",
-		"allowJs": true,
-		"checkJs": true,
-		// FIXME: NOT WORKING >:(
 		"paths": {
-			"@/*": ["src/*"],
-			"@lib/*": ["src/lib/*"],
-			"@components/*": ["src/components/*"],
-			"@util/*": ["src/lib/util/*"],
-			"@api/*": ["src/lib/api/*"],
-			"@store/*": ["src/store/*"]
+			"~components/*": ["src/components/*"],
+			"~util/*": ["src/util/*"],
+			"~api/*": ["src/api/*"],
+			"~store/*": ["src/store/*"],
+			"~pages/*": ["src/pages/*"]
 		}
 	},
 	"typeRoots": ["node_modules/@types", "@types"],
-	"include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "src/**/*.svelte", "@types"]
+	"include": ["src", "src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "@types", "@types/**/*.d.ts"],
+	"references": [{ "path": "./tsconfig.node.json" }]
 }

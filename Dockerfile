@@ -6,7 +6,7 @@ FROM node:16-alpine3.14 as frontend
 
 WORKDIR /home/stump
 
-COPY react/ .
+COPY frontend/ .
 
 RUN npm install -g pnpm
 

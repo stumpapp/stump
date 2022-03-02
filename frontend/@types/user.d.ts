@@ -1,4 +1,4 @@
-enum UserRole {
+declare enum UserRole {
 	Owner = 'owner',
 	Member = 'member',
 }

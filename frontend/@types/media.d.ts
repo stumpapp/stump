@@ -1,4 +1,4 @@
-enum MediaStatus {
+declare enum MediaStatus {
 	Unknown = 'UNKNOWN',
 	Error = 'ERROR',
 	Ready = 'READY',
@@ -61,3 +61,6 @@ interface MediaWithProgress extends Media {
 // interface MediaWithSeries extends MediaWithProgress {
 //     series_name: string;
 // }
+
+type GetMediaResponse = ApiResult<MediaWithProgress[], any>;
+type GetMediaById = ApiResult<MediaWithProgress, any>;

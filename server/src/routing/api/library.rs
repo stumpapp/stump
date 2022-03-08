@@ -14,14 +14,14 @@ use crate::{
 };
 
 // TODO: fix terrible error handling
-type GetLibraries = Json<Vec<library::Model>>;
+type GetLibraries = ApiResult<Json<Vec<library::Model>>>;
 
 #[get("/library")]
-pub async fn get_libraries(state: &State) -> Result<GetLibraries, String> {
+pub async fn get_libraries(state: &State) -> GetLibraries {
     let libraries = library::Entity::find()
         .all(state.get_connection())
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
 
     Ok(Json(libraries))
 }

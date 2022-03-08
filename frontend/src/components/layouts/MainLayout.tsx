@@ -14,28 +14,39 @@ export default function MainLayout() {
 	const navigate = useNavigate();
 
 	const _ = useQueries([
-		{ queryKey: 'getLibraries', queryFn: getLibraries, onSuccess: validateGetLibraries },
-		{ queryKey: 'getMedia', queryFn: getMedia, onSuccess: validateGetMedia },
+		{
+			queryKey: 'getLibraries',
+			queryFn: getLibraries,
+			onSuccess: validateGetLibraries,
+			onError,
+		},
+		{ queryKey: 'getMedia', queryFn: getMedia, onSuccess: validateGetMedia, onError },
 	]);
+
+	function onError(err: any) {
+		const res = err.response;
+
+		if (res.status === 401) {
+			navigate('/auth/login');
+		} else {
+			throw new Error(res.data);
+		}
+	}
 
 	function validateGetMedia(res?: GetMediaResponse) {
 		if (!res || !res.data) throw new Error('Could not get media');
 
-		if (res.status === 401) {
-			navigate('/login');
+		if (res.status === 200) {
+			store.setMedia(res.data);
 		}
-
-		store.setMedia(res.data);
 	}
 
 	function validateGetLibraries(res?: GetLibrariesResponse) {
 		if (!res || !res.data) throw new Error('Could not get libraries');
 
-		if (res.status === 401) {
-			navigate('/login');
+		if (res.status === 200) {
+			store.setLibraries(res.data);
 		}
-
-		store.setLibraries(res.data);
 	}
 
 	return (

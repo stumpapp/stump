@@ -6,7 +6,7 @@ interface Series {
 	/**
 	 * The id of the library this series belongs to.
 	 */
-	library_id: number;
+	libraryId: number;
 	/**
 	 * The name of the series. Either the directory name or extracted from the ComicInfo.xml file.
 	 */
@@ -14,11 +14,11 @@ interface Series {
 	/**
 	 * The number of media files in the series.
 	 */
-	book_count: number;
+	bookCount: number;
 	/**
 	 * The date/time the series was last modified.
 	 */
-	updated_at: string;
+	updatedAt: string;
 	/**
 	 * The path of the series on disk.
 	 */

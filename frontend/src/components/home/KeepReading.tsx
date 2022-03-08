@@ -31,11 +31,13 @@ export default function KeepReading({ media }: Props) {
 
 			{media.map((m) => (
 				<HStack h="full" w="full" key={m.id} alignItems="start" spacing={4}>
-					<img
-						src={getMediaThumbnail(m.id)}
-						alt={`${m.name} thumbnail`}
-						className="h-20 w-auto object-scale-down rounded-md"
-					/>
+					<a title={`Go to ${m.name} Overview`} href={`/book/${m.id}`}>
+						<img
+							src={getMediaThumbnail(m.id)}
+							alt={`${m.name} thumbnail`}
+							className="h-20 w-auto object-scale-down rounded-md"
+						/>
+					</a>
 
 					<VStack h="full" w="full" alignItems="start">
 						<Heading as="h3" size="xs">
@@ -45,7 +47,7 @@ export default function KeepReading({ media }: Props) {
 						<HStack w="full" justifyContent="space-between" alignItems="center">
 							<Text size="xs">Author</Text>
 							<Text size="xs">
-								{m.current_page}/{m.pages}
+								{m.currentPage}/{m.pages}
 							</Text>
 						</HStack>
 
@@ -56,7 +58,7 @@ export default function KeepReading({ media }: Props) {
 							rounded="md"
 							w="full"
 							colorScheme="brand"
-							value={((m.current_page ?? 0) / m.pages) * 100}
+							value={((m.currentPage ?? 0) / m.pages) * 100}
 						/>
 					</VStack>
 				</HStack>

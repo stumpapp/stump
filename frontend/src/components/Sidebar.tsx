@@ -4,7 +4,7 @@ import { Books, CaretRight, Gear, House } from 'phosphor-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import shallow from 'zustand/shallow';
-import { useMainStore } from '~store/mainStore';
+import { useStore } from '~store/store';
 
 import {
 	Box,
@@ -36,6 +36,7 @@ interface NavItemProps {
 }
 
 function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
+	// TODO: persist this so it stays open on navigate, I think that is better UX.
 	const { isOpen, onToggle } = useDisclosure();
 
 	return (
@@ -83,7 +84,6 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 									<a href={item.href} className="w-full flex-1 pl-1 text-sm">
 										{item.name}
 									</a>
-
 									<LibraryOptionsMenu />
 								</HStack>
 							</Box>
@@ -118,7 +118,7 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 function SidebarContent() {
 	const navigate = useNavigate();
 
-	const libraries = useMainStore((state) => state.libraries, shallow);
+	const libraries = useStore((state) => state.libraries, shallow);
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
@@ -148,9 +148,10 @@ function SidebarContent() {
 			pos="fixed"
 			h="full"
 			px={2}
+			zIndex={10}
 		>
 			<HStack px={2} flexShrink={0} justifyContent="start" alignItems="center" spacing="4">
-				<img src="/src/favicon.png" width="40" height="40" />
+				<img src="/favicon.png" width="40" height="40" />
 				<Text fontSize="2xl" fontWeight="bold">
 					Stump
 				</Text>

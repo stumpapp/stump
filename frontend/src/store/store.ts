@@ -35,7 +35,7 @@ if (import.meta.env.NODE_ENV !== 'production') {
 
 const mainStore = create<MainStore>(store);
 
-let createMainStore = () => mainStore;
+let createStore = () => mainStore;
 
-export default createMainStore;
-export { Provider, useStore as useMainStore };
+export default createStore;
+export { Provider, useStore };

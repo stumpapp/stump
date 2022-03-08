@@ -7,10 +7,10 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(rs_type = "String", db_type = "String(None)")]
 pub enum UserRole {
     /// The user who 'owns' the OPDS server
-    #[sea_orm(string_value = "owner")]
+    #[sea_orm(string_value = "OWNER")]
     Owner,
     /// A user who has read access to the server
-    #[sea_orm(string_value = "member")]
+    #[sea_orm(string_value = "MEMBER")]
     Member,
 }
 
@@ -21,7 +21,7 @@ impl Default for UserRole {
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
 #[sea_orm(table_name = "user")]
 pub struct Model {
     #[sea_orm(primary_key)]

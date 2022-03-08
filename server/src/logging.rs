@@ -7,7 +7,7 @@ pub trait LogTrait {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct Log {
     pub level: LogLevel,
     pub message: String,

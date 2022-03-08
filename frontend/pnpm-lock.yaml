@@ -4,6 +4,7 @@ specifiers:
   '@chakra-ui/react': ^1.8.5
   '@emotion/react': ^11
   '@emotion/styled': ^11
+  '@hookform/resolvers': ^2.8.8
   '@tailwindcss/aspect-ratio': ^0.4.0
   '@tailwindcss/forms': ^0.4.0
   '@tailwindcss/typography': ^0.5.2
@@ -23,6 +24,7 @@ specifiers:
   react: ^17.0.2
   react-dom: ^17.0.2
   react-error-boundary: ^3.1.4
+  react-hook-form: ^7.27.1
   react-query: ^3.34.16
   react-router-dom: '6'
   tailwind-scrollbar-hide: ^1.1.7
@@ -30,12 +32,14 @@ specifiers:
   typescript: ^4.5.4
   vite: ^2.8.0
   vite-plugin-package-version: ^1.0.2
+  zod: ^3.13.4
   zustand: ^3.7.0
 
 dependencies:
   '@chakra-ui/react': 1.8.5_189e00a0932443dc19f4914207ca4c5f
   '@emotion/react': 11.8.1_a0c521d4794c7ad97f5f4c1c4a7d5818
   '@emotion/styled': 11.8.1_d24c5a2cd50724e2cbcff1306f0cc72d
+  '@hookform/resolvers': 2.8.8_react-hook-form@7.27.1
   axios: 0.26.0
   clsx: 1.1.1
   framer-motion: 6.2.8_react-dom@17.0.2+react@17.0.2
@@ -45,9 +49,11 @@ dependencies:
   react: 17.0.2
   react-dom: 17.0.2_react@17.0.2
   react-error-boundary: 3.1.4_react@17.0.2
+  react-hook-form: 7.27.1_react@17.0.2
   react-query: 3.34.16_react-dom@17.0.2+react@17.0.2
   react-router-dom: 6.2.1_react-dom@17.0.2+react@17.0.2
   vite-plugin-package-version: 1.0.2_vite@2.8.4
+  zod: 3.13.4
   zustand: 3.7.0_react@17.0.2
 
 devDependencies:
@@ -1263,6 +1269,14 @@ packages:
 
   /@emotion/weak-memoize/0.2.5:
     resolution: {integrity: sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==}
+    dev: false
+
+  /@hookform/resolvers/2.8.8_react-hook-form@7.27.1:
+    resolution: {integrity: sha512-meAEDur1IJBfKyTo9yPYAuzjIfrxA7m9Ov+1nxaW/YupsqMeseWifoUjWK03+hz/RJizsVQAaUjVxFEkyu0GWg==}
+    peerDependencies:
+      react-hook-form: ^7.0.0
+    dependencies:
+      react-hook-form: 7.27.1_react@17.0.2
     dev: false
 
   /@jridgewell/resolve-uri/3.0.5:
@@ -2514,6 +2528,15 @@ packages:
       - '@types/react'
     dev: false
 
+  /react-hook-form/7.27.1_react@17.0.2:
+    resolution: {integrity: sha512-N3a7A6zIQ8DJeThisVZGtOUabTbJw+7DHJidmB9w8m3chckv2ZWKb5MHps9d2pPJqmCDoWe53Bos56bYmJms5w==}
+    engines: {node: '>=12.22.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17
+    dependencies:
+      react: 17.0.2
+    dev: false
+
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: false
@@ -2884,6 +2907,10 @@ packages:
   /yaml/1.10.2:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
+
+  /zod/3.13.4:
+    resolution: {integrity: sha512-LZRucWt4j/ru5azOkJxCfpR87IyFDn8h2UODdqvXzZLb3K7bb9chUrUIGTy3BPsr8XnbQYfQ5Md5Hu2OYIo1mg==}
+    dev: false
 
   /zustand/3.7.0_react@17.0.2:
     resolution: {integrity: sha512-USzVzLGrvZ8VK1/sEsOAmeqa8N7D3OBdZskVaL7DL89Q4QLTYD053iIlZ5KDidyZ+Od80Dttin/f8ZulOLFFDQ==}

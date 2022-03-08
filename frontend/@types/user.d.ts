@@ -1,6 +1,6 @@
 declare enum UserRole {
-	Owner = 'owner',
-	Member = 'member',
+	Owner = 'OWNER',
+	Member = 'MEMBER',
 }
 
 // No password field intentionally

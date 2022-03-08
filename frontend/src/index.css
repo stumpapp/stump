@@ -4,11 +4,11 @@
 
 /* Apply basic global styles to the body: */
 body {
-	@apply font-sans antialiased min-h-screen;
+	@apply font-sans antialiased min-h-screen overflow-hidden;
 }
 
 main {
-	@apply min-h-screen;
+	@apply min-h-screen overflow-y-scroll;
 }
 
 /* Remove trailing margin from forms for some browsers: */

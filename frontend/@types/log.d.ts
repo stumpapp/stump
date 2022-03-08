@@ -1,8 +1,8 @@
 declare enum LogLevel {
-	Error = 'error',
-	Warn = 'warn',
-	Info = 'info',
-	Debug = 'debug',
+	Error = 'ERROR',
+	Warn = 'WARN',
+	Info = 'INFO',
+	Debug = 'DEBUG',
 }
 
 interface Log {
@@ -18,8 +18,10 @@ interface Log {
 	 * The message of the log.
 	 */
 	message: string;
-	// TODO: see if this maps correctly
-	created_at: Date;
+	/**
+	 * The timestamp of the log.
+	 */
+	createdAt: Date;
 }
 
 type Logs = Log[];

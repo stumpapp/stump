@@ -4,7 +4,7 @@ use rocket::serde::{Deserialize, Serialize};
 
 // TODO: more fields
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(crate = "rocket::serde")]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct ComicInfo {
     #[serde(rename = "Series")]
     pub series: Option<String>,

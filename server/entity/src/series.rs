@@ -5,7 +5,7 @@ use crate::util::FileStatus;
 
 // use crate::fs::FileStatus;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
 #[sea_orm(table_name = "series")]
 pub struct Model {
     #[sea_orm(primary_key)]

@@ -13,7 +13,7 @@ interface Media {
 	/**
 	 * The id of the series which this media belongs to.
 	 */
-	series_id: number;
+	seriesId: number;
 	/**
 	 * The common name of the media. Either the name extracted from metadata or the file name.
 	 */
@@ -38,7 +38,7 @@ interface Media {
 	/**
 	 * The date/time the media was last modified. Extracted from metadata.
 	 */
-	updated_at?: Date;
+	updatedAt?: Date;
 	// TODO: this should be removed...
 	downloaded: boolean;
 	/**
@@ -55,7 +55,7 @@ interface MediaWithProgress extends Media {
 	/**
 	 * The page the viewing user is currently on for the associated media.
 	 */
-	current_page?: number;
+	currentPage?: number;
 }
 
 // interface MediaWithSeries extends MediaWithProgress {

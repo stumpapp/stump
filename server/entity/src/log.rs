@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 use crate::util::LogLevel;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
 #[sea_orm(table_name = "logs")]
 pub struct Model {
     #[sea_orm(primary_key)]

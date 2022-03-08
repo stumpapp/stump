@@ -4,7 +4,7 @@ use rocket::serde::Serialize;
 use crate::types::alias::{MediaWithMaybeProgress, SeriesModel};
 
 #[derive(Serialize, Debug)]
-#[serde(crate = "rocket::serde")]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct GetMediaByIdWithProgress {
     pub id: i32,
     pub series_id: i32,

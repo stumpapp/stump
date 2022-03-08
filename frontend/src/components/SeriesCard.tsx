@@ -32,7 +32,7 @@ export default function SeriesCard({ ...series }: Props) {
 
 			<Box p={2}>
 				<h3 className="text-gray-100">{series.title}</h3>
-				<Text>{series.book_count} books</Text>
+				<Text>{series.bookCount} books</Text>
 			</Box>
 		</a>
 	);

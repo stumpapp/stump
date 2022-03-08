@@ -2,7 +2,7 @@ use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
 #[sea_orm(table_name = "read_progress")]
 pub struct Model {
     /// The id of the media this progress belongs to.

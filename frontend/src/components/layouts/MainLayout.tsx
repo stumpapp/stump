@@ -1,4 +1,3 @@
-import { Box, useColorModeValue } from '@chakra-ui/react';
 import React from 'react';
 import { useQueries } from 'react-query';
 import { Outlet, useNavigate } from 'react-router-dom';
@@ -6,11 +5,12 @@ import { getLibraries } from '~api/query/library';
 import { getMedia } from '~api/query/media';
 import Lazy from '~components/Lazy';
 import Sidebar from '~components/Sidebar';
-import { useMainStore } from '~store/mainStore';
-import MainStoreProvider from '~store/MainStoreProvider';
+import { useStore } from '~store/store';
 
-function Layout() {
-	const store = useMainStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
+import { Box, useColorModeValue } from '@chakra-ui/react';
+
+export default function MainLayout() {
+	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
 	const navigate = useNavigate();
 
 	const _ = useQueries([
@@ -46,13 +46,5 @@ function Layout() {
 				</React.Suspense>
 			</Box>
 		</Sidebar>
-	);
-}
-
-export default function MainLayout() {
-	return (
-		<MainStoreProvider>
-			<Layout />
-		</MainStoreProvider>
 	);
 }

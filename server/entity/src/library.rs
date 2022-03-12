@@ -1,7 +1,7 @@
 use rocket::serde::{Deserialize, Serialize};
-use sea_orm::entity::prelude::*;
+use sea_orm::{entity::prelude::*, SelectTwoMany};
 
-use crate::util::FileStatus;
+use crate::{series, util::FileStatus};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
@@ -25,10 +25,24 @@ pub enum Relation {
     Series,
 }
 
-impl Related<super::series::Entity> for Entity {
+impl Related<series::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Series.def()
     }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+    /// Finds a library by its id, and loads all its series.
+    pub fn find_by_id(id: i32) -> SelectTwoMany<Entity, series::Entity> {
+        Self::find()
+            .filter(Column::Id.eq(id))
+            .find_with_related(series::Entity)
+    }
+
+    /// Finds all libraries, and loads all their series.
+    pub fn find_with_series() -> SelectTwoMany<Entity, series::Entity> {
+        Self::find().find_with_related(series::Entity)
+    }
+}

@@ -4,7 +4,7 @@ use std::{
 };
 
 use chrono::{DateTime, NaiveDateTime, Utc};
-use entity::sea_orm;
+use entity::sea_orm::{self, ActiveModelTrait};
 use entity::{library, series, util::FileStatus};
 use sea_orm::{DatabaseConnection, Set};
 
@@ -13,9 +13,12 @@ use walkdir::WalkDir;
 
 use crate::{
     database::queries,
-    logging::Log,
+    event::{event::Event, handler::EventHandler},
     types::dto::{GetMediaQuery, GetMediaQueryResult},
+    State,
 };
+
+// TODO: use ApiErrors here!
 
 pub trait IgnoredFile {
     fn should_ignore(&self) -> bool;
@@ -81,8 +84,7 @@ fn dir_has_files(path: &Path) -> bool {
 
 struct Scanner<'a> {
     pub db: &'a DatabaseConnection,
-    pub event_queue: &'a Sender<Log>,
-    pub libraries: Vec<library::Model>,
+    pub event_handler: &'a EventHandler,
     // TODO: make hashmap of <String, series::Model> for faster lookup
     pub series: Vec<series::Model>,
     // checksum -> obj
@@ -92,8 +94,8 @@ struct Scanner<'a> {
 impl<'a> Scanner<'a> {
     pub fn new(
         db: &'a DatabaseConnection,
-        event_queue: &'a Sender<Log>,
-        libraries: Vec<library::Model>,
+        // event_log_queue: &'a Sender<Log>,
+        event_handler: &'a EventHandler,
         series: Vec<series::Model>,
         media: GetMediaQueryResult,
     ) -> Self {
@@ -106,8 +108,7 @@ impl<'a> Scanner<'a> {
 
         Self {
             db,
-            event_queue,
-            libraries,
+            event_handler,
             series,
             media: hashmap,
         }
@@ -160,19 +161,49 @@ impl<'a> Scanner<'a> {
             Ok(_) => {
                 info!("set media status: {:?} -> {:?}", path, status);
                 if status == FileStatus::Missing {
-                    let _ = self
-                        .event_queue
-                        .send(Log::error(format!("Missing file: {}", path)));
+                    self.event_handler
+                        .log_error(format!("Missing file: {}", path));
                 }
             }
             Err(err) => {
-                let log = Log::error(err);
-                let _ = self.event_queue.send(log);
+                self.event_handler.log_error(err);
             }
         }
     }
 
-    pub async fn scan_library(&self, library: &library::Model) {
+    async fn set_series_status(&self, id: i32, status: FileStatus, path: String) {
+        match queries::series::set_status(self.db, id, status).await {
+            Ok(_) => {
+                info!("set series status: {:?} -> {:?}", path, status);
+                if status == FileStatus::Missing {
+                    self.event_handler
+                        .log_error(format!("Missing file: {}", path));
+                }
+            }
+            Err(err) => {
+                self.event_handler.log_error(err);
+            }
+        }
+    }
+
+    async fn create_series(&self, path: &Path, library_id: i32) -> Option<series::Model> {
+        let series = generate_series_model(path, library_id);
+
+        match series.insert(self.db).await {
+            Ok(m) => {
+                info!("Created new series: {:?}", m);
+                self.event_handler
+                    .emit_event(Event::series_created(m.clone()));
+                Some(m)
+            }
+            Err(err) => {
+                self.event_handler.log_error(err.to_string());
+                None
+            }
+        }
+    }
+
+    pub async fn scan_library(&mut self, library: &library::Model) {
         let library_path = PathBuf::from(&library.path);
 
         let mut visited_series = HashMap::<i32, bool>::new();
@@ -182,7 +213,6 @@ impl<'a> Scanner<'a> {
             .into_iter()
             .filter_map(|e| e.ok())
         {
-            println!("PATH: {:?}", entry.path());
             let path = entry.path();
 
             let series = self.get_series(&path);
@@ -194,70 +224,83 @@ impl<'a> Scanner<'a> {
                     continue;
                 }
 
-                info!("New series: {:?}", path);
+                match self.create_series(path, library.id).await {
+                    Some(series) => {
+                        visited_series.insert(series.id, true);
+                        self.series.push(series);
+                    }
+                    None => {}
+                }
+
                 continue;
             }
 
             if series_exists {
-                info!("Existing series: {:?}", path);
                 let series = series.unwrap();
+                info!("Existing series: {:?}", series);
                 visited_series.insert(series.id, true);
                 continue;
             } else if path.should_ignore() {
-                info!("Ignoring: {:?}", path);
+                // info!("Ignoring: {:?}", path);
                 continue;
             }
 
             let key = path.to_str().unwrap_or("").to_string();
 
-            println!("KEY: {:?}", key);
-
             if self.media.contains_key(&key) {
-                info!("Existing media: {:?}", path);
+                // info!("Existing media: {:?}", path);
                 let id = self.media.get(&key).unwrap().id;
                 visited_media.insert(id, true);
-                self.analyze_media(key).await;
+                // self.analyze_media(key).await;
                 continue;
             }
 
-            info!("New media: {:?}", path);
+            // info!("New media: {:?}", path);
 
             // TODO: make me
         }
 
         for series in self.series.iter() {
             match visited_series.get(&series.id) {
-                Some(true) => continue,
-                _ => info!("MOVED/MISSING SERIES: {}", series.path),
+                Some(true) => {
+                    if series.status == FileStatus::Missing {
+                        self.set_series_status(series.id, FileStatus::Ready, series.path.clone())
+                            .await;
+                    }
+                }
+                _ => {
+                    if series.library_id == library.id {
+                        info!("MOVED/MISSING SERIES: {}", series.path);
+                        self.set_series_status(series.id, FileStatus::Missing, series.path.clone())
+                            .await;
+                    }
+                }
             }
         }
 
         for media in self.media.values() {
             match visited_media.get(&media.id) {
-                Some(true) => continue,
+                Some(true) => {
+                    if media.status == FileStatus::Missing {
+                        self.set_media_status(media.id, FileStatus::Ready, media.path.clone())
+                            .await;
+                    }
+                }
                 _ => {
-                    info!("MOVED/MISSING MEDIA: {}", media.path);
-                    self.set_media_status(media.id, FileStatus::Missing, media.path.clone())
-                        .await;
+                    if media.library_id == library.id {
+                        info!("MOVED/MISSING MEDIA: {}", media.path);
+                        self.set_media_status(media.id, FileStatus::Missing, media.path.clone())
+                            .await;
+                    }
                 }
             }
         }
     }
-
-    pub async fn scan(&mut self) {
-        for library in self.libraries.iter().to_owned() {
-            self.scan_library(library).await;
-        }
-    }
 }
 
-pub async fn scan(
-    conn: &DatabaseConnection,
-    queue: &Sender<Log>,
-    library_id: Option<i32>,
-) -> Result<(), String> {
-    // TODO: optimize these queries to one if possible.
-    // TODO: use the new get_libraries_and_series function in queries::library
+pub async fn scan(state: &State, library_id: Option<i32>) -> Result<(), String> {
+    let conn = state.get_connection();
+    let event_handler = state.get_event_handler();
 
     let libraries: Vec<library::Model> = match library_id {
         Some(id) => queries::library::get_library_by_id(conn, id)
@@ -275,21 +318,24 @@ pub async fn scan(
             message = format!("No library with id: {}", library_id.unwrap());
         }
 
-        // This will error if there are no listeners (which is fine)
-        let _ = queue.send(Log::error(message.clone()));
+        event_handler.log_error(message.clone());
+
         return Err(message);
     }
 
     let series = queries::series::get_series_in_library(conn, library_id).await?;
 
-    println!("{:?}", series);
+    // println!("{:?}", series);
 
     let media = queries::media::get_media_with_library_and_series(conn, library_id).await?;
 
-    println!("{:?}", media);
+    // println!("{:?}", media);
 
-    let mut scanner = Scanner::new(conn, queue, libraries, series, media);
-    scanner.scan().await;
+    let mut scanner = Scanner::new(conn, event_handler, series, media);
+
+    for library in libraries {
+        scanner.scan_library(&library).await;
+    }
 
     Ok(())
 }

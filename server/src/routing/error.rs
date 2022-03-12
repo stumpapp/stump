@@ -1,13 +1,16 @@
+use entity::sea_orm::DbErr;
 use rocket::{
     http::Status,
     response::{self, Responder},
     Request, Response,
 };
-use std::{fmt::Error, io::Cursor};
-use unrar::error::UnrarError;
+use std::io::Cursor;
+// use unrar::error::UnrarError;
 use zip::result::ZipError;
 // use pdf as pdf_rs;
 use thiserror::Error;
+
+use crate::fs::error::ProcessFileError;
 
 #[derive(Error, Debug)]
 pub enum ApiError {
@@ -33,38 +36,58 @@ pub enum ApiError {
     Redirect(String),
 }
 
-#[derive(Error, Debug)]
-pub enum ProcessFileError {
-    // #[error("Invalid Archive")]
-    // InvalidArchive,
-    #[error("Error occurred while opening file: {0}")]
-    FileIoError(#[from] std::io::Error),
-    #[error("Could not read archive file")]
-    ArchiveReadError(#[from] ZipError),
-    #[error("Archive contains no files")]
-    ArchiveEmptyError,
-    #[error("Error while attempting to read .epub file: {0}")]
-    EpubReadError(String),
-    // #[error("Error while attempting to read .pdf file")]
-    // PdfReadError(#[from] pdf_rs::PdfError),
-    #[error("Could not find an image")]
-    NoImageError,
-    #[error("Could not open rar file")]
-    RarOpenError,
-    #[error("Error reading file content in rar")]
-    RarReadError,
-    #[error("Error reading bytes from rar")]
-    RarByteReadError(#[from] std::str::Utf8Error),
-    #[error("Invalid file type")]
-    UnsupportedFileType,
-    #[error("An unknown error occurred: {0}")]
-    Unknown(String),
-}
+// #[derive(Error, Debug)]
+// pub enum ProcessFileError {
+//     // #[error("Invalid Archive")]
+//     // InvalidArchive,
+//     #[error("Error occurred while opening file: {0}")]
+//     FileIoError(#[from] std::io::Error),
+//     #[error("Could not read archive file")]
+//     ArchiveReadError(#[from] ZipError),
+//     #[error("Archive contains no files")]
+//     ArchiveEmptyError,
+//     #[error("Error while attempting to read .epub file: {0}")]
+//     EpubReadError(String),
+//     // #[error("Error while attempting to read .pdf file")]
+//     // PdfReadError(#[from] pdf_rs::PdfError),
+//     #[error("Could not find an image")]
+//     NoImageError,
+//     #[error("Could not open rar file")]
+//     RarOpenError,
+//     #[error("Error reading file content in rar")]
+//     RarReadError,
+//     #[error("Error reading bytes from rar")]
+//     RarByteReadError(#[from] std::str::Utf8Error),
+//     #[error("Invalid file type")]
+//     UnsupportedFileType,
+//     #[error("An unknown error occurred: {0}")]
+//     Unknown(String),
+// }
+
+// #[rustfmt::skip]
+// impl Into<ApiError> for ProcessFileError {
+//     fn into(self) -> ApiError {
+//         match self {
+//             ProcessFileError::FileIoError(e) => ApiError::InternalServerError(e.to_string()),
+//             ProcessFileError::ArchiveReadError(_) => ApiError::InternalServerError("Could not read archive file".to_string()),
+//             ProcessFileError::ArchiveEmptyError => ApiError::InternalServerError("Archive contains no files".to_string()),
+//             ProcessFileError::EpubReadError(_) => ApiError::InternalServerError("Error while attempting to read .epub file".to_string()),
+//             // ProcessFileError::PdfReadError(_) => ApiError::InternalServerError("Error while attempting to read .pdf file".to_string()),
+//             ProcessFileError::NoImageError => ApiError::InternalServerError("Could not find an image".to_string()),
+//             ProcessFileError::RarOpenError => ApiError::InternalServerError("Could not open rar file".to_string()),
+//             ProcessFileError::RarReadError => ApiError::InternalServerError("Error reading file content in rar".to_string()),
+//             ProcessFileError::RarByteReadError(_) => ApiError::InternalServerError("Error reading bytes from rar".to_string()),
+//             ProcessFileError::UnsupportedFileType => ApiError::InternalServerError("Invalid file type".to_string()),
+//             // ProcessFileError::Unknown => ApiError::InternalServerError("unknown error occurred".to_string()),
+//             _ => ApiError::InternalServerError("Internal error occurred".to_string()),
+//         }
+//     }
+// }
 
 #[rustfmt::skip]
-impl Into<ApiError> for ProcessFileError {
-    fn into(self) -> ApiError {
-        match self {
+impl From<ProcessFileError> for ApiError {
+    fn from(error: ProcessFileError) -> ApiError {
+        match error {
             ProcessFileError::FileIoError(e) => ApiError::InternalServerError(e.to_string()),
             ProcessFileError::ArchiveReadError(_) => ApiError::InternalServerError("Could not read archive file".to_string()),
             ProcessFileError::ArchiveEmptyError => ApiError::InternalServerError("Archive contains no files".to_string()),
@@ -95,6 +118,18 @@ impl From<ApiError> for Status {
             ApiError::Unknown(_) => Status::InternalServerError,
             // TODO: is this the right status? 308?
             ApiError::Redirect(_) => Status::PermanentRedirect,
+        }
+    }
+}
+
+impl From<DbErr> for ApiError {
+    fn from(error: DbErr) -> ApiError {
+        match error {
+            DbErr::RecordNotFound(e) => ApiError::NotFound(e),
+            // TODO: is this correct? 'error occurred while performing a query'
+            DbErr::Query(e) => ApiError::BadRequest(e),
+            // everything else is an internal server error
+            e => ApiError::InternalServerError(e.to_string()),
         }
     }
 }

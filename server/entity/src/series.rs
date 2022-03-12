@@ -1,6 +1,8 @@
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
+use sea_orm::{EntityTrait, QueryFilter, SelectTwoMany};
 
+use crate::media;
 use crate::util::FileStatus;
 
 // use crate::fs::FileStatus;
@@ -52,3 +54,27 @@ impl Related<super::library::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+    pub fn find_by_id(id: i32) -> Select<Entity> {
+        Self::find().filter(Column::Id.eq(id))
+    }
+
+    pub fn find_with_media() -> SelectTwoMany<Entity, media::Entity> {
+        Self::find().find_with_related(media::Entity)
+    }
+}
+
+impl Into<Model> for (Model, Vec<media::Model>) {
+    fn into(self) -> Model {
+        Model {
+            id: self.0.id,
+            library_id: self.0.library_id,
+            title: self.0.title,
+            book_count: self.1.len() as i32,
+            updated_at: self.0.updated_at,
+            path: self.0.path,
+            status: self.0.status,
+        }
+    }
+}

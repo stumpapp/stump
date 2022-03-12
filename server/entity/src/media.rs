@@ -62,3 +62,13 @@ impl Related<super::read_progress::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Entity {
+    pub fn find_by_id(id: i32) -> Select<Entity> {
+        Self::find().filter(Column::Id.eq(id))
+    }
+
+    pub fn find_by_checksum(checksum: &str) -> Select<Entity> {
+        Self::find().filter(Column::Checksum.eq(checksum))
+    }
+}

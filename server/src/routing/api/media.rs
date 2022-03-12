@@ -31,7 +31,7 @@ pub async fn get_media(state: &State, auth: StumpAuth) -> GetAllMediaResult {
 
             Ok(Json(media))
         })
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?
+        .map_err(|e| ApiError::InternalServerError(e))?
 }
 
 type GetMediaResult = ApiResult<Json<GetMediaByIdWithProgress>>;
@@ -42,18 +42,16 @@ pub async fn get_media_by_id(state: &State, id: i32, _auth: StumpAuth) -> GetMed
     queries::media::get_media_by_id_with_progress(state.get_connection(), id)
         .await
         .map(|media| Ok(Json(media.into())))
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?
+        .map_err(|e| ApiError::InternalServerError(e))?
 }
 
 // TODO: add auth
 #[get("/media/<id>/thumbnail")]
-pub async fn get_media_thumbnail(state: &State, id: i32) -> Result<Option<ImageResponse>, String> {
+pub async fn get_media_thumbnail(state: &State, id: i32) -> ApiResult<Option<ImageResponse>> {
     let media = queries::media::get_media_by_id(state.get_connection(), id).await?;
 
     match media {
-        Some(m) => Ok(Some(
-            media_file::get_page(&m.path, 1).map_err(|e| e.to_string())?,
-        )),
+        Some(m) => Ok(Some(media_file::get_page(&m.path, 1)?)),
         None => Ok(None),
     }
 }
@@ -63,10 +61,7 @@ type GetMediaFileResult = ApiResult<NamedFile>;
 // TODO: add auth
 #[get("/media/<id>/consume")]
 pub async fn get_media_file(state: &State, id: i32) -> GetMediaFileResult {
-    match queries::media::get_media_by_id(state.get_connection(), id)
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?
-    {
+    match queries::media::get_media_by_id(state.get_connection(), id).await? {
         Some(m) => Ok(NamedFile::open(m.path.clone())
             .await
             .map_err(|e| ApiError::InternalServerError(e.to_string()))?),

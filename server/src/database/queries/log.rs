@@ -1,8 +1,8 @@
-use crate::logging::LogTrait;
-use crate::Log;
 use entity::log::{Entity as LogEntity, Model as LogModel};
 use entity::sea_orm;
 use sea_orm::{prelude::*, DatabaseConnection, DeleteResult};
+
+use crate::event::log::{Log, LogTrait};
 
 pub async fn insert_log(conn: &DatabaseConnection, log: Log) -> Result<LogModel, String> {
     let active_model: entity::log::ActiveModel = log.into_active_model();

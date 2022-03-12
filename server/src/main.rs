@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate rocket;
 
-// use redis::Client;
 use rocket::fs::NamedFile;
 use rocket::http::SameSite;
 use rocket::tokio::sync::broadcast::channel;
@@ -17,16 +16,16 @@ use std::time::Duration;
 use dotenv::dotenv;
 
 mod database;
+mod event;
 mod fs;
 mod guards;
-mod logging;
 mod opds;
 mod routing;
 mod state;
 mod types;
 mod utils;
 
-use crate::{database::Database, logging::Log, types::rocket::UnauthorizedResponse};
+use crate::{database::Database, types::rocket::UnauthorizedResponse};
 
 pub type State = state::State;
 
@@ -72,10 +71,10 @@ fn rocket() -> _ {
 
     init_env();
 
-    env_logger::builder()
-        .filter_level(log::LevelFilter::Debug)
-        .is_test(true)
-        .init();
+    // env_logger::builder()
+    //     .filter_level(log::LevelFilter::Debug)
+    //     .is_test(true)
+    //     .init();
 
     let allowed_origins =
         AllowedOrigins::some_exact(&["http://localhost:3000", "http://localhost:6969"]);
@@ -95,7 +94,7 @@ fn rocket() -> _ {
     .expect("Could not instantiate CORS configuration.");
 
     let db = block_on(Database::new());
-    let state = state::AppState::new(db, channel::<Log>(1024).0);
+    let state = state::AppState::new(db);
 
     let session_name = std::env::var("SESSION_NAME").unwrap_or_else(|_| "stump-session".into());
 
@@ -126,13 +125,14 @@ fn rocket() -> _ {
             routes![
                 // top level
                 routing::api::scan,
-                routing::api::log_listener,
+                routing::api::event_listener,
                 // auth
                 routing::api::auth::me,
                 routing::api::auth::login,
                 routing::api::auth::register,
                 // logs api
                 routing::api::log::get_logs,
+                routing::api::log::log_listener,
                 // library api
                 routing::api::library::get_libraries,
                 routing::api::library::get_library,

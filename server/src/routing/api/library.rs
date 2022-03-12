@@ -1,5 +1,5 @@
+use entity::library;
 use entity::sea_orm;
-use entity::{library, series};
 use rocket::{
     http::Status,
     serde::{json::Json, Deserialize},
@@ -7,21 +7,17 @@ use rocket::{
 use sea_orm::{sea_query::Expr, ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 
 use crate::{
-    fs::new_scanner,
+    fs::scanner,
     routing::error::{ApiError, ApiResult},
     types::dto::GetLibraryWithSeriesQuery,
     State,
 };
 
-// TODO: fix terrible error handling
 type GetLibraries = ApiResult<Json<Vec<library::Model>>>;
 
 #[get("/library")]
 pub async fn get_libraries(state: &State) -> GetLibraries {
-    let libraries = library::Entity::find()
-        .all(state.get_connection())
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let libraries = library::Entity::find().all(state.get_connection()).await?;
 
     Ok(Json(libraries))
 }
@@ -30,9 +26,7 @@ type GetLibraryResult = ApiResult<Json<GetLibraryWithSeriesQuery>>;
 
 #[get("/library/<id>")]
 pub async fn get_library(state: &State, id: i32) -> GetLibraryResult {
-    library::Entity::find()
-        .filter(library::Column::Id.eq(id))
-        .find_with_related(series::Entity)
+    library::Entity::find_by_id(id)
         .all(state.get_connection())
         .await
         .map(|res| {
@@ -44,18 +38,15 @@ pub async fn get_library(state: &State, id: i32) -> GetLibraryResult {
             } else {
                 Ok(Json(res[0].to_owned().into()))
             }
-        })
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?
+        })?
 }
 
+// TODO: use ApiResult
 #[get("/library/<id>/scan")]
 pub async fn scan_library(state: &State, id: i32) -> Result<(), String> {
     let connection = state.get_connection();
-    let queue = state.get_queue();
 
-    new_scanner::scan(connection, queue, Some(id))
-        .await
-        .map_err(|e| e.to_string())?;
+    scanner::scan(state, Some(id)).await?;
 
     Ok(())
 }
@@ -72,12 +63,9 @@ type InsertLibraryResult = ApiResult<Json<library::Model>>;
 /// A handler for POST /api/library. Inserts a new library into the database.
 #[post("/library", data = "<lib>")]
 pub async fn insert_library(state: &State, lib: Json<InsertLibrary<'_>>) -> InsertLibraryResult {
-    let libraries = library::Entity::find()
-        .all(state.get_connection())
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let libraries = library::Entity::find().all(state.get_connection()).await?;
 
-    if libraries.iter().any(|l| {
+    let invalid = libraries.iter().any(|l| {
         // library and name must be unique
         if l.name == lib.name || l.path == lib.path {
             return true;
@@ -89,7 +77,9 @@ pub async fn insert_library(state: &State, lib: Json<InsertLibrary<'_>>) -> Inse
         }
 
         false
-    }) {
+    });
+
+    if invalid {
         return Err(ApiError::BadRequest(
             "Library already exists is a child/parent to an existing library".to_string(),
         ));
@@ -101,10 +91,7 @@ pub async fn insert_library(state: &State, lib: Json<InsertLibrary<'_>>) -> Inse
         ..Default::default()
     };
 
-    let res = new_lib
-        .insert(state.get_connection())
-        .await
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?;
+    let res = new_lib.insert(state.get_connection()).await?;
 
     Ok(Json(res))
 }
@@ -124,18 +111,16 @@ pub async fn update_library(
         .filter(library::Column::Id.eq(id))
         .exec(state.get_connection())
         .await
-        .map(|_| Status::Ok)
-        .map_err(|e| ApiError::InternalServerError(e.to_string()))?)
+        .map(|_| Status::Ok)?)
 }
 
 /// A handler for DELETE /api/library/:id. Deletes a library from the database.
 #[delete("/library/<id>")]
-pub async fn delete_library(state: &State, id: i32) -> Result<(), String> {
+pub async fn delete_library(state: &State, id: i32) -> ApiResult<()> {
     library::Entity::delete_many()
         .filter(library::Column::Id.eq(id))
         .exec(state.get_connection())
-        .await
-        .map_err(|e| e.to_string())?;
+        .await?;
 
     Ok(())
 }

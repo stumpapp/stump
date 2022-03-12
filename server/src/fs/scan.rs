@@ -1,11 +1,11 @@
 use crate::database::queries;
+use crate::event::log::Log;
 use crate::{
     fs::checksum::Crc,
     types::{
         comic::ComicInfo,
         dto::{GetMediaQuery, GetMediaQueryResult},
     },
-    Log,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
 use entity::sea_orm;

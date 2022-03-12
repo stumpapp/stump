@@ -1,3 +1,4 @@
+use crate::routing::error::ApiResult;
 use crate::types::alias::{
     GetMediaWithProgress, GetMediaWithProgressRaw, GetUserMediaWithProgress, MediaWithMaybeProgress,
 };
@@ -36,12 +37,11 @@ pub async fn get_media_with_library_and_series(
 pub async fn get_media_by_id(
     conn: &DatabaseConnection,
     id: i32,
-) -> Result<Option<media::Model>, String> {
+) -> ApiResult<Option<media::Model>> {
     let res = media::Entity::find()
         .filter(media::Column::Id.eq(id))
         .one(conn)
-        .await
-        .map_err(|e| e.to_string())?;
+        .await?;
 
     Ok(res)
 }

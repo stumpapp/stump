@@ -1,8 +1,9 @@
-use entity::sea_orm;
+use entity::sea_orm::{self, ActiveModelTrait};
+use entity::util::FileStatus;
 use entity::{media, read_progress, series};
 use sea_orm::{
     ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QueryOrder, QuerySelect,
-    RelationTrait,
+    RelationTrait, Set,
 };
 
 pub async fn get_series(conn: &DatabaseConnection) -> Result<Vec<series::Model>, String> {
@@ -54,4 +55,25 @@ pub async fn get_series_by_id_with_media(
         .all(conn)
         .await
         .map_err(|e| e.to_string())?)
+}
+
+pub async fn set_status(
+    conn: &DatabaseConnection,
+    id: i32,
+    status: FileStatus,
+) -> Result<(), String> {
+    let series = series::Entity::find_by_id(id)
+        .one(conn)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    match series {
+        Some(s) => {
+            let mut active_model: series::ActiveModel = s.into();
+            active_model.status = Set(status);
+            active_model.update(conn).await.map_err(|e| e.to_string())?;
+            Ok(())
+        }
+        None => return Err("No series found".to_string()),
+    }
 }

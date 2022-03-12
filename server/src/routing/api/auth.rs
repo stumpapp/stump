@@ -71,7 +71,7 @@ pub async fn register(
     state: &State,
     session: Session<'_>,
     credentials: Json<LoginRequest<'_>>,
-) -> Result<String, String> {
+) -> ApiResult<Json<AuthenticatedUser>> {
     let existing_session = session.get().await.expect("TODO");
 
     let has_users = user::Entity::find()
@@ -84,7 +84,9 @@ pub async fn register(
 
     // owners must register member accounts
     if existing_session.is_none() && has_users {
-        unimplemented!()
+        return Err(ApiError::Forbidden(
+            "Must be owner to register member accounts".to_string(),
+        ));
     } else if !has_users {
         // register the user as owner
         user_role = UserRole::Owner;
@@ -102,5 +104,5 @@ pub async fn register(
 
     let user_model = new_user.insert(state.get_connection()).await.expect("TODO");
 
-    Ok(user_model.id.to_string())
+    Ok(Json(user_model.into()))
 }

@@ -6,7 +6,9 @@ I love Komga and use it at home, and I thought it would be cool to learn what go
 
 ## Roadmap
 
-I moved my roadmap/todo list to a [GitHub Project](https://github.com/users/aaronleopold/projects/1) to keep it more organized since the codebase is growing. Have a look, I am very open to suggestions and ideas!
+I recently discovered Linear and wanted to try it out, so I moved majority of issue tracking over to my linear workspace. I'll list the major target features below, but I am very open to suggestions and ideas!
+
+-   TODO
 
 ## Getting Started
 
@@ -37,22 +39,12 @@ pnpm server:dev # start the server
 pnpm frontend:dev # start the frontend
 ```
 
-### Building the Frontend
-
-Because of the prerendering options, the backend needs to be running while the frontend is being built. I am working on a script to automate this, but for now you'll just need two separate processes:
-
-```bash
-pnpm server:start
-# once the server starts, delete the `static` folder.
-pnpm frontend:build # this will build and move the build to the `server/static` folder
-```
-
 ### Docker
 
-No images have been published to dockerhub yet, so you'll have to build it yourself (requires frontend to have been built first):
+No images have been published to dockerhub yet, so you'll have to build it yourself:
 
 ```bash
-pnpm server:build:docker-alpine # builds the image
+pnpm build:docker # builds the docker image
 docker create \
   --name=stump \
   --user 1000:1000 \
@@ -68,4 +60,4 @@ As of now, you'll need to make the `source` and `target` paths match. So if you 
 
 ## Contributing
 
-Contributions are very **encouraged** and **welcome**! Please open an issue prior to working on a bug or feature to let me know what you're interested in working on. Thanks!
+Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) file beforehand. Thanks!

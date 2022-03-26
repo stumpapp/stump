@@ -1,6 +1,6 @@
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
-use sea_orm::{EntityTrait, QueryFilter, SelectTwoMany};
+use sea_orm::{EntityTrait, JoinType, QueryFilter, QuerySelect, SelectTwoMany};
 
 use crate::media;
 use crate::util::FileStatus;
@@ -16,8 +16,8 @@ pub struct Model {
     pub library_id: i32,
     /// The title of the series. This is generated from a fs scan, and will be the directory name.
     pub title: String,
-    /// The number of media files in the series.
-    pub book_count: i32,
+    // /// The number of media files in the series.
+    // pub book_count: i32,
     /// The date in which the series was last updated in the FS. ex: "2020-01-01"
     #[sea_orm(column_type = "DateTime")]
     pub updated_at: Option<chrono::NaiveDateTime>,
@@ -63,6 +63,19 @@ impl Entity {
     pub fn find_with_media() -> SelectTwoMany<Entity, media::Entity> {
         Self::find().find_with_related(media::Entity)
     }
+
+    pub fn find_with_book_count() -> Select<Entity> {
+        Self::find()
+            .column_as(media::Column::SeriesId.count(), "book_count")
+            .join_rev(
+                JoinType::InnerJoin,
+                media::Entity::belongs_to(Entity)
+                    .from(media::Column::SeriesId)
+                    .to(Column::Id)
+                    .into(),
+            )
+            .group_by(media::Column::SeriesId)
+    }
 }
 
 impl Into<Model> for (Model, Vec<media::Model>) {
@@ -71,7 +84,7 @@ impl Into<Model> for (Model, Vec<media::Model>) {
             id: self.0.id,
             library_id: self.0.library_id,
             title: self.0.title,
-            book_count: self.1.len() as i32,
+            // book_count: self.1.len() as i32,
             updated_at: self.0.updated_at,
             path: self.0.path,
             status: self.0.status,

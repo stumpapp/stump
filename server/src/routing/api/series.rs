@@ -4,24 +4,19 @@ use rocket::serde::json::Json;
 use crate::{
     database::queries,
     fs::media_file,
-    types::{dto::series::GetSeriesById, rocket::ImageResponse},
+    types::{
+        dto::series::{GetSeriesById, SeriesWithBookCount},
+        rocket::ImageResponse,
+    },
     State,
 };
 
-type GetSeriesList = Json<Vec<series::Model>>;
+type GetSeriesList = Json<Vec<SeriesWithBookCount>>;
 
 type GetSeriesByIdResponse = Json<Option<GetSeriesById>>;
 
 #[get("/series")]
 pub async fn get_series(state: &State) -> Result<GetSeriesList, String> {
-    // let ser: Vec<series::Model> = series::Entity::find_with_media()
-    //     .all(state.get_connection())
-    //     .await
-    //     .map_err(|e| e.to_string())?
-    //     .into_iter()
-    //     .map(|s| s.into())
-    //     .collect();
-
     Ok(Json(
         queries::series::get_series(state.get_connection()).await?,
     ))

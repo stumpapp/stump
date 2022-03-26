@@ -8,7 +8,6 @@ use entity::sea_orm::{self, ActiveModelTrait};
 use entity::{library, series, util::FileStatus};
 use sea_orm::{DatabaseConnection, Set};
 
-use rocket::tokio::sync::broadcast::Sender;
 use walkdir::WalkDir;
 
 use crate::{
@@ -26,9 +25,15 @@ pub trait IgnoredFile {
 
 impl IgnoredFile for Path {
     fn should_ignore(&self) -> bool {
+        let filename = self
+            .file_name()
+            .unwrap_or_default()
+            .to_str()
+            .expect(format!("Malformed filename: {:?}", self.as_os_str()).as_str());
+
         if self.is_dir() {
             return true;
-        } else if self.file_name().unwrap().to_str().unwrap().starts_with(".") {
+        } else if filename.starts_with(".") {
             return true;
         }
 
@@ -61,7 +66,7 @@ fn generate_series_model(path: &Path, library_id: i32) -> series::ActiveModel {
     series::ActiveModel {
         library_id: Set(library_id),
         title: Set(name),
-        book_count: Set(0),
+        // book_count: Set(0),
         updated_at: Set(updated_at),
         path: Set(path.to_str().unwrap_or("").to_string()),
         ..Default::default()
@@ -85,9 +90,7 @@ fn dir_has_files(path: &Path) -> bool {
 struct Scanner<'a> {
     pub db: &'a DatabaseConnection,
     pub event_handler: &'a EventHandler,
-    // TODO: make hashmap of <String, series::Model> for faster lookup
-    pub series: Vec<series::Model>,
-    // checksum -> obj
+    pub series: HashMap<String, series::Model>,
     pub media: HashMap<String, GetMediaQuery>,
 }
 
@@ -99,18 +102,23 @@ impl<'a> Scanner<'a> {
         series: Vec<series::Model>,
         media: GetMediaQueryResult,
     ) -> Self {
-        let mut hashmap = HashMap::new();
+        let mut media_map = HashMap::new();
+        let mut series_map = HashMap::new();
 
-        for media in media {
-            // hashmap.insert(media.checksum.clone(), media);
-            hashmap.insert(media.path.clone(), media);
+        for m in media {
+            // media_map.insert(media.checksum.clone(), media);
+            media_map.insert(m.path.clone(), m);
+        }
+
+        for s in series {
+            series_map.insert(s.path.clone(), s);
         }
 
         Self {
             db,
             event_handler,
-            series,
-            media: hashmap,
+            series: series_map,
+            media: media_map,
         }
     }
 
@@ -131,23 +139,18 @@ impl<'a> Scanner<'a> {
     }
 
     fn get_series(&self, path: &Path) -> Option<&series::Model> {
-        self.series
-            .iter()
-            .find(|series| path.to_str().unwrap_or("").to_string().eq(&series.path))
+        self.series.get(path.to_str().expect("Invalid key"))
     }
 
     // TODO: I'm not sure I love this solution. I could check if the Path.parent is the series path, but
     // not sure about that either
+    /// Get the series id for the given path. Used to determine the series of a media
+    /// file at a given path.
     fn get_series_id(&self, path: &Path) -> Option<i32> {
         self.series
             .iter()
-            .find(|series| {
-                path.to_str()
-                    .unwrap_or("")
-                    .to_string()
-                    .contains(&series.path)
-            })
-            .map(|series| series.id)
+            .find(|(_, s)| path.to_str().unwrap_or("").to_string().contains(&s.path))
+            .map(|(_, s)| s.id)
     }
 
     fn series_exists(&self, path: &Path) -> bool {
@@ -203,6 +206,30 @@ impl<'a> Scanner<'a> {
         }
     }
 
+    /*
+        loop through every file starting at library root
+
+        for each file:
+            if file is a directory:
+                if directory is a series:
+                    if series does not exist:
+                        collect series metadata?
+                        create series
+                    else:
+                        collect series metadata?
+                        update series
+
+                    mark series as visited
+                else:
+                    continue
+            else if file is a media:
+                if media does not exist:
+                    create media
+                else:
+                    update media
+
+                mark media as visited
+    */
     pub async fn scan_library(&mut self, library: &library::Model) {
         let library_path = PathBuf::from(&library.path);
 
@@ -225,10 +252,11 @@ impl<'a> Scanner<'a> {
                 }
 
                 match self.create_series(path, library.id).await {
-                    Some(series) => {
-                        visited_series.insert(series.id, true);
-                        self.series.push(series);
+                    Some(s) => {
+                        visited_series.insert(s.id, true);
+                        self.series.insert(s.path.clone(), s);
                     }
+                    // Error handled in the function call
                     None => {}
                 }
 
@@ -260,18 +288,18 @@ impl<'a> Scanner<'a> {
             // TODO: make me
         }
 
-        for series in self.series.iter() {
-            match visited_series.get(&series.id) {
+        for (_, s) in self.series.iter() {
+            match visited_series.get(&s.id) {
                 Some(true) => {
-                    if series.status == FileStatus::Missing {
-                        self.set_series_status(series.id, FileStatus::Ready, series.path.clone())
+                    if s.status == FileStatus::Missing {
+                        self.set_series_status(s.id, FileStatus::Ready, s.path.clone())
                             .await;
                     }
                 }
                 _ => {
-                    if series.library_id == library.id {
-                        info!("MOVED/MISSING SERIES: {}", series.path);
-                        self.set_series_status(series.id, FileStatus::Missing, series.path.clone())
+                    if s.library_id == library.id {
+                        info!("MOVED/MISSING SERIES: {}", s.path);
+                        self.set_series_status(s.id, FileStatus::Missing, s.path.clone())
                             .await;
                     }
                 }

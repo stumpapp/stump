@@ -1,5 +1,8 @@
 use entity::library;
 use entity::sea_orm;
+use entity::sea_orm::JoinType;
+use entity::sea_orm::QuerySelect;
+use entity::series;
 use rocket::{
     http::Status,
     serde::{json::Json, Deserialize},
@@ -24,6 +27,8 @@ pub async fn get_libraries(state: &State) -> GetLibraries {
 
 type GetLibraryResult = ApiResult<Json<GetLibraryWithSeriesQuery>>;
 
+// TODO: use SeriesWithBookCount
+
 #[get("/library/<id>")]
 pub async fn get_library(state: &State, id: i32) -> GetLibraryResult {
     library::Entity::find_by_id(id)
@@ -44,8 +49,6 @@ pub async fn get_library(state: &State, id: i32) -> GetLibraryResult {
 // TODO: use ApiResult
 #[get("/library/<id>/scan")]
 pub async fn scan_library(state: &State, id: i32) -> Result<(), String> {
-    let connection = state.get_connection();
-
     scanner::scan(state, Some(id)).await?;
 
     Ok(())

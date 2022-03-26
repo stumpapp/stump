@@ -5,6 +5,7 @@ use xml::{writer::XmlEvent, EventWriter};
 
 use crate::opds::link::OpdsStreamLink;
 use crate::types::alias::{MediaWithProgress, UserMediaWithProgress};
+use crate::types::dto::series::SeriesWithBookCount;
 use entity::{library, media, series};
 
 use super::{
@@ -112,6 +113,32 @@ impl From<library::Model> for OpdsEntry {
             // FIXME:
             updated: chrono::Utc::now(),
             title: l.name,
+            // FIXME:
+            content: None,
+            authors: None,
+            links,
+            stream_link: None,
+        }
+    }
+}
+
+impl From<SeriesWithBookCount> for OpdsEntry {
+    fn from(s: SeriesWithBookCount) -> Self {
+        let mut links = Vec::new();
+
+        let nav_link = OpdsLink::new(
+            OpdsLinkType::Navigation,
+            OpdsLinkRel::Subsection,
+            format!("/opds/v1.2/series/{}", s.id),
+        );
+
+        links.push(nav_link);
+
+        OpdsEntry {
+            id: s.id.to_string(),
+            // FIXME:
+            updated: chrono::Utc::now(),
+            title: s.title,
             // FIXME:
             content: None,
             authors: None,

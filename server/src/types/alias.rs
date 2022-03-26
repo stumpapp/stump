@@ -7,7 +7,7 @@ pub type MediaModel = media::Model;
 pub type SeriesWithMedia = (SeriesModel, Vec<MediaModel>);
 pub type SeriesWithMediaAndProgress = (SeriesModel, GetUserMediaWithProgress);
 pub type FeedPages = (usize, Option<usize>);
-pub type LibraryWithSeries = (LibraryModel, Vec<SeriesModel>);
+pub type LibraryWithSeries = (LibraryModel, Vec<series::Model>);
 pub type SeriesWithLibraries = Vec<(SeriesModel, Vec<LibraryModel>)>;
 
 pub type GetMediaWithProgressRaw = Vec<(media::Model, Vec<read_progress::Model>)>;

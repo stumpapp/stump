@@ -2,6 +2,7 @@ import { Box, Text } from '@chakra-ui/react';
 import React from 'react';
 import client from '~api/client';
 import { getSeriesById, getSeriesThumbnail } from '~api/query/series';
+import pluralizeStat from '~util/pluralize';
 
 interface Props extends Series {}
 
@@ -33,8 +34,7 @@ export default function SeriesCard({ ...series }: Props) {
 
 			<Box p={2}>
 				<h3 className="text-gray-100">{series.title}</h3>
-				{/* TODO pluralize */}
-				<Text>{series.bookCount ?? 0} books</Text>
+				<Text>{pluralizeStat('book', series.bookCount)}</Text>
 			</Box>
 		</a>
 	);

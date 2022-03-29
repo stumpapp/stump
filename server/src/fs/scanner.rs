@@ -4,8 +4,13 @@ use std::{
 };
 
 use chrono::{DateTime, NaiveDateTime, Utc};
-use entity::sea_orm::{self, ActiveModelTrait};
-use entity::{library, series, util::FileStatus};
+use entity::{
+    library, media,
+    sea_orm::{self, ActiveModelTrait},
+    series,
+    util::FileStatus,
+};
+
 use sea_orm::{DatabaseConnection, Set};
 
 use walkdir::WalkDir;
@@ -73,6 +78,10 @@ fn generate_series_model(path: &Path, library_id: i32) -> series::ActiveModel {
     }
 }
 
+fn generate_media_model(path: &Path, series_id: i32) -> media::ActiveModel {
+    unimplemented!()
+}
+
 fn dir_has_files(path: &Path) -> bool {
     let items = std::fs::read_dir(path);
 
@@ -97,7 +106,6 @@ struct Scanner<'a> {
 impl<'a> Scanner<'a> {
     pub fn new(
         db: &'a DatabaseConnection,
-        // event_log_queue: &'a Sender<Log>,
         event_handler: &'a EventHandler,
         series: Vec<series::Model>,
         media: GetMediaQueryResult,
@@ -122,6 +130,7 @@ impl<'a> Scanner<'a> {
         }
     }
 
+    // FIXME: pass in &Model??
     async fn analyze_media(&self, key: String) {
         let media = self.media.get(&key).unwrap();
 
@@ -140,6 +149,10 @@ impl<'a> Scanner<'a> {
 
     fn get_series(&self, path: &Path) -> Option<&series::Model> {
         self.series.get(path.to_str().expect("Invalid key"))
+    }
+
+    fn get_media(&self, key: &Path) -> Option<&GetMediaQuery> {
+        self.media.get(key.to_str().expect("Invalid key"))
     }
 
     // TODO: I'm not sure I love this solution. I could check if the Path.parent is the series path, but
@@ -206,30 +219,23 @@ impl<'a> Scanner<'a> {
         }
     }
 
-    /*
-        loop through every file starting at library root
+    async fn create_media(&self, path: &Path, series_id: i32) -> Option<media::Model> {
+        let media = generate_media_model(path, series_id);
 
-        for each file:
-            if file is a directory:
-                if directory is a series:
-                    if series does not exist:
-                        collect series metadata?
-                        create series
-                    else:
-                        collect series metadata?
-                        update series
+        match media.insert(self.db).await {
+            Ok(m) => {
+                info!("Created new media: {:?}", m);
+                self.event_handler
+                    .emit_event(Event::media_created(m.clone()));
+                Some(m)
+            }
+            Err(err) => {
+                self.event_handler.log_error(err.to_string());
+                None
+            }
+        }
+    }
 
-                    mark series as visited
-                else:
-                    continue
-            else if file is a media:
-                if media does not exist:
-                    create media
-                else:
-                    update media
-
-                mark media as visited
-    */
     pub async fn scan_library(&mut self, library: &library::Model) {
         let library_path = PathBuf::from(&library.path);
 
@@ -273,19 +279,28 @@ impl<'a> Scanner<'a> {
                 continue;
             }
 
-            let key = path.to_str().unwrap_or("").to_string();
-
-            if self.media.contains_key(&key) {
-                // info!("Existing media: {:?}", path);
-                let id = self.media.get(&key).unwrap().id;
-                visited_media.insert(id, true);
-                // self.analyze_media(key).await;
+            if let Some(media) = self.get_media(&path) {
+                // info!("Existing media: {:?}", media);
+                visited_media.insert(media.id, true);
+                // self.analyze_media(media).await;
                 continue;
             }
 
-            // info!("New media: {:?}", path);
+            // TODO: don't do this :)
+            let series_id = self.get_series_id(&path).expect(&format!(
+                "Could not determine series for new media: {:?}",
+                path
+            ));
 
-            // TODO: make me
+            match self.create_media(path, series_id).await {
+                Some(m) => {
+                    visited_media.insert(m.id, true);
+                    // FIXME: ruh roh, this won't work but *do I need it to??*
+                    // self.media.insert(m.path.clone(), m);
+                }
+                // Error handled in the function call
+                None => {}
+            }
         }
 
         for (_, s) in self.series.iter() {

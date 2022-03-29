@@ -16,8 +16,6 @@ pub struct Model {
     pub library_id: i32,
     /// The title of the series. This is generated from a fs scan, and will be the directory name.
     pub title: String,
-    // /// The number of media files in the series.
-    // pub book_count: i32,
     /// The date in which the series was last updated in the FS. ex: "2020-01-01"
     #[sea_orm(column_type = "DateTime")]
     pub updated_at: Option<chrono::NaiveDateTime>,

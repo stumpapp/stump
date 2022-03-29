@@ -1,25 +1,12 @@
 use entity::sea_orm::{self, ActiveModelTrait};
 use entity::util::FileStatus;
-use entity::{media, read_progress, series};
-use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QueryOrder, QuerySelect,
-    RelationTrait, Set,
-};
+use entity::{media, series};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Set};
 
 use crate::types::dto::series::SeriesWithBookCount;
 
 pub async fn get_series(conn: &DatabaseConnection) -> Result<Vec<SeriesWithBookCount>, String> {
     Ok(series::Entity::find_with_book_count()
-        // .column_as(media::Column::SeriesId.count(), "book_count")
-        // .join_rev(
-        //     // construct `RelationDef` on the fly
-        //     JoinType::InnerJoin,
-        //     media::Entity::belongs_to(series::Entity)
-        //         .from(media::Column::SeriesId)
-        //         .to(series::Column::Id)
-        //         .into(),
-        // )
-        // .group_by(media::Column::SeriesId)
         .into_model::<SeriesWithBookCount>()
         .all(conn)
         .await

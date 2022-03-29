@@ -1,7 +1,5 @@
 use entity::library;
 use entity::sea_orm;
-use entity::sea_orm::JoinType;
-use entity::sea_orm::QuerySelect;
 use entity::series;
 use rocket::{
     http::Status,
@@ -9,10 +7,11 @@ use rocket::{
 };
 use sea_orm::{sea_query::Expr, ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 
+use crate::types::dto::series::SeriesWithBookCount;
 use crate::{
     fs::scanner,
     routing::error::{ApiError, ApiResult},
-    types::dto::GetLibraryWithSeriesQuery,
+    types::dto::GetLibraryWithSeriesQuery_refactor,
     State,
 };
 
@@ -25,25 +24,63 @@ pub async fn get_libraries(state: &State) -> GetLibraries {
     Ok(Json(libraries))
 }
 
-type GetLibraryResult = ApiResult<Json<GetLibraryWithSeriesQuery>>;
+type GetLibraryResult = ApiResult<Json<GetLibraryWithSeriesQuery_refactor>>;
+type GetLibrarySeries = ApiResult<Json<Vec<SeriesWithBookCount>>>;
 
-// TODO: use SeriesWithBookCount
-
+// TODO: this is a work around until I can solve STU-12: Construct library with series query programmatically
+// I very much dislike having to make two queries here
 #[get("/library/<id>")]
 pub async fn get_library(state: &State, id: i32) -> GetLibraryResult {
-    library::Entity::find_by_id(id)
+    let res = library::Entity::find()
+        .filter(library::Column::Id.eq(id))
+        .all(state.get_connection())
+        .await?;
+
+    if res.is_empty() {
+        return Err(ApiError::NotFound(format!(
+            "Library with id {} not found",
+            id
+        )));
+    } else if res.len() > 1 {
+        return Err(ApiError::InternalServerError(
+            "Multiple libraries with the same id found".to_string(),
+        ));
+    }
+
+    let library = res.first().unwrap();
+
+    let series = series::Entity::find_with_book_count()
+        .filter(series::Column::LibraryId.eq(id))
+        .into_model::<SeriesWithBookCount>()
+        .all(state.get_connection())
+        .await?;
+
+    Ok(Json((library.to_owned(), series).into()))
+
+    // library::Entity::find_by_id(id)
+    //     .all(state.get_connection())
+    //     .await
+    //     .map(|res| {
+    //         if res.is_empty() {
+    //             Err(ApiError::NotFound(format!(
+    //                 "Library with id {} not found",
+    //                 id
+    //             )))
+    //         } else {
+    //             Ok(Json(res[0].to_owned().into()))
+    //         }
+    //     })?
+}
+
+// TODO: this is a work around until I can solve STU-12: Construct library with series query programmatically
+#[get("/library/<id>/series")]
+pub async fn get_library_series(state: &State, id: i32) -> GetLibrarySeries {
+    series::Entity::find_with_book_count()
+        .filter(series::Column::LibraryId.eq(id))
+        .into_model::<SeriesWithBookCount>()
         .all(state.get_connection())
         .await
-        .map(|res| {
-            if res.is_empty() {
-                Err(ApiError::NotFound(format!(
-                    "Library with id {} not found",
-                    id
-                )))
-            } else {
-                Ok(Json(res[0].to_owned().into()))
-            }
-        })?
+        .map(|res| Ok(Json(res)))?
 }
 
 // TODO: use ApiResult

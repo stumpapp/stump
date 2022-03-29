@@ -22,11 +22,9 @@ pub struct SeriesWithBookCount {
 #[derive(Serialize, Debug)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct GetSeriesById {
-    // pub series: SeriesModel,
     pub id: i32,
     pub library_id: i32,
     pub title: String,
-    // pub book_count: i32,
     pub updated_at: Option<chrono::NaiveDateTime>,
     pub path: String,
     pub status: FileStatus,

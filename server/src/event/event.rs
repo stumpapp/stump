@@ -1,4 +1,4 @@
-use entity::series;
+use entity::{media, series};
 use rocket::{
     response::content::Json,
     serde::{json, Deserialize, Serialize},
@@ -8,6 +8,7 @@ use rocket::{
 #[serde(crate = "rocket::serde")]
 pub enum EventType {
     SeriesCreated,
+    MediaCreated,
 
     ScanStarted,
     ScanProgress,
@@ -34,6 +35,13 @@ impl Event {
         Event::new(
             EventType::SeriesCreated,
             Some(json::serde_json::to_value(series).expect("Failed to serialize series")),
+        )
+    }
+
+    pub fn media_created(media: media::Model) -> Event {
+        Event::new(
+            EventType::MediaCreated,
+            Some(json::serde_json::to_value(media).expect("Failed to serialize media")),
         )
     }
 }

@@ -43,18 +43,28 @@ pub fn process_zip(file: &DirEntry) -> ProcessResult {
     Ok((comic_info, entries))
 }
 
+// FIXME: this solution is terrible, was just fighting with borrow checker and wanted
+// a quick solve. TODO: rework this!
 /// Get an image from a zip file by index (page).
 pub fn get_zip_image(file: &str, page: usize) -> GetPageResult {
     let zip_file = std::fs::File::open(file)?;
-    let mut archive = zip::ZipArchive::new(zip_file)?;
+
+    let mut archive = zip::ZipArchive::new(&zip_file)?;
+    // FIXME: stinky clone here
+    let file_names_archive = archive.clone();
 
     if archive.len() == 0 {
         return Err(ProcessFileError::ArchiveEmptyError);
     }
 
+    let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+    // NOTE: I noticed some zip files *also* come back out of order >:(
+    // TODO: look more into this!
+    file_names.sort_by(|a, b| a.cmp(b));
+
     let mut images_seen = 0;
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
+    for name in file_names {
+        let mut file = archive.by_name(name)?;
 
         let mut contents = Vec::new();
         let content_type = media_file::get_content_type(&file);

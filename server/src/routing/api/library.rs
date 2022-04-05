@@ -128,6 +128,8 @@ pub async fn insert_library(state: &State, lib: Json<InsertLibrary<'_>>) -> Inse
     let new_lib = library::ActiveModel {
         name: Set(lib.name.to_string()),
         path: Set(lib.path.to_string()),
+        status: Set(entity::util::FileStatus::Ready),
+        // FIXME: this was not setting the library status >:(
         ..Default::default()
     };
 

@@ -25,10 +25,11 @@ pub struct Model {
     #[sea_orm(column_type = "DateTime")]
     pub updated_at: Option<chrono::NaiveDateTime>,
     /// whether or not the media is downloaded to the client. ex: true
+    #[sea_orm(default_value = false)]
     pub downloaded: bool,
-    /// the checksum hash of the file contents. Used to ensure only one instance of a file in the database
-    #[sea_orm(unique)]
-    pub checksum: String,
+    // / the checksum hash of the file contents. Used to ensure only one instance of a file in the database
+    // #[sea_orm(unique)]
+    // pub checksum: String,
     /// the path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
     pub path: String,
     /// The status of the media since last scan or access
@@ -68,7 +69,7 @@ impl Entity {
         Self::find().filter(Column::Id.eq(id))
     }
 
-    pub fn find_by_checksum(checksum: &str) -> Select<Entity> {
-        Self::find().filter(Column::Checksum.eq(checksum))
-    }
+    // pub fn find_by_checksum(checksum: &str) -> Select<Entity> {
+    //     Self::find().filter(Column::Checksum.eq(checksum))
+    // }
 }

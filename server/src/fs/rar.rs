@@ -70,6 +70,7 @@ pub fn get_rar_image(file: &str, page: usize) -> GetPageResult {
             let mut images_seen = 0;
 
             let mut entries: Vec<_> = open_archive.into_iter().filter_map(|e| e.ok()).collect();
+
             entries.sort_by(|a, b| a.filename.cmp(&b.filename));
 
             for e in entries {

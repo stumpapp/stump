@@ -24,7 +24,7 @@ async fn main() {
 
     let database_url = format!(
         "sqlite:{}?mode=rwc",
-        config_dir.join("stump-test.db").to_str().unwrap()
+        config_dir.join("stump.db").to_str().unwrap()
     );
 
     std::env::set_var("DATABASE_URL", database_url);

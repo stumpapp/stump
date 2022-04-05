@@ -13,12 +13,19 @@ use entity::{
 
 use sea_orm::{DatabaseConnection, Set};
 
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 use crate::{
     database::queries,
     event::{event::Event, handler::EventHandler},
-    types::dto::{GetMediaQuery, GetMediaQueryResult},
+    fs::{
+        epub::process_epub, error::ProcessFileError, media_file::ProcessResult, rar::process_rar,
+        zip::process_zip,
+    },
+    types::{
+        comic::ComicInfo,
+        dto::{GetMediaQuery, GetMediaQueryResult},
+    },
     State,
 };
 
@@ -46,6 +53,7 @@ impl IgnoredFile for Path {
     }
 }
 
+// TODO: error handling / return result
 fn generate_series_model(path: &Path, library_id: i32) -> series::ActiveModel {
     let metadata = match path.metadata() {
         Ok(metadata) => Some(metadata),
@@ -71,15 +79,81 @@ fn generate_series_model(path: &Path, library_id: i32) -> series::ActiveModel {
     series::ActiveModel {
         library_id: Set(library_id),
         title: Set(name),
-        // book_count: Set(0),
         updated_at: Set(updated_at),
+        // TODO: do I want this to throw an error?
         path: Set(path.to_str().unwrap_or("").to_string()),
+        // FIXME: this should be handled by default but isn't, see https://github.com/SeaQL/sea-orm/issues/420 ?
+        status: Set(FileStatus::Ready),
         ..Default::default()
     }
 }
 
-fn generate_media_model(path: &Path, series_id: i32) -> media::ActiveModel {
-    unimplemented!()
+fn process_entry(entry: &DirEntry) -> ProcessResult {
+    match entry.file_name().to_str() {
+        Some(name) if name.ends_with("cbr") => process_rar(entry),
+        Some(name) if name.ends_with("cbz") => process_zip(entry),
+        // Some(name) if name.ends_with("epub") => process_epub(entry),
+        _ => Err(ProcessFileError::UnsupportedFileType),
+    }
+}
+
+// TODO: result return to handle error downstream
+fn generate_media_model(entry: &DirEntry, series_id: i32) -> Option<media::ActiveModel> {
+    let processed_info = process_entry(entry);
+
+    if let Err(e) = processed_info {
+        // log::info!("{:?}", e);
+        return None;
+    }
+
+    let (info, pages) = processed_info.unwrap();
+
+    let path = entry.path();
+
+    let metadata = match entry.metadata() {
+        Ok(metadata) => Some(metadata),
+        _ => None,
+    };
+
+    let path_str = path.to_str().unwrap().to_string();
+    let name = entry.file_name().to_str().unwrap().to_string();
+    let ext = path.extension().unwrap().to_str().unwrap().to_string();
+
+    let comic_info = match info {
+        Some(info) => info,
+        None => ComicInfo::default(),
+    };
+
+    let mut size: u64 = 0;
+    let mut modified: Option<NaiveDateTime> = None;
+
+    if let Some(metadata) = metadata {
+        size = metadata.len();
+
+        modified = match metadata.modified() {
+            Ok(st) => {
+                let dt: DateTime<Utc> = st.clone().into();
+                Some(dt.naive_utc())
+            }
+            Err(_) => Some(Utc::now().naive_utc()),
+        };
+    }
+
+    Some(media::ActiveModel {
+        series_id: Set(series_id),
+        name: Set(name),
+        description: Set(comic_info.summary),
+        size: Set(size as i64),
+        extension: Set(ext),
+        pages: Set(match comic_info.page_count {
+            Some(count) => count as i32,
+            None => pages.len() as i32,
+        }),
+        updated_at: Set(modified),
+        path: Set(path_str),
+        status: Set(FileStatus::Ready),
+        ..Default::default()
+    })
 }
 
 fn dir_has_files(path: &Path) -> bool {
@@ -131,6 +205,7 @@ impl<'a> Scanner<'a> {
     }
 
     // FIXME: pass in &Model??
+    // TODO: make me
     async fn analyze_media(&self, key: String) {
         let media = self.media.get(&key).unwrap();
 
@@ -139,7 +214,7 @@ impl<'a> Scanner<'a> {
         println!("analyzing media: {:?}", media);
 
         if media.status == FileStatus::Missing {
-            info!("Media found");
+            log::info!("Media found");
             self.set_media_status(id, FileStatus::Ready, media.path.clone())
                 .await;
         }
@@ -170,12 +245,10 @@ impl<'a> Scanner<'a> {
         self.get_series(path).is_some()
     }
 
-    async fn handle_new_media() {}
-
     async fn set_media_status(&self, id: i32, status: FileStatus, path: String) {
         match queries::media::set_status(self.db, id, status).await {
             Ok(_) => {
-                info!("set media status: {:?} -> {:?}", path, status);
+                log::info!("set media status: {:?} -> {:?}", path, status);
                 if status == FileStatus::Missing {
                     self.event_handler
                         .log_error(format!("Missing file: {}", path));
@@ -190,7 +263,7 @@ impl<'a> Scanner<'a> {
     async fn set_series_status(&self, id: i32, status: FileStatus, path: String) {
         match queries::series::set_status(self.db, id, status).await {
             Ok(_) => {
-                info!("set series status: {:?} -> {:?}", path, status);
+                log::info!("set series status: {:?} -> {:?}", path, status);
                 if status == FileStatus::Missing {
                     self.event_handler
                         .log_error(format!("Missing file: {}", path));
@@ -207,29 +280,39 @@ impl<'a> Scanner<'a> {
 
         match series.insert(self.db).await {
             Ok(m) => {
-                info!("Created new series: {:?}", m);
+                log::info!("Created new series: {:?}", m);
                 self.event_handler
                     .emit_event(Event::series_created(m.clone()));
                 Some(m)
             }
             Err(err) => {
+                log::error!("Failed to create series: {:?}", err);
                 self.event_handler.log_error(err.to_string());
                 None
             }
         }
     }
 
-    async fn create_media(&self, path: &Path, series_id: i32) -> Option<media::Model> {
-        let media = generate_media_model(path, series_id);
+    async fn create_media(&self, entry: &DirEntry, series_id: i32) -> Option<media::Model> {
+        let media = generate_media_model(entry, series_id);
+
+        if media.is_none() {
+            return None;
+        }
+
+        let media = media.unwrap();
+
+        log::info!("Creating media: {:?}", media);
 
         match media.insert(self.db).await {
             Ok(m) => {
-                info!("Created new media: {:?}", m);
+                log::info!("Created new media: {:?}", m);
                 self.event_handler
                     .emit_event(Event::media_created(m.clone()));
                 Some(m)
             }
             Err(err) => {
+                log::warn!("Failed to create media: {:?}", err);
                 self.event_handler.log_error(err.to_string());
                 None
             }
@@ -248,14 +331,18 @@ impl<'a> Scanner<'a> {
         {
             let path = entry.path();
 
+            log::info!("Current: {:?}", path);
+
             let series = self.get_series(&path);
             let series_exists = series.is_some();
 
             if path.is_dir() && !series_exists {
                 if path.to_path_buf().eq(&library_path) && !dir_has_files(path) {
-                    info!("Skipping library directory - contains no files.");
+                    log::info!("Skipping library directory - contains no files.");
                     continue;
                 }
+
+                log::info!("Creating new series: {:?}", path);
 
                 match self.create_series(path, library.id).await {
                     Some(s) => {
@@ -271,16 +358,16 @@ impl<'a> Scanner<'a> {
 
             if series_exists {
                 let series = series.unwrap();
-                info!("Existing series: {:?}", series);
+                log::info!("Existing series: {:?}", series);
                 visited_series.insert(series.id, true);
                 continue;
             } else if path.should_ignore() {
-                // info!("Ignoring: {:?}", path);
+                // log::info!("Ignoring: {:?}", path);
                 continue;
             }
 
             if let Some(media) = self.get_media(&path) {
-                // info!("Existing media: {:?}", media);
+                // log::info!("Existing media: {:?}", media);
                 visited_media.insert(media.id, true);
                 // self.analyze_media(media).await;
                 continue;
@@ -292,7 +379,9 @@ impl<'a> Scanner<'a> {
                 path
             ));
 
-            match self.create_media(path, series_id).await {
+            log::info!("New media at {:?} in series {:?}", &path, series_id);
+
+            match self.create_media(&entry, series_id).await {
                 Some(m) => {
                     visited_media.insert(m.id, true);
                     // FIXME: ruh roh, this won't work but *do I need it to??*
@@ -313,7 +402,7 @@ impl<'a> Scanner<'a> {
                 }
                 _ => {
                     if s.library_id == library.id {
-                        info!("MOVED/MISSING SERIES: {}", s.path);
+                        log::info!("MOVED/MISSING SERIES: {}", s.path);
                         self.set_series_status(s.id, FileStatus::Missing, s.path.clone())
                             .await;
                     }
@@ -331,7 +420,7 @@ impl<'a> Scanner<'a> {
                 }
                 _ => {
                     if media.library_id == library.id {
-                        info!("MOVED/MISSING MEDIA: {}", media.path);
+                        log::info!("MOVED/MISSING MEDIA: {}", media.path);
                         self.set_media_status(media.id, FileStatus::Missing, media.path.clone())
                             .await;
                     }

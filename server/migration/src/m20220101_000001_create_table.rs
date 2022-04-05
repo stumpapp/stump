@@ -24,7 +24,7 @@ fn get_seaorm_drop_stmt<E: EntityTrait>(e: E) -> TableDropStatement {
 
 impl MigrationName for Migration {
     fn name(&self) -> &str {
-        "m20220120_000001_create_post_table"
+        "m20220120_000001_create_table"
     }
 }
 

@@ -1,13 +1,13 @@
 use entity::sea_orm::{self, ActiveModelTrait};
 use entity::util::FileStatus;
-use entity::{media, read_progress, series};
-use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, JoinType, QueryFilter, QueryOrder, QuerySelect,
-    RelationTrait, Set,
-};
+use entity::{media, series};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, Set};
 
-pub async fn get_series(conn: &DatabaseConnection) -> Result<Vec<series::Model>, String> {
-    Ok(series::Entity::find()
+use crate::types::dto::series::SeriesWithBookCount;
+
+pub async fn get_series(conn: &DatabaseConnection) -> Result<Vec<SeriesWithBookCount>, String> {
+    Ok(series::Entity::find_with_book_count()
+        .into_model::<SeriesWithBookCount>()
         .all(conn)
         .await
         .map_err(|e| e.to_string())?)
@@ -26,9 +26,12 @@ pub async fn get_series_in_library(
     Ok(query.all(conn).await.map_err(|e| e.to_string())?)
 }
 
-pub async fn get_lastest_series(conn: &DatabaseConnection) -> Result<Vec<series::Model>, String> {
-    Ok(series::Entity::find()
+pub async fn get_lastest_series(
+    conn: &DatabaseConnection,
+) -> Result<Vec<SeriesWithBookCount>, String> {
+    Ok(series::Entity::find_with_book_count()
         .order_by_desc(series::Column::UpdatedAt)
+        .into_model::<SeriesWithBookCount>()
         .all(conn)
         .await
         .map_err(|e| e.to_string())?)
@@ -38,7 +41,7 @@ pub async fn get_series_by_id(
     conn: &DatabaseConnection,
     id: String,
 ) -> Result<Option<series::Model>, String> {
-    Ok(series::Entity::find()
+    Ok(series::Entity::find_with_book_count()
         .filter(series::Column::Id.eq(id))
         .one(conn)
         .await

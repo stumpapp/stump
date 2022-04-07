@@ -16,7 +16,7 @@ pub struct GetMediaByIdWithProgress {
     pub current_page: Option<i32>,
     pub updated_at: std::option::Option<NaiveDateTime>,
     pub downloaded: bool,
-    pub checksum: String,
+    // pub checksum: String,
     pub path: String,
 }
 
@@ -38,7 +38,7 @@ impl Into<GetMediaByIdWithProgress> for MediaWithMaybeProgress {
             },
             updated_at: media.updated_at,
             downloaded: media.downloaded,
-            checksum: media.checksum,
+            // checksum: media.checksum,
             path: media.path,
         }
     }

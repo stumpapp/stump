@@ -2,14 +2,16 @@ import { Box, Text } from '@chakra-ui/react';
 import React from 'react';
 import client from '~api/client';
 import { getSeriesById, getSeriesThumbnail } from '~api/query/series';
+import pluralizeStat from '~util/pluralize';
 
 interface Props extends Series {}
 
 export default function SeriesCard({ ...series }: Props) {
-	const prefetchSeries = async () =>
+	const prefetchSeries = async () => {
 		await client.prefetchQuery(['getSeries', series.id], () => getSeriesById(series.id), {
 			staleTime: 10 * 1000,
 		});
+	};
 
 	return (
 		<a
@@ -32,7 +34,7 @@ export default function SeriesCard({ ...series }: Props) {
 
 			<Box p={2}>
 				<h3 className="text-gray-100">{series.title}</h3>
-				<Text>{series.bookCount} books</Text>
+				<Text>{pluralizeStat('book', series.bookCount)}</Text>
 			</Box>
 		</a>
 	);

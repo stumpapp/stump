@@ -1,5 +1,6 @@
 use crate::database::queries;
 use crate::event::log::Log;
+use crate::types::dto::series::SeriesWithBookCount;
 use crate::{
     fs::checksum::Crc,
     types::{
@@ -52,7 +53,7 @@ impl<'a> Scanner<'a> {
         db: &'a DatabaseConnection,
         event_queue: &'a Sender<Log>,
         libraries: Vec<library::Model>,
-        series: Vec<series::Model>,
+        series: Vec<SeriesWithBookCount>,
         media: GetMediaQueryResult,
     ) -> Self {
         let mut hashmap = HashMap::new();
@@ -163,7 +164,7 @@ impl<'a> Scanner<'a> {
         series::ActiveModel {
             library_id: Set(library_id),
             title: Set(name),
-            book_count: Set(0),
+            // book_count: Set(0),
             updated_at: Set(updated_at),
             path: Set(path.to_str().unwrap_or("").to_string()),
             ..Default::default()

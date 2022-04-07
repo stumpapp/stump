@@ -7,8 +7,11 @@ use entity::{library, util::FileStatus};
 use rocket::serde::Serialize;
 use sea_orm::FromQueryResult;
 
+use self::series::SeriesWithBookCount;
+
 use super::alias::SeriesModel;
 
+// TODO: change this terrible name
 // I wanted to flatten this query into one struct to simplify some of the fs indexing logic
 // I need to write.
 #[derive(FromQueryResult, Debug)]
@@ -46,6 +49,30 @@ pub struct GetLibraryWithSeriesQuery {
 impl Into<GetLibraryWithSeriesQuery> for (library::Model, Vec<SeriesModel>) {
     fn into(self) -> GetLibraryWithSeriesQuery {
         GetLibraryWithSeriesQuery {
+            // library: self.0,
+            id: self.0.id,
+            name: self.0.name,
+            path: self.0.path,
+            status: self.0.status,
+            series: self.1,
+        }
+    }
+}
+
+// TODO: refactor this
+#[derive(Serialize, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct GetLibraryWithSeriesQuery_refactor {
+    pub id: i32,
+    pub name: String,
+    pub path: String,
+    pub status: FileStatus,
+    pub series: Vec<SeriesWithBookCount>,
+}
+
+impl Into<GetLibraryWithSeriesQuery_refactor> for (library::Model, Vec<SeriesWithBookCount>) {
+    fn into(self) -> GetLibraryWithSeriesQuery_refactor {
+        GetLibraryWithSeriesQuery_refactor {
             // library: self.0,
             id: self.0.id,
             name: self.0.name,

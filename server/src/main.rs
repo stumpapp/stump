@@ -3,7 +3,7 @@ extern crate rocket;
 
 use rocket::fs::NamedFile;
 use rocket::http::SameSite;
-use rocket::tokio::sync::broadcast::channel;
+use rocket::{catchers, routes};
 use rocket::{fs::FileServer, futures::executor::block_on, http::Method};
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_session_store::{memory::MemoryStore, CookieConfig, SessionStore};
@@ -136,6 +136,7 @@ fn rocket() -> _ {
                 // library api
                 routing::api::library::get_libraries,
                 routing::api::library::get_library,
+                routing::api::library::get_library_series,
                 routing::api::library::insert_library,
                 routing::api::library::update_library,
                 routing::api::library::delete_library,

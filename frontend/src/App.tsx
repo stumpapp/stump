@@ -15,6 +15,7 @@ import StoreProvider from '~store/StoreProvider';
 const Home = React.lazy(() => import('~pages/Home'));
 const Library = React.lazy(() => import('~pages/Library'));
 const Series = React.lazy(() => import('~pages/Series'));
+const Book = React.lazy(() => import('~pages/Book'));
 
 export default function App() {
 	return (
@@ -29,6 +30,7 @@ export default function App() {
 									<Route path="settings" element={<Settings />} />
 									<Route path="libraries/:id" element={<Library />} />
 									<Route path="series/:id" element={<Series />} />
+									<Route path="books/:id" element={<Book />} />
 								</Route>
 								<Route path="/auth" element={<BaseLayout />}>
 									<Route path="login" element={<Login />} />

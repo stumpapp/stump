@@ -14,7 +14,7 @@ export default function MediaCard({ ...media }: Props) {
 	return (
 		<a
 			href={`/books/${media.id}`}
-			className="hover:border-brand col-span-1 rounded-md rounded-t-md border border-transparent bg-gray-800 transition-all duration-200"
+			className="hover:border-brand rounded-md rounded-t-md border border-transparent bg-gray-800 transition-all duration-200"
 			onMouseEnter={prefetchMedia}
 		>
 			<Box px={1.5}>
@@ -30,8 +30,8 @@ export default function MediaCard({ ...media }: Props) {
 				/>
 			</Box>
 
-			<div className="max-w-[12rem] p-2">
-				<h3 title={media.name} className="truncate text-gray-100">
+			<div className="max-w-[11.5rem] p-2">
+				<h3 title={media.name} className="text-gray-100">
 					{media.name}
 				</h3>
 			</div>

@@ -1,8 +1,16 @@
+import React from 'react';
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
 import { ArrowsClockwise, DotsThreeVertical, NotePencil, Trash } from 'phosphor-react';
-import React from 'react';
+import { useMutation } from 'react-query';
+import { scanLibary } from '~api/mutation/library';
 
-export default function LibraryOptionsMenu() {
+interface Props {
+	libraryId: number;
+}
+
+export default function LibraryOptionsMenu({ libraryId }: Props) {
+	const { mutate: scan } = useMutation('scanLibary', { mutationFn: scanLibary });
+
 	return (
 		// TODO: https://chakra-ui.com/docs/theming/customize-theme#customizing-component-styles
 		<Menu size="sm">
@@ -11,7 +19,9 @@ export default function LibraryOptionsMenu() {
 			</MenuButton>
 
 			<MenuList>
-				<MenuItem icon={<ArrowsClockwise size={'1rem'} />}>Scan</MenuItem>
+				<MenuItem icon={<ArrowsClockwise size={'1rem'} onClick={() => scan(libraryId)} />}>
+					Scan
+				</MenuItem>
 				<MenuItem icon={<NotePencil size={'1rem'} />}>Edit</MenuItem>
 				<MenuDivider />
 				<MenuItem icon={<Trash size={'1rem'} />}>Delete</MenuItem>

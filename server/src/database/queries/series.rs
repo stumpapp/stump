@@ -55,6 +55,7 @@ pub async fn get_series_by_id_with_media(
     Ok(series::Entity::find()
         .filter(series::Column::Id.eq(id))
         .find_with_related(media::Entity)
+        .order_by_asc(media::Column::Name)
         .all(conn)
         .await
         .map_err(|e| e.to_string())?)

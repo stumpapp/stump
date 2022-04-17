@@ -84,7 +84,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 									<a href={item.href} className="w-full flex-1 pl-1 text-sm">
 										{item.name}
 									</a>
-									<LibraryOptionsMenu />
+									<LibraryOptionsMenu libraryId={item.id} />
 								</HStack>
 							</Box>
 						))}

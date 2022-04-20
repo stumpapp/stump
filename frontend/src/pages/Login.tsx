@@ -8,11 +8,28 @@ import Form from '~components/ui/Form';
 import Input from '~components/ui/Input';
 import { useStore } from '~store/store';
 
-import { Button, Heading, Stack } from '@chakra-ui/react';
+import { Button, Container, Heading, HStack, Text, VStack } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from 'react-query';
 
 export default function Login() {
 	const { user, setUser } = useStore(({ user, setUser }) => ({ user, setUser }), shallow);
+
+	const { isLoading, mutate } = useMutation('loginUser', {
+		mutationFn: login,
+		onSuccess: (res) => {
+			if (!res.data) {
+				throw new Error('Login failed.');
+			}
+
+			setUser(res.data);
+		},
+		onError: (err) => {
+			// TODO: handle this error
+			console.error(err);
+		},
+	});
+
 	const navigate = useNavigate();
 
 	const schema = z.object({
@@ -25,18 +42,9 @@ export default function Login() {
 	});
 
 	async function handleSubmit(values: FieldValues) {
-		console.log(values);
-
 		const { username, password } = values;
 
-		const res = await login(username, password).catch((err) => err.response);
-
-		if (res.status === 200) {
-			setUser(res.data);
-		} else {
-			// TODO: handle error
-			console.log(res);
-		}
+		mutate({ username, password });
 	}
 
 	useEffect(() => {
@@ -47,17 +55,32 @@ export default function Login() {
 
 	// TODO: form.formState.errors
 	return (
-		<Stack>
-			<Heading as="h3">Login</Heading>
+		<Container p="4">
+			<HStack px={2} flexShrink={0} justifyContent="center" alignItems="center" spacing="4">
+				<img src="/favicon.png" width="120" height="120" />
+				<Text
+					bgGradient="linear(to-r, brand.600, brand.200)"
+					bgClip="text"
+					fontSize="4xl"
+					fontWeight="bold"
+				>
+					Stump
+				</Text>
+			</HStack>
 
 			<Form form={form} onSubmit={handleSubmit}>
 				<Input label="Username" type="text" autoFocus {...form.register('username')} />
 				<Input label="Password" type="password" {...form.register('password')} />
 
-				<Button type="submit" colorScheme="brand">
+				<Button
+					isLoading={isLoading}
+					type="submit"
+					bgGradient="linear(to-r, brand.600, brand.400)"
+					_hover={{ bgGradient: 'linear(to-r, brand.700, brand.500)' }}
+				>
 					Login
 				</Button>
 			</Form>
-		</Stack>
+		</Container>
 	);
 }

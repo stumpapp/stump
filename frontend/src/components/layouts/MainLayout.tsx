@@ -7,7 +7,7 @@ import Lazy from '~components/Lazy';
 import Sidebar from '~components/Sidebar';
 import { useStore } from '~store/store';
 
-import { Box, useColorModeValue } from '@chakra-ui/react';
+import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
 
 export default function MainLayout() {
 	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
@@ -50,12 +50,13 @@ export default function MainLayout() {
 	}
 
 	return (
-		<Sidebar>
-			<Box bg={useColorModeValue('gray.100', 'gray.900')} as="main">
+		<Flex>
+			<Sidebar />
+			<Box as="main" bg={useColorModeValue('gray.100', 'gray.900')} p="4">
 				<React.Suspense fallback={<Lazy />}>
 					<Outlet />
 				</React.Suspense>
 			</Box>
-		</Sidebar>
+		</Flex>
 	);
 }

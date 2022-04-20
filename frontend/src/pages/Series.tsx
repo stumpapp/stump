@@ -1,3 +1,4 @@
+import { Wrap, WrapItem } from '@chakra-ui/react';
 import React from 'react';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
@@ -25,11 +26,15 @@ export default function Series() {
 		<div className="flex flex-col space-y-4">
 			<h1 className="text-lg font-bold text-gray-100">{series.title}</h1>
 
-			<div className="flex flex-wrap gap-4">
+			{/* <div className="flex flex-wrap gap-4 items-center justify-center"> */}
+			<Wrap align="center">
 				{series.media.map((m) => (
-					<MediaCard {...m} />
+					<WrapItem>
+						<MediaCard {...m} />
+					</WrapItem>
 				))}
-			</div>
+			</Wrap>
+			{/* </div> */}
 		</div>
 	);
 }

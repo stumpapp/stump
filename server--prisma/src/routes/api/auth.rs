@@ -9,11 +9,12 @@ use crate::{
         errors::ApiError,
         models::{AuthenticatedUser, LoginRequest},
     },
+    utils::auth,
 };
 
 #[get("/auth/me")]
 pub async fn me(session: Session<'_>, _auth: StumpAuth) -> Option<Json<AuthenticatedUser>> {
-    match session.get().await.expect("Could not get session") {
+    match session.get().await.expect("Session error") {
         Some(user) => Some(Json(user)),
         _ => None,
     }
@@ -25,30 +26,26 @@ pub async fn login(
     session: Session<'_>,
     credentials: Json<LoginRequest>,
 ) -> LoginResult {
-    let existing_session = session.get().await.expect("TODO");
+    let existing_session = session.get().await?;
 
     if let Some(user) = existing_session {
         return Ok(Json(user.into()));
     }
 
-    let user = state
-        .get_db()
+    let db = state.get_db();
+
+    let user = db
         .user()
         .find_unique(user::username::equals(credentials.username.to_owned()))
         .exec()
-        .await
-        .expect("TODO");
+        .await?;
 
     match user {
         Some(user) => {
-            let matches = bcrypt::verify(credentials.password.to_owned(), &user.hashed_password)
-                .expect("Error setting session");
+            let matches = bcrypt::verify(credentials.password.to_owned(), &user.hashed_password)?;
 
             if matches {
-                session
-                    .set(user.clone().into())
-                    .await
-                    .expect("Error setting session");
+                session.set(user.clone().into()).await?;
                 Ok(Json(user.into()))
             } else {
                 Err(ApiError::Unauthorized("Invalid credentials".to_string()))
@@ -58,43 +55,48 @@ pub async fn login(
     }
 }
 
-// #[post("/auth/register", data = "<credentials>")]
-// pub async fn register(
-//     state: &State,
-//     session: Session<'_>,
-//     credentials: Json<LoginRequest<'_>>,
-// ) -> ApiResult<Json<AuthenticatedUser>> {
-//     let existing_session = session.get().await.expect("TODO");
+// TODO: this entire flow needs a rework. I am not sure if people with *access* to the server
+// should be able to register without the ServerOwner user approving. Maybe this can be something
+// configurable? Maybe just allow it? Maybe make it an approval versus just registering immediately?
+#[post("/auth/register", data = "<credentials>")]
+pub async fn register(
+    state: &State,
+    session: Session<'_>,
+    credentials: Json<LoginRequest>,
+) -> ApiResult<Json<AuthenticatedUser>> {
+    let existing_session = session.get().await?;
+    let db = state.get_db();
 
-//     let has_users = user::Entity::find()
-//         .one(state.get_connection())
-//         .await
-//         .expect("TODO")
-//         .is_some();
+    let has_users = db.user().find_first(vec![]).exec().await?.is_some();
 
-//     let mut user_role = UserRole::default();
+    let mut user_role = UserRole::default();
 
-//     // owners must register member accounts
-//     if existing_session.is_none() && has_users {
-//         return Err(ApiError::Forbidden(
-//             "Must be owner to register member accounts".to_string(),
-//         ));
-//     } else if !has_users {
-//         // register the user as owner
-//         user_role = UserRole::ServerOwner;
-//     }
+    // server owners must register member accounts
+    if existing_session.is_none() && has_users {
+        return Err(ApiError::Forbidden(
+            "Must be server owner to register member accounts".to_string(),
+        ));
+    } else if !has_users {
+        // register the user as owner
+        user_role = UserRole::ServerOwner;
+    }
 
-//     // TODO: env var cost
-//     let hashed_password = bcrypt::hash(credentials.password, 12).expect("TODO");
+    let hashed_password = bcrypt::hash(&credentials.password, auth::get_hash_cost())?;
 
-//     let new_user = user::ActiveModel {
-//         username: Set(credentials.username.into()),
-//         password: Set(hashed_password),
-//         role: Set(user_role),
-//         ..Default::default()
-//     };
+    let user = db
+        .user()
+        .create(
+            user::username::set(credentials.username.to_owned()),
+            user::hashed_password::set(hashed_password),
+            vec![user::role::set(user_role.into())],
+        )
+        .exec()
+        .await?;
 
-//     let user_model = new_user.insert(state.get_connection()).await.expect("TODO");
+    Ok(Json(user.into()))
+}
 
-//     Ok(Json(user_model.into()))
-// }
+#[post("/auth/logout")]
+pub async fn logout(session: Session<'_>) -> ApiResult<()> {
+    Ok(session.remove().await?)
+}

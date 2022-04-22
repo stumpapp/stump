@@ -10,6 +10,7 @@ use std::path::Path;
 use types::http::UnauthorizedResponse;
 
 pub mod config;
+pub mod fs;
 pub mod guards;
 pub mod opds;
 pub mod prisma;

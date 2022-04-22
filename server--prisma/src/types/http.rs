@@ -1,4 +1,7 @@
+use std::io::Cursor;
+
 use rocket::{
+    http::ContentType,
     response::{self, Responder},
     Request, Response,
 };
@@ -17,6 +20,25 @@ impl<'r> Responder<'r, 'static> for UnauthorizedResponse {
             // .header(ContentType::XML)
             .raw_header("Authorization", "Basic")
             .raw_header("WWW-Authenticate", "Basic realm=\"stump\"")
+            .ok()
+    }
+}
+
+pub type ImageResponse = (ContentType, Vec<u8>);
+
+pub struct ImageResponseCached {
+    // size: u64,
+    pub data: Vec<u8>,
+    pub content_type: ContentType,
+}
+
+impl<'r> Responder<'r, 'static> for ImageResponseCached {
+    fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
+        Response::build()
+            .sized_body(self.data.len(), Cursor::new(self.data))
+            // 10 minutes
+            .raw_header("Cache-Control", "private,max-age=600")
+            .header(self.content_type)
             .ok()
     }
 }

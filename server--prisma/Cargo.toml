@@ -2,6 +2,7 @@
 name = "stump"
 version = "0.1.0"
 edition = "2021"
+default-run = "stump"
 
 [workspace]
 members = ["prisma-cli"]
@@ -21,4 +22,8 @@ urlencoding = "2.1.0"
 thiserror = "1.0.30"
 base64 = "0.13.0"
 log = "0.4.0"
+epub = "1.2.3"
+walkdir = "2.3.2"
+zip = "0.5.13"
+unrar = { git = "https://github.com/aaronleopold/unrar.rs" }
 

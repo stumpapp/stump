@@ -69,10 +69,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 					</HStack>
 					<Box p={1} rounded="full">
 						<CaretRight
-							className={clsx(
-								isOpen ? 'rotate-90' : 'rotate-270',
-								'transition-all duration-100',
-							)}
+							className={clsx(isOpen ? 'rotate-90' : 'rotate-270', 'transition-all duration-100')}
 						/>
 					</Box>
 				</HStack>
@@ -117,13 +114,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 function NavItem({ name, href, ...rest }: NavItemProps) {
 	return (
 		<Button w="full" variant="ghost" textAlign="left" p={2}>
-			<HStack
-				as={'a'}
-				href={href}
-				w="full"
-				alignItems="center"
-				justifyContent="space-between"
-			>
+			<HStack as={'a'} href={href} w="full" alignItems="center" justifyContent="space-between">
 				<HStack spacing="2">
 					{/* @ts-ignore */}
 					<rest.icon />

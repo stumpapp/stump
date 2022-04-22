@@ -62,3 +62,36 @@ impl Into<MediaWithProgress> for (prisma::media::Data, prisma::read_progress::Da
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct ComicInfo {
+    #[serde(rename = "Series")]
+    pub series: Option<String>,
+    #[serde(rename = "Number")]
+    pub number: Option<usize>,
+    #[serde(rename = "Web")]
+    pub web: Option<String>,
+    #[serde(rename = "Summary")]
+    pub summary: Option<String>,
+    #[serde(rename = "Publisher")]
+    pub publisher: Option<String>,
+    #[serde(rename = "Genre")]
+    pub genre: Option<String>,
+    #[serde(rename = "PageCount")]
+    pub page_count: Option<usize>,
+}
+
+impl ComicInfo {
+    pub fn default() -> Self {
+        Self {
+            series: None,
+            number: None,
+            web: None,
+            summary: None,
+            publisher: None,
+            genre: None,
+            page_count: None,
+        }
+    }
+}

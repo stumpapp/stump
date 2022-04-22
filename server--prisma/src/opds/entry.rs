@@ -4,7 +4,11 @@ use prisma_client_rust::chrono::{DateTime, Utc};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::{opds::link::OpdsStreamLink, types::models::MediaWithProgress};
+use crate::{
+    opds::link::OpdsStreamLink,
+    prisma::{library, media, series},
+    types::models::MediaWithProgress,
+};
 // use crate::types::alias::{MediaWithProgress, UserMediaWithProgress};
 // use crate::types::dto::series::SeriesWithBookCount;
 // use entity::{library, media, series};
@@ -97,31 +101,31 @@ impl OpdsEntry {
     }
 }
 
-// impl From<library::Model> for OpdsEntry {
-//     fn from(l: library::Model) -> Self {
-//         let mut links = Vec::new();
+impl From<library::Data> for OpdsEntry {
+    fn from(l: library::Data) -> Self {
+        let mut links = Vec::new();
 
-//         let nav_link = OpdsLink::new(
-//             OpdsLinkType::Navigation,
-//             OpdsLinkRel::Subsection,
-//             format!("/opds/v1.2/libraries/{}", l.id),
-//         );
+        let nav_link = OpdsLink::new(
+            OpdsLinkType::Navigation,
+            OpdsLinkRel::Subsection,
+            format!("/opds/v1.2/libraries/{}", l.id),
+        );
 
-//         links.push(nav_link);
+        links.push(nav_link);
 
-//         OpdsEntry {
-//             id: l.id.to_string(),
-//             // FIXME:
-//             updated: chrono::Utc::now(),
-//             title: l.name,
-//             // FIXME:
-//             content: None,
-//             authors: None,
-//             links,
-//             stream_link: None,
-//         }
-//     }
-// }
+        OpdsEntry {
+            id: l.id.to_string(),
+            // FIXME:
+            updated: chrono::Utc::now(),
+            title: l.name,
+            // FIXME:
+            content: None,
+            authors: None,
+            links,
+            stream_link: None,
+        }
+    }
+}
 
 // impl From<SeriesWithBookCount> for OpdsEntry {
 //     fn from(s: SeriesWithBookCount) -> Self {
@@ -149,85 +153,85 @@ impl OpdsEntry {
 //     }
 // }
 
-// impl From<series::Model> for OpdsEntry {
-//     fn from(s: series::Model) -> Self {
-//         let mut links = Vec::new();
+impl From<series::Data> for OpdsEntry {
+    fn from(s: series::Data) -> Self {
+        let mut links = Vec::new();
 
-//         let nav_link = OpdsLink::new(
-//             OpdsLinkType::Navigation,
-//             OpdsLinkRel::Subsection,
-//             format!("/opds/v1.2/series/{}", s.id),
-//         );
+        let nav_link = OpdsLink::new(
+            OpdsLinkType::Navigation,
+            OpdsLinkRel::Subsection,
+            format!("/opds/v1.2/series/{}", s.id),
+        );
 
-//         links.push(nav_link);
+        links.push(nav_link);
 
-//         OpdsEntry {
-//             id: s.id.to_string(),
-//             // FIXME:
-//             updated: chrono::Utc::now(),
-//             title: s.title,
-//             // FIXME:
-//             content: None,
-//             authors: None,
-//             links,
-//             stream_link: None,
-//         }
-//     }
-// }
+        OpdsEntry {
+            id: s.id.to_string(),
+            // FIXME:
+            updated: chrono::Utc::now(),
+            title: s.name,
+            // FIXME:
+            content: None,
+            authors: None,
+            links,
+            stream_link: None,
+        }
+    }
+}
 
-// impl From<media::Model> for OpdsEntry {
-//     fn from(m: media::Model) -> Self {
-//         let base_url = format!("/opds/v1.2/books/{}", m.id);
-//         let file_name = format!("{}.{}", m.name, m.extension);
-//         let file_name_encoded = encode(&file_name);
+impl From<media::Data> for OpdsEntry {
+    fn from(m: media::Data) -> Self {
+        let base_url = format!("/opds/v1.2/books/{}", m.id);
+        let file_name = format!("{}.{}", m.name, m.extension);
+        let file_name_encoded = encode(&file_name);
 
-//         let links = vec![
-//             OpdsLink::new(
-//                 OpdsLinkType::Image,
-//                 OpdsLinkRel::Thumbnail,
-//                 format!("{}/thumbnail", base_url),
-//             ),
-//             OpdsLink::new(
-//                 OpdsLinkType::Image,
-//                 OpdsLinkRel::Image,
-//                 format!("{}/pages/1", base_url),
-//             ),
-//             OpdsLink::new(
-//                 OpdsLinkType::Zip,
-//                 OpdsLinkRel::Acquisition,
-//                 format!("{}/file/{}", base_url, file_name_encoded),
-//             ),
-//         ];
+        let links = vec![
+            OpdsLink::new(
+                OpdsLinkType::Image,
+                OpdsLinkRel::Thumbnail,
+                format!("{}/thumbnail", base_url),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Image,
+                OpdsLinkRel::Image,
+                format!("{}/pages/1", base_url),
+            ),
+            OpdsLink::new(
+                OpdsLinkType::Zip,
+                OpdsLinkRel::Acquisition,
+                format!("{}/file/{}", base_url, file_name_encoded),
+            ),
+        ];
 
-//         let stream_link = OpdsStreamLink::new(
-//             m.id.to_string(),
-//             m.pages.to_string(),
-//             // FIXME:
-//             "image/jpeg".to_string(),
-//             None,
-//         );
+        let stream_link = OpdsStreamLink::new(
+            m.id.to_string(),
+            m.pages.to_string(),
+            // FIXME:
+            "image/jpeg".to_string(),
+            None,
+        );
 
-//         let mib = m.size as f64 / (1024.0 * 1024.0);
+        let mib = m.size as f64 / (1024.0 * 1024.0);
 
-//         let content = match m.description {
-//             Some(description) => Some(format!(
-//                 "{:.1} MiB - {}<br/><br/>{}",
-//                 mib, m.extension, description
-//             )),
-//             None => Some(format!("{:.1} MiB - {}", mib, m.extension)),
-//         };
+        let content = match m.description {
+            Some(description) => Some(format!(
+                "{:.1} MiB - {}<br/><br/>{}",
+                mib, m.extension, description
+            )),
+            None => Some(format!("{:.1} MiB - {}", mib, m.extension)),
+        };
 
-//         OpdsEntry {
-//             id: m.id.to_string(),
-//             title: m.name,
-//             updated: chrono::Utc::now(),
-//             content,
-//             links,
-//             authors: None,
-//             stream_link: Some(stream_link),
-//         }
-//     }
-// }
+        OpdsEntry {
+            id: m.id.to_string(),
+            title: m.name,
+            updated: chrono::Utc::now(),
+            content,
+            links,
+            authors: None,
+            stream_link: Some(stream_link),
+        }
+    }
+}
 
 impl From<MediaWithProgress> for OpdsEntry {
     fn from(media: MediaWithProgress) -> Self {

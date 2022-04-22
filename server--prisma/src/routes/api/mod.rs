@@ -5,17 +5,20 @@ pub mod auth;
 /// Function to return the routes for the `/api` path.
 pub fn api() -> Vec<Route> {
     routes![
-        // // top level
+        // top level
         // routing::api::scan,
         // routing::api::event_listener,
-        // // auth
+        // auth
         auth::me,
+        auth::login,
+        auth::register,
+        auth::logout,
         // routing::api::auth::login,
         // routing::api::auth::register,
-        // // logs api
+        // logs api
         // routing::api::log::get_logs,
         // routing::api::log::log_listener,
-        // // library api
+        // library api
         // routing::api::library::get_libraries,
         // routing::api::library::get_library,
         // routing::api::library::get_library_series,
@@ -23,11 +26,11 @@ pub fn api() -> Vec<Route> {
         // routing::api::library::update_library,
         // routing::api::library::delete_library,
         // routing::api::library::scan_library,
-        // // series api
+        // series api
         // routing::api::series::get_series,
         // routing::api::series::get_series_by_id,
         // routing::api::series::get_series_thumbnail,
-        // // media api
+        // media api
         // routing::api::media::get_media,
         // routing::api::media::get_media_by_id,
         // routing::api::media::get_media_file,

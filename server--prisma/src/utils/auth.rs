@@ -1,5 +1,12 @@
 use crate::types::{errors::AuthError, models::DecodedCredentials};
 
+pub fn get_hash_cost() -> u32 {
+    std::env::var("HASH_COST")
+        .unwrap_or("12".to_string())
+        .parse()
+        .unwrap_or(12)
+}
+
 pub fn verify_password(hash: &str, password: &str) -> Result<bool, AuthError> {
     Ok(bcrypt::verify(password, hash)?)
 }

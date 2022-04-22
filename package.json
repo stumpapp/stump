@@ -19,6 +19,8 @@
 		"frontend:start": "pnpm --filter frontend start",
 		"frontend:dev": "pnpm --filter frontend dev",
 		"frontend:build": "pnpm --filter frontend build",
+		"prisma": "cd server--prisma && cargo prisma",
+		"seed": "cd server--prisma && cargo seed",
 		"prettier": "prettier --plugin-search-dir=frontend  --write '**/*.{js,ts,jsx,tsx,css,html}'",
 		"prepare": "husky install"
 	},

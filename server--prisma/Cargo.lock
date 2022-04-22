@@ -148,26 +148,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "axum-graphql-prisma"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.13.0",
- "bcrypt",
- "dotenv",
- "log",
- "prisma-client-rust",
- "rocket",
- "rocket-session-store",
- "rocket_cors",
- "serde",
- "serde-xml-rs",
- "thiserror",
- "urlencoding",
- "xml-rs",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3718,6 +3698,26 @@ name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
+
+[[package]]
+name = "stump"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.13.0",
+ "bcrypt",
+ "dotenv",
+ "log",
+ "prisma-client-rust",
+ "rocket",
+ "rocket-session-store",
+ "rocket_cors",
+ "serde",
+ "serde-xml-rs",
+ "thiserror",
+ "urlencoding",
+ "xml-rs",
+]
 
 [[package]]
 name = "subprocess"

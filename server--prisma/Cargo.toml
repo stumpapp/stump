@@ -1,0 +1,24 @@
+[package]
+name = "axum-graphql-prisma"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["prisma-cli"]
+
+[dependencies]
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.4.0" }
+serde = { version = "1.0", features = ["derive"] }
+dotenv = "0.15.0"
+rocket =  { version = "0.5.0-rc.1", features =  ["json" ] }
+rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git", branch = "develop" }
+rocket_cors = "0.6.0-alpha1"
+bcrypt = "0.10.1"
+anyhow = "1.0.57"
+xml-rs = "0.8.4"
+serde-xml-rs = "0.5.1"
+urlencoding = "2.1.0"
+thiserror = "1.0.30"
+base64 = "0.13.0"
+log = "0.4.0"
+

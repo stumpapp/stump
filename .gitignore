@@ -13,7 +13,11 @@ $houdini
 .eslintcache
 
 # rust
-server/static
+static
+target
+*.db
+*.sqlite*
+*prisma.rs*
 
 # os
 .DS_Store

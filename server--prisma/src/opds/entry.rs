@@ -9,9 +9,6 @@ use crate::{
     prisma::{library, media, series},
     types::models::MediaWithProgress,
 };
-// use crate::types::alias::{MediaWithProgress, UserMediaWithProgress};
-// use crate::types::dto::series::SeriesWithBookCount;
-// use entity::{library, media, series};
 
 use super::{
     link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
@@ -114,12 +111,10 @@ impl From<library::Data> for OpdsEntry {
         links.push(nav_link);
 
         OpdsEntry {
-            id: l.id.to_string(),
-            // FIXME:
-            updated: chrono::Utc::now(),
+            id: l.id,
+            updated: l.updated_at,
             title: l.name,
-            // FIXME:
-            content: None,
+            content: l.description,
             authors: None,
             links,
             stream_link: None,
@@ -167,10 +162,11 @@ impl From<series::Data> for OpdsEntry {
 
         OpdsEntry {
             id: s.id.to_string(),
-            // FIXME:
-            updated: chrono::Utc::now(),
+            updated: s.updated_at,
             title: s.name,
-            // FIXME:
+            // TODO: I feel like a series could have a description, just have to figure out
+            // the best way to include it. I could look for ComicInfo.xml files or something at
+            // the directory root, or some other file, or maybe I could just leave it out.
             content: None,
             authors: None,
             links,

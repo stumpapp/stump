@@ -15,7 +15,7 @@ $houdini
 # rust
 static
 target
-*.db
+*.db*
 *.sqlite*
 *prisma.rs*
 

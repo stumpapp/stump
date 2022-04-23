@@ -35,7 +35,7 @@ model User {
   username       String         @unique
   // The password of the user. This will a hash - not the actual password.
   hashedPassword String
-  // The role of the user. Defaults to "Member".
+  // The role of the user. Defaults to "MEMBER".
   role           String         @default("MEMBER")
   // The media the user currently has progress on.
   // TODO: don't love this name but wanted to emphasize plural. I could do something like
@@ -45,15 +45,19 @@ model User {
 }
 
 model Library {
-  id     String   @id @default(uuid())
+  id          String   @id @default(uuid())
   // The name of the library. ex: "Marvel Comics"
-  name   String
+  name        String
+  // The description of the library. ex: "The best library ever"
+  description String?
   // The location of the library in the fs. ex: "/home/user/media/comics/marvel"
-  path   String   @unique
+  path        String   @unique
   // The status of the series since last scan or access
-  status String   @default("Ready")
+  status      String   @default("READY")
+  // The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
+  updatedAt   DateTime @updatedAt
   // The series in the library
-  series Series[]
+  series      Series[]
 }
 
 model Series {
@@ -65,7 +69,7 @@ model Series {
   // The url of the series. ex: "/home/user/media/comics/The Amazing Spider-Man"
   path      String
   // The status of the series since last scan or access
-  status    String   @default("Ready")
+  status    String   @default("READY")
   // The id of the library this series belongs to.
   libraryId String?
   // The library this series belongs to.
@@ -75,30 +79,29 @@ model Series {
 }
 
 model Media {
-  id          String   @id @default(uuid())
+  id             String         @id @default(uuid())
   // The name of the media. ex: "The Amazing Spider-Man (2018) #69.cbz"
-  name        String
+  name           String
   // The description of the media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
-  description String?
+  description    String?
   // The size of the media in bytes.
-  size        Int
+  size           Int
   // The file extension of the media. ex: "cbz"
-  extension   String
+  extension      String
   // The number of pages in the media. ex: "69"
-  pages       Int
+  pages          Int
   // The date in which the media was last updated in the FS. ex: "2022-04-20 04:20:69"
-  updatedAt   DateTime @updatedAt
+  updatedAt      DateTime       @updatedAt
   // Whether or not the media is downloaded to the client. ex: true
-  downloaded  Boolean  @default(false)
+  downloaded     Boolean        @default(false)
   // The checksum hash of the file contents. Used to ensure only one instance of a file in the database
-  checksum    String?  @unique
+  checksum       String?        @unique
   // The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
-  path        String
+  path           String
   // The series this media belongs to.
-  series      Series?  @relation(fields: [seriesId], references: [id])
+  series         Series?        @relation(fields: [seriesId], references: [id])
   // The id of the series this media belongs to.
-  seriesId    String?
-
+  seriesId       String?
   // The read progresses of the media
   readProgresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
 }
@@ -117,7 +120,7 @@ model ReadProgress {
 model Log {
   id        String   @id @default(uuid())
   // The level of the log. i.e: "Error", "Warn", "Info", "Debug"
-  level     String   @default("Info")
+  level     String   @default("INFO")
   // The message of the log.
   message   String
   // The datetime in which the log was created. ex: "2022-04-20 04:20:69"

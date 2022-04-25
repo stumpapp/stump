@@ -6,6 +6,8 @@
 	"license": "MIT",
 	"scripts": {
 		"start": "cd server && cargo run --release",
+		"dev:setup": "pnpm install && pnpm frontend:install && pnpm server:setup",
+		"server:setup": "cargo install cargo-watch && pnpm prisma generate && pnpm prisma db push && pnpm seed",
 		"dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
 		"build:docker": "docker build -t stump .",
 		"server:start": "cd server && cargo run",
@@ -19,8 +21,8 @@
 		"frontend:start": "pnpm --filter frontend start",
 		"frontend:dev": "pnpm --filter frontend dev",
 		"frontend:build": "pnpm --filter frontend build",
-		"prisma": "cd server--prisma && cargo prisma",
-		"seed": "cd server--prisma && cargo seed",
+		"prisma": "cd server && cargo prisma",
+		"seed": "cd server && cargo seed",
 		"prettier": "prettier --plugin-search-dir=frontend  --write '**/*.{js,ts,jsx,tsx,css,html}'",
 		"prepare": "husky install"
 	},
@@ -35,6 +37,9 @@
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": [
 			"prettier  --plugin-search-dir=frontend --write"
+		],
+		".rs": [
+			"cargo fmt --manifest-path=server/Cargo.toml --"
 		]
 	}
 }

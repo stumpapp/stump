@@ -1,4 +1,5 @@
 pub mod alias;
-pub mod comic;
-pub mod dto;
-pub mod rocket;
+pub mod enums;
+pub mod errors;
+pub mod http;
+pub mod models;

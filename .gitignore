@@ -24,3 +24,7 @@ target
 
 # editors / idea
 .idea
+
+
+# TODO: remove this
+server--old

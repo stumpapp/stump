@@ -1,5 +1,7 @@
-use crate::fs::error::ProcessFileError;
-use crate::fs::media_file::{self, GetPageResult, ProcessResult};
+use crate::{
+    fs::media_file::{self, GetPageResult, ProcessResult},
+    types::errors::ProcessFileError,
+};
 use epub::doc::EpubDoc;
 use walkdir::DirEntry;
 

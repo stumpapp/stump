@@ -31,6 +31,8 @@ pub struct LoginRequest {
     pub password: String,
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaWithProgress {
     pub id: String,
     pub name: String,
@@ -42,7 +44,61 @@ pub struct MediaWithProgress {
     // pub checksum: String
     pub path: String,
     pub series_id: String,
-    pub progress: i32,
+    pub progress: Option<i32>,
+}
+
+// TODO: this disgusting thing can be removed once https://github.com/Brendonovich/prisma-client-rust/issues/12
+// gets implemented
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SeriesWithMedia {
+    pub id: String,
+    pub name: String,
+    pub path: String,
+    pub media: Vec<MediaWithProgress>,
+}
+
+impl Into<SeriesWithMedia>
+    for (
+        prisma::series::Data,
+        Vec<prisma::media::Data>,
+        &Vec<prisma::read_progress::Data>,
+    )
+{
+    fn into(self) -> SeriesWithMedia {
+        let (series, media, progress) = self;
+
+        let mut media_with_progress: Vec<MediaWithProgress> = vec![];
+
+        for m in media.iter() {
+            let mut current_page = None;
+
+            for p in progress.iter() {
+                if p.media_id == m.id {
+                    current_page = Some(p.page);
+                }
+            }
+
+            media_with_progress.push(MediaWithProgress {
+                id: m.id.clone(),
+                name: m.name.clone(),
+                description: m.description.clone(),
+                size: m.size,
+                extension: m.extension.clone(),
+                pages: m.pages,
+                path: m.path.clone(),
+                series_id: series.id.clone(),
+                progress: current_page,
+            });
+        }
+
+        SeriesWithMedia {
+            id: series.id,
+            name: series.name,
+            path: series.path,
+            media: media_with_progress,
+        }
+    }
 }
 
 impl Into<MediaWithProgress> for (prisma::media::Data, prisma::read_progress::Data) {
@@ -58,7 +114,7 @@ impl Into<MediaWithProgress> for (prisma::media::Data, prisma::read_progress::Da
             pages: m.pages,
             path: m.path,
             series_id: m.series_id.unwrap(),
-            progress: rp.page,
+            progress: Some(rp.page),
         }
     }
 }

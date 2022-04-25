@@ -2,10 +2,8 @@ use rocket::http::ContentType;
 use std::str::FromStr;
 use zip::read::ZipFile;
 
-use crate::types::comic::ComicInfo;
-use crate::types::rocket::ImageResponse;
+use crate::types::{errors::ProcessFileError, http::ImageResponse, models::ComicInfo};
 
-use super::error::ProcessFileError;
 use super::{epub::get_epub_page, rar::get_rar_image, zip::get_zip_image};
 
 // FIXME: this needs to change. I really only need the ComicInfo

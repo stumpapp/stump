@@ -1,6 +1,8 @@
-# ![Stump Icon icon](./.github/images/logo.png)
+<p align="center">
+  <img alt="Stump logo" src="./.github/images/logo.png" style="width: 50%" />
+</p>
 
-A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga).
+A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
 
 I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want to practice Rust!_
 
@@ -8,19 +10,19 @@ I love Komga and use it at home, and I thought it would be cool to learn what go
 
 I'll list the major target features below - I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
 
--   Full OPDS + OPDS Page Streaming support
--   EPUB, PDF, and CBZ/CBR support
--   Customizable configuration (for both Docker and local hosting)
--   Scheduled and invokable filesystem indexing/scanning
--   Support for a range of metadata operations (e.g. adding/removing tags, changing metadata, etc.)
--   Import/export of libraries
--   Configurable CBR-to-CBZ conversion
--   Small footprint and resource utilization (Docker image size currently sits at ~41MB)
--   Integrated web client (React) served by Rust server
-    -   Full Text Search
-    -   Server management
-    -   Built-in webreader for media
--   Role-based access control (i.e. the server owner and authorized users)
+- Full OPDS + OPDS Page Streaming support
+- EPUB, PDF, and CBZ/CBR support
+- Customizable configuration (for both Docker and local hosting)
+- Scheduled and invokable filesystem indexing/scanning
+- Support for a range of metadata operations (e.g. adding/removing tags, changing metadata, etc.)
+- Import/export of libraries
+- Configurable CBR-to-CBZ conversion
+- Small footprint and resource utilization (Docker image size currently sits at ~41MB)
+- Integrated web client (React) served by Rust server
+  - Full Text Search
+  - Server management
+  - Built-in webreader for media
+- Role-based access control (i.e. the server owner and authorized users)
 
 ## Getting Started
 
@@ -29,12 +31,8 @@ There are no releases yet, so for now you'll have to clone the repo and run it y
 ```bash
 git clone https://github.com/aaronleopold/stump.git
 cd stump
-# install the react app dependencies
-pnpm frontend:install
-# install the rust-related development dependencies
-cargo install cargo-watch sea-orm-cli
-# run the migration
-pnpm server:migrate-up
+# handles all the setup required for local development
+pnpm dev:setup
 ```
 
 ## Running Stump
@@ -56,6 +54,11 @@ pnpm frontend:dev # start the frontend
 
 ### Docker
 
+<details>
+<summary>
+  <b>Note: This is currently non-functional. Migrating to Prisma from SeaORM bork this, but I am working on it.</b>
+</summary>
+
 No images have been published to dockerhub yet, so you'll have to build it yourself:
 
 ```bash
@@ -75,6 +78,8 @@ docker start stump
 ```
 
 As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library`, you'll need to bind `/Users/user/Library` to both `source` and `target`. This will eventually change to be more flexible.
+
+</details>
 
 ## Contributing
 

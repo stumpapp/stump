@@ -27,8 +27,8 @@ pub fn api() -> Vec<Route> {
         library::delete_library,
         // series api
         series::get_series,
-        // routing::api::series::get_series_by_id,
-        // routing::api::series::get_series_thumbnail,
+        series::get_series_by_id,
+        series::get_series_thumbnail
         // media api
         // routing::api::media::get_media,
         // routing::api::media::get_media_by_id,

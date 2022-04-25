@@ -42,6 +42,8 @@ model User {
   // `currentlyReading` but that wouldn't match the relation in the Media model. UGH. Naming
   // is so hard lol.
   readProgresses ReadProgress[]
+
+  @@map("users")
 }
 
 model Library {
@@ -58,6 +60,8 @@ model Library {
   updatedAt   DateTime @updatedAt
   // The series in the library
   series      Series[]
+
+  @@map("libraries")
 }
 
 model Series {
@@ -76,6 +80,8 @@ model Series {
   library   Library? @relation(fields: [libraryId], references: [id])
   // The media files in the series.
   media     Media[]
+
+  @@map("series")
 }
 
 model Media {
@@ -104,6 +110,8 @@ model Media {
   seriesId       String?
   // The read progresses of the media
   readProgresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
+
+  @@map("media")
 }
 
 model ReadProgress {
@@ -115,6 +123,8 @@ model ReadProgress {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+
+  @@map("read_progresses")
 }
 
 model Log {
@@ -125,4 +135,6 @@ model Log {
   message   String
   // The datetime in which the log was created. ex: "2022-04-20 04:20:69"
   createdAt DateTime @default(now())
+
+  @@map("logs")
 }

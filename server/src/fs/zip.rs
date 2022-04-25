@@ -1,6 +1,8 @@
-use crate::fs::media_file::{self, GetPageResult, IsImage, ProcessResult};
+use crate::{
+    fs::media_file::{self, GetPageResult, IsImage, ProcessResult},
+    types::errors::ProcessFileError,
+};
 
-use crate::fs::error::ProcessFileError;
 use std::io::Read;
 use walkdir::DirEntry;
 use zip::read::ZipFile;

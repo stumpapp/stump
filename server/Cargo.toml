@@ -2,42 +2,28 @@
 name = "stump"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+default-run = "stump"
 
 [workspace]
-members = [".", "entity", "migration"]
+members = ["prisma-cli"]
 
 [dependencies]
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.4.0" }
+serde = { version = "1.0", features = ["derive"] }
+dotenv = "0.15.0"
 rocket =  { version = "0.5.0-rc.1", features =  ["json" ] }
-log = "0.4.0"
-env_logger = "0.8.4"
-anyhow = "1.0.52"
-dirs = "4.0.0"
-derive_more = "0.99.17"
-unrar = { git = "https://github.com/aaronleopold/unrar.rs" }
-zip = "0.5.13"
+rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git", branch = "develop" }
+rocket_cors = "0.6.0-alpha1"
+bcrypt = "0.10.1"
+anyhow = "1.0.57"
 xml-rs = "0.8.4"
 serde-xml-rs = "0.5.1"
-chrono = "0.4.19"
-sha256 = "1.0.3"
-thiserror = "1.0.30"
-walkdir = "2.3.2"
 urlencoding = "2.1.0"
+thiserror = "1.0.30"
 base64 = "0.13.0"
-rocket-include-static-resources = "0.10.0"
+log = "0.4.0"
 epub = "1.2.3"
-# rocket-session-store = { path = "../../clones/rocket-session-store", features=["redis"] }
-# rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git", branch = "develop", features=["redis"] }
-rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git", branch = "develop" }
-# redis = "0.21.5"
-bcrypt = "0.10.1"
-rocket_cors = "0.6.0-alpha1"
-dotenv = "0.15.0"
-entity = { path = "entity" }
-migration = { path = "migration" }
-# FIXME: introduced MAJOR compilation issues
-#pdf = { git = "https://github.com/pdf-rs/pdf" }
-#pdf_render = { git = "https://github.com/pdf-rs/pdf_render" }
-#pathfinder_rasterize = { git = "https://github.com/s3bk/pathfinder_rasterizer" }
-#pathfinder_geometry = { git = "https://github.com/servo/pathfinder" }
+walkdir = "2.3.2"
+zip = "0.5.13"
+unrar = { git = "https://github.com/aaronleopold/unrar.rs" }
+

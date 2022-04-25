@@ -1,11 +1,14 @@
 use anyhow::Result;
-use chrono::{DateTime, Utc};
+use prisma_client_rust::chrono;
+use prisma_client_rust::chrono::{DateTime, Utc};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::opds::link::OpdsStreamLink;
-use crate::types::alias::{MediaWithProgress, UserMediaWithProgress};
-use entity::{library, media, series};
+use crate::{
+    opds::link::OpdsStreamLink,
+    prisma::{library, media, series},
+    types::models::MediaWithProgress,
+};
 
 use super::{
     link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
@@ -95,8 +98,8 @@ impl OpdsEntry {
     }
 }
 
-impl From<library::Model> for OpdsEntry {
-    fn from(l: library::Model) -> Self {
+impl From<library::Data> for OpdsEntry {
+    fn from(l: library::Data) -> Self {
         let mut links = Vec::new();
 
         let nav_link = OpdsLink::new(
@@ -108,12 +111,10 @@ impl From<library::Model> for OpdsEntry {
         links.push(nav_link);
 
         OpdsEntry {
-            id: l.id.to_string(),
-            // FIXME:
-            updated: chrono::Utc::now(),
+            id: l.id,
+            updated: l.updated_at,
             title: l.name,
-            // FIXME:
-            content: None,
+            content: l.description,
             authors: None,
             links,
             stream_link: None,
@@ -121,8 +122,34 @@ impl From<library::Model> for OpdsEntry {
     }
 }
 
-impl From<series::Model> for OpdsEntry {
-    fn from(s: series::Model) -> Self {
+// impl From<SeriesWithBookCount> for OpdsEntry {
+//     fn from(s: SeriesWithBookCount) -> Self {
+//         let mut links = Vec::new();
+
+//         let nav_link = OpdsLink::new(
+//             OpdsLinkType::Navigation,
+//             OpdsLinkRel::Subsection,
+//             format!("/opds/v1.2/series/{}", s.id),
+//         );
+
+//         links.push(nav_link);
+
+//         OpdsEntry {
+//             id: s.id.to_string(),
+//             // FIXME:
+//             updated: chrono::Utc::now(),
+//             title: s.title,
+//             // FIXME:
+//             content: None,
+//             authors: None,
+//             links,
+//             stream_link: None,
+//         }
+//     }
+// }
+
+impl From<series::Data> for OpdsEntry {
+    fn from(s: series::Data) -> Self {
         let mut links = Vec::new();
 
         let nav_link = OpdsLink::new(
@@ -135,10 +162,11 @@ impl From<series::Model> for OpdsEntry {
 
         OpdsEntry {
             id: s.id.to_string(),
-            // FIXME:
-            updated: chrono::Utc::now(),
-            title: s.title,
-            // FIXME:
+            updated: s.updated_at,
+            title: s.name,
+            // TODO: I feel like a series could have a description, just have to figure out
+            // the best way to include it. I could look for ComicInfo.xml files or something at
+            // the directory root, or some other file, or maybe I could just leave it out.
             content: None,
             authors: None,
             links,
@@ -147,8 +175,8 @@ impl From<series::Model> for OpdsEntry {
     }
 }
 
-impl From<media::Model> for OpdsEntry {
-    fn from(m: media::Model) -> Self {
+impl From<media::Data> for OpdsEntry {
+    fn from(m: media::Data) -> Self {
         let base_url = format!("/opds/v1.2/books/{}", m.id);
         let file_name = format!("{}.{}", m.name, m.extension);
         let file_name_encoded = encode(&file_name);
@@ -201,12 +229,10 @@ impl From<media::Model> for OpdsEntry {
     }
 }
 
-impl From<UserMediaWithProgress> for OpdsEntry {
-    fn from(m_p: UserMediaWithProgress) -> Self {
-        let (m, p) = m_p;
-
-        let base_url = format!("/opds/v1.2/books/{}", m.id);
-        let file_name = format!("{}.{}", m.name, m.extension);
+impl From<MediaWithProgress> for OpdsEntry {
+    fn from(media: MediaWithProgress) -> Self {
+        let base_url = format!("/opds/v1.2/books/{}", media.id);
+        let file_name = format!("{}.{}", media.name, media.extension);
         let file_name_encoded = encode(&file_name);
 
         // TODO: parse into function to reduce code duplication
@@ -228,29 +254,32 @@ impl From<UserMediaWithProgress> for OpdsEntry {
             ),
         ];
 
-        let current_page = p.map(|p| p.page.to_string());
+        let current_page = match media.progress {
+            Some(progress) => Some(progress.to_string()),
+            _ => None,
+        };
 
         let stream_link = OpdsStreamLink::new(
-            m.id.to_string(),
-            m.pages.to_string(),
+            media.id.to_string(),
+            media.pages.to_string(),
             // FIXME:
             "image/jpeg".to_string(),
             current_page,
         );
 
-        let mib = m.size as f64 / (1024.0 * 1024.0);
+        let mib = media.size as f64 / (1024.0 * 1024.0);
 
-        let content = match m.description {
+        let content = match media.description {
             Some(description) => Some(format!(
                 "{:.1} MiB - {}<br/><br/>{}",
-                mib, m.extension, description
+                mib, media.extension, description
             )),
-            None => Some(format!("{:.1} MiB - {}", mib, m.extension)),
+            None => Some(format!("{:.1} MiB - {}", mib, media.extension)),
         };
 
         OpdsEntry {
-            id: m.id.to_string(),
-            title: m.name,
+            id: media.id.to_string(),
+            title: media.name,
             updated: chrono::Utc::now(),
             content,
             links,

@@ -13,10 +13,18 @@ $houdini
 .eslintcache
 
 # rust
-server/static
+static
+target
+*.db*
+*.sqlite*
+*prisma.rs*
 
 # os
 .DS_Store
 
 # editors / idea
 .idea
+
+
+# TODO: remove this
+server--old

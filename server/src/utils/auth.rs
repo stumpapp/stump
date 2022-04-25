@@ -1,28 +1,14 @@
-use rocket_session_store::SessionError;
-use thiserror::Error;
+use crate::types::{errors::AuthError, models::DecodedCredentials};
 
-#[derive(Error, Debug)]
-pub enum AuthError {
-    #[error("Error during the authentication process")]
-    BcryptError(#[from] bcrypt::BcryptError),
-    #[error("Missing or malformed credentials")]
-    BadCredentials,
-    #[error("The Authorization header could no be parsed")]
-    BadRequest,
-    #[error("Unauthorized")]
-    Unauthorized,
-    #[error("The session is not valid")]
-    InvalidSession(#[from] SessionError),
+pub fn get_hash_cost() -> u32 {
+    std::env::var("HASH_COST")
+        .unwrap_or("12".to_string())
+        .parse()
+        .unwrap_or(12)
 }
 
 pub fn verify_password(hash: &str, password: &str) -> Result<bool, AuthError> {
     Ok(bcrypt::verify(password, hash)?)
-}
-
-#[derive(Debug)]
-pub struct DecodedCredentials {
-    pub username: String,
-    pub password: String,
 }
 
 pub fn decode_base64_credentials(bytes: Vec<u8>) -> Result<DecodedCredentials, AuthError> {

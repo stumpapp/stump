@@ -4,6 +4,6 @@ export function me() {
 	return API.get('/auth/me');
 }
 
-export function login(username: string, password: string) {
-	return API.post('/auth/login', { username, password });
+export function login(input: { username: string; password: string }) {
+	return API.post('/auth/login', input);
 }

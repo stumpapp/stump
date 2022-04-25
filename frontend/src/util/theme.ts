@@ -9,6 +9,7 @@ const config = {
 	useSystemColorMode: false,
 };
 
+// TODO: add intermediate colors in gray, e.g. gray.750
 const colors = {
 	brand: {
 		DEFAULT: '#C48259',

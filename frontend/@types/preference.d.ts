@@ -6,11 +6,11 @@ interface UserPreferences {
 	/**
 	 * The id of the user this preference belongs to
 	 */
-	user_id: number;
+	userId: number;
 	/**
 	 * Boolean indicating whether the user wants dark mode
 	 */
-	dark_mode: boolean;
+	darkMode: boolean;
 }
 
 interface ServerPreferences {
@@ -23,9 +23,9 @@ interface ServerPreferences {
 	 * Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
 	 * If none found, the series name will be the directory name. Default is false
 	 */
-	rename_series: boolean;
+	renameSeries: boolean;
 	/**
 	 * Flag indicating whether or not to attempt to convert scanned .cbr files to .cbz files.
 	 */
-	convert_cbr_to_cbz: boolean;
+	convertCbrToCbz: boolean;
 }

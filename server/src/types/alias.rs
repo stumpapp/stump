@@ -1,18 +1,12 @@
-use entity::{library, media, read_progress, series};
+use rocket::serde::json::Json;
 
-pub type SeriesModel = series::Model;
-pub type LibraryModel = library::Model;
-pub type MediaModel = media::Model;
+use crate::config::context::Context as AppContext;
 
-pub type SeriesWithMedia = (SeriesModel, Vec<MediaModel>);
-pub type SeriesWithMediaAndProgress = (SeriesModel, GetUserMediaWithProgress);
-pub type FeedPages = (usize, Option<usize>);
-pub type LibraryWithSeries = (LibraryModel, Vec<SeriesModel>);
-pub type SeriesWithLibraries = Vec<(SeriesModel, Vec<LibraryModel>)>;
+use super::{errors::ApiError, models::AuthenticatedUser};
 
-pub type GetMediaWithProgressRaw = Vec<(media::Model, Vec<read_progress::Model>)>;
-pub type MediaWithMaybeProgress = (media::Model, Option<read_progress::Model>);
-pub type MediaWithProgress = (media::Model, read_progress::Model);
-pub type GetMediaWithProgress = Vec<MediaWithProgress>;
-pub type UserMediaWithProgress = (media::Model, Option<read_progress::Model>);
-pub type GetUserMediaWithProgress = Vec<UserMediaWithProgress>;
+pub type Session<'a> = rocket_session_store::Session<'a, AuthenticatedUser>;
+pub type Context = rocket::State<AppContext>;
+
+pub type ApiResult<T> = Result<T, ApiError>;
+
+pub type LoginResult = ApiResult<Json<AuthenticatedUser>>;

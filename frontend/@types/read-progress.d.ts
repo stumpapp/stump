@@ -2,11 +2,11 @@ interface ReadProgress {
 	/**
 	 * The id of the media file this progress belongs to.
 	 */
-	media_id: number;
+	mediaId: number;
 	/**
 	 * The id of the user this progress belongs to.
 	 */
-	user_id: number;
+	userId: number;
 	/**
 	 * The current page the user is on.
 	 */

@@ -5,14 +5,14 @@ use crate::{
     guards::auth::StumpAuth,
     prisma::library,
     types::{
-        alias::{ApiResult, State},
+        alias::{ApiResult, Context},
         errors::ApiError,
     },
 };
 
 #[get("/libraries")]
-pub async fn get_libraries(state: &State, _auth: StumpAuth) -> ApiResult<Json<Vec<library::Data>>> {
-    let db = state.get_db();
+pub async fn get_libraries(ctx: &Context, _auth: StumpAuth) -> ApiResult<Json<Vec<library::Data>>> {
+    let db = ctx.get_db();
 
     Ok(Json(db.library().find_many(vec![]).exec().await?))
 }
@@ -20,37 +20,49 @@ pub async fn get_libraries(state: &State, _auth: StumpAuth) -> ApiResult<Json<Ve
 #[get("/libraries/<id>")]
 pub async fn get_library_by_id(
     id: String,
-    state: &State,
+    ctx: &Context,
     _auth: StumpAuth,
 ) -> ApiResult<Json<library::Data>> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
-    let l = db
+    let lib = db
         .library()
         .find_unique(library::id::equals(id.clone()))
         .with(library::series::fetch(vec![]))
         .exec()
         .await?;
 
-    if l.is_none() {
+    if lib.is_none() {
         return Err(ApiError::NotFound(format!(
             "Library with id {} not found",
             id
         )));
     }
 
-    let l = l.unwrap();
-
-    Ok(Json(l))
+    Ok(Json(lib.unwrap()))
 }
 
 // TODO: write me
 #[get("/library/<id>/scan")]
-pub async fn scan_library(id: String, state: &State) -> Result<(), ApiError> {
-    // scanner::scan(state, Some(id)).await?;
+pub async fn scan_library(id: String, ctx: &Context) -> Result<(), ApiError> {
+    let db = ctx.get_db();
 
-    // Ok(())
-    unimplemented!()
+    let lib = db
+        .library()
+        .find_unique(library::id::equals(id.clone()))
+        .exec()
+        .await?;
+
+    if lib.is_none() {
+        return Err(ApiError::NotFound(format!(
+            "Library with id {} not found",
+            id
+        )));
+    }
+
+    let lib = lib.unwrap();
+
+    todo!()
 }
 
 #[derive(Deserialize)]
@@ -63,10 +75,10 @@ pub struct CreateLibrary {
 #[post("/library", data = "<input>")]
 pub async fn create_library(
     input: Json<CreateLibrary>,
-    state: &State,
+    ctx: &Context,
     _auth: StumpAuth,
 ) -> ApiResult<Json<library::Data>> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     Ok(Json(
         db.library()
@@ -91,10 +103,10 @@ pub struct UpdateLibrary {
 pub async fn update_library(
     id: String,
     input: Json<UpdateLibrary>,
-    state: &State,
+    ctx: &Context,
     _auth: StumpAuth,
 ) -> ApiResult<Json<library::Data>> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let updated = db
         .library()
@@ -120,10 +132,10 @@ pub async fn update_library(
 #[delete("/library/<id>")]
 pub async fn delete_library(
     id: String,
-    state: &State,
+    ctx: &Context,
     _auth: StumpAuth,
 ) -> ApiResult<Json<library::Data>> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let deleted = db
         .library()

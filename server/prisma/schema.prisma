@@ -124,6 +124,8 @@ model ReadProgress {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
+
+  @@unique([userId, mediaId])
   @@map("read_progresses")
 }
 

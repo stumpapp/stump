@@ -44,7 +44,7 @@ pub fn get_content_type_from_mime(mime: &str) -> ContentType {
     })
 }
 
-pub fn get_page(file: &str, page: usize) -> GetPageResult {
+pub fn get_page(file: &str, page: i32) -> GetPageResult {
     let file_name = file.to_string();
 
     if file_name.ends_with(".cbr") {

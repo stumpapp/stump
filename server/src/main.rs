@@ -4,7 +4,7 @@ extern crate rocket;
 #[cfg(debug_assertions)]
 use dotenv::dotenv;
 
-use config::{cors, session, state::AppState};
+use config::{context::Context, cors, session};
 use rocket::fs::{FileServer, NamedFile};
 use std::path::Path;
 use types::http::UnauthorizedResponse;
@@ -37,7 +37,7 @@ async fn rocket() -> _ {
     dotenv().ok();
 
     rocket::build()
-        .manage(AppState::new().await)
+        .manage(Context::new().await)
         .attach(session::get_session_store().fairing())
         .attach(cors::get_cors())
         .mount("/", FileServer::from("static/").rank(1))

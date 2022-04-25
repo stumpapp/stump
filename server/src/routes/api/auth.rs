@@ -4,7 +4,7 @@ use crate::{
     guards::auth::StumpAuth,
     prisma::user,
     types::{
-        alias::{ApiResult, LoginResult, Session, State},
+        alias::{ApiResult, Context, LoginResult, Session},
         enums::UserRole,
         errors::ApiError,
         models::{AuthenticatedUser, LoginRequest},
@@ -22,7 +22,7 @@ pub async fn me(session: Session<'_>, _auth: StumpAuth) -> Option<Json<Authentic
 
 #[post("/auth/login", data = "<credentials>")]
 pub async fn login(
-    state: &State,
+    ctx: &Context,
     session: Session<'_>,
     credentials: Json<LoginRequest>,
 ) -> LoginResult {
@@ -32,7 +32,7 @@ pub async fn login(
         return Ok(Json(user.into()));
     }
 
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let user = db
         .user()
@@ -60,12 +60,12 @@ pub async fn login(
 // configurable? Maybe just allow it? Maybe make it an approval versus just registering immediately?
 #[post("/auth/register", data = "<credentials>")]
 pub async fn register(
-    state: &State,
+    ctx: &Context,
     session: Session<'_>,
     credentials: Json<LoginRequest>,
 ) -> ApiResult<Json<AuthenticatedUser>> {
     let existing_session = session.get().await?;
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let has_users = db.user().find_first(vec![]).exec().await?.is_some();
 

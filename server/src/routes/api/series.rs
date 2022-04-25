@@ -6,7 +6,7 @@ use crate::{
     guards::auth::StumpAuth,
     prisma::{media, read_progress, series},
     types::{
-        alias::{ApiResult, State},
+        alias::{ApiResult, Context},
         errors::ApiError,
         http::ImageResponse,
         models::SeriesWithMedia,
@@ -16,8 +16,8 @@ use crate::{
 // TODO: this disgusting thing needs to be refactored when https://github.com/Brendonovich/prisma-client-rust/issues/12
 // gets implemented. I can't wait 😩
 #[get("/series")]
-pub async fn get_series(state: &State, auth: StumpAuth) -> ApiResult<Json<Vec<SeriesWithMedia>>> {
-    let db = state.get_db();
+pub async fn get_series(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<SeriesWithMedia>>> {
+    let db = ctx.get_db();
 
     let s = db
         .series()
@@ -54,10 +54,10 @@ pub async fn get_series(state: &State, auth: StumpAuth) -> ApiResult<Json<Vec<Se
 #[get("/series/<id>")]
 pub async fn get_series_by_id(
     id: String,
-    state: &State,
+    ctx: &Context,
     auth: StumpAuth,
 ) -> ApiResult<Json<SeriesWithMedia>> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let series = db
         .series()
@@ -104,10 +104,10 @@ pub async fn get_series_by_id(
 #[get("/series/<id>/thumbnail")]
 pub async fn get_series_thumbnail(
     id: String,
-    state: &State,
+    ctx: &Context,
     _auth: StumpAuth,
 ) -> ApiResult<ImageResponse> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let media = db
         .media()

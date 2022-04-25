@@ -62,7 +62,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 // FIXME: this is not an ideal solution and is potentially unsafe. unrar seems to open the archive
 // in a different order than the actual content. I am sorting by filename, *however* this really is *not* ideal.
 // If the files were to have any other naming scheme that would be a problem.
-pub fn get_rar_image(file: &str, page: usize) -> GetPageResult {
+pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
     let archive = unrar::Archive::new(file.to_string());
 
     let mut filename: Option<String> = None;

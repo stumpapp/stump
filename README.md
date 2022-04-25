@@ -22,6 +22,7 @@ I'll list the major target features below - I am very open to suggestions and id
   - Full Text Search
   - Server management
   - Built-in webreader for media
+  - SSR would be an awesome feature, but so far seems to be a bit of a pain (since I am using Rust)
 - Role-based access control (i.e. the server owner and authorized users)
 
 ## Getting Started

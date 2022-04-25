@@ -1,12 +1,13 @@
 use crate::prisma;
 
-pub struct AppState {
-    pub db: prisma::PrismaClient,
+pub struct Context {
+    db: prisma::PrismaClient,
 }
 
-impl AppState {
-    pub async fn new() -> AppState {
-        AppState {
+/// Context each request will be provided with.
+impl Context {
+    pub async fn new() -> Context {
+        Context {
             db: prisma::new_client()
                 .await
                 .expect("Failed to create Prisma client"),

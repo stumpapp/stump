@@ -12,7 +12,7 @@ use crate::{
     },
     prisma::{self, library, media},
     types::{
-        alias::{ApiResult, State},
+        alias::{ApiResult, Context},
         errors::ApiError,
         http::{ImageResponse, XmlResponse},
         models::MediaWithProgress,
@@ -36,7 +36,7 @@ pub fn opds() -> Vec<Route> {
 
 /// A handler for GET /opds/v1.2/catalog. Returns an OPDS catalog as an XML document
 #[get("/catalog")]
-pub fn catalog(_state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+pub fn catalog(_ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
     let entries = vec![
         OpdsEntry::new(
             "keepReading".to_string(),
@@ -90,8 +90,8 @@ pub fn catalog(_state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/keep-reading")]
-async fn keep_reading(state: &State, auth: StumpAuth) -> ApiResult<XmlResponse> {
-    let db = state.get_db();
+async fn keep_reading(ctx: &Context, auth: StumpAuth) -> ApiResult<XmlResponse> {
+    let db = ctx.get_db();
 
     let user_id = auth.0.id.clone();
 
@@ -136,8 +136,8 @@ async fn keep_reading(state: &State, auth: StumpAuth) -> ApiResult<XmlResponse> 
 }
 
 #[get("/libraries")]
-async fn libraries(state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse> {
-    let db = state.get_db();
+async fn libraries(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+    let db = ctx.get_db();
 
     let libraries = db.library().find_many(vec![]).exec().await?;
 
@@ -165,8 +165,8 @@ async fn libraries(state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/libraries/<id>")]
-async fn library_by_id(state: &State, id: String, _auth: StumpAuth) -> ApiResult<XmlResponse> {
-    let db = state.get_db();
+async fn library_by_id(ctx: &Context, id: String, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+    let db = ctx.get_db();
 
     let library = db
         .library()
@@ -189,10 +189,10 @@ async fn library_by_id(state: &State, id: String, _auth: StumpAuth) -> ApiResult
 
 /// A handler for GET /opds/v1.2/series
 #[get("/series")]
-async fn series(state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse> {
-    // let res = get_series(state.get_connection()).await?;
+async fn series(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+    // let res = get_series(ctx.get_connection()).await?;
 
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let series = db
         .series()
@@ -228,8 +228,8 @@ async fn series(state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/series/latest")]
-async fn series_latest(state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse> {
-    let db = state.get_db();
+async fn series_latest(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+    let db = ctx.get_db();
 
     let series = db
         .series()
@@ -269,10 +269,10 @@ async fn series_latest(state: &State, _auth: StumpAuth) -> ApiResult<XmlResponse
 async fn series_by_id(
     id: String,
     page: Option<usize>,
-    state: &State,
+    ctx: &Context,
     _auth: StumpAuth,
 ) -> ApiResult<XmlResponse> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     // TODO: this query needs to change. I think I might just query for series, and
     // query for media separately. This would allow me to not have to sort the media, and
@@ -294,7 +294,7 @@ async fn series_by_id(
 
     // TODO: figure out why I grabbed progress I absolutely don't remember lol
     // let mut media =
-    //     get_user_media_with_progress(state.get_connection(), auth.0.id, Some(series.id)).await?;
+    //     get_user_media_with_progress(ctx.get_connection(), auth.0.id, Some(series.id)).await?;
 
     // page size is 20
     // take a slice of the media vector representing page
@@ -329,8 +329,8 @@ async fn series_by_id(
 }
 
 #[get("/books/<id>/thumbnail")]
-async fn book_thumbnail(id: String, state: &State, _auth: StumpAuth) -> ApiResult<ImageResponse> {
-    let db = state.get_db();
+async fn book_thumbnail(id: String, ctx: &Context, _auth: StumpAuth) -> ApiResult<ImageResponse> {
+    let db = ctx.get_db();
 
     let book = db
         .media()
@@ -353,10 +353,10 @@ async fn book_page(
     id: String,
     page: usize,
     zero_based: Option<bool>,
-    state: &State,
+    ctx: &Context,
     _auth: StumpAuth,
 ) -> ApiResult<ImageResponse> {
-    let db = state.get_db();
+    let db = ctx.get_db();
 
     let book = db
         .media()
@@ -375,7 +375,7 @@ async fn book_page(
             correct_page = 0;
         }
 
-        Ok(fs::media_file::get_page(&b.path, correct_page)?)
+        Ok(fs::media_file::get_page(&b.path, correct_page as i32)?)
     } else {
         Err(ApiError::NotFound(format!("Book {} not found", &id)))
     }

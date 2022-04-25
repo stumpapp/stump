@@ -2,6 +2,7 @@ use rocket::Route;
 
 pub mod auth;
 pub mod library;
+pub mod media;
 pub mod series;
 
 /// Function to return the routes for the `/api` path.
@@ -16,8 +17,8 @@ pub fn api() -> Vec<Route> {
         auth::register,
         auth::logout,
         // logs api
-        // routing::api::log::get_logs,
-        // routing::api::log::log_listener,
+        // job::get_jobs,
+        // job::jobs_listener,
         // library api
         library::get_libraries,
         library::get_library_by_id,
@@ -28,13 +29,13 @@ pub fn api() -> Vec<Route> {
         // series api
         series::get_series,
         series::get_series_by_id,
-        series::get_series_thumbnail
+        series::get_series_thumbnail,
         // media api
-        // routing::api::media::get_media,
-        // routing::api::media::get_media_by_id,
-        // routing::api::media::get_media_file,
-        // routing::api::media::get_media_page,
-        // routing::api::media::get_media_thumbnail,
-        // routing::api::media::update_media_progress,
+        media::get_media,
+        media::get_media_by_id,
+        media::get_media_file,
+        media::get_media_page,
+        media::get_media_thumbnail,
+        media::update_media_progress,
     ]
 }

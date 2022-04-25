@@ -1,5 +1,7 @@
-use crate::fs::error::ProcessFileError;
-use crate::fs::media_file::{self, GetPageResult, ProcessResult};
+use crate::{
+    fs::media_file::{self, GetPageResult, ProcessResult},
+    types::errors::ProcessFileError,
+};
 use epub::doc::EpubDoc;
 use walkdir::DirEntry;
 
@@ -8,7 +10,7 @@ pub fn process_epub(file: &DirEntry) -> ProcessResult {
 }
 
 // FIXME: error handling here is nasty
-pub fn get_epub_page(file: &str, page: usize) -> GetPageResult {
+pub fn get_epub_page(file: &str, page: i32) -> GetPageResult {
     let res = EpubDoc::new(file);
 
     match res {
@@ -22,7 +24,7 @@ pub fn get_epub_page(file: &str, page: usize) -> GetPageResult {
                 return Ok((content_type, contents));
             }
             let _ = doc
-                .set_current_page(page)
+                .set_current_page(page as usize)
                 .map_err(|e| ProcessFileError::EpubReadError(e.to_string()))?;
 
             let mime_type = doc

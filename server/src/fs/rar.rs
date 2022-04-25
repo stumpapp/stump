@@ -2,8 +2,10 @@ use rocket::http::ContentType;
 use unrar::archive::Entry;
 use walkdir::DirEntry;
 
-use crate::fs::error::ProcessFileError;
-use crate::fs::media_file::{self, GetPageResult, IsImage, ProcessResult};
+use crate::{
+    fs::media_file::{self, GetPageResult, IsImage, ProcessResult},
+    types::errors::ProcessFileError,
+};
 
 impl IsImage for Entry {
     fn is_image(&self) -> bool {
@@ -35,11 +37,11 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
                     Ok(e) => {
                         entries.push(e.filename);
                     }
-                    Err(e) => return Err(ProcessFileError::RarOpenError),
+                    Err(_e) => return Err(ProcessFileError::RarOpenError),
                 }
             }
         }
-        Err(e) => return Err(ProcessFileError::RarOpenError),
+        Err(_e) => return Err(ProcessFileError::RarOpenError),
     };
 
     if entries.iter().any(|e| e == "ComicInfo.xml") {
@@ -50,7 +52,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
                 media_file::process_comic_info(std::str::from_utf8(&bytes)?.to_owned()),
                 entries,
             )),
-            Err(e) => Err(ProcessFileError::RarOpenError),
+            Err(_e) => Err(ProcessFileError::RarOpenError),
         }
     } else {
         Ok((None, entries))
@@ -60,7 +62,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 // FIXME: this is not an ideal solution and is potentially unsafe. unrar seems to open the archive
 // in a different order than the actual content. I am sorting by filename, *however* this really is *not* ideal.
 // If the files were to have any other naming scheme that would be a problem.
-pub fn get_rar_image(file: &str, page: usize) -> GetPageResult {
+pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
     let archive = unrar::Archive::new(file.to_string());
 
     let mut filename: Option<String> = None;
@@ -82,7 +84,7 @@ pub fn get_rar_image(file: &str, page: usize) -> GetPageResult {
                 }
             }
         }
-        Err(e) => return Err(ProcessFileError::RarOpenError),
+        Err(_e) => return Err(ProcessFileError::RarOpenError),
     };
 
     if filename.is_some() {
@@ -90,7 +92,7 @@ pub fn get_rar_image(file: &str, page: usize) -> GetPageResult {
 
         match archive.read_bytes(&filename.unwrap()) {
             Ok(bytes) => Ok((ContentType::JPEG, bytes)),
-            Err(e) => Err(ProcessFileError::RarOpenError),
+            Err(_e) => Err(ProcessFileError::RarOpenError),
         }
     } else {
         Err(ProcessFileError::RarOpenError)

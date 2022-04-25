@@ -3,10 +3,15 @@ use rocket::{
     request::{FromRequest, Outcome, Request},
 };
 
-use crate::{database::queries::user::get_user_by_username, utils, State};
-use crate::{types::dto::user::AuthenticatedUser, utils::auth::AuthError};
-
-type Session<'a> = rocket_session_store::Session<'a, AuthenticatedUser>;
+use crate::{
+    prisma,
+    types::{
+        alias::{Session, State},
+        errors::AuthError,
+        models::AuthenticatedUser,
+    },
+    utils::{self},
+};
 
 pub struct StumpAuth(pub AuthenticatedUser);
 
@@ -88,7 +93,16 @@ impl<'r> FromRequest<'r> for StumpAuth {
 
             println!("Credentials: {:?}", credentials);
 
-            let user = get_user_by_username(&credentials.username, state.get_connection()).await;
+            // let user = get_user_by_username(&credentials.username, state.get_connection()).await;
+            let db = state.get_db();
+
+            let user = db
+                .user()
+                .find_unique(prisma::user::UniqueWhereParam::UsernameEquals(
+                    credentials.username,
+                ))
+                .exec()
+                .await;
 
             if user.is_err() {
                 println!("User error: {:?}", user.err().unwrap());
@@ -104,7 +118,8 @@ impl<'r> FromRequest<'r> for StumpAuth {
 
             let user = user.unwrap();
 
-            let matches = utils::auth::verify_password(&user.password, &credentials.password);
+            let matches =
+                utils::auth::verify_password(&user.hashed_password, &credentials.password);
 
             if matches.is_err() {
                 Outcome::Failure((Status::Unauthorized, matches.err().unwrap()))

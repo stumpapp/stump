@@ -1,0 +1,142 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.db"
+}
+
+generator client {
+  provider = "cargo prisma"
+  output   = "../src/prisma.rs"
+}
+
+// https://github.com/prisma/prisma/issues/2219
+// CHORE: once/if above is resolved, use enums
+// enum UserRole {
+//   Owner,
+//   Member,
+// }
+// enum FileStatus {
+//     Unknown,
+//     Error,
+//     Ready,
+//     Unsupported,
+//     Outdated,
+//     Missing,
+// }
+// enum LogLevel {
+//     Error,
+//     Warn,
+//     Info,
+//     Debug,
+// }
+
+model User {
+  id             String         @id @default(uuid())
+  // The username of the user. E.g. "oromei"
+  username       String         @unique
+  // The password of the user. This will a hash - not the actual password.
+  hashedPassword String
+  // The role of the user. Defaults to "MEMBER".
+  role           String         @default("MEMBER")
+  // The media the user currently has progress on.
+  // TODO: don't love this name but wanted to emphasize plural. I could do something like
+  // `currentlyReading` but that wouldn't match the relation in the Media model. UGH. Naming
+  // is so hard lol.
+  readProgresses ReadProgress[]
+
+  @@map("users")
+}
+
+model Library {
+  id          String   @id @default(uuid())
+  // The name of the library. ex: "Marvel Comics"
+  name        String
+  // The description of the library. ex: "The best library ever"
+  description String?
+  // The location of the library in the fs. ex: "/home/user/media/comics/marvel"
+  path        String   @unique
+  // The status of the series since last scan or access
+  status      String   @default("READY")
+  // The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
+  updatedAt   DateTime @updatedAt
+  // The series in the library
+  series      Series[]
+
+  @@map("libraries")
+}
+
+model Series {
+  id        String   @id @default(uuid())
+  // The title of the series. This is generated from a fs scan, and will be the directory name.
+  name      String
+  // The date in which the series was last updated in the FS. ex: "2020-01-01"
+  updatedAt DateTime @updatedAt
+  // The url of the series. ex: "/home/user/media/comics/The Amazing Spider-Man"
+  path      String
+  // The status of the series since last scan or access
+  status    String   @default("READY")
+  // The id of the library this series belongs to.
+  libraryId String?
+  // The library this series belongs to.
+  library   Library? @relation(fields: [libraryId], references: [id])
+  // The media files in the series.
+  media     Media[]
+
+  @@map("series")
+}
+
+model Media {
+  id             String         @id @default(uuid())
+  // The name of the media. ex: "The Amazing Spider-Man (2018) #69.cbz"
+  name           String
+  // The description of the media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
+  description    String?
+  // The size of the media in bytes.
+  size           Int
+  // The file extension of the media. ex: "cbz"
+  extension      String
+  // The number of pages in the media. ex: "69"
+  pages          Int
+  // The date in which the media was last updated in the FS. ex: "2022-04-20 04:20:69"
+  updatedAt      DateTime       @updatedAt
+  // Whether or not the media is downloaded to the client. ex: true
+  downloaded     Boolean        @default(false)
+  // The checksum hash of the file contents. Used to ensure only one instance of a file in the database
+  checksum       String?        @unique
+  // The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
+  path           String
+  // The series this media belongs to.
+  series         Series?        @relation(fields: [seriesId], references: [id])
+  // The id of the series this media belongs to.
+  seriesId       String?
+  // The read progresses of the media
+  readProgresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
+
+  @@map("media")
+}
+
+model ReadProgress {
+  id   String @id @default(uuid())
+  page Int
+
+  mediaId String
+  media   Media  @relation(fields: [mediaId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+
+  @@unique([userId, mediaId])
+  @@map("read_progresses")
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  // The level of the log. i.e: "Error", "Warn", "Info", "Debug"
+  level     String   @default("INFO")
+  // The message of the log.
+  message   String
+  // The datetime in which the log was created. ex: "2022-04-20 04:20:69"
+  createdAt DateTime @default(now())
+
+  @@map("logs")
+}

@@ -1,12 +1,20 @@
 // use crate::opds::author::StumpAuthor;
-use crate::opds::link::{OpdsLink, OpdsLinkRel, OpdsLinkType};
+use crate::{
+    opds::link::OpdsLink,
+    prisma::{library, media, series},
+};
 use anyhow::Result;
+use prisma_client_rust::chrono;
 use xml::{writer::XmlEvent, EventWriter};
 
-use super::{entry::OpdsEntry, util};
-use crate::types::alias::{
-    FeedPages, LibraryWithSeries, SeriesWithMedia, SeriesWithMediaAndProgress,
+use super::{
+    entry::OpdsEntry,
+    link::{OpdsLinkRel, OpdsLinkType},
+    util,
 };
+// use crate::types::alias::{
+//     FeedPages, LibraryWithSeries, SeriesWithMedia, SeriesWithMediaAndProgress,
+// };
 
 #[derive(Debug)]
 pub struct OpdsFeed {
@@ -63,15 +71,15 @@ impl OpdsFeed {
     }
 }
 
-// FIXME: need to pass a (current_page:usize, next_page:Option<usize>)
-impl From<(SeriesWithMediaAndProgress, FeedPages)> for OpdsFeed {
-    fn from(payload: (SeriesWithMediaAndProgress, FeedPages)) -> Self {
+// Note: this type is disgusting lol
+impl From<((series::Data, Vec<media::Data>), (usize, Option<usize>))> for OpdsFeed {
+    fn from(payload: ((series::Data, Vec<media::Data>), (usize, Option<usize>))) -> Self {
         let (series_with_media, pages) = payload;
         let (current_page, next_page) = pages;
         let (series, media) = series_with_media;
 
-        let id = series.id.to_string();
-        let title = series.title;
+        let id = series.id;
+        let title = series.name;
 
         // // TODO: use this
         // let author = StumpAuthor::new(
@@ -119,11 +127,9 @@ impl From<(SeriesWithMediaAndProgress, FeedPages)> for OpdsFeed {
     }
 }
 
-impl From<LibraryWithSeries> for OpdsFeed {
-    fn from(library_with_series: LibraryWithSeries) -> Self {
-        let (library, series) = library_with_series;
-
-        let id = library.id.to_string();
+impl From<(library::Data, Vec<series::Data>)> for OpdsFeed {
+    fn from((library, series): (library::Data, Vec<series::Data>)) -> Self {
+        let id = library.id;
         let title = library.name;
 
         let links = vec![

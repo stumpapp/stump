@@ -1,6 +1,8 @@
-use crate::fs::media_file::{self, GetPageResult, IsImage, ProcessResult};
+use crate::{
+    fs::media_file::{self, GetPageResult, IsImage, ProcessResult},
+    types::errors::ProcessFileError,
+};
 
-use crate::fs::error::ProcessFileError;
 use std::io::Read;
 use walkdir::DirEntry;
 use zip::read::ZipFile;
@@ -46,7 +48,7 @@ pub fn process_zip(file: &DirEntry) -> ProcessResult {
 // FIXME: this solution is terrible, was just fighting with borrow checker and wanted
 // a quick solve. TODO: rework this!
 /// Get an image from a zip file by index (page).
-pub fn get_zip_image(file: &str, page: usize) -> GetPageResult {
+pub fn get_zip_image(file: &str, page: i32) -> GetPageResult {
     let zip_file = std::fs::File::open(file)?;
 
     let mut archive = zip::ZipArchive::new(&zip_file)?;

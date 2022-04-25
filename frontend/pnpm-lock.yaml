@@ -27,6 +27,7 @@ specifiers:
   react-dom: ^18.0.0
   react-error-boundary: ^3.1.4
   react-hook-form: ^7.28.1
+  react-hot-toast: ^2.2.0
   react-query: ^3.34.19
   react-router-dom: ^6.2.2
   tailwind-scrollbar-hide: ^1.1.7
@@ -53,6 +54,7 @@ dependencies:
   react-dom: 18.0.0_react@18.0.0
   react-error-boundary: 3.1.4_react@18.0.0
   react-hook-form: 7.28.1_react@18.0.0
+  react-hot-toast: 2.2.0_react-dom@18.0.0+react@18.0.0
   react-query: 3.34.19_react-dom@18.0.0+react@18.0.0
   react-router-dom: 6.2.2_react-dom@18.0.0+react@18.0.0
   vite-plugin-package-version: 1.0.2_vite@2.8.6
@@ -2146,6 +2148,12 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
+  /goober/2.1.8:
+    resolution: {integrity: sha512-S0C85gCzcfFCMSdjD/CxyQMt1rbf2qEg6hmDzxk2FfD7+7Ogk55m8ZFUMtqNaZM4VVX/qaU9AzSORG+Gf4ZpAQ==}
+    peerDependencies:
+      csstype: ^3.0.10
+    dev: false
+
   /has-flag/3.0.0:
     resolution: {integrity: sha1-tdRU3CGZriJWmfNGfloH87lVuv0=}
     engines: {node: '>=4'}
@@ -2567,6 +2575,20 @@ packages:
       react: ^16.8.0 || ^17
     dependencies:
       react: 18.0.0
+    dev: false
+
+  /react-hot-toast/2.2.0_react-dom@18.0.0+react@18.0.0:
+    resolution: {integrity: sha512-248rXw13uhf/6TNDVzagX+y7R8J183rp7MwUMNkcrBRyHj/jWOggfXTGlM8zAOuh701WyVW+eUaWG2LeSufX9g==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16'
+      react-dom: '>=16'
+    dependencies:
+      goober: 2.1.8
+      react: 18.0.0
+      react-dom: 18.0.0_react@18.0.0
+    transitivePeerDependencies:
+      - csstype
     dev: false
 
   /react-is/16.13.1:

@@ -36,12 +36,31 @@ interface NavItemProps {
 }
 
 function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
-	// TODO: persist this so it stays open on navigate, I think that is better UX.
-	const { isOpen, onToggle } = useDisclosure();
+	const { isOpen, setDrawer } = useStore(({ libraryDrawer, setLibraryDrawer }) => ({
+		isOpen: libraryDrawer,
+		setDrawer: setLibraryDrawer,
+	}));
+
+	// FIXME: this is now persisted, however there is a terrible flash that bothers the heck
+	// out of me on inital render...
+	const { onToggle } = useDisclosure({
+		isOpen,
+		onOpen: () => setDrawer(true),
+		onClose: () => setDrawer(false),
+	});
 
 	return (
 		<Box w="full">
-			<Button w="full" variant="ghost" onClick={onToggle} textAlign="left" p={2}>
+			<Button
+				_focus={{
+					boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
+				}}
+				w="full"
+				variant="ghost"
+				onClick={onToggle}
+				textAlign="left"
+				p={2}
+			>
 				<HStack w="full" alignItems="center" justifyContent="space-between">
 					<HStack spacing="2">
 						{/* @ts-ignore */}
@@ -50,10 +69,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 					</HStack>
 					<Box p={1} rounded="full">
 						<CaretRight
-							className={clsx(
-								isOpen ? 'rotate-90' : 'rotate-270',
-								'transition-all duration-100',
-							)}
+							className={clsx(isOpen ? 'rotate-90' : 'rotate-270', 'transition-all duration-100')}
 						/>
 					</Box>
 				</HStack>
@@ -98,13 +114,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 function NavItem({ name, href, ...rest }: NavItemProps) {
 	return (
 		<Button w="full" variant="ghost" textAlign="left" p={2}>
-			<HStack
-				as={'a'}
-				href={href}
-				w="full"
-				alignItems="center"
-				justifyContent="space-between"
-			>
+			<HStack as={'a'} href={href} w="full" alignItems="center" justifyContent="space-between">
 				<HStack spacing="2">
 					{/* @ts-ignore */}
 					<rest.icon />
@@ -145,14 +155,21 @@ function SidebarContent() {
 			borderRight="1px"
 			borderRightColor={useColorModeValue('gray.200', 'gray.700')}
 			w={{ base: 20, md: 52 }}
-			pos="fixed"
 			h="full"
 			px={2}
 			zIndex={10}
 		>
 			<HStack px={2} flexShrink={0} justifyContent="start" alignItems="center" spacing="4">
 				<img src="/favicon.png" width="40" height="40" />
-				<Text fontSize="2xl" fontWeight="bold">
+				<Text
+					bgGradient="linear(to-r, brand.600, brand.400)"
+					bgClip="text"
+					fontSize="2xl"
+					fontWeight="bold"
+					_dark={{
+						bgGradient: 'linear(to-r, brand.600, brand.200)',
+					}}
+				>
 					Stump
 				</Text>
 			</HStack>
@@ -176,18 +193,14 @@ function SidebarContent() {
 	);
 }
 
-interface SidebarProps {
-	children: React.ReactNode;
-}
-
 // TODO: mobile breakpoint is stinky
-export default function Sidebar({ children }: SidebarProps) {
+export default function Sidebar() {
 	return (
-		<Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')}>
+		<Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')} as="aside">
 			<SidebarContent />
-			<Box ml={{ base: 24, md: 60 }} p="4">
+			{/* <Box ml={{ base: 24, md: 60 }} p="4">
 				{children}
-			</Box>
+			</Box> */}
 		</Box>
 	);
 }

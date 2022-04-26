@@ -6,7 +6,7 @@ use rocket::{
 use crate::{
     prisma,
     types::{
-        alias::{Session, State},
+        alias::{Context, Session},
         errors::AuthError,
         models::AuthenticatedUser,
     },
@@ -57,7 +57,7 @@ impl<'r> FromRequest<'r> for StumpAuth {
             // }
         }
 
-        let state: &State = req.guard().await.expect("TODO");
+        let ctx: &Context = req.guard().await.expect("TODO");
 
         let authorization = req.headers().get_one("authorization");
 
@@ -93,8 +93,7 @@ impl<'r> FromRequest<'r> for StumpAuth {
 
             println!("Credentials: {:?}", credentials);
 
-            // let user = get_user_by_username(&credentials.username, state.get_connection()).await;
-            let db = state.get_db();
+            let db = ctx.get_db();
 
             let user = db
                 .user()

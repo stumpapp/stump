@@ -1,9 +1,9 @@
 import API from '..';
 
 export function getLibraries(): Promise<GetLibrariesResponse> {
-	return API.get('/library');
+	return API.get('/libraries');
 }
 
 export function getLibraryById(id: string): Promise<GetLibraryWithSeries> {
-	return API.get(`/library/${id}`);
+	return API.get(`/libraries/${id}`);
 }

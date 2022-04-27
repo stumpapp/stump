@@ -19,31 +19,37 @@ const Book = React.lazy(() => import('~pages/Book'));
 const Login = React.lazy(() => import('~pages/Login'));
 const Settings = React.lazy(() => import('~pages/Settings'));
 
-export default function App() {
+export default function Root() {
 	return (
 		<ErrorBoundary>
 			<QueryClientProvider client={client}>
 				<ChakraProvider theme={theme}>
 					<StoreProvider>
-						<BrowserRouter>
-							<Routes>
-								<Route path="/" element={<MainLayout />}>
-									<Route path="" element={<Home />} />
-									<Route path="settings" element={<Settings />} />
-									<Route path="libraries/:id" element={<Library />} />
-									<Route path="series/:id" element={<Series />} />
-									<Route path="books/:id" element={<Book />} />
-								</Route>
-								<Route path="/auth" element={<BaseLayout />}>
-									<Route path="login" element={<Login />} />
-								</Route>
-								<Route path="*" element={<FourOhFour />} />
-							</Routes>
-						</BrowserRouter>
+						<App />
 						<Notifications />
 					</StoreProvider>
 				</ChakraProvider>
 			</QueryClientProvider>
 		</ErrorBoundary>
+	);
+}
+
+function App() {
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route path="/" element={<MainLayout />}>
+					<Route path="" element={<Home />} />
+					<Route path="settings" element={<Settings />} />
+					<Route path="libraries/:id" element={<Library />} />
+					<Route path="series/:id" element={<Series />} />
+					<Route path="books/:id" element={<Book />} />
+				</Route>
+				<Route path="/auth" element={<BaseLayout />}>
+					<Route path="login" element={<Login />} />
+				</Route>
+				<Route path="*" element={<FourOhFour />} />
+			</Routes>
+		</BrowserRouter>
 	);
 }

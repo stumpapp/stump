@@ -17,6 +17,8 @@ pub async fn get_libraries(ctx: &Context, _auth: StumpAuth) -> ApiResult<Json<Ve
     Ok(Json(db.library().find_many(vec![]).exec().await?))
 }
 
+// FIXME: this needs to return either the media count or just the media loaded,
+// same issue as in a few other files, not currently supported.
 #[get("/libraries/<id>")]
 pub async fn get_library_by_id(
     id: String,

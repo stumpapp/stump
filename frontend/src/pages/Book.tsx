@@ -8,5 +8,5 @@ export default function Book() {
 		throw new Error('Book id is required for this route.');
 	}
 
-	return <div>{id}</div>;
+	return <div className="p-4">{id}</div>;
 }

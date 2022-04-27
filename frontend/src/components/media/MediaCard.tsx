@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@chakra-ui/react';
 import client from '~api/client';
 import { getMediaById, getMediaThumbnail } from '~api/query/media';
+import { Link } from 'react-router-dom';
 
 interface Props extends MediaWithProgress {}
 
@@ -15,7 +16,7 @@ export default function MediaCard({ ...media }: Props) {
 	// the background (gray.800 vs gray.900)
 	return (
 		<Box
-			as="a"
+			as={Link}
 			shadow="base"
 			bg="gray.50"
 			border="1.5px solid"
@@ -24,7 +25,7 @@ export default function MediaCard({ ...media }: Props) {
 			_hover={{
 				borderColor: 'brand.500',
 			}}
-			href={`/books/${media.id}`}
+			to={`/books/${media.id}`}
 			rounded="md"
 			// className="hover:border-brand rounded-md rounded-t-md border border-transparent transition-all duration-200"
 			onMouseEnter={prefetchMedia}

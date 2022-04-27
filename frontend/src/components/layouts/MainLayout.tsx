@@ -4,7 +4,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { getLibraries } from '~api/query/library';
 import { getMedia } from '~api/query/media';
 import Lazy from '~components/Lazy';
-import Sidebar from '~components/Sidebar';
+import Sidebar from '~components/Sidebar/Sidebar';
 import { useStore } from '~store/store';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
@@ -52,7 +52,7 @@ export default function MainLayout() {
 	return (
 		<Flex>
 			<Sidebar />
-			<Box as="main" bg={useColorModeValue('gray.100', 'gray.900')} p="4">
+			<Box as="main" bg={useColorModeValue('gray.100', 'gray.900')}>
 				<React.Suspense fallback={<Lazy />}>
 					<Outlet />
 				</React.Suspense>

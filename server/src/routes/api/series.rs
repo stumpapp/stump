@@ -75,11 +75,11 @@ pub async fn get_series_by_id(
 
     let series = series.unwrap();
 
-    let media_ids = series
-        .media()?
-        .iter()
-        .map(|m| m.id.clone())
-        .collect::<Vec<_>>();
+    let mut media = series.media()?.to_owned();
+    // I HATE this, gotta wait for same issue as above
+    media.sort_by(|a, b| a.name.cmp(&b.name));
+
+    let media_ids = media.iter().map(|m| m.id.clone()).collect::<Vec<_>>();
 
     let progress = db
         .read_progress()
@@ -91,14 +91,7 @@ pub async fn get_series_by_id(
         .await?;
 
     // this is so gross
-    Ok(Json(
-        (
-            series.clone(),
-            series.media().unwrap().to_owned(),
-            &progress,
-        )
-            .into(),
-    ))
+    Ok(Json((series.clone(), media.to_owned(), &progress).into()))
 }
 
 #[get("/series/<id>/thumbnail")]

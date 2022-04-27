@@ -3,13 +3,23 @@ import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/re
 import { ArrowsClockwise, DotsThreeVertical, NotePencil, Trash } from 'phosphor-react';
 import { useMutation } from 'react-query';
 import { scanLibary } from '~api/mutation/library';
+import toast from 'react-hot-toast';
+import { restrictedToast, RESTRICTED_MODE } from '~util/restricted';
 
 interface Props {
-	libraryId: number;
+	libraryId: string;
 }
 
 export default function LibraryOptionsMenu({ libraryId }: Props) {
 	const { mutate: scan } = useMutation('scanLibary', { mutationFn: scanLibary });
+
+	function handleScan() {
+		if (RESTRICTED_MODE) {
+			restrictedToast();
+		} else {
+			scan(libraryId);
+		}
+	}
 
 	return (
 		// TODO: https://chakra-ui.com/docs/theming/customize-theme#customizing-component-styles
@@ -19,12 +29,22 @@ export default function LibraryOptionsMenu({ libraryId }: Props) {
 			</MenuButton>
 
 			<MenuList>
-				<MenuItem icon={<ArrowsClockwise size={'1rem'} onClick={() => scan(libraryId)} />}>
+				<MenuItem icon={<ArrowsClockwise size={'1rem'} />} onClick={handleScan}>
 					Scan
 				</MenuItem>
-				<MenuItem icon={<NotePencil size={'1rem'} />}>Edit</MenuItem>
+				<MenuItem
+					icon={<NotePencil size={'1rem'} />}
+					onClick={() => toast.error("I can't do that yet! 😢")}
+				>
+					Edit
+				</MenuItem>
 				<MenuDivider />
-				<MenuItem icon={<Trash size={'1rem'} />}>Delete</MenuItem>
+				<MenuItem
+					icon={<Trash size={'1rem'} />}
+					onClick={() => toast.error("I can't do that yet! 😢")}
+				>
+					Delete
+				</MenuItem>
 			</MenuList>
 		</Menu>
 	);

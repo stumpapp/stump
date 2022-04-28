@@ -1,5 +1,5 @@
 use anyhow::Result;
-use prisma_client_rust::chrono;
+use prisma_client_rust::chrono::{self, FixedOffset};
 use prisma_client_rust::chrono::{DateTime, Utc};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
@@ -18,7 +18,7 @@ use super::{
 #[derive(Debug)]
 pub struct OpdsEntry {
     id: String,
-    updated: DateTime<Utc>,
+    updated: DateTime<FixedOffset>,
     title: String,
     content: Option<String>,
     authors: Option<Vec<String>>,
@@ -29,7 +29,7 @@ pub struct OpdsEntry {
 impl OpdsEntry {
     pub fn new(
         id: String,
-        updated: DateTime<Utc>,
+        updated: DateTime<FixedOffset>,
         title: String,
         content: Option<String>,
         authors: Option<Vec<String>>,
@@ -217,10 +217,12 @@ impl From<media::Data> for OpdsEntry {
             None => Some(format!("{:.1} MiB - {}", mib, m.extension)),
         };
 
+        // let now = chrono::Utc::now();
+
         OpdsEntry {
             id: m.id.to_string(),
             title: m.name,
-            updated: chrono::Utc::now(),
+            updated: chrono::Utc::now().into(),
             content,
             links,
             authors: None,
@@ -280,7 +282,7 @@ impl From<MediaWithProgress> for OpdsEntry {
         OpdsEntry {
             id: media.id.to_string(),
             title: media.name,
-            updated: chrono::Utc::now(),
+            updated: chrono::Utc::now().into(),
             content,
             links,
             authors: None,

@@ -40,7 +40,7 @@ pub fn catalog(_ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
     let entries = vec![
         OpdsEntry::new(
             "keepReading".to_string(),
-            chrono::Utc::now(),
+            chrono::Utc::now().into(),
             "Keep Reading".to_string(),
             Some(String::from("Continue reading your in progress books")),
             None,
@@ -53,7 +53,7 @@ pub fn catalog(_ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
         ),
         OpdsEntry::new(
             "allSeries".to_string(),
-            chrono::Utc::now(),
+            chrono::Utc::now().into(),
             "All Series".to_string(),
             Some(String::from("Browse by series")),
             None,
@@ -66,7 +66,7 @@ pub fn catalog(_ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
         ),
         OpdsEntry::new(
             "latestSeries".to_string(),
-            chrono::Utc::now(),
+            chrono::Utc::now().into(),
             "Latest Series".to_string(),
             Some(String::from("Browse latest series")),
             None,
@@ -95,7 +95,7 @@ async fn keep_reading(ctx: &Context, auth: StumpAuth) -> ApiResult<XmlResponse> 
 
     let user_id = auth.0.id.clone();
 
-    let media_with_progress: Vec<MediaWithProgress> = db
+    let mut media_with_progress: Vec<MediaWithProgress> = db
         .read_progress()
         .find_many(vec![prisma::read_progress::user_id::equals(user_id)])
         .with(prisma::read_progress::media::fetch())
@@ -108,6 +108,9 @@ async fn keep_reading(ctx: &Context, auth: StumpAuth) -> ApiResult<XmlResponse> 
             (media, rp.to_owned()).into()
         })
         .collect();
+
+    // TODO: sort using order_by
+    media_with_progress.sort_by(|a, b| a.name.cmp(&b.name));
 
     let entries: Vec<OpdsEntry> = media_with_progress
         .into_iter()

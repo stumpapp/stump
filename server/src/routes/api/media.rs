@@ -1,4 +1,4 @@
-use rocket::serde::json::Json;
+use rocket::{fs::NamedFile, serde::json::Json};
 use serde::Deserialize;
 
 use crate::{
@@ -55,8 +55,25 @@ pub async fn get_media_by_id(
 }
 
 #[get("/media/<id>/file")]
-pub async fn get_media_file(id: String) {
-    unimplemented!()
+pub async fn get_media_file(id: String, ctx: &Context, _auth: StumpAuth) -> ApiResult<NamedFile> {
+    let db = ctx.get_db();
+
+    let media = db
+        .media()
+        .find_unique(media::id::equals(id.clone()))
+        .exec()
+        .await?;
+
+    if media.is_none() {
+        return Err(ApiError::NotFound(format!(
+            "Media with id {} not found",
+            id
+        )));
+    }
+
+    let media = media.unwrap();
+
+    Ok(NamedFile::open(media.path.clone()).await?)
 }
 
 #[get("/media/<id>/page/<page>")]
@@ -137,6 +154,7 @@ pub async fn update_media_progress(
 ) -> ApiResult<Json<read_progress::Data>> {
     let db = ctx.get_db();
 
+    // update the progress, otherwise create it
     Ok(Json(
         db.read_progress()
             .upsert(read_progress::UniqueWhereParam::UserIdMediaIdEquals(

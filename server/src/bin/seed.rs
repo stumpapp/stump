@@ -3,11 +3,10 @@ use std::io::BufReader;
 use rocket::tokio;
 
 // TODO: is this really the only way to achieve this?
-
 #[path = "../prisma.rs"]
 mod prisma;
 
-use prisma::{library, media, series, user};
+use prisma::{library, media, read_progress, series, user};
 use prisma_client_rust::serde_json;
 use serde::{Deserialize, Serialize};
 
@@ -35,6 +34,36 @@ struct MockMedia {
 }
 
 // TODO: remove some of the code duplication here when creating media
+
+async fn create_series_media(
+    client: &prisma::PrismaClient,
+    media_json: Vec<MockMedia>,
+    series_id: String,
+) -> Result<Vec<media::Data>, prisma_client_rust::query::Error> {
+    let mut ret = vec![];
+
+    for m in media_json {
+        ret.push(
+            client
+                .media()
+                .create(
+                    media::name::set(m.name),
+                    media::size::set(m.size),
+                    media::extension::set(m.extension),
+                    media::pages::set(m.pages),
+                    media::path::set(m.path),
+                    vec![
+                        media::description::set(m.description),
+                        media::series::link(series::id::equals(series_id.clone())),
+                    ],
+                )
+                .exec()
+                .await?,
+        );
+    }
+
+    Ok(ret)
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -98,23 +127,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let amazing_spiderman_json: Vec<MockMedia> =
         serde_json::from_reader(BufReader::new(amazing_spiderman_file))?;
 
-    for m in amazing_spiderman_json {
-        client
-            .media()
-            .create(
-                media::name::set(m.name),
-                media::size::set(m.size),
-                media::extension::set(m.extension),
-                media::pages::set(m.pages),
-                media::path::set(m.path),
-                vec![
-                    media::description::set(m.description),
-                    media::series::link(series::id::equals(amazing_spiderman.id.clone())),
-                ],
-            )
-            .exec()
-            .await?;
-    }
+    let amazing_spiderman_books = create_series_media(
+        &client,
+        amazing_spiderman_json,
+        amazing_spiderman.id.clone(),
+    )
+    .await?;
 
     println!("Created media for series: {}", &amazing_spiderman.id);
 
@@ -143,23 +161,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let spiderman_blue_json: Vec<MockMedia> =
         serde_json::from_reader(BufReader::new(spiderman_blue_file))?;
 
-    for m in spiderman_blue_json {
-        client
-            .media()
-            .create(
-                media::name::set(m.name),
-                media::size::set(m.size),
-                media::extension::set(m.extension),
-                media::pages::set(m.pages),
-                media::path::set(m.path),
-                vec![
-                    media::description::set(m.description),
-                    media::series::link(series::id::equals(spiderman_blue.id.clone())),
-                ],
-            )
-            .exec()
-            .await?;
-    }
+    let _spiderman_blue_books =
+        create_series_media(&client, spiderman_blue_json, spiderman_blue.id.clone()).await?;
 
     println!("Created media for series: {}", &spiderman_blue.id);
 
@@ -181,25 +184,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let venom_json: Vec<MockMedia> = serde_json::from_reader(BufReader::new(venom_file))?;
 
-    for m in venom_json {
-        client
-            .media()
-            .create(
-                media::name::set(m.name),
-                media::size::set(m.size),
-                media::extension::set(m.extension),
-                media::pages::set(m.pages),
-                media::path::set(m.path),
-                vec![
-                    media::description::set(m.description),
-                    media::series::link(series::id::equals(venom.id.clone())),
-                ],
-            )
-            .exec()
-            .await?;
-    }
+    let venom_books = create_series_media(&client, venom_json, venom.id.clone()).await?;
 
     println!("Created media for series: {}", &venom.id);
+
+    client.read_progress().create(
+        read_progress::page::set(2),
+        read_progress::media::link(media::id::equals(
+            amazing_spiderman_books.get(0).unwrap().id.clone(),
+        )),
+        read_progress::user::link(user::id::equals(oromei.id.clone())),
+        vec![],
+    );
+
+    client.read_progress().create(
+        read_progress::page::set(6),
+        read_progress::media::link(media::id::equals(venom_books.get(0).unwrap().id.clone())),
+        read_progress::user::link(user::id::equals(oromei.id.clone())),
+        vec![],
+    );
+
+    println!("Marked two books as in progress.");
 
     println!("Seed completed.");
 

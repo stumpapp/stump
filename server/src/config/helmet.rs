@@ -1,10 +1,7 @@
 use rocket::{
     fairing::{Fairing, Info, Kind},
-    http::{Cookie, Header, SameSite, Status},
-    request::{FromRequest, Outcome},
-    response::Responder,
-    tokio::sync::Mutex,
-    Build, Request, Response, Rocket, State,
+    http::Header,
+    Build, Request, Response, Rocket,
 };
 
 pub struct HelmetFairing {}

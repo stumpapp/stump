@@ -9,13 +9,13 @@ use crate::{
         entry::OpdsEntry,
         feed::OpdsFeed,
         link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
+        models::OpdsSeries,
     },
-    prisma::{self, library, media},
+    prisma::{self, library, media, read_progress},
     types::{
         alias::{ApiResult, Context},
         errors::ApiError,
         http::{ImageResponse, XmlResponse},
-        models::MediaWithProgress,
     },
 };
 
@@ -95,27 +95,17 @@ async fn keep_reading(ctx: &Context, auth: StumpAuth) -> ApiResult<XmlResponse> 
 
     let user_id = auth.0.id.clone();
 
-    let mut media_with_progress: Vec<MediaWithProgress> = db
-        .read_progress()
-        .find_many(vec![prisma::read_progress::user_id::equals(user_id)])
-        .with(prisma::read_progress::media::fetch())
+    let media = db
+        .media()
+        .find_many(vec![])
+        .with(media::read_progresses::fetch(vec![
+            read_progress::user_id::equals(user_id),
+        ]))
+        .order_by(media::name::order(Direction::Asc))
         .exec()
-        .await?
-        .iter()
-        .map(|rp| {
-            let media = rp.media().unwrap().to_owned();
+        .await?;
 
-            (media, rp.to_owned()).into()
-        })
-        .collect();
-
-    // TODO: sort using order_by
-    media_with_progress.sort_by(|a, b| a.name.cmp(&b.name));
-
-    let entries: Vec<OpdsEntry> = media_with_progress
-        .into_iter()
-        .map(|m| OpdsEntry::from(m))
-        .collect();
+    let entries: Vec<OpdsEntry> = media.into_iter().map(|m| OpdsEntry::from(m)).collect();
 
     let feed = OpdsFeed::new(
         "keepReading".to_string(),
@@ -182,27 +172,15 @@ async fn library_by_id(ctx: &Context, id: String, _auth: StumpAuth) -> ApiResult
         return Err(ApiError::NotFound(format!("Library {} not found", id)));
     }
 
-    let library = library.unwrap();
-    let series = library.series()?.to_owned();
-
-    let feed = OpdsFeed::from((library, series));
-
-    Ok(XmlResponse(feed.build()?))
+    Ok(XmlResponse(OpdsFeed::from(library.unwrap()).build()?))
 }
 
 /// A handler for GET /opds/v1.2/series
 #[get("/series")]
 async fn series(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
-    // let res = get_series(ctx.get_connection()).await?;
-
     let db = ctx.get_db();
 
-    let series = db
-        .series()
-        .find_many(vec![])
-        // .with(series::media::fetch(vec![]))
-        .exec()
-        .await?;
+    let series = db.series().find_many(vec![]).exec().await?;
 
     let entries = series
         .into_iter()
@@ -277,13 +255,25 @@ async fn series_by_id(
 ) -> ApiResult<XmlResponse> {
     let db = ctx.get_db();
 
-    // TODO: this query needs to change. I think I might just query for series, and
-    // query for media separately. This would allow me to not have to sort the media, and
-    // be able to distinguish between series not found and no media in series.
+    // page size is 20
+    // take a slice of the media vector representing page
+    let corrected_page = page.unwrap_or(0);
+    let page_size = 20;
+    let start = corrected_page * page_size;
+    let end = (start + page_size) - 1;
+
     let series = db
         .series()
         .find_unique(prisma::series::id::equals(id.clone()))
-        .with(prisma::series::media::fetch(vec![]))
+        .with(
+            prisma::series::media::fetch(vec![])
+                .order_by(media::name::order(Direction::Asc))
+                // Note: I really wanted to be able to just paginate the query here,
+                // but I need to be able to determine whether or not the series has more media
+                // in the below logic for the OPDS feed.
+                // .skip(start.try_into()?)
+                // .take(end.try_into()?),
+        )
         .exec()
         .await?;
 
@@ -295,26 +285,12 @@ async fn series_by_id(
 
     let mut media = series.media()?.to_owned();
 
-    // TODO: figure out why I grabbed progress I absolutely don't remember lol
-    // let mut media =
-    //     get_user_media_with_progress(ctx.get_connection(), auth.0.id, Some(series.id)).await?;
-
-    // page size is 20
-    // take a slice of the media vector representing page
-    let corrected_page = page.unwrap_or(0);
-    let page_size = 20;
-    let start = corrected_page * page_size;
-    let end = (start + page_size) - 1;
-
     let mut next_page = None;
 
     if start > media.len() {
         media = vec![];
     } else if end < media.len() {
-        next_page = Some(page.unwrap_or(1));
-
-        // FIXME: DO NOT like this. This needs to be solved along with the above notes
-        media.sort_by(|a, b| a.name.cmp(&b.name));
+        next_page = Some(page.unwrap_or(0) + 1);
 
         media = media
             .get(start..end)
@@ -323,10 +299,11 @@ async fn series_by_id(
             .to_vec();
     }
 
-    // TODO: this is kinda disgusting, maybe make it a struct?
-    let payload = ((series, media), (page.unwrap_or(0), next_page));
-
-    let feed = OpdsFeed::from(payload);
+    // // Note: this is still kinda gross but whatever
+    let feed = OpdsFeed::from(OpdsSeries::from((
+        (series, media),
+        (page.unwrap_or(0), next_page),
+    )));
 
     Ok(XmlResponse(feed.build()?))
 }

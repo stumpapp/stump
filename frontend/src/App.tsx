@@ -11,12 +11,14 @@ import StoreProvider from '~store/StoreProvider';
 import theme from '~util/theme';
 
 import { ChakraProvider } from '@chakra-ui/react';
+import JobOverlay from '~components/JobOverlay';
 
 const Home = React.lazy(() => import('~pages/Home'));
 const Library = React.lazy(() => import('~pages/Library'));
-const Series = React.lazy(() => import('~pages/Series'));
-const Book = React.lazy(() => import('~pages/Book'));
-const Login = React.lazy(() => import('~pages/Login'));
+const SeriesOverview = React.lazy(() => import('~pages/SeriesOverview'));
+const BookOverview = React.lazy(() => import('~pages/Book/BookOverview'));
+const ReadBook = React.lazy(() => import('~pages/Book/ReadBook'));
+const Login = React.lazy(() => import('~pages/Auth/Login'));
 const Settings = React.lazy(() => import('~pages/Settings'));
 
 export default function Root() {
@@ -26,7 +28,6 @@ export default function Root() {
 				<ChakraProvider theme={theme}>
 					<StoreProvider>
 						<App />
-						<Notifications />
 					</StoreProvider>
 				</ChakraProvider>
 			</QueryClientProvider>
@@ -36,20 +37,25 @@ export default function Root() {
 
 function App() {
 	return (
-		<BrowserRouter>
-			<Routes>
-				<Route path="/" element={<MainLayout />}>
-					<Route path="" element={<Home />} />
-					<Route path="settings" element={<Settings />} />
-					<Route path="libraries/:id" element={<Library />} />
-					<Route path="series/:id" element={<Series />} />
-					<Route path="books/:id" element={<Book />} />
-				</Route>
-				<Route path="/auth" element={<BaseLayout />}>
-					<Route path="login" element={<Login />} />
-				</Route>
-				<Route path="*" element={<FourOhFour />} />
-			</Routes>
-		</BrowserRouter>
+		<>
+			<BrowserRouter>
+				<Routes>
+					<Route path="/" element={<MainLayout />}>
+						<Route path="" element={<Home />} />
+						<Route path="settings" element={<Settings />} />
+						<Route path="libraries/:id" element={<Library />} />
+						<Route path="series/:id" element={<SeriesOverview />} />
+						<Route path="books/:id" element={<BookOverview />} />
+					</Route>
+					<Route path="/books/:id/pages/:page" element={<ReadBook />} />
+					<Route path="/auth" element={<BaseLayout />}>
+						<Route path="login" element={<Login />} />
+					</Route>
+					<Route path="*" element={<FourOhFour />} />
+				</Routes>
+			</BrowserRouter>
+			<Notifications />
+			<JobOverlay />
+		</>
 	);
 }

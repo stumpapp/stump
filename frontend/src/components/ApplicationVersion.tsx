@@ -1,10 +1,17 @@
 import React from 'react';
-import Link from './ui/Link';
+import { ArrowSquareOut } from 'phosphor-react';
 
 export default function ApplicationVersion() {
 	return (
-		<Link className="text-sm" to="https://github.com/aaronleopold/stump" isExternal>
-			v{import.meta.env.PACKAGE_VERSION}
-		</Link>
+		<a
+			href="https://github.com/aaronleopold/stump"
+			target="__blank"
+			rel="noopener noreferrer"
+			className="flex items-center space-x-2 text-sm"
+			title="View Stump on GitHub"
+		>
+			<span>v{import.meta.env.PACKAGE_VERSION}</span>
+			<ArrowSquareOut />
+		</a>
 	);
 }

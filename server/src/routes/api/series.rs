@@ -62,6 +62,7 @@ pub async fn get_series_by_id(
     let series = db
         .series()
         .find_unique(series::id::equals(id.clone()))
+        // .with(series::media::fetch(vec![]).with(media::read_progresses::fetch(vec![])))
         .with(series::media::fetch(vec![]))
         .exec()
         .await?;

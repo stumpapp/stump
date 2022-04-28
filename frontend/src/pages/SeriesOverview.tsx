@@ -1,11 +1,11 @@
-import { Wrap, WrapItem } from '@chakra-ui/react';
+import { Heading, Wrap, WrapItem } from '@chakra-ui/react';
 import React from 'react';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import { getSeriesById } from '~api/query/series';
 import MediaCard from '~components/Media/MediaCard';
 
-export default function Series() {
+export default function SeriesOverview() {
 	const { id } = useParams();
 
 	if (!id) {
@@ -24,9 +24,10 @@ export default function Series() {
 
 	return (
 		<div className="flex flex-col space-y-4 p-4">
-			<h1 className="text-lg font-bold text-gray-100">{series.name}</h1>
+			<Heading as="h3" size="md" fontWeight="bold">
+				{series.name}
+			</Heading>
 
-			{/* <div className="flex flex-wrap gap-4 items-center justify-center"> */}
 			<Wrap align="center">
 				{series.media.map((m) => (
 					<WrapItem>
@@ -34,7 +35,6 @@ export default function Series() {
 					</WrapItem>
 				))}
 			</Wrap>
-			{/* </div> */}
 		</div>
 	);
 }

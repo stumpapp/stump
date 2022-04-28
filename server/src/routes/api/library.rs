@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 use crate::{
     guards::auth::StumpAuth,
-    prisma::library,
+    prisma::{library, series},
     types::{
         alias::{ApiResult, Context},
         errors::ApiError,
@@ -30,6 +30,7 @@ pub async fn get_library_by_id(
     let lib = db
         .library()
         .find_unique(library::id::equals(id.clone()))
+        // .with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
         .with(library::series::fetch(vec![]))
         .exec()
         .await?;

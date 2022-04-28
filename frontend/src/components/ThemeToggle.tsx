@@ -9,7 +9,15 @@ export default function ThemeToggle() {
 	return (
 		<div onClick={toggleColorMode}>
 			<AnimatePresence exitBeforeEnter initial={false}>
-				<Button title="Toggle Application Theme" variant="ghost" cursor={'pointer'} p={1}>
+				<Button
+					title="Toggle Application Theme"
+					variant="ghost"
+					cursor={'pointer'}
+					p={1}
+					_focus={{
+						boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
+					}}
+				>
 					<motion.span
 						key={colorMode === 'dark' ? 'moon' : 'sun'}
 						initial={{ y: -30, opacity: 0 }}

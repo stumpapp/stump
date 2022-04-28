@@ -10,6 +10,7 @@ export interface LinkProps extends RouterLinkProps {
 
 export default function Link({ isExternal, noUnderline, ...props }: LinkProps) {
 	const { children, className, title, ...rest } = props;
+
 	return (
 		<RouterLink
 			title={title ?? props.to.toString()}

@@ -8,9 +8,10 @@ import Form from '~components/ui/Form';
 import Input from '~components/ui/Input';
 import { useStore } from '~store/store';
 
-import { Button, Container, Heading, HStack, Text, VStack } from '@chakra-ui/react';
+import { Button, Container, HStack, Text } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from 'react-query';
+import toast from 'react-hot-toast';
 
 export default function Login() {
 	const { user, setUser } = useStore(({ user, setUser }) => ({ user, setUser }), shallow);
@@ -26,6 +27,7 @@ export default function Login() {
 		},
 		onError: (err) => {
 			// TODO: handle this error
+			toast.error('Login failed. Please try again.');
 			console.error(err);
 		},
 	});

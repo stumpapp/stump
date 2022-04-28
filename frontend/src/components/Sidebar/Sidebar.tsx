@@ -115,8 +115,18 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 
 function NavItem({ name, href, ...rest }: NavItemProps) {
 	return (
-		<Button w="full" variant="ghost" textAlign="left" p={2}>
-			<HStack as={Link} to={href!} w="full" alignItems="center" justifyContent="space-between">
+		<Button
+			_focus={{
+				boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
+			}}
+			as={Link}
+			to={href!}
+			w="full"
+			variant="ghost"
+			textAlign="left"
+			p={2}
+		>
+			<HStack w="full" alignItems="center" justifyContent="space-between">
 				<HStack spacing="2">
 					{/* @ts-ignore */}
 					<rest.icon />
@@ -148,6 +158,7 @@ function SidebarContent() {
 		[libraries],
 	);
 
+	// This kinda makes me hate chakra
 	return (
 		<Stack
 			display="flex"

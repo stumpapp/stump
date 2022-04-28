@@ -24,7 +24,17 @@ export default function LibraryOptionsMenu({ libraryId }: Props) {
 	return (
 		// TODO: https://chakra-ui.com/docs/theming/customize-theme#customizing-component-styles
 		<Menu size="sm">
-			<MenuButton p={1} rounded="full" _hover={{ bg: 'gray.200', _dark: { bg: 'gray.700' } }}>
+			<MenuButton
+				p={1}
+				rounded="full"
+				_hover={{ bg: 'gray.200', _dark: { bg: 'gray.700' } }}
+				_focus={{
+					boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+				}}
+				_active={{
+					boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+				}}
+			>
 				<DotsThreeVertical size={'1.25rem'} />
 			</MenuButton>
 

@@ -1,15 +1,10 @@
-// theme.js
-
-// 1. import `extendTheme` function
 import { extendTheme } from '@chakra-ui/react';
 
-// 2. Add your color mode config
 const config = {
 	initialColorMode: 'dark',
 	useSystemColorMode: false,
 };
 
-// TODO: add intermediate colors in gray, e.g. gray.750
 const colors = {
 	brand: {
 		DEFAULT: '#C48259',
@@ -24,9 +19,33 @@ const colors = {
 		800: '#56341F',
 		900: '#2D1B10',
 	},
+	gray: {
+		50: '#F7FAFC',
+		100: '#EDF2F7',
+		150: '#E8EDF4',
+		200: '#E2E8F0',
+		250: '#D8DFE9',
+		300: '#CBD5E0',
+		350: '#B7C3D1',
+		400: '#A0AEC0',
+		450: '#8B99AD',
+		500: '#718096',
+		550: '#5F6C81',
+		600: '#4A5568',
+		650: '#3D4759',
+		700: '#2D3748',
+		750: '#212836',
+		800: '#1A202C',
+		850: '#191D28',
+		900: '#171923',
+	},
 };
 
-// 3. extend the theme
-const theme = extendTheme({ config, colors });
+const fonts = {
+	heading: 'Inter var, sans-serif',
+	body: 'Inter var, sans-serif',
+};
+
+const theme = extendTheme({ config, colors, fonts });
 
 export default theme;

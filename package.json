@@ -41,5 +41,8 @@
 		".rs": [
 			"cargo fmt --manifest-path=server/Cargo.toml --"
 		]
+	},
+	"dependencies": {
+		"@fontsource/inter": "^4.5.7"
 	}
 }

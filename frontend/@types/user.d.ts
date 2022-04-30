@@ -8,7 +8,7 @@ interface User {
 	/**
 	 * The id of the user.
 	 */
-	id: number;
+	id: string;
 	/**
 	 * The username of the user.
 	 */

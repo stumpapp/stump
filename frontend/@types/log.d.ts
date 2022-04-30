@@ -9,7 +9,7 @@ interface Log {
 	/**
 	 * The id of the log.
 	 */
-	id: number;
+	id: string;
 	/**
 	 * The level of the log.
 	 */

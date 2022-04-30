@@ -2,7 +2,7 @@ interface Library {
 	/**
 	 * The id of the library.
 	 */
-	id: number;
+	id: string;
 	/**
 	 * The name of the library.
 	 */
@@ -11,6 +11,10 @@ interface Library {
 	 * The path of the library on disk.
 	 */
 	path: string;
+	/**
+	 * The (optional) description of the library.
+	 */
+	description?: string;
 }
 
 interface LibraryWithSeries extends Library {

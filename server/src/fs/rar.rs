@@ -37,12 +37,14 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
                     Ok(e) => {
                         entries.push(e.filename);
                     }
-                    Err(_e) => return Err(ProcessFileError::RarOpenError),
+                    Err(_e) => return Err(ProcessFileError::RarReadError),
                 }
             }
         }
         Err(_e) => return Err(ProcessFileError::RarOpenError),
     };
+
+    // return Err(ProcessFileError::RarOpenError);
 
     if entries.iter().any(|e| e == "ComicInfo.xml") {
         let archive = unrar::Archive::new(path.to_string_lossy().into());
@@ -67,6 +69,14 @@ pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
 
     let mut filename: Option<String> = None;
 
+    // println!("File: {}, Result: {:?}", file.to_string(), archive.list());
+
+    // return Err(ProcessFileError::RarOpenError);
+
+    // FIXME: The `read_bytes` implmentation from my clone of the unrar clone that has
+    // this functionality is not working. That was quite the sentence lol. Regardless,
+    // if I want to support in-memmory extraction of bytes from a rar archive I will
+    // need to manually implement this. Going to cry, then do that I guess lol
     match archive.list() {
         Ok(open_archive) => {
             let mut images_seen = 0;
@@ -84,17 +94,22 @@ pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
                 }
             }
         }
-        Err(_e) => return Err(ProcessFileError::RarOpenError),
+        Err(_e) => {
+            println!("Error opening archive: {}", _e.to_string());
+            return Err(ProcessFileError::RarOpenError);
+        }
     };
 
     if filename.is_some() {
+        println!("Found: {:?}", filename);
+
         let archive = unrar::Archive::new(file.to_string());
 
         match archive.read_bytes(&filename.unwrap()) {
             Ok(bytes) => Ok((ContentType::JPEG, bytes)),
-            Err(_e) => Err(ProcessFileError::RarOpenError),
+            Err(_e) => Err(ProcessFileError::RarReadError),
         }
     } else {
-        Err(ProcessFileError::RarOpenError)
+        Err(ProcessFileError::NoImageError)
     }
 }

@@ -22,12 +22,12 @@ export default function Library() {
 	}
 
 	return (
-		<div className="flex flex-col space-y-4">
+		<div className="flex flex-col space-y-4 p-4">
 			<h1 className="text-lg font-bold text-gray-100">{library.name}</h1>
 
 			<div className="flex flex-wrap gap-4">
 				{library.series.map((s) => (
-					<SeriesCard {...s} />
+					<SeriesCard key={s.id} {...s} />
 				))}
 			</div>
 		</div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Button } from '@chakra-ui/react';
 import shallow from 'zustand/shallow';
-import KeepReading from '~components/home/KeepReading';
+import KeepReading from '~components/Home/KeepReading';
 import { useStore } from '~store/store';
 import toast from 'react-hot-toast';
 
@@ -17,7 +17,7 @@ export default function Home() {
 		});
 
 	return (
-		<Box rounded="md">
+		<Box rounded="md" p="4">
 			<KeepReading media={keepReading} />
 			<Button onClick={() => toast('Just a message')}>Notify info</Button>
 			<Button onClick={() => toast.error('Something bad happened')}>Notify error</Button>

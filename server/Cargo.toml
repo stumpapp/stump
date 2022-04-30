@@ -8,11 +8,11 @@ default-run = "stump"
 members = ["prisma-cli"]
 
 [dependencies]
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.4.0" }
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.4.1" }
 serde = { version = "1.0", features = ["derive"] }
 dotenv = "0.15.0"
 rocket =  { version = "0.5.0-rc.1", features =  ["json" ] }
-rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git", branch = "develop" }
+rocket-session-store = { git = "https://github.com/Aurora2500/rocket-session-store.git" }
 rocket_cors = "0.6.0-alpha1"
 bcrypt = "0.10.1"
 anyhow = "1.0.57"
@@ -25,6 +25,8 @@ log = "0.4.0"
 epub = "1.2.3"
 walkdir = "2.3.2"
 zip = "0.5.13"
+# unrar = "0.4.4"
+# FIXME: This fork needs to be reworked, relating to STU-16
 unrar = { git = "https://github.com/aaronleopold/unrar.rs" }
 async-trait = "0.1.53"
 

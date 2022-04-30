@@ -1,8 +1,5 @@
 // use crate::opds::author::StumpAuthor;
-use crate::{
-    opds::link::OpdsLink,
-    prisma::{library, media, series},
-};
+use crate::{opds::link::OpdsLink, prisma::library};
 use anyhow::Result;
 use prisma_client_rust::chrono;
 use xml::{writer::XmlEvent, EventWriter};
@@ -10,11 +7,9 @@ use xml::{writer::XmlEvent, EventWriter};
 use super::{
     entry::OpdsEntry,
     link::{OpdsLinkRel, OpdsLinkType},
+    models::OpdsSeries,
     util,
 };
-// use crate::types::alias::{
-//     FeedPages, LibraryWithSeries, SeriesWithMedia, SeriesWithMediaAndProgress,
-// };
 
 #[derive(Debug)]
 pub struct OpdsFeed {
@@ -71,13 +66,8 @@ impl OpdsFeed {
     }
 }
 
-// Note: this type is disgusting lol
-impl From<((series::Data, Vec<media::Data>), (usize, Option<usize>))> for OpdsFeed {
-    fn from(payload: ((series::Data, Vec<media::Data>), (usize, Option<usize>))) -> Self {
-        let (series_with_media, pages) = payload;
-        let (current_page, next_page) = pages;
-        let (series, media) = series_with_media;
-
+impl From<OpdsSeries> for OpdsFeed {
+    fn from(series: OpdsSeries) -> Self {
         let id = series.id;
         let title = series.name;
 
@@ -86,11 +76,6 @@ impl From<((series::Data, Vec<media::Data>), (usize, Option<usize>))> for OpdsFe
         //     "Stump".to_string(),
         //     Some("https://github.com/aaronleopold/stump".to_string()),
         // );
-
-        // let next_page = match page {
-        //     Some(p) => p + 1,
-        //     None => 1,
-        // };
 
         let mut links = vec![
             OpdsLink::new(
@@ -105,15 +90,25 @@ impl From<((series::Data, Vec<media::Data>), (usize, Option<usize>))> for OpdsFe
             ),
         ];
 
-        if current_page > 0 {
+        let prev_link = match series.current_page {
+            0 => None,
+            1 => Some(format!("/opds/v1.2/series/{}", id)),
+            _ => Some(format!(
+                "/opds/v1.2/series/{}?page={}",
+                id,
+                series.current_page - 1
+            )),
+        };
+
+        if let Some(prev_link) = prev_link {
             links.push(OpdsLink::new(
                 OpdsLinkType::Navigation,
                 OpdsLinkRel::Previous,
-                format!("/opds/v1.2/series/{}?page={}", id, current_page - 1),
+                prev_link,
             ));
         }
 
-        if let Some(next_page) = next_page {
+        if let Some(next_page) = series.next_page {
             links.push(OpdsLink::new(
                 OpdsLinkType::Navigation,
                 OpdsLinkRel::Next,
@@ -121,16 +116,16 @@ impl From<((series::Data, Vec<media::Data>), (usize, Option<usize>))> for OpdsFe
             ));
         }
 
-        let entries = media.into_iter().map(OpdsEntry::from).collect();
+        let entries = series.media.into_iter().map(OpdsEntry::from).collect();
 
         Self::new(id, title, Some(links), entries)
     }
 }
 
-impl From<(library::Data, Vec<series::Data>)> for OpdsFeed {
-    fn from((library, series): (library::Data, Vec<series::Data>)) -> Self {
-        let id = library.id;
-        let title = library.name;
+impl From<library::Data> for OpdsFeed {
+    fn from(library: library::Data) -> Self {
+        let id = library.id.clone();
+        let title = library.name.clone();
 
         let links = vec![
             OpdsLink::new(
@@ -145,7 +140,13 @@ impl From<(library::Data, Vec<series::Data>)> for OpdsFeed {
             ),
         ];
 
-        let entries = series.into_iter().map(OpdsEntry::from).collect();
+        let entries = match library.series() {
+            Ok(series) => series.to_owned().into_iter().map(OpdsEntry::from).collect(),
+            Err(e) => {
+                log::warn!("Failed to get series for library {}: {}", id, e);
+                vec![]
+            }
+        };
 
         Self::new(id, title, Some(links), entries)
     }

@@ -4,7 +4,7 @@ extern crate rocket;
 #[cfg(debug_assertions)]
 use dotenv::dotenv;
 
-use config::{context::Context, cors, session};
+use config::{context::Context, cors, helmet::Helmet, session};
 use rocket::fs::{FileServer, NamedFile};
 use std::path::Path;
 use types::http::UnauthorizedResponse;
@@ -40,6 +40,7 @@ async fn rocket() -> _ {
         .manage(Context::new().await)
         .attach(session::get_session_store().fairing())
         .attach(cors::get_cors())
+        .attach(Helmet::default().fairing())
         .mount("/", FileServer::from("static/").rank(1))
         .mount("/", routes![index_fallback])
         .mount("/api", routes::api::api())

@@ -9,11 +9,11 @@ interface Media {
 	/**
 	 * The id of the media.
 	 */
-	id: number;
+	id: string;
 	/**
 	 * The id of the series which this media belongs to.
 	 */
-	seriesId: number;
+	seriesId: string;
 	/**
 	 * The common name of the media. Either the name extracted from metadata or the file name.
 	 */

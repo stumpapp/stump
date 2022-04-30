@@ -1,8 +1,8 @@
 import clsx from 'clsx';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Books, CaretRight, Gear, House } from 'phosphor-react';
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import shallow from 'zustand/shallow';
 import { useStore } from '~store/store';
 
@@ -17,12 +17,12 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 
-import ApplicationVersion from './ApplicationVersion';
+import ApplicationVersion from '../ApplicationVersion';
 import LibraryOptionsMenu from './LibraryOptionsMenu';
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from '../ThemeToggle';
 
 interface NavMenuItemProps {
-	id: number;
+	id: string;
 	name: string;
 	href: string;
 }
@@ -36,18 +36,20 @@ interface NavItemProps {
 }
 
 function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
-	const { isOpen, setDrawer } = useStore(({ libraryDrawer, setLibraryDrawer }) => ({
-		isOpen: libraryDrawer,
-		setDrawer: setLibraryDrawer,
-	}));
+	// const { isOpen, setDrawer } = useStore(({ libraryDrawer, setLibraryDrawer }) => ({
+	// 	isOpen: libraryDrawer,
+	// 	setDrawer: setLibraryDrawer,
+	// }));
 
 	// FIXME: this is now persisted, however there is a terrible flash that bothers the heck
 	// out of me on inital render...
-	const { onToggle } = useDisclosure({
-		isOpen,
-		onOpen: () => setDrawer(true),
-		onClose: () => setDrawer(false),
-	});
+	// const { onToggle } = useDisclosure({
+	// 	isOpen,
+	// 	onOpen: () => setDrawer(true),
+	// 	onClose: () => setDrawer(false),
+	// });
+
+	const { isOpen, onToggle } = useDisclosure();
 
 	return (
 		<Box w="full">
@@ -97,9 +99,9 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 									p={1.5}
 									// className="cursor-pointer w-full flex items-center font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-900 dark:hover:text-gray-300 transition-colors duration-100"
 								>
-									<a href={item.href} className="w-full flex-1 pl-1 text-sm">
+									<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
 										{item.name}
-									</a>
+									</Link>
 									<LibraryOptionsMenu libraryId={item.id} />
 								</HStack>
 							</Box>
@@ -113,8 +115,18 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 
 function NavItem({ name, href, ...rest }: NavItemProps) {
 	return (
-		<Button w="full" variant="ghost" textAlign="left" p={2}>
-			<HStack as={'a'} href={href} w="full" alignItems="center" justifyContent="space-between">
+		<Button
+			_focus={{
+				boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
+			}}
+			as={Link}
+			to={href!}
+			w="full"
+			variant="ghost"
+			textAlign="left"
+			p={2}
+		>
+			<HStack w="full" alignItems="center" justifyContent="space-between">
 				<HStack spacing="2">
 					{/* @ts-ignore */}
 					<rest.icon />
@@ -132,20 +144,21 @@ function SidebarContent() {
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
-			{ name: 'Home', icon: House, href: '/' },
+			{ name: 'Home', icon: House as any, href: '/' },
 			{
 				name: 'Libraries',
-				icon: Books,
+				icon: Books as any,
 				items: libraries.map((library) => ({
 					...library,
 					href: `/libraries/${library.id}`,
 				})),
 			},
-			{ name: 'Settings', icon: Gear, href: '/settings' },
+			{ name: 'Settings', icon: Gear as any, href: '/settings' },
 		],
 		[libraries],
 	);
 
+	// This kinda makes me hate chakra
 	return (
 		<Stack
 			display="flex"
@@ -174,6 +187,7 @@ function SidebarContent() {
 				</Text>
 			</HStack>
 
+			{/* TODO: this needs to scroll on 'overflow' */}
 			<VStack spacing={2} flexGrow={1}>
 				{links.map((link) =>
 					link.items ? (

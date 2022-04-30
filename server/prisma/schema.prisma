@@ -65,21 +65,23 @@ model Library {
 }
 
 model Series {
-  id        String   @id @default(uuid())
+  id          String   @id @default(uuid())
   // The title of the series. This is generated from a fs scan, and will be the directory name.
-  name      String
+  name        String
+  // The description of the series. ex: "The best series ever"
+  description String?
   // The date in which the series was last updated in the FS. ex: "2020-01-01"
-  updatedAt DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
   // The url of the series. ex: "/home/user/media/comics/The Amazing Spider-Man"
-  path      String
+  path        String
   // The status of the series since last scan or access
-  status    String   @default("READY")
+  status      String   @default("READY")
   // The id of the library this series belongs to.
-  libraryId String?
+  libraryId   String?
   // The library this series belongs to.
-  library   Library? @relation(fields: [libraryId], references: [id])
+  library     Library? @relation(fields: [libraryId], references: [id])
   // The media files in the series.
-  media     Media[]
+  media       Media[]
 
   @@map("series")
 }
@@ -125,6 +127,7 @@ model ReadProgress {
   user   User   @relation(fields: [userId], references: [id])
 
 
+  // literally cant stand this name lol read_progresses
   @@unique([userId, mediaId])
   @@map("read_progresses")
 }

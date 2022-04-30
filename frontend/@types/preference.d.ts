@@ -2,11 +2,11 @@ interface UserPreferences {
 	/**
 	 * The id of the tuple in the database
 	 */
-	id: number;
+	id: string;
 	/**
 	 * The id of the user this preference belongs to
 	 */
-	userId: number;
+	userId: string;
 	/**
 	 * Boolean indicating whether the user wants dark mode
 	 */
@@ -18,7 +18,7 @@ interface ServerPreferences {
 	/**
 	 * The id of the tuple in the database
 	 */
-	id: number;
+	id: string;
 	/**
 	 * Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
 	 * If none found, the series name will be the directory name. Default is false

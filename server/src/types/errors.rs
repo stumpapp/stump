@@ -143,6 +143,18 @@ impl From<String> for ApiError {
     }
 }
 
+impl From<std::num::TryFromIntError> for ApiError {
+    fn from(error: std::num::TryFromIntError) -> ApiError {
+        ApiError::InternalServerError(error.to_string())
+    }
+}
+
+impl From<std::io::Error> for ApiError {
+    fn from(error: std::io::Error) -> ApiError {
+        ApiError::InternalServerError(error.to_string())
+    }
+}
+
 impl From<bcrypt::BcryptError> for ApiError {
     fn from(error: bcrypt::BcryptError) -> ApiError {
         ApiError::InternalServerError(error.to_string())

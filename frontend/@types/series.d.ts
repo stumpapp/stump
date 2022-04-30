@@ -2,15 +2,15 @@ interface Series {
 	/**
 	 * The id of the series.
 	 */
-	id: number;
+	id: string;
 	/**
 	 * The id of the library this series belongs to.
 	 */
-	libraryId: number;
+	libraryId: string;
 	/**
 	 * The name of the series. Either the directory name or extracted from the ComicInfo.xml file.
 	 */
-	title: string;
+	name: string;
 	/**
 	 * The number of media files in the series. This is not part of the SeaORM model,
 	 * and will be populated with an aggregate subquery in the backend.
@@ -24,6 +24,10 @@ interface Series {
 	 * The path of the series on disk.
 	 */
 	path: string;
+	/**
+	 * The (optional) description of the series.
+	 */
+	description?: string;
 }
 
 interface SeriesWithMedia extends Series {

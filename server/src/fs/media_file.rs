@@ -35,6 +35,7 @@ pub fn get_content_type(file: &ZipFile) -> ContentType {
     ContentType::Any
 }
 
+// TODO: use https://crates.io/crates/infer
 pub fn get_content_type_from_mime(mime: &str) -> ContentType {
     ContentType::from_str(mime).unwrap_or(match mime {
         "image/jpeg" => ContentType::JPEG,

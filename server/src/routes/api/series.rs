@@ -9,45 +9,25 @@ use crate::{
         alias::{ApiResult, Context},
         errors::ApiError,
         http::ImageResponse,
-        models::SeriesWithMedia,
     },
 };
 
-// TODO: this disgusting thing needs to be refactored when https://github.com/Brendonovich/prisma-client-rust/issues/12
-// gets implemented. I can't wait 😩
 #[get("/series")]
-pub async fn get_series(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<SeriesWithMedia>>> {
+pub async fn get_series(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<series::Data>>> {
     let db = ctx.get_db();
 
-    let s = db
-        .series()
-        .find_many(vec![])
-        .with(series::media::fetch(vec![]))
-        .exec()
-        .await?;
-
-    let mut media_ids: Vec<String> = vec![];
-
-    for s in s.iter() {
-        let media = s.media()?;
-
-        media_ids.append(&mut media.iter().map(|m| m.id.clone()).collect::<Vec<_>>());
-    }
-
-    let progress = db
-        .read_progress()
-        .find_many(vec![
-            read_progress::media_id::in_vec(media_ids),
-            read_progress::user_id::equals(auth.0.id),
-        ])
-        .exec()
-        .await?;
-
-    // I could barf
     Ok(Json(
-        s.iter()
-            .map(|s| (s.to_owned(), s.media().unwrap().to_owned(), &progress).into())
-            .collect(),
+        db.series()
+            .find_many(vec![])
+            .with(
+                series::media::fetch(vec![])
+                    .with(media::read_progresses::fetch(vec![
+                        read_progress::user_id::equals(auth.0.id),
+                    ]))
+                    .order_by(media::name::order(Direction::Asc)),
+            )
+            .exec()
+            .await?,
     ))
 }
 
@@ -56,13 +36,19 @@ pub async fn get_series_by_id(
     id: String,
     ctx: &Context,
     auth: StumpAuth,
-) -> ApiResult<Json<SeriesWithMedia>> {
+) -> ApiResult<Json<series::Data>> {
     let db = ctx.get_db();
 
     let series = db
         .series()
         .find_unique(series::id::equals(id.clone()))
-        .with(series::media::fetch(vec![]))
+        .with(
+            series::media::fetch(vec![])
+                .with(media::read_progresses::fetch(vec![
+                    read_progress::user_id::equals(auth.0.id),
+                ]))
+                .order_by(media::name::order(Direction::Asc)),
+        )
         .exec()
         .await?;
 
@@ -73,32 +59,7 @@ pub async fn get_series_by_id(
         )));
     }
 
-    let series = series.unwrap();
-
-    let media_ids = series
-        .media()?
-        .iter()
-        .map(|m| m.id.clone())
-        .collect::<Vec<_>>();
-
-    let progress = db
-        .read_progress()
-        .find_many(vec![
-            read_progress::media_id::in_vec(media_ids),
-            read_progress::user_id::equals(auth.0.id),
-        ])
-        .exec()
-        .await?;
-
-    // this is so gross
-    Ok(Json(
-        (
-            series.clone(),
-            series.media().unwrap().to_owned(),
-            &progress,
-        )
-            .into(),
-    ))
+    Ok(Json(series.unwrap()))
 }
 
 #[get("/series/<id>/thumbnail")]

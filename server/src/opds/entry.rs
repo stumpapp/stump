@@ -1,13 +1,12 @@
 use anyhow::Result;
-use prisma_client_rust::chrono;
-use prisma_client_rust::chrono::{DateTime, Utc};
+use prisma_client_rust::chrono::DateTime;
+use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
 use crate::{
     opds::link::OpdsStreamLink,
     prisma::{library, media, series},
-    types::models::MediaWithProgress,
 };
 
 use super::{
@@ -18,7 +17,7 @@ use super::{
 #[derive(Debug)]
 pub struct OpdsEntry {
     id: String,
-    updated: DateTime<Utc>,
+    updated: DateTime<FixedOffset>,
     title: String,
     content: Option<String>,
     authors: Option<Vec<String>>,
@@ -29,7 +28,7 @@ pub struct OpdsEntry {
 impl OpdsEntry {
     pub fn new(
         id: String,
-        updated: DateTime<Utc>,
+        updated: DateTime<FixedOffset>,
         title: String,
         content: Option<String>,
         authors: Option<Vec<String>>,
@@ -122,32 +121,6 @@ impl From<library::Data> for OpdsEntry {
     }
 }
 
-// impl From<SeriesWithBookCount> for OpdsEntry {
-//     fn from(s: SeriesWithBookCount) -> Self {
-//         let mut links = Vec::new();
-
-//         let nav_link = OpdsLink::new(
-//             OpdsLinkType::Navigation,
-//             OpdsLinkRel::Subsection,
-//             format!("/opds/v1.2/series/{}", s.id),
-//         );
-
-//         links.push(nav_link);
-
-//         OpdsEntry {
-//             id: s.id.to_string(),
-//             // FIXME:
-//             updated: chrono::Utc::now(),
-//             title: s.title,
-//             // FIXME:
-//             content: None,
-//             authors: None,
-//             links,
-//             stream_link: None,
-//         }
-//     }
-// }
-
 impl From<series::Data> for OpdsEntry {
     fn from(s: series::Data) -> Self {
         let mut links = Vec::new();
@@ -199,12 +172,21 @@ impl From<media::Data> for OpdsEntry {
             ),
         ];
 
+        let current_page = match m.read_progresses() {
+            Ok(progresses) => progresses
+                .get(0)
+                .map(|p| Some(p.page.to_string()))
+                .unwrap_or(None),
+            // Most likely the relation was not loaded. Which is fine.
+            Err(_) => None,
+        };
+
         let stream_link = OpdsStreamLink::new(
-            m.id.to_string(),
+            m.id.clone(),
             m.pages.to_string(),
             // FIXME:
             "image/jpeg".to_string(),
-            None,
+            current_page,
         );
 
         let mib = m.size as f64 / (1024.0 * 1024.0);
@@ -220,67 +202,7 @@ impl From<media::Data> for OpdsEntry {
         OpdsEntry {
             id: m.id.to_string(),
             title: m.name,
-            updated: chrono::Utc::now(),
-            content,
-            links,
-            authors: None,
-            stream_link: Some(stream_link),
-        }
-    }
-}
-
-impl From<MediaWithProgress> for OpdsEntry {
-    fn from(media: MediaWithProgress) -> Self {
-        let base_url = format!("/opds/v1.2/books/{}", media.id);
-        let file_name = format!("{}.{}", media.name, media.extension);
-        let file_name_encoded = encode(&file_name);
-
-        // TODO: parse into function to reduce code duplication
-        let links = vec![
-            OpdsLink::new(
-                OpdsLinkType::Image,
-                OpdsLinkRel::Thumbnail,
-                format!("{}/thumbnail", base_url),
-            ),
-            OpdsLink::new(
-                OpdsLinkType::Image,
-                OpdsLinkRel::Image,
-                format!("{}/pages/1", base_url),
-            ),
-            OpdsLink::new(
-                OpdsLinkType::Zip,
-                OpdsLinkRel::Acquisition,
-                format!("{}/file/{}", base_url, file_name_encoded),
-            ),
-        ];
-
-        let current_page = match media.progress {
-            Some(progress) => Some(progress.to_string()),
-            _ => None,
-        };
-
-        let stream_link = OpdsStreamLink::new(
-            media.id.to_string(),
-            media.pages.to_string(),
-            // FIXME:
-            "image/jpeg".to_string(),
-            current_page,
-        );
-
-        let mib = media.size as f64 / (1024.0 * 1024.0);
-
-        let content = match media.description {
-            Some(description) => Some(format!(
-                "{:.1} MiB - {}<br/><br/>{}",
-                mib, media.extension, description
-            )),
-            None => Some(format!("{:.1} MiB - {}", mib, media.extension)),
-        };
-
-        OpdsEntry {
-            id: media.id.to_string(),
-            title: media.name,
-            updated: chrono::Utc::now(),
+            updated: chrono::Utc::now().into(),
             content,
             links,
             authors: None,

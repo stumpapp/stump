@@ -1,9 +1,12 @@
 import React from 'react';
+import { useMutation } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';
+import { updateMediaProgress } from '~api/mutation/media';
 import { getMediaPage } from '~api/query/media';
 
 // TODO: handle redirects I will *probably* add for when a user
 // comes here trying to read pages of an epub.
+// TODO: preload next pages?
 export default function ReadBook() {
 	const navigate = useNavigate();
 
@@ -17,6 +20,14 @@ export default function ReadBook() {
 		// TODO: do I need this?
 		return null;
 	}
+
+	const { mutate: saveProgress } = useMutation(() => updateMediaProgress(id, parseInt(page, 10)));
+
+	// useEffect(() => {
+	// 	() => {
+	// 		saveProgress();
+	// 	};
+	// }, []);
 
 	return (
 		<div className="h-full w-full flex justify-center items-center">

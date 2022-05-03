@@ -139,16 +139,11 @@ pub async fn get_media_thumbnail(
     }
 }
 
-#[derive(Deserialize)]
-pub struct UpdateProgress {
-    page: i32,
-}
-
 // FIXME: this doesn't really handle certain errors correctly
-#[put("/media/<id>/progress", data = "<progress>")]
+#[put("/media/<id>/<page>")]
 pub async fn update_media_progress(
     id: String,
-    progress: Json<UpdateProgress>,
+    page: i32,
     ctx: &Context,
     auth: StumpAuth,
 ) -> ApiResult<Json<read_progress::Data>> {
@@ -162,12 +157,12 @@ pub async fn update_media_progress(
                 id.clone(),
             ))
             .create(
-                read_progress::page::set(progress.page),
+                read_progress::page::set(page),
                 read_progress::media::link(media::id::equals(id.clone())),
                 read_progress::user::link(user::id::equals(auth.0.id.clone())),
                 vec![],
             )
-            .update(vec![read_progress::page::set(progress.page)])
+            .update(vec![read_progress::page::set(page)])
             .exec()
             .await?,
     ))

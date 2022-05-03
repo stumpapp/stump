@@ -40,6 +40,7 @@ function App() {
 		<>
 			<BrowserRouter>
 				<Routes>
+					<Route path="/books/:id/pages/:page" element={<ReadBook />} />
 					<Route path="/" element={<MainLayout />}>
 						<Route path="" element={<Home />} />
 						<Route path="settings" element={<Settings />} />
@@ -47,7 +48,6 @@ function App() {
 						<Route path="series/:id" element={<SeriesOverview />} />
 						<Route path="books/:id" element={<BookOverview />} />
 					</Route>
-					<Route path="/books/:id/pages/:page" element={<ReadBook />} />
 					<Route path="/auth" element={<BaseLayout />}>
 						<Route path="login" element={<Login />} />
 					</Route>
@@ -55,7 +55,7 @@ function App() {
 				</Routes>
 			</BrowserRouter>
 			<Notifications />
-			<JobOverlay />
+			{/* <JobOverlay /> */}
 		</>
 	);
 }

@@ -1,5 +1,5 @@
+use prisma_client_rust::Direction;
 use rocket::{fs::NamedFile, serde::json::Json};
-use serde::Deserialize;
 
 use crate::{
     fs,
@@ -12,6 +12,8 @@ use crate::{
     },
 };
 
+// TODO: paginate some of these?
+
 #[get("/media")]
 pub async fn get_media(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<media::Data>>> {
     let db = ctx.get_db();
@@ -22,8 +24,41 @@ pub async fn get_media(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<med
             .with(media::read_progresses::fetch(vec![
                 read_progress::user_id::equals(auth.0.id),
             ]))
+            .order_by(media::name::order(Direction::Asc))
             .exec()
             .await?,
+    ))
+}
+
+#[get("/media/keep-reading")]
+pub async fn get_reading_media(
+    ctx: &Context,
+    auth: StumpAuth,
+) -> ApiResult<Json<Vec<media::Data>>> {
+    let db = ctx.get_db();
+
+    Ok(Json(
+        db.media()
+            .find_many(vec![media::read_progresses::some(vec![
+                read_progress::user_id::equals(auth.0.id.clone()),
+                read_progress::page::gt(0),
+            ])])
+            .with(media::read_progresses::fetch(vec![
+                read_progress::user_id::equals(auth.0.id),
+                read_progress::page::gt(0),
+            ]))
+            .order_by(media::name::order(Direction::Asc))
+            .exec()
+            .await?
+            .into_iter()
+            .filter(|m| match m.read_progresses() {
+                // Read progresses relation on media is one to many, there is a dual key
+                // on read_progresses table linking a user and media. Therefore, there should
+                // only be 1 item in this vec for each media resulting from the query.
+                Ok(progress) => progress.len() == 1 && progress[0].page < m.pages,
+                _ => false,
+            })
+            .collect(),
     ))
 }
 
@@ -139,8 +174,8 @@ pub async fn get_media_thumbnail(
     }
 }
 
-// FIXME: this doesn't really handle certain errors correctly
-#[put("/media/<id>/<page>")]
+// FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found
+#[put("/media/<id>/progress/<page>")]
 pub async fn update_media_progress(
     id: String,
     page: i32,

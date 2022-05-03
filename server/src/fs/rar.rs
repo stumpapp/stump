@@ -20,6 +20,10 @@ impl IsImage for Entry {
     }
 }
 
+pub fn convert_to_cbr() {
+    unimplemented!()
+}
+
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
 pub fn process_rar(file: &DirEntry) -> ProcessResult {

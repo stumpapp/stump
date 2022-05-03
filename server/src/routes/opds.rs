@@ -97,13 +97,25 @@ async fn keep_reading(ctx: &Context, auth: StumpAuth) -> ApiResult<XmlResponse> 
 
     let media = db
         .media()
-        .find_many(vec![])
+        .find_many(vec![media::read_progresses::some(vec![
+            read_progress::user_id::equals(auth.0.id),
+            read_progress::page::gt(0),
+        ])])
         .with(media::read_progresses::fetch(vec![
             read_progress::user_id::equals(user_id),
+            read_progress::page::gt(0),
         ]))
         .order_by(media::name::order(Direction::Asc))
         .exec()
-        .await?;
+        .await?
+        .into_iter()
+        .filter(|m| match m.read_progresses() {
+            // Read progresses relation on media is one to many, there is a dual key
+            // on read_progresses table linking a user and media. Therefore, there should
+            // only be 1 item in this vec for each media resulting from the query.
+            Ok(progress) => progress.len() == 1 && progress[0].page < m.pages,
+            _ => false,
+        });
 
     let entries: Vec<OpdsEntry> = media.into_iter().map(|m| OpdsEntry::from(m)).collect();
 

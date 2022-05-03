@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQueries } from 'react-query';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { getLibraries } from '~api/query/library';
 import { getMedia } from '~api/query/media';
 import Lazy from '~components/Lazy';
@@ -11,6 +11,7 @@ import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
 
 export default function MainLayout() {
 	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
+	const location = useLocation();
 	const navigate = useNavigate();
 
 	const _ = useQueries([
@@ -22,6 +23,11 @@ export default function MainLayout() {
 		},
 		{ queryKey: 'getMedia', queryFn: getMedia, onSuccess: validateGetMedia, onError },
 	]);
+
+	const hideSidebar = useMemo(() => {
+		// hide sidebar when on /books/:id/pages/:page
+		return location.pathname.match(/\/books\/.+\/pages\/.+/);
+	}, [location]);
 
 	function onError(err: any) {
 		const res = err.response;
@@ -51,7 +57,7 @@ export default function MainLayout() {
 
 	return (
 		<Flex>
-			<Sidebar />
+			{!hideSidebar && <Sidebar />}
 			<Box as="main" bg={useColorModeValue('gray.100', 'gray.900')}>
 				<React.Suspense fallback={<Lazy />}>
 					<Outlet />

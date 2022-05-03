@@ -40,14 +40,15 @@ function App() {
 		<>
 			<BrowserRouter>
 				<Routes>
-					<Route path="/books/:id/pages/:page" element={<ReadBook />} />
 					<Route path="/" element={<MainLayout />}>
 						<Route path="" element={<Home />} />
 						<Route path="settings" element={<Settings />} />
 						<Route path="libraries/:id" element={<Library />} />
 						<Route path="series/:id" element={<SeriesOverview />} />
 						<Route path="books/:id" element={<BookOverview />} />
+						<Route path="books/:id/pages/:page" element={<ReadBook />} />
 					</Route>
+
 					<Route path="/auth" element={<BaseLayout />}>
 						<Route path="login" element={<Login />} />
 					</Route>

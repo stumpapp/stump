@@ -1,5 +1,6 @@
 import { Heading, Wrap, WrapItem } from '@chakra-ui/react';
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import { getSeriesById } from '~api/query/series';
@@ -23,18 +24,17 @@ export default function SeriesOverview() {
 	}
 
 	return (
-		<div className="flex flex-col space-y-4 p-4">
-			<Heading as="h3" size="md" fontWeight="bold">
-				{series.name}
-			</Heading>
-
-			<Wrap align="center">
+		<>
+			<Helmet>
+				<title>Stump | {series.name}</title>
+			</Helmet>
+			<Wrap className="p-4" align="center">
 				{series.media.map((m) => (
 					<WrapItem>
 						<MediaCard {...m} />
 					</WrapItem>
 				))}
 			</Wrap>
-		</div>
+		</>
 	);
 }

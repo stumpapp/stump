@@ -7,7 +7,8 @@ import Lazy from '~components/Lazy';
 import Sidebar from '~components/Sidebar/Sidebar';
 import { useStore } from '~store/store';
 
-import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
+import { Box, Flex, useColorModeValue, VStack } from '@chakra-ui/react';
+import Topbar from '~components/Topbar';
 
 export default function MainLayout() {
 	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
@@ -59,6 +60,7 @@ export default function MainLayout() {
 		<Flex>
 			{!hideSidebar && <Sidebar />}
 			<Box as="main" bg={useColorModeValue('gray.100', 'gray.900')}>
+				{!hideSidebar && <Topbar />}
 				<React.Suspense fallback={<Lazy />}>
 					<Outlet />
 				</React.Suspense>

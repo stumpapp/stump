@@ -66,7 +66,7 @@ pub async fn get_series_by_id(
 pub async fn get_series_thumbnail(
     id: String,
     ctx: &Context,
-    _auth: StumpAuth,
+    // _auth: StumpAuth,
 ) -> ApiResult<ImageResponse> {
     let db = ctx.get_db();
 

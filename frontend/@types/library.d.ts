@@ -18,7 +18,7 @@ interface Library {
 }
 
 interface LibraryWithSeries extends Library {
-	series: Series[];
+	series: SeriesWithMedia[];
 }
 
 type GetLibrariesResponse = ApiResult<Library[], any>;

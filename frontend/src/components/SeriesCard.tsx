@@ -5,7 +5,7 @@ import pluralizeStat from '~util/pluralize';
 
 import Card from '~components/Card';
 
-interface Props extends Series {}
+interface Props extends SeriesWithMedia {}
 // TODO: figure out overflow stuff for the way this is styled. really long titles are a problem.
 export default function SeriesCard({ ...series }: Props) {
 	const prefetchSeries = async () => {
@@ -21,7 +21,7 @@ export default function SeriesCard({ ...series }: Props) {
 			imageSrc={getSeriesThumbnail(series.id)}
 			onMouseEnter={prefetchSeries}
 			title={series.name}
-			subtitle={pluralizeStat('book', series.bookCount)}
+			subtitle={pluralizeStat('book', series.media.length)}
 		/>
 	);
 }

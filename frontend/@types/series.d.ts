@@ -12,11 +12,6 @@ interface Series {
 	 */
 	name: string;
 	/**
-	 * The number of media files in the series. This is not part of the SeaORM model,
-	 * and will be populated with an aggregate subquery in the backend.
-	 */
-	bookCount?: number;
-	/**
 	 * The date/time the series was last modified.
 	 */
 	updatedAt: string;

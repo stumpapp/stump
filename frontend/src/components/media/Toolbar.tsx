@@ -1,6 +1,7 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft } from 'phosphor-react';
+import { useParams } from 'react-router-dom';
 
 interface ToolbarProps {
 	// media: Media;
@@ -9,6 +10,13 @@ interface ToolbarProps {
 }
 
 export default function Toolbar({ visible }: ToolbarProps) {
+	const { id } = useParams();
+
+	if (!id) {
+		// should never happen
+		throw new Error('woah boy how strange 0.o');
+	}
+
 	return (
 		<AnimatePresence>
 			{visible && (
@@ -22,9 +30,7 @@ export default function Toolbar({ visible }: ToolbarProps) {
 					>
 						<div className="flex justify-between items-center w-full">
 							<div className="flex items-center">
-								<a
-									/*title={`Go to ${media.name} Overview`}*/ /*href={`/book/${media.id}`}*/ href="#"
-								>
+								<a title="Go to media overview" href={`/books/${id}`}>
 									<ArrowLeft size={'1.25rem'} />
 								</a>
 							</div>

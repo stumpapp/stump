@@ -1,19 +1,23 @@
 import React from 'react';
-import { Box, Button } from '@chakra-ui/react';
-import shallow from 'zustand/shallow';
-import KeepReading from '~components/Home/KeepReading';
-import { useStore } from '~store/store';
+import { Box } from '@chakra-ui/react';
 import UiDemo from '~components/UiDemo';
+import { Helmet } from 'react-helmet';
 
 // TODO: account for new accounts, i.e. no media at all
 export default function Home() {
-	const media = useStore(({ media }) => media, shallow);
+	// const media = useStore(({ media }) => media, shallow);
 
-	const keepReading = media.filter((m) => m.currentPage && m.currentPage < m.pages).slice(0, 5);
+	// const keepReading = media.filter((m) => m.currentPage && m.currentPage < m.pages).slice(0, 5);
 
 	return (
-		<Box p="4">
-			<UiDemo />
-		</Box>
+		<>
+			<Helmet>
+				{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
+				<title>Stump | {'Home'}</title>
+			</Helmet>
+			<Box p="4">
+				<UiDemo />
+			</Box>
+		</>
 	);
 }

@@ -30,7 +30,7 @@ export default function Card({ to, imageAlt, imageSrc, title, subtitle, onMouseE
 			<Box px={1.5}>
 				<img
 					alt={imageAlt}
-					className="h-72 w-[12rem] object-cover"
+					className="h-96 w-[16rem] md:h-72 md:w-[12rem] object-cover"
 					src={imageSrc}
 					onError={(err) => {
 						// @ts-ignore

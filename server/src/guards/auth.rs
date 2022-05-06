@@ -13,14 +13,14 @@ use crate::{
     utils::{self},
 };
 
-pub struct StumpAuth(pub AuthenticatedUser);
+pub struct Auth(pub AuthenticatedUser);
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
 
 // FIXME: This is still really gross, there must be a neater way to handle this with all the safety checks
 // than what I am doing here.
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for StumpAuth {
+impl<'r> FromRequest<'r> for Auth {
     type Error = AuthError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -28,10 +28,10 @@ impl<'r> FromRequest<'r> for StumpAuth {
 
         match session.get().await {
             Ok(res) => {
-                println!("{:?}", res);
+                // println!("{:?}", res);
                 if res.is_some() {
-                    println!("Session existed: {:?}", res);
-                    return Outcome::Success(StumpAuth(res.unwrap()));
+                    // println!("Session existed: {:?}", res);
+                    return Outcome::Success(Auth(res.unwrap()));
                 }
             }
             Err(e) => {
@@ -47,13 +47,13 @@ impl<'r> FromRequest<'r> for StumpAuth {
             let cookie = cookie.unwrap();
             let cookie_value = cookie.value();
 
-            println!("COOKIE VALUE: {:?}", cookie_value);
+            // println!("COOKIE VALUE: {:?}", cookie_value);
 
             // let user = get_user_by_username(cookie_value, &req.guard().await.expect("TODO")).await;
 
             // if user.is_some() {
             //     session.set(user.unwrap().into()).await.expect("TODO");
-            //     return Outcome::Success(StumpAuth(user.unwrap()));
+            //     return Outcome::Success(Auth(user.unwrap()));
             // }
         }
 
@@ -67,7 +67,7 @@ impl<'r> FromRequest<'r> for StumpAuth {
             let authorization = authorization.unwrap_or("");
             let token: String;
 
-            println!("Authorization: {}", authorization);
+            // println!("Authorization: {}", authorization);
 
             if authorization.starts_with("Basic ") {
                 token = authorization.replace("Basic ", "");
@@ -91,7 +91,7 @@ impl<'r> FromRequest<'r> for StumpAuth {
 
             let credentials = credentials.unwrap();
 
-            println!("Credentials: {:?}", credentials);
+            // println!("Credentials: {:?}", credentials);
 
             let db = ctx.get_db();
 
@@ -104,12 +104,12 @@ impl<'r> FromRequest<'r> for StumpAuth {
                 .await;
 
             if user.is_err() {
-                println!("User error: {:?}", user.err().unwrap());
+                // println!("User error: {:?}", user.err().unwrap());
                 return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
             }
             let user = user.unwrap();
 
-            println!("User: {:?}", user);
+            // println!("User: {:?}", user);
 
             if user.is_none() {
                 return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
@@ -128,7 +128,7 @@ impl<'r> FromRequest<'r> for StumpAuth {
                     .set(authed_user.clone())
                     .await
                     .expect("An error occurred while setting the session");
-                Outcome::Success(StumpAuth(authed_user))
+                Outcome::Success(Auth(authed_user))
             } else {
                 Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized))
             }

@@ -27,7 +27,7 @@ export default function Library() {
 			<Helmet>
 				<title>Stump | {library.name}</title>
 			</Helmet>
-			<div className="p-4 flex flex-wrap gap-4">
+			<div className="p-4 flex flex-wrap gap-4 items-center justify-center md:justify-start">
 				{library.series.map((s) => (
 					<SeriesCard key={s.id} {...s} />
 				))}

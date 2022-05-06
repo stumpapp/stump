@@ -3,7 +3,7 @@ use rocket::serde::json::Json;
 
 use crate::{
     fs,
-    guards::auth::StumpAuth,
+    guards::auth::Auth,
     prisma::{media, read_progress, series},
     types::{
         alias::{ApiResult, Context},
@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[get("/series")]
-pub async fn get_series(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<series::Data>>> {
+pub async fn get_series(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<series::Data>>> {
     let db = ctx.get_db();
 
     Ok(Json(
@@ -35,7 +35,7 @@ pub async fn get_series(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<se
 pub async fn get_series_by_id(
     id: String,
     ctx: &Context,
-    auth: StumpAuth,
+    auth: Auth,
 ) -> ApiResult<Json<series::Data>> {
     let db = ctx.get_db();
 
@@ -66,7 +66,7 @@ pub async fn get_series_by_id(
 pub async fn get_series_thumbnail(
     id: String,
     ctx: &Context,
-    // _auth: StumpAuth,
+    _auth: Auth,
 ) -> ApiResult<ImageResponse> {
     let db = ctx.get_db();
 

@@ -113,17 +113,20 @@ model Media {
   // The read progresses of the media
   readProgresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
   // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
-  // tags           Tag[]
+  tags           Tag[]
 
   @@map("media")
 }
 
-// TODO: add tags
-// model Tag {
-//   id      String  @id @default(cuid())
-//   // The name of the tag. ex: "Marvel"
-//   name    String  @unique
-// }
+model Tag {
+  id   String @id @default(cuid())
+  // The name of the tag. ex: "Marvel"
+  name String @unique
+
+  media Media[]
+
+  @@map("tags")
+}
 
 model ReadProgress {
   id   String @id @default(uuid())
@@ -143,7 +146,7 @@ model ReadProgress {
 
 model Log {
   id        String   @id @default(uuid())
-  // The level of the log. i.e: "Error", "Warn", "Info", "Debug"
+  // The level of the log. i.e: "ERROR", "WARN", "INFO", "DEBUG"
   level     String   @default("INFO")
   // The message of the log.
   message   String
@@ -151,4 +154,15 @@ model Log {
   createdAt DateTime @default(now())
 
   @@map("logs")
+}
+
+model ServerPreferences {
+  id              String  @id @default(uuid())
+  // Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
+  // If none found, the series name will be the directory name.
+  renameSeries    Boolean @default(false)
+  // Flag indicating whether or not to attempt to convert .cbr files to .cbz files on scan automatically.
+  convertCbrToCbz Boolean @default(false)
+
+  @@map("server_preferences")
 }

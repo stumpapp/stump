@@ -30,6 +30,11 @@ export default function MainLayout() {
 		return location.pathname.match(/\/books\/.+\/pages\/.+/);
 	}, [location]);
 
+	// const hideTopBar = useMemo(() => {
+	// 	// hide topbar when on /books/:id/pages/:page OR /settings
+	// 	return location.pathname.match(/\/books\/.+\/pages\/.+|\/settings/);
+	// }, [location]);
+
 	function onError(err: any) {
 		const res = err.response;
 

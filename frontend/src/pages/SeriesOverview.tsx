@@ -28,13 +28,12 @@ export default function SeriesOverview() {
 			<Helmet>
 				<title>Stump | {series.name}</title>
 			</Helmet>
-			<Wrap className="p-4" align="center">
+
+			<div className="p-4 flex flex-wrap gap-4 items-center justify-center md:justify-start">
 				{series.media.map((m) => (
-					<WrapItem>
-						<MediaCard {...m} />
-					</WrapItem>
+					<MediaCard {...m} />
 				))}
-			</Wrap>
+			</div>
 		</>
 	);
 }

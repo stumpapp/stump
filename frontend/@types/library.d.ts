@@ -18,6 +18,11 @@ interface Library {
 }
 
 interface LibraryWithSeries extends Library {
+	/**
+	 * The series in the library
+	 * @see Series
+	 * @see SeriesWithMedia
+	 */
 	series: SeriesWithMedia[];
 }
 

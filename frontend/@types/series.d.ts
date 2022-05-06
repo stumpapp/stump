@@ -28,6 +28,7 @@ interface Series {
 interface SeriesWithMedia extends Series {
 	/**
 	 * The media files in the series
+	 * @see Media
 	 */
 	media: Media[];
 }

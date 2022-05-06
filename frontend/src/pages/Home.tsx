@@ -16,7 +16,8 @@ export default function Home() {
 				<title>Stump | {'Home'}</title>
 			</Helmet>
 			<Box p="4">
-				<UiDemo />
+				{/* <UiDemo /> */}
+				woof
 			</Box>
 		</>
 	);

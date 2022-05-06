@@ -3,6 +3,8 @@ import { ButtonProps as ChakraButtonProps, Button as ChakraButton } from '@chakr
 
 export interface ButtonProps extends ChakraButtonProps {}
 
+// FIXME: ref issues
+
 export default function Button(props: ButtonProps) {
 	return (
 		<ChakraButton

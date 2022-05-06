@@ -3,7 +3,7 @@ use rocket::{fs::NamedFile, serde::json::Json};
 
 use crate::{
     fs,
-    guards::auth::StumpAuth,
+    guards::auth::Auth,
     prisma::{media, read_progress, user},
     types::{
         alias::{ApiResult, Context},
@@ -15,7 +15,7 @@ use crate::{
 // TODO: paginate some of these?
 
 #[get("/media")]
-pub async fn get_media(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<media::Data>>> {
+pub async fn get_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<media::Data>>> {
     let db = ctx.get_db();
 
     Ok(Json(
@@ -31,10 +31,7 @@ pub async fn get_media(ctx: &Context, auth: StumpAuth) -> ApiResult<Json<Vec<med
 }
 
 #[get("/media/keep-reading")]
-pub async fn get_reading_media(
-    ctx: &Context,
-    auth: StumpAuth,
-) -> ApiResult<Json<Vec<media::Data>>> {
+pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<media::Data>>> {
     let db = ctx.get_db();
 
     Ok(Json(
@@ -66,7 +63,7 @@ pub async fn get_reading_media(
 pub async fn get_media_by_id(
     id: String,
     ctx: &Context,
-    auth: StumpAuth,
+    auth: Auth,
 ) -> ApiResult<Json<media::Data>> {
     let db = ctx.get_db();
 
@@ -90,7 +87,7 @@ pub async fn get_media_by_id(
 }
 
 #[get("/media/<id>/file")]
-pub async fn get_media_file(id: String, ctx: &Context, _auth: StumpAuth) -> ApiResult<NamedFile> {
+pub async fn get_media_file(id: String, ctx: &Context, _auth: Auth) -> ApiResult<NamedFile> {
     let db = ctx.get_db();
 
     let media = db
@@ -116,7 +113,7 @@ pub async fn get_media_page(
     id: String,
     page: i32,
     ctx: &Context,
-    auth: StumpAuth,
+    auth: Auth,
 ) -> ApiResult<ImageResponse> {
     let db = ctx.get_db();
 
@@ -152,7 +149,7 @@ pub async fn get_media_page(
 pub async fn get_media_thumbnail(
     id: String,
     ctx: &Context,
-    auth: StumpAuth,
+    auth: Auth,
 ) -> ApiResult<ImageResponse> {
     let db = ctx.get_db();
 
@@ -180,7 +177,7 @@ pub async fn update_media_progress(
     id: String,
     page: i32,
     ctx: &Context,
-    auth: StumpAuth,
+    auth: Auth,
 ) -> ApiResult<Json<read_progress::Data>> {
     let db = ctx.get_db();
 

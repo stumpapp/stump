@@ -36,19 +36,6 @@ interface NavItemProps {
 }
 
 function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
-	// const { isOpen, setDrawer } = useStore(({ libraryDrawer, setLibraryDrawer }) => ({
-	// 	isOpen: libraryDrawer,
-	// 	setDrawer: setLibraryDrawer,
-	// }));
-
-	// FIXME: this is now persisted, however there is a terrible flash that bothers the heck
-	// out of me on inital render...
-	// const { onToggle } = useDisclosure({
-	// 	isOpen,
-	// 	onOpen: () => setDrawer(true),
-	// 	onClose: () => setDrawer(false),
-	// });
-
 	const { isOpen, onToggle } = useDisclosure();
 
 	return (
@@ -137,7 +124,7 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 	);
 }
 
-function SidebarContent() {
+export function SidebarContent() {
 	const navigate = useNavigate();
 
 	const libraries = useStore((state) => state.libraries, shallow);
@@ -160,18 +147,7 @@ function SidebarContent() {
 
 	// This kinda makes me hate chakra
 	return (
-		<Stack
-			display="flex"
-			flexShrink={0}
-			py={4}
-			bg={useColorModeValue('white', 'gray.800')}
-			borderRight="1px"
-			borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-			w={{ base: 20, md: 52 }}
-			h="full"
-			px={2}
-			zIndex={10}
-		>
+		<>
 			<HStack px={2} flexShrink={0} justifyContent="start" alignItems="center" spacing="4">
 				<img src="/favicon.png" width="40" height="40" />
 				<Text
@@ -203,18 +179,33 @@ function SidebarContent() {
 
 				<ThemeToggle />
 			</HStack>
-		</Stack>
+		</>
 	);
 }
 
 // TODO: mobile breakpoint is stinky
 export default function Sidebar() {
 	return (
-		<Box minH="100vh" bg={useColorModeValue('gray.100', 'gray.900')} as="aside">
-			<SidebarContent />
-			{/* <Box ml={{ base: 24, md: 60 }} p="4">
-				{children}
-			</Box> */}
+		<Box
+			display={{ base: 'none', md: 'initial' }}
+			minH="100vh"
+			bg={useColorModeValue('gray.100', 'gray.900')}
+			as="aside"
+		>
+			<Stack
+				display="flex"
+				flexShrink={0}
+				py={4}
+				bg={useColorModeValue('white', 'gray.800')}
+				borderRight="1px"
+				borderRightColor={useColorModeValue('gray.200', 'gray.700')}
+				w={52}
+				h="full"
+				px={2}
+				zIndex={10}
+			>
+				<SidebarContent />
+			</Stack>
 		</Box>
 	);
 }

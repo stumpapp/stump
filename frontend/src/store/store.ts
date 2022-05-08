@@ -8,6 +8,8 @@ interface StoreMutations {
 	setMedia: (media: Media[]) => void;
 
 	setLibraryDrawer(value?: boolean): void;
+
+	setTitle(value: string): void;
 }
 
 interface MainStore extends StoreMutations {
@@ -17,6 +19,8 @@ interface MainStore extends StoreMutations {
 	media: MediaWithProgress[];
 
 	libraryDrawer: boolean;
+
+	title: string;
 }
 
 const { Provider, useStore } = createContext<MainStore>();
@@ -28,6 +32,8 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 
 	libraryDrawer: false,
 
+	title: 'Stump',
+
 	setUser: (user: User) => set(() => ({ user })),
 	setLibraries: (libraries: Library[]) => set(() => ({ libraries })),
 	setMedia: (media: MediaWithProgress[]) => set(() => ({ media })),
@@ -36,6 +42,8 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 		set(({ libraryDrawer }) => ({
 			libraryDrawer: value !== undefined ? value : !libraryDrawer,
 		})),
+
+	setTitle: (value: string) => set(() => ({ title: value })),
 });
 
 // if development mode, use devtools middleware to expose the zustand store

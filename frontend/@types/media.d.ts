@@ -34,13 +34,10 @@ interface Media {
 	 * The number of (image) pages in the media.
 	 */
 	pages: number;
-	// FIXME: let's see if this will work
 	/**
 	 * The date/time the media was last modified. Extracted from metadata.
 	 */
 	updatedAt?: Date;
-	// TODO: this should be removed...
-	downloaded: boolean;
 	/**
 	 * The checksum of the media file.
 	 */
@@ -49,6 +46,11 @@ interface Media {
 	 * The path of the media file on disk.
 	 */
 	path: string;
+	/**
+	 * The user assigned tags for this media.
+	 * @see Tag
+	 */
+	tags: Tag[];
 }
 
 interface MediaWithProgress extends Media {

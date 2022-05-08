@@ -1,6 +1,9 @@
 import React from 'react';
+import { useMutation, useQuery } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getMediaPage } from '~api/query/media';
+import { updateMediaProgress } from '~api/mutation/media';
+import { getMediaById, getMediaPage } from '~api/query/media';
+import ComicBookReader from '~components/Media/ComicBookReader';
 
 // TODO: handle redirects I will *probably* add for when a user
 // comes here trying to read pages of an epub.
@@ -18,17 +21,35 @@ export default function ReadBook() {
 		return null;
 	}
 
-	return (
-		<div className="h-full w-full flex justify-center items-center">
-			<img
-				// Note: Comic book ratio is -> 663 : 1024
-				className="object-scale-down max-h-full"
-				src={getMediaPage(id, parseInt(page, 10))}
-				onError={(err) => {
-					// @ts-ignore
-					err.target.src = '/src/favicon.png';
-				}}
+	function handleChangePage(newPage: number) {
+		saveProgress();
+		navigate(`/books/${id}/pages/${newPage}`);
+	}
+
+	const { mutate: saveProgress } = useMutation(() => updateMediaProgress(id, parseInt(page, 10)));
+
+	const { isLoading: fetchingBook, data: media } = useQuery('getMediaById', {
+		queryFn: async () => getMediaById(id).then((res) => res.data),
+	});
+
+	if (fetchingBook) {
+		return <div>Loading...</div>;
+	}
+
+	if (!media) {
+		throw new Error('Media not found');
+	}
+
+	if (media.extension.match(/cbr|cbz/)) {
+		return (
+			<ComicBookReader
+				media={media}
+				currentPage={parseInt(page, 10)}
+				getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
+				onPageChange={handleChangePage}
 			/>
-		</div>
-	);
+		);
+	}
+
+	return <div>Not a comic book; Can't do that yet! :)</div>;
 }

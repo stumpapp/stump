@@ -26,7 +26,6 @@ epub = "1.2.3"
 walkdir = "2.3.2"
 zip = "0.5.13"
 # unrar = "0.4.4"
-# FIXME: This fork needs to be reworked, relating to STU-16
-unrar = { git = "https://github.com/aaronleopold/unrar.rs" }
+unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--read-bytes" }
+# unrar = { path = "/Users/aaronleopold/Documents/sandbox/clones/unrar.rs" }
 async-trait = "0.1.53"
-

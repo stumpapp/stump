@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import { getLibraryById } from '~api/query/library';
+import { Helmet } from 'react-helmet';
 import SeriesCard from '~components/SeriesCard';
 
 export default function Library() {
@@ -22,14 +23,15 @@ export default function Library() {
 	}
 
 	return (
-		<div className="flex flex-col space-y-4 p-4">
-			<h1 className="text-lg font-bold text-gray-100">{library.name}</h1>
-
-			<div className="flex flex-wrap gap-4">
+		<>
+			<Helmet>
+				<title>Stump | {library.name}</title>
+			</Helmet>
+			<div className="p-4 flex flex-wrap gap-4 items-center justify-center md:justify-start">
 				{library.series.map((s) => (
 					<SeriesCard key={s.id} {...s} />
 				))}
 			</div>
-		</div>
+		</>
 	);
 }

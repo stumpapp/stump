@@ -11,7 +11,7 @@ body {
 }
 
 main {
-	@apply h-screen w-full overflow-y-scroll scrollbar-hide;
+	@apply h-screen w-full overflow-y-scroll scrollbar-hide overflow-x-hidden;
 }
 
 form {

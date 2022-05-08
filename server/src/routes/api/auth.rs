@@ -1,7 +1,7 @@
 use rocket::serde::json::Json;
 
 use crate::{
-    guards::auth::StumpAuth,
+    guards::auth::Auth,
     prisma::user,
     types::{
         alias::{ApiResult, Context, LoginResult, Session},
@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[get("/auth/me")]
-pub async fn me(session: Session<'_>, _auth: StumpAuth) -> Option<Json<AuthenticatedUser>> {
+pub async fn me(session: Session<'_>, _auth: Auth) -> Option<Json<AuthenticatedUser>> {
     match session.get().await.expect("Session error") {
         Some(user) => Some(Json(user)),
         _ => None,

@@ -3,7 +3,7 @@ use rocket::Route;
 
 use crate::{
     fs,
-    guards::auth::StumpAuth,
+    guards::auth::Auth,
     opds::{
         self,
         entry::OpdsEntry,
@@ -36,7 +36,7 @@ pub fn opds() -> Vec<Route> {
 
 /// A handler for GET /opds/v1.2/catalog. Returns an OPDS catalog as an XML document
 #[get("/catalog")]
-pub fn catalog(_ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
     let entries = vec![
         OpdsEntry::new(
             "keepReading".to_string(),
@@ -90,20 +90,32 @@ pub fn catalog(_ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/keep-reading")]
-async fn keep_reading(ctx: &Context, auth: StumpAuth) -> ApiResult<XmlResponse> {
+async fn keep_reading(ctx: &Context, auth: Auth) -> ApiResult<XmlResponse> {
     let db = ctx.get_db();
 
     let user_id = auth.0.id.clone();
 
     let media = db
         .media()
-        .find_many(vec![])
+        .find_many(vec![media::read_progresses::some(vec![
+            read_progress::user_id::equals(auth.0.id),
+            read_progress::page::gt(0),
+        ])])
         .with(media::read_progresses::fetch(vec![
             read_progress::user_id::equals(user_id),
+            read_progress::page::gt(0),
         ]))
         .order_by(media::name::order(Direction::Asc))
         .exec()
-        .await?;
+        .await?
+        .into_iter()
+        .filter(|m| match m.read_progresses() {
+            // Read progresses relation on media is one to many, there is a dual key
+            // on read_progresses table linking a user and media. Therefore, there should
+            // only be 1 item in this vec for each media resulting from the query.
+            Ok(progress) => progress.len() == 1 && progress[0].page < m.pages,
+            _ => false,
+        });
 
     let entries: Vec<OpdsEntry> = media.into_iter().map(|m| OpdsEntry::from(m)).collect();
 
@@ -129,7 +141,7 @@ async fn keep_reading(ctx: &Context, auth: StumpAuth) -> ApiResult<XmlResponse> 
 }
 
 #[get("/libraries")]
-async fn libraries(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+async fn libraries(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
     let db = ctx.get_db();
 
     let libraries = db.library().find_many(vec![]).exec().await?;
@@ -158,7 +170,7 @@ async fn libraries(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/libraries/<id>")]
-async fn library_by_id(ctx: &Context, id: String, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+async fn library_by_id(ctx: &Context, id: String, _auth: Auth) -> ApiResult<XmlResponse> {
     let db = ctx.get_db();
 
     let library = db
@@ -177,7 +189,7 @@ async fn library_by_id(ctx: &Context, id: String, _auth: StumpAuth) -> ApiResult
 
 /// A handler for GET /opds/v1.2/series
 #[get("/series")]
-async fn series(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+async fn series(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
     let db = ctx.get_db();
 
     let series = db.series().find_many(vec![]).exec().await?;
@@ -209,7 +221,7 @@ async fn series(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/series/latest")]
-async fn series_latest(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse> {
+async fn series_latest(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
     let db = ctx.get_db();
 
     let series = db
@@ -245,13 +257,12 @@ async fn series_latest(ctx: &Context, _auth: StumpAuth) -> ApiResult<XmlResponse
     Ok(XmlResponse(feed.build().unwrap()))
 }
 
-// TODO: use pagination or something instead of manually paging the results
 #[get("/series/<id>?<page>")]
 async fn series_by_id(
     id: String,
     page: Option<usize>,
     ctx: &Context,
-    _auth: StumpAuth,
+    _auth: Auth,
 ) -> ApiResult<XmlResponse> {
     let db = ctx.get_db();
 
@@ -309,7 +320,7 @@ async fn series_by_id(
 }
 
 #[get("/books/<id>/thumbnail")]
-async fn book_thumbnail(id: String, ctx: &Context, _auth: StumpAuth) -> ApiResult<ImageResponse> {
+async fn book_thumbnail(id: String, ctx: &Context, _auth: Auth) -> ApiResult<ImageResponse> {
     let db = ctx.get_db();
 
     let book = db
@@ -334,7 +345,7 @@ async fn book_page(
     page: usize,
     zero_based: Option<bool>,
     ctx: &Context,
-    _auth: StumpAuth,
+    _auth: Auth,
 ) -> ApiResult<ImageResponse> {
     let db = ctx.get_db();
 

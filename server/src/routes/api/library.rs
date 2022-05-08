@@ -2,7 +2,7 @@ use rocket::serde::json::Json;
 use serde::Deserialize;
 
 use crate::{
-    guards::auth::StumpAuth,
+    guards::auth::Auth,
     prisma::{library, series},
     types::{
         alias::{ApiResult, Context},
@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[get("/libraries")]
-pub async fn get_libraries(ctx: &Context, _auth: StumpAuth) -> ApiResult<Json<Vec<library::Data>>> {
+pub async fn get_libraries(ctx: &Context, _auth: Auth) -> ApiResult<Json<Vec<library::Data>>> {
     let db = ctx.get_db();
 
     Ok(Json(db.library().find_many(vec![]).exec().await?))
@@ -21,7 +21,7 @@ pub async fn get_libraries(ctx: &Context, _auth: StumpAuth) -> ApiResult<Json<Ve
 pub async fn get_library_by_id(
     id: String,
     ctx: &Context,
-    _auth: StumpAuth,
+    _auth: Auth,
 ) -> ApiResult<Json<library::Data>> {
     let db = ctx.get_db();
 
@@ -44,7 +44,7 @@ pub async fn get_library_by_id(
 
 // TODO: write me
 #[get("/library/<id>/scan")]
-pub async fn scan_library(id: String, ctx: &Context) -> Result<(), ApiError> {
+pub async fn scan_library(id: String, ctx: &Context, _auth: Auth) -> Result<(), ApiError> {
     let db = ctx.get_db();
 
     let lib = db
@@ -76,7 +76,7 @@ pub struct CreateLibrary {
 pub async fn create_library(
     input: Json<CreateLibrary>,
     ctx: &Context,
-    _auth: StumpAuth,
+    _auth: Auth,
 ) -> ApiResult<Json<library::Data>> {
     let db = ctx.get_db();
 
@@ -104,7 +104,7 @@ pub async fn update_library(
     id: String,
     input: Json<UpdateLibrary>,
     ctx: &Context,
-    _auth: StumpAuth,
+    _auth: Auth,
 ) -> ApiResult<Json<library::Data>> {
     let db = ctx.get_db();
 
@@ -133,7 +133,7 @@ pub async fn update_library(
 pub async fn delete_library(
     id: String,
     ctx: &Context,
-    _auth: StumpAuth,
+    _auth: Auth,
 ) -> ApiResult<Json<library::Data>> {
     let db = ctx.get_db();
 

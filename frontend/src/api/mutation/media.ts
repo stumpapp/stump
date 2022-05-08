@@ -1,5 +1,5 @@
 import API from '..';
 
-export function updateMediaProgress(id: String, page: number): Promise<ReadProgress> {
-	return API.put(`/media/${id}/${page}`);
+export function updateMediaProgress(id: string, page: number): Promise<ReadProgress> {
+	return API.put(`/media/${id}/progress/${page}`);
 }

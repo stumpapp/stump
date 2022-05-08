@@ -31,7 +31,7 @@ export default function SeriesOverview() {
 
 			<div className="p-4 flex flex-wrap gap-4 items-center justify-center md:justify-start">
 				{series.media.map((m) => (
-					<MediaCard {...m} />
+					<MediaCard key={m.id} {...m} />
 				))}
 			</div>
 		</>

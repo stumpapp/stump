@@ -9,6 +9,6 @@ You can contribute by opening new issues or PRs. Please do not drop random PRs w
 5. Add appropiate documentation to public items.
 6. Ensure you have your code formatter properly configured.
 7. Once you add your contributions, create a PR from your feature branch into `develop` - _not_ `main`.
-8. Be sure to pull in new changes **before** making the PR.
+8. Be sure to update your feature branch with any new changes **before** making the PR.
 
 Thanks for contributing to my project!!

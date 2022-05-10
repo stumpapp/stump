@@ -1,0 +1,1 @@
+import{j as e,F as t,a as r,H as o,B as a}from"./index.c3e0d6de.js";function n(){return e(t,{children:[r(o,{children:e("title",{children:["Stump | ","Home"]})}),r(a,{p:"4",children:"woof"})]})}export{n as default};

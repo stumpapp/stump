@@ -1,0 +1,50 @@
+.markdown-body {
+  @apply flex flex-col space-y-4 flex-1;
+}
+
+/* CODE */
+
+.markdown-body pre {
+  @apply relative p-3 rounded-lg shadow bg-gray-900;
+}
+
+/* HEADERS */
+
+.markdown-body h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-bold;
+}
+
+.markdown-body h1 {
+  @apply text-3xl;
+}
+
+.markdown-body h2 {
+  @apply text-2xl;
+}
+
+.markdown-body h3 {
+  @apply text-xl;
+}
+
+.markdown-body h4 {
+  @apply text-lg;
+}
+
+.markdown-body h5 {
+  @apply text-base;
+}
+
+.markdown-body h6 {
+  @apply text-sm;
+}
+
+/* LISTS / TABLES */
+
+.markdown-body ul {
+  @apply list-disc ml-4;
+}

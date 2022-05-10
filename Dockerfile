@@ -6,7 +6,7 @@ FROM node:16-alpine3.14 as frontend
 
 WORKDIR /home/stump
 
-COPY frontend/ .
+COPY packages/core/frontend/ .
 
 RUN npm install -g pnpm
 
@@ -25,7 +25,7 @@ RUN apk add --no-cache --verbose musl-dev build-base sqlite openssl-dev
 
 WORKDIR /home/stump
 
-COPY server/ .
+COPY packages/core/server/ .
 
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 

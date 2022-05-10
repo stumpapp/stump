@@ -22,38 +22,58 @@ I'll list the major target features below - I am very open to suggestions and id
   - Full Text Search
   - Server management
   - Built-in webreader for media
-  - SSR would be an awesome feature, but so far seems to be a bit of a pain (since I am using Rust)
 - Role-based access control (i.e. the server owner and authorized users)
 
-## Getting Started
+## Project Structure
 
-There are no releases yet, so for now you'll have to clone the repo and run it yourself:
+I am ommitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
+
+```bash
+.
+├── packages # workspaces root
+│   ├── core # core package, stump lives here
+│   │   ├── frontend # the built-in web client
+│   │   └── server # stump core implementation
+│   │       ├── prisma # prisma configuration
+│   │       ├── prisma-cli # prisma CLI configuration
+│   │       ├── src # source code
+│   │           ├── bin # bin rust files
+│   │               ├── seed.rs # seed database with fake data
+│   └── website # the advertisement website code
+├── README.md
+└── ...
+```
+
+<!-- - `website` code is deployed to [stumpapp.dev](http://stumpapp.dev) -->
+
+## Development Setup
+
+Clone the repository and run the setup script:
 
 ```bash
 git clone https://github.com/aaronleopold/stump.git
 cd stump
-# handles all the setup required for local development
-pnpm dev:setup
+pnpm run setup
 ```
 
-## Running Stump
+This will install all the dependencies, generate the prisma client, and seed the database with some fake data.
 
-### Development
+## Running Stump
 
 To start the application for development, simply run:
 
 ```bash
-pnpm dev
+pnpm core dev
 ```
 
 This will start both the vite dev server and the rust server, watching for changes. You can also run the server and the frontend in separate processes:
 
 ```bash
-pnpm server:dev # start the server
-pnpm frontend:dev # start the frontend
+pnpm core server:dev # start the server
+pnpm core frontend:dev # start the frontend
 ```
 
-### Docker
+## Docker
 
 <details>
 <summary>
@@ -64,7 +84,7 @@ No images have been published to dockerhub yet, so you'll have to build it yours
 
 ```bash
  # build the docker image
-pnpm build:docker
+pnpm core build:docker
 # create the docker container
 docker create \
   --name=stump \

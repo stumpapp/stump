@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	@apply font-sans antialiased h-screen;
+}
+
+#root {
+	@apply h-full;
+}
+
+main {
+	@apply h-screen w-full overflow-y-scroll scrollbar-hide overflow-x-hidden;
+}
+
+form {
+	margin-block-end: 0;
+}
+
+input:-webkit-autofill {
+	-webkit-text-fill-color: theme('colors.gray.800') !important;
+}
+
+#nprogress {
+	@apply pointer-events-none z-50;
+}
+#nprogress .bar {
+	@apply bg-brand-500 fixed top-0 left-0 z-50 h-0.5 w-full;
+}

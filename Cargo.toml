@@ -1,0 +1,2 @@
+[workspace]
+members = ["packages/core/server", "packages/core/server/prisma-cli"]

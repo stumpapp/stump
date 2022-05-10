@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"scripts": {
 		"start": "cd server && cargo run --release",
-		"setup": "pnpm install && pnpm frontend:install && pnpm server:setup",
+		"setup": "pnpm install && pnpm frontend:install && pnpm frontend:build && pnpm server:setup",
 		"server:setup": "cargo install cargo-watch && pnpm prisma generate && pnpm prisma db push && pnpm seed",
 		"dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
 		"build:docker": "docker build -t stump .",
@@ -20,7 +20,8 @@
 		"frontend:install": "pnpm --filter frontend install",
 		"frontend:start": "pnpm --filter frontend start",
 		"frontend:dev": "pnpm --filter frontend dev",
-		"frontend:build": "pnpm --filter frontend build",
+		"frontend:move-build": "rm -rf ./server/static && mv ./frontend/build ./server/static",
+		"frontend:build": "pnpm --filter frontend build && pnpm frontend:move-build",
 		"prisma": "cd server && cargo prisma",
 		"seed": "cd server && cargo seed"
 	},

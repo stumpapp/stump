@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 default-run = "stump"
 
-[workspace]
-members = ["prisma-cli"]
+# [workspace]
+# members = ["prisma-cli"]
 
 [dependencies]
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.4.1" }

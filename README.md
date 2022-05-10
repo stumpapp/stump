@@ -56,7 +56,7 @@ cd stump
 pnpm run setup
 ```
 
-This will install all the dependencies, generate the prisma client, and seed the database with some fake data.
+This will install all the dependencies, build the frontend bundle (required for server to start), generate the prisma client, and seed the database with some fake data.
 
 ## Running Stump
 

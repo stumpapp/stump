@@ -2,9 +2,6 @@ target
 
 # web
 node_modules
-/web/build
-/web/.svelte-kit
-/web/package
 .env
 .env.*
 !.env.template
@@ -12,6 +9,7 @@ $houdini
 *.log
 .eslintcache
 dist
+build
 
 # rust
 static

@@ -18,7 +18,7 @@ const social = [
 	},
 	{
 		name: 'Discord',
-		href: 'https://discord.gg/DFWSkpa4My',
+		href: 'https://discord.gg/63Ybb7J3as',
 		icon: Discord,
 		disabled: false,
 	},

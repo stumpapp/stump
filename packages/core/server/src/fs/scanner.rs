@@ -46,6 +46,7 @@ impl Job for ScannerJob {
 		let library = library.unwrap();
 
 		// TODO: not right lol
+		// TODO: should be in context?
 		let on_progress = |events: Vec<String>| {
 			for event in events {
 				ctx.emit_client_event(event).unwrap();
@@ -221,15 +222,15 @@ impl Scanner {
 		};
 
 		let mut size: u64 = 0;
-		let mut modified: DateTime<FixedOffset> = chrono::Utc::now().into();
+		// let mut modified: DateTime<FixedOffset> = chrono::Utc::now().into();
 
 		if let Some(metadata) = metadata {
 			size = metadata.len();
 
-			if let Ok(st) = metadata.modified() {
-				let utc: DateTime<Utc> = st.into();
-				modified = utc.into();
-			}
+			// if let Ok(st) = metadata.modified() {
+			// 	let utc: DateTime<Utc> = st.into();
+			// 	modified = utc.into();
+			// }
 		}
 
 		let media = self
@@ -246,6 +247,7 @@ impl Scanner {
 				media::path::set(path_str),
 				vec![
 					media::description::set(comic_info.summary),
+					media::series::link(series::id::equals(series_id)),
 					// media::updated_at::set(modified),
 				],
 			)
@@ -258,6 +260,42 @@ impl Scanner {
 		// self.on_progress(vec![])
 
 		Ok(media)
+	}
+
+	async fn insert_series(&self, entry: &DirEntry) {
+		let path = entry.path();
+
+		let metadata = match path.metadata() {
+			Ok(metadata) => Some(metadata),
+			_ => None,
+		};
+
+		//     // TODO: remove the unsafe unwraps throughout this file
+		//     let name = path.file_name().unwrap().to_str().unwrap().to_string();
+
+		//     let mut updated_at: Option<NaiveDateTime> = None;
+
+		//     if let Some(metadata) = metadata {
+		//         // TODO: extract to fn somewhere
+		//         updated_at = match metadata.modified() {
+		//             Ok(st) => {
+		//                 let dt: DateTime<Utc> = st.clone().into();
+		//                 Some(dt.naive_utc())
+		//             }
+		//             Err(_) => Some(Utc::now().naive_utc()),
+		//         };
+		//     }
+
+		//     series::ActiveModel {
+		//         library_id: Set(library_id),
+		//         title: Set(name),
+		//         updated_at: Set(updated_at),
+		//         // TODO: do I want this to throw an error?
+		//         path: Set(path.to_str().unwrap_or("").to_string()),
+		//         // FIXME: this should be handled by default but isn't, see https://github.com/SeaQL/sea-orm/issues/420 ?
+		//         status: Set(FileStatus::Ready),
+		//         ..Default::default()
+		//     }
 	}
 
 	pub async fn scan_library(&mut self) {
@@ -433,37 +471,7 @@ impl Scanner {
 
 // // TODO: error handling / return result
 // fn generate_series_model(path: &Path, library_id: i32) -> series::ActiveModel {
-//     let metadata = match path.metadata() {
-//         Ok(metadata) => Some(metadata),
-//         _ => None,
-//     };
 
-//     // TODO: remove the unsafe unwraps throughout this file
-//     let name = path.file_name().unwrap().to_str().unwrap().to_string();
-
-//     let mut updated_at: Option<NaiveDateTime> = None;
-
-//     if let Some(metadata) = metadata {
-//         // TODO: extract to fn somewhere
-//         updated_at = match metadata.modified() {
-//             Ok(st) => {
-//                 let dt: DateTime<Utc> = st.clone().into();
-//                 Some(dt.naive_utc())
-//             }
-//             Err(_) => Some(Utc::now().naive_utc()),
-//         };
-//     }
-
-//     series::ActiveModel {
-//         library_id: Set(library_id),
-//         title: Set(name),
-//         updated_at: Set(updated_at),
-//         // TODO: do I want this to throw an error?
-//         path: Set(path.to_str().unwrap_or("").to_string()),
-//         // FIXME: this should be handled by default but isn't, see https://github.com/SeaQL/sea-orm/issues/420 ?
-//         status: Set(FileStatus::Ready),
-//         ..Default::default()
-//     }
 // }
 
 // // TODO: result return to handle error downstream

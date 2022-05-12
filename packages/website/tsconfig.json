@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"useDefineForClassFields": true,
-		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"lib": ["DOM", "DOM.Iterable", "ESNext", "es2020"],
 		"allowJs": false,
 		"skipLibCheck": true,
 		"esModuleInterop": false,
@@ -22,6 +22,7 @@
 			"~pages/*": ["src/pages/*"]
 		}
 	},
-	"include": ["src"],
+	"typeRoots": ["node_modules/@types", "@types"],
+	"include": ["src", "src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "@types", "@types/**/*.d.ts"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

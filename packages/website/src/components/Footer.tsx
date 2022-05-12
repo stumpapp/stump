@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
 import { Twitter, Discord, Github } from '@icons-pack/react-simple-icons';
+import { Link } from 'react-router-dom';
 
 const navigation = {
 	about: [
@@ -33,6 +34,7 @@ const navigation = {
 			name: 'Twitter',
 			href: '#',
 			icon: Twitter,
+			disabled: true,
 		},
 		{
 			name: 'GitHub',
@@ -61,8 +63,8 @@ const LinkSection = ({ title, links }: LinkSectionProps) => {
 			<ul role="list" className="mt-4 space-y-4">
 				{links.map((item) => (
 					<li key={item.name}>
-						<a
-							href={item.disabled ? DISABLED_URL : item.href}
+						<Link
+							to={item.disabled ? DISABLED_URL : item.href}
 							className={clsx(
 								item.disabled
 									? 'pointer-events-none text-gray-500'
@@ -71,7 +73,7 @@ const LinkSection = ({ title, links }: LinkSectionProps) => {
 							)}
 						>
 							{item.name}
-						</a>
+						</Link>
 					</li>
 				))}
 			</ul>

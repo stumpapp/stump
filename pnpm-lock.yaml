@@ -130,6 +130,7 @@ importers:
       react: ^18.0.0
       react-dom: ^18.0.0
       react-helmet: ^6.1.0
+      react-intersection-observer: ^9.1.0
       react-router-dom: ^6.3.0
       tailwind: ^4.0.0
       tailwind-scrollbar-hide: ^1.1.7
@@ -150,6 +151,7 @@ importers:
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
       react-helmet: 6.1.0_react@18.1.0
+      react-intersection-observer: 9.1.0_react@18.1.0
       react-router-dom: 6.3.0_react-dom@18.1.0+react@18.1.0
       tailwind-scrollbar-hide: 1.1.7
     devDependencies:
@@ -4327,6 +4329,14 @@ packages:
       hotkeys-js: 3.8.7
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
+    dev: false
+
+  /react-intersection-observer/9.1.0_react@18.1.0:
+    resolution: {integrity: sha512-XSDWQGzgJ4/B4eW39+qa3S+uc4Gb+m6lxXR54m/uD5lqeL5sLrgYdntbjl4BlTYAblgUhz+JB5obINhZaD+c0Q==}
+    peerDependencies:
+      react: ^15.0.0 || ^16.0.0 || ^17.0.0|| ^18.0.0
+    dependencies:
+      react: 18.1.0
     dev: false
 
   /react-is/16.13.1:

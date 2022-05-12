@@ -13,7 +13,7 @@ export default function Link({ isExternal, noUnderline, ...props }: LinkProps) {
 	return (
 		<RouterLink
 			title={title ?? props.to.toString()}
-			className={clsx(className, { 'hover:underline': !noUnderline }, 'flex items-center')}
+			className={clsx(className, { 'hover:underline': !noUnderline }, 'inline-flex items-center')}
 			target={isExternal ? '__blank' : undefined}
 			rel={isExternal ? 'noopener noreferrer' : undefined}
 			{...rest}

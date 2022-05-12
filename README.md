@@ -50,11 +50,29 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 
 ## Development Setup
 
-Creating a setup script to ensure your system is ready for development automagically is on the todo list. For now, you'll have to ensure you have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). Clone the repository and run the setup script:
+Creating a setup script to ensure your system is ready for development automagically is on the todo list. For now, you'll have to ensure you have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
+
+### Pre-setup Script
+
+If you are on a Windows machine, you'll need to run the following:
+
+```
+.\.github\scripts\pre-setup.ps1
+```
+
+Otherwise, you can run the following:
 
 ```bash
-git clone https://github.com/aaronleopold/stump.git
-cd stump
+./.github/scripts/pre-setup.sh
+```
+
+These scripts will run system checks for `cargo` and `pnpm`, and for some Linux distributions, will install a few additional dependencies. If you face any issues running these, or are using a system that is not supported by the pre-setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
+
+### Setup Script
+
+After the pre-setup script, you may run the following:
+
+```bash
 pnpm run setup
 ```
 

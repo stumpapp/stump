@@ -8,8 +8,11 @@ import NavBar from '~components/NavBar';
 import './styles/index.css';
 
 import routes from '~react-pages';
+import { usePageScroll } from '~hooks/usePageScroll';
 
 function App() {
+	usePageScroll();
+
 	return (
 		<Suspense fallback={<Spinner />}>
 			<NavBar />

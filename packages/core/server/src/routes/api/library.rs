@@ -47,11 +47,11 @@ pub async fn get_library_by_id(
 }
 
 // TODO: write me
-#[get("/library/<id>/scan")]
+#[get("/libraries/<id>/scan")]
 pub async fn scan_library(
 	id: String,
 	ctx: &Context,
-	_auth: Auth,
+	// _auth: Auth, TODO: uncomment
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 
@@ -87,7 +87,7 @@ pub struct CreateLibrary {
 }
 
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
-#[post("/library", data = "<input>")]
+#[post("/libraries", data = "<input>")]
 pub async fn create_library(
 	input: Json<CreateLibrary>,
 	ctx: &Context,
@@ -121,7 +121,7 @@ pub struct UpdateLibrary {
 
 /// Update a library.
 // TODO: Scan?
-#[put("/library/<id>", data = "<input>")]
+#[put("/libraries/<id>", data = "<input>")]
 pub async fn update_library(
 	id: String,
 	input: Json<UpdateLibrary>,
@@ -152,7 +152,7 @@ pub async fn update_library(
 }
 
 // TODO: check the deletion of a library properly cascades to all series and media within it.
-#[delete("/library/<id>")]
+#[delete("/libraries/<id>")]
 pub async fn delete_library(
 	id: String,
 	ctx: &Context,

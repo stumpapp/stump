@@ -23,6 +23,8 @@ I'll list the major target features below - I am very open to suggestions and id
   - Server management
   - Built-in webreader for media
 - Role-based access control (i.e. the server owner and authorized users)
+- Language support (currently only English)
+  - Once more of the core features are implemented, I'll be prioritizing language support
 
 ## Project Structure
 
@@ -48,7 +50,7 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 
 ## Development Setup
 
-Clone the repository and run the setup script:
+Creating a setup script to ensure your system is ready for development automagically is on the todo list. For now, you'll have to ensure you have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). Clone the repository and run the setup script:
 
 ```bash
 git clone https://github.com/aaronleopold/stump.git
@@ -105,3 +107,14 @@ As of now, you'll need to make the `source` and `target` paths match. So if you 
 ## Contributing
 
 Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) file beforehand. Thanks!
+
+#### Developer Resources
+
+A few useful resources for developers looking to contribute:
+
+- [Rocket documentation](https://rocket.rs/v0.5-rc/)
+- [Prisma documentation](https://prisma.io/docs/prisma-client/introduction)
+  - [Prisma Client Rust Documentation](https://github.com/Brendonovich/prisma-client-rust/tree/main/docs)
+- [Chakra UI Documentation](https://chakra-ui.com/docs)
+- [OPDS specification](https://specs.opds.io/)
+- [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)

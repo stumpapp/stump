@@ -4,3 +4,4 @@ static
 target
 *.lock
 *.log
+*.db

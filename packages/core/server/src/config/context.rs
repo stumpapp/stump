@@ -6,6 +6,7 @@ use rocket::tokio::sync::{
 };
 
 use crate::{
+	db,
 	job::Job,
 	prisma,
 	types::event::{InternalEvent, InternalTask, TaskResponder},
@@ -27,11 +28,7 @@ pub struct Context {
 impl Context {
 	pub async fn new(event_sender: EventSender, task_sender: TaskSender) -> Context {
 		Context {
-			db: Arc::new(
-				prisma::new_client()
-					.await
-					.expect("Failed to create Prisma client"),
-			),
+			db: Arc::new(db::create_client().await),
 			event_sender: Arc::new(event_sender),
 			task_sender: Arc::new(task_sender),
 			client_channel: Arc::new(channel::<String>(1024)),

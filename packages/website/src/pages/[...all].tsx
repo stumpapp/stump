@@ -71,7 +71,7 @@ function Page() {
 
 	// TODO: sidebar
 	return (
-		<div className="text-gray-100 flex-1 w-full h-full min-h-screen">
+		<div className="text-gray-100 flex-1 w-full h-full">
 			<Markdown text={markdown} />
 		</div>
 	);

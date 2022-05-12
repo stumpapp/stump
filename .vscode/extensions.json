@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"esbenp.prettier-vscode",
+		"Prisma.prisma",
+		"matklad.rust-analyzer",
+		"bradlc.vscode-tailwindcss",
+		"Gruntfuggly.todo-tree"
+	]
+}

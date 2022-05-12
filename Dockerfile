@@ -55,4 +55,8 @@ RUN chown stump:stump stump
 
 USER stump
 
+ENV STUMP_CONFIG_DIR=/config
+ENV STUMP_DATA_DIR=/data
+ENV ROCKET_PROFILE=release
+
 CMD ["./stump"]

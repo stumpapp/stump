@@ -17,6 +17,7 @@ use types::{
 use utils::event::EventManager;
 
 pub mod config;
+pub mod db;
 pub mod fs;
 pub mod guards;
 pub mod job;
@@ -42,6 +43,18 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
 async fn rocket() -> _ {
 	#[cfg(debug_assertions)]
 	dotenv().ok();
+
+	// TODO: configure logging from env
+	// STUMP_LOG_LEVEL maybe
+
+	// println!(
+	// 	"{:?}",
+	// 	vec![
+	// 		std::env::var("STUMP_CONFIG_DIR"),
+	// 		std::env::var("STUMP_DATABASE_URL"),
+	// 		std::env::var("STUMP_DATA_DIR"),
+	// 	]
+	// );
 
 	// Channel to handle internal events
 	let event_channel = unbounded_channel::<InternalEvent>();

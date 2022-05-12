@@ -6,14 +6,16 @@ import ErrorBoundary from '~components/ErrorBoundary';
 import BaseLayout from '~components/Layouts/BaseLayout';
 import MainLayout from '~components/Layouts/MainLayout';
 import Notifications from '~components/Notifications';
+import JobOverlay from '~components/JobOverlay';
 import FourOhFour from '~pages/FourOhFour';
 import StoreProvider from '~store/StoreProvider';
 import theme from '~util/theme';
 
 import { ChakraProvider } from '@chakra-ui/react';
-// import JobOverlay from '~components/JobOverlay';
 import { Helmet, HelmetTags } from 'react-helmet';
 import { useStore } from '~store/store';
+import { useJobsListener } from '~hooks/useJobsListener';
+import toast from 'react-hot-toast';
 
 const Home = React.lazy(() => import('~pages/Home'));
 const Library = React.lazy(() => import('~pages/Library'));
@@ -40,7 +42,7 @@ export default function Root() {
 }
 
 function App() {
-	const setTitle = useStore((state) => state.setTitle);
+	const { title, setTitle } = useStore(({ setTitle, title }) => ({ setTitle, title }));
 
 	function handleChangedClientState(newState: any, _: HelmetTags, __: HelmetTags) {
 		if (Array.isArray(newState?.title) && newState.title.length > 0) {
@@ -57,6 +59,39 @@ function App() {
 			}
 		}
 	}
+
+	const { addJob, updateJob, completeJob } = useStore(({ addJob, updateJob, completeJob }) => ({
+		addJob,
+		updateJob,
+		completeJob,
+	}));
+
+	// FIXME: so the indexing on the backend is so quick that the UI doesn't appear to update lol
+	// this isn't 'bad' but it appears as if nothing happens. A solution for this will need to be found.
+	function handleJobEvent(data: JobEvent) {
+		if (data.JobStarted) {
+			addJob(data.JobStarted);
+		} else if (data.JobProgress) {
+			updateJob(data.JobProgress);
+		} else if (data.JobComplete) {
+			// completeJob(data.JobComplete as string);
+			setTimeout(() => {
+				completeJob(data.JobComplete as string);
+				toast.success(`Job ${data.JobComplete} complete.`);
+			}, 1500);
+		} else if (data.CreatedSeries || data.CreatedMedia) {
+			client.invalidateQueries('getLibrary');
+
+			if (data.CreatedMedia) {
+				client.invalidateQueries('getSeries');
+			}
+		} else {
+			console.log('Unknown JobEvent', data);
+			console.log(Object.keys(data));
+		}
+	}
+
+	useJobsListener({ onEvent: handleJobEvent });
 
 	return (
 		<>
@@ -83,9 +118,9 @@ function App() {
 					</Route>
 					<Route path="*" element={<FourOhFour />} />
 				</Routes>
+				<JobOverlay />
 			</BrowserRouter>
 			<Notifications />
-			{/* <JobOverlay /> */}
 		</>
 	);
 }

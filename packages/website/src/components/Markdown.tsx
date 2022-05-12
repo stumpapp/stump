@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { ArrowSquareOut } from 'phosphor-react';
 
 import Prism from 'prismjs';
 
@@ -23,6 +24,7 @@ marked.setOptions({
 	sanitizer: DOMPurify.sanitize,
 	gfm: true,
 	breaks: true,
+	headerIds: true,
 });
 
 interface Props {
@@ -30,7 +32,7 @@ interface Props {
 	lastModified: string | null;
 }
 
-export default function Markdown({ text }: Props) {
+export default function Markdown({ text, lastModified }: Props) {
 	useEffect(() => {
 		// https://spdevuk.com/how-to-create-code-copy-button/
 		// const highlights = document.querySelectorAll("div.highlight")
@@ -44,12 +46,45 @@ export default function Markdown({ text }: Props) {
 		// 	div.append(copy)
 		// })
 	}, []);
+
+	const lastUpdated = useMemo(() => {
+		if (lastModified) {
+			let date = new Date(lastModified);
+			return `${date.toLocaleDateString()}, ${date.toLocaleTimeString()}`;
+		}
+
+		return null;
+	}, [lastModified]);
+
 	return (
-		<div
-			className="markdown-body"
-			dangerouslySetInnerHTML={{
-				__html: marked.parse(text),
-			}}
-		/>
+		<div className="w-full h-full flex flex-1">
+			<div className="hidden md:inline-block md:h-full md:w-64">nav</div>
+			<div className="w-full h-full">
+				<div
+					className="markdown-body"
+					dangerouslySetInnerHTML={{
+						__html: marked.parse(text),
+					}}
+				/>
+
+				<div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:justify-between sm:items-center">
+					<a
+						className="inline-flex items-center"
+						href="https://github.com/aaronleopold/stump/issues/new/choose"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<span className="font-medium">Help us improve this page</span>
+						<ArrowSquareOut className="ml-1" />
+					</a>
+
+					{lastUpdated && (
+						<p>
+							<span className="font-medium">Last Updated:</span> {lastUpdated}
+						</p>
+					)}
+				</div>
+			</div>
+		</div>
 	);
 }

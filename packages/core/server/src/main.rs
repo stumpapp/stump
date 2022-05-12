@@ -48,9 +48,6 @@ async fn rocket() -> _ {
 	#[cfg(debug_assertions)]
 	dotenv().ok();
 
-	let static_dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
-	println!("{}", static_dir);
-
 	// logging::init();
 
 	// Channel to handle internal events

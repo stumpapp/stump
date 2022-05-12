@@ -3,7 +3,9 @@ use rocket::tokio::{self, sync::mpsc::UnboundedReceiver};
 use crate::{
 	config::context::Context,
 	job::jobs::Jobs,
-	types::event::{InternalEvent, InternalTask, TaskResponder, TaskResponse},
+	types::event::{
+		ClientEvent, InternalEvent, InternalTask, TaskResponder, TaskResponse,
+	},
 };
 
 type EventReceiver = UnboundedReceiver<InternalEvent>;
@@ -25,13 +27,19 @@ impl EventManager {
 	async fn handle_event(&mut self, event: InternalEvent) {
 		match event {
 			InternalEvent::QueueJob(job) => {
-				// TODO: queue the job, don't run it immediately
-				// TODO: don't block the thread
-				job.run(self.ctx.get_ctx()).await.unwrap_or(());
-				// self.jobs.enqueue(job, &self.ctx);
+				self.jobs.enqueue(job, self.ctx.get_ctx()).await;
 			},
 			InternalEvent::JobComplete(id) => {
-				println!("JobComplete: {:?}", id);
+				let _ = self
+					.ctx
+					.emit_client_event(ClientEvent::JobComplete(id.clone()));
+
+				self.jobs.dequeue(id);
+			},
+			InternalEvent::JobFailed(id, err) => {
+				println!("JobFailed: {:?}", id);
+				self.jobs.dequeue(id);
+				// let _ = self.ctx.emit_client_event(format!("JobFailed: {:?}", err));
 			},
 		}
 	}

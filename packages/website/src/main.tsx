@@ -17,7 +17,7 @@ function App() {
 		<Suspense fallback={<Spinner />}>
 			<NavBar />
 			<div className="min-h-[calc(100vh-56px)] max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
-				<main className="flex flex-col items-center py-12 lg:py-16 h-full w-full">
+				<main className="flex flex-col items-center pb-12 lg:pb-16 h-full w-full">
 					{useRoutes(routes)}
 				</main>
 			</div>

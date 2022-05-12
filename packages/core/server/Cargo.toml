@@ -33,6 +33,7 @@ dirs = "4.0.0"
 clap = { version = "3.1.18", features = ["derive"], optional = true }
 ring = "0.16.20"
 data-encoding = "2.3.2"
+cuid = "1.2.0"
 
 [features]
 seed-binary = ["clap"]

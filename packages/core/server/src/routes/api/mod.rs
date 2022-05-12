@@ -19,7 +19,7 @@ pub fn api() -> Vec<Route> {
 		auth::logout,
 		// logs api
 		// job::get_jobs,
-		// job::jobs_listener,
+		job::jobs_listener,
 		// library api
 		library::get_libraries,
 		library::get_library_by_id,

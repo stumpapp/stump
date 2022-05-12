@@ -1,11 +1,11 @@
 .markdown-body {
-  @apply flex flex-col space-y-4 flex-1;
+	@apply flex flex-col flex-1 w-full h-full space-y-4 min-h-[calc(100vh-56px-3rem)];
 }
 
 /* CODE */
 
 .markdown-body pre {
-  @apply relative p-3 rounded-lg shadow bg-gray-900;
+	@apply relative p-3 rounded-lg shadow bg-gray-900;
 }
 
 /* HEADERS */
@@ -16,35 +16,35 @@ h3,
 h4,
 h5,
 h6 {
-  @apply font-bold;
+	@apply font-bold;
 }
 
 .markdown-body h1 {
-  @apply text-3xl;
+	@apply text-3xl;
 }
 
 .markdown-body h2 {
-  @apply text-2xl;
+	@apply text-2xl;
 }
 
 .markdown-body h3 {
-  @apply text-xl;
+	@apply text-xl;
 }
 
 .markdown-body h4 {
-  @apply text-lg;
+	@apply text-lg;
 }
 
 .markdown-body h5 {
-  @apply text-base;
+	@apply text-base;
 }
 
 .markdown-body h6 {
-  @apply text-sm;
+	@apply text-sm;
 }
 
 /* LISTS / TABLES */
 
 .markdown-body ul {
-  @apply list-disc ml-4;
+	@apply list-disc ml-4;
 }

@@ -1,14 +1,15 @@
-use std::{collections::HashMap, path::Path, sync::Arc};
+use std::{collections::HashMap, path::Path};
 
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	config::context::Context,
 	job::Job,
-	prisma::{library, media, series, PrismaClient},
+	prisma::{library, media, series},
 	types::{
 		alias::ProcessResult,
 		errors::{ApiError, ProcessFileError, ScanError},
+		event::{ClientEvent, InternalEvent},
 		models::MediaMetadata,
 	},
 };
@@ -22,7 +23,7 @@ pub struct ScannerJob {
 
 #[async_trait::async_trait]
 impl Job for ScannerJob {
-	async fn run(&self, ctx: Context) -> Result<(), ApiError> {
+	async fn run(&self, runner_id: String, ctx: Context) -> Result<(), ApiError> {
 		let db = ctx.get_db();
 
 		let library = db
@@ -41,16 +42,19 @@ impl Job for ScannerJob {
 
 		let library = library.unwrap();
 
-		// TODO: not right lol
-		// TODO: should be in context?
-		let on_progress = |event: String| {
-			ctx.emit_client_event(event).unwrap();
-		};
+		let files_to_process = WalkDir::new(&library.path)
+			.into_iter()
+			.filter_map(|e| e.ok())
+			.count();
 
-		// TODO: removed this
-		ctx.emit_client_event(format!("Scanning library: {}", library.path.clone()));
+		ctx.emit_client_event(ClientEvent::job_started(
+			runner_id.clone(),
+			0,
+			Some(files_to_process),
+			Some(format!("Starting library scan at {}", &library.path)),
+		));
 
-		let mut scanner = Scanner::new(library, ctx.db.clone());
+		let mut scanner = Scanner::new(library, ctx.get_ctx(), runner_id);
 
 		scanner.scan_library().await;
 
@@ -143,15 +147,15 @@ impl ScannedFileTrait for Path {
 }
 
 struct Scanner {
-	db: Arc<PrismaClient>,
+	runner_id: String,
+	ctx: Context,
 	library: library::Data,
 	series_map: HashMap<String, series::Data>,
 	media_map: HashMap<String, media::Data>,
-	// on_progress: Box<dyn Fn(Vec<Json<Event>>)>,
 }
 
 impl Scanner {
-	pub fn new(library: library::Data, db: Arc<PrismaClient>) -> Scanner {
+	pub fn new(library: library::Data, ctx: Context, runner_id: String) -> Scanner {
 		let series = library
 			.series()
 			.expect("Failed to get series in library")
@@ -172,11 +176,16 @@ impl Scanner {
 		}
 
 		Scanner {
-			db,
+			ctx,
 			library,
 			series_map,
 			media_map,
+			runner_id,
 		}
+	}
+
+	fn on_progress(&self, event: ClientEvent) {
+		let _ = self.ctx.emit_client_event(event);
 	}
 
 	fn get_series(&self, path: &Path) -> Option<&series::Data> {
@@ -243,6 +252,7 @@ impl Scanner {
 		}
 
 		let media = self
+			.ctx
 			.db
 			.media()
 			.create(
@@ -266,8 +276,7 @@ impl Scanner {
 
 		log::info!("Created new media: {:?}", media);
 
-		// TODO: send progress
-		// self.on_progress(vec![])
+		self.on_progress(ClientEvent::CreatedMedia(media.clone()));
 
 		Ok(media)
 	}
@@ -291,6 +300,7 @@ impl Scanner {
 		};
 
 		let series = self
+			.ctx
 			.db
 			.series()
 			.create(
@@ -303,13 +313,7 @@ impl Scanner {
 			.exec()
 			.await?;
 
-		let files_to_process = WalkDir::new(&self.library.path)
-			.into_iter()
-			.filter_map(|e| e.ok())
-			.count();
-
-		// TODO: send progress
-		// self.on_progress(vec![])
+		self.on_progress(ClientEvent::CreatedSeries(series.clone()));
 
 		Ok(series)
 	}
@@ -318,7 +322,7 @@ impl Scanner {
 		let mut visited_series = HashMap::<String, bool>::new();
 		let mut visited_media = HashMap::<String, bool>::new();
 
-		for (_i, entry) in WalkDir::new(&self.library.path)
+		for (i, entry) in WalkDir::new(&self.library.path)
 			.into_iter()
 			.filter_map(|e| e.ok())
 			.enumerate()
@@ -329,6 +333,12 @@ impl Scanner {
 
 			// TODO: send progress (use i)
 			// self.on_progress(vec![])
+			self.on_progress(ClientEvent::job_progress(
+				self.runner_id.clone(),
+				i + 1,
+				None,
+				Some(format!("Analyzing {:?}", entry_path)),
+			));
 
 			let series = self.get_series(&entry_path);
 			let series_exists = series.is_some();

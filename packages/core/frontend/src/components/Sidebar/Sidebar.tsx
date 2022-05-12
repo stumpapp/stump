@@ -121,6 +121,8 @@ export function SidebarContent() {
 
 	const libraries = useStore((state) => state.libraries, shallow);
 
+	// console.log('libraries', libraries);
+
 	const links: Array<NavItemProps> = useMemo(
 		() => [
 			{ name: 'Home', icon: House as any, href: '/' },
@@ -149,7 +151,7 @@ export function SidebarContent() {
 				alignItems="center"
 				spacing="4"
 			>
-				<img src="/stump-logo--irregular-xs.png" className="h-14 w-14 object-scale-down" />
+				<img src="/favicon.ico" className="h-14 w-14 object-scale-down" />
 				<Text
 					bgGradient="linear(to-r, brand.600, brand.500)"
 					bgClip="text"

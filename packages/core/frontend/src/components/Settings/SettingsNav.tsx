@@ -33,6 +33,7 @@ export default function SettingsNav() {
 		}
 	}
 
+	// This is so horrendously ugly lol
 	return (
 		<Box py={4} w={{ base: 20, md: 48 }} h="full" px={4}>
 			<Tabs
@@ -45,6 +46,7 @@ export default function SettingsNav() {
 				<TabList>
 					<Tab color="gray.400">General Settings</Tab>
 					<Tab color="gray.400">Server Settings</Tab>
+					<Tab color="gray.400">Job History</Tab>
 				</TabList>
 			</Tabs>
 		</Box>

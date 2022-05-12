@@ -49,6 +49,7 @@ export default function MainLayout() {
 		if (!res || !res.data) throw new Error('Could not get media');
 
 		if (res.status === 200) {
+			console.log('validateGetMedia', res.data);
 			store.setMedia(res.data);
 		}
 	}

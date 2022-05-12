@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Box, Progress, Text } from '@chakra-ui/react';
+import { useStore } from '~store/store';
+import shallow from 'zustand/shallow';
 
 function ExampleJobSetup() {
 	return (
@@ -37,27 +39,26 @@ function ExampleJob({ onFinish }: any) {
 // TODO: this will pop up when someone does a job, i.e. scanning a library.
 // it will show progress and other information on click.
 export default function JobOverlay() {
-	// const [jobs, setJobs] = React.useState([{}]);
-	const [open, setOpen] = useState(true);
+	const { jobs } = useStore((state) => ({ jobs: state.jobs }), shallow);
 
-	const [settingUp, setSettingUp] = useState(true);
+	const jobShown = useMemo(() => {
+		return Object.values(jobs).find((job) => job.status === 'Running') ?? null;
+	}, [jobs]);
 
-	// useEffect(() => {
-	// 	let timeout = setTimeout(() => setOpen(!open), 3000);
+	// FIXME: this isn't a safe operation
+	function trim(message?: string) {
+		if (message?.startsWith('Analyzing')) {
+			let filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/');
 
-	// 	return () => clearTimeout(timeout);
-	// }, [open]);
+			return `Analyzing ${filePieces.slice(filePieces.length - 1).join('/')}`;
+		}
 
-	// TODO: remove me this is demo stuff
-	useEffect(() => {
-		let timeout = setTimeout(() => setSettingUp(false), 3000);
-
-		return () => clearTimeout(timeout);
-	}, []);
+		return null;
+	}
 
 	return (
 		<AnimatePresence>
-			{open && (
+			{jobShown && (
 				<Box
 					as={motion.div}
 					bg={'white'}
@@ -68,8 +69,18 @@ export default function JobOverlay() {
 					exit={{ opacity: 0, y: 100, scale: 0.9 }}
 				>
 					<div className="flex flex-col space-y-2 p-2 w-full text-xs">
-						{settingUp && <ExampleJobSetup />}
-						{!settingUp && <ExampleJob onFinish={() => setOpen(false)} />}
+						<Text fontWeight="medium">{trim(jobShown.message) ?? 'Job in Progress'}</Text>
+						<Progress
+							value={jobShown.currentTask}
+							max={jobShown.taskCount}
+							rounded="md"
+							w="full"
+							size="xs"
+							colorScheme="brand"
+						/>
+						<Text>
+							Scanning file {jobShown.currentTask} of {jobShown.taskCount}
+						</Text>
 					</div>
 				</Box>
 			)}

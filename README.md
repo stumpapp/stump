@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Stump logo" src="./.github/images/logo.png" style="width: 50%" />
+  <img alt="Stump's logo. Description: A young individual sitting on a tree stump reading a book. Inspired by Stump's creator's childhood, where a large amount of his time was spent sitting on a tree stump reading his comic books." src="./.github/images/logo.png" style="width: 50%" />
   <br />
   <a href="https://discord.gg/63Ybb7J3as">
     <img src="https://img.shields.io/discord/972593831172272148?label=Discord&color=5865F2" />
@@ -11,7 +11,7 @@
 
 Stump is a free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
 
-I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want to practice Rust!_
+I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want an excuse to practice Rust!_
 
 ## Roadmap
 
@@ -163,6 +163,10 @@ docker start stump
 As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library`, you'll need to bind `/Users/user/Library` to both `source` and `target`. This will eventually change to be more flexible.
 
 </details>
+
+## License
+
+Stump codebase is licensed under an [MIT license](./LICENSE). This does not apply to Stump's logo, if you would like to use the logo for anything other than a reference to Stump, please [contact me](aaronleopold1221@gmail.com).
 
 ## Contributing
 

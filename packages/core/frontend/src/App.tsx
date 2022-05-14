@@ -1,6 +1,6 @@
 import React from 'react';
 import { QueryClientProvider } from 'react-query';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import client from '~api/client';
 import ErrorBoundary from '~components/ErrorBoundary';
 import BaseLayout from '~components/Layouts/BaseLayout';
@@ -11,7 +11,7 @@ import StoreProvider from '~store/StoreProvider';
 import theme from '~util/theme';
 
 import { ChakraProvider } from '@chakra-ui/react';
-import JobOverlay from '~components/JobOverlay';
+// import JobOverlay from '~components/JobOverlay';
 import { Helmet, HelmetTags } from 'react-helmet';
 import { useStore } from '~store/store';
 
@@ -22,6 +22,8 @@ const BookOverview = React.lazy(() => import('~pages/Book/BookOverview'));
 const ReadBook = React.lazy(() => import('~pages/Book/ReadBook'));
 const Login = React.lazy(() => import('~pages/Auth/Login'));
 const Settings = React.lazy(() => import('~pages/Settings'));
+const GeneralSettings = React.lazy(() => import('~pages/Settings/GeneralSettings'));
+const ServerSettings = React.lazy(() => import('~pages/Settings/ServerSettings'));
 
 export default function Root() {
 	return (
@@ -65,7 +67,11 @@ function App() {
 				<Routes>
 					<Route path="/" element={<MainLayout />}>
 						<Route path="" element={<Home />} />
-						<Route path="settings" element={<Settings />} />
+						<Route path="settings" element={<Settings />}>
+							<Route path="" element={<Navigate to="/settings/general" replace={true} />} />
+							<Route path="general" element={<GeneralSettings />} />
+							<Route path="server" element={<ServerSettings />} />
+						</Route>
 						<Route path="libraries/:id" element={<Library />} />
 						<Route path="series/:id" element={<SeriesOverview />} />
 						<Route path="books/:id" element={<BookOverview />} />

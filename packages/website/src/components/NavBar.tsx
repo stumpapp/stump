@@ -51,7 +51,7 @@ export default function NavBar() {
 		>
 			<div className="w-full flex justify-between text-gray-100 max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-3">
 				<Link to="/" className="flex items-center space-x-2">
-					<img className="h-8" src="/favicon.png" alt="Stump" />
+					<img className="h-8" src="/favicon.ico" alt="Stump" />
 					<h3 className="font-bold text-xl text-gray-200">Stump</h3>
 				</Link>
 

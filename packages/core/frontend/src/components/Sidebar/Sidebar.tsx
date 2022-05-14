@@ -148,15 +148,23 @@ export function SidebarContent() {
 	// This kinda makes me hate chakra
 	return (
 		<>
-			<HStack px={2} flexShrink={0} justifyContent="start" alignItems="center" spacing="4">
-				<img src="/favicon.png" width="40" height="40" />
+			<HStack
+				as={Link}
+				to="/"
+				px={2}
+				flexShrink={0}
+				justifyContent="start"
+				alignItems="center"
+				spacing="4"
+			>
+				<img src="/stump-logo--irregular-xs.png" className="h-14 w-14 object-scale-down" />
 				<Text
-					bgGradient="linear(to-r, brand.600, brand.400)"
+					bgGradient="linear(to-r, brand.600, brand.500)"
 					bgClip="text"
 					fontSize="2xl"
 					fontWeight="bold"
 					_dark={{
-						bgGradient: 'linear(to-r, brand.600, brand.200)',
+						bgGradient: 'linear(to-r, brand.600, brand.400)',
 					}}
 				>
 					Stump

@@ -97,7 +97,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		&comics_library.name, &comics_library.id
 	);
 
-	// Note: I rarely need to create the media anymore, a scan is enough.
 	println!("\nSeed completed.");
 
 	println!("Be sure to spawn a 'ScannerJob' to populate the library: POST /api/libraries/{}/scan, or you may use the UI", comics_library.id);

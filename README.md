@@ -1,8 +1,15 @@
 <p align="center">
   <img alt="Stump logo" src="./.github/images/logo.png" style="width: 50%" />
+  <br />
+  <a href="https://discord.gg/63Ybb7J3as">
+    <img src="https://img.shields.io/discord/972593831172272148?label=Discord&color=5865F2" />
+  </a>
+  <a href="https://github.com/aaronleopold/stump/blob/main/LICENSE">
+    <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=000" />
+  </a>
 </p>
 
-A free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
+Stump is a free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
 
 I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want to practice Rust!_
 
@@ -26,6 +33,8 @@ I'll list the major target features below - I am very open to suggestions and id
 - Language support (currently only English)
   - Once more of the core features are implemented, I'll be prioritizing language support
 
+You can track the development of this project [here](https://github.com/users/aaronleopold/projects/2)
+
 ## Project Structure
 
 I am ommitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
@@ -38,9 +47,9 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 │   │   └── server # stump core implementation
 │   │       ├── prisma # prisma configuration
 │   │       ├── prisma-cli # prisma CLI configuration
-│   │       ├── src # source code
-│   │           ├── bin # bin rust files
-│   │               ├── seed.rs # seed database with fake data
+│   │       └── src # source code
+│   │           └── bin # bin rust files
+│   │               └── seed.rs # seed database with fake data
 │   └── website # the advertisement website code
 ├── README.md
 └── ...
@@ -50,7 +59,9 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 
 ## Development Setup
 
-Creating a setup script to ensure your system is ready for development automagically is on the todo list. For now, you'll have to ensure you have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
+There is now a setup script that handles most of the initial configuration, however for simplicity I recommend ensuring you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
+
+**Ensure you are on the `develop` branch before continuing.**
 
 ### Setup Script
 
@@ -78,7 +89,28 @@ During the next step, a seed will be run to create basic data for testing. At so
 cargo seed --help
 ```
 
-In general, you will should provide a `library_path` argument, which is the path to a Library directory on your system. This 'Library' should contain your folders that represent series. It will default to `$HOME/Documents/Stump`. You may provide a `user_name` argument, which will be the username of the server owner. Default will be 'oromei' with a password of 'oromei'. Providing this argument will still yield an **equivalent** username and password.
+In general, you should provide a `library_path` argument, which is the path to a Library directory on your system. This 'Library' should contain your folders that represent series. It will default to `$HOME/Documents/Stump`. You may provide a `user_name` argument, which will be the username of the server owner. Default will be 'oromei' with a password of 'oromei'. Specifiying a username will still yield an **equivalent** password.
+
+An example folder structure for a one-library collection might be:
+
+```
+/Users/aaronleopold/Documents
+├── Stump
+│   ├── Marvel Comics
+│   │   ├── The Amazing Spider-Man (2018)
+│   │   │   ├── The Amazing Spider-Man 001 (2018).cbz
+│   │   │   ├── The Amazing Spider-Man 002 (2018).cbz
+│   │   │   └── etc.
+│   │   └── The Amazing Spider-Man (2022)
+│   │       ├── The Amazing Spider-Man 001 (2022).cbz
+│   │       ├── The Amazing Spider-Man 002 (2022).cbz
+│   │       └── etc.
+│   └── EBooks
+│       ├── Martin, George R R - [Song of Ice and Fire 3] - A Storm of Swords (2003).epub
+│       ├── Tolkien, J R R - [The Lord of the Rings] - Hobbit Or There and Back Again (1986).epub
+│       └── etc.
+└── ...
+```
 
 ## Running Stump
 
@@ -99,7 +131,7 @@ pnpm core frontend:dev # start the frontend
 
 <details>
 <summary>
-  <b>Note: This is currently non-functional. Migrating to Prisma from SeaORM bork this, but I am working on it.</b>
+  <b>Note: This is not currently configured properly. Migrating to Prisma from SeaORM bork this, but I am working on it.</b>
 </summary>
 
 No images have been published to dockerhub yet, so you'll have to build it yourself:
@@ -138,3 +170,5 @@ A few useful resources for developers looking to contribute:
 - [Chakra UI Documentation](https://chakra-ui.com/docs)
 - [OPDS specification](https://specs.opds.io/)
 - [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)
+- [Getting started with React](https://reactjs.org/docs/getting-started.html)
+- [Rust Book](https://doc.rust-lang.org/book/)

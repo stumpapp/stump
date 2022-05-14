@@ -23,6 +23,5 @@
 		".rs": [
 			"cargo fmt --manifest-path=core/server/Cargo.toml --"
 		]
-	},
-	"dependencies": {}
+	}
 }

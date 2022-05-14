@@ -21,4 +21,4 @@ if (-NOT (Get-Command pnpm -errorAction SilentlyContinue)) {
 
 # TODO: check if anything else is needed
 
-write-host "Pre-setup completed! Be sure to run `pnpm run setup` to finish the setup."
+write-host "Pre-setup completed! Be sure to run 'pnpm run setup' to finish the setup."

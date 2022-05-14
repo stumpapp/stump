@@ -4,7 +4,7 @@ extern crate rocket;
 #[cfg(debug_assertions)]
 use dotenv::dotenv;
 
-use config::{context::Context, cors, helmet::Helmet, session};
+use config::{context::Context, cors, helmet::Helmet, logging, session};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
@@ -44,17 +44,7 @@ async fn rocket() -> _ {
 	#[cfg(debug_assertions)]
 	dotenv().ok();
 
-	// TODO: configure logging from env
-	// STUMP_LOG_LEVEL maybe
-
-	// println!(
-	// 	"{:?}",
-	// 	vec![
-	// 		std::env::var("STUMP_CONFIG_DIR"),
-	// 		std::env::var("STUMP_DATABASE_URL"),
-	// 		std::env::var("STUMP_DATA_DIR"),
-	// 	]
-	// );
+	// logging::init();
 
 	// Channel to handle internal events
 	let event_channel = unbounded_channel::<InternalEvent>();

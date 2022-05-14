@@ -60,8 +60,6 @@ impl Job for ScannerJob {
 
 		scanner.scan_library().await;
 
-		println!("DONE!!!!!!!");
-
 		Ok(())
 	}
 }

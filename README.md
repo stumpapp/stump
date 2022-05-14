@@ -52,31 +52,33 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 
 Creating a setup script to ensure your system is ready for development automagically is on the todo list. For now, you'll have to ensure you have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
 
-### Pre-setup Script
+### Setup Script
 
 If you are on a Windows machine, you'll need to run the following:
 
 ```
-.\.github\scripts\pre-setup.ps1
+.\.github\scripts\setup.ps1
 ```
 
 Otherwise, you can run the following:
 
 ```bash
-./.github/scripts/pre-setup.sh
+./.github/scripts/setup.sh
 ```
 
-These scripts will run system checks for `cargo` and `pnpm`, and for some Linux distributions, will install a few additional dependencies. If you face any issues running these, or are using a system that is not supported by the pre-setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
+These scripts will run system checks for `cargo` and `pnpm`, and will install a few additional dependencies, depending on your system. It will then install all the direct, Stump development dependencies, build the frontend bundle (required for server to start), generate the prisma client and sqlite database.
 
-### Setup Script
+If you face any issues running these, or are using a system that is not supported by the setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
 
-After the pre-setup script, you may run the following:
+### Running the Seed Script
+
+During the next step, a seed will be run to create basic data for testing. At some point, this will not be a requirement, but for now, it is. If you are running the seed script, you can run the following for instructions:
 
 ```bash
-pnpm run setup
+cargo seed --help
 ```
 
-This will install all the dependencies, build the frontend bundle (required for server to start), generate the prisma client, and seed the database with some fake data.
+In general, you will should provide a `library_path` argument, which is the path to a Library directory on your system. This 'Library' should contain your folders that represent series. It will default to `$HOME/Documents/Stump`. You may provide a `user_name` argument, which will be the username of the server owner. Default will be 'oromei' with a password of 'oromei'. Providing this argument will still yield an **equivalent** username and password.
 
 ## Running Stump
 

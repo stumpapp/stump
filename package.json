@@ -8,6 +8,7 @@
 		"setup": "pnpm website install && pnpm core run setup",
 		"website": "pnpm --filter @stump/website --",
 		"core": "pnpm --filter @stump/core --",
+		"prisma": "pnpm core prisma",
 		"prepare": "husky install"
 	},
 	"devDependencies": {

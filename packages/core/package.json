@@ -5,13 +5,13 @@
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-		"start": "cd server && cargo run --release",
+		"start": "cd server && ROCKET_PROFILE=release cargo run --release",
 		"setup": "pnpm install && pnpm frontend:install && pnpm frontend:build && pnpm server:setup",
-		"server:setup": "cargo install cargo-watch && pnpm prisma generate && pnpm prisma db push && pnpm seed",
+		"server:setup": "pnpm prisma generate && pnpm prisma db push",
 		"dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
 		"build:docker": "docker build -t stump .",
-		"server:start": "cd server && cargo run",
-		"server:dev": "cd server && cargo watch -x run",
+		"server:start": "cd server && ROCKET_PROFILE=debug cargo run",
+		"server:dev": "cd server && ROCKET_PROFILE=debug cargo watch -x run",
 		"server:build": "cd server && cargo build --release",
 		"server:check": "cd server && cargo check",
 		"server:migrate-up": "cd server && sea-orm-cli migrate up",
@@ -20,12 +20,13 @@
 		"frontend:install": "pnpm --filter frontend install",
 		"frontend:start": "pnpm --filter frontend start",
 		"frontend:dev": "pnpm --filter frontend dev",
-		"frontend:move-build": "rm -rf ./server/static && mv ./frontend/build ./server/static",
+		"frontend:move-build": "trash ./server/static && mv ./frontend/build ./server/static",
 		"frontend:build": "pnpm --filter frontend build && pnpm frontend:move-build",
 		"prisma": "cd server && cargo prisma",
 		"seed": "cd server && cargo seed"
 	},
 	"devDependencies": {
-		"concurrently": "^6.5.1"
+		"concurrently": "^6.5.1",
+		"trash-cli": "^5.0.0"
 	}
 }

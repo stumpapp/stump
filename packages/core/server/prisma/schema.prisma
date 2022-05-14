@@ -46,6 +46,8 @@ model User {
   @@map("users")
 }
 
+// TODO: access control for individual libraries. E.g. a managed user account that may only
+// access libraries a, b and c.
 model Library {
   id          String   @id @default(uuid())
   // The name of the library. ex: "Marvel Comics"

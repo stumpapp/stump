@@ -4,7 +4,7 @@ extern crate rocket;
 #[cfg(debug_assertions)]
 use dotenv::dotenv;
 
-use config::{context::Context, cors, helmet::Helmet, session};
+use config::{context::Context, cors, helmet::Helmet, logging, session};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
@@ -17,6 +17,7 @@ use types::{
 use utils::event::EventManager;
 
 pub mod config;
+pub mod db;
 pub mod fs;
 pub mod guards;
 pub mod job;
@@ -42,6 +43,8 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
 async fn rocket() -> _ {
 	#[cfg(debug_assertions)]
 	dotenv().ok();
+
+	// logging::init();
 
 	// Channel to handle internal events
 	let event_channel = unbounded_channel::<InternalEvent>();

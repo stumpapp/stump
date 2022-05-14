@@ -8,13 +8,18 @@ import NavBar from '~components/NavBar';
 import './styles/index.css';
 
 import routes from '~react-pages';
+import { usePageScroll } from '~hooks/usePageScroll';
 
 function App() {
+	usePageScroll();
+
 	return (
 		<Suspense fallback={<Spinner />}>
 			<NavBar />
-			<div className="flex flex-col items-center min-h-[calc(100vh-2rem)] lg:min-h-[calc(100vh-3rem)] max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-				{useRoutes(routes)}
+			<div className="min-h-[calc(100vh-56px)] max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
+				<main className="flex flex-col items-center py-12 lg:py-16 h-full w-full">
+					{useRoutes(routes)}
+				</main>
 			</div>
 			<Footer />
 		</Suspense>

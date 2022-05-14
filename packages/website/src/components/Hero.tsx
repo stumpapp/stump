@@ -38,7 +38,7 @@ export default function Hero() {
 						className="flex"
 						initial={{ opacity: 0, scale: 0.5 }}
 						animate={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.5, delay: 1.15 }}
+						transition={{ duration: 0.5, delay: 1.25 }}
 					>
 						<Button
 							className="flex items-center space-x-2"

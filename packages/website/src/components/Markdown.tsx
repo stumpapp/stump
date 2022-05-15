@@ -27,6 +27,7 @@ marked.setOptions({
 
 interface Props {
 	text: string;
+	lastModified: string | null;
 }
 
 export default function Markdown({ text }: Props) {

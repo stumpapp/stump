@@ -14,11 +14,13 @@ const navigation = {
 		{
 			name: 'Documentation',
 			href: 'https://github.com/aaronleopold/stump#development-setup',
+			isExternal: true,
 			disabled: false,
 		},
 		{
 			name: 'Contribute',
 			href: 'https://github.com/aaronleopold/stump/blob/main/CONTRIBUTING.md',
+			isExternal: true,
 			disabled: false,
 		},
 	],
@@ -26,6 +28,7 @@ const navigation = {
 		{
 			name: 'License',
 			href: 'https://github.com/aaronleopold/stump/blob/main/LICENSE',
+			isExternal: true,
 			disabled: false,
 		},
 	],
@@ -35,16 +38,19 @@ const navigation = {
 			href: '#',
 			icon: Twitter,
 			disabled: true,
+			isExternal: true,
 		},
 		{
 			name: 'GitHub',
 			href: 'https://github.com/aaronleopold/stump',
 			icon: Github,
+			isExternal: true,
 		},
 		{
 			name: 'Discord',
 			href: 'https://discord.gg/63Ybb7J3as',
 			icon: Discord,
+			isExternal: true,
 		},
 	],
 };
@@ -53,7 +59,7 @@ const DISABLED_URL = '';
 
 interface LinkSectionProps {
 	title: string;
-	links: { name: string; href: string; disabled?: boolean }[];
+	links: { name: string; href: string; disabled?: boolean; isExternal?: boolean }[];
 }
 
 const LinkSection = ({ title, links }: LinkSectionProps) => {
@@ -61,21 +67,36 @@ const LinkSection = ({ title, links }: LinkSectionProps) => {
 		<div className="col-span-1 flex flex-col space-y-2">
 			<h3 className="text-xs font-semibold text-gray-200 tracking-wider uppercase">{title}</h3>
 			<ul role="list" className="mt-4 space-y-4">
-				{links.map((item) => (
-					<li key={item.name}>
-						<Link
-							to={item.disabled ? DISABLED_URL : item.href}
-							className={clsx(
-								item.disabled
-									? 'pointer-events-none text-gray-500'
-									: 'text-gray-300 hover:text-gray-100',
-								'text-base',
-							)}
-						>
-							{item.name}
-						</Link>
-					</li>
-				))}
+				{links.map((item) => {
+					const className = clsx(
+						item.disabled
+							? 'pointer-events-none text-gray-500'
+							: 'text-gray-300 hover:text-gray-100',
+						'text-base',
+					);
+
+					if (item.isExternal) {
+						return (
+							<li key={item.name}>
+								<a
+									href={item.disabled ? DISABLED_URL : item.href}
+									target="_blank"
+									className={className}
+								>
+									{item.name}
+								</a>
+							</li>
+						);
+					}
+
+					return (
+						<li key={item.name}>
+							<Link to={item.disabled ? DISABLED_URL : item.href} className={className}>
+								{item.name}
+							</Link>
+						</li>
+					);
+				})}
 			</ul>
 		</div>
 	);

@@ -29,7 +29,7 @@ function NotFound() {
 function Page() {
 	const location = useLocation();
 
-	const [markdown, setMarkdown] = useState<string>();
+	const [markdown, setMarkdown] = useState<{ text: string; lastModified: string | null }>();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -49,9 +49,14 @@ function Page() {
 				}
 
 				if (target) {
-					await fetch(`/docs/${target}`)
-						.then((res) => res.text())
-						.then((text) => setMarkdown(text));
+					let doc = await fetch(`/docs/${target}`);
+
+					if (doc.status === 200) {
+						const lastModified = doc.headers.get('last-modified');
+						const text = await doc.text();
+
+						setMarkdown({ text, lastModified });
+					}
 				}
 			}
 
@@ -72,7 +77,7 @@ function Page() {
 	// TODO: sidebar
 	return (
 		<div className="text-gray-100 flex-1 w-full h-full">
-			<Markdown text={markdown} />
+			<Markdown text={markdown.text} lastModified={markdown.lastModified} />
 		</div>
 	);
 }

@@ -18,12 +18,10 @@ import {
 } from '@chakra-ui/react';
 
 import ApplicationVersion from '../ApplicationVersion';
-import LibraryOptionsMenu from './LibraryOptionsMenu';
+import LibraryOptionsMenu from '../Library/LibraryOptionsMenu';
 import ThemeToggle from '../ThemeToggle';
 
-interface NavMenuItemProps {
-	id: string;
-	name: string;
+interface NavMenuItemProps extends Library {
 	href: string;
 }
 
@@ -40,38 +38,36 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 
 	return (
 		<Box w="full">
-			<Button
+			<HStack
+				as={Button}
 				_focus={{
 					boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
 				}}
 				w="full"
 				variant="ghost"
+				justifyContent="space-between"
+				alignItems="center"
 				onClick={onToggle}
-				textAlign="left"
 				p={2}
 			>
-				<HStack w="full" alignItems="center" justifyContent="space-between">
-					<HStack spacing="2">
-						{/* @ts-ignore */}
-						<rest.icon />
-						<span>{name}</span>
-					</HStack>
-					<Box p={1} rounded="full">
-						<CaretRight
-							className={clsx(isOpen ? 'rotate-90' : 'rotate-270', 'transition-all duration-100')}
-						/>
-					</Box>
-				</HStack>
-			</Button>
+				<div className="flex space-x-2">
+					{/* @ts-ignore */}
+					<rest.icon weight="fill" />
+					<span>{name}</span>
+				</div>
+				<Box p={1} rounded="full">
+					<CaretRight
+						className={clsx(isOpen ? 'rotate-90' : 'rotate-270', 'transition-all duration-100')}
+					/>
+				</Box>
+			</HStack>
 
 			<AnimatePresence>
 				{isOpen && (
 					<VStack mt={2} spacing={2}>
 						{items!.map((item) => (
 							<Box
-								// as={motion.div}
 								key={item.id}
-								// TODO: fix color differences
 								pl={6}
 								w="full"
 								rounded="md"
@@ -82,14 +78,11 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 									_dark: { bg: 'gray.700', color: 'gray.100' },
 								}}
 							>
-								<HStack
-									p={1.5}
-									// className="cursor-pointer w-full flex items-center font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-900 dark:hover:text-gray-300 transition-colors duration-100"
-								>
+								<HStack p={1.5}>
 									<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
 										{item.name}
 									</Link>
-									<LibraryOptionsMenu libraryId={item.id} />
+									<LibraryOptionsMenu library={item} />
 								</HStack>
 							</Box>
 						))}
@@ -103,23 +96,22 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 function NavItem({ name, href, ...rest }: NavItemProps) {
 	return (
 		<Button
+			as={Link}
 			_focus={{
 				boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
 			}}
-			as={Link}
 			to={href!}
 			w="full"
 			variant="ghost"
 			textAlign="left"
+			display="flex"
 			p={2}
 		>
-			<HStack w="full" alignItems="center" justifyContent="space-between">
-				<HStack spacing="2">
-					{/* @ts-ignore */}
-					<rest.icon />
-					<span>{name}</span>
-				</HStack>
-			</HStack>
+			<div className="flex space-x-2 justify-start w-full">
+				{/* @ts-ignore */}
+				<rest.icon weight="fill" />
+				<span>{name}</span>
+			</div>
 		</Button>
 	);
 }
@@ -145,7 +137,7 @@ export function SidebarContent() {
 		[libraries],
 	);
 
-	// This kinda makes me hate chakra
+	// This kinda makes me hate chakra!!!!
 	return (
 		<>
 			<HStack
@@ -191,7 +183,6 @@ export function SidebarContent() {
 	);
 }
 
-// TODO: mobile breakpoint is stinky
 export default function Sidebar() {
 	return (
 		<Box
@@ -211,6 +202,7 @@ export default function Sidebar() {
 				h="full"
 				px={2}
 				zIndex={10}
+				spacing={4}
 			>
 				<SidebarContent />
 			</Stack>

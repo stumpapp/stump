@@ -2,6 +2,7 @@ import React from 'react';
 import { Box } from '@chakra-ui/react';
 import UiDemo from '~components/UiDemo';
 import { Helmet } from 'react-helmet';
+import EditLibraryModal from '~components/Library/EditLibraryModal';
 
 // TODO: account for new accounts, i.e. no media at all
 export default function Home() {
@@ -15,10 +16,7 @@ export default function Home() {
 				{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
 				<title>Stump | {'Home'}</title>
 			</Helmet>
-			<Box p="4">
-				{/* <UiDemo /> */}
-				woof
-			</Box>
+			<Box p="4">{/* <UiDemo /> */}</Box>
 		</>
 	);
 }

@@ -83,7 +83,7 @@ If you face any issues running these, or are using a system that is not supporte
 
 ### Running the Seed Script
 
-During the next step, a seed will be run to create basic data for testing. At some point, this will not be a requirement, but for now, it is. If you are running the seed script, you can run the following for instructions:
+A seed will be run to create essential starting data for development. At some point, server initialization logic will be added that will make this step optional, but for now it is required. If you are running the seed script, you can run the following for instructions:
 
 ```bash
 cargo seed --help
@@ -118,7 +118,7 @@ The default seed configuration with explicitly provided arguments would look lik
 pnpm core seed --library_path='/Users/aaronleopold/Documents/Stump/Marvel Comics' --user_name='oromei'
 ```
 
-Note: After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
+Note: `pnpm core seed` will trash the current sqlite file, create a new one, and then run the actual seed program. After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
 
 ## Running Stump
 

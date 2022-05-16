@@ -1,10 +1,5 @@
-use std::{
-	collections::HashMap,
-	path::{Path, PathBuf},
-	sync::Arc,
-};
+use std::{collections::HashMap, path::Path, sync::Arc};
 
-use prisma_client_rust::chrono::{self, DateTime, FixedOffset, Utc};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
@@ -12,12 +7,13 @@ use crate::{
 	job::Job,
 	prisma::{library, media, series, PrismaClient},
 	types::{
+		alias::ProcessResult,
 		errors::{ApiError, ProcessFileError, ScanError},
-		models::ComicInfo,
+		models::MediaMetadata,
 	},
 };
 
-use super::{media_file::ProcessResult, rar::process_rar, zip::process_zip};
+use super::{rar::process_rar, zip::process_zip};
 
 #[derive(Debug)]
 pub struct ScannerJob {
@@ -47,10 +43,8 @@ impl Job for ScannerJob {
 
 		// TODO: not right lol
 		// TODO: should be in context?
-		let on_progress = |events: Vec<String>| {
-			for event in events {
-				ctx.emit_client_event(event).unwrap();
-			}
+		let on_progress = |event: String| {
+			ctx.emit_client_event(event).unwrap();
 		};
 
 		// TODO: removed this
@@ -218,7 +212,7 @@ impl Scanner {
 		entry: &DirEntry,
 		series_id: String,
 	) -> Result<media::Data, ScanError> {
-		let (info, pages) = self.process_entry(entry)?;
+		let processed_entry = self.process_entry(entry)?;
 
 		let path = entry.path();
 
@@ -231,9 +225,9 @@ impl Scanner {
 		let name = entry.file_name().to_str().unwrap().to_string();
 		let ext = path.extension().unwrap().to_str().unwrap().to_string();
 
-		let comic_info = match info {
+		let comic_info = match processed_entry.metadata {
 			Some(info) => info,
-			None => ComicInfo::default(),
+			None => MediaMetadata::default(),
 		};
 
 		let mut size: u64 = 0;
@@ -257,10 +251,11 @@ impl Scanner {
 				media::extension::set(ext),
 				media::pages::set(match comic_info.page_count {
 					Some(count) => count as i32,
-					None => pages.len() as i32,
+					None => processed_entry.entries.len() as i32,
 				}),
 				media::path::set(path_str),
 				vec![
+					media::checksum::set(processed_entry.checksum),
 					media::description::set(comic_info.summary),
 					media::series::link(series::id::equals(series_id)),
 					// media::updated_at::set(modified),
@@ -280,10 +275,11 @@ impl Scanner {
 	async fn insert_series(&self, entry: &DirEntry) -> Result<series::Data, ScanError> {
 		let path = entry.path();
 
-		let metadata = match path.metadata() {
-			Ok(metadata) => Some(metadata),
-			_ => None,
-		};
+		// TODO: use this??
+		// let metadata = match path.metadata() {
+		// 	Ok(metadata) => Some(metadata),
+		// 	_ => None,
+		// };
 
 		// TODO: change error
 		let name = match path.file_name() {
@@ -319,12 +315,10 @@ impl Scanner {
 	}
 
 	pub async fn scan_library(&mut self) {
-		let library_path = PathBuf::from(&self.library.path);
-
 		let mut visited_series = HashMap::<String, bool>::new();
 		let mut visited_media = HashMap::<String, bool>::new();
 
-		for (i, entry) in WalkDir::new(&self.library.path)
+		for (_i, entry) in WalkDir::new(&self.library.path)
 			.into_iter()
 			.filter_map(|e| e.ok())
 			.enumerate()

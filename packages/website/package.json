@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "netlify build && netlify deploy"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^4.6.1",

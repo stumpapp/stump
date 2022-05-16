@@ -5,7 +5,7 @@
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-		"setup": "pnpm website install && pnpm core run setup",
+		"setup": "pnpm i && pnpm core run setup",
 		"website": "pnpm --filter @stump/website --",
 		"core": "pnpm --filter @stump/core --",
 		"prisma": "pnpm core prisma",

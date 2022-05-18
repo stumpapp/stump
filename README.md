@@ -42,20 +42,32 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 ```bash
 .
 ├── packages
-│   ├── core # The core package contains Stump's Rust code (server) and the React application (frontend).
+│   ├── core
 │   │   ├── frontend
 │   │   └── server
 │   │       ├── prisma
 │   │       ├── prisma-cli
 │   │       └── src
 │   │           └── bin
-│   │               └── seed.rs # This file is used to seed the database with data.
-│   └── website # The website package contains the website for Stump (React)
+│   │               └── seed.rs
+│   └── website
 ├── README.md
 └── ...
 ```
 
-<!-- - `website` code is deployed to [stumpapp.dev](http://stumpapp.dev) -->
+### Core
+
+The core package is where Stump's core functionality is located.
+
+`server`: This is the bulk of Stump's functionality. It is a Rocket server.
+
+`frontend`: The frontend directory is where the web client is located. It is a static React application that is served by Stump.
+
+<!-- This file is used to seed the database with data. -->
+
+### Website
+
+The website package contains a Next.js application for the Stump landing page and documentation pages. The documentation aspect is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev)
 
 ## Development Setup
 

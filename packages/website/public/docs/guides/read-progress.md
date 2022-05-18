@@ -1,3 +1,0 @@
-# Read Progress
-
-Coming Soon!

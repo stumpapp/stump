@@ -15,10 +15,14 @@ const brand = {
 };
 
 module.exports = {
-	content: ['./src/**/*.{html,js,jsx,ts,tsx}', './index.html'],
+	content: ['./src/pages/**/*.{js,ts,jsx,tsx}', './src/components/**/*.{js,ts,jsx,tsx}'],
 	darkMode: 'class',
 	theme: {
 		extend: {
+			backgroundImage: {
+				'demo-fallback--light': "url('/demo-fallback--light.png')",
+				'demo-fallback--dark': "url('/demo-fallback.png')",
+			},
 			colors: {
 				gray: {
 					50: '#F7FAFC',
@@ -52,7 +56,9 @@ module.exports = {
 		},
 	},
 	variants: {
-		extend: {},
+		extend: {
+			backgroundImage: ['dark'],
+		},
 	},
 	plugins: [require('@tailwindcss/typography'), require('tailwind-scrollbar-hide')],
 };

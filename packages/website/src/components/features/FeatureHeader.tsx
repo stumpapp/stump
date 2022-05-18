@@ -26,7 +26,7 @@ export function FeatureHeader({ children }: Props) {
 				duration: 0.5,
 				delay: 0.25,
 			}}
-			className="text-2xl md:text-3xl font-extrabold text-gray-100"
+			className="text-2xl md:text-3xl font-extrabold text-gray-850 dark:text-gray-100"
 		>
 			{children}
 		</motion.h2>
@@ -52,7 +52,7 @@ export function FeatureSubHeader({ children }: Props) {
 				duration: 0.5,
 				delay: 0.5,
 			}}
-			className="md:text-lg text-gray-400"
+			className="md:text-lg text-gray-700 dark:text-gray-400"
 		>
 			{children}
 		</motion.p>

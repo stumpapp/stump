@@ -1,8 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body,
-#root {
-	@apply bg-gray-1000;
-}

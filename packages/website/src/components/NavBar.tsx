@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Github, Discord } from '@icons-pack/react-simple-icons';
 import clsx from 'clsx';
 import { CloudArrowDown } from 'phosphor-react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
+import Link from 'next/link';
+import ThemeToggle from './ThemeToggle';
 
 const social = [
 	{
@@ -45,18 +47,22 @@ export default function NavBar() {
 	return (
 		<nav
 			className={clsx(
-				scrollPos < 25 ? 'bg-transparent border-b-transparent' : 'bg-gray-1000 border-b-gray-800',
+				scrollPos < 25
+					? 'bg-transparent border-b-transparent'
+					: 'bg-white border-b-gray-100 dark:bg-gray-1000 dark:border-b-gray-800',
 				'border-b sticky top-0 z-50 w-full transition-all duration-200',
 			)}
 		>
 			<div className="w-full flex justify-between text-gray-100 max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-3">
-				<Link to="/" className="flex items-center space-x-2">
-					<img className="h-8" src="/favicon.ico" alt="Stump" />
-					<h3 className="font-bold text-xl text-gray-200">Stump</h3>
+				<Link href="/" passHref>
+					<a className="flex items-center space-x-2">
+						<img className="h-8" src="/favicon.ico" alt="Stump" />
+						<h3 className="font-bold text-xl text-gray-850 dark:text-gray-200">Stump</h3>
+					</a>
 				</Link>
 
 				<div className="flex items-center">
-					<div className="flex space-x-4">
+					<div className="flex space-x-4 items-center">
 						{social.map((item) => (
 							<a
 								key={item.name}
@@ -66,14 +72,16 @@ export default function NavBar() {
 								rel="noopener noreferrer"
 								className={clsx(
 									item.disabled
-										? 'text-gray-500 pointer-events-none'
-										: 'text-gray-300 hover:text-gray-100',
+										? 'text-gray-400 dark:text-gray-500 pointer-events-none'
+										: 'text-gray-700 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100',
 								)}
 							>
 								<span className="sr-only">{item.name}</span>
 								<item.icon className="h-6 w-6" aria-hidden="true" />
 							</a>
 						))}
+
+						<ThemeToggle />
 					</div>
 				</div>
 			</div>

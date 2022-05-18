@@ -1,3 +1,0 @@
-# About Stump
-
-Coming Soon!

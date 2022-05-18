@@ -12,7 +12,7 @@ export default function ComingSoon() {
 					there! Feel free to come hang out in the{' '}
 					<Link
 						className="text-brand-400 hover:text-brand transition-colors duration-150"
-						to="https://discord.gg/63Ybb7J3as"
+						href="https://discord.gg/63Ybb7J3as"
 					>
 						Stump Discord
 					</Link>{' '}

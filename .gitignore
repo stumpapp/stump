@@ -23,3 +23,14 @@ target
 
 # editors / idea
 .idea
+
+.next
+
+# Local Netlify folder
+.netlify
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo

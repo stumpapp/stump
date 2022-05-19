@@ -30,7 +30,7 @@ generator client {
 // }
 
 model User {
-  id             String         @id @default(uuid())
+  id             String         @id @default(cuid())
   // The username of the user. E.g. "oromei"
   username       String         @unique
   // The password of the user. This will a hash - not the actual password.
@@ -42,6 +42,10 @@ model User {
   // `currentlyReading` but that wouldn't match the relation in the Media model. UGH. Naming
   // is so hard lol.
   readProgresses ReadProgress[]
+
+  readingLists ReadingList[]
+
+  sharedReadingLists ReadingListAccess[]
 
   @@map("users")
 }
@@ -100,7 +104,7 @@ model Media {
   extension      String
   // The number of pages in the media. ex: "69"
   pages          Int
-  // The date in which the media was last updated in the FS. ex: "2022-04-20 04:20:69"
+  // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
   updatedAt      DateTime       @updatedAt
   // Whether or not the media is downloaded to the client. ex: true
   downloaded     Boolean        @default(false)
@@ -115,19 +119,83 @@ model Media {
   // The read progresses of the media
   readProgresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
   // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
-  tags           Tag[]
+  tags           MediaTag[]
+
+  // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
+  // readingListId String?
+
 
   @@map("media")
 }
 
-model Tag {
+model MediaTag {
   id   String @id @default(cuid())
-  // The name of the tag. ex: "Marvel"
+  // The name of the tag. ex: "Action"
   name String @unique
 
   media Media[]
 
   @@map("tags")
+}
+
+// TODO: Before defining the relation I need to decide between the following scenarios:
+// 1. A server is the owning entity for reading lists
+// 2. A user is the owning entity for reading lists, and users can have their own reading lists
+// 3. A user is the owning entity for reading lists and may share reading lists with other users
+model ReadingList {
+  id          String   @id @default(cuid())
+  // The name of the reading list. ex: "Summer Reading"
+  name        String
+  // The description of the reading list. ex: "The best reading list ever"
+  description String?
+  // The date in which the reading list was last updated. ex: "2022-04-20 04:20:69"
+  updatedAt   DateTime @updatedAt
+  // The media in the reading list.
+  // media       Media[]
+
+  creatingUser   User   @relation(fields: [creatingUserId], references: [id], onDelete: Cascade)
+  creatingUserId String
+
+  accessInformation ReadingListAccess[]
+
+  // A user can only have one reading list with the same name
+  @@unique([creatingUserId, name])
+  @@map("reading_lists")
+}
+
+// Who may access a reading list created by a user
+model ReadingListAccess {
+  id String @id @default(cuid())
+
+  // The user who may access the reading list
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  // The reading list that may be accessed
+  readingList   ReadingList @relation(fields: [readingListId], references: [id])
+  readingListId String
+
+
+  @@unique([userId, readingListId])
+  @@map("reading_list_access")
+}
+
+// TODO: Before defining the relation I need to decide between the following scenarios:
+// 1. A server is the owning entity for collections
+// 2. A user is the owning entity for collections, and users can have their own collections
+// 3. A user is the owning entity for collections and may share collections with other users
+model Collection {
+  id          String   @id @default(cuid())
+  // The name of the collection. ex: "Spider-Man Comics"
+  name        String
+  // The description of the collection. ex: "All the Spider-Man arcs together in one place"
+  description String?
+  // The date in which the collection was last updated. ex: "2022-04-20 04:20:69"
+  updatedAt   DateTime @updatedAt
+  // The series in the collection.
+  // series       Series[]
+
+  @@map("collections")
 }
 
 model ReadProgress {

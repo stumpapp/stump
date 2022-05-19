@@ -27,9 +27,13 @@ pub mod routes;
 pub mod types;
 pub mod utils;
 
+const STATIC_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+
 #[get("/<_..>", rank = 2)]
 async fn index_fallback() -> Option<NamedFile> {
-	NamedFile::open(Path::new("static").join("index.html"))
+	let static_dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+	println!("{}", static_dir);
+	NamedFile::open(Path::new(STATIC_DIR).join("index.html"))
 		.await
 		.ok()
 }
@@ -69,7 +73,7 @@ async fn rocket() -> _ {
 		.attach(session::get_session_store().fairing())
 		.attach(cors::get_cors())
 		.attach(Helmet::default().fairing())
-		.mount("/", FileServer::from("static/").rank(1))
+		.mount("/", FileServer::from(STATIC_DIR).rank(1))
 		.mount("/", routes![index_fallback])
 		.mount("/api", routes::api::api())
 		.mount("/opds/v1.2", routes::opds::opds())

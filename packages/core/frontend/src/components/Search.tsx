@@ -10,8 +10,12 @@ import React, { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import Input from './ui/Input';
 
+// FIXME: overflow on ctrl+k
 function Shortcut() {
-	return <Kbd>⌘k</Kbd>;
+	// FIXME: don't use deprecated
+	const key = window.navigator.platform.match(/^Mac/) ? '⌘k' : 'ctrl+k';
+
+	return <Kbd>{key}</Kbd>;
 }
 
 export default function Search() {

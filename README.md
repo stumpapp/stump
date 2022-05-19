@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Stump logo" src="./.github/images/logo.png" style="width: 50%" />
+  <img alt="Stump's logo. Description: A young individual sitting on a tree stump reading a book. Inspired by Stump's creator's childhood, where a large amount of his time was spent sitting on a tree stump reading his comic books." src="./.github/images/logo.png" style="width: 50%" />
   <br />
   <a href="https://discord.gg/63Ybb7J3as">
     <img src="https://img.shields.io/discord/972593831172272148?label=Discord&color=5865F2" />
@@ -11,7 +11,7 @@
 
 Stump is a free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
 
-I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want to practice Rust!_
+I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want an excuse to practice Rust!_
 
 ## Roadmap
 
@@ -41,25 +41,37 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 
 ```bash
 .
-├── packages # workspaces root
-│   ├── core # core package, stump lives here
-│   │   ├── frontend # the built-in web client
-│   │   └── server # stump core implementation
-│   │       ├── prisma # prisma configuration
-│   │       ├── prisma-cli # prisma CLI configuration
-│   │       └── src # source code
-│   │           └── bin # bin rust files
-│   │               └── seed.rs # seed database with fake data
-│   └── website # the advertisement website code
+├── packages
+│   ├── core
+│   │   ├── frontend
+│   │   └── server
+│   │       ├── prisma
+│   │       ├── prisma-cli
+│   │       └── src
+│   │           └── bin
+│   │               └── seed.rs
+│   └── website
 ├── README.md
 └── ...
 ```
 
-<!-- - `website` code is deployed to [stumpapp.dev](http://stumpapp.dev) -->
+### Core
+
+The core package is where Stump's core functionality is located.
+
+`server`: This is the bulk of Stump's functionality. It is a Rocket server.
+
+`frontend`: The frontend directory is where the web client is located. It is a static React application that is served by Stump.
+
+<!-- This file is used to seed the database with data. -->
+
+### Website
+
+The website package contains a Next.js application for the Stump landing page and documentation pages. The documentation aspect is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev)
 
 ## Development Setup
 
-There is now a setup script that handles most of the initial configuration, however for simplicity I recommend ensuring you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
+There is now a setup script that handles most of the initial configuration, however ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
 
 **Ensure you are on the `develop` branch before continuing.**
 
@@ -83,7 +95,7 @@ If you face any issues running these, or are using a system that is not supporte
 
 ### Running the Seed Script
 
-During the next step, a seed will be run to create basic data for testing. At some point, this will not be a requirement, but for now, it is. If you are running the seed script, you can run the following for instructions:
+A seed will be run to create essential starting data for development. At some point, server initialization logic will be added that will make this step optional, but for now it is required. If you are running the seed script, you can run the following for instructions:
 
 ```bash
 cargo seed --help
@@ -111,6 +123,14 @@ An example folder structure for a one-library collection might be:
 │       └── etc.
 └── ...
 ```
+
+The default seed configuration with explicitly provided arguments would look like:
+
+```bash
+pnpm core seed --library_path='/Users/aaronleopold/Documents/Stump/Marvel Comics' --user_name='oromei'
+```
+
+Note: `pnpm core seed` will trash the current sqlite file, create a new one, and then run the actual seed program. After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
 
 ## Running Stump
 
@@ -155,6 +175,10 @@ docker start stump
 As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library`, you'll need to bind `/Users/user/Library` to both `source` and `target`. This will eventually change to be more flexible.
 
 </details>
+
+## License
+
+Stump codebase is licensed under an [MIT license](./LICENSE). This does not apply to Stump's logo, if you would like to use the logo for anything other than a reference to Stump, please [contact me](aaronleopold1221@gmail.com).
 
 ## Contributing
 

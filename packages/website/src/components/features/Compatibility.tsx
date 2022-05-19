@@ -43,11 +43,12 @@ function AppLogoContainer({ index, title, href, src, alt }: AppLogoProps) {
 				src={src}
 				alt={alt}
 			/>
-			<h3 className="text-gray-100">{title}</h3>
+			<h3 className="text-gray-700 dark:text-gray-100">{title}</h3>
 		</motion.a>
 	);
 }
 
+// TODO: render black panels logo on light theme?
 const logos: Omit<AppLogoProps, 'index'>[] = [
 	{
 		title: 'Panels',
@@ -82,14 +83,14 @@ export default function Compatibility() {
 				<FeatureHeader>Compatible with your favorite readers</FeatureHeader>
 
 				<FeatureSubHeader>
-					You aren't stuck with the built-in reader! With Stump, you can easily read all your digial
-					media from your preferred reader - so long as they support the OPDS specifications, it's
-					compatible!
+					You aren&apos;t stuck with the built-in reader! With Stump, you can easily read all your
+					digial media from your preferred reader - so long as they support the OPDS specifications,
+					it&apos;s compatible!
 				</FeatureSubHeader>
 
 				<div className="pt-6 flex justify-between md:justify-start md:space-x-6 lg:space-x-12">
 					{logos.map((logo, i) => (
-						<AppLogoContainer index={i} {...logo} />
+						<AppLogoContainer key={logo.href} index={i} {...logo} />
 					))}
 				</div>
 			</div>

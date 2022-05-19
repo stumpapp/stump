@@ -3,7 +3,8 @@ import { QueryClient } from 'react-query';
 const client = new QueryClient({
 	defaultOptions: {
 		queries: {
-			retry: 0,
+			retry: false,
+			refetchOnWindowFocus: false,
 			suspense: true,
 		},
 	},

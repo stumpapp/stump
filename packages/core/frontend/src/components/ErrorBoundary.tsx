@@ -1,7 +1,14 @@
-import { ErrorBoundary, ErrorBoundaryProps, FallbackProps } from 'react-error-boundary';
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
+// TODO: make pretty
 function ErrorFallback({ error }: FallbackProps) {
-	return <div></div>;
+	return (
+		<div>
+			<h3>{error.message}</h3>
+
+			<pre>{error.stack}</pre>
+		</div>
+	);
 }
 
 interface Props {

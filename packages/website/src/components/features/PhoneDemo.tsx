@@ -80,7 +80,7 @@ export default function PhoneDemo() {
 			<div className="-ml-12 md:ml-0 flex">
 				<motion.img
 					animate={pixelControls}
-					className="shadow h-[300px] md:h-[400px] lg:h-[525px] object-scale-down"
+					className="h-[300px] md:h-[400px] lg:h-[525px] object-scale-down"
 					onMouseEnter={() => handleHover('pixel')}
 					src="/images/pixel-5--TODO.png"
 					alt="Stump on Panels App"
@@ -88,7 +88,7 @@ export default function PhoneDemo() {
 
 				<motion.img
 					animate={iphoneControls}
-					className="shadow h-[300px] md:h-[400px] lg:h-[525px] object-scale-down transform"
+					className="h-[300px] md:h-[400px] lg:h-[525px] object-scale-down transform"
 					src="/images/panels/iphone-12--black.png"
 					onMouseEnter={() => handleHover('iphone')}
 					alt="Stump on Panels App"

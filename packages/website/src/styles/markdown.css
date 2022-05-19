@@ -1,50 +1,58 @@
-.markdown-body {
-  @apply flex flex-col space-y-4 flex-1;
+main > article {
+	@apply flex flex-col space-y-4 flex-1;
 }
+
+thead > tr {
+	@apply bg-gray-50 dark:bg-gray-900 !important;
+}
+
+/* tr:nth-child(even) {
+	background-color: #ccc;
+}
+tr:nth-child(odd) {
+	background-color: #fff;
+} */
 
 /* CODE */
 
-.markdown-body pre {
-  @apply relative p-3 rounded-lg shadow bg-gray-900;
-}
+/* .markdown-body pre {
+	@apply relative p-3 rounded-lg shadow bg-gray-900;
+} */
 
 /* HEADERS */
 
-.markdown-body h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  @apply font-bold;
+main > article h1,
+main > article h2,
+main > article h3,
+main > article h4,
+main > article h5,
+main > article h6 {
+	@apply font-bold;
 }
 
-.markdown-body h1 {
-  @apply text-3xl;
+main > article h1 {
+	@apply text-3xl;
 }
 
-.markdown-body h2 {
-  @apply text-2xl;
+main > article h2 {
+	@apply text-2xl;
+	/* TODO: underline */
 }
 
-.markdown-body h3 {
-  @apply text-xl;
+main > article h3 {
+	@apply text-xl;
 }
 
-.markdown-body h4 {
-  @apply text-lg;
+main > article h4 {
+	@apply text-lg;
 }
 
-.markdown-body h5 {
-  @apply text-base;
+main > article h5 {
+	@apply text-base;
 }
 
-.markdown-body h6 {
-  @apply text-sm;
+main > article h6 {
+	@apply text-sm;
 }
 
 /* LISTS / TABLES */
-
-.markdown-body ul {
-  @apply list-disc ml-4;
-}

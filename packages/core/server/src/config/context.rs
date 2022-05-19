@@ -9,13 +9,13 @@ use crate::{
 	db,
 	job::Job,
 	prisma,
-	types::event::{InternalEvent, InternalTask, TaskResponder},
+	types::event::{ClientEvent, InternalEvent, InternalTask, TaskResponder},
 };
 
 type EventSender = UnboundedSender<InternalEvent>;
 type TaskSender = UnboundedSender<TaskResponder<InternalTask>>;
 
-type ClientChannel = (Sender<String>, Receiver<String>);
+type ClientChannel = (Sender<ClientEvent>, Receiver<ClientEvent>);
 
 pub struct Context {
 	pub db: Arc<prisma::PrismaClient>,
@@ -31,7 +31,7 @@ impl Context {
 			db: Arc::new(db::create_client().await),
 			event_sender: Arc::new(event_sender),
 			task_sender: Arc::new(task_sender),
-			client_channel: Arc::new(channel::<String>(1024)),
+			client_channel: Arc::new(channel::<ClientEvent>(1024)),
 		}
 	}
 
@@ -48,7 +48,7 @@ impl Context {
 		}
 	}
 
-	pub fn client_receiver(&self) -> Receiver<String> {
+	pub fn client_receiver(&self) -> Receiver<ClientEvent> {
 		self.client_channel.0.subscribe()
 	}
 
@@ -57,11 +57,15 @@ impl Context {
 		self.task_sender.send(responder).unwrap();
 	}
 
+	pub fn emit_event(&self, event: InternalEvent) {
+		self.event_sender.send(event).unwrap();
+	}
+
 	// TODO: error handling
 	pub fn emit_client_event(
 		&self,
-		event: String,
-	) -> Result<(), SendError<std::string::String>> {
+		event: ClientEvent,
+	) -> Result<(), SendError<ClientEvent>> {
 		self.client_channel.0.send(event)?;
 
 		Ok(())

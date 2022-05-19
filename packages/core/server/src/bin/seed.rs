@@ -1,14 +1,10 @@
-use std::io::BufReader;
-
 use rocket::tokio;
 
 // TODO: is this really the only way to achieve this?
 #[path = "../prisma.rs"]
 mod prisma;
 
-use prisma::{library, media, read_progress, series, user};
-use prisma_client_rust::serde_json;
-use serde::{Deserialize, Serialize};
+use prisma::{library, user};
 
 use clap::Parser;
 

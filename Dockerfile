@@ -21,6 +21,12 @@ FROM rust:1-alpine3.15 as builder
 
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 
+# https://github.com/briansmith/ring/issues/1414 -> TLDR; might have to add musl-tools clang llvm and 
+# the following:
+# ENV CC_aarch64_unknown_linux_musl=clang
+# ENV AR_aarch64_unknown_linux_musl=llvm-ar
+# ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-Clink-self-contained=yes -Clinker=rust-lld"
+
 RUN apk add --no-cache --verbose musl-dev build-base sqlite openssl-dev
 
 WORKDIR /home/stump

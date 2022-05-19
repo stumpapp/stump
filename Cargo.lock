@@ -719,6 +719,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "cuid"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2a2891c056384f8461606f2579208164d67475fb17a0f442ac8d5981d3c2807"
+dependencies = [
+ "hostname 0.3.1",
+ "lazy_static",
+ "rand 0.8.5",
+]
+
+[[package]]
 name = "darling"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -903,7 +914,7 @@ version = "0.1.0"
 source = "git+https://github.com/Brendonovich/prisma-engines?rev=8b94a80a2d8f12a2916fe28e3218162aa71e8539#8b94a80a2d8f12a2916fe28e3218162aa71e8539"
 dependencies = [
  "chrono",
- "cuid",
+ "cuid 0.1.0",
  "enumflags2",
  "indoc",
  "native-types",
@@ -2064,7 +2075,7 @@ dependencies = [
  "async-trait",
  "bigdecimal 0.2.2",
  "chrono",
- "cuid",
+ "cuid 0.1.0",
  "datamodel",
  "futures",
  "indexmap",
@@ -2812,7 +2823,7 @@ source = "git+https://github.com/Brendonovich/prisma-engines?rev=8b94a80a2d8f12a
 dependencies = [
  "bigdecimal 0.2.2",
  "chrono",
- "cuid",
+ "cuid 0.1.0",
  "datamodel",
  "itertools",
  "once_cell",
@@ -2965,7 +2976,7 @@ dependencies = [
  "chrono",
  "connection-string",
  "crossbeam-queue 0.2.3",
- "cuid",
+ "cuid 0.1.0",
  "datamodel",
  "datamodel-connector",
  "futures",
@@ -3794,7 +3805,7 @@ dependencies = [
  "async-trait",
  "bigdecimal 0.2.2",
  "chrono",
- "cuid",
+ "cuid 0.1.0",
  "datamodel",
  "futures",
  "itertools",
@@ -3865,12 +3876,15 @@ dependencies = [
  "base64 0.13.0",
  "bcrypt",
  "clap",
+ "cuid 1.2.0",
+ "data-encoding",
  "dirs",
  "dotenv",
  "epub",
  "infer",
  "log",
  "prisma-client-rust",
+ "ring",
  "rocket",
  "rocket-session-store",
  "rocket_cors",

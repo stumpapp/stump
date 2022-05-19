@@ -11,6 +11,11 @@ export interface CardProps {
 	onMouseEnter?: () => void;
 }
 
+// FIXME: onError should behave differently to accomodate new cards that get rendered when new Series/Media
+// are created during a scan. When a Series is created, there won't be any Media to render a thumbnail for at first.
+// So, I think maybe there should be some retry logic in here? retry once every few ms for like 9ms before showing a
+// fallback image?
+// TODO: add /public/fallback-card.png
 export default function Card({ to, imageAlt, imageSrc, title, subtitle, onMouseEnter }: CardProps) {
 	return (
 		<Box
@@ -34,7 +39,7 @@ export default function Card({ to, imageAlt, imageSrc, title, subtitle, onMouseE
 					src={imageSrc}
 					onError={(err) => {
 						// @ts-ignore
-						err.target.src = '/src/favicon.png';
+						err.target.src = '/fallback-card.png';
 					}}
 				/>
 			</Box>

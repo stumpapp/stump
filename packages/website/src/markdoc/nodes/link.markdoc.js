@@ -1,9 +1,14 @@
-import Link from 'next/link';
+import Link from '~components/ui/Link';
+
+const MarkdocLink = (props) => <Link className="text-brand" {...props} />;
 
 export default {
-	render: Link,
+	render: MarkdocLink,
 	attributes: {
 		href: {
+			type: String,
+		},
+		title: {
 			type: String,
 		},
 	},

@@ -1,0 +1,2 @@
+# ignore markdown files, there's just gonna be so many of them lol
+*.md linguist-detectable=false

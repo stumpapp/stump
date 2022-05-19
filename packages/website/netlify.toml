@@ -1,4 +1,10 @@
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# https://github.com/netlify/netlify-plugin-nextjs/blob/main/docs/redirects-rewrites.md
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
+[build]
+publish = ".next"
+
+[[plugins]]
+package = "@netlify/plugin-nextjs"

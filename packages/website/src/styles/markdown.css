@@ -1,6 +1,17 @@
 main > article {
-	@apply md:py-4 flex flex-col space-y-4 flex-1;
+	@apply flex flex-col space-y-4 flex-1;
 }
+
+thead > tr {
+	@apply bg-gray-50 dark:bg-gray-900 !important;
+}
+
+/* tr:nth-child(even) {
+	background-color: #ccc;
+}
+tr:nth-child(odd) {
+	background-color: #fff;
+} */
 
 /* CODE */
 
@@ -25,6 +36,7 @@ main > article h1 {
 
 main > article h2 {
 	@apply text-2xl;
+	/* TODO: underline */
 }
 
 main > article h3 {

@@ -1,8 +1,3 @@
----
-title: Contributing
-description: Learn how to contribute to Stump
----
-
 # Contributing
 
 If you're interested in contributing to Stump, and you know how to code, then you're in the right place! Follow the steps below to get started.
@@ -54,7 +49,7 @@ There is now a setup script that handles most of the initial configuration, howe
 
 If you are on a Windows machine, you'll need to run the following:
 
-```
+```bash
 .\.github\scripts\setup.ps1
 ```
 
@@ -76,33 +71,33 @@ A seed will be run to create essential starting data for development. At some po
 cargo seed --help
 ```
 
-In general, you should provide a `library_path` argument, which is the path to a Library directory on your system. This 'Library' should contain your folders that represent series. It will default to `$HOME/Documents/Stump`. You may provide a `user_name` argument, which will be the username of the server owner. Default will be 'oromei' with a password of 'oromei'. Specifiying a username will still yield an **equivalent** password.
+In general, you should provide a `library_path` (`-l`) argument, which is the path to a Library directory on your system. This 'Library' should contain your folders that represent series. It will default to `$HOME/Documents/Stump`. You may provide a `user_name` (`-u`) argument, which will be the username of the server owner. Default will be 'oromei' with a password of 'oromei'. Specifiying a username will still yield an **equivalent** password.
 
 An example folder structure for a one-library collection might be:
 
 ```
-/Users/aaronleopold/Documents
-├── Stump
-│   ├── Marvel Comics
-│   │   ├── The Amazing Spider-Man (2018)
-│   │   │   ├── The Amazing Spider-Man 001 (2018).cbz
-│   │   │   ├── The Amazing Spider-Man 002 (2018).cbz
-│   │   │   └── etc.
-│   │   └── The Amazing Spider-Man (2022)
-│   │       ├── The Amazing Spider-Man 001 (2022).cbz
-│   │       ├── The Amazing Spider-Man 002 (2022).cbz
-│   │       └── etc.
-│   └── EBooks
-│       ├── Martin, George R R - [Song of Ice and Fire 3] - A Storm of Swords (2003).epub
-│       ├── Tolkien, J R R - [The Lord of the Rings] - Hobbit Or There and Back Again (1986).epub
-│       └── etc.
+/Users/aaronleopold/Documents/Stump
+├── Marvel Comics
+│   ├── The Amazing Spider-Man (2018)
+│   │   ├── The Amazing Spider-Man 001 (2018).cbz
+│   │   ├── The Amazing Spider-Man 002 (2018).cbz
+│   │   └── etc.
+│   ├── The Amazing Spider-Man (2022)
+│   │   ├── The Amazing Spider-Man 001 (2022).cbz
+│   │   ├── The Amazing Spider-Man 002 (2022).cbz
+│   │   └── etc.
+├── EBooks
+│   ├── Martin, George R R - A Storm of Swords.epub
+│   ├── Tolkien, J R R - Hobbit Or There and Back Again.epub
+│   └── etc.
 └── ...
 ```
 
-The default seed configuration with explicitly provided arguments would look like:
+Currently you'll have to navigate to the server directory in order to run with custom arguments:
 
 ```bash
-pnpm core seed --library_path='/Users/aaronleopold/Documents/Stump/Marvel Comics' --user_name='oromei'
+cd packages/core/server
+cargo seed -l='/Users/you/Documents/Stump/Marvel Comics' -u='oromei'
 ```
 
-Note: `pnpm core seed` will trash the current sqlite file, create a new one, and then run the actual seed program. After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
+Note: After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.

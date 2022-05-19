@@ -16,23 +16,16 @@ export default function Heading({ level = 1, children, className, id }: HeadingP
 
 	const component = (
 		// @ts-ignore: this is fine I promise
-		<Component className={clsx('heading', className)}>
-			<div id={id} />
+		<Component className={clsx('relative', className)}>
+			{/* 56px is top nav height, giving 5px extra for space */}
+			<div className="absolute -top-[calc(56px+5px)]" id={id} />
 			{children}
-			{/* <style jsx>
-				{`
-					div {
-						position: absolute;
-						top: calc(-1 * (var(--nav-height) + 44px));
-					}
-				`}
-			</style> */}
 		</Component>
 	);
 
 	if (isDocsHeading && level !== 1) {
 		return (
-			<a className="" href={`#${id}`}>
+			<a href={`#${id}`}>
 				{component}
 
 				<style jsx>
@@ -40,6 +33,7 @@ export default function Heading({ level = 1, children, className, id }: HeadingP
 						a :global(.heading::after) {
 							opacity: 0;
 							content: '  #';
+							color: rgb(196 130 89);
 							transition: opacity 250ms ease;
 						}
 						a :global(.heading:hover::after) {

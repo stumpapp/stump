@@ -7,8 +7,8 @@ export default function FormatSupport() {
 			<div className="w-1/2 flex flex-col space-y-4">
 				<FeatureHeader>Emphasis on format support</FeatureHeader>
 				<FeatureSubHeader>
-					While not every digital media format is compatible with the OPDS specifications, Stump's
-					built-in readers aim to support a wide range of formats.
+					While not every digital media format is compatible with the OPDS specifications,
+					Stump&apos;s built-in readers aim to support a wide range of formats.
 				</FeatureSubHeader>
 			</div>
 

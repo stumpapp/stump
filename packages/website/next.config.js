@@ -7,4 +7,4 @@ const nextConfig = {
 };
 
 // @ts-ignore: withMarkdoc not showing valid type definition
-module.exports = withMarkdoc({ schemaPath: './src/markdoc', mode: 'static' })(nextConfig);
+module.exports = withMarkdoc({ schemaPath: './src/markdoc' })(nextConfig);

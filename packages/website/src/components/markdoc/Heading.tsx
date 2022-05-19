@@ -12,8 +12,6 @@ export default function Heading({ level = 1, children, className, id }: HeadingP
 	// is docs heading when router.pathname isn't on /
 	const isDocsHeading = router.pathname !== '/';
 
-	console.log({ isDocsHeading, pathname: router.pathname });
-
 	const Component = `h${level}`;
 
 	const component = (
@@ -22,19 +20,13 @@ export default function Heading({ level = 1, children, className, id }: HeadingP
 			<div id={id} />
 			{children}
 			{/* <style jsx>
-        {`
-          a {
-            text-decoration: none;
-          }
-          a:hover {
-            opacity: 1;
-          }
-          div {
-            position: absolute;
-            top: calc(-1 * (var(--nav-height) + 44px));
-          }
-        `}
-      </style> */}
+				{`
+					div {
+						position: absolute;
+						top: calc(-1 * (var(--nav-height) + 44px));
+					}
+				`}
+			</style> */}
 		</Component>
 	);
 

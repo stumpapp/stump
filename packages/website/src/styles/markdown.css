@@ -1,5 +1,5 @@
 main > article {
-	@apply flex flex-col space-y-4 flex-1;
+	@apply md:py-4 flex flex-col space-y-4 flex-1;
 }
 
 /* CODE */
@@ -10,41 +10,37 @@ main > article {
 
 /* HEADERS */
 
-/* .markdown-body h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+main > article h1,
+main > article h2,
+main > article h3,
+main > article h4,
+main > article h5,
+main > article h6 {
 	@apply font-bold;
-} */
+}
 
-/* .markdown-body h1 {
+main > article h1 {
 	@apply text-3xl;
 }
 
-.markdown-body h2 {
+main > article h2 {
 	@apply text-2xl;
 }
 
-.markdown-body h3 {
+main > article h3 {
 	@apply text-xl;
 }
 
-.markdown-body h4 {
+main > article h4 {
 	@apply text-lg;
 }
 
-.markdown-body h5 {
+main > article h5 {
 	@apply text-base;
 }
 
-.markdown-body h6 {
+main > article h6 {
 	@apply text-sm;
-} */
+}
 
 /* LISTS / TABLES */
-
-/* .markdown-body ul {
-	@apply list-disc ml-4;
-} */

@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+#nprogress {
+	@apply pointer-events-none z-50;
+}
+#nprogress .bar {
+	@apply bg-brand-500 fixed top-0 left-0 z-50 h-0.5 w-full;
+}
+
 body,
 #root {
 	/* @apply bg-gray-1000; */

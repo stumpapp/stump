@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useIsomorphicLayoutEffect from '~hooks/useIsomorphicLayoutEffect';
 import copy from 'copy-to-clipboard';
 import clsx from 'clsx';
@@ -45,8 +45,10 @@ export interface CodeProps {
 }
 
 export default function Code({ children, language }: CodeProps) {
-	const [copied, setCopied] = React.useState(false);
-	const ref = React.useRef<HTMLPreElement>(null);
+	const [copied, setCopied] = useState(false);
+	// const [copyVisible, setCopyVisible] = useState(false);
+
+	const ref = useRef<HTMLPreElement>(null);
 
 	useIsomorphicLayoutEffect(() => {
 		if (ref.current) {
@@ -69,7 +71,7 @@ export default function Code({ children, language }: CodeProps) {
 	const lines = typeof children === 'string' ? children.split('\n').filter(Boolean) : [];
 
 	return (
-		<div className="code" aria-live="polite">
+		<div className="code relative" aria-live="polite">
 			<pre
 				// Prevents "Failed to execute 'removeChild' on 'Node'" error
 				// https://stackoverflow.com/questions/54880669/react-domexception-failed-to-execute-removechild-on-node-the-node-to-be-re
@@ -80,25 +82,15 @@ export default function Code({ children, language }: CodeProps) {
 			>
 				{children}
 			</pre>
-			<button onClick={() => setCopied(true)}>{copied ? <Check /> : <CopySimple />}</button>
-			<style jsx>
-				{`
-					.code {
-						position: relative;
-					}
-					.code button {
-						appearance: none;
-						position: absolute;
-						color: inherit;
-						background: var(--code-background);
-						top: ${lines.length === 1 ? '17px' : '13px'};
-						right: 11px;
-						border-radius: 4px;
-						border: none;
-						font-size: 15px;
-					}
-				`}
-			</style>
+			<button
+				onClick={() => setCopied(true)}
+				className={clsx(
+					lines.length === 1 ? 'top-4' : 'top-5',
+					'appearance-none absolute right-3 text-gray-100',
+				)}
+			>
+				{copied ? <Check /> : <CopySimple />}
+			</button>
 		</div>
 	);
 }

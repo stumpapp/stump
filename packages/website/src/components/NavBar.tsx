@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Github, Discord } from '@icons-pack/react-simple-icons';
 import clsx from 'clsx';
 import { CloudArrowDown } from 'phosphor-react';
-// import { Link } from 'react-router-dom';
 import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
 
@@ -26,8 +25,6 @@ const social = [
 		disabled: false,
 	},
 ];
-
-const DISABLED_URL = '';
 
 export default function NavBar() {
 	const [scrollPos, setScrollPos] = useState(0);
@@ -67,13 +64,13 @@ export default function NavBar() {
 							<a
 								key={item.name}
 								title={item.name}
-								href={item.disabled ? DISABLED_URL : item.href}
+								href={item.href}
 								target="_blank"
 								rel="noopener noreferrer"
 								className={clsx(
 									item.disabled
 										? 'text-gray-400 dark:text-gray-500 pointer-events-none'
-										: 'text-gray-700 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100',
+										: 'text-gray-750 hover:text-gray-650 dark:text-gray-300 dark:hover:text-gray-100',
 								)}
 							>
 								<span className="sr-only">{item.name}</span>

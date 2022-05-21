@@ -37,13 +37,13 @@ The core package is where Stump's core functionality is located.
 
 ### Website
 
-The website package contains a Next.js application for the Stump landing page and documentation pages (what you're currently reading). The documentation aspect is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev).
+The website package contains a Next.js application for the Stump landing page and documentation pages (what you're currently reading), created using [Markdoc](https://markdoc.io/).
 
 ## Development Setup
 
 There is now a setup script that handles most of the initial configuration, however ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
 
-**Ensure you are on the `develop` branch before continuing.**
+**_Ensure you are on the `develop` branch before continuing._**
 
 ### Setup Script
 

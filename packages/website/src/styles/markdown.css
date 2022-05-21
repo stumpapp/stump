@@ -6,19 +6,6 @@ thead > tr {
 	@apply bg-gray-50 dark:bg-gray-900 !important;
 }
 
-/* tr:nth-child(even) {
-	background-color: #ccc;
-}
-tr:nth-child(odd) {
-	background-color: #fff;
-} */
-
-/* CODE */
-
-/* .markdown-body pre {
-	@apply relative p-3 rounded-lg shadow bg-gray-900;
-} */
-
 /* HEADERS */
 
 main > article h1,
@@ -28,6 +15,14 @@ main > article h4,
 main > article h5,
 main > article h6 {
 	@apply font-bold;
+}
+
+main p > code {
+	@apply p-1 bg-gray-200 dark:bg-gray-800 rounded-md;
+}
+
+main li > code {
+	@apply p-1 bg-gray-200 dark:bg-gray-800 rounded-md;
 }
 
 main > article h1 {

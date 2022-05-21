@@ -3,12 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "export": "next export",
     "start": "next start",
-    "lint": "next lint",
-    "deploy": "pnpm build && netlify build && netlify deploy"
+    "lint": "next lint"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^4.6.1",

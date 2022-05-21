@@ -1,4 +1,4 @@
-// TODO: more config -> https://github.com/garmeeh/next-seo#add-seo-to-page
+// Reference: https://github.com/garmeeh/next-seo#add-seo-to-page
 
 export default {
 	title: undefined,
@@ -23,7 +23,8 @@ export default {
 		site_name: 'Stump',
 	},
 	twitter: {
-		handle: '@stumpapp',
+		handle: '@stumpapp_',
+		site: '@stumpapp_',
 		cardType: 'summary_large_image',
 	},
 };

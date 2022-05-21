@@ -9,6 +9,38 @@ import Prism from 'prismjs';
 import 'prismjs/components/prism-rust';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-yaml';
+
+Prism.languages.markdoc = {
+	tag: {
+		pattern: /{%(.|\n)*?%}/i,
+		inside: {
+			tagType: {
+				pattern: /^({%\s*\/?)(\w*|-)*\b/i,
+				lookbehind: true,
+			},
+			id: /#(\w|-)*\b/,
+			string: /".*?"/,
+			equals: /=/,
+			number: /\b\d+\b/i,
+			variable: {
+				pattern: /\$[\w.]+/i,
+				inside: {
+					punctuation: /\./i,
+				},
+			},
+			function: /\b\w+(?=\()/,
+			punctuation: /({%|\/?%})/i,
+			boolean: /false|true/,
+		},
+	},
+	variable: {
+		pattern: /\$\w+/i,
+	},
+	function: {
+		pattern: /\b\w+(?=\()/i,
+	},
+};
 
 export interface CodeProps {
 	children: React.ReactNode;
@@ -56,7 +88,7 @@ export default function Code({ children, language }: CodeProps) {
 				onClick={() => setCopied(true)}
 				className={clsx(
 					lines.length === 1 ? 'top-4' : 'top-5',
-					'appearance-none absolute right-3 text-gray-100',
+					'appearance-none absolute right-3 p-1.5 rounded-md bg-transparent active:bg-gray-650 hover:bg-gray-700  border-transparent active:border-gray-650 hover:border-gray-550 text-gray-200 active:text-white hover:text-white transition-colors duration-200',
 				)}
 			>
 				{copied ? <Check /> : <CopySimple />}

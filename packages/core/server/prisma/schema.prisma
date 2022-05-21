@@ -47,6 +47,9 @@ model User {
 
   sharedReadingLists ReadingListAccess[]
 
+  userPreferencesId String          @unique
+  userPreferences   UserPreferences @relation(fields: [userPreferencesId], references: [id])
+
   @@map("users")
 }
 
@@ -138,10 +141,7 @@ model MediaTag {
   @@map("tags")
 }
 
-// TODO: Before defining the relation I need to decide between the following scenarios:
-// 1. A server is the owning entity for reading lists
-// 2. A user is the owning entity for reading lists, and users can have their own reading lists
-// 3. A user is the owning entity for reading lists and may share reading lists with other users
+// TODO: A user is the owning entity for reading lists and may share reading lists with other users
 model ReadingList {
   id          String   @id @default(cuid())
   // The name of the reading list. ex: "Summer Reading"
@@ -180,10 +180,7 @@ model ReadingListAccess {
   @@map("reading_list_access")
 }
 
-// TODO: Before defining the relation I need to decide between the following scenarios:
-// 1. A server is the owning entity for collections
-// 2. A user is the owning entity for collections, and users can have their own collections
-// 3. A user is the owning entity for collections and may share collections with other users
+// TODO: A user is the owning entity for collections and may share collections with other users
 model Collection {
   id          String   @id @default(cuid())
   // The name of the collection. ex: "Spider-Man Comics"
@@ -226,8 +223,16 @@ model Log {
   @@map("logs")
 }
 
+model UserPreferences {
+  id               String  @id @default(cuid())
+  // Flag to indicate if the user wants to reduce some of the animations when using the build-in client
+  reduceAnimations Boolean @default(false)
+
+  User User[]
+}
+
 model ServerPreferences {
-  id              String  @id @default(uuid())
+  id              String  @id @default(cuid())
   // Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
   // If none found, the series name will be the directory name.
   renameSeries    Boolean @default(false)

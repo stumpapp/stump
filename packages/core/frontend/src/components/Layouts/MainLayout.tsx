@@ -4,11 +4,11 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { getLibraries } from '~api/query/library';
 import { getMedia } from '~api/query/media';
 import Lazy from '~components/Lazy';
+import Topbar from '~components/Topbar';
 import Sidebar from '~components/Sidebar/Sidebar';
 import { useStore } from '~store/store';
 
 import { Box, Flex, useColorModeValue, VStack } from '@chakra-ui/react';
-import Topbar from '~components/Topbar';
 
 export default function MainLayout() {
 	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));

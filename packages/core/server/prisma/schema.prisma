@@ -47,8 +47,8 @@ model User {
 
   sharedReadingLists ReadingListAccess[]
 
-  userPreferencesId String          @unique
-  userPreferences   UserPreferences @relation(fields: [userPreferencesId], references: [id])
+  // userPreferencesId String          @unique
+  // userPreferences   UserPreferences @relation(fields: [userPreferencesId], references: [id])
 
   @@map("users")
 }
@@ -228,7 +228,7 @@ model UserPreferences {
   // Flag to indicate if the user wants to reduce some of the animations when using the build-in client
   reduceAnimations Boolean @default(false)
 
-  User User[]
+  // User User[]
 }
 
 model ServerPreferences {

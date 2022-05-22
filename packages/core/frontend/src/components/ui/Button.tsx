@@ -16,3 +16,17 @@ export default forwardRef<ButtonProps, 'button'>((props, ref) => (
 		}}
 	/>
 ));
+
+export const IconButton = forwardRef<ButtonProps, 'button'>((props, ref) => (
+	<ChakraButton
+		ref={ref}
+		variant="ghost"
+		cursor={'pointer'}
+		p={0.5}
+		size="sm"
+		{...props}
+		_focus={{
+			boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+		}}
+	/>
+));

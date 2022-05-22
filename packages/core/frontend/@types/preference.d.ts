@@ -1,3 +1,8 @@
+declare enum ViewMode {
+	Grid = 'grid',
+	List = 'list',
+}
+
 interface UserPreferences {
 	/**
 	 * The id of the tuple in the database
@@ -11,6 +16,18 @@ interface UserPreferences {
 	 * Boolean indicating whether the user wants dark mode
 	 */
 	darkMode: boolean;
+	/**
+	 * Whether the user wants to see the series in a library as a grid or list
+	 */
+	libraryViewMode: ViewMode;
+	/**
+	 * Whether the user wants to see the media in a series as a grid or list
+	 */
+	seriesViewMode: ViewMode;
+	/**
+	 * Whether the user wants to see the media in a collection as a grid or list
+	 */
+	collectionViewMode: ViewMode;
 }
 
 interface ServerPreferences {

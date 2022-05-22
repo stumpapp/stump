@@ -1,13 +1,15 @@
+use prisma_client_rust::Direction;
 use rocket::serde::json::Json;
 use serde::Deserialize;
 
 use crate::{
-	fs::scanner::ScannerJob,
+	fs::{self, scanner::ScannerJob},
 	guards::auth::Auth,
-	prisma::{library, series},
+	prisma::{library, media, series},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
+		http::ImageResponse,
 	},
 };
 
@@ -44,6 +46,46 @@ pub async fn get_library_by_id(
 	}
 
 	Ok(Json(lib.unwrap()))
+}
+
+#[get("/libraries/<id>/thumbnail")]
+pub async fn get_library_thumbnail(
+	id: String,
+	ctx: &Context,
+	_auth: Auth,
+) -> ApiResult<ImageResponse> {
+	let db = ctx.get_db();
+
+	// let library = db
+	// 	.library()
+	// 	.find_unique(library::id::equals(id.clone()))
+	// 	.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
+	// 	.exec()
+	// 	.await?;
+
+	let library_series = db
+		.series()
+		.find_many(vec![series::library_id::equals(Some(id.clone()))])
+		.with(series::media::fetch(vec![]).order_by(media::name::order(Direction::Asc)))
+		.exec()
+		.await?;
+
+	// TODO: error handling
+
+	let series = library_series.first().unwrap();
+
+	let media = series.media()?.first().unwrap();
+
+	// if library.is_none() {
+	// 	return Err(ApiError::NotFound(format!(
+	// 		"Library with id {} not found",
+	// 		id
+	// 	)));
+	// }
+
+	// let library = library.unwrap();
+
+	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
 }
 
 // TODO: write me

@@ -1,18 +1,35 @@
-import React from 'react';
-import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react';
-import { CaretLeft, CaretRight } from 'phosphor-react';
-import Button from './ui/Button';
-import { useNavigate } from 'react-router-dom';
-import Search from './Search';
+import React, { useCallback, useMemo } from 'react';
+import {
+	Box,
+	ButtonGroup,
+	Heading,
+	HStack,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
+	useColorModeValue,
+} from '@chakra-ui/react';
+import { CaretDown, CaretLeft, CaretRight, Rows, SquaresFour } from 'phosphor-react';
+import Button, { IconButton } from '../ui/Button';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Search from '../Search';
 import { useStore } from '~store/store';
 import shallow from 'zustand/shallow';
-import MobileDrawer from './Sidebar/MobileDrawer';
+import MobileDrawer from '../Sidebar/MobileDrawer';
+import SortConfig from './SortConfig';
+import ViewModeConfig from './ViewModeConfig';
 
 // TODO: fix navigation, I don't necessarily want native navigation here. I want to be able to disable the
 // buttons if theres is no forward/backward history. If I am on /books/id/pages/page, and I click the back button on
 // that page to take me to /boos/id, I don't want the back button to go to /books/id/pages/page.
 function Navigation() {
+	const location = useLocation();
 	const navigate = useNavigate();
+
+	function navigateForward() {}
+
+	function navigateBackward() {}
 
 	return (
 		<HStack
@@ -47,7 +64,13 @@ function Navigation() {
 }
 
 export default function Topbar() {
+	const location = useLocation();
+
 	const title = useStore((state) => state.title, shallow);
+
+	const showViewOptions = useMemo(() => {
+		return location.pathname.match(/\/libraries\/.+$/) || location.pathname.match(/\/series\/.+$/);
+	}, [location.pathname]);
 
 	// TODO: make sticky? or just fixed?
 	return (
@@ -74,7 +97,17 @@ export default function Topbar() {
 				<Search />
 			</div>
 
-			<div className="md:flex md:col-span-3 items-center justify-end hidden"></div>
+			<div className="md:flex md:col-span-3 items-center justify-end hidden">
+				{showViewOptions && (
+					<>
+						<HStack>
+							<ViewModeConfig />
+
+							<SortConfig />
+						</HStack>
+					</>
+				)}
+			</div>
 		</Box>
 	);
 }

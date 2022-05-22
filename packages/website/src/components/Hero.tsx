@@ -34,6 +34,8 @@ export default function Hero() {
 					collections. Supports the most popular reading formats.
 				</motion.p>
 				<div className="mt-5 max-w-md mx-auto flex justify-center md:mt-8">
+					{/* TODO: add Getting Started button or sm */}
+
 					<motion.div
 						className="flex"
 						initial={{ opacity: 0, scale: 0.5 }}

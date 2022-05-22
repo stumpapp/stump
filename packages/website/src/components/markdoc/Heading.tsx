@@ -26,7 +26,11 @@ export default function Heading({ level = 1, children, className, id }: HeadingP
 	if (isDocsHeading && level !== 1) {
 		return (
 			// wrapping in div so it doesn't go full width... blech
-			<div className="flex">
+			<div
+				className={clsx('flex', {
+					'pb-[0.3em] border-b border-b-gray-150 dark:border-b-[#373e47]': level === 2,
+				})}
+			>
 				<a href={`#${id}`}>
 					{component}
 

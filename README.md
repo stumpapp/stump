@@ -13,6 +13,10 @@ Stump is a free and open source comics server with OPDS support, **heavily** ins
 
 I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want an excuse to practice Rust!_
 
+<p align='center'>
+<img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 85%" />
+</p>
+
 ## Roadmap
 
 I'll list the major target features below - I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
@@ -124,13 +128,25 @@ An example folder structure for a one-library collection might be:
 └── ...
 ```
 
-The default seed configuration with explicitly provided arguments would look like:
+Currently you'll have to navigate to the server directory in order to run with custom arguments. This will be fixed in the future, so you can use the `pnpm` command instead, however for now it would be:
 
 ```bash
-pnpm core seed --library_path='/Users/aaronleopold/Documents/Stump/Marvel Comics' --user_name='oromei'
+cd packages/core/server
+cargo seed -l='/Users/you/Documents/Stump/Marvel Comics' -u='oromei'
 ```
 
-Note: `pnpm core seed` will trash the current sqlite file, create a new one, and then run the actual seed program. After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
+If you then want to rerun the seed, you can run the following:
+
+```bash
+pnpm core prisma:db-trash
+pnpm core prisma:db-push
+cd packages/core/server
+cargo seed -l='/Users/you/Documents/Stump/Marvel Comics' -u='oromei'
+```
+
+Which will delete the database, create a new one, and then run the seed.
+
+Note: After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
 
 ## Running Stump
 

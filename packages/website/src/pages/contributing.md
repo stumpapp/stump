@@ -61,6 +61,10 @@ Otherwise, you can run the following:
 
 These scripts will run system checks for `cargo` and `pnpm`, and will install a few additional dependencies, depending on your system. It will then install all the direct, Stump development dependencies, build the frontend bundle (required for server to start), generate the prisma client and sqlite database.
 
+{% callout title="Windows WSL" icon="warning" %}
+I've found that running the setup script on Windows WSL works well, but if you're using it to install `pnpm` ensure you have node and npm configured to not point to your Windows installation of node/npm. You'll likely encounter a couple of permissions errors if it isn't configured this way.
+{% /callout %}
+
 If you face any issues running these, or are using a system that is not supported by the setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
 
 ### Running the Seed Script

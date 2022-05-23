@@ -3,7 +3,9 @@ import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import { getLibraryById } from '~api/query/library';
 import { Helmet } from 'react-helmet';
-import SeriesCard from '~components/Series/SeriesCard';
+import { useViewMode } from '~hooks/useViewMode';
+import SeriesGrid from '~components/Series/SeriesGrid';
+import SeriesList from '~components/Series/SeriesList';
 
 export default function Library() {
 	const { id } = useParams();
@@ -24,6 +26,8 @@ export default function Library() {
 		throw new Error('Library not found');
 	}
 
+	const { viewAsGrid } = useViewMode();
+
 	function handleError(err: unknown) {
 		console.error(err);
 	}
@@ -33,11 +37,8 @@ export default function Library() {
 			<Helmet>
 				<title>Stump | {library.name}</title>
 			</Helmet>
-			<div className="p-4 flex flex-wrap gap-4 items-center justify-center md:justify-start">
-				{library.series.map((s) => (
-					<SeriesCard key={s.id} {...s} />
-				))}
-			</div>
+
+			{viewAsGrid ? <SeriesGrid series={library.series} /> : <SeriesList series={library.series} />}
 		</>
 	);
 }

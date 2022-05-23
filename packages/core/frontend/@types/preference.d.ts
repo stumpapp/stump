@@ -1,6 +1,6 @@
 declare enum ViewMode {
-	Grid = 'grid',
-	List = 'list',
+	Grid = 'GRID',
+	List = 'LIST',
 }
 
 interface UserPreferences {

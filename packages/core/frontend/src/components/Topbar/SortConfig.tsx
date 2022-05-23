@@ -1,7 +1,16 @@
-import { ButtonGroup, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
-import { CaretDown, Rows, SortAscending, SortDescending } from 'phosphor-react';
+import {
+	ButtonGroup,
+	Menu,
+	MenuButton,
+	MenuItem,
+	MenuList,
+	useColorModeValue,
+} from '@chakra-ui/react';
+import { SortAscending, SortDescending } from 'phosphor-react';
 import React, { useState } from 'react';
 import Button from '~components/ui/Button';
+
+interface SortConfigProps {}
 
 export default function SortConfig() {
 	const [fakeState, setFakeState] = useState(false);
@@ -9,7 +18,13 @@ export default function SortConfig() {
 	return (
 		<ButtonGroup isAttached>
 			<Menu>
-				<MenuButton as={Button} py={0.5} px={2.5} size="sm">
+				<MenuButton
+					as={Button}
+					py={0.5}
+					px={2.5}
+					size="sm"
+					bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
+				>
 					Sort by
 				</MenuButton>
 				<MenuList>
@@ -25,6 +40,7 @@ export default function SortConfig() {
 				onClick={() => setFakeState((prev) => !prev)}
 				p={0.5}
 				size="sm"
+				bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
 			>
 				{fakeState ? (
 					<SortAscending className="text-lg" weight="regular" />

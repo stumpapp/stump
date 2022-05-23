@@ -74,3 +74,7 @@ docker logs -f stump
 ## Updating your container
 
 TODO
+
+## Example Configurations
+
+To get you started, I wrote how-to guides for a few different Docker configurations. You can find them [here](/guides/docker-examples).

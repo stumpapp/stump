@@ -1,22 +1,37 @@
-import { ButtonGroup } from '@chakra-ui/react';
+import React from 'react';
+import { ButtonGroup, useColorModeValue } from '@chakra-ui/react';
 import { Rows, SquaresFour } from 'phosphor-react';
-import React, { useState } from 'react';
 import { IconButton } from '~components/ui/Button';
 
-export default function ViewModeConfig() {
-	const [fakeState, setFakeState] = useState(false);
+interface ViewModeConfigProps {
+	viewAsGrid: boolean;
+	onChange: (mode: 'GRID' | 'LIST') => void;
+}
 
-	function toggle() {
-		setFakeState((prev) => !prev);
-	}
-
+export default function ViewModeConfig({ viewAsGrid, onChange }: ViewModeConfigProps) {
 	return (
 		<ButtonGroup isAttached>
-			<IconButton onClick={toggle} title="View as grid" variant={fakeState ? 'solid' : 'outline'}>
+			<IconButton
+				onClick={() => onChange('GRID')}
+				title="View as grid"
+				variant="solid"
+				bg={useColorModeValue(
+					viewAsGrid ? 'blackAlpha.200' : 'gray.150',
+					viewAsGrid ? 'whiteAlpha.200' : 'gray.800',
+				)}
+			>
 				<SquaresFour className="text-lg" weight="regular" />
 			</IconButton>
 
-			<IconButton onClick={toggle} title="View as list" variant={fakeState ? 'outline' : 'solid'}>
+			<IconButton
+				onClick={() => onChange('LIST')}
+				title="View as list"
+				variant="solid"
+				bg={useColorModeValue(
+					viewAsGrid ? 'gray.150' : 'blackAlpha.200',
+					viewAsGrid ? 'gray.800' : 'whiteAlpha.200',
+				)}
+			>
 				<Rows className="text-lg" weight="regular" />
 			</IconButton>
 		</ButtonGroup>

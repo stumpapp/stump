@@ -19,6 +19,10 @@ interface User {
 	role: UserRole;
 }
 
+interface UserWithPreferences extends User {
+	preferences: UserPreferences;
+}
+
 interface UserCredentials {
 	username: string;
 	password: string;

@@ -4,7 +4,7 @@ use rocket::tokio;
 #[path = "../prisma.rs"]
 mod prisma;
 
-use prisma::{library, user};
+use prisma::{library, user, user_preferences};
 
 use clap::Parser;
 
@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		},
 	};
 
-	let library_name = library_path.split('/').last().unwrap();
+	// let library_name = library_path.split('/').last().unwrap();
 
 	let user_name = match args.user_name {
 		Some(name) => name,
@@ -64,6 +64,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 	let client = prisma::new_client().await?;
 
+	// Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44
+
 	let user = client
 		.user()
 		.create(
@@ -73,6 +75,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			),
 			vec![user::role::set(String::from("SERVER_OWNER"))],
 		)
+		.exec()
+		.await?;
+
+	let _user_preferences = client
+		.user_preferences()
+		.create(vec![user_preferences::user::link(vec![user::id::equals(
+			user.id.clone(),
+		)])])
 		.exec()
 		.await?;
 

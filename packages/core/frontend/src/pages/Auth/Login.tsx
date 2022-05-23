@@ -14,7 +14,10 @@ import { useMutation } from 'react-query';
 import toast from 'react-hot-toast';
 
 export default function Login() {
-	const { user, setUser } = useStore(({ user, setUser }) => ({ user, setUser }), shallow);
+	const { user, setUserAndPreferences } = useStore(
+		({ user, setUserAndPreferences }) => ({ user, setUserAndPreferences }),
+		shallow,
+	);
 
 	const { isLoading, mutate } = useMutation('loginUser', {
 		mutationFn: login,
@@ -23,7 +26,7 @@ export default function Login() {
 				throw new Error('Login failed.');
 			}
 
-			setUser(res.data);
+			setUserAndPreferences(res.data);
 		},
 		onError: (err) => {
 			// TODO: handle this error

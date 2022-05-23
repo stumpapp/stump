@@ -47,8 +47,9 @@ model User {
 
   sharedReadingLists ReadingListAccess[]
 
-  // userPreferencesId String          @unique
-  // userPreferences   UserPreferences @relation(fields: [userPreferencesId], references: [id])
+  // Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44, then making it mandatory
+  userPreferencesId String?          @unique
+  userPreferences   UserPreferences? @relation(fields: [userPreferencesId], references: [id], onDelete: Cascade)
 
   @@map("users")
 }
@@ -224,11 +225,19 @@ model Log {
 }
 
 model UserPreferences {
-  id               String  @id @default(cuid())
+  id                 String  @id @default(cuid())
   // Flag to indicate if the user wants to reduce some of the animations when using the build-in client
-  reduceAnimations Boolean @default(false)
+  reduceAnimations   Boolean @default(false)
+  // Whether the user wants to see the series in a library as a grid or list
+  libraryViewMode    String  @default("GRID")
+  // Whether the user wants to see the media in a series as a grid or list
+  seriesViewMode     String  @default("GRID")
+  // Whether the user wants to see the media in a collection as a grid or list
+  collectionViewMode String  @default("GRID")
 
-  // User User[]
+  user User[]
+
+  @@map("user_preferences")
 }
 
 model ServerPreferences {

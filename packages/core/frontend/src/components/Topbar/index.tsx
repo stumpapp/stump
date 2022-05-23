@@ -1,20 +1,11 @@
-import React, { useCallback, useMemo } from 'react';
-import {
-	Box,
-	ButtonGroup,
-	Heading,
-	HStack,
-	Menu,
-	MenuButton,
-	MenuItem,
-	MenuList,
-	useColorModeValue,
-} from '@chakra-ui/react';
+import React from 'react';
+import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react';
 import { CaretDown, CaretLeft, CaretRight, Rows, SquaresFour } from 'phosphor-react';
 import Button, { IconButton } from '../ui/Button';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Search from '../Search';
 import { useStore } from '~store/store';
+import { useViewMode } from '~hooks/useViewMode';
 import shallow from 'zustand/shallow';
 import MobileDrawer from '../Sidebar/MobileDrawer';
 import SortConfig from './SortConfig';
@@ -64,13 +55,9 @@ function Navigation() {
 }
 
 export default function Topbar() {
-	const location = useLocation();
-
 	const title = useStore((state) => state.title, shallow);
 
-	const showViewOptions = useMemo(() => {
-		return location.pathname.match(/\/libraries\/.+$/) || location.pathname.match(/\/series\/.+$/);
-	}, [location.pathname]);
+	const { showViewOptions, viewAsGrid, onViewModeChange } = useViewMode();
 
 	// TODO: make sticky? or just fixed?
 	return (
@@ -101,7 +88,8 @@ export default function Topbar() {
 				{showViewOptions && (
 					<>
 						<HStack>
-							<ViewModeConfig />
+							{/* @ts-ignore */}
+							<ViewModeConfig viewAsGrid={viewAsGrid!} onChange={onViewModeChange!} />
 
 							<SortConfig />
 						</HStack>

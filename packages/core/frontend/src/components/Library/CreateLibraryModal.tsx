@@ -21,17 +21,18 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
-	Textarea,
+	TabList,
+	TabPanel,
+	TabPanels,
+	Tabs,
 	useDisclosure,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import TextArea from '~components/ui/TextArea';
+import { Tab } from '~components/ui/Tabs';
 
 export default function CreateLibraryModal() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
-
-	function handleCreate() {
-		toast.error('Not implemented');
-	}
 
 	// TODO: add check for existing library name? server WILL handle that error, but why
 	// not have client check too.
@@ -98,31 +99,54 @@ export default function CreateLibraryModal() {
 				<ModalContent>
 					<ModalHeader>Add new library</ModalHeader>
 					<ModalCloseButton />
-					<ModalBody className="flex flex-col space-y-2">
-						<Form id="create-library-form" form={form} onSubmit={handleSubmit}>
-							<FormControl>
-								<FormLabel htmlFor="name">Libary name</FormLabel>
-								<Input type="text" autoFocus {...form.register('name')} />
-							</FormControl>
+					<ModalBody w="full">
+						<Form className="w-full" id="create-library-form" form={form} onSubmit={handleSubmit}>
+							<Tabs isFitted colorScheme="brand" w="full">
+								<TabList>
+									<Tab>General</Tab>
+									<Tab>Options</Tab>
+								</TabList>
 
-							<FormControl>
-								<FormLabel htmlFor="name">Libary path</FormLabel>
-								<InputGroup>
-									<Input {...form.register('path')} />
-									<InputRightElement
-										cursor="pointer"
-										onClick={() => {
-											toast.error('Not implemented yet, please type the path manually');
-										}}
-										children={<Folder />}
-									/>
-								</InputGroup>
-							</FormControl>
+								<TabPanels>
+									<TabPanel className="flex flex-col space-y-2">
+										<FormControl>
+											<FormLabel htmlFor="name">Libary name</FormLabel>
+											<Input
+												type="text"
+												placeholder="My Library"
+												autoFocus
+												{...form.register('name')}
+											/>
+										</FormControl>
 
-							<FormControl>
-								<FormLabel htmlFor="name">Description</FormLabel>
-								<Textarea autoFocus {...form.register('description')} />
-							</FormControl>
+										<FormControl>
+											<FormLabel htmlFor="name">Libary path</FormLabel>
+											<InputGroup>
+												<Input placeholder="/path/to/library" {...form.register('path')} />
+												<InputRightElement
+													cursor="pointer"
+													onClick={() => {
+														toast.error('Not implemented yet, please type the path manually');
+													}}
+													children={<Folder />}
+												/>
+											</InputGroup>
+										</FormControl>
+
+										<FormControl>
+											<FormLabel htmlFor="name">Description</FormLabel>
+											<TextArea
+												placeholder="A short description of the library (optional)"
+												{...form.register('description')}
+											/>
+										</FormControl>
+									</TabPanel>
+									<TabPanel>
+										<p>TODO: access control options, tags, other stuffs tbd</p>
+										{/* https://github.com/csandman/chakra-react-select */}
+									</TabPanel>
+								</TabPanels>
+							</Tabs>
 						</Form>
 					</ModalBody>
 

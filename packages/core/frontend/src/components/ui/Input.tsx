@@ -6,6 +6,7 @@ interface Props extends InputProps {
 	fullWidth?: boolean;
 }
 
+// TODO: fix blue outline on blur?
 export default forwardRef<Props, 'input'>(({ fullWidth = true, ...props }, ref) => {
 	return (
 		<Input

@@ -4,3 +4,4 @@ pub mod feed;
 pub mod link;
 pub mod util;
 pub mod models;
+pub mod opensearch;

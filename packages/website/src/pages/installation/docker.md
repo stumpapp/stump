@@ -1,12 +1,10 @@
 # Docker
 
 {% callout title="Note" icon="danger" %}
-Stump underwent a major refactor to replace SeaORM with Prisma. This migration broke the Docker build and is on the roadmap for a proper fix.
+Stump will have an official Docker image available when the first beta release is published.
+
+For now, Docker builds of Stump are _development only_, meaning if you want to use Docker you'll have to build your own image. These instructions will be updated for general usage when the official Docker image is available.
 {% /callout %}
-
-Stump hasn't had it's first beta release yet, and so there isn't an official Docker image quite yet. When it does, this page will be updated to reflect the proper instructions.
-
-For now, Docker builds of Stump are for _development only_.
 
 ## Usage
 
@@ -25,7 +23,7 @@ docker create \
   --name=stump \
   --user 1000:1000 \
   -p 6969:6969 \
-  --volume ~/.stump:/home/stump/.stump \
+  --volume ~/.stump:/config \
   --mount type=bind,source=/path/to/data,target=/data \
   --restart unless-stopped \
   stump
@@ -39,29 +37,39 @@ Then you can start the container:
 docker start stump
 ```
 
-### Docker Compose
-
-```yaml
-version: '3.3'
-services:
-  stump:
-    image: stump
-    container_name: stump
-    volumes:
-      # TODO
-    ports:
-      - 6969:6969
-    # This `environment` field is optional, remove if you don't need it
-    environment:
-      - <ENV_VAR>=<ENV VALUE>
-    restart: unless-stopped
-```
-
-## Configuration
+#### Properties / Configuration
 
 | Parameter |                   Functionality                    |
 | --------- | :------------------------------------------------: |
 | `-p 6969` | The port Stump uses for it's API and web interface |
+
+### Docker Compose
+
+Below is an example of a Docker Compose file you can use to bootstrap your Stump server:
+
+````yaml
+version: '3.3'
+services:
+  stump:
+    image: stump # this will be `aaronleopold/stump` when it is released
+    container_name: stump
+    volumes:
+      - type: bind
+        source: /Users/aaronleopold/.stump
+        target: /home/stump/config
+      - type: bind
+        source: /Users/aaronleopold/Documents/Stump
+        target: /home/stump/data
+    ports:
+      - 6969:6969
+    user: "1000:1000"
+    # This `environment` field is optional, remove if you don't need it. I am using
+    # them as an example here, but these are actually their default values.
+    environment:
+      - STUMP_CONFIG_DIR=/home/stump/config
+      - STUMP_CLIENT_DIR=/home/stump/static
+    restart: unless-stopped
+```
 
 ## Monitoring
 
@@ -69,7 +77,7 @@ To monitor the logs of the container, you can use the following command:
 
 ```bash
 docker logs -f stump
-```
+````
 
 ## Updating your container
 

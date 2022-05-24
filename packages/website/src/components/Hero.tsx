@@ -3,6 +3,7 @@ import Button from './ui/Button';
 
 import { motion } from 'framer-motion';
 import { Github } from '@icons-pack/react-simple-icons';
+import { Play } from 'phosphor-react';
 
 const navigation = [
 	{ name: 'Product', href: '#' },
@@ -33,14 +34,23 @@ export default function Hero() {
 					Free, open source, self-hosting for all your comic books, manga and digital book
 					collections. Supports the most popular reading formats.
 				</motion.p>
-				<div className="mt-5 max-w-md mx-auto flex justify-center md:mt-8">
-					{/* TODO: add Getting Started button or sm */}
+				<div className="mt-5 max-w-md mx-auto flex justify-center space-x-2 md:mt-8">
+					<motion.div
+						className="flex"
+						initial={{ opacity: 0, scale: 0.5 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ duration: 0.5, delay: 1.1 }}
+					>
+						<Button href="/installation" variant="brand">
+							<span>Get Started</span>
+						</Button>
+					</motion.div>
 
 					<motion.div
 						className="flex"
 						initial={{ opacity: 0, scale: 0.5 }}
 						animate={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.5, delay: 1.25 }}
+						transition={{ duration: 0.5, delay: 1.3 }}
 					>
 						<Button
 							className="flex items-center space-x-2"
@@ -50,7 +60,7 @@ export default function Hero() {
 						>
 							<Github />
 
-							<span>Github</span>
+							<span>See on Github</span>
 						</Button>
 					</motion.div>
 				</div>

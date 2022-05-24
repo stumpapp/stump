@@ -11,6 +11,7 @@ pub enum OpdsLinkType {
     OctetStream, // "application/octet-stream",
     Zip,         // "application/zip"
     Epub,        // "application/epub+zip"
+    Search,      // "application/opensearchdescription+xml"
 }
 
 impl OpdsEnumStr for OpdsLinkType {
@@ -24,6 +25,7 @@ impl OpdsEnumStr for OpdsLinkType {
             OpdsLinkType::OctetStream => "application/octet-stream",
             OpdsLinkType::Zip => "application/zip",
             OpdsLinkType::Epub => "application/epub+zip",
+            OpdsLinkType::Search => "application/opensearchdescription+xml",
         }
     }
 }
@@ -39,6 +41,7 @@ pub enum OpdsLinkRel {
     Thumbnail,   // "http://opds-spec.org/image/thumbnail"
     Image,       // "http://opds-spec.org/image"
     PageStream,  // "http://vaemendis.net/opds-pse/stream"
+    Search       // "search"
 }
 
 impl OpdsEnumStr for OpdsLinkRel {
@@ -53,6 +56,7 @@ impl OpdsEnumStr for OpdsLinkRel {
             OpdsLinkRel::Thumbnail => "http://opds-spec.org/image/thumbnail",
             OpdsLinkRel::Image => "http://opds-spec.org/image",
             OpdsLinkRel::PageStream => "http://vaemendis.net/opds-pse/stream",
+            OpdsLinkRel::Search => "search",
         }
     }
 }

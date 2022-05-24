@@ -17,7 +17,8 @@ export default function ViewModeConfig({ viewAsGrid, onChange }: ViewModeConfigP
 				variant="solid"
 				bg={useColorModeValue(
 					viewAsGrid ? 'blackAlpha.200' : 'gray.150',
-					viewAsGrid ? 'whiteAlpha.200' : 'gray.800',
+					// viewAsGrid ? 'whiteAlpha.200' : 'gray.800',
+					viewAsGrid ? 'whiteAlpha.50' : 'whiteAlpha.200',
 				)}
 			>
 				<SquaresFour className="text-lg" weight="regular" />
@@ -29,7 +30,8 @@ export default function ViewModeConfig({ viewAsGrid, onChange }: ViewModeConfigP
 				variant="solid"
 				bg={useColorModeValue(
 					viewAsGrid ? 'gray.150' : 'blackAlpha.200',
-					viewAsGrid ? 'gray.800' : 'whiteAlpha.200',
+					// viewAsGrid ? 'gray.800' : 'whiteAlpha.200',
+					viewAsGrid ? 'whiteAlpha.200' : 'whiteAlpha.50',
 				)}
 			>
 				<Rows className="text-lg" weight="regular" />

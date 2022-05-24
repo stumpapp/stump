@@ -56,13 +56,6 @@ pub async fn get_library_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	// let library = db
-	// 	.library()
-	// 	.find_unique(library::id::equals(id.clone()))
-	// 	.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
-	// 	.exec()
-	// 	.await?;
-
 	let library_series = db
 		.series()
 		.find_many(vec![series::library_id::equals(Some(id.clone()))])
@@ -76,16 +69,7 @@ pub async fn get_library_thumbnail(
 
 	let media = series.media()?.first().unwrap();
 
-	// if library.is_none() {
-	// 	return Err(ApiError::NotFound(format!(
-	// 		"Library with id {} not found",
-	// 		id
-	// 	)));
-	// }
-
-	// let library = library.unwrap();
-
-	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
+	Ok(fs::media_file::get_page(media.path.as_str(), 1, true)?)
 }
 
 // TODO: write me

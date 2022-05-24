@@ -11,7 +11,7 @@ There are some really solid, self-hostable, OPDS media servers out there. The mo
 
 Overall, Stump has a few key features:
 
-- Tiny footprint (~41MB Docker image, ~TBD MB executable)
+- Tiny footprint (~100MB Docker image, ~36.8 MB compiled executable)
 - Super performant, even on less powerful hardware (e.g. Raspberry Pi)
   - < 5s total time for an initial scan of a library with ~200 comics, tested on a Raspberry Pi 4
 - Emphasis on UI and UX (i.e. it's pretty and easy to use)
@@ -37,6 +37,23 @@ Below is a list of the major features Stump is targeting before the first beta r
   - Once more of the core features are implemented, I'll be prioritizing language support
 
 You can track the development of these targeted features [here](https://github.com/users/aaronleopold/projects/2). If you have any suggestions or ideas, feel free to reach out!
+
+## Benchmarks
+
+{% callout title="Testing scenario" icon="note" %}
+2018 Macbook Pro 13" (1.4 GHz i5), basic Stump configuration with a library of ~100 comics.
+
+**Steps**: Boot stump, log into account, queue 3 scan jobs on library, exit when last job finishes.
+{% /callout %}
+
+### Docker
+
+- Average memory usage: ~6MiB / 1.939GiB (~0.33%)
+- Average CPU usage: ~2.2%
+
+### Executable
+
+TODO
 
 ## More questions?
 

@@ -34,6 +34,9 @@ clap = { version = "3.1.18", features = ["derive"], optional = true }
 ring = "0.16.20"
 data-encoding = "2.3.2"
 cuid = "1.2.0"
+webp = "0.2.2"
+image = "0.24.2"
+# include_dir = "0.7.2"
 
 [features]
 seed-binary = ["clap"]

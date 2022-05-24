@@ -8,6 +8,7 @@ Coming Soon!
 
 TODO: write systemd tutorial
 TODO: init scripts for alpine/non-systemd? (https://wiki.alpinelinux.org/wiki/Writing_Init_Scripts)
+TODO: look into freebsd
 
 ## macOS
 

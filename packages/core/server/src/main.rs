@@ -4,7 +4,8 @@ extern crate rocket;
 #[cfg(debug_assertions)]
 use dotenv::dotenv;
 
-use config::{context::Context, cors, helmet::Helmet, logging, session};
+use config::{context::Context, cors, helmet::Helmet, session};
+// use include_dir::{include_dir, Dir};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
@@ -27,13 +28,15 @@ pub mod routes;
 pub mod types;
 pub mod utils;
 
-const STATIC_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+// TODO: figure out how to embed /static and Rocket.toml in the binary if possible
+// otherwise I have to distribute a zip file which isn't TERRIBLE but I don't want to lol
+pub fn static_dir() -> String {
+	std::env::var("STUMP_CLIENT_DIR").unwrap_or("static".to_string())
+}
 
 #[get("/<_..>", rank = 2)]
 async fn index_fallback() -> Option<NamedFile> {
-	let static_dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
-	println!("{}", static_dir);
-	NamedFile::open(Path::new(STATIC_DIR).join("index.html"))
+	NamedFile::open(Path::new(&static_dir()).join("index.html"))
 		.await
 		.ok()
 }
@@ -73,7 +76,7 @@ async fn rocket() -> _ {
 		.attach(session::get_session_store().fairing())
 		.attach(cors::get_cors())
 		.attach(Helmet::default().fairing())
-		.mount("/", FileServer::from(STATIC_DIR).rank(1))
+		.mount("/", FileServer::from(static_dir()).rank(1))
 		.mount("/", routes![index_fallback])
 		.mount("/api", routes::api::api())
 		.mount("/opds/v1.2", routes::opds::opds())

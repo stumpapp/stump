@@ -35,7 +35,7 @@ export default function ListItem({ id, title, subtitle, href, even }: Props) {
 			<Heading
 				isTruncated
 				size="sm"
-				w={{ base: '50%', md: '30%', lg: '25%', xl: '20%' }}
+				w={{ base: '50%', md: '30%', lg: '25%', xl: '23%' }}
 				className="shrink-0"
 			>
 				{title}

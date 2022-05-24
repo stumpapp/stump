@@ -27,8 +27,9 @@ pub async fn create_client() -> prisma::PrismaClient {
 	let rocket_env =
 		std::env::var("ROCKET_PROFILE").unwrap_or_else(|_| "debug".to_string());
 
-	// .expect("ROCKET_PROFILE not set");
-
+	// FIXME: This is NOT working on builds, I can pass the ROCKET_PROFILE=release
+	// manually when running the binary, and when I set ROCKET_LOG_LEVEL=debug I can
+	// see Rocket knows it is release.
 	if rocket_env == "release" {
 		let config_dir = create_config_dir();
 
@@ -36,6 +37,7 @@ pub async fn create_client() -> prisma::PrismaClient {
 			.await
 			.expect("Failed to create Prisma client")
 	} else {
+		println!("{:?}", std::env::var("ROCKET_PROFILE"));
 		// Development database will live in the /prisma directory
 		prisma::new_client()
 			.await

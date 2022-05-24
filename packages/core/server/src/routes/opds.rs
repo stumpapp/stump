@@ -8,6 +8,7 @@ use crate::{
         self,
         entry::OpdsEntry,
         feed::OpdsFeed,
+        opensearch::OpdsOpenSearch,
         link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
         models::OpdsSeries,
     },
@@ -23,6 +24,7 @@ use crate::{
 pub fn opds() -> Vec<Route> {
     routes![
         catalog,
+        open_search,
         keep_reading,
         libraries,
         library_by_id,
@@ -41,7 +43,7 @@ pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
         OpdsEntry::new(
             "keepReading".to_string(),
             chrono::Utc::now().into(),
-            "Keep Reading".to_string(),
+            "Keep reading".to_string(),
             Some(String::from("Continue reading your in progress books")),
             None,
             Some(vec![OpdsLink {
@@ -54,7 +56,7 @@ pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
         OpdsEntry::new(
             "allSeries".to_string(),
             chrono::Utc::now().into(),
-            "All Series".to_string(),
+            "All series".to_string(),
             Some(String::from("Browse by series")),
             None,
             Some(vec![OpdsLink {
@@ -67,7 +69,7 @@ pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
         OpdsEntry::new(
             "latestSeries".to_string(),
             chrono::Utc::now().into(),
-            "Latest Series".to_string(),
+            "Latest series".to_string(),
             Some(String::from("Browse latest series")),
             None,
             Some(vec![OpdsLink {
@@ -77,16 +79,82 @@ pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
             }]),
             None,
         ),
+        OpdsEntry::new(
+            "allLibraries".to_string(),
+            chrono::Utc::now().into(),
+            "All libraries".to_string(),
+            Some(String::from("Browse by library")),
+            None,
+            Some(vec![OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Subsection,
+                href: String::from("/opds/v1.2/libraries"),
+            }]),
+            None,
+        ),
+        OpdsEntry::new(
+            "allCollections".to_string(),
+            chrono::Utc::now().into(),
+            "All collections".to_string(),
+            Some(String::from("Browse by collection")),
+            None,
+            Some(vec![OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Subsection,
+                href: String::from("/opds/v1.2/collections"),
+            }]),
+            None,
+        ),
+        OpdsEntry::new(
+            "allReadLists".to_string(),
+            chrono::Utc::now().into(),
+            "All read lists".to_string(),
+            Some(String::from("Browse by read list")),
+            None,
+            Some(vec![OpdsLink {
+                link_type: OpdsLinkType::Navigation,
+                rel: OpdsLinkRel::Subsection,
+                href: String::from("/opds/v1.2/readlists"),
+            }]),
+            None,
+        ),
+
+        // TODO: more?
+        // TODO: get user stored searches, so they don't have to redo them over and over?
+        // e.g. /opds/v1.2/series?search={searchTerms}, /opds/v1.2/libraries?search={searchTerms}, etc.
+    ];
+
+    let links = vec![
+        OpdsLink {
+            link_type: OpdsLinkType::Navigation,
+            rel: OpdsLinkRel::ItSelf,
+            href: String::from("/opds/v1.2/catalog"),
+        },
+        OpdsLink {
+            link_type: OpdsLinkType::Navigation,
+            rel: OpdsLinkRel::Start,
+            href: String::from("/opds/v1.2/catalog"),
+        },
+        OpdsLink {
+            link_type: OpdsLinkType::Search,
+            rel: OpdsLinkRel::Search,
+            href: String::from("/opds/v1.2/search"),
+        },
     ];
 
     let feed = OpdsFeed::new(
         "root".to_string(),
         "Stump OPDS catalog".to_string(),
-        None,
+        Some(links),
         entries,
     );
 
     Ok(XmlResponse(feed.build()?))
+}
+
+#[get("/search")]
+async fn open_search(_auth: Auth) -> ApiResult<XmlResponse> {
+    Ok(XmlResponse(OpdsOpenSearch::build()?))
 }
 
 #[get("/keep-reading")]
@@ -330,7 +398,7 @@ async fn book_thumbnail(id: String, ctx: &Context, _auth: Auth) -> ApiResult<Ima
         .await?;
 
     if let Some(b) = book {
-        Ok(fs::media_file::get_page(&b.path, 1)?)
+        Ok(fs::media_file::get_page(&b.path, 1, true)?)
     } else {
         Err(ApiError::NotFound(format!("Book {} not found", &id)))
     }
@@ -366,7 +434,7 @@ async fn book_page(
             correct_page = 0;
         }
 
-        Ok(fs::media_file::get_page(&b.path, correct_page as i32)?)
+        Ok(fs::media_file::get_page(&b.path, correct_page as i32, false)?)
     } else {
         Err(ApiError::NotFound(format!("Book {} not found", &id)))
     }

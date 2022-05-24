@@ -6,6 +6,9 @@ On [GitHub](https://github.com/aaronleopold/stump/releases), Stump has pre-built
 
 Coming Soon!
 
+TODO: write systemd tutorial
+TODO: init scripts for alpine/non-systemd? (https://wiki.alpinelinux.org/wiki/Writing_Init_Scripts)
+
 ## macOS
 
 Coming Soon!
@@ -23,7 +26,7 @@ I am currently exploring solutions for Windows systems to be able to configure S
 
 Coming Soon!
 
-TODO: research the following:
+TODO: research the following (I don't use windows so):
 
 - https://github.com/mullvad/windows-service-rs
 - http://nssm.cc/usage

@@ -6,8 +6,8 @@ For all of the examples below, I'll be mimicking a setup very close to my own us
 
 ## Simple Docker
 
-TODO
+Coming Soon!
 
 ## Docker with Traefik
 
-TODO
+Coming Soon!

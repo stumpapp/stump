@@ -8,7 +8,7 @@ import Form from '~components/ui/Form';
 import Input from '~components/ui/Input';
 import { useStore } from '~store/store';
 
-import { Button, Container, HStack, Text } from '@chakra-ui/react';
+import { Button, Container, FormControl, FormLabel, HStack, Text } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from 'react-query';
 import toast from 'react-hot-toast';
@@ -74,8 +74,15 @@ export default function Login() {
 			</HStack>
 
 			<Form form={form} onSubmit={handleSubmit}>
-				<Input label="Username" type="text" autoFocus {...form.register('username')} />
-				<Input label="Password" type="password" {...form.register('password')} />
+				<FormControl>
+					<FormLabel htmlFor="username">Username</FormLabel>
+					<Input type="text" autoFocus {...form.register('username')} />
+				</FormControl>
+
+				<FormControl>
+					<FormLabel htmlFor="passowrd">Password</FormLabel>
+					<Input type="password" {...form.register('password')} />
+				</FormControl>
 
 				<Button
 					isLoading={isLoading}

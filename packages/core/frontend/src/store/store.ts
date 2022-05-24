@@ -108,7 +108,7 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 	},
 
 	addJob: (job: Job) => {
-		console.log('addJob', job);
+		// console.log('addJob', job);
 		if (get().jobs[job.runnerId] == undefined) {
 			set(() => ({ jobs: { ...get().jobs, [job.runnerId]: job } }));
 		}

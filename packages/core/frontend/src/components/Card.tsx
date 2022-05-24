@@ -39,7 +39,8 @@ export default function Card({ to, imageAlt, imageSrc, title, subtitle, onMouseE
 					src={imageSrc}
 					onError={(err) => {
 						// @ts-ignore
-						err.target.src = '/fallback-card.png';
+						// err.target.src = '/fallback-card.png';
+						err.target.src = '/favicon.png';
 					}}
 				/>
 			</Box>

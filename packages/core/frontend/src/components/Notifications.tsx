@@ -1,21 +1,25 @@
 import React from 'react';
+import { useColorMode } from '@chakra-ui/react';
 import { Toaster, ToastBar } from 'react-hot-toast';
 
-// I don't really need this but keeping it abstracted in case I want to
-// do something more custom with the notifications. Can also choose to use
-// the useToaster() hook
 export default function Notifications() {
+	const { colorMode } = useColorMode();
+
 	return (
 		<Toaster position="bottom-center">
 			{(t) => (
-				<ToastBar toast={t}>
+				<ToastBar
+					toast={t}
+					// this is so gross, I miss tailwind
+					style={{
+						backgroundColor: colorMode === 'dark' ? '#3D4759' : '',
+						color: colorMode === 'dark' ? '#E2E8F0' : '',
+					}}
+				>
 					{({ icon, message }) => (
 						<>
 							{icon}
 							{message}
-							{/* {t.type !== 'loading' && (
-								<button onClick={() => toast.dismiss(t.id)}>X</button>
-							)} */}
 						</>
 					)}
 				</ToastBar>

@@ -26,5 +26,7 @@ interface LibraryWithSeries extends Library {
 	series: SeriesWithMedia[];
 }
 
+type CreateLibraryInput = Omit<Library, 'id'>;
+
 type GetLibrariesResponse = ApiResult<Library[], any>;
 type GetLibraryWithSeries = ApiResult<LibraryWithSeries, any>;

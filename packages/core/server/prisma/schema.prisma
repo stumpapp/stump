@@ -59,7 +59,7 @@ model User {
 model Library {
   id          String   @id @default(uuid())
   // The name of the library. ex: "Marvel Comics"
-  name        String
+  name        String   @unique
   // The description of the library. ex: "The best library ever"
   description String?
   // The location of the library in the fs. ex: "/home/user/media/comics/marvel"

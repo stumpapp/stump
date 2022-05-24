@@ -1,10 +1,9 @@
-import { Heading, Wrap, WrapItem } from '@chakra-ui/react';
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import { getSeriesById } from '~api/query/series';
-import MediaCard from '~components/Media/MediaCard';
+
 import MediaGrid from '~components/Media/MediaGrid';
 import MediaList from '~components/Media/MediaList';
 import { useViewMode } from '~hooks/useViewMode';

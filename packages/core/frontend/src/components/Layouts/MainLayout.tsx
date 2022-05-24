@@ -8,7 +8,7 @@ import Topbar from '~components/Topbar';
 import Sidebar from '~components/Sidebar/Sidebar';
 import { useStore } from '~store/store';
 
-import { Box, Flex, useColorModeValue, VStack } from '@chakra-ui/react';
+import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
 
 export default function MainLayout() {
 	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
@@ -49,7 +49,6 @@ export default function MainLayout() {
 		if (!res || !res.data) throw new Error('Could not get media');
 
 		if (res.status === 200) {
-			console.log('validateGetMedia', res.data);
 			store.setMedia(res.data);
 		}
 	}

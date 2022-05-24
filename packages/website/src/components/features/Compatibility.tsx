@@ -84,8 +84,8 @@ export default function Compatibility() {
 
 				<FeatureSubHeader>
 					You aren&apos;t stuck with the built-in reader! With Stump, you can easily read all your
-					digial media from your preferred reader - so long as they support the OPDS specifications,
-					it&apos;s compatible!
+					digital media from your preferred reader - so long as they support the OPDS
+					specifications, it&apos;s compatible!
 				</FeatureSubHeader>
 
 				<div className="pt-6 flex justify-between md:justify-start md:space-x-6 lg:space-x-12">

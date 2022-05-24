@@ -14,8 +14,12 @@ export default function Library() {
 		throw new Error('Library id is required');
 	}
 
-	// TODO: error handling is shite
-	const { isLoading, data: library } = useQuery('getLibrary', {
+	function handleError(err: unknown) {
+		console.error(err);
+	}
+
+	// [queryKey, id] => refetch on id change
+	const { isLoading, data: library } = useQuery(['getLibrary', id], {
 		queryFn: async () => getLibraryById(id).then((res) => res.data),
 		onError: handleError,
 	});
@@ -27,10 +31,6 @@ export default function Library() {
 	}
 
 	const { viewAsGrid } = useViewMode();
-
-	function handleError(err: unknown) {
-		console.error(err);
-	}
 
 	return (
 		<>

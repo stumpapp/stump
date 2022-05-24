@@ -9,7 +9,8 @@
 		"website": "pnpm --filter @stump/website --",
 		"core": "pnpm --filter @stump/core --",
 		"prisma": "pnpm core prisma",
-		"prepare": "husky install"
+		"prepare": "husky install",
+		"unimported": "npx unimported ./packages/core/frontend"
 	},
 	"devDependencies": {
 		"husky": "^7.0.2",

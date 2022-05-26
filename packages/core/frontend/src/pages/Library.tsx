@@ -7,6 +7,10 @@ import { useViewMode } from '~hooks/useViewMode';
 import SeriesGrid from '~components/Series/SeriesGrid';
 import SeriesList from '~components/Series/SeriesList';
 
+// FIXME: there is the *slightest* over stutter here when switching between
+// libraries, it's really kinda sorta irritating. I think react-query doesn't
+// pick up that it needs to rerun the query fast enough. TODO: see if this happens
+// outside development.
 export default function Library() {
 	const { id } = useParams();
 
@@ -25,7 +29,7 @@ export default function Library() {
 	});
 
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return null;
 	} else if (!library) {
 		throw new Error('Library not found');
 	}

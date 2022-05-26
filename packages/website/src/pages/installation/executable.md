@@ -1,5 +1,9 @@
 # Executable
 
+{% callout title="Coming Soon" icon="warning" %}
+Any present tense information in this section is not accurate. Once a release is made, the following information will apply.
+{% /callout %}
+
 On [GitHub](https://github.com/aaronleopold/stump/releases), Stump has pre-built binaries for Linux, macOS, and Windows. Follow the instructions below for your operating system to install Stump.
 
 ## Linux

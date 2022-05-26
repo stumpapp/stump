@@ -27,7 +27,7 @@ function Navigation() {
 			// >:( this won't work, probably some annoying thing with parent stack
 			// ml={0}
 			style={{ margin: 0 }}
-			spacing={1.5}
+			spacing={1}
 			alignItems="center"
 			display={{ base: 'none', md: 'flex' }}
 		>

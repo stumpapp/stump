@@ -9,13 +9,16 @@ import Sidebar from '~components/Sidebar/Sidebar';
 import { useStore } from '~store/store';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
+import { AxiosError } from 'axios';
 
+// FIXME: hook issues, not surprised.
 export default function MainLayout() {
-	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
-	const location = useLocation();
 	const navigate = useNavigate();
+	const location = useLocation();
 
-	const _ = useQueries([
+	const store = useStore(({ setLibraries, setMedia }) => ({ setLibraries, setMedia }));
+
+	const queries = useQueries([
 		{
 			queryKey: 'getLibraries',
 			queryFn: getLibraries,
@@ -30,18 +33,22 @@ export default function MainLayout() {
 		return location.pathname.match(/\/books\/.+\/pages\/.+/);
 	}, [location]);
 
+	const isLoading = useMemo(() => queries.some((query) => query.isLoading), [queries]);
+
 	// const hideTopBar = useMemo(() => {
 	// 	// hide topbar when on /books/:id/pages/:page OR /settings
 	// 	return location.pathname.match(/\/books\/.+\/pages\/.+|\/settings/);
 	// }, [location]);
 
-	function onError(err: any) {
+	function onError(e: any) {
+		let err = e as AxiosError;
+
 		const res = err.response;
 
-		if (res.status === 401) {
+		if (res?.status === 401) {
 			navigate('/auth/login');
 		} else {
-			throw new Error(res.data);
+			throw new Error(`Unknown error: ${err.message}`);
 		}
 	}
 
@@ -59,6 +66,10 @@ export default function MainLayout() {
 		if (res.status === 200) {
 			store.setLibraries(res.data);
 		}
+	}
+
+	if (isLoading) {
+		return null;
 	}
 
 	return (

@@ -57,9 +57,5 @@ module.exports = {
 		// 	sans: ['Inter var', ...defaultTheme.fontFamily.sans],
 		// },
 	},
-	plugins: [
-		require('tailwind-scrollbar-hide'),
-		require('@tailwindcss/forms'),
-		require('@tailwindcss/typography'),
-	],
+	plugins: [require('tailwind-scrollbar-hide'), require('@tailwindcss/typography')],
 };

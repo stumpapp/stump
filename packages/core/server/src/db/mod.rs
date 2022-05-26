@@ -9,10 +9,9 @@ use crate::prisma;
 fn create_config_dir() -> String {
 	let db_path = match std::env::var("STUMP_CONFIG_DIR") {
 		Ok(path) => PathBuf::from(&path),
-		// .join("stump.db"),
 		_ => dirs::home_dir()
 			.expect("Failed to get data dir")
-			.join(".stump"), // .join("stump.db"),
+			.join(".stump"),
 	};
 
 	let path_str = db_path.to_str().unwrap();
@@ -27,9 +26,10 @@ pub async fn create_client() -> prisma::PrismaClient {
 	let rocket_env =
 		std::env::var("ROCKET_PROFILE").unwrap_or_else(|_| "debug".to_string());
 
-	// FIXME: This is NOT working on builds, I can pass the ROCKET_PROFILE=release
-	// manually when running the binary, and when I set ROCKET_LOG_LEVEL=debug I can
-	// see Rocket knows it is release.
+	// FIXME: This is NOT working on builds, I have pass the ROCKET_PROFILE=release
+	// manually when running the binary to get it working. WHICH IS WEIRD because if I don't
+	// set it but set ROCKET_LOG_LEVEL=debug I can see Rocket knows it is release but this
+	// conditional still fails
 	if rocket_env == "release" {
 		let config_dir = create_config_dir();
 
@@ -37,7 +37,7 @@ pub async fn create_client() -> prisma::PrismaClient {
 			.await
 			.expect("Failed to create Prisma client")
 	} else {
-		println!("{:?}", std::env::var("ROCKET_PROFILE"));
+		println!("PROFILE: {:?}", std::env::var("ROCKET_PROFILE"));
 		// Development database will live in the /prisma directory
 		prisma::new_client()
 			.await

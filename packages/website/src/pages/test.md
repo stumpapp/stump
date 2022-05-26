@@ -21,11 +21,11 @@ This is used for titles and stuff. It won't have the hashtag next to it, and it 
 
 _Italic_
 
-[Links](/guides)
+[Link](/guides)
 
-![Images](/favicon.ico)
+![Image](/favicon.ico)
 
-Lists
+List
 
 - Item 1
 - Item 1

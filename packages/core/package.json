@@ -15,7 +15,7 @@
 		"build:docker": "docker build -t stump .",
 		"server:start": "cd server && ROCKET_PROFILE=debug cargo run",
 		"server:dev": "cd server && ROCKET_PROFILE=debug cargo watch -x run",
-		"server:build": "cd server && cargo build --release",
+		"server:build": "cd server && ROCKET_PROFILE=release cargo build --release",
 		"server:check": "cargo check",
 		"server:fmt": "cargo fmt --all --manifest-path=server/Cargo.toml",
 		"frontend": "pnpm --filter frontend --",

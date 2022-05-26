@@ -25,7 +25,7 @@ export default function ListItem({ id, title, subtitle, href, even }: Props) {
 				outline: 'none',
 			}}
 			_hover={{
-				bg: useColorModeValue('gray.100', 'gray.750'),
+				bg: useColorModeValue('gray.250', 'gray.700'),
 			}}
 			p={2}
 			h={'40px'}

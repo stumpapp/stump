@@ -6,12 +6,10 @@ import {
 	ModalHeader,
 	ModalFooter,
 	ModalBody,
-	ModalCloseButton,
 	useDisclosure,
 	MenuItem,
 	Tabs,
 	TabList,
-	Tab,
 	TabPanels,
 	TabPanel,
 	FormControl,
@@ -19,7 +17,7 @@ import {
 	InputGroup,
 	InputRightElement,
 } from '@chakra-ui/react';
-import Button from '~components/ui/Button';
+import Button, { ModalCloseButton } from '~components/ui/Button';
 import { Folder, NotePencil } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import Form from '~components/ui/Form';
@@ -28,6 +26,7 @@ import Input from '~components/ui/Input';
 import TextArea from '~components/ui/TextArea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { Tab } from '~components/ui/Tabs';
 
 interface Props {
 	library: Library;
@@ -120,7 +119,7 @@ export default function EditLibraryModal({ library }: Props) {
 							Cancel
 						</Button>
 						<Button colorScheme="brand" onClick={handleEdit}>
-							Edit
+							Save Changes
 						</Button>
 					</ModalFooter>
 				</ModalContent>

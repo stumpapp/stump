@@ -35,4 +35,4 @@ When a library is created, Stump will automatically queue a scan job for it. Thi
 
 To manually initiate a scan job, you can click the action button library selection menu on the sidebar and select "Scan". You may also navigate to the library's overview page and click the action button and select "Scan".
 
-For more thorough information on library scans, see the [file-system scanning](/guides/fs-scanning) guide.
+For more thorough information on library scans, see the [filesystem scanning](/guides/fs-scanning) guide.

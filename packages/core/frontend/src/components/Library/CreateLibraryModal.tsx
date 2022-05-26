@@ -1,12 +1,11 @@
-import React from 'react';
-import { Folder } from 'phosphor-react';
+import React, { useRef } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useMutation } from 'react-query';
 import { z } from 'zod';
 import client from '~api/client';
 import { createLibrary } from '~api/mutation/library';
-import Button from '~components/ui/Button';
+import Button, { ModalCloseButton } from '~components/ui/Button';
 import Form from '~components/ui/Form';
 import Input from '~components/ui/Input';
 import {
@@ -16,7 +15,6 @@ import {
 	InputRightElement,
 	Modal,
 	ModalBody,
-	ModalCloseButton,
 	ModalContent,
 	ModalFooter,
 	ModalHeader,
@@ -30,9 +28,16 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import TextArea from '~components/ui/TextArea';
 import { Tab } from '~components/ui/Tabs';
+import FileSystemModal from '~components/FileSystemModal';
 
-export default function CreateLibraryModal() {
+interface Props {
+	trigger?: (props: any) => JSX.Element;
+}
+
+export default function CreateLibraryModal(props: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
+
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	// TODO: add check for existing library name? server WILL handle that error, but why
 	// not have client check too.
@@ -54,6 +59,7 @@ export default function CreateLibraryModal() {
 				// TODO: log?
 			} else {
 				client.invalidateQueries('getLibraries');
+				onClose();
 			}
 		},
 		onError: (err) => {
@@ -75,24 +81,28 @@ export default function CreateLibraryModal() {
 
 	return (
 		<>
-			<Button
-				variant="outline"
-				key="CreateLibraryModalTrigger"
-				w="full"
-				rounded="md"
-				size="sm"
-				color={{ _dark: 'gray.200', _light: 'gray.600' }}
-				_hover={{
-					color: 'gray.900',
-					bg: 'gray.50',
-					_dark: { bg: 'gray.700', color: 'gray.100' },
-				}}
-				fontSize="sm"
-				fontWeight={'medium'}
-				onClick={onOpen}
-			>
-				Add new library
-			</Button>
+			{props.trigger ? (
+				<props.trigger onClick={onOpen} />
+			) : (
+				<Button
+					variant="outline"
+					key="CreateLibraryModalTrigger"
+					w="full"
+					rounded="md"
+					size="sm"
+					color={{ _dark: 'gray.200', _light: 'gray.600' }}
+					_hover={{
+						color: 'gray.900',
+						bg: 'gray.50',
+						_dark: { bg: 'gray.700', color: 'gray.100' },
+					}}
+					fontSize="sm"
+					fontWeight={'medium'}
+					onClick={onOpen}
+				>
+					Add new library
+				</Button>
+			)}
 
 			<Modal size="xl" isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />
@@ -119,17 +129,13 @@ export default function CreateLibraryModal() {
 											/>
 										</FormControl>
 
+										{/* <input className="hidden" type="file" directory="" webkitdirectory="" /> */}
+
 										<FormControl>
 											<FormLabel htmlFor="name">Libary path</FormLabel>
 											<InputGroup>
 												<Input placeholder="/path/to/library" {...form.register('path')} />
-												<InputRightElement
-													cursor="pointer"
-													onClick={() => {
-														toast.error('Not implemented yet, please type the path manually');
-													}}
-													children={<Folder />}
-												/>
+												<InputRightElement cursor="pointer" children={<FileSystemModal />} />
 											</InputGroup>
 										</FormControl>
 

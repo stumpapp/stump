@@ -71,6 +71,10 @@ model Library {
   // The series in the library
   series      Series[]
 
+
+  tags Tag[]
+
+
   @@map("libraries")
 }
 
@@ -92,6 +96,8 @@ model Series {
   library     Library? @relation(fields: [libraryId], references: [id], onDelete: Cascade)
   // The media files in the series.
   media       Media[]
+
+  tags Tag[]
 
   @@map("series")
 }
@@ -123,21 +129,24 @@ model Media {
   // The read progresses of the media
   readProgresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
   // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
-  tags           MediaTag[]
+  tags           Tag[]
 
   // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
   // readingListId String?
 
-
   @@map("media")
 }
 
-model MediaTag {
-  id   String @id @default(cuid())
+model Tag {
+  id        String    @id @default(cuid())
   // The name of the tag. ex: "Action"
-  name String @unique
-
-  media Media[]
+  name      String    @unique
+  // media which have this tag associated
+  media     Media[]
+  // series which have this tag associated
+  series    Series[]
+  // libraries which have this tag associated
+  libraries Library[]
 
   @@map("tags")
 }
@@ -249,4 +258,18 @@ model ServerPreferences {
   convertCbrToCbz Boolean @default(false)
 
   @@map("server_preferences")
+}
+
+model Migration {
+  id        Int      @id @default(autoincrement())
+  // The name of the migration. ex: "20220525133313_initial_migration"
+  name      String
+  // The checksum hash of the migration.sql file
+  checksum  String   @unique
+  // A flag indicating whether or not the migration was applied *without* error
+  success   Boolean  @default(false)
+  // The date in which the migration was applied (regardless of success). ex: "2022-04-20 04:20:69"
+  appliedAt DateTime @default(now())
+
+  @@map("migrations")
 }

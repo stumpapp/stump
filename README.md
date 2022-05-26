@@ -23,21 +23,19 @@ I'll list the major target features below - I am very open to suggestions and id
 
 - Full OPDS + OPDS Page Streaming support
 - EPUB, PDF, and CBZ/CBR support
-- Customizable configuration (for both Docker and local hosting)
-- Scheduled and invokable filesystem indexing/scanning
+- Customizable server configuration (for both Docker and local hosting)
+- Complex but lean and speedy indexing/scanning operations
 - Support for a range of metadata operations (e.g. adding/removing tags, changing metadata, etc.)
 - Import/export of libraries
 - Configurable CBR-to-CBZ conversion
-- Small footprint and resource utilization (Docker image size currently sits at ~41MB)
+- Small footprint and resource utilization
 - Integrated web client (React) served by Rust server
-  - Full Text Search
-  - Server management
-  - Built-in webreader for media
-- Role-based access control (i.e. the server owner and authorized users)
-- Language support (currently only English)
-  - Once more of the core features are implemented, I'll be prioritizing language support
 
-You can track the development of this project [here](https://github.com/users/aaronleopold/projects/2)
+For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're interested in tracking the development of specific features, you can take a look at the [V1 Project Board](https://github.com/users/aaronleopold/projects/2).
+
+## Getting Started
+
+For information about getting started, how Stump works and manages your library data, and much more detailed information, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 
 ## Project Structure
 
@@ -99,54 +97,9 @@ If you face any issues running these, or are using a system that is not supporte
 
 ### Running the Seed Script
 
-A seed will be run to create essential starting data for development. At some point, server initialization logic will be added that will make this step optional, but for now it is required. If you are running the seed script, you can run the following for instructions:
+This step isn't required anymore, and will shortly be removed! The built-in client has progressed to a point where it makes more sense to setup your server all through the client. Booting up your server, following the next section's steps, will now prompt you to create the managing account and create your first library.
 
-```bash
-cargo seed --help
-```
-
-In general, you should provide a `library_path` argument, which is the path to a Library directory on your system. This 'Library' should contain your folders that represent series. It will default to `$HOME/Documents/Stump`. You may provide a `user_name` argument, which will be the username of the server owner. Default will be 'oromei' with a password of 'oromei'. Specifiying a username will still yield an **equivalent** password.
-
-An example folder structure for a one-library collection might be:
-
-```
-/Users/aaronleopold/Documents
-├── Stump
-│   ├── Marvel Comics
-│   │   ├── The Amazing Spider-Man (2018)
-│   │   │   ├── The Amazing Spider-Man 001 (2018).cbz
-│   │   │   ├── The Amazing Spider-Man 002 (2018).cbz
-│   │   │   └── etc.
-│   │   └── The Amazing Spider-Man (2022)
-│   │       ├── The Amazing Spider-Man 001 (2022).cbz
-│   │       ├── The Amazing Spider-Man 002 (2022).cbz
-│   │       └── etc.
-│   └── EBooks
-│       ├── Martin, George R R - [Song of Ice and Fire 3] - A Storm of Swords (2003).epub
-│       ├── Tolkien, J R R - [The Lord of the Rings] - Hobbit Or There and Back Again (1986).epub
-│       └── etc.
-└── ...
-```
-
-Currently you'll have to navigate to the server directory in order to run with custom arguments. This will be fixed in the future, so you can use the `pnpm` command instead, however for now it would be:
-
-```bash
-cd packages/core/server
-cargo seed -l='/Users/you/Documents/Stump/Marvel Comics' -u='oromei'
-```
-
-If you then want to rerun the seed, you can run the following:
-
-```bash
-pnpm core prisma:db-trash
-pnpm core prisma:db-push
-cd packages/core/server
-cargo seed -l='/Users/you/Documents/Stump/Marvel Comics' -u='oromei'
-```
-
-Which will delete the database, create a new one, and then run the seed.
-
-Note: After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
+Leaving this section here for a few weeks to make sure people don't get confused.
 
 ## Running Stump
 
@@ -162,35 +115,6 @@ This will start both the vite dev server and the rust server, watching for chang
 pnpm core server:dev # start the server
 pnpm core frontend:dev # start the frontend
 ```
-
-## Docker
-
-<details>
-<summary>
-  <b>Note: This is not currently configured properly. Migrating to Prisma from SeaORM bork this, but I am working on it.</b>
-</summary>
-
-No images have been published to dockerhub yet, so you'll have to build it yourself:
-
-```bash
- # build the docker image
-pnpm core build:docker
-# create the docker container
-docker create \
-  --name=stump \
-  --user 1000:1000 \
-  -p 6969:6969 \
-  --volume ~/.stump:/home/stump/.stump \
-  --mount type=bind,source=/path/to/data,target=/data \
-  --restart unless-stopped \
-  stump
-# run the docker container
-docker start stump
-```
-
-As of now, you'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library`, you'll need to bind `/Users/user/Library` to both `source` and `target`. This will eventually change to be more flexible.
-
-</details>
 
 ## License
 

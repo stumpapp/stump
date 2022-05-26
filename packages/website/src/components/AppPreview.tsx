@@ -25,6 +25,8 @@ export default function AppPreview() {
 		return null;
 	}
 
+	// TODO: optimize images
+
 	return (
 		<div className="flex justify-center relative p-2 sm:p-0 overflow-hidden -mt-7">
 			{/* <motion.img

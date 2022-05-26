@@ -14,6 +14,7 @@ use crate::types::{
 	event::{InternalTask, TaskResponder, TaskResponse},
 };
 
+/// Get all running/pending jobs.
 #[get("/jobs")]
 pub async fn get_jobs(ctx: &Context) -> ApiResult<Json<TaskResponse>> {
 	let (sender, recv) = oneshot::channel();
@@ -30,7 +31,8 @@ pub async fn get_jobs(ctx: &Context) -> ApiResult<Json<TaskResponse>> {
 	Ok(Json(res))
 }
 
-// Subscriber for jobs running in the background.
+/// Subscriber for jobs running in the background. Will emit SSE, as they occur,
+/// to the listener.
 #[get("/jobs/listen")]
 pub async fn jobs_listener(ctx: &Context, mut end: Shutdown) -> EventStream![] {
 	let mut rx = ctx.client_receiver();

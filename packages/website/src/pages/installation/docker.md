@@ -19,17 +19,16 @@ pnpm core build:docker
 Once the image is created, you can create a container from it:
 
 ```bash
+# replace my paths with your own
 docker create \
   --name=stump \
   --user 1000:1000 \
   -p 6969:6969 \
-  --volume ~/.stump:/config \
-  --mount type=bind,source=/path/to/data,target=/data \
+  --volume /Users/aaronleopold/.stump:/config \
+  --mount type=bind,source=/Users/aaronleopold/Documents/Stump,target=/data \
   --restart unless-stopped \
   stump
 ```
-
-You'll need to make the `source` and `target` paths match. So if you keep your libraries in `/Users/user/Library`, you'll need to bind `/Users/user/Library` to both `source` and `target`. This will eventually change to be more flexible.
 
 Then you can start the container:
 
@@ -47,7 +46,7 @@ docker start stump
 
 Below is an example of a Docker Compose file you can use to bootstrap your Stump server:
 
-````yaml
+```yaml
 version: '3.3'
 services:
   stump:
@@ -62,7 +61,7 @@ services:
         target: /home/stump/data
     ports:
       - 6969:6969
-    user: "1000:1000"
+    user: '1000:1000'
     # This `environment` field is optional, remove if you don't need it. I am using
     # them as an example here, but these are actually their default values.
     environment:
@@ -77,7 +76,7 @@ To monitor the logs of the container, you can use the following command:
 
 ```bash
 docker logs -f stump
-````
+```
 
 ## Updating your container
 

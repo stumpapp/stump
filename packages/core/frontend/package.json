@@ -31,13 +31,13 @@
 		"react-hotkeys-hook": "^3.4.4",
 		"react-query": "^3.38.0",
 		"react-router-dom": "^6.3.0",
+		"react-window": "^1.8.7",
 		"vite-plugin-package-version": "^1.0.2",
 		"zod": "^3.14.4",
 		"zustand": "^3.7.1"
 	},
 	"devDependencies": {
 		"@tailwindcss/aspect-ratio": "^0.4.0",
-		"@tailwindcss/forms": "^0.5.0",
 		"@tailwindcss/typography": "^0.5.2",
 		"@types/node": "^17.0.29",
 		"@types/nprogress": "^0.2.0",

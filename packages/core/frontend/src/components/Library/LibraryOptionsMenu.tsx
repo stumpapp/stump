@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
-import { ArrowsClockwise, DotsThreeVertical, NotePencil, Trash } from 'phosphor-react';
+import { ArrowsClockwise, DotsThreeVertical } from 'phosphor-react';
 import { useMutation } from 'react-query';
 import { scanLibary } from '~api/mutation/library';
-import toast from 'react-hot-toast';
-import { restrictedToast, RESTRICTED_MODE } from '~util/restricted';
+// import { restrictedToast, RESTRICTED_MODE } from '~util/restricted';
 import EditLibraryModal from './EditLibraryModal';
 import DeleteLibraryModal from './DeleteLibraryModal';
 
@@ -16,11 +15,14 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const { mutate: scan } = useMutation('scanLibary', { mutationFn: scanLibary });
 
 	function handleScan() {
-		if (RESTRICTED_MODE) {
-			restrictedToast();
-		} else {
-			scan(library.id);
-		}
+		scan(library.id);
+
+		// Note: not worrying about this for a while so
+		// if (RESTRICTED_MODE) {
+		// 	restrictedToast();
+		// } else {
+		// 	scan(library.id);
+		// }
 	}
 
 	return (

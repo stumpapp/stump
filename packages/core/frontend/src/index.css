@@ -22,6 +22,14 @@ input:-webkit-autofill {
 	-webkit-text-fill-color: theme('colors.gray.800') !important;
 }
 
+.card-title {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 #nprogress {
 	@apply pointer-events-none z-50;
 }

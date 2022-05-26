@@ -1,14 +1,24 @@
+pub mod library;
+pub mod media;
+pub mod read_progress;
+pub mod series;
+pub mod tag;
+pub mod user;
+
+use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::prisma;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+use self::user::UserPreferences;
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 pub struct AuthenticatedUser {
 	pub id: String,
 	pub username: String,
 	pub role: String,
 	// FIXME: once issue 44 is resolved, remove Option
-	pub preferences: Option<prisma::user_preferences::Data>,
+	pub preferences: Option<UserPreferences>,
 }
 
 impl Into<AuthenticatedUser> for prisma::user::Data {
@@ -22,7 +32,8 @@ impl Into<AuthenticatedUser> for prisma::user::Data {
 				self.user_preferences()
 					.expect("Relation load error")
 					.unwrap()
-					.to_owned(),
+					.to_owned()
+					.into(),
 			),
 		}
 	}
@@ -34,7 +45,7 @@ pub struct DecodedCredentials {
 	pub password: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, JsonSchema)]
 pub struct LoginRequest {
 	pub username: String,
 	pub password: String,

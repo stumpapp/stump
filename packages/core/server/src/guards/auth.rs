@@ -1,18 +1,21 @@
 use rocket::{
-    http::Status,
-    request::{FromRequest, Outcome, Request},
+	http::Status,
+	request::{FromRequest, Outcome, Request},
 };
+
+use rocket_okapi::OpenApiFromRequest;
 
 use crate::{
-    prisma::{self, user},
-    types::{
-        alias::{Context, Session},
-        errors::AuthError,
-        models::AuthenticatedUser,
-    },
-    utils::{self},
+	prisma::{self, user},
+	types::{
+		alias::{Context, Session},
+		errors::AuthError,
+		models::AuthenticatedUser,
+	},
+	utils::{self},
 };
 
+#[derive(OpenApiFromRequest)]
 pub struct Auth(pub AuthenticatedUser);
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication
@@ -21,118 +24,128 @@ pub struct Auth(pub AuthenticatedUser);
 // than what I am doing here.
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Auth {
-    type Error = AuthError;
+	type Error = AuthError;
 
-    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        let session: Session<'_> = req.guard().await.expect("TODO");
+	async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+		let session: Session<'_> = req.guard().await.expect("TODO");
 
-        match session.get().await {
-            Ok(res) => {
-                // println!("{:?}", res);
-                if res.is_some() {
-                    // println!("Session existed: {:?}", res);
-                    return Outcome::Success(Auth(res.unwrap()));
-                }
-            }
-            Err(e) => {
-                return Outcome::Failure((Status::Unauthorized, AuthError::InvalidSession(e)));
-            }
-        };
+		match session.get().await {
+			Ok(res) => {
+				// println!("{:?}", res);
+				if res.is_some() {
+					// println!("Session existed: {:?}", res);
+					return Outcome::Success(Auth(res.unwrap()));
+				}
+			},
+			Err(e) => {
+				return Outcome::Failure((
+					Status::Unauthorized,
+					AuthError::InvalidSession(e),
+				));
+			},
+		};
 
-        let cookies = req.cookies();
-        let cookie = cookies.get("stump-session");
+		let cookies = req.cookies();
+		let cookie = cookies.get("stump-session");
 
-        // if cookie exists and is valid, refresh the session?
-        if cookie.is_some() {
-            let cookie = cookie.unwrap();
-            let cookie_value = cookie.value();
+		// if cookie exists and is valid, refresh the session?
+		if cookie.is_some() {
+			let cookie = cookie.unwrap();
+			let cookie_value = cookie.value();
 
-            // println!("COOKIE VALUE: {:?}", cookie_value);
+			// println!("COOKIE VALUE: {:?}", cookie_value);
 
-            // let user = get_user_by_username(cookie_value, &req.guard().await.expect("TODO")).await;
+			// let user = get_user_by_username(cookie_value, &req.guard().await.expect("TODO")).await;
 
-            // if user.is_some() {
-            //     session.set(user.unwrap().into()).await.expect("TODO");
-            //     return Outcome::Success(Auth(user.unwrap()));
-            // }
-        }
+			// if user.is_some() {
+			//     session.set(user.unwrap().into()).await.expect("TODO");
+			//     return Outcome::Success(Auth(user.unwrap()));
+			// }
+		}
 
-        let ctx: &Context = req.guard().await.expect("TODO");
+		let ctx: &Context = req.guard().await.expect("TODO");
 
-        let authorization = req.headers().get_one("authorization");
+		let authorization = req.headers().get_one("authorization");
 
-        if authorization.is_none() {
-            Outcome::Failure((Status::Unauthorized, AuthError::BadRequest))
-        } else {
-            let authorization = authorization.unwrap_or("");
-            let token: String;
+		if authorization.is_none() {
+			Outcome::Failure((Status::Unauthorized, AuthError::BadRequest))
+		} else {
+			let authorization = authorization.unwrap_or("");
+			let token: String;
 
-            // println!("Authorization: {}", authorization);
+			// println!("Authorization: {}", authorization);
 
-            if authorization.starts_with("Basic ") {
-                token = authorization.replace("Basic ", "");
-            } else {
-                return Outcome::Failure((Status::BadRequest, AuthError::BadRequest));
-            }
+			if authorization.starts_with("Basic ") {
+				token = authorization.replace("Basic ", "");
+			} else {
+				return Outcome::Failure((Status::BadRequest, AuthError::BadRequest));
+			}
 
-            let decoded = base64::decode(token);
+			let decoded = base64::decode(token);
 
-            if decoded.is_err() {
-                return Outcome::Failure((Status::Unauthorized, AuthError::BadRequest));
-            }
+			if decoded.is_err() {
+				return Outcome::Failure((Status::Unauthorized, AuthError::BadRequest));
+			}
 
-            let bytes = decoded.unwrap();
+			let bytes = decoded.unwrap();
 
-            let credentials = utils::auth::decode_base64_credentials(bytes);
+			let credentials = utils::auth::decode_base64_credentials(bytes);
 
-            if credentials.is_err() {
-                return Outcome::Failure((Status::Unauthorized, credentials.err().unwrap()));
-            }
+			if credentials.is_err() {
+				return Outcome::Failure((
+					Status::Unauthorized,
+					credentials.err().unwrap(),
+				));
+			}
 
-            let credentials = credentials.unwrap();
+			let credentials = credentials.unwrap();
 
-            // println!("Credentials: {:?}", credentials);
+			// println!("Credentials: {:?}", credentials);
 
-            let db = ctx.get_db();
+			let db = ctx.get_db();
 
-            let user = db
-                .user()
-                .find_unique(prisma::user::UniqueWhereParam::UsernameEquals(
-                    credentials.username,
-                ))
-                .with(user::user_preferences::fetch())
-                .exec()
-                .await;
+			let user = db
+				.user()
+				.find_unique(prisma::user::UniqueWhereParam::UsernameEquals(
+					credentials.username,
+				))
+				.with(user::user_preferences::fetch())
+				.exec()
+				.await;
 
-            if user.is_err() {
-                // println!("User error: {:?}", user.err().unwrap());
-                return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
-            }
-            let user = user.unwrap();
+			if user.is_err() {
+				// println!("User error: {:?}", user.err().unwrap());
+				return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
+			}
+			let user = user.unwrap();
 
-            // println!("User: {:?}", user);
+			// println!("User: {:?}", user);
 
-            if user.is_none() {
-                return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
-            }
+			if user.is_none() {
+				return Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized));
+			}
 
-            let user = user.unwrap();
+			let user = user.unwrap();
 
-            let matches =
-                utils::auth::verify_password(&user.hashed_password, &credentials.password);
+			let matches = utils::auth::verify_password(
+				&user.hashed_password,
+				&credentials.password,
+			);
 
-            if matches.is_err() {
-                Outcome::Failure((Status::Unauthorized, matches.err().unwrap()))
-            } else if matches.unwrap() {
-                let authed_user: AuthenticatedUser = user.into();
-                session
-                    .set(authed_user.clone())
-                    .await
-                    .expect("An error occurred while setting the session");
-                Outcome::Success(Auth(authed_user))
-            } else {
-                Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized))
-            }
-        }
-    }
+			if matches.is_err() {
+				Outcome::Failure((Status::Unauthorized, matches.err().unwrap()))
+			} else if matches.unwrap() {
+				let authed_user: AuthenticatedUser = user.into();
+				session
+					.set(authed_user.clone())
+					.await
+					.expect("An error occurred while setting the session");
+				Outcome::Success(Auth(authed_user))
+			} else {
+				Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized))
+			}
+		}
+	}
 }
+
+// OpenApiFromRequest<'_>

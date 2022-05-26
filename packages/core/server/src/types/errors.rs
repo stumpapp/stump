@@ -3,7 +3,13 @@ use rocket::{
 	response::{self, Responder},
 	Request, Response,
 };
+use rocket_okapi::{
+	gen::OpenApiGenerator, okapi::openapi3::Responses, response::OpenApiResponderInner,
+	OpenApiError,
+};
 use rocket_session_store::SessionError;
+use schemars::Map;
+use serde::Serialize;
 use std::io::Cursor;
 use thiserror::Error;
 // use unrar::error::UnrarError;
@@ -51,7 +57,7 @@ pub enum AuthError {
 	InvalidSession(#[from] SessionError),
 }
 
-#[derive(Error, Debug)]
+#[derive(Serialize, Error, Debug)]
 pub enum ApiError {
 	#[error("{0}")]
 	BadRequest(String),
@@ -73,6 +79,72 @@ pub enum ApiError {
 	Unknown(String),
 	#[error("{0}")]
 	Redirect(String),
+}
+
+impl OpenApiResponderInner for ApiError {
+	fn responses(_generator: &mut OpenApiGenerator) -> Result<Responses, OpenApiError> {
+		use rocket_okapi::okapi::openapi3::{RefOr, Response as OpenApiReponse};
+
+		let mut responses = Map::new();
+		responses.insert(
+            "400".to_string(),
+            RefOr::Object(OpenApiReponse {
+                description: "\
+                # [400 Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400)\n\
+                The request given is wrongly formatted or data asked could not be fulfilled. \
+                "
+                .to_string(),
+                ..Default::default()
+            }),
+        );
+		responses.insert(
+            "401".to_string(),
+            RefOr::Object(OpenApiReponse {
+                description: "\
+                # [401 Unauthorized](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401)\n\
+                You do not have authorization to make the request made. You must authenticate first. \
+                "
+                .to_string(),
+                ..Default::default()
+            }),
+        );
+		responses.insert(
+            "403".to_string(),
+            RefOr::Object(OpenApiReponse {
+                description: "\
+                # [403 Forbidden](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403)\n\
+                You do not have permission to make the request made. \
+                "
+                .to_string(),
+                ..Default::default()
+            }),
+        );
+		responses.insert(
+            "404".to_string(),
+            RefOr::Object(OpenApiReponse {
+                description: "\
+                # [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404)\n\
+                This response is given when you request a page that does not exists.\
+                "
+                .to_string(),
+                ..Default::default()
+            }),
+        );
+		responses.insert(
+            "500".to_string(),
+            RefOr::Object(OpenApiReponse {
+                description: "\
+                # [500 Internal Server Error](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500)\n\
+                This response is given when something went wrong on the server. \
+                ".to_string(),
+                ..Default::default()
+            }),
+        );
+		Ok(Responses {
+			responses,
+			..Default::default()
+		})
+	}
 }
 
 #[derive(Error, Debug)]

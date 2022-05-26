@@ -12,6 +12,8 @@ import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 
 // FIXME: hook issues, not surprised.
+// I believe it is caused becuase of how I navigate to login before some hooks complete?
+// not sure.
 export default function MainLayout() {
 	const navigate = useNavigate();
 	const location = useLocation();

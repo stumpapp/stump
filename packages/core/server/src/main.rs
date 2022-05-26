@@ -66,14 +66,14 @@ async fn rocket() -> _ {
 	// Context clone that will be managed by Rocket
 	let route_ctx = core_ctx.get_ctx();
 
-	// match run_migrations(route_ctx.get_db()).await {
-	// 	Ok(_) => {
-	// 		log::info!("Migrations ran successfully");
-	// 	},
-	// 	Err(e) => {
-	// 		panic!("Failed to run migrations: {:?}", e);
-	// 	},
-	// };
+	match run_migrations(route_ctx.get_db()).await {
+		Ok(_) => {
+			log::info!("Migrations ran successfully");
+		},
+		Err(e) => {
+			panic!("Failed to run migrations: {:?}", e);
+		},
+	};
 
 	tokio::spawn(async move {
 		EventManager::new(core_ctx)

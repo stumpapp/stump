@@ -114,11 +114,27 @@ CREATE TABLE "server_preferences" (
 );
 
 -- CreateTable
-CREATE TABLE "_MediaToMediaTag" (
+CREATE TABLE "_LibraryToTag" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
-    FOREIGN KEY ("A") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY ("B") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT "_LibraryToTag_A_fkey" FOREIGN KEY ("A") REFERENCES "libraries" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_LibraryToTag_B_fkey" FOREIGN KEY ("B") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "_SeriesToTag" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+    CONSTRAINT "_SeriesToTag_A_fkey" FOREIGN KEY ("A") REFERENCES "series" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_SeriesToTag_B_fkey" FOREIGN KEY ("B") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "_MediaToTag" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+    CONSTRAINT "_MediaToTag_A_fkey" FOREIGN KEY ("A") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "_MediaToTag_B_fkey" FOREIGN KEY ("B") REFERENCES "tags" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -149,7 +165,19 @@ CREATE UNIQUE INDEX "reading_list_access_userId_readingListId_key" ON "reading_l
 CREATE UNIQUE INDEX "read_progresses_userId_mediaId_key" ON "read_progresses"("userId", "mediaId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_MediaToMediaTag_AB_unique" ON "_MediaToMediaTag"("A", "B");
+CREATE UNIQUE INDEX "_LibraryToTag_AB_unique" ON "_LibraryToTag"("A", "B");
 
 -- CreateIndex
-CREATE INDEX "_MediaToMediaTag_B_index" ON "_MediaToMediaTag"("B");
+CREATE INDEX "_LibraryToTag_B_index" ON "_LibraryToTag"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_SeriesToTag_AB_unique" ON "_SeriesToTag"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_SeriesToTag_B_index" ON "_SeriesToTag"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_MediaToTag_AB_unique" ON "_MediaToTag"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_MediaToTag_B_index" ON "_MediaToTag"("B");

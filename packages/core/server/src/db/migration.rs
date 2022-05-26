@@ -1,4 +1,6 @@
 use anyhow::Result;
+use prisma_client_rust::raw;
+use serde::Deserialize;
 use std::io::BufReader;
 
 use include_dir::{include_dir, Dir};
@@ -12,16 +14,42 @@ static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/prisma/migrations
 const CREATE_MIGRATIONS_TABLE: &str =
 	include_str!("../../prisma/migrations/migrations.sql");
 
-// https://github.com/Brendonovich/prisma-client-rust/discussions/57
-// Cannot complete this until above is resolved :(
+#[derive(Deserialize, Debug)]
+struct CountQueryReturn {
+	count: u32,
+}
+
+fn get_sql_stmts(sql_str: &str) -> Vec<&str> {
+	sql_str
+		.split(";")
+		.filter(|s| !s.trim().is_empty())
+		.collect()
+}
+
 pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
-	// // Check if the migration table exists
-	// let count = ... "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='migrations';
+	log::info!("Checking for `migrations` table");
+
+	let res: Vec<CountQueryReturn> = db
+		._query_raw(raw!(
+			"SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name='migrations';"
+		))
+		.await?;
 
 	// If the table doesn't exist, create it
-	// if count == 0 {
-	// 	log::info!("Creating migrations table");
-	// }
+	if res.get(0).unwrap().count == 0 {
+		log::info!("`migrations` table not found, creating it");
+
+		let stmts = get_sql_stmts(CREATE_MIGRATIONS_TABLE);
+
+		for stmt in stmts {
+			log::debug!("{}", stmt);
+			db._execute_raw(raw!(stmt)).await?;
+		}
+
+		log::info!("`migrations` table created");
+	} else {
+		log::info!("`migrations` table already exists");
+	}
 
 	// migration structure: directory with name like [timstamp: i64]_[name], with a file named migration.sql
 	let mut migration_dirs = MIGRATIONS_DIR.dirs().collect::<Vec<&Dir>>();
@@ -40,15 +68,15 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 		a_timestamp.cmp(&b_timestamp)
 	});
 
+	log::info!("Migrations sorted by timestamp");
+
 	for dir in migration_dirs {
 		let name = dir.path().file_name().unwrap().to_str().unwrap();
 
-		let sql_file = dir.get_file("migration.sql").unwrap();
+		let sql_file = dir.get_file(dir.path().join("migration.sql")).unwrap();
 		let sql_str = sql_file.contents_utf8().unwrap();
 
 		let checksum = digest_from_reader(BufReader::new(sql_file.contents()))?;
-
-		log::info!("{:?}", &checksum);
 
 		let existing_migration = db
 			.migration()
@@ -57,19 +85,47 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 			.await?;
 
 		// Only run migrations that have not been run yet
+		// TODO: check success?
 		if existing_migration.is_some() {
+			log::info!(
+				"Migration {} already applied (checksum: {})",
+				name,
+				checksum
+			);
 			continue;
 		}
 
 		log::info!("Running migration {}", name);
 
-		// TODO: run the migration
-		// db._query_raw(sql_str).await?;
+		let stmts = get_sql_stmts(sql_str);
 
 		// TODO: do I bother letting this process continue with failed migrations?
 		// I don't see why I should, if the previous migration fails I feel like
 		// the next one shouldn't get run. Which makes the success field on migrations
 		// pointless. TBD.
+		for stmt in stmts {
+			log::debug!("{}", stmt);
+
+			match db._execute_raw(raw!(stmt)).await {
+				Ok(_) => continue,
+				Err(e) => {
+					log::error!("Migration {} failed: {}", name, e);
+
+					db.migration()
+						.create(
+							migration::name::set(name.to_string()),
+							migration::checksum::set(checksum.clone()),
+							vec![migration::success::set(false)],
+						)
+						.exec()
+						.await?;
+
+					return Err(anyhow::anyhow!(e));
+				},
+			};
+		}
+
+		log::info!("Migration {} applied", name);
 
 		db.migration()
 			.create(

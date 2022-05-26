@@ -38,3 +38,4 @@ target
 _next
 
 docker-compose.yaml
+openapi-example*

@@ -1,5 +1,9 @@
 # Getting Started
 
+{% callout title="Warning" icon="warning" %}
+This documentation is under active development. Some things will be missing, you might see some grammar issues or funny TODO comments. Please keep that in mind while using this guide.
+{% /callout %}
+
 There are three main, recommended ways to install Stump:
 
 1. Install Stump using [Docker](/installation/docker).

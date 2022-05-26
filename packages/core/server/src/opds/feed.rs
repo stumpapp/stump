@@ -66,6 +66,8 @@ impl OpdsFeed {
     }
 }
 
+// TODO: impl feeds for search results
+
 impl From<OpdsSeries> for OpdsFeed {
     fn from(series: OpdsSeries) -> Self {
         let id = series.id;

@@ -2,19 +2,28 @@ use serde::{Deserialize, Serialize};
 
 use crate::prisma;
 
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AuthenticatedUser {
 	pub id: String,
 	pub username: String,
 	pub role: String,
+	// FIXME: once issue 44 is resolved, remove Option
+	pub preferences: Option<prisma::user_preferences::Data>,
 }
 
 impl Into<AuthenticatedUser> for prisma::user::Data {
 	fn into(self) -> AuthenticatedUser {
 		AuthenticatedUser {
-			id: self.id,
-			username: self.username,
-			role: self.role,
+			id: self.id.clone(),
+			username: self.username.clone(),
+			role: self.role.clone(),
+			// This is disgusting, but necessary for now
+			preferences: Some(
+				self.user_preferences()
+					.expect("Relation load error")
+					.unwrap()
+					.to_owned(),
+			),
 		}
 	}
 }

@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import Layout from '~components/Layout';
 import { DefaultSeo } from 'next-seo';
 import { ThemeProvider } from 'next-themes';
+import { TocEntry } from '~components/markdoc/TableOfContents';
 import NProgress from '~components/NProgress';
 
 import SEO from '../../next-seo.config';
@@ -35,7 +36,9 @@ function collectHeadings(node: any, sections: any[] = []) {
 }
 
 export default function MyApp({ Component, pageProps }: AppProps) {
-	const toc = pageProps.markdoc?.content ? collectHeadings(pageProps.markdoc.content) : [];
+	const toc: TocEntry[] = pageProps.markdoc?.content
+		? collectHeadings(pageProps.markdoc.content)
+		: [];
 
 	return (
 		// TODO: frontmatter={pageProps.markdoc.frontmatter}

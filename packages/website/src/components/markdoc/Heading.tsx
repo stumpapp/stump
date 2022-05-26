@@ -16,7 +16,7 @@ export default function Heading({ level = 1, children, className, id }: HeadingP
 
 	const component = (
 		// @ts-ignore: this is fine I promise
-		<Component className={clsx('relative', className)}>
+		<Component className={clsx('heading relative', className)}>
 			{/* 56px is top nav height, giving 5px extra for space */}
 			<div className="absolute -top-[calc(56px+5px)]" id={id} />
 			{children}
@@ -25,23 +25,30 @@ export default function Heading({ level = 1, children, className, id }: HeadingP
 
 	if (isDocsHeading && level !== 1) {
 		return (
-			<a href={`#${id}`}>
-				{component}
+			// wrapping in div so it doesn't go full width... blech
+			<div
+				className={clsx('flex', {
+					'pb-[0.3em] border-b border-b-gray-150 dark:border-b-[#373e47]': level === 2,
+				})}
+			>
+				<a href={`#${id}`}>
+					{component}
 
-				<style jsx>
-					{`
-						a :global(.heading::after) {
-							opacity: 0;
-							content: '  #';
-							color: rgb(196 130 89);
-							transition: opacity 250ms ease;
-						}
-						a :global(.heading:hover::after) {
-							opacity: 1;
-						}
-					`}
-				</style>
-			</a>
+					<style jsx>
+						{`
+							a :global(.heading::after) {
+								opacity: 0;
+								content: '  #';
+								color: rgb(196 130 89);
+								transition: opacity 250ms ease;
+							}
+							a :global(.heading:hover::after) {
+								opacity: 1;
+							}
+						`}
+					</style>
+				</a>
+			</div>
 		);
 	}
 

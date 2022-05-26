@@ -1,5 +1,5 @@
 use prisma_client_rust::Direction;
-use rocket::serde::json::Json;
+use rocket::{serde::json::Json, http::ContentType};
 
 use crate::{
     fs,
@@ -7,9 +7,8 @@ use crate::{
     prisma::{media, read_progress, series},
     types::{
         alias::{ApiResult, Context},
-        errors::ApiError,
-        http::ImageResponse,
-    },
+        errors::ApiError, http::ImageResponse,
+    }, utils,
 };
 
 #[get("/series")]
@@ -86,5 +85,5 @@ pub async fn get_series_thumbnail(
 
     let media = media.unwrap();
 
-    Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
+    Ok(fs::media_file::get_page(media.path.as_str(), 1, true)?)
 }

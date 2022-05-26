@@ -1,6 +1,6 @@
 import API from '..';
 
-export function getLibraries(): Promise<GetLibrariesResponse> {
+export function getLibraries(): Promise<ApiResult<Library[]>> {
 	return API.get('/libraries');
 }
 

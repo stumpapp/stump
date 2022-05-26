@@ -34,6 +34,13 @@ clap = { version = "3.1.18", features = ["derive"], optional = true }
 ring = "0.16.20"
 data-encoding = "2.3.2"
 cuid = "1.2.0"
+webp = "0.2.2"
+image = "0.24.2"
+include_dir = "0.7.2"
+# TODO: make this *NOT* bundled in release, not necessary. I guess I would have to feature
+# gate it? but that is just kinda annoying. Since I am pushing this feature off for now, 
+# hopefully the PR branch I am pointing to is merged, as well.
+# rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc", "swagger"] }
 
 [features]
 seed-binary = ["clap"]

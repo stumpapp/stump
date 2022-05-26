@@ -1,4 +1,5 @@
-import { Box, Spacer, Stack, Text } from '@chakra-ui/react';
+import { Box, Spacer, Text } from '@chakra-ui/react';
+import clsx from 'clsx';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -39,18 +40,22 @@ export default function Card({ to, imageAlt, imageSrc, title, subtitle, onMouseE
 					src={imageSrc}
 					onError={(err) => {
 						// @ts-ignore
-						err.target.src = '/fallback-card.png';
+						// err.target.src = '/fallback-card.png';
+						err.target.src = '/favicon.png';
 					}}
 				/>
 			</Box>
 
 			<Box
-				className="flex flex-col max-w-[12rem] break-all h-[5rem] p-2"
+				className={clsx(
+					subtitle ? 'h-[5rem]' : 'h-[4rem]',
+					'flex flex-col max-w-[12rem] break-all  p-2',
+				)}
 				color="black"
 				_dark={{ color: 'gray.100' }}
 			>
-				{/* TODO: truncate SUPER long titles */}
-				<Text fontSize="md" as="h3">
+				{/* TODO: truncate SMARTER :) */}
+				<Text className="card-title" fontSize="md" as="h3">
 					{title}
 				</Text>
 

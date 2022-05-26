@@ -78,15 +78,15 @@ function App() {
 			setTimeout(() => {
 				completeJob(data.JobComplete as string);
 				toast.success(`Job ${data.JobComplete} complete.`);
-			}, 1500);
+			}, 500);
 		} else if (data.CreatedSeries || data.CreatedMedia) {
 			// I set a timeout here to give the backend a little time to analyze at least
 			// one of the books in a new series before triggering a refetch. This is to
 			// prevent the series/media cards from being displayed before there is an image ready.
-			setTimeout(() => client.invalidateQueries('getLibrary'), 500);
+			setTimeout(() => client.invalidateQueries('getLibrary'), 250);
 
 			if (data.CreatedMedia) {
-				setTimeout(() => client.invalidateQueries('getSeries'), 500);
+				setTimeout(() => client.invalidateQueries('getSeries'), 250);
 			}
 		} else {
 			console.log('Unknown JobEvent', data);

@@ -21,7 +21,7 @@ export function Td({ className, ...props }: TdProps) {
 	return (
 		<td
 			className={clsx(
-				'whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-200 sm:first:pl-6',
+				'whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-800 dark:text-gray-200 sm:first:pl-6',
 				className,
 			)}
 			{...props}
@@ -60,7 +60,7 @@ interface TableProps extends ComponentProps<'table'> {}
 
 export default function Table({ className, ...props }: TableProps) {
 	return (
-		<div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+		<div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
 			<table
 				className={clsx('min-w-full divide-y divide-gray-300 dark:divide-gray-750', className)}
 				{...props}

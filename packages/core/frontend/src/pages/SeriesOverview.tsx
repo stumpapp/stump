@@ -1,10 +1,12 @@
-import { Heading, Wrap, WrapItem } from '@chakra-ui/react';
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import { getSeriesById } from '~api/query/series';
-import MediaCard from '~components/Media/MediaCard';
+
+import MediaGrid from '~components/Media/MediaGrid';
+import MediaList from '~components/Media/MediaList';
+import { useViewMode } from '~hooks/useViewMode';
 
 export default function SeriesOverview() {
 	const { id } = useParams();
@@ -23,17 +25,15 @@ export default function SeriesOverview() {
 		throw new Error('Series not found');
 	}
 
+	const { viewAsGrid } = useViewMode();
+
 	return (
 		<>
 			<Helmet>
 				<title>Stump | {series.name}</title>
 			</Helmet>
 
-			<div className="p-4 flex flex-wrap gap-4 items-center justify-center md:justify-start">
-				{series.media.map((m) => (
-					<MediaCard key={m.id} {...m} />
-				))}
-			</div>
+			{viewAsGrid ? <MediaGrid media={series.media} /> : <MediaList media={series.media} />}
 		</>
 	);
 }

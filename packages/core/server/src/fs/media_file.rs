@@ -51,11 +51,11 @@ pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 	})
 }
 
-pub fn get_page(file: &str, page: i32) -> GetPageResult {
+pub fn get_page(file: &str, page: i32, try_webp: bool) -> GetPageResult {
 	let file_name = file.to_string();
 
 	if file_name.ends_with(".cbr") {
-		get_rar_image(file, page)
+		get_rar_image(file, page, try_webp)
 	} else if file_name.ends_with(".cbz") {
 		get_zip_image(file, page)
 	} else if file_name.ends_with(".epub") {

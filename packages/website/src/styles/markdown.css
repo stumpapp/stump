@@ -1,23 +1,10 @@
 main > article {
-	@apply flex flex-col space-y-4 flex-1;
+	@apply flex flex-col space-y-4 flex-1 leading-[1.5];
 }
 
 thead > tr {
 	@apply bg-gray-50 dark:bg-gray-900 !important;
 }
-
-/* tr:nth-child(even) {
-	background-color: #ccc;
-}
-tr:nth-child(odd) {
-	background-color: #fff;
-} */
-
-/* CODE */
-
-/* .markdown-body pre {
-	@apply relative p-3 rounded-lg shadow bg-gray-900;
-} */
 
 /* HEADERS */
 
@@ -28,6 +15,14 @@ main > article h4,
 main > article h5,
 main > article h6 {
 	@apply font-bold;
+}
+
+main p > code {
+	@apply py-[0.2em] px-[0.4em] bg-gray-200 dark:bg-gray-800 rounded-md;
+}
+
+main li > code {
+	@apply py-[0.2em] px-[0.4em] bg-gray-200 dark:bg-gray-800 rounded-md;
 }
 
 main > article h1 {

@@ -1,9 +1,18 @@
 import create, { GetState, SetState, StateCreator, StoreApi, UseBoundStore } from 'zustand';
 import createContext from 'zustand/context';
-import { devtools } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
 
-interface StoreMutations {
+interface UserPreferencesMutations {
+	// setDarkMode(darkMode: boolean): void;
+	setLibraryViewMode(viewMode: ViewMode): void;
+	setSeriesViewMode(viewMode: ViewMode): void;
+	setCollectionViewMode(viewMode: ViewMode): void;
+}
+
+interface StoreMutations extends UserPreferencesMutations {
 	setUser: (user: User) => void;
+	setUserAndPreferences: (user: UserWithPreferences) => void;
+	setUserPreferences: (preferences: UserPreferences) => void;
 	setLibraries: (libraries: Library[]) => void;
 	setMedia: (media: Media[]) => void;
 
@@ -16,6 +25,7 @@ interface StoreMutations {
 
 interface MainStore extends StoreMutations {
 	user: User | null;
+	userPreferences: UserPreferences | null;
 	libraries: Library[];
 	// TODO: I don't think I am going to store this in the store
 	media: MediaWithProgress[];
@@ -29,16 +39,60 @@ const { Provider, useStore } = createContext<MainStore>();
 
 let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (set, get) => ({
 	user: null,
+	userPreferences: null,
 	libraries: [],
 	media: [],
 
-	// libraryDrawer: false,
-
 	title: 'Stump',
-
 	jobs: {},
 
 	setUser: (user: User) => set(() => ({ user })),
+
+	setUserAndPreferences: (user: UserWithPreferences) =>
+		set(() => ({ user, userPreferences: user.preferences })),
+
+	setUserPreferences: (preferences: UserPreferences) =>
+		set(() => ({
+			userPreferences: preferences,
+		})),
+
+	setLibraryViewMode: (viewMode: ViewMode) => {
+		let userPreferences = get().userPreferences;
+
+		if (userPreferences) {
+			set(() => ({
+				userPreferences: {
+					...userPreferences,
+					libraryViewMode: viewMode,
+				} as UserPreferences,
+			}));
+		}
+	},
+	setSeriesViewMode: (viewMode: ViewMode) => {
+		let userPreferences = get().userPreferences;
+
+		if (userPreferences) {
+			set(() => ({
+				userPreferences: {
+					...userPreferences,
+					seriesViewMode: viewMode,
+				} as UserPreferences,
+			}));
+		}
+	},
+	setCollectionViewMode: (viewMode: ViewMode) => {
+		let userPreferences = get().userPreferences;
+
+		if (userPreferences) {
+			set(() => ({
+				userPreferences: {
+					...userPreferences,
+					collectionViewMode: viewMode,
+				} as UserPreferences,
+			}));
+		}
+	},
+
 	setLibraries: (libraries: Library[]) => set(() => ({ libraries })),
 	setMedia: (media: MediaWithProgress[]) => set(() => ({ media })),
 
@@ -54,7 +108,7 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 	},
 
 	addJob: (job: Job) => {
-		console.log('addJob', job);
+		// console.log('addJob', job);
 		if (get().jobs[job.runnerId] == undefined) {
 			set(() => ({ jobs: { ...get().jobs, [job.runnerId]: job } }));
 		}
@@ -95,7 +149,17 @@ if (import.meta.env.NODE_ENV !== 'production') {
 	store = devtools(store) as UseBoundStore<MainStore, StoreApi<MainStore>>;
 }
 
-const mainStore = create<MainStore>(store);
+// const mainStore = create<MainStore>(store);
+
+const mainStore = create<MainStore>(
+	persist(store, {
+		name: 'stump-config',
+		partialize: (state) => ({
+			userPreferences: state.userPreferences,
+		}),
+		getStorage: () => sessionStorage,
+	}),
+);
 
 let createStore = () => mainStore;
 

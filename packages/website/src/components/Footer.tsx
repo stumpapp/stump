@@ -1,26 +1,26 @@
 import clsx from 'clsx';
 import React from 'react';
-import { Discord, Github } from '@icons-pack/react-simple-icons';
+import { Discord, Github, Twitter } from '@icons-pack/react-simple-icons';
 import Link from 'next/link';
 
 const navigation = {
 	about: [
 		{ name: 'FAQ', href: '/faq', disabled: false },
-		{ name: 'Getting Started', href: '/guides/', disabled: false },
-		{ name: 'Changelog', href: '#', disabled: true },
+		{ name: 'Getting Started', href: '/installation', disabled: false },
+		// { name: 'Changelog', href: '#', disabled: true },
 	],
 	downloads: [{ name: 'Coming Soon!', href: '#', disabled: true }],
 	developers: [
 		{
 			name: 'Documentation',
-			href: 'https://github.com/aaronleopold/stump#development-setup',
+			href: 'https://github.com/aaronleopold/stump/tree/develop#development-setup',
 			isExternal: true,
 			disabled: false,
 		},
 		{
 			name: 'Contribute',
-			href: 'https://github.com/aaronleopold/stump/blob/main/CONTRIBUTING.md',
-			isExternal: true,
+			href: '/contributing',
+			isExternal: false,
 			disabled: false,
 		},
 	],
@@ -33,13 +33,12 @@ const navigation = {
 		},
 	],
 	social: [
-		// {
-		// 	name: 'Twitter',
-		// 	href: '#',
-		// 	icon: Twitter,
-		// 	disabled: true,
-		// 	isExternal: true,
-		// },
+		{
+			name: 'Twitter',
+			href: 'https://twitter.com/stumpapp_',
+			icon: Twitter,
+			isExternal: true,
+		},
 		{
 			name: 'GitHub',
 			href: 'https://github.com/aaronleopold/stump',
@@ -55,14 +54,11 @@ const navigation = {
 	],
 };
 
-const DISABLED_URL = '';
-
 interface LinkSectionProps {
 	title: string;
 	links: { name: string; href: string; disabled?: boolean; isExternal?: boolean }[];
 }
 
-// FIXME: hydration issue
 const LinkSection = ({ title, links }: LinkSectionProps) => {
 	return (
 		<div className="col-span-1 flex flex-col space-y-2">
@@ -72,18 +68,15 @@ const LinkSection = ({ title, links }: LinkSectionProps) => {
 			<ul role="list" className="mt-4 space-y-4">
 				{links.map((item) => (
 					<li key={item.name}>
-						<Link
-							href={item.disabled ? DISABLED_URL : item.href}
-							target={item.isExternal ? '_blank' : undefined}
-							passHref
-						>
+						<Link href={item.href} passHref>
 							<a
 								className={clsx(
 									item.disabled
 										? 'pointer-events-none text-gray-400 dark:text-gray-500'
-										: 'text-gray-700 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100',
+										: 'text-gray-750 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100',
 									'text-base',
 								)}
+								target={item.isExternal ? '_blank' : undefined}
 							>
 								{item.name}
 							</a>
@@ -98,7 +91,7 @@ const LinkSection = ({ title, links }: LinkSectionProps) => {
 export default function Footer() {
 	return (
 		<footer
-			className="bg-gray-100 dark:bg-gray-950 w-full border-t dark:border-gray-800"
+			className="bg-gray-75 dark:bg-gray-950 w-full border-t dark:border-gray-800"
 			aria-labelledby="footer-heading"
 		>
 			<h2 id="footer-heading" className="sr-only">
@@ -107,7 +100,7 @@ export default function Footer() {
 			<div className="max-w-[85rem] mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
 				<div className="grid grid-cols-2 gap-6 lg:gap-8 lg:grid-cols-6">
 					<div className="space-y-6 col-span-2 mb-12 lg:mb-0">
-						<img className="h-12" src="/favicon.png" alt="Stump" />
+						<img className="h-12" src="/favicon.ico" alt="Stump" />
 
 						<div className="flex flex-col space-y-1">
 							<h3 className="font-bold text-xl text-gray-800 dark:text-gray-200">Stump</h3>
@@ -123,7 +116,7 @@ export default function Footer() {
 									href={item.href}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="text-gray-700 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-100"
+									className="text-gray-750 hover:text-gray-650 dark:text-gray-300 dark:hover:text-gray-100"
 								>
 									<span className="sr-only">{item.name}</span>
 									<item.icon className="h-6 w-6" aria-hidden="true" />

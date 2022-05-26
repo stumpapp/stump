@@ -37,13 +37,17 @@ The core package is where Stump's core functionality is located.
 
 ### Website
 
-The website package contains a Next.js application for the Stump landing page and documentation pages (what you're currently reading). The documentation aspect is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev).
+The website package contains a Next.js application for the Stump landing page and documentation pages (what you're currently reading), created using [Markdoc](https://markdoc.io/).
 
 ## Development Setup
 
-There is now a setup script that handles most of the initial configuration, however ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
+There is a setup script to handle most of the initial configuration, however please ensure you at least have the basics installed: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your `$PATH`.
 
-**Ensure you are on the `develop` branch before continuing.**
+**_Ensure you are on the `develop` branch before continuing._**:
+
+```bash
+git switch develop # or git checkout develop
+```
 
 ### Setup Script
 
@@ -61,43 +65,25 @@ Otherwise, you can run the following:
 
 These scripts will run system checks for `cargo` and `pnpm`, and will install a few additional dependencies, depending on your system. It will then install all the direct, Stump development dependencies, build the frontend bundle (required for server to start), generate the prisma client and sqlite database.
 
+{% callout title="Windows WSL" icon="warning" %}
+I've found that running the setup script on Windows WSL works well, but if you're using it to install `pnpm` ensure you have node and npm configured to not point to your Windows installation of node/npm. You'll likely encounter a couple of permissions errors if it isn't configured this way.
+{% /callout %}
+
 If you face any issues running these, or are using a system that is not supported by the setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
 
-### Running the Seed Script
+### Running Stump
 
-A seed will be run to create essential starting data for development. At some point, server initialization logic will be added that will make this step optional, but for now it is required. If you are running the seed script, you can run the following for instructions:
-
-```bash
-cargo seed --help
-```
-
-In general, you should provide a `library_path` (`-l`) argument, which is the path to a Library directory on your system. This 'Library' should contain your folders that represent series. It will default to `$HOME/Documents/Stump`. You may provide a `user_name` (`-u`) argument, which will be the username of the server owner. Default will be 'oromei' with a password of 'oromei'. Specifiying a username will still yield an **equivalent** password.
-
-An example folder structure for a one-library collection might be:
-
-```
-/Users/aaronleopold/Documents/Stump
-├── Marvel Comics
-│   ├── The Amazing Spider-Man (2018)
-│   │   ├── The Amazing Spider-Man 001 (2018).cbz
-│   │   ├── The Amazing Spider-Man 002 (2018).cbz
-│   │   └── etc.
-│   ├── The Amazing Spider-Man (2022)
-│   │   ├── The Amazing Spider-Man 001 (2022).cbz
-│   │   ├── The Amazing Spider-Man 002 (2022).cbz
-│   │   └── etc.
-├── EBooks
-│   ├── Martin, George R R - A Storm of Swords.epub
-│   ├── Tolkien, J R R - Hobbit Or There and Back Again.epub
-│   └── etc.
-└── ...
-```
-
-Currently you'll have to navigate to the server directory in order to run with custom arguments:
+To start the application for development, simply run:
 
 ```bash
-cd packages/core/server
-cargo seed -l='/Users/you/Documents/Stump/Marvel Comics' -u='oromei'
+pnpm core dev
 ```
 
-Note: After the seed completes, you will need to invoke a library scan job (i.e. populate your library with series/media). The seed outputs a URL at which you can make a POST request to trigger the scan, however you can also just continue on to the next step and use the UI to start a scan.
+This will start both the vite dev server and the rust server, watching for changes and recompiling when necessary. If preferred, you may run the server and the frontend in separate processes:
+
+```bash
+pnpm core server:dev # start the server
+pnpm core frontend:dev # start the frontend
+```
+
+At this point, you're pretty much all set! When you navigate to [`localhost:3000`](http://localhost:3000), Stump will prompt you to create the managing user account and then your first library.

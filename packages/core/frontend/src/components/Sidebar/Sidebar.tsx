@@ -20,6 +20,7 @@ import {
 import ApplicationVersion from '../ApplicationVersion';
 import LibraryOptionsMenu from '../Library/LibraryOptionsMenu';
 import ThemeToggle from '../ThemeToggle';
+import CreateLibraryModal from '~components/Library/CreateLibraryModal';
 
 interface NavMenuItemProps extends Library {
 	href: string;
@@ -65,6 +66,8 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 			<AnimatePresence>
 				{isOpen && (
 					<VStack mt={2} spacing={2}>
+						<CreateLibraryModal />
+
 						{items!.map((item) => (
 							<Box
 								key={item.id}

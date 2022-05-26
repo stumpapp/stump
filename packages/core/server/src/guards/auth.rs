@@ -4,7 +4,7 @@ use rocket::{
 };
 
 use crate::{
-    prisma,
+    prisma::{self, user},
     types::{
         alias::{Context, Session},
         errors::AuthError,
@@ -100,6 +100,7 @@ impl<'r> FromRequest<'r> for Auth {
                 .find_unique(prisma::user::UniqueWhereParam::UsernameEquals(
                     credentials.username,
                 ))
+                .with(user::user_preferences::fetch())
                 .exec()
                 .await;
 

@@ -9,7 +9,7 @@ use crate::{
 	types::{
 		alias::ProcessResult,
 		errors::{ApiError, ProcessFileError, ScanError},
-		event::{ClientEvent, InternalEvent},
+		event::{ClientEvent},
 		models::MediaMetadata,
 	},
 };
@@ -47,7 +47,7 @@ impl Job for ScannerJob {
 			.filter_map(|e| e.ok())
 			.count();
 
-		ctx.emit_client_event(ClientEvent::job_started(
+		let _ = ctx.emit_client_event(ClientEvent::job_started(
 			runner_id.clone(),
 			0,
 			Some(files_to_process),
@@ -231,8 +231,13 @@ impl Scanner {
 		};
 
 		let path_str = path.to_str().unwrap().to_string();
-		let name = entry.file_name().to_str().unwrap().to_string();
+		let mut name = entry.file_name().to_str().unwrap().to_string();
 		let ext = path.extension().unwrap().to_str().unwrap().to_string();
+
+		// remove extension from name, not sure why file_name() includes it smh
+		if name.ends_with(format!(".{}", ext).as_str()) {
+			name.truncate(name.len() - (ext.len() + 1));
+		}
 
 		let comic_info = match processed_entry.metadata {
 			Some(info) => info,

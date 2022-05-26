@@ -1,6 +1,7 @@
 use anyhow::Result;
 use data_encoding::HEXLOWER;
 use ring::digest::{Context, SHA256};
+use std::io::Read;
 
 use std::fs::File;
 #[cfg(target_family = "unix")]
@@ -29,6 +30,27 @@ pub fn digest(path: &str, byte_offset: i32) -> Result<String> {
 	}
 
 	ring_context.update(&buffer);
+
+	let digest = ring_context.finish();
+
+	Ok(HEXLOWER.encode(digest.as_ref()))
+}
+
+pub fn digest_from_reader<R: Read>(mut reader: R) -> Result<String> {
+	let mut ring_context = Context::new(&SHA256);
+
+	let mut buffer = [0; 1024];
+
+	loop {
+		let count = reader.read(&mut buffer)?;
+
+		// This reader has reached its "end of file"
+		if count == 0 {
+			break;
+		}
+
+		ring_context.update(&buffer[..count]);
+	}
 
 	let digest = ring_context.finish();
 

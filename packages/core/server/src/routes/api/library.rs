@@ -1,16 +1,20 @@
+use prisma_client_rust::Direction;
 use rocket::serde::json::Json;
 use serde::Deserialize;
 
 use crate::{
-	fs::scanner::ScannerJob,
+	fs::{self, scanner::ScannerJob},
 	guards::auth::Auth,
-	prisma::{library, series},
+	prisma::{library, media, series},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
+		http::ImageResponse,
 	},
 };
 
+/// Get all libraries accessible by the current user. Library `tags` relation is loaded
+/// on this route.
 #[get("/libraries")]
 pub async fn get_libraries(
 	ctx: &Context,
@@ -18,9 +22,17 @@ pub async fn get_libraries(
 ) -> ApiResult<Json<Vec<library::Data>>> {
 	let db = ctx.get_db();
 
-	Ok(Json(db.library().find_many(vec![]).exec().await?))
+	Ok(Json(
+		db.library()
+			.find_many(vec![])
+			.with(library::tags::fetch(vec![]))
+			.exec()
+			.await?,
+	))
 }
 
+/// Get a library by id, if the current user has access to it. Library `series`, `media`
+/// and `tags` relations are loaded on this route.
 #[get("/libraries/<id>")]
 pub async fn get_library_by_id(
 	id: String,
@@ -33,6 +45,7 @@ pub async fn get_library_by_id(
 		.library()
 		.find_unique(library::id::equals(id.clone()))
 		.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
+		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
 
@@ -46,7 +59,33 @@ pub async fn get_library_by_id(
 	Ok(Json(lib.unwrap()))
 }
 
-// TODO: write me
+/// Get the thumbnail image for a library by id, if the current user has access to it.
+#[get("/libraries/<id>/thumbnail")]
+pub async fn get_library_thumbnail(
+	id: String,
+	ctx: &Context,
+	_auth: Auth,
+) -> ApiResult<ImageResponse> {
+	let db = ctx.get_db();
+
+	let library_series = db
+		.series()
+		.find_many(vec![series::library_id::equals(Some(id.clone()))])
+		.with(series::media::fetch(vec![]).order_by(media::name::order(Direction::Asc)))
+		.exec()
+		.await?;
+
+	// TODO: error handling
+
+	let series = library_series.first().unwrap();
+
+	let media = series.media()?.first().unwrap();
+
+	Ok(fs::media_file::get_page(media.path.as_str(), 1, true)?)
+}
+
+/// Queue a ScannerJob to scan the library by id. The job, when started, is
+/// executed in a separate thread.
 #[get("/libraries/<id>/scan")]
 pub async fn scan_library(
 	id: String,
@@ -119,7 +158,7 @@ pub struct UpdateLibrary {
 	description: Option<String>,
 }
 
-/// Update a library.
+/// Update a library by id, if the current user is a SERVER_OWNER.
 // TODO: Scan?
 #[put("/libraries/<id>", data = "<input>")]
 pub async fn update_library(
@@ -151,7 +190,7 @@ pub async fn update_library(
 	Ok(Json(updated.unwrap()))
 }
 
-// TODO: check the deletion of a library properly cascades to all series and media within it.
+/// Delete a library by id, if the current user is a SERVER_OWNER.
 #[delete("/libraries/<id>")]
 pub async fn delete_library(
 	id: String,

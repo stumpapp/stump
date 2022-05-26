@@ -1,4 +1,7 @@
-use rocket::Route;
+use rocket::{serde::json::Json, Route};
+use serde::Serialize;
+
+use crate::types::alias::{ApiResult, Context};
 
 pub mod auth;
 pub mod job;
@@ -10,6 +13,7 @@ pub mod series;
 pub fn api() -> Vec<Route> {
 	routes![
 		// top level
+		claim,
 		// routing::api::scan,
 		// routing::api::event_listener,
 		// auth
@@ -40,4 +44,24 @@ pub fn api() -> Vec<Route> {
 		media::get_media_thumbnail,
 		media::update_media_progress,
 	]
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ClaimResponse {
+	is_claimed: bool,
+}
+
+// TODO: set status?
+// TODO: should this explicitly check for a SERVER_OWNER? Not sure if it's needed, if
+// it would be a valid scenario that a SERVER_OWNER account gets deleted but not the
+// other *managed* accounts.
+/// Checks whether or not the server is 'claimed,' i.e. if there is a user registered.
+#[get("/claim")]
+async fn claim(ctx: &Context) -> ApiResult<Json<ClaimResponse>> {
+	let db = ctx.get_db();
+
+	Ok(Json(ClaimResponse {
+		is_claimed: db.user().find_first(vec![]).exec().await?.is_some(),
+	}))
 }

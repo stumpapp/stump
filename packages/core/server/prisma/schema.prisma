@@ -47,6 +47,10 @@ model User {
 
   sharedReadingLists ReadingListAccess[]
 
+  // Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44, then making it mandatory
+  userPreferencesId String?          @unique
+  userPreferences   UserPreferences? @relation(fields: [userPreferencesId], references: [id], onDelete: Cascade)
+
   @@map("users")
 }
 
@@ -55,7 +59,7 @@ model User {
 model Library {
   id          String   @id @default(uuid())
   // The name of the library. ex: "Marvel Comics"
-  name        String
+  name        String   @unique
   // The description of the library. ex: "The best library ever"
   description String?
   // The location of the library in the fs. ex: "/home/user/media/comics/marvel"
@@ -66,6 +70,10 @@ model Library {
   updatedAt   DateTime @updatedAt
   // The series in the library
   series      Series[]
+
+
+  tags Tag[]
+
 
   @@map("libraries")
 }
@@ -88,6 +96,8 @@ model Series {
   library     Library? @relation(fields: [libraryId], references: [id], onDelete: Cascade)
   // The media files in the series.
   media       Media[]
+
+  tags Tag[]
 
   @@map("series")
 }
@@ -119,29 +129,29 @@ model Media {
   // The read progresses of the media
   readProgresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
   // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
-  tags           MediaTag[]
+  tags           Tag[]
 
   // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
   // readingListId String?
 
-
   @@map("media")
 }
 
-model MediaTag {
-  id   String @id @default(cuid())
+model Tag {
+  id        String    @id @default(cuid())
   // The name of the tag. ex: "Action"
-  name String @unique
-
-  media Media[]
+  name      String    @unique
+  // media which have this tag associated
+  media     Media[]
+  // series which have this tag associated
+  series    Series[]
+  // libraries which have this tag associated
+  libraries Library[]
 
   @@map("tags")
 }
 
-// TODO: Before defining the relation I need to decide between the following scenarios:
-// 1. A server is the owning entity for reading lists
-// 2. A user is the owning entity for reading lists, and users can have their own reading lists
-// 3. A user is the owning entity for reading lists and may share reading lists with other users
+// TODO: A user is the owning entity for reading lists and may share reading lists with other users
 model ReadingList {
   id          String   @id @default(cuid())
   // The name of the reading list. ex: "Summer Reading"
@@ -180,10 +190,7 @@ model ReadingListAccess {
   @@map("reading_list_access")
 }
 
-// TODO: Before defining the relation I need to decide between the following scenarios:
-// 1. A server is the owning entity for collections
-// 2. A user is the owning entity for collections, and users can have their own collections
-// 3. A user is the owning entity for collections and may share collections with other users
+// TODO: A user is the owning entity for collections and may share collections with other users
 model Collection {
   id          String   @id @default(cuid())
   // The name of the collection. ex: "Spider-Man Comics"
@@ -226,8 +233,24 @@ model Log {
   @@map("logs")
 }
 
+model UserPreferences {
+  id                 String  @id @default(cuid())
+  // Flag to indicate if the user wants to reduce some of the animations when using the build-in client
+  reduceAnimations   Boolean @default(false)
+  // Whether the user wants to see the series in a library as a grid or list
+  libraryViewMode    String  @default("GRID")
+  // Whether the user wants to see the media in a series as a grid or list
+  seriesViewMode     String  @default("GRID")
+  // Whether the user wants to see the media in a collection as a grid or list
+  collectionViewMode String  @default("GRID")
+
+  user User[]
+
+  @@map("user_preferences")
+}
+
 model ServerPreferences {
-  id              String  @id @default(uuid())
+  id              String  @id @default(cuid())
   // Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
   // If none found, the series name will be the directory name.
   renameSeries    Boolean @default(false)
@@ -235,4 +258,18 @@ model ServerPreferences {
   convertCbrToCbz Boolean @default(false)
 
   @@map("server_preferences")
+}
+
+model Migration {
+  id        Int      @id @default(autoincrement())
+  // The name of the migration. ex: "20220525133313_initial_migration"
+  name      String
+  // The checksum hash of the migration.sql file
+  checksum  String   @unique
+  // A flag indicating whether or not the migration was applied *without* error
+  success   Boolean  @default(false)
+  // The date in which the migration was applied (regardless of success). ex: "2022-04-20 04:20:69"
+  appliedAt DateTime @default(now())
+
+  @@map("migrations")
 }

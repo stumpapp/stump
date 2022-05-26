@@ -34,3 +34,7 @@ target
 
 # typescript
 *.tsbuildinfo
+
+_next
+
+docker-compose.yaml

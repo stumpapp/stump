@@ -1,5 +1,5 @@
 use prisma_client_rust::Direction;
-use rocket::{fs::NamedFile, serde::json::Json};
+use rocket::{fs::NamedFile, serde::json::Json, http::ContentType};
 
 use crate::{
 	fs,
@@ -9,7 +9,7 @@ use crate::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
-	},
+	}, utils,
 };
 
 // TODO: paginate some of these?
@@ -142,7 +142,7 @@ pub async fn get_media_page(
 					id, book.pages
 				)))
 			} else {
-				Ok(fs::media_file::get_page(&book.path, page)?)
+				Ok(fs::media_file::get_page(&book.path, page, false)?)
 			}
 		},
 		None => Err(ApiError::NotFound(format!(
@@ -169,13 +169,16 @@ pub async fn get_media_thumbnail(
 		.exec()
 		.await?;
 
-	match book {
-		Some(book) => Ok(fs::media_file::get_page(&book.path, 1)?),
-		None => Err(ApiError::NotFound(format!(
+	if book.is_none() {
+		return Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
-		))),
+		)));
 	}
+
+	let book = book.unwrap();
+
+	Ok(fs::media_file::get_page(book.path.as_str(), 1, true)?)
 }
 
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found

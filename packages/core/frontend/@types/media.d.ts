@@ -64,5 +64,5 @@ interface MediaWithProgress extends Media {
 //     series_name: string;
 // }
 
-type GetMediaResponse = ApiResult<MediaWithProgress[], any>;
-type GetMediaById = ApiResult<MediaWithProgress, any>;
+type GetMediaResponse = ApiResult<MediaWithProgress[]>;
+type GetMediaById = ApiResult<MediaWithProgress>;

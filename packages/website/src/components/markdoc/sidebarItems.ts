@@ -32,6 +32,9 @@ export const sidebarItems: SidebarItem[] = [
 			{ href: '/guides/read-progress', description: 'Read Progress' },
 			{ href: '/guides/full-text-search', description: 'Full Text Search' },
 			{ href: '/guides/web-ui', description: "Stump's Readers" },
+			{ href: '/guides/opds-clients', description: 'Other OPDS Readers' },
+			{ href: '/guides/rest-api', description: 'Rest API' },
+			{ href: '/guides/docker-examples', description: 'Docker Examples' },
 		],
 	},
 	{

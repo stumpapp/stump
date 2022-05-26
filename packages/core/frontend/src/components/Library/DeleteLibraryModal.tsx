@@ -6,16 +6,16 @@ import {
 	ModalHeader,
 	ModalFooter,
 	ModalBody,
-	ModalCloseButton,
 	useDisclosure,
 	MenuItem,
 } from '@chakra-ui/react';
-import Button from '~components/ui/Button';
+import Button, { ModalCloseButton } from '~components/ui/Button';
 import { Trash } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import { useMutation } from 'react-query';
 import { deleteLibrary } from '~api/mutation/library';
 import client from '~api/client';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
 	library: Library;
@@ -23,6 +23,8 @@ interface Props {
 
 // TODO: custom tabs, active state is atrocious
 export default function DeleteLibraryModal({ library }: Props) {
+	const navigate = useNavigate();
+
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	const { mutateAsync } = useMutation('deleteLibrary', {
@@ -36,6 +38,8 @@ export default function DeleteLibraryModal({ library }: Props) {
 		// TODO: navigate away??
 
 		onClose();
+
+		navigate('/');
 	}
 
 	function handleDelete() {

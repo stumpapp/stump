@@ -33,7 +33,7 @@ export default function SettingsNav() {
 		}
 	}
 
-	// This is so horrendously ugly lol
+	// FIXME: This is so horrendously ugly lol
 	return (
 		<Box py={4} w={{ base: 20, md: 48 }} h="full" px={4}>
 			<Tabs

@@ -96,8 +96,8 @@ impl From<ProcessFileError> for ScanError {
 	}
 }
 
-impl From<prisma_client_rust::query::Error> for ScanError {
-	fn from(e: prisma_client_rust::query::Error) -> Self {
+impl From<prisma_client_rust::Error> for ScanError {
+	fn from(e: prisma_client_rust::Error) -> Self {
 		ScanError::QueryError(e.to_string())
 	}
 }
@@ -120,8 +120,8 @@ impl From<ApiError> for Status {
 	}
 }
 
-impl From<prisma_client_rust::query::Error> for ApiError {
-	fn from(error: prisma_client_rust::query::Error) -> ApiError {
+impl From<prisma_client_rust::Error> for ApiError {
+	fn from(error: prisma_client_rust::Error) -> ApiError {
 		ApiError::InternalServerError(error.to_string())
 	}
 }
@@ -167,6 +167,12 @@ impl From<anyhow::Error> for ApiError {
 impl From<String> for ApiError {
 	fn from(msg: String) -> ApiError {
 		ApiError::InternalServerError(msg)
+	}
+}
+
+impl From<&str> for ApiError {
+	fn from(msg: &str) -> ApiError {
+		ApiError::InternalServerError(msg.to_string())
 	}
 }
 

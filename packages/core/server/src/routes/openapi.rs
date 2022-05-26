@@ -14,7 +14,7 @@ pub fn openapi() -> Vec<Route> {
 	routes.append(&mut api::api());
 
 	// Add the routes from `opds` crate.
-	routes.append(&mut opds::opds());
+	// routes.append(&mut opds::opds());
 
 	routes
 }

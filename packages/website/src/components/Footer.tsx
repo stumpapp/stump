@@ -61,7 +61,7 @@ interface LinkSectionProps {
 
 const LinkSection = ({ title, links }: LinkSectionProps) => {
 	return (
-		<div className="col-span-1 flex flex-col space-y-2">
+		<div className="col-span-1 flex flex-col space-y-2 my-1 sm:my-0">
 			<h3 className="text-xs font-semibold text-gray-850 dark:text-gray-200 tracking-wider uppercase mb-1">
 				{title}
 			</h3>

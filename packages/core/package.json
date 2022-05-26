@@ -14,7 +14,7 @@
 		"build:move-rocket": "trash ../../target/release/Rocket.toml && cp ./server/Rocket.toml ../../target/release/Rocket.toml",
 		"build:docker": "docker build -t stump .",
 		"server:start": "cd server && ROCKET_PROFILE=debug cargo run",
-		"server:dev": "cd server && ROCKET_PROFILE=debug cargo watch -x run",
+		"server:dev": "cd server && cargo watch -x run",
 		"server:build": "cd server && ROCKET_PROFILE=release cargo build --release",
 		"server:check": "cargo check",
 		"server:fmt": "cargo fmt --all --manifest-path=server/Cargo.toml",

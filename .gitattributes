@@ -1,2 +1,6 @@
 # ignore markdown files, there's just gonna be so many of them lol
 *.md linguist-detectable=false
+*.sql linguist-detectable=false
+
+# I don't want website to be included in language stats
+packages/website/* linguist-vendored

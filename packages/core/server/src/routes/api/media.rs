@@ -1,5 +1,5 @@
 use prisma_client_rust::Direction;
-use rocket::{fs::NamedFile, serde::json::Json, http::ContentType};
+use rocket::{fs::NamedFile, serde::json::Json};
 
 use crate::{
 	fs,
@@ -9,7 +9,7 @@ use crate::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
-	}, utils,
+	},
 };
 
 // TODO: paginate some of these?
@@ -194,17 +194,19 @@ pub async fn update_media_progress(
 	// update the progress, otherwise create it
 	Ok(Json(
 		db.read_progress()
-			.upsert(read_progress::UniqueWhereParam::UserIdMediaIdEquals(
-				auth.0.id.clone(),
-				id.clone(),
-			))
-			.create(
-				read_progress::page::set(page),
-				read_progress::media::link(media::id::equals(id.clone())),
-				read_progress::user::link(user::id::equals(auth.0.id.clone())),
-				vec![],
+			.upsert(
+				read_progress::UniqueWhereParam::UserIdMediaIdEquals(
+					auth.0.id.clone(),
+					id.clone(),
+				),
+				(
+					read_progress::page::set(page),
+					read_progress::media::link(media::id::equals(id.clone())),
+					read_progress::user::link(user::id::equals(auth.0.id.clone())),
+					vec![],
+				),
+				(vec![read_progress::page::set(page)]),
 			)
-			.update(vec![read_progress::page::set(page)])
 			.exec()
 			.await?,
 	))

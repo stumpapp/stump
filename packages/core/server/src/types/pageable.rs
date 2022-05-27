@@ -1,6 +1,9 @@
+use rocket_okapi::JsonSchema;
 use serde::Serialize;
 
-use crate::prisma::{self, library};
+use crate::prisma::library;
+
+use super::models::library::Library;
 /*
 {
    "data": [{
@@ -24,7 +27,7 @@ use crate::prisma::{self, library};
 }
 */
 
-#[derive(Serialize)]
+#[derive(Serialize, JsonSchema)]
 pub struct PageLinks {
 	/// The current request URL. E.g. http://example.com/api/v1/users?page=2
 	#[serde(rename = "self")]
@@ -37,7 +40,7 @@ pub struct PageLinks {
 	pub next: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PageInfo {
 	/// The number of pages available.
@@ -50,7 +53,7 @@ pub struct PageInfo {
 	pub page_offset: u32,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, JsonSchema)]
 pub struct Pageable<T: Serialize> {
 	/// The target data being returned.
 	data: T,
@@ -70,9 +73,10 @@ impl<T: Serialize> Pageable<T> {
 	}
 }
 
-// (libraries, page_size, current_page)
-impl Into<Pageable<Vec<library::Data>>> for (Vec<library::Data>, usize, usize) {
-	fn into(self) -> Pageable<Vec<library::Data>> {
+// (libraries, page_size, total_pages, current_page)
+impl Into<Pageable<Vec<Library>>> for (Vec<library::Data>, usize, usize, usize) {
+	fn into(self) -> Pageable<Vec<Library>> {
+		// let (libraries, page_size, total_pages, current_page) = self;
 		// Pageable::unpaged(self)
 
 		unimplemented!()

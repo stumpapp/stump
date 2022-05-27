@@ -50,8 +50,6 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 │   │       ├── prisma
 │   │       ├── prisma-cli
 │   │       └── src
-│   │           └── bin
-│   │               └── seed.rs
 │   └── website
 ├── README.md
 └── ...

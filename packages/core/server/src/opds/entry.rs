@@ -137,10 +137,7 @@ impl From<series::Data> for OpdsEntry {
 			id: s.id.to_string(),
 			updated: s.updated_at,
 			title: s.name,
-			// TODO: I feel like a series could have a description, just have to figure out
-			// the best way to include it. I could look for ComicInfo.xml files or something at
-			// the directory root, or some other file, or maybe I could just leave it out.
-			content: None,
+			content: s.description,
 			authors: None,
 			links,
 			stream_link: None,

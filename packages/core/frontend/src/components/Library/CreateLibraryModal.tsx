@@ -29,6 +29,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import TextArea from '~components/ui/TextArea';
 import { Tab } from '~components/ui/Tabs';
 import FileSystemModal from '~components/FileSystemModal';
+import TagSelect from '~components/TagSelect';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;
@@ -148,8 +149,12 @@ export default function CreateLibraryModal(props: Props) {
 										</FormControl>
 									</TabPanel>
 									<TabPanel>
-										<p>TODO: access control options, tags, other stuffs tbd</p>
+										{/* <p>TODO: access control options, tags, other stuffs tbd</p> */}
 										{/* https://github.com/csandman/chakra-react-select */}
+										{/* FIXME: WHY DO I NEED TO DO THIS! */}
+										<React.Suspense>
+											<TagSelect />
+										</React.Suspense>
 									</TabPanel>
 								</TabPanels>
 							</Tabs>

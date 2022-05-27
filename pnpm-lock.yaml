@@ -56,6 +56,7 @@ importers:
       react-hotkeys-hook: ^3.4.4
       react-query: ^3.38.0
       react-router-dom: ^6.3.0
+      react-table: ^7.8.0
       react-window: ^1.8.7
       tailwind-scrollbar-hide: ^1.1.7
       tailwindcss: ^3.0.24
@@ -87,6 +88,7 @@ importers:
       react-hotkeys-hook: 3.4.4_react-dom@18.1.0+react@18.1.0
       react-query: 3.39.0_react-dom@18.1.0+react@18.1.0
       react-router-dom: 6.3.0_react-dom@18.1.0+react@18.1.0
+      react-table: 7.8.0_react@18.1.0
       react-window: 1.8.7_react-dom@18.1.0+react@18.1.0
       vite-plugin-package-version: 1.0.2_vite@2.9.8
       zod: 3.15.1
@@ -4880,6 +4882,14 @@ packages:
       invariant: 2.2.4
       react: 18.1.0
       tslib: 2.3.1
+    dev: false
+
+  /react-table/7.8.0_react@18.1.0:
+    resolution: {integrity: sha512-hNaz4ygkZO4bESeFfnfOft73iBUj8K5oKi1EcSHPAibEydfsX2MyU6Z8KCr3mv3C9Kqqh71U+DhZkFvibbnPbA==}
+    peerDependencies:
+      react: ^16.8.3 || ^17.0.0-0 || ^18.0.0
+    dependencies:
+      react: 18.1.0
     dev: false
 
   /react-transition-group/4.4.2_react-dom@18.1.0+react@18.1.0:

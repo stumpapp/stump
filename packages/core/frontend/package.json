@@ -31,6 +31,7 @@
 		"react-hotkeys-hook": "^3.4.4",
 		"react-query": "^3.38.0",
 		"react-router-dom": "^6.3.0",
+		"react-table": "^7.8.0",
 		"react-window": "^1.8.7",
 		"vite-plugin-package-version": "^1.0.2",
 		"zod": "^3.14.4",

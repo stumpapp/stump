@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { TagOption, useTags } from '~hooks/useTags';
-import { ActionMeta, CreatableSelect, MultiValue } from 'chakra-react-select';
+import { TagOption } from '~hooks/useTags';
+import { CreatableSelect } from 'chakra-react-select';
 import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react';
 import { Controller, useFormContext } from 'react-hook-form';
 
@@ -13,8 +13,8 @@ interface TagSelectProps {
 	hint?: string;
 }
 
-// https://react-select.com/creatable
 // FIXME: https://github.com/csandman/chakra-react-select/issues/134
+// issue above affecting the theme
 export default function TagSelect({
 	name = 'tags',
 	label = 'Tags',
@@ -23,36 +23,14 @@ export default function TagSelect({
 	isLoading,
 	hint,
 }: TagSelectProps) {
-	// const { tags, isLoading } = useTags();
-
 	const form = useFormContext();
 
 	// tags to be created
 	const [newTags, setNewTags] = useState([] as TagOption[]);
 
-	// tags to be removed from the entity
-	// const [removedTags, setRemovedTags] = useState([] as TagOption[]);
-
 	function handleCreateTag(value: string) {
 		setNewTags((curr) => [...curr, { label: value, value }]);
 	}
-
-	// function tagsToOptions(toConvert: Tag[]): TagOption[] {
-	// 	return toConvert.map((t) => ({ label: t.name, value: t.name }));
-	// }
-
-	// function handleChange(newValue: MultiValue<TagOption>, actionMeta: ActionMeta<TagOption>) {
-	// 	// console.group('Value Changed');
-	// 	// console.log(newValue);
-	// 	// console.log(`action: ${actionMeta.action}`);
-
-	// 	if (actionMeta.action === 'remove-value') {
-	// 		// TODO: add to removedTags?
-	// 		// might not need to do this, might let for submit handle this.
-	// 	}
-
-	// 	setSelectedTags(newValue as TagOption[]);
-	// }
 
 	return (
 		<Controller

@@ -67,7 +67,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if which apt-get &> /dev/null; then
                 echo "Detected 'apt' based distro!"
                 sudo apt-get -y update
-                sudo apt-get -y install "pkg-config libssl-dev"
+                sudo apt-get -y install pkg-config libssl-dev build-essential
         elif which pacman &> /dev/null; then
                 echo "Detected 'pacman' based distro!"
                 sudo pacman -Syu

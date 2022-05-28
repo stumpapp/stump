@@ -47,22 +47,15 @@ interface Media {
 	 */
 	path: string;
 	/**
-	 * The user assigned tags for this media.
-	 * @see Tag
-	 */
-	tags: Tag[];
-}
-
-interface MediaWithProgress extends Media {
-	/**
 	 * The page the viewing user is currently on for the associated media.
 	 */
 	currentPage?: number;
+	/**
+	 * The user assigned tags for this media. This will be undefined only if the relation is not loaded.
+	 * @see Tag
+	 */
+	tags?: Tag[];
 }
 
-// interface MediaWithSeries extends MediaWithProgress {
-//     series_name: string;
-// }
-
-type GetMediaResponse = ApiResult<MediaWithProgress[]>;
-type GetMediaById = ApiResult<MediaWithProgress>;
+type GetMediaResponse = ApiResult<Media[]>;
+type GetMediaById = ApiResult<Media>;

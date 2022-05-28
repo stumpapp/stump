@@ -15,18 +15,19 @@ interface Library {
 	 * The (optional) description of the library.
 	 */
 	description?: string;
-}
-
-interface LibraryWithSeries extends Library {
 	/**
-	 * The series in the library
-	 * @see Series
-	 * @see SeriesWithMedia
+	 * The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
 	 */
-	series: SeriesWithMedia[];
+	updatedAt: Date;
+	/**
+	 * The series in this library. Will be undefined only if the relation is not loaded.
+	 */
+	series?: Series[];
+	/**
+	 * The user assigned tags for the library. ex: ["Comics", "Family"]. Will be undefined only if the relation is not loaded.
+	 */
+	tags?: Tag[];
 }
 
-type CreateLibraryInput = Omit<Library, 'id'>;
-
-type GetLibrariesResponse = ApiResult<Library[], any>;
-type GetLibraryWithSeries = ApiResult<LibraryWithSeries, any>;
+type CreateLibraryInput = Omit<Library, 'id' | 'updatedAt' | 'series' | 'tags'>;
+type EditLibraryInput = Library;

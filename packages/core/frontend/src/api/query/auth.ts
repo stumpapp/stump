@@ -1,12 +1,9 @@
 import API from '..';
 
-export function me(): Promise<ApiResult<UserWithPreferences>> {
+export function me(): Promise<ApiResult<User>> {
 	return API.get('/auth/me');
 }
 
-export function login(input: {
-	username: string;
-	password: string;
-}): Promise<ApiResult<UserWithPreferences>> {
+export function login(input: { username: string; password: string }): Promise<ApiResult<User>> {
 	return API.post('/auth/login', input);
 }

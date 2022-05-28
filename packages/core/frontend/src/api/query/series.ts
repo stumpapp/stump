@@ -1,6 +1,6 @@
 import API, { baseURL } from '..';
 
-export function getSeriesById(id: string): Promise<GetSeriesWithMedia> {
+export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 	return API.get(`/series/${id}`);
 }
 

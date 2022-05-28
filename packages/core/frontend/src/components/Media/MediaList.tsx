@@ -2,7 +2,7 @@ import React from 'react';
 import ListItem from '~components/ListItem';
 
 interface Props {
-	media: MediaWithProgress[];
+	media: Media[];
 }
 
 export default function MediaList({ media }: Props) {

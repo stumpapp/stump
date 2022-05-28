@@ -8,7 +8,7 @@ import {
 import { MagnifyingGlass } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import Input from './ui/Input';
+import Input from '../ui/Input';
 
 // FIXME: overflow on ctrl+k
 function Shortcut() {

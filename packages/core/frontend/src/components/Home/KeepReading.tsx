@@ -12,8 +12,9 @@ import { getMediaThumbnail } from '~api/query/media';
 import MoreLink from '~components/ui/MoreLink';
 
 interface Props {
-	media: MediaWithProgress[];
+	media: Media[];
 }
+
 export default function KeepReading({ media }: Props) {
 	if (!media.length) {
 		return <div>TODO</div>;

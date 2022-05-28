@@ -25,6 +25,7 @@ export function useTags({
 		queryFn: getAllTags,
 		onSuccess: onQuerySuccess,
 		onError: onQueryError,
+		suspense: false,
 	});
 
 	const {

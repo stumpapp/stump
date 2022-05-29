@@ -5,13 +5,19 @@
     <img src="https://img.shields.io/discord/972593831172272148?label=Discord&color=5865F2" />
   </a>
   <a href="https://github.com/aaronleopold/stump/blob/main/LICENSE">
-    <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=000" />
+    <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=CF9977" />
   </a>
+  <!-- <a href="./.github/CHANGELOG.md">
+    <img src="https://img.shields.io/github/package-json/v/aaronleopold/stump?logo=azurepipelines&amp;color=0aa8d2" alt="Current Version">
+  </a>
+  <a href="https://hub.docker.com/r/aaronleopold/stump">
+    <img src="https://img.shields.io/docker/pulls/aaronleopold/stump?logo=docker&color=0aa8d2&logoColor=fff" alt="Docker Pulls">
+  </a> -->
 </p>
 
-Stump is a free and open source comics server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
+Stump is a free and open source comics, manga and digital book server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
 
-I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as if not almost as convenient but with a smaller footprint. _I also just want an excuse to practice Rust!_
+I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as, if not almost as, convenient but with a smaller footprint. _I also just want an excuse to practice Rust!_
 
 <p align='center'>
 <img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 85%" />

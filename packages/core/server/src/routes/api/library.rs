@@ -1,5 +1,5 @@
 use prisma_client_rust::Direction;
-use rocket::serde::json::Json;
+use rocket::{serde::json::Json, Request};
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
 
@@ -12,26 +12,44 @@ use crate::{
 		errors::ApiError,
 		http::ImageResponse,
 		models::library::Library,
+		pageable::{PageParams, Pageable, PagedRequestParams},
 	},
 };
 
-/// Get all libraries accessible by the current user. Library `tags` relation is loaded
+/// Get the libraries accessible by the current user. Library `tags` relation is loaded
 /// on this route.
 #[openapi(tag = "Library")]
-#[get("/libraries")]
-pub async fn get_libraries(ctx: &Context, _auth: Auth) -> ApiResult<Json<Vec<Library>>> {
+#[get("/libraries?<unpaged>&<page_params..>")]
+pub async fn get_libraries(
+	unpaged: Option<bool>,
+	page_params: Option<PagedRequestParams>,
+	ctx: &Context,
+	_auth: Auth,
+) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let db = ctx.get_db();
 
-	Ok(Json(
-		db.library()
-			.find_many(vec![])
-			.with(library::tags::fetch(vec![]))
-			.exec()
-			.await?
-			.into_iter()
-			.map(|l| l.into())
-			.collect(),
-	))
+	let libraries = db
+		.library()
+		.find_many(vec![])
+		.with(library::tags::fetch(vec![]))
+		.exec()
+		.await?
+		.into_iter()
+		.map(|l| l.into())
+		.collect::<Vec<Library>>();
+
+	let unpaged = match unpaged {
+		Some(val) => val,
+		None => page_params.is_none(),
+	};
+
+	if unpaged {
+		return Ok(Json(libraries.into()));
+	}
+
+	let page_params = PageParams::from(page_params);
+
+	Ok(Json((libraries, page_params).into()))
 }
 
 /// Get a library by id, if the current user has access to it. Library `series`, `media`

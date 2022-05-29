@@ -1,17 +1,19 @@
 use std::io::Cursor;
 
 use rocket::{
-	http::ContentType,
+	http::{ContentType, Status},
 	request::{self, FromRequest},
 	response::{self, Responder},
+	serde::json::Json,
 	Request, Response,
 };
 use rocket_okapi::{
 	gen::OpenApiGenerator,
 	request::{OpenApiFromRequest, RequestHeaderInput},
 };
+use serde::Serialize;
 
-use super::models::AuthenticatedUser;
+use super::{models::AuthenticatedUser, pageable::Pageable};
 
 #[derive(Responder)]
 #[response(content_type = "xml")]
@@ -50,31 +52,34 @@ impl<'r> Responder<'r, 'static> for ImageResponseCached {
 	}
 }
 
-// #[derive(OpenApiFromRequest)]
-// pub struct StumpSession<'r>(rocket_session_store::Session<'r, AuthenticatedUser>);
+// TODO: figure out if this is best method for this, and if so make it :)
+// impl<'r, T> Responder<'r, 'static> for Pageable<T>
+// where
+// 	T: Serialize,
+// {
+// 	fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+// 		let _links = &self._links;
 
-// #[rocket::async_trait]
-// impl<'a> FromRequest<'a> for StumpSession<'_> {
-// 	type Error = ();
+// 		let unpaged = req.query_value::<bool>("unpaged").unwrap_or(Ok(true));
 
-// 	async fn from_request(
-// 		req: &'a request::Request<'_>,
-// 	) -> request::Outcome<Self, Self::Error> {
-// 		// Outcome::Success(NoSpecialAuthentication)
+// 		if unpaged.is_err() {
+// 			let e = format!("{:?}", unpaged.err().unwrap());
 
-// 		let session: StumpSession<'_> = req.guard().await.expect("TODO");
+// 			log::debug!("Error in Pageable Response: {:?}", e);
 
-// 		// session.0.from_request(req).await
-// 	}
-// }
-// pub struct StumpSession(String);
+// 			return Response::build()
+// 				.status(Status::InternalServerError)
+// 				.sized_body(e.len(), Cursor::new(e))
+// 				.ok();
+// 		}
 
-// impl<'r> OpenApiFromRequest<'r> for StumpSession<'_> {
-// 	fn from_request_input(
-// 		_gen: &mut OpenApiGenerator,
-// 		_name: String,
-// 		_required: bool,
-// 	) -> rocket_okapi::Result<RequestHeaderInput> {
-// 		Ok(RequestHeaderInput::None)
+// 		let unpaged = unpaged.unwrap();
+
+// 		if unpaged {
+// 			// Response::from(self)
+// 			return Response::build_from(Json(self));
+// 		}
+
+// 		todo!()
 // 	}
 // }

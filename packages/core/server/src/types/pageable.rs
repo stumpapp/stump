@@ -1,31 +1,45 @@
+// use rocket::form::Form;
 use rocket_okapi::JsonSchema;
 use serde::Serialize;
 
 use crate::prisma::library;
 
 use super::models::library::Library;
-/*
-{
-   "data": [{
-	   "id": "",
-	   "name": "",
-	   ...
-   }],
-   "_page": {
-	   "totalPages": 4,
-	   "currentPage": 2,
-	   "pageSize": 20,
-	   "pageOffset": 40
-   },
-   "_links": {
-	   "base": "api/series",
-	   "self": "api/series?page=2",
-	   "start": "api/series?page=0",
-	   "prev": "api/series?page=1",
-	   "next": "api/series?page=3",
-   }
+
+#[derive(Serialize, FromForm, JsonSchema)]
+pub struct PagedRequestParams {
+	pub page: Option<u32>,
+	pub page_size: Option<u32>,
 }
-*/
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct PageParams {
+	pub page: u32,
+	pub page_size: u32,
+}
+
+impl Default for PageParams {
+	fn default() -> Self {
+		PageParams {
+			page: 0,
+			page_size: 20,
+		}
+	}
+}
+
+impl From<Option<PagedRequestParams>> for PageParams {
+	fn from(req_params: Option<PagedRequestParams>) -> Self {
+		match req_params {
+			Some(params) => {
+				let page_size = params.page_size.unwrap_or(20);
+				let page = params.page.unwrap_or(0);
+
+				PageParams { page, page_size }
+			},
+			None => PageParams::default(),
+		}
+	}
+}
 
 #[derive(Serialize, JsonSchema)]
 pub struct PageLinks {
@@ -53,14 +67,29 @@ pub struct PageInfo {
 	pub page_offset: u32,
 }
 
+impl PageInfo {
+	pub fn new(page_params: PageParams, total_pages: u32) -> Self {
+		let current_page = page_params.page.try_into().unwrap();
+		let page_size = page_params.page_size.try_into().unwrap();
+
+		PageInfo {
+			total_pages,
+			current_page,
+			page_size,
+			page_offset: current_page * page_size,
+		}
+	}
+}
+
 #[derive(Serialize, JsonSchema)]
 pub struct Pageable<T: Serialize> {
 	/// The target data being returned.
-	data: T,
+	pub data: T,
 	/// The pagination information (if paginated).
-	_page: Option<PageInfo>,
-	/// The links to other pages (if paginated).
-	_links: Option<PageLinks>,
+	pub _page: Option<PageInfo>,
+	// NOTE: removing for now.
+	// /// The links to other pages (if paginated).
+	// pub _links: Option<PageLinks>,
 }
 
 impl<T: Serialize> Pageable<T> {
@@ -68,17 +97,14 @@ impl<T: Serialize> Pageable<T> {
 		Pageable {
 			data,
 			_page: None,
-			_links: None,
+			// _links: None,
 		}
 	}
-}
 
-// (libraries, page_size, total_pages, current_page)
-impl Into<Pageable<Vec<Library>>> for (Vec<library::Data>, usize, usize, usize) {
-	fn into(self) -> Pageable<Vec<Library>> {
-		// let (libraries, page_size, total_pages, current_page) = self;
-		// Pageable::unpaged(self)
-
-		unimplemented!()
+	pub fn new(data: T, page_info: PageInfo) -> Self {
+		Pageable {
+			data,
+			_page: Some(page_info),
+		}
 	}
 }

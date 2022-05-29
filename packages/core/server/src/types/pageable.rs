@@ -1,10 +1,5 @@
-// use rocket::form::Form;
 use rocket_okapi::JsonSchema;
 use serde::Serialize;
-
-use crate::prisma::library;
-
-use super::models::library::Library;
 
 #[derive(Serialize, FromForm, JsonSchema)]
 pub struct PagedRequestParams {
@@ -87,7 +82,7 @@ pub struct Pageable<T: Serialize> {
 	pub data: T,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	// NOTE: removing for now.
+	// FIXME: removing for now.
 	// /// The links to other pages (if paginated).
 	// pub _links: Option<PageLinks>,
 }
@@ -106,5 +101,50 @@ impl<T: Serialize> Pageable<T> {
 			data,
 			_page: Some(page_info),
 		}
+	}
+}
+
+impl<T> Into<Pageable<Vec<T>>> for Vec<T>
+where
+	T: Serialize + Clone,
+{
+	fn into(self) -> Pageable<Vec<T>> {
+		Pageable::unpaged(self)
+	}
+}
+
+impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, PageParams)
+where
+	T: Serialize + Clone,
+{
+	fn into(self) -> Pageable<Vec<T>> {
+		let (mut data, page_params) = self;
+
+		let total_pages =
+			(data.len() as f32 / page_params.page_size as f32).ceil() as u32;
+
+		let start = page_params.page * page_params.page_size;
+		let end = start + page_params.page_size - 1;
+
+		if start > data.len() as u32 {
+			data = vec![];
+		} else if end < data.len() as u32 {
+			data = data
+				.get((start as usize)..(end as usize))
+				.ok_or("Invalid page")
+				.unwrap()
+				.to_vec();
+		}
+
+		Pageable::new(data, PageInfo::new(page_params, total_pages))
+	}
+}
+
+impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, Option<PagedRequestParams>)
+where
+	T: Serialize + Clone,
+{
+	fn into(self) -> Pageable<Vec<T>> {
+		(self.0, PageParams::from(self.1)).into()
 	}
 }

@@ -11,29 +11,45 @@ use crate::{
 		errors::ApiError,
 		http::ImageResponse,
 		models::{media::Media, read_progress::ReadProgress},
+		pageable::{Pageable, PagedRequestParams},
 	},
 };
 
 // TODO: paginate some of these?
 
 #[openapi(tag = "Media")]
-#[get("/media")]
-pub async fn get_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
+#[get("/media?<unpaged>&<page_params..>")]
+pub async fn get_media(
+	unpaged: Option<bool>,
+	page_params: Option<PagedRequestParams>,
+	ctx: &Context,
+	auth: Auth,
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 
-	Ok(Json(
-		db.media()
-			.find_many(vec![])
-			.with(media::read_progresses::fetch(vec![
-				read_progress::user_id::equals(auth.0.id),
-			]))
-			.order_by(media::name::order(Direction::Asc))
-			.exec()
-			.await?
-			.into_iter()
-			.map(|m| m.into())
-			.collect(),
-	))
+	let media = db
+		.media()
+		.find_many(vec![])
+		.with(media::read_progresses::fetch(vec![
+			read_progress::user_id::equals(auth.0.id),
+		]))
+		.order_by(media::name::order(Direction::Asc))
+		.exec()
+		.await?
+		.into_iter()
+		.map(|m| m.into())
+		.collect::<Vec<Media>>();
+
+	let unpaged = match unpaged {
+		Some(val) => val,
+		None => page_params.is_none(),
+	};
+
+	if unpaged {
+		return Ok(Json(media.into()));
+	}
+
+	Ok(Json((media, page_params).into()))
 }
 
 #[openapi(tag = "Media")]

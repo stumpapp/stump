@@ -2,10 +2,7 @@
 use rocket_okapi::JsonSchema;
 use serde::Serialize;
 
-use crate::{
-	prisma,
-	types::pageable::{PageInfo, PageParams, Pageable},
-};
+use crate::prisma;
 
 use super::{series::Series, tag::Tag};
 
@@ -57,37 +54,5 @@ impl Into<Library> for prisma::library::Data {
 			series,
 			tags,
 		}
-	}
-}
-
-impl Into<Pageable<Vec<Library>>> for Vec<Library> {
-	fn into(self) -> Pageable<Vec<Library>> {
-		Pageable::unpaged(self)
-	}
-}
-
-impl Into<Pageable<Vec<Library>>> for (Vec<Library>, PageParams) {
-	fn into(self) -> Pageable<Vec<Library>> {
-		let (mut libraries, page_params) = self;
-
-		let total_pages =
-			(libraries.len() as f32 / page_params.page_size as f32).ceil() as u32;
-
-		println!("{:?}", page_params);
-
-		let start = page_params.page * page_params.page_size;
-		let end = start + page_params.page_size - 1;
-
-		if start > libraries.len() as u32 {
-			libraries = vec![];
-		} else if end < libraries.len() as u32 {
-			libraries = libraries
-				.get((start as usize)..(end as usize))
-				.ok_or("Invalid page")
-				.unwrap()
-				.to_vec();
-		}
-
-		Pageable::new(libraries, PageInfo::new(page_params, total_pages))
 	}
 }

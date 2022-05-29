@@ -1,5 +1,5 @@
 use prisma_client_rust::Direction;
-use rocket::{serde::json::Json, Request};
+use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
 
@@ -46,8 +46,6 @@ pub async fn get_libraries(
 	if unpaged {
 		return Ok(Json(libraries.into()));
 	}
-
-	let page_params = PageParams::from(page_params);
 
 	Ok(Json((libraries, page_params).into()))
 }

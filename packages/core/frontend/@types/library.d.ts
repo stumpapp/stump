@@ -29,5 +29,5 @@ interface Library {
 	tags?: Tag[];
 }
 
-type CreateLibraryInput = Omit<Library, 'id' | 'updatedAt' | 'series' | 'tags'>;
+type CreateLibraryInput = Omit<Library, 'id' | 'updatedAt' | 'series'>;
 type EditLibraryInput = Library;

@@ -15,8 +15,9 @@ import {
 	useDisclosure,
 } from '@chakra-ui/react';
 
-import { useTags } from '~hooks/useTags';
+import { TagOption, useTags } from '~hooks/useTags';
 import LibraryModalForm from './LibraryModalForm';
+import { createTags } from '~api/query/tag';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;
@@ -45,16 +46,28 @@ export default function CreateLibraryModal(props: Props) {
 		},
 	});
 
+	const { mutateAsync: tryCreateTags } = useMutation('createTags', {
+		mutationFn: createTags,
+	});
+
 	async function handleSubmit(values: FieldValues) {
 		const { name, path, description, tags } = values;
 
-		// TODO: create tags?
+		let tagNames = tags.map((tag: TagOption) => tag.value);
 
-		toast.promise(mutateAsync({ name, path, description }), {
-			loading: 'Creating library...',
-			success: 'Library created!',
-			error: 'Something went wrong.',
-		});
+		// FIXME: why is this type not being picked up automatically?
+		const res: ApiResult<Tag[]> = await tryCreateTags(tagNames);
+
+		if (res.data && res.status === 200) {
+			toast.promise(mutateAsync({ name, path, description, tags: res.data }), {
+				loading: 'Creating library...',
+				success: 'Library created!',
+				error: 'Something went wrong.',
+			});
+		} else {
+			console.log(res);
+			toast.error('Something went wrong when creating the tags.');
+		}
 	}
 
 	return (

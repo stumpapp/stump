@@ -24,6 +24,7 @@ import { useMutation, useQuery } from 'react-query';
 import toast from 'react-hot-toast';
 import { checkIsClaimed } from '~api/query/server';
 import { register } from '~api/mutation/auth';
+import client from '~api/client';
 
 export default function Login() {
 	const [isClaimed, setIsClaimed] = useState(true);
@@ -53,6 +54,8 @@ export default function Login() {
 			if (!res.data) {
 				throw new Error('Login failed.');
 			}
+
+			client.invalidateQueries('getLibraries');
 
 			setUserAndPreferences(res.data);
 		},
@@ -100,6 +103,7 @@ export default function Login() {
 	}
 
 	if (user) {
+		client.invalidateQueries('getLibraries');
 		return <Navigate to="/" />;
 	}
 

@@ -9,6 +9,7 @@ import { useStore } from '~store/store';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
+import client from '~api/client';
 
 export default function MainLayout() {
 	const location = useLocation();
@@ -37,6 +38,7 @@ export default function MainLayout() {
 	if (isLoading) {
 		return null;
 	} else if (error?.response?.status === 401) {
+		client.invalidateQueries('getLibraries');
 		return <Navigate to="/auth/login" />;
 	}
 

@@ -30,34 +30,27 @@ pub async fn get_tags(ctx: &Context, _auth: Auth) -> ApiResult<Json<Vec<Tag>>> {
 }
 
 #[derive(Deserialize, JsonSchema)]
-pub struct CreateTag {
-	name: String,
+pub struct CreateTags {
+	pub tags: Vec<String>,
 }
 
-pub type CreateTags = Vec<CreateTag>;
-
 #[openapi(tag = "Tag")]
-#[post("/tags", format = "application/json", data = "<tags>")]
+#[post("/tags", format = "application/json", data = "<input>")]
 pub async fn create_tags(
-	tags: Json<CreateTags>,
+	input: Json<CreateTags>,
 	ctx: &Context,
-	_auth: Auth,
+	// _auth: Auth,
 ) -> ApiResult<Json<Vec<Tag>>> {
 	let db = ctx.get_db();
 
-	let tags = tags.into_inner();
+	let tags = input.tags.to_owned();
 
 	let mut created_tags = vec![];
 
 	// FIXME: bulk insert not yet supported. Also transactions, as an alternative,
 	// not yet supported.
 	for tag in tags {
-		match db
-			.tag()
-			.create(tag::name::set(tag.name), vec![])
-			.exec()
-			.await
-		{
+		match db.tag().create(tag::name::set(tag), vec![]).exec().await {
 			Ok(new_tag) => {
 				created_tags.push(new_tag.into());
 			},

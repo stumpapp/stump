@@ -6,12 +6,12 @@ use serde::Deserialize;
 use crate::{
 	fs::{self, scanner::ScannerJob},
 	guards::auth::Auth,
-	prisma::{library, media, series},
+	prisma::{library, media, series, tag},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
-		models::library::Library,
+		models::{library::Library, tag::Tag},
 		pageable::{PageParams, Pageable, PagedRequestParams},
 	},
 };
@@ -145,6 +145,7 @@ pub struct CreateLibrary {
 	name: String,
 	path: String,
 	description: Option<String>,
+	tags: Option<Vec<Tag>>,
 }
 
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
@@ -162,7 +163,18 @@ pub async fn create_library(
 		.create(
 			library::name::set(input.name.to_owned()),
 			library::path::set(input.path.to_owned()),
-			vec![library::description::set(input.description.to_owned())],
+			vec![
+				library::description::set(input.description.to_owned()),
+				library::tags::link(
+					input
+						.tags
+						.to_owned()
+						.unwrap_or(vec![])
+						.into_iter()
+						.map(|t| tag::id::equals(t.id.to_owned()))
+						.collect(),
+				),
+			],
 		)
 		.exec()
 		.await?;
@@ -179,6 +191,7 @@ pub struct UpdateLibrary {
 	name: String,
 	path: String,
 	description: Option<String>,
+	tags: Option<Vec<Tag>>,
 }
 
 /// Update a library by id, if the current user is a SERVER_OWNER.
@@ -200,6 +213,15 @@ pub async fn update_library(
 			library::name::set(input.name.to_owned()),
 			library::path::set(input.path.to_owned()),
 			library::description::set(input.description.to_owned()),
+			library::tags::link(
+				input
+					.tags
+					.to_owned()
+					.unwrap_or(vec![])
+					.into_iter()
+					.map(|t| tag::id::equals(t.id.to_owned()))
+					.collect(),
+			),
 		])
 		.exec()
 		.await?;
@@ -210,6 +232,10 @@ pub async fn update_library(
 			&id
 		)));
 	}
+
+	// ctx.spawn_job(Box::new(ScannerJob {
+	// 	path: lib.path.clone(),
+	// }));
 
 	Ok(Json(updated.unwrap().into()))
 }

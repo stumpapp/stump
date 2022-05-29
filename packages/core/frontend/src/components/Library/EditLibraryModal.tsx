@@ -47,6 +47,10 @@ export default function EditLibraryModal({ library }: Props) {
 		},
 	});
 
+	// const { mutateAsync: tryCreateTags } = useMutation('createTags', {
+	// 	mutationFn: createTags,
+	// });
+
 	function handleSubmit(values: FieldValues) {
 		toast.error("I can't do that yet! 😢");
 

@@ -10,7 +10,9 @@ serde = { version = "1.0", features = ["derive"] }
 dotenv = "0.15.0"
 # env_logger = "0.9.0"
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
-rocket-session-store = "0.2.0"
+# rocket-session-store = "0.2.0"
+# rocket-session-store = { path = "../../../../../Documents/sandbox/clones/rocket-session-store", features = ["okapi"] }
+rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }
 rocket_cors = "0.6.0-alpha1"
 bcrypt = "0.10.1"
 anyhow = "1.0.57"
@@ -40,7 +42,8 @@ include_dir = "0.7.2"
 # TODO: make this *NOT* bundled in release, not necessary. I guess I would have to feature
 # gate it? but that is just kinda annoying. Since I am pushing this feature off for now, 
 # hopefully the PR branch I am pointing to is merged, as well.
-# rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc", "swagger"] }
+rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc", "swagger"] }
+schemars = "0.8.10"
 
 [features]
 seed-binary = ["clap"]

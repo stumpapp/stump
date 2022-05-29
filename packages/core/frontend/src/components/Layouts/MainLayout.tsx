@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useQuery } from 'react-query';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getLibraries } from '~api/query/library';
 import Lazy from '~components/Lazy';
 import Topbar from '~components/Topbar';
@@ -11,22 +11,22 @@ import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 
 export default function MainLayout() {
-	const navigate = useNavigate();
 	const location = useLocation();
 
 	const setLibraries = useStore((state) => state.setLibraries);
 
-	const { isLoading } = useQuery('getLibraries', getLibraries, {
+	const { isLoading, error } = useQuery('getLibraries', getLibraries, {
 		onSuccess(res) {
-			setLibraries(res.data);
+			setLibraries(res.data.data);
 		},
 		onError(err: AxiosError) {
-			if (err.response?.status === 401) {
-				navigate('/auth/login');
-			} else {
+			// 401 errors will be handled below
+			if (err.response?.status !== 401) {
 				throw new Error(err.message);
 			}
 		},
+		// Send all non-401 errors to the error page
+		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
 	});
 
 	const hideSidebar = useMemo(() => {
@@ -36,6 +36,8 @@ export default function MainLayout() {
 
 	if (isLoading) {
 		return null;
+	} else if (error?.response?.status === 401) {
+		return <Navigate to="/auth/login" />;
 	}
 
 	return (

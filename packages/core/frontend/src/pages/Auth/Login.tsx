@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import shallow from 'zustand/shallow';
 import { login } from '~api/query/auth';
@@ -26,8 +26,6 @@ import { checkIsClaimed } from '~api/query/server';
 import { register } from '~api/mutation/auth';
 
 export default function Login() {
-	const navigate = useNavigate();
-
 	const [isClaimed, setIsClaimed] = useState(true);
 
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery('checkIsClaimed', {
@@ -67,11 +65,6 @@ export default function Login() {
 
 	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation('registerUser', {
 		mutationFn: register,
-		// onError: (err) => {
-		// 	// TODO: handle this error
-		// 	toast.error('Login failed. Please try again.');
-		// 	console.error(err);
-		// },
 	});
 
 	const schema = z.object({
@@ -106,11 +99,9 @@ export default function Login() {
 		}
 	}
 
-	useEffect(() => {
-		if (user) {
-			navigate('/');
-		}
-	}, [user]);
+	if (user) {
+		return <Navigate to="/" />;
+	}
 
 	// TODO: form.formState.errors
 	return (

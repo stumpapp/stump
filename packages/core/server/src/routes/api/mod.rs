@@ -1,4 +1,5 @@
 use rocket::{serde::json::Json, Route};
+use rocket_okapi::{openapi, openapi_get_routes, JsonSchema};
 use serde::Serialize;
 
 use crate::types::alias::{ApiResult, Context};
@@ -12,7 +13,7 @@ pub mod tag;
 
 /// Function to return the routes for the `/api` path.
 pub fn api() -> Vec<Route> {
-	routes![
+	openapi_get_routes![
 		// top level
 		claim,
 		// routing::api::scan,
@@ -22,21 +23,21 @@ pub fn api() -> Vec<Route> {
 		auth::login,
 		auth::register,
 		auth::logout,
-		// logs api
-		// job::get_jobs,
+		// // logs api
+		// // job::get_jobs,
 		job::jobs_listener,
-		// library api
+		// // library api
 		library::get_libraries,
 		library::get_library_by_id,
 		library::scan_library,
 		library::create_library,
 		library::update_library,
 		library::delete_library,
-		// series api
+		// // series api
 		series::get_series,
 		series::get_series_by_id,
 		series::get_series_thumbnail,
-		// media api
+		// // media api
 		media::get_media,
 		media::get_reading_media,
 		media::get_media_by_id,
@@ -50,7 +51,7 @@ pub fn api() -> Vec<Route> {
 	]
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 struct ClaimResponse {
 	is_claimed: bool,
@@ -61,6 +62,7 @@ struct ClaimResponse {
 // it would be a valid scenario that a SERVER_OWNER account gets deleted but not the
 // other *managed* accounts.
 /// Checks whether or not the server is 'claimed,' i.e. if there is a user registered.
+#[openapi(tag = "Setup")]
 #[get("/claim")]
 async fn claim(ctx: &Context) -> ApiResult<Json<ClaimResponse>> {
 	let db = ctx.get_db();

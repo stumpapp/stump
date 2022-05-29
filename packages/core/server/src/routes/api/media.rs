@@ -1,5 +1,6 @@
 use prisma_client_rust::Direction;
 use rocket::{fs::NamedFile, serde::json::Json};
+use rocket_okapi::openapi;
 
 use crate::{
 	fs,
@@ -9,32 +10,51 @@ use crate::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
+		models::{media::Media, read_progress::ReadProgress},
+		pageable::{Pageable, PagedRequestParams},
 	},
 };
 
 // TODO: paginate some of these?
 
-#[get("/media")]
-pub async fn get_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<media::Data>>> {
-	let db = ctx.get_db();
-
-	Ok(Json(
-		db.media()
-			.find_many(vec![])
-			.with(media::read_progresses::fetch(vec![
-				read_progress::user_id::equals(auth.0.id),
-			]))
-			.order_by(media::name::order(Direction::Asc))
-			.exec()
-			.await?,
-	))
-}
-
-#[get("/media/keep-reading")]
-pub async fn get_reading_media(
+#[openapi(tag = "Media")]
+#[get("/media?<unpaged>&<page_params..>")]
+pub async fn get_media(
+	unpaged: Option<bool>,
+	page_params: Option<PagedRequestParams>,
 	ctx: &Context,
 	auth: Auth,
-) -> ApiResult<Json<Vec<media::Data>>> {
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let db = ctx.get_db();
+
+	let media = db
+		.media()
+		.find_many(vec![])
+		.with(media::read_progresses::fetch(vec![
+			read_progress::user_id::equals(auth.0.id),
+		]))
+		.order_by(media::name::order(Direction::Asc))
+		.exec()
+		.await?
+		.into_iter()
+		.map(|m| m.into())
+		.collect::<Vec<Media>>();
+
+	let unpaged = match unpaged {
+		Some(val) => val,
+		None => page_params.is_none(),
+	};
+
+	if unpaged {
+		return Ok(Json(media.into()));
+	}
+
+	Ok(Json((media, page_params).into()))
+}
+
+#[openapi(tag = "Media")]
+#[get("/media/keep-reading")]
+pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
 	let db = ctx.get_db();
 
 	Ok(Json(
@@ -58,16 +78,18 @@ pub async fn get_reading_media(
 				Ok(progress) => progress.len() == 1 && progress[0].page < m.pages,
 				_ => false,
 			})
+			.map(|m| m.into())
 			.collect(),
 	))
 }
 
+#[openapi(tag = "Media")]
 #[get("/media/<id>")]
 pub async fn get_media_by_id(
 	id: String,
 	ctx: &Context,
 	auth: Auth,
-) -> ApiResult<Json<media::Data>> {
+) -> ApiResult<Json<Media>> {
 	let db = ctx.get_db();
 
 	let book = db
@@ -86,9 +108,10 @@ pub async fn get_media_by_id(
 		)));
 	}
 
-	Ok(Json(book.unwrap()))
+	Ok(Json(book.unwrap().into()))
 }
 
+#[openapi(tag = "Media")]
 #[get("/media/<id>/file")]
 pub async fn get_media_file(
 	id: String,
@@ -115,6 +138,7 @@ pub async fn get_media_file(
 	Ok(NamedFile::open(media.path.clone()).await?)
 }
 
+#[openapi(tag = "Media")]
 #[get("/media/<id>/page/<page>")]
 pub async fn get_media_page(
 	id: String,
@@ -152,6 +176,7 @@ pub async fn get_media_page(
 	}
 }
 
+#[openapi(tag = "Media")]
 #[get("/media/<id>/thumbnail")]
 pub async fn get_media_thumbnail(
 	id: String,
@@ -182,13 +207,14 @@ pub async fn get_media_thumbnail(
 }
 
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found
+#[openapi(tag = "Media")]
 #[put("/media/<id>/progress/<page>")]
 pub async fn update_media_progress(
 	id: String,
 	page: i32,
 	ctx: &Context,
 	auth: Auth,
-) -> ApiResult<Json<read_progress::Data>> {
+) -> ApiResult<Json<ReadProgress>> {
 	let db = ctx.get_db();
 
 	// update the progress, otherwise create it
@@ -208,6 +234,7 @@ pub async fn update_media_progress(
 				(vec![read_progress::page::set(page)]),
 			)
 			.exec()
-			.await?,
+			.await?
+			.into(),
 	))
 }

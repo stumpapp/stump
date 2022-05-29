@@ -1,5 +1,5 @@
 use rocket::serde::json::Json;
-// use rocket_okapi::openapi;
+use rocket_okapi::openapi;
 
 use crate::{
 	guards::auth::Auth,
@@ -13,8 +13,8 @@ use crate::{
 	utils::auth,
 };
 
-// #[openapi(tag = "Authentication")]
 /// Attempts to grab the user from the session.
+#[openapi(tag = "Auth")]
 #[get("/auth/me")]
 pub async fn me(session: Session<'_>, _auth: Auth) -> Option<Json<AuthenticatedUser>> {
 	match session.get().await.expect("Session error") {
@@ -23,8 +23,8 @@ pub async fn me(session: Session<'_>, _auth: Auth) -> Option<Json<AuthenticatedU
 	}
 }
 
-// #[openapi(tag = "Authentication")]
 /// Attempt to login a user. On success, a session is created and the user is returned.
+#[openapi(tag = "Auth")]
 #[post("/auth/login", data = "<credentials>")]
 pub async fn login(
 	ctx: &Context,
@@ -65,6 +65,7 @@ pub async fn login(
 /// Attempts to register a new user. On success, a session is *not* created, but the user is returned. Only the
 /// server owner can register new users, however if the server has no users it is considered to be 'unclaimed'
 /// and will assign the tentative new user the SERVER_OWNER role.
+#[openapi(tag = "Auth")]
 #[post("/auth/register", data = "<credentials>")]
 pub async fn register(
 	ctx: &Context,
@@ -125,6 +126,7 @@ pub async fn register(
 }
 
 /// Attempts to logout the current user, destroying the session.
+#[openapi(tag = "Auth")]
 #[post("/auth/logout")]
 pub async fn logout(session: Session<'_>) -> ApiResult<()> {
 	Ok(session.remove().await?)

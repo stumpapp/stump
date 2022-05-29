@@ -3,7 +3,7 @@
 {% callout title="Note" icon="danger" %}
 Stump will have an official Docker image available when the first beta release is published.
 
-For now, Docker builds of Stump are _development only_, meaning if you want to use Docker you'll have to build your own image. These instructions will be updated for general usage when the official Docker image is available.
+For now, Docker builds of Stump are _development only_, meaning if you want to use Docker you'll have to build your own image. This assumes you have already followed the [Developer Setup](/contributing) guide. These instructions will be updated for general usage when the official Docker image is available.
 {% /callout %}
 
 ## Usage

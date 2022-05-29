@@ -11,6 +11,7 @@ use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
 };
+use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
 use std::path::Path;
 use types::{
 	event::{InternalEvent, InternalTask, TaskResponder},
@@ -89,6 +90,13 @@ async fn rocket() -> _ {
 		.mount("/", FileServer::from(static_dir()).rank(1))
 		.mount("/", routes![index_fallback])
 		.mount("/api", routes::api::api())
+		.mount(
+			"/api/swagger",
+			make_swagger_ui(&SwaggerUIConfig {
+				url: "/api/openapi.json".to_owned(),
+				..Default::default()
+			}),
+		)
 		.mount("/opds/v1.2", routes::opds::opds())
 		.register("/opds/v1.2", catchers![opds_unauthorized])
 }

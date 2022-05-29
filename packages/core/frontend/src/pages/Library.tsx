@@ -42,7 +42,11 @@ export default function Library() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
-			{viewAsGrid ? <SeriesGrid series={library.series} /> : <SeriesList series={library.series} />}
+			{viewAsGrid ? (
+				<SeriesGrid series={library.series!} />
+			) : (
+				<SeriesList series={library.series!} />
+			)}
 		</>
 	);
 }

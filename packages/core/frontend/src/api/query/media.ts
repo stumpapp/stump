@@ -1,7 +1,7 @@
 import API, { baseURL } from '..';
 
-export function getMedia(): Promise<GetMediaResponse> {
-	return API.get('/media');
+export function getMedia(): Promise<PageableApiResult<Media[]>> {
+	return API.get('/media?unpaged=true');
 }
 
 export function getMediaById(id: string): Promise<GetMediaById> {

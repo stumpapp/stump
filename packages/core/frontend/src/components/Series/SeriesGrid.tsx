@@ -2,7 +2,7 @@ import React from 'react';
 import SeriesCard from './SeriesCard';
 
 interface Props {
-	series: SeriesWithMedia[];
+	series: Series[];
 }
 
 export default function SeriesGrid({ series }: Props) {

@@ -2,7 +2,7 @@ import React from 'react';
 import ListItem from '~components/ListItem';
 
 interface Props {
-	series: SeriesWithMedia[];
+	series: Series[];
 }
 
 export default function SeriesList({ series }: Props) {

@@ -19,8 +19,9 @@ import {
 
 import ApplicationVersion from '../ApplicationVersion';
 import LibraryOptionsMenu from '../Library/LibraryOptionsMenu';
-import ThemeToggle from '../ThemeToggle';
+import ThemeToggle from './ThemeToggle';
 import CreateLibraryModal from '~components/Library/CreateLibraryModal';
+import Logout from './Logout';
 
 interface NavMenuItemProps extends Library {
 	href: string;
@@ -182,7 +183,10 @@ export function SidebarContent() {
 			<HStack as="footer" px={2} alignItems="center" justifyContent="space-between">
 				<ApplicationVersion />
 
-				<ThemeToggle />
+				<HStack>
+					<Logout />
+					<ThemeToggle />
+				</HStack>
 			</HStack>
 		</>
 	);

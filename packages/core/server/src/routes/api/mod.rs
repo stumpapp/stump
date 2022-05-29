@@ -9,6 +9,7 @@ pub mod job;
 pub mod library;
 pub mod media;
 pub mod series;
+pub mod tag;
 
 /// Function to return the routes for the `/api` path.
 pub fn api() -> Vec<Route> {
@@ -44,6 +45,9 @@ pub fn api() -> Vec<Route> {
 		media::get_media_page,
 		media::get_media_thumbnail,
 		media::update_media_progress,
+		// tag api
+		tag::get_tags,
+		tag::create_tags,
 	]
 }
 

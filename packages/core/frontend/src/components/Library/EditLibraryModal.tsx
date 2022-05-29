@@ -8,25 +8,16 @@ import {
 	ModalBody,
 	useDisclosure,
 	MenuItem,
-	Tabs,
-	TabList,
-	TabPanels,
-	TabPanel,
-	FormControl,
-	FormLabel,
-	InputGroup,
-	InputRightElement,
 } from '@chakra-ui/react';
 import Button, { ModalCloseButton } from '~components/ui/Button';
-import { Folder, NotePencil } from 'phosphor-react';
+import { NotePencil } from 'phosphor-react';
 import toast from 'react-hot-toast';
-import Form from '~components/ui/Form';
-import { z } from 'zod';
-import Input from '~components/ui/Input';
-import TextArea from '~components/ui/TextArea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { Tab } from '~components/ui/Tabs';
+import { FieldValues } from 'react-hook-form';
+import LibraryModalForm from './LibraryModalForm';
+import { useTags } from '~hooks/useTags';
+import { useMutation } from 'react-query';
+import client from '~api/client';
+import { editLibrary } from '~api/mutation/library';
 
 interface Props {
 	library: Library;
@@ -36,21 +27,39 @@ interface Props {
 export default function EditLibraryModal({ library }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	function handleEdit() {
+	const { tags: tagOptions, isLoading: fetchingTags } = useTags();
+
+	const { isLoading, mutateAsync } = useMutation('editLibrary', {
+		mutationFn: editLibrary,
+		onSuccess: (res) => {
+			if (!res.data) {
+				// throw new Error('Something went wrong.');
+				// TODO: log?
+			} else {
+				client.invalidateQueries('getLibraries');
+				onClose();
+			}
+		},
+		onError: (err) => {
+			// TODO: handle this error
+			// toast.error('Login failed. Please try again.');
+			console.error(err);
+		},
+	});
+
+	function handleSubmit(values: FieldValues) {
 		toast.error("I can't do that yet! 😢");
+
+		// const { name, path, description, tags } = values;
+
+		// TODO: create tags?
+
+		// toast.promise(mutateAsync({ id: library.id, name, path, description }), {
+		// 	loading: 'Creating library...',
+		// 	success: 'Library created!',
+		// 	error: 'Something went wrong.',
+		// });
 	}
-
-	// TODO: add check for existing library name? server WILL handle that error, but why
-	// not have client check too.
-	const schema = z.object({
-		name: z.string().min(1, { message: 'Library name is required' }),
-		path: z.string().min(1, { message: 'Library path is required' }),
-		description: z.string().nullable(),
-	});
-
-	const form = useForm({
-		resolver: zodResolver(schema),
-	});
 
 	return (
 		<>
@@ -64,7 +73,15 @@ export default function EditLibraryModal({ library }: Props) {
 					<ModalHeader>{library.name}</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody>
-						<Form className="w-full" id="create-library-form" form={form} onSubmit={handleEdit}>
+						<LibraryModalForm
+							library={library}
+							tags={tagOptions}
+							fetchingTags={fetchingTags}
+							onSubmit={handleSubmit}
+							reset={!isOpen}
+						/>
+
+						{/* <Form className="w-full" id="create-library-form" form={form} onSubmit={handleEdit}>
 							<Tabs isFitted colorScheme="brand" w="full">
 								<TabList>
 									<Tab>General</Tab>
@@ -111,14 +128,19 @@ export default function EditLibraryModal({ library }: Props) {
 									</TabPanel>
 								</TabPanels>
 							</Tabs>
-						</Form>
+						</Form> */}
 					</ModalBody>
 
 					<ModalFooter>
 						<Button mr={3} onClick={onClose}>
 							Cancel
 						</Button>
-						<Button colorScheme="brand" onClick={handleEdit}>
+						<Button
+							isLoading={isLoading}
+							colorScheme="brand"
+							type="submit"
+							form="edit-library-form"
+						>
 							Save Changes
 						</Button>
 					</ModalFooter>

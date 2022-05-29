@@ -1,9 +1,9 @@
 import React from 'react';
 import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react';
-import { CaretDown, CaretLeft, CaretRight, Rows, SquaresFour } from 'phosphor-react';
-import Button, { IconButton } from '../ui/Button';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Search from '../Search';
+import { CaretLeft, CaretRight } from 'phosphor-react';
+import Button from '../ui/Button';
+import { useNavigate } from 'react-router-dom';
+import Search from './Search';
 import { useStore } from '~store/store';
 import { useViewMode } from '~hooks/useViewMode';
 import shallow from 'zustand/shallow';
@@ -15,12 +15,12 @@ import ViewModeConfig from './ViewModeConfig';
 // buttons if theres is no forward/backward history. If I am on /books/id/pages/page, and I click the back button on
 // that page to take me to /boos/id, I don't want the back button to go to /books/id/pages/page.
 function Navigation() {
-	const location = useLocation();
+	// const _location = useLocation();
 	const navigate = useNavigate();
 
-	function navigateForward() {}
+	// function navigateForward() {}
 
-	function navigateBackward() {}
+	// function navigateBackward() {}
 
 	return (
 		<HStack
@@ -54,6 +54,9 @@ function Navigation() {
 	);
 }
 
+// FIXME: this is not good AT ALL for mobile. It *looks* fine, but the navigation is gone, the
+// sort/view mode buttons are gone, the sort config is gone,and the search bar is meh. I need to
+// plan out the layout for mobile.
 export default function Topbar() {
 	const title = useStore((state) => state.title, shallow);
 
@@ -63,8 +66,11 @@ export default function Topbar() {
 	return (
 		<Box
 			as="nav"
-			className="grid grid-cols-12 gap-4 w-full items-center px-4 md:pb-0 md:pt-4 pt-2 pb-2"
-			bg={{ base: useColorModeValue('white', 'gray.800'), md: 'transparent' }}
+			className="sticky top-0 grid grid-cols-12 gap-4 w-full items-center px-4 py-2 md:py-3"
+			bg={{
+				base: useColorModeValue('white', 'gray.800'),
+				md: useColorModeValue('white', 'gray.900'),
+			}}
 		>
 			<HStack
 				spacing="2"
@@ -75,7 +81,7 @@ export default function Topbar() {
 				<Navigation />
 
 				{/* @ts-ignore: this seems to work, idky it has type error */}
-				<Heading as="h3" size={{ base: 'sm', md: 'md' }} isTruncated>
+				<Heading as="h3" size={{ base: 'sm', md: 'md' }} noOfLines={1}>
 					{title}
 				</Heading>
 			</HStack>

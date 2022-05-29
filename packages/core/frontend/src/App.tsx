@@ -29,15 +29,15 @@ const ServerSettings = React.lazy(() => import('~pages/Settings/ServerSettings')
 
 export default function Root() {
 	return (
-		<ErrorBoundary>
-			<QueryClientProvider client={client}>
-				<ChakraProvider theme={theme}>
+		<ChakraProvider theme={theme}>
+			<ErrorBoundary>
+				<QueryClientProvider client={client}>
 					<StoreProvider>
 						<App />
 					</StoreProvider>
-				</ChakraProvider>
-			</QueryClientProvider>
-		</ErrorBoundary>
+				</QueryClientProvider>
+			</ErrorBoundary>
+		</ChakraProvider>
 	);
 }
 

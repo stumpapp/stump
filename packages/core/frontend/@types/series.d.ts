@@ -23,14 +23,9 @@ interface Series {
 	 * The (optional) description of the series.
 	 */
 	description?: string;
-}
-
-interface SeriesWithMedia extends Series {
 	/**
-	 * The media files in the series
+	 * The media files in the series. Will be undefined only if the relation is not loaded.
 	 * @see Media
 	 */
-	media: Media[];
+	media?: Media[];
 }
-
-type GetSeriesWithMedia = ApiResult<SeriesWithMedia, any>;

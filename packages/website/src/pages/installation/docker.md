@@ -24,10 +24,10 @@ docker create \
   --name=stump \
   --user 1000:1000 \
   -p 6969:6969 \
-  --volume /Users/aaronleopold/.stump:/config \
+  --mount type=bind,source=/Users/aaronleopold/.stump,target=/config \
   --mount type=bind,source=/Users/aaronleopold/Documents/Stump,target=/data \
   --restart unless-stopped \
-  stump
+  aaronleopold/stump
 ```
 
 Then you can start the container:

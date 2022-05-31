@@ -26,7 +26,7 @@ interface Props {
 export default function CreateLibraryModal(props: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const { tags: tagOptions, isLoading: fetchingTags } = useTags();
+	const { tags, options, isLoading: fetchingTags } = useTags();
 
 	const { isLoading, mutateAsync } = useMutation('createLibrary', {
 		mutationFn: createLibrary,
@@ -50,24 +50,32 @@ export default function CreateLibraryModal(props: Props) {
 		mutationFn: createTags,
 	});
 
+	// /Users/aaronleopold/Documents/Stump/Demo
 	async function handleSubmit(values: FieldValues) {
-		const { name, path, description, tags } = values;
+		const { name, path, description, tags: formTags } = values;
 
-		let tagNames = tags.map((tag: TagOption) => tag.value);
+		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
 
-		// FIXME: why is this type not being picked up automatically?
-		const res: ApiResult<Tag[]> = await tryCreateTags(tagNames);
+		let tagsToCreate = formTags
+			?.map((tag: TagOption) => tag.value)
+			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName));
 
-		if (res.data && res.status === 200) {
-			toast.promise(mutateAsync({ name, path, description, tags: res.data }), {
-				loading: 'Creating library...',
-				success: 'Library created!',
-				error: 'Something went wrong.',
-			});
-		} else {
-			console.log(res);
-			toast.error('Something went wrong when creating the tags.');
+		if (tagsToCreate && tagsToCreate.length > 0) {
+			const res: ApiResult<Tag[]> = await tryCreateTags(tagsToCreate);
+
+			if (res.status > 201) {
+				toast.error('Something went wrong when creating the tags.');
+				return;
+			}
+
+			existingTags = existingTags.concat(res.data);
 		}
+
+		toast.promise(mutateAsync({ name, path, description, tags: tagsToCreate }), {
+			loading: 'Creating library...',
+			success: 'Library created!',
+			error: 'Something went wrong.',
+		});
 	}
 
 	return (
@@ -102,7 +110,7 @@ export default function CreateLibraryModal(props: Props) {
 					<ModalCloseButton />
 					<ModalBody w="full">
 						<LibraryModalForm
-							tags={tagOptions}
+							tags={options}
 							fetchingTags={fetchingTags}
 							onSubmit={handleSubmit}
 							reset={!isOpen}

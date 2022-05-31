@@ -63,7 +63,7 @@ export default function JobOverlay() {
 					as={motion.div}
 					bg={'white'}
 					_dark={{ bg: 'gray.700' }}
-					className="absolute right-[1rem] bottom-[1rem] rounded-md shadow p-2 flex flex-col justify-center items-center w-52"
+					className="fixed right-[1rem] bottom-[1rem] rounded-md shadow p-2 flex flex-col justify-center items-center w-52"
 					initial={{ opacity: 0, y: 100, scale: 0.9 }}
 					animate={{ opacity: 1, y: 0, scale: 1 }}
 					exit={{ opacity: 0, y: 100, scale: 0.9 }}

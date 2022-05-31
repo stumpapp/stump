@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TagOption } from '~hooks/useTags';
 import { CreatableSelect } from 'chakra-react-select';
-import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react';
+import { FormControl, FormHelperText, FormLabel, useColorModeValue } from '@chakra-ui/react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 interface TagSelectProps {
@@ -25,21 +25,17 @@ export default function TagSelect({
 }: TagSelectProps) {
 	const form = useFormContext();
 
-	// tags to be created
-	const [newTags, setNewTags] = useState([] as TagOption[]);
-
-	function handleCreateTag(value: string) {
-		setNewTags((curr) => [...curr, { label: value, value }]);
-	}
-
 	return (
 		<Controller
 			name={name}
 			control={form.control}
 			rules={{ required: false }}
-			render={({ field: { onChange, onBlur, value, name, ref }, fieldState: { error } }) => (
+			render={({
+				field: { onChange, onBlur, value, name: htmlFor, ref },
+				fieldState: { error },
+			}) => (
 				<FormControl>
-					<FormLabel htmlFor={name} mb={hint ? 1 : 2}>
+					<FormLabel htmlFor={htmlFor} mb={hint ? 1 : 2}>
 						{label}
 					</FormLabel>
 					{hint && (
@@ -54,26 +50,24 @@ export default function TagSelect({
 						isLoading={isLoading}
 						isMulti
 						name="tags"
-						onChange={(newValue, actionMeta) => {
-							if (actionMeta.action === 'remove-value') {
-								const newTag = newTags.find((t) => t.value === actionMeta.removedValue.value);
-
-								if (newTag) {
-									setNewTags(newTags.filter((t) => t !== newTag));
-								}
-							}
-
-							onChange(newValue as TagOption[]);
-						}}
+						onChange={onChange}
 						onBlur={onBlur}
 						defaultValue={defaultValue}
 						value={value}
-						options={options.concat(newTags)}
+						options={options}
 						placeholder="Select tags"
 						closeMenuOnSelect={false}
 						// menuIsOpen
-						onCreateOption={handleCreateTag}
 						chakraStyles={{
+							control: (provided) => ({
+								...provided,
+								_focus: {
+									boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+								},
+								_hover: {
+									borderColor: useColorModeValue('blackAlpha.200', 'whiteAlpha.400'),
+								},
+							}),
 							dropdownIndicator: (provided) => ({
 								...provided,
 								bg: 'transparent',
@@ -83,6 +77,25 @@ export default function TagSelect({
 							indicatorSeparator: (provided) => ({
 								...provided,
 								display: 'none',
+							}),
+							menuList: (provided) => ({
+								...provided,
+								bg: useColorModeValue('white', 'gray.700'),
+							}),
+							option: (provided, state) => ({
+								...provided,
+								bg: state.isFocused
+									? useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+									: 'transparent',
+							}),
+							multiValue: (provided) => ({
+								...provided,
+								color: useColorModeValue('black', 'gray.100'),
+								shadow: 'sm',
+								bg: useColorModeValue('blackAlpha.100', 'whiteAlpha.100'),
+								_hover: {
+									bg: useColorModeValue('blackAlpha.200', 'whiteAlpha.200'),
+								},
 							}),
 						}}
 					/>

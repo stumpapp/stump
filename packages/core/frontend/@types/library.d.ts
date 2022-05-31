@@ -30,4 +30,6 @@ interface Library {
 }
 
 type CreateLibraryInput = Omit<Library, 'id' | 'updatedAt' | 'series'>;
-type EditLibraryInput = Library;
+interface EditLibraryInput extends Library {
+	removedTags?: Tag[];
+}

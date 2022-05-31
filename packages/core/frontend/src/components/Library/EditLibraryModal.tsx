@@ -14,10 +14,11 @@ import { NotePencil } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import { FieldValues } from 'react-hook-form';
 import LibraryModalForm from './LibraryModalForm';
-import { useTags } from '~hooks/useTags';
+import { TagOption, useTags } from '~hooks/useTags';
 import { useMutation } from 'react-query';
 import client from '~api/client';
 import { editLibrary } from '~api/mutation/library';
+import { createTags } from '~api/mutation/tag';
 
 interface Props {
 	library: Library;
@@ -27,7 +28,7 @@ interface Props {
 export default function EditLibraryModal({ library }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const { tags: tagOptions, isLoading: fetchingTags } = useTags();
+	const { tags, options, isLoading: fetchingTags } = useTags();
 
 	const { isLoading, mutateAsync } = useMutation('editLibrary', {
 		mutationFn: editLibrary,
@@ -47,22 +48,60 @@ export default function EditLibraryModal({ library }: Props) {
 		},
 	});
 
-	// const { mutateAsync: tryCreateTags } = useMutation('createTags', {
-	// 	mutationFn: createTags,
-	// });
+	const { mutateAsync: tryCreateTags } = useMutation('createTags', {
+		mutationFn: createTags,
+	});
 
-	function handleSubmit(values: FieldValues) {
-		toast.error("I can't do that yet! 😢");
+	function getRemovedTags(tags: TagOption[]): Tag[] | undefined {
+		// All tags were removed, or no tags were there to begin with
+		if (tags.length === 0) {
+			return library.tags || undefined;
+		}
 
-		// const { name, path, description, tags } = values;
+		if (!library.tags || library.tags.length === 0) {
+			return undefined;
+		}
 
-		// TODO: create tags?
+		// Some tags were removed, but not all
+		return library.tags.filter((tag) => !tags.some((tagOption) => tagOption.value === tag.name));
+	}
 
-		// toast.promise(mutateAsync({ id: library.id, name, path, description }), {
-		// 	loading: 'Creating library...',
-		// 	success: 'Library created!',
-		// 	error: 'Something went wrong.',
-		// });
+	async function handleSubmit(values: FieldValues) {
+		const { name, path, description, tags: formTags } = values;
+
+		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
+
+		let tagsToCreate = formTags
+			.map((tag: TagOption) => tag.value)
+			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName));
+
+		let removedTags = getRemovedTags(formTags);
+
+		if (!removedTags?.length) {
+			removedTags = undefined;
+		}
+
+		if (tagsToCreate.length) {
+			const res = await tryCreateTags(tagsToCreate);
+
+			if (res.status > 201) {
+				toast.error('Something went wrong when creating the tags.');
+				return;
+			}
+
+			existingTags = existingTags.concat(res.data);
+		}
+
+		console.log({ ...library, name, path, description, tags: existingTags, removedTags });
+
+		toast.promise(
+			mutateAsync({ ...library, name, path, description, tags: existingTags, removedTags }),
+			{
+				loading: 'Updating library...',
+				success: 'Updates saved!',
+				error: 'Something went wrong.',
+			},
+		);
 	}
 
 	return (
@@ -79,60 +118,11 @@ export default function EditLibraryModal({ library }: Props) {
 					<ModalBody>
 						<LibraryModalForm
 							library={library}
-							tags={tagOptions}
+							tags={options}
 							fetchingTags={fetchingTags}
 							onSubmit={handleSubmit}
 							reset={!isOpen}
 						/>
-
-						{/* <Form className="w-full" id="create-library-form" form={form} onSubmit={handleEdit}>
-							<Tabs isFitted colorScheme="brand" w="full">
-								<TabList>
-									<Tab>General</Tab>
-									<Tab>Options</Tab>
-								</TabList>
-
-								<TabPanels>
-									<TabPanel className="flex flex-col space-y-2">
-										<FormControl>
-											<FormLabel htmlFor="name">Libary name</FormLabel>
-											<Input
-												type="text"
-												autoFocus
-												defaultValue={library.name}
-												{...form.register('name')}
-											/>
-										</FormControl>
-
-										<FormControl>
-											<FormLabel htmlFor="name">Libary path</FormLabel>
-											<InputGroup>
-												<Input defaultValue={library.path} {...form.register('path')} />
-												<InputRightElement
-													cursor="pointer"
-													onClick={() => {
-														toast.error('Not implemented yet, please type the path manually');
-													}}
-													children={<Folder />}
-												/>
-											</InputGroup>
-										</FormControl>
-
-										<FormControl>
-											<FormLabel htmlFor="name">Description</FormLabel>
-											<TextArea
-												placeholder="A short description of the library (optional)"
-												defaultValue={library.description}
-												{...form.register('description')}
-											/>
-										</FormControl>
-									</TabPanel>
-									<TabPanel>
-										<p>TODO: access control options, tags, other stuffs tbd</p>
-									</TabPanel>
-								</TabPanels>
-							</Tabs>
-						</Form> */}
 					</ModalBody>
 
 					<ModalFooter>

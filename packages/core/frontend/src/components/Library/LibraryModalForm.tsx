@@ -53,11 +53,9 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 		description: z.string().nullable(),
 		tags: z
 			.array(
-				// FIXME: not sure why this was registering as incorrect type on submit.
-				// this will need to be fixed, but I cannot be bothered right now.
 				// z.object({
 				// 	label: z.string(),
-				// 	name: z.string(),
+				// 	value: z.string(),
 				// }),
 				z.any(),
 			)
@@ -71,7 +69,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					name: library.name,
 					path: library.path,
 					description: library.description,
-					tags: library.tags?.map((t) => ({ label: t.name, name: t.name })),
+					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
 			  }
 			: {},
 	});
@@ -81,6 +79,8 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 	const errors = useMemo(() => {
 		return form.formState.errors;
 	}, [form.formState.errors]);
+
+	console.log(errors);
 
 	useEffect(() => {
 		if (reset) {

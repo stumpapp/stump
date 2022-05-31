@@ -38,22 +38,25 @@ export function useTags({
 		onError: onCreateError,
 	});
 
-	const tags = useMemo(() => {
+	const { tags, options } = useMemo(() => {
 		if (data && data.data) {
-			return data.data.map(
+			const tagOptions = data.data.map(
 				(tag) =>
 					({
 						label: tag.name,
 						value: tag.name,
 					} as TagOption),
 			);
+
+			return { tags: data.data, options: tagOptions };
 		}
 
-		return [];
+		return { tags: [], options: [] };
 	}, [data]);
 
 	return {
 		tags,
+		options,
 		isLoading,
 		refetch,
 		createTags,

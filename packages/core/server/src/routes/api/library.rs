@@ -1,4 +1,4 @@
-use prisma_client_rust::Direction;
+use prisma_client_rust::{Direction, Update};
 use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
@@ -57,7 +57,7 @@ pub async fn get_libraries(
 pub async fn get_library_by_id(
 	id: String,
 	ctx: &Context,
-	_auth: Auth,
+	// _auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
@@ -163,21 +163,26 @@ pub async fn create_library(
 		.create(
 			library::name::set(input.name.to_owned()),
 			library::path::set(input.path.to_owned()),
-			vec![
-				library::description::set(input.description.to_owned()),
-				library::tags::link(
-					input
-						.tags
-						.to_owned()
-						.unwrap_or(vec![])
-						.into_iter()
-						.map(|t| tag::id::equals(t.id.to_owned()))
-						.collect(),
-				),
-			],
+			vec![library::description::set(input.description.to_owned())],
 		)
 		.exec()
 		.await?;
+
+	// FIXME: this is disgusting. I don't understand why the library::tag::link doesn't
+	// work with multiple tags, nor why providing multiple library::tag::link params
+	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
+	// highly inefficient queries.
+	if let Some(tags) = input.tags.to_owned() {
+		for tag in tags {
+			db.library()
+				.find_unique(library::id::equals(lib.id.clone()))
+				.update(vec![library::tags::link(vec![tag::id::equals(
+					tag.id.to_owned(),
+				)])])
+				.exec()
+				.await?;
+		}
+	}
 
 	ctx.spawn_job(Box::new(ScannerJob {
 		path: lib.path.clone(),
@@ -187,11 +192,13 @@ pub async fn create_library(
 }
 
 #[derive(Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateLibrary {
 	name: String,
 	path: String,
 	description: Option<String>,
 	tags: Option<Vec<Tag>>,
+	removed_tags: Option<Vec<Tag>>,
 }
 
 /// Update a library by id, if the current user is a SERVER_OWNER.
@@ -202,27 +209,77 @@ pub async fn update_library(
 	id: String,
 	input: Json<UpdateLibrary>,
 	ctx: &Context,
-	_auth: Auth,
+	// _auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
+
+	println!("tags: {:?}", input.tags);
+
+	let mut updates: Vec<library::SetParam> = vec![
+		library::name::set(input.name.to_owned()),
+		library::path::set(input.path.to_owned()),
+		library::description::set(input.description.to_owned()),
+	];
+
+	// FIXME: this is disgusting. I don't understand why the library::tag::link doesn't
+	// work with multiple tags, nor why providing multiple library::tag::link params
+	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
+	// highly inefficient queries.
+
+	if let Some(tags) = input.tags.to_owned() {
+		if tags.len() > 0 {
+			// updates.push(library::tags::link(vec![
+			// 	tag::name::equals(String::from("Demo")),
+			// 	tag::name::equals(String::from("Dem2")),
+			// ]));
+
+			for tag in tags {
+				db.library()
+					.find_unique(library::id::equals(id.clone()))
+					.update(vec![library::tags::link(vec![tag::id::equals(
+						tag.id.to_owned(),
+					)])])
+					.exec()
+					.await?;
+			}
+		}
+	}
+
+	if let Some(removed_tags) = input.removed_tags.to_owned() {
+		if removed_tags.len() > 0 {
+			// updates.push(library::tags::link(vec![
+			// 	tag::name::equals(String::from("Demo")),
+			// 	tag::name::equals(String::from("Dem2")),
+			// ]));
+
+			// let mut removing = removed_tags
+			// 	.into_iter()
+			// 	.map(|t| {
+			// 		println!("unlink tag: {:?}", t);
+			// 		library::tags::unlink(vec![tag::UniqueWhereParam::IdEquals(
+			// 			t.id.to_owned(),
+			// 		)])
+			// 	})
+			// 	.collect::<Vec<library::SetParam>>();
+
+			// updates.push(removing);
+			for tag in removed_tags {
+				db.library()
+					.find_unique(library::id::equals(id.clone()))
+					.update(vec![library::tags::unlink(vec![tag::id::equals(
+						tag.id.to_owned(),
+					)])])
+					.exec()
+					.await?;
+			}
+		}
+	}
 
 	let updated = db
 		.library()
 		.find_unique(library::id::equals(id.clone()))
-		.update(vec![
-			library::name::set(input.name.to_owned()),
-			library::path::set(input.path.to_owned()),
-			library::description::set(input.description.to_owned()),
-			library::tags::link(
-				input
-					.tags
-					.to_owned()
-					.unwrap_or(vec![])
-					.into_iter()
-					.map(|t| tag::id::equals(t.id.to_owned()))
-					.collect(),
-			),
-		])
+		.update(updates)
+		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
 
@@ -233,11 +290,13 @@ pub async fn update_library(
 		)));
 	}
 
-	// ctx.spawn_job(Box::new(ScannerJob {
-	// 	path: lib.path.clone(),
-	// }));
+	let updated = updated.unwrap();
 
-	Ok(Json(updated.unwrap().into()))
+	ctx.spawn_job(Box::new(ScannerJob {
+		path: updated.path.clone(),
+	}));
+
+	Ok(Json(updated.into()))
 }
 
 /// Delete a library by id, if the current user is a SERVER_OWNER.

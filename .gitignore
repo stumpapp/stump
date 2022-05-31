@@ -38,4 +38,6 @@ target
 _next
 
 docker-compose.yaml
-openapi-example*
+
+# its a surprise
+README_RELEASE.md

@@ -16,10 +16,14 @@ function ErrorFallback({ error }: FallbackProps) {
 				<Text fontSize="lg" maxW="xl" textAlign="center">
 					An error occurred while attempting to complete your request. My systems detect:{' '}
 					{error.message}.{' '}
-					<span onClick={toggle} className="cursor-pointer text-brand-400">
-						Click me
-					</span>{' '}
-					to see {showMore ? 'less' : 'more'}.
+					{error.stack && (
+						<>
+							<span onClick={toggle} className="cursor-pointer text-brand-400">
+								Click me
+							</span>{' '}
+							to see {showMore ? 'less' : 'more'}.
+						</>
+					)}
 				</Text>
 
 				{showMore && (

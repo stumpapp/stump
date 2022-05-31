@@ -14,6 +14,6 @@ export function createLibrary(payload: CreateLibraryInput): Promise<ApiResult<Li
 	return API.post('/libraries', payload);
 }
 
-export function editLibrary({ id, ...payload }: EditLibraryInput): Promise<ApiResult<Library>> {
-	return API.put(`/libraries/${id}`, payload);
+export function editLibrary(payload: EditLibraryInput): Promise<ApiResult<Library>> {
+	return API.put(`/libraries/${payload.id}`, payload);
 }

@@ -11,8 +11,8 @@ pub fn get_cors() -> Cors {
 			.collect::<Vec<String>>(),
 		Err(_) => vec![
 			"http://localhost:3000".to_string(),
-			"http://localhost:6969".to_string(),
-			"http://0.0.0.0:6969".to_string(),
+			"http://localhost:81001".to_string(),
+			"http://0.0.0.0:81001".to_string(),
 		],
 	};
 

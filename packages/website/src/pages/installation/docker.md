@@ -23,7 +23,7 @@ Once the image is created, you can create a container from it:
 docker create \
   --name=stump \
   --user 1000:1000 \
-  -p 6969:6969 \
+  -p 81001:81001 \
   --mount type=bind,source=/Users/aaronleopold/.stump,target=/config \
   --mount type=bind,source=/Users/aaronleopold/Documents/Stump,target=/data \
   --restart unless-stopped \
@@ -38,9 +38,9 @@ docker start stump
 
 #### Properties / Configuration
 
-| Parameter |                   Functionality                    |
-| --------- | :------------------------------------------------: |
-| `-p 6969` | The port Stump uses for it's API and web interface |
+| Parameter  |                   Functionality                    |
+| ---------- | :------------------------------------------------: |
+| `-p 81001` | The port Stump uses for it's API and web interface |
 
 ### Docker Compose
 
@@ -60,7 +60,7 @@ services:
         source: /Users/aaronleopold/Documents/Stump
         target: /home/stump/data
     ports:
-      - 6969:6969
+      - 81001:81001
     user: '1000:1000'
     # This `environment` field is optional, remove if you don't need it. I am using
     # them as an example here, but these are actually their default values.

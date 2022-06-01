@@ -29,15 +29,15 @@ const ServerSettings = React.lazy(() => import('~pages/Settings/ServerSettings')
 
 export default function Root() {
 	return (
-		<ErrorBoundary>
-			<QueryClientProvider client={client}>
-				<ChakraProvider theme={theme}>
+		<ChakraProvider theme={theme}>
+			<ErrorBoundary>
+				<QueryClientProvider client={client}>
 					<StoreProvider>
 						<App />
 					</StoreProvider>
-				</ChakraProvider>
-			</QueryClientProvider>
-		</ErrorBoundary>
+				</QueryClientProvider>
+			</ErrorBoundary>
+		</ChakraProvider>
 	);
 }
 
@@ -78,6 +78,11 @@ function App() {
 			setTimeout(() => {
 				completeJob(data.JobComplete as string);
 				toast.success(`Job ${data.JobComplete} complete.`);
+			}, 500);
+		} else if (data.JobFailed) {
+			setTimeout(() => {
+				// completeJob(data.JobComplete as string);
+				toast.error(`Job ${data.JobFailed} failed.`);
 			}, 500);
 		} else if (data.CreatedSeries || data.CreatedMedia) {
 			// I set a timeout here to give the backend a little time to analyze at least

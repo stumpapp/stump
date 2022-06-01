@@ -8,7 +8,13 @@ interface Job {
 	message?: string;
 }
 
-type JobEventKind = 'JobStarted' | 'JobProgress' | 'JobComplete' | 'CreatedMedia' | 'CreatedSeries';
+type JobEventKind =
+	| 'JobStarted'
+	| 'JobProgress'
+	| 'JobComplete'
+	| 'JobFailed'
+	| 'CreatedMedia'
+	| 'CreatedSeries';
 
 type JobEvent = {
 	[kind in JobEventKind]: any;

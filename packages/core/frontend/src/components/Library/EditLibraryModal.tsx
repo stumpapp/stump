@@ -8,25 +8,17 @@ import {
 	ModalBody,
 	useDisclosure,
 	MenuItem,
-	Tabs,
-	TabList,
-	TabPanels,
-	TabPanel,
-	FormControl,
-	FormLabel,
-	InputGroup,
-	InputRightElement,
 } from '@chakra-ui/react';
 import Button, { ModalCloseButton } from '~components/ui/Button';
-import { Folder, NotePencil } from 'phosphor-react';
+import { NotePencil } from 'phosphor-react';
 import toast from 'react-hot-toast';
-import Form from '~components/ui/Form';
-import { z } from 'zod';
-import Input from '~components/ui/Input';
-import TextArea from '~components/ui/TextArea';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { Tab } from '~components/ui/Tabs';
+import { FieldValues } from 'react-hook-form';
+import LibraryModalForm from './LibraryModalForm';
+import { TagOption, useTags } from '~hooks/useTags';
+import { useMutation } from 'react-query';
+import client from '~api/client';
+import { editLibrary } from '~api/mutation/library';
+import { createTags } from '~api/mutation/tag';
 
 interface Props {
 	library: Library;
@@ -36,21 +28,81 @@ interface Props {
 export default function EditLibraryModal({ library }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	function handleEdit() {
-		toast.error("I can't do that yet! 😢");
+	const { tags, options, isLoading: fetchingTags } = useTags();
+
+	const { isLoading, mutateAsync } = useMutation('editLibrary', {
+		mutationFn: editLibrary,
+		onSuccess: (res) => {
+			if (!res.data) {
+				// throw new Error('Something went wrong.');
+				// TODO: log?
+			} else {
+				client.invalidateQueries('getLibraries');
+				onClose();
+			}
+		},
+		onError: (err) => {
+			// TODO: handle this error
+			// toast.error('Login failed. Please try again.');
+			console.error(err);
+		},
+	});
+
+	const { mutateAsync: tryCreateTags } = useMutation('createTags', {
+		mutationFn: createTags,
+	});
+
+	function getRemovedTags(tags: TagOption[]): Tag[] | undefined {
+		// All tags were removed, or no tags were there to begin with
+		if (tags.length === 0) {
+			return library.tags || undefined;
+		}
+
+		if (!library.tags || library.tags.length === 0) {
+			return undefined;
+		}
+
+		// Some tags were removed, but not all
+		return library.tags.filter((tag) => !tags.some((tagOption) => tagOption.value === tag.name));
 	}
 
-	// TODO: add check for existing library name? server WILL handle that error, but why
-	// not have client check too.
-	const schema = z.object({
-		name: z.string().min(1, { message: 'Library name is required' }),
-		path: z.string().min(1, { message: 'Library path is required' }),
-		description: z.string().nullable(),
-	});
+	async function handleSubmit(values: FieldValues) {
+		const { name, path, description, tags: formTags } = values;
 
-	const form = useForm({
-		resolver: zodResolver(schema),
-	});
+		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
+
+		let tagsToCreate = formTags
+			.map((tag: TagOption) => tag.value)
+			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName));
+
+		let removedTags = getRemovedTags(formTags);
+
+		if (!removedTags?.length) {
+			removedTags = undefined;
+		}
+
+		if (tagsToCreate.length) {
+			const res = await tryCreateTags(tagsToCreate);
+
+			if (res.status > 201) {
+				toast.error('Something went wrong when creating the tags.');
+				return;
+			}
+
+			existingTags = existingTags.concat(res.data);
+		}
+
+		console.log({ ...library, name, path, description, tags: existingTags, removedTags });
+
+		toast.promise(
+			mutateAsync({ ...library, name, path, description, tags: existingTags, removedTags }),
+			{
+				loading: 'Updating library...',
+				success: 'Updates saved!',
+				error: 'Something went wrong.',
+			},
+		);
+	}
 
 	return (
 		<>
@@ -64,61 +116,25 @@ export default function EditLibraryModal({ library }: Props) {
 					<ModalHeader>{library.name}</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody>
-						<Form className="w-full" id="create-library-form" form={form} onSubmit={handleEdit}>
-							<Tabs isFitted colorScheme="brand" w="full">
-								<TabList>
-									<Tab>General</Tab>
-									<Tab>Options</Tab>
-								</TabList>
-
-								<TabPanels>
-									<TabPanel className="flex flex-col space-y-2">
-										<FormControl>
-											<FormLabel htmlFor="name">Libary name</FormLabel>
-											<Input
-												type="text"
-												autoFocus
-												defaultValue={library.name}
-												{...form.register('name')}
-											/>
-										</FormControl>
-
-										<FormControl>
-											<FormLabel htmlFor="name">Libary path</FormLabel>
-											<InputGroup>
-												<Input defaultValue={library.path} {...form.register('path')} />
-												<InputRightElement
-													cursor="pointer"
-													onClick={() => {
-														toast.error('Not implemented yet, please type the path manually');
-													}}
-													children={<Folder />}
-												/>
-											</InputGroup>
-										</FormControl>
-
-										<FormControl>
-											<FormLabel htmlFor="name">Description</FormLabel>
-											<TextArea
-												placeholder="A short description of the library (optional)"
-												defaultValue={library.description}
-												{...form.register('description')}
-											/>
-										</FormControl>
-									</TabPanel>
-									<TabPanel>
-										<p>TODO: access control options, tags, other stuffs tbd</p>
-									</TabPanel>
-								</TabPanels>
-							</Tabs>
-						</Form>
+						<LibraryModalForm
+							library={library}
+							tags={options}
+							fetchingTags={fetchingTags}
+							onSubmit={handleSubmit}
+							reset={!isOpen}
+						/>
 					</ModalBody>
 
 					<ModalFooter>
 						<Button mr={3} onClick={onClose}>
 							Cancel
 						</Button>
-						<Button colorScheme="brand" onClick={handleEdit}>
+						<Button
+							isLoading={isLoading}
+							colorScheme="brand"
+							type="submit"
+							form="edit-library-form"
+						>
 							Save Changes
 						</Button>
 					</ModalFooter>

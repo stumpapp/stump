@@ -2,7 +2,7 @@ import React from 'react';
 import MediaCard from './MediaCard';
 
 interface Props {
-	media: MediaWithProgress[];
+	media: Media[];
 }
 
 export default function MediaGrid({ media }: Props) {

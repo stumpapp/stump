@@ -3,7 +3,7 @@ import client from '~api/client';
 import { getMediaById, getMediaThumbnail } from '~api/query/media';
 import Card from '~components/Card';
 
-interface Props extends MediaWithProgress {}
+interface Props extends Media {}
 
 export default function MediaCard({ ...media }: Props) {
 	const prefetchMedia = async () =>

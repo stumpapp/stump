@@ -68,7 +68,7 @@ const BACKWARD_ANIMATION: PageAnimation = [
 
 export interface ComicReaderProps {
 	currentPage: number;
-	media: MediaWithProgress;
+	media: Media;
 
 	onPageChange: (page: number) => void;
 	getPageUrl(page: number): string;

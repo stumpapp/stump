@@ -8,3 +8,7 @@ interface RegisterUserInput {
 export function register(payload: RegisterUserInput) {
 	return API.post('/auth/register', payload);
 }
+
+export function logout(): Promise<ApiResult<any>> {
+	return API.post('/auth/logout');
+}

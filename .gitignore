@@ -14,6 +14,7 @@ build
 # rust
 static
 target
+client
 *.db*
 *.sqlite*
 *prisma.rs*
@@ -38,4 +39,6 @@ target
 _next
 
 docker-compose.yaml
-openapi-example*
+
+# its a surprise
+README_RELEASE.md

@@ -1,13 +1,45 @@
+import { Box, Code, Heading, Link, Stack, Text, useBoolean } from '@chakra-ui/react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import BaseLayout from './Layouts/BaseLayout';
 
 // TODO: make pretty
 function ErrorFallback({ error }: FallbackProps) {
-	return (
-		<div>
-			<h3>{error.message}</h3>
+	const [showMore, { toggle }] = useBoolean(false);
 
-			<pre>{error.stack}</pre>
-		</div>
+	return (
+		<BaseLayout>
+			<Stack mt={{ base: 12, md: 16 }} w="full" h="full" align="center">
+				<Heading as="h1" size="lg">
+					Darn, something went wrong.
+				</Heading>
+
+				<Text fontSize="lg" maxW="xl" textAlign="center">
+					An error occurred while attempting to complete your request. My systems detect:{' '}
+					{error.message}.{' '}
+					{error.stack && (
+						<>
+							<span onClick={toggle} className="cursor-pointer text-brand-400">
+								Click me
+							</span>{' '}
+							to see {showMore ? 'less' : 'more'}.
+						</>
+					)}
+				</Text>
+
+				{showMore && (
+					<Code rounded="md" maxW="4xl" p={4}>
+						{error.stack}
+					</Code>
+				)}
+
+				<Text fontSize="lg" maxW="xl" textAlign="center">
+					<Link href="/" color="brand.400">
+						Click here
+					</Link>{' '}
+					to go home
+				</Text>
+			</Stack>
+		</BaseLayout>
 	);
 }
 

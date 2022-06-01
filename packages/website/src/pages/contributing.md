@@ -43,7 +43,7 @@ The website package contains a Next.js application for the Stump landing page an
 
 There is a setup script to handle most of the initial configuration, however please ensure you at least have the basics installed: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your `$PATH`.
 
-**_Ensure you are on the `develop` branch before continuing._**:
+**_Ensure you are on the `develop` branch before continuing_**:
 
 ```bash
 git switch develop # or git checkout develop
@@ -87,3 +87,16 @@ pnpm core frontend:dev # start the frontend
 ```
 
 At this point, you're pretty much all set! When you navigate to [`localhost:3000`](http://localhost:3000), Stump will prompt you to create the managing user account and then your first library.
+
+## Developer Resources 📚
+
+A few useful resources for developers looking to contribute:
+
+- [Rocket documentation](https://rocket.rs/v0.5-rc/)
+- [Prisma documentation](https://prisma.io/docs/prisma-client/introduction)
+  - [Prisma Client Rust Documentation](https://github.com/Brendonovich/prisma-client-rust/tree/main/docs)
+- [Chakra UI Documentation](https://chakra-ui.com/docs)
+- [OPDS specification](https://specs.opds.io/)
+- [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)
+- [Getting started with React](https://reactjs.org/docs/getting-started.html)
+- [Rust Book](https://doc.rust-lang.org/book/)

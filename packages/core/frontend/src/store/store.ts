@@ -10,11 +10,12 @@ interface UserPreferencesMutations {
 }
 
 interface StoreMutations extends UserPreferencesMutations {
+	logoutUser(): void;
 	setUser: (user: User) => void;
-	setUserAndPreferences: (user: UserWithPreferences) => void;
+	setUserAndPreferences: (user: User) => void;
 	setUserPreferences: (preferences: UserPreferences) => void;
 	setLibraries: (libraries: Library[]) => void;
-	setMedia: (media: Media[]) => void;
+	// setMedia: (media: Media[]) => void;
 
 	setTitle(value: string): void;
 
@@ -27,9 +28,10 @@ interface MainStore extends StoreMutations {
 	user: User | null;
 	userPreferences: UserPreferences | null;
 	libraries: Library[];
-	// TODO: I don't think I am going to store this in the store
-	media: MediaWithProgress[];
+	// // TODO: I don't think I am going to store this in the store
+	// media: Media[];
 
+	// locale: Locale;
 	title: string;
 
 	jobs: Record<string, Job>;
@@ -41,15 +43,26 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 	user: null,
 	userPreferences: null,
 	libraries: [],
-	media: [],
+	// media: [],
+
+	// locale: Locale[import.meta.env.VITE_LOCALE as keyof typeof Locale] ?? Locale.EN,
 
 	title: 'Stump',
 	jobs: {},
 
+	logoutUser: () => {
+		set({ user: null, userPreferences: null });
+	},
+
 	setUser: (user: User) => set(() => ({ user })),
 
-	setUserAndPreferences: (user: UserWithPreferences) =>
-		set(() => ({ user, userPreferences: user.preferences })),
+	setUserAndPreferences: (user: User) => {
+		if (!user.preferences) {
+			get().setUser(user);
+		} else {
+			set(() => ({ user, userPreferences: user.preferences! }));
+		}
+	},
 
 	setUserPreferences: (preferences: UserPreferences) =>
 		set(() => ({
@@ -94,12 +107,7 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 	},
 
 	setLibraries: (libraries: Library[]) => set(() => ({ libraries })),
-	setMedia: (media: MediaWithProgress[]) => set(() => ({ media })),
-
-	// setLibraryDrawer: (value) =>
-	// 	set(({ libraryDrawer }) => ({
-	// 		libraryDrawer: value !== undefined ? value : !libraryDrawer,
-	// 	})),
+	// setMedia: (media: Media[]) => set(() => ({ media })),
 
 	setTitle: (value: string) => {
 		if (value !== get().title) {

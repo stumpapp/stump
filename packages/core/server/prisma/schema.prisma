@@ -104,7 +104,7 @@ model Series {
 
 model Media {
   id             String         @id @default(uuid())
-  // The name of the media. ex: "The Amazing Spider-Man (2018) #69.cbz"
+  // The name of the media. ex: "The Amazing Spider-Man (2018) #69"
   name           String
   // The description of the media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
   description    String?

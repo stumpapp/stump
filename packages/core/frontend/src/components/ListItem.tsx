@@ -33,27 +33,21 @@ export default function ListItem({ id, title, subtitle, href, even }: Props) {
 			className="flex w-full"
 		>
 			<Heading
-				isTruncated
+				noOfLines={1}
 				size="sm"
 				w={{ base: '50%', md: '30%', lg: '25%', xl: '23%' }}
 				className="shrink-0"
 			>
 				{title}
 			</Heading>
+
 			<Text
 				fontSize="sm"
 				className="flex-1"
-				isTruncated
+				noOfLines={1}
 				color={useColorModeValue('gray.500', 'gray.450')}
 			>
 				{subtitle}
-				{/* The Amazing Spider-Man series beginning with a new No. 1, replacing long-time writer Dan
-				Slott, as part of the Fresh Start relaunch that July.[106] The first five-issue story arc
-				was titled 'Back to Basics.' During the Back to Basics story, Kindred, a mysterious villain
-				with some relation to Peter's past, was introduced. The first major story under Spencer was
-				Hunted which ran through issues 16 through 23, the story also included four ".HU" issues for
-				issues 16, 18, 19, and 20. The end of the story saw the death of long-running Spider-Man
-				villain Kraven the Hunter, being replaced by his clone son, The Last Son of Kraven. */}
 			</Text>
 		</HStack>
 	);

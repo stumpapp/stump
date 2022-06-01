@@ -1,4 +1,5 @@
 use rocket::{
+	futures::Stream,
 	response::stream::{Event, EventStream},
 	serde::json::Json,
 	tokio::{
@@ -7,12 +8,15 @@ use rocket::{
 	},
 	Shutdown,
 };
+use rocket_okapi::openapi;
 
 use crate::types::{
 	alias::{ApiResult, Context},
 	errors::ApiError,
 	event::{InternalTask, TaskResponder, TaskResponse},
 };
+
+// https://github.com/GREsau/okapi/blob/e686b442d6d7bb30913edf1bae900d14ea754cb1/examples/streams/src/main.rs
 
 /// Get all running/pending jobs.
 #[get("/jobs")]
@@ -33,8 +37,12 @@ pub async fn get_jobs(ctx: &Context) -> ApiResult<Json<TaskResponse>> {
 
 /// Subscriber for jobs running in the background. Will emit SSE, as they occur,
 /// to the listener.
+#[openapi(tag = "Job")]
 #[get("/jobs/listen")]
-pub async fn jobs_listener(ctx: &Context, mut end: Shutdown) -> EventStream![] {
+pub async fn jobs_listener(
+	ctx: &Context,
+	mut end: Shutdown,
+) -> EventStream<impl Stream<Item = Event>> {
 	let mut rx = ctx.client_receiver();
 
 	EventStream! {

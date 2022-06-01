@@ -13,3 +13,7 @@ export function deleteLibrary(id: string) {
 export function createLibrary(payload: CreateLibraryInput): Promise<ApiResult<Library>> {
 	return API.post('/libraries', payload);
 }
+
+export function editLibrary(payload: EditLibraryInput): Promise<ApiResult<Library>> {
+	return API.put(`/libraries/${payload.id}`, payload);
+}

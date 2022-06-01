@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import shallow from 'zustand/shallow';
 import { login } from '~api/query/auth';
@@ -24,10 +24,9 @@ import { useMutation, useQuery } from 'react-query';
 import toast from 'react-hot-toast';
 import { checkIsClaimed } from '~api/query/server';
 import { register } from '~api/mutation/auth';
+import client from '~api/client';
 
 export default function Login() {
-	const navigate = useNavigate();
-
 	const [isClaimed, setIsClaimed] = useState(true);
 
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery('checkIsClaimed', {
@@ -56,6 +55,8 @@ export default function Login() {
 				throw new Error('Login failed.');
 			}
 
+			client.invalidateQueries('getLibraries');
+
 			setUserAndPreferences(res.data);
 		},
 		onError: (err) => {
@@ -67,11 +68,6 @@ export default function Login() {
 
 	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation('registerUser', {
 		mutationFn: register,
-		// onError: (err) => {
-		// 	// TODO: handle this error
-		// 	toast.error('Login failed. Please try again.');
-		// 	console.error(err);
-		// },
 	});
 
 	const schema = z.object({
@@ -106,11 +102,10 @@ export default function Login() {
 		}
 	}
 
-	useEffect(() => {
-		if (user) {
-			navigate('/');
-		}
-	}, [user]);
+	if (user) {
+		client.invalidateQueries('getLibraries');
+		return <Navigate to="/" />;
+	}
 
 	// TODO: form.formState.errors
 	return (
@@ -149,6 +144,7 @@ export default function Login() {
 				<Button
 					isLoading={isLoggingIn || isRegistering}
 					type="submit"
+					color="gray.100"
 					bgGradient="linear(to-r, brand.600, brand.400)"
 					_hover={{ bgGradient: 'linear(to-r, brand.700, brand.500)' }}
 				>

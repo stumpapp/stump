@@ -1,152 +1,25 @@
-use std::{collections::HashMap, path::Path};
+use std::{
+	collections::{HashMap, HashSet},
+	path::{Path, PathBuf},
+};
 
+use prisma_client_rust::{raw, PrismaValue};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	config::context::Context,
-	job::Job,
 	prisma::{library, media, series},
 	types::{
-		alias::ProcessResult,
+		alias::{ProcessResult},
 		errors::{ApiError, ProcessFileError, ScanError},
-		event::{ClientEvent},
+		event::ClientEvent,
 		models::MediaMetadata,
-	},
+	}, fs::{rar::process_rar, zip::process_zip},
 };
 
-use super::{rar::process_rar, zip::process_zip};
+use super::{ScannedFileTrait};
 
-#[derive(Debug)]
-pub struct ScannerJob {
-	pub path: String,
-}
-
-#[async_trait::async_trait]
-impl Job for ScannerJob {
-	async fn run(&self, runner_id: String, ctx: Context) -> Result<(), ApiError> {
-		let db = ctx.get_db();
-
-		let library = db
-			.library()
-			.find_unique(library::path::equals(self.path.clone()))
-			.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
-			.exec()
-			.await?;
-
-		if library.is_none() {
-			return Err(ApiError::NotFound(format!(
-				"Library not found: {}",
-				self.path
-			)));
-		}
-
-		let library = library.unwrap();
-
-		let files_to_process = WalkDir::new(&library.path)
-			.into_iter()
-			.filter_map(|e| e.ok())
-			.count();
-
-		let _ = ctx.emit_client_event(ClientEvent::job_started(
-			runner_id.clone(),
-			0,
-			Some(files_to_process),
-			Some(format!("Starting library scan at {}", &library.path)),
-		));
-
-		let mut scanner = Scanner::new(library, ctx.get_ctx(), runner_id);
-
-		scanner.scan_library().await;
-
-		Ok(())
-	}
-}
-
-pub trait ScannedFileTrait {
-	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;
-	fn is_visible_file(&self) -> bool;
-	fn should_ignore(&self) -> bool;
-	fn dir_has_media(&self) -> bool;
-}
-
-impl ScannedFileTrait for Path {
-	fn get_kind(&self) -> std::io::Result<Option<infer::Type>> {
-		infer::get_from_path(self)
-	}
-
-	fn is_visible_file(&self) -> bool {
-		let filename = self
-			.file_name()
-			.unwrap_or_default()
-			.to_str()
-			.expect(format!("Malformed filename: {:?}", self.as_os_str()).as_str());
-
-		if self.is_dir() {
-			return false;
-		} else if filename.starts_with(".") {
-			return false;
-		}
-
-		true
-	}
-
-	fn should_ignore(&self) -> bool {
-		if !self.is_visible_file() {
-			log::info!("Ignoring hidden file: {}", self.display());
-			return true;
-		}
-
-		let kind = infer::get_from_path(self);
-
-		if kind.is_err() {
-			log::info!("Could not infer file type for {:?}: {:?}", self, kind);
-			return true;
-		}
-
-		let kind = kind.unwrap();
-
-		match kind {
-			Some(k) => {
-				let mime = k.mime_type();
-
-				match mime {
-					"application/zip" => false,
-					"application/vnd.rar" => false,
-					"application/epub+zip" => false,
-					"application/pdf" => false,
-					_ => {
-						log::info!("Ignoring file {:?} with mime type {}", self, mime);
-						true
-					},
-				}
-			},
-			None => {
-				log::info!("Unable to infer file type: {:?}", self);
-				return true;
-			},
-		}
-	}
-
-	fn dir_has_media(&self) -> bool {
-		if !self.is_dir() {
-			return false;
-		}
-
-		let items = std::fs::read_dir(self);
-
-		if items.is_err() {
-			return false;
-		}
-
-		let items = items.unwrap();
-
-		items
-			.filter_map(|item| item.ok())
-			.any(|f| !f.path().should_ignore())
-	}
-}
-
-struct Scanner {
+pub struct LibraryScanner {
 	runner_id: String,
 	ctx: Context,
 	library: library::Data,
@@ -154,8 +27,19 @@ struct Scanner {
 	media_map: HashMap<String, media::Data>,
 }
 
-impl Scanner {
-	pub fn new(library: library::Data, ctx: Context, runner_id: String) -> Scanner {
+// #[async_trait::async_trait]
+// impl ScannerJob for LibraryScanner {
+//     async fn precheck<T>() -> ApiResult<library::Data> {
+//         todo!()
+//     }
+
+//     async fn scan(&mut self) {
+//         todo!()
+//     }
+// }
+
+impl LibraryScanner {
+	pub fn new(library: library::Data, ctx: Context, runner_id: String) -> LibraryScanner {
 		let series = library
 			.series()
 			.expect("Failed to get series in library")
@@ -175,7 +59,7 @@ impl Scanner {
 			}
 		}
 
-		Scanner {
+		LibraryScanner {
 			ctx,
 			library,
 			series_map,
@@ -192,7 +76,7 @@ impl Scanner {
 		self.series_map.get(path.to_str().expect("Invalid key"))
 	}
 
-	fn get_media(&self, key: &Path) -> Option<&media::Data> {
+	fn get_media_by_path(&self, key: &Path) -> Option<&media::Data> {
 		self.media_map.get(key.to_str().expect("Invalid key"))
 	}
 
@@ -323,6 +207,98 @@ impl Scanner {
 		Ok(series)
 	}
 
+	pub async fn precheck(path: String, ctx: &Context) -> Result<library::Data, ApiError>  {
+		let library = ctx.db
+			.library()
+			.find_unique(library::path::equals(path.clone()))
+			.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
+			.exec()
+			.await?;
+
+		if library.is_none() {
+			return Err(ApiError::NotFound(format!(
+				"Library not found: {}",
+				path
+			)));
+		}
+
+		if !Path::new(&path).exists() {
+			return Err(ApiError::InternalServerError(format!(
+				"Library path does not exist in fs: {}",
+				path
+			)));
+		}
+
+		let library = library.unwrap();
+
+		log::debug!("Prechecking library: {:?}", &library);
+
+		let library_path = PathBuf::from(&library.path);
+
+		let series_list = library.series().unwrap();
+		let series_ids = series_list.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
+
+		let mut invalid_paths = HashSet::new();
+
+		for series in series_list {
+			let series_path = PathBuf::from(&series.path);
+
+			let series_parent = series_path.parent().unwrap();
+
+			if !series_parent.eq(&library_path) {
+				log::debug!("Series path doesn't match library path: {:?}", series);
+				invalid_paths.insert(String::from(series_parent.to_str().unwrap()));
+			}
+		}
+
+		if invalid_paths.len() == 0 {
+			return Ok(library);
+		}
+
+		for invalid_path in invalid_paths {
+			let series_id_ref: &Vec<String> = series_ids.as_ref();
+			let correct_base = library_path.to_str().unwrap().to_string();
+
+
+			// update series paths
+			ctx
+				.db
+				._execute_raw(raw!(
+					"UPDATE series SET path=REPLACE(path,{},{}) WHERE libraryId={}",
+					PrismaValue::String(invalid_path.clone()),
+					PrismaValue::String(correct_base.clone()),
+					PrismaValue::String(library.id.clone())
+				))
+				.await?;
+
+				// update media paths
+			// NOTE: ._execute_raw() throws an error using PrismaValue::List with Sqlite.
+			let media_query = format!(
+				"UPDATE media SET path=REPLACE(path, \"{}\", \"{}\") WHERE seriesId in ({})", 
+				invalid_path, 
+				correct_base, 
+				series_id_ref.into_iter().map(|id| format!("\"{}\"", id)).collect::<Vec<_>>().join(",")
+			);
+
+			ctx
+				.db
+				._execute_raw(raw!(&media_query))
+				.await?;
+		}
+
+		// Note: at this point, this should never fail so I am unwrapping
+		let library =  ctx.db
+			.library()
+			.find_unique(library::path::equals(path.clone()))
+			.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
+			.exec()
+			.await?
+			.unwrap();
+
+		Ok(library)
+
+	}
+
 	pub async fn scan_library(&mut self) {
 		let mut visited_series = HashMap::<String, bool>::new();
 		let mut visited_media = HashMap::<String, bool>::new();
@@ -345,6 +321,7 @@ impl Scanner {
 				Some(format!("Analyzing {:?}", entry_path)),
 			));
 
+			// FIXME: won't work for library updates after path change
 			let series = self.get_series(&entry_path);
 			let series_exists = series.is_some();
 
@@ -384,7 +361,7 @@ impl Scanner {
 				log::info!("Skipping ignored file: {:?}", entry_path);
 				// TODO: send progress
 				continue;
-			} else if let Some(media) = self.get_media(&entry_path) {
+			} else if let Some(media) = self.get_media_by_path(&entry_path) {
 				// log::info!("Existing media: {:?}", media);
 				visited_media.insert(media.id.clone(), true);
 				// TODO: send progress
@@ -402,8 +379,10 @@ impl Scanner {
 
 			match self.insert_media(&entry, series_id).await {
 				Ok(media) => {
-					visited_media.insert(media.id.clone(), true);
+					let id = media.id.clone();
 					self.media_map.insert(media.path.clone(), media);
+
+					visited_media.insert(id, true);
 				},
 				Err(e) => {
 					log::error!("Failed to insert media: {:?}", e);
@@ -495,45 +474,3 @@ impl Scanner {
 //             }
 //         }
 //     }
-
-// pub async fn scan(state: &State, library_id: Option<i32>) -> Result<(), String> {
-//     let conn = state.get_connection();
-//     let event_handler = state.get_event_handler();
-
-//     let libraries: Vec<library::Model> = match library_id {
-//         Some(id) => queries::library::get_library_by_id(conn, id)
-//             .await?
-//             .map(|l| l.into())
-//             .into_iter()
-//             .collect(),
-//         None => queries::library::get_libraries(conn).await?,
-//     };
-
-//     if libraries.is_empty() {
-//         let mut message = "No libraries configured.".to_string();
-
-//         if library_id.is_some() {
-//             message = format!("No library with id: {}", library_id.unwrap());
-//         }
-
-//         event_handler.log_error(message.clone());
-
-//         return Err(message);
-//     }
-
-//     let series = queries::series::get_series_in_library(conn, library_id).await?;
-
-//     // println!("{:?}", series);
-
-//     let media = queries::media::get_media_with_library_and_series(conn, library_id).await?;
-
-//     // println!("{:?}", media);
-
-//     let mut scanner = Scanner::new(conn, event_handler, series, media);
-
-//     for library in libraries {
-//         scanner.scan_library(&library).await;
-//     }
-
-//     Ok(())
-// }

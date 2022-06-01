@@ -17,10 +17,10 @@ interface User {
 	 * The role of the user.
 	 */
 	role: UserRole;
-}
-
-interface UserWithPreferences extends User {
-	preferences: UserPreferences;
+	/**
+	 * The user preferences associated with this account. Will be undefined only if the relation is not loaded.
+	 */
+	preferences?: UserPreferences;
 }
 
 interface UserCredentials {

@@ -3,7 +3,7 @@
 {% callout title="Note" icon="danger" %}
 Stump will have an official Docker image available when the first beta release is published.
 
-For now, Docker builds of Stump are _development only_, meaning if you want to use Docker you'll have to build your own image. These instructions will be updated for general usage when the official Docker image is available.
+For now, Docker builds of Stump are _development only_, meaning if you want to use Docker you'll have to build your own image. This assumes you have already followed the [Developer Setup](/contributing) guide. These instructions will be updated for general usage when the official Docker image is available.
 {% /callout %}
 
 ## Usage
@@ -24,10 +24,10 @@ docker create \
   --name=stump \
   --user 1000:1000 \
   -p 6969:6969 \
-  --volume /Users/aaronleopold/.stump:/config \
+  --mount type=bind,source=/Users/aaronleopold/.stump,target=/config \
   --mount type=bind,source=/Users/aaronleopold/Documents/Stump,target=/data \
   --restart unless-stopped \
-  stump
+  aaronleopold/stump
 ```
 
 Then you can start the container:
@@ -66,7 +66,7 @@ services:
     # them as an example here, but these are actually their default values.
     environment:
       - STUMP_CONFIG_DIR=/home/stump/config
-      - STUMP_CLIENT_DIR=/home/stump/static
+      - STUMP_CLIENT_DIR=/home/stump/client
     restart: unless-stopped
 ```
 

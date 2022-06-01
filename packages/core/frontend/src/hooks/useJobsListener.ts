@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { baseURL } from '~api/index';
 
 interface Props {
 	onEvent(event: JobEvent): void;
@@ -6,7 +7,7 @@ interface Props {
 
 export function useJobsListener({ onEvent }: Props) {
 	useEffect(() => {
-		let sse = new EventSource('http://localhost:6969/api/jobs/listen', {
+		let sse = new EventSource(`${baseURL}/jobs/listen`, {
 			withCredentials: true,
 		});
 

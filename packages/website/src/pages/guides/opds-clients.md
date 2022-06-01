@@ -4,7 +4,7 @@ Stump is compatible with any OPDS client that _properly_ implements the OPDS spe
 
 The general structure of the URL to connect to your Stump server is:
 
-`http(s)://your-server(:6969)(/baseUrl)/opds/v1.2/catalog`
+`http(s)://your-server(:81001)(/baseUrl)/opds/v1.2/catalog`
 
 Each client has a slightly different way of collecting this information. If you have any trouble using your preferred client, please open an issue on [GitHub](https://github.com/aaronleopold/stump/issues/new/choose) or feel free to pop into the Stump [Discord](https://discord.gg/63Ybb7J3as) server.
 

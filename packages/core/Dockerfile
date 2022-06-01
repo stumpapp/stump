@@ -71,6 +71,6 @@ ENV STUMP_CLIENT_DIR=/home/stump/client
 # Default Rocket environment variables
 ENV ROCKET_PROFILE=release
 ENV ROCKET_LOG_LEVEL=normal
-ENV ROCKET_PORT=6969
+ENV ROCKET_PORT=81001
 
 CMD ["./stump"]

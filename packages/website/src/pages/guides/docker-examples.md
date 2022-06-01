@@ -45,14 +45,14 @@ services:
         source: /Users/aaronleopold/Documents/Stump
         target: /home/stump/data
     ports:
-      - 6969:6969
+      - 81001:81001
     user: '1000:1000'
     environment:
       - STUMP_CONFIG_DIR=/home/stump/config
-      - STUMP_ALLOWED_ORIGINS=http://localhost:6969,http://stump.local
+      - STUMP_ALLOWED_ORIGINS=http://localhost:81001,http://stump.local
     restart: unless-stopped
     labels:
       - 'traefik.http.routers.stump-http.rule=Host(`stump.local`)'
       - 'traefik.http.routers.stump-http.service=stump'
-      - 'traefik.http.services.stump.loadbalancer.server.port=6969'
+      - 'traefik.http.services.stump.loadbalancer.server.port=81001'
 ```

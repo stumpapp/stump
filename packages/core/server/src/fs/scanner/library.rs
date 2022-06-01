@@ -222,6 +222,7 @@ impl LibraryScanner {
 			)));
 		}
 
+		// TODO: I should ~probably~ mark all series and series media as MISSING
 		if !Path::new(&path).exists() {
 			return Err(ApiError::InternalServerError(format!(
 				"Library path does not exist in fs: {}",

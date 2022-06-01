@@ -144,6 +144,7 @@ export default function Login() {
 				<Button
 					isLoading={isLoggingIn || isRegistering}
 					type="submit"
+					color="gray.100"
 					bgGradient="linear(to-r, brand.600, brand.400)"
 					_hover={{ bgGradient: 'linear(to-r, brand.700, brand.500)' }}
 				>

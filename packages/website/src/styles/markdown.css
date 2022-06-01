@@ -22,7 +22,7 @@ main p > code {
 }
 
 main li > code {
-	@apply py-[0.2em] px-[0.4em] bg-gray-200 dark:bg-gray-800 rounded-md;
+	@apply py-[0.2em] px-[0.4em] bg-gray-200 dark:bg-gray-800 rounded-md text-sm;
 }
 
 main > article h1 {

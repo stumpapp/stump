@@ -31,6 +31,7 @@ interface MainStore extends StoreMutations {
 	// // TODO: I don't think I am going to store this in the store
 	// media: Media[];
 
+	// locale: Locale;
 	title: string;
 
 	jobs: Record<string, Job>;
@@ -43,6 +44,8 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 	userPreferences: null,
 	libraries: [],
 	// media: [],
+
+	// locale: Locale[import.meta.env.VITE_LOCALE as keyof typeof Locale] ?? Locale.EN,
 
 	title: 'Stump',
 	jobs: {},

@@ -8,133 +8,18 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	config::context::Context,
-	job::Job,
 	prisma::{library, media, series},
 	types::{
-		alias::ProcessResult,
+		alias::{ProcessResult},
 		errors::{ApiError, ProcessFileError, ScanError},
 		event::ClientEvent,
 		models::MediaMetadata,
-	},
+	}, fs::{rar::process_rar, zip::process_zip},
 };
 
-use super::{rar::process_rar, zip::process_zip};
+use super::{ScannedFileTrait};
 
-#[derive(Debug)]
-pub struct ScannerJob {
-	pub path: String,
-}
-
-#[async_trait::async_trait]
-impl Job for ScannerJob {
-	async fn run(&self, runner_id: String, ctx: Context) -> Result<(), ApiError> {
-		let library = Scanner::precheck(self.path.clone(), &ctx).await?;
-
-		let files_to_process = WalkDir::new(&library.path)
-			.into_iter()
-			.filter_map(|e| e.ok())
-			.count();
-
-		let _ = ctx.emit_client_event(ClientEvent::job_started(
-			runner_id.clone(),
-			0,
-			Some(files_to_process),
-			Some(format!("Starting library scan at {}", &library.path)),
-		));
-
-		let mut scanner = Scanner::new(library, ctx.get_ctx(), runner_id);
-
-		scanner.scan_library().await;
-
-		Ok(())
-	}
-}
-
-pub trait ScannedFileTrait {
-	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;
-	fn is_visible_file(&self) -> bool;
-	fn should_ignore(&self) -> bool;
-	fn dir_has_media(&self) -> bool;
-}
-
-impl ScannedFileTrait for Path {
-	fn get_kind(&self) -> std::io::Result<Option<infer::Type>> {
-		infer::get_from_path(self)
-	}
-
-	fn is_visible_file(&self) -> bool {
-		let filename = self
-			.file_name()
-			.unwrap_or_default()
-			.to_str()
-			.expect(format!("Malformed filename: {:?}", self.as_os_str()).as_str());
-
-		if self.is_dir() {
-			return false;
-		} else if filename.starts_with(".") {
-			return false;
-		}
-
-		true
-	}
-
-	fn should_ignore(&self) -> bool {
-		if !self.is_visible_file() {
-			log::info!("Ignoring hidden file: {}", self.display());
-			return true;
-		}
-
-		let kind = infer::get_from_path(self);
-
-		if kind.is_err() {
-			log::info!("Could not infer file type for {:?}: {:?}", self, kind);
-			return true;
-		}
-
-		let kind = kind.unwrap();
-
-		match kind {
-			Some(k) => {
-				let mime = k.mime_type();
-
-				match mime {
-					"application/zip" => false,
-					"application/vnd.rar" => false,
-					"application/epub+zip" => false,
-					"application/pdf" => false,
-					_ => {
-						log::info!("Ignoring file {:?} with mime type {}", self, mime);
-						true
-					},
-				}
-			},
-			None => {
-				log::info!("Unable to infer file type: {:?}", self);
-				return true;
-			},
-		}
-	}
-
-	fn dir_has_media(&self) -> bool {
-		if !self.is_dir() {
-			return false;
-		}
-
-		let items = std::fs::read_dir(self);
-
-		if items.is_err() {
-			return false;
-		}
-
-		let items = items.unwrap();
-
-		items
-			.filter_map(|item| item.ok())
-			.any(|f| !f.path().should_ignore())
-	}
-}
-
-struct Scanner {
+pub struct LibraryScanner {
 	runner_id: String,
 	ctx: Context,
 	library: library::Data,
@@ -142,8 +27,19 @@ struct Scanner {
 	media_map: HashMap<String, media::Data>,
 }
 
-impl Scanner {
-	pub fn new(library: library::Data, ctx: Context, runner_id: String) -> Scanner {
+// #[async_trait::async_trait]
+// impl ScannerJob for LibraryScanner {
+//     async fn precheck<T>() -> ApiResult<library::Data> {
+//         todo!()
+//     }
+
+//     async fn scan(&mut self) {
+//         todo!()
+//     }
+// }
+
+impl LibraryScanner {
+	pub fn new(library: library::Data, ctx: Context, runner_id: String) -> LibraryScanner {
 		let series = library
 			.series()
 			.expect("Failed to get series in library")
@@ -163,7 +59,7 @@ impl Scanner {
 			}
 		}
 
-		Scanner {
+		LibraryScanner {
 			ctx,
 			library,
 			series_map,
@@ -578,45 +474,3 @@ impl Scanner {
 //             }
 //         }
 //     }
-
-// pub async fn scan(state: &State, library_id: Option<i32>) -> Result<(), String> {
-//     let conn = state.get_connection();
-//     let event_handler = state.get_event_handler();
-
-//     let libraries: Vec<library::Model> = match library_id {
-//         Some(id) => queries::library::get_library_by_id(conn, id)
-//             .await?
-//             .map(|l| l.into())
-//             .into_iter()
-//             .collect(),
-//         None => queries::library::get_libraries(conn).await?,
-//     };
-
-//     if libraries.is_empty() {
-//         let mut message = "No libraries configured.".to_string();
-
-//         if library_id.is_some() {
-//             message = format!("No library with id: {}", library_id.unwrap());
-//         }
-
-//         event_handler.log_error(message.clone());
-
-//         return Err(message);
-//     }
-
-//     let series = queries::series::get_series_in_library(conn, library_id).await?;
-
-//     // println!("{:?}", series);
-
-//     let media = queries::media::get_media_by_path_with_library_and_series(conn, library_id).await?;
-
-//     // println!("{:?}", media);
-
-//     let mut scanner = Scanner::new(conn, event_handler, series, media);
-
-//     for library in libraries {
-//         scanner.scan_library(&library).await;
-//     }
-
-//     Ok(())
-// }

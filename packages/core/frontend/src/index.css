@@ -18,9 +18,9 @@ form {
 	margin-block-end: 0;
 }
 
-input:-webkit-autofill {
+/* input:-webkit-autofill {
 	-webkit-text-fill-color: theme('colors.gray.800') !important;
-}
+} */
 
 .card-title {
 	display: -webkit-box;

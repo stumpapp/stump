@@ -55,7 +55,7 @@ RUN mkdir -p data
 COPY --from=builder /home/stump/target/x86_64-unknown-linux-musl/release/stump .
 
 # copy the react build
-COPY --from=frontend /home/stump/build static
+COPY --from=frontend /home/stump/build client
 
 # *sigh* Rocket requires the toml file at runtime
 COPY server/Rocket.toml .

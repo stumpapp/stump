@@ -1,7 +1,7 @@
 import React from 'react';
 import { TagOption } from '~hooks/useTags';
 import { CreatableSelect } from 'chakra-react-select';
-import { FormControl, FormHelperText, FormLabel, useColorModeValue } from '@chakra-ui/react';
+import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 interface TagSelectProps {
@@ -13,8 +13,6 @@ interface TagSelectProps {
 	hint?: string;
 }
 
-// FIXME: https://github.com/csandman/chakra-react-select/issues/134
-// issue above affecting the theme
 export default function TagSelect({
 	name = 'tags',
 	label = 'Tags',
@@ -64,9 +62,6 @@ export default function TagSelect({
 								_focus: {
 									boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 								},
-								_hover: {
-									borderColor: useColorModeValue('blackAlpha.200', 'whiteAlpha.400'),
-								},
 							}),
 							dropdownIndicator: (provided) => ({
 								...provided,
@@ -77,25 +72,6 @@ export default function TagSelect({
 							indicatorSeparator: (provided) => ({
 								...provided,
 								display: 'none',
-							}),
-							menuList: (provided) => ({
-								...provided,
-								bg: useColorModeValue('white', 'gray.700'),
-							}),
-							option: (provided, state) => ({
-								...provided,
-								bg: state.isFocused
-									? useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-									: 'transparent',
-							}),
-							multiValue: (provided) => ({
-								...provided,
-								color: useColorModeValue('black', 'gray.100'),
-								shadow: 'sm',
-								bg: useColorModeValue('blackAlpha.100', 'whiteAlpha.100'),
-								_hover: {
-									bg: useColorModeValue('blackAlpha.200', 'whiteAlpha.200'),
-								},
 							}),
 						}}
 					/>

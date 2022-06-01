@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAnimation, motion } from 'framer-motion';
 import { usePrevious } from '~hooks/usePrevious';
 import { useInView } from 'react-intersection-observer';
+import Image from 'next/image';
 
 export default function PhoneDemo() {
 	const [activePhone, setActivePhone] = useState('pixel');
@@ -86,10 +87,36 @@ export default function PhoneDemo() {
 					alt="Stump on Panels App"
 				/>
 
+				{/* <motion.div animate={pixelControls} onMouseEnter={() => handleHover('pixel')}>
+					<Image
+						className="h-[300px] md:h-[400px] lg:h-[525px] object-scale-down"
+						src="/images/pixel-5--TODO.png"
+						alt="Stump on Panels App"
+						height={1362}
+						width={668}
+					/>
+				</motion.div> */}
+
+				{/* <motion.div
+					className="relative flex flex-col justify-center h-[300px] md:h-[400px] lg:h-[525px] object-scale-down transform"
+					// animate={iphoneControls}
+					// onMouseEnter={() => handleHover('iphone')}
+				>
+					<Image
+						// className="h-[300px] md:h-[400px] lg:h-[525px] object-scale-down transform"
+						src="/images/panels/iphone-12--black-compressed.png"
+						alt="Stump on Panels App"
+						// height={1467}
+						// width={725}
+						layout="fill"
+						objectFit="contain"
+					/>
+				</motion.div> */}
+
 				<motion.img
 					animate={iphoneControls}
 					className="h-[300px] md:h-[400px] lg:h-[525px] object-scale-down transform"
-					src="/images/panels/iphone-12--black.png"
+					src="/images/panels/iphone-12--black-compressed.png"
 					onMouseEnter={() => handleHover('iphone')}
 					alt="Stump on Panels App"
 				/>

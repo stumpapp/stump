@@ -1,6 +1,7 @@
 node_modules
 build
 static
+client
 target
 *.lock
 *.log

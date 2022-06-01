@@ -1,4 +1,5 @@
 pub mod jobs;
+pub mod library;
 pub mod runner;
 
 use std::fmt::Debug;

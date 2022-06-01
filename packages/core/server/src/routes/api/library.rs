@@ -1,4 +1,4 @@
-use prisma_client_rust::{Direction, Update};
+use prisma_client_rust::Direction;
 use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
@@ -6,13 +6,14 @@ use serde::Deserialize;
 use crate::{
 	fs::{self, scanner::ScannerJob},
 	guards::auth::Auth,
+	job::library::LibraryScannerJob,
 	prisma::{library, media, series, tag},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
 		models::{library::Library, tag::Tag},
-		pageable::{PageParams, Pageable, PagedRequestParams},
+		pageable::{Pageable, PagedRequestParams},
 	},
 };
 
@@ -131,7 +132,7 @@ pub async fn scan_library(
 
 	let lib = lib.unwrap();
 
-	let job = ScannerJob {
+	let job = LibraryScannerJob {
 		path: lib.path.clone(),
 	};
 
@@ -184,7 +185,7 @@ pub async fn create_library(
 		}
 	}
 
-	ctx.spawn_job(Box::new(ScannerJob {
+	ctx.spawn_job(Box::new(LibraryScannerJob {
 		path: lib.path.clone(),
 	}));
 
@@ -292,7 +293,7 @@ pub async fn update_library(
 
 	let updated = updated.unwrap();
 
-	ctx.spawn_job(Box::new(ScannerJob {
+	ctx.spawn_job(Box::new(LibraryScannerJob {
 		path: updated.path.clone(),
 	}));
 

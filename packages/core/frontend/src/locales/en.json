@@ -1,0 +1,48 @@
+{
+  "loginPage": {
+    "claimText": "This Stump server is not yet claimed, you can use the form below to create a user account and claim it. Enter your preferred username and password.",
+    "labels": {
+      "username": "Username",
+      "password": "Password"
+    }
+  },
+  "signOutModal": {
+    "title": "Sign out",
+    "message": "Are you sure you want to sign out?",
+    "buttons": {
+      "cancel": "Cancel",
+      "signOut": "Sign out"
+    }
+  },
+  "settingsPage": {
+    "navigation": {
+      "generalSettings": "General Settings",
+      "serverSettings": "Server Settings",
+      "jobHistory": "Job History"
+    }
+  },
+  "sidebar": {
+    "buttons": {
+      "home": "Home",
+      "libraries": "Libraries",
+      "settings": "Settings"
+    }
+  },
+  "libraryModalForm": {
+    "createLibraryHeading": "Create a new library",
+    "labels": {
+      "libraryName": "Library Name",
+      "libraryPath": "Library Path",
+      "libraryDescription": "Library Description",
+      "libraryTags": "Library Tags"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "editLibrary": "Save Changes",
+      "createLibrary": "Create Library"
+    }
+  },
+  "search": {
+    "placeholder": "Search"
+  }
+}

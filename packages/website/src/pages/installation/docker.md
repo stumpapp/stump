@@ -66,7 +66,7 @@ services:
     # them as an example here, but these are actually their default values.
     environment:
       - STUMP_CONFIG_DIR=/home/stump/config
-      - STUMP_CLIENT_DIR=/home/stump/static
+      - STUMP_CLIENT_DIR=/home/stump/client
     restart: unless-stopped
 ```
 

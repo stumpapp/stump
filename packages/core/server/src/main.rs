@@ -11,7 +11,13 @@ use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
 };
-use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
+use rocket_okapi::{
+	rapidoc::{
+		make_rapidoc, GeneralConfig, HideShowConfig, RapiDocConfig, Theme, UiConfig,
+	},
+	// swagger_ui::{make_swagger_ui, SwaggerUIConfig},
+	settings::UrlObject,
+};
 use std::path::Path;
 use types::{
 	event::{InternalEvent, InternalTask, TaskResponder},
@@ -33,7 +39,7 @@ pub mod utils;
 // TODO: figure out how to embed /static and Rocket.toml in the binary if possible
 // otherwise I have to distribute a zip file which isn't TERRIBLE but I don't want to lol
 pub fn static_dir() -> String {
-	std::env::var("STUMP_CLIENT_DIR").unwrap_or("static".to_string())
+	std::env::var("STUMP_CLIENT_DIR").unwrap_or("client".to_string())
 }
 
 #[get("/<_..>", rank = 2)]
@@ -91,9 +97,21 @@ async fn rocket() -> _ {
 		.mount("/", routes![index_fallback])
 		.mount("/api", routes::api::api())
 		.mount(
-			"/api/swagger",
-			make_swagger_ui(&SwaggerUIConfig {
-				url: "/api/openapi.json".to_owned(),
+			"/api/rapidoc/",
+			make_rapidoc(&RapiDocConfig {
+				general: GeneralConfig {
+					spec_urls: vec![UrlObject::new("General", "/api/openapi.json")],
+					..Default::default()
+				},
+				hide_show: HideShowConfig {
+					allow_spec_url_load: false,
+					allow_spec_file_load: false,
+					..Default::default()
+				},
+				ui: UiConfig {
+					theme: Theme::Dark,
+					..Default::default()
+				},
 				..Default::default()
 			}),
 		)

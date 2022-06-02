@@ -91,122 +91,6 @@ impl LibraryScanner {
 			.map(|(_, s)| s.id.clone())
 	}
 
-	fn process_entry(&self, entry: &DirEntry) -> ProcessResult {
-		match entry.file_name().to_str() {
-			Some(name) if name.ends_with("cbr") => process_rar(entry),
-			Some(name) if name.ends_with("cbz") => process_zip(entry),
-			// Some(name) if name.ends_with("epub") => process_epub(entry),
-			_ => Err(ProcessFileError::UnsupportedFileType),
-		}
-	}
-
-	async fn insert_media(
-		&self,
-		entry: &DirEntry,
-		series_id: String,
-	) -> Result<media::Data, ScanError> {
-		let processed_entry = self.process_entry(entry)?;
-
-		let path = entry.path();
-
-		let metadata = match entry.metadata() {
-			Ok(metadata) => Some(metadata),
-			_ => None,
-		};
-
-		let path_str = path.to_str().unwrap().to_string();
-		let mut name = entry.file_name().to_str().unwrap().to_string();
-		let ext = path.extension().unwrap().to_str().unwrap().to_string();
-
-		// remove extension from name, not sure why file_name() includes it smh
-		if name.ends_with(format!(".{}", ext).as_str()) {
-			name.truncate(name.len() - (ext.len() + 1));
-		}
-
-		let comic_info = match processed_entry.metadata {
-			Some(info) => info,
-			None => MediaMetadata::default(),
-		};
-
-		let mut size: u64 = 0;
-		// let mut modified: DateTime<FixedOffset> = chrono::Utc::now().into();
-
-		if let Some(metadata) = metadata {
-			size = metadata.len();
-
-			// if let Ok(st) = metadata.modified() {
-			// 	let utc: DateTime<Utc> = st.into();
-			// 	modified = utc.into();
-			// }
-		}
-
-		let media = self
-			.ctx
-			.db
-			.media()
-			.create(
-				media::name::set(name),
-				media::size::set(size.try_into().unwrap()),
-				media::extension::set(ext),
-				media::pages::set(match comic_info.page_count {
-					Some(count) => count as i32,
-					None => processed_entry.entries.len() as i32,
-				}),
-				media::path::set(path_str),
-				vec![
-					media::checksum::set(processed_entry.checksum),
-					media::description::set(comic_info.summary),
-					media::series::link(series::id::equals(series_id)),
-					// media::updated_at::set(modified),
-				],
-			)
-			.exec()
-			.await?;
-
-		log::info!("Created new media: {:?}", media);
-
-		self.on_progress(ClientEvent::CreatedMedia(media.clone()));
-
-		Ok(media)
-	}
-
-	async fn insert_series(&self, entry: &DirEntry) -> Result<series::Data, ScanError> {
-		let path = entry.path();
-
-		// TODO: use this??
-		// let metadata = match path.metadata() {
-		// 	Ok(metadata) => Some(metadata),
-		// 	_ => None,
-		// };
-
-		// TODO: change error
-		let name = match path.file_name() {
-			Some(name) => match name.to_str() {
-				Some(name) => name.to_string(),
-				_ => return Err(ScanError::Unknown("Failed to get name".to_string())),
-			},
-			_ => return Err(ScanError::Unknown("Failed to get name".to_string())),
-		};
-
-		let series = self
-			.ctx
-			.db
-			.series()
-			.create(
-				series::name::set(name),
-				series::path::set(path.to_str().unwrap().to_string()),
-				vec![series::library::link(library::id::equals(
-					self.library.id.clone(),
-				))],
-			)
-			.exec()
-			.await?;
-
-		self.on_progress(ClientEvent::CreatedSeries(series.clone()));
-
-		Ok(series)
-	}
-
 	pub async fn precheck(path: String, ctx: &Context) -> Result<library::Data, ApiError>  {
 		let library = ctx.db
 			.library()
@@ -222,15 +106,16 @@ impl LibraryScanner {
 			)));
 		}
 
-		// TODO: I should ~probably~ mark all series and series media as MISSING
+		let library = library.unwrap();
+
 		if !Path::new(&path).exists() {
+			super::utils::mark_library_missing(library, &ctx).await?;
+
 			return Err(ApiError::InternalServerError(format!(
 				"Library path does not exist in fs: {}",
 				path
 			)));
 		}
-
-		let library = library.unwrap();
 
 		log::debug!("Prechecking library: {:?}", &library);
 
@@ -272,7 +157,7 @@ impl LibraryScanner {
 				))
 				.await?;
 
-				// update media paths
+			// update media paths
 			// NOTE: ._execute_raw() throws an error using PrismaValue::List with Sqlite.
 			let media_query = format!(
 				"UPDATE media SET path=REPLACE(path, \"{}\", \"{}\") WHERE seriesId in ({})", 
@@ -335,8 +220,10 @@ impl LibraryScanner {
 
 				log::info!("Creating new series: {:?}", entry_path);
 
-				match self.insert_series(&entry).await {
+				match super::utils::insert_series(&self.ctx, &entry, self.library.id.clone()).await {
 					Ok(series) => {
+						self.on_progress(ClientEvent::CreatedSeries(series.clone()));
+
 						visited_series.insert(series.id.clone(), true);
 						self.series_map.insert(series.path.clone(), series);
 					},
@@ -378,8 +265,10 @@ impl LibraryScanner {
 
 			log::info!("New media at {:?} in series {:?}", &entry_path, series_id);
 
-			match self.insert_media(&entry, series_id).await {
+			match super::utils::insert_media(&self.ctx, &entry, series_id).await {
 				Ok(media) => {
+					self.on_progress(ClientEvent::CreatedMedia(media.clone()));
+
 					let id = media.id.clone();
 					self.media_map.insert(media.path.clone(), media);
 

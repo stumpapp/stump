@@ -4,12 +4,12 @@ ident="Stump"
 
 [debug]
 address = "0.0.0.0"
-port = 81001
+port = 10801
 keep_alive = 5
 log_level = "normal"
 
 [release]
 address = "0.0.0.0"
-port = 81001
+port = 10801
 keep_alive = 5
 # log_level = "normal"

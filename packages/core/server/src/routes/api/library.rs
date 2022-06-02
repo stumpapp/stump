@@ -1,10 +1,12 @@
+use std::path::Path;
+
 use prisma_client_rust::Direction;
 use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
 
 use crate::{
-	fs::{self, scanner::ScannerJob},
+	fs::{self},
 	guards::auth::Auth,
 	job::library::LibraryScannerJob,
 	prisma::{library, media, series, tag},
@@ -214,9 +216,14 @@ pub async fn update_library(
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
-	println!("tags: {:?}", input.tags);
+	if !Path::new(&input.path).exists() {
+		return Err(ApiError::BadRequest(format!(
+			"The requested change would result in a non-existent library path: {}",
+			input.path
+		)));
+	}
 
-	let mut updates: Vec<library::SetParam> = vec![
+	let updates: Vec<library::SetParam> = vec![
 		library::name::set(input.name.to_owned()),
 		library::path::set(input.path.to_owned()),
 		library::description::set(input.description.to_owned()),

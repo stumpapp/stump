@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const baseURL = import.meta.env.PROD
 	? `${import.meta.env.BASE_URL}api`
-	: 'http://localhost:81001/api';
+	: 'http://localhost:10801/api';
 
 console.log(baseURL);
 

@@ -1,6 +1,7 @@
 use std::path::Path;
 
 pub mod library;
+pub mod utils;
 
 #[async_trait::async_trait]
 pub trait ScannerJob {

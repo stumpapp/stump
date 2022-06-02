@@ -1,15 +1,21 @@
 use rocket::http::ContentType;
 use std::str::FromStr;
+use walkdir::DirEntry;
 use zip::read::ZipFile;
 
 use crate::types::{
-	errors::ProcessFileError, http::ImageResponse, models::MediaMetadata,
+	alias::ProcessResult, errors::ProcessFileError, http::ImageResponse,
+	models::MediaMetadata,
 };
 
-use super::{epub::get_epub_page, rar::get_rar_image, zip::get_zip_image};
+use super::{
+	epub::get_epub_page,
+	rar::{get_rar_image, process_rar},
+	zip::{get_zip_image, process_zip},
+};
 
 // FIXME: this needs to change. I really only need the MediaMetadata
-pub type ProcessResult = Result<(Option<MediaMetadata>, Vec<String>), ProcessFileError>;
+// pub type ProcessResult = Result<(Option<MediaMetadata>, Vec<String>), ProcessFileError>;
 pub type GetPageResult = Result<ImageResponse, ProcessFileError>;
 
 pub trait IsImage {
@@ -62,5 +68,14 @@ pub fn get_page(file: &str, page: i32, try_webp: bool) -> GetPageResult {
 		get_epub_page(file, page)
 	} else {
 		Err(ProcessFileError::UnsupportedFileType)
+	}
+}
+
+pub fn process_entry(entry: &DirEntry) -> ProcessResult {
+	match entry.file_name().to_str() {
+		Some(name) if name.ends_with("cbr") => process_rar(entry),
+		Some(name) if name.ends_with("cbz") => process_zip(entry),
+		// Some(name) if name.ends_with("epub") => process_epub(entry),
+		_ => Err(ProcessFileError::UnsupportedFileType),
 	}
 }

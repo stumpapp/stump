@@ -118,8 +118,8 @@ model Media {
   updatedAt      DateTime       @updatedAt
   // Whether or not the media is downloaded to the client. ex: true
   downloaded     Boolean        @default(false)
-  // The checksum hash of the file contents. Used to ensure only one instance of a file in the database
-  checksum       String?        @unique
+  // The checksum hash of the file contents. Used to find multuple instances of a file in the database
+  checksum       String?
   // The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
   path           String
   // The series this media belongs to.

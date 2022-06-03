@@ -150,9 +150,6 @@ CREATE UNIQUE INDEX "libraries_name_key" ON "libraries"("name");
 CREATE UNIQUE INDEX "libraries_path_key" ON "libraries"("path");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "media_checksum_key" ON "media"("checksum");
-
--- CreateIndex
 CREATE UNIQUE INDEX "tags_name_key" ON "tags"("name");
 
 -- CreateIndex

@@ -1,12 +1,12 @@
 // use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use rocket_okapi::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::prisma;
 
 use super::{series::Series, tag::Tag};
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Library {
 	pub id: String,

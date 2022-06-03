@@ -1,11 +1,11 @@
 use rocket_okapi::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::prisma;
 
 use super::{media::Media, user::User};
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ReadProgress {
 	pub id: String,

@@ -45,6 +45,7 @@ pub fn api() -> Vec<Route> {
 		media::get_media_page,
 		media::get_media_thumbnail,
 		media::update_media_progress,
+		media::get_duplicate_media,
 		// tag api
 		tag::get_tags,
 		tag::create_tags,

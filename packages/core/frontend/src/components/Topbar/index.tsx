@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react';
 import { CaretLeft, CaretRight } from 'phosphor-react';
 import Button from '../ui/Button';
@@ -62,11 +62,19 @@ export default function Topbar() {
 
 	const { showViewOptions, viewAsGrid, onViewModeChange } = useViewMode();
 
-	// TODO: make sticky? or just fixed?
+	const truncatedTitle = useMemo(() => {
+		if (title.length <= 20) {
+			return title;
+		}
+
+		return `${title.substring(0, 20)}...`;
+	}, [title]);
+
+	// TODO: fix this
 	return (
 		<Box
 			as="nav"
-			className="sticky top-0 grid grid-cols-12 gap-4 w-full items-center px-4 py-2 md:py-3"
+			className="sticky top-0 grid grid-cols-12 w-full items-center px-4 py-2 md:py-3"
 			bg={{
 				base: useColorModeValue('white', 'gray.800'),
 				md: useColorModeValue('gray.50', 'gray.900'),
@@ -81,8 +89,8 @@ export default function Topbar() {
 				<Navigation />
 
 				{/* @ts-ignore: this seems to work, idky it has type error */}
-				<Heading as="h3" size={{ base: 'sm', md: 'md' }} noOfLines={1}>
-					{title}
+				<Heading as="h3" size={{ base: 'sm', md: 'md' }}>
+					{truncatedTitle}
 				</Heading>
 			</HStack>
 

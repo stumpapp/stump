@@ -1,5 +1,8 @@
-use prisma_client_rust::Direction;
-use rocket::{fs::NamedFile, serde::json::Json};
+use prisma_client_rust::{raw, Direction};
+use rocket::{
+	fs::NamedFile,
+	serde::json::{self, Json},
+};
 use rocket_okapi::openapi;
 
 use crate::{
@@ -39,6 +42,32 @@ pub async fn get_media(
 		.into_iter()
 		.map(|m| m.into())
 		.collect::<Vec<Media>>();
+
+	let unpaged = match unpaged {
+		Some(val) => val,
+		None => page_params.is_none(),
+	};
+
+	if unpaged {
+		return Ok(Json(media.into()));
+	}
+
+	Ok(Json((media, page_params).into()))
+}
+
+#[openapi(tag = "Media")]
+#[get("/media/duplicates?<unpaged>&<page_params..>")]
+pub async fn get_duplicate_media(
+	unpaged: Option<bool>,
+	page_params: Option<PagedRequestParams>,
+	ctx: &Context,
+	_auth: Auth,
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let db = ctx.get_db();
+
+	let media: Vec<Media> = db
+		._query_raw(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
+		.await?;
 
 	let unpaged = match unpaged {
 		Some(val) => val,

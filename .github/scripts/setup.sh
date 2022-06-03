@@ -6,6 +6,7 @@ echo
 which cargo &> /dev/null
 if [ $? -eq 1 ]; then
         echo "Rust could not be found on your system. Please ensure the 'rustc' and 'cargo' binaries are in your \$PATH."
+        echo "If you don't have Rust install, visit https://www.rust-lang.org/tools/install for official instructions."
         exit 1
 else 
         echo "Rust found on your system."
@@ -13,7 +14,7 @@ fi
 
 which node &> /dev/null
 if [ $? -eq 1 ]; then
-        echo "Node could not be found on your system. Please ensure the 'node'command is in your \$PATH."
+        echo "Node could not be found on your system. Please ensure the 'node' command is in your \$PATH."
         exit 1
 else 
         echo "Node found on your system."
@@ -82,24 +83,31 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                 exit 1
         fi
 
-        echo "Running 'pnpm core setup':"
+        echo "Attempting to install 'cargo-watch':"
         echo
 
         cargo install cargo-watch
+
+        echo "Running 'pnpm core setup':"
+        echo
+        
         pnpm run setup
 
         echo
-        echo "Pre-setup completed! Be sure to run 'pnpm core seed' to finish the setup."
+        echo "Pre-setup completed! Run 'pnpm core dev' to get started."
 elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo
-        echo "Running 'pnpm core setup':"
+        echo "Attempting to install 'cargo-watch':"
         echo
 
         cargo install cargo-watch
+
+        echo "Running 'pnpm core setup':"
+        echo
         pnpm run setup
                 
         echo
-        echo "Pre-setup completed! Be sure to run 'pnpm core seed' to finish the setup."
+        echo "Pre-setup completed! Run 'pnpm core dev' to get started."
 else
         echo "Your OS '$OSTYPE' is not supported by the pre-setup script. Please consider adding support for it: https://github.com/aaronleopold/stump/issues"
         exit 1

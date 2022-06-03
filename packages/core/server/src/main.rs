@@ -5,8 +5,7 @@ use db::migration::run_migrations;
 #[cfg(debug_assertions)]
 use dotenv::dotenv;
 
-use config::{context::Context, cors, helmet::Helmet, session};
-// use include_dir::{include_dir, Dir};
+use config::{context::Context, cors, helmet::Helmet, logging, session};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
@@ -15,7 +14,6 @@ use rocket_okapi::{
 	rapidoc::{
 		make_rapidoc, GeneralConfig, HideShowConfig, RapiDocConfig, Theme, UiConfig,
 	},
-	// swagger_ui::{make_swagger_ui, SwaggerUIConfig},
 	settings::UrlObject,
 };
 use std::path::Path;
@@ -56,10 +54,16 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
 
 #[launch]
 async fn rocket() -> _ {
+	// FIXME: This crate apparently does not work in release mode... Super disappointing.
+	// I don't want people manually specifying all of the environment variables used throughout
+	// stump, so will have to figure out an alternative solution.
 	#[cfg(debug_assertions)]
 	dotenv().ok();
 
-	// logging::init();
+	// I am not panic-ing here because I don't believe this should be a fatal error
+	logging::init_fern().unwrap_or_else(|e| {
+		log::error!("Failed to initialize logging: {:?}", e.to_string())
+	});
 
 	// Channel to handle internal events
 	let event_channel = unbounded_channel::<InternalEvent>();

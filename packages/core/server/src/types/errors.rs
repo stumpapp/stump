@@ -12,7 +12,6 @@ use schemars::Map;
 use serde::Serialize;
 use std::io::Cursor;
 use thiserror::Error;
-// use unrar::error::UnrarError;
 use zip::result::ZipError;
 
 #[derive(Error, Debug)]
@@ -37,8 +36,8 @@ pub enum ProcessFileError {
 	RarReadError,
 	#[error("Error reading bytes from rar")]
 	RarByteReadError(#[from] std::str::Utf8Error),
-	#[error("Invalid file type")]
-	UnsupportedFileType,
+	#[error("Unsupported file type: {0}")]
+	UnsupportedFileType(String),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }
@@ -162,7 +161,7 @@ pub enum ScanError {
 impl From<ProcessFileError> for ScanError {
 	fn from(e: ProcessFileError) -> Self {
 		match e {
-			ProcessFileError::UnsupportedFileType => {
+			ProcessFileError::UnsupportedFileType(_) => {
 				ScanError::UnsupportedFile(e.to_string())
 			},
 			_ => ScanError::Unknown(e.to_string()),

@@ -1,5 +1,5 @@
 use rocket::http::ContentType;
-use std::str::FromStr;
+use std::{path::Path, str::FromStr};
 use walkdir::DirEntry;
 use zip::read::ZipFile;
 
@@ -9,7 +9,7 @@ use crate::types::{
 };
 
 use super::{
-	epub::get_epub_page,
+	// epub::get_epub_page,
 	rar::{get_rar_image, process_rar},
 	zip::{get_zip_image, process_zip},
 };
@@ -33,9 +33,8 @@ pub fn process_comic_info(buffer: String) -> Option<MediaMetadata> {
 	}
 }
 
-pub fn get_content_type(file: &ZipFile) -> ContentType {
-	let file_name = file.name();
-	let file_name = file_name.to_lowercase();
+pub fn guess_content_type(file: &str) -> ContentType {
+	let file_name = file.to_lowercase();
 
 	if file_name.ends_with(".jpg") || file_name.ends_with(".jpeg") {
 		return ContentType::JPEG;
@@ -47,7 +46,33 @@ pub fn get_content_type(file: &ZipFile) -> ContentType {
 	ContentType::Any
 }
 
-// TODO: use https://crates.io/crates/infer
+pub fn get_content_type(file: &ZipFile) -> ContentType {
+	let file_name = file.name();
+
+	let mime = infer_mime(Path::new(file_name));
+
+	match mime {
+		Some(m) => match ContentType::from_str(m) {
+			Ok(t) => {
+				log::debug!("Inferred content type: {:?}", t);
+				t
+			},
+			_ => {
+				log::debug!(
+					"Failed to infer content type from {:?} for file {:?}",
+					m,
+					file_name
+				);
+				ContentType::Any
+			},
+		},
+		None => {
+			log::debug!("Failed to infer content type for file {:?}", file_name);
+			ContentType::Any
+		},
+	}
+}
+
 pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 	ContentType::from_str(mime).unwrap_or(match mime {
 		"image/jpeg" => ContentType::JPEG,
@@ -57,25 +82,70 @@ pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 	})
 }
 
-pub fn get_page(file: &str, page: i32, try_webp: bool) -> GetPageResult {
-	let file_name = file.to_string();
+pub fn guess_mime(path: &Path) -> Option<&str> {
+	let extension = path.extension().and_then(|ext| ext.to_str());
 
-	if file_name.ends_with(".cbr") {
-		get_rar_image(file, page, try_webp)
-	} else if file_name.ends_with(".cbz") {
-		get_zip_image(file, page)
-	} else if file_name.ends_with(".epub") {
-		get_epub_page(file, page)
-	} else {
-		Err(ProcessFileError::UnsupportedFileType)
+	if extension.is_none() {
+		log::warn!("Unable to guess mime for file: {:?}", path);
+		return None;
+	}
+
+	let extension = extension.unwrap();
+
+	match extension.to_lowercase().as_str() {
+		"pdf" => Some("application/pdf"),
+		"epub" => Some("application/epub+zip"),
+		"cbz" => Some("application/zip"),
+		"zip" => Some("application/zip"),
+		"cbr" => Some("application/vnd.rar"),
+		_ => None,
+	}
+}
+
+pub fn infer_mime(path: &Path) -> Option<&str> {
+	match infer::get_from_path(path) {
+		Ok(mime) => {
+			log::debug!("Inferred mime for file {:?}: {:?}", path, mime);
+			mime.and_then(|m| Some(m.mime_type()))
+		},
+		Err(e) => {
+			log::warn!(
+				"Unable to infer mime for file {:?}: {:?}",
+				path,
+				e.to_string()
+			);
+
+			guess_mime(path)
+		},
+	}
+}
+
+pub fn get_page(file: &str, page: i32, try_webp: bool) -> GetPageResult {
+	let mime = infer_mime(Path::new(file));
+
+	match mime {
+		Some("application/zip") => get_zip_image(file, page),
+		Some("application/vnd.rar") => get_rar_image(file, page, try_webp),
+		None => Err(ProcessFileError::Unknown(format!(
+			"Unable to determine mime type for file: {:?}",
+			file
+		))),
+		_ => Err(ProcessFileError::UnsupportedFileType(file.to_string())),
 	}
 }
 
 pub fn process_entry(entry: &DirEntry) -> ProcessResult {
-	match entry.file_name().to_str() {
-		Some(name) if name.ends_with("cbr") => process_rar(entry),
-		Some(name) if name.ends_with("cbz") => process_zip(entry),
-		// Some(name) if name.ends_with("epub") => process_epub(entry),
-		_ => Err(ProcessFileError::UnsupportedFileType),
+	let mime = infer_mime(entry.path());
+
+	match mime {
+		Some("application/zip") => process_zip(entry),
+		Some("application/vnd.rar") => process_rar(entry),
+		None => Err(ProcessFileError::Unknown(format!(
+			"Unable to determine mime type for file: {:?}",
+			entry.path()
+		))),
+		_ => Err(ProcessFileError::UnsupportedFileType(
+			entry.path().to_string_lossy().into_owned(),
+		)),
 	}
 }

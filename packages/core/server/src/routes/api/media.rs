@@ -168,6 +168,40 @@ pub async fn get_media_file(
 }
 
 #[openapi(tag = "Media")]
+#[post("/media/<id>/convert")]
+pub async fn convert_media_to_cbz(
+	id: String,
+	ctx: &Context,
+	_auth: Auth,
+) -> Result<(), ApiError> {
+	let db = ctx.get_db();
+
+	let media = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.exec()
+		.await?;
+
+	if media.is_none() {
+		return Err(ApiError::NotFound(format!(
+			"Media with id {} not found",
+			id
+		)));
+	}
+
+	let media = media.unwrap();
+
+	if media.extension != "cbr" {
+		return Err(ApiError::BadRequest(format!(
+			"Media with id {} is not a cbr file. Only cbr files can be converted to cbz",
+			id
+		)));
+	}
+
+	unimplemented!()
+}
+
+#[openapi(tag = "Media")]
 #[get("/media/<id>/page/<page>")]
 pub async fn get_media_page(
 	id: String,

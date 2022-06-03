@@ -10,6 +10,7 @@ use zip::read::ZipFile;
 use super::checksum;
 
 impl<'a> IsImage for ZipFile<'a> {
+	// FIXME: use infer here
 	fn is_image(&self) -> bool {
 		if self.is_file() {
 			let file_name = self.name();
@@ -43,7 +44,11 @@ pub fn digest_zip(path: &str) -> Option<String> {
 	match checksum::digest(path, byte_offset) {
 		Ok(digest) => Some(digest),
 		Err(e) => {
-			log::error!("Error digesting zip: {}", e);
+			log::error!(
+				"Failed to digest zipfile {}, unable to create checksum: {}",
+				path,
+				e
+			);
 			None
 		},
 	}

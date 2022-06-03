@@ -10,12 +10,15 @@ import React, { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import Input from '../ui/Input';
 
-// FIXME: overflow on ctrl+k
-function Shortcut() {
+function Shortcut({ visible }: { visible?: boolean }) {
 	// FIXME: don't use deprecated
 	const key = window.navigator.platform.match(/^Mac/) ? '⌘k' : 'ctrl+k';
 
-	return <Kbd>{key}</Kbd>;
+	return (
+		<Kbd hidden={!visible} mr={key === 'ctrl+k' ? 8 : undefined}>
+			{key}
+		</Kbd>
+	);
 }
 
 export default function Search() {
@@ -42,15 +45,16 @@ export default function Search() {
 				w={width}
 				bg={useColorModeValue('gray.50', 'gray.800')}
 				transition="all 0.2s"
-				// TODO: figure out why hotkey won't work, my guess is input focus overrides
-				// the hotkey stuff
 				onKeyDown={(e) => {
 					if (e.key === 'Escape') {
 						inputRef.current?.blur();
 					}
 				}}
 			/>
-			<InputRightElement display={{ base: 'none', md: 'flex' }} children={<Shortcut />} />
+			<InputRightElement
+				display={{ base: 'none', md: 'flex' }}
+				children={<Shortcut visible={!expanded} />}
+			/>
 			<InputRightElement display={{ base: 'flex', md: 'none' }} children={<MagnifyingGlass />} />
 		</InputGroup>
 	);

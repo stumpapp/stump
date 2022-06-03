@@ -72,6 +72,12 @@ pub async fn create_user(
 	Ok(Json(user.into()))
 }
 
+// TODO: figure out what operations are allowed here, and by whom. E.g. can a server
+// owner update user details of another managed account after they've been created?
+// or update another user's preferences? I don't like that last one, unsure about
+// the first. In general, after creation, I think a user has sole control over their account.
+// The server owner should be able to remove them, but I don't think they should be able
+// to do anything else?
 #[openapi(tag = "User")]
 #[put("/users")]
 pub async fn update_user() {

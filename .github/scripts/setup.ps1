@@ -10,15 +10,41 @@ write-host "Running Stump pre-setup script! This will install the necessary deve
 # check if user has cargo installed
 if (-NOT (Get-Command cargo -errorAction SilentlyContinue)) {
   write-Warning "Rust could not be found on your system. Please ensure the 'rustc' and 'cargo' binaries are in your \$PATH."
+  write-Warning "If you don't have Rust install, visit https://www.rust-lang.org/tools/install for official instructions."
   break
+} else {
+  write-host "Rust found on your system."
+}
+
+# check if user has node installed
+if (-NOT (Get-Command node -errorAction SilentlyContinue)) {
+  write-Warning "node could not be found on your system. Ensure the 'node' command is in your \$PATH."
+  break;
+} else {
+  write-host "node found on your system."
+}
+
+# check if user has npm installed
+if (-NOT (Get-Command npm -errorAction SilentlyContinue)) {
+  write-Warning "npm could not be found on your system. Ensure the 'npm' command is in your \$PATH."
+  break;
+} else {
+  write-host "npm found on your system."
 }
 
 # check if user has pnpm installed
 if (-NOT (Get-Command pnpm -errorAction SilentlyContinue)) {
-  write-Warning "PNPM could not be found on your system. Ensure the 'pnpm' command is in your \$PATH."
+  write-Warning "pnpm could not be found on your system. Ensure the 'pnpm' command is in your \$PATH."
   break;
+} else {
+  write-host "pnpm found on your system."
 }
 
-# TODO: check if anything else is needed
 
-write-host "Pre-setup completed! Be sure to run 'pnpm run setup' to finish the setup."
+write-host "Attempting to install 'cargo-watch':"
+cargo install cargo-watch
+
+write-host "Running 'pnpm core setup':"
+pnpm run setup
+
+write-host "Pre-setup completed! Run 'pnpm core dev' or 'pnpm core start' to get started."

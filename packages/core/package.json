@@ -7,7 +7,7 @@
 	"scripts": {
 		"start": "cd server && ROCKET_PROFILE=release cargo run --release",
 		"setup": "pnpm frontend:build && pnpm server:setup",
-		"server:setup": "pnpm prisma generate && pnpm prisma db push",
+		"server:setup": "pnpm prisma generate",
 		"dev": "concurrently -n server,frontend -c green.bold,blue.bold \"pnpm server:dev\" \"pnpm frontend:dev\"",
 		"build": "pnpm frontend:build && pnpm server:build && pnpm build:move-client && pnpm build:move-rocket",
 		"build:move-client": "trash ../../target/release/client && cp -r ./server/client ../../target/release/client",
@@ -21,7 +21,7 @@
 		"frontend": "pnpm --filter frontend --",
 		"frontend:start": "pnpm frontend start",
 		"frontend:dev": "pnpm frontend dev",
-		"frontend:move-build": "trash ./server/client && mv ./frontend/build ./server/client",
+		"frontend:move-build": "trash ./server/client && move-cli ./frontend/build ./server/client",
 		"frontend:build": "pnpm frontend build && pnpm frontend:move-build",
 		"prisma": "cd server && cargo prisma",
 		"prisma:generate": "pnpm prisma generate",
@@ -31,6 +31,7 @@
 	},
 	"devDependencies": {
 		"concurrently": "^6.5.1",
-		"trash-cli": "^5.0.0"
+		"trash-cli": "^5.0.0",
+		"move-cli": "2.0.0"
 	}
 }

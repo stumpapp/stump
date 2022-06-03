@@ -10,6 +10,7 @@ pub mod library;
 pub mod media;
 pub mod series;
 pub mod tag;
+pub mod user;
 
 /// Function to return the routes for the `/api` path.
 pub fn api() -> Vec<Route> {
@@ -23,8 +24,11 @@ pub fn api() -> Vec<Route> {
 		auth::login,
 		auth::register,
 		auth::logout,
-		// // logs api
-		// // job::get_jobs,
+		// user api
+		user::get_users,
+		user::create_user,
+		// user::update_user
+		// logs api
 		job::jobs_listener,
 		// // library api
 		library::get_libraries,

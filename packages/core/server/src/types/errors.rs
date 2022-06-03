@@ -53,6 +53,8 @@ pub enum AuthError {
 	BadRequest,
 	#[error("Unauthorized")]
 	Unauthorized,
+	#[error("Forbidden")]
+	Forbidden,
 	#[error("The session is not valid")]
 	InvalidSession(#[from] SessionError),
 }
@@ -211,6 +213,7 @@ impl From<AuthError> for ApiError {
 				"The Authorization header could no be parsed".to_string(),
 			),
 			AuthError::Unauthorized => ApiError::Unauthorized("Unauthorized".to_string()),
+			AuthError::Forbidden => ApiError::Forbidden("Forbidden".to_string()),
 			AuthError::InvalidSession(_) => {
 				ApiError::InternalServerError("Internal server error".to_string())
 			},

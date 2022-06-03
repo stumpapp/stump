@@ -100,8 +100,6 @@ impl<'r> FromRequest<'r> for Auth {
 
 			let credentials = credentials.unwrap();
 
-			// println!("Credentials: {:?}", credentials);
-
 			let db = ctx.get_db();
 
 			let user = db
@@ -148,4 +146,47 @@ impl<'r> FromRequest<'r> for Auth {
 	}
 }
 
-// OpenApiFromRequest<'_>
+#[derive(OpenApiFromRequest)]
+pub struct AdminGuard(pub AuthenticatedUser);
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for AdminGuard {
+	type Error = AuthError;
+
+	async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+		let session: Session<'_> = req.guard().await.expect("TODO");
+
+		let user = match session.get().await {
+			Ok(res) => res,
+			Err(e) => {
+				return Outcome::Failure((
+					Status::InternalServerError,
+					AuthError::InvalidSession(e),
+				));
+			},
+		};
+
+		if let Some(user) = user {
+			if user.role == "SERVER_OWNER" {
+				return Outcome::Success(AdminGuard(user));
+			} else {
+				return Outcome::Failure((Status::Forbidden, AuthError::Forbidden));
+			}
+		}
+
+		let cookies = req.cookies();
+		let cookie = cookies.get("stump-session");
+
+		// if cookie exists and is valid, refresh the session?
+		if cookie.is_some() {
+			let cookie = cookie.unwrap();
+			let cookie_value = cookie.value();
+
+			println!("COOKIE VALUE: {:?}", cookie_value);
+
+			unimplemented!("TODO: implement refresh session from cookies (maybe)")
+		}
+
+		Outcome::Failure((Status::Unauthorized, AuthError::Unauthorized))
+	}
+}

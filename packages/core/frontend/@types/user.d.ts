@@ -1,5 +1,5 @@
 declare enum UserRole {
-	Owner = 'OWNER',
+	ServerOwner = 'SERVER_OWNER',
 	Member = 'MEMBER',
 }
 

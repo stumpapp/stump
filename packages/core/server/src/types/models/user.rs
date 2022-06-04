@@ -12,6 +12,18 @@ pub struct User {
 	pub user_preferences: Option<UserPreferences>,
 }
 
+impl User {
+	pub fn is_admin(&self) -> bool {
+		self.role == "SERVER_OWNER"
+	}
+
+	pub fn is_member(&self) -> bool {
+		self.role == "MEMBER"
+	}
+
+	// TODO: other utilities based off of preferences
+}
+
 impl Into<User> for prisma::user::Data {
 	fn into(self) -> User {
 		let user_preferences = match self.user_preferences() {

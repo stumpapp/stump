@@ -21,9 +21,10 @@ import { createTags } from '~api/query/tag';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;
+	disabled?: boolean;
 }
 
-export default function CreateLibraryModal(props: Props) {
+export default function CreateLibraryModal({ disabled, ...props }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	const { tags, options, isLoading: fetchingTags } = useTags();
@@ -52,7 +53,13 @@ export default function CreateLibraryModal(props: Props) {
 
 	// /Users/aaronleopold/Documents/Stump/Demo
 	async function handleSubmit(values: FieldValues) {
-		const { name, path, description, tags: formTags } = values;
+		if (disabled) {
+			// This is extra protection, should never happen. Making it an error so it is
+			// easier to find on the chance it does.
+			throw new Error('You do not have permission to create libraries.');
+		}
+
+		const { name, path, description, tags: formTags, scan } = values;
 
 		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
 
@@ -71,17 +78,23 @@ export default function CreateLibraryModal(props: Props) {
 			existingTags = existingTags.concat(res.data);
 		}
 
-		toast.promise(mutateAsync({ name, path, description, tags: tagsToCreate }), {
+		toast.promise(mutateAsync({ name, path, description, tags: tagsToCreate, scan }), {
 			loading: 'Creating library...',
 			success: 'Library created!',
 			error: 'Something went wrong.',
 		});
 	}
 
+	function handleOpen() {
+		if (!disabled) {
+			onOpen();
+		}
+	}
+
 	return (
 		<>
 			{props.trigger ? (
-				<props.trigger onClick={onOpen} />
+				<props.trigger onClick={handleOpen} />
 			) : (
 				<Button
 					variant="outline"
@@ -97,13 +110,13 @@ export default function CreateLibraryModal(props: Props) {
 					}}
 					fontSize="sm"
 					fontWeight={'medium'}
-					onClick={onOpen}
+					onClick={handleOpen}
 				>
 					Add new library
 				</Button>
 			)}
 
-			<Modal size="xl" isOpen={isOpen} onClose={onClose}>
+			<Modal size="xl" isOpen={disabled ? false : isOpen} onClose={onClose}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Add new library</ModalHeader>

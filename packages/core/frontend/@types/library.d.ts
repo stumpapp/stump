@@ -29,7 +29,11 @@ interface Library {
 	tags?: Tag[];
 }
 
-type CreateLibraryInput = Omit<Library, 'id' | 'updatedAt' | 'series'>;
+interface CreateLibraryInput extends Omit<Library, 'id' | 'updatedAt' | 'series'> {
+	scan: boolean;
+}
+
 interface EditLibraryInput extends Library {
 	removedTags?: Tag[];
+	scan: boolean;
 }

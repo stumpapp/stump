@@ -8,10 +8,14 @@ use crate::{
 	types::{
 		alias::ApiResult,
 		errors::ApiError,
-		models::list_directory::{DirectoryListing, DirectoryListingInput, FsPath},
+		models::list_directory::{
+			DirectoryListing, DirectoryListingFile, DirectoryListingInput,
+		},
 	},
 };
 
+/// List the contents of a directory on the file system at a given (optional) path. If no path
+/// is provided, the file system root directory contents is returned.
 #[openapi(tag = "FileSystem")]
 #[post("/filesystem", data = "<input>")]
 pub async fn list_directory(
@@ -44,7 +48,7 @@ pub async fn list_directory(
 
 	let listing = std::fs::read_dir(start_path)?;
 
-	let directories = listing
+	let mut files = listing
 		.filter_map(|e| e.ok())
 		.map(|entry| {
 			let entry = entry;
@@ -55,19 +59,21 @@ pub async fn list_directory(
 			let is_directory = path.is_dir();
 			let path = path.to_string_lossy().to_string();
 
-			FsPath {
+			DirectoryListingFile {
 				name,
 				is_directory,
 				path,
 			}
 		})
-		.collect::<Vec<FsPath>>();
+		.collect::<Vec<DirectoryListingFile>>();
+
+	files.sort_by(|a, b| a.name.cmp(&b.name));
 
 	Ok(Json(DirectoryListing {
 		parent: start_path
 			.parent()
 			.and_then(|p| p.to_str())
 			.map(|p| p.to_string()),
-		directories,
+		files,
 	}))
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import {
+	Checkbox,
 	FormControl,
 	FormErrorMessage,
 	FormLabel,
@@ -13,7 +14,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FieldValues, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import FileSystemModal from '~components/FileSystemModal';
+import DirectoryPickerModal from '~components/DirectoryPickerModal';
 import TagSelect from '~components/TagSelect';
 import Form from '~components/ui/Form';
 import Input from '~components/ui/Input';
@@ -49,17 +50,28 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					message: `You already have a library named ${val}.`,
 				}),
 			),
-		path: z.string().min(1, { message: 'Library path is required' }),
+		path: z
+			.string()
+			.min(1, { message: 'Library path is required' })
+			.refine(
+				// check if path is parent to any existing library
+				// if so, and we aren't editing that library, return falsy value to indicate failure
+				(val) => !(libraries.some((l) => l.path.startsWith(val)) && library?.path !== val),
+				() => ({
+					message: 'Invalid library, parent directory already exists as library.',
+				}),
+			),
 		description: z.string().nullable(),
 		tags: z
 			.array(
-				// z.object({
-				// 	label: z.string(),
-				// 	value: z.string(),
-				// }),
-				z.any(),
+				z.object({
+					label: z.string(),
+					value: z.string(),
+				}),
+				// z.any(),
 			)
 			.optional(),
+		scan: z.boolean().default(true),
 	});
 
 	const form = useForm({
@@ -70,6 +82,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					path: library.path,
 					description: library.description,
 					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
+					scan: true,
 			  }
 			: {},
 	});
@@ -102,20 +115,26 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 				</TabList>
 
 				<TabPanels>
-					<TabPanel className="flex flex-col space-y-2">
+					<TabPanel className="flex flex-col space-y-4">
 						<FormControl isInvalid={!!errors.name}>
 							<FormLabel htmlFor="name">Libary name</FormLabel>
 							<Input type="text" placeholder="My Library" autoFocus {...form.register('name')} />
 							{!!errors.name && <FormErrorMessage>{errors.name?.message}</FormErrorMessage>}
 						</FormControl>
 
-						{/* <input className="hidden" type="file" directory="" webkitdirectory="" /> */}
-
 						<FormControl isInvalid={!!errors.path}>
 							<FormLabel htmlFor="path">Libary path</FormLabel>
 							<InputGroup>
 								<Input placeholder="/path/to/library" {...form.register('path')} />
-								<InputRightElement cursor="pointer" children={<FileSystemModal />} />
+								<InputRightElement
+									cursor="pointer"
+									children={
+										<DirectoryPickerModal
+											startingPath={library?.path}
+											onUpdate={(newPath) => form.setValue('path', newPath)}
+										/>
+									}
+								/>
 							</InputGroup>
 							{!!errors.path && <FormErrorMessage>{errors.path?.message}</FormErrorMessage>}
 						</FormControl>
@@ -128,12 +147,23 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							/>
 						</FormControl>
 					</TabPanel>
-					<TabPanel>
+					<TabPanel className="flex flex-col space-y-4">
 						<TagSelect
 							isLoading={fetchingTags}
 							options={tags}
 							defaultValue={library?.tags?.map((t) => ({ value: t.name, label: t.name }))}
 						/>
+
+						<FormControl>
+							<Checkbox
+								title="Scan the library after successful submit of this form"
+								defaultChecked
+								colorScheme="brand"
+								{...form.register('scan')}
+							>
+								Scan library
+							</Checkbox>
+						</FormControl>
 					</TabPanel>
 				</TabPanels>
 			</Tabs>

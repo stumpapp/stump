@@ -10,11 +10,14 @@ import { useStore } from '~store/store';
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
 import { AxiosError } from 'axios';
 import client from '~api/client';
+import { useUser } from '~hooks/useUser';
 
 export default function MainLayout() {
 	const location = useLocation();
 
 	const setLibraries = useStore((state) => state.setLibraries);
+
+	const user = useUser();
 
 	const { isLoading, error } = useQuery('getLibraries', getLibraries, {
 		onSuccess(res) {

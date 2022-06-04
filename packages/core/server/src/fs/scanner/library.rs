@@ -4,17 +4,14 @@ use std::{
 };
 
 use prisma_client_rust::{raw, PrismaValue};
-use walkdir::{DirEntry, WalkDir};
+use walkdir::{ WalkDir};
 
 use crate::{
 	config::context::Context,
 	prisma::{library, media, series},
 	types::{
-		alias::{ProcessResult},
-		errors::{ApiError, ProcessFileError, ScanError},
-		event::ClientEvent,
-		models::MediaMetadata,
-	}, fs::{rar::process_rar, zip::process_zip},
+		event::ClientEvent, errors::ApiError,
+	}
 };
 
 use super::{ScannedFileTrait};

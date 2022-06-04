@@ -5,7 +5,7 @@ use crate::{
 use epub::doc::EpubDoc;
 use walkdir::DirEntry;
 
-pub fn process_epub(file: &DirEntry) -> ProcessResult {
+pub fn process_epub(_file: &DirEntry) -> ProcessResult {
 	unimplemented!()
 }
 
@@ -49,7 +49,7 @@ pub fn get_container_xml(file: &str, resource: &str) -> Option<String> {
 	match res {
 		Ok(doc) => {
 			println!("{:?}", doc.resources);
-			doc.resources.get(resource).map(|(path, s)| s.to_owned())
+			doc.resources.get(resource).map(|(_path, s)| s.to_owned())
 		},
 		Err(_) => unimplemented!(),
 	}

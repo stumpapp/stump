@@ -4,7 +4,7 @@ use walkdir::DirEntry;
 
 use crate::{
 	fs::media_file::{self, GetPageResult, IsImage},
-	types::{alias::ProcessResult, errors::ProcessFileError, models::ProcessedMediaFile}, utils,
+	types::{alias::ProcessResult, errors::ProcessFileError, models::ProcessedMediaFile},
 };
 
 use super::checksum;
@@ -53,7 +53,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 							// FIXME: this won't work. `read_bytes` needs more refactoring.
 							metadata_buf = match e.read_bytes() {
 								Ok(b) => b,
-								Err(e) => {
+								Err(_e) => {
 									// error!("Error reading metadata: {}", e);
 									// todo!()
 									vec![]

@@ -40,7 +40,6 @@ if (-NOT (Get-Command pnpm -errorAction SilentlyContinue)) {
   write-host "pnpm found on your system."
 }
 
-
 write-host "Attempting to install 'cargo-watch':"
 cargo install cargo-watch
 

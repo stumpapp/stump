@@ -5,6 +5,7 @@ use serde::Serialize;
 use crate::types::alias::{ApiResult, Context};
 
 pub mod auth;
+pub mod filesystem;
 pub mod job;
 pub mod library;
 pub mod media;
@@ -53,6 +54,8 @@ pub fn api() -> Vec<Route> {
 		// tag api
 		tag::get_tags,
 		tag::create_tags,
+		// filesytem api
+		filesystem::list_directory,
 	]
 }
 

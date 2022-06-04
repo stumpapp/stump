@@ -51,9 +51,11 @@ impl<'r> FromRequest<'r> for Auth {
 		// if cookie exists and is valid, refresh the session?
 		if cookie.is_some() {
 			let cookie = cookie.unwrap();
-			let cookie_value = cookie.value();
+			let _cookie_value = cookie.value();
 
 			// println!("COOKIE VALUE: {:?}", cookie_value);
+
+			// unimplemented!()
 
 			// let user = get_user_by_username(cookie_value, &req.guard().await.expect("TODO")).await;
 

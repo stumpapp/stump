@@ -37,7 +37,7 @@ impl EventManager {
 				self.jobs.dequeue(id);
 			},
 			InternalEvent::JobFailed(id, err) => {
-				println!("JobFailed: {:?}", id);
+				log::error!("Job {} failed: {:?}", id, err);
 				self.jobs.dequeue(id);
 				// let _ = self.ctx.emit_client_event(format!("JobFailed: {:?}", err));
 			},

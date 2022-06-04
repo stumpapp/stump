@@ -2,10 +2,8 @@
 extern crate rocket;
 
 use db::migration::run_migrations;
-#[cfg(debug_assertions)]
-use dotenv::dotenv;
 
-use config::{context::Context, cors, helmet::Helmet, logging, session};
+use config::{context::Context, cors, env, helmet::Helmet, logging, session};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
@@ -54,15 +52,13 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
 
 #[launch]
 async fn rocket() -> _ {
-	// FIXME: This crate apparently does not work in release mode... Super disappointing.
-	// I don't want people manually specifying all of the environment variables used throughout
-	// stump, so will have to figure out an alternative solution.
-	#[cfg(debug_assertions)]
-	dotenv().ok();
-
 	// I am not panic-ing here because I don't believe this should be a fatal error
 	logging::init_fern().unwrap_or_else(|e| {
 		log::error!("Failed to initialize logging: {:?}", e.to_string())
+	});
+
+	env::Env::load().unwrap_or_else(|e| {
+		log::error!("Failed to load environment variables: {:?}", e.to_string())
 	});
 
 	// Channel to handle internal events

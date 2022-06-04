@@ -1,20 +1,13 @@
 pub mod migration;
 
-use std::path::PathBuf;
-
-use crate::prisma;
+use crate::{config::get_config_dir, prisma};
 
 /// Creates the Stump data directory relative to the home directory of the host
 /// OS. If the directory does not exist, it will be created.
 fn create_config_dir() -> String {
-	let db_path = match std::env::var("STUMP_CONFIG_DIR") {
-		Ok(path) => PathBuf::from(&path),
-		_ => dirs::home_dir()
-			.expect("Failed to get data dir")
-			.join(".stump"),
-	};
+	let config_dir = get_config_dir();
 
-	let path_str = db_path.to_str().unwrap();
+	let path_str = config_dir.to_str().unwrap();
 
 	std::fs::create_dir_all(&path_str).unwrap();
 
@@ -37,7 +30,6 @@ pub async fn create_client() -> prisma::PrismaClient {
 			.await
 			.expect("Failed to create Prisma client")
 	} else {
-		// println!("PROFILE: {:?}", std::env::var("ROCKET_PROFILE"));
 		// Development database will live in the /prisma directory
 		prisma::new_client()
 			.await

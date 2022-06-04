@@ -4,21 +4,25 @@ use rocket::http::Method;
 use rocket_cors::{AllowedHeaders, AllowedOrigins, Cors};
 
 pub fn get_cors() -> Cors {
-	let origin_strings = match env::var("STUMP_ALLOWED_ORIGINS") {
-		Ok(val) => val
-			.split(",")
-			.map(|val| val.trim().to_string())
-			.collect::<Vec<String>>(),
-		Err(_) => vec![
-			"http://localhost:3000".to_string(),
-			"http://localhost:10801".to_string(),
-			"http://0.0.0.0:10801".to_string(),
-		],
+	let exact_origins = match env::var("STUMP_ALLOWED_ORIGINS") {
+		Ok(val) => {
+			if val.is_empty() {
+				None
+			} else {
+				Some(
+					val.split(",")
+						.map(|val| val.trim().to_string())
+						.collect::<Vec<String>>(),
+				)
+			}
+		},
+		Err(_) => None,
 	};
 
-	// println!("Allowed origins: {:?}", origin_strings);
-
-	let allowed_origins = AllowedOrigins::some_exact(&origin_strings);
+	let allowed_origins = match exact_origins {
+		Some(val) => AllowedOrigins::some_exact(&val),
+		None => AllowedOrigins::all(),
+	};
 
 	rocket_cors::CorsOptions {
 		allowed_origins,

@@ -7,7 +7,6 @@ default-run = "stump"
 [dependencies]
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.5.0" }
 serde = { version = "1.0", features = ["derive"] }
-dotenv = "0.15.0"
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
 # rocket-session-store = "0.2.0"
 # rocket-session-store = { path = "../../../../../Documents/sandbox/clones/rocket-session-store", features = ["okapi"] }
@@ -44,3 +43,4 @@ include_dir = "0.7.2"
 rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc", "swagger"] }
 schemars = "0.8.10"
 fern = "0.6.1"
+toml = "0.5.9"

@@ -1,4 +1,5 @@
 pub mod library;
+pub mod list_directory;
 pub mod media;
 pub mod read_progress;
 pub mod series;

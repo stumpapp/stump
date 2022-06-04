@@ -37,7 +37,7 @@ pub async fn create_client() -> prisma::PrismaClient {
 			.await
 			.expect("Failed to create Prisma client")
 	} else {
-		println!("PROFILE: {:?}", std::env::var("ROCKET_PROFILE"));
+		// println!("PROFILE: {:?}", std::env::var("ROCKET_PROFILE"));
 		// Development database will live in the /prisma directory
 		prisma::new_client()
 			.await

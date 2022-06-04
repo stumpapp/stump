@@ -127,7 +127,7 @@ impl<'r> Responder<'r, 'static> for PartialContent {
 		let range_header = req.headers().get_one("Range").map(|x| Range::from_str(x));
 
 		let mut named_file = self.0;
-		let mut file = named_file.file_mut();
+		let file = named_file.file_mut();
 
 		let size = block_on(file.seek(SeekFrom::End(0)))
 			.expect("Attempted to retrieve size by seeking, but failed.");

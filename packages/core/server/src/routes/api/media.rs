@@ -1,8 +1,5 @@
 use prisma_client_rust::{raw, Direction};
-use rocket::{
-	fs::NamedFile,
-	serde::json::{self, Json},
-};
+use rocket::{fs::NamedFile, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
@@ -294,7 +291,7 @@ pub async fn update_media_progress(
 					read_progress::user::link(user::id::equals(auth.0.id.clone())),
 					vec![],
 				),
-				(vec![read_progress::page::set(page)]),
+				vec![read_progress::page::set(page)],
 			)
 			.exec()
 			.await?

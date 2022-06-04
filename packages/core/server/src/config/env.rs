@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use serde::{Deserialize, Serialize};
 
 use crate::config::get_config_dir;
@@ -29,32 +31,79 @@ impl Default for Env {
 }
 
 // TODO: error handling
+// FIXME: I don't believe this will work very well, but it requires some testing.
 impl Env {
+	/// Will try to create a new Env object from set environment variables. If none are set,
+	/// will return the default Env object.
+	pub fn from_env(existing: Option<Self>) -> anyhow::Result<Self> {
+		let mut env = match existing {
+			Some(env) => env,
+			None => Self::default(),
+		};
+
+		if let Ok(port) = std::env::var("ROCKET_PORT") {
+			env.rocket_port = Some(port.parse().unwrap());
+		}
+
+		if let Ok(profile) = std::env::var("ROCKET_PROFILE") {
+			if profile == "release" || profile == "debug" {
+				env.rocket_profile = Some(profile);
+			} else {
+				log::debug!("Invalid ROCKET_PROFILE value: {}", profile);
+
+				env.rocket_profile = Some(String::from("debug"));
+			}
+		}
+
+		if let Ok(verbosity) = std::env::var("STUMP_LOG_VERBOSITY") {
+			env.stump_log_verbosity = Some(verbosity.parse().unwrap());
+		}
+
+		if let Ok(client_dir) = std::env::var("STUMP_CLIENT_DIR") {
+			env.stump_client_dir = Some(client_dir);
+		}
+
+		if let Ok(config_dir) = std::env::var("STUMP_CONFIG_DIR") {
+			if !config_dir.is_empty() {
+				if Path::new(&config_dir).exists() {
+					env.stump_config_dir = Some(config_dir);
+				} else {
+					log::debug!(
+						"Invalid STUMP_CONFIG_DIR value, cannot find on file system: {}",
+						config_dir
+					);
+				}
+			} else {
+				log::debug!("Invalid STUMP_CONFIG_DIR value: EMPTY");
+			}
+		}
+
+		env.stump_config_dir = Some(get_config_dir().to_string_lossy().to_string());
+
+		env.write()?;
+
+		Ok(env)
+	}
+
 	pub fn load() -> anyhow::Result<()> {
 		let config_dir = get_config_dir();
 		let stump_toml = config_dir.join("Stump.toml");
 
-		if !stump_toml.exists() {
+		let env = if stump_toml.exists() {
+			let toml_str = std::fs::read_to_string(stump_toml)?;
+			toml::from_str::<Env>(&toml_str)?
+		} else {
 			log::debug!("Stump.toml does not exist, creating it");
-
 			std::fs::File::create(stump_toml.clone())?;
-
 			log::debug!("Stump.toml created");
 
-			let default_env = Env::default();
+			Self::default()
+		};
 
-			log::debug!("Writing default configuration to Stump.toml");
+		// I reassign the env here to make sure it picks up changes when a user manually sets a value
+		let env = Self::from_env(Some(env))?;
 
-			std::fs::write(stump_toml.as_path(), toml::to_string(&default_env)?)?;
-
-			log::debug!("Wrote default configuration to Stump.toml. Environment variables configured.");
-
-			return Ok(());
-		}
-
-		let toml_str = std::fs::read_to_string(stump_toml)?;
-
-		let env = toml::from_str::<Env>(&toml_str)?;
+		println!("{:?}", env);
 
 		// only 'debug' and 'release' are valid
 		if let Some(rocket_profile) = env.rocket_profile {
@@ -90,6 +139,15 @@ impl Env {
 				std::env::set_var("STUMP_ALLOWED_ORIGINS", allowed_origins.join(","));
 			}
 		}
+
+		Ok(())
+	}
+
+	pub fn write(&self) -> anyhow::Result<()> {
+		let config_dir = get_config_dir();
+		let stump_toml = config_dir.join("Stump.toml");
+
+		std::fs::write(stump_toml.as_path(), toml::to_string(&self)?)?;
 
 		Ok(())
 	}

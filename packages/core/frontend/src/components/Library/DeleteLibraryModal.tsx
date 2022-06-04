@@ -18,11 +18,12 @@ import client from '~api/client';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
+	disabled?: boolean;
 	library: Library;
 }
 
 // TODO: custom tabs, active state is atrocious
-export default function DeleteLibraryModal({ library }: Props) {
+export default function DeleteLibraryModal({ disabled, library }: Props) {
 	const navigate = useNavigate();
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -43,23 +44,34 @@ export default function DeleteLibraryModal({ library }: Props) {
 	}
 
 	function handleDelete() {
-		toast.promise(mutateAsync(library.id), {
-			loading: 'Deleting Library...',
-			success: 'Library Deleted!',
-			error: 'Error Deleting Library',
-		});
+		if (disabled) {
+			// This should never happen, but here just in case
+			throw new Error('You do not have permission to delete libraries.');
+		} else {
+			toast.promise(mutateAsync(library.id), {
+				loading: 'Deleting Library...',
+				success: 'Library Deleted!',
+				error: 'Error Deleting Library',
+			});
+		}
+	}
+
+	function handleOpen() {
+		if (!disabled) {
+			onOpen();
+		}
 	}
 
 	return (
 		<>
-			<MenuItem icon={<Trash size={'1rem'} />} onClick={onOpen}>
+			<MenuItem disabled={disabled} icon={<Trash size={'1rem'} />} onClick={handleOpen}>
 				Delete
 			</MenuItem>
 
-			<Modal size="xl" isOpen={isOpen} onClose={onClose}>
+			<Modal size="xl" isOpen={disabled ? false : isOpen} onClose={onClose}>
 				<ModalOverlay />
 				<ModalContent>
-					<ModalHeader>{library.name}</ModalHeader>
+					<ModalHeader>Delete {library.name}</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody className="flex flex-col space-y-2">
 						<p>Are you sure you want to delete this library?</p>

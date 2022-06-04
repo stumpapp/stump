@@ -22,10 +22,11 @@ import { createTags } from '~api/mutation/tag';
 
 interface Props {
 	library: Library;
+	disabled?: boolean;
 }
 
-// TODO: custom tabs, active state is atrocious
-export default function EditLibraryModal({ library }: Props) {
+// FIXME: tab navigation not working
+export default function EditLibraryModal({ disabled, library }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	const { tags, options, isLoading: fetchingTags } = useTags();
@@ -67,7 +68,13 @@ export default function EditLibraryModal({ library }: Props) {
 	}
 
 	async function handleSubmit(values: FieldValues) {
-		const { name, path, description, tags: formTags } = values;
+		if (disabled) {
+			// This is extra protection, should never happen. Making it an error so it is
+			// easier to find on the chance it does.
+			throw new Error('You do not have permission to update libraries.');
+		}
+
+		const { name, path, description, tags: formTags, scan } = values;
 
 		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
 
@@ -92,10 +99,8 @@ export default function EditLibraryModal({ library }: Props) {
 			existingTags = existingTags.concat(res.data);
 		}
 
-		console.log({ ...library, name, path, description, tags: existingTags, removedTags });
-
 		toast.promise(
-			mutateAsync({ ...library, name, path, description, tags: existingTags, removedTags }),
+			mutateAsync({ ...library, name, path, description, tags: existingTags, removedTags, scan }),
 			{
 				loading: 'Updating library...',
 				success: 'Updates saved!',
@@ -104,16 +109,22 @@ export default function EditLibraryModal({ library }: Props) {
 		);
 	}
 
+	function handleOpen() {
+		if (!disabled) {
+			onOpen();
+		}
+	}
+
 	return (
 		<>
-			<MenuItem icon={<NotePencil size={'1rem'} />} onClick={onOpen}>
+			<MenuItem disabled={disabled} icon={<NotePencil size={'1rem'} />} onClick={handleOpen}>
 				Edit
 			</MenuItem>
 
-			<Modal size="xl" isOpen={isOpen} onClose={onClose}>
+			<Modal size="xl" isOpen={disabled ? false : isOpen} onClose={onClose}>
 				<ModalOverlay />
 				<ModalContent>
-					<ModalHeader>{library.name}</ModalHeader>
+					<ModalHeader>Update {library.name}</ModalHeader>
 					<ModalCloseButton />
 					<ModalBody>
 						<LibraryModalForm

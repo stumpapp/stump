@@ -38,7 +38,7 @@ export function useAnimateOnInView(animations: Animations, animateOnce = false) 
 
 	useEffect(() => {
 		if (inView) {
-			console.log('inView', animations.animate ?? DEFAULT_ANIMATE);
+			// console.log('inView', animations.animate ?? DEFAULT_ANIMATE);
 			controls.start(animations.animate ?? DEFAULT_ANIMATE);
 			// controls.start(animations.initial ?? DEFAULT_INITIAL).then(() => {
 			// 	controls.start(animations.animate ?? DEFAULT_ANIMATE);

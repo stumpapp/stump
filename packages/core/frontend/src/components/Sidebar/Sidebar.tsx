@@ -82,7 +82,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 									_dark: { bg: 'gray.700', color: 'gray.100' },
 								}}
 							>
-								<HStack p={1.5}>
+								<HStack p={1.5} minH="40px">
 									<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
 										{item.name}
 									</Link>

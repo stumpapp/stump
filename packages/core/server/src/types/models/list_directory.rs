@@ -19,32 +19,32 @@ impl Default for DirectoryListingInput {
 #[serde(rename_all = "camelCase")]
 pub struct DirectoryListing {
 	pub parent: Option<String>,
-	pub directories: Vec<FsPath>,
+	pub files: Vec<DirectoryListingFile>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 
-pub struct FsPath {
+pub struct DirectoryListingFile {
 	pub is_directory: bool,
 	pub name: String,
 	pub path: String,
 }
 
-impl FsPath {
-	pub fn new(is_directory: bool, name: &str, path: &str) -> FsPath {
-		FsPath {
+impl DirectoryListingFile {
+	pub fn new(is_directory: bool, name: &str, path: &str) -> DirectoryListingFile {
+		DirectoryListingFile {
 			is_directory,
 			name: name.to_string(),
 			path: path.to_string(),
 		}
 	}
 
-	pub fn file(name: &str, path: &str) -> FsPath {
-		FsPath::new(false, name, path)
+	pub fn file(name: &str, path: &str) -> DirectoryListingFile {
+		DirectoryListingFile::new(false, name, path)
 	}
 
-	pub fn directory(name: &str, path: &str) -> FsPath {
-		FsPath::new(true, name, path)
+	pub fn directory(name: &str, path: &str) -> DirectoryListingFile {
+		DirectoryListingFile::new(true, name, path)
 	}
 }

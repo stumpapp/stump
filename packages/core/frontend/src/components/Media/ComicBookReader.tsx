@@ -103,7 +103,7 @@ export default function ComicBookReader({
 	}
 
 	function handleChangePage(page: number) {
-		console.log('changing page to', page);
+		// console.log('changing page to', page);
 		if (page > 0 && page <= media.pages) {
 			if (page > currPageRef.current) {
 				doAnimation(FORWARD_ANIMATION, page);

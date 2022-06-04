@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::{
 	fs::{self},
-	guards::auth::Auth,
+	guards::auth::{AdminGuard, Auth},
 	job::library::LibraryScannerJob,
 	prisma::{library, media, series, tag},
 	types::{
@@ -145,10 +145,16 @@ pub async fn scan_library(
 
 #[derive(Deserialize, JsonSchema)]
 pub struct CreateLibrary {
+	/// The name of the library to create.
 	name: String,
+	/// The path to the library to create, i.e. where the directory is on the filesystem.
 	path: String,
+	/// Optional text description of the library.
 	description: Option<String>,
+	/// Optional tags to assign to the library.
 	tags: Option<Vec<Tag>>,
+	/// Optional flag to indicate if the library should be automatically scanned after creation. Default is `true`.
+	scan: Option<bool>,
 }
 
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
@@ -195,9 +201,12 @@ pub async fn create_library(
 		}
 	}
 
-	ctx.spawn_job(Box::new(LibraryScannerJob {
-		path: lib.path.clone(),
-	}));
+	// `scan` is not a required field, however it will default to true if not provided
+	if input.scan.unwrap_or(true) {
+		ctx.spawn_job(Box::new(LibraryScannerJob {
+			path: lib.path.clone(),
+		}));
+	}
 
 	Ok(Json(lib.into()))
 }
@@ -205,11 +214,18 @@ pub async fn create_library(
 #[derive(Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateLibrary {
+	/// The updated name of the library.
 	name: String,
+	/// The updated path of the library.
 	path: String,
+	/// The updated description of the library.
 	description: Option<String>,
+	/// The updated tags of the library.
 	tags: Option<Vec<Tag>>,
+	/// The tags to remove from the library.
 	removed_tags: Option<Vec<Tag>>,
+	/// Optional flag to indicate if the library should be automatically scanned after update. Default is `true`.
+	scan: Option<bool>,
 }
 
 /// Update a library by id, if the current user is a SERVER_OWNER.
@@ -220,7 +236,7 @@ pub async fn update_library(
 	id: String,
 	input: Json<UpdateLibrary>,
 	ctx: &Context,
-	// _auth: Auth,
+	_auth: AdminGuard,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
@@ -308,9 +324,12 @@ pub async fn update_library(
 
 	let updated = updated.unwrap();
 
-	ctx.spawn_job(Box::new(LibraryScannerJob {
-		path: updated.path.clone(),
-	}));
+	// `scan` is not a required field, however it will default to true if not provided
+	if input.scan.unwrap_or(true) {
+		ctx.spawn_job(Box::new(LibraryScannerJob {
+			path: updated.path.clone(),
+		}));
+	}
 
 	Ok(Json(updated.into()))
 }

@@ -25,6 +25,7 @@ export const sidebarItems: SidebarItem[] = [
 		title: 'Guides',
 		links: [
 			{ href: '/guides', description: 'What is Stump?' },
+			{ href: '/guides/configuration', description: 'Configuring Stump' },
 			{ href: '/guides/libraries', description: 'Libraries' },
 			{ href: '/guides/series', description: 'Series' },
 			{ href: '/guides/fs-scanning', description: 'File Scanning' },

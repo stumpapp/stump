@@ -115,38 +115,44 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 		}
 	},
 
-	addJob: (job: Job) => {
-		// console.log('addJob', job);
-		if (get().jobs[job.runnerId] == undefined) {
-			set(() => ({ jobs: { ...get().jobs, [job.runnerId]: job } }));
+	addJob: (newJob: Job) => {
+		let job = get().jobs[newJob.runnerId];
+
+		if (job) {
+			get().updateJob(newJob);
+		} else {
+			set(() => ({
+				jobs: {
+					...get().jobs,
+					[newJob.runnerId]: newJob,
+				},
+			}));
 		}
 	},
 
 	updateJob(jobUpdate: Job) {
-		let job = get().jobs[jobUpdate.runnerId];
+		let jobs = get().jobs;
 
-		if (job) {
-			const { currentTask, message } = jobUpdate;
+		let job = jobs[jobUpdate.runnerId];
 
-			job.currentTask = currentTask;
-			job.message = message;
+		if (!job || !Object.keys(jobs).length) {
+			get().addJob(jobUpdate);
 
-			set(() => ({ jobs: { ...get().jobs, [jobUpdate.runnerId]: job } }));
+			return;
 		}
+
+		const { currentTask, message } = jobUpdate;
+
+		job.currentTask = currentTask;
+		job.message = message;
+
+		set(() => ({ jobs: { ...get().jobs, [jobUpdate.runnerId]: job } }));
 	},
 
 	completeJob(runnerId: string) {
 		const target = get().jobs[runnerId];
 		if (get().jobs[runnerId]) {
 			set(() => ({ jobs: { ...get().jobs, [runnerId]: { ...target, status: 'Completed' } } }));
-
-			// setTimeout(() => {
-			// 	let updated = get().jobs;
-
-			// 	delete updated[runnerId];
-
-			// 	set(() => ({ jobs: updated }));
-			// }, 1000);
 		}
 	},
 });

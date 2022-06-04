@@ -39,8 +39,8 @@ pub enum ClientEvent {
 impl ClientEvent {
 	pub fn job_started(
 		runner_id: String,
-		current_task: usize,
-		task_count: Option<usize>,
+		current_task: u64,
+		task_count: u64,
 		message: Option<String>,
 	) -> Self {
 		ClientEvent::JobStarted(JobUpdate {
@@ -54,8 +54,8 @@ impl ClientEvent {
 
 	pub fn job_progress(
 		runner_id: String,
-		current_task: usize,
-		task_count: Option<usize>,
+		current_task: u64,
+		task_count: u64,
 		message: Option<String>,
 	) -> Self {
 		ClientEvent::JobProgress(JobUpdate {

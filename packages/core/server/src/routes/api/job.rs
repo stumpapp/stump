@@ -50,10 +50,20 @@ pub async fn jobs_listener(
 			let msg = tokio::select! {
 				msg = rx.recv() => match msg {
 					Ok(msg) => msg,
-					Err(RecvError::Closed) => break,
-					Err(RecvError::Lagged(_)) => continue,
+					Err(RecvError::Closed) => {
+						log::debug!("Client receiver closed");
+						continue
+					},
+					Err(RecvError::Lagged(_)) => {
+						log::debug!("Client receiver lagged");
+						continue
+					},
 				},
-				_ = &mut end => break,
+				_ = &mut end => {
+					log::debug!("Client receiver shutdown");
+					break
+				},
+				// _ = &mut end => continue,
 			};
 
 			yield Event::json(&msg);

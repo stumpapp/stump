@@ -80,7 +80,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 		return form.formState.errors;
 	}, [form.formState.errors]);
 
-	console.log(errors);
+	// console.log(errors);
 
 	useEffect(() => {
 		if (reset) {

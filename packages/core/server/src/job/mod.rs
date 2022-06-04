@@ -29,8 +29,8 @@ pub enum JobStatus {
 #[serde(rename_all = "camelCase")]
 pub struct JobUpdate {
 	pub runner_id: String,
-	pub current_task: usize,
-	pub task_count: Option<usize>,
+	pub current_task: u64,
+	pub task_count: u64,
 	pub message: Option<String>,
 	pub status: Option<JobStatus>,
 }

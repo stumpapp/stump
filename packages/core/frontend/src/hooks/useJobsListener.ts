@@ -5,24 +5,43 @@ interface Props {
 	onEvent(event: JobEvent): void;
 }
 
+const eventSource = {
+	url: `${baseURL}/jobs/listen`,
+	config: {
+		withCredentials: true,
+	},
+};
+
 export function useJobsListener({ onEvent }: Props) {
 	useEffect(() => {
-		let sse = new EventSource(`${baseURL}/jobs/listen`, {
-			withCredentials: true,
-		});
+		let sse: EventSource;
 
-		sse.onmessage = (e) => {
-			try {
-				const event = JSON.parse(e.data);
-				onEvent(event);
-			} catch (err) {
-				console.error(err);
-			}
-		};
+		function initEventSource() {
+			// console.log('initEventSource');
+			sse = new EventSource(eventSource.url, eventSource.config);
 
-		sse.onerror = (event) => {
-			// console.log('ONERR', event);
-		};
+			sse.onmessage = (e) => {
+				// console.log('EVENT', e);
+				try {
+					const event = JSON.parse(e.data);
+					onEvent(event);
+				} catch (err) {
+					console.error(err);
+				}
+			};
+
+			sse.onerror = (event) => {
+				console.error('EventSource error event:', event);
+
+				sse?.close();
+
+				setTimeout(() => {
+					initEventSource();
+				}, 1000);
+			};
+		}
+
+		initEventSource();
 
 		return () => {
 			sse?.close();

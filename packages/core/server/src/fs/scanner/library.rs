@@ -17,7 +17,7 @@ use crate::{
 use super::{ScannedFileTrait};
 
 pub struct LibraryScanner {
-	runner_id: String,
+	runner: (String, u64),
 	ctx: Context,
 	library: library::Data,
 	series_map: HashMap<String, series::Data>,
@@ -36,7 +36,7 @@ pub struct LibraryScanner {
 // }
 
 impl LibraryScanner {
-	pub fn new(library: library::Data, ctx: Context, runner_id: String) -> LibraryScanner {
+	pub fn new(library: library::Data, ctx: Context, runner: (String, u64)) -> LibraryScanner {
 		let series = library
 			.series()
 			.expect("Failed to get series in library")
@@ -61,7 +61,7 @@ impl LibraryScanner {
 			library,
 			series_map,
 			media_map,
-			runner_id,
+			runner,
 		}
 	}
 
@@ -198,9 +198,9 @@ impl LibraryScanner {
 			// TODO: send progress (use i)
 			// self.on_progress(vec![])
 			self.on_progress(ClientEvent::job_progress(
-				self.runner_id.clone(),
-				i + 1,
-				None,
+				self.runner.0.clone(),
+				(i + 1) as u64,
+				self.runner.1,
 				Some(format!("Analyzing {:?}", entry_path)),
 			));
 

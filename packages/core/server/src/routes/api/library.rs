@@ -161,6 +161,14 @@ pub async fn create_library(
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
+	// TODO: check library is not a parent of another library
+	if !Path::new(&input.path).exists() {
+		return Err(ApiError::BadRequest(format!(
+			"The library directory does not exist: {}",
+			input.path
+		)));
+	}
+
 	let lib = db
 		.library()
 		.create(

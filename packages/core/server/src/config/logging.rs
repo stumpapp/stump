@@ -16,6 +16,8 @@ pub fn init_fern() -> Result<(), fern::InitError> {
 
 	let verbosity = get_log_verbosity();
 
+	// println!("Log verbosity: {}", verbosity);
+
 	let log_file_path = get_config_dir().join("stump.log");
 
 	base_config = match verbosity {

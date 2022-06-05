@@ -1,6 +1,7 @@
 use std::{
 	io::{Cursor, SeekFrom},
 	num::ParseIntError,
+	path::Path,
 	str::FromStr,
 };
 
@@ -14,6 +15,12 @@ use rocket::{
 	Request,
 	Response,
 };
+use rocket_okapi::{
+	gen::OpenApiGenerator, okapi::openapi3::Responses, response::OpenApiResponderInner,
+	OpenApiError,
+};
+
+use crate::fs::media_file::infer_mime;
 // use serde::Serialize;
 
 // use super::pageable::Pageable;
@@ -201,5 +208,31 @@ impl<'r> Responder<'r, 'static> for PartialContent {
 				Ok(response)
 			},
 		}
+	}
+}
+
+// Note: NamedFile Responder was not setting Content-Type header, which is wildly
+// frustrating. Even if it *was*, it was doing it based of extension which is ~bad~ sooo
+pub struct FileResponse(pub NamedFile, pub String);
+
+impl<'r> Responder<'r, 'static> for FileResponse {
+	fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+		let named_file = self.0;
+
+		let mut response = named_file.respond_to(req)?;
+		let file_path = self.1;
+		let path = Path::new(&file_path);
+
+		if let Some(mime) = infer_mime(&path) {
+			response.adjoin_raw_header("Content-Type", mime.to_string());
+		}
+
+		Ok(response)
+	}
+}
+
+impl OpenApiResponderInner for FileResponse {
+	fn responses(gen: &mut OpenApiGenerator) -> Result<Responses, OpenApiError> {
+		<Vec<u8>>::responses(gen)
 	}
 }

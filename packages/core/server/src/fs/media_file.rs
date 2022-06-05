@@ -9,6 +9,7 @@ use crate::types::{
 };
 
 use super::{
+	epub::process_epub,
 	// epub::get_epub_page,
 	rar::{get_rar_image, process_rar},
 	zip::{get_zip_image, process_zip},
@@ -140,6 +141,7 @@ pub fn process_entry(entry: &DirEntry) -> ProcessResult {
 	match mime {
 		Some("application/zip") => process_zip(entry),
 		Some("application/vnd.rar") => process_rar(entry),
+		Some("application/epub+zip") => process_epub(entry),
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
 			entry.path()

@@ -38,7 +38,7 @@ pub fn digest_zip(path: &str) -> Option<String> {
 
 		let file = archive.by_index(i).unwrap();
 
-		byte_offset += file.size() as i32;
+		byte_offset += file.size();
 	}
 
 	match checksum::digest(path, byte_offset) {
@@ -63,22 +63,25 @@ pub fn process_zip(file: &DirEntry) -> ProcessResult {
 	let mut archive = zip::ZipArchive::new(zip_file)?;
 
 	let mut comic_info = None;
-	let mut entries = Vec::new();
+	// let mut entries = Vec::new();
+	let mut pages = 0;
 
 	for i in 0..archive.len() {
 		let mut file = archive.by_index(i)?;
-		entries.push(file.name().to_owned());
+		// entries.push(file.name().to_owned());
 		if file.name() == "ComicInfo.xml" {
 			let mut contents = String::new();
 			file.read_to_string(&mut contents)?;
 			comic_info = media_file::process_comic_info(contents);
+		} else {
+			pages += 1;
 		}
 	}
 
 	Ok(ProcessedMediaFile {
 		checksum: digest_zip(file.path().to_str().unwrap()),
 		metadata: comic_info,
-		entries,
+		pages,
 	})
 }
 

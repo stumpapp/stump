@@ -1,12 +1,69 @@
+use std::{os::unix::prelude::MetadataExt, path::Path};
+
 use crate::{
 	fs::media_file::{self, GetPageResult},
-	types::{alias::ProcessResult, errors::ProcessFileError},
+	types::{
+		alias::ProcessResult,
+		errors::ProcessFileError,
+		models::{MediaMetadata, ProcessedMediaFile},
+	},
 };
 use epub::doc::EpubDoc;
 use walkdir::DirEntry;
 
-pub fn process_epub(_file: &DirEntry) -> ProcessResult {
-	unimplemented!()
+use super::checksum;
+
+pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
+	let mut bytes_to_read = size;
+
+	// FIXME: this isn't ideal
+	if size > 40000 {
+		bytes_to_read = 40000;
+	}
+
+	match checksum::digest(path.to_str().unwrap(), bytes_to_read) {
+		Ok(digest) => Some(digest),
+		Err(e) => {
+			log::error!(
+				"Failed to digest epub {:?}, unable to create checksum: {}",
+				path,
+				e
+			);
+			None
+		},
+	}
+}
+
+pub fn process_epub(file: &DirEntry) -> ProcessResult {
+	log::info!("Processing Epub: {}", file.path().display());
+
+	let path = file.path();
+
+	let epub_file = EpubDoc::new(path).map_err(|e| {
+		log::error!("Failed to open epub file: {}", e);
+		ProcessFileError::EpubOpenError(e.to_string())
+	})?;
+
+	let pages = epub_file.get_num_pages() as i32;
+
+	let metadata: Option<MediaMetadata> = None;
+
+	Ok(ProcessedMediaFile {
+		checksum: digest_epub(
+			path,
+			file.metadata()
+				.map_err(|e| {
+					log::error!(
+						"Failed to get metadata for epub file: {}",
+						e.to_string()
+					);
+					ProcessFileError::EpubReadError(e.to_string())
+				})?
+				.size(),
+		),
+		metadata,
+		pages,
+	})
 }
 
 // FIXME: error handling here is nasty

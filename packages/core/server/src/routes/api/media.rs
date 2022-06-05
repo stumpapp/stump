@@ -9,7 +9,7 @@ use crate::{
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
-		http::ImageResponse,
+		http::{FileResponse, ImageResponse},
 		models::{media::Media, read_progress::ReadProgress},
 		pageable::{Pageable, PagedRequestParams},
 	},
@@ -142,8 +142,8 @@ pub async fn get_media_by_id(
 pub async fn get_media_file(
 	id: String,
 	ctx: &Context,
-	_auth: Auth,
-) -> ApiResult<NamedFile> {
+	// _auth: Auth,
+) -> ApiResult<FileResponse> {
 	let db = ctx.get_db();
 
 	let media = db
@@ -161,7 +161,12 @@ pub async fn get_media_file(
 
 	let media = media.unwrap();
 
-	Ok(NamedFile::open(media.path.clone()).await?)
+	Ok(FileResponse(
+		NamedFile::open(media.path.clone()).await?,
+		media.path,
+	))
+
+	// Ok(NamedFile::open(media.path.clone()).await?)
 }
 
 #[openapi(tag = "Media")]

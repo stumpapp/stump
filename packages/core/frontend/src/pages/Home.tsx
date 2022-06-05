@@ -3,6 +3,7 @@ import { Box } from '@chakra-ui/react';
 import { Helmet } from 'react-helmet';
 import NoLibraries from '~components/Home/NoLibraries';
 import { useStore } from '~store/store';
+import EpubReader from '~components/Media/EpubReader';
 
 // TODO: account for new accounts, i.e. no media at all
 export default function Home() {
@@ -31,7 +32,10 @@ export default function Home() {
 	return (
 		<>
 			{helmet}
-			<Box p="4">{/* <UiDemo /> */}</Box>
+			<Box p="4" w="full" h="full">
+				{/* <UiDemo /> */}
+				{/* <EpubReader /> */}
+			</Box>
 		</>
 	);
 }

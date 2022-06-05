@@ -10,7 +10,7 @@ use std::os::unix::prelude::FileExt;
 #[cfg(target_family = "windows")]
 use std::os::windows::prelude::*;
 
-pub fn digest(path: &str, byte_offset: i32) -> Result<String> {
+pub fn digest(path: &str, byte_offset: u64) -> Result<String> {
 	let file = File::open(path).unwrap();
 
 	let mut ring_context = Context::new(&SHA256);
@@ -21,7 +21,7 @@ pub fn digest(path: &str, byte_offset: i32) -> Result<String> {
 
 	#[cfg(target_family = "unix")]
 	{
-		file.read_exact_at(&mut buffer, byte_offset as u64)?;
+		file.read_exact_at(&mut buffer, byte_offset)?;
 	}
 
 	#[cfg(target_family = "windows")]

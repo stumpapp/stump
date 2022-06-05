@@ -89,5 +89,6 @@ impl MediaMetadata {
 pub struct ProcessedMediaFile {
 	pub checksum: Option<String>,
 	pub metadata: Option<MediaMetadata>,
-	pub entries: Vec<String>,
+	// pub entries: Vec<String>,
+	pub pages: i32,
 }

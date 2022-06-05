@@ -98,7 +98,7 @@ pub async fn insert_media(
 			media::extension::set(ext),
 			media::pages::set(match comic_info.page_count {
 				Some(count) => count as i32,
-				None => processed_entry.entries.len() as i32,
+				None => processed_entry.pages,
 			}),
 			media::path::set(path_str),
 			vec![

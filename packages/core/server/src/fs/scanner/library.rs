@@ -254,11 +254,14 @@ impl LibraryScanner {
 				continue;
 			}
 
-			// TODO: don't do this :)
-			let series_id = self.get_series_id(&entry_path).expect(&format!(
-				"Could not determine series for new media: {:?}",
-				entry_path
-			));
+			let series_id = self.get_series_id(&entry_path);
+
+			if series_id.is_none() {
+				log::error!("Could not determine series for file: {:?}", entry_path);
+				continue;
+			}
+
+			let series_id = series_id.unwrap();
 
 			log::info!("New media at {:?} in series {:?}", &entry_path, series_id);
 

@@ -36,7 +36,8 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 	let path = file.path().to_string_lossy().to_string();
 	let archive = unrar::Archive::new(&path).unwrap();
 
-	let mut entries: Vec<String> = Vec::new();
+	// let mut entries: Vec<String> = Vec::new();
+	let mut pages = 0;
 
 	let mut metadata_buf = Vec::<u8>::new();
 
@@ -59,9 +60,11 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 									vec![]
 								},
 							}
+						} else {
+							pages += 1;
 						}
 
-						entries.push(filename);
+						// entries.push(filename);
 					},
 					Err(_e) => return Err(ProcessFileError::RarReadError),
 				}
@@ -75,7 +78,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 		metadata: media_file::process_comic_info(
 			std::str::from_utf8(&metadata_buf)?.to_owned(),
 		),
-		entries,
+		pages,
 	})
 
 	// if metadata_buf.is_empty() {
@@ -101,10 +104,10 @@ pub fn digest_rar(file: &str) -> Option<String> {
 		.collect();
 
 	// take first 6 images and add their sizes together
-	let byte_offset: i32 = entries
+	let byte_offset: u64 = entries
 		.iter()
 		.take(6)
-		.fold(0, |acc, e| acc + e.unpacked_size as i32);
+		.fold(0, |acc, e| acc + e.unpacked_size as u64);
 
 	match checksum::digest(file, byte_offset) {
 		Ok(digest) => Some(digest),

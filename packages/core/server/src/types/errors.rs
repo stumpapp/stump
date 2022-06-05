@@ -24,6 +24,8 @@ pub enum ProcessFileError {
 	ArchiveReadError(#[from] ZipError),
 	#[error("Archive contains no files")]
 	ArchiveEmptyError,
+	#[error("Unable to open .epub file: {0}")]
+	EpubOpenError(String),
 	#[error("Error while attempting to read .epub file: {0}")]
 	EpubReadError(String),
 	// #[error("Error while attempting to read .pdf file")]

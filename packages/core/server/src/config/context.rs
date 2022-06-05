@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use rocket::tokio::sync::{
 	broadcast::{channel, error::SendError, Receiver, Sender},
-	mpsc::UnboundedSender,
+	mpsc::{unbounded_channel, UnboundedSender},
 };
 
 use crate::{
@@ -31,6 +31,15 @@ impl Context {
 			db: Arc::new(db::create_client().await),
 			event_sender: Arc::new(event_sender),
 			task_sender: Arc::new(task_sender),
+			client_channel: Arc::new(channel::<ClientEvent>(1024)),
+		}
+	}
+
+	pub async fn mock() -> Context {
+		Context {
+			db: Arc::new(db::create_client().await),
+			event_sender: Arc::new(unbounded_channel::<InternalEvent>().0),
+			task_sender: Arc::new(unbounded_channel::<TaskResponder<InternalTask>>().0),
 			client_channel: Arc::new(channel::<ClientEvent>(1024)),
 		}
 	}

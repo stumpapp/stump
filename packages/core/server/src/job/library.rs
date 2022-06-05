@@ -33,7 +33,17 @@ impl Job for LibraryScannerJob {
 		let mut scanner =
 			LibraryScanner::new(library, ctx.get_ctx(), (runner_id, files_to_process));
 
+		let start = std::time::Instant::now();
+
 		scanner.scan_library().await;
+
+		let duration = start.elapsed();
+
+		log::info!(
+			"Library scan finished in {}.{:03} seconds",
+			duration.as_secs(),
+			duration.subsec_millis()
+		);
 
 		Ok(())
 	}

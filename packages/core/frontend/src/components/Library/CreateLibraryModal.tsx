@@ -61,7 +61,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 
 		const { name, path, description, tags: formTags, scan } = values;
 
-		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
+		let existingTags = tags.filter((tag) => formTags?.some((t: TagOption) => t.value === tag.name));
 
 		let tagsToCreate = formTags
 			?.map((tag: TagOption) => tag.value)

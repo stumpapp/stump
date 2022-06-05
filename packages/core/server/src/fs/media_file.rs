@@ -9,7 +9,7 @@ use crate::types::{
 };
 
 use super::{
-	epub::process_epub,
+	epub::{get_epub_page, process_epub},
 	// epub::get_epub_page,
 	rar::{get_rar_image, process_rar},
 	zip::{get_zip_image, process_zip},
@@ -127,6 +127,15 @@ pub fn get_page(file: &str, page: i32, try_webp: bool) -> GetPageResult {
 	match mime {
 		Some("application/zip") => get_zip_image(file, page),
 		Some("application/vnd.rar") => get_rar_image(file, page, try_webp),
+		Some("application/epub+zip") => {
+			if page == 1 {
+				get_epub_page(file, page)
+			} else {
+				Err(ProcessFileError::UnsupportedFileType(format!(
+					"EPUB files only support cover page for now"
+				)))
+			}
+		},
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
 			file

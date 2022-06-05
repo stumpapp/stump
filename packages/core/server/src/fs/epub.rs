@@ -66,20 +66,33 @@ pub fn process_epub(file: &DirEntry) -> ProcessResult {
 	})
 }
 
+pub fn get_epub_cover(file: &str) -> GetPageResult {
+	let mut epub_file = EpubDoc::new(file).map_err(|e| {
+		log::error!("Failed to open epub file: {}", e);
+		ProcessFileError::EpubOpenError(e.to_string())
+	})?;
+
+	// println!("{:?}", epub_file.resources);
+
+	let cover = epub_file.get_cover().map_err(|e| {
+		log::error!("Failed to get cover from epub file: {}", e);
+		ProcessFileError::EpubReadError(e.to_string())
+	})?;
+
+	// FIXME: mime type
+	Ok((media_file::get_content_type_from_mime("image/png"), cover))
+}
+
 // FIXME: error handling here is nasty
 pub fn get_epub_page(file: &str, page: i32) -> GetPageResult {
+	if page == 1 {
+		return get_epub_cover(file);
+	}
+
 	let res = EpubDoc::new(file);
 
 	match res {
 		Ok(mut doc) => {
-			if page == 0 {
-				let content_type = media_file::get_content_type_from_mime("image/png");
-				let contents = doc
-					.get_cover()
-					.map_err(|e| ProcessFileError::EpubReadError(e.to_string()))?;
-
-				return Ok((content_type, contents));
-			}
 			let _ = doc
 				.set_current_page(page as usize)
 				.map_err(|e| ProcessFileError::EpubReadError(e.to_string()))?;

@@ -1,4 +1,4 @@
-import { Box, Code, Heading, Link, Stack, Text, useBoolean } from '@chakra-ui/react';
+import { Code, Heading, Link, Stack, Text, useBoolean } from '@chakra-ui/react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import BaseLayout from './Layouts/BaseLayout';
 

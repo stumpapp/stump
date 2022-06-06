@@ -42,19 +42,32 @@ If you're interested in tracking the development of specific features, you can t
 ## Benchmarks
 
 {% callout title="Testing Scenario" icon="note" %}
-2018 Macbook Pro 13" (1.4 GHz i5), basic Stump configuration with a library of ~200 comics.
-
-**Steps**: Boot stump, log into account, queue 3 scan jobs on library, exit when last job finishes.
+2018 Macbook Pro 13" (1.4 GHz i5), basic Stump configuration with a library of 250 comics.
 {% /callout %}
 
 ### Docker
+
+**Steps**: Boot stump, log into account, queue 3 scan jobs on library, exit when last job finishes.
 
 - Average memory usage: ~6MiB / 1.939GiB (~0.33%)
 - Average CPU usage: ~2.2%
 
 ### Executable
 
-TODO
+**Steps**: Boot stump, log into account, queue 2 scan jobs on library, exit when last job finishes.
+
+- Average memory usage: TBD
+- Average CPU usage: TBD
+- First scan execution time: 9s
+  - ~25 full file scans per second (full file scan does every possible action in the scan, since it is a new file)
+- Consecutive scan execution time: 0.108s (no new files)
+
+**Steps**: Boot stump, log into account, update library path (making all media 'MISSING'), queue 1 scan job on library, revert library back to correct path, queue 1 scan job on library, exit when last job finishes.
+
+- Average memory usage: TBD
+- Average CPU usage: TBD
+- First scan execution time: TBD
+- Consecutive scan execution time (repairing library): TBD
 
 ## More questions?
 

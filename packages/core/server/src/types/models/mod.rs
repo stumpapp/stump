@@ -1,3 +1,4 @@
+pub mod epub;
 pub mod library;
 pub mod list_directory;
 pub mod log;

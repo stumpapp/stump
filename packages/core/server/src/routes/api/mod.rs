@@ -8,6 +8,7 @@ use crate::{
 };
 
 pub mod auth;
+pub mod epub;
 pub mod filesystem;
 pub mod job;
 pub mod library;
@@ -55,6 +56,9 @@ pub fn api() -> Vec<Route> {
 		media::get_media_thumbnail,
 		media::update_media_progress,
 		media::get_duplicate_media,
+		// epub api
+		epub::get_epub,
+		epub::get_epub_meta,
 		// tag api
 		tag::get_tags,
 		tag::create_tags,

@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { Book, Rendition } from 'epubjs';
 
+// Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
+
 export default function EpubReader() {
 	const ref = useRef<any>(null);
 

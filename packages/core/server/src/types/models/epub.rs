@@ -69,8 +69,10 @@ impl Epub {
 	/// Attempts to create an Epub from a media entity. Internally, this will attempt to open
 	/// an EpubDoc from the media's path. If this fails, it will return an EpubOpenError.
 	pub fn try_from(media: media::Data) -> Result<Epub, ProcessFileError> {
-		let epub_file = EpubDoc::new(media.path.as_str())
-			.map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))?;
+		let epub_file = EpubDoc::new(media.path.as_str()).map_err(|e| {
+			log::error!("Failed to open epub {}: {}", &media.path, e);
+			ProcessFileError::EpubOpenError(e.to_string())
+		})?;
 
 		Ok(Epub::from(media, epub_file))
 	}

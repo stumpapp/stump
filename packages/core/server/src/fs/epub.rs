@@ -182,66 +182,73 @@ pub fn get_container_xml(file: &str, resource: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
+
+	use super::get_epub_resource;
+
+	use rocket::{http::ContentType, tokio};
+	use std::str::FromStr;
 
 	use crate::{config::context::*, prisma::media, types::models::epub::Epub};
-	use rocket::tokio;
 
 	#[tokio::test]
-	async fn test() -> anyhow::Result<()> {
+	async fn can_make_epub_struct() -> anyhow::Result<()> {
 		let ctx = Context::mock().await;
 
-		let epubs = ctx
+		let media = ctx
 			.db
 			.media()
-			.find_many(vec![media::extension::equals("epub".to_string())])
+			.find_first(vec![media::extension::equals("epub".to_string())])
 			.exec()
 			.await?;
 
-		for epub in epubs {
-			let epub_file = EpubDoc::new(epub.path.as_str())?;
-			println!("{:?}", epub.path);
-
-			println!("Resources: {:?}", epub_file.resources);
-			println!("TOC:");
-
-			for content in epub_file.toc {
-				println!(
-					"\tlabel: {}, content: {:?}, play_order: {}",
-					content.label, content.content, content.play_order
-				);
-			}
-
-			println!("Meta: {:?}", epub_file.metadata);
-			println!("root_base: {:?}", epub_file.root_base);
-			println!("root_file: {:?}", epub_file.root_file);
-			println!("extra_css: {:?}", epub_file.extra_css);
-
-			println!("")
+		if media.is_none() {
+			// No epub file found, this is not a failure. Just skip the test.
+			return Ok(());
 		}
+
+		let media = media.unwrap();
+
+		let epub = Some(Epub::try_from(media)?);
+
+		assert!(epub.is_some());
 
 		Ok(())
 	}
 
-	// 35a5302d-ad48-4df9-9df7-9c20cc77e6ee
-
 	#[tokio::test]
-	async fn test2() -> anyhow::Result<()> {
+	async fn can_get_resource() -> anyhow::Result<()> {
 		let ctx = Context::mock().await;
 
-		let epub = ctx
+		let media = ctx
 			.db
 			.media()
-			.find_unique(media::id::equals(
-				"35a5302d-ad48-4df9-9df7-9c20cc77e6ee".to_string(),
-			))
+			.find_first(vec![media::extension::equals("epub".to_string())])
 			.exec()
-			.await?
-			.unwrap();
+			.await?;
 
-		let epub_file = EpubDoc::new(epub.path.as_str())?;
+		if media.is_none() {
+			// No epub file found, this is not a failure. Just skip the test.
+			return Ok(());
+		}
 
-		let epub = Epub::from(epub, epub_file);
+		let media = media.unwrap();
+		let media_path = media.path.clone();
+
+		let epub = Epub::try_from(media)?;
+
+		let first_resource = epub.resources.into_iter().next().unwrap();
+
+		let got_resource = get_epub_resource(&media_path, &first_resource.0);
+
+		assert!(got_resource.is_ok());
+
+		let got_resource = got_resource.unwrap();
+
+		assert_eq!(
+			got_resource.0,
+			ContentType::from_str(&first_resource.1 .1)
+				.expect("Could not determine content type")
+		);
 
 		Ok(())
 	}

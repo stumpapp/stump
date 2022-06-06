@@ -21,11 +21,9 @@ pub mod user;
 /// Function to return the routes for the `/api` path.
 pub fn api() -> Vec<Route> {
 	openapi_get_routes![
-		// top level
+		// top level api endpoints
 		claim,
 		shutdown,
-		// routing::api::scan,
-		// routing::api::event_listener,
 		// auth
 		auth::me,
 		auth::login,
@@ -36,18 +34,18 @@ pub fn api() -> Vec<Route> {
 		user::create_user,
 		// user::update_user
 		job::jobs_listener,
-		// // library api
+		// library api
 		library::get_libraries,
 		library::get_library_by_id,
 		library::scan_library,
 		library::create_library,
 		library::update_library,
 		library::delete_library,
-		// // series api
+		// series api
 		series::get_series,
 		series::get_series_by_id,
 		series::get_series_thumbnail,
-		// // media api
+		// media api
 		media::get_media,
 		media::get_reading_media,
 		media::get_media_by_id,

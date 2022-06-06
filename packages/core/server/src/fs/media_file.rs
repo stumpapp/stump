@@ -15,6 +15,10 @@ use super::{
 	zip::{get_zip_image, process_zip},
 };
 
+// TODO: replace all these match statements with an custom enum that handles it all.
+// The enum itself will have some repetition, however it'll be cleaner than
+// doing this stuff over and over as this file currently does.
+
 // FIXME: this needs to change. I really only need the MediaMetadata
 // pub type ProcessResult = Result<(Option<MediaMetadata>, Vec<String>), ProcessFileError>;
 pub type GetPageResult = Result<ImageResponse, ProcessFileError>;
@@ -35,25 +39,26 @@ pub fn process_comic_info(buffer: String) -> Option<MediaMetadata> {
 }
 
 pub fn guess_content_type(file: &str) -> ContentType {
-	let file_name = file.to_lowercase();
+	let file = Path::new(file);
 
-	if file_name.ends_with(".jpg") || file_name.ends_with(".jpeg") {
-		return ContentType::JPEG;
-	} else if file_name.ends_with(".png") {
-		return ContentType::PNG;
+	let extension = file.extension().unwrap_or_default();
+
+	let extension = extension.to_string_lossy().to_string();
+
+	// TODO: if this fails manually check the extension
+	match ContentType::from_extension(&extension) {
+		Some(content_type) => content_type,
+		None => ContentType::Any,
 	}
-
-	// FIXME: don't love this
-	ContentType::Any
 }
 
 pub fn get_content_type(file: &ZipFile) -> ContentType {
 	let file_name = file.name();
 
-	let mime = infer_mime(Path::new(file_name));
+	let mime = infer_mime_from_path(Path::new(file_name));
 
 	match mime {
-		Some(m) => match ContentType::from_str(m) {
+		Some(m) => match ContentType::from_str(&m) {
 			Ok(t) => {
 				log::debug!("Inferred content type: {:?}", t);
 				t
@@ -76,38 +81,65 @@ pub fn get_content_type(file: &ZipFile) -> ContentType {
 
 pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 	ContentType::from_str(mime).unwrap_or(match mime {
-		"image/jpeg" => ContentType::JPEG,
+		"application/pdf" => ContentType::PDF,
+		// "application/epub+zip" => ContentType::EPUB,
+		"application/zip" => ContentType::ZIP,
+		"application/vnd.comicbook+zip" => ContentType::ZIP,
+		// "application/vnd.rar" => ContentType::RAR,
+		// "application/vnd.comicbook-rar" => ContentType::RAR,
 		"image/png" => ContentType::PNG,
+		"image/jpeg" => ContentType::JPEG,
+		"image/webp" => ContentType::WEBP,
+		"image/gif" => ContentType::GIF,
 		"application/xhtml+xml" => ContentType::XML,
 		_ => ContentType::Any,
 	})
 }
 
-pub fn guess_mime(path: &Path) -> Option<&str> {
+/// Guess the MIME type of a file based on its extension.
+pub fn guess_mime(path: &Path) -> Option<String> {
 	let extension = path.extension().and_then(|ext| ext.to_str());
 
 	if extension.is_none() {
-		log::warn!("Unable to guess mime for file: {:?}", path);
+		log::warn!(
+			"Unable to guess mime for file without extension: {:?}",
+			path
+		);
 		return None;
 	}
 
 	let extension = extension.unwrap();
 
+	let content_type = ContentType::from_extension(extension);
+
+	if let Some(content_type) = content_type {
+		return Some(content_type.to_string());
+	}
+
+	// TODO: add more?
 	match extension.to_lowercase().as_str() {
-		"pdf" => Some("application/pdf"),
-		"epub" => Some("application/epub+zip"),
-		"cbz" => Some("application/zip"),
-		"zip" => Some("application/zip"),
-		"cbr" => Some("application/vnd.rar"),
+		"pdf" => Some("application/pdf".to_string()),
+		"epub" => Some("application/epub+zip".to_string()),
+		"zip" => Some("application/zip".to_string()),
+		"cbz" => Some("application/vnd.comicbook+zip".to_string()),
+		"rar" => Some("application/vnd.rar".to_string()),
+		"cbr" => Some("application/vnd.comicbook-rar".to_string()),
+		"png" => Some("image/png".to_string()),
+		"jpg" => Some("image/jpeg".to_string()),
+		"jpeg" => Some("image/jpeg".to_string()),
+		"webp" => Some("image/webp".to_string()),
+		"gif" => Some("image/gif".to_string()),
 		_ => None,
 	}
 }
 
-pub fn infer_mime(path: &Path) -> Option<&str> {
+/// Infer the MIME type of a file. If the MIME type cannot be inferred via reading
+/// the first few bytes of the file, then the file extension is used via `guess_mime`.
+pub fn infer_mime_from_path(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(mime) => {
 			log::debug!("Inferred mime for file {:?}: {:?}", path, mime);
-			mime.and_then(|m| Some(m.mime_type()))
+			mime.and_then(|m| Some(m.mime_type().to_string()))
 		},
 		Err(e) => {
 			log::warn!(
@@ -121,18 +153,20 @@ pub fn infer_mime(path: &Path) -> Option<&str> {
 	}
 }
 
-pub fn get_page(file: &str, page: i32, try_webp: bool) -> GetPageResult {
-	let mime = infer_mime(Path::new(file));
+pub fn get_page(file: &str, page: i32) -> GetPageResult {
+	let mime = guess_mime(Path::new(file));
 
-	match mime {
+	match mime.as_deref() {
 		Some("application/zip") => get_zip_image(file, page),
-		Some("application/vnd.rar") => get_rar_image(file, page, try_webp),
+		Some("application/vnd.comicbook+zip") => get_zip_image(file, page),
+		Some("application/vnd.rar") => get_rar_image(file, page),
+		Some("application/vnd.comicbook-rar") => get_rar_image(file, page),
 		Some("application/epub+zip") => {
 			if page == 1 {
 				get_epub_page(file, page)
 			} else {
 				Err(ProcessFileError::UnsupportedFileType(format!(
-					"EPUB files only support cover page for now"
+					"You may only request the cover page (first page) for epub files on this endpoint"
 				)))
 			}
 		},
@@ -145,11 +179,14 @@ pub fn get_page(file: &str, page: i32, try_webp: bool) -> GetPageResult {
 }
 
 pub fn process_entry(entry: &DirEntry) -> ProcessResult {
-	let mime = infer_mime(entry.path());
+	let mime = infer_mime_from_path(entry.path());
 
-	match mime {
+	// TODO: improve this? kinda verbose
+	match mime.as_deref() {
 		Some("application/zip") => process_zip(entry),
+		Some("application/vnd.comicbook+zip") => process_zip(entry),
 		Some("application/vnd.rar") => process_rar(entry),
+		Some("application/vnd.comicbook-rar") => process_rar(entry),
 		Some("application/epub+zip") => process_epub(entry),
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",

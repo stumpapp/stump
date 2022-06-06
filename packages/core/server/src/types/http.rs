@@ -20,7 +20,7 @@ use rocket_okapi::{
 	OpenApiError,
 };
 
-use crate::fs::media_file::infer_mime;
+use crate::fs::media_file::infer_mime_from_path;
 // use serde::Serialize;
 
 // use super::pageable::Pageable;
@@ -223,8 +223,8 @@ impl<'r> Responder<'r, 'static> for FileResponse {
 		let file_path = self.1;
 		let path = Path::new(&file_path);
 
-		if let Some(mime) = infer_mime(&path) {
-			response.adjoin_raw_header("Content-Type", mime.to_string());
+		if let Some(mime) = infer_mime_from_path(&path) {
+			response.adjoin_raw_header("Content-Type", mime);
 		}
 
 		Ok(response)

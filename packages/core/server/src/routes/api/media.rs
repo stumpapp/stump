@@ -231,7 +231,7 @@ pub async fn get_media_page(
 					id, book.pages
 				)))
 			} else {
-				Ok(fs::media_file::get_page(&book.path, page, false)?)
+				Ok(fs::media_file::get_page(&book.path, page)?)
 			}
 		},
 		None => Err(ApiError::NotFound(format!(
@@ -268,7 +268,7 @@ pub async fn get_media_thumbnail(
 
 	let book = book.unwrap();
 
-	Ok(fs::media_file::get_page(book.path.as_str(), 1, true)?)
+	Ok(fs::media_file::get_page(book.path.as_str(), 1)?)
 }
 
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found

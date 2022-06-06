@@ -1,14 +1,16 @@
-import { Box, Spacer, Text } from '@chakra-ui/react';
+import { Box, Spacer, Text, useBoolean } from '@chakra-ui/react';
 import clsx from 'clsx';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 export interface CardProps {
 	to: string;
 	imageAlt: string;
 	imageSrc: string;
+	imageFallback?: string;
 	title: string;
 	subtitle?: string;
+	variant?: 'default' | 'large';
 	onMouseEnter?: () => void;
 }
 
@@ -17,7 +19,27 @@ export interface CardProps {
 // So, I think maybe there should be some retry logic in here? retry once every few ms for like 9ms before showing a
 // fallback image?
 // TODO: add /public/fallback-card.png
-export default function Card({ to, imageAlt, imageSrc, title, subtitle, onMouseEnter }: CardProps) {
+export default function Card({
+	to,
+	imageAlt,
+	imageSrc,
+	imageFallback,
+	title,
+	subtitle,
+	variant = 'default',
+	onMouseEnter,
+}: CardProps) {
+	// const [src, setSrc] = useState(imageSrc);
+	const [isFallback, { on }] = useBoolean(false);
+
+	const src = useMemo(() => {
+		if (isFallback) {
+			return imageFallback ?? '/fallbacks/image-file.svg';
+		}
+
+		return imageSrc;
+	}, [isFallback]);
+
 	return (
 		<Box
 			as={Link}
@@ -36,33 +58,37 @@ export default function Card({ to, imageAlt, imageSrc, title, subtitle, onMouseE
 			<Box px={1.5}>
 				<img
 					alt={imageAlt}
-					className="h-96 w-[16rem] md:h-72 md:w-[12rem] object-cover"
-					src={imageSrc}
-					onError={(err) => {
-						// @ts-ignore
-						// err.target.src = '/fallback-card.png';
-						err.target.src = '/favicon.png';
+					className={clsx(
+						'h-96',
+						variant === 'default' ? 'w-[16rem] md:h-72 md:w-[12rem]' : 'w-[15.54rem]',
+						!isFallback && 'object-cover',
+					)}
+					src={src}
+					onError={(_) => {
+						on();
 					}}
 				/>
 			</Box>
 
-			<Box
-				className={clsx(
-					subtitle ? 'h-[5rem]' : 'h-[4rem]',
-					'flex flex-col max-w-[12rem] break-all  p-2',
-				)}
-				color="black"
-				_dark={{ color: 'gray.100' }}
-			>
-				{/* TODO: truncate SMARTER :) */}
-				<Text className="card-title" fontSize="md" as="h3">
-					{title}
-				</Text>
+			{variant === 'default' && (
+				<Box
+					className={clsx(
+						subtitle ? 'h-[5rem]' : 'h-[4rem]',
+						'flex flex-col max-w-[12rem] break-all  p-2',
+					)}
+					color="black"
+					_dark={{ color: 'gray.100' }}
+				>
+					{/* TODO: truncate SMARTER :) */}
+					<Text className="card-title" fontSize="md" as="h3">
+						{title}
+					</Text>
 
-				<Spacer />
+					<Spacer />
 
-				<Text size="sm">{subtitle}</Text>
-			</Box>
+					<Text size="sm">{subtitle}</Text>
+				</Box>
+			)}
 		</Box>
 	);
 }

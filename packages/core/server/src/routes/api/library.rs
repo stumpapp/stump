@@ -105,7 +105,7 @@ pub async fn get_library_thumbnail(
 
 	let media = series.media()?.first().unwrap();
 
-	Ok(fs::media_file::get_page(media.path.as_str(), 1, true)?)
+	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
 }
 
 /// Queue a ScannerJob to scan the library by id. The job, when started, is

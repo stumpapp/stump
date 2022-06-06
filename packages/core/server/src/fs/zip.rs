@@ -13,11 +13,14 @@ impl<'a> IsImage for ZipFile<'a> {
 	// FIXME: use infer here
 	fn is_image(&self) -> bool {
 		if self.is_file() {
-			let file_name = self.name();
-			let file_name = file_name.to_lowercase();
-			return file_name.ends_with(".jpg")
-				|| file_name.ends_with(".jpeg")
-				|| file_name.ends_with(".png");
+			let content_type = media_file::guess_content_type(self.name());
+
+			// TODO: is this all??
+			return content_type.is_jpeg()
+				|| content_type.is_png()
+				|| content_type.is_webp()
+				|| content_type.is_svg()
+				|| content_type.is_tiff();
 		}
 
 		false

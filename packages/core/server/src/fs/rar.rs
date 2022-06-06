@@ -125,7 +125,7 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // OpenArchive handle stored in Entry is no more. That's why I create another archive to grab what I want before
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-pub fn get_rar_image(file: &str, page: i32, _try_webp: bool) -> GetPageResult {
+pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
 	let archive = unrar::Archive::new(file).unwrap();
 
 	let mut entries: Vec<_> = archive

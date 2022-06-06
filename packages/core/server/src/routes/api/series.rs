@@ -111,7 +111,7 @@ pub async fn get_series_thumbnail(
 
 	let media = media.unwrap();
 
-	Ok(fs::media_file::get_page(media.path.as_str(), 1, true)?)
+	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
 }
 
 /// Returns the media in a given series.

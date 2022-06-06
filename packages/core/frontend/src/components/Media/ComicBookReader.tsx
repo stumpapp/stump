@@ -103,7 +103,6 @@ export default function ComicBookReader({
 	}
 
 	function handleChangePage(page: number) {
-		// console.log('changing page to', page);
 		if (page > 0 && page <= media.pages) {
 			if (page > currPageRef.current) {
 				doAnimation(FORWARD_ANIMATION, page);
@@ -117,18 +116,17 @@ export default function ComicBookReader({
 
 	function handlePreloadPage(page: number) {
 		if (page > 0 && page <= media.pages) {
-			// TODO: prefetch loading of next page
+			const img = new Image();
+			img.src = getPageUrl(page);
 		}
 	}
 
 	useHotkeys('right, left, space, esc', (_, handler) => {
 		switch (handler.key) {
 			case 'right':
-				// handlePreloadPage(currentPage + 1);
 				handleChangePage(currPageRef.current + 1);
 				break;
 			case 'left':
-				// handlePreloadPage(currentPage - 1);
 				handleChangePage(currPageRef.current - 1);
 				break;
 			case 'space':
@@ -145,7 +143,6 @@ export default function ComicBookReader({
 			<div
 				className="flex-1 w-full h-full z-50"
 				onClick={() => handleChangePage(currentPage - 1)}
-				onMouseEnter={() => handlePreloadPage(currentPage - 1)}
 			/>
 
 			<motion.img
@@ -159,12 +156,12 @@ export default function ComicBookReader({
 					// @ts-ignore
 					err.target.src = '/src/favicon.png';
 				}}
+				onLoad={() => handlePreloadPage(currentPage + 1)}
 			/>
 
 			<div
 				className="flex-1 w-full h-full z-50"
 				onClick={() => handleChangePage(currentPage + 1)}
-				onMouseEnter={() => handlePreloadPage(currentPage + 1)}
 			/>
 
 			<Toolbar

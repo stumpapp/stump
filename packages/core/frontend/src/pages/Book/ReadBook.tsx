@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMutation, useQuery } from 'react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { updateMediaProgress } from '~api/mutation/media';
 import { getMediaById, getMediaPage } from '~api/query/media';
 import ComicBookReader from '~components/Media/ComicBookReader';
@@ -14,19 +14,7 @@ export default function ReadBook() {
 
 	if (!id) {
 		throw new Error('Media id is required');
-	} else if (!page) {
-		navigate(`/books/${id}/pages/1`);
-
-		// TODO: do I need this?
-		return null;
 	}
-
-	function handleChangePage(newPage: number) {
-		saveProgress();
-		navigate(`/books/${id}/pages/${newPage}`);
-	}
-
-	const { mutate: saveProgress } = useMutation(() => updateMediaProgress(id, parseInt(page, 10)));
 
 	const { isLoading: fetchingBook, data: media } = useQuery('getMediaById', {
 		queryFn: async () => getMediaById(id).then((res) => res.data),
@@ -40,6 +28,19 @@ export default function ReadBook() {
 		throw new Error('Media not found');
 	}
 
+	if (media.extension.match(/epub/)) {
+		return <Navigate to={`/epub/${id}`} />;
+	} else if (!page) {
+		return <Navigate to={`/books/${id}/pages/1`} />;
+	}
+
+	function handleChangePage(newPage: number) {
+		saveProgress();
+		navigate(`/books/${id}/pages/${newPage}`);
+	}
+
+	const { mutate: saveProgress } = useMutation(() => updateMediaProgress(id, parseInt(page, 10)));
+
 	if (media.extension.match(/cbr|cbz/)) {
 		return (
 			<ComicBookReader
@@ -51,5 +52,5 @@ export default function ReadBook() {
 		);
 	}
 
-	return <div>Not a comic book; Can't do that yet! :)</div>;
+	return <div>Not a supported book or i just can't do that yet! :)</div>;
 }

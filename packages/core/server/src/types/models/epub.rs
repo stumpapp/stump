@@ -80,3 +80,4 @@ impl Epub {
 
 // https://idpf.github.io/epub3-samples/30/samples.html
 // https://danigm.github.io/epub-rs-doc/epub/doc/struct.EpubDoc.html
+// https://help.apple.com/itc/booksassetguide/en.lproj/itc6000a3603.html

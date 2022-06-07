@@ -1,70 +1,39 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useQuery } from 'react-query';
+import { any } from 'zod';
+import { getEpubResource } from '~api/query/epub';
 
-import { Book, Rendition } from 'epubjs';
+interface EpubReaderProps {
+	epub: Epub;
+}
 
-// Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
+export default function EpubReader({ epub, actions, ...rest }: any) {
+	console.log(epub, rest);
 
-export default function EpubReader() {
-	const ref = useRef<any>(null);
+	// const { isLoading: isFetchingResource, data: content } = useQuery(
+	// 	['getEbubResource', actions.currentResource()],
+	// 	{
+	// 		queryFn: () => getEpubResource().then((res) => res.data),
+	// 	},
+	// );
 
-	const [book, setBook] = useState<Book | null>(null);
-
-	const [rendition, setRendition] = useState<Rendition | null>(null);
-
-	const [isLoaded, setIsLoaded] = useState(false);
-
-	useEffect(() => {
-		if (!ref.current) return;
-
-		if (!book) {
-			setBook(
-				new Book('http://localhost:10801/api/media/35a5302d-ad48-4df9-9df7-9c20cc77e6ee/file', {
-					openAs: 'epub',
-				}),
-			);
-			// setBook(new Book('https://react-reader.metabits.no/files/alice.epub', {}));
-		}
-	}, [ref]);
+	const [content, setContent] = useState(null);
 
 	useEffect(() => {
-		if (!book) return;
+		getEpubResource({
+			id: epub.mediaEntity.id,
+			root: epub.rootBase,
+			resourceId: actions.currentResource()?.content,
+		}).then((res) => {
+			console.log(res);
 
-		book.ready.then(() => {
-			if (book.spine) {
-				const loc = book.rendition?.location?.start?.cfi;
-
-				const rendition_ = book.renderTo(ref.current, {
-					width: '100%',
-					height: '100%',
-					// ...epubOptions
-				});
-
-				setRendition(rendition_);
-
-				if (loc) {
-					rendition_.display(loc);
-				} else {
-					rendition_.display();
-				}
-			}
+			setContent(rest.sanitizeHtml(res.data));
 		});
-	}, [book]);
+	}, []);
 
-	// useEffect(() => {
-	// 	let interval: NodeJS.Timer;
-
-	// 	if (rendition) {
-	// 		interval = setInterval(() => {
-	// 			rendition.next();
-	// 		}, 1000);
-	// 	}
-
-	// 	return () => {
-	// 		clearInterval(interval);
-	// 	};
-	// }, [rendition]);
-
-	// console.log({ book, rendition });
-
-	return <div className="w-full h-full" ref={ref} />;
+	return (
+		<div className="w-full h-full">
+			{content && <div dangerouslySetInnerHTML={{ __html: content }} />}
+		</div>
+	);
 }

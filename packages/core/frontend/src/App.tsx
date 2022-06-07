@@ -22,6 +22,7 @@ const Library = React.lazy(() => import('~pages/Library'));
 const SeriesOverview = React.lazy(() => import('~pages/SeriesOverview'));
 const BookOverview = React.lazy(() => import('~pages/Book/BookOverview'));
 const ReadBook = React.lazy(() => import('~pages/Book/ReadBook'));
+const ReadEpub = React.lazy(() => import('~pages/Book/ReadEpub'));
 const Login = React.lazy(() => import('~pages/Auth/Login'));
 const Settings = React.lazy(() => import('~pages/Settings'));
 const GeneralSettings = React.lazy(() => import('~pages/Settings/GeneralSettings'));
@@ -119,6 +120,8 @@ function App() {
 						<Route path="series/:id" element={<SeriesOverview />} />
 						<Route path="books/:id" element={<BookOverview />} />
 						<Route path="books/:id/pages/:page" element={<ReadBook />} />
+						<Route path="epub/:id" element={<ReadEpub />} />
+						<Route path="epub/:id/loc/:loc" element={<ReadEpub />} />
 					</Route>
 
 					<Route path="/auth" element={<BaseLayout />}>

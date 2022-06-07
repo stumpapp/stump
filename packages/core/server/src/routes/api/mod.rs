@@ -1,13 +1,17 @@
-use rocket::{serde::json::Json, Route};
+use rocket::{serde::json::Json, Route, Shutdown};
 use rocket_okapi::{openapi, openapi_get_routes, JsonSchema};
 use serde::Serialize;
 
-use crate::types::alias::{ApiResult, Context};
+use crate::{
+	guards::auth::AdminGuard,
+	types::alias::{ApiResult, Context},
+};
 
 pub mod auth;
 pub mod filesystem;
 pub mod job;
 pub mod library;
+pub mod log;
 pub mod media;
 pub mod series;
 pub mod tag;
@@ -18,6 +22,7 @@ pub fn api() -> Vec<Route> {
 	openapi_get_routes![
 		// top level
 		claim,
+		shutdown,
 		// routing::api::scan,
 		// routing::api::event_listener,
 		// auth
@@ -29,7 +34,6 @@ pub fn api() -> Vec<Route> {
 		user::get_users,
 		user::create_user,
 		// user::update_user
-		// logs api
 		job::jobs_listener,
 		// // library api
 		library::get_libraries,
@@ -56,6 +60,9 @@ pub fn api() -> Vec<Route> {
 		tag::create_tags,
 		// filesytem api
 		filesystem::list_directory,
+		// log api
+		log::clear_logs,
+		log::get_log_info,
 	]
 }
 
@@ -78,4 +85,12 @@ async fn claim(ctx: &Context) -> ApiResult<Json<ClaimResponse>> {
 	Ok(Json(ClaimResponse {
 		is_claimed: db.user().find_first(vec![]).exec().await?.is_some(),
 	}))
+}
+
+// FIXME: won't work for docker. Allow custom shudown command sequences.
+/// Attempts to safely shutdown the server. Only server owners can do this.
+#[openapi(tag = "General")]
+#[post("/shutdown")]
+async fn shutdown(shutdown: Shutdown, _auth: AdminGuard) {
+	shutdown.notify();
 }

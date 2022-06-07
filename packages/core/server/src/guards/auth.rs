@@ -148,6 +148,9 @@ impl<'r> FromRequest<'r> for Auth {
 	}
 }
 
+/// A route guard that checks whether or not the user accessing an endpoint is an
+/// authenticated, server owner. If the user is not authenticated, or the user does
+/// not have the `SERVER_OWNER` role, the request will be rejected with a 401 status.
 #[derive(OpenApiFromRequest)]
 pub struct AdminGuard(pub AuthenticatedUser);
 

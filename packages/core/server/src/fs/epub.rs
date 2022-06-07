@@ -108,6 +108,44 @@ pub fn get_epub_resource(
 	Ok((get_content_type_from_mime(&content_type), contents))
 }
 
+pub fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
+	let mut adjusted_path = path;
+
+	if !adjusted_path.starts_with(root) {
+		adjusted_path = PathBuf::from(root).join(adjusted_path);
+	}
+
+	//  This below won't work since these paths are INSIDE the epub file >:(
+	// adjusted_path = adjusted_path.canonicalize().unwrap_or_else(|err| {
+	// 	// log::warn!(
+	// 	// 	"Failed to safely canonicalize path {}: {}",
+	// 	// 	adjusted_path.display(),
+	// 	// 	err
+	// 	// );
+
+	// 	log::warn!(
+	// 		"Failed to safely canonicalize path {}: {}",
+	// 		adjusted_path.display(),
+	// 		err
+	// 	);
+	// 	adjusted_path
+	// });
+
+	// FIXME: This actually is an invalid solution. If I have multiple '/../../' in the path, this will
+	// result in an incorrect path. I'm not worrying about it now, as I don't believe this will even
+	// be an issue in the context of epub resources, however once the below linked rust feature is completed
+	// I will replace this gross solution.
+	let adjusted_str = adjusted_path
+		.to_string_lossy()
+		.replace("/../", "/")
+		.replace("\\..\\", "\\");
+
+	// https://github.com/rust-lang/rust/issues/92750
+	// std::path::absolute(adjusted_path);
+
+	PathBuf::from(adjusted_str)
+}
+
 pub fn get_epub_resource_from_path(
 	path: &str,
 	root: &str,
@@ -115,11 +153,7 @@ pub fn get_epub_resource_from_path(
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = load_epub(path)?;
 
-	let mut adjusted_path = resource_path;
-
-	if !adjusted_path.starts_with(root) {
-		adjusted_path = PathBuf::from(root).join(adjusted_path);
-	}
+	let adjusted_path = normalize_resource_path(resource_path, root);
 
 	let contents = epub_file
 		.get_resource_by_path(adjusted_path.as_path())
@@ -128,56 +162,24 @@ pub fn get_epub_resource_from_path(
 			ProcessFileError::EpubReadError(e.to_string())
 		})?;
 
-	let content_type = epub_file
-		.get_resource_mime_by_path(adjusted_path.as_path())
-		.map_err(|e| {
-			log::error!("Failed to get resource: {}", e);
-			ProcessFileError::EpubReadError(e.to_string())
-		})?;
+	// Note: If the resource does not have an entry in the `resources` map, then loading the content
+	// type will fail. This seems to only happen when loading the root file (e.g. container.xml,
+	// package.opf, etc.).
+	let content_type = match epub_file.get_resource_mime_by_path(adjusted_path.as_path())
+	{
+		Ok(mime) => get_content_type_from_mime(&mime),
+		Err(e) => {
+			log::warn!(
+				"Failed to get explicit definition of resource mime for {}: {}",
+				adjusted_path.as_path().to_str().unwrap(),
+				e
+			);
 
-	Ok((get_content_type_from_mime(&content_type), contents))
-}
-
-// FIXME: error handling here is nasty
-pub fn get_epub_page(file: &str, page: i32) -> GetPageResult {
-	if page == 1 {
-		return get_epub_cover(file);
-	}
-
-	let res = EpubDoc::new(file);
-
-	match res {
-		Ok(mut doc) => {
-			let _ = doc
-				.set_current_page(page as usize)
-				.map_err(|e| ProcessFileError::EpubReadError(e.to_string()))?;
-
-			let mime_type = doc
-				.get_current_mime()
-				.map_err(|e| ProcessFileError::EpubReadError(e.to_string()))?;
-
-			let contents = doc
-				.get_current()
-				.map_err(|e| ProcessFileError::EpubReadError(e.to_string()))?;
-
-			let content_type = media_file::get_content_type_from_mime(&mime_type);
-
-			Ok((content_type, contents))
+			media_file::guess_content_type(adjusted_path.as_path().to_str().unwrap())
 		},
-		Err(e) => Err(ProcessFileError::EpubReadError(e.to_string())),
-	}
-}
+	};
 
-pub fn get_container_xml(file: &str, resource: &str) -> Option<String> {
-	let res = EpubDoc::new(file);
-
-	match res {
-		Ok(doc) => {
-			println!("{:?}", doc.resources);
-			doc.resources.get(resource).map(|(_path, s)| s.to_owned())
-		},
-		Err(_) => unimplemented!(),
-	}
+	Ok((content_type, contents))
 }
 
 #[cfg(test)]
@@ -186,7 +188,7 @@ mod tests {
 	use super::get_epub_resource;
 
 	use rocket::{http::ContentType, tokio};
-	use std::str::FromStr;
+	use std::{path::PathBuf, str::FromStr};
 
 	use crate::{config::context::*, prisma::media, types::models::epub::Epub};
 
@@ -251,5 +253,16 @@ mod tests {
 		);
 
 		Ok(())
+	}
+
+	#[test]
+	fn canonical_correction() {
+		let invalid = PathBuf::from("OEBPS/../Styles/style.css");
+
+		let expected = PathBuf::from("OEBPS/Styles/style.css");
+
+		let result = super::normalize_resource_path(invalid, "OEBPS");
+
+		assert_eq!(result, expected);
 	}
 }

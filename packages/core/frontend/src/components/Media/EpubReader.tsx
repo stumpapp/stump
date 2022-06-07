@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
-import { any } from 'zod';
 import { getEpubResource } from '~api/query/epub';
+import { UseEpubReturn } from '~hooks/useEpub';
 
-interface EpubReaderProps {
-	epub: Epub;
-}
+interface EpubReaderProps extends UseEpubReturn {}
 
-export default function EpubReader({ epub, actions, ...rest }: any) {
+export default function EpubReader({ epub, actions, ...rest }: EpubReaderProps) {
 	console.log(epub, rest);
 
 	// const { isLoading: isFetchingResource, data: content } = useQuery(
@@ -17,17 +15,17 @@ export default function EpubReader({ epub, actions, ...rest }: any) {
 	// 	},
 	// );
 
-	const [content, setContent] = useState(null);
+	const [content, setContent] = useState<string>();
 
 	useEffect(() => {
 		getEpubResource({
 			id: epub.mediaEntity.id,
 			root: epub.rootBase,
-			resourceId: actions.currentResource()?.content,
+			resourceId: actions.currentResource()?.content!,
 		}).then((res) => {
 			console.log(res);
 
-			setContent(rest.sanitizeHtml(res.data));
+			setContent(rest.correctHtmlUrls(res.data));
 		});
 	}, []);
 

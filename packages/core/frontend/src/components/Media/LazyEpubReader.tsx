@@ -4,7 +4,7 @@ import { Book, Rendition } from 'epubjs';
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 
-export default function EpubReader() {
+export default function LazyEpubReader() {
 	const ref = useRef<any>(null);
 
 	const [book, setBook] = useState<Book | null>(null);

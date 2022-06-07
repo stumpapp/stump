@@ -9,7 +9,7 @@ use crate::types::{
 };
 
 use super::{
-	epub::{get_epub_page, process_epub},
+	epub::{get_epub_cover, process_epub},
 	// epub::get_epub_page,
 	rar::{get_rar_image, process_rar},
 	zip::{get_zip_image, process_zip},
@@ -38,6 +38,19 @@ pub fn process_comic_info(buffer: String) -> Option<MediaMetadata> {
 	}
 }
 
+// I am adding the required and currently missing types I need to Rocket
+// (https://github.com/SergioBenitez/Rocket/pull/2221), but in the meantime
+// need to use this for now when encountering missing mimes. These are
+// almost correct replacements, e.g. opf is supposed to be application/oebps-package+xml,
+// not just application/xml.
+fn temporary_content_workarounds(extension: &str) -> ContentType {
+	if extension == "opf" || extension == "ncx" {
+		return ContentType::XML;
+	}
+
+	ContentType::Any
+}
+
 pub fn guess_content_type(file: &str) -> ContentType {
 	let file = Path::new(file);
 
@@ -48,7 +61,8 @@ pub fn guess_content_type(file: &str) -> ContentType {
 	// TODO: if this fails manually check the extension
 	match ContentType::from_extension(&extension) {
 		Some(content_type) => content_type,
-		None => ContentType::Any,
+		// None => ContentType::Any,
+		None => temporary_content_workarounds(&extension),
 	}
 }
 
@@ -79,6 +93,7 @@ pub fn get_content_type(file: &ZipFile) -> ContentType {
 	}
 }
 
+// FIXME: replace some of these once Rocket PR is merged
 pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 	ContentType::from_str(mime).unwrap_or(match mime {
 		"application/pdf" => ContentType::PDF,
@@ -91,6 +106,7 @@ pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 		"image/jpeg" => ContentType::JPEG,
 		"image/webp" => ContentType::WEBP,
 		"image/gif" => ContentType::GIF,
+		// FIXME: replace one PR is merged
 		"application/xhtml+xml" => ContentType::XML,
 		_ => ContentType::Any,
 	})
@@ -163,7 +179,7 @@ pub fn get_page(file: &str, page: i32) -> GetPageResult {
 		Some("application/vnd.comicbook-rar") => get_rar_image(file, page),
 		Some("application/epub+zip") => {
 			if page == 1 {
-				get_epub_page(file, page)
+				get_epub_cover(file)
 			} else {
 				Err(ProcessFileError::UnsupportedFileType(format!(
 					"You may only request the cover page (first page) for epub files on this endpoint"

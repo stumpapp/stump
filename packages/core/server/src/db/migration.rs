@@ -27,7 +27,9 @@ fn get_sql_stmts(sql_str: &str) -> Vec<&str> {
 }
 
 pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
-	log::info!("Checking for `migrations` table");
+	log::info!("Running migrations");
+
+	log::debug!("Checking for `migrations` table");
 
 	let res: Vec<CountQueryReturn> = db
 		._query_raw(raw!(
@@ -37,7 +39,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 
 	// If the table doesn't exist, create it
 	if res.get(0).unwrap().count == 0 {
-		log::info!("`migrations` table not found, creating it");
+		log::debug!("`migrations` table not found, creating it");
 
 		let stmts = get_sql_stmts(CREATE_MIGRATIONS_TABLE);
 
@@ -46,15 +48,15 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 			db._execute_raw(raw!(stmt)).await?;
 		}
 
-		log::info!("`migrations` table created");
+		log::debug!("`migrations` table created");
 	} else {
-		log::info!("`migrations` table already exists");
+		log::debug!("`migrations` table already exists");
 	}
 
 	// migration structure: directory with name like [timstamp: i64]_[name], with a file named migration.sql
 	let mut migration_dirs = MIGRATIONS_DIR.dirs().collect::<Vec<&Dir>>();
 
-	log::info!("Found {} migrations", migration_dirs.len());
+	log::debug!("Found {} migrations", migration_dirs.len());
 
 	// **must ensure** we run the migrations in order of timestamp
 	migration_dirs.sort_by(|a, b| {
@@ -68,7 +70,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 		a_timestamp.cmp(&b_timestamp)
 	});
 
-	log::info!("Migrations sorted by timestamp");
+	log::debug!("Migrations sorted by timestamp");
 
 	for dir in migration_dirs {
 		let name = dir.path().file_name().unwrap().to_str().unwrap();
@@ -87,7 +89,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 		// Only run migrations that have not been run yet
 		// TODO: check success?
 		if existing_migration.is_some() {
-			log::info!(
+			log::debug!(
 				"Migration {} already applied (checksum: {})",
 				name,
 				checksum
@@ -95,7 +97,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 			continue;
 		}
 
-		log::info!("Running migration {}", name);
+		log::debug!("Running migration {}", name);
 
 		let stmts = get_sql_stmts(sql_str);
 
@@ -125,7 +127,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 			};
 		}
 
-		log::info!("Migration {} applied", name);
+		log::debug!("Migration {} applied", name);
 
 		db.migration()
 			.create(
@@ -136,6 +138,8 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 			.exec()
 			.await?;
 	}
+
+	log::info!("Migrations complete");
 
 	Ok(())
 }

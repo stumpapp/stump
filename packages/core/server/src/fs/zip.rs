@@ -80,7 +80,7 @@ pub fn process_zip(file: &DirEntry) -> ProcessResult {
 			pages += 1;
 		}
 	}
-
+	// 7054b81b-09f1-48f9-9167-8396ccd57533
 	Ok(ProcessedMediaFile {
 		checksum: digest_zip(file.path().to_str().unwrap()),
 		metadata: comic_info,
@@ -99,6 +99,7 @@ pub fn get_zip_image(file: &str, page: i32) -> GetPageResult {
 	let file_names_archive = archive.clone();
 
 	if archive.len() == 0 {
+		log::error!("Zip file {} is empty", file);
 		return Err(ProcessFileError::ArchiveEmptyError);
 	}
 
@@ -112,15 +113,24 @@ pub fn get_zip_image(file: &str, page: i32) -> GetPageResult {
 		let mut file = archive.by_name(name)?;
 
 		let mut contents = Vec::new();
-		let content_type = media_file::get_content_type(&file);
+		// Note: guessing mime here since this file isn't accessible from the filesystem,
+		// it lives inside the zip file.
+		let content_type = media_file::guess_content_type(name);
 
 		if images_seen + 1 == page && file.is_image() {
+			log::debug!("Found target image: {}", name);
 			file.read_to_end(&mut contents)?;
 			return Ok((content_type, contents));
 		} else if file.is_image() {
 			images_seen += 1;
 		}
 	}
+
+	log::error!(
+		"Could not find image for page {} in zip file {}",
+		page,
+		file
+	);
 
 	Err(ProcessFileError::NoImageError)
 }

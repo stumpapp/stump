@@ -144,7 +144,7 @@ impl LibraryScanner {
 
 
 			// update series paths
-			ctx
+			let number_changed = ctx
 				.db
 				._execute_raw(raw!(
 					"UPDATE series SET path=REPLACE(path,{},{}) WHERE libraryId={}",
@@ -153,6 +153,8 @@ impl LibraryScanner {
 					PrismaValue::String(library.id.clone())
 				))
 				.await?;
+
+			log::debug!("Updated {} series paths: {:?}", number_changed, series_id_ref);
 
 			// update media paths
 			// NOTE: ._execute_raw() throws an error using PrismaValue::List with Sqlite.
@@ -163,10 +165,12 @@ impl LibraryScanner {
 				series_id_ref.into_iter().map(|id| format!("\"{}\"", id)).collect::<Vec<_>>().join(",")
 			);
 
-			ctx
+			let number_changed = ctx
 				.db
 				._execute_raw(raw!(&media_query))
 				.await?;
+
+			log::debug!("Updated {} media paths according to series changes", number_changed);
 		}
 
 		// Note: at this point, this should never fail so I am unwrapping
@@ -193,7 +197,7 @@ impl LibraryScanner {
 		{
 			let entry_path = entry.path();
 
-			log::info!("Scanning: {:?}", entry_path);
+			log::info!("Currently scanning: {:?}", entry_path);
 
 			// TODO: send progress (use i)
 			// self.on_progress(vec![])
@@ -210,8 +214,7 @@ impl LibraryScanner {
 
 			if entry_path.is_dir() && !series_exists {
 				if !entry_path.dir_has_media() {
-					log::info!("Skipping empty directory: {:?}", entry_path);
-					// TODO: send progress
+					log::debug!("Skipping empty directory: {:?}", entry_path);
 					continue;
 				}
 
@@ -236,21 +239,19 @@ impl LibraryScanner {
 
 			if series_exists {
 				let series = series.unwrap();
-				log::info!("Series exists: {:?}", series.path);
+				log::debug!("Series already exists: {:?}", series.path);
 				visited_series.insert(series.id.clone(), true);
 
 				// TODO: send progress
 
 				continue;
 			} else if entry_path.should_ignore() {
-				log::info!("Skipping ignored file: {:?}", entry_path);
+				log::debug!("Skipping ignored file: {:?}", entry_path);
 				// TODO: send progress
 				continue;
 			} else if let Some(media) = self.get_media_by_path(&entry_path) {
-				// log::info!("Existing media: {:?}", media);
+				log::debug!("Existing media found: {:?}", media);
 				visited_media.insert(media.id.clone(), true);
-				// TODO: send progress
-				// self.analyze_media(media).await;
 				continue;
 			}
 
@@ -263,7 +264,7 @@ impl LibraryScanner {
 
 			let series_id = series_id.unwrap();
 
-			log::info!("New media at {:?} in series {:?}", &entry_path, series_id);
+			log::debug!("New media at {:?} in series {:?}", &entry_path, series_id);
 
 			match super::utils::insert_media(&self.ctx, &entry, series_id).await {
 				Ok(media) => {
@@ -291,7 +292,7 @@ impl LibraryScanner {
 		//         }
 		//         _ => {
 		//             if s.library_id == library.id {
-		//                 log::info!("MOVED/MISSING SERIES: {}", s.path);
+		//                 log::debug!("MOVED/MISSING SERIES: {}", s.path);
 		//                 self.set_series_status(s.id, FileStatus::Missing, s.path.clone())
 		//                     .await;
 		//             }
@@ -309,7 +310,7 @@ impl LibraryScanner {
 		//         }
 		//         _ => {
 		//             if media.library_id == library.id {
-		//                 log::info!("MOVED/MISSING MEDIA: {}", media.path);
+		//                 log::debug!("MOVED/MISSING MEDIA: {}", media.path);
 		//                 self.set_media_status(media.id, FileStatus::Missing, media.path.clone())
 		//                     .await;
 		//             }
@@ -327,7 +328,7 @@ impl LibraryScanner {
 //         println!("analyzing media: {:?}", media);
 
 //         if media.status == FileStatus::Missing {
-//             log::info!("Media found");
+//             log::debug!("Media found");
 //             self.set_media_status(id, FileStatus::Ready, media.path.clone())
 //                 .await;
 //         }
@@ -338,7 +339,7 @@ impl LibraryScanner {
 //     async fn set_media_status(&self, id: i32, status: FileStatus, path: String) {
 //         match queries::media::set_status(self.db, id, status).await {
 //             Ok(_) => {
-//                 log::info!("set media status: {:?} -> {:?}", path, status);
+//                 log::debug!("set media status: {:?} -> {:?}", path, status);
 //                 if status == FileStatus::Missing {
 //                     self.event_handler
 //                         .log_error(format!("Missing file: {}", path));
@@ -353,7 +354,7 @@ impl LibraryScanner {
 //     async fn set_series_status(&self, id: i32, status: FileStatus, path: String) {
 //         match queries::series::set_status(self.db, id, status).await {
 //             Ok(_) => {
-//                 log::info!("set series status: {:?} -> {:?}", path, status);
+//                 log::debug!("set series status: {:?} -> {:?}", path, status);
 //                 if status == FileStatus::Missing {
 //                     self.event_handler
 //                         .log_error(format!("Missing file: {}", path));

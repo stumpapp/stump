@@ -66,33 +66,6 @@ pub fn guess_content_type(file: &str) -> ContentType {
 	}
 }
 
-pub fn get_content_type(file: &ZipFile) -> ContentType {
-	let file_name = file.name();
-
-	let mime = infer_mime_from_path(Path::new(file_name));
-
-	match mime {
-		Some(m) => match ContentType::from_str(&m) {
-			Ok(t) => {
-				log::debug!("Inferred content type: {:?}", t);
-				t
-			},
-			_ => {
-				log::debug!(
-					"Failed to infer content type from {:?} for file {:?}",
-					m,
-					file_name
-				);
-				ContentType::Any
-			},
-		},
-		None => {
-			log::debug!("Failed to infer content type for file {:?}", file_name);
-			ContentType::Any
-		},
-	}
-}
-
 // FIXME: replace some of these once Rocket PR is merged
 pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 	ContentType::from_str(mime).unwrap_or(match mime {
@@ -195,6 +168,8 @@ pub fn get_page(file: &str, page: i32) -> GetPageResult {
 }
 
 pub fn process_entry(entry: &DirEntry) -> ProcessResult {
+	log::debug!("Processing entry: {:?}", entry);
+
 	let mime = infer_mime_from_path(entry.path());
 
 	// TODO: improve this? kinda verbose

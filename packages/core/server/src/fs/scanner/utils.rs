@@ -111,7 +111,7 @@ pub async fn insert_media(
 		.exec()
 		.await?;
 
-	log::info!("Created new media: {:?}", media);
+	log::debug!("Created new media: {:?}", media);
 
 	// self.on_progress(ClientEvent::CreatedMedia(media.clone()));
 
@@ -135,9 +135,17 @@ pub async fn insert_series(
 	let name = match path.file_name() {
 		Some(name) => match name.to_str() {
 			Some(name) => name.to_string(),
-			_ => return Err(ScanError::Unknown("Failed to get name".to_string())),
+			_ => {
+				return Err(ScanError::Unknown(
+					"Failed to get name for series".to_string(),
+				))
+			},
 		},
-		_ => return Err(ScanError::Unknown("Failed to get name".to_string())),
+		_ => {
+			return Err(ScanError::Unknown(
+				"Failed to get name for series".to_string(),
+			))
+		},
 	};
 
 	let series = ctx
@@ -151,7 +159,7 @@ pub async fn insert_series(
 		.exec()
 		.await?;
 
-	// self.on_progress(ClientEvent::CreatedSeries(series.clone()));
+	log::debug!("Created new series: {:?}", series);
 
 	Ok(series)
 }

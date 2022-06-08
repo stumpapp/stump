@@ -20,9 +20,10 @@ pub struct Env {
 impl Default for Env {
 	fn default() -> Self {
 		Self {
-			rocket_profile: Some(String::from("release")),
+			rocket_profile: Some(String::from("debug")),
 			rocket_port: Some(10801),
-			stump_log_verbosity: Some(0),
+			// TODO: change default back to 0
+			stump_log_verbosity: Some(1),
 			stump_client_dir: Some(String::from("client")),
 			stump_config_dir: None,
 			stump_allowed_origins: None,

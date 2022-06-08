@@ -4,10 +4,12 @@ use prisma_client_rust::chrono;
 
 use super::get_config_dir;
 
+// TODO: change default back to 0
+// FIXME: use toml
 pub fn get_log_verbosity() -> u64 {
 	match std::env::var("STUMP_LOG_VERBOSITY") {
-		Ok(s) => s.parse::<u64>().unwrap_or(0),
-		Err(_) => 0,
+		Ok(s) => s.parse::<u64>().unwrap_or(3),
+		Err(_) => 3,
 	}
 }
 

@@ -207,14 +207,21 @@ model Collection {
 
 model ReadProgress {
   id   String @id @default(uuid())
+  // The page number the user is currently reading. ex: "69". This will be -1
+  // for epubs (maybe)
   page Int
+
+  // The chapter the user is currently reading. This is used *only* for epub files.
+  chapter       Int?
+  // The paragraph node in the chapter the user is currently reading.
+  // This is used *only* for epub files.
+  paragraphNode String?
 
   mediaId String
   media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
 
   // literally cant stand this name lol read_progresses
   @@unique([userId, mediaId])

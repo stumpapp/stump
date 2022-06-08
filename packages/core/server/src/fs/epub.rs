@@ -18,6 +18,11 @@ use walkdir::DirEntry;
 
 use super::{checksum, media_file::get_content_type_from_mime};
 
+/*
+epubcfi usually starts with /6, referring to spine element of package file
+file has three groups of elements: metadata, manifest and spine.
+*/
+
 pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 	let mut bytes_to_read = size;
 
@@ -87,6 +92,38 @@ pub fn get_epub_cover(file: &str) -> GetPageResult {
 
 	// FIXME: mime type
 	Ok((media_file::get_content_type_from_mime("image/png"), cover))
+}
+
+pub fn get_epub_chapter(
+	path: &str,
+	chapter: usize,
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
+	let mut epub_file = load_epub(path)?;
+
+	epub_file.set_current_page(chapter).map_err(|e| {
+		log::error!("Failed to get chapter from epub file: {}", e);
+		ProcessFileError::EpubReadError(e.to_string())
+	})?;
+
+	let content = epub_file.get_current_with_epub_uris().map_err(|e| {
+		log::error!("Failed to get chapter from epub file: {}", e);
+		ProcessFileError::EpubReadError(e.to_string())
+	})?;
+
+	let content_type = match epub_file.get_current_mime() {
+		Ok(mime) => get_content_type_from_mime(&mime),
+		Err(e) => {
+			log::warn!(
+				"Failed to get explicit definition of resource mime for {}: {}",
+				path,
+				e
+			);
+
+			media_file::guess_content_type("REMOVEME.xhml")
+		},
+	};
+
+	Ok((content_type, content))
 }
 
 pub fn get_epub_resource(
@@ -264,5 +301,32 @@ mod tests {
 		let result = super::normalize_resource_path(invalid, "OEBPS");
 
 		assert_eq!(result, expected);
+	}
+
+	#[tokio::test]
+	async fn can_get_chapter() -> anyhow::Result<()> {
+		let ctx = Context::mock().await;
+
+		let media = ctx
+			.db
+			.media()
+			.find_first(vec![media::extension::equals("epub".to_string())])
+			.exec()
+			.await?;
+
+		if media.is_none() {
+			// No epub file found, this is not a failure. Just skip the test.
+			return Ok(());
+		}
+
+		let media = media.unwrap();
+
+		let result = super::get_epub_chapter(&media.path, 4)?;
+
+		println!("{:?}", result);
+
+		assert!(result.1.len() > 0);
+
+		Ok(())
 	}
 }

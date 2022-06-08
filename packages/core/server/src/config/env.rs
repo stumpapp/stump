@@ -104,8 +104,6 @@ impl Env {
 		// I reassign the env here to make sure it picks up changes when a user manually sets a value
 		let env = Self::from_env(Some(env))?;
 
-		println!("{:?}", env);
-
 		// only 'debug' and 'release' are valid
 		if let Some(rocket_profile) = env.rocket_profile {
 			if rocket_profile != "debug" {

@@ -1,15 +1,18 @@
 import React from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import EpubReader from '~components/Media/EpubReader';
+import LazyEpubReader from '~components/Media/LazyEpubReader';
 import { useEpub } from '~hooks/useEpub';
 
 export default function ReadEpub() {
-	const navigate = useNavigate();
-
 	const { id, loc } = useParams();
+
+	const [search] = useSearchParams();
 
 	if (!id) {
 		throw new Error('Media id is required');
+	} else if (search.get('stream') && search.get('stream') !== 'true') {
+		return <LazyEpubReader id={id} />;
 	}
 
 	const { isFetchingBook, epub, ...rest } = useEpub(id, { loc });
@@ -30,5 +33,5 @@ export default function ReadEpub() {
 	// 	return <Navigate to={`/books/${id}/pages/1`} />;
 	// }
 
-	return <EpubReader epub={epub} {...rest} />;
+	return <EpubReader isFetchingBook={isFetchingBook} epub={epub} {...rest} />;
 }

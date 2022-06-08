@@ -46,7 +46,39 @@ pub async fn get_epub(id: String, ctx: &Context, auth: Auth) -> ApiResult<Json<E
 /// resource. (e.g. `/EPUB/chapter1.xhtml`, where `EPUB` is the root and `chapter1.xhtml` is
 /// the resource path)
 #[openapi(tag = "Epub Media")]
-#[get("/epub/<id>/<root>/<resource..>")]
+#[get("/epub/<id>/chapter/<chapter>", rank = 3)]
+pub async fn get_epub_chatper(
+	id: String,
+	chapter: usize,
+	ctx: &Context,
+	// auth: Auth,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let book = ctx
+		.db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.exec()
+		.await?;
+
+	if book.is_none() {
+		return Err(ApiError::NotFound(format!(
+			"Media with id {} not found",
+			id
+		)));
+	}
+
+	let book = book.unwrap();
+
+	Ok(epub::get_epub_chapter(book.path.as_str(), chapter)?)
+}
+
+/// Get a resource from an epub file. META-INF is a reserved `root` query parameter, which will
+/// grab a resource by resource ID (e.g. `META-INF/container.xml`, where `container.xml` is the
+/// resource ID). Otherwise, the `resource` query parameter represents the path to the requested
+/// resource. (e.g. `/EPUB/chapter1.xhtml`, where `EPUB` is the root and `chapter1.xhtml` is
+/// the resource path)
+#[openapi(tag = "Epub Media")]
+#[get("/epub/<id>/<root>/<resource..>", rank = 4)]
 pub async fn get_epub_meta(
 	id: String,
 	root: String,

@@ -38,7 +38,7 @@ pub fn static_dir() -> String {
 	std::env::var("STUMP_CLIENT_DIR").unwrap_or("client".to_string())
 }
 
-#[get("/<_..>", rank = 2)]
+#[get("/<_..>", rank = 15)]
 async fn index_fallback() -> Option<NamedFile> {
 	NamedFile::open(Path::new(&static_dir()).join("index.html"))
 		.await
@@ -52,13 +52,13 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
 
 #[launch]
 async fn rocket() -> _ {
+	env::Env::load().unwrap_or_else(|e| {
+		log::error!("Failed to load environment variables: {:?}", e.to_string())
+	});
+
 	// I am not panic-ing here because I don't believe this should be a fatal error
 	logging::init_fern().unwrap_or_else(|e| {
 		log::error!("Failed to initialize logging: {:?}", e.to_string())
-	});
-
-	env::Env::load().unwrap_or_else(|e| {
-		log::error!("Failed to load environment variables: {:?}", e.to_string())
 	});
 
 	// Channel to handle internal events

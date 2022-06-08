@@ -1,6 +1,6 @@
 use std::fs::File;
 
-use prisma_client_rust::chrono::{self, DateTime, Utc};
+use prisma_client_rust::chrono::{DateTime, Utc};
 use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 

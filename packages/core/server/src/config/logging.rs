@@ -40,9 +40,13 @@ pub fn init_fern() -> Result<(), fern::InitError> {
 			.level_for("sql_query_connector", log::LevelFilter::Off)
 			.level_for("query_core", log::LevelFilter::Off)
 			.level_for("prisma-client-rust", log::LevelFilter::Off)
-			.level_for("prisma", log::LevelFilter::Off),
-		// verbosity 2 has a log level of debug, doesn't exclude those particularly 'loud' crates
-		2 => base_config.level(log::LevelFilter::Debug),
+			.level_for("prisma", log::LevelFilter::Off)
+			.level_for("hyper", log::LevelFilter::Off),
+		// verbosity 2 has a log level of debug, doesn't exclude *most* of those particularly 'loud' crates
+		2 => base_config
+			.level(log::LevelFilter::Debug)
+			.level_for("hyper", log::LevelFilter::Off),
+
 		// verbosity 3 has everything
 		_3_or_more => base_config.level(log::LevelFilter::Trace),
 	};

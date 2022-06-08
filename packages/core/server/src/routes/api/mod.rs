@@ -56,6 +56,7 @@ pub fn api() -> Vec<Route> {
 		media::get_duplicate_media,
 		// epub api
 		epub::get_epub,
+		epub::get_epub_chatper,
 		epub::get_epub_meta,
 		// tag api
 		tag::get_tags,

@@ -21,6 +21,12 @@ export interface UseEpubReturn {
 	correctHtmlUrls: (html: string) => string;
 }
 
+// TODO: I need to decide how to navigate epub streaming. I can go the cheap route and
+// use chapters, but even that has layers of complexity:
+// - server-side chapters will handle to resource link fixes for me, but will make anchor tag navigation difficult
+// - client-side might be easier, but I'd rather not have heavier client-side computations for *large* epub files
+// I can use epubcfi to navigate, but that makes me want to throw up lol i mean just look at this syntax:
+// epubcfi(/6/4[chap01ref]!/4[body01]/10[para05]/3:10) -> wtf is that lmao
 export function useEpub(id: string, options?: EpubOptions) {
 	const [chapter, setChapter] = useState(2);
 

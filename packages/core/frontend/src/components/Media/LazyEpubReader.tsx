@@ -1,10 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Book, Rendition } from 'epubjs';
+import { baseURL } from '~api/index';
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 
-export default function LazyEpubReader() {
+/**
+
+looks like epubcfi generates the first two elements of the cfi like /6/{(index+1) * 2} (indexing non-zero based):
+	- index 1 /6/2, index=2 /6/4, index=3 /6/8 etc.
+
+can't figure out rest yet -> https://www.heliconbooks.com/?id=blog&postid=EPUB3Links
+
+*/
+
+interface LazyEpubReaderProps {
+	id: string;
+}
+
+export default function LazyEpubReader({ id }: LazyEpubReaderProps) {
 	const ref = useRef<any>(null);
 
 	const [book, setBook] = useState<Book | null>(null);
@@ -18,11 +32,10 @@ export default function LazyEpubReader() {
 
 		if (!book) {
 			setBook(
-				new Book('http://localhost:10801/api/media/35a5302d-ad48-4df9-9df7-9c20cc77e6ee/file', {
+				new Book(`${baseURL}/media/${id}/file`, {
 					openAs: 'epub',
 				}),
 			);
-			// setBook(new Book('https://react-reader.metabits.no/files/alice.epub', {}));
 		}
 	}, [ref]);
 
@@ -50,19 +63,21 @@ export default function LazyEpubReader() {
 		});
 	}, [book]);
 
-	// useEffect(() => {
-	// 	let interval: NodeJS.Timer;
+	useEffect(() => {
+		let interval: NodeJS.Timer;
 
-	// 	if (rendition) {
-	// 		interval = setInterval(() => {
-	// 			rendition.next();
-	// 		}, 1000);
-	// 	}
+		if (rendition) {
+			interval = setInterval(() => {
+				// console.log(rendition?.currentLocation());
 
-	// 	return () => {
-	// 		clearInterval(interval);
-	// 	};
-	// }, [rendition]);
+				rendition.next();
+			}, 2000);
+		}
+
+		return () => {
+			clearInterval(interval);
+		};
+	}, [rendition]);
 
 	// console.log({ book, rendition });
 

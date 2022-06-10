@@ -18,5 +18,7 @@ export function useUser() {
 		},
 	});
 
+	// TODO: handle on 401?
+
 	return user;
 }

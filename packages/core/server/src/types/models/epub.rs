@@ -26,6 +26,21 @@ impl Into<EpubContent> for NavPoint {
 	}
 }
 
+/*
+TODO: convert spine into this structure to match epub.js
+{
+	"id": null,
+	"idref": "dedication",
+	"linear": "yes",
+	"properties": [],
+	"index": 3,
+	"cfiBase": "/6/8",
+	"href": "dedication.xhtml",
+	"url": "/OEBPS/dedication.xhtml",
+	"canonical": "/OEBPS/dedication.xhtml"
+}
+*/
+
 #[derive(Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Epub {

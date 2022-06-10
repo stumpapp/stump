@@ -3,7 +3,8 @@ import { useQuery } from 'react-query';
 import { getEpubBaseUrl, getEpubById } from '~api/query/epub';
 
 export interface EpubOptions {
-	loc?: string;
+	// loc is the epubcfi, comes from the query param ?loc=epubcfi(..)
+	loc: string | null;
 }
 
 export interface EpubActions {

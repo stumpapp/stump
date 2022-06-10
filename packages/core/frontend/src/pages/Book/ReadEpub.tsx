@@ -1,18 +1,21 @@
 import React from 'react';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { useEpub } from '~hooks/useEpub';
 import EpubReader from '~components/Media/EpubReader';
 import LazyEpubReader from '~components/Media/LazyEpubReader';
-import { useEpub } from '~hooks/useEpub';
 
 export default function ReadEpub() {
-	const { id, loc } = useParams();
+	const { id } = useParams();
 
 	const [search] = useSearchParams();
+
+	const loc = search.get('loc');
 
 	if (!id) {
 		throw new Error('Media id is required');
 	} else if (search.get('stream') && search.get('stream') !== 'true') {
-		return <LazyEpubReader id={id} />;
+		// TODO: remove the loc from search..
+		return <LazyEpubReader id={id} loc={loc} />;
 	}
 
 	const { isFetchingBook, epub, ...rest } = useEpub(id, { loc });

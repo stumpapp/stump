@@ -17,7 +17,7 @@ export default function MainLayout() {
 
 	const setLibraries = useStore((state) => state.setLibraries);
 
-	const user = useUser();
+	const _user = useUser();
 
 	const { isLoading, error } = useQuery('getLibraries', getLibraries, {
 		onSuccess(res) {
@@ -34,8 +34,11 @@ export default function MainLayout() {
 	});
 
 	const hideSidebar = useMemo(() => {
-		// hide sidebar when on /books/:id/pages/:page
-		return location.pathname.match(/\/books\/.+\/pages\/.+/);
+		// hide sidebar when on /books/:id/pages/:page or /epub/
+		// TODO: replace with single regex, I am lazy rn
+		return (
+			location.pathname.match(/\/books\/.+\/pages\/.+/) || location.pathname.match(/\/epub\/.+/)
+		);
 	}, [location]);
 
 	if (isLoading) {

@@ -29,7 +29,7 @@ export default function ReadBook() {
 	}
 
 	if (media.extension.match(/epub/)) {
-		return <Navigate to={`/epub/${id}`} />;
+		return <Navigate to={`/epub/${id}?stream=false`} />;
 	} else if (!page) {
 		return <Navigate to={`/books/${id}/pages/1`} />;
 	}

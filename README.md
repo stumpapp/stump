@@ -41,6 +41,10 @@ For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're 
 
 ## Getting Started
 
+> Stump is very young software under active development. It has not reached a beta stage yet, so do not expect a fully featured experience if you spin up a development environment.
+
+Stump isn't ready for normal, non-development usage yet. Once a release has been made, this will be updated. For now, follow the [Development Setup](#development-setup) section to build from source and run locally.
+
 For information about getting started, how Stump works and manages your library data, and much more detailed information, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 
 ## Project Structure
@@ -83,6 +87,8 @@ There is now a setup script that handles most of the initial configuration, howe
 
 ### Setup Script
 
+> If you feel that your system is already configured for development, you may skip this step and run `cargo install cargo-watch` and `pnpm run setup`. I highly recommend using the script, however.
+
 If you are on a Windows machine, you'll need to run the following:
 
 ```
@@ -98,12 +104,6 @@ Otherwise, you can run the following:
 These scripts will run system checks for `cargo` and `pnpm`, and will install a few additional dependencies, depending on your system. It will then install all the direct, Stump development dependencies, build the frontend bundle (required for server to start), generate the prisma client and sqlite database.
 
 If you face any issues running these, or are using a system that is not supported by the setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
-
-### Running the Seed Script
-
-This step isn't required anymore, and will shortly be removed! The built-in client has progressed to a point where it makes more sense to setup your server all through the client. Booting up your server, following the next section's steps, will now prompt you to create the managing account and create your first library.
-
-Leaving this section here for a few weeks to make sure people don't get confused.
 
 ## Running Stump
 

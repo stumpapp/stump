@@ -59,6 +59,7 @@ importers:
       react-hotkeys-hook: ^3.4.6
       react-query: ^3.38.0
       react-router-dom: ^6.3.0
+      react-swipeable: ^7.0.0
       react-table: ^7.8.0
       react-window: ^1.8.7
       tailwind-scrollbar-hide: ^1.1.7
@@ -92,6 +93,7 @@ importers:
       react-hotkeys-hook: 3.4.6_react-dom@18.1.0+react@18.1.0
       react-query: 3.39.0_react-dom@18.1.0+react@18.1.0
       react-router-dom: 6.3.0_react-dom@18.1.0+react@18.1.0
+      react-swipeable: 7.0.0_react@18.1.0
       react-table: 7.8.0_react@18.1.0
       react-window: 1.8.7_react-dom@18.1.0+react@18.1.0
       vite-plugin-package-version: 1.0.2_vite@2.9.9
@@ -5002,6 +5004,14 @@ packages:
       invariant: 2.2.4
       react: 18.1.0
       tslib: 2.3.1
+    dev: false
+
+  /react-swipeable/7.0.0_react@18.1.0:
+    resolution: {integrity: sha512-NI7KGfQ6gwNFN0Hor3vytYW3iRfMMaivGEuxcADOOfBCx/kqwXE8IfHFxEcxSUkxCYf38COLKYd9EMYZghqaUA==}
+    peerDependencies:
+      react: ^16.8.3 || ^17 || ^18
+    dependencies:
+      react: 18.1.0
     dev: false
 
   /react-table/7.8.0_react@18.1.0:

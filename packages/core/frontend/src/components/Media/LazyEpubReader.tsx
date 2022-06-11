@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-
 import { Book, Rendition } from 'epubjs';
 import { baseURL } from '~api/index';
-import { Button, HStack, useBoolean, useColorMode, useColorModeValue } from '@chakra-ui/react';
+import { useColorMode } from '@chakra-ui/react';
 import toast from 'react-hot-toast';
-import { CaretLeft, CaretRight } from 'phosphor-react';
+import EpubControls from './Epub/EpubControls';
+import { useQuery } from 'react-query';
+import { getMediaById } from '~api/query/media';
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 
@@ -14,13 +15,14 @@ looks like epubcfi generates the first two elements of the cfi like /6/{(index+1
 	- index 1 /6/2, index=2 /6/4, index=3 /6/8 etc.
 
 can't figure out rest yet -> https://www.heliconbooks.com/?id=blog&postid=EPUB3Links
-
 */
 
 interface LazyEpubReaderProps {
 	id: string;
 	loc: string | null;
 }
+
+// TODO: https://github.com/FormidableLabs/react-swipeable#how-to-share-ref-from-useswipeable
 
 export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	const { colorMode } = useColorMode();
@@ -30,24 +32,15 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	const [book, setBook] = useState<Book | null>(null);
 	const [rendition, setRendition] = useState<Rendition | null>(null);
 
-	const [location, setLocation] = useState({ epubcfi: loc });
+	const [location, setLocation] = useState<any>({ epubcfi: loc });
 
-	const [visibleNav, { on: showNav, off: hideNav }] = useBoolean(true);
-
-	function handleMouseEnterNav() {
-		if (!visibleNav) {
-			showNav();
-		}
-	}
-
-	function handleMouseLeaveNav() {
-		if (visibleNav) {
-			hideNav();
-		}
-	}
+	const { data: epub, isLoading } = useQuery(['getMediaById', id], {
+		queryFn: async () => getMediaById(id).then((res) => res.data),
+	});
 
 	// TODO: type me
 	function handleLocationChange(newLocation: any) {
+		console.log(newLocation);
 		setLocation({
 			// @ts-ignore: types are wrong >:(
 			epubcfi: newLocation?.start?.cfi ?? null,
@@ -55,8 +48,23 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 			page: newLocation?.start?.displayed?.page,
 			// @ts-ignore: types are wrong >:(
 			total: newLocation?.start?.displayed?.total,
+			href: newLocation?.start?.href,
 		});
 	}
+
+	const chapter = useMemo(() => {
+		if (!book || !location.href) {
+			return null;
+		}
+
+		const bookNavigation = book.navigation.toc.filter((item) => item.href === location.href);
+
+		console.log(book);
+
+		console.log(bookNavigation);
+
+		return bookNavigation[0]?.label.trim();
+	}, [book, location]);
 
 	useEffect(() => {
 		if (!ref.current) return;
@@ -75,9 +83,6 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 
 		book.ready.then(() => {
 			if (book.spine) {
-				// console.log(book.spine);
-				// console.log({ book });
-
 				const defaultLoc = book.rendition?.location?.start?.cfi;
 
 				const rendition_ = book.renderTo(ref.current, {
@@ -128,7 +133,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	// epubcfi(/6/10!/4/2/2[Chapter1]/48/1:0)
 
 	// I hate this...
-	const navigation = useMemo(
+	const controls = useMemo(
 		() => ({
 			async next() {
 				if (rendition) {
@@ -147,41 +152,24 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 					});
 				}
 			},
+
+			changeFontSize(size: string) {
+				if (rendition) {
+					rendition.themes.fontSize(size);
+				}
+			},
 		}),
 		[rendition],
 	);
 
-	const { prev, next } = navigation;
+	if (isLoading) {
+		return <div>Loading TODO.....</div>;
+	}
 
-	// FIXME: buttons are kinda bad. Especially on mobile.
-	// TODO page swipe on mobile
 	return (
-		<HStack
-			className="relative"
-			h="full"
-			w="full"
-			p={4}
-			bg={useColorModeValue('white', 'gray.750')}
-		>
-			<div
-				className="fixed left-2 z-[100] h-full flex items-center w-12"
-				onMouseEnter={handleMouseEnterNav}
-				onMouseLeave={handleMouseLeaveNav}
-			>
-				<Button hidden={!visibleNav} variant="ghost" p={0} onClick={prev}>
-					<CaretLeft />
-				</Button>
-			</div>
+		// TODO: fix type here
+		<EpubControls controls={controls} location={{ ...location, chapter }} media={epub!}>
 			<div className="h-full w-full" ref={ref} />
-			<div
-				className="fixed right-2 z-[100] h-full flex items-center w-12"
-				onMouseEnter={handleMouseEnterNav}
-				onMouseLeave={handleMouseLeaveNav}
-			>
-				<Button hidden={!visibleNav} variant="ghost" p={0} onClick={next}>
-					<CaretRight />
-				</Button>
-			</div>
-		</HStack>
+		</EpubControls>
 	);
 }

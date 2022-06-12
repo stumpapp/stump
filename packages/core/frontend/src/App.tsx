@@ -9,7 +9,7 @@ import Notifications from '~components/Notifications';
 import JobOverlay from '~components/JobOverlay';
 import FourOhFour from '~pages/FourOhFour';
 import StoreProvider from '~store/StoreProvider';
-import theme from '~util/theme';
+import theme from '~util/chakraTheme';
 
 import { ChakraProvider } from '@chakra-ui/react';
 import { Helmet, HelmetTags } from 'react-helmet';

@@ -4,8 +4,10 @@ import { baseURL } from '~api/index';
 import { useColorMode } from '@chakra-ui/react';
 import toast from 'react-hot-toast';
 import EpubControls from './Epub/EpubControls';
+import { useSwipeable } from 'react-swipeable';
 import { useQuery } from 'react-query';
 import { getMediaById } from '~api/query/media';
+import { epubDarkTheme } from '~util/epubTheme';
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 
@@ -27,44 +29,45 @@ interface LazyEpubReaderProps {
 export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	const { colorMode } = useColorMode();
 
-	const ref = useRef<any>(null);
+	const ref = useRef<HTMLDivElement>(null);
 
 	const [book, setBook] = useState<Book | null>(null);
 	const [rendition, setRendition] = useState<Rendition | null>(null);
 
 	const [location, setLocation] = useState<any>({ epubcfi: loc });
+	const [chapter, setChapter] = useState<string>('');
 
 	const { data: epub, isLoading } = useQuery(['getMediaById', id], {
 		queryFn: async () => getMediaById(id).then((res) => res.data),
 	});
 
 	// TODO: type me
-	function handleLocationChange(newLocation: any) {
-		console.log(newLocation);
-		setLocation({
-			// @ts-ignore: types are wrong >:(
-			epubcfi: newLocation?.start?.cfi ?? null,
-			// @ts-ignore: types are wrong >:(
-			page: newLocation?.start?.displayed?.page,
-			// @ts-ignore: types are wrong >:(
-			total: newLocation?.start?.displayed?.total,
-			href: newLocation?.start?.href,
-		});
-	}
 
-	const chapter = useMemo(() => {
-		if (!book || !location.href) {
-			return null;
+	function handleLocationChange(changeState: any) {
+		const start = changeState?.start;
+
+		console.log({ changeState, start });
+		if (!start) {
+			return;
 		}
 
-		const bookNavigation = book.navigation.toc.filter((item) => item.href === location.href);
+		const newChapter = controls.getChapter(start.href);
 
-		console.log(book);
+		if (newChapter) {
+			setChapter(newChapter);
+		}
 
-		console.log(bookNavigation);
-
-		return bookNavigation[0]?.label.trim();
-	}, [book, location]);
+		setLocation({
+			// @ts-ignore: types are wrong >:(
+			epubcfi: start.cfi ?? null,
+			// @ts-ignore: types are wrong >:(
+			page: start.displayed?.page,
+			// @ts-ignore: types are wrong >:(
+			total: start.displayed?.total,
+			href: start.href,
+			index: start.index,
+		});
+	}
 
 	useEffect(() => {
 		if (!ref.current) return;
@@ -80,21 +83,19 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 
 	useEffect(() => {
 		if (!book) return;
+		if (!ref.current) return;
 
 		book.ready.then(() => {
 			if (book.spine) {
 				const defaultLoc = book.rendition?.location?.start?.cfi;
 
-				const rendition_ = book.renderTo(ref.current, {
+				const rendition_ = book.renderTo(ref.current!, {
 					width: '100%',
 					height: '100%',
 				});
 
 				// TODO more styles, probably separate this out
-				rendition_.themes.register('dark', {
-					body: { background: '#212836' },
-					p: { color: '#E8EDF4' },
-				});
+				rendition_.themes.register('dark', epubDarkTheme);
 
 				rendition_.on('relocated', handleLocationChange);
 
@@ -153,22 +154,50 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 				}
 			},
 
+			// Note: some books have entries in the spine for each href, some don't. This means for some
+			// books the chapter will be null after the first page of that chapter. This function is
+			// used to get the current chapter, which will only work, in some cases, on the first page
+			// of the chapter. The chapter state will only get updated when this function returns a non-null
+			// value.
+			getChapter(href: string): string | null {
+				if (book) {
+					const filteredToc = book.navigation.toc.filter((toc) => toc.href === href);
+
+					return filteredToc[0]?.label.trim() ?? null;
+				}
+
+				return null;
+			},
+
 			changeFontSize(size: string) {
 				if (rendition) {
 					rendition.themes.fontSize(size);
 				}
 			},
 		}),
-		[rendition],
+		[rendition, book],
 	);
+
+	const swipeHandlers = useSwipeable({
+		onSwipedRight: controls.prev,
+		onSwipedLeft: controls.next,
+		// onTap: ({ event }) => {
+		// 	console.log(event);
+		// },
+		preventScrollOnSwipe: true,
+	});
 
 	if (isLoading) {
 		return <div>Loading TODO.....</div>;
 	}
 
 	return (
-		// TODO: fix type here
-		<EpubControls controls={controls} location={{ ...location, chapter }} media={epub!}>
+		<EpubControls
+			controls={controls}
+			swipeHandlers={swipeHandlers}
+			location={{ ...location, chapter }}
+			media={epub!}
+		>
 			<div className="h-full w-full" ref={ref} />
 		</EpubControls>
 	);

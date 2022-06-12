@@ -1,3 +1,4 @@
+import React from 'react';
 import {
 	Box,
 	ButtonGroup,
@@ -7,6 +8,7 @@ import {
 	Text,
 	useBoolean,
 	useColorModeValue,
+	VStack,
 } from '@chakra-ui/react';
 import {
 	ArrowLeft,
@@ -16,8 +18,8 @@ import {
 	MagnifyingGlass,
 	TextAa,
 } from 'phosphor-react';
-import React from 'react';
 import Button, { IconButton } from '~components/ui/Button';
+import { SwipeableHandlers } from 'react-swipeable';
 
 interface IEpubControls {
 	next(): Promise<void>;
@@ -27,6 +29,7 @@ interface IEpubControls {
 
 interface EpubControlsProps {
 	controls: IEpubControls;
+	swipeHandlers: SwipeableHandlers;
 	location: any;
 	children: React.ReactNode;
 	media: Media;
@@ -58,14 +61,19 @@ function EpubHeaderControls({ changeFontSize, location, title }: HeaderControlsP
 
 	return (
 		<Box
-			py={2}
 			px={4}
 			h={10}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			className="z-[1000]"
 		>
-			<HStack visibility={visible ? 'visible' : 'hidden'}>
+			<HStack
+				pt={2}
+				pb={[0, 2]}
+				className="transition-opacity duration-150"
+				opacity={visible ? 1.0 : 0}
+				align="flex-start"
+			>
 				<ButtonGroup isAttached>
 					<IconButton variant="ghost">
 						<ArrowLeft className="text-lg" weight="regular" />
@@ -77,7 +85,24 @@ function EpubHeaderControls({ changeFontSize, location, title }: HeaderControlsP
 
 				<Spacer />
 
-				<Text>{title}</Text>
+				<VStack textAlign="center" spacing={0}>
+					<Text
+						color={useColorModeValue('gray.700', 'gray.200')}
+						fontSize={['xs', 'sm']}
+						noOfLines={1}
+					>
+						{title}
+					</Text>
+					{location.chapter && (
+						<Text
+							fontSize={['xs', 'sm']}
+							noOfLines={1}
+							color={useColorModeValue('gray.700', 'gray.400')}
+						>
+							{location.chapter}
+						</Text>
+					)}
+				</VStack>
 
 				<Spacer />
 
@@ -94,7 +119,13 @@ function EpubHeaderControls({ changeFontSize, location, title }: HeaderControlsP
 	);
 }
 
-export default function EpubControls({ children, controls, location, media }: EpubControlsProps) {
+export default function EpubControls({
+	children,
+	controls,
+	swipeHandlers,
+	location,
+	media,
+}: EpubControlsProps) {
 	const [visibleNav, { on: showNav, off: hideNav }] = useBoolean(true);
 
 	const { prev, next, changeFontSize } = controls;
@@ -111,32 +142,54 @@ export default function EpubControls({ children, controls, location, media }: Ep
 		}
 	}
 
+	function handleTapEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+		// if tap is really close to right edge of screen, next page
+		if (e.clientX > window.innerWidth - 75) {
+			next();
+		} else if (e.clientX < 75) {
+			// if tap is really close to left edge of screen, previous page
+			prev();
+		}
+	}
+
 	return (
 		<Stack className="relative" h="full" w="full" bg={useColorModeValue('white', 'gray.750')}>
-			{/* TODO: pull title from metadata instead? Not sure. */}
 			<EpubHeaderControls changeFontSize={changeFontSize} location={location} title={media.name} />
 
-			<HStack
-				className="relative h-full w-full"
-				p={4}
-				// bg={useColorModeValue('white', 'gray.750')}
-			>
+			<HStack className="relative h-full w-full" p={4} pt={0}>
 				<div
-					className="fixed left-2 z-[100] h-full flex items-center w-12"
+					className="hidden fixed left-2 z-[100] h-full md:flex items-center w-12"
 					onMouseEnter={handleMouseEnterNav}
 					onMouseLeave={handleMouseLeaveNav}
 				>
-					<Button hidden={!visibleNav} variant="ghost" p={0} onClick={prev}>
+					<Button
+						display={['none', 'flex']}
+						hidden={!visibleNav}
+						variant="ghost"
+						p={0}
+						onClick={prev}
+					>
 						<CaretLeft />
 					</Button>
 				</div>
+				<div
+					className="fixed inset-0 z-[99] md:hidden"
+					{...swipeHandlers}
+					onClick={handleTapEvent}
+				/>
 				{children}
 				<div
-					className="fixed right-2 z-[100] h-full flex items-center w-12"
+					className="hidden fixed right-2 z-[100] h-full md:flex items-center w-12"
 					onMouseEnter={handleMouseEnterNav}
 					onMouseLeave={handleMouseLeaveNav}
 				>
-					<Button hidden={!visibleNav} variant="ghost" p={0} onClick={next}>
+					<Button
+						display={['none', 'flex']}
+						hidden={!visibleNav}
+						variant="ghost"
+						p={0}
+						onClick={next}
+					>
 						<CaretRight />
 					</Button>
 				</div>

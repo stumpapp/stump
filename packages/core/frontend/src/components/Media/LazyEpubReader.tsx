@@ -36,6 +36,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 
 	const [location, setLocation] = useState<any>({ epubcfi: loc });
 	const [chapter, setChapter] = useState<string>('');
+	const [fontSize, setFontSize] = useState<number>(13);
 
 	const { data: epub, isLoading } = useQuery(['getEpubById', id], {
 		queryFn: async () => getEpubById(id).then((res) => res.data),
@@ -104,6 +105,8 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 					rendition_.themes.select('dark');
 				}
 
+				rendition_.themes.fontSize('13px');
+
 				setRendition(rendition_);
 
 				// Note: this *does* work, returns epubcfi. I might consider this...
@@ -162,20 +165,42 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 					return;
 				}
 
-				// let id = href.split('#')?.[1];
+				let adjusted = href.split('#')[0];
 
-				let item = book.spine.get(href);
+				let match = book.spine.get(adjusted);
 
-				if (!item) {
-					return;
+				if (!match) {
+					// @ts-ignore: types are wrong >:(
+					// Note: epubjs it literally terrible and this should be classified as torture dealing
+					// with this terrible library. The fact that I have to do this really blows my mind.
+					let matches = book.spine.items
+						.filter((item: any) => {
+							const withPrefix = `/${adjusted}`;
+							return (
+								item.url === adjusted ||
+								item.canonical == adjusted ||
+								item.url === withPrefix ||
+								item.canonical === withPrefix
+							);
+						})
+						.map((item: any) => book.spine.get(item.index))
+						.filter(Boolean);
+
+					if (matches.length > 0) {
+						match = matches[0];
+					} else {
+						console.log(`Could not find ${href}`);
+						// console.log({ book });
+						return;
+					}
 				}
 
-				const epubcfi = item.cfiFromElement(ref.current);
+				const epubcfi = match.cfiFromElement(ref.current);
 
 				if (epubcfi) {
 					rendition.display(epubcfi);
 				} else {
-					toast.error('Error occurred trying to process the EPUB location.');
+					toast.error('Could not generate a valid epubcfi.');
 				}
 			},
 
@@ -194,9 +219,10 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 				return null;
 			},
 
-			changeFontSize(size: string) {
+			changeFontSize(size: number) {
 				if (rendition) {
-					rendition.themes.fontSize(size);
+					setFontSize(size);
+					rendition.themes.fontSize(`${size}px`);
 				}
 			},
 		}),
@@ -216,6 +242,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	return (
 		<EpubControls
 			controls={controls}
+			fontSize={fontSize}
 			swipeHandlers={swipeHandlers}
 			location={{ ...location, chapter }}
 			epub={epub!}

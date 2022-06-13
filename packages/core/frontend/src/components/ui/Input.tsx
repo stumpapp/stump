@@ -17,6 +17,9 @@ const Input = forwardRef<Props, 'input'>(({ fullWidth = true, ...props }, ref) =
 			_focus={{
 				boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 			}}
+			_focusVisible={{
+				border: 'rgba(196, 130, 89, 0.4);',
+			}}
 		/>
 	);
 });

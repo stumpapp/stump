@@ -12,15 +12,13 @@ export default function BookOverview() {
 		throw new Error('Book id is required for this route.');
 	}
 
-	const { isLoading, data: media } = useQuery('getMediaById', {
+	const {
+		isLoading,
+		data: media,
+		isFetching,
+	} = useQuery('getMediaById', {
 		queryFn: async () => getMediaById(id).then((res) => res.data),
 	});
-
-	if (isLoading) {
-		return <div>Loading...</div>;
-	} else if (!media) {
-		throw new Error('Media not found');
-	}
 
 	const fallback = useMemo(() => {
 		// if (media.extension === 'epub') {
@@ -28,7 +26,7 @@ export default function BookOverview() {
 		// }
 
 		return '/fallbacks/image-file.svg';
-	}, [media.extension]);
+	}, [media?.extension]);
 
 	function prefetchCurrentPage() {
 		if (!media) {
@@ -41,10 +39,16 @@ export default function BookOverview() {
 		img.src = getMediaPage(media.id, currentPage);
 	}
 
+	if (isLoading || isFetching) {
+		return <div>Loading...</div>;
+	} else if (!media) {
+		throw new Error('Media not found');
+	}
+
 	return (
 		<>
 			<Helmet>
-				<title>Stump | {media.name}</title>
+				<title>Stump | {media.name ?? ''}</title>
 			</Helmet>
 			<div className="p-4 flex">
 				<Card

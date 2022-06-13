@@ -11,21 +11,25 @@ import { useViewMode } from '~hooks/useViewMode';
 export default function SeriesOverview() {
 	const { id } = useParams();
 
+	const { viewAsGrid } = useViewMode();
+
 	if (!id) {
 		throw new Error('Library id is required');
 	}
 
-	const { isLoading, data: series } = useQuery('getSeries', {
+	const {
+		isLoading,
+		isFetching,
+		data: series,
+	} = useQuery('getSeries', {
 		queryFn: async () => getSeriesById(id).then((res) => res.data),
 	});
 
-	if (isLoading) {
+	if (isLoading || isFetching) {
 		return <div>Loading...</div>;
 	} else if (!series) {
 		throw new Error('Series not found');
 	}
-
-	const { viewAsGrid } = useViewMode();
 
 	return (
 		<>
@@ -33,7 +37,7 @@ export default function SeriesOverview() {
 				<title>Stump | {series.name}</title>
 			</Helmet>
 
-			{viewAsGrid ? <MediaGrid media={series.media} /> : <MediaList media={series.media} />}
+			{viewAsGrid ? <MediaGrid media={series.media!} /> : <MediaList media={series.media!} />}
 		</>
 	);
 }

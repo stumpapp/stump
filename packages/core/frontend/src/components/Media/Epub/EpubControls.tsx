@@ -11,21 +11,23 @@ import {
 	useDisclosure,
 	VStack,
 } from '@chakra-ui/react';
-import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass, TextAa } from 'phosphor-react';
+import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react';
 import Button, { IconButton } from '~components/ui/Button';
 import { SwipeableHandlers } from 'react-swipeable';
 import EpubTocDrawer from './EpubTocDrawer';
 import { useNavigate } from 'react-router-dom';
+import FontSelection from './FontSelection';
 
 interface IEpubControls {
 	next(): Promise<void>;
 	prev(): Promise<void>;
 	goTo(href: string): void;
-	changeFontSize(size: string): void;
+	changeFontSize(size: number): void;
 }
 
 interface EpubControlsProps {
 	controls: IEpubControls;
+	fontSize: number;
 	swipeHandlers: SwipeableHandlers;
 	location: any;
 	children: React.ReactNode;
@@ -34,9 +36,15 @@ interface EpubControlsProps {
 
 interface HeaderControlsProps
 	extends Pick<IEpubControls, 'changeFontSize' | 'goTo'>,
-		Pick<EpubControlsProps, 'location' | 'epub'> {}
+		Pick<EpubControlsProps, 'location' | 'epub' | 'fontSize'> {}
 
-function EpubHeaderControls({ changeFontSize, location, epub, goTo }: HeaderControlsProps) {
+function EpubHeaderControls({
+	changeFontSize,
+	fontSize,
+	location,
+	epub,
+	goTo,
+}: HeaderControlsProps) {
 	const navigate = useNavigate();
 
 	const [visible, { on, off }] = useBoolean(false);
@@ -111,10 +119,8 @@ function EpubHeaderControls({ changeFontSize, location, epub, goTo }: HeaderCont
 				<Spacer />
 
 				<ButtonGroup isAttached>
-					<IconButton variant="ghost">
-						<TextAa className="text-lg" weight="regular" />
-					</IconButton>
-					<IconButton variant="ghost">
+					<FontSelection changeFontSize={changeFontSize} fontSize={fontSize} />
+					<IconButton variant="ghost" disabled>
 						<MagnifyingGlass className="text-lg" weight="regular" />
 					</IconButton>
 				</ButtonGroup>
@@ -126,6 +132,7 @@ function EpubHeaderControls({ changeFontSize, location, epub, goTo }: HeaderCont
 export default function EpubControls({
 	children,
 	controls,
+	fontSize,
 	swipeHandlers,
 	location,
 	epub,
@@ -159,6 +166,7 @@ export default function EpubControls({
 	return (
 		<Stack className="relative" h="full" w="full" bg={useColorModeValue('white', 'gray.750')}>
 			<EpubHeaderControls
+				fontSize={fontSize}
 				changeFontSize={changeFontSize}
 				location={location}
 				epub={epub}

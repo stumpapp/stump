@@ -8,22 +8,19 @@ import {
 	Text,
 	useBoolean,
 	useColorModeValue,
+	useDisclosure,
 	VStack,
 } from '@chakra-ui/react';
-import {
-	ArrowLeft,
-	CaretLeft,
-	CaretRight,
-	ListBullets,
-	MagnifyingGlass,
-	TextAa,
-} from 'phosphor-react';
+import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass, TextAa } from 'phosphor-react';
 import Button, { IconButton } from '~components/ui/Button';
 import { SwipeableHandlers } from 'react-swipeable';
+import EpubTocDrawer from './EpubTocDrawer';
+import { useNavigate } from 'react-router-dom';
 
 interface IEpubControls {
 	next(): Promise<void>;
 	prev(): Promise<void>;
+	goTo(href: string): void;
 	changeFontSize(size: string): void;
 }
 
@@ -32,17 +29,19 @@ interface EpubControlsProps {
 	swipeHandlers: SwipeableHandlers;
 	location: any;
 	children: React.ReactNode;
-	media: Media;
+	epub: Epub;
 }
 
 interface HeaderControlsProps
-	extends Pick<IEpubControls, 'changeFontSize'>,
-		Pick<EpubControlsProps, 'location'> {
-	title: string;
-}
+	extends Pick<IEpubControls, 'changeFontSize' | 'goTo'>,
+		Pick<EpubControlsProps, 'location' | 'epub'> {}
 
-function EpubHeaderControls({ changeFontSize, location, title }: HeaderControlsProps) {
+function EpubHeaderControls({ changeFontSize, location, epub, goTo }: HeaderControlsProps) {
+	const navigate = useNavigate();
+
 	const [visible, { on, off }] = useBoolean(false);
+
+	const { isOpen, onOpen, onClose } = useDisclosure();
 
 	function handleMouseEnter() {
 		if (!visible) {
@@ -51,7 +50,7 @@ function EpubHeaderControls({ changeFontSize, location, title }: HeaderControlsP
 	}
 
 	function handleMouseLeave() {
-		if (visible) {
+		if (visible && !isOpen) {
 			setTimeout(() => {
 				// TODO: need to check if still in div before shutting off
 				off();
@@ -71,16 +70,21 @@ function EpubHeaderControls({ changeFontSize, location, title }: HeaderControlsP
 				pt={2}
 				pb={[0, 2]}
 				className="transition-opacity duration-150"
-				opacity={visible ? 1.0 : 0}
+				opacity={visible || isOpen ? 1.0 : 0}
 				align="flex-start"
 			>
 				<ButtonGroup isAttached>
-					<IconButton variant="ghost">
+					<IconButton variant="ghost" onClick={() => navigate(`/books/${epub.mediaEntity.id}`)}>
 						<ArrowLeft className="text-lg" weight="regular" />
 					</IconButton>
-					<IconButton variant="ghost">
-						<ListBullets className="text-lg" weight="regular" />
-					</IconButton>
+
+					<EpubTocDrawer
+						isOpen={isOpen}
+						onOpen={onOpen}
+						onClose={onClose}
+						toc={epub.toc}
+						onSelect={goTo}
+					/>
 				</ButtonGroup>
 
 				<Spacer />
@@ -91,7 +95,7 @@ function EpubHeaderControls({ changeFontSize, location, title }: HeaderControlsP
 						fontSize={['xs', 'sm']}
 						noOfLines={1}
 					>
-						{title}
+						{epub.mediaEntity.name}
 					</Text>
 					{location.chapter && (
 						<Text
@@ -124,7 +128,7 @@ export default function EpubControls({
 	controls,
 	swipeHandlers,
 	location,
-	media,
+	epub,
 }: EpubControlsProps) {
 	const [visibleNav, { on: showNav, off: hideNav }] = useBoolean(true);
 
@@ -154,7 +158,12 @@ export default function EpubControls({
 
 	return (
 		<Stack className="relative" h="full" w="full" bg={useColorModeValue('white', 'gray.750')}>
-			<EpubHeaderControls changeFontSize={changeFontSize} location={location} title={media.name} />
+			<EpubHeaderControls
+				changeFontSize={changeFontSize}
+				location={location}
+				epub={epub}
+				goTo={controls.goTo}
+			/>
 
 			<HStack className="relative h-full w-full" p={4} pt={0}>
 				<div

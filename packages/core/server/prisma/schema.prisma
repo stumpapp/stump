@@ -211,11 +211,13 @@ model ReadProgress {
   // for epubs (maybe)
   page Int
 
-  // The chapter the user is currently reading. This is used *only* for epub files.
-  chapter       Int?
-  // The paragraph node in the chapter the user is currently reading.
-  // This is used *only* for epub files.
-  paragraphNode String?
+  epubcfi String?
+
+  // // The chapter the user is currently reading. This is used *only* for epub files.
+  // chapter       Int?
+  // // The paragraph node in the chapter the user is currently reading.
+  // // This is used *only* for epub files.
+  // paragraphNode String?
 
   mediaId String
   media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)

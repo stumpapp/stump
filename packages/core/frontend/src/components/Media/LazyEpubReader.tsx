@@ -6,8 +6,8 @@ import toast from 'react-hot-toast';
 import EpubControls from './Epub/EpubControls';
 import { useSwipeable } from 'react-swipeable';
 import { useQuery } from 'react-query';
-import { getMediaById } from '~api/query/media';
 import { epubDarkTheme } from '~util/epubTheme';
+import { getEpubById } from '~api/query/epub';
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 
@@ -37,8 +37,8 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	const [location, setLocation] = useState<any>({ epubcfi: loc });
 	const [chapter, setChapter] = useState<string>('');
 
-	const { data: epub, isLoading } = useQuery(['getMediaById', id], {
-		queryFn: async () => getMediaById(id).then((res) => res.data),
+	const { data: epub, isLoading } = useQuery(['getEpubById', id], {
+		queryFn: async () => getEpubById(id).then((res) => res.data),
 	});
 
 	// TODO: type me
@@ -46,7 +46,6 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	function handleLocationChange(changeState: any) {
 		const start = changeState?.start;
 
-		console.log({ changeState, start });
 		if (!start) {
 			return;
 		}
@@ -56,6 +55,8 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		if (newChapter) {
 			setChapter(newChapter);
 		}
+
+		controls.goTo('OPS/Mart_9780553897876_epub_c21_r1.htm#c21');
 
 		setLocation({
 			// @ts-ignore: types are wrong >:(
@@ -154,6 +155,30 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 				}
 			},
 
+			// FIXME: make async? I just need to programmatically detect failures so
+			// I don't close the TOC drawer.
+			goTo(href: string) {
+				if (!book || !rendition || !ref.current) {
+					return;
+				}
+
+				// let id = href.split('#')?.[1];
+
+				let item = book.spine.get(href);
+
+				if (!item) {
+					return;
+				}
+
+				const epubcfi = item.cfiFromElement(ref.current);
+
+				if (epubcfi) {
+					rendition.display(epubcfi);
+				} else {
+					toast.error('Error occurred trying to process the EPUB location.');
+				}
+			},
+
 			// Note: some books have entries in the spine for each href, some don't. This means for some
 			// books the chapter will be null after the first page of that chapter. This function is
 			// used to get the current chapter, which will only work, in some cases, on the first page
@@ -175,15 +200,12 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 				}
 			},
 		}),
-		[rendition, book],
+		[rendition, book, ref],
 	);
 
 	const swipeHandlers = useSwipeable({
 		onSwipedRight: controls.prev,
 		onSwipedLeft: controls.next,
-		// onTap: ({ event }) => {
-		// 	console.log(event);
-		// },
 		preventScrollOnSwipe: true,
 	});
 
@@ -196,7 +218,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 			controls={controls}
 			swipeHandlers={swipeHandlers}
 			location={{ ...location, chapter }}
-			media={epub!}
+			epub={epub!}
 		>
 			<div className="h-full w-full" ref={ref} />
 		</EpubControls>

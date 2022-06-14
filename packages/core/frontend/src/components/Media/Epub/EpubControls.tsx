@@ -69,16 +69,19 @@ function EpubHeaderControls({
 	return (
 		<Box
 			px={4}
+			// py={[2, 0]}
 			h={10}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
-			className="z-[1000]"
+			position={['fixed', 'unset']}
+			className="z-[100]"
 		>
 			<HStack
 				pt={2}
-				pb={[0, 2]}
+				pb={[2, 2]}
 				className="transition-opacity duration-150"
 				opacity={visible || isOpen ? 1.0 : 0}
+				bg={[useColorModeValue('white', 'gray.750'), 'transparent']}
 				align="flex-start"
 			>
 				<ButtonGroup isAttached>

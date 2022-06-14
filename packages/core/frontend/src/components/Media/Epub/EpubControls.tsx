@@ -178,7 +178,7 @@ export default function EpubControls({
 
 			<HStack className="relative h-full w-full" p={4} pt={0}>
 				<div
-					className="hidden fixed left-2 z-[100] h-full md:flex items-center w-12"
+					className="hidden fixed left-2 z-[100] h-1/2 md:flex items-center w-12"
 					onMouseEnter={handleMouseEnterNav}
 					onMouseLeave={handleMouseLeaveNav}
 				>
@@ -199,7 +199,7 @@ export default function EpubControls({
 				/>
 				{children}
 				<div
-					className="hidden fixed right-2 z-[100] h-full md:flex items-center w-12"
+					className="hidden fixed right-2 z-[100] h-1/2  md:flex items-center w-12"
 					onMouseEnter={handleMouseEnterNav}
 					onMouseLeave={handleMouseLeaveNav}
 				>

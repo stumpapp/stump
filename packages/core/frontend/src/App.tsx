@@ -28,6 +28,8 @@ const Settings = React.lazy(() => import('~pages/Settings'));
 const GeneralSettings = React.lazy(() => import('~pages/Settings/GeneralSettings'));
 const ServerSettings = React.lazy(() => import('~pages/Settings/ServerSettings'));
 
+// TODO: https://reactjs.org/docs/profiler.html for performance profiling and improvement
+
 export default function Root() {
 	return (
 		<ChakraProvider theme={theme}>

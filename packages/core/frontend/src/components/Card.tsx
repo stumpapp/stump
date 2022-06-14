@@ -1,6 +1,6 @@
-import { Box, Spacer, Text, useBoolean } from '@chakra-ui/react';
-import clsx from 'clsx';
 import React, { useMemo } from 'react';
+import { Box, Spacer, Text, useBoolean, useColorModeValue } from '@chakra-ui/react';
+import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 
 export interface CardProps {
@@ -18,7 +18,6 @@ export interface CardProps {
 // are created during a scan. When a Series is created, there won't be any Media to render a thumbnail for at first.
 // So, I think maybe there should be some retry logic in here? retry once every few ms for like 9ms before showing a
 // fallback image?
-// FIXME: this really kinda looks awfule on mobile. I think it might need to be a bit more compact.
 // TODO: add /public/fallback-card.png
 export default function Card({
 	to,
@@ -60,7 +59,7 @@ export default function Card({
 					alt={imageAlt}
 					className={clsx(
 						'h-96',
-						variant === 'default' ? 'w-[16rem] md:h-72 md:w-[12rem]' : 'w-[15.54rem]',
+						variant === 'default' ? 'md:h-72 w-full' : 'w-[15.54rem]',
 						!isFallback && 'object-cover',
 					)}
 					src={src}
@@ -74,19 +73,21 @@ export default function Card({
 				<Box
 					className={clsx(
 						subtitle ? 'h-[5rem]' : 'h-[4rem]',
-						'flex flex-col max-w-[12rem] break-all  p-2',
+						'flex flex-col max-w-[calc(100%-0.75rem)] break-all p-2',
 					)}
 					color="black"
 					_dark={{ color: 'gray.100' }}
 				>
 					{/* TODO: truncate SMARTER :) */}
-					<Text className="card-title" fontSize="md" as="h3">
+					<Text fontSize="sm" as="h3" className="[hyphens:auto]" noOfLines={2}>
 						{title}
 					</Text>
 
 					<Spacer />
 
-					<Text size="sm">{subtitle}</Text>
+					<Text fontSize="xs" color={useColorModeValue('gray.700', 'gray.300')}>
+						{subtitle}
+					</Text>
 				</Box>
 			)}
 		</Box>

@@ -43,7 +43,6 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	});
 
 	// TODO: type me
-
 	function handleLocationChange(changeState: any) {
 		const start = changeState?.start;
 
@@ -56,8 +55,6 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		if (newChapter) {
 			setChapter(newChapter);
 		}
-
-		controls.goTo('OPS/Mart_9780553897876_epub_c21_r1.htm#c21');
 
 		setLocation({
 			// @ts-ignore: types are wrong >:(
@@ -83,6 +80,15 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		}
 	}, [ref]);
 
+	// Note: not sure this is possible anymore? epub.js isn't maintained it seems,
+	// and I haven't figured this out yet.
+	function pageAnimation(iframeView: any, _rendition: Rendition) {
+		console.log('pageAnimation', { iframeView, _rendition });
+		// window.setTimeout(() => {
+		// console.log('in pageAnimation timeout');
+		// }, 100);
+	}
+
 	useEffect(() => {
 		if (!book) return;
 		if (!ref.current) return;
@@ -98,6 +104,13 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 
 				// TODO more styles, probably separate this out
 				rendition_.themes.register('dark', epubDarkTheme);
+
+				// book.spine.hooks.serialize // Section is being converted to text
+				// book.spine.hooks.content // Section has been loaded and parsed
+				// rendition.hooks.render // Section is rendered to the screen
+				// rendition.hooks.content // Section contents have been loaded
+				// rendition.hooks.unloaded // Section contents are being unloaded
+				rendition_.hooks.render.register(pageAnimation);
 
 				rendition_.on('relocated', handleLocationChange);
 
@@ -142,10 +155,15 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		() => ({
 			async next() {
 				if (rendition) {
-					await rendition.next().catch((err) => {
-						console.error(err);
-						toast.error('Something went wrong!');
-					});
+					await rendition
+						.next()
+						.then(() => {
+							// rendition.hooks.render.trigger(pageAnimation);
+						})
+						.catch((err) => {
+							console.error(err);
+							toast.error('Something went wrong!');
+						});
 				}
 			},
 

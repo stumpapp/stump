@@ -49,9 +49,9 @@ export default function MainLayout() {
 	}
 
 	return (
-		<Flex>
+		<Flex w="full" h="full">
 			{!hideSidebar && <Sidebar />}
-			<Box as="main" bg={useColorModeValue('gray.50', 'gray.900')}>
+			<Box as="main" w="full" h="full" bg={useColorModeValue('gray.50', 'gray.900')}>
 				{!hideSidebar && <Topbar />}
 				<React.Suspense fallback={<Lazy />}>
 					<Outlet />

@@ -18,6 +18,7 @@ export interface CardProps {
 // are created during a scan. When a Series is created, there won't be any Media to render a thumbnail for at first.
 // So, I think maybe there should be some retry logic in here? retry once every few ms for like 9ms before showing a
 // fallback image?
+// FIXME: this really kinda looks awfule on mobile. I think it might need to be a bit more compact.
 // TODO: add /public/fallback-card.png
 export default function Card({
 	to,
@@ -29,7 +30,6 @@ export default function Card({
 	variant = 'default',
 	onMouseEnter,
 }: CardProps) {
-	// const [src, setSrc] = useState(imageSrc);
 	const [isFallback, { on }] = useBoolean(false);
 
 	const src = useMemo(() => {

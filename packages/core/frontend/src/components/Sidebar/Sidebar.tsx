@@ -196,7 +196,7 @@ export default function Sidebar() {
 	return (
 		<Box
 			display={{ base: 'none', md: 'initial' }}
-			minH="100vh"
+			minH="100%"
 			bg={useColorModeValue('gray.100', 'gray.900')}
 			as="aside"
 		>

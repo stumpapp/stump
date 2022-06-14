@@ -3,15 +3,16 @@
 @tailwind utilities;
 
 body {
-	@apply font-sans antialiased h-screen;
+	@apply font-sans antialiased h-full;
 }
 
-#root {
+#root,
+html {
 	@apply h-full;
 }
 
 main {
-	@apply h-screen w-full overflow-y-scroll scrollbar-hide overflow-x-hidden flex flex-col !important;
+	@apply h-full w-full overflow-y-scroll scrollbar-hide overflow-x-hidden flex flex-col !important;
 }
 
 form {

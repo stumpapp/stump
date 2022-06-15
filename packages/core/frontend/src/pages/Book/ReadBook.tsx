@@ -5,8 +5,6 @@ import { updateMediaProgress } from '~api/mutation/media';
 import { getMediaById, getMediaPage } from '~api/query/media';
 import ComicBookReader from '~components/Media/ComicBookReader';
 
-// TODO: handle redirects I will *probably* add for when a user
-// comes here trying to read pages of an epub.
 export default function ReadBook() {
 	const navigate = useNavigate();
 
@@ -20,6 +18,13 @@ export default function ReadBook() {
 		queryFn: async () => getMediaById(id).then((res) => res.data),
 	});
 
+	const { mutate: saveProgress } = useMutation(() => updateMediaProgress(id, parseInt(page!, 10)));
+
+	function handleChangePage(newPage: number) {
+		saveProgress();
+		navigate(`/books/${id}/pages/${newPage}`);
+	}
+
 	if (fetchingBook) {
 		return <div>Loading...</div>;
 	}
@@ -30,16 +35,11 @@ export default function ReadBook() {
 
 	if (media.extension.match(/epub/)) {
 		return <Navigate to={`/epub/${id}?stream=false`} />;
-	} else if (!page) {
+	} else if (!page || parseInt(page, 10) <= 0) {
 		return <Navigate to={`/books/${id}/pages/1`} />;
+	} else if (parseInt(page, 10) > media.pages) {
+		return <Navigate to={`/books/${id}/pages/${media.pages}`} />;
 	}
-
-	function handleChangePage(newPage: number) {
-		saveProgress();
-		navigate(`/books/${id}/pages/${newPage}`);
-	}
-
-	const { mutate: saveProgress } = useMutation(() => updateMediaProgress(id, parseInt(page, 10)));
 
 	if (media.extension.match(/cbr|cbz/)) {
 		return (

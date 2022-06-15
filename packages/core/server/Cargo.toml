@@ -29,8 +29,6 @@ async-trait = "0.1.53"
 infer = "0.7.0"
 dirs = "4.0.0"
 
-# Using clap to make the seed more configurable
-clap = { version = "3.1.18", features = ["derive"], optional = true }
 ring = "0.16.20"
 data-encoding = "2.3.2"
 cuid = "1.2.0"
@@ -40,7 +38,8 @@ include_dir = "0.7.2"
 # TODO: make this *NOT* bundled in release, not necessary. I guess I would have to feature
 # gate it? but that is just kinda annoying. Since I am pushing this feature off for now, 
 # hopefully the PR branch I am pointing to is merged, as well.
-rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc", "swagger"] }
+# rocket_okapi = { git = "https://github.com/ThouCheese/okapi", branch = "feat/rocket0.5-rc.2", features = ["rapidoc", "swagger"] }
+rocket_okapi = { version = "0.8.0-rc.2", features = ["rapidoc", "swagger"] }
 schemars = "0.8.10"
 fern = "0.6.1"
 toml = "0.5.9"

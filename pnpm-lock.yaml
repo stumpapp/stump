@@ -4,25 +4,21 @@ importers:
 
   .:
     specifiers:
+      concurrently: ^6.5.1
       husky: ^7.0.2
       lint-staged: ^12.4.2
-      prettier: ^2.6.2
-    devDependencies:
-      husky: 7.0.4
-      lint-staged: 12.5.0
-      prettier: 2.6.2
-
-  packages/core:
-    specifiers:
-      concurrently: ^6.5.1
       move-cli: 2.0.0
+      prettier: ^2.6.2
       trash-cli: ^5.0.0
     devDependencies:
       concurrently: 6.5.1
+      husky: 7.0.4
+      lint-staged: 12.5.0
       move-cli: 2.0.0
+      prettier: 2.6.2
       trash-cli: 5.0.0
 
-  packages/core/frontend:
+  apps/client:
     specifiers:
       '@chakra-ui/react': ^2.0.0
       '@emotion/react': ^11.9.0
@@ -46,6 +42,7 @@ importers:
       eslint: ^8.16.0
       framer-motion: ^6.3.4
       history: ^5.3.0
+      move-cli: 2.0.0
       nprogress: ^0.2.0
       phosphor-react: ^1.4.1
       pluralize: ^8.0.0
@@ -64,6 +61,7 @@ importers:
       react-window: ^1.8.7
       tailwind-scrollbar-hide: ^1.1.7
       tailwindcss: ^3.0.24
+      trash-cli: ^5.0.0
       typescript: ^4.7.2
       vite: ^2.9.9
       vite-plugin-package-version: ^1.0.2
@@ -111,13 +109,15 @@ importers:
       '@vitejs/plugin-react': 1.3.2
       autoprefixer: 10.4.7_postcss@8.4.14
       eslint: 8.17.0
+      move-cli: 2.0.0
       postcss: 8.4.14
       tailwind-scrollbar-hide: 1.1.7
       tailwindcss: 3.1.2
+      trash-cli: 5.0.0
       typescript: 4.7.3
       vite: 2.9.12
 
-  packages/website:
+  apps/website:
     specifiers:
       '@icons-pack/react-simple-icons': ^4.7.0
       '@markdoc/markdoc': ^0.1.2
@@ -175,6 +175,9 @@ importers:
       tailwind-scrollbar-hide: 1.1.7
       tailwindcss: 3.1.2
       typescript: 4.6.4
+
+  core:
+    specifiers: {}
 
 packages:
 
@@ -1765,7 +1768,7 @@ packages:
   /@types/react-dom/18.0.4:
     resolution: {integrity: sha512-FgTtbqPOCI3dzZPZoC2T/sx3L34qxy99ITWn4eoSA95qPyXDMH0ALoAqUp49ITniiJFsXUVBtalh/KffMpg21Q==}
     dependencies:
-      '@types/react': 18.0.9
+      '@types/react': 18.0.12
     dev: true
 
   /@types/react-dom/18.0.5:

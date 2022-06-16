@@ -1,12 +1,13 @@
 {
-	"name": "frontend",
+	"name": "@stump/client",
 	"private": true,
 	"version": "0.0.1",
 	"homepage": ".",
 	"scripts": {
 		"dev": "vite --host",
 		"build": "vite build",
-		"preview": "vite preview --port 3000"
+		"preview": "vite preview --port 3000",
+		"unimported": "npx unimported"
 	},
 	"dependencies": {
 		"@chakra-ui/react": "^2.0.0",
@@ -55,6 +56,8 @@
 		"tailwind-scrollbar-hide": "^1.1.7",
 		"tailwindcss": "^3.0.24",
 		"typescript": "^4.7.2",
-		"vite": "^2.9.9"
+		"vite": "^2.9.9",
+		"move-cli": "2.0.0",
+		"trash-cli": "^5.0.0"
 	}
 }

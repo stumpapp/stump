@@ -51,33 +51,34 @@ For information about getting started, how Stump works and manages your library 
 
 I am ommitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
 
-```bash
+```
 .
-├── packages
-│   ├── core
-│   │   ├── frontend
-│   │   └── server
-│   │       ├── prisma
-│   │       ├── prisma-cli
-│   │       └── src
+├── apps
+│   ├── client
+│   │   └── src
 │   └── website
+│       └── src
+├── core
+│   ├── prisma
+│   ├── prisma-cli
+│   └── src
 ├── README.md
 └── ...
 ```
 
 ### Core
 
-The core package is where Stump's core functionality is located.
+The core directory is where Stump's 'core' functionality is located, written in Rust.
 
-`server`: This is the bulk of Stump's functionality. It is a Rocket server.
+<!-- TODO: mention prisma -->
 
-`frontend`: The frontend directory is where the web client is located. It is a static React application that is served by Stump.
+### Apps
 
-<!-- This file is used to seed the database with data. -->
+The 'apps' directory is where Stump applications are located. These are separate from the Rust core, and are individual applications.
 
-### Website
+`client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
 
-The website package contains a Next.js application for the Stump landing page and documentation pages. The documentation aspect is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev)
+`website`: A Next.js application for the Stump landing site and documentation pages. The documentation is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev)
 
 ## Development Setup
 
@@ -88,6 +89,8 @@ There is now a setup script that handles most of the initial configuration, howe
 ### Setup Script
 
 > If you feel that your system is already configured for development, you may skip this step and run `cargo install cargo-watch` and `pnpm run setup`. I highly recommend using the script, however.
+
+> **Note**: If you are on a Windows machine, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) installed on your system.
 
 If you are on a Windows machine, you'll need to run the following:
 
@@ -110,14 +113,20 @@ If you face any issues running these, or are using a system that is not supporte
 To start the application for development, simply run:
 
 ```bash
-pnpm core dev
+pnpm dev
 ```
 
 This will start both the vite dev server and the rust server, watching for changes. You can also run the server and the frontend in separate processes:
 
 ```bash
-pnpm core server:dev # start the server
-pnpm core frontend:dev # start the frontend
+pnpm core dev # start the Stump server
+pnpm client dev # start the web client
+```
+
+To run in a release profile, you would just need to run:
+
+```bash
+pnpm core start
 ```
 
 ## License

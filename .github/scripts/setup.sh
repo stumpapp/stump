@@ -88,13 +88,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 
         cargo install cargo-watch
 
-        echo "Running 'pnpm core setup':"
+        echo "Running 'pnpm run setup':"
         echo
         
         pnpm run setup
 
         echo
-        echo "Pre-setup completed! Run 'pnpm core dev' to get started."
+        echo "Pre-setup completed! Run 'pnpm dev' to get started."
 elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo
         echo "Attempting to install 'cargo-watch':"
@@ -102,12 +102,12 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 
         cargo install cargo-watch
 
-        echo "Running 'pnpm core setup':"
+        echo "Running 'pnpm run setup':"
         echo
         pnpm run setup
                 
         echo
-        echo "Pre-setup completed! Run 'pnpm core dev' to get started."
+        echo "Pre-setup completed! Run 'pnpm dev' to get started."
 else
         echo "Your OS '$OSTYPE' is not supported by the pre-setup script. Please consider adding support for it: https://github.com/aaronleopold/stump/issues"
         exit 1

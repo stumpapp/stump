@@ -3,4 +3,4 @@
 *.sql linguist-detectable=false
 
 # I don't want website to be included in language stats
-packages/website/** linguist-vendored
+apps/website/** linguist-vendored

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react';
 import { CaretLeft, CaretRight } from 'phosphor-react';
 import Button from '../ui/Button';
@@ -62,13 +62,13 @@ export default function Topbar() {
 
 	const { showViewOptions, viewAsGrid, onViewModeChange } = useViewMode();
 
-	const truncatedTitle = useMemo(() => {
-		if (title.length <= 20) {
-			return title;
-		}
+	// const truncatedTitle = useMemo(() => {
+	// 	if (title.length <= 20) {
+	// 		return title;
+	// 	}
 
-		return `${title.substring(0, 20)}...`;
-	}, [title]);
+	// 	return `${title.substring(0, 20)}...`;
+	// }, [title]);
 
 	// TODO: fix this
 	return (
@@ -89,8 +89,8 @@ export default function Topbar() {
 				<Navigation />
 
 				{/* @ts-ignore: this seems to work, idky it has type error */}
-				<Heading as="h3" size={{ base: 'sm', md: 'md' }}>
-					{truncatedTitle}
+				<Heading as="h3" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>
+					{title}
 				</Heading>
 			</HStack>
 

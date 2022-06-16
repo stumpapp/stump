@@ -5,7 +5,7 @@ export default {
 	titleTemplate: 'Stump | %s',
 	defaultTitle: 'Stump',
 	description:
-		'Free, open source, self-hosting for all your comic books, manga and digital book collections.',
+		'Free, open source, self-hosting for your comic books, manga and digital book collections.',
 	canonical: 'https://stumpapp.dev',
 	openGraph: {
 		type: 'website',

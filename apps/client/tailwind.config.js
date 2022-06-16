@@ -1,6 +1,3 @@
-// const defaultTheme = require('tailwindcss/defaultTheme');
-// const colors = require('tailwindcss/colors');
-
 const brand = {
 	DEFAULT: '#C48259',
 	50: '#F4E8E0',
@@ -17,8 +14,6 @@ const brand = {
 
 module.exports = {
 	darkMode: 'class',
-	// Inform Tailwind of where our classes will be defined:
-	// https://tailwindcss.com/docs/optimizing-for-production
 	content: ['./src/**/*.{js,ts,jsx,tsx}', './index.html'],
 	theme: {
 		extend: {
@@ -52,10 +47,10 @@ module.exports = {
 			ringColor: {
 				DEFAULT: brand['500'],
 			},
+			screens: {
+				'3xl': '1600px',
+			},
 		},
-		// fontFamily: {
-		// 	sans: ['Inter var', ...defaultTheme.fontFamily.sans],
-		// },
 	},
 	plugins: [require('tailwind-scrollbar-hide'), require('@tailwindcss/typography')],
 };

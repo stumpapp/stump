@@ -53,14 +53,17 @@ export default function Card({
 			rounded="md"
 			to={to}
 			onMouseEnter={onMouseEnter}
+			maxW="16rem"
 		>
 			<Box px={1.5}>
 				<img
 					alt={imageAlt}
 					className={clsx(
-						'h-96',
-						variant === 'default' ? 'md:h-72 w-full' : 'w-[15.54rem]',
+						variant === 'default' ? 'h-auto ' : 'min-h-96',
 						!isFallback && 'object-cover',
+						// 663:1024 is standard aspect ratio for comic books. Stump supports a wider range of media, however
+						// for now these cards will be tailored to that aspect ratio.
+						'w-full [aspect-ratio:663/1024]',
 					)}
 					src={src}
 					onError={(_) => {
@@ -78,8 +81,7 @@ export default function Card({
 					color="black"
 					_dark={{ color: 'gray.100' }}
 				>
-					{/* TODO: truncate SMARTER :) */}
-					<Text fontSize="sm" as="h3" className="[hyphens:auto]" noOfLines={2}>
+					<Text fontSize="sm" as="h3" fontWeight="medium" className="[hyphens:auto]" noOfLines={2}>
 						{title}
 					</Text>
 

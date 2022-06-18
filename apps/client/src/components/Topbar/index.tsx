@@ -77,7 +77,7 @@ export default function Topbar() {
 			className="sticky top-0 grid grid-cols-12 w-full items-center px-4 py-2 md:py-3"
 			bg={{
 				base: useColorModeValue('white', 'gray.800'),
-				md: useColorModeValue('gray.50', 'gray.900'),
+				md: useColorModeValue('gray.75', 'gray.900'),
 			}}
 		>
 			<HStack

@@ -50,7 +50,7 @@ export default function Toolbar({ title, currentPage, pages, visible }: ToolbarP
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: 100 }}
 						transition={{ duration: 0.2, ease: 'easeInOut' }}
-						className="fixed bottom-0 p-4 w-full bg-opacity-75 bg-gray-700 text-white"
+						className="fixed bottom-0 p-4 w-full bg-opacity-75 bg-gray-700 text-white z-[100]"
 					>
 						<div className="flex space-x-2">
 							<Text>

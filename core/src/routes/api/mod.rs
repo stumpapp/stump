@@ -23,6 +23,7 @@ pub fn api() -> Vec<Route> {
 	openapi_get_routes![
 		// top level api endpoints
 		claim,
+		ping,
 		shutdown,
 		// auth
 		auth::me,
@@ -88,6 +89,12 @@ async fn claim(ctx: &Context) -> ApiResult<Json<ClaimResponse>> {
 	Ok(Json(ClaimResponse {
 		is_claimed: db.user().find_first(vec![]).exec().await?.is_some(),
 	}))
+}
+
+#[openapi(tag = "General")]
+#[get("/ping")]
+async fn ping() -> String {
+	"pong".to_string()
 }
 
 // FIXME: won't work for docker. Allow custom shudown command sequences.

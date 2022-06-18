@@ -16,8 +16,9 @@ use crate::{
 };
 
 #[openapi(tag = "Series")]
-#[get("/series?<unpaged>&<page_params..>")]
+#[get("/series?<load_media>&<unpaged>&<page_params..>")]
 pub async fn get_series(
+	load_media: Option<bool>,
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
 	ctx: &Context,
@@ -25,16 +26,23 @@ pub async fn get_series(
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
 
-	let series = db
-		.series()
-		.find_many(vec![])
-		.with(
+	let load_media = load_media.unwrap_or(false);
+
+	let action = db.series();
+	let action = action.find_many(vec![]);
+
+	let query = match load_media {
+		true => action.with(
 			series::media::fetch(vec![])
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(auth.0.id),
 				]))
 				.order_by(media::name::order(Direction::Asc)),
-		)
+		),
+		false => action,
+	};
+
+	let series = query
 		.exec()
 		.await?
 		.into_iter()
@@ -54,26 +62,32 @@ pub async fn get_series(
 }
 
 #[openapi(tag = "Series")]
-#[get("/series/<id>")]
+#[get("/series/<id>?<load_media>")]
 pub async fn get_series_by_id(
 	id: String,
+	load_media: Option<bool>,
 	ctx: &Context,
 	auth: Auth,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
 
-	let series = db
-		.series()
-		.find_unique(series::id::equals(id.clone()))
-		.with(
+	let load_media = load_media.unwrap_or(false);
+
+	let action = db.series();
+	let action = action.find_unique(series::id::equals(id.clone()));
+
+	let query = match load_media {
+		true => action.with(
 			series::media::fetch(vec![])
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(auth.0.id),
 				]))
 				.order_by(media::name::order(Direction::Asc)),
-		)
-		.exec()
-		.await?;
+		),
+		false => action,
+	};
+
+	let series = query.exec().await?;
 
 	if series.is_none() {
 		return Err(ApiError::NotFound(format!(

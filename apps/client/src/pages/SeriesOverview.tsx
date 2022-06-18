@@ -37,7 +37,9 @@ export default function SeriesOverview() {
 				<title>Stump | {series.name}</title>
 			</Helmet>
 
-			{viewAsGrid ? <MediaGrid media={series.media!} /> : <MediaList media={series.media!} />}
+			<MediaGrid seriesId={id} />
+
+			{/* {viewAsGrid ? <MediaGrid media={series.media!} /> : <MediaList media={series.media!} />} */}
 		</>
 	);
 }

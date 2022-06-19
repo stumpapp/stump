@@ -15,8 +15,8 @@ const defaultOptions: Options = {
 export function useSeriesMedia(seriesId: string) {
 	const [search, setSearchParams] = useSearchParams();
 
-	const [media, setMedia] = useState<Media[]>([]);
-	const [pageData, setPageData] = useState<PageInfo>();
+	// const [media, setMedia] = useState<Media[]>([]);
+	// const [pageData, setPageData] = useState<PageInfo>();
 
 	const page = useMemo(() => {
 		const searchPage = search.get('page');
@@ -32,13 +32,20 @@ export function useSeriesMedia(seriesId: string) {
 		['getSeriesMedia', page],
 		() => getSeriesMedia(seriesId, page),
 		{
-			onSuccess(data) {
-				setMedia(data.data.data);
-				setPageData(data.data._page);
-			},
 			keepPreviousData: true,
 		},
 	);
+
+	const { media, pageData } = useMemo(() => {
+		if (data?.data) {
+			return {
+				media: data.data.data,
+				pageData: data.data._page,
+			};
+		}
+
+		return {};
+	}, [data]);
 
 	const actions = useMemo(
 		() => ({

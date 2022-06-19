@@ -183,6 +183,7 @@ export default function EpubControls({
 					onMouseLeave={handleMouseLeaveNav}
 				>
 					<Button
+						size="sm"
 						display={['none', 'flex']}
 						hidden={!visibleNav}
 						variant="ghost"
@@ -204,6 +205,7 @@ export default function EpubControls({
 					onMouseLeave={handleMouseLeaveNav}
 				>
 					<Button
+						size="sm"
 						display={['none', 'flex']}
 						hidden={!visibleNav}
 						variant="ghost"

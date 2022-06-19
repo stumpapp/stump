@@ -18,7 +18,7 @@ import { useJobsListener } from '~hooks/useJobsListener';
 import toast from 'react-hot-toast';
 
 const Home = React.lazy(() => import('~pages/Home'));
-const Library = React.lazy(() => import('~pages/Library'));
+const LibraryOverview = React.lazy(() => import('~pages/LibraryOverview'));
 const SeriesOverview = React.lazy(() => import('~pages/SeriesOverview'));
 const BookOverview = React.lazy(() => import('~pages/Book/BookOverview'));
 const ReadBook = React.lazy(() => import('~pages/Book/ReadBook'));
@@ -118,7 +118,7 @@ function App() {
 							<Route path="general" element={<GeneralSettings />} />
 							<Route path="server" element={<ServerSettings />} />
 						</Route>
-						<Route path="libraries/:id" element={<Library />} />
+						<Route path="libraries/:id" element={<LibraryOverview />} />
 						<Route path="series/:id" element={<SeriesOverview />} />
 						<Route path="books/:id" element={<BookOverview />} />
 						<Route path="books/:id/pages/:page" element={<ReadBook />} />

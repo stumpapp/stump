@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react';
 import {
 	Box,
@@ -27,6 +27,7 @@ import Form from './Form';
 import { z } from 'zod';
 import { FieldValues, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useWindowSize } from '~hooks/useWindowSize';
 
 interface PaginationArrowProps {
 	kind: 'previous' | 'next';
@@ -41,25 +42,31 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 				as={Link}
 				aria-disabled={isDisabled}
 				to={href}
+				// FIXME: I need to figure out how to disable the link while not removing pointer events
 				className={clsx(
-					isDisabled && 'pointer-events-none',
+					isDisabled && 'pointer-events-none cursor-not-allowed',
 					'border-t-2 border-transparent inline-flex items-center text-sm font-medium',
 				)}
 				pt={4}
 				pr={kind === 'previous' ? '1' : '0'}
 				pl={kind === 'next' ? '1' : '0'}
-				color={useColorModeValue('gray.500', 'gray.300')}
+				fontSize={{ base: 'xs', md: 'sm' }}
+				color={
+					isDisabled
+						? useColorModeValue('gray.300', 'gray.500')
+						: useColorModeValue('gray.500', 'gray.300')
+				}
 				_hover={{ borderColor: useColorModeValue('gray.600', 'gray.600') }}
 			>
 				{kind === 'previous' ? (
 					<>
-						<ArrowLeft className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+						<ArrowLeft className="mr-3 h-4 w-4 md:h-5 md:w-5 text-gray-400" aria-hidden="true" />
 						Previous
 					</>
 				) : (
 					<>
 						Next
-						<ArrowRight className="ml-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+						<ArrowRight className="ml-3 h-4 w-4 md:h-5 md:w-5 text-gray-400" aria-hidden="true" />
 					</>
 				)}
 			</Box>
@@ -80,6 +87,7 @@ function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
 			to={href}
 			pt={4}
 			px={4}
+			fontSize={{ base: 'xs', md: 'sm' }}
 			color={isActive ? 'brand.500' : useColorModeValue('gray.500', 'gray.300')}
 			borderColor={isActive ? 'brand.500' : 'transparent'}
 			_hover={{
@@ -92,12 +100,12 @@ function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
 	);
 }
 
-interface PaginationEllipsisProps extends Pick<PaginationProps, 'pages'> {
+interface PaginationEllipsisProps extends Pick<PaginationProps, 'pages' | 'position'> {
 	onNavigate: (page: number) => void;
 }
 
-function PaginationEllipsis({ pages, onNavigate }: PaginationEllipsisProps) {
-	// const initialFocusRef = useRef<any>(null);
+function PaginationEllipsis({ position, pages, onNavigate }: PaginationEllipsisProps) {
+	const inputRef = useRef<any>(null);
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -118,6 +126,8 @@ function PaginationEllipsis({ pages, onNavigate }: PaginationEllipsisProps) {
 		resolver: zodResolver(schema),
 	});
 
+	const register = form.register('goTo');
+
 	const errors = useMemo(() => {
 		return form.formState.errors;
 	}, [form.formState.errors]);
@@ -137,8 +147,9 @@ function PaginationEllipsis({ pages, onNavigate }: PaginationEllipsisProps) {
 			isOpen={isOpen}
 			onOpen={onOpen}
 			onClose={onClose}
-			placement="bottom"
+			placement={position === 'bottom' ? 'top' : 'bottom'}
 			closeOnBlur={true}
+			initialFocusRef={inputRef}
 		>
 			<PopoverTrigger>
 				<Box
@@ -160,7 +171,18 @@ function PaginationEllipsis({ pages, onNavigate }: PaginationEllipsisProps) {
 						<FormControl isInvalid={!!errors.goTo}>
 							<FormLabel htmlFor="goTo">Enter page</FormLabel>
 							{/* TODO: auto focus not working */}
-							<Input type="number" autoFocus max={pages} {...form.register('goTo')} />
+							<Input
+								type="number"
+								autoFocus
+								max={pages}
+								{...register}
+								ref={(ref) => {
+									if (ref) {
+										register.ref(ref);
+										inputRef.current = ref;
+									}
+								}}
+							/>
 							{!!errors.goTo && <FormErrorMessage>{errors.goTo?.message}</FormErrorMessage>}
 						</FormControl>
 					</Form>
@@ -185,15 +207,30 @@ function PaginationEllipsis({ pages, onNavigate }: PaginationEllipsisProps) {
 }
 
 interface PaginationProps {
+	position?: 'top' | 'bottom';
 	pages: number;
 	currentPage: number;
 }
 
-export default function Pagination({ pages, currentPage }: PaginationProps) {
+export default function Pagination({ position = 'top', pages, currentPage }: PaginationProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const { pageRange } = usePagination({ totalPages: pages, pageSize: 20, currentPage });
+	const { width: screenWidth } = useWindowSize();
+
+	const numbersToShow = useMemo(() => {
+		if (screenWidth < 768) {
+			return 5;
+		}
+
+		if (screenWidth < 992) {
+			return 7;
+		}
+
+		return 10;
+	}, [screenWidth]);
+
+	const { pageRange } = usePagination({ totalPages: pages, currentPage, numbersToShow });
 
 	function handleEllipsisNavigate(page: number) {
 		navigate(`${location.pathname}?page=${page}`);
@@ -205,11 +242,12 @@ export default function Pagination({ pages, currentPage }: PaginationProps) {
 			borderColor={useColorModeValue('gray.200', 'gray.700')}
 			justify="space-between"
 			align="center"
+			pb={position === 'bottom' ? 8 : 0}
 		>
 			<PaginationArrow
 				kind="previous"
 				href={`${location.pathname}?page=${currentPage - 1}`}
-				isDisabled={currentPage === 0}
+				isDisabled={currentPage === 1}
 			/>
 
 			<HStack align="center">
@@ -230,6 +268,7 @@ export default function Pagination({ pages, currentPage }: PaginationProps) {
 							key={`${i}-pagination-ellipsis`}
 							pages={pages}
 							onNavigate={handleEllipsisNavigate}
+							position={position}
 						/>
 					);
 				})}

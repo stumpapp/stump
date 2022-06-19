@@ -1,31 +1,30 @@
+import { Heading } from '@chakra-ui/react';
 import React from 'react';
-import Pagination from '~components/ui/Pagination';
-import { useSeriesMedia } from '~hooks/useSeriesMedia';
 import MediaCard from './MediaCard';
 
 interface Props {
-	// media: Media[];
-	seriesId: string;
+	isLoading: boolean;
+	media?: Media[];
 }
 
-// TODO: I think this *might* need a redesign... Not sure, gotta do some UX research about this
-export default function MediaGrid({ seriesId }: Props) {
-	const { isLoading, media, pageData } = useSeriesMedia(seriesId);
-
+export default function MediaGrid({ media, isLoading }: Props) {
 	if (isLoading) {
 		return <div>Loading...</div>;
-	} else if (!media) {
-		return <div>whoop</div>;
+	} else if (!media || !media.length) {
+		return (
+			<div className="flex flex-1 items-center justify-center">
+				{/* TODO: If I take in pageData, I can determine if it is an out of bounds issue or if the series truly has
+				no media. */}
+				<Heading size="sm">It doesn't look like there is any media here.</Heading>
+			</div>
+		);
 	}
 
 	return (
-		<div className="p-4 w-full h-full flex flex-col space-y-6">
-			<Pagination pages={10} currentPage={pageData?.currentPage!} />
-			<div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:gap-2 2xl:grid-cols-8 3xl:grid-cols-9 items-center justify-center md:justify-start">
-				{media.map((s) => (
-					<MediaCard key={s.id} {...s} />
-				))}
-			</div>
+		<div className="flex-1 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:gap-2 2xl:grid-cols-8 3xl:grid-cols-9 items-start justify-center md:justify-start pb-4">
+			{media.map((s) => (
+				<MediaCard key={s.id} {...s} />
+			))}
 		</div>
 	);
 }

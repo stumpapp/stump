@@ -14,7 +14,7 @@ use crate::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
-		models::{library::Library, tag::Tag},
+		models::{library::Library, series::Series, tag::Tag},
 		pageable::{Pageable, PagedRequestParams},
 	},
 };
@@ -80,6 +80,49 @@ pub async fn get_library_by_id(
 	}
 
 	Ok(Json(lib.unwrap().into()))
+}
+
+// FIXME: I don't load the media relation on this query anymore, and it breaks the
+// book count calculation. This needs to be corrected, but for another day.
+// https://github.com/Brendonovich/prisma-client-rust/issues/24 --> eventually,
+// this will pretty much solve the problem, but for now I'll probably just (unfortunately)
+// run a custom query to grab the book count and change the Series model a little bit to
+// take in that field.
+/// Returns the series in a given library.
+#[openapi(tag = "Series")]
+#[get("/libraries/<id>/series?<unpaged>&<page_params..>")]
+pub async fn get_library_series(
+	id: String,
+	unpaged: Option<bool>,
+	page_params: Option<PagedRequestParams>,
+	ctx: &Context,
+	// auth: Auth,
+) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+	let db = ctx.get_db();
+
+	let series = db
+		.series()
+		.find_many(vec![series::library_id::equals(Some(id))])
+		// .with(media::read_progresses::fetch(vec![
+		// 	read_progress::user_id::equals(auth.0.id),
+		// ]))
+		.order_by(series::name::order(Direction::Asc))
+		.exec()
+		.await?
+		.into_iter()
+		.map(|m| m.into())
+		.collect::<Vec<Series>>();
+
+	let unpaged = match unpaged {
+		Some(val) => val,
+		None => page_params.is_none(),
+	};
+
+	if unpaged {
+		return Ok(Json(series.into()));
+	}
+
+	Ok(Json((series, page_params).into()))
 }
 
 /// Get the thumbnail image for a library by id, if the current user has access to it.

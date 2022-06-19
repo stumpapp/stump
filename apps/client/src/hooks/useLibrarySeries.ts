@@ -1,9 +1,14 @@
 import { useMemo } from 'react';
 import { useQuery } from 'react-query';
 import { useSearchParams } from 'react-router-dom';
-import { getSeriesMedia } from '~api/query/series';
+import { getLibrarySeries } from '~api/query/library';
 
-export function useSeriesMedia(seriesId: string) {
+// interface Options {
+// 	// sortBy
+// 	page: number;
+// }
+
+export function useLibrarySeries(libraryId: string) {
 	const [search, setSearchParams] = useSearchParams();
 
 	const page = useMemo(() => {
@@ -17,17 +22,17 @@ export function useSeriesMedia(seriesId: string) {
 	}, [search]);
 
 	const { isLoading, isFetching, isPreviousData, data } = useQuery(
-		['getSeriesMedia', page, seriesId],
-		() => getSeriesMedia(seriesId, page),
+		['getLibrarySeries', page, libraryId],
+		() => getLibrarySeries(libraryId, page),
 		{
 			keepPreviousData: true,
 		},
 	);
 
-	const { media, pageData } = useMemo(() => {
+	const { series, pageData } = useMemo(() => {
 		if (data?.data) {
 			return {
-				media: data.data.data,
+				series: data.data.data,
 				pageData: data.data._page,
 			};
 		}
@@ -50,8 +55,8 @@ export function useSeriesMedia(seriesId: string) {
 				}
 			},
 		}),
-		[page, media, pageData],
+		[page, series, pageData],
 	);
 
-	return { isLoading, isFetching, isPreviousData, media, pageData, actions };
+	return { isLoading, isFetching, isPreviousData, series, pageData, actions };
 }

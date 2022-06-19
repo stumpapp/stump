@@ -208,7 +208,6 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 						match = matches[0];
 					} else {
 						console.log(`Could not find ${href}`);
-						// console.log({ book });
 						return;
 					}
 				}

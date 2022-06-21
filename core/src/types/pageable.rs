@@ -3,12 +3,14 @@ use serde::Serialize;
 
 #[derive(Serialize, FromForm, JsonSchema)]
 pub struct PagedRequestParams {
+	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct PageParams {
+	pub zero_based: bool,
 	pub page: u32,
 	pub page_size: u32,
 }
@@ -16,6 +18,7 @@ pub struct PageParams {
 impl Default for PageParams {
 	fn default() -> Self {
 		PageParams {
+			zero_based: false,
 			page: 0,
 			page_size: 20,
 		}
@@ -26,10 +29,18 @@ impl From<Option<PagedRequestParams>> for PageParams {
 	fn from(req_params: Option<PagedRequestParams>) -> Self {
 		match req_params {
 			Some(params) => {
+				let zero_based = params.zero_based.unwrap_or(false);
 				let page_size = params.page_size.unwrap_or(20);
-				let page = params.page.unwrap_or(0);
 
-				PageParams { page, page_size }
+				let default_page = if zero_based { 0 } else { 1 };
+
+				let mut page = params.page.unwrap_or(default_page);
+
+				PageParams {
+					page,
+					page_size,
+					zero_based,
+				}
 			},
 			None => PageParams::default(),
 		}
@@ -60,18 +71,22 @@ pub struct PageInfo {
 	pub page_size: u32,
 	/// The offset of the current page. E.g. if current page is 1, and pageSize is 10, the offset is 20.
 	pub page_offset: u32,
+	/// Whether or not the page is zero-indexed.
+	pub zero_based: bool,
 }
 
 impl PageInfo {
 	pub fn new(page_params: PageParams, total_pages: u32) -> Self {
 		let current_page = page_params.page.try_into().unwrap();
 		let page_size = page_params.page_size.try_into().unwrap();
+		let zero_based = page_params.zero_based;
 
 		PageInfo {
 			total_pages,
 			current_page,
 			page_size,
 			page_offset: current_page * page_size,
+			zero_based,
 		}
 	}
 }
@@ -123,14 +138,27 @@ where
 		let total_pages =
 			(data.len() as f32 / page_params.page_size as f32).ceil() as u32;
 
-		let start = page_params.page * page_params.page_size;
-		let end = start + page_params.page_size - 1;
+		let start = match page_params.zero_based {
+			true => page_params.page * page_params.page_size,
+			false => (page_params.page - 1) * page_params.page_size,
+		};
+
+		// let start = page_params.page * page_params.page_size;
+		let end = start + page_params.page_size;
+
+		// println!("len:{}, start: {}, end: {}", data.len(), start, end);
 
 		if start > data.len() as u32 {
 			data = vec![];
 		} else if end < data.len() as u32 {
 			data = data
 				.get((start as usize)..(end as usize))
+				.ok_or("Invalid page")
+				.unwrap()
+				.to_vec();
+		} else {
+			data = data
+				.get((start as usize)..)
 				.ok_or("Invalid page")
 				.unwrap()
 				.to_vec();

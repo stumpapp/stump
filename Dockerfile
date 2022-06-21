@@ -4,7 +4,7 @@
 
 FROM node:16-alpine3.14 as frontend
 
-WORKDIR /home/stump
+WORKDIR /app
 
 COPY apps/client/ .
 
@@ -21,7 +21,7 @@ ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 RUN apk add --no-cache --verbose musl-dev build-base sqlite openssl-dev
 
-WORKDIR /home/stump
+WORKDIR /app
 
 COPY core/ .
 
@@ -39,28 +39,29 @@ RUN addgroup -g 1000 stump
 
 RUN adduser -D -s /bin/sh -u 1000 -G stump stump
 
-WORKDIR /home/stump
+WORKDIR /
 
 # create the config and data directories
+RUN mkdir -p app
 RUN mkdir -p config
 RUN mkdir -p data
 
 # copy the binary
-COPY --from=builder /home/stump/target/x86_64-unknown-linux-musl/release/stump .
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/stump /app/stump
 
 # copy the react build
-COPY --from=frontend /home/stump/build client
+COPY --from=frontend /app/build /app/client
 
 # *sigh* Rocket requires the toml file at runtime
-COPY server/Rocket.toml .
+COPY core/Rocket.toml /app/Rocket.toml
 
 RUN chown stump:stump stump
 
 USER stump
 
 # Default Stump environment variables
-ENV STUMP_CONFIG_DIR=/home/stump/config
-ENV STUMP_CLIENT_DIR=/home/stump/client
+ENV STUMP_CONFIG_DIR=/config
+ENV STUMP_CLIENT_DIR=/app/client
 
 # Default Rocket environment variables
 ENV ROCKET_PROFILE=release

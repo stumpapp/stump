@@ -5,13 +5,17 @@ edition = "2021"
 default-run = "stump"
 
 [dependencies]
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.5.0" }
+# TODO organize these
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.5.2" }
 serde = { version = "1.0", features = ["derive"] }
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
 # rocket-session-store = "0.2.0"
 # rocket-session-store = { path = "../../../../../Documents/sandbox/clones/rocket-session-store", features = ["okapi"] }
 rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }
-rocket_cors = "0.6.0-alpha1"
+# rocket_cors = "0.6.0-alpha1"
+# Note: not pointing to master caused some compilation issues. It's in alpha, so :)
+# See https://github.com/lawliet89/rocket_cors/pull/108
+rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
 bcrypt = "0.10.1"
 anyhow = "1.0.57"
 xml-rs = "0.8.4"
@@ -28,7 +32,6 @@ unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--
 async-trait = "0.1.53"
 infer = "0.7.0"
 dirs = "4.0.0"
-
 ring = "0.16.20"
 data-encoding = "2.3.2"
 cuid = "1.2.0"

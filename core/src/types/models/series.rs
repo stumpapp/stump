@@ -25,8 +25,26 @@ pub struct Series {
 	pub library: Option<Library>,
 	/// The media that are in this series. Will be `None` only if the relation is not loaded.
 	pub media: Option<Vec<Media>>,
+	/// The number of media in this series. Optional for safety, but should be loaded if possible.
+	pub media_count: Option<i32>,
 	/// The user assigned tags for the series. ex: ["comic", "family"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
+}
+
+impl Series {
+	// Note: this is not great practice, and will eventually change...
+	pub fn without_media(mut series: Series, media_count: i32) -> Series {
+		series.media = None;
+
+		Series {
+			media_count: Some(media_count),
+			..series
+		}
+	}
+
+	pub fn set_media_count(&mut self, count: i32) {
+		self.media_count = Some(count);
+	}
 }
 
 impl Into<Series> for prisma::series::Data {
@@ -34,23 +52,31 @@ impl Into<Series> for prisma::series::Data {
 		let library = match self.library() {
 			Ok(library) => Some(library.unwrap().to_owned().into()),
 			Err(e) => {
-				log::debug!("Failed to load library for series: {}", e);
+				log::trace!("Failed to load library for series: {}", e);
 				None
 			},
 		};
 
-		let media = match self.media() {
-			Ok(media) => Some(media.into_iter().map(|m| m.to_owned().into()).collect()),
+		let (media, media_count) = match self.media() {
+			Ok(media) => {
+				let m = media
+					.into_iter()
+					.map(|m| m.to_owned().into())
+					.collect::<Vec<Media>>();
+				let m_ct = media.len() as i32;
+
+				(Some(m), Some(m_ct))
+			},
 			Err(e) => {
-				log::debug!("Failed to load media for series: {}", e);
-				None
+				log::trace!("Failed to load media for series: {}", e);
+				(None, None)
 			},
 		};
 
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
 			Err(e) => {
-				log::debug!("Failed to load tags for series: {}", e);
+				log::trace!("Failed to load tags for series: {}", e);
 				None
 			},
 		};
@@ -65,7 +91,16 @@ impl Into<Series> for prisma::series::Data {
 			library_id: self.library_id.unwrap(),
 			library,
 			media,
+			media_count,
 			tags,
 		}
+	}
+}
+
+impl Into<Series> for (prisma::series::Data, i32) {
+	fn into(self) -> Series {
+		let (series, media_count) = self;
+
+		Series::without_media(series.into(), media_count)
 	}
 }

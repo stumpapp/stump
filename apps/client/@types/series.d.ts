@@ -28,4 +28,8 @@ interface Series {
 	 * @see Media
 	 */
 	media?: Media[];
+	/**
+	 * The number of media files in the series. Will be undefined on errors.
+	 */
+	mediaCount?: number;
 }

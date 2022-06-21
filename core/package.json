@@ -5,6 +5,7 @@
   "keywords": [],
   "license": "MIT",
   "scripts": {
+    "prisma": "cargo prisma --",
     "setup": "cargo prisma generate && pnpm get-client",
     "start": "cargo run --release",
     "dev": "cargo watch -x run",

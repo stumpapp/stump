@@ -1,5 +1,5 @@
-import { Box, Tab, TabList, Tabs } from '@chakra-ui/react';
 import React, { useMemo } from 'react';
+import { Box, Tab, TabList, Tabs } from '@chakra-ui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const pages = [
@@ -33,20 +33,14 @@ export default function SettingsNav() {
 		}
 	}
 
-	// FIXME: This is so horrendously ugly lol
+	// Note: idk how I feel about this UI...
 	return (
-		<Box py={4} w={{ base: 20, md: 48 }} h="full" px={4}>
-			<Tabs
-				index={activeTab}
-				onChange={handleChange}
-				variant="soft-rounded"
-				colorScheme="brand"
-				orientation="vertical"
-			>
+		<Box py={[2, 2, 0]} px={4} w="full">
+			<Tabs index={activeTab} onChange={handleChange} colorScheme="brand" w="full">
 				<TabList>
-					<Tab color="gray.400">General Settings</Tab>
-					<Tab color="gray.400">Server Settings</Tab>
-					<Tab color="gray.400">Job History</Tab>
+					<Tab>General</Tab>
+					<Tab>Server</Tab>
+					<Tab disabled>Jobs</Tab>
 				</TabList>
 			</Tabs>
 		</Box>

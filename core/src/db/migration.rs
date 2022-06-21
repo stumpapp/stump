@@ -15,8 +15,14 @@ const CREATE_MIGRATIONS_TABLE: &str =
 	include_str!("../../prisma/migrations/migrations.sql");
 
 #[derive(Deserialize, Debug)]
-struct CountQueryReturn {
-	count: u32,
+pub struct CountQueryReturn {
+	pub count: u32,
+}
+
+impl Default for CountQueryReturn {
+	fn default() -> Self {
+		Self { count: 0 }
+	}
 }
 
 fn get_sql_stmts(sql_str: &str) -> Vec<&str> {

@@ -38,6 +38,7 @@ pub fn api() -> Vec<Route> {
 		// library api
 		library::get_libraries,
 		library::get_library_by_id,
+		library::get_library_series,
 		library::scan_library,
 		library::create_library,
 		library::update_library,
@@ -46,6 +47,7 @@ pub fn api() -> Vec<Route> {
 		series::get_series,
 		series::get_series_by_id,
 		series::get_series_thumbnail,
+		series::get_series_media,
 		// media api
 		media::get_media,
 		media::get_reading_media,

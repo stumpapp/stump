@@ -4,6 +4,10 @@ export function getMedia(): Promise<PageableApiResult<Media[]>> {
 	return API.get('/media?unpaged=true');
 }
 
+export function getPaginatedMedia(page: number): Promise<PageableApiResult<Media[]>> {
+	return API.get(`/media?page=${page}`);
+}
+
 export function getMediaById(id: string): Promise<GetMediaById> {
 	return API.get(`/media/${id}`);
 }

@@ -29,7 +29,7 @@ impl Into<User> for prisma::user::Data {
 		let user_preferences = match self.user_preferences() {
 			Ok(up) => Some(up.unwrap().to_owned().into()),
 			Err(e) => {
-				log::debug!("Failed to load user preferences for user: {}", e);
+				log::trace!("Failed to load user preferences for user: {}", e);
 				None
 			},
 		};

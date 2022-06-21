@@ -1,11 +1,12 @@
 use std::path::Path;
 
-use prisma_client_rust::Direction;
+use prisma_client_rust::{raw, Direction, PrismaValue};
 use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
 
 use crate::{
+	db::migration::CountQueryReturn,
 	fs::{self},
 	guards::auth::{AdminGuard, Auth},
 	job::library::LibraryScannerJob,
@@ -64,22 +65,27 @@ pub async fn get_library_by_id(
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
-	let lib = db
+	// FIXME: this query is a pain to add series->media relation counts.
+	// This should be much better in https://github.com/Brendonovich/prisma-client-rust/issues/24
+	// but for now I kinda have to load all the media...
+	let library = db
 		.library()
 		.find_unique(library::id::equals(id.clone()))
-		.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
+		.with(library::series::fetch(vec![]))
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
 
-	if lib.is_none() {
+	if library.is_none() {
 		return Err(ApiError::NotFound(format!(
 			"Library with id {} not found",
 			id
 		)));
 	}
 
-	Ok(Json(lib.unwrap().into()))
+	let library = library.unwrap();
+
+	Ok(Json(library.into()))
 }
 
 // FIXME: I don't load the media relation on this query anymore, and it breaks the
@@ -100,17 +106,25 @@ pub async fn get_library_series(
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
 
+	// FIXME: this query is a pain to add series->media relation counts.
+	// This should be much better in https://github.com/Brendonovich/prisma-client-rust/issues/24
+	// but for now I kinda have to load all the media...
 	let series = db
 		.series()
 		.find_many(vec![series::library_id::equals(Some(id))])
-		// .with(media::read_progresses::fetch(vec![
-		// 	read_progress::user_id::equals(auth.0.id),
-		// ]))
+		.with(series::media::fetch(vec![]))
 		.order_by(series::name::order(Direction::Asc))
 		.exec()
 		.await?
 		.into_iter()
-		.map(|m| m.into())
+		.map(|series| {
+			let media_count = match series.media() {
+				Ok(media) => media.len() as i32,
+				_ => 0,
+			};
+
+			(series, media_count).into()
+		})
 		.collect::<Vec<Series>>();
 
 	let unpaged = match unpaged {

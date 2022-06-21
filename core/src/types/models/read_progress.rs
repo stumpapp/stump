@@ -26,7 +26,7 @@ impl Into<ReadProgress> for prisma::read_progress::Data {
 		let media = match self.media() {
 			Ok(media) => Some(media.to_owned().into()),
 			Err(e) => {
-				log::debug!("Failed to load media for read progress: {}", e);
+				log::trace!("Failed to load media for read progress: {}", e);
 				None
 			},
 		};
@@ -34,7 +34,7 @@ impl Into<ReadProgress> for prisma::read_progress::Data {
 		let user = match self.user() {
 			Ok(user) => Some(user.to_owned().into()),
 			Err(e) => {
-				log::debug!("Failed to load user for read progress: {}", e);
+				log::trace!("Failed to load user for read progress: {}", e);
 				None
 			},
 		};

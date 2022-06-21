@@ -14,6 +14,8 @@ export default function SeriesCard({ ...series }: Props) {
 		});
 	};
 
+	const bookCount = series.media ? series.media.length : series.mediaCount ?? 0;
+
 	return (
 		<Card
 			to={`/series/${series.id}`}
@@ -21,7 +23,7 @@ export default function SeriesCard({ ...series }: Props) {
 			imageSrc={getSeriesThumbnail(series.id)}
 			onMouseEnter={prefetchSeries}
 			title={series.name}
-			subtitle={pluralizeStat('book', series.media?.length || 0)}
+			subtitle={pluralizeStat('book', bookCount)}
 		/>
 	);
 }

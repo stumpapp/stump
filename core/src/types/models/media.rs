@@ -54,7 +54,7 @@ impl Into<Media> for prisma::media::Data {
 					.collect(),
 			),
 			Err(e) => {
-				log::debug!("Failed to load read progresses for media: {}", e);
+				log::trace!("Failed to load read progresses for media: {}", e);
 				None
 			},
 		};

@@ -1,8 +1,9 @@
-use prisma_client_rust::Direction;
+use prisma_client_rust::{raw, Direction, PrismaValue};
 use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
 use crate::{
+	db::migration::CountQueryReturn,
 	fs,
 	guards::auth::Auth,
 	prisma::{media, read_progress, series},
@@ -73,8 +74,7 @@ pub async fn get_series_by_id(
 
 	let load_media = load_media.unwrap_or(false);
 
-	let action = db.series();
-	let action = action.find_unique(series::id::equals(id.clone()));
+	let action = db.series().find_unique(series::id::equals(id.clone()));
 
 	let query = match load_media {
 		true => action.with(
@@ -94,6 +94,23 @@ pub async fn get_series_by_id(
 			"Series with id {} not found",
 			id
 		)));
+	}
+
+	if !load_media {
+		let count_res: Vec<CountQueryReturn> = db
+			._query_raw(raw!(
+				"SELECT COUNT(*) as count FROM media WHERE seriesId={}",
+				PrismaValue::String(id.clone())
+			))
+			.await?;
+
+		// TODO: dangerous cast
+		let media_count = match count_res.get(0) {
+			Some(val) => val.count,
+			None => 0,
+		} as i32;
+
+		return Ok(Json((series.unwrap(), media_count).into()));
 	}
 
 	Ok(Json(series.unwrap().into()))

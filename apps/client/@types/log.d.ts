@@ -24,4 +24,10 @@ interface Log {
 	createdAt: Date;
 }
 
+interface LogFileMeta {
+	path: string;
+	size: number;
+	modified: string;
+}
+
 type Logs = Log[];

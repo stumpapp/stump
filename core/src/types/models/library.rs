@@ -31,7 +31,7 @@ impl Into<Library> for prisma::library::Data {
 		let series = match self.series() {
 			Ok(series) => Some(series.into_iter().map(|s| s.to_owned().into()).collect()),
 			Err(e) => {
-				log::debug!("Failed to load series for library: {}", e);
+				log::trace!("Failed to load series for library: {}", e);
 				None
 			},
 		};
@@ -39,7 +39,7 @@ impl Into<Library> for prisma::library::Data {
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
 			Err(e) => {
-				log::debug!("Failed to load tags for library: {}", e);
+				log::trace!("Failed to load tags for library: {}", e);
 				None
 			},
 		};

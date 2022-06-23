@@ -3,7 +3,6 @@
 # ------------------------------------------------------------------------------
 
 FROM node:16-alpine3.14 as frontend
-ARG TARGETARCH
 
 WORKDIR /app
 
@@ -65,15 +64,15 @@ RUN mkdir -p data
 RUN mkdir -p app
 
 # copy the binary
-COPY --from=backend-build /app/stump ./app/stump
+COPY --from=backend-build /app/stump /app/stump
 
 # copy the react build
-COPY --from=frontend /app/build ./app/client
+COPY --from=frontend /app/build /app/client
 
 # *sigh* Rocket requires the toml file at runtime
-COPY core/Rocket.toml ./app/Rocket.toml
+COPY core/Rocket.toml /app/Rocket.toml
 
-RUN chown stump:stump ./app/stump
+RUN chown stump:stump stump
 
 USER stump
 
@@ -86,4 +85,4 @@ ENV ROCKET_PROFILE=release
 ENV ROCKET_LOG_LEVEL=normal
 ENV ROCKET_PORT=10801
 
-CMD ["./app/stump"]
+CMD ["./stump"]

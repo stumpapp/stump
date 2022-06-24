@@ -2623,6 +2623,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
+name = "openssl-src"
+version = "111.21.0+1.1.1p"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d0a8313729211913936f1b95ca47a5fc7f2e04cd658c115388287f8a8361008"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "openssl-sys"
 version = "0.9.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2631,6 +2640,7 @@ dependencies = [
  "autocfg",
  "cc",
  "libc",
+ "openssl-src",
  "pkg-config",
  "vcpkg",
 ]
@@ -4246,6 +4256,7 @@ dependencies = [
  "include_dir",
  "infer",
  "log",
+ "openssl",
  "prisma-client-rust",
  "ring",
  "rocket",

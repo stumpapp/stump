@@ -1,12 +1,11 @@
 use std::path::Path;
 
-use prisma_client_rust::{raw, Direction, PrismaValue};
+use prisma_client_rust::Direction;
 use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
 
 use crate::{
-	db::migration::CountQueryReturn,
 	fs::{self},
 	guards::auth::{AdminGuard, Auth},
 	job::library::LibraryScannerJob,

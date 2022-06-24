@@ -30,8 +30,12 @@ impl Job for LibraryScannerJob {
 			Some(format!("Starting library scan at {}", &library.path)),
 		));
 
+		let scanner_ctx = ctx.get_ctx();
+
+		// let on_progress = move |e| ctx.emit_client_event(e);
+
 		let mut scanner =
-			LibraryScanner::new(library, ctx.get_ctx(), (runner_id, files_to_process));
+			LibraryScanner::new(library, scanner_ctx, (runner_id, files_to_process));
 
 		let start = std::time::Instant::now();
 

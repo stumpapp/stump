@@ -277,7 +277,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 			<PaginationArrow
 				kind="next"
 				href={`${location.pathname}?page=${currentPage + 1}`}
-				isDisabled={currentPage >= pages - 1}
+				isDisabled={currentPage >= pages}
 			/>
 		</HStack>
 	);

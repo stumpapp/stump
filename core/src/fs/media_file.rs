@@ -1,7 +1,6 @@
 use rocket::http::ContentType;
 use std::{path::Path, str::FromStr};
 use walkdir::DirEntry;
-use zip::read::ZipFile;
 
 use crate::types::{
 	alias::ProcessResult, errors::ProcessFileError, http::ImageResponse,
@@ -14,6 +13,9 @@ use super::{
 	rar::{get_rar_image, process_rar},
 	zip::{get_zip_image, process_zip},
 };
+
+// FIXME: this module does way too much. It should be cleaned up, way too many vaguely
+// similar things shoved in here with little distinction.
 
 // TODO: replace all these match statements with an custom enum that handles it all.
 // The enum itself will have some repetition, however it'll be cleaner than

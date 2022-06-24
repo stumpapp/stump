@@ -4241,6 +4241,7 @@ dependencies = [
  "dirs",
  "epub",
  "fern",
+ "figment",
  "image",
  "include_dir",
  "infer",

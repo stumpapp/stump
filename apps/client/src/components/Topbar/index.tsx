@@ -74,7 +74,7 @@ export default function Topbar() {
 	return (
 		<Box
 			as="nav"
-			className="sticky top-0 grid grid-cols-12 w-full items-center px-4 py-2 md:py-3"
+			className="sticky top-0 grid grid-cols-12 w-full items-center px-4 py-2 md:py-3 z-10"
 			bg={{
 				base: useColorModeValue('white', 'gray.800'),
 				md: useColorModeValue('gray.75', 'gray.900'),

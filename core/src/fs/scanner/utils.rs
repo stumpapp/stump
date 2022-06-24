@@ -58,11 +58,6 @@ pub async fn insert_media(
 
 	let path = entry.path();
 
-	let metadata = match entry.metadata() {
-		Ok(metadata) => Some(metadata),
-		_ => None,
-	};
-
 	let path_str = path.to_str().unwrap().to_string();
 	let mut name = entry.file_name().to_str().unwrap().to_string();
 	let ext = path.extension().unwrap().to_str().unwrap().to_string();
@@ -72,22 +67,16 @@ pub async fn insert_media(
 		name.truncate(name.len() - (ext.len() + 1));
 	}
 
+	// Note: make this return a tuple if I need to grab anything else from metadata.
+	let size = match entry.metadata() {
+		Ok(metadata) => metadata.len(),
+		_ => 0,
+	};
+
 	let comic_info = match processed_entry.metadata {
 		Some(info) => info,
 		None => MediaMetadata::default(),
 	};
-
-	let mut size: u64 = 0;
-	// let mut modified: DateTime<FixedOffset> = chrono::Utc::now().into();
-
-	if let Some(metadata) = metadata {
-		size = metadata.len();
-
-		// if let Ok(st) = metadata.modified() {
-		// 	let utc: DateTime<Utc> = st.into();
-		// 	modified = utc.into();
-		// }
-	}
 
 	let media = ctx
 		.db
@@ -105,7 +94,6 @@ pub async fn insert_media(
 				media::checksum::set(processed_entry.checksum),
 				media::description::set(comic_info.summary),
 				media::series::link(series::id::equals(series_id)),
-				// media::updated_at::set(modified),
 			],
 		)
 		.exec()

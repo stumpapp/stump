@@ -34,7 +34,7 @@ impl From<Option<PagedRequestParams>> for PageParams {
 
 				let default_page = if zero_based { 0 } else { 1 };
 
-				let mut page = params.page.unwrap_or(default_page);
+				let page = params.page.unwrap_or(default_page);
 
 				PageParams {
 					page,

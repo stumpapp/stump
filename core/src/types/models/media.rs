@@ -40,7 +40,7 @@ impl Into<Media> for prisma::media::Data {
 	fn into(self) -> Media {
 		let series = match self.series() {
 			Ok(series) => Some(series.unwrap().to_owned().into()),
-			Err(e) => {
+			Err(_e) => {
 				// log::debug!("Failed to load series for media: {}", e);
 				None
 			},
@@ -61,7 +61,7 @@ impl Into<Media> for prisma::media::Data {
 
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
-			Err(e) => {
+			Err(_e) => {
 				// log::debug!("Failed to load tags for media: {}", e);
 				None
 			},

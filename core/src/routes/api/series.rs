@@ -181,3 +181,72 @@ pub async fn get_series_media(
 
 	Ok(Json((media, page_params).into()))
 }
+
+// TODO: I might just have this endpoint return a string (id) of the media
+// instead. I could try and write a raw SQL query that would probably perform
+// better than this manual sorting.
+#[openapi(tag = "Series")]
+#[get("/series/<id>/next")]
+pub async fn series_next_media(
+	id: String,
+	ctx: &Context,
+	auth: Auth,
+) -> ApiResult<Json<Option<Media>>> {
+	let db = ctx.get_db();
+
+	let series = db
+		.series()
+		.find_unique(series::id::equals(id.clone()))
+		.with(
+			series::media::fetch(vec![])
+				.with(media::read_progresses::fetch(vec![
+					read_progress::user_id::equals(auth.0.id),
+				]))
+				.order_by(media::name::order(Direction::Asc)),
+		)
+		.exec()
+		.await?;
+
+	if series.is_none() {
+		return Err(ApiError::NotFound(format!(
+			"Series with id {} no found.",
+			id
+		)));
+	}
+
+	let series = series.unwrap();
+
+	let media = series.media();
+
+	if media.is_err() {
+		return Ok(Json(None));
+	}
+
+	let media = media
+		.unwrap()
+		.into_iter()
+		.map(|m| m.to_owned().into())
+		.filter(|m: &Media| {
+			if let Some(progresses) = &m.read_progresses {
+				let progress = progresses.get(0).unwrap();
+
+				return progress.page < m.pages && progress.page > 0;
+			}
+
+			false
+		})
+		.collect::<Vec<Media>>();
+
+	if media.len() == 0 {
+		return Ok(Json(None));
+	}
+
+	// TODO: test that this is really what I want. I am on a plane and don't
+	// have the mental capacity to think of this now lol but if I sort initially
+	// by name in the query and then filter out media that either has no progress
+	// or has 'completed' progress, then the 'next' book should be the first in that
+	// list
+	Ok(Json(media.get(0).map(|n| n.to_owned())))
+}
+
+// pub async fn download_series()

@@ -1,28 +1,35 @@
 {
 	"name": "@stump/monorepo",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"repository": "https://github.com/aaronleopold/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
 	"scripts": {
-		"setup": "pnpm i && pnpm core run setup",
-		"website": "pnpm --filter @stump/website --",
+		"setup": "pnpm i && pnpm client build && pnpm core run setup",
+		"start": "pnpm core start",
+		"dev": "concurrently -n core,client -c green.bold,blue.bold \"pnpm core dev\" \"pnpm client dev\"",
 		"core": "pnpm --filter @stump/core --",
-		"prisma": "pnpm core prisma",
+		"prisma": "pnpm core prisma --",
+		"client": "pnpm --filter @stump/client --",
+		"website": "pnpm --filter @stump/website --",
 		"prepare": "husky install",
-		"unimported": "npx unimported ./packages/core/frontend"
+		"build": "pnpm client build && pnpm core build",
+		"build:docker": "docker buildx build --push --platform=linux/arm/v7,linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest ."
 	},
 	"devDependencies": {
 		"husky": "^7.0.2",
 		"lint-staged": "^12.4.2",
-		"prettier": "^2.6.2"
+		"prettier": "^2.6.2",
+		"concurrently": "^6.5.1",
+		"move-cli": "2.0.0",
+		"trash-cli": "^5.0.0"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,md}": [
 			"prettier --write"
 		],
 		".rs": [
-			"cargo fmt --manifest-path=core/server/Cargo.toml --"
+			"cargo fmt --manifest-path=core/Cargo.toml --"
 		]
 	}
 }

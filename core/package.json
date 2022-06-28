@@ -1,0 +1,18 @@
+{
+  "name": "@stump/core",
+  "version": "0.0.1",
+  "description": "",
+  "keywords": [],
+  "license": "MIT",
+  "scripts": {
+    "prisma": "cargo prisma --",
+    "setup": "cargo prisma generate && pnpm get-client",
+    "start": "cargo run --release",
+    "dev": "cargo watch -x run",
+    "build": "pnpm get-client && cargo build --release && pnpm move-client && pnpm move-rocket",
+    "get-client": "trash ./client && move-cli ../apps/client/build ./client",
+    "move-client": "trash ../target/release/client && cp -r ./client ../target/release/client",
+    "move-rocket": "trash ../target/release/Rocket.toml && cp ./Rocket.toml ../target/release/Rocket.toml",
+    "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --"
+  }
+}

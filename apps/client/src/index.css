@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	@apply font-sans antialiased h-full;
+}
+
+#root,
+html {
+	@apply h-full;
+}
+
+main {
+	@apply h-full w-full overflow-y-scroll scrollbar-hide overflow-x-hidden flex flex-col !important;
+}
+
+form {
+	margin-block-end: 0;
+}
+
+.chakra-popover__popper {
+	z-index: 100 !important;
+}
+
+/* input:-webkit-autofill {
+	-webkit-text-fill-color: theme('colors.gray.800') !important;
+} */
+
+.card-title {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#nprogress {
+	@apply pointer-events-none z-50;
+}
+#nprogress .bar {
+	@apply bg-brand-500 fixed top-0 left-0 z-50 h-0.5 w-full;
+}

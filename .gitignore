@@ -14,7 +14,7 @@ build
 # rust
 static
 target
-client
+core/client
 *.db*
 *.sqlite*
 *prisma.rs*

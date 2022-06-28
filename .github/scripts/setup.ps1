@@ -43,7 +43,7 @@ if (-NOT (Get-Command pnpm -errorAction SilentlyContinue)) {
 write-host "Attempting to install 'cargo-watch':"
 cargo install cargo-watch
 
-write-host "Running 'pnpm core setup':"
+write-host "Running 'pnpm run setup':"
 pnpm run setup
 
-write-host "Pre-setup completed! Run 'pnpm core dev' or 'pnpm core start' to get started."
+write-host "Pre-setup completed! Run 'pnpm dev' or 'pnpm start' to get started."

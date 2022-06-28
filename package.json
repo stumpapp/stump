@@ -14,7 +14,7 @@
 		"website": "pnpm --filter @stump/website --",
 		"prepare": "husky install",
 		"build": "pnpm client build && pnpm core build",
-		"build:docker": "docker buildx build --platform=linux/arm64,linux/amd64 -t stump ."
+		"build:docker": "docker buildx build --push --platform=linux/arm/v7,linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest ."
 	},
 	"devDependencies": {
 		"husky": "^7.0.2",

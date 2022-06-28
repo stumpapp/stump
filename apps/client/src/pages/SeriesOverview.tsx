@@ -53,7 +53,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 
 				<Text>
 					{series.description}
-					PRESS START ON A BRAND-NEW MARVEL UNIVERSE! Showered with worldwide acclaim, the
+					{/* PRESS START ON A BRAND-NEW MARVEL UNIVERSE! Showered with worldwide acclaim, the
 					blockbuster Marvel’s Spider-Man has everyone’s spider-sense buzzing! Now you can
 					experience the emotional and shock-filled story that takes favorite characters (including
 					Mary Jane, Aunt May, Norman Osborn, Otto Octavius and Miles Morales) and spins them into
@@ -64,7 +64,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					removed from the mean streets of the Big Apple, how will the mysterious Mister Negative’s
 					ascent to power bring Peter Parker’s civilian world and Spider-Man’s superhuman worlds
 					crashing together? Plus: All-new story moments never seen in the game and bonus
-					behind-the-scenes content!
+					behind-the-scenes content! */}
 				</Text>
 			</div>
 		</div>

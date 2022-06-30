@@ -16,6 +16,8 @@ use crate::{
 	},
 };
 
+/// Get all series accessible by user. This is a paginated respone, and
+/// accepts various paginated request params.
 #[openapi(tag = "Series")]
 #[get("/series?<load_media>&<unpaged>&<page_params..>")]
 pub async fn get_series(
@@ -62,6 +64,8 @@ pub async fn get_series(
 	Ok(Json((series, page_params).into()))
 }
 
+/// Get a series by ID. Optional query param `load_media` that will load the media
+/// relation (i.e. the media entities will be loaded and sent with the response)
 #[openapi(tag = "Series")]
 #[get("/series/<id>?<load_media>")]
 pub async fn get_series_by_id(
@@ -145,7 +149,8 @@ pub async fn get_series_thumbnail(
 	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
 }
 
-/// Returns the media in a given series.
+/// Returns the media in a given series. This is a paginated respone, and
+/// accepts various paginated request params.
 #[openapi(tag = "Series")]
 #[get("/series/<id>/media?<unpaged>&<page_params..>")]
 pub async fn get_series_media(
@@ -182,11 +187,12 @@ pub async fn get_series_media(
 	Ok(Json((media, page_params).into()))
 }
 
-// TODO: I might just have this endpoint return a string (id) of the media
-// instead. I could try and write a raw SQL query that would probably perform
-// better than this manual sorting.
+/// Get the next media in a series, based on the read progress for the requesting user.
+/// Stump will return the first book in the series without progress, or return the first
+/// with partial progress. E.g. if a user has read pages 32/32 of book 3, then book 4 is
+/// next. If a user has read pages 31/32 of book 4, then book 4 is still next.
 #[openapi(tag = "Series")]
-#[get("/series/<id>/next")]
+#[get("/series/<id>/media/next")]
 pub async fn series_next_media(
 	id: String,
 	ctx: &Context,
@@ -222,31 +228,34 @@ pub async fn series_next_media(
 		return Ok(Json(None));
 	}
 
-	let media = media
-		.unwrap()
-		.into_iter()
-		.map(|m| m.to_owned().into())
-		.filter(|m: &Media| {
-			if let Some(progresses) = &m.read_progresses {
-				let progress = progresses.get(0).unwrap();
+	let media = media.unwrap();
 
-				return progress.page < m.pages && progress.page > 0;
-			}
+	Ok(Json(
+		media
+			.into_iter()
+			.find(|m| {
+				// I don't really know that this is valid... When I load in the
+				// relation, this will NEVER be None. It will default to an empty
+				// vector. But, for safety I guess I will leave this for now.
+				if m.read_progresses.is_none() {
+					return true;
+				}
 
-			false
-		})
-		.collect::<Vec<Media>>();
+				let progresses = m.read_progresses.as_ref().unwrap();
 
-	if media.len() == 0 {
-		return Ok(Json(None));
-	}
+				// No progress means it is up next (for this user)!
+				if progresses.len() == 0 {
+					return true;
+				} else {
+					// Note: this should never really exceed len == 1, but :shrug:
+					let progress = progresses.get(0).unwrap();
 
-	// TODO: test that this is really what I want. I am on a plane and don't
-	// have the mental capacity to think of this now lol but if I sort initially
-	// by name in the query and then filter out media that either has no progress
-	// or has 'completed' progress, then the 'next' book should be the first in that
-	// list
-	Ok(Json(media.get(0).map(|n| n.to_owned())))
+					return progress.page < m.pages && progress.page > 0;
+				}
+			})
+			.or(media.get(0))
+			.map(|data| data.to_owned().into()),
+	))
 }
 
 // pub async fn download_series()

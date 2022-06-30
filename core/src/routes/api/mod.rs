@@ -48,6 +48,7 @@ pub fn api() -> Vec<Route> {
 		series::get_series_by_id,
 		series::get_series_thumbnail,
 		series::get_series_media,
+		series::series_next_media,
 		// media api
 		media::get_media,
 		media::get_reading_media,
@@ -99,7 +100,7 @@ async fn ping() -> String {
 	"pong".to_string()
 }
 
-// FIXME: won't work for docker. Allow custom shudown command sequences.
+// FIXME: won't work for docker. Allow custom shudown command sequences?
 /// Attempts to safely shutdown the server. Only server owners can do this.
 #[openapi(tag = "General")]
 #[post("/shutdown")]

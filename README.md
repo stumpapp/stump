@@ -45,6 +45,8 @@ For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're 
 
 Stump isn't ready for normal, non-development usage yet. Once a release has been made, this will be updated. For now, follow the [Development Setup](#development-setup) section to build from source and run locally.
 
+There is now a [x86_64 preview docker image](https://hub.docker.com/repository/docker/aaronleopold/stump-preview) available for those interested. **This is only meant for testing purposes, and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container.
+
 For information about getting started, how Stump works and manages your library data, and much more detailed information, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 
 ## Project Structure
@@ -82,7 +84,7 @@ The 'apps' directory is where Stump applications are located. These are separate
 
 ## Development Setup
 
-There is now a setup script that handles most of the initial configuration, however ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
+There is a setup script that handles most of the initial configuration, however ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
 
 **Ensure you are on the `develop` branch before continuing.**
 

@@ -15,8 +15,8 @@ use crate::{
 	},
 };
 
-// TODO: paginate some of these?
-
+/// Get all media accessible to the requester. This is a paginated request, and
+/// has various pagination params available.
 #[openapi(tag = "Media")]
 #[get("/media?<unpaged>&<page_params..>")]
 pub async fn get_media(
@@ -52,6 +52,8 @@ pub async fn get_media(
 	Ok(Json((media, page_params).into()))
 }
 
+/// Get all media with identical checksums. This heavily implies duplicate files.  
+/// This is a paginated request, and has various pagination params available.
 #[openapi(tag = "Media")]
 #[get("/media/duplicates?<unpaged>&<page_params..>")]
 pub async fn get_duplicate_media(
@@ -77,7 +79,11 @@ pub async fn get_duplicate_media(
 
 	Ok(Json((media, page_params).into()))
 }
-
+// TODO: I will need to add epub progress in here SOMEHOW... this will be rather
+// difficult...
+// TODO: paginate?
+/// Get all media which the requester has progress for that is less than the
+/// total number of pages available (i.e not completed).
 #[openapi(tag = "Media")]
 #[get("/media/keep-reading")]
 pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
@@ -142,7 +148,7 @@ pub async fn get_media_by_id(
 pub async fn get_media_file(
 	id: String,
 	ctx: &Context,
-	// _auth: Auth,
+	_auth: Auth,
 ) -> ApiResult<FileResponse> {
 	let db = ctx.get_db();
 
@@ -200,6 +206,7 @@ pub async fn convert_media_to_cbz(
 		)));
 	}
 
+	// TODO: write me...
 	unimplemented!()
 }
 

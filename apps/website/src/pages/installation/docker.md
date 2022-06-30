@@ -3,16 +3,12 @@
 {% callout title="Note" icon="danger" %}
 Stump will have an official Docker image available when the first beta release is published.
 
-For now, Docker builds of Stump are _development only_, meaning if you want to use Docker you'll have to build your own image. This assumes you have already followed the [Developer Setup](/contributing) guide. These instructions will be updated for general usage when the official Docker image is available.
+For now, there is an x86_64 preview image available. **These are not frequently updated and are for testing purposes and are not intended for public usage yet**, so do not expect a fully featured, bug-free experience if you spin up a container.
 {% /callout %}
 
 ## Usage
 
-You need to first create the image. Run the following command:
-
-```bash
-pnpm core build:docker
-```
+You have two options for spinning up a container based on your preference. I prefer using compose, however I have listed instructions for both Docker CLI and Docker Compose below.
 
 ### Docker CLI
 
@@ -27,7 +23,7 @@ docker create \
   --mount type=bind,source=/Users/aaronleopold/.stump,target=/config \
   --mount type=bind,source=/Users/aaronleopold/Documents/Stump,target=/data \
   --restart unless-stopped \
-  aaronleopold/stump
+  aaronleopold/stump-preview
 ```
 
 Then you can start the container:
@@ -50,23 +46,19 @@ Below is an example of a Docker Compose file you can use to bootstrap your Stump
 version: '3.3'
 services:
   stump:
-    image: stump # this will be `aaronleopold/stump` when it is released
+    image: aaronleopold/stump-preview # this will be `aaronleopold/stump` when it is released
     container_name: stump
+    # Replace my paths (prior to the colons) with your own
     volumes:
-      - type: bind
-        source: /Users/aaronleopold/.stump
-        target: /home/stump/config
-      - type: bind
-        source: /Users/aaronleopold/Documents/Stump
-        target: /home/stump/data
+      - /Users/aaronleopold/.stump:/config
+      - /Users/aaronleopold/Documents/Stump:/data
     ports:
       - 10801:10801
     user: '1000:1000'
     # This `environment` field is optional, remove if you don't need it. I am using
     # them as an example here, but these are actually their default values.
     environment:
-      - STUMP_CONFIG_DIR=/home/stump/config
-      - STUMP_CLIENT_DIR=/home/stump/client
+      - STUMP_CONFIG_DIR=/config
     restart: unless-stopped
 ```
 

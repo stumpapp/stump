@@ -12,6 +12,8 @@ import useIsInView from '~hooks/useIsInView';
 import { Box, ButtonGroup, Heading, Text } from '@chakra-ui/react';
 import Button, { IconButton } from '~components/ui/Button';
 import { CloudArrowDown } from 'phosphor-react';
+import UpNextButton from '~components/Series/UpNextButton';
+import DownloadSeriesButton from '~components/Series/DownloadSeriesButton';
 
 interface OverviewTitleSectionProps {
 	isVisible: boolean;
@@ -43,12 +45,8 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					{series.name}
 				</Heading>
 				<ButtonGroup>
-					<Button title="Continue from where you left off" colorScheme="brand">
-						Continue
-					</Button>
-					<IconButton size="md" title="Download series as ZIP archive">
-						<CloudArrowDown size="1.25rem" />
-					</IconButton>
+					<UpNextButton seriesId={series.id} />
+					<DownloadSeriesButton seriesId={series.id} />
 				</ButtonGroup>
 
 				<Text>

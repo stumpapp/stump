@@ -8,6 +8,10 @@ export function getSeriesMedia(id: string, page: number): Promise<PageableApiRes
 	return API.get(`/series/${id}/media?page=${page}`);
 }
 
+export function getNextInSeries(id: string): Promise<ApiResult<Media | undefined>> {
+	return API.get(`/series/${id}/media/next`);
+}
+
 export function getSeriesThumbnail(id: string): string {
 	return `${baseURL}/series/${id}/thumbnail`;
 }

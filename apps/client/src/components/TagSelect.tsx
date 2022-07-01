@@ -54,6 +54,7 @@ export default function TagSelect({
 						value={value}
 						options={options}
 						placeholder="Select tags"
+						noOptionsMessage={() => <p>You haven't created any tags yet</p>}
 						closeMenuOnSelect={false}
 						// menuIsOpen
 						chakraStyles={{

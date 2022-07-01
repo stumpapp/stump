@@ -84,7 +84,8 @@ FROM ${TARGETARCH}-backend AS core-builder
 # ------------------------------------------------------------------------------
 FROM alpine:latest
 
-RUN apk add --no-cache libstdc++
+# TODO: remove binutils, adding for debug options
+RUN apk add --no-cache libstdc++ binutils
 
 RUN addgroup -g 1000 stump
 
@@ -119,4 +120,6 @@ ENV ROCKET_PROFILE=release
 ENV ROCKET_LOG_LEVEL=normal
 ENV ROCKET_PORT=10801
 
-CMD ["./app/stump"]
+WORKDIR /app
+
+CMD ["./stump"]

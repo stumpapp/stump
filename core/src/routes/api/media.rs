@@ -3,6 +3,7 @@ use rocket::{fs::NamedFile, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
+	db::utils::PrismaClientTrait,
 	fs,
 	guards::auth::Auth,
 	prisma::{media, read_progress, user},
@@ -11,7 +12,7 @@ use crate::{
 		errors::ApiError,
 		http::{FileResponse, ImageResponse},
 		models::{media::Media, read_progress::ReadProgress},
-		pageable::{Pageable, PagedRequestParams},
+		pageable::{PageParams, Pageable, PagedRequestParams},
 	},
 };
 
@@ -50,6 +51,66 @@ pub async fn get_media(
 	}
 
 	Ok(Json((media, page_params).into()))
+}
+
+/// Get all media accessible to the requester. This is a paginated request, and
+/// has various pagination params available.
+#[openapi(tag = "Media")]
+#[get("/media-test?<unpaged>&<page_params..>")]
+pub async fn get_media_test(
+	unpaged: Option<bool>,
+	page_params: Option<PagedRequestParams>,
+	ctx: &Context,
+	auth: Auth,
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let db = ctx.get_db();
+
+	let base_query = db
+		.media()
+		.find_many(vec![])
+		.with(media::read_progresses::fetch(vec![
+			read_progress::user_id::equals(auth.0.id),
+		]))
+		.order_by(media::name::order(Direction::Asc));
+
+	let unpaged = match unpaged {
+		Some(val) => val,
+		None => page_params.is_none(),
+	};
+
+	if unpaged {
+		return Ok(Json(
+			base_query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>()
+				.into(),
+		));
+	}
+
+	let count = db.media_count().await?;
+
+	let page_params = PageParams::from(page_params);
+
+	let skip = match page_params.zero_based {
+		true => page_params.page * page_params.page_size,
+		false => (page_params.page - 1) * page_params.page_size,
+	} as i64;
+
+	let take = page_params.page_size as i64;
+
+	let media = base_query
+		.skip(skip)
+		.take(take)
+		.exec()
+		.await?
+		.into_iter()
+		.map(|m| m.into())
+		.collect::<Vec<Media>>();
+
+	Ok(Json((media, count, page_params).into()))
 }
 
 /// Get all media with identical checksums. This heavily implies duplicate files.  
@@ -99,7 +160,7 @@ pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<
 				read_progress::user_id::equals(auth.0.id),
 				read_progress::page::gt(0),
 			]))
-			.order_by(media::name::order(Direction::Asc))
+			.order_by(media::updated_at::order(Direction::Desc))
 			.exec()
 			.await?
 			.into_iter()
@@ -107,7 +168,20 @@ pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<
 				// Read progresses relation on media is one to many, there is a dual key
 				// on read_progresses table linking a user and media. Therefore, there should
 				// only be 1 item in this vec for each media resulting from the query.
-				Ok(progress) => progress.len() == 1 && progress[0].page < m.pages,
+				Ok(progresses) => {
+					if progresses.len() != 1 {
+						return false;
+					}
+
+					let progress = &progresses[0];
+
+					if let Some(_epubcfi) = progress.epubcfi.as_ref() {
+						// TODO: figure something out... might just need a `completed` field in progress TBH.
+						return false;
+					} else {
+						return progress.page < m.pages;
+					}
+				},
 				_ => false,
 			})
 			.map(|m| m.into())

@@ -176,3 +176,16 @@ where
 		(self.0, PageParams::from(self.1)).into()
 	}
 }
+
+impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, u32, PageParams)
+where
+	T: Serialize + Clone,
+{
+	fn into(self) -> Pageable<Vec<T>> {
+		let (data, db_total, page_params) = self;
+
+		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
+
+		Pageable::new(data, PageInfo::new(page_params, total_pages))
+	}
+}

@@ -1,4 +1,5 @@
 pub mod migration;
+pub mod utils;
 
 use crate::{config::get_config_dir, prisma};
 

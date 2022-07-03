@@ -51,6 +51,7 @@ pub fn api() -> Vec<Route> {
 		series::series_next_media,
 		// media api
 		media::get_media,
+		media::get_media_test,
 		media::get_reading_media,
 		media::get_media_by_id,
 		media::get_media_file,

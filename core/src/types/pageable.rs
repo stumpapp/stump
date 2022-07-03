@@ -8,7 +8,7 @@ pub struct PagedRequestParams {
 	pub page_size: Option<u32>,
 }
 
-#[derive(Debug, Serialize, JsonSchema)]
+#[derive(Debug, Serialize, JsonSchema, Clone, Copy)]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,

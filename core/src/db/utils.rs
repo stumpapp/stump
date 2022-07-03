@@ -1,6 +1,12 @@
-use prisma_client_rust::{raw, PrismaValue};
+use prisma_client_rust::{
+	query_core::Selection, raw, FindMany, PrismaValue, SerializedWhere,
+};
+use rocket::serde::DeserializeOwned;
 
-use crate::{prisma::PrismaClient, types::alias::ApiResult};
+use crate::{
+	prisma::PrismaClient,
+	types::{alias::ApiResult, pageable::PageParams},
+};
 
 use super::migration::CountQueryReturn;
 
@@ -35,5 +41,31 @@ impl PrismaClientTrait for PrismaClient {
 			Some(val) => val.count,
 			None => 0,
 		})
+	}
+}
+
+pub trait FindManyTrait {
+	fn paginated(self, page_params: PageParams) -> Self;
+}
+
+impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
+	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
+where
+	Where: Into<SerializedWhere>,
+	With: Into<Selection>,
+	OrderBy: Into<(String, PrismaValue)>,
+	Cursor: Into<(String, PrismaValue)>,
+	Set: Into<(String, PrismaValue)>,
+	Data: DeserializeOwned,
+{
+	fn paginated(self, page_params: PageParams) -> Self {
+		let skip = match page_params.zero_based {
+			true => page_params.page * page_params.page_size,
+			false => (page_params.page - 1) * page_params.page_size,
+		} as i64;
+
+		let take = page_params.page_size as i64;
+
+		self.skip(skip).take(take)
 	}
 }

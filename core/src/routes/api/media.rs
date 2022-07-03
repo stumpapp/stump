@@ -3,7 +3,7 @@ use rocket::{fs::NamedFile, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
-	db::utils::PrismaClientTrait,
+	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs,
 	guards::auth::Auth,
 	prisma::{media, read_progress, user},
@@ -16,48 +16,48 @@ use crate::{
 	},
 };
 
+// /// Get all media accessible to the requester. This is a paginated request, and
+// /// has various pagination params available.
+// #[openapi(tag = "Media")]
+// #[get("/media?<unpaged>&<page_params..>")]
+// pub async fn get_media(
+// 	unpaged: Option<bool>,
+// 	page_params: Option<PagedRequestParams>,
+// 	ctx: &Context,
+// 	auth: Auth,
+// ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+// 	let db = ctx.get_db();
+
+// 	let media = db
+// 		.media()
+// 		.find_many(vec![])
+// 		.with(media::read_progresses::fetch(vec![
+// 			read_progress::user_id::equals(auth.0.id),
+// 		]))
+// 		.order_by(media::name::order(Direction::Asc))
+// 		.exec()
+// 		.await?
+// 		.into_iter()
+// 		.map(|m| m.into())
+// 		.collect::<Vec<Media>>();
+
+// 	let unpaged = match unpaged {
+// 		Some(val) => val,
+// 		None => page_params.is_none(),
+// 	};
+
+// 	if unpaged {
+// 		return Ok(Json(media.into()));
+// 	}
+
+// 	Ok(Json((media, page_params).into()))
+// }
+
 /// Get all media accessible to the requester. This is a paginated request, and
 /// has various pagination params available.
 #[openapi(tag = "Media")]
 #[get("/media?<unpaged>&<page_params..>")]
 pub async fn get_media(
-	unpaged: Option<bool>,
-	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
-	auth: Auth,
-) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let db = ctx.get_db();
-
-	let media = db
-		.media()
-		.find_many(vec![])
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(auth.0.id),
-		]))
-		.order_by(media::name::order(Direction::Asc))
-		.exec()
-		.await?
-		.into_iter()
-		.map(|m| m.into())
-		.collect::<Vec<Media>>();
-
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
-
-	if unpaged {
-		return Ok(Json(media.into()));
-	}
-
-	Ok(Json((media, page_params).into()))
-}
-
-/// Get all media accessible to the requester. This is a paginated request, and
-/// has various pagination params available.
-#[openapi(tag = "Media")]
-#[get("/media-test?<unpaged>&<page_params..>")]
-pub async fn get_media_test(
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
 	ctx: &Context,
@@ -94,16 +94,8 @@ pub async fn get_media_test(
 
 	let page_params = PageParams::from(page_params);
 
-	let skip = match page_params.zero_based {
-		true => page_params.page * page_params.page_size,
-		false => (page_params.page - 1) * page_params.page_size,
-	} as i64;
-
-	let take = page_params.page_size as i64;
-
 	let media = base_query
-		.skip(skip)
-		.take(take)
+		.paginated(page_params)
 		.exec()
 		.await?
 		.into_iter()

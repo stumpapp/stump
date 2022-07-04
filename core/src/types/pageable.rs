@@ -1,18 +1,26 @@
 use rocket_okapi::JsonSchema;
 use serde::Serialize;
 
+use super::enums::Direction;
+
+pub trait QueryOrderTrait {}
+
 #[derive(Serialize, FromForm, JsonSchema)]
 pub struct PagedRequestParams {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
+	pub order_by: Option<String>,
+	pub direction: Option<Direction>,
 }
 
-#[derive(Debug, Serialize, JsonSchema, Clone, Copy)]
+#[derive(Debug, Serialize, JsonSchema, Clone)]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,
 	pub page_size: u32,
+	pub order_by: String,
+	pub direction: Direction,
 }
 
 impl Default for PageParams {
@@ -21,6 +29,8 @@ impl Default for PageParams {
 			zero_based: false,
 			page: 0,
 			page_size: 20,
+			order_by: "name".to_string(),
+			direction: Direction::Asc,
 		}
 	}
 }
@@ -40,6 +50,8 @@ impl From<Option<PagedRequestParams>> for PageParams {
 					page,
 					page_size,
 					zero_based,
+					order_by: params.order_by.unwrap_or("name".to_string()),
+					direction: params.direction.unwrap_or_default(),
 				}
 			},
 			None => PageParams::default(),

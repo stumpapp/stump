@@ -6,64 +6,38 @@ use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs,
 	guards::auth::Auth,
-	prisma::{media, read_progress, user},
+	prisma::{
+		media::{self, OrderByParam},
+		read_progress, user,
+	},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::{FileResponse, ImageResponse},
-		models::{media::Media, read_progress::ReadProgress},
+		models::{
+			media::{Media, MediaOrder},
+			read_progress::ReadProgress,
+		},
 		pageable::{PageParams, Pageable, PagedRequestParams},
 	},
 };
 
-// /// Get all media accessible to the requester. This is a paginated request, and
-// /// has various pagination params available.
-// #[openapi(tag = "Media")]
-// #[get("/media?<unpaged>&<page_params..>")]
-// pub async fn get_media(
-// 	unpaged: Option<bool>,
-// 	page_params: Option<PagedRequestParams>,
-// 	ctx: &Context,
-// 	auth: Auth,
-// ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-// 	let db = ctx.get_db();
-
-// 	let media = db
-// 		.media()
-// 		.find_many(vec![])
-// 		.with(media::read_progresses::fetch(vec![
-// 			read_progress::user_id::equals(auth.0.id),
-// 		]))
-// 		.order_by(media::name::order(Direction::Asc))
-// 		.exec()
-// 		.await?
-// 		.into_iter()
-// 		.map(|m| m.into())
-// 		.collect::<Vec<Media>>();
-
-// 	let unpaged = match unpaged {
-// 		Some(val) => val,
-// 		None => page_params.is_none(),
-// 	};
-
-// 	if unpaged {
-// 		return Ok(Json(media.into()));
-// 	}
-
-// 	Ok(Json((media, page_params).into()))
-// }
-
 /// Get all media accessible to the requester. This is a paginated request, and
 /// has various pagination params available.
 #[openapi(tag = "Media")]
-#[get("/media?<unpaged>&<page_params..>")]
+#[get("/media?<unpaged>&<req_params..>")]
 pub async fn get_media(
 	unpaged: Option<bool>,
-	page_params: Option<PagedRequestParams>,
+	req_params: Option<PagedRequestParams>,
 	ctx: &Context,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
+
+	let unpaged = unpaged.unwrap_or_else(|| req_params.is_none());
+	let page_params = PageParams::from(req_params);
+	let order_by_param: OrderByParam =
+		MediaOrder::from(page_params.clone()).try_into()?;
 
 	let base_query = db
 		.media()
@@ -71,12 +45,7 @@ pub async fn get_media(
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(auth.0.id),
 		]))
-		.order_by(media::name::order(Direction::Asc));
-
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
+		.order_by(order_by_param);
 
 	if unpaged {
 		return Ok(Json(
@@ -92,10 +61,8 @@ pub async fn get_media(
 
 	let count = db.media_count().await?;
 
-	let page_params = PageParams::from(page_params);
-
 	let media = base_query
-		.paginated(page_params)
+		.paginated(page_params.clone())
 		.exec()
 		.await?
 		.into_iter()

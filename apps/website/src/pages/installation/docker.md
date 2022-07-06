@@ -10,7 +10,7 @@ For now, there is an x86_64 preview image available. **These are not frequently 
 
 You have two options for spinning up a container based on your preference. I prefer using compose, however I have listed instructions for both Docker CLI and Docker Compose below.
 
-### Docker CLI
+### Docker Run CLI
 
 Once the image is created, you can create a container from it:
 
@@ -39,6 +39,10 @@ docker start stump
 | `-p 10801` | The port Stump uses for it's API and web interface |
 
 ### Docker Compose
+
+{% callout title="Note" icon="info" %}
+This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for you, you might be on V1, which uses `docker-compose`. Please review [Docker's documentation](https://docs.docker.com/compose/install/) for more information and/or platform-specific installation.
+{% /callout %}
 
 Below is an example of a Docker Compose file you can use to bootstrap your Stump server:
 
@@ -72,7 +76,23 @@ docker logs -f stump
 
 ## Updating your container
 
-TODO
+As with starting Stump, updating your container is slightly different depending on how you chose to run it.
+
+### Docker Run CLI
+
+1. Update the image: `docker pull aaronleopold/stump-preview`
+2. Stop the running container: docker stop komga
+3. Delete the container: docker rm komga
+4. Recreate your container (as instructed above)
+5. Start the new container: `docker start stump`
+
+To remove the old dangling images you have installed: `docker image prune`
+
+### Docker Compose
+
+1. Stop the running container: `docker compose down`
+2. Update the image: `docker compose pull` or `docker compose pull aaronleopold/stump-preview`
+3. Start the container again: `docker-compose up`
 
 ## Example Configurations
 

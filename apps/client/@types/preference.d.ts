@@ -28,6 +28,10 @@ interface UserPreferences {
 	 * Whether the user wants to see the media in a collection as a grid or list
 	 */
 	collectionViewMode: ViewMode;
+	/**
+	 *
+	 */
+	locale: Locale;
 }
 
 interface ServerPreferences {

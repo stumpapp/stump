@@ -20,6 +20,7 @@ export default defineConfig({
 			'~store': path.resolve('./src/store'),
 			'~util': path.resolve('./src/util'),
 			'~hooks': path.resolve('./src/hooks'),
+			'~i18n': path.resolve('./src/i18n'),
 		},
 	},
 });

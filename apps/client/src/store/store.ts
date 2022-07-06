@@ -7,6 +7,8 @@ interface UserPreferencesMutations {
 	setLibraryViewMode(viewMode: ViewMode): void;
 	setSeriesViewMode(viewMode: ViewMode): void;
 	setCollectionViewMode(viewMode: ViewMode): void;
+
+	setLocale(locale: Locale): void;
 }
 
 interface StoreMutations extends UserPreferencesMutations {
@@ -101,6 +103,19 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 				userPreferences: {
 					...userPreferences,
 					collectionViewMode: viewMode,
+				} as UserPreferences,
+			}));
+		}
+	},
+
+	setLocale: (locale) => {
+		let userPreferences = get().userPreferences;
+
+		if (userPreferences) {
+			set(() => ({
+				userPreferences: {
+					...userPreferences,
+					locale,
 				} as UserPreferences,
 			}));
 		}

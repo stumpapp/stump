@@ -22,7 +22,8 @@
 			"~hooks/*": ["src/hooks/*"],
 			"~api/*": ["src/api/*"],
 			"~store/*": ["src/store/*"],
-			"~pages/*": ["src/pages/*"]
+			"~pages/*": ["src/pages/*"],
+			"~i18n/*": ["src/i18n/*"]
 		}
 	},
 	"typeRoots": ["node_modules/@types", "@types"],

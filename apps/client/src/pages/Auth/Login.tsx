@@ -25,8 +25,11 @@ import toast from 'react-hot-toast';
 import { checkIsClaimed } from '~api/query/server';
 import { register } from '~api/mutation/auth';
 import client from '~api/client';
+import { useLocale } from '~hooks/useLocale';
 
 export default function Login() {
+	const { t } = useLocale();
+
 	const [isClaimed, setIsClaimed] = useState(true);
 
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery('checkIsClaimed', {
@@ -61,7 +64,6 @@ export default function Login() {
 		},
 		onError: (err) => {
 			// TODO: handle this error
-			toast.error('Login failed. Please try again.');
 			console.error(err);
 		},
 	});
@@ -71,8 +73,8 @@ export default function Login() {
 	});
 
 	const schema = z.object({
-		username: z.string().min(1, { message: 'Username is required' }),
-		password: z.string().min(1, { message: 'Password is required' }),
+		username: z.string().min(1, { message: t('loginPage.form.validation.missingUsername') }),
+		password: z.string().min(1, { message: t('loginPage.form.validation.missingPassword') }),
 	});
 
 	const form = useForm({
@@ -84,9 +86,11 @@ export default function Login() {
 
 		const doLogin = async (firstTime = false) =>
 			toast.promise(loginUser({ username, password }), {
-				loading: 'Logging in...',
-				success: firstTime ? 'Welcome! Redirecting...' : 'Welcome back! Redirecting...',
-				error: 'Login failed. Please try again.',
+				loading: t('loginPage.toasts.loggingIn'),
+				success: firstTime
+					? t('loginPage.toasts.loggedInFirstTime')
+					: t('loginPage.toasts.loggedIn'),
+				error: t('loginPage.toasts.loginFailed'),
 			});
 
 		if (isClaimed) {
@@ -94,9 +98,9 @@ export default function Login() {
 		} else {
 			toast
 				.promise(registerUser({ username, password }), {
-					loading: 'Registering...',
-					success: 'Registered!',
-					error: 'Registration failed. Please try again.',
+					loading: t('loginPage.toasts.registering'),
+					success: t('loginPage.toasts.registered'),
+					error: t('loginPage.toasts.registrationFailed'),
 				})
 				.then(() => doLogin(true));
 		}
@@ -125,19 +129,18 @@ export default function Login() {
 			{!isClaimed && (
 				<Alert status="warning" rounded="md">
 					<AlertIcon />
-					This Stump server is not yet claimed, you can use the form below to create a user account
-					and claim it. Enter your preferred username and password.
+					{t('loginPage.claimText')}
 				</Alert>
 			)}
 
 			<Form form={form} onSubmit={handleSubmit}>
 				<FormControl>
-					<FormLabel htmlFor="username">Username</FormLabel>
+					<FormLabel htmlFor="username">{t('loginPage.form.labels.username')}</FormLabel>
 					<Input type="text" autoFocus {...form.register('username')} />
 				</FormControl>
 
 				<FormControl>
-					<FormLabel htmlFor="passowrd">Password</FormLabel>
+					<FormLabel htmlFor="passowrd">{t('loginPage.form.labels.password')}</FormLabel>
 					<Input type="password" {...form.register('password')} />
 				</FormControl>
 
@@ -148,7 +151,9 @@ export default function Login() {
 					bgGradient="linear(to-r, brand.600, brand.400)"
 					_hover={{ bgGradient: 'linear(to-r, brand.700, brand.500)' }}
 				>
-					{isClaimed ? 'Login' : 'Create Account'}
+					{isClaimed
+						? t('loginPage.form.buttons.login')
+						: t('loginPage.form.buttons.createAccount')}
 				</Button>
 			</Form>
 		</Stack>

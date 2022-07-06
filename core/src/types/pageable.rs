@@ -3,8 +3,6 @@ use serde::Serialize;
 
 use super::enums::Direction;
 
-pub trait QueryOrderTrait {}
-
 #[derive(Serialize, FromForm, JsonSchema)]
 pub struct PagedRequestParams {
 	pub zero_based: Option<bool>,

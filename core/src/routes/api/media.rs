@@ -14,11 +14,9 @@ use crate::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::{FileResponse, ImageResponse},
-		models::{
-			media::{Media, MediaOrder},
-			read_progress::ReadProgress,
-		},
+		models::{media::Media, read_progress::ReadProgress},
 		pageable::{PageParams, Pageable, PagedRequestParams},
+		query::QueryOrder,
 	},
 };
 
@@ -37,7 +35,7 @@ pub async fn get_media(
 	let unpaged = unpaged.unwrap_or_else(|| req_params.is_none());
 	let page_params = PageParams::from(req_params);
 	let order_by_param: OrderByParam =
-		MediaOrder::from(page_params.clone()).try_into()?;
+		QueryOrder::from(page_params.clone()).try_into()?;
 
 	let base_query = db
 		.media()

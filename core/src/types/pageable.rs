@@ -1,7 +1,7 @@
 use rocket_okapi::JsonSchema;
 use serde::Serialize;
 
-use super::enums::Direction;
+use super::query::Direction;
 
 #[derive(Serialize, FromForm, JsonSchema)]
 pub struct PagedRequestParams {

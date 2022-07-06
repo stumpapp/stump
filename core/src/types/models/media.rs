@@ -1,10 +1,7 @@
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-	prisma::{self, media::OrderByParam},
-	types::{enums::Direction, errors::ApiError, pageable::PageParams},
-};
+use crate::prisma;
 
 use super::{read_progress::ReadProgress, series::Series, tag::Tag};
 
@@ -37,57 +34,6 @@ pub struct Media {
 	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 	// pub status: String,
-}
-
-/// Model used in media API to alter sorting/ordering of queried media
-#[derive(Debug, Deserialize, JsonSchema)]
-pub struct MediaOrder {
-	/// The field to order by. Defaults to 'name'
-	pub order_by: String,
-	/// The order in which to sort, based on order_by. Defaults to 'Asc'
-	pub direction: Direction,
-}
-
-impl Default for MediaOrder {
-	fn default() -> Self {
-		MediaOrder {
-			order_by: "name".to_string(),
-			direction: Direction::Asc,
-		}
-	}
-}
-
-impl From<PageParams> for MediaOrder {
-	fn from(params: PageParams) -> Self {
-		MediaOrder {
-			order_by: params.order_by,
-			direction: params.direction,
-		}
-	}
-}
-
-impl TryInto<OrderByParam> for MediaOrder {
-	type Error = ApiError;
-
-	fn try_into(self) -> Result<OrderByParam, Self::Error> {
-		let dir: prisma_client_rust::Direction = self.direction.into();
-
-		Ok(match self.order_by.to_lowercase().as_str() {
-			"name" => prisma::media::name::order(dir),
-			"size" => prisma::media::size::order(dir),
-			"description" => prisma::media::description::order(dir),
-			"extension" => prisma::media::extension::order(dir),
-			"updated_at" => prisma::media::updated_at::order(dir),
-			"path" => prisma::media::path::order(dir),
-			"series_id" => prisma::media::series_id::order(dir),
-			_ => {
-				return Err(ApiError::BadRequest(format!(
-					"You cannot order media by {:?}",
-					self.order_by
-				)))
-			},
-		})
-	}
 }
 
 impl Into<Media> for prisma::media::Data {

@@ -4,17 +4,15 @@ use std::{
 };
 
 use prisma_client_rust::{raw, PrismaValue};
-use walkdir::{ WalkDir};
+use walkdir::WalkDir;
 
 use crate::{
 	config::context::Context,
 	prisma::{library, media, series},
-	types::{
-		event::ClientEvent, errors::ApiError,
-	}
+	types::{errors::ApiError, event::ClientEvent},
 };
 
-use super::{ScannedFileTrait};
+use super::ScannedFileTrait;
 
 pub struct LibraryScanner {
 	runner: (String, u64),
@@ -36,7 +34,11 @@ pub struct LibraryScanner {
 // }
 
 impl LibraryScanner {
-	pub fn new(library: library::Data, ctx: Context, runner: (String, u64)) -> LibraryScanner {
+	pub fn new(
+		library: library::Data,
+		ctx: Context,
+		runner: (String, u64),
+	) -> LibraryScanner {
 		let series = library
 			.series()
 			.expect("Failed to get series in library")
@@ -88,8 +90,12 @@ impl LibraryScanner {
 			.map(|(_, s)| s.id.clone())
 	}
 
-	pub async fn precheck(path: String, ctx: &Context) -> Result<library::Data, ApiError>  {
-		let library = ctx.db
+	pub async fn precheck(
+		path: String,
+		ctx: &Context,
+	) -> Result<library::Data, ApiError> {
+		let library = ctx
+			.db
 			.library()
 			.find_unique(library::path::equals(path.clone()))
 			.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
@@ -97,10 +103,7 @@ impl LibraryScanner {
 			.await?;
 
 		if library.is_none() {
-			return Err(ApiError::NotFound(format!(
-				"Library not found: {}",
-				path
-			)));
+			return Err(ApiError::NotFound(format!("Library not found: {}", path)));
 		}
 
 		let library = library.unwrap();
@@ -142,7 +145,6 @@ impl LibraryScanner {
 			let series_id_ref: &Vec<String> = series_ids.as_ref();
 			let correct_base = library_path.to_str().unwrap().to_string();
 
-
 			// update series paths
 			let number_changed = ctx
 				.db
@@ -154,27 +156,32 @@ impl LibraryScanner {
 				))
 				.await?;
 
-			log::debug!("Updated {} series paths: {:?}", number_changed, series_id_ref);
+			log::debug!(
+				"Updated {} series paths: {:?}",
+				number_changed,
+				series_id_ref
+			);
 
 			// update media paths
 			// NOTE: ._execute_raw() throws an error using PrismaValue::List with Sqlite.
 			let media_query = format!(
 				"UPDATE media SET path=REPLACE(path, \"{}\", \"{}\") WHERE seriesId in ({})", 
-				invalid_path, 
-				correct_base, 
+				invalid_path,
+				correct_base,
 				series_id_ref.into_iter().map(|id| format!("\"{}\"", id)).collect::<Vec<_>>().join(",")
 			);
 
-			let number_changed = ctx
-				.db
-				._execute_raw(raw!(&media_query))
-				.await?;
+			let number_changed = ctx.db._execute_raw(raw!(&media_query)).await?;
 
-			log::debug!("Updated {} media paths according to series changes", number_changed);
+			log::debug!(
+				"Updated {} media paths according to series changes",
+				number_changed
+			);
 		}
 
 		// Note: at this point, this should never fail so I am unwrapping
-		let library =  ctx.db
+		let library = ctx
+			.db
 			.library()
 			.find_unique(library::path::equals(path.clone()))
 			.with(library::series::fetch(vec![]).with(series::media::fetch(vec![])))
@@ -183,7 +190,6 @@ impl LibraryScanner {
 			.unwrap();
 
 		Ok(library)
-
 	}
 
 	pub async fn scan_library(&mut self) {
@@ -220,7 +226,13 @@ impl LibraryScanner {
 
 				log::info!("Creating new series: {:?}", entry_path);
 
-				match super::utils::insert_series(&self.ctx, &entry, self.library.id.clone()).await {
+				match super::utils::insert_series(
+					&self.ctx,
+					&entry,
+					self.library.id.clone(),
+				)
+				.await
+				{
 					Ok(series) => {
 						self.on_progress(ClientEvent::CreatedSeries(series.clone()));
 

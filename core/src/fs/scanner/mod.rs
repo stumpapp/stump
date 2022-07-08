@@ -1,7 +1,6 @@
 use std::path::Path;
 
 pub mod library;
-pub mod library_new;
 pub mod utils;
 
 use rocket::http::ContentType;

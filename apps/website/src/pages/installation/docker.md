@@ -40,7 +40,7 @@ docker start stump
 
 ### Docker Compose
 
-{% callout title="Note" icon="info" %}
+{% callout title="docker compose vs docker-compose" icon="note" %}
 This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for you, you might be on V1, which uses `docker-compose`. Please review [Docker's documentation](https://docs.docker.com/compose/install/) for more information and/or platform-specific installation.
 {% /callout %}
 

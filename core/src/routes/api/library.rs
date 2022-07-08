@@ -9,7 +9,7 @@ use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs::{self},
 	guards::auth::{AdminGuard, Auth},
-	job::library::LibraryScannerJob,
+	job::jobs::scan::LibraryScannerJob,
 	prisma::{
 		library, media,
 		series::{self, OrderByParam},

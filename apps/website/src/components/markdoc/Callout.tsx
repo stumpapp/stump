@@ -16,7 +16,7 @@ export interface CalloutProps {
 }
 
 export default function Callout({ title, icon = 'note', children }: CalloutProps) {
-	const Icon = icons[icon];
+	const Icon = icons[icon] || icons.note;
 
 	const borderColor = {
 		'border-green-400': icon === 'check',

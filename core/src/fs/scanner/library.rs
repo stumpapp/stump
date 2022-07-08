@@ -3,7 +3,10 @@ use rocket::tokio::{self, task::JoinHandle};
 use std::{
 	collections::HashMap,
 	path::Path,
-	sync::{Arc, Mutex},
+	sync::{
+		atomic::{AtomicU64, Ordering},
+		Arc, Mutex,
+	},
 };
 use walkdir::WalkDir;
 
@@ -190,7 +193,7 @@ pub async fn scan_concurrent(
 
 	let duration = start.elapsed();
 
-	println!(
+	log::debug!(
 		"Files to process: {:?} (calculated in {}.{:03} seconds)",
 		files_to_process,
 		duration.as_secs(),
@@ -212,7 +215,7 @@ pub async fn scan_concurrent(
 
 					*shared += 1;
 
-					// println!("{:?} - {:?}", msg, shared);
+					// log::debug!("{:?} - {:?}", msg, shared);
 
 					// let _ = ctx_cpy.job_progress(ClientEvent::job_progress(
 					// 	"runnerid".to_string(),
@@ -265,7 +268,7 @@ pub async fn scan_sync(
 
 	let duration = start.elapsed();
 
-	println!(
+	log::debug!(
 		"Files to process: {} (calculated in {}.{:03} seconds)",
 		files_to_process,
 		duration.as_secs(),
@@ -279,7 +282,7 @@ pub async fn scan_sync(
 		Some(format!("Starting library scan at {}", &library.path)),
 	));
 
-	let counter = Arc::new(Mutex::new(0));
+	let counter = Arc::new(AtomicU64::new(0));
 
 	for s in series {
 		let progress_ctx = ctx.get_ctx();
@@ -288,15 +291,11 @@ pub async fn scan_sync(
 		let counter_ref = counter.clone();
 
 		scan_series(ctx.get_ctx(), s, move |msg| {
-			let mut shared = counter_ref.lock().unwrap();
-
-			*shared += 1;
-
-			// println!("{:?} - {:?}", msg, counter);
+			let current = counter_ref.fetch_add(1, Ordering::SeqCst);
 
 			let _ = progress_ctx.emit_client_event(ClientEvent::job_progress(
 				r_id.to_owned(),
-				*shared as u64,
+				current,
 				files_to_process,
 				Some(msg),
 			));
@@ -333,7 +332,7 @@ mod tests {
 		.await?;
 		let duration = start.elapsed();
 
-		println!(
+		log::debug!(
 			"Concurrent: {}.{:03} seconds",
 			duration.as_secs(),
 			duration.subsec_millis()
@@ -355,7 +354,7 @@ mod tests {
 		.await?;
 		let duration = start.elapsed();
 
-		println!(
+		log::debug!(
 			"Sync: {}.{:03} seconds",
 			duration.as_secs(),
 			duration.subsec_millis()

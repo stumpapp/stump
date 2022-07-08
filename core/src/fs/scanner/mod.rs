@@ -1,8 +1,8 @@
 use std::path::Path;
 
 pub mod library;
-pub mod utils;
 pub mod library_new;
+pub mod utils;
 
 use rocket::http::ContentType;
 
@@ -12,6 +12,7 @@ pub trait ScannedFileTrait {
 	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;
 	fn is_invisible_file(&self) -> bool;
 	fn should_ignore(&self) -> bool;
+	fn is_declarative_img(&self) -> bool;
 	fn dir_has_media(&self) -> bool;
 }
 
@@ -83,6 +84,18 @@ impl ScannedFileTrait for Path {
 				return true;
 			},
 		}
+	}
+
+	fn is_declarative_img(&self) -> bool {
+		self.file_name()
+			.unwrap_or_default()
+			.to_str()
+			.map(|name| {
+				name.eq_ignore_ascii_case("cover.jpg")
+					|| name.eq_ignore_ascii_case("thumbnail.jpg")
+					|| name.eq_ignore_ascii_case("folder.jpg")
+			})
+			.unwrap_or(false)
 	}
 
 	fn dir_has_media(&self) -> bool {

@@ -3,9 +3,9 @@ use rocket::tokio::{self, task::JoinHandle};
 use std::{
 	collections::HashMap,
 	path::Path,
-	sync::{atomic::AtomicI64, Arc, Mutex},
+	sync::{Arc, Mutex},
 };
-use walkdir::{DirEntry, WalkDir};
+use walkdir::WalkDir;
 
 use crate::{
 	config::context::Context,
@@ -93,34 +93,67 @@ async fn scan_series(
 		.await
 		.unwrap();
 
-	let _visited_media = media
+	let mut visited_media = media
 		.iter()
-		.map(|data| (data.path.as_str(), false).into())
-		.collect::<HashMap<&str, bool>>();
+		.map(|data| (data.path.clone(), false).into())
+		.collect::<HashMap<String, bool>>();
 
 	for entry in WalkDir::new(&series.path)
 		.into_iter()
 		.filter_map(|e| e.ok())
 		.filter(|e| e.path().is_file())
 	{
-		let entry_path = entry.path();
+		let path = entry.path();
 
-		log::info!("Currently scanning: {:?}", entry_path);
+		log::info!("Currently scanning: {:?}", path);
 
-		on_progress(format!("Analyzing {:?}", entry_path));
+		// Tell client we are on the next file
+		on_progress(format!("Analyzing {:?}", path));
 
 		// Just a query to slow it down a little to mimick an insertion or something each iteration
-		let _res = ctx
-			.db
-			._query_raw::<media::Data>(raw!("SELECT * FROM media"))
-			.await;
+		// let _res = ctx
+		// 	.db
+		// 	._query_raw::<media::Data>(raw!("SELECT * FROM media"))
+		// 	.await;
+
+		if path.should_ignore() {
+			log::debug!("Skipping ignored file: {:?}", path);
+			continue;
+		} else if path.is_declarative_img() {
+			log::debug!(
+				"Stump does not support image overrides yet ({:?}). Stay tuned!",
+				path
+			);
+			continue;
+		} else if let Some(_) = visited_media.get(path.to_str().unwrap_or("")) {
+			log::debug!("Existing media found: {:?}", path);
+			continue;
+		}
+
+		log::debug!("New media found at {:?} in series {:?}", &path, &series.id);
+
+		match super::utils::insert_media(&ctx, &entry, series.id.clone()).await {
+			Ok(media) => {
+				visited_media.insert(media.path.clone(), true);
+
+				// TODO: error handling...
+				let _ = ctx.emit_client_event(ClientEvent::CreatedMedia(media.clone()));
+			},
+			Err(e) => {
+				log::error!("Failed to insert media: {:?}", e);
+			},
+		}
 	}
 }
 
-pub async fn scan_concurrent(ctx: Context, path: String) -> Result<(), ApiError> {
+pub async fn scan_concurrent(
+	ctx: Context,
+	path: String,
+	runner_id: String,
+) -> Result<(), ApiError> {
 	let (library, series) = precheck(&ctx, path).await?;
 
-	// let counter = Arc::new(Mutex::new(0));
+	let counter = Arc::new(Mutex::new(0));
 
 	let start = std::time::Instant::now();
 
@@ -161,14 +194,15 @@ pub async fn scan_concurrent(ctx: Context, path: String) -> Result<(), ApiError>
 		// .cloned()
 		.map(|s| {
 			let ctx_cpy = ctx.get_ctx();
+			// let r_id = runner_id.clone();
 
-			// let counter_ref = counter.clone();
+			let counter_ref = counter.clone();
 
 			tokio::spawn(async move {
 				scan_series(ctx_cpy.get_ctx(), s, move |_msg| {
-					// let mut shared = counter_ref.lock().unwrap();
+					let mut shared = counter_ref.lock().unwrap();
 
-					// *shared += 1;
+					*shared += 1;
 
 					// println!("{:?} - {:?}", msg, shared);
 
@@ -189,10 +223,13 @@ pub async fn scan_concurrent(ctx: Context, path: String) -> Result<(), ApiError>
 	Ok(())
 }
 
-pub async fn scan_sync(ctx: Context, path: String) -> Result<(), ApiError> {
+pub async fn scan_sync(
+	ctx: Context,
+	path: String,
+	runner_id: String,
+) -> Result<(), ApiError> {
 	let (library, series) = precheck(&ctx, path).await?;
 
-	// let counter = Arc::new(Mutex::new(0));
 	let start = std::time::Instant::now();
 
 	let files_to_process: u64 = futures::future::join_all(
@@ -227,14 +264,19 @@ pub async fn scan_sync(ctx: Context, path: String) -> Result<(), ApiError> {
 		duration.subsec_millis()
 	);
 
+	let mut counter = 0;
+
 	for s in series {
-		scan_series(ctx.get_ctx(), s, move |_msg| {
-			// counter += 1;
+		let progress_ctx = ctx.get_ctx();
+		// let r_id = runner_id.clone();
+
+		scan_series(ctx.get_ctx(), s, move |msg| {
+			counter += 1;
 
 			// println!("{:?} - {:?}", msg, counter);
 
-			// let _ = ctx_cpy.job_progress(ClientEvent::job_progress(
-			// 	"runnerid".to_string(),
+			// let _ = progress_ctx.emit_client_event(ClientEvent::job_progress(
+			// 	r_id.to_owned(),
 			// 	counter as u64,
 			// 	files_to_process,
 			// 	Some(msg),
@@ -263,6 +305,7 @@ mod tests {
 		super::scan_concurrent(
 			ctx,
 			"/Users/aaronleopold/Documents/Stump/Demo".to_string(),
+			"runner_id_concurrent".to_string(),
 		)
 		.await?;
 		let duration = start.elapsed();
@@ -281,8 +324,12 @@ mod tests {
 		let ctx = Context::mock().await;
 
 		let start = std::time::Instant::now();
-		super::scan_sync(ctx, "/Users/aaronleopold/Documents/Stump/Demo".to_string())
-			.await?;
+		super::scan_sync(
+			ctx,
+			"/Users/aaronleopold/Documents/Stump/Demo".to_string(),
+			"runner_id_sync".to_string(),
+		)
+		.await?;
 		let duration = start.elapsed();
 
 		println!(

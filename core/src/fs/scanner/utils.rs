@@ -1,4 +1,5 @@
 use prisma_client_rust::{raw, PrismaValue};
+use rocket::tokio::{self, task::JoinHandle};
 use walkdir::DirEntry;
 
 use crate::{
@@ -150,4 +151,30 @@ pub async fn insert_series(
 	log::debug!("Created new series: {:?}", series);
 
 	Ok(series)
+}
+
+pub async fn insert_series_many(
+	ctx: &Context,
+	entries: Vec<DirEntry>,
+	library_id: String,
+) -> Vec<series::Data> {
+	let tasks = entries
+		.iter()
+		.cloned()
+		.map(|entry| {
+			let ctx_cpy = ctx.get_ctx();
+			let library_id = library_id.clone();
+			tokio::spawn(async move {
+				super::utils::insert_series(&ctx_cpy, &entry, library_id)
+					.await
+					.unwrap()
+			})
+		})
+		.collect::<Vec<JoinHandle<series::Data>>>();
+
+	futures::future::join_all(tasks)
+		.await
+		.into_iter()
+		.filter_map(|res| res.ok())
+		.collect()
 }

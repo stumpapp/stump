@@ -2,16 +2,11 @@ use std::path::Path;
 
 pub mod library;
 pub mod utils;
+pub mod library_new;
 
 use rocket::http::ContentType;
 
 use crate::fs::media_file;
-
-#[async_trait::async_trait]
-pub trait ScannerJob {
-	// async fn precheck() -> Result<T, ApiError>;
-	async fn scan(&mut self);
-}
 
 pub trait ScannedFileTrait {
 	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;

@@ -101,10 +101,11 @@ function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
 }
 
 interface PaginationEllipsisProps extends Pick<PaginationProps, 'pages' | 'position'> {
+	listId: number;
 	onNavigate: (page: number) => void;
 }
 
-function PaginationEllipsis({ position, pages, onNavigate }: PaginationEllipsisProps) {
+function PaginationEllipsis({ listId, position, pages, onNavigate }: PaginationEllipsisProps) {
 	const inputRef = useRef<any>(null);
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -167,7 +168,7 @@ function PaginationEllipsis({ position, pages, onNavigate }: PaginationEllipsisP
 				</PopoverHeader>
 				<PopoverArrow />
 				<PopoverBody>
-					<Form id="pagination-page-entry-form" form={form} onSubmit={handleSubmit}>
+					<Form id={`pagination-page-entry-form-${listId}`} form={form} onSubmit={handleSubmit}>
 						<FormControl isInvalid={!!errors.goTo}>
 							<FormLabel htmlFor="goTo">Enter page</FormLabel>
 							{/* TODO: auto focus not working */}
@@ -196,7 +197,7 @@ function PaginationEllipsis({ position, pages, onNavigate }: PaginationEllipsisP
 				>
 					<ButtonGroup size="sm">
 						<Button onClick={onClose}>Cancel</Button>
-						<Button colorScheme="brand" type="submit" form="pagination-page-entry-form">
+						<Button colorScheme="brand" type="submit" form={`pagination-page-entry-form-${listId}`}>
 							Go
 						</Button>
 					</ButtonGroup>
@@ -265,6 +266,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 
 					return (
 						<PaginationEllipsis
+							listId={i}
 							key={`${i}-pagination-ellipsis`}
 							pages={pages}
 							onNavigate={handleEllipsisNavigate}

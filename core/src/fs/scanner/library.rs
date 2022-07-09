@@ -1,4 +1,4 @@
-// use prisma_client_rust::raw;
+use prisma_client_rust::raw;
 use rocket::tokio::{self, task::JoinHandle};
 use std::{
 	collections::HashMap,
@@ -144,7 +144,33 @@ async fn scan_series(
 		}
 	}
 
-	// TODO: mark missing media
+	let missing_media = visited_media
+		.into_iter()
+		.filter(|(_, visited)| !visited)
+		.map(|(path, _)| path)
+		.collect::<Vec<String>>();
+
+	if missing_media.len() > 0 {
+		log::info!("{} media in this series ({}) have not been found at the end of this series-level scan.", missing_media.len(), &series.id);
+		// TODO: replace once batching is implemented -> https://github.com/Brendonovich/prisma-client-rust/issues/31
+		if let Err(e) = db
+			._execute_raw(raw!(format!(
+				"UPDATE media SET status=\"{}\" WHERE path in ({})",
+				String::default(),
+				missing_media
+					.into_iter()
+					.map(|path| format!("\"{}\"", path))
+					.collect::<Vec<_>>()
+					.join(",")
+			)
+			.as_str()))
+			.await
+		{
+			log::error!("Failed to mark missing media as MISSING: {:?}", e);
+		} else {
+			log::debug!("Marked missing media as MISSING.");
+		}
+	}
 }
 
 // FIXME: Okay, this made me sad lol. So with how this is currently I was averaging about

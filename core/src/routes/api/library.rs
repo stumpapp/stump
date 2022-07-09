@@ -47,10 +47,7 @@ pub async fn get_libraries(
 		.map(|l| l.into())
 		.collect::<Vec<Library>>();
 
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
+	let unpaged = unpaged.unwrap_or(page_params.is_none());
 
 	if unpaged {
 		return Ok(Json(libraries.into()));

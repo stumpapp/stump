@@ -1,5 +1,5 @@
 use prisma_client_rust::{raw, PrismaValue};
-use rocket::tokio::{self, task::JoinHandle};
+// use rocket::tokio::{self, task::JoinHandle};
 use walkdir::DirEntry;
 
 use crate::{
@@ -75,10 +75,7 @@ pub async fn insert_media(
 		_ => 0,
 	};
 
-	let comic_info = match processed_entry.metadata {
-		Some(info) => info,
-		None => MediaMetadata::default(),
-	};
+	let comic_info = processed_entry.metadata.unwrap_or(MediaMetadata::default());
 
 	let media = ctx
 		.db

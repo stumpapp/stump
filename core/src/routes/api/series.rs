@@ -52,10 +52,7 @@ pub async fn get_series(
 		.map(|s| s.into())
 		.collect::<Vec<Series>>();
 
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
+	let unpaged = unpaged.unwrap_or(page_params.is_none());
 
 	if unpaged {
 		return Ok(Json(series.into()));
@@ -175,10 +172,7 @@ pub async fn get_series_media(
 		.map(|m| m.into())
 		.collect::<Vec<Media>>();
 
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
+	let unpaged = unpaged.unwrap_or(page_params.is_none());
 
 	if unpaged {
 		return Ok(Json(media.into()));

@@ -86,10 +86,7 @@ pub async fn get_duplicate_media(
 		._query_raw(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
 		.await?;
 
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
+	let unpaged = unpaged.unwrap_or(page_params.is_none());
 
 	if unpaged {
 		return Ok(Json(media.into()));

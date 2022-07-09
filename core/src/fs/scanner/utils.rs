@@ -1,4 +1,5 @@
 use prisma_client_rust::{raw, PrismaValue};
+// use rocket::tokio::{self, task::JoinHandle};
 use walkdir::DirEntry;
 
 use crate::{
@@ -7,6 +8,7 @@ use crate::{
 	prisma::{library, media, series},
 	types::{
 		errors::{ApiError, ScanError},
+		event::ClientEvent,
 		models::MediaMetadata,
 	},
 };
@@ -73,10 +75,7 @@ pub async fn insert_media(
 		_ => 0,
 	};
 
-	let comic_info = match processed_entry.metadata {
-		Some(info) => info,
-		None => MediaMetadata::default(),
-	};
+	let comic_info = processed_entry.metadata.unwrap_or(MediaMetadata::default());
 
 	let media = ctx
 		.db
@@ -100,8 +99,6 @@ pub async fn insert_media(
 		.await?;
 
 	log::debug!("Created new media: {:?}", media);
-
-	// self.on_progress(ClientEvent::CreatedMedia(media.clone()));
 
 	Ok(media)
 }
@@ -151,3 +148,53 @@ pub async fn insert_series(
 
 	Ok(series)
 }
+
+pub async fn insert_series_many(
+	ctx: &Context,
+	entries: Vec<DirEntry>,
+	library_id: String,
+) -> Vec<series::Data> {
+	let mut inserted_series = vec![];
+
+	for entry in entries {
+		match insert_series(&ctx, &entry, library_id.clone()).await {
+			Ok(series) => {
+				let _ = ctx.emit_client_event(ClientEvent::CreatedSeries(series.clone()));
+
+				inserted_series.push(series);
+			},
+			Err(e) => {
+				log::error!("Failed to insert series: {:?}", e);
+			},
+		}
+	}
+
+	inserted_series
+}
+
+// Note: This faced a similar issue as `scan_concurrent` did. So, commenting out for now..
+// pub async fn insert_series_many_concurrent(
+// 	ctx: &Context,
+// 	entries: Vec<DirEntry>,
+// 	library_id: String,
+// ) -> Vec<series::Data> {
+// 	let tasks = entries
+// 		.iter()
+// 		.cloned()
+// 		.map(|entry| {
+// 			let ctx_cpy = ctx.get_ctx();
+// 			let library_id = library_id.clone();
+// 			tokio::spawn(async move {
+// 				super::utils::insert_series(&ctx_cpy, &entry, library_id)
+// 					.await
+// 					.unwrap()
+// 			})
+// 		})
+// 		.collect::<Vec<JoinHandle<series::Data>>>();
+
+// 	futures::future::join_all(tasks)
+// 		.await
+// 		.into_iter()
+// 		.filter_map(|res| res.ok())
+// 		.collect()
+// }

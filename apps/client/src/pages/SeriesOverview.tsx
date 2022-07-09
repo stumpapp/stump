@@ -14,6 +14,7 @@ import Button, { IconButton } from '~components/ui/Button';
 import { CloudArrowDown } from 'phosphor-react';
 import UpNextButton from '~components/Series/UpNextButton';
 import DownloadSeriesButton from '~components/Series/DownloadSeriesButton';
+import ReadMore from '~components/ui/ReadMore';
 
 interface OverviewTitleSectionProps {
 	isVisible: boolean;
@@ -49,21 +50,19 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					<DownloadSeriesButton seriesId={series.id} />
 				</ButtonGroup>
 
-				<Text>
-					{series.description}
-					{/* PRESS START ON A BRAND-NEW MARVEL UNIVERSE! Showered with worldwide acclaim, the
-					blockbuster Marvel’s Spider-Man has everyone’s spider-sense buzzing! Now you can
-					experience the emotional and shock-filled story that takes favorite characters (including
-					Mary Jane, Aunt May, Norman Osborn, Otto Octavius and Miles Morales) and spins them into
-					an all-new and unexpected web of drama, spectacle, and classic Spidey action in the Mighty
-					Marvel Manner… with more original stories to come! After years of seeing Wilson Fisk
-					escape criminal prosecution, the wise-cracking web-slinger finally has the opportunity to
-					team with the PDNY to help them arrest his fearsome foe. But when the Kingpin of Crime is
-					removed from the mean streets of the Big Apple, how will the mysterious Mister Negative’s
-					ascent to power bring Peter Parker’s civilian world and Spider-Man’s superhuman worlds
-					crashing together? Plus: All-new story moments never seen in the game and bonus
-					behind-the-scenes content! */}
-				</Text>
+				<ReadMore
+					// text={`Mark Millar, the best-selling writer behind The Ultimates and Ultimate X-Men, presents his
+					// definitive take on Marvel Comics' greatest hero. During Peter's pulse-pounding search for
+					// Aunt May, Millar offers his unique perspective on such classic Spider-Man foes as Doctor
+					// Octopus and the Vulture - and an all-new, vicious Venom. Fan-favorite artists Terry Dodson
+					// and Frank Cho superbly illustrate Millar's tale, contributing modern redesigns for several
+					// Spider-Man villains - as well as an unforgettable take on the classic Spidey femme fatale,
+					// the Black Cat.\n
+					// Marvel Knights Spider-Man features one of comics' most inventive writers matched with an
+					// iconic Marvel hero. The result is a spellbinding story from start to finish, a must-have
+					// read for any Spider-Man fan!`}
+					text={series.description}
+				/>
 			</div>
 		</div>
 	);

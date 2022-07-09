@@ -75,18 +75,17 @@ pub async fn get_series_by_id(
 
 	let load_media = load_media.unwrap_or(false);
 
-	let action = db.series().find_unique(series::id::equals(id.clone()));
+	let mut query = db.series().find_unique(series::id::equals(id.clone()));
 
-	let query = match load_media {
-		true => action.with(
+	if load_media {
+		query = query.with(
 			series::media::fetch(vec![])
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(auth.0.id),
 				]))
 				.order_by(media::name::order(Direction::Asc)),
-		),
-		false => action,
-	};
+		);
+	}
 
 	let series = query.exec().await?;
 
@@ -105,13 +104,10 @@ pub async fn get_series_by_id(
 			))
 			.await?;
 
-		// TODO: dangerous cast
-		let media_count = match count_res.get(0) {
-			Some(val) => val.count,
-			None => 0,
-		} as i32;
+		let media_count = count_res.get(0).map(|res| res.count).unwrap_or(0);
 
-		return Ok(Json((series.unwrap(), media_count).into()));
+		// TODO: dangerous cast
+		return Ok(Json((series.unwrap(), media_count as i32).into()));
 	}
 
 	Ok(Json(series.unwrap().into()))

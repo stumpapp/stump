@@ -45,7 +45,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 
 > Stump is very young software under active development. It has not reached a beta stage yet, so do not expect a fully featured experience if you spin up a development environment or use a testing Docker image.
 
-Some of these are actually completed(!), but the following items are the major targets for Stump's first beta release:
+Some of these are actually completed(!) already, but the following items are the major targets for Stump's first beta release:
 
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
@@ -68,7 +68,7 @@ Stump isn't ready for normal, non-development usage yet. Once a release has been
 
 There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump-preview) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container.
 
-For information about getting started, how Stump works and manages your library data, and much more detailed information, please visit [stumpapp.dev](https://stumpapp.dev/guides).
+For more information about getting started, how Stump works and how it manages your library, and much more, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 
 ## Project Structure 📦
 
@@ -89,9 +89,7 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 └── ...
 ```
 
-The 'core' directory is where Stump's 'core' functionality is located, written in Rust.
-
-<!-- TODO: mention prisma -->
+The `core` directory is where Stump's 'core' functionality is located, written in Rust. Stump uses [Prisma](https://github.com/Brendonovich/prisma-client-rust).
 
 The 'apps' directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
 
@@ -165,4 +163,4 @@ There are a number of other projects that are similar to Stump, it certainly isn
 
 ## License 🔑
 
-Stump codebase is licensed under an [MIT license](./LICENSE). This does not apply to Stump's logo, if you would like to use the logo for anything other than a reference to Stump, please [contact me](aaronleopold1221@gmail.com).
+Stump codebase is licensed under an [MIT license](./LICENSE) - (_[tldr;](https://tldrlegal.com/license/mit-license)_). This does **not** apply to Stump's logo, if you would like to use the logo for anything other than a reference to Stump, please [contact me](aaronleopold1221@gmail.com).

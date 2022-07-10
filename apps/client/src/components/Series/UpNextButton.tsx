@@ -19,10 +19,9 @@ export default function UpNextButton({ seriesId }: Props) {
 
 	return (
 		<Button
+			isDisabled={!isLoading && !isFetching && !media}
 			as={Link}
 			to={`/books/${media?.id}/pages/${media?.currentPage || 1}`}
-			// TODO: not sure I really want a loading state for this button...
-			isLoading={isLoading || isFetching}
 			disabled={!media}
 			title={`Continue reading ${media?.name || 'from where you left off'}`}
 			colorScheme="brand"

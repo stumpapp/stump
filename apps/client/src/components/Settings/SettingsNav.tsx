@@ -9,9 +9,14 @@ const pages = [
 		index: 0,
 	},
 	{
+		path: '/settings/users',
+		shortName: 'users',
+		index: 1,
+	},
+	{
 		path: '/settings/server',
 		shortName: 'server',
-		index: 1,
+		index: 2,
 	},
 ];
 
@@ -39,6 +44,7 @@ export default function SettingsNav() {
 			<Tabs index={activeTab} onChange={handleChange} colorScheme="brand" w="full">
 				<TabList>
 					<Tab>General</Tab>
+					<Tab>Users</Tab>
 					<Tab>Server</Tab>
 					<Tab disabled>Jobs</Tab>
 				</TabList>

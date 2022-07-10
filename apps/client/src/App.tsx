@@ -26,6 +26,7 @@ const ReadEpub = React.lazy(() => import('~pages/Book/ReadEpub'));
 const Login = React.lazy(() => import('~pages/Auth/Login'));
 const Settings = React.lazy(() => import('~pages/Settings'));
 const GeneralSettings = React.lazy(() => import('~pages/Settings/GeneralSettings'));
+const UserSettings = React.lazy(() => import('~pages/Settings/UserSettings'));
 const ServerSettings = React.lazy(() => import('~pages/Settings/ServerSettings'));
 
 // TODO: https://reactjs.org/docs/profiler.html for performance profiling and improvement
@@ -116,6 +117,7 @@ function App() {
 						<Route path="settings" element={<Settings />}>
 							<Route path="" element={<Navigate to="/settings/general" replace={true} />} />
 							<Route path="general" element={<GeneralSettings />} />
+							<Route path="users" element={<UserSettings />} />
 							<Route path="server" element={<ServerSettings />} />
 						</Route>
 						<Route path="libraries/:id" element={<LibraryOverview />} />

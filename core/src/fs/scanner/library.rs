@@ -107,6 +107,7 @@ async fn scan_series(
 		.filter(|e| e.path().is_file())
 	{
 		let path = entry.path();
+		let path_str = path.to_str().unwrap_or("");
 
 		log::debug!("Currently scanning: {:?}", path);
 
@@ -117,15 +118,16 @@ async fn scan_series(
 		if path.should_ignore() {
 			log::debug!("Skipping ignored file: {:?}", path);
 			continue;
-		} else if path.is_declarative_img() {
+		} else if path.is_thumbnail_img() {
 			// TODO: these will *eventually* be supported, but not priority right now.
 			log::debug!(
-				"Stump does not support image overrides yet ({:?}). Stay tuned!",
+				"Stump does not support thumbnail image overrides yet ({:?}). Stay tuned!",
 				path
 			);
 			continue;
-		} else if let Some(_) = visited_media.get(path.to_str().unwrap_or("")) {
+		} else if let Some(_) = visited_media.get(path_str) {
 			log::debug!("Existing media found: {:?}", path);
+			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;
 		}
 
@@ -152,11 +154,12 @@ async fn scan_series(
 
 	if missing_media.len() > 0 {
 		log::info!("{} media in this series ({}) have not been found at the end of this series-level scan.", missing_media.len(), &series.id);
+		log::debug!("{:?}", missing_media);
 		// TODO: replace once batching is implemented -> https://github.com/Brendonovich/prisma-client-rust/issues/31
 		if let Err(e) = db
 			._execute_raw(raw!(format!(
 				"UPDATE media SET status=\"{}\" WHERE path in ({})",
-				String::default(),
+				"MISSING".to_string(),
 				missing_media
 					.into_iter()
 					.map(|path| format!("\"{}\"", path))

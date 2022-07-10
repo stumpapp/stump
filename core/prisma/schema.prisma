@@ -122,6 +122,8 @@ model Media {
   checksum       String?
   // The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
   path           String
+  // The status of the series since last scan or access
+  status      String   @default("READY")
   // The series this media belongs to.
   series         Series?        @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   // The id of the series this media belongs to.

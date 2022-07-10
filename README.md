@@ -36,8 +36,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Developing 💻](#developing-)
   - [Setup Script ⚙️](#setup-script-️)
   - [Running Stump 🏃‍♀️](#running-stump-️)
-- [Alternatives 🤔](#alternatives-)
-- [Developer Resources 📚](#developer-resources-)
+- [Similar Projects 👯](#similar-projects-)
 - [License 🔑](#license-)
   </p>
 </details>
@@ -102,9 +101,11 @@ The 'apps' directory is where Stump applications are located. These are separate
 
 ## Developing 💻
 
-Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
+Contributions are very **encouraged** and **welcome**!
 
 I put together a small set of [resources](https://www.stumpapp.dev/contributing#developer-resources-📚) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
+
+Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
 
 **Ensure you are on the `develop` branch before continuing.**
 
@@ -153,26 +154,14 @@ To run in a release profile, you would just need to run:
 pnpm core start
 ```
 
-## Alternatives 🤔
+## Similar Projects 👯
 
-There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there (_heck, it isn't even in beta yet_)! if Stump isn't for you, consider checking out these alternatives and/or similar open source software in this space:
+There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there (_heck, it isn't even in beta yet_)! if Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
 
 - [Komga](https://github.com/gotson/komga)
 - [Kavita](https://github.com/Kareadita/Kavita)
-- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_audio books_)
-
-## Developer Resources 📚
-
-A few useful resources for developers looking to contribute:
-
-- [Rocket documentation](https://rocket.rs/v0.5-rc/)
-- [Prisma documentation](https://prisma.io/docs/prisma-client/introduction)
-  - [Prisma Client Rust Documentation](https://github.com/Brendonovich/prisma-client-rust/tree/main/docs)
-- [Chakra UI Documentation](https://chakra-ui.com/docs)
-- [OPDS specification](https://specs.opds.io/)
-- [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)
-- [Getting started with React](https://reactjs.org/docs/getting-started.html)
-- [Rust Book](https://doc.rust-lang.org/book/)
+- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books_)
+- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_)
 
 ## License 🔑
 

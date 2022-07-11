@@ -38,6 +38,16 @@
       "generalSettings": "General Settings",
       "serverSettings": "Server Settings",
       "jobHistory": "Job History"
+    },
+    "general": {
+      "profileForm": {
+        "validation": {},
+        "labels": {
+          "username": "Username",
+          "password": "Password"
+        },
+        "buttons": {}
+      }
     }
   },
   "sidebar": {

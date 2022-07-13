@@ -11,6 +11,9 @@ export default defineConfig({
 		outDir: 'build',
 		manifest: true,
 	},
+	server: {
+		port: 3000,
+	},
 	resolve: {
 		alias: {
 			'~': path.resolve('./src'),

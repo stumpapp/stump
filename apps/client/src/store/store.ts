@@ -1,12 +1,18 @@
+import type { Job, Library, Locale, User, UserPreferences, ViewMode } from '@stump/core';
 import create, { GetState, SetState, StateCreator, StoreApi, UseBoundStore } from 'zustand';
 import createContext from 'zustand/context';
 import { devtools, persist } from 'zustand/middleware';
 
+// FIXME: these will need to query the DB... which is kinda annoying lol
+// unless I split userPreferences up somehow between database persisted things
+// (like locale at least)
 interface UserPreferencesMutations {
 	// setDarkMode(darkMode: boolean): void;
 	setLibraryViewMode(viewMode: ViewMode): void;
 	setSeriesViewMode(viewMode: ViewMode): void;
 	setCollectionViewMode(viewMode: ViewMode): void;
+
+	setLocale(locale: Locale): void;
 }
 
 interface StoreMutations extends UserPreferencesMutations {
@@ -101,6 +107,19 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 				userPreferences: {
 					...userPreferences,
 					collectionViewMode: viewMode,
+				} as UserPreferences,
+			}));
+		}
+	},
+
+	setLocale: (locale) => {
+		let userPreferences = get().userPreferences;
+
+		if (userPreferences) {
+			set(() => ({
+				userPreferences: {
+					...userPreferences,
+					locale,
 				} as UserPreferences,
 			}));
 		}

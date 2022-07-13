@@ -7,16 +7,12 @@ use rocket::http::ContentType;
 
 use crate::fs::media_file;
 
-#[async_trait::async_trait]
-pub trait ScannerJob {
-	// async fn precheck() -> Result<T, ApiError>;
-	async fn scan(&mut self);
-}
-
 pub trait ScannedFileTrait {
 	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;
 	fn is_invisible_file(&self) -> bool;
 	fn should_ignore(&self) -> bool;
+	fn is_img(&self) -> bool;
+	fn is_thumbnail_img(&self) -> bool;
 	fn dir_has_media(&self) -> bool;
 }
 
@@ -26,13 +22,11 @@ impl ScannedFileTrait for Path {
 	}
 
 	fn is_invisible_file(&self) -> bool {
-		let filename = self
-			.file_name()
+		self.file_name()
 			.unwrap_or_default()
 			.to_str()
-			.expect(format!("Malformed filename: {:?}", self.as_os_str()).as_str());
-
-		filename.starts_with(".")
+			.map(|name| name.starts_with("."))
+			.unwrap_or(false)
 	}
 
 	fn should_ignore(&self) -> bool {
@@ -88,6 +82,37 @@ impl ScannedFileTrait for Path {
 				return true;
 			},
 		}
+	}
+
+	fn is_img(&self) -> bool {
+		if let Ok(kind) = infer::get_from_path(self) {
+			if let Some(file_type) = kind {
+				return file_type.mime_type().starts_with("image/");
+			}
+		}
+
+		// TODO: more, or refactor. Too lazy rn
+		self.extension()
+			.map(|ext| {
+				ext.eq_ignore_ascii_case("jpg")
+					|| ext.eq_ignore_ascii_case("png")
+					|| ext.eq_ignore_ascii_case("jpeg")
+			})
+			.unwrap_or(false)
+	}
+
+	fn is_thumbnail_img(&self) -> bool {
+		self.is_img()
+			&& self
+				.file_stem()
+				.unwrap_or_default()
+				.to_str()
+				.map(|name| {
+					name.eq_ignore_ascii_case("cover")
+						|| name.eq_ignore_ascii_case("thumbnail")
+						|| name.eq_ignore_ascii_case("folder")
+				})
+				.unwrap_or(false)
 	}
 
 	fn dir_has_media(&self) -> bool {

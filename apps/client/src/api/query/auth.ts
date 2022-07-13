@@ -1,3 +1,4 @@
+import { ApiResult, User } from '@stump/core';
 import API from '..';
 
 export function me(): Promise<ApiResult<User>> {

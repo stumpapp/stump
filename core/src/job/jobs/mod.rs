@@ -1,3 +1,5 @@
+pub mod scan;
+
 use std::{collections::HashMap, sync::Arc};
 
 use rocket::tokio::sync::Mutex;

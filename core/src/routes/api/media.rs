@@ -3,55 +3,75 @@ use rocket::{fs::NamedFile, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
+	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs,
 	guards::auth::Auth,
-	prisma::{media, read_progress, user},
+	prisma::{
+		media::{self, OrderByParam},
+		read_progress, user,
+	},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::{FileResponse, ImageResponse},
 		models::{media::Media, read_progress::ReadProgress},
-		pageable::{Pageable, PagedRequestParams},
+		pageable::{PageParams, Pageable, PagedRequestParams},
+		query::QueryOrder,
 	},
 };
 
-// TODO: paginate some of these?
-
+/// Get all media accessible to the requester. This is a paginated request, and
+/// has various pagination params available.
 #[openapi(tag = "Media")]
-#[get("/media?<unpaged>&<page_params..>")]
+#[get("/media?<unpaged>&<req_params..>")]
 pub async fn get_media(
 	unpaged: Option<bool>,
-	page_params: Option<PagedRequestParams>,
+	req_params: Option<PagedRequestParams>,
 	ctx: &Context,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 
-	let media = db
+	let unpaged = unpaged.unwrap_or_else(|| req_params.is_none());
+	let page_params = PageParams::from(req_params);
+	let order_by_param: OrderByParam =
+		QueryOrder::from(page_params.clone()).try_into()?;
+
+	let base_query = db
 		.media()
 		.find_many(vec![])
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(auth.0.id),
 		]))
-		.order_by(media::name::order(Direction::Asc))
+		.order_by(order_by_param);
+
+	if unpaged {
+		return Ok(Json(
+			base_query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>()
+				.into(),
+		));
+	}
+
+	let count = db.media_count().await?;
+
+	let media = base_query
+		.paginated(page_params.clone())
 		.exec()
 		.await?
 		.into_iter()
 		.map(|m| m.into())
 		.collect::<Vec<Media>>();
 
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
-
-	if unpaged {
-		return Ok(Json(media.into()));
-	}
-
-	Ok(Json((media, page_params).into()))
+	Ok(Json((media, count, page_params).into()))
 }
 
+/// Get all media with identical checksums. This heavily implies duplicate files.  
+/// This is a paginated request, and has various pagination params available.
 #[openapi(tag = "Media")]
 #[get("/media/duplicates?<unpaged>&<page_params..>")]
 pub async fn get_duplicate_media(
@@ -66,10 +86,7 @@ pub async fn get_duplicate_media(
 		._query_raw(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
 		.await?;
 
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
+	let unpaged = unpaged.unwrap_or(page_params.is_none());
 
 	if unpaged {
 		return Ok(Json(media.into()));
@@ -77,7 +94,11 @@ pub async fn get_duplicate_media(
 
 	Ok(Json((media, page_params).into()))
 }
-
+// TODO: I will need to add epub progress in here SOMEHOW... this will be rather
+// difficult...
+// TODO: paginate?
+/// Get all media which the requester has progress for that is less than the
+/// total number of pages available (i.e not completed).
 #[openapi(tag = "Media")]
 #[get("/media/keep-reading")]
 pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
@@ -93,7 +114,7 @@ pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<
 				read_progress::user_id::equals(auth.0.id),
 				read_progress::page::gt(0),
 			]))
-			.order_by(media::name::order(Direction::Asc))
+			.order_by(media::updated_at::order(Direction::Desc))
 			.exec()
 			.await?
 			.into_iter()
@@ -101,7 +122,20 @@ pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<
 				// Read progresses relation on media is one to many, there is a dual key
 				// on read_progresses table linking a user and media. Therefore, there should
 				// only be 1 item in this vec for each media resulting from the query.
-				Ok(progress) => progress.len() == 1 && progress[0].page < m.pages,
+				Ok(progresses) => {
+					if progresses.len() != 1 {
+						return false;
+					}
+
+					let progress = &progresses[0];
+
+					if let Some(_epubcfi) = progress.epubcfi.as_ref() {
+						// TODO: figure something out... might just need a `completed` field in progress TBH.
+						return false;
+					} else {
+						return progress.page < m.pages;
+					}
+				},
 				_ => false,
 			})
 			.map(|m| m.into())
@@ -142,7 +176,7 @@ pub async fn get_media_by_id(
 pub async fn get_media_file(
 	id: String,
 	ctx: &Context,
-	// _auth: Auth,
+	_auth: Auth,
 ) -> ApiResult<FileResponse> {
 	let db = ctx.get_db();
 
@@ -200,6 +234,7 @@ pub async fn convert_media_to_cbz(
 		)));
 	}
 
+	// TODO: write me...
 	unimplemented!()
 }
 

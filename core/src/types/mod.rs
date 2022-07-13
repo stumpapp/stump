@@ -5,3 +5,4 @@ pub mod event;
 pub mod http;
 pub mod models;
 pub mod pageable;
+pub mod query;

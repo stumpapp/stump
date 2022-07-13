@@ -1,4 +1,8 @@
+import { ApiResult, Media, PageableApiResult } from '@stump/core';
 import API, { baseURL } from '..';
+
+// type GetMediaResponse = ApiResult<Media[]>;
+type GetMediaById = ApiResult<Media>;
 
 export function getMedia(): Promise<PageableApiResult<Media[]>> {
 	return API.get('/media?unpaged=true');

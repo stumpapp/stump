@@ -1,18 +1,24 @@
 use rocket_okapi::JsonSchema;
 use serde::Serialize;
 
+use super::query::Direction;
+
 #[derive(Serialize, FromForm, JsonSchema)]
 pub struct PagedRequestParams {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
+	pub order_by: Option<String>,
+	pub direction: Option<Direction>,
 }
 
-#[derive(Debug, Serialize, JsonSchema)]
+#[derive(Debug, Serialize, JsonSchema, Clone)]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,
 	pub page_size: u32,
+	pub order_by: String,
+	pub direction: Direction,
 }
 
 impl Default for PageParams {
@@ -21,6 +27,8 @@ impl Default for PageParams {
 			zero_based: false,
 			page: 0,
 			page_size: 20,
+			order_by: "name".to_string(),
+			direction: Direction::Asc,
 		}
 	}
 }
@@ -40,6 +48,8 @@ impl From<Option<PagedRequestParams>> for PageParams {
 					page,
 					page_size,
 					zero_based,
+					order_by: params.order_by.unwrap_or("name".to_string()),
+					direction: params.direction.unwrap_or_default(),
 				}
 			},
 			None => PageParams::default(),
@@ -174,5 +184,18 @@ where
 {
 	fn into(self) -> Pageable<Vec<T>> {
 		(self.0, PageParams::from(self.1)).into()
+	}
+}
+
+impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, u32, PageParams)
+where
+	T: Serialize + Clone,
+{
+	fn into(self) -> Pageable<Vec<T>> {
+		let (data, db_total, page_params) = self;
+
+		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
+
+		Pageable::new(data, PageInfo::new(page_params, total_pages))
 	}
 }

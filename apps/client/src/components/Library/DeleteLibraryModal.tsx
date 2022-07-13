@@ -16,6 +16,7 @@ import { useMutation } from 'react-query';
 import { deleteLibrary } from '~api/mutation/library';
 import client from '~api/client';
 import { useNavigate } from 'react-router-dom';
+import { Library } from '@stump/core';
 
 interface Props {
 	disabled?: boolean;

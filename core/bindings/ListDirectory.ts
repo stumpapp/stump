@@ -1,14 +1,14 @@
-interface DirectoryListingFile {
+export interface DirectoryListingFile {
 	isDirectory: boolean;
 	name: string;
 	path: string;
 }
 
-interface DirectoryListing {
+export interface DirectoryListing {
 	parent?: string;
 	files: DirectoryListingFile[];
 }
 
-interface DirectoryListingInput {
+export interface DirectoryListingInput {
 	path?: string;
 }

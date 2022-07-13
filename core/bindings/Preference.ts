@@ -1,9 +1,11 @@
-declare enum ViewMode {
+import { Locale } from './Locale';
+
+export enum ViewMode {
 	Grid = 'GRID',
 	List = 'LIST',
 }
 
-interface UserPreferences {
+export interface UserPreferences {
 	/**
 	 * The id of the tuple in the database
 	 */
@@ -28,9 +30,13 @@ interface UserPreferences {
 	 * Whether the user wants to see the media in a collection as a grid or list
 	 */
 	collectionViewMode: ViewMode;
+	/**
+	 *
+	 */
+	locale: Locale;
 }
 
-interface ServerPreferences {
+export interface ServerPreferences {
 	// this won't be used, there is only one tuple in the database
 	/**
 	 * The id of the tuple in the database

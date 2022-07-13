@@ -1,5 +1,8 @@
 # ignore markdown files, there's just gonna be so many of them lol
 *.md linguist-detectable=false
+# ignore json files, as languages get added there will be *way* too many
+*.json linguist-detectable=false
+# ignore sql files, migrations get added there will be *way* too many
 *.sql linguist-detectable=false
 
 # I don't want website to be included in language stats

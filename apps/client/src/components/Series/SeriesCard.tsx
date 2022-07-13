@@ -4,6 +4,7 @@ import { getSeriesById, getSeriesThumbnail } from '~api/query/series';
 import pluralizeStat from '~util/pluralize';
 
 import Card from '~components/Card';
+import { Series } from '@stump/core';
 
 interface Props extends Series {}
 // TODO: figure out overflow stuff for the way this is styled. really long titles are a problem.

@@ -72,7 +72,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         elif which pacman &> /dev/null; then
                 echo "Detected 'pacman' based distro!"
                 sudo pacman -Syu
-                sudo pacman -S --needed base-devel openssl libssl-dev
+                sudo pacman -S --needed base-devel openssl
         elif which dnf &> /dev/null; then
                 echo "Detected 'dnf' based distro!"
                 sudo dnf check-update

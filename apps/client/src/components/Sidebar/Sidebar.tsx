@@ -22,6 +22,8 @@ import LibraryOptionsMenu from '../Library/LibraryOptionsMenu';
 import ThemeToggle from './ThemeToggle';
 import CreateLibraryModal from '~components/Library/CreateLibraryModal';
 import Logout from './Logout';
+import { useLocale } from '~hooks/useLocale';
+import { Library } from '@stump/core';
 
 interface NavMenuItemProps extends Library {
 	href: string;
@@ -123,24 +125,26 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 export function SidebarContent() {
 	const navigate = useNavigate();
 
+	const { locale, t } = useLocale();
+
 	const libraries = useStore((state) => state.libraries, shallow);
 
 	// console.log('libraries', libraries);
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
-			{ name: 'Home', icon: House as any, href: '/' },
+			{ name: t('sidebar.buttons.home'), icon: House as any, href: '/' },
 			{
-				name: 'Libraries',
+				name: t('sidebar.buttons.libraries'),
 				icon: Books as any,
 				items: libraries.map((library) => ({
 					...library,
 					href: `/libraries/${library.id}`,
 				})),
 			},
-			{ name: 'Settings', icon: Gear as any, href: '/settings' },
+			{ name: t('sidebar.buttons.settings'), icon: Gear as any, href: '/settings' },
 		],
-		[libraries],
+		[libraries, locale],
 	);
 
 	// This kinda makes me hate chakra!!!!

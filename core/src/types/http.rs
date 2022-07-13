@@ -236,3 +236,7 @@ impl OpenApiResponderInner for FileResponse {
 		<Vec<u8>>::responses(gen)
 	}
 }
+
+// pub struct RequestParams {
+
+// }

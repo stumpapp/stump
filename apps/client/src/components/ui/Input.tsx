@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { forwardRef, Input as ChakraInput, InputProps } from '@chakra-ui/react';
 
 interface Props extends InputProps {
@@ -7,6 +7,28 @@ interface Props extends InputProps {
 }
 
 const Input = forwardRef<Props, 'input'>(({ fullWidth = true, ...props }, ref) => {
+	const { _focus, _focusVisible } = useMemo(() => {
+		if (props.variant === 'flushed') {
+			return {
+				_focus: {
+					boxShadow: '0px 2px 0px 0px rgba(196, 130, 89, 0.6);',
+				},
+				_focusVisible: {
+					borderBottom: '1px rgba(196, 130, 89, 0.4);',
+				},
+			};
+		}
+
+		return {
+			_focus: {
+				boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+			},
+			_focusVisible: {
+				border: 'rgba(196, 130, 89, 0.4);',
+			},
+		};
+	}, [props.variant]);
+
 	return (
 		<ChakraInput
 			w={fullWidth ? 'full' : undefined}
@@ -14,12 +36,8 @@ const Input = forwardRef<Props, 'input'>(({ fullWidth = true, ...props }, ref) =
 			errorBorderColor="red.400"
 			{...props}
 			// TODO: shouldnt use brand color on error state
-			_focus={{
-				boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
-			}}
-			_focusVisible={{
-				border: 'rgba(196, 130, 89, 0.4);',
-			}}
+			_focus={_focus}
+			_focusVisible={_focusVisible}
 		/>
 	);
 });

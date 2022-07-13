@@ -1,8 +1,12 @@
-use std::io;
+use std::{io, path::PathBuf};
 
 use prisma_client_rust::chrono;
 
 use super::get_config_dir;
+
+pub fn get_log_file() -> PathBuf {
+	get_config_dir().join("Stump.log")
+}
 
 // TODO: change default back to 0
 // FIXME: use toml
@@ -18,9 +22,7 @@ pub fn init_fern() -> Result<(), fern::InitError> {
 
 	let verbosity = get_log_verbosity();
 
-	// println!("Log verbosity: {}", verbosity);
-
-	let log_file_path = get_config_dir().join("stump.log");
+	let log_file_path = get_log_file();
 
 	base_config = match verbosity {
 		// verbosity 0 has a log level of info. Excludes particularly 'loud' crates

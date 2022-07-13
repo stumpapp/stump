@@ -1,6 +1,6 @@
-type JobStatus = 'Running' | 'Completed' | 'Failed';
+export type JobStatus = 'Running' | 'Completed' | 'Failed';
 
-interface Job {
+export interface Job {
 	runnerId: string;
 	status: JobStatus;
 	currentTask: number;
@@ -8,7 +8,7 @@ interface Job {
 	message?: string;
 }
 
-type JobEventKind =
+export type JobEventKind =
 	| 'JobStarted'
 	| 'JobProgress'
 	| 'JobComplete'
@@ -16,6 +16,6 @@ type JobEventKind =
 	| 'CreatedMedia'
 	| 'CreatedSeries';
 
-type JobEvent = {
+export type JobEvent = {
 	[kind in JobEventKind]: any;
 };

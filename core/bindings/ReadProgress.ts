@@ -1,4 +1,4 @@
-interface ReadProgress {
+export interface ReadProgress {
 	/**
 	 * The id of the media file this progress belongs to.
 	 */

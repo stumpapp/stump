@@ -1,9 +1,28 @@
 {
   "loginPage": {
     "claimText": "This Stump server is not yet claimed, you can use the form below to create a user account and claim it. Enter your preferred username and password.",
-    "labels": {
-      "username": "Username",
-      "password": "Password"
+    "form": {
+      "validation": {
+        "missingUsername": "Username is required",
+        "missingPassword": "Password is required"
+      },
+      "labels": {
+        "username": "Username",
+        "password": "Password"
+      },
+      "buttons": {
+        "createAccount": "Create Account",
+        "login": "Login"
+      }
+    },
+    "toasts": {
+      "loggingIn": "Logging in...",
+      "loggedIn": "Welcome back! Redirecting...",
+      "loggedInFirstTime": "Welcome! Redirecting...",
+      "registering": "Registering...",
+      "registered": "Registered!",
+      "loginFailed": "Login failed. Please try again.",
+      "registrationFailed": "Registration failed. Please try again."
     }
   },
   "signOutModal": {
@@ -19,6 +38,16 @@
       "generalSettings": "General Settings",
       "serverSettings": "Server Settings",
       "jobHistory": "Job History"
+    },
+    "general": {
+      "profileForm": {
+        "validation": {},
+        "labels": {
+          "username": "Username",
+          "password": "Password"
+        },
+        "buttons": {}
+      }
     }
   },
   "sidebar": {

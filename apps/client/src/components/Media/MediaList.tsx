@@ -1,3 +1,4 @@
+import { Media } from '@stump/core';
 import React from 'react';
 import ListItem from '~components/ListItem';
 

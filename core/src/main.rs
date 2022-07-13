@@ -78,7 +78,8 @@ async fn rocket() -> _ {
 			log::info!("Migrations ran successfully");
 		},
 		Err(e) => {
-			panic!("Failed to run migrations: {:?}", e);
+			log::error!("Failed to run migrations: {:?}", e);
+			// panic!("Failed to run migrations: {:?}", e);
 		},
 	};
 

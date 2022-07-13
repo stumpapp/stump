@@ -1,10 +1,12 @@
+import { UserPreferences } from './Preference';
+
 declare enum UserRole {
 	ServerOwner = 'SERVER_OWNER',
 	Member = 'MEMBER',
 }
 
 // No password field intentionally
-interface User {
+export interface User {
 	/**
 	 * The id of the user.
 	 */
@@ -23,7 +25,7 @@ interface User {
 	preferences?: UserPreferences;
 }
 
-interface UserCredentials {
+export interface UserCredentials {
 	username: string;
 	password: string;
 }

@@ -1,6 +1,9 @@
 <p align="center">
   <img alt="Stump's logo. Description: A young individual sitting on a tree stump reading a book. Inspired by Stump's creator's childhood, where a large amount of his time was spent sitting on a tree stump reading his comic books." src="./.github/images/logo.png" style="width: 50%" />
   <br />
+  <a href="https://github.com/awesome-selfhosted/awesome-selfhosted#document-management---e-books">
+    <img src="https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg" alt="Awesome Self-Hosted">
+  </a>
   <a href="https://discord.gg/63Ybb7J3as">
     <img src="https://img.shields.io/discord/972593831172272148?label=Discord&color=5865F2" />
   </a>
@@ -15,41 +18,61 @@
   </a> -->
 </p>
 
-Stump is a free and open source comics, manga and digital book server with OPDS support, **heavily** inspired by [Komga](https://github.com/gotson/komga), created with Rust, [Rocket](https://github.com/SergioBenitez/Rocket), [Prisma](https://github.com/Brendonovich/prisma-client-rust) and React.
-
-I love Komga and use it at home, and I thought it would be cool to learn what goes into making something like this myself. I opted to develop this in Rust to hopefully, at the end of all this, create something just as, if not almost as, convenient but with a smaller footprint. _I also just want an excuse to practice Rust!_
-
 <p align='center'>
-<img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 85%" />
+Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/SergioBenitez/Rocket'>Rocket</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and React.
 </p>
 
-## Roadmap
+<p align='center'>
+<img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 90%" />
+</p>
 
-I'll list the major target features below - I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
+<details>
+  <summary><b>Table of Contents</b></summary>
+  <p>
 
-- Full OPDS + OPDS Page Streaming support
-- EPUB, PDF, and CBZ/CBR support
-- Customizable server configuration (for both Docker and local hosting)
-- Complex but lean and speedy indexing/scanning operations
-- Support for a range of metadata operations (e.g. adding/removing tags, changing metadata, etc.)
-- Import/export of libraries
-- Configurable CBR-to-CBZ conversion
-- Small footprint and resource utilization
-- Integrated web client (React) served by Rust server
+- [Roadmap 🗺](#roadmap-)
+- [Getting Started 🚀](#getting-started-)
+- [Project Structure 📦](#project-structure-)
+- [Developing 💻](#developing-)
+  - [Setup Script ⚙️](#setup-script-️)
+  - [Running Stump 🏃‍♀️](#running-stump-️)
+- [Similar Projects 👯](#similar-projects-)
+- [License 🔑](#license-)
+  </p>
+</details>
 
-For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're interested in tracking the development of specific features, you can take a look at the [V1 Project Board](https://github.com/users/aaronleopold/projects/2).
+## Roadmap 🗺
 
-## Getting Started
+> Stump is very young software under active development. It has not reached a beta stage yet, so do not expect a fully featured experience if you spin up a development environment or use a testing Docker image.
 
-> Stump is very young software under active development. It has not reached a beta stage yet, so do not expect a fully featured experience if you spin up a development environment.
+Some of these are actually completed(!) already, but the following items are the major targets for Stump's first beta release:
 
-Stump isn't ready for normal, non-development usage yet. Once a release has been made, this will be updated. For now, follow the [Development Setup](#development-setup) section to build from source and run locally.
+- 📃 Full OPDS + OPDS Page Streaming support
+- 📕 EPUB, PDF, and CBZ/CBR support
+- 📚 Organizing libraries with collections and reading lists
+- 🔎 Versitile full-text search
+- 🔐 Role-based access-control with managed user accounts and configurable privileges
+- 🚀 Easy setup and deployment using Docker or bare metal
+- 🤏 Small bundle size with a fully responsive, built-in UI
+- 🏃 Low resource utilization with excellent performance
+- 🧰 Easily consumable and documented REST API, so community tools and scripts can interact with Stump
+- 🌈 And more!
 
-For information about getting started, how Stump works and manages your library data, and much more detailed information, please visit [stumpapp.dev](https://stumpapp.dev/guides).
+I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
 
-## Project Structure
+> For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're interested in tracking the development of specific features, you can take a look at the [Project Board](https://github.com/users/aaronleopold/projects/2).
 
-I am ommitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
+## Getting Started 🚀
+
+Stump isn't ready for normal, non-development usage yet. Once a release has been made, this will be updated. For now, follow the [Developing](#developing-) section to build from source and run locally.
+
+There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump-preview) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container.
+
+For more information about getting started, how Stump works and how it manages your library, and much more, please visit [stumpapp.dev](https://stumpapp.dev/guides).
+
+## Project Structure 📦
+
+I am omitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
 
 ```
 .
@@ -59,6 +82,7 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 │   └── website
 │       └── src
 ├── core
+│   ├── bindings
 │   ├── prisma
 │   ├── prisma-cli
 │   └── src
@@ -66,31 +90,31 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 └── ...
 ```
 
-### Core
+The `core` directory is where Stump's 'core' functionality is located, written in Rust. Stump uses [Prisma](https://github.com/Brendonovich/prisma-client-rust).
 
-The core directory is where Stump's 'core' functionality is located, written in Rust.
+The 'apps' directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
 
-<!-- TODO: mention prisma -->
+- `client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
 
-### Apps
+- `website`: A Next.js application for the Stump landing site and documentation pages. The documentation is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev)
 
-The 'apps' directory is where Stump applications are located. These are separate from the Rust core, and are individual applications.
+## Developing 💻
 
-`client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
+Contributions are very **encouraged** and **welcome**!
 
-`website`: A Next.js application for the Stump landing site and documentation pages. The documentation is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev)
+I put together a small set of [resources](https://www.stumpapp.dev/contributing#developer-resources-📚) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
 
-## Development Setup
-
-There is now a setup script that handles most of the initial configuration, however ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
+Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
 
 **Ensure you are on the `develop` branch before continuing.**
 
-### Setup Script
+### Setup Script ⚙️
 
 > If you feel that your system is already configured for development, you may skip this step and run `cargo install cargo-watch` and `pnpm run setup`. I highly recommend using the script, however.
 
 > **Note**: If you are on a Windows machine, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) installed on your system.
+
+The setup script handles most of the initial configuration and installation of dependencies, however you should ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
 
 If you are on a Windows machine, you'll need to run the following:
 
@@ -108,7 +132,7 @@ These scripts will run system checks for `cargo` and `pnpm`, and will install a 
 
 If you face any issues running these, or are using a system that is not supported by the setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
 
-## Running Stump
+### Running Stump 🏃‍♀️
 
 To start the application for development, simply run:
 
@@ -116,7 +140,7 @@ To start the application for development, simply run:
 pnpm dev
 ```
 
-This will start both the vite dev server and the rust server, watching for changes. You can also run the server and the frontend in separate processes:
+This will start both the vite dev server and the rust server, watching for changes. You can also run the server and the client in separate processes:
 
 ```bash
 pnpm core dev # start the Stump server
@@ -129,23 +153,15 @@ To run in a release profile, you would just need to run:
 pnpm core start
 ```
 
-## License
+## Similar Projects 👯
 
-Stump codebase is licensed under an [MIT license](./LICENSE). This does not apply to Stump's logo, if you would like to use the logo for anything other than a reference to Stump, please [contact me](aaronleopold1221@gmail.com).
+There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there (_heck, it isn't even in beta yet_)! if Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
 
-## Contributing
+- [Komga](https://github.com/gotson/komga)
+- [Kavita](https://github.com/Kareadita/Kavita)
+- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books_)
+- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_)
 
-Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) file beforehand. Thanks!
+## License 🔑
 
-#### Developer Resources
-
-A few useful resources for developers looking to contribute:
-
-- [Rocket documentation](https://rocket.rs/v0.5-rc/)
-- [Prisma documentation](https://prisma.io/docs/prisma-client/introduction)
-  - [Prisma Client Rust Documentation](https://github.com/Brendonovich/prisma-client-rust/tree/main/docs)
-- [Chakra UI Documentation](https://chakra-ui.com/docs)
-- [OPDS specification](https://specs.opds.io/)
-- [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)
-- [Getting started with React](https://reactjs.org/docs/getting-started.html)
-- [Rust Book](https://doc.rust-lang.org/book/)
+Stump codebase is licensed under an [MIT license](./LICENSE) - (_[tldr;](https://tldrlegal.com/license/mit-license)_). This does **not** apply to Stump's logo, if you would like to use the logo for anything other than a reference to Stump, please [contact me](aaronleopold1221@gmail.com).

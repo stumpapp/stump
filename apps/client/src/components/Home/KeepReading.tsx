@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { getMediaThumbnail } from '~api/query/media';
 import MoreLink from '~components/ui/MoreLink';
+import { Media } from '@stump/core';
 
 interface Props {
 	media: Media[];

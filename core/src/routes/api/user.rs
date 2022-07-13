@@ -83,3 +83,10 @@ pub async fn create_user(
 pub async fn update_user() {
 	unimplemented!()
 }
+
+// TODO: make me
+#[openapi(tag = "User")]
+#[put("/users/<id>/preferences")]
+pub async fn update_user_preferences(id: String) {
+	todo!("I can't do that yet! ID: {:?}", id);
+}

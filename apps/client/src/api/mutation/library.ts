@@ -1,3 +1,4 @@
+import { ApiResult, CreateLibraryInput, EditLibraryInput, Library } from '@stump/core';
 import API from '..';
 
 // TODO: type this

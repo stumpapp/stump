@@ -1,5 +1,4 @@
 pub mod jobs;
-pub mod library;
 pub mod runner;
 
 use std::fmt::Debug;
@@ -13,7 +12,7 @@ use crate::{config::context::Context, types::errors::ApiError};
 // This taught me a lot and honestly it would have taken me forever without the reference.
 // HOWEVER, it is still really not an optimal solution. It's a little messy,
 // and a little all over the place, and it isn't structured in a way that makes it easy
-// for the UI to consume. But, for now it works.
+// for the UI to consume. But, for now it works. It will have a lot of changes very soon...
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum JobStatus {

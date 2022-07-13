@@ -341,19 +341,18 @@ async fn series_by_id(
 	let end = (start + page_size) - 1;
 
 	let series = db
-        .series()
-        .find_unique(prisma::series::id::equals(id.clone()))
-        .with(
-            prisma::series::media::fetch(vec![])
-                .order_by(media::name::order(Direction::Asc))
-                // Note: I really wanted to be able to just paginate the query here,
-                // but I need to be able to determine whether or not the series has more media
-                // in the below logic for the OPDS feed.
-                // .skip(start.try_into()?)
-                // .take(end.try_into()?),
-        )
-        .exec()
-        .await?;
+		.series()
+		.find_unique(prisma::series::id::equals(id.clone()))
+		.with(
+			prisma::series::media::fetch(vec![])
+				.order_by(media::name::order(Direction::Asc)), // Note: I really wanted to be able to just paginate the query here,
+			                                                // but I need to be able to determine whether or not the series has more media
+			                                                // in the below logic for the OPDS feed.
+			                                                // .skip(start.try_into()?)
+			                                                // .take(end.try_into()?),
+		)
+		.exec()
+		.await?;
 
 	if series.is_none() {
 		return Err(ApiError::NotFound(format!("Series {} not found", id)));

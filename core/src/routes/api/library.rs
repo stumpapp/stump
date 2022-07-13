@@ -6,16 +6,22 @@ use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
 
 use crate::{
+	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs::{self},
 	guards::auth::{AdminGuard, Auth},
-	job::library::LibraryScannerJob,
-	prisma::{library, media, series, tag},
+	job::jobs::scan::LibraryScannerJob,
+	prisma::{
+		library, media,
+		series::{self, OrderByParam},
+		tag,
+	},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
 		models::{library::Library, series::Series, tag::Tag},
-		pageable::{Pageable, PagedRequestParams},
+		pageable::{PageParams, Pageable, PagedRequestParams},
+		query::QueryOrder,
 	},
 };
 
@@ -41,10 +47,7 @@ pub async fn get_libraries(
 		.map(|l| l.into())
 		.collect::<Vec<Library>>();
 
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
+	let unpaged = unpaged.unwrap_or(page_params.is_none());
 
 	if unpaged {
 		return Ok(Json(libraries.into()));
@@ -87,55 +90,59 @@ pub async fn get_library_by_id(
 	Ok(Json(library.into()))
 }
 
-// FIXME: I don't load the media relation on this query anymore, and it breaks the
-// book count calculation. This needs to be corrected, but for another day.
-// https://github.com/Brendonovich/prisma-client-rust/issues/24 --> eventually,
-// this will pretty much solve the problem, but for now I'll probably just (unfortunately)
-// run a custom query to grab the book count and change the Series model a little bit to
-// take in that field.
-/// Returns the series in a given library.
+// FIXME: this is absolutely atrocious...
+// This should be much better once https://github.com/Brendonovich/prisma-client-rust/issues/24 is added
+// but for now I will have this disgustingly gross and ugly work around...
+/// Returns the series in a given library. Will *not* load the media relation.
 #[openapi(tag = "Series")]
-#[get("/libraries/<id>/series?<unpaged>&<page_params..>")]
+#[get("/libraries/<id>/series?<unpaged>&<req_params..>")]
 pub async fn get_library_series(
 	id: String,
 	unpaged: Option<bool>,
-	page_params: Option<PagedRequestParams>,
+	req_params: Option<PagedRequestParams>,
 	ctx: &Context,
 	// auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
 
-	// FIXME: this query is a pain to add series->media relation counts.
-	// This should be much better in https://github.com/Brendonovich/prisma-client-rust/issues/24
-	// but for now I kinda have to load all the media...
-	let series = db
-		.series()
-		.find_many(vec![series::library_id::equals(Some(id))])
-		.with(series::media::fetch(vec![]))
-		.order_by(series::name::order(Direction::Asc))
-		.exec()
-		.await?
-		.into_iter()
-		.map(|series| {
-			let media_count = match series.media() {
-				Ok(media) => media.len() as i32,
-				_ => 0,
-			};
+	let unpaged = unpaged.unwrap_or_else(|| req_params.is_none());
+	let page_params = PageParams::from(req_params);
+	let order_by_param: OrderByParam =
+		QueryOrder::from(page_params.clone()).try_into()?;
 
-			(series, media_count).into()
+	let base_query = db
+		.series()
+		.find_many(vec![series::library_id::equals(Some(id.clone()))])
+		.order_by(order_by_param);
+
+	let series = match unpaged {
+		true => base_query.exec().await?,
+		false => base_query.paginated(page_params.clone()).exec().await?,
+	};
+
+	let series_ids = series.iter().map(|s| s.id.clone()).collect();
+
+	let media_counts = db.series_media_count(series_ids).await?;
+
+	let series = series
+		.iter()
+		.map(|s| {
+			let media_count = match media_counts.get(&s.id) {
+				Some(count) => count.to_owned(),
+				_ => 0,
+			} as i32;
+
+			(s.to_owned(), media_count).into()
 		})
 		.collect::<Vec<Series>>();
-
-	let unpaged = match unpaged {
-		Some(val) => val,
-		None => page_params.is_none(),
-	};
 
 	if unpaged {
 		return Ok(Json(series.into()));
 	}
 
-	Ok(Json((series, page_params).into()))
+	let series_count = db.series_count(id).await?;
+
+	Ok(Json((series, series_count, page_params).into()))
 }
 
 /// Get the thumbnail image for a library by id, if the current user has access to it.

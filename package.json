@@ -17,11 +17,11 @@
 		"build:docker": "docker buildx build --push --platform=linux/arm/v7,linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest ."
 	},
 	"devDependencies": {
+		"concurrently": "^6.5.1",
 		"husky": "^7.0.2",
 		"lint-staged": "^12.4.2",
-		"prettier": "^2.6.2",
-		"concurrently": "^6.5.1",
 		"move-cli": "2.0.0",
+		"prettier": "^2.7.1",
 		"trash-cli": "^5.0.0"
 	},
 	"lint-staged": {

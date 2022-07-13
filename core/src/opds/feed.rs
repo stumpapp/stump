@@ -1,5 +1,8 @@
 // use crate::opds::author::StumpAuthor;
-use crate::{opds::link::OpdsLink, prisma::library};
+use crate::{
+	opds::link::OpdsLink,
+	prisma::{library, series},
+};
 use anyhow::Result;
 use prisma_client_rust::chrono;
 use xml::{writer::XmlEvent, EventWriter};
@@ -155,5 +158,96 @@ impl From<library::Data> for OpdsFeed {
 		};
 
 		Self::new(id, title, Some(links), entries)
+	}
+}
+
+impl From<(library::Data, i64, u32)> for OpdsFeed {
+	fn from((library, page, count): (library::Data, i64, u32)) -> Self {
+		let id = library.id.clone();
+		let title = library.name.clone();
+
+		let mut links = vec![
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::ItSelf,
+				format!("/opds/v1.2/libraries/{}", id),
+			),
+			OpdsLink::new(
+				OpdsLinkType::Navigation,
+				OpdsLinkRel::Start,
+				"/opds/v1.2/catalog".to_string(),
+			),
+		];
+
+		let entries = library
+			.series()
+			.unwrap_or(Vec::<series::Data>::new().as_ref())
+			.to_owned()
+			.into_iter()
+			.map(OpdsEntry::from)
+			.collect::<Vec<_>>();
+
+		if page > 0 {
+			links.push(OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Previous,
+				href: format!("/opds/v1.2/libraries?page={}", page - 1),
+			});
+		}
+
+		let total_pages = (count as f32 / 20.0).ceil() as u32;
+
+		if page < total_pages as i64 && entries.len() == 20 {
+			links.push(OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Next,
+				href: format!("/opds/v1.2/libraries?page={}", page + 1),
+			});
+		}
+
+		OpdsFeed::new(id, title, Some(links), entries)
+	}
+}
+
+impl From<(String, Vec<series::Data>, i64, u32)> for OpdsFeed {
+	/// Used in /opds/series?page={page}, converting the raw Vector of series into an OPDS feed.
+	/// The page URL param is also passed in, and is used when generating the OPDS links.
+	fn from((title, series, page, count): (String, Vec<series::Data>, i64, u32)) -> Self {
+		let entries = series.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
+
+		let mut links = vec![
+			OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::ItSelf,
+				href: String::from("/opds/v1.2/series"),
+			},
+			OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Start,
+				href: String::from("/opds/v1.2/catalog"),
+			},
+		];
+
+		if page > 0 {
+			links.push(OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Previous,
+				href: format!("/opds/v1.2/series?page={}", page - 1),
+			});
+		}
+
+		// TODO: this 20.0 is the page size, which I might make dynamic for OPDS routes... but
+		// not sure..
+		let total_pages = (count as f32 / 20.0).ceil() as u32;
+
+		if page < total_pages as i64 && entries.len() == 20 {
+			links.push(OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Next,
+				href: format!("/opds/v1.2/series?page={}", page + 1),
+			});
+		}
+
+		OpdsFeed::new("root".to_string(), title, Some(links), entries)
 	}
 }

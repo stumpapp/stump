@@ -2,6 +2,7 @@ use prisma_client_rust::{chrono, Direction};
 use rocket::Route;
 
 use crate::{
+	db::utils::PrismaClientTrait,
 	fs,
 	guards::auth::Auth,
 	opds::{
@@ -19,6 +20,13 @@ use crate::{
 		http::{ImageResponse, XmlResponse},
 	},
 };
+
+fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
+	let skip = page * page_size;
+	let take = skip + page_size;
+
+	(skip, take)
+}
 
 /// Function to return the routes for the `/opds/v1.2` path.
 pub fn opds() -> Vec<Route> {
@@ -162,6 +170,10 @@ async fn keep_reading(ctx: &Context, auth: Auth) -> ApiResult<XmlResponse> {
 
 	let user_id = auth.0.id.clone();
 
+	// FIXME: not sure how to go about fixing this query. I kind of need to load all the
+	// media, so I know which ones are 'completed'. I think the solution here is to just create
+	// a new field on read_progress called 'completed'.
+	// Lol just noticed I already said that below. Guess I'll do that before next PR.
 	let media = db
 		.media()
 		.find_many(vec![media::read_progresses::some(vec![
@@ -180,7 +192,20 @@ async fn keep_reading(ctx: &Context, auth: Auth) -> ApiResult<XmlResponse> {
 			// Read progresses relation on media is one to many, there is a dual key
 			// on read_progresses table linking a user and media. Therefore, there should
 			// only be 1 item in this vec for each media resulting from the query.
-			Ok(progress) => progress.len() == 1 && progress[0].page < m.pages,
+			Ok(progresses) => {
+				if progresses.len() != 1 {
+					return false;
+				}
+
+				let progress = &progresses[0];
+
+				if let Some(_epubcfi) = progress.epubcfi.as_ref() {
+					// TODO: figure something out... might just need a `completed` field in progress TBH.
+					return false;
+				} else {
+					return progress.page < m.pages;
+				}
+			},
 			_ => false,
 		});
 
@@ -236,14 +261,24 @@ async fn libraries(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
 	Ok(XmlResponse(feed.build()?))
 }
 
-#[get("/libraries/<id>")]
-async fn library_by_id(ctx: &Context, id: String, _auth: Auth) -> ApiResult<XmlResponse> {
+#[get("/libraries/<id>?<page>")]
+async fn library_by_id(
+	ctx: &Context,
+	id: String,
+	page: Option<i64>,
+	_auth: Auth,
+) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
+
+	let page = page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page, 20);
+
+	let series_count = db.series_count(id.clone()).await?;
 
 	let library = db
 		.library()
 		.find_unique(library::id::equals(id.clone()))
-		.with(library::series::fetch(vec![]))
+		.with(library::series::fetch(vec![]).skip(skip).take(take))
 		.exec()
 		.await?;
 
@@ -251,38 +286,34 @@ async fn library_by_id(ctx: &Context, id: String, _auth: Auth) -> ApiResult<XmlR
 		return Err(ApiError::NotFound(format!("Library {} not found", id)));
 	}
 
-	Ok(XmlResponse(OpdsFeed::from(library.unwrap()).build()?))
+	Ok(XmlResponse(
+		OpdsFeed::from((library.unwrap(), page, series_count)).build()?,
+	))
 }
 
-/// A handler for GET /opds/v1.2/series
-#[get("/series")]
-async fn series(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
+/// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
+/// pagination is zero-indexed.
+#[get("/series?<page>")]
+async fn series(page: Option<i64>, ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
 
-	let series = db.series().find_many(vec![]).exec().await?;
+	let page = page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page, 20);
 
-	let entries = series
-		.into_iter()
-		.map(|s| opds::entry::OpdsEntry::from(s))
-		.collect();
+	// FIXME: like other areas throughout Stump's paginated routes, I do not love
+	// that I need to make 2 queries. Hopefully this get's better as prisma client matures
+	// and introduces potential other work arounds.
+	let series_count = db.series_count_all().await?;
 
-	let feed = opds::feed::OpdsFeed::new(
-		"root".to_string(),
-		"Stump OPDS All Series".to_string(),
-		Some(vec![
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::ItSelf,
-				href: String::from("/opds/v1.2/series"),
-			},
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Start,
-				href: String::from("/opds/v1.2/catalog"),
-			},
-		]),
-		entries,
-	);
+	let series = db
+		.series()
+		.find_many(vec![])
+		.skip(skip)
+		.take(take)
+		.exec()
+		.await?;
+
+	let feed = OpdsFeed::from(("All Series".to_string(), series, page, series_count));
 
 	Ok(XmlResponse(feed.build()?))
 }
@@ -303,9 +334,9 @@ async fn series_latest(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
 		.map(|s| opds::entry::OpdsEntry::from(s))
 		.collect();
 
-	let feed = opds::feed::OpdsFeed::new(
+	let feed = OpdsFeed::new(
 		"root".to_string(),
-		"Stump OPDS All Series".to_string(),
+		"Latest Series".to_string(),
 		Some(vec![
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,

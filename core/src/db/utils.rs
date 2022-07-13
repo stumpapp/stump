@@ -19,9 +19,12 @@ pub struct SeriesMediaCountQueryReturn {
 	pub count: u32,
 }
 
+// TODO: Replace pretty much all of these once prisma client 0.6 comes out... Count queries and
+// relation counting is expected in that release.
 #[async_trait::async_trait]
 pub trait PrismaClientTrait {
 	async fn media_count(&self) -> ApiResult<u32>;
+	async fn series_count_all(&self) -> ApiResult<u32>;
 	async fn series_count(&self, library_id: String) -> ApiResult<u32>;
 	async fn series_media_count(
 		&self,
@@ -34,6 +37,17 @@ impl PrismaClientTrait for PrismaClient {
 	async fn media_count(&self) -> ApiResult<u32> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM media"))
+			.await?;
+
+		Ok(match count_res.get(0) {
+			Some(val) => val.count,
+			None => 0,
+		})
+	}
+
+	async fn series_count_all(&self) -> ApiResult<u32> {
+		let count_res: Vec<CountQueryReturn> = self
+			._query_raw(raw!("SELECT COUNT(*) as count FROM series"))
 			.await?;
 
 		Ok(match count_res.get(0) {

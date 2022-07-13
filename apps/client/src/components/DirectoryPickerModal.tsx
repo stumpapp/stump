@@ -104,6 +104,7 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 						>
 							{directoryList.map((directory) => (
 								<Button
+									key={directory.path}
 									justifyContent="flex-start"
 									py={2}
 									px={1}

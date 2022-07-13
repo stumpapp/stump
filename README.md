@@ -72,7 +72,7 @@ For more information about getting started, how Stump works and how it manages y
 
 ## Project Structure 📦
 
-I am ommitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
+I am omitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
 
 ```
 .
@@ -82,6 +82,7 @@ I am ommitting a lot of files and only focusing on the main directories, but the
 │   └── website
 │       └── src
 ├── core
+│   ├── bindings
 │   ├── prisma
 │   ├── prisma-cli
 │   └── src

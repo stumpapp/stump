@@ -238,6 +238,10 @@ model Log {
   @@map("logs")
 }
 
+// TODO: I think I want to remove the view modes from database persisted preferences.
+// Instead, I'll have a sessionStorage/localStorage store just for those, I think
+// it might be silly to ping the database everytime this gets updated is mainly 
+// the reason. Not sure though...
 model UserPreferences {
   id                 String  @id @default(cuid())
   // Flag to indicate if the user wants to reduce some of the animations when using the build-in client

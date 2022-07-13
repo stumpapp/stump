@@ -3,6 +3,9 @@ import create, { GetState, SetState, StateCreator, StoreApi, UseBoundStore } fro
 import createContext from 'zustand/context';
 import { devtools, persist } from 'zustand/middleware';
 
+// FIXME: these will need to query the DB... which is kinda annoying lol
+// unless I split userPreferences up somehow between database persisted things
+// (like locale at least)
 interface UserPreferencesMutations {
 	// setDarkMode(darkMode: boolean): void;
 	setLibraryViewMode(viewMode: ViewMode): void;

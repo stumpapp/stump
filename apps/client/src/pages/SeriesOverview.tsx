@@ -10,8 +10,6 @@ import MediaList from '~components/Media/MediaList';
 import Pagination from '~components/ui/Pagination';
 import useIsInView from '~hooks/useIsInView';
 import { Box, ButtonGroup, Heading, Text } from '@chakra-ui/react';
-import Button, { IconButton } from '~components/ui/Button';
-import { CloudArrowDown } from 'phosphor-react';
 import UpNextButton from '~components/Series/UpNextButton';
 import DownloadSeriesButton from '~components/Series/DownloadSeriesButton';
 import ReadMore from '~components/ui/ReadMore';

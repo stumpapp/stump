@@ -42,7 +42,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
 	return (
 		// TODO: frontmatter={pageProps.markdoc.frontmatter}
-		<ThemeProvider attribute="class" enableSystem={false}>
+		<ThemeProvider attribute="class" enableSystem={false} defaultTheme="dark">
 			<DefaultSeo {...SEO} />
 			<NProgress />
 			<Layout toc={toc}>

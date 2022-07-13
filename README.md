@@ -43,7 +43,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 
 ## Roadmap 🗺
 
-> Stump is very young software under active development. It has not reached a beta stage yet, so do not expect a fully featured experience if you spin up a development environment or use a testing Docker image.
+> Stump is very young software under active development. It has not reached a beta stage yet, so do not expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image.
 
 Some of these are actually completed(!) already, but the following items are the major targets for Stump's first beta release:
 

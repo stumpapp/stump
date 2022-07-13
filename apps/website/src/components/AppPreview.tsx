@@ -10,7 +10,7 @@ export default function AppPreview() {
 					initial={{ opacity: 0, scale: 0.75 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 1, delay: 0.5 }}
-					className="z-40 h-full flex-1 w-[650px] sm:w-auto bg-contain bg-no-repeat bg-[center:center_top] bg-[url('/demo-fallback--light.png')] dark:bg-[url('/demo-fallback--dark.png')]"
+					className="z-40 h-full flex self-center flex-1 w-[650px] sm:w-auto bg-contain bg-no-repeat bg-[center_top] bg-[url('/demo-fallback--light.png')] dark:bg-[url('/demo-fallback--dark.png')]"
 				/>
 			</div>
 		</div>

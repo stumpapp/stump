@@ -3,7 +3,7 @@
 {% callout title="Note" icon="danger" %}
 Stump will have an official Docker image available when the first beta release is published.
 
-For now, there is an x86_64 preview image available. **These are not frequently updated and are for testing purposes and are not intended for public usage yet**, so do not expect a fully featured, bug-free experience if you spin up a container.
+For now, there is a preview image available on a separate [Dockerhub repository](https://hub.docker.com/r/aaronleopold/stump-preview). **This image will not be frequently updated and should be used for testing purposes only**, so do not expect a fully featured, bug-free experience if you spin up a container.
 {% /callout %}
 
 ## Usage
@@ -15,15 +15,22 @@ You have two options for spinning up a container based on your preference. I pre
 Once the image is created, you can create a container from it:
 
 ```bash
-# replace my paths with your own
+# replace my paths (left of colon) with your own
 docker create \
   --name=stump \
   --user 1000:1000 \
   -p 10801:10801 \
-  --mount type=bind,source=/Users/aaronleopold/.stump,target=/config \
-  --mount type=bind,source=/Users/aaronleopold/Documents/Stump,target=/data \
+  --volume "/Users/aaronleopold/.stump:/config" \
+  --volume "/Users/aaronleopold/Documents/Stump:/data" \
   --restart unless-stopped \
   aaronleopold/stump-preview
+```
+
+If you prefer bind mounts, you can swap out the two `--volume` lines with:
+
+```bash
+--mount type=volume,source=/Users/aaronleopold/.stump,target=/config \
+--mount type=volume,source=/Users/aaronleopold/Documents/Stump,target=/data \
 ```
 
 Then you can start the container:
@@ -34,9 +41,11 @@ docker start stump
 
 #### Properties / Configuration
 
-| Parameter  |                   Functionality                    |
-| ---------- | :------------------------------------------------: |
-| `-p 10801` | The port Stump uses for it's API and web interface |
+| Parameter          |                                Functionality                                |
+| ------------------ | :-------------------------------------------------------------------------: |
+| `--name=stump`     |           Sets the name of the container this command will create           |
+| `--user=1000:1000` |    Sets the user and group used within the container (leave this as is)     |
+| `-p 10801:10801`   | Maps the port on your machine (left) to the port the container uses (right) |
 
 ### Docker Compose
 

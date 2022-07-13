@@ -1,5 +1,6 @@
-import { Heading } from '@chakra-ui/react';
 import React from 'react';
+import { Heading } from '@chakra-ui/react';
+import { Series } from '@stump/core';
 import ListItem from '~components/ListItem';
 
 interface Props {

@@ -1,3 +1,4 @@
+import { ApiResult, Library, PageableApiResult, Series } from '@stump/core';
 import API from '..';
 
 export function getLibraries(): Promise<PageableApiResult<Library[]>> {

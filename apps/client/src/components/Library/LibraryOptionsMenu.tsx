@@ -8,6 +8,7 @@ import DeleteLibraryModal from './DeleteLibraryModal';
 import toast from 'react-hot-toast';
 import { UserRole } from '~util/common';
 import { useUser } from '~hooks/useUser';
+import { Library } from '@stump/core';
 
 interface Props {
 	library: Library;

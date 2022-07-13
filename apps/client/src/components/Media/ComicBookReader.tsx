@@ -5,6 +5,7 @@ import { useAnimation, motion, useMotionValue, useTransform } from 'framer-motio
 import type { ControlsAnimationDefinition } from 'framer-motion/types/animation/types';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useWindowSize } from '~hooks/useWindowSize';
+import { Media } from '@stump/core';
 
 const RESET_CONTROLS = {
 	x: '0%',

@@ -1,4 +1,6 @@
-interface Series {
+import { Media } from './Media';
+
+export interface Series {
 	/**
 	 * The id of the series.
 	 */

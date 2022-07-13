@@ -1,3 +1,4 @@
+import { ApiResult } from '@stump/core';
 import API from '..';
 
 interface RegisterUserInput {

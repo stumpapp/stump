@@ -13,6 +13,7 @@ import {
 import { ListBullets } from 'phosphor-react';
 import { useLocation } from 'react-router-dom';
 import { IconButton } from '~components/ui/Button';
+import { EpubContent } from '@stump/core';
 
 interface EpubTocDrawerProps {
 	isOpen: boolean;

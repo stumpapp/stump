@@ -5,7 +5,7 @@
   "keywords": [],
   "license": "MIT",
   "scripts": {
-    "prisma": "cargo prisma --",
+    "prisma": "cargo prisma",
     "setup": "cargo prisma generate && pnpm get-client",
     "start": "cargo run --release",
     "dev": "cargo watch -x run",
@@ -14,5 +14,11 @@
     "move-client": "trash ../target/release/client && cp -r ./client ../target/release/client",
     "move-rocket": "trash ../target/release/Rocket.toml && cp ./Rocket.toml ../target/release/Rocket.toml",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.36",
+    "axios": "^0.27.1",
+    "ts-node": "^10.8.0",
+    "typescript": "^4.7.2"
   }
 }

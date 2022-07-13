@@ -1,11 +1,11 @@
-declare enum LogLevel {
+export enum LogLevel {
 	Error = 'ERROR',
 	Warn = 'WARN',
 	Info = 'INFO',
 	Debug = 'DEBUG',
 }
 
-interface Log {
+export interface Log {
 	/**
 	 * The id of the log.
 	 */
@@ -24,10 +24,10 @@ interface Log {
 	createdAt: Date;
 }
 
-interface LogFileMeta {
+export interface LogFileMeta {
 	path: string;
 	size: number;
 	modified: string;
 }
 
-type Logs = Log[];
+export type Logs = Log[];

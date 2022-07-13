@@ -5,7 +5,7 @@ use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
 use crate::{
-	config::get_config_dir,
+	config::logging::get_log_file,
 	guards::auth::AdminGuard,
 	types::{alias::ApiResult, errors::ApiError, models::log::LogMetadata},
 };
@@ -19,7 +19,7 @@ use crate::{
 #[openapi(tag = "Logs")]
 #[get("/logs")]
 pub async fn get_log_info(_auth: AdminGuard) -> ApiResult<Json<LogMetadata>> {
-	let log_file_path = get_config_dir().join("stump.log");
+	let log_file_path = get_log_file();
 
 	let file = File::open(log_file_path.as_path())?;
 
@@ -44,7 +44,7 @@ pub async fn get_log_info(_auth: AdminGuard) -> ApiResult<Json<LogMetadata>> {
 #[openapi(tag = "Logs")]
 #[delete("/logs")]
 pub async fn clear_logs(_auth: AdminGuard) -> Result<(), ApiError> {
-	let log_file_path = get_config_dir().join("stump.log");
+	let log_file_path = get_log_file();
 
 	File::create(log_file_path.as_path())?;
 

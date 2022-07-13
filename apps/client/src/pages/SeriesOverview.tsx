@@ -15,6 +15,7 @@ import { CloudArrowDown } from 'phosphor-react';
 import UpNextButton from '~components/Series/UpNextButton';
 import DownloadSeriesButton from '~components/Series/DownloadSeriesButton';
 import ReadMore from '~components/ui/ReadMore';
+import { Series } from '@stump/core';
 
 interface OverviewTitleSectionProps {
 	isVisible: boolean;

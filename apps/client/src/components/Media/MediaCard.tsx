@@ -1,3 +1,4 @@
+import { Media } from '@stump/core';
 import React, { useMemo } from 'react';
 import client from '~api/client';
 import { getMediaById, getMediaThumbnail } from '~api/query/media';

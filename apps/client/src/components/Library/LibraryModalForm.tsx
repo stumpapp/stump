@@ -22,6 +22,7 @@ import { Tab } from '~components/ui/Tabs';
 import TextArea from '~components/ui/TextArea';
 import { TagOption } from '~hooks/useTags';
 import { useStore } from '~store/store';
+import { Library } from '@stump/core';
 
 interface Props {
 	tags: TagOption[];

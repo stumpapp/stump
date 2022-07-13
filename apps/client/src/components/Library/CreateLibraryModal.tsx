@@ -18,6 +18,7 @@ import {
 import { TagOption, useTags } from '~hooks/useTags';
 import LibraryModalForm from './LibraryModalForm';
 import { createTags } from '~api/query/tag';
+import { ApiResult, Tag } from '@stump/core';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;

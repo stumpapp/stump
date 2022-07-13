@@ -1,3 +1,4 @@
+import { JobEvent } from '@stump/core';
 import { useEffect } from 'react';
 import { baseURL } from '~api/index';
 

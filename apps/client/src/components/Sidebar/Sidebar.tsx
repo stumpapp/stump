@@ -23,6 +23,7 @@ import ThemeToggle from './ThemeToggle';
 import CreateLibraryModal from '~components/Library/CreateLibraryModal';
 import Logout from './Logout';
 import { useLocale } from '~hooks/useLocale';
+import { Library } from '@stump/core';
 
 interface NavMenuItemProps extends Library {
 	href: string;

@@ -1,3 +1,4 @@
+import type { Job, Library, Locale, User, UserPreferences, ViewMode } from '@stump/core';
 import create, { GetState, SetState, StateCreator, StoreApi, UseBoundStore } from 'zustand';
 import createContext from 'zustand/context';
 import { devtools, persist } from 'zustand/middleware';

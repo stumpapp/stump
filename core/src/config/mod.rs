@@ -15,7 +15,7 @@ fn home() -> PathBuf {
 }
 
 pub fn get_config_dir() -> PathBuf {
-	std::env::var("STUMP_CONFIG_DIR")
+	let config_dir = std::env::var("STUMP_CONFIG_DIR")
 		.and_then(|val| {
 			if val.len() < 1 {
 				Ok(home().join(".stump"))
@@ -23,5 +23,12 @@ pub fn get_config_dir() -> PathBuf {
 				Ok(PathBuf::from(val))
 			}
 		})
-		.unwrap_or_else(|_| home().join(".stump"))
+		.unwrap_or_else(|_| home().join(".stump"));
+
+	if !config_dir.exists() {
+		// TODO: error handling
+		std::fs::create_dir_all(&config_dir).unwrap();
+	}
+
+	config_dir
 }

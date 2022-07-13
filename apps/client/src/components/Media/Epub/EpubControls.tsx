@@ -17,6 +17,7 @@ import { SwipeableHandlers } from 'react-swipeable';
 import EpubTocDrawer from './EpubTocDrawer';
 import { useNavigate } from 'react-router-dom';
 import FontSelection from './FontSelection';
+import { Epub } from '@stump/core';
 
 interface IEpubControls {
 	next(): Promise<void>;

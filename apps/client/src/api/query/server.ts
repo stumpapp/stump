@@ -1,9 +1,10 @@
-import API from "..";
+import { ApiResult } from '@stump/core';
+import API from '..';
 
 interface Claim {
-  isClaimed: boolean;
+	isClaimed: boolean;
 }
 
-export async function checkIsClaimed(): Promise<ApiResult<Claim>>{
-  return API.get('/claim');
+export async function checkIsClaimed(): Promise<ApiResult<Claim>> {
+	return API.get('/claim');
 }

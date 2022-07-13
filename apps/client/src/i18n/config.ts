@@ -12,14 +12,33 @@ import { initReactI18next } from 'react-i18next';
 export const resources = {
 	en: {
 		en,
+	},
+	fr: {
 		fr,
 	},
 } as const;
 
+function parseMissingKeyHandler(missingKey: string) {
+	const translation = (missingKey ?? '')
+		.split('.')
+		// @ts-ignore
+		.reduce((previous, current) => previous[current], resources.en.en);
+
+	// console.log({ translation });
+
+	if (typeof translation === 'string') {
+		return translation;
+	}
+
+	return missingKey;
+}
+
 i18n.use(initReactI18next).init({
-	lng: 'en',
+	// lng: 'en',
 	interpolation: {
 		escapeValue: false, // not needed for react as it escapes by default
 	},
+	fallbackLng: 'en',
+	parseMissingKeyHandler,
 	resources,
 });

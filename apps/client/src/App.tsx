@@ -16,6 +16,7 @@ import { Helmet, HelmetTags } from 'react-helmet';
 import { useStore } from '~store/store';
 import { useJobsListener } from '~hooks/useJobsListener';
 import toast from 'react-hot-toast';
+import { JobEvent } from '@stump/core';
 
 const Home = React.lazy(() => import('~pages/Home'));
 const LibraryOverview = React.lazy(() => import('~pages/LibraryOverview'));

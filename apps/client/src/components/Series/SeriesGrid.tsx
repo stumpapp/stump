@@ -1,4 +1,5 @@
 import { Heading } from '@chakra-ui/react';
+import { Series } from '@stump/core';
 import React from 'react';
 import SeriesCard from './SeriesCard';
 

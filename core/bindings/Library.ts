@@ -1,4 +1,7 @@
-interface Library {
+import { Series } from './Series';
+import { Tag } from './Tag';
+
+export interface Library {
 	/**
 	 * The id of the library.
 	 */
@@ -29,11 +32,11 @@ interface Library {
 	tags?: Tag[];
 }
 
-interface CreateLibraryInput extends Omit<Library, 'id' | 'updatedAt' | 'series'> {
+export interface CreateLibraryInput extends Omit<Library, 'id' | 'updatedAt' | 'series'> {
 	scan: boolean;
 }
 
-interface EditLibraryInput extends Library {
+export interface EditLibraryInput extends Library {
 	removedTags?: Tag[];
 	scan: boolean;
 }

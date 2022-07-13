@@ -1,3 +1,4 @@
+import { ReadProgress } from '@stump/core';
 import API from '..';
 
 export function updateMediaProgress(id: string, page: number): Promise<ReadProgress> {

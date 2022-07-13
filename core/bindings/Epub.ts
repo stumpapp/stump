@@ -1,20 +1,22 @@
-interface EpubContent {
+import { Media } from './Media';
+
+export interface EpubContent {
 	label: string;
 	content: string;
 	playOrder: number;
 }
 
-type EpubResource = [path: string, contentType: string];
+export type EpubResource = [path: string, contentType: string];
 
-type EpubResources = {
+export type EpubResources = {
 	[key: string]: EpubResource;
 };
 
-type EpubMetadata = {
+export type EpubMetadata = {
 	[key: string]: string[];
 };
 
-interface Epub {
+export interface Epub {
 	// This is the epub's record in Stump's database
 	mediaEntity: Media;
 	// A list of spine IDs. See https://www.w3.org/publishing/epub3/epub-ocf.html

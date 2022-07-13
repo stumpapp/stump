@@ -7,9 +7,11 @@
 		"dev": "vite --host",
 		"build": "vite build",
 		"preview": "vite preview --port 3000",
-		"unimported": "npx unimported"
+		"unimported": "npx unimported",
+		"check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@stump/core": "workspace:*",
 		"@chakra-ui/react": "^2.0.0",
 		"@emotion/react": "^11.9.0",
 		"@emotion/styled": "^11",

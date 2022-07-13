@@ -1,11 +1,13 @@
-declare enum MediaStatus {
+import { Tag } from './Tag';
+
+export enum MediaStatus {
 	Unknown = 'UNKNOWN',
 	Error = 'ERROR',
 	Ready = 'READY',
 	Unsupported = 'UNSUPPORTED',
 }
 
-interface Media {
+export interface Media {
 	/**
 	 * The id of the media.
 	 */
@@ -56,6 +58,3 @@ interface Media {
 	 */
 	tags?: Tag[];
 }
-
-type GetMediaResponse = ApiResult<Media[]>;
-type GetMediaById = ApiResult<Media>;

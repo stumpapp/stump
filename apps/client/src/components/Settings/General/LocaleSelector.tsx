@@ -1,10 +1,17 @@
+import React from 'react';
 import { FormControl, FormLabel } from '@chakra-ui/react';
 import { Select } from 'chakra-react-select';
-import React from 'react';
 import { useLocale } from '~hooks/useLocale';
+import { Locale } from '~util/enums';
 
 export default function LocaleSelector() {
 	const { t, locale, setLocale, locales } = useLocale();
+
+	function handleLocaleChange(newLocale?: Locale) {
+		if (newLocale) {
+			setLocale(newLocale);
+		}
+	}
 
 	return (
 		<FormControl>
@@ -13,8 +20,9 @@ export default function LocaleSelector() {
 			</FormLabel>
 
 			<Select
-				// value={locale}
+				value={locales.find((l) => l.value === locale)}
 				options={locales}
+				onChange={(newLocale) => handleLocaleChange(newLocale?.value)}
 				chakraStyles={{
 					control: (provided) => ({
 						...provided,

@@ -130,6 +130,7 @@ importers:
       '@markdoc/next.js': ^0.1.4
       '@tailwindcss/typography': ^0.5.2
       '@types/node': 17.0.34
+      '@types/nprogress': ^0.2.0
       '@types/prismjs': ^1.26.0
       '@types/react': 18.0.9
       '@types/react-dom': 18.0.4
@@ -143,6 +144,7 @@ importers:
       next: 12.1.6
       next-seo: ^5.4.0
       next-themes: ^0.2.0
+      nprogress: ^0.2.0
       phosphor-react: ^1.4.1
       postcss: ^8.4.14
       prismjs: ^1.28.0
@@ -163,6 +165,7 @@ importers:
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       next-seo: 5.4.0_2mgcgz5qhsdxw4fgpqzqeafmkq
       next-themes: 0.2.0_2mgcgz5qhsdxw4fgpqzqeafmkq
+      nprogress: 0.2.0
       phosphor-react: 1.4.1_react@18.1.0
       prismjs: 1.28.0
       react: 18.1.0
@@ -171,6 +174,7 @@ importers:
     devDependencies:
       '@tailwindcss/typography': 0.5.2_tailwindcss@3.1.2
       '@types/node': 17.0.34
+      '@types/nprogress': 0.2.0
       '@types/prismjs': 1.26.0
       '@types/react': 18.0.9
       '@types/react-dom': 18.0.4

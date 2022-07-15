@@ -6,14 +6,12 @@ use crate::{
 	fs,
 	guards::auth::Auth,
 	opds::{
-		self,
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
-		models::OpdsSeries,
-		opensearch::OpdsOpenSearch,
+		// opensearch::OpdsOpenSearch,
 	},
-	prisma::{self, library, media, read_progress},
+	prisma::{self, library, media, read_progress, series},
 	types::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
@@ -36,7 +34,7 @@ pub fn opds() -> Vec<Route> {
 		keep_reading,
 		libraries,
 		library_by_id,
-		series,
+		get_series,
 		series_latest,
 		series_by_id,
 		book_thumbnail,
@@ -100,32 +98,32 @@ pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
 			}]),
 			None,
 		),
-		OpdsEntry::new(
-			"allCollections".to_string(),
-			chrono::Utc::now().into(),
-			"All collections".to_string(),
-			Some(String::from("Browse by collection")),
-			None,
-			Some(vec![OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Subsection,
-				href: String::from("/opds/v1.2/collections"),
-			}]),
-			None,
-		),
-		OpdsEntry::new(
-			"allReadLists".to_string(),
-			chrono::Utc::now().into(),
-			"All read lists".to_string(),
-			Some(String::from("Browse by read list")),
-			None,
-			Some(vec![OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Subsection,
-				href: String::from("/opds/v1.2/readlists"),
-			}]),
-			None,
-		),
+		// OpdsEntry::new(
+		// 	"allCollections".to_string(),
+		// 	chrono::Utc::now().into(),
+		// 	"All collections".to_string(),
+		// 	Some(String::from("Browse by collection")),
+		// 	None,
+		// 	Some(vec![OpdsLink {
+		// 		link_type: OpdsLinkType::Navigation,
+		// 		rel: OpdsLinkRel::Subsection,
+		// 		href: String::from("/opds/v1.2/collections"),
+		// 	}]),
+		// 	None,
+		// ),
+		// OpdsEntry::new(
+		// 	"allReadLists".to_string(),
+		// 	chrono::Utc::now().into(),
+		// 	"All read lists".to_string(),
+		// 	Some(String::from("Browse by read list")),
+		// 	None,
+		// 	Some(vec![OpdsLink {
+		// 		link_type: OpdsLinkType::Navigation,
+		// 		rel: OpdsLinkRel::Subsection,
+		// 		href: String::from("/opds/v1.2/readlists"),
+		// 	}]),
+		// 	None,
+		// ),
 		// TODO: more?
 		// TODO: get user stored searches, so they don't have to redo them over and over?
 		// e.g. /opds/v1.2/series?search={searchTerms}, /opds/v1.2/libraries?search={searchTerms}, etc.
@@ -142,11 +140,11 @@ pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
 			rel: OpdsLinkRel::Start,
 			href: String::from("/opds/v1.2/catalog"),
 		},
-		OpdsLink {
-			link_type: OpdsLinkType::Search,
-			rel: OpdsLinkRel::Search,
-			href: String::from("/opds/v1.2/search"),
-		},
+		// OpdsLink {
+		// 	link_type: OpdsLinkType::Search,
+		// 	rel: OpdsLinkRel::Search,
+		// 	href: String::from("/opds/v1.2/search"),
+		// },
 	];
 
 	let feed = OpdsFeed::new(
@@ -159,9 +157,11 @@ pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
 	Ok(XmlResponse(feed.build()?))
 }
 
+// TODO: implement me
 #[get("/search")]
 async fn open_search(_auth: Auth) -> ApiResult<XmlResponse> {
-	Ok(XmlResponse(OpdsOpenSearch::build()?))
+	unimplemented!("This isn't supported yet!")
+	// Ok(XmlResponse(OpdsOpenSearch::build()?))
 }
 
 #[get("/keep-reading")]
@@ -286,15 +286,29 @@ async fn library_by_id(
 		return Err(ApiError::NotFound(format!("Library {} not found", id)));
 	}
 
+	let library = library.unwrap();
+
 	Ok(XmlResponse(
-		OpdsFeed::from((library.unwrap(), page, series_count)).build()?,
+		OpdsFeed::paginated(
+			library.id.as_str(),
+			library.name.as_str(),
+			format!("libraries/{}", &library.id).as_str(),
+			library.series().unwrap_or(&Vec::new()).to_owned(),
+			page,
+			series_count,
+		)
+		.build()?,
 	))
 }
 
 /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 /// pagination is zero-indexed.
 #[get("/series?<page>")]
-async fn series(page: Option<i64>, ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
+async fn get_series(
+	page: Option<i64>,
+	ctx: &Context,
+	_auth: Auth,
+) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
 
 	let page = page.unwrap_or(0);
@@ -313,74 +327,82 @@ async fn series(page: Option<i64>, ctx: &Context, _auth: Auth) -> ApiResult<XmlR
 		.exec()
 		.await?;
 
-	let feed = OpdsFeed::from(("All Series".to_string(), series, page, series_count));
-
-	Ok(XmlResponse(feed.build()?))
+	Ok(XmlResponse(
+		OpdsFeed::paginated(
+			"allSeries",
+			"All Series",
+			"series",
+			series,
+			page,
+			series_count,
+		)
+		.build()?,
+	))
 }
 
-#[get("/series/latest")]
-async fn series_latest(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
-	let db = ctx.get_db();
-
-	let series = db
-		.series()
-		.find_many(vec![])
-		.order_by(prisma::series::updated_at::order(Direction::Desc))
-		.exec()
-		.await?;
-
-	let entries = series
-		.into_iter()
-		.map(|s| opds::entry::OpdsEntry::from(s))
-		.collect();
-
-	let feed = OpdsFeed::new(
-		"root".to_string(),
-		"Latest Series".to_string(),
-		Some(vec![
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::ItSelf,
-				href: String::from("/opds/v1.2/series/latest"),
-			},
-			OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Start,
-				href: String::from("/opds/v1.2/catalog"),
-			},
-		]),
-		entries,
-	);
-
-	Ok(XmlResponse(feed.build().unwrap()))
-}
-
-#[get("/series/<id>?<page>")]
-async fn series_by_id(
-	id: String,
-	page: Option<usize>,
+#[get("/series/latest?<page>")]
+async fn series_latest(
+	page: Option<i64>,
 	ctx: &Context,
 	_auth: Auth,
 ) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
 
-	// page size is 20
-	// take a slice of the media vector representing page
-	let corrected_page = page.unwrap_or(0);
-	let page_size = 20;
-	let start = corrected_page * page_size;
-	let end = (start + page_size) - 1;
+	let page = page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page, 20);
+
+	let series_count = db.series_count_all().await?;
 
 	let series = db
 		.series()
-		.find_unique(prisma::series::id::equals(id.clone()))
+		.find_many(vec![])
+		.order_by(prisma::series::updated_at::order(Direction::Desc))
+		.skip(skip)
+		.take(take)
+		.exec()
+		.await?;
+
+	Ok(XmlResponse(
+		OpdsFeed::paginated(
+			"latestSeries",
+			"Latest Series",
+			"series/latest",
+			series,
+			page,
+			series_count,
+		)
+		.build()?,
+	))
+}
+
+#[get("/series/<id>?<page>")]
+async fn series_by_id(
+	id: String,
+	page: Option<i64>,
+	ctx: &Context,
+	_auth: Auth,
+) -> ApiResult<XmlResponse> {
+	let db = ctx.get_db();
+
+	let page = page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page, 20);
+
+	// FIXME: very nasty, hate it.
+	let series_media_count = db
+		.series_media_count(vec![id.clone()])
+		.await?
+		.get(id.as_str())
+		.unwrap_or(&0)
+		.to_owned();
+
+	let series = db
+		.series()
+		.find_unique(series::id::equals(id.clone()))
 		.with(
-			prisma::series::media::fetch(vec![])
-				.order_by(media::name::order(Direction::Asc)), // Note: I really wanted to be able to just paginate the query here,
-			                                                // but I need to be able to determine whether or not the series has more media
-			                                                // in the below logic for the OPDS feed.
-			                                                // .skip(start.try_into()?)
-			                                                // .take(end.try_into()?),
+			series::media::fetch(vec![])
+				.skip(skip)
+				.take(take)
+				.order_by(media::name::order(Direction::Asc)),
 		)
 		.exec()
 		.await?;
@@ -391,29 +413,17 @@ async fn series_by_id(
 
 	let series = series.unwrap();
 
-	let mut media = series.media()?.to_owned();
-
-	let mut next_page = None;
-
-	if start > media.len() {
-		media = vec![];
-	} else if end < media.len() {
-		next_page = Some(page.unwrap_or(0) + 1);
-
-		media = media
-			.get(start..end)
-			.ok_or("Invalid page")
-			.unwrap()
-			.to_vec();
-	}
-
-	// // Note: this is still kinda gross but whatever
-	let feed = OpdsFeed::from(OpdsSeries::from((
-		(series, media),
-		(page.unwrap_or(0), next_page),
-	)));
-
-	Ok(XmlResponse(feed.build()?))
+	Ok(XmlResponse(
+		OpdsFeed::paginated(
+			series.id.as_str(),
+			series.name.as_str(),
+			format!("series/{}", &series.id).as_str(),
+			series.media().unwrap_or(&Vec::new()).to_owned(),
+			page,
+			series_media_count,
+		)
+		.build()?,
+	))
 }
 
 #[get("/books/<id>/thumbnail")]
@@ -430,11 +440,13 @@ async fn book_thumbnail(
 		.exec()
 		.await?;
 
-	if let Some(b) = book {
-		Ok(fs::media_file::get_page(&b.path, 1)?)
-	} else {
-		Err(ApiError::NotFound(format!("Book {} not found", &id)))
+	if book.is_none() {
+		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
 	}
+
+	let book = book.unwrap();
+
+	Ok(fs::media_file::get_page(&book.path, 1)?)
 }
 
 // TODO: generalize the function call
@@ -450,25 +462,29 @@ async fn book_page(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
+	let zero_based = zero_based.unwrap_or(false);
+
 	let book = db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
 		.exec()
 		.await?;
 
-	let mut correct_page = match zero_based {
-		Some(true) => page + 1,
-		_ => page,
-	};
+	let mut correct_page = page;
 
-	if let Some(b) = book {
-		// TODO: move this elsewhere?? Doing this to load the cover photo instead of page 1. Not ideal solution
-		if b.path.ends_with(".epub") && correct_page == 1 {
-			correct_page = 0;
-		}
-
-		Ok(fs::media_file::get_page(&b.path, correct_page as i32)?)
-	} else {
-		Err(ApiError::NotFound(format!("Book {} not found", &id)))
+	if zero_based {
+		correct_page = page + 1;
 	}
+
+	if book.is_none() {
+		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
+	}
+
+	let book = book.unwrap();
+
+	if book.path.ends_with(".epub") && correct_page == 1 {
+		return Ok(fs::epub::get_epub_cover(&book.path)?);
+	}
+
+	Ok(fs::media_file::get_page(&book.path, correct_page as i32)?)
 }

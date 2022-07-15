@@ -10,7 +10,6 @@ use xml::{writer::XmlEvent, EventWriter};
 use super::{
 	entry::OpdsEntry,
 	link::{OpdsLinkRel, OpdsLinkType},
-	models::OpdsSeries,
 	util,
 };
 
@@ -35,6 +34,28 @@ impl OpdsFeed {
 			entries,
 			links,
 		}
+	}
+
+	pub fn paginated<T>(
+		id: &str,
+		title: &str,
+		href_postfix: &str,
+		data: Vec<T>,
+		page: i64,
+		count: u32,
+	) -> OpdsFeed
+	where
+		OpdsEntry: From<T>,
+	{
+		(
+			id.to_string(),
+			title.to_string(),
+			href_postfix.to_string(),
+			data,
+			page,
+			count,
+		)
+			.into()
 	}
 
 	/// Build an xml string from the feed.
@@ -75,62 +96,6 @@ impl OpdsFeed {
 
 // TODO: impl feeds for search results
 
-impl From<OpdsSeries> for OpdsFeed {
-	fn from(series: OpdsSeries) -> Self {
-		let id = series.id;
-		let title = series.name;
-
-		// // TODO: use this
-		// let author = StumpAuthor::new(
-		//     "Stump".to_string(),
-		//     Some("https://github.com/aaronleopold/stump".to_string()),
-		// );
-
-		let mut links = vec![
-			OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::ItSelf,
-				format!("/opds/v1.2/series/{}", id),
-			),
-			OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::Start,
-				"/opds/v1.2/catalog".to_string(),
-			),
-		];
-
-		let prev_link = match series.current_page {
-			0 => None,
-			1 => Some(format!("/opds/v1.2/series/{}", id)),
-			_ => Some(format!(
-				"/opds/v1.2/series/{}?page={}",
-				id,
-				series.current_page - 1
-			)),
-		};
-
-		if let Some(prev_link) = prev_link {
-			links.push(OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::Previous,
-				prev_link,
-			));
-		}
-
-		if let Some(next_page) = series.next_page {
-			links.push(OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::Next,
-				format!("/opds/v1.2/series/{}?page={}", id, next_page),
-			));
-		}
-
-		let entries = series.media.into_iter().map(OpdsEntry::from).collect();
-
-		Self::new(id, title, Some(links), entries)
-	}
-}
-
 impl From<library::Data> for OpdsFeed {
 	fn from(library: library::Data) -> Self {
 		let id = library.id.clone();
@@ -166,46 +131,52 @@ impl From<(library::Data, i64, u32)> for OpdsFeed {
 		let id = library.id.clone();
 		let title = library.name.clone();
 
-		let mut links = vec![
-			OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::ItSelf,
-				format!("/opds/v1.2/libraries/{}", id),
-			),
-			OpdsLink::new(
-				OpdsLinkType::Navigation,
-				OpdsLinkRel::Start,
-				"/opds/v1.2/catalog".to_string(),
-			),
-		];
+		let href_postfix = format!("libraries/{}", &id);
 
-		let entries = library
-			.series()
-			.unwrap_or(Vec::<series::Data>::new().as_ref())
-			.to_owned()
-			.into_iter()
-			.map(OpdsEntry::from)
-			.collect::<Vec<_>>();
+		let data = library.series().unwrap_or(&Vec::new()).to_owned();
 
-		if page > 0 {
-			links.push(OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Previous,
-				href: format!("/opds/v1.2/libraries?page={}", page - 1),
-			});
-		}
+		(id, title, href_postfix, data, page, count).into()
 
-		let total_pages = (count as f32 / 20.0).ceil() as u32;
+		// let mut links = vec![
+		// 	OpdsLink::new(
+		// 		OpdsLinkType::Navigation,
+		// 		OpdsLinkRel::ItSelf,
+		// 		format!("/opds/v1.2/libraries/{}", id),
+		// 	),
+		// 	OpdsLink::new(
+		// 		OpdsLinkType::Navigation,
+		// 		OpdsLinkRel::Start,
+		// 		"/opds/v1.2/catalog".to_string(),
+		// 	),
+		// ];
 
-		if page < total_pages as i64 && entries.len() == 20 {
-			links.push(OpdsLink {
-				link_type: OpdsLinkType::Navigation,
-				rel: OpdsLinkRel::Next,
-				href: format!("/opds/v1.2/libraries?page={}", page + 1),
-			});
-		}
+		// let entries = library
+		// 	.series()
+		// 	.unwrap_or(Vec::<series::Data>::new().as_ref())
+		// 	.to_owned()
+		// 	.into_iter()
+		// 	.map(OpdsEntry::from)
+		// 	.collect::<Vec<_>>();
 
-		OpdsFeed::new(id, title, Some(links), entries)
+		// if page > 0 {
+		// 	links.push(OpdsLink {
+		// 		link_type: OpdsLinkType::Navigation,
+		// 		rel: OpdsLinkRel::Previous,
+		// 		href: format!("/opds/v1.2/libraries?page={}", page - 1),
+		// 	});
+		// }
+
+		// let total_pages = (count as f32 / 20.0).ceil() as u32;
+
+		// if page < total_pages as i64 && entries.len() == 20 {
+		// 	links.push(OpdsLink {
+		// 		link_type: OpdsLinkType::Navigation,
+		// 		rel: OpdsLinkRel::Next,
+		// 		href: format!("/opds/v1.2/libraries?page={}", page + 1),
+		// 	});
+		// }
+
+		// OpdsFeed::new(id, title, Some(links), entries)
 	}
 }
 
@@ -249,5 +220,53 @@ impl From<(String, Vec<series::Data>, i64, u32)> for OpdsFeed {
 		}
 
 		OpdsFeed::new("root".to_string(), title, Some(links), entries)
+	}
+}
+
+// String, Vec<series::Data>, i64, u32
+impl<T> Into<OpdsFeed> for (String, String, String, Vec<T>, i64, u32)
+where
+	OpdsEntry: From<T>,
+	// T: Into<OpdsEntry>,
+{
+	fn into(self) -> OpdsFeed {
+		let (id, title, href_postfix, data, page, count) = self;
+
+		let entries = data.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
+
+		let mut links = vec![
+			OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::ItSelf,
+				href: format!("/opds/v1.2/{}", href_postfix),
+			},
+			OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Start,
+				href: format!("/opds/v1.2/catalog"),
+			},
+		];
+
+		if page > 0 {
+			links.push(OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Previous,
+				href: format!("/opds/v1.2/{}?page={}", href_postfix, page - 1),
+			});
+		}
+
+		// TODO: this 20.0 is the page size, which I might make dynamic for OPDS routes... but
+		// not sure..
+		let total_pages = (count as f32 / 20.0).ceil() as u32;
+
+		if page < total_pages as i64 && entries.len() == 20 {
+			links.push(OpdsLink {
+				link_type: OpdsLinkType::Navigation,
+				rel: OpdsLinkRel::Next,
+				href: format!("/opds/v1.2/{}?page={}", href_postfix, page + 1),
+			});
+		}
+
+		OpdsFeed::new(id, title, Some(links), entries)
 	}
 }

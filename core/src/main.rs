@@ -117,5 +117,7 @@ async fn rocket() -> _ {
 			}),
 		)
 		.mount("/opds/v1.2", routes::opds::opds())
+		// TODO: I need to figure out if I want to allow basic auth on non-opds routes...
+		// .register("/api", catchers![opds_unauthorized])
 		.register("/opds/v1.2", catchers![opds_unauthorized])
 }

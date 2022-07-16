@@ -17,6 +17,11 @@ export default function UpNextButton({ seriesId }: Props) {
 		getNextInSeries(seriesId).then((res) => res.data),
 	);
 
+	// TODO: Change this once Stump supports epub progress tracking.
+	if (media?.extension === 'epub') {
+		return null;
+	}
+
 	return (
 		<Button
 			isDisabled={!isLoading && !isFetching && !media}

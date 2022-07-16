@@ -177,6 +177,9 @@ pub async fn get_series_media(
 	Ok(Json((media, page_params).into()))
 }
 
+// TODO: Should I support epub here too?? Not sure, I have separate routes for epub,
+// but until I actually implement progress tracking for epub I think think I can really
+// give a hard answer on what is best...
 /// Get the next media in a series, based on the read progress for the requesting user.
 /// Stump will return the first book in the series without progress, or return the first
 /// with partial progress. E.g. if a user has read pages 32/32 of book 3, then book 4 is

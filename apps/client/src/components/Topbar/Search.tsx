@@ -6,7 +6,8 @@ import {
 	useColorModeValue,
 } from '@chakra-ui/react';
 import { MagnifyingGlass } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { FormEvent, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { useHotkeys } from 'react-hotkeys-hook';
 import Input from '../ui/Input';
 
@@ -35,27 +36,35 @@ export default function Search() {
 		return { base: 28, md: 52 };
 	}, [expanded]);
 
+	function handleSubmit(e: FormEvent) {
+		e.preventDefault();
+
+		toast.error("I don't support search yet, check back soon!");
+	}
+
 	return (
-		<InputGroup w="unset">
-			<Input
-				ref={inputRef}
-				placeholder="Search"
-				onFocus={on}
-				onBlur={off}
-				w={width}
-				bg={useColorModeValue('gray.50', 'gray.800')}
-				transition="all 0.2s"
-				onKeyDown={(e) => {
-					if (e.key === 'Escape') {
-						inputRef.current?.blur();
-					}
-				}}
-			/>
-			<InputRightElement
-				display={{ base: 'none', md: 'flex' }}
-				children={<Shortcut visible={!expanded} />}
-			/>
-			<InputRightElement display={{ base: 'flex', md: 'none' }} children={<MagnifyingGlass />} />
-		</InputGroup>
+		<form onSubmit={handleSubmit}>
+			<InputGroup w="unset">
+				<Input
+					ref={inputRef}
+					placeholder="Search"
+					onFocus={on}
+					onBlur={off}
+					w={width}
+					bg={useColorModeValue('gray.50', 'gray.800')}
+					transition="all 0.2s"
+					onKeyDown={(e) => {
+						if (e.key === 'Escape') {
+							inputRef.current?.blur();
+						}
+					}}
+				/>
+				<InputRightElement
+					display={{ base: 'none', md: 'flex' }}
+					children={<Shortcut visible={!expanded} />}
+				/>
+				<InputRightElement display={{ base: 'flex', md: 'none' }} children={<MagnifyingGlass />} />
+			</InputGroup>
+		</form>
 	);
 }

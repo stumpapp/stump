@@ -1,26 +1,17 @@
-import {
-	FormControl,
-	FormLabel,
-	InputGroup,
-	InputRightElement,
-	useBoolean,
-} from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AnimatePresence } from 'framer-motion';
-import { Eye, EyeSlash, Lock, LockKeyOpen } from 'phosphor-react';
 import React from 'react';
+import { FormControl, FormLabel } from '@chakra-ui/react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { FieldValues, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import Button from '~components/ui/Button';
 import Form from '~components/ui/Form';
-import Input from '~components/ui/Input';
+import Input, { PasswordInput } from '~components/ui/Input';
 import { useLocale } from '~hooks/useLocale';
 import { useUser } from '~hooks/useUser';
 import SettingsFormContainer from '../SettingsFormContainer';
 
 export default function ProfileForm() {
 	const user = useUser();
-	const [showPass, { toggle }] = useBoolean(false);
 	const { t } = useLocale();
 
 	if (!user) {
@@ -49,29 +40,26 @@ export default function ProfileForm() {
 					<FormLabel htmlFor="username">
 						{t('settingsPage.general.profileForm.labels.username')}
 					</FormLabel>
-					<Input variant="flushed" type="text" autoFocus {...form.register('username')} />
+					<Input
+						variant="flushed"
+						type="text"
+						// Note: Not really sure I want autofocus.
+						placeholder="Enter a new username"
+						{...form.register('username')}
+					/>
 				</FormControl>
 
 				<FormControl>
 					<FormLabel htmlFor="password">
 						{t('settingsPage.general.profileForm.labels.password')}
 					</FormLabel>
-					<InputGroup>
-						<Input variant="flushed" type="text" autoFocus {...form.register('password')} />
 
-						<InputRightElement
-							children={
-								// TODO: fades
-								<AnimatePresence>
-									{showPass ? (
-										<Eye cursor="pointer" color="white" onClick={toggle} />
-									) : (
-										<EyeSlash cursor="pointer" color="white" onClick={toggle} />
-									)}
-								</AnimatePresence>
-							}
-						/>
-					</InputGroup>
+					<PasswordInput
+						variant="flushed"
+						autoComplete="new-password"
+						placeholder="Enter a new password"
+						{...form.register('password')}
+					/>
 				</FormControl>
 
 				<Button alignSelf="end" type="submit" colorScheme="brand">

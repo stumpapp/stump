@@ -1,5 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { forwardRef, Input as ChakraInput, InputProps } from '@chakra-ui/react';
+import {
+	forwardRef,
+	Input as ChakraInput,
+	InputGroup,
+	InputProps,
+	InputRightElement,
+	useBoolean,
+} from '@chakra-ui/react';
+import { Eye, EyeSlash } from 'phosphor-react';
 
 interface Props extends InputProps {
 	// label?: string;
@@ -43,6 +51,29 @@ const Input = forwardRef<Props, 'input'>(({ fullWidth = true, ...props }, ref) =
 });
 
 export default Input;
+
+export const PasswordInput = forwardRef<Props, 'input'>(({ ...props }, ref) => {
+	const [showPass, { toggle }] = useBoolean(false);
+
+	return (
+		<InputGroup>
+			<Input {...props} type={showPass ? 'text' : 'password'} />
+
+			<InputRightElement
+				children={
+					// TODO: fades
+					<>
+						{showPass ? (
+							<Eye cursor="pointer" color="white" onClick={toggle} />
+						) : (
+							<EyeSlash cursor="pointer" color="white" onClick={toggle} />
+						)}
+					</>
+				}
+			/>
+		</InputGroup>
+	);
+});
 
 interface DebouncedProps extends Props {
 	delay?: number;

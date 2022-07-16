@@ -159,8 +159,8 @@ There are a number of other projects that are similar to Stump, it certainly isn
 
 - [Komga](https://github.com/gotson/komga)
 - [Kavita](https://github.com/Kareadita/Kavita)
-- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books_)
-- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_)
+- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
+- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
 
 ## License 🔑
 

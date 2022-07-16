@@ -7,14 +7,26 @@ ARG TARGETARCH
 
 WORKDIR /app
 
-COPY apps/client/ .
+# Note: I don't like copying ~everything~ but since I now use types exported from
+# the core, and use pnpm specific means of accessing it via the workspace, I kind
+# of need to maintain the structure of the workspace and use pnpm
+COPY . .
 
-RUN npm install
-RUN npm run build
+RUN npm install -g pnpm
+
+RUN pnpm --filter @stump/client install
+RUN pnpm client build
+
+RUN mv ./apps/client/build build
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
+
+# TODO: determine if this is OK
+# Workaround as otherwise container would err during crates.io index updating 
+# (introduced when I started using M1).
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 ######################
 ### aarch64 / arm64 ##
@@ -26,9 +38,6 @@ WORKDIR /app
 
 COPY .cargo .cargo
 COPY core/ .
-
-# Workaround as otherwise container would err during crates.io index updating
-ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add aarch64-unknown-linux-musl
 
@@ -47,9 +56,6 @@ WORKDIR /app
 
 COPY .cargo .cargo
 COPY core/ .
-
-# Workaround as otherwise container would err during crates.io index updating
-ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add armv7-unknown-linux-musleabihf
 

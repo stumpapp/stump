@@ -11,6 +11,4 @@ target
 # ignore contents in excess directories
 apps/*
 !apps/client
-
-# TODO: next time I boot up my windows machine (it took 20 minutes to build this on my mac D:)
-# try adding more exclusions here to see if it drops the build time and/or bundle size.
+!apps/client/

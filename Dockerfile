@@ -23,11 +23,6 @@ RUN mv ./apps/client/build build
 # Cargo Build Stage
 # ------------------------------------------------------------------------------
 
-# TODO: determine if this is OK
-# Workaround as otherwise container would err during crates.io index updating 
-# (introduced when I started using M1).
-ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
-
 ######################
 ### aarch64 / arm64 ##
 ######################
@@ -38,6 +33,8 @@ WORKDIR /app
 
 COPY .cargo .cargo
 COPY core/ .
+
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add aarch64-unknown-linux-musl
 
@@ -57,6 +54,8 @@ WORKDIR /app
 COPY .cargo .cargo
 COPY core/ .
 
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
+
 RUN rustup target add armv7-unknown-linux-musleabihf
 
 RUN cargo build --release --target armv7-unknown-linux-musleabihf && \
@@ -69,6 +68,8 @@ RUN cargo build --release --target armv7-unknown-linux-musleabihf && \
 FROM messense/rust-musl-cross:x86_64-musl AS amd64-backend
 
 WORKDIR /app
+
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 COPY .cargo .cargo
 COPY core/ .

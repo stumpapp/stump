@@ -2,11 +2,14 @@ use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
 use crate::{
-	guards::auth::AdminGuard,
+	guards::auth::{AdminGuard, Auth},
 	prisma::{user, user_preferences},
 	types::{
 		alias::{ApiResult, Context},
-		models::{user::User, LoginRequest},
+		models::{
+			user::{User, UserPreferences, UserPreferencesUpdate},
+			LoginRequest,
+		},
 	},
 	utils::auth,
 };
@@ -84,9 +87,42 @@ pub async fn update_user() {
 	unimplemented!()
 }
 
-// TODO: make me
+// TODO: I load the user preferences from the session in the auth call.
+// If a session didn't exist then I load it from DB. I think for now this is OK since
+// all the preferences are client-side, so if the server is not in sync with
+// preferences updates it is not a big deal. This will have to change somehow in the
+// future potentially though, unless I just load preferences when required.
+//
+// Note: I don't even use the user id to load the preferences, as I pull it from
+// when I got from the session. I could remove the ID requirement. I think the preferences
+// structure needs to eventually change a little anyways, I don't like how I can't query
+// by user id, it should be a unique where param but it isn't with how I structured it...
 #[openapi(tag = "User")]
-#[put("/users/<id>/preferences")]
-pub async fn update_user_preferences(id: String) {
-	todo!("I can't do that yet! ID: {:?}", id);
+#[put("/users/<id>/preferences", data = "<input>")]
+pub async fn update_user_preferences(
+	id: String,
+	input: Json<UserPreferencesUpdate>,
+	ctx: &Context,
+	auth: Auth,
+) -> ApiResult<Json<Option<UserPreferences>>> {
+	let db = ctx.get_db();
+
+	let user_preferences = auth.0.preferences;
+
+	Ok(Json(
+		db.user_preferences()
+			.find_unique(user_preferences::id::equals(user_preferences.id.clone()))
+			.update(vec![
+				user_preferences::locale::set(input.locale.to_owned()),
+				user_preferences::library_view_mode::set(
+					input.library_view_mode.to_owned(),
+				),
+				user_preferences::series_view_mode::set(
+					input.series_view_mode.to_owned(),
+				),
+			])
+			.exec()
+			.await?
+			.map(|p| p.into()),
+	))
 }

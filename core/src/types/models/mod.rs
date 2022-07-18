@@ -21,23 +21,26 @@ pub struct AuthenticatedUser {
 	pub username: String,
 	pub role: String,
 	// FIXME: once issue 44 is resolved, remove Option
-	pub preferences: Option<UserPreferences>,
+	pub preferences: UserPreferences,
 }
 
 impl Into<AuthenticatedUser> for prisma::user::Data {
 	fn into(self) -> AuthenticatedUser {
+		let user_preferences = match self
+			.user_preferences()
+			.expect("Failed to load user preferences")
+		{
+			Some(preferences) => preferences.to_owned(),
+			None => unreachable!(
+				"User does not have preferences. This should not be reachable."
+			),
+		};
+
 		AuthenticatedUser {
 			id: self.id.clone(),
 			username: self.username.clone(),
 			role: self.role.clone(),
-			// This is disgusting, but necessary for now
-			preferences: Some(
-				self.user_preferences()
-					.expect("Relation load error")
-					.unwrap()
-					.to_owned()
-					.into(),
-			),
+			preferences: user_preferences.into(),
 		}
 	}
 }

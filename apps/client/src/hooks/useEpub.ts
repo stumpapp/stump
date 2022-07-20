@@ -1,7 +1,7 @@
 import { Epub, EpubContent } from '@stump/core';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
-import { getEpubBaseUrl, getEpubById } from '~api/query/epub';
+import { getEpubBaseUrl, getEpubById } from '~api/epub';
 
 export interface EpubOptions {
 	// loc is the epubcfi, comes from the query param ?loc=epubcfi(..)

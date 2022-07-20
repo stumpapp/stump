@@ -1,13 +1,13 @@
 use std::path::Path;
 
-use prisma_client_rust::Direction;
+use prisma_client_rust::{raw, Direction};
 use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
 
 use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs::{self},
+	fs,
 	guards::auth::{AdminGuard, Auth},
 	job::jobs::scan::LibraryScannerJob,
 	prisma::{
@@ -19,7 +19,11 @@ use crate::{
 		alias::{ApiResult, Context},
 		errors::ApiError,
 		http::ImageResponse,
-		models::{library::Library, series::Series, tag::Tag},
+		models::{
+			library::{LibrariesStats, Library},
+			series::Series,
+			tag::Tag,
+		},
 		pageable::{PageParams, Pageable, PagedRequestParams},
 		query::QueryOrder,
 	},
@@ -54,6 +58,33 @@ pub async fn get_libraries(
 	}
 
 	Ok(Json((libraries, page_params).into()))
+}
+
+/// Get the stats for all libraries. Includes series count, book count and total space used (in bytes).
+#[openapi(tag = "Library")]
+#[get("/libraries/stats")]
+pub async fn get_libraries_stats(
+	ctx: &Context,
+	// _auth: Auth,
+) -> ApiResult<Json<LibrariesStats>> {
+	let db = ctx.get_db();
+
+	// TODO: maybe add more, like missingBooks, idk
+	let stats = db
+		._query_raw::<LibrariesStats>(raw!(
+			"SELECT COUNT(*) as bookCount, SUM(media.size) as totalBytes, seriesCount FROM media INNER JOIN (SELECT COUNT(*) as seriesCount FROM series)"
+		))
+		.await?
+		.into_iter()
+		.next();
+
+	if stats.is_none() {
+		return Err(ApiError::InternalServerError(
+			"Failed to compute stats for libraries".to_string(),
+		));
+	}
+
+	Ok(Json(stats.unwrap()))
 }
 
 /// Get a library by id, if the current user has access to it. Library `series`, `media`

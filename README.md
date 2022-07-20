@@ -84,7 +84,6 @@ I am omitting a lot of files and only focusing on the main directories, but the 
 ├── core
 │   ├── bindings
 │   ├── prisma
-│   ├── prisma-cli
 │   └── src
 ├── README.md
 └── ...
@@ -92,7 +91,7 @@ I am omitting a lot of files and only focusing on the main directories, but the 
 
 The `core` directory is where Stump's 'core' functionality is located, written in Rust. Stump uses [Prisma](https://github.com/Brendonovich/prisma-client-rust).
 
-The 'apps' directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
+The `apps` directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
 
 - `client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
 

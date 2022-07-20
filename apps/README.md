@@ -20,8 +20,6 @@ I am omitting a lot of files and only focusing on the main directories, but the 
 /apps/client
 └── src
     ├── api
-    │   ├── mutation
-    │   └── query
     ├── components
     │   └── ui
     ├── hooks
@@ -32,9 +30,7 @@ I am omitting a lot of files and only focusing on the main directories, but the 
     └── util
 ```
 
-- `api`: This is where all of the query functions used by react query are defined.
-  - `query`: Non-mutating queries (GET) are defined here, grouped by entity (e.g. media, library, etc.)
-  - `mutation`: Mutating queries (PUT, POST, DELETE, etc) are defined here, grouped by entity (e.g. media, library, etc.)
+- `api`: This is where all of the query functions used by react query are defined, grouped by entity (e.g. media, library, etc.).
 - `components`: Custom React components live here. They are largely grouped by Entity and/or page.
   - `ui`: General purpose UI components live here, things like Buttons and what not.
 - `hooks`: Custom React hooks live here
@@ -67,7 +63,7 @@ pnpm core start
 
 ## Mobile
 
-TBD 😉
+TBD 😉👀🤷
 
 ## Webiste
 

@@ -13,7 +13,7 @@ import Button, { ModalCloseButton } from '~components/ui/Button';
 import { Trash } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import { useMutation } from 'react-query';
-import { deleteLibrary } from '~api/mutation/library';
+import { deleteLibrary } from '~api/library';
 import client from '~api/client';
 import { useNavigate } from 'react-router-dom';
 import { Library } from '@stump/core';

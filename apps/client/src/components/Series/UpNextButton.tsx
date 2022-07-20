@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
-import { getNextInSeries } from '~api/query/series';
+import { getNextInSeries } from '~api/series';
 import Button from '~components/ui/Button';
 
 interface Props {

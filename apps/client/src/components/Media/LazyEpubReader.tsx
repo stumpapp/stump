@@ -7,7 +7,7 @@ import EpubControls from './Epub/EpubControls';
 import { useSwipeable } from 'react-swipeable';
 import { useQuery } from 'react-query';
 import { epubDarkTheme } from '~util/epubTheme';
-import { getEpubById } from '~api/query/epub';
+import { getEpubById } from '~api/epub';
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 

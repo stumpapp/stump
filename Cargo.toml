@@ -1,2 +1,2 @@
 [workspace]
-members = ["core", "core/prisma-cli"]
+members = ["core", "core/prisma"]

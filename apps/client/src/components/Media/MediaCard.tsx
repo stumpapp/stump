@@ -1,7 +1,7 @@
 import { Media } from '@stump/core';
 import React, { useMemo } from 'react';
 import client from '~api/client';
-import { getMediaById, getMediaThumbnail } from '~api/query/media';
+import { getMediaById, getMediaThumbnail } from '~api/media';
 import Card from '~components/Card';
 
 interface Props extends Media {}

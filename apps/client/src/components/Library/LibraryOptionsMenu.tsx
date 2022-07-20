@@ -2,7 +2,7 @@ import React from 'react';
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
 import { ArrowsClockwise, DotsThreeVertical } from 'phosphor-react';
 import { useMutation } from 'react-query';
-import { scanLibary } from '~api/mutation/library';
+import { scanLibary } from '~api/library';
 import EditLibraryModal from './EditLibraryModal';
 import DeleteLibraryModal from './DeleteLibraryModal';
 import toast from 'react-hot-toast';

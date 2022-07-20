@@ -2,7 +2,7 @@ import { DirectoryListing } from '@stump/core';
 import { AxiosError } from 'axios';
 import { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
-import { listDirectory } from '~api/query/filesystem';
+import { listDirectory } from '~api/filesystem';
 
 interface Props {
 	enabled: boolean;

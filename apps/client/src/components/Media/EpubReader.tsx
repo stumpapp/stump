@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getEpubResource } from '~api/query/epub';
+import { getEpubResource } from '~api/epub';
 import { UseEpubReturn } from '~hooks/useEpub';
 
 interface EpubReaderProps extends UseEpubReturn {}

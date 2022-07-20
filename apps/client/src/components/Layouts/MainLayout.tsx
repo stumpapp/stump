@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from 'react-query';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { getLibraries } from '~api/query/library';
+import { getLibraries } from '~api/library';
 import Lazy from '~components/Lazy';
 import Topbar from '~components/Topbar';
 import Sidebar from '~components/Sidebar/Sidebar';

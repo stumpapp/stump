@@ -1,8 +1,8 @@
 import React from 'react';
 import { useMutation, useQuery } from 'react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { updateMediaProgress } from '~api/mutation/media';
-import { getMediaById, getMediaPage } from '~api/query/media';
+import { updateMediaProgress } from '~api/media';
+import { getMediaById, getMediaPage } from '~api/media';
 import ComicBookReader from '~components/Media/ComicBookReader';
 
 export default function ReadBook() {

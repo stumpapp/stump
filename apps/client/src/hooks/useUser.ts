@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query';
 import shallow from 'zustand/shallow';
-import { me } from '~api/query/auth';
+import { me } from '~api/auth';
 import { useStore } from '~store/store';
 
 export function useUser() {

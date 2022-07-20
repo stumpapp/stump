@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
-import { getLibraryById } from '~api/query/library';
+import { getLibraryById } from '~api/library';
 import { Helmet } from 'react-helmet';
 import { useViewMode } from '~hooks/useViewMode';
 import SeriesGrid from '~components/Series/SeriesGrid';

@@ -26,6 +26,14 @@ pub struct Library {
 	pub tags: Option<Vec<Tag>>,
 }
 
+#[derive(Deserialize, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct LibrariesStats {
+	series_count: u64,
+	book_count: u64,
+	total_bytes: u64,
+}
+
 impl Into<Library> for prisma::library::Data {
 	fn into(self) -> Library {
 		let series = match self.series() {

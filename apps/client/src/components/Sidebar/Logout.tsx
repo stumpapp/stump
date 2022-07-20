@@ -11,7 +11,7 @@ import {
 import { SignOut } from 'phosphor-react';
 import Button, { ModalCloseButton } from '~components/ui/Button';
 import { useMutation } from 'react-query';
-import { logout } from '~api/mutation/auth';
+import { logout } from '~api/auth';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '~store/store';

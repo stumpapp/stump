@@ -1,5 +1,5 @@
 import { ApiResult } from '@stump/core';
-import API from '..';
+import API from '.';
 
 interface Claim {
 	isClaimed: boolean;

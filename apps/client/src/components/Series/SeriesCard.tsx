@@ -1,6 +1,6 @@
 import React from 'react';
 import client from '~api/client';
-import { getSeriesById, getSeriesThumbnail } from '~api/query/series';
+import { getSeriesById, getSeriesThumbnail } from '~api/series';
 import pluralizeStat from '~util/pluralize';
 
 import Card from '~components/Card';

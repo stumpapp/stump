@@ -55,9 +55,9 @@ pub async fn create_user(
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::link(vec![user::id::equals(
+		.create(vec![user_preferences::user::link(user::id::equals(
 			created_user.id.clone(),
-		)])])
+		))])
 		.exec()
 		.await?;
 
@@ -85,6 +85,25 @@ pub async fn create_user(
 #[put("/users")]
 pub async fn update_user() {
 	unimplemented!()
+}
+
+#[openapi(tag = "User")]
+#[get("/users/<id>/preferences")]
+pub async fn get_user_preferences(
+	id: String,
+	// ctx: &Context,
+	auth: Auth,
+) -> ApiResult<Json<UserPreferences>> {
+	let user_preferences = auth.0.preferences;
+
+	Ok(Json(
+		// db.user_preferences()
+		// 	.find_unique(user_preferences::id::equals(user_preferences.id.clone()))
+		// 	.exec()
+		// 	.await?
+		// 	.map(|p| p.into()),
+		user_preferences,
+	))
 }
 
 // TODO: I load the user preferences from the session in the auth call.

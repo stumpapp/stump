@@ -2,7 +2,7 @@ import { ApiResult, Tag } from '@stump/core';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
 import { useMutation, useQuery } from 'react-query';
-import { createTags as createTagsFn, getAllTags } from '~api/query/tag';
+import { createTags as createTagsFn, getAllTags } from '~api/tag';
 
 export interface UseTagsConfig {
 	onQuerySuccess?: (res: ApiResult<Tag[]>) => void;

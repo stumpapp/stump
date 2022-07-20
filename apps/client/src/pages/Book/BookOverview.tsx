@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
-import { getMediaById, getMediaPage, getMediaThumbnail } from '~api/query/media';
+import { getMediaById, getMediaPage, getMediaThumbnail } from '~api/media';
 import Card from '~components/Card';
 
 export default function BookOverview() {

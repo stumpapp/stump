@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
-import { getSeriesById, getSeriesThumbnail } from '~api/query/series';
+import { getSeriesById, getSeriesThumbnail } from '~api/series';
 import { useSeriesMedia } from '~hooks/useSeriesMedia';
 import { useViewMode } from '~hooks/useViewMode';
 import MediaGrid from '~components/Media/MediaGrid';

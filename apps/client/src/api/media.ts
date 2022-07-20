@@ -1,7 +1,6 @@
-import { ApiResult, Media, PageableApiResult } from '@stump/core';
-import API, { baseURL } from '..';
+import { ApiResult, Media, PageableApiResult, ReadProgress } from '@stump/core';
+import API, { baseURL } from '.';
 
-// type GetMediaResponse = ApiResult<Media[]>;
 type GetMediaById = ApiResult<Media>;
 
 export function getMedia(): Promise<PageableApiResult<Media[]>> {
@@ -22,4 +21,8 @@ export function getMediaThumbnail(id: string): string {
 
 export function getMediaPage(id: string, page: number): string {
 	return `${baseURL}/media/${id}/page/${page}`;
+}
+
+export function updateMediaProgress(id: string, page: number): Promise<ReadProgress> {
+	return API.put(`/media/${id}/progress/${page}`);
 }

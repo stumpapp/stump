@@ -3,7 +3,7 @@ import { FieldValues, useForm } from 'react-hook-form';
 import { Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import shallow from 'zustand/shallow';
-import { login } from '~api/query/auth';
+import { login } from '~api/auth';
 import Form from '~components/ui/Form';
 import Input from '~components/ui/Input';
 import { useStore } from '~store/store';
@@ -22,8 +22,8 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from 'react-query';
 import toast from 'react-hot-toast';
-import { checkIsClaimed } from '~api/query/server';
-import { register } from '~api/mutation/auth';
+import { checkIsClaimed } from '~api/server';
+import { register } from '~api/auth';
 import client from '~api/client';
 import { useLocale } from '~hooks/useLocale';
 

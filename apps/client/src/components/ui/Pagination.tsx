@@ -184,7 +184,8 @@ function PaginationEllipsis({ listId, position, pages, onNavigate }: PaginationE
 									}
 								}}
 							/>
-							{!!errors.goTo && <FormErrorMessage>{errors.goTo?.message}</FormErrorMessage>}
+							{/* FIXME: Updates seem to have broken types here, need to look into this... */}
+							{!!errors.goTo && <FormErrorMessage>{errors.goTo?.message as any}</FormErrorMessage>}
 						</FormControl>
 					</Form>
 				</PopoverBody>

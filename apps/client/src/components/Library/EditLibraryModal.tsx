@@ -17,8 +17,8 @@ import LibraryModalForm from './LibraryModalForm';
 import { TagOption, useTags } from '~hooks/useTags';
 import { useMutation } from 'react-query';
 import client from '~api/client';
-import { editLibrary } from '~api/mutation/library';
-import { createTags } from '~api/mutation/tag';
+import { editLibrary } from '~api/library';
+import { createTags } from '~api/tag';
 import { Library, Tag } from '@stump/core';
 
 interface Props {

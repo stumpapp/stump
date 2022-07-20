@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from 'react-query';
 import { useSearchParams } from 'react-router-dom';
-import { getLibrarySeries } from '~api/query/library';
+import { getLibrarySeries } from '~api/library';
 
 // interface Options {
 // 	// sortBy

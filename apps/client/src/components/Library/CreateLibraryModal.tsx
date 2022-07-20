@@ -3,7 +3,7 @@ import { FieldValues } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useMutation } from 'react-query';
 import client from '~api/client';
-import { createLibrary } from '~api/mutation/library';
+import { createLibrary } from '~api/library';
 import Button, { ModalCloseButton } from '~components/ui/Button';
 import {
 	Modal,
@@ -17,7 +17,7 @@ import {
 
 import { TagOption, useTags } from '~hooks/useTags';
 import LibraryModalForm from './LibraryModalForm';
-import { createTags } from '~api/query/tag';
+import { createTags } from '~api/tag';
 import { ApiResult, Tag } from '@stump/core';
 
 interface Props {

@@ -7,6 +7,7 @@
   "scripts": {
     "prisma": "cargo prisma",
     "setup": "cargo prisma generate && pnpm get-client",
+    "check": "cargo check",
     "start": "cargo run --release",
     "dev": "cargo watch -x run",
     "build": "pnpm get-client && cargo build --release && pnpm move-client && pnpm move-rocket",
@@ -18,7 +19,7 @@
   "devDependencies": {
     "@types/node": "^17.0.45",
     "axios": "^0.27.1",
-    "ts-node": "^10.8.0",
+    "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
   }
 }

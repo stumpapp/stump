@@ -1,5 +1,5 @@
 import { ApiResult, Media, PageableApiResult, Series } from '@stump/core';
-import API, { baseURL } from '..';
+import API, { baseURL } from '.';
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 	return API.get(`/series/${id}`);

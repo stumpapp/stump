@@ -3,8 +3,8 @@ import React from 'react';
 import toast from 'react-hot-toast';
 import { useMutation, useQuery } from 'react-query';
 import client from '~api/client';
-import { clearLogFile } from '~api/mutation/log';
-import { getLogFileMeta } from '~api/query/log';
+import { clearLogFile } from '~api/log';
+import { getLogFileMeta } from '~api/log';
 import Button from '~components/ui/Button';
 import { formatBytes } from '~util/format';
 

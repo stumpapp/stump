@@ -1,5 +1,5 @@
 import { ApiResult, Epub } from '@stump/core';
-import API, { baseURL } from '..';
+import API, { baseURL } from '.';
 
 export function getEpubBaseUrl(id: string): string {
 	return `${baseURL}/epub/${id}`;

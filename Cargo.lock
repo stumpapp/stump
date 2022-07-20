@@ -3003,7 +3003,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be91bcc43e73799dc46a6c194a55e7aae1d86cc867c860fd4a436019af21bd8c"
 
 [[package]]
-name = "prisma-cli"
+name = "prisma"
 version = "0.1.0"
 dependencies = [
  "prisma-client-rust-cli",

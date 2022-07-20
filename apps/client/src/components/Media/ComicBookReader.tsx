@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { useBoolean } from '@chakra-ui/react';
 import Toolbar from './Toolbar';
 import { useAnimation, motion, useMotionValue, useTransform } from 'framer-motion';
-import type { ControlsAnimationDefinition } from 'framer-motion/types/animation/types';
+// import type { ControlsAnimationDefinition } from 'framer-motion/types/animation/types';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useWindowSize } from '~hooks/useWindowSize';
 import { Media } from '@stump/core';
@@ -11,21 +11,21 @@ const RESET_CONTROLS = {
 	x: '0%',
 };
 
-const FORWARD_START_ANIMATION: ControlsAnimationDefinition = {
+const FORWARD_START_ANIMATION = {
 	x: '-200%',
 	transition: {
 		duration: 0.35,
 	},
 };
 
-const TO_CENTER_ANIMATION: ControlsAnimationDefinition = {
+const TO_CENTER_ANIMATION = {
 	x: 0,
 	transition: {
 		duration: 0.35,
 	},
 };
 
-const BACKWARD_START_ANIMATION: ControlsAnimationDefinition = {
+const BACKWARD_START_ANIMATION = {
 	x: '200%',
 	transition: {
 		duration: 0.35,

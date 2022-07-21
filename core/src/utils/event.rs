@@ -38,6 +38,12 @@ impl EventManager {
 			},
 			InternalEvent::JobFailed(id, err) => {
 				log::error!("Job {} failed: {:?}", id, err);
+
+				let _ = self.ctx.emit_client_event(ClientEvent::JobFailed((
+					id.clone(),
+					err.to_string(),
+				)));
+
 				self.jobs.dequeue(id);
 				// let _ = self.ctx.emit_client_event(format!("JobFailed: {:?}", err));
 			},

@@ -22,7 +22,7 @@ use super::utils::mark_library_missing;
 async fn precheck(
 	ctx: &Context,
 	path: String,
-) -> Result<(library::Data, Vec<series::Data>), ApiError> {
+) -> Result<(library::Data, Vec<series::Data>, u64), ApiError> {
 	let db = ctx.get_db();
 
 	let library = db
@@ -79,7 +79,41 @@ async fn precheck(
 
 	series.append(&mut inserted_series);
 
-	Ok((library, series))
+	let start = std::time::Instant::now();
+
+	let files_to_process: u64 = futures::future::join_all(
+		series
+			.iter()
+			.map(|data| {
+				let path = data.path.clone();
+
+				tokio::task::spawn_blocking(move || {
+					WalkDir::new(&path)
+						.into_iter()
+						// FIXME: why won't this work??
+						// .filter_entry(|e| e.path().is_file())
+						.filter_map(|e| e.ok())
+						.filter(|e| e.path().is_file())
+						.count() as u64
+				})
+			})
+			.collect::<Vec<JoinHandle<u64>>>(),
+	)
+	.await
+	.into_iter()
+	.filter_map(|res| res.ok())
+	.sum();
+
+	let duration = start.elapsed();
+
+	log::debug!(
+		"Files to process: {:?} (calculated in {}.{:03} seconds)",
+		files_to_process,
+		duration.as_secs(),
+		duration.subsec_millis()
+	);
+
+	Ok((library, series, files_to_process))
 }
 
 async fn scan_series(
@@ -186,48 +220,18 @@ async fn scan_series(
 // Once transactions are supported, I think at the end of each series scan I can commit
 // the transaction to maybe reduce load on the sql file. For now, I'll use the sync
 // version...
+//
+// Ideas:
+// - maybe create a TentativeMedia struct that scan_path returns? OR just the paths + series.id?
+// grab the media before scan_path then block thread for the inserstions?
 pub async fn scan_concurrent(
 	ctx: Context,
 	path: String,
 	_runner_id: String,
 ) -> Result<(), ApiError> {
-	let (_library, series) = precheck(&ctx, path).await?;
+	let (_library, series, _files_to_process) = precheck(&ctx, path).await?;
 
 	let counter = Arc::new(Mutex::new(0));
-
-	let start = std::time::Instant::now();
-
-	let files_to_process: u64 = futures::future::join_all(
-		series
-			.iter()
-			.map(|data| {
-				let path = data.path.clone();
-
-				tokio::task::spawn_blocking(move || {
-					WalkDir::new(&path)
-						.into_iter()
-						// FIXME: why won't this work??
-						// .filter_entry(|e| e.path().is_file())
-						.filter_map(|e| e.ok())
-						.filter(|e| e.path().is_file())
-						.count() as u64
-				})
-			})
-			.collect::<Vec<JoinHandle<u64>>>(),
-	)
-	.await
-	.into_iter()
-	.filter_map(|res| res.ok())
-	.sum();
-
-	let duration = start.elapsed();
-
-	log::debug!(
-		"Files to process: {:?} (calculated in {}.{:03} seconds)",
-		files_to_process,
-		duration.as_secs(),
-		duration.subsec_millis()
-	);
 
 	let tasks: Vec<JoinHandle<()>> = series
 		.into_iter()
@@ -268,50 +272,16 @@ pub async fn scan_sync(
 	path: String,
 	runner_id: String,
 ) -> Result<(), ApiError> {
-	let (library, series) = precheck(&ctx, path).await?;
-
-	let start = std::time::Instant::now();
-
-	let files_to_process: u64 = futures::future::join_all(
-		series
-			.iter()
-			.map(|data| {
-				let path = data.path.clone();
-
-				tokio::task::spawn_blocking(move || {
-					WalkDir::new(&path)
-						.into_iter()
-						// FIXME: why won't this work??
-						// .filter_entry(|e| e.path().is_file())
-						.filter_map(|e| e.ok())
-						.filter(|e| e.path().is_file())
-						.count() as u64
-				})
-			})
-			.collect::<Vec<JoinHandle<u64>>>(),
-	)
-	.await
-	.into_iter()
-	.filter_map(|res| res.ok())
-	.sum();
-
-	let duration = start.elapsed();
-
-	log::debug!(
-		"Files to process: {} (calculated in {}.{:03} seconds)",
-		files_to_process,
-		duration.as_secs(),
-		duration.subsec_millis()
-	);
+	let (library, series, files_to_process) = precheck(&ctx, path).await?;
 
 	let _ = ctx.emit_client_event(ClientEvent::job_started(
 		runner_id.clone(),
-		0,
+		1,
 		files_to_process,
 		Some(format!("Starting library scan at {}", &library.path)),
 	));
 
-	let counter = Arc::new(AtomicU64::new(0));
+	let counter = Arc::new(AtomicU64::new(1));
 
 	for s in series {
 		let progress_ctx = ctx.get_ctx();

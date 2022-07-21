@@ -32,6 +32,7 @@ pub enum ClientEvent {
 	JobStarted(JobUpdate),
 	JobProgress(JobUpdate),
 	JobComplete(String),
+	JobFailed((String, String)),
 	CreatedMedia(prisma::media::Data),
 	CreatedSeries(prisma::series::Data),
 }

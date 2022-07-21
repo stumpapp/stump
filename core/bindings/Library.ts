@@ -32,6 +32,12 @@ export interface Library {
 	tags?: Tag[];
 }
 
+export interface LibrariesStats {
+	bookCount: number;
+	seriesCount: number;
+	totalBytes: number;
+}
+
 export interface CreateLibraryInput extends Omit<Library, 'id' | 'updatedAt' | 'series'> {
 	scan: boolean;
 }

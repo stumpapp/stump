@@ -87,6 +87,8 @@ pub async fn update_user() {
 	unimplemented!()
 }
 
+// FIXME: remove this once I resolve the below 'TODO'
+#[allow(unused_variables)]
 #[openapi(tag = "User")]
 #[get("/users/<id>/preferences")]
 pub async fn get_user_preferences(
@@ -116,6 +118,8 @@ pub async fn get_user_preferences(
 // when I got from the session. I could remove the ID requirement. I think the preferences
 // structure needs to eventually change a little anyways, I don't like how I can't query
 // by user id, it should be a unique where param but it isn't with how I structured it...
+// FIXME: remove this 'allow' once I resolve the above 'TODO'
+#[allow(unused_variables)]
 #[openapi(tag = "User")]
 #[put("/users/<id>/preferences", data = "<input>")]
 pub async fn update_user_preferences(

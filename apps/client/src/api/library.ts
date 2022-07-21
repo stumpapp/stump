@@ -2,6 +2,7 @@ import {
 	ApiResult,
 	CreateLibraryInput,
 	EditLibraryInput,
+	LibrariesStats,
 	Library,
 	PageableApiResult,
 	Series,
@@ -10,6 +11,10 @@ import API from '.';
 
 export function getLibraries(): Promise<PageableApiResult<Library[]>> {
 	return API.get('/libraries?unpaged=true');
+}
+
+export function getLibrariesStats(): Promise<ApiResult<LibrariesStats>> {
+	return API.get('/libraries/stats');
 }
 
 export function getLibraryById(id: string): Promise<ApiResult<Library>> {

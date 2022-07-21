@@ -7,12 +7,12 @@ import { useSeriesMedia } from '~hooks/useSeriesMedia';
 import { useViewMode } from '~hooks/useViewMode';
 import MediaGrid from '~components/Media/MediaGrid';
 import MediaList from '~components/Media/MediaList';
-import Pagination from '~components/ui/Pagination';
+import Pagination from '~ui/Pagination';
+import ReadMore from '~ui/ReadMore';
 import useIsInView from '~hooks/useIsInView';
 import { Box, ButtonGroup, Heading, Text } from '@chakra-ui/react';
 import UpNextButton from '~components/Series/UpNextButton';
 import DownloadSeriesButton from '~components/Series/DownloadSeriesButton';
-import ReadMore from '~components/ui/ReadMore';
 import { Series } from '@stump/core';
 
 interface OverviewTitleSectionProps {

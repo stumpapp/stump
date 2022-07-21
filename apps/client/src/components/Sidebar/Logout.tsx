@@ -9,7 +9,7 @@ import {
 	useDisclosure,
 } from '@chakra-ui/react';
 import { SignOut } from 'phosphor-react';
-import Button, { ModalCloseButton } from '~components/ui/Button';
+import Button, { ModalCloseButton } from '~ui/Button';
 import { useMutation } from 'react-query';
 import { logout } from '~api/auth';
 import toast from 'react-hot-toast';

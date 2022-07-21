@@ -80,20 +80,9 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 		),
 		pages,
 	})
-
-	// if metadata_buf.is_empty() {
-	// 	Ok((None, entries))
-	// } else {
-	// 	Ok((
-	// 		media_file::process_comic_info(
-	// 			std::str::from_utf8(&metadata_buf)?.to_owned(),
-	// 		),
-	// 		entries,
-	// 	))
-	// }
 }
 
-pub fn digest_rar(file: &str) -> Option<String> {
+pub fn rar_sample(file: &str) -> u64 {
 	let archive = unrar::Archive::new(&file).unwrap();
 
 	let entries: Vec<_> = archive
@@ -104,15 +93,31 @@ pub fn digest_rar(file: &str) -> Option<String> {
 		.collect();
 
 	// take first 6 images and add their sizes together
-	let byte_offset: u64 = entries
+	entries
 		.iter()
 		.take(6)
-		.fold(0, |acc, e| acc + e.unpacked_size as u64);
+		.fold(0, |acc, e| acc + e.unpacked_size as u64)
+}
 
-	match checksum::digest(file, byte_offset) {
+pub fn digest_rar(file: &str) -> Option<String> {
+	log::debug!("Attempting to generate checksum for: {}", file);
+
+	let size = rar_sample(file);
+
+	log::debug!(
+		"Calculated sample size (in bytes) for generating checksum: {}",
+		size
+	);
+
+	match checksum::digest(file, size) {
 		Ok(digest) => Some(digest),
 		Err(e) => {
-			log::error!("Error digesting rar: {}", e);
+			log::debug!(
+				"Failed to digest rar file: {}. Unable to generate checksum: {}",
+				file,
+				e
+			);
+
 			None
 		},
 	}
@@ -151,15 +156,93 @@ pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
 		.read_bytes()
 		.unwrap();
 
-	// if try_webp {
-	// 	match utils::webp::webp_from_bytes(&bytes) {
-	// 		Ok(webp_bytes) => return Ok((ContentType::WEBP, webp_bytes)),
-	// 		Err(e) => {
-	// 			log::error!("Error converting to webp: {}", e);
-	// 			// Err(GetPageError::WebpError)
-	// 		},
-	// 	};
-	// }
-
 	Ok((ContentType::JPEG, bytes))
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	use crate::{config::context::Context, prisma::media, types::errors::ApiError};
+
+	use rocket::tokio;
+
+	#[tokio::test]
+	async fn digest_rars_asynchronous() -> Result<(), ApiError> {
+		let ctx = Context::mock().await;
+
+		let rars = ctx
+			.db
+			.media()
+			.find_many(vec![media::extension::in_vec(vec![
+				"rar".to_string(),
+				"cbr".to_string(),
+			])])
+			.exec()
+			.await?;
+
+		if rars.len() == 0 {
+			println!("Warning: could not run digest_rars_asynchronous test, please insert RAR files in the mock database...");
+			return Ok(());
+		}
+
+		for rar in rars {
+			let rar_sample = rar_sample(&rar.path);
+
+			let checksum = match checksum::digest_async(&rar.path, rar_sample).await {
+				Ok(digest) => {
+					println!("Generated checksum (async): {:?}", digest);
+
+					Some(digest)
+				},
+				Err(e) => {
+					println!("Failed to digest rar: {}", e);
+					None
+				},
+			};
+
+			assert!(checksum.is_some());
+		}
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn digest_rars_synchronous() -> Result<(), ApiError> {
+		let ctx = Context::mock().await;
+
+		let rars = ctx
+			.db
+			.media()
+			.find_many(vec![media::extension::in_vec(vec![
+				"rar".to_string(),
+				"cbr".to_string(),
+			])])
+			.exec()
+			.await?;
+
+		if rars.len() == 0 {
+			println!("Warning: could not run digest_rars_synchronous test, please insert RAR files in the mock database...");
+			return Ok(());
+		}
+
+		for rar in rars {
+			let rar_sample = rar_sample(&rar.path);
+
+			let checksum = match checksum::digest(&rar.path, rar_sample) {
+				Ok(digest) => {
+					println!("Generated checksum: {:?}", digest);
+					Some(digest)
+				},
+				Err(e) => {
+					println!("Failed to digest rar: {}", e);
+					None
+				},
+			};
+
+			assert!(checksum.is_some());
+		}
+
+		Ok(())
+	}
 }

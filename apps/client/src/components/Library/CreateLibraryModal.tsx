@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useMutation } from 'react-query';
 import client from '~api/client';
 import { createLibrary } from '~api/library';
-import Button, { ModalCloseButton } from '~components/ui/Button';
+import Button, { ModalCloseButton } from '~ui/Button';
 import {
 	Modal,
 	ModalBody,

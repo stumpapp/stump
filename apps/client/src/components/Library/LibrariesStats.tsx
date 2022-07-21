@@ -3,7 +3,7 @@ import { HStack } from '@chakra-ui/react';
 import { useQuery } from 'react-query';
 import { getLibrariesStats } from '~api/library';
 import { formatBytesSeparate } from '~util/format';
-import AnimatedStat from '~components/ui/AnimatedStat';
+import AnimatedStat from '~ui/AnimatedStat';
 
 // Note: I don't ~love~ the plural here, but I want to make sure it is understood it
 // encompasses *all* libraries, not just one.
@@ -26,7 +26,7 @@ export default function LibrariesStats() {
 				value={libraryUsage.value}
 				label="Space Used"
 				unit={libraryUsage.unit}
-				round={false}
+				decimal={true}
 			/>
 		</HStack>
 	);

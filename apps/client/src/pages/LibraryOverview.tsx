@@ -7,7 +7,7 @@ import { useViewMode } from '~hooks/useViewMode';
 import SeriesGrid from '~components/Series/SeriesGrid';
 import SeriesList from '~components/Series/SeriesList';
 import { useLibrarySeries } from '~hooks/useLibrarySeries';
-import Pagination from '~components/ui/Pagination';
+import Pagination from '~ui/Pagination';
 import useIsInView from '~hooks/useIsInView';
 
 // FIXME: there is the *slightest* over stutter here when switching between

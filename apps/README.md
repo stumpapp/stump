@@ -21,8 +21,7 @@ I am omitting a lot of files and only focusing on the main directories, but the 
 └── src
     ├── api
     ├── components
-    │   └── ui
-    ├── hooks
+    ├── ui
     ├── i18n
     │   └── locales
     ├── pages
@@ -32,7 +31,7 @@ I am omitting a lot of files and only focusing on the main directories, but the 
 
 - `api`: This is where all of the query functions used by react query are defined, grouped by entity (e.g. media, library, etc.).
 - `components`: Custom React components live here. They are largely grouped by Entity and/or page.
-  - `ui`: General purpose UI components live here, things like Buttons and what not.
+- `ui`: General purpose UI components live here, things like Buttons and what not.
 - `hooks`: Custom React hooks live here
 - `i18n`: Locale directory, mainly initializes `i18next`.
   - `locales`: JSON locale files are defined here. They are used for displaying various locales in Stump.

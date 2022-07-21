@@ -4,8 +4,8 @@ import { Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import shallow from 'zustand/shallow';
 import { login } from '~api/auth';
-import Form from '~components/ui/Form';
-import Input from '~components/ui/Input';
+import Form from '~ui/Form';
+import Input from '~ui/Input';
 import { useStore } from '~store/store';
 
 import {

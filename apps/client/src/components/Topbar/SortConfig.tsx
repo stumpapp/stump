@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import { SortAscending, SortDescending } from 'phosphor-react';
 import React, { useState } from 'react';
-import Button from '~components/ui/Button';
+import Button from '~ui/Button';
 
 interface SortConfigProps {}
 

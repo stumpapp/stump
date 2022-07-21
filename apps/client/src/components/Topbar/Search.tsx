@@ -5,11 +5,11 @@ import {
 	useBoolean,
 	useColorModeValue,
 } from '@chakra-ui/react';
+import Input from '~ui/Input';
 import { MagnifyingGlass } from 'phosphor-react';
 import React, { FormEvent, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useHotkeys } from 'react-hotkeys-hook';
-import Input from '../ui/Input';
 
 function Shortcut({ visible }: { visible?: boolean }) {
 	// FIXME: don't use deprecated

@@ -14,7 +14,9 @@
     "get-client": "trash \"client/*\" \"!client/.placeholder\" && cpy \"../apps/client/build/**/*\" ./client/",
     "move-client": "trash ../target/release/client && cp -r ./client ../target/release/client",
     "move-rocket": "trash ../target/release/Rocket.toml && cp ./Rocket.toml ../target/release/Rocket.toml",
-    "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --"
+    "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
+    "benchmarks": "cargo test --benches",
+    "test": "cargo test"
   },
   "devDependencies": {
     "@types/node": "^17.0.45",

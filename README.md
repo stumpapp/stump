@@ -101,7 +101,7 @@ The `apps` directory is where Stump applications are located. These are separate
 
 Contributions are very **encouraged** and **welcome**!
 
-I put together a small set of [resources](https://www.stumpapp.dev/contributing#developer-resources-📚) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
+I put together a small set of [resources](https://www.stumpapp.dev/contributing#developer-resources) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
 
 Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
 

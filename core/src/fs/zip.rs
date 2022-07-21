@@ -3,7 +3,7 @@ use crate::{
 	types::{alias::ProcessResult, errors::ProcessFileError, models::ProcessedMediaFile},
 };
 
-use std::io::Read;
+use std::{fs::File, io::Read};
 use walkdir::DirEntry;
 use zip::read::ZipFile;
 
@@ -27,12 +27,12 @@ impl<'a> IsImage for ZipFile<'a> {
 	}
 }
 
-// TODO: result return
-pub fn digest_zip(path: &str) -> Option<String> {
-	let zip_file = std::fs::File::open(path).unwrap();
+/// Get the sample size (in bytes) to use for generating a checksum of a zip file.
+pub fn zip_sample(file: &str) -> u64 {
+	let zip_file = File::open(file).unwrap();
 	let mut archive = zip::ZipArchive::new(zip_file).unwrap();
 
-	let mut byte_offset = 0;
+	let mut sample_size = 0;
 
 	for i in 0..archive.len() {
 		if i > 5 {
@@ -41,28 +41,41 @@ pub fn digest_zip(path: &str) -> Option<String> {
 
 		let file = archive.by_index(i).unwrap();
 
-		byte_offset += file.size();
+		sample_size += file.size();
 	}
 
-	match checksum::digest(path, byte_offset) {
+	sample_size
+}
+
+/// Calls `checksum::digest` to attempt generating a checksum for the zip file.
+pub fn digest_zip(path: &str) -> Option<String> {
+	let size = zip_sample(path);
+
+	log::debug!(
+		"Calculated sample size (in bytes) for generating checksum: {}",
+		size
+	);
+
+	match checksum::digest(path, size) {
 		Ok(digest) => Some(digest),
 		Err(e) => {
 			log::error!(
-				"Failed to digest zipfile {}, unable to create checksum: {}",
+				"Failed to digest zip file {}. Unable to generate checksum: {}",
 				path,
 				e
 			);
+
 			None
 		},
 	}
 }
 
-/// Processes a zip file in its entirety. Will return a tuple of the comic info and the list of
-/// files in the zip.
+/// Processes a zip file in its entirety, includes: medatadata, page count, and the
+/// generated checksum for the file.
 pub fn process_zip(file: &DirEntry) -> ProcessResult {
 	info!("Processing Zip: {}", file.path().display());
 
-	let zip_file = std::fs::File::open(file.path())?;
+	let zip_file = File::open(file.path())?;
 	let mut archive = zip::ZipArchive::new(zip_file)?;
 
 	let mut comic_info = None;
@@ -92,7 +105,7 @@ pub fn process_zip(file: &DirEntry) -> ProcessResult {
 // a quick solve. TODO: rework this!
 /// Get an image from a zip file by index (page).
 pub fn get_zip_image(file: &str, page: i32) -> GetPageResult {
-	let zip_file = std::fs::File::open(file)?;
+	let zip_file = File::open(file)?;
 
 	let mut archive = zip::ZipArchive::new(&zip_file)?;
 	// FIXME: stinky clone here
@@ -133,4 +146,92 @@ pub fn get_zip_image(file: &str, page: i32) -> GetPageResult {
 	);
 
 	Err(ProcessFileError::NoImageError)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	use crate::{config::context::Context, prisma::media, types::errors::ApiError};
+
+	use rocket::tokio;
+
+	#[tokio::test]
+	async fn digest_zips_asynchronous() -> Result<(), ApiError> {
+		let ctx = Context::mock().await;
+
+		let zips = ctx
+			.db
+			.media()
+			.find_many(vec![media::extension::in_vec(vec![
+				"zip".to_string(),
+				"cbz".to_string(),
+			])])
+			.exec()
+			.await?;
+
+		if zips.len() == 0 {
+			println!("Warning: could not run digest_zips_asynchronous test, please insert RAR files in the mock database...");
+			return Ok(());
+		}
+
+		for zip in zips {
+			let zip_sample = zip_sample(&zip.path);
+
+			let checksum = match checksum::digest_async(&zip.path, zip_sample).await {
+				Ok(digest) => {
+					println!("Generated checksum (async): {:?}", digest);
+
+					Some(digest)
+				},
+				Err(e) => {
+					println!("Failed to digest zip: {}", e);
+					None
+				},
+			};
+
+			assert!(checksum.is_some());
+		}
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn digest_zips_synchronous() -> Result<(), ApiError> {
+		let ctx = Context::mock().await;
+
+		let zips = ctx
+			.db
+			.media()
+			.find_many(vec![media::extension::in_vec(vec![
+				"zip".to_string(),
+				"cbz".to_string(),
+			])])
+			.exec()
+			.await?;
+
+		if zips.len() == 0 {
+			println!("Warning: could not run digest_zips_synchronous test, please insert RAR files in the mock database...");
+			return Ok(());
+		}
+
+		for zip in zips {
+			let zip_sample = zip_sample(&zip.path);
+
+			let checksum = match checksum::digest(&zip.path, zip_sample) {
+				Ok(digest) => {
+					println!("Generated checksum: {:?}", digest);
+					Some(digest)
+				},
+				Err(e) => {
+					println!("Failed to digest zip: {}", e);
+					None
+				},
+			};
+
+			assert!(checksum.is_some());
+		}
+
+		Ok(())
+	}
 }

@@ -8,6 +8,7 @@
 		"prepare": "husky install",
 		"setup": "pnpm i && pnpm client build && pnpm core run setup",
 		"checks": "pnpm -r check",
+		"tests": "pnpm -r test",
 		"start": "pnpm core start",
 		"dev": "concurrently -n core,client -c green.bold,blue.bold \"pnpm core dev\" \"pnpm client dev\"",
 		"core": "pnpm --filter @stump/core --",

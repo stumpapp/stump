@@ -1,4 +1,7 @@
-const KILOBYTE = 1024;
+// Note: ~technically~ 1024 is correct, but it always differed from what my computer natively reported.
+// I care more about matching a users reported byte conversion, and 1000 seems to do the trick
+// for me in my testing.
+const KILOBYTE = 1000;
 const BYTE_UNITS = ['B', 'KB', 'MiB', 'GB', 'TB'];
 
 /**

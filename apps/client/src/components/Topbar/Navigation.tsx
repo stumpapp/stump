@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { HStack, useColorModeValue, usePrevious } from '@chakra-ui/react';
 import { CaretLeft, CaretRight } from 'phosphor-react';
 import { Path, useLocation, useNavigate, useParams } from 'react-router-dom';
-import Button from '~components/ui/Button';
+import Button from '~ui/Button';
 
 interface Destinations {
 	forward: string | Partial<Path>;

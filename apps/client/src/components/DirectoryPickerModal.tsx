@@ -16,8 +16,8 @@ import {
 } from '@chakra-ui/react';
 import { ArrowLeft, Folder, FolderNotch } from 'phosphor-react';
 import { useDirectoryListing } from '~hooks/useDirectoryListing';
-import Button, { ModalCloseButton } from './ui/Button';
-import Input from './ui/Input';
+import Button, { ModalCloseButton } from '~ui/Button';
+import Input from '~ui/Input';
 import toast from 'react-hot-toast';
 
 interface Props {

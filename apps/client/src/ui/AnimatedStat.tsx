@@ -15,7 +15,7 @@ export interface AnimatedStatProps {
 	helpText?: string;
 	unit?: string;
 	duration?: number;
-	round?: boolean;
+	decimal?: boolean;
 	enabled?: boolean;
 }
 
@@ -26,7 +26,7 @@ export default function AnimatedStat({
 	helpText,
 	unit,
 	duration = 1.5,
-	round = true,
+	decimal = false,
 	enabled = true,
 }: AnimatedStatProps) {
 	const { value: currentValue } = useCountUp({
@@ -34,11 +34,12 @@ export default function AnimatedStat({
 		end: value,
 		duration,
 		formatter: (value) => {
-			if (round) {
-				return Math.round(value).toLocaleString();
+			if (decimal) {
+				// TODO: do locale conversion too?
+				return value.toFixed(2);
 			}
 
-			return value.toLocaleString();
+			return Math.round(value).toLocaleString();
 		},
 	});
 

@@ -5,7 +5,7 @@ import { useMutation, useQuery } from 'react-query';
 import client from '~api/client';
 import { clearLogFile } from '~api/log';
 import { getLogFileMeta } from '~api/log';
-import Button from '~components/ui/Button';
+import Button from '~ui/Button';
 import { formatBytes } from '~util/format';
 
 export function LogStats() {

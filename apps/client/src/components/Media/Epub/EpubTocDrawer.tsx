@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 import { ListBullets } from 'phosphor-react';
 import { useLocation } from 'react-router-dom';
-import { IconButton } from '~components/ui/Button';
+import { IconButton } from '~ui/Button';
 import { EpubContent } from '@stump/core';
 
 interface EpubTocDrawerProps {

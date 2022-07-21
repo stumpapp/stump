@@ -9,7 +9,7 @@ import {
 	useDisclosure,
 	MenuItem,
 } from '@chakra-ui/react';
-import Button, { ModalCloseButton } from '~components/ui/Button';
+import Button, { ModalCloseButton } from '~ui/Button';
 import { NotePencil } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import { FieldValues } from 'react-hook-form';

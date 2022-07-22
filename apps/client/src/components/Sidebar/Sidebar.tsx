@@ -24,6 +24,7 @@ import CreateLibraryModal from '~components/Library/CreateLibraryModal';
 import Logout from './Logout';
 import { useLocale } from '~hooks/useLocale';
 import { Library } from '@stump/core';
+import { useLibraries } from '~hooks/useLibraries';
 
 interface NavMenuItemProps extends Library {
 	href: string;
@@ -127,9 +128,7 @@ export function SidebarContent() {
 
 	const { locale, t } = useLocale();
 
-	const libraries = useStore((state) => state.libraries, shallow);
-
-	// console.log('libraries', libraries);
+	const { libraries } = useLibraries();
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
@@ -137,7 +136,7 @@ export function SidebarContent() {
 			{
 				name: t('sidebar.buttons.libraries'),
 				icon: Books as any,
-				items: libraries.map((library) => ({
+				items: libraries?.map((library) => ({
 					...library,
 					href: `/libraries/${library.id}`,
 				})),

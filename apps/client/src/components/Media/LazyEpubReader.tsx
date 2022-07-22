@@ -75,6 +75,9 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 			setBook(
 				new Book(`${baseURL}/media/${id}/file`, {
 					openAs: 'epub',
+					// @ts-ignore: more incorrect types >:( I really truly cannot stress enough how much I want to just
+					// rip out my eyes working with epubjs...
+					requestCredentials: true,
 				}),
 			);
 		}

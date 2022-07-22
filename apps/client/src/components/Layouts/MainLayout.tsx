@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { getLibraries } from '~api/library';
 import Lazy from '~components/Lazy';
@@ -19,7 +19,7 @@ export default function MainLayout() {
 
 	const _user = useUser();
 
-	const { isLoading, error } = useQuery('getLibraries', getLibraries, {
+	const { isLoading, error } = useQuery(['getLibraries'], getLibraries, {
 		onSuccess(res) {
 			setLibraries(res.data.data);
 		},
@@ -44,7 +44,7 @@ export default function MainLayout() {
 	if (isLoading) {
 		return null;
 	} else if (error?.response?.status === 401) {
-		client.invalidateQueries('getLibraries');
+		client.invalidateQueries(['getLibraries']);
 		return <Navigate to="/auth/login" />;
 	}
 

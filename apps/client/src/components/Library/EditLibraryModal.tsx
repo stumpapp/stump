@@ -15,7 +15,7 @@ import toast from 'react-hot-toast';
 import { FieldValues } from 'react-hook-form';
 import LibraryModalForm from './LibraryModalForm';
 import { TagOption, useTags } from '~hooks/useTags';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import client from '~api/client';
 import { editLibrary } from '~api/library';
 import { createTags } from '~api/tag';
@@ -32,14 +32,14 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 
 	const { tags, options, isLoading: fetchingTags } = useTags();
 
-	const { isLoading, mutateAsync } = useMutation('editLibrary', {
+	const { isLoading, mutateAsync } = useMutation(['editLibrary'], {
 		mutationFn: editLibrary,
 		onSuccess: (res) => {
 			if (!res.data) {
 				// throw new Error('Something went wrong.');
 				// TODO: log?
 			} else {
-				client.invalidateQueries('getLibraries');
+				client.invalidateQueries(['getLibraries']);
 				onClose();
 			}
 		},
@@ -50,7 +50,7 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 		},
 	});
 
-	const { mutateAsync: tryCreateTags } = useMutation('createTags', {
+	const { mutateAsync: tryCreateTags } = useMutation(['createTags'], {
 		mutationFn: createTags,
 	});
 

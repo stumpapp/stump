@@ -1,7 +1,7 @@
 import { ApiResult, Tag } from '@stump/core';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createTags as createTagsFn, getAllTags } from '~api/tag';
 
 export interface UseTagsConfig {
@@ -22,7 +22,7 @@ export function useTags({
 	onCreateSuccess,
 	onCreateError,
 }: UseTagsConfig = {}) {
-	const { data, isLoading, refetch } = useQuery('getAllTags', {
+	const { data, isLoading, refetch } = useQuery(['getAllTags'], {
 		queryFn: getAllTags,
 		onSuccess: onQuerySuccess,
 		onError: onQueryError,
@@ -33,7 +33,7 @@ export function useTags({
 		mutate: createTags,
 		mutateAsync: createTagsAsync,
 		isLoading: isCreating,
-	} = useMutation('createTags', {
+	} = useMutation(['createTags'], {
 		mutationFn: createTagsFn,
 		onSuccess: onCreateSuccess,
 		onError: onCreateError,

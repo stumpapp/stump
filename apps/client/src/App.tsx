@@ -1,5 +1,5 @@
 import React from 'react';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import client from '~api/client';
 import ErrorBoundary from '~components/ErrorBoundary';
@@ -93,10 +93,15 @@ function App() {
 			// I set a timeout here to give the backend a little time to analyze at least
 			// one of the books in a new series before triggering a refetch. This is to
 			// prevent the series/media cards from being displayed before there is an image ready.
-			setTimeout(() => client.invalidateQueries('getLibrary'), 250);
+			setTimeout(() => {
+				// TODO: I must misunderstand how this function works. Giving multiple keys
+				// does not work, not a huge deal but would rather a one-liner for these.
+				client.invalidateQueries(['getLibrary']);
+				client.invalidateQueries(['getLibrariesStats']);
+			}, 250);
 
 			if (data.CreatedMedia) {
-				setTimeout(() => client.invalidateQueries('getSeries'), 250);
+				setTimeout(() => client.invalidateQueries(['getSeries']), 250);
 			}
 		} else {
 			console.log('Unknown JobEvent', data);

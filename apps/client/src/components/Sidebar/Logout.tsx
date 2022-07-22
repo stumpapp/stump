@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { SignOut } from 'phosphor-react';
 import Button, { ModalCloseButton } from '~ui/Button';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { logout } from '~api/auth';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +22,7 @@ export default function Logout() {
 	const logoutUser = useStore((state) => state.logoutUser);
 	const navigate = useNavigate();
 
-	const { mutateAsync } = useMutation('logoutUser', logout);
+	const { mutateAsync } = useMutation(['logoutUser'], logout);
 
 	async function handleLogout() {
 		toast

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FieldValues } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import client from '~api/client';
 import { createLibrary } from '~api/library';
 import Button, { ModalCloseButton } from '~ui/Button';
@@ -30,14 +30,14 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 
 	const { tags, options, isLoading: fetchingTags } = useTags();
 
-	const { isLoading, mutateAsync } = useMutation('createLibrary', {
+	const { isLoading, mutateAsync } = useMutation(['createLibrary'], {
 		mutationFn: createLibrary,
 		onSuccess: (res) => {
 			if (!res.data) {
 				// throw new Error('Something went wrong.');
 				// TODO: log?
 			} else {
-				client.invalidateQueries('getLibraries');
+				client.invalidateQueries(['getLibraries']);
 				onClose();
 			}
 		},
@@ -48,7 +48,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 		},
 	});
 
-	const { mutateAsync: tryCreateTags } = useMutation('createTags', {
+	const { mutateAsync: tryCreateTags } = useMutation(['createTags'], {
 		mutationFn: createTags,
 	});
 

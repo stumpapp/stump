@@ -231,7 +231,7 @@ pub async fn scan_concurrent(
 ) -> Result<(), ApiError> {
 	let (_library, series, _files_to_process) = precheck(&ctx, path).await?;
 
-	let counter = Arc::new(Mutex::new(0));
+	let counter = Arc::new(Mutex::new(1));
 
 	let tasks: Vec<JoinHandle<()>> = series
 		.into_iter()

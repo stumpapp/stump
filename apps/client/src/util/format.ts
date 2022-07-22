@@ -7,10 +7,15 @@ const BYTE_UNITS = ['B', 'KB', 'MiB', 'GB', 'TB'];
 /**
  * Returns a formatted string for converted bytes and unit of measurement.
  */
-export function formatBytes(bytes?: number, decimals = 2) {
+export function formatBytes(bytes?: number, decimals = 2, zeroUnit = 'GB') {
 	if (bytes == undefined) return null;
 
 	let precision = decimals >= 0 ? decimals : 0;
+
+	if (bytes === 0) {
+		return parseFloat((0).toFixed(precision)) + ' ' + zeroUnit;
+	}
+
 	let threshold = Math.floor(Math.log(bytes) / Math.log(KILOBYTE));
 
 	return (
@@ -23,10 +28,18 @@ export function formatBytes(bytes?: number, decimals = 2) {
 /**
  * Returns an object containing the converted bytes and the unit of measurement.
  */
-export function formatBytesSeparate(bytes?: number, decimals = 2) {
+export function formatBytesSeparate(bytes?: number, decimals = 2, zeroUnit = 'GB') {
 	if (bytes == undefined) return null;
 
 	let precision = decimals >= 0 ? decimals : 0;
+
+	if (bytes === 0) {
+		return {
+			value: parseFloat((0).toFixed(precision)),
+			unit: zeroUnit,
+		};
+	}
+
 	let threshold = Math.floor(Math.log(bytes) / Math.log(KILOBYTE));
 
 	return {

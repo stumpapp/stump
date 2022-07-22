@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { HStack } from '@chakra-ui/react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getLibrariesStats } from '~api/library';
 import { formatBytesSeparate } from '~util/format';
 import AnimatedStat from '~ui/AnimatedStat';
@@ -8,7 +8,7 @@ import AnimatedStat from '~ui/AnimatedStat';
 // Note: I don't ~love~ the plural here, but I want to make sure it is understood it
 // encompasses *all* libraries, not just one.
 export default function LibrariesStats() {
-	const { data: libraryStats } = useQuery('getLibrariesStats', () =>
+	const { data: libraryStats } = useQuery(['getLibrariesStats'], () =>
 		getLibrariesStats().then((data) => data.data),
 	);
 

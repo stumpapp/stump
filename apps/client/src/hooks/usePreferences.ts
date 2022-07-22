@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { getUserPreferences } from '~api/user';
 import { useUser } from './useUser';
 

@@ -1,6 +1,6 @@
 import { Epub, EpubContent } from '@stump/core';
 import { useMemo, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getEpubBaseUrl, getEpubById } from '~api/epub';
 
 export interface EpubOptions {

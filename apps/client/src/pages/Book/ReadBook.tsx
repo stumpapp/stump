@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { updateMediaProgress } from '~api/media';
 import { getMediaById, getMediaPage } from '~api/media';
@@ -14,7 +14,7 @@ export default function ReadBook() {
 		throw new Error('Media id is required');
 	}
 
-	const { isLoading: fetchingBook, data: media } = useQuery('getMediaById', {
+	const { isLoading: fetchingBook, data: media } = useQuery(['getMediaById'], {
 		queryFn: async () => getMediaById(id).then((res) => res.data),
 	});
 

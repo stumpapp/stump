@@ -12,7 +12,7 @@ import {
 import Button, { ModalCloseButton } from '~ui/Button';
 import { Trash } from 'phosphor-react';
 import toast from 'react-hot-toast';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { deleteLibrary } from '~api/library';
 import client from '~api/client';
 import { useNavigate } from 'react-router-dom';
@@ -29,13 +29,13 @@ export default function DeleteLibraryModal({ disabled, library }: Props) {
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const { mutateAsync } = useMutation('deleteLibrary', {
+	const { mutateAsync } = useMutation(['deleteLibrary'], {
 		mutationFn: deleteLibrary,
 		onSuccess: handleSuccess,
 	});
 
 	async function handleSuccess() {
-		await client.invalidateQueries('getLibraries');
+		await client.invalidateQueries(['getLibraries']);
 
 		// TODO: navigate away??
 

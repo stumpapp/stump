@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { getSeriesById, getSeriesThumbnail } from '~api/series';
 import { useSeriesMedia } from '~hooks/useSeriesMedia';
@@ -84,7 +84,7 @@ export default function SeriesOverview() {
 		isLoading: isLoadingSeries,
 		isFetching: isFetchingSeries,
 		data: series,
-	} = useQuery('getSeries', {
+	} = useQuery(['getSeries'], {
 		queryFn: async () => getSeriesById(id).then((res) => res.data),
 	});
 

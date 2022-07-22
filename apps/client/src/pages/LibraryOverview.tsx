@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { getLibraryById } from '~api/library';
 import { Helmet } from 'react-helmet';

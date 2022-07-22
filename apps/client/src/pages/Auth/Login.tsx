@@ -20,7 +20,7 @@ import {
 	Text,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { checkIsClaimed } from '~api/server';
 import { register } from '~api/auth';
@@ -32,7 +32,7 @@ export default function Login() {
 
 	const [isClaimed, setIsClaimed] = useState(true);
 
-	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery('checkIsClaimed', {
+	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(['checkIsClaimed'], {
 		queryFn: checkIsClaimed,
 	});
 
@@ -51,14 +51,14 @@ export default function Login() {
 		shallow,
 	);
 
-	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation('loginUser', {
+	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation(['loginUser'], {
 		mutationFn: login,
 		onSuccess: (res) => {
 			if (!res.data) {
 				throw new Error('Login failed.');
 			}
 
-			client.invalidateQueries('getLibraries');
+			client.invalidateQueries(['getLibraries']);
 
 			setUserAndPreferences(res.data);
 		},
@@ -68,7 +68,7 @@ export default function Login() {
 		},
 	});
 
-	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation('registerUser', {
+	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(['registerUser'], {
 		mutationFn: register,
 	});
 
@@ -107,7 +107,7 @@ export default function Login() {
 	}
 
 	if (user) {
-		client.invalidateQueries('getLibraries');
+		client.invalidateQueries(['getLibraries']);
 		return <Navigate to="/" />;
 	}
 

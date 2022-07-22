@@ -1,7 +1,7 @@
 import React from 'react';
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
 import { ArrowsClockwise, DotsThreeVertical } from 'phosphor-react';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { scanLibary } from '~api/library';
 import EditLibraryModal from './EditLibraryModal';
 import DeleteLibraryModal from './DeleteLibraryModal';
@@ -17,7 +17,7 @@ interface Props {
 export default function LibraryOptionsMenu({ library }: Props) {
 	const user = useUser();
 
-	const { mutate: scan } = useMutation('scanLibary', { mutationFn: scanLibary });
+	const { mutate: scan } = useMutation(['scanLibary'], { mutationFn: scanLibary });
 
 	function handleScan() {
 		// extra protection, should not be possible to reach this.

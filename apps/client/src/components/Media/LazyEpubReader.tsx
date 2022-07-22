@@ -5,7 +5,7 @@ import { useColorMode } from '@chakra-ui/react';
 import toast from 'react-hot-toast';
 import EpubControls from './Epub/EpubControls';
 import { useSwipeable } from 'react-swipeable';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { epubDarkTheme } from '~util/epubTheme';
 import { getEpubById } from '~api/epub';
 

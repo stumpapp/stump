@@ -72,7 +72,7 @@ pub async fn get_libraries_stats(
 	// TODO: maybe add more, like missingBooks, idk
 	let stats = db
 		._query_raw::<LibrariesStats>(raw!(
-			"SELECT COUNT(*) as bookCount, SUM(media.size) as totalBytes, seriesCount FROM media INNER JOIN (SELECT COUNT(*) as seriesCount FROM series)"
+			"SELECT COUNT(*) as bookCount, IFNULL(SUM(media.size),0) as totalBytes, IFNULL(seriesCount,0) as seriesCount FROM media INNER JOIN (SELECT COUNT(*) as seriesCount FROM series)"
 		))
 		.await?
 		.into_iter()

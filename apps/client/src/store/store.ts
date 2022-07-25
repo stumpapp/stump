@@ -3,8 +3,8 @@ import create, { GetState, SetState, StateCreator, StoreApi, UseBoundStore } fro
 import createContext from 'zustand/context';
 import { devtools, persist } from 'zustand/middleware';
 
-// TODO: remove zustand, at this point I really don't think I need it in combination with
-// react-query.
+// TODO: remove *most* of what I use zustand for. I'm happy keeping a little bit of
+// it as it simplifies some of my life.
 
 // FIXME: these will need to query the DB... which is kinda annoying lol
 // unless I split userPreferences up somehow between database persisted things

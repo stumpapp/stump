@@ -1,3 +1,4 @@
+import { Library, PageInfo } from '@stump/core';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
@@ -9,7 +10,7 @@ export function useLibraries() {
 		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
 	});
 
-	const { libraries, pageData } = useMemo(() => {
+	const { libraries, pageData } = useMemo<{ libraries: Library[]; pageData?: PageInfo }>(() => {
 		if (data?.data) {
 			return {
 				libraries: data.data.data,
@@ -17,13 +18,14 @@ export function useLibraries() {
 			};
 		}
 
-		return {};
+		return { libraries: [] };
 	}, [data]);
 
 	console.log({ libraries });
 
 	return {
 		libraries,
+		pageData,
 		...rest,
 	};
 }

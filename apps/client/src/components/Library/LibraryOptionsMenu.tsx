@@ -15,7 +15,7 @@ interface Props {
 }
 
 export default function LibraryOptionsMenu({ library }: Props) {
-	const user = useUser();
+	const { user } = useUser();
 
 	const { mutate: scan } = useMutation(['scanLibary'], { mutationFn: scanLibary });
 

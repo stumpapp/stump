@@ -1,17 +1,18 @@
-import React from 'react';
-import { FormControl, FormLabel } from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { FieldValues, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useLocale } from '~hooks/useLocale';
+import { useUser } from '~hooks/useUser';
 import Button from '~ui/Button';
 import Form from '~ui/Form';
 import Input, { PasswordInput } from '~ui/Input';
-import { useLocale } from '~hooks/useLocale';
-import { useUser } from '~hooks/useUser';
+
+import { FormControl, FormLabel } from '@chakra-ui/react';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import SettingsFormContainer from '../SettingsFormContainer';
 
 export default function ProfileForm() {
-	const user = useUser();
+	const { user } = useUser();
 	const { t } = useLocale();
 
 	if (!user) {

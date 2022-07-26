@@ -23,6 +23,7 @@ import TextArea from '~ui/TextArea';
 import { TagOption } from '~hooks/useTags';
 import { useStore } from '~store/store';
 import { Library } from '@stump/core';
+import { useLibraries } from '~hooks/useLibraries';
 
 interface Props {
 	tags: TagOption[];
@@ -37,7 +38,8 @@ interface Props {
  * It is not intended to be used outside of those components.
  */
 export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, library }: Props) {
-	const libraries = useStore((state) => state.libraries);
+	// const libraries = useStore((state) => state.libraries);
+	const { libraries } = useLibraries();
 
 	const schema = z.object({
 		name: z

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { Navigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -46,10 +46,7 @@ export default function Login() {
 		}
 	}, [claimCheck]);
 
-	const { user, setUserAndPreferences } = useStore(
-		({ user, setUserAndPreferences }) => ({ user, setUserAndPreferences }),
-		shallow,
-	);
+	const { user, setUser } = useStore(({ user, setUser }) => ({ user, setUser }), shallow);
 
 	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation(['loginUser'], {
 		mutationFn: login,
@@ -60,7 +57,7 @@ export default function Login() {
 
 			client.invalidateQueries(['getLibraries']);
 
-			setUserAndPreferences(res.data);
+			setUser(res.data);
 		},
 		onError: (err) => {
 			// TODO: handle this error

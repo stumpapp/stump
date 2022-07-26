@@ -1,3 +1,7 @@
+import { SortAscending, SortDescending } from 'phosphor-react';
+import { useState } from 'react';
+import Button from '~ui/Button';
+
 import {
 	ButtonGroup,
 	Menu,
@@ -6,9 +10,6 @@ import {
 	MenuList,
 	useColorModeValue,
 } from '@chakra-ui/react';
-import { SortAscending, SortDescending } from 'phosphor-react';
-import React, { useState } from 'react';
-import Button from '~ui/Button';
 
 interface SortConfigProps {}
 

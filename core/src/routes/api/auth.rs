@@ -16,11 +16,28 @@ use crate::{
 /// Attempts to grab the user from the session.
 #[openapi(tag = "Auth")]
 #[get("/auth/me")]
-pub async fn me(session: Session<'_>, _auth: Auth) -> Option<Json<AuthenticatedUser>> {
-	match session.get().await.expect("Session error") {
-		Some(user) => Some(Json(user)),
-		_ => None,
-	}
+pub async fn me(
+	ctx: &Context,
+	_session: Session<'_>,
+	auth: Auth,
+) -> ApiResult<Json<Option<AuthenticatedUser>>> {
+	let db = ctx.get_db();
+
+	// FIXME: I am querying here because I need the most up to date preferences... I need to
+	// decide if I should update the session each time the preferences/user gets updated!
+	Ok(Json(
+		db.user()
+			.find_unique(user::id::equals(auth.0.id))
+			.with(user::user_preferences::fetch())
+			.exec()
+			.await?
+			.map(|u| u.into()),
+	))
+
+	// match session.get().await.expect("Session error") {
+	// 	Some(user) => Some(Json(user)),
+	// 	_ => None,
+	// }
 }
 
 /// Attempt to login a user. On success, a session is created and the user is returned.

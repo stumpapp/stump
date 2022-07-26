@@ -93,18 +93,20 @@ pub async fn update_user() {
 #[get("/users/<id>/preferences")]
 pub async fn get_user_preferences(
 	id: String,
-	// ctx: &Context,
-	auth: Auth,
+	ctx: &Context,
+	_auth: Auth,
 ) -> ApiResult<Json<UserPreferences>> {
-	let user_preferences = auth.0.preferences;
+	let db = ctx.get_db();
+	// let user_preferences = auth.0.preferences;
 
 	Ok(Json(
-		// db.user_preferences()
-		// 	.find_unique(user_preferences::id::equals(user_preferences.id.clone()))
-		// 	.exec()
-		// 	.await?
-		// 	.map(|p| p.into()),
-		user_preferences,
+		db.user_preferences()
+			.find_unique(user_preferences::id::equals(id.clone()))
+			.exec()
+			.await?
+			.expect("Failed to fetch user preferences")
+			.into(), // .map(|p| p.into()),
+		          // user_preferences,
 	))
 }
 

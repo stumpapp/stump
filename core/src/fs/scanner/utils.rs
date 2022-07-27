@@ -3,7 +3,7 @@ use prisma_client_rust::{raw, PrismaValue};
 use walkdir::DirEntry;
 
 use crate::{
-	config::context::Context,
+	config::context::Ctx,
 	fs::media_file,
 	prisma::{library, media, series},
 	types::{
@@ -17,7 +17,7 @@ use crate::{
 /// series and series.media relations to have been loaded to function properly.
 pub async fn mark_library_missing(
 	library: library::Data,
-	ctx: &Context,
+	ctx: &Ctx,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 
@@ -52,7 +52,7 @@ pub async fn mark_library_missing(
 }
 
 pub async fn insert_media(
-	ctx: &Context,
+	ctx: &Ctx,
 	entry: &DirEntry,
 	series_id: String,
 ) -> Result<media::Data, ScanError> {
@@ -104,7 +104,7 @@ pub async fn insert_media(
 }
 
 pub async fn insert_series(
-	ctx: &Context,
+	ctx: &Ctx,
 	entry: &DirEntry,
 	library_id: String,
 ) -> Result<series::Data, ScanError> {
@@ -150,7 +150,7 @@ pub async fn insert_series(
 }
 
 pub async fn insert_series_many(
-	ctx: &Context,
+	ctx: &Ctx,
 	entries: Vec<DirEntry>,
 	library_id: String,
 ) -> Vec<series::Data> {

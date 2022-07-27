@@ -6,7 +6,7 @@ use crate::{
 	guards::auth::Auth,
 	prisma::tag,
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		models::tag::Tag,
 	},
 };
@@ -15,7 +15,7 @@ use crate::{
 /// not grouped by the items which they belong to.
 #[openapi(tag = "Tag")]
 #[get("/tags")]
-pub async fn get_tags(ctx: &Context, _auth: Auth) -> ApiResult<Json<Vec<Tag>>> {
+pub async fn get_tags(ctx: &Ctx, _auth: Auth) -> ApiResult<Json<Vec<Tag>>> {
 	let db = ctx.get_db();
 
 	Ok(Json(
@@ -38,7 +38,7 @@ pub struct CreateTags {
 #[post("/tags", format = "application/json", data = "<input>")]
 pub async fn create_tags(
 	input: Json<CreateTags>,
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth,
 ) -> ApiResult<Json<Vec<Tag>>> {
 	let db = ctx.get_db();

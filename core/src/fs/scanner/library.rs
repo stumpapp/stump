@@ -11,7 +11,7 @@ use std::{
 use walkdir::WalkDir;
 
 use crate::{
-	config::context::Context,
+	config::context::Ctx,
 	fs::scanner::ScannedFileTrait,
 	prisma::{library, media, series},
 	types::{errors::ApiError, event::ClientEvent},
@@ -20,7 +20,7 @@ use crate::{
 use super::utils::mark_library_missing;
 
 async fn precheck(
-	ctx: &Context,
+	ctx: &Ctx,
 	path: String,
 ) -> Result<(library::Data, Vec<series::Data>, u64), ApiError> {
 	let db = ctx.get_db();
@@ -117,7 +117,7 @@ async fn precheck(
 }
 
 async fn scan_series(
-	ctx: Context,
+	ctx: Ctx,
 	series: series::Data,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) {
@@ -225,7 +225,7 @@ async fn scan_series(
 // - maybe create a TentativeMedia struct that scan_path returns? OR just the paths + series.id?
 // grab the media before scan_path then block thread for the inserstions?
 pub async fn scan_concurrent(
-	ctx: Context,
+	ctx: Ctx,
 	path: String,
 	_runner_id: String,
 ) -> Result<(), ApiError> {
@@ -268,7 +268,7 @@ pub async fn scan_concurrent(
 }
 
 pub async fn scan_sync(
-	ctx: Context,
+	ctx: Ctx,
 	path: String,
 	runner_id: String,
 ) -> Result<(), ApiError> {
@@ -320,7 +320,7 @@ mod tests {
 
 	#[tokio::test(flavor = "multi_thread")]
 	async fn scan_concurrent() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let start = std::time::Instant::now();
 		super::scan_concurrent(
@@ -342,7 +342,7 @@ mod tests {
 
 	#[tokio::test(flavor = "multi_thread")]
 	async fn scan_sync() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let start = std::time::Instant::now();
 		super::scan_sync(

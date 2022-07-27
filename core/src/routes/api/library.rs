@@ -16,7 +16,7 @@ use crate::{
 		tag,
 	},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::ImageResponse,
 		models::{
@@ -36,7 +36,7 @@ use crate::{
 pub async fn get_libraries(
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let db = ctx.get_db();
@@ -64,7 +64,7 @@ pub async fn get_libraries(
 #[openapi(tag = "Library")]
 #[get("/libraries/stats")]
 pub async fn get_libraries_stats(
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth,
 ) -> ApiResult<Json<LibrariesStats>> {
 	let db = ctx.get_db();
@@ -93,7 +93,7 @@ pub async fn get_libraries_stats(
 #[get("/libraries/<id>")]
 pub async fn get_library_by_id(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -131,7 +131,7 @@ pub async fn get_library_series(
 	id: String,
 	unpaged: Option<bool>,
 	req_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	// auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
@@ -181,7 +181,7 @@ pub async fn get_library_series(
 #[get("/libraries/<id>/thumbnail")]
 pub async fn get_library_thumbnail(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -208,7 +208,7 @@ pub async fn get_library_thumbnail(
 #[get("/libraries/<id>/scan")]
 pub async fn scan_library(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth, TODO: uncomment
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
@@ -256,7 +256,7 @@ pub struct CreateLibrary {
 #[post("/libraries", data = "<input>")]
 pub async fn create_library(
 	input: Json<CreateLibrary>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -329,7 +329,7 @@ pub struct UpdateLibrary {
 pub async fn update_library(
 	id: String,
 	input: Json<UpdateLibrary>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: AdminGuard,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -433,7 +433,7 @@ pub async fn update_library(
 #[delete("/libraries/<id>")]
 pub async fn delete_library(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();

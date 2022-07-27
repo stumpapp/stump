@@ -11,7 +11,7 @@ use crate::{
 		read_progress, user,
 	},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::{FileResponse, ImageResponse},
 		models::{media::Media, read_progress::ReadProgress},
@@ -27,7 +27,7 @@ use crate::{
 pub async fn get_media(
 	unpaged: Option<bool>,
 	req_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
@@ -77,7 +77,7 @@ pub async fn get_media(
 pub async fn get_duplicate_media(
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
@@ -101,7 +101,7 @@ pub async fn get_duplicate_media(
 /// total number of pages available (i.e not completed).
 #[openapi(tag = "Media")]
 #[get("/media/keep-reading")]
-pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
+pub async fn get_reading_media(ctx: &Ctx, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
 	let db = ctx.get_db();
 
 	Ok(Json(
@@ -147,7 +147,7 @@ pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<
 #[get("/media/<id>")]
 pub async fn get_media_by_id(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Media>> {
 	let db = ctx.get_db();
@@ -175,7 +175,7 @@ pub async fn get_media_by_id(
 #[get("/media/<id>/file")]
 pub async fn get_media_file(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<FileResponse> {
 	let db = ctx.get_db();
@@ -207,7 +207,7 @@ pub async fn get_media_file(
 #[post("/media/<id>/convert")]
 pub async fn convert_media_to_cbz(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
@@ -243,7 +243,7 @@ pub async fn convert_media_to_cbz(
 pub async fn get_media_page(
 	id: String,
 	page: i32,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -280,7 +280,7 @@ pub async fn get_media_page(
 #[get("/media/<id>/thumbnail")]
 pub async fn get_media_thumbnail(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -312,7 +312,7 @@ pub async fn get_media_thumbnail(
 pub async fn update_media_progress(
 	id: String,
 	page: i32,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<ReadProgress>> {
 	let db = ctx.get_db();

@@ -1,7 +1,7 @@
 use super::Job;
 
 use crate::{
-	config::context::Context, fs::scanner::library::scan_sync as scan,
+	config::context::Ctx, fs::scanner::library::scan_sync as scan,
 	types::errors::ApiError,
 };
 
@@ -12,7 +12,7 @@ pub struct LibraryScannerJob {
 
 #[async_trait::async_trait]
 impl Job for LibraryScannerJob {
-	async fn run(&self, runner_id: String, ctx: Context) -> Result<(), ApiError> {
+	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError> {
 		let start = std::time::Instant::now();
 		scan(ctx, self.path.clone(), runner_id.clone()).await?;
 		let duration = start.elapsed();

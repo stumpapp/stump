@@ -17,17 +17,17 @@ type TaskSender = UnboundedSender<TaskResponder<InternalTask>>;
 
 type ClientChannel = (Sender<ClientEvent>, Receiver<ClientEvent>);
 
-pub struct Context {
+pub struct Ctx {
 	pub db: Arc<prisma::PrismaClient>,
 	pub event_sender: Arc<EventSender>,
 	pub task_sender: Arc<TaskSender>,
 	pub client_channel: Arc<ClientChannel>,
 }
 
-/// Context each request will be provided with.
-impl Context {
-	pub async fn new(event_sender: EventSender, task_sender: TaskSender) -> Context {
-		Context {
+/// Ctx each request will be provided with.
+impl Ctx {
+	pub async fn new(event_sender: EventSender, task_sender: TaskSender) -> Ctx {
+		Ctx {
 			db: Arc::new(db::create_client().await),
 			event_sender: Arc::new(event_sender),
 			task_sender: Arc::new(task_sender),
@@ -35,8 +35,8 @@ impl Context {
 		}
 	}
 
-	pub async fn mock() -> Context {
-		Context {
+	pub async fn mock() -> Ctx {
+		Ctx {
 			db: Arc::new(db::create_client().await),
 			event_sender: Arc::new(unbounded_channel::<InternalEvent>().0),
 			task_sender: Arc::new(unbounded_channel::<TaskResponder<InternalTask>>().0),
@@ -48,8 +48,8 @@ impl Context {
 		&self.db
 	}
 
-	pub fn get_ctx(&self) -> Context {
-		Context {
+	pub fn get_ctx(&self) -> Ctx {
+		Ctx {
 			db: self.db.clone(),
 			event_sender: self.event_sender.clone(),
 			task_sender: self.task_sender.clone(),

@@ -4,7 +4,7 @@ use serde::Serialize;
 
 use crate::{
 	guards::auth::AdminGuard,
-	types::alias::{ApiResult, Context},
+	types::alias::{ApiResult, Ctx},
 };
 
 pub mod auth;
@@ -88,7 +88,7 @@ struct ClaimResponse {
 /// Checks whether or not the server is 'claimed,' i.e. if there is a user registered.
 #[openapi(tag = "Setup")]
 #[get("/claim")]
-async fn claim(ctx: &Context) -> ApiResult<Json<ClaimResponse>> {
+async fn claim(ctx: &Ctx) -> ApiResult<Json<ClaimResponse>> {
 	let db = ctx.get_db();
 
 	Ok(Json(ClaimResponse {

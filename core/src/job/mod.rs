@@ -1,11 +1,12 @@
 pub mod jobs;
+pub mod pool;
 pub mod runner;
 
 use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{config::context::Context, types::errors::ApiError};
+use crate::{config::context::Ctx, types::errors::ApiError};
 
 // This entire `job` crate was *heavily* inspired by the `job` crate from spacedrive.
 // https://github.com/spacedriveapp/spacedrive/tree/main/core/src/job
@@ -36,5 +37,5 @@ pub struct JobUpdate {
 
 #[async_trait::async_trait]
 pub trait Job: Send + Sync + Debug {
-	async fn run(&self, runner_id: String, ctx: Context) -> Result<(), ApiError>;
+	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError>;
 }

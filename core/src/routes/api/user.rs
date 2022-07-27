@@ -5,7 +5,7 @@ use crate::{
 	guards::auth::{AdminGuard, Auth},
 	prisma::{user, user_preferences},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		models::{
 			user::{User, UserPreferences, UserPreferencesUpdate},
 			LoginRequest,
@@ -16,7 +16,7 @@ use crate::{
 
 #[openapi(tag = "User")]
 #[get("/users")]
-pub async fn get_users(ctx: &Context, _auth: AdminGuard) -> ApiResult<Json<Vec<User>>> {
+pub async fn get_users(ctx: &Ctx, _auth: AdminGuard) -> ApiResult<Json<Vec<User>>> {
 	Ok(Json(
 		ctx.db
 			.user()
@@ -32,7 +32,7 @@ pub async fn get_users(ctx: &Context, _auth: AdminGuard) -> ApiResult<Json<Vec<U
 #[openapi(tag = "User")]
 #[post("/users", data = "<credentials>")]
 pub async fn create_user(
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: AdminGuard,
 	credentials: Json<LoginRequest>,
 ) -> ApiResult<Json<User>> {
@@ -93,7 +93,7 @@ pub async fn update_user() {
 #[get("/users/<id>/preferences")]
 pub async fn get_user_preferences(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
@@ -127,7 +127,7 @@ pub async fn get_user_preferences(
 pub async fn update_user_preferences(
 	id: String,
 	input: Json<UserPreferencesUpdate>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Option<UserPreferences>>> {
 	let db = ctx.get_db();

@@ -1,7 +1,7 @@
 use rocket::tokio::{self, sync::mpsc::UnboundedReceiver};
 
 use crate::{
-	config::context::Context,
+	config::context::Ctx,
 	job::jobs::Jobs,
 	types::event::{
 		ClientEvent, InternalEvent, InternalTask, TaskResponder, TaskResponse,
@@ -12,12 +12,12 @@ type EventReceiver = UnboundedReceiver<InternalEvent>;
 type TaskReceiver = UnboundedReceiver<TaskResponder<InternalTask>>;
 
 pub struct EventManager {
-	ctx: Context,
+	ctx: Ctx,
 	jobs: Jobs,
 }
 
 impl EventManager {
-	pub fn new(ctx: Context) -> EventManager {
+	pub fn new(ctx: Ctx) -> EventManager {
 		EventManager {
 			ctx,
 			jobs: Jobs::new(),

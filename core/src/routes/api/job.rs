@@ -11,7 +11,7 @@ use rocket::{
 use rocket_okapi::openapi;
 
 use crate::types::{
-	alias::{ApiResult, Context},
+	alias::{ApiResult, Ctx},
 	errors::ApiError,
 	event::{InternalTask, TaskResponder, TaskResponse},
 };
@@ -20,7 +20,7 @@ use crate::types::{
 
 /// Get all running/pending jobs.
 #[get("/jobs")]
-pub async fn get_jobs(ctx: &Context) -> ApiResult<Json<TaskResponse>> {
+pub async fn get_jobs(ctx: &Ctx) -> ApiResult<Json<TaskResponse>> {
 	let (sender, recv) = oneshot::channel();
 
 	ctx.emit_task(TaskResponder {
@@ -40,7 +40,7 @@ pub async fn get_jobs(ctx: &Context) -> ApiResult<Json<TaskResponse>> {
 #[openapi(tag = "Job")]
 #[get("/jobs/listen")]
 pub async fn jobs_listener(
-	ctx: &Context,
+	ctx: &Ctx,
 	mut end: Shutdown,
 ) -> EventStream<impl Stream<Item = Event>> {
 	let mut rx = ctx.client_receiver();

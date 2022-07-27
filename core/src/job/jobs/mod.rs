@@ -4,7 +4,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use rocket::tokio::sync::Mutex;
 
-use crate::config::context::Context;
+use crate::config::context::Ctx;
 
 use super::{runner::Runner, Job};
 
@@ -29,21 +29,23 @@ impl Jobs {
 	// 	None
 	// }
 
-	pub async fn enqueue(&mut self, job: Box<dyn Job>, ctx: Context) {
+	pub async fn enqueue(&mut self, job: Box<dyn Job>, ctx: Ctx) {
 		let runner = Runner::new(job);
 		let runner_id = runner.id.clone();
 
-		if self.queue.len() < 2 {
-			let runner = Arc::new(Mutex::new(runner));
+		unimplemented!()
 
-			Runner::spawn(runner.clone(), ctx).await;
+		// if self.queue.len() < 2 {
+		// 	let runner = Arc::new(Mutex::new(runner));
 
-			self.queue.insert(runner_id, runner);
-		} else {
-			// println!("queue is full");
-			// panic!("queue is full");
-			// let _ = ctx.emit_client_event("job_queue_full".to_string());
-		}
+		// 	Runner::spawn(runner.clone(), ctx).await;
+
+		// 	self.queue.insert(runner_id, runner);
+		// } else {
+		// 	// println!("queue is full");
+		// 	// panic!("queue is full");
+		// 	// let _ = ctx.emit_client_event("job_queue_full".to_string());
+		// }
 	}
 
 	pub fn dequeue(&mut self, runner_id: String) {

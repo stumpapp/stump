@@ -3,7 +3,7 @@ extern crate rocket;
 
 use db::migration::run_migrations;
 
-use config::{context::Context, cors, env, helmet::Helmet, logging, session};
+use config::{context::Ctx, cors, env, helmet::Helmet, logging, session};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
@@ -68,7 +68,7 @@ async fn rocket() -> _ {
 	let task_channel = unbounded_channel::<TaskResponder<InternalTask>>();
 
 	// Ownership will be transferred to the background thread.
-	let core_ctx = Context::new(event_channel.0.clone(), task_channel.0.clone()).await;
+	let core_ctx = Ctx::new(event_channel.0.clone(), task_channel.0.clone()).await;
 
 	// Context clone that will be managed by Rocket
 	let route_ctx = core_ctx.get_ctx();

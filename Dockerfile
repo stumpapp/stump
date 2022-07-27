@@ -94,9 +94,12 @@ FROM alpine:latest
 # TODO: remove binutils, adding for debug options
 RUN apk add --no-cache libstdc++ binutils libc6-compat
 
+# Create the user/group for stump
 RUN addgroup -g 1000 stump
-
 RUN adduser -D -s /bin/sh -u 1000 -G stump stump
+
+# Set user so every command following will be executed as stump user
+USER stump
 
 WORKDIR /
 
@@ -115,8 +118,6 @@ COPY --from=frontend /app/build ./app/client
 COPY core/Rocket.toml ./app/Rocket.toml
 
 RUN chown stump:stump ./app/stump
-
-USER stump
 
 # TODO: replace this with something more elegant lol maybe a bash case statement
 RUN ln -s /lib/ld-musl-aarch64.so.1 /lib/ld-linux-aarch64.so.1; exit 0

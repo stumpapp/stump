@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react';
 import {
 	Box,
@@ -54,19 +54,19 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 				color={
 					isDisabled
 						? useColorModeValue('gray.300', 'gray.500')
-						: useColorModeValue('gray.500', 'gray.300')
+						: useColorModeValue('gray.600', 'gray.300')
 				}
-				_hover={{ borderColor: useColorModeValue('gray.600', 'gray.600') }}
+				_hover={{ borderColor: useColorModeValue('gray.300', 'gray.600') }}
 			>
 				{kind === 'previous' ? (
 					<>
-						<ArrowLeft className="mr-3 h-4 w-4 md:h-5 md:w-5 text-gray-400" aria-hidden="true" />
+						<ArrowLeft className="mr-3 h-4 w-4 md:h-5 md:w-5 text-gray-600" aria-hidden="true" />
 						Previous
 					</>
 				) : (
 					<>
 						Next
-						<ArrowRight className="ml-3 h-4 w-4 md:h-5 md:w-5 text-gray-400" aria-hidden="true" />
+						<ArrowRight className="ml-3 h-4 w-4 md:h-5 md:w-5 text-gray-600" aria-hidden="true" />
 					</>
 				)}
 			</Box>
@@ -88,7 +88,7 @@ function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
 			pt={4}
 			px={4}
 			fontSize={{ base: 'xs', md: 'sm' }}
-			color={isActive ? 'brand.500' : useColorModeValue('gray.500', 'gray.300')}
+			color={isActive ? 'brand.500' : useColorModeValue('gray.550', 'gray.300')}
 			borderColor={isActive ? 'brand.500' : 'transparent'}
 			_hover={{
 				borderColor: isActive ? 'brand.500' : useColorModeValue('gray.300', 'gray.600'),
@@ -157,12 +157,12 @@ function PaginationEllipsis({ listId, position, pages, onNavigate }: PaginationE
 					as={'button'}
 					pt={4}
 					px={4}
-					className="text-sm font-medium inline-flex items-center cursor-pointer"
+					className="text-sm font-medium inline-flex items-center cursor-pointer focus:outline-none active:outline-none"
 				>
 					<DotsThree />
 				</Box>
 			</PopoverTrigger>
-			<PopoverContent borderColor="gray.650">
+			<PopoverContent borderColor={useColorModeValue('gray.200', 'gray.650')}>
 				<PopoverHeader pt={4} fontWeight="bold" border="0">
 					Go to page
 				</PopoverHeader>

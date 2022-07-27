@@ -91,8 +91,8 @@ FROM ${TARGETARCH}-backend AS core-builder
 # ------------------------------------------------------------------------------
 FROM alpine:latest
 
-# TODO: remove binutils, adding for debug options
-RUN apk add --no-cache libstdc++ binutils libc6-compat
+# libc6-compat
+RUN apk add --no-cache libstdc++ binutils
 
 # Create the user/group for stump
 RUN addgroup -g 1000 stump
@@ -109,15 +109,13 @@ RUN mkdir -p data
 RUN mkdir -p app
 
 # copy the binary
-COPY --from=core-builder /app/stump ./app/stump
+COPY --chown=stump:stump--from=core-builder /app/stump ./app/stump
 
 # copy the react build
 COPY --from=frontend /app/build ./app/client
 
 # *sigh* Rocket requires the toml file at runtime, at CWD
 COPY core/Rocket.toml ./app/Rocket.toml
-
-RUN chown stump:stump ./app/stump
 
 # TODO: replace this with something more elegant lol maybe a bash case statement
 RUN ln -s /lib/ld-musl-aarch64.so.1 /lib/ld-linux-aarch64.so.1; exit 0

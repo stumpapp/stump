@@ -44,10 +44,10 @@ impl JobPool {
 		pool
 	}
 
-	pub async fn enqueue_job(self: Arc<Self>, ctx: &Ctx, mut job: Box<dyn Job>) {
+	pub async fn enqueue_job(self: Arc<Self>, ctx: &Ctx, job: Box<dyn Job>) {
 		let mut job_runners = self.job_runners.write().await;
 
-		if job_runners.len() == 0 {
+		if job_runners.is_empty() {
 			let runner = Runner::new(job);
 			let runner_id = runner.id.clone();
 

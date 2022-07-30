@@ -1,6 +1,7 @@
 use rocket::{
 	http::Status,
 	response::{self, Responder},
+	tokio::sync::mpsc,
 	Request, Response,
 };
 use rocket_okapi::{
@@ -13,6 +14,8 @@ use serde::Serialize;
 use std::io::Cursor;
 use thiserror::Error;
 use zip::result::ZipError;
+
+use crate::event::ClientRequest;
 
 #[derive(Error, Debug)]
 pub enum ProcessFileError {
@@ -267,6 +270,12 @@ impl From<std::io::Error> for ApiError {
 impl From<bcrypt::BcryptError> for ApiError {
 	fn from(error: bcrypt::BcryptError) -> ApiError {
 		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<mpsc::error::SendError<ClientRequest>> for ApiError {
+	fn from(err: mpsc::error::SendError<ClientRequest>) -> Self {
+		ApiError::InternalServerError(err.to_string())
 	}
 }
 

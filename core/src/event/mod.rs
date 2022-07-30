@@ -1,4 +1,5 @@
-use rocket::tokio::sync::oneshot;
+pub mod event_manager;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -6,25 +7,12 @@ use crate::{
 	prisma,
 };
 
-use super::errors::ApiError;
-
 #[derive(Debug)]
-pub enum InternalEvent {
-	QueueJob(Box<dyn Job>),
-	JobComplete(String),
-	JobFailed(String, ApiError),
-}
 
-#[derive(Serialize, Deserialize, Debug)]
-pub enum InternalTask {
+pub enum ClientRequest {
+	QueueJob(Box<dyn Job>),
 	GetRunningJob,
 	GetQueuedJobs,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum TaskResponse {
-	GetRunningJob(String),
-	GetQueuedJobs(String),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -32,6 +20,7 @@ pub enum ClientEvent {
 	JobStarted(JobUpdate),
 	JobProgress(JobUpdate),
 	JobComplete(String),
+	// FIXME: don't use tuple
 	JobFailed((String, String)),
 	CreatedMedia(prisma::media::Data),
 	CreatedSeries(prisma::series::Data),
@@ -67,10 +56,4 @@ impl ClientEvent {
 			status: Some(JobStatus::Running),
 		})
 	}
-}
-
-#[derive(Debug)]
-pub struct TaskResponder<D, R = Result<TaskResponse, ApiError>> {
-	pub task: D,
-	pub return_sender: oneshot::Sender<R>,
 }

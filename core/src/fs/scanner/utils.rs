@@ -4,11 +4,11 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::context::Ctx,
+	event::ClientEvent,
 	fs::media_file,
 	prisma::{library, media, series},
 	types::{
 		errors::{ApiError, ScanError},
-		event::ClientEvent,
 		models::MediaMetadata,
 	},
 };

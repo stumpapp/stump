@@ -12,9 +12,10 @@ use walkdir::WalkDir;
 
 use crate::{
 	config::context::Ctx,
+	event::ClientEvent,
 	fs::scanner::ScannedFileTrait,
 	prisma::{library, media, series},
-	types::{errors::ApiError, event::ClientEvent},
+	types::errors::ApiError,
 };
 
 use super::utils::mark_library_missing;

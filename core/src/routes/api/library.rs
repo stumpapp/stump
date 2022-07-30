@@ -9,7 +9,7 @@ use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs,
 	guards::auth::{AdminGuard, Auth},
-	job::jobs::scan::LibraryScannerJob,
+	job::library_scan::LibraryScannerJob,
 	prisma::{
 		library, media,
 		series::{self, OrderByParam},
@@ -232,9 +232,7 @@ pub async fn scan_library(
 		path: lib.path.clone(),
 	};
 
-	ctx.spawn_job(Box::new(job));
-
-	Ok(())
+	Ok(ctx.spawn_job(Box::new(job))?)
 }
 
 #[derive(Deserialize, JsonSchema)]
@@ -299,7 +297,7 @@ pub async fn create_library(
 	if input.scan.unwrap_or(true) {
 		ctx.spawn_job(Box::new(LibraryScannerJob {
 			path: lib.path.clone(),
-		}));
+		}))?;
 	}
 
 	Ok(Json(lib.into()))
@@ -422,7 +420,7 @@ pub async fn update_library(
 	if input.scan.unwrap_or(true) {
 		ctx.spawn_job(Box::new(LibraryScannerJob {
 			path: updated.path.clone(),
-		}));
+		}))?;
 	}
 
 	Ok(Json(updated.into()))

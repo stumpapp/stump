@@ -3,7 +3,13 @@ extern crate rocket;
 
 use db::migration::run_migrations;
 
-use config::{context::Ctx, cors, env, helmet::Helmet, logging, session};
+use config::{
+	context::Ctx,
+	cors, env,
+	helmet::Helmet,
+	logging::{self, STUMP_SHADOW_TEXT},
+	session,
+};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::{self, sync::mpsc::unbounded_channel},
@@ -88,6 +94,8 @@ async fn rocket() -> _ {
 			.run(event_channel.1, task_channel.1)
 			.await;
 	});
+
+	log::info!("{}", STUMP_SHADOW_TEXT);
 
 	rocket::build()
 		.manage(route_ctx.get_ctx())

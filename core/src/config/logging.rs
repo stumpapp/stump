@@ -4,10 +4,11 @@ use prisma_client_rust::chrono;
 
 use super::get_config_dir;
 
+pub const STUMP_SHADOW_TEXT: &str = include_str!("stump_shadow_text.txt");
+
 pub fn get_log_file() -> PathBuf {
 	get_config_dir().join("Stump.log")
 }
-
 // TODO: change default back to 0
 // FIXME: use toml
 pub fn get_log_verbosity() -> u64 {

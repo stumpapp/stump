@@ -11,4 +11,8 @@ You can contribute by opening new issues or PRs. Please do not drop random PRs w
 7. Once you add your contributions, create a PR from your feature branch into `develop` - _not_ `main`.
 8. Be sure to update your feature branch with any new changes **before** making the PR.
 
+Before making the PR, please consider the following:
+
+- Please only submit **meaningful** changes. Grammar fixes, such as README updates, are okay, but should be more substantiative than a few corrections.
+
 Thanks for contributing to my project!!

@@ -21,7 +21,6 @@ impl EventManager {
 
 		let this_cpy = this.clone();
 		tokio::spawn(async move {
-			// let ctx = ctx.get_ctx();
 			while let Some(req) = request_reciever.recv().await {
 				match req {
 					ClientRequest::QueueJob(job) => {

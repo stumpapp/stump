@@ -241,6 +241,8 @@ model Job {
   completedAt        DateTime @default(now())
 
   logs Log[]
+
+  @@map("jobs")
 }
 
 model Log {
@@ -252,7 +254,7 @@ model Log {
   // The datetime in which the log was created. ex: "2022-04-20 04:20:69"
   createdAt DateTime @default(now())
 
-  job   Job?    @relation(fields: [jobId], references: [id])
+  job   Job?    @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId String?
 
   @@map("logs")

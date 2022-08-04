@@ -6,7 +6,10 @@ use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{config::context::Ctx, event::ClientEvent, types::errors::ApiError};
+use crate::{
+	config::context::Ctx, event::ClientEvent, prisma::job::task_count,
+	types::errors::ApiError,
+};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum JobStatus {
@@ -65,50 +68,78 @@ pub struct JobReport {
 }
 
 #[async_trait::async_trait]
-pub trait Job: Send + Sync + Debug {
+pub trait Job: Send + Sync {
+	fn kind(&self) -> &'static str;
+	fn details(&self) -> Option<&'static str>;
+
 	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError>;
 }
 
-pub async fn init_job(
+pub async fn persist_new_job(
 	ctx: &Ctx,
 	id: String,
-	kind: &str,
-	task_count: u64,
-	details: Option<String>,
-	event_message: Option<String>,
+	job: &Box<dyn Job>,
 ) -> Result<crate::prisma::job::Data, ApiError> {
 	use crate::prisma::job;
 
 	let db = ctx.get_db();
 
-	ctx.emit_client_event(ClientEvent::job_started(
-		id.clone(),
-		1,
-		task_count,
-		event_message,
-	));
-
 	Ok(db
 		.job()
 		.create(
 			job::id::set(id),
-			job::kind::set(kind.to_string()),
+			job::kind::set(job.kind().to_string()),
 			// FIXME: error handling
 			vec![
-				job::details::set(details),
-				job::task_count::set(task_count.try_into()?),
+				job::details::set(job.details().map(|d| d.into())),
+				// job::task_count::set(task_count.try_into()?),
 			],
 		)
 		.exec()
 		.await?)
 }
 
-pub async fn log_job_end(
+pub async fn persist_job_start(
+	ctx: &Ctx,
+	id: String,
+	task_count: u64,
+) -> Result<crate::prisma::job::Data, ApiError> {
+	use crate::prisma::job;
+
+	let db = ctx.get_db();
+
+	let job = db
+		.job()
+		.find_unique(job::id::equals(id.clone()))
+		.update(vec![
+			job::task_count::set(task_count.try_into()?),
+			job::status::set(JobStatus::Running.to_string()),
+		])
+		.exec()
+		.await?;
+
+	if job.is_none() {
+		return Err(ApiError::InternalServerError(format!(
+			"Error trying to update job with runner ID {}: could not find job.",
+			id
+		)));
+	}
+
+	ctx.emit_client_event(ClientEvent::job_started(
+		id.clone(),
+		1,
+		task_count,
+		Some(format!("Job {} started.", id)),
+	));
+
+	Ok(job.unwrap())
+}
+
+pub async fn persist_job_end(
 	ctx: &Ctx,
 	id: String,
 	completed_task_count: u64,
 	elapsed_seconds: u64,
-	status: JobStatus,
 ) -> Result<crate::prisma::job::Data, ApiError> {
 	use crate::prisma::job;
 
@@ -120,14 +151,14 @@ pub async fn log_job_end(
 		.update(vec![
 			job::completed_task_count::set(completed_task_count.try_into()?),
 			job::seconds_elapsed::set(elapsed_seconds.try_into()?),
-			job::status::set(status.to_string()),
+			job::status::set(JobStatus::Completed.to_string()),
 		])
 		.exec()
 		.await?;
 
 	if job.is_none() {
 		return Err(ApiError::InternalServerError(format!(
-			"Error trying to update job {}: could not find job.",
+			"Error trying to update job with runner ID {}: could not find job.",
 			id
 		)));
 	}

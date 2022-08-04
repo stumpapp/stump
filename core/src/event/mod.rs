@@ -7,7 +7,7 @@ use crate::{
 	prisma,
 };
 
-#[derive(Debug)]
+// #[derive(Debug)]
 
 pub enum ClientRequest {
 	QueueJob(Box<dyn Job>),

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{config::context::Ctx, event::ClientEvent};
 
-use super::{pool::JobPool, Job, JobUpdate};
+use super::{persist_new_job, pool::JobPool, Job, JobUpdate};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum RunnerEvent {
@@ -20,11 +20,19 @@ pub struct Runner {
 }
 
 impl Runner {
-	pub fn new(job: Box<dyn Job>) -> Self {
-		Runner {
-			id: cuid::cuid().unwrap().to_string(),
-			job: Some(job),
-		}
+	pub fn create_id() -> String {
+		cuid::cuid()
+			.expect("Failed to generate CUID for runner.")
+			.to_string()
+	}
+
+	pub async fn new(ctx: &Ctx, job: Box<dyn Job>) -> Self {
+		let id = Runner::create_id();
+
+		// FIXME: error handling
+		let _ = persist_new_job(ctx, id.clone(), &job).await;
+
+		Runner { id, job: Some(job) }
 	}
 
 	pub async fn spawn(job_pool: Arc<JobPool>, runner_arc: Arc<Mutex<Self>>, ctx: Ctx) {

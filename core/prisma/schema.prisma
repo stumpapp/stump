@@ -229,8 +229,8 @@ model Job {
   kind               String
   // The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
   details            String?
-  // The status of the job (i.e. COMPLETED, FAILED, CANCELLED). Running jobs are not persisted to DB.
-  status             String   @default("COMPLETED")
+  // The status of the job (i.e. RUNNING, COMPLETED, FAILED, CANCELLED).
+  status             String   @default("RUNNING")
   // The total number of tasks
   taskCount          Int      @default(1)
   // The total number of tasks completed (i.e. without error/failure)

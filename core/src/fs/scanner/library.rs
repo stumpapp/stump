@@ -14,7 +14,7 @@ use crate::{
 	config::context::Ctx,
 	event::ClientEvent,
 	fs::scanner::ScannedFileTrait,
-	job::init_job,
+	job::persist_job_start,
 	prisma::{library, media, series},
 	types::errors::ApiError,
 };
@@ -276,16 +276,8 @@ pub async fn scan_sync(
 ) -> Result<u64, ApiError> {
 	let (library, series, files_to_process) = precheck(&ctx, path).await?;
 
-	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
-	let _job = init_job(
-		&ctx,
-		runner_id.clone(),
-		"LibraryScan",
-		files_to_process,
-		Some(library.path.clone()),
-		Some(format!("Starting library scan at {}", &library.path)),
-	)
-	.await?;
+	// // TODO: I am not sure if jobs should fail when the job fails to persist to DB.
+	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
 	let _ = ctx.emit_client_event(ClientEvent::job_started(
 		runner_id.clone(),

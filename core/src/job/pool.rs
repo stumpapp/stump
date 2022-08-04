@@ -6,9 +6,9 @@ use std::{
 use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::config::context::Ctx;
+use crate::{config::context::Ctx, types::alias::ApiResult};
 
-use super::{runner::Runner, Job};
+use super::{runner::Runner, Job, JobReport};
 
 pub enum JobPoolEvent {
 	EnqueueJob(Ctx, Box<dyn Job>),
@@ -48,7 +48,7 @@ impl JobPool {
 		let mut job_runners = self.job_runners.write().await;
 
 		if job_runners.is_empty() {
-			let runner = Runner::new(job);
+			let runner = Runner::new(ctx, job).await;
 			let runner_id = runner.id.clone();
 
 			let runner_arc = Arc::new(Mutex::new(runner));
@@ -74,5 +74,28 @@ impl JobPool {
 					log::error!("Failed to queue next job: {}", e.to_string())
 				})
 		}
+	}
+
+	pub async fn clear_queue(self: Arc<Self>, ctx: &Ctx) {
+		self.job_queue.write().await.clear();
+	}
+
+	pub async fn report(self: Arc<Self>, ctx: &Ctx) -> ApiResult<Vec<JobReport>> {
+		use crate::prisma::job;
+
+		let db = ctx.get_db();
+		let job_runners = self.job_runners.write().await;
+
+		let runner_ids: Vec<String> =
+			job_runners.iter().map(|(id, _)| id.clone()).collect();
+
+		// note: this will really only be one job...
+		let running_jobs = db
+			.job()
+			.find_many(vec![job::id::in_vec(runner_ids)])
+			.exec()
+			.await?;
+
+		unimplemented!()
 	}
 }

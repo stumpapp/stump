@@ -1,4 +1,4 @@
-use super::{log_job_end, Job, JobStatus};
+use super::{persist_job_end, Job};
 
 use crate::{
 	config::context::Ctx, fs::scanner::library::scan_sync as scan,
@@ -12,6 +12,16 @@ pub struct LibraryScannerJob {
 
 #[async_trait::async_trait]
 impl Job for LibraryScannerJob {
+	fn kind(&self) -> &'static str {
+		"LibraryScannerJob"
+	}
+
+	// FIXME: lifetime issues here...
+	fn details(&self) -> Option<&'static str> {
+		None
+		// Some(&self.path[..])
+	}
+
 	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError> {
 		// TODO: I am unsure if I want to have the scan return completed_task, or if I
 		// should just move the time tracking and job logging to the scan entirely...
@@ -26,14 +36,7 @@ impl Job for LibraryScannerJob {
 			duration.subsec_millis()
 		);
 
-		log_job_end(
-			&ctx,
-			runner_id,
-			completed_tasks,
-			duration.as_secs(),
-			JobStatus::Completed,
-		)
-		.await?;
+		persist_job_end(&ctx, runner_id, completed_tasks, duration.as_secs()).await?;
 
 		Ok(())
 	}

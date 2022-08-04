@@ -42,7 +42,7 @@ export default function JobOverlay() {
 	const { jobs } = useStore((state) => ({ jobs: state.jobs }), shallow);
 
 	const jobShown = useMemo(() => {
-		return Object.values(jobs).find((job) => job.status === 'Running') ?? null;
+		return Object.values(jobs).find((job) => job.status.toLowerCase() === 'running') ?? null;
 	}, [jobs]);
 
 	// FIXME: this isn't a safe operation

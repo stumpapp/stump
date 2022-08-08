@@ -31,6 +31,22 @@ impl EventManager {
 							.enqueue_job(&ctx, job)
 							.await;
 					},
+					ClientRequest::GetJobReports(return_sender) => {
+						let job_report =
+							this_cpy.clone().job_pool.clone().report(&ctx).await;
+
+						// FIXME: lots...
+
+						// if job_report.is_err() {
+						// 	log::error!(
+						// 		"TODO: logging isn't enough here, but: {:?}",
+						// 		job_report.err()
+						// 	);
+						// }
+
+						// FIXME: I know, this will break.
+						let _ = return_sender.send(job_report.unwrap());
+					},
 					_ => unimplemented!("I can't do that yet!"),
 				}
 			}

@@ -2,7 +2,6 @@ import { Code, Heading, Link, Stack, Text, useBoolean } from '@chakra-ui/react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import BaseLayout from './Layouts/BaseLayout';
 
-// TODO: make pretty
 function ErrorFallback({ error }: FallbackProps) {
 	const [showMore, { toggle }] = useBoolean(false);
 
@@ -10,12 +9,11 @@ function ErrorFallback({ error }: FallbackProps) {
 		<BaseLayout>
 			<Stack mt={{ base: 12, md: 16 }} w="full" h="full" align="center">
 				<Heading as="h1" size="lg">
-					Darn, something went wrong.
+					Well, this is embarrassing...
 				</Heading>
 
 				<Text fontSize="lg" maxW="xl" textAlign="center">
-					An error occurred while attempting to complete your request. My systems detect:{' '}
-					{error.message}.{' '}
+					Something went wrong! Error: {error.message}.{' '}
 					{error.stack && (
 						<>
 							<span onClick={toggle} className="cursor-pointer text-brand-400">

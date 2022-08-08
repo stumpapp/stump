@@ -37,7 +37,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 				// throw new Error('Something went wrong.');
 				// TODO: log?
 			} else {
-				client.invalidateQueries(['getLibraries']);
+				client.invalidateQueries(['getLibraries', 'getJobReports']);
 				onClose();
 			}
 		},

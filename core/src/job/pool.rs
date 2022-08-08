@@ -6,7 +6,7 @@ use std::{
 use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::{config::context::Ctx, types::alias::ApiResult};
+use crate::{config::context::Ctx, job::JobStatus, types::alias::ApiResult};
 
 use super::{runner::Runner, Job, JobReport};
 
@@ -76,7 +76,7 @@ impl JobPool {
 		}
 	}
 
-	pub async fn clear_queue(self: Arc<Self>, ctx: &Ctx) {
+	pub async fn clear_queue(self: Arc<Self>, _ctx: &Ctx) {
 		self.job_queue.write().await.clear();
 	}
 
@@ -90,12 +90,30 @@ impl JobPool {
 			job_runners.iter().map(|(id, _)| id.clone()).collect();
 
 		// note: this will really only be one job...
-		let running_jobs = db
+		let mut jobs = db
 			.job()
 			.find_many(vec![job::id::in_vec(runner_ids)])
 			.exec()
-			.await?;
+			.await?
+			.into_iter()
+			.map(JobReport::from)
+			.collect::<Vec<JobReport>>();
 
-		unimplemented!()
+		jobs.append(
+			&mut self
+				.job_queue
+				.write()
+				.await
+				.iter()
+				.map(|job| JobReport {
+					// queued jobs do not have id yet, nor are they persisted...
+					id: None,
+					kind: job.kind().to_string(),
+					status: JobStatus::Queued,
+				})
+				.collect::<Vec<JobReport>>(),
+		);
+
+		Ok(jobs)
 	}
 }

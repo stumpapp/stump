@@ -307,6 +307,7 @@ pub async fn scan_sync(
 		.await;
 	}
 
+	// FIXME: adding 1??
 	Ok(counter.fetch_add(0, Ordering::SeqCst))
 }
 

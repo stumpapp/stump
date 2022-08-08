@@ -1,18 +1,20 @@
 pub mod event_manager;
 
+use rocket::tokio::sync::oneshot;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	job::{Job, JobStatus, JobUpdate},
+	job::{Job, JobReport, JobStatus, JobUpdate},
 	prisma,
 };
 
-// #[derive(Debug)]
-
 pub enum ClientRequest {
 	QueueJob(Box<dyn Job>),
-	GetRunningJob,
-	GetQueuedJobs,
+	GetJobReports(oneshot::Sender<Vec<JobReport>>),
+}
+
+pub enum ClientResponse {
+	GetJobReports(Vec<JobReport>),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

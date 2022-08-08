@@ -4,17 +4,22 @@ pub mod runner;
 
 use std::fmt::Debug;
 
+use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	config::context::Ctx, event::ClientEvent, prisma::job::task_count,
+	config::context::Ctx,
+	event::ClientEvent,
+	prisma::{self},
 	types::errors::ApiError,
 };
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema)]
 pub enum JobStatus {
 	#[serde(rename = "RUNNING")]
 	Running,
+	#[serde(rename = "QUEUED")]
+	Queued,
 	#[serde(rename = "COMPLETED")]
 	Completed,
 	#[serde(rename = "CANCELLED")]
@@ -27,9 +32,23 @@ impl std::fmt::Display for JobStatus {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			JobStatus::Running => write!(f, "RUNNING"),
+			JobStatus::Queued => write!(f, "QUEUED"),
 			JobStatus::Completed => write!(f, "COMPLETED"),
 			JobStatus::Cancelled => write!(f, "CANCELLED"),
 			JobStatus::Failed => write!(f, "FAILED"),
+		}
+	}
+}
+
+impl From<&str> for JobStatus {
+	fn from(s: &str) -> Self {
+		match s {
+			"RUNNING" => JobStatus::Running,
+			"QUEUED" => JobStatus::Queued,
+			"COMPLETED" => JobStatus::Completed,
+			"CANCELLED" => JobStatus::Cancelled,
+			"FAILED" => JobStatus::Failed,
+			_ => unreachable!(),
 		}
 	}
 }
@@ -45,14 +64,16 @@ pub struct JobUpdate {
 	pub status: Option<JobStatus>,
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct JobReport {
 	/// This will actually refer to the job runner id
-	pub id: String,
+	pub id: Option<String>,
 	//   kind               String
 	//   // The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
 	//   details            String?
 	//   // The status of the job (i.e. COMPLETED, FAILED, CANCELLED). Running jobs are not persisted to DB.
-	//   status             String   @default("COMPLETED")
+	status: JobStatus,
 	//   // The total number of tasks
 	//   taskCount          Int
 	//   // The total number of tasks completed (i.e. without error/failure)
@@ -65,6 +86,16 @@ pub struct JobReport {
 	//   logs Log[]
 	// The kind of log, e.g. LibraryScan
 	pub kind: String,
+}
+
+impl From<prisma::job::Data> for JobReport {
+	fn from(data: prisma::job::Data) -> Self {
+		JobReport {
+			id: Some(data.id),
+			kind: data.kind,
+			status: JobStatus::from(data.status.as_str()),
+		}
+	}
 }
 
 #[async_trait::async_trait]

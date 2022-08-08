@@ -7,7 +7,7 @@ use rocket::tokio::sync::{
 
 use crate::{
 	db,
-	event::{ClientEvent, ClientRequest},
+	event::{ClientEvent, ClientRequest, ClientResponse},
 	job::Job,
 	prisma,
 };
@@ -59,6 +59,13 @@ impl Ctx {
 	// TODO: error handling??
 	pub fn emit_client_event(&self, event: ClientEvent) {
 		let _ = self.response_channel.0.send(event);
+	}
+
+	pub fn internal_task(
+		&self,
+		task: ClientRequest,
+	) -> Result<(), SendError<ClientRequest>> {
+		self.internal_sender.send(task)
 	}
 
 	pub fn spawn_job(&self, job: Box<dyn Job>) -> Result<(), SendError<ClientRequest>> {

@@ -35,6 +35,7 @@ pub fn api() -> Vec<Route> {
 		user::create_user,
 		user::update_user_preferences,
 		// user::update_user
+		job::get_jobs,
 		job::jobs_listener,
 		// library api
 		library::get_libraries,

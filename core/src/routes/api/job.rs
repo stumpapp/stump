@@ -1,32 +1,40 @@
 use rocket::{
 	futures::Stream,
 	response::stream::{Event, EventStream},
-	tokio::{self, sync::broadcast::error::RecvError},
+	serde::json::Json,
+	tokio::{
+		self,
+		sync::{broadcast::error::RecvError, oneshot},
+	},
 	Shutdown,
 };
 use rocket_okapi::openapi;
 
-use crate::types::alias::Ctx;
+use crate::{
+	event::ClientRequest,
+	job::JobReport,
+	types::{
+		alias::{ApiResult, Ctx},
+		errors::ApiError,
+	},
+};
 
 // https://github.com/GREsau/okapi/blob/e686b442d6d7bb30913edf1bae900d14ea754cb1/examples/streams/src/main.rs
 
 /// Get all running/pending jobs.
+#[openapi(tag = "Job")]
 #[get("/jobs")]
-pub async fn get_jobs(_ctx: &Ctx) {
-	// let (sender, recv) = oneshot::channel();
+pub async fn get_jobs(ctx: &Ctx) -> ApiResult<Json<Vec<JobReport>>> {
+	let (sender, recv) = oneshot::channel();
 
-	// // ctx.emit_task(TaskResponder {
-	// // 	task: InternalTask::GetQueuedJobs,
-	// // 	return_sender: sender,
-	// // });
+	// TODO: fail here if can't submit task?
+	let _ = ctx.internal_task(ClientRequest::GetJobReports(sender));
 
-	// let res = recv.await.unwrap_or(Err(ApiError::InternalServerError(
-	// 	"Failed to get jobs".to_string(),
-	// )))?;
+	let res = recv.await.map_err(|e| {
+		ApiError::InternalServerError(format!("Failed to get jobs: {}", e.to_string()))
+	})?;
 
-	// Ok(Json(res))
-
-	unimplemented!()
+	Ok(Json(res))
 }
 
 /// Subscriber for jobs running in the background. Will emit SSE, as they occur,

@@ -4,5 +4,5 @@ import { getJobs } from '~api/job';
 export function useJobReport() {
 	const { data } = useQuery(['getJobReports'], getJobs);
 
-	return data?.data;
+	return { jobs: data?.data as any[] };
 }

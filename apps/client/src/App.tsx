@@ -29,6 +29,7 @@ const Settings = React.lazy(() => import('~pages/Settings'));
 const GeneralSettings = React.lazy(() => import('~pages/Settings/GeneralSettings'));
 const UserSettings = React.lazy(() => import('~pages/Settings/UserSettings'));
 const ServerSettings = React.lazy(() => import('~pages/Settings/ServerSettings'));
+const JobSettingsTab = React.lazy(() => import('~pages/Settings/JobSettingsTab'));
 
 // TODO: https://reactjs.org/docs/profiler.html for performance profiling and improvement
 
@@ -125,6 +126,7 @@ function App() {
 							<Route path="general" element={<GeneralSettings />} />
 							<Route path="users" element={<UserSettings />} />
 							<Route path="server" element={<ServerSettings />} />
+							<Route path="jobs" element={<JobSettingsTab />} />
 						</Route>
 						<Route path="libraries/:id" element={<LibraryOverview />} />
 						<Route path="series/:id" element={<SeriesOverview />} />

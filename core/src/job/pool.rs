@@ -81,18 +81,19 @@ impl JobPool {
 	}
 
 	pub async fn report(self: Arc<Self>, ctx: &Ctx) -> ApiResult<Vec<JobReport>> {
-		use crate::prisma::job;
+		// use crate::prisma::job;
 
 		let db = ctx.get_db();
-		let job_runners = self.job_runners.write().await;
+		// let job_runners = self.job_runners.write().await;
 
-		let runner_ids: Vec<String> =
-			job_runners.iter().map(|(id, _)| id.clone()).collect();
+		// let runner_ids: Vec<String> =
+		// 	job_runners.iter().map(|(id, _)| id.clone()).collect();
 
 		// note: this will really only be one job...
 		let mut jobs = db
 			.job()
-			.find_many(vec![job::id::in_vec(runner_ids)])
+			// .find_many(vec![job::id::in_vec(runner_ids)])
+			.find_many(vec![])
 			.exec()
 			.await?
 			.into_iter()
@@ -105,12 +106,7 @@ impl JobPool {
 				.write()
 				.await
 				.iter()
-				.map(|job| JobReport {
-					// queued jobs do not have id yet, nor are they persisted...
-					id: None,
-					kind: job.kind().to_string(),
-					status: JobStatus::Queued,
-				})
+				.map(JobReport::from)
 				.collect::<Vec<JobReport>>(),
 		);
 

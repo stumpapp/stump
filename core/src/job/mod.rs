@@ -75,13 +75,13 @@ pub struct JobReport {
 	//   // The status of the job (i.e. COMPLETED, FAILED, CANCELLED). Running jobs are not persisted to DB.
 	status: JobStatus,
 	//   // The total number of tasks
-	//   taskCount          Int
+	task_count: Option<i32>,
 	//   // The total number of tasks completed (i.e. without error/failure)
-	//   completedTaskCount Int
+	completed_task_count: Option<i32>,
 	//   // The time (in seconds) to complete the job
-	//   secondsElapsed     Int
+	seconds_elapsed: Option<u64>,
 	//   // The datetime stamp of when the job completed
-	//   completedAt        DateTime @default(now())
+	completed_at: Option<String>,
 
 	//   logs Log[]
 	// The kind of log, e.g. LibraryScan
@@ -94,6 +94,25 @@ impl From<prisma::job::Data> for JobReport {
 			id: Some(data.id),
 			kind: data.kind,
 			status: JobStatus::from(data.status.as_str()),
+			task_count: Some(data.task_count),
+			completed_task_count: Some(data.completed_task_count),
+			seconds_elapsed: Some(data.seconds_elapsed as u64),
+			completed_at: Some(data.completed_at.to_string()),
+		}
+	}
+}
+
+impl From<&Box<dyn Job>> for JobReport {
+	fn from(job: &Box<dyn Job>) -> Self {
+		Self {
+			id: None,
+			kind: job.kind().to_string(),
+			status: JobStatus::Queued,
+
+			task_count: None,
+			completed_task_count: None,
+			seconds_elapsed: None,
+			completed_at: None,
 		}
 	}
 }

@@ -1,6 +1,5 @@
 import { Helmet } from 'react-helmet';
 import LibrariesStats from '~components/Library/LibrariesStats';
-import JobReport from '~components/Settings/JobReport';
 import ServerStats from '~components/Settings/ServerStats';
 
 export default function ServerSettings() {
@@ -12,8 +11,6 @@ export default function ServerSettings() {
 			</Helmet>
 			<div className="w-full flex flex-col space-y-3">
 				<LibrariesStats />
-
-				<JobReport />
 
 				<ServerStats />
 			</div>

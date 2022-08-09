@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Flex, useColorModeValue, VStack } from '@chakra-ui/react';
+import { Box, useColorModeValue, VStack } from '@chakra-ui/react';
 import SettingsNav from '~components/Settings/SettingsNav';
 import { Outlet } from 'react-router-dom';
 

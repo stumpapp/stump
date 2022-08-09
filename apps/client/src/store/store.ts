@@ -88,6 +88,7 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 		set(() => ({ jobs: { ...get().jobs, [jobUpdate.runnerId]: job } }));
 	},
 
+	// TODO: delete job? will be in DB so not really needed anymore
 	completeJob(runnerId: string) {
 		const target = get().jobs[runnerId];
 		if (get().jobs[runnerId]) {

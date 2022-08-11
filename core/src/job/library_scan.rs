@@ -6,14 +6,14 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub struct LibraryScannerJob {
+pub struct LibraryScanJob {
 	pub path: String,
 }
 
 #[async_trait::async_trait]
-impl Job for LibraryScannerJob {
+impl Job for LibraryScanJob {
 	fn kind(&self) -> &'static str {
-		"LibraryScannerJob"
+		"LibraryScanJob"
 	}
 
 	// FIXME: lifetime issues here...
@@ -39,5 +39,23 @@ impl Job for LibraryScannerJob {
 		persist_job_end(&ctx, runner_id, completed_tasks, duration.as_secs()).await?;
 
 		Ok(())
+	}
+}
+
+#[derive(Debug)]
+pub struct AllLibrariesScanJob;
+
+#[async_trait::async_trait]
+impl Job for AllLibrariesScanJob {
+	fn kind(&self) -> &'static str {
+		"AllLibrariesScanJob"
+	}
+
+	fn details(&self) -> Option<&'static str> {
+		todo!()
+	}
+
+	async fn run(&self, _runner_id: String, _ctx: Ctx) -> Result<(), ApiError> {
+		todo!()
 	}
 }

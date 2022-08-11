@@ -212,9 +212,7 @@ async fn scan_series(
 	}
 }
 
-// FIXME: Okay, this made me sad lol. So with how this is currently I was averaging about
-// a 2x speedup over sync, which the is averaging a 1.52x speedup over my previous implementation.
-// The *major* snag I've hit with concurrent is it starts to cause timeouts and connection errors
+// FIXME: The *major* snag I've hit with concurrent is it starts to cause timeouts and connection errors
 // to the database. I think there are just too many writers to the database file.
 //
 // I'm *definitely* not removing this, however I'm really hopeful that a
@@ -226,6 +224,15 @@ async fn scan_series(
 // Ideas:
 // - maybe create a TentativeMedia struct that scan_path returns? OR just the paths + series.id?
 // grab the media before scan_path then block thread for the inserstions?
+// - Create a ScanOperation enum, scan_series would instead return a Vec<ScanOperation> across
+// multiple threads, and then at the end would sequentially run the operations. something like:
+/*
+	enum ScanOperation {
+		CreateMedia { path: PathBuf },
+		CreateSeries { path: PathBuf },
+		... etc ...
+	}
+*/
 pub async fn scan_concurrent(
 	ctx: Ctx,
 	path: String,
@@ -276,7 +283,7 @@ pub async fn scan_sync(
 ) -> Result<u64, ApiError> {
 	let (library, series, files_to_process) = precheck(&ctx, path).await?;
 
-	// // TODO: I am not sure if jobs should fail when the job fails to persist to DB.
+	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
 	let _ = ctx.emit_client_event(ClientEvent::job_started(
@@ -311,6 +318,8 @@ pub async fn scan_sync(
 	Ok(counter.fetch_add(0, Ordering::SeqCst))
 }
 
+// TODO: add a 'scan all' for scanning all libraries...
+
 // Note: You can't really run these tests from the top module level, as you need to
 // delete all media before each one runs for good performance metrics. What I have been
 // doing is deleting media, then running them individually, as I haven't figured out a
@@ -321,10 +330,10 @@ mod tests {
 
 	use crate::config::context::*;
 
-	// use crate::prisma::*;
 	use crate::types::errors::ApiError;
 
 	#[tokio::test(flavor = "multi_thread")]
+	#[ignore]
 	async fn scan_concurrent() -> Result<(), ApiError> {
 		let ctx = Ctx::mock().await;
 
@@ -347,6 +356,7 @@ mod tests {
 	}
 
 	#[tokio::test(flavor = "multi_thread")]
+	#[ignore]
 	async fn scan_sync() -> Result<(), ApiError> {
 		let ctx = Ctx::mock().await;
 

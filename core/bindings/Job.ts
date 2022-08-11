@@ -16,6 +16,7 @@ export type JobEventKind =
 	| 'CreatedMedia'
 	| 'CreatedSeries';
 
+// FIXME: this type is bad...
 export type JobEvent = {
 	[kind in JobEventKind]: any;
 };

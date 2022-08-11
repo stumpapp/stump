@@ -50,10 +50,11 @@ impl Runner {
 			if let Err(e) = job.run(runner_id.clone(), ctx.get_ctx()).await {
 				log::error!("job failed {:?}", e);
 
-				ctx.emit_client_event(ClientEvent::JobFailed((
-					runner_id.clone(),
-					e.to_string(),
-				)));
+				ctx.handle_failure_event(ClientEvent::JobFailed {
+					runner_id: runner_id.clone(),
+					message: e.to_string(),
+				})
+				.await;
 			} else {
 				ctx.emit_client_event(ClientEvent::JobComplete(runner_id.clone()));
 			}

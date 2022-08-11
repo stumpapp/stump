@@ -50,8 +50,10 @@ pub fn init_fern() -> Result<(), fern::InitError> {
 			.level(log::LevelFilter::Debug)
 			.level_for("hyper", log::LevelFilter::Off),
 
-		// verbosity 3 has everything
-		_3_or_more => base_config.level(log::LevelFilter::Trace),
+		// verbosity 3 has everything except hyper... hyper is just SO LOUD
+		_3_or_more => base_config
+			.level(log::LevelFilter::Trace)
+			.level_for("hyper", log::LevelFilter::Off),
 	};
 
 	// Separate file config so we can include year, month and day in file logs

@@ -69,22 +69,19 @@ pub struct JobUpdate {
 pub struct JobReport {
 	/// This will actually refer to the job runner id
 	pub id: Option<String>,
-	//   kind               String
-	//   // The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
+	// The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
 	//   details            String?
-	//   // The status of the job (i.e. COMPLETED, FAILED, CANCELLED). Running jobs are not persisted to DB.
+	/// The status of the job (i.e. COMPLETED, FAILED, CANCELLED). Running jobs are not persisted to DB.
 	status: JobStatus,
-	//   // The total number of tasks
+	/// The total number of tasks
 	task_count: Option<i32>,
-	//   // The total number of tasks completed (i.e. without error/failure)
+	/// The total number of tasks completed (i.e. without error/failure)
 	completed_task_count: Option<i32>,
-	//   // The time (in seconds) to complete the job
+	/// The time (in seconds) to complete the job
 	seconds_elapsed: Option<u64>,
-	//   // The datetime stamp of when the job completed
+	/// The datetime stamp of when the job completed
 	completed_at: Option<String>,
-
-	//   logs Log[]
-	// The kind of log, e.g. LibraryScan
+	/// The kind of log, e.g. LibraryScanJob
 	pub kind: String,
 }
 

@@ -7,9 +7,10 @@ use rocket::tokio::sync::{
 
 use crate::{
 	db,
-	event::{ClientEvent, ClientRequest, ClientResponse},
+	event::{ClientEvent, ClientRequest},
 	job::Job,
 	prisma,
+	types::models::log::TentativeLog,
 };
 
 type InternalSender = UnboundedSender<ClientRequest>;
@@ -59,6 +60,28 @@ impl Ctx {
 	// TODO: error handling??
 	pub fn emit_client_event(&self, event: ClientEvent) {
 		let _ = self.response_channel.0.send(event);
+	}
+
+	pub async fn handle_failure_event(&self, event: ClientEvent) {
+		use prisma::log;
+
+		self.emit_client_event(event.clone());
+
+		let tentative_log = TentativeLog::from(event);
+
+		// TODO: error handling here...
+		let _ = self
+			.db
+			.log()
+			.create(
+				log::message::set(tentative_log.message),
+				vec![
+					log::job_id::set(tentative_log.job_id),
+					log::level::set(tentative_log.level.to_string()),
+				],
+			)
+			.exec()
+			.await;
 	}
 
 	pub fn internal_task(

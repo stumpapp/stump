@@ -3,12 +3,16 @@ use std::{
 	sync::Arc,
 };
 
+use prisma_client_rust::chrono;
 use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::{config::context::Ctx, job::JobStatus, types::alias::ApiResult};
+use crate::{config::context::Ctx, types::alias::ApiResult};
 
 use super::{runner::Runner, Job, JobReport};
+
+// Note: this is 12 hours
+pub const DEFAULT_SCAN_INTERVAL_IN_SEC: i64 = 43200;
 
 pub enum JobPoolEvent {
 	EnqueueJob(Ctx, Box<dyn Job>),
@@ -21,6 +25,8 @@ pub struct JobPool {
 }
 
 impl JobPool {
+	/// Creates a new JobPool. Internally, two threads will be spawned: 1 to handle internal
+	/// job pool events, and another for scheduled jobs.
 	pub fn new() -> Arc<Self> {
 		let (internal_sender, mut internal_receiver) = mpsc::unbounded_channel();
 
@@ -41,9 +47,30 @@ impl JobPool {
 			}
 		});
 
+		// TODO: Not sure I ~love~ spawning again, but we shall see.
+		// let pool_cpy = pool.clone();
+		tokio::spawn(async move {
+			let interval: i64 = std::env::var("SCAN_INTERVAL")
+				.map(|val| val.parse::<i64>().unwrap_or(DEFAULT_SCAN_INTERVAL_IN_SEC))
+				.unwrap_or(DEFAULT_SCAN_INTERVAL_IN_SEC);
+
+			let mut timer = tokio::time::interval(
+				chrono::Duration::seconds(interval).to_std().unwrap(),
+			);
+			loop {
+				timer.tick().await;
+
+				log::debug!("TODO: implement new scanner that scans all libraries!");
+
+				// pool_cpy.clone().enqueue_job(&ctx, AllLibrariesScanJob {}).await
+			}
+		});
+
 		pool
 	}
 
+	/// Adds a new job to the job queue. If the queue is empty, it will immediately get
+	/// run.
 	pub async fn enqueue_job(self: Arc<Self>, ctx: &Ctx, job: Box<dyn Job>) {
 		let mut job_runners = self.job_runners.write().await;
 
@@ -62,8 +89,10 @@ impl JobPool {
 		}
 	}
 
-	pub async fn dequeue_job(self: Arc<Self>, ctx: &Ctx, job_id: String) {
-		self.job_runners.write().await.remove(&job_id);
+	/// Removes a job by its runner id. It will attempt to queue the next job,
+	/// if there is one, by emiting a JobPoolEvent to the JobPool's internal sender.
+	pub async fn dequeue_job(self: Arc<Self>, ctx: &Ctx, runner_id: String) {
+		self.job_runners.write().await.remove(&runner_id);
 
 		let next_job = self.job_queue.write().await.pop_front();
 
@@ -76,23 +105,18 @@ impl JobPool {
 		}
 	}
 
+	/// Clears the job queue.
 	pub async fn clear_queue(self: Arc<Self>, _ctx: &Ctx) {
 		self.job_queue.write().await.clear();
 	}
 
+	/// Returns a vector of JobReport for all persisted jobs, and appends the JobReports
+	/// for jobs in the job queue.
 	pub async fn report(self: Arc<Self>, ctx: &Ctx) -> ApiResult<Vec<JobReport>> {
-		// use crate::prisma::job;
-
 		let db = ctx.get_db();
-		// let job_runners = self.job_runners.write().await;
 
-		// let runner_ids: Vec<String> =
-		// 	job_runners.iter().map(|(id, _)| id.clone()).collect();
-
-		// note: this will really only be one job...
 		let mut jobs = db
 			.job()
-			// .find_many(vec![job::id::in_vec(runner_ids)])
 			.find_many(vec![])
 			.exec()
 			.await?

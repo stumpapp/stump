@@ -9,7 +9,7 @@ use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs,
 	guards::auth::{AdminGuard, Auth},
-	job::library_scan::LibraryScannerJob,
+	job::library_scan::LibraryScanJob,
 	prisma::{
 		library, media,
 		series::{self, OrderByParam},
@@ -228,7 +228,7 @@ pub async fn scan_library(
 
 	let lib = lib.unwrap();
 
-	let job = LibraryScannerJob {
+	let job = LibraryScanJob {
 		path: lib.path.clone(),
 	};
 
@@ -295,7 +295,7 @@ pub async fn create_library(
 
 	// `scan` is not a required field, however it will default to true if not provided
 	if input.scan.unwrap_or(true) {
-		ctx.spawn_job(Box::new(LibraryScannerJob {
+		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: lib.path.clone(),
 		}))?;
 	}
@@ -418,7 +418,7 @@ pub async fn update_library(
 
 	// `scan` is not a required field, however it will default to true if not provided
 	if input.scan.unwrap_or(true) {
-		ctx.spawn_job(Box::new(LibraryScannerJob {
+		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: updated.path.clone(),
 		}))?;
 	}

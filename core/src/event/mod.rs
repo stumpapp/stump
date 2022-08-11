@@ -21,9 +21,9 @@ pub enum ClientResponse {
 pub enum ClientEvent {
 	JobStarted(JobUpdate),
 	JobProgress(JobUpdate),
+	// TODO: change from string...
 	JobComplete(String),
-	// FIXME: don't use tuple
-	JobFailed((String, String)),
+	JobFailed { runner_id: String, message: String },
 	CreatedMedia(prisma::media::Data),
 	CreatedSeries(prisma::series::Data),
 }

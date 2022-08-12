@@ -1,5 +1,4 @@
 import { Box, Text } from '@chakra-ui/react';
-import React from 'react';
 import toast from 'react-hot-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import client from '~api/client';

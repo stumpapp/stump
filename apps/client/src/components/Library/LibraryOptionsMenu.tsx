@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { UserRole } from '~util/common';
 import { useUser } from '~hooks/useUser';
 import { Library } from '@stump/core';
+import client from '~api/client';
 
 interface Props {
 	library: Library;
@@ -27,6 +28,8 @@ export default function LibraryOptionsMenu({ library }: Props) {
 		}
 
 		scan(library.id);
+
+		client.invalidateQueries(['getJobReports']);
 
 		// Note: not worrying about this for a while so
 		// if (RESTRICTED_MODE) {

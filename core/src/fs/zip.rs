@@ -152,13 +152,13 @@ pub fn get_zip_image(file: &str, page: i32) -> GetPageResult {
 mod tests {
 	use super::*;
 
-	use crate::{config::context::Context, prisma::media, types::errors::ApiError};
+	use crate::{config::context::Ctx, prisma::media, types::errors::ApiError};
 
 	use rocket::tokio;
 
 	#[tokio::test]
 	async fn digest_zips_asynchronous() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let zips = ctx
 			.db
@@ -198,7 +198,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn digest_zips_synchronous() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let zips = ctx
 			.db

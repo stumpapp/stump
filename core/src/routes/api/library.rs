@@ -9,14 +9,14 @@ use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs,
 	guards::auth::{AdminGuard, Auth},
-	job::jobs::scan::LibraryScannerJob,
+	job::library_scan::LibraryScanJob,
 	prisma::{
 		library, media,
 		series::{self, OrderByParam},
 		tag,
 	},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::ImageResponse,
 		models::{
@@ -36,7 +36,7 @@ use crate::{
 pub async fn get_libraries(
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let db = ctx.get_db();
@@ -64,7 +64,7 @@ pub async fn get_libraries(
 #[openapi(tag = "Library")]
 #[get("/libraries/stats")]
 pub async fn get_libraries_stats(
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth,
 ) -> ApiResult<Json<LibrariesStats>> {
 	let db = ctx.get_db();
@@ -93,7 +93,7 @@ pub async fn get_libraries_stats(
 #[get("/libraries/<id>")]
 pub async fn get_library_by_id(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -131,7 +131,7 @@ pub async fn get_library_series(
 	id: String,
 	unpaged: Option<bool>,
 	req_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	// auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
@@ -181,7 +181,7 @@ pub async fn get_library_series(
 #[get("/libraries/<id>/thumbnail")]
 pub async fn get_library_thumbnail(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -208,7 +208,7 @@ pub async fn get_library_thumbnail(
 #[get("/libraries/<id>/scan")]
 pub async fn scan_library(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth, TODO: uncomment
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
@@ -228,13 +228,11 @@ pub async fn scan_library(
 
 	let lib = lib.unwrap();
 
-	let job = LibraryScannerJob {
+	let job = LibraryScanJob {
 		path: lib.path.clone(),
 	};
 
-	ctx.spawn_job(Box::new(job));
-
-	Ok(())
+	Ok(ctx.spawn_job(Box::new(job))?)
 }
 
 #[derive(Deserialize, JsonSchema)]
@@ -256,7 +254,7 @@ pub struct CreateLibrary {
 #[post("/libraries", data = "<input>")]
 pub async fn create_library(
 	input: Json<CreateLibrary>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -297,9 +295,9 @@ pub async fn create_library(
 
 	// `scan` is not a required field, however it will default to true if not provided
 	if input.scan.unwrap_or(true) {
-		ctx.spawn_job(Box::new(LibraryScannerJob {
+		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: lib.path.clone(),
-		}));
+		}))?;
 	}
 
 	Ok(Json(lib.into()))
@@ -329,7 +327,7 @@ pub struct UpdateLibrary {
 pub async fn update_library(
 	id: String,
 	input: Json<UpdateLibrary>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: AdminGuard,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -420,9 +418,9 @@ pub async fn update_library(
 
 	// `scan` is not a required field, however it will default to true if not provided
 	if input.scan.unwrap_or(true) {
-		ctx.spawn_job(Box::new(LibraryScannerJob {
+		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: updated.path.clone(),
-		}));
+		}))?;
 	}
 
 	Ok(Json(updated.into()))
@@ -433,7 +431,7 @@ pub async fn update_library(
 #[delete("/libraries/<id>")]
 pub async fn delete_library(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();

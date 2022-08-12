@@ -1,38 +1,37 @@
+pub mod event_manager;
+
 use rocket::tokio::sync::oneshot;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	job::{Job, JobStatus, JobUpdate},
+	job::{Job, JobReport, JobStatus, JobUpdate},
 	prisma,
 };
 
-use super::errors::ApiError;
-
-#[derive(Debug)]
-pub enum InternalEvent {
+pub enum ClientRequest {
 	QueueJob(Box<dyn Job>),
-	JobComplete(String),
-	JobFailed(String, ApiError),
+	GetJobReports(oneshot::Sender<Vec<JobReport>>),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub enum InternalTask {
-	GetRunningJob,
-	GetQueuedJobs,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub enum TaskResponse {
-	GetRunningJob(String),
-	GetQueuedJobs(String),
+pub enum ClientResponse {
+	GetJobReports(Vec<JobReport>),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum ClientEvent {
 	JobStarted(JobUpdate),
 	JobProgress(JobUpdate),
+	// TODO: change from string...
 	JobComplete(String),
-	JobFailed((String, String)),
+	JobFailed {
+		runner_id: String,
+		message: String,
+	},
+	CreateEntityFailed {
+		runner_id: Option<String>,
+		path: String,
+		message: String,
+	},
 	CreatedMedia(prisma::media::Data),
 	CreatedSeries(prisma::series::Data),
 }
@@ -67,10 +66,4 @@ impl ClientEvent {
 			status: Some(JobStatus::Running),
 		})
 	}
-}
-
-#[derive(Debug)]
-pub struct TaskResponder<D, R = Result<TaskResponse, ApiError>> {
-	pub task: D,
-	pub return_sender: oneshot::Sender<R>,
 }

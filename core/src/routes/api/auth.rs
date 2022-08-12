@@ -5,7 +5,7 @@ use crate::{
 	guards::auth::Auth,
 	prisma::{user, user_preferences},
 	types::{
-		alias::{ApiResult, Context, LoginResult, Session},
+		alias::{ApiResult, Ctx, LoginResult, Session},
 		enums::UserRole,
 		errors::ApiError,
 		models::{AuthenticatedUser, LoginRequest},
@@ -17,7 +17,7 @@ use crate::{
 #[openapi(tag = "Auth")]
 #[get("/auth/me")]
 pub async fn me(
-	ctx: &Context,
+	ctx: &Ctx,
 	_session: Session<'_>,
 	auth: Auth,
 ) -> ApiResult<Json<Option<AuthenticatedUser>>> {
@@ -44,7 +44,7 @@ pub async fn me(
 #[openapi(tag = "Auth")]
 #[post("/auth/login", data = "<credentials>")]
 pub async fn login(
-	ctx: &Context,
+	ctx: &Ctx,
 	session: Session<'_>,
 	credentials: Json<LoginRequest>,
 ) -> LoginResult {
@@ -85,7 +85,7 @@ pub async fn login(
 #[openapi(tag = "Auth")]
 #[post("/auth/register", data = "<credentials>")]
 pub async fn register(
-	ctx: &Context,
+	ctx: &Ctx,
 	session: Session<'_>,
 	credentials: Json<LoginRequest>,
 ) -> ApiResult<Json<AuthenticatedUser>> {

@@ -98,18 +98,23 @@ RUN apk add --no-cache libstdc++ binutils
 RUN addgroup -g 1000 stump
 RUN adduser -D -s /bin/sh -u 1000 -G stump stump
 
-# Set user so every command following will be executed as stump user
-USER stump
-
 WORKDIR /
 
 # create the config, data and app directories
-RUN mkdir -p config
-RUN mkdir -p data
-RUN mkdir -p app
+RUN mkdir -p config && \
+    mkdir -p data && \
+    mkdir -p app
+
+# FIXME: this does not seem to be working...
+# make the stump user own the directories
+RUN chown stump /config && \
+    chown stump /data && \
+    chown stump /app
+
+USER stump
 
 # copy the binary
-COPY --chown=stump:stump--from=core-builder /app/stump ./app/stump
+COPY --chown=stump:stump --from=core-builder /app/stump ./app/stump
 
 # copy the react build
 COPY --from=frontend /app/build ./app/client

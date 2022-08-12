@@ -3,12 +3,12 @@ use prisma_client_rust::{raw, PrismaValue};
 use walkdir::DirEntry;
 
 use crate::{
-	config::context::Context,
+	config::context::Ctx,
+	event::ClientEvent,
 	fs::media_file,
 	prisma::{library, media, series},
 	types::{
 		errors::{ApiError, ScanError},
-		event::ClientEvent,
 		models::MediaMetadata,
 	},
 };
@@ -17,7 +17,7 @@ use crate::{
 /// series and series.media relations to have been loaded to function properly.
 pub async fn mark_library_missing(
 	library: library::Data,
-	ctx: &Context,
+	ctx: &Ctx,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 
@@ -52,7 +52,7 @@ pub async fn mark_library_missing(
 }
 
 pub async fn insert_media(
-	ctx: &Context,
+	ctx: &Ctx,
 	entry: &DirEntry,
 	series_id: String,
 ) -> Result<media::Data, ScanError> {
@@ -60,9 +60,14 @@ pub async fn insert_media(
 
 	let path = entry.path();
 
-	let path_str = path.to_str().unwrap().to_string();
-	let mut name = entry.file_name().to_str().unwrap().to_string();
-	let ext = path.extension().unwrap().to_str().unwrap().to_string();
+	let path_str = path.to_str().unwrap_or_default().to_string();
+	let mut name = entry.file_name().to_str().unwrap_or_default().to_string();
+	let ext = path
+		.extension()
+		.unwrap_or_default()
+		.to_str()
+		.unwrap_or_default()
+		.to_string();
 
 	// remove extension from name, not sure why file_name() includes it smh
 	if name.ends_with(format!(".{}", ext).as_str()) {
@@ -82,7 +87,11 @@ pub async fn insert_media(
 		.media()
 		.create(
 			media::name::set(name),
-			media::size::set(size.try_into().unwrap()),
+			media::size::set(size.try_into().unwrap_or_else(|e| {
+				log::error!("Failed to calculate file size: {:?}", e);
+
+				0
+			})),
 			media::extension::set(ext),
 			media::pages::set(match comic_info.page_count {
 				Some(count) => count as i32,
@@ -104,7 +113,7 @@ pub async fn insert_media(
 }
 
 pub async fn insert_series(
-	ctx: &Context,
+	ctx: &Ctx,
 	entry: &DirEntry,
 	library_id: String,
 ) -> Result<series::Data, ScanError> {
@@ -150,7 +159,7 @@ pub async fn insert_series(
 }
 
 pub async fn insert_series_many(
-	ctx: &Context,
+	ctx: &Ctx,
 	entries: Vec<DirEntry>,
 	library_id: String,
 ) -> Vec<series::Data> {

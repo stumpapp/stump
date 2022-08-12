@@ -223,6 +223,28 @@ model ReadProgress {
   @@map("read_progresses")
 }
 
+model Job {
+  id                 String   @id
+  // The kind of log, e.g. LibraryScan
+  kind               String
+  // The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
+  details            String?
+  // The status of the job (i.e. RUNNING, COMPLETED, FAILED, CANCELLED).
+  status             String   @default("RUNNING")
+  // The total number of tasks
+  taskCount          Int      @default(1)
+  // The total number of tasks completed (i.e. without error/failure)
+  completedTaskCount Int      @default(0)
+  // The time (in seconds) to complete the job
+  secondsElapsed     Int      @default(0)
+  // The datetime stamp of when the job completed
+  completedAt        DateTime @default(now())
+
+  logs Log[]
+
+  @@map("jobs")
+}
+
 model Log {
   id        String   @id @default(uuid())
   // The level of the log. i.e: "ERROR", "WARN", "INFO", "DEBUG"
@@ -231,6 +253,9 @@ model Log {
   message   String
   // The datetime in which the log was created. ex: "2022-04-20 04:20:69"
   createdAt DateTime @default(now())
+
+  job   Job?    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String?
 
   @@map("logs")
 }

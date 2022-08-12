@@ -21,8 +21,6 @@ export function useLibraries() {
 		return { libraries: [] };
 	}, [data]);
 
-	console.log({ libraries });
-
 	return {
 		libraries,
 		pageData,

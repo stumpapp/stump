@@ -231,7 +231,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn can_make_epub_struct() -> anyhow::Result<()> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let media = ctx
 			.db
@@ -256,7 +256,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn can_get_resource() -> anyhow::Result<()> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let media = ctx
 			.db
@@ -305,7 +305,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn can_get_chapter() -> anyhow::Result<()> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let media = ctx
 			.db

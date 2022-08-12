@@ -1,43 +1,72 @@
-import { Code, Heading, Link, Stack, Text, useBoolean } from '@chakra-ui/react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import toast from 'react-hot-toast';
+import Button from '~ui/Button';
+
+import { ButtonGroup, Code, Heading, HStack, Link, Stack, Text } from '@chakra-ui/react';
+
 import BaseLayout from './Layouts/BaseLayout';
 
-// TODO: make pretty
 function ErrorFallback({ error }: FallbackProps) {
-	const [showMore, { toggle }] = useBoolean(false);
+	async function copyTextToClipboard(text: string) {
+		return await navigator.clipboard.writeText(text);
+	}
+
+	function handleCopyErrorDetails() {
+		if (error.stack) {
+			copyTextToClipboard(error.stack).then(() => toast.success('Copied error details!'));
+		}
+	}
 
 	return (
 		<BaseLayout>
-			<Stack mt={{ base: 12, md: 16 }} w="full" h="full" align="center">
-				<Heading as="h1" size="lg">
-					Darn, something went wrong.
+			<Stack mt={{ base: 12, md: 16 }} w="full" h="full" align="center" spacing={3}>
+				<Heading as="h4" size="sm">
+					Well, this is embarrassing...
 				</Heading>
 
-				<Text fontSize="lg" maxW="xl" textAlign="center">
-					An error occurred while attempting to complete your request. My systems detect:{' '}
-					{error.message}.{' '}
+				<Heading as="h2" size="lg">
+					Something went wrong!
+				</Heading>
+
+				<Text as="pre" fontSize="lg" maxW="xl" textAlign="center" pt={4} noOfLines={3}>
+					Error: {error.message}.{' '}
+				</Text>
+
+				<Stack>
 					{error.stack && (
-						<>
-							<span onClick={toggle} className="cursor-pointer text-brand-400">
-								Click me
-							</span>{' '}
-							to see {showMore ? 'less' : 'more'}.
-						</>
+						<Code rounded="md" maxW="4xl" maxH={72} overflowY="scroll" p={4}>
+							{error.stack}
+						</Code>
 					)}
-				</Text>
 
-				{showMore && (
-					<Code rounded="md" maxW="4xl" p={4}>
-						{error.stack}
-					</Code>
-				)}
+					<HStack pt={3} w="full" justify="space-between">
+						<ButtonGroup>
+							<Button
+								href="https://github.com/aaronleopold/stump/issues/new/choose"
+								target="_blank"
+								className="!no-underline"
+								as={Link}
+							>
+								Report Bug
+							</Button>
+							{error.stack && (
+								<Button onClick={handleCopyErrorDetails} variant="ghost">
+									Copy Error Details
+								</Button>
+							)}
+						</ButtonGroup>
 
-				<Text fontSize="lg" maxW="xl" textAlign="center">
-					<Link href="/" color="brand.400">
-						Click here
-					</Link>{' '}
-					to go home
-				</Text>
+						<Button
+							href="/"
+							variant="solid"
+							colorScheme="brand"
+							className="!no-underline"
+							as={Link}
+						>
+							Go Home
+						</Button>
+					</HStack>
+				</Stack>
 			</Stack>
 		</BaseLayout>
 	);

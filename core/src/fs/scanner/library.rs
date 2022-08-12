@@ -11,16 +11,18 @@ use std::{
 use walkdir::WalkDir;
 
 use crate::{
-	config::context::Context,
+	config::context::Ctx,
+	event::ClientEvent,
 	fs::scanner::ScannedFileTrait,
+	job::persist_job_start,
 	prisma::{library, media, series},
-	types::{errors::ApiError, event::ClientEvent},
+	types::errors::ApiError,
 };
 
 use super::utils::mark_library_missing;
 
 async fn precheck(
-	ctx: &Context,
+	ctx: &Ctx,
 	path: String,
 ) -> Result<(library::Data, Vec<series::Data>, u64), ApiError> {
 	let db = ctx.get_db();
@@ -117,7 +119,8 @@ async fn precheck(
 }
 
 async fn scan_series(
-	ctx: Context,
+	ctx: Ctx,
+	runner_id: String,
 	series: series::Data,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) {
@@ -176,6 +179,13 @@ async fn scan_series(
 			},
 			Err(e) => {
 				log::error!("Failed to insert media: {:?}", e);
+
+				ctx.handle_failure_event(ClientEvent::CreateEntityFailed {
+					runner_id: Some(runner_id.clone()),
+					path: path.to_str().unwrap_or_default().to_string(),
+					message: e.to_string(),
+				})
+				.await;
 			},
 		}
 	}
@@ -210,9 +220,7 @@ async fn scan_series(
 	}
 }
 
-// FIXME: Okay, this made me sad lol. So with how this is currently I was averaging about
-// a 2x speedup over sync, which the is averaging a 1.52x speedup over my previous implementation.
-// The *major* snag I've hit with concurrent is it starts to cause timeouts and connection errors
+// FIXME: The *major* snag I've hit with concurrent is it starts to cause timeouts and connection errors
 // to the database. I think there are just too many writers to the database file.
 //
 // I'm *definitely* not removing this, however I'm really hopeful that a
@@ -224,10 +232,19 @@ async fn scan_series(
 // Ideas:
 // - maybe create a TentativeMedia struct that scan_path returns? OR just the paths + series.id?
 // grab the media before scan_path then block thread for the inserstions?
+// - Create a ScanOperation enum, scan_series would instead return a Vec<ScanOperation> across
+// multiple threads, and then at the end would sequentially run the operations. something like:
+/*
+	enum ScanOperation {
+		CreateMedia { path: PathBuf },
+		CreateSeries { path: PathBuf },
+		... etc ...
+	}
+*/
 pub async fn scan_concurrent(
-	ctx: Context,
+	ctx: Ctx,
 	path: String,
-	_runner_id: String,
+	runner_id: String,
 ) -> Result<(), ApiError> {
 	let (_library, series, _files_to_process) = precheck(&ctx, path).await?;
 
@@ -242,8 +259,10 @@ pub async fn scan_concurrent(
 
 			let counter_ref = counter.clone();
 
+			let runner_id = runner_id.clone();
+
 			tokio::spawn(async move {
-				scan_series(ctx_cpy.get_ctx(), s, move |_msg| {
+				scan_series(ctx_cpy.get_ctx(), runner_id, s, move |_msg| {
 					let mut shared = counter_ref.lock().unwrap();
 
 					*shared += 1;
@@ -268,20 +287,24 @@ pub async fn scan_concurrent(
 }
 
 pub async fn scan_sync(
-	ctx: Context,
+	ctx: Ctx,
 	path: String,
 	runner_id: String,
-) -> Result<(), ApiError> {
+) -> Result<u64, ApiError> {
 	let (library, series, files_to_process) = precheck(&ctx, path).await?;
+
+	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
+	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
 	let _ = ctx.emit_client_event(ClientEvent::job_started(
 		runner_id.clone(),
-		1,
+		// TODO: my brain is being silly and I don't know if I want 0 or 1 here....
+		0,
 		files_to_process,
 		Some(format!("Starting library scan at {}", &library.path)),
 	));
 
-	let counter = Arc::new(AtomicU64::new(1));
+	let counter = Arc::new(AtomicU64::new(0));
 
 	for s in series {
 		let progress_ctx = ctx.get_ctx();
@@ -289,12 +312,14 @@ pub async fn scan_sync(
 
 		let counter_ref = counter.clone();
 
-		scan_series(ctx.get_ctx(), s, move |msg| {
-			let current = counter_ref.fetch_add(1, Ordering::SeqCst);
+		let runner_id = runner_id.clone();
+
+		scan_series(ctx.get_ctx(), runner_id, s, move |msg| {
+			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
 			let _ = progress_ctx.emit_client_event(ClientEvent::job_progress(
 				r_id.to_owned(),
-				current,
+				previous + 1,
 				files_to_process,
 				Some(msg),
 			));
@@ -302,8 +327,10 @@ pub async fn scan_sync(
 		.await;
 	}
 
-	Ok(())
+	Ok(counter.load(Ordering::SeqCst))
 }
+
+// TODO: add a 'scan all' for scanning all libraries...
 
 // Note: You can't really run these tests from the top module level, as you need to
 // delete all media before each one runs for good performance metrics. What I have been
@@ -315,12 +342,12 @@ mod tests {
 
 	use crate::config::context::*;
 
-	// use crate::prisma::*;
 	use crate::types::errors::ApiError;
 
 	#[tokio::test(flavor = "multi_thread")]
+	#[ignore]
 	async fn scan_concurrent() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let start = std::time::Instant::now();
 		super::scan_concurrent(
@@ -341,8 +368,9 @@ mod tests {
 	}
 
 	#[tokio::test(flavor = "multi_thread")]
+	#[ignore]
 	async fn scan_sync() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let start = std::time::Instant::now();
 		super::scan_sync(

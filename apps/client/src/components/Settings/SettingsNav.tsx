@@ -18,6 +18,11 @@ const pages = [
 		shortName: 'server',
 		index: 2,
 	},
+	{
+		path: '/settings/jobs',
+		shortName: 'jobs',
+		index: 3,
+	},
 ];
 
 export default function SettingsNav() {
@@ -46,7 +51,7 @@ export default function SettingsNav() {
 					<Tab>General</Tab>
 					<Tab>Users</Tab>
 					<Tab>Server</Tab>
-					<Tab disabled>Jobs</Tab>
+					<Tab>Jobs</Tab>
 				</TabList>
 			</Tabs>
 		</Box>

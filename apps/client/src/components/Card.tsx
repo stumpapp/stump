@@ -60,10 +60,11 @@ export default function Card({
 					alt={imageAlt}
 					className={clsx(
 						variant === 'default' ? 'h-auto ' : 'min-h-96',
+						// FIXME: object-scale-down fixes the pixely look, but is NOT desired styling :weary: how annoying
 						!isFallback && 'object-cover',
 						// 663:1024 is standard aspect ratio for comic books. Stump supports a wider range of media, however
 						// for now these cards will be tailored to that aspect ratio.
-						'w-full [aspect-ratio:663/1024]',
+						'w-full aspect-[2/3]',
 					)}
 					src={src}
 					onError={(_) => {

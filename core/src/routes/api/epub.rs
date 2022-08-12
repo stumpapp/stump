@@ -8,7 +8,7 @@ use crate::{
 	guards::auth::Auth,
 	prisma::{media, read_progress},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		models::epub::Epub,
 	},
@@ -17,7 +17,7 @@ use crate::{
 /// Get an Epub by ID. The `read_progress` relation is loaded.
 #[openapi(tag = "Epub Media")]
 #[get("/epub/<id>")]
-pub async fn get_epub(id: String, ctx: &Context, auth: Auth) -> ApiResult<Json<Epub>> {
+pub async fn get_epub(id: String, ctx: &Ctx, auth: Auth) -> ApiResult<Json<Epub>> {
 	let book = ctx
 		.db
 		.media()
@@ -50,7 +50,7 @@ pub async fn get_epub(id: String, ctx: &Context, auth: Auth) -> ApiResult<Json<E
 pub async fn get_epub_chatper(
 	id: String,
 	chapter: usize,
-	ctx: &Context,
+	ctx: &Ctx,
 	// auth: Auth,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let book = ctx
@@ -83,7 +83,7 @@ pub async fn get_epub_meta(
 	id: String,
 	root: String,
 	resource: PathBuf,
-	ctx: &Context,
+	ctx: &Ctx,
 	// auth: Auth,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let book = ctx

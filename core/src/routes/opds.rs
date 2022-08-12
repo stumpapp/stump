@@ -13,7 +13,7 @@ use crate::{
 	},
 	prisma::{self, library, media, read_progress, series},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::{ImageResponse, XmlResponse},
 	},
@@ -44,7 +44,7 @@ pub fn opds() -> Vec<Route> {
 
 /// A handler for GET /opds/v1.2/catalog. Returns an OPDS catalog as an XML document
 #[get("/catalog")]
-pub fn catalog(_ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
+pub fn catalog(_ctx: &Ctx, _auth: Auth) -> ApiResult<XmlResponse> {
 	let entries = vec![
 		OpdsEntry::new(
 			"keepReading".to_string(),
@@ -165,7 +165,7 @@ async fn open_search(_auth: Auth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/keep-reading")]
-async fn keep_reading(ctx: &Context, auth: Auth) -> ApiResult<XmlResponse> {
+async fn keep_reading(ctx: &Ctx, auth: Auth) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
 
 	let user_id = auth.0.id.clone();
@@ -233,7 +233,7 @@ async fn keep_reading(ctx: &Context, auth: Auth) -> ApiResult<XmlResponse> {
 }
 
 #[get("/libraries")]
-async fn libraries(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
+async fn libraries(ctx: &Ctx, _auth: Auth) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
@@ -263,7 +263,7 @@ async fn libraries(ctx: &Context, _auth: Auth) -> ApiResult<XmlResponse> {
 
 #[get("/libraries/<id>?<page>")]
 async fn library_by_id(
-	ctx: &Context,
+	ctx: &Ctx,
 	id: String,
 	page: Option<i64>,
 	_auth: Auth,
@@ -304,11 +304,7 @@ async fn library_by_id(
 /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 /// pagination is zero-indexed.
 #[get("/series?<page>")]
-async fn get_series(
-	page: Option<i64>,
-	ctx: &Context,
-	_auth: Auth,
-) -> ApiResult<XmlResponse> {
+async fn get_series(page: Option<i64>, ctx: &Ctx, _auth: Auth) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
 
 	let page = page.unwrap_or(0);
@@ -343,7 +339,7 @@ async fn get_series(
 #[get("/series/latest?<page>")]
 async fn series_latest(
 	page: Option<i64>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
@@ -379,7 +375,7 @@ async fn series_latest(
 async fn series_by_id(
 	id: String,
 	page: Option<i64>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<XmlResponse> {
 	let db = ctx.get_db();
@@ -427,11 +423,7 @@ async fn series_by_id(
 }
 
 #[get("/books/<id>/thumbnail")]
-async fn book_thumbnail(
-	id: String,
-	ctx: &Context,
-	_auth: Auth,
-) -> ApiResult<ImageResponse> {
+async fn book_thumbnail(id: String, ctx: &Ctx, _auth: Auth) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
 	let book = db
@@ -457,7 +449,7 @@ async fn book_page(
 	id: String,
 	page: usize,
 	zero_based: Option<bool>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();

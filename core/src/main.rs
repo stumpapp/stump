@@ -3,10 +3,17 @@ extern crate rocket;
 
 use db::migration::run_migrations;
 
-use config::{context::Context, cors, env, helmet::Helmet, logging, session};
+use config::{
+	context::Ctx,
+	cors, env,
+	helmet::Helmet,
+	logging::{self, STUMP_SHADOW_TEXT},
+	session,
+};
+use event::{event_manager::EventManager, ClientRequest};
 use rocket::{
 	fs::{FileServer, NamedFile},
-	tokio::{self, sync::mpsc::unbounded_channel},
+	tokio::sync::mpsc::unbounded_channel,
 };
 use rocket_okapi::{
 	rapidoc::{
@@ -15,14 +22,11 @@ use rocket_okapi::{
 	settings::UrlObject,
 };
 use std::path::Path;
-use types::{
-	event::{InternalEvent, InternalTask, TaskResponder},
-	http::UnauthorizedResponse,
-};
-use utils::event::EventManager;
+use types::http::UnauthorizedResponse;
 
 pub mod config;
 pub mod db;
+pub mod event;
 pub mod fs;
 pub mod guards;
 pub mod job;
@@ -61,19 +65,14 @@ async fn rocket() -> _ {
 		log::error!("Failed to initialize logging: {:?}", e.to_string())
 	});
 
-	// Channel to handle internal events
-	let event_channel = unbounded_channel::<InternalEvent>();
+	// Channel to handle client requests. The sender goes in Stump Ctx, the receiver goes
+	// in the event manager.
+	let internal_channel = unbounded_channel::<ClientRequest>();
 
-	// Channel to handle internal tasks (usually an endpoint requesting data from the background thread below)
-	let task_channel = unbounded_channel::<TaskResponder<InternalTask>>();
+	// Ownership will be transferred to the event manager.
+	let core_ctx = Ctx::new(internal_channel.0.clone()).await;
 
-	// Ownership will be transferred to the background thread.
-	let core_ctx = Context::new(event_channel.0.clone(), task_channel.0.clone()).await;
-
-	// Context clone that will be managed by Rocket
-	let route_ctx = core_ctx.get_ctx();
-
-	match run_migrations(route_ctx.get_db()).await {
+	match run_migrations(core_ctx.get_db()).await {
 		Ok(_) => {
 			log::info!("Migrations ran successfully");
 		},
@@ -83,14 +82,12 @@ async fn rocket() -> _ {
 		},
 	};
 
-	tokio::spawn(async move {
-		EventManager::new(core_ctx)
-			.run(event_channel.1, task_channel.1)
-			.await;
-	});
+	let _event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
+
+	log::info!("{}", STUMP_SHADOW_TEXT);
 
 	rocket::build()
-		.manage(route_ctx.get_ctx())
+		.manage(core_ctx)
 		.attach(session::get_session_store().fairing())
 		.attach(cors::get_cors())
 		.attach(Helmet::default().fairing())

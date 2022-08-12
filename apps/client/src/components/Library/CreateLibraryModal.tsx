@@ -38,6 +38,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 				// TODO: log?
 			} else {
 				client.invalidateQueries(['getLibraries']);
+				client.invalidateQueries(['getJobReports']);
 				onClose();
 			}
 		},

@@ -10,27 +10,29 @@ use rocket::{
 };
 use rocket_okapi::openapi;
 
-use crate::types::{
-	alias::{ApiResult, Context},
-	errors::ApiError,
-	event::{InternalTask, TaskResponder, TaskResponse},
+use crate::{
+	event::ClientRequest,
+	job::JobReport,
+	types::{
+		alias::{ApiResult, Ctx},
+		errors::ApiError,
+	},
 };
 
 // https://github.com/GREsau/okapi/blob/e686b442d6d7bb30913edf1bae900d14ea754cb1/examples/streams/src/main.rs
 
 /// Get all running/pending jobs.
+#[openapi(tag = "Job")]
 #[get("/jobs")]
-pub async fn get_jobs(ctx: &Context) -> ApiResult<Json<TaskResponse>> {
+pub async fn get_jobs(ctx: &Ctx) -> ApiResult<Json<Vec<JobReport>>> {
 	let (sender, recv) = oneshot::channel();
 
-	ctx.emit_task(TaskResponder {
-		task: InternalTask::GetQueuedJobs,
-		return_sender: sender,
-	});
+	// TODO: fail here if can't submit task?
+	let _ = ctx.internal_task(ClientRequest::GetJobReports(sender));
 
-	let res = recv.await.unwrap_or(Err(ApiError::InternalServerError(
-		"Failed to get jobs".to_string(),
-	)))?;
+	let res = recv.await.map_err(|e| {
+		ApiError::InternalServerError(format!("Failed to get jobs: {}", e.to_string()))
+	})?;
 
 	Ok(Json(res))
 }
@@ -40,10 +42,10 @@ pub async fn get_jobs(ctx: &Context) -> ApiResult<Json<TaskResponse>> {
 #[openapi(tag = "Job")]
 #[get("/jobs/listen")]
 pub async fn jobs_listener(
-	ctx: &Context,
+	ctx: &Ctx,
 	mut end: Shutdown,
 ) -> EventStream<impl Stream<Item = Event>> {
-	let mut rx = ctx.client_receiver();
+	let mut rx = ctx.get_client_receiver();
 
 	EventStream! {
 		loop {

@@ -3,9 +3,9 @@ use std::sync::Arc;
 use rocket::tokio::{self, sync::Mutex};
 use serde::{Deserialize, Serialize};
 
-use crate::{config::context::Context, types::event::InternalEvent};
+use crate::{config::context::Ctx, event::ClientEvent};
 
-use super::{Job, JobUpdate};
+use super::{persist_new_job, pool::JobPool, Job, JobUpdate};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum RunnerEvent {
@@ -14,54 +14,52 @@ pub enum RunnerEvent {
 	Failed,
 }
 
-enum RunnerState {
-	Pending(Box<dyn Job>),
-	Running,
-}
-
 pub struct Runner {
 	pub id: String,
-	// pub is_running: bool,
-	state: RunnerState,
+	job: Option<Box<dyn Job>>,
 }
 
 impl Runner {
-	pub fn new(job: Box<dyn Job>) -> Self {
-		Runner {
-			id: cuid::cuid().unwrap().to_string(),
-			// is_running: false,
-			state: RunnerState::Pending(job),
-		}
+	pub fn create_id() -> String {
+		cuid::cuid()
+			.expect("Failed to generate CUID for runner.")
+			.to_string()
 	}
 
-	// fn set_running(&mut self, running: bool) {
-	// 	self.is_running = running;
-	// }
+	pub async fn new(ctx: &Ctx, job: Box<dyn Job>) -> Self {
+		let id = Runner::create_id();
 
-	pub async fn spawn(runner: Arc<Mutex<Self>>, ctx: Context) {
-		let mut runner_mut = runner.lock().await;
+		// FIXME: error handling
+		let _ = persist_new_job(ctx, id.clone(), &job).await;
 
-		let runner_id = runner_mut.id.clone();
+		Runner { id, job: Some(job) }
+	}
 
-		// runner_mut.set_running(true);
+	pub async fn spawn(job_pool: Arc<JobPool>, runner_arc: Arc<Mutex<Self>>, ctx: Ctx) {
+		let mut runner = runner_arc.lock().await;
+		let runner_id = runner.id.clone();
 
-		let job = match std::mem::replace(&mut runner_mut.state, RunnerState::Running) {
-			RunnerState::Pending(job) => {
-				runner_mut.state = RunnerState::Running;
-				job
-			},
-			RunnerState::Running => unreachable!(),
-		};
+		let job = runner
+			.job
+			.take()
+			.expect(&format!("Missing job in job runner {}", runner_id));
 
 		tokio::spawn(async move {
-			let result = job.run(runner_id.clone(), ctx.get_ctx()).await;
+			let runner_id = runner_id.clone();
 
-			if let Err(e) = result {
+			if let Err(e) = job.run(runner_id.clone(), ctx.get_ctx()).await {
 				log::error!("job failed {:?}", e);
-				ctx.emit_event(InternalEvent::JobFailed(runner_id, e));
+
+				ctx.handle_failure_event(ClientEvent::JobFailed {
+					runner_id: runner_id.clone(),
+					message: e.to_string(),
+				})
+				.await;
 			} else {
-				ctx.emit_event(InternalEvent::JobComplete(runner_id));
+				ctx.emit_client_event(ClientEvent::JobComplete(runner_id.clone()));
 			}
+
+			job_pool.dequeue_job(&ctx, runner_id).await;
 		});
 	}
 }

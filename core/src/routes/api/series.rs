@@ -8,7 +8,7 @@ use crate::{
 	guards::auth::Auth,
 	prisma::{media, read_progress, series},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::ImageResponse,
 		models::{media::Media, series::Series},
@@ -24,7 +24,7 @@ pub async fn get_series(
 	load_media: Option<bool>,
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
@@ -68,7 +68,7 @@ pub async fn get_series(
 pub async fn get_series_by_id(
 	id: String,
 	load_media: Option<bool>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
@@ -118,7 +118,7 @@ pub async fn get_series_by_id(
 #[get("/series/<id>/thumbnail")]
 pub async fn get_series_thumbnail(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -150,7 +150,7 @@ pub async fn get_series_media(
 	id: String,
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
@@ -188,7 +188,7 @@ pub async fn get_series_media(
 #[get("/series/<id>/media/next")]
 pub async fn series_next_media(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Option<Media>>> {
 	let db = ctx.get_db();

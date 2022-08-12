@@ -18,7 +18,7 @@
 		"build": "pnpm client build && pnpm core build",
 		"build:docker": "docker buildx build --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
 		"cache:docker-arm": "docker buildx build --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
-		"cache:docker-amd": "docker buildx build --platform=linux/amd64 -t aaronleopold/stump-preview:latest ."
+		"build:docker-amd": "docker buildx build --push --platform=linux/amd64 -t aaronleopold/stump-preview:latest ."
 	},
 	"devDependencies": {
 		"concurrently": "^6.5.1",

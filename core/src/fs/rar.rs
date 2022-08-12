@@ -7,6 +7,8 @@ use crate::{
 	types::{alias::ProcessResult, errors::ProcessFileError, models::ProcessedMediaFile},
 };
 
+// FIXME: terrible error handling in this file... needs a total rework honestly.
+
 use super::checksum;
 
 impl IsImage for Entry {
@@ -34,9 +36,8 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 	info!("Processing Rar: {}", file.path().display());
 
 	let path = file.path().to_string_lossy().to_string();
-	let archive = unrar::Archive::new(&path).unwrap();
+	let archive = unrar::Archive::new(&path)?;
 
-	// let mut entries: Vec<String> = Vec::new();
 	let mut pages = 0;
 
 	let mut metadata_buf = Vec::<u8>::new();
@@ -82,27 +83,40 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 	})
 }
 
-pub fn rar_sample(file: &str) -> u64 {
-	let archive = unrar::Archive::new(&file).unwrap();
+pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
+	log::debug!("Calculating checksum sample size for: {}", file);
+
+	let archive = unrar::Archive::new(&file)?;
 
 	let entries: Vec<_> = archive
 		.list()
-		.unwrap()
+		.map_err(|e| {
+			log::error!("Failed to read rar archive: {:?}", e);
+
+			ProcessFileError::RarReadError
+		})?
 		.filter_map(|e| e.ok())
 		.filter(|e| e.is_image())
 		.collect();
 
 	// take first 6 images and add their sizes together
-	entries
+	Ok(entries
 		.iter()
 		.take(6)
-		.fold(0, |acc, e| acc + e.unpacked_size as u64)
+		.fold(0, |acc, e| acc + e.unpacked_size as u64))
 }
 
 pub fn digest_rar(file: &str) -> Option<String> {
 	log::debug!("Attempting to generate checksum for: {}", file);
 
-	let size = rar_sample(file);
+	let sample = rar_sample(file);
+
+	// Error handled in `rar_sample`
+	if let Err(_) = sample {
+		return None;
+	}
+
+	let size = sample.unwrap();
 
 	log::debug!(
 		"Calculated sample size (in bytes) for generating checksum: {}",
@@ -131,45 +145,56 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
 pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
-	let archive = unrar::Archive::new(file).unwrap();
+	let archive = unrar::Archive::new(file)?;
 
 	let mut entries: Vec<_> = archive
 		.list_extract()
-		.unwrap()
+		.map_err(|e| {
+			log::error!("Failed to read rar archive: {:?}", e);
+
+			ProcessFileError::RarReadError
+		})?
 		.filter_map(|e| e.ok())
 		.filter(|e| e.is_image())
 		.collect();
 
 	entries.sort_by(|a, b| a.filename.cmp(&b.filename));
 
-	let entry = entries.into_iter().nth((page - 1) as usize).unwrap();
+	if let Some(entry) = entries.into_iter().nth((page - 1) as usize) {
+		let archive = unrar::Archive::new(file)?;
 
-	let archive = unrar::Archive::new(file).unwrap();
+		let bytes = archive
+			.list_extract()
+			.map_err(|e| {
+				log::error!("Failed to read rar archive: {:?}", e);
 
-	let bytes = archive
-		.list_extract()
-		.unwrap()
-		.filter_map(|e| e.ok())
-		.filter(|e| e.filename == entry.filename)
-		.nth(0)
-		.unwrap()
-		.read_bytes()
-		.unwrap();
+				ProcessFileError::RarReadError
+			})?
+			.filter_map(|e| e.ok())
+			.filter(|e| e.filename == entry.filename)
+			.nth(0)
+			// FIXME: remove this unwrap...
+			.unwrap()
+			.read_bytes()
+			.map_err(|_e| ProcessFileError::RarReadError)?;
 
-	Ok((ContentType::JPEG, bytes))
+		return Ok((ContentType::JPEG, bytes));
+	}
+
+	Err(ProcessFileError::RarReadError)
 }
 
 #[cfg(test)]
 mod tests {
 	use super::*;
 
-	use crate::{config::context::Context, prisma::media, types::errors::ApiError};
+	use crate::{config::context::Ctx, prisma::media, types::errors::ApiError};
 
 	use rocket::tokio;
 
 	#[tokio::test]
 	async fn digest_rars_asynchronous() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let rars = ctx
 			.db
@@ -187,7 +212,7 @@ mod tests {
 		}
 
 		for rar in rars {
-			let rar_sample = rar_sample(&rar.path);
+			let rar_sample = rar_sample(&rar.path).unwrap();
 
 			let checksum = match checksum::digest_async(&rar.path, rar_sample).await {
 				Ok(digest) => {
@@ -209,7 +234,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn digest_rars_synchronous() -> Result<(), ApiError> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let rars = ctx
 			.db
@@ -227,7 +252,7 @@ mod tests {
 		}
 
 		for rar in rars {
-			let rar_sample = rar_sample(&rar.path);
+			let rar_sample = rar_sample(&rar.path).unwrap();
 
 			let checksum = match checksum::digest(&rar.path, rar_sample) {
 				Ok(digest) => {

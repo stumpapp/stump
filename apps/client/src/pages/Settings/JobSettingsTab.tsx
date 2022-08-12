@@ -17,9 +17,6 @@ export default function JobSettingsTab() {
 				<title>Stump | {'Jobs'}</title>
 			</Helmet>
 			<Stack w="full" spacing={6}>
-				{/* <Text alignSelf="start" size="sm" color={useColorModeValue('gray.700', 'gray.400')}>
-				{subtitle}
-			</Text> */}
 				<RunningJobs jobs={jobs} />
 				<QueuedJobs jobs={jobs} />
 				<JobHistory jobs={jobs} />

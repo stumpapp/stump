@@ -23,7 +23,15 @@ pub enum ClientEvent {
 	JobProgress(JobUpdate),
 	// TODO: change from string...
 	JobComplete(String),
-	JobFailed { runner_id: String, message: String },
+	JobFailed {
+		runner_id: String,
+		message: String,
+	},
+	CreateEntityFailed {
+		runner_id: Option<String>,
+		path: String,
+		message: String,
+	},
 	CreatedMedia(prisma::media::Data),
 	CreatedSeries(prisma::series::Data),
 }

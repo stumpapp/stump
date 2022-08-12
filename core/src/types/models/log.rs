@@ -61,6 +61,15 @@ impl From<ClientEvent> for TentativeLog {
 				message,
 				job_id: Some(runner_id),
 			},
+			ClientEvent::CreateEntityFailed {
+				runner_id,
+				path,
+				message,
+			} => TentativeLog {
+				level: LogLevel::Error,
+				message: format!("{}: {}", path, message),
+				job_id: runner_id,
+			},
 			_ => unimplemented!(),
 		}
 	}

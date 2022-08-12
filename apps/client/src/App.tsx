@@ -43,6 +43,7 @@ export default function Root() {
 					</StoreProvider>
 				</QueryClientProvider>
 			</ErrorBoundary>
+			<Notifications />
 		</ChakraProvider>
 	);
 }
@@ -99,7 +100,6 @@ function App() {
 				</Routes>
 				<JobOverlay />
 			</BrowserRouter>
-			<Notifications />
 		</>
 	);
 }

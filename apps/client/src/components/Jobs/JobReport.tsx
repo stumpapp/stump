@@ -1,18 +1,18 @@
 import { Heading, Stack } from '@chakra-ui/react';
+import { JobReport } from '@stump/core';
 import { useMemo } from 'react';
 import shallow from 'zustand/shallow';
-import { useJobReport } from '~hooks/useJobReport';
 import { useStore } from '~store/store';
 
 // TODO: ORGANIZE BETTER
 
-export function RunningJobs({ jobs }: { jobs: any[] }) {
+export function RunningJobs({ jobs }: { jobs: JobReport[] }) {
 	const zustandJobs = useStore((state) => state.jobs, shallow);
 
 	const runningJobs = useMemo(() => {
 		return jobs
-			.filter((job) => job.status === 'RUNNING' && zustandJobs[job.id])
-			.map((job) => ({ ...job, ...zustandJobs[job.id] }));
+			.filter((job) => job.status === 'RUNNING' && job.id && zustandJobs[job.id])
+			.map((job) => ({ ...job, ...zustandJobs[job.id!] }));
 	}, [zustandJobs, jobs]);
 
 	return (
@@ -26,7 +26,7 @@ export function RunningJobs({ jobs }: { jobs: any[] }) {
 	);
 }
 
-export function QueuedJobs({ jobs }: { jobs: any[] }) {
+export function QueuedJobs({ jobs }: { jobs: JobReport[] }) {
 	const zustandJobs = useStore((state) => state.jobs, shallow);
 
 	const queuedJobs = useMemo(() => {
@@ -44,7 +44,7 @@ export function QueuedJobs({ jobs }: { jobs: any[] }) {
 	);
 }
 
-export function JobHistory({ jobs }: { jobs: any[] }) {
+export function JobHistory({ jobs }: { jobs: JobReport[] }) {
 	const zustandJobs = useStore((state) => state.jobs, shallow);
 
 	const pastJobs = useMemo(() => {

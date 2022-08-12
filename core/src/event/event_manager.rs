@@ -47,6 +47,8 @@ impl EventManager {
 						// FIXME: I know, this will break.
 						let _ = return_sender.send(job_report.unwrap());
 					},
+					// TODO: remove this
+					#[allow(unreachable_patterns)]
 					_ => unimplemented!("I can't do that yet!"),
 				}
 			}

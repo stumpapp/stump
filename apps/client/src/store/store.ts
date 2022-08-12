@@ -92,7 +92,7 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 	completeJob(runnerId: string) {
 		const target = get().jobs[runnerId];
 		if (get().jobs[runnerId]) {
-			set(() => ({ jobs: { ...get().jobs, [runnerId]: { ...target, status: 'Completed' } } }));
+			set(() => ({ jobs: { ...get().jobs, [runnerId]: { ...target, status: 'COMPLETED' } } }));
 		}
 	},
 });

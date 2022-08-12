@@ -16,10 +16,8 @@ impl Job for LibraryScanJob {
 		"LibraryScanJob"
 	}
 
-	// FIXME: lifetime issues here...
-	fn details(&self) -> Option<&'static str> {
-		None
-		// Some(&self.path[..])
+	fn details(&self) -> Option<Box<&str>> {
+		Some(Box::new(self.path.as_str()))
 	}
 
 	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError> {
@@ -31,9 +29,10 @@ impl Job for LibraryScanJob {
 		let duration = start.elapsed();
 
 		log::info!(
-			"Finished library scan in {}.{:03} seconds",
+			"Finished library scan in {}.{:03} seconds. {} files processed.",
 			duration.as_secs(),
-			duration.subsec_millis()
+			duration.subsec_millis(),
+			completed_tasks
 		);
 
 		persist_job_end(&ctx, runner_id, completed_tasks, duration.as_secs()).await?;
@@ -51,7 +50,7 @@ impl Job for AllLibrariesScanJob {
 		"AllLibrariesScanJob"
 	}
 
-	fn details(&self) -> Option<&'static str> {
+	fn details(&self) -> Option<Box<&str>> {
 		todo!()
 	}
 

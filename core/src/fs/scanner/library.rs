@@ -120,6 +120,7 @@ async fn precheck(
 
 async fn scan_series(
 	ctx: Ctx,
+	runner_id: String,
 	series: series::Data,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) {
@@ -178,6 +179,13 @@ async fn scan_series(
 			},
 			Err(e) => {
 				log::error!("Failed to insert media: {:?}", e);
+
+				ctx.handle_failure_event(ClientEvent::CreateEntityFailed {
+					runner_id: Some(runner_id.clone()),
+					path: path.to_str().unwrap_or_default().to_string(),
+					message: e.to_string(),
+				})
+				.await;
 			},
 		}
 	}
@@ -236,7 +244,7 @@ async fn scan_series(
 pub async fn scan_concurrent(
 	ctx: Ctx,
 	path: String,
-	_runner_id: String,
+	runner_id: String,
 ) -> Result<(), ApiError> {
 	let (_library, series, _files_to_process) = precheck(&ctx, path).await?;
 
@@ -251,8 +259,10 @@ pub async fn scan_concurrent(
 
 			let counter_ref = counter.clone();
 
+			let runner_id = runner_id.clone();
+
 			tokio::spawn(async move {
-				scan_series(ctx_cpy.get_ctx(), s, move |_msg| {
+				scan_series(ctx_cpy.get_ctx(), runner_id, s, move |_msg| {
 					let mut shared = counter_ref.lock().unwrap();
 
 					*shared += 1;
@@ -288,12 +298,13 @@ pub async fn scan_sync(
 
 	let _ = ctx.emit_client_event(ClientEvent::job_started(
 		runner_id.clone(),
-		1,
+		// TODO: my brain is being silly and I don't know if I want 0 or 1 here....
+		0,
 		files_to_process,
 		Some(format!("Starting library scan at {}", &library.path)),
 	));
 
-	let counter = Arc::new(AtomicU64::new(1));
+	let counter = Arc::new(AtomicU64::new(0));
 
 	for s in series {
 		let progress_ctx = ctx.get_ctx();
@@ -301,12 +312,14 @@ pub async fn scan_sync(
 
 		let counter_ref = counter.clone();
 
-		scan_series(ctx.get_ctx(), s, move |msg| {
-			let current = counter_ref.fetch_add(1, Ordering::SeqCst);
+		let runner_id = runner_id.clone();
+
+		scan_series(ctx.get_ctx(), runner_id, s, move |msg| {
+			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
 			let _ = progress_ctx.emit_client_event(ClientEvent::job_progress(
 				r_id.to_owned(),
-				current,
+				previous + 1,
 				files_to_process,
 				Some(msg),
 			));
@@ -314,8 +327,7 @@ pub async fn scan_sync(
 		.await;
 	}
 
-	// FIXME: adding 1??
-	Ok(counter.fetch_add(0, Ordering::SeqCst))
+	Ok(counter.load(Ordering::SeqCst))
 }
 
 // TODO: add a 'scan all' for scanning all libraries...

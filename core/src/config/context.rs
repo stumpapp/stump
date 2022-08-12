@@ -41,10 +41,12 @@ impl Ctx {
 		}
 	}
 
+	/// Get reference to prisma client
 	pub fn get_db(&self) -> &prisma::PrismaClient {
 		&self.db
 	}
 
+	/// Returns a copy of the ctx
 	pub fn get_ctx(&self) -> Ctx {
 		Ctx {
 			db: self.db.clone(),
@@ -53,15 +55,17 @@ impl Ctx {
 		}
 	}
 
+	/// Returns the reciever for the ClientEvent channel. Used in the SSE listener endpoint.
 	pub fn get_client_receiver(&self) -> Receiver<ClientEvent> {
 		self.response_channel.0.subscribe()
 	}
 
-	// TODO: error handling??
+	// FIXME: error handling??
 	pub fn emit_client_event(&self, event: ClientEvent) {
 		let _ = self.response_channel.0.send(event);
 	}
 
+	/// Emits a client event and persists a log based on the failure.
 	pub async fn handle_failure_event(&self, event: ClientEvent) {
 		use prisma::log;
 
@@ -69,7 +73,7 @@ impl Ctx {
 
 		let tentative_log = TentativeLog::from(event);
 
-		// TODO: error handling here...
+		// FIXME: error handling here...
 		let _ = self
 			.db
 			.log()
@@ -84,6 +88,7 @@ impl Ctx {
 			.await;
 	}
 
+	/// Sends in internal task
 	pub fn internal_task(
 		&self,
 		task: ClientRequest,
@@ -91,6 +96,7 @@ impl Ctx {
 		self.internal_sender.send(task)
 	}
 
+	/// Sends a QueueJob task to the event manager.
 	pub fn spawn_job(&self, job: Box<dyn Job>) -> Result<(), SendError<ClientRequest>> {
 		self.internal_sender.send(ClientRequest::QueueJob(job))
 	}

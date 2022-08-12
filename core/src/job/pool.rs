@@ -15,6 +15,7 @@ use super::{runner::Runner, Job, JobReport};
 pub const DEFAULT_SCAN_INTERVAL_IN_SEC: i64 = 43200;
 
 pub enum JobPoolEvent {
+	Init(Ctx),
 	EnqueueJob(Ctx, Box<dyn Job>),
 }
 
@@ -40,6 +41,10 @@ impl JobPool {
 		tokio::spawn(async move {
 			while let Some(e) = internal_receiver.recv().await {
 				match e {
+					// TODO: should I just take in a &Ctx for this function and handle the Init event outside this?
+					JobPoolEvent::Init(_ctx) => {
+						log::warn!("TODO: unimplemented. This event will handle readding queued jobs on the event the server was stopped before they were completed");
+					},
 					JobPoolEvent::EnqueueJob(ctx, job) => {
 						pool_cpy.clone().enqueue_job(&ctx, job).await
 					},

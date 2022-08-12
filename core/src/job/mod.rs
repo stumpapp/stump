@@ -69,8 +69,10 @@ pub struct JobUpdate {
 pub struct JobReport {
 	/// This will actually refer to the job runner id
 	pub id: Option<String>,
-	// The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
-	//   details            String?
+	/// The kind of log, e.g. LibraryScanJob
+	pub kind: String,
+	/// The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
+	pub details: Option<String>,
 	/// The status of the job (i.e. COMPLETED, FAILED, CANCELLED). Running jobs are not persisted to DB.
 	status: JobStatus,
 	/// The total number of tasks
@@ -81,8 +83,6 @@ pub struct JobReport {
 	seconds_elapsed: Option<u64>,
 	/// The datetime stamp of when the job completed
 	completed_at: Option<String>,
-	/// The kind of log, e.g. LibraryScanJob
-	pub kind: String,
 }
 
 impl From<prisma::job::Data> for JobReport {
@@ -90,6 +90,7 @@ impl From<prisma::job::Data> for JobReport {
 		JobReport {
 			id: Some(data.id),
 			kind: data.kind,
+			details: data.details,
 			status: JobStatus::from(data.status.as_str()),
 			task_count: Some(data.task_count),
 			completed_task_count: Some(data.completed_task_count),
@@ -104,6 +105,7 @@ impl From<&Box<dyn Job>> for JobReport {
 		Self {
 			id: None,
 			kind: job.kind().to_string(),
+			details: job.details().map(|d| d.clone().to_string()),
 			status: JobStatus::Queued,
 
 			task_count: None,
@@ -117,7 +119,7 @@ impl From<&Box<dyn Job>> for JobReport {
 #[async_trait::async_trait]
 pub trait Job: Send + Sync {
 	fn kind(&self) -> &'static str;
-	fn details(&self) -> Option<&'static str>;
+	fn details(&self) -> Option<Box<&str>>;
 
 	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError>;
 }
@@ -136,9 +138,8 @@ pub async fn persist_new_job(
 		.create(
 			job::id::set(id),
 			job::kind::set(job.kind().to_string()),
-			// FIXME: error handling
 			vec![
-				job::details::set(job.details().map(|d| d.into())),
+				job::details::set(job.details().map(|d| d.clone().to_string())),
 				// job::task_count::set(task_count.try_into()?),
 			],
 		)

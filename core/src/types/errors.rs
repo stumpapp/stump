@@ -35,6 +35,8 @@ pub enum ProcessFileError {
 	// PdfReadError(#[from] pdf_rs::PdfError),
 	#[error("Could not find an image")]
 	NoImageError,
+	#[error("Failed to open rar archive: {0}")]
+	RarNulError(#[from] unrar::error::NulError),
 	#[error("Could not open rar file")]
 	RarOpenError,
 	#[error("Error reading file content in rar")]

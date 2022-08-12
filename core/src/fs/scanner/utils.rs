@@ -60,9 +60,14 @@ pub async fn insert_media(
 
 	let path = entry.path();
 
-	let path_str = path.to_str().unwrap().to_string();
-	let mut name = entry.file_name().to_str().unwrap().to_string();
-	let ext = path.extension().unwrap().to_str().unwrap().to_string();
+	let path_str = path.to_str().unwrap_or_default().to_string();
+	let mut name = entry.file_name().to_str().unwrap_or_default().to_string();
+	let ext = path
+		.extension()
+		.unwrap_or_default()
+		.to_str()
+		.unwrap_or_default()
+		.to_string();
 
 	// remove extension from name, not sure why file_name() includes it smh
 	if name.ends_with(format!(".{}", ext).as_str()) {
@@ -82,7 +87,11 @@ pub async fn insert_media(
 		.media()
 		.create(
 			media::name::set(name),
-			media::size::set(size.try_into().unwrap()),
+			media::size::set(size.try_into().unwrap_or_else(|e| {
+				log::error!("Failed to calculate file size: {:?}", e);
+
+				0
+			})),
 			media::extension::set(ext),
 			media::pages::set(match comic_info.page_count {
 				Some(count) => count as i32,

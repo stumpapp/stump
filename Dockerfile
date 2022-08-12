@@ -105,6 +105,7 @@ RUN mkdir -p config && \
     mkdir -p data && \
     mkdir -p app
 
+# FIXME: this does not seem to be working...
 # make the stump user own the directories
 RUN chown stump /config && \
     chown stump /data && \

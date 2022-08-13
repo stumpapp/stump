@@ -3,7 +3,10 @@ use unrar::archive::Entry;
 use walkdir::DirEntry;
 
 use crate::{
-	fs::media_file::{self, GetPageResult, IsImage},
+	fs::{
+		checksum::{DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
+		media_file::{self, GetPageResult, IsImage},
+	},
 	types::{alias::ProcessResult, errors::ProcessFileError, models::ProcessedMediaFile},
 };
 
@@ -33,7 +36,7 @@ pub fn convert_to_cbr() {
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
 pub fn process_rar(file: &DirEntry) -> ProcessResult {
-	info!("Processing Rar: {}", file.path().display());
+	info!("Processing Rar (new): {}", file.path().display());
 
 	let path = file.path().to_string_lossy().to_string();
 	let archive = unrar::Archive::new(&path)?;
@@ -49,23 +52,24 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 			for entry in open_archive {
 				match entry {
 					Ok(mut e) => {
-						let filename = e.filename.to_string_lossy().to_string();
+						// FIXME: This was segfaulting in Docker. I have a feeling it is because
+						// of my subpar implementation of the `read_bytes`.
+						// https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
+						// let filename = e.filename.to_string_lossy().to_string();
 
-						if filename.eq("ComicInfo.xml") {
-							// FIXME: this won't work. `read_bytes` needs more refactoring.
-							metadata_buf = match e.read_bytes() {
-								Ok(b) => b,
-								Err(_e) => {
-									// error!("Error reading metadata: {}", e);
-									// todo!()
-									vec![]
-								},
-							}
-						} else {
-							pages += 1;
-						}
-
-						// entries.push(filename);
+						// if filename.eq("ComicInfo.xml") {
+						// 	// FIXME: this won't work. `read_bytes` needs more refactoring.
+						// 	metadata_buf = match e.read_bytes() {
+						// 		Ok(b) => b,
+						// 		Err(_e) => {
+						// 			// error!("Error reading metadata: {}", e);
+						// 			// todo!()
+						// 			vec![]
+						// 		},
+						// 	}
+						// } else {
+						// 	pages += 1;
+						// }
 					},
 					Err(_e) => return Err(ProcessFileError::RarReadError),
 				}
@@ -83,27 +87,45 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 	})
 }
 
+// FIXME: this is a temporary work around for the issue wonderful people on Discord
+// discovered.
 pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
 	log::debug!("Calculating checksum sample size for: {}", file);
 
-	let archive = unrar::Archive::new(&file)?;
+	let file = std::fs::File::open(file)?;
 
-	let entries: Vec<_> = archive
-		.list()
-		.map_err(|e| {
-			log::error!("Failed to read rar archive: {:?}", e);
+	let file_size = file.metadata()?.len();
+	let threshold = DIGEST_SAMPLE_SIZE * DIGEST_SAMPLE_COUNT;
 
-			ProcessFileError::RarReadError
-		})?
-		.filter_map(|e| e.ok())
-		.filter(|e| e.is_image())
-		.collect();
+	if file_size < threshold {
+		return Ok(file_size);
+	}
 
-	// take first 6 images and add their sizes together
-	Ok(entries
-		.iter()
-		.take(6)
-		.fold(0, |acc, e| acc + e.unpacked_size as u64))
+	let division = file_size / threshold;
+
+	// if the file size is 4x the threshold, we'll take up to the threshold.
+	if division > 4 {
+		Ok(threshold)
+	} else {
+		Ok(file_size / 2)
+	}
+
+	// let entries: Vec<_> = archive
+	// 	.list()
+	// 	.map_err(|e| {
+	// 		log::error!("Failed to read rar archive: {:?}", e);
+
+	// 		ProcessFileError::RarReadError
+	// 	})?
+	// 	.filter_map(|e| e.ok())
+	// 	.filter(|e| e.is_image())
+	// 	.collect();
+
+	// // take first 6 images and add their sizes together
+	// Ok(entries
+	// 	.iter()
+	// 	.take(6)
+	// 	.fold(0, |acc, e| acc + e.unpacked_size as u64))
 }
 
 pub fn digest_rar(file: &str) -> Option<String> {
@@ -137,6 +159,7 @@ pub fn digest_rar(file: &str) -> Option<String> {
 	}
 }
 
+// FIXME: the unrar library completely breaks on Docker... AGH!!
 // Note: I am sorting by filename after opening, *however* this really is *not* ideal.
 // If the files were to have any other naming scheme that would be a problem. Is this a problem?
 // TODO: I have to solve the `read_bytes` issue on my unrar fork. For now, I am leaving this very unideal
@@ -160,28 +183,49 @@ pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
 
 	entries.sort_by(|a, b| a.filename.cmp(&b.filename));
 
-	if let Some(entry) = entries.into_iter().nth((page - 1) as usize) {
-		let archive = unrar::Archive::new(file)?;
+	let entry = entries.into_iter().nth((page - 1) as usize).unwrap();
 
-		let bytes = archive
-			.list_extract()
-			.map_err(|e| {
-				log::error!("Failed to read rar archive: {:?}", e);
+	let archive = unrar::Archive::new(file)?;
 
-				ProcessFileError::RarReadError
-			})?
-			.filter_map(|e| e.ok())
-			.filter(|e| e.filename == entry.filename)
-			.nth(0)
-			// FIXME: remove this unwrap...
-			.unwrap()
-			.read_bytes()
-			.map_err(|_e| ProcessFileError::RarReadError)?;
+	let bytes = archive
+		.list_extract()
+		.map_err(|e| {
+			log::error!("Failed to read rar archive: {:?}", e);
 
-		return Ok((ContentType::JPEG, bytes));
-	}
+			ProcessFileError::RarReadError
+		})?
+		.filter_map(|e| e.ok())
+		.filter(|e| e.filename == entry.filename)
+		.nth(0)
+		// FIXME: remove this unwrap...
+		.unwrap()
+		.read_bytes()
+		.map_err(|_e| ProcessFileError::RarReadError)?;
 
-	Err(ProcessFileError::RarReadError)
+	Ok((ContentType::JPEG, bytes))
+
+	// if let Some(entry) = entries.into_iter().nth((page - 1) as usize) {
+	// 	let archive = unrar::Archive::new(file)?;
+
+	// 	let bytes = archive
+	// 		.list_extract()
+	// 		.map_err(|e| {
+	// 			log::error!("Failed to read rar archive: {:?}", e);
+
+	// 			ProcessFileError::RarReadError
+	// 		})?
+	// 		.filter_map(|e| e.ok())
+	// 		.filter(|e| e.filename == entry.filename)
+	// 		.nth(0)
+	// 		// FIXME: remove this unwrap...
+	// 		.unwrap()
+	// 		.read_bytes()
+	// 		.map_err(|_e| ProcessFileError::RarReadError)?;
+
+	// 	return Ok((ContentType::JPEG, bytes));
+	// }
+
+	// Err(ProcessFileError::RarReadError)
 }
 
 #[cfg(test)]

@@ -45,3 +45,7 @@ pub fn get_config_dir() -> PathBuf {
 
 	config_dir
 }
+
+pub fn stump_in_docker() -> bool {
+	std::env::var("STUMP_IN_DOCKER").is_ok()
+}

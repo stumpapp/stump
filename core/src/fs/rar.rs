@@ -3,6 +3,7 @@ use unrar::archive::Entry;
 use walkdir::DirEntry;
 
 use crate::{
+	config::stump_in_docker,
 	fs::{
 		checksum::{DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
 		media_file::{self, GetPageResult, IsImage},
@@ -36,6 +37,12 @@ pub fn convert_to_cbr() {
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
 pub fn process_rar(file: &DirEntry) -> ProcessResult {
+	if stump_in_docker() {
+		return Err(ProcessFileError::UnsupportedFileType(
+			"Stump cannot support cbr/rar files in docker containers for now.".into(),
+		));
+	}
+
 	info!("Processing Rar (new): {}", file.path().display());
 
 	let path = file.path().to_string_lossy().to_string();
@@ -43,6 +50,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 
 	let mut pages = 0;
 
+	#[allow(unused_mut)]
 	let mut metadata_buf = Vec::<u8>::new();
 
 	let checksum = digest_rar(&path);
@@ -51,25 +59,24 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 		Ok(open_archive) => {
 			for entry in open_archive {
 				match entry {
-					Ok(mut e) => {
-						// FIXME: This was segfaulting in Docker. I have a feeling it is because
-						// of my subpar implementation of the `read_bytes`.
+					Ok(e) => {
 						// https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-						// let filename = e.filename.to_string_lossy().to_string();
+						let filename = e.filename.to_string_lossy().to_string();
 
-						// if filename.eq("ComicInfo.xml") {
-						// 	// FIXME: this won't work. `read_bytes` needs more refactoring.
-						// 	metadata_buf = match e.read_bytes() {
-						// 		Ok(b) => b,
-						// 		Err(_e) => {
-						// 			// error!("Error reading metadata: {}", e);
-						// 			// todo!()
-						// 			vec![]
-						// 		},
-						// 	}
-						// } else {
-						// 	pages += 1;
-						// }
+						if filename.eq("ComicInfo.xml") {
+							// FIXME: This was segfaulting in Docker. I have a feeling it is because
+							// of my subpar implementation of the `read_bytes`.
+							// metadata_buf = match e.read_bytes() {
+							// 	Ok(b) => b,
+							// 	Err(_e) => {
+							// 		// error!("Error reading metadata: {}", e);
+							// 		// todo!()
+							// 		vec![]
+							// 	},
+							// }
+						} else {
+							pages += 1;
+						}
 					},
 					Err(_e) => return Err(ProcessFileError::RarReadError),
 				}
@@ -168,6 +175,12 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
 pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
+	if stump_in_docker() {
+		return Err(ProcessFileError::UnsupportedFileType(
+			"Stump cannot support cbr/rar files in docker containers for now.".into(),
+		));
+	}
+
 	let archive = unrar::Archive::new(file)?;
 
 	let mut entries: Vec<_> = archive

@@ -3,8 +3,6 @@ import { AnimatePresence } from 'framer-motion';
 import { Books, CaretRight, Gear, House } from 'phosphor-react';
 import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import shallow from 'zustand/shallow';
-import { useStore } from '~store/store';
 
 import {
 	Box,
@@ -70,6 +68,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 			<AnimatePresence>
 				{isOpen && (
 					<VStack mt={2} spacing={2}>
+						{/* FIXME: there is the *slightest* stutter when clicking this button. it looks as if the portal doesn't render right away? */}
 						<CreateLibraryModal />
 
 						{items!.map((item) => (

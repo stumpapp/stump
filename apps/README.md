@@ -64,7 +64,11 @@ pnpm core start
 
 TBD 😉👀🤷
 
-## Webiste
+## Desktop??
+
+Probably not lol
+
+## Website
 
 The website is mainly the documentation for Stump. It lives at [stumpapp.dev](http://stumpapp.dev). It uses Next.js, Tailwind and Markdoc.
 

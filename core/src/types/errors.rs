@@ -23,8 +23,8 @@ pub enum ProcessFileError {
 	// InvalidArchive,
 	#[error("Error occurred while opening file: {0}")]
 	FileIoError(#[from] std::io::Error),
-	#[error("Could not read archive file")]
-	ArchiveReadError(#[from] ZipError),
+	#[error("A zip error ocurred: {0}")]
+	ZipFileError(#[from] ZipError),
 	#[error("Archive contains no files")]
 	ArchiveEmptyError,
 	#[error("Unable to open .epub file: {0}")]
@@ -39,6 +39,8 @@ pub enum ProcessFileError {
 	RarNulError(#[from] unrar::error::NulError),
 	#[error("Could not open rar file")]
 	RarOpenError,
+	#[error("Could not extract rar file: {0}")]
+	RarExtractError(String),
 	#[error("Error reading file content in rar")]
 	RarReadError,
 	#[error("Error reading bytes from rar")]

@@ -1,9 +1,11 @@
+use std::path::{Path, PathBuf};
+
 use rocket::http::ContentType;
 use unrar::archive::Entry;
 use walkdir::DirEntry;
 
 use crate::{
-	config::stump_in_docker,
+	config::{self, stump_in_docker},
 	fs::{
 		checksum::{DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
 		media_file::{self, GetPageResult, IsImage},
@@ -13,7 +15,7 @@ use crate::{
 
 // FIXME: terrible error handling in this file... needs a total rework honestly.
 
-use super::checksum;
+use super::{checksum, zip};
 
 impl IsImage for Entry {
 	fn is_image(&self) -> bool {
@@ -28,8 +30,60 @@ impl IsImage for Entry {
 	}
 }
 
-pub fn convert_to_cbr() {
-	unimplemented!()
+pub fn convert_to_cbr(path: &Path) -> Result<PathBuf, ProcessFileError> {
+	log::debug!("Converting {:?} to zip format.", &path);
+
+	let archive = unrar::Archive::new(path)?;
+
+	let parent = path.parent().unwrap_or(Path::new("/"));
+	// TODO: remove *unsafe* unwraps
+	let dir_name = path.file_stem().unwrap().to_str().unwrap();
+	let original_ext = path.extension().unwrap().to_str().unwrap();
+	let unpacked_path = config::get_cache_dir().join(dir_name);
+
+	log::trace!("Extracting rar contents to: {:?}", &unpacked_path);
+
+	// TODO: fix this mess...
+	archive
+		.extract_to(&unpacked_path)
+		.map_err(|e| {
+			log::error!("Failed to open archive: {:?}", e.to_string());
+
+			ProcessFileError::RarOpenError
+		})?
+		.process()
+		.map_err(|e| {
+			log::error!("Failed to extract archive: {:?}", e.to_string());
+
+			ProcessFileError::RarExtractError(e.to_string())
+		})?;
+
+	let zip_path = zip::create_zip(&unpacked_path, dir_name, original_ext, parent)?;
+
+	// Note: this will put the file in the 'trash' according to the user's platform.
+	// Rather than hard deleting it, I figured this would be desirable.
+	// This error won't be 'fatal' in that it won't cause an error to be returned.
+	// TODO: maybe persist a log here? Or make more compliacated return?
+	// something like ConvertResult { ConvertedMoveFailed, etc. }
+	if let Err(err) = trash::delete(path) {
+		log::warn!(
+			"Failed to delete converted rar file {:?}: {:?}",
+			path,
+			err.to_string()
+		);
+	}
+
+	// TODO: same as above, except this is a HARD delete
+	// TODO: maybe check that this path isn't in a pre-defined list of important paths?
+	if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
+		log::warn!(
+			"Failed to delete unpacked rar contents in cache {:?}: {:?}",
+			path,
+			err.to_string()
+		);
+	}
+
+	Ok(zip_path)
 }
 
 // TODO: fix error handling after rar changes
@@ -248,6 +302,24 @@ mod tests {
 	use crate::{config::context::Ctx, prisma::media, types::errors::ApiError};
 
 	use rocket::tokio;
+
+	#[test]
+	fn test_rar_to_zip() {
+		let test_file =
+			"/Users/aaronleopold/Documents/Stump/Demo/Venom/Venom 001 (2022).cbr";
+
+		let path = Path::new(test_file);
+
+		let result = super::convert_to_cbr(path);
+
+		// assert!(result.is_ok());
+
+		let zip_path = result.unwrap();
+
+		// assert!(zip_path.exists());
+
+		println!("{:?}", zip_path);
+	}
 
 	#[tokio::test]
 	async fn digest_rars_asynchronous() -> Result<(), ApiError> {

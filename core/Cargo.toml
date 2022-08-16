@@ -32,6 +32,7 @@ serde-xml-rs = "0.5.1" # used for serializing/deserializing xml
 # files & hashing
 walkdir = "2.3.2"
 dirs = "4.0.0"
+trash = "2.0"
 infer = "0.7.0"
 image = "0.24.2"
 webp = "0.2.2"

@@ -1,5 +1,5 @@
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
-import { ArrowsClockwise, DotsThreeVertical } from 'phosphor-react';
+import { ArrowsClockwise, Binoculars, DotsThreeVertical } from 'phosphor-react';
 import { useMutation } from '@tanstack/react-query';
 import { scanLibary } from '~api/library';
 import EditLibraryModal from './EditLibraryModal';
@@ -9,12 +9,15 @@ import { UserRole } from '~util/common';
 import { useUser } from '~hooks/useUser';
 import { Library } from '@stump/core';
 import client from '~api/client';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
 	library: Library;
 }
 
 export default function LibraryOptionsMenu({ library }: Props) {
+	const navigate = useNavigate();
+
 	const { user } = useUser();
 
 	const { mutate: scan } = useMutation(['scanLibary'], { mutationFn: scanLibary });
@@ -66,6 +69,12 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					Scan
 				</MenuItem>
 				<EditLibraryModal library={library} disabled={user?.role !== UserRole.ServerOwner} />
+				<MenuItem
+					icon={<Binoculars size={'1rem'} />}
+					onClick={() => navigate(`libraries/${library.id}/explorer`)}
+				>
+					File Explorer
+				</MenuItem>
 				<MenuDivider />
 				<DeleteLibraryModal library={library} disabled={user?.role !== UserRole.ServerOwner} />
 			</MenuList>

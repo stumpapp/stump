@@ -50,6 +50,16 @@ pub async fn list_directory(
 
 	let mut files = listing
 		.filter_map(|e| e.ok())
+		.filter_map(|f| {
+			let path = f.path();
+			let stem = path.file_stem().unwrap_or_default();
+
+			if stem.to_str().unwrap_or_default().starts_with(".") {
+				return None;
+			}
+
+			Some(f)
+		})
 		.map(|entry| {
 			let entry = entry;
 

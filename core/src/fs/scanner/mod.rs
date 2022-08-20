@@ -7,6 +7,7 @@ use rocket::http::ContentType;
 
 use crate::fs::media_file;
 
+// TODO: refactor this trait?
 pub trait ScannedFileTrait {
 	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;
 	fn is_invisible_file(&self) -> bool;

@@ -14,7 +14,6 @@ use crate::{
 };
 use epub::doc::EpubDoc;
 use rocket::http::ContentType;
-use walkdir::DirEntry;
 
 use super::{checksum, media_file::get_content_type_from_mime};
 
@@ -48,10 +47,8 @@ fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
 	Ok(EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))?)
 }
 
-pub fn process_epub(file: &DirEntry) -> ProcessResult {
-	log::info!("Processing Epub: {}", file.path().display());
-
-	let path = file.path();
+pub fn process_epub(path: &Path) -> ProcessResult {
+	log::info!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
 
@@ -60,9 +57,10 @@ pub fn process_epub(file: &DirEntry) -> ProcessResult {
 	let metadata: Option<MediaMetadata> = None;
 
 	Ok(ProcessedMediaFile {
+		path: path.to_path_buf(),
 		checksum: digest_epub(
 			path,
-			file.metadata()
+			path.metadata()
 				.map_err(|e| {
 					log::error!(
 						"Failed to get metadata for epub file: {}",

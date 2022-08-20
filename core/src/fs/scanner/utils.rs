@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use prisma_client_rust::{raw, PrismaValue};
 // use rocket::tokio::{self, task::JoinHandle};
 use walkdir::DirEntry;
@@ -53,15 +55,24 @@ pub async fn mark_library_missing(
 
 pub async fn insert_media(
 	ctx: &Ctx,
-	entry: &DirEntry,
+	path: &Path,
 	series_id: String,
 ) -> Result<media::Data, ScanError> {
-	let processed_entry = media_file::process_entry(entry)?;
+	let processed_entry = media_file::process(path)?;
 
-	let path = entry.path();
+	let pathbuf = processed_entry.path;
+	let path = pathbuf.as_path();
 
 	let path_str = path.to_str().unwrap_or_default().to_string();
-	let mut name = entry.file_name().to_str().unwrap_or_default().to_string();
+
+	// EW, I hate that I need to do this over and over lol time to make a trait for Path.
+	let name = path
+		.file_stem()
+		.unwrap_or_default()
+		.to_str()
+		.unwrap_or_default()
+		.to_string();
+
 	let ext = path
 		.extension()
 		.unwrap_or_default()
@@ -69,13 +80,8 @@ pub async fn insert_media(
 		.unwrap_or_default()
 		.to_string();
 
-	// remove extension from name, not sure why file_name() includes it smh
-	if name.ends_with(format!(".{}", ext).as_str()) {
-		name.truncate(name.len() - (ext.len() + 1));
-	}
-
 	// Note: make this return a tuple if I need to grab anything else from metadata.
-	let size = match entry.metadata() {
+	let size = match path.metadata() {
 		Ok(metadata) => metadata.len(),
 		_ => 0,
 	};

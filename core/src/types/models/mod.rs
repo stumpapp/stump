@@ -8,6 +8,8 @@ pub mod series;
 pub mod tag;
 pub mod user;
 
+use std::path::PathBuf;
+
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -92,8 +94,8 @@ impl MediaMetadata {
 }
 
 pub struct ProcessedMediaFile {
+	pub path: PathBuf,
 	pub checksum: Option<String>,
 	pub metadata: Option<MediaMetadata>,
-	// pub entries: Vec<String>,
 	pub pages: i32,
 }

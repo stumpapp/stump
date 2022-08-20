@@ -17,7 +17,8 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 const Home = React.lazy(() => import('~pages/Home'));
-const LibraryOverview = React.lazy(() => import('~pages/LibraryOverview'));
+const LibraryOverview = React.lazy(() => import('~pages/Library/LibraryOverview'));
+const LibraryFileExplorer = React.lazy(() => import('~pages/Library/LibraryFileExplorer'));
 const SeriesOverview = React.lazy(() => import('~pages/SeriesOverview'));
 const BookOverview = React.lazy(() => import('~pages/Book/BookOverview'));
 const ReadBook = React.lazy(() => import('~pages/Book/ReadBook'));
@@ -86,6 +87,7 @@ function App() {
 							<Route path="jobs" element={<JobSettingsTab />} />
 						</Route>
 						<Route path="libraries/:id" element={<LibraryOverview />} />
+						<Route path="libraries/:id/explorer" element={<LibraryFileExplorer />} />
 						<Route path="series/:id" element={<SeriesOverview />} />
 						<Route path="books/:id" element={<BookOverview />} />
 						<Route path="books/:id/pages/:page" element={<ReadBook />} />

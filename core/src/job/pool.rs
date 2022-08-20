@@ -7,7 +7,10 @@ use prisma_client_rust::chrono;
 use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::{config::context::Ctx, types::alias::ApiResult};
+use crate::{
+	config::{context::Ctx, stump_in_docker},
+	types::alias::ApiResult,
+};
 
 use super::{runner::Runner, Job, JobReport};
 
@@ -52,7 +55,6 @@ impl JobPool {
 			}
 		});
 
-		// TODO: Not sure I ~love~ spawning again, but we shall see.
 		// let pool_cpy = pool.clone();
 		tokio::spawn(async move {
 			let interval: i64 = std::env::var("SCAN_INTERVAL")
@@ -62,6 +64,7 @@ impl JobPool {
 			let mut timer = tokio::time::interval(
 				chrono::Duration::seconds(interval).to_std().unwrap(),
 			);
+
 			loop {
 				timer.tick().await;
 
@@ -70,6 +73,23 @@ impl JobPool {
 				// pool_cpy.clone().enqueue_job(&ctx, AllLibrariesScanJob {}).await
 			}
 		});
+
+		// let pool_cpy = pool.clone();
+		if stump_in_docker() {
+			// TODO: look into performance impacts for spawning yet another thread...
+			tokio::spawn(async move {
+				let mut timer =
+					tokio::time::interval(chrono::Duration::days(3).to_std().unwrap());
+
+				loop {
+					timer.tick().await;
+
+					log::debug!("TODO: implement trash empty!");
+
+					// pool_cpy.clone().enqueue_job(&ctx, ClearDockerTrash {}).await
+				}
+			});
+		}
 
 		pool
 	}

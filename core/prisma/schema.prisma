@@ -76,6 +76,20 @@ model Library {
   @@map("libraries")
 }
 
+model LibraryOptions {
+  id                    String  @id @default(uuid())
+  // Flag indicating whether or not to attempt to convert rar files to zip on scans.
+  convertRarToZip       Boolean @default(false)
+  // Flag indicating whether or not to *hard* delete rar files that were sucessfully converted to zip.
+  // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
+  // trash location, or a custom location when running in Docker (which will clear on an interval).
+  hardDeleteConversions Boolean @default(false)
+  // The ID of the library which these options belong to.
+  libraryId             String
+
+  @@map("library_options")
+}
+
 model Series {
   id          String   @id @default(uuid())
   // The title of the series. This is generated from a fs scan, and will be the directory name.

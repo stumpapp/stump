@@ -1,6 +1,5 @@
 use rocket::http::ContentType;
 use std::{path::Path, str::FromStr};
-use walkdir::DirEntry;
 
 use crate::types::{
 	alias::ProcessResult, errors::ProcessFileError, http::ImageResponse,
@@ -9,7 +8,6 @@ use crate::types::{
 
 use super::{
 	epub::{get_epub_cover, process_epub},
-	// epub::get_epub_page,
 	rar::{get_rar_image, process_rar},
 	zip::{get_zip_image, process_zip},
 };
@@ -169,24 +167,27 @@ pub fn get_page(file: &str, page: i32) -> GetPageResult {
 	}
 }
 
-pub fn process_entry(entry: &DirEntry) -> ProcessResult {
-	log::debug!("Processing entry: {:?}", entry);
+// TODO: take in a LibraryOptions
+pub fn process(path: &Path) -> ProcessResult {
+	log::debug!("Processing entry: {:?}", path);
 
-	let mime = infer_mime_from_path(entry.path());
+	let mime = infer_mime_from_path(path);
 
-	// TODO: improve this? kinda verbose
+	// TODO: replace with flag in LibraryOptions
+	let convert_rar_to_zip = true;
+
 	match mime.as_deref() {
-		Some("application/zip") => process_zip(entry),
-		Some("application/vnd.comicbook+zip") => process_zip(entry),
-		Some("application/vnd.rar") => process_rar(entry),
-		Some("application/vnd.comicbook-rar") => process_rar(entry),
-		Some("application/epub+zip") => process_epub(entry),
+		Some("application/zip") => process_zip(path),
+		Some("application/vnd.comicbook+zip") => process_zip(path),
+		Some("application/vnd.rar") => process_rar(path, convert_rar_to_zip),
+		Some("application/vnd.comicbook-rar") => process_rar(path, convert_rar_to_zip),
+		Some("application/epub+zip") => process_epub(path),
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
-			entry.path()
+			path
 		))),
 		_ => Err(ProcessFileError::UnsupportedFileType(
-			entry.path().to_string_lossy().into_owned(),
+			path.to_string_lossy().into_owned(),
 		)),
 	}
 }

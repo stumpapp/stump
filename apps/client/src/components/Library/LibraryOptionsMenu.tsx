@@ -1,4 +1,3 @@
-import React from 'react';
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
 import { ArrowsClockwise, DotsThreeVertical } from 'phosphor-react';
 import { useMutation } from '@tanstack/react-query';

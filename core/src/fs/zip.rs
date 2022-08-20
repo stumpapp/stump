@@ -8,7 +8,7 @@ use std::{
 	io::{Read, Write},
 	path::{Path, PathBuf},
 };
-use walkdir::{DirEntry, WalkDir};
+use walkdir::WalkDir;
 use zip::{read::ZipFile, write::FileOptions};
 
 use super::checksum;
@@ -146,10 +146,10 @@ pub fn digest_zip(path: &str) -> Option<String> {
 
 /// Processes a zip file in its entirety, includes: medatadata, page count, and the
 /// generated checksum for the file.
-pub fn process_zip(file: &DirEntry) -> ProcessResult {
-	info!("Processing Zip: {}", file.path().display());
+pub fn process_zip(path: &Path) -> ProcessResult {
+	info!("Processing Zip: {}", path.display());
 
-	let zip_file = File::open(file.path())?;
+	let zip_file = File::open(path)?;
 	let mut archive = zip::ZipArchive::new(zip_file)?;
 
 	let mut comic_info = None;
@@ -169,7 +169,8 @@ pub fn process_zip(file: &DirEntry) -> ProcessResult {
 	}
 	// 7054b81b-09f1-48f9-9167-8396ccd57533
 	Ok(ProcessedMediaFile {
-		checksum: digest_zip(file.path().to_str().unwrap()),
+		path: path.to_path_buf(),
+		checksum: digest_zip(path.to_str().unwrap()),
 		metadata: comic_info,
 		pages,
 	})

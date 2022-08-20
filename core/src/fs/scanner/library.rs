@@ -27,6 +27,7 @@ async fn precheck(
 ) -> Result<(library::Data, Vec<series::Data>, u64), ApiError> {
 	let db = ctx.get_db();
 
+	// TODO: load library options
 	let library = db
 		.library()
 		.find_unique(library::path::equals(path.clone()))
@@ -56,6 +57,9 @@ async fn precheck(
 		.map(|data| (data.path.as_str(), data.to_owned()).into())
 		.collect::<HashMap<&str, series::Data>>();
 
+	// FIXME: I still don't like this. This needs to create series from bottom-most level, not top most
+	// level I think. It's a little more annoying, but worth in the end? UNLESS, I just use the file explorer
+	// option PNG suggested.
 	let new_entries = WalkDir::new(&path)
 		// I only allow depth of 1 because the top most directory will *always* be the series. Nested
 		// directories get 'folded' into the series represented by the top directory.
@@ -68,9 +72,22 @@ async fn precheck(
 
 			let path_str = path.as_os_str().to_string_lossy().to_string();
 
+			// The root should only be added as a series if it has a file as a direct descendent.
+			// This has to short circuit here, since below checks for deeply nested files, which will
+			// always be true for library paths unless there is truly no media in it.
+			if path_str == library.path {
+				return path.dir_has_media()
+					&& !series_map.contains_key(path_str.as_str());
+			}
+
+			let has_media_nested = WalkDir::new(path)
+				.into_iter()
+				.filter_map(|e| e.ok())
+				.any(|e| e.path().is_file());
+
 			// Only create series if there is media inside them, and if they aren't in
 			// the exisitng series map.
-			path.dir_has_media() && !series_map.contains_key(path_str.as_str())
+			has_media_nested && !series_map.contains_key(path_str.as_str())
 		})
 		.collect();
 
@@ -153,7 +170,7 @@ async fn scan_series(
 		on_progress(format!("Analyzing {:?}", path));
 
 		if path.should_ignore() {
-			log::debug!("Skipping ignored file: {:?}", path);
+			log::trace!("Skipping ignored file: {:?}", path);
 			continue;
 		} else if path.is_thumbnail_img() {
 			// TODO: these will *eventually* be supported, but not priority right now.
@@ -170,7 +187,7 @@ async fn scan_series(
 
 		log::debug!("New media found at {:?} in series {:?}", &path, &series.id);
 
-		match super::utils::insert_media(&ctx, &entry, series.id.clone()).await {
+		match super::utils::insert_media(&ctx, path, series.id.clone()).await {
 			Ok(media) => {
 				visited_media.insert(media.path.clone(), true);
 

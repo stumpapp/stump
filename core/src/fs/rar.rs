@@ -2,7 +2,6 @@ use std::path::{Path, PathBuf};
 
 use rocket::http::ContentType;
 use unrar::archive::Entry;
-use walkdir::DirEntry;
 
 use crate::{
 	config::{self, stump_in_docker},
@@ -30,7 +29,7 @@ impl IsImage for Entry {
 	}
 }
 
-pub fn convert_to_cbr(path: &Path) -> Result<PathBuf, ProcessFileError> {
+pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 	log::debug!("Converting {:?} to zip format.", &path);
 
 	let archive = unrar::Archive::new(path)?;
@@ -90,16 +89,24 @@ pub fn convert_to_cbr(path: &Path) -> Result<PathBuf, ProcessFileError> {
 
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
-pub fn process_rar(file: &DirEntry) -> ProcessResult {
+pub fn process_rar(path: &Path, convert_to_zip: bool) -> ProcessResult {
+	if convert_to_zip {
+		let new_path = convert_rar_to_zip(path)?;
+
+		log::trace!("Using `process_zip` with converted rar.");
+
+		return zip::process_zip(&new_path);
+	}
+
 	if stump_in_docker() {
 		return Err(ProcessFileError::UnsupportedFileType(
-			"Stump cannot support cbr/rar files in docker containers for now.".into(),
+			"Stump cannot support cbr/rar files in docker containers for now. Please either alter your Library options to convert rar files to zip, or run Stump from source".into(),
 		));
 	}
 
-	info!("Processing Rar (new): {}", file.path().display());
+	info!("Processing Rar (new): {}", path.display());
 
-	let path = file.path().to_string_lossy().to_string();
+	let path_str = path.to_string_lossy().to_string();
 	let archive = unrar::Archive::new(&path)?;
 
 	let mut pages = 0;
@@ -107,7 +114,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 	#[allow(unused_mut)]
 	let mut metadata_buf = Vec::<u8>::new();
 
-	let checksum = digest_rar(&path);
+	let checksum = digest_rar(&path_str);
 
 	match archive.list_extract() {
 		Ok(open_archive) => {
@@ -140,6 +147,7 @@ pub fn process_rar(file: &DirEntry) -> ProcessResult {
 	};
 
 	Ok(ProcessedMediaFile {
+		path: path.to_path_buf(),
 		checksum,
 		metadata: media_file::process_comic_info(
 			std::str::from_utf8(&metadata_buf)?.to_owned(),
@@ -310,7 +318,7 @@ mod tests {
 
 		let path = Path::new(test_file);
 
-		let result = super::convert_to_cbr(path);
+		let result = super::convert_rar_to_zip(path);
 
 		// assert!(result.is_ok());
 

@@ -61,8 +61,10 @@ export function useDirectoryListing({ enabled, startingPath }: Props) {
 		error,
 		errorMessage,
 		path,
+		entries: directoryListing?.files ?? [],
 		parent: directoryListing?.parent,
 		directories: directoryListing?.files.filter((f) => f.isDirectory) ?? [],
+		// files: directoryListing?.files.filter((f) => !f.isDirectory) ?? [],
 		...actions,
 	};
 }

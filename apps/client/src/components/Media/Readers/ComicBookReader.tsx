@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useBoolean } from '@chakra-ui/react';
-import Toolbar from './Toolbar';
+import Toolbar from '../Toolbar';
 import { useAnimation, motion, useMotionValue, useTransform } from 'framer-motion';
 // import type { ControlsAnimationDefinition } from 'framer-motion/types/animation/types';
 import { useHotkeys } from 'react-hotkeys-hook';

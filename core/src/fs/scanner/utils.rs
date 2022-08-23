@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use prisma_client_rust::{raw, PrismaValue};
-// use rocket::tokio::{self, task::JoinHandle};
 use walkdir::DirEntry;
 
 use crate::{

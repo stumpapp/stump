@@ -4,7 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import { scanLibary } from '~api/library';
 import EditLibraryModal from './EditLibraryModal';
 import DeleteLibraryModal from './DeleteLibraryModal';
-import toast from 'react-hot-toast';
 import { UserRole } from '~util/common';
 import { useUser } from '~hooks/useUser';
 import { Library } from '@stump/core';
@@ -25,8 +24,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	function handleScan() {
 		// extra protection, should not be possible to reach this.
 		if (user?.role !== UserRole.ServerOwner) {
-			toast.error('You do not have permission to scan libraries.');
-			return;
+			throw new Error('You do not have permission to scan libraries.');
 		}
 
 		scan(library.id);
@@ -41,6 +39,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 		// }
 	}
 
+	// FIXME: so, disabled on the MenuItem doesn't seem to actually work... how cute.
 	return (
 		// TODO: https://chakra-ui.com/docs/theming/customize-theme#customizing-component-styles
 		<Menu size="sm">

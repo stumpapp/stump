@@ -23,6 +23,7 @@ use super::{
 // pub type ProcessResult = Result<(Option<MediaMetadata>, Vec<String>), ProcessFileError>;
 pub type GetPageResult = Result<ImageResponse, ProcessFileError>;
 
+// TODO: move trait, maybe merge with another.
 pub trait IsImage {
 	fn is_image(&self) -> bool;
 }
@@ -174,7 +175,7 @@ pub fn process(path: &Path) -> ProcessResult {
 	let mime = infer_mime_from_path(path);
 
 	// TODO: replace with flag in LibraryOptions
-	let convert_rar_to_zip = true;
+	let convert_rar_to_zip = false;
 
 	match mime.as_deref() {
 		Some("application/zip") => process_zip(path),

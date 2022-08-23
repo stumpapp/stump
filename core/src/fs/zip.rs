@@ -163,11 +163,11 @@ pub fn process_zip(path: &Path) -> ProcessResult {
 			let mut contents = String::new();
 			file.read_to_string(&mut contents)?;
 			comic_info = media_file::process_comic_info(contents);
-		} else {
+		} else if file.is_image() {
 			pages += 1;
 		}
 	}
-	// 7054b81b-09f1-48f9-9167-8396ccd57533
+
 	Ok(ProcessedMediaFile {
 		path: path.to_path_buf(),
 		checksum: digest_zip(path.to_str().unwrap()),

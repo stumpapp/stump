@@ -14,4 +14,5 @@ pub type ApiResult<T> = Result<T, ApiError>;
 
 pub type LoginResult = ApiResult<Json<AuthenticatedUser>>;
 
+// TODO:  just remove this. type aliases just cause headache tbh.
 pub type ProcessResult = Result<ProcessedMediaFile, ProcessFileError>;

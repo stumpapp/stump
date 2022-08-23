@@ -1,14 +1,15 @@
-import React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { updateMediaProgress } from '~api/media';
 import { getMediaById, getMediaPage } from '~api/media';
-import ComicBookReader from '~components/Media/ComicBookReader';
+import ImageBasedReader, {
+	AnimatedImageBasedReader,
+} from '~components/Media/Readers/ImageBasedReader';
 
 export default function ReadBook() {
 	const navigate = useNavigate();
 
-	const { id, page } = useParams();
+	const { id, page, animated } = useParams();
 
 	if (!id) {
 		throw new Error('Media id is required');
@@ -18,7 +19,15 @@ export default function ReadBook() {
 		queryFn: async () => getMediaById(id).then((res) => res.data),
 	});
 
-	const { mutate: saveProgress } = useMutation(() => updateMediaProgress(id, parseInt(page!, 10)));
+	const { mutate: saveProgress } = useMutation(
+		['updateReadProgress'],
+		() => updateMediaProgress(id, parseInt(page!, 10)),
+		{
+			onError(err) {
+				console.error(err);
+			},
+		},
+	);
 
 	function handleChangePage(newPage: number) {
 		saveProgress();
@@ -42,8 +51,12 @@ export default function ReadBook() {
 	}
 
 	if (media.extension.match(/cbr|cbz/)) {
+		// TODO: this will be merged under ImageBasedReader once animations get stable. animation will become a prop
+		// eventually. This is just a debug tool for me right now, and will not remain as separate components in the future.
+		const Component = animated ? AnimatedImageBasedReader : ImageBasedReader;
+
 		return (
-			<ComicBookReader
+			<Component
 				media={media}
 				currentPage={parseInt(page, 10)}
 				getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}

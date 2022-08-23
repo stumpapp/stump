@@ -45,6 +45,7 @@ pub async fn get_libraries(
 		.library()
 		.find_many(vec![])
 		.with(library::tags::fetch(vec![]))
+		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?
 		.into_iter()

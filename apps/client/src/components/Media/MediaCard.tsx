@@ -6,7 +6,7 @@ import Card from '~components/Card';
 
 interface Props extends Media {}
 
-export default function MediaCard({ ...media }: Props) {
+export default function MediaCard(media: Props) {
 	const prefetchMedia = async () =>
 		client.prefetchQuery(['getMediaById', media.id], () => getMediaById(media.id), {
 			staleTime: 10 * 1000,
@@ -28,6 +28,8 @@ export default function MediaCard({ ...media }: Props) {
 			imageFallback={fallback}
 			onMouseEnter={prefetchMedia}
 			title={media.name}
+			showMissingOverlay={media.status === 'MISSING'}
+			// showMissingOverlay={media.name.includes('v02')}
 		/>
 	);
 }

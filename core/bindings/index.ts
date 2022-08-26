@@ -3,6 +3,14 @@ export type Option<T> = T | undefined | null;
 
 export type ApiResult<T, E = any> = import('axios').AxiosResponse<T, import('axios').AxiosError>;
 
+export enum FileStatus {
+	Unknown = 'UNKNOWN',
+	Ready = 'READY',
+	Unsupported = 'UNSUPPORTED',
+	Error = 'ERROR',
+	Missing = 'MISSING',
+}
+
 export interface PageInfo {
 	// The number of pages available.
 	totalPages: number;

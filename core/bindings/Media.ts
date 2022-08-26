@@ -1,11 +1,5 @@
+import { FileStatus } from '.';
 import { Tag } from './Tag';
-
-export enum MediaStatus {
-	Unknown = 'UNKNOWN',
-	Error = 'ERROR',
-	Ready = 'READY',
-	Unsupported = 'UNSUPPORTED',
-}
 
 export interface Media {
 	/**
@@ -52,6 +46,10 @@ export interface Media {
 	 * The page the viewing user is currently on for the associated media.
 	 */
 	currentPage?: number;
+	/**
+	 * The status of the media.
+	 */
+	status: FileStatus;
 	/**
 	 * The user assigned tags for this media. This will be undefined only if the relation is not loaded.
 	 * @see Tag

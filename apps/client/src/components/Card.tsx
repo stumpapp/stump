@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Box, Spacer, Text, useBoolean, useColorModeValue } from '@chakra-ui/react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
+import { FileX } from 'phosphor-react';
 
 export interface CardProps {
 	to: string;
@@ -11,6 +12,7 @@ export interface CardProps {
 	title: string;
 	subtitle?: string;
 	variant?: 'default' | 'large';
+	showMissingOverlay?: boolean;
 	onMouseEnter?: () => void;
 }
 
@@ -27,6 +29,7 @@ export default function Card({
 	title,
 	subtitle,
 	variant = 'default',
+	showMissingOverlay,
 	onMouseEnter,
 }: CardProps) {
 	const [isFallback, { on }] = useBoolean(false);
@@ -48,13 +51,27 @@ export default function Card({
 			borderColor="transparent"
 			_dark={{ bg: 'gray.750' }}
 			_hover={{
-				borderColor: 'brand.500',
+				borderColor: showMissingOverlay ? 'transparent' : 'brand.500',
 			}}
 			rounded="md"
 			to={to}
 			onMouseEnter={onMouseEnter}
 			maxW="16rem"
+			className="relative overflow-hidden"
 		>
+			{showMissingOverlay && (
+				// FIXME: this has terrible UX, not very readable.
+				<Box
+					bg={useColorModeValue('whiteAlpha.500', 'blackAlpha.600')}
+					color={useColorModeValue('red.400', 'red.200')}
+					className="flex flex-col space-y-2 items-center justify-center absolute inset-0 h-full w-full !bg-opacity-50"
+				>
+					<FileX className="w-12 h-12" />
+					<Text fontSize="sm" fontWeight="semibold" textShadow="1.5px">
+						Missing!
+					</Text>
+				</Box>
+			)}
 			<Box px={1.5}>
 				<img
 					alt={imageAlt}

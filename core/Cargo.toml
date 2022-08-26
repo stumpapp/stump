@@ -6,7 +6,7 @@ default-run = "stump"
 
 [dependencies]
 # core dependencies
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.5.2" }
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.5.3" }
 serde = { version = "1.0", features = ["derive"] }
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
 

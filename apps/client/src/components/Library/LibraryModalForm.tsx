@@ -10,6 +10,8 @@ import {
 	TabPanel,
 	TabPanels,
 	Tabs,
+	Text,
+	VStack,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FieldValues, useForm } from 'react-hook-form';
@@ -165,6 +167,33 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 								{...form.register('scan')}
 							>
 								Scan library
+							</Checkbox>
+						</FormControl>
+
+						{/* FIXME: design this to not be ugly. */}
+						{/* <Text>Analysis Options</Text> */}
+
+						<FormControl>
+							<Checkbox
+								title="When rar files are found, automatically extract them and re-bundle them in a zip file"
+								defaultChecked
+								colorScheme="brand"
+								disabled
+								// {...form.register('scan')}
+							>
+								Convert rar files to zip
+							</Checkbox>
+						</FormControl>
+
+						<FormControl>
+							<Checkbox
+								title="When rar files have been converted to zip, automatically remove them from the host machine. The files are *not recoverable*"
+								defaultChecked={false}
+								colorScheme="brand"
+								disabled
+								// {...form.register('scan')}
+							>
+								Permanently delete rar files after conversion
 							</Checkbox>
 						</FormControl>
 					</TabPanel>

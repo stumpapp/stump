@@ -8,8 +8,6 @@ pub mod series;
 pub mod tag;
 pub mod user;
 
-use std::path::PathBuf;
-
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -59,43 +57,16 @@ pub struct LoginRequest {
 	pub password: String,
 }
 
-// Derived from ComicInfo.xml
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
-pub struct MediaMetadata {
-	#[serde(rename = "Series")]
-	pub series: Option<String>,
-	#[serde(rename = "Number")]
-	pub number: Option<usize>,
-	#[serde(rename = "Web")]
-	pub web: Option<String>,
-	#[serde(rename = "Summary")]
-	pub summary: Option<String>,
-	#[serde(rename = "Publisher")]
-	pub publisher: Option<String>,
-	#[serde(rename = "Genre")]
-	pub genre: Option<String>,
-	#[serde(rename = "PageCount")]
-	pub page_count: Option<usize>,
-}
-
-impl MediaMetadata {
-	pub fn default() -> Self {
-		Self {
-			series: None,
-			number: None,
-			web: None,
-			summary: None,
-			publisher: None,
-			genre: None,
-			page_count: None,
-		}
-	}
-}
-
-pub struct ProcessedMediaFile {
-	pub path: PathBuf,
-	pub checksum: Option<String>,
-	pub metadata: Option<MediaMetadata>,
-	pub pages: i32,
+#[derive(Debug, Deserialize, Serialize, JsonSchema)]
+pub enum FileStatus {
+	#[serde(rename = "UNKNOWN")]
+	Unknown,
+	#[serde(rename = "READY")]
+	Ready,
+	#[serde(rename = "UNSUPPORTED")]
+	Unsupported,
+	#[serde(rename = "ERROR")]
+	Error,
+	#[serde(rename = "MISSING")]
+	Missing,
 }

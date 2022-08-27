@@ -7,9 +7,12 @@ use crate::{
 	config::{self, stump_in_docker},
 	fs::{
 		checksum::{DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
-		media_file::{self, GetPageResult, IsImage},
+		media_file::{self, IsImage},
 	},
-	types::{alias::ProcessResult, errors::ProcessFileError, models::ProcessedMediaFile},
+	types::{
+		alias::ProcessFileResult, errors::ProcessFileError, http,
+		models::media::ProcessedMediaFile,
+	},
 };
 
 // FIXME: terrible error handling in this file... needs a total rework honestly.
@@ -89,7 +92,10 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
-pub fn process_rar(path: &Path, convert_to_zip: bool) -> ProcessResult {
+pub fn process_rar(
+	path: &Path,
+	convert_to_zip: bool,
+) -> ProcessFileResult<ProcessedMediaFile> {
 	if convert_to_zip {
 		let new_path = convert_rar_to_zip(path)?;
 
@@ -147,6 +153,7 @@ pub fn process_rar(path: &Path, convert_to_zip: bool) -> ProcessResult {
 	};
 
 	Ok(ProcessedMediaFile {
+		thumbnail_path: None,
 		path: path.to_path_buf(),
 		checksum,
 		metadata: media_file::process_comic_info(
@@ -236,7 +243,7 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // OpenArchive handle stored in Entry is no more. That's why I create another archive to grab what I want before
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-pub fn get_rar_image(file: &str, page: i32) -> GetPageResult {
+pub fn get_rar_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
 	if stump_in_docker() {
 		return Err(ProcessFileError::UnsupportedFileType(
 			"Stump cannot support cbr/rar files in docker containers for now.".into(),

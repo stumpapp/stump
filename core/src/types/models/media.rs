@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -83,4 +85,46 @@ impl Into<Media> for prisma::media::Data {
 			tags,
 		}
 	}
+}
+
+// Derived from ComicInfo.xml
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaMetadata {
+	#[serde(rename = "Series")]
+	pub series: Option<String>,
+	#[serde(rename = "Number")]
+	pub number: Option<usize>,
+	#[serde(rename = "Web")]
+	pub web: Option<String>,
+	#[serde(rename = "Summary")]
+	pub summary: Option<String>,
+	#[serde(rename = "Publisher")]
+	pub publisher: Option<String>,
+	#[serde(rename = "Genre")]
+	pub genre: Option<String>,
+	#[serde(rename = "PageCount")]
+	pub page_count: Option<usize>,
+}
+
+impl MediaMetadata {
+	pub fn default() -> Self {
+		Self {
+			series: None,
+			number: None,
+			web: None,
+			summary: None,
+			publisher: None,
+			genre: None,
+			page_count: None,
+		}
+	}
+}
+
+pub struct ProcessedMediaFile {
+	pub thumbnail_path: Option<PathBuf>,
+	pub path: PathBuf,
+	pub checksum: Option<String>,
+	pub metadata: Option<MediaMetadata>,
+	pub pages: i32,
 }

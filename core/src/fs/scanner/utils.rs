@@ -10,7 +10,7 @@ use crate::{
 	prisma::{library, media, series},
 	types::{
 		errors::{ApiError, ScanError},
-		models::MediaMetadata,
+		models::media::MediaMetadata,
 	},
 };
 
@@ -135,13 +135,13 @@ pub async fn insert_series(
 		Some(name) => match name.to_str() {
 			Some(name) => name.to_string(),
 			_ => {
-				return Err(ScanError::Unknown(
+				return Err(ScanError::FileParseError(
 					"Failed to get name for series".to_string(),
 				))
 			},
 		},
 		_ => {
-			return Err(ScanError::Unknown(
+			return Err(ScanError::FileParseError(
 				"Failed to get name for series".to_string(),
 			))
 		},

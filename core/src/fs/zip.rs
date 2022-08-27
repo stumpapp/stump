@@ -1,6 +1,9 @@
 use crate::{
-	fs::media_file::{self, GetPageResult, IsImage},
-	types::{alias::ProcessResult, errors::ProcessFileError, models::ProcessedMediaFile},
+	fs::media_file::{self, IsImage},
+	types::{
+		alias::ProcessFileResult, errors::ProcessFileError, http,
+		models::media::ProcessedMediaFile,
+	},
 };
 
 use std::{
@@ -146,7 +149,7 @@ pub fn digest_zip(path: &str) -> Option<String> {
 
 /// Processes a zip file in its entirety, includes: medatadata, page count, and the
 /// generated checksum for the file.
-pub fn process_zip(path: &Path) -> ProcessResult {
+pub fn process_zip(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
 	info!("Processing Zip: {}", path.display());
 
 	let zip_file = File::open(path)?;
@@ -169,6 +172,7 @@ pub fn process_zip(path: &Path) -> ProcessResult {
 	}
 
 	Ok(ProcessedMediaFile {
+		thumbnail_path: None,
 		path: path.to_path_buf(),
 		checksum: digest_zip(path.to_str().unwrap()),
 		metadata: comic_info,
@@ -179,7 +183,7 @@ pub fn process_zip(path: &Path) -> ProcessResult {
 // FIXME: this solution is terrible, was just fighting with borrow checker and wanted
 // a quick solve. TODO: rework this!
 /// Get an image from a zip file by index (page).
-pub fn get_zip_image(file: &str, page: i32) -> GetPageResult {
+pub fn get_zip_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
 	let zip_file = File::open(file)?;
 
 	let mut archive = zip::ZipArchive::new(&zip_file)?;

@@ -21,6 +21,7 @@ export default function LocaleSelector() {
 			</FormLabel>
 
 			<Select
+				isDisabled
 				value={locales.find((l) => l.value === locale)}
 				options={locales}
 				onChange={(newLocale) => handleLocaleChange(newLocale?.value)}

@@ -2,8 +2,10 @@ use rocket::http::ContentType;
 use std::{path::Path, str::FromStr};
 
 use crate::types::{
-	alias::ProcessResult, errors::ProcessFileError, http::ImageResponse,
-	models::MediaMetadata,
+	alias::ProcessFileResult,
+	errors::ProcessFileError,
+	http,
+	models::media::{MediaMetadata, ProcessedMediaFile},
 };
 
 use super::{
@@ -18,10 +20,6 @@ use super::{
 // TODO: replace all these match statements with an custom enum that handles it all.
 // The enum itself will have some repetition, however it'll be cleaner than
 // doing this stuff over and over as this file currently does.
-
-// FIXME: this needs to change. I really only need the MediaMetadata
-// pub type ProcessResult = Result<(Option<MediaMetadata>, Vec<String>), ProcessFileError>;
-pub type GetPageResult = Result<ImageResponse, ProcessFileError>;
 
 // TODO: move trait, maybe merge with another.
 pub trait IsImage {
@@ -80,7 +78,7 @@ pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 		"image/jpeg" => ContentType::JPEG,
 		"image/webp" => ContentType::WEBP,
 		"image/gif" => ContentType::GIF,
-		// FIXME: replace one PR is merged
+		// FIXME: replace one PR is merged (AGH, will it ever get merged??)
 		"application/xhtml+xml" => ContentType::XML,
 		_ => ContentType::Any,
 	})
@@ -143,7 +141,8 @@ pub fn infer_mime_from_path(path: &Path) -> Option<String> {
 	}
 }
 
-pub fn get_page(file: &str, page: i32) -> GetPageResult {
+// TODO: change return to make more sense.
+pub fn get_page(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
 	let mime = guess_mime(Path::new(file));
 
 	match mime.as_deref() {
@@ -169,13 +168,14 @@ pub fn get_page(file: &str, page: i32) -> GetPageResult {
 }
 
 // TODO: take in a LibraryOptions
-pub fn process(path: &Path) -> ProcessResult {
+pub fn process(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
 	log::debug!("Processing entry: {:?}", path);
 
 	let mime = infer_mime_from_path(path);
 
 	// TODO: replace with flag in LibraryOptions
 	let convert_rar_to_zip = false;
+	// TODO: generate_webp_thumbnail = false;
 
 	match mime.as_deref() {
 		Some("application/zip") => process_zip(path),

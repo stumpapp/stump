@@ -84,6 +84,8 @@ model LibraryOptions {
   // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
   // trash location, or a custom location when running in Docker (which will clear on an interval).
   hardDeleteConversions Boolean @default(false)
+  // Flag indicating whether or not to create WEBP thumbnails for scanned media.
+  createWebpThumbnails  Boolean @default(false)
   // The ID of the library which these options belong to.
   libraryId             String
 

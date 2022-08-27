@@ -19,8 +19,6 @@ use crate::event::ClientRequest;
 
 #[derive(Error, Debug)]
 pub enum ProcessFileError {
-	// #[error("Invalid Archive")]
-	// InvalidArchive,
 	#[error("Error occurred while opening file: {0}")]
 	FileIoError(#[from] std::io::Error),
 	#[error("A zip error ocurred: {0}")]
@@ -47,6 +45,10 @@ pub enum ProcessFileError {
 	RarByteReadError(#[from] std::str::Utf8Error),
 	#[error("Unsupported file type: {0}")]
 	UnsupportedFileType(String),
+	#[error("{0}")]
+	ImageIoError(#[from] image::ImageError),
+	#[error("Failed to encode image to webp: {0}")]
+	WebpEncodeError(String),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }
@@ -163,6 +165,8 @@ pub enum ScanError {
 	QueryError(String),
 	#[error("Unsupported file: {0}")]
 	UnsupportedFile(String),
+	#[error("{0}")]
+	FileParseError(String),
 	#[error("{0}")]
 	Unknown(String),
 }

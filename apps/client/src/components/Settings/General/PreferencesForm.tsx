@@ -6,7 +6,7 @@ export default function PreferencesForm() {
 	return (
 		<SettingsFormContainer
 			title="Preferences"
-			subtitle="Various configurable options according to your preference"
+			subtitle="Various configurable options according to your preference (currently only English)"
 		>
 			<LocaleSelector />
 		</SettingsFormContainer>

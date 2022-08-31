@@ -73,6 +73,7 @@ export default function ImageBasedReader({
 				currentPage={currentPage}
 				pages={media.pages}
 				visible={toolbarVisible}
+				onPageChange={handlePageChange}
 			/>
 
 			<div
@@ -283,6 +284,7 @@ export function AnimatedImageBasedReader({
 				currentPage={currentPage}
 				pages={media.pages}
 				visible={toolbarVisible}
+				onPageChange={(_) => alert('TODO;')}
 			/>
 
 			{imageUrls[0] && (

@@ -67,32 +67,35 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 
 			<AnimatePresence>
 				{isOpen && (
-					<VStack mt={2} spacing={2}>
-						{/* FIXME: there is the *slightest* stutter when clicking this button. it looks as if the portal doesn't render right away? */}
-						<CreateLibraryModal />
+					<>
+						<Box my={2}>
+							<CreateLibraryModal />
+						</Box>
 
-						{items!.map((item) => (
-							<Box
-								key={item.id}
-								pl={6}
-								w="full"
-								rounded="md"
-								color={{ _dark: 'gray.200', _light: 'gray.600' }}
-								_hover={{
-									color: 'gray.900',
-									bg: 'gray.50',
-									_dark: { bg: 'gray.700', color: 'gray.100' },
-								}}
-							>
-								<HStack p={1.5} minH="40px">
-									<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
-										{item.name}
-									</Link>
-									<LibraryOptionsMenu library={item} />
-								</HStack>
-							</Box>
-						))}
-					</VStack>
+						<VStack mt={2} spacing={2}>
+							{items!.map((item) => (
+								<Box
+									key={item.id}
+									pl={6}
+									w="full"
+									rounded="md"
+									color={{ _dark: 'gray.200', _light: 'gray.600' }}
+									_hover={{
+										color: 'gray.900',
+										bg: 'gray.50',
+										_dark: { bg: 'gray.700', color: 'gray.100' },
+									}}
+								>
+									<HStack p={1.5} minH="40px">
+										<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
+											{item.name}
+										</Link>
+										<LibraryOptionsMenu library={item} />
+									</HStack>
+								</Box>
+							))}
+						</VStack>
+					</>
 				)}
 			</AnimatePresence>
 		</Box>

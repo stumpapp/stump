@@ -22,7 +22,6 @@ export function useJobManager() {
 		} else if (data.JobProgress) {
 			updateJob(data.JobProgress);
 		} else if (data.JobComplete) {
-			// completeJob(data.JobComplete as string);
 			setTimeout(() => {
 				completeJob(data.JobComplete as string);
 				toast.success(`Job ${data.JobComplete} complete.`);
@@ -41,14 +40,11 @@ export function useJobManager() {
 				// does not work, not a huge deal but would rather a one-liner for these.
 				client.invalidateQueries(['getLibrary']);
 				client.invalidateQueries(['getLibrariesStats']);
+				client.invalidateQueries(['getSeries']);
 			}, 250);
-
-			if (data.CreatedMedia) {
-				setTimeout(() => client.invalidateQueries(['getSeries']), 250);
-			}
 		} else {
 			console.log('Unknown JobEvent', data);
-			console.log(Object.keys(data));
+			console.debug(data);
 		}
 	}
 

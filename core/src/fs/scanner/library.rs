@@ -228,6 +228,7 @@ async fn scan_series(
 					.join(",")
 			)
 			.as_str()))
+			.exec()
 			.await
 		{
 			log::error!("Failed to mark missing media as MISSING: {:?}", e);

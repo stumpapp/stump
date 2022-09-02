@@ -4,7 +4,6 @@ use serde::Deserialize;
 
 use crate::{
 	guards::auth::Auth,
-	prisma::tag,
 	types::{
 		alias::{ApiResult, Ctx},
 		models::tag::Tag,
@@ -50,7 +49,7 @@ pub async fn create_tags(
 	// FIXME: bulk insert not yet supported. Also transactions, as an alternative,
 	// not yet supported.
 	for tag in tags {
-		match db.tag().create(tag::name::set(tag), vec![]).exec().await {
+		match db.tag().create(tag, vec![]).exec().await {
 			Ok(new_tag) => {
 				created_tags.push(new_tag.into());
 			},

@@ -1,7 +1,8 @@
 [package]
 name = "prisma"
 version = "0.1.0"
+rust-version = "1.63.0"
 edition = "2021"
 
 [dependencies]
-prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.5.3" }
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.0" }

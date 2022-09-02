@@ -84,6 +84,7 @@ pub async fn get_duplicate_media(
 
 	let media: Vec<Media> = db
 		._query_raw(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
+		.exec()
 		.await?;
 
 	let unpaged = unpaged.unwrap_or(page_params.is_none());
@@ -325,10 +326,10 @@ pub async fn update_media_progress(
 					auth.0.id.clone(),
 					id.clone(),
 				),
-				(
-					read_progress::page::set(page),
-					read_progress::media::link(media::id::equals(id.clone())),
-					read_progress::user::link(user::id::equals(auth.0.id.clone())),
+				read_progress::create(
+					page,
+					media::id::equals(id.clone()),
+					user::id::equals(auth.0.id.clone()),
 					vec![],
 				),
 				vec![read_progress::page::set(page)],

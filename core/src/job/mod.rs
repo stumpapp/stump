@@ -136,8 +136,8 @@ pub async fn persist_new_job(
 	Ok(db
 		.job()
 		.create(
-			job::id::set(id),
-			job::kind::set(job.kind().to_string()),
+			id,
+			job.kind().to_string(),
 			vec![
 				job::details::set(job.details().map(|d| d.clone().to_string())),
 				// job::task_count::set(task_count.try_into()?),
@@ -158,20 +158,15 @@ pub async fn persist_job_start(
 
 	let job = db
 		.job()
-		.find_unique(job::id::equals(id.clone()))
-		.update(vec![
-			job::task_count::set(task_count.try_into()?),
-			job::status::set(JobStatus::Running.to_string()),
-		])
+		.update(
+			job::id::equals(id.clone()),
+			vec![
+				job::task_count::set(task_count.try_into()?),
+				job::status::set(JobStatus::Running.to_string()),
+			],
+		)
 		.exec()
 		.await?;
-
-	if job.is_none() {
-		return Err(ApiError::InternalServerError(format!(
-			"Error trying to update job with runner ID {}: could not find job.",
-			id
-		)));
-	}
 
 	ctx.emit_client_event(ClientEvent::job_started(
 		id.clone(),
@@ -180,7 +175,7 @@ pub async fn persist_job_start(
 		Some(format!("Job {} started.", id)),
 	));
 
-	Ok(job.unwrap())
+	Ok(job)
 }
 
 pub async fn persist_job_end(
@@ -195,21 +190,16 @@ pub async fn persist_job_end(
 
 	let job = db
 		.job()
-		.find_unique(job::id::equals(id.clone()))
-		.update(vec![
-			job::completed_task_count::set(completed_task_count.try_into()?),
-			job::seconds_elapsed::set(elapsed_seconds.try_into()?),
-			job::status::set(JobStatus::Completed.to_string()),
-		])
+		.update(
+			job::id::equals(id.clone()),
+			vec![
+				job::completed_task_count::set(completed_task_count.try_into()?),
+				job::seconds_elapsed::set(elapsed_seconds.try_into()?),
+				job::status::set(JobStatus::Completed.to_string()),
+			],
+		)
 		.exec()
 		.await?;
 
-	if job.is_none() {
-		return Err(ApiError::InternalServerError(format!(
-			"Error trying to update job with runner ID {}: could not find job.",
-			id
-		)));
-	}
-
-	Ok(job.unwrap())
+	Ok(job)
 }

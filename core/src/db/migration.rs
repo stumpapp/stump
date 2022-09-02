@@ -41,6 +41,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 		._query_raw(raw!(
 			"SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name='migrations';"
 		))
+		.exec()
 		.await?;
 
 	// If the table doesn't exist, create it
@@ -51,7 +52,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 
 		for stmt in stmts {
 			log::debug!("{}", stmt);
-			db._execute_raw(raw!(stmt)).await?;
+			db._execute_raw(raw!(stmt)).exec().await?;
 		}
 
 		log::debug!("`migrations` table created");
@@ -114,15 +115,15 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 		for stmt in stmts {
 			log::debug!("{}", stmt);
 
-			match db._execute_raw(raw!(stmt)).await {
+			match db._execute_raw(raw!(stmt)).exec().await {
 				Ok(_) => continue,
 				Err(e) => {
 					log::error!("Migration {} failed: {}", name, e);
 
 					db.migration()
 						.create(
-							migration::name::set(name.to_string()),
-							migration::checksum::set(checksum.clone()),
+							name.to_string(),
+							checksum.clone(),
 							vec![migration::success::set(false)],
 						)
 						.exec()
@@ -137,8 +138,8 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 
 		db.migration()
 			.create(
-				migration::name::set(name.to_string()),
-				migration::checksum::set(checksum.clone()),
+				name.to_string(),
+				checksum.clone(),
 				vec![migration::success::set(true)],
 			)
 			.exec()

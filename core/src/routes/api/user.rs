@@ -42,11 +42,7 @@ pub async fn create_user(
 
 	let created_user = db
 		.user()
-		.create(
-			user::username::set(credentials.username.to_owned()),
-			user::hashed_password::set(hashed_password),
-			vec![],
-		)
+		.create(credentials.username.to_owned(), hashed_password, vec![])
 		.exec()
 		.await?;
 
@@ -55,7 +51,7 @@ pub async fn create_user(
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::link(user::id::equals(
+		.create(vec![user_preferences::user::connect(user::id::equals(
 			created_user.id.clone(),
 		))])
 		.exec()
@@ -129,25 +125,27 @@ pub async fn update_user_preferences(
 	input: Json<UserPreferencesUpdate>,
 	ctx: &Ctx,
 	auth: Auth,
-) -> ApiResult<Json<Option<UserPreferences>>> {
+) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
 
 	let user_preferences = auth.0.preferences;
 
 	Ok(Json(
 		db.user_preferences()
-			.find_unique(user_preferences::id::equals(user_preferences.id.clone()))
-			.update(vec![
-				user_preferences::locale::set(input.locale.to_owned()),
-				user_preferences::library_view_mode::set(
-					input.library_view_mode.to_owned(),
-				),
-				user_preferences::series_view_mode::set(
-					input.series_view_mode.to_owned(),
-				),
-			])
+			.update(
+				user_preferences::id::equals(user_preferences.id.clone()),
+				vec![
+					user_preferences::locale::set(input.locale.to_owned()),
+					user_preferences::library_view_mode::set(
+						input.library_view_mode.to_owned(),
+					),
+					user_preferences::series_view_mode::set(
+						input.series_view_mode.to_owned(),
+					),
+				],
+			)
 			.exec()
 			.await?
-			.map(|p| p.into()),
+			.into(),
 	))
 }

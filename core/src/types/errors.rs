@@ -182,8 +182,8 @@ impl From<ProcessFileError> for ScanError {
 	}
 }
 
-impl From<prisma_client_rust::Error> for ScanError {
-	fn from(e: prisma_client_rust::Error) -> Self {
+impl From<prisma_client_rust::queries::QueryError> for ScanError {
+	fn from(e: prisma_client_rust::queries::QueryError) -> Self {
 		ScanError::QueryError(e.to_string())
 	}
 }
@@ -206,9 +206,16 @@ impl From<ApiError> for Status {
 	}
 }
 
-impl From<prisma_client_rust::Error> for ApiError {
-	fn from(error: prisma_client_rust::Error) -> ApiError {
+// TODO: look into how prisma returns record not found errors?
+impl From<prisma_client_rust::queries::QueryError> for ApiError {
+	fn from(error: prisma_client_rust::queries::QueryError) -> ApiError {
 		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<prisma_client_rust::RelationNotFetchedError> for ApiError {
+	fn from(e: prisma_client_rust::RelationNotFetchedError) -> Self {
+		ApiError::InternalServerError(e.to_string())
 	}
 }
 

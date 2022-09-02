@@ -27,6 +27,7 @@ pub async fn mark_library_missing(
 		PrismaValue::String("MISSING".to_owned()),
 		PrismaValue::String(library.id.clone())
 	))
+	.exec()
 	.await?;
 
 	let series_ids = library
@@ -47,7 +48,7 @@ pub async fn mark_library_missing(
 			.join(",")
 	);
 
-	db._execute_raw(raw!(&media_query)).await?;
+	db._execute_raw(raw!(&media_query)).exec().await?;
 
 	Ok(())
 }
@@ -91,22 +92,22 @@ pub async fn insert_media(
 		.db
 		.media()
 		.create(
-			media::name::set(name),
-			media::size::set(size.try_into().unwrap_or_else(|e| {
+			name,
+			size.try_into().unwrap_or_else(|e| {
 				log::error!("Failed to calculate file size: {:?}", e);
 
 				0
-			})),
-			media::extension::set(ext),
-			media::pages::set(match comic_info.page_count {
+			}),
+			ext,
+			match comic_info.page_count {
 				Some(count) => count as i32,
 				None => processed_entry.pages,
-			}),
-			media::path::set(path_str),
+			},
+			path_str,
 			vec![
 				media::checksum::set(processed_entry.checksum),
 				media::description::set(comic_info.summary),
-				media::series::link(series::id::equals(series_id)),
+				media::series::connect(series::id::equals(series_id)),
 			],
 		)
 		.exec()
@@ -151,9 +152,9 @@ pub async fn insert_series(
 		.db
 		.series()
 		.create(
-			series::name::set(name),
-			series::path::set(path.to_str().unwrap().to_string()),
-			vec![series::library::link(library::id::equals(library_id))],
+			name,
+			path.to_str().unwrap().to_string(),
+			vec![series::library::connect(library::id::equals(library_id))],
 		)
 		.exec()
 		.await?;

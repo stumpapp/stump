@@ -75,6 +75,7 @@ pub async fn get_libraries_stats(
 		._query_raw::<LibrariesStats>(raw!(
 			"SELECT COUNT(*) as bookCount, IFNULL(SUM(media.size),0) as totalBytes, IFNULL(seriesCount,0) as seriesCount FROM media INNER JOIN (SELECT COUNT(*) as seriesCount FROM series)"
 		))
+		.exec()
 		.await?
 		.into_iter()
 		.next();
@@ -271,24 +272,26 @@ pub async fn create_library(
 	let lib = db
 		.library()
 		.create(
-			library::name::set(input.name.to_owned()),
-			library::path::set(input.path.to_owned()),
+			input.name.to_owned(),
+			input.path.to_owned(),
 			vec![library::description::set(input.description.to_owned())],
 		)
 		.exec()
 		.await?;
 
-	// FIXME: this is disgusting. I don't understand why the library::tag::link doesn't
-	// work with multiple tags, nor why providing multiple library::tag::link params
+	// FIXME: this is disgusting. I don't understand why the library::tag::connect doesn't
+	// work with multiple tags, nor why providing multiple library::tag::connect params
 	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
 	// highly inefficient queries.
 	if let Some(tags) = input.tags.to_owned() {
 		for tag in tags {
 			db.library()
-				.find_unique(library::id::equals(lib.id.clone()))
-				.update(vec![library::tags::link(vec![tag::id::equals(
-					tag.id.to_owned(),
-				)])])
+				.update(
+					library::id::equals(lib.id.clone()),
+					vec![library::tags::connect(vec![tag::id::equals(
+						tag.id.to_owned(),
+					)])],
+				)
 				.exec()
 				.await?;
 		}
@@ -346,24 +349,26 @@ pub async fn update_library(
 		library::description::set(input.description.to_owned()),
 	];
 
-	// FIXME: this is disgusting. I don't understand why the library::tag::link doesn't
-	// work with multiple tags, nor why providing multiple library::tag::link params
+	// FIXME: this is disgusting. I don't understand why the library::tag::connect doesn't
+	// work with multiple tags, nor why providing multiple library::tag::connect params
 	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
 	// highly inefficient queries.
 
 	if let Some(tags) = input.tags.to_owned() {
 		if tags.len() > 0 {
-			// updates.push(library::tags::link(vec![
+			// updates.push(library::tags::connect(vec![
 			// 	tag::name::equals(String::from("Demo")),
 			// 	tag::name::equals(String::from("Dem2")),
 			// ]));
 
 			for tag in tags {
 				db.library()
-					.find_unique(library::id::equals(id.clone()))
-					.update(vec![library::tags::link(vec![tag::id::equals(
-						tag.id.to_owned(),
-					)])])
+					.update(
+						library::id::equals(id.clone()),
+						vec![library::tags::connect(vec![tag::id::equals(
+							tag.id.to_owned(),
+						)])],
+					)
 					.exec()
 					.await?;
 			}
@@ -372,7 +377,7 @@ pub async fn update_library(
 
 	if let Some(removed_tags) = input.removed_tags.to_owned() {
 		if removed_tags.len() > 0 {
-			// updates.push(library::tags::link(vec![
+			// updates.push(library::tags::connect(vec![
 			// 	tag::name::equals(String::from("Demo")),
 			// 	tag::name::equals(String::from("Dem2")),
 			// ]));
@@ -390,10 +395,12 @@ pub async fn update_library(
 			// updates.push(removing);
 			for tag in removed_tags {
 				db.library()
-					.find_unique(library::id::equals(id.clone()))
-					.update(vec![library::tags::unlink(vec![tag::id::equals(
-						tag.id.to_owned(),
-					)])])
+					.update(
+						library::id::equals(id.clone()),
+						vec![library::tags::disconnect(vec![tag::id::equals(
+							tag.id.to_owned(),
+						)])],
+					)
 					.exec()
 					.await?;
 			}
@@ -402,20 +409,19 @@ pub async fn update_library(
 
 	let updated = db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
-		.update(updates)
+		.update(library::id::equals(id.clone()), updates)
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
 
-	if updated.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Library with id {} not found",
-			&id
-		)));
-	}
+	// if updated.is_none() {
+	// 	return Err(ApiError::NotFound(format!(
+	// 		"Library with id {} not found",
+	// 		&id
+	// 	)));
+	// }
 
-	let updated = updated.unwrap();
+	// let updated = updated.unwrap();
 
 	// `scan` is not a required field, however it will default to true if not provided
 	if input.scan.unwrap_or(true) {
@@ -439,17 +445,9 @@ pub async fn delete_library(
 
 	let deleted = db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
-		.delete()
+		.delete(library::id::equals(id.clone()))
 		.exec()
 		.await?;
 
-	if deleted.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Library with id {} not found",
-			&id
-		)));
-	}
-
-	Ok(Json(deleted.unwrap().into()))
+	Ok(Json(deleted.into()))
 }

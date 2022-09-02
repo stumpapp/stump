@@ -78,7 +78,7 @@ impl Ctx {
 			.db
 			.log()
 			.create(
-				log::message::set(tentative_log.message),
+				tentative_log.message,
 				vec![
 					log::job_id::set(tentative_log.job_id),
 					log::level::set(tentative_log.level.to_string()),

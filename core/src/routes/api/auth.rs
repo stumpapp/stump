@@ -111,8 +111,8 @@ pub async fn register(
 	let created_user = db
 		.user()
 		.create(
-			user::username::set(credentials.username.to_owned()),
-			user::hashed_password::set(hashed_password),
+			credentials.username.to_owned(),
+			hashed_password,
 			vec![user::role::set(user_role.into())],
 		)
 		.exec()
@@ -122,7 +122,7 @@ pub async fn register(
 	// supported on the prisma client. Until then, this ugly mess is necessary.
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::link(user::id::equals(
+		.create(vec![user_preferences::user::connect(user::id::equals(
 			created_user.id.clone(),
 		))])
 		.exec()

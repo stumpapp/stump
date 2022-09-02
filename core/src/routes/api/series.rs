@@ -102,6 +102,7 @@ pub async fn get_series_by_id(
 				"SELECT COUNT(*) as count FROM media WHERE seriesId={}",
 				PrismaValue::String(id.clone())
 			))
+			.exec()
 			.await?;
 
 		let media_count = count_res.get(0).map(|res| res.count).unwrap_or(0);

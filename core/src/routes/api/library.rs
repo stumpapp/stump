@@ -289,22 +289,19 @@ pub async fn create_library(
 		.exec()
 		.await?;
 
-	// FIXME: this is disgusting. I don't understand why the library::tag::connect doesn't
-	// work with multiple tags, nor why providing multiple library::tag::connect params
-	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
-	// highly inefficient queries.
+	// FIXME: try and do multiple connects again soon, batching is WAY better than
+	// previous solution but still...
 	if let Some(tags) = input.tags.to_owned() {
-		for tag in tags {
-			db.library()
-				.update(
-					library::id::equals(lib.id.clone()),
-					vec![library::tags::connect(vec![tag::id::equals(
-						tag.id.to_owned(),
-					)])],
-				)
-				.exec()
-				.await?;
-		}
+		let tag_connects = tags.into_iter().map(|tag| {
+			db.library().update(
+				library::id::equals(lib.id.clone()),
+				vec![library::tags::connect(vec![tag::id::equals(
+					tag.id.to_owned(),
+				)])],
+			)
+		});
+
+		db._batch(tag_connects).await?;
 	}
 
 	// `scan` is not a required field, however it will default to true if not provided
@@ -364,32 +361,30 @@ pub async fn update_library(
 	// highly inefficient queries.
 
 	if let Some(tags) = input.tags.to_owned() {
-		if tags.len() > 0 {
-			for tag in tags {
-				batches.push(db.library().update(
-					library::id::equals(id.clone()),
-					vec![library::tags::connect(vec![tag::id::equals(
-						tag.id.to_owned(),
-					)])],
-				));
-			}
+		for tag in tags {
+			batches.push(db.library().update(
+				library::id::equals(id.clone()),
+				vec![library::tags::connect(vec![tag::id::equals(
+					tag.id.to_owned(),
+				)])],
+			));
 		}
 	}
 
 	if let Some(removed_tags) = input.removed_tags.to_owned() {
-		if removed_tags.len() > 0 {
-			for tag in removed_tags {
-				batches.push(db.library().update(
-					library::id::equals(id.clone()),
-					vec![library::tags::disconnect(vec![tag::id::equals(
-						tag.id.to_owned(),
-					)])],
-				));
-			}
+		for tag in removed_tags {
+			batches.push(db.library().update(
+				library::id::equals(id.clone()),
+				vec![library::tags::disconnect(vec![tag::id::equals(
+					tag.id.to_owned(),
+				)])],
+			));
 		}
 	}
 
-	let _batched_updates = db._batch(batches).await?;
+	if !batches.is_empty() {
+		db._batch(batches).await?;
+	}
 
 	let updated = db
 		.library()

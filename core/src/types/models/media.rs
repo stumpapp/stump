@@ -2,12 +2,13 @@ use std::path::PathBuf;
 
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::prisma;
 
 use super::{read_progress::ReadProgress, series::Series, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Media {
 	pub id: String,
@@ -33,6 +34,9 @@ pub struct Media {
 	pub series: Option<Series>,
 	/// The read progresses of the media. Will be `None` only if the relation is not loaded.
 	pub read_progresses: Option<Vec<ReadProgress>>,
+	/// The current page of the media, computed from `read_progresses`. Will be `None` only
+	/// if the `read_progresses` relation is not loaded.
+	pub current_page: Option<i32>,
 	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 	// pub status: String,
@@ -82,13 +86,15 @@ impl Into<Media> for prisma::media::Data {
 			series_id: self.series_id.unwrap(),
 			series,
 			read_progresses,
+			// TODO:
+			current_page: None,
 			tags,
 		}
 	}
 }
 
 // Derived from ComicInfo.xml
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaMetadata {
 	#[serde(rename = "Series")]

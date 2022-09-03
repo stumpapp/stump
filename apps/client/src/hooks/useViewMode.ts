@@ -1,8 +1,6 @@
 import { ViewMode } from '@stump/core';
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import shallow from 'zustand/shallow';
-import { useStore } from '~store/store';
 import { useUser } from './useUser';
 
 export function useViewMode() {
@@ -21,15 +19,6 @@ export function useViewMode() {
 			updatePreferences({ ...preferences, seriesViewMode: viewMode });
 		}
 	}
-
-	// const { userPreferences, setLibraryViewMode, setSeriesViewMode } = useStore(
-	// 	({ userPreferences, setLibraryViewMode, setSeriesViewMode }) => ({
-	// 		userPreferences,
-	// 		setLibraryViewMode,
-	// 		setSeriesViewMode,
-	// 	}),
-	// 	shallow,
-	// );
 
 	const { showViewOptions, viewAsGrid, onViewModeChange } = useMemo(() => {
 		let _showViewOptions =

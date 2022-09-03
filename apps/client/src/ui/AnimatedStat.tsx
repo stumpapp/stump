@@ -10,7 +10,7 @@ import {
 import { useCountUp } from 'use-count-up';
 
 export interface AnimatedStatProps {
-	value: number;
+	value: number | bigint;
 	label: string;
 	helpText?: string;
 	unit?: string;
@@ -31,7 +31,8 @@ export default function AnimatedStat({
 }: AnimatedStatProps) {
 	const { value: currentValue } = useCountUp({
 		isCounting: enabled,
-		end: value,
+		// FIXME: not safe!?
+		end: Number(value),
 		duration,
 		formatter: (value) => {
 			if (decimal) {

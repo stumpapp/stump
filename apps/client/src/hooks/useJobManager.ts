@@ -1,4 +1,4 @@
-import { JobEvent } from '@stump/core';
+import { ClientEvent } from '@stump/core';
 import toast from 'react-hot-toast';
 import client from '~api/client';
 import { useStore } from '~store/store';
@@ -11,40 +11,46 @@ export function useJobManager() {
 		completeJob,
 	}));
 
-	// FIXME: this is disgusting lol
-	function handleJobEvent(data: JobEvent) {
-		if (!data.CreatedMedia && !data.CreatedSeries && !data.JobProgress) {
+	function handleJobEvent(event: ClientEvent) {
+		const { key, data } = event;
+
+		if (['JobComplete', 'JobFailed'].includes(key)) {
 			client.invalidateQueries(['getJobReports']);
 		}
 
-		if (data.JobStarted) {
-			addJob(data.JobStarted);
-		} else if (data.JobProgress) {
-			updateJob(data.JobProgress);
-		} else if (data.JobComplete) {
-			setTimeout(() => {
-				completeJob(data.JobComplete as string);
-				toast.success(`Job ${data.JobComplete} complete.`);
-			}, 500);
-		} else if (data.JobFailed) {
-			setTimeout(() => {
-				// completeJob(data.JobComplete as string);
-				toast.error(`Job ${data.JobFailed.runner_id} failed.`);
-			}, 500);
-		} else if (data.CreatedSeries || data.CreatedMedia) {
-			// I set a timeout here to give the backend a little time to analyze at least
-			// one of the books in a new series before triggering a refetch. This is to
-			// prevent the series/media cards from being displayed before there is an image ready.
-			setTimeout(() => {
-				// TODO: I must misunderstand how this function works. Giving multiple keys
-				// does not work, not a huge deal but would rather a one-liner for these.
-				client.invalidateQueries(['getLibrary']);
-				client.invalidateQueries(['getLibrariesStats']);
-				client.invalidateQueries(['getSeries']);
-			}, 250);
-		} else {
-			console.log('Unknown JobEvent', data);
-			console.debug(data);
+		switch (key) {
+			case 'JobStarted':
+				addJob(data);
+				break;
+			case 'JobProgress':
+				updateJob(data);
+				break;
+			case 'JobComplete':
+				setTimeout(() => {
+					completeJob(data);
+					toast.success(`Job ${data} complete.`);
+				}, 500);
+				break;
+			case 'JobFailed':
+				toast.error(`Job ${data.runner_id} failed.`);
+				break;
+			case 'CreatedMedia':
+			case 'CreatedSeries':
+				// I set a timeout here to give the backend a little time to analyze at least
+				// one of the books in a new series before triggering a refetch. This is to
+				// prevent the series/media cards from being displayed before there is an image ready.
+				setTimeout(() => {
+					// TODO: I must misunderstand how this function works. Giving multiple keys
+					// does not work, not a huge deal but would rather a one-liner for these.
+					client.invalidateQueries(['getLibrary']);
+					client.invalidateQueries(['getLibrariesStats']);
+					client.invalidateQueries(['getSeries']);
+				}, 250);
+				break;
+			default:
+				console.warn('Unknown JobEvent', data);
+				console.debug(data);
+				break;
 		}
 	}
 

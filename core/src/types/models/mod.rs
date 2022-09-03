@@ -16,12 +16,13 @@ use crate::prisma;
 use self::user::UserPreferences;
 
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct AuthenticatedUser {
 	pub id: String,
 	pub username: String,
 	pub role: String,
 	// FIXME: once issue 44 is resolved, remove Option
-	pub preferences: UserPreferences,
+	pub user_preferences: UserPreferences,
 }
 
 impl Into<AuthenticatedUser> for prisma::user::Data {
@@ -40,7 +41,7 @@ impl Into<AuthenticatedUser> for prisma::user::Data {
 			id: self.id.clone(),
 			username: self.username.clone(),
 			role: self.role.clone(),
-			preferences: user_preferences.into(),
+			user_preferences: user_preferences.into(),
 		}
 	}
 }
@@ -55,18 +56,4 @@ pub struct DecodedCredentials {
 pub struct LoginRequest {
 	pub username: String,
 	pub password: String,
-}
-
-#[derive(Debug, Deserialize, Serialize, JsonSchema)]
-pub enum FileStatus {
-	#[serde(rename = "UNKNOWN")]
-	Unknown,
-	#[serde(rename = "READY")]
-	Ready,
-	#[serde(rename = "UNSUPPORTED")]
-	Unsupported,
-	#[serde(rename = "ERROR")]
-	Error,
-	#[serde(rename = "MISSING")]
-	Missing,
 }

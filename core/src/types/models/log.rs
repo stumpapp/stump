@@ -2,19 +2,20 @@ use std::path::PathBuf;
 
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::event::ClientEvent;
 
 /// Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, JsonSchema, Type)]
 pub struct LogMetadata {
 	pub path: PathBuf,
 	pub size: u64,
 	pub modified: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Serialize, Deserialize, JsonSchema, Type)]
 pub enum LogLevel {
 	#[serde(rename = "ERROR")]
 	Error,
@@ -37,6 +38,7 @@ impl std::fmt::Display for LogLevel {
 	}
 }
 
+#[derive(Clone, Serialize, Deserialize, JsonSchema, Type)]
 pub struct Log {
 	pub id: String,
 	pub level: LogLevel,

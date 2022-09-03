@@ -1,7 +1,7 @@
 import {
 	ApiResult,
-	CreateLibraryInput,
-	EditLibraryInput,
+	CreateLibraryArgs,
+	UpdateLibraryArgs,
 	LibrariesStats,
 	Library,
 	PageableApiResult,
@@ -35,10 +35,10 @@ export function deleteLibrary(id: string) {
 	return API.delete(`/libraries/${id}`);
 }
 
-export function createLibrary(payload: CreateLibraryInput): Promise<ApiResult<Library>> {
+export function createLibrary(payload: CreateLibraryArgs): Promise<ApiResult<Library>> {
 	return API.post('/libraries', payload);
 }
 
-export function editLibrary(payload: EditLibraryInput): Promise<ApiResult<Library>> {
+export function editLibrary(payload: UpdateLibraryArgs): Promise<ApiResult<Library>> {
 	return API.put(`/libraries/${payload.id}`, payload);
 }

@@ -54,5 +54,5 @@ export function useUser() {
 
 	// TODO: handle on 401?
 
-	return { user, preferences: user?.preferences, updatePreferences };
+	return { user, preferences: user?.userPreferences, updatePreferences };
 }

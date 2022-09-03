@@ -1,9 +1,10 @@
 use rocket_okapi::JsonSchema;
 use serde::Serialize;
+use specta::Type;
 
 use super::query::Direction;
 
-#[derive(Serialize, FromForm, JsonSchema)]
+#[derive(Serialize, FromForm, JsonSchema, Type)]
 pub struct PagedRequestParams {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
@@ -12,7 +13,7 @@ pub struct PagedRequestParams {
 	pub direction: Option<Direction>,
 }
 
-#[derive(Debug, Serialize, JsonSchema, Clone)]
+#[derive(Debug, Serialize, JsonSchema, Clone, Type)]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,
@@ -70,7 +71,7 @@ pub struct PageLinks {
 	pub next: Option<String>,
 }
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct PageInfo {
 	/// The number of pages available.
@@ -101,7 +102,7 @@ impl PageInfo {
 	}
 }
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Serialize, JsonSchema, Type)]
 pub struct Pageable<T: Serialize> {
 	/// The target data being returned.
 	pub data: T,

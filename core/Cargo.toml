@@ -7,7 +7,10 @@ default-run = "stump"
 
 [dependencies]
 # core dependencies
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.0" }
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.0", features = [
+  'rspc',
+  # 'sqlite-create-many'
+] }
 serde = { version = "1.0", features = ["derive"] }
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
 
@@ -21,6 +24,8 @@ rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "mast
 # dev utils
 rocket_okapi = { version = "0.8.0-rc.2", features = ["rapidoc", "swagger"] }
 schemars = "0.8.10"
+# ts-rs = { git = "https://github.com/aaronleopold/ts-rs" }
+specta = "0.0.2"
 
 # misc utils
 include_dir = "0.7.2"

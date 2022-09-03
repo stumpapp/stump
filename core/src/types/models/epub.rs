@@ -3,12 +3,13 @@ use std::{collections::HashMap, fs::File, path::PathBuf};
 use epub::doc::{EpubDoc, NavPoint};
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::{prisma::media, types::errors::ProcessFileError};
 
 use super::media::Media;
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct EpubContent {
 	label: String,
@@ -41,7 +42,7 @@ TODO: convert spine into this structure to match epub.js
 }
 */
 
-#[derive(Serialize, Deserialize, JsonSchema)]
+#[derive(Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Epub {
 	/// This is the epub's record in Stump's database

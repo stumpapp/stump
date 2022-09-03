@@ -1,12 +1,13 @@
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::{
 	prisma::{media, series},
 	types::{errors::ApiError, pageable::PageParams},
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone, JsonSchema, FromFormField)]
+#[derive(Debug, Serialize, Deserialize, Clone, JsonSchema, FromFormField, Type)]
 pub enum Direction {
 	#[serde(rename = "asc")]
 	Asc,

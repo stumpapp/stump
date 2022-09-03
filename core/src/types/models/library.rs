@@ -1,12 +1,13 @@
 // use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::prisma;
 
 use super::{series::Series, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Library {
 	pub id: String,
@@ -26,7 +27,39 @@ pub struct Library {
 	pub tags: Option<Vec<Tag>>,
 }
 
-#[derive(Deserialize, Serialize, JsonSchema)]
+#[derive(Deserialize, JsonSchema, Type)]
+pub struct CreateLibraryArgs {
+	/// The name of the library to create.
+	pub name: String,
+	/// The path to the library to create, i.e. where the directory is on the filesystem.
+	pub path: String,
+	/// Optional text description of the library.
+	pub description: Option<String>,
+	/// Optional tags to assign to the library.
+	pub tags: Option<Vec<Tag>>,
+	/// Optional flag to indicate if the library should be automatically scanned after creation. Default is `true`.
+	pub scan: Option<bool>,
+}
+
+#[derive(Deserialize, JsonSchema, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateLibraryArgs {
+	pub id: String,
+	/// The updated name of the library.
+	pub name: String,
+	/// The updated path of the library.
+	pub path: String,
+	/// The updated description of the library.
+	pub description: Option<String>,
+	/// The updated tags of the library.
+	pub tags: Option<Vec<Tag>>,
+	/// The tags to remove from the library.
+	pub removed_tags: Option<Vec<Tag>>,
+	/// Optional flag to indicate if the library should be automatically scanned after update. Default is `true`.
+	pub scan: Option<bool>,
+}
+
+#[derive(Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct LibrariesStats {
 	series_count: u64,

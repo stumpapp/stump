@@ -7,7 +7,7 @@ const BYTE_UNITS = ['B', 'KB', 'MiB', 'GB', 'TB'];
 /**
  * Returns a formatted string for converted bytes and unit of measurement.
  */
-export function formatBytes(bytes?: number, decimals = 2, zeroUnit = 'GB') {
+export function formatBytes(bytes?: number | bigint, decimals = 2, zeroUnit = 'GB') {
 	if (bytes == undefined) return null;
 
 	let precision = decimals >= 0 ? decimals : 0;
@@ -16,19 +16,30 @@ export function formatBytes(bytes?: number, decimals = 2, zeroUnit = 'GB') {
 		return parseFloat((0).toFixed(precision)) + ' ' + zeroUnit;
 	}
 
-	let threshold = Math.floor(Math.log(bytes) / Math.log(KILOBYTE));
+	if (typeof bytes !== 'bigint') {
+		let threshold = Math.floor(Math.log(bytes) / Math.log(KILOBYTE));
 
-	return (
-		parseFloat((bytes / Math.pow(KILOBYTE, threshold)).toFixed(precision)) +
-		' ' +
-		BYTE_UNITS[threshold]
-	);
+		return (
+			parseFloat((bytes / Math.pow(KILOBYTE, threshold)).toFixed(precision)) +
+			' ' +
+			BYTE_UNITS[threshold]
+		);
+	} else {
+		// FIXME: I don't think this is safe!!!
+		let threshold = Math.floor(Math.log(Number(bytes)) / Math.log(KILOBYTE));
+
+		return (
+			parseFloat((Number(bytes) / Math.pow(KILOBYTE, threshold)).toFixed(precision)) +
+			' ' +
+			BYTE_UNITS[threshold]
+		);
+	}
 }
 
 /**
  * Returns an object containing the converted bytes and the unit of measurement.
  */
-export function formatBytesSeparate(bytes?: number, decimals = 2, zeroUnit = 'GB') {
+export function formatBytesSeparate(bytes?: number | bigint, decimals = 2, zeroUnit = 'GB') {
 	if (bytes == undefined) return null;
 
 	let precision = decimals >= 0 ? decimals : 0;
@@ -40,10 +51,20 @@ export function formatBytesSeparate(bytes?: number, decimals = 2, zeroUnit = 'GB
 		};
 	}
 
-	let threshold = Math.floor(Math.log(bytes) / Math.log(KILOBYTE));
+	if (typeof bytes !== 'bigint') {
+		let threshold = Math.floor(Math.log(bytes) / Math.log(KILOBYTE));
 
-	return {
-		value: parseFloat((bytes / Math.pow(KILOBYTE, threshold)).toFixed(precision)),
-		unit: BYTE_UNITS[threshold],
-	};
+		return {
+			value: parseFloat((bytes / Math.pow(KILOBYTE, threshold)).toFixed(precision)),
+			unit: BYTE_UNITS[threshold],
+		};
+	} else {
+		// FIXME: I don't think this is safe!!!
+		let threshold = Math.floor(Math.log(Number(bytes)) / Math.log(KILOBYTE));
+
+		return {
+			value: parseFloat((Number(bytes) / Math.pow(KILOBYTE, threshold)).toFixed(precision)),
+			unit: BYTE_UNITS[threshold],
+		};
+	}
 }

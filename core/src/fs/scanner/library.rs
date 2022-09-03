@@ -16,7 +16,7 @@ use crate::{
 	fs::scanner::ScannedFileTrait,
 	job::persist_job_start,
 	prisma::{library, media, series},
-	types::errors::ApiError,
+	types::{errors::ApiError, models::library::LibraryOptions},
 };
 
 use super::utils::mark_library_missing;
@@ -32,6 +32,7 @@ async fn precheck(
 		.library()
 		.find_unique(library::path::equals(path.clone()))
 		.with(library::series::fetch(vec![]))
+		.with(library::library_options::fetch())
 		.exec()
 		.await?;
 
@@ -91,7 +92,7 @@ async fn precheck(
 		})
 		.collect();
 
-	// TODO: I need to check for missing series? maybe? UGH...
+	// TODO: I need to check for missing series!! UGH...
 
 	let mut inserted_series =
 		super::utils::insert_series_many(ctx, new_entries, library.id.clone()).await;
@@ -139,6 +140,7 @@ async fn scan_series(
 	ctx: Ctx,
 	runner_id: String,
 	series: series::Data,
+	library_options: LibraryOptions,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) {
 	let db = ctx.get_db();
@@ -187,7 +189,9 @@ async fn scan_series(
 
 		log::debug!("New media found at {:?} in series {:?}", &path, &series.id);
 
-		match super::utils::insert_media(&ctx, path, series.id.clone()).await {
+		match super::utils::insert_media(&ctx, path, series.id.clone(), &library_options)
+			.await
+		{
 			Ok(media) => {
 				visited_media.insert(media.path.clone(), true);
 
@@ -264,36 +268,36 @@ pub async fn scan_concurrent(
 	path: String,
 	runner_id: String,
 ) -> Result<(), ApiError> {
-	let (_library, series, _files_to_process) = precheck(&ctx, path).await?;
+	let (library, series, _files_to_process) = precheck(&ctx, path).await?;
+
+	let library_options: LibraryOptions = library
+		.library_options
+		.map(|opt| (*opt).into())
+		.unwrap_or_default();
 
 	let counter = Arc::new(Mutex::new(1));
 
 	let tasks: Vec<JoinHandle<()>> = series
 		.into_iter()
-		// .cloned()
 		.map(|s| {
 			let ctx_cpy = ctx.get_ctx();
-			// let r_id = runner_id.clone();
 
 			let counter_ref = counter.clone();
-
 			let runner_id = runner_id.clone();
+			let library_options = library_options.clone();
 
 			tokio::spawn(async move {
-				scan_series(ctx_cpy.get_ctx(), runner_id, s, move |_msg| {
-					let mut shared = counter_ref.lock().unwrap();
+				scan_series(
+					ctx_cpy.get_ctx(),
+					runner_id,
+					s,
+					library_options,
+					move |_msg| {
+						let mut shared = counter_ref.lock().unwrap();
 
-					*shared += 1;
-
-					// log::debug!("{:?} - {:?}", msg, shared);
-
-					// let _ = ctx_cpy.job_progress(ClientEvent::job_progress(
-					// 	"runnerid".to_string(),
-					// 	counter as u64,
-					// 	files_to_process,
-					// 	Some(msg),
-					// ));
-				})
+						*shared += 1;
+					},
+				)
 				.await;
 			})
 		})
@@ -310,6 +314,11 @@ pub async fn scan_sync(
 	runner_id: String,
 ) -> Result<u64, ApiError> {
 	let (library, series, files_to_process) = precheck(&ctx, path).await?;
+
+	let library_options: LibraryOptions = library
+		.library_options
+		.map(|opt| (*opt).into())
+		.unwrap_or_default();
 
 	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
@@ -329,10 +338,12 @@ pub async fn scan_sync(
 		let r_id = runner_id.clone();
 
 		let counter_ref = counter.clone();
-
 		let runner_id = runner_id.clone();
+		// Note: I don't ~love~ having to clone this struct each iteration. I think it's fine for now,
+		// considering it consists of just a few booleans.
+		let library_options = library_options.clone();
 
-		scan_series(ctx.get_ctx(), runner_id, s, move |msg| {
+		scan_series(ctx.get_ctx(), runner_id, s, library_options, move |msg| {
 			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
 			let _ = progress_ctx.emit_client_event(ClientEvent::job_progress(

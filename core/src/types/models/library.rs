@@ -86,6 +86,8 @@ pub struct UpdateLibraryArgs {
 	pub tags: Option<Vec<Tag>>,
 	/// The tags to remove from the library.
 	pub removed_tags: Option<Vec<Tag>>,
+	/// The updated options of the library.
+	pub library_options: LibraryOptions,
 	/// Optional flag to indicate if the library should be automatically scanned after update. Default is `true`.
 	pub scan: Option<bool>,
 }

@@ -17,8 +17,7 @@ import { TagOption, useTags } from '~hooks/useTags';
 import { useMutation } from '@tanstack/react-query';
 import client from '~api/client';
 import { editLibrary } from '~api/library';
-import { createTags } from '~api/tag';
-import { Library, Tag } from '@stump/core';
+import { Library, LibraryOptions, Tag } from '@stump/core';
 
 interface Props {
 	library: Library;
@@ -29,7 +28,7 @@ interface Props {
 export default function EditLibraryModal({ disabled, library }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const { tags, options, isLoading: fetchingTags } = useTags();
+	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags();
 
 	const { isLoading, mutateAsync } = useMutation(['editLibrary'], {
 		mutationFn: editLibrary,
@@ -38,7 +37,8 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 				// throw new Error('Something went wrong.');
 				// TODO: log?
 			} else {
-				client.invalidateQueries(['getLibraries', 'getJobReports']);
+				client.invalidateQueries(['getLibraries']);
+				client.invalidateQueries(['getJobReports']);
 				onClose();
 			}
 		},
@@ -47,10 +47,6 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 			// toast.error('Login failed. Please try again.');
 			console.error(err);
 		},
-	});
-
-	const { mutateAsync: tryCreateTags } = useMutation(['createTags'], {
-		mutationFn: createTags,
 	});
 
 	function getRemovedTags(tags: TagOption[]): Tag[] | null {
@@ -74,7 +70,12 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 			throw new Error('You do not have permission to update libraries.');
 		}
 
-		const { name, path, description, tags: formTags, scan } = values;
+		const { name, path, description, tags: formTags, scan, ...rest } = values;
+
+		const libraryOptions = {
+			...rest,
+			id: library.libraryOptions.id,
+		} as LibraryOptions;
 
 		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
 
@@ -100,7 +101,16 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 		}
 
 		toast.promise(
-			mutateAsync({ ...library, name, path, description, tags: existingTags, removedTags, scan }),
+			mutateAsync({
+				...library,
+				name,
+				path,
+				description,
+				tags: existingTags,
+				removedTags,
+				scan,
+				libraryOptions,
+			}),
 			{
 				loading: 'Updating library...',
 				success: 'Updates saved!',

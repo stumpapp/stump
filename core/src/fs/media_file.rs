@@ -5,7 +5,10 @@ use crate::types::{
 	alias::ProcessFileResult,
 	errors::ProcessFileError,
 	http,
-	models::media::{MediaMetadata, ProcessedMediaFile},
+	models::{
+		library::LibraryOptions,
+		media::{MediaMetadata, ProcessedMediaFile},
+	},
 };
 
 use super::{
@@ -167,15 +170,21 @@ pub fn get_page(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse>
 	}
 }
 
-// TODO: take in a LibraryOptions
-pub fn process(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
-	log::debug!("Processing entry: {:?}", path);
+pub fn process(
+	path: &Path,
+	library_options: &LibraryOptions,
+) -> ProcessFileResult<ProcessedMediaFile> {
+	log::debug!(
+		"Processing entry {:?} with options: {:?}",
+		path,
+		library_options
+	);
 
 	let mime = infer_mime_from_path(path);
 
-	// TODO: replace with flag in LibraryOptions
-	let convert_rar_to_zip = false;
-	// TODO: generate_webp_thumbnail = false;
+	let convert_rar_to_zip = library_options.convert_rar_to_zip;
+	// TODO: hard_delete_conversions = library_options.hard_delete_conversions;
+	// TODO: generate_webp_thumbnail = library_options.generate_webp_thumbnail;
 
 	match mime.as_deref() {
 		Some("application/zip") => process_zip(path),

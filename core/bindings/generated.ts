@@ -56,6 +56,7 @@ export interface UpdateLibraryArgs {
 	description: string | null;
 	tags: Array<Tag> | null;
 	removedTags: Array<Tag> | null;
+	libraryOptions: LibraryOptions;
 	scan: boolean | null;
 }
 

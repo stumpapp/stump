@@ -43,6 +43,7 @@ pub async fn get_libraries(
 		.library()
 		.find_many(vec![])
 		.with(library::tags::fetch(vec![]))
+		.with(library::library_options::fetch())
 		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?
@@ -335,11 +336,27 @@ pub async fn update_library(
 		)));
 	}
 
-	let updates: Vec<library::SetParam> = vec![
-		library::name::set(input.name.to_owned()),
-		library::path::set(input.path.to_owned()),
-		library::description::set(input.description.to_owned()),
-	];
+	let library_options = input.library_options.to_owned();
+
+	db.library_options()
+		.update(
+			library_options::id::equals(library_options.id.unwrap_or_default()),
+			vec![
+				library_options::convert_rar_to_zip::set(
+					library_options.convert_rar_to_zip,
+				),
+				library_options::hard_delete_conversions::set(
+					library_options.hard_delete_conversions,
+				),
+				library_options::create_webp_thumbnails::set(
+					library_options.create_webp_thumbnails,
+				),
+			],
+		)
+		.exec()
+		.await?;
+
+	let mut batches = vec![];
 
 	// FIXME: this is disgusting. I don't understand why the library::tag::connect doesn't
 	// work with multiple tags, nor why providing multiple library::tag::connect params
@@ -348,72 +365,45 @@ pub async fn update_library(
 
 	if let Some(tags) = input.tags.to_owned() {
 		if tags.len() > 0 {
-			// updates.push(library::tags::connect(vec![
-			// 	tag::name::equals(String::from("Demo")),
-			// 	tag::name::equals(String::from("Dem2")),
-			// ]));
-
 			for tag in tags {
-				db.library()
-					.update(
-						library::id::equals(id.clone()),
-						vec![library::tags::connect(vec![tag::id::equals(
-							tag.id.to_owned(),
-						)])],
-					)
-					.exec()
-					.await?;
+				batches.push(db.library().update(
+					library::id::equals(id.clone()),
+					vec![library::tags::connect(vec![tag::id::equals(
+						tag.id.to_owned(),
+					)])],
+				));
 			}
 		}
 	}
 
 	if let Some(removed_tags) = input.removed_tags.to_owned() {
 		if removed_tags.len() > 0 {
-			// updates.push(library::tags::connect(vec![
-			// 	tag::name::equals(String::from("Demo")),
-			// 	tag::name::equals(String::from("Dem2")),
-			// ]));
-
-			// let mut removing = removed_tags
-			// 	.into_iter()
-			// 	.map(|t| {
-			// 		println!("unlink tag: {:?}", t);
-			// 		library::tags::unlink(vec![tag::UniqueWhereParam::IdEquals(
-			// 			t.id.to_owned(),
-			// 		)])
-			// 	})
-			// 	.collect::<Vec<library::SetParam>>();
-
-			// updates.push(removing);
 			for tag in removed_tags {
-				db.library()
-					.update(
-						library::id::equals(id.clone()),
-						vec![library::tags::disconnect(vec![tag::id::equals(
-							tag.id.to_owned(),
-						)])],
-					)
-					.exec()
-					.await?;
+				batches.push(db.library().update(
+					library::id::equals(id.clone()),
+					vec![library::tags::disconnect(vec![tag::id::equals(
+						tag.id.to_owned(),
+					)])],
+				));
 			}
 		}
 	}
 
+	let _batched_updates = db._batch(batches).await?;
+
 	let updated = db
 		.library()
-		.update(library::id::equals(id.clone()), updates)
+		.update(
+			library::id::equals(id),
+			vec![
+				library::name::set(input.name.to_owned()),
+				library::path::set(input.path.to_owned()),
+				library::description::set(input.description.to_owned()),
+			],
+		)
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
-
-	// if updated.is_none() {
-	// 	return Err(ApiError::NotFound(format!(
-	// 		"Library with id {} not found",
-	// 		&id
-	// 	)));
-	// }
-
-	// let updated = updated.unwrap();
 
 	// `scan` is not a required field, however it will default to true if not provided
 	if input.scan.unwrap_or(true) {

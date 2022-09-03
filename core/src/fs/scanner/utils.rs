@@ -10,7 +10,7 @@ use crate::{
 	prisma::{library, media, series},
 	types::{
 		errors::{ApiError, ScanError},
-		models::media::MediaMetadata,
+		models::{library::LibraryOptions, media::MediaMetadata},
 	},
 };
 
@@ -57,8 +57,9 @@ pub async fn insert_media(
 	ctx: &Ctx,
 	path: &Path,
 	series_id: String,
+	library_options: &LibraryOptions,
 ) -> Result<media::Data, ScanError> {
-	let processed_entry = media_file::process(path)?;
+	let processed_entry = media_file::process(path, library_options)?;
 
 	let pathbuf = processed_entry.path;
 	let path = pathbuf.as_path();

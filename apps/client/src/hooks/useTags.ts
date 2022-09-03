@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createTags as createTagsFn, getAllTags } from '~api/tag';
+import client from '~api/client';
 
 export interface UseTagsConfig {
 	onQuerySuccess?: (res: ApiResult<Tag[]>) => void;
@@ -35,7 +36,11 @@ export function useTags({
 		isLoading: isCreating,
 	} = useMutation(['createTags'], {
 		mutationFn: createTagsFn,
-		onSuccess: onCreateSuccess,
+		onSuccess(res) {
+			onCreateSuccess?.(res);
+
+			client.refetchQueries(['getAllTags']);
+		},
 		onError: onCreateError,
 	});
 

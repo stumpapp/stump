@@ -16,7 +16,6 @@ import {
 
 import { TagOption, useTags } from '~hooks/useTags';
 import LibraryModalForm from './LibraryModalForm';
-import { createTags } from '~api/tag';
 import { ApiResult, LibraryOptions, Tag } from '@stump/core';
 
 interface Props {
@@ -27,7 +26,7 @@ interface Props {
 export default function CreateLibraryModal({ disabled, ...props }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const { tags, options, isLoading: fetchingTags } = useTags();
+	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags();
 
 	const { isLoading, mutateAsync } = useMutation(['createLibrary'], {
 		mutationFn: createLibrary,
@@ -46,10 +45,6 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 			// toast.error('Login failed. Please try again.');
 			console.error(err);
 		},
-	});
-
-	const { mutateAsync: tryCreateTags } = useMutation(['createTags'], {
-		mutationFn: createTags,
 	});
 
 	// /Users/aaronleopold/Documents/Stump/Demo
@@ -84,8 +79,6 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 
 			existingTags = existingTags.concat(res.data);
 		}
-
-		console.log({ existingTags });
 
 		toast.promise(
 			mutateAsync({ name, path, description, tags: existingTags, scan, libraryOptions }),

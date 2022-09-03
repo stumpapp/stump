@@ -38,7 +38,6 @@ interface Props {
  * It is not intended to be used outside of those components.
  */
 export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, library }: Props) {
-	// const libraries = useStore((state) => state.libraries);
 	const { libraries } = useLibraries();
 
 	const schema = z.object({
@@ -101,8 +100,6 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 	const errors = useMemo(() => {
 		return form.formState.errors;
 	}, [form.formState.errors]);
-
-	console.log(errors);
 
 	const convertRarToZip = form.watch('convertRarToZip');
 
@@ -182,7 +179,6 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 						<FormControl>
 							<Checkbox
 								title="Create Webp thumbnails for each scanned media. When turned off, Stump will extract the first image as the thumbnail."
-								defaultChecked
 								colorScheme="brand"
 								{...form.register('createWebpThumbnails')}
 							>
@@ -193,7 +189,6 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 						<FormControl>
 							<Checkbox
 								title="When rar files are found, automatically extract them and re-bundle them in a zip file"
-								defaultChecked
 								colorScheme="brand"
 								{...form.register('convertRarToZip')}
 							>
@@ -204,7 +199,6 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 						<FormControl>
 							<Checkbox
 								title="When rar files have been converted to zip, automatically remove them from the host machine. The files are *not recoverable*"
-								defaultChecked={false}
 								colorScheme="brand"
 								disabled={!convertRarToZip}
 								{...form.register('hardDeleteConversions')}

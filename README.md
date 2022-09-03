@@ -36,10 +36,13 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Developing 💻](#developing-)
   - [Setup Script ⚙️](#setup-script-️)
   - [Running Stump 🏃‍♀️](#running-stump-️)
+  - [Where to start? 🤔](#where-to-start-)
 - [Similar Projects 👯](#similar-projects-)
 - [License 🔑](#license-)
   </p>
 </details>
+
+> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please see the [Developing](#developing-) section below for more information on how you can help. Otherwise, stay tuned for the first release!
 
 ## Roadmap 🗺
 
@@ -151,6 +154,12 @@ To run in a release profile, you would just need to run:
 ```bash
 pnpm core start
 ```
+
+### Where to start? 🤔
+
+If you're looking to contribute, but aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the development of Stump, mostly for personal organization. You can see what features are being worked on and what needs to be done.
+
+Features are categorized by `Core: Frontend` (the React client, for now), `Core: Backend` (the Rust server), `Core: Devops` (Docker and other misc devops things), and `Website` (the documentation website). I'll be responsive on [Discord](https://discord.gg/63Ybb7J3as) (and eventually Matrix) if you have any questions, so feel free to reach out!
 
 ## Similar Projects 👯
 

@@ -52,6 +52,21 @@ const fonts = {
 	body: 'Inter var, sans-serif',
 };
 
-const theme = extendTheme({ config, colors, fonts });
+const theme = extendTheme({
+	config,
+	colors,
+	fonts,
+	components: {
+		Checkbox: {
+			baseStyle: {
+				control: {
+					_focus: {
+						boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+					},
+				},
+			},
+		},
+	},
+});
 
 export default theme;

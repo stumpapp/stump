@@ -29,6 +29,15 @@ export interface Library {
 	updatedAt: string;
 	series: Array<Series> | null;
 	tags: Array<Tag> | null;
+	libraryOptions: LibraryOptions;
+}
+
+export interface LibraryOptions {
+	id: string | null;
+	convertRarToZip: boolean;
+	hardDeleteConversions: boolean;
+	createWebpThumbnails: boolean;
+	libraryId: string | null;
 }
 
 export interface CreateLibraryArgs {
@@ -37,6 +46,7 @@ export interface CreateLibraryArgs {
 	description: string | null;
 	tags: Array<Tag> | null;
 	scan: boolean | null;
+	libraryOptions: LibraryOptions | null;
 }
 
 export interface UpdateLibraryArgs {

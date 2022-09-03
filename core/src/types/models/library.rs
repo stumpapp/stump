@@ -1,4 +1,3 @@
-// use prisma_client_rust::chrono::{DateTime, FixedOffset};
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -25,9 +24,39 @@ pub struct Library {
 	pub series: Option<Vec<Series>>,
 	/// The tags associated with this library. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
+	/// The options of the library. Will be Default only if the relation is not loaded.
+	pub library_options: LibraryOptions,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct LibraryOptions {
+	// Note: this isn't really an Option, but I felt it was a little verbose
+	// to create an entirely new struct Create/UpdateLibraryOptions for just one
+	// field... even though I ~kinda~ did that below lol for Create/UpdateLibraryArgs lol.
+	pub id: Option<String>,
+	pub convert_rar_to_zip: bool,
+	pub hard_delete_conversions: bool,
+	pub create_webp_thumbnails: bool,
+	// TODO: don't make Option after pcr supports nested create
+	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+	pub library_id: Option<String>,
+}
+
+impl Default for LibraryOptions {
+	fn default() -> Self {
+		Self {
+			id: None,
+			convert_rar_to_zip: false,
+			hard_delete_conversions: false,
+			create_webp_thumbnails: false,
+			library_id: None,
+		}
+	}
 }
 
 #[derive(Deserialize, JsonSchema, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateLibraryArgs {
 	/// The name of the library to create.
 	pub name: String,
@@ -39,6 +68,8 @@ pub struct CreateLibraryArgs {
 	pub tags: Option<Vec<Tag>>,
 	/// Optional flag to indicate if the library should be automatically scanned after creation. Default is `true`.
 	pub scan: Option<bool>,
+	/// Optional options to apply to the library. When not provided, the default options will be used.
+	pub library_options: Option<LibraryOptions>,
 }
 
 #[derive(Deserialize, JsonSchema, Type)]
@@ -67,6 +98,18 @@ pub struct LibrariesStats {
 	total_bytes: u64,
 }
 
+impl Into<LibraryOptions> for prisma::library_options::Data {
+	fn into(self) -> LibraryOptions {
+		LibraryOptions {
+			id: Some(self.id),
+			convert_rar_to_zip: self.convert_rar_to_zip,
+			hard_delete_conversions: self.hard_delete_conversions,
+			create_webp_thumbnails: self.create_webp_thumbnails,
+			library_id: self.library_id,
+		}
+	}
+}
+
 impl Into<Library> for prisma::library::Data {
 	fn into(self) -> Library {
 		let series = match self.series() {
@@ -85,6 +128,14 @@ impl Into<Library> for prisma::library::Data {
 			},
 		};
 
+		let library_options = match self.library_options() {
+			Ok(library_options) => library_options.to_owned().into(),
+			Err(e) => {
+				log::trace!("Failed to load library options for library: {}", e);
+				LibraryOptions::default()
+			},
+		};
+
 		Library {
 			id: self.id,
 			name: self.name,
@@ -94,6 +145,7 @@ impl Into<Library> for prisma::library::Data {
 			updated_at: self.updated_at.to_string(),
 			series,
 			tags,
+			library_options,
 		}
 	}
 }

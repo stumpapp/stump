@@ -13,6 +13,7 @@
 		"dev": "concurrently -n core,client -c green.bold,blue.bold \"pnpm core dev\" \"pnpm client dev\"",
 		"core": "pnpm --filter @stump/core --",
 		"prisma": "pnpm core prisma",
+		"codegen": "pnpm core codegen",
 		"client": "pnpm --filter @stump/client --",
 		"website": "pnpm --filter @stump/website --",
 		"build": "pnpm client build && pnpm core build",

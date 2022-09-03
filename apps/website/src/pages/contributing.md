@@ -99,6 +99,12 @@ pnpm core start
 
 At this point, you're pretty much all set! When you navigate to [`localhost:3000`](http://localhost:3000), or [`localhost:10801`](http://localhost:10801) using the release profile, Stump will prompt you to create the managing user account and then your first library.
 
+### Where to start?
+
+If you're looking to contribute, but aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the development of Stump, mostly for personal organization. You can see what features are being worked on and what needs to be done.
+
+Features are categorized by `Core: Frontend` (the React client, for now), `Core: Backend` (the Rust server), `Core: Devops` (Docker and other misc devops things), and `Website` (the documentation website).
+
 ### Developer Resources
 
 A few useful resources for developers looking to contribute:

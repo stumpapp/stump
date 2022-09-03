@@ -1,7 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
-	Checkbox,
-	FormControl,
 	FormErrorMessage,
 	FormLabel,
 	InputGroup,
@@ -18,14 +16,14 @@ import { FieldValues, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import DirectoryPickerModal from '~components/DirectoryPickerModal';
 import TagSelect from '~components/TagSelect';
-import Form from '~ui/Form';
+import Form, { FormControl } from '~ui/Form';
 import Input from '~ui/Input';
 import { Tab } from '~ui/Tabs';
 import TextArea from '~ui/TextArea';
 import { TagOption } from '~hooks/useTags';
-import { useStore } from '~store/store';
 import { Library } from '@stump/core';
 import { useLibraries } from '~hooks/useLibraries';
+import Checkbox from '~ui/Checkbox';
 
 interface Props {
 	tags: TagOption[];
@@ -77,6 +75,9 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 			)
 			.optional(),
 		scan: z.boolean().default(true),
+		convertRarToZip: z.boolean().default(false),
+		hardDeleteConversions: z.boolean().default(false),
+		createWebpThumbnails: z.boolean().default(false),
 	});
 
 	const form = useForm({
@@ -87,6 +88,9 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					path: library.path,
 					description: library.description,
 					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
+					convertRarToZip: library.libraryOptions.convertRarToZip,
+					hardDeleteConversions: library.libraryOptions.hardDeleteConversions,
+					createWebpThumbnails: library.libraryOptions.createWebpThumbnails,
 					scan: true,
 			  }
 			: {},
@@ -98,7 +102,9 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 		return form.formState.errors;
 	}, [form.formState.errors]);
 
-	// console.log(errors);
+	console.log(errors);
+
+	const convertRarToZip = form.watch('convertRarToZip');
 
 	useEffect(() => {
 		if (reset) {
@@ -175,11 +181,21 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 
 						<FormControl>
 							<Checkbox
+								title="Create Webp thumbnails for each scanned media. When turned off, Stump will extract the first image as the thumbnail."
+								defaultChecked
+								colorScheme="brand"
+								{...form.register('createWebpThumbnails')}
+							>
+								Create Webp Thumbnails
+							</Checkbox>
+						</FormControl>
+
+						<FormControl>
+							<Checkbox
 								title="When rar files are found, automatically extract them and re-bundle them in a zip file"
 								defaultChecked
 								colorScheme="brand"
-								disabled
-								// {...form.register('scan')}
+								{...form.register('convertRarToZip')}
 							>
 								Convert rar files to zip
 							</Checkbox>
@@ -190,8 +206,8 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 								title="When rar files have been converted to zip, automatically remove them from the host machine. The files are *not recoverable*"
 								defaultChecked={false}
 								colorScheme="brand"
-								disabled
-								// {...form.register('scan')}
+								disabled={!convertRarToZip}
+								{...form.register('hardDeleteConversions')}
 							>
 								Permanently delete rar files after conversion
 							</Checkbox>

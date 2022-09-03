@@ -40,6 +40,7 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryOptions>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibraryArgs>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibraryArgs>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibrariesStats>()?).as_bytes())?;

@@ -10,7 +10,7 @@ use crate::{
 	guards::auth::{AdminGuard, Auth},
 	job::library_scan::LibraryScanJob,
 	prisma::{
-		library, media,
+		library, library_options, media,
 		series::{self, OrderByParam},
 		tag,
 	},
@@ -105,6 +105,7 @@ pub async fn get_library_by_id(
 		.library()
 		.find_unique(library::id::equals(id.clone()))
 		.with(library::series::fetch(vec![]))
+		.with(library::library_options::fetch())
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
@@ -253,11 +254,35 @@ pub async fn create_library(
 		)));
 	}
 
+	// TODO: refactor once nested create is supported
+	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+
+	let library_options_arg = input.library_options.to_owned().unwrap_or_default();
+
+	// FIXME: until nested create, library_options.library_id will be NULL in the database... unless I run ANOTHER
+	// update. Which I am not doing lol.
+	let library_options = db
+		.library_options()
+		.create(vec![
+			library_options::convert_rar_to_zip::set(
+				library_options_arg.convert_rar_to_zip,
+			),
+			library_options::hard_delete_conversions::set(
+				library_options_arg.hard_delete_conversions,
+			),
+			library_options::create_webp_thumbnails::set(
+				library_options_arg.create_webp_thumbnails,
+			),
+		])
+		.exec()
+		.await?;
+
 	let lib = db
 		.library()
 		.create(
 			input.name.to_owned(),
 			input.path.to_owned(),
+			library_options::id::equals(library_options.id),
 			vec![library::description::set(input.description.to_owned())],
 		)
 		.exec()
@@ -292,7 +317,7 @@ pub async fn create_library(
 }
 
 /// Update a library by id, if the current user is a SERVER_OWNER.
-// TODO: Scan?
+// TODO: LibraryOptions update
 #[openapi(tag = "Library")]
 #[put("/libraries/<id>", data = "<input>")]
 pub async fn update_library(

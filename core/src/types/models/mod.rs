@@ -21,7 +21,6 @@ pub struct AuthenticatedUser {
 	pub id: String,
 	pub username: String,
 	pub role: String,
-	// FIXME: once issue 44 is resolved, remove Option
 	pub user_preferences: UserPreferences,
 }
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import {
 	ButtonProps as ChakraButtonProps,
 	Button as ChakraButton,

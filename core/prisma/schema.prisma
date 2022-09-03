@@ -71,6 +71,9 @@ model Library {
   // The series in the library
   series      Series[]
 
+  libraryOptions   LibraryOptions @relation(fields: [libraryOptionsId], references: [id])
+  libraryOptionsId String         @unique
+
   tags Tag[]
 
   @@map("libraries")
@@ -87,7 +90,9 @@ model LibraryOptions {
   // Flag indicating whether or not to create WEBP thumbnails for scanned media.
   createWebpThumbnails  Boolean @default(false)
   // The ID of the library which these options belong to.
-  libraryId             String
+
+  libraryId String?
+  library   Library?
 
   @@map("library_options")
 }

@@ -16,6 +16,7 @@
     "move-rocket": "trash ../target/release/Rocket.toml && cp ./Rocket.toml ../target/release/Rocket.toml",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
     "benchmarks": "cargo test --benches",
+    "codegen": "cargo test --package stump --bin stump -- types::tests --nocapture ",
     "test": "cargo test"
   },
   "devDependencies": {

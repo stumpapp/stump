@@ -1,4 +1,3 @@
-import React from 'react';
 import { FieldValues } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useMutation } from '@tanstack/react-query';
@@ -18,7 +17,7 @@ import {
 import { TagOption, useTags } from '~hooks/useTags';
 import LibraryModalForm from './LibraryModalForm';
 import { createTags } from '~api/tag';
-import { ApiResult, Tag } from '@stump/core';
+import { ApiResult, LibraryOptions, Tag } from '@stump/core';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;
@@ -61,7 +60,13 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 			throw new Error('You do not have permission to create libraries.');
 		}
 
-		const { name, path, description, tags: formTags, scan } = values;
+		const { name, path, description, tags: formTags, scan, ...rest } = values;
+
+		const libraryOptions = rest as LibraryOptions;
+
+		console.log({ name, path, description, tags: formTags, scan, libraryOptions });
+
+		// /Users/aaronleopold/Documents/Stump/Demo
 
 		let existingTags = tags.filter((tag) => formTags?.some((t: TagOption) => t.value === tag.name));
 
@@ -82,11 +87,14 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 
 		console.log({ existingTags });
 
-		toast.promise(mutateAsync({ name, path, description, tags: existingTags, scan }), {
-			loading: 'Creating library...',
-			success: 'Library created!',
-			error: 'Something went wrong.',
-		});
+		toast.promise(
+			mutateAsync({ name, path, description, tags: existingTags, scan, libraryOptions }),
+			{
+				loading: 'Creating library...',
+				success: 'Library created!',
+				error: 'Something went wrong.',
+			},
+		);
 	}
 
 	function handleOpen() {

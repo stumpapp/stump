@@ -1,4 +1,3 @@
-import React from 'react';
 import { TagOption } from '~hooks/useTags';
 import { CreatableSelect } from 'chakra-react-select';
 import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react';
@@ -56,6 +55,7 @@ export default function TagSelect({
 						placeholder="Select tags"
 						noOptionsMessage={() => <p>You haven't created any tags yet</p>}
 						closeMenuOnSelect={false}
+						focusBorderColor="0 0 0 2px rgba(196, 130, 89, 0.6);"
 						// menuIsOpen
 						chakraStyles={{
 							control: (provided) => ({

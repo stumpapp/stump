@@ -1,11 +1,12 @@
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::prisma;
 
 use super::{library::Library, media::Media, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Series {
 	pub id: String,

@@ -1,6 +1,35 @@
+use rocket_okapi::JsonSchema;
+use serde::{Deserialize, Serialize};
+use specta::Type;
+
+#[derive(Serialize, Deserialize, Type)]
 pub enum UserRole {
+	#[serde(rename = "SERVER_OWNER")]
 	ServerOwner,
+	#[serde(rename = "MEMBER")]
 	Member,
+}
+
+#[derive(Serialize, Deserialize, Type)]
+pub enum ViewMode {
+	#[serde(rename = "GRID")]
+	Grid,
+	#[serde(rename = "LIST")]
+	List,
+}
+
+#[derive(Debug, Deserialize, Serialize, JsonSchema, Type)]
+pub enum FileStatus {
+	#[serde(rename = "UNKNOWN")]
+	Unknown,
+	#[serde(rename = "READY")]
+	Ready,
+	#[serde(rename = "UNSUPPORTED")]
+	Unsupported,
+	#[serde(rename = "ERROR")]
+	Error,
+	#[serde(rename = "MISSING")]
+	Missing,
 }
 
 impl Default for UserRole {

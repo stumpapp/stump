@@ -45,7 +45,7 @@ export function RunningJobs({ jobs }: { jobs: JobReport[] }) {
 
 	// TODO: generalize this since I use it in other places
 	// FIXME: this isn't a safe operation
-	function trim(message?: string) {
+	function trim(message?: string | null) {
 		if (message?.startsWith('Analyzing')) {
 			let filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/');
 
@@ -67,15 +67,17 @@ export function RunningJobs({ jobs }: { jobs: JobReport[] }) {
 				<div className="flex flex-col space-y-2 p-2 w-full text-xs">
 					<Text fontWeight="medium">{trim(job.message) ?? 'Job in Progress'}</Text>
 					<Progress
-						value={job.currentTask}
-						max={job.taskCount}
+						value={Number(job.currentTask)}
+						max={Number(job.taskCount)}
 						rounded="md"
 						w="full"
 						size="xs"
 						colorScheme="brand"
 					/>
 					<Text>
-						Scanning file {job.currentTask} of {job.taskCount}
+						<>
+							Scanning file {job.currentTask} of {job.taskCount}
+						</>
 					</Text>
 				</div>
 			))}

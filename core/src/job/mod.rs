@@ -6,6 +6,7 @@ use std::fmt::Debug;
 
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::{
 	config::context::Ctx,
@@ -14,7 +15,7 @@ use crate::{
 	types::errors::ApiError,
 };
 
-#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema)]
+#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema, Type)]
 pub enum JobStatus {
 	#[serde(rename = "RUNNING")]
 	Running,
@@ -53,7 +54,7 @@ impl From<&str> for JobStatus {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct JobUpdate {
 	pub runner_id: String,
@@ -64,7 +65,7 @@ pub struct JobUpdate {
 	pub status: Option<JobStatus>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema)]
+#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct JobReport {
 	/// This will actually refer to the job runner id

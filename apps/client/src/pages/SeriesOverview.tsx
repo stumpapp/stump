@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
@@ -60,7 +60,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					// Marvel Knights Spider-Man features one of comics' most inventive writers matched with an
 					// iconic Marvel hero. The result is a spellbinding story from start to finish, a must-have
 					// read for any Spider-Man fan!`}
-					text={series.description}
+					text={series.description ?? ''}
 				/>
 			</div>
 		</div>

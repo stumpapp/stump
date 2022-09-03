@@ -86,7 +86,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	// Note: not sure this is possible anymore? epub.js isn't maintained it seems,
 	// and I haven't figured this out yet.
 	function pageAnimation(iframeView: any, _rendition: Rendition) {
-		console.log('pageAnimation', { iframeView, _rendition });
+		// console.log('pageAnimation', { iframeView, _rendition });
 		// window.setTimeout(() => {
 		// console.log('in pageAnimation timeout');
 		// }, 100);
@@ -210,7 +210,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 					if (matches.length > 0) {
 						match = matches[0];
 					} else {
-						console.log(`Could not find ${href}`);
+						console.error(`Could not find ${href}`);
 						return;
 					}
 				}

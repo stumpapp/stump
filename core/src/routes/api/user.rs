@@ -128,7 +128,7 @@ pub async fn update_user_preferences(
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
 
-	let user_preferences = auth.0.preferences;
+	let user_preferences = auth.0.user_preferences;
 
 	Ok(Json(
 		db.user_preferences()

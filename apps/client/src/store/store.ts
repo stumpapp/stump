@@ -1,4 +1,4 @@
-import type { Job, User, UserPreferences } from '@stump/core';
+import type { JobUpdate, User, UserPreferences } from '@stump/core';
 import create, { GetState, SetState, StateCreator, StoreApi, UseBoundStore } from 'zustand';
 import createContext from 'zustand/context';
 import { devtools } from 'zustand/middleware';
@@ -10,15 +10,15 @@ interface StoreMutations {
 
 	setTitle(value: string): void;
 
-	addJob(job: Job): void;
-	updateJob(job: Job): void;
+	addJob(job: JobUpdate): void;
+	updateJob(job: JobUpdate): void;
 	completeJob(runnerId: string): void;
 }
 
 interface MainStore extends StoreMutations {
 	user: User | null;
 	title: string;
-	jobs: Record<string, Job>;
+	jobs: Record<string, JobUpdate>;
 }
 
 const { Provider, useStore } = createContext<MainStore>();
@@ -35,14 +35,14 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 
 	setUser: (user: User) => set(() => ({ user })),
 
-	setUserPreferences: (preferences: UserPreferences) => {
+	setUserPreferences: (userPreferences: UserPreferences) => {
 		const user = get().user;
 
 		if (user) {
 			set(() => ({
 				user: {
 					...user,
-					preferences,
+					userPreferences,
 				},
 			}));
 		}
@@ -54,7 +54,7 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 		}
 	},
 
-	addJob: (newJob: Job) => {
+	addJob: (newJob: JobUpdate) => {
 		let job = get().jobs[newJob.runnerId];
 
 		if (job) {
@@ -69,7 +69,7 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 		}
 	},
 
-	updateJob(jobUpdate: Job) {
+	updateJob(jobUpdate: JobUpdate) {
 		let jobs = get().jobs;
 
 		let job = jobs[jobUpdate.runnerId];

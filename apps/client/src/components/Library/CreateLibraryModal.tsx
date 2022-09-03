@@ -80,7 +80,9 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 			existingTags = existingTags.concat(res.data);
 		}
 
-		toast.promise(mutateAsync({ name, path, description, tags: tagsToCreate, scan }), {
+		console.log({ existingTags });
+
+		toast.promise(mutateAsync({ name, path, description, tags: existingTags, scan }), {
 			loading: 'Creating library...',
 			success: 'Library created!',
 			error: 'Something went wrong.',

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Box, Progress, Text } from '@chakra-ui/react';
 import { useStore } from '~store/store';
@@ -42,11 +42,11 @@ export default function JobOverlay() {
 	const { jobs } = useStore((state) => ({ jobs: state.jobs }), shallow);
 
 	const jobShown = useMemo(() => {
-		return Object.values(jobs).find((job) => job.status.toLowerCase() === 'running') ?? null;
+		return Object.values(jobs).find((job) => job.status?.toLowerCase() === 'running') ?? null;
 	}, [jobs]);
 
 	// FIXME: this isn't a safe operation
-	function trim(message?: string) {
+	function trim(message?: string | null) {
 		if (message?.startsWith('Analyzing')) {
 			let filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/');
 
@@ -71,15 +71,18 @@ export default function JobOverlay() {
 					<div className="flex flex-col space-y-2 p-2 w-full text-xs">
 						<Text fontWeight="medium">{trim(jobShown.message) ?? 'Job in Progress'}</Text>
 						<Progress
-							value={jobShown.currentTask}
-							max={jobShown.taskCount}
+							value={Number(jobShown.currentTask)}
+							max={Number(jobShown.taskCount)}
 							rounded="md"
 							w="full"
 							size="xs"
 							colorScheme="brand"
 						/>
 						<Text>
-							Scanning file {jobShown.currentTask} of {jobShown.taskCount}
+							{/* This is infuriating that I needed to do this... */}
+							<>
+								Scanning file {jobShown.currentTask} of {jobShown.taskCount}
+							</>
 						</Text>
 					</div>
 				</Box>

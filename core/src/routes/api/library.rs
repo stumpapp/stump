@@ -2,8 +2,7 @@ use std::path::Path;
 
 use prisma_client_rust::{raw, Direction};
 use rocket::serde::json::Json;
-use rocket_okapi::{openapi, JsonSchema};
-use serde::Deserialize;
+use rocket_okapi::openapi;
 
 use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
@@ -20,9 +19,8 @@ use crate::{
 		errors::ApiError,
 		http::ImageResponse,
 		models::{
-			library::{LibrariesStats, Library},
+			library::{CreateLibraryArgs, LibrariesStats, Library, UpdateLibraryArgs},
 			series::Series,
-			tag::Tag,
 		},
 		pageable::{PageParams, Pageable, PagedRequestParams},
 		query::QueryOrder,
@@ -237,25 +235,11 @@ pub async fn scan_library(
 	Ok(ctx.spawn_job(Box::new(job))?)
 }
 
-#[derive(Deserialize, JsonSchema)]
-pub struct CreateLibrary {
-	/// The name of the library to create.
-	name: String,
-	/// The path to the library to create, i.e. where the directory is on the filesystem.
-	path: String,
-	/// Optional text description of the library.
-	description: Option<String>,
-	/// Optional tags to assign to the library.
-	tags: Option<Vec<Tag>>,
-	/// Optional flag to indicate if the library should be automatically scanned after creation. Default is `true`.
-	scan: Option<bool>,
-}
-
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 #[openapi(tag = "Library")]
 #[post("/libraries", data = "<input>")]
 pub async fn create_library(
-	input: Json<CreateLibrary>,
+	input: Json<CreateLibraryArgs>,
 	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Library>> {
@@ -307,30 +291,13 @@ pub async fn create_library(
 	Ok(Json(lib.into()))
 }
 
-#[derive(Deserialize, JsonSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct UpdateLibrary {
-	/// The updated name of the library.
-	name: String,
-	/// The updated path of the library.
-	path: String,
-	/// The updated description of the library.
-	description: Option<String>,
-	/// The updated tags of the library.
-	tags: Option<Vec<Tag>>,
-	/// The tags to remove from the library.
-	removed_tags: Option<Vec<Tag>>,
-	/// Optional flag to indicate if the library should be automatically scanned after update. Default is `true`.
-	scan: Option<bool>,
-}
-
 /// Update a library by id, if the current user is a SERVER_OWNER.
 // TODO: Scan?
 #[openapi(tag = "Library")]
 #[put("/libraries/<id>", data = "<input>")]
 pub async fn update_library(
 	id: String,
-	input: Json<UpdateLibrary>,
+	input: Json<UpdateLibraryArgs>,
 	ctx: &Ctx,
 	_auth: AdminGuard,
 ) -> ApiResult<Json<Library>> {

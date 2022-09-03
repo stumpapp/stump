@@ -2,6 +2,7 @@ pub mod event_manager;
 
 use rocket::tokio::sync::oneshot;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::{
 	job::{Job, JobReport, JobStatus, JobUpdate},
@@ -17,7 +18,8 @@ pub enum ClientResponse {
 	GetJobReports(Vec<JobReport>),
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[serde(tag = "key", content = "data")]
 pub enum ClientEvent {
 	JobStarted(JobUpdate),
 	JobProgress(JobUpdate),

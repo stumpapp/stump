@@ -53,14 +53,14 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 		mutationFn: createTags,
 	});
 
-	function getRemovedTags(tags: TagOption[]): Tag[] | undefined {
+	function getRemovedTags(tags: TagOption[]): Tag[] | null {
 		// All tags were removed, or no tags were there to begin with
 		if (tags.length === 0) {
-			return library.tags || undefined;
+			return library.tags || null;
 		}
 
 		if (!library.tags || library.tags.length === 0) {
-			return undefined;
+			return null;
 		}
 
 		// Some tags were removed, but not all
@@ -85,7 +85,7 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 		let removedTags = getRemovedTags(formTags);
 
 		if (!removedTags?.length) {
-			removedTags = undefined;
+			removedTags = null;
 		}
 
 		if (tagsToCreate.length) {

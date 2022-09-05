@@ -28,6 +28,10 @@ export function useJobManager() {
 			case 'JobComplete':
 				setTimeout(() => {
 					completeJob(data);
+
+					client.invalidateQueries(['getLibrary']);
+					client.invalidateQueries(['getLibrariesStats']);
+					client.invalidateQueries(['getSeries']);
 					toast.success(`Job ${data} complete.`);
 				}, 500);
 				break;
@@ -35,6 +39,7 @@ export function useJobManager() {
 				toast.error(`Job ${data.runner_id} failed.`);
 				break;
 			case 'CreatedMedia':
+			case 'CreatedMediaBatch':
 			case 'CreatedSeries':
 				// I set a timeout here to give the backend a little time to analyze at least
 				// one of the books in a new series before triggering a refetch. This is to

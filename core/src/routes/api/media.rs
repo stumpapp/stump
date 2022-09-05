@@ -1,10 +1,11 @@
 use prisma_client_rust::{raw, Direction};
-use rocket::{fs::NamedFile, serde::json::Json};
+use rocket::{fs::NamedFile, http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
+	config::get_config_dir,
 	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs,
+	fs::{self, image},
 	guards::auth::Auth,
 	prisma::{
 		media::{self, OrderByParam},
@@ -285,6 +286,15 @@ pub async fn get_media_thumbnail(
 	auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
+
+	let webp_path = get_config_dir()
+		.join("thumbnails")
+		.join(format!("{}.webp", id));
+
+	if webp_path.exists() {
+		log::trace!("Found webp thumbnail for media {}", id);
+		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?));
+	}
 
 	let book = db
 		.media()

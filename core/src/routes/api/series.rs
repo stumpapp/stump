@@ -1,10 +1,10 @@
 use prisma_client_rust::{raw, Direction, PrismaValue};
-use rocket::serde::json::Json;
+use rocket::{http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
 	db::migration::CountQueryReturn,
-	fs,
+	fs::{self, image},
 	guards::auth::Auth,
 	prisma::{media, read_progress, series},
 	types::{
@@ -139,6 +139,11 @@ pub async fn get_series_thumbnail(
 	}
 
 	let media = media.unwrap();
+
+	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
+		log::trace!("Found webp thumbnail for series {}", &id);
+		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?));
+	}
 
 	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
 }

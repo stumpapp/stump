@@ -22,7 +22,7 @@ use super::{
 epubcfi usually starts with /6, referring to spine element of package file
 file has three groups of elements: metadata, manifest and spine.
 */
-
+// TODO: options: &LibraryOptions
 pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 	let mut bytes_to_read = size;
 

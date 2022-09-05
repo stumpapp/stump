@@ -55,13 +55,11 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 			throw new Error('You do not have permission to create libraries.');
 		}
 
-		const { name, path, description, tags: formTags, scan, ...rest } = values;
+		const { name, path, description, tags: formTags, scanMode, ...rest } = values;
 
 		const libraryOptions = rest as LibraryOptions;
 
-		console.log({ name, path, description, tags: formTags, scan, libraryOptions });
-
-		// /Users/aaronleopold/Documents/Stump/Demo
+		console.debug({ name, path, description, tags: formTags, scanMode, libraryOptions });
 
 		let existingTags = tags.filter((tag) => formTags?.some((t: TagOption) => t.value === tag.name));
 
@@ -81,7 +79,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 		}
 
 		toast.promise(
-			mutateAsync({ name, path, description, tags: existingTags, scan, libraryOptions }),
+			mutateAsync({ name, path, description, tags: existingTags, scanMode, libraryOptions }),
 			{
 				loading: 'Creating library...',
 				success: 'Library created!',

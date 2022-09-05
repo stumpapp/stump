@@ -1,18 +1,23 @@
 use std::path::Path;
 
-use prisma_client_rust::{raw, PrismaValue};
+use prisma_client_rust::{raw, PrismaValue, QueryError};
 use walkdir::DirEntry;
 
 use crate::{
 	config::context::Ctx,
 	event::ClientEvent,
-	fs::media_file,
+	fs::{image, media_file},
 	prisma::{library, media, series},
 	types::{
 		errors::{ApiError, ScanError},
-		models::{library::LibraryOptions, media::MediaMetadata},
+		models::{
+			library::LibraryOptions,
+			media::{MediaMetadata, TentativeMedia},
+		},
 	},
 };
+
+use super::BatchScanOperation;
 
 /// Will mark all series and media within the library as MISSING. Requires the
 /// series and series.media relations to have been loaded to function properly.
@@ -53,12 +58,11 @@ pub async fn mark_library_missing(
 	Ok(())
 }
 
-pub async fn insert_media(
-	ctx: &Ctx,
+pub fn get_tentative_media(
 	path: &Path,
 	series_id: String,
 	library_options: &LibraryOptions,
-) -> Result<media::Data, ScanError> {
+) -> Result<TentativeMedia, ScanError> {
 	let processed_entry = media_file::process(path, library_options)?;
 
 	let pathbuf = processed_entry.path;
@@ -89,32 +93,66 @@ pub async fn insert_media(
 
 	let comic_info = processed_entry.metadata.unwrap_or(MediaMetadata::default());
 
-	let media = ctx
-		.db
-		.media()
-		.create(
-			name,
-			size.try_into().unwrap_or_else(|e| {
-				log::error!("Failed to calculate file size: {:?}", e);
+	Ok(TentativeMedia {
+		name,
+		description: comic_info.summary,
+		size: size.try_into().unwrap_or_else(|e| {
+			log::error!("Failed to calculate file size: {:?}", e);
 
-				0
-			}),
-			ext,
-			match comic_info.page_count {
-				Some(count) => count as i32,
-				None => processed_entry.pages,
-			},
-			path_str,
-			vec![
-				media::checksum::set(processed_entry.checksum),
-				media::description::set(comic_info.summary),
-				media::series::connect(series::id::equals(series_id)),
-			],
-		)
-		.exec()
-		.await?;
+			0
+		}),
+		extension: ext,
+		pages: match comic_info.page_count {
+			Some(count) => count as i32,
+			None => processed_entry.pages,
+		},
+		checksum: processed_entry.checksum,
+		path: path_str,
+		series_id,
+	})
 
-	log::debug!("Created new media: {:?}", media);
+	// Ok(ctx.db.media().create(
+	// 	name,
+	// size.try_into().unwrap_or_else(|e| {
+	// 	log::error!("Failed to calculate file size: {:?}", e);
+
+	// 	0
+	// }),
+	// 	ext,
+	// match comic_info.page_count {
+	// 	Some(count) => count as i32,
+	// 	None => processed_entry.pages,
+	// },
+	// 	path_str.clone(),
+	// 	vec![
+	// 		media::checksum::set(processed_entry.checksum),
+	// 		media::description::set(comic_info.summary),
+	// 		media::series::connect(series::id::equals(series_id)),
+	// 	],
+	// ))
+}
+
+pub async fn insert_media(
+	ctx: &Ctx,
+	path: &Path,
+	series_id: String,
+	library_options: &LibraryOptions,
+) -> Result<media::Data, ScanError> {
+	let path_str = path.to_str().unwrap_or_default().to_string();
+
+	let tentative_media = get_tentative_media(path, series_id, library_options)?;
+	let create_action = tentative_media.into_action(ctx);
+	let media = create_action.exec().await?;
+
+	log::trace!("Media entity created: {:?}", media);
+
+	if library_options.create_webp_thumbnails {
+		log::debug!("Attempting to create WEBP thumbnail");
+		let thumbnail_path = image::generate_thumbnail(&media.id, &path_str)?;
+		log::debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
+	}
+
+	log::debug!("Media for {} created successfully", path_str);
 
 	Ok(media)
 }
@@ -188,29 +226,76 @@ pub async fn insert_series_many(
 	inserted_series
 }
 
-// Note: This faced a similar issue as `scan_concurrent` did. So, commenting out for now..
-// pub async fn insert_series_many_concurrent(
-// 	ctx: &Context,
-// 	entries: Vec<DirEntry>,
-// 	library_id: String,
-// ) -> Vec<series::Data> {
-// 	let tasks = entries
-// 		.iter()
-// 		.cloned()
-// 		.map(|entry| {
-// 			let ctx_cpy = ctx.get_ctx();
-// 			let library_id = library_id.clone();
-// 			tokio::spawn(async move {
-// 				super::utils::insert_series(&ctx_cpy, &entry, library_id)
-// 					.await
-// 					.unwrap()
-// 			})
-// 		})
-// 		.collect::<Vec<JoinHandle<series::Data>>>();
+pub async fn mark_media_missing(
+	ctx: &Ctx,
+	paths: Vec<String>,
+) -> Result<i64, QueryError> {
+	let db = ctx.get_db();
 
-// 	futures::future::join_all(tasks)
-// 		.await
-// 		.into_iter()
-// 		.filter_map(|res| res.ok())
-// 		.collect()
-// }
+	db._execute_raw(raw!(format!(
+		"UPDATE media SET status=\"{}\" WHERE path in ({})",
+		"MISSING".to_string(),
+		paths
+			.into_iter()
+			.map(|path| format!("\"{}\"", path))
+			.collect::<Vec<_>>()
+			.join(",")
+	)
+	.as_str()))
+		.exec()
+		.await
+}
+
+pub async fn batch_media_operations(
+	ctx: &Ctx,
+	operations: Vec<BatchScanOperation>,
+	library_options: &LibraryOptions,
+) -> Result<Vec<media::Data>, ScanError> {
+	// Note: this won't work if I add any other operations...
+	let (create_operations, mark_missing_operations): (Vec<_>, Vec<_>) =
+		operations.into_iter().partition(|operation| {
+			matches!(
+				operation,
+				BatchScanOperation::CreateMedia {
+					path: _,
+					series_id: __
+				}
+			)
+		});
+
+	let media_creates = create_operations
+		.into_iter()
+		.map(|operation| {
+			match operation {
+				BatchScanOperation::CreateMedia { path, series_id } => {
+					// let result = insert_media(&ctx, &path, series_id, &library_options).await;
+					get_tentative_media(&path, series_id, library_options)
+				},
+				_ => unreachable!(),
+			}
+		})
+		.filter_map(|res| match res {
+			Ok(entry) => Some(entry.into_action(ctx)),
+			Err(e) => {
+				log::error!("Failed to create media: {:?}", e);
+
+				None
+			},
+		});
+
+	let missing_paths = mark_missing_operations
+		.into_iter()
+		.map(|operation| match operation {
+			BatchScanOperation::MarkMediaMissing { path } => path,
+			_ => unreachable!(),
+		})
+		.collect::<Vec<String>>();
+
+	if let Err(err) = mark_media_missing(ctx, missing_paths).await {
+		log::error!("Failed to mark media missing: {:?}", err);
+	} else {
+		log::debug!("Marked media missing");
+	}
+
+	Ok(ctx.db._batch(media_creates).await?)
+}

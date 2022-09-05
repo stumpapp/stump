@@ -70,7 +70,7 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 			throw new Error('You do not have permission to update libraries.');
 		}
 
-		const { name, path, description, tags: formTags, scan, ...rest } = values;
+		const { name, path, description, tags: formTags, scanMode, ...rest } = values;
 
 		const libraryOptions = {
 			...rest,
@@ -108,7 +108,7 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 				description,
 				tags: existingTags,
 				removedTags,
-				scan,
+				scanMode,
 				libraryOptions,
 			}),
 			{

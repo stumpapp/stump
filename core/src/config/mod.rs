@@ -61,6 +61,14 @@ pub fn get_cache_dir() -> PathBuf {
 	cache_dir
 }
 
+pub fn get_thumbnails_dir() -> PathBuf {
+	let thumbnails_dir = get_config_dir().join("thumbnails");
+
+	check_configuration_dir(&thumbnails_dir);
+
+	thumbnails_dir
+}
+
 pub fn stump_in_docker() -> bool {
 	std::env::var("STUMP_IN_DOCKER").is_ok()
 }

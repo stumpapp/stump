@@ -4,7 +4,7 @@ use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::prisma;
+use crate::{config::context::Ctx, prisma};
 
 use super::{read_progress::ReadProgress, series::Series, tag::Tag};
 
@@ -40,6 +40,37 @@ pub struct Media {
 	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 	// pub status: String,
+}
+
+// Note: used internally...
+pub struct TentativeMedia {
+	pub name: String,
+	pub description: Option<String>,
+	pub size: i32,
+	pub extension: String,
+	pub pages: i32,
+	pub checksum: Option<String>,
+	pub path: String,
+	pub series_id: String,
+}
+
+impl TentativeMedia {
+	pub fn into_action<'a>(self, ctx: &'a Ctx) -> prisma::media::Create<'a> {
+		ctx.db.media().create(
+			self.name,
+			self.size,
+			self.extension,
+			self.pages,
+			self.path,
+			vec![
+				prisma::media::checksum::set(self.checksum),
+				prisma::media::description::set(self.description),
+				prisma::media::series::connect(prisma::series::id::equals(
+					self.series_id,
+				)),
+			],
+		)
+	}
 }
 
 impl Into<Media> for prisma::media::Data {

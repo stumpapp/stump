@@ -144,7 +144,6 @@ pub fn infer_mime_from_path(path: &Path) -> Option<String> {
 	}
 }
 
-// TODO: change return to make more sense.
 pub fn get_page(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
 	let mime = guess_mime(Path::new(file));
 
@@ -172,25 +171,17 @@ pub fn get_page(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse>
 
 pub fn process(
 	path: &Path,
-	library_options: &LibraryOptions,
+	options: &LibraryOptions,
 ) -> ProcessFileResult<ProcessedMediaFile> {
-	log::debug!(
-		"Processing entry {:?} with options: {:?}",
-		path,
-		library_options
-	);
+	log::debug!("Processing entry {:?} with options: {:?}", path, options);
 
 	let mime = infer_mime_from_path(path);
-
-	let convert_rar_to_zip = library_options.convert_rar_to_zip;
-	// TODO: hard_delete_conversions = library_options.hard_delete_conversions;
-	// TODO: generate_webp_thumbnail = library_options.generate_webp_thumbnail;
 
 	match mime.as_deref() {
 		Some("application/zip") => process_zip(path),
 		Some("application/vnd.comicbook+zip") => process_zip(path),
-		Some("application/vnd.rar") => process_rar(path, convert_rar_to_zip),
-		Some("application/vnd.comicbook-rar") => process_rar(path, convert_rar_to_zip),
+		Some("application/vnd.rar") => process_rar(path, options),
+		Some("application/vnd.comicbook-rar") => process_rar(path, options),
 		Some("application/epub+zip") => process_epub(path),
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",

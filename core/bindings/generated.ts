@@ -32,6 +32,8 @@ export interface Library {
 	libraryOptions: LibraryOptions;
 }
 
+export type LibraryScanMode = 'SYNC' | 'BATCHED' | 'NONE';
+
 export interface LibraryOptions {
 	id: string | null;
 	convertRarToZip: boolean;
@@ -45,7 +47,7 @@ export interface CreateLibraryArgs {
 	path: string;
 	description: string | null;
 	tags: Array<Tag> | null;
-	scan: boolean | null;
+	scanMode: LibraryScanMode | null;
 	libraryOptions: LibraryOptions | null;
 }
 
@@ -57,7 +59,7 @@ export interface UpdateLibraryArgs {
 	tags: Array<Tag> | null;
 	removedTags: Array<Tag> | null;
 	libraryOptions: LibraryOptions;
-	scan: boolean | null;
+	scanMode: LibraryScanMode | null;
 }
 
 export interface LibrariesStats {
@@ -168,6 +170,7 @@ export type ClientEvent =
 	| { key: 'JobFailed'; data: { runner_id: string; message: string } }
 	| { key: 'CreateEntityFailed'; data: { runner_id: string | null; path: string; message: string } }
 	| { key: 'CreatedMedia'; data: Media }
+	| { key: 'CreatedMediaBatch'; data: bigint }
 	| { key: 'CreatedSeries'; data: Series };
 
 export interface DirectoryListing {

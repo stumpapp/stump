@@ -13,6 +13,7 @@ prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust
 ] }
 serde = { version = "1.0", features = ["derive"] }
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
+rayon = "1.5.3"
 
 # auth / security
 rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }

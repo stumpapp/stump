@@ -149,6 +149,7 @@ pub fn digest_zip(path: &str) -> Option<String> {
 
 /// Processes a zip file in its entirety, includes: medatadata, page count, and the
 /// generated checksum for the file.
+// TODO: do I need to pass in the library options here?
 pub fn process_zip(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
 	info!("Processing Zip: {}", path.display());
 

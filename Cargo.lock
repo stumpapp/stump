@@ -4520,6 +4520,7 @@ dependencies = [
  "log",
  "openssl",
  "prisma-client-rust",
+ "rayon",
  "ring",
  "rocket",
  "rocket-session-store",

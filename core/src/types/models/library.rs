@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -55,6 +57,39 @@ impl Default for LibraryOptions {
 	}
 }
 
+#[derive(Deserialize, Debug, JsonSchema, PartialEq, Copy, Clone, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum LibraryScanMode {
+	#[serde(rename = "SYNC")]
+	Sync,
+	#[serde(rename = "BATCHED")]
+	Batched,
+	#[serde(rename = "NONE")]
+	None,
+}
+
+impl FromStr for LibraryScanMode {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let uppercase = s.to_uppercase();
+
+		match uppercase.as_str() {
+			"SYNC" => Ok(LibraryScanMode::Sync),
+			"BATCHED" => Ok(LibraryScanMode::Batched),
+			"NONE" => Ok(LibraryScanMode::None),
+			"" => Ok(LibraryScanMode::default()),
+			_ => Err(format!("Invalid library scan mode: {}", s)),
+		}
+	}
+}
+
+impl Default for LibraryScanMode {
+	fn default() -> Self {
+		Self::Batched
+	}
+}
+
 #[derive(Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateLibraryArgs {
@@ -66,8 +101,8 @@ pub struct CreateLibraryArgs {
 	pub description: Option<String>,
 	/// Optional tags to assign to the library.
 	pub tags: Option<Vec<Tag>>,
-	/// Optional flag to indicate if the library should be automatically scanned after creation. Default is `true`.
-	pub scan: Option<bool>,
+	/// Optional flag to indicate if the how the library should be scanned after creation. Default is `BATCHED`.
+	pub scan_mode: Option<LibraryScanMode>,
 	/// Optional options to apply to the library. When not provided, the default options will be used.
 	pub library_options: Option<LibraryOptions>,
 }
@@ -88,8 +123,8 @@ pub struct UpdateLibraryArgs {
 	pub removed_tags: Option<Vec<Tag>>,
 	/// The updated options of the library.
 	pub library_options: LibraryOptions,
-	/// Optional flag to indicate if the library should be automatically scanned after update. Default is `true`.
-	pub scan: Option<bool>,
+	/// Optional flag to indicate how the library should be automatically scanned after update. Default is `BATCHED`.
+	pub scan_mode: Option<LibraryScanMode>,
 }
 
 #[derive(Deserialize, Serialize, JsonSchema, Type)]

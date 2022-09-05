@@ -30,7 +30,7 @@ function ExplorerFile({ name, path, isDirectory }: ExplorerFileProps) {
 	return (
 		<button className="flex flex-col space-y-2 items-center justify-center">
 			{/* FIXME: don't use images for svg fallbacks... or, just set color of images... */}
-			<img src={getIconSrc()} className="h-20 w-20" />
+			<img src={getIconSrc()} className="h-20 w-20 active:translate-y-[0.5px]" />
 			<Text maxW="20" fontSize="xs">
 				{name}
 			</Text>
@@ -83,7 +83,7 @@ export default function LibraryFileExplorer() {
 			</Helmet>
 
 			<div className="p-4 w-full h-full flex flex-col space-y-6">
-				<div className="flex-1 flex flex-row flex-wrap space-x-8 items-start justify-center md:justify-start pb-4">
+				<div className="flex flex-row flex-wrap space-x-8 items-start justify-center md:justify-start pb-4">
 					{entries.map((entry) => (
 						<ExplorerFile key={entry.path} {...entry} />
 					))}

@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, str::FromStr};
 
 use prisma_client_rust::{raw, Direction};
 use rocket::serde::json::Json;
@@ -6,7 +6,7 @@ use rocket_okapi::openapi;
 
 use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs,
+	fs::{self, image},
 	guards::auth::{AdminGuard, Auth},
 	job::library_scan::LibraryScanJob,
 	prisma::{
@@ -19,7 +19,10 @@ use crate::{
 		errors::ApiError,
 		http::ImageResponse,
 		models::{
-			library::{CreateLibraryArgs, LibrariesStats, Library, UpdateLibraryArgs},
+			library::{
+				CreateLibraryArgs, LibrariesStats, Library, LibraryScanMode,
+				UpdateLibraryArgs,
+			},
 			series::Series,
 		},
 		pageable::{PageParams, Pageable, PagedRequestParams},
@@ -207,10 +210,11 @@ pub async fn get_library_thumbnail(
 /// Queue a ScannerJob to scan the library by id. The job, when started, is
 /// executed in a separate thread.
 #[openapi(tag = "Library")]
-#[get("/libraries/<id>/scan")]
+#[get("/libraries/<id>/scan?<scan_mode>")]
 pub async fn scan_library(
 	id: String,
 	ctx: &Ctx,
+	scan_mode: Option<&str>,
 	// _auth: Auth, TODO: uncomment
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
@@ -230,11 +234,19 @@ pub async fn scan_library(
 
 	let lib = lib.unwrap();
 
-	let job = LibraryScanJob {
-		path: lib.path.clone(),
-	};
+	let scan_mode = LibraryScanMode::from_str(scan_mode.unwrap_or_default())?;
 
-	Ok(ctx.spawn_job(Box::new(job))?)
+	// TODO: should this just be an error?
+	if scan_mode != LibraryScanMode::None {
+		let job = LibraryScanJob {
+			path: lib.path.clone(),
+			scan_mode,
+		};
+
+		return Ok(ctx.spawn_job(Box::new(job))?);
+	}
+
+	Ok(())
 }
 
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
@@ -304,10 +316,13 @@ pub async fn create_library(
 		db._batch(tag_connects).await?;
 	}
 
-	// `scan` is not a required field, however it will default to true if not provided
-	if input.scan.unwrap_or(true) {
+	let scan_mode = input.scan_mode.unwrap_or_default();
+
+	// `scan` is not a required field, however it will default to BATCHED if not provided
+	if scan_mode != LibraryScanMode::None {
 		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: lib.path.clone(),
+			scan_mode,
 		}))?;
 	}
 
@@ -400,10 +415,13 @@ pub async fn update_library(
 		.exec()
 		.await?;
 
-	// `scan` is not a required field, however it will default to true if not provided
-	if input.scan.unwrap_or(true) {
+	let scan_mode = input.scan_mode.unwrap_or_default();
+
+	// `scan` is not a required field, however it will default to BATCHED if not provided
+	if scan_mode != LibraryScanMode::None {
 		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: updated.path.clone(),
+			scan_mode,
 		}))?;
 	}
 
@@ -417,14 +435,52 @@ pub async fn delete_library(
 	id: String,
 	ctx: &Ctx,
 	_auth: Auth,
-) -> ApiResult<Json<Library>> {
+) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
 
 	let deleted = db
 		.library()
 		.delete(library::id::equals(id.clone()))
+		.include(library::include!({
+			series: select {
+				id
+			}
+		}))
 		.exec()
 		.await?;
 
-	Ok(Json(deleted.into()))
+	let series_ids = deleted
+		.series
+		.into_iter()
+		.map(|s| s.id)
+		.collect::<Vec<String>>();
+
+	log::debug!("List of deleted series IDs: {:?}", series_ids);
+
+	// FIXME: lmao this won't work! I can't query for media AFTER the series has been deleted, it will cascade delete the media.
+	// I guess I NEED to load the media relations with the library... Too tired now to do it, will do it tomorrow.
+
+	if let Ok(media_ids) = db
+		.media()
+		.find_many(vec![media::series_id::in_vec(series_ids)])
+		.select(media::select!({ id }))
+		.exec()
+		.await
+	{
+		let list = media_ids.iter().map(|m| m.id.as_str()).collect::<Vec<_>>();
+
+		log::debug!("List of delete media IDs: {:?}", list);
+		log::debug!(
+			"Attempting to delete {} media thumbnails (if present)",
+			list.len()
+		);
+
+		if let Err(err) = image::remove_thumbnails(&list) {
+			log::error!("Failed to remove thumbnails for library media: {:?}", err);
+		} else {
+			log::info!("Removed thumbnails for library media");
+		}
+	}
+
+	Ok(Json(deleted.id))
 }

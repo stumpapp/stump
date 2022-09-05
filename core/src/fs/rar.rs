@@ -10,8 +10,10 @@ use crate::{
 		media_file::{self, IsImage},
 	},
 	types::{
-		alias::ProcessFileResult, errors::ProcessFileError, http,
-		models::media::ProcessedMediaFile,
+		alias::ProcessFileResult,
+		errors::ProcessFileError,
+		http,
+		models::{library::LibraryOptions, media::ProcessedMediaFile},
 	},
 };
 
@@ -94,9 +96,9 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 /// files in the rar.
 pub fn process_rar(
 	path: &Path,
-	convert_to_zip: bool,
+	options: &LibraryOptions,
 ) -> ProcessFileResult<ProcessedMediaFile> {
-	if convert_to_zip {
+	if options.convert_rar_to_zip {
 		let new_path = convert_rar_to_zip(path)?;
 
 		log::trace!("Using `process_zip` with converted rar.");

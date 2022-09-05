@@ -46,14 +46,14 @@ export default function JobOverlay() {
 	}, [jobs]);
 
 	// FIXME: this isn't a safe operation
-	function trim(message?: string | null) {
+	function formatMessage(message?: string | null) {
 		if (message?.startsWith('Analyzing')) {
 			let filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/');
 
 			return `Analyzing ${filePieces.slice(filePieces.length - 1).join('/')}`;
 		}
 
-		return null;
+		return message;
 	}
 
 	return (
@@ -69,7 +69,7 @@ export default function JobOverlay() {
 					exit={{ opacity: 0, y: 100, scale: 0.9 }}
 				>
 					<div className="flex flex-col space-y-2 p-2 w-full text-xs">
-						<Text fontWeight="medium">{trim(jobShown.message) ?? 'Job in Progress'}</Text>
+						<Text fontWeight="medium">{formatMessage(jobShown.message) ?? 'Job in Progress'}</Text>
 						<Progress
 							value={Number(jobShown.currentTask)}
 							max={Number(jobShown.taskCount)}
@@ -81,7 +81,7 @@ export default function JobOverlay() {
 						<Text>
 							{/* This is infuriating that I needed to do this... */}
 							<>
-								Scanning file {jobShown.currentTask} of {jobShown.taskCount}
+								Task {jobShown.currentTask} of {jobShown.taskCount}
 							</>
 						</Text>
 					</div>

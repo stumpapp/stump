@@ -7,19 +7,23 @@ use std::{
 		atomic::{AtomicU64, Ordering},
 		Arc, Mutex,
 	},
+	time::Duration,
 };
 use walkdir::WalkDir;
 
 use crate::{
 	config::context::Ctx,
 	event::ClientEvent,
-	fs::scanner::ScannedFileTrait,
+	fs::{image, scanner::ScannedFileTrait},
 	job::persist_job_start,
 	prisma::{library, media, series},
 	types::{errors::ApiError, models::library::LibraryOptions},
 };
 
-use super::utils::mark_library_missing;
+use super::{
+	utils::{batch_media_operations, mark_library_missing},
+	BatchScanOperation,
+};
 
 async fn precheck(
 	ctx: &Ctx,
@@ -195,8 +199,7 @@ async fn scan_series(
 			Ok(media) => {
 				visited_media.insert(media.path.clone(), true);
 
-				// TODO: error handling...
-				let _ = ctx.emit_client_event(ClientEvent::CreatedMedia(media.clone()));
+				ctx.emit_client_event(ClientEvent::CreatedMedia(media.clone()));
 			},
 			Err(e) => {
 				log::error!("Failed to insert media: {:?}", e);
@@ -242,70 +245,171 @@ async fn scan_series(
 	}
 }
 
-// FIXME: The *major* snag I've hit with concurrent is it starts to cause timeouts and connection errors
-// to the database. I think there are just too many writers to the database file.
-//
-// I'm *definitely* not removing this, however I'm really hopeful that a
-// potential solution lies in https://github.com/Brendonovich/prisma-client-rust/issues/60.
-// Once transactions are supported, I think at the end of each series scan I can commit
-// the transaction to maybe reduce load on the sql file. For now, I'll use the sync
-// version...
-//
-// Ideas:
-// - maybe create a TentativeMedia struct that scan_path returns? OR just the paths + series.id?
-// grab the media before scan_path then block thread for the inserstions?
-// - Create a ScanOperation enum, scan_series would instead return a Vec<ScanOperation> across
-// multiple threads, and then at the end would sequentially run the operations. something like:
-/*
-	enum ScanOperation {
-		CreateMedia { path: PathBuf },
-		CreateSeries { path: PathBuf },
-		... etc ...
+async fn scan_series_batch(
+	ctx: Ctx,
+	series: series::Data,
+	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
+) -> Vec<BatchScanOperation> {
+	let db = ctx.get_db();
+
+	let media = db
+		.media()
+		.find_many(vec![media::series_id::equals(Some(series.id.clone()))])
+		.exec()
+		.await
+		.unwrap();
+
+	let mut visited_media = media
+		.iter()
+		.map(|data| (data.path.clone(), false).into())
+		.collect::<HashMap<String, bool>>();
+
+	let mut operations = vec![];
+
+	for entry in WalkDir::new(&series.path)
+		.into_iter()
+		.filter_map(|e| e.ok())
+		.filter(|e| e.path().is_file())
+	{
+		let path = entry.path();
+		let path_str = path.to_str().unwrap_or("");
+
+		log::debug!("Currently scanning: {:?}", path);
+
+		// Tell client we are on the next file, this will increment the counter in the
+		// callback, as well.
+		on_progress(format!("Analyzing {:?}", path));
+
+		if path.should_ignore() {
+			log::trace!("Skipping ignored file: {:?}", path);
+			continue;
+		} else if path.is_thumbnail_img() {
+			// TODO: these will *eventually* be supported, but not priority right now.
+			log::debug!(
+				"Stump does not support thumbnail image overrides yet ({:?}). Stay tuned!",
+				path
+			);
+			continue;
+		} else if let Some(_) = visited_media.get(path_str) {
+			log::debug!("Existing media found: {:?}", path);
+			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
+			continue;
+		}
+
+		log::debug!("New media found at {:?} in series {:?}", &path, &series.id);
+
+		operations.push(BatchScanOperation::CreateMedia {
+			path: path.to_path_buf(),
+			series_id: series.id.clone(),
+		});
 	}
-*/
-pub async fn scan_concurrent(
+
+	visited_media
+		.into_iter()
+		.filter(|(_, visited)| !visited)
+		.for_each(|(path, _)| {
+			operations.push(BatchScanOperation::MarkMediaMissing { path })
+		});
+
+	operations
+}
+
+pub async fn scan_batch(
 	ctx: Ctx,
 	path: String,
 	runner_id: String,
-) -> Result<(), ApiError> {
-	let (library, series, _files_to_process) = precheck(&ctx, path).await?;
+) -> Result<u64, ApiError> {
+	log::trace!("Enter scan_batch");
+
+	let (library, series, files_to_process) = precheck(&ctx, path).await?;
 
 	let library_options: LibraryOptions = library
 		.library_options
 		.map(|opt| (*opt).into())
 		.unwrap_or_default();
 
-	let counter = Arc::new(Mutex::new(1));
+	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
+	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
-	let tasks: Vec<JoinHandle<()>> = series
+	let _ = ctx.emit_client_event(ClientEvent::job_started(
+		runner_id.clone(),
+		// TODO: my brain is being silly and I don't know if I want 0 or 1 here....
+		0,
+		files_to_process,
+		Some(format!("Starting library scan at {}", &library.path)),
+	));
+
+	let counter = Arc::new(Mutex::new(0));
+
+	let tasks: Vec<JoinHandle<Vec<BatchScanOperation>>> = series
 		.into_iter()
 		.map(|s| {
 			let ctx_cpy = ctx.get_ctx();
-
+			let r_id = runner_id.clone();
 			let counter_ref = counter.clone();
-			let runner_id = runner_id.clone();
-			let library_options = library_options.clone();
 
 			tokio::spawn(async move {
-				scan_series(
-					ctx_cpy.get_ctx(),
-					runner_id,
-					s,
-					library_options,
-					move |_msg| {
-						let mut shared = counter_ref.lock().unwrap();
+				scan_series_batch(ctx_cpy.get_ctx(), s, move |msg| {
+					let mut shared = counter_ref.lock().unwrap();
 
-						*shared += 1;
-					},
-				)
-				.await;
+					*shared += 1;
+
+					let _ = ctx_cpy.emit_client_event(ClientEvent::job_progress(
+						r_id.to_owned(),
+						*shared,
+						files_to_process,
+						Some(msg),
+					));
+				})
+				.await
 			})
 		})
 		.collect();
 
-	futures::future::join_all(tasks).await;
+	// FIXME: this reference is out dated, and so shows 0... I have done over 6 hours of coding for stump today so am not fixing now lol
+	let final_count = *counter.lock().unwrap();
 
-	Ok(())
+	let operations: Vec<BatchScanOperation> = futures::future::join_all(tasks)
+		.await
+		.into_iter()
+		// TODO: log errors
+		.filter_map(|res| res.ok())
+		.flatten()
+		.collect();
+
+	let created_media = batch_media_operations(&ctx, operations, &library_options)
+		.await
+		.map_err(|e| {
+			log::error!("Failed to batch media operations: {:?}", e);
+			ApiError::InternalServerError(e.to_string())
+		})?;
+
+	ctx.emit_client_event(ClientEvent::CreatedMediaBatch(created_media.len() as u64));
+
+	// TODO: change task_count and send progress?
+	if library_options.create_webp_thumbnails {
+		log::trace!("Library configured to create WEBP thumbnails.");
+
+		ctx.emit_client_event(ClientEvent::job_progress(
+			runner_id.clone(),
+			final_count,
+			files_to_process,
+			Some(format!(
+				"Creating {} WEBP thumbnails (this can take some time)",
+				created_media.len()
+			)),
+		));
+
+		// sleep for a second to let client catch up
+		tokio::time::sleep(Duration::from_secs(1)).await;
+
+		if let Err(err) = image::generate_thumbnails(created_media) {
+			log::error!("Failed to generate thumbnails: {:?}", err);
+		}
+	}
+
+	// TODO: safety
+	Ok(final_count)
 }
 
 pub async fn scan_sync(
@@ -323,7 +427,7 @@ pub async fn scan_sync(
 	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
-	let _ = ctx.emit_client_event(ClientEvent::job_started(
+	ctx.emit_client_event(ClientEvent::job_started(
 		runner_id.clone(),
 		// TODO: my brain is being silly and I don't know if I want 0 or 1 here....
 		0,
@@ -346,7 +450,7 @@ pub async fn scan_sync(
 		scan_series(ctx.get_ctx(), runner_id, s, library_options, move |msg| {
 			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-			let _ = progress_ctx.emit_client_event(ClientEvent::job_progress(
+			progress_ctx.emit_client_event(ClientEvent::job_progress(
 				r_id.to_owned(),
 				previous + 1,
 				files_to_process,
@@ -375,20 +479,20 @@ mod tests {
 
 	#[tokio::test(flavor = "multi_thread")]
 	#[ignore]
-	async fn scan_concurrent() -> Result<(), ApiError> {
+	async fn scan_batch() -> Result<(), ApiError> {
 		let ctx = Ctx::mock().await;
 
 		let start = std::time::Instant::now();
-		super::scan_concurrent(
+		super::scan_batch(
 			ctx,
 			"/Users/aaronleopold/Documents/Stump/Demo".to_string(),
-			"runner_id_concurrent".to_string(),
+			"runner_id_batch".to_string(),
 		)
 		.await?;
 		let duration = start.elapsed();
 
 		log::debug!(
-			"Concurrent: {}.{:03} seconds",
+			"Batch: {}.{:03} seconds",
 			duration.as_secs(),
 			duration.subsec_millis()
 		);

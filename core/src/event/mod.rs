@@ -35,6 +35,7 @@ pub enum ClientEvent {
 		message: String,
 	},
 	CreatedMedia(prisma::media::Data),
+	CreatedMediaBatch(u64),
 	CreatedSeries(prisma::series::Data),
 }
 

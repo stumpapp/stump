@@ -52,13 +52,13 @@ Some of these are actually completed(!) already, but the following items are the
 
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
-- 📚 Organizing libraries with collections and reading lists
+- 📚 Organize libraries with collections and reading lists
 - 🔎 Versitile full-text search
 - 🔐 Role-based access-control with managed user accounts and configurable privileges
 - 🚀 Easy setup and deployment using Docker or bare metal
 - 🤏 Small bundle size with a fully responsive, built-in UI
 - 🏃 Low resource utilization with excellent performance
-- 🧰 Easily consumable and documented REST API, so community tools and scripts can interact with Stump
+- 🧰 Easily consumable and self-documented REST API, so community tools and scripts can interact with Stump
 - 🌈 And more!
 
 I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!

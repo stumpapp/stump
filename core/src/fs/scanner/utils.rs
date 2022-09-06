@@ -9,6 +9,7 @@ use crate::{
 	fs::{image, media_file},
 	prisma::{library, media, series},
 	types::{
+		enums::FileStatus,
 		errors::{ApiError, ScanError},
 		models::{
 			library::LibraryOptions,
@@ -232,18 +233,27 @@ pub async fn mark_media_missing(
 ) -> Result<i64, QueryError> {
 	let db = ctx.get_db();
 
-	db._execute_raw(raw!(format!(
-		"UPDATE media SET status=\"{}\" WHERE path in ({})",
-		"MISSING".to_string(),
-		paths
-			.into_iter()
-			.map(|path| format!("\"{}\"", path))
-			.collect::<Vec<_>>()
-			.join(",")
-	)
-	.as_str()))
+	db.media()
+		.update_many(
+			vec![media::path::in_vec(paths)],
+			vec![media::status::set(FileStatus::Missing.to_string())],
+		)
 		.exec()
 		.await
+
+	// TODO: remove this commented code once I better test above...
+	// db._execute_raw(raw!(format!(
+	// 	"UPDATE media SET status=\"{}\" WHERE path in ({})",
+	// 	"MISSING".to_string(),
+	// 	paths
+	// 		.into_iter()
+	// 		.map(|path| format!("\"{}\"", path))
+	// 		.collect::<Vec<_>>()
+	// 		.join(",")
+	// )
+	// .as_str()))
+	// 	.exec()
+	// 	.await
 }
 
 pub async fn batch_media_operations(
@@ -291,10 +301,12 @@ pub async fn batch_media_operations(
 		})
 		.collect::<Vec<String>>();
 
-	if let Err(err) = mark_media_missing(ctx, missing_paths).await {
-		log::error!("Failed to mark media missing: {:?}", err);
+	let result = mark_media_missing(ctx, missing_paths).await;
+
+	if let Err(err) = result {
+		log::error!("Failed to mark media as MISSING: {:?}", err);
 	} else {
-		log::debug!("Marked media missing");
+		log::debug!("Marked {} media as MISSING", result.unwrap());
 	}
 
 	Ok(ctx.db._batch(media_creates).await?)

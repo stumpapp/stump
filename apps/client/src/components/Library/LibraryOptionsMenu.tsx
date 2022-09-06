@@ -60,6 +60,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 			</MenuButton>
 
 			<MenuList>
+				{/* TODO: scanMode */}
 				<MenuItem
 					disabled={user?.role !== UserRole.ServerOwner}
 					icon={<ArrowsClockwise size={'1rem'} />}

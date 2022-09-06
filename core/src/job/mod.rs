@@ -58,7 +58,9 @@ impl From<&str> for JobStatus {
 #[serde(rename_all = "camelCase")]
 pub struct JobUpdate {
 	pub runner_id: String,
-	pub current_task: u64,
+	// TODO: don't use option. This is a temporary workaround for the Arc issue with
+	// batch scan mode.
+	pub current_task: Option<u64>,
 	pub task_count: u64,
 	// TODO: change this to data: Option<T: Serialize> or something...
 	pub message: Option<String>,

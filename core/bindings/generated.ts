@@ -146,7 +146,7 @@ export type JobStatus = 'RUNNING' | 'QUEUED' | 'COMPLETED' | 'CANCELLED' | 'FAIL
 
 export interface JobUpdate {
 	runnerId: string;
-	currentTask: bigint;
+	currentTask: bigint | null;
 	taskCount: bigint;
 	message: string | null;
 	status: JobStatus | null;

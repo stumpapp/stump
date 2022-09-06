@@ -1,3 +1,5 @@
+use std::fmt;
+
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -30,6 +32,18 @@ pub enum FileStatus {
 	Error,
 	#[serde(rename = "MISSING")]
 	Missing,
+}
+
+impl fmt::Display for FileStatus {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			FileStatus::Unknown => write!(f, "UNKNOWN"),
+			FileStatus::Ready => write!(f, "READY"),
+			FileStatus::Unsupported => write!(f, "UNSUPPORTED"),
+			FileStatus::Error => write!(f, "ERROR"),
+			FileStatus::Missing => write!(f, "MISSING"),
+		}
+	}
 }
 
 impl Default for UserRole {

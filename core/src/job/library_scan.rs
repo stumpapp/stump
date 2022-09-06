@@ -24,8 +24,6 @@ impl Job for LibraryScanJob {
 	}
 
 	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError> {
-		// TODO: I am unsure if I want to have the scan return completed_task, or if I
-		// should just move the time tracking and job logging to the scan entirely...
 		let start = std::time::Instant::now();
 		let completed_tasks = match self.scan_mode {
 			LibraryScanMode::Sync => scan_sync(ctx.get_ctx(), self.path.clone(), runner_id.clone()).await?,
@@ -48,7 +46,9 @@ impl Job for LibraryScanJob {
 }
 
 #[derive(Debug)]
-pub struct AllLibrariesScanJob;
+pub struct AllLibrariesScanJob {
+	pub scan_mode: LibraryScanMode,
+}
 
 #[async_trait::async_trait]
 impl Job for AllLibrariesScanJob {

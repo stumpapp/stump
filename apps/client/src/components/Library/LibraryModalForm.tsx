@@ -102,7 +102,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					convertRarToZip: library.libraryOptions.convertRarToZip,
 					hardDeleteConversions: library.libraryOptions.hardDeleteConversions,
 					createWebpThumbnails: library.libraryOptions.createWebpThumbnails,
-					scanMode: 'SYNC',
+					scanMode: 'BATCHED',
 			  }
 			: {},
 	});
@@ -182,7 +182,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							<FormControl>
 								<Checkbox
 									title="Scan the library in a syncronous manner. This will allow you to access media as it is being scanned, however is slower as the library gets larger."
-									isChecked={scanMode === 'SYNC' || !scanMode}
+									isChecked={scanMode === 'SYNC'}
 									colorScheme="brand"
 									onChange={() => form.setValue('scanMode', getNewScanMode('SYNC'))}
 								>
@@ -193,7 +193,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							<FormControl>
 								<Checkbox
 									title="Scan the library using batched insertions. This will be significantly faster, but you will not be able to access media until the scan is complete. This is highly recommended for large libraries or initial scans."
-									isChecked={scanMode === 'BATCHED'}
+									isChecked={scanMode === 'BATCHED' || !scanMode}
 									colorScheme="brand"
 									onChange={() => form.setValue('scanMode', getNewScanMode('BATCHED'))}
 								>

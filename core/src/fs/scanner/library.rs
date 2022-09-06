@@ -1,11 +1,10 @@
-use prisma_client_rust::raw;
 use rocket::tokio::{self, task::JoinHandle};
 use std::{
 	collections::HashMap,
 	path::Path,
 	sync::{
 		atomic::{AtomicU64, Ordering},
-		Arc, Mutex,
+		Arc,
 	},
 	time::Duration,
 };
@@ -14,7 +13,10 @@ use walkdir::WalkDir;
 use crate::{
 	config::context::Ctx,
 	event::ClientEvent,
-	fs::{image, scanner::ScannedFileTrait},
+	fs::{
+		image,
+		scanner::{utils::mark_media_missing, ScannedFileTrait},
+	},
 	job::persist_job_start,
 	prisma::{library, media, series},
 	types::{errors::ApiError, models::library::LibraryOptions},
@@ -221,27 +223,40 @@ async fn scan_series(
 		.collect::<Vec<String>>();
 
 	if missing_media.len() > 0 {
-		log::info!("{} media in this series ({}) have not been found at the end of this series-level scan.", missing_media.len(), &series.id);
-		log::debug!("{:?}", missing_media);
-		// TODO: replace once batching is implemented -> https://github.com/Brendonovich/prisma-client-rust/issues/31
-		if let Err(e) = db
-			._execute_raw(raw!(format!(
-				"UPDATE media SET status=\"{}\" WHERE path in ({})",
-				"MISSING".to_string(),
-				missing_media
-					.into_iter()
-					.map(|path| format!("\"{}\"", path))
-					.collect::<Vec<_>>()
-					.join(",")
-			)
-			.as_str()))
-			.exec()
-			.await
-		{
-			log::error!("Failed to mark missing media as MISSING: {:?}", e);
+		log::info!(
+			"{} media were unable to be located during scan.",
+			missing_media.len(),
+		);
+
+		log::debug!("Missing media paths: {:?}", missing_media);
+
+		let result = mark_media_missing(&ctx, missing_media).await;
+
+		if let Err(err) = result {
+			log::error!("Failed to mark media as MISSING: {:?}", err);
 		} else {
-			log::debug!("Marked missing media as MISSING.");
+			log::debug!("Marked {} media as MISSING", result.unwrap());
 		}
+
+		// TODO: remove comment once I test the above implementation
+		// if let Err(e) = db
+		// 	._execute_raw(raw!(format!(
+		// 		"UPDATE media SET status=\"{}\" WHERE path in ({})",
+		// 		"MISSING".to_string(),
+		// 		missing_media
+		// 			.into_iter()
+		// 			.map(|path| format!("\"{}\"", path))
+		// 			.collect::<Vec<_>>()
+		// 			.join(",")
+		// 	)
+		// 	.as_str()))
+		// 	.exec()
+		// 	.await
+		// {
+		// 	log::error!("Failed to mark missing media as MISSING: {:?}", e);
+		// } else {
+		// 	log::debug!("Marked missing media as MISSING.");
+		// }
 	}
 }
 
@@ -339,7 +354,8 @@ pub async fn scan_batch(
 		Some(format!("Starting library scan at {}", &library.path)),
 	));
 
-	let counter = Arc::new(Mutex::new(0));
+	// let counter = Arc::new(Mutex::new(0));
+	let counter = Arc::new(AtomicU64::new(0));
 
 	let tasks: Vec<JoinHandle<Vec<BatchScanOperation>>> = series
 		.into_iter()
@@ -350,13 +366,15 @@ pub async fn scan_batch(
 
 			tokio::spawn(async move {
 				scan_series_batch(ctx_cpy.get_ctx(), s, move |msg| {
-					let mut shared = counter_ref.lock().unwrap();
+					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-					*shared += 1;
+					// let mut shared = counter_ref.lock().unwrap();
+
+					// *shared += 1;
 
 					let _ = ctx_cpy.emit_client_event(ClientEvent::job_progress(
 						r_id.to_owned(),
-						*shared,
+						Some(previous + 1),
 						files_to_process,
 						Some(msg),
 					));
@@ -367,7 +385,9 @@ pub async fn scan_batch(
 		.collect();
 
 	// FIXME: this reference is out dated, and so shows 0... I have done over 6 hours of coding for stump today so am not fixing now lol
-	let final_count = *counter.lock().unwrap();
+	let final_count = counter.load(Ordering::SeqCst);
+
+	// println!("Final count: {}", final_count);
 
 	let operations: Vec<BatchScanOperation> = futures::future::join_all(tasks)
 		.await
@@ -392,7 +412,9 @@ pub async fn scan_batch(
 
 		ctx.emit_client_event(ClientEvent::job_progress(
 			runner_id.clone(),
-			final_count,
+			// Some(final_count),
+			// TODO: don't do this...
+			None,
 			files_to_process,
 			Some(format!(
 				"Creating {} WEBP thumbnails (this can take some time)",
@@ -400,15 +422,14 @@ pub async fn scan_batch(
 			)),
 		));
 
-		// sleep for a second to let client catch up
-		tokio::time::sleep(Duration::from_secs(1)).await;
+		// sleep for a bit to let client catch up
+		tokio::time::sleep(Duration::from_millis(100)).await;
 
 		if let Err(err) = image::generate_thumbnails(created_media) {
 			log::error!("Failed to generate thumbnails: {:?}", err);
 		}
 	}
 
-	// TODO: safety
 	Ok(final_count)
 }
 
@@ -452,7 +473,7 @@ pub async fn scan_sync(
 
 			progress_ctx.emit_client_event(ClientEvent::job_progress(
 				r_id.to_owned(),
-				previous + 1,
+				Some(previous + 1),
 				files_to_process,
 				Some(msg),
 			));

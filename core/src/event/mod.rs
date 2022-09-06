@@ -48,7 +48,7 @@ impl ClientEvent {
 	) -> Self {
 		ClientEvent::JobStarted(JobUpdate {
 			runner_id,
-			current_task,
+			current_task: Some(current_task),
 			task_count,
 			message,
 			status: Some(JobStatus::Running),
@@ -57,7 +57,7 @@ impl ClientEvent {
 
 	pub fn job_progress(
 		runner_id: String,
-		current_task: u64,
+		current_task: Option<u64>,
 		task_count: u64,
 		message: Option<String>,
 	) -> Self {

@@ -3,14 +3,10 @@ use std::{
 	sync::Arc,
 };
 
-use prisma_client_rust::chrono;
 use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::{
-	config::{context::Ctx, stump_in_docker},
-	types::alias::ApiResult,
-};
+use crate::{config::context::Ctx, types::alias::ApiResult};
 
 use super::{runner::Runner, Job, JobReport};
 
@@ -55,41 +51,42 @@ impl JobPool {
 			}
 		});
 
+		// TODO: uncomment when actually implementing these features...
 		// let pool_cpy = pool.clone();
-		tokio::spawn(async move {
-			let interval: i64 = std::env::var("SCAN_INTERVAL")
-				.map(|val| val.parse::<i64>().unwrap_or(DEFAULT_SCAN_INTERVAL_IN_SEC))
-				.unwrap_or(DEFAULT_SCAN_INTERVAL_IN_SEC);
+		// tokio::spawn(async move {
+		// 	let interval: i64 = std::env::var("SCAN_INTERVAL")
+		// 		.map(|val| val.parse::<i64>().unwrap_or(DEFAULT_SCAN_INTERVAL_IN_SEC))
+		// 		.unwrap_or(DEFAULT_SCAN_INTERVAL_IN_SEC);
 
-			let mut timer = tokio::time::interval(
-				chrono::Duration::seconds(interval).to_std().unwrap(),
-			);
+		// 	let mut timer = tokio::time::interval(
+		// 		chrono::Duration::seconds(interval).to_std().unwrap(),
+		// 	);
 
-			loop {
-				timer.tick().await;
+		// 	loop {
+		// 		timer.tick().await;
 
-				log::debug!("TODO: implement new scanner that scans all libraries!");
+		// 		log::debug!("TODO: implement new scanner that scans all libraries!");
 
-				// pool_cpy.clone().enqueue_job(&ctx, AllLibrariesScanJob {}).await
-			}
-		});
+		// 		// pool_cpy.clone().enqueue_job(&ctx, AllLibrariesScanJob {}).await
+		// 	}
+		// });
 
 		// let pool_cpy = pool.clone();
-		if stump_in_docker() {
-			// TODO: look into performance impacts for spawning yet another thread...
-			tokio::spawn(async move {
-				let mut timer =
-					tokio::time::interval(chrono::Duration::days(3).to_std().unwrap());
+		// if stump_in_docker() {
+		// 	// TODO: look into performance impacts for spawning yet another thread...
+		// 	tokio::spawn(async move {
+		// 		let mut timer =
+		// 			tokio::time::interval(chrono::Duration::days(3).to_std().unwrap());
 
-				loop {
-					timer.tick().await;
+		// 		loop {
+		// 			timer.tick().await;
 
-					log::debug!("TODO: implement trash empty!");
+		// 			log::debug!("TODO: implement trash empty!");
 
-					// pool_cpy.clone().enqueue_job(&ctx, ClearDockerTrash {}).await
-				}
-			});
-		}
+		// 			// pool_cpy.clone().enqueue_job(&ctx, ClearDockerTrash {}).await
+		// 		}
+		// 	});
+		// }
 
 		pool
 	}

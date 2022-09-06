@@ -82,7 +82,12 @@ let store: StateCreator<MainStore, SetState<MainStore>, GetState<MainStore>> = (
 
 		const { currentTask, message } = jobUpdate;
 
-		job.currentTask = currentTask;
+		// TODO: uncomment this line and remove if statement once i fix batch scan mode
+		// job.currentTask = currentTask;
+		if (currentTask != undefined) {
+			job.currentTask = currentTask;
+		}
+
 		job.message = message;
 
 		set(() => ({ jobs: { ...get().jobs, [jobUpdate.runnerId]: job } }));

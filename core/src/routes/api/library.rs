@@ -438,44 +438,37 @@ pub async fn delete_library(
 ) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
 
+	log::trace!("Attempting to delete library with ID {}", &id);
+
 	let deleted = db
 		.library()
 		.delete(library::id::equals(id.clone()))
 		.include(library::include!({
-			series: select {
-				id
+			series: include {
+				media: select {
+					id
+				}
 			}
 		}))
 		.exec()
 		.await?;
 
-	let series_ids = deleted
+	let media_ids = deleted
 		.series
 		.into_iter()
-		.map(|s| s.id)
-		.collect::<Vec<String>>();
+		.flat_map(|series| series.media)
+		.map(|media| media.id)
+		.collect::<Vec<_>>();
 
-	log::debug!("List of deleted series IDs: {:?}", series_ids);
+	if media_ids.len() > 0 {
+		log::trace!("List of deleted media IDs: {:?}", media_ids);
 
-	// FIXME: lmao this won't work! I can't query for media AFTER the series has been deleted, it will cascade delete the media.
-	// I guess I NEED to load the media relations with the library... Too tired now to do it, will do it tomorrow.
-
-	if let Ok(media_ids) = db
-		.media()
-		.find_many(vec![media::series_id::in_vec(series_ids)])
-		.select(media::select!({ id }))
-		.exec()
-		.await
-	{
-		let list = media_ids.iter().map(|m| m.id.as_str()).collect::<Vec<_>>();
-
-		log::debug!("List of delete media IDs: {:?}", list);
 		log::debug!(
 			"Attempting to delete {} media thumbnails (if present)",
-			list.len()
+			media_ids.len()
 		);
 
-		if let Err(err) = image::remove_thumbnails(&list) {
+		if let Err(err) = image::remove_thumbnails(&media_ids) {
 			log::error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
 			log::info!("Removed thumbnails for library media");

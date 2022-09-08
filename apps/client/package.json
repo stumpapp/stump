@@ -18,6 +18,7 @@
 		"@hookform/resolvers": "^2.9.7",
 		"@stump/core": "workspace:*",
 		"@tanstack/react-query": "^4.0.10",
+		"@tanstack/react-query-devtools": "^4.2.3",
 		"axios": "^0.27.1",
 		"chakra-react-select": "^4.1.4",
 		"clsx": "^1.2.1",

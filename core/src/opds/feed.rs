@@ -42,7 +42,7 @@ impl OpdsFeed {
 		href_postfix: &str,
 		data: Vec<T>,
 		page: i64,
-		count: u32,
+		count: i64,
 	) -> OpdsFeed
 	where
 		OpdsEntry: From<T>,
@@ -126,8 +126,8 @@ impl From<library::Data> for OpdsFeed {
 	}
 }
 
-impl From<(library::Data, i64, u32)> for OpdsFeed {
-	fn from((library, page, count): (library::Data, i64, u32)) -> Self {
+impl From<(library::Data, i64, i64)> for OpdsFeed {
+	fn from((library, page, count): (library::Data, i64, i64)) -> Self {
 		let id = library.id.clone();
 		let title = library.name.clone();
 
@@ -180,10 +180,10 @@ impl From<(library::Data, i64, u32)> for OpdsFeed {
 	}
 }
 
-impl From<(String, Vec<series::Data>, i64, u32)> for OpdsFeed {
+impl From<(String, Vec<series::Data>, i64, i64)> for OpdsFeed {
 	/// Used in /opds/series?page={page}, converting the raw Vector of series into an OPDS feed.
 	/// The page URL param is also passed in, and is used when generating the OPDS links.
-	fn from((title, series, page, count): (String, Vec<series::Data>, i64, u32)) -> Self {
+	fn from((title, series, page, count): (String, Vec<series::Data>, i64, i64)) -> Self {
 		let entries = series.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
 
 		let mut links = vec![
@@ -223,8 +223,7 @@ impl From<(String, Vec<series::Data>, i64, u32)> for OpdsFeed {
 	}
 }
 
-// String, Vec<series::Data>, i64, u32
-impl<T> Into<OpdsFeed> for (String, String, String, Vec<T>, i64, u32)
+impl<T> Into<OpdsFeed> for (String, String, String, Vec<T>, i64, i64)
 where
 	OpdsEntry: From<T>,
 	// T: Into<OpdsEntry>,

@@ -35,8 +35,13 @@ pub enum ClientEvent {
 		message: String,
 	},
 	CreatedMedia(prisma::media::Data),
+	// TODO: not sure if I should send the number of insertions or the insertions themselves.
+	// cloning the vector is potentially expensive.
 	CreatedMediaBatch(u64),
 	CreatedSeries(prisma::series::Data),
+	// TODO: not sure if I should send the number of insertions or the insertions themselves.
+	// cloning the vector is potentially expensive.
+	CreatedSeriesBatch(u64),
 }
 
 impl ClientEvent {

@@ -12,10 +12,6 @@ export default function MediaCard(media: Media) {
 		});
 
 	const fallback = useMemo(() => {
-		// if (media.extension === 'epub') {
-		// 	return '/fallbacks/epub.png';
-		// }
-
 		return '/fallbacks/image-file.svg';
 	}, [media.extension]);
 
@@ -27,9 +23,7 @@ export default function MediaCard(media: Media) {
 			imageFallback={fallback}
 			onMouseEnter={prefetchMedia}
 			title={media.name}
-			// FIXME
-			// showMissingOverlay={media.status === 'MISSING'}
-			// showMissingOverlay={media.name.includes('v02')}
+			showMissingOverlay={media.status === 'MISSING'}
 		/>
 	);
 }

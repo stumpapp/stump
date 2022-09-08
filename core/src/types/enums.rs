@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -20,7 +20,7 @@ pub enum ViewMode {
 	List,
 }
 
-#[derive(Debug, Deserialize, Serialize, JsonSchema, Type)]
+#[derive(Debug, Deserialize, Serialize, JsonSchema, Type, Clone, Copy)]
 pub enum FileStatus {
 	#[serde(rename = "UNKNOWN")]
 	Unknown,
@@ -42,6 +42,21 @@ impl fmt::Display for FileStatus {
 			FileStatus::Unsupported => write!(f, "UNSUPPORTED"),
 			FileStatus::Error => write!(f, "ERROR"),
 			FileStatus::Missing => write!(f, "MISSING"),
+		}
+	}
+}
+
+impl FromStr for FileStatus {
+	type Err = ();
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"UNKNOWN" => Ok(FileStatus::Unknown),
+			"READY" => Ok(FileStatus::Ready),
+			"UNSUPPORTED" => Ok(FileStatus::Unsupported),
+			"ERROR" => Ok(FileStatus::Error),
+			"MISSING" => Ok(FileStatus::Missing),
+			_ => Err(()),
 		}
 	}
 }

@@ -148,6 +148,7 @@ pub async fn get_library_series(
 
 	let base_query = db
 		.series()
+		// TODO: add media relation count....
 		.find_many(vec![series::library_id::equals(Some(id.clone()))])
 		.order_by(order_by_param);
 
@@ -330,7 +331,6 @@ pub async fn create_library(
 }
 
 /// Update a library by id, if the current user is a SERVER_OWNER.
-// TODO: LibraryOptions update
 #[openapi(tag = "Library")]
 #[put("/libraries/<id>", data = "<input>")]
 pub async fn update_library(
@@ -343,7 +343,7 @@ pub async fn update_library(
 
 	if !Path::new(&input.path).exists() {
 		return Err(ApiError::BadRequest(format!(
-			"The requested change would result in a non-existent library path: {}",
+			"Updated path does not exist: {}",
 			input.path
 		)));
 	}
@@ -471,7 +471,7 @@ pub async fn delete_library(
 		if let Err(err) = image::remove_thumbnails(&media_ids) {
 			log::error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
-			log::info!("Removed thumbnails for library media");
+			log::info!("Removed thumbnails for library media (if present)");
 		}
 	}
 

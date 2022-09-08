@@ -1,3 +1,4 @@
+use rayon::prelude::{ParallelBridge, ParallelIterator};
 use rocket::tokio::{self, task::JoinHandle};
 use std::{
 	collections::HashMap,
@@ -8,18 +9,21 @@ use std::{
 	},
 	time::Duration,
 };
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	config::context::Ctx,
 	event::ClientEvent,
 	fs::{
 		image,
-		scanner::{utils::mark_media_missing, ScannedFileTrait},
+		scanner::{
+			utils::{insert_series_batch, mark_media_missing},
+			ScannedFileTrait,
+		},
 	},
 	job::persist_job_start,
 	prisma::{library, media, series},
-	types::{errors::ApiError, models::library::LibraryOptions},
+	types::{enums::FileStatus, errors::ApiError, models::library::LibraryOptions},
 };
 
 use super::{
@@ -27,13 +31,50 @@ use super::{
 	BatchScanOperation,
 };
 
+fn check_series(
+	library_path: &str,
+	series: Vec<series::Data>,
+) -> (Vec<series::Data>, Vec<String>, Vec<DirEntry>) {
+	let series_map = series
+		.iter()
+		.map(|data| (data.path.as_str(), false).into())
+		.collect::<HashMap<&str, bool>>();
+
+	let missing_series = series
+		.iter()
+		.filter(|s| {
+			let path = Path::new(&s.path);
+			!path.exists()
+		})
+		.map(|s| s.id.clone())
+		.collect::<Vec<String>>();
+
+	let new_entries = WalkDir::new(library_path)
+		.into_iter()
+		.filter_entry(|e| e.path().is_dir())
+		.filter_map(|e| e.ok())
+		.par_bridge()
+		.filter(|entry| {
+			let path = entry.path();
+
+			let path_str = path.as_os_str().to_string_lossy().to_string();
+
+			path.dir_has_media() && !series_map.contains_key(path_str.as_str())
+		})
+		.collect::<Vec<DirEntry>>();
+
+	(series, missing_series, new_entries)
+}
+
+/// Queries the database for the library by the given `path` and performs basic
+/// checks to ensure the library is in a valid state for scanning. Returns the
+/// library itself, its series, and the number of files that will be processed.
 async fn precheck(
 	ctx: &Ctx,
 	path: String,
 ) -> Result<(library::Data, Vec<series::Data>, u64), ApiError> {
 	let db = ctx.get_db();
 
-	// TODO: load library options
 	let library = db
 		.library()
 		.find_unique(library::path::equals(path.clone()))
@@ -57,56 +98,45 @@ async fn precheck(
 		)));
 	}
 
-	let mut series = library.series()?.to_owned();
+	let series = library.series()?.to_owned();
 
-	let series_map = series
-		.iter()
-		.map(|data| (data.path.as_str(), data.to_owned()).into())
-		.collect::<HashMap<&str, series::Data>>();
+	let (mut series, missing_series_ids, new_entries) = check_series(&path, series);
 
-	// FIXME: I still don't like this. This needs to create series from bottom-most level, not top most
-	// level I think. It's a little more annoying, but worth in the end? UNLESS, I just use the file explorer
-	// option PNG suggested.
-	let new_entries = WalkDir::new(&path)
-		// I only allow depth of 1 because the top most directory will *always* be the series. Nested
-		// directories get 'folded' into the series represented by the top directory.
-		.max_depth(1)
-		.into_iter()
-		.filter_entry(|e| e.path().is_dir())
-		.filter_map(|e| e.ok())
-		.filter(|entry| {
-			let path = entry.path();
+	if !missing_series_ids.is_empty() {
+		ctx.db
+			.series()
+			.update_many(
+				vec![series::id::in_vec(missing_series_ids)],
+				vec![series::status::set(FileStatus::Missing.to_string())],
+			)
+			.exec()
+			.await?;
+	}
 
-			let path_str = path.as_os_str().to_string_lossy().to_string();
+	let insertion_result =
+		insert_series_batch(ctx, new_entries, library.id.clone()).await;
 
-			// The root should only be added as a series if it has a file as a direct descendent.
-			// This has to short circuit here, since below checks for deeply nested files, which will
-			// always be true for library paths unless there is truly no media in it.
-			if path_str == library.path {
-				return path.dir_has_media()
-					&& !series_map.contains_key(path_str.as_str());
-			}
+	if let Err(e) = insertion_result {
+		log::error!("Failed to batch insert series: {}", e);
 
-			let has_media_nested = WalkDir::new(path)
-				.into_iter()
-				.filter_map(|e| e.ok())
-				.any(|e| e.path().is_file());
+		ctx.emit_client_event(ClientEvent::CreateEntityFailed {
+			runner_id: None,
+			message: format!("Failed to batch insert series: {}", e.to_string()),
+			path: path.clone(),
+		});
+	} else {
+		let mut inserted_series = insertion_result.unwrap();
 
-			// Only create series if there is media inside them, and if they aren't in
-			// the exisitng series map.
-			has_media_nested && !series_map.contains_key(path_str.as_str())
-		})
-		.collect();
+		ctx.emit_client_event(ClientEvent::CreatedSeriesBatch(
+			inserted_series.len() as u64
+		));
 
-	// TODO: I need to check for missing series!! UGH...
-
-	let mut inserted_series =
-		super::utils::insert_series_many(ctx, new_entries, library.id.clone()).await;
-
-	series.append(&mut inserted_series);
+		series.append(&mut inserted_series);
+	}
 
 	let start = std::time::Instant::now();
 
+	// TODO: perhaps use rayon instead...
 	let files_to_process: u64 = futures::future::join_all(
 		series
 			.iter()
@@ -343,18 +373,15 @@ pub async fn scan_batch(
 		.map(|opt| (*opt).into())
 		.unwrap_or_default();
 
-	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
-	let _ = ctx.emit_client_event(ClientEvent::job_started(
+	ctx.emit_client_event(ClientEvent::job_started(
 		runner_id.clone(),
-		// TODO: my brain is being silly and I don't know if I want 0 or 1 here....
 		0,
 		files_to_process,
 		Some(format!("Starting library scan at {}", &library.path)),
 	));
 
-	// let counter = Arc::new(Mutex::new(0));
 	let counter = Arc::new(AtomicU64::new(0));
 
 	let tasks: Vec<JoinHandle<Vec<BatchScanOperation>>> = series
@@ -368,11 +395,7 @@ pub async fn scan_batch(
 				scan_series_batch(ctx_cpy.get_ctx(), s, move |msg| {
 					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-					// let mut shared = counter_ref.lock().unwrap();
-
-					// *shared += 1;
-
-					let _ = ctx_cpy.emit_client_event(ClientEvent::job_progress(
+					ctx_cpy.emit_client_event(ClientEvent::job_progress(
 						r_id.to_owned(),
 						Some(previous + 1),
 						files_to_process,
@@ -423,7 +446,7 @@ pub async fn scan_batch(
 		));
 
 		// sleep for a bit to let client catch up
-		tokio::time::sleep(Duration::from_millis(100)).await;
+		tokio::time::sleep(Duration::from_millis(50)).await;
 
 		if let Err(err) = image::generate_thumbnails(created_media) {
 			log::error!("Failed to generate thumbnails: {:?}", err);
@@ -450,7 +473,6 @@ pub async fn scan_sync(
 
 	ctx.emit_client_event(ClientEvent::job_started(
 		runner_id.clone(),
-		// TODO: my brain is being silly and I don't know if I want 0 or 1 here....
 		0,
 		files_to_process,
 		Some(format!("Starting library scan at {}", &library.path)),

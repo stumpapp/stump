@@ -111,26 +111,6 @@ pub fn get_tentative_media(
 		path: path_str,
 		series_id,
 	})
-
-	// Ok(ctx.db.media().create(
-	// 	name,
-	// size.try_into().unwrap_or_else(|e| {
-	// 	log::error!("Failed to calculate file size: {:?}", e);
-
-	// 	0
-	// }),
-	// 	ext,
-	// match comic_info.page_count {
-	// 	Some(count) => count as i32,
-	// 	None => processed_entry.pages,
-	// },
-	// 	path_str.clone(),
-	// 	vec![
-	// 		media::checksum::set(processed_entry.checksum),
-	// 		media::description::set(comic_info.summary),
-	// 		media::series::connect(series::id::equals(series_id)),
-	// 	],
-	// ))
 }
 
 pub async fn insert_media(
@@ -204,6 +184,7 @@ pub async fn insert_series(
 	Ok(series)
 }
 
+// TODO: remove
 pub async fn insert_series_many(
 	ctx: &Ctx,
 	entries: Vec<DirEntry>,
@@ -214,7 +195,7 @@ pub async fn insert_series_many(
 	for entry in entries {
 		match insert_series(&ctx, &entry, library_id.clone()).await {
 			Ok(series) => {
-				let _ = ctx.emit_client_event(ClientEvent::CreatedSeries(series.clone()));
+				ctx.emit_client_event(ClientEvent::CreatedSeries(series.clone()));
 
 				inserted_series.push(series);
 			},
@@ -225,6 +206,38 @@ pub async fn insert_series_many(
 	}
 
 	inserted_series
+}
+
+pub async fn insert_series_batch(
+	ctx: &Ctx,
+	entries: Vec<DirEntry>,
+	library_id: String,
+) -> Result<Vec<series::Data>, ApiError> {
+	let series_creates = entries.into_iter().map(|entry| {
+		let path = entry.path();
+
+		// TODO: figure out how to do this in the safest way possible...
+		let name = path
+			.file_name()
+			.unwrap_or_default()
+			.to_str()
+			.unwrap_or_default()
+			.to_string();
+
+		// TODO: change this to a Result, then filter map on the iterator and
+		// log the Err values...
+		ctx.db.series().create(
+			name,
+			path.to_str().unwrap_or_default().to_string(),
+			vec![series::library::connect(library::id::equals(
+				library_id.clone(),
+			))],
+		)
+	});
+
+	let inserted_series = ctx.db._batch(series_creates).await?;
+
+	Ok(inserted_series)
 }
 
 pub async fn mark_media_missing(
@@ -240,20 +253,6 @@ pub async fn mark_media_missing(
 		)
 		.exec()
 		.await
-
-	// TODO: remove this commented code once I better test above...
-	// db._execute_raw(raw!(format!(
-	// 	"UPDATE media SET status=\"{}\" WHERE path in ({})",
-	// 	"MISSING".to_string(),
-	// 	paths
-	// 		.into_iter()
-	// 		.map(|path| format!("\"{}\"", path))
-	// 		.collect::<Vec<_>>()
-	// 		.join(",")
-	// )
-	// .as_str()))
-	// 	.exec()
-	// 	.await
 }
 
 pub async fn batch_media_operations(

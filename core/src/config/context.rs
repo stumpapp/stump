@@ -69,6 +69,8 @@ impl Ctx {
 	pub async fn handle_failure_event(&self, event: ClientEvent) {
 		use prisma::log;
 
+		// TODO: maybe log::error! here?
+
 		self.emit_client_event(event.clone());
 
 		let tentative_log = TentativeLog::from(event);

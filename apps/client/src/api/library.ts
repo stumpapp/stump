@@ -26,8 +26,8 @@ export function getLibrarySeries(id: string, page: number): Promise<PageableApiR
 }
 
 // TODO: add scan_mode query param
-// TODO: type this
-export function scanLibary(id: string): Promise<unknown> {
+// FIXME: type this lol
+export function scanLibary(id: string): Promise<ApiResult<unknown>> {
 	return API.get(`/libraries/${id}/scan`);
 }
 

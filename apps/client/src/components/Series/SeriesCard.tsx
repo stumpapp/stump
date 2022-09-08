@@ -25,6 +25,7 @@ export default function SeriesCard({ ...series }: Props) {
 			onMouseEnter={prefetchSeries}
 			title={series.name}
 			subtitle={pluralizeStat('book', bookCount)}
+			showMissingOverlay={series.status === 'MISSING'}
 		/>
 	);
 }

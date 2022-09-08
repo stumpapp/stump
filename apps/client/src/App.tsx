@@ -14,7 +14,8 @@ import StoreProvider from '~store/StoreProvider';
 import theme from '~util/chakraTheme';
 
 import { ChakraProvider } from '@chakra-ui/react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { defaultContext, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const Home = React.lazy(() => import('~pages/Home'));
 const LibraryOverview = React.lazy(() => import('~pages/Library/LibraryOverview'));
@@ -31,14 +32,14 @@ const ServerSettings = React.lazy(() => import('~pages/Settings/ServerSettings')
 const JobSettingsTab = React.lazy(() => import('~pages/Settings/JobSettingsTab'));
 
 // TODO: https://reactjs.org/docs/profiler.html for performance profiling and improvement
-// TODO: https://tanstack.com/query/v4/docs/devtools -> apparently it internally handles not being
-// rendered unless dev mode, which is cool.
 
 export default function Root() {
 	return (
 		<ChakraProvider theme={theme}>
 			<ErrorBoundary>
 				<QueryClientProvider client={client}>
+					{/* TODO: apparently this automatically excludes from prod bundle, check this is true... */}
+					<ReactQueryDevtools position="bottom-right" context={defaultContext} />
 					<StoreProvider>
 						<App />
 					</StoreProvider>

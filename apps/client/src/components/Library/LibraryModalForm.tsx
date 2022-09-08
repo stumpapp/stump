@@ -41,7 +41,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 	const { libraries } = useLibraries();
 
 	function isLibraryScanMode(input: string): input is LibraryScanMode {
-		return input === 'SYNC' || input === 'BATCHED' || input === 'NONE';
+		return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input;
 	}
 
 	function getNewScanMode(value: string) {
@@ -85,7 +85,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 				// z.any(),
 			)
 			.optional(),
-		scanMode: z.string().refine(isLibraryScanMode),
+		scanMode: z.string().refine(isLibraryScanMode).default('BATCHED'),
 		convertRarToZip: z.boolean().default(false),
 		hardDeleteConversions: z.boolean().default(false),
 		createWebpThumbnails: z.boolean().default(false),
@@ -122,7 +122,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 		}
 	}, [reset]);
 
-	console.log(scanMode);
+	console.log('errors', errors);
 
 	return (
 		<Form

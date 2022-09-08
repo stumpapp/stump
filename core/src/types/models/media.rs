@@ -1,10 +1,10 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, str::FromStr};
 
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::{config::context::Ctx, prisma};
+use crate::{config::context::Ctx, prisma, types::enums::FileStatus};
 
 use super::{read_progress::ReadProgress, series::Series, tag::Tag};
 
@@ -28,6 +28,8 @@ pub struct Media {
 	pub checksum: Option<String>,
 	/// The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
 	pub path: String,
+	/// The status of the media
+	pub status: FileStatus,
 	/// The ID of the series this media belongs to.
 	pub series_id: String,
 	// The series this media belongs to. Will be `None` only if the relation is not loaded.
@@ -114,6 +116,7 @@ impl Into<Media> for prisma::media::Data {
 			updated_at: self.updated_at.to_string(),
 			checksum: self.checksum,
 			path: self.path,
+			status: FileStatus::from_str(&self.status).unwrap_or(FileStatus::Error),
 			series_id: self.series_id.unwrap(),
 			series,
 			read_progresses,

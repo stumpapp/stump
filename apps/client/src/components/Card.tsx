@@ -35,12 +35,12 @@ export default function Card({
 	const [isFallback, { on }] = useBoolean(false);
 
 	const src = useMemo(() => {
-		if (isFallback) {
+		if (isFallback || showMissingOverlay) {
 			return imageFallback ?? '/fallbacks/image-file.svg';
 		}
 
 		return imageSrc;
-	}, [isFallback]);
+	}, [isFallback, showMissingOverlay]);
 
 	return (
 		<Box
@@ -60,7 +60,7 @@ export default function Card({
 			className="relative overflow-hidden"
 		>
 			{showMissingOverlay && (
-				// FIXME: this has terrible UX, not very readable.
+				// FIXME: this has terrible UX, not very readable. very ugly lmfao
 				<Box
 					bg={useColorModeValue('whiteAlpha.500', 'blackAlpha.600')}
 					color={useColorModeValue('red.400', 'red.200')}

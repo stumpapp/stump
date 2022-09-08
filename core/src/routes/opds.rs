@@ -2,14 +2,12 @@ use prisma_client_rust::{chrono, Direction};
 use rocket::Route;
 
 use crate::{
-	db::utils::PrismaClientTrait,
 	fs,
 	guards::auth::Auth,
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
-		// opensearch::OpdsOpenSearch,
 	},
 	prisma::{self, library, media, read_progress, series},
 	types::{
@@ -273,7 +271,11 @@ async fn library_by_id(
 	let page = page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page, 20);
 
-	let series_count = db.series_count(id.clone()).await?;
+	let series_count = db
+		.series()
+		.count(vec![series::library_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
 
 	let library = db
 		.library()
@@ -313,7 +315,8 @@ async fn get_series(page: Option<i64>, ctx: &Ctx, _auth: Auth) -> ApiResult<XmlR
 	// FIXME: like other areas throughout Stump's paginated routes, I do not love
 	// that I need to make 2 queries. Hopefully this get's better as prisma client matures
 	// and introduces potential other work arounds.
-	let series_count = db.series_count_all().await?;
+
+	let series_count = db.series().count(vec![]).exec().await?;
 
 	let series = db
 		.series()
@@ -347,7 +350,7 @@ async fn series_latest(
 	let page = page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page, 20);
 
-	let series_count = db.series_count_all().await?;
+	let series_count = db.series().count(vec![]).exec().await?;
 
 	let series = db
 		.series()
@@ -383,13 +386,11 @@ async fn series_by_id(
 	let page = page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page, 20);
 
-	// FIXME: very nasty, hate it.
 	let series_media_count = db
-		.series_media_count(vec![id.clone()])
-		.await?
-		.get(id.as_str())
-		.unwrap_or(&0)
-		.to_owned();
+		.media()
+		.count(vec![media::series_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
 
 	let series = db
 		.series()

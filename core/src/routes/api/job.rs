@@ -19,16 +19,19 @@ use crate::{
 	},
 };
 
-// https://github.com/GREsau/okapi/blob/e686b442d6d7bb30913edf1bae900d14ea754cb1/examples/streams/src/main.rs
-
 /// Get all running/pending jobs.
 #[openapi(tag = "Job")]
 #[get("/jobs")]
 pub async fn get_jobs(ctx: &Ctx) -> ApiResult<Json<Vec<JobReport>>> {
 	let (sender, recv) = oneshot::channel();
 
-	// TODO: fail here if can't submit task?
-	let _ = ctx.internal_task(ClientRequest::GetJobReports(sender));
+	ctx.internal_task(ClientRequest::GetJobReports(sender))
+		.map_err(|e| {
+			ApiError::InternalServerError(format!(
+				"Failed to submit internal task: {}",
+				e
+			))
+		})?;
 
 	let res = recv.await.map_err(|e| {
 		ApiError::InternalServerError(format!("Failed to get jobs: {}", e.to_string()))

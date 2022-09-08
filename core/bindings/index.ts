@@ -11,7 +11,7 @@ export enum FileStatus {
 }
 
 export interface Pageable<T> {
-	// The target data being retuxrned.
+	// The target data being returned.
 	data: T;
 	// The pagination information (if paginated).
 	_page?: PageInfo;

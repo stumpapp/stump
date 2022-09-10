@@ -211,7 +211,7 @@ pub fn get_zip_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResp
 		let content_type = media_file::guess_content_type(name);
 
 		if images_seen + 1 == page && file.is_image() {
-			log::debug!("Found target image: {}", name);
+			log::trace!("Found target image: {}", name);
 			file.read_to_end(&mut contents)?;
 			return Ok((content_type, contents));
 		} else if file.is_image() {

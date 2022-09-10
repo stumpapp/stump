@@ -38,8 +38,9 @@ export default function Root() {
 		<ChakraProvider theme={theme}>
 			<ErrorBoundary>
 				<QueryClientProvider client={client}>
-					{/* TODO: apparently this automatically excludes from prod bundle, check this is true... */}
-					<ReactQueryDevtools position="bottom-right" context={defaultContext} />
+					{import.meta.env.MODE === 'development' && (
+						<ReactQueryDevtools position="bottom-right" context={defaultContext} />
+					)}
 					<StoreProvider>
 						<App />
 					</StoreProvider>

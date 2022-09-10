@@ -336,7 +336,7 @@ pub async fn update_media_progress(
 					auth.0.id.clone(),
 					id.clone(),
 				),
-				read_progress::create(
+				(
 					page,
 					media::id::equals(id.clone()),
 					user::id::equals(auth.0.id.clone()),

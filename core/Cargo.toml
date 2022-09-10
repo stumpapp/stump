@@ -7,7 +7,7 @@ default-run = "stump"
 
 [dependencies]
 # core dependencies
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.0", features = [
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
   'rspc',
   # 'sqlite-create-many'
 ] }

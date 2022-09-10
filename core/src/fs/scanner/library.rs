@@ -408,11 +408,6 @@ pub async fn scan_batch(
 		})
 		.collect();
 
-	// FIXME: this reference is out dated, and so shows 0... I have done over 6 hours of coding for stump today so am not fixing now lol
-	let final_count = counter.load(Ordering::SeqCst);
-
-	// println!("Final count: {}", final_count);
-
 	let operations: Vec<BatchScanOperation> = futures::future::join_all(tasks)
 		.await
 		.into_iter()
@@ -420,6 +415,8 @@ pub async fn scan_batch(
 		.filter_map(|res| res.ok())
 		.flatten()
 		.collect();
+
+	let final_count = counter.load(Ordering::SeqCst);
 
 	let created_media = batch_media_operations(&ctx, operations, &library_options)
 		.await
@@ -436,9 +433,7 @@ pub async fn scan_batch(
 
 		ctx.emit_client_event(ClientEvent::job_progress(
 			runner_id.clone(),
-			// Some(final_count),
-			// TODO: don't do this...
-			None,
+			Some(final_count),
 			files_to_process,
 			Some(format!(
 				"Creating {} WEBP thumbnails (this can take some time)",

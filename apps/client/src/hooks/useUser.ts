@@ -2,7 +2,7 @@ import toast from 'react-hot-toast';
 import shallow from 'zustand/shallow';
 import { me } from '~api/auth';
 import { updateUserPreferences } from '~api/user';
-import { useStore } from '~store/store';
+import { useStore } from '~stores/mainStore';
 
 import { UserPreferences } from '@stump/core';
 import { useMutation, useQuery } from '@tanstack/react-query';

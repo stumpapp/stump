@@ -1,3 +1,7 @@
+import { useMemo } from 'react';
+import shallow from 'zustand/shallow';
+import { useStore } from '~stores/mainStore';
+
 import {
 	Box,
 	Heading,
@@ -9,9 +13,6 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 import { JobReport } from '@stump/core';
-import { useMemo } from 'react';
-import shallow from 'zustand/shallow';
-import { useStore } from '~store/store';
 
 // TODO: ORGANIZE BETTER
 

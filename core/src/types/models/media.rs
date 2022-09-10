@@ -85,25 +85,29 @@ impl Into<Media> for prisma::media::Data {
 			},
 		};
 
-		let read_progresses = match self.read_progresses() {
-			Ok(read_progresses) => Some(
-				read_progresses
+		let (read_progresses, current_page) = match self.read_progresses() {
+			Ok(read_progresses) => {
+				let progress = read_progresses
 					.into_iter()
 					.map(|rp| rp.to_owned().into())
-					.collect(),
-			),
+					.collect::<Vec<ReadProgress>>();
+
+				// Note: ugh.
+				if let Some(p) = progress.first().cloned() {
+					(Some(progress), Some(p.page))
+				} else {
+					(Some(progress), None)
+				}
+			},
 			Err(e) => {
 				log::trace!("Failed to load read progresses for media: {}", e);
-				None
+				(None, None)
 			},
 		};
 
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
-			Err(_e) => {
-				// log::debug!("Failed to load tags for media: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		Media {
@@ -120,8 +124,7 @@ impl Into<Media> for prisma::media::Data {
 			series_id: self.series_id.unwrap(),
 			series,
 			read_progresses,
-			// TODO:
-			current_page: None,
+			current_page,
 			tags,
 		}
 	}

@@ -3,7 +3,7 @@ import create, { GetState, SetState, StateCreator, StoreApi, UseBoundStore } fro
 import createContext from 'zustand/context';
 import { devtools } from 'zustand/middleware';
 
-interface StoreMutations {
+interface MainStoreMutations {
 	logoutUser(): void;
 	setUser: (user: User) => void;
 	setUserPreferences: (preferences: UserPreferences) => void;
@@ -15,7 +15,7 @@ interface StoreMutations {
 	completeJob(runnerId: string): void;
 }
 
-interface MainStore extends StoreMutations {
+interface MainStore extends MainStoreMutations {
 	user: User | null;
 	title: string;
 	jobs: Record<string, JobUpdate>;

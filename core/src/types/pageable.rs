@@ -5,6 +5,7 @@ use specta::Type;
 use super::query::Direction;
 
 #[derive(Serialize, FromForm, JsonSchema, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct PagedRequestParams {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
@@ -14,6 +15,7 @@ pub struct PagedRequestParams {
 }
 
 #[derive(Debug, Serialize, JsonSchema, Clone, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,

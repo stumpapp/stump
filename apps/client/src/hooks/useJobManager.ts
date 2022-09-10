@@ -1,7 +1,7 @@
 import { ClientEvent } from '@stump/core';
 import toast from 'react-hot-toast';
 import client from '~api/client';
-import { useStore } from '~store/store';
+import { useStore } from '~stores/mainStore';
 import { useJobsListener } from './useJobsListener';
 
 export function useJobManager() {

@@ -6,7 +6,7 @@ import shallow from 'zustand/shallow';
 import { login } from '~api/auth';
 import Form from '~ui/Form';
 import Input from '~ui/Input';
-import { useStore } from '~store/store';
+import { useStore } from '~stores/mainStore';
 
 import {
 	Alert,

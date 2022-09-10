@@ -17,6 +17,7 @@ export interface ImageBasedReaderProps {
 }
 
 // TODO: merge with AnimatedImageBasedReader once animates aren't ass
+// TODO: obviously mobile pretty much doesn't work really. I'll fix that later
 export default function ImageBasedReader({
 	currentPage,
 	media,

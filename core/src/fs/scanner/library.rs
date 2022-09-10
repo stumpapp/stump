@@ -72,6 +72,7 @@ fn check_series(
 async fn precheck(
 	ctx: &Ctx,
 	path: String,
+	runner_id: &str,
 ) -> Result<(library::Data, Vec<series::Data>, u64), ApiError> {
 	let db = ctx.get_db();
 
@@ -120,7 +121,7 @@ async fn precheck(
 		log::error!("Failed to batch insert series: {}", e);
 
 		ctx.emit_client_event(ClientEvent::CreateEntityFailed {
-			runner_id: None,
+			runner_id: Some(runner_id.to_string()),
 			message: format!("Failed to batch insert series: {}", e.to_string()),
 			path: path.clone(),
 		});
@@ -366,7 +367,7 @@ pub async fn scan_batch(
 ) -> Result<u64, ApiError> {
 	log::trace!("Enter scan_batch");
 
-	let (library, series, files_to_process) = precheck(&ctx, path).await?;
+	let (library, series, files_to_process) = precheck(&ctx, path, &runner_id).await?;
 
 	let library_options: LibraryOptions = library
 		.library_options
@@ -461,7 +462,7 @@ pub async fn scan_sync(
 	path: String,
 	runner_id: String,
 ) -> Result<u64, ApiError> {
-	let (library, series, files_to_process) = precheck(&ctx, path).await?;
+	let (library, series, files_to_process) = precheck(&ctx, path, &runner_id).await?;
 
 	let library_options: LibraryOptions = library
 		.library_options

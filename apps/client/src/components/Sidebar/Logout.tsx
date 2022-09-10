@@ -14,7 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import { logout } from '~api/auth';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '~store/store';
+import { useStore } from '~stores/mainStore';
 
 export default function Logout() {
 	const { isOpen, onOpen, onClose } = useDisclosure();

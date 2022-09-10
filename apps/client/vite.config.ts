@@ -21,7 +21,7 @@ export default defineConfig({
 			'~ui': path.resolve('./src/ui'),
 			'~pages': path.resolve('./src/pages'),
 			'~api': path.resolve('./src/api'),
-			'~store': path.resolve('./src/store'),
+			'~stores': path.resolve('./src/stores'),
 			'~util': path.resolve('./src/util'),
 			'~hooks': path.resolve('./src/hooks'),
 			'~i18n': path.resolve('./src/i18n'),

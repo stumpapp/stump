@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Box, Spacer, Text, useBoolean, useColorModeValue } from '@chakra-ui/react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
@@ -20,7 +20,6 @@ export interface CardProps {
 // are created during a scan. When a Series is created, there won't be any Media to render a thumbnail for at first.
 // So, I think maybe there should be some retry logic in here? retry once every few ms for like 9ms before showing a
 // fallback image?
-// TODO: add /public/fallback-card.png
 export default function Card({
 	to,
 	imageAlt,
@@ -94,7 +93,7 @@ export default function Card({
 				<Box
 					className={clsx(
 						subtitle ? 'h-[5rem]' : 'h-[4rem]',
-						'flex flex-col max-w-[calc(100%-0.75rem)] break-all p-2',
+						'flex flex-col max-w-[calc(100%-0.75rem)] p-2',
 					)}
 					color="black"
 					_dark={{ color: 'gray.100' }}

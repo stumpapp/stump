@@ -22,7 +22,7 @@
 			"~util/*": ["src/util/*"],
 			"~hooks/*": ["src/hooks/*"],
 			"~api/*": ["src/api/*"],
-			"~store/*": ["src/store/*"],
+			"~stores/*": ["src/stores/*"],
 			"~pages/*": ["src/pages/*"],
 			"~i18n/*": ["src/i18n/*"]
 		}

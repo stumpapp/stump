@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Box, Progress, Text } from '@chakra-ui/react';
-import { useStore } from '~store/store';
+import { useStore } from '~stores/mainStore';
 import shallow from 'zustand/shallow';
 
 // TODO: this will pop up when someone does a job, i.e. scanning a library.

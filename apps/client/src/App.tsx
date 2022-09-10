@@ -9,8 +9,8 @@ import MainLayout from '~components/Layouts/MainLayout';
 import Notifications from '~components/Notifications';
 import { useJobManager } from '~hooks/useJobManager';
 import FourOhFour from '~pages/FourOhFour';
-import { useStore } from '~store/store';
-import StoreProvider from '~store/StoreProvider';
+import { useStore } from '~stores/mainStore';
+import StoreProvider from '~stores/StoreProvider';
 import theme from '~util/chakraTheme';
 
 import { ChakraProvider } from '@chakra-ui/react';

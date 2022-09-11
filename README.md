@@ -12,10 +12,10 @@
   </a>
   <!-- <a href="./.github/CHANGELOG.md">
     <img src="https://img.shields.io/github/package-json/v/aaronleopold/stump?logo=azurepipelines&amp;color=0aa8d2" alt="Current Version">
-  </a>
-  <a href="https://hub.docker.com/r/aaronleopold/stump">
-    <img src="https://img.shields.io/docker/pulls/aaronleopold/stump?logo=docker&color=0aa8d2&logoColor=fff" alt="Docker Pulls">
   </a> -->
+  <a href="https://hub.docker.com/r/aaronleopold/stump-preview">
+    <img src="https://img.shields.io/docker/pulls/aaronleopold/stump-preview?logo=docker&color=0aa8d2&logoColor=fff" alt="Docker Pulls">
+  </a>
 </p>
 
 <p align='center'>
@@ -32,21 +32,19 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
+- [Developer Guide 💻](#developer-guide-)
 - [Project Structure 📦](#project-structure-)
-- [Developing 💻](#developing-)
-  - [Setup Script ⚙️](#setup-script-️)
-  - [Running Stump 🏃‍♀️](#running-stump-️)
-  - [Where to start? 🤔](#where-to-start-)
+  - [/apps](#apps)
+  - [/common](#common)
+  - [/core](#core)
 - [Similar Projects 👯](#similar-projects-)
 - [License 🔑](#license-)
   </p>
 </details>
 
-> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please see the [Developing](#developing-) section below for more information on how you can help. Otherwise, stay tuned for the first release!
+> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please see the [contributing guide](https://www.stumpapp.dev/contributing) for more information on how you can help. Otherwise, stay tuned for the first release!
 
 ## Roadmap 🗺
-
-> Stump is very young software under active development. It has not reached a beta stage yet, so do not expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image.
 
 Some of these are actually completed(!) already, but the following items are the major targets for Stump's first beta release:
 
@@ -73,93 +71,29 @@ There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/
 
 For more information about getting started, how Stump works and how it manages your library, and much more, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 
+## Developer Guide 💻
+
+Contributions are very **encouraged** and **welcome**! Please review the [developer guide](https://www.stumpapp.dev/contributing) on the documentation website for information on how to get started developing.
+
 ## Project Structure 📦
 
-I am omitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
+Stump has a monorepo structure that follows a similar pattern to that of [Spacedrive](https://www.spacedrive.com/).
 
-```
-.
-├── apps
-│   ├── client
-│   │   └── src
-│   └── website
-│       └── src
-├── core
-│   ├── bindings
-│   ├── prisma
-│   └── src
-├── README.md
-└── ...
-```
+### /apps
 
-The `core` directory is where Stump's 'core' functionality is located, written in Rust. Stump uses [Prisma](https://github.com/Brendonovich/prisma-client-rust).
+- `docs`: The documentation website, built with Next.js and [Markdoc](https://markdoc.io/), deployed to [stumpapp.dev](http://stumpapp.dev).
+- `web`: The React application that is served by a Stump server.
+- `desktop`: A Tauri application.
 
-The `apps` directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
+### /common
 
-- `client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
+- `client`: Zustand and React Query configuration to be used by the `interface` package.
+- `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.
+- `interface`: Stump's main React-based interface, shared between the web and desktop applications.
 
-- `website`: A Next.js application for the Stump landing site and documentation pages. The documentation is created using [Markdoc](https://markdoc.io/). This code gets deployed to [stumpapp.dev](http://stumpapp.dev)
+### /core
 
-## Developing 💻
-
-Contributions are very **encouraged** and **welcome**!
-
-I put together a small set of [resources](https://www.stumpapp.dev/contributing#developer-resources) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
-
-Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
-
-**Ensure you are on the `develop` branch before continuing.**
-
-### Setup Script ⚙️
-
-> If you feel that your system is already configured for development, you may skip this step and run `cargo install cargo-watch` and `pnpm run setup`. I highly recommend using the script, however.
-
-> **Note**: If you are on a Windows machine, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) installed on your system.
-
-The setup script handles most of the initial configuration and installation of dependencies, however you should ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
-
-If you are on a Windows machine, you'll need to run the following:
-
-```
-.\.github\scripts\setup.ps1
-```
-
-Otherwise, you can run the following:
-
-```bash
-./.github/scripts/setup.sh
-```
-
-These scripts will run system checks for `cargo` and `pnpm`, and will install a few additional dependencies, depending on your system. It will then install all the direct, Stump development dependencies, build the frontend bundle (required for server to start), generate the prisma client and sqlite database.
-
-If you face any issues running these, or are using a system that is not supported by the setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
-
-### Running Stump 🏃‍♀️
-
-To start the application for development, simply run:
-
-```bash
-pnpm dev
-```
-
-This will start both the vite dev server and the rust server, watching for changes. You can also run the server and the client in separate processes:
-
-```bash
-pnpm core dev # start the Stump server
-pnpm client dev # start the web client
-```
-
-To run in a release profile, you would just need to run:
-
-```bash
-pnpm core start
-```
-
-### Where to start? 🤔
-
-If you're looking to contribute, but aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the development of Stump, mostly for personal organization. You can see what features are being worked on and what needs to be done.
-
-Features are categorized by `Core: Frontend` (the React client, for now), `Core: Backend` (the Rust server), `Core: Devops` (Docker and other misc devops things), and `Website` (the documentation website). I'll be responsive on [Discord](https://discord.gg/63Ybb7J3as) (and eventually Matrix) if you have any questions, so feel free to reach out!
+- `core`: Stump's 'core' functionality is located here, written in Rust. Effectively, this is a Rocket server.
 
 ## Similar Projects 👯
 

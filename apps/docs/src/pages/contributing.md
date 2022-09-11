@@ -1,6 +1,6 @@
 # Contributing
 
-If you're interested in supporting Stump's development, and you know how to code, follow the steps outlined in the [Developing](#developing-💻) section to get started. There are several areas where help is needed:
+If you're interested in supporting Stump's development, and you know how to code, follow the steps outlined in the [developer guide](#developer-guide) section to get started. There are several areas where help is needed:
 
 - Translation, so Stump is accessible to non-English speakers.
 - Writing comprehensive benchmarks and tests.
@@ -13,7 +13,7 @@ If you can't contribute programatically, but you still wish to help, consider co
 - [GitHub Sponsors](https://github.com/sponsors/aaronleopold)
 - [Open Collective](https://opencollective.com/stump)
 
-## Developing
+## Developer Guide
 
 Contributions are very **encouraged** and **welcome**!
 
@@ -22,33 +22,6 @@ I put together a small set of [resources](#developer-resources) to get you start
 Please review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/blob/main/CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
 
 **Ensure you are on the `develop` branch before continuing.**
-
-### Project Structure
-
-I am omitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
-
-```
-.
-├── apps
-│   ├── client
-│   │   └── src
-│   └── website
-│       └── src
-├── core
-│   ├── bindings
-│   ├── prisma
-│   └── src
-├── README.md
-└── ...
-```
-
-The `core` directory is where Stump's 'core' functionality is located, written in Rust. Stump uses [Prisma](https://github.com/Brendonovich/prisma-client-rust).
-
-The `apps` directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
-
-- `client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
-
-- `website`: A Next.js application for the Stump landing site and documentation pages. The documentation is created using [Markdoc](https://markdoc.io/).
 
 ### Setup Script
 

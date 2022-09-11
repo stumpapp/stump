@@ -41,5 +41,4 @@ _next
 
 docker-compose.yaml
 
-# its a surprise
-README_RELEASE.md
+apps/desktop/src-tauri/icons/*

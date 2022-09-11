@@ -1,0 +1,27 @@
+{
+	"name": "@stump/client",
+	"version": "0.0.0",
+	"private": true,
+	"main": "./src/index.ts",
+	"files": [
+		"dist/**"
+	],
+	"scripts": {
+		"dev": "tsc -w",
+		"build": "tsc"
+	},
+	"dependencies": {
+		"@stump/config": "workspace:*",
+		"@stump/core": "workspace:*",
+		"@tanstack/react-query": "^4.2.3",
+		"zustand": "^3.7.1"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.15",
+		"tsconfig": "*",
+		"typescript": "^4.7.4"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0"
+	}
+}

@@ -6,7 +6,6 @@ rust-version = "1.63.0"
 default-run = "stump"
 
 [dependencies]
-# core dependencies
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
   'rspc',
   # 'sqlite-create-many'
@@ -15,28 +14,27 @@ serde = { version = "1.0", features = ["derive"] }
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
 rayon = "1.5.3"
 
-# auth / security
+### AUTH / SECURITY ###
 rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }
 bcrypt = "0.10.1"
 # FIXME: not pointing to master caused some compilation issues. It's in alpha, so :)
 # See https://github.com/lawliet89/rocket_cors/pull/108. Should be updated on next release
 rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
 
-# dev utils
+### DEV UTILS / TOOLS ###
 rocket_okapi = { version = "0.8.0-rc.2", features = ["rapidoc", "swagger"] }
 schemars = "0.8.10"
 # ts-rs = { git = "https://github.com/aaronleopold/ts-rs" }
 specta = "0.0.2"
 
-# misc utils
-include_dir = "0.7.2"
+### MISC UTILS ###
 urlencoding = "2.1.0"
 cuid = "1.2.0"
 async-trait = "0.1.53"
 xml-rs = "0.8.4" # used for creating XML docs
 serde-xml-rs = "0.5.1" # used for serializing/deserializing xml
 
-# files & hashing
+### FILESYSTEM UTILS ###
 walkdir = "2.3.2"
 dirs = "4.0.0"
 trash = "2.0"
@@ -48,9 +46,10 @@ epub = "1.2.3"
 unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--read-bytes" }
 base64 = "0.13.0"
 data-encoding = "2.3.2"
+include_dir = "0.7.2"
 ring = "0.16.20"
 
-# error handling & logging
+## ERROR HANDLING + LOGGING ###
 anyhow = "1.0.57"
 thiserror = "1.0.30"
 log = "0.4.0"
@@ -59,6 +58,7 @@ figment = { version = "0.10.6", features = ["toml", "env"] }
 toml = "0.5.9"
 futures = "0.3.21"
 
+### PLATFORM SPECIFIC DEPENDENCIES ###
 [target.aarch64-unknown-linux-musl.dependencies]
 openssl = { version = "0.10.40", features = ["vendored"] }
 

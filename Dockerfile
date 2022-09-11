@@ -14,10 +14,10 @@ COPY . .
 
 RUN npm install -g pnpm
 
-RUN pnpm --filter @stump/client install
-RUN pnpm client build
+RUN pnpm --filter @stump/web install
+RUN pnpm web build
 
-RUN mv ./apps/client/build build
+RUN mv ./apps/web/build build
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage

@@ -1,0 +1,34 @@
+{
+  "name": "@stump/interface",
+  "version": "0.0.0",
+  "description": "",
+  "license": "MIT",
+  "private": true,
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./assets/*": "./src/assets/*",
+    "./components/*": "./src/components/*"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@stump/client": "workspace:*",
+    "@tanstack/react-query": "^4.3.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.35.0",
+    "react-router": "^6.3.0",
+    "react-router-dom": "^6.3.0",
+    "rooks": "^7.1.1",
+    "tailwindcss": "^3.1.8",
+    "zod": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.19",
+    "@types/react-dom": "^18.0.6",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^2.1.0",
+    "vite": "^3.1.0"
+  },
+  "keywords": []
+}

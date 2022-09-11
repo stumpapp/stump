@@ -1,59 +1,68 @@
 # Contributing
 
-If you're interested in contributing to Stump, and you know how to code, then you're in the right place! Follow the steps below to get started.
+If you're interested in supporting Stump's development, and you know how to code, follow the steps outlined in the [Developing](#developing-💻) section to get started. There are several areas where help is needed:
+
+- Translation, so Stump is accessible to non-English speakers.
+- Writing comprehensive benchmarks and tests.
+- TODO: write more examples
+- And lots more!
 
 If you can't contribute programatically, but you still wish to help, consider contributing financially by using any of these platforms:
 
 - [Kofi](https://ko-fi.com/aaronleop)
 - [GitHub Sponsors](https://github.com/sponsors/aaronleopold)
+- [Open Collective](https://opencollective.com/stump)
 
-## Project Structure
+## Developing
 
-I am ommitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
+Contributions are very **encouraged** and **welcome**!
 
-```bash
+I put together a small set of [resources](#developer-resources) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
+
+Please review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/blob/main/CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
+
+**Ensure you are on the `develop` branch before continuing.**
+
+### Project Structure
+
+I am omitting a lot of files and only focusing on the main directories, but the following is the structure of the project:
+
+```
 .
-├── packages
-│   ├── core
-│   │   ├── frontend
-│   │   └── server
-│   │       ├── prisma
-│   │       ├── prisma-cli
-│   │       └── src
-│   │           └── bin
-│   │               └── seed.rs
+├── apps
+│   ├── client
+│   │   └── src
 │   └── website
+│       └── src
+├── core
+│   ├── bindings
+│   ├── prisma
+│   └── src
 ├── README.md
 └── ...
 ```
 
-### Core
+The `core` directory is where Stump's 'core' functionality is located, written in Rust. Stump uses [Prisma](https://github.com/Brendonovich/prisma-client-rust).
 
-The core package is where Stump's core functionality is located.
+The `apps` directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
 
-`server`: This is the bulk of Stump's functionality. It is a Rocket server.
+- `client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
 
-`frontend`: The frontend directory is where the web client is located. It is a static React application that is served by Stump.
-
-### Website
-
-The website package contains a Next.js application for the Stump landing page and documentation pages (what you're currently reading), created using [Markdoc](https://markdoc.io/).
-
-## Development Setup
-
-There is a setup script to handle most of the initial configuration, however please ensure you at least have the basics installed: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your `$PATH`.
-
-**_Ensure you are on the `develop` branch before continuing_**:
-
-```bash
-git switch develop # or git checkout develop
-```
+- `website`: A Next.js application for the Stump landing site and documentation pages. The documentation is created using [Markdoc](https://markdoc.io/).
 
 ### Setup Script
 
+{% callout title="Note" icon="note" %}
+If you feel that your system is already configured for development, you may skip this step and run `cargo install cargo-watch` and `pnpm run setup`. I highly recommend using the script, however.
+
+If you are on a Windows machine, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) installed on your system.
+{% /callout %}
+
+The setup script handles most of the initial configuration and installation of dependencies, however you should ensure you at least have the basics: [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). The script may ask to attempt installing `pnpm` using `npm` if it is not found in your $PATH.
+
 If you are on a Windows machine, you'll need to run the following:
 
-```bash
+```
 .\.github\scripts\setup.ps1
 ```
 
@@ -65,10 +74,6 @@ Otherwise, you can run the following:
 
 These scripts will run system checks for `cargo` and `pnpm`, and will install a few additional dependencies, depending on your system. It will then install all the direct, Stump development dependencies, build the frontend bundle (required for server to start), generate the prisma client and sqlite database.
 
-{% callout title="Windows WSL" icon="warning" %}
-I've found that running the setup script on Windows WSL works well, but if you're using it to install `pnpm` ensure you have node and npm configured to not point to your Windows installation of node/npm. You'll likely encounter a couple of permissions errors if it isn't configured this way.
-{% /callout %}
-
 If you face any issues running these, or are using a system that is not supported by the setup scripts, please consider [adding/improving support](https://github.com/aaronleopold/stump/issues) for your system.
 
 ### Running Stump
@@ -76,22 +81,35 @@ If you face any issues running these, or are using a system that is not supporte
 To start the application for development, simply run:
 
 ```bash
-pnpm core dev
+pnpm dev
 ```
 
-This will start both the vite dev server and the rust server, watching for changes and recompiling when necessary. If preferred, you may run the server and the frontend in separate processes:
+This will start both the vite dev server and the rust server, watching for changes. You can also run the server and the client in separate processes:
 
 ```bash
-pnpm core server:dev # start the server
-pnpm core frontend:dev # start the frontend
+pnpm core dev # start the Stump server
+pnpm client dev # start the web client
 ```
 
-At this point, you're pretty much all set! When you navigate to [`localhost:3000`](http://localhost:3000), Stump will prompt you to create the managing user account and then your first library.
+To run in a release profile, you would just need to run:
 
-## Developer Resources 📚
+```bash
+pnpm core start
+```
+
+At this point, you're pretty much all set! When you navigate to [`localhost:3000`](http://localhost:3000), or [`localhost:10801`](http://localhost:10801) using the release profile, Stump will prompt you to create the managing user account and then your first library.
+
+### Where to start?
+
+If you're looking to contribute, but aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the development of Stump, mostly for personal organization. You can see what features are being worked on and what needs to be done.
+
+Features are categorized by `Core: Frontend` (the React client, for now), `Core: Backend` (the Rust server), `Core: Devops` (Docker and other misc devops things), and `Website` (the documentation website).
+
+### Developer Resources
 
 A few useful resources for developers looking to contribute:
 
+- [Rust Book](https://doc.rust-lang.org/book/)
 - [Rocket documentation](https://rocket.rs/v0.5-rc/)
 - [Prisma documentation](https://prisma.io/docs/prisma-client/introduction)
   - [Prisma Client Rust Documentation](https://github.com/Brendonovich/prisma-client-rust/tree/main/docs)
@@ -99,4 +117,3 @@ A few useful resources for developers looking to contribute:
 - [OPDS specification](https://specs.opds.io/)
 - [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)
 - [Getting started with React](https://reactjs.org/docs/getting-started.html)
-- [Rust Book](https://doc.rust-lang.org/book/)

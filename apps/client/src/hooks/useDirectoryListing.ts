@@ -1,8 +1,8 @@
 import { DirectoryListing } from '@stump/core';
 import { AxiosError } from 'axios';
 import { useMemo, useState } from 'react';
-import { useQuery } from 'react-query';
-import { listDirectory } from '~api/query/filesystem';
+import { useQuery } from '@tanstack/react-query';
+import { listDirectory } from '~api/filesystem';
 
 interface Props {
 	enabled: boolean;
@@ -61,8 +61,10 @@ export function useDirectoryListing({ enabled, startingPath }: Props) {
 		error,
 		errorMessage,
 		path,
+		entries: directoryListing?.files ?? [],
 		parent: directoryListing?.parent,
 		directories: directoryListing?.files.filter((f) => f.isDirectory) ?? [],
+		// files: directoryListing?.files.filter((f) => !f.isDirectory) ?? [],
 		...actions,
 	};
 }

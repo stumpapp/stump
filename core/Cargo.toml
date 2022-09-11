@@ -2,13 +2,18 @@
 name = "stump"
 version = "0.0.1"
 edition = "2021"
+rust-version = "1.63.0"
 default-run = "stump"
 
 [dependencies]
 # core dependencies
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.5.2" }
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
+  'rspc',
+  # 'sqlite-create-many'
+] }
 serde = { version = "1.0", features = ["derive"] }
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
+rayon = "1.5.3"
 
 # auth / security
 rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }
@@ -20,6 +25,8 @@ rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "mast
 # dev utils
 rocket_okapi = { version = "0.8.0-rc.2", features = ["rapidoc", "swagger"] }
 schemars = "0.8.10"
+# ts-rs = { git = "https://github.com/aaronleopold/ts-rs" }
+specta = "0.0.2"
 
 # misc utils
 include_dir = "0.7.2"
@@ -32,6 +39,7 @@ serde-xml-rs = "0.5.1" # used for serializing/deserializing xml
 # files & hashing
 walkdir = "2.3.2"
 dirs = "4.0.0"
+trash = "2.0"
 infer = "0.7.0"
 image = "0.24.2"
 webp = "0.2.2"

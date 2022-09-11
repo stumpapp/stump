@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { getMediaById, getMediaPage, getMediaThumbnail } from '~api/query/media';
+import { getMediaById, getMediaPage, getMediaThumbnail } from '~api/media';
 import Card from '~components/Card';
 
 export default function BookOverview() {
@@ -16,7 +16,7 @@ export default function BookOverview() {
 		isLoading,
 		data: media,
 		isFetching,
-	} = useQuery('getMediaById', {
+	} = useQuery(['getMediaById'], {
 		queryFn: async () => getMediaById(id).then((res) => res.data),
 	});
 

@@ -2,8 +2,8 @@ import { Heading, Spacer, useColorMode } from '@chakra-ui/react';
 import React from 'react';
 import toast from 'react-hot-toast';
 import JobOverlay from './JobOverlay';
-import Button from './ui/Button';
-import Link from './ui/Link';
+import Button from '~ui/Button';
+import Link from '~ui/Link';
 
 const UiSection = ({ title, children }: any) => {
 	return (

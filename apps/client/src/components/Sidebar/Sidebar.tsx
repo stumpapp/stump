@@ -3,8 +3,6 @@ import { AnimatePresence } from 'framer-motion';
 import { Books, CaretRight, Gear, House } from 'phosphor-react';
 import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import shallow from 'zustand/shallow';
-import { useStore } from '~store/store';
 
 import {
 	Box,
@@ -24,6 +22,7 @@ import CreateLibraryModal from '~components/Library/CreateLibraryModal';
 import Logout from './Logout';
 import { useLocale } from '~hooks/useLocale';
 import { Library } from '@stump/core';
+import { useLibraries } from '~hooks/useLibraries';
 
 interface NavMenuItemProps extends Library {
 	href: string;
@@ -68,31 +67,35 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 
 			<AnimatePresence>
 				{isOpen && (
-					<VStack mt={2} spacing={2}>
-						<CreateLibraryModal />
+					<>
+						<Box my={2}>
+							<CreateLibraryModal />
+						</Box>
 
-						{items!.map((item) => (
-							<Box
-								key={item.id}
-								pl={6}
-								w="full"
-								rounded="md"
-								color={{ _dark: 'gray.200', _light: 'gray.600' }}
-								_hover={{
-									color: 'gray.900',
-									bg: 'gray.50',
-									_dark: { bg: 'gray.700', color: 'gray.100' },
-								}}
-							>
-								<HStack p={1.5} minH="40px">
-									<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
-										{item.name}
-									</Link>
-									<LibraryOptionsMenu library={item} />
-								</HStack>
-							</Box>
-						))}
-					</VStack>
+						<VStack mt={2} spacing={2}>
+							{items!.map((item) => (
+								<Box
+									key={item.id}
+									pl={6}
+									w="full"
+									rounded="md"
+									color={{ _dark: 'gray.200', _light: 'gray.600' }}
+									_hover={{
+										color: 'gray.900',
+										bg: 'gray.50',
+										_dark: { bg: 'gray.700', color: 'gray.100' },
+									}}
+								>
+									<HStack p={1.5} minH="40px">
+										<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
+											{item.name}
+										</Link>
+										<LibraryOptionsMenu library={item} />
+									</HStack>
+								</Box>
+							))}
+						</VStack>
+					</>
 				)}
 			</AnimatePresence>
 		</Box>
@@ -127,9 +130,7 @@ export function SidebarContent() {
 
 	const { locale, t } = useLocale();
 
-	const libraries = useStore((state) => state.libraries, shallow);
-
-	// console.log('libraries', libraries);
+	const { libraries } = useLibraries();
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
@@ -137,7 +138,7 @@ export function SidebarContent() {
 			{
 				name: t('sidebar.buttons.libraries'),
 				icon: Books as any,
-				items: libraries.map((library) => ({
+				items: libraries?.map((library) => ({
 					...library,
 					href: `/libraries/${library.id}`,
 				})),

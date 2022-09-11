@@ -1,16 +1,12 @@
-import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { Helmet } from 'react-helmet';
 import NoLibraries from '~components/Home/NoLibraries';
-import { useStore } from '~store/store';
+import LibrariesStats from '~components/Library/LibrariesStats';
+import { useLibraries } from '~hooks/useLibraries';
 
 // TODO: account for new accounts, i.e. no media at all
 export default function Home() {
-	const libraries = useStore(({ libraries }) => libraries);
-
-	// console.log('media', media);
-	//
-	// const keepReading = media.filter((m) => m.currentPage && m.currentPage < m.pages).slice(0, 5);
+	const { libraries, isLoading } = useLibraries();
 
 	const helmet = (
 		<Helmet>
@@ -19,7 +15,11 @@ export default function Home() {
 		</Helmet>
 	);
 
-	if (!libraries.length) {
+	if (isLoading) {
+		return null;
+	}
+
+	if (!libraries?.length) {
 		return (
 			<>
 				{helmet}
@@ -34,6 +34,7 @@ export default function Home() {
 			<Box p="4" w="full" h="full">
 				{/* <UiDemo /> */}
 				{/* <EpubReader /> */}
+				<LibrariesStats />
 			</Box>
 		</>
 	);

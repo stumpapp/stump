@@ -1,6 +1,7 @@
 use rocket::{
 	http::Status,
 	response::{self, Responder},
+	tokio::sync::mpsc,
 	Request, Response,
 };
 use rocket_okapi::{
@@ -14,14 +15,14 @@ use std::io::Cursor;
 use thiserror::Error;
 use zip::result::ZipError;
 
+use crate::event::ClientRequest;
+
 #[derive(Error, Debug)]
 pub enum ProcessFileError {
-	// #[error("Invalid Archive")]
-	// InvalidArchive,
 	#[error("Error occurred while opening file: {0}")]
 	FileIoError(#[from] std::io::Error),
-	#[error("Could not read archive file")]
-	ArchiveReadError(#[from] ZipError),
+	#[error("A zip error ocurred: {0}")]
+	ZipFileError(#[from] ZipError),
 	#[error("Archive contains no files")]
 	ArchiveEmptyError,
 	#[error("Unable to open .epub file: {0}")]
@@ -32,14 +33,22 @@ pub enum ProcessFileError {
 	// PdfReadError(#[from] pdf_rs::PdfError),
 	#[error("Could not find an image")]
 	NoImageError,
+	#[error("Failed to open rar archive: {0}")]
+	RarNulError(#[from] unrar::error::NulError),
 	#[error("Could not open rar file")]
 	RarOpenError,
+	#[error("Could not extract rar file: {0}")]
+	RarExtractError(String),
 	#[error("Error reading file content in rar")]
 	RarReadError,
 	#[error("Error reading bytes from rar")]
 	RarByteReadError(#[from] std::str::Utf8Error),
 	#[error("Unsupported file type: {0}")]
 	UnsupportedFileType(String),
+	#[error("{0}")]
+	ImageIoError(#[from] image::ImageError),
+	#[error("Failed to encode image to webp: {0}")]
+	WebpEncodeError(String),
 	#[error("An unknown error occurred: {0}")]
 	Unknown(String),
 }
@@ -157,6 +166,8 @@ pub enum ScanError {
 	#[error("Unsupported file: {0}")]
 	UnsupportedFile(String),
 	#[error("{0}")]
+	FileParseError(String),
+	#[error("{0}")]
 	Unknown(String),
 }
 
@@ -171,8 +182,8 @@ impl From<ProcessFileError> for ScanError {
 	}
 }
 
-impl From<prisma_client_rust::Error> for ScanError {
-	fn from(e: prisma_client_rust::Error) -> Self {
+impl From<prisma_client_rust::queries::QueryError> for ScanError {
+	fn from(e: prisma_client_rust::queries::QueryError) -> Self {
 		ScanError::QueryError(e.to_string())
 	}
 }
@@ -195,9 +206,16 @@ impl From<ApiError> for Status {
 	}
 }
 
-impl From<prisma_client_rust::Error> for ApiError {
-	fn from(error: prisma_client_rust::Error) -> ApiError {
+// TODO: look into how prisma returns record not found errors?
+impl From<prisma_client_rust::queries::QueryError> for ApiError {
+	fn from(error: prisma_client_rust::queries::QueryError) -> ApiError {
 		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<prisma_client_rust::RelationNotFetchedError> for ApiError {
+	fn from(e: prisma_client_rust::RelationNotFetchedError) -> Self {
+		ApiError::InternalServerError(e.to_string())
 	}
 }
 
@@ -267,6 +285,12 @@ impl From<std::io::Error> for ApiError {
 impl From<bcrypt::BcryptError> for ApiError {
 	fn from(error: bcrypt::BcryptError) -> ApiError {
 		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<mpsc::error::SendError<ClientRequest>> for ApiError {
+	fn from(err: mpsc::error::SendError<ClientRequest>) -> Self {
+		ApiError::InternalServerError(err.to_string())
 	}
 }
 

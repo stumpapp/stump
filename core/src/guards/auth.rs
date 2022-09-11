@@ -8,7 +8,7 @@ use rocket_okapi::OpenApiFromRequest;
 use crate::{
 	prisma::{self, user},
 	types::{
-		alias::{Context, Session},
+		alias::{Ctx, Session},
 		errors::AuthError,
 		models::AuthenticatedUser,
 	},
@@ -65,7 +65,7 @@ impl<'r> FromRequest<'r> for Auth {
 			// }
 		}
 
-		let ctx: &Context = req.guard().await.expect("TODO");
+		let ctx: &Ctx = req.guard().await.expect("TODO");
 
 		let authorization = req.headers().get_one("authorization");
 

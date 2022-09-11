@@ -4,7 +4,7 @@
 		"useDefineForClassFields": true,
 		"lib": ["DOM", "DOM.Iterable", "ESNext", "es2020"],
 		"allowJs": false,
-		"skipLibCheck": false,
+		"skipLibCheck": true,
 		"esModuleInterop": false,
 		"allowSyntheticDefaultImports": true,
 		"strict": true,
@@ -18,10 +18,11 @@
 		"baseUrl": "./",
 		"paths": {
 			"~components/*": ["src/components/*"],
+			"~ui/*": ["src/ui/*"],
 			"~util/*": ["src/util/*"],
 			"~hooks/*": ["src/hooks/*"],
 			"~api/*": ["src/api/*"],
-			"~store/*": ["src/store/*"],
+			"~stores/*": ["src/stores/*"],
 			"~pages/*": ["src/pages/*"],
 			"~i18n/*": ["src/i18n/*"]
 		}

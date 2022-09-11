@@ -4,25 +4,25 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use crate::{
-	fs::media_file::{self, GetPageResult},
-	types::{
-		alias::ProcessResult,
-		errors::ProcessFileError,
-		models::{MediaMetadata, ProcessedMediaFile},
-	},
+use crate::types::{
+	alias::ProcessFileResult,
+	errors::ProcessFileError,
+	http,
+	models::media::{MediaMetadata, ProcessedMediaFile},
 };
 use epub::doc::EpubDoc;
 use rocket::http::ContentType;
-use walkdir::DirEntry;
 
-use super::{checksum, media_file::get_content_type_from_mime};
+use super::{
+	checksum,
+	media_file::{self, get_content_type_from_mime},
+};
 
 /*
 epubcfi usually starts with /6, referring to spine element of package file
 file has three groups of elements: metadata, manifest and spine.
 */
-
+// TODO: options: &LibraryOptions
 pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 	let mut bytes_to_read = size;
 
@@ -44,14 +44,12 @@ pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 	}
 }
 
-fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
+fn load_epub(path: &str) -> ProcessFileResult<EpubDoc<File>> {
 	Ok(EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))?)
 }
 
-pub fn process_epub(file: &DirEntry) -> ProcessResult {
-	log::info!("Processing Epub: {}", file.path().display());
-
-	let path = file.path();
+pub fn process_epub(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
+	log::info!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
 
@@ -60,9 +58,11 @@ pub fn process_epub(file: &DirEntry) -> ProcessResult {
 	let metadata: Option<MediaMetadata> = None;
 
 	Ok(ProcessedMediaFile {
+		thumbnail_path: None,
+		path: path.to_path_buf(),
 		checksum: digest_epub(
 			path,
-			file.metadata()
+			path.metadata()
 				.map_err(|e| {
 					log::error!(
 						"Failed to get metadata for epub file: {}",
@@ -77,13 +77,12 @@ pub fn process_epub(file: &DirEntry) -> ProcessResult {
 	})
 }
 
-pub fn get_epub_cover(file: &str) -> GetPageResult {
+// TODO: change return type to make more sense
+pub fn get_epub_cover(file: &str) -> ProcessFileResult<http::ImageResponse> {
 	let mut epub_file = EpubDoc::new(file).map_err(|e| {
 		log::error!("Failed to open epub file: {}", e);
 		ProcessFileError::EpubOpenError(e.to_string())
 	})?;
-
-	// println!("{:?}", epub_file.resources);
 
 	let cover = epub_file.get_cover().map_err(|e| {
 		log::error!("Failed to get cover from epub file: {}", e);
@@ -97,7 +96,7 @@ pub fn get_epub_cover(file: &str) -> GetPageResult {
 pub fn get_epub_chapter(
 	path: &str,
 	chapter: usize,
-) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
+) -> ProcessFileResult<(ContentType, Vec<u8>)> {
 	let mut epub_file = load_epub(path)?;
 
 	epub_file.set_current_page(chapter).map_err(|e| {
@@ -129,7 +128,7 @@ pub fn get_epub_chapter(
 pub fn get_epub_resource(
 	path: &str,
 	resource_id: &str,
-) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
+) -> ProcessFileResult<(ContentType, Vec<u8>)> {
 	let mut epub_file = load_epub(path)?;
 
 	let contents = epub_file.get_resource(resource_id).map_err(|e| {
@@ -187,7 +186,7 @@ pub fn get_epub_resource_from_path(
 	path: &str,
 	root: &str,
 	resource_path: PathBuf,
-) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
+) -> ProcessFileResult<(ContentType, Vec<u8>)> {
 	let mut epub_file = load_epub(path)?;
 
 	let adjusted_path = normalize_resource_path(resource_path, root);
@@ -231,7 +230,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn can_make_epub_struct() -> anyhow::Result<()> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let media = ctx
 			.db
@@ -256,7 +255,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn can_get_resource() -> anyhow::Result<()> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let media = ctx
 			.db
@@ -305,7 +304,7 @@ mod tests {
 
 	#[tokio::test]
 	async fn can_get_chapter() -> anyhow::Result<()> {
-		let ctx = Context::mock().await;
+		let ctx = Ctx::mock().await;
 
 		let media = ctx
 			.db

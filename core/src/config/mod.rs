@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub mod context;
 pub mod cors;
@@ -15,6 +15,25 @@ fn home() -> PathBuf {
 	dirs::home_dir().expect("Could not determine your home directory")
 }
 
+fn check_configuration_dir(path: &Path) {
+	if !path.exists() {
+		std::fs::create_dir_all(path).unwrap_or_else(|e| {
+			panic!(
+				"Failed to create Stump configuration directory at {:?}: {:?}",
+				path,
+				e.to_string()
+			)
+		});
+	}
+
+	if !path.is_dir() {
+		panic!(
+			"Invalid Stump configuration, the item located at {:?} must be a directory.",
+			path
+		);
+	}
+}
+
 /// Gets the Stump config directory. If the directory does not exist, it will be created. If
 /// the path is not a directory (only possible if overridden using STUMP_CONFIG_DIR) it will
 /// panic.
@@ -29,19 +48,27 @@ pub fn get_config_dir() -> PathBuf {
 		})
 		.unwrap_or_else(|_| home().join(".stump"));
 
-	if !config_dir.exists() {
-		// TODO: error handling
-		std::fs::create_dir_all(&config_dir).unwrap();
-	}
-
-	// Not having as an else statement so it checks validity after creating
-	// the directory (in above if statement)
-	if !config_dir.is_dir() {
-		panic!(
-			"Invalid config directory, {} is not a directory.",
-			config_dir.to_str().unwrap_or("")
-		);
-	}
+	check_configuration_dir(&config_dir);
 
 	config_dir
+}
+
+pub fn get_cache_dir() -> PathBuf {
+	let cache_dir = get_config_dir().join("cache");
+
+	check_configuration_dir(&cache_dir);
+
+	cache_dir
+}
+
+pub fn get_thumbnails_dir() -> PathBuf {
+	let thumbnails_dir = get_config_dir().join("thumbnails");
+
+	check_configuration_dir(&thumbnails_dir);
+
+	thumbnails_dir
+}
+
+pub fn stump_in_docker() -> bool {
+	std::env::var("STUMP_IN_DOCKER").is_ok()
 }

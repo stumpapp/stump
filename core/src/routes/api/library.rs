@@ -1,25 +1,30 @@
-use std::path::Path;
+use std::{path::Path, str::FromStr};
 
-use prisma_client_rust::Direction;
+use prisma_client_rust::{raw, Direction};
 use rocket::serde::json::Json;
-use rocket_okapi::{openapi, JsonSchema};
-use serde::Deserialize;
+use rocket_okapi::openapi;
 
 use crate::{
 	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs::{self},
+	fs::{self, image},
 	guards::auth::{AdminGuard, Auth},
-	job::jobs::scan::LibraryScannerJob,
+	job::library_scan::LibraryScanJob,
 	prisma::{
-		library, media,
+		library, library_options, media,
 		series::{self, OrderByParam},
 		tag,
 	},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::ImageResponse,
-		models::{library::Library, series::Series, tag::Tag},
+		models::{
+			library::{
+				CreateLibraryArgs, LibrariesStats, Library, LibraryScanMode,
+				UpdateLibraryArgs,
+			},
+			series::Series,
+		},
 		pageable::{PageParams, Pageable, PagedRequestParams},
 		query::QueryOrder,
 	},
@@ -32,7 +37,7 @@ use crate::{
 pub async fn get_libraries(
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let db = ctx.get_db();
@@ -41,6 +46,8 @@ pub async fn get_libraries(
 		.library()
 		.find_many(vec![])
 		.with(library::tags::fetch(vec![]))
+		.with(library::library_options::fetch())
+		.order_by(library::name::order(Direction::Asc))
 		.exec()
 		.await?
 		.into_iter()
@@ -56,13 +63,41 @@ pub async fn get_libraries(
 	Ok(Json((libraries, page_params).into()))
 }
 
+/// Get the stats for all libraries. Includes series count, book count and total space used (in bytes).
+#[openapi(tag = "Library")]
+#[get("/libraries/stats")]
+pub async fn get_libraries_stats(
+	ctx: &Ctx,
+	// _auth: Auth,
+) -> ApiResult<Json<LibrariesStats>> {
+	let db = ctx.get_db();
+
+	// TODO: maybe add more, like missingBooks, idk
+	let stats = db
+		._query_raw::<LibrariesStats>(raw!(
+			"SELECT COUNT(*) as bookCount, IFNULL(SUM(media.size),0) as totalBytes, IFNULL(seriesCount,0) as seriesCount FROM media INNER JOIN (SELECT COUNT(*) as seriesCount FROM series)"
+		))
+		.exec()
+		.await?
+		.into_iter()
+		.next();
+
+	if stats.is_none() {
+		return Err(ApiError::InternalServerError(
+			"Failed to compute stats for libraries".to_string(),
+		));
+	}
+
+	Ok(Json(stats.unwrap()))
+}
+
 /// Get a library by id, if the current user has access to it. Library `series`, `media`
 /// and `tags` relations are loaded on this route.
 #[openapi(tag = "Library")]
 #[get("/libraries/<id>")]
 pub async fn get_library_by_id(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	// _auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -74,6 +109,7 @@ pub async fn get_library_by_id(
 		.library()
 		.find_unique(library::id::equals(id.clone()))
 		.with(library::series::fetch(vec![]))
+		.with(library::library_options::fetch())
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
@@ -100,7 +136,7 @@ pub async fn get_library_series(
 	id: String,
 	unpaged: Option<bool>,
 	req_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	// auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
@@ -112,6 +148,7 @@ pub async fn get_library_series(
 
 	let base_query = db
 		.series()
+		// TODO: add media relation count....
 		.find_many(vec![series::library_id::equals(Some(id.clone()))])
 		.order_by(order_by_param);
 
@@ -150,7 +187,7 @@ pub async fn get_library_series(
 #[get("/libraries/<id>/thumbnail")]
 pub async fn get_library_thumbnail(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -174,10 +211,11 @@ pub async fn get_library_thumbnail(
 /// Queue a ScannerJob to scan the library by id. The job, when started, is
 /// executed in a separate thread.
 #[openapi(tag = "Library")]
-#[get("/libraries/<id>/scan")]
+#[get("/libraries/<id>/scan?<scan_mode>")]
 pub async fn scan_library(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
+	scan_mode: Option<&str>,
 	// _auth: Auth, TODO: uncomment
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
@@ -197,35 +235,27 @@ pub async fn scan_library(
 
 	let lib = lib.unwrap();
 
-	let job = LibraryScannerJob {
-		path: lib.path.clone(),
-	};
+	let scan_mode = LibraryScanMode::from_str(scan_mode.unwrap_or_default())?;
 
-	ctx.spawn_job(Box::new(job));
+	// TODO: should this just be an error?
+	if scan_mode != LibraryScanMode::None {
+		let job = LibraryScanJob {
+			path: lib.path.clone(),
+			scan_mode,
+		};
+
+		return Ok(ctx.spawn_job(Box::new(job))?);
+	}
 
 	Ok(())
-}
-
-#[derive(Deserialize, JsonSchema)]
-pub struct CreateLibrary {
-	/// The name of the library to create.
-	name: String,
-	/// The path to the library to create, i.e. where the directory is on the filesystem.
-	path: String,
-	/// Optional text description of the library.
-	description: Option<String>,
-	/// Optional tags to assign to the library.
-	tags: Option<Vec<Tag>>,
-	/// Optional flag to indicate if the library should be automatically scanned after creation. Default is `true`.
-	scan: Option<bool>,
 }
 
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 #[openapi(tag = "Library")]
 #[post("/libraries", data = "<input>")]
 pub async fn create_library(
-	input: Json<CreateLibrary>,
-	ctx: &Context,
+	input: Json<CreateLibraryArgs>,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
@@ -238,160 +268,161 @@ pub async fn create_library(
 		)));
 	}
 
+	// TODO: refactor once nested create is supported
+	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+
+	let library_options_arg = input.library_options.to_owned().unwrap_or_default();
+
+	// FIXME: until nested create, library_options.library_id will be NULL in the database... unless I run ANOTHER
+	// update. Which I am not doing lol.
+	let library_options = db
+		.library_options()
+		.create(vec![
+			library_options::convert_rar_to_zip::set(
+				library_options_arg.convert_rar_to_zip,
+			),
+			library_options::hard_delete_conversions::set(
+				library_options_arg.hard_delete_conversions,
+			),
+			library_options::create_webp_thumbnails::set(
+				library_options_arg.create_webp_thumbnails,
+			),
+		])
+		.exec()
+		.await?;
+
 	let lib = db
 		.library()
 		.create(
-			library::name::set(input.name.to_owned()),
-			library::path::set(input.path.to_owned()),
+			input.name.to_owned(),
+			input.path.to_owned(),
+			library_options::id::equals(library_options.id),
 			vec![library::description::set(input.description.to_owned())],
 		)
 		.exec()
 		.await?;
 
-	// FIXME: this is disgusting. I don't understand why the library::tag::link doesn't
-	// work with multiple tags, nor why providing multiple library::tag::link params
-	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
-	// highly inefficient queries.
+	// FIXME: try and do multiple connects again soon, batching is WAY better than
+	// previous solution but still...
 	if let Some(tags) = input.tags.to_owned() {
-		for tag in tags {
-			db.library()
-				.find_unique(library::id::equals(lib.id.clone()))
-				.update(vec![library::tags::link(vec![tag::id::equals(
+		let tag_connects = tags.into_iter().map(|tag| {
+			db.library().update(
+				library::id::equals(lib.id.clone()),
+				vec![library::tags::connect(vec![tag::id::equals(
 					tag.id.to_owned(),
-				)])])
-				.exec()
-				.await?;
-		}
+				)])],
+			)
+		});
+
+		db._batch(tag_connects).await?;
 	}
 
-	// `scan` is not a required field, however it will default to true if not provided
-	if input.scan.unwrap_or(true) {
-		ctx.spawn_job(Box::new(LibraryScannerJob {
+	let scan_mode = input.scan_mode.unwrap_or_default();
+
+	// `scan` is not a required field, however it will default to BATCHED if not provided
+	if scan_mode != LibraryScanMode::None {
+		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: lib.path.clone(),
-		}));
+			scan_mode,
+		}))?;
 	}
 
 	Ok(Json(lib.into()))
 }
 
-#[derive(Deserialize, JsonSchema)]
-#[serde(rename_all = "camelCase")]
-pub struct UpdateLibrary {
-	/// The updated name of the library.
-	name: String,
-	/// The updated path of the library.
-	path: String,
-	/// The updated description of the library.
-	description: Option<String>,
-	/// The updated tags of the library.
-	tags: Option<Vec<Tag>>,
-	/// The tags to remove from the library.
-	removed_tags: Option<Vec<Tag>>,
-	/// Optional flag to indicate if the library should be automatically scanned after update. Default is `true`.
-	scan: Option<bool>,
-}
-
 /// Update a library by id, if the current user is a SERVER_OWNER.
-// TODO: Scan?
 #[openapi(tag = "Library")]
 #[put("/libraries/<id>", data = "<input>")]
 pub async fn update_library(
 	id: String,
-	input: Json<UpdateLibrary>,
-	ctx: &Context,
+	input: Json<UpdateLibraryArgs>,
+	ctx: &Ctx,
 	_auth: AdminGuard,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
 	if !Path::new(&input.path).exists() {
 		return Err(ApiError::BadRequest(format!(
-			"The requested change would result in a non-existent library path: {}",
+			"Updated path does not exist: {}",
 			input.path
 		)));
 	}
 
-	let updates: Vec<library::SetParam> = vec![
-		library::name::set(input.name.to_owned()),
-		library::path::set(input.path.to_owned()),
-		library::description::set(input.description.to_owned()),
-	];
+	let library_options = input.library_options.to_owned();
 
-	// FIXME: this is disgusting. I don't understand why the library::tag::link doesn't
-	// work with multiple tags, nor why providing multiple library::tag::link params
+	db.library_options()
+		.update(
+			library_options::id::equals(library_options.id.unwrap_or_default()),
+			vec![
+				library_options::convert_rar_to_zip::set(
+					library_options.convert_rar_to_zip,
+				),
+				library_options::hard_delete_conversions::set(
+					library_options.hard_delete_conversions,
+				),
+				library_options::create_webp_thumbnails::set(
+					library_options.create_webp_thumbnails,
+				),
+			],
+		)
+		.exec()
+		.await?;
+
+	let mut batches = vec![];
+
+	// FIXME: this is disgusting. I don't understand why the library::tag::connect doesn't
+	// work with multiple tags, nor why providing multiple library::tag::connect params
 	// doesn't work. Regardless, absolutely do NOT keep this. Correction required,
 	// highly inefficient queries.
 
 	if let Some(tags) = input.tags.to_owned() {
-		if tags.len() > 0 {
-			// updates.push(library::tags::link(vec![
-			// 	tag::name::equals(String::from("Demo")),
-			// 	tag::name::equals(String::from("Dem2")),
-			// ]));
-
-			for tag in tags {
-				db.library()
-					.find_unique(library::id::equals(id.clone()))
-					.update(vec![library::tags::link(vec![tag::id::equals(
-						tag.id.to_owned(),
-					)])])
-					.exec()
-					.await?;
-			}
+		for tag in tags {
+			batches.push(db.library().update(
+				library::id::equals(id.clone()),
+				vec![library::tags::connect(vec![tag::id::equals(
+					tag.id.to_owned(),
+				)])],
+			));
 		}
 	}
 
 	if let Some(removed_tags) = input.removed_tags.to_owned() {
-		if removed_tags.len() > 0 {
-			// updates.push(library::tags::link(vec![
-			// 	tag::name::equals(String::from("Demo")),
-			// 	tag::name::equals(String::from("Dem2")),
-			// ]));
-
-			// let mut removing = removed_tags
-			// 	.into_iter()
-			// 	.map(|t| {
-			// 		println!("unlink tag: {:?}", t);
-			// 		library::tags::unlink(vec![tag::UniqueWhereParam::IdEquals(
-			// 			t.id.to_owned(),
-			// 		)])
-			// 	})
-			// 	.collect::<Vec<library::SetParam>>();
-
-			// updates.push(removing);
-			for tag in removed_tags {
-				db.library()
-					.find_unique(library::id::equals(id.clone()))
-					.update(vec![library::tags::unlink(vec![tag::id::equals(
-						tag.id.to_owned(),
-					)])])
-					.exec()
-					.await?;
-			}
+		for tag in removed_tags {
+			batches.push(db.library().update(
+				library::id::equals(id.clone()),
+				vec![library::tags::disconnect(vec![tag::id::equals(
+					tag.id.to_owned(),
+				)])],
+			));
 		}
+	}
+
+	if !batches.is_empty() {
+		db._batch(batches).await?;
 	}
 
 	let updated = db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
-		.update(updates)
+		.update(
+			library::id::equals(id),
+			vec![
+				library::name::set(input.name.to_owned()),
+				library::path::set(input.path.to_owned()),
+				library::description::set(input.description.to_owned()),
+			],
+		)
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?;
 
-	if updated.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Library with id {} not found",
-			&id
-		)));
-	}
+	let scan_mode = input.scan_mode.unwrap_or_default();
 
-	let updated = updated.unwrap();
-
-	// `scan` is not a required field, however it will default to true if not provided
-	if input.scan.unwrap_or(true) {
-		ctx.spawn_job(Box::new(LibraryScannerJob {
+	// `scan` is not a required field, however it will default to BATCHED if not provided
+	if scan_mode != LibraryScanMode::None {
+		ctx.spawn_job(Box::new(LibraryScanJob {
 			path: updated.path.clone(),
-		}));
+			scan_mode,
+		}))?;
 	}
 
 	Ok(Json(updated.into()))
@@ -402,24 +433,47 @@ pub async fn update_library(
 #[delete("/libraries/<id>")]
 pub async fn delete_library(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
-) -> ApiResult<Json<Library>> {
+) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
+
+	log::trace!("Attempting to delete library with ID {}", &id);
 
 	let deleted = db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
-		.delete()
+		.delete(library::id::equals(id.clone()))
+		.include(library::include!({
+			series: include {
+				media: select {
+					id
+				}
+			}
+		}))
 		.exec()
 		.await?;
 
-	if deleted.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Library with id {} not found",
-			&id
-		)));
+	let media_ids = deleted
+		.series
+		.into_iter()
+		.flat_map(|series| series.media)
+		.map(|media| media.id)
+		.collect::<Vec<_>>();
+
+	if media_ids.len() > 0 {
+		log::trace!("List of deleted media IDs: {:?}", media_ids);
+
+		log::debug!(
+			"Attempting to delete {} media thumbnails (if present)",
+			media_ids.len()
+		);
+
+		if let Err(err) = image::remove_thumbnails(&media_ids) {
+			log::error!("Failed to remove thumbnails for library media: {:?}", err);
+		} else {
+			log::info!("Removed thumbnails for library media (if present)");
+		}
 	}
 
-	Ok(Json(deleted.unwrap().into()))
+	Ok(Json(deleted.id))
 }

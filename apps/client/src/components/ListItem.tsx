@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 interface Props {
 	id: string;
 	title: string;
-	subtitle?: string;
+	subtitle?: string | null;
 	href: string;
 	even?: boolean;
 }

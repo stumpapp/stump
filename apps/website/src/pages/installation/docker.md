@@ -10,6 +10,13 @@ For now, there is a preview image available on a separate [Dockerhub repository]
 
 You have two options for spinning up a container based on your preference. I prefer using compose, however I have listed instructions for both Docker CLI and Docker Compose below.
 
+**Note**: there is a current issue on some platforms where the config directory you specify in the volume mapping is created as root by Docker. Please be sure to either create the config directory _before_ creating the container, or be sure to transfer ownership to the appropriate user afterwards:
+
+```bash
+# example on macOS/linux
+sudo chown -r $USER ~/.stump
+```
+
 ### Docker Run CLI
 
 Once the image is created, you can create a container from it:

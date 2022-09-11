@@ -11,13 +11,17 @@ export default defineConfig({
 		outDir: 'build',
 		manifest: true,
 	},
+	server: {
+		port: 3000,
+	},
 	resolve: {
 		alias: {
 			'~': path.resolve('./src'),
 			'~components': path.resolve('./src/components'),
+			'~ui': path.resolve('./src/ui'),
 			'~pages': path.resolve('./src/pages'),
 			'~api': path.resolve('./src/api'),
-			'~store': path.resolve('./src/store'),
+			'~stores': path.resolve('./src/stores'),
 			'~util': path.resolve('./src/util'),
 			'~hooks': path.resolve('./src/hooks'),
 			'~i18n': path.resolve('./src/i18n'),

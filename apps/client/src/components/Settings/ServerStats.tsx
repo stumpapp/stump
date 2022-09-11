@@ -1,19 +1,18 @@
 import { Box, Text } from '@chakra-ui/react';
-import React from 'react';
 import toast from 'react-hot-toast';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import client from '~api/client';
-import { clearLogFile } from '~api/mutation/log';
-import { getLogFileMeta } from '~api/query/log';
-import Button from '~components/ui/Button';
+import { clearLogFile } from '~api/log';
+import { getLogFileMeta } from '~api/log';
+import Button from '~ui/Button';
 import { formatBytes } from '~util/format';
 
 export function LogStats() {
-	const { data: logMeta } = useQuery('getLogFileMeta', () =>
+	const { data: logMeta } = useQuery(['getLogFileMeta'], () =>
 		getLogFileMeta().then((res) => res.data),
 	);
 
-	const { mutateAsync } = useMutation('clearStumpLogs', clearLogFile);
+	const { mutateAsync } = useMutation(['clearStumpLogs'], clearLogFile);
 
 	function handleClearLogs() {
 		toast
@@ -22,7 +21,7 @@ export function LogStats() {
 				success: 'Cleared logs!',
 				error: 'Error clearing logs.',
 			})
-			.then(() => client.invalidateQueries('getLogFileMeta'));
+			.then(() => client.invalidateQueries(['getLogFileMeta']));
 	}
 
 	return (

@@ -5,23 +5,29 @@
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
 	"scripts": {
+		"prepare": "husky install",
 		"setup": "pnpm i && pnpm client build && pnpm core run setup",
+		"checks": "pnpm -r check",
+		"tests": "pnpm -r test",
 		"start": "pnpm core start",
 		"dev": "concurrently -n core,client -c green.bold,blue.bold \"pnpm core dev\" \"pnpm client dev\"",
 		"core": "pnpm --filter @stump/core --",
-		"prisma": "pnpm core prisma --",
+		"prisma": "pnpm core prisma",
+		"codegen": "pnpm core codegen",
 		"client": "pnpm --filter @stump/client --",
 		"website": "pnpm --filter @stump/website --",
-		"prepare": "husky install",
 		"build": "pnpm client build && pnpm core build",
-		"build:docker": "docker buildx build --push --platform=linux/arm/v7,linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest ."
+		"build:docker": "docker buildx build --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
+		"cache:docker-arm": "docker buildx build --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
+		"build:docker-amd": "docker buildx build --push --platform=linux/amd64 -t aaronleopold/stump-preview:latest ."
 	},
 	"devDependencies": {
+		"concurrently": "^6.5.1",
+		"cpy-cli": "^4.1.0",
 		"husky": "^7.0.2",
 		"lint-staged": "^12.4.2",
-		"prettier": "^2.6.2",
-		"concurrently": "^6.5.1",
 		"move-cli": "2.0.0",
+		"prettier": "^2.7.1",
 		"trash-cli": "^5.0.0"
 	},
 	"lint-staged": {

@@ -12,7 +12,7 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react';
-import Button, { IconButton } from '~components/ui/Button';
+import Button, { IconButton } from '~ui/Button';
 import { SwipeableHandlers } from 'react-swipeable';
 import EpubTocDrawer from './EpubTocDrawer';
 import { useNavigate } from 'react-router-dom';

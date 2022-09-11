@@ -1,14 +1,14 @@
 use prisma_client_rust::{raw, Direction, PrismaValue};
-use rocket::serde::json::Json;
+use rocket::{http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
 	db::migration::CountQueryReturn,
-	fs,
+	fs::{self, image},
 	guards::auth::Auth,
 	prisma::{media, read_progress, series},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::ImageResponse,
 		models::{media::Media, series::Series},
@@ -24,7 +24,7 @@ pub async fn get_series(
 	load_media: Option<bool>,
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
@@ -68,7 +68,7 @@ pub async fn get_series(
 pub async fn get_series_by_id(
 	id: String,
 	load_media: Option<bool>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
@@ -102,6 +102,7 @@ pub async fn get_series_by_id(
 				"SELECT COUNT(*) as count FROM media WHERE seriesId={}",
 				PrismaValue::String(id.clone())
 			))
+			.exec()
 			.await?;
 
 		let media_count = count_res.get(0).map(|res| res.count).unwrap_or(0);
@@ -118,7 +119,7 @@ pub async fn get_series_by_id(
 #[get("/series/<id>/thumbnail")]
 pub async fn get_series_thumbnail(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -139,6 +140,11 @@ pub async fn get_series_thumbnail(
 
 	let media = media.unwrap();
 
+	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
+		log::trace!("Found webp thumbnail for series {}", &id);
+		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?));
+	}
+
 	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
 }
 
@@ -150,7 +156,7 @@ pub async fn get_series_media(
 	id: String,
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
@@ -177,6 +183,9 @@ pub async fn get_series_media(
 	Ok(Json((media, page_params).into()))
 }
 
+// TODO: Should I support epub here too?? Not sure, I have separate routes for epub,
+// but until I actually implement progress tracking for epub I think think I can really
+// give a hard answer on what is best...
 /// Get the next media in a series, based on the read progress for the requesting user.
 /// Stump will return the first book in the series without progress, or return the first
 /// with partial progress. E.g. if a user has read pages 32/32 of book 3, then book 4 is
@@ -185,7 +194,7 @@ pub async fn get_series_media(
 #[get("/series/<id>/media/next")]
 pub async fn series_next_media(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Option<Media>>> {
 	let db = ctx.get_db();

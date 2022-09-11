@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { Navigate } from 'react-router-dom';
 import { z } from 'zod';
 import shallow from 'zustand/shallow';
-import { login } from '~api/query/auth';
-import Form from '~components/ui/Form';
-import Input from '~components/ui/Input';
-import { useStore } from '~store/store';
+import { login } from '~api/auth';
+import Form from '~ui/Form';
+import Input from '~ui/Input';
+import { useStore } from '~stores/mainStore';
 
 import {
 	Alert,
@@ -20,10 +20,10 @@ import {
 	Text,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { checkIsClaimed } from '~api/query/server';
-import { register } from '~api/mutation/auth';
+import { checkIsClaimed } from '~api/server';
+import { register } from '~api/auth';
 import client from '~api/client';
 import { useLocale } from '~hooks/useLocale';
 
@@ -32,7 +32,7 @@ export default function Login() {
 
 	const [isClaimed, setIsClaimed] = useState(true);
 
-	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery('checkIsClaimed', {
+	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(['checkIsClaimed'], {
 		queryFn: checkIsClaimed,
 	});
 
@@ -46,21 +46,18 @@ export default function Login() {
 		}
 	}, [claimCheck]);
 
-	const { user, setUserAndPreferences } = useStore(
-		({ user, setUserAndPreferences }) => ({ user, setUserAndPreferences }),
-		shallow,
-	);
+	const { user, setUser } = useStore(({ user, setUser }) => ({ user, setUser }), shallow);
 
-	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation('loginUser', {
+	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation(['loginUser'], {
 		mutationFn: login,
 		onSuccess: (res) => {
 			if (!res.data) {
 				throw new Error('Login failed.');
 			}
 
-			client.invalidateQueries('getLibraries');
+			client.invalidateQueries(['getLibraries']);
 
-			setUserAndPreferences(res.data);
+			setUser(res.data);
 		},
 		onError: (err) => {
 			// TODO: handle this error
@@ -68,7 +65,7 @@ export default function Login() {
 		},
 	});
 
-	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation('registerUser', {
+	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(['registerUser'], {
 		mutationFn: register,
 	});
 
@@ -107,7 +104,7 @@ export default function Login() {
 	}
 
 	if (user) {
-		client.invalidateQueries('getLibraries');
+		client.invalidateQueries(['getLibraries']);
 		return <Navigate to="/" />;
 	}
 

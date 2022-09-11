@@ -1,7 +1,7 @@
 import React from 'react';
 import { ButtonGroup, useColorModeValue } from '@chakra-ui/react';
 import { Rows, SquaresFour } from 'phosphor-react';
-import { IconButton } from '~components/ui/Button';
+import { IconButton } from '~ui/Button';
 
 interface ViewModeConfigProps {
 	viewAsGrid: boolean;

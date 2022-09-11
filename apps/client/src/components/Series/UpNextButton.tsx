@@ -1,8 +1,8 @@
 import React from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { getNextInSeries } from '~api/query/series';
-import Button from '~components/ui/Button';
+import { getNextInSeries } from '~api/series';
+import Button from '~ui/Button';
 
 interface Props {
 	seriesId: string;
@@ -16,6 +16,11 @@ export default function UpNextButton({ seriesId }: Props) {
 	} = useQuery(['getNextInSeries', seriesId], () =>
 		getNextInSeries(seriesId).then((res) => res.data),
 	);
+
+	// TODO: Change this once Stump supports epub progress tracking.
+	if (media?.extension === 'epub') {
+		return null;
+	}
 
 	return (
 		<Button

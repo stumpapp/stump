@@ -1,10 +1,9 @@
-import React from 'react';
 import { FieldValues } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import client from '~api/client';
-import { createLibrary } from '~api/mutation/library';
-import Button, { ModalCloseButton } from '~components/ui/Button';
+import { createLibrary } from '~api/library';
+import Button, { ModalCloseButton } from '~ui/Button';
 import {
 	Modal,
 	ModalBody,
@@ -17,8 +16,7 @@ import {
 
 import { TagOption, useTags } from '~hooks/useTags';
 import LibraryModalForm from './LibraryModalForm';
-import { createTags } from '~api/query/tag';
-import { ApiResult, Tag } from '@stump/core';
+import { ApiResult, LibraryOptions, Tag } from '@stump/core';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;
@@ -28,16 +26,17 @@ interface Props {
 export default function CreateLibraryModal({ disabled, ...props }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const { tags, options, isLoading: fetchingTags } = useTags();
+	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags();
 
-	const { isLoading, mutateAsync } = useMutation('createLibrary', {
+	const { isLoading, mutateAsync } = useMutation(['createLibrary'], {
 		mutationFn: createLibrary,
 		onSuccess: (res) => {
 			if (!res.data) {
 				// throw new Error('Something went wrong.');
 				// TODO: log?
 			} else {
-				client.invalidateQueries('getLibraries');
+				client.invalidateQueries(['getLibraries']);
+				client.invalidateQueries(['getJobReports']);
 				onClose();
 			}
 		},
@@ -48,10 +47,6 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 		},
 	});
 
-	const { mutateAsync: tryCreateTags } = useMutation('createTags', {
-		mutationFn: createTags,
-	});
-
 	// /Users/aaronleopold/Documents/Stump/Demo
 	async function handleSubmit(values: FieldValues) {
 		if (disabled) {
@@ -60,7 +55,11 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 			throw new Error('You do not have permission to create libraries.');
 		}
 
-		const { name, path, description, tags: formTags, scan } = values;
+		const { name, path, description, tags: formTags, scanMode, ...rest } = values;
+
+		const libraryOptions = rest as LibraryOptions;
+
+		console.debug({ name, path, description, tags: formTags, scanMode, libraryOptions });
 
 		let existingTags = tags.filter((tag) => formTags?.some((t: TagOption) => t.value === tag.name));
 
@@ -79,11 +78,14 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 			existingTags = existingTags.concat(res.data);
 		}
 
-		toast.promise(mutateAsync({ name, path, description, tags: tagsToCreate, scan }), {
-			loading: 'Creating library...',
-			success: 'Library created!',
-			error: 'Something went wrong.',
-		});
+		toast.promise(
+			mutateAsync({ name, path, description, tags: existingTags, scanMode, libraryOptions }),
+			{
+				loading: 'Creating library...',
+				success: 'Library created!',
+				error: 'Something went wrong.',
+			},
+		);
 	}
 
 	function handleOpen() {

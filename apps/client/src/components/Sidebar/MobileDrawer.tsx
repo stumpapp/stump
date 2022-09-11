@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { List } from 'phosphor-react';
 import { useLocation } from 'react-router-dom';
-import Button from '~components/ui/Button';
+import Button from '~ui/Button';
 import { SidebarContent } from './Sidebar';
 
 export default function MobileDrawer() {

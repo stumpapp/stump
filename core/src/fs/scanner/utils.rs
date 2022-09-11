@@ -1,23 +1,30 @@
-use prisma_client_rust::{raw, PrismaValue};
-// use rocket::tokio::{self, task::JoinHandle};
+use std::path::Path;
+
+use prisma_client_rust::{raw, PrismaValue, QueryError};
 use walkdir::DirEntry;
 
 use crate::{
-	config::context::Context,
-	fs::media_file,
+	config::context::Ctx,
+	event::ClientEvent,
+	fs::{image, media_file},
 	prisma::{library, media, series},
 	types::{
+		enums::FileStatus,
 		errors::{ApiError, ScanError},
-		event::ClientEvent,
-		models::MediaMetadata,
+		models::{
+			library::LibraryOptions,
+			media::{MediaMetadata, TentativeMedia},
+		},
 	},
 };
+
+use super::BatchScanOperation;
 
 /// Will mark all series and media within the library as MISSING. Requires the
 /// series and series.media relations to have been loaded to function properly.
 pub async fn mark_library_missing(
 	library: library::Data,
-	ctx: &Context,
+	ctx: &Ctx,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 
@@ -26,6 +33,7 @@ pub async fn mark_library_missing(
 		PrismaValue::String("MISSING".to_owned()),
 		PrismaValue::String(library.id.clone())
 	))
+	.exec()
 	.await?;
 
 	let series_ids = library
@@ -46,65 +54,92 @@ pub async fn mark_library_missing(
 			.join(",")
 	);
 
-	db._execute_raw(raw!(&media_query)).await?;
+	db._execute_raw(raw!(&media_query)).exec().await?;
 
 	Ok(())
 }
 
-pub async fn insert_media(
-	ctx: &Context,
-	entry: &DirEntry,
+pub fn get_tentative_media(
+	path: &Path,
 	series_id: String,
-) -> Result<media::Data, ScanError> {
-	let processed_entry = media_file::process_entry(entry)?;
+	library_options: &LibraryOptions,
+) -> Result<TentativeMedia, ScanError> {
+	let processed_entry = media_file::process(path, library_options)?;
 
-	let path = entry.path();
+	let pathbuf = processed_entry.path;
+	let path = pathbuf.as_path();
 
-	let path_str = path.to_str().unwrap().to_string();
-	let mut name = entry.file_name().to_str().unwrap().to_string();
-	let ext = path.extension().unwrap().to_str().unwrap().to_string();
+	let path_str = path.to_str().unwrap_or_default().to_string();
 
-	// remove extension from name, not sure why file_name() includes it smh
-	if name.ends_with(format!(".{}", ext).as_str()) {
-		name.truncate(name.len() - (ext.len() + 1));
-	}
+	// EW, I hate that I need to do this over and over lol time to make a trait for Path.
+	let name = path
+		.file_stem()
+		.unwrap_or_default()
+		.to_str()
+		.unwrap_or_default()
+		.to_string();
+
+	let ext = path
+		.extension()
+		.unwrap_or_default()
+		.to_str()
+		.unwrap_or_default()
+		.to_string();
 
 	// Note: make this return a tuple if I need to grab anything else from metadata.
-	let size = match entry.metadata() {
+	let size = match path.metadata() {
 		Ok(metadata) => metadata.len(),
 		_ => 0,
 	};
 
 	let comic_info = processed_entry.metadata.unwrap_or(MediaMetadata::default());
 
-	let media = ctx
-		.db
-		.media()
-		.create(
-			media::name::set(name),
-			media::size::set(size.try_into().unwrap()),
-			media::extension::set(ext),
-			media::pages::set(match comic_info.page_count {
-				Some(count) => count as i32,
-				None => processed_entry.pages,
-			}),
-			media::path::set(path_str),
-			vec![
-				media::checksum::set(processed_entry.checksum),
-				media::description::set(comic_info.summary),
-				media::series::link(series::id::equals(series_id)),
-			],
-		)
-		.exec()
-		.await?;
+	Ok(TentativeMedia {
+		name,
+		description: comic_info.summary,
+		size: size.try_into().unwrap_or_else(|e| {
+			log::error!("Failed to calculate file size: {:?}", e);
 
-	log::debug!("Created new media: {:?}", media);
+			0
+		}),
+		extension: ext,
+		pages: match comic_info.page_count {
+			Some(count) => count as i32,
+			None => processed_entry.pages,
+		},
+		checksum: processed_entry.checksum,
+		path: path_str,
+		series_id,
+	})
+}
+
+pub async fn insert_media(
+	ctx: &Ctx,
+	path: &Path,
+	series_id: String,
+	library_options: &LibraryOptions,
+) -> Result<media::Data, ScanError> {
+	let path_str = path.to_str().unwrap_or_default().to_string();
+
+	let tentative_media = get_tentative_media(path, series_id, library_options)?;
+	let create_action = tentative_media.into_action(ctx);
+	let media = create_action.exec().await?;
+
+	log::trace!("Media entity created: {:?}", media);
+
+	if library_options.create_webp_thumbnails {
+		log::debug!("Attempting to create WEBP thumbnail");
+		let thumbnail_path = image::generate_thumbnail(&media.id, &path_str)?;
+		log::debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
+	}
+
+	log::debug!("Media for {} created successfully", path_str);
 
 	Ok(media)
 }
 
 pub async fn insert_series(
-	ctx: &Context,
+	ctx: &Ctx,
 	entry: &DirEntry,
 	library_id: String,
 ) -> Result<series::Data, ScanError> {
@@ -121,13 +156,13 @@ pub async fn insert_series(
 		Some(name) => match name.to_str() {
 			Some(name) => name.to_string(),
 			_ => {
-				return Err(ScanError::Unknown(
+				return Err(ScanError::FileParseError(
 					"Failed to get name for series".to_string(),
 				))
 			},
 		},
 		_ => {
-			return Err(ScanError::Unknown(
+			return Err(ScanError::FileParseError(
 				"Failed to get name for series".to_string(),
 			))
 		},
@@ -137,9 +172,9 @@ pub async fn insert_series(
 		.db
 		.series()
 		.create(
-			series::name::set(name),
-			series::path::set(path.to_str().unwrap().to_string()),
-			vec![series::library::link(library::id::equals(library_id))],
+			name,
+			path.to_str().unwrap().to_string(),
+			vec![series::library::connect(library::id::equals(library_id))],
 		)
 		.exec()
 		.await?;
@@ -149,8 +184,9 @@ pub async fn insert_series(
 	Ok(series)
 }
 
+// TODO: remove
 pub async fn insert_series_many(
-	ctx: &Context,
+	ctx: &Ctx,
 	entries: Vec<DirEntry>,
 	library_id: String,
 ) -> Vec<series::Data> {
@@ -159,7 +195,7 @@ pub async fn insert_series_many(
 	for entry in entries {
 		match insert_series(&ctx, &entry, library_id.clone()).await {
 			Ok(series) => {
-				let _ = ctx.emit_client_event(ClientEvent::CreatedSeries(series.clone()));
+				ctx.emit_client_event(ClientEvent::CreatedSeries(series.clone()));
 
 				inserted_series.push(series);
 			},
@@ -172,29 +208,105 @@ pub async fn insert_series_many(
 	inserted_series
 }
 
-// Note: This faced a similar issue as `scan_concurrent` did. So, commenting out for now..
-// pub async fn insert_series_many_concurrent(
-// 	ctx: &Context,
-// 	entries: Vec<DirEntry>,
-// 	library_id: String,
-// ) -> Vec<series::Data> {
-// 	let tasks = entries
-// 		.iter()
-// 		.cloned()
-// 		.map(|entry| {
-// 			let ctx_cpy = ctx.get_ctx();
-// 			let library_id = library_id.clone();
-// 			tokio::spawn(async move {
-// 				super::utils::insert_series(&ctx_cpy, &entry, library_id)
-// 					.await
-// 					.unwrap()
-// 			})
-// 		})
-// 		.collect::<Vec<JoinHandle<series::Data>>>();
+pub async fn insert_series_batch(
+	ctx: &Ctx,
+	entries: Vec<DirEntry>,
+	library_id: String,
+) -> Result<Vec<series::Data>, ApiError> {
+	let series_creates = entries.into_iter().map(|entry| {
+		let path = entry.path();
 
-// 	futures::future::join_all(tasks)
-// 		.await
-// 		.into_iter()
-// 		.filter_map(|res| res.ok())
-// 		.collect()
-// }
+		// TODO: figure out how to do this in the safest way possible...
+		let name = path
+			.file_name()
+			.unwrap_or_default()
+			.to_str()
+			.unwrap_or_default()
+			.to_string();
+
+		// TODO: change this to a Result, then filter map on the iterator and
+		// log the Err values...
+		ctx.db.series().create(
+			name,
+			path.to_str().unwrap_or_default().to_string(),
+			vec![series::library::connect(library::id::equals(
+				library_id.clone(),
+			))],
+		)
+	});
+
+	let inserted_series = ctx.db._batch(series_creates).await?;
+
+	Ok(inserted_series)
+}
+
+pub async fn mark_media_missing(
+	ctx: &Ctx,
+	paths: Vec<String>,
+) -> Result<i64, QueryError> {
+	let db = ctx.get_db();
+
+	db.media()
+		.update_many(
+			vec![media::path::in_vec(paths)],
+			vec![media::status::set(FileStatus::Missing.to_string())],
+		)
+		.exec()
+		.await
+}
+
+pub async fn batch_media_operations(
+	ctx: &Ctx,
+	operations: Vec<BatchScanOperation>,
+	library_options: &LibraryOptions,
+) -> Result<Vec<media::Data>, ScanError> {
+	// Note: this won't work if I add any other operations...
+	let (create_operations, mark_missing_operations): (Vec<_>, Vec<_>) =
+		operations.into_iter().partition(|operation| {
+			matches!(
+				operation,
+				BatchScanOperation::CreateMedia {
+					path: _,
+					series_id: __
+				}
+			)
+		});
+
+	let media_creates = create_operations
+		.into_iter()
+		.map(|operation| {
+			match operation {
+				BatchScanOperation::CreateMedia { path, series_id } => {
+					// let result = insert_media(&ctx, &path, series_id, &library_options).await;
+					get_tentative_media(&path, series_id, library_options)
+				},
+				_ => unreachable!(),
+			}
+		})
+		.filter_map(|res| match res {
+			Ok(entry) => Some(entry.into_action(ctx)),
+			Err(e) => {
+				log::error!("Failed to create media: {:?}", e);
+
+				None
+			},
+		});
+
+	let missing_paths = mark_missing_operations
+		.into_iter()
+		.map(|operation| match operation {
+			BatchScanOperation::MarkMediaMissing { path } => path,
+			_ => unreachable!(),
+		})
+		.collect::<Vec<String>>();
+
+	let result = mark_media_missing(ctx, missing_paths).await;
+
+	if let Err(err) = result {
+		log::error!("Failed to mark media as MISSING: {:?}", err);
+	} else {
+		log::debug!("Marked {} media as MISSING", result.unwrap());
+	}
+
+	Ok(ctx.db._batch(media_creates).await?)
+}

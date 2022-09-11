@@ -12,7 +12,7 @@ import {
 	Text,
 } from '@chakra-ui/react';
 import { TextAa } from 'phosphor-react';
-import { IconButton } from '~components/ui/Button';
+import { IconButton } from '~ui/Button';
 
 interface Props {
 	changeFontSize(size: number): void;

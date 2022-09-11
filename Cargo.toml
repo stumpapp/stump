@@ -1,2 +1,3 @@
 [workspace]
-members = ["core", "core/prisma-cli"]
+resolver = "2"
+members = ["core", "core/prisma"]

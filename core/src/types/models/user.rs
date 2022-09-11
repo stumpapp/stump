@@ -1,9 +1,10 @@
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::prisma;
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
 	pub id: String,
@@ -43,11 +44,12 @@ impl Into<User> for prisma::user::Data {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct UserPreferences {
 	pub id: String,
 	pub reduce_animations: bool,
+	pub locale: String,
 	pub library_view_mode: String,
 	pub series_view_mode: String,
 	pub collection_view_mode: String,
@@ -57,10 +59,21 @@ impl Into<UserPreferences> for prisma::user_preferences::Data {
 	fn into(self) -> UserPreferences {
 		UserPreferences {
 			id: self.id.clone(),
+			locale: self.locale,
 			reduce_animations: self.reduce_animations,
 			library_view_mode: self.library_view_mode.clone(),
 			series_view_mode: self.series_view_mode.clone(),
 			collection_view_mode: self.collection_view_mode.clone(),
 		}
 	}
+}
+
+#[derive(Debug, Clone, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UserPreferencesUpdate {
+	pub locale: String,
+	pub reduce_animations: bool,
+	pub library_view_mode: String,
+	pub series_view_mode: String,
+	pub collection_view_mode: String,
 }

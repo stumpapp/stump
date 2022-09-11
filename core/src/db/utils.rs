@@ -19,9 +19,12 @@ pub struct SeriesMediaCountQueryReturn {
 	pub count: u32,
 }
 
+// TODO: Replace pretty much all of these once prisma client 0.6 comes out... Count queries and
+// relation counting is expected in that release.
 #[async_trait::async_trait]
 pub trait PrismaClientTrait {
 	async fn media_count(&self) -> ApiResult<u32>;
+	async fn series_count_all(&self) -> ApiResult<u32>;
 	async fn series_count(&self, library_id: String) -> ApiResult<u32>;
 	async fn series_media_count(
 		&self,
@@ -34,6 +37,19 @@ impl PrismaClientTrait for PrismaClient {
 	async fn media_count(&self) -> ApiResult<u32> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM media"))
+			.exec()
+			.await?;
+
+		Ok(match count_res.get(0) {
+			Some(val) => val.count,
+			None => 0,
+		})
+	}
+
+	async fn series_count_all(&self) -> ApiResult<u32> {
+		let count_res: Vec<CountQueryReturn> = self
+			._query_raw(raw!("SELECT COUNT(*) as count FROM series"))
+			.exec()
 			.await?;
 
 		Ok(match count_res.get(0) {
@@ -48,6 +64,7 @@ impl PrismaClientTrait for PrismaClient {
 				"SELECT COUNT(*) as count FROM series WHERE libraryId={}",
 				PrismaValue::String(library_id)
 			))
+			.exec()
 			.await?;
 
 		Ok(match count_res.get(0) {
@@ -69,7 +86,7 @@ impl PrismaClientTrait for PrismaClient {
 			.map(|id| format!("\"{}\"", id))
 			.collect::<Vec<_>>()
 			.join(",")
-	).as_str())).await?;
+	).as_str())).exec().await?;
 
 		Ok(count_res
 			.iter()
@@ -88,7 +105,7 @@ where
 	Where: Into<SerializedWhere>,
 	With: Into<Selection>,
 	OrderBy: Into<(String, PrismaValue)>,
-	Cursor: Into<(String, PrismaValue)>,
+	Cursor: Into<Where>,
 	Set: Into<(String, PrismaValue)>,
 	Data: DeserializeOwned,
 {

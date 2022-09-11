@@ -36,10 +36,13 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Developing 💻](#developing-)
   - [Setup Script ⚙️](#setup-script-️)
   - [Running Stump 🏃‍♀️](#running-stump-️)
+  - [Where to start? 🤔](#where-to-start-)
 - [Similar Projects 👯](#similar-projects-)
 - [License 🔑](#license-)
   </p>
 </details>
+
+> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please see the [Developing](#developing-) section below for more information on how you can help. Otherwise, stay tuned for the first release!
 
 ## Roadmap 🗺
 
@@ -49,13 +52,13 @@ Some of these are actually completed(!) already, but the following items are the
 
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
-- 📚 Organizing libraries with collections and reading lists
+- 📚 Organize libraries with collections and reading lists
 - 🔎 Versitile full-text search
 - 🔐 Role-based access-control with managed user accounts and configurable privileges
 - 🚀 Easy setup and deployment using Docker or bare metal
 - 🤏 Small bundle size with a fully responsive, built-in UI
 - 🏃 Low resource utilization with excellent performance
-- 🧰 Easily consumable and documented REST API, so community tools and scripts can interact with Stump
+- 🧰 Easily consumable and self-documented REST API, so community tools and scripts can interact with Stump
 - 🌈 And more!
 
 I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
@@ -84,7 +87,6 @@ I am omitting a lot of files and only focusing on the main directories, but the 
 ├── core
 │   ├── bindings
 │   ├── prisma
-│   ├── prisma-cli
 │   └── src
 ├── README.md
 └── ...
@@ -92,7 +94,7 @@ I am omitting a lot of files and only focusing on the main directories, but the 
 
 The `core` directory is where Stump's 'core' functionality is located, written in Rust. Stump uses [Prisma](https://github.com/Brendonovich/prisma-client-rust).
 
-The 'apps' directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
+The `apps` directory is where Stump applications are located. These are separate from the Rust core, and are individual applications:
 
 - `client`: A React application that is served by a Stump server. This is the primary web-client for interacting with a Stump server.
 
@@ -102,7 +104,7 @@ The 'apps' directory is where Stump applications are located. These are separate
 
 Contributions are very **encouraged** and **welcome**!
 
-I put together a small set of [resources](https://www.stumpapp.dev/contributing#developer-resources-📚) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
+I put together a small set of [resources](https://www.stumpapp.dev/contributing#developer-resources) to get you started with Stump. If you're completely new to rust and/or web development, I recommend reviewing the [Rust Book](https://doc.rust-lang.org/book/) and [Getting started with React](https://reactjs.org/docs/getting-started.html) in that section first.
 
 Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) beforehand. To get started, you'll need to set up your development environment.
 
@@ -153,14 +155,20 @@ To run in a release profile, you would just need to run:
 pnpm core start
 ```
 
+### Where to start? 🤔
+
+If you're looking to contribute, but aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the development of Stump, mostly for personal organization. You can see what features are being worked on and what needs to be done.
+
+Features are categorized by `Core: Frontend` (the React client, for now), `Core: Backend` (the Rust server), `Core: Devops` (Docker and other misc devops things), and `Website` (the documentation website). I'll be responsive on [Discord](https://discord.gg/63Ybb7J3as) (and eventually Matrix) if you have any questions, so feel free to reach out!
+
 ## Similar Projects 👯
 
 There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there (_heck, it isn't even in beta yet_)! if Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
 
 - [Komga](https://github.com/gotson/komga)
 - [Kavita](https://github.com/Kareadita/Kavita)
-- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books_)
-- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_)
+- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
+- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
 
 ## License 🔑
 

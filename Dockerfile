@@ -7,10 +7,17 @@ ARG TARGETARCH
 
 WORKDIR /app
 
-COPY apps/client/ .
+# Note: I don't like copying ~everything~ but since I now use types exported from
+# the core, and use pnpm specific means of accessing it via the workspace, I kind
+# of need to maintain the structure of the workspace and use pnpm
+COPY . .
 
-RUN npm install
-RUN npm run build
+RUN npm install -g pnpm
+
+RUN pnpm --filter @stump/client install
+RUN pnpm client build
+
+RUN mv ./apps/client/build build
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
@@ -27,7 +34,6 @@ WORKDIR /app
 COPY .cargo .cargo
 COPY core/ .
 
-# Workaround as otherwise container would err during crates.io index updating
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add aarch64-unknown-linux-musl
@@ -48,7 +54,6 @@ WORKDIR /app
 COPY .cargo .cargo
 COPY core/ .
 
-# Workaround as otherwise container would err during crates.io index updating
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add armv7-unknown-linux-musleabihf
@@ -63,6 +68,8 @@ RUN cargo build --release --target armv7-unknown-linux-musleabihf && \
 FROM messense/rust-musl-cross:x86_64-musl AS amd64-backend
 
 WORKDIR /app
+
+ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 COPY .cargo .cargo
 COPY core/ .
@@ -84,32 +91,36 @@ FROM ${TARGETARCH}-backend AS core-builder
 # ------------------------------------------------------------------------------
 FROM alpine:latest
 
-# TODO: remove binutils, adding for debug options
-RUN apk add --no-cache libstdc++ binutils libc6-compat
+# libc6-compat
+RUN apk add --no-cache libstdc++ binutils
 
+# Create the user/group for stump
 RUN addgroup -g 1000 stump
-
 RUN adduser -D -s /bin/sh -u 1000 -G stump stump
 
 WORKDIR /
 
 # create the config, data and app directories
-RUN mkdir -p config
-RUN mkdir -p data
-RUN mkdir -p app
+RUN mkdir -p config && \
+    mkdir -p data && \
+    mkdir -p app
+
+# FIXME: this does not seem to be working...
+# make the stump user own the directories
+RUN chown stump /config && \
+    chown stump /data && \
+    chown stump /app
+
+USER stump
 
 # copy the binary
-COPY --from=core-builder /app/stump ./app/stump
+COPY --chown=stump:stump --from=core-builder /app/stump ./app/stump
 
 # copy the react build
 COPY --from=frontend /app/build ./app/client
 
 # *sigh* Rocket requires the toml file at runtime, at CWD
 COPY core/Rocket.toml ./app/Rocket.toml
-
-RUN chown stump:stump ./app/stump
-
-USER stump
 
 # TODO: replace this with something more elegant lol maybe a bash case statement
 RUN ln -s /lib/ld-musl-aarch64.so.1 /lib/ld-linux-aarch64.so.1; exit 0
@@ -122,6 +133,8 @@ ENV STUMP_CLIENT_DIR=/app/client
 ENV ROCKET_PROFILE=release
 ENV ROCKET_LOG_LEVEL=normal
 ENV ROCKET_PORT=10801
+
+ENV STUMP_IN_DOCKER=true
 
 WORKDIR /app
 

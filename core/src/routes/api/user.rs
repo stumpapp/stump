@@ -2,18 +2,21 @@ use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
 use crate::{
-	guards::auth::AdminGuard,
+	guards::auth::{AdminGuard, Auth},
 	prisma::{user, user_preferences},
 	types::{
-		alias::{ApiResult, Context},
-		models::{user::User, LoginRequest},
+		alias::{ApiResult, Ctx},
+		models::{
+			user::{User, UserPreferences, UserPreferencesUpdate},
+			LoginRequest,
+		},
 	},
 	utils::auth,
 };
 
 #[openapi(tag = "User")]
 #[get("/users")]
-pub async fn get_users(ctx: &Context, _auth: AdminGuard) -> ApiResult<Json<Vec<User>>> {
+pub async fn get_users(ctx: &Ctx, _auth: AdminGuard) -> ApiResult<Json<Vec<User>>> {
 	Ok(Json(
 		ctx.db
 			.user()
@@ -29,7 +32,7 @@ pub async fn get_users(ctx: &Context, _auth: AdminGuard) -> ApiResult<Json<Vec<U
 #[openapi(tag = "User")]
 #[post("/users", data = "<credentials>")]
 pub async fn create_user(
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: AdminGuard,
 	credentials: Json<LoginRequest>,
 ) -> ApiResult<Json<User>> {
@@ -39,11 +42,7 @@ pub async fn create_user(
 
 	let created_user = db
 		.user()
-		.create(
-			user::username::set(credentials.username.to_owned()),
-			user::hashed_password::set(hashed_password),
-			vec![],
-		)
+		.create(credentials.username.to_owned(), hashed_password, vec![])
 		.exec()
 		.await?;
 
@@ -52,9 +51,9 @@ pub async fn create_user(
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::link(vec![user::id::equals(
+		.create(vec![user_preferences::user::connect(user::id::equals(
 			created_user.id.clone(),
-		)])])
+		))])
 		.exec()
 		.await?;
 
@@ -84,9 +83,69 @@ pub async fn update_user() {
 	unimplemented!()
 }
 
-// TODO: make me
+// FIXME: remove this once I resolve the below 'TODO'
+#[allow(unused_variables)]
 #[openapi(tag = "User")]
-#[put("/users/<id>/preferences")]
-pub async fn update_user_preferences(id: String) {
-	todo!("I can't do that yet! ID: {:?}", id);
+#[get("/users/<id>/preferences")]
+pub async fn get_user_preferences(
+	id: String,
+	ctx: &Ctx,
+	_auth: Auth,
+) -> ApiResult<Json<UserPreferences>> {
+	let db = ctx.get_db();
+	// let user_preferences = auth.0.preferences;
+
+	Ok(Json(
+		db.user_preferences()
+			.find_unique(user_preferences::id::equals(id.clone()))
+			.exec()
+			.await?
+			.expect("Failed to fetch user preferences")
+			.into(), // .map(|p| p.into()),
+		          // user_preferences,
+	))
+}
+
+// TODO: I load the user preferences from the session in the auth call.
+// If a session didn't exist then I load it from DB. I think for now this is OK since
+// all the preferences are client-side, so if the server is not in sync with
+// preferences updates it is not a big deal. This will have to change somehow in the
+// future potentially though, unless I just load preferences when required.
+//
+// Note: I don't even use the user id to load the preferences, as I pull it from
+// when I got from the session. I could remove the ID requirement. I think the preferences
+// structure needs to eventually change a little anyways, I don't like how I can't query
+// by user id, it should be a unique where param but it isn't with how I structured it...
+// FIXME: remove this 'allow' once I resolve the above 'TODO'
+#[allow(unused_variables)]
+#[openapi(tag = "User")]
+#[put("/users/<id>/preferences", data = "<input>")]
+pub async fn update_user_preferences(
+	id: String,
+	input: Json<UserPreferencesUpdate>,
+	ctx: &Ctx,
+	auth: Auth,
+) -> ApiResult<Json<UserPreferences>> {
+	let db = ctx.get_db();
+
+	let user_preferences = auth.0.user_preferences;
+
+	Ok(Json(
+		db.user_preferences()
+			.update(
+				user_preferences::id::equals(user_preferences.id.clone()),
+				vec![
+					user_preferences::locale::set(input.locale.to_owned()),
+					user_preferences::library_view_mode::set(
+						input.library_view_mode.to_owned(),
+					),
+					user_preferences::series_view_mode::set(
+						input.series_view_mode.to_owned(),
+					),
+				],
+			)
+			.exec()
+			.await?
+			.into(),
+	))
 }

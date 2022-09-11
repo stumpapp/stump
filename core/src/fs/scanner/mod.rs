@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub mod library;
 pub mod utils;
@@ -7,6 +7,7 @@ use rocket::http::ContentType;
 
 use crate::fs::media_file;
 
+// TODO: refactor this trait?
 pub trait ScannedFileTrait {
 	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;
 	fn is_invisible_file(&self) -> bool;
@@ -135,4 +136,9 @@ impl ScannedFileTrait for Path {
 			.filter(|item| item.path() != self)
 			.any(|f| !f.path().should_ignore())
 	}
+}
+
+pub enum BatchScanOperation {
+	CreateMedia { path: PathBuf, series_id: String },
+	MarkMediaMissing { path: String },
 }

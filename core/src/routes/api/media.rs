@@ -1,17 +1,18 @@
 use prisma_client_rust::{raw, Direction};
-use rocket::{fs::NamedFile, serde::json::Json};
+use rocket::{fs::NamedFile, http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
+	config::get_config_dir,
 	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs,
+	fs::{self, image},
 	guards::auth::Auth,
 	prisma::{
 		media::{self, OrderByParam},
 		read_progress, user,
 	},
 	types::{
-		alias::{ApiResult, Context},
+		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::{FileResponse, ImageResponse},
 		models::{media::Media, read_progress::ReadProgress},
@@ -27,7 +28,7 @@ use crate::{
 pub async fn get_media(
 	unpaged: Option<bool>,
 	req_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
@@ -77,13 +78,14 @@ pub async fn get_media(
 pub async fn get_duplicate_media(
 	unpaged: Option<bool>,
 	page_params: Option<PagedRequestParams>,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 
 	let media: Vec<Media> = db
 		._query_raw(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
+		.exec()
 		.await?;
 
 	let unpaged = unpaged.unwrap_or(page_params.is_none());
@@ -101,7 +103,7 @@ pub async fn get_duplicate_media(
 /// total number of pages available (i.e not completed).
 #[openapi(tag = "Media")]
 #[get("/media/keep-reading")]
-pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
+pub async fn get_reading_media(ctx: &Ctx, auth: Auth) -> ApiResult<Json<Vec<Media>>> {
 	let db = ctx.get_db();
 
 	Ok(Json(
@@ -147,7 +149,7 @@ pub async fn get_reading_media(ctx: &Context, auth: Auth) -> ApiResult<Json<Vec<
 #[get("/media/<id>")]
 pub async fn get_media_by_id(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Media>> {
 	let db = ctx.get_db();
@@ -175,7 +177,7 @@ pub async fn get_media_by_id(
 #[get("/media/<id>/file")]
 pub async fn get_media_file(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> ApiResult<FileResponse> {
 	let db = ctx.get_db();
@@ -207,7 +209,7 @@ pub async fn get_media_file(
 #[post("/media/<id>/convert")]
 pub async fn convert_media_to_cbz(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	_auth: Auth,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
@@ -243,7 +245,7 @@ pub async fn convert_media_to_cbz(
 pub async fn get_media_page(
 	id: String,
 	page: i32,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -280,10 +282,19 @@ pub async fn get_media_page(
 #[get("/media/<id>/thumbnail")]
 pub async fn get_media_thumbnail(
 	id: String,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
+
+	let webp_path = get_config_dir()
+		.join("thumbnails")
+		.join(format!("{}.webp", id));
+
+	if webp_path.exists() {
+		log::trace!("Found webp thumbnail for media {}", id);
+		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?));
+	}
 
 	let book = db
 		.media()
@@ -312,7 +323,7 @@ pub async fn get_media_thumbnail(
 pub async fn update_media_progress(
 	id: String,
 	page: i32,
-	ctx: &Context,
+	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<ReadProgress>> {
 	let db = ctx.get_db();
@@ -326,9 +337,9 @@ pub async fn update_media_progress(
 					id.clone(),
 				),
 				(
-					read_progress::page::set(page),
-					read_progress::media::link(media::id::equals(id.clone())),
-					read_progress::user::link(user::id::equals(auth.0.id.clone())),
+					page,
+					media::id::equals(id.clone()),
+					user::id::equals(auth.0.id.clone()),
 					vec![],
 				),
 				vec![read_progress::page::set(page)],

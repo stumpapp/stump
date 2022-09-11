@@ -1,7 +1,8 @@
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct DirectoryListingInput {
 	pub path: Option<String>,
@@ -15,14 +16,14 @@ impl Default for DirectoryListingInput {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct DirectoryListing {
 	pub parent: Option<String>,
 	pub files: Vec<DirectoryListingFile>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 
 pub struct DirectoryListingFile {

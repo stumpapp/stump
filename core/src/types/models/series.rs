@@ -1,11 +1,14 @@
+use std::str::FromStr;
+
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
-use crate::prisma;
+use crate::{prisma, types::enums::FileStatus};
 
 use super::{library::Library, media::Media, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Series {
 	pub id: String,
@@ -16,7 +19,7 @@ pub struct Series {
 	/// The description of the series. ex: "The best series ever"
 	pub description: Option<String>,
 	/// The status of the series since last scan or access
-	pub status: String,
+	pub status: FileStatus,
 	// pub updated_at: DateTime<FixedOffset>,
 	pub updated_at: String,
 	/// The ID of the library this series belongs to.
@@ -86,7 +89,7 @@ impl Into<Series> for prisma::series::Data {
 			name: self.name,
 			path: self.path,
 			description: self.description,
-			status: self.status,
+			status: FileStatus::from_str(&self.status).unwrap_or(FileStatus::Error),
 			updated_at: self.updated_at.to_string(),
 			library_id: self.library_id.unwrap(),
 			library,

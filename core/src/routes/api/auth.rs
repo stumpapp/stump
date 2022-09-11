@@ -5,7 +5,7 @@ use crate::{
 	guards::auth::Auth,
 	prisma::{user, user_preferences},
 	types::{
-		alias::{ApiResult, Context, LoginResult, Session},
+		alias::{ApiResult, Ctx, LoginResult, Session},
 		enums::UserRole,
 		errors::ApiError,
 		models::{AuthenticatedUser, LoginRequest},
@@ -16,18 +16,35 @@ use crate::{
 /// Attempts to grab the user from the session.
 #[openapi(tag = "Auth")]
 #[get("/auth/me")]
-pub async fn me(session: Session<'_>, _auth: Auth) -> Option<Json<AuthenticatedUser>> {
-	match session.get().await.expect("Session error") {
-		Some(user) => Some(Json(user)),
-		_ => None,
-	}
+pub async fn me(
+	ctx: &Ctx,
+	_session: Session<'_>,
+	auth: Auth,
+) -> ApiResult<Json<Option<AuthenticatedUser>>> {
+	let db = ctx.get_db();
+
+	// FIXME: I am querying here because I need the most up to date preferences... I need to
+	// decide if I should update the session each time the preferences/user gets updated!
+	Ok(Json(
+		db.user()
+			.find_unique(user::id::equals(auth.0.id))
+			.with(user::user_preferences::fetch())
+			.exec()
+			.await?
+			.map(|u| u.into()),
+	))
+
+	// match session.get().await.expect("Session error") {
+	// 	Some(user) => Some(Json(user)),
+	// 	_ => None,
+	// }
 }
 
 /// Attempt to login a user. On success, a session is created and the user is returned.
 #[openapi(tag = "Auth")]
 #[post("/auth/login", data = "<credentials>")]
 pub async fn login(
-	ctx: &Context,
+	ctx: &Ctx,
 	session: Session<'_>,
 	credentials: Json<LoginRequest>,
 ) -> LoginResult {
@@ -68,7 +85,7 @@ pub async fn login(
 #[openapi(tag = "Auth")]
 #[post("/auth/register", data = "<credentials>")]
 pub async fn register(
-	ctx: &Context,
+	ctx: &Ctx,
 	session: Session<'_>,
 	credentials: Json<LoginRequest>,
 ) -> ApiResult<Json<AuthenticatedUser>> {
@@ -94,8 +111,8 @@ pub async fn register(
 	let created_user = db
 		.user()
 		.create(
-			user::username::set(credentials.username.to_owned()),
-			user::hashed_password::set(hashed_password),
+			credentials.username.to_owned(),
+			hashed_password,
 			vec![user::role::set(user_role.into())],
 		)
 		.exec()
@@ -105,9 +122,9 @@ pub async fn register(
 	// supported on the prisma client. Until then, this ugly mess is necessary.
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::link(vec![user::id::equals(
+		.create(vec![user_preferences::user::connect(user::id::equals(
 			created_user.id.clone(),
-		)])])
+		))])
 		.exec()
 		.await?;
 

@@ -1,19 +1,24 @@
+import { ViewMode } from '@stump/core';
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import shallow from 'zustand/shallow';
-import { useStore } from '~store/store';
+import { useUser } from './useUser';
 
 export function useViewMode() {
 	const location = useLocation();
 
-	const { userPreferences, setLibraryViewMode, setSeriesViewMode } = useStore(
-		({ userPreferences, setLibraryViewMode, setSeriesViewMode }) => ({
-			userPreferences,
-			setLibraryViewMode,
-			setSeriesViewMode,
-		}),
-		shallow,
-	);
+	const { preferences, updatePreferences } = useUser();
+
+	function setLibraryViewMode(viewMode: ViewMode) {
+		if (preferences) {
+			updatePreferences({ ...preferences, libraryViewMode: viewMode });
+		}
+	}
+
+	function setSeriesViewMode(viewMode: ViewMode) {
+		if (preferences) {
+			updatePreferences({ ...preferences, seriesViewMode: viewMode });
+		}
+	}
 
 	const { showViewOptions, viewAsGrid, onViewModeChange } = useMemo(() => {
 		let _showViewOptions =
@@ -29,10 +34,10 @@ export function useViewMode() {
 		let _onViewModeChange;
 
 		if (location.pathname.match(/\/libraries\/.+$/)) {
-			_viewAsGrid = userPreferences?.libraryViewMode === 'GRID';
+			_viewAsGrid = preferences?.libraryViewMode === 'GRID';
 			_onViewModeChange = setLibraryViewMode;
 		} else if (location.pathname.match(/\/series\/.+$/)) {
-			_viewAsGrid = userPreferences?.seriesViewMode === 'GRID';
+			_viewAsGrid = preferences?.seriesViewMode === 'GRID';
 			_onViewModeChange = setSeriesViewMode;
 		}
 
@@ -48,7 +53,7 @@ export function useViewMode() {
 			viewAsGrid: _viewAsGrid,
 			onViewModeChange: _onViewModeChange,
 		};
-	}, [location.pathname, userPreferences]);
+	}, [location.pathname, preferences]);
 
 	return { showViewOptions, viewAsGrid, onViewModeChange };
 }

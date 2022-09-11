@@ -1,18 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { getSeriesById, getSeriesThumbnail } from '~api/query/series';
+import { getSeriesById, getSeriesThumbnail } from '~api/series';
 import { useSeriesMedia } from '~hooks/useSeriesMedia';
 import { useViewMode } from '~hooks/useViewMode';
 import MediaGrid from '~components/Media/MediaGrid';
 import MediaList from '~components/Media/MediaList';
-import Pagination from '~components/ui/Pagination';
+import Pagination from '~ui/Pagination';
+import ReadMore from '~ui/ReadMore';
 import useIsInView from '~hooks/useIsInView';
 import { Box, ButtonGroup, Heading, Text } from '@chakra-ui/react';
 import UpNextButton from '~components/Series/UpNextButton';
 import DownloadSeriesButton from '~components/Series/DownloadSeriesButton';
-import ReadMore from '~components/ui/ReadMore';
 import { Series } from '@stump/core';
 
 interface OverviewTitleSectionProps {
@@ -60,7 +60,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					// Marvel Knights Spider-Man features one of comics' most inventive writers matched with an
 					// iconic Marvel hero. The result is a spellbinding story from start to finish, a must-have
 					// read for any Spider-Man fan!`}
-					text={series.description}
+					text={series.description ?? ''}
 				/>
 			</div>
 		</div>
@@ -84,7 +84,7 @@ export default function SeriesOverview() {
 		isLoading: isLoadingSeries,
 		isFetching: isFetchingSeries,
 		data: series,
-	} = useQuery('getSeries', {
+	} = useQuery(['getSeries'], {
 		queryFn: async () => getSeriesById(id).then((res) => res.data),
 	});
 

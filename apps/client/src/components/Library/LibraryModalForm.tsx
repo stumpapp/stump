@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
-	Checkbox,
-	FormControl,
 	FormErrorMessage,
 	FormLabel,
+	HStack,
 	InputGroup,
 	InputRightElement,
 	TabList,
@@ -16,13 +15,14 @@ import { FieldValues, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import DirectoryPickerModal from '~components/DirectoryPickerModal';
 import TagSelect from '~components/TagSelect';
-import Form from '~components/ui/Form';
-import Input from '~components/ui/Input';
-import { Tab } from '~components/ui/Tabs';
-import TextArea from '~components/ui/TextArea';
+import Form, { FormControl } from '~ui/Form';
+import Input from '~ui/Input';
+import { Tab } from '~ui/Tabs';
+import TextArea from '~ui/TextArea';
 import { TagOption } from '~hooks/useTags';
-import { useStore } from '~store/store';
-import { Library } from '@stump/core';
+import { Library, LibraryScanMode } from '@stump/core';
+import { useLibraries } from '~hooks/useLibraries';
+import Checkbox from '~ui/Checkbox';
 
 interface Props {
 	tags: TagOption[];
@@ -36,8 +36,21 @@ interface Props {
  * This is a form for creating and editing libraries. It is used in the `CreateLibraryModal` and `EditLibraryModal` components.
  * It is not intended to be used outside of those components.
  */
+// FIXME: tab focus is not working, e.g. when you press tab, it should go to the next form element
 export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, library }: Props) {
-	const libraries = useStore((state) => state.libraries);
+	const { libraries } = useLibraries();
+
+	function isLibraryScanMode(input: string): input is LibraryScanMode {
+		return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input;
+	}
+
+	function getNewScanMode(value: string) {
+		if (value === scanMode) {
+			return 'NONE';
+		}
+
+		return value;
+	}
 
 	const schema = z.object({
 		name: z
@@ -72,7 +85,10 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 				// z.any(),
 			)
 			.optional(),
-		scan: z.boolean().default(true),
+		scanMode: z.string().refine(isLibraryScanMode).default('BATCHED'),
+		convertRarToZip: z.boolean().default(false),
+		hardDeleteConversions: z.boolean().default(false),
+		createWebpThumbnails: z.boolean().default(false),
 	});
 
 	const form = useForm({
@@ -83,7 +99,10 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					path: library.path,
 					description: library.description,
 					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
-					scan: true,
+					convertRarToZip: library.libraryOptions.convertRarToZip,
+					hardDeleteConversions: library.libraryOptions.hardDeleteConversions,
+					createWebpThumbnails: library.libraryOptions.createWebpThumbnails,
+					scanMode: 'BATCHED',
 			  }
 			: {},
 	});
@@ -94,13 +113,16 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 		return form.formState.errors;
 	}, [form.formState.errors]);
 
-	// console.log(errors);
+	// const convertRarToZip = form.watch('convertRarToZip');
+	const [scanMode, convertRarToZip] = form.watch(['scanMode', 'convertRarToZip']);
 
 	useEffect(() => {
 		if (reset) {
 			form.reset();
 		}
 	}, [reset]);
+
+	console.log('errors', errors);
 
 	return (
 		<Form
@@ -155,14 +177,62 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							defaultValue={library?.tags?.map((t) => ({ value: t.name, label: t.name }))}
 						/>
 
+						{/* TODO change entire layout to be better UX, provide information for what each option does */}
+						<HStack>
+							<FormControl>
+								<Checkbox
+									title="Scan the library in a syncronous manner. This will allow you to access media as it is being scanned, however is slower as the library gets larger."
+									isChecked={scanMode === 'SYNC'}
+									colorScheme="brand"
+									onChange={() => form.setValue('scanMode', getNewScanMode('SYNC'))}
+								>
+									Synchronous Scan
+								</Checkbox>
+							</FormControl>
+
+							<FormControl>
+								<Checkbox
+									title="Scan the library using batched insertions. This will be significantly faster, but you will not be able to access media until the scan is complete. This is highly recommended for large libraries or initial scans."
+									isChecked={scanMode === 'BATCHED' || !scanMode}
+									colorScheme="brand"
+									onChange={() => form.setValue('scanMode', getNewScanMode('BATCHED'))}
+								>
+									Batched Scan
+								</Checkbox>
+							</FormControl>
+						</HStack>
+
+						{/* FIXME: design this to not be ugly. */}
+						{/* <Text>Analysis Options</Text> */}
+
 						<FormControl>
 							<Checkbox
-								title="Scan the library after successful submit of this form"
-								defaultChecked
+								title="Create Webp thumbnails for each scanned media. When turned off, Stump will extract the first image as the thumbnail."
 								colorScheme="brand"
-								{...form.register('scan')}
+								{...form.register('createWebpThumbnails')}
 							>
-								Scan library
+								Create Webp Thumbnails
+							</Checkbox>
+						</FormControl>
+
+						<FormControl>
+							<Checkbox
+								title="When rar files are found, automatically extract them and re-bundle them in a zip file"
+								colorScheme="brand"
+								{...form.register('convertRarToZip')}
+							>
+								Convert rar files to zip
+							</Checkbox>
+						</FormControl>
+
+						<FormControl>
+							<Checkbox
+								title="When rar files have been converted to zip, automatically remove them from the host machine. The files are *not recoverable*"
+								colorScheme="brand"
+								disabled={!convertRarToZip}
+								{...form.register('hardDeleteConversions')}
+							>
+								Permanently delete rar files after conversion
 							</Checkbox>
 						</FormControl>
 					</TabPanel>

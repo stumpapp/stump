@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import React from 'react';
-import { Discord, Github, Twitter } from '@icons-pack/react-simple-icons';
+import { Discord, Github, Opencollective, Twitter } from '@icons-pack/react-simple-icons';
 import Link from 'next/link';
 
 const navigation = {
@@ -33,6 +33,12 @@ const navigation = {
 		},
 	],
 	social: [
+		{
+			name: 'Open Collective',
+			href: 'https://opencollective.com/stump',
+			icon: Opencollective,
+			isExternal: true,
+		},
 		{
 			name: 'Twitter',
 			href: 'https://twitter.com/stumpapp_',

@@ -71,11 +71,30 @@ model Library {
   // The series in the library
   series      Series[]
 
+  libraryOptions   LibraryOptions @relation(fields: [libraryOptionsId], references: [id])
+  libraryOptionsId String         @unique
 
   tags Tag[]
 
-
   @@map("libraries")
+}
+
+model LibraryOptions {
+  id                    String  @id @default(uuid())
+  // Flag indicating whether or not to attempt to convert rar files to zip on scans.
+  convertRarToZip       Boolean @default(false)
+  // Flag indicating whether or not to *hard* delete rar files that were sucessfully converted to zip.
+  // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
+  // trash location, or a custom location when running in Docker (which will clear on an interval).
+  hardDeleteConversions Boolean @default(false)
+  // Flag indicating whether or not to create WEBP thumbnails for scanned media.
+  createWebpThumbnails  Boolean @default(false)
+  // The ID of the library which these options belong to.
+
+  libraryId String?
+  library   Library?
+
+  @@map("library_options")
 }
 
 model Series {
@@ -123,7 +142,7 @@ model Media {
   // The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
   path           String
   // The status of the series since last scan or access
-  status      String   @default("READY")
+  status         String         @default("READY")
   // The series this media belongs to.
   series         Series?        @relation(fields: [seriesId], references: [id], onDelete: Cascade)
   // The id of the series this media belongs to.
@@ -187,7 +206,6 @@ model ReadingListAccess {
   readingList   ReadingList @relation(fields: [readingListId], references: [id])
   readingListId String
 
-
   @@unique([userId, readingListId])
   @@map("reading_list_access")
 }
@@ -213,7 +231,7 @@ model ReadProgress {
   // for epubs (maybe)
   page Int
 
-  epubcfi String? 
+  epubcfi String?
 
   mediaId String
   media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
@@ -226,6 +244,28 @@ model ReadProgress {
   @@map("read_progresses")
 }
 
+model Job {
+  id                 String   @id
+  // The kind of log, e.g. LibraryScan
+  kind               String
+  // The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
+  details            String?
+  // The status of the job (i.e. RUNNING, COMPLETED, FAILED, CANCELLED).
+  status             String   @default("RUNNING")
+  // The total number of tasks
+  taskCount          Int      @default(1)
+  // The total number of tasks completed (i.e. without error/failure)
+  completedTaskCount Int      @default(0)
+  // The time (in seconds) to complete the job
+  secondsElapsed     Int      @default(0)
+  // The datetime stamp of when the job completed
+  completedAt        DateTime @default(now())
+
+  logs Log[]
+
+  @@map("jobs")
+}
+
 model Log {
   id        String   @id @default(uuid())
   // The level of the log. i.e: "ERROR", "WARN", "INFO", "DEBUG"
@@ -234,6 +274,9 @@ model Log {
   message   String
   // The datetime in which the log was created. ex: "2022-04-20 04:20:69"
   createdAt DateTime @default(now())
+
+  job   Job?    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String?
 
   @@map("logs")
 }
@@ -253,9 +296,10 @@ model UserPreferences {
   // Whether the user wants to see the media in a collection as a grid or list
   collectionViewMode String  @default("GRID")
   // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
-  locale String @default("en")
+  locale             String  @default("en")
 
-  user User[]
+  // user User[]
+  user User?
 
   @@map("user_preferences")
 }

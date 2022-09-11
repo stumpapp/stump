@@ -1,5 +1,6 @@
 pub mod checksum;
 pub mod epub;
+pub mod image;
 pub mod media_file;
 pub mod pdf;
 pub mod rar;

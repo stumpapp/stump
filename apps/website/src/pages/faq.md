@@ -7,15 +7,14 @@ description: Common questions (and answers) about Stump
 
 ## Why Stump?
 
-There are some really solid, self-hostable, OPDS media servers out there. The most notable probably being [Komga](https://komga.org) - a phenomenal open source project, and frankly a great alternative. Stump is heavily influenced by Komga, striving to maintain all of its coveted features while also bringing about improvements in usability and performance.
+There are some really solid, self-hostable, OPDS media servers out there. I've personally used [Komga](https://komga.org) the most - a phenomenal open source project, and frankly a great alternative. I started developing Stump becuase I thought it would be cool to learn what goes into making something like Komga myself. Stump is therefore heavily influenced by Komga, striving to maintain all of its coveted features while also bringing about improvements in usability and performance.
 
 Overall, Stump has a few key features:
 
-- Tiny footprint (~100MB Docker image, ~36.8 MB compiled executable)
-  - Aiming to decrease Docker image size to around ~50MB
+- Tiny footprint (~45MB compressed Docker image, ~36.8 MB compiled executable)
 - Super performant, even on less powerful hardware (e.g. Raspberry Pi)
-- Emphasis on UI and UX (i.e. it's pretty and easy to use)
-- Broader usage (i.e. it's more than just a comics/manga server)
+- Strong emphasis on UI and UX (i.e. it's pretty and easy to use)
+- Broader usage (i.e. it's for more than _just_ comics and manga)
 
 ## What is on the roadmap?
 
@@ -41,33 +40,45 @@ If you're interested in tracking the development of specific features, you can t
 
 ## Benchmarks
 
-{% callout title="Testing Scenario" icon="note" %}
-2018 Macbook Pro 13" (1.4 GHz i5), basic Stump configuration with a library of 250 comics.
-{% /callout %}
+Unfortunately I don't own all of the machines/libraries outlined below. So, the benchmarks are not a complete and full combination of all the available scenarios.
 
-### Docker
+**Computers**:
 
-**Steps**: Boot stump, log into account, queue 3 scan jobs on library, exit when last job finishes.
+1. 2021 Macbook Pro 14" (M1 Pro, 32GB RAM, SSD)
+2. Raspberry Pi 4 (8GB RAM, SSD)
 
-- Average memory usage: ~6MiB / 1.939GiB (~0.33%)
-- Average CPU usage: ~2.2%
+**Test Libraries**:
 
-### Executable
+1. Small: 2 libraries, 15 series, 300 books (10GB)
+2. Medium: TODO
+3. Large: X libraries, Y series, 89,000 books
 
-**Steps**: Boot stump, log into account, queue 2 scan jobs on library, exit when last job finishes.
+**Test Scenarios**:
 
-- Average memory usage: TBD
-- Average CPU usage: TBD
-- First scan execution time: 9s
-  - ~25 full file scans per second (full file scan does every possible action in the scan, since it is a new file)
-- Consecutive scan execution time: 0.108s (no new files)
+1. New server initial scan (i.e. everything gets added to DB)
+2. Consecutive scan
+3. Query books with varying page sizes
+4. Query books with varying page sizes AND ordering
 
-**Steps**: Boot stump, log into account, update library path (making all media 'MISSING'), queue 1 scan job on library, revert library back to correct path, queue 1 scan job on library, exit when last job finishes.
+TODO: FOR ALL SCENARIOS DO THE FOLLOWING:
 
-- Average memory usage: TBD
-- Average CPU usage: TBD
-- First scan execution time: TBD
-- Consecutive scan execution time (repairing library): TBD
+- measure average memory usage
+- measure CPU usage
+- measure failure rate
+- measure total time taken
+- compare SSD/HDD
+- test network drive
+
+TODO
+
+## Similar Projects
+
+There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there (_heck, it isn't even in beta yet_)! If Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
+
+- [Komga](https://github.com/gotson/komga)
+- [Kavita](https://github.com/Kareadita/Kavita)
+- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
+- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
 
 ## More questions?
 

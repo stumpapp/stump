@@ -9,12 +9,12 @@ import {
 	useDisclosure,
 } from '@chakra-ui/react';
 import { SignOut } from 'phosphor-react';
-import Button, { ModalCloseButton } from '~components/ui/Button';
-import { useMutation } from 'react-query';
-import { logout } from '~api/mutation/auth';
+import Button, { ModalCloseButton } from '~ui/Button';
+import { useMutation } from '@tanstack/react-query';
+import { logout } from '~api/auth';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '~store/store';
+import { useStore } from '~stores/mainStore';
 
 export default function Logout() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -22,7 +22,7 @@ export default function Logout() {
 	const logoutUser = useStore((state) => state.logoutUser);
 	const navigate = useNavigate();
 
-	const { mutateAsync } = useMutation('logoutUser', logout);
+	const { mutateAsync } = useMutation(['logoutUser'], logout);
 
 	async function handleLogout() {
 		toast

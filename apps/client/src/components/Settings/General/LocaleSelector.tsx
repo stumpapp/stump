@@ -4,6 +4,7 @@ import { Select } from 'chakra-react-select';
 import { useLocale } from '~hooks/useLocale';
 import { Locale } from '~util/enums';
 
+// FIXME: style is not aligned with theme, but I am lazy right now so future aaron problem
 export default function LocaleSelector() {
 	const { t, locale, setLocale, locales } = useLocale();
 
@@ -20,6 +21,7 @@ export default function LocaleSelector() {
 			</FormLabel>
 
 			<Select
+				isDisabled
 				value={locales.find((l) => l.value === locale)}
 				options={locales}
 				onChange={(newLocale) => handleLocaleChange(newLocale?.value)}

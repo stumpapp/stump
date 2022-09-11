@@ -1,6 +1,6 @@
 import React from 'react';
 import { CloudArrowDown } from 'phosphor-react';
-import { IconButton } from '~components/ui/Button';
+import { IconButton } from '~ui/Button';
 
 interface Props {
 	seriesId: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react';
 import Search from './Search';
-import { useStore } from '~store/store';
+import { useStore } from '~stores/mainStore';
 import { useViewMode } from '~hooks/useViewMode';
 import shallow from 'zustand/shallow';
 import MobileDrawer from '../Sidebar/MobileDrawer';

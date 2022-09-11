@@ -1,15 +1,18 @@
 use rocket::http::ContentType;
 use std::{path::Path, str::FromStr};
-use walkdir::DirEntry;
 
 use crate::types::{
-	alias::ProcessResult, errors::ProcessFileError, http::ImageResponse,
-	models::MediaMetadata,
+	alias::ProcessFileResult,
+	errors::ProcessFileError,
+	http,
+	models::{
+		library::LibraryOptions,
+		media::{MediaMetadata, ProcessedMediaFile},
+	},
 };
 
 use super::{
 	epub::{get_epub_cover, process_epub},
-	// epub::get_epub_page,
 	rar::{get_rar_image, process_rar},
 	zip::{get_zip_image, process_zip},
 };
@@ -21,10 +24,7 @@ use super::{
 // The enum itself will have some repetition, however it'll be cleaner than
 // doing this stuff over and over as this file currently does.
 
-// FIXME: this needs to change. I really only need the MediaMetadata
-// pub type ProcessResult = Result<(Option<MediaMetadata>, Vec<String>), ProcessFileError>;
-pub type GetPageResult = Result<ImageResponse, ProcessFileError>;
-
+// TODO: move trait, maybe merge with another.
 pub trait IsImage {
 	fn is_image(&self) -> bool;
 }
@@ -81,7 +81,7 @@ pub fn get_content_type_from_mime(mime: &str) -> ContentType {
 		"image/jpeg" => ContentType::JPEG,
 		"image/webp" => ContentType::WEBP,
 		"image/gif" => ContentType::GIF,
-		// FIXME: replace one PR is merged
+		// FIXME: replace one PR is merged (AGH, will it ever get merged??)
 		"application/xhtml+xml" => ContentType::XML,
 		_ => ContentType::Any,
 	})
@@ -144,7 +144,7 @@ pub fn infer_mime_from_path(path: &Path) -> Option<String> {
 	}
 }
 
-pub fn get_page(file: &str, page: i32) -> GetPageResult {
+pub fn get_page(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
 	let mime = guess_mime(Path::new(file));
 
 	match mime.as_deref() {
@@ -169,24 +169,26 @@ pub fn get_page(file: &str, page: i32) -> GetPageResult {
 	}
 }
 
-pub fn process_entry(entry: &DirEntry) -> ProcessResult {
-	log::debug!("Processing entry: {:?}", entry);
+pub fn process(
+	path: &Path,
+	options: &LibraryOptions,
+) -> ProcessFileResult<ProcessedMediaFile> {
+	log::debug!("Processing entry {:?} with options: {:?}", path, options);
 
-	let mime = infer_mime_from_path(entry.path());
+	let mime = infer_mime_from_path(path);
 
-	// TODO: improve this? kinda verbose
 	match mime.as_deref() {
-		Some("application/zip") => process_zip(entry),
-		Some("application/vnd.comicbook+zip") => process_zip(entry),
-		Some("application/vnd.rar") => process_rar(entry),
-		Some("application/vnd.comicbook-rar") => process_rar(entry),
-		Some("application/epub+zip") => process_epub(entry),
+		Some("application/zip") => process_zip(path),
+		Some("application/vnd.comicbook+zip") => process_zip(path),
+		Some("application/vnd.rar") => process_rar(path, options),
+		Some("application/vnd.comicbook-rar") => process_rar(path, options),
+		Some("application/epub+zip") => process_epub(path),
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
-			entry.path()
+			path
 		))),
 		_ => Err(ProcessFileError::UnsupportedFileType(
-			entry.path().to_string_lossy().into_owned(),
+			path.to_string_lossy().into_owned(),
 		)),
 	}
 }

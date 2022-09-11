@@ -1,4 +1,3 @@
-import React from 'react';
 import {
 	Modal,
 	ModalOverlay,
@@ -9,17 +8,16 @@ import {
 	useDisclosure,
 	MenuItem,
 } from '@chakra-ui/react';
-import Button, { ModalCloseButton } from '~components/ui/Button';
+import Button, { ModalCloseButton } from '~ui/Button';
 import { NotePencil } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import { FieldValues } from 'react-hook-form';
 import LibraryModalForm from './LibraryModalForm';
 import { TagOption, useTags } from '~hooks/useTags';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import client from '~api/client';
-import { editLibrary } from '~api/mutation/library';
-import { createTags } from '~api/mutation/tag';
-import { Library, Tag } from '@stump/core';
+import { editLibrary } from '~api/library';
+import { Library, LibraryOptions, Tag } from '@stump/core';
 
 interface Props {
 	library: Library;
@@ -30,16 +28,17 @@ interface Props {
 export default function EditLibraryModal({ disabled, library }: Props) {
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	const { tags, options, isLoading: fetchingTags } = useTags();
+	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags();
 
-	const { isLoading, mutateAsync } = useMutation('editLibrary', {
+	const { isLoading, mutateAsync } = useMutation(['editLibrary'], {
 		mutationFn: editLibrary,
 		onSuccess: (res) => {
 			if (!res.data) {
 				// throw new Error('Something went wrong.');
 				// TODO: log?
 			} else {
-				client.invalidateQueries('getLibraries');
+				client.invalidateQueries(['getLibraries']);
+				client.invalidateQueries(['getJobReports']);
 				onClose();
 			}
 		},
@@ -50,18 +49,14 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 		},
 	});
 
-	const { mutateAsync: tryCreateTags } = useMutation('createTags', {
-		mutationFn: createTags,
-	});
-
-	function getRemovedTags(tags: TagOption[]): Tag[] | undefined {
+	function getRemovedTags(tags: TagOption[]): Tag[] | null {
 		// All tags were removed, or no tags were there to begin with
 		if (tags.length === 0) {
-			return library.tags || undefined;
+			return library.tags || null;
 		}
 
 		if (!library.tags || library.tags.length === 0) {
-			return undefined;
+			return null;
 		}
 
 		// Some tags were removed, but not all
@@ -75,7 +70,12 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 			throw new Error('You do not have permission to update libraries.');
 		}
 
-		const { name, path, description, tags: formTags, scan } = values;
+		const { name, path, description, tags: formTags, scanMode, ...rest } = values;
+
+		const libraryOptions = {
+			...rest,
+			id: library.libraryOptions.id,
+		} as LibraryOptions;
 
 		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
 
@@ -86,7 +86,7 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 		let removedTags = getRemovedTags(formTags);
 
 		if (!removedTags?.length) {
-			removedTags = undefined;
+			removedTags = null;
 		}
 
 		if (tagsToCreate.length) {
@@ -101,7 +101,16 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 		}
 
 		toast.promise(
-			mutateAsync({ ...library, name, path, description, tags: existingTags, removedTags, scan }),
+			mutateAsync({
+				...library,
+				name,
+				path,
+				description,
+				tags: existingTags,
+				removedTags,
+				scanMode,
+				libraryOptions,
+			}),
 			{
 				loading: 'Updating library...',
 				success: 'Updates saved!',

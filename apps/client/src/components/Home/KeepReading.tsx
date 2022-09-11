@@ -1,4 +1,3 @@
-import React from 'react';
 import {
 	Heading,
 	HStack,
@@ -8,8 +7,8 @@ import {
 	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react';
-import { getMediaThumbnail } from '~api/query/media';
-import MoreLink from '~components/ui/MoreLink';
+import { getMediaThumbnail } from '~api/media';
+import MoreLink from '~ui/MoreLink';
 import { Media } from '@stump/core';
 
 interface Props {

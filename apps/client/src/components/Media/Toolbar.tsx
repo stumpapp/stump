@@ -3,15 +3,23 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft } from 'phosphor-react';
 import { Link, useParams } from 'react-router-dom';
 import { Heading, Spacer, Text } from '@chakra-ui/react';
+import { getMediaPage } from '~api/media';
 
 interface ToolbarProps {
 	title: string;
 	currentPage: number;
 	pages: number;
 	visible: boolean;
+	onPageChange(page: number): void;
 }
 
-export default function Toolbar({ title, currentPage, pages, visible }: ToolbarProps) {
+export default function Toolbar({
+	title,
+	currentPage,
+	pages,
+	visible,
+	onPageChange,
+}: ToolbarProps) {
 	const { id } = useParams();
 
 	if (!id) {
@@ -28,7 +36,7 @@ export default function Toolbar({ title, currentPage, pages, visible }: ToolbarP
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: -100 }}
 						transition={{ duration: 0.2, ease: 'easeInOut' }}
-						className="fixed top-0 p-4 w-full bg-opacity-75 bg-gray-700 text-white z-[100]"
+						className="fixed top-0 p-4 w-full bg-opacity-90 bg-gray-700 text-white z-[100]"
 					>
 						<div className="flex justify-between items-center w-full">
 							<div className="flex items-center space-x-4">
@@ -50,15 +58,21 @@ export default function Toolbar({ title, currentPage, pages, visible }: ToolbarP
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: 100 }}
 						transition={{ duration: 0.2, ease: 'easeInOut' }}
-						className="fixed bottom-0 p-4 w-full bg-opacity-75 bg-gray-700 text-white z-[100]"
+						className="fixed bottom-0 p-4 w-full overflow-x-scroll bg-opacity-75 shadow-lg text-white z-[100]"
 					>
-						<div className="flex space-x-2">
-							<Text>
-								Page {currentPage} of {pages}
-							</Text>
-
-							<Spacer />
-							<div>TODO: page previews</div>
+						<div className="flex space-x-2 w-full bottom-0 select-none">
+							{/* TODO:  don't do this, terrible loading for most people */}
+							{/* TODO: scroll to center current page */}
+							{/* TODO: tool tips? */}
+							{/* FIXME: styling isn't quite right, should have space on either side... */}
+							{Array.from({ length: pages }).map((_, i) => (
+								<img
+									key={i}
+									src={getMediaPage(id, i + 1)}
+									className="cursor-pointer h-32 w-auto rounded-md transition duration-300 hover:-translate-y-2 shadow-xl"
+									onClick={() => onPageChange(i + 1)}
+								/>
+							))}
 						</div>
 					</motion.nav>
 				</>

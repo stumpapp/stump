@@ -1,9 +1,9 @@
-import { ClientEvent } from '@stump/core';
+import { CoreEvent } from '@stump/core';
 import { useEffect } from 'react';
 import { baseURL } from '~api/index';
 
 interface Props {
-	onEvent(event: ClientEvent): void;
+	onEvent(event: CoreEvent): void;
 }
 
 const eventSource = {

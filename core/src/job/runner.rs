@@ -3,7 +3,7 @@ use std::sync::Arc;
 use rocket::tokio::{self, sync::Mutex};
 use serde::{Deserialize, Serialize};
 
-use crate::{config::context::Ctx, event::ClientEvent};
+use crate::{config::context::Ctx, event::CoreEvent};
 
 use super::{persist_new_job, pool::JobPool, Job, JobUpdate};
 
@@ -50,13 +50,13 @@ impl Runner {
 			if let Err(e) = job.run(runner_id.clone(), ctx.get_ctx()).await {
 				log::error!("job failed {:?}", e);
 
-				ctx.handle_failure_event(ClientEvent::JobFailed {
+				ctx.handle_failure_event(CoreEvent::JobFailed {
 					runner_id: runner_id.clone(),
 					message: e.to_string(),
 				})
 				.await;
 			} else {
-				ctx.emit_client_event(ClientEvent::JobComplete(runner_id.clone()));
+				ctx.emit_client_event(CoreEvent::JobComplete(runner_id.clone()));
 			}
 
 			job_pool.dequeue_job(&ctx, runner_id).await;

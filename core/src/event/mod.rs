@@ -9,7 +9,7 @@ use crate::{
 	prisma,
 };
 
-pub enum ClientRequest {
+pub enum InternalCoreTask {
 	QueueJob(Box<dyn Job>),
 	GetJobReports(oneshot::Sender<Vec<JobReport>>),
 }
@@ -20,7 +20,7 @@ pub enum ClientResponse {
 
 #[derive(Clone, Serialize, Deserialize, Debug, Type)]
 #[serde(tag = "key", content = "data")]
-pub enum ClientEvent {
+pub enum CoreEvent {
 	JobStarted(JobUpdate),
 	JobProgress(JobUpdate),
 	// TODO: change from string...
@@ -44,14 +44,14 @@ pub enum ClientEvent {
 	CreatedSeriesBatch(u64),
 }
 
-impl ClientEvent {
+impl CoreEvent {
 	pub fn job_started(
 		runner_id: String,
 		current_task: u64,
 		task_count: u64,
 		message: Option<String>,
 	) -> Self {
-		ClientEvent::JobStarted(JobUpdate {
+		CoreEvent::JobStarted(JobUpdate {
 			runner_id,
 			current_task: Some(current_task),
 			task_count,
@@ -66,7 +66,7 @@ impl ClientEvent {
 		task_count: u64,
 		message: Option<String>,
 	) -> Self {
-		ClientEvent::JobProgress(JobUpdate {
+		CoreEvent::JobProgress(JobUpdate {
 			runner_id,
 			current_task,
 			task_count,

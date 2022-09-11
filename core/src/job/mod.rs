@@ -10,7 +10,7 @@ use specta::Type;
 
 use crate::{
 	config::context::Ctx,
-	event::ClientEvent,
+	event::CoreEvent,
 	prisma::{self},
 	types::errors::ApiError,
 };
@@ -171,7 +171,7 @@ pub async fn persist_job_start(
 		.exec()
 		.await?;
 
-	ctx.emit_client_event(ClientEvent::job_started(
+	ctx.emit_client_event(CoreEvent::job_started(
 		id.clone(),
 		1,
 		task_count,

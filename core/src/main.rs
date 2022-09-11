@@ -10,7 +10,7 @@ use config::{
 	logging::{self, STUMP_SHADOW_TEXT},
 	session,
 };
-use event::{event_manager::EventManager, ClientRequest};
+use event::{event_manager::EventManager, InternalCoreTask};
 use rocket::{
 	fs::{FileServer, NamedFile},
 	tokio::sync::mpsc::unbounded_channel,
@@ -67,7 +67,7 @@ async fn rocket() -> _ {
 
 	// Channel to handle client requests. The sender goes in Stump Ctx, the receiver goes
 	// in the event manager.
-	let internal_channel = unbounded_channel::<ClientRequest>();
+	let internal_channel = unbounded_channel::<InternalCoreTask>();
 
 	// Ownership will be transferred to the event manager.
 	let core_ctx = Ctx::new(internal_channel.0.clone()).await;

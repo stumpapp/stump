@@ -1,4 +1,4 @@
-import { ClientEvent } from '@stump/core';
+import { CoreEvent } from '@stump/core';
 import toast from 'react-hot-toast';
 import client from '~api/client';
 import { useStore } from '~stores/mainStore';
@@ -11,7 +11,7 @@ export function useJobManager() {
 		completeJob,
 	}));
 
-	function handleJobEvent(event: ClientEvent) {
+	function handleJobEvent(event: CoreEvent) {
 		const { key, data } = event;
 
 		if (['JobComplete', 'JobFailed'].includes(key)) {

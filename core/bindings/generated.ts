@@ -164,7 +164,7 @@ export interface JobReport {
 	completedAt: string | null;
 }
 
-export type ClientEvent =
+export type CoreEvent =
 	| { key: 'JobStarted'; data: JobUpdate }
 	| { key: 'JobProgress'; data: JobUpdate }
 	| { key: 'JobComplete'; data: string }

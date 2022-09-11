@@ -5,7 +5,7 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::context::Ctx,
-	event::ClientEvent,
+	event::CoreEvent,
 	fs::{image, media_file},
 	prisma::{library, media, series},
 	types::{
@@ -195,7 +195,7 @@ pub async fn insert_series_many(
 	for entry in entries {
 		match insert_series(&ctx, &entry, library_id.clone()).await {
 			Ok(series) => {
-				ctx.emit_client_event(ClientEvent::CreatedSeries(series.clone()));
+				ctx.emit_client_event(CoreEvent::CreatedSeries(series.clone()));
 
 				inserted_series.push(series);
 			},

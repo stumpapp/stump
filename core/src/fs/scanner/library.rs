@@ -13,7 +13,7 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	config::context::Ctx,
-	event::ClientEvent,
+	event::CoreEvent,
 	fs::{
 		image,
 		scanner::{
@@ -120,7 +120,7 @@ async fn precheck(
 	if let Err(e) = insertion_result {
 		log::error!("Failed to batch insert series: {}", e);
 
-		ctx.emit_client_event(ClientEvent::CreateEntityFailed {
+		ctx.emit_client_event(CoreEvent::CreateEntityFailed {
 			runner_id: Some(runner_id.to_string()),
 			message: format!("Failed to batch insert series: {}", e.to_string()),
 			path: path.clone(),
@@ -128,9 +128,9 @@ async fn precheck(
 	} else {
 		let mut inserted_series = insertion_result.unwrap();
 
-		ctx.emit_client_event(ClientEvent::CreatedSeriesBatch(
-			inserted_series.len() as u64
-		));
+		ctx.emit_client_event(
+			CoreEvent::CreatedSeriesBatch(inserted_series.len() as u64),
+		);
 
 		series.append(&mut inserted_series);
 	}
@@ -232,12 +232,12 @@ async fn scan_series(
 			Ok(media) => {
 				visited_media.insert(media.path.clone(), true);
 
-				ctx.emit_client_event(ClientEvent::CreatedMedia(media.clone()));
+				ctx.emit_client_event(CoreEvent::CreatedMedia(media.clone()));
 			},
 			Err(e) => {
 				log::error!("Failed to insert media: {:?}", e);
 
-				ctx.handle_failure_event(ClientEvent::CreateEntityFailed {
+				ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
 					runner_id: Some(runner_id.clone()),
 					path: path.to_str().unwrap_or_default().to_string(),
 					message: e.to_string(),
@@ -376,7 +376,7 @@ pub async fn scan_batch(
 
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
-	ctx.emit_client_event(ClientEvent::job_started(
+	ctx.emit_client_event(CoreEvent::job_started(
 		runner_id.clone(),
 		0,
 		files_to_process,
@@ -396,7 +396,7 @@ pub async fn scan_batch(
 				scan_series_batch(ctx_cpy.get_ctx(), s, move |msg| {
 					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-					ctx_cpy.emit_client_event(ClientEvent::job_progress(
+					ctx_cpy.emit_client_event(CoreEvent::job_progress(
 						r_id.to_owned(),
 						Some(previous + 1),
 						files_to_process,
@@ -425,13 +425,13 @@ pub async fn scan_batch(
 			ApiError::InternalServerError(e.to_string())
 		})?;
 
-	ctx.emit_client_event(ClientEvent::CreatedMediaBatch(created_media.len() as u64));
+	ctx.emit_client_event(CoreEvent::CreatedMediaBatch(created_media.len() as u64));
 
 	// TODO: change task_count and send progress?
 	if library_options.create_webp_thumbnails {
 		log::trace!("Library configured to create WEBP thumbnails.");
 
-		ctx.emit_client_event(ClientEvent::job_progress(
+		ctx.emit_client_event(CoreEvent::job_progress(
 			runner_id.clone(),
 			Some(final_count),
 			files_to_process,
@@ -467,7 +467,7 @@ pub async fn scan_sync(
 	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
-	ctx.emit_client_event(ClientEvent::job_started(
+	ctx.emit_client_event(CoreEvent::job_started(
 		runner_id.clone(),
 		0,
 		files_to_process,
@@ -489,7 +489,7 @@ pub async fn scan_sync(
 		scan_series(ctx.get_ctx(), runner_id, s, library_options, move |msg| {
 			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-			progress_ctx.emit_client_event(ClientEvent::job_progress(
+			progress_ctx.emit_client_event(CoreEvent::job_progress(
 				r_id.to_owned(),
 				Some(previous + 1),
 				files_to_process,

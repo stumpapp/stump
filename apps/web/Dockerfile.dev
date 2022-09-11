@@ -1,4 +1,0 @@
-FROM node
-
-RUN apk add --no-cache curl \
-    && curl -sL https://unpkg.com/@pnpm/self-installer | node

@@ -11,7 +11,7 @@ use rocket::{
 use rocket_okapi::openapi;
 
 use crate::{
-	event::ClientRequest,
+	event::InternalCoreTask,
 	job::JobReport,
 	types::{
 		alias::{ApiResult, Ctx},
@@ -25,7 +25,7 @@ use crate::{
 pub async fn get_jobs(ctx: &Ctx) -> ApiResult<Json<Vec<JobReport>>> {
 	let (sender, recv) = oneshot::channel();
 
-	ctx.internal_task(ClientRequest::GetJobReports(sender))
+	ctx.internal_task(InternalCoreTask::GetJobReports(sender))
 		.map_err(|e| {
 			ApiError::InternalServerError(format!(
 				"Failed to submit internal task: {}",

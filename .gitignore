@@ -40,5 +40,3 @@ core/client/*
 _next
 
 docker-compose.yaml
-
-apps/desktop/src-tauri/icons/*

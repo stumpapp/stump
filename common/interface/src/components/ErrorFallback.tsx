@@ -1,5 +1,6 @@
 import { FallbackProps } from 'react-error-boundary';
 
+// TODO: take in platform?
 export function ErrorFallback({ error }: FallbackProps) {
 	return (
 		<div>

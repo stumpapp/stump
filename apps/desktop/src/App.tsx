@@ -5,9 +5,10 @@ import { os } from '@tauri-apps/api';
 
 import StumpInterface from '@stump/interface';
 
+import '@stump/interface/styles';
+
 export default function App() {
 	function getPlatform(platform: string): Platform {
-		console.log('getPlatform', platform);
 		switch (platform) {
 			case 'darwin':
 				return 'macOS';
@@ -30,6 +31,7 @@ export default function App() {
 		});
 	}, []);
 
+	// I want to wait until platform is properly set before rendering the interface
 	if (!mounted) {
 		return null;
 	}

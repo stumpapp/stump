@@ -1,18 +1,7 @@
 {
 	"extends": "../../common/config/base.tsconfig.json",
 	"compilerOptions": {
-		"types": ["vite/client"],
-		"baseUrl": "./",
-		"paths": {
-			"~components/*": ["src/components/*"],
-			"~ui/*": ["src/ui/*"],
-			"~util/*": ["src/util/*"],
-			"~hooks/*": ["src/hooks/*"],
-			"~api/*": ["src/api/*"],
-			"~stores/*": ["src/stores/*"],
-			"~pages/*": ["src/pages/*"],
-			"~i18n/*": ["src/i18n/*"]
-		}
+		"types": ["vite/client"]
 	},
-	"references": [{ "path": "./tsconfig.node.json" }]
+	"include": ["src"]
 }

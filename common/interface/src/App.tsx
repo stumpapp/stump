@@ -3,7 +3,7 @@ import {
 	AppPropsContext,
 	initializeApi,
 	queryClient,
-	useOnBoardingStore,
+	useStumpConfigStore,
 } from '@stump/client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { QueryClientProvider, defaultContext } from '@tanstack/react-query';
@@ -15,15 +15,16 @@ import { BrowserRouter } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
 import { chakraTheme } from './chakra';
 
-import './styles/index.css';
-
 function RouterContainer(props: { appProps: AppProps }) {
+	const [mounted, setMounted] = useState(false);
 	const [appProps, setAppProps] = useState(props.appProps);
 
-	const { baseUrl } = useOnBoardingStore();
+	const { baseUrl, setBaseUrl } = useStumpConfigStore();
 
 	useEffect(() => {
-		if (baseUrl) {
+		if (!baseUrl && appProps.baseUrl) {
+			setBaseUrl(appProps.baseUrl);
+		} else if (baseUrl) {
 			initializeApi(baseUrl);
 
 			setAppProps((appProps) => ({
@@ -31,7 +32,14 @@ function RouterContainer(props: { appProps: AppProps }) {
 				baseUrl,
 			}));
 		}
+
+		setMounted(true);
 	}, [baseUrl]);
+
+	if (!mounted) {
+		// TODO: suspend
+		return null;
+	}
 
 	return (
 		<AppPropsContext.Provider value={appProps}>

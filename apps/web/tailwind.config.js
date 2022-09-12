@@ -1,1 +1,1 @@
-module.exports = require('@stump/config/tailwind.config.js');
+module.exports = require('../../common/config/tailwind.js')('web');

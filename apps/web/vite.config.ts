@@ -1,30 +1,24 @@
 import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-plugin-tsconfig-paths';
+
 import react from '@vitejs/plugin-react';
-import loadVersion from 'vite-plugin-package-version';
-import * as path from 'path';
+
+import { name, version } from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [react(), loadVersion()],
-	base: '/',
-	build: {
-		outDir: 'build',
-		manifest: true,
-	},
 	server: {
 		port: 3000,
 	},
-	resolve: {
-		alias: {
-			'~': path.resolve('./src'),
-			'~components': path.resolve('./src/components'),
-			'~ui': path.resolve('./src/ui'),
-			'~pages': path.resolve('./src/pages'),
-			'~api': path.resolve('./src/api'),
-			'~stores': path.resolve('./src/stores'),
-			'~util': path.resolve('./src/util'),
-			'~hooks': path.resolve('./src/hooks'),
-			'~i18n': path.resolve('./src/i18n'),
-		},
+	plugins: [react(), tsconfigPaths()],
+	root: 'src',
+	publicDir: '../../../common/interface/src/assets',
+	define: {
+		pkgJson: { name, version },
+	},
+	build: {
+		outDir: '../dist',
+		assetsDir: '.',
+		manifest: true,
 	},
 });

@@ -1,34 +1,18 @@
-import { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import { AppPropsContext, useOnBoardingStore } from '@stump/client';
+import { AppPropsContext } from '@stump/client';
 import { AppLayout } from './AppLayout';
 
+// TODO: import() for lazy loading...
 import Home from './pages/Home';
+import OnBoarding from './pages/OnBoarding';
+import LoginOrClaim from './pages/LoginOrClaim';
 
 function OnBoardingRouter() {
-	const { setBaseUrl } = useOnBoardingStore();
-
-	const [baseUrl, setBaseUrlState] = useState('');
-
 	return (
 		<Routes>
-			<Route
-				path="/"
-				element={
-					<div>
-						<h4>Enter baseUrl:</h4>
-						<form
-							onSubmit={(e) => {
-								e.preventDefault();
-								setBaseUrl(baseUrl);
-							}}
-						>
-							<input onChange={(e) => setBaseUrlState(e.currentTarget.value)} />
-						</form>
-					</div>
-				}
-			/>
+			<Route path="/" element={<OnBoarding />} />
 		</Routes>
 	);
 }
@@ -49,6 +33,8 @@ export function AppRouter() {
 			<Route path="/" element={<AppLayout />}>
 				<Route path="" element={<Home />} />
 			</Route>
+
+			<Route path="/auth" element={<LoginOrClaim />} />
 
 			{/* <Route path="" element={<Home />} />
 		<Route path="settings" element={<Settings />}>

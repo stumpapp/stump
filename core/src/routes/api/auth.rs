@@ -8,7 +8,7 @@ use crate::{
 		alias::{ApiResult, Ctx, LoginResult, Session},
 		enums::UserRole,
 		errors::ApiError,
-		models::{AuthenticatedUser, LoginRequest},
+		models::user::{AuthenticatedUser, LoginOrRegisterArgs},
 	},
 	utils::auth,
 };
@@ -46,7 +46,7 @@ pub async fn me(
 pub async fn login(
 	ctx: &Ctx,
 	session: Session<'_>,
-	credentials: Json<LoginRequest>,
+	credentials: Json<LoginOrRegisterArgs>,
 ) -> LoginResult {
 	let existing_session = session.get().await?;
 
@@ -87,7 +87,7 @@ pub async fn login(
 pub async fn register(
 	ctx: &Ctx,
 	session: Session<'_>,
-	credentials: Json<LoginRequest>,
+	credentials: Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<AuthenticatedUser>> {
 	let existing_session = session.get().await?;
 	let db = ctx.get_db();

@@ -18,6 +18,11 @@ export interface UserPreferences {
 	collectionViewMode: string;
 }
 
+export interface LoginOrRegisterArgs {
+	username: string;
+	password: string;
+}
+
 export type FileStatus = 'UNKNOWN' | 'READY' | 'UNSUPPORTED' | 'ERROR' | 'MISSING';
 
 export interface Library {

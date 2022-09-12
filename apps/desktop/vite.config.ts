@@ -12,7 +12,8 @@ export default defineConfig({
 	},
 	plugins: [react(), tsconfigPaths()],
 	root: 'src',
-	publicDir: '../../common/interface/src/assets',
+	publicDir: '../../../common/interface/src/assets',
+	base: '/',
 	define: {
 		pkgJson: { name, version },
 	},

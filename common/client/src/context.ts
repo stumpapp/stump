@@ -8,5 +8,4 @@ export interface AppProps {
 	platform: Platform;
 	baseUrl?: string;
 	demoMode?: boolean;
-	// set(changes: Partial<AppProps>): void;
 }

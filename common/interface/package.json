@@ -20,6 +20,7 @@
     "@tanstack/react-query-devtools": "^4.3.4",
     "chakra-react-select": "^4.2.2",
     "framer-motion": "^6.5.1",
+    "immer": "^9.0.15",
     "nprogress": "^0.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -28,7 +29,6 @@
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0",
     "rooks": "^7.1.1",
-    "tailwindcss": "^3.1.8",
     "zod": "^3.19.0",
     "zustand": "^4.1.1"
   },

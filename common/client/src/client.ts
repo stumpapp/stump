@@ -1,6 +1,4 @@
-import { QueryClient, useQuery } from '@tanstack/react-query';
-import { API } from './api';
-import { startUpQuery } from './api/init';
+import { QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
 	defaultOptions: {
@@ -11,8 +9,3 @@ export const queryClient = new QueryClient({
 		},
 	},
 });
-
-export function useStartUpQuery() {
-	console.log('useStartUpQuery', API.getUri());
-	return useQuery(['startUp'], startUpQuery, {});
-}

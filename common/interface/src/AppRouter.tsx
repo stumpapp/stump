@@ -1,7 +1,10 @@
 import { useContext, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
+
 import { AppPropsContext, useOnBoardingStore } from '@stump/client';
 import { AppLayout } from './AppLayout';
+
+import Home from './pages/Home';
 
 function OnBoardingRouter() {
 	const { setBaseUrl } = useOnBoardingStore();
@@ -41,11 +44,11 @@ export function AppRouter() {
 		return <OnBoardingRouter />;
 	}
 
-	console.log('AppRouter', appProps);
-
 	return (
 		<Routes>
-			<Route path="/" element={<AppLayout />}></Route>
+			<Route path="/" element={<AppLayout />}>
+				<Route path="" element={<Home />} />
+			</Route>
 
 			{/* <Route path="" element={<Home />} />
 		<Route path="settings" element={<Settings />}>

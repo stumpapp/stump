@@ -21,10 +21,18 @@ export default function App() {
 	}
 
 	const [platform, setPlatform] = useState<Platform>('unknown');
+	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
-		os.platform().then((platform) => setPlatform(getPlatform(platform)));
+		os.platform().then((platform) => {
+			setPlatform(getPlatform(platform));
+			setMounted(true);
+		});
 	}, []);
+
+	if (!mounted) {
+		return null;
+	}
 
 	return <StumpInterface platform={platform} />;
 }

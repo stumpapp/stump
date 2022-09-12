@@ -2,9 +2,9 @@
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
     "beforeBuildCommand": "echo 'TODO'",
-    "beforeDevCommand": "cd ../web && npm run dev",
+    "beforeDevCommand": "pnpm vite --host",
     "devPath": "http://localhost:3000",
-    "distDir": "../../web/build"
+    "distDir": "../dist"
   },
   "package": {
     "productName": "stump-desktop",

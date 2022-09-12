@@ -25,6 +25,7 @@ importers:
       '@stump/client': workspace:*
       '@stump/interface': workspace:*
       '@tanstack/react-query': ^4.0.10
+      '@tauri-apps/api': ^1.0.2
       '@tauri-apps/cli': ^1.0.5
       '@types/react': ^18.0.15
       '@types/react-dom': ^18.0.6
@@ -41,6 +42,7 @@ importers:
       '@stump/client': link:../../common/client
       '@stump/interface': link:../../common/interface
       '@tanstack/react-query': 4.3.4_biqbaboplfbrettd7655fr4n2y
+      '@tauri-apps/api': 1.0.2
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     devDependencies:
@@ -237,7 +239,9 @@ importers:
       '@stump/config': workspace:*
       '@stump/core': workspace:*
       '@tanstack/react-query': ^4.2.3
+      '@types/axios': ^0.14.0
       '@types/react': ^18.0.15
+      axios: ^0.27.1
       tsconfig: '*'
       typescript: ^4.7.4
       zustand: ^3.7.1
@@ -245,8 +249,10 @@ importers:
       '@stump/config': link:../config
       '@stump/core': link:../../core
       '@tanstack/react-query': 4.3.4
+      axios: 0.27.2
       zustand: 3.7.2
     devDependencies:
+      '@types/axios': 0.14.0
       '@types/react': 18.0.19
       tsconfig: 7.0.0
       typescript: 4.8.3
@@ -256,14 +262,23 @@ importers:
 
   common/interface:
     specifiers:
+      '@chakra-ui/react': ^2.3.2
+      '@emotion/react': ^11.10.4
+      '@emotion/styled': ^11.10.4
       '@stump/client': workspace:*
       '@tanstack/react-query': ^4.3.4
+      '@tanstack/react-query-devtools': ^4.3.4
+      '@types/nprogress': ^0.2.0
       '@types/react': ^18.0.19
       '@types/react-dom': ^18.0.6
       '@types/react-router-dom': ^5.3.3
       '@vitejs/plugin-react': ^2.1.0
+      chakra-react-select: ^4.2.2
+      framer-motion: ^6.5.1
+      nprogress: ^0.2.0
       react: ^18.2.0
       react-dom: ^18.2.0
+      react-error-boundary: ^3.1.4
       react-hook-form: ^7.35.0
       react-router: ^6.3.0
       react-router-dom: ^6.3.0
@@ -271,18 +286,29 @@ importers:
       tailwindcss: ^3.1.8
       vite: ^3.1.0
       zod: ^3.19.0
+      zustand: ^4.1.1
     dependencies:
+      '@chakra-ui/react': 2.3.2_w6k6assfvcacdclmprnlqvwew4
+      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
+      '@emotion/styled': 11.10.4_v6omebeixt23oq3ljl3rjllla4
       '@stump/client': link:../client
       '@tanstack/react-query': 4.3.4_biqbaboplfbrettd7655fr4n2y
+      '@tanstack/react-query-devtools': 4.3.4_hbsvmtv74eglyqgnta4rgheflu
+      chakra-react-select: 4.2.2_vuepnbt5oicqlz3k4xoyqz5wx4
+      framer-motion: 6.5.1_biqbaboplfbrettd7655fr4n2y
+      nprogress: 0.2.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      react-error-boundary: 3.1.4_react@18.2.0
       react-hook-form: 7.35.0_react@18.2.0
       react-router: 6.3.0_react@18.2.0
       react-router-dom: 6.3.0_biqbaboplfbrettd7655fr4n2y
       rooks: 7.1.1_biqbaboplfbrettd7655fr4n2y
       tailwindcss: 3.1.8
       zod: 3.19.0
+      zustand: 4.1.1_react@18.2.0
     devDependencies:
+      '@types/nprogress': 0.2.0
       '@types/react': 18.0.19
       '@types/react-dom': 18.0.6
       '@types/react-router-dom': 5.3.3
@@ -485,6 +511,15 @@ packages:
     hasBin: true
     dependencies:
       '@babel/types': 7.19.0
+
+  /@babel/plugin-syntax-jsx/7.18.6:
+    resolution: {integrity: sha512-6mmljtAedFGTWu2p/8WIORGwy+61PLgOMPOdazc7YoJ9ZCWUyFy3A6CpPkRKLKD1ToAesxX8KGEViAiLo9N+7Q==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/helper-plugin-utils': 7.18.9
+    dev: false
 
   /@babel/plugin-syntax-jsx/7.18.6_@babel+core@7.19.0:
     resolution: {integrity: sha512-6mmljtAedFGTWu2p/8WIORGwy+61PLgOMPOdazc7YoJ9ZCWUyFy3A6CpPkRKLKD1ToAesxX8KGEViAiLo9N+7Q==}
@@ -1682,6 +1717,25 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
+  /@emotion/babel-plugin/11.10.0:
+    resolution: {integrity: sha512-xVnpDAAbtxL1dsuSelU5A7BnY/lftws0wUexNJZTPsvX/1tM4GZJbclgODhvW4E+NH7E5VFcH0bBn30NvniPJA==}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/helper-module-imports': 7.18.6
+      '@babel/plugin-syntax-jsx': 7.18.6
+      '@babel/runtime': 7.18.9
+      '@emotion/hash': 0.9.0
+      '@emotion/memoize': 0.8.0
+      '@emotion/serialize': 1.1.0
+      babel-plugin-macros: 3.1.0
+      convert-source-map: 1.8.0
+      escape-string-regexp: 4.0.0
+      find-root: 1.1.0
+      source-map: 0.5.7
+      stylis: 4.0.13
+    dev: false
+
   /@emotion/babel-plugin/11.10.0_@babel+core@7.19.0:
     resolution: {integrity: sha512-xVnpDAAbtxL1dsuSelU5A7BnY/lftws0wUexNJZTPsvX/1tM4GZJbclgODhvW4E+NH7E5VFcH0bBn30NvniPJA==}
     peerDependencies:
@@ -1737,6 +1791,30 @@ packages:
 
   /@emotion/memoize/0.8.0:
     resolution: {integrity: sha512-G/YwXTkv7Den9mXDO7AhLWkE3q+I92B+VqAE+dYG4NGPaHZGvt3G8Q0p9vmE+sq7rTGphUbAvmQ9YpbfMQGGlA==}
+    dev: false
+
+  /@emotion/react/11.10.4_fn6mmk7tilns4p7ajkklhuudvi:
+    resolution: {integrity: sha512-j0AkMpr6BL8gldJZ6XQsQ8DnS9TxEQu1R+OGmDZiWjBAJtCcbt0tS3I/YffoqHXxH6MjgI7KdMbYKw3MEiU9eA==}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+      '@types/react': '*'
+      react: '>=16.8.0'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.18.9
+      '@emotion/babel-plugin': 11.10.0
+      '@emotion/cache': 11.10.1
+      '@emotion/serialize': 1.1.0
+      '@emotion/use-insertion-effect-with-fallbacks': 1.0.0_react@18.2.0
+      '@emotion/utils': 1.2.0
+      '@emotion/weak-memoize': 0.3.0
+      '@types/react': 18.0.19
+      hoist-non-react-statics: 3.3.2
+      react: 18.2.0
     dev: false
 
   /@emotion/react/11.10.4_jzesbwkbmcauznusyf3xl355uu:
@@ -1796,6 +1874,30 @@ packages:
       '@emotion/babel-plugin': 11.10.0_@babel+core@7.19.0
       '@emotion/is-prop-valid': 1.2.0
       '@emotion/react': 11.10.4_jzesbwkbmcauznusyf3xl355uu
+      '@emotion/serialize': 1.1.0
+      '@emotion/use-insertion-effect-with-fallbacks': 1.0.0_react@18.2.0
+      '@emotion/utils': 1.2.0
+      '@types/react': 18.0.19
+      react: 18.2.0
+    dev: false
+
+  /@emotion/styled/11.10.4_v6omebeixt23oq3ljl3rjllla4:
+    resolution: {integrity: sha512-pRl4R8Ez3UXvOPfc2bzIoV8u9P97UedgHS4FPX594ntwEuAMA114wlaHvOK24HB48uqfXiGlYIZYCxVJ1R1ttQ==}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+      '@emotion/react': ^11.0.0-rc.0
+      '@types/react': '*'
+      react: '>=16.8.0'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.18.9
+      '@emotion/babel-plugin': 11.10.0
+      '@emotion/is-prop-valid': 1.2.0
+      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
       '@emotion/serialize': 1.1.0
       '@emotion/use-insertion-effect-with-fallbacks': 1.0.0_react@18.2.0
       '@emotion/utils': 1.2.0
@@ -2260,6 +2362,11 @@ packages:
       use-sync-external-store: 1.2.0_react@18.2.0
     dev: false
 
+  /@tauri-apps/api/1.0.2:
+    resolution: {integrity: sha512-yuNW0oeJ1/ZA7wNF1KgxhHrSu5viPVzY/UgUczzN5ptLM8dH15Juy5rEGkoHfeXGju90Y/l22hi3BtIrp/za+w==}
+    engines: {node: '>= 12.22.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
+    dev: false
+
   /@tauri-apps/cli-darwin-arm64/1.0.5:
     resolution: {integrity: sha512-oxpFb9ZeMiC3xPUJ9NsXWCnnwFSVkPbJUvDKpc9IaoDIUpsMTV72W4P0Nh0uQRbyhx4modPpstt7+ONypNVYNg==}
     engines: {node: '>= 10'}
@@ -2371,6 +2478,15 @@ packages:
 
   /@tsconfig/node16/1.0.3:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
+    dev: true
+
+  /@types/axios/0.14.0:
+    resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
+    deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
+    dependencies:
+      axios: 0.27.2
+    transitivePeerDependencies:
+      - debug
     dev: true
 
   /@types/babel__core/7.1.19:
@@ -3102,6 +3218,28 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-select: 5.4.0_kunnbtlwyntza55g5v4bnmmtxy
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/react'
+    dev: false
+
+  /chakra-react-select/4.2.2_vuepnbt5oicqlz3k4xoyqz5wx4:
+    resolution: {integrity: sha512-22PjDlhk4341jCofxQQhNtfI6YPoeE5hpppJACAquLvRzs9y6lgTUTm+fhOhWUwzQ4SF++1jC5bt/G3bxsJvZQ==}
+    peerDependencies:
+      '@chakra-ui/form-control': ^2.0.0
+      '@chakra-ui/icon': ^3.0.0
+      '@chakra-ui/layout': ^2.0.0
+      '@chakra-ui/menu': ^2.0.0
+      '@chakra-ui/spinner': ^2.0.0
+      '@chakra-ui/system': ^2.0.0
+      '@emotion/react': ^11.8.1
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    dependencies:
+      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-select: 5.4.0_nylzxt5ale4dsv666zkb25cgtm
     transitivePeerDependencies:
       - '@babel/core'
       - '@types/react'
@@ -6358,7 +6496,7 @@ packages:
     peerDependencies:
       react: '>=16.13.1'
     dependencies:
-      '@babel/runtime': 7.18.9
+      '@babel/runtime': 7.19.0
       react: 18.2.0
     dev: false
 
@@ -6537,6 +6675,26 @@ packages:
       '@babel/runtime': 7.18.9
       '@emotion/cache': 11.10.1
       '@emotion/react': 11.10.4_jzesbwkbmcauznusyf3xl355uu
+      '@types/react-transition-group': 4.4.5
+      memoize-one: 5.2.1
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-transition-group: 4.4.2_biqbaboplfbrettd7655fr4n2y
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/react'
+    dev: false
+
+  /react-select/5.4.0_nylzxt5ale4dsv666zkb25cgtm:
+    resolution: {integrity: sha512-CjE9RFLUvChd5SdlfG4vqxZd55AZJRrLrHzkQyTYeHlpOztqcgnyftYAolJ0SGsBev6zAs6qFrjm6KU3eo2hzg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@babel/runtime': 7.18.9
+      '@emotion/cache': 11.10.1
+      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
       '@types/react-transition-group': 4.4.5
       memoize-one: 5.2.1
       prop-types: 15.8.1
@@ -7907,4 +8065,20 @@ packages:
         optional: true
     dependencies:
       react: 18.2.0
+    dev: false
+
+  /zustand/4.1.1_react@18.2.0:
+    resolution: {integrity: sha512-h4F3WMqsZgvvaE0n3lThx4MM81Ls9xebjvrABNzf5+jb3/03YjNTSgZXeyrvXDArMeV9untvWXRw1tY+ntPYbA==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      immer: '>=9.0'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      immer:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      react: 18.2.0
+      use-sync-external-store: 1.2.0_react@18.2.0
     dev: false

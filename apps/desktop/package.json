@@ -5,12 +5,14 @@
   "license": "MIT",
   "scripts": {
     "tauri": "tauri",
+    "vite": "vite --",
     "dev": "tauri dev"
   },
   "dependencies": {
-    "@stump/interface": "workspace:*",
     "@stump/client": "workspace:*",
+    "@stump/interface": "workspace:*",
     "@tanstack/react-query": "^4.0.10",
+    "@tauri-apps/api": "^1.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

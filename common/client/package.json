@@ -14,10 +14,12 @@
 		"@stump/config": "workspace:*",
 		"@stump/core": "workspace:*",
 		"@tanstack/react-query": "^4.2.3",
+		"axios": "^0.27.1",
 		"zustand": "^3.7.1"
 	},
 	"devDependencies": {
 		"@types/react": "^18.0.15",
+		"@types/axios": "^0.14.0",
 		"tsconfig": "*",
 		"typescript": "^4.7.4"
 	},

@@ -2,6 +2,7 @@ import { ApiResult } from '@stump/core';
 
 export * from './auth';
 export * from './filesystem';
+export * from './job';
 export * from './library';
 export * from './media';
 export * from './series';

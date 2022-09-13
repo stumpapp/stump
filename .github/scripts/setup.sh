@@ -94,7 +94,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         pnpm run setup
 
         echo
-        echo "Pre-setup completed! Run 'pnpm dev' to get started."
+        echo "Pre-setup completed! Run 'pnpm dev:web' or 'pnpm start:web' to get started."
 elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo
         echo "Attempting to install 'cargo-watch':"
@@ -107,7 +107,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         pnpm run setup
                 
         echo
-        echo "Pre-setup completed! Run 'pnpm dev' to get started."
+        echo "Pre-setup completed! Run 'pnpm dev:web' or 'pnpm start:web' to get started."
 else
         echo "Your OS '$OSTYPE' is not supported by the pre-setup script. Please consider adding support for it: https://github.com/aaronleopold/stump/issues"
         exit 1

@@ -3,7 +3,7 @@ import { getMediaPage } from '@stump/client/api';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import ImageBasedReader, {
 	AnimatedImageBasedReader,
-} from '../../components/reader/ImageBasedReader';
+} from '../../components/readers/ImageBasedReader';
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '../../utils/patterns';
 
 export default function ReadBook() {

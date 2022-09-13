@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "echo 'TODO'",
-    "beforeDevCommand": "pnpm vite --host",
+    "beforeBuildCommand": "pnpm vite build",
+    "beforeDevCommand": "pnpm vite --clearScreen=false",
     "devPath": "http://localhost:3000",
     "distDir": "../dist"
   },

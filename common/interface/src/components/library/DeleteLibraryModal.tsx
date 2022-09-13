@@ -1,4 +1,3 @@
-import React from 'react';
 import {
 	Modal,
 	ModalOverlay,
@@ -11,10 +10,10 @@ import {
 } from '@chakra-ui/react';
 import { Trash } from 'phosphor-react';
 import toast from 'react-hot-toast';
-import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Library } from '@stump/core';
 import Button, { ModalCloseButton } from '../../ui/Button';
+import { useLibraryMutation } from '@stump/client';
 
 interface Props {
 	disabled?: boolean;
@@ -27,31 +26,23 @@ export default function DeleteLibraryModal({ disabled, library }: Props) {
 
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
-	// const { mutateAsync } = useMutation(['deleteLibrary'], {
-	// 	mutationFn: deleteLibrary,
-	// 	onSuccess: handleSuccess,
-	// });
-
-	async function handleSuccess() {
-		// await client.invalidateQueries(['getLibraries']);
-
-		// TODO: navigate away??
-
-		onClose();
-
-		navigate('/');
-	}
+	const { deleteLibraryAsync } = useLibraryMutation({
+		onDeleted() {
+			onClose();
+			navigate('/');
+		},
+	});
 
 	function handleDelete() {
 		if (disabled) {
 			// This should never happen, but here just in case
 			throw new Error('You do not have permission to delete libraries.');
 		} else {
-			// toast.promise(mutateAsync(library.id), {
-			// 	loading: 'Deleting Library...',
-			// 	success: 'Library Deleted!',
-			// 	error: 'Error Deleting Library',
-			// });
+			toast.promise(deleteLibraryAsync(library.id), {
+				loading: 'Deleting Library...',
+				success: 'Library Deleted!',
+				error: 'Error Deleting Library',
+			});
 		}
 	}
 

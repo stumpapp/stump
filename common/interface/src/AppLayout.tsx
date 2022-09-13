@@ -2,23 +2,16 @@ import React, { useContext, useMemo } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import { AppPropsContext, useAuthQuery, useUserStore } from '@stump/client';
+import { AppPropsContext, useAuthQuery, useJobManager, useUserStore } from '@stump/client';
 
 import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
-// import clsx from 'clsx';
+import JobOverlay from './components/JobOverlay';
 
 export function AppLayout() {
-	// const appProps = useContext(AppPropsContext);
-
-	const { setUser } = useUserStore();
-
-	const { user, isLoading } = useAuthQuery({
-		onSuccess: setUser,
-	});
+	const appProps = useContext(AppPropsContext);
 
 	const location = useLocation();
-
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
 		// TODO: replace with single regex, I am lazy rn
@@ -27,15 +20,18 @@ export function AppLayout() {
 		);
 	}, [location]);
 
-	// const { data: user, isLoading } = useAuthQuery({
-	// onSuccess: setUser,
-	// });
+	useJobManager();
 
-	// if (isLoading) {
-	// 	return null;
-	// }
+	const { user: storeUser, setUser } = useUserStore();
 
-	if (!user) {
+	const { user, isLoading } = useAuthQuery({
+		onSuccess: setUser,
+		enabled: !storeUser,
+	});
+
+	const hasUser = !!user || !!storeUser;
+
+	if (!hasUser && !isLoading) {
 		return <Navigate to="/auth" state={{ from: location }} />;
 	}
 
@@ -46,6 +42,7 @@ export function AppLayout() {
 				w="full"
 				h="full"
 				onContextMenu={(e) => {
+					// TODO: uncomment once I add custom menu on Tauri side
 					// if (appProps?.platform != 'browser') {
 					// 	e.preventDefault();
 					// 	return false;
@@ -62,6 +59,8 @@ export function AppLayout() {
 					</React.Suspense>
 				</Box>
 			</Flex>
+
+			<JobOverlay />
 		</React.Suspense>
 	);
 }

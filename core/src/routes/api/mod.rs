@@ -24,6 +24,7 @@ pub fn api() -> Vec<Route> {
 		// top level api endpoints
 		claim,
 		ping,
+		version,
 		shutdown,
 		// auth
 		auth::me,
@@ -101,6 +102,12 @@ async fn claim(ctx: &Ctx) -> ApiResult<Json<ClaimResponse>> {
 #[get("/ping")]
 async fn ping() -> String {
 	"pong".to_string()
+}
+
+#[openapi(tag = "General")]
+#[get("/version")]
+async fn version() -> String {
+	env!("CARGO_PKG_VERSION").to_string()
 }
 
 // FIXME: won't work for docker. Allow custom shudown command sequences?

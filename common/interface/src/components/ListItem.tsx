@@ -1,5 +1,4 @@
 import { Heading, HStack, Text, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 interface Props {

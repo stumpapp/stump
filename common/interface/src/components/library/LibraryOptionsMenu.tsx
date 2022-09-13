@@ -4,8 +4,7 @@ import EditLibraryModal from './EditLibraryModal';
 import DeleteLibraryModal from './DeleteLibraryModal';
 import { Library } from '@stump/core';
 import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '@stump/client';
-// import { UserRole } from '@stump/core';
+import { queryClient, useScanLibrary, useUserStore } from '@stump/client';
 
 interface Props {
 	library: Library;
@@ -14,12 +13,9 @@ interface Props {
 export default function LibraryOptionsMenu({ library }: Props) {
 	const navigate = useNavigate();
 
-	// const { user } = useUser();
 	const { user } = useUserStore();
 
-	// const { mutate: scan } = useMutation(['scanLibary'], { mutationFn: scanLibary });
-
-	// const {}
+	const { scan } = useScanLibrary();
 
 	function handleScan() {
 		// extra protection, should not be possible to reach this.
@@ -27,9 +23,9 @@ export default function LibraryOptionsMenu({ library }: Props) {
 			throw new Error('You do not have permission to scan libraries.');
 		}
 
-		// scan(library.id);
+		scan(library.id);
 
-		// client.invalidateQueries(['getJobReports']);
+		queryClient.invalidateQueries(['getJobReports']);
 
 		// Note: not worrying about this for a while so
 		// if (RESTRICTED_MODE) {

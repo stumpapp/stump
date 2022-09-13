@@ -1,9 +1,22 @@
-import { Heading, InputGroup, InputRightElement } from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { checkUrl, isUrl, useStumpConfigStore } from '@stump/client';
 import { FieldValues, useForm } from 'react-hook-form';
 import { useDebounce } from 'rooks';
 import { z } from 'zod';
+
+import {
+	Alert,
+	AlertIcon,
+	Container,
+	FormLabel,
+	HStack,
+	InputGroup,
+	InputRightElement,
+	Stack,
+	Text,
+} from '@chakra-ui/react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useStumpConfigStore } from '@stump/client';
+import { checkUrl, isUrl } from '@stump/client/api';
+
 import Form, { FormControl } from '../ui/Form';
 import Input from '../ui/Input';
 
@@ -56,10 +69,27 @@ export default function OnBoarding() {
 	}
 
 	return (
-		<div>
-			<Heading>Enter baseUrl:</Heading>
+		<Stack as={Container} p="4" spacing={4} h="full" justify="center">
+			<HStack px={2} flexShrink={0} justifyContent="center" alignItems="center" spacing="4">
+				<img src="/favicon.png" width="120" height="120" />
+				<Text
+					bgGradient="linear(to-r, brand.600, brand.200)"
+					bgClip="text"
+					fontSize="4xl"
+					fontWeight="bold"
+				>
+					Stump
+				</Text>
+			</HStack>
+			<Alert status="info" rounded="md">
+				<AlertIcon />
+				{/* {t('loginPage.claimText')} */}
+				Welcome to Stump! To get started, please enter the base URL of your Stump server below.
+			</Alert>
 			<Form onSubmit={handleSubmit} form={form}>
 				<FormControl label="Server URL">
+					<FormLabel htmlFor="baseUrl">Server URL</FormLabel>
+
 					<InputGroup>
 						<Input {...form.register('baseUrl')} onChange={debouncedValidate} />
 						<InputRightElement children={<></>} />
@@ -67,6 +97,6 @@ export default function OnBoarding() {
 				</FormControl>
 				{/* <ServerURLInput /> */}
 			</Form>
-		</div>
+		</Stack>
 	);
 }

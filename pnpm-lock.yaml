@@ -344,7 +344,9 @@ importers:
       react-i18next: ^11.18.6
       react-router: ^6.3.0
       react-router-dom: ^6.3.0
+      react-swipeable: ^7.0.0
       rooks: ^7.1.1
+      typescript: ^4.8.3
       use-count-up: ^3.0.1
       vite: ^3.1.0
       zod: ^3.19.0
@@ -375,6 +377,7 @@ importers:
       react-i18next: 11.18.6_4sidbwfhen5r7txudrvpua6nty
       react-router: 6.3.0_react@18.2.0
       react-router-dom: 6.3.0_biqbaboplfbrettd7655fr4n2y
+      react-swipeable: 7.0.0_react@18.2.0
       rooks: 7.1.1_biqbaboplfbrettd7655fr4n2y
       use-count-up: 3.0.1_react@18.2.0
       zod: 3.19.0
@@ -388,6 +391,7 @@ importers:
       '@types/react-helmet': 6.1.5
       '@types/react-router-dom': 5.3.3
       '@vitejs/plugin-react': 2.1.0_vite@3.1.0
+      typescript: 4.8.3
       vite: 3.1.0
 
   core:
@@ -862,7 +866,7 @@ packages:
       '@emotion/react': '>=10.0.35'
       react: '>=18'
     dependencies:
-      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
+      '@emotion/react': 11.10.4_jzesbwkbmcauznusyf3xl355uu
       react: 18.2.0
     dev: false
 
@@ -1179,8 +1183,8 @@ packages:
       '@chakra-ui/react-env': 2.0.9_react@18.2.0
       '@chakra-ui/system': 2.2.9_hfzxdiydbrbhhfpkwuv3jhvwmq
       '@chakra-ui/utils': 2.0.9
-      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
-      '@emotion/styled': 11.10.4_v6omebeixt23oq3ljl3rjllla4
+      '@emotion/react': 11.10.4_jzesbwkbmcauznusyf3xl355uu
+      '@emotion/styled': 11.10.4_fegg7422thxjtv2g43ohoqlm7a
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false
@@ -1436,8 +1440,8 @@ packages:
       '@chakra-ui/transition': 2.0.9_s2wzvri4ojre7yvvetwrt2nhzi
       '@chakra-ui/utils': 2.0.9
       '@chakra-ui/visually-hidden': 2.0.9_t3ehvuuqn76q3rgsqchbz6ue7u
-      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
-      '@emotion/styled': 11.10.4_v6omebeixt23oq3ljl3rjllla4
+      '@emotion/react': 11.10.4_jzesbwkbmcauznusyf3xl355uu
+      '@emotion/styled': 11.10.4_fegg7422thxjtv2g43ohoqlm7a
       framer-motion: 6.5.1_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -1545,8 +1549,8 @@ packages:
       '@chakra-ui/react-utils': 2.0.6_react@18.2.0
       '@chakra-ui/styled-system': 2.3.1
       '@chakra-ui/utils': 2.0.9
-      '@emotion/react': 11.10.4_fn6mmk7tilns4p7ajkklhuudvi
-      '@emotion/styled': 11.10.4_v6omebeixt23oq3ljl3rjllla4
+      '@emotion/react': 11.10.4_jzesbwkbmcauznusyf3xl355uu
+      '@emotion/styled': 11.10.4_fegg7422thxjtv2g43ohoqlm7a
       react: 18.2.0
       react-fast-compare: 3.2.0
     dev: false

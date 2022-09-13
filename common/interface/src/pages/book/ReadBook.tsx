@@ -1,11 +1,10 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMedia, useMediaMutation } from '@stump/client';
+import { getMediaPage } from '@stump/client/api';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { updateMediaProgress } from '~api/media';
-import { getMediaById, getMediaPage } from '~api/media';
 import ImageBasedReader, {
 	AnimatedImageBasedReader,
-} from '~components/Media/Readers/ImageBasedReader';
-import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '~util/patterns';
+} from '../../components/reader/ImageBasedReader';
+import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '../../utils/patterns';
 
 export default function ReadBook() {
 	const navigate = useNavigate();
@@ -18,22 +17,16 @@ export default function ReadBook() {
 		throw new Error('Media id is required');
 	}
 
-	const { isLoading: fetchingBook, data: media } = useQuery(['getMediaById'], {
-		queryFn: async () => getMediaById(id).then((res) => res.data),
+	const { isLoading: fetchingBook, media } = useMedia(id);
+
+	const { updateReadProgress } = useMediaMutation(id, {
+		onError(err) {
+			console.error(err);
+		},
 	});
 
-	const { mutate: saveProgress } = useMutation(
-		['updateReadProgress'],
-		() => updateMediaProgress(id, parseInt(page!, 10)),
-		{
-			onError(err) {
-				console.error(err);
-			},
-		},
-	);
-
 	function handleChangePage(newPage: number) {
-		saveProgress();
+		updateReadProgress(newPage);
 		navigate(`/books/${id}/pages/${newPage}`);
 	}
 

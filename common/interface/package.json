@@ -11,7 +11,9 @@
     "./styles": "./src/styles/index.css",
     "./components/*": "./src/components/*"
   },
-  "scripts": {},
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
   "dependencies": {
     "@chakra-ui/react": "^2.3.2",
     "@emotion/react": "^11.10.4",
@@ -38,6 +40,7 @@
     "react-i18next": "^11.18.6",
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0",
+    "react-swipeable": "^7.0.0",
     "rooks": "^7.1.1",
     "use-count-up": "^3.0.1",
     "zod": "^3.19.0",
@@ -52,6 +55,7 @@
     "@types/react-helmet": "^6.1.5",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^2.1.0",
+    "typescript": "^4.8.3",
     "vite": "^3.1.0"
   },
   "keywords": []

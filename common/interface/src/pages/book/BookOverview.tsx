@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { Helmet } from 'react-helmet';
-import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { getMediaById, getMediaPage, getMediaThumbnail } from '~api/media';
-import Card from '~components/Card';
+
+import { useMedia } from '@stump/client';
+import { getMediaPage, getMediaThumbnail } from '@stump/client/api';
+
+import Card from '../../components/Card';
 
 export default function BookOverview() {
 	const { id } = useParams();
@@ -12,13 +14,7 @@ export default function BookOverview() {
 		throw new Error('Book id is required for this route.');
 	}
 
-	const {
-		isLoading,
-		data: media,
-		isFetching,
-	} = useQuery(['getMediaById'], {
-		queryFn: async () => getMediaById(id).then((res) => res.data),
-	});
+	const { media, isLoading } = useMedia(id);
 
 	const fallback = useMemo(() => {
 		// if (media.extension === 'epub') {
@@ -39,7 +35,7 @@ export default function BookOverview() {
 		img.src = getMediaPage(media.id, currentPage);
 	}
 
-	if (isLoading || isFetching) {
+	if (isLoading) {
 		return <div>Loading...</div>;
 	} else if (!media) {
 		throw new Error('Media not found');

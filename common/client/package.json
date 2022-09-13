@@ -9,7 +9,8 @@
 	},
 	"scripts": {
 		"dev": "tsc -w",
-		"build": "tsc"
+		"build": "tsc",
+		"check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@stump/config": "workspace:*",

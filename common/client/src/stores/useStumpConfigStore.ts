@@ -1,3 +1,4 @@
+import produce from 'immer';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { StoreBase } from '.';
@@ -16,17 +17,21 @@ export const useStumpConfigStore = create<StumpConfigStore>()(
 		persist(
 			(set) => ({
 				setBaseUrl(baseUrl: string) {
-					let adjustedBaseUrl = baseUrl;
+					set((store) =>
+						produce(store, (draft) => {
+							let adjustedBaseUrl = baseUrl;
 
-					if (baseUrl.endsWith('/')) {
-						adjustedBaseUrl = baseUrl.slice(0, -1);
-					}
+							if (baseUrl.endsWith('/')) {
+								adjustedBaseUrl = baseUrl.slice(0, -1);
+							}
 
-					if (!baseUrl.endsWith('/api')) {
-						adjustedBaseUrl += '/api';
-					}
+							if (!baseUrl.endsWith('/api')) {
+								adjustedBaseUrl += '/api';
+							}
 
-					set({ baseUrl: adjustedBaseUrl });
+							draft.baseUrl = adjustedBaseUrl;
+						}),
+					);
 				},
 				reset() {
 					set(() => ({}));

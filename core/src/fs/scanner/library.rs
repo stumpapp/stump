@@ -31,6 +31,7 @@ use super::{
 	BatchScanOperation,
 };
 
+// TODO: take in bottom up or top down scan option
 fn check_series(
 	library_path: &str,
 	series: Vec<series::Data>,
@@ -49,7 +50,16 @@ fn check_series(
 		.map(|s| s.id.clone())
 		.collect::<Vec<String>>();
 
-	let new_entries = WalkDir::new(library_path)
+	let mut walkdir = WalkDir::new(library_path);
+
+	// TODO: make this configurable
+	let top_level_series = false;
+
+	if top_level_series {
+		walkdir = walkdir.max_depth(1);
+	}
+
+	let new_entries = walkdir
 		.into_iter()
 		.filter_entry(|e| e.path().is_dir())
 		.filter_map(|e| e.ok())
@@ -194,7 +204,16 @@ async fn scan_series(
 		.map(|data| (data.path.clone(), false).into())
 		.collect::<HashMap<String, bool>>();
 
-	for entry in WalkDir::new(&series.path)
+	let mut walkdir = WalkDir::new(&series.path);
+
+	// TODO: make this configurable
+	let top_level_series = false;
+
+	if top_level_series {
+		walkdir = walkdir.max_depth(1);
+	}
+
+	for entry in walkdir
 		.into_iter()
 		.filter_map(|e| e.ok())
 		.filter(|e| e.path().is_file())

@@ -8,7 +8,7 @@ interface UserStore extends StoreBase<UserStore> {
 	user?: User | null;
 	userPreferences?: UserPreferences | null;
 
-	setUser: (user: User | null) => void;
+	setUser: (user?: User | null) => void;
 	setUserPreferences: (userPreferences: UserPreferences | null) => void;
 }
 
@@ -16,7 +16,7 @@ export const useUserStore = create<UserStore>()(
 	devtools(
 		persist(
 			(set, get) => ({
-				setUser(user: User | null) {
+				setUser(user?: User | null) {
 					set((state) =>
 						produce(state, (draft) => {
 							draft.user = user;

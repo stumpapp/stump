@@ -31,6 +31,9 @@
 			"@stump/client": [
 				"../../common/client"
 			],
+			"@stump/client/api": [
+				"../../common/client/src/api"
+			],
 			"@stump/interface": [
 				"../../common/interface"
 			]

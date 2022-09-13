@@ -1,10 +1,5 @@
-import {
-	AppProps,
-	AppPropsContext,
-	initializeApi,
-	queryClient,
-	useStumpConfigStore,
-} from '@stump/client';
+import { AppProps, AppPropsContext, queryClient, useStumpConfigStore } from '@stump/client';
+import { initializeApi } from '@stump/client/api';
 import { ChakraProvider } from '@chakra-ui/react';
 import { QueryClientProvider, defaultContext } from '@tanstack/react-query';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -14,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
 import { chakraTheme } from './chakra';
+import Notifications from './components/Notifications';
 
 function RouterContainer(props: { appProps: AppProps }) {
 	const [mounted, setMounted] = useState(false);
@@ -61,6 +57,8 @@ export default function StumpInterface(props: AppProps) {
 					<RouterContainer appProps={props} />
 				</QueryClientProvider>
 			</ErrorBoundary>
+
+			<Notifications />
 		</ChakraProvider>
 	);
 }

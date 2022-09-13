@@ -1,6 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 
 export * from './config';
+export * from './series';
+export * from './media';
 
 export let API: AxiosInstance;
 

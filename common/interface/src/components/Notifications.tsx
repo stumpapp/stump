@@ -1,4 +1,3 @@
-import React from 'react';
 import { useColorMode } from '@chakra-ui/react';
 import { Toaster, ToastBar } from 'react-hot-toast';
 

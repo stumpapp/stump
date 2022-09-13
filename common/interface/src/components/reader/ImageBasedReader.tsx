@@ -6,7 +6,7 @@ import { useBoolean } from '@chakra-ui/react';
 import { Media } from '@stump/core';
 import { useWindowSize } from 'rooks';
 
-import Toolbar from './Toolbar';
+import Toolbar from './utils/Toolbar';
 
 export interface ImageBasedReaderProps {
 	currentPage: number;

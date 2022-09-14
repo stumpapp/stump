@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 
 import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react';
-import { useLayoutMode, useSeries, useSeriesMedia } from '@stump/client';
+import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client';
 import { getSeriesThumbnail } from '@stump/client/api';
 import { Series } from '@stump/core';
 
@@ -70,10 +70,11 @@ export default function SeriesOverview() {
 	const { id } = useParams();
 
 	if (!id) {
-		throw new Error('Library id is required');
+		throw new Error('Series id is required');
 	}
 
 	const { layoutMode } = useLayoutMode('SERIES');
+	const { setBackwardsUrl } = useTopBarStore();
 
 	const { series, isLoading: isLoadingSeries } = useSeries(id);
 
@@ -87,6 +88,16 @@ export default function SeriesOverview() {
 			});
 		}
 	}, [pageData?.currentPage]);
+
+	useEffect(() => {
+		if (series?.library) {
+			setBackwardsUrl(`/libraries/${series.library.id}`);
+		}
+
+		return () => {
+			setBackwardsUrl();
+		};
+	}, [series?.library?.id]);
 
 	// FIXME: ugly
 	if (isLoadingSeries) {

@@ -1,14 +1,23 @@
-import { AppProps, AppPropsContext, queryClient, useStumpConfigStore } from '@stump/client';
-import { initializeApi } from '@stump/client/api';
-import { ChakraProvider } from '@chakra-ui/react';
-import { QueryClientProvider, defaultContext } from '@tanstack/react-query';
-import { ErrorBoundary } from 'react-error-boundary';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { ErrorFallback } from './components/ErrorFallback';
 import { useEffect, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Helmet } from 'react-helmet';
 import { BrowserRouter } from 'react-router-dom';
+
+import { ChakraProvider } from '@chakra-ui/react';
+import {
+	AppProps,
+	AppPropsContext,
+	queryClient,
+	useStumpConfigStore,
+	useTopBarStore,
+} from '@stump/client';
+import { initializeApi } from '@stump/client/api';
+import { defaultContext, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 import { AppRouter } from './AppRouter';
 import { chakraTheme } from './chakra';
+import { ErrorFallback } from './components/ErrorFallback';
 import Notifications from './components/Notifications';
 
 function RouterContainer(props: { appProps: AppProps }) {
@@ -16,6 +25,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 	const [appProps, setAppProps] = useState(props.appProps);
 
 	const { baseUrl, setBaseUrl } = useStumpConfigStore();
+	const { setTitle } = useTopBarStore();
 
 	useEffect(() => {
 		if (!baseUrl && appProps.baseUrl) {
@@ -32,6 +42,22 @@ function RouterContainer(props: { appProps: AppProps }) {
 		setMounted(true);
 	}, [baseUrl]);
 
+	function handleHelmetChange(newState: any, _: any, __: any) {
+		if (Array.isArray(newState?.title) && newState.title.length > 0) {
+			if (newState.title.length > 1) {
+				setTitle(newState.title[newState.title.length - 1]);
+			} else {
+				setTitle(newState.title[0]);
+			}
+		} else if (typeof newState?.title === 'string') {
+			if (newState.title === 'Stump') {
+				setTitle('');
+			} else {
+				setTitle(newState.title);
+			}
+		}
+	}
+
 	if (!mounted) {
 		// TODO: suspend
 		return null;
@@ -39,6 +65,9 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	return (
 		<AppPropsContext.Provider value={appProps}>
+			<Helmet defaultTitle="Stump" onChangeClientState={handleHelmetChange}>
+				<title>Stump</title>
+			</Helmet>
 			<BrowserRouter>
 				<AppRouter />
 			</BrowserRouter>

@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 
-import { useMedia } from '@stump/client';
+import { useMedia, useTopBarStore } from '@stump/client';
 import { getMediaPage, getMediaThumbnail } from '@stump/client/api';
 
 import Card from '../../components/Card';
@@ -15,12 +15,19 @@ export default function BookOverview() {
 	}
 
 	const { media, isLoading } = useMedia(id);
+	const { setBackwardsUrl } = useTopBarStore();
+
+	useEffect(() => {
+		if (media?.series) {
+			setBackwardsUrl(`/libraries/${media.series.id}`);
+		}
+
+		return () => {
+			setBackwardsUrl();
+		};
+	}, [media?.series?.id]);
 
 	const fallback = useMemo(() => {
-		// if (media.extension === 'epub') {
-		// 	return '/fallbacks/epub.png';
-		// }
-
 		return '/fallbacks/image-file.svg';
 	}, [media?.extension]);
 

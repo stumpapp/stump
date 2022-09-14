@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { HStack } from '@chakra-ui/react';
-import { useLibraryStats } from '@stump/client';
+import { useLibraryStats, useQueryParamStore } from '@stump/client';
 import { formatBytesSeparate } from '../../utils/format';
 import AnimatedStat from '../../ui/AnimatedStat';
 

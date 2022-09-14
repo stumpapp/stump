@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
+export * from './auth';
 export * from './config';
 export * from './series';
 export * from './media';

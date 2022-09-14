@@ -33,6 +33,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
+    - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
   - [/common](#common)
@@ -78,7 +79,42 @@ For more information about getting started, how Stump works and how it manages y
 
 ## Developer Guide 💻
 
-Contributions are very **encouraged** and **welcome**! Please review the [developer guide](https://www.stumpapp.dev/contributing) on the documentation website for information on how to get started developing.
+Contributions are very **encouraged** and **welcome**! Please review the [contributing guide](https://www.stumpapp.dev/contributing) for more thorough information on how to get started.
+
+A quick summary of the steps required to get going:
+
+1. Install [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/)
+   - If you're running Windows, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+   - If you're running macOS on Apple Silicon, you'll need to install [Rosetta](https://support.apple.com/en-us/HT211861)
+2. Run the setup script (based on your system):
+
+```bash
+.\.github\scripts\setup.ps1 # Windows
+./.github/scripts/setup.sh # Linux/MacOS
+```
+
+3. Start one of the apps:
+
+```bash
+pnpm dev:web # Web app
+pnpm dev:desktop # Desktop app
+```
+
+And that's it!
+
+#### Where to start?
+
+If you aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs work.
+
+Some other good places to start:
+
+- Translation, so Stump is accessible to non-English speakers.
+  - An automated translation system would be immensely helpful! If you're knowledgeable in this area, please reach out!
+- Writing comprehensive benchmarks and tests.
+- Designing and/or implementing missing UI components.
+- Docker build optimizations (it is currently _horrendously_ slow).
+- CI pipelines / workflows (given above issue with Docker is resolved).
+- And lots more!
 
 ## Project Structure 📦
 

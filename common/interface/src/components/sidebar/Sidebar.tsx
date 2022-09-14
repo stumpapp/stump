@@ -21,6 +21,8 @@ import { useLocale } from '../../hooks/useLocale';
 import ApplicationVersion from '../ApplicationVersion';
 import CreateLibraryModal from '../library/CreateLibraryModal';
 import LibraryOptionsMenu from '../library/LibraryOptionsMenu';
+import Logout from './Logout';
+import ThemeToggle from './ThemeToggle';
 
 interface NavMenuItemProps extends Library {
 	href: string;
@@ -186,8 +188,8 @@ export function SidebarContent() {
 				<ApplicationVersion />
 
 				<HStack>
-					{/* <Logout />
-					<ThemeToggle /> */}
+					<Logout />
+					<ThemeToggle />
 				</HStack>
 			</HStack>
 		</>

@@ -7,6 +7,7 @@ import { AppPropsContext, useAuthQuery, useJobManager, useUserStore } from '@stu
 import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
 import JobOverlay from './components/JobOverlay';
+import TopBar from './components/topbar/TopBar';
 
 export function AppLayout() {
 	const appProps = useContext(AppPropsContext);
@@ -53,7 +54,7 @@ export function AppLayout() {
 			>
 				{!hideSidebar && <Sidebar />}
 				<Box as="main" w="full" h="full" bg={useColorModeValue('gray.75', 'gray.900')}>
-					{/* {!hideSidebar && <Topbar />} */}
+					{!hideSidebar && <TopBar />}
 					<React.Suspense fallback={<Lazy />}>
 						<Outlet />
 					</React.Suspense>

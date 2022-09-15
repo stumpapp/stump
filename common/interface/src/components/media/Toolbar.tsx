@@ -1,9 +1,8 @@
-import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft } from 'phosphor-react';
 import { Link, useParams } from 'react-router-dom';
-import { Heading, Spacer, Text } from '@chakra-ui/react';
-import { getMediaPage } from '~api/media';
+import { Heading } from '@chakra-ui/react';
+import { getMediaPage } from '@stump/client/api';
 
 interface ToolbarProps {
 	title: string;

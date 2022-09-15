@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 export * from './auth';
 export * from './config';
+export * from './epub';
 export * from './series';
 export * from './media';
 

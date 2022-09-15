@@ -11,6 +11,8 @@ const LibraryOverview = React.lazy(() => import('./pages/library/LibraryOverview
 const LibraryFileExplorer = React.lazy(() => import('./pages/library/LibraryFileExplorer'));
 const SeriesOverview = React.lazy(() => import('./pages/SeriesOverview'));
 const BookOverview = React.lazy(() => import('./pages/book/BookOverview'));
+const ReadBook = React.lazy(() => import('./pages/book/ReadBook'));
+const ReadEpub = React.lazy(() => import('./pages/book/ReadEpub'));
 const SettingsLayout = React.lazy(() => import('./components/settings/SettingsLayout'));
 const GeneralSettings = React.lazy(() => import('./pages/settings/GeneralSettings'));
 const JobSettings = React.lazy(() => import('./pages/settings/JobSettings'));
@@ -48,8 +50,12 @@ export function AppRouter() {
 
 				<Route path="libraries/:id" element={<LibraryOverview />} />
 				<Route path="libraries/:id/explorer" element={<LibraryFileExplorer />} />
+
 				<Route path="series/:id" element={<SeriesOverview />} />
+
 				<Route path="books/:id" element={<BookOverview />} />
+				<Route path="books/:id/pages/:page" element={<ReadBook />} />
+				<Route path="epub/:id" element={<ReadEpub />} />
 
 				<Route path="settings" element={<SettingsLayout />}>
 					<Route path="" element={<Navigate to="/settings/general" replace />} />
@@ -63,25 +69,6 @@ export function AppRouter() {
 
 			<Route path="/auth" element={<LoginOrClaim />} />
 			<Route path="*" element={<FourOhFour />} />
-
-			{/* 
-		<Route path="settings" element={<Settings />}>
-			<Route path="" element={<Navigate to="/settings/general" replace={true} />} />
-			<Route path="general" element={<GeneralSettings />} />
-			<Route path="users" element={<UserSettings />} />
-			<Route path="server" element={<ServerSettings />} />
-			<Route path="jobs" element={<JobSettingsTab />} />
-		</Route>
-		<Route path="libraries/:id/explorer" element={<LibraryFileExplorer />} />
-		<Route path="books/:id/pages/:page" element={<ReadBook />} />
-		<Route path="epub/:id" element={<ReadEpub />} />
-		<Route path="epub/:id/loc/:loc" element={<ReadEpub />} />
-	</Route>
-
-	<Route path="/auth" element={<BaseLayout />}>
-		<Route path="login" element={<Login />} />
-	</Route>
-	<Route path="*" element={<FourOhFour />} /> */}
 		</Routes>
 	);
 }

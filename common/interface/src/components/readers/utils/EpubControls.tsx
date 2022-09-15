@@ -1,5 +1,5 @@
-import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react';
 import React from 'react';
+import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react';
 import { useNavigate } from 'react-router-dom';
 import { SwipeableHandlers } from 'react-swipeable';
 

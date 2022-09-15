@@ -15,10 +15,15 @@ export interface QueryParamStore extends Partial<PageParams>, StoreBase<QueryPar
 	getQueryString: () => string;
 }
 
+const defaultValues = {
+	zeroBased: false,
+	pageSize: 20,
+	direction: 'asc',
+} as Partial<QueryParamStore>;
+
 export const useQueryParamStore = create<QueryParamStore>()(
 	devtools((set, get) => ({
-		zeroBased: false,
-		pageSize: 20,
+		...defaultValues,
 
 		setZeroBased(zeroBased) {
 			set((store) => ({ ...store, zeroBased }));

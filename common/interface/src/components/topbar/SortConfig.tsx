@@ -1,6 +1,5 @@
 import { SortAscending, SortDescending } from 'phosphor-react';
 import { useState } from 'react';
-import Button from '~ui/Button';
 
 import {
 	ButtonGroup,
@@ -10,11 +9,11 @@ import {
 	MenuList,
 	useColorModeValue,
 } from '@chakra-ui/react';
-
-interface SortConfigProps {}
+import Button from '../../ui/Button';
+import { useQueryParamStore } from '@stump/client';
 
 export default function SortConfig() {
-	const [fakeState, setFakeState] = useState(false);
+	const { orderBy, setOrderBy, direction, setDirection } = useQueryParamStore();
 
 	return (
 		<ButtonGroup isAttached>
@@ -26,7 +25,7 @@ export default function SortConfig() {
 					size="sm"
 					bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
 				>
-					Sort by
+					Order by
 				</MenuButton>
 				<MenuList>
 					<MenuItem>Option 1</MenuItem>
@@ -37,13 +36,13 @@ export default function SortConfig() {
 			</Menu>
 
 			<Button
-				title={fakeState ? 'Sort ascending' : 'Sort descending'}
-				onClick={() => setFakeState((prev) => !prev)}
+				title={direction === 'asc' ? 'Sort ascending' : 'Sort descending'}
+				onClick={() => setDirection(direction === 'asc' ? 'desc' : 'asc')}
 				p={0.5}
 				size="sm"
 				bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
 			>
-				{fakeState ? (
+				{direction === 'asc' ? (
 					<SortAscending className="text-lg" weight="regular" />
 				) : (
 					<SortDescending className="text-lg" weight="regular" />

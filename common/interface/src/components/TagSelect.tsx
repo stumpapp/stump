@@ -1,7 +1,7 @@
-import { TagOption } from '~hooks/useTags';
 import { CreatableSelect } from 'chakra-react-select';
 import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { TagOption } from '@stump/client';
 
 interface TagSelectProps {
 	name?: string;

@@ -1,6 +1,7 @@
 import { ApiResult } from '@stump/core';
 
 export * from './auth';
+export * from './epub';
 export * from './filesystem';
 export * from './job';
 export * from './library';

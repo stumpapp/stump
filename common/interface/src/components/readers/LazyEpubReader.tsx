@@ -1,13 +1,14 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Book, Rendition } from 'epubjs';
-import { baseURL } from '~api/index';
-import { useColorMode } from '@chakra-ui/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import EpubControls from '../Epub/EpubControls';
 import { useSwipeable } from 'react-swipeable';
-import { useQuery } from '@tanstack/react-query';
-import { epubDarkTheme } from '~util/epubTheme';
-import { getEpubById } from '~api/epub';
+
+import { useColorMode } from '@chakra-ui/react';
+import { useEpubLazy } from '@stump/client';
+import { API } from '@stump/client/api';
+
+import { epubDarkTheme } from '../../utils/epubTheme';
+import EpubControls from './utils/EpubControls';
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 
@@ -38,9 +39,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	const [chapter, setChapter] = useState<string>('');
 	const [fontSize, setFontSize] = useState<number>(13);
 
-	const { data: epub, isLoading } = useQuery(['getEpubById', id], {
-		queryFn: async () => getEpubById(id).then((res) => res.data),
-	});
+	const { epub, isLoading } = useEpubLazy(id);
 
 	// TODO: type me
 	function handleLocationChange(changeState: any) {
@@ -73,7 +72,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 
 		if (!book) {
 			setBook(
-				new Book(`${baseURL}/media/${id}/file`, {
+				new Book(`${API.getUri()}/media/${id}/file`, {
 					openAs: 'epub',
 					// @ts-ignore: more incorrect types >:( I really truly cannot stress enough how much I want to just
 					// rip out my eyes working with epubjs...

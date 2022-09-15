@@ -1,9 +1,7 @@
+import { UseEpubReturn } from '@stump/client';
+import { getEpubResource } from '@stump/client/api';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getEpubResource } from '~api/epub';
-import { UseEpubReturn } from '~hooks/useEpub';
-
-interface EpubReaderProps extends UseEpubReturn {}
 
 /*
 	NOTE: I have decided to move this streamable epub reading to a future feature.
@@ -21,7 +19,7 @@ interface EpubReaderProps extends UseEpubReturn {}
 		- much more
 	Some of this has been started, but not finished.
 */
-export default function EpubReader({ epub, actions, ...rest }: EpubReaderProps) {
+export default function EpubReader({ epub, actions, ...rest }: UseEpubReturn) {
 	const navigate = useNavigate();
 
 	// const { isLoading: isFetchingResource, data: content } = useQuery(

@@ -1,7 +1,7 @@
+import { useEpub } from '@stump/client';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
-import { useEpub } from '~hooks/useEpub';
-import EpubReader from '~components/Media/Readers/EpubReader';
-import LazyEpubReader from '~components/Media/Readers/LazyEpubReader';
+import EpubReader from '../../components/readers/EpubReader';
+import LazyEpubReader from '../../components/readers/LazyEpubReader';
 
 export default function ReadEpub() {
 	const { id } = useParams();

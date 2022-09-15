@@ -18,6 +18,8 @@
 		"web": "pnpm --filter @stump/web --",
 		"desktop": "pnpm --filter @stump/desktop --",
 		"docs": "pnpm --filter @stump/docs --",
+		"interface": "pnpm --filter @stump/interface --",
+		"client": "pnpm --filter @stump/client --",
 		"build": "pnpm web build && pnpm core build",
 		"build:docker": "docker buildx build --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
 		"cache:docker-arm": "docker buildx build --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",

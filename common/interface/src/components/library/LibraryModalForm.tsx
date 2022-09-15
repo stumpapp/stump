@@ -121,8 +121,6 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 		}
 	}, [reset]);
 
-	console.log('errors', errors);
-
 	return (
 		<Form
 			className="w-full"

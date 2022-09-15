@@ -1,13 +1,13 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeBuildCommand": "pnpm vite build",
+    "beforeBuildCommand": "pnpm build:web",
     "beforeDevCommand": "pnpm vite --clearScreen=false",
     "devPath": "http://localhost:3000",
     "distDir": "../dist"
   },
   "package": {
-    "productName": "stump-desktop",
+    "productName": "Stump",
     "version": "0.0.0"
   },
   "tauri": {
@@ -29,7 +29,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.oromei.stump",
       "longDescription": "",
       "macOS": {
         "entitlements": null,

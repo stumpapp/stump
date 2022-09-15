@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, useQuery as _useQuery } from '@tanstack/react-query';
 
 export * from './queries';
 

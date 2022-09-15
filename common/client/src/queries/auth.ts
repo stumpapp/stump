@@ -6,6 +6,7 @@ import { checkIsClaimed } from '../api';
 import { login, me, register } from '../api/auth';
 import { queryClient } from '../client';
 import { ClientQueryParams } from '.';
+import { StumpQueryContext } from '../context';
 
 import type { User } from '@stump/core';
 export interface AuthQueryOptions {
@@ -21,6 +22,7 @@ export function useAuthQuery(options: AuthQueryOptions = {}) {
 		},
 		useErrorBoundary: false,
 		enabled: options?.enabled,
+		context: StumpQueryContext,
 	});
 
 	return {
@@ -35,6 +37,7 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(['checkIsClaimed'], {
 		queryFn: checkIsClaimed,
+		context: StumpQueryContext,
 	});
 
 	useEffect(() => {
@@ -57,6 +60,7 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 		onError: (err) => {
 			onError?.(err);
 		},
+		context: StumpQueryContext,
 	});
 
 	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(['registerUser'], {
@@ -64,6 +68,7 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 		// onError(err) {
 		// 	onError?.(err);
 		// },
+		context: StumpQueryContext,
 	});
 
 	return {

@@ -54,14 +54,14 @@ export function AppLayout() {
 			>
 				{!hideSidebar && <Sidebar />}
 				<Box as="main" w="full" h="full" bg={useColorModeValue('gray.75', 'gray.900')}>
-					{!hideSidebar && <TopBar />}
+					{/* {!hideSidebar && <TopBar />} */}
 					<React.Suspense fallback={<Lazy />}>
 						<Outlet />
 					</React.Suspense>
 				</Box>
 			</Flex>
 
-			<JobOverlay />
+			{/* <JobOverlay /> */}
 		</React.Suspense>
 	);
 }

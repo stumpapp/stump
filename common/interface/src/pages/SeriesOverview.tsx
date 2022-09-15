@@ -14,6 +14,7 @@ import Pagination from '../ui/Pagination';
 import ReadMore from '../ui/ReadMore';
 import MediaGrid from '../components/media/MediaGrid';
 import MediaList from '../components/media/MediaList';
+import { useGetPage } from '../hooks/useGetPage';
 
 interface OverviewTitleSectionProps {
 	isVisible: boolean;
@@ -68,6 +69,7 @@ export default function SeriesOverview() {
 	const [containerRef, isInView] = useIsInView();
 
 	const { id } = useParams();
+	const { page } = useGetPage();
 
 	if (!id) {
 		throw new Error('Series id is required');
@@ -78,7 +80,7 @@ export default function SeriesOverview() {
 
 	const { series, isLoading: isLoadingSeries } = useSeries(id);
 
-	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMedia(id);
+	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMedia(id, page);
 
 	useEffect(() => {
 		if (!isInView) {

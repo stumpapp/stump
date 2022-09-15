@@ -1,17 +1,27 @@
-import { ButtonGroup, useColorModeValue } from '@chakra-ui/react';
 import { Rows, SquaresFour } from 'phosphor-react';
+import toast from 'react-hot-toast';
+
+import { ButtonGroup, useColorModeValue } from '@chakra-ui/react';
+import { LayoutEntity, LayoutMode, useLayoutMode } from '@stump/client';
+
 import { IconButton } from '../../ui/Button';
 
-interface ViewModeConfigProps {
-	viewAsGrid: boolean;
-	onChange: (mode: 'GRID' | 'LIST') => void;
-}
+export default function LayoutModeButtons({ entity }: { entity: LayoutEntity }) {
+	const { layoutMode, updateLayoutMode } = useLayoutMode(entity);
 
-export default function ViewModeConfig({ viewAsGrid, onChange }: ViewModeConfigProps) {
+	async function handleChange(mode: LayoutMode) {
+		updateLayoutMode(mode, (err) => {
+			console.error(err);
+			toast.error('Failed to update layout mode');
+		});
+	}
+
+	const viewAsGrid = layoutMode === 'GRID';
+
 	return (
 		<ButtonGroup isAttached>
 			<IconButton
-				onClick={() => onChange('GRID')}
+				onClick={() => handleChange('GRID')}
 				title="View as grid"
 				variant="solid"
 				bg={useColorModeValue(
@@ -24,7 +34,7 @@ export default function ViewModeConfig({ viewAsGrid, onChange }: ViewModeConfigP
 			</IconButton>
 
 			<IconButton
-				onClick={() => onChange('LIST')}
+				onClick={() => handleChange('LIST')}
 				title="View as list"
 				variant="solid"
 				bg={useColorModeValue(

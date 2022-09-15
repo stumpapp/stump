@@ -17,6 +17,7 @@ export const useStumpConfigStore = create<StumpConfigStore>()(
 		persist(
 			(set) => ({
 				setBaseUrl(baseUrl: string) {
+					// TODO: remove immer here, no datastructures to be mutated here
 					set((store) =>
 						produce(store, (draft) => {
 							let adjustedBaseUrl = baseUrl;

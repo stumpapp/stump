@@ -1,6 +1,6 @@
 [package]
 name = "stump"
-version = "0.0.1"
+version = "0.0.0"
 edition = "2021"
 rust-version = "1.63.0"
 default-run = "stump"

@@ -1,6 +1,6 @@
 {
 	"name": "@stump/monorepo",
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"repository": "https://github.com/aaronleopold/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
@@ -20,7 +20,8 @@
 		"docs": "pnpm --filter @stump/docs --",
 		"interface": "pnpm --filter @stump/interface --",
 		"client": "pnpm --filter @stump/client --",
-		"build": "pnpm web build && pnpm core build",
+		"build:web": "pnpm web build && pnpm core build",
+		"build:desktop": "pnpm desktop build",
 		"build:docker": "docker buildx build --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
 		"cache:docker-arm": "docker buildx build --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
 		"build:docker-amd": "docker buildx build --push --platform=linux/amd64 -t aaronleopold/stump-preview:latest ."

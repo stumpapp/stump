@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { listDirectory } from '../api/filesystem';
+import { StumpQueryContext } from '../context';
 
 export interface DirectoryListingQueryParams {
 	enabled: boolean;
@@ -27,6 +28,7 @@ export function useDirectoryListing({ enabled, startingPath }: DirectoryListingQ
 		onSuccess(res) {
 			setDirectoryListing(res.data);
 		},
+		context: StumpQueryContext,
 	});
 
 	const actions = useMemo(

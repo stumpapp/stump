@@ -5,6 +5,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { getMediaById, updateMediaProgress } from '../api';
 import { queryClient } from '../client';
+import { StumpQueryContext } from '../context';
 
 export const prefetchMedia = async (id: string) => {
 	await queryClient.prefetchQuery(['getMediaById', id], () => getMediaById(id), {
@@ -26,6 +27,7 @@ export function useMedia(id: string, options: QueryCallbacks<Media> = {}) {
 		onError(err) {
 			options.onError?.(err);
 		},
+		context: StumpQueryContext,
 	});
 
 	return { isLoading: isLoading || isFetching || isRefetching, media };
@@ -43,6 +45,7 @@ export function useMediaMutation(id: string, options: MutationCallbacks<ReadProg
 		onError(err) {
 			options.onError?.(err);
 		},
+		context: StumpQueryContext,
 	});
 
 	return { updateReadProgress, updateReadProgressAsync, isLoading };

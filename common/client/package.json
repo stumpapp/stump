@@ -16,14 +16,13 @@
 		"@stump/config": "workspace:*",
 		"@stump/core": "workspace:*",
 		"@tanstack/react-query": "^4.2.3",
-		"react-router-dom": "^6.3.0",
 		"axios": "^0.27.1",
 		"immer": "^9.0.15",
 		"zustand": "^4.1.1"
 	},
 	"devDependencies": {
 		"@types/axios": "^0.14.0",
-		"@types/react": "^18.0.15",
+		"@types/react": "^18.0.20",
 		"tsconfig": "*",
 		"typescript": "^4.7.4"
 	},

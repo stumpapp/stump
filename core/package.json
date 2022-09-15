@@ -1,6 +1,6 @@
 {
   "name": "@stump/core",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "",
   "keywords": [],
   "license": "MIT",
@@ -11,7 +11,7 @@
     "start": "cargo run --release",
     "dev": "cargo watch -x run",
     "build": "pnpm get-client && cargo build --release && pnpm move-client && pnpm move-rocket",
-    "get-client": "trash \"client/*\" \"!client/.placeholder\" && cpy \"../apps/web/build/**/*\" ./client/",
+    "get-client": "trash \"client/*\" \"!client/.placeholder\" && cpy \"../apps/web/dist/**/*\" ./client/",
     "move-client": "trash ../target/release/client && cp -r ./client ../target/release/client",
     "move-rocket": "trash ../target/release/Rocket.toml && cp ./Rocket.toml ../target/release/Rocket.toml",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",

@@ -57,8 +57,6 @@ export default function OnBoarding() {
 	}, 500);
 
 	function handleSubmit(values: FieldValues) {
-		console.log('submit values:', values);
-
 		const { baseUrl } = values;
 
 		setBaseUrl(baseUrl);

@@ -34,7 +34,7 @@ export default function ListItem({ id, title, subtitle, href, even }: Props) {
 			<Heading
 				noOfLines={1}
 				size="sm"
-				w={{ base: '50%', md: '30%', lg: '25%', xl: '23%' }}
+				w={subtitle ? { base: '50%', md: '30%', lg: '25%', xl: '23%' } : 'full'}
 				className="shrink-0"
 			>
 				{title}

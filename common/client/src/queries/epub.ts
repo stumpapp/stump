@@ -2,6 +2,7 @@ import { Epub, EpubContent } from '@stump/core';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { getEpubBaseUrl, getEpubById } from '../api/epub';
+import { StumpQueryContext } from '../context';
 
 export interface EpubOptions {
 	// loc is the epubcfi, comes from the query param ?loc=epubcfi(..)
@@ -34,6 +35,7 @@ export function useEpub(id: string, options?: EpubOptions) {
 
 	const { isLoading: isFetchingBook, data: epub } = useQuery(['getEpubById', id], {
 		queryFn: () => getEpubById(id).then((res) => res.data),
+		context: StumpQueryContext,
 	});
 
 	const actions = useMemo(
@@ -87,6 +89,7 @@ export function useEpubLazy(id: string, options?: EpubOptions) {
 		isFetching,
 	} = useQuery(['getEpubById', id], {
 		queryFn: () => getEpubById(id).then((res) => res.data),
+		context: StumpQueryContext,
 	});
 
 	return {

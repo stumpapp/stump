@@ -6,6 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { createTags, getAllTags } from '../api/tag';
 import { queryClient } from '../client';
+import { StumpQueryContext } from '../context';
 
 export interface UseTagsConfig {
 	onQuerySuccess?: (res: ApiResult<Tag[]>) => void;
@@ -30,6 +31,7 @@ export function useTags({
 		onSuccess: onQuerySuccess,
 		onError: onQueryError,
 		suspense: false,
+		context: StumpQueryContext,
 	});
 
 	const {
@@ -44,6 +46,7 @@ export function useTags({
 			queryClient.refetchQueries(['getAllTags']);
 		},
 		onError: onCreateError,
+		context: StumpQueryContext,
 	});
 
 	const { tags, options } = useMemo(() => {

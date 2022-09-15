@@ -17,7 +17,7 @@ RUN npm install -g pnpm
 RUN pnpm --filter @stump/web install
 RUN pnpm web build
 
-RUN mv ./apps/web/build build
+RUN mv ./apps/web/dist build
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage

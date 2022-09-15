@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router';
 import { Route, Routes } from 'react-router-dom';
 
-import { AppPropsContext } from '@stump/client';
+import { useAppContext } from '@stump/client';
 
 import { AppLayout } from './AppLayout';
 
@@ -33,7 +33,7 @@ function OnBoardingRouter() {
 }
 
 export function AppRouter() {
-	const appProps = useContext(AppPropsContext);
+	const appProps = useAppContext();
 
 	if (!appProps?.baseUrl) {
 		if (appProps?.platform === 'browser') {

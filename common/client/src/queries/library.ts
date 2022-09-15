@@ -2,7 +2,7 @@ import type { Library, PageInfo } from '@stump/core';
 import type { ClientQueryParams, QueryCallbacks } from '.';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+// import { useSearchParams } from 'react-router-dom';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -17,6 +17,7 @@ import {
 	scanLibary,
 } from '../api/library';
 import { queryClient } from '../client';
+import { StumpQueryContext } from '../context';
 
 export function useLibrary(id: string, options: QueryCallbacks<Library> = {}) {
 	const { isLoading, data: library } = useQuery(['getLibrary', id], {
@@ -24,6 +25,7 @@ export function useLibrary(id: string, options: QueryCallbacks<Library> = {}) {
 		onError(err) {
 			options.onError?.(err);
 		},
+		context: StumpQueryContext,
 	});
 
 	return { isLoading, library };
@@ -38,6 +40,7 @@ export function useLibraries() {
 	const { data, ...rest } = useQuery(['getLibraries'], getLibraries, {
 		// Send all non-401 errors to the error page
 		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
+		context: StumpQueryContext,
 	});
 
 	const { libraries, pageData } = useMemo<UseLibrariesReturn>(() => {
@@ -58,59 +61,23 @@ export function useLibraries() {
 	};
 }
 
-export function useLibrarySeries(libraryId: string) {
-	// TODO: I will need to remove this (react-router-dom) dependency once
-	// I start developing the mobile app...
-	const [search, setSearchParams] = useSearchParams();
-
-	const page = useMemo(() => {
-		const searchPage = search.get('page');
-
-		if (searchPage) {
-			return parseInt(searchPage, 10);
-		}
-
-		return 1;
-	}, [search]);
-
+export function useLibrarySeries(libraryId: string, page: number = 1) {
 	const { isLoading, isFetching, isPreviousData, data } = useQuery(
 		['getLibrarySeries', page, libraryId],
-		() => getLibrarySeries(libraryId, page),
+		() =>
+			getLibrarySeries(libraryId, page).then(({ data }) => ({
+				series: data.data,
+				pageData: data._page,
+			})),
 		{
 			keepPreviousData: true,
+			context: StumpQueryContext,
 		},
 	);
 
-	const { series, pageData } = useMemo(() => {
-		if (data?.data) {
-			return {
-				series: data.data.data,
-				pageData: data.data._page,
-			};
-		}
+	const { series, pageData } = data ?? {};
 
-		return {};
-	}, [data]);
-
-	// Note: I am leaving these here for now, but I think they should be removed.
-	// The Pagination.tsx component will use navigation to handle pagination, so these
-	// manual actions aren't really necessary.
-	const actions = useMemo(
-		() => ({
-			hasMore() {
-				return !!pageData && page + 1 < pageData.totalPages;
-			},
-			next() {
-				if (actions.hasMore()) {
-					search.set('page', (page + 1).toString());
-					setSearchParams(search);
-				}
-			},
-		}),
-		[page, series, pageData],
-	);
-
-	return { isLoading, isFetching, isPreviousData, series, pageData, actions };
+	return { isLoading, isFetching, isPreviousData, series, pageData };
 }
 
 export function useLibraryStats() {
@@ -119,7 +86,9 @@ export function useLibraryStats() {
 		isLoading,
 		isRefetching,
 		isFetching,
-	} = useQuery(['getLibraryStats'], () => getLibrariesStats().then((data) => data.data));
+	} = useQuery(['getLibraryStats'], () => getLibrariesStats().then((data) => data.data), {
+		context: StumpQueryContext,
+	});
 
 	return { libraryStats, isLoading: isLoading || isRefetching || isFetching };
 }
@@ -128,6 +97,7 @@ export function useScanLibrary({ onError }: ClientQueryParams<unknown> = {}) {
 	const { mutate: scan, mutateAsync: scanAsync } = useMutation(['scanLibary'], {
 		mutationFn: scanLibary,
 		onError,
+		context: StumpQueryContext,
 	});
 
 	return { scan, scanAsync };
@@ -151,6 +121,7 @@ export function useLibraryMutation({
 				} else {
 					queryClient.invalidateQueries(['getLibraries']);
 					queryClient.invalidateQueries(['getJobReports']);
+					queryClient.invalidateQueries(['getLibraryStats']);
 					onCreated?.(res.data);
 					// onClose();
 				}
@@ -159,6 +130,7 @@ export function useLibraryMutation({
 				// toast.error('Login failed. Please try again.');
 				onError?.(err);
 			},
+			context: StumpQueryContext,
 		},
 	);
 
@@ -172,6 +144,7 @@ export function useLibraryMutation({
 			} else {
 				queryClient.invalidateQueries(['getLibraries']);
 				queryClient.invalidateQueries(['getJobReports']);
+				queryClient.invalidateQueries(['getLibraryStats']);
 				// onClose();
 				onUpdated?.(res.data);
 			}
@@ -182,6 +155,7 @@ export function useLibraryMutation({
 			// toast.error('Login failed. Please try again.');
 			console.error(err);
 		},
+		context: StumpQueryContext,
 	});
 
 	const { mutateAsync: deleteLibraryAsync } = useMutation(['deleteLibrary'], {
@@ -189,8 +163,11 @@ export function useLibraryMutation({
 		async onSuccess(res) {
 			// FIXME: just realized invalidateQueries is async... I need to check all my usages of it...
 			await queryClient.invalidateQueries(['getLibraries']);
+			await queryClient.invalidateQueries(['getLibraryStats']);
+
 			onDeleted?.(res.data);
 		},
+		context: StumpQueryContext,
 	});
 
 	return {

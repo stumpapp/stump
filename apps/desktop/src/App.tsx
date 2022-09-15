@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Platform } from '@stump/client';
+import { Platform, StumpQueryProvider } from '@stump/client';
 import { os } from '@tauri-apps/api';
 
 import StumpInterface from '@stump/interface';
@@ -36,5 +36,9 @@ export default function App() {
 		return null;
 	}
 
-	return <StumpInterface platform={platform} />;
+	return (
+		<StumpQueryProvider>
+			<StumpInterface platform={platform} />
+		</StumpQueryProvider>
+	);
 }

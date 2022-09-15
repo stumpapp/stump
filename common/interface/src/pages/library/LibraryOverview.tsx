@@ -9,11 +9,13 @@ import SeriesGrid from '../../components/series/SeriesGrid';
 import SeriesList from '../../components/series/SeriesList';
 import useIsInView from '../../hooks/useIsInView';
 import Pagination from '../../ui/Pagination';
+import { useGetPage } from '../../hooks/useGetPage';
 
 export default function LibraryOverview() {
 	const [containerRef, isInView] = useIsInView<HTMLDivElement>();
 
 	const { id } = useParams();
+	const { page } = useGetPage();
 
 	if (!id) {
 		throw new Error('Library id is required');
@@ -25,7 +27,7 @@ export default function LibraryOverview() {
 
 	const { isLoading, library } = useLibrary(id, { onError: handleError });
 
-	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id);
+	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page);
 
 	useEffect(() => {
 		if (!isInView) {

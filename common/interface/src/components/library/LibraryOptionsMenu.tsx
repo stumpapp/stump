@@ -15,7 +15,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 
 	const { user } = useUserStore();
 
-	const { scan } = useScanLibrary();
+	const { scanAsync } = useScanLibrary();
 
 	function handleScan() {
 		// extra protection, should not be possible to reach this.
@@ -23,16 +23,12 @@ export default function LibraryOptionsMenu({ library }: Props) {
 			throw new Error('You do not have permission to scan libraries.');
 		}
 
-		scan(library.id);
-
-		queryClient.invalidateQueries(['getJobReports']);
-
-		// Note: not worrying about this for a while so
-		// if (RESTRICTED_MODE) {
-		// 	restrictedToast();
-		// } else {
-		// 	scan(library.id);
-		// }
+		// The UI will receive updates from SSE in fractions of ms lol and it can get bogged down.
+		// So, add a slight delay so the close animation of the menu can finish cleanly.
+		setTimeout(async () => {
+			await scanAsync(library.id);
+			await queryClient.invalidateQueries(['getJobReports']);
+		}, 50);
 	}
 
 	// FIXME: so, disabled on the MenuItem doesn't seem to actually work... how cute.

@@ -6,6 +6,7 @@ import {
 	Library,
 	PageableApiResult,
 	Series,
+	LibraryScanMode,
 } from '@stump/core';
 import { API } from '.';
 
@@ -25,10 +26,11 @@ export function getLibrarySeries(id: string, page: number): Promise<PageableApiR
 	return API.get(`/libraries/${id}/series?page=${page}`);
 }
 
-// TODO: add scan_mode query param
 // FIXME: type this lol
-export function scanLibary(id: string): Promise<ApiResult<unknown>> {
-	return API.get(`/libraries/${id}/scan`);
+// TODO: narrow mode type to exclude NONE
+// TODO: fix function signature to work with react-query
+export function scanLibary(id: string, mode?: LibraryScanMode): Promise<ApiResult<unknown>> {
+	return API.get(`/libraries/${id}/scan?scan_mode=${mode ?? 'BATCHED'}`);
 }
 
 // TODO: type this

@@ -1,4 +1,4 @@
-import { PageInfo } from './generated';
+import { PageInfo, Media, Series, Library } from './generated';
 
 export type ApiResult<T, E = any> = import('axios').AxiosResponse<T, import('axios').AxiosError>;
 
@@ -18,5 +18,21 @@ export interface Pageable<T> {
 }
 
 export type PageableApiResult<T> = ApiResult<Pageable<T>>;
+
+// Note: I am separating these options / exclusions in case I want to use either independently.
+export type MediaOrderByExclusions = Extract<
+	keyof Media,
+	'currentPage' | 'series' | 'readProgresses' | 'tags'
+>;
+export type MediaOrderBy = keyof Omit<Media, MediaOrderByExclusions>;
+
+export type SeriesOrderByExclusions = Extract<
+	keyof Series,
+	'library' | 'media' | 'mediaCount' | 'tags'
+>;
+export type SeriesOrder = keyof Omit<Series, SeriesOrderByExclusions>;
+
+export type LibraryOrderByExclusions = Extract<keyof Library, 'series' | 'tags' | 'libraryOptions'>;
+export type LibraryOrder = keyof Omit<Library, LibraryOrderByExclusions>;
 
 export * from './generated';

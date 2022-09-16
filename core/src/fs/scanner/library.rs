@@ -60,6 +60,9 @@ fn check_series(
 	}
 
 	let new_entries = walkdir
+		// Set min_depth to 0 so we include the library path itself,
+		// which allows us to add it as a series when there are media items in it
+		.min_depth(0)
 		.into_iter()
 		.filter_entry(|e| e.path().is_dir())
 		.filter_map(|e| e.ok())
@@ -147,18 +150,25 @@ async fn precheck(
 
 	let start = std::time::Instant::now();
 
-	// TODO: perhaps use rayon instead...
+	// TODO: perhaps use rayon instead...?
 	let files_to_process: u64 = futures::future::join_all(
 		series
 			.iter()
 			.map(|data| {
 				let path = data.path.clone();
 
+				let mut series_walkdir = WalkDir::new(&path);
+
+				// When the series is the library itself, we want to set the max_depth
+				// to 1 so it doesn't walk through the entire library (effectively doubling
+				// the return result, instead of the actual number of files to process)
+				if path == library.path {
+					series_walkdir = series_walkdir.max_depth(1)
+				}
+
 				tokio::task::spawn_blocking(move || {
-					WalkDir::new(&path)
+					series_walkdir
 						.into_iter()
-						// FIXME: why won't this work??
-						// .filter_entry(|e| e.path().is_file())
 						.filter_map(|e| e.ok())
 						.filter(|e| e.path().is_file())
 						.count() as u64
@@ -187,6 +197,7 @@ async fn scan_series(
 	ctx: Ctx,
 	runner_id: String,
 	series: series::Data,
+	library_path: &str,
 	library_options: LibraryOptions,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) {
@@ -209,7 +220,8 @@ async fn scan_series(
 	// TODO: make this configurable
 	let top_level_series = false;
 
-	if top_level_series {
+	// top_level OR series path is the library path
+	if top_level_series || series.path == library_path {
 		walkdir = walkdir.max_depth(1);
 	}
 
@@ -310,9 +322,14 @@ async fn scan_series(
 	}
 }
 
+// Note: if this function signature gets much larger I probably want to refactor it...
+// TODO: investigate this with LARGE libraries. I am noticing the UI huff and puff a bit
+// trying to keep up with the shear amount of updates it gets. I might have to throttle the
+// updates to the UI when libraries reach a certain size and send updates in batches instead.
 async fn scan_series_batch(
 	ctx: Ctx,
 	series: series::Data,
+	library_path: &str,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Vec<BatchScanOperation> {
 	let db = ctx.get_db();
@@ -331,7 +348,17 @@ async fn scan_series_batch(
 
 	let mut operations = vec![];
 
-	for entry in WalkDir::new(&series.path)
+	let mut walkdir = WalkDir::new(&series.path);
+
+	// TODO: make this configurable
+	let top_level_series = false;
+
+	// top_level OR series path is the library path
+	if top_level_series || series.path == library_path {
+		walkdir = walkdir.max_depth(1);
+	}
+
+	for entry in walkdir
 		.into_iter()
 		.filter_map(|e| e.ok())
 		.filter(|e| e.path().is_file())
@@ -410,9 +437,10 @@ pub async fn scan_batch(
 			let ctx_cpy = ctx.get_ctx();
 			let r_id = runner_id.clone();
 			let counter_ref = counter.clone();
+			let library_path = library.path.clone();
 
 			tokio::spawn(async move {
-				scan_series_batch(ctx_cpy.get_ctx(), s, move |msg| {
+				scan_series_batch(ctx_cpy.get_ctx(), s, &library_path, move |msg| {
 					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
 					ctx_cpy.emit_client_event(CoreEvent::job_progress(
@@ -501,20 +529,28 @@ pub async fn scan_sync(
 
 		let counter_ref = counter.clone();
 		let runner_id = runner_id.clone();
+		let library_path = library.path.clone();
 		// Note: I don't ~love~ having to clone this struct each iteration. I think it's fine for now,
 		// considering it consists of just a few booleans.
 		let library_options = library_options.clone();
 
-		scan_series(ctx.get_ctx(), runner_id, s, library_options, move |msg| {
-			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
+		scan_series(
+			ctx.get_ctx(),
+			runner_id,
+			s,
+			&library_path,
+			library_options,
+			move |msg| {
+				let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-			progress_ctx.emit_client_event(CoreEvent::job_progress(
-				r_id.to_owned(),
-				Some(previous + 1),
-				files_to_process,
-				Some(msg),
-			));
-		})
+				progress_ctx.emit_client_event(CoreEvent::job_progress(
+					r_id.to_owned(),
+					Some(previous + 1),
+					files_to_process,
+					Some(msg),
+				));
+			},
+		)
 		.await;
 	}
 

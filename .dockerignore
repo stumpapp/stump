@@ -11,5 +11,5 @@ target
 
 # ignore contents in excess directories
 apps/*
-!apps/client
-!apps/client/
+!apps/web
+!apps/web/

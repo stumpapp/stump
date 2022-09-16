@@ -22,6 +22,9 @@ function Shortcut({ visible }: { visible?: boolean }) {
 	);
 }
 
+// TODO: I think I am going to remove this component from the TopBar. It interferes with the
+// UI of the navigation and the title. I think a potential solution would be to have the search
+// be solely rendered via keybind, and have it be in a portal.
 export default function Search() {
 	const inputRef = React.useRef<HTMLInputElement>(null);
 	const [expanded, { on, off }] = useBoolean(false);

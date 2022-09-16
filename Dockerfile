@@ -14,7 +14,7 @@ COPY . .
 
 RUN npm install -g pnpm
 
-RUN pnpm --filter @stump/web install
+RUN pnpm i
 RUN pnpm web build
 
 RUN mv ./apps/web/dist build

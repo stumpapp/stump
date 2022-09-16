@@ -11,7 +11,9 @@ export interface AppProps {
 	platform: Platform;
 	baseUrl?: string;
 	demoMode?: boolean;
+
+	setBaseUrl?: (baseUrl: string) => void;
 }
 
-export const useAppContext = () => useContext(AppPropsContext);
+export const useAppProps = () => useContext(AppPropsContext);
 export const useQueryContext = () => useContext(StumpQueryContext);

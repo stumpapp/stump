@@ -18,6 +18,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AppRouter } from './AppRouter';
 import { chakraTheme } from './chakra';
 import { ErrorFallback } from './components/ErrorFallback';
+
 import Notifications from './components/Notifications';
 
 function RouterContainer(props: { appProps: AppProps }) {

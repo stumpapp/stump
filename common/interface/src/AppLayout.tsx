@@ -1,8 +1,8 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import { AppPropsContext, useAuthQuery, useJobManager, useUserStore } from '@stump/client';
+import { useAuthQuery, useJobManager, useUserStore } from '@stump/client';
 
 import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
@@ -10,8 +10,6 @@ import JobOverlay from './components/JobOverlay';
 import TopBar from './components/topbar/TopBar';
 
 export function AppLayout() {
-	const appProps = useContext(AppPropsContext);
-
 	const location = useLocation();
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
@@ -54,14 +52,14 @@ export function AppLayout() {
 			>
 				{!hideSidebar && <Sidebar />}
 				<Box as="main" w="full" h="full" bg={useColorModeValue('gray.75', 'gray.900')}>
-					{/* {!hideSidebar && <TopBar />} */}
+					{!hideSidebar && <TopBar />}
 					<React.Suspense fallback={<Lazy />}>
 						<Outlet />
 					</React.Suspense>
 				</Box>
 			</Flex>
 
-			{/* <JobOverlay /> */}
+			<JobOverlay />
 		</React.Suspense>
 	);
 }

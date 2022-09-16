@@ -12,20 +12,26 @@ export let API: AxiosInstance;
  * Creates an axios instance with the given base URL and assigns it to the global
  * `API` variable.
  */
-export function initializeApi(baseURL: string) {
+export function initializeApi(baseUrl: string) {
+	let correctedUrl = baseUrl;
+
+	// add /api to end of URL, don't allow double slashes
+	if (!correctedUrl.endsWith('/')) {
+		correctedUrl += '/';
+	}
+	if (!correctedUrl.endsWith('api/')) {
+		correctedUrl += 'api/';
+	}
+
 	API = axios.create({
-		baseURL,
+		baseURL: correctedUrl,
 		withCredentials: true,
 	});
 }
 
+// TODO: be better lol
 export function isUrl(url: string) {
-	try {
-		new URL(url);
-		return true;
-	} catch (e) {
-		return false;
-	}
+	return url.startsWith('http://') || url.startsWith('https://');
 }
 
 export async function checkUrl(url: string) {

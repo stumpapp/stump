@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router';
 import { Route, Routes } from 'react-router-dom';
 
-import { useAppContext } from '@stump/client';
+import { useAppProps } from '@stump/client';
 
 import { AppLayout } from './AppLayout';
 
@@ -33,7 +33,7 @@ function OnBoardingRouter() {
 }
 
 export function AppRouter() {
-	const appProps = useAppContext();
+	const appProps = useAppProps();
 
 	if (!appProps?.baseUrl) {
 		if (appProps?.platform === 'browser') {

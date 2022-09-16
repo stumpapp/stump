@@ -1,60 +1,84 @@
 import { FieldValues, useForm } from 'react-hook-form';
-import { useDebounce } from 'rooks';
 import { z } from 'zod';
 
 import {
 	Alert,
 	AlertIcon,
 	Container,
+	FormErrorMessage,
+	FormHelperText,
 	FormLabel,
 	HStack,
 	InputGroup,
 	InputRightElement,
+	Spinner,
 	Stack,
 	Text,
+	useBoolean,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useStumpConfigStore } from '@stump/client';
 import { checkUrl, isUrl } from '@stump/client/api';
 
 import Form, { FormControl } from '../ui/Form';
-import Input from '../ui/Input';
+import { DebouncedInput } from '../ui/Input';
+import { ChangeEvent, useMemo, useState } from 'react';
+import { CloudCheck, CloudSlash } from 'phosphor-react';
 
 // Used primarily for setting the correct base url for the api when the app is
 // NOT running in a browser. I.e. when the app is running in Tauri.
 // TODO: locale!
+// FIXME: this component's logic is kinda very yucky. I should probably refactor it.
 export default function OnBoarding() {
 	const { setBaseUrl } = useStumpConfigStore();
-
-	async function validateUrl(url: string) {
-		if (!isUrl(url)) {
-			form.setError('baseUrl', {
-				message: 'Invalid URL',
-			});
-
-			return;
-		}
-
-		const isValid = await checkUrl(url);
-
-		if (!isValid) {
-			form.setError('baseUrl', {
-				message: `Failed to connect to ${url}`,
-			});
-		}
-	}
+	const [isCheckingUrl, { on, off }] = useBoolean(false);
+	const [sucessfulConnection, setSuccessfulConnection] = useState(false);
 
 	const schema = z.object({
-		baseUrl: z.string().refine(isUrl, { message: 'Please enter a valid URL' }),
+		baseUrl: z
+			.string()
+			.min(1, { message: 'URL is required' })
+			.refine(isUrl, { message: 'Invalid URL' }),
 	});
 
 	const form = useForm({
 		resolver: zodResolver(schema),
+		mode: 'onSubmit',
 	});
 
-	const debouncedValidate = useDebounce(async (e: any) => {
-		return await validateUrl(form.getValues('baseUrl'));
-	}, 500);
+	async function validateUrl() {
+		on();
+		const url = form.getValues('baseUrl');
+
+		if (!url) {
+			off();
+			return;
+		}
+
+		let errorMessage: string;
+
+		// TODO: this function doesn't work lol
+		if (!isUrl(url)) {
+			errorMessage = 'Invalid URL';
+		} else {
+			const isValid = await checkUrl(url);
+
+			if (!isValid) {
+				errorMessage = `Failed to connect to ${url}`;
+			} else {
+				setSuccessfulConnection(true);
+			}
+		}
+
+		setTimeout(() => {
+			off();
+			if (errorMessage) {
+				form.setError('baseUrl', {
+					message: `Failed to connect to ${url}`,
+				});
+			}
+		}, 300);
+	}
 
 	function handleSubmit(values: FieldValues) {
 		const { baseUrl } = values;
@@ -62,8 +86,25 @@ export default function OnBoarding() {
 		setBaseUrl(baseUrl);
 	}
 
-	if (form.formState.errors && Object.keys(form.formState.errors).length) {
-		console.log('errors', form.formState.errors);
+	const InputDecoration = useMemo(() => {
+		if (isCheckingUrl) {
+			return <Spinner size="sm" />;
+		} else if (Object.keys(form.formState.errors).length > 0) {
+			return <CloudSlash size="1.25rem" color="#F56565" />;
+		} else if (sucessfulConnection) {
+			return <CloudCheck size="1.25rem" color="#48BB78" />;
+		}
+
+		return null;
+	}, [isCheckingUrl, form.formState.errors, sucessfulConnection]);
+
+	const { onChange, ...register } = form.register('baseUrl');
+
+	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+		setSuccessfulConnection(false);
+		form.clearErrors('baseUrl');
+
+		onChange(e);
 	}
 
 	return (
@@ -85,15 +126,37 @@ export default function OnBoarding() {
 				Welcome to Stump! To get started, please enter the base URL of your Stump server below.
 			</Alert>
 			<Form onSubmit={handleSubmit} form={form}>
-				<FormControl label="Server URL">
+				<FormControl label="Server URL" isInvalid={!!form.formState.errors.baseUrl}>
 					<FormLabel htmlFor="baseUrl">Server URL</FormLabel>
 
 					<InputGroup>
-						<Input {...form.register('baseUrl')} onChange={debouncedValidate} />
-						<InputRightElement children={<></>} />
+						<DebouncedInput
+							borderColor={sucessfulConnection ? 'green.500' : undefined}
+							{...register}
+							onChange={handleChange}
+							onInputStop={validateUrl}
+						/>
+						<InputRightElement
+							title={
+								// TODO: remove ternary, yuck
+								isCheckingUrl
+									? 'Testing connection...'
+									: !!InputDecoration
+									? 'Failed to connect!'
+									: undefined
+							}
+							children={InputDecoration}
+						/>
 					</InputGroup>
+
+					<FormErrorMessage>{form.formState.errors.baseUrl?.message as string}</FormErrorMessage>
+
+					{sucessfulConnection && (
+						<FormHelperText color="green.300">
+							Sucessfully connected to {form.getValues('baseUrl')}!
+						</FormHelperText>
+					)}
 				</FormControl>
-				{/* <ServerURLInput /> */}
 			</Form>
 		</Stack>
 	);

@@ -27,7 +27,7 @@ function ExplorerFile({ name, path, isDirectory }: DirectoryListingFile) {
 	return (
 		<button className="flex flex-col space-y-2 items-center justify-center">
 			{/* FIXME: don't use images for svg fallbacks... or, just set color of images... */}
-			<img src={getIconSrc()} className="h-20 w-20 active:translate-y-[0.5px]" />
+			<img src={getIconSrc()} className="h-20 w-20 active:scale-[.99]" />
 			<Text maxW="20" fontSize="xs">
 				{name}
 			</Text>

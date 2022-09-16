@@ -33,7 +33,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-    - [Where to start?](#where-to-start)
+  - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
   - [/common](#common)
@@ -55,7 +55,7 @@ Some of these are actually completed(!) already, but the following items are the
 - 🔎 Versitile full-text search
 - 🔐 Role-based access-control with managed user accounts and configurable privileges
 - 🚀 Easy setup and deployment using Docker or bare metal
-- 🤏 Small bundle size with a fully responsive, built-in UI
+- 👀 Fully responsive, built-in UI with a dark mode
 - 🏃 Low resource utilization with excellent performance
 - 🧰 Easily consumable and self-documented REST API, so community tools and scripts can interact with Stump
 - 🌈 And more!

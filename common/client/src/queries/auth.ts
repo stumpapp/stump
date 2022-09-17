@@ -5,13 +5,13 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { checkIsClaimed } from '../api';
 import { login, me, register } from '../api/auth';
 import { queryClient } from '../client';
-import { ClientQueryParams } from '.';
+import { ClientQueryParams, QueryCallbacks } from '.';
 import { StumpQueryContext } from '../context';
 
 import type { User } from '@stump/core';
-export interface AuthQueryOptions {
+export interface AuthQueryOptions extends QueryCallbacks<User> {
 	disabled?: boolean;
-	onSuccess?: (user: User | null) => void;
+	// onSuccess?: (user: User | null) => void;
 	enabled?: boolean;
 }
 
@@ -19,6 +19,9 @@ export function useAuthQuery(options: AuthQueryOptions = {}) {
 	const { data, error, isLoading, isFetching, isRefetching } = useQuery(['getViewer'], me, {
 		onSuccess(res) {
 			options.onSuccess?.(res.data);
+		},
+		onError(err) {
+			options.onError?.(err);
 		},
 		useErrorBoundary: false,
 		enabled: options?.enabled,

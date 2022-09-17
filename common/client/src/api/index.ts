@@ -39,10 +39,7 @@ export async function checkUrl(url: string) {
 		return false;
 	}
 
-	const res = await fetch(`${url}/api/ping`);
+	const res = await fetch(`${url}/api/ping`).catch((err) => err);
 
-	console.log('Got response', res);
-
-	// TODO: check response...
 	return res.status === 200;
 }

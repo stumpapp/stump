@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import { useAuthQuery, useJobManager, useUserStore } from '@stump/client';
+import { useAppProps, useAuthQuery, useJobManager, useUserStore } from '@stump/client';
 
 import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
@@ -10,6 +10,9 @@ import JobOverlay from './components/JobOverlay';
 import TopBar from './components/topbar/TopBar';
 
 export function AppLayout() {
+	const appProps = useAppProps();
+	const navigate = useNavigate();
+
 	const location = useLocation();
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
@@ -23,10 +26,19 @@ export function AppLayout() {
 
 	const { user: storeUser, setUser } = useUserStore();
 
-	const { user, isLoading } = useAuthQuery({
+	// TODO: This logic needs to be moved, pretty much every request in Stump should have this
+	// functionality. I have no idea how to do this in a clean way right now though.
+	// On network error, if on desktop app, navigate to a screen to troubleshoot
+	// the connection to the server
+	const { user, isLoading, error } = useAuthQuery({
 		onSuccess: setUser,
 		enabled: !storeUser,
 	});
+
+	// @ts-ignore: FIXME: type error no good >:(
+	if (error?.code === 'ERR_NETWORK' && appProps?.platform !== 'browser') {
+		return <Navigate to="/server-connection-error" state={{ from: location }} />;
+	}
 
 	const hasUser = !!user || !!storeUser;
 

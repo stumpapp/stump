@@ -141,4 +141,7 @@ impl ScannedFileTrait for Path {
 pub enum BatchScanOperation {
 	CreateMedia { path: PathBuf, series_id: String },
 	MarkMediaMissing { path: String },
+	// Note: this will be tricky. I will need to have this as a separate operation so I don't chance
+	// issuing concurrent writes to the database. But will be a bit of a pain, not too bad though.
+	// LogFailureEvent { event: CoreEvent },
 }

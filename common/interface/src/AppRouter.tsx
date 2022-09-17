@@ -19,6 +19,7 @@ const JobSettings = React.lazy(() => import('./pages/settings/JobSettings'));
 const ServerSettings = React.lazy(() => import('./pages/settings/ServerSettings'));
 const UserSettings = React.lazy(() => import('./pages/settings/UserSettings'));
 const FourOhFour = React.lazy(() => import('./pages/FourOhFour'));
+const ServerConnectionError = React.lazy(() => import('./pages/ServerConnectionError'));
 const LoginOrClaim = React.lazy(() => import('./pages/LoginOrClaim'));
 const OnBoarding = React.lazy(() => import('./pages/OnBoarding'));
 
@@ -68,6 +69,9 @@ export function AppRouter() {
 			</Route>
 
 			<Route path="/auth" element={<LoginOrClaim />} />
+			{appProps?.platform !== 'browser' && (
+				<Route path="/server-connection-error" element={<ServerConnectionError />} />
+			)}
 			<Route path="*" element={<FourOhFour />} />
 		</Routes>
 	);

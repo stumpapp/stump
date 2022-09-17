@@ -71,6 +71,10 @@ pnpm web dev # start the web client
 
 At this point, you're pretty much all set to start contributing!
 
+### Repository Notes
+
+I format my code using [Prettier](https://prettier.io/) and [rustfmt](https://github.com/rust-lang/rustfmt). There is a pre-commit hook that will run these for you, but I want to point out that all of the apps within this repository use 4 tab spaces for indentation. This is primarily for accessibility, as well as consistency with the Rust codebase. If you'd like, you can configure your editor to render whatever indentation you prefer, even though the raw code will be as described above.
+
 ### Developer Resources
 
 A few useful resources for developers looking to contribute:

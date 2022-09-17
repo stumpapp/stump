@@ -37,6 +37,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserRole>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
+		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
@@ -59,7 +62,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobReport>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ClientEvent>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<DirectoryListing>()?).as_bytes())?;
 		file.write_all(

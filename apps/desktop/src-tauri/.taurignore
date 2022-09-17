@@ -1,0 +1,4 @@
+# FIXME: not working >:( desktop rebuilds after insertion to DB... very annoying
+dev.db
+*.journal
+.wal

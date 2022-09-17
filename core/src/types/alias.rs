@@ -4,7 +4,7 @@ use crate::config::context;
 
 use super::{
 	errors::{ApiError, ProcessFileError},
-	models::AuthenticatedUser,
+	models::user::AuthenticatedUser,
 };
 
 pub type Session<'a> = rocket_session_store::Session<'a, AuthenticatedUser>;

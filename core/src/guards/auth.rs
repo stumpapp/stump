@@ -10,7 +10,7 @@ use crate::{
 	types::{
 		alias::{Ctx, Session},
 		errors::AuthError,
-		models::AuthenticatedUser,
+		models::user::AuthenticatedUser,
 	},
 	utils::{self},
 };

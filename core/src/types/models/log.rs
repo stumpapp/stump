@@ -4,7 +4,7 @@ use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::event::ClientEvent;
+use crate::event::CoreEvent;
 
 /// Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
@@ -55,15 +55,15 @@ pub struct TentativeLog {
 	pub job_id: Option<String>,
 }
 
-impl From<ClientEvent> for TentativeLog {
-	fn from(event: ClientEvent) -> Self {
+impl From<CoreEvent> for TentativeLog {
+	fn from(event: CoreEvent) -> Self {
 		match event {
-			ClientEvent::JobFailed { runner_id, message } => TentativeLog {
+			CoreEvent::JobFailed { runner_id, message } => TentativeLog {
 				level: LogLevel::Error,
 				message,
 				job_id: Some(runner_id),
 			},
-			ClientEvent::CreateEntityFailed {
+			CoreEvent::CreateEntityFailed {
 				runner_id,
 				path,
 				message,

@@ -33,7 +33,8 @@ impl Job for LibraryScanJob {
 		let duration = start.elapsed();
 
 		log::info!(
-			"Finished library scan in {}.{:03} seconds. {} files processed.",
+			"Finished {:?} library scan in {}.{:03} seconds. {} files processed.",
+			self.scan_mode,
 			duration.as_secs(),
 			duration.subsec_millis(),
 			completed_tasks

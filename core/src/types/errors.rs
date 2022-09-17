@@ -15,7 +15,7 @@ use std::io::Cursor;
 use thiserror::Error;
 use zip::result::ZipError;
 
-use crate::event::ClientRequest;
+use crate::event::InternalCoreTask;
 
 #[derive(Error, Debug)]
 pub enum ProcessFileError {
@@ -288,8 +288,8 @@ impl From<bcrypt::BcryptError> for ApiError {
 	}
 }
 
-impl From<mpsc::error::SendError<ClientRequest>> for ApiError {
-	fn from(err: mpsc::error::SendError<ClientRequest>) -> Self {
+impl From<mpsc::error::SendError<InternalCoreTask>> for ApiError {
+	fn from(err: mpsc::error::SendError<InternalCoreTask>) -> Self {
 		ApiError::InternalServerError(err.to_string())
 	}
 }

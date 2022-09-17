@@ -46,4 +46,4 @@ cargo install cargo-watch
 write-host "Running 'pnpm run setup':"
 pnpm run setup
 
-write-host "Pre-setup completed! Run 'pnpm dev' or 'pnpm start' to get started."
+write-host "Pre-setup completed! Run 'pnpm dev:web' or 'pnpm start:web' to get started."

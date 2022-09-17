@@ -4,7 +4,7 @@ use rocket::tokio::{self, sync::mpsc};
 
 use crate::{config::context::Ctx, job::pool::JobPool};
 
-use super::ClientRequest;
+use super::InternalCoreTask;
 
 pub struct EventManager {
 	job_pool: Arc<JobPool>,
@@ -13,7 +13,7 @@ pub struct EventManager {
 impl EventManager {
 	pub fn new(
 		ctx: Ctx,
-		mut request_reciever: mpsc::UnboundedReceiver<ClientRequest>,
+		mut request_reciever: mpsc::UnboundedReceiver<InternalCoreTask>,
 	) -> Arc<Self> {
 		let this = Arc::new(Self {
 			job_pool: JobPool::new(),
@@ -23,7 +23,7 @@ impl EventManager {
 		tokio::spawn(async move {
 			while let Some(req) = request_reciever.recv().await {
 				match req {
-					ClientRequest::QueueJob(job) => {
+					InternalCoreTask::QueueJob(job) => {
 						this_cpy
 							.clone()
 							.job_pool
@@ -31,7 +31,7 @@ impl EventManager {
 							.enqueue_job(&ctx, job)
 							.await;
 					},
-					ClientRequest::GetJobReports(return_sender) => {
+					InternalCoreTask::GetJobReports(return_sender) => {
 						let job_report =
 							this_cpy.clone().job_pool.clone().report(&ctx).await;
 

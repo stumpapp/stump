@@ -6,9 +6,8 @@ use crate::{
 	prisma::{user, user_preferences},
 	types::{
 		alias::{ApiResult, Ctx},
-		models::{
-			user::{User, UserPreferences, UserPreferencesUpdate},
-			LoginRequest,
+		models::user::{
+			LoginOrRegisterArgs, User, UserPreferences, UserPreferencesUpdate,
 		},
 	},
 	utils::auth,
@@ -34,7 +33,7 @@ pub async fn get_users(ctx: &Ctx, _auth: AdminGuard) -> ApiResult<Json<Vec<User>
 pub async fn create_user(
 	ctx: &Ctx,
 	_auth: AdminGuard,
-	credentials: Json<LoginRequest>,
+	credentials: Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 

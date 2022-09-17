@@ -7,15 +7,15 @@ use rocket::tokio::sync::{
 
 use crate::{
 	db,
-	event::{ClientEvent, ClientRequest},
+	event::{CoreEvent, InternalCoreTask},
 	job::Job,
 	prisma,
 	types::models::log::TentativeLog,
 };
 
-type InternalSender = UnboundedSender<ClientRequest>;
+type InternalSender = UnboundedSender<InternalCoreTask>;
 
-type ClientChannel = (Sender<ClientEvent>, Receiver<ClientEvent>);
+type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 
 pub struct Ctx {
 	pub db: Arc<prisma::PrismaClient>,
@@ -29,15 +29,15 @@ impl Ctx {
 		Ctx {
 			db: Arc::new(db::create_client().await),
 			internal_sender: Arc::new(internal_sender),
-			response_channel: Arc::new(channel::<ClientEvent>(1024)),
+			response_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
 	}
 
 	pub async fn mock() -> Ctx {
 		Ctx {
 			db: Arc::new(db::create_client().await),
-			internal_sender: Arc::new(unbounded_channel::<ClientRequest>().0),
-			response_channel: Arc::new(channel::<ClientEvent>(1024)),
+			internal_sender: Arc::new(unbounded_channel::<InternalCoreTask>().0),
+			response_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
 	}
 
@@ -55,18 +55,18 @@ impl Ctx {
 		}
 	}
 
-	/// Returns the reciever for the ClientEvent channel. Used in the SSE listener endpoint.
-	pub fn get_client_receiver(&self) -> Receiver<ClientEvent> {
+	/// Returns the reciever for the CoreEvent channel. Used in the SSE listener endpoint.
+	pub fn get_client_receiver(&self) -> Receiver<CoreEvent> {
 		self.response_channel.0.subscribe()
 	}
 
 	// FIXME: error handling??
-	pub fn emit_client_event(&self, event: ClientEvent) {
+	pub fn emit_client_event(&self, event: CoreEvent) {
 		let _ = self.response_channel.0.send(event);
 	}
 
 	/// Emits a client event and persists a log based on the failure.
-	pub async fn handle_failure_event(&self, event: ClientEvent) {
+	pub async fn handle_failure_event(&self, event: CoreEvent) {
 		use prisma::log;
 
 		// TODO: maybe log::error! here?
@@ -93,13 +93,16 @@ impl Ctx {
 	/// Sends in internal task
 	pub fn internal_task(
 		&self,
-		task: ClientRequest,
-	) -> Result<(), SendError<ClientRequest>> {
+		task: InternalCoreTask,
+	) -> Result<(), SendError<InternalCoreTask>> {
 		self.internal_sender.send(task)
 	}
 
 	/// Sends a QueueJob task to the event manager.
-	pub fn spawn_job(&self, job: Box<dyn Job>) -> Result<(), SendError<ClientRequest>> {
-		self.internal_sender.send(ClientRequest::QueueJob(job))
+	pub fn spawn_job(
+		&self,
+		job: Box<dyn Job>,
+	) -> Result<(), SendError<InternalCoreTask>> {
+		self.internal_sender.send(InternalCoreTask::QueueJob(job))
 	}
 }

@@ -1,4 +1,4 @@
-use crate::types::{errors::AuthError, models::DecodedCredentials};
+use crate::types::{errors::AuthError, models::user::DecodedCredentials};
 
 pub fn get_hash_cost() -> u32 {
 	std::env::var("HASH_COST")

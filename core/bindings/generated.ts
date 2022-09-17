@@ -18,6 +18,11 @@ export interface UserPreferences {
 	collectionViewMode: string;
 }
 
+export interface LoginOrRegisterArgs {
+	username: string;
+	password: string;
+}
+
 export type FileStatus = 'UNKNOWN' | 'READY' | 'UNSUPPORTED' | 'ERROR' | 'MISSING';
 
 export interface Library {
@@ -164,7 +169,7 @@ export interface JobReport {
 	completedAt: string | null;
 }
 
-export type ClientEvent =
+export type CoreEvent =
 	| { key: 'JobStarted'; data: JobUpdate }
 	| { key: 'JobProgress'; data: JobUpdate }
 	| { key: 'JobComplete'; data: string }

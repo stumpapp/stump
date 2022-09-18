@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getNextInSeries, getSeriesById, getSeriesMedia } from '../api';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
+import { useQueryParamStore } from '../stores';
 
 export const prefetchSeries = async (id: string) => {
 	await queryClient.prefetchQuery(['getSeries', id], () => getSeriesById(id), {
@@ -35,10 +36,12 @@ export function useSeries(id: string, options: QueryCallbacks<Series> = {}) {
 }
 
 export function useSeriesMedia(seriesId: string, page: number = 1) {
+	const { getQueryString, ...paramsStore } = useQueryParamStore();
+
 	const { isLoading, isFetching, isRefetching, isPreviousData, data } = useQuery(
-		['getSeriesMedia', page, seriesId],
+		['getSeriesMedia', page, seriesId, paramsStore],
 		() =>
-			getSeriesMedia(seriesId, page).then(({ data }) => ({
+			getSeriesMedia(seriesId, page, getQueryString()).then(({ data }) => ({
 				media: data.data,
 				pageData: data._page,
 			})),

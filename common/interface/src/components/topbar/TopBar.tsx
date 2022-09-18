@@ -5,8 +5,7 @@ import { useLocation } from 'react-router';
 import MobileDrawer from '../sidebar/MobileDrawer';
 import LayoutModeButtons from './LayoutModeButtons';
 import NavigationButtons from './NavigationButtons';
-import Search from './Search';
-import SortConfig from './SortConfig';
+import OrderDirectionToggle from './OrderDirectionToggle';
 
 // FIXME: this is not good AT ALL for mobile. It *looks* fine, but the navigation is gone, the
 // sort/view mode buttons are gone, the sort config is gone,and the search bar is meh. I need to
@@ -14,12 +13,6 @@ import SortConfig from './SortConfig';
 export default function TopBar() {
 	const { title } = useTopBarStore();
 	const location = useLocation();
-
-	// const showQueryParamOptions = useMemo(() => {
-	// 	return (
-	// 		!!location.pathname.match(/\/libraries\/.+$/) || location.pathname.match(/\/series\/.+$/)
-	// 	);
-	// }, [location]);
 
 	const { entity, showQueryParamOptions } = useMemo(() => {
 		let match =
@@ -61,7 +54,7 @@ export default function TopBar() {
 				{showQueryParamOptions && (
 					<HStack>
 						<LayoutModeButtons entity={entity} />
-						<SortConfig />
+						<OrderDirectionToggle />
 					</HStack>
 				)}
 			</HStack>

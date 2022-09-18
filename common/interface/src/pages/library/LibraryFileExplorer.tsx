@@ -3,37 +3,9 @@ import { Helmet } from 'react-helmet';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router-dom';
 
-import { Text } from '@chakra-ui/react';
 import { useDirectoryListing, useLibrary } from '@stump/client';
-import { DirectoryListingFile } from '@stump/core';
 
-function ExplorerFile({ name, path, isDirectory }: DirectoryListingFile) {
-	function getIconSrc() {
-		const archivePattern = new RegExp(/^.*\.(cbz|zip|rar|cbr)$/gi);
-
-		if (isDirectory) {
-			return '/icons/folder.png';
-		} else if (archivePattern.test(path)) {
-			// TODO: no lol, I want to try and render a small preview still
-			// will have to create a new endpoint to try and grab a thumbnail by path
-			return '/icons/archive.svg';
-		} else if (path.endsWith('.epub')) {
-			return '/icons/epub.svg';
-		} else {
-			return '';
-		}
-	}
-
-	return (
-		<button className="flex flex-col space-y-2 items-center justify-center">
-			{/* FIXME: don't use images for svg fallbacks... or, just set color of images... */}
-			<img src={getIconSrc()} className="h-20 w-20 active:scale-[.99]" />
-			<Text maxW="20" fontSize="xs">
-				{name}
-			</Text>
-		</button>
-	);
-}
+import FileExplorer from '../../components/files/FileExplorer';
 
 // TODO: this is just a concept right now, its pretty ugly and I won't spend much more time on it
 // until more of stump is compelted. That being said, if someone wants to run with this go for it!
@@ -61,7 +33,8 @@ export default function LibraryFileExplorer() {
 		},
 	});
 
-	// TODO: make different hook for explorer
+	// TODO: make different hook for explorer, will need a separate endpoint to
+	// compare paths with DB media entries to pair them up (used for navigation and file icons)
 	const { entries } = useDirectoryListing({
 		enabled: !!library?.path,
 		startingPath: library?.path,
@@ -81,11 +54,7 @@ export default function LibraryFileExplorer() {
 			</Helmet>
 
 			<div className="p-4 w-full h-full flex flex-col space-y-6">
-				<div className="flex flex-row flex-wrap space-x-8 items-start justify-center md:justify-start pb-4">
-					{entries.map((entry) => (
-						<ExplorerFile key={entry.path} {...entry} />
-					))}
-				</div>
+				<FileExplorer files={entries} />
 			</div>
 		</>
 	);

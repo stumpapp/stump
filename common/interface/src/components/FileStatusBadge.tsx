@@ -14,7 +14,7 @@ export default function FileStatusBadge({ status }: { status: FileStatus }) {
 	})();
 
 	return (
-		<Badge textTransform="none" bg={color}>
+		<Badge textTransform="none" bg={color} rounded="md">
 			{status}
 		</Badge>
 	);

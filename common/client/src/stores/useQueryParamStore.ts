@@ -1,5 +1,5 @@
 import create from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
 
 import { Direction, PageParams } from '@stump/core';
 
@@ -16,50 +16,63 @@ export interface QueryParamStore extends Partial<PageParams>, StoreBase<QueryPar
 }
 
 const defaultValues = {
-	zeroBased: false,
-	pageSize: 20,
+	// zeroBased: false,
+	// pageSize: 20,
 	direction: 'asc',
 } as Partial<QueryParamStore>;
 
 export const useQueryParamStore = create<QueryParamStore>()(
-	devtools((set, get) => ({
-		...defaultValues,
+	devtools(
+		persist(
+			(set, get) => ({
+				...defaultValues,
 
-		setZeroBased(zeroBased) {
-			set((store) => ({ ...store, zeroBased }));
-		},
-		setPageSize(pageSize) {
-			set((store) => ({ ...store, pageSize }));
-		},
-		setOrderBy(orderBy) {
-			set((store) => ({ ...store, orderBy }));
-		},
-		setDirection(direction) {
-			set((store) => ({ ...store, direction }));
-		},
+				setZeroBased(zeroBased) {
+					set((store) => ({ ...store, zeroBased }));
+				},
+				setPageSize(pageSize) {
+					set((store) => ({ ...store, pageSize }));
+				},
+				setOrderBy(orderBy) {
+					set((store) => ({ ...store, orderBy }));
+				},
+				setDirection(direction) {
+					set((store) => ({ ...store, direction }));
+				},
 
-		getQueryString() {
-			let params = '';
+				getQueryString() {
+					let params = '';
 
-			for (const [key, value] of Object.entries(get())) {
-				if (value != undefined && typeof value !== 'function' && typeof value !== 'object') {
-					params += `${key}=${value}&`;
-				}
-			}
+					for (const [key, value] of Object.entries(get())) {
+						if (value != undefined && typeof value !== 'function' && typeof value !== 'object') {
+							params += `${key}=${value}&`;
+						}
+					}
 
-			// remote trailing & if present
-			if (params.endsWith('&')) {
-				return params.slice(0, -1);
-			}
+					// remote trailing & if present
+					if (params.endsWith('&')) {
+						return params.slice(0, -1);
+					}
 
-			return params;
-		},
+					return params;
+				},
 
-		reset() {
-			set(() => ({}));
-		},
-		set(changes) {
-			set((state) => ({ ...state, ...changes }));
-		},
-	})),
+				reset() {
+					set(() => ({}));
+				},
+				set(changes) {
+					set((state) => ({ ...state, ...changes }));
+				},
+			}),
+			{
+				name: 'stump-query-param-store',
+				getStorage: () => sessionStorage,
+				partialize(store) {
+					return {
+						direction: store.direction,
+					};
+				},
+			},
+		),
+	),
 );

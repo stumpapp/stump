@@ -1,5 +1,4 @@
 import { SortAscending, SortDescending } from 'phosphor-react';
-import { useState } from 'react';
 
 import {
 	ButtonGroup,
@@ -12,7 +11,7 @@ import {
 import Button from '../../ui/Button';
 import { useQueryParamStore } from '@stump/client';
 
-export default function SortConfig() {
+export default function OrderDirectionToggle() {
 	const { orderBy, setOrderBy, direction, setDirection } = useQueryParamStore();
 
 	return (
@@ -36,13 +35,15 @@ export default function SortConfig() {
 			</Menu>
 
 			<Button
-				title={direction === 'asc' ? 'Sort ascending' : 'Sort descending'}
+				title={
+					direction === 'desc' ? 'Change ordering to ascending' : 'Change ordering to descending'
+				}
 				onClick={() => setDirection(direction === 'asc' ? 'desc' : 'asc')}
 				p={0.5}
 				size="sm"
 				bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
 			>
-				{direction === 'asc' ? (
+				{direction === 'desc' ? (
 					<SortAscending className="text-lg" weight="regular" />
 				) : (
 					<SortDescending className="text-lg" weight="regular" />

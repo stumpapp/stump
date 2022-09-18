@@ -174,7 +174,7 @@ function QueryResults({ results }: { results?: typeof fakeResults }) {
 				w="50%"
 				p={1.5}
 				className="scrollbar-hide"
-				minH="xxs"
+				minH="52"
 				maxH="md"
 				overflowY="scroll"
 				spacing={1.5}

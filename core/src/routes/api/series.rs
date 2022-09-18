@@ -3,16 +3,20 @@ use rocket::{http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
-	db::migration::CountQueryReturn,
+	db::{migration::CountQueryReturn, utils::FindManyTrait},
 	fs::{self, image},
 	guards::auth::Auth,
-	prisma::{media, read_progress, series},
+	prisma::{
+		media::{self, OrderByParam},
+		read_progress, series,
+	},
 	types::{
 		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::ImageResponse,
 		models::{media::Media, series::Series},
-		pageable::{Pageable, PagedRequestParams},
+		pageable::{PageParams, Pageable, PagedRequestParams},
+		query::QueryOrder,
 	},
 };
 
@@ -151,30 +155,36 @@ pub async fn get_series_thumbnail(
 /// Returns the media in a given series. This is a paginated respone, and
 /// accepts various paginated request params.
 #[openapi(tag = "Series")]
-#[get("/series/<id>/media?<unpaged>&<page_params..>")]
+#[get("/series/<id>/media?<unpaged>&<req_params..>")]
 pub async fn get_series_media(
 	id: String,
 	unpaged: Option<bool>,
-	page_params: Option<PagedRequestParams>,
+	req_params: Option<PagedRequestParams>,
 	ctx: &Ctx,
 	auth: Auth,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 
-	let media = db
+	let unpaged = unpaged.unwrap_or_else(|| req_params.is_none());
+	let page_params = PageParams::from(req_params);
+	let order_by_param: OrderByParam =
+		QueryOrder::from(page_params.clone()).try_into()?;
+
+	let base_query = db
 		.media()
 		.find_many(vec![media::series_id::equals(Some(id))])
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(auth.0.id),
 		]))
-		.order_by(media::name::order(Direction::Asc))
-		.exec()
-		.await?
-		.into_iter()
-		.map(|m| m.into())
-		.collect::<Vec<Media>>();
+		.order_by(order_by_param);
 
-	let unpaged = unpaged.unwrap_or(page_params.is_none());
+	let media = if unpaged {
+		base_query.exec().await?
+	} else {
+		base_query.paginated(page_params.clone()).exec().await?
+	};
+
+	let media = media.into_iter().map(|m| m.into()).collect::<Vec<Media>>();
 
 	if unpaged {
 		return Ok(Json(media.into()));

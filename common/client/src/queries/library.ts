@@ -18,6 +18,7 @@ import {
 } from '../api/library';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
+import { useQueryParamStore } from '../stores';
 
 export function useLibrary(id: string, options: QueryCallbacks<Library> = {}) {
 	const { isLoading, data: library } = useQuery(['getLibrary', id], {
@@ -62,10 +63,12 @@ export function useLibraries() {
 }
 
 export function useLibrarySeries(libraryId: string, page: number = 1) {
+	const { getQueryString, ...paramsStore } = useQueryParamStore();
+
 	const { isLoading, isFetching, isPreviousData, data } = useQuery(
-		['getLibrarySeries', page, libraryId],
+		['getLibrarySeries', page, libraryId, paramsStore],
 		() =>
-			getLibrarySeries(libraryId, page).then(({ data }) => ({
+			getLibrarySeries(libraryId, page, getQueryString()).then(({ data }) => ({
 				series: data.data,
 				pageData: data._page,
 			})),

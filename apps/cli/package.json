@@ -1,0 +1,9 @@
+{
+  "name": "@stump/cli",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "cargo watch -x run",
+    "build": "cargo build --release"
+  }
+}

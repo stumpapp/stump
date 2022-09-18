@@ -1,0 +1,14 @@
+[package]
+name = "stump_cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "3.2.22", features = ["derive"] }
+tui = "0.19"
+crossterm = "0.25"
+
+### ASYNC ###
+tokio = { version = "1.17.0", features = ["macros", "rt-multi-thread"] }
+reqwest = "0.11.11"
+reqwest-eventsource = "0.4.0"

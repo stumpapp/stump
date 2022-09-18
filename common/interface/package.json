@@ -22,6 +22,7 @@
     "@stump/client": "workspace:*",
     "@tanstack/react-query": "^4.3.4",
     "@tanstack/react-query-devtools": "^4.3.5",
+    "@tanstack/react-table": "^8.5.13",
     "chakra-react-select": "^4.2.2",
     "clsx": "^1.2.1",
     "epubjs": "^0.3.93",

@@ -40,39 +40,31 @@ export default function TopBar() {
 
 	return (
 		<Box
-			as="nav"
-			className="sticky top-0 grid grid-cols-12 w-full items-center px-4 py-2 md:py-3 z-10"
+			as="header"
+			className="sticky top-0 w-full px-4 py-2 md:py-3 z-10"
 			bg={{
 				base: useColorModeValue('white', 'gray.800'),
 				md: useColorModeValue('gray.75', 'gray.900'),
 			}}
 		>
-			<HStack
-				spacing="2"
-				className="flex col-span-6 md:col-span-3 justify-start items-center self-center"
-			>
-				<MobileDrawer />
+			<HStack w="full" justify="space-between" align="center" spacing="2">
+				<HStack>
+					<MobileDrawer />
 
-				<NavigationButtons />
+					<NavigationButtons />
+					{/* @ts-ignore: this seems to work, idky it has type error */}
+					<Heading as="h3" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>
+						{title}
+					</Heading>
+				</HStack>
 
-				{/* @ts-ignore: this seems to work, idky it has type error */}
-				<Heading as="h3" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>
-					{title}
-				</Heading>
-			</HStack>
-
-			<div className="flex w-full col-span-6 justify-end items-center md:justify-center">
-				<Search />
-			</div>
-
-			<div className="md:flex md:col-span-3 items-center justify-end hidden">
 				{showQueryParamOptions && (
 					<HStack>
 						<LayoutModeButtons entity={entity} />
 						<SortConfig />
 					</HStack>
 				)}
-			</div>
+			</HStack>
 		</Box>
 	);
 }

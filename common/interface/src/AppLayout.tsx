@@ -8,11 +8,13 @@ import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
 import JobOverlay from './components/JobOverlay';
 import TopBar from './components/topbar/TopBar';
+import CommandPalette from './components/CommandPalette';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 export function AppLayout() {
 	const appProps = useAppProps();
-	const navigate = useNavigate();
 
+	const navigate = useNavigate();
 	const location = useLocation();
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
@@ -25,6 +27,12 @@ export function AppLayout() {
 	useJobManager();
 
 	const { user: storeUser, setUser } = useUserStore();
+
+	// TODO: platform specific hotkeys
+	useHotkeys('ctrl+,, cmd+,', (e) => {
+		e.preventDefault();
+		navigate('/settings/general');
+	});
 
 	// TODO: This logic needs to be moved, pretty much every request in Stump should have this
 	// functionality. I have no idea how to do this in a clean way right now though.
@@ -48,6 +56,7 @@ export function AppLayout() {
 
 	return (
 		<React.Suspense fallback={<>Loading...</>}>
+			<CommandPalette />
 			<Flex
 				// className={clsx({ 'overflow-hidden': appProps?.platform !== 'browser' })}
 				w="full"

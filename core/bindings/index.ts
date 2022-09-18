@@ -24,15 +24,15 @@ export type MediaOrderByExclusions = Extract<
 	keyof Media,
 	'currentPage' | 'series' | 'readProgresses' | 'tags'
 >;
-export type MediaOrderBy = keyof Omit<Media, MediaOrderByExclusions>;
+export type MediaOrderByOptions = Omit<Media, MediaOrderByExclusions>;
 
 export type SeriesOrderByExclusions = Extract<
 	keyof Series,
 	'library' | 'media' | 'mediaCount' | 'tags'
 >;
-export type SeriesOrder = keyof Omit<Series, SeriesOrderByExclusions>;
+export type SeriesOrderOptions = Omit<Series, SeriesOrderByExclusions>;
 
 export type LibraryOrderByExclusions = Extract<keyof Library, 'series' | 'tags' | 'libraryOptions'>;
-export type LibraryOrder = keyof Omit<Library, LibraryOrderByExclusions>;
+export type LibraryOrderOptions = Omit<Library, LibraryOrderByExclusions>;
 
 export * from './generated';

@@ -73,7 +73,7 @@ export default function Code({ children, language }: CodeProps) {
 
 	// TODO: super long lines cause issues
 	return (
-		<div className="code relative" aria-live="polite">
+		<div className="code relative max-w-[750px] overflow-x-scroll" aria-live="polite">
 			<pre
 				// Prevents "Failed to execute 'removeChild' on 'Node'" error
 				// https://stackoverflow.com/questions/54880669/react-domexception-failed-to-execute-removechild-on-node-the-node-to-be-re

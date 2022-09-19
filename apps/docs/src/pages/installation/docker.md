@@ -66,7 +66,7 @@ Below is an example of a Docker Compose file you can use to bootstrap your Stump
 version: '3.3'
 services:
   stump:
-    image: aaronleopold/stump-preview # this will be `aaronleopold/stump` when it is released
+    image: aaronleopold/stump-preview
     container_name: stump
     # Replace my paths (prior to the colons) with your own
     volumes:
@@ -75,8 +75,9 @@ services:
     ports:
       - 10801:10801
     user: '1000:1000'
-    # This `environment` field is optional, remove if you don't need it. I am using
-    # them as an example here, but these are actually their default values.
+    # This `environment` field is optional, remove if you don't need it.
+    # I am using them as an example here, but these are actually
+    # their default values.
     environment:
       - STUMP_CONFIG_DIR=/config
     restart: unless-stopped
@@ -111,5 +112,7 @@ To remove the old dangling images you have installed: `docker image prune`
 3. Start the container again: `docker-compose up`
 
 ## Example Configurations
+
+> TODO
 
 To get you started, I wrote how-to guides for a few different Docker configurations. You can find them [here](/guides/docker-examples).

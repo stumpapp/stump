@@ -70,6 +70,7 @@ pub enum AuthError {
 }
 
 #[derive(Serialize, Error, Debug)]
+#[serde(tag = "kind", content = "data")]
 pub enum ApiError {
 	#[error("{0}")]
 	BadRequest(String),

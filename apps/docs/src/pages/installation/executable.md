@@ -4,7 +4,19 @@
 Any present tense information in this section is not accurate. Once a release is made, the following information will apply.
 {% /callout %}
 
-On [GitHub](https://github.com/aaronleopold/stump/releases), Stump has pre-built binaries for Linux, macOS, and Windows. Follow the instructions below for your operating system to install Stump.
+On [GitHub](https://github.com/aaronleopold/stump/releases), Stump has pre-built binaries, for both the Stump server and desktop application, for Linux, macOS, and Windows platforms.
+
+## Downloading the Stump desktop application
+
+If you want to install the desktop application, you will want to select the appropriate binary for your operating system:
+
+- macOS: `Stump.dmg`
+- Linux: `Stump.AppImage`
+- Windows: `Stump.exe`
+
+## Downloading the Stump server
+
+Otherwise, for the Stump server, follow the instructions below for your operating system to install Stump.
 
 ## Linux
 

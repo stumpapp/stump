@@ -3,7 +3,7 @@ import Link from '../ui/Link';
 import { NextRouter, useRouter } from 'next/router';
 import { sidebarItems } from './sidebarItems';
 import clsx from 'clsx';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { List, X } from 'phosphor-react';
 import IconButton from '~components/ui/IconButton';
 import { useMediaQuery } from '~hooks/useMediaQuery';

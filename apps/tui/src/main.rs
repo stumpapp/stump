@@ -14,6 +14,7 @@ use std::{
 	time::Duration,
 };
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio_graceful_shutdown::{SubsystemHandle, Toplevel};
 use tui::{
 	backend::CrosstermBackend,
 	widgets::{Block, Borders},
@@ -102,6 +103,22 @@ impl StumpTui {
 	}
 }
 
+async fn start_tui(_subsys: SubsystemHandle) -> Result<(), TuiError> {
+	enable_raw_mode()?;
+
+	let mut stdout = io::stdout();
+	execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+	let backend = CrosstermBackend::new(stdout);
+	let terminal = Terminal::new(backend)?;
+
+	let mut stump_tui = StumpTui::new("http://localhost:10801", terminal);
+
+	stump_tui.run().await?;
+	stump_tui.shutdown()?;
+
+	Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), TuiError> {
 	match cli::parse_and_run().await? {
@@ -114,17 +131,10 @@ async fn main() -> Result<(), TuiError> {
 		},
 		_ => {},
 	};
-	enable_raw_mode()?;
-	let mut stdout = io::stdout();
-	execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
-	let backend = CrosstermBackend::new(stdout);
-	let terminal = Terminal::new(backend)?;
 
-	let mut stump_tui = StumpTui::new("http://localhost:10801", terminal);
-
-	let res = stump_tui.run().await;
-
-	stump_tui.shutdown()?;
-
-	return res;
+	Ok(Toplevel::new()
+		.start("start_tui", start_tui)
+		.catch_signals()
+		.handle_shutdown_requests(Duration::from_millis(1000))
+		.await?)
 }

@@ -1,57 +1,12 @@
 # Series
 
-The most important takeaway from this section is that **series are just folders** inside of a library, **one level deep** only.
+The most important takeaway from this section is that **series are just folders** on your file system that live within the path of a library.
 
 ![A series is just a folder](/images/1folder1series.gif)
 
-## Basic Example
+What defines a series is actually dependent on how its library is configured. A library can be configured to support 2 different patterns:
 
-Consider the following example library:
+- **Collection based library**: Takes the top most folder and collapses everything into it as a single series.
+- **Series Based Library**: Takes the bottom most folders as series, effectively being the opposite of a collection based library.
 
-```
-. /Users/aaronleopold/Documents/Stump/Demo
-├── Daredevil
-│   ├── Daredevil 001.cbz
-│   ├── Daredevil 002.cbz
-│   └── ...
-└── The Amazing Spider-Man (2018)
-    ├── The Amazing Spider-Man 001 (2018).cbz
-    ├── The Amazing Spider-Man 002 (2018).cbz
-    └── ...
-```
-
-This library has **2 series**: _Daredevil_ and _The Amazing Spider-Man (2018)_.
-
-## Nested Folders
-
-Let's make it a little more complicated now:
-
-```
-. /Users/aaronleopold/Documents/Stump/Demo
-├── Daredevil
-│   ├── Daredevil 001.cbz
-│   ├── Daredevil 002.cbz
-│   └── ...
-├── Some Manga
-│   ├── Volume 001
-│   │   ├── Chapter 001.zip
-│   │   ├── Chapter 002.zip
-│   │   └── ...
-│   ├── Volume 002
-│   └── ...
-└── The Amazing Spider-Man (2018)
-    ├── The Amazing Spider-Man 001 (2018).cbz
-    ├── The Amazing Spider-Man 002 (2018).cbz
-    └── ...
-```
-
-Stump only recognizes **3 series** in this library: _Daredevil_, _The Amazing Spider-Man (2018)_ and _Some Manga_. Stump **does not** and, _most likely_, **will not** support separating nested folders into individual series. Past the first level directory, i.e. `Some Manga`, all media inside nested directories (e.g. `Volume 001`, `Volume 002`, etc) will flatten into the parent under the same series. A visual representation of this flattening for that series, after Stump scans your library, would look like:
-
-```
-Some Manga
-├── Book 001.zip
-├── Book 002.zip
-└── ...
-```
-
-There are plans to implement a configurable option to automatically tag media files in these kinds of configurations, for example assigning `Chapter001.zip` and `Chapter002.zip` a new tag `Some Manga - Volume 001`, however that is not yet developed.
+For more information on these patterns, please review the [Library Configuration](/guides/libraries#library-patterns) section of the documentation.

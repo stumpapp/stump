@@ -6070,8 +6070,10 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "crossterm",
+ "futures-util",
  "reqwest",
  "reqwest-eventsource",
+ "thiserror",
  "tokio",
  "tui",
 ]

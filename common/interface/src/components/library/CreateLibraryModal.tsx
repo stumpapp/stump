@@ -14,7 +14,7 @@ import { TagOption, useLibraryMutation, useTags } from '@stump/client';
 import { ApiResult, LibraryOptions, Tag } from '@stump/core';
 
 import Button, { ModalCloseButton } from '../../ui/Button';
-import LibraryModalForm from './LibraryModalForm';
+import LibraryModalForm from './form/LibraryModalForm';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;
@@ -48,7 +48,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 
 		const { name, path, description, tags: formTags, scan_mode, ...library_options } = values;
 
-		// console.debug({ name, path, description, tags: formTags, scan_mode, libraryOptions });
+		// console.log({ name, path, description, tags: formTags, scan_mode, library_options });
 
 		let existingTags = tags.filter((tag) => formTags?.some((t: TagOption) => t.value === tag.name));
 

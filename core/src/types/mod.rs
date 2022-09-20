@@ -45,6 +45,7 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryPattern>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanMode>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryOptions>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibraryArgs>()?).as_bytes())?;
@@ -56,7 +57,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Tag>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ViewMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LayoutMode>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<Epub>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;

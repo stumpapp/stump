@@ -16,10 +16,13 @@ struct Cli {
 enum Commands {
 	/// Configures the CLI to connect to the Stump server
 	Config {
+		// #[clap()]
 		base_url: Option<String>,
 		username: Option<String>,
 		password: Option<String>,
 	},
+	/// Pings the Stump server
+	Ping,
 }
 
 pub async fn parse_and_run() -> Result<CliEvent, CliError> {
@@ -31,6 +34,9 @@ pub async fn parse_and_run() -> Result<CliEvent, CliError> {
 			password,
 		}) => {
 			config::run_command(base_url, username, password).await?;
+		},
+		Some(Commands::Ping) => {
+			unimplemented!("Ping command not implemented yet");
 		},
 		None => {
 			// When no subcommand is provided, launch the TUI

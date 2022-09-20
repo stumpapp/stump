@@ -11,17 +11,18 @@ import {
 	Tabs,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FieldValues, useForm } from 'react-hook-form';
+import { FieldValues, useForm, useFormContext } from 'react-hook-form';
 import { z } from 'zod';
-import DirectoryPickerModal from '../DirectoryPickerModal';
-import TagSelect from '../TagSelect';
-import { Library, LibraryScanMode } from '@stump/core';
+import DirectoryPickerModal from '../../DirectoryPickerModal';
+import TagSelect from '../../TagSelect';
+import { Library, LibraryPattern, LibraryScanMode } from '@stump/core';
 import { TagOption, useLibraries } from '@stump/client';
-import Form, { FormControl } from '../../ui/Form';
-import { Tab } from '../../ui/Tabs';
-import Input from '../../ui/Input';
-import TextArea from '../../ui/TextArea';
-import Checkbox from '../../ui/Checkbox';
+import Form, { FormControl } from '../../../ui/Form';
+import { Tab } from '../../../ui/Tabs';
+import Input from '../../../ui/Input';
+import TextArea from '../../../ui/TextArea';
+import Checkbox from '../../../ui/Checkbox';
+import { LibraryPatternRadio } from './LibraryPatternRadio';
 
 interface Props {
 	tags: TagOption[];
@@ -36,11 +37,16 @@ interface Props {
  * It is not intended to be used outside of those components.
  */
 // FIXME: tab focus is not working, e.g. when you press tab, it should go to the next form element
+// TODO: I think this should be broken up... it's getting a bit big
 export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, library }: Props) {
 	const { libraries } = useLibraries();
 
 	function isLibraryScanMode(input: string): input is LibraryScanMode {
 		return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input;
+	}
+
+	function isLibraryPattern(input: string): input is LibraryPattern {
+		return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input;
 	}
 
 	function getNewScanMode(value: string) {
@@ -85,6 +91,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 			)
 			.optional(),
 		scan_mode: z.string().refine(isLibraryScanMode).default('BATCHED'),
+		library_pattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
 		convert_rar_to_zip: z.boolean().default(false),
 		hard_delete_conversions: z.boolean().default(false),
 		create_webp_thumbnails: z.boolean().default(false),
@@ -101,6 +108,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					convert_rar_to_zip: library.library_options.convert_rar_to_zip,
 					hard_delete_conversions: library.library_options.hard_delete_conversions,
 					create_webp_thumbnails: library.library_options.create_webp_thumbnails,
+					library_pattern: library.library_options.library_pattern,
 					scan_mode: 'BATCHED',
 			  }
 			: {},
@@ -135,6 +143,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 				</TabList>
 
 				<TabPanels>
+					{/* GENERAL LIBRARY INFO TAB */}
 					<TabPanel className="flex flex-col space-y-4">
 						<FormControl isInvalid={!!errors.name}>
 							<FormLabel htmlFor="name">Libary name</FormLabel>
@@ -159,6 +168,12 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							{!!errors.path && <FormErrorMessage>{errors.path?.message}</FormErrorMessage>}
 						</FormControl>
 
+						<TagSelect
+							isLoading={fetchingTags}
+							options={tags}
+							defaultValue={library?.tags?.map((t) => ({ value: t.name, label: t.name }))}
+						/>
+
 						<FormControl>
 							<FormLabel htmlFor="name">Description</FormLabel>
 							<TextArea
@@ -167,12 +182,10 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							/>
 						</FormControl>
 					</TabPanel>
+
+					{/* LIBRARY OPTIONS */}
 					<TabPanel className="flex flex-col space-y-4">
-						<TagSelect
-							isLoading={fetchingTags}
-							options={tags}
-							defaultValue={library?.tags?.map((t) => ({ value: t.name, label: t.name }))}
-						/>
+						<LibraryPatternRadio library={library} />
 
 						{/* TODO change entire layout to be better UX, provide information for what each option does */}
 						<HStack>

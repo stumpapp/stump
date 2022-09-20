@@ -1,8 +1,8 @@
+import { LayoutMode } from '@stump/core';
 import { useMemo } from 'react';
 import { useUserPreferences } from '../queries';
 import { useUserStore } from '../stores';
 
-export type LayoutMode = 'GRID' | 'LIST';
 export type LayoutEntity = 'LIBRARY' | 'SERIES';
 
 const DEFAULT_LAYOUT_MODE: LayoutMode = 'GRID';

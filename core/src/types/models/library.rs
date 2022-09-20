@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt, str::FromStr};
 
 use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -29,6 +29,50 @@ pub struct Library {
 	pub library_options: LibraryOptions,
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, PartialEq, Type)]
+pub enum LibraryPattern {
+	#[serde(rename = "SERIES_BASED")]
+	SeriesBased,
+	#[serde(rename = "COLLECTION_BASED")]
+	CollectionBased,
+}
+
+impl FromStr for LibraryPattern {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let uppercase = s.to_uppercase();
+
+		match uppercase.as_str() {
+			"SERIES_BASED" => Ok(LibraryPattern::SeriesBased),
+			"COLLECTION_BASED" => Ok(LibraryPattern::CollectionBased),
+			"" => Ok(LibraryPattern::default()),
+			_ => Err(format!("Invalid library pattern: {}", s)),
+		}
+	}
+}
+
+impl Default for LibraryPattern {
+	fn default() -> Self {
+		Self::SeriesBased
+	}
+}
+
+impl From<String> for LibraryPattern {
+	fn from(s: String) -> Self {
+		LibraryPattern::from_str(&s).unwrap_or_default()
+	}
+}
+
+impl fmt::Display for LibraryPattern {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			LibraryPattern::SeriesBased => write!(f, "SERIES_BASED"),
+			LibraryPattern::CollectionBased => write!(f, "COLLECTION_BASED"),
+		}
+	}
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
 pub struct LibraryOptions {
 	// Note: this isn't really an Option, but I felt it was a little verbose
@@ -38,9 +82,16 @@ pub struct LibraryOptions {
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
 	pub create_webp_thumbnails: bool,
+	pub library_pattern: LibraryPattern,
 	// TODO: don't make Option after pcr supports nested create
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	pub library_id: Option<String>,
+}
+
+impl LibraryOptions {
+	pub fn is_collection_based(&self) -> bool {
+		self.library_pattern == LibraryPattern::CollectionBased
+	}
 }
 
 impl Default for LibraryOptions {
@@ -50,13 +101,13 @@ impl Default for LibraryOptions {
 			convert_rar_to_zip: false,
 			hard_delete_conversions: false,
 			create_webp_thumbnails: false,
+			library_pattern: LibraryPattern::default(),
 			library_id: None,
 		}
 	}
 }
 
 #[derive(Deserialize, Debug, JsonSchema, PartialEq, Copy, Clone, Type)]
-
 pub enum LibraryScanMode {
 	#[serde(rename = "SYNC")]
 	Sync,
@@ -79,6 +130,12 @@ impl FromStr for LibraryScanMode {
 			"" => Ok(LibraryScanMode::default()),
 			_ => Err(format!("Invalid library scan mode: {}", s)),
 		}
+	}
+}
+
+impl From<String> for LibraryScanMode {
+	fn from(s: String) -> Self {
+		LibraryScanMode::from_str(&s).unwrap_or(LibraryScanMode::default())
 	}
 }
 
@@ -137,7 +194,21 @@ impl Into<LibraryOptions> for prisma::library_options::Data {
 			convert_rar_to_zip: self.convert_rar_to_zip,
 			hard_delete_conversions: self.hard_delete_conversions,
 			create_webp_thumbnails: self.create_webp_thumbnails,
+			library_pattern: LibraryPattern::from(self.library_pattern),
 			library_id: self.library_id,
+		}
+	}
+}
+
+impl Into<LibraryOptions> for &prisma::library_options::Data {
+	fn into(self) -> LibraryOptions {
+		LibraryOptions {
+			id: Some(self.id.clone()),
+			convert_rar_to_zip: self.convert_rar_to_zip,
+			hard_delete_conversions: self.hard_delete_conversions,
+			create_webp_thumbnails: self.create_webp_thumbnails,
+			library_pattern: LibraryPattern::from(self.library_pattern.clone()),
+			library_id: self.library_id.clone(),
 		}
 	}
 }

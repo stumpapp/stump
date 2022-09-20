@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use futures_util::stream::StreamExt;
-use reqwest_eventsource::{Event as EventSourceEvent, EventSource};
+use reqwest_eventsource::{Event, EventSource};
 use tokio::sync::mpsc::UnboundedSender;
 
 use super::TuiEvent;
@@ -26,11 +26,11 @@ impl SSEHandler {
 				EventSource::get(&format!("{}/api/jobs/listen", this_cpy.base_url));
 			while let Some(event) = source.next().await {
 				match event {
-					Ok(EventSourceEvent::Open) => {
+					Ok(Event::Open) => {
 						// println!("SSE connection opened");
 					},
-					Ok(EventSourceEvent::Message(message)) => {
-						// println!("SSE message: {:?}", message);
+					Ok(Event::Message(message_event)) => {
+						this_cpy.handle_message(message_event.data);
 					},
 					Err(err) => {
 						println!("Error: {}", err);
@@ -41,5 +41,14 @@ impl SSEHandler {
 		});
 
 		this
+	}
+
+	fn handle_message(&self, data: String) {
+		println!("SSE message: {}", data);
+		// deserialize as JobUpdate, will be {key: String, data: ... }, can match
+		// on that enum accordingly...
+		// requires some heavy restructure again to access core types lol
+		// core -> just the core library
+		// apps/server -> rocket will need to be moved here
 	}
 }

@@ -4,6 +4,7 @@ pub mod library;
 pub mod utils;
 
 use rocket::http::ContentType;
+use walkdir::WalkDir;
 
 use crate::fs::media_file;
 
@@ -15,6 +16,7 @@ pub trait ScannedFileTrait {
 	fn is_img(&self) -> bool;
 	fn is_thumbnail_img(&self) -> bool;
 	fn dir_has_media(&self) -> bool;
+	fn dir_has_media_deep(&self) -> bool;
 }
 
 impl ScannedFileTrait for Path {
@@ -132,6 +134,18 @@ impl ScannedFileTrait for Path {
 		// log::error!("{:?}", items);
 
 		items
+			.filter_map(|item| item.ok())
+			.filter(|item| item.path() != self)
+			.any(|f| !f.path().should_ignore())
+	}
+
+	fn dir_has_media_deep(&self) -> bool {
+		if !self.is_dir() {
+			return false;
+		}
+
+		WalkDir::new(self)
+			.into_iter()
 			.filter_map(|item| item.ok())
 			.filter(|item| item.path() != self)
 			.any(|f| !f.path().should_ignore())

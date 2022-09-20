@@ -64,10 +64,11 @@ Things you can expect to see after the first beta release:
 
 - 🖥️ Desktop app ([Tauri](https://tauri.app/))
 - 📱 Mobile app ([Tachiyomi](https://github.com/aaronleopold/tachiyomi-extensions) and/or [custom application](https://github.com/aaronleopold/stump/tree/main/apps/mobile))
+- A utility [TUI](https://github.com/aaronleopold/stump/tree/main/apps/tui) for managing a Stump instance from the command line
 
 I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
 
-> For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're interested in tracking the development of specific features, you can take a look at the [Project Board](https://github.com/users/aaronleopold/projects/2).
+> For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're interested in tracking the development of specific features, you can take a look at my personal [task board](https://github.com/users/aaronleopold/projects/2).
 
 ## Getting Started 🚀
 

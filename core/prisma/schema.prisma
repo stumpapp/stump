@@ -89,8 +89,12 @@ model LibraryOptions {
   hard_delete_conversions Boolean @default(false)
   // Flag indicating whether or not to create WEBP thumbnails for scanned media.
   create_webp_thumbnails  Boolean @default(false)
-  // The ID of the library which these options belong to.
+  // The pattern which this library follows. Used primarily during scanning, affects how Stump
+  // will define its series. SERIES_BASED and COLLECTION_BASED are the only
+  // two valid options. Default is SERIES_BASED.
+  library_pattern         String  @default("SERIES_BASED")
 
+  // The ID of the library which these options belong to.
   library_id String?
   library    Library?
 

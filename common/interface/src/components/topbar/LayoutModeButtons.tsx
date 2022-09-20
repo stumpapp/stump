@@ -2,7 +2,8 @@ import { Rows, SquaresFour } from 'phosphor-react';
 import toast from 'react-hot-toast';
 
 import { ButtonGroup, useColorModeValue } from '@chakra-ui/react';
-import { LayoutEntity, LayoutMode, useLayoutMode } from '@stump/client';
+import { LayoutEntity, useLayoutMode } from '@stump/client';
+import { LayoutMode } from '@stump/core';
 
 import { IconButton } from '../../ui/Button';
 

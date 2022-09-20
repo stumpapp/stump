@@ -287,6 +287,9 @@ pub async fn create_library(
 			library_options::create_webp_thumbnails::set(
 				library_options_arg.create_webp_thumbnails,
 			),
+			library_options::library_pattern::set(
+				library_options_arg.library_pattern.to_string(),
+			),
 		])
 		.exec()
 		.await?;

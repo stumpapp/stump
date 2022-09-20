@@ -40,6 +40,8 @@ export interface Library {
 	library_options: LibraryOptions;
 }
 
+export type LibraryPattern = 'SERIES_BASED' | 'COLLECTION_BASED';
+
 export type LibraryScanMode = 'SYNC' | 'BATCHED' | 'NONE';
 
 export interface LibraryOptions {
@@ -47,6 +49,7 @@ export interface LibraryOptions {
 	convert_rar_to_zip: boolean;
 	hard_delete_conversions: boolean;
 	create_webp_thumbnails: boolean;
+	library_pattern: LibraryPattern;
 	library_id: string | null;
 }
 
@@ -132,7 +135,7 @@ export interface Tag {
 	name: string;
 }
 
-export type ViewMode = 'GRID' | 'LIST';
+export type LayoutMode = 'GRID' | 'LIST';
 
 export interface Epub {
 	media_entity: Media;

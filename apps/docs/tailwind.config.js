@@ -1,5 +1,3 @@
-// const colors = require('tailwindcss/colors');
-
 const brand = {
 	DEFAULT: '#C48259',
 	50: '#F4E8E0',
@@ -14,6 +12,7 @@ const brand = {
 	900: '#2D1B10',
 };
 
+// TODO: merge with `common/config`
 module.exports = {
 	content: ['./src/pages/**/*.{js,ts,jsx,tsx}', './src/components/**/*.{js,ts,jsx,tsx}'],
 	darkMode: 'class',

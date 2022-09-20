@@ -13,7 +13,7 @@ pub enum UserRole {
 }
 
 #[derive(Serialize, Deserialize, Type)]
-pub enum ViewMode {
+pub enum LayoutMode {
 	#[serde(rename = "GRID")]
 	Grid,
 	#[serde(rename = "LIST")]

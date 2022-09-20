@@ -35,6 +35,7 @@ use super::{
 fn check_series(
 	library_path: &str,
 	series: Vec<series::Data>,
+	library_options: &LibraryOptions,
 ) -> (Vec<series::Data>, Vec<String>, Vec<DirEntry>) {
 	let series_map = series
 		.iter()
@@ -52,10 +53,9 @@ fn check_series(
 
 	let mut walkdir = WalkDir::new(library_path);
 
-	// TODO: make this configurable
-	let top_level_series = false;
+	let is_collection_based = library_options.is_collection_based();
 
-	if top_level_series {
+	if is_collection_based {
 		walkdir = walkdir.max_depth(1);
 	}
 
@@ -72,7 +72,16 @@ fn check_series(
 
 			let path_str = path.as_os_str().to_string_lossy().to_string();
 
-			path.dir_has_media() && !series_map.contains_key(path_str.as_str())
+			if is_collection_based && path_str != library_path {
+				// If we're doing a top level scan, we need to check that the path
+				// has media deeply nested. Exception for when the path is the library path,
+				// then we only need to check if it has media in it directly
+				path.dir_has_media_deep() && !series_map.contains_key(path_str.as_str())
+			} else {
+				// If we're doing a bottom up scan, we need to check that the path has
+				// media directly in it.
+				path.dir_has_media() && !series_map.contains_key(path_str.as_str())
+			}
 		})
 		.collect::<Vec<DirEntry>>();
 
@@ -86,7 +95,7 @@ async fn precheck(
 	ctx: &Ctx,
 	path: String,
 	runner_id: &str,
-) -> Result<(library::Data, Vec<series::Data>, u64), ApiError> {
+) -> Result<(library::Data, LibraryOptions, Vec<series::Data>, u64), ApiError> {
 	let db = ctx.get_db();
 
 	let library = db
@@ -112,9 +121,15 @@ async fn precheck(
 		)));
 	}
 
+	let library_options: LibraryOptions = library
+		.library_options()
+		.map(|o| o.into())
+		.unwrap_or_default();
+
 	let series = library.series()?.to_owned();
 
-	let (mut series, missing_series_ids, new_entries) = check_series(&path, series);
+	let (mut series, missing_series_ids, new_entries) =
+		check_series(&path, series, &library_options);
 
 	if !missing_series_ids.is_empty() {
 		ctx.db
@@ -150,7 +165,11 @@ async fn precheck(
 
 	let start = std::time::Instant::now();
 
+	let is_collection_based = library_options.is_collection_based();
+
 	// TODO: perhaps use rayon instead...?
+	// TODO: check this to see if it is still correct after adding the collection based
+	// vs series based options
 	let files_to_process: u64 = futures::future::join_all(
 		series
 			.iter()
@@ -162,7 +181,7 @@ async fn precheck(
 				// When the series is the library itself, we want to set the max_depth
 				// to 1 so it doesn't walk through the entire library (effectively doubling
 				// the return result, instead of the actual number of files to process)
-				if path == library.path {
+				if !is_collection_based || path == library.path {
 					series_walkdir = series_walkdir.max_depth(1)
 				}
 
@@ -190,7 +209,7 @@ async fn precheck(
 		duration.subsec_millis()
 	);
 
-	Ok((library, series, files_to_process))
+	Ok((library, library_options, series, files_to_process))
 }
 
 async fn scan_series(
@@ -217,11 +236,9 @@ async fn scan_series(
 
 	let mut walkdir = WalkDir::new(&series.path);
 
-	// TODO: make this configurable
-	let top_level_series = false;
+	let is_collection_based = library_options.is_collection_based();
 
-	// top_level OR series path is the library path
-	if top_level_series || series.path == library_path {
+	if !is_collection_based || series.path == library_path {
 		walkdir = walkdir.max_depth(1);
 	}
 
@@ -299,26 +316,6 @@ async fn scan_series(
 		} else {
 			log::debug!("Marked {} media as MISSING", result.unwrap());
 		}
-
-		// TODO: remove comment once I test the above implementation
-		// if let Err(e) = db
-		// 	._execute_raw(raw!(format!(
-		// 		"UPDATE media SET status=\"{}\" WHERE path in ({})",
-		// 		"MISSING".to_string(),
-		// 		missing_media
-		// 			.into_iter()
-		// 			.map(|path| format!("\"{}\"", path))
-		// 			.collect::<Vec<_>>()
-		// 			.join(",")
-		// 	)
-		// 	.as_str()))
-		// 	.exec()
-		// 	.await
-		// {
-		// 	log::error!("Failed to mark missing media as MISSING: {:?}", e);
-		// } else {
-		// 	log::debug!("Marked missing media as MISSING.");
-		// }
 	}
 }
 
@@ -330,6 +327,7 @@ async fn scan_series_batch(
 	ctx: Ctx,
 	series: series::Data,
 	library_path: &str,
+	library_options: LibraryOptions,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Vec<BatchScanOperation> {
 	let db = ctx.get_db();
@@ -350,11 +348,9 @@ async fn scan_series_batch(
 
 	let mut walkdir = WalkDir::new(&series.path);
 
-	// TODO: make this configurable
-	let top_level_series = false;
+	let is_collection_based = library_options.is_collection_based();
 
-	// top_level OR series path is the library path
-	if top_level_series || series.path == library_path {
+	if !is_collection_based || series.path == library_path {
 		walkdir = walkdir.max_depth(1);
 	}
 
@@ -413,12 +409,8 @@ pub async fn scan_batch(
 ) -> Result<u64, ApiError> {
 	log::trace!("Enter scan_batch");
 
-	let (library, series, files_to_process) = precheck(&ctx, path, &runner_id).await?;
-
-	let library_options: LibraryOptions = library
-		.library_options
-		.map(|opt| (*opt).into())
-		.unwrap_or_default();
+	let (library, library_options, series, files_to_process) =
+		precheck(&ctx, path, &runner_id).await?;
 
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
 
@@ -439,17 +431,25 @@ pub async fn scan_batch(
 			let counter_ref = counter.clone();
 			let library_path = library.path.clone();
 
-			tokio::spawn(async move {
-				scan_series_batch(ctx_cpy.get_ctx(), s, &library_path, move |msg| {
-					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
+			let library_options = library_options.clone();
 
-					ctx_cpy.emit_client_event(CoreEvent::job_progress(
-						r_id.to_owned(),
-						Some(previous + 1),
-						files_to_process,
-						Some(msg),
-					));
-				})
+			tokio::spawn(async move {
+				scan_series_batch(
+					ctx_cpy.get_ctx(),
+					s,
+					&library_path,
+					library_options,
+					move |msg| {
+						let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
+
+						ctx_cpy.emit_client_event(CoreEvent::job_progress(
+							r_id.to_owned(),
+							Some(previous + 1),
+							files_to_process,
+							Some(msg),
+						));
+					},
+				)
 				.await
 			})
 		})
@@ -504,12 +504,8 @@ pub async fn scan_sync(
 	path: String,
 	runner_id: String,
 ) -> Result<u64, ApiError> {
-	let (library, series, files_to_process) = precheck(&ctx, path, &runner_id).await?;
-
-	let library_options: LibraryOptions = library
-		.library_options
-		.map(|opt| (*opt).into())
-		.unwrap_or_default();
+	let (library, library_options, series, files_to_process) =
+		precheck(&ctx, path, &runner_id).await?;
 
 	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
 	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;

@@ -11,7 +11,7 @@ import {
 import { NotePencil } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import { FieldValues } from 'react-hook-form';
-import LibraryModalForm from './LibraryModalForm';
+import LibraryModalForm from './form/LibraryModalForm';
 import { Library, LibraryOptions, Tag } from '@stump/core';
 import { TagOption, useLibraryMutation, useTags } from '@stump/client';
 import Button, { ModalCloseButton } from '../../ui/Button';

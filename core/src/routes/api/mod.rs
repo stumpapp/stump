@@ -1,10 +1,12 @@
 use rocket::{serde::json::Json, Route, Shutdown};
-use rocket_okapi::{openapi, openapi_get_routes, JsonSchema};
-use serde::Serialize;
+use rocket_okapi::{openapi, openapi_get_routes};
 
 use crate::{
 	guards::auth::AdminGuard,
-	types::alias::{ApiResult, Ctx},
+	types::{
+		alias::{ApiResult, Ctx},
+		models::user::ClaimResponse,
+	},
 };
 
 pub mod auth;
@@ -75,12 +77,6 @@ pub fn api() -> Vec<Route> {
 		log::clear_logs,
 		log::get_log_info,
 	]
-}
-
-#[derive(Serialize, JsonSchema)]
-#[serde(rename_all = "camelCase")]
-struct ClaimResponse {
-	is_claimed: bool,
 }
 
 // TODO: set status?

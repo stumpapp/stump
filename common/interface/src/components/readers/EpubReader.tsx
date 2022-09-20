@@ -33,8 +33,8 @@ export default function EpubReader({ epub, actions, ...rest }: UseEpubReturn) {
 
 	useEffect(() => {
 		getEpubResource({
-			id: epub.mediaEntity.id,
-			root: epub.rootBase,
+			id: epub.media_entity.id,
+			root: epub.root_base,
 			resourceId: actions.currentResource()?.content!,
 		}).then((res) => {
 			console.log(res);

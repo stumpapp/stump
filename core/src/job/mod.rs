@@ -55,7 +55,6 @@ impl From<&str> for JobStatus {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct JobUpdate {
 	pub runner_id: String,
 	// TODO: don't use option. This is a temporary workaround for the Arc issue with
@@ -68,7 +67,6 @@ pub struct JobUpdate {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct JobReport {
 	/// This will actually refer to the job runner id
 	pub id: Option<String>,
@@ -83,7 +81,7 @@ pub struct JobReport {
 	/// The total number of tasks completed (i.e. without error/failure)
 	completed_task_count: Option<i32>,
 	/// The time (in seconds) to complete the job
-	seconds_elapsed: Option<u64>,
+	ms_elapsed: Option<u64>,
 	/// The datetime stamp of when the job completed
 	completed_at: Option<String>,
 }
@@ -97,7 +95,7 @@ impl From<prisma::job::Data> for JobReport {
 			status: JobStatus::from(data.status.as_str()),
 			task_count: Some(data.task_count),
 			completed_task_count: Some(data.completed_task_count),
-			seconds_elapsed: Some(data.seconds_elapsed as u64),
+			ms_elapsed: Some(data.ms_elapsed as u64),
 			completed_at: Some(data.completed_at.to_string()),
 		}
 	}
@@ -113,7 +111,7 @@ impl From<&Box<dyn Job>> for JobReport {
 
 			task_count: None,
 			completed_task_count: None,
-			seconds_elapsed: None,
+			ms_elapsed: None,
 			completed_at: None,
 		}
 	}
@@ -185,7 +183,7 @@ pub async fn persist_job_end(
 	ctx: &Ctx,
 	id: String,
 	completed_task_count: u64,
-	elapsed_seconds: u64,
+	ms_elapsed: u128,
 ) -> Result<crate::prisma::job::Data, ApiError> {
 	use crate::prisma::job;
 
@@ -197,7 +195,8 @@ pub async fn persist_job_end(
 			job::id::equals(id.clone()),
 			vec![
 				job::completed_task_count::set(completed_task_count.try_into()?),
-				job::seconds_elapsed::set(elapsed_seconds.try_into()?),
+				// FIXME: potentially unsafe cast u128 -> u64
+				job::ms_elapsed::set(ms_elapsed.try_into()?),
 				job::status::set(JobStatus::Completed.to_string()),
 			],
 		)

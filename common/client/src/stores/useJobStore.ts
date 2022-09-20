@@ -16,7 +16,7 @@ export const useJobStore = create<JobStore>()(
 		jobs: {},
 
 		addJob(newJob: JobUpdate) {
-			let job = get().jobs[newJob.runnerId];
+			let job = get().jobs[newJob.runner_id];
 
 			if (job) {
 				get().updateJob(newJob);
@@ -25,7 +25,7 @@ export const useJobStore = create<JobStore>()(
 					produce(store, (draft) => {
 						draft.jobs = {
 							...store.jobs,
-							[newJob.runnerId]: newJob,
+							[newJob.runner_id]: newJob,
 						};
 					}),
 				);
@@ -34,7 +34,7 @@ export const useJobStore = create<JobStore>()(
 		updateJob(jobUpdate: JobUpdate) {
 			let jobs = get().jobs;
 
-			let job = jobs[jobUpdate.runnerId];
+			let job = jobs[jobUpdate.runner_id];
 
 			if (!job || !Object.keys(jobs).length) {
 				get().addJob(jobUpdate);
@@ -42,12 +42,12 @@ export const useJobStore = create<JobStore>()(
 				return;
 			}
 
-			const { currentTask, message } = jobUpdate;
+			const { current_task, message } = jobUpdate;
 
 			set((store) =>
 				produce(store, (draft) => {
-					draft.jobs[jobUpdate.runnerId].currentTask = currentTask;
-					draft.jobs[jobUpdate.runnerId].message = message;
+					draft.jobs[jobUpdate.runner_id].current_task = current_task;
+					draft.jobs[jobUpdate.runner_id].message = message;
 				}),
 			);
 		},
@@ -62,7 +62,6 @@ export const useJobStore = create<JobStore>()(
 						draft.jobs[runnerId].status = 'COMPLETED';
 					}),
 				);
-				// set(() => ({ jobs: { ...get().jobs, [runnerId]: { ...target, status: 'COMPLETED' } } }));
 			}
 		},
 		reset() {

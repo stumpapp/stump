@@ -16,25 +16,26 @@ use super::migration::CountQueryReturn;
 #[derive(Deserialize, Debug)]
 pub struct SeriesMediaCountQueryReturn {
 	pub series_id: String,
-	pub count: u32,
+	pub count: i64,
 }
 
 // TODO: Replace pretty much all of these once prisma client 0.6 comes out... Count queries and
 // relation counting is expected in that release.
 #[async_trait::async_trait]
 pub trait PrismaClientTrait {
-	async fn media_count(&self) -> ApiResult<u32>;
-	async fn series_count_all(&self) -> ApiResult<u32>;
-	async fn series_count(&self, library_id: String) -> ApiResult<u32>;
+	async fn media_count(&self) -> ApiResult<i64>;
+	async fn media_in_series_count(&self, series_id: String) -> ApiResult<i64>;
+	async fn series_count_all(&self) -> ApiResult<i64>;
+	async fn series_count(&self, library_id: String) -> ApiResult<i64>;
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> ApiResult<HashMap<String, u32>>;
+	) -> ApiResult<HashMap<String, i64>>;
 }
 
 #[async_trait::async_trait]
 impl PrismaClientTrait for PrismaClient {
-	async fn media_count(&self) -> ApiResult<u32> {
+	async fn media_count(&self) -> ApiResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM media"))
 			.exec()
@@ -46,7 +47,22 @@ impl PrismaClientTrait for PrismaClient {
 		})
 	}
 
-	async fn series_count_all(&self) -> ApiResult<u32> {
+	async fn media_in_series_count(&self, series_id: String) -> ApiResult<i64> {
+		let count_res: Vec<CountQueryReturn> = self
+			._query_raw(raw!(
+				"SELECT COUNT(*) as count FROM media WHERE series_id={}",
+				PrismaValue::String(series_id)
+			))
+			.exec()
+			.await?;
+
+		Ok(match count_res.get(0) {
+			Some(val) => val.count,
+			None => 0,
+		})
+	}
+
+	async fn series_count_all(&self) -> ApiResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM series"))
 			.exec()
@@ -58,10 +74,10 @@ impl PrismaClientTrait for PrismaClient {
 		})
 	}
 
-	async fn series_count(&self, library_id: String) -> ApiResult<u32> {
+	async fn series_count(&self, library_id: String) -> ApiResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!(
-				"SELECT COUNT(*) as count FROM series WHERE libraryId={}",
+				"SELECT COUNT(*) as count FROM series WHERE library_id={}",
 				PrismaValue::String(library_id)
 			))
 			.exec()
@@ -78,9 +94,9 @@ impl PrismaClientTrait for PrismaClient {
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> ApiResult<HashMap<String, u32>> {
+	) -> ApiResult<HashMap<String, i64>> {
 		let count_res: Vec<SeriesMediaCountQueryReturn> = self
-		._query_raw(raw!(format!("SELECT DISTINCT seriesId as series_id, COUNT(*) as count FROM media WHERE seriesId in ({}) GROUP BY seriesId",
+		._query_raw(raw!(format!("SELECT DISTINCT series_id as series_id, COUNT(*) as count FROM media WHERE series_id in ({}) GROUP BY series_id",
 		series_ids
 			.into_iter()
 			.map(|id| format!("\"{}\"", id))

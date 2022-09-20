@@ -89,7 +89,7 @@ export default function SeriesOverview() {
 				inline: 'start',
 			});
 		}
-	}, [pageData?.currentPage]);
+	}, [pageData?.current_page]);
 
 	useEffect(() => {
 		if (series?.library) {
@@ -114,12 +114,12 @@ export default function SeriesOverview() {
 				<title>Stump | {series.name}</title>
 			</Helmet>
 
-			<OverviewTitleSection series={series} isVisible={pageData?.currentPage === 1} />
+			<OverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
 
 			{/* @ts-ignore */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 			<div className="p-4 w-full h-full flex flex-col space-y-6">
-				<Pagination pages={pageData?.totalPages!} currentPage={pageData?.currentPage!} />
+				<Pagination pages={pageData?.total_pages!} currentPage={pageData?.current_page!} />
 				{layoutMode === 'GRID' ? (
 					<MediaGrid isLoading={isLoadingMedia} media={media} />
 				) : (
@@ -131,8 +131,8 @@ export default function SeriesOverview() {
 
 				<Pagination
 					position="bottom"
-					pages={pageData?.totalPages!}
-					currentPage={pageData?.currentPage!}
+					pages={pageData?.total_pages!}
+					currentPage={pageData?.current_page!}
 				/>
 			</div>
 		</div>

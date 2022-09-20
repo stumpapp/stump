@@ -75,7 +75,7 @@ pub async fn get_libraries_stats(
 	// TODO: maybe add more, like missingBooks, idk
 	let stats = db
 		._query_raw::<LibrariesStats>(raw!(
-			"SELECT COUNT(*) as bookCount, IFNULL(SUM(media.size),0) as totalBytes, IFNULL(seriesCount,0) as seriesCount FROM media INNER JOIN (SELECT COUNT(*) as seriesCount FROM series)"
+			"SELECT COUNT(*) as book_count, IFNULL(SUM(media.size),0) as total_bytes, IFNULL(series_count,0) as series_count FROM media INNER JOIN (SELECT COUNT(*) as series_count FROM series)"
 		))
 		.exec()
 		.await?
@@ -167,7 +167,7 @@ pub async fn get_library_series(
 			let media_count = match media_counts.get(&s.id) {
 				Some(count) => count.to_owned(),
 				_ => 0,
-			} as i32;
+			} as i64;
 
 			(s.to_owned(), media_count).into()
 		})

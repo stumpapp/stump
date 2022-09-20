@@ -18,7 +18,7 @@ export default function UpNextButton({ seriesId }: Props) {
 		<Button
 			isDisabled={!isLoading && !media}
 			as={Link}
-			to={`/books/${media?.id}/pages/${media?.currentPage || 1}`}
+			to={`/books/${media?.id}/pages/${media?.current_page || 1}`}
 			disabled={!media}
 			title={`Continue reading ${media?.name || 'from where you left off'}`}
 			colorScheme="brand"

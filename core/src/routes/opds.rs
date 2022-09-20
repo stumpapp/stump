@@ -2,6 +2,7 @@ use prisma_client_rust::{chrono, Direction};
 use rocket::Route;
 
 use crate::{
+	db::utils::PrismaClientTrait,
 	fs,
 	guards::auth::Auth,
 	opds::{
@@ -271,6 +272,7 @@ async fn library_by_id(
 	let page = page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page, 20);
 
+	// FIXME: PCR doesn't support relation counts yet!
 	let series_count = db
 		.series()
 		.count(vec![series::library_id::equals(Some(id.clone()))])
@@ -386,11 +388,14 @@ async fn series_by_id(
 	let page = page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page, 20);
 
-	let series_media_count = db
-		.media()
-		.count(vec![media::series_id::equals(Some(id.clone()))])
-		.exec()
-		.await?;
+	// FIXME: PCR doesn't support relation counts yet!
+	// let series_media_count = db
+	// 	.media()
+	// 	.count(vec![media::series_id::equals(Some(id.clone()))])
+	// 	.exec()
+	// 	.await?;
+
+	let series_media_count = db.media_in_series_count(id.clone()).await?;
 
 	let series = db
 		.series()

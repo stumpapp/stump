@@ -4,23 +4,26 @@ export interface User {
 	id: string;
 	username: string;
 	role: string;
-	userPreferences: UserPreferences | null;
+	user_preferences: UserPreferences | null;
 }
 
 export type UserRole = 'SERVER_OWNER' | 'MEMBER';
 
 export interface UserPreferences {
 	id: string;
-	reduceAnimations: boolean;
 	locale: string;
-	libraryViewMode: string;
-	seriesViewMode: string;
-	collectionViewMode: string;
+	library_layout_mode: string;
+	series_layout_mode: string;
+	collection_layout_mode: string;
 }
 
 export interface LoginOrRegisterArgs {
 	username: string;
 	password: string;
+}
+
+export interface ClaimResponse {
+	is_claimed: boolean;
 }
 
 export type FileStatus = 'UNKNOWN' | 'READY' | 'UNSUPPORTED' | 'ERROR' | 'MISSING';
@@ -31,20 +34,20 @@ export interface Library {
 	description: string | null;
 	path: string;
 	status: string;
-	updatedAt: string;
+	updated_at: string;
 	series: Array<Series> | null;
 	tags: Array<Tag> | null;
-	libraryOptions: LibraryOptions;
+	library_options: LibraryOptions;
 }
 
 export type LibraryScanMode = 'SYNC' | 'BATCHED' | 'NONE';
 
 export interface LibraryOptions {
 	id: string | null;
-	convertRarToZip: boolean;
-	hardDeleteConversions: boolean;
-	createWebpThumbnails: boolean;
-	libraryId: string | null;
+	convert_rar_to_zip: boolean;
+	hard_delete_conversions: boolean;
+	create_webp_thumbnails: boolean;
+	library_id: string | null;
 }
 
 export interface CreateLibraryArgs {
@@ -52,8 +55,8 @@ export interface CreateLibraryArgs {
 	path: string;
 	description: string | null;
 	tags: Array<Tag> | null;
-	scanMode: LibraryScanMode | null;
-	libraryOptions: LibraryOptions | null;
+	scan_mode: LibraryScanMode | null;
+	library_options: LibraryOptions | null;
 }
 
 export interface UpdateLibraryArgs {
@@ -62,15 +65,15 @@ export interface UpdateLibraryArgs {
 	path: string;
 	description: string | null;
 	tags: Array<Tag> | null;
-	removedTags: Array<Tag> | null;
-	libraryOptions: LibraryOptions;
-	scanMode: LibraryScanMode | null;
+	removed_tags: Array<Tag> | null;
+	library_options: LibraryOptions;
+	scan_mode: LibraryScanMode | null;
 }
 
 export interface LibrariesStats {
-	seriesCount: bigint;
-	bookCount: bigint;
-	totalBytes: bigint;
+	series_count: bigint;
+	book_count: bigint;
+	total_bytes: bigint;
 }
 
 export interface Series {
@@ -79,11 +82,11 @@ export interface Series {
 	path: string;
 	description: string | null;
 	status: FileStatus;
-	updatedAt: string;
-	libraryId: string;
+	updated_at: string;
+	library_id: string;
 	library: Library | null;
 	media: Array<Media> | null;
-	mediaCount: number | null;
+	media_count: bigint | null;
 	tags: Array<Tag> | null;
 }
 
@@ -94,14 +97,14 @@ export interface Media {
 	size: number;
 	extension: string;
 	pages: number;
-	updatedAt: string;
+	updated_at: string;
 	checksum: string | null;
 	path: string;
 	status: FileStatus;
-	seriesId: string;
+	series_id: string;
 	series: Series | null;
-	readProgresses: Array<ReadProgress> | null;
-	currentPage: number | null;
+	read_progresses: Array<ReadProgress> | null;
+	current_page: number | null;
 	tags: Array<Tag> | null;
 }
 
@@ -118,9 +121,9 @@ export interface MediaMetadata {
 export interface ReadProgress {
 	id: string;
 	page: number;
-	mediaId: string;
+	media_id: string;
 	media: Media | null;
-	userId: string;
+	user_id: string;
 	user: User | null;
 }
 
@@ -132,28 +135,28 @@ export interface Tag {
 export type ViewMode = 'GRID' | 'LIST';
 
 export interface Epub {
-	mediaEntity: Media;
+	media_entity: Media;
 	spine: Array<string>;
 	resources: Record<string, [string, string]>;
 	toc: Array<EpubContent>;
 	metadata: Record<string, Array<string>>;
-	rootBase: string;
-	rootFile: string;
-	extraCss: Array<string>;
+	root_base: string;
+	root_file: string;
+	extra_css: Array<string>;
 }
 
 export interface EpubContent {
 	label: string;
 	content: string;
-	playOrder: number;
+	play_order: number;
 }
 
 export type JobStatus = 'RUNNING' | 'QUEUED' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
 
 export interface JobUpdate {
-	runnerId: string;
-	currentTask: bigint | null;
-	taskCount: bigint;
+	runner_id: string;
+	current_task: bigint | null;
+	task_count: bigint;
 	message: string | null;
 	status: JobStatus | null;
 }
@@ -163,10 +166,10 @@ export interface JobReport {
 	kind: string;
 	details: string | null;
 	status: JobStatus;
-	taskCount: number | null;
-	completedTaskCount: number | null;
-	secondsElapsed: bigint | null;
-	completedAt: string | null;
+	task_count: number | null;
+	completed_task_count: number | null;
+	ms_elapsed: bigint | null;
+	completed_at: string | null;
 }
 
 export type CoreEvent =
@@ -186,7 +189,7 @@ export interface DirectoryListing {
 }
 
 export interface DirectoryListingFile {
-	isDirectory: boolean;
+	is_directory: boolean;
 	name: string;
 	path: string;
 }
@@ -214,25 +217,37 @@ export type LogLevel = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 export type Direction = 'asc' | 'desc';
 
 export interface PageParams {
-	zeroBased: boolean;
+	zero_based: boolean;
 	page: number;
-	pageSize: number;
-	orderBy: string;
+	page_size: number;
+	order_by: string;
 	direction: Direction;
 }
 
 export interface PagedRequestParams {
-	zeroBased: boolean | null;
+	zero_based: boolean | null;
 	page: number | null;
-	pageSize: number | null;
-	orderBy: string | null;
+	page_size: number | null;
+	order_by: string | null;
 	direction: Direction | null;
 }
 
 export interface PageInfo {
-	totalPages: number;
-	currentPage: number;
-	pageSize: number;
-	pageOffset: number;
-	zeroBased: boolean;
+	total_pages: number;
+	current_page: number;
+	page_size: number;
+	page_offset: number;
+	zero_based: boolean;
 }
+
+export type ApiError =
+	| { code: 'BadRequest'; details: string }
+	| { code: 'NotFound'; details: string }
+	| { code: 'InternalServerError'; details: string }
+	| { code: 'Unauthorized'; details: string }
+	| { code: 'Forbidden'; details: string }
+	| { code: 'NotImplemented'; details: string }
+	| { code: 'ServiceUnavailable'; details: string }
+	| { code: 'BadGateway'; details: string }
+	| { code: 'Unknown'; details: string }
+	| { code: 'Redirect'; details: string };

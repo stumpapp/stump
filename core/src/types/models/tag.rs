@@ -5,7 +5,6 @@ use specta::Type;
 use crate::prisma;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct Tag {
 	pub id: String,
 	/// The name of the tag. ex: "comic"

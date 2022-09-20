@@ -9,7 +9,6 @@ use crate::prisma;
 use super::{series::Series, tag::Tag};
 
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct Library {
 	pub id: String,
 	/// The name of the library. ex: "Marvel Comics"
@@ -31,7 +30,6 @@ pub struct Library {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct LibraryOptions {
 	// Note: this isn't really an Option, but I felt it was a little verbose
 	// to create an entirely new struct Create/UpdateLibraryOptions for just one
@@ -58,7 +56,7 @@ impl Default for LibraryOptions {
 }
 
 #[derive(Deserialize, Debug, JsonSchema, PartialEq, Copy, Clone, Type)]
-#[serde(rename_all = "camelCase")]
+
 pub enum LibraryScanMode {
 	#[serde(rename = "SYNC")]
 	Sync,
@@ -91,7 +89,6 @@ impl Default for LibraryScanMode {
 }
 
 #[derive(Deserialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct CreateLibraryArgs {
 	/// The name of the library to create.
 	pub name: String,
@@ -108,7 +105,6 @@ pub struct CreateLibraryArgs {
 }
 
 #[derive(Deserialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct UpdateLibraryArgs {
 	pub id: String,
 	/// The updated name of the library.
@@ -128,7 +124,6 @@ pub struct UpdateLibraryArgs {
 }
 
 #[derive(Deserialize, Serialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct LibrariesStats {
 	series_count: u64,
 	book_count: u64,

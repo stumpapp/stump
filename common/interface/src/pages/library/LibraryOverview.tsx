@@ -33,7 +33,7 @@ export default function LibraryOverview() {
 		if (!isInView) {
 			containerRef.current?.scrollIntoView();
 		}
-	}, [pageData?.currentPage]);
+	}, [pageData?.current_page]);
 
 	if (isLoading) {
 		return null;
@@ -53,7 +53,7 @@ export default function LibraryOverview() {
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 			<div className="p-4 w-full h-full flex flex-col space-y-6">
-				<Pagination pages={pageData?.totalPages!} currentPage={pageData?.currentPage!} />
+				<Pagination pages={pageData?.total_pages!} currentPage={pageData?.current_page!} />
 
 				{layoutMode === 'GRID' ? (
 					<SeriesGrid isLoading={isLoadingSeries} series={series} />
@@ -65,8 +65,8 @@ export default function LibraryOverview() {
 
 				<Pagination
 					position="bottom"
-					pages={pageData?.totalPages!}
-					currentPage={pageData?.currentPage!}
+					pages={pageData?.total_pages!}
+					currentPage={pageData?.current_page!}
 				/>
 			</div>
 		</>

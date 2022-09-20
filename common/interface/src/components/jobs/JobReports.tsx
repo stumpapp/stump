@@ -67,8 +67,8 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 				<div className="flex flex-col space-y-2 p-2 w-full text-xs">
 					<Text fontWeight="medium">{trim(job.message) ?? 'Job in Progress'}</Text>
 					<Progress
-						value={Number(job.currentTask)}
-						max={Number(job.taskCount)}
+						value={Number(job.current_task)}
+						max={Number(job.task_count)}
 						rounded="md"
 						w="full"
 						size="xs"
@@ -76,7 +76,7 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 					/>
 					<Text>
 						<>
-							Scanning file {job.currentTask} of {job.taskCount}
+							Scanning file {job.current_task} of {job.task_count}
 						</>
 					</Text>
 				</div>

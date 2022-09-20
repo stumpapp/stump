@@ -9,7 +9,6 @@ use crate::{prisma, types::enums::FileStatus};
 use super::{library::Library, media::Media, tag::Tag};
 
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct Series {
 	pub id: String,
 	/// The name of the series. ex: "The Amazing Spider-Man (2018)"
@@ -29,14 +28,14 @@ pub struct Series {
 	/// The media that are in this series. Will be `None` only if the relation is not loaded.
 	pub media: Option<Vec<Media>>,
 	/// The number of media in this series. Optional for safety, but should be loaded if possible.
-	pub media_count: Option<i32>,
+	pub media_count: Option<i64>,
 	/// The user assigned tags for the series. ex: ["comic", "family"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 }
 
 impl Series {
 	// Note: this is not great practice, and will eventually change...
-	pub fn without_media(mut series: Series, media_count: i32) -> Series {
+	pub fn without_media(mut series: Series, media_count: i64) -> Series {
 		series.media = None;
 
 		Series {
@@ -45,7 +44,7 @@ impl Series {
 		}
 	}
 
-	pub fn set_media_count(&mut self, count: i32) {
+	pub fn set_media_count(&mut self, count: i64) {
 		self.media_count = Some(count);
 	}
 }
@@ -66,7 +65,7 @@ impl Into<Series> for prisma::series::Data {
 					.into_iter()
 					.map(|m| m.to_owned().into())
 					.collect::<Vec<Media>>();
-				let m_ct = media.len() as i32;
+				let m_ct = media.len() as i64;
 
 				(Some(m), Some(m_ct))
 			},
@@ -100,7 +99,7 @@ impl Into<Series> for prisma::series::Data {
 	}
 }
 
-impl Into<Series> for (prisma::series::Data, i32) {
+impl Into<Series> for (prisma::series::Data, i64) {
 	fn into(self) -> Series {
 		let (series, media_count) = self;
 

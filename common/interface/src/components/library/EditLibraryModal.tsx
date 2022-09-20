@@ -56,11 +56,11 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 			throw new Error('You do not have permission to update libraries.');
 		}
 
-		const { name, path, description, tags: formTags, scanMode, ...rest } = values;
+		const { name, path, description, tags: formTags, scan_mode, ...rest } = values;
 
-		const libraryOptions = {
+		const library_options = {
 			...rest,
-			id: library.libraryOptions.id,
+			id: library.library_options.id,
 		} as LibraryOptions;
 
 		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
@@ -93,9 +93,9 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 				path,
 				description,
 				tags: existingTags,
-				removedTags,
-				scanMode,
-				libraryOptions,
+				removed_tags: removedTags,
+				scan_mode,
+				library_options,
 			}),
 			{
 				loading: 'Updating library...',

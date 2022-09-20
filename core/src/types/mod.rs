@@ -16,6 +16,7 @@ mod tests {
 
 	use super::{
 		enums::*,
+		errors::*,
 		models::{
 			epub::*, library::*, list_directory::*, log::*, media::*, read_progress::*,
 			series::*, tag::*, user::*,
@@ -40,6 +41,7 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;
@@ -82,6 +84,8 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<PagedRequestParams>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
 		// file.write_all(format!("{}\n\n", ts_export::<Pageable>()?).as_bytes())?; // TODO: figure this out
+
+		file.write_all(format!("{}\n\n", ts_export::<ApiError>()?).as_bytes())?;
 
 		Ok(())
 	}

@@ -66,7 +66,7 @@ export function useDirectoryListing({ enabled, startingPath }: DirectoryListingQ
 		path,
 		entries: directoryListing?.files ?? [],
 		parent: directoryListing?.parent,
-		directories: directoryListing?.files.filter((f) => f.isDirectory) ?? [],
+		directories: directoryListing?.files.filter((f) => f.is_directory) ?? [],
 		// files: directoryListing?.files.filter((f) => !f.isDirectory) ?? [],
 		...actions,
 	};

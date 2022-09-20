@@ -23,7 +23,7 @@ export const useUserStore = create<UserStore>()(
 						}),
 					);
 
-					get().setUserPreferences(user?.userPreferences ?? null);
+					get().setUserPreferences(user?.user_preferences ?? null);
 				},
 				setUserPreferences(userPreferences: UserPreferences | null) {
 					set((state) =>

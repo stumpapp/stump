@@ -84,10 +84,10 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 				// z.any(),
 			)
 			.optional(),
-		scanMode: z.string().refine(isLibraryScanMode).default('BATCHED'),
-		convertRarToZip: z.boolean().default(false),
-		hardDeleteConversions: z.boolean().default(false),
-		createWebpThumbnails: z.boolean().default(false),
+		scan_mode: z.string().refine(isLibraryScanMode).default('BATCHED'),
+		convert_rar_to_zip: z.boolean().default(false),
+		hard_delete_conversions: z.boolean().default(false),
+		create_webp_thumbnails: z.boolean().default(false),
 	});
 
 	const form = useForm({
@@ -98,10 +98,10 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					path: library.path,
 					description: library.description,
 					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
-					convertRarToZip: library.libraryOptions.convertRarToZip,
-					hardDeleteConversions: library.libraryOptions.hardDeleteConversions,
-					createWebpThumbnails: library.libraryOptions.createWebpThumbnails,
-					scanMode: 'BATCHED',
+					convert_rar_to_zip: library.library_options.convert_rar_to_zip,
+					hard_delete_conversions: library.library_options.hard_delete_conversions,
+					create_webp_thumbnails: library.library_options.create_webp_thumbnails,
+					scan_mode: 'BATCHED',
 			  }
 			: {},
 	});
@@ -113,7 +113,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 	}, [form.formState.errors]);
 
 	// const convertRarToZip = form.watch('convertRarToZip');
-	const [scanMode, convertRarToZip] = form.watch(['scanMode', 'convertRarToZip']);
+	const [scanMode, convertRarToZip] = form.watch(['scan_mode', 'convert_rar_to_zip']);
 
 	useEffect(() => {
 		if (reset) {
@@ -181,7 +181,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 									title="Scan the library in a syncronous manner. This will allow you to access media as it is being scanned, however is slower as the library gets larger."
 									isChecked={scanMode === 'SYNC'}
 									colorScheme="brand"
-									onChange={() => form.setValue('scanMode', getNewScanMode('SYNC'))}
+									onChange={() => form.setValue('scan_mode', getNewScanMode('SYNC'))}
 								>
 									Synchronous Scan
 								</Checkbox>
@@ -192,7 +192,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 									title="Scan the library using batched insertions. This will be significantly faster, but you will not be able to access media until the scan is complete. This is highly recommended for large libraries or initial scans."
 									isChecked={scanMode === 'BATCHED' || !scanMode}
 									colorScheme="brand"
-									onChange={() => form.setValue('scanMode', getNewScanMode('BATCHED'))}
+									onChange={() => form.setValue('scan_mode', getNewScanMode('BATCHED'))}
 								>
 									Batched Scan
 								</Checkbox>
@@ -206,7 +206,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							<Checkbox
 								title="Create Webp thumbnails for each scanned media. When turned off, Stump will extract the first image as the thumbnail."
 								colorScheme="brand"
-								{...form.register('createWebpThumbnails')}
+								{...form.register('create_webp_thumbnails')}
 							>
 								Create Webp Thumbnails
 							</Checkbox>
@@ -216,7 +216,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							<Checkbox
 								title="When rar files are found, automatically extract them and re-bundle them in a zip file"
 								colorScheme="brand"
-								{...form.register('convertRarToZip')}
+								{...form.register('convert_rar_to_zip')}
 							>
 								Convert rar files to zip
 							</Checkbox>
@@ -227,7 +227,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 								title="When rar files have been converted to zip, automatically remove them from the host machine. The files are *not recoverable*"
 								colorScheme="brand"
 								disabled={!convertRarToZip}
-								{...form.register('hardDeleteConversions')}
+								{...form.register('hard_delete_conversions')}
 							>
 								Permanently delete rar files after conversion
 							</Checkbox>

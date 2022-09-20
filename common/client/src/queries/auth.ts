@@ -44,7 +44,7 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 	});
 
 	useEffect(() => {
-		if (claimCheck?.data && !claimCheck.data.isClaimed) {
+		if (claimCheck?.data && !claimCheck.data.is_claimed) {
 			setIsClaimed(false);
 		}
 	}, [claimCheck]);

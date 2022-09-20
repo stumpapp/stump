@@ -135,11 +135,11 @@ pub async fn update_user_preferences(
 				user_preferences::id::equals(user_preferences.id.clone()),
 				vec![
 					user_preferences::locale::set(input.locale.to_owned()),
-					user_preferences::library_view_mode::set(
-						input.library_view_mode.to_owned(),
+					user_preferences::library_layout_mode::set(
+						input.library_layout_mode.to_owned(),
 					),
-					user_preferences::series_view_mode::set(
-						input.series_view_mode.to_owned(),
+					user_preferences::series_layout_mode::set(
+						input.series_layout_mode.to_owned(),
 					),
 				],
 			)

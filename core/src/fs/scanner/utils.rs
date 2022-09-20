@@ -29,7 +29,7 @@ pub async fn mark_library_missing(
 	let db = ctx.get_db();
 
 	db._execute_raw(raw!(
-		"UPDATE series SET status={} WHERE libraryId={}",
+		"UPDATE series SET status={} WHERE library_id={}",
 		PrismaValue::String("MISSING".to_owned()),
 		PrismaValue::String(library.id.clone())
 	))

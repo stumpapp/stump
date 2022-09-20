@@ -35,19 +35,19 @@ export default function JobOverlay() {
 					<div className="flex flex-col space-y-2 p-2 w-full text-xs">
 						<Text fontWeight="medium">{formatMessage(jobShown.message) ?? 'Job in Progress'}</Text>
 						<Progress
-							isIndeterminate={jobShown.currentTask == undefined}
-							value={Number(jobShown.currentTask)}
-							max={Number(jobShown.taskCount)}
+							isIndeterminate={jobShown.current_task == undefined}
+							value={Number(jobShown.current_task)}
+							max={Number(jobShown.task_count)}
 							rounded="md"
 							w="full"
 							size="xs"
 							colorScheme="brand"
 						/>
-						{jobShown.currentTask != undefined && jobShown.taskCount != undefined && (
+						{jobShown.current_task != undefined && jobShown.task_count != undefined && (
 							<Text>
 								{/* This is infuriating that I needed to do this... */}
 								<>
-									Task {jobShown.currentTask} of {jobShown.taskCount}
+									Task {jobShown.current_task} of {jobShown.task_count}
 								</>
 							</Text>
 						)}

@@ -7,7 +7,6 @@ use crate::prisma;
 use super::{media::Media, user::User};
 
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct ReadProgress {
 	pub id: String,
 	/// The current page

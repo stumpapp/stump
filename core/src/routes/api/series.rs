@@ -1,9 +1,9 @@
-use prisma_client_rust::{raw, Direction, PrismaValue};
+use prisma_client_rust::Direction;
 use rocket::{http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
-	db::{migration::CountQueryReturn, utils::FindManyTrait},
+	db::utils::{FindManyTrait, PrismaClientTrait},
 	fs::{self, image},
 	guards::auth::Auth,
 	prisma::{
@@ -101,18 +101,15 @@ pub async fn get_series_by_id(
 	}
 
 	if !load_media {
-		let count_res: Vec<CountQueryReturn> = db
-			._query_raw(raw!(
-				"SELECT COUNT(*) as count FROM media WHERE seriesId={}",
-				PrismaValue::String(id.clone())
-			))
-			.exec()
-			.await?;
+		// FIXME: PCR doesn't support relation counts yet!
+		// let media_count = db
+		// 	.media()
+		// 	.count(vec![media::series_id::equals(Some(id.clone()))])
+		// 	.exec()
+		// 	.await?;
+		let series_media_count = db.media_in_series_count(id).await?;
 
-		let media_count = count_res.get(0).map(|res| res.count).unwrap_or(0);
-
-		// TODO: dangerous cast
-		return Ok(Json((series.unwrap(), media_count as i32).into()));
+		return Ok(Json((series.unwrap(), series_media_count).into()));
 	}
 
 	Ok(Json(series.unwrap().into()))
@@ -172,7 +169,7 @@ pub async fn get_series_media(
 
 	let base_query = db
 		.media()
-		.find_many(vec![media::series_id::equals(Some(id))])
+		.find_many(vec![media::series_id::equals(Some(id.clone()))])
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(auth.0.id),
 		]))
@@ -190,7 +187,18 @@ pub async fn get_series_media(
 		return Ok(Json(media.into()));
 	}
 
-	Ok(Json((media, page_params).into()))
+	// TODO: investigate this, I am getting incorrect counts here...
+	// FIXME: AHAHAHAHAHAHA, PCR doesn't support relation counts! I legit thought I was
+	// going OUTSIDE my fuckin mind
+	// FIXME: PCR doesn't support relation counts yet!
+	// let series_media_count = db
+	// 	.media()
+	// 	.count(vec![media::series_id::equals(Some(id))])
+	// 	.exec()
+	// 	.await?;
+	let series_media_count = db.media_in_series_count(id).await?;
+
+	Ok(Json((media, series_media_count, page_params).into()))
 }
 
 // TODO: Should I support epub here too?? Not sure, I have separate routes for epub,

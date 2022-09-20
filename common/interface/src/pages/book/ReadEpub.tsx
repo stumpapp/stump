@@ -27,8 +27,8 @@ export default function ReadEpub() {
 		throw new Error('Epub not found');
 	}
 
-	if (!epub.mediaEntity.extension.match(/epub/)) {
-		return <Navigate to={`/books/${id}/pages/${epub.mediaEntity.currentPage ?? 1}`} />;
+	if (!epub.media_entity.extension.match(/epub/)) {
+		return <Navigate to={`/books/${id}/pages/${epub.media_entity.current_page ?? 1}`} />;
 	}
 
 	// else if (!loc) {

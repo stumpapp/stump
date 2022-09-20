@@ -88,7 +88,7 @@ function EpubHeaderControls({
 				align="flex-start"
 			>
 				<ButtonGroup isAttached>
-					<IconButton variant="ghost" onClick={() => navigate(`/books/${epub.mediaEntity.id}`)}>
+					<IconButton variant="ghost" onClick={() => navigate(`/books/${epub.media_entity.id}`)}>
 						<ArrowLeft className="text-lg" weight="regular" />
 					</IconButton>
 
@@ -109,7 +109,7 @@ function EpubHeaderControls({
 						fontSize={['xs', 'sm']}
 						noOfLines={1}
 					>
-						{epub.mediaEntity.name}
+						{epub.media_entity.name}
 					</Text>
 					{location.chapter && (
 						<Text

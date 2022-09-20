@@ -1,8 +1,9 @@
 use rocket::{
 	http::Status,
 	response::{self, Responder},
+	serde::json::Json,
 	tokio::sync::mpsc,
-	Request, Response,
+	Request,
 };
 use rocket_okapi::{
 	gen::OpenApiGenerator, okapi::openapi3::Responses, response::OpenApiResponderInner,
@@ -11,7 +12,7 @@ use rocket_okapi::{
 use rocket_session_store::SessionError;
 use schemars::Map;
 use serde::Serialize;
-use std::io::Cursor;
+use specta::Type;
 use thiserror::Error;
 use zip::result::ZipError;
 
@@ -69,8 +70,9 @@ pub enum AuthError {
 	InvalidSession(#[from] SessionError),
 }
 
-#[derive(Serialize, Error, Debug)]
-#[serde(tag = "kind", content = "data")]
+#[derive(Serialize, Error, Debug, Type)]
+// TODO: agh, naming is so hard. code vs kind, details vs data...
+#[serde(tag = "code", content = "details")]
 pub enum ApiError {
 	#[error("{0}")]
 	BadRequest(String),
@@ -207,6 +209,24 @@ impl From<ApiError> for Status {
 	}
 }
 
+impl From<&ApiError> for Status {
+	fn from(error: &ApiError) -> Status {
+		match error {
+			ApiError::BadRequest(_) => Status::BadRequest,
+			ApiError::NotFound(_) => Status::NotFound,
+			ApiError::InternalServerError(_) => Status::InternalServerError,
+			ApiError::Unauthorized(_) => Status::Unauthorized,
+			ApiError::Forbidden(_) => Status::Forbidden,
+			ApiError::NotImplemented(_) => Status::NotImplemented,
+			ApiError::ServiceUnavailable(_) => Status::ServiceUnavailable,
+			ApiError::BadGateway(_) => Status::BadGateway,
+			ApiError::Unknown(_) => Status::InternalServerError,
+			// TODO: is this the right status? 308?
+			ApiError::Redirect(_) => Status::PermanentRedirect,
+		}
+	}
+}
+
 // TODO: look into how prisma returns record not found errors?
 impl From<prisma_client_rust::queries::QueryError> for ApiError {
 	fn from(error: prisma_client_rust::queries::QueryError) -> ApiError {
@@ -296,13 +316,14 @@ impl From<mpsc::error::SendError<InternalCoreTask>> for ApiError {
 }
 
 impl<'r> Responder<'r, 'static> for ApiError {
-	fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
-		let body = self.to_string();
-		let status = Status::from(self);
+	fn respond_to(self, req: &'r Request<'_>) -> response::Result<'static> {
+		let status = Status::from(&self);
+		let body = Json(self);
 
-		Response::build()
-			.status(status)
-			.sized_body(body.len(), Cursor::new(body))
-			.ok()
+		let mut response = body.respond_to(req)?;
+
+		response.set_status(status);
+
+		Ok(response)
 	}
 }

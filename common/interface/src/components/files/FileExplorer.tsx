@@ -19,11 +19,11 @@ export default function FileExplorer({ files }: FileExplorerProps) {
 }
 
 // Lol the name is just reversed...
-function ExplorerFile({ name, path, isDirectory }: DirectoryListingFile) {
+function ExplorerFile({ name, path, is_directory }: DirectoryListingFile) {
 	function getIconSrc() {
 		const archivePattern = new RegExp(/^.*\.(cbz|zip|rar|cbr)$/gi);
 
-		if (isDirectory) {
+		if (is_directory) {
 			return '/icons/folder.png';
 		} else if (archivePattern.test(path)) {
 			// TODO: no lol, I want to try and render a small preview still

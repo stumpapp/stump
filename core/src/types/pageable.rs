@@ -1,11 +1,10 @@
 use rocket_okapi::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use super::query::Direction;
 
-#[derive(Serialize, FromForm, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Deserialize, Serialize, FromForm, JsonSchema, Type)]
 pub struct PagedRequestParams {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
@@ -15,7 +14,6 @@ pub struct PagedRequestParams {
 }
 
 #[derive(Debug, Serialize, JsonSchema, Clone, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,
@@ -74,7 +72,6 @@ pub struct PageLinks {
 }
 
 #[derive(Serialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct PageInfo {
 	/// The number of pages available.
 	pub total_pages: u32,
@@ -190,7 +187,8 @@ where
 	}
 }
 
-impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, u32, PageParams)
+// Note: this is used when you have to query the database for the total number of pages.
+impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, i64, PageParams)
 where
 	T: Serialize + Clone,
 {

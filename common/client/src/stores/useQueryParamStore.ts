@@ -5,6 +5,10 @@ import { Direction, PageParams } from '@stump/core';
 
 import { StoreBase } from './';
 
+export const DEFAULT_ORDER_BY = 'name';
+export const DEFAULT_ORDER_DIRECTION = 'asc';
+export const DEFAULT_PAGE_SIZE = 20;
+
 // TODO: search?
 export interface QueryParamStore extends Partial<PageParams>, StoreBase<QueryParamStore> {
 	setZeroBased: (zeroBased?: boolean) => void;
@@ -28,13 +32,13 @@ export const useQueryParamStore = create<QueryParamStore>()(
 				...defaultValues,
 
 				setZeroBased(zeroBased) {
-					set((store) => ({ ...store, zeroBased }));
+					set((store) => ({ ...store, zero_based: zeroBased }));
 				},
 				setPageSize(pageSize) {
-					set((store) => ({ ...store, pageSize }));
+					set((store) => ({ ...store, page_zize: pageSize }));
 				},
 				setOrderBy(orderBy) {
-					set((store) => ({ ...store, orderBy }));
+					set((store) => ({ ...store, order_by: orderBy }));
 				},
 				setDirection(direction) {
 					set((store) => ({ ...store, direction }));

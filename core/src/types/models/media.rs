@@ -9,7 +9,6 @@ use crate::{config::context::Ctx, prisma, types::enums::FileStatus};
 use super::{read_progress::ReadProgress, series::Series, tag::Tag};
 
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct Media {
 	pub id: String,
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
@@ -132,7 +131,7 @@ impl Into<Media> for prisma::media::Data {
 
 // Derived from ComicInfo.xml
 #[derive(Debug, Serialize, Deserialize, PartialEq, Type)]
-#[serde(rename_all = "camelCase")]
+
 pub struct MediaMetadata {
 	#[serde(rename = "Series")]
 	pub series: Option<String>,

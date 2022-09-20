@@ -10,15 +10,15 @@ export default function LibrariesStats() {
 	const { libraryStats } = useLibraryStats();
 
 	const libraryUsage = useMemo(() => {
-		return formatBytesSeparate(libraryStats?.totalBytes);
-	}, [libraryStats?.totalBytes]);
+		return formatBytesSeparate(libraryStats?.total_bytes);
+	}, [libraryStats?.total_bytes]);
 
 	if (!libraryStats || !libraryUsage) return null;
 
 	return (
 		<HStack spacing={4}>
-			<AnimatedStat value={libraryStats.seriesCount} label="Total Series" />
-			<AnimatedStat value={libraryStats.bookCount} label="Total Books" />
+			<AnimatedStat value={libraryStats.series_count} label="Total Series" />
+			<AnimatedStat value={libraryStats.book_count} label="Total Books" />
 			<AnimatedStat
 				value={libraryUsage.value}
 				label="Space Used"

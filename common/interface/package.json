@@ -20,6 +20,7 @@
     "@emotion/styled": "^11.10.4",
     "@hookform/resolvers": "^2.9.8",
     "@stump/client": "workspace:*",
+    "@stump/core": "workspace:*",
     "@tanstack/react-query": "^4.3.4",
     "@tanstack/react-query-devtools": "^4.3.5",
     "@tanstack/react-table": "^8.5.13",

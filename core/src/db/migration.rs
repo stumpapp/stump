@@ -16,7 +16,7 @@ const CREATE_MIGRATIONS_TABLE: &str =
 
 #[derive(Deserialize, Debug)]
 pub struct CountQueryReturn {
-	pub count: u32,
+	pub count: i64,
 }
 
 impl Default for CountQueryReturn {

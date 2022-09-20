@@ -40,7 +40,7 @@ impl Job for LibraryScanJob {
 			completed_tasks
 		);
 
-		persist_job_end(&ctx, runner_id, completed_tasks, duration.as_secs()).await?;
+		persist_job_end(&ctx, runner_id, completed_tasks, duration.as_millis()).await?;
 
 		Ok(())
 	}

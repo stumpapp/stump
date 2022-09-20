@@ -4,7 +4,7 @@ CREATE TABLE "migrations" (
     "name" TEXT NOT NULL,
     "checksum" TEXT NOT NULL,
     "success" BOOLEAN NOT NULL DEFAULT false,
-    "appliedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "applied_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateIndex

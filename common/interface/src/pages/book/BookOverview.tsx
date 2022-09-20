@@ -36,7 +36,7 @@ export default function BookOverview() {
 			return;
 		}
 
-		const currentPage = media.currentPage ?? 1;
+		const currentPage = media.current_page ?? 1;
 
 		const img = new Image();
 		img.src = getMediaPage(media.id, currentPage);
@@ -55,7 +55,7 @@ export default function BookOverview() {
 			</Helmet>
 			<div className="p-4 flex">
 				<Card
-					to={`/books/${media.id}/pages/${media.currentPage ?? 1}`}
+					to={`/books/${media.id}/pages/${media.current_page ?? 1}`}
 					imageAlt={media.name}
 					imageSrc={getMediaThumbnail(media.id)}
 					imageFallback={fallback}

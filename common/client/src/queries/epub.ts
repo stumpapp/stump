@@ -41,7 +41,7 @@ export function useEpub(id: string, options?: EpubOptions) {
 	const actions = useMemo(
 		() => ({
 			currentResource() {
-				return epub?.toc.find((item) => item.playOrder === chapter);
+				return epub?.toc.find((item) => item.play_order === chapter);
 			},
 			hasNext() {},
 			hasPrevious() {},
@@ -59,14 +59,14 @@ export function useEpub(id: string, options?: EpubOptions) {
 		const invalidSources = corrected.match(/src="[^"]+"/g);
 
 		invalidSources?.forEach((entry) => {
-			const src = entry.replace('src="', `src="${getEpubBaseUrl(id)}/${epub?.rootBase ?? ''}/`);
+			const src = entry.replace('src="', `src="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`);
 			corrected = corrected.replace(entry, src);
 		});
 
 		const invlalidHrefs = corrected.match(/href="[^"]+"/g);
 
 		invlalidHrefs?.forEach((entry) => {
-			const href = entry.replace('href="', `href="${getEpubBaseUrl(id)}/${epub?.rootBase ?? ''}/`);
+			const href = entry.replace('href="', `href="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`);
 			corrected = corrected.replace(entry, href);
 		});
 

@@ -10,7 +10,6 @@ use crate::{prisma::media, types::errors::ProcessFileError};
 use super::media::Media;
 
 #[derive(Serialize, Deserialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct EpubContent {
 	label: String,
 	content: PathBuf,
@@ -43,7 +42,6 @@ TODO: convert spine into this structure to match epub.js
 */
 
 #[derive(Serialize, Deserialize, JsonSchema, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct Epub {
 	/// This is the epub's record in Stump's database
 	pub media_entity: Media,

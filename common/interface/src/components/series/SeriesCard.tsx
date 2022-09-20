@@ -5,7 +5,7 @@ import { getSeriesThumbnail } from '@stump/client/api';
 import pluralizeStat from '../../utils/pluralize';
 
 export default function SeriesCard(series: Series) {
-	const bookCount = series.media ? series.media.length : series.mediaCount ?? 0;
+	const bookCount = series.media ? series.media.length : series.media_count ?? 0;
 
 	return (
 		<Card
@@ -14,7 +14,7 @@ export default function SeriesCard(series: Series) {
 			imageSrc={getSeriesThumbnail(series.id)}
 			onMouseEnter={() => prefetchSeries(series.id)}
 			title={series.name}
-			subtitle={pluralizeStat('book', bookCount)}
+			subtitle={pluralizeStat('book', Number(bookCount))}
 			showMissingOverlay={series.status === 'MISSING'}
 		/>
 	);

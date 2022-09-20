@@ -1,12 +1,8 @@
-import { ApiResult } from '@stump/core';
+import { ApiResult, ClaimResponse } from '@stump/core';
 import { API } from '.';
 
 export function ping() {}
 
-interface Claim {
-	isClaimed: boolean;
-}
-
-export async function checkIsClaimed(): Promise<ApiResult<Claim>> {
+export async function checkIsClaimed(): Promise<ApiResult<ClaimResponse>> {
 	return API.get('/claim');
 }

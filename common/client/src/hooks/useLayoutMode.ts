@@ -17,8 +17,7 @@ export function useLayoutMode(entity: LayoutEntity) {
 
 	async function updateLayoutMode(mode: LayoutMode, onError?: (err: unknown) => void) {
 		if (userPreferences) {
-			// TODO: change to layoutMode
-			let key = entity === 'LIBRARY' ? 'libraryViewMode' : 'seriesViewMode';
+			let key = entity === 'LIBRARY' ? 'library_layout_mode' : 'series_layout_mode';
 
 			updateUserPreferences({
 				...userPreferences,
@@ -37,9 +36,9 @@ export function useLayoutMode(entity: LayoutEntity) {
 
 		switch (entity) {
 			case 'LIBRARY':
-				return userPreferences.libraryViewMode || DEFAULT_LAYOUT_MODE;
+				return userPreferences.library_layout_mode || DEFAULT_LAYOUT_MODE;
 			case 'SERIES':
-				return userPreferences.seriesViewMode || DEFAULT_LAYOUT_MODE;
+				return userPreferences.series_layout_mode || DEFAULT_LAYOUT_MODE;
 			default:
 				console.warn('Unknown layout entity', entity);
 				return DEFAULT_LAYOUT_MODE;

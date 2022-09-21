@@ -155,7 +155,11 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							<FormLabel htmlFor="path">Libary path</FormLabel>
 							<InputGroup>
 								<Input placeholder="/path/to/library" {...form.register('path')} />
+								{/* FIXME: on small breakpoints, paths are visible behind element */}
 								<InputRightElement
+									// bg="gray.700"
+									// roundedBottomRight="md"
+									// roundedTopRight="md"
 									cursor="pointer"
 									children={
 										<DirectoryPickerModal

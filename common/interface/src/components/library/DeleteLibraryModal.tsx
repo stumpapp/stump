@@ -58,7 +58,12 @@ export default function DeleteLibraryModal({ disabled, library }: Props) {
 				Delete
 			</MenuItem>
 
-			<Modal size="xl" isOpen={disabled ? false : isOpen} onClose={onClose}>
+			<Modal
+				isCentered
+				size={{ base: 'sm', sm: 'xl' }}
+				isOpen={disabled ? false : isOpen}
+				onClose={onClose}
+			>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Delete {library.name}</ModalHeader>

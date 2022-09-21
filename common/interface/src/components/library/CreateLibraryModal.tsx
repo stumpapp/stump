@@ -115,12 +115,17 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 				</Button>
 			)}
 
-			<Modal size="xl" isOpen={disabled ? false : isOpen} onClose={onClose}>
+			<Modal
+				isCentered
+				size={{ base: 'sm', sm: 'xl' }}
+				isOpen={disabled ? false : isOpen}
+				onClose={onClose}
+			>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Create Library</ModalHeader>
 					<ModalCloseButton />
-					<ModalBody w="full">
+					<ModalBody w="full" px={{ base: 0, md: 6 }}>
 						<LibraryModalForm
 							tags={options}
 							fetchingTags={fetchingTags}
@@ -130,7 +135,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 					</ModalBody>
 
 					<ModalFooter>
-						<Button mr={3} onClick={onClose}>
+						<Button mr={3} onClick={onClose} w={{ base: 'full', md: 'auto' }}>
 							Cancel
 						</Button>
 						<Button
@@ -138,6 +143,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 							colorScheme="brand"
 							type="submit"
 							form="create-library-form"
+							w={{ base: 'full', md: 'auto' }}
 						>
 							Create
 						</Button>

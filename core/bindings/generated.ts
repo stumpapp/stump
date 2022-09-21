@@ -7,10 +7,24 @@ export interface User {
 	user_preferences: UserPreferences | null;
 }
 
+export interface AuthenticatedUser {
+	id: string;
+	username: string;
+	role: string;
+	user_preferences: UserPreferences;
+}
+
 export type UserRole = 'SERVER_OWNER' | 'MEMBER';
 
 export interface UserPreferences {
 	id: string;
+	locale: string;
+	library_layout_mode: string;
+	series_layout_mode: string;
+	collection_layout_mode: string;
+}
+
+export interface UserPreferencesUpdate {
 	locale: string;
 	library_layout_mode: string;
 	series_layout_mode: string;

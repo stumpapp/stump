@@ -67,17 +67,16 @@ impl Into<UserPreferences> for prisma::user_preferences::Data {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Deserialize, JsonSchema, Type)]
 
 pub struct UserPreferencesUpdate {
 	pub locale: String,
-	pub reduce_animations: bool,
 	pub library_layout_mode: String,
 	pub series_layout_mode: String,
 	pub collection_layout_mode: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema, Type)]
 
 pub struct AuthenticatedUser {
 	pub id: String,

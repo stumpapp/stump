@@ -117,12 +117,17 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 				Edit
 			</MenuItem>
 
-			<Modal size="xl" isOpen={disabled ? false : isOpen} onClose={onClose}>
+			<Modal
+				isCentered
+				size={{ base: 'sm', sm: 'xl' }}
+				isOpen={disabled ? false : isOpen}
+				onClose={onClose}
+			>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Update {library.name}</ModalHeader>
 					<ModalCloseButton />
-					<ModalBody>
+					<ModalBody px={{ base: 0, md: 6 }}>
 						<LibraryModalForm
 							library={library}
 							tags={options}
@@ -133,7 +138,7 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 					</ModalBody>
 
 					<ModalFooter>
-						<Button mr={3} onClick={onClose}>
+						<Button mr={3} onClick={onClose} w={{ base: 'full', md: 'auto' }}>
 							Cancel
 						</Button>
 						<Button
@@ -141,6 +146,7 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 							colorScheme="brand"
 							type="submit"
 							form="edit-library-form"
+							w={{ base: 'full', md: 'auto' }}
 						>
 							Save Changes
 						</Button>

@@ -3,6 +3,7 @@ import { ArrowLeft } from 'phosphor-react';
 import { Link, useParams } from 'react-router-dom';
 
 import { Heading } from '@chakra-ui/react';
+import { getMediaPage } from '@stump/client/api';
 
 interface ToolbarProps {
 	title: string;
@@ -67,7 +68,7 @@ export default function Toolbar({
 							{Array.from({ length: pages }).map((_, i) => (
 								<img
 									key={i}
-									// src={getMediaPage(id, i + 1)}
+									src={getMediaPage(id, i + 1)}
 									className="cursor-pointer h-32 w-auto rounded-md transition duration-300 hover:-translate-y-2 shadow-xl"
 									onClick={() => onPageChange(i + 1)}
 								/>

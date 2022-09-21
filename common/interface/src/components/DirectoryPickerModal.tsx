@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import {
 	Checkbox,
+	Flex,
 	HStack,
 	Modal,
 	ModalBody,
@@ -60,7 +61,7 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 		<>
 			<Folder onClick={onOpen} />
 
-			<Modal size="xl" isOpen={isOpen} onClose={onClose}>
+			<Modal isCentered size={{ base: 'sm', sm: 'xl' }} isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Select a Directory</ModalHeader>
@@ -120,21 +121,36 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 					</ModalBody>
 
 					<ModalFooter>
-						<Checkbox colorScheme="brand" checked={showHidden} onChange={toggle}>
-							Show Hidden Directories
-						</Checkbox>
-						<Spacer />
-						<Button mr={3} onClick={onClose}>
-							Cancel
-						</Button>
-						<Button
-							disabled={!!errorMessage}
-							title="Select the current directory"
-							colorScheme="brand"
-							onClick={handleUpdate}
+						<Flex
+							w="full"
+							// align={{ base: 'flex-start', sm: 'center' }}
+							direction={{ base: 'column', sm: 'row' }}
 						>
-							Choose
-						</Button>
+							<Checkbox
+								colorScheme="brand"
+								checked={showHidden}
+								onChange={toggle}
+								mb={{ base: 3, sm: 0 }}
+								w="full"
+							>
+								Show Hidden Directories
+							</Checkbox>
+
+							<HStack w="full" justify="flex-end">
+								<Button mr={3} onClick={onClose} w={{ base: 'full', md: 'auto' }}>
+									Cancel
+								</Button>
+								<Button
+									disabled={!!errorMessage}
+									title="Select the current directory"
+									colorScheme="brand"
+									onClick={handleUpdate}
+									w={{ base: 'full', md: 'auto' }}
+								>
+									Choose
+								</Button>
+							</HStack>
+						</Flex>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>

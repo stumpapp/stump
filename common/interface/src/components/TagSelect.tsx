@@ -53,7 +53,13 @@ export default function TagSelect({
 						value={value}
 						options={options}
 						placeholder="Select tags"
-						noOptionsMessage={() => <p>You haven't created any tags yet</p>}
+						noOptionsMessage={() =>
+							!options.length ? (
+								<p>You haven't created any tags yet</p>
+							) : (
+								<p>Start typing to create a new tag</p>
+							)
+						}
 						closeMenuOnSelect={false}
 						focusBorderColor="0 0 0 2px rgba(196, 130, 89, 0.6);"
 						// menuIsOpen

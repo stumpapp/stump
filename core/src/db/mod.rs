@@ -24,3 +24,9 @@ pub async fn create_client() -> prisma::PrismaClient {
 			.expect("Failed to create Prisma client")
 	}
 }
+
+pub async fn create_client_with_url(url: &str) -> prisma::PrismaClient {
+	prisma::new_client_with_url(url)
+		.await
+		.expect("Failed to create Prisma client")
+}

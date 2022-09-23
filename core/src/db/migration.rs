@@ -10,6 +10,9 @@ use crate::{
 	prisma::{self, migration},
 };
 
+// TODO: this entire crate is pretty much going to be removed with next pcr release,
+// where migration engine will actually be bundled. SUPER cool!
+
 static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/prisma/migrations");
 const CREATE_MIGRATIONS_TABLE: &str =
 	include_str!("../../prisma/migrations/migrations.sql");

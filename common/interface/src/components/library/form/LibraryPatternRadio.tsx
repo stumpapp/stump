@@ -70,7 +70,9 @@ export function LibraryPatternRadio({ library }: LibraryPatternRadioProps) {
 				<Link isExternal to="https://stumpapp.dev/guides/libraries#library-patterns">
 					Click here
 				</Link>{' '}
-				<span>to learn more.</span>
+				<span>
+					to learn more. <i>You cannot change this setting later.</i>
+				</span>
 			</FormHelperText>
 			<input disabled={disabled} type="hidden" {...form.register('library_pattern')} />
 			<HStack>

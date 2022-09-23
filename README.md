@@ -64,7 +64,7 @@ Things you can expect to see after the first beta release:
 
 - 🖥️ Desktop app ([Tauri](https://tauri.app/))
 - 📱 Mobile app ([Tachiyomi](https://github.com/aaronleopold/tachiyomi-extensions) and/or [custom application](https://github.com/aaronleopold/stump/tree/main/apps/mobile))
-- A utility [TUI](https://github.com/aaronleopold/stump/tree/main/apps/tui) for managing a Stump instance from the command line
+- 📺 A utility [TUI](https://github.com/aaronleopold/stump/tree/main/apps/tui) for managing a Stump instance from the command line
 
 I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
 
@@ -107,6 +107,8 @@ And that's it!
 
 If you aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs work.
 
+You can also check out the [v0.1.0 milestone](https://github.com/aaronleopold/stump/milestone/1) for a more filtered list of major features planned for that 0.1.0 release.
+
 Some other good places to start:
 
 - Translation, so Stump is accessible to non-English speakers.
@@ -145,6 +147,7 @@ There are a number of other projects that are similar to Stump, it certainly isn
 - [Kavita](https://github.com/Kareadita/Kavita)
 - [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
 - [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
+- [tonbun](https://github.com/KPidS/tonbun) (_Reading and downloading manga_) (✨*Rust*✨)
 
 ## License 🔑
 

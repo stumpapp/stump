@@ -6,6 +6,7 @@ import { HStack, useColorModeValue } from '@chakra-ui/react';
 import { useTopBarStore } from '@stump/client';
 
 import Button from '../../ui/Button';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 export default function NavigationButtons() {
 	const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function NavigationButtons() {
 	const navigateForward = useCallback(() => {
 		if (forwardsUrl != undefined) {
 			navigate(forwardsUrl as To);
-		} else {
+		} else if (forwardsUrl !== 0) {
 			navigate(1);
 		}
 	}, [forwardsUrl]);
@@ -25,10 +26,21 @@ export default function NavigationButtons() {
 	const navigateBackward = useCallback(() => {
 		if (backwardsUrl) {
 			navigate(backwardsUrl as To);
-		} else {
+		} else if (backwardsUrl !== 0) {
 			navigate(-1);
 		}
 	}, [backwardsUrl]);
+
+	// FIXME: this is pretty buggy, but it works for now.
+	// TODO: platform specific keybinds
+	useHotkeys('ctrl+], cmd+],ctrl+[, cmd+[', (e) => {
+		e.preventDefault();
+		if (e.key === ']') {
+			navigateForward();
+		} else if (e.key === '[') {
+			navigateBackward();
+		}
+	});
 
 	return (
 		<HStack
@@ -40,25 +52,32 @@ export default function NavigationButtons() {
 			display={{ base: 'none', md: 'flex' }}
 		>
 			<Button
+				shortcutAction="Go back"
+				shortcutKeybind="⌘ + ["
 				variant="ghost"
 				p="0.5"
+				// FIXME: literally why won't this work >:(
+				// size={{ base: 'sm', sm: 'xs' }}
 				size="sm"
 				_hover={{ bg: useColorModeValue('gray.200', 'gray.750') }}
 				onClick={navigateBackward}
 				disabled={backwardsUrl === 0}
 			>
-				<CaretLeft />
+				<CaretLeft size="0.75rem" />
 			</Button>
 
 			<Button
+				shortcutAction="Go forward"
+				shortcutKeybind="⌘ + ]"
 				variant="ghost"
 				p="0.5"
+				// size={{ base: 'sm', sm: 'xs' }}
 				size="sm"
 				_hover={{ bg: useColorModeValue('gray.200', 'gray.750') }}
 				onClick={navigateForward}
 				disabled={forwardsUrl === 0}
 			>
-				<CaretRight />
+				<CaretRight size="0.75rem" />
 			</Button>
 		</HStack>
 	);

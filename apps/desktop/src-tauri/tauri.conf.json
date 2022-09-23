@@ -59,7 +59,10 @@
         "height": 700,
         "resizable": true,
         "title": "Stump",
-        "width": 1200
+        "width": 1200,
+        "decorations": true,
+        "transparent": false,
+        "center": true
       }
     ]
   }

@@ -21,6 +21,7 @@ import { useLocale } from '../../hooks/useLocale';
 import ApplicationVersion from '../ApplicationVersion';
 import CreateLibraryModal from '../library/CreateLibraryModal';
 import LibraryOptionsMenu from '../library/LibraryOptionsMenu';
+import NavigationButtons from '../topbar/NavigationButtons';
 import Logout from './Logout';
 import ThemeToggle from './ThemeToggle';
 
@@ -150,27 +151,23 @@ export function SidebarContent() {
 
 	return (
 		<>
-			<HStack
-				as={Link}
-				to="/"
-				px={2}
-				flexShrink={0}
-				justifyContent="start"
-				alignItems="center"
-				spacing="4"
-			>
-				<img src="/favicon.ico" className="h-14 w-14 object-scale-down" />
-				<Text
-					bgGradient="linear(to-r, brand.600, brand.500)"
-					bgClip="text"
-					fontSize="2xl"
-					fontWeight="bold"
-					_dark={{
-						bgGradient: 'linear(to-r, brand.600, brand.400)',
-					}}
-				>
-					Stump
-				</Text>
+			<HStack px={2} justifyContent="space-between" alignItems="center">
+				<HStack as={Link} to="/" flexShrink={0} justifyContent="start" alignItems="center">
+					<img src="/favicon.ico" className="h-6 w-6 object-scale-down" />
+					<Text
+						bgGradient="linear(to-r, brand.600, brand.500)"
+						bgClip="text"
+						fontSize="md"
+						fontWeight="bold"
+						_dark={{
+							bgGradient: 'linear(to-r, brand.600, brand.400)',
+						}}
+					>
+						Stump
+					</Text>
+				</HStack>
+
+				<NavigationButtons />
 			</HStack>
 
 			{/* TODO: this needs to scroll on 'overflow' */}

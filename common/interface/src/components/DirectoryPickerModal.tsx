@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useDirectoryListing } from '@stump/client';
 import Button, { ModalCloseButton } from '../ui/Button';
 import Input from '../ui/Input';
+import ToolTip from '../ui/ToolTip';
 
 interface Props {
 	startingPath?: string;
@@ -59,7 +60,9 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 
 	return (
 		<>
-			<Folder onClick={onOpen} />
+			<ToolTip label="Select folder">
+				<Folder onClick={onOpen} />
+			</ToolTip>
 
 			<Modal isCentered size={{ base: 'sm', sm: 'xl' }} isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />

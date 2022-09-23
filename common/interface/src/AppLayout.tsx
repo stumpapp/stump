@@ -29,6 +29,7 @@ export function AppLayout() {
 	const { user: storeUser, setUser } = useUserStore();
 
 	// TODO: platform specific hotkeys
+	// TODO: cmd+shift+h for home
 	useHotkeys('ctrl+,, cmd+,', (e) => {
 		e.preventDefault();
 		navigate('/settings/general');

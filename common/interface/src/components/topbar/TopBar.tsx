@@ -43,10 +43,10 @@ export default function TopBar() {
 			}}
 		>
 			<HStack w="full" justify="space-between" align="center" spacing="2">
-				<HStack>
+				<HStack minH={10}>
 					<MobileDrawer />
 
-					<NavigationButtons />
+					{/* <NavigationButtons /> */}
 					{/* @ts-ignore: this seems to work, idky it has type error */}
 					<Heading as="h3" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>
 						{title}

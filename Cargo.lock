@@ -1308,6 +1308,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "discord-rich-presence"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47fc4beffb85ee1461588499073a4d9c20dcc7728c4b13d6b282ab6c508947e5"
+dependencies = [
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "uuid 0.8.2",
+]
+
+[[package]]
 name = "dispatch"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6100,7 +6112,7 @@ dependencies = [
 
 [[package]]
 name = "stump_cli"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "clap",
  "crossterm",
@@ -6117,11 +6129,16 @@ dependencies = [
 name = "stump_desktop"
 version = "0.0.0"
 dependencies = [
+ "discord-rich-presence",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
 ]
+
+[[package]]
+name = "stump_server"
+version = "0.0.0"
 
 [[package]]
 name = "subprocess"

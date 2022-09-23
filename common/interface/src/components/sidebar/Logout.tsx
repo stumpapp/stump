@@ -15,6 +15,7 @@ import { useUserStore } from '@stump/client';
 import { logout } from '@stump/client/api';
 
 import Button, { ModalCloseButton } from '../../ui/Button';
+import ToolTip from '../../ui/ToolTip';
 
 export default function Logout() {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -38,19 +39,20 @@ export default function Logout() {
 
 	return (
 		<>
-			<Button
-				title="Sign Out"
-				variant="ghost"
-				cursor={'pointer'}
-				p={0.5}
-				size="sm"
-				_focus={{
-					boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
-				}}
-				onClick={onOpen}
-			>
-				<SignOut className="transform -scale-x-[1]" />
-			</Button>
+			<ToolTip label="Sign out">
+				<Button
+					variant="ghost"
+					cursor={'pointer'}
+					p={0.5}
+					size="sm"
+					_focus={{
+						boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
+					}}
+					onClick={onOpen}
+				>
+					<SignOut className="transform -scale-x-[1]" />
+				</Button>
+			</ToolTip>
 
 			<Modal isCentered size="lg" isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />

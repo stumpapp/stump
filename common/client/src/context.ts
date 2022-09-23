@@ -13,6 +13,8 @@ export interface AppProps {
 	demoMode?: boolean;
 
 	setBaseUrl?: (baseUrl: string) => void;
+	setUseDiscordPresence?: (connect: boolean) => void;
+	setDiscordPresence?: (status?: string, details?: string) => void;
 }
 
 export const useAppProps = () => useContext(AppPropsContext);

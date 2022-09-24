@@ -17,6 +17,7 @@ pub mod prisma;
 pub mod types;
 
 use config::context::Ctx;
+use config::logging::STUMP_SHADOW_TEXT;
 use config::{env::StumpEnv, logging::init_fern};
 use event::{event_manager::EventManager, InternalCoreTask};
 use rocket::tokio::sync::mpsc::unbounded_channel;
@@ -48,12 +49,16 @@ impl StumpCore {
 		self.ctx.get_ctx()
 	}
 
-	pub fn init_logging() -> Result<(), fern::InitError> {
+	pub fn init_logging(&self) -> Result<(), fern::InitError> {
 		init_fern()
 	}
 
-	pub fn load_env() -> CoreResult<()> {
+	pub fn load_env(&self) -> CoreResult<()> {
 		StumpEnv::load()
+	}
+
+	pub fn get_shadow_text(&self) -> &str {
+		return STUMP_SHADOW_TEXT;
 	}
 
 	pub async fn run_migrations(

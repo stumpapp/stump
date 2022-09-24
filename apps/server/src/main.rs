@@ -55,17 +55,20 @@ async fn rocket() -> _ {
 		},
 	};
 
-	// env::Env::load().unwrap_or_else(|e| {
-	// 	log::error!("Failed to load environment variables: {:?}", e.to_string())
-	// });
+	if let Err(err) = core.load_env() {
+		log::error!("Failed to load environment variables: {:?}", err);
+		// panic!("Failed to load environment variables: {}", err);
+	}
 
-	// // I am not panic-ing here because I don't believe this should be a fatal error
-	// logging::init_fern().unwrap_or_else(|e| {
-	// 	log::error!("Failed to initialize logging: {:?}", e.to_string())
-	// });
+	if let Err(err) = core.init_logging() {
+		log::error!("Failed to initialize logging: {:?}", err);
+		// panic!("Failed to initialize logging: {}", err);
+	}
 
 	let cors_config = cors::get_cors();
 	let session_store = get_session_store();
+
+	log::info!("{}", core.get_shadow_text());
 
 	rocket::build()
 		.manage(core_ctx)

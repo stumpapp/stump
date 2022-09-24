@@ -9,7 +9,7 @@
 		"setup": "pnpm i && pnpm web build && pnpm core run setup",
 		"checks": "pnpm -r check",
 		"tests": "pnpm -r test",
-		"start:web": "pnpm core start",
+		"start:web": "pnpm run server start",
 		"dev:server": "pnpm server dev",
 		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm web dev\"",
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm desktop dev\"",
@@ -22,7 +22,7 @@
 		"docs": "pnpm --filter @stump/docs --",
 		"interface": "pnpm --filter @stump/interface --",
 		"client": "pnpm --filter @stump/client --",
-		"build:web": "pnpm web build && pnpm core build",
+		"build:web": "pnpm web build && pnpm run server build",
 		"build:desktop": "pnpm desktop build",
 		"build:docker": "docker buildx build --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
 		"cache:docker-arm": "docker buildx build --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
@@ -42,7 +42,9 @@
 			"prettier --write"
 		],
 		".rs": [
-			"cargo fmt --manifest-path=core/Cargo.toml --"
+			"cargo fmt --manifest-path=core/Cargo.toml --",
+			"cargo fmt --manifest-path=apps/server/Cargo.toml --",
+			"cargo fmt --manifest-path=apps/desktop/Cargo.toml --"
 		]
 	}
 }

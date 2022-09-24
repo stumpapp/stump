@@ -6135,6 +6135,7 @@ dependencies = [
  "base64 0.13.0",
  "bcrypt",
  "log",
+ "openssl",
  "prisma-client-rust",
  "rocket",
  "rocket-session-store",

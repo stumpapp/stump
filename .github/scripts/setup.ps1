@@ -13,7 +13,8 @@ if (-NOT (Get-Command cargo -errorAction SilentlyContinue)) {
   write-Warning "If you don't have Rust install, visit https://www.rust-lang.org/tools/install for official instructions."
   break
 } else {
-  write-host "Rust found on your system."
+  write-host "Rust found on your system. Attempting to update..."
+  rustup update
 }
 
 # check if user has node installed

@@ -9,7 +9,8 @@ if [ $? -eq 1 ]; then
         echo "If you don't have Rust install, visit https://www.rust-lang.org/tools/install for official instructions."
         exit 1
 else 
-        echo "Rust found on your system."
+        echo "Rust found on your system. Attempting to update..."
+        rustup update
 fi
 
 which node &> /dev/null

@@ -7,13 +7,16 @@ members = ["core", "core/prisma", "apps/desktop/src-tauri", "apps/tui", "apps/se
 # will break...
 [workspace.package]
 version = "0.0.0"
+rust-version = "1.64.0"
 
 [workspace.dependencies]
 rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
 serde = { version = "1.0", features = ["derive"] }
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
   'rspc',
-  # 'sqlite-create-many'
+  # 'sqlite-create-many',
+  # "migrations",
+  # "sqlite",
 ] }
 
 ### DEV UTILS ###

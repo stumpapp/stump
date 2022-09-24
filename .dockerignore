@@ -1,6 +1,7 @@
 node_modules
 **/node_modules
 build
+dist
 static
 core/client
 target
@@ -9,7 +10,7 @@ target
 *.log
 *.db
 
-# ignore contents in excess directories
-apps/*
-!apps/web
-!apps/web/
+# ignore contents in excess directories, some are kept only so cargo 
+# doesn't yell at me
+apps/docs
+apps/mobile

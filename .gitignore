@@ -14,8 +14,8 @@ build
 # rust
 static
 target
-server/client/*
-!server/client/.placeholder
+apps/server/client/*
+!apps/server/client/.placeholder
 *.db*
 *.sqlite*
 *prisma.rs*

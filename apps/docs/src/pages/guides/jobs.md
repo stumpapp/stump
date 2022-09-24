@@ -2,9 +2,9 @@
 
 With Stump, you can queue various types of jobs that do a variety of things in the background. For all jobs available, you can expect:
 
-- live, visual progress updates
-- accessible logging and reporting, including after job completion
-- super speed!
+- Live, visual progress updates
+- Accessible logging and reporting
+- Persisted job history
 
 ## Library scans
 

@@ -14,8 +14,8 @@ build
 # rust
 static
 target
-core/client/*
-!core/client/.placeholder
+server/client/*
+!server/client/.placeholder
 *.db*
 *.sqlite*
 *prisma.rs*
@@ -40,5 +40,3 @@ core/client/*
 _next
 
 docker-compose.yaml
-
-web_old

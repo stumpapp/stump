@@ -15,12 +15,5 @@
     "typegen": "cargo test --package stump_server --bin stump_server -- types::tests --nocapture",
     "codegen": "pnpm typegen",
     "test": "cargo test"
-  },
-  "devDependencies": {
-    "@stump/core": "workspace:*",
-    "@types/node": "^17.0.45",
-    "axios": "^0.27.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.8.3"
   }
 }

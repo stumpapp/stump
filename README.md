@@ -126,8 +126,9 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 ### /apps
 
 - `docs`: The documentation website, built with Next.js and [Markdoc](https://markdoc.io/), deployed to [stumpapp.dev](http://stumpapp.dev).
-- `web`: The React application that is served by a Stump server.
 - `desktop`: A Tauri application.
+- `server`: A Rocket server.
+- `web`: The React application that is served by the Rocket server.
 
 ### /common
 
@@ -137,7 +138,7 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 
 ### /core
 
-- `core`: Stump's 'core' functionality is located here, written in Rust. Effectively, this is a Rocket server.
+- `core`: Stump's 'core' functionality is located here, written in Rust.
 
 ## Similar Projects 👯
 

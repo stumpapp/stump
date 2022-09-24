@@ -5,9 +5,7 @@ use std::{
 };
 
 use crate::types::{
-	alias::ProcessFileResult,
 	errors::ProcessFileError,
-	http,
 	models::media::{MediaMetadata, ProcessedMediaFile},
 };
 use epub::doc::EpubDoc;
@@ -44,11 +42,11 @@ pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 	}
 }
 
-fn load_epub(path: &str) -> ProcessFileResult<EpubDoc<File>> {
+fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
 	Ok(EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))?)
 }
 
-pub fn process_epub(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
+pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	log::info!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
@@ -78,7 +76,7 @@ pub fn process_epub(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
 }
 
 // TODO: change return type to make more sense
-pub fn get_epub_cover(file: &str) -> ProcessFileResult<http::ImageResponse> {
+pub fn get_epub_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = EpubDoc::new(file).map_err(|e| {
 		log::error!("Failed to open epub file: {}", e);
 		ProcessFileError::EpubOpenError(e.to_string())
@@ -96,7 +94,7 @@ pub fn get_epub_cover(file: &str) -> ProcessFileResult<http::ImageResponse> {
 pub fn get_epub_chapter(
 	path: &str,
 	chapter: usize,
-) -> ProcessFileResult<(ContentType, Vec<u8>)> {
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = load_epub(path)?;
 
 	epub_file.set_current_page(chapter).map_err(|e| {
@@ -128,7 +126,7 @@ pub fn get_epub_chapter(
 pub fn get_epub_resource(
 	path: &str,
 	resource_id: &str,
-) -> ProcessFileResult<(ContentType, Vec<u8>)> {
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = load_epub(path)?;
 
 	let contents = epub_file.get_resource(resource_id).map_err(|e| {
@@ -186,7 +184,7 @@ pub fn get_epub_resource_from_path(
 	path: &str,
 	root: &str,
 	resource_path: PathBuf,
-) -> ProcessFileResult<(ContentType, Vec<u8>)> {
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = load_epub(path)?;
 
 	let adjusted_path = normalize_resource_path(resource_path, root);
@@ -226,10 +224,14 @@ mod tests {
 	use rocket::{http::ContentType, tokio};
 	use std::{path::PathBuf, str::FromStr};
 
-	use crate::{config::context::*, prisma::media, types::models::epub::Epub};
+	use crate::{
+		config::context::*,
+		prisma::media,
+		types::{models::epub::Epub, CoreResult},
+	};
 
 	#[tokio::test]
-	async fn can_make_epub_struct() -> anyhow::Result<()> {
+	async fn can_make_epub_struct() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let media = ctx
@@ -254,7 +256,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn can_get_resource() -> anyhow::Result<()> {
+	async fn can_get_resource() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let media = ctx
@@ -303,7 +305,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn can_get_chapter() -> anyhow::Result<()> {
+	async fn can_get_chapter() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let media = ctx

@@ -1,4 +1,4 @@
-pub mod event_manager;
+pub(crate) mod event_manager;
 
 use rocket::tokio::sync::oneshot;
 use serde::{Deserialize, Serialize};

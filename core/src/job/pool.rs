@@ -6,7 +6,7 @@ use std::{
 use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::{config::context::Ctx, types::alias::ApiResult};
+use crate::{config::context::Ctx, types::CoreResult};
 
 use super::{runner::Runner, Job, JobReport};
 
@@ -134,7 +134,7 @@ impl JobPool {
 
 	/// Returns a vector of JobReport for all persisted jobs, and appends the JobReports
 	/// for jobs in the job queue.
-	pub async fn report(self: Arc<Self>, ctx: &Ctx) -> ApiResult<Vec<JobReport>> {
+	pub async fn report(self: Arc<Self>, ctx: &Ctx) -> CoreResult<Vec<JobReport>> {
 		let db = ctx.get_db();
 
 		let mut jobs = db

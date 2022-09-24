@@ -2,10 +2,13 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use crate::config::get_config_dir;
+use crate::{
+	config::get_config_dir,
+	types::{errors::CoreError, CoreResult},
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Env {
+pub struct StumpEnv {
 	// SERVER CONFIG
 	pub rocket_profile: Option<String>,
 	pub rocket_port: Option<u16>,
@@ -17,7 +20,7 @@ pub struct Env {
 	pub stump_allowed_origins: Option<Vec<String>>,
 }
 
-impl Default for Env {
+impl Default for StumpEnv {
 	fn default() -> Self {
 		Self {
 			rocket_profile: Some(String::from("debug")),
@@ -33,10 +36,10 @@ impl Default for Env {
 
 // TODO: error handling
 // FIXME: I don't believe this will work very well, but it requires some testing.
-impl Env {
+impl StumpEnv {
 	/// Will try to create a new Env object from set environment variables. If none are set,
 	/// will return the default Env object.
-	pub fn from_env(existing: Option<Self>) -> anyhow::Result<Self> {
+	pub fn from_env(existing: Option<Self>) -> CoreResult<Self> {
 		let mut env = match existing {
 			Some(env) => env,
 			None => Self::default(),
@@ -86,13 +89,14 @@ impl Env {
 		Ok(env)
 	}
 
-	pub fn load() -> anyhow::Result<()> {
+	pub fn load() -> CoreResult<()> {
 		let config_dir = get_config_dir();
 		let stump_toml = config_dir.join("Stump.toml");
 
 		let env = if stump_toml.exists() {
 			let toml_str = std::fs::read_to_string(stump_toml)?;
-			toml::from_str::<Env>(&toml_str)?
+			toml::from_str::<StumpEnv>(&toml_str)
+				.map_err(|e| CoreError::InitializationError(e.to_string()))?
 		} else {
 			log::debug!("Stump.toml does not exist, creating it");
 			std::fs::File::create(stump_toml.clone())?;
@@ -142,11 +146,15 @@ impl Env {
 		Ok(())
 	}
 
-	pub fn write(&self) -> anyhow::Result<()> {
+	pub fn write(&self) -> CoreResult<()> {
 		let config_dir = get_config_dir();
 		let stump_toml = config_dir.join("Stump.toml");
 
-		std::fs::write(stump_toml.as_path(), toml::to_string(&self)?)?;
+		std::fs::write(
+			stump_toml.as_path(),
+			toml::to_string(&self)
+				.map_err(|e| CoreError::InitializationError(e.to_string()))?,
+		)?;
 
 		Ok(())
 	}

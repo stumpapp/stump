@@ -1,23 +1,26 @@
 use prisma_client_rust::{raw, Direction};
 use rocket::{fs::NamedFile, http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
-
-use crate::{
+use stump_core::{
 	config::get_config_dir,
-	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs::{self, image},
-	guards::auth::Auth,
+	db::utils::PrismaClientTrait,
+	fs::{image, media_file},
 	prisma::{
 		media::{self, OrderByParam},
 		read_progress, user,
 	},
 	types::{
-		alias::{ApiResult, Ctx},
+		media::Media, read_progress::ReadProgress, FindManyTrait, PageParams, Pageable,
+		PagedRequestParams, QueryOrder,
+	},
+};
+
+use crate::{
+	guards::auth::Auth,
+	types::{
 		errors::ApiError,
 		http::{FileResponse, ImageResponse},
-		models::{media::Media, read_progress::ReadProgress},
-		pageable::{PageParams, Pageable, PagedRequestParams},
-		query::QueryOrder,
+		ApiResult, Ctx,
 	},
 };
 
@@ -205,6 +208,8 @@ pub async fn get_media_file(
 	// Ok(NamedFile::open(media.path.clone()).await?)
 }
 
+// TODO: remove this, implement it? maybe?
+#[allow(unused)]
 #[openapi(tag = "Media")]
 #[post("/media/<id>/convert")]
 pub async fn convert_media_to_cbz(
@@ -268,7 +273,7 @@ pub async fn get_media_page(
 					id, book.pages
 				)))
 			} else {
-				Ok(fs::media_file::get_page(&book.path, page)?)
+				Ok(media_file::get_page(&book.path, page)?)
 			}
 		},
 		None => Err(ApiError::NotFound(format!(
@@ -314,7 +319,7 @@ pub async fn get_media_thumbnail(
 
 	let book = book.unwrap();
 
-	Ok(fs::media_file::get_page(book.path.as_str(), 1)?)
+	Ok(media_file::get_page(book.path.as_str(), 1)?)
 }
 
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found

@@ -2,8 +2,8 @@
 use crate::{
 	opds::link::OpdsLink,
 	prisma::{library, series},
+	types::errors::CoreError,
 };
-use anyhow::Result;
 use prisma_client_rust::chrono;
 use xml::{writer::XmlEvent, EventWriter};
 
@@ -59,7 +59,7 @@ impl OpdsFeed {
 	}
 
 	/// Build an xml string from the feed.
-	pub fn build(&self) -> Result<String> {
+	pub fn build(&self) -> Result<String, CoreError> {
 		let raw = Vec::new();
 		let mut writer = EventWriter::new(raw);
 

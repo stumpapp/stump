@@ -4,10 +4,9 @@ use prisma_client_rust::{raw, Direction};
 use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
-use crate::{
-	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs::{self, image},
-	guards::auth::{AdminGuard, Auth},
+use stump_core::{
+	db::utils::PrismaClientTrait,
+	fs::{image, media_file},
 	job::library_scan::LibraryScanJob,
 	prisma::{
 		library, library_options, media,
@@ -15,19 +14,16 @@ use crate::{
 		tag,
 	},
 	types::{
-		alias::{ApiResult, Ctx},
-		errors::ApiError,
-		http::ImageResponse,
-		models::{
-			library::{
-				CreateLibraryArgs, LibrariesStats, Library, LibraryScanMode,
-				UpdateLibraryArgs,
-			},
-			series::Series,
-		},
-		pageable::{PageParams, Pageable, PagedRequestParams},
-		query::QueryOrder,
+		library::{LibrariesStats, Library, LibraryScanMode},
+		series::Series,
+		CreateLibraryArgs, FindManyTrait, PageParams, Pageable, PagedRequestParams,
+		QueryOrder, UpdateLibraryArgs,
 	},
+};
+
+use crate::{
+	guards::auth::{AdminGuard, Auth},
+	types::{errors::ApiError, http::ImageResponse, ApiResult, Ctx},
 };
 
 /// Get the libraries accessible by the current user. Library `tags` relation is loaded
@@ -205,7 +201,7 @@ pub async fn get_library_thumbnail(
 
 	let media = series.media()?.first().unwrap();
 
-	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
+	Ok(media_file::get_page(media.path.as_str(), 1)?)
 }
 
 /// Queue a ScannerJob to scan the library by id. The job, when started, is

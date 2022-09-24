@@ -1,4 +1,3 @@
-use anyhow::Result;
 use prisma_client_rust::raw;
 use serde::Deserialize;
 use std::io::BufReader;
@@ -8,6 +7,7 @@ use include_dir::{include_dir, Dir};
 use crate::{
 	fs::checksum::digest_from_reader,
 	prisma::{self, migration},
+	CoreError,
 };
 
 // TODO: this entire crate is pretty much going to be removed with next pcr release,
@@ -35,7 +35,7 @@ fn get_sql_stmts(sql_str: &str) -> Vec<&str> {
 		.collect()
 }
 
-pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
+pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> {
 	log::info!("Running migrations");
 
 	log::debug!("Checking for `migrations` table");
@@ -132,7 +132,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<()> {
 						.exec()
 						.await?;
 
-					return Err(anyhow::anyhow!(e));
+					return Err(CoreError::MigrationError(e.to_string()));
 				},
 			};
 		}

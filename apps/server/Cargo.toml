@@ -4,3 +4,24 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+stump_core = { path = "../../core" }
+# serde = { version = "1.0", features = ["derive"] }
+prisma-client-rust.workspace = true
+serde.workspace = true
+
+### ROCKET / SERVER ### 
+rocket.workspace = true
+rocket_okapi = { version = "0.8.0-rc.2", features = ["rapidoc", "swagger"] }
+rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
+rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }
+
+schemars.workspace = true
+specta.workspace = true
+
+### Error Handling + Logging ###
+thiserror.workspace = true
+log.workspace = true
+
+# 
+bcrypt = "0.10.1"
+base64 = "0.13.0"

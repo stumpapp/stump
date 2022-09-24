@@ -1,4 +1,4 @@
-use rocket_okapi::JsonSchema;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -67,58 +67,32 @@ impl Into<UserPreferences> for prisma::user_preferences::Data {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, JsonSchema, Type)]
+// #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema, Type)]
 
-pub struct UserPreferencesUpdate {
-	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
-}
+// pub struct AuthenticatedUser {
+// 	pub id: String,
+// 	pub username: String,
+// 	pub role: String,
+// 	pub user_preferences: UserPreferences,
+// }
 
-#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema, Type)]
+// impl Into<AuthenticatedUser> for prisma::user::Data {
+// 	fn into(self) -> AuthenticatedUser {
+// 		let user_preferences = match self
+// 			.user_preferences()
+// 			.expect("Failed to load user preferences")
+// 		{
+// 			Some(preferences) => preferences.to_owned(),
+// 			None => unreachable!(
+// 				"User does not have preferences. This should not be reachable."
+// 			),
+// 		};
 
-pub struct AuthenticatedUser {
-	pub id: String,
-	pub username: String,
-	pub role: String,
-	pub user_preferences: UserPreferences,
-}
-
-impl Into<AuthenticatedUser> for prisma::user::Data {
-	fn into(self) -> AuthenticatedUser {
-		let user_preferences = match self
-			.user_preferences()
-			.expect("Failed to load user preferences")
-		{
-			Some(preferences) => preferences.to_owned(),
-			None => unreachable!(
-				"User does not have preferences. This should not be reachable."
-			),
-		};
-
-		AuthenticatedUser {
-			id: self.id.clone(),
-			username: self.username.clone(),
-			role: self.role.clone(),
-			user_preferences: user_preferences.into(),
-		}
-	}
-}
-
-#[derive(Debug)]
-pub struct DecodedCredentials {
-	pub username: String,
-	pub password: String,
-}
-
-#[derive(Deserialize, JsonSchema, Type)]
-pub struct LoginOrRegisterArgs {
-	pub username: String,
-	pub password: String,
-}
-
-#[derive(Serialize, JsonSchema, Type)]
-pub struct ClaimResponse {
-	pub is_claimed: bool,
-}
+// 		AuthenticatedUser {
+// 			id: self.id.clone(),
+// 			username: self.username.clone(),
+// 			role: self.role.clone(),
+// 			user_preferences: user_preferences.into(),
+// 		}
+// 	}
+// }

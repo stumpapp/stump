@@ -1,20 +1,23 @@
 use prisma_client_rust::{chrono, Direction};
 use rocket::Route;
 
-use crate::{
+use stump_core::{
 	db::utils::PrismaClientTrait,
-	fs,
-	guards::auth::Auth,
+	fs::{epub, media_file},
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
 	prisma::{self, library, media, read_progress, series},
+};
+
+use crate::{
+	guards::auth::Auth,
 	types::{
-		alias::{ApiResult, Ctx},
 		errors::ApiError,
 		http::{ImageResponse, XmlResponse},
+		ApiResult, Ctx,
 	},
 };
 
@@ -444,7 +447,7 @@ async fn book_thumbnail(id: String, ctx: &Ctx, _auth: Auth) -> ApiResult<ImageRe
 
 	let book = book.unwrap();
 
-	Ok(fs::media_file::get_page(&book.path, 1)?)
+	Ok(media_file::get_page(&book.path, 1)?)
 }
 
 // TODO: generalize the function call
@@ -481,8 +484,8 @@ async fn book_page(
 	let book = book.unwrap();
 
 	if book.path.ends_with(".epub") && correct_page == 1 {
-		return Ok(fs::epub::get_epub_cover(&book.path)?);
+		return Ok(epub::get_epub_cover(&book.path)?);
 	}
 
-	Ok(fs::media_file::get_page(&book.path, correct_page as i32)?)
+	Ok(media_file::get_page(&book.path, correct_page as i32)?)
 }

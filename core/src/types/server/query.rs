@@ -1,10 +1,13 @@
-use rocket_okapi::JsonSchema;
+use rocket::serde::DeserializeOwned;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+use prisma_client_rust::{query_core::Selection, FindMany, PrismaValue, SerializedWhere};
+
 use crate::{
 	prisma::{media, series},
-	types::{errors::ApiError, pageable::PageParams},
+	types::{errors::CoreError, server::pageable::PageParams},
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema, FromFormField, Type)]
@@ -58,7 +61,7 @@ impl From<PageParams> for QueryOrder {
 }
 
 impl TryInto<media::OrderByParam> for QueryOrder {
-	type Error = ApiError;
+	type Error = CoreError;
 
 	fn try_into(self) -> Result<media::OrderByParam, Self::Error> {
 		let dir: prisma_client_rust::Direction = self.direction.into();
@@ -72,7 +75,7 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 			"path" => media::path::order(dir),
 			"series_id" => media::series_id::order(dir),
 			_ => {
-				return Err(ApiError::BadRequest(format!(
+				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order media by {:?}",
 					self.order_by
 				)))
@@ -82,7 +85,7 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 }
 
 impl TryInto<series::OrderByParam> for QueryOrder {
-	type Error = ApiError;
+	type Error = CoreError;
 
 	fn try_into(self) -> Result<series::OrderByParam, Self::Error> {
 		let dir: prisma_client_rust::Direction = self.direction.into();
@@ -94,11 +97,37 @@ impl TryInto<series::OrderByParam> for QueryOrder {
 			"path" => series::path::order(dir),
 			"library_id" => series::library_id::order(dir),
 			_ => {
-				return Err(ApiError::BadRequest(format!(
+				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order series by {:?}",
 					self.order_by
 				)))
 			},
 		})
+	}
+}
+
+pub trait FindManyTrait {
+	fn paginated(self, page_params: PageParams) -> Self;
+}
+
+impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
+	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
+where
+	Where: Into<SerializedWhere>,
+	With: Into<Selection>,
+	OrderBy: Into<(String, PrismaValue)>,
+	Cursor: Into<Where>,
+	Set: Into<(String, PrismaValue)>,
+	Data: DeserializeOwned,
+{
+	fn paginated(self, page_params: PageParams) -> Self {
+		let skip = match page_params.zero_based {
+			true => page_params.page * page_params.page_size,
+			false => (page_params.page - 1) * page_params.page_size,
+		} as i64;
+
+		let take = page_params.page_size as i64;
+
+		self.skip(skip).take(take)
 	}
 }

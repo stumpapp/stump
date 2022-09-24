@@ -7,15 +7,11 @@ use std::{
 };
 use webp::{Encoder, WebPMemory};
 
-use crate::{
-	config::get_thumbnails_dir,
-	prisma::media,
-	types::{alias::ProcessFileResult, errors::ProcessFileError},
-};
+use crate::{config::get_thumbnails_dir, prisma::media, types::errors::ProcessFileError};
 
 use super::media_file;
 
-pub fn get_image_bytes<P: AsRef<Path>>(path: P) -> ProcessFileResult<Vec<u8>> {
+pub fn get_image_bytes<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, ProcessFileError> {
 	let mut file = File::open(path)?;
 
 	let mut buf = Vec::new();
@@ -24,7 +20,7 @@ pub fn get_image_bytes<P: AsRef<Path>>(path: P) -> ProcessFileResult<Vec<u8>> {
 	Ok(buf)
 }
 
-pub fn webp_from_path<P: AsRef<Path>>(file_path: P) -> ProcessFileResult<Vec<u8>> {
+pub fn webp_from_path<P: AsRef<Path>>(file_path: P) -> Result<Vec<u8>, ProcessFileError> {
 	let image = Reader::open(file_path.as_ref())?
 		.with_guessed_format()?
 		.decode()?;
@@ -51,7 +47,7 @@ pub fn webp_from_path<P: AsRef<Path>>(file_path: P) -> ProcessFileResult<Vec<u8>
 }
 
 // TODO: this is **super** slow!!!!
-pub fn webp_from_bytes(bytes: &[u8]) -> ProcessFileResult<Vec<u8>> {
+pub fn webp_from_bytes(bytes: &[u8]) -> Result<Vec<u8>, ProcessFileError> {
 	let image = image::load_from_memory(bytes)?;
 
 	let (width, height) = image.dimensions();
@@ -75,7 +71,7 @@ pub fn webp_from_bytes(bytes: &[u8]) -> ProcessFileResult<Vec<u8>> {
 	Ok(encoded_webp.as_bytes().to_vec())
 }
 
-pub fn generate_thumbnail(id: &str, path: &str) -> ProcessFileResult<PathBuf> {
+pub fn generate_thumbnail(id: &str, path: &str) -> Result<PathBuf, ProcessFileError> {
 	let (_, buf) = media_file::get_page(path, 1)?;
 	let webp_buf = webp_from_bytes(&buf)?;
 
@@ -93,7 +89,9 @@ pub fn generate_thumbnail(id: &str, path: &str) -> ProcessFileResult<PathBuf> {
 }
 
 // TODO: does this need to return a result?
-pub fn generate_thumbnails(media: Vec<media::Data>) -> ProcessFileResult<Vec<PathBuf>> {
+pub fn generate_thumbnails(
+	media: Vec<media::Data>,
+) -> Result<Vec<PathBuf>, ProcessFileError> {
 	log::debug!("Enter generate_thumbnails");
 
 	// TODO: this might make the stack overflow lol
@@ -126,7 +124,7 @@ pub fn get_thumbnail_path(id: &str) -> Option<PathBuf> {
 	}
 }
 
-pub fn remove_thumbnail(id: &str) -> ProcessFileResult<()> {
+pub fn remove_thumbnail(id: &str) -> Result<(), ProcessFileError> {
 	let thumbnail_path = get_thumbnails_dir().join(format!("{}.webp", id));
 
 	if thumbnail_path.exists() {
@@ -136,7 +134,7 @@ pub fn remove_thumbnail(id: &str) -> ProcessFileResult<()> {
 	Ok(())
 }
 
-pub fn remove_thumbnails(id_list: &[String]) -> ProcessFileResult<()> {
+pub fn remove_thumbnails(id_list: &[String]) -> Result<(), ProcessFileError> {
 	for id in id_list {
 		// TODO: not sure I want the entire process to fail if one thumbnail fails to delete...
 		// for now, I will leave it as is. I can't see to many cases where this would happen, but

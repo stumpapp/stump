@@ -3,7 +3,7 @@ use std::time::Duration;
 use rocket::http::SameSite;
 use rocket_session_store::{memory::MemoryStore, CookieConfig, SessionStore};
 
-use crate::types::models::user::AuthenticatedUser;
+use crate::types::auth::AuthenticatedUser;
 
 pub fn get_session_store() -> SessionStore<AuthenticatedUser> {
 	let session_name =

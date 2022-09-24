@@ -3,11 +3,11 @@ use std::fs::File;
 use prisma_client_rust::chrono::{DateTime, Utc};
 use rocket::serde::json::Json;
 use rocket_okapi::openapi;
+use stump_core::{config::logging::get_log_file, types::log::LogMetadata};
 
 use crate::{
-	config::logging::get_log_file,
 	guards::auth::AdminGuard,
-	types::{alias::ApiResult, errors::ApiError, models::log::LogMetadata},
+	types::{errors::ApiError, ApiResult},
 };
 
 // TODO: there is a database entity Log. If that stays, I should differenciate between

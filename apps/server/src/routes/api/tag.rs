@@ -1,13 +1,11 @@
 use rocket::serde::json::Json;
 use rocket_okapi::{openapi, JsonSchema};
 use serde::Deserialize;
+use stump_core::types::tag::Tag;
 
 use crate::{
 	guards::auth::Auth,
-	types::{
-		alias::{ApiResult, Ctx},
-		models::tag::Tag,
-	},
+	types::{ApiResult, Ctx},
 };
 
 /// Get all tags for all items in the database. Tags are returned in a flat list,

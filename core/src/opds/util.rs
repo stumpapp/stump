@@ -1,5 +1,6 @@
-use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
+
+use crate::types::CoreResult;
 
 pub trait OpdsEnumStr {
 	fn as_str(&self) -> &'static str;
@@ -17,14 +18,17 @@ pub fn write_xml_element(
 	name: &str,
 	value: &str,
 	writer: &mut EventWriter<Vec<u8>>,
-) -> Result<()> {
+) -> CoreResult<()> {
 	writer.write(XmlEvent::start_element(name))?;
 	writer.write(XmlEvent::characters(value))?;
 	writer.write(XmlEvent::end_element())?;
 	Ok(())
 }
 
-pub fn write_xml_content(value: &str, writer: &mut EventWriter<Vec<u8>>) -> Result<()> {
+pub fn write_xml_content(
+	value: &str,
+	writer: &mut EventWriter<Vec<u8>>,
+) -> CoreResult<()> {
 	writer.write(XmlEvent::start_element("content").attr("type", "html"))?;
 	writer.write(XmlEvent::characters(value))?;
 	writer.write(XmlEvent::end_element())?;

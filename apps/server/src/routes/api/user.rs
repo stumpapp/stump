@@ -1,15 +1,17 @@
 use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
-use crate::{
-	guards::auth::{AdminGuard, Auth},
+use stump_core::{
 	prisma::{user, user_preferences},
 	types::{
-		alias::{ApiResult, Ctx},
-		models::user::{
-			LoginOrRegisterArgs, User, UserPreferences, UserPreferencesUpdate,
-		},
+		user::{User, UserPreferences},
+		LoginOrRegisterArgs, UserPreferencesUpdate,
 	},
+};
+
+use crate::{
+	guards::auth::{AdminGuard, Auth},
+	types::{ApiResult, Ctx},
 	utils::auth,
 };
 
@@ -78,12 +80,13 @@ pub async fn create_user(
 // to do anything else?
 #[openapi(tag = "User")]
 #[put("/users")]
+#[allow(unused)]
 pub async fn update_user() {
 	unimplemented!()
 }
 
 // FIXME: remove this once I resolve the below 'TODO'
-#[allow(unused_variables)]
+#[allow(unused)]
 #[openapi(tag = "User")]
 #[get("/users/<id>/preferences")]
 pub async fn get_user_preferences(
@@ -116,7 +119,7 @@ pub async fn get_user_preferences(
 // structure needs to eventually change a little anyways, I don't like how I can't query
 // by user id, it should be a unique where param but it isn't with how I structured it...
 // FIXME: remove this 'allow' once I resolve the above 'TODO'
-#[allow(unused_variables)]
+#[allow(unused)]
 #[openapi(tag = "User")]
 #[put("/users/<id>/preferences", data = "<input>")]
 pub async fn update_user_preferences(

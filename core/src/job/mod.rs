@@ -2,9 +2,9 @@ pub mod library_scan;
 pub mod pool;
 pub mod runner;
 
-use std::fmt::Debug;
+use std::{fmt::Debug, num::TryFromIntError};
 
-use rocket_okapi::JsonSchema;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -12,7 +12,7 @@ use crate::{
 	config::context::Ctx,
 	event::CoreEvent,
 	prisma::{self},
-	types::errors::ApiError,
+	types::{errors::CoreError, CoreResult},
 };
 
 #[derive(Clone, Serialize, Deserialize, Debug, JsonSchema, Type)]
@@ -122,14 +122,14 @@ pub trait Job: Send + Sync {
 	fn kind(&self) -> &'static str;
 	fn details(&self) -> Option<Box<&str>>;
 
-	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError>;
+	async fn run(&self, runner_id: String, ctx: Ctx) -> CoreResult<()>;
 }
 
 pub async fn persist_new_job(
 	ctx: &Ctx,
 	id: String,
 	job: &Box<dyn Job>,
-) -> Result<crate::prisma::job::Data, ApiError> {
+) -> CoreResult<crate::prisma::job::Data> {
 	use crate::prisma::job;
 
 	let db = ctx.get_db();
@@ -152,7 +152,7 @@ pub async fn persist_job_start(
 	ctx: &Ctx,
 	id: String,
 	task_count: u64,
-) -> Result<crate::prisma::job::Data, ApiError> {
+) -> CoreResult<crate::prisma::job::Data> {
 	use crate::prisma::job;
 
 	let db = ctx.get_db();
@@ -162,7 +162,10 @@ pub async fn persist_job_start(
 		.update(
 			job::id::equals(id.clone()),
 			vec![
-				job::task_count::set(task_count.try_into()?),
+				// TODO: I am clearly using this a lot, make a mapping for it
+				job::task_count::set(task_count.try_into().map_err(
+					|e: TryFromIntError| CoreError::InternalError(e.to_string()),
+				)?),
 				job::status::set(JobStatus::Running.to_string()),
 			],
 		)
@@ -184,7 +187,7 @@ pub async fn persist_job_end(
 	id: String,
 	completed_task_count: u64,
 	ms_elapsed: u128,
-) -> Result<crate::prisma::job::Data, ApiError> {
+) -> CoreResult<crate::prisma::job::Data> {
 	use crate::prisma::job;
 
 	let db = ctx.get_db();
@@ -194,9 +197,13 @@ pub async fn persist_job_end(
 		.update(
 			job::id::equals(id.clone()),
 			vec![
-				job::completed_task_count::set(completed_task_count.try_into()?),
+				job::completed_task_count::set(completed_task_count.try_into().map_err(
+					|e: TryFromIntError| CoreError::InternalError(e.to_string()),
+				)?),
 				// FIXME: potentially unsafe cast u128 -> u64
-				job::ms_elapsed::set(ms_elapsed.try_into()?),
+				job::ms_elapsed::set(ms_elapsed.try_into().map_err(
+					|e: TryFromIntError| CoreError::InternalError(e.to_string()),
+				)?),
 				job::status::set(JobStatus::Completed.to_string()),
 			],
 		)

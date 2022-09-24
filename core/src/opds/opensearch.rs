@@ -1,5 +1,6 @@
-use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
+
+use crate::types::CoreResult;
 
 use super::{
 	link::OpdsLinkType,
@@ -10,7 +11,7 @@ pub struct OpdsOpenSearch {}
 
 impl OpdsOpenSearch {
 	/// Build an xml string for the OpenSearchDescription
-	pub fn build() -> Result<String> {
+	pub fn build() -> CoreResult<String> {
 		let raw = Vec::new();
 		let mut writer = EventWriter::new(raw);
 

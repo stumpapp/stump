@@ -10,20 +10,14 @@ use rocket::{
 	futures::executor::block_on,
 	http::{ContentType, Status},
 	response::{self, Responder},
-	// serde::json::Json,
 	tokio::io::AsyncSeekExt,
-	Request,
-	Response,
+	Request, Response,
 };
 use rocket_okapi::{
 	gen::OpenApiGenerator, okapi::openapi3::Responses, response::OpenApiResponderInner,
 	OpenApiError,
 };
-
-use crate::fs::media_file::infer_mime_from_path;
-// use serde::Serialize;
-
-// use super::pageable::Pageable;
+use stump_core::fs::media_file::infer_mime_from_path;
 
 #[derive(Responder)]
 #[response(content_type = "xml")]

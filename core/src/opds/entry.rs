@@ -1,9 +1,9 @@
-use anyhow::Result;
 use prisma_client_rust::chrono::DateTime;
 use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
+use crate::types::CoreResult;
 use crate::{
 	opds::link::OpdsStreamLink,
 	prisma::{library, media, series},
@@ -51,7 +51,7 @@ impl OpdsEntry {
 		}
 	}
 
-	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> Result<()> {
+	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> CoreResult<()> {
 		writer.write(XmlEvent::start_element("entry"))?;
 
 		util::write_xml_element("title", self.title.as_str(), writer)?;

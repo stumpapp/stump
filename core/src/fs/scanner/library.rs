@@ -23,7 +23,9 @@ use crate::{
 	},
 	job::persist_job_start,
 	prisma::{library, media, series},
-	types::{enums::FileStatus, errors::ApiError, models::library::LibraryOptions},
+	types::{
+		enums::FileStatus, errors::CoreError, models::library::LibraryOptions, CoreResult,
+	},
 };
 
 use super::{
@@ -95,7 +97,7 @@ async fn precheck(
 	ctx: &Ctx,
 	path: String,
 	runner_id: &str,
-) -> Result<(library::Data, LibraryOptions, Vec<series::Data>, u64), ApiError> {
+) -> CoreResult<(library::Data, LibraryOptions, Vec<series::Data>, u64)> {
 	let db = ctx.get_db();
 
 	let library = db
@@ -107,7 +109,7 @@ async fn precheck(
 		.await?;
 
 	if library.is_none() {
-		return Err(ApiError::NotFound(format!("Library not found: {}", path)));
+		return Err(CoreError::NotFound(format!("Library not found: {}", path)));
 	}
 
 	let library = library.unwrap();
@@ -115,7 +117,7 @@ async fn precheck(
 	if !Path::new(&path).exists() {
 		mark_library_missing(library, &ctx).await?;
 
-		return Err(ApiError::InternalServerError(format!(
+		return Err(CoreError::FileNotFound(format!(
 			"Library path does not exist in fs: {}",
 			path
 		)));
@@ -402,11 +404,7 @@ async fn scan_series_batch(
 	operations
 }
 
-pub async fn scan_batch(
-	ctx: Ctx,
-	path: String,
-	runner_id: String,
-) -> Result<u64, ApiError> {
+pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult<u64> {
 	log::trace!("Enter scan_batch");
 
 	let (library, library_options, series, files_to_process) =
@@ -469,7 +467,7 @@ pub async fn scan_batch(
 		.await
 		.map_err(|e| {
 			log::error!("Failed to batch media operations: {:?}", e);
-			ApiError::InternalServerError(e.to_string())
+			CoreError::InternalError(e.to_string())
 		})?;
 
 	ctx.emit_client_event(CoreEvent::CreatedMediaBatch(created_media.len() as u64));
@@ -499,11 +497,7 @@ pub async fn scan_batch(
 	Ok(final_count)
 }
 
-pub async fn scan_sync(
-	ctx: Ctx,
-	path: String,
-	runner_id: String,
-) -> Result<u64, ApiError> {
+pub async fn scan_sync(ctx: Ctx, path: String, runner_id: String) -> CoreResult<u64> {
 	let (library, library_options, series, files_to_process) =
 		precheck(&ctx, path, &runner_id).await?;
 
@@ -563,13 +557,11 @@ pub async fn scan_sync(
 mod tests {
 	use rocket::tokio;
 
-	use crate::config::context::*;
-
-	use crate::types::errors::ApiError;
+	use crate::{config::context::*, types::CoreResult};
 
 	#[tokio::test(flavor = "multi_thread")]
 	#[ignore]
-	async fn scan_batch() -> Result<(), ApiError> {
+	async fn scan_batch() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let start = std::time::Instant::now();
@@ -592,7 +584,7 @@ mod tests {
 
 	#[tokio::test(flavor = "multi_thread")]
 	#[ignore]
-	async fn scan_sync() -> Result<(), ApiError> {
+	async fn scan_sync() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let start = std::time::Instant::now();

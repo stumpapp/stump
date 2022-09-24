@@ -1,23 +1,22 @@
 use prisma_client_rust::Direction;
 use rocket::{http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
-
-use crate::{
-	db::utils::{FindManyTrait, PrismaClientTrait},
-	fs::{self, image},
-	guards::auth::Auth,
+use stump_core::{
+	db::utils::PrismaClientTrait,
+	fs::{image, media_file},
 	prisma::{
 		media::{self, OrderByParam},
 		read_progress, series,
 	},
 	types::{
-		alias::{ApiResult, Ctx},
-		errors::ApiError,
-		http::ImageResponse,
-		models::{media::Media, series::Series},
-		pageable::{PageParams, Pageable, PagedRequestParams},
-		query::QueryOrder,
+		media::Media, series::Series, FindManyTrait, PageParams, Pageable,
+		PagedRequestParams, QueryOrder,
 	},
+};
+
+use crate::{
+	guards::auth::Auth,
+	types::{errors::ApiError, http::ImageResponse, ApiResult, Ctx},
 };
 
 /// Get all series accessible by user. This is a paginated respone, and
@@ -146,7 +145,7 @@ pub async fn get_series_thumbnail(
 		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?));
 	}
 
-	Ok(fs::media_file::get_page(media.path.as_str(), 1)?)
+	Ok(media_file::get_page(media.path.as_str(), 1)?)
 }
 
 /// Returns the media in a given series. This is a paginated respone, and

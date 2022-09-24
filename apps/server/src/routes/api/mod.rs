@@ -1,12 +1,10 @@
 use rocket::{serde::json::Json, Route, Shutdown};
 use rocket_okapi::{openapi, openapi_get_routes};
+use stump_core::types::ClaimResponse;
 
 use crate::{
 	guards::auth::AdminGuard,
-	types::{
-		alias::{ApiResult, Ctx},
-		models::user::ClaimResponse,
-	},
+	types::{ApiResult, Ctx},
 };
 
 pub mod auth;
@@ -36,7 +34,7 @@ pub fn api() -> Vec<Route> {
 		// user api
 		user::get_users,
 		user::create_user,
-		user::update_user_preferences,
+		user::get_user_preferences,
 		// user::update_user
 		job::get_jobs,
 		job::jobs_listener,
@@ -45,6 +43,7 @@ pub fn api() -> Vec<Route> {
 		library::get_libraries_stats,
 		library::get_library_by_id,
 		library::get_library_series,
+		library::get_library_thumbnail,
 		library::scan_library,
 		library::create_library,
 		library::update_library,

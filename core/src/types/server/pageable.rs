@@ -1,8 +1,8 @@
-use rocket_okapi::JsonSchema;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use super::query::Direction;
+use super::Direction;
 
 #[derive(Debug, Deserialize, Serialize, FromForm, JsonSchema, Type)]
 pub struct PagedRequestParams {

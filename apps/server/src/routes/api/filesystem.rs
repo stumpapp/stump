@@ -2,16 +2,13 @@ use std::path::Path;
 
 use rocket::serde::json::Json;
 use rocket_okapi::openapi;
+use stump_core::types::list_directory::{
+	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
+};
 
 use crate::{
 	guards::auth::AdminGuard,
-	types::{
-		alias::ApiResult,
-		errors::ApiError,
-		models::list_directory::{
-			DirectoryListing, DirectoryListingFile, DirectoryListingInput,
-		},
-	},
+	types::{errors::ApiError, ApiResult},
 };
 
 /// List the contents of a directory on the file system at a given (optional) path. If no path

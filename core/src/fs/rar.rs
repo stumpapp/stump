@@ -10,9 +10,7 @@ use crate::{
 		media_file::{self, IsImage},
 	},
 	types::{
-		alias::ProcessFileResult,
 		errors::ProcessFileError,
-		http,
 		models::{library::LibraryOptions, media::ProcessedMediaFile},
 	},
 };
@@ -97,7 +95,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 pub fn process_rar(
 	path: &Path,
 	options: &LibraryOptions,
-) -> ProcessFileResult<ProcessedMediaFile> {
+) -> Result<ProcessedMediaFile, ProcessFileError> {
 	if options.convert_rar_to_zip {
 		let new_path = convert_rar_to_zip(path)?;
 
@@ -245,7 +243,10 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // OpenArchive handle stored in Entry is no more. That's why I create another archive to grab what I want before
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-pub fn get_rar_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
+pub fn get_rar_image(
+	file: &str,
+	page: i32,
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	if stump_in_docker() {
 		return Err(ProcessFileError::UnsupportedFileType(
 			"Stump cannot support cbr/rar files in docker containers for now.".into(),
@@ -316,7 +317,7 @@ pub fn get_rar_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResp
 mod tests {
 	use super::*;
 
-	use crate::{config::context::Ctx, prisma::media, types::errors::ApiError};
+	use crate::{config::context::Ctx, prisma::media, types::CoreResult};
 
 	use rocket::tokio;
 
@@ -339,7 +340,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn digest_rars_asynchronous() -> Result<(), ApiError> {
+	async fn digest_rars_asynchronous() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let rars = ctx
@@ -379,7 +380,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn digest_rars_synchronous() -> Result<(), ApiError> {
+	async fn digest_rars_synchronous() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let rars = ctx

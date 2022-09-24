@@ -9,15 +9,9 @@ use rocket::{
 	Shutdown,
 };
 use rocket_okapi::openapi;
+use stump_core::{event::InternalCoreTask, job::JobReport};
 
-use crate::{
-	event::InternalCoreTask,
-	job::JobReport,
-	types::{
-		alias::{ApiResult, Ctx},
-		errors::ApiError,
-	},
-};
+use crate::types::{errors::ApiError, ApiResult, Ctx};
 
 /// Get all running/pending jobs.
 #[openapi(tag = "Job")]

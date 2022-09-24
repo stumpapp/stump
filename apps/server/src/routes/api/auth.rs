@@ -1,15 +1,14 @@
 use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
+use stump_core::{
+	prisma::{user, user_preferences},
+	types::{enums::UserRole, LoginOrRegisterArgs},
+};
+
 use crate::{
 	guards::auth::Auth,
-	prisma::{user, user_preferences},
-	types::{
-		alias::{ApiResult, Ctx, LoginResult, Session},
-		enums::UserRole,
-		errors::ApiError,
-		models::user::{AuthenticatedUser, LoginOrRegisterArgs},
-	},
+	types::{auth::AuthenticatedUser, errors::ApiError, ApiResult, Ctx, Session},
 	utils::auth,
 };
 
@@ -47,7 +46,7 @@ pub async fn login(
 	ctx: &Ctx,
 	session: Session<'_>,
 	credentials: Json<LoginOrRegisterArgs>,
-) -> LoginResult {
+) -> ApiResult<Json<AuthenticatedUser>> {
 	let existing_session = session.get().await?;
 
 	if let Some(user) = existing_session {

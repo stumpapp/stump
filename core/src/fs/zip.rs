@@ -1,11 +1,9 @@
 use crate::{
 	fs::media_file::{self, IsImage},
-	types::{
-		alias::ProcessFileResult, errors::ProcessFileError, http,
-		models::media::ProcessedMediaFile,
-	},
+	types::{errors::ProcessFileError, models::media::ProcessedMediaFile},
 };
 
+use rocket::http::ContentType;
 use std::{
 	fs::File,
 	io::{Read, Write},
@@ -150,7 +148,7 @@ pub fn digest_zip(path: &str) -> Option<String> {
 /// Processes a zip file in its entirety, includes: medatadata, page count, and the
 /// generated checksum for the file.
 // TODO: do I need to pass in the library options here?
-pub fn process_zip(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
+pub fn process_zip(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	info!("Processing Zip: {}", path.display());
 
 	let zip_file = File::open(path)?;
@@ -184,7 +182,10 @@ pub fn process_zip(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
 // FIXME: this solution is terrible, was just fighting with borrow checker and wanted
 // a quick solve. TODO: rework this!
 /// Get an image from a zip file by index (page).
-pub fn get_zip_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
+pub fn get_zip_image(
+	file: &str,
+	page: i32,
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let zip_file = File::open(file)?;
 
 	let mut archive = zip::ZipArchive::new(&zip_file)?;
@@ -232,12 +233,12 @@ pub fn get_zip_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResp
 mod tests {
 	use super::*;
 
-	use crate::{config::context::Ctx, prisma::media, types::errors::ApiError};
+	use crate::{config::context::Ctx, prisma::media, types::CoreResult};
 
 	use rocket::tokio;
 
 	#[tokio::test]
-	async fn digest_zips_asynchronous() -> Result<(), ApiError> {
+	async fn digest_zips_asynchronous() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let zips = ctx
@@ -277,7 +278,7 @@ mod tests {
 	}
 
 	#[tokio::test]
-	async fn digest_zips_synchronous() -> Result<(), ApiError> {
+	async fn digest_zips_synchronous() -> CoreResult<()> {
 		let ctx = Ctx::mock().await;
 
 		let zips = ctx

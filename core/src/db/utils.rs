@@ -1,15 +1,9 @@
 use std::collections::HashMap;
 
-use prisma_client_rust::{
-	query_core::Selection, raw, FindMany, PrismaValue, SerializedWhere,
-};
-use rocket::serde::DeserializeOwned;
+use prisma_client_rust::{raw, PrismaValue};
 use serde::Deserialize;
 
-use crate::{
-	prisma::PrismaClient,
-	types::{alias::ApiResult, pageable::PageParams},
-};
+use crate::{prisma::PrismaClient, types::CoreResult};
 
 use super::migration::CountQueryReturn;
 
@@ -23,19 +17,19 @@ pub struct SeriesMediaCountQueryReturn {
 // relation counting is expected in that release.
 #[async_trait::async_trait]
 pub trait PrismaClientTrait {
-	async fn media_count(&self) -> ApiResult<i64>;
-	async fn media_in_series_count(&self, series_id: String) -> ApiResult<i64>;
-	async fn series_count_all(&self) -> ApiResult<i64>;
-	async fn series_count(&self, library_id: String) -> ApiResult<i64>;
+	async fn media_count(&self) -> CoreResult<i64>;
+	async fn media_in_series_count(&self, series_id: String) -> CoreResult<i64>;
+	async fn series_count_all(&self) -> CoreResult<i64>;
+	async fn series_count(&self, library_id: String) -> CoreResult<i64>;
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> ApiResult<HashMap<String, i64>>;
+	) -> CoreResult<HashMap<String, i64>>;
 }
 
 #[async_trait::async_trait]
 impl PrismaClientTrait for PrismaClient {
-	async fn media_count(&self) -> ApiResult<i64> {
+	async fn media_count(&self) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM media"))
 			.exec()
@@ -47,7 +41,7 @@ impl PrismaClientTrait for PrismaClient {
 		})
 	}
 
-	async fn media_in_series_count(&self, series_id: String) -> ApiResult<i64> {
+	async fn media_in_series_count(&self, series_id: String) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!(
 				"SELECT COUNT(*) as count FROM media WHERE series_id={}",
@@ -62,7 +56,7 @@ impl PrismaClientTrait for PrismaClient {
 		})
 	}
 
-	async fn series_count_all(&self) -> ApiResult<i64> {
+	async fn series_count_all(&self) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM series"))
 			.exec()
@@ -74,7 +68,7 @@ impl PrismaClientTrait for PrismaClient {
 		})
 	}
 
-	async fn series_count(&self, library_id: String) -> ApiResult<i64> {
+	async fn series_count(&self, library_id: String) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!(
 				"SELECT COUNT(*) as count FROM series WHERE library_id={}",
@@ -94,7 +88,7 @@ impl PrismaClientTrait for PrismaClient {
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> ApiResult<HashMap<String, i64>> {
+	) -> CoreResult<HashMap<String, i64>> {
 		let count_res: Vec<SeriesMediaCountQueryReturn> = self
 		._query_raw(raw!(format!("SELECT DISTINCT series_id as series_id, COUNT(*) as count FROM media WHERE series_id in ({}) GROUP BY series_id",
 		series_ids
@@ -111,28 +105,28 @@ impl PrismaClientTrait for PrismaClient {
 	}
 }
 
-pub trait FindManyTrait {
-	fn paginated(self, page_params: PageParams) -> Self;
-}
+// pub trait FindManyTrait {
+// 	fn paginated(self, page_params: PageParams) -> Self;
+// }
 
-impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
-	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
-where
-	Where: Into<SerializedWhere>,
-	With: Into<Selection>,
-	OrderBy: Into<(String, PrismaValue)>,
-	Cursor: Into<Where>,
-	Set: Into<(String, PrismaValue)>,
-	Data: DeserializeOwned,
-{
-	fn paginated(self, page_params: PageParams) -> Self {
-		let skip = match page_params.zero_based {
-			true => page_params.page * page_params.page_size,
-			false => (page_params.page - 1) * page_params.page_size,
-		} as i64;
+// impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
+// 	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
+// where
+// 	Where: Into<SerializedWhere>,
+// 	With: Into<Selection>,
+// 	OrderBy: Into<(String, PrismaValue)>,
+// 	Cursor: Into<Where>,
+// 	Set: Into<(String, PrismaValue)>,
+// 	Data: DeserializeOwned,
+// {
+// 	fn paginated(self, page_params: PageParams) -> Self {
+// 		let skip = match page_params.zero_based {
+// 			true => page_params.page * page_params.page_size,
+// 			false => (page_params.page - 1) * page_params.page_size,
+// 		} as i64;
 
-		let take = page_params.page_size as i64;
+// 		let take = page_params.page_size as i64;
 
-		self.skip(skip).take(take)
-	}
-}
+// 		self.skip(skip).take(take)
+// 	}
+// }

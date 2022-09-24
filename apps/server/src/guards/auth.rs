@@ -5,14 +5,11 @@ use rocket::{
 
 use rocket_okapi::OpenApiFromRequest;
 
+use stump_core::prisma::{self, user};
+
 use crate::{
-	prisma::{self, user},
-	types::{
-		alias::{Ctx, Session},
-		errors::AuthError,
-		models::user::AuthenticatedUser,
-	},
-	utils::{self},
+	types::{auth::AuthenticatedUser, errors::AuthError, Ctx, Session},
+	utils,
 };
 
 #[derive(OpenApiFromRequest)]

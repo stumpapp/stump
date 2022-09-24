@@ -4,14 +4,13 @@ use rocket::{http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 
 use crate::{
-	fs::epub,
 	guards::auth::Auth,
+	types::{errors::ApiError, ApiResult, Ctx},
+};
+use stump_core::{
+	fs::epub,
 	prisma::{media, read_progress},
-	types::{
-		alias::{ApiResult, Ctx},
-		errors::ApiError,
-		models::epub::Epub,
-	},
+	types::epub::Epub,
 };
 
 /// Get an Epub by ID. The `read_progress` relation is loaded.

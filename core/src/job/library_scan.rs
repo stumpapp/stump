@@ -4,7 +4,7 @@ use crate::{
 	config::context::Ctx,
 	fs::scanner::library::scan_batch,
 	fs::scanner::library::scan_sync,
-	types::{errors::ApiError, models::library::LibraryScanMode},
+	types::{models::library::LibraryScanMode, CoreResult},
 };
 
 #[derive(Debug)]
@@ -23,7 +23,7 @@ impl Job for LibraryScanJob {
 		Some(Box::new(self.path.as_str()))
 	}
 
-	async fn run(&self, runner_id: String, ctx: Ctx) -> Result<(), ApiError> {
+	async fn run(&self, runner_id: String, ctx: Ctx) -> CoreResult<()> {
 		let start = std::time::Instant::now();
 		let completed_tasks = match self.scan_mode {
 			LibraryScanMode::Sync => scan_sync(ctx.get_ctx(), self.path.clone(), runner_id.clone()).await?,
@@ -61,7 +61,7 @@ impl Job for AllLibrariesScanJob {
 		todo!()
 	}
 
-	async fn run(&self, _runner_id: String, _ctx: Ctx) -> Result<(), ApiError> {
+	async fn run(&self, _runner_id: String, _ctx: Ctx) -> CoreResult<()> {
 		todo!()
 	}
 }

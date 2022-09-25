@@ -19,7 +19,7 @@
 </p>
 
 <p align='center'>
-Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/SergioBenitez/Rocket'>Rocket</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and React.
+Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/SergioBenitez/Rocket'>Rocket</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and <a href='https://reactjs.org/'>React</a>.
 </p>
 
 <p align='center'>
@@ -39,15 +39,15 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [/common](#common)
   - [/core](#core)
 - [Similar Projects 👯](#similar-projects-)
-- [License 🔑](#license-)
-  </p>
-</details>
+- [Acknowledgements 🙏](#acknowledgements-)
+    </p>
+  </details>
 
 > **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please see the [contributing guide](https://www.stumpapp.dev/contributing) for more information on how you can help. Otherwise, stay tuned for the first release!
 
 ## Roadmap 🗺
 
-Some of these are actually completed(!) already, but the following items are the major targets for Stump's first beta release:
+The following items are the major targets for Stump's first release:
 
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
@@ -60,7 +60,7 @@ Some of these are actually completed(!) already, but the following items are the
 - 🧰 Easily consumable and self-documented REST API, so community tools and scripts can interact with Stump
 - 🌈 And more!
 
-Things you can expect to see after the first beta release:
+Things you can expect to see after the first release:
 
 - 🖥️ Desktop app ([Tauri](https://tauri.app/))
 - 📱 Mobile app ([Tachiyomi](https://github.com/aaronleopold/tachiyomi-extensions) and/or [custom application](https://github.com/aaronleopold/stump/tree/main/apps/mobile))
@@ -87,14 +87,14 @@ A quick summary of the steps required to get going:
 1. Install [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/)
    - If you're running Windows, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
    - If you're running macOS on Apple Silicon, you'll need to install [Rosetta](https://support.apple.com/en-us/HT211861)
-2. Run the setup script (based on your system):
+2. Install [cargo-watch](https://crates.io/crates/cargo-watch)
+3. Run the setup:
 
 ```bash
-.\.github\scripts\setup.ps1 # Windows
-./.github/scripts/setup.sh # Linux/MacOS
+pnpm run setup
 ```
 
-3. Start one of the apps:
+4. Start one of the apps:
 
 ```bash
 pnpm dev:web # Web app
@@ -126,8 +126,9 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 ### /apps
 
 - `docs`: The documentation website, built with Next.js and [Markdoc](https://markdoc.io/), deployed to [stumpapp.dev](http://stumpapp.dev).
-- `web`: The React application that is served by a Stump server.
 - `desktop`: A Tauri application.
+- `server`: A Rocket server.
+- `web`: The React application that is served by the Rocket server.
 
 ### /common
 
@@ -137,11 +138,11 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 
 ### /core
 
-- `core`: Stump's 'core' functionality is located here, written in Rust. Effectively, this is a Rocket server.
+- `core`: Stump's 'core' functionality is located here, written in Rust. The `server` was previously part of the core, but was extracted to support integration testing.
 
 ## Similar Projects 👯
 
-There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there (_heck, it isn't even in beta yet_)! if Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
+There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there. If Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
 
 - [Komga](https://github.com/gotson/komga)
 - [Kavita](https://github.com/Kareadita/Kavita)
@@ -149,6 +150,8 @@ There are a number of other projects that are similar to Stump, it certainly isn
 - [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
 - [tonbun](https://github.com/KPidS/tonbun) (_Reading and downloading manga_) (✨*Rust*✨)
 
-## License 🔑
+## Acknowledgements 🙏
 
-Stump codebase is licensed under an [MIT license](./LICENSE) - (_[tldr;](https://tldrlegal.com/license/mit-license)_). This does **not** apply to Stump's logo, if you would like to use the logo for anything other than a reference to Stump, please [contact me](aaronleopold1221@gmail.com).
+- [Komga](https://github.com/gotson/komga) is a huge inspiration for Stump, an amazing comics/manga media server written in Kotlin.
+- The devs working on [Spacedrive](https://www.spacedrive.com/) are incredible, pushing out amazing things in the OSS community. I learned a lot from their work, which has helped me to build Stump.
+- [Brendonovich](https://github.com/Brendonovich) for building [prisma client rust](https://github.com/Brendonovich/prisma-client-rust), which allows me to use Prisma with Rust. Stump previously used SeaORM, but the DX simply can't compare to Prisma.

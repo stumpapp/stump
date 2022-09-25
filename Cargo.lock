@@ -6069,32 +6069,39 @@ dependencies = [
 ]
 
 [[package]]
-name = "stump"
+name = "stump_cli"
 version = "0.0.0"
 dependencies = [
- "anyhow",
+ "clap",
+ "crossterm",
+ "futures-util",
+ "reqwest",
+ "reqwest-eventsource",
+ "thiserror",
+ "tokio",
+ "tokio-graceful-shutdown",
+ "tui",
+]
+
+[[package]]
+name = "stump_core"
+version = "0.0.0"
+dependencies = [
  "async-trait",
- "base64 0.13.0",
- "bcrypt",
  "cuid 1.2.0",
  "data-encoding",
  "dirs",
  "epub",
  "fern",
- "figment",
  "futures",
  "image",
  "include_dir",
  "infer",
  "log",
- "openssl",
  "prisma-client-rust",
  "rayon",
  "ring",
  "rocket",
- "rocket-session-store",
- "rocket_cors",
- "rocket_okapi",
  "schemars",
  "serde",
  "serde-xml-rs",
@@ -6111,21 +6118,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "stump_cli"
-version = "0.0.0"
-dependencies = [
- "clap",
- "crossterm",
- "futures-util",
- "reqwest",
- "reqwest-eventsource",
- "thiserror",
- "tokio",
- "tokio-graceful-shutdown",
- "tui",
-]
-
-[[package]]
 name = "stump_desktop"
 version = "0.0.0"
 dependencies = [
@@ -6139,6 +6131,22 @@ dependencies = [
 [[package]]
 name = "stump_server"
 version = "0.0.0"
+dependencies = [
+ "base64 0.13.0",
+ "bcrypt",
+ "log",
+ "openssl",
+ "prisma-client-rust",
+ "rocket",
+ "rocket-session-store",
+ "rocket_cors",
+ "rocket_okapi",
+ "schemars",
+ "serde",
+ "specta",
+ "stump_core",
+ "thiserror",
+]
 
 [[package]]
 name = "subprocess"

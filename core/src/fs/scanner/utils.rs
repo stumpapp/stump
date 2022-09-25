@@ -10,11 +10,12 @@ use crate::{
 	prisma::{library, media, series},
 	types::{
 		enums::FileStatus,
-		errors::{ApiError, ScanError},
+		errors::ScanError,
 		models::{
 			library::LibraryOptions,
 			media::{MediaMetadata, TentativeMedia},
 		},
+		CoreResult,
 	},
 };
 
@@ -22,10 +23,7 @@ use super::BatchScanOperation;
 
 /// Will mark all series and media within the library as MISSING. Requires the
 /// series and series.media relations to have been loaded to function properly.
-pub async fn mark_library_missing(
-	library: library::Data,
-	ctx: &Ctx,
-) -> Result<(), ApiError> {
+pub async fn mark_library_missing(library: library::Data, ctx: &Ctx) -> CoreResult<()> {
 	let db = ctx.get_db();
 
 	db._execute_raw(raw!(
@@ -212,7 +210,7 @@ pub async fn insert_series_batch(
 	ctx: &Ctx,
 	entries: Vec<DirEntry>,
 	library_id: String,
-) -> Result<Vec<series::Data>, ApiError> {
+) -> CoreResult<Vec<series::Data>> {
 	let series_creates = entries.into_iter().map(|entry| {
 		let path = entry.path();
 

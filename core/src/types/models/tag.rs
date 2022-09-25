@@ -1,4 +1,4 @@
-use rocket_okapi::JsonSchema;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 

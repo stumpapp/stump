@@ -1,4 +1,3 @@
-use anyhow::Result;
 use data_encoding::HEXLOWER;
 use ring::digest::{Context, SHA256};
 use rocket::tokio::{
@@ -13,6 +12,8 @@ use std::os::unix::prelude::FileExt;
 
 #[cfg(target_family = "windows")]
 use std::os::windows::prelude::*;
+
+use crate::CoreError;
 
 pub const DIGEST_SAMPLE_SIZE: u64 = 10000;
 pub const DIGEST_SAMPLE_COUNT: u64 = 4;
@@ -108,7 +109,7 @@ pub fn digest(path: &str, bytes: u64) -> Result<String, io::Error> {
 	Ok(encoded_digest)
 }
 
-pub fn digest_from_reader<R: Read>(mut reader: R) -> Result<String> {
+pub fn digest_from_reader<R: Read>(mut reader: R) -> Result<String, CoreError> {
 	let mut ring_context = Context::new(&SHA256);
 
 	let mut buffer = [0; 1024];

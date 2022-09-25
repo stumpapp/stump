@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
-use rocket_okapi::JsonSchema;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 

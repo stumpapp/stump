@@ -1,5 +1,6 @@
-use anyhow::Result;
 use xml::EventWriter;
+
+use crate::types::CoreResult;
 
 use super::util;
 
@@ -16,7 +17,7 @@ impl StumpAuthor {
 		}
 	}
 
-	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> Result<()> {
+	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> CoreResult<()> {
 		writer.write(xml::writer::XmlEvent::start_element("author"))?;
 		util::write_xml_element("name", &self.name, writer)?;
 

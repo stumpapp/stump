@@ -2,9 +2,7 @@ use rocket::http::ContentType;
 use std::{path::Path, str::FromStr};
 
 use crate::types::{
-	alias::ProcessFileResult,
 	errors::ProcessFileError,
-	http,
 	models::{
 		library::LibraryOptions,
 		media::{MediaMetadata, ProcessedMediaFile},
@@ -144,7 +142,10 @@ pub fn infer_mime_from_path(path: &Path) -> Option<String> {
 	}
 }
 
-pub fn get_page(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
+pub fn get_page(
+	file: &str,
+	page: i32,
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mime = guess_mime(Path::new(file));
 
 	match mime.as_deref() {
@@ -172,7 +173,7 @@ pub fn get_page(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse>
 pub fn process(
 	path: &Path,
 	options: &LibraryOptions,
-) -> ProcessFileResult<ProcessedMediaFile> {
+) -> Result<ProcessedMediaFile, ProcessFileError> {
 	log::debug!("Processing entry {:?} with options: {:?}", path, options);
 
 	let mime = infer_mime_from_path(path);

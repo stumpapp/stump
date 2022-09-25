@@ -1,4 +1,5 @@
-import { PageInfo, Media, Series, Library, ApiError } from './generated';
+import { PageInfo, Media, Series, Library } from './generated';
+import { ApiError } from './server';
 
 export type ApiResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<ApiError>>;
 
@@ -66,3 +67,4 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 };
 
 export * from './generated';
+export * from './server';

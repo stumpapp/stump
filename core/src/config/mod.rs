@@ -1,11 +1,13 @@
 use std::path::{Path, PathBuf};
 
-pub mod context;
-pub mod cors;
+pub(crate) mod context;
+// pub mod cors;
 pub mod env;
-pub mod helmet;
+// pub mod helmet;
 pub mod logging;
-pub mod session;
+// pub mod session;
+
+pub use context::Ctx;
 
 // TODO: look into this
 // https://api.rocket.rs/v0.5-rc/rocket/struct.Config.html#method.figment

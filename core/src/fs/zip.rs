@@ -1,11 +1,9 @@
 use crate::{
 	fs::media_file::{self, IsImage},
-	types::{
-		alias::ProcessFileResult, errors::ProcessFileError, http,
-		models::media::ProcessedMediaFile,
-	},
+	types::{errors::ProcessFileError, models::media::ProcessedMediaFile},
 };
 
+use rocket::http::ContentType;
 use std::{
 	fs::File,
 	io::{Read, Write},
@@ -150,7 +148,7 @@ pub fn digest_zip(path: &str) -> Option<String> {
 /// Processes a zip file in its entirety, includes: medatadata, page count, and the
 /// generated checksum for the file.
 // TODO: do I need to pass in the library options here?
-pub fn process_zip(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
+pub fn process_zip(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	info!("Processing Zip: {}", path.display());
 
 	let zip_file = File::open(path)?;
@@ -184,7 +182,10 @@ pub fn process_zip(path: &Path) -> ProcessFileResult<ProcessedMediaFile> {
 // FIXME: this solution is terrible, was just fighting with borrow checker and wanted
 // a quick solve. TODO: rework this!
 /// Get an image from a zip file by index (page).
-pub fn get_zip_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
+pub fn get_zip_image(
+	file: &str,
+	page: i32,
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let zip_file = File::open(file)?;
 
 	let mut archive = zip::ZipArchive::new(&zip_file)?;
@@ -226,92 +227,4 @@ pub fn get_zip_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResp
 	);
 
 	Err(ProcessFileError::NoImageError)
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	use crate::{config::context::Ctx, prisma::media, types::errors::ApiError};
-
-	use rocket::tokio;
-
-	#[tokio::test]
-	async fn digest_zips_asynchronous() -> Result<(), ApiError> {
-		let ctx = Ctx::mock().await;
-
-		let zips = ctx
-			.db
-			.media()
-			.find_many(vec![media::extension::in_vec(vec![
-				"zip".to_string(),
-				"cbz".to_string(),
-			])])
-			.exec()
-			.await?;
-
-		if zips.len() == 0 {
-			println!("Warning: could not run digest_zips_asynchronous test, please insert RAR files in the mock database...");
-			return Ok(());
-		}
-
-		for zip in zips {
-			let zip_sample = zip_sample(&zip.path);
-
-			let checksum = match checksum::digest_async(&zip.path, zip_sample).await {
-				Ok(digest) => {
-					println!("Generated checksum (async): {:?}", digest);
-
-					Some(digest)
-				},
-				Err(e) => {
-					println!("Failed to digest zip: {}", e);
-					None
-				},
-			};
-
-			assert!(checksum.is_some());
-		}
-
-		Ok(())
-	}
-
-	#[tokio::test]
-	async fn digest_zips_synchronous() -> Result<(), ApiError> {
-		let ctx = Ctx::mock().await;
-
-		let zips = ctx
-			.db
-			.media()
-			.find_many(vec![media::extension::in_vec(vec![
-				"zip".to_string(),
-				"cbz".to_string(),
-			])])
-			.exec()
-			.await?;
-
-		if zips.len() == 0 {
-			println!("Warning: could not run digest_zips_synchronous test, please insert RAR files in the mock database...");
-			return Ok(());
-		}
-
-		for zip in zips {
-			let zip_sample = zip_sample(&zip.path);
-
-			let checksum = match checksum::digest(&zip.path, zip_sample) {
-				Ok(digest) => {
-					println!("Generated checksum: {:?}", digest);
-					Some(digest)
-				},
-				Err(e) => {
-					println!("Failed to digest zip: {}", e);
-					None
-				},
-			};
-
-			assert!(checksum.is_some());
-		}
-
-		Ok(())
-	}
 }

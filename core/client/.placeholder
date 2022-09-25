@@ -1,1 +1,0 @@
-This is here so Stump core doesn't throw an error during development if you forget to build the frontend and move the bundle to 'core/client'

@@ -9,20 +9,20 @@
 		"setup": "pnpm i && pnpm web build && pnpm core run setup",
 		"checks": "pnpm -r check",
 		"tests": "pnpm -r test",
-		"start:web": "pnpm core start",
-		"dev:server": "pnpm server dev",
-		"dev:web": "concurrently -n core,web -c green.bold,blue.bold \"pnpm core dev\" \"pnpm web dev\"",
-		"dev:desktop": "concurrently -n core,desktop -c green.bold,blue.bold \"pnpm core dev\" \"pnpm desktop dev\"",
+		"start:web": "pnpm run server start",
+		"dev:server": "cargo watch -x 'run --manifest-path=apps/server/Cargo.toml --package stump_server'",
+		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"pnpm dev:server\" \"pnpm web dev\"",
+		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm desktop dev\"",
 		"core": "pnpm --filter @stump/core --",
 		"prisma": "pnpm core prisma",
-		"codegen": "pnpm core codegen",
+		"codegen": "pnpm -r codegen",
 		"web": "pnpm --filter @stump/web --",
 		"server": "pnpm --filter @stump/server --",
 		"desktop": "pnpm --filter @stump/desktop --",
 		"docs": "pnpm --filter @stump/docs --",
 		"interface": "pnpm --filter @stump/interface --",
 		"client": "pnpm --filter @stump/client --",
-		"build:web": "pnpm web build && pnpm core build",
+		"build:web": "pnpm web build && pnpm run server build",
 		"build:desktop": "pnpm desktop build",
 		"build:docker": "docker buildx build --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
 		"cache:docker-arm": "docker buildx build --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
@@ -42,7 +42,9 @@
 			"prettier --write"
 		],
 		".rs": [
-			"cargo fmt --manifest-path=core/Cargo.toml --"
+			"cargo fmt --manifest-path=core/Cargo.toml --",
+			"cargo fmt --manifest-path=apps/server/Cargo.toml --",
+			"cargo fmt --manifest-path=apps/desktop/Cargo.toml --"
 		]
 	}
 }

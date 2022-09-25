@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs::File, path::PathBuf};
 
 use epub::doc::{EpubDoc, NavPoint};
-use rocket_okapi::JsonSchema;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 

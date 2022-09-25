@@ -6,7 +6,7 @@ use std::{
 use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
 
-use crate::{config::context::Ctx, types::alias::ApiResult};
+use crate::{config::context::Ctx, types::CoreResult};
 
 use super::{runner::Runner, Job, JobReport};
 
@@ -97,6 +97,10 @@ impl JobPool {
 		let mut job_runners = self.job_runners.write().await;
 
 		if job_runners.is_empty() {
+			// wait 500 ms before starting the job, otherwise the client gets overloaded with the derendering of UI elements
+			// while receiving an enormous amount of data from the core
+			tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
 			let runner = Runner::new(ctx, job).await;
 			let runner_id = runner.id.clone();
 
@@ -134,7 +138,7 @@ impl JobPool {
 
 	/// Returns a vector of JobReport for all persisted jobs, and appends the JobReports
 	/// for jobs in the job queue.
-	pub async fn report(self: Arc<Self>, ctx: &Ctx) -> ApiResult<Vec<JobReport>> {
+	pub async fn report(self: Arc<Self>, ctx: &Ctx) -> CoreResult<Vec<JobReport>> {
 		let db = ctx.get_db();
 
 		let mut jobs = db

@@ -10,9 +10,7 @@ use crate::{
 		media_file::{self, IsImage},
 	},
 	types::{
-		alias::ProcessFileResult,
 		errors::ProcessFileError,
-		http,
 		models::{library::LibraryOptions, media::ProcessedMediaFile},
 	},
 };
@@ -97,7 +95,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 pub fn process_rar(
 	path: &Path,
 	options: &LibraryOptions,
-) -> ProcessFileResult<ProcessedMediaFile> {
+) -> Result<ProcessedMediaFile, ProcessFileError> {
 	if options.convert_rar_to_zip {
 		let new_path = convert_rar_to_zip(path)?;
 
@@ -245,7 +243,10 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // OpenArchive handle stored in Entry is no more. That's why I create another archive to grab what I want before
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-pub fn get_rar_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResponse> {
+pub fn get_rar_image(
+	file: &str,
+	page: i32,
+) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	if stump_in_docker() {
 		return Err(ProcessFileError::UnsupportedFileType(
 			"Stump cannot support cbr/rar files in docker containers for now.".into(),
@@ -310,110 +311,4 @@ pub fn get_rar_image(file: &str, page: i32) -> ProcessFileResult<http::ImageResp
 	// }
 
 	// Err(ProcessFileError::RarReadError)
-}
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	use crate::{config::context::Ctx, prisma::media, types::errors::ApiError};
-
-	use rocket::tokio;
-
-	#[test]
-	fn test_rar_to_zip() {
-		let test_file =
-			"/Users/aaronleopold/Documents/Stump/Demo/Venom/Venom 001 (2022).cbr";
-
-		let path = Path::new(test_file);
-
-		let result = super::convert_rar_to_zip(path);
-
-		// assert!(result.is_ok());
-
-		let zip_path = result.unwrap();
-
-		// assert!(zip_path.exists());
-
-		println!("{:?}", zip_path);
-	}
-
-	#[tokio::test]
-	async fn digest_rars_asynchronous() -> Result<(), ApiError> {
-		let ctx = Ctx::mock().await;
-
-		let rars = ctx
-			.db
-			.media()
-			.find_many(vec![media::extension::in_vec(vec![
-				"rar".to_string(),
-				"cbr".to_string(),
-			])])
-			.exec()
-			.await?;
-
-		if rars.len() == 0 {
-			println!("Warning: could not run digest_rars_asynchronous test, please insert RAR files in the mock database...");
-			return Ok(());
-		}
-
-		for rar in rars {
-			let rar_sample = rar_sample(&rar.path).unwrap();
-
-			let checksum = match checksum::digest_async(&rar.path, rar_sample).await {
-				Ok(digest) => {
-					println!("Generated checksum (async): {:?}", digest);
-
-					Some(digest)
-				},
-				Err(e) => {
-					println!("Failed to digest rar: {}", e);
-					None
-				},
-			};
-
-			assert!(checksum.is_some());
-		}
-
-		Ok(())
-	}
-
-	#[tokio::test]
-	async fn digest_rars_synchronous() -> Result<(), ApiError> {
-		let ctx = Ctx::mock().await;
-
-		let rars = ctx
-			.db
-			.media()
-			.find_many(vec![media::extension::in_vec(vec![
-				"rar".to_string(),
-				"cbr".to_string(),
-			])])
-			.exec()
-			.await?;
-
-		if rars.len() == 0 {
-			println!("Warning: could not run digest_rars_synchronous test, please insert RAR files in the mock database...");
-			return Ok(());
-		}
-
-		for rar in rars {
-			let rar_sample = rar_sample(&rar.path).unwrap();
-
-			let checksum = match checksum::digest(&rar.path, rar_sample) {
-				Ok(digest) => {
-					println!("Generated checksum: {:?}", digest);
-					Some(digest)
-				},
-				Err(e) => {
-					println!("Failed to digest rar: {}", e);
-					None
-				},
-			};
-
-			assert!(checksum.is_some());
-		}
-
-		Ok(())
-	}
 }

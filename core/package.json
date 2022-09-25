@@ -6,19 +6,13 @@
   "license": "MIT",
   "scripts": {
     "prisma": "cargo prisma",
-    "setup": "cargo prisma generate && pnpm get-client",
+    "setup": "cargo prisma generate",
     "check": "cargo check",
-    "start": "cargo run --release",
-    "dev": "cargo watch -x run",
-    "build": "pnpm get-client && cargo build --release && pnpm move-client && pnpm move-rocket",
-    "get-client": "trash \"client/*\" \"!client/.placeholder\" && cpy \"../apps/web/dist/**/*\" ./client/",
-    "move-client": "trash ../target/release/client && cp -r ./client ../target/release/client",
-    "move-rocket": "trash ../target/release/Rocket.toml && cp ./Rocket.toml ../target/release/Rocket.toml",
+    "build": "cargo build --release",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
-    "benchmarks": "cargo test --benches",
-    "typegen": "cargo test --package stump --bin stump -- types::tests --nocapture",
-    "codegen": "pnpm prisma generate && cargo test --package stump --bin stump -- types::tests --nocapture",
-    "test": "cargo test"
+    "typegen": "cargo test --package stump_core --lib -- types::tests::codegen --ignored",
+    "codegen": "pnpm prisma generate && pnpm typegen",
+    "integration-tests": "cargo test --package stump_core -- --test-threads=1"
   },
   "devDependencies": {
     "@types/node": "^17.0.45",

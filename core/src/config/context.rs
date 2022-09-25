@@ -35,7 +35,7 @@ impl Ctx {
 
 	pub async fn mock() -> Ctx {
 		Ctx {
-			db: Arc::new(db::create_client().await),
+			db: Arc::new(db::create_test_client().await),
 			internal_sender: Arc::new(unbounded_channel::<InternalCoreTask>().0),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}

@@ -64,6 +64,11 @@ module.exports = function (app) {
 				},
 			},
 		},
+		variants: {
+			extend: {
+				backgroundImage: ['dark'],
+			},
+		},
 		// @ts-ignore: consumer needs to install these deps
 		plugins: [require('tailwind-scrollbar-hide'), require('@tailwindcss/typography')],
 	};

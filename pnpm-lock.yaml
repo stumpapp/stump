@@ -129,6 +129,9 @@ importers:
   apps/mobile:
     specifiers: {}
 
+  apps/server:
+    specifiers: {}
+
   apps/tui:
     specifiers: {}
 

@@ -1,5 +1,6 @@
-use anyhow::Result;
 use xml::{writer::XmlEvent, EventWriter};
+
+use crate::types::CoreResult;
 
 use super::util::OpdsEnumStr;
 
@@ -83,7 +84,7 @@ impl OpdsLink {
 		}
 	}
 
-	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> Result<()> {
+	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> CoreResult<()> {
 		let link = XmlEvent::start_element("link")
 			.attr("type", self.link_type.as_str())
 			.attr("rel", self.rel.as_str())
@@ -120,7 +121,7 @@ impl OpdsStreamLink {
 		}
 	}
 
-	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> Result<()> {
+	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> CoreResult<()> {
 		let href = format!(
 			"/opds/v1.2/books/{}/pages/{{pageNumber}}?zero_based=true",
 			self.book_id

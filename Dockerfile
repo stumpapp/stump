@@ -32,13 +32,13 @@ FROM messense/rust-musl-cross:aarch64-musl AS arm64-backend
 WORKDIR /app
 
 COPY .cargo .cargo
-COPY core/ .
+COPY . .
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add aarch64-unknown-linux-musl
 
-RUN cargo build --release --target aarch64-unknown-linux-musl && \
+RUN cargo build --package stump_server --bin stump_server --release --target aarch64-unknown-linux-musl && \
     cp target/aarch64-unknown-linux-musl/release/stump .
 
 ######################
@@ -52,13 +52,13 @@ FROM messense/rust-musl-cross:armv7-musleabihf@sha256:3e133558686fd5059ce25749ce
 WORKDIR /app
 
 COPY .cargo .cargo
-COPY core/ .
+COPY . .
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add armv7-unknown-linux-musleabihf
 
-RUN cargo build --release --target armv7-unknown-linux-musleabihf && \
+RUN cargo build --package stump_server --bin stump_server --release --target armv7-unknown-linux-musleabihf && \
     cp target/armv7-unknown-linux-musleabihf/release/stump .
 
 ######################
@@ -72,12 +72,12 @@ WORKDIR /app
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 COPY .cargo .cargo
-COPY core/ .
+COPY . .
 
-RUN rustup target add x86_64-unknown-linux-musl
+RUN rustup update && rustup target add x86_64-unknown-linux-musl
 
-RUN cargo build --release --target x86_64-unknown-linux-musl && \
-    cp target/x86_64-unknown-linux-musl/release/stump .
+RUN cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl && \
+    cp target/x86_64-unknown-linux-musl/release/stump_server ./stump
 
 ######################
 ## Conditional step ##
@@ -120,7 +120,7 @@ COPY --chown=stump:stump --from=core-builder /app/stump ./app/stump
 COPY --from=frontend /app/build ./app/client
 
 # *sigh* Rocket requires the toml file at runtime, at CWD
-COPY core/Rocket.toml ./app/Rocket.toml
+COPY apps/server/Rocket.toml ./app/Rocket.toml
 
 # TODO: replace this with something more elegant lol maybe a bash case statement
 RUN ln -s /lib/ld-musl-aarch64.so.1 /lib/ld-linux-aarch64.so.1; exit 0

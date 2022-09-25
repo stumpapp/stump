@@ -17,7 +17,7 @@ You have two options for spinning up a container based on your preference. I pre
 sudo chown -r $USER ~/.stump
 ```
 
-### Docker Run CLI
+### Using docker run
 
 Once the image is created, you can create a container from it:
 
@@ -46,7 +46,7 @@ Then you can start the container:
 docker start stump
 ```
 
-#### Properties / Configuration
+#### Properties and configuration
 
 | Parameter          |                                Functionality                                |
 | ------------------ | :-------------------------------------------------------------------------: |
@@ -54,7 +54,7 @@ docker start stump
 | `--user=1000:1000` |    Sets the user and group used within the container (leave this as is)     |
 | `-p 10801:10801`   | Maps the port on your machine (left) to the port the container uses (right) |
 
-### Docker Compose
+### Using docker compose
 
 {% callout title="docker compose vs docker-compose" icon="note" %}
 This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for you, you might be on V1, which uses `docker-compose`. Please review [Docker's documentation](https://docs.docker.com/compose/install/) for more information and/or platform-specific installation.
@@ -95,7 +95,7 @@ docker logs -f stump
 
 As with starting Stump, updating your container is slightly different depending on how you chose to run it.
 
-### Docker Run CLI
+### Update using docker CLI
 
 1. Update the image: `docker pull aaronleopold/stump-preview`
 2. Stop the running container: docker stop komga
@@ -105,14 +105,8 @@ As with starting Stump, updating your container is slightly different depending 
 
 To remove the old dangling images you have installed: `docker image prune`
 
-### Docker Compose
+### Update using docker compose
 
 1. Stop the running container: `docker compose down`
 2. Update the image: `docker compose pull` or `docker compose pull aaronleopold/stump-preview`
 3. Start the container again: `docker-compose up`
-
-## Example Configurations
-
-> TODO
-
-To get you started, I wrote how-to guides for a few different Docker configurations. You can find them [here](/guides/docker-examples).

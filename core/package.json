@@ -10,9 +10,8 @@
     "check": "cargo check",
     "build": "cargo build --release",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
-    "benchmarks": "cargo test --benches",
-    "typegen": "cargo test --package stump --bin stump -- types::tests --nocapture",
-    "codegen": "pnpm prisma generate && cargo test --package stump --bin stump -- types::tests --nocapture",
+    "typegen": "cargo test --package stump_core --lib -- types::tests::codegen --ignored",
+    "codegen": "pnpm prisma generate && pnpm typegen",
     "integration-tests": "cargo test --package stump_core -- --test-threads=1"
   },
   "devDependencies": {

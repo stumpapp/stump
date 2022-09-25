@@ -15,6 +15,9 @@ use rocket::tokio;
 // TODO: fix these tests...
 
 #[test]
+// TODO: don't ignore, need to figure out best way to do this... something like the
+// tempfile crate maybe?
+#[ignore]
 fn test_rar_to_zip() {
 	let test_file = "/Users/aaronleopold/Documents/Stump/Demo/Venom/Venom 001 (2022).cbr";
 
@@ -45,27 +48,27 @@ async fn digest_rars_asynchronous() -> CoreResult<()> {
 		.exec()
 		.await?;
 
+	// TODO: uncomment once I create rar test data
+	// assert_ne!(rars.len(), 0);
+
+	// TODO: remove this check once I create rar test data
 	if rars.len() == 0 {
-		println!("Warning: could not run digest_rars_asynchronous test, please insert RAR files in the mock database...");
+		println!("STINKY: could not run digest_rars_asynchronous test until aaron fixes his stuff");
 		return Ok(());
 	}
 
 	for rar in rars {
-		let rar_sample = rar_sample(&rar.path).unwrap();
+		let rar_sample_result = rar_sample(&rar.path);
 
-		let checksum = match checksum::digest_async(&rar.path, rar_sample).await {
-			Ok(digest) => {
-				println!("Generated checksum (async): {:?}", digest);
+		assert!(rar_sample_result.is_ok());
 
-				Some(digest)
-			},
-			Err(e) => {
-				println!("Failed to digest rar: {}", e);
-				None
-			},
-		};
+		let rar_sample = rar_sample_result.unwrap();
 
-		assert!(checksum.is_some());
+		let digest_result = checksum::digest_async(&rar.path, rar_sample).await;
+		assert!(digest_result.is_ok());
+
+		let checksum = digest_result.unwrap();
+		assert_ne!(checksum.len(), 0);
 	}
 
 	Ok(())
@@ -85,26 +88,26 @@ async fn digest_rars_synchronous() -> CoreResult<()> {
 		.exec()
 		.await?;
 
+	// TODO: uncomment once I create rar test data
+	// assert_ne!(rars.len(), 0);
+
+	// TODO: remove this check once I create rar test data
 	if rars.len() == 0 {
-		println!("Warning: could not run digest_rars_synchronous test, please insert RAR files in the mock database...");
+		println!("STINKY: could not run digest_rars_synchronous test until aaron fixes his stuff");
 		return Ok(());
 	}
 
 	for rar in rars {
-		let rar_sample = rar_sample(&rar.path).unwrap();
+		let rar_sample_result = rar_sample(&rar.path);
+		assert!(rar_sample_result.is_ok());
 
-		let checksum = match checksum::digest(&rar.path, rar_sample) {
-			Ok(digest) => {
-				println!("Generated checksum: {:?}", digest);
-				Some(digest)
-			},
-			Err(e) => {
-				println!("Failed to digest rar: {}", e);
-				None
-			},
-		};
+		let rar_sample = rar_sample_result.unwrap();
 
-		assert!(checksum.is_some());
+		let digest_result = checksum::digest(&rar.path, rar_sample);
+		assert!(digest_result.is_ok());
+
+		let checksum = digest_result.unwrap();
+		assert_ne!(checksum.len(), 0);
 	}
 
 	Ok(())

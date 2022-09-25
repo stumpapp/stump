@@ -6,6 +6,8 @@ use tokio::sync::mpsc::UnboundedSender;
 
 use super::TuiEvent;
 
+// TODO: remove this
+#[allow(unused)]
 pub struct SSEHandler {
 	base_url: String,
 	internal_sender: UnboundedSender<TuiEvent>,

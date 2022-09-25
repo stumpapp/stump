@@ -23,27 +23,16 @@ async fn digest_zips_asynchronous() -> CoreResult<()> {
 		.exec()
 		.await?;
 
-	if zips.len() == 0 {
-		println!("Warning: could not run digest_zips_asynchronous test, please insert RAR files in the mock database...");
-		return Ok(());
-	}
+	assert_ne!(zips.len(), 0);
 
 	for zip in zips {
 		let zip_sample = zip_sample(&zip.path);
 
-		let checksum = match checksum::digest_async(&zip.path, zip_sample).await {
-			Ok(digest) => {
-				println!("Generated checksum (async): {:?}", digest);
+		let digest_result = checksum::digest_async(&zip.path, zip_sample).await;
+		assert!(digest_result.is_ok());
 
-				Some(digest)
-			},
-			Err(e) => {
-				println!("Failed to digest zip: {}", e);
-				None
-			},
-		};
-
-		assert!(checksum.is_some());
+		let checksum = digest_result.unwrap();
+		assert_ne!(checksum.len(), 0);
 	}
 
 	Ok(())
@@ -63,26 +52,16 @@ async fn digest_zips_synchronous() -> CoreResult<()> {
 		.exec()
 		.await?;
 
-	if zips.len() == 0 {
-		println!("Warning: could not run digest_zips_synchronous test, please insert RAR files in the mock database...");
-		return Ok(());
-	}
+	assert_ne!(zips.len(), 0);
 
 	for zip in zips {
 		let zip_sample = zip_sample(&zip.path);
 
-		let checksum = match checksum::digest(&zip.path, zip_sample) {
-			Ok(digest) => {
-				println!("Generated checksum: {:?}", digest);
-				Some(digest)
-			},
-			Err(e) => {
-				println!("Failed to digest zip: {}", e);
-				None
-			},
-		};
+		let digest_result = checksum::digest(&zip.path, zip_sample);
+		assert!(digest_result.is_ok());
 
-		assert!(checksum.is_some());
+		let checksum = digest_result.unwrap();
+		assert_ne!(checksum.len(), 0);
 	}
 
 	Ok(())

@@ -30,6 +30,7 @@ mod tests {
 	};
 
 	#[test]
+	#[ignore]
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let mut file = File::create(
 			PathBuf::from(env!("CARGO_MANIFEST_DIR"))

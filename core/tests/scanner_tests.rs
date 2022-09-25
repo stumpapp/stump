@@ -11,9 +11,7 @@ use stump_core::{
 
 #[tokio::test]
 async fn series_based_library_batch_scan() {
-	println!("Starting series_based_library_batch_scan test");
 	initialize();
-	println!("Initialized test context");
 
 	let test_ctx = Ctx::mock().await;
 
@@ -93,13 +91,11 @@ async fn series_based_library_batch_scan() {
 	);
 
 	let library = library.unwrap();
-
 	assert!(library.is_some(), "Library not found");
 
 	let library = library.unwrap();
 
 	let library_series = library.series;
-
 	assert_eq!(library_series.len(), 3);
 
 	let library_media = library_series

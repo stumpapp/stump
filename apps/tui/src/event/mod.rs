@@ -5,6 +5,8 @@ pub enum CliEvent {
 	GracefulShutdown(Option<String>),
 }
 
+// TODO: remove this
+#[allow(unused)]
 pub enum TuiEvent {
 	RerenderScreen,
 	GracefulShutdown(Option<String>),

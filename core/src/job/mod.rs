@@ -1,6 +1,8 @@
-pub mod library_scan;
+pub mod jobs;
 pub mod pool;
 pub mod runner;
+
+pub use jobs::*;
 
 use std::{fmt::Debug, num::TryFromIntError};
 
@@ -80,7 +82,7 @@ pub struct JobReport {
 	task_count: Option<i32>,
 	/// The total number of tasks completed (i.e. without error/failure)
 	completed_task_count: Option<i32>,
-	/// The time (in seconds) to complete the job
+	/// The time (in milliseconds) to complete the job
 	ms_elapsed: Option<u64>,
 	/// The datetime stamp of when the job completed
 	completed_at: Option<String>,

@@ -5,9 +5,9 @@ use rocket::serde::json::Json;
 use rocket_okapi::openapi;
 
 use stump_core::{
-	db::utils::PrismaClientTrait,
+	db::utils::PrismaCountTrait,
 	fs::{image, media_file},
-	job::library_scan::LibraryScanJob,
+	job::LibraryScanJob,
 	prisma::{
 		library, library_options, media,
 		series::{self, OrderByParam},

@@ -2,6 +2,7 @@
 name = "stump_server"
 version.workspace = true
 edition = "2021"
+default-run = "stump_server"
 
 [dependencies]
 stump_core = { path = "../../core" }

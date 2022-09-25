@@ -16,7 +16,7 @@ pub struct SeriesMediaCountQueryReturn {
 // TODO: Replace pretty much all of these once prisma client 0.6 comes out... Count queries and
 // relation counting is expected in that release.
 #[async_trait::async_trait]
-pub trait PrismaClientTrait {
+pub trait PrismaCountTrait {
 	async fn media_count(&self) -> CoreResult<i64>;
 	async fn media_in_series_count(&self, series_id: String) -> CoreResult<i64>;
 	async fn series_count_all(&self) -> CoreResult<i64>;
@@ -28,7 +28,7 @@ pub trait PrismaClientTrait {
 }
 
 #[async_trait::async_trait]
-impl PrismaClientTrait for PrismaClient {
+impl PrismaCountTrait for PrismaClient {
 	async fn media_count(&self) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM media"))
@@ -104,29 +104,3 @@ impl PrismaClientTrait for PrismaClient {
 			.collect())
 	}
 }
-
-// pub trait FindManyTrait {
-// 	fn paginated(self, page_params: PageParams) -> Self;
-// }
-
-// impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
-// 	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
-// where
-// 	Where: Into<SerializedWhere>,
-// 	With: Into<Selection>,
-// 	OrderBy: Into<(String, PrismaValue)>,
-// 	Cursor: Into<Where>,
-// 	Set: Into<(String, PrismaValue)>,
-// 	Data: DeserializeOwned,
-// {
-// 	fn paginated(self, page_params: PageParams) -> Self {
-// 		let skip = match page_params.zero_based {
-// 			true => page_params.page * page_params.page_size,
-// 			false => (page_params.page - 1) * page_params.page_size,
-// 		} as i64;
-
-// 		let take = page_params.page_size as i64;
-
-// 		self.skip(skip).take(take)
-// 	}
-// }

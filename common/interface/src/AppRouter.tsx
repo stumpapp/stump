@@ -64,7 +64,7 @@ export function AppRouter() {
 					<Route path="users" element={<UserSettings />} />
 					<Route path="server" element={<ServerSettings />} />
 					<Route path="jobs" element={<JobSettings />} />
-					{appProps?.platform !== 'browser' && <Route path="general" element={<>Desktop!</>} />}
+					{appProps?.platform !== 'browser' && <Route path="desktop" element={<>Desktop!</>} />}
 				</Route>
 			</Route>
 

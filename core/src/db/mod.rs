@@ -20,10 +20,11 @@ pub async fn create_client() -> prisma::PrismaClient {
 			.await
 			.expect("Failed to create Prisma client")
 	} else {
-		// Development database will live in the /prisma directory
-		prisma::new_client()
-			.await
-			.expect("Failed to create Prisma client")
+		create_client_with_url(&format!(
+			"file:{}/prisma/dev.db",
+			&env!("CARGO_MANIFEST_DIR")
+		))
+		.await
 	}
 }
 

@@ -13,7 +13,7 @@
     "benchmarks": "cargo test --benches",
     "typegen": "cargo test --package stump --bin stump -- types::tests --nocapture",
     "codegen": "pnpm prisma generate && cargo test --package stump --bin stump -- types::tests --nocapture",
-    "test": "cargo test"
+    "integration-tests": "cargo test --package stump_core -- --test-threads=1"
   },
   "devDependencies": {
     "@types/node": "^17.0.45",

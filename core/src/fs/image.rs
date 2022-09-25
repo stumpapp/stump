@@ -144,7 +144,3 @@ pub fn remove_thumbnails(id_list: &[String]) -> Result<(), ProcessFileError> {
 
 	Ok(())
 }
-
-// TODO: tests!
-#[cfg(test)]
-mod tests {}

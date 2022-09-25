@@ -21,6 +21,7 @@ use utils::{cors, helmet::Helmet, session::get_session_store};
 
 // TODO: figure out how to embed /static and Rocket.toml in the binary if possible
 // otherwise I have to distribute a zip file which isn't TERRIBLE but I don't want to lol
+// OR, just remove rocket because it has been annoying me...
 pub fn static_dir() -> String {
 	std::env::var("STUMP_CLIENT_DIR").unwrap_or("client".to_string())
 }
@@ -37,9 +38,23 @@ fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
 	UnauthorizedResponse {}
 }
 
+fn debug_setup() {
+	std::env::set_var(
+		"STUMP_CLIENT_DIR",
+		env!("CARGO_MANIFEST_DIR").to_string() + "/client",
+	);
+	std::env::set_var(
+		"ROCKET_CONFIG",
+		env!("CARGO_MANIFEST_DIR").to_string() + "/Rocket.toml",
+	);
+}
+
 // TODO: bye bye Rocket, you have annoyed me for the last time lol
 #[launch]
 async fn rocket() -> _ {
+	#[cfg(debug_assertions)]
+	debug_setup();
+
 	let core = StumpCore::new().await;
 
 	let core_ctx = core.get_context();

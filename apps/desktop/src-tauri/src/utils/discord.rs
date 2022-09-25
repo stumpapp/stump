@@ -22,19 +22,19 @@ impl StumpDiscordPresence {
 		}
 	}
 
-	pub fn init() -> Result<Self, String> {
-		let mut client = DiscordIpcClient::new("1022185766677389392")
-			.map_err(|e| format!("Failed to create Discord IPC client: {}", e))?;
+	// pub fn init() -> Result<Self, String> {
+	// 	let mut client = DiscordIpcClient::new("1022185766677389392")
+	// 		.map_err(|e| format!("Failed to create Discord IPC client: {}", e))?;
 
-		client
-			.connect()
-			.map_err(|e| format!("Failed to connect to Discord IPC client: {}", e))?;
+	// 	client
+	// 		.connect()
+	// 		.map_err(|e| format!("Failed to connect to Discord IPC client: {}", e))?;
 
-		Ok(Self {
-			client,
-			is_connected: true,
-		})
-	}
+	// 	Ok(Self {
+	// 		client,
+	// 		is_connected: true,
+	// 	})
+	// }
 
 	pub fn set_defaults(&mut self) {
 		self.set_presence(None, None);
@@ -42,7 +42,8 @@ impl StumpDiscordPresence {
 
 	pub fn connect(&mut self) {
 		if let Err(err) = self.client.connect() {
-			// TODO: log error
+			// TODO: log error, this is probably just because Discord isn't running...
+			println!("Failed to connect to Discord IPC: {}", err);
 		} else {
 			self.is_connected = true;
 		}
@@ -70,15 +71,15 @@ impl StumpDiscordPresence {
 			.expect("Failed to set Discord presence");
 	}
 
-	pub fn clear_presence(&mut self) {
-		if !self.is_connected {
-			return;
-		}
+	// pub fn clear_presence(&mut self) {
+	// 	if !self.is_connected {
+	// 		return;
+	// 	}
 
-		self.client
-			.clear_activity()
-			.expect("Failed to clear Discord presence");
-	}
+	// 	self.client
+	// 		.clear_activity()
+	// 		.expect("Failed to clear Discord presence");
+	// }
 
 	pub fn shutdown(&mut self) {
 		if !self.is_connected {

@@ -2,7 +2,7 @@ use prisma_client_rust::{chrono, Direction};
 use rocket::Route;
 
 use stump_core::{
-	db::utils::PrismaClientTrait,
+	db::utils::PrismaCountTrait,
 	fs::{epub, media_file},
 	opds::{
 		entry::OpdsEntry,

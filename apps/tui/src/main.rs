@@ -26,6 +26,8 @@ pub(crate) mod cli;
 pub(crate) mod error;
 pub(crate) mod event;
 
+// TODO: remove this
+#[allow(unused)]
 struct StumpTui {
 	base_url: String,
 	sse_handler: Arc<SSEHandler>,

@@ -3,7 +3,7 @@ use rocket::{fs::NamedFile, http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 use stump_core::{
 	config::get_config_dir,
-	db::utils::PrismaClientTrait,
+	db::utils::PrismaCountTrait,
 	fs::{image, media_file},
 	prisma::{
 		media::{self, OrderByParam},

@@ -2,7 +2,7 @@ use prisma_client_rust::Direction;
 use rocket::{http::ContentType, serde::json::Json};
 use rocket_okapi::openapi;
 use stump_core::{
-	db::utils::PrismaClientTrait,
+	db::utils::PrismaCountTrait,
 	fs::{image, media_file},
 	prisma::{
 		media::{self, OrderByParam},

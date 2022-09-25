@@ -97,6 +97,10 @@ impl JobPool {
 		let mut job_runners = self.job_runners.write().await;
 
 		if job_runners.is_empty() {
+			// wait 500 ms before starting the job, otherwise the client gets overloaded with the derendering of UI elements
+			// while receiving an enormous amount of data from the core
+			tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
 			let runner = Runner::new(ctx, job).await;
 			let runner_id = runner.id.clone();
 

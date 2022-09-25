@@ -12,20 +12,16 @@ use stump_core::{
 async fn can_make_epub_struct() -> CoreResult<()> {
 	let ctx = Ctx::mock().await;
 
-	let media = ctx
+	let fetch_epub = ctx
 		.db
 		.media()
 		.find_first(vec![media::extension::equals("epub".to_string())])
 		.exec()
 		.await?;
 
-	if media.is_none() {
-		// No epub file found, this is not a failure. Just skip the test.
-		return Ok(());
-	}
+	assert!(fetch_epub.is_some());
 
-	let media = media.unwrap();
-
+	let media = fetch_epub.unwrap();
 	let epub = Some(Epub::try_from(media)?);
 
 	assert!(epub.is_some());
@@ -37,19 +33,16 @@ async fn can_make_epub_struct() -> CoreResult<()> {
 async fn can_get_resource() -> CoreResult<()> {
 	let ctx = Ctx::mock().await;
 
-	let media = ctx
+	let fetch_epub = ctx
 		.db
 		.media()
 		.find_first(vec![media::extension::equals("epub".to_string())])
 		.exec()
 		.await?;
 
-	if media.is_none() {
-		// No epub file found, this is not a failure. Just skip the test.
-		return Ok(());
-	}
+	assert!(fetch_epub.is_some());
 
-	let media = media.unwrap();
+	let media = fetch_epub.unwrap();
 	let media_path = media.path.clone();
 
 	let epub = Epub::try_from(media)?;
@@ -86,25 +79,23 @@ fn canonical_correction() {
 async fn can_get_chapter() -> CoreResult<()> {
 	let ctx = Ctx::mock().await;
 
-	let media = ctx
+	let fetch_epub = ctx
 		.db
 		.media()
 		.find_first(vec![media::extension::equals("epub".to_string())])
 		.exec()
 		.await?;
 
-	if media.is_none() {
-		// No epub file found, this is not a failure. Just skip the test.
-		return Ok(());
-	}
+	assert!(fetch_epub.is_some());
 
-	let media = media.unwrap();
+	let media = fetch_epub.unwrap();
 
-	let result = get_epub_chapter(&media.path, 4)?;
+	let get_chapter_result = get_epub_chapter(&media.path, 4);
+	assert!(get_chapter_result.is_ok());
 
-	println!("{:?}", result);
+	let get_chapter_result = get_chapter_result.unwrap();
 
-	assert!(result.1.len() > 0);
+	assert!(get_chapter_result.1.len() > 0);
 
 	Ok(())
 }

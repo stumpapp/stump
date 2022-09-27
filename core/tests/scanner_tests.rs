@@ -11,7 +11,7 @@ use stump_core::{
 
 #[tokio::test]
 async fn series_based_library_batch_scan() {
-	initialize();
+	initialize().await;
 
 	let test_ctx = Ctx::mock().await;
 
@@ -50,6 +50,11 @@ async fn series_based_library_batch_scan() {
 
 	let library = library.unwrap();
 
+	// TODO: this fails because the job is attempted to be updated, but the job doesn't exist
+	// in this test context. I'd rather test the scanner directly, but I guess if I really need to
+	// I can listen to the job events and wait for the job to complete... really don't want to do that.
+	// I can change the query to an upsert, but that isn't ~really~ correct. It shouldn't harm anything,
+	// but it's not correct. Just shoot me now ig.
 	let scan_result = scan_batch(
 		test_ctx.get_ctx(),
 		library.path,

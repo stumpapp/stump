@@ -11,7 +11,7 @@ use stump_core::{
 
 use crate::{
 	guards::auth::{AdminGuard, Auth},
-	types::{ApiResult, Ctx},
+	types::{errors::ApiError, ApiResult, Ctx},
 	utils::auth,
 };
 
@@ -131,6 +131,12 @@ pub async fn update_user_preferences(
 	let db = ctx.get_db();
 
 	let user_preferences = auth.0.user_preferences;
+
+	if user_preferences.id != input.id {
+		return Err(ApiError::Unauthorized(
+			"You cannot update another user's preferences".into(),
+		));
+	}
 
 	Ok(Json(
 		db.user_preferences()

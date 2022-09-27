@@ -6,8 +6,7 @@ import { LayoutEntity, useTopBarStore } from '@stump/client';
 
 import MobileDrawer from '../sidebar/MobileDrawer';
 import LayoutModeButtons from './LayoutModeButtons';
-import NavigationButtons from './NavigationButtons';
-import OrderByConfig from './OrderByConfig';
+import QueryConfig from './query-options/QueryConfig';
 
 // FIXME: this is not good AT ALL for mobile. It *looks* fine, but the navigation is gone, the
 // sort/view mode buttons are gone, the sort config is gone,and the search bar is meh. I need to
@@ -46,7 +45,6 @@ export default function TopBar() {
 				<HStack minH={10}>
 					<MobileDrawer />
 
-					{/* <NavigationButtons /> */}
 					{/* @ts-ignore: this seems to work, idky it has type error */}
 					<Heading as="h3" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>
 						{title}
@@ -56,7 +54,8 @@ export default function TopBar() {
 				{showQueryParamOptions && (
 					<HStack>
 						<LayoutModeButtons entity={entity} />
-						<OrderByConfig />
+						<QueryConfig />
+						{/* <OrderByConfig /> */}
 					</HStack>
 				)}
 			</HStack>

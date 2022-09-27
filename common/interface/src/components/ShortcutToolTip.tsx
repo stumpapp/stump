@@ -1,9 +1,9 @@
-import { Kbd } from '@chakra-ui/react';
+import { HStack, Kbd } from '@chakra-ui/react';
 import ToolTip, { ToolTipProps } from '../ui/ToolTip';
 
 interface ShortcutToolTipProps extends ToolTipProps {
 	shortcutAction?: string;
-	keybind: string;
+	keybind: string[];
 }
 
 export default function ShortcutToolTip({
@@ -11,7 +11,15 @@ export default function ShortcutToolTip({
 	shortcutAction,
 	...props
 }: ShortcutToolTipProps) {
-	let label = <Kbd p={0.5}>{keybind}</Kbd>;
+	let label = (
+		<HStack spacing={1}>
+			{keybind.map((key) => (
+				<Kbd h={5} w={5} className="flex items-center justify-center">
+					{key}
+				</Kbd>
+			))}
+		</HStack>
+	);
 
 	if (shortcutAction) {
 		label = (

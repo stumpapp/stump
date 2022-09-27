@@ -7,8 +7,6 @@ use stump_core::{
 
 use rocket::tokio;
 
-// TODO: fix these tests...
-
 #[tokio::test]
 async fn digest_zips_asynchronous() -> CoreResult<()> {
 	let ctx = Ctx::mock().await;

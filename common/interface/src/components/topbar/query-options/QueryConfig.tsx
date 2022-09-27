@@ -12,12 +12,11 @@ import {
 	Select,
 	Stack,
 	Switch,
-	useBoolean,
 	useColorModeValue,
 } from '@chakra-ui/react';
 import Button from '../../../ui/Button';
 import { CaretDown, Sliders } from 'phosphor-react';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Direction, mediaOrderByOptions, seriesOrderByOptions } from '@stump/core';
 
 function QueryConfigSection({ children }: { children: React.ReactNode }) {
@@ -29,7 +28,6 @@ function QueryConfigSection({ children }: { children: React.ReactNode }) {
 }
 
 export default function QueryConfig() {
-	const [open, { on: onOpen, off: onClose }] = useBoolean(false);
 	const { order_by, setOrderBy, direction, setDirection } = useQueryParamStore();
 
 	const location = useLocation();
@@ -59,72 +57,76 @@ export default function QueryConfig() {
 	}, [location.pathname]);
 
 	return (
-		<Popover onOpen={onOpen} onClose={onClose}>
-			<PopoverTrigger>
-				<Button
-					leftIcon={<Sliders />}
-					rightIcon={<CaretDown />}
-					py={0.5}
-					px={2}
-					size="sm"
-					bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
-					shortcutAction={!open ? 'View display options' : undefined}
-				>
-					Options
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent>
-				<PopoverBody p={0} className="flex flex-col divide-y">
-					<QueryConfigSection>
-						<HStack justify="space-between">
-							<Heading className="min-w-[50%]" size="xs" fontWeight="medium">
-								Order by
-							</Heading>
-							<Select
-								placeholder="Select option"
-								size="sm"
-								rounded="md"
-								value={order_by}
-								onChange={(e) => setOrderBy(e.target.value)}
-							>
-								{orderByOptions?.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</Select>
-						</HStack>
+		<Popover placement="bottom-start">
+			{({ isOpen }) => (
+				<React.Fragment>
+					<PopoverTrigger>
+						<Button
+							leftIcon={<Sliders />}
+							rightIcon={<CaretDown />}
+							py={0.5}
+							px={2}
+							size="sm"
+							// bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
+							shortcutAction={!isOpen ? 'View display options' : undefined}
+						>
+							Options
+						</Button>
+					</PopoverTrigger>
+					<PopoverContent>
+						<PopoverBody p={0} className="flex flex-col divide-y">
+							<QueryConfigSection>
+								<HStack justify="space-between">
+									<Heading className="min-w-[50%]" size="xs" fontWeight="medium">
+										Order by
+									</Heading>
+									<Select
+										placeholder="Select option"
+										size="sm"
+										rounded="md"
+										value={order_by}
+										onChange={(e) => setOrderBy(e.target.value)}
+									>
+										{orderByOptions?.map((option) => (
+											<option key={option.value} value={option.value}>
+												{option.label}
+											</option>
+										))}
+									</Select>
+								</HStack>
 
-						<HStack justify="space-between">
-							<Heading className="min-w-[50%]" size="xs" fontWeight="medium">
-								Order Direction
-							</Heading>
-							<RadioGroup
-								value={direction ?? 'asc'}
-								onChange={(val) => setDirection(val as Direction)}
-							>
-								<Stack spacing={3} direction="row">
-									<Radio size="sm" colorScheme="brand" value="asc">
-										Asc
-									</Radio>
-									<Radio size="sm" colorScheme="brand" value="desc">
-										Desc
-									</Radio>
-								</Stack>
-							</RadioGroup>
-						</HStack>
-					</QueryConfigSection>
-					<QueryConfigSection>
-						<HStack justify="space-between">
-							<Heading className="min-w-[50%]" size="xs" fontWeight="medium">
-								Show unsupported
-							</Heading>
+								<HStack justify="space-between">
+									<Heading className="min-w-[50%]" size="xs" fontWeight="medium">
+										Order Direction
+									</Heading>
+									<RadioGroup
+										value={direction ?? 'asc'}
+										onChange={(val) => setDirection(val as Direction)}
+									>
+										<Stack spacing={3} direction="row">
+											<Radio size="sm" colorScheme="brand" value="asc">
+												Asc
+											</Radio>
+											<Radio size="sm" colorScheme="brand" value="desc">
+												Desc
+											</Radio>
+										</Stack>
+									</RadioGroup>
+								</HStack>
+							</QueryConfigSection>
+							<QueryConfigSection>
+								<HStack justify="space-between">
+									<Heading className="min-w-[50%]" size="xs" fontWeight="medium">
+										Show unsupported
+									</Heading>
 
-							<Switch size="sm" />
-						</HStack>
-					</QueryConfigSection>
-				</PopoverBody>
-			</PopoverContent>
+									<Switch size="sm" colorScheme="brand" />
+								</HStack>
+							</QueryConfigSection>
+						</PopoverBody>
+					</PopoverContent>
+				</React.Fragment>
+			)}
 		</Popover>
 	);
 }

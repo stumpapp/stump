@@ -22,6 +22,7 @@ export interface QueryParamStore extends Partial<PageParams>, StoreBase<QueryPar
 const defaultValues = {
 	// zeroBased: false,
 	// pageSize: 20,
+	order_by: 'name',
 	direction: 'asc',
 } as Partial<QueryParamStore>;
 

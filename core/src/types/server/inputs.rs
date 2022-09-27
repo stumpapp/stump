@@ -9,6 +9,7 @@ use crate::types::{
 
 #[derive(Debug, Clone, Deserialize, JsonSchema, Type)]
 pub struct UserPreferencesUpdate {
+	pub id: String,
 	pub locale: String,
 	pub library_layout_mode: String,
 	pub series_layout_mode: String,

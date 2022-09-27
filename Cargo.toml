@@ -2,9 +2,6 @@
 resolver = "2"
 members = ["core", "core/prisma", "apps/desktop/src-tauri", "apps/tui", "apps/server"]
 
-# TODO: with new rust version, 1.64.0, workspace dependencies can be added.
-# do that lol. BUT, have to check docker and see if images are available otherwise will
-# will break...
 [workspace.package]
 version = "0.0.0"
 rust-version = "1.64.0"

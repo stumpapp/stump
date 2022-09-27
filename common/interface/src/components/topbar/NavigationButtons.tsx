@@ -53,7 +53,7 @@ export default function NavigationButtons() {
 		>
 			<Button
 				shortcutAction="Go back"
-				shortcutKeybind="⌘ + ["
+				shortcutKeybind={['⌘', '[']}
 				variant="ghost"
 				p="0.5"
 				// FIXME: literally why won't this work >:(
@@ -68,7 +68,7 @@ export default function NavigationButtons() {
 
 			<Button
 				shortcutAction="Go forward"
-				shortcutKeybind="⌘ + ]"
+				shortcutKeybind={['⌘', ']']}
 				variant="ghost"
 				p="0.5"
 				// size={{ base: 'sm', sm: 'xs' }}

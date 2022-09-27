@@ -23,26 +23,26 @@ export default function LayoutModeButtons({ entity }: { entity: LayoutEntity }) 
 		<ButtonGroup isAttached>
 			<IconButton
 				onClick={() => handleChange('GRID')}
-				title="View as grid"
 				variant="solid"
 				bg={useColorModeValue(
 					viewAsGrid ? 'blackAlpha.200' : 'gray.150',
 					// viewAsGrid ? 'whiteAlpha.200' : 'gray.800',
 					viewAsGrid ? 'whiteAlpha.50' : 'whiteAlpha.200',
 				)}
+				shortcutAction="View as grid"
 			>
 				<SquaresFour className="text-lg" weight="regular" />
 			</IconButton>
 
 			<IconButton
 				onClick={() => handleChange('LIST')}
-				title="View as list"
 				variant="solid"
 				bg={useColorModeValue(
 					viewAsGrid ? 'gray.150' : 'blackAlpha.200',
 					// viewAsGrid ? 'gray.800' : 'whiteAlpha.200',
 					viewAsGrid ? 'whiteAlpha.200' : 'whiteAlpha.50',
 				)}
+				shortcutAction="View as list"
 			>
 				<Rows className="text-lg" weight="regular" />
 			</IconButton>

@@ -3,7 +3,7 @@ node_modules
 build
 dist
 static
-core/client
+apps/server/client
 target
 *.lock
 *-lock.*

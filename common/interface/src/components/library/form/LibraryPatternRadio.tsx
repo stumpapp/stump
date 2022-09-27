@@ -67,9 +67,13 @@ export function LibraryPatternRadio({ library }: LibraryPatternRadioProps) {
 			</FormLabel>
 			<FormHelperText mt={0} mb={2} className="flex space-x-1" fontSize="xs">
 				<span>Not sure which to choose?</span>{' '}
-				<Link isExternal to="https://stumpapp.dev/guides/libraries#library-patterns">
+				<a
+					className="hover:underline underline-offset-1"
+					href="https://stumpapp.dev/guides/libraries#library-patterns"
+					target="_blank"
+				>
 					Click here
-				</Link>{' '}
+				</a>{' '}
 				<span>
 					to learn more. <i>You cannot change this setting later.</i>
 				</span>

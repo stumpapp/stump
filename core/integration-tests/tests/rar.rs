@@ -1,9 +1,7 @@
 use rocket::tokio;
 use std::path::Path;
 
-mod setup;
-
-use setup::initialize;
+use crate::utils::init_test;
 
 use stump_core::{
 	config::Ctx,
@@ -22,8 +20,6 @@ use stump_core::{
 // tempfile crate maybe?
 #[ignore]
 fn test_rar_to_zip() {
-	initialize();
-
 	let test_file = "/Users/aaronleopold/Documents/Stump/Demo/Venom/Venom 001 (2022).cbr";
 
 	let path = Path::new(test_file);
@@ -41,7 +37,7 @@ fn test_rar_to_zip() {
 
 #[tokio::test]
 async fn digest_rars_asynchronous() -> CoreResult<()> {
-	initialize();
+	init_test().await;
 
 	let ctx = Ctx::mock().await;
 
@@ -83,7 +79,7 @@ async fn digest_rars_asynchronous() -> CoreResult<()> {
 
 #[tokio::test]
 async fn digest_rars_synchronous() -> CoreResult<()> {
-	initialize();
+	init_test().await;
 
 	let ctx = Ctx::mock().await;
 

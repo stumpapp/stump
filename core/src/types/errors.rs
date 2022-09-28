@@ -35,7 +35,7 @@ pub enum CoreError {
 #[derive(Error, Debug)]
 pub enum ProcessFileError {
 	#[error("Error occurred while opening file: {0}")]
-	FileIoError(#[from] std::io::Error),
+	FileIoError(#[from] io::Error),
 	#[error("A zip error ocurred: {0}")]
 	ZipFileError(#[from] ZipError),
 	#[error("Archive contains no files")]
@@ -70,7 +70,11 @@ pub enum ProcessFileError {
 
 impl From<ProcessFileError> for CoreError {
 	fn from(error: ProcessFileError) -> Self {
-		CoreError::InternalError(error.to_string())
+		match error {
+			ProcessFileError::FileIoError(err) => CoreError::IoError(err),
+			ProcessFileError::Unknown(err) => CoreError::Unknown(err),
+			_ => CoreError::InternalError(error.to_string()),
+		}
 	}
 }
 
@@ -82,6 +86,8 @@ pub enum ScanError {
 	UnsupportedFile(String),
 	#[error("{0}")]
 	FileParseError(String),
+	#[error("Failed to build globset from invalid .stumpignore file: {0}")]
+	GlobParseError(#[from] globset::Error),
 	#[error("{0}")]
 	Unknown(String),
 }

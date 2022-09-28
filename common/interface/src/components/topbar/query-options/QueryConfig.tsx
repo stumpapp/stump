@@ -12,6 +12,7 @@ import {
 	Select,
 	Stack,
 	Switch,
+	Text,
 	useColorModeValue,
 } from '@chakra-ui/react';
 import Button from '../../../ui/Button';
@@ -56,6 +57,9 @@ export default function QueryConfig() {
 		}
 	}, [location.pathname]);
 
+	const activeRadioFontColor = useColorModeValue('gray.800', 'gray.200');
+	const inActiveRadioFontColor = useColorModeValue('gray.600', 'gray.400');
+
 	return (
 		<Popover placement="bottom-start">
 			{({ isOpen }) => (
@@ -67,7 +71,6 @@ export default function QueryConfig() {
 							py={0.5}
 							px={2}
 							size="sm"
-							// bg={useColorModeValue('gray.150', 'whiteAlpha.200')}
 							shortcutAction={!isOpen ? 'View display options' : undefined}
 						>
 							Options
@@ -105,10 +108,35 @@ export default function QueryConfig() {
 									>
 										<Stack spacing={3} direction="row">
 											<Radio size="sm" colorScheme="brand" value="asc">
-												Asc
+												{/* FIXME: the hover states are bad, hover should be on the radio NOT
+													just on the text. I really don't love chakra, can't wait to get rid of it.
+												*/}
+												<Text
+													color={
+														direction === 'asc' ? activeRadioFontColor : inActiveRadioFontColor
+													}
+													_hover={{
+														color: activeRadioFontColor,
+													}}
+													as="span"
+													className="text-xs"
+												>
+													Asc
+												</Text>
 											</Radio>
 											<Radio size="sm" colorScheme="brand" value="desc">
-												Desc
+												<Text
+													color={
+														direction === 'desc' ? activeRadioFontColor : inActiveRadioFontColor
+													}
+													_hover={{
+														color: activeRadioFontColor,
+													}}
+													as="span"
+													className="text-xs"
+												>
+													Desc
+												</Text>
 											</Radio>
 										</Stack>
 									</RadioGroup>

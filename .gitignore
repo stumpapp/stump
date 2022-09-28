@@ -19,6 +19,7 @@ apps/server/client/*
 *.db*
 *.sqlite*
 *prisma.rs*
+core/integration-tests/*libraries*
 
 # os
 .DS_Store

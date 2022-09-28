@@ -1,5 +1,6 @@
 [alias]
 prisma = "run --package prisma --"
+integration-tests = "test --package integration-tests -- --test-threads 1"
 build-server = "build --package stump_server --bin stump_server --release --"
 
 # this caused me such an unbearable headache...

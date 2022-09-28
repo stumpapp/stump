@@ -20,9 +20,11 @@ urlencoding = "2.1.0"
 cuid = "1.2.0"
 xml-rs = "0.8.4" # used for creating XML docs
 serde-xml-rs = "0.5.1" # used for serializing/deserializing xml
+itertools = "0.10.5"
 
 ### FILESYSTEM UTILS ###
 walkdir = "2.3.2"
+globset = "0.4.9"
 dirs = "4.0.0"
 trash = "2.0"
 infer = "0.7.0"

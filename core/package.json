@@ -12,7 +12,7 @@
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
     "typegen": "cargo test --package stump_core --lib -- types::tests::codegen --ignored",
     "codegen": "pnpm prisma generate && pnpm typegen",
-    "integration-tests": "cargo test --package stump_core -- --test-threads=1"
+    "integration-tests": "cargo integration-tests"
   },
   "devDependencies": {
     "@types/node": "^17.0.45",

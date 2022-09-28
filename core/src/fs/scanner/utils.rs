@@ -1,5 +1,10 @@
-use std::path::Path;
+use std::{
+	fs::File,
+	io::{BufRead, BufReader},
+	path::{Path, PathBuf},
+};
 
+use globset::{Glob, GlobSetBuilder};
 use prisma_client_rust::{raw, PrismaValue, QueryError};
 use walkdir::DirEntry;
 
@@ -307,4 +312,19 @@ pub async fn batch_media_operations(
 	}
 
 	Ok(ctx.db._batch(media_creates).await?)
+}
+
+// TODO: error handling, i.e don't unwrap lol
+// TODO: is it better practice to make this async?
+pub fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathBuf]) {
+	for path in paths {
+		// read the lines of the file, and add each line as a glob pattern in the builder
+		let file = File::open(path).unwrap();
+
+		for line in BufReader::new(file).lines() {
+			if let Ok(pattern) = line {
+				builder.add(Glob::new(&pattern).unwrap());
+			}
+		}
+	}
 }

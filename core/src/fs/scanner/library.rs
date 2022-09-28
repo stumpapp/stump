@@ -1,3 +1,5 @@
+use globset::GlobSetBuilder;
+use itertools::Itertools;
 use rayon::prelude::{ParallelBridge, ParallelIterator};
 use rocket::tokio::{self, task::JoinHandle};
 use std::{
@@ -29,7 +31,7 @@ use crate::{
 };
 
 use super::{
-	utils::{batch_media_operations, mark_library_missing},
+	utils::{batch_media_operations, mark_library_missing, populate_glob_builder},
 	BatchScanOperation,
 };
 
@@ -224,6 +226,9 @@ async fn scan_series(
 ) {
 	let db = ctx.get_db();
 
+	let series_ignore_file = Path::new(series.path.as_str()).join(".stumpignore");
+	let library_ignore_file = Path::new(library_path).join(".stumpignore");
+
 	let media = db
 		.media()
 		.find_many(vec![media::series_id::equals(Some(series.id.clone()))])
@@ -244,6 +249,24 @@ async fn scan_series(
 		walkdir = walkdir.max_depth(1);
 	}
 
+	let mut builder = GlobSetBuilder::new();
+
+	if series_ignore_file.exists() || library_ignore_file.exists() {
+		populate_glob_builder(
+			&mut builder,
+			vec![series_ignore_file, library_ignore_file]
+				.into_iter()
+				.unique()
+				.filter(|p| p.exists())
+				.collect::<Vec<_>>()
+				.as_slice(),
+		);
+	}
+
+	// TODO: make this an error to enforce correct glob patterns in an ignore file.
+	// This way, no scan will ever add things a user wants to ignore.
+	let glob_set = builder.build().unwrap();
+
 	for entry in walkdir
 		.into_iter()
 		.filter_map(|e| e.ok())
@@ -258,15 +281,12 @@ async fn scan_series(
 		// callback, as well.
 		on_progress(format!("Analyzing {:?}", path));
 
-		if path.should_ignore() {
+		let glob_match = glob_set.is_match(path);
+		// println!("Path: {:?} -> Matches: {}", path, glob_match);
+
+		if path.should_ignore() || glob_match {
 			log::trace!("Skipping ignored file: {:?}", path);
-			continue;
-		} else if path.is_thumbnail_img() {
-			// TODO: these will *eventually* be supported, but not priority right now.
-			log::debug!(
-				"Stump does not support thumbnail image overrides yet ({:?}). Stay tuned!",
-				path
-			);
+			log::trace!("Globbed ignore?: {}", glob_match);
 			continue;
 		} else if let Some(_) = visited_media.get(path_str) {
 			log::debug!("Existing media found: {:?}", path);
@@ -322,6 +342,7 @@ async fn scan_series(
 }
 
 // Note: if this function signature gets much larger I probably want to refactor it...
+// TODO: return result...
 // TODO: investigate this with LARGE libraries. I am noticing the UI huff and puff a bit
 // trying to keep up with the shear amount of updates it gets. I might have to throttle the
 // updates to the UI when libraries reach a certain size and send updates in batches instead.
@@ -333,6 +354,9 @@ async fn scan_series_batch(
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Vec<BatchScanOperation> {
 	let db = ctx.get_db();
+
+	let series_ignore_file = Path::new(series.path.as_str()).join(".stumpignore");
+	let library_ignore_file = Path::new(library_path).join(".stumpignore");
 
 	let media = db
 		.media()
@@ -356,6 +380,26 @@ async fn scan_series_batch(
 		walkdir = walkdir.max_depth(1);
 	}
 
+	let mut builder = GlobSetBuilder::new();
+
+	if series_ignore_file.exists() || library_ignore_file.exists() {
+		populate_glob_builder(
+			&mut builder,
+			vec![series_ignore_file, library_ignore_file]
+				.into_iter()
+				// We have to remove duplicates here otherwise the glob will double some patterns.
+				// An example would be when the library has media in root. Not the end of the world.
+				.unique()
+				.filter(|p| p.exists())
+				.collect::<Vec<_>>()
+				.as_slice(),
+		);
+	}
+
+	// TODO: make this an error to enforce correct glob patterns in an ignore file.
+	// This way, no scan will ever add things a user wants to ignore.
+	let glob_set = builder.build().unwrap_or_default();
+
 	for entry in walkdir
 		.into_iter()
 		.filter_map(|e| e.ok())
@@ -370,15 +414,12 @@ async fn scan_series_batch(
 		// callback, as well.
 		on_progress(format!("Analyzing {:?}", path));
 
-		if path.should_ignore() {
+		let glob_match = glob_set.is_match(path);
+		// println!("Path: {:?} -> Matches: {}", path, glob_match);
+
+		if path.should_ignore() || glob_match {
 			log::trace!("Skipping ignored file: {:?}", path);
-			continue;
-		} else if path.is_thumbnail_img() {
-			// TODO: these will *eventually* be supported, but not priority right now.
-			log::debug!(
-				"Stump does not support thumbnail image overrides yet ({:?}). Stay tuned!",
-				path
-			);
+			log::trace!("Globbed ignore?: {}", glob_match);
 			continue;
 		} else if let Some(_) = visited_media.get(path_str) {
 			log::debug!("Existing media found: {:?}", path);

@@ -1,9 +1,7 @@
 use rocket::{http::ContentType, tokio};
 use std::{path::PathBuf, str::FromStr};
 
-mod setup;
-
-use setup::initialize;
+use crate::utils::init_test;
 
 use stump_core::{
 	config::Ctx,
@@ -14,7 +12,7 @@ use stump_core::{
 
 #[tokio::test]
 async fn can_make_epub_struct() -> CoreResult<()> {
-	initialize();
+	init_test().await;
 
 	let ctx = Ctx::mock().await;
 
@@ -37,7 +35,7 @@ async fn can_make_epub_struct() -> CoreResult<()> {
 
 #[tokio::test]
 async fn can_get_resource() -> CoreResult<()> {
-	initialize();
+	init_test().await;
 
 	let ctx = Ctx::mock().await;
 
@@ -74,8 +72,6 @@ async fn can_get_resource() -> CoreResult<()> {
 
 #[test]
 fn canonical_correction() {
-	initialize();
-
 	let invalid = PathBuf::from("OEBPS/../Styles/style.css");
 
 	let expected = PathBuf::from("OEBPS/Styles/style.css");
@@ -87,7 +83,7 @@ fn canonical_correction() {
 
 #[tokio::test]
 async fn can_get_chapter() -> CoreResult<()> {
-	initialize();
+	init_test().await;
 
 	let ctx = Ctx::mock().await;
 

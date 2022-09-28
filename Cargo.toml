@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["core", "core/prisma", "apps/desktop/src-tauri", "apps/tui", "apps/server"]
+members = ["core", "core/prisma", "core/integration-tests", "apps/desktop/src-tauri", "apps/tui", "apps/server"]
 
 [workspace.package]
 version = "0.0.0"

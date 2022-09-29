@@ -55,29 +55,28 @@ async fn rocket() -> _ {
 	#[cfg(debug_assertions)]
 	debug_setup();
 
-	let core = StumpCore::new().await;
-
-	let core_ctx = core.get_context();
-
-	match core.run_migrations(core_ctx.get_db()).await {
-		Ok(_) => {
-			println!("Migrations ran successfully");
-			// log::info!("Migrations ran successfully");
-		},
-		Err(e) => {
-			// log::error!("Failed to run migrations: {}", e);
-			panic!("Failed to run migrations: {}", e);
-		},
-	};
-
-	if let Err(err) = core.load_env() {
+	if let Err(err) = StumpCore::load_env() {
 		log::error!("Failed to load environment variables: {:?}", err);
 		// panic!("Failed to load environment variables: {}", err);
 	}
 
-	if let Err(err) = core.init_logging() {
+	if let Err(err) = StumpCore::init_logging() {
 		log::error!("Failed to initialize logging: {:?}", err);
 		// panic!("Failed to initialize logging: {}", err);
+	}
+
+	let core = StumpCore::new().await;
+
+	let core_ctx = core.get_context();
+
+	if let Err(e) = core.run_migrations(core_ctx.get_db()).await {
+		// Note: panic seems to lock the database (tested in docker). So,
+		// definitely don't do that. Maybe I can refactor this to return
+		// a Result... instead of this launch crap.
+		// panic!("Failed to run migrations: {}", e);
+		log::error!("Failed to run migrations: {}", e);
+	} else {
+		log::info!("Migrations ran successfully");
 	}
 
 	let cors_config = cors::get_cors();

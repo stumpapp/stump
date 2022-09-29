@@ -16,10 +16,18 @@ pub async fn create_client() -> prisma::PrismaClient {
 		std::env::var("ROCKET_PROFILE").unwrap_or_else(|_| "debug".to_string());
 
 	if rocket_env == "release" {
+		log::trace!(
+			"Creating Prisma client with url: file:{}/stump.db",
+			&config_dir
+		);
 		prisma::new_client_with_url(&format!("file:{}/stump.db", &config_dir))
 			.await
 			.expect("Failed to create Prisma client")
 	} else {
+		log::trace!(
+			"Creating Prisma client with url: file:{}/prisma/dev.db",
+			&env!("CARGO_MANIFEST_DIR")
+		);
 		create_client_with_url(&format!(
 			"file:{}/prisma/dev.db",
 			&env!("CARGO_MANIFEST_DIR")

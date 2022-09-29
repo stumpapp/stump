@@ -45,16 +45,16 @@ impl StumpCore {
 		Arc::new(core)
 	}
 
-	pub fn get_context(&self) -> Ctx {
-		self.ctx.get_ctx()
-	}
-
-	pub fn init_logging(&self) -> Result<(), fern::InitError> {
+	pub fn init_logging() -> Result<(), fern::InitError> {
 		init_fern()
 	}
 
-	pub fn load_env(&self) -> CoreResult<()> {
+	pub fn load_env() -> CoreResult<()> {
 		StumpEnv::load()
+	}
+
+	pub fn get_context(&self) -> Ctx {
+		self.ctx.get_ctx()
 	}
 
 	pub fn get_shadow_text(&self) -> &str {

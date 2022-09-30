@@ -6,11 +6,18 @@ use crate::{config::context::Ctx, job::pool::JobPool};
 
 use super::InternalCoreTask;
 
+/// The [`EventManager`] struct is responsible for handling internal tasks ([`InternalCoreTask`]).
+/// Internal tasks are 'converted' to [`Job`](crate::job::Job)s, which are queued and executed
+/// by the [`JobPool`].
 pub struct EventManager {
 	job_pool: Arc<JobPool>,
 }
 
+// TODO: I think event manager can manage it's own Ctx here, and instead of housing all
+// of the logic in the `new` function there can be something like `handle_event`.
 impl EventManager {
+	/// Creates a new instance of [`EventManager`] and returns it wrapped in an [`Arc`].
+	/// A thread is spawned to handle the incoming tasks.
 	pub fn new(
 		ctx: Ctx,
 		mut request_reciever: mpsc::UnboundedReceiver<InternalCoreTask>,

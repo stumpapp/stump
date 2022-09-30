@@ -32,12 +32,13 @@ impl<'a> IsImage for ZipFile<'a> {
 	}
 }
 
+/// Creates a new zip file at `destination` from the contents of the folder `unpacked_path`.
 fn zip_dir(
 	unpacked_path: &Path,
-	zip_path: &Path,
+	destination: &Path,
 	prefix: &Path,
 ) -> zip::result::ZipResult<()> {
-	let zip_file = std::fs::File::create(&zip_path).unwrap();
+	let zip_file = std::fs::File::create(&destination).unwrap();
 
 	let mut zip_writer = zip::ZipWriter::new(zip_file);
 
@@ -45,7 +46,7 @@ fn zip_dir(
 		.compression_method(zip::CompressionMethod::Stored)
 		.unix_permissions(0o755);
 
-	log::trace!("Creating zip file at {:?}", zip_path);
+	log::trace!("Creating zip file at {:?}", destination);
 
 	let mut buffer = Vec::new();
 	for entry in WalkDir::new(unpacked_path)
@@ -81,12 +82,16 @@ fn zip_dir(
 	Ok(())
 }
 
+/// Creates a zip file from a directory at `unpacked_path` and places it in the
+/// `destination` directory with the name `name` and the extension `ext`.
+/// Uses [`zip_dir`] to actually create the zip file.
 pub fn create_zip(
 	unpacked_path: &Path,
 	name: &str,
 	original_ext: &str,
-	parent: &Path,
+	destination: &Path,
 ) -> zip::result::ZipResult<PathBuf> {
+	// TODO: does it make sense to leave this ext logic up to the caller?
 	let mut ext = "cbz";
 
 	if original_ext != "cbr" {
@@ -95,14 +100,16 @@ pub fn create_zip(
 
 	log::trace!("Calculated extension for zip file: {}", ext);
 
-	let zip_path = parent.join(format!("{}.{}", name, ext));
+	let zip_path = destination.join(format!("{}.{}", name, ext));
 
 	zip_dir(&unpacked_path, &zip_path, unpacked_path)?;
 
 	Ok(zip_path)
 }
 
-/// Get the sample size (in bytes) to use for generating a checksum of a zip file.
+/// Get the sample size (in bytes) to use for generating a checksum of a zip file. Rather than
+/// computing the sample size via the file size, we instead calculate the sample size by
+/// summing the size of the first 5 files in the zip file.
 pub fn zip_sample(file: &str) -> u64 {
 	let zip_file = File::open(file).unwrap();
 	let mut archive = zip::ZipArchive::new(zip_file).unwrap();
@@ -118,6 +125,8 @@ pub fn zip_sample(file: &str) -> u64 {
 
 		sample_size += file.size();
 	}
+
+	// TODO: sample size needs to be > 0...
 
 	sample_size
 }

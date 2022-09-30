@@ -4,12 +4,16 @@ If you're interested in supporting Stump's development, and you know how to code
 
 - Translation, so Stump is accessible to non-English speakers.
   - An automated translation system would be immensely helpful! If you're knowledgeable in this area, please reach out!
-- Writing comprehensive benchmarks and tests.
-  - [look here](https://github.com/aaronleopold/stump/tree/develop/core/tests)
-- Designing and/or implementing missing UI components.
+- Writing comprehensive integration tests.
+  - [look here](https://github.com/aaronleopold/stump/tree/develop/core/integration-tests)
+- Designing and/or implementing UI elements.
+- Docker build optimizations (it is currently _horrendously_ slow).
+- CI pipelines / workflows (given above issue with Docker is resolved).
 - And lots more!
 
-If you can't contribute programatically, but you still wish to help, consider contributing financially by using any of these platforms:
+I keep track of all non-code contributions in a [CONTRIBUTORS.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTORS.md) file on Stump's GitHub. If you contribute in that manner, please add yourself to the list!
+
+You can contribute to the project financially by using any of these platforms:
 
 - [Kofi](https://ko-fi.com/aaronleop)
 - [GitHub Sponsors](https://github.com/sponsors/aaronleopold)

@@ -1,4 +1,4 @@
-import { ApiResult, UserPreferences } from '@stump/core';
+import type { ApiResult, UserPreferences } from '../types';
 import { API } from '.';
 
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {

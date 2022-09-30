@@ -1,4 +1,4 @@
-import { ApiResult } from '@stump/core';
+import type { ApiResult } from '../types';
 
 export * from './auth';
 export * from './epub';

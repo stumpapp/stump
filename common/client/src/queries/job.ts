@@ -1,4 +1,4 @@
-import { JobReport } from '@stump/core';
+import type { JobReport } from '../types';
 import { useQuery } from '@tanstack/react-query';
 import { QueryCallbacks } from '.';
 import { getJobs } from '../api/job';

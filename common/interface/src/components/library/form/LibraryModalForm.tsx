@@ -1,4 +1,7 @@
 import { useEffect, useMemo } from 'react';
+import { FieldValues, useForm, useFormContext } from 'react-hook-form';
+import { z } from 'zod';
+
 import {
 	FormErrorMessage,
 	FormLabel,
@@ -11,19 +14,18 @@ import {
 	Tabs,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FieldValues, useForm, useFormContext } from 'react-hook-form';
-import { z } from 'zod';
+import { useLibraries } from '@stump/client';
+
+import Checkbox from '../../../ui/Checkbox';
+import Form, { FormControl } from '../../../ui/Form';
+import Input from '../../../ui/Input';
+import { Tab } from '../../../ui/Tabs';
+import TextArea from '../../../ui/TextArea';
 import DirectoryPickerModal from '../../DirectoryPickerModal';
 import TagSelect from '../../TagSelect';
-import { Library, LibraryPattern, LibraryScanMode } from '@stump/core';
-import { TagOption, useLibraries } from '@stump/client';
-import Form, { FormControl } from '../../../ui/Form';
-import { Tab } from '../../../ui/Tabs';
-import Input from '../../../ui/Input';
-import TextArea from '../../../ui/TextArea';
-import Checkbox from '../../../ui/Checkbox';
 import { LibraryPatternRadio } from './LibraryPatternRadio';
 
+import type { TagOption, Library, LibraryPattern, LibraryScanMode } from '@stump/client';
 interface Props {
 	tags: TagOption[];
 	onSubmit(values: FieldValues): void;

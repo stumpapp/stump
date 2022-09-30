@@ -10,9 +10,9 @@ import {
 	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react';
-import { JobReport } from '@stump/core';
 import { useJobStore } from '@stump/client';
 
+import type { JobReport } from '@stump/client';
 // TODO: ORGANIZE BETTER
 
 function JobReportComponent(jobReport: JobReport) {

@@ -15,7 +15,6 @@ import {
 	VStack,
 } from '@chakra-ui/react';
 import { useLibraries } from '@stump/client';
-import { Library } from '@stump/core';
 
 import { useLocale } from '../../hooks/useLocale';
 import ApplicationVersion from '../ApplicationVersion';
@@ -24,6 +23,8 @@ import LibraryOptionsMenu from '../library/LibraryOptionsMenu';
 import NavigationButtons from '../topbar/NavigationButtons';
 import Logout from './Logout';
 import ThemeToggle from './ThemeToggle';
+
+import type { Library } from '@stump/client';
 
 interface NavMenuItemProps extends Library {
 	href: string;

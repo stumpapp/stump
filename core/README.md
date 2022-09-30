@@ -2,7 +2,6 @@
 
 An overview of this package's contents:
 
-- `bindings`: Auto-generated TypeScript type definitions for the Rust types.
 - `prisma`: Separate package for Prisma and Prisma CLI, not bundled in releases.
 
 ### Crates

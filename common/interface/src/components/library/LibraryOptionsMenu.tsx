@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/re
 import { ArrowsClockwise, Binoculars, DotsThreeVertical } from 'phosphor-react';
 import EditLibraryModal from './EditLibraryModal';
 import DeleteLibraryModal from './DeleteLibraryModal';
-import { Library } from '@stump/core';
+import type { Library } from '@stump/client';
 import { useNavigate } from 'react-router-dom';
 import { queryClient, useScanLibrary, useUserStore } from '@stump/client';
 

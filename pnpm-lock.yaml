@@ -175,7 +175,6 @@ importers:
   common/client:
     specifiers:
       '@stump/config': workspace:*
-      '@stump/core': workspace:*
       '@tanstack/react-query': ^4.2.3
       '@types/axios': ^0.14.0
       '@types/react': ^18.0.20
@@ -186,7 +185,6 @@ importers:
       zustand: ^4.1.1
     dependencies:
       '@stump/config': link:../config
-      '@stump/core': link:../../core
       '@tanstack/react-query': 4.3.4
       axios: 0.27.2
       immer: 9.0.15
@@ -207,7 +205,6 @@ importers:
       '@emotion/styled': ^11.10.4
       '@hookform/resolvers': ^2.9.8
       '@stump/client': workspace:*
-      '@stump/core': workspace:*
       '@tanstack/react-query': ^4.3.4
       '@tanstack/react-query-devtools': ^4.3.5
       '@tanstack/react-table': ^8.5.13
@@ -251,7 +248,6 @@ importers:
       '@emotion/styled': 11.10.4_yiaqs725o7pcd7rteavrnhgj4y
       '@hookform/resolvers': 2.9.8_react-hook-form@7.35.0
       '@stump/client': link:../client
-      '@stump/core': link:../../core
       '@tanstack/react-query': 4.3.4_biqbaboplfbrettd7655fr4n2y
       '@tanstack/react-query-devtools': 4.3.5_hbsvmtv74eglyqgnta4rgheflu
       '@tanstack/react-table': 8.5.13_biqbaboplfbrettd7655fr4n2y

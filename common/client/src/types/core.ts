@@ -18,6 +18,7 @@ export interface UserPreferences {
 }
 
 export interface UserPreferencesUpdate {
+	id: string;
 	locale: string;
 	library_layout_mode: string;
 	series_layout_mode: string;

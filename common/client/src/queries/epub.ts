@@ -1,4 +1,4 @@
-import { Epub, EpubContent } from '@stump/core';
+import type { Epub, EpubContent } from '../types';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { getEpubBaseUrl, getEpubById } from '../api/epub';

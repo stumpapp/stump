@@ -1,21 +1,23 @@
-import {
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	useDisclosure,
-	MenuItem,
-} from '@chakra-ui/react';
 import { NotePencil } from 'phosphor-react';
-import toast from 'react-hot-toast';
 import { FieldValues } from 'react-hook-form';
-import LibraryModalForm from './form/LibraryModalForm';
-import { Library, LibraryOptions, Tag } from '@stump/core';
-import { TagOption, useLibraryMutation, useTags } from '@stump/client';
-import Button, { ModalCloseButton } from '../../ui/Button';
+import toast from 'react-hot-toast';
 
+import {
+	MenuItem,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalOverlay,
+	useDisclosure,
+} from '@chakra-ui/react';
+import { useLibraryMutation, useTags } from '@stump/client';
+
+import Button, { ModalCloseButton } from '../../ui/Button';
+import LibraryModalForm from './form/LibraryModalForm';
+
+import type { Library, LibraryOptions, Tag, TagOption } from '@stump/client';
 interface Props {
 	library: Library;
 	disabled?: boolean;

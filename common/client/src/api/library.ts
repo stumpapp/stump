@@ -1,4 +1,4 @@
-import {
+import type {
 	ApiResult,
 	CreateLibraryArgs,
 	UpdateLibraryArgs,
@@ -7,7 +7,7 @@ import {
 	PageableApiResult,
 	Series,
 	LibraryScanMode,
-} from '@stump/core';
+} from '../types';
 import { API } from '.';
 
 export function getLibraries(): Promise<PageableApiResult<Library[]>> {

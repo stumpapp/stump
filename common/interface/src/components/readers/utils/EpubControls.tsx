@@ -15,7 +15,7 @@ import {
 	useDisclosure,
 	VStack,
 } from '@chakra-ui/react';
-import { Epub } from '@stump/core';
+import type { Epub } from '@stump/client';
 
 import Button, { IconButton } from '../../../ui/Button';
 import EpubTocDrawer from './EpubTocDrawer';

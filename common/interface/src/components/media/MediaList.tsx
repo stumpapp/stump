@@ -1,4 +1,4 @@
-import { Media } from '@stump/core';
+import type { Media } from '@stump/client';
 import ListItem from '../ListItem';
 
 interface Props {

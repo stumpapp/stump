@@ -1,4 +1,4 @@
-import { LayoutMode } from '@stump/core';
+import type { LayoutMode } from '../types';
 import { useMemo } from 'react';
 import { useUserPreferences } from '../queries';
 import { useUserStore } from '../stores';

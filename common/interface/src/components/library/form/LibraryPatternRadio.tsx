@@ -7,7 +7,7 @@ import {
 	Text,
 	useColorModeValue,
 } from '@chakra-ui/react';
-import { Library, LibraryPattern } from '@stump/core';
+import type { Library, LibraryPattern } from '@stump/client';
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import Link from '../../../ui/Link';

@@ -1,4 +1,4 @@
-import { CoreEvent } from '@stump/core';
+import type { CoreEvent } from '../types';
 import { queryClient } from '../client';
 import { useJobStore } from '../stores';
 import { useJobsListener } from './useJobsListener';

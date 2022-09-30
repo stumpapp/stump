@@ -1,4 +1,4 @@
-import type { ApiResult, Tag } from '@stump/core';
+import type { ApiResult, Tag } from '../types';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
 

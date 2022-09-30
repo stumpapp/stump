@@ -1,9 +1,10 @@
-import Card from '../Card';
-import { Series } from '@stump/core';
 import { prefetchSeries } from '@stump/client';
 import { getSeriesThumbnail } from '@stump/client/api';
-import pluralizeStat from '../../utils/pluralize';
 
+import pluralizeStat from '../../utils/pluralize';
+import Card from '../Card';
+
+import type { Series } from '@stump/client';
 export default function SeriesCard(series: Series) {
 	const bookCount = series.media ? series.media.length : series.media_count ?? 0;
 

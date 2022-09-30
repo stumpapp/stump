@@ -1,4 +1,4 @@
-import { ApiResult, Media, PageableApiResult, Series } from '@stump/core';
+import type { ApiResult, Media, PageableApiResult, Series } from '../types';
 import { API } from '.';
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {

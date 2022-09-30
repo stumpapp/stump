@@ -1,4 +1,4 @@
-import { ApiResult, LoginOrRegisterArgs, User } from '@stump/core';
+import type { ApiResult, LoginOrRegisterArgs, User } from '../types';
 import { API } from '.';
 
 // TODO: types

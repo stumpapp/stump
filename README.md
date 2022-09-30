@@ -135,7 +135,7 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 
 ### /common
 
-- `client`: Zustand and React Query configuration to be used by the `interface` package.
+- `client`: Everything needed to create a react-based client for Stump. Contains Zustand and React Query configuration, used by the `interface` package, as well as the generated TypeScript types.
 - `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.
 - `interface`: Stump's main React-based interface, shared between the web and desktop applications.
 

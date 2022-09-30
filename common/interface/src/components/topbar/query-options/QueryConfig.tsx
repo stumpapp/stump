@@ -1,5 +1,7 @@
+import { CaretDown, Sliders } from 'phosphor-react';
+import React, { useMemo } from 'react';
 import { useLocation } from 'react-router';
-import { useQueryParamStore } from '@stump/client';
+
 import {
 	Heading,
 	HStack,
@@ -15,10 +17,11 @@ import {
 	Text,
 	useColorModeValue,
 } from '@chakra-ui/react';
+import { mediaOrderByOptions, seriesOrderByOptions, useQueryParamStore } from '@stump/client';
+
 import Button from '../../../ui/Button';
-import { CaretDown, Sliders } from 'phosphor-react';
-import React, { useMemo } from 'react';
-import { Direction, mediaOrderByOptions, seriesOrderByOptions } from '@stump/core';
+
+import type { Direction } from '@stump/client';
 
 function QueryConfigSection({ children }: { children: React.ReactNode }) {
 	return (

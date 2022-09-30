@@ -5,16 +5,17 @@ import { useParams } from 'react-router-dom';
 import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react';
 import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client';
 import { getSeriesThumbnail } from '@stump/client/api';
-import { Series } from '@stump/core';
 
+import MediaGrid from '../components/media/MediaGrid';
+import MediaList from '../components/media/MediaList';
 import DownloadSeriesButton from '../components/series/DownloadSeriesButton';
 import UpNextButton from '../components/series/UpNextButton';
+import { useGetPage } from '../hooks/useGetPage';
 import useIsInView from '../hooks/useIsInView';
 import Pagination from '../ui/Pagination';
 import ReadMore from '../ui/ReadMore';
-import MediaGrid from '../components/media/MediaGrid';
-import MediaList from '../components/media/MediaList';
-import { useGetPage } from '../hooks/useGetPage';
+
+import type { Series } from '@stump/client';
 
 interface OverviewTitleSectionProps {
 	isVisible: boolean;

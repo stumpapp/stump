@@ -1,7 +1,7 @@
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-import { Direction, PageParams } from '@stump/core';
+import type { Direction, PageParams } from '../types';
 
 import { StoreBase } from './';
 

@@ -10,11 +10,12 @@ import {
 	ModalOverlay,
 	useDisclosure,
 } from '@chakra-ui/react';
-import { TagOption, useLibraryMutation, useTags } from '@stump/client';
-import { ApiResult, LibraryOptions, Tag } from '@stump/core';
+import { useLibraryMutation, useTags } from '@stump/client';
 
 import Button, { ModalCloseButton } from '../../ui/Button';
 import LibraryModalForm from './form/LibraryModalForm';
+
+import type { ApiResult, LibraryOptions, Tag, TagOption } from '@stump/client';
 
 interface Props {
 	trigger?: (props: any) => JSX.Element;

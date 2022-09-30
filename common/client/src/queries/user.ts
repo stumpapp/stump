@@ -1,4 +1,4 @@
-import { UserPreferences } from '@stump/core';
+import type { UserPreferences } from '../types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ClientQueryParams } from '.';
 import { getUserPreferences, updateUserPreferences as updateUserPreferencesFn } from '../api/user';

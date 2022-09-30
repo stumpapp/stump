@@ -41,6 +41,10 @@ impl Ctx {
 		}
 	}
 
+	pub fn arced(&self) -> Arc<Ctx> {
+		Arc::new(self.get_ctx())
+	}
+
 	/// Get reference to prisma client
 	pub fn get_db(&self) -> &prisma::PrismaClient {
 		&self.db

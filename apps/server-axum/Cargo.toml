@@ -1,0 +1,61 @@
+[package]
+name = "stump_server_axum"
+version = "0.0.0"
+# version.workspace = true
+edition = "2021"
+default-run = "stump_server_axum"
+
+# TODO: remove this so workspace picks this up
+[workspace]
+
+[dev-dependencies]
+# axum-macros = "0.2.3"
+
+[dependencies]
+stump_core = { path = "../../core" }
+axum = "0.5.16"
+axum-macros = "0.2.3"
+axum-extra = { version = "0.3.7", features = [
+  "spa",
+  "cookie"
+] }
+tower-http = { version = "0.3.4", features = ["fs"] }
+tokio = { version = "1.21.2", features = [
+  # feature for the internal channels (internal communication)
+  "sync", 
+  # this is needed for tokio::spawn multi-threaded
+  "rt-multi-thread"
+] }
+
+# prisma-client-rust.workspace = true
+# serde.workspace = true
+
+### Rocket / Generic Server ### 
+# rocket.workspace = true
+# rocket_okapi = { version = "0.8.0-rc.2", features = ["rapidoc", "swagger"] }
+# rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
+# rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }
+
+### Dev Utils ###
+# schemars.workspace = true
+# specta.workspace = true
+
+### Error Handling + Logging ###
+tracing-appender = "0.2.2"
+tracing = "0.1.36"
+tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
+thiserror = "1.0.37"
+
+### Auth ###
+bcrypt = "0.10.1"
+base64 = "0.13.0"
+
+### Platform Specific Deps ###
+[target.aarch64-unknown-linux-musl.dependencies]
+openssl = { version = "0.10.40", features = ["vendored"] }
+
+[target.armv7-unknown-linux-musleabihf.dependencies]
+openssl = { version = "0.10.40", features = ["vendored"] }
+
+[target.x86_64-unknown-linux-musl.dependencies]
+openssl = { version = "0.10.40", features = ["vendored"] }

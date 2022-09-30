@@ -1,4 +1,7 @@
+import { ListBullets } from 'phosphor-react';
 import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import {
 	Box,
 	Drawer,
@@ -10,11 +13,10 @@ import {
 	Text,
 	useColorModeValue,
 } from '@chakra-ui/react';
-import { ListBullets } from 'phosphor-react';
-import { useLocation } from 'react-router-dom';
-import { EpubContent } from '@stump/core';
+
 import { IconButton } from '../../../ui/Button';
 
+import type { EpubContent } from '@stump/client';
 interface EpubTocDrawerProps {
 	isOpen: boolean;
 	onClose(): void;

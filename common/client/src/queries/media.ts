@@ -1,4 +1,4 @@
-import type { Media, ReadProgress } from '@stump/core';
+import type { Media, ReadProgress } from '../types';
 import type { MutationCallbacks, QueryCallbacks } from '.';
 
 import { useMutation, useQuery } from '@tanstack/react-query';

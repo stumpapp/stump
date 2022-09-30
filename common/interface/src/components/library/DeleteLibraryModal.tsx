@@ -1,20 +1,22 @@
-import {
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	useDisclosure,
-	MenuItem,
-} from '@chakra-ui/react';
 import { Trash } from 'phosphor-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { Library } from '@stump/core';
-import Button, { ModalCloseButton } from '../../ui/Button';
+
+import {
+	MenuItem,
+	Modal,
+	ModalBody,
+	ModalContent,
+	ModalFooter,
+	ModalHeader,
+	ModalOverlay,
+	useDisclosure,
+} from '@chakra-ui/react';
 import { useLibraryMutation } from '@stump/client';
 
+import Button, { ModalCloseButton } from '../../ui/Button';
+
+import type { Library } from '@stump/client';
 interface Props {
 	disabled?: boolean;
 	library: Library;

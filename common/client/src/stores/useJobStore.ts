@@ -1,4 +1,4 @@
-import { JobUpdate } from '@stump/core';
+import type { JobUpdate } from '../types';
 import create from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { produce } from 'immer';

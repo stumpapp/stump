@@ -1,5 +1,5 @@
 import { Heading } from '@chakra-ui/react';
-import { Media } from '@stump/core';
+import type { Media } from '@stump/client';
 import MediaCard from './MediaCard';
 
 interface Props {

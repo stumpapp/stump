@@ -1,5 +1,5 @@
 import { Text } from '@chakra-ui/react';
-import { DirectoryListingFile } from '@stump/core';
+import type { DirectoryListingFile } from '@stump/client';
 
 interface FileExplorerProps {
 	files: DirectoryListingFile[];

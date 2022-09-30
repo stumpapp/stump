@@ -1,7 +1,8 @@
 import { Heading } from '@chakra-ui/react';
-import { Series } from '@stump/core';
+
 import SeriesCard from './SeriesCard';
 
+import type { Series } from '@stump/client';
 interface Props {
 	isLoading: boolean;
 	series?: Series[];

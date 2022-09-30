@@ -1,4 +1,4 @@
-import type { Library, PageInfo } from '@stump/core';
+import type { Library, PageInfo } from '../types';
 import type { ClientQueryParams, QueryCallbacks } from '.';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';

@@ -1,4 +1,4 @@
-import { User, UserPreferences } from '@stump/core';
+import type { User, UserPreferences } from '../types';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { produce } from 'immer';

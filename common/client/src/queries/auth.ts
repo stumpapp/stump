@@ -8,7 +8,7 @@ import { queryClient } from '../client';
 import { ClientQueryParams, QueryCallbacks } from '.';
 import { StumpQueryContext } from '../context';
 
-import type { User } from '@stump/core';
+import type { User } from '../types';
 export interface AuthQueryOptions extends QueryCallbacks<User> {
 	disabled?: boolean;
 	// onSuccess?: (user: User | null) => void;

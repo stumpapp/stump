@@ -1,4 +1,4 @@
-import { ApiResult, LogMetadata } from '@stump/core';
+import type { ApiResult, LogMetadata } from '../types';
 import { API } from '.';
 
 export function getLogFileMeta(): Promise<ApiResult<LogMetadata>> {

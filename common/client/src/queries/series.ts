@@ -1,4 +1,4 @@
-import type { Media, Series } from '@stump/core';
+import type { Media, Series } from '../types';
 import type { QueryCallbacks } from '.';
 import { useMemo } from 'react';
 

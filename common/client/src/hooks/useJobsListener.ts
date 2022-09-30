@@ -1,4 +1,4 @@
-import { CoreEvent } from '@stump/core';
+import type { CoreEvent } from '../types';
 import { useEffect, useMemo } from 'react';
 import { API } from '../api';
 

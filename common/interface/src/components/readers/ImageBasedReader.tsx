@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useRef } from 'react';
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useWindowSize } from 'rooks';
 
 import { useBoolean } from '@chakra-ui/react';
-import { Media } from '@stump/core';
-import { useWindowSize } from 'rooks';
 
 import Toolbar from './utils/Toolbar';
 
+import type { Media } from '@stump/client';
 export interface ImageBasedReaderProps {
 	currentPage: number;
 	media: Media;

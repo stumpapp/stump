@@ -1,4 +1,4 @@
-import { ApiResult, ClaimResponse } from '@stump/core';
+import type { ApiResult, ClaimResponse } from '../types';
 import { API } from '.';
 
 export function ping() {}

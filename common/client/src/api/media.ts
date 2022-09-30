@@ -1,4 +1,4 @@
-import { ApiResult, Media, PageableApiResult, ReadProgress } from '@stump/core';
+import type { ApiResult, Media, PageableApiResult, ReadProgress } from '../types';
 import { API } from '.';
 
 type GetMediaById = ApiResult<Media>;

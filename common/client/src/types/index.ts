@@ -1,4 +1,4 @@
-import { PageInfo, Media, Series, Library } from './generated';
+import { PageInfo, Media, Series, Library } from './core';
 import { ApiError } from './server';
 
 export type ApiResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<ApiError>>;
@@ -66,5 +66,5 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 	status: undefined,
 };
 
-export * from './generated';
+export * from './core';
 export * from './server';

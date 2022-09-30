@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
+import type { Media } from '@stump/client';
 import { prefetchMedia } from '@stump/client';
 import { getMediaThumbnail } from '@stump/client/api';
-import { Media } from '@stump/core';
 
 import Card from '../Card';
 

@@ -1,6 +1,8 @@
 import { Heading } from '@chakra-ui/react';
-import { Series } from '@stump/core';
+
 import ListItem from '../ListItem';
+
+import type { Series } from '@stump/client';
 
 interface Props {
 	isLoading: boolean;

@@ -1,4 +1,4 @@
-import { ApiResult, Epub } from '@stump/core';
+import type { ApiResult, Epub } from '../types';
 import { API } from '.';
 
 export function getEpubBaseUrl(id: string): string {

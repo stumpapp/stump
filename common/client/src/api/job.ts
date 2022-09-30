@@ -1,4 +1,4 @@
-import { ApiResult, JobReport } from '@stump/core';
+import type { ApiResult, JobReport } from '../types';
 import { API } from '.';
 
 export function getJobs(): Promise<ApiResult<JobReport[]>> {

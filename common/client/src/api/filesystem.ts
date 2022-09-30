@@ -1,4 +1,4 @@
-import { ApiResult, DirectoryListing, DirectoryListingInput } from '@stump/core';
+import type { ApiResult, DirectoryListing, DirectoryListingInput } from '../types';
 import { API } from '.';
 
 export function listDirectory(input?: DirectoryListingInput): Promise<ApiResult<DirectoryListing>> {

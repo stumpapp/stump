@@ -23,7 +23,7 @@ mod tests {
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let mut file = File::create(
 			PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-				.join("../../core/bindings")
+				.join("../../common/client/src/types")
 				.join("server.ts"),
 		)?;
 

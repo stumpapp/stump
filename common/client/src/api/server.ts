@@ -1,4 +1,4 @@
-import { ApiResult } from '@stump/core';
+import type { ApiResult } from '../types';
 import { API } from '.';
 
 export function getStumpVersion(): Promise<ApiResult<string>> {

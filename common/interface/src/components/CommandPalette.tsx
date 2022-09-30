@@ -7,7 +7,6 @@ import { useDebounce } from 'rooks';
 import {
 	Badge,
 	Box,
-	Flex,
 	Heading,
 	HStack,
 	Input,
@@ -25,7 +24,7 @@ import {
 	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react';
-import { FileStatus } from '@stump/core';
+import type { FileStatus } from '@stump/client';
 
 import FileStatusBadge from './FileStatusBadge';
 

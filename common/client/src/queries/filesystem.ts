@@ -1,4 +1,4 @@
-import type { DirectoryListing } from '@stump/core';
+import type { DirectoryListing } from '../types';
 import { AxiosError } from 'axios';
 import { useMemo, useState } from 'react';
 

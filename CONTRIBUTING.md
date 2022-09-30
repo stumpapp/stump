@@ -11,4 +11,6 @@ You can contribute by opening new issues or PRs. Please do not drop random PRs w
 7. Once you add your contributions, create a PR from your feature branch into `develop` - _not_ `main`.
 8. Be sure to update your feature branch with any new changes **before** making the PR.
 
+If you are interested in making a non-code contribution, please be sure to add yourself to the [`CONTRIBUTORS.md`](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTORS.md) file once your contribution has been finalized.
+
 Thanks for contributing to my project!!

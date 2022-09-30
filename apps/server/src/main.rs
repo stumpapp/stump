@@ -69,7 +69,7 @@ async fn rocket() -> _ {
 
 	let core_ctx = core.get_context();
 
-	if let Err(e) = core.run_migrations(core_ctx.get_db()).await {
+	if let Err(e) = core.run_migrations().await {
 		// Note: panic seems to lock the database (tested in docker). So,
 		// definitely don't do that. Maybe I can refactor this to return
 		// a Result... instead of this launch crap.

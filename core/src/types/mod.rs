@@ -3,7 +3,7 @@ pub mod errors;
 pub mod models;
 pub mod server;
 
-use errors::CoreError;
+pub use errors::CoreError;
 
 pub type CoreResult<T> = Result<T, CoreError>;
 

@@ -12,13 +12,13 @@ export default defineConfig({
 	},
 	plugins: [react(), tsconfigPaths()],
 	root: 'src',
-	publicDir: '../../../common/interface/src/assets',
+	publicDir: '../../../common/interface/public',
 	define: {
 		pkgJson: { name, version },
 	},
 	build: {
 		outDir: '../dist',
-		assetsDir: '.',
+		assetsDir: './assets',
 		manifest: true,
 	},
 });

@@ -1,19 +1,15 @@
-use std::{io, net::SocketAddr};
+use std::net::SocketAddr;
 
-use axum::{
-	http::StatusCode,
-	response::{Html, IntoResponse},
-	routing::{get, get_service},
-	Extension, Router,
-};
-use axum_extra::routing::SpaRouter;
+use axum::{Extension, Router};
 use errors::{ServerError, ServerResult};
 use stump_core::StumpCore;
-use tower_http::services::{ServeDir, ServeFile};
 use tracing::error;
 
+mod config;
 mod errors;
 mod routers;
+
+use config::session;
 
 fn debug_setup() {
 	std::env::set_var(
@@ -24,6 +20,8 @@ fn debug_setup() {
 		"ROCKET_CONFIG",
 		env!("CARGO_MANIFEST_DIR").to_string() + "/Rocket.toml",
 	);
+	// TODO: remove this
+	std::env::set_var("ROCKET_PROFILE", "debug");
 }
 
 #[tokio::main]
@@ -39,48 +37,18 @@ async fn main() -> ServerResult<()> {
 	}
 
 	// TODO: init logging
-
 	let core = StumpCore::new().await;
 	let server_ctx = core.get_context();
+	// let server_state = ServerState::new(core);
 
-	// lmao as you can see, ive had some issues with SPA routing
 	let app = Router::new()
+		.merge(routers::mount())
 		.layer(Extension(server_ctx.arced()))
-		.merge(SpaRouter::new("/assets", "dist"))
-		.merge(routers::mount());
-	// .fallback(get_service(ServeDir::new("dist")).handle_error(handle_error));
-	// .fallback(get_service(ServeFile::new("dist/index.html")).handle_error(
-	// 	|e| async move { (StatusCode::INTERNAL_SERVER_ERROR, format!("Error: {}", e)) },
-	// ))
-	// .nest(
-	// 	"/dist",
-	// 	get_service(ServeDir::new("dist")).handle_error(|e| async move {
-	// 		(StatusCode::INTERNAL_SERVER_ERROR, format!("Error: {}", e))
-	// 	}),
-	// );
-	// .merge(SpaRouter::new("/assets", "dist"))
-	// .fallback_service(get_service(ServeDir::new("dist")).handle_error(handle_error));
-	// .route(
-	// 	"/",
-	// 	get_service(ServeDir::new("./static/index.html")).handle_error(handle_error),
-	// )
-	// .merge(
-	// 	axum_extra::routing::SpaRouter::new("/dist", "./dist/assets")
-	// 		.index_file("./dist/index.html"),
-	// );
-	// .fallback(get(|| async { Html(include_str!("../dist/index.html")) }))
-	// .fallback(
-	// 	get_service(ServeDir::new("dist")).handle_error(|e| async move {
-	// 		(StatusCode::INTERNAL_SERVER_ERROR, format!("Error: {}", e))
-	// 	}),
-	// );
-
-	let addr = SocketAddr::from(([0, 0, 0, 0], 10801));
+		.layer(session::get_session_layer());
 
 	// TODO: set ip based on env var
-	// addr.set_ip()
 	// TODO: set port based on env var
-	// add.set_port(..);
+	let addr = SocketAddr::from(([0, 0, 0, 0], 10801));
 
 	axum::Server::bind(&addr)
 		.serve(app.into_make_service())
@@ -90,6 +58,6 @@ async fn main() -> ServerResult<()> {
 	Ok(())
 }
 
-async fn handle_error(_err: io::Error) -> impl IntoResponse {
-	(StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
-}
+// async fn handle_error(_err: io::Error) -> impl IntoResponse {
+// 	(StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
+// }

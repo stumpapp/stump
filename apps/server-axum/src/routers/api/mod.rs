@@ -1,5 +1,7 @@
-use axum::{routing::get, Router};
+use axum::Router;
+
+mod auth;
 
 pub(crate) fn mount() -> Router {
-	Router::new().route("/", get(|| async { "API: /" }))
+	Router::new().merge(auth::mount())
 }

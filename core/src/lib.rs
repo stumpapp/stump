@@ -57,7 +57,7 @@ pub struct StumpCore {
 
 impl StumpCore {
 	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`Arc`].
-	pub async fn new() -> Arc<StumpCore> {
+	pub async fn new() -> StumpCore {
 		let internal_channel = unbounded_channel::<InternalCoreTask>();
 
 		let core_ctx = Ctx::new(internal_channel.0).await;
@@ -69,7 +69,7 @@ impl StumpCore {
 			event_manager,
 		};
 
-		Arc::new(core)
+		core
 	}
 
 	/// Initializes logging for the core using [`log`] and [`fern`].

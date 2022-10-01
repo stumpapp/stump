@@ -1,6 +1,6 @@
 use rocket::tokio;
 
-use crate::utils::{create_library, init_test, run_test_scan, TempLibrary};
+use crate::utils::{init_test, run_test_scan, TempLibrary};
 
 use stump_core::{
 	config::Ctx,
@@ -49,20 +49,11 @@ async fn series_based_library_batch_scan() -> CoreResult<()> {
 	init_test().await;
 
 	let ctx = Ctx::mock().await;
-	let tmp_library = TempLibrary::series_library()?;
-	let library_root = tmp_library.fmt_with_root("series-based-library");
-	let library_root_str = library_root.to_str().unwrap();
-
 	let client = ctx.get_db();
 
-	let (library, _library_options) = create_library(
-		client,
-		"series_based_library",
-		library_root_str,
-		LibraryPattern::SeriesBased,
-		LibraryScanMode::None,
-	)
-	.await?;
+	let (library, _library_options, _tmp) =
+		TempLibrary::create(client, LibraryPattern::SeriesBased, LibraryScanMode::None)
+			.await?;
 
 	let scan_result = run_test_scan(&ctx, &library, LibraryScanMode::Sync).await;
 
@@ -87,14 +78,8 @@ async fn collection_based_library_batch_scan() -> CoreResult<()> {
 	let ctx = Ctx::mock().await;
 	let client = ctx.get_db();
 
-	let tmp_library = TempLibrary::series_library()?;
-	let library_root = tmp_library.fmt_with_root("collection-based-library");
-	let library_root_str = library_root.to_str().unwrap();
-
-	let (library, _library_options) = create_library(
+	let (library, _library_options, _tmp) = TempLibrary::create(
 		client,
-		"collection_based_library",
-		library_root_str,
 		LibraryPattern::CollectionBased,
 		LibraryScanMode::None,
 	)
@@ -109,7 +94,7 @@ async fn collection_based_library_batch_scan() -> CoreResult<()> {
 	);
 
 	let completed_tasks = scan_result.unwrap();
-	assert_eq!(completed_tasks, 6);
+	assert_eq!(completed_tasks, 3);
 
 	check_library_post_scan(client, &library.id, 1, 3).await?;
 

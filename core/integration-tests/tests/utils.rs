@@ -1,7 +1,8 @@
 extern crate stump_core;
 
+use rocket::{futures::executor::block_on, tokio};
 use std::{fs, path::PathBuf, sync::Once};
-use tempfile::{Builder, TempDir};
+use tempfile::{Builder, NamedTempFile, TempDir};
 
 use stump_core::{
 	config::Ctx,
@@ -19,26 +20,35 @@ use stump_core::{
 // scope, the directory is deleted.
 pub struct TempLibrary {
 	pub _dir: TempDir,
-	pub path: PathBuf,
+	pub root: PathBuf,
+	pub library_root: PathBuf,
+	pub pattern: LibraryPattern,
 }
 
 impl TempLibrary {
-	fn get_root() -> TempDir {
+	fn root() -> TempDir {
 		Builder::new()
-			.prefix("libraries")
-			// I want the temp directory to be named `libraries` exactly, so
-			// I'm setting the random bytes to 0, otherwise it would tack on
-			// a random string n chars long to the end of the name.
-			.rand_bytes(0)
-			.tempdir_in(&get_manifest_dir())
+			.tempdir_in(get_manifest_dir())
 			.expect("Failed to create temp dir")
 	}
+
+	/// Returns a temporary directory
+	// fn named_root() -> TempDir {
+	// 	Builder::new()
+	// 		.prefix("libraries")
+	// 		// I want the temp directory to be named `libraries` exactly, so
+	// 		// I'm setting the random bytes to 0, otherwise it would tack on
+	// 		// a random string n chars long to the end of the name.
+	// 		.rand_bytes(0)
+	// 		.tempdir_in(&get_manifest_dir())
+	// 		.expect("Failed to create temp dir")
+	// }
 
 	/// Builds a temporary directory structure for a collection-based library:
 	///
 	/// ```md
 	/// .
-	/// └── collection-based-library
+	/// └── LIBRARY-ROOT
 	///     └── collection-1
 	///         ├── collection-1-nested1
 	///         │   ├── collection-1-nested1-nested2
@@ -47,10 +57,10 @@ impl TempLibrary {
 	///         └── book.epub
 	/// ```
 	pub fn collection_library() -> CoreResult<TempLibrary> {
-		let root = TempLibrary::get_root();
+		let root = TempLibrary::root();
 		let root_path = root.path().to_path_buf();
 
-		let collection_based_library = root_path.join("collection-based-library");
+		let collection_based_library = root_path.clone();
 		let cbl_1 = collection_based_library.join("collection-1");
 		let cbl_1_epub = cbl_1.join("book.epub");
 		let cbl_nested_1 = cbl_1.join("collection-1-nested1");
@@ -70,7 +80,9 @@ impl TempLibrary {
 
 		Ok(TempLibrary {
 			_dir: root,
-			path: root_path,
+			root: root_path,
+			library_root: collection_based_library,
+			pattern: LibraryPattern::CollectionBased,
 		})
 	}
 
@@ -78,7 +90,7 @@ impl TempLibrary {
 	///
 	/// ```md
 	/// .
-	/// └── series-based-library
+	/// └── LIBRARY-ROOT
 	///     ├── book.zip
 	///     ├── series-1
 	///     │   └── space-book.zip
@@ -86,10 +98,10 @@ impl TempLibrary {
 	///         └── duck-book.zip
 	/// ```
 	pub fn series_library() -> CoreResult<TempLibrary> {
-		let root = TempLibrary::get_root();
+		let root = TempLibrary::root();
 		let root_path = root.path().to_path_buf();
 
-		let series_based_library = root_path.join("series-based-library");
+		let series_based_library = root_path.clone();
 		let series_based_library_root_book = series_based_library.join("book.zip");
 		let sbl_1 = series_based_library.join("series-1");
 		let sbl_1_book = sbl_1.join("space-book.cbz");
@@ -108,13 +120,61 @@ impl TempLibrary {
 
 		Ok(TempLibrary {
 			_dir: root,
-			path: root_path,
+			root: root_path,
+			library_root: series_based_library,
+			pattern: LibraryPattern::SeriesBased,
 		})
 	}
 
-	/// Creates a PathBuf from a join of the root path and the given directory name.
-	pub fn fmt_with_root(&self, dir_name: &str) -> PathBuf {
-		self.path.as_path().join(dir_name)
+	/// Builds a temporary directory structure, and inserts it into the database.
+	/// Returns the temporary directory, the library, and the library options.
+	pub async fn create(
+		client: &PrismaClient,
+		pattern: LibraryPattern,
+		scan_mode: LibraryScanMode,
+	) -> CoreResult<(library::Data, library_options::Data, TempLibrary)> {
+		let temp_library = match pattern {
+			LibraryPattern::CollectionBased => TempLibrary::collection_library()?,
+			LibraryPattern::SeriesBased => TempLibrary::series_library()?,
+		};
+
+		temp_library.insert(client, scan_mode).await
+	}
+
+	/// A helper to create a collection based library used in the epub tests.
+	pub async fn epub_library(
+		client: &PrismaClient,
+	) -> CoreResult<(library::Data, library_options::Data, TempLibrary)> {
+		let _tmp = TempLibrary::collection_library()?;
+
+		_tmp.insert(client, LibraryScanMode::Batched).await
+	}
+
+	/// Gets the name of the library from the directory name.
+	pub fn get_name(&self) -> &str {
+		self.library_root
+			.file_name()
+			.unwrap()
+			.to_str()
+			.expect("Failed to get library name")
+	}
+
+	/// Inserts a library into the database based on the temp library
+	pub async fn insert(
+		self,
+		client: &PrismaClient,
+		scan_mode: LibraryScanMode,
+	) -> CoreResult<(library::Data, library_options::Data, TempLibrary)> {
+		let (library, options) = create_library(
+			client,
+			self.get_name(),
+			self.library_root.to_str().unwrap(),
+			self.pattern.clone(),
+			scan_mode,
+		)
+		.await?;
+
+		Ok((library, options, self))
 	}
 }
 
@@ -174,6 +234,16 @@ pub async fn init_test() {
 	INIT.call_once(|| {});
 }
 
+pub fn make_tmp_file(test_file: &str) -> CoreResult<NamedTempFile> {
+	let contents = get_test_file_contents(test_file);
+	let tmp_file =
+		NamedTempFile::new_in(&get_manifest_dir()).expect("Failed to create temp file");
+
+	fs::write(tmp_file.path(), contents)?;
+
+	Ok(tmp_file)
+}
+
 pub fn get_manifest_dir() -> PathBuf {
 	PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
@@ -182,11 +252,7 @@ pub fn get_test_data_dir() -> PathBuf {
 	get_manifest_dir().join("data")
 }
 
-pub fn get_test_libraries_dir() -> PathBuf {
-	get_manifest_dir().join("libraries")
-}
-
-fn get_test_file_contents(name: &str) -> Vec<u8> {
+pub fn get_test_file_contents(name: &str) -> Vec<u8> {
 	let path = get_test_data_dir().join(name);
 	fs::read(path).expect(format!("Failed to read test file: {}", name).as_str())
 }

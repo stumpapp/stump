@@ -83,8 +83,8 @@ pub enum ApiError {
 	Unauthorized,
 	#[error("{0}")]
 	Forbidden(String),
-	#[error("{0}")]
-	NotImplemented(String),
+	#[error("This functionality has not been implemented yet")]
+	NotImplemented,
 	#[error("{0}")]
 	ServiceUnavailable(String),
 	#[error("{0}")]
@@ -174,7 +174,7 @@ impl IntoResponse for ApiError {
 			},
 			ApiError::Unauthorized => (StatusCode::UNAUTHORIZED, self.to_string()),
 			ApiError::Forbidden(err) => (StatusCode::FORBIDDEN, err),
-			ApiError::NotImplemented(err) => (StatusCode::NOT_IMPLEMENTED, err),
+			ApiError::NotImplemented => (StatusCode::NOT_IMPLEMENTED, self.to_string()),
 			ApiError::ServiceUnavailable(err) => (StatusCode::SERVICE_UNAVAILABLE, err),
 			ApiError::BadGateway(err) => (StatusCode::BAD_GATEWAY, err),
 			ApiError::PrismaError(e) => {

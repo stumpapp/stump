@@ -8,7 +8,11 @@ mod epub;
 mod filesystem;
 mod job;
 mod library;
+mod log;
 mod media;
+mod series;
+mod tag;
+mod user;
 
 pub(crate) fn mount() -> Router {
 	Router::new()
@@ -18,6 +22,10 @@ pub(crate) fn mount() -> Router {
 		.merge(media::mount())
 		.merge(filesystem::mount())
 		.merge(job::mount())
+		.merge(log::mount())
+		.merge(series::mount())
+		.merge(tag::mount())
+		.merge(user::mount())
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", get(version))

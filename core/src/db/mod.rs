@@ -4,10 +4,7 @@ pub mod utils;
 use std::path::Path;
 use tracing::trace;
 
-use crate::{
-	config::{env, get_config_dir},
-	prisma,
-};
+use crate::{config::get_config_dir, prisma};
 
 /// Creates the PrismaClient. Will call `create_data_dir` as well
 pub async fn create_client() -> prisma::PrismaClient {

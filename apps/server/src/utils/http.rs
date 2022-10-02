@@ -22,6 +22,9 @@ impl IntoResponse for ImageResponse {
 				.unwrap_or(HeaderValue::from_static("image/png")),
 		);
 
+		println!("Content type: {}", self.content_type.to_string());
+		println!("{:?}", base_response.headers());
+
 		// 10 minutes
 		// .raw_header("Cache-Control", "private,max-age=600")
 		base_response

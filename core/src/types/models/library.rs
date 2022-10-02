@@ -2,7 +2,6 @@ use std::{fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tracing::trace;
 
 use crate::prisma;
 
@@ -182,26 +181,17 @@ impl Into<Library> for prisma::library::Data {
 	fn into(self) -> Library {
 		let series = match self.series() {
 			Ok(series) => Some(series.into_iter().map(|s| s.to_owned().into()).collect()),
-			Err(e) => {
-				trace!("Failed to load series for library: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
-			Err(e) => {
-				trace!("Failed to load tags for library: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		let library_options = match self.library_options() {
 			Ok(library_options) => library_options.to_owned().into(),
-			Err(e) => {
-				trace!("Failed to load library options for library: {}", e);
-				LibraryOptions::default()
-			},
+			Err(_e) => LibraryOptions::default(),
 		};
 
 		Library {

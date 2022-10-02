@@ -15,13 +15,18 @@ export let API: AxiosInstance;
 export function initializeApi(baseUrl: string) {
 	let correctedUrl = baseUrl;
 
-	// add /api to end of URL, don't allow double slashes
-	if (!correctedUrl.endsWith('/')) {
-		correctedUrl += '/';
+	// remove trailing slash
+	if (correctedUrl.endsWith('/')) {
+		// correctedUrl = correctedUrl.slice(0, -1);
 	}
-	if (!correctedUrl.endsWith('api/')) {
-		correctedUrl += 'api/';
+
+	// add api to end of URL, don't allow double slashes
+	if (!correctedUrl.endsWith('/api')) {
+		correctedUrl += '/api';
 	}
+
+	// remove all double slashes AFTER the initial http:// or https:// or whatever
+	correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, '$1');
 
 	API = axios.create({
 		baseURL: correctedUrl,

@@ -31,13 +31,7 @@ impl Into<ReadProgress> for prisma::read_progress::Data {
 			},
 		};
 
-		let user = match self.user() {
-			Ok(user) => Some(user.to_owned().into()),
-			Err(e) => {
-				trace!("Failed to load user for read progress: {}", e);
-				None
-			},
-		};
+		let user = self.user().ok().map(|u| u.to_owned().into());
 
 		ReadProgress {
 			id: self.id,

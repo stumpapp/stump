@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tracing::trace;
 
 use crate::prisma;
 
@@ -28,10 +27,7 @@ impl Into<User> for prisma::user::Data {
 	fn into(self) -> User {
 		let user_preferences = match self.user_preferences() {
 			Ok(up) => Some(up.unwrap().to_owned().into()),
-			Err(e) => {
-				trace!("Failed to load user preferences for user: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		User {
@@ -79,33 +75,3 @@ impl Into<UserPreferences> for prisma::user_preferences::Data {
 		}
 	}
 }
-
-// #[derive(Clone, Debug, Serialize, Deserialize, Type)]
-
-// pub struct AuthenticatedUser {
-// 	pub id: String,
-// 	pub username: String,
-// 	pub role: String,
-// 	pub user_preferences: UserPreferences,
-// }
-
-// impl Into<AuthenticatedUser> for prisma::user::Data {
-// 	fn into(self) -> AuthenticatedUser {
-// 		let user_preferences = match self
-// 			.user_preferences()
-// 			.expect("Failed to load user preferences")
-// 		{
-// 			Some(preferences) => preferences.to_owned(),
-// 			None => unreachable!(
-// 				"User does not have preferences. This should not be reachable."
-// 			),
-// 		};
-
-// 		AuthenticatedUser {
-// 			id: self.id.clone(),
-// 			username: self.username.clone(),
-// 			role: self.role.clone(),
-// 			user_preferences: user_preferences.into(),
-// 		}
-// 	}
-// }

@@ -5,6 +5,8 @@ use crate::{config::state::State, errors::ApiResult};
 
 mod auth;
 mod epub;
+mod filesystem;
+mod job;
 mod library;
 mod media;
 
@@ -14,6 +16,8 @@ pub(crate) fn mount() -> Router {
 		.merge(epub::mount())
 		.merge(library::mount())
 		.merge(media::mount())
+		.merge(filesystem::mount())
+		.merge(job::mount())
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", get(version))

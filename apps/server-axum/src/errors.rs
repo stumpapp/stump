@@ -158,6 +158,12 @@ impl From<ProcessFileError> for ApiError {
 	}
 }
 
+impl From<std::io::Error> for ApiError {
+	fn from(error: std::io::Error) -> ApiError {
+		ApiError::InternalServerError(error.to_string())
+	}
+}
+
 impl IntoResponse for ApiError {
 	fn into_response(self) -> Response {
 		match self {

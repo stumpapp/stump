@@ -22,7 +22,7 @@
 </p>
 
 <p align='center'>
-Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/SergioBenitez/Rocket'>Rocket</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and <a href='https://reactjs.org/'>React</a>.
+Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/tokio-rs/axum'>Axum</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and <a href='https://reactjs.org/'>React</a>.
 </p>
 
 <p align='center'>
@@ -135,8 +135,8 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 
 - `docs`: The documentation website, built with Next.js and [Markdoc](https://markdoc.io/), deployed to [stumpapp.dev](http://stumpapp.dev).
 - `desktop`: A Tauri application.
-- `server`: A Rocket server.
-- `web`: The React application that is served by the Rocket server.
+- `server`: An [Axum](https://github.com/tokio-rs/axum) server.
+- `web`: The React application that is served by the Axum server.
 
 ### /common
 

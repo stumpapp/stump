@@ -1,5 +1,4 @@
-use rocket::serde::DeserializeOwned;
-use schemars::JsonSchema;
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -10,7 +9,7 @@ use crate::{
 	types::{errors::CoreError, server::pageable::PageParams},
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone, JsonSchema, FromFormField, Type)]
+#[derive(Debug, Serialize, Deserialize, Clone, Type)]
 pub enum Direction {
 	#[serde(rename = "asc")]
 	Asc,
@@ -34,7 +33,7 @@ impl Into<prisma_client_rust::Direction> for Direction {
 }
 
 /// Model used in media API to alter sorting/ordering of queried media
-#[derive(Debug, Deserialize, JsonSchema)]
+#[derive(Debug, Deserialize)]
 pub struct QueryOrder {
 	/// The field to order by. Defaults to 'name'
 	pub order_by: String,

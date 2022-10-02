@@ -6,6 +6,7 @@ use std::{
 
 use globset::{Glob, GlobSetBuilder};
 use prisma_client_rust::{raw, PrismaValue, QueryError};
+use tracing::{debug, error, trace};
 use walkdir::DirEntry;
 
 use crate::{
@@ -101,7 +102,7 @@ pub fn get_tentative_media(
 		name,
 		description: comic_info.summary,
 		size: size.try_into().unwrap_or_else(|e| {
-			log::error!("Failed to calculate file size: {:?}", e);
+			error!("Failed to calculate file size: {:?}", e);
 
 			0
 		}),
@@ -128,15 +129,15 @@ pub async fn insert_media(
 	let create_action = tentative_media.into_action(ctx);
 	let media = create_action.exec().await?;
 
-	log::trace!("Media entity created: {:?}", media);
+	trace!("Media entity created: {:?}", media);
 
 	if library_options.create_webp_thumbnails {
-		log::debug!("Attempting to create WEBP thumbnail");
+		debug!("Attempting to create WEBP thumbnail");
 		let thumbnail_path = image::generate_thumbnail(&media.id, &path_str)?;
-		log::debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
+		debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
 	}
 
-	log::debug!("Media for {} created successfully", path_str);
+	debug!("Media for {} created successfully", path_str);
 
 	Ok(media)
 }
@@ -182,7 +183,7 @@ pub async fn insert_series(
 		.exec()
 		.await?;
 
-	log::debug!("Created new series: {:?}", series);
+	debug!("Created new series: {:?}", series);
 
 	Ok(series)
 }
@@ -203,7 +204,7 @@ pub async fn insert_series_many(
 				inserted_series.push(series);
 			},
 			Err(e) => {
-				log::error!("Failed to insert series: {:?}", e);
+				error!("Failed to insert series: {:?}", e);
 			},
 		}
 	}
@@ -289,7 +290,7 @@ pub async fn batch_media_operations(
 		.filter_map(|res| match res {
 			Ok(entry) => Some(entry.into_action(ctx)),
 			Err(e) => {
-				log::error!("Failed to create media: {:?}", e);
+				error!("Failed to create media: {:?}", e);
 
 				None
 			},
@@ -306,9 +307,9 @@ pub async fn batch_media_operations(
 	let result = mark_media_missing(ctx, missing_paths).await;
 
 	if let Err(err) = result {
-		log::error!("Failed to mark media as MISSING: {:?}", err);
+		error!("Failed to mark media as MISSING: {:?}", err);
 	} else {
-		log::debug!("Marked {} media as MISSING", result.unwrap());
+		debug!("Marked {} media as MISSING", result.unwrap());
 	}
 
 	Ok(ctx.db._batch(media_creates).await?)

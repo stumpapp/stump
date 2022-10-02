@@ -3,6 +3,7 @@ use serde::Deserialize;
 use std::io::BufReader;
 
 use include_dir::{include_dir, Dir};
+use tracing::{debug, info,error};
 
 use crate::{
 	fs::checksum::digest_from_reader,
@@ -36,9 +37,9 @@ fn get_sql_stmts(sql_str: &str) -> Vec<&str> {
 }
 
 pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> {
-	log::info!("Running migrations");
+	info!("Running migrations");
 
-	log::debug!("Checking for `migrations` table");
+	debug!("Checking for `migrations` table");
 
 	let res: Vec<CountQueryReturn> = db
 		._query_raw(raw!(
@@ -49,24 +50,24 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> 
 
 	// If the table doesn't exist, create it
 	if res.get(0).unwrap().count == 0 {
-		log::debug!("`migrations` table not found, creating it");
+		debug!("`migrations` table not found, creating it");
 
 		let stmts = get_sql_stmts(CREATE_MIGRATIONS_TABLE);
 
 		for stmt in stmts {
-			log::debug!("{}", stmt);
+			debug!("{}", stmt);
 			db._execute_raw(raw!(stmt)).exec().await?;
 		}
 
-		log::debug!("`migrations` table created");
+		debug!("`migrations` table created");
 	} else {
-		log::debug!("`migrations` table already exists");
+		debug!("`migrations` table already exists");
 	}
 
 	// migration structure: directory with name like [timstamp: i64]_[name], with a file named migration.sql
 	let mut migration_dirs = MIGRATIONS_DIR.dirs().collect::<Vec<&Dir>>();
 
-	log::debug!("Found {} migrations", migration_dirs.len());
+	debug!("Found {} migrations", migration_dirs.len());
 
 	// **must ensure** we run the migrations in order of timestamp
 	migration_dirs.sort_by(|a, b| {
@@ -80,7 +81,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> 
 		a_timestamp.cmp(&b_timestamp)
 	});
 
-	log::debug!("Migrations sorted by timestamp");
+	debug!("Migrations sorted by timestamp");
 
 	for dir in migration_dirs {
 		let name = dir.path().file_name().unwrap().to_str().unwrap();
@@ -99,15 +100,14 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> 
 		// Only run migrations that have not been run yet
 		// TODO: check success?
 		if existing_migration.is_some() {
-			log::debug!(
+			debug!(
 				"Migration {} already applied (checksum: {})",
-				name,
-				checksum
+				name, checksum
 			);
 			continue;
 		}
 
-		log::debug!("Running migration {}", name);
+		debug!("Running migration {}", name);
 
 		let stmts = get_sql_stmts(sql_str);
 
@@ -116,12 +116,12 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> 
 		// the next one shouldn't get run. Which makes the success field on migrations
 		// pointless. TBD.
 		for stmt in stmts {
-			log::debug!("{}", stmt);
+			debug!("{}", stmt);
 
 			match db._execute_raw(raw!(stmt)).exec().await {
 				Ok(_) => continue,
 				Err(e) => {
-					log::error!("Migration {} failed: {}", name, e);
+					error!("Migration {} failed: {}", name, e);
 
 					db.migration()
 						.create(
@@ -137,7 +137,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> 
 			};
 		}
 
-		log::debug!("Migration {} applied", name);
+		debug!("Migration {} applied", name);
 
 		db.migration()
 			.create(
@@ -149,7 +149,7 @@ pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> 
 			.await?;
 	}
 
-	log::info!("Migrations complete");
+	info!("Migrations complete");
 
 	Ok(())
 }

@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate rocket;
-
 use std::sync::Arc;
 
 // TODO: for these crates, some should NOT hoist entire crate, I need to restrict it
@@ -20,11 +17,11 @@ pub mod opds;
 pub mod prisma;
 pub mod types;
 
-use config::context::Ctx;
+use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
-use config::{env::StumpEnvironment, logging::init_fern};
+use config::{context::Ctx};
 use event::{event_manager::EventManager, InternalCoreTask};
-use rocket::tokio::sync::mpsc::unbounded_channel;
+use tokio::sync::mpsc::unbounded_channel;
 use types::{errors::CoreError, CoreResult};
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump
@@ -37,7 +34,6 @@ use types::{errors::CoreError, CoreResult};
 ///
 /// Example:
 /// ```rust
-/// use rocket::tokio;
 /// use stump_core::StumpCore;
 ///
 /// #[tokio::main]
@@ -69,11 +65,6 @@ impl StumpCore {
 		};
 
 		core
-	}
-
-	/// Initializes logging for the core using [`log`] and [`fern`].
-	pub fn init_logging() -> Result<(), fern::InitError> {
-		init_fern()
 	}
 
 	/// Loads environment variables from the `Stump.toml` configuration file, if

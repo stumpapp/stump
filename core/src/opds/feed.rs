@@ -1,10 +1,10 @@
-// use crate::opds::author::StumpAuthor;
 use crate::{
 	opds::link::OpdsLink,
 	prisma::{library, series},
 	types::errors::CoreError,
 };
 use prisma_client_rust::chrono;
+use tracing::warn;
 use xml::{writer::XmlEvent, EventWriter};
 
 use super::{
@@ -117,7 +117,7 @@ impl From<library::Data> for OpdsFeed {
 		let entries = match library.series() {
 			Ok(series) => series.to_owned().into_iter().map(OpdsEntry::from).collect(),
 			Err(e) => {
-				log::warn!("Failed to get series for library {}: {}", id, e);
+				warn!("Failed to get series for library {}: {}", id, e);
 				vec![]
 			},
 		};

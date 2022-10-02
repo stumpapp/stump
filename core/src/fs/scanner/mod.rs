@@ -2,13 +2,14 @@ use std::path::{Path, PathBuf};
 
 pub mod library;
 pub mod utils;
+use tracing::debug;
 
-use rocket::http::ContentType;
 use walkdir::WalkDir;
 
-use crate::fs::media_file;
-
-use super::media_file::guess_mime;
+use crate::{
+	fs::media_file::{self, guess_mime},
+	types::ContentType,
+};
 
 // TODO: refactor this trait? yes please
 pub trait ScannedFileTrait {
@@ -45,7 +46,7 @@ impl ScannedFileTrait for Path {
 				let mime = typ.mime_type();
 				let content_type = media_file::get_content_type_from_mime(mime);
 
-				return content_type != ContentType::Any;
+				return content_type != ContentType::UNKNOWN;
 			}
 		}
 
@@ -53,7 +54,7 @@ impl ScannedFileTrait for Path {
 			return !guessed_mime.starts_with("image/");
 		}
 
-		log::debug!("Unsupported file {:?}", self);
+		debug!("Unsupported file {:?}", self);
 
 		return false;
 	}

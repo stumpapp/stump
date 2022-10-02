@@ -1,15 +1,15 @@
 use std::{collections::HashMap, fs::File, path::PathBuf};
 
 use epub::doc::{EpubDoc, NavPoint};
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use tracing::error;
 
 use crate::{prisma::media, types::errors::ProcessFileError};
 
 use super::media::Media;
 
-#[derive(Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Serialize, Deserialize, Type)]
 pub struct EpubContent {
 	label: String,
 	content: PathBuf,
@@ -41,7 +41,7 @@ TODO: convert spine into this structure to match epub.js
 }
 */
 
-#[derive(Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Serialize, Deserialize, Type)]
 pub struct Epub {
 	/// This is the epub's record in Stump's database
 	pub media_entity: Media,
@@ -84,7 +84,7 @@ impl Epub {
 	/// an EpubDoc from the media's path. If this fails, it will return an EpubOpenError.
 	pub fn try_from(media: media::Data) -> Result<Epub, ProcessFileError> {
 		let epub_file = EpubDoc::new(media.path.as_str()).map_err(|e| {
-			log::error!("Failed to open epub {}: {}", &media.path, e);
+			error!("Failed to open epub {}: {}", &media.path, e);
 			ProcessFileError::EpubOpenError(e.to_string())
 		})?;
 

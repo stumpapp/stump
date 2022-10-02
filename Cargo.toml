@@ -6,8 +6,7 @@ members = [
   "core/integration-tests", 
   "apps/desktop/src-tauri", 
   "apps/tui", 
-  "apps/server",
-  "apps/server-axum"
+  "apps/server"
 ]
 
 [workspace.package]
@@ -15,7 +14,6 @@ version = "0.0.0"
 rust-version = "1.64.0"
 
 [workspace.dependencies]
-rocket =  { version = "0.5.0-rc.2", features =  ["json" ] }
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
   'rspc',
   # 'sqlite-create-many',
@@ -31,10 +29,8 @@ tokio = { version = "1.21.2", features = [
 ] }
 
 ### DEV UTILS ###
-schemars = "0.8.10"
 specta = "0.0.2"
 
 ### Error Handling + Logging ###
-log = "0.4.0" # TODO: remove this!
 tracing = "0.1.36"
 thiserror = "1.0.37"

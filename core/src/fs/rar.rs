@@ -1,6 +1,5 @@
 use std::path::{Path, PathBuf};
-
-use rocket::http::ContentType;
+use tracing::{debug, error, info, trace, warn};
 use unrar::archive::Entry;
 
 use crate::{
@@ -12,6 +11,7 @@ use crate::{
 	types::{
 		errors::ProcessFileError,
 		models::{library::LibraryOptions, media::ProcessedMediaFile},
+		ContentType,
 	},
 };
 
@@ -33,7 +33,7 @@ impl IsImage for Entry {
 }
 
 pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
-	log::debug!("Converting {:?} to zip format.", &path);
+	debug!("Converting {:?} to zip format.", &path);
 
 	let archive = unrar::Archive::new(path)?;
 
@@ -43,19 +43,19 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 	let original_ext = path.extension().unwrap().to_str().unwrap();
 	let unpacked_path = config::get_cache_dir().join(dir_name);
 
-	log::trace!("Extracting rar contents to: {:?}", &unpacked_path);
+	trace!("Extracting rar contents to: {:?}", &unpacked_path);
 
 	// TODO: fix this mess...
 	archive
 		.extract_to(&unpacked_path)
 		.map_err(|e| {
-			log::error!("Failed to open archive: {:?}", e.to_string());
+			error!("Failed to open archive: {:?}", e.to_string());
 
 			ProcessFileError::RarOpenError
 		})?
 		.process()
 		.map_err(|e| {
-			log::error!("Failed to extract archive: {:?}", e.to_string());
+			error!("Failed to extract archive: {:?}", e.to_string());
 
 			ProcessFileError::RarExtractError(e.to_string())
 		})?;
@@ -68,7 +68,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 	// TODO: maybe persist a log here? Or make more compliacated return?
 	// something like ConvertResult { ConvertedMoveFailed, etc. }
 	if let Err(err) = trash::delete(path) {
-		log::warn!(
+		warn!(
 			"Failed to delete converted rar file {:?}: {:?}",
 			path,
 			err.to_string()
@@ -78,7 +78,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 	// TODO: same as above, except this is a HARD delete
 	// TODO: maybe check that this path isn't in a pre-defined list of important paths?
 	if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
-		log::warn!(
+		warn!(
 			"Failed to delete unpacked rar contents in cache {:?}: {:?}",
 			path,
 			err.to_string()
@@ -99,7 +99,7 @@ pub fn process_rar(
 	if options.convert_rar_to_zip {
 		let new_path = convert_rar_to_zip(path)?;
 
-		log::trace!("Using `process_zip` with converted rar.");
+		trace!("Using `process_zip` with converted rar.");
 
 		return zip::process_zip(&new_path);
 	}
@@ -166,7 +166,7 @@ pub fn process_rar(
 // FIXME: this is a temporary work around for the issue wonderful people on Discord
 // discovered.
 pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
-	log::debug!("Calculating checksum sample size for: {}", file);
+	debug!("Calculating checksum sample size for: {}", file);
 
 	let file = std::fs::File::open(file)?;
 
@@ -189,7 +189,7 @@ pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
 	// let entries: Vec<_> = archive
 	// 	.list()
 	// 	.map_err(|e| {
-	// 		log::error!("Failed to read rar archive: {:?}", e);
+	// 		error!("Failed to read rar archive: {:?}", e);
 
 	// 		ProcessFileError::RarReadError
 	// 	})?
@@ -205,7 +205,7 @@ pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
 }
 
 pub fn digest_rar(file: &str) -> Option<String> {
-	log::debug!("Attempting to generate checksum for: {}", file);
+	debug!("Attempting to generate checksum for: {}", file);
 
 	let sample = rar_sample(file);
 
@@ -216,7 +216,7 @@ pub fn digest_rar(file: &str) -> Option<String> {
 
 	let size = sample.unwrap();
 
-	log::debug!(
+	debug!(
 		"Calculated sample size (in bytes) for generating checksum: {}",
 		size
 	);
@@ -224,10 +224,9 @@ pub fn digest_rar(file: &str) -> Option<String> {
 	match checksum::digest(file, size) {
 		Ok(digest) => Some(digest),
 		Err(e) => {
-			log::debug!(
+			debug!(
 				"Failed to digest rar file: {}. Unable to generate checksum: {}",
-				file,
-				e
+				file, e
 			);
 
 			None
@@ -258,7 +257,7 @@ pub fn get_rar_image(
 	let mut entries: Vec<_> = archive
 		.list_extract()
 		.map_err(|e| {
-			log::error!("Failed to read rar archive: {:?}", e);
+			error!("Failed to read rar archive: {:?}", e);
 
 			ProcessFileError::RarReadError
 		})?
@@ -275,7 +274,7 @@ pub fn get_rar_image(
 	let bytes = archive
 		.list_extract()
 		.map_err(|e| {
-			log::error!("Failed to read rar archive: {:?}", e);
+			error!("Failed to read rar archive: {:?}", e);
 
 			ProcessFileError::RarReadError
 		})?
@@ -295,7 +294,7 @@ pub fn get_rar_image(
 	// 	let bytes = archive
 	// 		.list_extract()
 	// 		.map_err(|e| {
-	// 			log::error!("Failed to read rar archive: {:?}", e);
+	// 			error!("Failed to read rar archive: {:?}", e);
 
 	// 			ProcessFileError::RarReadError
 	// 		})?

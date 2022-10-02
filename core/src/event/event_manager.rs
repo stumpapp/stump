@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rocket::tokio::{self, sync::mpsc};
+use tokio::{self, sync::mpsc};
 
 use crate::{config::context::Ctx, job::pool::JobPool};
 

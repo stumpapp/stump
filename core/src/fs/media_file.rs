@@ -1,5 +1,5 @@
-use rocket::http::ContentType;
-use std::{path::Path, str::FromStr};
+use std::path::Path;
+use tracing::{debug, warn};
 
 use crate::types::{
 	errors::ProcessFileError,
@@ -7,6 +7,7 @@ use crate::types::{
 		library::LibraryOptions,
 		media::{MediaMetadata, ProcessedMediaFile},
 	},
+	ContentType,
 };
 
 use super::{
@@ -38,17 +39,12 @@ pub fn process_comic_info(buffer: String) -> Option<MediaMetadata> {
 	}
 }
 
-// I am adding the required and currently missing types I need to Rocket
-// (https://github.com/SergioBenitez/Rocket/pull/2221), but in the meantime
-// need to use this for now when encountering missing mimes. These are
-// almost correct replacements, e.g. opf is supposed to be application/oebps-package+xml,
-// not just application/xml.
 fn temporary_content_workarounds(extension: &str) -> ContentType {
 	if extension == "opf" || extension == "ncx" {
 		return ContentType::XML;
 	}
 
-	ContentType::Any
+	ContentType::UNKNOWN
 }
 
 pub fn guess_content_type(file: &str) -> ContentType {
@@ -66,23 +62,8 @@ pub fn guess_content_type(file: &str) -> ContentType {
 	}
 }
 
-// FIXME: replace some of these once Rocket PR is merged
 pub fn get_content_type_from_mime(mime: &str) -> ContentType {
-	ContentType::from_str(mime).unwrap_or(match mime {
-		"application/pdf" => ContentType::PDF,
-		// "application/epub+zip" => ContentType::EPUB,
-		"application/zip" => ContentType::ZIP,
-		"application/vnd.comicbook+zip" => ContentType::ZIP,
-		// "application/vnd.rar" => ContentType::RAR,
-		// "application/vnd.comicbook-rar" => ContentType::RAR,
-		"image/png" => ContentType::PNG,
-		"image/jpeg" => ContentType::JPEG,
-		"image/webp" => ContentType::WEBP,
-		"image/gif" => ContentType::GIF,
-		// FIXME: replace one PR is merged (AGH, will it ever get merged??)
-		"application/xhtml+xml" => ContentType::XML,
-		_ => ContentType::Any,
-	})
+	ContentType::from(mime)
 }
 
 /// Guess the MIME type of a file based on its extension.
@@ -90,7 +71,7 @@ pub fn guess_mime(path: &Path) -> Option<String> {
 	let extension = path.extension().and_then(|ext| ext.to_str());
 
 	if extension.is_none() {
-		log::warn!(
+		warn!(
 			"Unable to guess mime for file without extension: {:?}",
 			path
 		);
@@ -127,11 +108,11 @@ pub fn guess_mime(path: &Path) -> Option<String> {
 pub fn infer_mime_from_path(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(mime) => {
-			log::debug!("Inferred mime for file {:?}: {:?}", path, mime);
+			debug!("Inferred mime for file {:?}: {:?}", path, mime);
 			mime.and_then(|m| Some(m.mime_type().to_string()))
 		},
 		Err(e) => {
-			log::warn!(
+			warn!(
 				"Unable to infer mime for file {:?}: {:?}",
 				path,
 				e.to_string()
@@ -174,7 +155,7 @@ pub fn process(
 	path: &Path,
 	options: &LibraryOptions,
 ) -> Result<ProcessedMediaFile, ProcessFileError> {
-	log::debug!("Processing entry {:?} with options: {:?}", path, options);
+	debug!("Processing entry {:?} with options: {:?}", path, options);
 
 	let mime = infer_mime_from_path(path);
 

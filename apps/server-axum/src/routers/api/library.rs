@@ -11,12 +11,17 @@ use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 
 use stump_core::{
+	db::utils::PrismaCountTrait,
 	fs::{image, media_file},
 	job::LibraryScanJob,
-	prisma::{library, library_options, media, series, tag},
+	prisma::{
+		library, library_options, media,
+		series::{self, OrderByParam as SeriesOrderByParam},
+		tag,
+	},
 	types::{
-		CreateLibraryArgs, LibrariesStats, Library, LibraryScanMode, Pageable,
-		PagedRequestParams, UpdateLibraryArgs,
+		CreateLibraryArgs, FindManyTrait, LibrariesStats, Library, LibraryScanMode,
+		Pageable, PagedRequestParams, QueryOrder, Series, UpdateLibraryArgs,
 	},
 };
 
@@ -24,24 +29,30 @@ use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::http::ImageResponse,
+	utils::http::{ImageResponse, PageableTrait},
 };
 
 pub(crate) fn mount() -> Router {
 	Router::new()
 		.route("/libraries", get(get_libraries).post(create_library))
 		.route("/libraries/stats", get(get_libraries_stats))
-		.route(
+		.nest(
 			"/libraries/:id",
-			get(get_library_by_id)
-				.put(update_library)
-				.delete(delete_library),
+			Router::new()
+				.route(
+					"/",
+					get(get_library_by_id)
+						.put(update_library)
+						.delete(delete_library),
+				)
+				.route("/scan", get(scan_library))
+				.route("/series", get(get_library_series))
+				.route("/thumbnail", get(get_library_thumbnail)),
 		)
-		.route("/libraries/:id/scan", get(scan_library))
-		.route("/libraries/:id/thumbnail", get(get_library_thumbnail))
 		.layer(from_extractor::<Auth>())
 }
 
+/// Get all libraries
 async fn get_libraries(
 	Extension(ctx): State,
 	pagination: Query<PagedRequestParams>,
@@ -65,15 +76,11 @@ async fn get_libraries(
 		return Ok(Json(libraries.into()));
 	}
 
-	unimplemented!()
-
-	// Ok(Json((libraries, page_params).into()))
+	Ok(Json((libraries, pagination.page_params()).into()))
 }
 
-async fn get_libraries_stats(
-	Extension(ctx): State,
-	// session: ReadableSession
-) -> ApiResult<Json<LibrariesStats>> {
+/// Get stats for all libraries
+async fn get_libraries_stats(Extension(ctx): State) -> ApiResult<Json<LibrariesStats>> {
 	let db = ctx.get_db();
 
 	// TODO: maybe add more, like missingBooks, idk
@@ -127,64 +134,57 @@ async fn get_library_by_id(
 	Ok(Json(library.into()))
 }
 
-// TODO: make this in core once axum is more finalized and I can gut rocket
-// impl From<Query<PagedRequestParams>> for PageParams {
-// 	fn from(params: Query<PagedRequestParams>) -> Self {
-// 		unimplemented!()
-// 	}
-// }
-
 // FIXME: this is absolutely atrocious...
 // This should be much better once https://github.com/Brendonovich/prisma-client-rust/issues/24 is added
 // but for now I will have this disgustingly gross and ugly work around...
-// / Returns the series in a given library. Will *not* load the media relation.
-// async fn get_library_series(
-// 	Path(id): Path<String>,
-// 	pagination: Query<PagedRequestParams>,
-// 	Extension(ctx): State,
-// ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
-// 	let db = ctx.get_db();
+///Returns the series in a given library. Will *not* load the media relation.
+async fn get_library_series(
+	Path(id): Path<String>,
+	pagination: Query<PagedRequestParams>,
+	Extension(ctx): State,
+) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+	let db = ctx.get_db();
 
-// 	let unpaged = pagination.unpaged.unwrap_or(false);
-// 	let page_params = PageParams::from(pagination);
-// 	let order_by_param: OrderByParam =
-// 		QueryOrder::from(page_params.clone()).try_into()?;
+	let unpaged = pagination.unpaged.unwrap_or(false);
+	let page_params = pagination.page_params();
+	let order_by_param: SeriesOrderByParam =
+		QueryOrder::from(page_params.clone()).try_into()?;
 
-// 	let base_query = db
-// 		.series()
-// 		// TODO: add media relation count....
-// 		.find_many(vec![series::library_id::equals(Some(id.clone()))])
-// 		.order_by(order_by_param);
+	let base_query = db
+		.series()
+		// TODO: add media relation count....
+		.find_many(vec![series::library_id::equals(Some(id.clone()))])
+		.order_by(order_by_param);
 
-// 	let series = match unpaged {
-// 		true => base_query.exec().await?,
-// 		false => base_query.paginated(page_params.clone()).exec().await?,
-// 	};
+	let series = match unpaged {
+		true => base_query.exec().await?,
+		false => base_query.paginated(page_params.clone()).exec().await?,
+	};
 
-// 	let series_ids = series.iter().map(|s| s.id.clone()).collect();
+	let series_ids = series.iter().map(|s| s.id.clone()).collect();
 
-// 	let media_counts = db.series_media_count(series_ids).await?;
+	let media_counts = db.series_media_count(series_ids).await?;
 
-// 	let series = series
-// 		.iter()
-// 		.map(|s| {
-// 			let media_count = match media_counts.get(&s.id) {
-// 				Some(count) => count.to_owned(),
-// 				_ => 0,
-// 			} as i64;
+	let series = series
+		.iter()
+		.map(|s| {
+			let media_count = match media_counts.get(&s.id) {
+				Some(count) => count.to_owned(),
+				_ => 0,
+			} as i64;
 
-// 			(s.to_owned(), media_count).into()
-// 		})
-// 		.collect::<Vec<Series>>();
+			(s.to_owned(), media_count).into()
+		})
+		.collect::<Vec<Series>>();
 
-// 	if unpaged {
-// 		return Ok(Json(series.into()));
-// 	}
+	if unpaged {
+		return Ok(Json(series.into()));
+	}
 
-// 	let series_count = db.series_count(id).await?;
+	let series_count = db.series_count(id).await?;
 
-// 	Ok(Json((series, series_count, page_params).into()))
-// }
+	Ok(Json((series, series_count, page_params).into()))
+}
 
 // /// Get the thumbnail image for a library by id, if the current user has access to it.
 async fn get_library_thumbnail(
@@ -223,7 +223,7 @@ struct ScanQueryParam {
 /// Queue a ScannerJob to scan the library by id. The job, when started, is
 /// executed in a separate thread.
 async fn scan_library(
-	id: String,
+	Path(id): Path<String>,
 	Extension(ctx): State,
 	query: Query<ScanQueryParam>,
 	// session: ReadableSession TODO: uncomment

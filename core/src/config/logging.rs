@@ -1,6 +1,10 @@
 use std::{io, path::PathBuf};
 
 use prisma_client_rust::chrono;
+use tracing_subscriber::{
+	filter::LevelFilter, fmt::writer::MakeWriterExt,
+	prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, EnvFilter,
+};
 
 use super::get_config_dir;
 
@@ -102,4 +106,56 @@ pub fn init_fern() -> Result<(), fern::InitError> {
 		.apply()?;
 
 	Ok(())
+}
+
+pub fn init_tracing() {
+	let config_dir = get_config_dir();
+
+	let file_appender = tracing_appender::rolling::never(&config_dir, "Stump.log");
+
+	let verbosity = get_log_verbosity();
+	let max_level = match verbosity {
+		0 => LevelFilter::OFF,
+		1 => LevelFilter::INFO,
+		2 => LevelFilter::DEBUG,
+		_3_or_more => LevelFilter::TRACE,
+	};
+
+	// let l0 = tracing_subscriber::fmt::layer();
+
+	// let layer = tracing_subscriber::fmt::layer().with_ansi(false);
+
+	// tracing_subscriber::registry()
+	// 	.with(l0)
+	// 	.with(layer)
+	// 	.try_init()
+	// 	.unwrap();
+
+	tracing_subscriber::registry()
+		// .with(tracing_subscriber::fmt().with_max_level(max_level))
+		.with(max_level)
+		.with(
+			EnvFilter::from_default_env()
+				.add_directive(
+					"stump_core=trace"
+						.parse()
+						.expect("Error invalid tracing directive!"),
+				)
+				.add_directive(
+					"stump_server_axum=trace"
+						.parse()
+						.expect("Error invalid tracing directive!"),
+				),
+		)
+		.with(
+			tracing_subscriber::fmt::layer()
+				.pretty()
+				.with_ansi(true)
+				// TODO: maybe separate file appender and stdout as separate layers to
+				// remove ansi from file appender
+				.with_writer(file_appender.and(std::io::stdout)),
+		)
+		.init();
+
+	tracing::debug!("Tracing initialized with verbosity {}", verbosity);
 }

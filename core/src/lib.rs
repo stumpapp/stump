@@ -22,7 +22,7 @@ pub mod types;
 
 use config::context::Ctx;
 use config::logging::STUMP_SHADOW_TEXT;
-use config::{env::StumpEnv, logging::init_fern};
+use config::{env::StumpEnvironment, logging::init_fern};
 use event::{event_manager::EventManager, InternalCoreTask};
 use rocket::tokio::sync::mpsc::unbounded_channel;
 use types::{errors::CoreError, CoreResult};
@@ -61,7 +61,6 @@ impl StumpCore {
 		let internal_channel = unbounded_channel::<InternalCoreTask>();
 
 		let core_ctx = Ctx::new(internal_channel.0).await;
-
 		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
 
 		let core = Self {
@@ -79,8 +78,8 @@ impl StumpCore {
 
 	/// Loads environment variables from the `Stump.toml` configuration file, if
 	/// it exists, using the [`StumpEnv`] struct.
-	pub fn load_env() -> CoreResult<()> {
-		StumpEnv::load()
+	pub fn init_environment() -> CoreResult<StumpEnvironment> {
+		StumpEnvironment::load()
 	}
 
 	/// Returns [`StumpCore`] wrapped in an [`Arc`]. Will take ownership of self. Created

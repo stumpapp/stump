@@ -54,6 +54,19 @@ pub struct UserPreferences {
 	pub collection_layout_mode: String,
 }
 
+impl Default for UserPreferences {
+	fn default() -> Self {
+		Self {
+			id: "DEFAULT".to_string(),
+			locale: "en".to_string(),
+			// reduce_animations: false,
+			library_layout_mode: "GRID".to_string(),
+			series_layout_mode: "GRID".to_string(),
+			collection_layout_mode: "GRID".to_string(),
+		}
+	}
+}
+
 impl Into<UserPreferences> for prisma::user_preferences::Data {
 	fn into(self) -> UserPreferences {
 		UserPreferences {

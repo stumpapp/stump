@@ -4624,7 +4624,7 @@ dependencies = [
 name = "stump_server_axum"
 version = "0.0.0"
 dependencies = [
- "async-session",
+ "async-trait",
  "axum",
  "axum-extra",
  "axum-macros",
@@ -4632,6 +4632,7 @@ dependencies = [
  "base64 0.13.0",
  "bcrypt",
  "openssl",
+ "prisma-client-rust",
  "rand 0.8.5",
  "serde",
  "stump_core",

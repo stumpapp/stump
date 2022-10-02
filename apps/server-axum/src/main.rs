@@ -7,9 +7,11 @@ use tracing::error;
 
 mod config;
 mod errors;
+mod middleware;
 mod routers;
+mod utils;
 
-use config::session;
+use config::{cors, session};
 
 fn debug_setup() {
 	std::env::set_var(
@@ -44,7 +46,8 @@ async fn main() -> ServerResult<()> {
 	let app = Router::new()
 		.merge(routers::mount())
 		.layer(Extension(server_ctx.arced()))
-		.layer(session::get_session_layer());
+		.layer(session::get_session_layer())
+		.layer(cors::get_cors_layer());
 
 	// TODO: set ip based on env var
 	// TODO: set port based on env var
@@ -57,7 +60,3 @@ async fn main() -> ServerResult<()> {
 
 	Ok(())
 }
-
-// async fn handle_error(_err: io::Error) -> impl IntoResponse {
-// 	(StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
-// }

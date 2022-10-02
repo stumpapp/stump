@@ -14,7 +14,7 @@ export default function ShortcutToolTip({
 	let label = (
 		<HStack spacing={1}>
 			{keybind.map((key) => (
-				<Kbd h={5} w={5} className="flex items-center justify-center">
+				<Kbd key={key} h={5} w={5} className="flex items-center justify-center">
 					{key}
 				</Kbd>
 			))}

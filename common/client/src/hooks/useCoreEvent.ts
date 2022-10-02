@@ -1,18 +1,21 @@
 import type { CoreEvent } from '../types';
 import { queryClient } from '../client';
 import { useJobStore } from '../stores';
-// import { useJobsListener } from './useJobsListener';
+import { useStumpWs } from './useStumpWs';
 
-interface UseJobManagerParams {
+interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void;
 	// FIXME: camelCase
 	onJobFailed?: (err: { runner_id: string; message: string }) => void;
 }
 
-export function useJobManager({ onJobComplete, onJobFailed }: UseJobManagerParams = {}) {
+export function useCoreEventHandler({
+	onJobComplete,
+	onJobFailed,
+}: UseCoreEventHandlerParams = {}) {
 	const { addJob, updateJob, completeJob } = useJobStore();
 
-	function handleJobEvent(event: CoreEvent) {
+	function handleCoreEvent(event: CoreEvent) {
 		const { key, data } = event;
 
 		if (['JobComplete', 'JobFailed'].includes(key)) {
@@ -62,5 +65,5 @@ export function useJobManager({ onJobComplete, onJobFailed }: UseJobManagerParam
 		}
 	}
 
-	// useJobsListener({ onEvent: handleJobEvent });
+	useStumpWs({ onEvent: handleCoreEvent });
 }

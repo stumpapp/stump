@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import { useAppProps, useAuthQuery, useJobManager, useUserStore } from '@stump/client';
+import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client';
 
 import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
@@ -24,7 +24,7 @@ export function AppLayout() {
 		);
 	}, [location]);
 
-	useJobManager();
+	useCoreEventHandler();
 
 	const { user: storeUser, setUser } = useUserStore();
 

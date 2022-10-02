@@ -1,8 +1,10 @@
 use axum::{
+	extract::Query,
 	headers::ContentType,
 	http::{header, HeaderValue},
 	response::{IntoResponse, Response},
 };
+use stump_core::types::{PageParams, PagedRequestParams};
 
 pub struct ImageResponse {
 	pub content_type: ContentType,
@@ -39,5 +41,25 @@ impl IntoResponse for Xml {
 		);
 
 		base_response
+	}
+}
+
+pub trait PageableTrait {
+	fn page_params(self) -> PageParams;
+}
+
+impl PageableTrait for Query<PagedRequestParams> {
+	fn page_params(self) -> PageParams {
+		let params = self.0;
+
+		let zero_based = params.zero_based.unwrap_or(false);
+
+		PageParams {
+			zero_based,
+			page: params.page.unwrap_or(if zero_based { 0 } else { 1 }),
+			page_size: params.page_size.unwrap_or(20),
+			order_by: params.order_by.unwrap_or("name".to_string()),
+			direction: params.direction.unwrap_or_default(),
+		}
 	}
 }

@@ -1,20 +1,32 @@
-use axum::{middleware::from_extractor, routing::get, Extension, Router};
+use axum::{
+	extract::{Path, Query},
+	headers::ContentType,
+	middleware::from_extractor,
+	routing::get,
+	Extension, Router,
+};
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
+	db::utils::PrismaCountTrait,
+	fs::{epub, media_file},
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prisma::{media, read_progress},
+	prisma::{library, media, read_progress, series},
+	types::PagedRequestParams,
 };
 
 use crate::{
 	config::state::State,
-	errors::ApiResult,
+	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::{get_session_user, http::Xml},
+	utils::{
+		get_session_user,
+		http::{ImageResponse, Xml},
+	},
 };
 
 pub(crate) fn mount() -> Router {
@@ -24,9 +36,34 @@ pub(crate) fn mount() -> Router {
 			Router::new()
 				.route("/catalog", get(catalog))
 				.route("/keep-reading", get(keep_reading))
-				.route("/libraries", get(libraries)),
+				.nest(
+					"/libraries",
+					Router::new()
+						.route("/", get(get_libraries))
+						.route("/:id", get(get_library_by_id)),
+				)
+				.nest(
+					"/series",
+					Router::new()
+						.route("/", get(get_series))
+						.route("/latest", get(get_latest_series))
+						.route("/:id", get(get_series_by_id)),
+				)
+				.nest(
+					"/books/:id",
+					Router::new()
+						.route("/thumbnail", get(get_book_thumbnail))
+						.route("/pages", get(get_book_page)),
+				),
 		)
 		.layer(from_extractor::<Auth>())
+}
+
+fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
+	let skip = page * page_size;
+	let take = skip + page_size;
+
+	(skip, take)
 }
 
 // TODO auth middleware....
@@ -210,7 +247,7 @@ async fn keep_reading(Extension(ctx): State, session: ReadableSession) -> ApiRes
 	Ok(Xml(feed.build()?))
 }
 
-async fn libraries(Extension(ctx): State) -> ApiResult<Xml> {
+async fn get_libraries(Extension(ctx): State) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
@@ -238,229 +275,235 @@ async fn libraries(Extension(ctx): State) -> ApiResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-// #[get("/libraries/<id>?<page>")]
-// async fn library_by_id(
-// 	Extension(ctx): State,
-// 	id: String,
-// 	page: Option<i64>,
-// 	session: ReadableSession,
-// ) -> ApiResult<Xml> {
-// 	let db = ctx.get_db();
+async fn get_library_by_id(
+	Extension(ctx): State,
+	Path(id): Path<String>,
+	pagination: Query<PagedRequestParams>,
+) -> ApiResult<Xml> {
+	let db = ctx.get_db();
 
-// 	let page = page.unwrap_or(0);
-// 	let (skip, take) = pagination_bounds(page, 20);
+	let page = pagination.page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page.into(), 20);
 
-// 	// FIXME: PCR doesn't support relation counts yet!
-// 	let series_count = db
-// 		.series()
-// 		.count(vec![series::library_id::equals(Some(id.clone()))])
-// 		.exec()
-// 		.await?;
+	// FIXME: PCR doesn't support relation counts yet!
+	let series_count = db
+		.series()
+		.count(vec![series::library_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
 
-// 	let library = db
-// 		.library()
-// 		.find_unique(library::id::equals(id.clone()))
-// 		.with(library::series::fetch(vec![]).skip(skip).take(take))
-// 		.exec()
-// 		.await?;
+	let library = db
+		.library()
+		.find_unique(library::id::equals(id.clone()))
+		.with(library::series::fetch(vec![]).skip(skip).take(take))
+		.exec()
+		.await?;
 
-// 	if library.is_none() {
-// 		return Err(ApiError::NotFound(format!("Library {} not found", id)));
-// 	}
+	if library.is_none() {
+		return Err(ApiError::NotFound(format!("Library {} not found", id)));
+	}
 
-// 	let library = library.unwrap();
+	let library = library.unwrap();
 
-// 	Ok(Xml(
-// 		OpdsFeed::paginated(
-// 			library.id.as_str(),
-// 			library.name.as_str(),
-// 			format!("libraries/{}", &library.id).as_str(),
-// 			library.series().unwrap_or(&Vec::new()).to_owned(),
-// 			page,
-// 			series_count,
-// 		)
-// 		.build()?,
-// 	))
-// }
+	Ok(Xml(OpdsFeed::paginated(
+		library.id.as_str(),
+		library.name.as_str(),
+		format!("libraries/{}", &library.id).as_str(),
+		library.series().unwrap_or(&Vec::new()).to_owned(),
+		page.into(),
+		series_count,
+	)
+	.build()?))
+}
 
 // /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 // /// pagination is zero-indexed.
 // #[get("/series?<page>")]
-// async fn get_series(page: Option<i64>, Extension(ctx): State, session: ReadableSession) -> ApiResult<Xml> {
-// 	let db = ctx.get_db();
+async fn get_series(
+	pagination: Query<PagedRequestParams>,
+	Extension(ctx): State,
+) -> ApiResult<Xml> {
+	let db = ctx.get_db();
 
-// 	let page = page.unwrap_or(0);
-// 	let (skip, take) = pagination_bounds(page, 20);
+	let page = pagination.page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page.into(), 20);
 
-// 	// FIXME: like other areas throughout Stump's paginated routes, I do not love
-// 	// that I need to make 2 queries. Hopefully this get's better as prisma client matures
-// 	// and introduces potential other work arounds.
+	// FIXME: like other areas throughout Stump's paginated routes, I do not love
+	// that I need to make 2 queries. Hopefully this get's better as prisma client matures
+	// and introduces potential other work arounds.
 
-// 	let series_count = db.series().count(vec![]).exec().await?;
+	let series_count = db.series().count(vec![]).exec().await?;
 
-// 	let series = db
-// 		.series()
-// 		.find_many(vec![])
-// 		.skip(skip)
-// 		.take(take)
-// 		.exec()
-// 		.await?;
+	let series = db
+		.series()
+		.find_many(vec![])
+		.skip(skip)
+		.take(take)
+		.exec()
+		.await?;
 
-// 	Ok(Xml(
-// 		OpdsFeed::paginated(
-// 			"allSeries",
-// 			"All Series",
-// 			"series",
-// 			series,
-// 			page,
-// 			series_count,
-// 		)
-// 		.build()?,
-// 	))
-// }
+	Ok(Xml(OpdsFeed::paginated(
+		"allSeries",
+		"All Series",
+		"series",
+		series,
+		page.into(),
+		series_count,
+	)
+	.build()?))
+}
 
-// #[get("/series/latest?<page>")]
-// async fn series_latest(
-// 	page: Option<i64>,
-// 	Extension(ctx): State,
-// 	session: ReadableSession,
-// ) -> ApiResult<Xml> {
-// 	let db = ctx.get_db();
+async fn get_latest_series(
+	pagination: Query<PagedRequestParams>,
+	Extension(ctx): State,
+) -> ApiResult<Xml> {
+	let db = ctx.get_db();
 
-// 	let page = page.unwrap_or(0);
-// 	let (skip, take) = pagination_bounds(page, 20);
+	let page = pagination.page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page.into(), 20);
 
-// 	let series_count = db.series().count(vec![]).exec().await?;
+	let series_count = db.series().count(vec![]).exec().await?;
 
-// 	let series = db
-// 		.series()
-// 		.find_many(vec![])
-// 		.order_by(prisma::series::updated_at::order(Direction::Desc))
-// 		.skip(skip)
-// 		.take(take)
-// 		.exec()
-// 		.await?;
+	let series = db
+		.series()
+		.find_many(vec![])
+		.order_by(series::updated_at::order(Direction::Desc))
+		.skip(skip)
+		.take(take)
+		.exec()
+		.await?;
 
-// 	Ok(Xml(
-// 		OpdsFeed::paginated(
-// 			"latestSeries",
-// 			"Latest Series",
-// 			"series/latest",
-// 			series,
-// 			page,
-// 			series_count,
-// 		)
-// 		.build()?,
-// 	))
-// }
+	Ok(Xml(OpdsFeed::paginated(
+		"latestSeries",
+		"Latest Series",
+		"series/latest",
+		series,
+		page.into(),
+		series_count,
+	)
+	.build()?))
+}
 
-// #[get("/series/<id>?<page>")]
-// async fn series_by_id(
-// 	id: String,
-// 	page: Option<i64>,
-// 	Extension(ctx): State,
-// 	session: ReadableSession,
-// ) -> ApiResult<Xml> {
-// 	let db = ctx.get_db();
+async fn get_series_by_id(
+	Path(id): Path<String>,
+	pagination: Query<PagedRequestParams>,
+	Extension(ctx): State,
+) -> ApiResult<Xml> {
+	let db = ctx.get_db();
 
-// 	let page = page.unwrap_or(0);
-// 	let (skip, take) = pagination_bounds(page, 20);
+	let page = pagination.page.unwrap_or(0);
+	let (skip, take) = pagination_bounds(page.into(), 20);
 
-// 	// FIXME: PCR doesn't support relation counts yet!
-// 	// let series_media_count = db
-// 	// 	.media()
-// 	// 	.count(vec![media::series_id::equals(Some(id.clone()))])
-// 	// 	.exec()
-// 	// 	.await?;
+	// FIXME: PCR doesn't support relation counts yet!
+	// let series_media_count = db
+	// 	.media()
+	// 	.count(vec![media::series_id::equals(Some(id.clone()))])
+	// 	.exec()
+	// 	.await?;
 
-// 	let series_media_count = db.media_in_series_count(id.clone()).await?;
+	let series_media_count = db.media_in_series_count(id.clone()).await?;
 
-// 	let series = db
-// 		.series()
-// 		.find_unique(series::id::equals(id.clone()))
-// 		.with(
-// 			series::media::fetch(vec![])
-// 				.skip(skip)
-// 				.take(take)
-// 				.order_by(media::name::order(Direction::Asc)),
-// 		)
-// 		.exec()
-// 		.await?;
+	let series = db
+		.series()
+		.find_unique(series::id::equals(id.clone()))
+		.with(
+			series::media::fetch(vec![])
+				.skip(skip)
+				.take(take)
+				.order_by(media::name::order(Direction::Asc)),
+		)
+		.exec()
+		.await?;
 
-// 	if series.is_none() {
-// 		return Err(ApiError::NotFound(format!("Series {} not found", id)));
-// 	}
+	if series.is_none() {
+		return Err(ApiError::NotFound(format!("Series {} not found", id)));
+	}
 
-// 	let series = series.unwrap();
+	let series = series.unwrap();
 
-// 	Ok(Xml(
-// 		OpdsFeed::paginated(
-// 			series.id.as_str(),
-// 			series.name.as_str(),
-// 			format!("series/{}", &series.id).as_str(),
-// 			series.media().unwrap_or(&Vec::new()).to_owned(),
-// 			page,
-// 			series_media_count,
-// 		)
-// 		.build()?,
-// 	))
-// }
+	Ok(Xml(OpdsFeed::paginated(
+		series.id.as_str(),
+		series.name.as_str(),
+		format!("series/{}", &series.id).as_str(),
+		series.media().unwrap_or(&Vec::new()).to_owned(),
+		page.into(),
+		series_media_count,
+	)
+	.build()?))
+}
 
-// #[get("/books/<id>/thumbnail")]
-// async fn book_thumbnail(id: String, Extension(ctx): State, session: ReadableSession) -> ApiResult<ImageResponse> {
-// 	let db = ctx.get_db();
+async fn get_book_thumbnail(
+	Path(id): Path<String>,
+	Extension(ctx): State,
+) -> ApiResult<ImageResponse> {
+	let db = ctx.get_db();
 
-// 	let book = db
-// 		.media()
-// 		.find_unique(media::id::equals(id.clone()))
-// 		.exec()
-// 		.await?;
+	let book = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.exec()
+		.await?;
 
-// 	if book.is_none() {
-// 		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
-// 	}
+	if book.is_none() {
+		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
+	}
 
-// 	let book = book.unwrap();
+	let book = book.unwrap();
 
-// 	Ok(media_file::get_page(&book.path, 1)?)
-// }
+	let old = media_file::get_page(book.path.as_str(), 1)?;
 
-// // TODO: generalize the function call
-// // TODO: cache this? Look into this, I can send a cache-control header to the client, but not sure if I should
-// // also cache on server. Check my types::rocket crate
-// #[get("/books/<id>/pages/<page>?<zero_based>")]
-// async fn book_page(
-// 	id: String,
-// 	page: usize,
-// 	zero_based: Option<bool>,
-// 	Extension(ctx): State,
-// 	session: ReadableSession,
-// ) -> ApiResult<ImageResponse> {
-// 	let db = ctx.get_db();
+	// FIXME: old rocket usage above
+	Ok(ImageResponse {
+		content_type: ContentType::png(),
+		data: old.1,
+	})
+}
 
-// 	let zero_based = zero_based.unwrap_or(false);
+async fn get_book_page(
+	Path(id): Path<String>,
+	Extension(ctx): State,
+	pagination: Query<PagedRequestParams>,
+) -> ApiResult<ImageResponse> {
+	let db = ctx.get_db();
 
-// 	let book = db
-// 		.media()
-// 		.find_unique(media::id::equals(id.clone()))
-// 		.exec()
-// 		.await?;
+	let zero_based = pagination.zero_based.unwrap_or(false);
+	let page = pagination.page.unwrap_or(if zero_based { 0 } else { 1 });
 
-// 	let mut correct_page = page;
+	let book = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.exec()
+		.await?;
 
-// 	if zero_based {
-// 		correct_page = page + 1;
-// 	}
+	let mut correct_page = page;
 
-// 	if book.is_none() {
-// 		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
-// 	}
+	if zero_based {
+		correct_page = page + 1;
+	}
 
-// 	let book = book.unwrap();
+	if book.is_none() {
+		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
+	}
 
-// 	if book.path.ends_with(".epub") && correct_page == 1 {
-// 		return Ok(epub::get_epub_cover(&book.path)?);
-// 	}
+	let book = book.unwrap();
 
-// 	Ok(media_file::get_page(&book.path, correct_page as i32)?)
-// }
+	let old = match book.path.ends_with(".epub") && correct_page == 1 {
+		true => epub::get_epub_cover(&book.path)?,
+		false => {
+			// FIXME: unsafe cast
+			media_file::get_page(book.path.as_str(), correct_page.try_into().unwrap())?
+		},
+	};
+
+	// if book.path.ends_with(".epub") && correct_page == 1 {
+	// 	return Ok(epub::get_epub_cover(&book.path)?);
+	// }
+
+	// let old = media_file::get_page(book.path.as_str(), 1)?;
+
+	// FIXME: old rocket usage above
+	Ok(ImageResponse {
+		content_type: ContentType::png(),
+		data: old.1,
+	})
+}

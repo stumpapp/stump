@@ -43,3 +43,6 @@ log.workspace = true
 fern = "0.6.1"
 # figment = { version = "0.10.6", features = ["toml", "env"] }
 toml = "0.5.9"
+tracing.workspace = true
+tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
+tracing-appender = "0.2.2"

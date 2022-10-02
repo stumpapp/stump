@@ -2,8 +2,8 @@ use std::net::SocketAddr;
 
 use axum::{Extension, Router};
 use errors::{ServerError, ServerResult};
-use stump_core::StumpCore;
-use tracing::error;
+use stump_core::{config::logging::init_tracing, StumpCore};
+use tracing::{error, info};
 
 mod config;
 mod errors;
@@ -33,17 +33,22 @@ async fn main() -> ServerResult<()> {
 	#[cfg(debug_assertions)]
 	debug_setup();
 
+	init_tracing();
+
 	// TODO: refactor `load_env` to return StumpEnv, so I can use the values (like port) here.
 	// let stump_env = StumpCore::load_env();
-	if let Err(err) = StumpCore::load_env() {
+	let stump_environment = StumpCore::init_environment();
+	if let Err(err) = stump_environment {
 		error!("Failed to load environment variables: {:?}", err);
-
 		return Err(ServerError::ServerStartError(err.to_string()));
 	}
+	let stump_environment = stump_environment.unwrap();
 
 	// TODO: init logging
 	let core = StumpCore::new().await;
 	let server_ctx = core.get_context();
+
+	info!("{}", core.get_shadow_text());
 
 	let app = Router::new()
 		.merge(routers::mount())
@@ -52,8 +57,7 @@ async fn main() -> ServerResult<()> {
 		.layer(cors::get_cors_layer());
 
 	// TODO: set ip based on env var
-	// TODO: set port based on env var
-	let addr = SocketAddr::from(([0, 0, 0, 0], 10801));
+	let addr = SocketAddr::from(([0, 0, 0, 0], stump_environment.port.unwrap_or(10801)));
 
 	axum::Server::bind(&addr)
 		.serve(app.into_make_service())

@@ -5,8 +5,6 @@ use stump_core::{
 	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
-use rocket::tokio;
-
 use crate::utils::{init_test, TempLibrary};
 
 #[tokio::test]

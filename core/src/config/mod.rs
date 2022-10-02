@@ -6,9 +6,6 @@ pub use context::Ctx;
 pub mod env;
 pub mod logging;
 
-// TODO: look into this
-// https://api.rocket.rs/v0.5-rc/rocket/struct.Config.html#method.figment
-
 /// Gets the home directory of the system running Stump
 fn home() -> PathBuf {
 	dirs::home_dir().expect("Could not determine your home directory")

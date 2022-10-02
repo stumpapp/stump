@@ -11,5 +11,4 @@ pnpm build:web # build:desktop for the desktop app
 This will bundle the web application and build the Stump core, located in the `target/release` directory (relative to the root of the project). You can place the following files anywhere you want, and run the main `stump` executable to start the Stump server:
 
 - `stump`
-- `Rocket.toml`
 - `client`

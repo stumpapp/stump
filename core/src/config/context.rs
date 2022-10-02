@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rocket::tokio::sync::{
+use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
 	mpsc::{error::SendError, unbounded_channel, UnboundedSender},
 };

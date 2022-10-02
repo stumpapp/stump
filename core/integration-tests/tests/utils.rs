@@ -1,6 +1,5 @@
 extern crate stump_core;
 
-use rocket::{futures::executor::block_on, tokio};
 use std::{fs, path::PathBuf, sync::Once};
 use tempfile::{Builder, NamedTempFile, TempDir};
 

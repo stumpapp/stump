@@ -6,7 +6,6 @@ pub use jobs::*;
 
 use std::{fmt::Debug, num::TryFromIntError};
 
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -17,7 +16,7 @@ use crate::{
 	types::{errors::CoreError, CoreResult},
 };
 
-#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type)]
 pub enum JobStatus {
 	#[serde(rename = "RUNNING")]
 	Running,
@@ -68,7 +67,7 @@ pub struct JobUpdate {
 	pub status: Option<JobStatus>,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, JsonSchema, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type)]
 pub struct JobReport {
 	/// This will actually refer to the job runner id
 	pub id: Option<String>,

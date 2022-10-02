@@ -1,118 +1,63 @@
-#[macro_use]
-extern crate rocket;
+use std::net::SocketAddr;
 
-mod guards;
-mod routes;
-mod types;
+use axum::{Extension, Router};
+use errors::{ServerError, ServerResult};
+use stump_core::{config::logging::init_tracing, StumpCore};
+use tracing::{error, info};
+
+mod config;
+mod errors;
+mod middleware;
+mod routers;
 mod utils;
 
-use std::path::Path;
-
-use rocket::fs::{FileServer, NamedFile};
-use rocket_okapi::{
-	rapidoc::{
-		make_rapidoc, GeneralConfig, HideShowConfig, RapiDocConfig, Theme, UiConfig,
-	},
-	settings::UrlObject,
-};
-use stump_core::StumpCore;
-use types::http::UnauthorizedResponse;
-use utils::{cors, helmet::Helmet, session::get_session_store};
-
-// TODO: figure out how to embed /static and Rocket.toml in the binary if possible
-// otherwise I have to distribute a zip file which isn't TERRIBLE but I don't want to lol
-// OR, just remove rocket because it has been annoying me...
-pub fn static_dir() -> String {
-	std::env::var("STUMP_CLIENT_DIR").unwrap_or("client".to_string())
-}
-
-#[get("/<_..>", rank = 15)]
-async fn index_fallback() -> Option<NamedFile> {
-	NamedFile::open(Path::new(&static_dir()).join("index.html"))
-		.await
-		.ok()
-}
-
-#[catch(401)]
-fn opds_unauthorized(_req: &rocket::Request) -> UnauthorizedResponse {
-	UnauthorizedResponse {}
-}
+use config::{cors, session};
 
 fn debug_setup() {
 	std::env::set_var(
 		"STUMP_CLIENT_DIR",
-		env!("CARGO_MANIFEST_DIR").to_string() + "/client",
+		env!("CARGO_MANIFEST_DIR").to_string() + "/dist",
 	);
-	std::env::set_var(
-		"ROCKET_CONFIG",
-		env!("CARGO_MANIFEST_DIR").to_string() + "/Rocket.toml",
-	);
+	std::env::set_var("STUMP_PROFILE", "debug");
 }
 
-// TODO: bye bye Rocket, you have annoyed me for the last time lol
-#[launch]
-async fn rocket() -> _ {
+// https://docs.rs/tokio/latest/tokio/attr.main.html#using-the-multi-thread-runtime
+// TODO: Do I need to annotate with flavor?? I don't ~think~ so, but I'm not sure.
+#[tokio::main(flavor = "multi_thread")]
+async fn main() -> ServerResult<()> {
 	#[cfg(debug_assertions)]
 	debug_setup();
 
-	if let Err(err) = StumpCore::load_env() {
-		log::error!("Failed to load environment variables: {:?}", err);
-		// panic!("Failed to load environment variables: {}", err);
-	}
+	init_tracing();
 
-	if let Err(err) = StumpCore::init_logging() {
-		log::error!("Failed to initialize logging: {:?}", err);
-		// panic!("Failed to initialize logging: {}", err);
+	// TODO: refactor `load_env` to return StumpEnv, so I can use the values (like port) here.
+	// let stump_env = StumpCore::load_env();
+	let stump_environment = StumpCore::init_environment();
+	if let Err(err) = stump_environment {
+		error!("Failed to load environment variables: {:?}", err);
+		return Err(ServerError::ServerStartError(err.to_string()));
 	}
+	let stump_environment = stump_environment.unwrap();
 
+	// TODO: init logging
 	let core = StumpCore::new().await;
+	let server_ctx = core.get_context();
 
-	let core_ctx = core.get_context();
+	info!("{}", core.get_shadow_text());
 
-	if let Err(e) = core.run_migrations().await {
-		// Note: panic seems to lock the database (tested in docker). So,
-		// definitely don't do that. Maybe I can refactor this to return
-		// a Result... instead of this launch crap.
-		// panic!("Failed to run migrations: {}", e);
-		log::error!("Failed to run migrations: {}", e);
-	} else {
-		log::info!("Migrations ran successfully");
-	}
+	let app = Router::new()
+		.merge(routers::mount())
+		.layer(Extension(server_ctx.arced()))
+		.layer(session::get_session_layer())
+		.layer(cors::get_cors_layer());
 
-	let cors_config = cors::get_cors();
-	let session_store = get_session_store();
+	// TODO: set ip based on env var
+	let addr = SocketAddr::from(([0, 0, 0, 0], stump_environment.port.unwrap_or(10801)));
 
-	log::info!("{}", core.get_shadow_text());
+	axum::Server::bind(&addr)
+		.serve(app.into_make_service())
+		.await
+		.expect("Failed to start HTTP server!");
 
-	rocket::build()
-		.manage(core_ctx)
-		.attach(session_store.fairing())
-		.attach(cors_config)
-		.attach(Helmet::default().fairing())
-		.mount("/", FileServer::from(static_dir()).rank(1))
-		.mount("/", routes![index_fallback])
-		.mount("/api", routes::api::api())
-		.mount(
-			"/api/rapidoc/",
-			make_rapidoc(&RapiDocConfig {
-				general: GeneralConfig {
-					spec_urls: vec![UrlObject::new("General", "/api/openapi.json")],
-					..Default::default()
-				},
-				hide_show: HideShowConfig {
-					allow_spec_url_load: false,
-					allow_spec_file_load: false,
-					..Default::default()
-				},
-				ui: UiConfig {
-					theme: Theme::Dark,
-					..Default::default()
-				},
-				..Default::default()
-			}),
-		)
-		.mount("/opds/v1.2", routes::opds::opds())
-		// TODO: I need to figure out if I want to allow basic auth on non-opds routes...
-		// .register("/api", catchers![opds_unauthorized])
-		.register("/opds/v1.2", catchers![opds_unauthorized])
+	Ok(())
 }

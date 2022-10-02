@@ -1,5 +1,3 @@
-use rocket::tokio;
-
 use crate::utils::{init_test, run_test_scan, TempLibrary};
 
 use stump_core::{

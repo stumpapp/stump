@@ -1,11 +1,11 @@
 use super::{persist_job_end, Job};
-
 use crate::{
 	config::context::Ctx,
 	fs::scanner::library::scan_batch,
 	fs::scanner::library::scan_sync,
 	types::{models::library::LibraryScanMode, CoreResult},
 };
+use tracing::info;
 
 #[derive(Debug)]
 pub struct LibraryScanJob {
@@ -32,7 +32,7 @@ impl Job for LibraryScanJob {
 		};
 		let duration = start.elapsed();
 
-		log::info!(
+		info!(
 			"Finished {:?} library scan in {}.{:03} seconds. {} files processed.",
 			self.scan_mode,
 			duration.as_secs(),

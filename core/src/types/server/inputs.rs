@@ -1,4 +1,3 @@
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -7,7 +6,7 @@ use crate::types::{
 	tag::Tag,
 };
 
-#[derive(Debug, Clone, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Deserialize, Type)]
 pub struct UserPreferencesUpdate {
 	pub id: String,
 	pub locale: String,
@@ -22,18 +21,18 @@ pub struct DecodedCredentials {
 	pub password: String,
 }
 
-#[derive(Deserialize, JsonSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct LoginOrRegisterArgs {
 	pub username: String,
 	pub password: String,
 }
 
-#[derive(Serialize, JsonSchema, Type)]
+#[derive(Serialize, Type)]
 pub struct ClaimResponse {
 	pub is_claimed: bool,
 }
 
-#[derive(Deserialize, JsonSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct CreateLibraryArgs {
 	/// The name of the library to create.
 	pub name: String,
@@ -49,7 +48,7 @@ pub struct CreateLibraryArgs {
 	pub library_options: Option<LibraryOptions>,
 }
 
-#[derive(Deserialize, JsonSchema, Type)]
+#[derive(Deserialize, Type)]
 pub struct UpdateLibraryArgs {
 	pub id: String,
 	/// The updated name of the library.

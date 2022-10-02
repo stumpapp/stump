@@ -2,13 +2,11 @@ use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
 };
-
-use rocket::tokio;
 use tokio::sync::{mpsc, Mutex, RwLock};
-
-use crate::{config::context::Ctx, types::CoreResult};
+use tracing::{error, warn};
 
 use super::{runner::Runner, Job, JobReport};
+use crate::{config::context::Ctx, types::CoreResult};
 
 // Note: this is 12 hours
 pub const DEFAULT_SCAN_INTERVAL_IN_SEC: i64 = 43200;
@@ -42,7 +40,7 @@ impl JobPool {
 				match e {
 					// TODO: should I just take in a &Ctx for this function and handle the Init event outside this?
 					JobPoolEvent::Init(_ctx) => {
-						log::warn!("TODO: unimplemented. This event will handle readding queued jobs on the event the server was stopped before they were completed");
+						warn!("TODO: unimplemented. This event will handle readding queued jobs on the event the server was stopped before they were completed");
 					},
 					JobPoolEvent::EnqueueJob(ctx, job) => {
 						pool_cpy.clone().enqueue_job(&ctx, job).await
@@ -65,7 +63,7 @@ impl JobPool {
 		// 	loop {
 		// 		timer.tick().await;
 
-		// 		log::debug!("TODO: implement new scanner that scans all libraries!");
+		// 		debug!("TODO: implement new scanner that scans all libraries!");
 
 		// 		// pool_cpy.clone().enqueue_job(&ctx, AllLibrariesScanJob {}).await
 		// 	}
@@ -81,7 +79,7 @@ impl JobPool {
 		// 		loop {
 		// 			timer.tick().await;
 
-		// 			log::debug!("TODO: implement trash empty!");
+		// 			debug!("TODO: implement trash empty!");
 
 		// 			// pool_cpy.clone().enqueue_job(&ctx, ClearDockerTrash {}).await
 		// 		}
@@ -125,9 +123,7 @@ impl JobPool {
 		if let Some(job) = next_job {
 			self.internal_sender
 				.send(JobPoolEvent::EnqueueJob(ctx.get_ctx(), job))
-				.unwrap_or_else(|e| {
-					log::error!("Failed to queue next job: {}", e.to_string())
-				})
+				.unwrap_or_else(|e| error!("Failed to queue next job: {}", e.to_string()))
 		}
 	}
 

@@ -1,8 +1,8 @@
 pub(crate) mod event_manager;
 
-use rocket::tokio::sync::oneshot;
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use tokio::sync::oneshot;
 
 use crate::{
 	job::{Job, JobReport, JobStatus, JobUpdate},

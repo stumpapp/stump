@@ -1,6 +1,7 @@
 use data_encoding::HEXLOWER;
 use ring::digest::{Context, SHA256};
 use std::io::{self, Read};
+use tracing::debug;
 
 // use std::fs::File;
 #[cfg(target_family = "unix")]
@@ -55,7 +56,7 @@ pub fn digest(path: &str, bytes: u64) -> Result<String, io::Error> {
 
 	let encoded_digest = HEXLOWER.encode(digest.as_ref());
 
-	log::debug!("Generated checksum: {:?}", encoded_digest);
+	debug!("Generated checksum: {:?}", encoded_digest);
 
 	Ok(encoded_digest)
 }

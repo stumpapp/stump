@@ -7,9 +7,10 @@ use std::{
 use crate::types::{
 	errors::ProcessFileError,
 	models::media::{MediaMetadata, ProcessedMediaFile},
+	ContentType,
 };
 use epub::doc::EpubDoc;
-use rocket::http::ContentType;
+use tracing::{error, info, warn};
 
 use super::{
 	checksum,
@@ -32,10 +33,9 @@ pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 	match checksum::digest(path.to_str().unwrap(), bytes_to_read) {
 		Ok(digest) => Some(digest),
 		Err(e) => {
-			log::error!(
+			error!(
 				"Failed to digest epub {:?}, unable to create checksum: {}",
-				path,
-				e
+				path, e
 			);
 			None
 		},
@@ -47,7 +47,7 @@ fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
 }
 
 pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
-	log::info!("Processing Epub: {}", path.display());
+	info!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
 
@@ -62,10 +62,7 @@ pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError>
 			path,
 			path.metadata()
 				.map_err(|e| {
-					log::error!(
-						"Failed to get metadata for epub file: {}",
-						e.to_string()
-					);
+					error!("Failed to get metadata for epub file: {}", e.to_string());
 					ProcessFileError::EpubReadError(e.to_string())
 				})?
 				.size(),
@@ -78,12 +75,12 @@ pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError>
 // TODO: change return type to make more sense
 pub fn get_epub_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = EpubDoc::new(file).map_err(|e| {
-		log::error!("Failed to open epub file: {}", e);
+		error!("Failed to open epub file: {}", e);
 		ProcessFileError::EpubOpenError(e.to_string())
 	})?;
 
 	let cover = epub_file.get_cover().map_err(|e| {
-		log::error!("Failed to get cover from epub file: {}", e);
+		error!("Failed to get cover from epub file: {}", e);
 		ProcessFileError::EpubReadError(e.to_string())
 	})?;
 
@@ -98,22 +95,21 @@ pub fn get_epub_chapter(
 	let mut epub_file = load_epub(path)?;
 
 	epub_file.set_current_page(chapter).map_err(|e| {
-		log::error!("Failed to get chapter from epub file: {}", e);
+		error!("Failed to get chapter from epub file: {}", e);
 		ProcessFileError::EpubReadError(e.to_string())
 	})?;
 
 	let content = epub_file.get_current_with_epub_uris().map_err(|e| {
-		log::error!("Failed to get chapter from epub file: {}", e);
+		error!("Failed to get chapter from epub file: {}", e);
 		ProcessFileError::EpubReadError(e.to_string())
 	})?;
 
 	let content_type = match epub_file.get_current_mime() {
 		Ok(mime) => get_content_type_from_mime(&mime),
 		Err(e) => {
-			log::warn!(
+			warn!(
 				"Failed to get explicit definition of resource mime for {}: {}",
-				path,
-				e
+				path, e
 			);
 
 			media_file::guess_content_type("REMOVEME.xhml")
@@ -130,12 +126,12 @@ pub fn get_epub_resource(
 	let mut epub_file = load_epub(path)?;
 
 	let contents = epub_file.get_resource(resource_id).map_err(|e| {
-		log::error!("Failed to get resource: {}", e);
+		error!("Failed to get resource: {}", e);
 		ProcessFileError::EpubReadError(e.to_string())
 	})?;
 
 	let content_type = epub_file.get_resource_mime(resource_id).map_err(|e| {
-		log::error!("Failed to get resource mime: {}", e);
+		error!("Failed to get resource mime: {}", e);
 		ProcessFileError::EpubReadError(e.to_string())
 	})?;
 
@@ -151,13 +147,13 @@ pub fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 
 	//  This below won't work since these paths are INSIDE the epub file >:(
 	// adjusted_path = adjusted_path.canonicalize().unwrap_or_else(|err| {
-	// 	// log::warn!(
+	// 	// warn!(
 	// 	// 	"Failed to safely canonicalize path {}: {}",
 	// 	// 	adjusted_path.display(),
 	// 	// 	err
 	// 	// );
 
-	// 	log::warn!(
+	// 	warn!(
 	// 		"Failed to safely canonicalize path {}: {}",
 	// 		adjusted_path.display(),
 	// 		err
@@ -192,7 +188,7 @@ pub fn get_epub_resource_from_path(
 	let contents = epub_file
 		.get_resource_by_path(adjusted_path.as_path())
 		.map_err(|e| {
-			log::error!("Failed to get resource: {}", e);
+			error!("Failed to get resource: {}", e);
 			ProcessFileError::EpubReadError(e.to_string())
 		})?;
 
@@ -203,7 +199,7 @@ pub fn get_epub_resource_from_path(
 	{
 		Ok(mime) => get_content_type_from_mime(&mime),
 		Err(e) => {
-			log::warn!(
+			warn!(
 				"Failed to get explicit definition of resource mime for {}: {}",
 				adjusted_path.as_path().to_str().unwrap(),
 				e

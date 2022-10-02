@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
-use rocket::tokio::{self, sync::Mutex};
 use serde::{Deserialize, Serialize};
+use tokio::{self, sync::Mutex};
+use tracing::error;
 
 use crate::{config::context::Ctx, event::CoreEvent};
 
@@ -48,7 +49,7 @@ impl Runner {
 			let runner_id = runner_id.clone();
 
 			if let Err(e) = job.run(runner_id.clone(), ctx.get_ctx()).await {
-				log::error!("job failed {:?}", e);
+				error!("job failed {:?}", e);
 
 				ctx.handle_failure_event(CoreEvent::JobFailed {
 					runner_id: runner_id.clone(),

@@ -1,10 +1,10 @@
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use tracing::trace;
 
 use crate::prisma;
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct User {
 	pub id: String,
 	pub username: String,
@@ -29,7 +29,7 @@ impl Into<User> for prisma::user::Data {
 		let user_preferences = match self.user_preferences() {
 			Ok(up) => Some(up.unwrap().to_owned().into()),
 			Err(e) => {
-				log::trace!("Failed to load user preferences for user: {}", e);
+				trace!("Failed to load user preferences for user: {}", e);
 				None
 			},
 		};
@@ -43,7 +43,7 @@ impl Into<User> for prisma::user::Data {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 
 pub struct UserPreferences {
 	pub id: String,
@@ -80,7 +80,7 @@ impl Into<UserPreferences> for prisma::user_preferences::Data {
 	}
 }
 
-// #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema, Type)]
+// #[derive(Clone, Debug, Serialize, Deserialize, Type)]
 
 // pub struct AuthenticatedUser {
 // 	pub id: String,

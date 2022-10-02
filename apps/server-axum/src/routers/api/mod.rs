@@ -4,12 +4,16 @@ use stump_core::types::ClaimResponse;
 use crate::{config::state::State, errors::ApiResult};
 
 mod auth;
+mod epub;
 mod library;
+mod media;
 
 pub(crate) fn mount() -> Router {
 	Router::new()
 		.merge(auth::mount())
+		.merge(epub::mount())
 		.merge(library::mount())
+		.merge(media::mount())
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", get(version))

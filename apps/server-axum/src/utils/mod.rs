@@ -1,5 +1,4 @@
 mod auth;
-mod xml;
+pub mod http;
 
 pub(crate) use auth::*;
-pub(crate) use xml::*;

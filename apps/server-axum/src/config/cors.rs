@@ -4,7 +4,7 @@ use axum::http::{
 	header::{ACCEPT, AUTHORIZATION},
 	HeaderValue, Method,
 };
-use tower_http::cors::{AllowHeaders, AllowOrigin, CorsLayer};
+use tower_http::cors::{AllowOrigin, CorsLayer};
 use tracing::error;
 
 pub fn get_cors_layer() -> CorsLayer {

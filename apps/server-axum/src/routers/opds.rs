@@ -14,7 +14,7 @@ use crate::{
 	config::state::State,
 	errors::ApiResult,
 	middleware::auth::Auth,
-	utils::{get_session_user, Xml},
+	utils::{get_session_user, http::Xml},
 };
 
 pub(crate) fn mount() -> Router {

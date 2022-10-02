@@ -13,13 +13,22 @@ default-run = "stump_server_axum"
 
 [dependencies]
 stump_core = { path = "../../core" }
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
+  'rspc',
+  # 'sqlite-create-many',
+  # "migrations",
+  # "sqlite",
+] }
 axum = "0.5.16"
 axum-macros = "0.2.3"
 axum-extra = { version = "0.3.7", features = [
   "spa",
-  "cookie"
+  # "cookie"
 ] }
-tower-http = { version = "0.3.4", features = ["fs"] }
+tower-http = { version = "0.3.4", features = [
+  "fs",
+  "cors"
+] }
 tokio = { version = "1.21.2", features = [
   # feature for the internal channels (internal communication)
   "sync", 
@@ -27,8 +36,9 @@ tokio = { version = "1.21.2", features = [
   "rt-multi-thread"
 ] }
 serde = { version = "1.0", features = ["derive"] }
-async-session = "3.0.0"
 axum-sessions = "0.3.1"
+async-trait = "0.1.53"
+
 
 # prisma-client-rust.workspace = true
 # serde.workspace = true

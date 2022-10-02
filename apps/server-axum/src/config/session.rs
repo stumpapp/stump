@@ -1,7 +1,6 @@
 use std::{env, time::Duration};
 
-use async_session::MemoryStore;
-use axum_sessions::{SameSite, SessionLayer};
+use axum_sessions::{async_session::MemoryStore, SameSite, SessionLayer};
 use rand::{thread_rng, Rng};
 
 fn rand_secret() -> Vec<u8> {

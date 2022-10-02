@@ -6,7 +6,11 @@ use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::types::CoreError;
+use stump_core::{
+	event::InternalCoreTask,
+	types::{errors::ProcessFileError, CoreError},
+};
+use tokio::sync::mpsc;
 
 use std::net;
 use thiserror::Error;
@@ -66,6 +70,7 @@ impl IntoResponse for AuthError {
 	}
 }
 
+#[allow(unused)]
 #[derive(Debug, Error)]
 pub enum ApiError {
 	#[error("{0}")]
@@ -131,6 +136,24 @@ impl From<AuthError> for ApiError {
 
 impl From<bcrypt::BcryptError> for ApiError {
 	fn from(error: bcrypt::BcryptError) -> ApiError {
+		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<mpsc::error::SendError<InternalCoreTask>> for ApiError {
+	fn from(err: mpsc::error::SendError<InternalCoreTask>) -> Self {
+		ApiError::InternalServerError(err.to_string())
+	}
+}
+
+impl From<prisma_client_rust::RelationNotFetchedError> for ApiError {
+	fn from(e: prisma_client_rust::RelationNotFetchedError) -> Self {
+		ApiError::InternalServerError(e.to_string())
+	}
+}
+
+impl From<ProcessFileError> for ApiError {
+	fn from(error: ProcessFileError) -> ApiError {
 		ApiError::InternalServerError(error.to_string())
 	}
 }

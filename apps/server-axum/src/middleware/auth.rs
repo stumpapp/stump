@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use axum::{
 	body::BoxBody,
 	extract::{FromRequest, RequestParts},
-	http::{header, StatusCode},
+	http::{header, Method, StatusCode},
 	response::{IntoResponse, Response},
 };
 use axum_sessions::SessionHandle;
@@ -27,6 +27,12 @@ where
 	type Rejection = Response;
 
 	async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+		// Note: this is fine, right? I mean, it's not like we're doing anything
+		// on a OPTIONS request, right? Right? 👀
+		if req.method() == &Method::OPTIONS {
+			return Ok(Self);
+		}
+
 		let session_handle = req.extensions().get::<SessionHandle>().unwrap();
 		let session = session_handle.read().await;
 
@@ -40,6 +46,13 @@ where
 
 		let ctx = req.extensions().get::<Arc<Ctx>>().unwrap();
 
+		// TODO: figure me out plz
+		// let cookie_jar = req.extensions().get::<CookieJar>().unwrap();
+
+		// if let Some(cookie) = cookie_jar.get("stump_session") {
+		// println!("cookie: {:?}", cookie);
+		// }
+
 		let auth_header = req
 			.headers()
 			.get(header::AUTHORIZATION)
@@ -49,7 +62,7 @@ where
 
 		if auth_header.is_none() {
 			if is_opds {
-				return Err(BasicAuthRequired.into_response());
+				return Err(BasicAuth.into_response());
 			}
 
 			return Err((StatusCode::UNAUTHORIZED).into_response());
@@ -113,9 +126,9 @@ where
 	}
 }
 
-pub struct BasicAuthRequired;
+pub struct BasicAuth;
 
-impl IntoResponse for BasicAuthRequired {
+impl IntoResponse for BasicAuth {
 	fn into_response(self) -> Response {
 		Response::builder()
 			.status(StatusCode::UNAUTHORIZED)

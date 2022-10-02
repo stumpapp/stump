@@ -6,6 +6,7 @@ use super::Direction;
 
 #[derive(Debug, Deserialize, Serialize, FromForm, JsonSchema, Type)]
 pub struct PagedRequestParams {
+	pub unpaged: Option<bool>,
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,

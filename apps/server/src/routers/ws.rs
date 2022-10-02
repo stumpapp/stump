@@ -35,6 +35,8 @@ async fn handle_socket(socket: WebSocket, ctx: Arc<Ctx>) {
 			sender
 				.send(Message::Text(payload))
 				.await
+				// FIXME: This `or_else` is hitting for EVERY message, even though I see
+				// the messages coming in on the client side.
 				.unwrap_or_else(|e| error!("Failed to send message: {}", e));
 		}
 	}

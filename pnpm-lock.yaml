@@ -177,9 +177,11 @@ importers:
       '@stump/config': workspace:*
       '@tanstack/react-query': ^4.2.3
       '@types/axios': ^0.14.0
+      '@types/node': ^17.0.45
       '@types/react': ^18.0.20
       axios: ^0.27.1
       immer: ^9.0.15
+      react-use-websocket: ^4.2.0
       tsconfig: '*'
       typescript: ^4.7.4
       zustand: ^4.1.1
@@ -188,9 +190,11 @@ importers:
       '@tanstack/react-query': 4.3.4
       axios: 0.27.2
       immer: 9.0.15
+      react-use-websocket: 4.2.0
       zustand: 4.1.1_immer@9.0.15
     devDependencies:
       '@types/axios': 0.14.0
+      '@types/node': 17.0.45
       '@types/react': 18.0.20
       tsconfig: 7.0.0
       typescript: 4.8.3
@@ -6488,6 +6492,13 @@ packages:
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+    dev: false
+
+  /react-use-websocket/4.2.0:
+    resolution: {integrity: sha512-ZovaTlc/tWX6a590fi3kMWImhyoWj46BWJWvO5oucZJzRnVVhYtes2D9g+5MKXjSdR7Es3456hB89v4/1pcBKg==}
+    peerDependencies:
+      react: '>= 18.0.0'
+      react-dom: '>= 18.0.0'
     dev: false
 
   /react/18.1.0:

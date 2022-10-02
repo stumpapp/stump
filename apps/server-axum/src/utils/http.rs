@@ -6,6 +6,7 @@ use axum::{
 };
 use stump_core::types::{PageParams, PagedRequestParams};
 
+// TODO: remove in favor of BufferResponse, which is more generic.
 pub struct ImageResponse {
 	pub content_type: ContentType,
 	pub data: Vec<u8>,
@@ -38,6 +39,44 @@ impl IntoResponse for Xml {
 		base_response.headers_mut().insert(
 			header::CONTENT_TYPE,
 			HeaderValue::from_static("application/xml"),
+		);
+
+		base_response
+	}
+}
+
+pub struct BufferResponse {
+	pub content_type: ContentType,
+	pub data: Vec<u8>,
+}
+
+impl IntoResponse for BufferResponse {
+	fn into_response(self) -> Response {
+		let mut base_response = self.data.into_response();
+
+		base_response.headers_mut().insert(
+			header::CONTENT_TYPE,
+			HeaderValue::from_str(self.content_type.to_string().as_str())
+				.expect("Failed to parse content type"),
+		);
+
+		base_response
+	}
+}
+
+pub struct UnknownBufferResponse {
+	pub content_type: String,
+	pub data: Vec<u8>,
+}
+
+impl IntoResponse for UnknownBufferResponse {
+	fn into_response(self) -> Response {
+		let mut base_response = self.data.into_response();
+
+		base_response.headers_mut().insert(
+			header::CONTENT_TYPE,
+			HeaderValue::from_str(self.content_type.as_str())
+				.expect("Failed to parse content type"),
 		);
 
 		base_response

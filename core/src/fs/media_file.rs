@@ -51,7 +51,6 @@ pub fn guess_content_type(file: &str) -> ContentType {
 	let file = Path::new(file);
 
 	let extension = file.extension().unwrap_or_default();
-
 	let extension = extension.to_string_lossy().to_string();
 
 	// TODO: if this fails manually check the extension

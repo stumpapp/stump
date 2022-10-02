@@ -72,7 +72,7 @@ export default function LoginOrClaim() {
 	return (
 		<Stack as={Container} p="4" spacing={4}>
 			<HStack px={2} flexShrink={0} justifyContent="center" alignItems="center" spacing="4">
-				<img src="/favicon.png" width="120" height="120" />
+				<img src="/assets/favicon.png" width="120" height="120" />
 				<Text
 					bgGradient="linear(to-r, brand.600, brand.200)"
 					bgClip="text"

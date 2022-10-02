@@ -9,6 +9,6 @@ pub(crate) fn mount() -> Router {
 	Router::new()
 		.merge(spa::mount())
 		.merge(ws::mount())
-		.nest("/api", api::mount())
+		.merge(api::mount())
 		.merge(opds::mount())
 }

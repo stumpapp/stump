@@ -15,20 +15,23 @@ mod tag;
 mod user;
 
 pub(crate) fn mount() -> Router {
-	Router::new()
-		.merge(auth::mount())
-		.merge(epub::mount())
-		.merge(library::mount())
-		.merge(media::mount())
-		.merge(filesystem::mount())
-		.merge(job::mount())
-		.merge(log::mount())
-		.merge(series::mount())
-		.merge(tag::mount())
-		.merge(user::mount())
-		.route("/claim", get(claim))
-		.route("/ping", get(ping))
-		.route("/version", get(version))
+	Router::new().nest(
+		"/api",
+		Router::new()
+			.merge(auth::mount())
+			.merge(epub::mount())
+			.merge(library::mount())
+			.merge(media::mount())
+			.merge(filesystem::mount())
+			.merge(job::mount())
+			.merge(log::mount())
+			.merge(series::mount())
+			.merge(tag::mount())
+			.merge(user::mount())
+			.route("/claim", get(claim))
+			.route("/ping", get(ping))
+			.route("/version", get(version)),
+	)
 }
 
 async fn claim(Extension(ctx): State) -> ApiResult<Json<ClaimResponse>> {

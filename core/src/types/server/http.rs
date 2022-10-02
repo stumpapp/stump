@@ -33,7 +33,7 @@ impl ContentType {
 	///     assert_eq!(content_type, Some(ContentType::PNG));
 	/// }
 	pub fn from_extension(extension: &str) -> Option<ContentType> {
-		match extension {
+		match extension.to_lowercase().as_str() {
 			"xhtml" => Some(ContentType::XHTML),
 			"xml" => Some(ContentType::XML),
 			"html" => Some(ContentType::HTML),
@@ -73,7 +73,7 @@ impl ContentType {
 
 impl From<&str> for ContentType {
 	fn from(s: &str) -> Self {
-		match s {
+		match s.to_lowercase().as_str() {
 			"application/xhtml+xml" => ContentType::XHTML,
 			"application/xml" => ContentType::XML,
 			"text/html" => ContentType::HTML,

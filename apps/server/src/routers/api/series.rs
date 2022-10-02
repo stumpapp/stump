@@ -7,6 +7,7 @@ use axum::{
 };
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
+use serde::Deserialize;
 use stump_core::{
 	db::utils::PrismaCountTrait,
 	fs::{image, media_file},
@@ -42,10 +43,15 @@ pub(crate) fn mount() -> Router {
 		.layer(from_extractor::<Auth>())
 }
 
+#[derive(Deserialize)]
+struct LoadMedia {
+	load_media: Option<bool>,
+}
+
 /// Get all series accessible by user. This is a paginated respone, and
 /// accepts various paginated request params.
 async fn get_series(
-	load_media: Query<Option<bool>>,
+	load: Query<LoadMedia>,
 	pagination: Query<PagedRequestParams>,
 	Extension(ctx): State,
 	session: ReadableSession,
@@ -53,7 +59,7 @@ async fn get_series(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let load_media = load_media.0.unwrap_or(false);
+	let load_media = load.load_media.unwrap_or(false);
 
 	let action = db.series();
 	let action = action.find_many(vec![]);
@@ -90,13 +96,13 @@ async fn get_series(
 async fn get_series_by_id(
 	Path(id): Path<String>,
 	Extension(ctx): State,
-	load_media: Query<Option<bool>>,
+	load_media: Query<LoadMedia>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let load_media = load_media.0.unwrap_or(false);
+	let load_media = load_media.load_media.unwrap_or(false);
 	let mut query = db.series().find_unique(series::id::equals(id.clone()));
 
 	if load_media {

@@ -35,7 +35,6 @@ pub fn init_tracing() {
 	};
 
 	tracing_subscriber::registry()
-		// .with(tracing_subscriber::fmt().with_max_level(max_level))
 		.with(max_level)
 		.with(
 			EnvFilter::from_default_env()
@@ -45,7 +44,7 @@ pub fn init_tracing() {
 						.expect("Error invalid tracing directive!"),
 				)
 				.add_directive(
-					"stump_server_axum=trace"
+					"stump_server=trace"
 						.parse()
 						.expect("Error invalid tracing directive!"),
 				),

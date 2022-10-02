@@ -1,7 +1,7 @@
 import type { CoreEvent } from '../types';
 import { queryClient } from '../client';
 import { useJobStore } from '../stores';
-import { useJobsListener } from './useJobsListener';
+// import { useJobsListener } from './useJobsListener';
 
 interface UseJobManagerParams {
 	onJobComplete?: (jobId: string) => void;
@@ -62,5 +62,5 @@ export function useJobManager({ onJobComplete, onJobFailed }: UseJobManagerParam
 		}
 	}
 
-	useJobsListener({ onEvent: handleJobEvent });
+	// useJobsListener({ onEvent: handleJobEvent });
 }

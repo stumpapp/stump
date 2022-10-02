@@ -20,6 +20,11 @@ impl<'a> IsImage for ZipFile<'a> {
 	fn is_image(&self) -> bool {
 		if self.is_file() {
 			let content_type = media_file::guess_content_type(self.name());
+			trace!(
+				"Content type of file {:?} is {:?}",
+				self.name(),
+				content_type
+			);
 
 			return content_type.is_image();
 		}

@@ -2,7 +2,6 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tracing::trace;
 
 use crate::{prisma, types::enums::FileStatus};
 
@@ -53,10 +52,7 @@ impl Into<Series> for prisma::series::Data {
 	fn into(self) -> Series {
 		let library = match self.library() {
 			Ok(library) => Some(library.unwrap().to_owned().into()),
-			Err(e) => {
-				trace!("Failed to load library for series: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		let (media, media_count) = match self.media() {
@@ -69,18 +65,12 @@ impl Into<Series> for prisma::series::Data {
 
 				(Some(m), Some(m_ct))
 			},
-			Err(e) => {
-				trace!("Failed to load media for series: {}", e);
-				(None, None)
-			},
+			Err(_e) => (None, None),
 		};
 
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
-			Err(e) => {
-				trace!("Failed to load tags for series: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		Series {

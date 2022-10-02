@@ -145,6 +145,7 @@ async fn get_user_preferences(
 // structure needs to eventually change a little anyways, I don't like how I can't query
 // by user id, it should be a unique where param but it isn't with how I structured it...
 // FIXME: remove this 'allow' once I resolve the above 'TODO'
+#[allow(unused)]
 async fn update_user_preferences(
 	Path(id): Path<String>,
 	Json(input): Json<UserPreferencesUpdate>,

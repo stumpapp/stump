@@ -65,8 +65,7 @@ async fn get_epub(
 /// resource. (e.g. `/EPUB/chapter1.xhtml`, where `EPUB` is the root and `chapter1.xhtml` is
 /// the resource path)
 async fn get_epub_chapter(
-	Path(id): Path<String>,
-	Path(chapter): Path<usize>,
+	Path((id, chapter)): Path<(String, usize)>,
 	Extension(ctx): State,
 ) -> ApiResult<BufferResponse> {
 	let book = ctx
@@ -94,10 +93,8 @@ async fn get_epub_chapter(
 /// resource. (e.g. `/EPUB/chapter1.xhtml`, where `EPUB` is the root and `chapter1.xhtml` is
 /// the resource path)
 async fn get_epub_meta(
-	Path(id): Path<String>,
-	Path(root): Path<String>,
 	// TODO: does this work?
-	Path(resource): Path<PathBuf>,
+	Path((id, root, resource)): Path<(String, String, PathBuf)>,
 	Extension(ctx): State,
 ) -> ApiResult<BufferResponse> {
 	let book = ctx

@@ -4,6 +4,7 @@ use axum::{
 	routing::get,
 	Extension, Json, Router,
 };
+use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
 use std::{path, str::FromStr};
@@ -28,7 +29,10 @@ use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::http::{ImageResponse, PageableTrait},
+	utils::{
+		get_session_user,
+		http::{ImageResponse, PageableTrait},
+	},
 };
 
 pub(crate) fn mount() -> Router {
@@ -219,9 +223,16 @@ async fn scan_library(
 	Path(id): Path<String>,
 	Extension(ctx): State,
 	query: Query<ScanQueryParam>,
-	// session: ReadableSession TODO: uncomment
+	session: ReadableSession, // TODO: admin middleware
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
+
+	if !user.is_admin() {
+		return Err(ApiError::Forbidden(
+			"You do not have permission to access this resource".to_string(),
+		));
+	}
 
 	let lib = db
 		.library()

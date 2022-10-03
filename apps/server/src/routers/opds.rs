@@ -52,7 +52,7 @@ pub(crate) fn mount() -> Router {
 					"/books/:id",
 					Router::new()
 						.route("/thumbnail", get(get_book_thumbnail))
-						.route("/pages", get(get_book_page)),
+						.route("/pages/:page", get(get_book_page)),
 				),
 		)
 		.layer(from_extractor::<Auth>())
@@ -317,7 +317,6 @@ async fn get_library_by_id(
 
 // /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 // /// pagination is zero-indexed.
-// #[get("/series?<page>")]
 async fn get_series(
 	pagination: Query<PagedRequestParams>,
 	Extension(ctx): State,
@@ -453,15 +452,13 @@ async fn get_book_thumbnail(
 }
 
 async fn get_book_page(
-	Path(id): Path<String>,
+	Path((id, page)): Path<(String, i32)>,
 	Extension(ctx): State,
 	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
 	let zero_based = pagination.zero_based.unwrap_or(false);
-	let page = pagination.page.unwrap_or(if zero_based { 0 } else { 1 });
-
 	let book = db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
@@ -469,7 +466,6 @@ async fn get_book_page(
 		.await?;
 
 	let mut correct_page = page;
-
 	if zero_based {
 		correct_page = page + 1;
 	}
@@ -484,5 +480,5 @@ async fn get_book_page(
 		return Ok(epub::get_epub_cover(&book.path)?.into());
 	}
 
-	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
+	Ok(media_file::get_page(book.path.as_str(), page)?.into())
 }

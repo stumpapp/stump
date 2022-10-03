@@ -256,15 +256,12 @@ async fn convert_media(
 }
 
 async fn get_media_page(
-	Path(id): Path<String>,
-	pagination: Query<PagedRequestParams>,
+	Path((id, page)): Path<(String, i32)>,
 	Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
-	// FIXME: unsafe cast
-	let page = pagination.page.unwrap_or(1).try_into().unwrap();
 
 	let book = db
 		.media()
@@ -333,10 +330,8 @@ async fn get_media_thumbnail(
 }
 
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found
-// #[put("/media/<id>/progress/<page>")]
 async fn update_media_progress(
-	Path(id): Path<String>,
-	Path(page): Path<i32>,
+	Path((id, page)): Path<(String, i32)>,
 	Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<ReadProgress>> {

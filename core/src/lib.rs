@@ -17,9 +17,9 @@ pub mod opds;
 pub mod prisma;
 pub mod types;
 
+use config::context::Ctx;
 use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
-use config::{context::Ctx};
 use event::{event_manager::EventManager, InternalCoreTask};
 use tokio::sync::mpsc::unbounded_channel;
 use types::{errors::CoreError, CoreResult};
@@ -29,7 +29,7 @@ use types::{errors::CoreError, CoreResult};
 /// outgoing events ([`CoreEvent`](event::CoreEvent)), and providing access to the database
 /// via the core's [`Ctx`].
 ///
-/// [`StumpCore`] also provides a few initilization functions, such as `init_logging`. This
+/// [`StumpCore`] also provides a few initilization functions, such as `init_environment`. This
 /// is provided to standardize various configurations for consumers of the library.
 ///
 /// Example:
@@ -38,11 +38,9 @@ use types::{errors::CoreError, CoreResult};
 ///
 /// #[tokio::main]
 /// async fn main() {
-/// 	assert!(StumpCore::load_env().is_ok());
-///		assert!(StumpCore::init_logging().is_ok());
+///		assert!(StumpCore::init_environment().is_ok());
 ///
 /// 	let core = StumpCore::new().await;
-///
 /// 	// do stuff with core
 /// }
 pub struct StumpCore {
@@ -91,7 +89,7 @@ impl StumpCore {
 		return STUMP_SHADOW_TEXT;
 	}
 
-	/// Runs the database migrations.
+	/// Runs the database migrations. This will be updated with PCR 0.6.2
 	pub async fn run_migrations(&self) -> Result<(), CoreError> {
 		db::migration::run_migrations(&self.ctx.db).await
 	}

@@ -1,4 +1,4 @@
-pub(crate) mod event_manager;
+pub mod event_manager;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;

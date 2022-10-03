@@ -2,12 +2,15 @@ import type { CoreEvent } from '../types';
 import { useMemo } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { API } from '../api';
+import { useStumpStore } from '../stores';
 
 interface Props {
 	onEvent(event: CoreEvent): void;
 }
 
 export function useStumpWs({ onEvent }: Props) {
+	const { setConnected } = useStumpStore();
+
 	const socketUrl = useMemo(() => {
 		let url = API.getUri();
 		// remove http(s):// from url, and replace with ws(s)://
@@ -27,13 +30,19 @@ export function useStumpWs({ onEvent }: Props) {
 		}
 	}
 
-	// TODO: don't just return this value, create something in the store to track connection status
-	// so the UI can display when the connection is lost/reconnecting/etc
-	const { readyState } = useWebSocket(socketUrl, { onMessage: handleWsMessage });
-
-	if (readyState !== ReadyState.OPEN) {
-		console.log('Websocket status:', readyState);
+	function handleOpen() {
+		setConnected(true);
 	}
+
+	function handleClose() {
+		setConnected(false);
+	}
+
+	const { readyState } = useWebSocket(socketUrl, {
+		onMessage: handleWsMessage,
+		onOpen: handleOpen,
+		onClose: handleClose,
+	});
 
 	return { readyState };
 }

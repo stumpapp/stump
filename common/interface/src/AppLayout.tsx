@@ -10,6 +10,7 @@ import JobOverlay from './components/JobOverlay';
 import TopBar from './components/topbar/TopBar';
 import CommandPalette from './components/CommandPalette';
 import { useHotkeys } from 'react-hotkeys-hook';
+import ServerStatusOverlay from './components/ServerStatusOverlay';
 
 export function AppLayout() {
 	const appProps = useAppProps();
@@ -81,6 +82,7 @@ export function AppLayout() {
 				</Box>
 			</Flex>
 
+			{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
 			<JobOverlay />
 		</React.Suspense>
 	);

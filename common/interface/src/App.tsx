@@ -8,7 +8,7 @@ import {
 	AppProps,
 	AppPropsContext,
 	queryClient,
-	useStumpConfigStore,
+	useStumpStore,
 	useTopBarStore,
 } from '@stump/client';
 import { initializeApi } from '@stump/client/api';
@@ -25,7 +25,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 	const [mounted, setMounted] = useState(false);
 	const [appProps, setAppProps] = useState(props.appProps);
 
-	const { baseUrl, setBaseUrl } = useStumpConfigStore();
+	const { baseUrl, setBaseUrl } = useStumpStore();
 	const { setTitle } = useTopBarStore();
 
 	useEffect(() => {

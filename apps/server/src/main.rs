@@ -30,8 +30,6 @@ async fn main() -> ServerResult<()> {
 
 	init_tracing();
 
-	// TODO: refactor `load_env` to return StumpEnv, so I can use the values (like port) here.
-	// let stump_env = StumpCore::load_env();
 	let stump_environment = StumpCore::init_environment();
 	if let Err(err) = stump_environment {
 		error!("Failed to load environment variables: {:?}", err);
@@ -39,8 +37,12 @@ async fn main() -> ServerResult<()> {
 	}
 	let stump_environment = stump_environment.unwrap();
 
-	// TODO: init logging
 	let core = StumpCore::new().await;
+	if let Err(err) = core.run_migrations().await {
+		error!("Failed to run migrations: {:?}", err);
+		return Err(ServerError::ServerStartError(err.to_string()));
+	}
+
 	let server_ctx = core.get_context();
 
 	info!("{}", core.get_shadow_text());
@@ -51,7 +53,6 @@ async fn main() -> ServerResult<()> {
 		.layer(session::get_session_layer())
 		.layer(cors::get_cors_layer());
 
-	// TODO: set ip based on env var
 	let addr = SocketAddr::from(([0, 0, 0, 0], stump_environment.port.unwrap_or(10801)));
 
 	axum::Server::bind(&addr)

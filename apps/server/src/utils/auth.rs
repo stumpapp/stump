@@ -10,7 +10,7 @@ pub fn get_hash_cost() -> u32 {
 		.unwrap_or(12)
 }
 
-pub fn check_password(hash: &str, password: &str) -> Result<bool, AuthError> {
+pub fn verify_password(hash: &str, password: &str) -> Result<bool, AuthError> {
 	Ok(bcrypt::verify(password, hash)?)
 }
 

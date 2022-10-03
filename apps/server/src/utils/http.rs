@@ -1,9 +1,16 @@
 use axum::{
+	body::{BoxBody, StreamBody},
 	extract::Query,
 	http::{header, HeaderValue},
 	response::{IntoResponse, Response},
 };
+use std::{
+	io,
+	path::{Path, PathBuf},
+};
 use stump_core::types::{ContentType, PageParams, PagedRequestParams};
+use tokio::fs::File;
+use tokio_util::io::ReaderStream;
 
 /// [ImageResponse] is a thin wrapper struct to return an image correctly in Axum.
 /// It contains a subset of actual Content-Type's (using [ContentType] enum from
@@ -124,5 +131,49 @@ impl PageableTrait for Query<PagedRequestParams> {
 			order_by: params.order_by.unwrap_or("name".to_string()),
 			direction: params.direction.unwrap_or_default(),
 		}
+	}
+}
+
+// TODO: I think it would be cool to support some variant of a named file with
+// range request support. I'm not sure how to do that yet, but it would be cool.
+// maybe something here -> https://docs.rs/tower-http/latest/tower_http/services/fs/index.html
+/// [NamedFile] is a struct used for serving 'named' files from the server. As
+/// opposed to the static files handled by Stump's SPA router, this is used for
+/// dynamic files outside of the server's static directory.
+pub struct NamedFile {
+	pub path_buf: PathBuf,
+	pub file: File,
+}
+
+impl NamedFile {
+	pub async fn open<P: AsRef<Path>>(path: P) -> io::Result<Self> {
+		let file = File::open(path.as_ref()).await?;
+
+		Ok(Self {
+			path_buf: path.as_ref().to_path_buf(),
+			file,
+		})
+	}
+}
+
+impl IntoResponse for NamedFile {
+	fn into_response(self) -> Response {
+		let stream = ReaderStream::new(self.file);
+		let body = StreamBody::new(stream);
+
+		// FIXME: unsafe unwraps
+		let filename = self.path_buf.file_name().unwrap().to_str().unwrap();
+
+		Response::builder()
+			.header(
+				header::CONTENT_TYPE,
+				ContentType::from_infer(&self.path_buf).to_string(),
+			)
+			.header(
+				header::CONTENT_DISPOSITION,
+				format!("attachment; filename=\"{}\"", filename),
+			)
+			.body(BoxBody::new(body))
+			.unwrap()
 	}
 }

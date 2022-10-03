@@ -1,4 +1,8 @@
+use std::path::Path;
+
 use serde::Serialize;
+
+use crate::fs::media_file::infer_mime_from_path;
 
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
@@ -50,6 +54,20 @@ impl ContentType {
 			"gif" => Some(ContentType::GIF),
 			_ => None,
 		}
+	}
+
+	pub fn from_infer(path: &Path) -> ContentType {
+		infer_mime_from_path(&path)
+			.map(|mime| ContentType::from(mime.as_str()))
+			.unwrap_or(
+				ContentType::from_extension(
+					path.extension()
+						.unwrap_or_default()
+						.to_str()
+						.unwrap_or_default(),
+				)
+				.unwrap_or(ContentType::UNKNOWN),
+			)
 	}
 
 	/// Returns true if the content type is an image.

@@ -27,7 +27,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_session_user,
-		http::{ImageResponse, PageableTrait},
+		http::{ImageResponse, NamedFile, PageableTrait},
 	},
 };
 
@@ -40,6 +40,7 @@ pub(crate) fn mount() -> Router {
 			"/media/:id",
 			Router::new()
 				.route("/", get(get_media_by_id))
+				.route("/file", get(get_media_file))
 				.route("/convert", get(convert_media))
 				.route("/thumbnail", get(get_media_thumbnail))
 				.route("/page/:page", get(get_media_page))
@@ -197,36 +198,29 @@ async fn get_media_by_id(
 	Ok(Json(book.unwrap().into()))
 }
 
-// #[get("/media/<id>/file")]
-// async fn get_media_file(
-// 	Path(id): Path<String>,
-// 	Extension(ctx): State,
-// 	_session: ReadableSession,
-// ) -> ApiResult<FileResponse> {
-// 	let db = ctx.get_db();
+async fn get_media_file(
+	Path(id): Path<String>,
+	Extension(ctx): State,
+) -> ApiResult<NamedFile> {
+	let db = ctx.get_db();
 
-// 	let media = db
-// 		.media()
-// 		.find_unique(media::id::equals(id.clone()))
-// 		.exec()
-// 		.await?;
+	let media = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.exec()
+		.await?;
 
-// 	if media.is_none() {
-// 		return Err(ApiError::NotFound(format!(
-// 			"Media with id {} not found",
-// 			id
-// 		)));
-// 	}
+	if media.is_none() {
+		return Err(ApiError::NotFound(format!(
+			"Media with id {} not found",
+			id
+		)));
+	}
 
-// 	let media = media.unwrap();
+	let media = media.unwrap();
 
-// 	Ok(FileResponse(
-// 		NamedFile::open(media.path.clone()).await?,
-// 		media.path,
-// 	))
-
-// 	// Ok(NamedFile::open(media.path.clone()).await?)
-// }
+	Ok(NamedFile::open(media.path.clone()).await?)
+}
 
 // TODO: remove this, implement it? maybe?
 async fn convert_media(

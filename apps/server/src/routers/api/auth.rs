@@ -11,7 +11,7 @@ use stump_core::{
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
-	utils,
+	utils::{self, verify_password},
 };
 
 pub(crate) fn mount() -> Router {
@@ -20,6 +20,7 @@ pub(crate) fn mount() -> Router {
 		Router::new()
 			.route("/me", get(viewer))
 			.route("/login", post(login))
+			.route("/logout", post(logout))
 			.route("/register", post(register)),
 	)
 }
@@ -54,7 +55,10 @@ async fn login(
 		.await?;
 
 	if let Some(db_user) = fetched_user {
-		// TODO: check password
+		let matches = verify_password(&db_user.hashed_password, &input.password)?;
+		if !matches {
+			return Err(ApiError::Unauthorized);
+		}
 
 		let user: User = db_user.into();
 		session.insert("user", user.clone()).unwrap();
@@ -63,6 +67,11 @@ async fn login(
 	}
 
 	Err(ApiError::Unauthorized)
+}
+
+async fn logout(mut session: WritableSession) -> ApiResult<()> {
+	session.destroy();
+	Ok(())
 }
 
 pub async fn register(

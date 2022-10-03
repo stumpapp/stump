@@ -15,7 +15,7 @@ use prisma_client_rust::{
 use stump_core::{config::Ctx, prisma::user, types::User};
 use tracing::{error, trace};
 
-use crate::utils::{check_password, decode_base64_credentials};
+use crate::utils::{decode_base64_credentials, verify_password};
 
 pub struct Auth;
 
@@ -102,7 +102,7 @@ where
 
 		let user = user.unwrap();
 		let is_match =
-			check_password(&user.hashed_password, &decoded_credentials.password)
+			verify_password(&user.hashed_password, &decoded_credentials.password)
 				.map_err(|e| e.into_response())?;
 
 		if is_match {

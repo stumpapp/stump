@@ -15,6 +15,6 @@ export function register(payload: LoginOrRegisterArgs) {
 	return API.post('/auth/register', payload);
 }
 
-export function logout(): Promise<ApiResult<unknown>> {
+export function logout(): Promise<ApiResult<never>> {
 	return API.post('/auth/logout');
 }

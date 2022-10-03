@@ -26,6 +26,7 @@ CREATE TABLE "library_options" (
     "convert_rar_to_zip" BOOLEAN NOT NULL DEFAULT false,
     "hard_delete_conversions" BOOLEAN NOT NULL DEFAULT false,
     "create_webp_thumbnails" BOOLEAN NOT NULL DEFAULT false,
+    "library_pattern" TEXT NOT NULL DEFAULT 'SERIES_BASED',
     "library_id" TEXT
 );
 

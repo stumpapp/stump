@@ -1,6 +1,5 @@
 use axum::{
 	extract::{Path, Query},
-	headers::ContentType,
 	middleware::from_extractor,
 	routing::get,
 	Extension, Json, Router,
@@ -206,13 +205,7 @@ async fn get_library_thumbnail(
 
 	let media = series.media()?.first().unwrap();
 
-	let old = media_file::get_page(media.path.as_str(), 1)?;
-
-	// FIXME: old rocket usage above
-	Ok(ImageResponse {
-		content_type: ContentType::png(),
-		data: old.1,
-	})
+	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }
 
 #[derive(Deserialize)]

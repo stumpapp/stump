@@ -1,15 +1,23 @@
 use axum::{
 	extract::Query,
-	headers::ContentType,
 	http::{header, HeaderValue},
 	response::{IntoResponse, Response},
 };
-use stump_core::types::{PageParams, PagedRequestParams};
+use stump_core::types::{ContentType, PageParams, PagedRequestParams};
 
-// TODO: remove in favor of BufferResponse, which is more generic.
+/// [ImageResponse] is a thin wrapper struct to return an image correctly in Axum.
+/// It contains a subset of actual Content-Type's (using [ContentType] enum from
+/// stump_core), as well as the raw image data. This is mostly the same as [BufferResponse],
+/// but adds the Cache-Control header.
 pub struct ImageResponse {
 	pub content_type: ContentType,
 	pub data: Vec<u8>,
+}
+
+impl From<(ContentType, Vec<u8>)> for ImageResponse {
+	fn from((content_type, data): (ContentType, Vec<u8>)) -> Self {
+		Self { content_type, data }
+	}
 }
 
 impl IntoResponse for ImageResponse {
@@ -21,16 +29,18 @@ impl IntoResponse for ImageResponse {
 			HeaderValue::from_str(self.content_type.to_string().as_str())
 				.unwrap_or(HeaderValue::from_static("image/png")),
 		);
+		base_response.headers_mut().insert(
+			header::CACHE_CONTROL,
+			// 10 minutes
+			HeaderValue::from_static("private,max-age=600"),
+		);
 
-		println!("Content type: {}", self.content_type.to_string());
-		println!("{:?}", base_response.headers());
-
-		// 10 minutes
-		// .raw_header("Cache-Control", "private,max-age=600")
 		base_response
 	}
 }
 
+/// [Xml] is a wrapper struct to return XML correctly in Axum. It really just
+/// sets the content type to application/xml.
 pub struct Xml(pub String);
 
 impl IntoResponse for Xml {
@@ -48,9 +58,17 @@ impl IntoResponse for Xml {
 	}
 }
 
+/// [BufferResponse] is a wrapper struct to return a buffer of any Stump-compliant (see [ContentType])
+/// Content-Type correctly in Axum.
 pub struct BufferResponse {
 	pub content_type: ContentType,
 	pub data: Vec<u8>,
+}
+
+impl From<(ContentType, Vec<u8>)> for BufferResponse {
+	fn from((content_type, data): (ContentType, Vec<u8>)) -> Self {
+		Self { content_type, data }
+	}
 }
 
 impl IntoResponse for BufferResponse {
@@ -67,6 +85,9 @@ impl IntoResponse for BufferResponse {
 	}
 }
 
+/// [UnknownBufferResponse] is the same as [BufferResponse], but takes a string instead of a [ContentType].
+/// This makes it useful for returning a buffer with a content type that Stump doesn't know about. I don't
+/// anticipate this being used much, but it's here just in case.
 pub struct UnknownBufferResponse {
 	pub content_type: String,
 	pub data: Vec<u8>,

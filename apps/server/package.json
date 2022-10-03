@@ -6,14 +6,11 @@
     "check": "cargo check",
     "start": "cargo run --release",
     "dev": "cargo watch -x run",
-    "build": "pnpm get-client && cargo build --release && pnpm move-client && pnpm move-rocket",
+    "build": "pnpm get-client && cargo build --release && pnpm move-client",
     "get-client": "trash \"client/*\" \"!client/.placeholder\" && cpy \"../web/dist/**/*\" ./client/",
     "move-client": "trash ../../target/release/client && cp -r ./client ../../target/release/client",
-    "move-rocket": "trash ../../target/release/Rocket.toml && cp ./Rocket.toml ../../target/release/Rocket.toml",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
     "benchmarks": "cargo test --benches",
-    "typegen": "cargo test --package stump_server --bin stump_server -- types::tests --nocapture",
-    "codegen": "pnpm typegen",
     "test": "cargo test"
   }
 }

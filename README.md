@@ -10,6 +10,9 @@
   <a href="https://github.com/aaronleopold/stump/blob/main/LICENSE">
     <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=CF9977" />
   </a>
+  <!-- <a href="https://app.getpostman.com/run-collection/6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20?action=collection%2Ffork&collection-url=entityId%3D6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20%26entityType%3Dcollection%26workspaceId%3D722014ea-55eb-4a49-b29d-814300c1016d">
+    <img src="https://run.pstmn.io/button.svg">
+  </a> -->
   <!-- <a href="./.github/CHANGELOG.md">
     <img src="https://img.shields.io/github/package-json/v/aaronleopold/stump?logo=azurepipelines&amp;color=0aa8d2" alt="Current Version">
   </a> -->
@@ -19,7 +22,7 @@
 </p>
 
 <p align='center'>
-Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/SergioBenitez/Rocket'>Rocket</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and <a href='https://reactjs.org/'>React</a>.
+Stump is a free and open source comics, manga and digital book server with OPDS support, created with <a href="https://www.rust-lang.org/">Rust</a>, <a href='https://github.com/tokio-rs/axum'>Axum</a>, <a href='https://github.com/Brendonovich/prisma-client-rust'>Prisma</a> and <a href='https://reactjs.org/'>React</a>.
 </p>
 
 <p align='center'>
@@ -122,6 +125,8 @@ Some other good places to start:
 
 I keep track of all non-code contributions in the [CONTRIBUTORS.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTORS.md) file. If you contribute in that manner, please add yourself to the list!
 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20?action=collection%2Ffork&collection-url=entityId%3D6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20%26entityType%3Dcollection%26workspaceId%3D722014ea-55eb-4a49-b29d-814300c1016d)
+
 ## Project Structure 📦
 
 Stump has a monorepo structure that follows a similar pattern to that of [Spacedrive](https://www.spacedrive.com/).
@@ -130,8 +135,8 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 
 - `docs`: The documentation website, built with Next.js and [Markdoc](https://markdoc.io/), deployed to [stumpapp.dev](http://stumpapp.dev).
 - `desktop`: A Tauri application.
-- `server`: A Rocket server.
-- `web`: The React application that is served by the Rocket server.
+- `server`: An [Axum](https://github.com/tokio-rs/axum) server.
+- `web`: The React application that is served by the Axum server.
 
 ### /common
 

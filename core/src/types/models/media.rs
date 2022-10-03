@@ -1,6 +1,5 @@
 use std::{path::PathBuf, str::FromStr};
 
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -8,7 +7,7 @@ use crate::{config::context::Ctx, prisma, types::enums::FileStatus};
 
 use super::{read_progress::ReadProgress, series::Series, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct Media {
 	pub id: String,
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
@@ -78,10 +77,7 @@ impl Into<Media> for prisma::media::Data {
 	fn into(self) -> Media {
 		let series = match self.series() {
 			Ok(series) => Some(series.unwrap().to_owned().into()),
-			Err(_e) => {
-				// log::debug!("Failed to load series for media: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		let (read_progresses, current_page) = match self.read_progresses() {
@@ -98,10 +94,7 @@ impl Into<Media> for prisma::media::Data {
 					(Some(progress), None)
 				}
 			},
-			Err(e) => {
-				log::trace!("Failed to load read progresses for media: {}", e);
-				(None, None)
-			},
+			Err(_e) => (None, None),
 		};
 
 		let tags = match self.tags() {

@@ -5,6 +5,7 @@ use std::{
 	io::{Read, Write},
 	path::{Path, PathBuf},
 };
+use tracing::{debug, error, trace};
 use webp::{Encoder, WebPMemory};
 
 use crate::{config::get_thumbnails_dir, prisma::media, types::errors::ProcessFileError};
@@ -82,7 +83,7 @@ pub fn generate_thumbnail(id: &str, path: &str) -> Result<PathBuf, ProcessFileEr
 
 		webp_image.write_all(&webp_buf)?;
 	} else {
-		log::trace!("Thumbnail already exists for {}", &id);
+		trace!("Thumbnail already exists for {}", &id);
 	}
 
 	Ok(thumbnail_path)
@@ -92,7 +93,7 @@ pub fn generate_thumbnail(id: &str, path: &str) -> Result<PathBuf, ProcessFileEr
 pub fn generate_thumbnails(
 	media: Vec<media::Data>,
 ) -> Result<Vec<PathBuf>, ProcessFileError> {
-	log::debug!("Enter generate_thumbnails");
+	debug!("Enter generate_thumbnails");
 
 	// TODO: this might make the stack overflow lol
 	let results = media
@@ -101,7 +102,7 @@ pub fn generate_thumbnails(
 		.map(|m| generate_thumbnail(m.id.as_str(), &m.path.as_str()))
 		.filter_map(|res| {
 			if res.is_err() {
-				log::error!("Error generating thumbnail: {:?}", res.err());
+				error!("Error generating thumbnail: {:?}", res.err());
 				None
 			} else {
 				res.ok()
@@ -109,7 +110,7 @@ pub fn generate_thumbnails(
 		})
 		.collect::<Vec<PathBuf>>();
 
-	log::debug!("Generated the following thumbnails: {:?}", results);
+	debug!("Generated the following thumbnails: {:?}", results);
 
 	Ok(results)
 }

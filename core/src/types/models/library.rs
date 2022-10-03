@@ -1,6 +1,5 @@
 use std::{fmt, str::FromStr};
 
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -8,7 +7,7 @@ use crate::prisma;
 
 use super::{series::Series, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct Library {
 	pub id: String,
 	/// The name of the library. ex: "Marvel Comics"
@@ -29,7 +28,7 @@ pub struct Library {
 	pub library_options: LibraryOptions,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, PartialEq, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Type)]
 pub enum LibraryPattern {
 	#[serde(rename = "SERIES_BASED")]
 	SeriesBased,
@@ -73,7 +72,7 @@ impl fmt::Display for LibraryPattern {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct LibraryOptions {
 	// Note: this isn't really an Option, but I felt it was a little verbose
 	// to create an entirely new struct Create/UpdateLibraryOptions for just one
@@ -107,7 +106,7 @@ impl Default for LibraryOptions {
 	}
 }
 
-#[derive(Deserialize, Debug, JsonSchema, PartialEq, Copy, Clone, Type)]
+#[derive(Deserialize, Debug, PartialEq, Copy, Clone, Type)]
 pub enum LibraryScanMode {
 	#[serde(rename = "SYNC")]
 	Sync,
@@ -145,7 +144,7 @@ impl Default for LibraryScanMode {
 	}
 }
 
-#[derive(Deserialize, Serialize, JsonSchema, Type)]
+#[derive(Deserialize, Serialize, Type)]
 pub struct LibrariesStats {
 	series_count: u64,
 	book_count: u64,
@@ -182,26 +181,17 @@ impl Into<Library> for prisma::library::Data {
 	fn into(self) -> Library {
 		let series = match self.series() {
 			Ok(series) => Some(series.into_iter().map(|s| s.to_owned().into()).collect()),
-			Err(e) => {
-				log::trace!("Failed to load series for library: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
-			Err(e) => {
-				log::trace!("Failed to load tags for library: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		let library_options = match self.library_options() {
 			Ok(library_options) => library_options.to_owned().into(),
-			Err(e) => {
-				log::trace!("Failed to load library options for library: {}", e);
-				LibraryOptions::default()
-			},
+			Err(_e) => LibraryOptions::default(),
 		};
 
 		Library {

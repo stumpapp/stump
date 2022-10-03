@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate rocket;
-
 use std::sync::Arc;
 
 // TODO: for these crates, some should NOT hoist entire crate, I need to restrict it
@@ -21,10 +18,10 @@ pub mod prisma;
 pub mod types;
 
 use config::context::Ctx;
+use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
-use config::{env::StumpEnv, logging::init_fern};
 use event::{event_manager::EventManager, InternalCoreTask};
-use rocket::tokio::sync::mpsc::unbounded_channel;
+use tokio::sync::mpsc::unbounded_channel;
 use types::{errors::CoreError, CoreResult};
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump
@@ -32,21 +29,18 @@ use types::{errors::CoreError, CoreResult};
 /// outgoing events ([`CoreEvent`](event::CoreEvent)), and providing access to the database
 /// via the core's [`Ctx`].
 ///
-/// [`StumpCore`] also provides a few initilization functions, such as `init_logging`. This
+/// [`StumpCore`] also provides a few initilization functions, such as `init_environment`. This
 /// is provided to standardize various configurations for consumers of the library.
 ///
 /// Example:
 /// ```rust
-/// use rocket::tokio;
 /// use stump_core::StumpCore;
 ///
 /// #[tokio::main]
 /// async fn main() {
-/// 	assert!(StumpCore::load_env().is_ok());
-///		assert!(StumpCore::init_logging().is_ok());
+///		assert!(StumpCore::init_environment().is_ok());
 ///
 /// 	let core = StumpCore::new().await;
-///
 /// 	// do stuff with core
 /// }
 pub struct StumpCore {
@@ -57,11 +51,10 @@ pub struct StumpCore {
 
 impl StumpCore {
 	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`Arc`].
-	pub async fn new() -> Arc<StumpCore> {
+	pub async fn new() -> StumpCore {
 		let internal_channel = unbounded_channel::<InternalCoreTask>();
 
 		let core_ctx = Ctx::new(internal_channel.0).await;
-
 		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
 
 		let core = Self {
@@ -69,18 +62,13 @@ impl StumpCore {
 			event_manager,
 		};
 
-		Arc::new(core)
-	}
-
-	/// Initializes logging for the core using [`log`] and [`fern`].
-	pub fn init_logging() -> Result<(), fern::InitError> {
-		init_fern()
+		core
 	}
 
 	/// Loads environment variables from the `Stump.toml` configuration file, if
 	/// it exists, using the [`StumpEnv`] struct.
-	pub fn load_env() -> CoreResult<()> {
-		StumpEnv::load()
+	pub fn init_environment() -> CoreResult<StumpEnvironment> {
+		StumpEnvironment::load()
 	}
 
 	/// Returns [`StumpCore`] wrapped in an [`Arc`]. Will take ownership of self. Created
@@ -101,7 +89,7 @@ impl StumpCore {
 		return STUMP_SHADOW_TEXT;
 	}
 
-	/// Runs the database migrations.
+	/// Runs the database migrations. This will be updated with PCR 0.6.2
 	pub async fn run_migrations(&self) -> Result<(), CoreError> {
 		db::migration::run_migrations(&self.ctx.db).await
 	}

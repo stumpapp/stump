@@ -4,12 +4,10 @@ version.workspace = true
 edition = "2021"
 
 [dependencies]
-rocket.workspace = true
+tokio.workspace = true
 serde.workspace = true
 prisma-client-rust.workspace = true
-
 specta.workspace = true
-schemars.workspace = true
 
 rayon = "1.5.3"
 futures = "0.3.21"
@@ -39,7 +37,8 @@ ring = "0.16.20"
 
 ## ERROR HANDLING + LOGGING ###
 thiserror.workspace = true
-log.workspace = true
-fern = "0.6.1"
 # figment = { version = "0.10.6", features = ["toml", "env"] }
 toml = "0.5.9"
+tracing.workspace = true
+tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
+tracing-appender = "0.2.2"

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rocket::tokio::{self, sync::mpsc};
+use tokio::{self, sync::mpsc};
 
 use crate::{config::context::Ctx, job::pool::JobPool};
 
@@ -18,6 +18,19 @@ pub struct EventManager {
 impl EventManager {
 	/// Creates a new instance of [`EventManager`] and returns it wrapped in an [`Arc`].
 	/// A thread is spawned to handle the incoming tasks.
+	///
+	/// ## Example
+	/// ```rust
+	/// use stump_core::{event::event_manager::EventManager, config::Ctx};
+	/// use tokio::sync::mpsc::unbounded_channel;
+	///
+	/// #[tokio::main]
+	/// async fn main() {
+	/// 	let (sender, reciever) = unbounded_channel();
+	/// 	let ctx = Ctx::new(sender).await;
+	/// 	let event_manager = EventManager::new(ctx, reciever);
+	/// }
+	/// ```
 	pub fn new(
 		ctx: Ctx,
 		mut request_reciever: mpsc::UnboundedReceiver<InternalCoreTask>,

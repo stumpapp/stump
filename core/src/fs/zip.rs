@@ -1,31 +1,32 @@
-use crate::{
-	fs::media_file::{self, IsImage},
-	types::{errors::ProcessFileError, models::media::ProcessedMediaFile},
-};
-
-use rocket::http::ContentType;
 use std::{
 	fs::File,
 	io::{Read, Write},
 	path::{Path, PathBuf},
 };
+use tracing::{debug, error, info, trace, warn};
 use walkdir::WalkDir;
 use zip::{read::ZipFile, write::FileOptions};
 
-use super::checksum;
+use crate::{
+	fs::{
+		checksum,
+		media_file::{self, IsImage},
+	},
+	types::{errors::ProcessFileError, models::media::ProcessedMediaFile, ContentType},
+};
 
 impl<'a> IsImage for ZipFile<'a> {
 	// FIXME: use infer here
 	fn is_image(&self) -> bool {
 		if self.is_file() {
 			let content_type = media_file::guess_content_type(self.name());
+			trace!(
+				"Content type of file {:?} is {:?}",
+				self.name(),
+				content_type
+			);
 
-			// TODO: is this all??
-			return content_type.is_jpeg()
-				|| content_type.is_png()
-				|| content_type.is_webp()
-				|| content_type.is_svg()
-				|| content_type.is_tiff();
+			return content_type.is_image();
 		}
 
 		false
@@ -46,7 +47,7 @@ fn zip_dir(
 		.compression_method(zip::CompressionMethod::Stored)
 		.unix_permissions(0o755);
 
-	log::trace!("Creating zip file at {:?}", destination);
+	trace!("Creating zip file at {:?}", destination);
 
 	let mut buffer = Vec::new();
 	for entry in WalkDir::new(unpacked_path)
@@ -59,7 +60,7 @@ fn zip_dir(
 		// Write file or directory explicitly
 		// Some unzip tools unzip files with directory paths correctly, some do not!
 		if path.is_file() {
-			log::trace!("Adding file to zip file: {:?} as {:?}", path, name);
+			trace!("Adding file to zip file: {:?} as {:?}", path, name);
 			#[allow(deprecated)]
 			zip_writer.start_file_from_path(name, options)?;
 			let mut f = File::open(path)?;
@@ -71,11 +72,11 @@ fn zip_dir(
 		} else if !name.as_os_str().is_empty() {
 			// Only if not root! Avoids path spec / warning
 			// and mapname conversion failed error on unzip
-			log::trace!("Adding directory to zipfile: {:?} as {:?}", path, name);
+			trace!("Adding directory to zipfile: {:?} as {:?}", path, name);
 			#[allow(deprecated)]
 			zip_writer.add_directory_from_path(name, options)?;
 		} else {
-			log::warn!("Please create a bug report! This entry did not meet any of the conditions to be added to the zipfile: {:?}", entry);
+			warn!("Please create a bug report! This entry did not meet any of the conditions to be added to the zipfile: {:?}", entry);
 		}
 	}
 
@@ -98,7 +99,7 @@ pub fn create_zip(
 		ext = "zip";
 	}
 
-	log::trace!("Calculated extension for zip file: {}", ext);
+	trace!("Calculated extension for zip file: {}", ext);
 
 	let zip_path = destination.join(format!("{}.{}", name, ext));
 
@@ -135,7 +136,7 @@ pub fn zip_sample(file: &str) -> u64 {
 pub fn digest_zip(path: &str) -> Option<String> {
 	let size = zip_sample(path);
 
-	log::debug!(
+	debug!(
 		"Calculated sample size (in bytes) for generating checksum: {}",
 		size
 	);
@@ -143,10 +144,9 @@ pub fn digest_zip(path: &str) -> Option<String> {
 	match checksum::digest(path, size) {
 		Ok(digest) => Some(digest),
 		Err(e) => {
-			log::error!(
+			error!(
 				"Failed to digest zip file {}. Unable to generate checksum: {}",
-				path,
-				e
+				path, e
 			);
 
 			None
@@ -202,7 +202,7 @@ pub fn get_zip_image(
 	let file_names_archive = archive.clone();
 
 	if archive.len() == 0 {
-		log::error!("Zip file {} is empty", file);
+		error!("Zip file {} is empty", file);
 		return Err(ProcessFileError::ArchiveEmptyError);
 	}
 
@@ -221,7 +221,7 @@ pub fn get_zip_image(
 		let content_type = media_file::guess_content_type(name);
 
 		if images_seen + 1 == page && file.is_image() {
-			log::trace!("Found target image: {}", name);
+			trace!("Found target image: {}", name);
 			file.read_to_end(&mut contents)?;
 			return Ok((content_type, contents));
 		} else if file.is_image() {
@@ -229,10 +229,9 @@ pub fn get_zip_image(
 		}
 	}
 
-	log::error!(
+	error!(
 		"Could not find image for page {} in zip file {}",
-		page,
-		file
+		page, file
 	);
 
 	Err(ProcessFileError::NoImageError)

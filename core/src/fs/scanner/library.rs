@@ -1,7 +1,7 @@
 use globset::GlobSetBuilder;
 use itertools::Itertools;
 use rayon::prelude::{ParallelBridge, ParallelIterator};
-use rocket::tokio::{self, task::JoinHandle};
+use tokio::{self, task::JoinHandle};
 use std::{
 	collections::HashMap,
 	path::Path,
@@ -11,6 +11,7 @@ use std::{
 	},
 	time::Duration,
 };
+use tracing::{debug, error, info, trace};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
@@ -150,7 +151,7 @@ async fn precheck(
 		insert_series_batch(ctx, new_entries, library.id.clone()).await;
 
 	if let Err(e) = insertion_result {
-		log::error!("Failed to batch insert series: {}", e);
+		error!("Failed to batch insert series: {}", e);
 
 		ctx.emit_client_event(CoreEvent::CreateEntityFailed {
 			runner_id: Some(runner_id.to_string()),
@@ -206,7 +207,7 @@ async fn precheck(
 
 	let duration = start.elapsed();
 
-	log::debug!(
+	debug!(
 		"Files to process: {:?} (calculated in {}.{:03} seconds)",
 		files_to_process,
 		duration.as_secs(),
@@ -275,7 +276,7 @@ async fn scan_series(
 		let path = entry.path();
 		let path_str = path.to_str().unwrap_or("");
 
-		log::debug!("Currently scanning: {:?}", path);
+		debug!("Currently scanning: {:?}", path);
 
 		// Tell client we are on the next file, this will increment the counter in the
 		// callback, as well.
@@ -285,16 +286,16 @@ async fn scan_series(
 		// println!("Path: {:?} -> Matches: {}", path, glob_match);
 
 		if path.should_ignore() || glob_match {
-			log::trace!("Skipping ignored file: {:?}", path);
-			log::trace!("Globbed ignore?: {}", glob_match);
+			trace!("Skipping ignored file: {:?}", path);
+			trace!("Globbed ignore?: {}", glob_match);
 			continue;
 		} else if let Some(_) = visited_media.get(path_str) {
-			log::debug!("Existing media found: {:?}", path);
+			debug!("Existing media found: {:?}", path);
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;
 		}
 
-		log::debug!("New media found at {:?} in series {:?}", &path, &series.id);
+		debug!("New media found at {:?} in series {:?}", &path, &series.id);
 
 		match super::utils::insert_media(&ctx, path, series.id.clone(), &library_options)
 			.await
@@ -305,7 +306,7 @@ async fn scan_series(
 				ctx.emit_client_event(CoreEvent::CreatedMedia(media.clone()));
 			},
 			Err(e) => {
-				log::error!("Failed to insert media: {:?}", e);
+				error!("Failed to insert media: {:?}", e);
 
 				ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
 					runner_id: Some(runner_id.clone()),
@@ -324,19 +325,19 @@ async fn scan_series(
 		.collect::<Vec<String>>();
 
 	if missing_media.len() > 0 {
-		log::info!(
+		info!(
 			"{} media were unable to be located during scan.",
 			missing_media.len(),
 		);
 
-		log::debug!("Missing media paths: {:?}", missing_media);
+		debug!("Missing media paths: {:?}", missing_media);
 
 		let result = mark_media_missing(&ctx, missing_media).await;
 
 		if let Err(err) = result {
-			log::error!("Failed to mark media as MISSING: {:?}", err);
+			error!("Failed to mark media as MISSING: {:?}", err);
 		} else {
-			log::debug!("Marked {} media as MISSING", result.unwrap());
+			debug!("Marked {} media as MISSING", result.unwrap());
 		}
 	}
 }
@@ -408,7 +409,7 @@ async fn scan_series_batch(
 		let path = entry.path();
 		let path_str = path.to_str().unwrap_or("");
 
-		log::debug!("Currently scanning: {:?}", path);
+		debug!("Currently scanning: {:?}", path);
 
 		// Tell client we are on the next file, this will increment the counter in the
 		// callback, as well.
@@ -418,16 +419,16 @@ async fn scan_series_batch(
 		// println!("Path: {:?} -> Matches: {}", path, glob_match);
 
 		if path.should_ignore() || glob_match {
-			log::trace!("Skipping ignored file: {:?}", path);
-			log::trace!("Globbed ignore?: {}", glob_match);
+			trace!("Skipping ignored file: {:?}", path);
+			trace!("Globbed ignore?: {}", glob_match);
 			continue;
 		} else if let Some(_) = visited_media.get(path_str) {
-			log::debug!("Existing media found: {:?}", path);
+			debug!("Existing media found: {:?}", path);
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;
 		}
 
-		log::debug!("New media found at {:?} in series {:?}", &path, &series.id);
+		debug!("New media found at {:?} in series {:?}", &path, &series.id);
 
 		operations.push(BatchScanOperation::CreateMedia {
 			path: path.to_path_buf(),
@@ -446,7 +447,7 @@ async fn scan_series_batch(
 }
 
 pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult<u64> {
-	log::trace!("Enter scan_batch");
+	trace!("Enter scan_batch");
 
 	let (library, library_options, series, files_to_process) =
 		precheck(&ctx, path, &runner_id).await?;
@@ -507,7 +508,7 @@ pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult
 	let created_media = batch_media_operations(&ctx, operations, &library_options)
 		.await
 		.map_err(|e| {
-			log::error!("Failed to batch media operations: {:?}", e);
+			error!("Failed to batch media operations: {:?}", e);
 			CoreError::InternalError(e.to_string())
 		})?;
 
@@ -515,7 +516,7 @@ pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult
 
 	// TODO: change task_count and send progress?
 	if library_options.create_webp_thumbnails {
-		log::trace!("Library configured to create WEBP thumbnails.");
+		trace!("Library configured to create WEBP thumbnails.");
 
 		ctx.emit_client_event(CoreEvent::job_progress(
 			runner_id.clone(),
@@ -531,7 +532,7 @@ pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult
 		tokio::time::sleep(Duration::from_millis(50)).await;
 
 		if let Err(err) = image::generate_thumbnails(created_media) {
-			log::error!("Failed to generate thumbnails: {:?}", err);
+			error!("Failed to generate thumbnails: {:?}", err);
 		}
 	}
 

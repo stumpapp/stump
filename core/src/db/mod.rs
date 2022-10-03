@@ -2,6 +2,7 @@ pub mod migration;
 pub mod utils;
 
 use std::path::Path;
+use tracing::trace;
 
 use crate::{config::get_config_dir, prisma};
 
@@ -12,11 +13,10 @@ pub async fn create_client() -> prisma::PrismaClient {
 		.expect("Error parsing config directory")
 		.to_string();
 
-	let rocket_env =
-		std::env::var("ROCKET_PROFILE").unwrap_or_else(|_| "debug".to_string());
+	let profile = std::env::var("STUMP_PROFILE").unwrap_or_else(|_| "debug".to_string());
 
-	if rocket_env == "release" {
-		log::trace!(
+	if profile == "release" {
+		trace!(
 			"Creating Prisma client with url: file:{}/stump.db",
 			&config_dir
 		);
@@ -24,7 +24,7 @@ pub async fn create_client() -> prisma::PrismaClient {
 			.await
 			.expect("Failed to create Prisma client")
 	} else {
-		log::trace!(
+		trace!(
 			"Creating Prisma client with url: file:{}/prisma/dev.db",
 			&env!("CARGO_MANIFEST_DIR")
 		);

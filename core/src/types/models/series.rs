@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -8,7 +7,7 @@ use crate::{prisma, types::enums::FileStatus};
 
 use super::{library::Library, media::Media, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type)]
 pub struct Series {
 	pub id: String,
 	/// The name of the series. ex: "The Amazing Spider-Man (2018)"
@@ -53,10 +52,7 @@ impl Into<Series> for prisma::series::Data {
 	fn into(self) -> Series {
 		let library = match self.library() {
 			Ok(library) => Some(library.unwrap().to_owned().into()),
-			Err(e) => {
-				log::trace!("Failed to load library for series: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		let (media, media_count) = match self.media() {
@@ -69,18 +65,12 @@ impl Into<Series> for prisma::series::Data {
 
 				(Some(m), Some(m_ct))
 			},
-			Err(e) => {
-				log::trace!("Failed to load media for series: {}", e);
-				(None, None)
-			},
+			Err(_e) => (None, None),
 		};
 
 		let tags = match self.tags() {
 			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
-			Err(e) => {
-				log::trace!("Failed to load tags for series: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		Series {

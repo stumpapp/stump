@@ -51,7 +51,7 @@ export function useTags({
 
 	const { tags, options } = useMemo(() => {
 		if (data && data.data) {
-			const tagOptions = data.data.map(
+			const tagOptions = data.data?.map(
 				(tag) =>
 					({
 						label: tag.name,

@@ -119,21 +119,14 @@ COPY --chown=stump:stump --from=core-builder /app/stump ./app/stump
 # copy the react build
 COPY --from=frontend /app/build ./app/client
 
-# *sigh* Rocket requires the toml file at runtime, at CWD
-COPY apps/server/Rocket.toml ./app/Rocket.toml
-
 # TODO: replace this with something more elegant lol maybe a bash case statement
 RUN ln -s /lib/ld-musl-aarch64.so.1 /lib/ld-linux-aarch64.so.1; exit 0
 
 # Default Stump environment variables
 ENV STUMP_CONFIG_DIR=/config
 ENV STUMP_CLIENT_DIR=/app/client
-
-# Default Rocket environment variables
-ENV ROCKET_PROFILE=release
-ENV ROCKET_LOG_LEVEL=normal
-ENV ROCKET_PORT=10801
-
+ENV STUMP_PROFILE=release
+ENV STUMP_PORT=10801
 ENV STUMP_IN_DOCKER=true
 
 WORKDIR /app

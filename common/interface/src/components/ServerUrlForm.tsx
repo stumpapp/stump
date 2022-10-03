@@ -13,14 +13,14 @@ import {
 	useBoolean,
 } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useStumpConfigStore } from '@stump/client';
+import { useStumpStore } from '@stump/client';
 import { checkUrl, isUrl } from '@stump/client/api';
 
 import Form, { FormControl } from '../ui/Form';
 import { DebouncedInput } from '../ui/Input';
 
 export default function ServerUrlForm() {
-	const { setBaseUrl } = useStumpConfigStore();
+	const { setBaseUrl } = useStumpStore();
 	const [isCheckingUrl, { on, off }] = useBoolean(false);
 	const [sucessfulConnection, setSuccessfulConnection] = useState(false);
 

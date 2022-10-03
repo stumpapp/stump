@@ -1,10 +1,9 @@
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::prisma;
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct User {
 	pub id: String,
 	pub username: String,
@@ -28,10 +27,7 @@ impl Into<User> for prisma::user::Data {
 	fn into(self) -> User {
 		let user_preferences = match self.user_preferences() {
 			Ok(up) => Some(up.unwrap().to_owned().into()),
-			Err(e) => {
-				log::trace!("Failed to load user preferences for user: {}", e);
-				None
-			},
+			Err(_e) => None,
 		};
 
 		User {
@@ -43,7 +39,7 @@ impl Into<User> for prisma::user::Data {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
 
 pub struct UserPreferences {
 	pub id: String,
@@ -52,6 +48,19 @@ pub struct UserPreferences {
 	pub library_layout_mode: String,
 	pub series_layout_mode: String,
 	pub collection_layout_mode: String,
+}
+
+impl Default for UserPreferences {
+	fn default() -> Self {
+		Self {
+			id: "DEFAULT".to_string(),
+			locale: "en".to_string(),
+			// reduce_animations: false,
+			library_layout_mode: "GRID".to_string(),
+			series_layout_mode: "GRID".to_string(),
+			collection_layout_mode: "GRID".to_string(),
+		}
+	}
 }
 
 impl Into<UserPreferences> for prisma::user_preferences::Data {
@@ -66,33 +75,3 @@ impl Into<UserPreferences> for prisma::user_preferences::Data {
 		}
 	}
 }
-
-// #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema, Type)]
-
-// pub struct AuthenticatedUser {
-// 	pub id: String,
-// 	pub username: String,
-// 	pub role: String,
-// 	pub user_preferences: UserPreferences,
-// }
-
-// impl Into<AuthenticatedUser> for prisma::user::Data {
-// 	fn into(self) -> AuthenticatedUser {
-// 		let user_preferences = match self
-// 			.user_preferences()
-// 			.expect("Failed to load user preferences")
-// 		{
-// 			Some(preferences) => preferences.to_owned(),
-// 			None => unreachable!(
-// 				"User does not have preferences. This should not be reachable."
-// 			),
-// 		};
-
-// 		AuthenticatedUser {
-// 			id: self.id.clone(),
-// 			username: self.username.clone(),
-// 			role: self.role.clone(),
-// 			user_preferences: user_preferences.into(),
-// 		}
-// 	}
-// }

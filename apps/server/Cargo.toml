@@ -7,21 +7,34 @@ default-run = "stump_server"
 [dependencies]
 stump_core = { path = "../../core" }
 prisma-client-rust.workspace = true
+axum = { version = "0.5.16", features = ["ws"] }
+axum-macros = "0.2.3"
+axum-extra = { version = "0.3.7", features = [
+  "spa",
+  # "cookie"
+] }
+tower-http = { version = "0.3.4", features = [
+  "fs",
+  "cors",
+  "set-header"
+] }
+serde_json = "1.0.85"
+# used for the ws stuff
+futures-util = "0.3.24"
+# axum-typed-websockets = "0.4.0"
+tokio.workspace = true
+tokio-util = "0.7.4"
 serde.workspace = true
+axum-sessions = "0.3.1"
+async-trait = "0.1.53"
 
-### Rocket / Generic Server ### 
-rocket.workspace = true
-rocket_okapi = { version = "0.8.0-rc.2", features = ["rapidoc", "swagger"] }
-rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
-rocket-session-store = { git = "https://github.com/aaronleopold/rocket-session-store", branch = "develop", features = ["okapi"] }
 
 ### Dev Utils ###
-schemars.workspace = true
-specta.workspace = true
+rand = "0.8.5"
 
 ### Error Handling + Logging ###
+tracing.workspace = true
 thiserror.workspace = true
-log.workspace = true
 
 ### Auth ###
 bcrypt = "0.10.1"

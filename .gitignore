@@ -41,3 +41,4 @@ core/integration-tests/*libraries*
 _next
 
 docker-compose.yaml
+server_old

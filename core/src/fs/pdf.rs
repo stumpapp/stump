@@ -1,6 +1,4 @@
-use rocket::http::ContentType;
-
-use crate::types::errors::ProcessFileError;
+use crate::types::{errors::ProcessFileError, ContentType};
 
 pub fn get_pdf_page(
 	_file: &str,

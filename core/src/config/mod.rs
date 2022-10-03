@@ -1,16 +1,10 @@
 use std::path::{Path, PathBuf};
 
 pub(crate) mod context;
-// pub mod cors;
-pub mod env;
-// pub mod helmet;
-pub mod logging;
-// pub mod session;
-
 pub use context::Ctx;
 
-// TODO: look into this
-// https://api.rocket.rs/v0.5-rc/rocket/struct.Config.html#method.figment
+pub mod env;
+pub mod logging;
 
 /// Gets the home directory of the system running Stump
 fn home() -> PathBuf {

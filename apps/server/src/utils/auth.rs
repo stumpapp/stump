@@ -1,6 +1,7 @@
-use stump_core::types::DecodedCredentials;
+use axum_sessions::extractors::ReadableSession;
+use stump_core::types::{DecodedCredentials, User};
 
-use crate::types::errors::AuthError;
+use crate::errors::{ApiError, ApiResult, AuthError};
 
 pub fn get_hash_cost() -> u32 {
 	std::env::var("HASH_COST")
@@ -26,4 +27,12 @@ pub fn decode_base64_credentials(
 	}
 
 	Ok(DecodedCredentials { username, password })
+}
+
+pub fn get_session_user(session: &ReadableSession) -> ApiResult<User> {
+	if let Some(user) = session.get::<User>("user") {
+		Ok(user)
+	} else {
+		Err(ApiError::Unauthorized)
+	}
 }

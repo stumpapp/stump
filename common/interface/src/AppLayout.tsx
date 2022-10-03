@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import { useAppProps, useAuthQuery, useJobManager, useUserStore } from '@stump/client';
+import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client';
 
 import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
@@ -10,6 +10,7 @@ import JobOverlay from './components/JobOverlay';
 import TopBar from './components/topbar/TopBar';
 import CommandPalette from './components/CommandPalette';
 import { useHotkeys } from 'react-hotkeys-hook';
+import ServerStatusOverlay from './components/ServerStatusOverlay';
 
 export function AppLayout() {
 	const appProps = useAppProps();
@@ -24,7 +25,7 @@ export function AppLayout() {
 		);
 	}, [location]);
 
-	useJobManager();
+	useCoreEventHandler();
 
 	const { user: storeUser, setUser } = useUserStore();
 
@@ -81,6 +82,7 @@ export function AppLayout() {
 				</Box>
 			</Flex>
 
+			{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
 			<JobOverlay />
 		</React.Suspense>
 	);

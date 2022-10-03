@@ -1,6 +1,5 @@
 use std::{fmt, str::FromStr};
 
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -20,7 +19,7 @@ pub enum LayoutMode {
 	List,
 }
 
-#[derive(Debug, Deserialize, Serialize, JsonSchema, Type, Clone, Copy)]
+#[derive(Debug, Deserialize, Serialize, Type, Clone, Copy)]
 pub enum FileStatus {
 	#[serde(rename = "UNKNOWN")]
 	Unknown,

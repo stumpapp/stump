@@ -13,6 +13,6 @@ harness = true
 [dev-dependencies]
 serde.workspace = true
 prisma-client-rust.workspace = true
-rocket.workspace = true
+tokio.workspace = true
 stump_core = { path = ".." }
 tempfile = "3.3.0"

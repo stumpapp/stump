@@ -13,6 +13,7 @@ pub struct SSEHandler {
 	internal_sender: UnboundedSender<TuiEvent>,
 }
 
+// FIXME: server is now websockets
 impl SSEHandler {
 	pub fn new(base_url: &str, internal_sender: UnboundedSender<TuiEvent>) -> Arc<Self> {
 		let this = Arc::new(Self {

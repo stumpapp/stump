@@ -1,5 +1,4 @@
-use rocket::{http::ContentType, tokio};
-use std::{path::PathBuf, str::FromStr};
+use std::path::PathBuf;
 
 use crate::utils::{init_test, TempLibrary};
 
@@ -7,7 +6,7 @@ use stump_core::{
 	config::Ctx,
 	fs::epub::{get_epub_chapter, get_epub_resource, normalize_resource_path},
 	prisma::media,
-	types::{models::epub::Epub, CoreResult},
+	types::{models::epub::Epub, ContentType, CoreResult},
 };
 
 #[tokio::test]
@@ -67,8 +66,7 @@ async fn can_get_resource() -> CoreResult<()> {
 
 	assert_eq!(
 		got_resource.0,
-		ContentType::from_str(&first_resource.1 .1)
-			.expect("Could not determine content type")
+		ContentType::from(first_resource.1 .1.as_str())
 	);
 
 	Ok(())

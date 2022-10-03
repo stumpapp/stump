@@ -1,11 +1,11 @@
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use super::Direction;
 
-#[derive(Debug, Deserialize, Serialize, FromForm, JsonSchema, Type)]
+#[derive(Debug, Deserialize, Serialize, Type)]
 pub struct PagedRequestParams {
+	pub unpaged: Option<bool>,
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
@@ -13,7 +13,7 @@ pub struct PagedRequestParams {
 	pub direction: Option<Direction>,
 }
 
-#[derive(Debug, Serialize, JsonSchema, Clone, Type)]
+#[derive(Debug, Serialize, Clone, Type)]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,
@@ -58,7 +58,7 @@ impl From<Option<PagedRequestParams>> for PageParams {
 	}
 }
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Serialize)]
 pub struct PageLinks {
 	/// The current request URL. E.g. http://example.com/api/v1/users?page=2
 	#[serde(rename = "self")]
@@ -71,7 +71,7 @@ pub struct PageLinks {
 	pub next: Option<String>,
 }
 
-#[derive(Serialize, JsonSchema, Type)]
+#[derive(Serialize, Type)]
 pub struct PageInfo {
 	/// The number of pages available.
 	pub total_pages: u32,
@@ -101,7 +101,7 @@ impl PageInfo {
 	}
 }
 
-#[derive(Serialize, JsonSchema, Type)]
+#[derive(Serialize, Type)]
 pub struct Pageable<T: Serialize> {
 	/// The target data being returned.
 	pub data: T,

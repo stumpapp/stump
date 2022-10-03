@@ -69,7 +69,7 @@ I format my code using [Prettier](https://prettier.io/) and [rustfmt](https://gi
 A few useful resources for developers looking to contribute:
 
 - [Rust Book](https://doc.rust-lang.org/book/)
-- [Rocket documentation](https://rocket.rs/v0.5-rc/)
+- [Axum documentation](https://docs.rs/axum/latest/axum/)
 - [Prisma documentation](https://prisma.io/docs/prisma-client/introduction)
   - [Prisma Client Rust Documentation](https://prisma.brendonovich.dev/introduction)
 - [Chakra UI Documentation](https://chakra-ui.com/docs)

@@ -14,7 +14,7 @@ use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::{get_session_user, http::UnknownBufferResponse},
+	utils::{get_session_user, http::BufferResponse},
 };
 
 pub(crate) fn mount() -> Router {
@@ -68,7 +68,7 @@ async fn get_epub_chapter(
 	Path(id): Path<String>,
 	Path(chapter): Path<usize>,
 	Extension(ctx): State,
-) -> ApiResult<UnknownBufferResponse> {
+) -> ApiResult<BufferResponse> {
 	let book = ctx
 		.db
 		.media()
@@ -85,14 +85,7 @@ async fn get_epub_chapter(
 
 	let book = book.unwrap();
 
-	let old = epub::get_epub_chapter(book.path.as_str(), chapter)?;
-	// Ok(epub::get_epub_chapter(book.path.as_str(), chapter)?)
-
-	// FIXME: old rocket usage above
-	Ok(UnknownBufferResponse {
-		content_type: old.0.to_string(),
-		data: old.1,
-	})
+	Ok(epub::get_epub_chapter(book.path.as_str(), chapter)?.into())
 }
 
 /// Get a resource from an epub file. META-INF is a reserved `root` query parameter, which will
@@ -106,7 +99,7 @@ async fn get_epub_meta(
 	// TODO: does this work?
 	Path(resource): Path<PathBuf>,
 	Extension(ctx): State,
-) -> ApiResult<UnknownBufferResponse> {
+) -> ApiResult<BufferResponse> {
 	let book = ctx
 		.db
 		.media()
@@ -123,34 +116,19 @@ async fn get_epub_meta(
 
 	let book = book.unwrap();
 
-	let old = match root == "META-INF" {
-		true => epub::get_epub_resource(book.path.as_str(), resource.to_str().unwrap())?,
-		false => epub::get_epub_resource_from_path(
+	// reserved for accessing resources via resource id
+	if root == "META-INF" {
+		return Ok(epub::get_epub_resource(
 			book.path.as_str(),
-			root.as_str(),
-			resource,
-		)?,
-	};
+			resource.to_str().unwrap(),
+		)?
+		.into());
+	}
 
-	// FIXME: old rocket usage above
-	Ok(UnknownBufferResponse {
-		content_type: old.0.to_string(),
-		data: old.1,
-	})
-
-	// // reserved for accessing resources via resource id
-	// if root == "META-INF" {
-	// 	return Ok(epub::get_epub_resource(
-	// 		book.path.as_str(),
-	// 		resource.to_str().unwrap(),
-	// 	)?);
-	// }
-
-	// // when a resource is loaded from a path, it is likely something inside the contents of an epub page,
-	// // such as a css file or an image file.
-	// Ok(epub::get_epub_resource_from_path(
-	// 	book.path.as_str(),
-	// 	root.as_str(),
-	// 	resource,
-	// )?)
+	// when a resource is loaded from a path, it is likely something inside the contents of an epub page,
+	// such as a css file or an image file.
+	Ok(
+		epub::get_epub_resource_from_path(book.path.as_str(), root.as_str(), resource)?
+			.into(),
+	)
 }

@@ -1,6 +1,5 @@
 use axum::{
 	extract::{Path, Query},
-	headers::ContentType,
 	middleware::from_extractor,
 	routing::{get, put},
 	Extension, Json, Router,
@@ -16,7 +15,8 @@ use stump_core::{
 		read_progress, user,
 	},
 	types::{
-		FindManyTrait, Media, Pageable, PagedRequestParams, QueryOrder, ReadProgress,
+		ContentType, FindManyTrait, Media, Pageable, PagedRequestParams, QueryOrder,
+		ReadProgress,
 	},
 };
 use tracing::trace;
@@ -290,14 +290,7 @@ async fn get_media_page(
 					id, book.pages
 				)))
 			} else {
-				// Ok(media_file::get_page(&book.path, page)?)
-				// FIXME: old rocket usage above
-				let old = media_file::get_page(&book.path, page)?;
-
-				Ok(ImageResponse {
-					content_type: ContentType::png(),
-					data: old.1,
-				})
+				Ok(media_file::get_page(&book.path, page)?.into())
 			}
 		},
 		None => Err(ApiError::NotFound(format!(
@@ -321,12 +314,7 @@ async fn get_media_thumbnail(
 
 	if webp_path.exists() {
 		trace!("Found webp thumbnail for media {}", id);
-		// return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?));
-		return Ok(ImageResponse {
-			// FIXME: how does axum not have a webp content type??
-			content_type: ContentType::png(),
-			data: image::get_image_bytes(webp_path)?,
-		});
+		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?).into());
 	}
 
 	let book = db
@@ -347,14 +335,7 @@ async fn get_media_thumbnail(
 
 	let book = book.unwrap();
 
-	// Ok(media_file::get_page(book.path.as_str(), 1)?)
-	// FIXME: old rocket usage above
-	let old = media_file::get_page(book.path.as_str(), 1)?;
-
-	Ok(ImageResponse {
-		content_type: ContentType::png(),
-		data: old.1,
-	})
+	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
 }
 
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found

@@ -1,6 +1,5 @@
 use axum::{
 	extract::{Path, Query},
-	headers::ContentType,
 	middleware::from_extractor,
 	routing::get,
 	Extension, Router,
@@ -450,13 +449,7 @@ async fn get_book_thumbnail(
 
 	let book = book.unwrap();
 
-	let old = media_file::get_page(book.path.as_str(), 1)?;
-
-	// FIXME: old rocket usage above
-	Ok(ImageResponse {
-		content_type: ContentType::png(),
-		data: old.1,
-	})
+	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
 }
 
 async fn get_book_page(
@@ -487,23 +480,9 @@ async fn get_book_page(
 
 	let book = book.unwrap();
 
-	let old = match book.path.ends_with(".epub") && correct_page == 1 {
-		true => epub::get_epub_cover(&book.path)?,
-		false => {
-			// FIXME: unsafe cast
-			media_file::get_page(book.path.as_str(), correct_page.try_into().unwrap())?
-		},
-	};
+	if book.path.ends_with(".epub") && correct_page == 1 {
+		return Ok(epub::get_epub_cover(&book.path)?.into());
+	}
 
-	// if book.path.ends_with(".epub") && correct_page == 1 {
-	// 	return Ok(epub::get_epub_cover(&book.path)?);
-	// }
-
-	// let old = media_file::get_page(book.path.as_str(), 1)?;
-
-	// FIXME: old rocket usage above
-	Ok(ImageResponse {
-		content_type: ContentType::png(),
-		data: old.1,
-	})
+	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
 }

@@ -1,6 +1,5 @@
 use axum::{
 	extract::{Path, Query},
-	headers::ContentType,
 	middleware::from_extractor,
 	routing::get,
 	Extension, Json, Router,
@@ -15,7 +14,10 @@ use stump_core::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress, series,
 	},
-	types::{FindManyTrait, Media, Pageable, PagedRequestParams, QueryOrder, Series},
+	types::{
+		ContentType, FindManyTrait, Media, Pageable, PagedRequestParams, QueryOrder,
+		Series,
+	},
 };
 use tracing::trace;
 
@@ -165,21 +167,10 @@ async fn get_series_thumbnail(
 
 	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
 		trace!("Found webp thumbnail for series {}", &id);
-		// return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?));
-		let old = image::get_image_bytes(webp_path)?;
-		// FIXME: old rocket usage above
-		return Ok(ImageResponse {
-			content_type: ContentType::png(),
-			data: old,
-		});
+		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?).into());
 	}
 
-	let old = media_file::get_page(media.path.as_str(), 1)?;
-
-	Ok(ImageResponse {
-		content_type: ContentType::png(),
-		data: old.1,
-	})
+	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }
 
 /// Returns the media in a given series. This is a paginated respone, and

@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use tracing_subscriber::{
-	filter::LevelFilter, fmt::writer::MakeWriterExt,
-	prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, EnvFilter,
+	filter::LevelFilter, prelude::__tracing_subscriber_SubscriberExt,
+	util::SubscriberInitExt, EnvFilter,
 };
 
 use super::get_config_dir;
@@ -12,15 +12,16 @@ pub const STUMP_SHADOW_TEXT: &str = include_str!("stump_shadow_text.txt");
 pub fn get_log_file() -> PathBuf {
 	get_config_dir().join("Stump.log")
 }
-// TODO: change default back to 0
-// FIXME: use toml
 pub fn get_log_verbosity() -> u64 {
 	match std::env::var("STUMP_LOG_VERBOSITY") {
-		Ok(s) => s.parse::<u64>().unwrap_or(3),
-		Err(_) => 3,
+		Ok(s) => s.parse::<u64>().unwrap_or(1),
+		Err(_) => 1,
 	}
 }
 
+/// Initializes the logging system, which uses the [tracing] crate. Logs are written to
+/// both the console and a file in the config directory. The file is called `Stump.log`
+/// by default.
 pub fn init_tracing() {
 	let config_dir = get_config_dir();
 
@@ -49,13 +50,20 @@ pub fn init_tracing() {
 						.expect("Error invalid tracing directive!"),
 				),
 		)
+		// Note: I have two layers here, separating the file appender and the stdout.
+		// I've done this, rather than merging them, becuase I don't want the ansi
+		// characters in the file appender.
 		.with(
 			tracing_subscriber::fmt::layer()
 				.pretty()
 				.with_ansi(true)
-				// TODO: maybe separate file appender and stdout as separate layers to
-				// remove ansi from file appender
-				.with_writer(file_appender.and(std::io::stdout)),
+				.with_writer(std::io::stdout),
+		)
+		.with(
+			tracing_subscriber::fmt::layer()
+				.pretty()
+				.with_ansi(false)
+				.with_writer(file_appender),
 		)
 		.init();
 

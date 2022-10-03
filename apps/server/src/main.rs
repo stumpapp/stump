@@ -28,14 +28,16 @@ async fn main() -> ServerResult<()> {
 	#[cfg(debug_assertions)]
 	debug_setup();
 
-	init_tracing();
-
 	let stump_environment = StumpCore::init_environment();
 	if let Err(err) = stump_environment {
 		error!("Failed to load environment variables: {:?}", err);
 		return Err(ServerError::ServerStartError(err.to_string()));
 	}
 	let stump_environment = stump_environment.unwrap();
+
+	// Note: init_tracing after loading the environment so the correct verbosity
+	// level is used for logging.
+	init_tracing();
 
 	let core = StumpCore::new().await;
 	if let Err(err) = core.run_migrations().await {

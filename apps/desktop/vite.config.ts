@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 
 import { name, version } from './package.json';
 
+// TODO: move this to common/config?
 // https://vitejs.dev/config/
 export default defineConfig({
 	server: {
@@ -12,13 +13,14 @@ export default defineConfig({
 	},
 	plugins: [react(), tsconfigPaths()],
 	root: 'src',
-	publicDir: '../../../common/interface/src/assets',
+	publicDir: '../../../common/interface/public',
 	base: '/',
 	define: {
 		pkgJson: { name, version },
 	},
 	build: {
 		outDir: '../dist',
-		assetsDir: '.',
+		assetsDir: './assets',
+		manifest: true,
 	},
 });

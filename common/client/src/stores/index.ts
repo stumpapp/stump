@@ -1,4 +1,4 @@
-export * from './useStumpConfigStore';
+export * from './useStumpStore';
 export * from './useUserStore';
 export * from './useJobStore';
 export * from './useQueryParamStore';

@@ -2,12 +2,14 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { StoreBase } from '.';
 
-interface StumpConfigStore extends StoreBase<StumpConfigStore> {
+interface StumpStore extends StoreBase<StumpStore> {
 	baseUrl?: string;
+	connected: boolean;
 	setBaseUrl(baseUrl: string): void;
+	setConnected(connected: boolean): void;
 }
 
-export const useStumpConfigStore = create<StumpConfigStore>()(
+export const useStumpStore = create<StumpStore>()(
 	devtools(
 		// TODO: I am unsure the base url is something to be persisted. The only scenario
 		// where it will come in unset is when running in Tauri, and in that case I might just
@@ -15,6 +17,7 @@ export const useStumpConfigStore = create<StumpConfigStore>()(
 		// before the interface is loaded.
 		persist(
 			(set) => ({
+				connected: false,
 				setBaseUrl(baseUrl: string) {
 					let adjustedBaseUrl = baseUrl;
 
@@ -28,6 +31,9 @@ export const useStumpConfigStore = create<StumpConfigStore>()(
 
 					set({ baseUrl: adjustedBaseUrl });
 				},
+				setConnected(connected: boolean) {
+					set({ connected });
+				},
 				reset() {
 					set(() => ({}));
 				},
@@ -35,7 +41,12 @@ export const useStumpConfigStore = create<StumpConfigStore>()(
 					set((state) => ({ ...state, ...changes }));
 				},
 			}),
-			{ name: 'stump-config-store' },
+			{
+				name: 'stump-config-store',
+				partialize(state) {
+					return { baseUrl: state.baseUrl };
+				},
+			},
 		),
 	),
 );

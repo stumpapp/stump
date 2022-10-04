@@ -7,8 +7,8 @@
     "start": "cargo run --release",
     "dev": "cargo watch -x run",
     "build": "pnpm get-client && cargo build --release && pnpm move-client",
-    "get-client": "trash \"client/*\" \"!client/.placeholder\" && cpy \"../web/dist/**/*\" ./client/",
-    "move-client": "trash ../../target/release/client && cp -r ./client ../../target/release/client",
+    "get-client": "trash \"dist/*\" \"!dist/.placeholder\" && cpy \"../web/dist/**/*\" ./dist/",
+    "move-client": "trash ../../target/release/dist && cp -r ./dist ../../target/release/dist",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
     "benchmarks": "cargo test --benches",
     "test": "cargo test"

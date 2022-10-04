@@ -3,7 +3,7 @@
 {% callout title="Note" icon="danger" %}
 Stump will have an official Docker image available when the first beta release is published.
 
-For now, there is a preview image available on a separate [Dockerhub repository](https://hub.docker.com/r/aaronleopold/stump-preview). **This image will not be frequently updated and should be used for testing purposes only**, so do not expect a fully featured, bug-free experience if you spin up a container.
+Until then, you may use a preview image available on a separate [Dockerhub repository](https://hub.docker.com/r/aaronleopold/stump-preview). **This image will not be frequently updated and should be used for testing purposes only**, so do not expect a fully featured, bug-free experience if you spin up a container.
 {% /callout %}
 
 ## Usage
@@ -19,7 +19,7 @@ sudo chown -r $USER ~/.stump
 
 ### Using docker run
 
-Once the image is created, you can create a container from it:
+You can create a container by running:
 
 ```bash
 # replace my paths (left of colon) with your own

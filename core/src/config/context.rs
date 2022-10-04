@@ -46,8 +46,8 @@ impl Ctx {
 	///
 	/// #[tokio::main]
 	/// async fn main() {
-	/// 	let (sender, _) = unbounded_channel();
-	/// 	let ctx = Ctx::new(sender).await;
+	///    let (sender, _) = unbounded_channel();
+	///    let ctx = Ctx::new(sender).await;
 	/// }
 	/// ```
 	pub async fn new(internal_sender: InternalSender) -> Ctx {
@@ -81,13 +81,13 @@ impl Ctx {
 	///
 	/// #[tokio::main]
 	/// async fn main() {
-	/// 	let (sender, _) = unbounded_channel();
+	///     let (sender, _) = unbounded_channel();
 	///
-	/// 	let ctx = Ctx::new(sender).await;
-	/// 	let arced_ctx = ctx.arced();
-	/// 	let ctx_clone = arced_ctx.clone();
+	///     let ctx = Ctx::new(sender).await;
+	///     let arced_ctx = ctx.arced();
+	///     let ctx_clone = arced_ctx.clone();
 	///
-	/// 	assert_eq!(2, Arc::strong_count(&ctx_clone))
+	///     assert_eq!(2, Arc::strong_count(&ctx_clone))
 	/// }
 	/// ```
 	pub fn arced(&self) -> Arc<Ctx> {
@@ -114,7 +114,7 @@ impl Ctx {
 		self.response_channel.0.subscribe()
 	}
 
-	///	Emits a [CoreEvent] to the client event channel.
+	/// Emits a [CoreEvent] to the client event channel.
 	///
 	/// ## Example
 	/// ```rust
@@ -123,30 +123,29 @@ impl Ctx {
 	///
 	/// #[tokio::main]
 	/// async fn main() {
-	/// 	let (sender, _) = unbounded_channel();
-	/// 	let ctx = Ctx::new(sender).await;
+	///    let (sender, _) = unbounded_channel();
+	///    let ctx = Ctx::new(sender).await;
 	///
-	/// 	let event = CoreEvent::JobFailed {
-	/// 		runner_id: "Gandalf quote".to_string(),
-	/// 		message: "When in doubt, follow your nose".to_string(),
-	/// 	};
+	///    let event = CoreEvent::JobFailed {
+	///        runner_id: "Gandalf quote".to_string(),
+	///        message: "When in doubt, follow your nose".to_string(),
+	///    };
 	///
-	/// 	let ctx_cpy = ctx.clone();
-	/// 	tokio::spawn(async move {
-	/// 		let mut receiver = ctx_cpy.get_client_receiver();
+	///    let ctx_cpy = ctx.clone();
+	///    tokio::spawn(async move {
+	///        let mut receiver = ctx_cpy.get_client_receiver();
+	///        let received_event = receiver.recv().await;
+	///        assert_eq!(received_event.is_ok(), true);
+	///        match received_event.unwrap() {
+	///            CoreEvent::JobFailed { runner_id, message } => {
+	///                assert_eq!(runner_id, "Gandalf quote");
+	///                assert_eq!(message, "When in doubt, follow your nose");
+	///            }
+	///            _ => unreachable!("Wrong event type received"),
+	///        }
+	///    });
 	///
-	/// 		let received_event = receiver.recv().await;
-	/// 		assert_eq!(received_event.is_ok(), true);
-	/// 		match received_event.unwrap() {
-	/// 			CoreEvent::JobFailed { runner_id, message } => {
-	/// 					assert_eq!(runner_id, "Gandalf quote");
-	/// 					assert_eq!(message, "When in doubt, follow your nose");
-	/// 			}
-	/// 			_ => unreachable!("Wrong event type received"),
-	/// 		}
-	/// 	});
-	///
-	/// 	ctx.emit_client_event(event.clone());
+	///    ctx.emit_client_event(event.clone());
 	/// }
 	/// ```
 	pub fn emit_client_event(&self, event: CoreEvent) {

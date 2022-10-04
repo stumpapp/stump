@@ -13,10 +13,7 @@ pub struct StumpAuthor {
 impl StumpAuthor {
 	/// Creates a new author.
 	pub fn new(name: String, uri: Option<String>) -> StumpAuthor {
-		StumpAuthor {
-			name: name,
-			uri: uri,
-		}
+		StumpAuthor { name, uri }
 	}
 
 	/// Writes the [StumpAuthor] instance as XML.

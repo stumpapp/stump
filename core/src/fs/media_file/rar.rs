@@ -36,7 +36,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 
 	let archive = unrar::Archive::new(path)?;
 
-	let parent = path.parent().unwrap_or(Path::new("/"));
+	let parent = path.parent().unwrap_or_else(|| Path::new("/"));
 	// TODO: remove *unsafe* unwraps
 	let dir_name = path.file_stem().unwrap().to_str().unwrap();
 	let original_ext = path.extension().unwrap().to_str().unwrap();
@@ -209,7 +209,7 @@ pub fn digest_rar(file: &str) -> Option<String> {
 	let sample = rar_sample(file);
 
 	// Error handled in `rar_sample`
-	if let Err(_) = sample {
+	if sample.is_err() {
 		return None;
 	}
 
@@ -278,8 +278,8 @@ pub fn get_rar_image(
 			ProcessFileError::RarReadError
 		})?
 		.filter_map(|e| e.ok())
-		.filter(|e| e.filename == entry.filename)
-		.nth(0)
+		.find(|e| e.filename == entry.filename)
+		// .next()
 		// FIXME: remove this unwrap...
 		.unwrap()
 		.read_bytes()

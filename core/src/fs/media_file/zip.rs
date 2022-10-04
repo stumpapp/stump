@@ -121,7 +121,7 @@ pub fn get_zip_image(
 	// FIXME: stinky clone here
 	let file_names_archive = archive.clone();
 
-	if archive.len() == 0 {
+	if archive.is_empty() {
 		error!("Zip file {} is empty", file);
 		return Err(ProcessFileError::ArchiveEmptyError);
 	}
@@ -129,7 +129,8 @@ pub fn get_zip_image(
 	let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
 	// NOTE: I noticed some zip files *also* come back out of order >:(
 	// TODO: look more into this!
-	file_names.sort_by(|a, b| a.cmp(b));
+	// file_names.sort_by(|a, b| a.cmp(b));
+	file_names.sort();
 
 	let mut images_seen = 0;
 	for name in file_names {

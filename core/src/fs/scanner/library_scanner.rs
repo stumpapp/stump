@@ -44,7 +44,7 @@ fn check_series(
 ) -> (Vec<series::Data>, Vec<String>, Vec<DirEntry>) {
 	let series_map = series
 		.iter()
-		.map(|data| (data.path.as_str(), false).into())
+		.map(|data| (data.path.as_str(), false))
 		.collect::<HashMap<&str, bool>>();
 
 	let missing_series = series
@@ -118,7 +118,7 @@ async fn precheck(
 	let library = library.unwrap();
 
 	if !Path::new(&path).exists() {
-		mark_library_missing(library, &ctx).await?;
+		mark_library_missing(library, ctx).await?;
 
 		return Err(CoreError::FileNotFound(format!(
 			"Library path does not exist in fs: {}",
@@ -155,7 +155,7 @@ async fn precheck(
 
 		ctx.emit_client_event(CoreEvent::CreateEntityFailed {
 			runner_id: Some(runner_id.to_string()),
-			message: format!("Failed to batch insert series: {}", e.to_string()),
+			message: format!("Failed to batch insert series: {}", e),
 			path: path.clone(),
 		});
 	} else {

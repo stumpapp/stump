@@ -35,11 +35,11 @@ fn check_configuration_dir(path: &Path) {
 /// panic.
 pub fn get_config_dir() -> PathBuf {
 	let config_dir = std::env::var("STUMP_CONFIG_DIR")
-		.and_then(|val| {
-			if val.len() < 1 {
-				Ok(home().join(".stump"))
+		.map(|val| {
+			if val.is_empty() {
+				home().join(".stump")
 			} else {
-				Ok(PathBuf::from(val))
+				PathBuf::from(val)
 			}
 		})
 		.unwrap_or_else(|_| home().join(".stump"));

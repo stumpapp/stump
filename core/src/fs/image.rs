@@ -99,7 +99,7 @@ pub fn generate_thumbnails(
 	let results = media
 		.into_par_iter()
 		// .with_max_len(5)
-		.map(|m| generate_thumbnail(m.id.as_str(), &m.path.as_str()))
+		.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str()))
 		.filter_map(|res| {
 			if res.is_err() {
 				error!("Error generating thumbnail: {:?}", res.err());

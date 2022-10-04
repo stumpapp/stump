@@ -77,7 +77,7 @@ pub fn create_zip_archive(
 
 	let zip_path = destination.join(format!("{}.{}", name, ext));
 
-	zip_dir(&unpacked_path, &zip_path, unpacked_path)?;
+	zip_dir(unpacked_path, &zip_path, unpacked_path)?;
 
 	Ok(zip_path)
 }

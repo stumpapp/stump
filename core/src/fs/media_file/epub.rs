@@ -44,7 +44,7 @@ pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 }
 
 fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
-	Ok(EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))?)
+	EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))
 }
 
 pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {

@@ -259,13 +259,7 @@ pub async fn batch_media_operations(
 	// Note: this won't work if I add any other operations...
 	let (create_operations, mark_missing_operations): (Vec<_>, Vec<_>) =
 		operations.into_iter().partition(|operation| {
-			matches!(
-				operation,
-				BatchScanOperation::CreateMedia {
-					path: _,
-					series_id: __
-				}
-			)
+			matches!(operation, BatchScanOperation::CreateMedia { .. })
 		});
 
 	let media_creates = create_operations

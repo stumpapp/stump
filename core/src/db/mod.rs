@@ -45,9 +45,5 @@ pub async fn create_client_with_url(url: &str) -> prisma::PrismaClient {
 pub async fn create_test_client() -> prisma::PrismaClient {
 	let test_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("integration-tests");
 
-	return create_client_with_url(&format!(
-		"file:{}/test.db",
-		test_dir.to_str().unwrap()
-	))
-	.await;
+	create_client_with_url(&format!("file:{}/test.db", test_dir.to_str().unwrap())).await
 }

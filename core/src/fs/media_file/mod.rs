@@ -112,7 +112,7 @@ pub fn infer_mime_from_path(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(mime) => {
 			debug!("Inferred mime for file {:?}: {:?}", path, mime);
-			mime.and_then(|m| Some(m.mime_type().to_string()))
+			mime.map(|m| m.mime_type().to_string())
 		},
 		Err(e) => {
 			warn!(
@@ -141,9 +141,9 @@ pub fn get_page(
 			if page == 1 {
 				get_epub_cover(file)
 			} else {
-				Err(ProcessFileError::UnsupportedFileType(format!(
-					"You may only request the cover page (first page) for epub files on this endpoint"
-				)))
+				Err(ProcessFileError::UnsupportedFileType(
+					"You may only request the cover page (first page) for epub files on this endpoint".into()
+				))
 			}
 		},
 		None => Err(ProcessFileError::Unknown(format!(

@@ -5,8 +5,9 @@ use unrar::archive::Entry;
 use crate::{
 	config::{self, stump_in_docker},
 	fs::{
-		checksum::{DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
-		media_file::{self, IsImage},
+		archive::create_zip_archive,
+		checksum::{self, DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
+		media_file::{self, zip, IsImage},
 	},
 	types::{
 		errors::ProcessFileError,
@@ -16,8 +17,6 @@ use crate::{
 };
 
 // FIXME: terrible error handling in this file... needs a total rework honestly.
-
-use super::{checksum, zip};
 
 impl IsImage for Entry {
 	fn is_image(&self) -> bool {
@@ -60,7 +59,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 			ProcessFileError::RarExtractError(e.to_string())
 		})?;
 
-	let zip_path = zip::create_zip(&unpacked_path, dir_name, original_ext, parent)?;
+	let zip_path = create_zip_archive(&unpacked_path, dir_name, original_ext, parent)?;
 
 	// Note: this will put the file in the 'trash' according to the user's platform.
 	// Rather than hard deleting it, I figured this would be desirable.

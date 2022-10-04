@@ -48,17 +48,17 @@ impl Series {
 	}
 }
 
-impl Into<Series> for prisma::series::Data {
-	fn into(self) -> Series {
-		let library = match self.library() {
+impl From<prisma::series::Data> for Series {
+	fn from(data: prisma::series::Data) -> Series {
+		let library = match data.library() {
 			Ok(library) => Some(library.unwrap().to_owned().into()),
 			Err(_e) => None,
 		};
 
-		let (media, media_count) = match self.media() {
+		let (media, media_count) = match data.media() {
 			Ok(media) => {
 				let m = media
-					.into_iter()
+					.iter()
 					.map(|m| m.to_owned().into())
 					.collect::<Vec<Media>>();
 				let m_ct = media.len() as i64;
@@ -68,19 +68,19 @@ impl Into<Series> for prisma::series::Data {
 			Err(_e) => (None, None),
 		};
 
-		let tags = match self.tags() {
-			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
+		let tags = match data.tags() {
+			Ok(tags) => Some(tags.iter().map(|tag| tag.to_owned().into()).collect()),
 			Err(_e) => None,
 		};
 
 		Series {
-			id: self.id,
-			name: self.name,
-			path: self.path,
-			description: self.description,
-			status: FileStatus::from_str(&self.status).unwrap_or(FileStatus::Error),
-			updated_at: self.updated_at.to_string(),
-			library_id: self.library_id.unwrap(),
+			id: data.id,
+			name: data.name,
+			path: data.path,
+			description: data.description,
+			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
+			updated_at: data.updated_at.to_string(),
+			library_id: data.library_id.unwrap(),
 			library,
 			media,
 			media_count,
@@ -89,9 +89,9 @@ impl Into<Series> for prisma::series::Data {
 	}
 }
 
-impl Into<Series> for (prisma::series::Data, i64) {
-	fn into(self) -> Series {
-		let (series, media_count) = self;
+impl From<(prisma::series::Data, i64)> for Series {
+	fn from(tuple: (prisma::series::Data, i64)) -> Series {
+		let (series, media_count) = tuple;
 
 		Series::without_media(series.into(), media_count)
 	}

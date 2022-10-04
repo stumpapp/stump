@@ -10,11 +10,11 @@ pub struct Tag {
 	pub name: String,
 }
 
-impl Into<Tag> for prisma::tag::Data {
-	fn into(self) -> Tag {
+impl From<prisma::tag::Data> for Tag {
+	fn from(data: prisma::tag::Data) -> Tag {
 		Tag {
-			id: self.id,
-			name: self.name,
+			id: data.id,
+			name: data.name,
 		}
 	}
 }

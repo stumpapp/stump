@@ -57,12 +57,10 @@ impl StumpCore {
 		let core_ctx = Ctx::new(internal_channel.0).await;
 		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
 
-		let core = Self {
+		StumpCore {
 			ctx: core_ctx,
 			event_manager,
-		};
-
-		core
+		}
 	}
 
 	/// Loads environment variables from the `Stump.toml` configuration file, if
@@ -86,7 +84,7 @@ impl StumpCore {
 	/// Returns the shadow text for the core. This is just the fun ascii art that
 	/// is printed to the console when the server starts.
 	pub fn get_shadow_text(&self) -> &str {
-		return STUMP_SHADOW_TEXT;
+		STUMP_SHADOW_TEXT
 	}
 
 	/// Runs the database migrations. This will be updated with PCR 0.6.2

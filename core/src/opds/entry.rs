@@ -89,11 +89,9 @@ impl OpdsEntry {
 	}
 
 	fn get_content(&self) -> Option<String> {
-		if let Some(content) = &self.content {
-			Some(content.clone().replace("\n", "<br/>"))
-		} else {
-			None
-		}
+		self.content
+			.as_ref()
+			.map(|content| content.clone().replace('\n', "<br/>"))
 	}
 }
 

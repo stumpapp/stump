@@ -22,20 +22,19 @@ pub struct Runner {
 
 impl Runner {
 	pub fn create_id() -> String {
-		cuid::cuid()
-			.expect("Failed to generate CUID for runner.")
-			.to_string()
+		cuid::cuid().expect("Failed to generate CUID for runner.")
 	}
 
 	pub async fn new(ctx: &Ctx, job: Box<dyn Job>) -> Self {
 		let id = Runner::create_id();
 
 		// FIXME: error handling
-		let _ = persist_new_job(ctx, id.clone(), &job).await;
+		let _ = persist_new_job(ctx, id.clone(), job.as_ref()).await;
 
 		Runner { id, job: Some(job) }
 	}
 
+	// FIXME: don't panic, return error here
 	pub async fn spawn(job_pool: Arc<JobPool>, runner_arc: Arc<Mutex<Self>>, ctx: Ctx) {
 		let mut runner = runner_arc.lock().await;
 		let runner_id = runner.id.clone();
@@ -43,7 +42,7 @@ impl Runner {
 		let job = runner
 			.job
 			.take()
-			.expect(&format!("Missing job in job runner {}", runner_id));
+			.unwrap_or_else(|| panic!("Missing job in job runner {}", runner_id));
 
 		tokio::spawn(async move {
 			let runner_id = runner_id.clone();

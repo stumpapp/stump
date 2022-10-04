@@ -28,7 +28,7 @@ pub struct Library {
 	pub library_options: LibraryOptions,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Type)]
 pub enum LibraryPattern {
 	#[serde(rename = "SERIES_BASED")]
 	SeriesBased,
@@ -72,7 +72,7 @@ impl fmt::Display for LibraryPattern {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, Default)]
 pub struct LibraryOptions {
 	// Note: this isn't really an Option, but I felt it was a little verbose
 	// to create an entirely new struct Create/UpdateLibraryOptions for just one
@@ -93,20 +93,22 @@ impl LibraryOptions {
 	}
 }
 
-impl Default for LibraryOptions {
-	fn default() -> Self {
-		Self {
-			id: None,
-			convert_rar_to_zip: false,
-			hard_delete_conversions: false,
-			create_webp_thumbnails: false,
-			library_pattern: LibraryPattern::default(),
-			library_id: None,
-		}
-	}
-}
+// Note: If any of these fields are changed from their default values (e.g. false, None, etc)
+// I will want to remove the derived Default trait and implement it manually here.
+// impl Default for LibraryOptions {
+// 	fn default() -> Self {
+// 		Self {
+// 			id: None,
+// 			convert_rar_to_zip: false,
+// 			hard_delete_conversions: false,
+// 			create_webp_thumbnails: false,
+// 			library_pattern: LibraryPattern::default(),
+// 			library_id: None,
+// 		}
+// 	}
+// }
 
-#[derive(Deserialize, Debug, PartialEq, Copy, Clone, Type)]
+#[derive(Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type)]
 pub enum LibraryScanMode {
 	#[serde(rename = "SYNC")]
 	Sync,
@@ -134,7 +136,7 @@ impl FromStr for LibraryScanMode {
 
 impl From<String> for LibraryScanMode {
 	fn from(s: String) -> Self {
-		LibraryScanMode::from_str(&s).unwrap_or(LibraryScanMode::default())
+		LibraryScanMode::from_str(&s).unwrap_or_default()
 	}
 }
 
@@ -151,56 +153,56 @@ pub struct LibrariesStats {
 	total_bytes: u64,
 }
 
-impl Into<LibraryOptions> for prisma::library_options::Data {
-	fn into(self) -> LibraryOptions {
+impl From<prisma::library_options::Data> for LibraryOptions {
+	fn from(data: prisma::library_options::Data) -> LibraryOptions {
 		LibraryOptions {
-			id: Some(self.id),
-			convert_rar_to_zip: self.convert_rar_to_zip,
-			hard_delete_conversions: self.hard_delete_conversions,
-			create_webp_thumbnails: self.create_webp_thumbnails,
-			library_pattern: LibraryPattern::from(self.library_pattern),
-			library_id: self.library_id,
+			id: Some(data.id),
+			convert_rar_to_zip: data.convert_rar_to_zip,
+			hard_delete_conversions: data.hard_delete_conversions,
+			create_webp_thumbnails: data.create_webp_thumbnails,
+			library_pattern: LibraryPattern::from(data.library_pattern),
+			library_id: data.library_id,
 		}
 	}
 }
 
-impl Into<LibraryOptions> for &prisma::library_options::Data {
-	fn into(self) -> LibraryOptions {
+impl From<&prisma::library_options::Data> for LibraryOptions {
+	fn from(data: &prisma::library_options::Data) -> LibraryOptions {
 		LibraryOptions {
-			id: Some(self.id.clone()),
-			convert_rar_to_zip: self.convert_rar_to_zip,
-			hard_delete_conversions: self.hard_delete_conversions,
-			create_webp_thumbnails: self.create_webp_thumbnails,
-			library_pattern: LibraryPattern::from(self.library_pattern.clone()),
-			library_id: self.library_id.clone(),
+			id: Some(data.id.clone()),
+			convert_rar_to_zip: data.convert_rar_to_zip,
+			hard_delete_conversions: data.hard_delete_conversions,
+			create_webp_thumbnails: data.create_webp_thumbnails,
+			library_pattern: LibraryPattern::from(data.library_pattern.clone()),
+			library_id: data.library_id.clone(),
 		}
 	}
 }
 
-impl Into<Library> for prisma::library::Data {
-	fn into(self) -> Library {
-		let series = match self.series() {
-			Ok(series) => Some(series.into_iter().map(|s| s.to_owned().into()).collect()),
+impl From<prisma::library::Data> for Library {
+	fn from(data: prisma::library::Data) -> Library {
+		let series = match data.series() {
+			Ok(series) => Some(series.iter().map(|s| s.to_owned().into()).collect()),
 			Err(_e) => None,
 		};
 
-		let tags = match self.tags() {
-			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
+		let tags = match data.tags() {
+			Ok(tags) => Some(tags.iter().map(|tag| tag.to_owned().into()).collect()),
 			Err(_e) => None,
 		};
 
-		let library_options = match self.library_options() {
+		let library_options = match data.library_options() {
 			Ok(library_options) => library_options.to_owned().into(),
 			Err(_e) => LibraryOptions::default(),
 		};
 
 		Library {
-			id: self.id,
-			name: self.name,
-			description: self.description,
-			path: self.path,
-			status: self.status,
-			updated_at: self.updated_at.to_string(),
+			id: data.id,
+			name: data.name,
+			description: data.description,
+			path: data.path,
+			status: data.status,
+			updated_at: data.updated_at.to_string(),
 			series,
 			tags,
 			library_options,

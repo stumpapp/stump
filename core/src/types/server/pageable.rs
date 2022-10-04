@@ -49,7 +49,7 @@ impl From<Option<PagedRequestParams>> for PageParams {
 					page,
 					page_size,
 					zero_based,
-					order_by: params.order_by.unwrap_or("name".to_string()),
+					order_by: params.order_by.unwrap_or_else(|| "name".to_string()),
 					direction: params.direction.unwrap_or_default(),
 				}
 			},
@@ -87,8 +87,8 @@ pub struct PageInfo {
 
 impl PageInfo {
 	pub fn new(page_params: PageParams, total_pages: u32) -> Self {
-		let current_page = page_params.page.try_into().unwrap();
-		let page_size = page_params.page_size.try_into().unwrap();
+		let current_page = page_params.page;
+		let page_size = page_params.page_size;
 		let zero_based = page_params.zero_based;
 
 		PageInfo {
@@ -129,21 +129,21 @@ impl<T: Serialize> Pageable<T> {
 	}
 }
 
-impl<T> Into<Pageable<Vec<T>>> for Vec<T>
+impl<T> From<Vec<T>> for Pageable<Vec<T>>
 where
 	T: Serialize + Clone,
 {
-	fn into(self) -> Pageable<Vec<T>> {
-		Pageable::unpaged(self)
+	fn from(vec: Vec<T>) -> Pageable<Vec<T>> {
+		Pageable::unpaged(vec)
 	}
 }
 
-impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, PageParams)
+impl<T> From<(Vec<T>, PageParams)> for Pageable<Vec<T>>
 where
 	T: Serialize + Clone,
 {
-	fn into(self) -> Pageable<Vec<T>> {
-		let (mut data, page_params) = self;
+	fn from(tuple: (Vec<T>, PageParams)) -> Pageable<Vec<T>> {
+		let (mut data, page_params) = tuple;
 
 		let total_pages =
 			(data.len() as f32 / page_params.page_size as f32).ceil() as u32;
@@ -178,22 +178,22 @@ where
 	}
 }
 
-impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, Option<PagedRequestParams>)
+impl<T> From<(Vec<T>, Option<PagedRequestParams>)> for Pageable<Vec<T>>
 where
 	T: Serialize + Clone,
 {
-	fn into(self) -> Pageable<Vec<T>> {
-		(self.0, PageParams::from(self.1)).into()
+	fn from(tuple: (Vec<T>, Option<PagedRequestParams>)) -> Pageable<Vec<T>> {
+		(tuple.0, PageParams::from(tuple.1)).into()
 	}
 }
 
 // Note: this is used when you have to query the database for the total number of pages.
-impl<T> Into<Pageable<Vec<T>>> for (Vec<T>, i64, PageParams)
+impl<T> From<(Vec<T>, i64, PageParams)> for Pageable<Vec<T>>
 where
 	T: Serialize + Clone,
 {
-	fn into(self) -> Pageable<Vec<T>> {
-		let (data, db_total, page_params) = self;
+	fn from(tuple: (Vec<T>, i64, PageParams)) -> Pageable<Vec<T>> {
+		let (data, db_total, page_params) = tuple;
 
 		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
 

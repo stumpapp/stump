@@ -8,6 +8,7 @@
 		"prepare": "husky install",
 		"setup": "pnpm i && pnpm web build && pnpm core run setup",
 		"checks": "pnpm -r check",
+		"clippy": "cargo clippy -- -D warnings",
 		"tests": "pnpm -r test",
 		"start:web": "pnpm run server start",
 		"dev:server": "cargo watch --ignore common -x 'run --manifest-path=apps/server/Cargo.toml --package stump_server'",

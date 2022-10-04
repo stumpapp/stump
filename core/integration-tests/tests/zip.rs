@@ -1,6 +1,6 @@
 use stump_core::{
 	config::Ctx,
-	fs::{checksum, zip::zip_sample},
+	fs::{checksum, media_file::zip::zip_sample},
 	prisma::media,
 	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };

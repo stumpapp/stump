@@ -33,7 +33,7 @@ impl OpdsOpenSearch {
 		writer.write(
 			XmlEvent::start_element("Url")
 				.attr("type", OpdsLinkType::Acquisition.as_str())
-				.attr("template", &series_example),
+				.attr("template", series_example),
 		)?;
 
 		writer.write(XmlEvent::end_element())?; // end of URL
@@ -42,7 +42,7 @@ impl OpdsOpenSearch {
 		writer.write(
 			XmlEvent::start_element("Url")
 				.attr("type", OpdsLinkType::Acquisition.as_str())
-				.attr("template", &library_example),
+				.attr("template", library_example),
 		)?;
 
 		writer.write(XmlEvent::end_element())?; // end of URL
@@ -51,7 +51,7 @@ impl OpdsOpenSearch {
 		writer.write(
 			XmlEvent::start_element("Url")
 				.attr("type", OpdsLinkType::Acquisition.as_str())
-				.attr("template", &media_example),
+				.attr("template", media_example),
 		)?;
 
 		writer.write(XmlEvent::end_element())?; // end of URL

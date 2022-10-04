@@ -43,31 +43,29 @@ export default function TableOfContents({ toc }: TableOfContentsProps) {
 
 	return (
 		<nav className="hidden lg:inline-block w-[12rem] text-sm sticky lg:top-[calc(56px+16px)] top-0 self-start justify-end md:ml-4">
-			{items.length > 1 ? (
-				<ul className="flex flex-col space-y-3 border-l ml-2 pl-4">
-					{items.map((item) => {
-						const href = `#${item.id}`;
-						const isActive = currentSection === item.id;
+			<ul className="flex flex-col space-y-3 border-l ml-2 pl-4">
+				{items.map((item) => {
+					const href = `#${item.id}`;
+					const isActive = currentSection === item.id;
 
-						// console.log({ currentSection, itemId: item.id, isActive });
+					// console.log({ currentSection, itemId: item.id, isActive });
 
-						return (
-							<li
-								key={href}
-								className={clsx(
-									{ 'text-brand': isActive },
-									{ 'ml-2 text-xs': item.level === 3 },
-									'hover:text-brand transition-colors duration-200',
-								)}
-							>
-								<Link noUnderline href={href}>
-									{item.title}
-								</Link>
-							</li>
-						);
-					})}
-				</ul>
-			) : null}
+					return (
+						<li
+							key={href}
+							className={clsx(
+								{ 'text-brand': isActive },
+								{ 'ml-2 text-xs': item.level === 3 },
+								'hover:text-brand transition-colors duration-200',
+							)}
+						>
+							<Link noUnderline href={href}>
+								{item.title}
+							</Link>
+						</li>
+					);
+				})}
+			</ul>
 		</nav>
 	);
 }

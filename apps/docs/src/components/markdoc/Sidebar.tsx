@@ -128,7 +128,8 @@ export default function Sidebar() {
 				)}
 			</AnimatePresence>
 
-			<nav className="hidden md:flex md:py-4 md:mr-4 flex-col shrink-0 space-y-7 w-[12rem] md:w-[14rem] max-h-[calc(100vh-56px)] overflow-y-scroll scrollbar-hide">
+			{/* FIXME: x axis is not aligned on some pages? */}
+			<nav className="hidden text-sm sticky lg:top-[calc(56px+16px)] top-0 md:flex md:py-4 md:mr-4 flex-col shrink-0 space-y-7 w-[12rem] md:w-[14rem] max-h-[calc(100vh-56px)] overflow-y-scroll scrollbar-hide">
 				<SidebarContent router={router} />
 			</nav>
 		</>

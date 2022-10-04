@@ -16,12 +16,12 @@ pub struct EpubContent {
 	play_order: usize,
 }
 
-impl Into<EpubContent> for NavPoint {
-	fn into(self) -> EpubContent {
+impl From<NavPoint> for EpubContent {
+	fn from(nav_point: NavPoint) -> EpubContent {
 		EpubContent {
-			label: self.label,
-			content: self.content,
-			play_order: self.play_order,
+			label: nav_point.label,
+			content: nav_point.content,
+			play_order: nav_point.play_order,
 		}
 	}
 }

@@ -10,7 +10,7 @@ pub fn tag_id_from_url(tag_authority: &str, url: &str) -> String {
 	format!(
 		"tag:{}:{}",
 		tag_authority,
-		url.trim_start_matches('/').replace("/", ":")
+		url.trim_start_matches('/').replace('/', ":")
 	)
 }
 

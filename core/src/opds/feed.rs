@@ -115,7 +115,7 @@ impl From<library::Data> for OpdsFeed {
 		];
 
 		let entries = match library.series() {
-			Ok(series) => series.to_owned().into_iter().map(OpdsEntry::from).collect(),
+			Ok(series) => series.iter().cloned().map(OpdsEntry::from).collect(),
 			Err(e) => {
 				warn!("Failed to get series for library {}: {}", id, e);
 				vec![]
@@ -223,13 +223,12 @@ impl From<(String, Vec<series::Data>, i64, i64)> for OpdsFeed {
 	}
 }
 
-impl<T> Into<OpdsFeed> for (String, String, String, Vec<T>, i64, i64)
+impl<T> From<(String, String, String, Vec<T>, i64, i64)> for OpdsFeed
 where
 	OpdsEntry: From<T>,
-	// T: Into<OpdsEntry>,
 {
-	fn into(self) -> OpdsFeed {
-		let (id, title, href_postfix, data, page, count) = self;
+	fn from(tuple: (String, String, String, Vec<T>, i64, i64)) -> OpdsFeed {
+		let (id, title, href_postfix, data, page, count) = tuple;
 
 		let entries = data.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
 
@@ -242,7 +241,7 @@ where
 			OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Start,
-				href: format!("/opds/v1.2/catalog"),
+				href: "/opds/v1.2/catalog".into(),
 			},
 		];
 

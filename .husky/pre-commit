@@ -3,3 +3,5 @@
 
 npx lint-staged
 pnpm checks
+
+# cargo clippy -- -D warnings

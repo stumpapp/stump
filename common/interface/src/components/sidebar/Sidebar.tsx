@@ -154,7 +154,7 @@ export function SidebarContent() {
 		<>
 			<HStack px={2} justifyContent="space-between" alignItems="center">
 				<HStack as={Link} to="/" flexShrink={0} justifyContent="start" alignItems="center">
-					<img src="/favicon.ico" className="h-6 w-6 object-scale-down" />
+					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
 					<Text
 						bgGradient="linear(to-r, brand.600, brand.500)"
 						bgClip="text"

@@ -3,14 +3,6 @@ import Button from './ui/Button';
 
 import { motion } from 'framer-motion';
 import { Github } from '@icons-pack/react-simple-icons';
-import { Play } from 'phosphor-react';
-
-const navigation = [
-	{ name: 'Product', href: '#' },
-	{ name: 'Features', href: '#' },
-	{ name: 'Marketplace', href: '#' },
-	{ name: 'Company', href: '#' },
-];
 
 export default function Hero() {
 	return (
@@ -41,8 +33,8 @@ export default function Hero() {
 						animate={{ opacity: 1, scale: 1 }}
 						transition={{ duration: 0.5, delay: 1.1 }}
 					>
-						<Button href="/installation" variant="brand">
-							<span>Get Started</span>
+						<Button href="/installation" variant="primary">
+							<span>Read Documentation</span>
 						</Button>
 					</motion.div>
 

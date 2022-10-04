@@ -23,9 +23,9 @@ impl Default for Direction {
 	}
 }
 
-impl Into<prisma_client_rust::Direction> for Direction {
-	fn into(self) -> prisma_client_rust::Direction {
-		match self {
+impl From<Direction> for prisma_client_rust::Direction {
+	fn from(direction: Direction) -> prisma_client_rust::Direction {
+		match direction {
 			Direction::Asc => prisma_client_rust::Direction::Asc,
 			Direction::Desc => prisma_client_rust::Direction::Desc,
 		}

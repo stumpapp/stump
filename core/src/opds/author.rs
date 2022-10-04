@@ -26,23 +26,21 @@ impl StumpAuthor {
 	/// use stump_core::opds::author::StumpAuthor;
 	/// use xml::EventWriter;
 	///
-	/// fn main() {
-	/// 	let author = StumpAuthor::new("Aaron Leopold".to_string(), None);
-	/// 	let xml_str = r#"<?xml version="1.0" encoding="utf-8"?><author><name>Aaron Leopold</name></author>"#;
+	/// let author = StumpAuthor::new("Aaron Leopold".to_string(), None);
+	/// let xml_str = r#"<?xml version="1.0" encoding="utf-8"?><author><name>Aaron Leopold</name></author>"#;
 	///
-	/// 	let mut writer = EventWriter::new(Vec::new());
-	/// 	author.write(&mut writer).unwrap();
-	/// 	let result = String::from_utf8(writer.into_inner()).unwrap();
+	/// let mut writer = EventWriter::new(Vec::new());
+	/// author.write(&mut writer).unwrap();
+	/// let result = String::from_utf8(writer.into_inner()).unwrap();
 	///
-	/// 	assert_eq!(result, xml_str);
-	/// }
+	/// assert_eq!(result, xml_str);
 	/// ```
 	pub fn write(&self, writer: &mut EventWriter<Vec<u8>>) -> CoreResult<()> {
 		writer.write(xml::writer::XmlEvent::start_element("author"))?;
 		util::write_xml_element("name", &self.name, writer)?;
 
 		if let Some(uri) = &self.uri {
-			util::write_xml_element("uri", &uri, writer)?;
+			util::write_xml_element("uri", uri, writer)?;
 		}
 
 		writer.write(xml::writer::XmlEvent::end_element())?; // end of author

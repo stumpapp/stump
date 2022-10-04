@@ -1,8 +1,8 @@
 use super::{persist_job_end, Job};
 use crate::{
 	config::context::Ctx,
-	fs::scanner::library::scan_batch,
-	fs::scanner::library::scan_sync,
+	fs::scanner::library_scanner::scan_batch,
+	fs::scanner::library_scanner::scan_sync,
 	types::{models::library::LibraryScanMode, CoreResult},
 };
 use tracing::info;

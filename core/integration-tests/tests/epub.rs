@@ -4,7 +4,9 @@ use crate::utils::{init_test, TempLibrary};
 
 use stump_core::{
 	config::Ctx,
-	fs::epub::{get_epub_chapter, get_epub_resource, normalize_resource_path},
+	fs::media_file::epub::{
+		get_epub_chapter, get_epub_resource, normalize_resource_path,
+	},
 	prisma::media,
 	types::{models::epub::Epub, ContentType, CoreResult},
 };

@@ -1,7 +1,7 @@
 use axum::{
 	body::{BoxBody, StreamBody},
 	extract::Query,
-	http::{header, HeaderValue},
+	http::{header, HeaderValue, StatusCode},
 	response::{IntoResponse, Response},
 };
 use std::{
@@ -12,6 +12,15 @@ use stump_core::types::{ContentType, PageParams, PagedRequestParams};
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
 
+/// A helper function to send an error response when something breaks *hard*. I only
+/// anticipate this being used when an error occurs when building custom [Response]
+/// objects.
+pub(crate) fn unexpected_error<E: std::error::Error>(err: E) -> impl IntoResponse {
+	(
+		StatusCode::INTERNAL_SERVER_ERROR,
+		format!("An unknown error occurred: {}", err),
+	)
+}
 /// [ImageResponse] is a thin wrapper struct to return an image correctly in Axum.
 /// It contains a subset of actual Content-Type's (using [ContentType] enum from
 /// stump_core), as well as the raw image data. This is mostly the same as [BufferResponse],
@@ -174,6 +183,6 @@ impl IntoResponse for NamedFile {
 				format!("attachment; filename=\"{}\"", filename),
 			)
 			.body(BoxBody::new(body))
-			.unwrap()
+			.unwrap_or_else(|e| unexpected_error(e).into_response())
 	}
 }

@@ -55,7 +55,7 @@ pub struct TentativeMedia {
 }
 
 impl TentativeMedia {
-	pub fn into_action<'a>(self, ctx: &'a Ctx) -> prisma::media::Create<'a> {
+	pub fn into_action(self, ctx: &Ctx) -> prisma::media::Create {
 		ctx.db.media().create(
 			self.name,
 			self.size,
@@ -73,17 +73,17 @@ impl TentativeMedia {
 	}
 }
 
-impl Into<Media> for prisma::media::Data {
-	fn into(self) -> Media {
-		let series = match self.series() {
+impl From<prisma::media::Data> for Media {
+	fn from(data: prisma::media::Data) -> Media {
+		let series = match data.series() {
 			Ok(series) => Some(series.unwrap().to_owned().into()),
 			Err(_e) => None,
 		};
 
-		let (read_progresses, current_page) = match self.read_progresses() {
+		let (read_progresses, current_page) = match data.read_progresses() {
 			Ok(read_progresses) => {
 				let progress = read_progresses
-					.into_iter()
+					.iter()
 					.map(|rp| rp.to_owned().into())
 					.collect::<Vec<ReadProgress>>();
 
@@ -97,23 +97,23 @@ impl Into<Media> for prisma::media::Data {
 			Err(_e) => (None, None),
 		};
 
-		let tags = match self.tags() {
-			Ok(tags) => Some(tags.into_iter().map(|tag| tag.to_owned().into()).collect()),
+		let tags = match data.tags() {
+			Ok(tags) => Some(tags.iter().map(|tag| tag.to_owned().into()).collect()),
 			Err(_e) => None,
 		};
 
 		Media {
-			id: self.id,
-			name: self.name,
-			description: self.description,
-			size: self.size,
-			extension: self.extension,
-			pages: self.pages,
-			updated_at: self.updated_at.to_string(),
-			checksum: self.checksum,
-			path: self.path,
-			status: FileStatus::from_str(&self.status).unwrap_or(FileStatus::Error),
-			series_id: self.series_id.unwrap(),
+			id: data.id,
+			name: data.name,
+			description: data.description,
+			size: data.size,
+			extension: data.extension,
+			pages: data.pages,
+			updated_at: data.updated_at.to_string(),
+			checksum: data.checksum,
+			path: data.path,
+			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
+			series_id: data.series_id.unwrap(),
 			series,
 			read_progresses,
 			current_page,
@@ -123,7 +123,7 @@ impl Into<Media> for prisma::media::Data {
 }
 
 // Derived from ComicInfo.xml
-#[derive(Debug, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Type, Default)]
 
 pub struct MediaMetadata {
 	#[serde(rename = "Series")]
@@ -142,19 +142,19 @@ pub struct MediaMetadata {
 	pub page_count: Option<usize>,
 }
 
-impl MediaMetadata {
-	pub fn default() -> Self {
-		Self {
-			series: None,
-			number: None,
-			web: None,
-			summary: None,
-			publisher: None,
-			genre: None,
-			page_count: None,
-		}
-	}
-}
+// impl MediaMetadata {
+// 	pub fn default() -> Self {
+// 		Self {
+// 			series: None,
+// 			number: None,
+// 			web: None,
+// 			summary: None,
+// 			publisher: None,
+// 			genre: None,
+// 			page_count: None,
+// 		}
+// 	}
+// }
 
 pub struct ProcessedMediaFile {
 	pub thumbnail_path: Option<PathBuf>,

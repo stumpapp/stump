@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-pub mod library;
+pub mod library_scanner;
 pub mod utils;
 use tracing::debug;
 
@@ -34,20 +34,18 @@ impl ScannedFileTrait for Path {
 		self.file_name()
 			.unwrap_or_default()
 			.to_str()
-			.map(|name| name.starts_with("."))
+			.map(|name| name.starts_with('.'))
 			.unwrap_or(false)
 	}
 
 	/// Returns true if the file is a supported media file. This is a strict check when
 	/// infer can determine the file type, and a loose extension-based check when infer cannot.
 	fn is_supported(&self) -> bool {
-		if let Ok(maybe_typ) = infer::get_from_path(self) {
-			if let Some(typ) = maybe_typ {
-				let mime = typ.mime_type();
-				let content_type = media_file::get_content_type_from_mime(mime);
+		if let Ok(Some(typ)) = infer::get_from_path(self) {
+			let mime = typ.mime_type();
+			let content_type = media_file::get_content_type_from_mime(mime);
 
-				return content_type != ContentType::UNKNOWN;
-			}
+			return content_type != ContentType::UNKNOWN;
 		}
 
 		if let Some(guessed_mime) = guess_mime(self) {
@@ -56,7 +54,7 @@ impl ScannedFileTrait for Path {
 
 		debug!("Unsupported file {:?}", self);
 
-		return false;
+		false
 	}
 
 	/// Returns true when the scanner should not persist the file to the database.
@@ -70,16 +68,14 @@ impl ScannedFileTrait for Path {
 			return true;
 		}
 
-		return !self.is_supported();
+		!self.is_supported()
 	}
 
 	/// Returns true if the file is an image. This is a strict check when infer
 	/// can determine the file type, and a loose extension-based check when infer cannot.
 	fn is_img(&self) -> bool {
-		if let Ok(kind) = infer::get_from_path(self) {
-			if let Some(file_type) = kind {
-				return file_type.mime_type().starts_with("image/");
-			}
+		if let Ok(Some(file_type)) = infer::get_from_path(self) {
+			return file_type.mime_type().starts_with("image/");
 		}
 
 		// TODO: more, or refactor. Too lazy rn

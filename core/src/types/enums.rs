@@ -66,11 +66,20 @@ impl Default for UserRole {
 	}
 }
 
-impl Into<String> for UserRole {
-	fn into(self) -> String {
-		match self {
+impl From<UserRole> for String {
+	fn from(role: UserRole) -> String {
+		match role {
 			UserRole::ServerOwner => "SERVER_OWNER".to_string(),
 			UserRole::Member => "MEMBER".to_string(),
+		}
+	}
+}
+
+impl fmt::Display for UserRole {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			UserRole::ServerOwner => write!(f, "SERVER_OWNER"),
+			UserRole::Member => write!(f, "MEMBER"),
 		}
 	}
 }

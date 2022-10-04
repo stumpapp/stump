@@ -4,7 +4,7 @@ use stump_core::{
 	config::Ctx,
 	fs::{
 		checksum,
-		rar::{convert_rar_to_zip, rar_sample},
+		media_file::rar::{convert_rar_to_zip, rar_sample},
 	},
 	prisma::media,
 	types::{CoreResult, LibraryPattern, LibraryScanMode},

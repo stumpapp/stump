@@ -4,18 +4,19 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use crate::types::{
-	errors::ProcessFileError,
-	models::media::{MediaMetadata, ProcessedMediaFile},
-	ContentType,
+use crate::{
+	fs::{
+		checksum,
+		media_file::{get_content_type_from_mime, guess_content_type},
+	},
+	types::{
+		errors::ProcessFileError,
+		models::media::{MediaMetadata, ProcessedMediaFile},
+		ContentType,
+	},
 };
 use epub::doc::EpubDoc;
 use tracing::{error, info, warn};
-
-use super::{
-	checksum,
-	media_file::{self, get_content_type_from_mime},
-};
 
 /*
 epubcfi usually starts with /6, referring to spine element of package file
@@ -85,7 +86,7 @@ pub fn get_epub_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileE
 	})?;
 
 	// FIXME: mime type
-	Ok((media_file::get_content_type_from_mime("image/png"), cover))
+	Ok((get_content_type_from_mime("image/png"), cover))
 }
 
 pub fn get_epub_chapter(
@@ -112,7 +113,8 @@ pub fn get_epub_chapter(
 				path, e
 			);
 
-			media_file::guess_content_type("REMOVEME.xhml")
+			// FIXME: when did I write this? lmao
+			guess_content_type("REMOVEME.xhml")
 		},
 	};
 
@@ -205,7 +207,7 @@ pub fn get_epub_resource_from_path(
 				e
 			);
 
-			media_file::guess_content_type(adjusted_path.as_path().to_str().unwrap())
+			guess_content_type(adjusted_path.as_path().to_str().unwrap())
 		},
 	};
 

@@ -23,17 +23,17 @@ impl User {
 	// TODO: other utilities based off of preferences
 }
 
-impl Into<User> for prisma::user::Data {
-	fn into(self) -> User {
-		let user_preferences = match self.user_preferences() {
+impl From<prisma::user::Data> for User {
+	fn from(data: prisma::user::Data) -> User {
+		let user_preferences = match data.user_preferences() {
 			Ok(up) => Some(up.unwrap().to_owned().into()),
 			Err(_e) => None,
 		};
 
 		User {
-			id: self.id,
-			username: self.username,
-			role: self.role,
+			id: data.id,
+			username: data.username,
+			role: data.role,
 			user_preferences,
 		}
 	}
@@ -63,15 +63,15 @@ impl Default for UserPreferences {
 	}
 }
 
-impl Into<UserPreferences> for prisma::user_preferences::Data {
-	fn into(self) -> UserPreferences {
+impl From<prisma::user_preferences::Data> for UserPreferences {
+	fn from(data: prisma::user_preferences::Data) -> UserPreferences {
 		UserPreferences {
-			id: self.id.clone(),
-			locale: self.locale,
-			// reduce_animations: self.reduce_animations,
-			library_layout_mode: self.library_layout_mode.clone(),
-			series_layout_mode: self.series_layout_mode.clone(),
-			collection_layout_mode: self.collection_layout_mode.clone(),
+			id: data.id,
+			locale: data.locale,
+			// reduce_animations: data.reduce_animations,
+			library_layout_mode: data.library_layout_mode,
+			series_layout_mode: data.series_layout_mode,
+			collection_layout_mode: data.collection_layout_mode,
 		}
 	}
 }

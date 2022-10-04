@@ -76,6 +76,7 @@ impl StumpTui {
 
 		self.render()?;
 
+		#[allow(clippy::never_loop)]
 		while let Some(event) = self.internal_receiver.recv().await {
 			match event {
 				TuiEvent::GracefulShutdown(message) => {
@@ -89,7 +90,7 @@ impl StumpTui {
 
 					let err = tokio::spawn(async move {
 						thread::sleep(Duration::from_secs(5));
-						return TuiError::Unknown("test".to_string());
+						TuiError::Unknown("test".to_string())
 					})
 					.await
 					.unwrap();
@@ -123,6 +124,7 @@ async fn start_tui(_subsys: SubsystemHandle) -> Result<(), TuiError> {
 
 #[tokio::main]
 async fn main() -> Result<(), TuiError> {
+	#[allow(clippy::match_single_binding)]
 	match cli::parse_and_run().await? {
 		CliEvent::GracefulShutdown(message) => {
 			if let Some(message) = message {

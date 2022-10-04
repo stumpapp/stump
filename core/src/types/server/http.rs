@@ -7,7 +7,7 @@ use crate::fs::media_file::infer_mime_from_path;
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
 #[allow(non_camel_case_types)]
-#[derive(Serialize, Debug, Clone, Copy, PartialEq)]
+#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ContentType {
 	XHTML,
 	XML,
@@ -32,10 +32,9 @@ impl ContentType {
 	/// ```rust
 	/// use stump_core::types::server::http::ContentType;
 	///
-	/// fn main() {
-	///     let content_type = ContentType::from_extension("png");
-	///     assert_eq!(content_type, Some(ContentType::PNG));
-	/// }
+	/// let content_type = ContentType::from_extension("png");
+	/// assert_eq!(content_type, Some(ContentType::PNG));
+	/// ```
 	pub fn from_extension(extension: &str) -> Option<ContentType> {
 		match extension.to_lowercase().as_str() {
 			"xhtml" => Some(ContentType::XHTML),
@@ -57,17 +56,17 @@ impl ContentType {
 	}
 
 	pub fn from_infer(path: &Path) -> ContentType {
-		infer_mime_from_path(&path)
+		infer_mime_from_path(path)
 			.map(|mime| ContentType::from(mime.as_str()))
-			.unwrap_or(
+			.unwrap_or_else(|| {
 				ContentType::from_extension(
 					path.extension()
 						.unwrap_or_default()
 						.to_str()
 						.unwrap_or_default(),
 				)
-				.unwrap_or(ContentType::UNKNOWN),
-			)
+				.unwrap_or(ContentType::UNKNOWN)
+			})
 	}
 
 	/// Returns true if the content type is an image.
@@ -76,13 +75,11 @@ impl ContentType {
 	/// ```rust
 	/// use stump_core::types::server::http::ContentType;
 	///
-	/// fn main() {
-	///     let content_type = ContentType::PNG;
-	///     assert!(content_type.is_image());
+	/// let content_type = ContentType::PNG;
+	/// assert!(content_type.is_image());
 	///
-	///     let content_type = ContentType::XHTML;
-	///     assert!(!content_type.is_image());
-	/// }
+	/// let content_type = ContentType::XHTML;
+	/// assert!(!content_type.is_image());
 	/// ```
 	pub fn is_image(&self) -> bool {
 		self.to_string().starts_with("image")

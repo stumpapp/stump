@@ -17,10 +17,7 @@ use crate::{
 	types::{
 		enums::FileStatus,
 		errors::ScanError,
-		models::{
-			library::LibraryOptions,
-			media::{MediaMetadata, TentativeMedia},
-		},
+		models::{library::LibraryOptions, media::TentativeMedia},
 		CoreResult,
 	},
 };
@@ -40,20 +37,15 @@ pub async fn mark_library_missing(library: library::Data, ctx: &Ctx) -> CoreResu
 	.exec()
 	.await?;
 
-	let series_ids = library
-		.series()
-		.unwrap_or(&vec![])
-		.to_owned()
-		.into_iter()
-		.map(|s| s.id.to_owned())
-		.collect::<Vec<_>>();
-
 	let media_query = format!(
 		"UPDATE media SET status\"{}\" WHERE seriesId in ({})",
 		"MISSING".to_owned(),
-		series_ids
-			.into_iter()
-			.map(|id| format!("\"{}\"", id))
+		library
+			.series()
+			.unwrap_or(&vec![])
+			.iter()
+			.cloned()
+			.map(|s| format!("\"{}\"", s.id))
 			.collect::<Vec<_>>()
 			.join(",")
 	);
@@ -96,7 +88,7 @@ pub fn get_tentative_media(
 		_ => 0,
 	};
 
-	let comic_info = processed_entry.metadata.unwrap_or(MediaMetadata::default());
+	let comic_info = processed_entry.metadata.unwrap_or_default();
 
 	Ok(TentativeMedia {
 		name,
@@ -197,7 +189,7 @@ pub async fn insert_series_many(
 	let mut inserted_series = vec![];
 
 	for entry in entries {
-		match insert_series(&ctx, &entry, library_id.clone()).await {
+		match insert_series(ctx, &entry, library_id.clone()).await {
 			Ok(series) => {
 				ctx.emit_client_event(CoreEvent::CreatedSeries(series.clone()));
 
@@ -323,9 +315,12 @@ pub fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathBuf]) {
 		let file = File::open(path).unwrap();
 
 		for line in BufReader::new(file).lines() {
-			if let Ok(pattern) = line {
-				builder.add(Glob::new(&pattern).unwrap());
+			if let Err(e) = line {
+				error!("Failed to read line from file: {:?}", e);
+				continue;
 			}
+
+			builder.add(Glob::new(&line.unwrap()).unwrap());
 		}
 	}
 }

@@ -1,20 +1,24 @@
+pub mod epub;
+pub mod pdf;
+pub mod rar;
+pub mod zip;
+
 use std::path::Path;
 use tracing::{debug, warn};
 
-use crate::types::{
-	errors::ProcessFileError,
-	models::{
-		library::LibraryOptions,
-		media::{MediaMetadata, ProcessedMediaFile},
+use crate::{
+	fs::media_file::{epub::process_epub, rar::process_rar, zip::process_zip},
+	types::{
+		errors::ProcessFileError,
+		models::{
+			library::LibraryOptions,
+			media::{MediaMetadata, ProcessedMediaFile},
+		},
+		ContentType,
 	},
-	ContentType,
 };
 
-use super::{
-	epub::{get_epub_cover, process_epub},
-	rar::{get_rar_image, process_rar},
-	zip::{get_zip_image, process_zip},
-};
+use self::{epub::get_epub_cover, rar::get_rar_image, zip::get_zip_image};
 
 // FIXME: this module does way too much. It should be cleaned up, way too many vaguely
 // similar things shoved in here with little distinction.

@@ -129,7 +129,7 @@ pub trait Job: Send + Sync {
 pub async fn persist_new_job(
 	ctx: &Ctx,
 	id: String,
-	job: &Box<dyn Job>,
+	job: &dyn Job,
 ) -> CoreResult<crate::prisma::job::Data> {
 	use crate::prisma::job;
 

@@ -1,7 +1,6 @@
 use globset::GlobSetBuilder;
 use itertools::Itertools;
 use rayon::prelude::{ParallelBridge, ParallelIterator};
-use tokio::{self, task::JoinHandle};
 use std::{
 	collections::HashMap,
 	path::Path,
@@ -11,6 +10,7 @@ use std::{
 	},
 	time::Duration,
 };
+use tokio::{self, task::JoinHandle};
 use tracing::{debug, error, info, trace};
 use walkdir::{DirEntry, WalkDir};
 
@@ -239,7 +239,7 @@ async fn scan_series(
 
 	let mut visited_media = media
 		.iter()
-		.map(|data| (data.path.clone(), false).into())
+		.map(|data| (data.path.clone(), false))
 		.collect::<HashMap<String, bool>>();
 
 	let mut walkdir = WalkDir::new(&series.path);
@@ -289,7 +289,7 @@ async fn scan_series(
 			trace!("Skipping ignored file: {:?}", path);
 			trace!("Globbed ignore?: {}", glob_match);
 			continue;
-		} else if let Some(_) = visited_media.get(path_str) {
+		} else if visited_media.get(path_str).is_some() {
 			debug!("Existing media found: {:?}", path);
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;
@@ -324,7 +324,7 @@ async fn scan_series(
 		.map(|(path, _)| path)
 		.collect::<Vec<String>>();
 
-	if missing_media.len() > 0 {
+	if missing_media.is_empty() {
 		info!(
 			"{} media were unable to be located during scan.",
 			missing_media.len(),
@@ -368,7 +368,7 @@ async fn scan_series_batch(
 
 	let mut visited_media = media
 		.iter()
-		.map(|data| (data.path.clone(), false).into())
+		.map(|data| (data.path.clone(), false))
 		.collect::<HashMap<String, bool>>();
 
 	let mut operations = vec![];
@@ -422,7 +422,7 @@ async fn scan_series_batch(
 			trace!("Skipping ignored file: {:?}", path);
 			trace!("Globbed ignore?: {}", glob_match);
 			continue;
-		} else if let Some(_) = visited_media.get(path_str) {
+		} else if visited_media.get(path_str).is_some() {
 			debug!("Existing media found: {:?}", path);
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;

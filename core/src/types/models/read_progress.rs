@@ -21,9 +21,9 @@ pub struct ReadProgress {
 	pub user: Option<User>,
 }
 
-impl Into<ReadProgress> for prisma::read_progress::Data {
-	fn into(self) -> ReadProgress {
-		let media = match self.media() {
+impl From<prisma::read_progress::Data> for ReadProgress {
+	fn from(data: prisma::read_progress::Data) -> ReadProgress {
+		let media = match data.media() {
 			Ok(media) => Some(media.to_owned().into()),
 			Err(e) => {
 				trace!("Failed to load media for read progress: {}", e);
@@ -31,14 +31,14 @@ impl Into<ReadProgress> for prisma::read_progress::Data {
 			},
 		};
 
-		let user = self.user().ok().map(|u| u.to_owned().into());
+		let user = data.user().ok().map(|u| u.to_owned().into());
 
 		ReadProgress {
-			id: self.id,
-			page: self.page,
-			media_id: self.media_id,
+			id: data.id,
+			page: data.page,
+			media_id: data.media_id,
 			media,
-			user_id: self.user_id,
+			user_id: data.user_id,
 			user,
 		}
 	}

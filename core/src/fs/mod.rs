@@ -1,8 +1,7 @@
+pub mod archive;
 pub mod checksum;
-pub mod epub;
 pub mod image;
 pub mod media_file;
-pub mod pdf;
-pub mod rar;
 pub mod scanner;
-pub mod zip;
+
+pub use media_file::*;

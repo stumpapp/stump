@@ -26,9 +26,9 @@ impl EventManager {
 	///
 	/// #[tokio::main]
 	/// async fn main() {
-	/// 	let (sender, reciever) = unbounded_channel();
-	/// 	let ctx = Ctx::new(sender).await;
-	/// 	let event_manager = EventManager::new(ctx, reciever);
+	///    let (sender, reciever) = unbounded_channel();
+	///    let ctx = Ctx::new(sender).await;
+	///    let event_manager = EventManager::new(ctx, reciever);
 	/// }
 	/// ```
 	pub fn new(

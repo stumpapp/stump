@@ -256,7 +256,7 @@ async fn scan_library(
 	// TODO: should this just be an error?
 	if scan_mode != LibraryScanMode::None {
 		let job = LibraryScanJob {
-			path: lib.path.clone(),
+			path: lib.path,
 			scan_mode,
 		};
 
@@ -324,9 +324,7 @@ async fn create_library(
 		let tag_connects = tags.into_iter().map(|tag| {
 			db.library().update(
 				library::id::equals(lib.id.clone()),
-				vec![library::tags::connect(vec![tag::id::equals(
-					tag.id.to_owned(),
-				)])],
+				vec![library::tags::connect(vec![tag::id::equals(tag.id)])],
 			)
 		});
 
@@ -470,7 +468,7 @@ async fn delete_library(
 		.map(|media| media.id)
 		.collect::<Vec<_>>();
 
-	if media_ids.len() > 0 {
+	if !media_ids.is_empty() {
 		trace!("List of deleted media IDs: {:?}", media_ids);
 
 		debug!(

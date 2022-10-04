@@ -267,9 +267,7 @@ pub async fn persist_test_job(
 		scan_mode,
 	};
 
-	let boxed: Box<dyn Job> = Box::new(job);
-
-	persist_new_job(ctx, id.to_string(), &boxed).await?;
+	persist_new_job(ctx, id.to_string(), &job).await?;
 
 	Ok(())
 }

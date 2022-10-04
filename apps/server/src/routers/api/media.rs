@@ -159,9 +159,9 @@ async fn get_reading_media(
 
 					if let Some(_epubcfi) = progress.epubcfi.as_ref() {
 						// TODO: figure something out... might just need a `completed` field in progress TBH.
-						return false;
+						false
 					} else {
-						return progress.page < m.pages;
+						progress.page < m.pages
 					}
 				},
 				_ => false,

@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::io::BufReader;
 
 use include_dir::{include_dir, Dir};
-use tracing::{debug, info,error};
+use tracing::{debug, error, info};
 
 use crate::{
 	fs::checksum::digest_from_reader,
@@ -18,20 +18,14 @@ static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/prisma/migrations
 const CREATE_MIGRATIONS_TABLE: &str =
 	include_str!("../../prisma/migrations/migrations.sql");
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct CountQueryReturn {
 	pub count: i64,
 }
 
-impl Default for CountQueryReturn {
-	fn default() -> Self {
-		Self { count: 0 }
-	}
-}
-
 fn get_sql_stmts(sql_str: &str) -> Vec<&str> {
 	sql_str
-		.split(";")
+		.split(';')
 		.filter(|s| !s.trim().is_empty())
 		.collect()
 }

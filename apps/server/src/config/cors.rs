@@ -17,7 +17,7 @@ pub fn get_cors_layer() -> CorsLayer {
 				None
 			} else {
 				Some(
-					val.split(",")
+					val.split(',')
 						.map(|val| val.trim().to_string().parse::<HeaderValue>())
 						// Note: doing this the more verbose way so I can log errors...
 						.filter_map(|res| {
@@ -39,10 +39,10 @@ pub fn get_cors_layer() -> CorsLayer {
 
 	if let Some(origins_list) = allowed_origins {
 		cors_layer = cors_layer.allow_origin(AllowOrigin::list(origins_list));
-	} else if env::var("STUMP_PROFILE").unwrap_or("release".into()) == "debug" {
+	} else if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "debug" {
 		cors_layer = cors_layer.allow_origin(
 			DEFAULT_ALLOWED_ORIGINS
-				.into_iter()
+				.iter()
 				.map(|origin| origin.parse())
 				.filter_map(|res| res.ok())
 				.collect::<Vec<HeaderValue>>(),

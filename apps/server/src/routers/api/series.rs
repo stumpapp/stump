@@ -272,7 +272,7 @@ async fn get_next_in_series(
 
 	Ok(Json(
 		media
-			.into_iter()
+			.iter()
 			.find(|m| {
 				// I don't really know that this is valid... When I load in the
 				// relation, this will NEVER be None. It will default to an empty
@@ -284,16 +284,16 @@ async fn get_next_in_series(
 				let progresses = m.read_progresses.as_ref().unwrap();
 
 				// No progress means it is up next (for this user)!
-				if progresses.len() == 0 {
-					return true;
+				if progresses.is_empty() {
+					true
 				} else {
 					// Note: this should never really exceed len == 1, but :shrug:
 					let progress = progresses.get(0).unwrap();
 
-					return progress.page < m.pages && progress.page > 0;
+					progress.page < m.pages && progress.page > 0
 				}
 			})
-			.or(media.get(0))
+			.or_else(|| media.get(0))
 			.map(|data| data.to_owned().into()),
 	))
 }

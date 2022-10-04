@@ -38,11 +38,12 @@ use types::{errors::CoreError, CoreResult};
 ///
 /// #[tokio::main]
 /// async fn main() {
-///		assert!(StumpCore::init_environment().is_ok());
+///    assert!(StumpCore::init_environment().is_ok());
 ///
-/// 	let core = StumpCore::new().await;
-/// 	// do stuff with core
+///    let core = StumpCore::new().await;
+///    // do stuff with core
 /// }
+/// ```
 pub struct StumpCore {
 	ctx: Ctx,
 	#[allow(dead_code)]

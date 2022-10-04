@@ -29,7 +29,7 @@ where
 	async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
 		// Note: this is fine, right? I mean, it's not like we're doing anything
 		// on a OPTIONS request, right? Right? 👀
-		if req.method() == &Method::OPTIONS {
+		if req.method() == Method::OPTIONS {
 			return Ok(Self);
 		}
 
@@ -69,19 +69,19 @@ where
 		}
 
 		let auth_header = auth_header.unwrap();
-		let encoded_credentials: String;
 
-		if auth_header.starts_with("Basic ") && auth_header.len() > 6 {
-			encoded_credentials = auth_header[6..].to_string();
-		} else {
+		if !auth_header.starts_with("Basic ") || auth_header.len() <= 6 {
 			return Err((StatusCode::UNAUTHORIZED).into_response());
 		}
 
-		let decoded_bytes = base64::decode(encoded_credentials)
-			.map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR).into_response())?;
-
-		let decoded_credentials = decode_base64_credentials(decoded_bytes)
-			.map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR).into_response())?;
+		let encoded_credentials = auth_header[6..].to_string();
+		let decoded_bytes = base64::decode(encoded_credentials).map_err(|e| {
+			(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+		})?;
+		let decoded_credentials =
+			decode_base64_credentials(decoded_bytes).map_err(|e| {
+				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+			})?;
 
 		let user = ctx
 			.db

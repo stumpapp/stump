@@ -102,7 +102,7 @@ async fn create_user(
 }
 
 async fn get_user_by_id() -> ApiResult<()> {
-	return Err(ApiError::NotImplemented);
+	Err(ApiError::NotImplemented)
 }
 
 // TODO: figure out what operations are allowed here, and by whom. E.g. can a server
@@ -112,7 +112,7 @@ async fn get_user_by_id() -> ApiResult<()> {
 // The server owner should be able to remove them, but I don't think they should be able
 // to do anything else?
 async fn update_user() -> ApiResult<()> {
-	return Err(ApiError::NotImplemented);
+	Err(ApiError::NotImplemented)
 }
 
 // FIXME: remove this once I resolve the below 'TODO'

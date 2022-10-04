@@ -18,21 +18,21 @@ use crate::{
 /// use stump_core::config::env::StumpEnvironment;
 ///
 /// fn read_toml() {
-/// 	let toml_str = r#"
+///    let toml_str = r#"
 /// debug = true
 /// port = 8080
 /// verbosity = 3
 /// client_dir = "client"
 /// "#;
-/// 	let stump_toml = toml::from_str::<StumpEnvironment>(toml_str);
+///    let stump_toml = toml::from_str::<StumpEnvironment>(toml_str);
 ///
-/// 	assert!(stump_toml.is_ok());
-///		let stump_toml = stump_toml.unwrap();
-/// 	println!("{:?}", stump_toml);
-/// 	assert_eq!(stump_toml.debug, Some(true));
-/// 	assert_eq!(stump_toml.port, Some(8080));
-/// 	assert_eq!(stump_toml.verbosity, Some(3));
-/// 	assert_eq!(stump_toml.client_dir, Some(String::from("client")));
+///    assert!(stump_toml.is_ok());
+///    let stump_toml = stump_toml.unwrap();
+///    println!("{:?}", stump_toml);
+///    assert_eq!(stump_toml.debug, Some(true));
+///    assert_eq!(stump_toml.port, Some(8080));
+///    assert_eq!(stump_toml.verbosity, Some(3));
+///    assert_eq!(stump_toml.client_dir, Some(String::from("client")));
 /// }
 /// ```
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -70,16 +70,15 @@ impl StumpEnvironment {
 	/// use std::env;
 	/// use stump_core::config::env::StumpEnvironment;
 	///
-	/// fn main() {
-	/// 	env::set_var("STUMP_PORT", "8080");
-	/// 	env::set_var("STUMP_VERBOSITY", "3");
+	/// env::set_var("STUMP_PORT", "8080");
+	/// env::set_var("STUMP_VERBOSITY", "3");
 	///
-	/// 	let env = StumpEnvironment::from_env(None);
-	/// 	assert!(env.is_ok());
-	/// 	let env = env.unwrap();
-	/// 	assert_eq!(env.port, Some(8080));
-	/// 	assert_eq!(env.verbosity, Some(3));
-	/// }
+	/// let env = StumpEnvironment::from_env(None);
+	/// assert!(env.is_ok());
+	/// let env = env.unwrap();
+	/// assert_eq!(env.port, Some(8080));
+	/// assert_eq!(env.verbosity, Some(3));
+	/// ```
 	pub fn from_env(existing: Option<Self>) -> CoreResult<Self> {
 		let mut env = match existing {
 			Some(env) => env,
@@ -138,14 +137,13 @@ impl StumpEnvironment {
 	/// use std::env;
 	/// use stump_core::config::env::StumpEnvironment;
 	///
-	/// fn main() {
-	/// 	let mut env = StumpEnvironment::default();
-	/// 	env.port = Some(8080);
+	/// let mut env = StumpEnvironment::default();
+	/// env.port = Some(8080);
 	///
-	/// 	assert_eq!(env::var("STUMP_PORT"), None);
-	/// 	env.set_env().unwrap();
-	/// 	assert_eq!(env::var("STUMP_PORT").unwrap(), "8080");
-	/// }
+	/// assert_eq!(env::var("STUMP_PORT"), None);
+	/// env.set_env().unwrap();
+	/// assert_eq!(env::var("STUMP_PORT").unwrap(), "8080");
+	/// ```
 	pub fn set_env(&self) -> CoreResult<()> {
 		if let Some(profile) = &self.profile {
 			if profile != "debug" {
@@ -191,11 +189,10 @@ impl StumpEnvironment {
 	/// use stump_core::config::env::StumpEnvironment;
 	/// use std::env;
 	///
-	/// fn main() {
-	/// 	env::set_var("STUMP_PORT", "8080");
-	/// 	let env = StumpEnvironment::load().unwrap();
-	/// 	assert_eq!(env.port, Some(8080));
-	/// }
+	/// env::set_var("STUMP_PORT", "8080");
+	/// let env = StumpEnvironment::load().unwrap();
+	/// assert_eq!(env.port, Some(8080));
+	/// ```
 	pub fn load() -> CoreResult<StumpEnvironment> {
 		let config_dir = get_config_dir();
 		let stump_toml = config_dir.join("Stump.toml");
@@ -206,7 +203,7 @@ impl StumpEnvironment {
 				.map_err(|e| CoreError::InitializationError(e.to_string()))?
 		} else {
 			debug!("Stump.toml does not exist, creating it");
-			std::fs::File::create(stump_toml.clone())?;
+			std::fs::File::create(stump_toml)?;
 			debug!("Stump.toml created");
 
 			Self::default()

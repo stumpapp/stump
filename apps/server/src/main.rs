@@ -56,11 +56,12 @@ async fn main() -> ServerResult<()> {
 		.layer(cors::get_cors_layer());
 
 	let addr = SocketAddr::from(([0, 0, 0, 0], stump_environment.port.unwrap_or(10801)));
+	info!("⚡️ Stump HTTP server starting on http://{}", addr);
 
 	axum::Server::bind(&addr)
 		.serve(app.into_make_service())
 		.await
-		.expect("Failed to start HTTP server!");
+		.expect("Failed to start Stump HTTP server!");
 
 	Ok(())
 }

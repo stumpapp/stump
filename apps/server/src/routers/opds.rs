@@ -215,15 +215,15 @@ async fn keep_reading(Extension(ctx): State, session: ReadableSession) -> ApiRes
 
 				if let Some(_epubcfi) = progress.epubcfi.as_ref() {
 					// TODO: figure something out... might just need a `completed` field in progress TBH.
-					return false;
+					false
 				} else {
-					return progress.page < m.pages;
+					progress.page < m.pages
 				}
 			},
 			_ => false,
 		});
 
-	let entries: Vec<OpdsEntry> = media.into_iter().map(|m| OpdsEntry::from(m)).collect();
+	let entries: Vec<OpdsEntry> = media.into_iter().map(OpdsEntry::from).collect();
 
 	let feed = OpdsFeed::new(
 		"keepReading".to_string(),
@@ -251,7 +251,7 @@ async fn get_libraries(Extension(ctx): State) -> ApiResult<Xml> {
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
 
-	let entries = libraries.into_iter().map(|l| OpdsEntry::from(l)).collect();
+	let entries = libraries.into_iter().map(OpdsEntry::from).collect();
 
 	let feed = OpdsFeed::new(
 		"allLibraries".to_string(),

@@ -124,17 +124,13 @@ async fn start_tui(_subsys: SubsystemHandle) -> Result<(), TuiError> {
 
 #[tokio::main]
 async fn main() -> Result<(), TuiError> {
-	#[allow(clippy::match_single_binding)]
-	match cli::parse_and_run().await? {
-		CliEvent::GracefulShutdown(message) => {
-			if let Some(message) = message {
-				println!("{}", message);
-			}
+	if let CliEvent::GracefulShutdown(message) = cli::parse_and_run().await? {
+		if let Some(message) = message {
+			println!("{}", message);
+		}
 
-			return Ok(());
-		},
-		_ => {},
-	};
+		return Ok(());
+	}
 
 	Ok(Toplevel::new()
 		.start("start_tui", start_tui)

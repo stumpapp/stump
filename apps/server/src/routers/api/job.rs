@@ -28,7 +28,7 @@ pub async fn get_jobs(Extension(ctx): State) -> ApiResult<Json<Vec<JobReport>>> 
 		})?;
 
 	let res = recv.await.map_err(|e| {
-		ApiError::InternalServerError(format!("Failed to get jobs: {}", e.to_string()))
+		ApiError::InternalServerError(format!("Failed to get jobs: {}", e))
 	})?;
 
 	Ok(Json(res))

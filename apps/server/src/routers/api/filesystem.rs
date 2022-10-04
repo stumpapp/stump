@@ -35,7 +35,7 @@ pub async fn list_directory(
 
 	let input = input.0.unwrap_or_default();
 
-	let start_path = match input.path.clone() {
+	let start_path = match input.path {
 		Some(path) => path,
 		None => "/".to_string(),
 	};
@@ -62,7 +62,7 @@ pub async fn list_directory(
 			let path = f.path();
 			let stem = path.file_stem().unwrap_or_default();
 
-			if stem.to_str().unwrap_or_default().starts_with(".") {
+			if stem.to_str().unwrap_or_default().starts_with('.') {
 				return None;
 			}
 

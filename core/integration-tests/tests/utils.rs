@@ -1,6 +1,6 @@
 extern crate stump_core;
 
-use std::{fs, path::PathBuf, sync::Once};
+use std::{fs, path::PathBuf};
 use tempfile::{Builder, NamedTempFile, TempDir};
 
 use stump_core::{
@@ -25,23 +25,13 @@ pub struct TempLibrary {
 }
 
 impl TempLibrary {
+	/// Creates the root temporary libray for the [`TempLibrary`] struct. Places it
+	/// as a child of CARGO_MANIFEST_DIR.
 	fn root() -> TempDir {
 		Builder::new()
 			.tempdir_in(get_manifest_dir())
 			.expect("Failed to create temp dir")
 	}
-
-	/// Returns a temporary directory
-	// fn named_root() -> TempDir {
-	// 	Builder::new()
-	// 		.prefix("libraries")
-	// 		// I want the temp directory to be named `libraries` exactly, so
-	// 		// I'm setting the random bytes to 0, otherwise it would tack on
-	// 		// a random string n chars long to the end of the name.
-	// 		.rand_bytes(0)
-	// 		.tempdir_in(&get_manifest_dir())
-	// 		.expect("Failed to create temp dir")
-	// }
 
 	/// Builds a temporary directory structure for a collection-based library:
 	///
@@ -137,7 +127,9 @@ impl TempLibrary {
 			LibraryPattern::SeriesBased => TempLibrary::series_library()?,
 		};
 
-		temp_library.insert(client, scan_mode).await
+		let (library, options) = temp_library.insert(client, scan_mode).await?;
+
+		Ok((library, options, temp_library))
 	}
 
 	/// A helper to create a collection based library used in the epub tests.
@@ -146,7 +138,9 @@ impl TempLibrary {
 	) -> CoreResult<(library::Data, library_options::Data, TempLibrary)> {
 		let _tmp = TempLibrary::collection_library()?;
 
-		_tmp.insert(client, LibraryScanMode::Batched).await
+		let (library, options) = _tmp.insert(client, LibraryScanMode::Batched).await?;
+
+		Ok((library, options, _tmp))
 	}
 
 	/// Gets the name of the library from the directory name.
@@ -160,10 +154,10 @@ impl TempLibrary {
 
 	/// Inserts a library into the database based on the temp library
 	pub async fn insert(
-		self,
+		&self,
 		client: &PrismaClient,
 		scan_mode: LibraryScanMode,
-	) -> CoreResult<(library::Data, library_options::Data, TempLibrary)> {
+	) -> CoreResult<(library::Data, library_options::Data)> {
 		let (library, options) = create_library(
 			client,
 			self.get_name(),
@@ -173,11 +167,13 @@ impl TempLibrary {
 		)
 		.await?;
 
-		Ok((library, options, self))
+		Ok((library, options))
 	}
 }
 
-static INIT: Once = Once::new();
+// FIXME: not sure why this caused the tests to fail... I'd rather not create a
+// database for each test, but I'm not sure how to get around this for now.
+// static INIT: Once = Once::new();
 
 /// Deletes the test database if it exists, then runs migrations and creates a test user.
 /// Meant to create a clean slate for each test that needs it.
@@ -222,15 +218,11 @@ pub async fn init_db() {
 }
 
 pub async fn init_test() {
-	if INIT.is_completed() {
-		return;
-	}
-
-	println!("Initializing tests...");
+	// if INIT.is_completed() {
+	// 	return;
+	// }
 	init_db().await;
-	println!("Tests initialized.");
-
-	INIT.call_once(|| {});
+	// INIT.call_once(|| {});
 }
 
 pub fn make_tmp_file(test_file: &str) -> CoreResult<NamedTempFile> {

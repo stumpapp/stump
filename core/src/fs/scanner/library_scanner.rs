@@ -11,7 +11,7 @@ use std::{
 	time::Duration,
 };
 use tokio::{self, task::JoinHandle};
-use tracing::{debug, error, info, trace};
+use tracing::{debug, error, trace, warn};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
@@ -325,7 +325,7 @@ async fn scan_series(
 		.collect::<Vec<String>>();
 
 	if missing_media.is_empty() {
-		info!(
+		warn!(
 			"{} media were unable to be located during scan.",
 			missing_media.len(),
 		);

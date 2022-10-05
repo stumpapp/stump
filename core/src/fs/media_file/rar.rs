@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use tracing::{debug, error, info, trace, warn};
+use tracing::{debug, error, trace, warn};
 use unrar::archive::Entry;
 
 use crate::{
@@ -109,7 +109,7 @@ pub fn process_rar(
 		));
 	}
 
-	info!("Processing Rar (new): {}", path.display());
+	debug!("Processing Rar (new): {}", path.display());
 
 	let path_str = path.to_string_lossy().to_string();
 	let archive = unrar::Archive::new(&path)?;

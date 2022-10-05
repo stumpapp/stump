@@ -1,5 +1,5 @@
 use std::{fs::File, io::Read, path::Path};
-use tracing::{debug, error, info, trace};
+use tracing::{debug, error, trace};
 use zip::read::ZipFile;
 
 use crate::{
@@ -78,7 +78,7 @@ pub fn digest_zip(path: &str) -> Option<String> {
 /// generated checksum for the file.
 // TODO: do I need to pass in the library options here?
 pub fn process_zip(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
-	info!("Processing Zip: {}", path.display());
+	debug!("Processing Zip: {}", path.display());
 
 	let zip_file = File::open(path)?;
 	let mut archive = zip::ZipArchive::new(zip_file)?;

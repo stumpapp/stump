@@ -5,7 +5,10 @@ use serde::Deserialize;
 
 use crate::{prisma::PrismaClient, types::CoreResult};
 
-use super::migration::CountQueryReturn;
+#[derive(Deserialize, Debug, Default)]
+pub struct CountQueryReturn {
+	pub count: i64,
+}
 
 #[derive(Deserialize, Debug)]
 pub struct SeriesMediaCountQueryReturn {

@@ -33,11 +33,15 @@ impl Job for LibraryScanJob {
 		let duration = start.elapsed();
 
 		info!(
-			"Finished {:?} library scan in {}.{:03} seconds. {} files processed.",
+			"Finished {:?} library scan at {:?}",
 			self.scan_mode,
+			self.path.clone(),
+		);
+		info!(
+			"{} files processed in {}.{:03} seconds.",
+			completed_tasks,
 			duration.as_secs(),
-			duration.subsec_millis(),
-			completed_tasks
+			duration.subsec_millis()
 		);
 
 		persist_job_end(&ctx, runner_id, completed_tasks, duration.as_millis()).await?;

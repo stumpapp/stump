@@ -16,7 +16,7 @@ use crate::{
 	},
 };
 use epub::doc::EpubDoc;
-use tracing::{error, info, warn};
+use tracing::{debug, error, warn};
 
 /*
 epubcfi usually starts with /6, referring to spine element of package file
@@ -48,7 +48,7 @@ fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
 }
 
 pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
-	info!("Processing Epub: {}", path.display());
+	debug!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
 

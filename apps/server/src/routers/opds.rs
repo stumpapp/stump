@@ -458,7 +458,9 @@ async fn get_book_page(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let zero_based = pagination.zero_based.unwrap_or(false);
+	// OPDS defaults to zero-indexed pages, I don't even think it allows the
+	// ?zero_based query param to be set.
+	let zero_based = pagination.zero_based.unwrap_or(true);
 	let book = db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
@@ -480,5 +482,5 @@ async fn get_book_page(
 		return Ok(epub::get_epub_cover(&book.path)?.into());
 	}
 
-	Ok(media_file::get_page(book.path.as_str(), page)?.into())
+	Ok(media_file::get_page(book.path.as_str(), correct_page)?.into())
 }

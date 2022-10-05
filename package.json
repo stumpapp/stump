@@ -20,7 +20,6 @@
 		"web": "pnpm --filter @stump/web --",
 		"server": "pnpm --filter @stump/server --",
 		"desktop": "pnpm --filter @stump/desktop --",
-		"docs": "pnpm --filter @stump/docs --",
 		"interface": "pnpm --filter @stump/interface --",
 		"client": "pnpm --filter @stump/client --",
 		"build:server": "pnpm run server build",

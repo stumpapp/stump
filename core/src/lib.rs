@@ -32,7 +32,7 @@ use types::{errors::CoreError, CoreResult};
 /// [`StumpCore`] also provides a few initilization functions, such as `init_environment`. This
 /// is provided to standardize various configurations for consumers of the library.
 ///
-/// Example:
+/// ## Example:
 /// ```rust
 /// use stump_core::StumpCore;
 ///

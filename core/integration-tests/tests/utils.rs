@@ -7,7 +7,7 @@ use stump_core::{
 	config::Ctx,
 	db::migration::run_migrations,
 	fs::scanner::library_scanner::{scan_batch, scan_sync},
-	job::{persist_new_job, Job, LibraryScanJob},
+	job::{persist_new_job, LibraryScanJob},
 	prisma::{library, library_options, PrismaClient},
 	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };

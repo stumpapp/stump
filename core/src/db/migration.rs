@@ -1,149 +1,32 @@
-use prisma_client_rust::raw;
-use serde::Deserialize;
-use std::io::BufReader;
+use tracing::{debug, info};
 
-use include_dir::{include_dir, Dir};
-use tracing::{debug, error, info};
+use crate::{prisma, types::CoreResult, CoreError};
 
-use crate::{
-	fs::checksum::digest_from_reader,
-	prisma::{self, migration},
-	CoreError,
-};
+pub async fn run_migrations(client: &prisma::PrismaClient) -> CoreResult<()> {
+	info!("Running migrations...");
 
-// TODO: this entire crate is pretty much going to be removed with next pcr release,
-// where migration engine will actually be bundled. SUPER cool!
+	#[cfg(debug_assertions)]
+	{
+		let mut builder = client._db_push();
 
-static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/prisma/migrations");
-const CREATE_MIGRATIONS_TABLE: &str =
-	include_str!("../../prisma/migrations/migrations.sql");
-
-#[derive(Deserialize, Debug, Default)]
-pub struct CountQueryReturn {
-	pub count: i64,
-}
-
-fn get_sql_stmts(sql_str: &str) -> Vec<&str> {
-	sql_str
-		.split(';')
-		.filter(|s| !s.trim().is_empty())
-		.collect()
-}
-
-pub async fn run_migrations(db: &prisma::PrismaClient) -> Result<(), CoreError> {
-	info!("Running migrations");
-
-	debug!("Checking for `migrations` table");
-
-	let res: Vec<CountQueryReturn> = db
-		._query_raw(raw!(
-			"SELECT count(*) as count FROM sqlite_master WHERE type='table' AND name='migrations';"
-		))
-		.exec()
-		.await?;
-
-	// If the table doesn't exist, create it
-	if res.get(0).unwrap().count == 0 {
-		debug!("`migrations` table not found, creating it");
-
-		let stmts = get_sql_stmts(CREATE_MIGRATIONS_TABLE);
-
-		for stmt in stmts {
-			debug!("{}", stmt);
-			db._execute_raw(raw!(stmt)).exec().await?;
+		if std::env::var("FORCE_RESET_DB")
+			.map(|v| v == "true")
+			.unwrap_or(false)
+		{
+			debug!("Forcing database reset...");
+			builder = builder.force_reset();
 		}
 
-		debug!("`migrations` table created");
-	} else {
-		debug!("`migrations` table already exists");
+		debug!("Committing database push...");
+		builder
+			.await
+			.map_err(|e| CoreError::MigrationError(e.to_string()))?;
+
+		info!("Migrations complete!");
 	}
 
-	// migration structure: directory with name like [timstamp: i64]_[name], with a file named migration.sql
-	let mut migration_dirs = MIGRATIONS_DIR.dirs().collect::<Vec<&Dir>>();
-
-	debug!("Found {} migrations", migration_dirs.len());
-
-	// **must ensure** we run the migrations in order of timestamp
-	migration_dirs.sort_by(|a, b| {
-		let a_filename = a.path().file_name().unwrap().to_str().unwrap();
-		let b_filename = b.path().file_name().unwrap().to_str().unwrap();
-
-		// timestamp is the first 14 chars, e.g. 20220525133313_initial_migration -> 20220525133313
-		let a_timestamp = a_filename[..14].parse::<i64>().unwrap();
-		let b_timestamp = b_filename[..14].parse::<i64>().unwrap();
-
-		a_timestamp.cmp(&b_timestamp)
-	});
-
-	debug!("Migrations sorted by timestamp");
-
-	for dir in migration_dirs {
-		let name = dir.path().file_name().unwrap().to_str().unwrap();
-
-		let sql_file = dir.get_file(dir.path().join("migration.sql")).unwrap();
-		let sql_str = sql_file.contents_utf8().unwrap();
-
-		let checksum = digest_from_reader(BufReader::new(sql_file.contents()))?;
-
-		let existing_migration = db
-			.migration()
-			.find_unique(migration::checksum::equals(checksum.clone()))
-			.exec()
-			.await?;
-
-		// Only run migrations that have not been run yet
-		// TODO: check success?
-		if existing_migration.is_some() {
-			debug!(
-				"Migration {} already applied (checksum: {})",
-				name, checksum
-			);
-			continue;
-		}
-
-		debug!("Running migration {}", name);
-
-		let stmts = get_sql_stmts(sql_str);
-
-		// TODO: do I bother letting this process continue with failed migrations?
-		// I don't see why I should, if the previous migration fails I feel like
-		// the next one shouldn't get run. Which makes the success field on migrations
-		// pointless. TBD.
-		for stmt in stmts {
-			debug!("{}", stmt);
-
-			match db._execute_raw(raw!(stmt)).exec().await {
-				Ok(_) => continue,
-				Err(e) => {
-					error!("Migration {} failed: {}", name, e);
-
-					db.migration()
-						.create(
-							name.to_string(),
-							checksum.clone(),
-							vec![migration::success::set(false)],
-						)
-						.exec()
-						.await?;
-
-					return Err(CoreError::MigrationError(e.to_string()));
-				},
-			};
-		}
-
-		debug!("Migration {} applied", name);
-
-		db.migration()
-			.create(
-				name.to_string(),
-				checksum.clone(),
-				vec![migration::success::set(true)],
-			)
-			.exec()
-			.await?;
-	}
-
-	info!("Migrations complete");
+	#[cfg(not(debug_assertions))]
+	client._migrate_deploy().await?;
 
 	Ok(())
 }

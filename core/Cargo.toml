@@ -32,7 +32,7 @@ zip = "0.5.13"
 epub = "1.2.3"
 unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--read-bytes" }
 data-encoding = "2.3.2"
-include_dir = "0.7.2"
+# include_dir = "0.7.2"
 ring = "0.16.20"
 
 ## ERROR HANDLING + LOGGING ###

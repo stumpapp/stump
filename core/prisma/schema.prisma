@@ -321,18 +321,3 @@ model ServerPreferences {
 
   @@map("server_preferences")
 }
-
-// TODO: remove this. PCR is actually shipping with its own migration engine soon.
-model Migration {
-  id         Int      @id @default(autoincrement())
-  // The name of the migration. ex: "20220525133313_initial_migration"
-  name       String
-  // The checksum hash of the migration.sql file
-  checksum   String   @unique
-  // A flag indicating whether or not the migration was applied *without* error
-  success    Boolean  @default(false)
-  // The date in which the migration was applied (regardless of success). ex: "2022-04-20 04:20:69"
-  applied_at DateTime @default(now())
-
-  @@map("migrations")
-}

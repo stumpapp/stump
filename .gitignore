@@ -21,6 +21,8 @@ apps/server/client/*
 *prisma.rs*
 core/integration-tests/*libraries*
 
+core/integration-tests/.*
+
 # os
 .DS_Store
 

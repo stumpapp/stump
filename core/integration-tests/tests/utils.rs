@@ -115,6 +115,30 @@ impl TempLibrary {
 		})
 	}
 
+	pub fn massive_library(
+		num_dirs: i32,
+		pattern: LibraryPattern,
+	) -> CoreResult<TempLibrary> {
+		let root = TempLibrary::root();
+		let root_path = root.path().to_path_buf();
+
+		let massive_library = root_path.clone();
+		// Create num_dirs directories in the root, all containing `book.zip`. So,
+		// if num_dirs is 1000, since `book.zip` is 31kb, a 31mb temporary directory is created.
+		for i in 0..num_dirs {
+			let dir = massive_library.join(format!("dir-{}", i));
+			fs::create_dir_all(&dir)?;
+			fs::write(&dir.join("book.zip"), get_test_file_contents("book.zip"))?;
+		}
+
+		Ok(TempLibrary {
+			_dir: root,
+			root: root_path,
+			library_root: massive_library,
+			pattern,
+		})
+	}
+
 	/// Builds a temporary directory structure, and inserts it into the database.
 	/// Returns the temporary directory, the library, and the library options.
 	pub async fn create(

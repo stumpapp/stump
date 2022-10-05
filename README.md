@@ -133,7 +133,6 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 
 ### /apps
 
-- `docs`: The documentation website, built with Next.js and [Markdoc](https://markdoc.io/), deployed to [stumpapp.dev](http://stumpapp.dev).
 - `desktop`: A Tauri application.
 - `server`: An [Axum](https://github.com/tokio-rs/axum) server.
 - `web`: The React application that is served by the Axum server.

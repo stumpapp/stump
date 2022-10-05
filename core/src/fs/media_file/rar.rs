@@ -103,9 +103,10 @@ pub fn process_rar(
 		return zip::process_zip(&new_path);
 	}
 
-	if stump_in_docker() {
+	// or platform is windows
+	if stump_in_docker() || cfg!(windows) {
 		return Err(ProcessFileError::UnsupportedFileType(
-			"Stump cannot support cbr/rar files in docker containers for now. Please either alter your Library options to convert rar files to zip, or run Stump from source".into(),
+			"Stump cannot support cbr/rar files in docker or Windows for now. Please either alter your Library options to convert rar files to zip, or run Stump from source".into(),
 		));
 	}
 
@@ -245,9 +246,10 @@ pub fn get_rar_image(
 	file: &str,
 	page: i32,
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
-	if stump_in_docker() {
+	if stump_in_docker() || cfg!(windows) {
 		return Err(ProcessFileError::UnsupportedFileType(
-			"Stump cannot support cbr/rar files in docker containers for now.".into(),
+			"Stump cannot support cbr/rar files in docker containers or Windows for now."
+				.into(),
 		));
 	}
 

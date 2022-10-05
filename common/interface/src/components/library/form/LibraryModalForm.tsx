@@ -166,7 +166,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 									children={
 										<DirectoryPickerModal
 											startingPath={library?.path}
-											onUpdate={(newPath) => form.setValue('path', newPath)}
+											onUpdate={(newPath) => form.setValue('path', newPath ?? undefined)}
 										/>
 									}
 								/>

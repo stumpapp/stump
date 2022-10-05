@@ -24,7 +24,7 @@ import ToolTip from '../ui/ToolTip';
 
 interface Props {
 	startingPath?: string;
-	onUpdate(path: string): void;
+	onUpdate(path: string | null): void;
 }
 
 export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) {
@@ -85,7 +85,7 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 
 							<Input
 								isInvalid={!!errorMessage}
-								value={path}
+								value={path ?? undefined}
 								// onInputStop={(newPath) => {
 								// 	if (newPath) {
 								// 		onSelect(newPath);

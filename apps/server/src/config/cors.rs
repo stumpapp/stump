@@ -9,7 +9,8 @@ use tracing::error;
 
 const DEBUG_ALLOWED_ORIGINS: &[&str] = &["http://localhost:3000", "http://0.0.0.0:3000"];
 
-const DEFAULT_ALLOWED_ORIGINS: &[&str] = &["tauri://localhost"];
+const DEFAULT_ALLOWED_ORIGINS: &[&str] =
+	&["tauri://localhost", "https://tauri.localhost"];
 
 pub fn get_cors_layer() -> CorsLayer {
 	let allowed_origins = match env::var("STUMP_ALLOWED_ORIGINS") {

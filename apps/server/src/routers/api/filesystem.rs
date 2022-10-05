@@ -35,11 +35,12 @@ pub async fn list_directory(
 
 	let input = input.0.unwrap_or_default();
 
-	let start_path = match input.path {
-		Some(path) => path,
-		None => "/".to_string(),
-	};
-
+	let start_path = input.path.unwrap_or_else(|| {
+		#[cfg(target_os = "windows")]
+		return "C:\\".to_string();
+		#[cfg(target_family = "unix")]
+		return "/".to_string();
+	});
 	let start_path = Path::new(&start_path);
 
 	if !start_path.exists() {

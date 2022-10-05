@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use axum::{Extension, Router};
 use errors::{ServerError, ServerResult};
 use stump_core::{config::logging::init_tracing, StumpCore};
-use tracing::{error, info};
+use tracing::{error, info, trace};
 
 mod config;
 mod errors;
@@ -38,6 +38,10 @@ async fn main() -> ServerResult<()> {
 	// Note: init_tracing after loading the environment so the correct verbosity
 	// level is used for logging.
 	init_tracing();
+
+	if stump_environment.verbosity.unwrap_or(1) >= 3 {
+		trace!("Environment configuration: {:?}", stump_environment);
+	}
 
 	let core = StumpCore::new().await;
 	if let Err(err) = core.run_migrations().await {

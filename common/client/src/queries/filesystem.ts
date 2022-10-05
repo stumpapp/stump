@@ -13,7 +13,7 @@ export interface DirectoryListingQueryParams {
 }
 
 export function useDirectoryListing({ enabled, startingPath }: DirectoryListingQueryParams) {
-	const [path, setPath] = useState(startingPath || '/');
+	const [path, setPath] = useState(startingPath || null);
 
 	const [directoryListing, setDirectoryListing] = useState<DirectoryListing>();
 

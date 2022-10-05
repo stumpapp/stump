@@ -21,6 +21,6 @@ pub fn get_session_layer() -> SessionLayer<MemoryStore> {
 		.with_cookie_name("stump_session")
 		.with_session_ttl(Some(Duration::from_secs(3600 * 24 * 3)))
 		.with_cookie_path("/")
-		.with_same_site_policy(SameSite::Lax)
-		.with_secure(false)
+		.with_same_site_policy(SameSite::None)
+		.with_secure(true)
 }

@@ -1,19 +1,20 @@
 use std::{
 	fs::File,
-	os::unix::prelude::MetadataExt,
 	path::{Path, PathBuf},
 };
+
+#[cfg(target_family = "unix")]
+use std::os::unix::prelude::MetadataExt;
+
+#[cfg(target_family = "windows")]
+use std::os::windows::prelude::*;
 
 use crate::{
 	fs::{
 		checksum,
 		media_file::{get_content_type_from_mime, guess_content_type},
 	},
-	types::{
-		errors::ProcessFileError,
-		models::media::{MediaMetadata, ProcessedMediaFile},
-		ContentType,
-	},
+	types::{errors::ProcessFileError, models::media::ProcessedMediaFile, ContentType},
 };
 use epub::doc::EpubDoc;
 use tracing::{debug, error, warn};
@@ -54,21 +55,21 @@ pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError>
 
 	let pages = epub_file.get_num_pages() as i32;
 
-	let metadata: Option<MediaMetadata> = None;
+	let file_metadata = path.metadata().map_err(|e| {
+		error!("Failed to get metadata for epub file: {}", e.to_string());
+		ProcessFileError::EpubReadError(e.to_string())
+	})?;
+
+	#[cfg(target_family = "unix")]
+	let file_size = file_metadata.size();
+	#[cfg(target_family = "windows")]
+	let file_size = file_metadata.file_size();
 
 	Ok(ProcessedMediaFile {
 		thumbnail_path: None,
 		path: path.to_path_buf(),
-		checksum: digest_epub(
-			path,
-			path.metadata()
-				.map_err(|e| {
-					error!("Failed to get metadata for epub file: {}", e.to_string());
-					ProcessFileError::EpubReadError(e.to_string())
-				})?
-				.size(),
-		),
-		metadata,
+		checksum: digest_epub(path, file_size),
+		metadata: None,
 		pages,
 	})
 }

@@ -26,7 +26,10 @@ pub async fn run_migrations(client: &prisma::PrismaClient) -> CoreResult<()> {
 	}
 
 	#[cfg(not(debug_assertions))]
-	client._migrate_deploy().await?;
+	client
+		._migrate_deploy()
+		.await
+		.map_err(|e| CoreError::MigrationError(e.to_string()))?;
 
 	Ok(())
 }

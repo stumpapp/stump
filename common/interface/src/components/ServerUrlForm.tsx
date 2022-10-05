@@ -18,6 +18,8 @@ import { checkUrl, isUrl } from '@stump/client/api';
 
 import Form, { FormControl } from '../ui/Form';
 import { DebouncedInput } from '../ui/Input';
+import Button from '../ui/Button';
+import { useNavigate } from 'react-router';
 
 export default function ServerUrlForm() {
 	const { setBaseUrl } = useStumpStore();
@@ -28,7 +30,8 @@ export default function ServerUrlForm() {
 		baseUrl: z
 			.string()
 			.min(1, { message: 'URL is required' })
-			.refine(isUrl, { message: 'Invalid URL' }),
+			.refine(isUrl, { message: 'Invalid URL' })
+			.refine(checkUrl, (url) => ({ message: `Failed to connect to ${url}` })),
 	});
 
 	const form = useForm({
@@ -70,10 +73,13 @@ export default function ServerUrlForm() {
 		}, 300);
 	}
 
-	function handleSubmit(values: FieldValues) {
+	async function handleSubmit(values: FieldValues) {
 		const { baseUrl } = values;
 
 		setBaseUrl(baseUrl);
+
+		// FIXME: super cringe, big no
+		window.location.href = '/';
 	}
 
 	const InputDecoration = useMemo(() => {
@@ -130,6 +136,10 @@ export default function ServerUrlForm() {
 					</FormHelperText>
 				)}
 			</FormControl>
+
+			<Button colorScheme="brand" type="submit">
+				Submit Form
+			</Button>
 		</Form>
 	);
 }

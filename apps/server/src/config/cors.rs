@@ -7,8 +7,9 @@ use axum::http::{
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use tracing::error;
 
-const DEFAULT_ALLOWED_ORIGINS: &[&str] =
-	&["http://localhost:3000", "http://0.0.0.0:3000"];
+const DEBUG_ALLOWED_ORIGINS: &[&str] = &["http://localhost:3000", "http://0.0.0.0:3000"];
+
+const DEFAULT_ALLOWED_ORIGINS: &[&str] = &["tauri://localhost"];
 
 pub fn get_cors_layer() -> CorsLayer {
 	let allowed_origins = match env::var("STUMP_ALLOWED_ORIGINS") {
@@ -40,6 +41,14 @@ pub fn get_cors_layer() -> CorsLayer {
 	if let Some(origins_list) = allowed_origins {
 		cors_layer = cors_layer.allow_origin(AllowOrigin::list(origins_list));
 	} else if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "debug" {
+		cors_layer = cors_layer.allow_origin(
+			DEBUG_ALLOWED_ORIGINS
+				.iter()
+				.map(|origin| origin.parse())
+				.filter_map(|res| res.ok())
+				.collect::<Vec<HeaderValue>>(),
+		);
+	} else {
 		cors_layer = cors_layer.allow_origin(
 			DEFAULT_ALLOWED_ORIGINS
 				.iter()

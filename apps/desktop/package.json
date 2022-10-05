@@ -8,6 +8,7 @@
     "vite": "vite --",
     "dev": "tauri dev",
     "build": "tauri build",
+    "build:mac": "tauri build --target universal-apple-darwin",
     "build:web": "vite build"
   },
   "dependencies": {

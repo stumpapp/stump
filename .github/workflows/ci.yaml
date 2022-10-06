@@ -1,0 +1,73 @@
+name: Stump-CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-rust:
+    name: Run Rust checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          components: rustfmt, clippy
+
+      # TODO: Add caching
+
+      # This is a big pain without caching lol
+      - name: Generate Prisma client
+        uses: ./.github/actions/generate-prisma-client
+
+      - name: Run cargo fmt
+        run: |
+          cargo fmt --all -- --check
+
+      - name: Run clippy
+        run: |
+          export RUSTFLAGS="-C debuginfo=0"
+            cargo clippy --all-features
+            cargo clippy -- -D warnings
+
+      - name: Run tests
+        run: |
+          cargo integration-tests
+
+  release:
+    name: Release (${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    # Release only runs on push to main. TODO: can I make this trigger on tag?
+    if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          # TODO: clippy??
+          components: rustfmt, rust-src
+
+      # TODO: figure out caching for rust deps
+
+      - name: Generate Prisma client
+        uses: ./.github/actions/generate-prisma-client
+
+      # TODO: pnpm setup
+      # TODO: docker builds -> maybe this helps? https://github.com/devture/matrix-corporal/blob/master/.gitlab-ci.yml

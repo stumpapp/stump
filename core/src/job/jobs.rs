@@ -23,6 +23,7 @@ impl Job for LibraryScanJob {
 		Some(Box::new(self.path.as_str()))
 	}
 
+	// TODO: in order to support cancelling a job, I need to change how this works slightly.
 	async fn run(&self, runner_id: String, ctx: Ctx) -> CoreResult<()> {
 		let start = std::time::Instant::now();
 		let completed_tasks = match self.scan_mode {

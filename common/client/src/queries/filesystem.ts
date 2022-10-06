@@ -10,26 +10,31 @@ import { StumpQueryContext } from '../context';
 export interface DirectoryListingQueryParams {
 	enabled: boolean;
 	startingPath?: string;
+	page?: number;
 }
 
-export function useDirectoryListing({ enabled, startingPath }: DirectoryListingQueryParams) {
+export function useDirectoryListing({
+	enabled,
+	startingPath,
+	page = 1,
+}: DirectoryListingQueryParams) {
 	const [path, setPath] = useState(startingPath || null);
 
 	const [directoryListing, setDirectoryListing] = useState<DirectoryListing>();
 
-	async function queryFn() {
-		return listDirectory({ path });
-	}
-
-	const { isLoading, error } = useQuery(['listDirectory', path], queryFn, {
-		// Do not run query until `enabled` aka modal is opened.
-		enabled,
-		suspense: false,
-		onSuccess(res) {
-			setDirectoryListing(res.data);
+	const { isLoading, error } = useQuery(
+		['listDirectory', path, page],
+		() => listDirectory({ path, page }),
+		{
+			// Do not run query until `enabled` aka modal is opened.
+			enabled,
+			suspense: false,
+			onSuccess(res) {
+				setDirectoryListing(res.data.data);
+			},
+			context: StumpQueryContext,
 		},
-		context: StumpQueryContext,
-	});
+	);
 
 	const actions = useMemo(
 		() => ({

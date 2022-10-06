@@ -1,6 +1,6 @@
-import type { ApiResult } from '../types';
+import type { ApiResult, StumpVersion } from '../types';
 import { API } from '.';
 
-export function getStumpVersion(): Promise<ApiResult<string>> {
-	return API.get('/version');
+export function getStumpVersion(): Promise<ApiResult<StumpVersion>> {
+	return API.post('/version');
 }

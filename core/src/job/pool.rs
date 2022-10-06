@@ -2,7 +2,7 @@ use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
 };
-use tokio::sync::{mpsc, Mutex, RwLock};
+use tokio::sync::{broadcast, mpsc, Mutex, RwLock};
 use tracing::{error, warn};
 
 use super::{runner::Runner, Job, JobReport};
@@ -14,12 +14,16 @@ pub const DEFAULT_SCAN_INTERVAL_IN_SEC: i64 = 43200;
 pub enum JobPoolEvent {
 	Init(Ctx),
 	EnqueueJob(Ctx, Box<dyn Job>),
+	CancelJob { ctx: Ctx, job_id: String },
 }
 
 pub struct JobPool {
 	job_queue: RwLock<VecDeque<Box<dyn Job>>>,
 	job_runners: RwLock<HashMap<String, Arc<Mutex<Runner>>>>,
 	internal_sender: mpsc::UnboundedSender<JobPoolEvent>,
+	// FIXME: use this.
+	#[allow(dead_code)]
+	shutdown_tx: Arc<broadcast::Sender<()>>,
 }
 
 impl JobPool {
@@ -27,11 +31,13 @@ impl JobPool {
 	/// job pool events, and another for scheduled jobs.
 	pub fn new() -> Arc<Self> {
 		let (internal_sender, mut internal_receiver) = mpsc::unbounded_channel();
+		let (shutdown_tx, _shutdown_rx) = broadcast::channel(1);
 
 		let pool = Arc::new(Self {
 			job_queue: RwLock::new(VecDeque::new()),
 			job_runners: RwLock::new(HashMap::new()),
 			internal_sender,
+			shutdown_tx: Arc::new(shutdown_tx),
 		});
 
 		let pool_cpy = pool.clone();
@@ -43,7 +49,13 @@ impl JobPool {
 						warn!("TODO: unimplemented. This event will handle readding queued jobs on the event the server was stopped before they were completed");
 					},
 					JobPoolEvent::EnqueueJob(ctx, job) => {
+						// TODO: change to JobCtx that takes in an Arc<Receiver<()>> -> shutdown_rx
+						// This will allow the job to be cancelled...?
 						pool_cpy.clone().enqueue_job(&ctx, job).await
+					},
+					JobPoolEvent::CancelJob { .. } => {
+						// shutdown_tx.send(()).unwrap();
+						warn!("TODO: unimplemented. This event will handle cancelling a job");
 					},
 				}
 			}

@@ -1,7 +1,11 @@
-use axum::{middleware::from_extractor, routing::post, Json, Router};
+use axum::{extract::Query, middleware::from_extractor, routing::post, Json, Router};
 use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
-use stump_core::types::{DirectoryListing, DirectoryListingFile, DirectoryListingInput};
+use stump_core::types::{
+	DirectoryListing, DirectoryListingFile, DirectoryListingInput, Pageable,
+	PagedRequestParams,
+};
+use tracing::trace;
 
 use crate::{
 	errors::{ApiError, ApiResult},
@@ -20,7 +24,8 @@ pub(crate) fn mount() -> Router {
 pub async fn list_directory(
 	input: Json<Option<DirectoryListingInput>>,
 	session: ReadableSession,
-) -> ApiResult<Json<DirectoryListing>> {
+	pagination: Query<PagedRequestParams>,
+) -> ApiResult<Json<Pageable<DirectoryListing>>> {
 	let user = get_session_user(&session)?;
 
 	// FIXME: The auth extractor middleware doesn't check admin, but I don't want to have this check
@@ -56,6 +61,8 @@ pub async fn list_directory(
 	}
 
 	let listing = std::fs::read_dir(start_path)?;
+	let page = pagination.page.unwrap_or(1);
+	let page_size = pagination.page_size.unwrap_or(100);
 
 	let mut files = listing
 		.filter_map(|e| e.ok())
@@ -89,11 +96,21 @@ pub async fn list_directory(
 	// Sort the files by name, ignore case
 	files.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
 
-	Ok(Json(DirectoryListing {
-		parent: start_path
-			.parent()
-			.and_then(|p| p.to_str())
-			.map(|p| p.to_string()),
-		files,
-	}))
+	trace!(
+		"{} files in directory listing for: {}",
+		files.len(),
+		start_path.display()
+	);
+
+	Ok(Json(Pageable::from((
+		DirectoryListing {
+			parent: start_path
+				.parent()
+				.and_then(|p| p.to_str())
+				.map(|p| p.to_string()),
+			files,
+		},
+		page,
+		page_size,
+	))))
 }

@@ -13,6 +13,8 @@ export default function ServerSettings() {
 				<LibrariesStats />
 				<ServerStats />
 			</div>
+
+			<div>I am not implemented yet</div>
 		</>
 	);
 }

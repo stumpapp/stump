@@ -1,5 +1,8 @@
-use axum::{routing::get, Extension, Json, Router};
-use stump_core::types::ClaimResponse;
+use axum::{
+	routing::{get, post},
+	Extension, Json, Router,
+};
+use stump_core::types::{ClaimResponse, StumpVersion};
 
 use crate::{config::state::State, errors::ApiResult};
 
@@ -30,7 +33,7 @@ pub(crate) fn mount() -> Router {
 			.merge(user::mount())
 			.route("/claim", get(claim))
 			.route("/ping", get(ping))
-			.route("/version", get(version)),
+			.route("/version", post(version)),
 	)
 }
 
@@ -46,6 +49,10 @@ async fn ping() -> ApiResult<String> {
 	Ok("pong".to_string())
 }
 
-async fn version() -> ApiResult<String> {
-	Ok(env!("CARGO_PKG_VERSION").to_string())
+async fn version() -> ApiResult<Json<StumpVersion>> {
+	Ok(Json(StumpVersion {
+		semver: env!("CARGO_PKG_VERSION").to_string(),
+		rev: std::env::var("GIT_REV").ok(),
+		compile_time: env!("STATIC_BUILD_DATE").to_string(),
+	}))
 }

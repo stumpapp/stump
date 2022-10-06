@@ -6,7 +6,7 @@ import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@s
 
 import Lazy from './components/Lazy';
 import Sidebar from './components/sidebar/Sidebar';
-import JobOverlay from './components/JobOverlay';
+import JobOverlay from './components/jobs/JobOverlay';
 import TopBar from './components/topbar/TopBar';
 import CommandPalette from './components/CommandPalette';
 import { useHotkeys } from 'react-hotkeys-hook';

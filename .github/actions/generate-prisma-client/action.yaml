@@ -1,0 +1,22 @@
+name: Generate Prisma client
+description: Generate the Prisma client, or use the cached client if possible
+runs:
+  # using composite means that this action will be run in the context of the repo where it is used
+  using: 'composite'
+  steps:
+    - name: Cache Prisma client
+      id: cache-prisma
+      uses: actions/cache@v3
+      with:
+        path: ./core/src/prisma.rs
+        # The cache key is based on the hash of the Prisma schema + the Cargo.toml.
+        # This *should* ensure that the cache is only invalidated when it needs to be,
+        # but might have to add the migrations too...
+        # FIXME: maybe it is just `act`, but this keeps failing: An internal error has occurred in cache backend.
+        key: prisma-${{ runner.os }}-${{ hashFiles('./core/prisma/schema.prisma', './Cargo.toml') }}
+
+    - name: Generate Prisma client
+      working-directory: core
+      if: steps.cache-prisma.outputs.cache-hit != 'true'
+      shell: bash
+      run: cargo run -p prisma --release -- generate

@@ -38,8 +38,12 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup target add aarch64-unknown-linux-musl
 
+RUN set -ex; \
+    sed -i 's|\/.*\/core\/prisma\/schema.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
+    sed -i 's|\/.*\/core\/prisma\/migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs
+
 RUN cargo build --package stump_server --bin stump_server --release --target aarch64-unknown-linux-musl && \
-    cp target/aarch64-unknown-linux-musl/release/stump .
+    cp target/aarch64-unknown-linux-musl/release/stump_server ./stump
 
 ######################
 ### armv7 / arm/v7 ###
@@ -59,7 +63,7 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 RUN rustup target add armv7-unknown-linux-musleabihf
 
 RUN cargo build --package stump_server --bin stump_server --release --target armv7-unknown-linux-musleabihf && \
-    cp target/armv7-unknown-linux-musleabihf/release/stump .
+    cp target/armv7-unknown-linux-musleabihf/release/stump_server ./stump
 
 ######################
 ### x86_64 / amd64 ###
@@ -75,6 +79,13 @@ COPY .cargo .cargo
 COPY . .
 
 RUN rustup update && rustup target add x86_64-unknown-linux-musl
+
+# prisma uses some `include_str!` macros that are mapped to locations on the host machine. so
+# when we build in docker, we need to correct these paths according to the docker workdir. 
+# it's a bit of a hack, but it works lol
+RUN set -ex; \
+    sed -i 's|\/.*\/core\/prisma\/schema.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
+    sed -i 's|\/.*\/core\/prisma\/migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs
 
 RUN cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl && \
     cp target/x86_64-unknown-linux-musl/release/stump_server ./stump

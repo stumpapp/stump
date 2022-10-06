@@ -10,6 +10,8 @@ export default function GeneralSettings() {
 				<title>Stump | {'General Settings'}</title>
 			</Helmet>
 
+			<div>I am not implemented yet</div>
+
 			{/* <ProfileForm /> */}
 
 			{/* <PreferencesForm /> */}

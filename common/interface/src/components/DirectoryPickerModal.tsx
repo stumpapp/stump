@@ -9,7 +9,6 @@ import {
 	ModalFooter,
 	ModalHeader,
 	ModalOverlay,
-	Spacer,
 	Stack,
 	Text,
 	useBoolean,
@@ -32,9 +31,13 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 
 	const [showHidden, { toggle }] = useBoolean(false);
 
+	// FIXME: This component needs to render a *virtual* list AND pass a page param as the user scrolls
+	// down the list. I recently tested a directory with 1000+ files and it took a while to load. So,
+	// I am paging the results to 100 per page. Might reduce to 50.
 	const { errorMessage, path, parent, directories, onSelect, goBack } = useDirectoryListing({
 		startingPath,
 		enabled: isOpen,
+		// TODO: page
 	});
 
 	function handleUpdate() {

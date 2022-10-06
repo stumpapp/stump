@@ -17,6 +17,8 @@ export default function JobSettings() {
 				<title>Stump | {'Jobs'}</title>
 			</Helmet>
 			<Stack w="full" spacing={6}>
+				<div>I am not implemented yet, ugly content below...</div>
+
 				<RunningJobs jobReports={jobReports} />
 				<QueuedJobs jobReports={jobReports} />
 				<JobHistory jobReports={jobReports} />

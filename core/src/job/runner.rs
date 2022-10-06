@@ -44,7 +44,7 @@ impl Runner {
 			.take()
 			.unwrap_or_else(|| panic!("Missing job in job runner {}", runner_id));
 
-		tokio::spawn(async move {
+		let _handle = tokio::spawn(async move {
 			let runner_id = runner_id.clone();
 
 			if let Err(e) = job.run(runner_id.clone(), ctx.get_ctx()).await {
@@ -61,5 +61,8 @@ impl Runner {
 
 			job_pool.dequeue_job(&ctx, runner_id).await;
 		});
+
+		// TODO: job_pool.shutdown_rx() -> on signal received, call abort
+		// handle.abort();
 	}
 }

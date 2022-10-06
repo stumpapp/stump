@@ -6,6 +6,11 @@ import { useJobStore } from '@stump/client';
 export default function JobOverlay() {
 	const { jobs } = useJobStore();
 
+	// FIXME: If you refresh the page RIGHT before a job completes, and miss the JobComplete event,
+	// the job will be stuck in the store forever. I think instead maybe I should query the
+	// database for jobs that are running, and then fetch the current info from the store here
+	// as I do now. That way, when a refresh happens, the DB will be queried for jobs that are
+	// running, and in this edge case the job will be set in the store accordingly.
 	const jobShown = useMemo(() => {
 		return Object.values(jobs).find((job) => job.status?.toLowerCase() === 'running') ?? null;
 	}, [jobs]);

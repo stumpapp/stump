@@ -17,10 +17,21 @@ pub fn get_session_layer() -> SessionLayer<MemoryStore> {
 		.map(|s| s.into_bytes())
 		.unwrap_or_else(|_| rand_secret());
 
-	SessionLayer::new(store, &secret)
+	// FIXME: I need to figure out which is correct. What currently gets returned in
+	// dev breaks the desktop client on windows? But what I have for release makes it
+	// so I can't run postman.
+	let sesssion_layer = SessionLayer::new(store, &secret)
 		.with_cookie_name("stump_session")
 		.with_session_ttl(Some(Duration::from_secs(3600 * 24 * 3)))
-		.with_cookie_path("/")
-		.with_same_site_policy(SameSite::None)
-		.with_secure(true)
+		.with_cookie_path("/");
+
+	if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "release" {
+		sesssion_layer
+			.with_same_site_policy(SameSite::None)
+			.with_secure(false)
+	} else {
+		sesssion_layer
+			.with_same_site_policy(SameSite::Lax)
+			.with_secure(true)
+	}
 }

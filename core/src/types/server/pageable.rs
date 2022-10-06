@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use tracing::trace;
+
+use crate::types::DirectoryListing;
 
 use super::Direction;
 
@@ -198,5 +201,57 @@ where
 		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
 
 		Pageable::new(data, PageInfo::new(page_params, total_pages))
+	}
+}
+
+impl From<(DirectoryListing, u32, u32)> for Pageable<DirectoryListing> {
+	fn from(tuple: (DirectoryListing, u32, u32)) -> Pageable<DirectoryListing> {
+		let (data, page, page_size) = tuple;
+
+		let total_pages = (data.files.len() as f32 / page_size as f32).ceil() as u32;
+		// directory listing will always be zero-based.
+		let start = (page - 1) * page_size;
+		let end = start + page_size;
+
+		let mut truncated_files = data.files;
+
+		if start > truncated_files.len() as u32 {
+			truncated_files = vec![];
+		} else if end < truncated_files.len() as u32 {
+			truncated_files = truncated_files
+				.get((start as usize)..(end as usize))
+				.ok_or("Invalid page")
+				.unwrap()
+				.to_vec();
+		} else {
+			truncated_files = truncated_files
+				.get((start as usize)..)
+				.ok_or("Invalid page")
+				.unwrap()
+				.to_vec();
+		}
+
+		trace!(
+			"{} total pages of size {}. Returning truncated data of size {}.",
+			total_pages,
+			page_size,
+			truncated_files.len()
+		);
+
+		let truncated_data = DirectoryListing {
+			parent: data.parent,
+			files: truncated_files,
+		};
+
+		Pageable::new(
+			truncated_data,
+			PageInfo {
+				total_pages,
+				current_page: page,
+				page_size,
+				page_offset: page * page_size,
+				zero_based: false,
+			},
+		)
 	}
 }

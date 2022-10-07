@@ -46,7 +46,7 @@
 		".rs": [
 			"cargo fmt --manifest-path=core/Cargo.toml --",
 			"cargo fmt --manifest-path=apps/server/Cargo.toml --",
-			"cargo fmt --manifest-path=apps/desktop/Cargo.toml --"
+			"cargo fmt --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
 		]
 	}
 }

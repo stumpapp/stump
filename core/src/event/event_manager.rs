@@ -11,6 +11,7 @@ use super::InternalCoreTask;
 /// by the [`JobPool`].
 pub struct EventManager {
 	job_pool: Arc<JobPool>,
+	// ctx: Arc<Ctx>,
 }
 
 // TODO: I think event manager can manage it's own Ctx here, and instead of housing all
@@ -36,44 +37,42 @@ impl EventManager {
 		mut request_reciever: mpsc::UnboundedReceiver<InternalCoreTask>,
 	) -> Arc<Self> {
 		let this = Arc::new(Self {
-			job_pool: JobPool::new(),
+			job_pool: JobPool::new(ctx),
+			// ctx: ctx.arced(),
 		});
 
 		let this_cpy = this.clone();
 		tokio::spawn(async move {
-			while let Some(req) = request_reciever.recv().await {
-				match req {
-					InternalCoreTask::QueueJob(job) => {
-						this_cpy
-							.clone()
-							.job_pool
-							.clone()
-							.enqueue_job(&ctx, job)
-							.await;
-					},
-					InternalCoreTask::GetJobReports(return_sender) => {
-						let job_report =
-							this_cpy.clone().job_pool.clone().report(&ctx).await;
-
-						// FIXME: lots...
-
-						// if job_report.is_err() {
-						// 	log::error!(
-						// 		"TODO: logging isn't enough here, but: {:?}",
-						// 		job_report.err()
-						// 	);
-						// }
-
-						// FIXME: I know, this will break.
-						let _ = return_sender.send(job_report.unwrap());
-					},
-					// TODO: remove this
-					#[allow(unreachable_patterns)]
-					_ => unimplemented!("I can't do that yet!"),
-				}
+			while let Some(task) = request_reciever.recv().await {
+				this_cpy.clone().handle_task(task).await;
 			}
 		});
 
 		this
+	}
+
+	async fn handle_task(self: Arc<Self>, task: InternalCoreTask) {
+		match task {
+			InternalCoreTask::QueueJob(job) => {
+				self.job_pool.clone().enqueue_job(job).await;
+			},
+			InternalCoreTask::CancelJob {
+				job_id,
+				return_sender,
+			} => {
+				let result = self.job_pool.clone().cancel_job(job_id).await;
+
+				return_sender
+					.send(result)
+					.expect("Fatal error: failed to send cancel job result");
+			},
+			InternalCoreTask::GetJobReports(return_sender) => {
+				let job_report = self.clone().job_pool.clone().report().await;
+
+				return_sender
+					.send(job_report)
+					.expect("Fatal error: failed to send job report");
+			},
+		}
 	}
 }

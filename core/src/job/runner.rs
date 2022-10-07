@@ -1,18 +1,52 @@
 use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
-use tokio::{self, sync::Mutex};
+use tokio::{
+	self,
+	sync::{broadcast, Mutex},
+};
 use tracing::error;
 
 use crate::{config::context::Ctx, event::CoreEvent};
 
-use super::{persist_new_job, pool::JobPool, Job, JobUpdate};
+use super::{persist_new_job, pool::JobPool, Job, JobUpdate, JobWrapper};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum RunnerEvent {
 	Progress(Vec<JobUpdate>),
 	Completed,
 	Failed,
+}
+
+#[derive(Clone)]
+pub struct RunnerCtx {
+	pub runner_id: String,
+	pub core_ctx: Ctx,
+	pub progress_tx: Arc<broadcast::Sender<JobUpdate>>,
+	pub shutdown_tx: Arc<broadcast::Sender<()>>,
+}
+
+impl RunnerCtx {
+	pub fn new(ctx: Ctx, id: String) -> Self {
+		let (progress_tx, _) = broadcast::channel(1024);
+		let (shutdown_tx, _) = broadcast::channel(1);
+
+		RunnerCtx {
+			runner_id: id,
+			core_ctx: ctx,
+			progress_tx: Arc::new(progress_tx),
+			shutdown_tx: Arc::new(shutdown_tx),
+		}
+	}
+
+	pub fn progress(&self, e: JobUpdate) {
+		let _ = self.progress_tx.send(e);
+		// .expect("Fatal error: failed to send job progress event.");
+	}
+
+	pub fn shutdown_rx(&self) -> broadcast::Receiver<()> {
+		self.shutdown_tx.subscribe()
+	}
 }
 
 pub struct Runner {
@@ -44,10 +78,14 @@ impl Runner {
 			.take()
 			.unwrap_or_else(|| panic!("Missing job in job runner {}", runner_id));
 
-		let _handle = tokio::spawn(async move {
-			let runner_id = runner_id.clone();
+		drop(runner);
 
-			if let Err(e) = job.run(runner_id.clone(), ctx.get_ctx()).await {
+		tokio::spawn(async move {
+			let runner_id = runner_id.clone();
+			let runner_ctx = RunnerCtx::new(ctx.clone(), runner_id.clone());
+			let mut job_wrapper = JobWrapper::new(job);
+
+			if let Err(e) = job_wrapper.run(runner_ctx).await {
 				error!("job failed {:?}", e);
 
 				ctx.handle_failure_event(CoreEvent::JobFailed {
@@ -59,10 +97,10 @@ impl Runner {
 				ctx.emit_client_event(CoreEvent::JobComplete(runner_id.clone()));
 			}
 
-			job_pool.dequeue_job(&ctx, runner_id).await;
+			job_pool.dequeue_job(runner_id).await;
 		});
-
-		// TODO: job_pool.shutdown_rx() -> on signal received, call abort
-		// handle.abort();
 	}
+
+	// TODO: function to persist to DB
+	// TODO: function to remove from DB
 }

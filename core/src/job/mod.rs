@@ -16,6 +16,90 @@ use crate::{
 	types::{errors::CoreError, CoreResult},
 };
 
+use self::runner::RunnerCtx;
+
+#[async_trait::async_trait]
+pub trait Job: Send + Sync {
+	fn kind(&self) -> &'static str;
+	fn details(&self) -> Option<Box<&str>>;
+
+	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<()>;
+}
+
+pub struct JobWrapper {
+	job: Box<dyn Job>,
+}
+
+impl JobWrapper {
+	pub fn new(job: Box<dyn Job>) -> Self {
+		JobWrapper { job }
+	}
+}
+
+#[async_trait::async_trait]
+impl Job for JobWrapper {
+	fn kind(&self) -> &'static str {
+		"test"
+	}
+
+	fn details(&self) -> Option<Box<&str>> {
+		None
+	}
+
+	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<()> {
+		let runner_id = ctx.runner_id.clone();
+		let core_ctx = ctx.core_ctx.clone();
+
+		let mut shutdown_rx = ctx.shutdown_rx();
+		let shutdown_rx_fut = shutdown_rx.recv();
+		tokio::pin!(shutdown_rx_fut);
+
+		let job_fn = self.job.run(ctx.clone());
+		tokio::pin!(job_fn);
+
+		let mut progress_rx = ctx.progress_tx.subscribe();
+
+		let mut running = true;
+		while running {
+			tokio::select! {
+				job_progress = progress_rx.recv() => {
+					if let Ok(progress) = job_progress {
+						core_ctx
+							.emit_client_event(CoreEvent::JobProgress(progress));
+					}
+				},
+				job_result = &mut job_fn => {
+					running = false;
+
+					if let Err(err) = job_result {
+						core_ctx.emit_client_event(CoreEvent::JobFailed {
+							runner_id,
+							message: err.to_string(),
+						});
+
+						return Err(err)
+					} else {
+						core_ctx.emit_client_event(CoreEvent::JobComplete(runner_id.clone()));
+					}
+				},
+				_ = &mut shutdown_rx_fut => {
+					return Err(CoreError::UnImplemented("Library scan job cancellation is not yet implemented.".to_string()));
+				}
+			}
+		}
+
+		Ok(())
+	}
+}
+
+#[derive(Debug, Clone)]
+pub enum JobEvent {
+	Progress(JobUpdate),
+	// Cancelled,
+	Completed,
+	Failed,
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, Type)]
 pub enum JobStatus {
 	#[serde(rename = "RUNNING")]
@@ -67,6 +151,38 @@ pub struct JobUpdate {
 	pub status: Option<JobStatus>,
 }
 
+impl JobUpdate {
+	pub fn job_started(
+		runner_id: String,
+		current_task: u64,
+		task_count: u64,
+		message: Option<String>,
+	) -> Self {
+		JobUpdate {
+			runner_id,
+			current_task: Some(current_task),
+			task_count,
+			message,
+			status: Some(JobStatus::Running),
+		}
+	}
+
+	pub fn job_progress(
+		runner_id: String,
+		current_task: Option<u64>,
+		task_count: u64,
+		message: Option<String>,
+	) -> Self {
+		JobUpdate {
+			runner_id,
+			current_task,
+			task_count,
+			message,
+			status: Some(JobStatus::Running),
+		}
+	}
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, Type)]
 pub struct JobReport {
 	/// This will actually refer to the job runner id
@@ -116,14 +232,6 @@ impl From<&Box<dyn Job>> for JobReport {
 			completed_at: None,
 		}
 	}
-}
-
-#[async_trait::async_trait]
-pub trait Job: Send + Sync {
-	fn kind(&self) -> &'static str;
-	fn details(&self) -> Option<Box<&str>>;
-
-	async fn run(&self, runner_id: String, ctx: Ctx) -> CoreResult<()>;
 }
 
 pub async fn persist_new_job(

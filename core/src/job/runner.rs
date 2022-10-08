@@ -23,19 +23,16 @@ pub struct RunnerCtx {
 	pub runner_id: String,
 	pub core_ctx: Ctx,
 	pub progress_tx: Arc<broadcast::Sender<JobUpdate>>,
-	pub shutdown_tx: Arc<broadcast::Sender<()>>,
 }
 
 impl RunnerCtx {
 	pub fn new(ctx: Ctx, id: String) -> Self {
 		let (progress_tx, _) = broadcast::channel(1024);
-		let (shutdown_tx, _) = broadcast::channel(1);
 
 		RunnerCtx {
 			runner_id: id,
 			core_ctx: ctx,
 			progress_tx: Arc::new(progress_tx),
-			shutdown_tx: Arc::new(shutdown_tx),
 		}
 	}
 
@@ -43,15 +40,12 @@ impl RunnerCtx {
 		let _ = self.progress_tx.send(e);
 		// .expect("Fatal error: failed to send job progress event.");
 	}
-
-	pub fn shutdown_rx(&self) -> broadcast::Receiver<()> {
-		self.shutdown_tx.subscribe()
-	}
 }
 
 pub struct Runner {
 	pub id: String,
 	job: Option<Box<dyn Job>>,
+	handle: Option<tokio::task::JoinHandle<()>>,
 }
 
 impl Runner {
@@ -65,7 +59,11 @@ impl Runner {
 		// FIXME: error handling
 		let _ = persist_new_job(ctx, id.clone(), job.as_ref()).await;
 
-		Runner { id, job: Some(job) }
+		Runner {
+			id,
+			job: Some(job),
+			handle: None,
+		}
 	}
 
 	// FIXME: don't panic, return error here
@@ -80,7 +78,7 @@ impl Runner {
 
 		drop(runner);
 
-		tokio::spawn(async move {
+		let handle = tokio::spawn(async move {
 			let runner_id = runner_id.clone();
 			let runner_ctx = RunnerCtx::new(ctx.clone(), runner_id.clone());
 			let mut job_wrapper = JobWrapper::new(job);
@@ -99,6 +97,19 @@ impl Runner {
 
 			job_pool.dequeue_job(runner_id).await;
 		});
+
+		runner_arc.lock().await.handle = Some(handle);
+		drop(runner_arc);
+	}
+
+	pub fn shutdown(&mut self) -> bool {
+		if let Some(handle) = self.handle.take() {
+			println!("Shutting down job runner {}", self.id);
+			handle.abort();
+			true
+		} else {
+			false
+		}
 	}
 
 	// TODO: function to persist to DB

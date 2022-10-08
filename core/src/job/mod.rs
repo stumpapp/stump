@@ -50,15 +50,12 @@ impl Job for JobWrapper {
 		let runner_id = ctx.runner_id.clone();
 		let core_ctx = ctx.core_ctx.clone();
 
-		let mut shutdown_rx = ctx.shutdown_rx();
-		let shutdown_rx_fut = shutdown_rx.recv();
-		tokio::pin!(shutdown_rx_fut);
-
 		let job_fn = self.job.run(ctx.clone());
 		tokio::pin!(job_fn);
 
 		let mut progress_rx = ctx.progress_tx.subscribe();
 
+		println!("Runner {} has started...", runner_id);
 		let mut running = true;
 		while running {
 			tokio::select! {
@@ -82,9 +79,6 @@ impl Job for JobWrapper {
 						core_ctx.emit_client_event(CoreEvent::JobComplete(runner_id.clone()));
 					}
 				},
-				_ = &mut shutdown_rx_fut => {
-					return Err(CoreError::UnImplemented("Library scan job cancellation is not yet implemented.".to_string()));
-				}
 			}
 		}
 

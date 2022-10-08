@@ -3,7 +3,7 @@ use crate::{
 	fs::scanner::library_scanner::scan,
 	types::{models::library::LibraryScanMode, CoreResult},
 };
-use tracing::{debug, info};
+use tracing::info;
 
 #[derive(Debug)]
 pub struct LibraryScanJob {
@@ -83,8 +83,6 @@ impl Job for TestJob {
 	}
 
 	async fn run(&mut self, _job_ctx: RunnerCtx) -> CoreResult<()> {
-		// tokio::time::sleep(std::time::Duration::from_secs(self.duration_in_sec)).await;
-
 		// tick every 5 seconds
 		let tick_interval = self.interval.unwrap_or(5);
 		let max_ticks = self.max_ticks.unwrap_or(20);
@@ -94,7 +92,7 @@ impl Job for TestJob {
 
 		for i in 0..max_ticks {
 			interval.tick().await;
-			debug!("Test job tick {}", i);
+			println!("Test job tick {}", i);
 		}
 
 		Ok(())

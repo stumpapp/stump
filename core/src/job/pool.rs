@@ -2,11 +2,14 @@ use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
 };
-use tokio::sync::{broadcast, mpsc, Mutex, RwLock};
+use tokio::sync::{mpsc, Mutex, RwLock};
 use tracing::{error, warn};
 
 use super::{runner::Runner, Job, JobReport};
-use crate::{config::context::Ctx, types::CoreResult};
+use crate::{
+	config::context::Ctx,
+	types::{CoreError, CoreResult},
+};
 
 // Note: this is 12 hours
 pub const DEFAULT_SCAN_INTERVAL_IN_SEC: i64 = 43200;
@@ -14,15 +17,18 @@ pub const DEFAULT_SCAN_INTERVAL_IN_SEC: i64 = 43200;
 pub enum JobPoolEvent {
 	Init,
 	EnqueueJob { job: Box<dyn Job> },
-	CancelJob { job_id: String },
+	// TODO: I only really need this if another JobPool method needs to
+	// be able to cancel internally. TBD.
+	// CancelJob { job_id: String },
 }
 
 pub struct JobPool {
 	core_ctx: Arc<Ctx>,
+	// TODO: I think maybe this should be Runners in the queue. That way,
+	// I can search by ID to cancel a job before it's even started.
 	job_queue: RwLock<VecDeque<Box<dyn Job>>>,
 	job_runners: RwLock<HashMap<String, Arc<Mutex<Runner>>>>,
 	internal_sender: mpsc::UnboundedSender<JobPoolEvent>,
-	shutdown_tx: Arc<broadcast::Sender<()>>,
 }
 
 impl JobPool {
@@ -30,14 +36,12 @@ impl JobPool {
 	/// job pool events, and another for scheduled jobs.
 	pub fn new(ctx: Ctx) -> Arc<Self> {
 		let (internal_sender, mut internal_receiver) = mpsc::unbounded_channel();
-		let (shutdown_tx, _shutdown_rx) = broadcast::channel(1);
 
 		let pool = Arc::new(Self {
 			core_ctx: ctx.arced(),
 			job_queue: RwLock::new(VecDeque::new()),
 			job_runners: RwLock::new(HashMap::new()),
 			internal_sender,
-			shutdown_tx: Arc::new(shutdown_tx),
 		});
 
 		let pool_cpy = pool.clone();
@@ -57,21 +61,12 @@ impl JobPool {
 				warn!("TODO: unimplemented. This event will handle readding queued jobs on the event the server was stopped before they were completed");
 			},
 			JobPoolEvent::EnqueueJob { job } => self_cpy.enqueue_job(job).await,
-			JobPoolEvent::CancelJob { .. } => {
-				self_cpy.shutdown_tx.send(()).unwrap();
-				// warn!("TODO: unimplemented. This event will handle cancelling a job");
-			},
 		}
-	}
-
-	pub fn shutdown_rx(&self) -> Arc<broadcast::Receiver<()>> {
-		Arc::new(self.shutdown_tx.subscribe())
 	}
 
 	/// Adds a new job to the job queue. If the queue is empty, it will immediately get
 	/// run.
 	pub async fn enqueue_job(self: Arc<Self>, job: Box<dyn Job>) {
-		println!("Enqueuing job...");
 		let mut job_runners = self.job_runners.write().await;
 
 		if job_runners.is_empty() {
@@ -114,20 +109,20 @@ impl JobPool {
 	}
 
 	pub async fn cancel_job(self: Arc<Self>, runner_id: String) -> CoreResult<()> {
-		// check queue first, if job is in queue just remove it
-		// TODO: replace with some method on the Runner struct that handles
-		// removing job from DB...
-		if self.job_runners.read().await.get(&runner_id).is_some() {
-			self.job_runners.write().await.remove(&runner_id);
-
-			return Ok(());
+		if let Some(runner) = self.job_runners.write().await.remove(&runner_id) {
+			if runner.lock().await.shutdown() {
+				drop(runner);
+				Ok(())
+			} else {
+				Err(CoreError::Unknown(
+					"Failed to cancel job. It may have already completed.".to_string(),
+				))
+			}
+		} else {
+			Err(CoreError::NotFound(
+				"Failed to cancel job, it was not found.".to_string(),
+			))
 		}
-
-		self.internal_sender
-			.send(JobPoolEvent::CancelJob { job_id: runner_id })
-			.unwrap_or_else(|e| error!("Failed to cancel job: {}", e.to_string()));
-
-		Ok(())
 	}
 
 	/// Clears the job queue.

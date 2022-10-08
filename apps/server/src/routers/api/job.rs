@@ -26,6 +26,7 @@ pub(crate) fn mount() -> Router {
 		router = router.route("/jobs/test", get(test_job))
 	}
 
+	// router
 	router.layer(from_extractor::<Auth>())
 }
 

@@ -62,7 +62,7 @@ impl EventManager {
 				job_id,
 				return_sender,
 			} => {
-				let result = self.job_pool.clone().cancel_job(job_id).await;
+				let result = self.job_pool.clone().cancel_job(job_id.clone()).await;
 
 				return_sender
 					.send(result)

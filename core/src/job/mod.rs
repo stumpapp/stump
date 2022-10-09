@@ -8,15 +8,15 @@ use std::{fmt::Debug, num::TryFromIntError};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+// use tracing::error;
 
 use crate::{
 	config::context::Ctx,
 	event::CoreEvent,
+	job::runner::RunnerCtx,
 	prisma::{self},
 	types::{errors::CoreError, CoreResult},
 };
-
-use self::runner::RunnerCtx;
 
 #[async_trait::async_trait]
 pub trait Job: Send + Sync {
@@ -45,23 +45,30 @@ impl JobWrapper {
 		tokio::pin!(job_fn);
 		let start = std::time::Instant::now();
 
-		// TODO: consider splitting progress into two kinds:
+		// Consider splitting progress into two kinds:
 		// 1. task complete, iterate a counter, send to client
 		// 2. job update, send misc info to client
 		// I think this would be useful so that on a failure event,
 		// the JobWrapper still has the final progress value to send to the client
-		let mut progress_rx = ctx.progress_tx.subscribe();
+		// let mut progress_rx = ctx.progress_tx.subscribe();
 
-		// println!("Runner {} has started...", runner_id);
 		let mut running = true;
 		while running {
 			tokio::select! {
-				job_progress = progress_rx.recv() => {
-					if let Ok(progress) = job_progress {
-						core_ctx
-							.emit_client_event(CoreEvent::JobProgress(progress));
-					}
-				},
+				// FIXME: I think this caused way too much lag, having this middle layer. Essentially,
+				// what I have found is that when I send progress updates to here, instead of directly
+				// using `emit_client_event`, the lag would build up and then ONLY send the first and second
+				// udpates. That is bad. For now, leaving as commented out so I can wrap up the
+				// job cancelling. Will need to revist this, as I liked this pattern.
+				// job_progress = progress_rx.recv() => {
+				// 	println!("Runner {} has progressed: {:?}", runner_id, job_progress);
+				// 	if let Ok(progress) = job_progress {
+				// 		core_ctx
+				// 			.emit_client_event(CoreEvent::JobProgress(progress));
+				// 	} else {
+				// 		error!("Unable to send job progress: {:?}", job_progress.err());
+				// 	}
+				// },
 				job_result = &mut job_fn => {
 					let duration = start.elapsed();
 
@@ -147,6 +154,16 @@ pub struct JobUpdate {
 }
 
 impl JobUpdate {
+	pub fn job_initializing(runner_id: String, message: Option<String>) -> Self {
+		JobUpdate {
+			runner_id,
+			current_task: None,
+			task_count: 0,
+			message: Some(message.unwrap_or_else(|| "Initializing job...".to_string())),
+			status: Some(JobStatus::Running),
+		}
+	}
+
 	pub fn job_started(
 		runner_id: String,
 		current_task: u64,
@@ -174,6 +191,21 @@ impl JobUpdate {
 			task_count,
 			message,
 			status: Some(JobStatus::Running),
+		}
+	}
+
+	pub fn job_finished(
+		runner_id: String,
+		current_task: Option<u64>,
+		task_count: u64,
+		message: Option<String>,
+	) -> Self {
+		JobUpdate {
+			runner_id,
+			current_task,
+			task_count,
+			message: Some(message.unwrap_or_else(|| "Job finished!".to_string())),
+			status: Some(JobStatus::Completed),
 		}
 	}
 }
@@ -278,7 +310,7 @@ pub async fn persist_job_start(
 
 	ctx.emit_client_event(CoreEvent::job_started(
 		id.clone(),
-		1,
+		0,
 		task_count,
 		Some(format!("Job {} started.", id)),
 	));
@@ -310,6 +342,26 @@ pub async fn persist_job_end(
 				)?),
 				job::status::set(JobStatus::Completed.to_string()),
 			],
+		)
+		.exec()
+		.await?;
+
+	Ok(job)
+}
+
+pub async fn persist_job_cancelled(
+	ctx: &Ctx,
+	id: String,
+) -> CoreResult<crate::prisma::job::Data> {
+	use crate::prisma::job;
+
+	let db = ctx.get_db();
+
+	let job = db
+		.job()
+		.update(
+			job::id::equals(id.clone()),
+			vec![job::status::set(JobStatus::Cancelled.to_string())],
 		)
 		.exec()
 		.await?;

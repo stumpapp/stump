@@ -114,6 +114,7 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 								<Text fontWeight="medium">{job.message}</Text>
 								<div className="flex items-center space-x-2">
 									<Progress
+										isIndeterminate={!job.current_task || !job.task_count}
 										value={Number(job.current_task)}
 										max={Number(job.task_count)}
 										rounded="md"
@@ -122,11 +123,13 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 										colorScheme="brand"
 									/>
 
-									<Text fontSize="xs" className="min-w-fit">
-										<>
-											{job.current_task} / {job.task_count}
-										</>
-									</Text>
+									{job.current_task != undefined && !!job.task_count && (
+										<Text fontSize="xs" className="min-w-fit">
+											<>
+												{job.current_task} / {job.task_count}
+											</>
+										</Text>
+									)}
 								</div>
 							</div>
 						</VStack>

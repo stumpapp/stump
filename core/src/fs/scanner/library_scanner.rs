@@ -460,17 +460,17 @@ pub async fn scan_batch(
 ) -> CoreResult<u64> {
 	let core_ctx = ctx.core_ctx.clone();
 
+	ctx.progress(JobUpdate::job_initializing(
+		runner_id.clone(),
+		Some("Preparing library scan...".to_string()),
+	));
+
 	let (library, library_options, series, files_to_process) =
 		precheck(&core_ctx, path, &runner_id).await?;
+	// Sleep for a little to let the UI breathe.
+	tokio::time::sleep(Duration::from_millis(1000)).await;
 
 	let _job = persist_job_start(&core_ctx, runner_id.clone(), files_to_process).await?;
-
-	ctx.progress(JobUpdate::job_started(
-		runner_id.clone(),
-		0,
-		files_to_process,
-		Some(format!("Starting library scan at {}", &library.path)),
-	));
 
 	let counter = Arc::new(AtomicU64::new(0));
 
@@ -552,6 +552,14 @@ pub async fn scan_batch(
 		}
 	}
 
+	ctx.progress(JobUpdate::job_finished(
+		runner_id,
+		Some(final_count),
+		files_to_process,
+		None,
+	));
+	tokio::time::sleep(Duration::from_millis(50)).await;
+
 	Ok(final_count)
 }
 
@@ -608,6 +616,14 @@ pub async fn scan_sync(
 		)
 		.await;
 	}
+
+	ctx.progress(JobUpdate::job_finished(
+		runner_id,
+		Some(counter.load(Ordering::SeqCst)),
+		files_to_process,
+		None,
+	));
+	tokio::time::sleep(Duration::from_millis(50)).await;
 
 	Ok(counter.load(Ordering::SeqCst))
 }

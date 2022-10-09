@@ -5,9 +5,10 @@ use std::{
 use tokio::sync::{mpsc, Mutex, RwLock};
 use tracing::{error, warn};
 
-use super::{runner::Runner, Job, JobReport};
+use super::{persist_job_cancelled, runner::Runner, Job, JobReport};
 use crate::{
 	config::context::Ctx,
+	event::CoreEvent,
 	types::{CoreError, CoreResult},
 };
 
@@ -73,9 +74,9 @@ impl JobPool {
 		let mut job_runners = self.job_runners.write().await;
 
 		if job_runners.is_empty() {
-			// wait 150 ms before starting the job, otherwise the client gets overloaded with the derendering of UI elements
+			// wait 50 ms before starting the job, otherwise the client gets overloaded with the derendering of UI elements
 			// while receiving an enormous amount of data from the core immediately after the job is started
-			tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+			tokio::time::sleep(std::time::Duration::from_millis(50)).await;
 
 			let runner = Runner::new(&self.core_ctx, job).await;
 			let runner_id = runner.id.clone();
@@ -115,6 +116,17 @@ impl JobPool {
 	pub async fn cancel_job(self: Arc<Self>, runner_id: String) -> CoreResult<()> {
 		if let Some(runner) = self.job_runners.write().await.remove(&runner_id) {
 			if runner.lock().await.shutdown() {
+				// Tell the UI that the job was cancelled
+				self.core_ctx.emit_client_event(CoreEvent::JobFailed {
+					runner_id: runner_id.clone(),
+					message: "Job cancelled".to_string(),
+				});
+
+				// Persist the job as cancelled
+				if let Err(err) = persist_job_cancelled(&self.core_ctx, runner_id).await {
+					error!("Failed to persist job cancellation: {}", err);
+				}
+
 				drop(runner);
 				Ok(())
 			} else {

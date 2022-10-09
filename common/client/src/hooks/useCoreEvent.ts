@@ -18,15 +18,16 @@ export function useCoreEventHandler({
 	function handleCoreEvent(event: CoreEvent) {
 		const { key, data } = event;
 
-		if (['JobComplete', 'JobFailed'].includes(key)) {
-			queryClient.invalidateQueries(['getJobReports']);
-		}
-
 		switch (key) {
 			case 'JobStarted':
 				addJob(data);
 				break;
 			case 'JobProgress':
+				// FIXME:  Testing with a test library containing over 10k cbz files, there are so
+				//  many updates that around 2000k it just dies. I have implemented a check to
+				// in this store function where if the task_count is greater than 1000, it will
+				// only update the store every 50 tasks. This is a temporary fix. The UI is still pretty
+				// slow when this happens, but is usable. A better solution needs to be found.
 				updateJob(data);
 				break;
 			case 'JobComplete':
@@ -36,13 +37,17 @@ export function useCoreEventHandler({
 					queryClient.invalidateQueries(['getLibrary']);
 					queryClient.invalidateQueries(['getLibrariesStats']);
 					queryClient.invalidateQueries(['getSeries']);
+					queryClient.invalidateQueries(['getJobReports']);
+
 					// toast.success(`Job ${data} complete.`);
 					onJobComplete?.(data);
 				}, 500);
 				break;
 			case 'JobFailed':
-				// toast.error(`Job ${data.runner_id} failed.`);
 				onJobFailed?.(data);
+				completeJob(data.runner_id);
+				queryClient.invalidateQueries(['getJobReports']);
+
 				break;
 			case 'CreatedMedia':
 			case 'CreatedMediaBatch':

@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
-use tokio::{
-	self,
-	sync::{broadcast, Mutex},
-};
+use tokio::{self, sync::Mutex};
 use tracing::error;
 
 use crate::{
@@ -32,23 +29,25 @@ pub struct RunnerCtx {
 	/// The core context, used for database operations and accessing the internal
 	/// event channel.
 	pub core_ctx: Ctx,
-	/// A channel dedicated to sending job updates to a receiver.
-	pub progress_tx: Arc<broadcast::Sender<JobUpdate>>,
+	// A channel dedicated to sending job updates to a receiver.
+	// #[deprecated = "Use `core_ctx.emit_client_event` instead. Too many bugs with this for now."]
+	// pub progress_tx: Arc<broadcast::Sender<JobUpdate>>,
 }
 
 impl RunnerCtx {
 	pub fn new(ctx: Ctx, id: String) -> Self {
-		let (progress_tx, _) = broadcast::channel(1024);
+		// let (progress_tx, _) = broadcast::channel(1024);
 
 		RunnerCtx {
 			runner_id: id,
 			core_ctx: ctx,
-			progress_tx: Arc::new(progress_tx),
+			// progress_tx: Arc::new(progress_tx),
 		}
 	}
 
 	pub fn progress(&self, e: JobUpdate) {
-		let _ = self.progress_tx.send(e);
+		// let _ = self.progress_tx.send(e);
+		self.core_ctx.emit_client_event(CoreEvent::JobProgress(e));
 		// .expect("Fatal error: failed to send job progress event.");
 	}
 }

@@ -29,6 +29,12 @@ function useSse(url: string, sseOptions: SseOptions = {}) {
 		sse.onerror = (event) => {
 			console.error('EventSource error event:', event);
 
+			// @ts-ignore: this exists
+			if (event?.target?.readyState === EventSource.CLOSED) {
+				console.error('EventSource closed');
+				onClose?.(event);
+			}
+
 			sse?.close();
 
 			setTimeout(() => {
@@ -96,5 +102,15 @@ export function useStumpSse({ onEvent }: Props) {
 		onClose: () => {
 			setConnected(false);
 		},
+		// onError: (e) => {
+		// 	// check if the error is a network error
+		// 	if (readyState === EventSource.CLOSED) {
+		// 		setConnected(false);
+		// 	}
+		// },
 	});
+
+	return {
+		readyState,
+	};
 }

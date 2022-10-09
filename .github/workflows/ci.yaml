@@ -89,12 +89,10 @@ jobs:
         run: pnpm install
 
       # run checks
-      - name: TypeScript check for apps/client
-        run: pnpm tsc --noEmit
-        working-directory: apps/client
-      - name: TypeScript check for apps/website
-        run: pnpm tsc --noEmit
-        working-directory: apps/website
+      - run: pnpm tsc --noEmit
+        working-directory: common/client
+      - run: pnpm tsc --noEmit
+        working-directory: common/interface
 
   release:
     name: Release (${{ matrix.platform }})

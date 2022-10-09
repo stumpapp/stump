@@ -26,9 +26,9 @@ jobs:
       with:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-    - name: Install clippy
-      run: rustup component add clippy
     # run checks
+    - name: Run cargo check
+      run: cargo check
     - name: Run clippy
       run: cargo clippy
     - name: Run formatter
@@ -63,5 +63,9 @@ jobs:
     - name: Install dependencies
       run: pnpm install
     # run checks
-    - name: TypeScript checks
-      run: pnpm run checks
+    - name: TypeScript check for apps/client
+      run: pnpm tsc --noEmit
+      working-directory: apps/client
+    - name: TypeScript check for apps/website
+      run: pnpm tsc --noEmit
+      working-directory: apps/website

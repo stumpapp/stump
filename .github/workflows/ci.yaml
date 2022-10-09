@@ -11,9 +11,9 @@ jobs:
     name: Run Rust checks
     runs-on: ubuntu-latest
     steps:
+      # setup
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -22,25 +22,77 @@ jobs:
           override: true
           components: rustfmt, clippy
 
-      # TODO: Add caching
+      # caching
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo build
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-      # This is a big pain without caching lol
+      # generate needed files
       - name: Generate Prisma client
         uses: ./.github/actions/generate-prisma-client
 
+      # run checks
       - name: Run cargo fmt
         run: |
           cargo fmt --all -- --check
-
       - name: Run clippy
         run: |
           export RUSTFLAGS="-C debuginfo=0"
-            cargo clippy --all-features
-            cargo clippy -- -D warnings
-
+          cargo clippy --all-features
+          cargo clippy -- -D warnings
       - name: Run tests
         run: |
           cargo integration-tests
+
+  check-typescript:
+    name: Run TypeScript checks
+    runs-on: ubuntu-latest
+    steps:
+      # setup
+      - uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - uses: pnpm/action-setup@v2.0.1
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      # caching
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: pnpm install
+
+      # run checks
+      - run: pnpm tsc --noEmit
+        working-directory: common/client
+      - run: pnpm tsc --noEmit
+        working-directory: common/interface
 
   release:
     name: Release (${{ matrix.platform }})

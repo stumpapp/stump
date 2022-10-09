@@ -31,7 +31,7 @@ jobs:
       run: cargo check
     - name: Run clippy
       run: cargo clippy
-    - name: Run formatter
+    - name: Checking formatting
       run: cargo fmt --check
 
   typescript:

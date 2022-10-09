@@ -1,6 +1,7 @@
 use super::{Job, RunnerCtx};
 use crate::{
 	fs::scanner::library_scanner::scan,
+	job::JobUpdate,
 	types::{models::library::LibraryScanMode, CoreResult},
 };
 use tracing::info;
@@ -21,28 +22,18 @@ impl Job for LibraryScanJob {
 		Some(Box::new(self.path.as_str()))
 	}
 
-	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<()> {
+	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<u64> {
 		let runner_id = ctx.runner_id.clone();
 
-		let start = std::time::Instant::now();
 		let result = scan(ctx, self.path.clone(), runner_id, self.scan_mode).await?;
-		let duration = start.elapsed();
-
 		info!(
 			"Finished {:?} library scan at {:?}",
 			self.scan_mode,
 			self.path.clone(),
 		);
-		info!(
-			"{} files processed in {}.{:03} seconds.",
-			result,
-			duration.as_secs(),
-			duration.subsec_millis()
-		);
-
 		// persist_job_end(&ctx, runner_id, completed_tasks, duration.as_millis()).await?;
 
-		Ok(())
+		Ok(result)
 	}
 }
 
@@ -82,7 +73,7 @@ impl Job for TestJob {
 		None
 	}
 
-	async fn run(&mut self, _job_ctx: RunnerCtx) -> CoreResult<()> {
+	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<u64> {
 		// tick every 5 seconds
 		let tick_interval = self.interval.unwrap_or(5);
 		let max_ticks = self.max_ticks.unwrap_or(20);
@@ -92,9 +83,15 @@ impl Job for TestJob {
 
 		for i in 0..max_ticks {
 			interval.tick().await;
-			println!("Test job tick {}", i);
+			// println!("Test job tick {}", i);
+			ctx.progress(JobUpdate::job_progress(
+				ctx.runner_id.clone(),
+				Some(i),
+				max_ticks * tick_interval,
+				Some(format!("Test job tick {}", i)),
+			));
 		}
 
-		Ok(())
+		Ok(max_ticks * tick_interval)
 	}
 }

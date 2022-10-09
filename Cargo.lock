@@ -5208,6 +5208,7 @@ dependencies = [
 name = "stump_server"
 version = "0.0.0"
 dependencies = [
+ "async-stream",
  "async-trait",
  "axum",
  "axum-extra",

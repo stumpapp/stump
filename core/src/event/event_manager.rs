@@ -1,17 +1,14 @@
 use std::sync::Arc;
 
+use crate::{config::context::Ctx, event::InternalCoreTask, job::pool::JobPool};
 use tokio::{self, sync::mpsc};
-
-use crate::{config::context::Ctx, job::pool::JobPool};
-
-use super::InternalCoreTask;
+use tracing::error;
 
 /// The [`EventManager`] struct is responsible for handling internal tasks ([`InternalCoreTask`]).
 /// Internal tasks are 'converted' to [`Job`](crate::job::Job)s, which are queued and executed
 /// by the [`JobPool`].
 pub struct EventManager {
 	job_pool: Arc<JobPool>,
-	// ctx: Arc<Ctx>,
 }
 
 // TODO: I think event manager can manage it's own Ctx here, and instead of housing all
@@ -38,7 +35,6 @@ impl EventManager {
 	) -> Arc<Self> {
 		let this = Arc::new(Self {
 			job_pool: JobPool::new(ctx),
-			// ctx: ctx.arced(),
 		});
 
 		let this_cpy = this.clone();
@@ -54,7 +50,13 @@ impl EventManager {
 	async fn handle_task(self: Arc<Self>, task: InternalCoreTask) {
 		match task {
 			InternalCoreTask::QueueJob(job) => {
-				self.job_pool.clone().enqueue_job(job).await;
+				self.job_pool
+					.clone()
+					.enqueue_job(job)
+					.await
+					.unwrap_or_else(|e| {
+						error!("Failed to enqueue job: {}", e);
+					});
 			},
 			InternalCoreTask::CancelJob {
 				job_id,

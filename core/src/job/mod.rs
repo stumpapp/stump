@@ -23,7 +23,7 @@ pub trait Job: Send + Sync {
 	fn kind(&self) -> &'static str;
 	fn details(&self) -> Option<Box<&str>>;
 
-	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<()>;
+	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<u64>;
 }
 
 pub struct JobWrapper {
@@ -36,26 +36,23 @@ impl JobWrapper {
 	}
 }
 
-#[async_trait::async_trait]
-impl Job for JobWrapper {
-	fn kind(&self) -> &'static str {
-		"test"
-	}
-
-	fn details(&self) -> Option<Box<&str>> {
-		None
-	}
-
+impl JobWrapper {
 	async fn run(&mut self, ctx: RunnerCtx) -> CoreResult<()> {
 		let runner_id = ctx.runner_id.clone();
 		let core_ctx = ctx.core_ctx.clone();
 
 		let job_fn = self.job.run(ctx.clone());
 		tokio::pin!(job_fn);
+		let start = std::time::Instant::now();
 
+		// TODO: consider splitting progress into two kinds:
+		// 1. task complete, iterate a counter, send to client
+		// 2. job update, send misc info to client
+		// I think this would be useful so that on a failure event,
+		// the JobWrapper still has the final progress value to send to the client
 		let mut progress_rx = ctx.progress_tx.subscribe();
 
-		println!("Runner {} has started...", runner_id);
+		// println!("Runner {} has started...", runner_id);
 		let mut running = true;
 		while running {
 			tokio::select! {
@@ -66,18 +63,22 @@ impl Job for JobWrapper {
 					}
 				},
 				job_result = &mut job_fn => {
+					let duration = start.elapsed();
+
 					running = false;
 
 					if let Err(err) = job_result {
 						core_ctx.emit_client_event(CoreEvent::JobFailed {
-							runner_id,
+							runner_id: runner_id.clone(),
 							message: err.to_string(),
 						});
 
 						return Err(err)
 					} else {
-						core_ctx.emit_client_event(CoreEvent::JobComplete(runner_id.clone()));
+						let completed_tasks = job_result.unwrap();
+						persist_job_end(&core_ctx, ctx.runner_id.clone(), completed_tasks, duration.as_millis()).await?;
 					}
+
 				},
 			}
 		}

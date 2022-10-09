@@ -60,13 +60,16 @@ impl JobPool {
 			JobPoolEvent::Init => {
 				warn!("TODO: unimplemented. This event will handle readding queued jobs on the event the server was stopped before they were completed");
 			},
-			JobPoolEvent::EnqueueJob { job } => self_cpy.enqueue_job(job).await,
+			JobPoolEvent::EnqueueJob { job } => self_cpy
+				.enqueue_job(job)
+				.await
+				.unwrap_or_else(|e| error!("Failed to enqueue job: {}", e)),
 		}
 	}
 
 	/// Adds a new job to the job queue. If the queue is empty, it will immediately get
 	/// run.
-	pub async fn enqueue_job(self: Arc<Self>, job: Box<dyn Job>) {
+	pub async fn enqueue_job(self: Arc<Self>, job: Box<dyn Job>) -> CoreResult<()> {
 		let mut job_runners = self.job_runners.write().await;
 
 		if job_runners.is_empty() {
@@ -84,7 +87,7 @@ impl JobPool {
 				Arc::clone(&runner_arc),
 				self.core_ctx.get_ctx(),
 			)
-			.await;
+			.await?;
 
 			job_runners.insert(runner_id, runner_arc);
 		} else {
@@ -92,6 +95,7 @@ impl JobPool {
 		}
 
 		drop(job_runners);
+		Ok(())
 	}
 
 	/// Removes a job by its runner id. It will attempt to queue the next job,

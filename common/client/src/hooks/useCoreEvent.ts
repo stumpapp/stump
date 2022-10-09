@@ -1,7 +1,7 @@
 import type { CoreEvent } from '../types';
 import { queryClient } from '../client';
 import { useJobStore } from '../stores';
-import { useStumpWs } from './useStumpWs';
+import { useStumpSse } from './useStumpSse';
 
 interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void;
@@ -65,5 +65,5 @@ export function useCoreEventHandler({
 		}
 	}
 
-	useStumpWs({ onEvent: handleCoreEvent });
+	useStumpSse({ onEvent: handleCoreEvent });
 }

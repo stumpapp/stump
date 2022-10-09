@@ -32,7 +32,9 @@ tokio = { version = "1.21.2", features = [
   # feature for the internal channels (internal communication)
   "sync", 
   # this is needed for tokio::spawn multi-threaded
-  "rt-multi-thread"
+  "rt-multi-thread",
+  # needed for detecting shutdown signals (e.g. ctrl+c)
+  "signal",
 ] }
 
 ### DEV UTILS ###

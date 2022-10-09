@@ -7,7 +7,7 @@ use stump_core::{
 	config::Ctx,
 	db::migration::run_migrations,
 	fs::scanner::library_scanner::{scan_batch, scan_sync},
-	job::{persist_new_job, LibraryScanJob},
+	job::{persist_new_job, runner::RunnerCtx, LibraryScanJob},
 	prisma::{library, library_options, PrismaClient},
 	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
@@ -296,12 +296,16 @@ pub async fn run_test_scan(
 ) -> CoreResult<u64> {
 	persist_test_job(&library.id, &ctx, &library, scan_mode).await?;
 
+	let fake_runner_ctx = RunnerCtx::new(ctx.get_ctx(), library.id.clone());
+
 	if scan_mode == LibraryScanMode::None {
 		return Ok(0);
 	} else if scan_mode == LibraryScanMode::Batched {
-		return scan_batch(ctx.get_ctx(), library.path.clone(), library.id.clone()).await;
+		return scan_batch(fake_runner_ctx, library.path.clone(), library.id.clone())
+			.await;
 	} else {
-		return scan_sync(ctx.get_ctx(), library.path.clone(), library.id.clone()).await;
+		return scan_sync(fake_runner_ctx, library.path.clone(), library.id.clone())
+			.await;
 	}
 }
 

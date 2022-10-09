@@ -7,7 +7,11 @@ use tokio::{
 };
 use tracing::error;
 
-use crate::{config::context::Ctx, event::CoreEvent};
+use crate::{
+	config::context::Ctx,
+	event::CoreEvent,
+	types::{CoreError, CoreResult},
+};
 
 use super::{persist_new_job, pool::JobPool, Job, JobUpdate, JobWrapper};
 
@@ -18,10 +22,17 @@ pub enum RunnerEvent {
 	Failed,
 }
 
+/// The [`RunnerCtx`] is the main context for a job runner. It contains the core
+/// context used throughout the core, as well as the `runner_id` and a
+/// channel for job updates.
 #[derive(Clone)]
 pub struct RunnerCtx {
+	/// The unique id of the runner owning this context.
 	pub runner_id: String,
+	/// The core context, used for database operations and accessing the internal
+	/// event channel.
 	pub core_ctx: Ctx,
+	/// A channel dedicated to sending job updates to a receiver.
 	pub progress_tx: Arc<broadcast::Sender<JobUpdate>>,
 }
 
@@ -42,17 +53,28 @@ impl RunnerCtx {
 	}
 }
 
+/// The [`Runner`] is the main job runner. It holds the [`JoinHandle`] for the job.
+/// The [`JobPool`] keeps track of runners.
 pub struct Runner {
+	/// The unique id of the runner.
 	pub id: String,
+	// TODO: I probably don't need this to be optional anymore, I changed how Runner
+	// works a while ago and never updated this...
+	/// The job that the runner is managing.
 	job: Option<Box<dyn Job>>,
+	/// The [`JoinHandle`] for the job. This is mainly kept so a job can be
+	/// properly cancelled.
 	handle: Option<tokio::task::JoinHandle<()>>,
 }
 
 impl Runner {
+	/// Uses the `cuid` crate to generate a unique id for the runner.
 	pub fn create_id() -> String {
 		cuid::cuid().expect("Failed to generate CUID for runner.")
 	}
 
+	/// Creates a new [`Runner`] for a given [`Job`]. This is asynchronous
+	/// mainly because the job will be persisted to the database here.
 	pub async fn new(ctx: &Ctx, job: Box<dyn Job>) -> Self {
 		let id = Runner::create_id();
 
@@ -66,16 +88,26 @@ impl Runner {
 		}
 	}
 
-	// FIXME: don't panic, return error here
-	pub async fn spawn(job_pool: Arc<JobPool>, runner_arc: Arc<Mutex<Self>>, ctx: Ctx) {
+	/// Spawns the job and sets the [`JoinHandle`] for the runner. The job will
+	/// be wrapped in a [`JobWrapper`] to handle the progress updates, time tracking,
+	/// and other common, shared functionalities.
+	pub async fn spawn(
+		job_pool: Arc<JobPool>,
+		runner_arc: Arc<Mutex<Self>>,
+		ctx: Ctx,
+	) -> CoreResult<()> {
 		let mut runner = runner_arc.lock().await;
 		let runner_id = runner.id.clone();
 
-		let job = runner
-			.job
-			.take()
-			.unwrap_or_else(|| panic!("Missing job in job runner {}", runner_id));
+		let maybe_job = runner.job.take();
 
+		if maybe_job.is_none() {
+			return Err(CoreError::InternalError(
+				"Missing job in job runner {}".to_string(),
+			));
+		}
+
+		let job = maybe_job.unwrap();
 		drop(runner);
 
 		let handle = tokio::spawn(async move {
@@ -100,8 +132,13 @@ impl Runner {
 
 		runner_arc.lock().await.handle = Some(handle);
 		drop(runner_arc);
+
+		Ok(())
 	}
 
+	/// Attempts to cancel the job, returning whether or not a job was cancelled.
+	/// If a runner has a thread handle, it will be aborted.
+	/// Otherwise, no spawned task exists.
 	pub fn shutdown(&mut self) -> bool {
 		if let Some(handle) = self.handle.take() {
 			println!("Shutting down job runner {}", self.id);

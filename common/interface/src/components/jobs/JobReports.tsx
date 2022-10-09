@@ -13,6 +13,7 @@ import {
 import { JobUpdate, useJobStore } from '@stump/client';
 
 import type { JobReport } from '@stump/client';
+import { cancelJob } from '@stump/client/api';
 import Button from '../../ui/Button';
 import toast from 'react-hot-toast';
 // TODO: ORGANIZE BETTER
@@ -45,30 +46,13 @@ function JobReportComponent(jobReport: JobReport) {
 }
 
 export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
-	interface Test extends JobReport, Omit<JobUpdate, 'status' | 'task_count'> {}
+	const { jobs: zustandJobs } = useJobStore();
 
-	const [fakeJob, setFakeJob] = useState<Test>();
-	const [startedAt, setStartedAt] = useState<number>();
-
-	useEffect(() => {
-		setTimeout(() => {
-			setFakeJob({
-				id: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
-				kind: 'LibraryScan',
-				details: '/Users/aaronleopold/Documents/Stump/Comics',
-				task_count: 1024,
-				status: 'RUNNING',
-				completed_task_count: 0,
-				ms_elapsed: null,
-				completed_at: null,
-				current_task: 0 as any,
-				message: 'Job started',
-				runner_id: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
-			});
-
-			setStartedAt(Date.now());
-		}, 3000);
-	}, []);
+	const runningJobs = useMemo(() => {
+		return jobReports
+			.filter((job) => job.status === 'RUNNING' && job.id && zustandJobs[job.id])
+			.map((job) => ({ ...job, ...zustandJobs[job.id!] }));
+	}, [zustandJobs, jobReports]);
 
 	function readableKind(kind: string | null) {
 		if (!kind) {
@@ -78,31 +62,17 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 		return kind.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 	}
 
-	// set an interval when a job is running to increment the completed task count
-	// by 1 every 100ms
-	useEffect(() => {
-		if (!fakeJob) {
-			return;
-		}
-
-		const interval = setInterval(() => {
-			setFakeJob((prev) => {
-				if (!prev) {
-					return prev;
-				}
-
-				let curr = Number(prev.current_task || 0) + 1;
-
-				return {
-					...prev,
-					current_task: curr as any,
-					message: `Working on task ${curr}`,
-				};
+	async function handleCancelJob(id: string | null) {
+		if (id) {
+			toast.promise(cancelJob(id), {
+				loading: 'Cancelling job...',
+				success: 'Job cancelled',
+				error: 'Failed to cancel job',
 			});
-		}, 100);
-
-		return () => clearInterval(interval);
-	}, [fakeJob]);
+		} else {
+			console.debug('Tried to cancel job with no ID: ', runningJobs);
+		}
+	}
 
 	return (
 		<Stack>
@@ -110,105 +80,61 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 				Active Job
 			</Heading>
 
-			{!fakeJob && <EmptyState message="No jobs are currently running" />}
+			{!runningJobs.length && <EmptyState message="No jobs are currently running" />}
 
-			{fakeJob && (
-				<VStack
-					align="start"
-					spacing={2}
-					bg={useColorModeValue('whiteAlpha.600', 'blackAlpha.300')}
-					rounded="md"
-					p={3}
-				>
-					<div className="w-full flex justify-between items-center">
-						<div className="flex space-x-3 items-center">
-							<Text fontSize="sm" fontWeight="semibold">
-								{readableKind(fakeJob.kind)}
-							</Text>
-							<Text
-								color={useColorModeValue('gray.600', 'gray.400')}
-								fontSize="xs"
-								className="italic"
-							>
-								{fakeJob.details}
-							</Text>
-						</div>
-						<Button size="xs" onClick={() => toast.error('Unimplemented')}>
-							Cancel Job
-						</Button>
-					</div>
+			<Stack p={0} m={0}>
+				{runningJobs.map((job) => {
+					return (
+						<VStack
+							align="start"
+							spacing={2}
+							bg={useColorModeValue('whiteAlpha.600', 'blackAlpha.300')}
+							rounded="md"
+							p={3}
+						>
+							<div className="w-full flex justify-between items-center">
+								<div className="flex space-x-3 items-center">
+									<Text fontSize="sm" fontWeight="semibold">
+										{readableKind(job.kind)}
+									</Text>
+									<Text
+										color={useColorModeValue('gray.600', 'gray.400')}
+										fontSize="xs"
+										className="italic"
+									>
+										{job.details}
+									</Text>
+								</div>
+								<Button size="xs" onClick={() => handleCancelJob(job.id)}>
+									Cancel Job
+								</Button>
+							</div>
 
-					<div className="flex flex-col space-y-2 w-full text-xs">
-						<Text fontWeight="medium">{fakeJob.message}</Text>
-						<div className="flex items-center space-x-2">
-							<Progress
-								value={Number(fakeJob.current_task)}
-								max={Number(fakeJob.task_count)}
-								rounded="md"
-								w="full"
-								size="xs"
-								colorScheme="brand"
-							/>
+							<div className="flex flex-col space-y-2 w-full text-xs">
+								<Text fontWeight="medium">{job.message}</Text>
+								<div className="flex items-center space-x-2">
+									<Progress
+										value={Number(job.current_task)}
+										max={Number(job.task_count)}
+										rounded="md"
+										w="full"
+										size="xs"
+										colorScheme="brand"
+									/>
 
-							<Text fontSize="xs" className="min-w-fit">
-								<>
-									{fakeJob.current_task} / {fakeJob.task_count}
-								</>
-							</Text>
-						</div>
-					</div>
-				</VStack>
-			)}
+									<Text fontSize="xs" className="min-w-fit">
+										<>
+											{job.current_task} / {job.task_count}
+										</>
+									</Text>
+								</div>
+							</div>
+						</VStack>
+					);
+				})}
+			</Stack>
 		</Stack>
 	);
-	// const { jobs: zustandJobs } = useJobStore();
-
-	// const runningJobs = useMemo(() => {
-	// 	return jobReports
-	// 		.filter((job) => job.status === 'RUNNING' && job.id && zustandJobs[job.id])
-	// 		.map((job) => ({ ...job, ...zustandJobs[job.id!] }));
-	// }, [zustandJobs, jobReports]);
-
-	// // TODO: generalize this since I use it in other places
-	// // FIXME: this isn't a safe operation
-	// function trim(message?: string | null) {
-	// 	if (message?.startsWith('Analyzing')) {
-	// 		let filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/');
-
-	// 		return `Analyzing ${filePieces.slice(filePieces.length - 1).join('/')}`;
-	// 	}
-
-	// 	return null;
-	// }
-
-	// return (
-	// 	<Stack>
-	// 		<Heading alignSelf="start" size="md">
-	// 			Running Jobs
-	// 		</Heading>
-
-	// 		{!runningJobs.length && <p>No jobs are currently running.</p>}
-
-	// 		{runningJobs.map((job) => (
-	// 			<div className="flex flex-col space-y-2 p-2 w-full text-xs">
-	// 				<Text fontWeight="medium">{trim(job.message) ?? 'Job in Progress'}</Text>
-	// <Progress
-	// 	value={Number(job.current_task)}
-	// 	max={Number(job.task_count)}
-	// 	rounded="md"
-	// 	w="full"
-	// 	size="xs"
-	// 	colorScheme="brand"
-	// />
-	// 				<Text>
-	// 					<>
-	// 						Scanning file {job.current_task} of {job.task_count}
-	// 					</>
-	// 				</Text>
-	// 			</div>
-	// 		))}
-	// 	</Stack>
-	// );
 }
 
 export function QueuedJobs({ jobReports }: { jobReports: JobReport[] }) {

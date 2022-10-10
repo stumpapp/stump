@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import {
 	Box,
@@ -10,7 +10,7 @@ import {
 	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react';
-import { JobUpdate, useJobStore } from '@stump/client';
+import { useJobContext } from '@stump/client';
 
 import type { JobReport } from '@stump/client';
 import { cancelJob } from '@stump/client/api';
@@ -46,13 +46,19 @@ function JobReportComponent(jobReport: JobReport) {
 }
 
 export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
-	const { jobs: zustandJobs } = useJobStore();
+	const context = useJobContext();
+
+	if (!context) {
+		throw new Error('JobContextProvider not found');
+	}
+
+	const { activeJobs } = context;
 
 	const runningJobs = useMemo(() => {
 		return jobReports
-			.filter((job) => job.status === 'RUNNING' && job.id && zustandJobs[job.id])
-			.map((job) => ({ ...job, ...zustandJobs[job.id!] }));
-	}, [zustandJobs, jobReports]);
+			.filter((job) => job.status === 'RUNNING' && job.id && activeJobs[job.id])
+			.map((job) => ({ ...job, ...activeJobs[job.id!] }));
+	}, [activeJobs, jobReports]);
 
 	function readableKind(kind: string | null) {
 		if (!kind) {
@@ -141,11 +147,7 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 }
 
 export function QueuedJobs({ jobReports }: { jobReports: JobReport[] }) {
-	const { jobs: zustandJobs } = useJobStore();
-
-	const queuedJobs = useMemo(() => {
-		return jobReports.filter((job) => job.status === 'QUEUED');
-	}, [zustandJobs, jobReports]);
+	const queuedJobs = jobReports.filter((job) => job.status === 'QUEUED');
 
 	return (
 		<Stack>
@@ -165,11 +167,7 @@ export function QueuedJobs({ jobReports }: { jobReports: JobReport[] }) {
 }
 
 export function JobHistory({ jobReports }: { jobReports: JobReport[] }) {
-	const { jobs: zustandJobs } = useJobStore();
-
-	const pastJobs = useMemo(() => {
-		return jobReports.filter((job) => job.status === 'COMPLETED');
-	}, [zustandJobs, jobReports]);
+	const pastJobs = jobReports.filter((job) => job.status === 'COMPLETED');
 
 	// TODO: truncate, allow for 'View More' button or something
 	return (

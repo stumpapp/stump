@@ -1,11 +1,10 @@
 import type { CoreEvent } from '../types';
 import { queryClient } from '../client';
-import { useJobStore } from '../stores';
 import { useStumpSse } from './useStumpSse';
+import { useJobContext } from '../context';
 
 interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void;
-	// FIXME: camelCase
 	onJobFailed?: (err: { runner_id: string; message: string }) => void;
 }
 
@@ -13,7 +12,13 @@ export function useCoreEventHandler({
 	onJobComplete,
 	onJobFailed,
 }: UseCoreEventHandlerParams = {}) {
-	const { addJob, updateJob, completeJob } = useJobStore();
+	const context = useJobContext();
+
+	if (!context) {
+		throw new Error('useCoreEventHandler must be used within a JobContext');
+	}
+
+	const { addJob, updateJob, removeJob } = context;
 
 	function handleCoreEvent(event: CoreEvent) {
 		const { key, data } = event;
@@ -32,7 +37,7 @@ export function useCoreEventHandler({
 				break;
 			case 'JobComplete':
 				setTimeout(() => {
-					completeJob(data);
+					removeJob(data);
 
 					queryClient.invalidateQueries(['getLibrary']);
 					queryClient.invalidateQueries(['getLibrariesStats']);
@@ -45,7 +50,7 @@ export function useCoreEventHandler({
 				break;
 			case 'JobFailed':
 				onJobFailed?.(data);
-				completeJob(data.runner_id);
+				removeJob(data.runner_id);
 				queryClient.invalidateQueries(['getJobReports']);
 
 				break;

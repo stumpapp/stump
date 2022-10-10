@@ -13,6 +13,7 @@ interface SseOptions {
 
 let sse: EventSource;
 
+// this is a little meh
 function useSse(url: string, sseOptions: SseOptions = {}) {
 	const { onOpen, onClose, onMessage } = sseOptions;
 
@@ -29,17 +30,16 @@ function useSse(url: string, sseOptions: SseOptions = {}) {
 		sse.onerror = (event) => {
 			console.error('EventSource error event:', event);
 
-			// @ts-ignore: this exists
-			if (event?.target?.readyState === EventSource.CLOSED) {
-				console.error('EventSource closed');
-				onClose?.(event);
-			}
-
 			sse?.close();
 
 			setTimeout(() => {
 				initEventSource();
-			}, 1000);
+
+				if (sse?.readyState !== EventSource.OPEN) {
+					onClose?.(event);
+					return;
+				}
+			}, 5000);
 		};
 
 		sse.onopen = (e) => {
@@ -54,16 +54,6 @@ function useSse(url: string, sseOptions: SseOptions = {}) {
 			sse?.close();
 		};
 	}, [url]);
-
-	useEffect(() => {
-		if (sse?.readyState === EventSource.CLOSED) {
-			setTimeout(() => {
-				if (sse?.readyState === EventSource.CLOSED) {
-					onClose?.();
-				}
-			}, 1000);
-		}
-	}, [sse?.readyState]);
 
 	return {
 		readyState: sse?.readyState,
@@ -102,12 +92,6 @@ export function useStumpSse({ onEvent }: Props) {
 		onClose: () => {
 			setConnected(false);
 		},
-		// onError: (e) => {
-		// 	// check if the error is a network error
-		// 	if (readyState === EventSource.CLOSED) {
-		// 		setConnected(false);
-		// 	}
-		// },
 	});
 
 	return {

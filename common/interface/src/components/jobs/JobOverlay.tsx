@@ -1,19 +1,19 @@
 import { useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Box, Progress, Text } from '@chakra-ui/react';
-import { useJobStore } from '@stump/client';
+import { useJobContext } from '@stump/client';
 
 export default function JobOverlay() {
-	const { jobs } = useJobStore();
+	const context = useJobContext();
 
-	// FIXME: If you refresh the page RIGHT before a job completes, and miss the JobComplete event,
-	// the job will be stuck in the store forever. I think instead maybe I should query the
-	// database for jobs that are running, and then fetch the current info from the store here
-	// as I do now. That way, when a refresh happens, the DB will be queried for jobs that are
-	// running, and in this edge case the job will be set in the store accordingly.
-	const jobShown = useMemo(() => {
-		return Object.values(jobs).find((job) => job.status?.toLowerCase() === 'running') ?? null;
-	}, [jobs]);
+	if (!context) {
+		throw new Error('JobContextProvider not found');
+	}
+
+	const { activeJobs } = context;
+
+	// get the first job that is running from the activeJobs object
+	const jobShown = Object.values(activeJobs).find((job) => job.status?.toLowerCase() === 'running');
 
 	function formatMessage(message?: string | null) {
 		if (message?.startsWith('Analyzing')) {

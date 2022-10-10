@@ -55,25 +55,25 @@ export const useJobStore = create<JobStore>()(
 			let curr = Number(current_task);
 			let isDifferentCount = task_count !== job.task_count;
 			let isLargeJob = task_count > 1000;
-			if (isLargeJob && !isDifferentCount) {
-				// get the threshold based on the closest key in the LARGE_JOB_THRESHOLDS object
-				let threshold_key = Object.keys(LARGE_JOB_THRESHOLDS).reduce((prev, curr) => {
-					return Math.abs(Number(curr) - Number(task_count)) <
-						Math.abs(Number(prev) - Number(task_count))
-						? curr
-						: prev;
-				});
+			// if (isLargeJob && !isDifferentCount) {
+			// 	// get the threshold based on the closest key in the LARGE_JOB_THRESHOLDS object
+			// 	let threshold_key = Object.keys(LARGE_JOB_THRESHOLDS).reduce((prev, curr) => {
+			// 		return Math.abs(Number(curr) - Number(task_count)) <
+			// 			Math.abs(Number(prev) - Number(task_count))
+			// 			? curr
+			// 			: prev;
+			// 	});
 
-				// console.log('threshold_key', threshold_key);
-				let threshold =
-					LARGE_JOB_THRESHOLDS[Number(threshold_key) as keyof typeof LARGE_JOB_THRESHOLDS] ?? 50;
-				// console.log('threshold_key', threshold_key);
+			// 	// console.log('threshold_key', threshold_key);
+			// 	let threshold =
+			// 		LARGE_JOB_THRESHOLDS[Number(threshold_key) as keyof typeof LARGE_JOB_THRESHOLDS] ?? 50;
+			// 	// console.log('threshold_key', threshold_key);
 
-				// if the current task is not divisible by the threshold, don't update the store
-				if (curr % threshold !== 0) {
-					return;
-				}
-			}
+			// 	// if the current task is not divisible by the threshold, don't update the store
+			// 	if (curr % threshold !== 0) {
+			// 		return;
+			// 	}
+			// }
 
 			set((store) =>
 				produce(store, (draft) => {

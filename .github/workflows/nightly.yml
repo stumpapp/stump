@@ -13,4 +13,4 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Build web
-        uses: .github/actions/build-web
+        uses: ./.github/actions/build-web

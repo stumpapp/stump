@@ -16,16 +16,16 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.7",
-    "@types/react": "^18.0.20",
+    "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.0.0",
-    "autoprefixer": "^10.4.11",
-    "postcss": "^8.4.16",
+    "autoprefixer": "^10.4.12",
+    "postcss": "^8.4.17",
     "tailwind": "^4.0.0",
     "tailwind-scrollbar-hide": "^1.1.7",
     "tailwindcss": "^3.1.8",
-    "typescript": "^4.7.4",
-    "vite": "^3.1.1",
+    "typescript": "^4.8.4",
+    "vite": "^3.1.6",
     "vite-plugin-tsconfig-paths": "^1.1.0"
   }
 }

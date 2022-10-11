@@ -28,10 +28,10 @@ pub fn get_session_layer() -> SessionLayer<MemoryStore> {
 	if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "release" {
 		sesssion_layer
 			.with_same_site_policy(SameSite::None)
-			.with_secure(false)
+			.with_secure(true)
 	} else {
 		sesssion_layer
 			.with_same_site_policy(SameSite::Lax)
-			.with_secure(true)
+			.with_secure(false)
 	}
 }

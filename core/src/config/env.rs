@@ -19,7 +19,7 @@ use crate::{
 ///
 /// fn read_toml() {
 ///    let toml_str = r#"
-/// debug = true
+/// profile = "debug"
 /// port = 8080
 /// verbosity = 3
 /// client_dir = "client"
@@ -29,7 +29,7 @@ use crate::{
 ///    assert!(stump_toml.is_ok());
 ///    let stump_toml = stump_toml.unwrap();
 ///    println!("{:?}", stump_toml);
-///    assert_eq!(stump_toml.debug, Some(true));
+///    assert_eq!(stump_toml.profile, Some("debug".to_string()));
 ///    assert_eq!(stump_toml.port, Some(8080));
 ///    assert_eq!(stump_toml.verbosity, Some(3));
 ///    assert_eq!(stump_toml.client_dir, Some(String::from("client")));
@@ -140,7 +140,7 @@ impl StumpEnvironment {
 	/// let mut env = StumpEnvironment::default();
 	/// env.port = Some(8080);
 	///
-	/// assert_eq!(env::var("STUMP_PORT"), None);
+	/// assert_eq!(env::var("STUMP_PORT").is_err(), true);
 	/// env.set_env().unwrap();
 	/// assert_eq!(env::var("STUMP_PORT").unwrap(), "8080");
 	/// ```

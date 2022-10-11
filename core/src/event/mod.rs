@@ -7,11 +7,16 @@ use tokio::sync::oneshot;
 use crate::{
 	job::{Job, JobReport, JobStatus, JobUpdate},
 	prisma,
+	types::CoreResult,
 };
 
 pub enum InternalCoreTask {
 	QueueJob(Box<dyn Job>),
-	GetJobReports(oneshot::Sender<Vec<JobReport>>),
+	GetJobReports(oneshot::Sender<CoreResult<Vec<JobReport>>>),
+	CancelJob {
+		job_id: String,
+		return_sender: oneshot::Sender<CoreResult<()>>,
+	},
 }
 
 pub enum ClientResponse {

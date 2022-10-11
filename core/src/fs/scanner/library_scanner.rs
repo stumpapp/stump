@@ -24,10 +24,11 @@ use crate::{
 			ScannedFileTrait,
 		},
 	},
-	job::persist_job_start,
+	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
 	prisma::{library, media, series},
 	types::{
-		enums::FileStatus, errors::CoreError, models::library::LibraryOptions, CoreResult,
+		enums::FileStatus, errors::CoreError, models::library::LibraryOptions,
+		CoreResult, LibraryScanMode,
 	},
 };
 
@@ -35,6 +36,8 @@ use super::{
 	utils::{batch_media_operations, mark_library_missing, populate_glob_builder},
 	BatchScanOperation,
 };
+
+// FIXME: clean up usage of Ctx vs RunnerCtx... It can get confusing.
 
 // TODO: take in bottom up or top down scan option
 fn check_series(
@@ -147,25 +150,29 @@ async fn precheck(
 			.await?;
 	}
 
-	let insertion_result =
-		insert_series_batch(ctx, new_entries, library.id.clone()).await;
+	if !new_entries.is_empty() {
+		trace!("Found {} new series", new_entries.len());
 
-	if let Err(e) = insertion_result {
-		error!("Failed to batch insert series: {}", e);
+		let insertion_result =
+			insert_series_batch(ctx, new_entries, library.id.clone()).await;
 
-		ctx.emit_client_event(CoreEvent::CreateEntityFailed {
-			runner_id: Some(runner_id.to_string()),
-			message: format!("Failed to batch insert series: {}", e),
-			path: path.clone(),
-		});
-	} else {
-		let mut inserted_series = insertion_result.unwrap();
+		if let Err(e) = insertion_result {
+			error!("Failed to batch insert series: {}", e);
 
-		ctx.emit_client_event(
-			CoreEvent::CreatedSeriesBatch(inserted_series.len() as u64),
-		);
+			ctx.emit_client_event(CoreEvent::CreateEntityFailed {
+				runner_id: Some(runner_id.to_string()),
+				message: format!("Failed to batch insert series: {}", e),
+				path: path.clone(),
+			});
+		} else {
+			let mut inserted_series = insertion_result.unwrap();
 
-		series.append(&mut inserted_series);
+			ctx.emit_client_event(CoreEvent::CreatedSeriesBatch(
+				inserted_series.len() as u64
+			));
+
+			series.append(&mut inserted_series);
+		}
 	}
 
 	let start = std::time::Instant::now();
@@ -446,27 +453,33 @@ async fn scan_series_batch(
 	operations
 }
 
-pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult<u64> {
-	trace!("Enter scan_batch");
+pub async fn scan_batch(
+	ctx: RunnerCtx,
+	path: String,
+	runner_id: String,
+) -> CoreResult<u64> {
+	let core_ctx = ctx.core_ctx.clone();
+
+	ctx.progress(JobUpdate::job_initializing(
+		runner_id.clone(),
+		Some("Preparing library scan...".to_string()),
+	));
 
 	let (library, library_options, series, files_to_process) =
-		precheck(&ctx, path, &runner_id).await?;
+		precheck(&core_ctx, path, &runner_id).await?;
+	// Sleep for a little to let the UI breathe.
+	tokio::time::sleep(Duration::from_millis(1000)).await;
 
-	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
-
-	ctx.emit_client_event(CoreEvent::job_started(
-		runner_id.clone(),
-		0,
-		files_to_process,
-		Some(format!("Starting library scan at {}", &library.path)),
-	));
+	let _job = persist_job_start(&core_ctx, runner_id.clone(), files_to_process).await?;
 
 	let counter = Arc::new(AtomicU64::new(0));
 
 	let tasks: Vec<JoinHandle<Vec<BatchScanOperation>>> = series
 		.into_iter()
 		.map(|s| {
-			let ctx_cpy = ctx.get_ctx();
+			let progress_ctx = ctx.clone();
+			let scanner_ctx = core_ctx.clone();
+
 			let r_id = runner_id.clone();
 			let counter_ref = counter.clone();
 			let library_path = library.path.clone();
@@ -475,14 +488,14 @@ pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult
 
 			tokio::spawn(async move {
 				scan_series_batch(
-					ctx_cpy.get_ctx(),
+					scanner_ctx,
 					s,
 					&library_path,
 					library_options,
 					move |msg| {
 						let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-						ctx_cpy.emit_client_event(CoreEvent::job_progress(
+						progress_ctx.progress(JobUpdate::job_progress(
 							r_id.to_owned(),
 							Some(previous + 1),
 							files_to_process,
@@ -505,20 +518,23 @@ pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult
 
 	let final_count = counter.load(Ordering::SeqCst);
 
-	let created_media = batch_media_operations(&ctx, operations, &library_options)
+	let created_media = batch_media_operations(&core_ctx, operations, &library_options)
 		.await
 		.map_err(|e| {
 			error!("Failed to batch media operations: {:?}", e);
 			CoreError::InternalError(e.to_string())
 		})?;
 
-	ctx.emit_client_event(CoreEvent::CreatedMediaBatch(created_media.len() as u64));
+	if !created_media.is_empty() {
+		core_ctx
+			.emit_client_event(CoreEvent::CreatedMediaBatch(created_media.len() as u64));
+	}
 
 	// TODO: change task_count and send progress?
 	if library_options.create_webp_thumbnails {
 		trace!("Library configured to create WEBP thumbnails.");
 
-		ctx.emit_client_event(CoreEvent::job_progress(
+		ctx.progress(JobUpdate::job_progress(
 			runner_id.clone(),
 			Some(final_count),
 			files_to_process,
@@ -536,17 +552,31 @@ pub async fn scan_batch(ctx: Ctx, path: String, runner_id: String) -> CoreResult
 		}
 	}
 
+	ctx.progress(JobUpdate::job_finishing(
+		runner_id,
+		Some(final_count),
+		files_to_process,
+		None,
+	));
+	tokio::time::sleep(Duration::from_millis(1000)).await;
+
 	Ok(final_count)
 }
 
-pub async fn scan_sync(ctx: Ctx, path: String, runner_id: String) -> CoreResult<u64> {
+pub async fn scan_sync(
+	ctx: RunnerCtx,
+	path: String,
+	runner_id: String,
+) -> CoreResult<u64> {
+	let core_ctx = ctx.core_ctx.clone();
+
 	let (library, library_options, series, files_to_process) =
-		precheck(&ctx, path, &runner_id).await?;
+		precheck(&core_ctx, path, &runner_id).await?;
 
 	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
-	let _job = persist_job_start(&ctx, runner_id.clone(), files_to_process).await?;
+	let _job = persist_job_start(&core_ctx, runner_id.clone(), files_to_process).await?;
 
-	ctx.emit_client_event(CoreEvent::job_started(
+	ctx.progress(JobUpdate::job_started(
 		runner_id.clone(),
 		0,
 		files_to_process,
@@ -556,7 +586,8 @@ pub async fn scan_sync(ctx: Ctx, path: String, runner_id: String) -> CoreResult<
 	let counter = Arc::new(AtomicU64::new(0));
 
 	for s in series {
-		let progress_ctx = ctx.get_ctx();
+		let progress_ctx = ctx.clone();
+		let scanner_ctx = core_ctx.clone();
 		let r_id = runner_id.clone();
 
 		let counter_ref = counter.clone();
@@ -567,7 +598,7 @@ pub async fn scan_sync(ctx: Ctx, path: String, runner_id: String) -> CoreResult<
 		let library_options = library_options.clone();
 
 		scan_series(
-			ctx.get_ctx(),
+			scanner_ctx,
 			runner_id,
 			s,
 			&library_path,
@@ -575,7 +606,7 @@ pub async fn scan_sync(ctx: Ctx, path: String, runner_id: String) -> CoreResult<
 			move |msg| {
 				let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-				progress_ctx.emit_client_event(CoreEvent::job_progress(
+				progress_ctx.progress(JobUpdate::job_progress(
 					r_id.to_owned(),
 					Some(previous + 1),
 					files_to_process,
@@ -586,5 +617,26 @@ pub async fn scan_sync(ctx: Ctx, path: String, runner_id: String) -> CoreResult<
 		.await;
 	}
 
+	ctx.progress(JobUpdate::job_finishing(
+		runner_id,
+		Some(counter.load(Ordering::SeqCst)),
+		files_to_process,
+		None,
+	));
+	tokio::time::sleep(Duration::from_millis(1000)).await;
+
 	Ok(counter.load(Ordering::SeqCst))
+}
+
+pub async fn scan(
+	ctx: RunnerCtx,
+	path: String,
+	runner_id: String,
+	scan_mode: LibraryScanMode,
+) -> CoreResult<u64> {
+	match scan_mode {
+		LibraryScanMode::Batched => scan_batch(ctx, path, runner_id).await,
+		LibraryScanMode::Sync => scan_sync(ctx, path, runner_id).await,
+		_ => unreachable!("A job should not have reached this point if the scan mode is not batch or sync."),
+	}
 }

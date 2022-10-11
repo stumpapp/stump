@@ -30,7 +30,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user,
+		get_session_admin_user,
 		http::{ImageResponse, PageableTrait},
 	},
 };
@@ -226,13 +226,7 @@ async fn scan_library(
 	session: ReadableSession, // TODO: admin middleware
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
-	let user = get_session_user(&session)?;
-
-	if !user.is_admin() {
-		return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource".to_string(),
-		));
-	}
+	let _user = get_session_admin_user(&session)?;
 
 	let lib = db
 		.library()

@@ -5,6 +5,9 @@ inputs:
   node-version:
     required: true
     description: 'Node version to use'
+  node-pnpm-version:
+    required: true
+    description: 'Pnpm version to use'
 
 outputs:
   dist-path:

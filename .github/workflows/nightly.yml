@@ -2,8 +2,8 @@ name: Stump-nightly
 
 on:
   push:
-    branches:
-      - 'gh-action'
+    branches: 
+      - 'gh-actions'
 
 jobs:
   build-web:

@@ -5,13 +5,13 @@ runs:
   using: 'composite'
   steps:
     - name: Build
-      uses: .github/actions/compile-web
+      uses: ./.github/actions/compile-web
       id: compile
       with:
         node-version: 16
 
     - name: Upload
-      uses: .github/actions/upload-artifact
+      uses: ./.github/actions/upload-artifact
       with:
         upload-name: web
         upload-path: ${{ steps.compile.outputs.dist-path }}

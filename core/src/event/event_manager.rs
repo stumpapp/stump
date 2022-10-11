@@ -1,10 +1,8 @@
 use std::sync::Arc;
 
+use crate::{config::context::Ctx, event::InternalCoreTask, job::pool::JobPool};
 use tokio::{self, sync::mpsc};
-
-use crate::{config::context::Ctx, job::pool::JobPool};
-
-use super::InternalCoreTask;
+use tracing::error;
 
 /// The [`EventManager`] struct is responsible for handling internal tasks ([`InternalCoreTask`]).
 /// Internal tasks are 'converted' to [`Job`](crate::job::Job)s, which are queued and executed
@@ -36,44 +34,47 @@ impl EventManager {
 		mut request_reciever: mpsc::UnboundedReceiver<InternalCoreTask>,
 	) -> Arc<Self> {
 		let this = Arc::new(Self {
-			job_pool: JobPool::new(),
+			job_pool: JobPool::new(ctx),
 		});
 
 		let this_cpy = this.clone();
 		tokio::spawn(async move {
-			while let Some(req) = request_reciever.recv().await {
-				match req {
-					InternalCoreTask::QueueJob(job) => {
-						this_cpy
-							.clone()
-							.job_pool
-							.clone()
-							.enqueue_job(&ctx, job)
-							.await;
-					},
-					InternalCoreTask::GetJobReports(return_sender) => {
-						let job_report =
-							this_cpy.clone().job_pool.clone().report(&ctx).await;
-
-						// FIXME: lots...
-
-						// if job_report.is_err() {
-						// 	log::error!(
-						// 		"TODO: logging isn't enough here, but: {:?}",
-						// 		job_report.err()
-						// 	);
-						// }
-
-						// FIXME: I know, this will break.
-						let _ = return_sender.send(job_report.unwrap());
-					},
-					// TODO: remove this
-					#[allow(unreachable_patterns)]
-					_ => unimplemented!("I can't do that yet!"),
-				}
+			while let Some(task) = request_reciever.recv().await {
+				this_cpy.clone().handle_task(task).await;
 			}
 		});
 
 		this
+	}
+
+	async fn handle_task(self: Arc<Self>, task: InternalCoreTask) {
+		match task {
+			InternalCoreTask::QueueJob(job) => {
+				self.job_pool
+					.clone()
+					.enqueue_job(job)
+					.await
+					.unwrap_or_else(|e| {
+						error!("Failed to enqueue job: {}", e);
+					});
+			},
+			InternalCoreTask::CancelJob {
+				job_id,
+				return_sender,
+			} => {
+				let result = self.job_pool.clone().cancel_job(job_id.clone()).await;
+
+				return_sender
+					.send(result)
+					.expect("Fatal error: failed to send cancel job result");
+			},
+			InternalCoreTask::GetJobReports(return_sender) => {
+				let job_report = self.clone().job_pool.clone().report().await;
+
+				return_sender
+					.send(job_report)
+					.expect("Fatal error: failed to send job report");
+			},
+		}
 	}
 }

@@ -28,6 +28,8 @@ pub enum CoreError {
 	Utf8ConversionError(#[from] std::string::FromUtf8Error),
 	#[error("Something went wrong: {0}")]
 	InternalError(String),
+	#[error("This feature is not yet implemented: {0}")]
+	UnImplemented(String),
 	#[error("An unknown error ocurred: {0}")]
 	Unknown(String),
 }

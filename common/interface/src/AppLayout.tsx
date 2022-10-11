@@ -17,6 +17,7 @@ export function AppLayout() {
 
 	const navigate = useNavigate();
 	const location = useLocation();
+
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
 		// TODO: replace with single regex, I am lazy rn
@@ -40,6 +41,7 @@ export function AppLayout() {
 	// functionality. I have no idea how to do this in a clean way right now though.
 	// On network error, if on desktop app, navigate to a screen to troubleshoot
 	// the connection to the server
+	// FIXME: after switching to SSE again, this seems to break desktop app... kinda annoying bug.
 	const { user, isLoading, error } = useAuthQuery({
 		onSuccess: setUser,
 		enabled: !storeUser,
@@ -83,7 +85,7 @@ export function AppLayout() {
 			</Flex>
 
 			{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
-			<JobOverlay />
+			{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
 		</React.Suspense>
 	);
 }

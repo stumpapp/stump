@@ -7,6 +7,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import {
 	AppProps,
 	AppPropsContext,
+	JobContextProvider,
 	queryClient,
 	useStumpStore,
 	useTopBarStore,
@@ -70,7 +71,9 @@ function RouterContainer(props: { appProps: AppProps }) {
 				<title>Stump</title>
 			</Helmet>
 			<BrowserRouter>
-				<AppRouter />
+				<JobContextProvider>
+					<AppRouter />
+				</JobContextProvider>
 			</BrowserRouter>
 		</AppPropsContext.Provider>
 	);

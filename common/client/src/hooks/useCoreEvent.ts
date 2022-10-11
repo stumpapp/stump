@@ -46,7 +46,7 @@ export function useCoreEventHandler({
 
 					// toast.success(`Job ${data} complete.`);
 					onJobComplete?.(data);
-				}, 500);
+				}, 750);
 				break;
 			case 'JobFailed':
 				onJobFailed?.(data);

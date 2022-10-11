@@ -194,7 +194,9 @@ impl JobUpdate {
 		}
 	}
 
-	pub fn job_finished(
+	// TODO: remove / replace this. semantically, this is not correct. it will be confusing
+	// to others. in general, much of these job helpers need to be rethinked.
+	pub fn job_finishing(
 		runner_id: String,
 		current_task: Option<u64>,
 		task_count: u64,
@@ -205,7 +207,7 @@ impl JobUpdate {
 			current_task,
 			task_count,
 			message: Some(message.unwrap_or_else(|| "Job finished!".to_string())),
-			status: Some(JobStatus::Completed),
+			status: Some(JobStatus::Running),
 		}
 	}
 }

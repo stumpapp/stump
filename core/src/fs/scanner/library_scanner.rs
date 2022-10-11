@@ -552,13 +552,13 @@ pub async fn scan_batch(
 		}
 	}
 
-	ctx.progress(JobUpdate::job_finished(
+	ctx.progress(JobUpdate::job_finishing(
 		runner_id,
 		Some(final_count),
 		files_to_process,
 		None,
 	));
-	tokio::time::sleep(Duration::from_millis(50)).await;
+	tokio::time::sleep(Duration::from_millis(1000)).await;
 
 	Ok(final_count)
 }
@@ -617,13 +617,13 @@ pub async fn scan_sync(
 		.await;
 	}
 
-	ctx.progress(JobUpdate::job_finished(
+	ctx.progress(JobUpdate::job_finishing(
 		runner_id,
 		Some(counter.load(Ordering::SeqCst)),
 		files_to_process,
 		None,
 	));
-	tokio::time::sleep(Duration::from_millis(50)).await;
+	tokio::time::sleep(Duration::from_millis(1000)).await;
 
 	Ok(counter.load(Ordering::SeqCst))
 }

@@ -5,7 +5,7 @@ inputs:
   node-version:
     required: true
     description: 'Node version to use'
-  node-pnpm-version:
+  pnpm-version:
     required: true
     description: 'Pnpm version to use'
 
@@ -27,7 +27,7 @@ runs:
       name: Install pnpm
       id: pnpm-install
       with:
-        version: ${{ inputs.node-pnpm-version }}
+        version: ${{ inputs.pnpm-version }}
         run_install: false
     - name: Get pnpm store directory
       shell: bash

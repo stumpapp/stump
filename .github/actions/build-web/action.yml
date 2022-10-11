@@ -9,7 +9,7 @@ runs:
       id: compile
       with:
         node-version: 16
-        node-pnpm-version: 7          
+        pnpm-version: 7
 
     - name: Upload
       uses: ./.github/actions/upload-artifact

@@ -1,0 +1,30 @@
+name: 'Upload Local'
+description: 'Upload artifact to local action'
+
+inputs:
+  # Upload
+  upload-name:
+    required: true
+    description: 'Name of the upload'
+  upload-path:
+    required: true
+    description: 'Path to the upload data'
+
+runs:
+  using: 'composite'
+  steps:
+    # https://github.com/actions/upload-artifact/issues/337
+    - name: Normalize
+      if: ${{ runner.os == 'Windows' }}
+      shell: bash
+      id: normalize
+      run: |
+        UPLOAD_PATH=$(cygpath -w ${{ inputs.upload-path }})
+        echo ::set-output name=path::$UPLOAD_PATH
+
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ inputs.upload-name }}
+        path: ${{ steps.normalize.outputs.path || inputs.upload-path }}
+        retention-days: 1

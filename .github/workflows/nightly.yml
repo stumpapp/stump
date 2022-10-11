@@ -1,0 +1,16 @@
+name: Stump-nightly
+
+on:
+  push:
+    branches:
+      - 'gh-action'
+
+jobs:
+  build-web:
+    name: Build web application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Build web
+        uses: .github/actions/build-web

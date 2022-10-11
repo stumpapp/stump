@@ -1,5 +1,5 @@
 name: 'Compile Web Application'
-description: 'Compile stump web client'
+description: 'Compile stump web web'
 
 inputs:
   node-version:
@@ -44,8 +44,8 @@ runs:
     - name: Install dependencies
       shell: bash
       run: pnpm install
-      working-directory: apps/client
-    - name: TypeScript check for apps/client
+      working-directory: apps/web
+    - name: TypeScript check for apps/web
       shell: bash
       run: pnpm run build 
-      working-directory: apps/client
+      working-directory: apps/web

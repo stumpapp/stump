@@ -13,7 +13,7 @@ pub fn get_log_file() -> PathBuf {
 	get_config_dir().join("Stump.log")
 }
 pub fn get_log_verbosity() -> u64 {
-	match std::env::var("STUMP_LOG_VERBOSITY") {
+	match std::env::var("STUMP_VERBOSITY") {
 		Ok(s) => s.parse::<u64>().unwrap_or(1),
 		Err(_) => 1,
 	}

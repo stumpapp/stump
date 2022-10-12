@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, Query},
-	middleware::from_extractor,
+	middleware::{from_extractor, from_fn},
 	routing::get,
 	Extension, Json, Router,
 };
@@ -28,7 +28,7 @@ use stump_core::{
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
-	middleware::auth::Auth,
+	middleware::{auth::Auth, logging::logging_middleware},
 	utils::{
 		get_session_admin_user,
 		http::{ImageResponse, PageableTrait},
@@ -53,6 +53,7 @@ pub(crate) fn mount() -> Router {
 				.route("/thumbnail", get(get_library_thumbnail)),
 		)
 		.layer(from_extractor::<Auth>())
+		.layer(from_fn(logging_middleware))
 }
 
 /// Get all libraries

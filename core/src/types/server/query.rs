@@ -73,6 +73,7 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 			"updated_at" => media::updated_at::order(dir),
 			"status" => media::status::order(dir),
 			"path" => media::path::order(dir),
+			"pages" => media::pages::order(dir),
 			"series_id" => media::series_id::order(dir),
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(

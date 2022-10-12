@@ -5218,6 +5218,7 @@ dependencies = [
  "bcrypt",
  "chrono",
  "futures-util",
+ "hyper",
  "openssl",
  "prisma-client-rust",
  "rand 0.8.5",

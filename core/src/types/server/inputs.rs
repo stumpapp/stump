@@ -32,7 +32,7 @@ pub struct ClaimResponse {
 	pub is_claimed: bool,
 }
 
-#[derive(Deserialize, Type)]
+#[derive(Deserialize, Debug, Type)]
 pub struct CreateLibraryArgs {
 	/// The name of the library to create.
 	pub name: String,
@@ -48,7 +48,7 @@ pub struct CreateLibraryArgs {
 	pub library_options: Option<LibraryOptions>,
 }
 
-#[derive(Deserialize, Type)]
+#[derive(Deserialize, Debug, Type)]
 pub struct UpdateLibraryArgs {
 	pub id: String,
 	/// The updated name of the library.

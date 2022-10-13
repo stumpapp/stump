@@ -4,6 +4,7 @@ use axum::{
 	middleware::Next,
 	response::IntoResponse,
 };
+use stump_core::config::logging::get_log_verbosity;
 
 use crate::errors::ApiResult;
 
@@ -11,6 +12,10 @@ pub(crate) async fn logging_middleware(
 	req: Request<Body>,
 	next: Next<Body>,
 ) -> ApiResult<impl IntoResponse> {
+	if get_log_verbosity() < 3 {
+		return Ok(next.run(req).await);
+	}
+
 	let (parts, body) = req.into_parts();
 
 	let method = parts.method.as_ref();
@@ -25,7 +30,7 @@ pub(crate) async fn logging_middleware(
 		};
 	}
 
-	tracing::trace!(?method, ?uri, ?body, "request");
+	tracing::trace!(?method, ?uri, ?body, "HTTP Request");
 
 	let req = Request::from_parts(parts, Body::from(bytes));
 

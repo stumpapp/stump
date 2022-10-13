@@ -1,13 +1,17 @@
 import { Stack } from '@chakra-ui/react';
 import { useJobReport } from '@stump/client';
 import { Helmet } from 'react-helmet';
-import { JobHistory, QueuedJobs, RunningJobs } from '../../components/jobs/JobReports';
+import { RunningJobs } from '../../components/jobs/RunningJobs';
+import JobsTable from '../../components/jobs/JobsTable';
 
+// TODO: fix error/loading state lol
 export default function JobSettings() {
-	const { jobReports } = useJobReport();
+	const { isLoading, jobReports } = useJobReport();
 
-	if (!jobReports) {
+	if (!jobReports && isLoading) {
 		throw new Error('TODO');
+	} else if (isLoading) {
+		return <p>Loading...</p>;
 	}
 
 	return (
@@ -19,9 +23,10 @@ export default function JobSettings() {
 			<Stack w="full" spacing={6}>
 				<div>I am not implemented yet, ugly content below...</div>
 
-				<RunningJobs jobReports={jobReports} />
-				<QueuedJobs jobReports={jobReports} />
-				<JobHistory jobReports={jobReports} />
+				<RunningJobs jobReports={jobReports!} />
+				<JobsTable />
+				{/* <QueuedJobs jobReports={jobReports} />
+				<JobHistory jobReports={jobReports} /> */}
 			</Stack>
 		</>
 	);

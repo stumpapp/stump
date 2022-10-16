@@ -46,6 +46,8 @@ impl JobPool {
 		});
 
 		let pool_cpy = pool.clone();
+		// TODO: I think I should merge this with event manager. Spawning
+		// yet another new thread just for a smaller set of events is silly.
 		tokio::spawn(async move {
 			while let Some(e) = internal_receiver.recv().await {
 				pool_cpy.clone().handle_task(e).await;

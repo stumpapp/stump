@@ -8,6 +8,7 @@ use stump_core::config::logging::get_log_verbosity;
 
 use crate::errors::ApiResult;
 
+#[allow(dead_code)]
 pub(crate) async fn logging_middleware(
 	req: Request<Body>,
 	next: Next<Body>,
@@ -45,6 +46,7 @@ pub(crate) async fn logging_middleware(
 	Ok(next.run(req).await)
 }
 
+#[allow(dead_code)]
 async fn get_buffer<B>(body: B) -> Bytes
 where
 	B: axum::body::HttpBody<Data = Bytes>,

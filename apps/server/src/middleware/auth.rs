@@ -126,6 +126,48 @@ where
 	}
 }
 
+/// Middleware to check the session user is an admin. **Must** be used **after** [Auth] midddleware.
+/// Refer to https://docs.rs/axum/latest/axum/middleware/index.html#ordering.
+///
+/// ## Example:
+///
+/// ```rust
+/// use axum::{Router, middleware::from_extractor};
+///
+/// Router::new()
+///     .layer(from_extractor::<AdminGuard>())
+///     .layer(from_extractor::<Auth>());
+/// ```
+pub struct AdminGuard;
+
+#[async_trait]
+impl<B> FromRequest<B> for AdminGuard
+where
+	B: Send,
+{
+	type Rejection = StatusCode;
+
+	async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+		if req.method() == Method::OPTIONS {
+			return Ok(Self);
+		}
+
+		let session_handle = req.extensions().get::<SessionHandle>().unwrap();
+		let session = session_handle.read().await;
+
+		if let Some(user) = session.get::<User>("user") {
+			if user.is_admin() {
+				return Ok(Self);
+			}
+
+			return Err(StatusCode::FORBIDDEN);
+		}
+
+		drop(session);
+		return Err(StatusCode::UNAUTHORIZED);
+	}
+}
+
 pub struct BasicAuth;
 
 impl IntoResponse for BasicAuth {

@@ -1,8 +1,16 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import {
+	ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	getPaginationRowModel,
+	useReactTable,
+} from '@tanstack/react-table';
 import { useMemo } from 'react';
-import { JobReport, useJobReport } from '@stump/client';
-import { readableKind } from './utils';
+import { JobReport, JobStatus, useJobReport } from '@stump/client';
+import { formatJobStatus, readableKind } from './utils';
 import { Box, useColorModeValue } from '@chakra-ui/react';
+import TablePagination from '../../ui/table/Pagination';
+import Table from '../../ui/table/Table';
 
 // interface JobReport {
 // 	id: string | null;
@@ -20,6 +28,7 @@ import { Box, useColorModeValue } from '@chakra-ui/react';
 export default function JobsTable() {
 	const { isLoading, jobReports } = useJobReport();
 
+	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 	const columns = useMemo<ColumnDef<JobReport>[]>(
 		() => [
 			{
@@ -34,143 +43,35 @@ export default function JobsTable() {
 					{
 						accessorKey: 'kind',
 						header: 'Type',
-						cell: (info) => readableKind(info.getValue()),
+						cell: (info) => readableKind(info.getValue<string>()),
 						footer: (props) => props.column.id,
 					},
-					// {
-					// 	accessorFn: (row) => row.lastName,
-					// 	id: 'lastName',
-					// 	cell: (info) => info.getValue(),
-					// 	header: () => <span>Last Name</span>,
-					// 	footer: (props) => props.column.id,
-					// },
+					{
+						accessorKey: 'status',
+						header: 'Status',
+						// change value to all lowercase except for first letter
+						cell: (info) => formatJobStatus(info.getValue<JobStatus>()),
+						footer: (props) => props.column.id,
+					},
 				],
 			},
 		],
 		[],
 	);
 
-	// const pagination = useMemo(
-	// 	() => ({
-	// 		pageIndex,
-	// 		pageSize,
-	// 	}),
-	// 	[pageIndex, pageSize],
-	// );
-
-	const table = useReactTable({
-		data: jobReports ?? [],
-		columns,
-		// pageCount: dataQuery.data?.pageCount ?? -1,
-		state: {
-			// pagination,
-		},
-		// onPaginationChange: setPagination,
-		getCoreRowModel: getCoreRowModel(),
-		// manualPagination: true,
-		// getPaginationRowModel: getPaginationRowModel(), // If only doing manual pagination, you don't need this
-		debugTable: true,
-	});
-
 	return (
-		<Box bg={useColorModeValue('whiteAlpha.600', 'blackAlpha.300')} rounded="md" p={3}>
-			<table>
-				<thead>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<tr key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
-								return (
-									<th key={header.id} colSpan={header.colSpan}>
-										{header.isPlaceholder ? null : (
-											<div>{flexRender(header.column.columnDef.header, header.getContext())}</div>
-										)}
-									</th>
-								);
-							})}
-						</tr>
-					))}
-				</thead>
-				<tbody>
-					{table.getRowModel().rows.map((row) => {
-						return (
-							<tr key={row.id}>
-								{row.getVisibleCells().map((cell) => {
-									return (
-										<td key={cell.id}>
-											{flexRender(cell.column.columnDef.cell, cell.getContext())}
-										</td>
-									);
-								})}
-							</tr>
-						);
-					})}
-				</tbody>
-			</table>
-			<div className="h-2" />
-			<div className="flex items-center gap-2">
-				<button
-					className="border rounded p-1"
-					onClick={() => table.setPageIndex(0)}
-					disabled={!table.getCanPreviousPage()}
-				>
-					{'<<'}
-				</button>
-				<button
-					className="border rounded p-1"
-					onClick={() => table.previousPage()}
-					disabled={!table.getCanPreviousPage()}
-				>
-					{'<'}
-				</button>
-				<button
-					className="border rounded p-1"
-					onClick={() => table.nextPage()}
-					disabled={!table.getCanNextPage()}
-				>
-					{'>'}
-				</button>
-				<button
-					className="border rounded p-1"
-					onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-					disabled={!table.getCanNextPage()}
-				>
-					{'>>'}
-				</button>
-				<span className="flex items-center gap-1">
-					<div>Page</div>
-					<strong>
-						{table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-					</strong>
-				</span>
-				<span className="flex items-center gap-1">
-					| Go to page:
-					<input
-						type="number"
-						defaultValue={table.getState().pagination.pageIndex + 1}
-						onChange={(e) => {
-							const page = e.target.value ? Number(e.target.value) - 1 : 0;
-							table.setPageIndex(page);
-						}}
-						className="border p-1 rounded w-16"
-					/>
-				</span>
-				<select
-					value={table.getState().pagination.pageSize}
-					onChange={(e) => {
-						table.setPageSize(Number(e.target.value));
-					}}
-				>
-					{[10, 20, 30, 40, 50].map((pageSize) => (
-						<option key={pageSize} value={pageSize}>
-							Show {pageSize}
-						</option>
-					))}
-				</select>
-				{isLoading ? 'Loading...' : null}
-			</div>
-			<div>{table.getRowModel().rows.length} Rows</div>
-
-			{/* <pre>{JSON.stringify(pagination, null, 2)}</pre> */}
-		</Box>
+		<Table
+			columns={columns}
+			options={{
+				getCoreRowModel: getCoreRowModel(),
+				// TODO: change to manual once API endpoint is ready
+				getPaginationRowModel: getPaginationRowModel(), // If only doing manual pagination, you don't need this
+				debugTable: true,
+				debugHeaders: true,
+				debugColumns: true,
+			}}
+			data={jobReports ?? []}
+			fullWidth
+		/>
 	);
 }

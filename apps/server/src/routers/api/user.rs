@@ -10,13 +10,14 @@ use stump_core::{
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
-	middleware::auth::Auth,
+	middleware::auth::{AdminGuard, Auth},
 	utils::{get_hash_cost, get_session_user},
 };
 
 pub(crate) fn mount() -> Router {
 	Router::new()
 		.route("/users", get(get_users).post(create_user))
+		.layer(from_extractor::<AdminGuard>())
 		.nest(
 			"/users/:id",
 			Router::new()

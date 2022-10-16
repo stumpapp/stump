@@ -33,8 +33,9 @@ impl EventManager {
 		ctx: Ctx,
 		mut request_reciever: mpsc::UnboundedReceiver<InternalCoreTask>,
 	) -> Arc<Self> {
+		let job_pool = JobPool::new(ctx);
 		let this = Arc::new(Self {
-			job_pool: JobPool::new(ctx),
+			job_pool: job_pool.arced(),
 		});
 
 		let this_cpy = this.clone();

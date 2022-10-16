@@ -1,14 +1,16 @@
+use prisma_client_rust::Direction;
 use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
 };
-use tokio::sync::{mpsc, Mutex, RwLock};
-use tracing::{error, warn};
+use tokio::sync::{Mutex, RwLock};
+use tracing::error;
 
 use super::{persist_job_cancelled, runner::Runner, Job, JobReport};
 use crate::{
 	config::context::Ctx,
-	event::CoreEvent,
+	event::{CoreEvent, InternalCoreTask},
+	prisma::job,
 	types::{CoreError, CoreResult},
 };
 
@@ -29,45 +31,22 @@ pub struct JobPool {
 	// I can search by ID to cancel a job before it's even started.
 	job_queue: RwLock<VecDeque<Box<dyn Job>>>,
 	job_runners: RwLock<HashMap<String, Arc<Mutex<Runner>>>>,
-	internal_sender: mpsc::UnboundedSender<JobPoolEvent>,
 }
 
 impl JobPool {
 	/// Creates a new JobPool. Internally, two threads will be spawned: 1 to handle internal
 	/// job pool events, and another for scheduled jobs.
-	pub fn new(ctx: Ctx) -> Arc<Self> {
-		let (internal_sender, mut internal_receiver) = mpsc::unbounded_channel();
-
-		let pool = Arc::new(Self {
+	pub fn new(ctx: Ctx) -> Self {
+		Self {
 			core_ctx: ctx.arced(),
 			job_queue: RwLock::new(VecDeque::new()),
 			job_runners: RwLock::new(HashMap::new()),
-			internal_sender,
-		});
-
-		let pool_cpy = pool.clone();
-		// TODO: I think I should merge this with event manager. Spawning
-		// yet another new thread just for a smaller set of events is silly.
-		tokio::spawn(async move {
-			while let Some(e) = internal_receiver.recv().await {
-				pool_cpy.clone().handle_task(e).await;
-			}
-		});
-
-		pool
+		}
 	}
 
-	async fn handle_task(self: Arc<Self>, task: JobPoolEvent) {
-		let self_cpy = self.clone();
-		match task {
-			JobPoolEvent::Init => {
-				warn!("TODO: unimplemented. This event will handle readding queued jobs on the event the server was stopped before they were completed");
-			},
-			JobPoolEvent::EnqueueJob { job } => self_cpy
-				.enqueue_job(job)
-				.await
-				.unwrap_or_else(|e| error!("Failed to enqueue job: {}", e)),
-		}
+	/// Wraps the JobPool in an Arc, consuming self.
+	pub fn arced(self) -> Arc<Self> {
+		Arc::new(self)
 	}
 
 	/// Adds a new job to the job queue. If the queue is empty, it will immediately get
@@ -102,21 +81,26 @@ impl JobPool {
 	}
 
 	/// Removes a job by its runner id. It will attempt to queue the next job,
-	/// if there is one, by emiting a JobPoolEvent to the JobPool's internal sender.
+	/// if there is one.
 	pub async fn dequeue_job(self: Arc<Self>, runner_id: String) {
 		self.job_runners.write().await.remove(&runner_id);
 
 		let next_job = self.job_queue.write().await.pop_front();
 
 		if let Some(job) = next_job {
-			self.internal_sender
-				.send(JobPoolEvent::EnqueueJob { job })
+			self.core_ctx
+				.internal_sender
+				.send(InternalCoreTask::QueueJob(job))
 				.unwrap_or_else(|e| error!("Failed to queue next job: {}", e.to_string()))
 		}
 	}
 
+	/// Cancels a job by its runner id. If a job is queued after the job to be cancelled,
+	/// it will be started.
 	pub async fn cancel_job(self: Arc<Self>, runner_id: String) -> CoreResult<()> {
 		if let Some(runner) = self.job_runners.write().await.remove(&runner_id) {
+			let next_job = self.job_queue.write().await.pop_front();
+
 			if runner.lock().await.shutdown() {
 				// Tell the UI that the job was cancelled
 				self.core_ctx.emit_client_event(CoreEvent::JobFailed {
@@ -130,12 +114,22 @@ impl JobPool {
 				}
 
 				drop(runner);
-				Ok(())
 			} else {
-				Err(CoreError::Unknown(
+				return Err(CoreError::Unknown(
 					"Failed to cancel job. It may have already completed.".to_string(),
-				))
+				));
 			}
+
+			if let Some(job) = next_job {
+				self.core_ctx
+					.internal_sender
+					.send(InternalCoreTask::QueueJob(job))
+					.unwrap_or_else(|e| {
+						error!("Failed to queue next job: {}", e.to_string())
+					})
+			}
+
+			Ok(())
 		} else {
 			Err(CoreError::NotFound(
 				"Failed to cancel job, it was not found.".to_string(),
@@ -143,7 +137,7 @@ impl JobPool {
 		}
 	}
 
-	/// Clears the job queue.
+	/// Clears the job queue. Will not cancel any jobs that are currently running.
 	pub async fn clear_queue(self: Arc<Self>, _ctx: &Ctx) {
 		self.job_queue.write().await.clear();
 	}
@@ -156,6 +150,7 @@ impl JobPool {
 		let mut jobs = db
 			.job()
 			.find_many(vec![])
+			.order_by(job::completed_at::order(Direction::Desc))
 			.exec()
 			.await?
 			.into_iter()

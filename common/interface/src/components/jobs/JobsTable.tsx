@@ -1,19 +1,9 @@
-import {
-	ColumnDef,
-	flexRender,
-	getCoreRowModel,
-	getPaginationRowModel,
-	useReactTable,
-} from '@tanstack/react-table';
+import { ColumnDef, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import { JobReport, JobStatus, useJobReport } from '@stump/client';
 import { formatJobStatus, readableKind } from './utils';
-import { Box, useColorModeValue } from '@chakra-ui/react';
-import TablePagination from '../../ui/table/Pagination';
 import Table from '../../ui/table/Table';
 
-// interface JobReport {
-// 	id: string | null;
 // 	kind: string;
 // 	details: string | null;
 // 	status: JobStatus;
@@ -21,10 +11,7 @@ import Table from '../../ui/table/Table';
 // 	completed_task_count: number | null;
 // 	ms_elapsed: bigint | null;
 // 	completed_at: string | null;
-// }
 
-// TODO: once I understand react-table more, extract this into a separate component
-// in  `ui` folder... -> https://tanstack.com/table/v8/docs/guide/overview
 export default function JobsTable() {
 	const { isLoading, jobReports } = useJobReport();
 

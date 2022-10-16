@@ -24,9 +24,8 @@ export default function JobSettings() {
 				<div>I am not implemented yet, ugly content below...</div>
 
 				<RunningJobs jobReports={jobReports!} />
+				{/* FIXME: starting a job while on the page causes a weird stutter/flicker */}
 				<JobsTable />
-				{/* <QueuedJobs jobReports={jobReports} />
-				<JobHistory jobReports={jobReports} /> */}
 			</Stack>
 		</>
 	);

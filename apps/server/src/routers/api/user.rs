@@ -1,6 +1,7 @@
 use axum::{
 	extract::Path, middleware::from_extractor, routing::get, Extension, Json, Router,
 };
+use std::convert::From;
 use axum_sessions::extractors::ReadableSession;
 use stump_core::{
 	prisma::{user, user_preferences},

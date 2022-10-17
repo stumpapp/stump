@@ -1,11 +1,11 @@
 use axum::{
-	routing::{get, post},
+	routing::{get, post, put, delete},
 	Extension, Json, Router,
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
     prisma::{reading_list, media, user},
-	types::{User, ReadingList},
+	types::{User, readinglist::ReadingList},
 };
 use crate::{
 	config::state::State,
@@ -28,14 +28,6 @@ async fn get_reading_list(
     Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<Vec<ReadingList>>> {
-	let user = get_session_user(&session)?;
-
-    if user != user.reading_lists.creating_user {
-        return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource.".into(),
-		));
-    }
-
     Ok(Json(
         ctx.db
             .reading_list()

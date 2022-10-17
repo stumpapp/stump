@@ -44,8 +44,24 @@ async fn get_reading_list(
     ))
 }
 
-async fn create_reading_list() {
-    todo!()
+async fn create_reading_list(
+    Extension(ctx): State,
+	Json(input): Json<ReadingList>,
+	session: ReadableSession,
+) -> ApiResult<Json<ReadingList>> {
+	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
+	let user_id = get_session_user(&session)?.id;
+
+    let created_reading_list = db
+        .reading_list()
+        .create(input.name.to_owned(), 
+        stump_core::prisma::user::UniqueWhereParam::UsernameEquals(input.creating_user_id), 
+                vec![])
+        .exec()
+        .await?;
+
+    Ok(Json(created_reading_list.into()))
 }
 
 async fn get_reading_list_by_id() {

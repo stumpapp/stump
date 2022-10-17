@@ -8,6 +8,7 @@ use crate::prisma::{self};
 pub struct ReadingList {
 	pub id: String,
 	pub name: String,
+	pub creating_user_id: String,
 	pub description: Option<String>,
 }
 
@@ -16,6 +17,7 @@ impl From<prisma::reading_list::Data> for ReadingList {
 		ReadingList {
 			id: data.id,
 			name: data.name,
+			creating_user_id: data.creating_user_id,
 			description: data.description,
 		}
 	}

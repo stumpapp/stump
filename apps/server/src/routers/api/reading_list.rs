@@ -28,10 +28,14 @@ async fn get_reading_list(
     Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<Vec<ReadingList>>> {
+	let user_id = get_session_user(&session)?.id;
+
     Ok(Json(
         ctx.db
             .reading_list()
-            .find_many(vec![])
+            .find_many(vec![
+                reading_list::creating_user_id::equals(user_id),
+            ])
 			.exec()
 			.await?
 			.into_iter()

@@ -56,7 +56,7 @@ async fn create_reading_list(
         .reading_list()
         .create(
             input.id.to_owned(),
-            reading_list::creating_user::user::id::equals(user_id),
+            reading_list::creating_user::user::id::equals(user_id.clone()),
             vec![reading_list::media::connect(input.media_ids.iter().map(|id| media::id::equals(id.to_string())).collect())]
         )
         .exec()

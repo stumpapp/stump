@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::prisma::{self};
+use crate::prisma::{self, media};
 
 // TODO
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -24,7 +24,7 @@ impl From<prisma::reading_list::Data> for ReadingList {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
-pub struct CreatedReadingList {
+pub struct CreateReadingList {
 	pub id: String,
 	pub media_ids: Vec<String>
 }

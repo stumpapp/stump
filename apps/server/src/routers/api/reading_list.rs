@@ -5,14 +5,13 @@ use axum::{
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
     prisma::{reading_list, media, user},
-	types::{User, readinglist::ReadingList, Media},
+	types::{User, readinglist::ReadingList, Media, readinglist::CreateReadingList},
 };
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
 	utils::{get_session_user},
 };
-
 
 pub(crate) fn mount() -> Router {
     Router::new()
@@ -46,18 +45,20 @@ async fn get_reading_list(
 
 async fn create_reading_list(
     Extension(ctx): State,
-	Json(input): Json<ReadingList>,
+	Json(input): Json<CreateReadingList>,
 	session: ReadableSession,
 ) -> ApiResult<Json<ReadingList>> {
 	let db = ctx.get_db();
-	let user = get_session_user(&session)?;
+    let username = get_session_user(&session)?;
 	let user_id = get_session_user(&session)?.id;
 
     let created_reading_list = db
         .reading_list()
-        .create(input.name.to_owned(), 
-        stump_core::prisma::user::UniqueWhereParam::UsernameEquals(input.creating_user_id), 
-                vec![])
+        .create(
+            input.id.to_owned(),
+            reading_list::creating_user::user::id::equals(user_id),
+            vec![reading_list::media::connect(input.media_ids.iter().map(|id| media::id::equals(id.to_string())).collect())]
+        )
         .exec()
         .await?;
 

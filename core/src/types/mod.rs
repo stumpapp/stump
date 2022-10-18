@@ -24,7 +24,7 @@ mod tests {
 		inputs::*,
 		models::{
 			epub::*, library::*, list_directory::*, log::*, media::*, read_progress::*,
-			series::*, tag::*, user::*,
+			series::*, tag::*, user::*, readinglist::*
 		},
 		server::*,
 	};

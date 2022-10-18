@@ -49,7 +49,6 @@ async fn create_reading_list(
 	session: ReadableSession,
 ) -> ApiResult<Json<ReadingList>> {
 	let db = ctx.get_db();
-    let username = get_session_user(&session)?;
 	let user_id = get_session_user(&session)?.id;
 
     let created_reading_list = db

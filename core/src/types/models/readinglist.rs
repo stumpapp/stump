@@ -22,3 +22,9 @@ impl From<prisma::reading_list::Data> for ReadingList {
 		}
 	}
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+pub struct CreatedReadingList {
+	pub id: String,
+	pub media_ids: Vec<String>
+}

@@ -5,7 +5,7 @@ use axum::{
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
     prisma::{reading_list, media, user},
-	types::{User, readinglist::ReadingList},
+	types::{User, readinglist::ReadingList, Media},
 };
 use crate::{
 	config::state::State,

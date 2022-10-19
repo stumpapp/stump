@@ -89,8 +89,25 @@ async fn get_reading_list_by_id(
     Ok(Json(reading_list_id.unwrap().into()))
 }
 
-async fn update_reading_list() {
-    todo!()
+async fn update_reading_list(
+	Path(id): Path<String>,
+    Extension(ctx): State,
+	Json(input): Json<CreateReadingList>,
+	session: ReadableSession,
+) -> ApiResult<Json<ReadingList>> {
+	let db = ctx.get_db();
+
+    let created_reading_list: _ = db
+    .reading_list()
+    .update(reading_list::UniqueWhereParam::IdEquals(id), vec![
+        reading_list::SetParam::SetId(input.id.to_owned()),
+        reading_list::media::connect(input.media_ids.iter().map(|id| media::id::equals(id.to_string())).collect())
+    ])
+    .exec()
+    .await?;
+
+Ok(Json(created_reading_list.into()))
+
 }
 
 async fn delete_reading_list_by_id() {

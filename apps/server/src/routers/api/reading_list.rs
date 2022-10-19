@@ -8,6 +8,7 @@ use stump_core::{
     prisma::{reading_list, media, user},
 	types::{User, readinglist::ReadingList, Media, readinglist::CreateReadingList},
 };
+use tracing::log::trace;
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
@@ -99,17 +100,29 @@ async fn update_reading_list(
 
     let created_reading_list: _ = db
     .reading_list()
-    .update(reading_list::UniqueWhereParam::IdEquals(id), vec![
+    .update(reading_list::UniqueWhereParam::IdEquals(id.clone()), vec![
         reading_list::SetParam::SetId(input.id.to_owned()),
         reading_list::media::connect(input.media_ids.iter().map(|id| media::id::equals(id.to_string())).collect())
     ])
     .exec()
     .await?;
 
-Ok(Json(created_reading_list.into()))
-
+    Ok(Json(created_reading_list.into()))
 }
 
-async fn delete_reading_list_by_id() {
-    todo!()
+async fn delete_reading_list_by_id(
+	Path(id): Path<String>,
+    Extension(ctx): State,
+) -> ApiResult<Json<String>> {
+    let db = ctx.get_db();
+
+	trace!("Attempting to delete reading list with ID {}", &id);
+
+    let deleted = db
+        .reading_list()
+        .delete(reading_list::UniqueWhereParam::IdEquals((id.clone())))
+        .exec()
+        .await?;
+
+	Ok(Json(deleted.id))
 }

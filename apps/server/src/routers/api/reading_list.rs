@@ -94,7 +94,6 @@ async fn update_reading_list(
 	Path(id): Path<String>,
     Extension(ctx): State,
 	Json(input): Json<CreateReadingList>,
-	session: ReadableSession,
 ) -> ApiResult<Json<ReadingList>> {
 	let db = ctx.get_db();
 
@@ -120,7 +119,7 @@ async fn delete_reading_list_by_id(
 
     let deleted = db
         .reading_list()
-        .delete(reading_list::UniqueWhereParam::IdEquals((id.clone())))
+        .delete(reading_list::UniqueWhereParam::IdEquals(id.clone()))
         .exec()
         .await?;
 

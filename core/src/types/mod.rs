@@ -24,7 +24,7 @@ mod tests {
 		inputs::*,
 		models::{
 			epub::*, library::*, list_directory::*, log::*, media::*, read_progress::*,
-			series::*, tag::*, user::*,
+			series::*, tag::*, user::*, readinglist::*
 		},
 		server::*,
 	};
@@ -75,6 +75,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobReport>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<ReadingList>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<CreateReadingList>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<DirectoryListing>()?).as_bytes())?;
 		file.write_all(

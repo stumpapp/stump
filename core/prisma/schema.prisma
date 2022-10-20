@@ -45,7 +45,7 @@ model User {
 
   reading_lists ReadingList[]
 
-  shared_reading_lists ReadingListAccess[]
+  // shared_reading_lists ReadingListAccess[]
 
   // Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44, then making it mandatory
   user_preferences_id String?          @unique
@@ -158,6 +158,8 @@ model Media {
 
   // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
   // readingListId String?
+  reading_list   ReadingList? @relation(fields: [reading_list_id], references: [id])
+  reading_list_id String?
 
   @@map("media")
 }
@@ -186,12 +188,12 @@ model ReadingList {
   // The date in which the reading list was last updated. ex: "2022-04-20 04:20:69"
   updated_at  DateTime @updatedAt
   // The media in the reading list.
-  // media       Media[]
+  media       Media[]
 
   creating_user    User   @relation(fields: [creating_user_id], references: [id], onDelete: Cascade)
   creating_user_id String
 
-  access_information ReadingListAccess[]
+  // access_information ReadingListAccess[]
 
   // A user can only have one reading list with the same name
   @@unique([creating_user_id, name])
@@ -199,20 +201,20 @@ model ReadingList {
 }
 
 // Who may access a reading list created by a user
-model ReadingListAccess {
-  id String @id @default(cuid())
+// model ReadingListAccess {
+// id String @id @default(cuid())
 
-  // The user who may access the reading list
-  user    User   @relation(fields: [user_id], references: [id])
-  user_id String
+// The user who may access the reading list
+// user    User   @relation(fields: [user_id], references: [id])
+// user_id String
 
-  // The reading list that may be accessed
-  reading_list    ReadingList @relation(fields: [reading_list_id], references: [id])
-  reading_list_id String
+// The reading list that may be accessed
+// reading_list    ReadingList @relation(fields: [reading_list_id], references: [id])
+// reading_list_id String
 
-  @@unique([user_id, reading_list_id])
-  @@map("reading_list_access")
-}
+// @@unique([user_id, reading_list_id])
+// @@map("reading_list_access")
+// }
 
 // TODO: A user is the owning entity for collections and may share collections with other users
 model Collection {

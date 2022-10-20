@@ -16,6 +16,7 @@ mod media;
 mod series;
 mod tag;
 mod user;
+mod reading_list;
 
 pub(crate) fn mount() -> Router {
 	Router::new().nest(
@@ -31,6 +32,7 @@ pub(crate) fn mount() -> Router {
 			.merge(series::mount())
 			.merge(tag::mount())
 			.merge(user::mount())
+			.merge(reading_list::mount())
 			.route("/claim", get(claim))
 			.route("/ping", get(ping))
 			.route("/version", post(version)),

@@ -7,6 +7,7 @@ pub mod read_progress;
 pub mod series;
 pub mod tag;
 pub mod user;
+pub mod readinglist;
 
 pub use crate::types::models::epub::*;
 pub use crate::types::models::log::*;

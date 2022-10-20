@@ -76,6 +76,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<JobReport>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<ReadingList>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<CreateReadingList>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<DirectoryListing>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<DirectoryListingFile>()?).as_bytes(),

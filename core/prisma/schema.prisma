@@ -158,8 +158,8 @@ model Media {
 
   // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
   // readingListId String?
-  ReadingList   ReadingList? @relation(fields: [readingListId], references: [id])
-  readingListId String?
+  reading_list   ReadingList? @relation(fields: [reading_list_id], references: [id])
+  reading_list_id String?
 
   @@map("media")
 }

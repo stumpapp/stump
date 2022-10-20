@@ -99,8 +99,7 @@ async fn update_reading_list(
 
     let created_reading_list: _ = db
     .reading_list()
-    .update(reading_list::UniqueWhereParam::IdEquals(id.clone()), vec![
-        reading_list::SetParam::SetId(input.id.to_owned()),
+    .update(reading_list::id::equals(id.clone()), vec![
         reading_list::media::connect(input.media_ids.iter().map(|id| media::id::equals(id.to_string())).collect())
     ])
     .exec()
@@ -119,7 +118,7 @@ async fn delete_reading_list_by_id(
 
     let deleted = db
         .reading_list()
-        .delete(reading_list::UniqueWhereParam::IdEquals(id.clone()))
+        .delete(reading_list::id::equals(id.clone()))
         .exec()
         .await?;
 

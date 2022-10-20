@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::prisma::{self, media};
+use crate::prisma::{self};
 
-// TODO
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct ReadingList {
 	pub id: String,

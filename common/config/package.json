@@ -1,4 +1,7 @@
 {
 	"name": "@stump/config",
-	"version": "0.0.0"
+	"version": "0.0.0",
+	"devDependencies": {
+		"tailwind-scrollbar-hide": "^1.1.7"
+	}
 }

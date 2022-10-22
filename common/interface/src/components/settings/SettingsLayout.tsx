@@ -6,7 +6,7 @@ export default function SettingsLayout() {
 	return (
 		<VStack h="full" w="full">
 			<SettingsNavigation />
-			<Box w="full" h="full" bg={useColorModeValue('gray.100', 'gray.900')} p="4">
+			<Box w="full" h="full" bg={useColorModeValue('gray.75', 'gray.900')} p="4">
 				<Outlet />
 			</Box>
 		</VStack>

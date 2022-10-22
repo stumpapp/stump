@@ -137,7 +137,10 @@ importers:
       typescript: 4.8.4
 
   common/config:
-    specifiers: {}
+    specifiers:
+      tailwind-scrollbar-hide: ^1.1.7
+    devDependencies:
+      tailwind-scrollbar-hide: 1.1.7
 
   common/interface:
     specifiers:

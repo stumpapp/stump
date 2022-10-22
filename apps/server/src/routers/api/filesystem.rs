@@ -9,13 +9,14 @@ use tracing::trace;
 
 use crate::{
 	errors::{ApiError, ApiResult},
-	middleware::auth::Auth,
+	middleware::auth::{AdminGuard, Auth},
 	utils::get_session_user,
 };
 
 pub(crate) fn mount() -> Router {
 	Router::new()
 		.route("/filesystem", post(list_directory))
+		.layer(from_extractor::<AdminGuard>())
 		.layer(from_extractor::<Auth>())
 }
 

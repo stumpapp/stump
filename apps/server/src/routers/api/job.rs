@@ -4,34 +4,30 @@ use axum::{
 	routing::{delete, get},
 	Extension, Json, Router,
 };
-use stump_core::{
-	event::InternalCoreTask,
-	job::{JobReport, TestJob},
-};
+use stump_core::{event::InternalCoreTask, job::JobReport};
 use tokio::sync::oneshot;
+use tracing::debug;
 
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
-	middleware::auth::Auth,
+	middleware::auth::{AdminGuard, Auth},
 };
 
-// FIXME: admin...
 pub(crate) fn mount() -> Router {
-	let mut router = Router::new()
-		.route("/jobs", get(get_jobs))
-		.route("/jobs/:id/cancel", delete(cancel_job));
-
-	if cfg!(debug_assertions) {
-		router = router.route("/jobs/test", get(test_job))
-	}
-
-	// router
-	router.layer(from_extractor::<Auth>())
+	Router::new()
+		.nest(
+			"/jobs",
+			Router::new()
+				.route("/", get(get_job_reports).delete(delete_job_reports))
+				.route("/:id/cancel", delete(cancel_job)),
+		)
+		.layer(from_extractor::<AdminGuard>())
+		.layer(from_extractor::<Auth>())
 }
 
 /// Get all running/pending jobs.
-async fn get_jobs(Extension(ctx): State) -> ApiResult<Json<Vec<JobReport>>> {
+async fn get_job_reports(Extension(ctx): State) -> ApiResult<Json<Vec<JobReport>>> {
 	let (task_tx, task_rx) = oneshot::channel();
 
 	ctx.internal_task(InternalCoreTask::GetJobReports(task_tx))
@@ -49,6 +45,12 @@ async fn get_jobs(Extension(ctx): State) -> ApiResult<Json<Vec<JobReport>>> {
 	Ok(Json(res))
 }
 
+async fn delete_job_reports(Extension(ctx): State) -> ApiResult<()> {
+	let result = ctx.db.job().delete_many(vec![]).exec().await?;
+	debug!("Deleted {} job reports", result);
+	Ok(())
+}
+
 async fn cancel_job(Extension(ctx): State, Path(job_id): Path<String>) -> ApiResult<()> {
 	let (task_tx, task_rx) = oneshot::channel();
 
@@ -63,16 +65,4 @@ async fn cancel_job(Extension(ctx): State, Path(job_id): Path<String>) -> ApiRes
 	Ok(task_rx.await.map_err(|e| {
 		ApiError::InternalServerError(format!("Failed to cancel job: {}", e))
 	})??)
-}
-
-async fn test_job(Extension(ctx): State) -> ApiResult<()> {
-	ctx.internal_task(InternalCoreTask::QueueJob(Box::new(TestJob {
-		interval: Some(1),
-		max_ticks: Some(100),
-	})))
-	.map_err(|e| {
-		ApiError::InternalServerError(format!("Failed to submit internal task: {}", e))
-	})?;
-
-	Ok(())
 }

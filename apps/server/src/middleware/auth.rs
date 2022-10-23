@@ -12,7 +12,7 @@ use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{config::Ctx, prisma::user, types::User};
+use stump_core::{config::Ctx, db::models::User, prisma::user};
 use tracing::{error, trace};
 
 use crate::utils::{decode_base64_credentials, verify_password};

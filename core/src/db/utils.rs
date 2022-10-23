@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use prisma_client_rust::{raw, PrismaValue};
 use serde::Deserialize;
 
-use crate::{prisma::PrismaClient, types::CoreResult};
+use crate::{prelude::CoreResult, prisma::PrismaClient};
 
 #[derive(Deserialize, Debug, Default)]
 pub struct CountQueryReturn {

@@ -7,7 +7,7 @@ use tracing::error;
 use crate::{
 	config::context::Ctx,
 	event::CoreEvent,
-	types::{CoreError, CoreResult},
+	prelude::{CoreError, CoreResult},
 };
 
 use super::{persist_new_job, pool::JobPool, Job, JobUpdate, JobWrapper};

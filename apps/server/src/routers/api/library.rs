@@ -11,17 +11,20 @@ use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 
 use stump_core::{
-	db::utils::PrismaCountTrait,
+	db::{
+		models::{LibrariesStats, Library, LibraryScanMode, Series},
+		utils::PrismaCountTrait,
+	},
 	fs::{image, media_file},
 	job::LibraryScanJob,
+	prelude::{
+		CreateLibraryArgs, FindManyTrait, Pageable, PagedRequestParams, QueryOrder,
+		UpdateLibraryArgs,
+	},
 	prisma::{
 		library, library_options, media,
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag,
-	},
-	types::{
-		CreateLibraryArgs, FindManyTrait, LibrariesStats, Library, LibraryScanMode,
-		Pageable, PagedRequestParams, QueryOrder, Series, UpdateLibraryArgs,
 	},
 };
 

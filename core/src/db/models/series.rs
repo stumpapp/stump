@@ -3,7 +3,7 @@ use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::{prisma, types::enums::FileStatus};
+use crate::{prelude::enums::FileStatus, prisma};
 
 use super::{library::Library, media::Media, tag::Tag};
 

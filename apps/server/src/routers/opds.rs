@@ -14,8 +14,8 @@ use stump_core::{
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
+	prelude::PagedRequestParams,
 	prisma::{library, media, read_progress, series},
-	types::PagedRequestParams,
 };
 
 use crate::{

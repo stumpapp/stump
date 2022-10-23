@@ -5,9 +5,9 @@ use axum::{
 };
 use axum_sessions::extractors::ReadableSession;
 use stump_core::{
+	db::models::Epub,
 	fs::epub,
 	prisma::{media, read_progress},
-	types::Epub,
 };
 
 use crate::{

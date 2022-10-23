@@ -1,6 +1,6 @@
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::types::CoreResult;
+use crate::prelude::CoreResult;
 
 use super::{
 	link::OpdsLinkType,

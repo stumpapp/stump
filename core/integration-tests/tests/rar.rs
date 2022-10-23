@@ -2,12 +2,13 @@ use crate::utils::{init_test, make_tmp_file, TempLibrary};
 
 use stump_core::{
 	config::Ctx,
+	db::models::{LibraryPattern, LibraryScanMode},
 	fs::{
 		checksum,
 		media_file::rar::{convert_rar_to_zip, rar_sample},
 	},
+	prelude::CoreResult,
 	prisma::media,
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 // TODO: fix these tests...

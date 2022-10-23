@@ -2,7 +2,7 @@ use axum::{middleware::from_extractor, routing::get, Json, Router};
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::chrono::{DateTime, Utc};
 use std::fs::File;
-use stump_core::{config::logging::get_log_file, types::LogMetadata};
+use stump_core::{config::logging::get_log_file, db::models::LogMetadata};
 
 use crate::{
 	errors::{ApiError, ApiResult},

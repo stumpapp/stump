@@ -2,8 +2,9 @@ use crate::utils::{init_test, run_test_scan, TempLibrary};
 
 use stump_core::{
 	config::Ctx,
+	db::models::{LibraryPattern, LibraryScanMode},
+	prelude::CoreResult,
 	prisma::{library, PrismaClient},
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 async fn check_library_post_scan(

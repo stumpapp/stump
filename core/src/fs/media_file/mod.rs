@@ -7,13 +7,11 @@ use std::path::Path;
 use tracing::{debug, warn};
 
 use crate::{
+	db::models::LibraryOptions,
 	fs::media_file::{epub::process_epub, rar::process_rar, zip::process_zip},
-	types::{
+	prelude::{
 		errors::ProcessFileError,
-		models::{
-			library::LibraryOptions,
-			media::{MediaMetadata, ProcessedMediaFile},
-		},
+		fs::media_file::{MediaMetadata, ProcessedMediaFile},
 		ContentType,
 	},
 };

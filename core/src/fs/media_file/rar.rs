@@ -4,15 +4,14 @@ use unrar::archive::Entry;
 
 use crate::{
 	config::{self, stump_in_docker},
+	db::models::LibraryOptions,
 	fs::{
 		archive::create_zip_archive,
 		checksum::{self, DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
 		media_file::{self, zip, IsImage},
 	},
-	types::{
-		errors::ProcessFileError,
-		models::{library::LibraryOptions, media::ProcessedMediaFile},
-		ContentType,
+	prelude::{
+		errors::ProcessFileError, fs::media_file::ProcessedMediaFile, ContentType,
 	},
 };
 

@@ -3,7 +3,7 @@ use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::types::CoreResult;
+use crate::prelude::CoreResult;
 use crate::{
 	opds::link::OpdsStreamLink,
 	prisma::{library, media, series},

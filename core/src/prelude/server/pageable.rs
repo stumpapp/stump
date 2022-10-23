@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tracing::trace;
 
-use crate::types::DirectoryListing;
+use crate::prelude::DirectoryListing;
 
 use super::Direction;
 

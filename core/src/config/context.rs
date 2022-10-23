@@ -6,11 +6,10 @@ use tokio::sync::{
 };
 
 use crate::{
-	db,
+	db::{self, models::TentativeLog},
 	event::{CoreEvent, InternalCoreTask},
 	job::Job,
 	prisma,
-	types::models::log::TentativeLog,
 };
 
 type InternalSender = UnboundedSender<InternalCoreTask>;

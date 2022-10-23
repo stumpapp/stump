@@ -1,6 +1,6 @@
 use axum::{middleware::from_extractor, routing::get, Extension, Json, Router};
 use serde::Deserialize;
-use stump_core::types::Tag;
+use stump_core::db::models::Tag;
 
 use crate::{config::state::State, errors::ApiResult, middleware::auth::Auth};
 

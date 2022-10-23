@@ -2,7 +2,7 @@ use axum::{
 	routing::{get, post},
 	Extension, Json, Router,
 };
-use stump_core::types::{ClaimResponse, StumpVersion};
+use stump_core::prelude::{ClaimResponse, StumpVersion};
 
 use crate::{config::state::State, errors::ApiResult};
 
@@ -13,10 +13,10 @@ mod job;
 mod library;
 mod log;
 mod media;
+mod reading_list;
 mod series;
 mod tag;
 mod user;
-mod reading_list;
 
 pub(crate) fn mount() -> Router {
 	Router::new().nest(

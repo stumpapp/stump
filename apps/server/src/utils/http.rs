@@ -8,7 +8,7 @@ use std::{
 	io,
 	path::{Path, PathBuf},
 };
-use stump_core::types::{ContentType, PageParams, PagedRequestParams};
+use stump_core::prelude::{ContentType, PageParams, PagedRequestParams};
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
 

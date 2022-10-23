@@ -3,8 +3,9 @@ use axum::{
 };
 use axum_sessions::extractors::ReadableSession;
 use stump_core::{
+	db::models::{User, UserPreferences},
+	prelude::{LoginOrRegisterArgs, UserPreferencesUpdate},
 	prisma::{user, user_preferences},
-	types::{LoginOrRegisterArgs, User, UserPreferences, UserPreferencesUpdate},
 };
 
 use crate::{

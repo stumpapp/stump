@@ -11,18 +11,14 @@ use walkdir::DirEntry;
 
 use crate::{
 	config::context::Ctx,
+	db::models::LibraryOptions,
 	event::CoreEvent,
 	fs::{image, media_file},
+	prelude::{CoreResult, FileStatus, ScanError},
 	prisma::{library, media, series},
-	types::{
-		enums::FileStatus,
-		errors::ScanError,
-		models::{library::LibraryOptions, media::TentativeMedia},
-		CoreResult,
-	},
 };
 
-use super::BatchScanOperation;
+use super::{BatchScanOperation, TentativeMedia};
 
 /// Will mark all series and media within the library as MISSING. Requires the
 /// series and series.media relations to have been loaded to function properly.
@@ -116,22 +112,21 @@ pub async fn insert_media(
 	library_options: &LibraryOptions,
 ) -> Result<media::Data, ScanError> {
 	let path_str = path.to_str().unwrap_or_default().to_string();
-
 	let tentative_media = get_tentative_media(path, series_id, library_options)?;
 	let create_action = tentative_media.into_action(ctx);
-	let media = create_action.exec().await?;
+	let created_media = create_action.exec().await?;
 
-	trace!("Media entity created: {:?}", media);
+	trace!("Media entity created: {:?}", created_media);
 
 	if library_options.create_webp_thumbnails {
 		debug!("Attempting to create WEBP thumbnail");
-		let thumbnail_path = image::generate_thumbnail(&media.id, &path_str)?;
+		let thumbnail_path = image::generate_thumbnail(&created_media.id, &path_str)?;
 		debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
 	}
 
 	debug!("Media for {} created successfully", path_str);
 
-	Ok(media)
+	Ok(created_media)
 }
 
 pub async fn insert_series(
@@ -264,14 +259,11 @@ pub async fn batch_media_operations(
 
 	let media_creates = create_operations
 		.into_iter()
-		.map(|operation| {
-			match operation {
-				BatchScanOperation::CreateMedia { path, series_id } => {
-					// let result = insert_media(&ctx, &path, series_id, &library_options).await;
-					get_tentative_media(&path, series_id, library_options)
-				},
-				_ => unreachable!(),
-			}
+		.map(|operation| match operation {
+			BatchScanOperation::CreateMedia { path, series_id } => {
+				get_tentative_media(&path, series_id, library_options)
+			},
+			_ => unreachable!(),
 		})
 		.filter_map(|res| match res {
 			Ok(entry) => Some(entry.into_action(ctx)),
@@ -291,12 +283,6 @@ pub async fn batch_media_operations(
 		.collect::<Vec<String>>();
 
 	let result = mark_media_missing(ctx, missing_paths).await;
-
-	if let Err(err) = result {
-		error!("Failed to mark media as MISSING: {:?}", err);
-	} else {
-		debug!("Marked {} media as MISSING", result.unwrap());
-	}
 
 	Ok(ctx.db._batch(media_creates).await?)
 }

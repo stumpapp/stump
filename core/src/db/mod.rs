@@ -1,4 +1,5 @@
 pub mod migration;
+pub mod models;
 pub mod utils;
 
 use std::path::Path;

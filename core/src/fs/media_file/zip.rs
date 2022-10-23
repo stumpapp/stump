@@ -7,7 +7,9 @@ use crate::{
 		checksum,
 		media_file::{self, IsImage},
 	},
-	types::{errors::ProcessFileError, models::media::ProcessedMediaFile, ContentType},
+	prelude::{
+		errors::ProcessFileError, fs::media_file::ProcessedMediaFile, ContentType,
+	},
 };
 
 impl<'a> IsImage for ZipFile<'a> {

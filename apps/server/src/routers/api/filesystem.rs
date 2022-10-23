@@ -1,7 +1,7 @@
 use axum::{extract::Query, middleware::from_extractor, routing::post, Json, Router};
 use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
-use stump_core::types::{
+use stump_core::prelude::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput, Pageable,
 	PagedRequestParams,
 };

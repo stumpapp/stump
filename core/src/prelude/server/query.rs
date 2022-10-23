@@ -5,8 +5,8 @@ use specta::Type;
 use prisma_client_rust::{query_core::Selection, FindMany, PrismaValue, SerializedWhere};
 
 use crate::{
+	prelude::{errors::CoreError, server::pageable::PageParams},
 	prisma::{media, series},
-	types::{errors::CoreError, server::pageable::PageParams},
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]

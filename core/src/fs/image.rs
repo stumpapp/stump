@@ -8,7 +8,9 @@ use std::{
 use tracing::{debug, error, trace};
 use webp::{Encoder, WebPMemory};
 
-use crate::{config::get_thumbnails_dir, prisma::media, types::errors::ProcessFileError};
+use crate::{
+	config::get_thumbnails_dir, prelude::errors::ProcessFileError, prisma::media,
+};
 
 use super::media_file;
 

@@ -1,8 +1,9 @@
 use stump_core::{
 	config::Ctx,
+	db::models::{LibraryPattern, LibraryScanMode},
 	fs::{checksum, media_file::zip::zip_sample},
+	prelude::CoreResult,
 	prisma::media,
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 use crate::utils::{init_test, TempLibrary};

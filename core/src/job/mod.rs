@@ -14,8 +14,8 @@ use crate::{
 	config::context::Ctx,
 	event::CoreEvent,
 	job::runner::RunnerCtx,
+	prelude::{errors::CoreError, CoreResult},
 	prisma::{self},
-	types::{errors::CoreError, CoreResult},
 };
 
 #[async_trait::async_trait]

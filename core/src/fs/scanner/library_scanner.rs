@@ -16,6 +16,7 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	config::context::Ctx,
+	db::models::{LibraryOptions, LibraryScanMode},
 	event::CoreEvent,
 	fs::{
 		image,
@@ -25,11 +26,8 @@ use crate::{
 		},
 	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
+	prelude::{CoreError, CoreResult, FileStatus},
 	prisma::{library, media, series},
-	types::{
-		enums::FileStatus, errors::CoreError, models::library::LibraryOptions,
-		CoreResult, LibraryScanMode,
-	},
 };
 
 use super::{

@@ -8,15 +8,15 @@ use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
 use serde::Deserialize;
 use stump_core::{
-	db::utils::PrismaCountTrait,
+	db::{
+		models::{Media, Series},
+		utils::PrismaCountTrait,
+	},
 	fs::{image, media_file},
+	prelude::{ContentType, FindManyTrait, Pageable, PagedRequestParams, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress, series,
-	},
-	types::{
-		ContentType, FindManyTrait, Media, Pageable, PagedRequestParams, QueryOrder,
-		Series,
 	},
 };
 use tracing::trace;

@@ -1,4 +1,4 @@
-use crate::types::{errors::ProcessFileError, ContentType};
+use crate::prelude::{errors::ProcessFileError, ContentType};
 
 pub fn get_pdf_page(
 	_file: &str,

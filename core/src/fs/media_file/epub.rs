@@ -14,7 +14,7 @@ use crate::{
 		checksum,
 		media_file::{get_content_type_from_mime, guess_content_type},
 	},
-	types::{errors::ProcessFileError, models::media::ProcessedMediaFile, ContentType},
+	prelude::{errors::ProcessFileError, fs::ProcessedMediaFile, ContentType},
 };
 use epub::doc::EpubDoc;
 use tracing::{debug, error, warn};

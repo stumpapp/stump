@@ -13,7 +13,7 @@ use stump_core::{
 		utils::PrismaCountTrait,
 	},
 	fs::{image, media_file},
-	prelude::{ContentType, FindManyTrait, Pageable, PagedRequestParams, QueryOrder},
+	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress, series,
@@ -190,7 +190,7 @@ async fn get_series_media(
 	let order_by_param: MediaOrderByParam =
 		QueryOrder::from(page_params.clone()).try_into()?;
 
-	let base_query = db
+	let mut query = db
 		.media()
 		.find_many(vec![media::series_id::equals(Some(id.clone()))])
 		.with(media::read_progresses::fetch(vec![
@@ -198,16 +198,20 @@ async fn get_series_media(
 		]))
 		.order_by(order_by_param);
 
-	let media = if unpaged {
-		base_query.exec().await?
-	} else {
-		base_query.paginated(page_params.clone()).exec().await?
-	};
+	if !unpaged {
+		let (skip, take) = page_params.get_skip_take();
+		query = query.skip(skip).take(take);
+	}
 
-	let media = media.into_iter().map(|m| m.into()).collect::<Vec<Media>>();
+	let media = query
+		.exec()
+		.await?
+		.into_iter()
+		.map(Media::from)
+		.collect::<Vec<Media>>();
 
 	if unpaged {
-		return Ok(Json(media.into()));
+		return Ok(Json(Pageable::from(media)));
 	}
 
 	// TODO: investigate this, I am getting incorrect counts here...

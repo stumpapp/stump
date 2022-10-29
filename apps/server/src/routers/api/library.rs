@@ -18,8 +18,7 @@ use stump_core::{
 	fs::{image, media_file},
 	job::LibraryScanJob,
 	prelude::{
-		CreateLibraryArgs, FindManyTrait, Pageable, PagedRequestParams, QueryOrder,
-		UpdateLibraryArgs,
+		CreateLibraryArgs, Pageable, PagedRequestParams, QueryOrder, UpdateLibraryArgs,
 	},
 	prisma::{
 		library, library_options, media,
@@ -158,19 +157,19 @@ async fn get_library_series(
 	let order_by_param: SeriesOrderByParam =
 		QueryOrder::from(page_params.clone()).try_into()?;
 
-	let base_query = db
+	let mut query = db
 		.series()
 		// TODO: add media relation count....
 		.find_many(vec![series::library_id::equals(Some(id.clone()))])
 		.order_by(order_by_param);
 
-	let series = match unpaged {
-		true => base_query.exec().await?,
-		false => base_query.paginated(page_params.clone()).exec().await?,
-	};
+	if !unpaged {
+		let (skip, take) = page_params.get_skip_take();
+		query = query.skip(skip).take(take);
+	}
 
+	let series = query.exec().await?;
 	let series_ids = series.iter().map(|s| s.id.clone()).collect();
-
 	let media_counts = db.series_media_count(series_ids).await?;
 
 	let series = series

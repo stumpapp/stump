@@ -1,8 +1,5 @@
-use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use specta::Type;
-
-use prisma_client_rust::{query_core::Selection, FindMany, PrismaValue, SerializedWhere};
 
 use crate::{
 	prelude::{errors::CoreError, server::pageable::PageParams},
@@ -108,28 +105,28 @@ impl TryInto<series::OrderByParam> for QueryOrder {
 	}
 }
 
-pub trait FindManyTrait {
-	fn paginated(self, page_params: PageParams) -> Self;
-}
+// pub trait FindManyTrait {
+// 	fn paginated(self, page_params: PageParams) -> Self;
+// }
 
-impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
-	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
-where
-	Where: Into<SerializedWhere>,
-	With: Into<Selection>,
-	OrderBy: Into<(String, PrismaValue)>,
-	Cursor: Into<Where>,
-	Set: Into<(String, PrismaValue)>,
-	Data: DeserializeOwned,
-{
-	fn paginated(self, page_params: PageParams) -> Self {
-		let skip = match page_params.zero_based {
-			true => page_params.page * page_params.page_size,
-			false => (page_params.page - 1) * page_params.page_size,
-		} as i64;
+// impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
+// 	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
+// where
+// 	Where: Into<SerializedWhereInput>,
+// 	With: Into<Selection>,
+// 	OrderBy: Into<(String, PrismaValue)>,
+// 	Cursor: Into<Where>,
+// 	Set: Into<(String, PrismaValue)>,
+// 	Data: DeserializeOwned,
+// {
+// 	fn paginated(self, page_params: PageParams) -> Self {
+// 		let skip = match page_params.zero_based {
+// 			true => page_params.page * page_params.page_size,
+// 			false => (page_params.page - 1) * page_params.page_size,
+// 		} as i64;
 
-		let take = page_params.page_size as i64;
+// 		let take = page_params.page_size as i64;
 
-		self.skip(skip).take(take)
-	}
-}
+// 		self.skip(skip).take(take)
+// 	}
+// }

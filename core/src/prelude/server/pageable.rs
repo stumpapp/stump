@@ -37,6 +37,22 @@ impl Default for PageParams {
 	}
 }
 
+impl PageParams {
+	/// Returns a tuple of (skip, take) for use in Prisma queries.
+	pub fn get_skip_take(&self) -> (i64, i64) {
+		let start = if self.zero_based {
+			self.page * self.page_size
+		} else {
+			(self.page - 1) * self.page_size
+		} as i64;
+
+		// let end = start + self.page_size;
+		let take = self.page_size as i64;
+
+		(start, take)
+	}
+}
+
 impl From<Option<PagedRequestParams>> for PageParams {
 	fn from(req_params: Option<PagedRequestParams>) -> Self {
 		match req_params {

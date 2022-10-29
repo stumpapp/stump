@@ -282,7 +282,7 @@ pub async fn batch_media_operations(
 		})
 		.collect::<Vec<String>>();
 
-	let result = mark_media_missing(ctx, missing_paths).await;
+	let _result = mark_media_missing(ctx, missing_paths).await;
 
 	Ok(ctx.db._batch(media_creates).await?)
 }

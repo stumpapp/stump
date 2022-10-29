@@ -49,7 +49,6 @@ pub struct Log {
 	pub level: LogLevel,
 	pub message: String,
 	pub created_at: String,
-
 	pub job_id: Option<String>,
 }
 
@@ -71,36 +70,6 @@ impl From<CoreEvent> for Log {
 				message: format!("{}: {}", path, message),
 				job_id: runner_id,
 				..Default::default()
-			},
-			_ => unimplemented!(),
-		}
-	}
-}
-
-/// A helper struct mainly to convert client events to structs easier to persist to DB.
-#[deprecated]
-pub struct TentativeLog {
-	pub level: LogLevel,
-	pub message: String,
-	pub job_id: Option<String>,
-}
-
-impl From<CoreEvent> for TentativeLog {
-	fn from(event: CoreEvent) -> Self {
-		match event {
-			CoreEvent::JobFailed { runner_id, message } => TentativeLog {
-				level: LogLevel::Error,
-				message,
-				job_id: Some(runner_id),
-			},
-			CoreEvent::CreateEntityFailed {
-				runner_id,
-				path,
-				message,
-			} => TentativeLog {
-				level: LogLevel::Error,
-				message: format!("{}: {}", path, message),
-				job_id: runner_id,
 			},
 			_ => unimplemented!(),
 		}

@@ -167,7 +167,7 @@ async fn get_series_thumbnail(
 
 	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
 		trace!("Found webp thumbnail for series {}", &id);
-		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?).into());
+		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
 	}
 
 	Ok(media_file::get_page(media.path.as_str(), 1)?.into())

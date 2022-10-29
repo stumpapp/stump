@@ -305,7 +305,7 @@ async fn get_media_thumbnail(
 
 	if webp_path.exists() {
 		trace!("Found webp thumbnail for media {}", id);
-		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?).into());
+		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
 	}
 
 	let book = db

@@ -12,6 +12,7 @@
     "./components/*": "./src/components/*"
   },
   "scripts": {
+    "tsc": "tsc",
     "check": "tsc --noEmit"
   },
   "dependencies": {

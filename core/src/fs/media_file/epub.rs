@@ -48,7 +48,7 @@ fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
 	EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))
 }
 
-pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
+pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	debug!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
@@ -75,7 +75,7 @@ pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError>
 }
 
 // TODO: change return type to make more sense
-pub fn get_epub_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
+pub fn get_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = EpubDoc::new(file).map_err(|e| {
 		error!("Failed to open epub file: {}", e);
 		ProcessFileError::EpubOpenError(e.to_string())

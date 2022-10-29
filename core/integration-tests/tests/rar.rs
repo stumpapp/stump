@@ -5,7 +5,7 @@ use stump_core::{
 	db::models::{LibraryPattern, LibraryScanMode},
 	fs::{
 		checksum,
-		media_file::rar::{convert_rar_to_zip, rar_sample},
+		media_file::rar::{convert_rar_to_zip, sample_size},
 	},
 	prelude::CoreResult,
 	prisma::media,
@@ -67,7 +67,7 @@ async fn digest_rars_synchronous() -> CoreResult<()> {
 	}
 
 	for rar in rars {
-		let rar_sample_result = rar_sample(&rar.path);
+		let rar_sample_result = sample_size(&rar.path);
 		assert!(rar_sample_result.is_ok());
 
 		let rar_sample = rar_sample_result.unwrap();

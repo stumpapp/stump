@@ -6,7 +6,7 @@ use tokio::sync::{
 };
 
 use crate::{
-	db::{self, models::TentativeLog},
+	db::{self, models::Log},
 	event::{CoreEvent, InternalCoreTask},
 	job::Job,
 	prisma,
@@ -155,21 +155,19 @@ impl Ctx {
 	pub async fn handle_failure_event(&self, event: CoreEvent) {
 		use prisma::log;
 
-		// TODO: maybe log::error! here?
-
 		self.emit_client_event(event.clone());
 
-		let tentative_log = TentativeLog::from(event);
+		let log = Log::from(event);
 
 		// FIXME: error handling here...
 		let _ = self
 			.db
 			.log()
 			.create(
-				tentative_log.message,
+				log.message,
 				vec![
-					log::job_id::set(tentative_log.job_id),
-					log::level::set(tentative_log.level.to_string()),
+					log::job_id::set(log.job_id),
+					log::level::set(log.level.to_string()),
 				],
 			)
 			.exec()

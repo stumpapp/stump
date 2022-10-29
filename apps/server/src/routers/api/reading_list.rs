@@ -79,7 +79,7 @@ async fn get_reading_list_by_id(
 	Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<ReadingList>> {
-	let user_id = get_session_user(&session)?.id;
+	let _user_id = get_session_user(&session)?.id;
 	let db = ctx.get_db();
 
 	let reading_list_id = db
@@ -94,6 +94,8 @@ async fn get_reading_list_by_id(
 			id
 		)));
 	}
+
+	// TODO: access control for reading lists...
 
 	Ok(Json(reading_list_id.unwrap().into()))
 }

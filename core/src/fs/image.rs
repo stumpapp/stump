@@ -14,7 +14,7 @@ use crate::{
 
 use super::media_file;
 
-pub fn get_image_bytes<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, ProcessFileError> {
+pub fn get_bytes<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, ProcessFileError> {
 	let mut file = File::open(path)?;
 
 	let mut buf = Vec::new();

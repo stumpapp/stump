@@ -90,7 +90,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
-pub fn process_rar(
+pub fn process(
 	path: &Path,
 	options: &LibraryOptions,
 ) -> Result<ProcessedMediaFile, ProcessFileError> {
@@ -99,7 +99,7 @@ pub fn process_rar(
 
 		trace!("Using `process_zip` with converted rar.");
 
-		return zip::process_zip(&new_path);
+		return zip::process(&new_path);
 	}
 
 	// or platform is windows
@@ -119,7 +119,7 @@ pub fn process_rar(
 	#[allow(unused_mut)]
 	let mut metadata_buf = Vec::<u8>::new();
 
-	let checksum = digest_rar(&path_str);
+	let checksum = digest(&path_str);
 
 	match archive.list_extract() {
 		Ok(open_archive) => {
@@ -164,7 +164,7 @@ pub fn process_rar(
 
 // FIXME: this is a temporary work around for the issue wonderful people on Discord
 // discovered.
-pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
+pub fn sample_size(file: &str) -> Result<u64, ProcessFileError> {
 	debug!("Calculating checksum sample size for: {}", file);
 
 	let file = std::fs::File::open(file)?;
@@ -203,10 +203,10 @@ pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
 	// 	.fold(0, |acc, e| acc + e.unpacked_size as u64))
 }
 
-pub fn digest_rar(file: &str) -> Option<String> {
+pub fn digest(file: &str) -> Option<String> {
 	debug!("Attempting to generate checksum for: {}", file);
 
-	let sample = rar_sample(file);
+	let sample = sample_size(file);
 
 	// Error handled in `rar_sample`
 	if sample.is_err() {
@@ -241,7 +241,7 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // OpenArchive handle stored in Entry is no more. That's why I create another archive to grab what I want before
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-pub fn get_rar_image(
+pub fn get_image(
 	file: &str,
 	page: i32,
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {

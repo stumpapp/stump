@@ -22,7 +22,11 @@ pub(crate) fn mount() -> Router {
 		.nest(
 			"/users/:id",
 			Router::new()
-				.route("/", get(get_user_by_id).put(update_user))
+				.route(
+					"/",
+					// TODO: admin / self guard
+					get(get_user_by_id).put(update_user).delete(delete_user),
+				)
 				.route(
 					"/preferences",
 					get(get_user_preferences).put(update_user_preferences),
@@ -37,7 +41,6 @@ async fn get_users(
 ) -> ApiResult<Json<Vec<User>>> {
 	let user = get_session_user(&session)?;
 
-	// FIXME: admin middleware
 	if !user.is_admin() {
 		return Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".into(),
@@ -51,8 +54,8 @@ async fn get_users(
 			.exec()
 			.await?
 			.into_iter()
-			.map(|u| u.into())
-			.collect::<Vec<User>>(),
+			.map(User::from)
+			.collect(),
 	))
 }
 
@@ -114,6 +117,10 @@ async fn get_user_by_id() -> ApiResult<()> {
 // The server owner should be able to remove them, but I don't think they should be able
 // to do anything else?
 async fn update_user() -> ApiResult<()> {
+	Err(ApiError::NotImplemented)
+}
+
+async fn delete_user() -> ApiResult<()> {
 	Err(ApiError::NotImplemented)
 }
 

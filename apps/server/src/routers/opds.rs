@@ -479,7 +479,7 @@ async fn get_book_page(
 	let book = book.unwrap();
 
 	if book.path.ends_with(".epub") && correct_page == 1 {
-		return Ok(epub::get_epub_cover(&book.path)?.into());
+		return Ok(epub::get_cover(&book.path)?.into());
 	}
 
 	Ok(media_file::get_page(book.path.as_str(), correct_page)?.into())

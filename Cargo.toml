@@ -14,12 +14,6 @@ version = "0.0.0"
 rust-version = "1.64.0"
 
 [workspace.dependencies]
-# prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
-#   'rspc',
-#   # 'sqlite-create-many',
-#   # "migrations",
-#   # "sqlite",
-# ] }
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "79ab6bd700199b92103711f01d4df42e4cef62a6", features = [
   'rspc',
   # 'sqlite-create-many',

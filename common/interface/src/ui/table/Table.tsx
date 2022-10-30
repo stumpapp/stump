@@ -1,6 +1,19 @@
 import { Box, useColorModeValue } from '@chakra-ui/react';
-import { ColumnDef, flexRender, TableOptions, useReactTable } from '@tanstack/react-table';
+import {
+	ColumnDef,
+	ColumnFiltersState,
+	flexRender,
+	getFilteredRowModel,
+	getSortedRowModel,
+	SortDirection,
+	SortingState,
+	TableOptions,
+	useReactTable,
+} from '@tanstack/react-table';
 import clsx from 'clsx';
+import { SortAscending, SortDescending } from 'phosphor-react';
+import { useRef, useState } from 'react';
+import { DebouncedInput } from '../Input';
 import TablePagination from './Pagination';
 
 export interface TableProps<T = unknown, V = unknown> {
@@ -8,23 +21,62 @@ export interface TableProps<T = unknown, V = unknown> {
 	columns: ColumnDef<T, V>[];
 	options: Omit<TableOptions<T>, 'data' | 'columns'>;
 	fullWidth?: boolean;
+	searchable?: boolean;
+	sortable?: boolean;
 }
 
-export default function Table<T, V>({ data, columns, options, ...props }: TableProps<T, V>) {
+export default function Table<T, V>({
+	data,
+	columns,
+	options,
+	searchable,
+	sortable,
+	...props
+}: TableProps<T, V>) {
+	const [sorting, setSorting] = useState<SortingState>([]);
+
+	const filterColRef = useRef<HTMLSelectElement | null>(null);
+	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+	const [globalFilter, setGlobalFilter] = useState('');
+
 	const table = useReactTable({
 		...options,
 		data,
 		columns,
 		state: {
 			...options.state,
+			sorting,
+			columnFilters,
+			globalFilter,
 		},
+		onSortingChange: setSorting,
+		getSortedRowModel: getSortedRowModel(),
+		onColumnFiltersChange: setColumnFilters,
+		onGlobalFilterChange: setGlobalFilter,
+		getFilteredRowModel: getFilteredRowModel(),
 	});
+
+	const headers = [{ id: 'GLOBAL_FILTER', header: 'All' }].concat(
+		table
+			.getAllColumns()
+			.map((col) => col.columns.map((c) => ({ id: c.id, header: c.columnDef.header as string })))
+			.flat(),
+	);
 
 	const { pageSize, pageIndex } = table.getState().pagination;
 
 	const pageCount = table.getPageCount();
 	const lastIndex = (pageIndex + 1) * pageSize;
 	const firstIndex = lastIndex - (pageSize - 1);
+
+	function handleFilter(value?: string) {
+		const filterCol = filterColRef.current?.value;
+		if (filterCol === 'GLOBAL_FILTER') {
+			setGlobalFilter(value || '');
+		} else if (filterCol) {
+			table.getColumn(filterCol).setFilterValue(value);
+		}
+	}
 
 	return (
 		<Box
@@ -40,7 +92,19 @@ export default function Table<T, V>({ data, columns, options, ...props }: TableP
 							{headerGroup.headers.map((header) => {
 								return (
 									<th key={header.id} colSpan={header.colSpan}>
-										<div>{flexRender(header.column.columnDef.header, header.getContext())}</div>
+										<div
+											className={clsx('flex items-center', {
+												'cursor-pointer select-none': header.column.getCanSort() && sortable,
+											})}
+											onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
+										>
+											{flexRender(header.column.columnDef.header, header.getContext())}
+											{sortable && (
+												<SortIcon
+													direction={(header.column.getIsSorted() as SortDirection) ?? null}
+												/>
+											)}
+										</div>
 									</th>
 								);
 							})}
@@ -86,6 +150,32 @@ export default function Table<T, V>({ data, columns, options, ...props }: TableP
 							</option>
 						))}
 					</select>
+
+					{/* FIXME: scuffed */}
+					{searchable && (
+						<div className="relative rounded-md shadow-sm">
+							<DebouncedInput
+								placeholder="Filter"
+								fullWidth
+								className="pr-12"
+								onInputStop={(value) => handleFilter(value)}
+							/>
+							<div className="absolute inset-y-0 right-0 flex items-center">
+								<select
+									ref={filterColRef}
+									id="currency"
+									name="currency"
+									className="appearance-none h-full rounded-md border-transparent bg-transparent py-0 px-4 text-sm text-center focus:outline-brand"
+								>
+									{headers.map((column) => (
+										<option key={column.id} value={column.id}>
+											{column.header}
+										</option>
+									))}
+								</select>
+							</div>
+						</div>
+					)}
 				</div>
 
 				<TablePagination
@@ -95,5 +185,15 @@ export default function Table<T, V>({ data, columns, options, ...props }: TableP
 				/>
 			</div>
 		</Box>
+	);
+}
+
+function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
+	if (!direction) {
+		return null;
+	}
+
+	return (
+		<span className="ml-1.5">{direction === 'asc' ? <SortAscending /> : <SortDescending />}</span>
 	);
 }

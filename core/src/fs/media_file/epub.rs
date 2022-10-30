@@ -14,7 +14,7 @@ use crate::{
 		checksum,
 		media_file::{get_content_type_from_mime, guess_content_type},
 	},
-	types::{errors::ProcessFileError, models::media::ProcessedMediaFile, ContentType},
+	prelude::{errors::ProcessFileError, fs::ProcessedMediaFile, ContentType},
 };
 use epub::doc::EpubDoc;
 use tracing::{debug, error, warn};
@@ -24,7 +24,7 @@ epubcfi usually starts with /6, referring to spine element of package file
 file has three groups of elements: metadata, manifest and spine.
 */
 // TODO: options: &LibraryOptions
-pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
+pub fn digest(path: &Path, size: u64) -> Option<String> {
 	let mut bytes_to_read = size;
 
 	// FIXME: this isn't ideal
@@ -48,7 +48,7 @@ fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
 	EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))
 }
 
-pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
+pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	debug!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
@@ -68,14 +68,14 @@ pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError>
 	Ok(ProcessedMediaFile {
 		thumbnail_path: None,
 		path: path.to_path_buf(),
-		checksum: digest_epub(path, file_size),
+		checksum: digest(path, file_size),
 		metadata: None,
 		pages,
 	})
 }
 
 // TODO: change return type to make more sense
-pub fn get_epub_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
+pub fn get_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = EpubDoc::new(file).map_err(|e| {
 		error!("Failed to open epub file: {}", e);
 		ProcessFileError::EpubOpenError(e.to_string())

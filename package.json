@@ -7,6 +7,7 @@
 	"scripts": {
 		"prepare": "husky install",
 		"setup": "pnpm i && pnpm web build && pnpm core run setup",
+		"tsc:checks": "pnpm -r tsc --noEmit",
 		"checks": "pnpm -r check",
 		"clippy": "cargo clippy -- -D warnings",
 		"tests": "pnpm -r test",

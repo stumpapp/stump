@@ -1,0 +1,88 @@
+name: Stump-CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-rust:
+    name: Rust checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          components: rustfmt, clippy
+
+      - name: System setup
+        run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
+
+      - name: Setup rust
+        uses: ./.github/actions/rust-setup
+
+      - name: Setup prisma
+        uses: ./.github/actions/prisma-setup
+
+      - name: Run cargo checks
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy -- -D warnings
+      # - name: Run tests
+      #   run: |
+      #     cargo integration-tests
+
+  check-typescript:
+    name: TypeScript checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Setup pnpm and typescript
+        uses: ./.github/actions/pnpm-setup
+
+      - name: Run type checks
+        run: pnpm tsc:checks
+
+  # release:
+  #   name: Release (${{ matrix.platform }})
+  #   runs-on: ${{ matrix.platform }}
+  #   # Release only runs on push to main. TODO: can I make this trigger on tag?
+  #   if: github.event_name != 'pull_request'
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       platform: [ubuntu-latest, macos-latest, windows-latest]
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Install Rust
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+  #         profile: minimal
+  #         override: true
+  #         # TODO: clippy??
+  #         components: rustfmt, rust-src
+
+  #     # TODO: figure out caching for rust deps
+
+  #     - name: Generate Prisma client
+  #       uses: ./.github/actions/generate-prisma-client
+
+  # TODO: pnpm setup
+  # TODO: docker builds -> maybe this helps? https://github.com/devture/matrix-corporal/blob/master/.gitlab-ci.yml

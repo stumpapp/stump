@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tracing::error;
 
-use crate::{prisma::media, types::errors::ProcessFileError};
+use crate::{prelude::errors::ProcessFileError, prisma::media};
 
 use super::media::Media;
 

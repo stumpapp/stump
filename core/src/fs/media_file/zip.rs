@@ -7,7 +7,9 @@ use crate::{
 		checksum,
 		media_file::{self, IsImage},
 	},
-	types::{errors::ProcessFileError, models::media::ProcessedMediaFile, ContentType},
+	prelude::{
+		errors::ProcessFileError, fs::media_file::ProcessedMediaFile, ContentType,
+	},
 };
 
 impl<'a> IsImage for ZipFile<'a> {
@@ -31,7 +33,7 @@ impl<'a> IsImage for ZipFile<'a> {
 /// Get the sample size (in bytes) to use for generating a checksum of a zip file. Rather than
 /// computing the sample size via the file size, we instead calculate the sample size by
 /// summing the size of the first 5 files in the zip file.
-pub fn zip_sample(file: &str) -> u64 {
+pub fn sample_size(file: &str) -> u64 {
 	let zip_file = File::open(file).unwrap();
 	let mut archive = zip::ZipArchive::new(zip_file).unwrap();
 
@@ -53,8 +55,8 @@ pub fn zip_sample(file: &str) -> u64 {
 }
 
 /// Calls `checksum::digest` to attempt generating a checksum for the zip file.
-pub fn digest_zip(path: &str) -> Option<String> {
-	let size = zip_sample(path);
+pub fn digest(path: &str) -> Option<String> {
+	let size = sample_size(path);
 
 	debug!(
 		"Calculated sample size (in bytes) for generating checksum: {}",
@@ -77,7 +79,7 @@ pub fn digest_zip(path: &str) -> Option<String> {
 /// Processes a zip file in its entirety, includes: medatadata, page count, and the
 /// generated checksum for the file.
 // TODO: do I need to pass in the library options here?
-pub fn process_zip(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
+pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	debug!("Processing Zip: {}", path.display());
 
 	let zip_file = File::open(path)?;
@@ -99,10 +101,16 @@ pub fn process_zip(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> 
 		}
 	}
 
+	let checksum = if let Some(path) = path.to_str() {
+		digest(path)
+	} else {
+		None
+	};
+
 	Ok(ProcessedMediaFile {
 		thumbnail_path: None,
 		path: path.to_path_buf(),
-		checksum: digest_zip(path.to_str().unwrap()),
+		checksum,
 		metadata: comic_info,
 		pages,
 	})
@@ -111,7 +119,7 @@ pub fn process_zip(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> 
 // FIXME: this solution is terrible, was just fighting with borrow checker and wanted
 // a quick solve. TODO: rework this!
 /// Get an image from a zip file by index (page).
-pub fn get_zip_image(
+pub fn get_image(
 	file: &str,
 	page: i32,
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {

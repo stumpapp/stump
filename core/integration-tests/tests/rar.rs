@@ -1,13 +1,13 @@
 use crate::utils::{init_test, make_tmp_file, TempLibrary};
 
 use stump_core::{
-	config::Ctx,
+	db::models::{LibraryPattern, LibraryScanMode},
 	fs::{
 		checksum,
-		media_file::rar::{convert_rar_to_zip, rar_sample},
+		media_file::rar::{convert_to_zip, sample_size},
 	},
+	prelude::{CoreResult, Ctx},
 	prisma::media,
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 // TODO: fix these tests...
@@ -21,7 +21,7 @@ fn test_rar_to_zip() -> CoreResult<()> {
 
 	let path = tmp_file.path();
 
-	let result = convert_rar_to_zip(path);
+	let result = convert_to_zip(path);
 	assert!(result.is_ok());
 
 	let zip_path = result.unwrap();
@@ -66,7 +66,7 @@ async fn digest_rars_synchronous() -> CoreResult<()> {
 	}
 
 	for rar in rars {
-		let rar_sample_result = rar_sample(&rar.path);
+		let rar_sample_result = sample_size(&rar.path);
 		assert!(rar_sample_result.is_ok());
 
 		let rar_sample = rar_sample_result.unwrap();

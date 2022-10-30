@@ -1,7 +1,7 @@
 use crate::{
 	opds::link::OpdsLink,
+	prelude::errors::CoreError,
 	prisma::{library, series},
-	types::errors::CoreError,
 };
 use prisma_client_rust::chrono;
 use tracing::warn;

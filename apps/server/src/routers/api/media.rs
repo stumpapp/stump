@@ -8,15 +8,15 @@ use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use stump_core::{
 	config::get_config_dir,
-	db::utils::PrismaCountTrait,
+	db::{
+		models::{Media, ReadProgress},
+		utils::PrismaCountTrait,
+	},
 	fs::{image, media_file},
+	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress, user,
-	},
-	types::{
-		ContentType, FindManyTrait, Media, Pageable, PagedRequestParams, QueryOrder,
-		ReadProgress,
 	},
 };
 use tracing::trace;
@@ -64,7 +64,7 @@ async fn get_media(
 	let order_by_param: MediaOrderByParam =
 		QueryOrder::from(page_params.clone()).try_into()?;
 
-	let base_query = db
+	let mut query = db
 		.media()
 		.find_many(vec![])
 		.with(media::read_progresses::fetch(vec![
@@ -72,29 +72,25 @@ async fn get_media(
 		]))
 		.order_by(order_by_param);
 
-	if unpaged {
-		return Ok(Json(
-			base_query
-				.exec()
-				.await?
-				.into_iter()
-				.map(|m| m.into())
-				.collect::<Vec<Media>>()
-				.into(),
-		));
+	if !unpaged {
+		let (skip, take) = page_params.get_skip_take();
+		query = query.skip(skip).take(take);
 	}
 
-	let count = db.media_count().await?;
-
-	let media = base_query
-		.paginated(page_params.clone())
+	let media = query
 		.exec()
 		.await?
 		.into_iter()
 		.map(|m| m.into())
 		.collect::<Vec<Media>>();
 
-	Ok(Json((media, count, page_params).into()))
+	if unpaged {
+		return Ok(Json(Pageable::from(media)));
+	}
+
+	let count = db.media_count().await?;
+
+	Ok(Json(Pageable::from((media, count, page_params))))
 }
 
 /// Get all media with identical checksums. This heavily implies duplicate files.  
@@ -305,7 +301,7 @@ async fn get_media_thumbnail(
 
 	if webp_path.exists() {
 		trace!("Found webp thumbnail for media {}", id);
-		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?).into());
+		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
 	}
 
 	let book = db

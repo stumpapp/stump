@@ -1,13 +1,16 @@
-use std::{path::PathBuf, str::FromStr};
+use std::{path::Path, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::{config::context::Ctx, prisma, types::enums::FileStatus};
+use crate::{
+	prelude::{enums::FileStatus, CoreResult},
+	prisma::media,
+};
 
-use super::{read_progress::ReadProgress, series::Series, tag::Tag};
+use super::{read_progress::ReadProgress, series::Series, tag::Tag, LibraryOptions};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, Default)]
 pub struct Media {
 	pub id: String,
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
@@ -42,39 +45,20 @@ pub struct Media {
 	// pub status: String,
 }
 
-// Note: used internally...
-pub struct TentativeMedia {
-	pub name: String,
-	pub description: Option<String>,
-	pub size: i32,
-	pub extension: String,
-	pub pages: i32,
-	pub checksum: Option<String>,
-	pub path: String,
+#[derive(Default)]
+pub struct MediaBuilderOptions {
 	pub series_id: String,
+	pub library_options: LibraryOptions,
 }
 
-impl TentativeMedia {
-	pub fn into_action(self, ctx: &Ctx) -> prisma::media::Create {
-		ctx.db.media().create(
-			self.name,
-			self.size,
-			self.extension,
-			self.pages,
-			self.path,
-			vec![
-				prisma::media::checksum::set(self.checksum),
-				prisma::media::description::set(self.description),
-				prisma::media::series::connect(prisma::series::id::equals(
-					self.series_id,
-				)),
-			],
-		)
-	}
+pub trait MediaBuilder {
+	fn build(path: &Path, series_id: &str) -> CoreResult<Media>;
+	fn build_with_options(path: &Path, options: MediaBuilderOptions)
+		-> CoreResult<Media>;
 }
 
-impl From<prisma::media::Data> for Media {
-	fn from(data: prisma::media::Data) -> Media {
+impl From<media::Data> for Media {
+	fn from(data: media::Data) -> Media {
 		let series = match data.series() {
 			Ok(series) => Some(series.unwrap().to_owned().into()),
 			Err(_e) => None,
@@ -120,46 +104,4 @@ impl From<prisma::media::Data> for Media {
 			tags,
 		}
 	}
-}
-
-// Derived from ComicInfo.xml
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Type, Default)]
-
-pub struct MediaMetadata {
-	#[serde(rename = "Series")]
-	pub series: Option<String>,
-	#[serde(rename = "Number")]
-	pub number: Option<usize>,
-	#[serde(rename = "Web")]
-	pub web: Option<String>,
-	#[serde(rename = "Summary")]
-	pub summary: Option<String>,
-	#[serde(rename = "Publisher")]
-	pub publisher: Option<String>,
-	#[serde(rename = "Genre")]
-	pub genre: Option<String>,
-	#[serde(rename = "PageCount")]
-	pub page_count: Option<usize>,
-}
-
-// impl MediaMetadata {
-// 	pub fn default() -> Self {
-// 		Self {
-// 			series: None,
-// 			number: None,
-// 			web: None,
-// 			summary: None,
-// 			publisher: None,
-// 			genre: None,
-// 			page_count: None,
-// 		}
-// 	}
-// }
-
-pub struct ProcessedMediaFile {
-	pub thumbnail_path: Option<PathBuf>,
-	pub path: PathBuf,
-	pub checksum: Option<String>,
-	pub metadata: Option<MediaMetadata>,
-	pub pages: i32,
 }

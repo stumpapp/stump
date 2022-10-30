@@ -4,12 +4,14 @@ use std::{fs, path::PathBuf};
 use tempfile::{Builder, NamedTempFile, TempDir};
 
 use stump_core::{
-	config::Ctx,
-	db::migration::run_migrations,
+	db::{
+		migration::run_migrations,
+		models::{LibraryPattern, LibraryScanMode},
+	},
 	fs::scanner::library_scanner::{scan_batch, scan_sync},
 	job::{persist_new_job, runner::RunnerCtx, LibraryScanJob},
+	prelude::{CoreResult, Ctx},
 	prisma::{library, library_options, PrismaClient},
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 // https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/second-edition/ch11-03-test-organization.html

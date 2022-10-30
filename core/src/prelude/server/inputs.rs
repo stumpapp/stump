@@ -1,10 +1,7 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::types::{
-	library::{LibraryOptions, LibraryScanMode},
-	tag::Tag,
-};
+use crate::db::models::{LibraryOptions, LibraryScanMode, Tag};
 
 #[derive(Debug, Clone, Deserialize, Type)]
 pub struct UserPreferencesUpdate {
@@ -65,4 +62,10 @@ pub struct UpdateLibraryArgs {
 	pub library_options: LibraryOptions,
 	/// Optional flag to indicate how the library should be automatically scanned after update. Default is `BATCHED`.
 	pub scan_mode: Option<LibraryScanMode>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+pub struct CreateReadingList {
+	pub id: String,
+	pub media_ids: Vec<String>,
 }

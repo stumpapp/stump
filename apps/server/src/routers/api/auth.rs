@@ -4,8 +4,9 @@ use axum::{
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
+	db::models::User,
+	prelude::{LoginOrRegisterArgs, UserRole},
 	prisma::{user, user_preferences},
-	types::{enums::UserRole, LoginOrRegisterArgs, User},
 };
 
 use crate::{

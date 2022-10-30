@@ -33,6 +33,12 @@ pub enum FileStatus {
 	Missing,
 }
 
+impl Default for FileStatus {
+	fn default() -> Self {
+		Self::Ready
+	}
+}
+
 impl fmt::Display for FileStatus {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {

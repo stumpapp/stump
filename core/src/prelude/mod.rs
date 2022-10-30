@@ -1,13 +1,15 @@
+pub mod context;
 pub mod enums;
 pub mod errors;
-pub mod models;
+pub mod fs;
 pub mod server;
-
-pub use errors::CoreError;
 
 pub type CoreResult<T> = Result<T, CoreError>;
 
-pub use models::*;
+pub use context::*;
+pub use enums::*;
+pub use errors::*;
+pub use fs::*;
 pub use server::*;
 
 #[allow(unused_imports)]
@@ -16,18 +18,16 @@ mod tests {
 
 	use specta::ts_export;
 
-	use crate::{event::*, job::*};
-
-	use super::{
-		enums::*,
-		errors::*,
-		inputs::*,
-		models::{
-			epub::*, library::*, list_directory::*, log::*, media::*, read_progress::*,
-			series::*, tag::*, user::*, readinglist::*
+	use crate::{
+		db::models::{
+			epub::*, library::*, log::*, media::*, read_progress::*, reading_list::*,
+			series::*, tag::*, user::*,
 		},
-		server::*,
+		event::*,
+		job::*,
 	};
+
+	use super::{enums::*, errors::*, fs::*, inputs::*, server::*};
 
 	#[test]
 	#[ignore]

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tracing::trace;
 
-use crate::types::DirectoryListing;
+use crate::prelude::DirectoryListing;
 
 use super::Direction;
 
@@ -34,6 +34,22 @@ impl Default for PageParams {
 			order_by: "name".to_string(),
 			direction: Direction::Asc,
 		}
+	}
+}
+
+impl PageParams {
+	/// Returns a tuple of (skip, take) for use in Prisma queries.
+	pub fn get_skip_take(&self) -> (i64, i64) {
+		let start = if self.zero_based {
+			self.page * self.page_size
+		} else {
+			(self.page - 1) * self.page_size
+		} as i64;
+
+		// let end = start + self.page_size;
+		let take = self.page_size as i64;
+
+		(start, take)
 	}
 }
 

@@ -1,8 +1,5 @@
 use std::path::{Path, PathBuf};
 
-pub(crate) mod context;
-pub use context::Ctx;
-
 pub mod env;
 pub mod logging;
 

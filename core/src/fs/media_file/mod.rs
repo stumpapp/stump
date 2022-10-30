@@ -7,18 +7,13 @@ use std::path::Path;
 use tracing::{debug, warn};
 
 use crate::{
-	fs::media_file::{epub::process_epub, rar::process_rar, zip::process_zip},
-	types::{
+	db::models::LibraryOptions,
+	prelude::{
 		errors::ProcessFileError,
-		models::{
-			library::LibraryOptions,
-			media::{MediaMetadata, ProcessedMediaFile},
-		},
+		fs::media_file::{MediaMetadata, ProcessedMediaFile},
 		ContentType,
 	},
 };
-
-use self::{epub::get_epub_cover, rar::get_rar_image, zip::get_zip_image};
 
 // FIXME: this module does way too much. It should be cleaned up, way too many vaguely
 // similar things shoved in here with little distinction.
@@ -133,13 +128,13 @@ pub fn get_page(
 	let mime = guess_mime(Path::new(file));
 
 	match mime.as_deref() {
-		Some("application/zip") => get_zip_image(file, page),
-		Some("application/vnd.comicbook+zip") => get_zip_image(file, page),
-		Some("application/vnd.rar") => get_rar_image(file, page),
-		Some("application/vnd.comicbook-rar") => get_rar_image(file, page),
+		Some("application/zip") => zip::get_image(file, page),
+		Some("application/vnd.comicbook+zip") => zip::get_image(file, page),
+		Some("application/vnd.rar") => rar::get_image(file, page),
+		Some("application/vnd.comicbook-rar") => rar::get_image(file, page),
 		Some("application/epub+zip") => {
 			if page == 1 {
-				get_epub_cover(file)
+				epub::get_cover(file)
 			} else {
 				Err(ProcessFileError::UnsupportedFileType(
 					"You may only request the cover page (first page) for epub files on this endpoint".into()
@@ -154,6 +149,18 @@ pub fn get_page(
 	}
 }
 
+fn process_rar(
+	convert: bool,
+	path: &Path,
+) -> Result<ProcessedMediaFile, ProcessFileError> {
+	if convert {
+		let zip_path = rar::convert_to_zip(path)?;
+		zip::process(zip_path.as_path())
+	} else {
+		rar::process(path)
+	}
+}
+
 pub fn process(
 	path: &Path,
 	options: &LibraryOptions,
@@ -163,11 +170,13 @@ pub fn process(
 	let mime = infer_mime_from_path(path);
 
 	match mime.as_deref() {
-		Some("application/zip") => process_zip(path),
-		Some("application/vnd.comicbook+zip") => process_zip(path),
-		Some("application/vnd.rar") => process_rar(path, options),
-		Some("application/vnd.comicbook-rar") => process_rar(path, options),
-		Some("application/epub+zip") => process_epub(path),
+		Some("application/zip") => zip::process(path),
+		Some("application/vnd.comicbook+zip") => zip::process(path),
+		Some("application/vnd.rar") => process_rar(options.convert_rar_to_zip, path),
+		Some("application/vnd.comicbook-rar") => {
+			process_rar(options.convert_rar_to_zip, path)
+		},
+		Some("application/epub+zip") => epub::process(path),
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
 			path

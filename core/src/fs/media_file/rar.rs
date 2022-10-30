@@ -7,12 +7,10 @@ use crate::{
 	fs::{
 		archive::create_zip_archive,
 		checksum::{self, DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
-		media_file::{self, zip, IsImage},
+		media_file::{self, IsImage},
 	},
-	types::{
-		errors::ProcessFileError,
-		models::{library::LibraryOptions, media::ProcessedMediaFile},
-		ContentType,
+	prelude::{
+		errors::ProcessFileError, fs::media_file::ProcessedMediaFile, ContentType,
 	},
 };
 
@@ -31,7 +29,7 @@ impl IsImage for Entry {
 	}
 }
 
-pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
+pub fn convert_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 	debug!("Converting {:?} to zip format.", &path);
 
 	let archive = unrar::Archive::new(path)?;
@@ -91,18 +89,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
-pub fn process_rar(
-	path: &Path,
-	options: &LibraryOptions,
-) -> Result<ProcessedMediaFile, ProcessFileError> {
-	if options.convert_rar_to_zip {
-		let new_path = convert_rar_to_zip(path)?;
-
-		trace!("Using `process_zip` with converted rar.");
-
-		return zip::process_zip(&new_path);
-	}
-
+pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	// or platform is windows
 	if stump_in_docker() || cfg!(windows) {
 		return Err(ProcessFileError::UnsupportedFileType(
@@ -120,7 +107,7 @@ pub fn process_rar(
 	#[allow(unused_mut)]
 	let mut metadata_buf = Vec::<u8>::new();
 
-	let checksum = digest_rar(&path_str);
+	let checksum = digest(&path_str);
 
 	match archive.list_extract() {
 		Ok(open_archive) => {
@@ -165,7 +152,7 @@ pub fn process_rar(
 
 // FIXME: this is a temporary work around for the issue wonderful people on Discord
 // discovered.
-pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
+pub fn sample_size(file: &str) -> Result<u64, ProcessFileError> {
 	debug!("Calculating checksum sample size for: {}", file);
 
 	let file = std::fs::File::open(file)?;
@@ -204,10 +191,10 @@ pub fn rar_sample(file: &str) -> Result<u64, ProcessFileError> {
 	// 	.fold(0, |acc, e| acc + e.unpacked_size as u64))
 }
 
-pub fn digest_rar(file: &str) -> Option<String> {
+pub fn digest(file: &str) -> Option<String> {
 	debug!("Attempting to generate checksum for: {}", file);
 
-	let sample = rar_sample(file);
+	let sample = sample_size(file);
 
 	// Error handled in `rar_sample`
 	if sample.is_err() {
@@ -242,7 +229,7 @@ pub fn digest_rar(file: &str) -> Option<String> {
 // OpenArchive handle stored in Entry is no more. That's why I create another archive to grab what I want before
 // the iterator is done. At least, I *think* that is what is happening.
 // Fix location: https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-pub fn get_rar_image(
+pub fn get_image(
 	file: &str,
 	page: i32,
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {

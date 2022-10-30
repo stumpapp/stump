@@ -8,15 +8,15 @@ use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
 use serde::Deserialize;
 use stump_core::{
-	db::utils::PrismaCountTrait,
+	db::{
+		models::{Media, Series},
+		utils::PrismaCountTrait,
+	},
 	fs::{image, media_file},
+	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress, series,
-	},
-	types::{
-		ContentType, FindManyTrait, Media, Pageable, PagedRequestParams, QueryOrder,
-		Series,
 	},
 };
 use tracing::trace;
@@ -167,7 +167,7 @@ async fn get_series_thumbnail(
 
 	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
 		trace!("Found webp thumbnail for series {}", &id);
-		return Ok((ContentType::WEBP, image::get_image_bytes(webp_path)?).into());
+		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
 	}
 
 	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
@@ -190,7 +190,7 @@ async fn get_series_media(
 	let order_by_param: MediaOrderByParam =
 		QueryOrder::from(page_params.clone()).try_into()?;
 
-	let base_query = db
+	let mut query = db
 		.media()
 		.find_many(vec![media::series_id::equals(Some(id.clone()))])
 		.with(media::read_progresses::fetch(vec![
@@ -198,16 +198,20 @@ async fn get_series_media(
 		]))
 		.order_by(order_by_param);
 
-	let media = if unpaged {
-		base_query.exec().await?
-	} else {
-		base_query.paginated(page_params.clone()).exec().await?
-	};
+	if !unpaged {
+		let (skip, take) = page_params.get_skip_take();
+		query = query.skip(skip).take(take);
+	}
 
-	let media = media.into_iter().map(|m| m.into()).collect::<Vec<Media>>();
+	let media = query
+		.exec()
+		.await?
+		.into_iter()
+		.map(Media::from)
+		.collect::<Vec<Media>>();
 
 	if unpaged {
-		return Ok(Json(media.into()));
+		return Ok(Json(Pageable::from(media)));
 	}
 
 	// TODO: investigate this, I am getting incorrect counts here...

@@ -10,19 +10,80 @@ use tracing::{debug, error, trace};
 use walkdir::DirEntry;
 
 use crate::{
-	config::context::Ctx,
-	event::CoreEvent,
-	fs::{image, media_file},
-	prisma::{library, media, series},
-	types::{
-		enums::FileStatus,
-		errors::ScanError,
-		models::{library::LibraryOptions, media::TentativeMedia},
-		CoreResult,
+	db::{
+		models::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
+		Dao, DaoBatch, MediaDao,
 	},
+	event::CoreEvent,
+	fs::{image, media_file, scanner::BatchScanOperation},
+	prelude::{CoreResult, Ctx, FileStatus, ScanError},
+	prisma::{library, media, series},
 };
 
-use super::BatchScanOperation;
+impl MediaBuilder for Media {
+	fn build(path: &Path, series_id: &str) -> CoreResult<Media> {
+		Media::build_with_options(
+			path,
+			MediaBuilderOptions {
+				series_id: series_id.to_string(),
+				..Default::default()
+			},
+		)
+	}
+
+	fn build_with_options(
+		path: &Path,
+		options: MediaBuilderOptions,
+	) -> CoreResult<Media> {
+		let processed_entry = media_file::process(path, &options.library_options)?;
+
+		let pathbuf = processed_entry.path;
+		let path = pathbuf.as_path();
+
+		let path_str = path.to_str().unwrap_or_default().to_string();
+
+		let name = path
+			.file_stem()
+			.unwrap_or_default()
+			.to_str()
+			.unwrap_or_default()
+			.to_string();
+
+		let ext = path
+			.extension()
+			.unwrap_or_default()
+			.to_str()
+			.unwrap_or_default()
+			.to_string();
+
+		// Note: make this return a tuple if I need to grab anything else from metadata.
+		let size = match path.metadata() {
+			Ok(metadata) => metadata.len(),
+			_ => 0,
+		};
+
+		let comic_info = processed_entry.metadata.unwrap_or_default();
+
+		Ok(Media {
+			name,
+			description: comic_info.summary,
+			size: size.try_into().unwrap_or_else(|e| {
+				error!("Failed to calculate file size: {:?}", e);
+
+				0
+			}),
+			extension: ext,
+			pages: match comic_info.page_count {
+				Some(count) => count as i32,
+				None => processed_entry.pages,
+			},
+			checksum: processed_entry.checksum,
+			path: path_str,
+			series_id: options.series_id,
+			..Default::default()
+		})
+	}
+}
 
 /// Will mark all series and media within the library as MISSING. Requires the
 /// series and series.media relations to have been loaded to function properly.
@@ -55,83 +116,88 @@ pub async fn mark_library_missing(library: library::Data, ctx: &Ctx) -> CoreResu
 	Ok(())
 }
 
-pub fn get_tentative_media(
-	path: &Path,
-	series_id: String,
-	library_options: &LibraryOptions,
-) -> Result<TentativeMedia, ScanError> {
-	let processed_entry = media_file::process(path, library_options)?;
+// pub fn get_tentative_media(
+// 	path: &Path,
+// 	series_id: String,
+// 	library_options: &LibraryOptions,
+// ) -> Result<TentativeMedia, ScanError> {
+// 	let processed_entry = media_file::process(path, library_options)?;
 
-	let pathbuf = processed_entry.path;
-	let path = pathbuf.as_path();
+// 	let pathbuf = processed_entry.path;
+// 	let path = pathbuf.as_path();
 
-	let path_str = path.to_str().unwrap_or_default().to_string();
+// 	let path_str = path.to_str().unwrap_or_default().to_string();
 
-	// EW, I hate that I need to do this over and over lol time to make a trait for Path.
-	let name = path
-		.file_stem()
-		.unwrap_or_default()
-		.to_str()
-		.unwrap_or_default()
-		.to_string();
+// 	// EW, I hate that I need to do this over and over lol time to make a trait for Path.
+// 	let name = path
+// 		.file_stem()
+// 		.unwrap_or_default()
+// 		.to_str()
+// 		.unwrap_or_default()
+// 		.to_string();
 
-	let ext = path
-		.extension()
-		.unwrap_or_default()
-		.to_str()
-		.unwrap_or_default()
-		.to_string();
+// 	let ext = path
+// 		.extension()
+// 		.unwrap_or_default()
+// 		.to_str()
+// 		.unwrap_or_default()
+// 		.to_string();
 
-	// Note: make this return a tuple if I need to grab anything else from metadata.
-	let size = match path.metadata() {
-		Ok(metadata) => metadata.len(),
-		_ => 0,
-	};
+// 	// Note: make this return a tuple if I need to grab anything else from metadata.
+// 	let size = match path.metadata() {
+// 		Ok(metadata) => metadata.len(),
+// 		_ => 0,
+// 	};
 
-	let comic_info = processed_entry.metadata.unwrap_or_default();
+// 	let comic_info = processed_entry.metadata.unwrap_or_default();
 
-	Ok(TentativeMedia {
-		name,
-		description: comic_info.summary,
-		size: size.try_into().unwrap_or_else(|e| {
-			error!("Failed to calculate file size: {:?}", e);
+// 	Ok(TentativeMedia {
+// 		name,
+// 		description: comic_info.summary,
+// 		size: size.try_into().unwrap_or_else(|e| {
+// 			error!("Failed to calculate file size: {:?}", e);
 
-			0
-		}),
-		extension: ext,
-		pages: match comic_info.page_count {
-			Some(count) => count as i32,
-			None => processed_entry.pages,
-		},
-		checksum: processed_entry.checksum,
-		path: path_str,
-		series_id,
-	})
-}
+// 			0
+// 		}),
+// 		extension: ext,
+// 		pages: match comic_info.page_count {
+// 			Some(count) => count as i32,
+// 			None => processed_entry.pages,
+// 		},
+// 		checksum: processed_entry.checksum,
+// 		path: path_str,
+// 		series_id,
+// 	})
+// }
 
 pub async fn insert_media(
 	ctx: &Ctx,
 	path: &Path,
 	series_id: String,
 	library_options: &LibraryOptions,
-) -> Result<media::Data, ScanError> {
+) -> CoreResult<Media> {
 	let path_str = path.to_str().unwrap_or_default().to_string();
+	let media_dao = MediaDao::new(ctx.db.clone());
+	let media = Media::build_with_options(
+		path,
+		MediaBuilderOptions {
+			series_id,
+			library_options: library_options.clone(),
+		},
+	)?;
+	let created_media = media_dao.insert(media).await?;
 
-	let tentative_media = get_tentative_media(path, series_id, library_options)?;
-	let create_action = tentative_media.into_action(ctx);
-	let media = create_action.exec().await?;
-
-	trace!("Media entity created: {:?}", media);
+	trace!("Media entity created: {:?}", created_media);
 
 	if library_options.create_webp_thumbnails {
 		debug!("Attempting to create WEBP thumbnail");
-		let thumbnail_path = image::generate_thumbnail(&media.id, &path_str)?;
+		let thumbnail_path = image::generate_thumbnail(&created_media.id, &path_str)?;
 		debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
 	}
 
 	debug!("Media for {} created successfully", path_str);
 
-	Ok(media)
+	Ok(created_media)
 }
 
 pub async fn insert_series(
@@ -255,7 +321,8 @@ pub async fn batch_media_operations(
 	ctx: &Ctx,
 	operations: Vec<BatchScanOperation>,
 	library_options: &LibraryOptions,
-) -> Result<Vec<media::Data>, ScanError> {
+) -> CoreResult<Vec<Media>> {
+	let media_dao = MediaDao::new(ctx.db.clone());
 	// Note: this won't work if I add any other operations...
 	let (create_operations, mark_missing_operations): (Vec<_>, Vec<_>) =
 		operations.into_iter().partition(|operation| {
@@ -264,17 +331,20 @@ pub async fn batch_media_operations(
 
 	let media_creates = create_operations
 		.into_iter()
-		.map(|operation| {
-			match operation {
-				BatchScanOperation::CreateMedia { path, series_id } => {
-					// let result = insert_media(&ctx, &path, series_id, &library_options).await;
-					get_tentative_media(&path, series_id, library_options)
-				},
-				_ => unreachable!(),
-			}
+		.map(|operation| match operation {
+			BatchScanOperation::CreateMedia { path, series_id } => {
+				Media::build_with_options(
+					&path,
+					MediaBuilderOptions {
+						series_id,
+						library_options: library_options.clone(),
+					},
+				)
+			},
+			_ => unreachable!(),
 		})
 		.filter_map(|res| match res {
-			Ok(entry) => Some(entry.into_action(ctx)),
+			Ok(entry) => Some(entry),
 			Err(e) => {
 				error!("Failed to create media: {:?}", e);
 
@@ -290,15 +360,9 @@ pub async fn batch_media_operations(
 		})
 		.collect::<Vec<String>>();
 
-	let result = mark_media_missing(ctx, missing_paths).await;
+	let _result = mark_media_missing(ctx, missing_paths).await;
 
-	if let Err(err) = result {
-		error!("Failed to mark media as MISSING: {:?}", err);
-	} else {
-		debug!("Marked {} media as MISSING", result.unwrap());
-	}
-
-	Ok(ctx.db._batch(media_creates).await?)
+	media_dao._insert_batch(media_creates).await
 }
 
 // TODO: error handling, i.e don't unwrap lol

@@ -1,5 +1,9 @@
+pub(crate) mod dao;
 pub mod migration;
+pub mod models;
 pub mod utils;
+
+pub use dao::*;
 
 use std::path::Path;
 use tracing::trace;

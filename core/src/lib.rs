@@ -10,19 +10,14 @@ pub mod fs;
 pub mod job;
 pub mod opds;
 
-// TODO: I don't really want this to be pub. I think the only way that is possible is if I
-// made ALL the DB operations pub, interfacing with the prisma client directly. This way,
-// the server invokes those functions, rather than building those queries. I don't see a nice,
-// neat way to do this that won't give me a migraine lol.
+pub mod prelude;
 pub mod prisma;
-pub mod types;
 
-use config::context::Ctx;
 use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
 use event::{event_manager::EventManager, InternalCoreTask};
+use prelude::{CoreError, CoreResult, Ctx};
 use tokio::sync::mpsc::unbounded_channel;
-use types::{errors::CoreError, CoreResult};
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump
 /// applications. It is responsible for managing incoming tasks ([`InternalCoreTask`]),

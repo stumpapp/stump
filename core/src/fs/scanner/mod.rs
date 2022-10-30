@@ -8,7 +8,7 @@ use walkdir::WalkDir;
 
 use crate::{
 	fs::media_file::{self, guess_mime},
-	types::ContentType,
+	prelude::ContentType,
 };
 
 // TODO: refactor this trait? yes please

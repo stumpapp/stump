@@ -8,7 +8,7 @@ use prisma_client_rust::{
 };
 use stump_core::{
 	event::InternalCoreTask,
-	types::{errors::ProcessFileError, CoreError},
+	prelude::{CoreError, ProcessFileError},
 };
 use tokio::sync::mpsc;
 

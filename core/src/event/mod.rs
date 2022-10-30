@@ -6,8 +6,8 @@ use tokio::sync::oneshot;
 
 use crate::{
 	job::{Job, JobReport, JobStatus, JobUpdate},
+	prelude::CoreResult,
 	prisma,
-	types::CoreResult,
 };
 
 pub enum InternalCoreTask {

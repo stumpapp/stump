@@ -8,7 +8,7 @@ use axum::{
 };
 // use axum_typed_websockets::{Message, WebSocket, WebSocketUpgrade};
 use futures_util::{sink::SinkExt, stream::StreamExt};
-use stump_core::config::Ctx;
+use stump_core::prelude::Ctx;
 use tracing::error;
 
 use crate::config::state::State;

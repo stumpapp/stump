@@ -18,8 +18,10 @@ pub struct Series {
 	pub description: Option<String>,
 	/// The status of the series since last scan or access
 	pub status: FileStatus,
-	// pub updated_at: DateTime<FixedOffset>,
+	/// The timestamp of when the series was last updated
 	pub updated_at: String,
+	/// The timestamp of when the series was created
+	pub created_at: String,
 	/// The ID of the library this series belongs to.
 	pub library_id: String,
 	/// The library this series belongs to. Will be `None` only if the relation is not loaded.
@@ -80,6 +82,7 @@ impl From<prisma::series::Data> for Series {
 			description: data.description,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
 			updated_at: data.updated_at.to_string(),
+			created_at: data.created_at.to_string(),
 			library_id: data.library_id.unwrap(),
 			library,
 			media,

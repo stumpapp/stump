@@ -1,15 +1,67 @@
 use std::sync::Arc;
 
+use prisma_client_rust::{raw, PrismaValue};
+
 use crate::{
 	db::models::Series,
 	prelude::{CoreError, CoreResult},
 	prisma::{library, series, PrismaClient},
 };
 
-use super::Dao;
+use super::{Dao, DaoCount};
 
 pub struct SeriesDao {
 	client: Arc<PrismaClient>,
+}
+
+impl SeriesDao {
+	pub async fn find_recently_added(
+		&self,
+		skip: i64,
+		take: i64,
+	) -> CoreResult<Vec<Series>> {
+		let series_with_count = self
+			.client
+			._query_raw::<Series>(raw!(
+				r#"
+				SELECT
+					series.id as id,
+					series.name as name,
+					series.path as path,
+					series.description as description,
+					series.status as status,
+					series.updated_at as updated_at,
+					series.created_at as created_at,
+					series.library_id as library_id,
+					COUNT(series_media.id) as media_count
+				FROM 
+					series 
+				LEFT OUTER JOIN 
+					media series_media
+				ON 
+					series_media.series_id = series.id
+				GROUP BY 
+					series.id
+				ORDER BY
+					series.created_at DESC
+				LIMIT {} OFFSET {}"#,
+				PrismaValue::Int(take),
+				PrismaValue::Int(skip)
+			))
+			.exec()
+			.await?;
+
+		Ok(series_with_count)
+	}
+}
+
+#[async_trait::async_trait]
+impl DaoCount for SeriesDao {
+	async fn count_all(&self) -> CoreResult<i64> {
+		let count = self.client.series().count(vec![]).exec().await?;
+
+		Ok(count)
+	}
 }
 
 #[async_trait::async_trait]

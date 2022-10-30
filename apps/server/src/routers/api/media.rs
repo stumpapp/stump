@@ -35,7 +35,8 @@ pub(crate) fn mount() -> Router {
 	Router::new()
 		.route("/media", get(get_media))
 		.route("/media/duplicates", get(get_duplicate_media))
-		.route("/media/keep-reading", get(get_reading_media))
+		.route("/media/keep-reading", get(get_in_progress_media))
+		.route("/media/recently-added", get(get_recently_added_media))
 		.nest(
 			"/media/:id",
 			Router::new()
@@ -121,7 +122,7 @@ async fn get_duplicate_media(
 // TODO: paginate?
 /// Get all media which the requester has progress for that is less than the
 /// total number of pages available (i.e not completed).
-async fn get_reading_media(
+async fn get_in_progress_media(
 	Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<Vec<Media>>> {
@@ -165,6 +166,41 @@ async fn get_reading_media(
 			.map(|m| m.into())
 			.collect(),
 	))
+}
+
+async fn get_recently_added_media(
+	Extension(ctx): State,
+	pagination: Query<PagedRequestParams>,
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let db = ctx.get_db();
+
+	let unpaged = pagination.unpaged.unwrap_or(false);
+	let page_params = pagination.page_params();
+
+	let mut query = db
+		.media()
+		.find_many(vec![])
+		.order_by(media::created_at::order(Direction::Desc));
+
+	if !unpaged {
+		let (skip, take) = page_params.get_skip_take();
+		query = query.skip(skip).take(take);
+	}
+
+	let media = query
+		.exec()
+		.await?
+		.into_iter()
+		.map(|m| m.into())
+		.collect::<Vec<Media>>();
+
+	if unpaged {
+		return Ok(Json(Pageable::from(media)));
+	}
+
+	let count = db.media_count().await?;
+
+	Ok(Json(Pageable::from((media, count, page_params))))
 }
 
 async fn get_media_by_id(

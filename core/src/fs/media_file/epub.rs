@@ -24,7 +24,7 @@ epubcfi usually starts with /6, referring to spine element of package file
 file has three groups of elements: metadata, manifest and spine.
 */
 // TODO: options: &LibraryOptions
-pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
+pub fn digest(path: &Path, size: u64) -> Option<String> {
 	let mut bytes_to_read = size;
 
 	// FIXME: this isn't ideal
@@ -68,7 +68,7 @@ pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	Ok(ProcessedMediaFile {
 		thumbnail_path: None,
 		path: path.to_path_buf(),
-		checksum: digest_epub(path, file_size),
+		checksum: digest(path, file_size),
 		metadata: None,
 		pages,
 	})

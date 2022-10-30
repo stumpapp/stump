@@ -4,11 +4,10 @@ use unrar::archive::Entry;
 
 use crate::{
 	config::{self, stump_in_docker},
-	db::models::LibraryOptions,
 	fs::{
 		archive::create_zip_archive,
 		checksum::{self, DIGEST_SAMPLE_COUNT, DIGEST_SAMPLE_SIZE},
-		media_file::{self, zip, IsImage},
+		media_file::{self, IsImage},
 	},
 	prelude::{
 		errors::ProcessFileError, fs::media_file::ProcessedMediaFile, ContentType,
@@ -30,7 +29,7 @@ impl IsImage for Entry {
 	}
 }
 
-pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
+pub fn convert_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 	debug!("Converting {:?} to zip format.", &path);
 
 	let archive = unrar::Archive::new(path)?;
@@ -90,18 +89,7 @@ pub fn convert_rar_to_zip(path: &Path) -> Result<PathBuf, ProcessFileError> {
 
 /// Processes a rar file in its entirety. Will return a tuple of the comic info and the list of
 /// files in the rar.
-pub fn process(
-	path: &Path,
-	options: &LibraryOptions,
-) -> Result<ProcessedMediaFile, ProcessFileError> {
-	if options.convert_rar_to_zip {
-		let new_path = convert_rar_to_zip(path)?;
-
-		trace!("Using `process_zip` with converted rar.");
-
-		return zip::process(&new_path);
-	}
-
+pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	// or platform is windows
 	if stump_in_docker() || cfg!(windows) {
 		return Err(ProcessFileError::UnsupportedFileType(

@@ -1,12 +1,12 @@
+pub mod context;
 pub mod enums;
 pub mod errors;
 pub mod fs;
 pub mod server;
 
-pub use errors::CoreError;
-
 pub type CoreResult<T> = Result<T, CoreError>;
 
+pub use context::*;
 pub use enums::*;
 pub use errors::*;
 pub use fs::*;

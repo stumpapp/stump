@@ -1,8 +1,7 @@
 use stump_core::{
-	config::Ctx,
 	db::models::{LibraryPattern, LibraryScanMode},
 	fs::{checksum, media_file::zip},
-	prelude::CoreResult,
+	prelude::{CoreResult, Ctx},
 	prisma::media,
 };
 

@@ -15,18 +15,14 @@ use tracing::{debug, error, trace, warn};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	config::context::Ctx,
 	db::models::{LibraryOptions, LibraryScanMode},
 	event::CoreEvent,
-	fs::{
-		image,
-		scanner::{
-			utils::{insert_series_batch, mark_media_missing},
-			ScannedFileTrait,
-		},
+	fs::scanner::{
+		utils::{insert_series_batch, mark_media_missing},
+		ScannedFileTrait,
 	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
-	prelude::{CoreError, CoreResult, FileStatus},
+	prelude::{CoreError, CoreResult, Ctx, FileStatus},
 	prisma::{library, media, series},
 };
 
@@ -308,7 +304,7 @@ async fn scan_series(
 			Ok(media) => {
 				visited_media.insert(media.path.clone(), true);
 
-				ctx.emit_client_event(CoreEvent::CreatedMedia(media.clone()));
+				// ctx.emit_client_event(CoreEvent::CreatedMedia(media.clone()));
 			},
 			Err(e) => {
 				error!("Failed to insert media: {:?}", e);
@@ -545,9 +541,10 @@ pub async fn scan_batch(
 		// sleep for a bit to let client catch up
 		tokio::time::sleep(Duration::from_millis(50)).await;
 
-		if let Err(err) = image::generate_thumbnails(created_media) {
-			error!("Failed to generate thumbnails: {:?}", err);
-		}
+		// FIXME: dao
+		// if let Err(err) = image::generate_thumbnails(created_media) {
+		// 	error!("Failed to generate thumbnails: {:?}", err);
+		// }
 	}
 
 	ctx.progress(JobUpdate::job_finishing(

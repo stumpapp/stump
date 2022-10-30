@@ -149,6 +149,18 @@ pub fn get_page(
 	}
 }
 
+fn process_rar(
+	convert: bool,
+	path: &Path,
+) -> Result<ProcessedMediaFile, ProcessFileError> {
+	if convert {
+		let zip_path = rar::convert_to_zip(path)?;
+		zip::process(zip_path.as_path())
+	} else {
+		rar::process(path)
+	}
+}
+
 pub fn process(
 	path: &Path,
 	options: &LibraryOptions,
@@ -160,8 +172,10 @@ pub fn process(
 	match mime.as_deref() {
 		Some("application/zip") => zip::process(path),
 		Some("application/vnd.comicbook+zip") => zip::process(path),
-		Some("application/vnd.rar") => rar::process(path, options),
-		Some("application/vnd.comicbook-rar") => rar::process(path, options),
+		Some("application/vnd.rar") => process_rar(options.convert_rar_to_zip, path),
+		Some("application/vnd.comicbook-rar") => {
+			process_rar(options.convert_rar_to_zip, path)
+		},
 		Some("application/epub+zip") => epub::process(path),
 		None => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",

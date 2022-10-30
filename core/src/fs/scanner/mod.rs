@@ -7,10 +7,8 @@ use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{
-	config::Ctx,
 	fs::media_file::{self, guess_mime},
 	prelude::ContentType,
-	prisma,
 };
 
 // TODO: refactor this trait? yes please
@@ -154,35 +152,4 @@ pub enum BatchScanOperation {
 	// Note: this will be tricky. I will need to have this as a separate operation so I don't chance
 	// issuing concurrent writes to the database. But will be a bit of a pain, not too bad though.
 	// LogFailureEvent { event: CoreEvent },
-}
-
-// TODO: remove this terrible pattern.
-pub struct TentativeMedia {
-	pub name: String,
-	pub description: Option<String>,
-	pub size: i32,
-	pub extension: String,
-	pub pages: i32,
-	pub checksum: Option<String>,
-	pub path: String,
-	pub series_id: String,
-}
-
-impl TentativeMedia {
-	pub fn into_action(self, ctx: &Ctx) -> prisma::media::Create {
-		ctx.db.media().create(
-			self.name,
-			self.size,
-			self.extension,
-			self.pages,
-			self.path,
-			vec![
-				prisma::media::checksum::set(self.checksum),
-				prisma::media::description::set(self.description),
-				prisma::media::series::connect(prisma::series::id::equals(
-					self.series_id,
-				)),
-			],
-		)
-	}
 }

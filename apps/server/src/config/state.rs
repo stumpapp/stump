@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::Extension;
-use stump_core::config::Ctx;
+use stump_core::prelude::Ctx;
 
 // TODO: I don't feel like I need this module... Unless I add things to it..
 

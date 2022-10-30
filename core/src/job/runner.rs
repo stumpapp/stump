@@ -5,9 +5,8 @@ use tokio::{self, sync::Mutex};
 use tracing::error;
 
 use crate::{
-	config::context::Ctx,
 	event::CoreEvent,
-	prelude::{CoreError, CoreResult},
+	prelude::{CoreError, CoreResult, Ctx},
 };
 
 use super::{persist_new_job, pool::JobPool, Job, JobUpdate, JobWrapper};

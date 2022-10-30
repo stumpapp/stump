@@ -1,11 +1,14 @@
-use std::str::FromStr;
+use std::{path::Path, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::{prelude::enums::FileStatus, prisma::media};
+use crate::{
+	prelude::{enums::FileStatus, CoreResult},
+	prisma::media,
+};
 
-use super::{read_progress::ReadProgress, series::Series, tag::Tag};
+use super::{read_progress::ReadProgress, series::Series, tag::Tag, LibraryOptions};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, Default)]
 pub struct Media {
@@ -40,6 +43,18 @@ pub struct Media {
 	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 	// pub status: String,
+}
+
+#[derive(Default)]
+pub struct MediaBuilderOptions {
+	pub series_id: String,
+	pub library_options: LibraryOptions,
+}
+
+pub trait MediaBuilder {
+	fn build(path: &Path, series_id: &str) -> CoreResult<Media>;
+	fn build_with_options(path: &Path, options: MediaBuilderOptions)
+		-> CoreResult<Media>;
 }
 
 impl From<media::Data> for Media {

@@ -4,14 +4,13 @@ use std::{fs, path::PathBuf};
 use tempfile::{Builder, NamedTempFile, TempDir};
 
 use stump_core::{
-	config::Ctx,
 	db::{
 		migration::run_migrations,
 		models::{LibraryPattern, LibraryScanMode},
 	},
 	fs::scanner::library_scanner::{scan_batch, scan_sync},
 	job::{persist_new_job, runner::RunnerCtx, LibraryScanJob},
-	prelude::CoreResult,
+	prelude::{CoreResult, Ctx},
 	prisma::{library, library_options, PrismaClient},
 };
 

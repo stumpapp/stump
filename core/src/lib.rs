@@ -13,11 +13,10 @@ pub mod opds;
 pub mod prelude;
 pub mod prisma;
 
-use config::context::Ctx;
 use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
 use event::{event_manager::EventManager, InternalCoreTask};
-use prelude::{errors::CoreError, CoreResult};
+use prelude::{CoreError, CoreResult, Ctx};
 use tokio::sync::mpsc::unbounded_channel;
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump

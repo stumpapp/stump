@@ -1,19 +1,17 @@
-use std::hash;
-
 use axum::{
 	extract::Path, middleware::from_extractor, routing::get, Extension, Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::query_core::find_unique;
 use stump_core::{
+	db::models::{User, UserPreferences},
+	prelude::{LoginOrRegisterArgs, UserPreferencesUpdate},
 	prisma::{user, user_preferences},
-	types::{LoginOrRegisterArgs, User, UserPreferences, UserPreferencesUpdate},
 };
 
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
-	middleware::auth::Auth,
+	middleware::auth::{Auth},
 	utils::{get_hash_cost, get_session_user},
 };
 

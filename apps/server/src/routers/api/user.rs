@@ -1,32 +1,29 @@
+use std::hash;
+
 use axum::{
 	extract::Path, middleware::from_extractor, routing::get, Extension, Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
+use prisma_client_rust::query_core::find_unique;
 use stump_core::{
-	db::models::{User, UserPreferences},
-	prelude::{LoginOrRegisterArgs, UserPreferencesUpdate},
 	prisma::{user, user_preferences},
+	types::{LoginOrRegisterArgs, User, UserPreferences, UserPreferencesUpdate},
 };
 
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
-	middleware::auth::{AdminGuard, Auth},
+	middleware::auth::Auth,
 	utils::{get_hash_cost, get_session_user},
 };
 
 pub(crate) fn mount() -> Router {
 	Router::new()
 		.route("/users", get(get_users).post(create_user))
-		.layer(from_extractor::<AdminGuard>())
 		.nest(
 			"/users/:id",
 			Router::new()
-				.route(
-					"/",
-					// TODO: admin / self guard
-					get(get_user_by_id).put(update_user).delete(delete_user),
-				)
+				.route("/", get(get_user_by_id).put(update_user).delete(delete_user_by_id))
 				.route(
 					"/preferences",
 					get(get_user_preferences).put(update_user_preferences),
@@ -41,6 +38,7 @@ async fn get_users(
 ) -> ApiResult<Json<Vec<User>>> {
 	let user = get_session_user(&session)?;
 
+	// FIXME: admin middleware
 	if !user.is_admin() {
 		return Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".into(),
@@ -54,8 +52,8 @@ async fn get_users(
 			.exec()
 			.await?
 			.into_iter()
-			.map(User::from)
-			.collect(),
+			.map(|u| u.into())
+			.collect::<Vec<User>>(),
 	))
 }
 
@@ -106,8 +104,61 @@ async fn create_user(
 	Ok(Json(user.into()))
 }
 
-async fn get_user_by_id() -> ApiResult<()> {
-	Err(ApiError::NotImplemented)
+async fn delete_user_by_id(
+	Path(id): Path<String>,
+	Extension(ctx): State,
+	session: ReadableSession,
+) -> ApiResult<Json<String>> {
+	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
+
+	// TODO: Add user delete himself and admin cannot delete hiimselt
+	if !user.is_admin() {
+		return Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".into(),
+		));
+	}
+
+	let deleted_user = db
+		.user()
+		.delete(user::id::equals(id.clone()))
+		.exec()
+		.await?;
+
+	Ok(Json(deleted_user.id))
+}
+
+async fn get_user_by_id(
+	Path(id): Path<String>,
+    Extension(ctx): State,
+	session: ReadableSession,
+) -> ApiResult<Json<User>> {
+	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
+
+	if !user.is_admin() {
+		return Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".into(),
+		));
+	}
+
+	let user_by_id = db
+		.user()
+		.find_unique(user::id::equals(id.clone()))
+		.exec()
+		.await?
+		.unwrap();
+
+	// TODO: Check if is it exists
+	/* if user_by_id.is_none() {
+		return Err(ApiError::NotFound(format!(
+			"User with id {} not found",
+			id
+		)));
+	} */
+
+	Ok(Json(user_by_id.into()))
+
 }
 
 // TODO: figure out what operations are allowed here, and by whom. E.g. can a server
@@ -116,12 +167,35 @@ async fn get_user_by_id() -> ApiResult<()> {
 // the first. In general, after creation, I think a user has sole control over their account.
 // The server owner should be able to remove them, but I don't think they should be able
 // to do anything else?
-async fn update_user() -> ApiResult<()> {
-	Err(ApiError::NotImplemented)
-}
+async fn update_user(
+	Path(id): Path<String>,
+	Json(input): Json<LoginOrRegisterArgs>,
+    Extension(ctx): State,
+	session: ReadableSession,
+) -> ApiResult<Json<User>> {
+	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
 
-async fn delete_user() -> ApiResult<()> {
-	Err(ApiError::NotImplemented)
+	let hashed_password = bcrypt::hash(&input.password, get_hash_cost())?;
+
+	if user.id != id {
+		return Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".into(),
+		));
+	}
+	
+	let updated = db
+		.user()
+		.upsert(user::id::equals(id.clone()), (
+			input.username.clone(),
+			hashed_password.clone(),
+			vec![]
+		), vec![user::username::set(input.username), user::hashed_password::set(hashed_password)])
+		.exec()
+		.await?
+		.into();
+	
+	Ok(Json(updated))
 }
 
 // FIXME: remove this once I resolve the below 'TODO'

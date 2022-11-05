@@ -16,6 +16,11 @@ pub struct PagedRequestParams {
 	pub direction: Option<Direction>,
 }
 
+pub struct PageBounds {
+	pub skip: i64,
+	pub take: i64,
+}
+
 #[derive(Debug, Serialize, Clone, Type)]
 pub struct PageParams {
 	pub zero_based: bool,
@@ -50,6 +55,12 @@ impl PageParams {
 		let take = self.page_size as i64;
 
 		(start, take)
+	}
+
+	pub fn get_page_bounds(&self) -> PageBounds {
+		let (skip, take) = self.get_skip_take();
+
+		PageBounds { skip, take }
 	}
 }
 

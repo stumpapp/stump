@@ -4,9 +4,13 @@ import type { Media } from '@stump/client';
 import { prefetchMedia } from '@stump/client';
 import { getMediaThumbnail } from '@stump/client/api';
 
-import Card from '../Card';
+import Card from '../_Card';
 
-export default function MediaCard(media: Media) {
+export type MediaCardProps = {
+	media: Media;
+};
+
+export default function MediaCard({ media }: MediaCardProps) {
 	const fallback = useMemo(() => {
 		return '/fallbacks/image-file.svg';
 	}, [media.extension]);

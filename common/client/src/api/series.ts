@@ -17,6 +17,10 @@ export function getSeriesMedia(
 	return API.get(`/series/${id}/media?page=${page}`);
 }
 
+export function getRecentlyAddedSeries(page: number): Promise<PageableApiResult<Series[]>> {
+	return API.get(`/series/recently-added?page=${page}`);
+}
+
 export function getNextInSeries(id: string): Promise<ApiResult<Media | undefined>> {
 	return API.get(`/series/${id}/media/next`);
 }

@@ -1,13 +1,14 @@
-import type { Media, Series } from '../types';
+import type { Media, Pageable, Series } from '../types';
 import type { QueryCallbacks } from '.';
 import { useMemo } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { getNextInSeries, getSeriesById, getSeriesMedia } from '../api';
+import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '../api';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
 import { useQueryParamStore } from '../stores';
+import { useCounter } from '../hooks/useCounter';
 
 export const prefetchSeries = async (id: string) => {
 	await queryClient.prefetchQuery(['getSeries', id], () => getSeriesById(id), {
@@ -58,6 +59,61 @@ export function useSeriesMedia(seriesId: string, page: number = 1) {
 		isPreviousData,
 		media,
 		pageData,
+	};
+}
+
+export function useRecentlyAddedSeries(options: QueryCallbacks<Pageable<Series[]>> = {}) {
+	const [page, actions] = useCounter(1);
+
+	const {
+		data: series,
+		refetch,
+		isLoading,
+		isFetching,
+		isRefetching,
+	} = useQuery(
+		['getRecentlyAddedSeries', page],
+		() => getRecentlyAddedSeries(page).then((res) => res.data),
+		{
+			onSuccess(data) {
+				options.onSuccess?.(data);
+			},
+			onError(err) {
+				options.onError?.(err);
+			},
+			context: StumpQueryContext,
+		},
+	);
+
+	function setPage(page: number) {
+		actions.set(page);
+	}
+
+	function nextPage() {
+		actions.increment();
+	}
+
+	function prevPage() {
+		actions.decrement();
+	}
+
+	function hasMore() {
+		if (!series?._page) {
+			return false;
+		}
+
+		return series._page.current_page < series._page.total_pages;
+	}
+
+	return {
+		isLoading: isLoading || isFetching || isRefetching,
+		series,
+		refetch,
+		page,
+		setPage,
+		nextPage,
+		prevPage,
+		hasMore,
 	};
 }
 

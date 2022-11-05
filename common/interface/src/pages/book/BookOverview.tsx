@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useMedia, useTopBarStore } from '@stump/client';
 import { getMediaPage, getMediaThumbnail } from '@stump/client/api';
 
-import Card from '../../components/Card';
+import Card from '../../components/_Card';
 
 export default function BookOverview() {
 	const { id } = useParams();

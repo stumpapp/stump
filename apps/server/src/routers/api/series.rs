@@ -146,6 +146,7 @@ async fn get_series_by_id(
 async fn get_recently_added_series(
 	Extension(ctx): State,
 	pagination: Query<PagedRequestParams>,
+	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	if pagination.unpaged.unwrap_or_default() {
 		return Err(ApiError::BadRequest(
@@ -153,11 +154,13 @@ async fn get_recently_added_series(
 		));
 	}
 
+	let viewer_id = get_session_user(&session)?.id;
 	let page_params = pagination.page_params();
-	let (skip, take) = page_params.get_skip_take();
 	let series_dao = SeriesDao::new(ctx.db.clone());
 
-	let recently_added_series = series_dao.find_recently_added(skip, take).await?;
+	let recently_added_series = series_dao
+		.find_recently_added(&viewer_id, page_params.get_page_bounds())
+		.await?;
 	let series_count = series_dao.count_all().await?;
 
 	Ok(Json(Pageable::from_truncated(

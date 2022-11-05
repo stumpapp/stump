@@ -28,8 +28,12 @@ pub struct Series {
 	pub library: Option<Library>,
 	/// The media that are in this series. Will be `None` only if the relation is not loaded.
 	pub media: Option<Vec<Media>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	/// The number of media in this series. Optional for safety, but should be loaded if possible.
 	pub media_count: Option<i64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	/// The number of media in this series which have not been read. Only loaded on some queries.
+	pub unread_media_count: Option<i64>,
 	/// The user assigned tags for the series. ex: ["comic", "family"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 }
@@ -87,6 +91,7 @@ impl From<prisma::series::Data> for Series {
 			library,
 			media,
 			media_count,
+			unread_media_count: None,
 			tags,
 		}
 	}

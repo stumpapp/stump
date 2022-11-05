@@ -8,7 +8,7 @@ export default function ThemeToggle() {
 
 	return (
 		<div>
-			<AnimatePresence exitBeforeEnter initial={false}>
+			<AnimatePresence mode="wait" initial={false}>
 				<ToolTip label="Toggle theme">
 					<Button
 						variant="ghost"

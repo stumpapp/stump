@@ -97,16 +97,16 @@ A quick summary of the steps required to get going:
 pnpm run setup
 ```
 
+3.5 If you want to build the desktop application, you'll need an OS specific setup. You can find instructions to set it up here: [tauri setup](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-linux)
+
 4. Start one of the apps:
 
 ```bash
 pnpm dev:web # Web app
-pnpm dev:desktop # Desktop app [^1]
+pnpm dev:desktop # Desktop app
 ```
 
-[^1]: The desktop application need an OS specific setup. You can find instructions to set it up here: [tauri setup](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-linux)
-
-And that's it!
+And that's it !
 
 #### Where to start?
 

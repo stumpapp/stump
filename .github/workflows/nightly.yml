@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - 'gh-actions'
+# on:
+#   schedule:
+#     # * is a special character in YAML so you have to quote this string
+#     - cron: '0 1 * * *'
+# workflow_dispatch:
 
 jobs:
   build-web:

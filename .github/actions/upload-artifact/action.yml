@@ -20,11 +20,11 @@ runs:
       id: normalize
       run: |
         UPLOAD_PATH=$(cygpath -w ${{ inputs.upload-path }})
-        echo ::set-output name=path::$UPLOAD_PATH
+        echo "normalized_path=$UPLOAD_PATH" >> $GITHUB_OUTPUT
 
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: ${{ inputs.upload-name }}
-        path: ${{ steps.normalize.outputs.path || inputs.upload-path }}
+        path: ${{ env.normalized_path || inputs.upload-path }}
         retention-days: 1

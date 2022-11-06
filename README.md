@@ -101,8 +101,10 @@ pnpm run setup
 
 ```bash
 pnpm dev:web # Web app
-pnpm dev:desktop # Desktop app
+pnpm dev:desktop # Desktop app [^1]
 ```
+
+[^1]: The desktop application need an OS specific setup. You can find instructions to set it up here: [tauri setup](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-linux)
 
 And that's it!
 

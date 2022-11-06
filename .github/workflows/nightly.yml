@@ -2,7 +2,7 @@ name: Stump-nightly
 
 on:
   push:
-    branches: 
+    branches:
       - 'gh-actions'
 
 jobs:
@@ -18,4 +18,4 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           upload-name: web-application
-          upload-path: web-application
+          upload-path: apps/web/dist

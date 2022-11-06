@@ -32,11 +32,13 @@ runs:
       shell: bash
       id: pnpm-cache
       run: |
-        echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+        echo 'PNPM_CACHE_DIR<<EOF' >> $GITHUB_ENV
+        pnpm store path >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
     - uses: actions/cache@v3
       name: Setup pnpm cache
       with:
-        path: ${{ env.pnpm_cache_dir }}
+        path: ${{ env.PNPM_CACHE_DIR }}
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-

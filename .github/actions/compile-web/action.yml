@@ -1,5 +1,5 @@
 name: 'Compile Web Application'
-description: 'Compile stump web web'
+description: 'Compile stump web'
 
 inputs:
   node-version:
@@ -25,7 +25,6 @@ runs:
         node-version: ${{ inputs.node-version }}
     - uses: pnpm/action-setup@v2.2.2
       name: Install pnpm
-      id: pnpm-install
       with:
         version: ${{ inputs.pnpm-version }}
         run_install: false
@@ -45,7 +44,7 @@ runs:
       shell: bash
       run: pnpm install
       working-directory: apps/web
-    - name: TypeScript check for apps/web
+    - name: Build app 
       shell: bash
       run: pnpm run build 
       working-directory: apps/web

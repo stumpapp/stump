@@ -14,3 +14,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Build web
         uses: ./.github/actions/build-web
+      - name: Upload web build
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: web-application
+          upload-path: web-application

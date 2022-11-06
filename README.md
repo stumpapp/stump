@@ -91,13 +91,13 @@ A quick summary of the steps required to get going:
    - If you're running Windows, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
    - If you're running macOS on Apple Silicon, you'll need to install [Rosetta](https://support.apple.com/en-us/HT211861)
 2. Install [cargo-watch](https://crates.io/crates/cargo-watch)
-3. Run the setup:
+3. Run the setup [^1]:
 
 ```bash
 pnpm run setup
 ```
 
-3.5 If you want to build the desktop application, you'll need an OS specific setup. You can find instructions to set it up here: [tauri setup](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-linux)
+[^1]: If you want to build the desktop application, you'll need an OS specific setup. You can find instructions to set it up here: [tauri setup](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-linux)
 
 4. Start one of the apps:
 

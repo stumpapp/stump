@@ -8,7 +8,8 @@ export const cardVariants = cva('relative shadow rounded-md', {
 	variants: {
 		variant: {
 			default: '',
-			image: 'min-w-[10rem] sm:min-w-[10.666rem] md:min-w-[12rem]',
+			image:
+				'min-w-[10rem] min-h-[15rem] sm:min-w-[10.666rem] sm:min-h-[16rem] md:min-w-[12rem] md:min-h-[18.666rem]',
 		},
 		size: {
 			sm: '',
@@ -50,8 +51,6 @@ export default function Card({
 					: undefined
 			}
 			_dark={{ bg: 'gray.750' }}
-			// maxW={{ base: '16rem', sm: '28rem', md: '24rem', lg: '28rem' }}
-			// minW="10.666rem"
 			className={cardVariants({
 				variant,
 				size,

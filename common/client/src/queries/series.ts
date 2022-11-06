@@ -1,5 +1,5 @@
 import type { Media, Pageable, Series } from '../types';
-import type { QueryCallbacks } from '.';
+import { QueryCallbacks, usePagedQuery } from '.';
 import { useMemo } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -63,58 +63,12 @@ export function useSeriesMedia(seriesId: string, page: number = 1) {
 }
 
 export function useRecentlyAddedSeries(options: QueryCallbacks<Pageable<Series[]>> = {}) {
-	const [page, actions] = useCounter(1);
-
-	const {
-		data: series,
-		refetch,
-		isLoading,
-		isFetching,
-		isRefetching,
-	} = useQuery(
-		['getRecentlyAddedSeries', page],
-		() => getRecentlyAddedSeries(page).then((res) => res.data),
-		{
-			onSuccess(data) {
-				options.onSuccess?.(data);
-			},
-			onError(err) {
-				options.onError?.(err);
-			},
-			context: StumpQueryContext,
-		},
+	return usePagedQuery(
+		'getRecentlyAddedSeries',
+		getRecentlyAddedSeries,
+		options,
+		new URLSearchParams('page_size=50'),
 	);
-
-	function setPage(page: number) {
-		actions.set(page);
-	}
-
-	function nextPage() {
-		actions.increment();
-	}
-
-	function prevPage() {
-		actions.decrement();
-	}
-
-	function hasMore() {
-		if (!series?._page) {
-			return false;
-		}
-
-		return series._page.current_page < series._page.total_pages;
-	}
-
-	return {
-		isLoading: isLoading || isFetching || isRefetching,
-		series,
-		refetch,
-		page,
-		setPage,
-		nextPage,
-		prevPage,
-		hasMore,
-	};
 }
 
 export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {}) {

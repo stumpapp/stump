@@ -15,7 +15,15 @@ export function getMediaById(id: string): Promise<GetMediaById> {
 	return API.get(`/media/${id}`);
 }
 
-export function getRecentlyAddedMedia(page: number): Promise<PageableApiResult<Media[]>> {
+export function getRecentlyAddedMedia(
+	page: number,
+	params?: URLSearchParams,
+): Promise<PageableApiResult<Media[]>> {
+	if (params) {
+		params.set('page', page.toString());
+		return API.get(`/media/recently-added?${params.toString()}`);
+	}
+
 	return API.get(`/media/recently-added?page=${page}`);
 }
 

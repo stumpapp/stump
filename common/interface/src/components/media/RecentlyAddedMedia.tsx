@@ -3,25 +3,15 @@ import SlidingCardList from '../SlidingCardList';
 import MediaCard from './MediaCard';
 
 export default function RecentlyAddedMedia() {
-	const { media, isLoading, hasMore, nextPage } = useRecentlyAddedMedia();
+	const { data, isLoading } = useRecentlyAddedMedia();
 
-	if (isLoading || !media?.data.length) {
+	if (isLoading || !data) {
 		return null;
 	}
 
-	function handleScrollEnd() {
-		if (hasMore()) {
-			nextPage();
-		}
-	}
-
 	return (
-		<SlidingCardList
-			title="Recently Added Media"
-			onScrollEnd={handleScrollEnd}
-			isLoadingNext={isLoading}
-		>
-			{media.data.map((media) => (
+		<SlidingCardList title="Recently Added Media" isLoadingNext={isLoading}>
+			{data.map((media) => (
 				<MediaCard key={media.id} media={media} />
 			))}
 		</SlidingCardList>

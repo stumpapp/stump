@@ -3,26 +3,15 @@ import SlidingCardList from '../SlidingCardList';
 import SeriesCard from './SeriesCard';
 
 export default function RecentlyAddedSeries() {
-	const { series, isLoading, hasMore, nextPage } = useRecentlyAddedSeries();
+	const { data, isLoading } = useRecentlyAddedSeries();
 
-	if (isLoading || !series?.data.length) {
+	if (isLoading || !data) {
 		return null;
 	}
 
-	function handleScrollEnd() {
-		console.log('handleScrollEnd');
-		if (hasMore()) {
-			nextPage();
-		}
-	}
-
 	return (
-		<SlidingCardList
-			title="Recently Added Series"
-			onScrollEnd={handleScrollEnd}
-			isLoadingNext={isLoading}
-		>
-			{series.data.map((series) => (
+		<SlidingCardList title="Recently Added Series" isLoadingNext={isLoading}>
+			{data.map((series) => (
 				<SeriesCard key={series.id} series={series} />
 			))}
 		</SlidingCardList>

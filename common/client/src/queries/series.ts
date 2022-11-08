@@ -2,7 +2,7 @@ import type { Media, Pageable, Series } from '../types';
 import { QueryCallbacks, usePagedQuery } from '.';
 import { useMemo } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '../api';
 import { queryClient } from '../client';
@@ -69,6 +69,30 @@ export function useRecentlyAddedSeries(options: QueryCallbacks<Pageable<Series[]
 		options,
 		new URLSearchParams('page_size=50'),
 	);
+}
+
+export function useInfinite() {
+	const {
+		status,
+		data: pageData,
+		error,
+		isFetching,
+		isFetchingNextPage,
+		fetchNextPage,
+		hasNextPage,
+	} = useInfiniteQuery(
+		['getRecentlyAddedSeries'],
+		(ctx) => getRecentlyAddedSeries(ctx.pageParam, new URLSearchParams('page_size=50')),
+		{
+			getNextPageParam: (_lastGroup, groups) => groups.length,
+		},
+	);
+
+	const data = pageData ? pageData.pages.flatMap((res) => res.data.data) : [];
+
+	return {
+		data,
+	};
 }
 
 export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {}) {

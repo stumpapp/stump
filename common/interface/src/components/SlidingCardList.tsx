@@ -1,26 +1,50 @@
 import { Heading, Text, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 interface Props {
 	title?: string;
-	children: React.ReactNode;
+	cards: JSX.Element[];
 	onScrollEnd?: () => void;
 	isLoadingNext?: boolean;
+	hasNext?: boolean;
 }
 
-// TODO: VIRTAULIZE THIS LIST!!!!! I will only really use this for image cards, which
-// can really bog down the browser if there are too many of them.
-export default function SlidingCardList({ children, onScrollEnd, isLoadingNext, title }: Props) {
-	// TODO: I think this can be a problematic implementation.
-	const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-		const currPos = e.currentTarget.scrollLeft;
-		const maxPos = e.currentTarget.scrollWidth - e.currentTarget.clientWidth;
+export default function SlidingCardList({
+	cards,
+	onScrollEnd,
+	isLoadingNext,
+	hasNext,
+	title,
+}: Props) {
+	const parentRef = useRef(null);
+	const columnVirtualizer = useVirtualizer({
+		count: cards.length,
+		getScrollElement: () => parentRef.current,
+		estimateSize: () => 200,
+		overscan: 5,
+		horizontal: true,
+	});
 
-		if (currPos >= maxPos - 350 && !isLoadingNext) {
+	useEffect(() => {
+		const [lastItem] = [...columnVirtualizer.getVirtualItems()].reverse();
+
+		if (!lastItem) {
+			return;
+		}
+
+		// console.log({
+		// 	lastItem,
+		// 	lastItemIndex: lastItem.index,
+		// 	cardsLength: cards.length,
+		// 	lastItemIndexEqualsCardsLengthMinusOne: lastItem.index === cards.length - 1,
+		// });
+
+		if (lastItem.index >= cards.length - 10 && hasNext && !isLoadingNext) {
 			onScrollEnd?.();
 		}
-	};
+	}, [hasNext, onScrollEnd, cards.length, isLoadingNext, columnVirtualizer.getVirtualItems()]);
 
 	return (
 		<div className="w-full flex flex-col space-y-2">
@@ -39,11 +63,17 @@ export default function SlidingCardList({ children, onScrollEnd, isLoadingNext, 
 					</Text>
 				</div>
 			</div>
-			<div
-				onScroll={handleScroll}
-				className="w-full flex flex-row space-x-2 overflow-x-scroll pb-4 scrollbar-hide"
-			>
-				{children}
+			<div className="w-full flex flex-row space-x-2 overflow-x-scroll pb-4" ref={parentRef}>
+				<div
+					className="w-full relative flex flex-row space-x-2"
+					style={{
+						width: `${columnVirtualizer.getTotalSize()}px`,
+					}}
+				>
+					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
+						return cards[virtualItem.index];
+					})}
+				</div>
 			</div>
 		</div>
 	);

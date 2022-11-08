@@ -19,6 +19,7 @@ export function getRecentlyAddedMedia(
 	page: number,
 	params?: URLSearchParams,
 ): Promise<PageableApiResult<Media[]>> {
+	console.log(page);
 	if (params) {
 		params.set('page', page.toString());
 		return API.get(`/media/recently-added?${params.toString()}`);

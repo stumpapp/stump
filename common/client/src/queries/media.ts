@@ -58,6 +58,6 @@ export function useRecentlyAddedMedia(options: QueryCallbacks<Pageable<Media[]>>
 		'getRecentlyAddedMedia',
 		getRecentlyAddedMedia,
 		options,
-		new URLSearchParams('page_size=50'),
+		new URLSearchParams('page_size=10'),
 	);
 }

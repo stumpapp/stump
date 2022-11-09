@@ -6,10 +6,6 @@ runs:
   steps:
     - name: Build
       uses: ./.github/actions/compile-web
-      id: compile
-      with:
-        node-version: 16
-        pnpm-version: 7
 
     - name: Upload
       uses: ./.github/actions/upload-artifact

@@ -22,7 +22,6 @@ runs:
       with:
         name: web
         path: ./dist
-      working-directory: apps/server
     - name: Display structure of downloaded files
       run: ls -R dist
       shell: bash

@@ -15,6 +15,8 @@ runs:
       uses: .github/actions/setup-rust
       with:
         plaform: ${{ inputs.platform }}
+    - name: Generate Prisma client
+      uses: ./.github/actions/generate-prisma-client
     - name: Download frontend
       uses: actions/download-artifact@v3
       with:

@@ -15,4 +15,4 @@ runs:
       uses: ./.github/actions/upload-artifact
       with:
         upload-name: web
-        upload-path: ${{ steps.compile.outputs.dist-path }}
+        upload-path: apps/web/dist

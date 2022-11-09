@@ -7,8 +7,8 @@
     "tauri": "tauri",
     "vite": "vite --",
     "dev": "tauri dev",
-    "build": "tauri build",
-    "build:mac": "tauri build --target universal-apple-darwin",
+    "build": "pnpm build:web && tauri build",
+    "build:mac": "pnpm build:web && tauri build --target universal-apple-darwin",
     "build:web": "vite build"
   },
   "dependencies": {

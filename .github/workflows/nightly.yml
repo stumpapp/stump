@@ -28,7 +28,7 @@ jobs:
       fail-fast: true
       matrix:
         plaform: [ubuntu-20.04] # We should probably build for window and macos
-    name: Build server
+    name: Build rust
     runs-on: ${{ matrix.plaform }}
     needs: build-web
     steps:
@@ -38,16 +38,12 @@ jobs:
         uses: ./.github/actions/build-server
         with:
           platform: ${{ matrix.plaform }}
+      - uses: tauri-apps/tauri-action@v0
       - name: Upload stump server
         uses: ./.github/actions/upload-artifact
         with:
           upload-name: stump_server
           upload-path: target/release/stump_server
-      - name: Upload stump
-        uses: ./.github/actions/upload-artifact
-        with:
-          upload-name: stump
-          upload-path: target/release/stump
       - name: Upload desktop
         uses: ./.github/actions/upload-artifact
         with:

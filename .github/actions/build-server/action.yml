@@ -16,7 +16,7 @@ runs:
       uses: ./.github/actions/setup-system
 
     - name: Generate Prisma client
-      uses: ./.github/actions/generate-prisma-client
+      uses: ./.github/actions/prisma-setup
 
     - name: Download frontend
       uses: actions/download-artifact@v3

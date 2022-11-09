@@ -41,5 +41,20 @@ jobs:
       - name: Upload
         uses: ./.github/actions/upload-artifact
         with:
-          upload-name: server
-          upload-path: release/stump_server
+          upload-name: server_server
+          upload-path: target/release/stump_server
+      - name: Upload stump server
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: stump_server
+          upload-path: target/release/stump_server
+      - name: Upload stump
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: stump
+          upload-path: target/release/stump
+      - name: Upload desktop
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: stump-desktop
+          upload-path: target/release/bundle

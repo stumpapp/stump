@@ -38,11 +38,6 @@ jobs:
         uses: ./.github/actions/build-server
         with:
           platform: ${{ matrix.plaform }}
-      - name: Upload
-        uses: ./.github/actions/upload-artifact
-        with:
-          upload-name: server_server
-          upload-path: target/release/stump_server
       - name: Upload stump server
         uses: ./.github/actions/upload-artifact
         with:

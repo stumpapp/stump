@@ -11,11 +11,11 @@ on:
 # workflow_dispatch:
 
 jobs:
-  strategy:
-    fail-fast: true
-    matrix:
-      plaform: [ubuntu-20.04]
   build-web:
+    strategy:
+      fail-fast: true
+      matrix:
+        plaform: [ubuntu-20.04]
     name: Build web application
     runs-on: ${{ matrix.plaform }}
     steps:
@@ -24,8 +24,13 @@ jobs:
       - name: Build web
         uses: ./.github/actions/build-web
   build-server:
+    strategy:
+      fail-fast: true
+      matrix:
+        plaform: [ubuntu-20.04] # We should probably build for window and macos
     name: Build server
     runs-on: ${{ matrix.plaform }}
+    needs: build-web
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -35,7 +40,6 @@ jobs:
           platform: ${{ matrix.plaform }}
       - name: Upload
         uses: ./.github/actions/upload-artifact
-        working-directory: apps/server
         with:
           upload-name: server
           upload-path: release/stump_server

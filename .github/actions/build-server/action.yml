@@ -14,14 +14,14 @@ runs:
     - name: Setup rust
       uses: ./.github/actions/setup-rust
       with:
-        plaform: ${{ inputs.platform }}
+        platform: ${{ inputs.platform }}
     - name: Generate Prisma client
       uses: ./.github/actions/generate-prisma-client
     - name: Download frontend
       uses: actions/download-artifact@v3
       with:
         name: web
-        path: ./dist
+        path: ./apps/server/dist
     - name: Display structure of downloaded files
       run: ls -R dist
       shell: bash

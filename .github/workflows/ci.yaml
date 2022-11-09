@@ -1,11 +1,9 @@
 name: Stump-CI
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
-    paths: [apps]
+    paths:
+      - 'apps/*'
 
 jobs:
   check-rust:

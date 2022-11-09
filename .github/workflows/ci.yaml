@@ -5,9 +5,8 @@ on:
   push:
     branches:
       - main
+    paths: [apps]
 
-env:
-  PLATFORM: 'ubuntu-20.04'
 jobs:
   check-rust:
     strategy:
@@ -64,7 +63,7 @@ jobs:
 
   check-typescript:
     name: Run TypeScript checks
-    runs-on: ${{ matrix.plaform }}
+    runs-on: 'ubuntu-20.04'
     steps:
       # setup
       - uses: actions/checkout@v3

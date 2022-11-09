@@ -11,16 +11,31 @@ on:
 # workflow_dispatch:
 
 jobs:
+  strategy:
+    fail-fast: true
+    matrix:
+      plaform: [ubuntu-20.04]
   build-web:
     name: Build web application
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.plaform }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Build web
         uses: ./.github/actions/build-web
-      - name: Upload web build
-        uses: ./.github/actions/upload-artifact
+  build-server:
+    name: Build server
+    runs-on: ${{ matrix.plaform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Build server
+        uses: ./.github/actions/build-server
         with:
-          upload-name: web-application
-          upload-path: apps/web/dist
+          platform: ${{ matrix.plaform }}
+      - name: Upload
+        uses: ./.github/actions/upload-artifact
+        working-directory: apps/server
+        with:
+          upload-name: server
+          upload-path: release/stump_server

@@ -1,5 +1,5 @@
-name: 'Setup rust'
-description: 'Install all rust related dependencies'
+name: 'Setup stump'
+description: 'Install dependencies to buld stump'
 
 inputs:
   platform:
@@ -16,6 +16,12 @@ runs:
         profile: minimal
         override: true
         components: rustfmt, clippy
+    - uses: pnpm/action-setup@v2.0.1
+      name: Install pnpm
+      id: pnpm-install
+      with:
+        version: 7
+        run_install: false
     - name: install dependencies (ubuntu only)
       if: inputs.platform == 'ubuntu-20.04'
       shell: bash

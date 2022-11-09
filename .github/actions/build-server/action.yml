@@ -22,10 +22,9 @@ runs:
       with:
         name: web
         path: ./apps/server/dist
-    - name: Display structure of downloaded files
-      run: ls -R dist
+    - name: Copy web app to tauri
+      run: cp -r ./app/server/dist pps/desktop/src-tauri/dist
       shell: bash
-      working-directory: apps/server
     - name: Build server
       shell: bash
       run: cargo build --release

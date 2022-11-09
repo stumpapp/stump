@@ -23,7 +23,7 @@ jobs:
       - name: Setup rust
         uses: ./.github/actions/setup-rust
         with:
-          plaform: ${{ matrix.plaform }}
+          platform: ${{ matrix.plaform }}
 
       # Mock web app dist directory to allow tauri app to compile
       - run: mkdir dist
@@ -64,14 +64,14 @@ jobs:
 
   check-typescript:
     name: Run TypeScript checks
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.plaform }}
     steps:
       # setup
       - uses: actions/checkout@v3
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
       - uses: pnpm/action-setup@v2.0.1
         name: Install pnpm
         id: pnpm-install
@@ -113,14 +113,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Setup rust
+        uses: ./.github/actions/setup-rust
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          # TODO: clippy??
-          components: rustfmt, rust-src
+          plaform: ${{ matrix.plaform }}
 
       # TODO: figure out caching for rust deps
 

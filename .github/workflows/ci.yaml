@@ -6,28 +6,28 @@ on:
     branches:
       - main
 
+env:
+  PLATFORM: 'ubuntu-20.04'
 jobs:
   check-rust:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        plaform: [ubuntu-20.04]
+    runs-on: ${{ matrix.plaform }}
     name: Run Rust checks
     steps:
       # setup
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
+      - name: Setup rust
+        uses: ./.github/actions/setup-rust
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          components: rustfmt, clippy
-      - name: Install desktop application dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
+          plaform: ${{ matrix.plaform }}
+
+      # Mock web app dist directory to allow tauri app to compile
       - run: mkdir dist
         working-directory: apps/desktop
-
       # caching
       - name: Cache cargo registry
         uses: actions/cache@v1

@@ -14,19 +14,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          components: rustfmt, clippy
-
       - name: System setup
-        run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
-
-      - name: Setup rust
-        uses: ./.github/actions/rust-setup
+        uses: ./.github/actions/setup-system
 
       - name: Setup prisma
         uses: ./.github/actions/prisma-setup
@@ -45,11 +34,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
 
       - name: Setup pnpm and typescript
         uses: ./.github/actions/pnpm-setup

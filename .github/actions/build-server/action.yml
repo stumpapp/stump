@@ -1,0 +1,33 @@
+name: 'Compile rust'
+description: 'Compile stump rust server'
+
+inputs:
+  platform:
+    description: 'runner plaform'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout project
+      uses: actions/checkout@v3
+
+    - name: Setup rust
+      uses: ./.github/actions/setup-system
+
+    - name: Generate Prisma client
+      uses: ./.github/actions/generate-prisma-client
+
+    - name: Download frontend
+      uses: actions/download-artifact@v3
+      with:
+        name: web
+        path: ./apps/server/dist
+
+    - name: Copy web app to tauri
+      run: cp -r ./apps/server/dist apps/desktop/dist
+      shell: bash
+
+    - name: Build server
+      shell: bash
+      run: cargo build --release

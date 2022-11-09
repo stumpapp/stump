@@ -1,0 +1,60 @@
+name: Stump-nightly
+
+on:
+  push:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-web:
+    strategy:
+      fail-fast: true
+      matrix:
+        plaform: [ubuntu-20.04]
+    name: Build web application
+    runs-on: ${{ matrix.plaform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build web
+        uses: ./.github/actions/build-web
+
+      - name: Upload web build
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: web
+          upload-path: apps/web/dist
+
+  build-server:
+    strategy:
+      fail-fast: true
+      matrix:
+        plaform: [ubuntu-20.04] # We should probably build for window and macos
+    name: Build server and desktop
+    runs-on: ${{ matrix.plaform }}
+    needs: build-web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build server
+        uses: ./.github/actions/build-server
+        with:
+          platform: ${{ matrix.plaform }}
+
+      - name: Upload stump server
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: stump_server
+          upload-path: target/release/stump_server
+
+      - uses: tauri-apps/tauri-action@v0
+
+      - name: Upload desktop
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: stump-desktop
+          upload-path: target/release/bundle

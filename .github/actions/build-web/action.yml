@@ -1,0 +1,14 @@
+name: 'Build Web Application'
+description: "Build web application and upload it's artifacts"
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build
+      uses: ./.github/actions/compile-web
+
+    - name: Upload
+      uses: ./.github/actions/upload-artifact
+      with:
+        upload-name: web
+        upload-path: apps/web/dist

@@ -3,7 +3,7 @@ use std::process::Command;
 
 fn get_git_rev() -> Option<String> {
 	let output = Command::new("git")
-		.args(&["rev-parse", "--short", "HEAD"])
+		.args(["rev-parse", "--short", "HEAD"])
 		.output()
 		.ok()?;
 

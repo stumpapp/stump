@@ -1,0 +1,52 @@
+name: 'Compile Web Application'
+description: 'Compile stump web'
+
+inputs:
+  node-version:
+    required: true
+    description: 'Node version to use'
+  pnpm-version:
+    required: true
+    description: 'Pnpm version to use'
+
+outputs:
+  dist-path:
+    description: 'Path to the compiled artifact'
+    value: ./apps/web/dist
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout project
+      uses: actions/checkout@v3
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+    - uses: pnpm/action-setup@v2.2.2
+      name: Install pnpm
+      with:
+        version: ${{ inputs.pnpm-version }}
+        run_install: false
+    - name: Get pnpm store directory
+      shell: bash
+      id: pnpm-cache
+      run: |
+        echo 'PNPM_CACHE_DIR<<EOF' >> $GITHUB_ENV
+        pnpm store path >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: ${{ env.PNPM_CACHE_DIR }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install
+      working-directory: apps/web
+    - name: Build app
+      shell: bash
+      run: pnpm run build
+      working-directory: apps/web

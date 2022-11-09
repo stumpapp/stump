@@ -1,7 +1,6 @@
-import { Heading, Text, useColorModeValue } from '@chakra-ui/react';
+import { Heading } from '@chakra-ui/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 
 interface Props {
 	title?: string;
@@ -28,30 +27,12 @@ export default function SlidingCardList({
 		horizontal: true,
 	});
 
-	// TODO: I think this can be a problematic implementation.
-	const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-		const currPos = e.currentTarget.scrollLeft;
-		const maxPos = e.currentTarget.scrollWidth - e.currentTarget.clientWidth;
-
-		if (currPos >= maxPos - 350 && !isLoadingNext) {
-			onScrollEnd?.();
-		}
-	};
-
 	useEffect(() => {
 		const [lastItem] = [...columnVirtualizer.getVirtualItems()].reverse();
 
 		if (!lastItem) {
 			return;
 		}
-
-		// console.log({
-		// 	lastItem,
-		// 	lastItemIndex: lastItem.index,
-		// 	cardsLength: cards.length,
-		// 	lastItemIndexEqualsCardsLengthMinusOne: lastItem.index === cards.length - 1,
-		// 	hasNext,
-		// });
 
 		if (lastItem.index >= cards.length - 5 && hasNext && !isLoadingNext) {
 			onScrollEnd?.();
@@ -86,11 +67,7 @@ export default function SlidingCardList({
 					</Text> */}
 				</div>
 			</div>
-			<div
-				className="w-full flex flex-row space-x-2 overflow-x-scroll pb-4"
-				ref={parentRef}
-				onScroll={handleScroll}
-			>
+			<div className="w-full flex flex-row space-x-2 overflow-x-scroll pb-4" ref={parentRef}>
 				<div
 					className="w-full relative flex flex-row space-x-2"
 					style={{

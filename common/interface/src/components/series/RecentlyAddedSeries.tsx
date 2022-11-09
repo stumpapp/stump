@@ -13,7 +13,7 @@ export default function RecentlyAddedSeries() {
 		<SlidingCardList
 			title="Recently Added Series"
 			cards={data.map((series) => (
-				<SeriesCard key={series.id} series={series} />
+				<SeriesCard key={series.id} series={series} fixed />
 			))}
 			isLoadingNext={isLoading}
 			hasNext={hasMore}

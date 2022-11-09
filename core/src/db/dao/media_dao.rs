@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
+use prisma_client_rust::{raw, PrismaValue};
+
 use crate::{
 	db::models::Media,
-	prelude::{CoreError, CoreResult},
+	prelude::{CoreError, CoreResult, PageBounds},
 	prisma::{media, series, PrismaClient},
 };
 
@@ -10,6 +12,52 @@ use super::{Dao, DaoBatch};
 
 pub struct MediaDao {
 	client: Arc<PrismaClient>,
+}
+
+impl MediaDao {
+	// TODO: this can change once I set a `completed` field on the media table, which
+	// would really simplify this query.
+	pub async fn get_in_progress_media(
+		&self,
+		viewer_id: &str,
+		page_bounds: PageBounds,
+	) -> CoreResult<Vec<Media>> {
+		let media_in_progress = self
+			.client
+			._query_raw::<Media>(raw!(
+				r#"
+				SELECT
+					media.id AS id,
+					media.name AS name,
+					media.description AS description,
+					media.size AS size,
+					media.extension AS extension,
+					media.pages AS pages,
+					media.updated_at AS updated_at,
+					media.created_at AS created_at,
+					media.checksum AS checksum,
+					media.path AS path,
+					media.status AS status,
+					media.series_id AS series_id,
+					media_progress.page AS current_page
+				FROM
+					media
+					LEFT OUTER JOIN read_progresses media_progress
+						ON media_progress.media_id = media.id
+						AND media_progress.user_id == {} AND media_progress.page < media.pages
+				WHERE current_page IS NOT NULL
+				GROUP BY media.id
+				ORDER BY media.updated_at DESC
+				LIMIT {} OFFSET {}"#,
+				PrismaValue::String(viewer_id.to_string()),
+				PrismaValue::Int(page_bounds.take),
+				PrismaValue::Int(page_bounds.skip)
+			))
+			.exec()
+			.await?;
+
+		Ok(media_in_progress)
+	}
 }
 
 #[async_trait::async_trait]

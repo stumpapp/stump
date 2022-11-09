@@ -128,7 +128,8 @@ export function usePagedQuery<T>(
 
 	return {
 		data,
-		isLoading: isLoading || isFetching || isFetchingNextPage,
+		isLoading: isLoading,
+		isFetching: isFetching || isFetchingNextPage,
 		hasMore: hasNextPage,
 		fetchMore: fetchNextPage,
 		isFetchingNextPage,

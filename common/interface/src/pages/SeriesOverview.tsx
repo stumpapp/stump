@@ -16,6 +16,7 @@ import Pagination from '../ui/Pagination';
 import ReadMore from '../ui/ReadMore';
 
 import type { Series } from '@stump/client';
+import TagList from '../components/tags/TagList';
 
 interface OverviewTitleSectionProps {
 	isVisible: boolean;
@@ -39,7 +40,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					</Box>
 				</Box>
 			</div>
-			<div className="flex-1 flex flex-col space-y-4">
+			<div className="flex-1 flex flex-col space-y-4 h-full">
 				<Heading size="sm" noOfLines={1}>
 					{series.name}
 				</Heading>
@@ -61,6 +62,9 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					// read for any Spider-Man fan!`}
 					text={series.description ?? ''}
 				/>
+
+				{/* TODO: I want this at the bottom of the container here, but layout needs to be tweaked and I am tired. */}
+				<TagList tags={series.tags} />
 			</div>
 		</div>
 	);

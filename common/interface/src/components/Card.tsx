@@ -4,12 +4,14 @@ import clsx from 'clsx';
 import { ComponentProps } from 'react';
 import { Link } from 'react-router-dom';
 
+// FIXME: what's not to fix here lol just not a great variant pattern...
 export const cardVariants = cva('relative shadow rounded-md', {
 	variants: {
 		variant: {
 			default: '',
 			image:
 				'min-w-[10rem] min-h-[15rem] sm:min-w-[10.666rem] sm:min-h-[16rem] md:min-w-[12rem] md:min-h-[18.666rem]',
+			fixedImage: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
 		},
 		size: {
 			sm: '',
@@ -28,6 +30,7 @@ type CardBaseProps = ComponentProps<'div'> & {
 };
 export type CardProps = VariantProps<typeof cardVariants> & CardBaseProps;
 
+// TODO fix tab focus
 export default function Card({
 	to,
 	overlay,

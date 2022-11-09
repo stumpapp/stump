@@ -15,17 +15,29 @@ export function getMediaById(id: string): Promise<GetMediaById> {
 	return API.get(`/media/${id}`);
 }
 
+// TODO: I see myself using this pattern a lot, so I should make a helper/wrapper for it...
 export function getRecentlyAddedMedia(
 	page: number,
 	params?: URLSearchParams,
 ): Promise<PageableApiResult<Media[]>> {
-	console.log(page);
 	if (params) {
 		params.set('page', page.toString());
 		return API.get(`/media/recently-added?${params.toString()}`);
 	}
 
 	return API.get(`/media/recently-added?page=${page}`);
+}
+
+export function getInProgressMedia(
+	page: number,
+	params?: URLSearchParams,
+): Promise<PageableApiResult<Media[]>> {
+	if (params) {
+		params.set('page', page.toString());
+		return API.get(`/media/keep-reading?${params.toString()}`);
+	}
+
+	return API.get(`/media/keep-reading?page=${page}`);
 }
 
 export function getMediaThumbnail(id: string): string {

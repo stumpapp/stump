@@ -37,6 +37,7 @@ pub struct Media {
 	pub series_id: String,
 	// The series this media belongs to. Will be `None` only if the relation is not loaded.
 	pub series: Option<Series>,
+	// TODO: serde skip
 	/// The read progresses of the media. Will be `None` only if the relation is not loaded.
 	pub read_progresses: Option<Vec<ReadProgress>>,
 	/// The current page of the media, computed from `read_progresses`. Will be `None` only

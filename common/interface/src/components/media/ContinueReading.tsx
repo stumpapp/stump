@@ -1,9 +1,9 @@
-import { useRecentlyAddedMedia } from '@stump/client';
+import { useContinueReading } from '@stump/client';
 import SlidingCardList from '../SlidingCardList';
 import MediaCard from './MediaCard';
 
-export default function RecentlyAddedMedia() {
-	const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedMedia();
+export default function ContinueReadingMedia() {
+	const { data, isLoading, hasMore, fetchMore } = useContinueReading();
 
 	if (isLoading || !data) {
 		return null;
@@ -11,7 +11,7 @@ export default function RecentlyAddedMedia() {
 
 	return (
 		<SlidingCardList
-			title="Recently Added Books"
+			title="Continue Reading"
 			cards={data.map((media) => (
 				<MediaCard key={media.id} media={media} fixed />
 			))}

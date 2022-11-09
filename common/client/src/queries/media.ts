@@ -3,7 +3,12 @@ import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getMediaById, getRecentlyAddedMedia, updateMediaProgress } from '../api';
+import {
+	getInProgressMedia,
+	getMediaById,
+	getRecentlyAddedMedia,
+	updateMediaProgress,
+} from '../api';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
 import { useCounter } from '../hooks/useCounter';
@@ -57,6 +62,15 @@ export function useRecentlyAddedMedia(options: QueryCallbacks<Pageable<Media[]>>
 	return usePagedQuery(
 		'getRecentlyAddedMedia',
 		getRecentlyAddedMedia,
+		options,
+		new URLSearchParams('page_size=10'),
+	);
+}
+
+export function useContinueReading(options: QueryCallbacks<Pageable<Media[]>> = {}) {
+	return usePagedQuery(
+		'getInProgressMedia',
+		getInProgressMedia,
 		options,
 		new URLSearchParams('page_size=10'),
 	);

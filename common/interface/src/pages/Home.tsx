@@ -5,6 +5,7 @@ import LibrariesStats from '../components/library/LibrariesStats';
 import NoLibraries from '../components/library/NoLibraries';
 import RecentlyAddedSeries from '../components/series/RecentlyAddedSeries';
 import RecentlyAddedMedia from '../components/media/RecentlyAddedMedia';
+import ContinueReadingMedia from '../components/media/ContinueReading';
 
 // TODO: account for new accounts, i.e. no media at all
 export default function Home() {
@@ -34,12 +35,10 @@ export default function Home() {
 		<>
 			{helmet}
 			<Stack p="4" w="full" h="full" spacing={4}>
-				{/* <UiDemo /> */}
-				{/* <EpubReader /> */}
 				<LibrariesStats />
-
+				<ContinueReadingMedia />
 				<RecentlyAddedMedia />
-				{/* <RecentlyAddedSeries /> */}
+				<RecentlyAddedSeries />
 			</Stack>
 		</>
 	);

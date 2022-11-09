@@ -22,10 +22,21 @@ export default function SlidingCardList({
 	const columnVirtualizer = useVirtualizer({
 		count: cards.length,
 		getScrollElement: () => parentRef.current,
-		estimateSize: () => 200,
-		overscan: 5,
+		estimateSize: () => 350,
+		// FIXME: this is an absurd overscan... needs to change, however I cannot get it to work with less
+		overscan: 75,
 		horizontal: true,
 	});
+
+	// TODO: I think this can be a problematic implementation.
+	const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+		const currPos = e.currentTarget.scrollLeft;
+		const maxPos = e.currentTarget.scrollWidth - e.currentTarget.clientWidth;
+
+		if (currPos >= maxPos - 350 && !isLoadingNext) {
+			onScrollEnd?.();
+		}
+	};
 
 	useEffect(() => {
 		const [lastItem] = [...columnVirtualizer.getVirtualItems()].reverse();
@@ -39,19 +50,31 @@ export default function SlidingCardList({
 		// 	lastItemIndex: lastItem.index,
 		// 	cardsLength: cards.length,
 		// 	lastItemIndexEqualsCardsLengthMinusOne: lastItem.index === cards.length - 1,
+		// 	hasNext,
 		// });
 
-		if (lastItem.index >= cards.length - 10 && hasNext && !isLoadingNext) {
+		if (lastItem.index >= cards.length - 5 && hasNext && !isLoadingNext) {
 			onScrollEnd?.();
 		}
-	}, [hasNext, onScrollEnd, cards.length, isLoadingNext, columnVirtualizer.getVirtualItems()]);
+	}, [
+		hasNext,
+		onScrollEnd,
+		cards.length,
+		isLoadingNext,
+		columnVirtualizer.getVirtualItems().length,
+	]);
+
+	// console.log({
+	// 	virtualCount: columnVirtualizer.getVirtualItems().length,
+	// 	cardsLength: cards.length,
+	// });
 
 	return (
 		<div className="w-full flex flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
 				{title && <Heading fontSize="lg">{title}</Heading>}
 				<div className="self-end">
-					<Text
+					{/* <Text
 						to="#"
 						as={Link}
 						className="transition-colors duration-150"
@@ -60,10 +83,14 @@ export default function SlidingCardList({
 						_hover={{ color: 'brand.500' }}
 					>
 						See More
-					</Text>
+					</Text> */}
 				</div>
 			</div>
-			<div className="w-full flex flex-row space-x-2 overflow-x-scroll pb-4" ref={parentRef}>
+			<div
+				className="w-full flex flex-row space-x-2 overflow-x-scroll pb-4"
+				ref={parentRef}
+				onScroll={handleScroll}
+			>
 				<div
 					className="w-full relative flex flex-row space-x-2"
 					style={{

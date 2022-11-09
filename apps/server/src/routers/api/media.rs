@@ -11,6 +11,7 @@ use stump_core::{
 	db::{
 		models::{Media, ReadProgress},
 		utils::PrismaCountTrait,
+		Dao, MediaDao,
 	},
 	fs::{image, media_file},
 	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
@@ -125,47 +126,22 @@ async fn get_duplicate_media(
 async fn get_in_progress_media(
 	Extension(ctx): State,
 	session: ReadableSession,
-) -> ApiResult<Json<Vec<Media>>> {
-	let db = ctx.get_db();
+	pagination: Query<PagedRequestParams>,
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let user_id = get_session_user(&session)?.id;
+	let media_dao = MediaDao::new(ctx.db.clone());
+	let page_params = pagination.page_params();
+	let media_in_progress = media_dao
+		.get_in_progress_media(&user_id, page_params.get_page_bounds())
+		.await?;
+	// Becuase of the nature of this query, I can just grab the count from here.
+	let count = media_in_progress.len() as i64;
 
-	Ok(Json(
-		db.media()
-			.find_many(vec![media::read_progresses::some(vec![
-				read_progress::user_id::equals(user_id.clone()),
-				read_progress::page::gt(0),
-			])])
-			.with(media::read_progresses::fetch(vec![
-				read_progress::user_id::equals(user_id),
-				read_progress::page::gt(0),
-			]))
-			.order_by(media::updated_at::order(Direction::Desc))
-			.exec()
-			.await?
-			.into_iter()
-			.filter(|m| match m.read_progresses() {
-				// Read progresses relation on media is one to many, there is a dual key
-				// on read_progresses table linking a user and media. Therefore, there should
-				// only be 1 item in this vec for each media resulting from the query.
-				Ok(progresses) => {
-					if progresses.len() != 1 {
-						return false;
-					}
-
-					let progress = &progresses[0];
-
-					if let Some(_epubcfi) = progress.epubcfi.as_ref() {
-						// TODO: figure something out... might just need a `completed` field in progress TBH.
-						false
-					} else {
-						progress.page < m.pages
-					}
-				},
-				_ => false,
-			})
-			.map(|m| m.into())
-			.collect(),
-	))
+	Ok(Json(Pageable::from_truncated(
+		media_in_progress,
+		count,
+		page_params,
+	)))
 }
 
 async fn get_recently_added_media(

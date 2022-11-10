@@ -6,11 +6,14 @@ runs:
   steps:
     - name: Checkout project
       uses: actions/checkout@v3
-    - uses: ./.github/actions/pnpm-setup
+
+    - uses: ./.github/actions/setup-pnpm
+
     - name: Install dependencies
       shell: bash
       run: pnpm install
       working-directory: apps/web
+
     - name: Build app
       shell: bash
       run: pnpm run build

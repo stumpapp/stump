@@ -3,23 +3,30 @@ description: Setup PNPM and cache PNPM dependencies
 runs:
   using: 'composite'
   steps:
-    - uses: pnpm/action-setup@v2.0.1
+    - uses: pnpm/action-setup@v2
       name: Install pnpm
       id: pnpm-install
       with:
         version: 7
         run_install: false
+
     - name: Get pnpm store directory
+      id: pnpm-cache-store
       shell: bash
-      id: pnpm-cache
       run: |
         echo 'PNPM_CACHE_DIR<<EOF' >> $GITHUB_ENV
         pnpm store path >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
+
     - uses: actions/cache@v3
       name: Setup pnpm cache
+      id: pnpm-cache
       with:
-        path: ${{ env.PNPM_CACHE_DIR }}
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-store-    - name: Install dependencies
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      if: steps.pnpm-cache.outputs.cache-hit != 'true'
+      run: pnpm install

@@ -11,7 +11,7 @@ use stump_core::{
 use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
-	middleware::auth::{Auth},
+	middleware::auth::Auth,
 	utils::{get_hash_cost, get_session_user},
 };
 
@@ -21,7 +21,12 @@ pub(crate) fn mount() -> Router {
 		.nest(
 			"/users/:id",
 			Router::new()
-				.route("/", get(get_user_by_id).put(update_user).delete(delete_user_by_id))
+				.route(
+					"/",
+					get(get_user_by_id)
+						.put(update_user)
+						.delete(delete_user_by_id),
+				)
 				.route(
 					"/preferences",
 					get(get_user_preferences).put(update_user_preferences),
@@ -128,7 +133,7 @@ async fn delete_user_by_id(
 
 async fn get_user_by_id(
 	Path(id): Path<String>,
-    Extension(ctx): State,
+	Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
@@ -156,7 +161,6 @@ async fn get_user_by_id(
 	} */
 
 	Ok(Json(user_by_id.into()))
-
 }
 
 // TODO: figure out what operations are allowed here, and by whom. E.g. can a server
@@ -168,7 +172,7 @@ async fn get_user_by_id(
 async fn update_user(
 	Path(id): Path<String>,
 	Json(input): Json<LoginOrRegisterArgs>,
-    Extension(ctx): State,
+	Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
@@ -181,18 +185,21 @@ async fn update_user(
 			"You do not have permission to access this resource.".into(),
 		));
 	}
-	
+
 	let updated = db
 		.user()
-		.upsert(user::id::equals(id.clone()), (
-			input.username.clone(),
-			hashed_password.clone(),
-			vec![]
-		), vec![user::username::set(input.username), user::hashed_password::set(hashed_password)])
+		.upsert(
+			user::id::equals(id.clone()),
+			(input.username.clone(), hashed_password.clone(), vec![]),
+			vec![
+				user::username::set(input.username),
+				user::hashed_password::set(hashed_password),
+			],
+		)
 		.exec()
 		.await?
 		.into();
-	
+
 	Ok(Json(updated))
 }
 

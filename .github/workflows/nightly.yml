@@ -1,10 +1,15 @@
 name: Stump-nightly
 
+# on:
+#   schedule:
+#     # * is a special character in YAML so you have to quote this string
+#     - cron: '0 1 * * *'
+#   workflow_dispatch:
+
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: '0 1 * * *'
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - 'nightly'
 
 jobs:
   build-web:

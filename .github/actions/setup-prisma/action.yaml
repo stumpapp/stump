@@ -8,7 +8,6 @@ runs:
       uses: actions/cache@v3
       with:
         path: core/src/prisma.rs
-        # FIXME: maybe it is just `act`, but this keeps failing: An internal error has occurred in cache backend.
         key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
 
     - name: Generate Prisma client

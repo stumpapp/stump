@@ -13,15 +13,8 @@ export const cardVariants = cva('relative shadow rounded-md', {
 				'min-w-[10rem] min-h-[15rem] sm:min-w-[10.666rem] sm:min-h-[16rem] md:min-w-[12rem] md:min-h-[18.666rem]',
 			fixedImage: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
 		},
-		size: {
-			sm: '',
-			md: '',
-			lg: '',
-		},
 	},
-	defaultVariants: {
-		size: 'md',
-	},
+	defaultVariants: {},
 });
 type CardBaseProps = ComponentProps<'div'> & {
 	to?: string;
@@ -30,16 +23,8 @@ type CardBaseProps = ComponentProps<'div'> & {
 };
 export type CardProps = VariantProps<typeof cardVariants> & CardBaseProps;
 
-// TODO fix tab focus
-export default function Card({
-	to,
-	overlay,
-	children,
-	size,
-	variant,
-	className,
-	...rest
-}: CardProps) {
+// TODO: fix tab focus
+export default function Card({ to, overlay, children, variant, className, ...rest }: CardProps) {
 	const card = (
 		<Box
 			{...rest}
@@ -56,7 +41,6 @@ export default function Card({
 			_dark={{ bg: 'gray.750' }}
 			className={cardVariants({
 				variant,
-				size,
 				class: clsx('relative flex flex-col overflow-hidden flex-1 space-y-1', className),
 			})}
 		>
@@ -94,6 +78,14 @@ export function CardFooter({ children, ...props }: CardFooterProps) {
 		<Box p={1.5} {...props}>
 			{children}
 		</Box>
+	);
+}
+
+export function CardGrid({ children }: { children: React.ReactNode }) {
+	return (
+		<div className="flex-1 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:gap-2 2xl:grid-cols-7 4xl:grid-cols-8 items-start justify-center md:justify-start pb-4">
+			{children}
+		</div>
 	);
 }
 

@@ -11,7 +11,7 @@ jobs:
     name: Rust checks
     runs-on: ubuntu-latest
     # TODO: remove this once I have my own, hosted runner...
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

@@ -7,7 +7,9 @@ import pluralizeStat from '../../utils/pluralize';
 
 export type MediaCardProps = {
 	media: Media;
+	// changes the card link to go directly to a reader, rather than overview page
 	readingLink?: boolean;
+	// Used on the home page to set the height/width of the card for the sliding flex layout
 	fixed?: boolean;
 };
 
@@ -24,11 +26,13 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 			variant={fixed ? 'fixedImage' : 'image'}
 			to={link}
 			onMouseEnter={() => prefetchMedia(media.id)}
+			title={media.name}
 		>
 			<CardBody p={0} className="relative">
 				<img
 					className="aspect-[2/3] object-cover"
 					src={isFallback ? '/fallbacks/image-file.svg' : getMediaThumbnail(media.id)}
+					alt={`Cover for ${media.name}`}
 					onError={on}
 				/>
 
@@ -46,6 +50,7 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 				)}
 			</CardBody>
 			<CardFooter p={1} className="flex flex-col gap-1">
+				{/* TODO: figure out how to make this not look like shit with 2 lines */}
 				<Text fontSize="sm" as="h3" fontWeight="semibold" className="[hyphens:auto]" noOfLines={1}>
 					{media.name}
 				</Text>

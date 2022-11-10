@@ -20,11 +20,13 @@ export default function SeriesCard({ series, fixed }: SeriesCardProps) {
 			variant={fixed ? 'fixedImage' : 'image'}
 			to={`/series/${series.id}`}
 			onMouseEnter={() => prefetchSeries(series.id)}
+			title={series.name}
 		>
 			<CardBody p={0} className="relative">
 				<img
 					className="aspect-[2/3] object-cover min-h-full"
 					src={isFallback ? '/fallbacks/image-file.svg' : getSeriesThumbnail(series.id)}
+					alt={`Cover for ${series.name}`}
 					onError={on}
 				/>
 
@@ -41,14 +43,13 @@ export default function SeriesCard({ series, fixed }: SeriesCardProps) {
 				)}
 			</CardBody>
 			<CardFooter p={1} className="flex flex-col gap-1">
+				{/* TODO: figure out how to make this not look like shit with 2 lines */}
 				<Text fontSize="sm" as="h3" fontWeight="semibold" className="[hyphens:auto]" noOfLines={1}>
 					{series.name}
 				</Text>
 
 				<Text fontSize="xs" color={useColorModeValue('gray.700', 'gray.300')} noOfLines={1}>
 					{pluralizeStat('book', Number(bookCount))}
-					{/* {!!unreadCount &&
-						` • ${Math.round(((bookCount - Number(unreadCount)) / bookCount) * 100)}% Completed`} */}
 				</Text>
 			</CardFooter>
 		</Card>

@@ -14,15 +14,13 @@ runs:
       id: pnpm-cache-store
       shell: bash
       run: |
-        echo 'PNPM_CACHE_DIR<<EOF' >> $GITHUB_ENV
-        pnpm store path >> $GITHUB_ENV
-        echo 'EOF' >> $GITHUB_ENV
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
     - uses: actions/cache@v3
       name: Setup pnpm cache
       id: pnpm-cache
       with:
-        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        path: ${{ steps.pnpm-cache-store.outputs.STORE_PATH }}
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-

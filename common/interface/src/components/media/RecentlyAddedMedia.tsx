@@ -2,6 +2,7 @@ import { useRecentlyAddedMedia } from '@stump/client';
 import SlidingCardList from '../SlidingCardList';
 import MediaCard from './MediaCard';
 
+// TODO: better empty state
 export default function RecentlyAddedMedia() {
 	const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedMedia();
 

@@ -2,6 +2,7 @@ import { useRecentlyAddedSeries } from '@stump/client';
 import SlidingCardList from '../SlidingCardList';
 import SeriesCard from './SeriesCard';
 
+// TODO: better empty state
 export default function RecentlyAddedSeries() {
 	const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedSeries();
 

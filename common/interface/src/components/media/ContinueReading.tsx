@@ -2,6 +2,7 @@ import { useContinueReading } from '@stump/client';
 import SlidingCardList from '../SlidingCardList';
 import MediaCard from './MediaCard';
 
+// TODO: better empty state
 export default function ContinueReadingMedia() {
 	const { data, isLoading, hasMore, fetchMore } = useContinueReading();
 

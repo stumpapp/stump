@@ -28,4 +28,4 @@ runs:
     - name: Install dependencies
       if: steps.pnpm-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: pnpm install
+      run: pnpm install --no-frozen-lockfile

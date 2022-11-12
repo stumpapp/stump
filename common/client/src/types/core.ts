@@ -100,10 +100,12 @@ export interface Series {
 	description: string | null;
 	status: FileStatus;
 	updated_at: string;
+	created_at: string;
 	library_id: string;
 	library: Library | null;
 	media: Array<Media> | null;
-	media_count: bigint | null;
+	media_count?: bigint;
+	unread_media_count?: bigint;
 	tags: Array<Tag> | null;
 }
 
@@ -115,6 +117,7 @@ export interface Media {
 	extension: string;
 	pages: number;
 	updated_at: string;
+	created_at: string;
 	checksum: string | null;
 	path: string;
 	status: FileStatus;
@@ -199,6 +202,19 @@ export type CoreEvent =
 	| { key: 'CreatedMediaBatch'; data: bigint }
 	| { key: 'CreatedSeries'; data: Series }
 	| { key: 'CreatedSeriesBatch'; data: bigint };
+
+export interface ReadingList {
+	id: string;
+	name: string;
+	creating_user_id: string;
+	description: string | null;
+	media: Array<Media> | null;
+}
+
+export interface CreateReadingList {
+	id: string;
+	media_ids: Array<string>;
+}
 
 export interface DirectoryListing {
 	parent: string | null;

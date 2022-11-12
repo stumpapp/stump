@@ -88,6 +88,12 @@ pub trait DaoBatch: Sync + Sized {
 }
 
 #[async_trait::async_trait]
+pub trait DaoCount: Sync + Sized {
+	/// Counts the number of records in the database.
+	async fn count_all(&self) -> CoreResult<i64>;
+}
+
+#[async_trait::async_trait]
 pub trait DaoRestricted: Sync + Sized {
 	type Model: Sync;
 

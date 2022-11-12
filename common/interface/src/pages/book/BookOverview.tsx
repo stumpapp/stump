@@ -4,8 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import { useMedia, useTopBarStore } from '@stump/client';
 import { getMediaPage, getMediaThumbnail } from '@stump/client/api';
-
-import Card from '../../components/Card';
+import MediaCard from '../../components/media/MediaCard';
 
 export default function BookOverview() {
 	const { id } = useParams();
@@ -53,16 +52,8 @@ export default function BookOverview() {
 			<Helmet>
 				<title>Stump | {media.name ?? ''}</title>
 			</Helmet>
-			<div className="p-4 flex">
-				<Card
-					to={`/books/${media.id}/pages/${media.current_page ?? 1}`}
-					imageAlt={media.name}
-					imageSrc={getMediaThumbnail(media.id)}
-					imageFallback={fallback}
-					onMouseEnter={prefetchCurrentPage}
-					title={media.name}
-					variant="large"
-				/>
+			<div className="p-4 flex max-w-xs">
+				<MediaCard media={media} readingLink />
 			</div>
 		</>
 	);

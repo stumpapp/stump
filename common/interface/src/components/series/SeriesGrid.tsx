@@ -3,6 +3,8 @@ import { Heading } from '@chakra-ui/react';
 import SeriesCard from './SeriesCard';
 
 import type { Series } from '@stump/client';
+import { CardGrid } from '../Card';
+
 interface Props {
 	isLoading: boolean;
 	series?: Series[];
@@ -23,10 +25,10 @@ export default function SeriesGrid({ series, isLoading }: Props) {
 	}
 
 	return (
-		<div className="flex-1 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:gap-2 2xl:grid-cols-8 3xl:grid-cols-9 items-start justify-center md:justify-start pb-4">
+		<CardGrid>
 			{series.map((s) => (
-				<SeriesCard key={s.id} {...s} />
+				<SeriesCard key={s.id} series={s} />
 			))}
-		</div>
+		</CardGrid>
 	);
 }

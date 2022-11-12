@@ -18,16 +18,22 @@ pub struct Series {
 	pub description: Option<String>,
 	/// The status of the series since last scan or access
 	pub status: FileStatus,
-	// pub updated_at: DateTime<FixedOffset>,
+	/// The timestamp of when the series was last updated
 	pub updated_at: String,
+	/// The timestamp of when the series was created
+	pub created_at: String,
 	/// The ID of the library this series belongs to.
 	pub library_id: String,
 	/// The library this series belongs to. Will be `None` only if the relation is not loaded.
 	pub library: Option<Library>,
 	/// The media that are in this series. Will be `None` only if the relation is not loaded.
 	pub media: Option<Vec<Media>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	/// The number of media in this series. Optional for safety, but should be loaded if possible.
 	pub media_count: Option<i64>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	/// The number of media in this series which have not been read. Only loaded on some queries.
+	pub unread_media_count: Option<i64>,
 	/// The user assigned tags for the series. ex: ["comic", "family"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 }
@@ -80,10 +86,12 @@ impl From<prisma::series::Data> for Series {
 			description: data.description,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
 			updated_at: data.updated_at.to_string(),
+			created_at: data.created_at.to_string(),
 			library_id: data.library_id.unwrap(),
 			library,
 			media,
 			media_count,
+			unread_media_count: None,
 			tags,
 		}
 	}

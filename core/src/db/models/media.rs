@@ -23,8 +23,10 @@ pub struct Media {
 	pub extension: String,
 	/// The number of pages in the media. ex: "69"
 	pub pages: i32,
-	// pub updated_at: DateTime<FixedOffset>,
+	/// The timestamp when the media was last updated.
 	pub updated_at: String,
+	/// The timestamp when the media was created.
+	pub created_at: String,
 	/// The checksum hash of the file contents. Used to ensure only one instance of a file in the database.
 	pub checksum: Option<String>,
 	/// The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
@@ -35,6 +37,7 @@ pub struct Media {
 	pub series_id: String,
 	// The series this media belongs to. Will be `None` only if the relation is not loaded.
 	pub series: Option<Series>,
+	// TODO: serde skip
 	/// The read progresses of the media. Will be `None` only if the relation is not loaded.
 	pub read_progresses: Option<Vec<ReadProgress>>,
 	/// The current page of the media, computed from `read_progresses`. Will be `None` only
@@ -94,6 +97,7 @@ impl From<media::Data> for Media {
 			extension: data.extension,
 			pages: data.pages,
 			updated_at: data.updated_at.to_string(),
+			created_at: data.created_at.to_string(),
 			checksum: data.checksum,
 			path: data.path,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),

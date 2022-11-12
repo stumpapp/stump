@@ -83,7 +83,11 @@ export default function StumpInterface(props: AppProps) {
 	return (
 		<ChakraProvider theme={chakraTheme}>
 			<ErrorBoundary FallbackComponent={ErrorFallback}>
-				<QueryClientProvider client={queryClient} contextSharing={true}>
+				<QueryClientProvider
+					client={queryClient}
+					// FIXME: this will be removed... https://github.com/TanStack/query/discussions/4252
+					contextSharing={true}
+				>
 					{import.meta.env.MODE === 'development' && (
 						<ReactQueryDevtools position="bottom-right" context={defaultContext} />
 					)}

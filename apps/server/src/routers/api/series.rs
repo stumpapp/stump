@@ -11,6 +11,7 @@ use stump_core::{
 	db::{
 		models::{Media, Series},
 		utils::PrismaCountTrait,
+		Dao, DaoCount, SeriesDao,
 	},
 	fs::{image, media_file},
 	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
@@ -34,6 +35,7 @@ use crate::{
 pub(crate) fn mount() -> Router {
 	Router::new()
 		.route("/series", get(get_series))
+		.route("/series/recently-added", get(get_recently_added_series))
 		.nest(
 			"/series/:id",
 			Router::new()
@@ -139,6 +141,33 @@ async fn get_series_by_id(
 	}
 
 	Ok(Json(series.unwrap().into()))
+}
+
+async fn get_recently_added_series(
+	Extension(ctx): State,
+	pagination: Query<PagedRequestParams>,
+	session: ReadableSession,
+) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+	if pagination.unpaged.unwrap_or_default() {
+		return Err(ApiError::BadRequest(
+			"Unpaged request not supported for this endpoint".to_string(),
+		));
+	}
+
+	let viewer_id = get_session_user(&session)?.id;
+	let page_params = pagination.page_params();
+	let series_dao = SeriesDao::new(ctx.db.clone());
+
+	let recently_added_series = series_dao
+		.find_recently_added(&viewer_id, page_params.get_page_bounds())
+		.await?;
+	let series_count = series_dao.count_all().await?;
+
+	Ok(Json(Pageable::from_truncated(
+		recently_added_series,
+		series_count,
+		page_params,
+	)))
 }
 
 /// Returns the thumbnail image for a series

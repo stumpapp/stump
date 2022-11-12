@@ -1,11 +1,18 @@
-import type { Media, ReadProgress } from '../types';
-import type { MutationCallbacks, QueryCallbacks } from '.';
+import type { Media, Pageable, ReadProgress } from '../types';
+import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getMediaById, updateMediaProgress } from '../api';
+import {
+	getInProgressMedia,
+	getMediaById,
+	getRecentlyAddedMedia,
+	updateMediaProgress,
+} from '../api';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
+import { useCounter } from '../hooks/useCounter';
+import { useState } from 'react';
 
 export const prefetchMedia = async (id: string) => {
 	await queryClient.prefetchQuery(['getMediaById', id], () => getMediaById(id), {
@@ -49,4 +56,22 @@ export function useMediaMutation(id: string, options: MutationCallbacks<ReadProg
 	});
 
 	return { updateReadProgress, updateReadProgressAsync, isLoading };
+}
+
+export function useRecentlyAddedMedia(options: QueryCallbacks<Pageable<Media[]>> = {}) {
+	return usePagedQuery(
+		'getRecentlyAddedMedia',
+		getRecentlyAddedMedia,
+		options,
+		new URLSearchParams('page_size=10'),
+	);
+}
+
+export function useContinueReading(options: QueryCallbacks<Pageable<Media[]>> = {}) {
+	return usePagedQuery(
+		'getInProgressMedia',
+		getInProgressMedia,
+		options,
+		new URLSearchParams('page_size=10'),
+	);
 }

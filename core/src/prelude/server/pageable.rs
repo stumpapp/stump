@@ -16,6 +16,11 @@ pub struct PagedRequestParams {
 	pub direction: Option<Direction>,
 }
 
+pub struct PageBounds {
+	pub skip: i64,
+	pub take: i64,
+}
+
 #[derive(Debug, Serialize, Clone, Type)]
 pub struct PageParams {
 	pub zero_based: bool,
@@ -50,6 +55,12 @@ impl PageParams {
 		let take = self.page_size as i64;
 
 		(start, take)
+	}
+
+	pub fn get_page_bounds(&self) -> PageBounds {
+		let (skip, take) = self.get_skip_take();
+
+		PageBounds { skip, take }
 	}
 }
 
@@ -145,6 +156,16 @@ impl<T: Serialize> Pageable<T> {
 			data,
 			_page: Some(page_info),
 		}
+	}
+
+	// TODO: rename this terribly named function lol
+	/// Generates a Pageable instance using an explicitly provided count and page params. This is useful for
+	/// when the data provided is not the full set available, but rather a subset of the data (e.g. a query with
+	/// a limit).
+	pub fn from_truncated(data: T, db_count: i64, page_params: PageParams) -> Self {
+		let total_pages = (db_count as f32 / page_params.page_size as f32).ceil() as u32;
+
+		Pageable::new(data, PageInfo::new(page_params, total_pages))
 	}
 }
 

@@ -109,6 +109,8 @@ model Series {
   description String?
   // The date in which the series was last updated in the FS. ex: "2020-01-01"
   updated_at  DateTime @updatedAt
+  // The date in which the series was created. ex: "2020-01-01"
+  created_at  DateTime @default(now())
   // The url of the series. ex: "/home/user/media/comics/The Amazing Spider-Man"
   path        String
   // The status of the series since last scan or access
@@ -139,6 +141,8 @@ model Media {
   pages           Int
   // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
   updated_at      DateTime       @updatedAt
+  // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
+  created_at      DateTime       @default(now())
   // Whether or not the media is downloaded to the client. ex: true
   downloaded      Boolean        @default(false)
   // The checksum hash of the file contents. Used to find multuple instances of a file in the database
@@ -158,7 +162,7 @@ model Media {
 
   // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
   // readingListId String?
-  reading_list   ReadingList? @relation(fields: [reading_list_id], references: [id])
+  reading_list    ReadingList? @relation(fields: [reading_list_id], references: [id])
   reading_list_id String?
 
   @@map("media")

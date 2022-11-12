@@ -1,13 +1,14 @@
-import type { Media, Series } from '../types';
-import type { QueryCallbacks } from '.';
+import type { Media, Pageable, Series } from '../types';
+import { QueryCallbacks, usePagedQuery } from '.';
 import { useMemo } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
-import { getNextInSeries, getSeriesById, getSeriesMedia } from '../api';
+import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '../api';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
 import { useQueryParamStore } from '../stores';
+import { useCounter } from '../hooks/useCounter';
 
 export const prefetchSeries = async (id: string) => {
 	await queryClient.prefetchQuery(['getSeries', id], () => getSeriesById(id), {
@@ -58,6 +59,39 @@ export function useSeriesMedia(seriesId: string, page: number = 1) {
 		isPreviousData,
 		media,
 		pageData,
+	};
+}
+
+export function useRecentlyAddedSeries(options: QueryCallbacks<Pageable<Series[]>> = {}) {
+	return usePagedQuery(
+		'getRecentlyAddedSeries',
+		getRecentlyAddedSeries,
+		options,
+		new URLSearchParams('page_size=50'),
+	);
+}
+
+export function useInfinite() {
+	const {
+		status,
+		data: pageData,
+		error,
+		isFetching,
+		isFetchingNextPage,
+		fetchNextPage,
+		hasNextPage,
+	} = useInfiniteQuery(
+		['getRecentlyAddedSeries'],
+		(ctx) => getRecentlyAddedSeries(ctx.pageParam, new URLSearchParams('page_size=50')),
+		{
+			getNextPageParam: (_lastGroup, groups) => groups.length,
+		},
+	);
+
+	const data = pageData ? pageData.pages.flatMap((res) => res.data.data) : [];
+
+	return {
+		data,
 	};
 }
 

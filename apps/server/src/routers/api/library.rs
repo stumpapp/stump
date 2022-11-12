@@ -264,7 +264,8 @@ async fn scan_library(
 	Ok(())
 }
 
-// /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
+// FIXME: once transactions are supported I think that will be a much better flow here. for the delete, as well.
+/// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 async fn create_library(
 	Json(input): Json<CreateLibraryArgs>,
 	Extension(ctx): State,

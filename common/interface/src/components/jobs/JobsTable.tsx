@@ -4,14 +4,6 @@ import { JobReport, JobStatus, useJobReport } from '@stump/client';
 import { formatJobStatus, readableKind } from './utils';
 import Table from '../../ui/table/Table';
 
-// 	kind: string;
-// 	details: string | null;
-// 	status: JobStatus;
-// 	task_count: number | null;
-// 	completed_task_count: number | null;
-// 	ms_elapsed: bigint | null;
-// 	completed_at: string | null;
-
 export default function JobsTable() {
 	const { isLoading, jobReports } = useJobReport();
 
@@ -48,6 +40,8 @@ export default function JobsTable() {
 
 	return (
 		<Table
+			sortable
+			searchable
 			columns={columns}
 			options={{
 				getCoreRowModel: getCoreRowModel(),

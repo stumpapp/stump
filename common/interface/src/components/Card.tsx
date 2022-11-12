@@ -1,115 +1,109 @@
+import { Box, BoxProps } from '@chakra-ui/react';
+import { cva, VariantProps } from 'class-variance-authority';
 import clsx from 'clsx';
-import { FileX } from 'phosphor-react';
-import { useMemo } from 'react';
+import { ComponentProps } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Box, Spacer, Text, useBoolean, useColorModeValue } from '@chakra-ui/react';
+// FIXME: what's not to fix here lol just not a great variant pattern...
+export const cardVariants = cva('relative shadow rounded-md', {
+	variants: {
+		variant: {
+			default: '',
+			image:
+				'min-w-[10rem] min-h-[15rem] sm:min-w-[10.666rem] sm:min-h-[16rem] md:min-w-[12rem] md:min-h-[18.666rem]',
+			fixedImage: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
+		},
+	},
+	defaultVariants: {},
+});
+type CardBaseProps = ComponentProps<'div'> & {
+	to?: string;
+	overlay?: React.ReactNode;
+	children: React.ReactNode;
+};
+export type CardProps = VariantProps<typeof cardVariants> & CardBaseProps;
 
-export interface CardProps {
-	to: string;
-	imageAlt: string;
-	imageSrc: string;
-	imageFallback?: string;
-	title: string;
-	subtitle?: string;
-	variant?: 'default' | 'large';
-	showMissingOverlay?: boolean;
-	onMouseEnter?: () => void;
-}
-
-// FIXME: onError should behave differently to accomodate new cards that get rendered when new Series/Media
-// are created during a scan. When a Series is created, there won't be any Media to render a thumbnail for at first.
-// So, I think maybe there should be some retry logic in here? retry once every few ms for like 9ms before showing a
-// fallback image?
-export default function Card({
-	to,
-	imageAlt,
-	imageSrc,
-	imageFallback,
-	title,
-	subtitle,
-	variant = 'default',
-	showMissingOverlay,
-	onMouseEnter,
-}: CardProps) {
-	const [isFallback, { on }] = useBoolean(false);
-
-	const src = useMemo(() => {
-		if (isFallback || showMissingOverlay) {
-			return imageFallback ?? '/fallbacks/image-file.svg';
-		}
-
-		return imageSrc;
-	}, [isFallback, showMissingOverlay]);
-
-	return (
+// TODO: fix tab focus
+export default function Card({ to, overlay, children, variant, className, ...rest }: CardProps) {
+	const card = (
 		<Box
-			as={Link}
-			shadow="base"
+			{...rest}
 			bg="gray.50"
 			border="1.5px solid"
 			borderColor="transparent"
+			_hover={
+				to
+					? {
+							borderColor: 'brand.500',
+					  }
+					: undefined
+			}
 			_dark={{ bg: 'gray.750' }}
-			_hover={{
-				borderColor: showMissingOverlay ? 'transparent' : 'brand.500',
-			}}
-			rounded="md"
-			to={to}
-			onMouseEnter={onMouseEnter}
-			maxW="16rem"
-			className="relative overflow-hidden"
+			className={cardVariants({
+				variant,
+				class: clsx('relative flex flex-col overflow-hidden flex-1 space-y-1', className),
+			})}
 		>
-			{showMissingOverlay && (
-				// FIXME: this has terrible UX, not very readable. very ugly lmfao
-				<Box
-					bg={useColorModeValue('whiteAlpha.500', 'blackAlpha.600')}
-					color={useColorModeValue('red.400', 'red.200')}
-					className="flex flex-col space-y-2 items-center justify-center absolute inset-0 h-full w-full !bg-opacity-50"
-				>
-					<FileX className="w-12 h-12" />
-					<Text fontSize="sm" fontWeight="semibold" textShadow="1.5px">
-						Missing!
-					</Text>
-				</Box>
-			)}
-			<Box px={1.5}>
-				<img
-					alt={imageAlt}
-					className={clsx(
-						variant === 'default' ? 'h-auto ' : 'min-h-96',
-						// FIXME: object-scale-down fixes the pixely look, but is NOT desired styling :weary: how annoying
-						!isFallback && 'object-cover',
-						// 663:1024 is standard aspect ratio for comic books. Stump supports a wider range of media, however
-						// for now these cards will be tailored to that aspect ratio.
-						'w-full aspect-[2/3]',
-					)}
-					src={src}
-					onError={(_) => {
-						on();
-					}}
-				/>
-			</Box>
+			{overlay}
 
-			{variant === 'default' && (
-				<Box
-					className={clsx(
-						subtitle ? 'h-[5rem]' : 'h-[4rem]',
-						'flex flex-col max-w-[calc(100%-0.75rem)] p-2',
-					)}
-					color="black"
-					_dark={{ color: 'gray.100' }}
-				>
-					<Text fontSize="sm" as="h3" fontWeight="medium" className="[hyphens:auto]" noOfLines={2}>
-						{title}
-					</Text>
+			{children}
+		</Box>
+	);
 
-					<Spacer />
+	if (to) {
+		return <Link to={to}>{card}</Link>;
+	}
 
-					<Text fontSize="xs" color={useColorModeValue('gray.700', 'gray.300')}>
-						{subtitle}
-					</Text>
-				</Box>
-			)}
+	return card;
+}
+
+interface CardBodyProps extends Omit<BoxProps, 'children'> {
+	children: React.ReactNode;
+}
+
+export function CardBody({ children, className, ...props }: CardBodyProps) {
+	return (
+		<Box px={1.5} {...props} className={clsx('flex-1', className)}>
+			{children}
 		</Box>
 	);
 }
+
+interface CardFooterProps extends Omit<BoxProps, 'children'> {
+	children: React.ReactNode;
+}
+
+export function CardFooter({ children, ...props }: CardFooterProps) {
+	return (
+		<Box p={1.5} {...props}>
+			{children}
+		</Box>
+	);
+}
+
+export function CardGrid({ children }: { children: React.ReactNode }) {
+	return (
+		<div className="flex-1 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:gap-2 2xl:grid-cols-7 4xl:grid-cols-8 items-start justify-center md:justify-start pb-4">
+			{children}
+		</div>
+	);
+}
+
+// function CardCornerDecoration() {
+// 	return (
+// 		<Box
+// 			className="absolute top-0 right-0"
+// 			bg="brand.500"
+// 			shadow="lg"
+// 			color="white"
+// 			fontSize="xs"
+// 			fontWeight="bold"
+// 			rounded="md"
+// 			py={0.5}
+// 			px={1}
+// 			m={1}
+// 		>
+// 			{children}
+// 		</Box>
+// 	);
+// }

@@ -1,20 +1,15 @@
-import { Box } from '@chakra-ui/react';
+import { Stack } from '@chakra-ui/react';
 import { Helmet } from 'react-helmet';
 import { useLibraries } from '@stump/client';
 import LibrariesStats from '../components/library/LibrariesStats';
 import NoLibraries from '../components/library/NoLibraries';
-// import { useDidMount } from 'rooks';
+import RecentlyAddedSeries from '../components/series/RecentlyAddedSeries';
+import RecentlyAddedMedia from '../components/media/RecentlyAddedMedia';
+import ContinueReadingMedia from '../components/media/ContinueReading';
 
 // TODO: account for new accounts, i.e. no media at all
 export default function Home() {
 	const { libraries, isLoading } = useLibraries();
-
-	// const { setBackwardsUrl } = useTopBarStore();
-
-	// FIXME: NO
-	// useDidMount(() => {
-	// setBackwardsUrl(0);
-	// });
 
 	const helmet = (
 		<Helmet>
@@ -39,11 +34,12 @@ export default function Home() {
 	return (
 		<>
 			{helmet}
-			<Box p="4" w="full" h="full">
-				{/* <UiDemo /> */}
-				{/* <EpubReader /> */}
+			<Stack p="4" w="full" h="full" spacing={4}>
 				<LibrariesStats />
-			</Box>
+				<ContinueReadingMedia />
+				<RecentlyAddedMedia />
+				<RecentlyAddedSeries />
+			</Stack>
 		</>
 	);
 }

@@ -46,7 +46,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
     </p>
   </details>
 
-> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please see the [contributing guide](https://www.stumpapp.dev/contributing) for more information on how you can help. Otherwise, stay tuned for the first release!
+> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developing-). Otherwise, stay tuned for the first release!
 
 ## Roadmap 🗺
 
@@ -65,9 +65,12 @@ The following items are the major targets for Stump's first release:
 
 Things you can expect to see after the first release:
 
-- 🖥️ Desktop app ([Tauri](https://tauri.app/))
+- 🖥️ Desktop app ([Tauri](https://github.com/aaronleopold/stump/tree/main/apps/desktop))
 - 📱 Mobile app ([Tachiyomi](https://github.com/aaronleopold/tachiyomi-extensions) and/or [custom application](https://github.com/aaronleopold/stump/tree/main/apps/mobile))
-- 📺 A utility [TUI](https://github.com/aaronleopold/stump/tree/main/apps/tui) for managing a Stump instance from the command line
+
+Things you might see in the future:
+
+- 📺 A utility [TUI](https://github.com/aaronleopold/stump/tree/main/apps/tui) for managing a Stump instance(s) from the command line
 
 I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
 
@@ -83,7 +86,7 @@ For more information about getting started, how Stump works and how it manages y
 
 ## Developer Guide 💻
 
-Contributions are very **encouraged** and **welcome**! Please review the [contributing guide](https://www.stumpapp.dev/contributing) for more thorough information on how to get started.
+Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) before getting started.
 
 A quick summary of the steps required to get going:
 
@@ -100,8 +103,8 @@ pnpm run setup
 4. Start one of the apps:
 
 ```bash
-pnpm dev:web # Web app
-pnpm dev:desktop # Desktop app
+pnpm dev:web
+pnpm dev:desktop
 ```
 
 And that's it!
@@ -116,11 +119,10 @@ Some other good places to start:
 
 - Translation, so Stump is accessible to non-English speakers.
   - An automated translation system would be immensely helpful! If you're knowledgeable in this area, please reach out!
-- Writing comprehensive integration tests.
-  - [look here](https://github.com/aaronleopold/stump/tree/develop/core/integration-tests)
+- Writing comprehensive [integration tests](https://github.com/aaronleopold/stump/tree/develop/core/integration-tests).
 - Designing and/or implementing UI elements.
 - Docker build optimizations (it is currently _horrendously_ slow).
-- CI pipelines / workflows (given above issue with Docker is resolved).
+- CI pipelines / workflows.
 - And lots more!
 
 I keep track of all non-code contributions in the [CONTRIBUTORS.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTORS.md) file. If you contribute in that manner, please add yourself to the list!
@@ -145,7 +147,7 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 
 ### /core
 
-- `core`: Stump's 'core' functionality is located here, written in Rust. The `server` was previously part of the core, but was extracted to support integration testing.
+- `core`: Stump's 'core' functionality is located here, written in Rust. The `server` was previously part of the core, but was extracted for better isolation.
 
 ## Similar Projects 👯
 

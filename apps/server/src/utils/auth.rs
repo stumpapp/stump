@@ -1,4 +1,4 @@
-use axum_sessions::extractors::ReadableSession;
+use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{db::models::User, prelude::DecodedCredentials};
 
 use crate::errors::{ApiError, ApiResult, AuthError};
@@ -30,6 +30,14 @@ pub fn decode_base64_credentials(
 }
 
 pub fn get_session_user(session: &ReadableSession) -> ApiResult<User> {
+	if let Some(user) = session.get::<User>("user") {
+		Ok(user)
+	} else {
+		Err(ApiError::Unauthorized)
+	}
+}
+
+pub fn get_writable_session_user(session: &WritableSession) -> ApiResult<User> {
 	if let Some(user) = session.get::<User>("user") {
 		Ok(user)
 	} else {

@@ -1,6 +1,5 @@
 import { Helmet } from 'react-helmet';
-// import PreferencesForm from '~components/Settings/General/PreferencesForm';
-// import ProfileForm from '~components/Settings/General/ProfileForm';
+import { UserPreferencesForm, UserProfileForm } from '../../components/settings/forms';
 
 export default function GeneralSettings() {
 	return (
@@ -10,11 +9,8 @@ export default function GeneralSettings() {
 				<title>Stump | {'General Settings'}</title>
 			</Helmet>
 
-			<div>I am not implemented yet</div>
-
-			{/* <ProfileForm /> */}
-
-			{/* <PreferencesForm /> */}
+			<UserProfileForm />
+			<UserPreferencesForm />
 		</>
 	);
 }

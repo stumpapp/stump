@@ -1,7 +1,7 @@
 import { useContext, useMemo } from 'react';
 import { Box, Tab, TabList, Tabs } from '@chakra-ui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppPropsContext } from '@stump/client';
+import { AppPropsContext, User } from '@stump/client';
 
 const DEFAULT_PAGES = [
 	{
@@ -32,7 +32,11 @@ const DESKTOP_PAGE = {
 	displayName: 'Desktop',
 };
 
-export default function SettingsNavigation() {
+type Props = {
+	user?: User | null;
+};
+
+export default function SettingsNavigation({ user }: Props) {
 	const appProps = useContext(AppPropsContext);
 	const navigate = useNavigate();
 
@@ -46,8 +50,12 @@ export default function SettingsNavigation() {
 			base = [...base.slice(0, 1), DESKTOP_PAGE, ...base.slice(1)];
 		}
 
+		if (user?.role !== 'SERVER_OWNER') {
+			base = base.filter((page) => page.shortName === 'general' || page.shortName === 'desktop');
+		}
+
 		return base.map((page, i) => ({ ...page, index: i }));
-	}, [appProps?.platform]);
+	}, [appProps?.platform, user?.role]);
 
 	const activeTab = useMemo(
 		() => pages.find((p) => p.path === location.pathname)?.index ?? 0,

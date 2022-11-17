@@ -75,7 +75,8 @@ export default function SlidingCardList({
 	};
 
 	const canSkipBackward = visibleRef.current[0] > 0;
-	const canSkipForward = visibleRef.current[1] < cards.length - 5;
+	// FIXME: wrong, the overscan messes this up I think...
+	const canSkipForward = visibleRef.current[1] * 2 < cards.length;
 
 	return (
 		<div className="w-full flex flex-col space-y-2">

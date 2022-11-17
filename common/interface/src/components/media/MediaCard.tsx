@@ -26,7 +26,7 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 			variant={fixed ? 'fixedImage' : 'image'}
 			to={link}
 			onMouseEnter={() => prefetchMedia(media.id)}
-			title={media.name}
+			title={readingLink ? `Continue reading ${media.name}` : media.name}
 		>
 			<CardBody p={0} className="relative">
 				<img
@@ -39,12 +39,12 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 				{!!pagesLeft && pagesLeft !== media.pages && (
 					<div className="absolute bottom-0 left-0 w-full">
 						<Progress
-							shadow="sm"
+							shadow="xl"
 							value={media.pages - Number(pagesLeft)}
 							max={media.pages}
 							w="full"
 							size="xs"
-							colorScheme="brand"
+							colorScheme="orange"
 						/>
 					</div>
 				)}
@@ -57,7 +57,6 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 
 				<Text fontSize="xs" color={useColorModeValue('gray.700', 'gray.300')} noOfLines={1}>
 					{pluralizeStat('pages', media.pages)}
-					{/* {pagesLeft && ` • ${pagesLeft} pages left`} */}
 				</Text>
 			</CardFooter>
 		</Card>

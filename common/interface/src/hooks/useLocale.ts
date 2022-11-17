@@ -7,6 +7,11 @@ export enum Locale {
 	French = 'fr',
 }
 
+export type LocaleSelectOption = {
+	label: string;
+	value: Locale;
+};
+
 export function useLocale() {
 	// TODO: update DB on changes
 	const { userPreferences, setUserPreferences } = useUserStore();
@@ -29,7 +34,7 @@ export function useLocale() {
 
 	const { t } = useTranslation(locale);
 
-	const locales = Object.keys(Locale)
+	const locales: LocaleSelectOption[] = Object.keys(Locale)
 		.map((key) => ({ label: key, value: Locale[key as keyof typeof Locale] }))
 		.filter((option) => typeof option.value === 'string');
 

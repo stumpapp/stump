@@ -44,6 +44,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserRole>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UpdateUserArgs>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UserPreferencesUpdate>()?).as_bytes(),
 		)?;

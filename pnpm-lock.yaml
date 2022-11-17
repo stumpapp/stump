@@ -25,21 +25,21 @@ importers:
       '@stump/client': workspace:*
       '@stump/interface': workspace:*
       '@tailwindcss/typography': ^0.5.7
-      '@tanstack/react-query': ^4.14.1
+      '@tanstack/react-query': ^4.10.3
       '@tauri-apps/api': ^1.1.0
       '@tauri-apps/cli': ^1.1.1
-      '@types/react': ^18.0.24
-      '@types/react-dom': ^18.0.8
-      '@vitejs/plugin-react': ^2.2.0
-      autoprefixer: ^10.4.13
-      postcss: ^8.4.18
+      '@types/react': ^18.0.21
+      '@types/react-dom': ^18.0.6
+      '@vitejs/plugin-react': ^2.0.0
+      autoprefixer: ^10.4.12
+      postcss: ^8.4.17
       react: ^18.2.0
       react-dom: ^18.2.0
       tailwind: ^4.0.0
       tailwind-scrollbar-hide: ^1.1.7
-      tailwindcss: ^3.2.1
+      tailwindcss: ^3.1.8
       typescript: ^4.8.4
-      vite: ^3.2.2
+      vite: ^3.1.6
       vite-plugin-tsconfig-paths: ^1.1.0
     dependencies:
       '@stump/client': link:../../common/client
@@ -139,8 +139,10 @@ importers:
   common/config:
     specifiers:
       tailwind-scrollbar-hide: ^1.1.7
+      typescript: ^4.8.4
     devDependencies:
       tailwind-scrollbar-hide: 1.1.7
+      typescript: 4.8.4
 
   common/interface:
     specifiers:

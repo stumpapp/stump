@@ -2,6 +2,7 @@
 	"name": "@stump/config",
 	"version": "0.0.0",
 	"devDependencies": {
-		"tailwind-scrollbar-hide": "^1.1.7"
+		"tailwind-scrollbar-hide": "^1.1.7",
+		"typescript": "^4.8.4"
 	}
 }

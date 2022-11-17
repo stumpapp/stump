@@ -19,18 +19,22 @@ export const resources = {
 } as const;
 
 function parseMissingKeyHandler(missingKey: string) {
-	const translation = (missingKey ?? '')
-		.split('.')
-		// @ts-ignore
-		.reduce((previous, current) => previous[current], resources.en.en);
+	try {
+		const translation = (missingKey ?? '')
+			.split('.')
+			// @ts-ignore
+			.reduce((previous, current) => previous[current], resources.en.en);
 
-	// console.log({ translation });
+		// console.log({ translation });
 
-	if (typeof translation === 'string') {
-		return translation;
+		if (typeof translation === 'string') {
+			return translation;
+		}
+
+		return missingKey;
+	} catch (error) {
+		return missingKey;
 	}
-
-	return missingKey;
 }
 
 i18n.use(initReactI18next).init({

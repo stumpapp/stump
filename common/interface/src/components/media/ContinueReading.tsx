@@ -14,7 +14,7 @@ export default function ContinueReadingMedia() {
 		<SlidingCardList
 			title="Continue Reading"
 			cards={data.map((media) => (
-				<MediaCard key={media.id} media={media} fixed />
+				<MediaCard key={media.id} media={media} fixed readingLink />
 			))}
 			isLoadingNext={isLoading}
 			hasNext={hasMore}

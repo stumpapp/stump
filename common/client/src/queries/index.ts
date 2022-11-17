@@ -1,7 +1,15 @@
-import { QueryFunction, QueryKey, useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import {
+	QueryKey,
+	useInfiniteQuery,
+	useQuery as useReactQuery,
+	useMutation as useReactMutation,
+	MutationKey,
+	MutationFunction,
+	UseMutationOptions,
+	QueryFunction,
+	UseQueryOptions,
+} from '@tanstack/react-query';
 import { StumpQueryContext } from '../context';
-import { useCounter } from '../hooks/useCounter';
 import type { ApiResult, Pageable, PageableApiResult } from '../types';
 
 export * from './auth';
@@ -39,7 +47,6 @@ export interface DeleteCallbacks<T> {
 }
 
 export type MutationCallbacks<T> = CreateCallbacks<T> & UpdateCallbacks<T> & DeleteCallbacks<T>;
-
 export type ClientQueryParams<T> = QueryCallbacks<T> & MutationCallbacks<T>;
 
 // TODO: I think it would be better to split up some of my mutations into updates
@@ -71,6 +78,7 @@ export function usePagedQuery<T>(
 			}
 		},
 		keepPreviousData: true,
+		context: StumpQueryContext,
 	});
 
 	const data = pageData ? pageData.pages.flatMap((res) => res.data.data) : [];
@@ -84,4 +92,39 @@ export function usePagedQuery<T>(
 		isFetchingNextPage,
 		...rest,
 	};
+}
+
+export function useQuery<
+	TQueryFnData = unknown,
+	TError = unknown,
+	TData = TQueryFnData,
+	TQueryKey extends QueryKey = QueryKey,
+>(
+	queryKey: TQueryKey,
+	queryFn: QueryFunction<TQueryFnData, TQueryKey>,
+	options?: Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'queryKey' | 'queryFn'>,
+) {
+	return useReactQuery(queryKey, queryFn, {
+		context: StumpQueryContext,
+		...options,
+	});
+}
+
+export function useMutation<
+	TData = unknown,
+	TError = unknown,
+	TVariables = void,
+	TContext = unknown,
+>(
+	mutationKey: MutationKey,
+	mutationFn?: MutationFunction<TData, TVariables>,
+	options?: Omit<
+		UseMutationOptions<TData, TError, TVariables, TContext>,
+		'mutationKey' | 'mutationFn'
+	>,
+) {
+	return useReactMutation(mutationKey, mutationFn, {
+		context: StumpQueryContext,
+		...options,
+	});
 }

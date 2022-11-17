@@ -64,19 +64,19 @@ export default function TagSelect({
 						focusBorderColor="0 0 0 2px rgba(196, 130, 89, 0.6);"
 						// menuIsOpen
 						chakraStyles={{
-							control: (provided) => ({
+							control: (provided: any) => ({
 								...provided,
 								_focus: {
 									boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 								},
 							}),
-							dropdownIndicator: (provided) => ({
+							dropdownIndicator: (provided: any) => ({
 								...provided,
 								bg: 'transparent',
 								px: 2,
 								cursor: 'inherit',
 							}),
-							indicatorSeparator: (provided) => ({
+							indicatorSeparator: (provided: any) => ({
 								...provided,
 								display: 'none',
 							}),

@@ -1,10 +1,10 @@
 use axum::{
 	extract::Path, middleware::from_extractor, routing::get, Extension, Json, Router,
 };
-use axum_sessions::extractors::ReadableSession;
+use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
 	db::models::{User, UserPreferences},
-	prelude::{LoginOrRegisterArgs, UserPreferencesUpdate},
+	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
 	prisma::{user, user_preferences},
 };
 
@@ -12,8 +12,10 @@ use crate::{
 	config::state::State,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::{get_hash_cost, get_session_user},
+	utils::{get_hash_cost, get_session_user, get_writable_session_user},
 };
+
+// TODO: move some of these user operations to the UserDao...
 
 pub(crate) fn mount() -> Router {
 	Router::new()
@@ -149,36 +151,23 @@ async fn get_user_by_id(
 		.user()
 		.find_unique(user::id::equals(id.clone()))
 		.exec()
-		.await?
-		.unwrap();
+		.await?;
 
-	// TODO: Check if is it exists
-	/* if user_by_id.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"User with id {} not found",
-			id
-		)));
-	} */
+	if user_by_id.is_none() {
+		return Err(ApiError::NotFound(format!("User with id {} not found", id)));
+	}
 
-	Ok(Json(user_by_id.into()))
+	Ok(Json(User::from(user_by_id.unwrap())))
 }
 
-// TODO: figure out what operations are allowed here, and by whom. E.g. can a server
-// owner update user details of another managed account after they've been created?
-// or update another user's preferences? I don't like that last one, unsure about
-// the first. In general, after creation, I think a user has sole control over their account.
-// The server owner should be able to remove them, but I don't think they should be able
-// to do anything else?
 async fn update_user(
 	Path(id): Path<String>,
-	Json(input): Json<LoginOrRegisterArgs>,
+	Json(input): Json<UpdateUserArgs>,
 	Extension(ctx): State,
-	session: ReadableSession,
+	mut writable_session: WritableSession,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
-	let user = get_session_user(&session)?;
-
-	let hashed_password = bcrypt::hash(&input.password, get_hash_cost())?;
+	let user = get_writable_session_user(&writable_session)?;
 
 	if user.id != id {
 		return Err(ApiError::Forbidden(
@@ -186,21 +175,26 @@ async fn update_user(
 		));
 	}
 
-	let updated = db
-		.user()
-		.upsert(
-			user::id::equals(id.clone()),
-			(input.username.clone(), hashed_password.clone(), vec![]),
-			vec![
-				user::username::set(input.username),
-				user::hashed_password::set(hashed_password),
-			],
-		)
-		.exec()
-		.await?
-		.into();
+	let mut update_params = vec![user::username::set(input.username)];
+	if let Some(password) = input.password {
+		let hashed_password = bcrypt::hash(&password, get_hash_cost())?;
+		update_params.push(user::hashed_password::set(hashed_password));
+	}
 
-	Ok(Json(updated))
+	let updated_user = User::from(
+		db.user()
+			.update(user::id::equals(user.id.clone()), update_params)
+			.exec()
+			.await?,
+	);
+
+	writable_session
+		.insert("user", updated_user.clone())
+		.map_err(|e| {
+			ApiError::InternalServerError(format!("Failed to update session: {}", e))
+		})?;
+
+	Ok(Json(updated_user))
 }
 
 // FIXME: remove this once I resolve the below 'TODO'

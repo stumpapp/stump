@@ -25,6 +25,7 @@ export interface TableProps<T = unknown, V = unknown> {
 	sortable?: boolean;
 }
 
+// TODO: loading state
 export default function Table<T, V>({
 	data,
 	columns,
@@ -159,6 +160,8 @@ export default function Table<T, V>({
 								fullWidth
 								className="pr-12"
 								onInputStop={(value) => handleFilter(value)}
+								size="sm"
+								rounded="md"
 							/>
 							<div className="absolute inset-y-0 right-0 flex items-center">
 								<select

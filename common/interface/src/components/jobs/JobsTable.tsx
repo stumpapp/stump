@@ -4,6 +4,9 @@ import { JobReport, JobStatus, useJobReport } from '@stump/client';
 import { formatJobStatus, readableKind } from './utils';
 import Table from '../../ui/table/Table';
 
+const IS_DEV = import.meta.env.DEV;
+
+// FIXME: loading state
 export default function JobsTable() {
 	const { isLoading, jobReports } = useJobReport();
 
@@ -47,9 +50,9 @@ export default function JobsTable() {
 				getCoreRowModel: getCoreRowModel(),
 				// TODO: change to manual once API endpoint is ready
 				getPaginationRowModel: getPaginationRowModel(), // If only doing manual pagination, you don't need this
-				debugTable: true,
-				debugHeaders: true,
-				debugColumns: true,
+				debugTable: IS_DEV,
+				debugHeaders: IS_DEV,
+				debugColumns: IS_DEV,
 			}}
 			data={jobReports ?? []}
 			fullWidth

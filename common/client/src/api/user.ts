@@ -1,4 +1,4 @@
-import type { ApiResult, UserPreferences } from '../types';
+import type { ApiResult, User, UserPreferences, UpdateUserArgs } from '../types';
 import { API } from '.';
 
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {
@@ -10,4 +10,8 @@ export function updateUserPreferences(
 	preferences: UserPreferences,
 ): Promise<ApiResult<UserPreferences>> {
 	return API.put(`/users/${userId}/preferences`, preferences);
+}
+
+export function updateUser(userId: string, params: UpdateUserArgs): Promise<ApiResult<User>> {
+	return API.put(`/users/${userId}`, params);
 }

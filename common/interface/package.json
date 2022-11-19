@@ -28,6 +28,7 @@
     "chakra-react-select": "^4.4.0",
     "class-variance-authority": "^0.2.4",
     "clsx": "^1.2.1",
+    "dayjs": "^1.11.6",
     "epubjs": "^0.3.93",
     "framer-motion": "^7.6.4",
     "i18next": "^21.10.0",

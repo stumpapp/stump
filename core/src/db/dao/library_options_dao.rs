@@ -8,12 +8,12 @@ use crate::{
 
 use super::Dao;
 
-pub struct LibraryOptionsDao {
+pub struct LibraryOptionsDaoImpl {
 	client: Arc<PrismaClient>,
 }
 
 #[async_trait::async_trait]
-impl Dao for LibraryOptionsDao {
+impl Dao for LibraryOptionsDaoImpl {
 	type Model = LibraryOptions;
 
 	fn new(client: Arc<PrismaClient>) -> Self {
@@ -72,22 +72,6 @@ impl Dao for LibraryOptionsDao {
 			.client
 			.library_options()
 			.find_many(vec![])
-			.exec()
-			.await?;
-
-		Ok(library_options
-			.into_iter()
-			.map(LibraryOptions::from)
-			.collect())
-	}
-
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Self::Model>> {
-		let library_options = self
-			.client
-			.library_options()
-			.find_many(vec![])
-			.skip(skip)
-			.take(take)
 			.exec()
 			.await?;
 

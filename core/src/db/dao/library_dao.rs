@@ -6,14 +6,14 @@ use crate::{
 	prisma::{library, library_options, PrismaClient},
 };
 
-use super::{Dao, LibraryOptionsDao};
+use super::{Dao, LibraryOptionsDaoImpl};
 
-pub struct LibraryDao {
+pub struct LibraryDaoImpl {
 	client: Arc<PrismaClient>,
 }
 
 #[async_trait::async_trait]
-impl Dao for LibraryDao {
+impl Dao for LibraryDaoImpl {
 	type Model = Library;
 
 	fn new(client: Arc<PrismaClient>) -> Self {
@@ -21,7 +21,7 @@ impl Dao for LibraryDao {
 	}
 
 	async fn insert(&self, data: Self::Model) -> CoreResult<Self::Model> {
-		let library_options_dao = LibraryOptionsDao::new(self.client.clone());
+		let library_options_dao = LibraryOptionsDaoImpl::new(self.client.clone());
 		let library_options = library_options_dao.insert(data.library_options).await?;
 
 		let created_library = self
@@ -72,19 +72,6 @@ impl Dao for LibraryDao {
 
 	async fn find_all(&self) -> CoreResult<Vec<Self::Model>> {
 		let libraries = self.client.library().find_many(vec![]).exec().await?;
-
-		Ok(libraries.into_iter().map(Library::from).collect())
-	}
-
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Self::Model>> {
-		let libraries = self
-			.client
-			.library()
-			.find_many(vec![])
-			.skip(skip)
-			.take(take)
-			.exec()
-			.await?;
 
 		Ok(libraries.into_iter().map(Library::from).collect())
 	}

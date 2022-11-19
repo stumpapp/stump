@@ -5,7 +5,7 @@ import Input, { PasswordInput } from '../../../ui/Input';
 import { FormControl, FormLabel } from '@chakra-ui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import SettingsFormContainer from './SettingsFormContainer';
+import SettingsSection from '../SettingsSection';
 import { useLocale } from '../../../hooks/useLocale';
 import { UpdateUserArgs, useMutation, useUserStore } from '@stump/client';
 import Form from '../../../ui/Form';
@@ -48,7 +48,7 @@ export default function ProfileForm() {
 	}
 
 	return (
-		<SettingsFormContainer title="Account" subtitle="This is just your basic account information">
+		<SettingsSection title="Account" subtitle="This is just your basic account information">
 			<Form form={form} onSubmit={handleSubmit}>
 				<FormControl>
 					<FormLabel htmlFor="username">
@@ -80,6 +80,6 @@ export default function ProfileForm() {
 					Update Account
 				</Button>
 			</Form>
-		</SettingsFormContainer>
+		</SettingsSection>
 	);
 }

@@ -1,26 +1,61 @@
 import clsx from 'clsx';
 import { ArrowSquareOut } from 'phosphor-react';
+import { ComponentProps } from 'react';
 import { Link as RouterLink, LinkProps as RouterLinkProps } from 'react-router-dom';
 
-export interface LinkProps extends RouterLinkProps {
+type LinkBaseProps = {
 	isExternal?: boolean;
 	noUnderline?: boolean;
-}
+};
+
+// either a react-router-dom link or an anchor tag
+export type LinkProps = LinkBaseProps & (RouterLinkProps | ComponentProps<'a'>);
 
 export default function Link({ isExternal, noUnderline, ...props }: LinkProps) {
 	const { children, className, title, ...rest } = props;
 
-	return (
-		<RouterLink
-			title={title ?? props.to.toString()}
-			className={clsx(className, { 'hover:underline': !noUnderline }, 'flex items-center')}
-			target={isExternal ? '_blank' : undefined}
-			rel={isExternal ? 'noopener noreferrer' : undefined}
-			{...rest}
-		>
+	const content = (
+		<>
 			<span>{children}</span>
-
 			{isExternal && <ArrowSquareOut className="ml-1" />}
-		</RouterLink>
+		</>
 	);
+
+	const getLinkProps = () => {
+		return {
+			title,
+			className: clsx(className, { 'hover:underline': !noUnderline }, 'flex items-center'),
+			target: isExternal ? '_blank' : undefined,
+			rel: isExternal ? 'noopener noreferrer' : undefined,
+		};
+	};
+
+	// if the props contain a `to` prop, it's a react-router-dom link
+	if ('to' in rest) {
+		return (
+			<RouterLink {...getLinkProps()} {...rest}>
+				{content}
+			</RouterLink>
+		);
+	}
+
+	return (
+		<a {...getLinkProps()} {...rest}>
+			{content}
+		</a>
+	);
+
+	// return (
+	// <RouterLink
+	// 	title={title ?? props.to.toString()}
+	// 	className={clsx(className, { 'hover:underline': !noUnderline }, 'flex items-center')}
+	// 	target={isExternal ? '_blank' : undefined}
+	// 	rel={isExternal ? 'noopener noreferrer' : undefined}
+	// 	{...rest}
+	// >
+	// 	<span>{children}</span>
+
+	// 	{isExternal && <ArrowSquareOut className="ml-1" />}
+	// </RouterLink>
+	// );
 }

@@ -24,13 +24,13 @@ function ExplorerFile({ name, path, is_directory }: DirectoryListingFile) {
 		const archivePattern = new RegExp(/^.*\.(cbz|zip|rar|cbr)$/gi);
 
 		if (is_directory) {
-			return '/icons/folder.png';
+			return '/assets/icons/folder.png';
 		} else if (archivePattern.test(path)) {
 			// TODO: no lol, I want to try and render a small preview still
 			// will have to create a new endpoint to try and grab a thumbnail by path
-			return '/icons/archive.svg';
+			return '/assets/icons/archive.svg';
 		} else if (path.endsWith('.epub')) {
-			return '/icons/epub.svg';
+			return '/assets/icons/epub.svg';
 		} else {
 			return '';
 		}

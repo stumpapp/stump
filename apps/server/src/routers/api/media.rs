@@ -5,13 +5,13 @@ use axum::{
 	Extension, Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{raw, Direction};
+use prisma_client_rust::Direction;
 use stump_core::{
 	config::get_config_dir,
 	db::{
 		models::{Media, ReadProgress},
 		utils::PrismaCountTrait,
-		Dao, MediaDao,
+		Dao, MediaDao, MediaDaoImpl,
 	},
 	fs::{image, media_file},
 	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
@@ -96,22 +96,17 @@ async fn get_media(
 }
 
 /// Get all media with identical checksums. This heavily implies duplicate files.  
-/// This is a paginated request, and has various pagination params available.
+/// This is a paginated request, and has various pagination params available, but
+/// hopefully you won't have that many duplicates ;D
 async fn get_duplicate_media(
 	pagination: Query<PagedRequestParams>,
 	Extension(ctx): State,
 	_session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let db = ctx.get_db();
+	let media_dao = MediaDaoImpl::new(ctx.db.clone());
+	let media = media_dao.get_duplicate_media().await?;
 
-	let media: Vec<Media> = db
-		._query_raw(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
-		.exec()
-		.await?;
-
-	let unpaged = pagination.unpaged.unwrap_or(false);
-
-	if unpaged {
+	if pagination.unpaged.unwrap_or(false) {
 		return Ok(Json(media.into()));
 	}
 
@@ -129,12 +124,12 @@ async fn get_in_progress_media(
 	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let user_id = get_session_user(&session)?.id;
-	let media_dao = MediaDao::new(ctx.db.clone());
+	let media_dao = MediaDaoImpl::new(ctx.db.clone());
 	let page_params = pagination.page_params();
 	let media_in_progress = media_dao
 		.get_in_progress_media(&user_id, page_params.get_page_bounds())
 		.await?;
-	// Becuase of the nature of this query, I can just grab the count from here.
+	// FIXME: this is wrong lol idk what I was thinking
 	let count = media_in_progress.len() as i64;
 
 	Ok(Json(Pageable::from_truncated(

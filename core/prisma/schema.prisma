@@ -243,6 +243,9 @@ model ReadProgress {
 
   epubcfi String?
 
+  is_completed Boolean  @default(false)
+  updated_at   DateTime @updatedAt
+
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
 

@@ -12,12 +12,12 @@ use crate::{
 
 use super::{Dao, DaoUpdate};
 
-pub struct ReadProgressDao {
+pub struct ReadProgressDaoImpl {
 	client: Arc<PrismaClient>,
 }
 
 #[async_trait::async_trait]
-impl Dao for ReadProgressDao {
+impl Dao for ReadProgressDaoImpl {
 	type Model = ReadProgress;
 
 	fn new(client: Arc<PrismaClient>) -> Self {
@@ -84,27 +84,14 @@ impl Dao for ReadProgressDao {
 
 		Ok(read_progress.into_iter().map(ReadProgress::from).collect())
 	}
-
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Self::Model>> {
-		let read_progress = self
-			.client
-			.read_progress()
-			.find_many(vec![])
-			.skip(skip)
-			.take(take)
-			.exec()
-			.await?;
-
-		Ok(read_progress.into_iter().map(ReadProgress::from).collect())
-	}
 }
 
 #[async_trait::async_trait]
-impl DaoUpdate for ReadProgressDao {
+impl DaoUpdate for ReadProgressDaoImpl {
 	type Model = ReadProgress;
 
 	async fn update(&self, _id: &str, _data: Self::Model) -> CoreResult<Self::Model> {
-		unreachable!("ReadProgressDao::update will not be implemented");
+		unreachable!("ReadProgressDaoImpl::update will not be implemented");
 	}
 
 	async fn upsert(&self, data: Self::Model) -> CoreResult<Self::Model> {

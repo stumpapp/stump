@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet';
-import LibrariesStats from '../../components/library/LibrariesStats';
-import ServerStats from '../../components/settings/ServerStats';
+// import LibrariesStats from '../../components/library/LibrariesStats';
+import ServerInformation from '../../components/settings/ServerInformation';
 
 export default function ServerSettings() {
 	return (
@@ -10,11 +10,10 @@ export default function ServerSettings() {
 				<title>Stump | {'Server Settings'}</title>
 			</Helmet>
 			<div className="w-full flex flex-col space-y-3">
-				<LibrariesStats />
-				<ServerStats />
+				<ServerInformation />
 			</div>
 
-			<div>I am not implemented yet</div>
+			{/* <div>TODO: add more</div> */}
 		</>
 	);
 }

@@ -6,6 +6,7 @@ export * from './epub';
 export * from './series';
 export * from './media';
 export * from './job';
+export * from './log';
 
 export let API: AxiosInstance;
 

@@ -166,6 +166,7 @@ importers:
       chakra-react-select: ^4.4.0
       class-variance-authority: ^0.2.4
       clsx: ^1.2.1
+      dayjs: ^1.11.6
       epubjs: ^0.3.93
       framer-motion: ^7.6.4
       i18next: ^21.10.0
@@ -203,6 +204,7 @@ importers:
       chakra-react-select: 4.4.0_gbteudask4bkflqotk6boh7pfy
       class-variance-authority: 0.2.4_typescript@4.8.4
       clsx: 1.2.1
+      dayjs: 1.11.6
       epubjs: 0.3.93
       framer-motion: 7.6.4_biqbaboplfbrettd7655fr4n2y
       i18next: 21.10.0
@@ -2985,6 +2987,10 @@ packages:
     resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
     engines: {node: '>=0.11'}
     dev: true
+
+  /dayjs/1.11.6:
+    resolution: {integrity: sha512-zZbY5giJAinCG+7AGaw0wIhNZ6J8AhWuSXKvuc1KAyMiRsvGQWqh4L+MomvhdAYjN+lqvVCMq1I41e3YHvXkyQ==}
+    dev: false
 
   /debug/2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}

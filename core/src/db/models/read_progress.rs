@@ -6,11 +6,13 @@ use crate::prisma;
 
 use super::{media::Media, user::User};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, Default)]
 pub struct ReadProgress {
 	pub id: String,
 	/// The current page
 	pub page: i32,
+	/// boolean to indicate if the media is completed
+	pub is_completed: bool,
 	/// The ID of the media which has progress.
 	pub media_id: String,
 	/// The media which has progress. Will be `None` if the relation is not loaded.
@@ -36,6 +38,7 @@ impl From<prisma::read_progress::Data> for ReadProgress {
 		ReadProgress {
 			id: data.id,
 			page: data.page,
+			is_completed: data.is_completed,
 			media_id: data.media_id,
 			media,
 			user_id: data.user_id,

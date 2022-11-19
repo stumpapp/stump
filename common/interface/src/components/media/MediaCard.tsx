@@ -1,7 +1,7 @@
 import type { Media } from '@stump/client';
 import { prefetchMedia } from '@stump/client';
 import { getMediaThumbnail } from '@stump/client/api';
-import { Progress, Text, useBoolean, useColorModeValue } from '@chakra-ui/react';
+import { Progress, Text, useColorModeValue } from '@chakra-ui/react';
 import Card, { CardBody, CardFooter } from '../Card';
 import pluralizeStat from '../../utils/pluralize';
 
@@ -14,8 +14,6 @@ export type MediaCardProps = {
 };
 
 export default function MediaCard({ media, readingLink, fixed }: MediaCardProps) {
-	const [isFallback, { on }] = useBoolean(false);
-
 	const pagesLeft = media.current_page ? media.pages - media.current_page : undefined;
 	const link = readingLink
 		? `/books/${media.id}/pages/${media.current_page ?? 1}`
@@ -28,14 +26,14 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 			onMouseEnter={() => prefetchMedia(media.id)}
 			title={readingLink ? `Continue reading ${media.name}` : media.name}
 		>
-			<CardBody p={0} className="relative">
-				<img
-					className="aspect-[2/3] object-cover"
-					src={isFallback ? '/fallbacks/image-file.svg' : getMediaThumbnail(media.id)}
-					alt={`Cover for ${media.name}`}
-					onError={on}
-				/>
-
+			<CardBody
+				p={0}
+				className="relative aspect-[2/3] bg-center bg-cover"
+				style={{
+					// TODO: figure out how to do fallback ONLY on error... url('/assets/fallbacks/image-file.svg')
+					backgroundImage: `url('${getMediaThumbnail(media.id)}')`,
+				}}
+			>
 				{!!pagesLeft && pagesLeft !== media.pages && (
 					<div className="absolute bottom-0 left-0 w-full">
 						<Progress

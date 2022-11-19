@@ -8,12 +8,12 @@ use crate::{
 
 use super::Dao;
 
-pub struct ReadingListDao {
+pub struct ReadingListDaoImpl {
 	client: Arc<PrismaClient>,
 }
 
 #[async_trait::async_trait]
-impl Dao for ReadingListDao {
+impl Dao for ReadingListDaoImpl {
 	type Model = ReadingList;
 
 	fn new(client: Arc<PrismaClient>) -> Self {
@@ -87,20 +87,6 @@ impl Dao for ReadingListDao {
 			.reading_list()
 			.find_many(vec![])
 			.with(reading_list::media::fetch(vec![]))
-			.exec()
-			.await?;
-
-		Ok(reading_lists.into_iter().map(ReadingList::from).collect())
-	}
-
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Self::Model>> {
-		let reading_lists = self
-			.client
-			.reading_list()
-			.find_many(vec![])
-			.with(reading_list::media::fetch(vec![]))
-			.skip(skip)
-			.take(take)
 			.exec()
 			.await?;
 

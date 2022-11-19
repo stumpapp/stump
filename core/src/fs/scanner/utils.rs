@@ -12,7 +12,7 @@ use walkdir::DirEntry;
 use crate::{
 	db::{
 		models::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
-		Dao, DaoBatch, MediaDao,
+		Dao, DaoBatch, MediaDaoImpl,
 	},
 	event::CoreEvent,
 	fs::{image, media_file, scanner::BatchScanOperation},
@@ -177,7 +177,7 @@ pub async fn insert_media(
 	library_options: &LibraryOptions,
 ) -> CoreResult<Media> {
 	let path_str = path.to_str().unwrap_or_default().to_string();
-	let media_dao = MediaDao::new(ctx.db.clone());
+	let media_dao = MediaDaoImpl::new(ctx.db.clone());
 	let media = Media::build_with_options(
 		path,
 		MediaBuilderOptions {
@@ -322,7 +322,7 @@ pub async fn batch_media_operations(
 	operations: Vec<BatchScanOperation>,
 	library_options: &LibraryOptions,
 ) -> CoreResult<Vec<Media>> {
-	let media_dao = MediaDao::new(ctx.db.clone());
+	let media_dao = MediaDaoImpl::new(ctx.db.clone());
 	// Note: this won't work if I add any other operations...
 	let (create_operations, mark_missing_operations): (Vec<_>, Vec<_>) =
 		operations.into_iter().partition(|operation| {

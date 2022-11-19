@@ -24,22 +24,17 @@ pub trait Dao: Sync + Sized {
 
 	// Creates a new Dao instance.
 	fn new(client: Arc<PrismaClient>) -> Self;
-
 	/// Creates a new record in the database.
 	async fn insert(&self, data: Self::Model) -> CoreResult<Self::Model>;
-
 	/// Deletes a record from the database.
 	async fn delete(&self, id: &str) -> CoreResult<Self::Model>;
-
 	/// Finds a record by its id.
 	async fn find_by_id(&self, id: &str) -> CoreResult<Self::Model>;
-
 	/// Finds all records.
 	async fn find_all(&self) -> CoreResult<Vec<Self::Model>>;
-
-	/// Finds all records, returning a paginated result.
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Self::Model>>;
 }
+
+// TODO: look into put an patch operations, remove DaoUpdate and merge with Dao
 
 /// [`DaoUpdate`] trait defines a single update operation for a model. This is a generic type signature
 /// for the update operation, and since not all models really need this, it is contained in
@@ -50,7 +45,6 @@ pub trait DaoUpdate {
 
 	/// Updates a record in the database.
 	async fn update(&self, id: &str, data: Self::Model) -> CoreResult<Self::Model>;
-
 	/// Updates a record in the database, or creates it if it does not exist.
 	async fn upsert(&self, data: Self::Model) -> CoreResult<Self::Model>;
 }
@@ -102,12 +96,4 @@ pub trait DaoRestricted: Sync + Sized {
 
 	/// Finds all records, if the user has access to them.
 	async fn find_all(&self, user_id: &str) -> CoreResult<Vec<Self::Model>>;
-
-	/// Finds all records, returning a paginated result, if the user has access to them.
-	async fn find_paginated(
-		&self,
-		skip: i64,
-		take: i64,
-		user_id: &str,
-	) -> CoreResult<Vec<Self::Model>>;
 }

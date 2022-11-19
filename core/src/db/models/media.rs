@@ -1,16 +1,19 @@
 use std::{path::Path, str::FromStr};
 
+use optional_struct::OptionalStruct;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
-	prelude::{enums::FileStatus, CoreResult},
-	prisma::media,
+	prelude::{enums::FileStatus, CoreError, CoreResult},
+	prisma::{media, read_progress},
 };
 
 use super::{read_progress::ReadProgress, series::Series, tag::Tag, LibraryOptions};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, OptionalStruct)]
+#[optional_name = "PartialMedia"]
+#[optional_derive(Deserialize, Serialize)]
 pub struct Media {
 	pub id: String,
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
@@ -36,16 +39,41 @@ pub struct Media {
 	/// The ID of the series this media belongs to.
 	pub series_id: String,
 	// The series this media belongs to. Will be `None` only if the relation is not loaded.
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<Series>,
-	// TODO: serde skip
 	/// The read progresses of the media. Will be `None` only if the relation is not loaded.
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub read_progresses: Option<Vec<ReadProgress>>,
 	/// The current page of the media, computed from `read_progresses`. Will be `None` only
 	/// if the `read_progresses` relation is not loaded.
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub current_page: Option<i32>,
+	/// Whether or not the media is completed. Only None if the relation is not loaded.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub is_completed: Option<bool>,
 	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tags: Option<Vec<Tag>>,
-	// pub status: String,
+}
+
+impl Media {
+	/// Creates a [Media] instance from the loaded relation of a [media::Data] on
+	/// a [read_progress::Data] instance. If the relation is not loaded, it will
+	/// return an error.
+	pub fn from_progress(data: read_progress::Data) -> CoreResult<Self> {
+		let relation = data.media();
+
+		if relation.is_err() {
+			return Err(CoreError::InvalidQuery(
+				"Failed to load media for read progress".to_string(),
+			));
+		}
+
+		let mut media = Media::from(relation.unwrap().to_owned());
+		media.current_page = Some(data.page);
+
+		Ok(media)
+	}
 }
 
 #[derive(Default)]
@@ -67,7 +95,7 @@ impl From<media::Data> for Media {
 			Err(_e) => None,
 		};
 
-		let (read_progresses, current_page) = match data.read_progresses() {
+		let (read_progresses, current_page, is_completed) = match data.read_progresses() {
 			Ok(read_progresses) => {
 				let progress = read_progresses
 					.iter()
@@ -76,12 +104,12 @@ impl From<media::Data> for Media {
 
 				// Note: ugh.
 				if let Some(p) = progress.first().cloned() {
-					(Some(progress), Some(p.page))
+					(Some(progress), Some(p.page), Some(p.is_completed))
 				} else {
-					(Some(progress), None)
+					(Some(progress), None, None)
 				}
 			},
-			Err(_e) => (None, None),
+			Err(_e) => (None, None, None),
 		};
 
 		let tags = match data.tags() {
@@ -105,6 +133,7 @@ impl From<media::Data> for Media {
 			series,
 			read_progresses,
 			current_page,
+			is_completed,
 			tags,
 		}
 	}

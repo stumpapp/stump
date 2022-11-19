@@ -10,12 +10,12 @@ use crate::{
 
 use super::{Dao, DaoCount};
 
-pub struct SeriesDao {
+pub struct SeriesDaoImpl {
 	client: Arc<PrismaClient>,
 }
 
-impl SeriesDao {
-	// TODO: Once PCR is hella more mature, I think this kind of query can be possible without writing raw SQL.
+impl SeriesDaoImpl {
+	// TODO: Once PCR is more mature, I think this kind of query can be possible without writing raw SQL.
 	// I know it's possible in JS prisma, so hopefully these kinds of manual queries can be phased out.
 	/// Returns a vector of [Series] in the order of most recently created in the database.
 	/// The number of books and unread books is included in the resulting [Series] objects.
@@ -61,7 +61,7 @@ impl SeriesDao {
 }
 
 #[async_trait::async_trait]
-impl DaoCount for SeriesDao {
+impl DaoCount for SeriesDaoImpl {
 	async fn count_all(&self) -> CoreResult<i64> {
 		let count = self.client.series().count(vec![]).exec().await?;
 
@@ -70,7 +70,7 @@ impl DaoCount for SeriesDao {
 }
 
 #[async_trait::async_trait]
-impl Dao for SeriesDao {
+impl Dao for SeriesDaoImpl {
 	type Model = Series;
 
 	fn new(client: Arc<PrismaClient>) -> Self {
@@ -126,19 +126,6 @@ impl Dao for SeriesDao {
 
 	async fn find_all(&self) -> CoreResult<Vec<Self::Model>> {
 		let series = self.client.series().find_many(vec![]).exec().await?;
-
-		Ok(series.into_iter().map(Series::from).collect())
-	}
-
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Self::Model>> {
-		let series = self
-			.client
-			.series()
-			.find_many(vec![])
-			.skip(skip)
-			.take(take)
-			.exec()
-			.await?;
 
 		Ok(series.into_iter().map(Series::from).collect())
 	}

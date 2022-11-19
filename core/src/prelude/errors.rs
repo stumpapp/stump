@@ -8,6 +8,10 @@ use zip::result::ZipError;
 pub enum CoreError {
 	#[error("Failed to initialize Stump core: {0}")]
 	InitializationError(String),
+	#[error(
+		"Attempted to initialize StumpCore with a config dir that does not exist: {0}"
+	)]
+	ConfigDirDoesNotExist(String),
 	#[error("Query error: {0}")]
 	QueryError(#[from] prisma_client_rust::queries::QueryError),
 	#[error("Invalid query error: {0}")]

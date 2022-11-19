@@ -95,27 +95,29 @@ async fn get_media(
 	Ok(Json(Pageable::from((media, count, page_params))))
 }
 
-/// Get all media with identical checksums. This heavily implies duplicate files.  
-/// This is a paginated request, and has various pagination params available, but
-/// hopefully you won't have that many duplicates ;D
+/// Get all media with identical checksums. This heavily implies duplicate files,
+/// however it is not a guarantee (checksums are generated from the first chunk of
+/// the file, so if a 2 comic books had say the same first 6 pages it might return a
+/// false positive). This is a paginated request, and has various pagination
+/// params available, but hopefully you won't have that many duplicates ;D
 async fn get_duplicate_media(
 	pagination: Query<PagedRequestParams>,
 	Extension(ctx): State,
 	_session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let media_dao = MediaDaoImpl::new(ctx.db.clone());
-	let media = media_dao.get_duplicate_media().await?;
 
 	if pagination.unpaged.unwrap_or(false) {
-		return Ok(Json(media.into()));
+		return Ok(Json(Pageable::from(media_dao.get_duplicate_media().await?)));
 	}
 
-	Ok(Json((media, pagination.page_params()).into()))
+	Ok(Json(
+		media_dao
+			.get_duplicate_media_page(pagination.page_params())
+			.await?,
+	))
 }
 
-// TODO: I will need to add epub progress in here SOMEHOW... this will be rather
-// difficult...
-// TODO: paginate?
 /// Get all media which the requester has progress for that is less than the
 /// total number of pages available (i.e not completed).
 async fn get_in_progress_media(
@@ -126,17 +128,12 @@ async fn get_in_progress_media(
 	let user_id = get_session_user(&session)?.id;
 	let media_dao = MediaDaoImpl::new(ctx.db.clone());
 	let page_params = pagination.page_params();
-	let media_in_progress = media_dao
-		.get_in_progress_media(&user_id, page_params.get_page_bounds())
-		.await?;
-	// FIXME: this is wrong lol idk what I was thinking
-	let count = media_in_progress.len() as i64;
 
-	Ok(Json(Pageable::from_truncated(
-		media_in_progress,
-		count,
-		page_params,
-	)))
+	Ok(Json(
+		media_dao
+			.get_in_progress_media(&user_id, page_params)
+			.await?,
+	))
 }
 
 async fn get_recently_added_media(

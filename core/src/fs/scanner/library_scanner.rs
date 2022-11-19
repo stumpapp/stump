@@ -26,6 +26,8 @@ use crate::{
 	prisma::{library, media, series},
 };
 
+// TODO: split the batch vs sync scan into two separate files, it is getting too cluttered in here together I think...
+
 use super::{
 	utils::{batch_media_operations, mark_library_missing, populate_glob_builder},
 	BatchScanOperation,

@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use prisma_client_rust::{raw, Direction};
+use prisma_client_rust::{raw, Direction, PrismaValue};
 
 use crate::{
-	db::models::Media,
-	prelude::{CoreError, CoreResult, PageBounds},
+	db::{models::Media, utils::CountQueryReturn},
+	prelude::{CoreError, CoreResult, PageParams, Pageable},
 	prisma::{media, read_progress, series, PrismaClient},
 };
 
@@ -15,10 +15,14 @@ pub trait MediaDao: Dao {
 	async fn get_in_progress_media(
 		&self,
 		viewer_id: &str,
-		page_bounds: PageBounds,
-	) -> CoreResult<Vec<Media>>;
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>>;
 
 	async fn get_duplicate_media(&self) -> CoreResult<Vec<Media>>;
+	async fn get_duplicate_media_page(
+		&self,
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>>;
 	// async fn patch(&self, media: Media, partial: MediaPatch) -> CoreResult<Media>;
 }
 
@@ -31,8 +35,10 @@ impl MediaDao for MediaDaoImpl {
 	async fn get_in_progress_media(
 		&self,
 		viewer_id: &str,
-		page_bounds: PageBounds,
-	) -> CoreResult<Vec<Media>> {
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>> {
+		let page_bounds = page_params.get_page_bounds();
+
 		let progresses_with_media = self
 			.client
 			.read_progress()
@@ -47,12 +53,28 @@ impl MediaDao for MediaDaoImpl {
 			.exec()
 			.await?;
 
-		Ok(progresses_with_media
+		let media_in_progress = progresses_with_media
 			.into_iter()
 			.filter(|progress| progress.media.is_some())
 			.map(Media::try_from)
 			.filter_map(Result::ok)
-			.collect())
+			.collect();
+
+		let db_total = self
+			.client
+			.read_progress()
+			.count(vec![
+				read_progress::user_id::equals(viewer_id.to_string()),
+				read_progress::is_completed::equals(false),
+			])
+			.exec()
+			.await?;
+
+		Ok(Pageable::with_count(
+			media_in_progress,
+			db_total,
+			page_params,
+		))
 	}
 
 	async fn get_duplicate_media(&self) -> CoreResult<Vec<Media>> {
@@ -62,6 +84,52 @@ impl MediaDao for MediaDaoImpl {
 			.await?;
 
 		Ok(duplicates)
+	}
+
+	async fn get_duplicate_media_page(
+		&self,
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>> {
+		let page_bounds = page_params.get_page_bounds();
+
+		let duplicated_media_page = self
+			.client
+			._query_raw::<Media>(raw!(
+				r#"
+				SELECT * FROM media
+				WHERE checksum IN (
+					SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1
+				)
+				LIMIT {} OFFSET {}"#,
+				PrismaValue::Int(page_bounds.take),
+				PrismaValue::Int(page_bounds.skip)
+			))
+			.exec()
+			.await?;
+
+		let count_result = self
+			.client
+			._query_raw::<CountQueryReturn>(raw!(
+				r#"
+				SELECT COUNT(*) as count FROM media
+				WHERE checksum IN (
+					SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) s> 1
+				)"#
+			))
+			.exec()
+			.await?;
+
+		if let Some(db_total) = count_result.first() {
+			Ok(Pageable::with_count(
+				duplicated_media_page,
+				db_total.count,
+				page_params,
+			))
+		} else {
+			Err(CoreError::InternalError(
+				"A failure occurred when trying to query for the count of duplicate media".to_string(),
+			))
+		}
 	}
 }
 

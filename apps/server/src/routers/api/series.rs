@@ -11,7 +11,7 @@ use stump_core::{
 	db::{
 		models::{Media, Series},
 		utils::PrismaCountTrait,
-		Dao, DaoCount, SeriesDaoImpl,
+		Dao, SeriesDao, SeriesDaoImpl,
 	},
 	fs::{image, media_file},
 	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
@@ -67,16 +67,16 @@ async fn get_series(
 
 	let action = db.series();
 	let action = action.find_many(vec![]);
-
-	let query = match load_media {
-		true => action.with(
+	let query = if load_media {
+		action.with(
 			series::media::fetch(vec![])
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
 				.order_by(media::name::order(Direction::Asc)),
-		),
-		false => action,
+		)
+	} else {
+		action
 	};
 
 	let series = query
@@ -158,16 +158,10 @@ async fn get_recently_added_series(
 	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
 
 	let recently_added_series = series_dao
-		.find_recently_added(&viewer_id, page_params.get_page_bounds())
+		.get_recently_added_series_page(&viewer_id, page_params)
 		.await?;
-	// FIXME: this is wrong. I need the total count including the conditions in custom query...
-	let series_count = series_dao.count_all().await?;
 
-	Ok(Json(Pageable::from_truncated(
-		recently_added_series,
-		series_count,
-		page_params,
-	)))
+	Ok(Json(recently_added_series))
 }
 
 /// Returns the thumbnail image for a series

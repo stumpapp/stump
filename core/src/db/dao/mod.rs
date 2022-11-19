@@ -16,6 +16,8 @@ pub use series_dao::*;
 
 use crate::{prelude::CoreResult, prisma::PrismaClient};
 
+// TODO: once my dao impls are more complete, add some integration tests.
+
 /// [`Dao`] trait defines the basic DB operations for a model. Update operations are not included since
 /// they are more niche per model, and are not used in the generic way as the other operations.
 #[async_trait::async_trait]

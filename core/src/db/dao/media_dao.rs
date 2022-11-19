@@ -50,7 +50,7 @@ impl MediaDao for MediaDaoImpl {
 		Ok(progresses_with_media
 			.into_iter()
 			.filter(|progress| progress.media.is_some())
-			.map(Media::from_progress)
+			.map(Media::try_from)
 			.filter_map(Result::ok)
 			.collect())
 	}

@@ -56,11 +56,13 @@ pub struct Media {
 	pub tags: Option<Vec<Tag>>,
 }
 
-impl Media {
+impl TryFrom<read_progress::Data> for Media {
+	type Error = CoreError;
+
 	/// Creates a [Media] instance from the loaded relation of a [media::Data] on
 	/// a [read_progress::Data] instance. If the relation is not loaded, it will
 	/// return an error.
-	pub fn from_progress(data: read_progress::Data) -> CoreResult<Self> {
+	fn try_from(data: read_progress::Data) -> Result<Self, Self::Error> {
 		let relation = data.media();
 
 		if relation.is_err() {

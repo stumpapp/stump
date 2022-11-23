@@ -1,15 +1,32 @@
 use std::path::{Path, PathBuf};
 
-pub mod library_scanner;
-pub mod utils;
-use tracing::debug;
+mod batch_scanner;
+mod sync_scanner;
+mod utils;
+mod validate;
 
+use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{
+	db::models::LibraryScanMode,
 	fs::media_file::{self, guess_mime},
-	prelude::ContentType,
+	job::runner::RunnerCtx,
+	prelude::{ContentType, CoreResult},
 };
+
+pub async fn scan(
+	ctx: RunnerCtx,
+	path: String,
+	runner_id: String,
+	scan_mode: LibraryScanMode,
+) -> CoreResult<u64> {
+	match scan_mode {
+		LibraryScanMode::Batched => batch_scanner::scan(ctx, path, runner_id).await,
+		LibraryScanMode::Sync => sync_scanner::scan(ctx, path, runner_id).await,
+		_ => unreachable!("A job should not have reached this point if the scan mode is not batch or sync."),
+	}
+}
 
 // TODO: refactor this trait? yes please
 pub trait ScannedFileTrait {

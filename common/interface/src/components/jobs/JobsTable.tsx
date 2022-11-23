@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { JobReport, JobStatus, useJobReport } from '@stump/client';
 import { formatJobStatus, readableKind } from './utils';
 import Table from '../../ui/table/Table';
+import dayjs from 'dayjs';
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -33,6 +34,19 @@ export default function JobsTable() {
 						header: 'Status',
 						// change value to all lowercase except for first letter
 						cell: (info) => formatJobStatus(info.getValue<JobStatus>()),
+						footer: (props) => props.column.id,
+					},
+					// FIXME: I think sorting of this is backwards, because it is string sorting
+					// and this particular column needs to be sorted differently.... AGH
+					{
+						accessorKey: 'completed_at',
+						header: 'Time Completed',
+						cell: (info) => {
+							const completed_at = info.getValue<string | null>();
+							if (completed_at) {
+								return dayjs(completed_at).format('YYYY-MM-DD HH:mm:ss');
+							}
+						},
 						footer: (props) => props.column.id,
 					},
 				],

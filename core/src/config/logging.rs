@@ -19,6 +19,7 @@ pub fn get_log_verbosity() -> u64 {
 	}
 }
 
+// TODO: allow for overriding of format
 /// Initializes the logging system, which uses the [tracing] crate. Logs are written to
 /// both the console and a file in the config directory. The file is called `Stump.log`
 /// by default.

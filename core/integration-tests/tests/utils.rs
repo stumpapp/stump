@@ -8,7 +8,7 @@ use stump_core::{
 		migration::run_migrations,
 		models::{LibraryPattern, LibraryScanMode},
 	},
-	fs::scanner::library_scanner::{scan_batch, scan_sync},
+	fs::scanner::scan,
 	job::{persist_new_job, runner::RunnerCtx, LibraryScanJob},
 	prelude::{CoreResult, Ctx},
 	prisma::{library, library_options, PrismaClient},
@@ -302,13 +302,15 @@ pub async fn run_test_scan(
 
 	if scan_mode == LibraryScanMode::None {
 		return Ok(0);
-	} else if scan_mode == LibraryScanMode::Batched {
-		return scan_batch(fake_runner_ctx, library.path.clone(), library.id.clone())
-			.await;
-	} else {
-		return scan_sync(fake_runner_ctx, library.path.clone(), library.id.clone())
-			.await;
 	}
+
+	scan(
+		fake_runner_ctx,
+		library.path.clone(),
+		library.id.clone(),
+		scan_mode,
+	)
+	.await
 }
 
 /// Creates a library with the given name, path, and pattern. If the scan mode is

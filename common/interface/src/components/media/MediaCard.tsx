@@ -4,6 +4,7 @@ import { getMediaThumbnail } from '@stump/client/api';
 import { Progress, Text, useColorModeValue } from '@chakra-ui/react';
 import Card, { CardBody, CardFooter } from '../Card';
 import pluralizeStat from '../../utils/pluralize';
+import { prefetchMediaPage } from '../../utils/prefetch';
 
 export type MediaCardProps = {
 	media: Media;
@@ -19,11 +20,19 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 		? `/books/${media.id}/pages/${media.current_page ?? 1}`
 		: `/books/${media.id}`;
 
+	function handleMouseOver() {
+		prefetchMedia(media.id);
+
+		if (media.current_page) {
+			let _img = prefetchMediaPage(media.id, media.current_page);
+		}
+	}
+
 	return (
 		<Card
 			variant={fixed ? 'fixedImage' : 'image'}
 			to={link}
-			onMouseEnter={() => prefetchMedia(media.id)}
+			onMouseEnter={handleMouseOver}
 			title={readingLink ? `Continue reading ${media.name}` : media.name}
 		>
 			<CardBody

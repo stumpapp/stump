@@ -110,7 +110,7 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('bottom')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed bottom-0 p-4 w-full bg-opacity-75 shadow-lg text-white z-[100] overflow-scroll"
+				className="fixed bottom-0 p-4 w-full bg-opacity-75 shadow-lg text-white z-[100] overflow-x-scroll"
 			>
 				<div
 					className="flex space-x-2 w-full bottom-0 select-none relative"

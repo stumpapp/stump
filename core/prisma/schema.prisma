@@ -143,6 +143,8 @@ model Media {
   updated_at      DateTime       @updatedAt
   // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
   created_at      DateTime       @default(now())
+  // The date in which the file was last modified. Defaults to now() for safety.
+  modified_at     DateTime       @default(now())
   // Whether or not the media is downloaded to the client. ex: true
   downloaded      Boolean        @default(false)
   // The checksum hash of the file contents. Used to find multuple instances of a file in the database

@@ -30,6 +30,8 @@ pub struct Media {
 	pub updated_at: String,
 	/// The timestamp when the media was created.
 	pub created_at: String,
+	/// The timestamp when the file was last modified.
+	pub modified_at: String,
 	/// The checksum hash of the file contents. Used to ensure only one instance of a file in the database.
 	pub checksum: Option<String>,
 	/// The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
@@ -128,6 +130,7 @@ impl From<media::Data> for Media {
 			pages: data.pages,
 			updated_at: data.updated_at.to_string(),
 			created_at: data.created_at.to_string(),
+			modified_at: data.modified_at.to_string(),
 			checksum: data.checksum,
 			path: data.path,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),

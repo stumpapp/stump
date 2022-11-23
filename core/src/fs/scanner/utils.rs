@@ -14,9 +14,8 @@ use crate::{
 		models::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
 		Dao, DaoBatch, MediaDaoImpl,
 	},
-	event::CoreEvent,
 	fs::{image, media_file, scanner::BatchScanOperation},
-	prelude::{CoreResult, Ctx, FileStatus, ScanError},
+	prelude::{CoreResult, Ctx, FileStatus},
 	prisma::{library, media, series},
 };
 
@@ -116,60 +115,6 @@ pub async fn mark_library_missing(library: library::Data, ctx: &Ctx) -> CoreResu
 	Ok(())
 }
 
-// pub fn get_tentative_media(
-// 	path: &Path,
-// 	series_id: String,
-// 	library_options: &LibraryOptions,
-// ) -> Result<TentativeMedia, ScanError> {
-// 	let processed_entry = media_file::process(path, library_options)?;
-
-// 	let pathbuf = processed_entry.path;
-// 	let path = pathbuf.as_path();
-
-// 	let path_str = path.to_str().unwrap_or_default().to_string();
-
-// 	// EW, I hate that I need to do this over and over lol time to make a trait for Path.
-// 	let name = path
-// 		.file_stem()
-// 		.unwrap_or_default()
-// 		.to_str()
-// 		.unwrap_or_default()
-// 		.to_string();
-
-// 	let ext = path
-// 		.extension()
-// 		.unwrap_or_default()
-// 		.to_str()
-// 		.unwrap_or_default()
-// 		.to_string();
-
-// 	// Note: make this return a tuple if I need to grab anything else from metadata.
-// 	let size = match path.metadata() {
-// 		Ok(metadata) => metadata.len(),
-// 		_ => 0,
-// 	};
-
-// 	let comic_info = processed_entry.metadata.unwrap_or_default();
-
-// 	Ok(TentativeMedia {
-// 		name,
-// 		description: comic_info.summary,
-// 		size: size.try_into().unwrap_or_else(|e| {
-// 			error!("Failed to calculate file size: {:?}", e);
-
-// 			0
-// 		}),
-// 		extension: ext,
-// 		pages: match comic_info.page_count {
-// 			Some(count) => count as i32,
-// 			None => processed_entry.pages,
-// 		},
-// 		checksum: processed_entry.checksum,
-// 		path: path_str,
-// 		series_id,
-// 	})
-// }
-
 pub async fn insert_media(
 	ctx: &Ctx,
 	path: &Path,
@@ -198,76 +143,6 @@ pub async fn insert_media(
 	debug!("Media for {} created successfully", path_str);
 
 	Ok(created_media)
-}
-
-pub async fn insert_series(
-	ctx: &Ctx,
-	entry: &DirEntry,
-	library_id: String,
-) -> Result<series::Data, ScanError> {
-	let path = entry.path();
-
-	// TODO: use this??
-	// let metadata = match path.metadata() {
-	// 	Ok(metadata) => Some(metadata),
-	// 	_ => None,
-	// };
-
-	// TODO: change error
-	let name = match path.file_name() {
-		Some(name) => match name.to_str() {
-			Some(name) => name.to_string(),
-			_ => {
-				return Err(ScanError::FileParseError(
-					"Failed to get name for series".to_string(),
-				))
-			},
-		},
-		_ => {
-			return Err(ScanError::FileParseError(
-				"Failed to get name for series".to_string(),
-			))
-		},
-	};
-
-	let series = ctx
-		.db
-		.series()
-		.create(
-			name,
-			path.to_str().unwrap().to_string(),
-			vec![series::library::connect(library::id::equals(library_id))],
-		)
-		.exec()
-		.await?;
-
-	debug!("Created new series: {:?}", series);
-
-	Ok(series)
-}
-
-// TODO: remove
-pub async fn insert_series_many(
-	ctx: &Ctx,
-	entries: Vec<DirEntry>,
-	library_id: String,
-) -> Vec<series::Data> {
-	let mut inserted_series = vec![];
-
-	for entry in entries {
-		match insert_series(ctx, &entry, library_id.clone()).await {
-			Ok(series) => {
-				ctx.emit_client_event(CoreEvent::CreatedSeries(series.clone()));
-
-				inserted_series.push(series);
-			},
-			Err(e) => {
-				error!("Failed to insert series: {:?}", e);
-			},
-		}
-	}
-
-	inserted_series
 }
 
 pub async fn insert_series_batch(

@@ -49,19 +49,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					<DownloadSeriesButton seriesId={series.id} />
 				</ButtonGroup>
 
-				<ReadMore
-					// text={`Mark Millar, the best-selling writer behind The Ultimates and Ultimate X-Men, presents his
-					// definitive take on Marvel Comics' greatest hero. During Peter's pulse-pounding search for
-					// Aunt May, Millar offers his unique perspective on such classic Spider-Man foes as Doctor
-					// Octopus and the Vulture - and an all-new, vicious Venom. Fan-favorite artists Terry Dodson
-					// and Frank Cho superbly illustrate Millar's tale, contributing modern redesigns for several
-					// Spider-Man villains - as well as an unforgettable take on the classic Spidey femme fatale,
-					// the Black Cat.\n
-					// Marvel Knights Spider-Man features one of comics' most inventive writers matched with an
-					// iconic Marvel hero. The result is a spellbinding story from start to finish, a must-have
-					// read for any Spider-Man fan!`}
-					text={series.description ?? ''}
-				/>
+				<ReadMore text={series.description} />
 
 				{/* TODO: I want this at the bottom of the container here, but layout needs to be tweaked and I am tired. */}
 				<TagList tags={series.tags} />

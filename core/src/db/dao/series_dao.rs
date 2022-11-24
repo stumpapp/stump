@@ -3,9 +3,12 @@ use std::sync::Arc;
 use prisma_client_rust::{raw, PrismaValue};
 
 use crate::{
-	db::{models::Series, utils::CountQueryReturn},
+	db::{
+		models::{Media, Series},
+		utils::CountQueryReturn,
+	},
 	prelude::{CoreError, CoreResult, PageParams, Pageable},
-	prisma::{library, series, PrismaClient},
+	prisma::{library, media, series, PrismaClient},
 };
 
 use super::{Dao, DaoCount};
@@ -17,6 +20,7 @@ pub trait SeriesDao {
 		viewer_id: &str,
 		page_params: PageParams,
 	) -> CoreResult<Pageable<Vec<Series>>>;
+	async fn get_series_media(&self, series_id: &str) -> CoreResult<Vec<Media>>;
 }
 
 pub struct SeriesDaoImpl {
@@ -98,6 +102,20 @@ impl SeriesDao for SeriesDaoImpl {
 					.to_string(),
 			))
 		}
+	}
+
+	async fn get_series_media(&self, series_id: &str) -> CoreResult<Vec<Media>> {
+		let series_media = self
+			.client
+			.media()
+			.find_many(vec![media::series_id::equals(Some(series_id.to_string()))])
+			.exec()
+			.await?;
+
+		Ok(series_media
+			.into_iter()
+			.map(Media::from)
+			.collect::<Vec<Media>>())
 	}
 }
 

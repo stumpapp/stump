@@ -1,32 +1,26 @@
-use globset::GlobSetBuilder;
-use itertools::Itertools;
-use prisma_client_rust::chrono::{DateTime, Utc};
 use std::{
-	collections::HashMap,
-	path::Path,
 	sync::{
 		atomic::{AtomicU64, Ordering},
 		Arc,
 	},
-	time::{Duration, SystemTime},
+	time::Duration,
 };
 use tokio::{self, task::JoinHandle};
 use tracing::{debug, error, trace};
-use walkdir::WalkDir;
 
 use crate::{
-	db::models::{LibraryOptions, Media},
+	db::models::LibraryOptions,
 	event::CoreEvent,
 	fs::scanner::{validate, ScannedFileTrait},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
 	prelude::{CoreError, CoreResult, Ctx},
-	prisma::{media, series},
+	prisma::series,
 };
 
 // TODO: split the batch vs sync scan into two separate files, it is getting too cluttered in here together I think...
 
 use super::{
-	utils::{batch_media_operations, populate_glob_builder},
+	utils::{self, batch_media_operations},
 	BatchScanOperation,
 };
 
@@ -42,58 +36,11 @@ async fn scan_series(
 	library_options: LibraryOptions,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Vec<BatchScanOperation> {
-	let db = ctx.get_db();
-
-	let series_ignore_file = Path::new(series.path.as_str()).join(".stumpignore");
-	let library_ignore_file = Path::new(library_path).join(".stumpignore");
-
-	let media = db
-		.media()
-		.find_many(vec![media::series_id::equals(Some(series.id.clone()))])
-		.exec()
-		.await
-		.unwrap_or_else(|e| {
-			error!("Error occurred trying to fetch media for series: {}", e);
-			vec![]
-		});
-
-	let mut visited_media = HashMap::with_capacity(media.len());
-	let mut media_by_path = HashMap::with_capacity(media.len());
-	for m in media {
-		visited_media.insert(m.path.clone(), false);
-		media_by_path.insert(m.path.clone(), Media::from(m));
-	}
+	debug!(?series, "Scanning series");
+	let (mut visited_media, media_by_path, walkdir, glob_set) =
+		utils::setup_series_scan(&ctx, &series, library_path, &library_options).await;
 
 	let mut operations = vec![];
-
-	let mut walkdir = WalkDir::new(&series.path);
-
-	let is_collection_based = library_options.is_collection_based();
-
-	if !is_collection_based || series.path == library_path {
-		walkdir = walkdir.max_depth(1);
-	}
-
-	let mut builder = GlobSetBuilder::new();
-
-	if series_ignore_file.exists() || library_ignore_file.exists() {
-		populate_glob_builder(
-			&mut builder,
-			vec![series_ignore_file, library_ignore_file]
-				.into_iter()
-				// We have to remove duplicates here otherwise the glob will double some patterns.
-				// An example would be when the library has media in root. Not the end of the world.
-				.unique()
-				.filter(|p| p.exists())
-				.collect::<Vec<_>>()
-				.as_slice(),
-		);
-	}
-
-	// TODO: make this an error to enforce correct glob patterns in an ignore file.
-	// This way, no scan will ever add things a user wants to ignore.
-	let glob_set = builder.build().unwrap_or_default();
-
 	for entry in walkdir
 		.into_iter()
 		.filter_map(|e| e.ok())
@@ -101,46 +48,30 @@ async fn scan_series(
 	{
 		let path = entry.path();
 		let path_str = path.to_str().unwrap_or("");
-		debug!(path = ?path, "Scanning file");
+		trace!(?path, "Scanning file");
 
 		// Tell client we are on the next file, this will increment the counter in the
 		// callback, as well.
 		on_progress(format!("Analyzing {:?}", path));
 
 		let glob_match = glob_set.is_match(path);
-		// println!("Path: {:?} -> Matches: {}", path, glob_match);
 
 		if path.should_ignore() || glob_match {
-			trace!(path = ?path, glob_match = glob_match, "Skipping ignored file");
+			trace!(?path, glob_match, "Skipping ignored file");
 			continue;
 		} else if visited_media.get(path_str).is_some() {
-			debug!(media_path = ?path, "Existing media found");
+			trace!(media_path = ?path, "Existing media found");
 
-			// TODO: this really shouldn't be a problem, buttttttt i guess isn't best practice
 			let media = media_by_path.get(path_str).unwrap();
-			// TODO: parse into util function
-			if let Ok(Ok(system_time)) = entry.metadata().map(|m| m.modified()) {
-				let media_modified_at = media
-					.modified_at
-					.parse::<DateTime<Utc>>()
-					.unwrap_or_else(|_| SystemTime::now().into());
-				let system_time_converted: DateTime<Utc> = system_time.into();
+			let check_modified_at =
+				utils::file_updated_since_scan(&entry, media.modified_at.clone());
 
-				trace!(
-					system_time_converted = ?system_time_converted,
-					media_modified_at = ?media_modified_at,
-				);
-
+			if let Ok(has_been_modified) = check_modified_at {
 				// If the file has been modified since the last scan, we need to update it.
-				if system_time_converted > media_modified_at {
-					debug!(path = ?path, "Media has been modified since last scan");
+				if has_been_modified {
+					debug!(?media, "Media file has been modified since last scan");
 					// operations.push(BatchScanOperation::UpdateMedia(media.clone()));
 				}
-			} else {
-				error!(
-					path = ?path,
-					"Error occurred trying to read modified date for media",
-				);
 			}
 
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;

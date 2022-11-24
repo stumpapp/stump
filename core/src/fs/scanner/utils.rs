@@ -1,21 +1,26 @@
 use std::{
+	collections::HashMap,
 	fs::File,
 	io::{BufRead, BufReader},
 	path::{Path, PathBuf},
 };
 
-use globset::{Glob, GlobSetBuilder};
-use prisma_client_rust::{raw, PrismaValue, QueryError};
+use globset::{Glob, GlobSet, GlobSetBuilder};
+use itertools::Itertools;
+use prisma_client_rust::{
+	chrono::{DateTime, Utc},
+	raw, PrismaValue, QueryError,
+};
 use tracing::{debug, error, trace};
-use walkdir::DirEntry;
+use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	db::{
 		models::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
-		Dao, DaoBatch, MediaDaoImpl,
+		Dao, DaoBatch, MediaDaoImpl, SeriesDao, SeriesDaoImpl,
 	},
 	fs::{image, media_file, scanner::BatchScanOperation},
-	prelude::{CoreResult, Ctx, FileStatus},
+	prelude::{CoreError, CoreResult, Ctx, FileStatus},
 	prisma::{library, media, series},
 };
 
@@ -81,6 +86,98 @@ impl MediaBuilder for Media {
 			series_id: options.series_id,
 			..Default::default()
 		})
+	}
+}
+
+pub(crate) async fn setup_series_scan(
+	ctx: &Ctx,
+	series: &series::Data,
+	library_path: &str,
+	library_options: &LibraryOptions,
+) -> (
+	HashMap<String, bool>,
+	HashMap<String, Media>,
+	WalkDir,
+	GlobSet,
+) {
+	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
+	let series_ignore_file = Path::new(series.path.as_str()).join(".stumpignore");
+	let library_ignore_file = Path::new(library_path).join(".stumpignore");
+
+	let media = series_dao
+		.get_series_media(series.id.as_str())
+		.await
+		.unwrap_or_else(|e| {
+			error!("Error occurred trying to fetch media for series: {}", e);
+			vec![]
+		});
+
+	let mut visited_media = HashMap::with_capacity(media.len());
+	let mut media_by_path = HashMap::with_capacity(media.len());
+	for m in media {
+		visited_media.insert(m.path.clone(), false);
+		media_by_path.insert(m.path.clone(), m);
+	}
+
+	let mut walkdir = WalkDir::new(&series.path);
+	let is_collection_based = library_options.is_collection_based();
+
+	if !is_collection_based || series.path == library_path {
+		walkdir = walkdir.max_depth(1);
+	}
+
+	let mut builder = GlobSetBuilder::new();
+	if series_ignore_file.exists() || library_ignore_file.exists() {
+		populate_glob_builder(
+			&mut builder,
+			vec![series_ignore_file, library_ignore_file]
+				.into_iter()
+				// We have to remove duplicates here otherwise the glob will double some patterns.
+				// An example would be when the library has media in root. Not the end of the world.
+				.unique()
+				.filter(|p| p.exists())
+				.collect::<Vec<_>>()
+				.as_slice(),
+		);
+	}
+
+	// TODO: make this an error to enforce correct glob patterns in an ignore file.
+	// This way, no scan will ever add things a user wants to ignore.
+	let glob_set = builder.build().unwrap_or_default();
+
+	(visited_media, media_by_path, walkdir, glob_set)
+}
+
+pub(crate) fn file_updated_since_scan(
+	entry: &DirEntry,
+	last_modified_at: String,
+) -> CoreResult<bool> {
+	if let Ok(Ok(system_time)) = entry.metadata().map(|m| m.modified()) {
+		let media_modified_at =
+			last_modified_at.parse::<DateTime<Utc>>().map_err(|e| {
+				error!(
+					path = ?entry.path(),
+					error = ?e,
+					"Error occurred trying to read modified date for media",
+				);
+
+				CoreError::Unknown(e.to_string())
+			})?;
+		let system_time_converted: DateTime<Utc> = system_time.into();
+		trace!(?system_time_converted, ?media_modified_at,);
+
+		if system_time_converted > media_modified_at {
+			return Ok(true);
+		}
+
+		Ok(false)
+	} else {
+		error!(
+			path = ?entry.path(),
+			"Error occurred trying to read modified date for media",
+		);
+
+		Ok(true)
 	}
 }
 

@@ -49,6 +49,9 @@ pub trait DaoUpdate {
 	async fn update(&self, id: &str, data: Self::Model) -> CoreResult<Self::Model>;
 	/// Updates a record in the database, or creates it if it does not exist.
 	async fn upsert(&self, data: Self::Model) -> CoreResult<Self::Model>;
+
+	// async fn update_many(&self, data: Vec<Self::Model>) -> CoreResult<Vec<Self::Model>>;
+	// async fn patch_many(&self, data: Vec<Self::Model>) -> CoreResult<Vec<Self::Model>>;
 }
 
 #[async_trait::async_trait]

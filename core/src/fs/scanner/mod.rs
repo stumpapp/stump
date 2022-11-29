@@ -9,7 +9,7 @@ use tracing::debug;
 use walkdir::WalkDir;
 
 use crate::{
-	db::models::LibraryScanMode,
+	db::models::{LibraryScanMode, Media},
 	fs::media_file::{self, guess_mime},
 	job::runner::RunnerCtx,
 	prelude::{ContentType, CoreResult},
@@ -163,8 +163,12 @@ impl ScannedFileTrait for Path {
 	}
 }
 
+// FIXME: I don't want to allow this, however Box<Media> won't work
+#[allow(clippy::large_enum_variant)]
 pub enum BatchScanOperation {
 	CreateMedia { path: PathBuf, series_id: String },
+
+	UpdateMedia(Media),
 	MarkMediaMissing { path: String },
 	// Note: this will be tricky. I will need to have this as a separate operation so I don't chance
 	// issuing concurrent writes to the database. But will be a bit of a pain, not too bad though.

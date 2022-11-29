@@ -24,7 +24,6 @@ use super::{
 	BatchScanOperation,
 };
 
-// Note: if this function signature gets much larger I probably want to refactor it...
 // TODO: return result...
 // TODO: investigate this with LARGE libraries. I am noticing the UI huff and puff a bit
 // trying to keep up with the shear amount of updates it gets. I might have to throttle the
@@ -70,7 +69,7 @@ async fn scan_series(
 				// If the file has been modified since the last scan, we need to update it.
 				if has_been_modified {
 					debug!(?media, "Media file has been modified since last scan");
-					// operations.push(BatchScanOperation::UpdateMedia(media.clone()));
+					operations.push(BatchScanOperation::UpdateMedia(media.clone()));
 				}
 			}
 

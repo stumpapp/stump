@@ -11,7 +11,7 @@ use prisma_client_rust::{
 	chrono::{DateTime, Utc},
 	raw, PrismaValue, QueryError,
 };
-use tracing::{debug, error, trace};
+use tracing::{debug, error, trace, warn};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
@@ -108,7 +108,7 @@ pub(crate) async fn setup_series_scan(
 		.get_series_media(series.id.as_str())
 		.await
 		.unwrap_or_else(|e| {
-			error!("Error occurred trying to fetch media for series: {}", e);
+			error!(error = ?e, "Error occurred trying to fetch media for series");
 			vec![]
 		});
 
@@ -247,31 +247,35 @@ pub async fn insert_series_batch(
 	entries: Vec<DirEntry>,
 	library_id: String,
 ) -> CoreResult<Vec<series::Data>> {
-	let series_creates = entries.into_iter().map(|entry| {
-		let path = entry.path();
+	let series_creates = entries
+		.into_iter()
+		.map(|entry| {
+			let path = entry.path();
 
-		// TODO: figure out how to do this in the safest way possible...
-		let name = path
-			.file_name()
-			.unwrap_or_default()
-			.to_str()
-			.unwrap_or_default()
-			.to_string();
+			let file_name = path
+				.file_name()
+				.and_then(|file_name| file_name.to_str().map(String::from));
+			let path_str = path.to_str().map(String::from);
 
-		// TODO: change this to a Result, then filter map on the iterator and
-		// log the Err values...
-		ctx.db.series().create(
-			name,
-			path.to_str().unwrap_or_default().to_string(),
-			vec![series::library::connect(library::id::equals(
-				library_id.clone(),
-			))],
-		)
-	});
+			debug!(
+				file_name,
+				path_str, "Parsing series name and path from file"
+			);
 
-	let inserted_series = ctx.db._batch(series_creates).await?;
+			(file_name, path_str)
+		})
+		.filter_map(|result| match result {
+			(Some(file_name), Some(path_str)) => Some(ctx.db.series().create(
+				file_name,
+				path_str,
+				vec![series::library::connect(library::id::equals(
+					library_id.clone(),
+				))],
+			)),
+			_ => None,
+		});
 
-	Ok(inserted_series)
+	Ok(ctx.db._batch(series_creates).await?)
 }
 
 pub async fn mark_media_missing(
@@ -295,62 +299,117 @@ pub async fn batch_media_operations(
 	library_options: &LibraryOptions,
 ) -> CoreResult<Vec<Media>> {
 	let media_dao = MediaDaoImpl::new(ctx.db.clone());
-	// Note: this won't work if I add any other operations...
-	let (create_operations, mark_missing_operations): (Vec<_>, Vec<_>) =
-		operations.into_iter().partition(|operation| {
-			matches!(operation, BatchScanOperation::CreateMedia { .. })
-		});
 
-	let media_creates = create_operations
-		.into_iter()
-		.map(|operation| match operation {
-			BatchScanOperation::CreateMedia { path, series_id } => {
-				Media::build_with_options(
-					&path,
-					MediaBuilderOptions {
-						series_id,
-						library_options: library_options.clone(),
+	let (media_creates, media_updates, missing_paths) =
+		operations
+			.into_iter()
+			.fold(
+				(vec![], vec![], vec![]),
+				|mut acc, operation| match operation {
+					BatchScanOperation::CreateMedia { path, series_id } => {
+						let build_result = Media::build_with_options(
+							&path,
+							MediaBuilderOptions {
+								series_id,
+								library_options: library_options.clone(),
+							},
+						);
+
+						if let Ok(media) = build_result {
+							acc.0.push(media);
+						} else {
+							error!(
+								?build_result,
+								"Error occurred trying to build media entity",
+							);
+						}
+
+						acc
 					},
-				)
-			},
-			_ => unreachable!(),
-		})
-		.filter_map(|res| match res {
-			Ok(entry) => Some(entry),
-			Err(e) => {
-				error!("Failed to create media: {:?}", e);
+					BatchScanOperation::UpdateMedia(outdated_media) => {
+						// TODO: do something with media_updates
+						warn!(
+							?outdated_media,
+							"Stump does not support updating media entities yet",
+						);
+						acc.1.push(outdated_media);
+						// let build_result = Media::build_with_options(
+						// 	Path::new(&outdated_media.path),
+						// 	MediaBuilderOptions {
+						// 		series_id: outdated_media.series_id.clone(),
+						// 		library_options: library_options.clone(),
+						// 	},
+						// );
 
-				None
-			},
-		});
+						// if let Ok(patch_media) = build_result {
+						// 	// outdated_media.apply_options(patch_media);
+						// 	acc.0.push(patch_media);
+						// } else {
+						// 	error!(
+						// 		?build_result,
+						// 		"Error occurred trying to build media entity for update",
+						// 	);
+						// }
 
-	let missing_paths = mark_missing_operations
-		.into_iter()
-		.map(|operation| match operation {
-			BatchScanOperation::MarkMediaMissing { path } => path,
-			_ => unreachable!(),
-		})
-		.collect::<Vec<String>>();
+						acc
+					},
+					BatchScanOperation::MarkMediaMissing { path } => {
+						acc.2.push(path);
+						acc
+					},
+				},
+			);
 
-	let _result = mark_media_missing(ctx, missing_paths).await;
+	trace!(
+		media_creates_len = media_creates.len(),
+		media_updates_len = media_updates.len(),
+		missing_paths_len = missing_paths.len(),
+		"Partitioned batch operations",
+	);
 
-	media_dao._insert_batch(media_creates).await
+	// TODO: do something with media_updates
+
+	let marked_missing_result = mark_media_missing(ctx, missing_paths).await;
+	if let Err(err) = marked_missing_result {
+		error!(
+			query_error = ?err,
+			"Error occurred trying to mark media as missing",
+		);
+	}
+
+	let inserted_media = media_dao.insert_many(media_creates).await?;
+	debug!(
+		inserted_media_len = inserted_media.len(),
+		"Inserted new media entities",
+	);
+
+	// let updated_media = media_dao.update_many(media_updates).await?;
+	// FIXME: make return generic (not literally)
+	Ok(inserted_media)
 }
 
-// TODO: error handling, i.e don't unwrap lol
-// TODO: is it better practice to make this async?
 pub fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathBuf]) {
 	for path in paths {
-		// read the lines of the file, and add each line as a glob pattern in the builder
-		let file = File::open(path).unwrap();
+		let open_result = File::open(path);
+		if let Ok(file) = open_result {
+			// read the lines of the file, and add each line as a glob pattern in the builder
+			for line in BufReader::new(file).lines() {
+				if let Err(e) = line {
+					error!(
+						error = ?e,
+						"Error occurred trying to read line from glob file",
+					);
+					continue;
+				}
 
-		for line in BufReader::new(file).lines() {
-			if let Err(e) = line {
-				error!("Failed to read line from file: {:?}", e);
-				continue;
+				builder.add(Glob::new(&line.unwrap()).unwrap());
 			}
-
-			builder.add(Glob::new(&line.unwrap()).unwrap());
+		} else {
+			error!(
+				error = ?open_result.err(),
+				?path,
+				"Failed to open file",
+			);
 		}
 	}
 }

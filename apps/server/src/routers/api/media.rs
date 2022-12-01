@@ -6,6 +6,7 @@ use axum::{
 };
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
+use serde::Deserialize;
 use stump_core::{
 	config::get_config_dir,
 	db::{
@@ -20,7 +21,7 @@ use stump_core::{
 		read_progress, user,
 	},
 };
-use tracing::trace;
+use tracing::{debug, trace};
 
 use crate::{
 	config::state::State,
@@ -171,31 +172,40 @@ async fn get_recently_added_media(
 	Ok(Json(Pageable::from((media, count, page_params))))
 }
 
+#[derive(Deserialize)]
+struct LoadSeries {
+	load_series: Option<bool>,
+}
+
 async fn get_media_by_id(
 	Path(id): Path<String>,
+	params: Query<LoadSeries>,
 	Extension(ctx): State,
 	session: ReadableSession,
 ) -> ApiResult<Json<Media>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let book = db
-		.media()
-		.find_unique(media::id::equals(id.clone()))
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
-		]))
-		.exec()
-		.await?;
+	let mut query = db.media().find_unique(media::id::equals(id.clone())).with(
+		media::read_progresses::fetch(vec![read_progress::user_id::equals(user_id)]),
+	);
 
-	if book.is_none() {
+	if params.load_series.unwrap_or_default() {
+		trace!(media_id = id, "Loading series relation for media");
+		query = query.with(media::series::fetch());
+	}
+
+	let result = query.exec().await?;
+	debug!(media_id = id, ?result, "Get media by id");
+
+	if result.is_none() {
 		return Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
 		)));
 	}
 
-	Ok(Json(book.unwrap().into()))
+	Ok(Json(Media::from(result.unwrap())))
 }
 
 async fn get_media_file(

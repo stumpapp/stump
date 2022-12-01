@@ -2,14 +2,14 @@ import { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams } from 'react-router-dom';
 
+import { Box, Heading, Text, useColorModeValue } from '@chakra-ui/react';
 import { useMedia, useTopBarStore } from '@stump/client';
-// import { getMediaPage, getMediaThumbnail } from '@stump/client/api';
+
 import MediaCard from '../../components/media/MediaCard';
-import { DEBUG_ENV } from '../..';
-import { Box, ButtonGroup, Heading, Text, useColorModeValue } from '@chakra-ui/react';
-import ReadMore from '../../ui/ReadMore';
 import TagList from '../../components/tags/TagList';
+import ReadMore from '../../ui/ReadMore';
 import { formatBytes } from '../../utils/format';
+import Link from '../../ui/Link';
 
 // TODO: looks shit on mobile
 export default function BookOverview() {
@@ -47,12 +47,8 @@ export default function BookOverview() {
 				<div className="flex items-start space-x-4">
 					<MediaCard media={media} readingLink />
 					<div className="flex-1 flex flex-col space-y-4 h-full">
-						<ButtonGroup>
-							{/* <UpNextButton seriesId={series.id} /> */}
-							{/* <DownloadSeriesButton seriesId={series.id} /> */}
-						</ButtonGroup>
-
 						<ReadMore text={media.description} />
+						{media.series && <Link to={`/series/${media.series.id}`}>{media.series.name}</Link>}
 
 						{/* TODO: I want this at the bottom of the container here, but layout needs to be tweaked and I am tired. */}
 						<TagList tags={media.tags} />
@@ -66,9 +62,15 @@ export default function BookOverview() {
 						<Text>Kind: {media.extension.toUpperCase()}</Text>
 					</Box>
 					<Text color={useColorModeValue('gray.700', 'gray.400')}>Checksum: {media.checksum}</Text>
+					<Text color={useColorModeValue('gray.700', 'gray.400')}>Path: {media.path}</Text>
 				</div>
 
 				{/* TODO: series slider, cursor after current? */}
+
+				{/* <div className="pt-6">
+					<Heading fontSize="md">Up Next in Series</Heading>
+					TODO: make me BOB
+				</div> */}
 			</div>
 		</>
 	);

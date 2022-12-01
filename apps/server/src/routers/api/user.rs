@@ -7,6 +7,7 @@ use stump_core::{
 	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
 	prisma::{user, user_preferences},
 };
+use tracing::debug;
 
 use crate::{
 	config::state::State,
@@ -19,6 +20,7 @@ use crate::{
 
 pub(crate) fn mount() -> Router {
 	Router::new()
+		// TODO: adminguard these first two routes
 		.route("/users", get(get_users).post(create_user))
 		.nest(
 			"/users/:id",
@@ -70,7 +72,7 @@ async fn create_user(
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
 
-	// FIXME: admin middleware
+	// TODO: admin middleware instead
 	if !user.is_admin() {
 		return Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".into(),
@@ -117,10 +119,13 @@ async fn delete_user_by_id(
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
 
-	// TODO: Add user delete himself and admin cannot delete hiimselt
 	if !user.is_admin() {
 		return Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".into(),
+		));
+	} else if user.id == id {
+		return Err(ApiError::BadRequest(
+			"You cannot delete your own account.".into(),
 		));
 	}
 
@@ -129,6 +134,8 @@ async fn delete_user_by_id(
 		.delete(user::id::equals(id.clone()))
 		.exec()
 		.await?;
+
+	debug!(?deleted_user, "Deleted user");
 
 	Ok(Json(deleted_user.id))
 }
@@ -152,6 +159,7 @@ async fn get_user_by_id(
 		.find_unique(user::id::equals(id.clone()))
 		.exec()
 		.await?;
+	debug!(id, ?user_by_id, "Result of fetching user by id");
 
 	if user_by_id.is_none() {
 		return Err(ApiError::NotFound(format!("User with id {} not found", id)));
@@ -181,12 +189,13 @@ async fn update_user(
 		update_params.push(user::hashed_password::set(hashed_password));
 	}
 
-	let updated_user = User::from(
-		db.user()
-			.update(user::id::equals(user.id.clone()), update_params)
-			.exec()
-			.await?,
-	);
+	let updated_user_data = db
+		.user()
+		.update(user::id::equals(user.id.clone()), update_params)
+		.exec()
+		.await?;
+	let updated_user = User::from(updated_user_data);
+	debug!(?updated_user, "Updated user");
 
 	writable_session
 		.insert("user", updated_user.clone())
@@ -197,47 +206,48 @@ async fn update_user(
 	Ok(Json(updated_user))
 }
 
-// FIXME: remove this once I resolve the below 'TODO'
 async fn get_user_preferences(
 	Path(id): Path<String>,
 	Extension(ctx): State,
-	// session: ReadableSession,
+	session: ReadableSession,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
 
-	Ok(Json(
-		db.user_preferences()
-			.find_unique(user_preferences::id::equals(id.clone()))
-			.exec()
-			.await?
-			.expect("Failed to fetch user preferences")
-			.into(), // .map(|p| p.into()),
-		          // user_preferences,
-	))
+	if id != user.id {
+		return Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".into(),
+		));
+	}
+
+	let user_preferences = db
+		.user_preferences()
+		.find_unique(user_preferences::id::equals(id.clone()))
+		.exec()
+		.await?;
+	debug!(id, ?user_preferences, "Fetched user preferences");
+
+	if user_preferences.is_none() {
+		return Err(ApiError::NotFound(format!(
+			"User preferences with id {} not found",
+			id
+		)));
+	}
+
+	Ok(Json(UserPreferences::from(user_preferences.unwrap())))
 }
 
-// TODO: I load the user preferences from the session in the auth call.
-// If a session didn't exist then I load it from DB. I think for now this is OK since
-// all the preferences are client-side, so if the server is not in sync with
-// preferences updates it is not a big deal. This will have to change somehow in the
-// future potentially though, unless I just load preferences when required.
-//
-// Note: I don't even use the user id to load the preferences, as I pull it from
-// when I got from the session. I could remove the ID requirement. I think the preferences
-// structure needs to eventually change a little anyways, I don't like how I can't query
-// by user id, it should be a unique where param but it isn't with how I structured it...
-// FIXME: remove this 'allow' once I resolve the above 'TODO'
 #[allow(unused)]
 async fn update_user_preferences(
 	Path(id): Path<String>,
 	Json(input): Json<UserPreferencesUpdate>,
 	Extension(ctx): State,
-	session: ReadableSession,
+	mut writable_session: WritableSession,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
 
-	let user = get_session_user(&session)?;
-	let user_preferences = user.user_preferences.unwrap_or_default();
+	let user = get_writable_session_user(&writable_session)?;
+	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	if user_preferences.id != input.id {
 		return Err(ApiError::Forbidden(
@@ -245,22 +255,37 @@ async fn update_user_preferences(
 		));
 	}
 
-	Ok(Json(
-		db.user_preferences()
-			.update(
-				user_preferences::id::equals(user_preferences.id.clone()),
-				vec![
-					user_preferences::locale::set(input.locale.to_owned()),
-					user_preferences::library_layout_mode::set(
-						input.library_layout_mode.to_owned(),
-					),
-					user_preferences::series_layout_mode::set(
-						input.series_layout_mode.to_owned(),
-					),
-				],
-			)
-			.exec()
-			.await?
-			.into(),
-	))
+	let updated_preferences = db
+		.user_preferences()
+		.update(
+			user_preferences::id::equals(user_preferences.id.clone()),
+			vec![
+				user_preferences::locale::set(input.locale.to_owned()),
+				user_preferences::library_layout_mode::set(
+					input.library_layout_mode.to_owned(),
+				),
+				user_preferences::series_layout_mode::set(
+					input.series_layout_mode.to_owned(),
+				),
+			],
+		)
+		.exec()
+		.await?;
+	debug!(?updated_preferences, "Updated user preferences");
+
+	writable_session
+		.insert(
+			"user",
+			User {
+				user_preferences: Some(UserPreferences::from(
+					updated_preferences.clone(),
+				)),
+				..user
+			},
+		)
+		.map_err(|e| {
+			ApiError::InternalServerError(format!("Failed to update session: {}", e))
+		})?;
+
+	Ok(Json(UserPreferences::from(updated_preferences)))
 }

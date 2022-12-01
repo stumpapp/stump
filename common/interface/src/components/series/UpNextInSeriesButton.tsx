@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom';
-import Button from '../../ui/Button';
+import Button, { ButtonProps } from '../../ui/Button';
 
 import { useUpNextInSeries } from '@stump/client';
 
-interface Props {
+type Props = {
 	seriesId: string;
-}
+	title?: string;
+} & ButtonProps;
 
-export default function UpNextButton({ seriesId }: Props) {
+export default function UpNextInSeriesButton({ seriesId, title, ...props }: Props) {
 	const { media, isLoading } = useUpNextInSeries(seriesId);
+
 	// TODO: Change this once Stump supports epub progress tracking.
 	if (media?.extension === 'epub') {
 		return null;
@@ -22,8 +24,9 @@ export default function UpNextButton({ seriesId }: Props) {
 			disabled={!media}
 			title={`Continue reading ${media?.name || 'from where you left off'}`}
 			colorScheme="brand"
+			{...props}
 		>
-			Continue
+			{title || 'Continue Reading'}
 		</Button>
 	);
 }

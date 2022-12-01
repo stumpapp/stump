@@ -145,7 +145,12 @@ export function SidebarContent() {
 					href: `/libraries/${library.id}`,
 				})),
 			},
-			{ name: t('sidebar.buttons.settings'), icon: Gear as any, href: '/settings' },
+			{
+				name: t('sidebar.buttons.settings'),
+				icon: Gear as any,
+				href: '/settings',
+				// onHover:  () => queryClient.prefetchQuery([])
+			},
 		],
 		[libraries, locale],
 	);

@@ -1,8 +1,4 @@
-use globset::GlobSetBuilder;
-use itertools::Itertools;
 use std::{
-	collections::HashMap,
-	path::Path,
 	sync::{
 		atomic::{AtomicU64, Ordering},
 		Arc,
@@ -10,7 +6,6 @@ use std::{
 	time::Duration,
 };
 use tracing::{debug, error, trace, warn};
-use walkdir::WalkDir;
 
 use crate::{
 	db::models::LibraryOptions,
@@ -18,7 +13,7 @@ use crate::{
 	fs::scanner::{utils, validate, ScannedFileTrait},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
 	prelude::{CoreResult, Ctx},
-	prisma::{media, series},
+	prisma::series,
 };
 
 async fn scan_series(
@@ -29,48 +24,9 @@ async fn scan_series(
 	library_options: LibraryOptions,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) {
-	let db = ctx.get_db();
-
-	let series_ignore_file = Path::new(series.path.as_str()).join(".stumpignore");
-	let library_ignore_file = Path::new(library_path).join(".stumpignore");
-
-	let media = db
-		.media()
-		.find_many(vec![media::series_id::equals(Some(series.id.clone()))])
-		.exec()
-		.await
-		.unwrap();
-
-	let mut visited_media = media
-		.iter()
-		.map(|data| (data.path.clone(), false))
-		.collect::<HashMap<String, bool>>();
-
-	let mut walkdir = WalkDir::new(&series.path);
-
-	let is_collection_based = library_options.is_collection_based();
-
-	if !is_collection_based || series.path == library_path {
-		walkdir = walkdir.max_depth(1);
-	}
-
-	let mut builder = GlobSetBuilder::new();
-
-	if series_ignore_file.exists() || library_ignore_file.exists() {
-		utils::populate_glob_builder(
-			&mut builder,
-			vec![series_ignore_file, library_ignore_file]
-				.into_iter()
-				.unique()
-				.filter(|p| p.exists())
-				.collect::<Vec<_>>()
-				.as_slice(),
-		);
-	}
-
-	// TODO: make this an error to enforce correct glob patterns in an ignore file.
-	// This way, no scan will ever add things a user wants to ignore.
-	let glob_set = builder.build().unwrap();
+	debug!(?series, "Scanning series");
+	let (mut visited_media, media_by_path, walkdir, glob_set) =
+		utils::setup_series_scan(&ctx, &series, library_path, &library_options).await;
 
 	for entry in walkdir
 		.into_iter()
@@ -79,39 +35,47 @@ async fn scan_series(
 	{
 		let path = entry.path();
 		let path_str = path.to_str().unwrap_or("");
-
-		debug!("Currently scanning: {:?}", path);
+		trace!(?path, "Scanning file");
 
 		// Tell client we are on the next file, this will increment the counter in the
 		// callback, as well.
 		on_progress(format!("Analyzing {:?}", path));
 
 		let glob_match = glob_set.is_match(path);
-		// println!("Path: {:?} -> Matches: {}", path, glob_match);
 
 		if path.should_ignore() || glob_match {
-			trace!("Skipping ignored file: {:?}", path);
-			trace!("Globbed ignore?: {}", glob_match);
+			trace!(?path, glob_match, "Skipping ignored file");
 			continue;
 		} else if visited_media.get(path_str).is_some() {
-			debug!("Existing media found: {:?}", path);
+			trace!(media_path = ?path, "Existing media found");
+			let media = media_by_path.get(path_str).unwrap();
+			let check_modified_at =
+				utils::file_updated_since_scan(&entry, media.modified_at.clone());
+
+			if let Ok(has_been_modified) = check_modified_at {
+				// If the file has been modified since the last scan, we need to update it.
+				if has_been_modified {
+					debug!(?media, "Media file has been modified since last scan");
+					// TODO: do something with media_updates
+					warn!(
+						outdated_media = ?media,
+						"Stump does not support updating media entities yet",
+					);
+				}
+			}
+
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;
 		}
 
-		debug!("New media found at {:?} in series {:?}", &path, &series.id);
-
-		match super::utils::insert_media(&ctx, path, series.id.clone(), &library_options)
-			.await
-		{
+		debug!(series_id = ?series.id, new_media_path = ?path, "New media found in series");
+		match utils::insert_media(&ctx, path, series.id.clone(), &library_options).await {
 			Ok(media) => {
 				visited_media.insert(media.path.clone(), true);
-
-				// ctx.emit_client_event(CoreEvent::CreatedMedia(media.clone()));
+				ctx.emit_client_event(CoreEvent::CreatedMedia(Box::new(media)));
 			},
 			Err(e) => {
-				error!("Failed to insert media: {:?}", e);
-
+				error!(error = ?e, "Failed to create media");
 				ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
 					runner_id: Some(runner_id.clone()),
 					path: path.to_str().unwrap_or_default().to_string(),
@@ -130,16 +94,13 @@ async fn scan_series(
 
 	if missing_media.is_empty() {
 		warn!(
-			"{} media were unable to be located during scan.",
-			missing_media.len(),
+			missing_paths = ?missing_media,
+			"Some media files could not be located during scan."
 		);
-
-		debug!("Missing media paths: {:?}", missing_media);
-
 		let result = utils::mark_media_missing(&ctx, missing_media).await;
 
 		if let Err(err) = result {
-			error!("Failed to mark media as MISSING: {:?}", err);
+			error!(error = ?err, "Failed to mark media as MISSING");
 		} else {
 			debug!("Marked {} media as MISSING", result.unwrap());
 		}
@@ -151,6 +112,9 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 
 	let (library, library_options, series, files_to_process) =
 		validate::precheck(&core_ctx, path, &runner_id).await?;
+
+	// Sleep for a little to let the UI breathe.
+	tokio::time::sleep(Duration::from_millis(700)).await;
 
 	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
 	let _job = persist_job_start(&core_ctx, runner_id.clone(), files_to_process).await?;

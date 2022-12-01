@@ -11,17 +11,16 @@ use tracing::{debug, error, trace};
 use crate::{
 	db::models::LibraryOptions,
 	event::CoreEvent,
-	fs::scanner::{validate, ScannedFileTrait},
+	fs::{
+		image,
+		scanner::{
+			utils::{self, batch_media_operations},
+			validate, BatchScanOperation, ScannedFileTrait,
+		},
+	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
 	prelude::{CoreError, CoreResult, Ctx},
 	prisma::series,
-};
-
-// TODO: split the batch vs sync scan into two separate files, it is getting too cluttered in here together I think...
-
-use super::{
-	utils::{self, batch_media_operations},
-	BatchScanOperation,
 };
 
 // TODO: return result...
@@ -179,10 +178,9 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		// sleep for a bit to let client catch up
 		tokio::time::sleep(Duration::from_millis(50)).await;
 
-		// FIXME: dao
-		// if let Err(err) = image::generate_thumbnails(created_media) {
-		// 	error!("Failed to generate thumbnails: {:?}", err);
-		// }
+		if let Err(err) = image::generate_thumbnails(&created_media) {
+			error!("Failed to generate thumbnails: {:?}", err);
+		}
 	}
 
 	ctx.progress(JobUpdate::job_finishing(

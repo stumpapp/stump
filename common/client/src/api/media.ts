@@ -12,7 +12,7 @@ export function getPaginatedMedia(page: number): Promise<PageableApiResult<Media
 }
 
 export function getMediaById(id: string): Promise<GetMediaById> {
-	return API.get(`/media/${id}`);
+	return API.get(`/media/${id}?load_series=true`);
 }
 
 // TODO: I see myself using this pattern a lot, so I should make a helper/wrapper for it...

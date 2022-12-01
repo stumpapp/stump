@@ -9,7 +9,7 @@ import { getSeriesThumbnail } from '@stump/client/api';
 import MediaGrid from '../components/media/MediaGrid';
 import MediaList from '../components/media/MediaList';
 import DownloadSeriesButton from '../components/series/DownloadSeriesButton';
-import UpNextButton from '../components/series/UpNextButton';
+import UpNextInSeriesButton from '../components/series/UpNextInSeriesButton';
 import { useGetPage } from '../hooks/useGetPage';
 import useIsInView from '../hooks/useIsInView';
 import Pagination from '../ui/Pagination';
@@ -45,7 +45,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 					{series.name}
 				</Heading>
 				<ButtonGroup>
-					<UpNextButton seriesId={series.id} />
+					<UpNextInSeriesButton seriesId={series.id} />
 					<DownloadSeriesButton seriesId={series.id} />
 				</ButtonGroup>
 

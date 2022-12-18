@@ -102,7 +102,7 @@ pub fn generate_thumbnails(media: &[Media]) -> Result<Vec<PathBuf>, ProcessFileE
 		.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str()))
 		.filter_map(|res| {
 			if res.is_err() {
-				error!("Error generating thumbnail: {:?}", res.err());
+				error!(error = ?res.err(), "Error generating thumbnail");
 				None
 			} else {
 				res.ok()

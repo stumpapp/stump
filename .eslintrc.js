@@ -14,7 +14,8 @@ module.exports = {
 		{
 			files: ['*.jsx', '*.tsx', '*.ts'],
 			rules: {
-				'no-console': ['error', { allow: ['warn', 'error'] }],
+				'@typescript-eslint/no-non-null-assertion': 'off',
+				'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
 				'react/react-in-jsx-scope': 'off',
 			},
 		},
@@ -51,4 +52,4 @@ module.exports = {
 			version: 'detect',
 		},
 	},
-};
+}

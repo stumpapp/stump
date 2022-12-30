@@ -1,23 +1,21 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 import {
 	getInProgressMedia,
 	getMediaById,
 	getRecentlyAddedMedia,
 	updateMediaProgress,
-} from '../api';
-import { queryClient } from '../client';
-import { StumpQueryContext } from '../context';
-import { useCounter } from '../hooks/useCounter';
-import type { Media, Pageable, ReadProgress } from '../types';
-import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.';
+} from '../api'
+import { queryClient } from '../client'
+import { StumpQueryContext } from '../context'
+import type { Media, Pageable, ReadProgress } from '../types'
+import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.'
 
 export const prefetchMedia = async (id: string) => {
 	await queryClient.prefetchQuery(['getMediaById', id], () => getMediaById(id), {
 		staleTime: 10 * 1000,
-	});
-};
+	})
+}
 
 export function useMedia(id: string, options: QueryCallbacks<Media> = {}) {
 	const {
@@ -28,15 +26,15 @@ export function useMedia(id: string, options: QueryCallbacks<Media> = {}) {
 	} = useQuery(['getMediaById'], {
 		context: StumpQueryContext,
 		onError(err) {
-			options.onError?.(err);
+			options.onError?.(err)
 		},
 		onSuccess(data) {
-			options.onSuccess?.(data);
+			options.onSuccess?.(data)
 		},
 		queryFn: async () => getMediaById(id).then((res) => res.data),
-	});
+	})
 
-	return { isLoading: isLoading || isFetching || isRefetching, media };
+	return { isLoading: isLoading || isFetching || isRefetching, media }
 }
 
 export function useMediaMutation(id: string, options: MutationCallbacks<ReadProgress> = {}) {
@@ -47,14 +45,14 @@ export function useMediaMutation(id: string, options: MutationCallbacks<ReadProg
 	} = useMutation(['updateReadProgress'], (page: number) => updateMediaProgress(id, page), {
 		context: StumpQueryContext,
 		onError(err) {
-			options.onError?.(err);
+			options.onError?.(err)
 		},
 		onSuccess(data) {
-			options.onUpdated?.(data);
+			options.onUpdated?.(data)
 		},
-	});
+	})
 
-	return { isLoading, updateReadProgress, updateReadProgressAsync };
+	return { isLoading, updateReadProgress, updateReadProgressAsync }
 }
 
 export function useRecentlyAddedMedia(options: QueryCallbacks<Pageable<Media[]>> = {}) {
@@ -63,7 +61,7 @@ export function useRecentlyAddedMedia(options: QueryCallbacks<Pageable<Media[]>>
 		getRecentlyAddedMedia,
 		options,
 		new URLSearchParams('page_size=10'),
-	);
+	)
 }
 
 export function useContinueReading(options: QueryCallbacks<Pageable<Media[]>> = {}) {
@@ -72,5 +70,5 @@ export function useContinueReading(options: QueryCallbacks<Pageable<Media[]>> = 
 		getInProgressMedia,
 		options,
 		new URLSearchParams('page_size=10'),
-	);
+	)
 }

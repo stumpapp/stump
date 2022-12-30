@@ -108,7 +108,7 @@ async fn can_get_chapter() -> CoreResult<()> {
 
 	let get_chapter_result = get_chapter_result.unwrap();
 
-	assert!(get_chapter_result.1.len() > 0);
+	assert!(!get_chapter_result.1.is_empty());
 
 	Ok(())
 }

@@ -38,7 +38,17 @@
   - [ ] Settings pages
 - [ ] Add redirects for unauthed access
   - I.e. if I visit `/some-page/1`, and get redirected to `/auth`, should redirect instead with query params to restore state: `/auth?redirect=/some-page/1`
+- [ ] Finish implementing EPUB support
+  - [ ] Queries in `client`
+  - [ ] Lots of parsing in `core`
+  - [ ] Tracking progress
+- [ ] Finish implementing Stump Readers:
+  - [ ] ImageBased
+  - [ ] AnimatedImageBased
+  - [ ] EPUB
 - [ ] Tighten logging noise
+- [ ] Tighten some of the meh config files
+  - [ ] Looking at you messy tsconfigs
 - [ ] Revisit rework of `StumpConfig`
 - [ ] Setup self hosted runner using gaming computer
 - [ ] Finish GH workflows/actions

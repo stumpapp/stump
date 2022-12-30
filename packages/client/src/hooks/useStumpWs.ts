@@ -1,52 +1,57 @@
-import { useMemo } from 'react';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { useMemo } from 'react'
+import useWebSocket, { ReadyState } from 'react-use-websocket'
 
-import { API } from '../api';
-import { useStumpStore } from '../stores';
-import type { CoreEvent } from '../types';
+import { API } from '../api'
+import { useStumpStore } from '../stores'
+import type { CoreEvent } from '../types'
 
 interface Props {
-	onEvent(event: CoreEvent): void;
+	onEvent(event: CoreEvent): void
 }
 
 export function useStumpWs({ onEvent }: Props) {
-	const { setConnected } = useStumpStore();
+	const URI = API?.getUri()
+	const { setConnected } = useStumpStore()
 
 	const socketUrl = useMemo(() => {
-		let url = API.getUri();
+		let url = URI
 		// remove http(s):// from url, and replace with ws(s)://
-		url = url.replace(/^http(s?):\/\//, 'ws$1://');
+		url = url.replace(/^http(s?):\/\//, 'ws$1://')
 		// remove /api(/) from end of url
-		url = url.replace(/\/api\/?$/, '');
+		url = url.replace(/\/api\/?$/, '')
 
-		return `${url}/ws`;
-	}, [API?.getUri()]);
+		return `${url}/ws`
+	}, [URI])
 
-	function handleWsMessage(event: MessageEvent<any>) {
-		try {
-			const data = JSON.parse(event.data);
-			onEvent(data);
-		} catch (err) {
-			console.error(err);
+	function handleWsMessage(e: MessageEvent<unknown>) {
+		if ('data' in e && typeof e.data === 'string') {
+			try {
+				const event = JSON.parse(e.data)
+				onEvent(event)
+			} catch (err) {
+				console.error(err)
+			}
+		} else {
+			console.warn('Unrecognized message event:', e)
 		}
 	}
 
 	function handleOpen() {
-		setConnected(true);
+		setConnected(true)
 	}
 
 	function handleClose() {
-		setConnected(false);
+		setConnected(false)
 	}
 
 	const { readyState } = useWebSocket(socketUrl, {
 		onClose: handleClose,
 		onMessage: handleWsMessage,
 		onOpen: handleOpen,
-	});
+	})
 
-	return { readyState };
+	return { readyState }
 }
 
 // Re-export the ready state enum so consumer of client can use it if needed
-export { ReadyState };
+export { ReadyState }

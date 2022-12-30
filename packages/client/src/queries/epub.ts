@@ -1,17 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query'
+import { useMemo, useState } from 'react'
 
-import { getEpubBaseUrl, getEpubById } from '../api/epub';
-import { StumpQueryContext } from '../context';
-import type { Epub, EpubContent } from '../types';
+import { getEpubBaseUrl, getEpubById } from '../api/epub'
+import { StumpQueryContext } from '../context'
+import type { Epub, EpubContent } from '../types'
 
 export interface EpubOptions {
 	// loc is the epubcfi, comes from the query param ?loc=epubcfi(..)
-	loc: string | null;
+	loc: string | null
 }
 
 export interface EpubActions {
-	currentResource(): EpubContent | undefined;
+	currentResource(): EpubContent | undefined
 	// hasNext(): boolean;
 	// hasPrev(): boolean;
 	// next(): void;
@@ -19,10 +19,10 @@ export interface EpubActions {
 }
 
 export interface UseEpubReturn {
-	epub: Epub;
-	isFetchingBook: boolean;
-	actions: EpubActions;
-	correctHtmlUrls: (html: string) => string;
+	epub: Epub
+	isFetchingBook: boolean
+	actions: EpubActions
+	correctHtmlUrls: (html: string) => string
 }
 
 // TODO: I need to decide how to navigate epub streaming. I can go the cheap route and
@@ -31,47 +31,59 @@ export interface UseEpubReturn {
 // - client-side might be easier, but I'd rather not have heavier client-side computations for *large* epub files
 // I can use epubcfi to navigate, but that makes me want to throw up lol i mean just look at this syntax:
 // epubcfi(/6/4[chap01ref]!/4[body01]/10[para05]/3:10) -> wtf is that lmao
+
+// FIXME: use options
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useEpub(id: string, options?: EpubOptions) {
-	const [chapter, setChapter] = useState(2);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [chapter, setChapter] = useState(2)
 
 	const { isLoading: isFetchingBook, data: epub } = useQuery(['getEpubById', id], {
 		context: StumpQueryContext,
 		queryFn: () => getEpubById(id).then((res) => res.data),
-	});
+	})
 
 	const actions = useMemo(
 		() => ({
 			currentResource() {
-				return epub?.toc.find((item) => item.play_order === chapter);
+				return epub?.toc.find((item) => item.play_order === chapter)
 			},
-			hasNext() {},
-			hasPrevious() {},
-			next() {},
-			previous() {},
+			hasNext() {
+				// TODO: make me
+			},
+			hasPrevious() {
+				// TODO: make me
+			},
+			next() {
+				// TODO: make me
+			},
+			previous() {
+				// TODO: make me
+			},
 		}),
-		[epub],
-	);
+		[epub, chapter],
+	)
 
 	function correctHtmlUrls(html: string): string {
 		// replace all src attributes with `{epubBaseURl}/{root}/{src}`
 		// replace all href attributes with `{epubBaseURl}/{root}/{href}`
-		let corrected = html;
+		let corrected = html
 
-		const invalidSources = corrected.match(/src="[^"]+"/g);
+		const invalidSources = corrected.match(/src="[^"]+"/g)
 
 		invalidSources?.forEach((entry) => {
-			const src = entry.replace('src="', `src="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`);
-			corrected = corrected.replace(entry, src);
-		});
+			const src = entry.replace('src="', `src="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`)
+			corrected = corrected.replace(entry, src)
+		})
 
-		const invlalidHrefs = corrected.match(/href="[^"]+"/g);
+		const invlalidHrefs = corrected.match(/href="[^"]+"/g)
 
 		invlalidHrefs?.forEach((entry) => {
-			const href = entry.replace('href="', `href="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`);
-			corrected = corrected.replace(entry, href);
-		});
+			const href = entry.replace('href="', `href="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`)
+			corrected = corrected.replace(entry, href)
+		})
 
-		return corrected;
+		return corrected
 	}
 
 	return {
@@ -79,9 +91,11 @@ export function useEpub(id: string, options?: EpubOptions) {
 		correctHtmlUrls,
 		epub,
 		isFetchingBook,
-	} as UseEpubReturn;
+	} as UseEpubReturn
 }
 
+// FIXME: use options
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useEpubLazy(id: string, options?: EpubOptions) {
 	const {
 		data: epub,
@@ -91,10 +105,10 @@ export function useEpubLazy(id: string, options?: EpubOptions) {
 	} = useQuery(['getEpubById', id], {
 		context: StumpQueryContext,
 		queryFn: () => getEpubById(id).then((res) => res.data),
-	});
+	})
 
 	return {
 		epub,
 		isLoading: isLoading || isRefetching || isFetching,
-	};
+	}
 }

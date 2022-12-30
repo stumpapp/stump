@@ -26,13 +26,13 @@
 		"jsx": "react-jsx",
 		"paths": {
 			"@stump/client": [
-				"../../common/client"
+				"../../packages/client"
 			],
 			"@stump/client/api": [
-				"../../common/client/src/api"
+				"../../packages/client/src/api"
 			],
 			"@stump/interface": [
-				"../../common/interface"
+				"../../packages/interface"
 			]
 		}
 	},

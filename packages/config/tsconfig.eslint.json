@@ -2,7 +2,7 @@
 	"extends": "./base.tsconfig.json",
 	"include": [
 		"../../apps/**/*",
-		"../../common/**/*",
+		"../../packages/**/*",
 		"../../core",
 		"../../.eslintrc.js",
 		"**/*.config.js"

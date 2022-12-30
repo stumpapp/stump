@@ -21,6 +21,7 @@ module.exports = {
 		{
 			files: ['*.config.js', '.eslintrc.js'],
 			rules: {
+				'@typescript-eslint/no-var-requires': 'off',
 				'import/no-commonjs': 'off',
 				'sort-keys': 'off',
 				'unicorn/prefer-module': 'off',
@@ -32,7 +33,7 @@ module.exports = {
 		ecmaFeatures: {
 			jsx: true,
 		},
-		project: './common/config/tsconfig.eslint.json',
+		project: './packages/config/tsconfig.eslint.json',
 		tsconfigRootDir: __dirname,
 	},
 	plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier', 'sort-keys-fix', 'react'],

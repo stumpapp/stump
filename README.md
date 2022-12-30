@@ -36,10 +36,10 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-  - [Where to start?](#where-to-start)
+    - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
-  - [/common](#common)
+  - [/packages](#packages)
   - [/core](#core)
 - [Similar Projects 👯](#similar-projects-)
 - [Acknowledgements 🙏](#acknowledgements-)
@@ -135,7 +135,7 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 - `server`: An [Axum](https://github.com/tokio-rs/axum) server.
 - `web`: The React application that is served by the Axum server.
 
-### /common
+### /packages
 
 - `client`: Everything needed to create a react-based client for Stump. Contains Zustand and React Query configuration, used by the `interface` package, as well as the generated TypeScript types.
 - `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.

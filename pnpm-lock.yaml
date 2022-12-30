@@ -66,8 +66,8 @@ importers:
       vite: ^3.1.6
       vite-plugin-tsconfig-paths: ^1.1.0
     dependencies:
-      '@stump/client': link:../../common/client
-      '@stump/interface': link:../../common/interface
+      '@stump/client': link:../../packages/client
+      '@stump/interface': link:../../packages/interface
       '@tanstack/react-query': 4.14.1_biqbaboplfbrettd7655fr4n2y
       '@tauri-apps/api': 1.1.0
       react: 18.2.0
@@ -93,9 +93,6 @@ importers:
   apps/server:
     specifiers: {}
 
-  apps/tui:
-    specifiers: {}
-
   apps/web:
     specifiers:
       '@stump/client': workspace:*
@@ -115,8 +112,8 @@ importers:
       vite: ^3.2.2
       vite-plugin-tsconfig-paths: ^1.1.0
     dependencies:
-      '@stump/client': link:../../common/client
-      '@stump/interface': link:../../common/interface
+      '@stump/client': link:../../packages/client
+      '@stump/interface': link:../../packages/interface
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     devDependencies:
@@ -133,7 +130,10 @@ importers:
       vite: 3.2.2
       vite-plugin-tsconfig-paths: 1.2.0_t4ne7jgngekqctbesvavhjku3m
 
-  common/client:
+  core:
+    specifiers: {}
+
+  packages/client:
     specifiers:
       '@stump/config': workspace:*
       '@tanstack/react-query': ^4.14.1
@@ -158,17 +158,19 @@ importers:
       '@types/node': 18.11.9
       '@types/react': 18.0.24
       tsconfig: 7.0.0
-      typescript: 4.8.4
+      typescript: 4.9.4
 
-  common/config:
+  packages/config:
     specifiers:
+      '@tailwindcss/typography': ^0.5.7
       tailwind-scrollbar-hide: ^1.1.7
       typescript: ^4.8.4
     devDependencies:
+      '@tailwindcss/typography': 0.5.7
       tailwind-scrollbar-hide: 1.1.7
-      typescript: 4.8.4
+      typescript: 4.9.4
 
-  common/interface:
+  packages/interface:
     specifiers:
       '@chakra-ui/react': ^2.3.7
       '@emotion/react': ^11.10.5
@@ -226,7 +228,7 @@ importers:
       '@tanstack/react-table': 8.5.22_biqbaboplfbrettd7655fr4n2y
       '@tanstack/react-virtual': 3.0.0-beta.18_react@18.2.0
       chakra-react-select: 4.4.0_gbteudask4bkflqotk6boh7pfy
-      class-variance-authority: 0.2.4_typescript@4.8.4
+      class-variance-authority: 0.2.4_typescript@4.9.4
       clsx: 1.2.1
       dayjs: 1.11.6
       epubjs: 0.3.93
@@ -260,11 +262,8 @@ importers:
       '@types/react-helmet': 6.1.5
       '@types/react-router-dom': 5.3.3
       '@vitejs/plugin-react': 2.2.0_vite@3.2.2
-      typescript: 4.8.4
+      typescript: 4.9.4
       vite: 3.2.2
-
-  core:
-    specifiers: {}
 
 packages:
 
@@ -614,20 +613,6 @@ packages:
     dependencies:
       regenerator-runtime: 0.12.1
     dev: true
-
-  /@babel/runtime/7.18.9:
-    resolution: {integrity: sha512-lkqXDcvlFT5rvEjiu6+QYO+1GXrEHRo2LOtS7E4GtX5ESIZOgepqsZBVIj6Pv+a6zqsya9VCgiK1KAK4BvJDAw==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      regenerator-runtime: 0.13.9
-    dev: false
-
-  /@babel/runtime/7.19.0:
-    resolution: {integrity: sha512-eR8Lo9hnDS7tqkO7NsV+mKvCmv5boaXFSZ70DnfhcgiEne8hv9oCEd36Klw74EtizEqLsy4YnW8UWwpBVolHZA==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      regenerator-runtime: 0.13.9
-    dev: false
 
   /@babel/runtime/7.2.0:
     resolution: {integrity: sha512-oouEibCbHMVdZSDlJBO6bZmID/zA/G/Qx3H1d3rSNPTD+L8UNKvCat7aKWSJ74zYbm5zWGh0GQN0hKj8zYFTCg==}
@@ -1751,7 +1736,7 @@ packages:
     dependencies:
       '@babel/helper-module-imports': 7.18.6
       '@babel/plugin-syntax-jsx': 7.18.6
-      '@babel/runtime': 7.18.9
+      '@babel/runtime': 7.20.1
       '@emotion/hash': 0.9.0
       '@emotion/memoize': 0.8.0
       '@emotion/serialize': 1.1.1
@@ -1812,7 +1797,7 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-      '@babel/runtime': 7.18.9
+      '@babel/runtime': 7.20.1
       '@emotion/babel-plugin': 11.10.5
       '@emotion/cache': 11.10.5
       '@emotion/serialize': 1.1.1
@@ -1851,7 +1836,7 @@ packages:
       '@types/react':
         optional: true
     dependencies:
-      '@babel/runtime': 7.18.9
+      '@babel/runtime': 7.20.1
       '@emotion/babel-plugin': 11.10.5
       '@emotion/is-prop-valid': 1.2.0
       '@emotion/react': 11.10.5_bbvjflvjoibwhtpmedigb26h6y
@@ -1999,7 +1984,7 @@ packages:
       '@motionone/easing': 10.14.0
       '@motionone/types': 10.14.0
       '@motionone/utils': 10.14.0
-      tslib: 2.4.0
+      tslib: 2.4.1
     dev: false
 
   /@motionone/dom/10.13.1:
@@ -2010,14 +1995,14 @@ packages:
       '@motionone/types': 10.14.0
       '@motionone/utils': 10.14.0
       hey-listen: 1.0.8
-      tslib: 2.4.0
+      tslib: 2.4.1
     dev: false
 
   /@motionone/easing/10.14.0:
     resolution: {integrity: sha512-2vUBdH9uWTlRbuErhcsMmt1jvMTTqvGmn9fHq8FleFDXBlHFs5jZzHJT9iw+4kR1h6a4SZQuCf72b9ji92qNYA==}
     dependencies:
       '@motionone/utils': 10.14.0
-      tslib: 2.4.0
+      tslib: 2.4.1
     dev: false
 
   /@motionone/generators/10.14.0:
@@ -2025,7 +2010,7 @@ packages:
     dependencies:
       '@motionone/types': 10.14.0
       '@motionone/utils': 10.14.0
-      tslib: 2.4.0
+      tslib: 2.4.1
     dev: false
 
   /@motionone/types/10.14.0:
@@ -2037,7 +2022,7 @@ packages:
     dependencies:
       '@motionone/types': 10.14.0
       hey-listen: 1.0.8
-      tslib: 2.4.0
+      tslib: 2.4.1
     dev: false
 
   /@nodelib/fs.scandir/2.1.5:
@@ -2090,6 +2075,17 @@ packages:
   /@stroncium/procfs/1.2.1:
     resolution: {integrity: sha512-X1Iui3FUNZP18EUvysTHxt+Avu2nlVzyf90YM8OYgP6SGzTzzX/0JgObfO1AQQDzuZtNNz29bVh8h5R97JrjxA==}
     engines: {node: '>=8'}
+    dev: true
+
+  /@tailwindcss/typography/0.5.7:
+    resolution: {integrity: sha512-JTTSTrgZfp6Ki4svhPA4mkd9nmQ/j9EfE7SbHJ1cLtthKkpW2OxsFXzSmxbhYbEkfNIyAyhle5p4SYyKRbz/jg==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dependencies:
+      lodash.castarray: 4.4.0
+      lodash.isplainobject: 4.0.6
+      lodash.merge: 4.6.2
+      postcss-selector-parser: 6.0.10
     dev: true
 
   /@tailwindcss/typography/0.5.7_tailwindcss@3.2.1:
@@ -2893,7 +2889,7 @@ packages:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
     engines: {node: '>=10', npm: '>=6'}
     dependencies:
-      '@babel/runtime': 7.18.9
+      '@babel/runtime': 7.20.1
       cosmiconfig: 7.0.1
       resolve: 1.22.1
     dev: false
@@ -3110,7 +3106,7 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /class-variance-authority/0.2.4_typescript@4.8.4:
+  /class-variance-authority/0.2.4_typescript@4.9.4:
     resolution: {integrity: sha512-JJKn9ESARiNEBBRdTSPB9/SwaPb+wi19DMX/r8BVSyp1dxHa3JyUxa2GQjEVag5rBi+O3pL64UZ0XhnQsMz+3w==}
     peerDependencies:
       typescript: '>= 4.5.5 < 5'
@@ -3118,7 +3114,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      typescript: 4.8.4
+      typescript: 4.9.4
     dev: false
 
   /clean-stack/2.2.0:
@@ -4439,7 +4435,7 @@ packages:
   /framesync/5.3.0:
     resolution: {integrity: sha512-oc5m68HDO/tuK2blj7ZcdEBRx3p1PjrgHazL8GYEpvULhrtGIFbQArN6cQS2QhW8mitffaB+VYzMjDqBxxQeoA==}
     dependencies:
-      tslib: 2.4.0
+      tslib: 2.4.1
     dev: false
 
   /framesync/6.1.2:
@@ -4750,7 +4746,7 @@ packages:
   /i18next/21.10.0:
     resolution: {integrity: sha512-YeuIBmFsGjUfO3qBmMOc0rQaun4mIpGKET5WDwvu8lU7gvwpcariZLNtL0Fzj+zazcHUrlXHiptcFhBMFaxzfg==}
     dependencies:
-      '@babel/runtime': 7.19.0
+      '@babel/runtime': 7.20.1
     dev: false
 
   /iconv-lite/0.4.23:
@@ -6201,7 +6197,7 @@ packages:
     peerDependencies:
       react: '>=16.13.1'
     dependencies:
-      '@babel/runtime': 7.19.0
+      '@babel/runtime': 7.20.1
       react: 18.2.0
     dev: false
 
@@ -6287,7 +6283,7 @@ packages:
       react-native:
         optional: true
     dependencies:
-      '@babel/runtime': 7.19.0
+      '@babel/runtime': 7.20.1
       html-parse-stringify: 3.0.1
       i18next: 21.10.0
       react: 18.2.0
@@ -6550,10 +6546,6 @@ packages:
 
   /regenerator-runtime/0.13.10:
     resolution: {integrity: sha512-KepLsg4dU12hryUO7bp/axHAKvwGOCV0sGloQtpagJ12ai+ojVDqkeGSiRX1zlq+kjIMZ1t7gpze+26QqtdGqw==}
-    dev: false
-
-  /regenerator-runtime/0.13.9:
-    resolution: {integrity: sha512-p3VT+cOEgxFsRRA9X4lkI1E+k2/CtnKtU4gcxyaCUreilL/vqI6CdZ3wxVUx3UOUg+gnUOQQcRI7BmSI656MYA==}
     dev: false
 
   /regexp.prototype.flags/1.4.3:
@@ -7331,12 +7323,12 @@ packages:
     resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /typescript/4.9.4:
     resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
 
   /unbox-primitive/1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}

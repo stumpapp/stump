@@ -2,7 +2,7 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
 import type { Direction, PageParams } from '../types';
-import { StoreBase } from './';
+import { StoreBase } from '.';
 
 export const DEFAULT_ORDER_BY = 'name';
 export const DEFAULT_ORDER_DIRECTION = 'asc';

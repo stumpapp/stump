@@ -1,15 +1,16 @@
-import { FormControl, FormLabel } from '@chakra-ui/react';
-import { Select, SingleValue } from 'chakra-react-select';
-import { Locale, LocaleSelectOption, useLocale } from '../../hooks/useLocale';
+import { FormControl, FormLabel } from '@chakra-ui/react'
+import { Select, SingleValue } from 'chakra-react-select'
+
+import { Locale, LocaleSelectOption, useLocale } from '../../hooks/useLocale'
 
 // FIXME: style is not aligned with theme, but I am lazy right now so future aaron problem
 // TODO: use locale for labels
 export default function LocaleSelector() {
-	const { t, locale, setLocale, locales } = useLocale();
+	const { t, locale, setLocale, locales } = useLocale()
 
 	function handleLocaleChange(newLocale?: Locale) {
 		if (newLocale) {
-			setLocale(newLocale);
+			setLocale(newLocale)
 		}
 	}
 
@@ -36,8 +37,8 @@ export default function LocaleSelector() {
 					dropdownIndicator: (provided: any) => ({
 						...provided,
 						bg: 'transparent',
-						px: 2,
 						cursor: 'inherit',
+						px: 2,
 					}),
 					indicatorSeparator: (provided: any) => ({
 						...provided,
@@ -46,5 +47,5 @@ export default function LocaleSelector() {
 				}}
 			/>
 		</FormControl>
-	);
+	)
 }

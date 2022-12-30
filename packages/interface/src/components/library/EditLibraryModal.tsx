@@ -1,7 +1,3 @@
-import { NotePencil } from 'phosphor-react';
-import { FieldValues } from 'react-hook-form';
-import toast from 'react-hot-toast';
-
 import {
 	MenuItem,
 	Modal,
@@ -11,105 +7,107 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	useDisclosure,
-} from '@chakra-ui/react';
-import { useLibraryMutation, useTags } from '@stump/client';
+} from '@chakra-ui/react'
+import type { Library, LibraryOptions, Tag, TagOption } from '@stump/client'
+import { useLibraryMutation, useTags } from '@stump/client'
+import { NotePencil } from 'phosphor-react'
+import { FieldValues } from 'react-hook-form'
+import toast from 'react-hot-toast'
 
-import Button, { ModalCloseButton } from '../../ui/Button';
-import LibraryModalForm from './form/LibraryModalForm';
-
-import type { Library, LibraryOptions, Tag, TagOption } from '@stump/client';
+import Button, { ModalCloseButton } from '../../ui/Button'
+import LibraryModalForm from './form/LibraryModalForm'
 interface Props {
-	library: Library;
-	disabled?: boolean;
+	library: Library
+	disabled?: boolean
 }
 
 // FIXME: tab navigation not working
 export default function EditLibraryModal({ disabled, library }: Props) {
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
-	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags();
+	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags()
 
 	const { editIsLoading, editLibraryAsync: editLibrary } = useLibraryMutation({
-		onUpdated: onClose,
 		onError(err) {
-			console.error(err);
-			toast.error('Failed to edit library.');
+			console.error(err)
+			toast.error('Failed to edit library.')
 		},
-	});
+		onUpdated: onClose,
+	})
 
 	function getRemovedTags(tags: TagOption[]): Tag[] | null {
 		// All tags were removed, or no tags were there to begin with
 		if (tags.length === 0) {
-			return library.tags || null;
+			return library.tags || null
 		}
 
 		if (!library.tags || library.tags.length === 0) {
-			return null;
+			return null
 		}
 
 		// Some tags were removed, but not all
-		return library.tags.filter((tag) => !tags.some((tagOption) => tagOption.value === tag.name));
+		return library.tags.filter((tag) => !tags.some((tagOption) => tagOption.value === tag.name))
 	}
 
 	async function handleSubmit(values: FieldValues) {
 		if (disabled) {
 			// This is extra protection, should never happen. Making it an error so it is
 			// easier to find on the chance it does.
-			throw new Error('You do not have permission to update libraries.');
+			throw new Error('You do not have permission to update libraries.')
 		}
 
-		const { name, path, description, tags: formTags, scan_mode, ...rest } = values;
+		const { name, path, description, tags: formTags, scan_mode, ...rest } = values
 
 		const library_options = {
 			...rest,
 			id: library.library_options.id,
-		} as LibraryOptions;
+		} as LibraryOptions
 
-		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name));
+		let existingTags = tags.filter((tag) => formTags.some((t: TagOption) => t.value === tag.name))
 
-		let tagsToCreate = formTags
+		const tagsToCreate = formTags
 			.map((tag: TagOption) => tag.value)
-			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName));
+			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName))
 
-		let removedTags = getRemovedTags(formTags);
+		let removedTags = getRemovedTags(formTags)
 
 		if (!removedTags?.length) {
-			removedTags = null;
+			removedTags = null
 		}
 
 		if (tagsToCreate.length) {
-			const res = await tryCreateTags(tagsToCreate);
+			const res = await tryCreateTags(tagsToCreate)
 
 			if (res.status > 201) {
-				toast.error('Something went wrong when creating the tags.');
-				return;
+				toast.error('Something went wrong when creating the tags.')
+				return
 			}
 
-			existingTags = existingTags.concat(res.data);
+			existingTags = existingTags.concat(res.data)
 		}
 
 		toast.promise(
 			editLibrary({
 				...library,
+				description,
+				library_options,
 				name,
 				path,
-				description,
-				tags: existingTags,
 				removed_tags: removedTags,
 				scan_mode,
-				library_options,
+				tags: existingTags,
 			}),
 			{
+				error: 'Something went wrong.',
 				loading: 'Updating library...',
 				success: 'Updates saved!',
-				error: 'Something went wrong.',
 			},
-		);
+		)
 	}
 
 	function handleOpen() {
 		if (!disabled) {
-			onOpen();
+			onOpen()
 		}
 	}
 
@@ -156,5 +154,5 @@ export default function EditLibraryModal({ disabled, library }: Props) {
 				</ModalContent>
 			</Modal>
 		</>
-	);
+	)
 }

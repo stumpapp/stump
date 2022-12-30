@@ -1,7 +1,3 @@
-import { useEffect, useMemo } from 'react';
-import { FieldValues, useForm, useFormContext } from 'react-hook-form';
-import { z } from 'zod';
-
 import {
 	FormErrorMessage,
 	FormLabel,
@@ -12,26 +8,28 @@ import {
 	TabPanel,
 	TabPanels,
 	Tabs,
-} from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useLibraries } from '@stump/client';
+} from '@chakra-ui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { Library, LibraryPattern, LibraryScanMode, TagOption } from '@stump/client'
+import { useLibraries } from '@stump/client'
+import { useEffect, useMemo } from 'react'
+import { FieldValues, useForm, useFormContext } from 'react-hook-form'
+import { z } from 'zod'
 
-import Checkbox from '../../../ui/Checkbox';
-import Form, { FormControl } from '../../../ui/Form';
-import Input from '../../../ui/Input';
-import { Tab } from '../../../ui/Tabs';
-import TextArea from '../../../ui/TextArea';
-import DirectoryPickerModal from '../../DirectoryPickerModal';
-import TagSelect from '../../TagSelect';
-import { LibraryPatternRadio } from './LibraryPatternRadio';
-
-import type { TagOption, Library, LibraryPattern, LibraryScanMode } from '@stump/client';
+import Checkbox from '../../../ui/Checkbox'
+import Form, { FormControl } from '../../../ui/Form'
+import Input from '../../../ui/Input'
+import { Tab } from '../../../ui/Tabs'
+import TextArea from '../../../ui/TextArea'
+import DirectoryPickerModal from '../../DirectoryPickerModal'
+import TagSelect from '../../TagSelect'
+import { LibraryPatternRadio } from './LibraryPatternRadio'
 interface Props {
-	tags: TagOption[];
-	onSubmit(values: FieldValues): void;
-	fetchingTags?: boolean;
-	reset?: boolean;
-	library?: Library;
+	tags: TagOption[]
+	onSubmit(values: FieldValues): void
+	fetchingTags?: boolean
+	reset?: boolean
+	library?: Library
 }
 
 /**
@@ -41,25 +39,30 @@ interface Props {
 // FIXME: tab focus is not working, e.g. when you press tab, it should go to the next form element
 // TODO: I think this should be broken up... it's getting a bit big
 export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, library }: Props) {
-	const { libraries } = useLibraries();
+	const { libraries } = useLibraries()
 
 	function isLibraryScanMode(input: string): input is LibraryScanMode {
-		return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input;
+		return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input
 	}
 
 	function isLibraryPattern(input: string): input is LibraryPattern {
-		return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input;
+		return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
 	}
 
 	function getNewScanMode(value: string) {
 		if (value === scanMode) {
-			return 'NONE';
+			return 'NONE'
 		}
 
-		return value;
+		return value
 	}
 
 	const schema = z.object({
+		convert_rar_to_zip: z.boolean().default(false),
+		create_webp_thumbnails: z.boolean().default(false),
+		description: z.string().nullable(),
+		hard_delete_conversions: z.boolean().default(false),
+		library_pattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
 		name: z
 			.string()
 			.min(1, { message: 'Library name is required' })
@@ -82,7 +85,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 					message: 'Invalid library, parent directory already exists as library.',
 				}),
 			),
-		description: z.string().nullable(),
+		scan_mode: z.string().refine(isLibraryScanMode).default('BATCHED'),
 		tags: z
 			.array(
 				z.object({
@@ -92,44 +95,39 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 				// z.any(),
 			)
 			.optional(),
-		scan_mode: z.string().refine(isLibraryScanMode).default('BATCHED'),
-		library_pattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
-		convert_rar_to_zip: z.boolean().default(false),
-		hard_delete_conversions: z.boolean().default(false),
-		create_webp_thumbnails: z.boolean().default(false),
-	});
+	})
 
 	const form = useForm({
-		resolver: zodResolver(schema),
 		defaultValues: library
 			? {
+					convert_rar_to_zip: library.library_options.convert_rar_to_zip,
+					create_webp_thumbnails: library.library_options.create_webp_thumbnails,
+					description: library.description,
+					hard_delete_conversions: library.library_options.hard_delete_conversions,
+					library_pattern: library.library_options.library_pattern,
 					name: library.name,
 					path: library.path,
-					description: library.description,
-					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
-					convert_rar_to_zip: library.library_options.convert_rar_to_zip,
-					hard_delete_conversions: library.library_options.hard_delete_conversions,
-					create_webp_thumbnails: library.library_options.create_webp_thumbnails,
-					library_pattern: library.library_options.library_pattern,
 					scan_mode: 'BATCHED',
+					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
 			  }
 			: {},
-	});
+		resolver: zodResolver(schema),
+	})
 
 	// TODO: maybe check if each error has a message? then if not, log it for
 	// debugging purposes.
 	const errors = useMemo(() => {
-		return form.formState.errors;
-	}, [form.formState.errors]);
+		return form.formState.errors
+	}, [form.formState.errors])
 
 	// const convertRarToZip = form.watch('convertRarToZip');
-	const [scanMode, convertRarToZip] = form.watch(['scan_mode', 'convert_rar_to_zip']);
+	const [scanMode, convertRarToZip] = form.watch(['scan_mode', 'convert_rar_to_zip'])
 
 	useEffect(() => {
 		if (reset) {
-			form.reset();
+			form.reset()
 		}
-	}, [reset]);
+	}, [reset])
 
 	return (
 		<Form
@@ -177,7 +175,7 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 						<TagSelect
 							isLoading={fetchingTags}
 							options={tags}
-							defaultValue={library?.tags?.map((t) => ({ value: t.name, label: t.name }))}
+							defaultValue={library?.tags?.map((t) => ({ label: t.name, value: t.name }))}
 						/>
 
 						<FormControl>
@@ -255,5 +253,5 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 				</TabPanels>
 			</Tabs>
 		</Form>
-	);
+	)
 }

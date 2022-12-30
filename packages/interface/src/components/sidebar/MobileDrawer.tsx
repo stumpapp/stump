@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import {
 	Drawer,
 	DrawerBody,
@@ -7,23 +6,25 @@ import {
 	Stack,
 	useColorModeValue,
 	useDisclosure,
-} from '@chakra-ui/react';
-import { List } from 'phosphor-react';
-import { useLocation } from 'react-router-dom';
-import { SidebarContent } from './Sidebar';
-import Button from '../../ui/Button';
+} from '@chakra-ui/react'
+import { List } from 'phosphor-react'
+import { useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
+
+import Button from '../../ui/Button'
+import { SidebarContent } from './Sidebar'
 
 export default function MobileDrawer() {
-	const location = useLocation();
+	const location = useLocation()
 
-	const btnRef = useRef(null);
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const btnRef = useRef(null)
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
 	useEffect(() => {
 		if (isOpen) {
-			onClose();
+			onClose()
 		}
-	}, [location]);
+	}, [location])
 
 	return (
 		<>
@@ -58,5 +59,5 @@ export default function MobileDrawer() {
 				</DrawerContent>
 			</Drawer>
 		</>
-	);
+	)
 }

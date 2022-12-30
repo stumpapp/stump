@@ -1,8 +1,3 @@
-import { CloudCheck, CloudSlash } from 'phosphor-react';
-import { ChangeEvent, useMemo, useState } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
-import { z } from 'zod';
-
 import {
 	FormErrorMessage,
 	FormHelperText,
@@ -11,20 +6,24 @@ import {
 	InputRightElement,
 	Spinner,
 	useBoolean,
-} from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useStumpStore } from '@stump/client';
-import { checkUrl, isUrl } from '@stump/client/api';
+} from '@chakra-ui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useStumpStore } from '@stump/client'
+import { checkUrl, isUrl } from '@stump/client/api'
+import { CloudCheck, CloudSlash } from 'phosphor-react'
+import { ChangeEvent, useMemo, useState } from 'react'
+import { FieldValues, useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
+import { z } from 'zod'
 
-import Form, { FormControl } from '../ui/Form';
-import { DebouncedInput } from '../ui/Input';
-import Button from '../ui/Button';
-import { useNavigate } from 'react-router';
+import Button from '../ui/Button'
+import Form, { FormControl } from '../ui/Form'
+import { DebouncedInput } from '../ui/Input'
 
 export default function ServerUrlForm() {
-	const { setBaseUrl } = useStumpStore();
-	const [isCheckingUrl, { on, off }] = useBoolean(false);
-	const [sucessfulConnection, setSuccessfulConnection] = useState(false);
+	const { setBaseUrl } = useStumpStore()
+	const [isCheckingUrl, { on, off }] = useBoolean(false)
+	const [sucessfulConnection, setSuccessfulConnection] = useState(false)
 
 	const schema = z.object({
 		baseUrl: z
@@ -32,75 +31,75 @@ export default function ServerUrlForm() {
 			.min(1, { message: 'URL is required' })
 			.refine(isUrl, { message: 'Invalid URL' })
 			.refine(checkUrl, (url) => ({ message: `Failed to connect to ${url}` })),
-	});
+	})
 
 	const form = useForm({
-		resolver: zodResolver(schema),
 		mode: 'onSubmit',
-	});
+		resolver: zodResolver(schema),
+	})
 
 	async function validateUrl() {
-		on();
-		const url = form.getValues('baseUrl');
+		on()
+		const url = form.getValues('baseUrl')
 
 		if (!url) {
-			off();
-			return;
+			off()
+			return
 		}
 
-		let errorMessage: string;
+		let errorMessage: string
 
 		// TODO: this function doesn't work lol
 		if (!isUrl(url)) {
-			errorMessage = 'Invalid URL';
+			errorMessage = 'Invalid URL'
 		} else {
-			const isValid = await checkUrl(url);
+			const isValid = await checkUrl(url)
 
 			if (!isValid) {
-				errorMessage = `Failed to connect to ${url}`;
+				errorMessage = `Failed to connect to ${url}`
 			} else {
-				setSuccessfulConnection(true);
+				setSuccessfulConnection(true)
 			}
 		}
 
 		setTimeout(() => {
-			off();
+			off()
 			if (errorMessage) {
 				form.setError('baseUrl', {
 					message: `Failed to connect to ${url}`,
-				});
+				})
 			}
-		}, 300);
+		}, 300)
 	}
 
 	async function handleSubmit(values: FieldValues) {
-		const { baseUrl } = values;
+		const { baseUrl } = values
 
-		setBaseUrl(baseUrl);
+		setBaseUrl(baseUrl)
 
 		// FIXME: super cringe, big no
-		window.location.href = '/';
+		window.location.href = '/'
 	}
 
 	const InputDecoration = useMemo(() => {
 		if (isCheckingUrl) {
-			return <Spinner size="sm" />;
+			return <Spinner size="sm" />
 		} else if (Object.keys(form.formState.errors).length > 0) {
-			return <CloudSlash size="1.25rem" color="#F56565" />;
+			return <CloudSlash size="1.25rem" color="#F56565" />
 		} else if (sucessfulConnection) {
-			return <CloudCheck size="1.25rem" color="#48BB78" />;
+			return <CloudCheck size="1.25rem" color="#48BB78" />
 		}
 
-		return null;
-	}, [isCheckingUrl, form.formState.errors, sucessfulConnection]);
+		return null
+	}, [isCheckingUrl, form.formState.errors, sucessfulConnection])
 
-	const { onChange, ...register } = form.register('baseUrl');
+	const { onChange, ...register } = form.register('baseUrl')
 
 	function handleChange(e: ChangeEvent<HTMLInputElement>) {
-		setSuccessfulConnection(false);
-		form.clearErrors('baseUrl');
+		setSuccessfulConnection(false)
+		form.clearErrors('baseUrl')
 
-		onChange(e);
+		onChange(e)
 	}
 
 	return (
@@ -120,7 +119,7 @@ export default function ServerUrlForm() {
 							// TODO: remove ternary, yuck
 							isCheckingUrl
 								? 'Testing connection...'
-								: !!InputDecoration
+								: InputDecoration
 								? 'Failed to connect!'
 								: undefined
 						}
@@ -141,5 +140,5 @@ export default function ServerUrlForm() {
 				Submit Form
 			</Button>
 		</Form>
-	);
+	)
 }

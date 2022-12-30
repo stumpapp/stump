@@ -1,13 +1,14 @@
-import { useRecentlyAddedMedia } from '@stump/client';
-import SlidingCardList from '../SlidingCardList';
-import MediaCard from './MediaCard';
+import { useRecentlyAddedMedia } from '@stump/client'
+
+import SlidingCardList from '../SlidingCardList'
+import MediaCard from './MediaCard'
 
 // TODO: better empty state
 export default function RecentlyAddedMedia() {
-	const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedMedia();
+	const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedMedia()
 
 	if (isLoading || !data) {
-		return null;
+		return null
 	}
 
 	return (
@@ -20,5 +21,5 @@ export default function RecentlyAddedMedia() {
 			hasNext={hasMore}
 			onScrollEnd={fetchMore}
 		/>
-	);
+	)
 }

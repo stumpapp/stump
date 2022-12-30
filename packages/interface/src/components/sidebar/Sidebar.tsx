@@ -1,9 +1,3 @@
-import clsx from 'clsx';
-import { AnimatePresence } from 'framer-motion';
-import { Books, CaretRight, Gear, House } from 'phosphor-react';
-import { useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-
 import {
 	Box,
 	Button,
@@ -13,33 +7,37 @@ import {
 	useColorModeValue,
 	useDisclosure,
 	VStack,
-} from '@chakra-ui/react';
-import { useLibraries } from '@stump/client';
+} from '@chakra-ui/react'
+import type { Library } from '@stump/client'
+import { useLibraries } from '@stump/client'
+import clsx from 'clsx'
+import { AnimatePresence } from 'framer-motion'
+import { Books, CaretRight, Gear, House } from 'phosphor-react'
+import { useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { useLocale } from '../../hooks/useLocale';
-import ApplicationVersion from '../ApplicationVersion';
-import CreateLibraryModal from '../library/CreateLibraryModal';
-import LibraryOptionsMenu from '../library/LibraryOptionsMenu';
-import NavigationButtons from '../topbar/NavigationButtons';
-import Logout from './Logout';
-import ThemeToggle from './ThemeToggle';
-
-import type { Library } from '@stump/client';
+import { useLocale } from '../../hooks/useLocale'
+import ApplicationVersion from '../ApplicationVersion'
+import CreateLibraryModal from '../library/CreateLibraryModal'
+import LibraryOptionsMenu from '../library/LibraryOptionsMenu'
+import NavigationButtons from '../topbar/NavigationButtons'
+import Logout from './Logout'
+import ThemeToggle from './ThemeToggle'
 
 interface NavMenuItemProps extends Library {
-	href: string;
+	href: string
 }
 
 interface NavItemProps {
-	name: string;
-	icon: React.ReactNode;
-	onClick?: (href: string) => void;
-	href?: string;
-	items?: NavMenuItemProps[];
+	name: string
+	icon: React.ReactNode
+	onClick?: (href: string) => void
+	href?: string
+	items?: NavMenuItemProps[]
 }
 
 function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
-	const { isOpen, onToggle } = useDisclosure();
+	const { isOpen, onToggle } = useDisclosure()
 
 	return (
 		<Box w="full">
@@ -83,9 +81,9 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 									rounded="md"
 									color={{ _dark: 'gray.200', _light: 'gray.600' }}
 									_hover={{
-										color: 'gray.900',
-										bg: 'gray.50',
 										_dark: { bg: 'gray.700', color: 'gray.100' },
+										bg: 'gray.50',
+										color: 'gray.900',
 									}}
 								>
 									<HStack p={1.5} minH="40px">
@@ -101,7 +99,7 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 				)}
 			</AnimatePresence>
 		</Box>
-	);
+	)
 }
 
 function NavItem({ name, href, ...rest }: NavItemProps) {
@@ -124,36 +122,36 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 				<span>{name}</span>
 			</div>
 		</Button>
-	);
+	)
 }
 
 export function SidebarContent() {
-	const navigate = useNavigate();
+	const navigate = useNavigate()
 
-	const { locale, t } = useLocale();
+	const { locale, t } = useLocale()
 
-	const { libraries } = useLibraries();
+	const { libraries } = useLibraries()
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
-			{ name: t('sidebar.buttons.home'), icon: House as any, href: '/' },
+			{ href: '/', icon: House as any, name: t('sidebar.buttons.home') },
 			{
-				name: t('sidebar.buttons.libraries'),
 				icon: Books as any,
 				items: libraries?.map((library) => ({
 					...library,
 					href: `/libraries/${library.id}`,
 				})),
+				name: t('sidebar.buttons.libraries'),
 			},
 			{
-				name: t('sidebar.buttons.settings'),
-				icon: Gear as any,
 				href: '/settings',
+				icon: Gear as any,
+				name: t('sidebar.buttons.settings'),
 				// onHover:  () => queryClient.prefetchQuery([])
 			},
 		],
 		[libraries, locale],
-	);
+	)
 
 	return (
 		<>
@@ -196,7 +194,7 @@ export function SidebarContent() {
 				</HStack>
 			</HStack>
 		</>
-	);
+	)
 }
 
 export default function Sidebar() {
@@ -223,5 +221,5 @@ export default function Sidebar() {
 				<SidebarContent />
 			</Stack>
 		</Box>
-	);
+	)
 }

@@ -1,36 +1,35 @@
-import { useMemo } from 'react';
-import { useLocation } from 'react-router';
+import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react'
+import { LayoutEntity, useTopBarStore } from '@stump/client'
+import { useMemo } from 'react'
+import { useLocation } from 'react-router'
 
-import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react';
-import { LayoutEntity, useTopBarStore } from '@stump/client';
-
-import MobileDrawer from '../sidebar/MobileDrawer';
-import LayoutModeButtons from './LayoutModeButtons';
-import QueryConfig from './query-options/QueryConfig';
+import MobileDrawer from '../sidebar/MobileDrawer'
+import LayoutModeButtons from './LayoutModeButtons'
+import QueryConfig from './query-options/QueryConfig'
 
 // FIXME: this is not good AT ALL for mobile. It *looks* fine, but the navigation is gone, the
 // sort/view mode buttons are gone, the sort config is gone,and the search bar is meh. I need to
 // plan out the layout for mobile.
 export default function TopBar() {
-	const { title } = useTopBarStore();
-	const location = useLocation();
+	const { title } = useTopBarStore()
+	const location = useLocation()
 
 	const { entity, showQueryParamOptions } = useMemo(() => {
-		let match =
-			location.pathname.match(/\/libraries\/.+$/) || location.pathname.match(/\/series\/.+$/);
+		const match =
+			location.pathname.match(/\/libraries\/.+$/) || location.pathname.match(/\/series\/.+$/)
 
-		let _entity: LayoutEntity = 'SERIES';
+		let _entity: LayoutEntity = 'SERIES'
 
 		// TODO: what if not either of these?
 		if (location.pathname.startsWith('/libraries')) {
-			_entity = 'LIBRARY';
+			_entity = 'LIBRARY'
 		}
 
 		return {
 			entity: _entity,
 			showQueryParamOptions: !!match,
-		};
-	}, [location]);
+		}
+	}, [location])
 
 	return (
 		<Box
@@ -60,5 +59,5 @@ export default function TopBar() {
 				)}
 			</HStack>
 		</Box>
-	);
+	)
 }

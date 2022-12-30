@@ -1,14 +1,13 @@
-import { Book, Rendition } from 'epubjs';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
-import { useSwipeable } from 'react-swipeable';
+import { useColorMode } from '@chakra-ui/react'
+import { useEpubLazy } from '@stump/client'
+import { API } from '@stump/client/api'
+import { Book, Rendition } from 'epubjs'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
+import { useSwipeable } from 'react-swipeable'
 
-import { useColorMode } from '@chakra-ui/react';
-import { useEpubLazy } from '@stump/client';
-import { API } from '@stump/client/api';
-
-import { epubDarkTheme } from '../../utils/epubTheme';
-import EpubControls from './utils/EpubControls';
+import { epubDarkTheme } from '../../utils/epubTheme'
+import EpubControls from './utils/EpubControls'
 
 // Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 
@@ -21,54 +20,57 @@ can't figure out rest yet -> https://www.heliconbooks.com/?id=blog&postid=EPUB3L
 */
 
 interface LazyEpubReaderProps {
-	id: string;
-	loc: string | null;
+	id: string
+	loc: string | null
 }
 
 // TODO: https://github.com/FormidableLabs/react-swipeable#how-to-share-ref-from-useswipeable
 
 export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
-	const { colorMode } = useColorMode();
+	const { colorMode } = useColorMode()
 
-	const ref = useRef<HTMLDivElement>(null);
+	const ref = useRef<HTMLDivElement>(null)
 
-	const [book, setBook] = useState<Book | null>(null);
-	const [rendition, setRendition] = useState<Rendition | null>(null);
+	const [book, setBook] = useState<Book | null>(null)
+	const [rendition, setRendition] = useState<Rendition | null>(null)
 
-	const [location, setLocation] = useState<any>({ epubcfi: loc });
-	const [chapter, setChapter] = useState<string>('');
-	const [fontSize, setFontSize] = useState<number>(13);
+	const [location, setLocation] = useState<any>({ epubcfi: loc })
+	const [chapter, setChapter] = useState<string>('')
+	const [fontSize, setFontSize] = useState<number>(13)
 
-	const { epub, isLoading } = useEpubLazy(id);
+	const { epub, isLoading } = useEpubLazy(id)
 
 	// TODO: type me
 	function handleLocationChange(changeState: any) {
-		const start = changeState?.start;
+		const start = changeState?.start
 
 		if (!start) {
-			return;
+			return
 		}
 
-		const newChapter = controls.getChapter(start.href);
+		const newChapter = controls.getChapter(start.href)
 
 		if (newChapter) {
-			setChapter(newChapter);
+			setChapter(newChapter)
 		}
 
 		setLocation({
 			// @ts-ignore: types are wrong >:(
 			epubcfi: start.cfi ?? null,
+
+			href: start.href,
+
+			index: start.index,
+
 			// @ts-ignore: types are wrong >:(
 			page: start.displayed?.page,
 			// @ts-ignore: types are wrong >:(
 			total: start.displayed?.total,
-			href: start.href,
-			index: start.index,
-		});
+		})
 	}
 
 	useEffect(() => {
-		if (!ref.current) return;
+		if (!ref.current) return
 
 		if (!book) {
 			setBook(
@@ -78,9 +80,9 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 					// rip out my eyes working with epubjs...
 					requestCredentials: true,
 				}),
-			);
+			)
 		}
-	}, [ref]);
+	}, [ref])
 
 	// Note: not sure this is possible anymore? epub.js isn't maintained it seems,
 	// and I haven't figured this out yet.
@@ -92,134 +94,73 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 	}
 
 	useEffect(() => {
-		if (!book) return;
-		if (!ref.current) return;
+		if (!book) return
+		if (!ref.current) return
 
 		book.ready.then(() => {
 			if (book.spine) {
-				const defaultLoc = book.rendition?.location?.start?.cfi;
+				const defaultLoc = book.rendition?.location?.start?.cfi
 
 				const rendition_ = book.renderTo(ref.current!, {
-					width: '100%',
 					height: '100%',
-				});
+					width: '100%',
+				})
 
 				// TODO more styles, probably separate this out
-				rendition_.themes.register('dark', epubDarkTheme);
+				rendition_.themes.register('dark', epubDarkTheme)
 
 				// book.spine.hooks.serialize // Section is being converted to text
 				// book.spine.hooks.content // Section has been loaded and parsed
 				// rendition.hooks.render // Section is rendered to the screen
 				// rendition.hooks.content // Section contents have been loaded
 				// rendition.hooks.unloaded // Section contents are being unloaded
-				rendition_.hooks.render.register(pageAnimation);
+				rendition_.hooks.render.register(pageAnimation)
 
-				rendition_.on('relocated', handleLocationChange);
+				rendition_.on('relocated', handleLocationChange)
 
 				if (colorMode === 'dark') {
-					rendition_.themes.select('dark');
+					rendition_.themes.select('dark')
 				}
 
-				rendition_.themes.fontSize('13px');
+				rendition_.themes.fontSize('13px')
 
-				setRendition(rendition_);
+				setRendition(rendition_)
 
 				// Note: this *does* work, returns epubcfi. I might consider this...
 				// console.log(book.spine.get('chapter001.xhtml'));
 
 				if (location?.epubcfi) {
-					rendition_.display(location.epubcfi);
+					rendition_.display(location.epubcfi)
 				} else if (defaultLoc) {
-					rendition_.display(defaultLoc);
+					rendition_.display(defaultLoc)
 				} else {
-					rendition_.display();
+					rendition_.display()
 				}
 			}
-		});
-	}, [book]);
+		})
+	}, [book])
 
 	useEffect(() => {
 		if (!rendition) {
-			return;
+			return
 		}
 
 		if (colorMode === 'dark') {
-			rendition.themes.select('dark');
+			rendition.themes.select('dark')
 		} else {
-			rendition.themes.select('default');
+			rendition.themes.select('default')
 		}
-	}, [rendition, colorMode]);
+	}, [rendition, colorMode])
 
 	// epubcfi(/6/10!/4/2/2[Chapter1]/48/1:0)
 
 	// I hate this...
 	const controls = useMemo(
 		() => ({
-			async next() {
+			changeFontSize(size: number) {
 				if (rendition) {
-					await rendition
-						.next()
-						.then(() => {
-							// rendition.hooks.render.trigger(pageAnimation);
-						})
-						.catch((err) => {
-							console.error(err);
-							toast.error('Something went wrong!');
-						});
-				}
-			},
-
-			async prev() {
-				if (rendition) {
-					await rendition.prev().catch((err) => {
-						console.error(err);
-						toast.error('Something went wrong!');
-					});
-				}
-			},
-
-			// FIXME: make async? I just need to programmatically detect failures so
-			// I don't close the TOC drawer.
-			goTo(href: string) {
-				if (!book || !rendition || !ref.current) {
-					return;
-				}
-
-				let adjusted = href.split('#')[0];
-
-				let match = book.spine.get(adjusted);
-
-				if (!match) {
-					// @ts-ignore: types are wrong >:(
-					// Note: epubjs it literally terrible and this should be classified as torture dealing
-					// with this terrible library. The fact that I have to do this really blows my mind.
-					let matches = book.spine.items
-						.filter((item: any) => {
-							const withPrefix = `/${adjusted}`;
-							return (
-								item.url === adjusted ||
-								item.canonical == adjusted ||
-								item.url === withPrefix ||
-								item.canonical === withPrefix
-							);
-						})
-						.map((item: any) => book.spine.get(item.index))
-						.filter(Boolean);
-
-					if (matches.length > 0) {
-						match = matches[0];
-					} else {
-						console.error(`Could not find ${href}`);
-						return;
-					}
-				}
-
-				const epubcfi = match.cfiFromElement(ref.current);
-
-				if (epubcfi) {
-					rendition.display(epubcfi);
-				} else {
-					toast.error('Could not generate a valid epubcfi.');
+					setFontSize(size)
+					rendition.themes.fontSize(`${size}px`)
 				}
 			},
 
@@ -230,32 +171,93 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 			// value.
 			getChapter(href: string): string | null {
 				if (book) {
-					const filteredToc = book.navigation.toc.filter((toc) => toc.href === href);
+					const filteredToc = book.navigation.toc.filter((toc) => toc.href === href)
 
-					return filteredToc[0]?.label.trim() ?? null;
+					return filteredToc[0]?.label.trim() ?? null
 				}
 
-				return null;
+				return null
 			},
 
-			changeFontSize(size: number) {
+			// FIXME: make async? I just need to programmatically detect failures so
+			// I don't close the TOC drawer.
+			goTo(href: string) {
+				if (!book || !rendition || !ref.current) {
+					return
+				}
+
+				const adjusted = href.split('#')[0]
+
+				let match = book.spine.get(adjusted)
+
+				if (!match) {
+					// @ts-ignore: types are wrong >:(
+					// Note: epubjs it literally terrible and this should be classified as torture dealing
+					// with this terrible library. The fact that I have to do this really blows my mind.
+					const matches = book.spine.items
+						.filter((item: any) => {
+							const withPrefix = `/${adjusted}`
+							return (
+								item.url === adjusted ||
+								item.canonical == adjusted ||
+								item.url === withPrefix ||
+								item.canonical === withPrefix
+							)
+						})
+						.map((item: any) => book.spine.get(item.index))
+						.filter(Boolean)
+
+					if (matches.length > 0) {
+						match = matches[0]
+					} else {
+						console.error(`Could not find ${href}`)
+						return
+					}
+				}
+
+				const epubcfi = match.cfiFromElement(ref.current)
+
+				if (epubcfi) {
+					rendition.display(epubcfi)
+				} else {
+					toast.error('Could not generate a valid epubcfi.')
+				}
+			},
+
+			async next() {
 				if (rendition) {
-					setFontSize(size);
-					rendition.themes.fontSize(`${size}px`);
+					await rendition
+						.next()
+						.then(() => {
+							// rendition.hooks.render.trigger(pageAnimation);
+						})
+						.catch((err) => {
+							console.error(err)
+							toast.error('Something went wrong!')
+						})
+				}
+			},
+
+			async prev() {
+				if (rendition) {
+					await rendition.prev().catch((err) => {
+						console.error(err)
+						toast.error('Something went wrong!')
+					})
 				}
 			},
 		}),
 		[rendition, book, ref],
-	);
+	)
 
 	const swipeHandlers = useSwipeable({
-		onSwipedRight: controls.prev,
 		onSwipedLeft: controls.next,
+		onSwipedRight: controls.prev,
 		preventScrollOnSwipe: true,
-	});
+	})
 
 	if (isLoading) {
-		return <div>Loading TODO.....</div>;
+		return <div>Loading TODO.....</div>
 	}
 
 	return (
@@ -268,5 +270,5 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		>
 			<div className="h-full w-full" ref={ref} />
 		</EpubControls>
-	);
+	)
 }

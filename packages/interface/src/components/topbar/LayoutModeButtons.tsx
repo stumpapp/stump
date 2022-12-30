@@ -1,24 +1,22 @@
-import { Rows, SquaresFour } from 'phosphor-react';
-import toast from 'react-hot-toast';
+import { ButtonGroup, useColorModeValue } from '@chakra-ui/react'
+import type { LayoutMode } from '@stump/client'
+import { LayoutEntity, useLayoutMode } from '@stump/client'
+import { Rows, SquaresFour } from 'phosphor-react'
+import toast from 'react-hot-toast'
 
-import { ButtonGroup, useColorModeValue } from '@chakra-ui/react';
-import { LayoutEntity, useLayoutMode } from '@stump/client';
-
-import { IconButton } from '../../ui/Button';
-
-import type { LayoutMode } from '@stump/client';
+import { IconButton } from '../../ui/Button'
 
 export default function LayoutModeButtons({ entity }: { entity: LayoutEntity }) {
-	const { layoutMode, updateLayoutMode } = useLayoutMode(entity);
+	const { layoutMode, updateLayoutMode } = useLayoutMode(entity)
 
 	async function handleChange(mode: LayoutMode) {
 		updateLayoutMode(mode, (err) => {
-			console.error(err);
-			toast.error('Failed to update layout mode');
-		});
+			console.error(err)
+			toast.error('Failed to update layout mode')
+		})
 	}
 
-	const viewAsGrid = layoutMode === 'GRID';
+	const viewAsGrid = layoutMode === 'GRID'
 
 	return (
 		<ButtonGroup isAttached>
@@ -48,5 +46,5 @@ export default function LayoutModeButtons({ entity }: { entity: LayoutEntity }) 
 				<Rows className="text-lg" weight="regular" />
 			</IconButton>
 		</ButtonGroup>
-	);
+	)
 }

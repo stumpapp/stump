@@ -1,27 +1,26 @@
-import React from 'react';
-import { Navigate } from 'react-router';
-import { Route, Routes } from 'react-router-dom';
+import { useAppProps } from '@stump/client'
+import React from 'react'
+import { Navigate } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 
-import { useAppProps } from '@stump/client';
+import { AppLayout } from './AppLayout'
 
-import { AppLayout } from './AppLayout';
-
-const Home = React.lazy(() => import('./pages/Home'));
-const LibraryOverview = React.lazy(() => import('./pages/library/LibraryOverview'));
-const LibraryFileExplorer = React.lazy(() => import('./pages/library/LibraryFileExplorer'));
-const SeriesOverview = React.lazy(() => import('./pages/SeriesOverview'));
-const BookOverview = React.lazy(() => import('./pages/book/BookOverview'));
-const ReadBook = React.lazy(() => import('./pages/book/ReadBook'));
-const ReadEpub = React.lazy(() => import('./pages/book/ReadEpub'));
-const SettingsLayout = React.lazy(() => import('./components/settings/SettingsLayout'));
-const GeneralSettings = React.lazy(() => import('./pages/settings/GeneralSettings'));
-const JobSettings = React.lazy(() => import('./pages/settings/JobSettings'));
-const ServerSettings = React.lazy(() => import('./pages/settings/ServerSettings'));
-const UserSettings = React.lazy(() => import('./pages/settings/UserSettings'));
-const FourOhFour = React.lazy(() => import('./pages/FourOhFour'));
-const ServerConnectionError = React.lazy(() => import('./pages/ServerConnectionError'));
-const LoginOrClaim = React.lazy(() => import('./pages/LoginOrClaim'));
-const OnBoarding = React.lazy(() => import('./pages/OnBoarding'));
+const Home = React.lazy(() => import('./pages/Home'))
+const LibraryOverview = React.lazy(() => import('./pages/library/LibraryOverview'))
+const LibraryFileExplorer = React.lazy(() => import('./pages/library/LibraryFileExplorer'))
+const SeriesOverview = React.lazy(() => import('./pages/SeriesOverview'))
+const BookOverview = React.lazy(() => import('./pages/book/BookOverview'))
+const ReadBook = React.lazy(() => import('./pages/book/ReadBook'))
+const ReadEpub = React.lazy(() => import('./pages/book/ReadEpub'))
+const SettingsLayout = React.lazy(() => import('./components/settings/SettingsLayout'))
+const GeneralSettings = React.lazy(() => import('./pages/settings/GeneralSettings'))
+const JobSettings = React.lazy(() => import('./pages/settings/JobSettings'))
+const ServerSettings = React.lazy(() => import('./pages/settings/ServerSettings'))
+const UserSettings = React.lazy(() => import('./pages/settings/UserSettings'))
+const FourOhFour = React.lazy(() => import('./pages/FourOhFour'))
+const ServerConnectionError = React.lazy(() => import('./pages/ServerConnectionError'))
+const LoginOrClaim = React.lazy(() => import('./pages/LoginOrClaim'))
+const OnBoarding = React.lazy(() => import('./pages/OnBoarding'))
 
 function OnBoardingRouter() {
 	return (
@@ -30,18 +29,18 @@ function OnBoardingRouter() {
 				<Route path="/" element={<OnBoarding />} />
 			</Routes>
 		</React.Suspense>
-	);
+	)
 }
 
 export function AppRouter() {
-	const appProps = useAppProps();
+	const appProps = useAppProps()
 
 	if (!appProps?.baseUrl) {
 		if (appProps?.platform === 'browser') {
-			throw new Error('Base URL is not set');
+			throw new Error('Base URL is not set')
 		}
 
-		return <OnBoardingRouter />;
+		return <OnBoardingRouter />
 	}
 
 	return (
@@ -74,5 +73,5 @@ export function AppRouter() {
 			)}
 			<Route path="*" element={<FourOhFour />} />
 		</Routes>
-	);
+	)
 }

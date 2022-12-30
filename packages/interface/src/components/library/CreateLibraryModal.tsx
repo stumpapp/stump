@@ -1,6 +1,3 @@
-import { FieldValues } from 'react-hook-form';
-import toast from 'react-hot-toast';
-
 import {
 	Modal,
 	ModalBody,
@@ -9,85 +6,86 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	useDisclosure,
-} from '@chakra-ui/react';
-import { useLibraryMutation, useTags } from '@stump/client';
+} from '@chakra-ui/react'
+import type { ApiResult, LibraryOptions, Tag, TagOption } from '@stump/client'
+import { useLibraryMutation, useTags } from '@stump/client'
+import { FieldValues } from 'react-hook-form'
+import toast from 'react-hot-toast'
 
-import Button, { ModalCloseButton } from '../../ui/Button';
-import LibraryModalForm from './form/LibraryModalForm';
-
-import type { ApiResult, LibraryOptions, Tag, TagOption } from '@stump/client';
+import Button, { ModalCloseButton } from '../../ui/Button'
+import LibraryModalForm from './form/LibraryModalForm'
 
 interface Props {
-	trigger?: (props: any) => JSX.Element;
-	disabled?: boolean;
+	trigger?: (props: any) => JSX.Element
+	disabled?: boolean
 }
 
 export default function CreateLibraryModal({ disabled, ...props }: Props) {
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
-	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags();
+	const { tags, options, isLoading: fetchingTags, createTagsAsync: tryCreateTags } = useTags()
 
 	const { createIsLoading, createLibraryAsync: createLibrary } = useLibraryMutation({
-		onCreated: onClose,
 		onCreateFailed(res) {
-			toast.error('Failed to create library.');
-			console.error(res);
+			toast.error('Failed to create library.')
+			console.error(res)
 		},
+		onCreated: onClose,
 		onError(err) {
-			toast.error('Failed to create library.');
-			console.error(err);
+			toast.error('Failed to create library.')
+			console.error(err)
 		},
-	});
+	})
 
 	// /Users/aaronleopold/Documents/Stump/Demo
 	async function handleSubmit(values: FieldValues) {
 		if (disabled) {
 			// This is extra protection, should never happen. Making it an error so it is
 			// easier to find on the chance it does.
-			throw new Error('You do not have permission to create libraries.');
+			throw new Error('You do not have permission to create libraries.')
 		}
 
-		const { name, path, description, tags: formTags, scan_mode, ...library_options } = values;
+		const { name, path, description, tags: formTags, scan_mode, ...library_options } = values
 
 		// console.log({ name, path, description, tags: formTags, scan_mode, library_options });
 
-		let existingTags = tags.filter((tag) => formTags?.some((t: TagOption) => t.value === tag.name));
+		let existingTags = tags.filter((tag) => formTags?.some((t: TagOption) => t.value === tag.name))
 
-		let tagsToCreate = formTags
+		const tagsToCreate = formTags
 			?.map((tag: TagOption) => tag.value)
-			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName));
+			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName))
 
 		if (tagsToCreate && tagsToCreate.length > 0) {
-			const res: ApiResult<Tag[]> = await tryCreateTags(tagsToCreate);
+			const res: ApiResult<Tag[]> = await tryCreateTags(tagsToCreate)
 
 			if (res.status > 201) {
-				toast.error('Something went wrong when creating the tags.');
-				return;
+				toast.error('Something went wrong when creating the tags.')
+				return
 			}
 
-			existingTags = existingTags.concat(res.data);
+			existingTags = existingTags.concat(res.data)
 		}
 
 		toast.promise(
 			createLibrary({
+				description,
+				library_options: library_options as LibraryOptions,
 				name,
 				path,
-				description,
-				tags: existingTags,
 				scan_mode,
-				library_options: library_options as LibraryOptions,
+				tags: existingTags,
 			}),
 			{
+				error: 'Something went wrong.',
 				loading: 'Creating library...',
 				success: 'Library created!',
-				error: 'Something went wrong.',
 			},
-		);
+		)
 	}
 
 	function handleOpen() {
 		if (!disabled) {
-			onOpen();
+			onOpen()
 		}
 	}
 
@@ -104,9 +102,9 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 					size="sm"
 					color={{ _dark: 'gray.200', _light: 'gray.600' }}
 					_hover={{
-						color: 'gray.900',
-						bg: 'gray.50',
 						_dark: { bg: 'gray.700', color: 'gray.100' },
+						bg: 'gray.50',
+						color: 'gray.900',
 					}}
 					fontSize="sm"
 					fontWeight={'medium'}
@@ -152,5 +150,5 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 				</ModalContent>
 			</Modal>
 		</>
-	);
+	)
 }

@@ -1,0 +1,26 @@
+{
+	"extends": "tsconfig-moon/tsconfig.json",
+	"compilerOptions": {
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"strict": true,
+		"allowJs": true,
+		"moduleResolution": "nodenext",
+		"target": "es2022",
+		"composite": true,
+		"declaration": true,
+		"declarationMap": true,
+		"emitDeclarationOnly": true,
+		"incremental": true,
+		"noEmit": false,
+		"noEmitOnError": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedParameters": true,
+		"noUnusedLocals": true,
+		"skipLibCheck": true,
+		"paths": {
+			"@stump/client": ["./packages/client"],
+			"@stump/client/api": ["./packages/client/src/api"],
+			"@stump/interface": ["./packages/interface"]
+		}
+	}
+}

@@ -1,19 +1,20 @@
-import { useMemo } from 'react';
-import { HStack } from '@chakra-ui/react';
-import { useLibraryStats, useQueryParamStore } from '@stump/client';
-import { formatBytesSeparate } from '../../utils/format';
-import AnimatedStat from '../../ui/AnimatedStat';
+import { HStack } from '@chakra-ui/react'
+import { useLibraryStats, useQueryParamStore } from '@stump/client'
+import { useMemo } from 'react'
+
+import AnimatedStat from '../../ui/AnimatedStat'
+import { formatBytesSeparate } from '../../utils/format'
 
 // Note: I don't ~love~ the plural here, but I want to make sure it is understood it
 // encompasses *all* libraries, not just one.
 export default function LibrariesStats() {
-	const { libraryStats } = useLibraryStats();
+	const { libraryStats } = useLibraryStats()
 
 	const libraryUsage = useMemo(() => {
-		return formatBytesSeparate(libraryStats?.total_bytes);
-	}, [libraryStats?.total_bytes]);
+		return formatBytesSeparate(libraryStats?.total_bytes)
+	}, [libraryStats?.total_bytes])
 
-	if (!libraryStats || !libraryUsage) return null;
+	if (!libraryStats || !libraryUsage) return null
 
 	return (
 		<HStack spacing={4}>
@@ -26,5 +27,5 @@ export default function LibrariesStats() {
 				decimal={true}
 			/>
 		</HStack>
-	);
+	)
 }

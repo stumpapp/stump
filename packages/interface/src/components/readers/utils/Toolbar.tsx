@@ -1,19 +1,18 @@
-import { motion } from 'framer-motion';
-import { ArrowLeft } from 'phosphor-react';
-import { Link, useParams } from 'react-router-dom';
-
-import { Heading } from '@chakra-ui/react';
-import { getMediaPage } from '@stump/client/api';
-import { useCallback, useEffect, useRef } from 'react';
-import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
-import clsx from 'clsx';
+import { Heading } from '@chakra-ui/react'
+import { getMediaPage } from '@stump/client/api'
+import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
+import clsx from 'clsx'
+import { motion } from 'framer-motion'
+import { ArrowLeft } from 'phosphor-react'
+import { useCallback, useEffect, useRef } from 'react'
+import { Link, useParams } from 'react-router-dom'
 
 interface ToolbarProps {
-	title: string;
-	currentPage: number;
-	pages: number;
-	visible: boolean;
-	onPageChange(page: number): void;
+	title: string
+	currentPage: number
+	pages: number
+	visible: boolean
+	onPageChange(page: number): void
 }
 
 export default function Toolbar({
@@ -23,27 +22,27 @@ export default function Toolbar({
 	visible,
 	onPageChange,
 }: ToolbarProps) {
-	const { id } = useParams();
+	const { id } = useParams()
 
 	if (!id) {
 		// should never happen
-		throw new Error('No ID provided');
+		throw new Error('No ID provided')
 	}
 
-	const parentRef = useRef<HTMLDivElement>(null);
-	const rangeRef = useRef([0, 0]);
+	const parentRef = useRef<HTMLDivElement>(null)
+	const rangeRef = useRef([0, 0])
 	const columnVirtualizer = useVirtualizer({
 		count: pages,
-		getScrollElement: () => parentRef.current,
-		estimateSize: () => 80,
-		overscan: 5,
-		horizontal: true,
-		rangeExtractor: useCallback((range: Range) => {
-			rangeRef.current = [range.startIndex, range.endIndex];
-			return defaultRangeExtractor(range);
-		}, []),
 		enableSmoothScroll: true,
-	});
+		estimateSize: () => 80,
+		getScrollElement: () => parentRef.current,
+		horizontal: true,
+		overscan: 5,
+		rangeExtractor: useCallback((range: Range) => {
+			rangeRef.current = [range.startIndex, range.endIndex]
+			return defaultRangeExtractor(range)
+		}, []),
+	})
 
 	// FIXME: this is super scufffed, something is throwing off the scrollToIndex and the
 	// workaround is atrocious...
@@ -52,40 +51,40 @@ export default function Toolbar({
 			// FIXME: why no work
 			// columnVirtualizer.scrollToIndex(currentPage, { smoothScroll: true });
 			setTimeout(() => {
-				const totalSize = columnVirtualizer.getTotalSize();
-				const offset = (totalSize / pages) * currentPage;
+				const totalSize = columnVirtualizer.getTotalSize()
+				const offset = (totalSize / pages) * currentPage
 
-				const targetID = `${id}-page-${currentPage}`;
-				const target = document.getElementById(targetID);
+				const targetID = `${id}-page-${currentPage}`
+				const target = document.getElementById(targetID)
 
 				if (target) {
-					target.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+					target.scrollIntoView({ behavior: 'smooth', inline: 'center' })
 				} else {
 					// FIXME: this actually doesn't work lol
-					parentRef.current?.scrollTo({ left: offset, behavior: 'smooth' });
+					parentRef.current?.scrollTo({ behavior: 'smooth', left: offset })
 				}
-			}, 50);
+			}, 50)
 		}
-	}, [visible, currentPage]);
+	}, [visible, currentPage])
 
 	const variants = (position: 'top' | 'bottom') => ({
 		hidden: {
 			opacity: 0,
-			y: position === 'top' ? '-100%' : '100%',
 			transition: {
 				duration: 0.2,
 				ease: 'easeInOut',
 			},
+			y: position === 'top' ? '-100%' : '100%',
 		},
 		visible: {
 			opacity: 1,
-			y: 0,
 			transition: {
 				duration: 0.2,
 				ease: 'easeInOut',
 			},
+			y: 0,
 		},
-	});
+	})
 
 	return (
 		<div className={!visible ? 'invisible' : 'visible'}>
@@ -136,5 +135,5 @@ export default function Toolbar({
 				</div>
 			</motion.nav>
 		</div>
-	);
+	)
 }

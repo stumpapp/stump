@@ -1,2 +1,2 @@
-export { default as UserProfileForm } from './ProfileForm';
-export { default as UserPreferencesForm } from './PreferencesForm';
+export { default as UserPreferencesForm } from './PreferencesForm'
+export { default as UserProfileForm } from './ProfileForm'

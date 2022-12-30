@@ -1,18 +1,17 @@
-import clsx from 'clsx';
-import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react';
-import { useMemo } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useWindowSize } from 'rooks';
+import { Box, Flex, HStack, useColorModeValue } from '@chakra-ui/react'
+import clsx from 'clsx'
+import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react'
+import { useMemo } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useWindowSize } from 'rooks'
 
-import { Box, Flex, HStack, useColorModeValue } from '@chakra-ui/react';
-
-import { usePagination } from '../hooks/usePagination';
-import PagePopoverForm from '../components/PagePopoverForm';
+import PagePopoverForm from '../components/PagePopoverForm'
+import { usePagination } from '../hooks/usePagination'
 
 interface PaginationArrowProps {
-	kind: 'previous' | 'next';
-	isDisabled?: boolean;
-	href: string;
+	kind: 'previous' | 'next'
+	isDisabled?: boolean
+	href: string
 }
 
 function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
@@ -51,13 +50,13 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 				)}
 			</Box>
 		</Flex>
-	);
+	)
 }
 
 interface PaginationLinkProps {
-	href: string;
-	value: number;
-	isActive: boolean;
+	href: string
+	value: number
+	isActive: boolean
 }
 
 function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
@@ -77,39 +76,39 @@ function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
 		>
 			{value}
 		</Box>
-	);
+	)
 }
 
 export interface PaginationProps {
-	position?: 'top' | 'bottom';
-	pages: number;
-	currentPage: number;
+	position?: 'top' | 'bottom'
+	pages: number
+	currentPage: number
 }
 
 export default function Pagination({ position = 'top', pages, currentPage }: PaginationProps) {
-	const navigate = useNavigate();
-	const location = useLocation();
+	const navigate = useNavigate()
+	const location = useLocation()
 
-	const { innerWidth: screenWidth } = useWindowSize();
+	const { innerWidth: screenWidth } = useWindowSize()
 
 	const numbersToShow = useMemo(() => {
 		if (screenWidth != null) {
 			if (screenWidth < 768) {
-				return 5;
+				return 5
 			}
 
 			if (screenWidth < 992) {
-				return 7;
+				return 7
 			}
 		}
 
-		return 10;
-	}, [screenWidth]);
+		return 10
+	}, [screenWidth])
 
-	const { pageRange } = usePagination({ totalPages: pages, currentPage, numbersToShow });
+	const { pageRange } = usePagination({ currentPage, numbersToShow, totalPages: pages })
 
 	function handleEllipsisNavigate(page: number) {
-		navigate(`${location.pathname}?page=${page}`);
+		navigate(`${location.pathname}?page=${page}`)
 	}
 
 	return (
@@ -136,7 +135,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 								isActive={page === currentPage}
 								value={page}
 							/>
-						);
+						)
 					}
 
 					return (
@@ -156,7 +155,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 								</Box>
 							}
 						/>
-					);
+					)
 				})}
 			</HStack>
 
@@ -166,5 +165,5 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 				isDisabled={currentPage >= pages}
 			/>
 		</HStack>
-	);
+	)
 }

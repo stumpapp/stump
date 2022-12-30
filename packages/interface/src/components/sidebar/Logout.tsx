@@ -1,7 +1,3 @@
-import { SignOut } from 'phosphor-react';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-
 import {
 	Modal,
 	ModalBody,
@@ -10,31 +6,34 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	useDisclosure,
-} from '@chakra-ui/react';
-import { useUserStore } from '@stump/client';
-import { logout } from '@stump/client/api';
+} from '@chakra-ui/react'
+import { useUserStore } from '@stump/client'
+import { logout } from '@stump/client/api'
+import { SignOut } from 'phosphor-react'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
-import Button, { ModalCloseButton } from '../../ui/Button';
-import ToolTip from '../../ui/ToolTip';
+import Button, { ModalCloseButton } from '../../ui/Button'
+import ToolTip from '../../ui/ToolTip'
 
 export default function Logout() {
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
-	const { setUser } = useUserStore();
+	const { setUser } = useUserStore()
 
-	const navigate = useNavigate();
+	const navigate = useNavigate()
 
 	async function handleLogout() {
 		toast
 			.promise(logout(), {
+				error: 'There was an error logging you out. Please try again.',
 				loading: null,
 				success: 'You have been logged out. Redirecting...',
-				error: 'There was an error logging you out. Please try again.',
 			})
 			.then(() => {
-				setUser(null);
-				navigate('/auth');
-			});
+				setUser(null)
+				navigate('/auth')
+			})
 	}
 
 	return (
@@ -74,5 +73,5 @@ export default function Logout() {
 				</ModalContent>
 			</Modal>
 		</>
-	);
+	)
 }

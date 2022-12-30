@@ -1,0 +1,38 @@
+type: 'application'
+
+workspace:
+  inheritedTasks:
+    exclude: ['buildPackage']
+
+fileGroups:
+  app:
+    - 'src/**/*'
+
+language: 'rust'
+
+tasks:
+  dev:
+    command: 'cargo watch --ignore packages -x "run --package stump_server"'
+    local: true
+
+  start:
+    command: 'cargo run --release --package stump_server'
+    local: true
+
+  build:
+    command: 'cargo build --release --package stump_server'
+    local: true
+    deps:
+      - 'web:build'
+      # - '~:get-webapp'
+
+  clean:
+    command: 'cargo clean'
+
+  # FIXME: doesn't work
+  # https://moonrepo.dev/docs/config/project#special-commands
+  get-webapp:
+    command: 'trash "dist/*" "!dist/.placeholder" && cpy "../web/dist/**/*" ./dist/'
+    platform: 'system'
+    # deps:
+    #   - 'web:build'

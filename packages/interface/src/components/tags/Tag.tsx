@@ -1,8 +1,8 @@
-import { Tag } from '@stump/client';
-import { Badge } from '@chakra-ui/react';
+import { Badge } from '@chakra-ui/react'
+import { Tag } from '@stump/client'
 
 interface Props {
-	tag: Tag;
+	tag: Tag
 }
 
 export default function TagComponent({ tag }: Props) {
@@ -10,5 +10,5 @@ export default function TagComponent({ tag }: Props) {
 		<Badge textTransform="none" rounded="md" px={1.5} py={0.5} colorScheme="brand">
 			{tag.name}
 		</Badge>
-	);
+	)
 }

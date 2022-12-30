@@ -11,20 +11,21 @@ import {
 	PopoverTrigger,
 	useColorModeValue,
 	useDisclosure,
-} from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useMemo, useRef } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import Button from '../ui/Button';
-import Form, { FormControl } from '../ui/Form';
-import Input from '../ui/Input';
+} from '@chakra-ui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import React, { useMemo, useRef } from 'react'
+import { FieldValues, useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+import Button from '../ui/Button'
+import Form, { FormControl } from '../ui/Form'
+import Input from '../ui/Input'
 
 interface PagePopoverFormProps {
-	pos: number;
-	totalPages: number;
-	onPageChange: (page: number) => void;
-	trigger: React.ReactElement;
+	pos: number
+	totalPages: number
+	onPageChange: (page: number) => void
+	trigger: React.ReactElement
 }
 
 export default function PagePopoverForm({
@@ -33,40 +34,40 @@ export default function PagePopoverForm({
 	pos,
 	trigger,
 }: PagePopoverFormProps) {
-	const inputRef = useRef<any>(null);
+	const inputRef = useRef<any>(null)
 
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
 	const schema = z.object({
 		goTo: z.string().refine(
 			(val) => {
-				const num = parseInt(val, 10);
+				const num = parseInt(val, 10)
 
-				return num > 0 && num <= totalPages;
+				return num > 0 && num <= totalPages
 			},
 			() => ({
 				message: `Please enter a number from 1 to ${totalPages}.`,
 			}),
 		),
-	});
+	})
 
 	const form = useForm({
 		resolver: zodResolver(schema),
-	});
+	})
 
-	const register = form.register('goTo');
+	const register = form.register('goTo')
 
 	const errors = useMemo(() => {
-		return form.formState.errors;
-	}, [form.formState.errors]);
+		return form.formState.errors
+	}, [form.formState.errors])
 
 	function handleSubmit(values: FieldValues) {
 		if (values.goTo) {
-			onClose();
+			onClose()
 			setTimeout(() => {
-				form.reset();
-				onPageChange(values.goTo);
-			}, 50);
+				form.reset()
+				onPageChange(values.goTo)
+			}, 50)
 		}
 	}
 
@@ -97,8 +98,8 @@ export default function PagePopoverForm({
 								{...register}
 								ref={(ref) => {
 									if (ref) {
-										register.ref(ref);
-										inputRef.current = ref;
+										register.ref(ref)
+										inputRef.current = ref
 									}
 								}}
 							/>
@@ -123,5 +124,5 @@ export default function PagePopoverForm({
 				</PopoverFooter>
 			</PopoverContent>
 		</Popover>
-	);
+	)
 }

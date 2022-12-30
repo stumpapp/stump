@@ -1,46 +1,49 @@
-target
+# OS
+.DS_Store
 
-# web
-node_modules
-.env
-.env.*
-!.env.template
-$houdini
+# Logs
+logs/
 *.log
+
+# Cache
 .eslintcache
-**/dist/*
-!**/dist/.placeholder
-build
+.idea
+.npm
+.vscode/**/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Directories
+build/
+coverage/
+cjs/
+dist/
+dts/
+esm/
+lib/
+mjs/
+tmp/
+umd/
+node_modules/
+target/
+
+# Custom
+*.min.js
+*.map
+*.tsbuildinfo
+docker-compose.yaml
 
 # rust
+core/integration-tests/.*
+core/integration-tests/*libraries*
 static
-target
 apps/server/client/*
 !apps/server/client/.placeholder
 *.db*
 *.sqlite*
 *prisma.rs*
-core/integration-tests/*libraries*
 
-core/integration-tests/.*
-
-# os
-.DS_Store
-
-# editors / idea
-.idea
-
-.next
-
-# Local Netlify folder
-.netlify
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-
-_next
-
-docker-compose.yaml
+# Moon
+.moon/cache
+.moon/dts
+.moon/docker

@@ -1,4 +1,4 @@
-import { forwardRef, TabProps, Tab as ChakraTab } from '@chakra-ui/react';
+import { forwardRef, Tab as ChakraTab, TabProps } from '@chakra-ui/react'
 
 export const Tab = forwardRef((props: TabProps, ref) => {
 	// this worked like DOODY
@@ -17,5 +17,5 @@ export const Tab = forwardRef((props: TabProps, ref) => {
 				outline: 'none',
 			}}
 		/>
-	);
-});
+	)
+})

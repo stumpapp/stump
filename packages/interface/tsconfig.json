@@ -1,9 +1,27 @@
 {
-	"extends": "../config/base.tsconfig.json",
-	"compilerOptions": {
-		"types": ["vite/client", "node"],
-		"outDir": "./dist",
-		"skipLibCheck": true
-	},
-	"include": ["src"]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "outDir": "../../.moon/cache/types/packages/interface",
+    "skipLibCheck": true,
+    "paths": {
+      "@stump/client": [
+        "../client/src/index.ts"
+      ],
+      "@stump/client/*": [
+        "../client/src/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../client"
+    }
+  ]
 }

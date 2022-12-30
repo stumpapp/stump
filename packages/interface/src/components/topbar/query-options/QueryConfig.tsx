@@ -1,7 +1,3 @@
-import { CaretDown, Sliders } from 'phosphor-react';
-import React, { useMemo } from 'react';
-import { useLocation } from 'react-router';
-
 import {
 	Heading,
 	HStack,
@@ -16,25 +12,27 @@ import {
 	Switch,
 	Text,
 	useColorModeValue,
-} from '@chakra-ui/react';
-import { mediaOrderByOptions, seriesOrderByOptions, useQueryParamStore } from '@stump/client';
+} from '@chakra-ui/react'
+import type { Direction } from '@stump/client'
+import { mediaOrderByOptions, seriesOrderByOptions, useQueryParamStore } from '@stump/client'
+import { CaretDown, Sliders } from 'phosphor-react'
+import React, { useMemo } from 'react'
+import { useLocation } from 'react-router'
 
-import Button from '../../../ui/Button';
-
-import type { Direction } from '@stump/client';
+import Button from '../../../ui/Button'
 
 function QueryConfigSection({ children }: { children: React.ReactNode }) {
 	return (
 		<Stack py={2} px={4} w="full">
 			{children}
 		</Stack>
-	);
+	)
 }
 
 export default function QueryConfig() {
-	const { order_by, setOrderBy, direction, setDirection } = useQueryParamStore();
+	const { order_by, setOrderBy, direction, setDirection } = useQueryParamStore()
 
-	const location = useLocation();
+	const location = useLocation()
 
 	function intoOptions(keys: string[]) {
 		return keys.map((key) => ({
@@ -43,7 +41,7 @@ export default function QueryConfig() {
 				.replace(/_/g, ' ')
 				.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1)),
 			value: key,
-		}));
+		}))
 	}
 
 	// FIXME: This will BREAK when switching between entities. For example, lets say
@@ -54,14 +52,14 @@ export default function QueryConfig() {
 	const orderByOptions = useMemo(() => {
 		// TODO: remove this from component, to reduce computation... also it is just ugly.
 		if (location.pathname.startsWith('/libraries')) {
-			return intoOptions(Object.keys(seriesOrderByOptions));
+			return intoOptions(Object.keys(seriesOrderByOptions))
 		} else if (location.pathname.startsWith('/series')) {
-			return intoOptions(Object.keys(mediaOrderByOptions));
+			return intoOptions(Object.keys(mediaOrderByOptions))
 		}
-	}, [location.pathname]);
+	}, [location.pathname])
 
-	const activeRadioFontColor = useColorModeValue('gray.800', 'gray.200');
-	const inActiveRadioFontColor = useColorModeValue('gray.600', 'gray.400');
+	const activeRadioFontColor = useColorModeValue('gray.800', 'gray.200')
+	const inActiveRadioFontColor = useColorModeValue('gray.600', 'gray.400')
 
 	return (
 		<Popover placement="bottom-start">
@@ -159,5 +157,5 @@ export default function QueryConfig() {
 				</React.Fragment>
 			)}
 		</Popover>
-	);
+	)
 }

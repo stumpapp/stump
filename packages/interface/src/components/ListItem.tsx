@@ -1,12 +1,12 @@
-import { Heading, HStack, Text, useColorModeValue } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
+import { Heading, HStack, Text, useColorModeValue } from '@chakra-ui/react'
+import { Link } from 'react-router-dom'
 
 interface Props {
-	id: string;
-	title: string;
-	subtitle?: string | null;
-	href: string;
-	even?: boolean;
+	id: string
+	title: string
+	subtitle?: string | null
+	href: string
+	even?: boolean
 }
 
 // Used to render the items in the series list and media list
@@ -34,7 +34,7 @@ export default function ListItem({ id, title, subtitle, href, even }: Props) {
 			<Heading
 				noOfLines={1}
 				size="sm"
-				w={subtitle ? { base: '50%', md: '30%', lg: '25%', xl: '23%' } : 'full'}
+				w={subtitle ? { base: '50%', lg: '25%', md: '30%', xl: '23%' } : 'full'}
 				className="shrink-0"
 			>
 				{title}
@@ -49,5 +49,5 @@ export default function ListItem({ id, title, subtitle, href, even }: Props) {
 				{subtitle}
 			</Text>
 		</HStack>
-	);
+	)
 }

@@ -1,15 +1,15 @@
-import { CreatableSelect } from 'chakra-react-select';
-import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { TagOption } from '@stump/client';
+import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react'
+import { TagOption } from '@stump/client'
+import { CreatableSelect } from 'chakra-react-select'
+import { Controller, useFormContext } from 'react-hook-form'
 
 interface TagSelectProps {
-	name?: string;
-	label?: string;
-	options: TagOption[];
-	defaultValue?: TagOption[];
-	isLoading?: boolean;
-	hint?: string;
+	name?: string
+	label?: string
+	options: TagOption[]
+	defaultValue?: TagOption[]
+	isLoading?: boolean
+	hint?: string
 }
 
 export default function TagSelect({
@@ -20,7 +20,7 @@ export default function TagSelect({
 	isLoading,
 	hint,
 }: TagSelectProps) {
-	const form = useFormContext();
+	const form = useFormContext()
 
 	return (
 		<Controller
@@ -73,8 +73,8 @@ export default function TagSelect({
 							dropdownIndicator: (provided: any) => ({
 								...provided,
 								bg: 'transparent',
-								px: 2,
 								cursor: 'inherit',
+								px: 2,
 							}),
 							indicatorSeparator: (provided: any) => ({
 								...provided,
@@ -87,5 +87,5 @@ export default function TagSelect({
 				</FormControl>
 			)}
 		/>
-	);
+	)
 }

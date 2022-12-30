@@ -8,13 +8,14 @@ import {
 	Portal,
 	Stack,
 	Text,
-} from '@chakra-ui/react';
-import { TextAa } from 'phosphor-react';
-import { IconButton } from '../../../ui/Button';
+} from '@chakra-ui/react'
+import { TextAa } from 'phosphor-react'
+
+import { IconButton } from '../../../ui/Button'
 
 interface Props {
-	changeFontSize(size: number): void;
-	fontSize: number;
+	changeFontSize(size: number): void
+	fontSize: number
 }
 
 export default function FontSelection({ changeFontSize, fontSize }: Props) {
@@ -56,5 +57,5 @@ export default function FontSelection({ changeFontSize, fontSize }: Props) {
 				</PopoverContent>
 			</Portal>
 		</Popover>
-	);
+	)
 }

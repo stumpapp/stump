@@ -1,14 +1,16 @@
 {
-	"extends": "./base.tsconfig.json",
+	"extends": "./tsconfig.options.json",
 	"include": [
-		"../../apps/**/*",
-		"../../packages/**/*",
-		"../../core",
-		"../../.eslintrc.js",
+		"apps/**/*",
+		"core",
+		"crates/**/*",
+		"packages/**/*",
+		"**/.eslintrc.js",
 		"**/*.config.js"
 	],
 	"exclude": [
 		"**/.cache/**/*",
+		"**/.next/**/*",
 		"**/build/**/*",
 		"**/cjs/**/*",
 		"**/dist/**/*",

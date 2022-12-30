@@ -1,49 +1,48 @@
-import { FieldValues, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import Input, { PasswordInput } from '../../../ui/Input';
+import { FormControl, FormLabel } from '@chakra-ui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { UpdateUserArgs, useMutation, useUserStore } from '@stump/client'
+import { FieldValues, useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { z } from 'zod'
 
-import { FormControl, FormLabel } from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-import SettingsSection from '../SettingsSection';
-import { useLocale } from '../../../hooks/useLocale';
-import { UpdateUserArgs, useMutation, useUserStore } from '@stump/client';
-import Form from '../../../ui/Form';
-import Button from '../../../ui/Button';
-import toast from 'react-hot-toast';
-import { updateUser } from '../../../../../client/src/api/user';
+import { updateUser } from '../../../../../client/src/api/user'
+import { useLocale } from '../../../hooks/useLocale'
+import Button from '../../../ui/Button'
+import Form from '../../../ui/Form'
+import Input, { PasswordInput } from '../../../ui/Input'
+import SettingsSection from '../SettingsSection'
 
 export default function ProfileForm() {
-	const { user, setUser } = useUserStore();
+	const { user, setUser } = useUserStore()
 	const { mutateAsync: updateProfile } = useMutation(
 		['updateUserProfile', user?.id],
 		(params: UpdateUserArgs) => updateUser(user!.id, params).then((res) => res.data),
-	);
-	const { t } = useLocale();
+	)
+	const { t } = useLocale()
 
 	if (!user) {
-		return null;
+		return null
 	}
 
 	const schema = z.object({
-		username: z.string().min(1, { message: t('loginPage.form.validation.missingUsername') }),
 		password: z.string().optional(),
-	});
+		username: z.string().min(1, { message: t('loginPage.form.validation.missingUsername') }),
+	})
 
 	const form = useForm({
-		resolver: zodResolver(schema),
 		defaultValues: {
 			username: user.username,
 		} as FieldValues,
-	});
+		resolver: zodResolver(schema),
+	})
 
 	async function handleSubmit(values: FieldValues) {
 		try {
-			const updatedUser = await updateProfile(values as UpdateUserArgs);
-			setUser(updatedUser);
-			toast.success(t('settingsPage.profileForm.success'));
+			const updatedUser = await updateProfile(values as UpdateUserArgs)
+			setUser(updatedUser)
+			toast.success(t('settingsPage.profileForm.success'))
 		} catch (error) {
-			toast.error(t('settingsPage.profileForm.error'));
+			toast.error(t('settingsPage.profileForm.error'))
 		}
 	}
 
@@ -81,5 +80,5 @@ export default function ProfileForm() {
 				</Button>
 			</Form>
 		</SettingsSection>
-	);
+	)
 }

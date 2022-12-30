@@ -1,24 +1,25 @@
-import { Text, TextProps, useBoolean } from '@chakra-ui/react';
-import { DEBUG_ENV } from '..';
+import { Text, TextProps, useBoolean } from '@chakra-ui/react'
+
+import { DEBUG_ENV } from '..'
 
 interface Props extends Omit<TextProps, 'children'> {
-	text?: string | null;
+	text?: string | null
 }
 
 // TODO: markdown rendering... will probably fix below FIXME, as well.
 // FIXME: does not render new lines properly, this is pretty basic and needs changing.
 export default function ReadMore({ text, ...props }: Props) {
-	const [showingAll, { toggle }] = useBoolean(false);
+	const [showingAll, { toggle }] = useBoolean(false)
 
-	const resolvedText = text ?? DEBUG_ENV ? DEBUG_FAKE_TEXT : ('' as string);
-	const canReadMore = resolvedText.length > 250;
+	const resolvedText = text ?? DEBUG_ENV ? DEBUG_FAKE_TEXT : ('' as string)
+	const canReadMore = resolvedText.length > 250
 
 	if (!resolvedText && !DEBUG_ENV) {
-		return null;
+		return null
 	}
 
 	if (!canReadMore) {
-		return <Text {...props}>{resolvedText}</Text>;
+		return <Text {...props}>{resolvedText}</Text>
 	}
 
 	return (
@@ -28,7 +29,7 @@ export default function ReadMore({ text, ...props }: Props) {
 				{showingAll ? ' Read less' : '... Read more'}
 			</span>
 		</Text>
-	);
+	)
 }
 
 const DEBUG_FAKE_TEXT =
@@ -40,4 +41,4 @@ const DEBUG_FAKE_TEXT =
 	Nullam malesuada nec massa eget facilisis. Aenean in nisi lacus. Etiam et tortor vel lacus maximus imperdiet. Fusce \
 	scelerisque dapibus fermentum. Nunc non mauris rhoncus neque tincidunt convallis id et nisl. Donec lobortis at lectus quis venenatis. \
 	Ut lacus urna, accumsan sed nisl eget, auctor auctor massa. Duis scelerisque aliquam scelerisque. In hac habitasse platea dictumst. Suspendisse \
-	consequat nisi nec enim finibus, sit amet gravida sem ultrices. Vestibulum feugiat erat et tincidunt pellentesque. Sed interdum mi ac quam convallis lobortis.';
+	consequat nisi nec enim finibus, sit amet gravida sem ultrices. Vestibulum feugiat erat et tincidunt pellentesque. Sed interdum mi ac quam convallis lobortis.'

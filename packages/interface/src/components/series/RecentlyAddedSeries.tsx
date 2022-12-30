@@ -1,13 +1,14 @@
-import { useRecentlyAddedSeries } from '@stump/client';
-import SlidingCardList from '../SlidingCardList';
-import SeriesCard from './SeriesCard';
+import { useRecentlyAddedSeries } from '@stump/client'
+
+import SlidingCardList from '../SlidingCardList'
+import SeriesCard from './SeriesCard'
 
 // TODO: better empty state
 export default function RecentlyAddedSeries() {
-	const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedSeries();
+	const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedSeries()
 
 	if (isLoading || !data) {
-		return null;
+		return null
 	}
 
 	return (
@@ -20,5 +21,5 @@ export default function RecentlyAddedSeries() {
 			hasNext={hasMore}
 			onScrollEnd={fetchMore}
 		/>
-	);
+	)
 }

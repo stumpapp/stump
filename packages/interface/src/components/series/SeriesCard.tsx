@@ -1,17 +1,18 @@
-import { prefetchSeries, Series } from '@stump/client';
-import { Progress, Text, useColorModeValue } from '@chakra-ui/react';
-import { getSeriesThumbnail } from '@stump/client/api';
-import pluralizeStat from '../../utils/pluralize';
-import Card, { CardBody, CardFooter } from '../Card';
+import { Progress, Text, useColorModeValue } from '@chakra-ui/react'
+import { prefetchSeries, Series } from '@stump/client'
+import { getSeriesThumbnail } from '@stump/client/api'
+
+import pluralizeStat from '../../utils/pluralize'
+import Card, { CardBody, CardFooter } from '../Card'
 
 export type SeriesCardProps = {
-	series: Series;
-	fixed?: boolean;
-};
+	series: Series
+	fixed?: boolean
+}
 
 export default function SeriesCard({ series, fixed }: SeriesCardProps) {
-	const bookCount = Number(series.media ? series.media.length : series.media_count ?? 0);
-	const unreadCount = series.unread_media_count;
+	const bookCount = Number(series.media ? series.media.length : series.media_count ?? 0)
+	const unreadCount = series.unread_media_count
 
 	return (
 		<Card
@@ -50,5 +51,5 @@ export default function SeriesCard({ series, fixed }: SeriesCardProps) {
 				</Text>
 			</CardFooter>
 		</Card>
-	);
+	)
 }

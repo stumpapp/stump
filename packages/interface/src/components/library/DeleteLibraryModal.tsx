@@ -1,7 +1,3 @@
-import { Trash } from 'phosphor-react';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-
 import {
 	MenuItem,
 	Modal,
@@ -11,46 +7,48 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	useDisclosure,
-} from '@chakra-ui/react';
-import { useLibraryMutation } from '@stump/client';
+} from '@chakra-ui/react'
+import type { Library } from '@stump/client'
+import { useLibraryMutation } from '@stump/client'
+import { Trash } from 'phosphor-react'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
-import Button, { ModalCloseButton } from '../../ui/Button';
-
-import type { Library } from '@stump/client';
+import Button, { ModalCloseButton } from '../../ui/Button'
 interface Props {
-	disabled?: boolean;
-	library: Library;
+	disabled?: boolean
+	library: Library
 }
 
 // TODO: custom tabs, active state is atrocious
 export default function DeleteLibraryModal({ disabled, library }: Props) {
-	const navigate = useNavigate();
+	const navigate = useNavigate()
 
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
 	const { deleteLibraryAsync } = useLibraryMutation({
 		onDeleted() {
-			onClose();
-			navigate('/');
+			onClose()
+			navigate('/')
 		},
-	});
+	})
 
 	function handleDelete() {
 		if (disabled) {
 			// This should never happen, but here just in case
-			throw new Error('You do not have permission to delete libraries.');
+			throw new Error('You do not have permission to delete libraries.')
 		} else {
 			toast.promise(deleteLibraryAsync(library.id), {
+				error: 'Error Deleting Library',
 				loading: 'Deleting Library...',
 				success: 'Library Deleted!',
-				error: 'Error Deleting Library',
-			});
+			})
 		}
 	}
 
 	function handleOpen() {
 		if (!disabled) {
-			onOpen();
+			onOpen()
 		}
 	}
 
@@ -87,5 +85,5 @@ export default function DeleteLibraryModal({ disabled, library }: Props) {
 				</ModalContent>
 			</Modal>
 		</>
-	);
+	)
 }

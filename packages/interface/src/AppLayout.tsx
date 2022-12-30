@@ -1,41 +1,40 @@
-import React, { useMemo } from 'react';
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Box, Flex, useColorModeValue } from '@chakra-ui/react'
+import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
+import React, { useMemo } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client';
-
-import Lazy from './components/Lazy';
-import Sidebar from './components/sidebar/Sidebar';
-import JobOverlay from './components/jobs/JobOverlay';
-import TopBar from './components/topbar/TopBar';
-import CommandPalette from './components/CommandPalette';
-import { useHotkeys } from 'react-hotkeys-hook';
-import ServerStatusOverlay from './components/ServerStatusOverlay';
+import CommandPalette from './components/CommandPalette'
+import JobOverlay from './components/jobs/JobOverlay'
+import Lazy from './components/Lazy'
+import ServerStatusOverlay from './components/ServerStatusOverlay'
+import Sidebar from './components/sidebar/Sidebar'
+import TopBar from './components/topbar/TopBar'
 
 export function AppLayout() {
-	const appProps = useAppProps();
+	const appProps = useAppProps()
 
-	const navigate = useNavigate();
-	const location = useLocation();
+	const navigate = useNavigate()
+	const location = useLocation()
 
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
 		// TODO: replace with single regex, I am lazy rn
 		return (
 			location.pathname.match(/\/books\/.+\/pages\/.+/) || location.pathname.match(/\/epub\/.+/)
-		);
-	}, [location]);
+		)
+	}, [location])
 
-	useCoreEventHandler();
+	useCoreEventHandler()
 
-	const { user: storeUser, setUser } = useUserStore();
+	const { user: storeUser, setUser } = useUserStore()
 
 	// TODO: platform specific hotkeys
 	// TODO: cmd+shift+h for home
 	useHotkeys('ctrl+,, cmd+,', (e) => {
-		e.preventDefault();
-		navigate('/settings/general');
-	});
+		e.preventDefault()
+		navigate('/settings/general')
+	})
 
 	// TODO: This logic needs to be moved, pretty much every request in Stump should have this
 	// functionality. I have no idea how to do this in a clean way right now though.
@@ -43,19 +42,19 @@ export function AppLayout() {
 	// the connection to the server
 	// FIXME: after switching to SSE again, this seems to break desktop app... kinda annoying bug.
 	const { user, isLoading, error } = useAuthQuery({
-		onSuccess: setUser,
 		enabled: !storeUser,
-	});
+		onSuccess: setUser,
+	})
 
 	// @ts-ignore: FIXME: type error no good >:(
 	if (error?.code === 'ERR_NETWORK' && appProps?.platform !== 'browser') {
-		return <Navigate to="/server-connection-error" state={{ from: location }} />;
+		return <Navigate to="/server-connection-error" state={{ from: location }} />
 	}
 
-	const hasUser = !!user || !!storeUser;
+	const hasUser = !!user || !!storeUser
 
 	if (!hasUser && !isLoading) {
-		return <Navigate to="/auth" state={{ from: location }} />;
+		return <Navigate to="/auth" state={{ from: location }} />
 	}
 
 	return (
@@ -72,7 +71,7 @@ export function AppLayout() {
 					// 	return false;
 					// }
 
-					return true;
+					return true
 				}}
 			>
 				{!hideSidebar && <Sidebar />}
@@ -87,5 +86,5 @@ export function AppLayout() {
 			{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
 			{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
 		</React.Suspense>
-	);
+	)
 }

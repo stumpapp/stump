@@ -1,7 +1,3 @@
-import { ListBullets } from 'phosphor-react';
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-
 import {
 	Box,
 	Drawer,
@@ -12,19 +8,21 @@ import {
 	Stack,
 	Text,
 	useColorModeValue,
-} from '@chakra-ui/react';
+} from '@chakra-ui/react'
+import type { EpubContent } from '@stump/client'
+import { ListBullets } from 'phosphor-react'
+import { useEffect, useRef } from 'react'
+import { useLocation } from 'react-router-dom'
 
-import { IconButton } from '../../../ui/Button';
-
-import type { EpubContent } from '@stump/client';
+import { IconButton } from '../../../ui/Button'
 interface EpubTocDrawerProps {
-	isOpen: boolean;
-	onClose(): void;
-	onOpen(): void;
+	isOpen: boolean
+	onClose(): void
+	onOpen(): void
 
 	// TODO: TYPE THESE, has to work both with epubjs and streaming epub engine (not built yet)
-	toc: EpubContent[];
-	onSelect(tocItem: string): void;
+	toc: EpubContent[]
+	onSelect(tocItem: string): void
 }
 
 export default function EpubTocDrawer({
@@ -34,19 +32,19 @@ export default function EpubTocDrawer({
 	toc,
 	onSelect,
 }: EpubTocDrawerProps) {
-	const location = useLocation();
+	const location = useLocation()
 
-	const btnRef = useRef(null);
+	const btnRef = useRef(null)
 
 	useEffect(() => {
 		if (isOpen) {
-			onClose();
+			onClose()
 		}
-	}, [location]);
+	}, [location])
 
 	function handleSelect(href: string) {
-		onSelect(href);
-		onClose();
+		onSelect(href)
+		onClose()
 	}
 
 	return (
@@ -84,5 +82,5 @@ export default function EpubTocDrawer({
 				</DrawerContent>
 			</Drawer>
 		</>
-	);
+	)
 }

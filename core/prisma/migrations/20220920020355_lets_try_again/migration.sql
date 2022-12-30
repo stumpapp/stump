@@ -35,6 +35,7 @@ CREATE TABLE "series" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "description" TEXT,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" DATETIME NOT NULL,
     "path" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'READY',

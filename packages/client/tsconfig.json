@@ -1,8 +1,13 @@
 {
-	"extends": "../config/base.tsconfig.json",
-	"compilerOptions": {
-		"skipLibCheck": true
-	},
-	"include": ["src"],
-	"exclude": ["node_modules"]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "outDir": "../../.moon/cache/types/packages/client"
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

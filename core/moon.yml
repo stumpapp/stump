@@ -1,0 +1,18 @@
+type: 'application'
+
+workspace:
+  inheritedTasks:
+    exclude: ['buildPackage']
+
+fileGroups:
+  app:
+    - 'src/**/*'
+
+language: 'rust'
+
+tasks:
+  test:
+    command: 'cargo test --all-targets'
+
+  generate:
+    command: 'cargo prisma generate'

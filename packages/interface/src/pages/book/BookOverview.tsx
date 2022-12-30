@@ -1,41 +1,40 @@
-import { useEffect } from 'react';
-import { Helmet } from 'react-helmet';
-import { useParams } from 'react-router-dom';
+import { Box, Heading, Text, useColorModeValue } from '@chakra-ui/react'
+import { useMedia, useTopBarStore } from '@stump/client'
+import { useEffect } from 'react'
+import { Helmet } from 'react-helmet'
+import { useParams } from 'react-router-dom'
 
-import { Box, Heading, Text, useColorModeValue } from '@chakra-ui/react';
-import { useMedia, useTopBarStore } from '@stump/client';
-
-import MediaCard from '../../components/media/MediaCard';
-import TagList from '../../components/tags/TagList';
-import ReadMore from '../../ui/ReadMore';
-import { formatBytes } from '../../utils/format';
-import Link from '../../ui/Link';
+import MediaCard from '../../components/media/MediaCard'
+import TagList from '../../components/tags/TagList'
+import Link from '../../ui/Link'
+import ReadMore from '../../ui/ReadMore'
+import { formatBytes } from '../../utils/format'
 
 // TODO: looks shit on mobile
 export default function BookOverview() {
-	const { id } = useParams();
+	const { id } = useParams()
 
 	if (!id) {
-		throw new Error('Book id is required for this route.');
+		throw new Error('Book id is required for this route.')
 	}
 
-	const { media, isLoading } = useMedia(id);
-	const { setBackwardsUrl } = useTopBarStore();
+	const { media, isLoading } = useMedia(id)
+	const { setBackwardsUrl } = useTopBarStore()
 
 	useEffect(() => {
 		if (media?.series) {
-			setBackwardsUrl(`/libraries/${media.series.id}`);
+			setBackwardsUrl(`/libraries/${media.series.id}`)
 		}
 
 		return () => {
-			setBackwardsUrl();
-		};
-	}, [media?.series?.id]);
+			setBackwardsUrl()
+		}
+	}, [media?.series?.id])
 
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div>Loading...</div>
 	} else if (!media) {
-		throw new Error('Media not found');
+		throw new Error('Media not found')
 	}
 
 	return (
@@ -73,5 +72,5 @@ export default function BookOverview() {
 				</div> */}
 			</div>
 		</>
-	);
+	)
 }

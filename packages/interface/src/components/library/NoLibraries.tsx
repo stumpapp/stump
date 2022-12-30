@@ -1,6 +1,7 @@
-import React from 'react';
-import { Heading, Stack, Text } from '@chakra-ui/react';
-import CreateLibraryModal from './CreateLibraryModal';
+import { Heading, Stack, Text } from '@chakra-ui/react'
+import React from 'react'
+
+import CreateLibraryModal from './CreateLibraryModal'
 
 export default function NoLibraries() {
 	return (
@@ -18,5 +19,5 @@ export default function NoLibraries() {
 				to add your first one.
 			</Text>
 		</Stack>
-	);
+	)
 }

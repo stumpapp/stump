@@ -1,6 +1,7 @@
-import { InputGroup, InputRightElement } from '@chakra-ui/react';
-import { FormControl } from '../../ui/Form';
-import Input from '../../ui/Input';
+import { InputGroup, InputRightElement } from '@chakra-ui/react'
+
+import { FormControl } from '../../ui/Form'
+import Input from '../../ui/Input'
 
 export default function ServerURLInput(props: any) {
 	return (
@@ -10,5 +11,5 @@ export default function ServerURLInput(props: any) {
 				<InputRightElement children={<></>} />
 			</InputGroup>
 		</FormControl>
-	);
+	)
 }

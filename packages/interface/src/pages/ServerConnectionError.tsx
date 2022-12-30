@@ -1,5 +1,6 @@
-import { Alert, AlertIcon, Container, Stack } from '@chakra-ui/react';
-import ServerUrlForm from '../components/ServerUrlForm';
+import { Alert, AlertIcon, Container, Stack } from '@chakra-ui/react'
+
+import ServerUrlForm from '../components/ServerUrlForm'
 
 export default function ServerConnectionError() {
 	return (
@@ -13,5 +14,5 @@ export default function ServerConnectionError() {
 
 			<ServerUrlForm />
 		</Stack>
-	);
+	)
 }

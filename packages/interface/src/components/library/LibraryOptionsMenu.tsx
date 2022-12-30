@@ -1,34 +1,35 @@
-import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
-import { ArrowsClockwise, Binoculars, DotsThreeVertical } from 'phosphor-react';
-import EditLibraryModal from './EditLibraryModal';
-import DeleteLibraryModal from './DeleteLibraryModal';
-import type { Library } from '@stump/client';
-import { useNavigate } from 'react-router-dom';
-import { queryClient, useScanLibrary, useUserStore } from '@stump/client';
+import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react'
+import type { Library } from '@stump/client'
+import { queryClient, useScanLibrary, useUserStore } from '@stump/client'
+import { ArrowsClockwise, Binoculars, DotsThreeVertical } from 'phosphor-react'
+import { useNavigate } from 'react-router-dom'
+
+import DeleteLibraryModal from './DeleteLibraryModal'
+import EditLibraryModal from './EditLibraryModal'
 
 interface Props {
-	library: Library;
+	library: Library
 }
 
 export default function LibraryOptionsMenu({ library }: Props) {
-	const navigate = useNavigate();
+	const navigate = useNavigate()
 
-	const { user } = useUserStore();
+	const { user } = useUserStore()
 
-	const { scanAsync } = useScanLibrary();
+	const { scanAsync } = useScanLibrary()
 
 	function handleScan() {
 		// extra protection, should not be possible to reach this.
 		if (user?.role !== 'SERVER_OWNER') {
-			throw new Error('You do not have permission to scan libraries.');
+			throw new Error('You do not have permission to scan libraries.')
 		}
 
 		// The UI will receive updates from SSE in fractions of ms lol and it can get bogged down.
 		// So, add a slight delay so the close animation of the menu can finish cleanly.
 		setTimeout(async () => {
-			await scanAsync(library.id);
-			await queryClient.invalidateQueries(['getJobReports']);
-		}, 50);
+			await scanAsync(library.id)
+			await queryClient.invalidateQueries(['getJobReports'])
+		}, 50)
 	}
 
 	// FIXME: so, disabled on the MenuItem doesn't seem to actually work... how cute.
@@ -40,7 +41,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 				hidden={user?.role !== 'SERVER_OWNER'}
 				p={1}
 				rounded="full"
-				_hover={{ bg: 'gray.200', _dark: { bg: 'gray.700' } }}
+				_hover={{ _dark: { bg: 'gray.700' }, bg: 'gray.200' }}
 				_focus={{
 					boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 				}}
@@ -71,5 +72,5 @@ export default function LibraryOptionsMenu({ library }: Props) {
 				<DeleteLibraryModal library={library} disabled={user?.role !== 'SERVER_OWNER'} />
 			</MenuList>
 		</Menu>
-	);
+	)
 }

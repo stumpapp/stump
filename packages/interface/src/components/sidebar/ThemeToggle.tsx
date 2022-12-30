@@ -1,10 +1,11 @@
-import { Button, useColorMode } from '@chakra-ui/react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Moon, Sun } from 'phosphor-react';
-import ToolTip from '../../ui/ToolTip';
+import { Button, useColorMode } from '@chakra-ui/react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Moon, Sun } from 'phosphor-react'
+
+import ToolTip from '../../ui/ToolTip'
 
 export default function ThemeToggle() {
-	const { colorMode, toggleColorMode } = useColorMode();
+	const { colorMode, toggleColorMode } = useColorMode()
 
 	return (
 		<div>
@@ -22,9 +23,9 @@ export default function ThemeToggle() {
 					>
 						<motion.span
 							key={colorMode === 'dark' ? 'moon' : 'sun'}
-							initial={{ y: -30, opacity: 0 }}
-							animate={{ y: 0, opacity: 1 }}
-							exit={{ y: 30, opacity: 0 }}
+							initial={{ opacity: 0, y: -30 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: 30 }}
 							transition={{ duration: 0.2 }}
 						>
 							{colorMode === 'dark' ? <Moon /> : <Sun />}
@@ -33,5 +34,5 @@ export default function ThemeToggle() {
 				</ToolTip>
 			</AnimatePresence>
 		</div>
-	);
+	)
 }

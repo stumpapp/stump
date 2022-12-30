@@ -1,31 +1,29 @@
-import { useEffect } from 'react';
-import { Helmet } from 'react-helmet';
-import { useParams } from 'react-router-dom';
+import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react'
+import type { Series } from '@stump/client'
+import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client'
+import { getSeriesThumbnail } from '@stump/client/api'
+import { useEffect } from 'react'
+import { Helmet } from 'react-helmet'
+import { useParams } from 'react-router-dom'
 
-import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react';
-import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client';
-import { getSeriesThumbnail } from '@stump/client/api';
-
-import MediaGrid from '../components/media/MediaGrid';
-import MediaList from '../components/media/MediaList';
-import DownloadSeriesButton from '../components/series/DownloadSeriesButton';
-import UpNextInSeriesButton from '../components/series/UpNextInSeriesButton';
-import { useGetPage } from '../hooks/useGetPage';
-import useIsInView from '../hooks/useIsInView';
-import Pagination from '../ui/Pagination';
-import ReadMore from '../ui/ReadMore';
-
-import type { Series } from '@stump/client';
-import TagList from '../components/tags/TagList';
+import MediaGrid from '../components/media/MediaGrid'
+import MediaList from '../components/media/MediaList'
+import DownloadSeriesButton from '../components/series/DownloadSeriesButton'
+import UpNextInSeriesButton from '../components/series/UpNextInSeriesButton'
+import TagList from '../components/tags/TagList'
+import { useGetPage } from '../hooks/useGetPage'
+import useIsInView from '../hooks/useIsInView'
+import Pagination from '../ui/Pagination'
+import ReadMore from '../ui/ReadMore'
 
 interface OverviewTitleSectionProps {
-	isVisible: boolean;
-	series: Series;
+	isVisible: boolean
+	series: Series
 }
 
 function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) {
 	if (!isVisible) {
-		return null;
+		return null
 	}
 
 	return (
@@ -55,50 +53,50 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 				<TagList tags={series.tags} />
 			</div>
 		</div>
-	);
+	)
 }
 
 export default function SeriesOverview() {
-	const [containerRef, isInView] = useIsInView();
+	const [containerRef, isInView] = useIsInView()
 
-	const { id } = useParams();
-	const { page } = useGetPage();
+	const { id } = useParams()
+	const { page } = useGetPage()
 
 	if (!id) {
-		throw new Error('Series id is required');
+		throw new Error('Series id is required')
 	}
 
-	const { layoutMode } = useLayoutMode('SERIES');
-	const { setBackwardsUrl } = useTopBarStore();
+	const { layoutMode } = useLayoutMode('SERIES')
+	const { setBackwardsUrl } = useTopBarStore()
 
-	const { series, isLoading: isLoadingSeries } = useSeries(id);
+	const { series, isLoading: isLoadingSeries } = useSeries(id)
 
-	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMedia(id, page);
+	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMedia(id, page)
 
 	useEffect(() => {
 		if (!isInView) {
 			containerRef.current?.scrollIntoView({
 				block: 'nearest',
 				inline: 'start',
-			});
+			})
 		}
-	}, [pageData?.current_page]);
+	}, [pageData?.current_page])
 
 	useEffect(() => {
 		if (series?.library) {
-			setBackwardsUrl(`/libraries/${series.library.id}`);
+			setBackwardsUrl(`/libraries/${series.library.id}`)
 		}
 
 		return () => {
-			setBackwardsUrl();
-		};
-	}, [series?.library?.id]);
+			setBackwardsUrl()
+		}
+	}, [series?.library?.id])
 
 	// FIXME: ugly
 	if (isLoadingSeries) {
-		return <div>Loading...</div>;
+		return <div>Loading...</div>
 	} else if (!series) {
-		throw new Error('Series not found');
+		throw new Error('Series not found')
 	}
 
 	return (
@@ -129,5 +127,5 @@ export default function SeriesOverview() {
 				/>
 			</div>
 		</div>
-	);
+	)
 }

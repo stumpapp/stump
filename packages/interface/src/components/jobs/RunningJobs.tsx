@@ -1,46 +1,45 @@
-import { useMemo } from 'react';
+import { Heading, Progress, Stack, Text, useColorModeValue, VStack } from '@chakra-ui/react'
+import type { JobReport } from '@stump/client'
+import { useJobContext } from '@stump/client'
+import { cancelJob } from '@stump/client/api'
+import { useMemo } from 'react'
+import toast from 'react-hot-toast'
 
-import { Heading, Progress, Stack, Text, useColorModeValue, VStack } from '@chakra-ui/react';
-import { useJobContext } from '@stump/client';
-
-import type { JobReport } from '@stump/client';
-import { cancelJob } from '@stump/client/api';
-import Button from '../../ui/Button';
-import toast from 'react-hot-toast';
-import { readableKind } from './utils';
+import Button from '../../ui/Button'
+import { readableKind } from './utils'
 
 function EmptyState({ message }: { message: string }) {
 	return (
 		<Text color={useColorModeValue('gray.600', 'gray.400')} fontSize="sm">
 			{message}
 		</Text>
-	);
+	)
 }
 
 export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
-	const context = useJobContext();
+	const context = useJobContext()
 
 	if (!context) {
-		throw new Error('JobContextProvider not found');
+		throw new Error('JobContextProvider not found')
 	}
 
-	const { activeJobs } = context;
+	const { activeJobs } = context
 
 	const runningJobs = useMemo(() => {
 		return jobReports
 			.filter((job) => job.status === 'RUNNING' && job.id && activeJobs[job.id])
-			.map((job) => ({ ...job, ...activeJobs[job.id!] }));
-	}, [activeJobs, jobReports]);
+			.map((job) => ({ ...job, ...activeJobs[job.id!] }))
+	}, [activeJobs, jobReports])
 
 	async function handleCancelJob(id: string | null) {
 		if (id) {
 			toast.promise(cancelJob(id), {
+				error: 'Failed to cancel job',
 				loading: 'Cancelling job...',
 				success: 'Job cancelled',
-				error: 'Failed to cancel job',
-			});
+			})
 		} else {
-			console.debug('Tried to cancel job with no ID: ', runningJobs);
+			console.debug('Tried to cancel job with no ID: ', runningJobs)
 		}
 	}
 
@@ -103,9 +102,9 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 								</div>
 							</div>
 						</VStack>
-					);
+					)
 				})}
 			</Stack>
 		</Stack>
-	);
+	)
 }

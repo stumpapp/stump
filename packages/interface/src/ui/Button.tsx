@@ -1,21 +1,22 @@
 import {
-	ButtonProps as ChakraButtonProps,
 	Button as ChakraButton,
-	ModalCloseButton as ChakraModalCloseButton,
+	ButtonProps as ChakraButtonProps,
 	forwardRef,
-} from '@chakra-ui/react';
-import ShortcutToolTip from '../components/ShortcutToolTip';
-import ToolTip from './ToolTip';
+	ModalCloseButton as ChakraModalCloseButton,
+} from '@chakra-ui/react'
+
+import ShortcutToolTip from '../components/ShortcutToolTip'
+import ToolTip from './ToolTip'
 
 export interface ButtonProps extends ChakraButtonProps {
 	// TODO: change shortcutAction to toolTipLabel, more generic.
 	// when shortcutKeybind is present, we know it is a shortcutAction.
-	shortcutAction?: string;
-	shortcutKeybind?: string[];
+	shortcutAction?: string
+	shortcutKeybind?: string[]
 }
 
 export default forwardRef<ButtonProps, 'button'>((props, ref) => {
-	const { shortcutKeybind, shortcutAction, ...rest } = props;
+	const { shortcutKeybind, shortcutAction, ...rest } = props
 
 	const button = (
 		<ChakraButton
@@ -25,23 +26,23 @@ export default forwardRef<ButtonProps, 'button'>((props, ref) => {
 				boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 			}}
 		/>
-	);
+	)
 
 	if (shortcutKeybind) {
 		return (
 			<ShortcutToolTip shortcutAction={shortcutAction} keybind={shortcutKeybind}>
 				{button}
 			</ShortcutToolTip>
-		);
+		)
 	} else if (shortcutAction) {
-		return <ToolTip label={shortcutAction}>{button}</ToolTip>;
+		return <ToolTip label={shortcutAction}>{button}</ToolTip>
 	}
 
-	return button;
-});
+	return button
+})
 
 export const IconButton = forwardRef<ButtonProps, 'button'>((props, ref) => {
-	const { shortcutKeybind, shortcutAction, ...rest } = props;
+	const { shortcutKeybind, shortcutAction, ...rest } = props
 
 	const button = (
 		<ChakraButton
@@ -55,20 +56,20 @@ export const IconButton = forwardRef<ButtonProps, 'button'>((props, ref) => {
 				boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 			}}
 		/>
-	);
+	)
 
 	if (shortcutKeybind) {
 		return (
 			<ShortcutToolTip shortcutAction={shortcutAction} keybind={shortcutKeybind}>
 				{button}
 			</ShortcutToolTip>
-		);
+		)
 	} else if (shortcutAction) {
-		return <ToolTip label={shortcutAction}>{button}</ToolTip>;
+		return <ToolTip label={shortcutAction}>{button}</ToolTip>
 	}
 
-	return button;
-});
+	return button
+})
 
 export const ModalCloseButton = forwardRef<ButtonProps, 'button'>((props, ref) => (
 	<ChakraModalCloseButton
@@ -78,4 +79,4 @@ export const ModalCloseButton = forwardRef<ButtonProps, 'button'>((props, ref) =
 			boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 		}}
 	/>
-));
+))

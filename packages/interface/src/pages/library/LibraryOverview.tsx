@@ -1,47 +1,46 @@
-import { useEffect } from 'react';
-import { Helmet } from 'react-helmet';
-import { useParams } from 'react-router-dom';
+import { Spacer } from '@chakra-ui/react'
+import { useLayoutMode, useLibrary, useLibrarySeries } from '@stump/client'
+import { useEffect } from 'react'
+import { Helmet } from 'react-helmet'
+import { useParams } from 'react-router-dom'
 
-import { Spacer } from '@chakra-ui/react';
-import { useLayoutMode, useLibrary, useLibrarySeries } from '@stump/client';
-
-import SeriesGrid from '../../components/series/SeriesGrid';
-import SeriesList from '../../components/series/SeriesList';
-import useIsInView from '../../hooks/useIsInView';
-import Pagination from '../../ui/Pagination';
-import { useGetPage } from '../../hooks/useGetPage';
+import SeriesGrid from '../../components/series/SeriesGrid'
+import SeriesList from '../../components/series/SeriesList'
+import { useGetPage } from '../../hooks/useGetPage'
+import useIsInView from '../../hooks/useIsInView'
+import Pagination from '../../ui/Pagination'
 
 export default function LibraryOverview() {
-	const [containerRef, isInView] = useIsInView<HTMLDivElement>();
+	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
-	const { id } = useParams();
-	const { page } = useGetPage();
+	const { id } = useParams()
+	const { page } = useGetPage()
 
 	if (!id) {
-		throw new Error('Library id is required');
+		throw new Error('Library id is required')
 	}
 
 	function handleError(err: unknown) {
-		console.error(err);
+		console.error(err)
 	}
 
-	const { isLoading, library } = useLibrary(id, { onError: handleError });
+	const { isLoading, library } = useLibrary(id, { onError: handleError })
 
-	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page);
+	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page)
 
 	useEffect(() => {
 		if (!isInView) {
-			containerRef.current?.scrollIntoView();
+			containerRef.current?.scrollIntoView()
 		}
-	}, [pageData?.current_page]);
+	}, [pageData?.current_page])
 
 	if (isLoading) {
-		return null;
+		return null
 	} else if (!library) {
-		throw new Error('Library not found');
+		throw new Error('Library not found')
 	}
 
-	const { layoutMode } = useLayoutMode('LIBRARY');
+	const { layoutMode } = useLayoutMode('LIBRARY')
 
 	return (
 		<>
@@ -70,5 +69,5 @@ export default function LibraryOverview() {
 				/>
 			</div>
 		</>
-	);
+	)
 }

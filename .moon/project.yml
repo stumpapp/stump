@@ -1,0 +1,100 @@
+# https://moonrepo.dev/docs/config/global-project
+$schema: 'https://moonrepo.dev/schemas/global-project.json'
+
+fileGroups:
+  # Application specific files
+  app: []
+  configs:
+    - '*.{js,json,yml,yaml}'
+  sources:
+    - 'public/**/*'
+    - 'src/**/*'
+    - 'types/**/*'
+  tests:
+    - 'tests/**/*.test.*'
+    - 'tests/**/*.stories.*'
+    - '**/__tests__/**/*'
+  assets:
+    - 'assets/**/*'
+    - 'images/**/*'
+    - 'static/**/*'
+    - '**/*.{scss,css}'
+    - '**/*.{md,mdx}'
+
+# A task is an action that is ran within the context of a project, and wraps
+# around an npm or system command. Tasks that are defined here and inherited by all projects
+# within the workspace, but can be overridden per project.
+#
+# This setting requires a map, where the key is a unique name for the task,
+# and the value is an object of task parameters.
+tasks:
+  format:
+    command:
+      - 'prettier'
+      # Use the same config for the entire repo
+      - '--config'
+      - '@in(4)'
+      # Use the same ignore patterns as well
+      - '--ignore-path'
+      - '@in(3)'
+      # Fail for unformatted code
+      - '--check'
+      # Run in current dir
+      - '.'
+    inputs:
+      # Source and test files
+      - 'src/**/*'
+      - 'tests/**/*'
+      # Config and other files
+      - '**/*.{md,mdx,yml,yaml,json}'
+      # Root configs, any format
+      - '/.prettierignore'
+      - '/.prettierrc'
+
+  lint:
+    command:
+      - 'eslint'
+      - '--ext'
+      - '.ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs'
+      - '--fix'
+      - '--report-unused-disable-directives'
+      - '--no-error-on-unmatched-pattern'
+      - '--exit-on-fatal-error'
+      - '--ignore-path'
+      - '@in(2)'
+      - '.'
+    inputs:
+      - '*.config.*'
+      - '**/.eslintrc.*'
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+      - 'tsconfig.json'
+      - '/tsconfig.eslint.json'
+      - '/tsconfig.options.json'
+      - '@group(app)'
+      - '@globs(sources)'
+      - '@globs(tests)'
+
+  typecheck:
+    command:
+      - 'tsc'
+      - '--build'
+      - '--verbose'
+    inputs:
+      - '@group(app)'
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - 'tsconfig.json'
+      - 'tsconfig.*.json'
+      - '/tsconfig.options.json'
+
+  # test:
+  #   command:
+  #     - 'jest'
+  #     - '--passWithNoTests'
+  #     - '--preset'
+  #     - 'jest-preset-moon'
+  #   inputs:
+  #     - '@globs(sources)'
+  #     - '@globs(tests)'
+  #     - 'jest.config.*'

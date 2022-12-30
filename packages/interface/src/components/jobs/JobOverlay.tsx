@@ -1,28 +1,28 @@
-import { useMemo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Box, Progress, Text } from '@chakra-ui/react';
-import { useJobContext } from '@stump/client';
+import { Box, Progress, Text } from '@chakra-ui/react'
+import { useJobContext } from '@stump/client'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useMemo } from 'react'
 
 export default function JobOverlay() {
-	const context = useJobContext();
+	const context = useJobContext()
 
 	if (!context) {
-		throw new Error('JobContextProvider not found');
+		throw new Error('JobContextProvider not found')
 	}
 
-	const { activeJobs } = context;
+	const { activeJobs } = context
 
 	// get the first job that is running from the activeJobs object
-	const jobShown = Object.values(activeJobs).find((job) => job.status?.toLowerCase() === 'running');
+	const jobShown = Object.values(activeJobs).find((job) => job.status?.toLowerCase() === 'running')
 
 	function formatMessage(message?: string | null) {
 		if (message?.startsWith('Analyzing')) {
-			let filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/');
+			const filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/')
 
-			return `Analyzing ${filePieces.slice(filePieces.length - 1).join('/')}`;
+			return `Analyzing ${filePieces.slice(filePieces.length - 1).join('/')}`
 		}
 
-		return message;
+		return message
 	}
 
 	return (
@@ -33,9 +33,9 @@ export default function JobOverlay() {
 					bg={'white'}
 					_dark={{ bg: 'gray.700' }}
 					className="fixed right-[1rem] bottom-[1rem] rounded-md shadow p-2 flex flex-col justify-center items-center w-52"
-					initial={{ opacity: 0, y: 100, scale: 0.9 }}
-					animate={{ opacity: 1, y: 0, scale: 1 }}
-					exit={{ opacity: 0, y: 100, scale: 0.9 }}
+					initial={{ opacity: 0, scale: 0.9, y: 100 }}
+					animate={{ opacity: 1, scale: 1, y: 0 }}
+					exit={{ opacity: 0, scale: 0.9, y: 100 }}
 				>
 					<div className="flex flex-col space-y-2 p-2 w-full text-xs">
 						<Text fontWeight="medium">{formatMessage(jobShown.message) ?? 'Job in Progress'}</Text>
@@ -59,5 +59,5 @@ export default function JobOverlay() {
 				</Box>
 			)}
 		</AnimatePresence>
-	);
+	)
 }

@@ -1,5 +1,5 @@
-import SettingsSection from '../SettingsSection';
-import LocaleSelector from '../LocaleSelector';
+import LocaleSelector from '../LocaleSelector'
+import SettingsSection from '../SettingsSection'
 
 // TODO: locale for title/subtitle
 // TODO: more preferences here...
@@ -12,7 +12,7 @@ export default function PreferencesForm() {
 		>
 			<LocaleSelector />
 		</SettingsSection>
-	);
+	)
 }
 
 // TODO: I will eventually add a decent amount of configurable user preferences here.

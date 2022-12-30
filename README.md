@@ -29,6 +29,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 <img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 90%" />
 </p>
 
+<!-- prettier-ignore: I hate you sometimes prettier -->
 <details>
   <summary><b>Table of Contents</b></summary>
   <p>
@@ -36,13 +37,14 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-    - [Where to start?](#where-to-start)
+  - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
   - [/packages](#packages)
   - [/core](#core)
 - [Similar Projects 👯](#similar-projects-)
 - [Acknowledgements 🙏](#acknowledgements-)
+</details>
 
 > **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developing-). Otherwise, stay tuned for the first release!
 

@@ -1,19 +1,18 @@
-import { Heading } from '@chakra-ui/react';
+import { Heading } from '@chakra-ui/react'
+import type { Series } from '@stump/client'
 
-import SeriesCard from './SeriesCard';
-
-import type { Series } from '@stump/client';
-import { CardGrid } from '../Card';
+import { CardGrid } from '../Card'
+import SeriesCard from './SeriesCard'
 
 interface Props {
-	isLoading: boolean;
-	series?: Series[];
+	isLoading: boolean
+	series?: Series[]
 }
 
 // TODO: I think this *might* need a redesign... Not sure, gotta do some UX research about this
 export default function SeriesGrid({ series, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div>Loading...</div>
 	} else if (!series || !series.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">
@@ -21,7 +20,7 @@ export default function SeriesGrid({ series, isLoading }: Props) {
 				no media. */}
 				<Heading size="sm">It doesn't look like there are any series here.</Heading>
 			</div>
-		);
+		)
 	}
 
 	return (
@@ -30,5 +29,5 @@ export default function SeriesGrid({ series, isLoading }: Props) {
 				<SeriesCard key={s.id} series={s} />
 			))}
 		</CardGrid>
-	);
+	)
 }

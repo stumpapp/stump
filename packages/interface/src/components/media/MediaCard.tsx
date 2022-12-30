@@ -1,30 +1,31 @@
-import type { Media } from '@stump/client';
-import { prefetchMedia } from '@stump/client';
-import { getMediaThumbnail } from '@stump/client/api';
-import { Progress, Text, useColorModeValue } from '@chakra-ui/react';
-import Card, { CardBody, CardFooter } from '../Card';
-import pluralizeStat from '../../utils/pluralize';
-import { prefetchMediaPage } from '../../utils/prefetch';
+import { Progress, Text, useColorModeValue } from '@chakra-ui/react'
+import type { Media } from '@stump/client'
+import { prefetchMedia } from '@stump/client'
+import { getMediaThumbnail } from '@stump/client/api'
+
+import pluralizeStat from '../../utils/pluralize'
+import { prefetchMediaPage } from '../../utils/prefetch'
+import Card, { CardBody, CardFooter } from '../Card'
 
 export type MediaCardProps = {
-	media: Media;
+	media: Media
 	// changes the card link to go directly to a reader, rather than overview page
-	readingLink?: boolean;
+	readingLink?: boolean
 	// Used on the home page to set the height/width of the card for the sliding flex layout
-	fixed?: boolean;
-};
+	fixed?: boolean
+}
 
 export default function MediaCard({ media, readingLink, fixed }: MediaCardProps) {
-	const pagesLeft = media.current_page ? media.pages - media.current_page : undefined;
+	const pagesLeft = media.current_page ? media.pages - media.current_page : undefined
 	const link = readingLink
 		? `/books/${media.id}/pages/${media.current_page ?? 1}`
-		: `/books/${media.id}`;
+		: `/books/${media.id}`
 
 	function handleMouseOver() {
-		prefetchMedia(media.id);
+		prefetchMedia(media.id)
 
 		if (media.current_page) {
-			let _img = prefetchMediaPage(media.id, media.current_page);
+			const _img = prefetchMediaPage(media.id, media.current_page)
 		}
 	}
 
@@ -67,5 +68,5 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 				</Text>
 			</CardFooter>
 		</Card>
-	);
+	)
 }

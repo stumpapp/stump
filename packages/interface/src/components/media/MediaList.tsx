@@ -1,16 +1,17 @@
-import type { Media } from '@stump/client';
-import ListItem from '../ListItem';
+import type { Media } from '@stump/client'
+
+import ListItem from '../ListItem'
 
 interface Props {
-	isLoading: boolean;
-	media?: Media[];
+	isLoading: boolean
+	media?: Media[]
 }
 
 export default function MediaList({ media, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div>Loading...</div>
 	} else if (!media) {
-		return <div>whoop</div>;
+		return <div>whoop</div>
 	}
 
 	return (
@@ -26,5 +27,5 @@ export default function MediaList({ media, isLoading }: Props) {
 				/>
 			))}
 		</div>
-	);
+	)
 }

@@ -34,7 +34,7 @@ module.exports = {
 		ecmaFeatures: {
 			jsx: true,
 		},
-		project: './packages/config/tsconfig.eslint.json',
+		project: 'tsconfig.eslint.json',
 		tsconfigRootDir: __dirname,
 	},
 	plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier', 'sort-keys-fix', 'react'],

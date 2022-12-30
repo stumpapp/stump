@@ -1,16 +1,17 @@
-import { ButtonGroup, Code, Heading, HStack, Stack, Text } from '@chakra-ui/react';
-import { FallbackProps } from 'react-error-boundary';
-import toast from 'react-hot-toast';
-import Button from '../ui/Button';
-import { copyTextToClipboard } from '../utils/misc';
+import { ButtonGroup, Code, Heading, HStack, Stack, Text } from '@chakra-ui/react'
+import { FallbackProps } from 'react-error-boundary'
+import toast from 'react-hot-toast'
+
+import Button from '../ui/Button'
+import { copyTextToClipboard } from '../utils/misc'
 
 // TODO: take in platform?
 export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 	function copyErrorStack() {
 		if (error.stack) {
 			copyTextToClipboard(error.stack).then(() => {
-				toast.success('Copied error details to your clipboard');
-			});
+				toast.success('Copied error details to your clipboard')
+			})
 		}
 	}
 
@@ -77,5 +78,5 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 				</HStack>
 			</Stack>
 		</Stack>
-	);
+	)
 }

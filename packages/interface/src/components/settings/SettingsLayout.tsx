@@ -1,13 +1,14 @@
-import { Box, useColorModeValue, VStack } from '@chakra-ui/react';
-import SettingsNavigation from './SettingsNavigation';
-import { Outlet } from 'react-router-dom';
-import { useUserStore } from '@stump/client';
+import { Box, useColorModeValue, VStack } from '@chakra-ui/react'
+import { useUserStore } from '@stump/client'
+import { Outlet } from 'react-router-dom'
+
+import SettingsNavigation from './SettingsNavigation'
 
 export default function SettingsLayout() {
-	const { user } = useUserStore();
+	const { user } = useUserStore()
 
 	if (!user) {
-		return null;
+		return null
 	}
 
 	return (
@@ -17,5 +18,5 @@ export default function SettingsLayout() {
 				<Outlet />
 			</Box>
 		</VStack>
-	);
+	)
 }

@@ -1,72 +1,72 @@
-import { useContext, useMemo } from 'react';
-import { Box, Tab, TabList, Tabs } from '@chakra-ui/react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { AppPropsContext, User } from '@stump/client';
+import { Box, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { AppPropsContext, User } from '@stump/client'
+import { useContext, useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const DEFAULT_PAGES = [
 	{
+		displayName: 'General',
 		path: '/settings/general',
 		shortName: 'general',
-		displayName: 'General',
 	},
 	{
+		displayName: 'Users',
 		path: '/settings/users',
 		shortName: 'users',
-		displayName: 'Users',
 	},
 	{
+		displayName: 'Server',
 		path: '/settings/server',
 		shortName: 'server',
-		displayName: 'Server',
 	},
 	{
+		displayName: 'Jobs',
 		path: '/settings/jobs',
 		shortName: 'jobs',
-		displayName: 'Jobs',
 	},
-];
+]
 
 const DESKTOP_PAGE = {
+	displayName: 'Desktop',
 	path: '/settings/desktop',
 	shortName: 'desktop',
-	displayName: 'Desktop',
-};
+}
 
 type Props = {
-	user?: User | null;
-};
+	user?: User | null
+}
 
 export default function SettingsNavigation({ user }: Props) {
-	const appProps = useContext(AppPropsContext);
-	const navigate = useNavigate();
+	const appProps = useContext(AppPropsContext)
+	const navigate = useNavigate()
 
-	const location = useLocation();
+	const location = useLocation()
 
 	const pages = useMemo(() => {
-		let base = DEFAULT_PAGES;
+		let base = DEFAULT_PAGES
 
 		if (appProps?.platform !== 'browser') {
 			// insert into 2nd position
-			base = [...base.slice(0, 1), DESKTOP_PAGE, ...base.slice(1)];
+			base = [...base.slice(0, 1), DESKTOP_PAGE, ...base.slice(1)]
 		}
 
 		if (user?.role !== 'SERVER_OWNER') {
-			base = base.filter((page) => page.shortName === 'general' || page.shortName === 'desktop');
+			base = base.filter((page) => page.shortName === 'general' || page.shortName === 'desktop')
 		}
 
-		return base.map((page, i) => ({ ...page, index: i }));
-	}, [appProps?.platform, user?.role]);
+		return base.map((page, i) => ({ ...page, index: i }))
+	}, [appProps?.platform, user?.role])
 
 	const activeTab = useMemo(
 		() => pages.find((p) => p.path === location.pathname)?.index ?? 0,
 		[location],
-	);
+	)
 
 	function handleChange(index: number) {
-		const page = pages.find((p) => p.index === index);
+		const page = pages.find((p) => p.index === index)
 
 		if (page && index !== activeTab) {
-			navigate(`/settings/${page.shortName}`);
+			navigate(`/settings/${page.shortName}`)
 		}
 	}
 
@@ -81,5 +81,5 @@ export default function SettingsNavigation({ user }: Props) {
 				</TabList>
 			</Tabs>
 		</Box>
-	);
+	)
 }

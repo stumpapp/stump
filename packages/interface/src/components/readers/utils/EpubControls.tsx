@@ -1,8 +1,3 @@
-import React from 'react';
-import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react';
-import { useNavigate } from 'react-router-dom';
-import { SwipeableHandlers } from 'react-swipeable';
-
 import {
 	Box,
 	ButtonGroup,
@@ -14,27 +9,31 @@ import {
 	useColorModeValue,
 	useDisclosure,
 	VStack,
-} from '@chakra-ui/react';
-import type { Epub } from '@stump/client';
+} from '@chakra-ui/react'
+import type { Epub } from '@stump/client'
+import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { SwipeableHandlers } from 'react-swipeable'
 
-import Button, { IconButton } from '../../../ui/Button';
-import EpubTocDrawer from './EpubTocDrawer';
-import FontSelection from './FontSelection';
+import Button, { IconButton } from '../../../ui/Button'
+import EpubTocDrawer from './EpubTocDrawer'
+import FontSelection from './FontSelection'
 
 interface IEpubControls {
-	next(): Promise<void>;
-	prev(): Promise<void>;
-	goTo(href: string): void;
-	changeFontSize(size: number): void;
+	next(): Promise<void>
+	prev(): Promise<void>
+	goTo(href: string): void
+	changeFontSize(size: number): void
 }
 
 interface EpubControlsProps {
-	controls: IEpubControls;
-	fontSize: number;
-	swipeHandlers: SwipeableHandlers;
-	location: any;
-	children: React.ReactNode;
-	epub: Epub;
+	controls: IEpubControls
+	fontSize: number
+	swipeHandlers: SwipeableHandlers
+	location: any
+	children: React.ReactNode
+	epub: Epub
 }
 
 interface HeaderControlsProps
@@ -48,15 +47,15 @@ function EpubHeaderControls({
 	epub,
 	goTo,
 }: HeaderControlsProps) {
-	const navigate = useNavigate();
+	const navigate = useNavigate()
 
-	const [visible, { on, off }] = useBoolean(false);
+	const [visible, { on, off }] = useBoolean(false)
 
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
 	function handleMouseEnter() {
 		if (!visible) {
-			on();
+			on()
 		}
 	}
 
@@ -64,8 +63,8 @@ function EpubHeaderControls({
 		if (visible && !isOpen) {
 			setTimeout(() => {
 				// TODO: need to check if still in div before shutting off
-				off();
-			}, 500);
+				off()
+			}, 500)
 		}
 	}
 
@@ -132,7 +131,7 @@ function EpubHeaderControls({
 				</ButtonGroup>
 			</HStack>
 		</Box>
-	);
+	)
 }
 
 export default function EpubControls({
@@ -143,29 +142,29 @@ export default function EpubControls({
 	location,
 	epub,
 }: EpubControlsProps) {
-	const [visibleNav, { on: showNav, off: hideNav }] = useBoolean(true);
+	const [visibleNav, { on: showNav, off: hideNav }] = useBoolean(true)
 
-	const { prev, next, changeFontSize } = controls;
+	const { prev, next, changeFontSize } = controls
 
 	function handleMouseEnterNav() {
 		if (!visibleNav) {
-			showNav();
+			showNav()
 		}
 	}
 
 	function handleMouseLeaveNav() {
 		if (visibleNav) {
-			hideNav();
+			hideNav()
 		}
 	}
 
 	function handleTapEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
 		// if tap is really close to right edge of screen, next page
 		if (e.clientX > window.innerWidth - 75) {
-			next();
+			next()
 		} else if (e.clientX < 75) {
 			// if tap is really close to left edge of screen, previous page
-			prev();
+			prev()
 		}
 	}
 
@@ -220,5 +219,5 @@ export default function EpubControls({
 				</div>
 			</HStack>
 		</Stack>
-	);
+	)
 }

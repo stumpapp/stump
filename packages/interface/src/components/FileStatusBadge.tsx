@@ -1,22 +1,21 @@
-import { Badge } from '@chakra-ui/react';
-
-import type { FileStatus } from '@stump/client';
+import { Badge } from '@chakra-ui/react'
+import type { FileStatus } from '@stump/client'
 
 export default function FileStatusBadge({ status }: { status: FileStatus }) {
 	const color = (() => {
 		if (status === 'READY') {
-			return 'green';
+			return 'green'
 		} else if (status === 'MISSING') {
-			return 'yellow';
+			return 'yellow'
 		} else if (status === 'ERROR') {
-			return 'red';
+			return 'red'
 		}
-		return 'gray';
-	})();
+		return 'gray'
+	})()
 
 	return (
 		<Badge textTransform="none" bg={color} rounded="md">
 			{status}
 		</Badge>
-	);
+	)
 }

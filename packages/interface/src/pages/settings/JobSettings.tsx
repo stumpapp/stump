@@ -1,17 +1,18 @@
-import { Stack } from '@chakra-ui/react';
-import { useJobReport } from '@stump/client';
-import { Helmet } from 'react-helmet';
-import { RunningJobs } from '../../components/jobs/RunningJobs';
-import JobsTable from '../../components/jobs/JobsTable';
+import { Stack } from '@chakra-ui/react'
+import { useJobReport } from '@stump/client'
+import { Helmet } from 'react-helmet'
+
+import JobsTable from '../../components/jobs/JobsTable'
+import { RunningJobs } from '../../components/jobs/RunningJobs'
 
 // TODO: fix error/loading state lol
 export default function JobSettings() {
-	const { isLoading, jobReports } = useJobReport();
+	const { isLoading, jobReports } = useJobReport()
 
 	if (!jobReports && isLoading) {
-		throw new Error('TODO');
+		throw new Error('TODO')
 	} else if (isLoading) {
-		return <p>Loading...</p>;
+		return <p>Loading...</p>
 	}
 
 	return (
@@ -28,5 +29,5 @@ export default function JobSettings() {
 				<JobsTable />
 			</Stack>
 		</>
-	);
+	)
 }

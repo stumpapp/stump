@@ -7,13 +7,14 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	ModalProps,
-} from '@chakra-ui/react';
-import Button from './Button';
+} from '@chakra-ui/react'
+
+import Button from './Button'
 
 export type ConfirmationModalProps = {
-	title?: string;
-	onConfirm: () => void;
-} & ModalProps;
+	title?: string
+	onConfirm: () => void
+} & ModalProps
 
 export default function ConfirmationModal({
 	title,
@@ -37,5 +38,5 @@ export default function ConfirmationModal({
 				</ModalFooter>
 			</ModalContent>
 		</Modal>
-	);
+	)
 }

@@ -1,16 +1,17 @@
-import { Heading } from '@chakra-ui/react';
-import type { Media } from '@stump/client';
-import { CardGrid } from '../Card';
-import MediaCard from './MediaCard';
+import { Heading } from '@chakra-ui/react'
+import type { Media } from '@stump/client'
+
+import { CardGrid } from '../Card'
+import MediaCard from './MediaCard'
 
 interface Props {
-	isLoading: boolean;
-	media?: Media[];
+	isLoading: boolean
+	media?: Media[]
 }
 
 export default function MediaGrid({ media, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div>Loading...</div>
 	} else if (!media || !media.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">
@@ -18,7 +19,7 @@ export default function MediaGrid({ media, isLoading }: Props) {
 				no media. */}
 				<Heading size="sm">It doesn't look like there is any media here.</Heading>
 			</div>
-		);
+		)
 	}
 
 	return (
@@ -27,5 +28,5 @@ export default function MediaGrid({ media, isLoading }: Props) {
 				<MediaCard key={m.id} media={m} />
 			))}
 		</CardGrid>
-	);
+	)
 }

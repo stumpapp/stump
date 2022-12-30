@@ -1,19 +1,17 @@
-import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { useWindowSize } from 'rooks';
+import { useBoolean } from '@chakra-ui/react'
+import type { Media } from '@stump/client'
+import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
+import React, { useEffect, useMemo, useRef } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
+import { useWindowSize } from 'rooks'
 
-import { useBoolean } from '@chakra-ui/react';
-
-import Toolbar from './utils/Toolbar';
-
-import type { Media } from '@stump/client';
+import Toolbar from './utils/Toolbar'
 export interface ImageBasedReaderProps {
-	currentPage: number;
-	media: Media;
+	currentPage: number
+	media: Media
 
-	onPageChange: (page: number) => void;
-	getPageUrl(page: number): string;
+	onPageChange: (page: number) => void
+	getPageUrl(page: number): string
 }
 
 // TODO: merge with AnimatedImageBasedReader once animates aren't ass
@@ -24,48 +22,48 @@ export default function ImageBasedReader({
 	onPageChange,
 	getPageUrl,
 }: ImageBasedReaderProps) {
-	const currPageRef = React.useRef(currentPage);
+	const currPageRef = React.useRef(currentPage)
 
-	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false);
+	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
 	// TODO: is this enough?
 	useEffect(() => {
-		const pageArray = Array.from({ length: media.pages });
+		const pageArray = Array.from({ length: media.pages })
 
-		let start = currentPage >= 1 ? currentPage - 1 : 0;
+		const start = currentPage >= 1 ? currentPage - 1 : 0
 
 		pageArray.slice(start, 3).forEach((_, i) => {
-			const preloadedImg = new Image();
-			preloadedImg.src = getPageUrl(currentPage + (i + 1));
-		});
-	}, [currentPage, media.pages]);
+			const preloadedImg = new Image()
+			preloadedImg.src = getPageUrl(currentPage + (i + 1))
+		})
+	}, [currentPage, media.pages])
 
 	useEffect(() => {
-		currPageRef.current = currentPage;
-	}, [currentPage]);
+		currPageRef.current = currentPage
+	}, [currentPage])
 
 	function handlePageChange(newPage: number) {
 		if (newPage < media.pages && newPage > 0) {
-			onPageChange(newPage);
+			onPageChange(newPage)
 		}
 	}
 
 	useHotkeys('right, left, space, esc', (_, handler) => {
 		switch (handler.key) {
 			case 'right':
-				handlePageChange(currPageRef.current + 1);
-				break;
+				handlePageChange(currPageRef.current + 1)
+				break
 			case 'left':
-				handlePageChange(currPageRef.current - 1);
-				break;
+				handlePageChange(currPageRef.current - 1)
+				break
 			case 'space':
-				toggleToolbar();
-				break;
+				toggleToolbar()
+				break
 			case 'esc':
-				hideToolbar();
-				break;
+				hideToolbar()
+				break
 		}
-	});
+	})
 
 	return (
 		<div className="relative flex h-full items-center justify-center">
@@ -87,7 +85,7 @@ export default function ImageBasedReader({
 				src={getPageUrl(currentPage)}
 				onError={(err) => {
 					// @ts-ignore
-					err.target.src = '/favicon.png';
+					err.target.src = '/favicon.png'
 				}}
 				onClick={toggleToolbar}
 			/>
@@ -97,33 +95,33 @@ export default function ImageBasedReader({
 				onClick={() => onPageChange(currentPage + 1)}
 			/>
 		</div>
-	);
+	)
 }
 
 const RESET_CONTROLS = {
 	x: '0%',
-};
+}
 
 const FORWARD_START_ANIMATION = {
-	x: '-200%',
 	transition: {
 		duration: 0.35,
 	},
-};
+	x: '-200%',
+}
 
 const TO_CENTER_ANIMATION = {
-	x: 0,
 	transition: {
 		duration: 0.35,
 	},
-};
+	x: 0,
+}
 
 const BACKWARD_START_ANIMATION = {
-	x: '200%',
 	transition: {
 		duration: 0.35,
 	},
-};
+	x: '200%',
+}
 
 // FIXME: its much better overall, Works very well on portrait images, still a little stuttering
 // when moving between images of different aspect ratios. (e.g. portrait vs landscape). A little
@@ -137,105 +135,105 @@ export function AnimatedImageBasedReader({
 	onPageChange,
 	getPageUrl,
 }: ImageBasedReaderProps) {
-	const { innerWidth } = useWindowSize();
+	const { innerWidth } = useWindowSize()
 
-	const prevRef = useRef<HTMLImageElement>(null);
-	const nextRef = useRef<HTMLImageElement>(null);
+	const prevRef = useRef<HTMLImageElement>(null)
+	const nextRef = useRef<HTMLImageElement>(null)
 
-	const x = useMotionValue(0);
+	const x = useMotionValue(0)
 
 	const nextX = useTransform(x, (latest) => {
 		if (nextRef.current) {
 			// Only time this will happen is when no motion is happening, or a swipe right
 			// to go to previous page is happening.
 			if (latest >= 0) {
-				return latest;
+				return latest
 			}
 
-			const center = (innerWidth ?? 0) / 2;
-			const imageWidth = nextRef.current.width;
+			const center = (innerWidth ?? 0) / 2
+			const imageWidth = nextRef.current.width
 
-			const imageCenter = imageWidth / 2;
+			const imageCenter = imageWidth / 2
 
-			const centerPosition = center + imageCenter;
+			const centerPosition = center + imageCenter
 
 			// latest will be 0 at the start, and go negative as we swipe
 			// left.
 			if (Math.abs(latest) >= centerPosition) {
-				return -centerPosition;
+				return -centerPosition
 			}
 		}
 
-		return latest;
-	});
+		return latest
+	})
 
 	const prevX = useTransform(x, (latest) => {
 		if (prevRef.current) {
 			// Only time this will happen is when no motion is happening, or a swipe left
 			// to go to next page is happening.
 			if (latest <= 0) {
-				return latest;
+				return latest
 			}
 
-			const center = (innerWidth ?? 0) / 2;
-			const imageWidth = prevRef.current.width;
+			const center = (innerWidth ?? 0) / 2
+			const imageWidth = prevRef.current.width
 
-			const imageCenter = imageWidth / 2;
+			const imageCenter = imageWidth / 2
 
-			const centerPosition = center + imageCenter;
+			const centerPosition = center + imageCenter
 
 			// latest will be 0 at the start, and go positive as we swipe
 			// left.
 			if (latest >= centerPosition) {
-				return centerPosition;
+				return centerPosition
 			}
 		}
 
-		return latest;
-	});
+		return latest
+	})
 
-	const controls = useAnimation();
-	const nextControls = useAnimation();
-	const prevControls = useAnimation();
+	const controls = useAnimation()
+	const nextControls = useAnimation()
+	const prevControls = useAnimation()
 
-	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false);
+	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
 	// This is for the hotkeys
-	const currPageRef = React.useRef(currentPage);
+	const currPageRef = React.useRef(currentPage)
 
 	useEffect(() => {
-		currPageRef.current = currentPage;
-	}, [currentPage]);
+		currPageRef.current = currentPage
+	}, [currentPage])
 
 	const imageUrls = useMemo(() => {
-		let urls = [];
+		const urls = []
 
 		// if has previous
 		if (currentPage > 1) {
-			urls.push(getPageUrl(currentPage - 1));
+			urls.push(getPageUrl(currentPage - 1))
 		} else {
-			urls.push(undefined);
+			urls.push(undefined)
 		}
 
-		urls.push(getPageUrl(currentPage));
+		urls.push(getPageUrl(currentPage))
 
 		// if has next
 		if (currentPage < media.pages) {
-			urls.push(getPageUrl(currentPage + 1));
+			urls.push(getPageUrl(currentPage + 1))
 		} else {
-			urls.push(undefined);
+			urls.push(undefined)
 		}
 
-		return urls;
-	}, [currentPage]);
+		return urls
+	}, [currentPage])
 
 	function startNextPageAnimation() {
 		Promise.all([
 			controls.start(FORWARD_START_ANIMATION),
 			nextControls.start(TO_CENTER_ANIMATION),
 		]).then(() => {
-			onPageChange(currPageRef.current + 1);
-		});
+			onPageChange(currPageRef.current + 1)
+		})
 	}
 
 	function startPrevPageAnimation() {
@@ -243,40 +241,40 @@ export function AnimatedImageBasedReader({
 			controls.start(BACKWARD_START_ANIMATION),
 			prevControls.start(TO_CENTER_ANIMATION),
 		]).then(() => {
-			onPageChange(currPageRef.current - 1);
-		});
+			onPageChange(currPageRef.current - 1)
+		})
 	}
 
 	useEffect(() => {
-		controls.set(RESET_CONTROLS);
-		nextControls.set({ left: '100%' });
-		prevControls.set({ right: '100%' });
-	}, [currentPage]);
+		controls.set(RESET_CONTROLS)
+		nextControls.set({ left: '100%' })
+		prevControls.set({ right: '100%' })
+	}, [currentPage])
 
 	function handleHotKeyPagination(direction: 'next' | 'prev') {
 		if (direction === 'next' && currPageRef.current < media.pages) {
-			startNextPageAnimation();
+			startNextPageAnimation()
 		} else if (direction === 'prev' && currPageRef.current > 1) {
-			startPrevPageAnimation();
+			startPrevPageAnimation()
 		}
 	}
 
 	useHotkeys('right, left, space, esc', (_, handler) => {
 		switch (handler.key) {
 			case 'right':
-				handleHotKeyPagination('next');
-				break;
+				handleHotKeyPagination('next')
+				break
 			case 'left':
-				handleHotKeyPagination('prev');
-				break;
+				handleHotKeyPagination('prev')
+				break
 			case 'space':
-				toggleToolbar();
-				break;
+				toggleToolbar()
+				break
 			case 'esc':
-				hideToolbar();
-				break;
+				hideToolbar()
+				break
 		}
-	});
+	})
 
 	return (
 		<div className="relative flex h-full items-center justify-center">
@@ -298,7 +296,7 @@ export function AnimatedImageBasedReader({
 					src={imageUrls[0]}
 					onError={(err) => {
 						// @ts-ignore
-						err.target.src = '/src/favicon.png';
+						err.target.src = '/src/favicon.png'
 					}}
 				/>
 			)}
@@ -309,12 +307,12 @@ export function AnimatedImageBasedReader({
 				dragElastic={1}
 				dragConstraints={{ left: 0, right: 0 }}
 				onDragEnd={(_e, info) => {
-					const { velocity, offset } = info;
+					const { velocity, offset } = info
 
 					if ((velocity.x <= -200 || offset.x <= -300) && currPageRef.current < media.pages) {
-						startNextPageAnimation();
+						startNextPageAnimation()
 					} else if ((velocity.x >= 200 || offset.x >= 300) && currPageRef.current > 1) {
-						startPrevPageAnimation();
+						startPrevPageAnimation()
 					}
 				}}
 				transition={{ ease: 'easeOut' }}
@@ -323,7 +321,7 @@ export function AnimatedImageBasedReader({
 				src={imageUrls[1]}
 				onError={(err) => {
 					// @ts-ignore
-					err.target.src = '/favicon.png';
+					err.target.src = '/favicon.png'
 				}}
 				// TODO: figure this out, I can't do this anymore with the drag...
 				// onClick={toggleToolbar}
@@ -339,10 +337,10 @@ export function AnimatedImageBasedReader({
 					src={imageUrls[2]}
 					onError={(err) => {
 						// @ts-ignore
-						err.target.src = '/favicon.png';
+						err.target.src = '/favicon.png'
 					}}
 				/>
 			)}
 		</div>
-	);
+	)
 }

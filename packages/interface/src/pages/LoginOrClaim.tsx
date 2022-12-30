@@ -1,7 +1,3 @@
-import { FieldValues, useForm } from 'react-hook-form';
-import { Navigate } from 'react-router-dom';
-import { z } from 'zod';
-
 import {
 	Alert,
 	AlertIcon,
@@ -12,61 +8,65 @@ import {
 	HStack,
 	Stack,
 	Text,
-} from '@chakra-ui/react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import toast from 'react-hot-toast';
-import { queryClient, useLoginOrRegister, useUserStore } from '@stump/client';
-import Form from '../ui/Form';
-import Input from '../ui/Input';
-import { useLocale } from '../hooks/useLocale';
+} from '@chakra-ui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { queryClient, useLoginOrRegister, useUserStore } from '@stump/client'
+import { FieldValues, useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { Navigate } from 'react-router-dom'
+import { z } from 'zod'
+
+import { useLocale } from '../hooks/useLocale'
+import Form from '../ui/Form'
+import Input from '../ui/Input'
 
 export default function LoginOrClaim() {
-	const { user, setUser } = useUserStore();
+	const { user, setUser } = useUserStore()
 
-	const { t } = useLocale();
+	const { t } = useLocale()
 
 	const { isClaimed, isCheckingClaimed, loginUser, registerUser, isLoggingIn, isRegistering } =
 		useLoginOrRegister({
 			onSuccess: setUser,
-		});
+		})
 
 	const schema = z.object({
-		username: z.string().min(1, { message: t('loginPage.form.validation.missingUsername') }),
 		password: z.string().min(1, { message: t('loginPage.form.validation.missingPassword') }),
-	});
+		username: z.string().min(1, { message: t('loginPage.form.validation.missingUsername') }),
+	})
 
 	const form = useForm({
 		resolver: zodResolver(schema),
-	});
+	})
 
 	async function handleSubmit(values: FieldValues) {
-		const { username, password } = values;
+		const { username, password } = values
 		const doLogin = async (firstTime = false) =>
-			toast.promise(loginUser({ username, password }), {
+			toast.promise(loginUser({ password, username }), {
+				error: t('loginPage.toasts.loginFailed'),
 				loading: t('loginPage.toasts.loggingIn'),
 				success: firstTime
 					? t('loginPage.toasts.loggedInFirstTime')
 					: t('loginPage.toasts.loggedIn'),
-				error: t('loginPage.toasts.loginFailed'),
-			});
+			})
 		if (isClaimed) {
-			await doLogin();
+			await doLogin()
 		} else {
 			toast
-				.promise(registerUser({ username, password }), {
+				.promise(registerUser({ password, username }), {
+					error: t('loginPage.toasts.registrationFailed'),
 					loading: t('loginPage.toasts.registering'),
 					success: t('loginPage.toasts.registered'),
-					error: t('loginPage.toasts.registrationFailed'),
 				})
-				.then(() => doLogin(true));
+				.then(() => doLogin(true))
 		}
 	}
 
 	if (user) {
-		queryClient.invalidateQueries(['getLibraries']);
-		return <Navigate to="/" />;
+		queryClient.invalidateQueries(['getLibraries'])
+		return <Navigate to="/" />
 	} else if (isCheckingClaimed) {
-		return null;
+		return null
 	}
 
 	return (
@@ -114,5 +114,5 @@ export default function LoginOrClaim() {
 				</Button>
 			</Form>
 		</Stack>
-	);
+	)
 }

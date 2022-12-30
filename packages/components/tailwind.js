@@ -10,7 +10,7 @@ const brand = {
 	800: '#56341F',
 	900: '#2D1B10',
 	DEFAULT: '#C48259',
-};
+}
 
 /**
  *
@@ -71,7 +71,7 @@ module.exports = function (app) {
 				backgroundImage: ['dark'],
 			},
 		},
-	};
+	}
 
-	return config;
-};
+	return config
+}

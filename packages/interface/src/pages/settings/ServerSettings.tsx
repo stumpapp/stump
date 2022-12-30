@@ -1,6 +1,7 @@
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet'
+
 // import LibrariesStats from '../../components/library/LibrariesStats';
-import ServerInformation from '../../components/settings/ServerInformation';
+import ServerInformation from '../../components/settings/ServerInformation'
 
 export default function ServerSettings() {
 	return (
@@ -15,5 +16,5 @@ export default function ServerSettings() {
 
 			{/* <div>TODO: add more</div> */}
 		</>
-	);
+	)
 }

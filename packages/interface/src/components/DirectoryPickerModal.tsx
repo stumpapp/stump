@@ -1,4 +1,3 @@
-import { useEffect, useMemo } from 'react';
 import {
 	Checkbox,
 	Flex,
@@ -13,53 +12,55 @@ import {
 	Text,
 	useBoolean,
 	useDisclosure,
-} from '@chakra-ui/react';
-import { ArrowLeft, Folder, FolderNotch } from 'phosphor-react';
-import toast from 'react-hot-toast';
-import { useDirectoryListing } from '@stump/client';
-import Button, { ModalCloseButton } from '../ui/Button';
-import Input from '../ui/Input';
-import ToolTip from '../ui/ToolTip';
+} from '@chakra-ui/react'
+import { useDirectoryListing } from '@stump/client'
+import { ArrowLeft, Folder, FolderNotch } from 'phosphor-react'
+import { useEffect, useMemo } from 'react'
+import toast from 'react-hot-toast'
+
+import Button, { ModalCloseButton } from '../ui/Button'
+import Input from '../ui/Input'
+import ToolTip from '../ui/ToolTip'
 
 interface Props {
-	startingPath?: string;
-	onUpdate(path: string | null): void;
+	startingPath?: string
+	onUpdate(path: string | null): void
 }
 
 export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) {
-	const { isOpen, onOpen, onClose } = useDisclosure();
+	const { isOpen, onOpen, onClose } = useDisclosure()
 
-	const [showHidden, { toggle }] = useBoolean(false);
+	const [showHidden, { toggle }] = useBoolean(false)
 
 	// FIXME: This component needs to render a *virtual* list AND pass a page param as the user scrolls
 	// down the list. I recently tested a directory with 1000+ files and it took a while to load. So,
 	// I am paging the results to 100 per page. Might reduce to 50.
 	const { errorMessage, path, parent, directories, onSelect, goBack } = useDirectoryListing({
-		startingPath,
 		enabled: isOpen,
+		startingPath,
 		// TODO: page
-	});
+	})
 
 	function handleUpdate() {
 		if (!errorMessage) {
-			onUpdate(path);
-			onClose();
+			onUpdate(path)
+			onClose()
 		}
 	}
 
 	useEffect(() => {
 		if (errorMessage) {
-			toast.error(errorMessage);
+			toast.error(errorMessage)
 		}
-	}, [errorMessage]);
+	}, [errorMessage])
 
 	const directoryList = useMemo(() => {
 		if (showHidden) {
-			return directories;
+			return directories
 		}
 
-		return directories.filter((d) => !d.name.startsWith('.'));
-	}, [directories, showHidden]);
+		return directories.filter((d) => !d.name.startsWith('.'))
+	}, [directories, showHidden])
 
 	return (
 		<>
@@ -161,5 +162,5 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 				</ModalContent>
 			</Modal>
 		</>
-	);
+	)
 }

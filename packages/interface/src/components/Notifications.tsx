@@ -1,8 +1,8 @@
-import { useColorMode } from '@chakra-ui/react';
-import { Toaster, ToastBar } from 'react-hot-toast';
+import { useColorMode } from '@chakra-ui/react'
+import { ToastBar, Toaster } from 'react-hot-toast'
 
 export default function Notifications() {
-	const { colorMode } = useColorMode();
+	const { colorMode } = useColorMode()
 
 	return (
 		<Toaster position="bottom-center">
@@ -24,5 +24,5 @@ export default function Notifications() {
 				</ToastBar>
 			)}
 		</Toaster>
-	);
+	)
 }

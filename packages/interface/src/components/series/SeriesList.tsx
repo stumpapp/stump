@@ -1,17 +1,16 @@
-import { Heading } from '@chakra-ui/react';
+import { Heading } from '@chakra-ui/react'
+import type { Series } from '@stump/client'
 
-import ListItem from '../ListItem';
-
-import type { Series } from '@stump/client';
+import ListItem from '../ListItem'
 
 interface Props {
-	isLoading: boolean;
-	series?: Series[];
+	isLoading: boolean
+	series?: Series[]
 }
 
 export default function SeriesList({ series, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div>Loading...</div>
 	} else if (!series || !series.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">
@@ -19,7 +18,7 @@ export default function SeriesList({ series, isLoading }: Props) {
 				no media. */}
 				<Heading size="sm">It doesn't look like there are any series here.</Heading>
 			</div>
-		);
+		)
 	}
 
 	return (
@@ -35,5 +34,5 @@ export default function SeriesList({ series, isLoading }: Props) {
 				/>
 			))}
 		</div>
-	);
+	)
 }

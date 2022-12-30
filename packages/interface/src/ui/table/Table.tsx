@@ -1,4 +1,4 @@
-import { Box, useColorModeValue } from '@chakra-ui/react';
+import { Box, useColorModeValue } from '@chakra-ui/react'
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -9,20 +9,21 @@ import {
 	SortingState,
 	TableOptions,
 	useReactTable,
-} from '@tanstack/react-table';
-import clsx from 'clsx';
-import { SortAscending, SortDescending } from 'phosphor-react';
-import { useRef, useState } from 'react';
-import { DebouncedInput } from '../Input';
-import TablePagination from './Pagination';
+} from '@tanstack/react-table'
+import clsx from 'clsx'
+import { SortAscending, SortDescending } from 'phosphor-react'
+import { useRef, useState } from 'react'
+
+import { DebouncedInput } from '../Input'
+import TablePagination from './Pagination'
 
 export interface TableProps<T = unknown, V = unknown> {
-	data: T[];
-	columns: ColumnDef<T, V>[];
-	options: Omit<TableOptions<T>, 'data' | 'columns'>;
-	fullWidth?: boolean;
-	searchable?: boolean;
-	sortable?: boolean;
+	data: T[]
+	columns: ColumnDef<T, V>[]
+	options: Omit<TableOptions<T>, 'data' | 'columns'>
+	fullWidth?: boolean
+	searchable?: boolean
+	sortable?: boolean
 }
 
 // TODO: loading state
@@ -34,48 +35,48 @@ export default function Table<T, V>({
 	sortable,
 	...props
 }: TableProps<T, V>) {
-	const [sorting, setSorting] = useState<SortingState>([]);
+	const [sorting, setSorting] = useState<SortingState>([])
 
-	const filterColRef = useRef<HTMLSelectElement | null>(null);
-	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-	const [globalFilter, setGlobalFilter] = useState('');
+	const filterColRef = useRef<HTMLSelectElement | null>(null)
+	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+	const [globalFilter, setGlobalFilter] = useState('')
 
 	const table = useReactTable({
 		...options,
-		data,
 		columns,
-		state: {
-			...options.state,
-			sorting,
-			columnFilters,
-			globalFilter,
-		},
-		onSortingChange: setSorting,
+		data,
+		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		onColumnFiltersChange: setColumnFilters,
 		onGlobalFilterChange: setGlobalFilter,
-		getFilteredRowModel: getFilteredRowModel(),
-	});
+		onSortingChange: setSorting,
+		state: {
+			...options.state,
+			columnFilters,
+			globalFilter,
+			sorting,
+		},
+	})
 
-	const headers = [{ id: 'GLOBAL_FILTER', header: 'All' }].concat(
+	const headers = [{ header: 'All', id: 'GLOBAL_FILTER' }].concat(
 		table
 			.getAllColumns()
-			.map((col) => col.columns.map((c) => ({ id: c.id, header: c.columnDef.header as string })))
+			.map((col) => col.columns.map((c) => ({ header: c.columnDef.header as string, id: c.id })))
 			.flat(),
-	);
+	)
 
-	const { pageSize, pageIndex } = table.getState().pagination;
+	const { pageSize, pageIndex } = table.getState().pagination
 
-	const pageCount = table.getPageCount();
-	const lastIndex = (pageIndex + 1) * pageSize;
-	const firstIndex = lastIndex - (pageSize - 1);
+	const pageCount = table.getPageCount()
+	const lastIndex = (pageIndex + 1) * pageSize
+	const firstIndex = lastIndex - (pageSize - 1)
 
 	function handleFilter(value?: string) {
-		const filterCol = filterColRef.current?.value;
+		const filterCol = filterColRef.current?.value
 		if (filterCol === 'GLOBAL_FILTER') {
-			setGlobalFilter(value || '');
+			setGlobalFilter(value || '')
 		} else if (filterCol) {
-			table.getColumn(filterCol).setFilterValue(value);
+			table.getColumn(filterCol).setFilterValue(value)
 		}
 	}
 
@@ -107,7 +108,7 @@ export default function Table<T, V>({
 											)}
 										</div>
 									</th>
-								);
+								)
 							})}
 						</tr>
 					))}
@@ -121,10 +122,10 @@ export default function Table<T, V>({
 										<td key={cell.id} className="py-2">
 											{flexRender(cell.column.columnDef.cell, cell.getContext())}
 										</td>
-									);
+									)
 								})}
 							</tr>
-						);
+						)
 					})}
 				</tbody>
 			</table>
@@ -142,7 +143,7 @@ export default function Table<T, V>({
 						className="rounded-md text-sm py-0.5"
 						value={pageSize}
 						onChange={(e) => {
-							table.setPageSize(Number(e.target.value));
+							table.setPageSize(Number(e.target.value))
 						}}
 					>
 						{[10, 20, 30, 40, 50].map((pageSize) => (
@@ -188,15 +189,15 @@ export default function Table<T, V>({
 				/>
 			</div>
 		</Box>
-	);
+	)
 }
 
 function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
 	if (!direction) {
-		return null;
+		return null
 	}
 
 	return (
 		<span className="ml-1.5">{direction === 'asc' ? <SortAscending /> : <SortDescending />}</span>
-	);
+	)
 }

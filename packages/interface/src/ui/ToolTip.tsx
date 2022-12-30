@@ -2,9 +2,9 @@ import {
 	Tooltip as ChakraToolTip,
 	TooltipProps as ChakraToolTipProps,
 	useColorModeValue,
-} from '@chakra-ui/react';
+} from '@chakra-ui/react'
 
-export interface ToolTipProps extends ChakraToolTipProps {}
+export type ToolTipProps = ChakraToolTipProps
 
 export default function ToolTip(props: ToolTipProps) {
 	return (
@@ -18,5 +18,5 @@ export default function ToolTip(props: ToolTipProps) {
 			fontSize="xs"
 			openDelay={300}
 		/>
-	);
+	)
 }

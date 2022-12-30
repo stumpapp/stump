@@ -1,0 +1,26 @@
+[alias]
+prisma = "run --package prisma --"
+integration-tests = "test --package integration-tests -- --test-threads 1"
+doc-tests = "cargo test --doc -- --show-output"
+build-server = "build --package stump_server --bin stump_server --release --"
+
+[target.x86_64-apple-darwin]
+rustflags = [
+  "-C", "link-arg=-undefined",
+  "-C", "link-arg=dynamic_lookup",
+]
+
+[target.x86_64-unknown-linux-musl]
+rustflags = [
+  "-C", "target-feature=+crt-static",
+]
+
+[target.aarch64-unknown-linux-musl]
+rustflags = [
+  "-C", "target-feature=+crt-static",
+]
+
+[target.armv7-unknown-linux-musleabihf]
+rustflags = [
+  "-C", "target-feature=+crt-static",
+]

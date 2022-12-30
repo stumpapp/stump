@@ -1,7 +1,8 @@
-import i18n from 'i18next';
-import en from './locales/en.json';
-import fr from './locales/fr.json';
-import { initReactI18next } from 'react-i18next';
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+
+import en from './locales/en.json'
+import fr from './locales/fr.json'
 
 // NOTE: the fr locale is *NOT* complete or acurrate. Used for testing...
 // TODO: once the english locale is completed/mostly completed, the structure
@@ -16,33 +17,33 @@ export const resources = {
 	fr: {
 		fr,
 	},
-} as const;
+} as const
 
 function parseMissingKeyHandler(missingKey: string) {
 	try {
 		const translation = (missingKey ?? '')
 			.split('.')
 			// @ts-ignore
-			.reduce((previous, current) => previous[current], resources.en.en);
+			.reduce((previous, current) => previous[current], resources.en.en)
 
 		// console.log({ translation });
 
 		if (typeof translation === 'string') {
-			return translation;
+			return translation
 		}
 
-		return missingKey;
+		return missingKey
 	} catch (error) {
-		return missingKey;
+		return missingKey
 	}
 }
 
 i18n.use(initReactI18next).init({
+	fallbackLng: 'en',
 	// lng: 'en',
 	interpolation: {
 		escapeValue: false, // not needed for react as it escapes by default
 	},
-	fallbackLng: 'en',
 	parseMissingKeyHandler,
 	resources,
-});
+})

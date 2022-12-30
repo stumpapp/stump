@@ -1,16 +1,17 @@
-import { ButtonGroup, Heading } from '@chakra-ui/react';
-import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
-import { CaretLeft, CaretRight } from 'phosphor-react';
-import { useCallback, useEffect, useRef } from 'react';
-import { IconButton } from '../ui/Button';
-import ToolTip from '../ui/ToolTip';
+import { ButtonGroup, Heading } from '@chakra-ui/react'
+import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
+import { CaretLeft, CaretRight } from 'phosphor-react'
+import { useCallback, useEffect, useRef } from 'react'
+
+import { IconButton } from '../ui/Button'
+import ToolTip from '../ui/ToolTip'
 
 interface Props {
-	title?: string;
-	cards: JSX.Element[];
-	onScrollEnd?: () => void;
-	isLoadingNext?: boolean;
-	hasNext?: boolean;
+	title?: string
+	cards: JSX.Element[]
+	onScrollEnd?: () => void
+	isLoadingNext?: boolean
+	hasNext?: boolean
 }
 
 export default function SlidingCardList({
@@ -20,31 +21,33 @@ export default function SlidingCardList({
 	hasNext,
 	title,
 }: Props) {
-	const parentRef = useRef<HTMLDivElement>(null);
-	const visibleRef = useRef([0, 0]);
+	const parentRef = useRef<HTMLDivElement>(null)
+	const visibleRef = useRef([0, 0])
 	const columnVirtualizer = useVirtualizer({
 		count: cards.length,
-		getScrollElement: () => parentRef.current,
+		enableSmoothScroll: true,
 		estimateSize: () => 350,
+
+		getScrollElement: () => parentRef.current,
+
+		horizontal: true,
 		// FIXME: this is an absurd overscan... needs to change, however I cannot get it to work with less
 		overscan: 75,
-		horizontal: true,
 		rangeExtractor: useCallback((range: Range) => {
-			visibleRef.current = [range.startIndex, range.endIndex];
-			return defaultRangeExtractor(range);
+			visibleRef.current = [range.startIndex, range.endIndex]
+			return defaultRangeExtractor(range)
 		}, []),
-		enableSmoothScroll: true,
-	});
+	})
 
 	useEffect(() => {
-		const [lastItem] = [...columnVirtualizer.getVirtualItems()].reverse();
+		const [lastItem] = [...columnVirtualizer.getVirtualItems()].reverse()
 
 		if (!lastItem) {
-			return;
+			return
 		}
 
 		if (lastItem.index >= cards.length - 5 && hasNext && !isLoadingNext) {
-			onScrollEnd?.();
+			onScrollEnd?.()
 		}
 	}, [
 		hasNext,
@@ -52,31 +55,31 @@ export default function SlidingCardList({
 		cards.length,
 		isLoadingNext,
 		columnVirtualizer.getVirtualItems().length,
-	]);
+	])
 
 	const handleSkipAhead = (skipValue = 5) => {
-		let nextIndex = visibleRef?.current[1] + skipValue || 10;
+		let nextIndex = visibleRef?.current[1] + skipValue || 10
 
 		if (nextIndex > columnVirtualizer.getVirtualItems().length - 1) {
-			nextIndex = columnVirtualizer.getVirtualItems().length - 1;
+			nextIndex = columnVirtualizer.getVirtualItems().length - 1
 		}
 
-		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true });
-	};
+		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
+	}
 
 	const handleSkipBackward = (skipValue = 5) => {
-		let nextIndex = visibleRef?.current[0] - skipValue || 0;
+		let nextIndex = visibleRef?.current[0] - skipValue || 0
 
 		if (nextIndex < 0) {
-			nextIndex = 0;
+			nextIndex = 0
 		}
 
-		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true });
-	};
+		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
+	}
 
-	const canSkipBackward = visibleRef.current[0] > 0;
+	const canSkipBackward = visibleRef.current[0] > 0
 	// FIXME: wrong, the overscan messes this up I think...
-	const canSkipForward = visibleRef.current[1] * 2 < cards.length;
+	const canSkipForward = visibleRef.current[1] * 2 < cards.length
 
 	return (
 		<div className="w-full flex flex-col space-y-2">
@@ -116,10 +119,10 @@ export default function SlidingCardList({
 					}}
 				>
 					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
-						return cards[virtualItem.index];
+						return cards[virtualItem.index]
 					})}
 				</div>
 			</div>
 		</div>
-	);
+	)
 }

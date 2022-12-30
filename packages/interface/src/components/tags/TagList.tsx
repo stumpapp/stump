@@ -1,5 +1,6 @@
-import { Tag } from '@stump/client';
-import TagComponent from './Tag';
+import { Tag } from '@stump/client'
+
+import TagComponent from './Tag'
 
 export const DEBUG_TAGS: Tag[] = [
 	{
@@ -18,15 +19,15 @@ export const DEBUG_TAGS: Tag[] = [
 		id: '4',
 		name: 'Drama',
 	},
-];
+]
 
 interface Props {
-	tags: Tag[] | null;
+	tags: Tag[] | null
 }
 
 export default function TagList({ tags }: Props) {
 	if (!tags && !import.meta.env.DEV) {
-		return null;
+		return null
 	}
 
 	return (
@@ -35,5 +36,5 @@ export default function TagList({ tags }: Props) {
 				<TagComponent key={tag.id} tag={tag} />
 			))}
 		</div>
-	);
+	)
 }

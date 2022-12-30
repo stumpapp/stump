@@ -1,15 +1,15 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft } from 'phosphor-react';
-import { Link, useParams } from 'react-router-dom';
-import { Heading } from '@chakra-ui/react';
-import { getMediaPage } from '@stump/client/api';
+import { Heading } from '@chakra-ui/react'
+import { getMediaPage } from '@stump/client/api'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft } from 'phosphor-react'
+import { Link, useParams } from 'react-router-dom'
 
 interface ToolbarProps {
-	title: string;
-	currentPage: number;
-	pages: number;
-	visible: boolean;
-	onPageChange(page: number): void;
+	title: string
+	currentPage: number
+	pages: number
+	visible: boolean
+	onPageChange(page: number): void
 }
 
 export default function Toolbar({
@@ -19,11 +19,11 @@ export default function Toolbar({
 	visible,
 	onPageChange,
 }: ToolbarProps) {
-	const { id } = useParams();
+	const { id } = useParams()
 
 	if (!id) {
 		// should never happen
-		throw new Error('woah boy how strange 0.o');
+		throw new Error('woah boy how strange 0.o')
 	}
 
 	return (
@@ -77,5 +77,5 @@ export default function Toolbar({
 				</>
 			)}
 		</AnimatePresence>
-	);
+	)
 }

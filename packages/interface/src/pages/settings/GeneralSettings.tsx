@@ -1,5 +1,6 @@
-import { Helmet } from 'react-helmet';
-import { UserPreferencesForm, UserProfileForm } from '../../components/settings/forms';
+import { Helmet } from 'react-helmet'
+
+import { UserPreferencesForm, UserProfileForm } from '../../components/settings/forms'
 
 export default function GeneralSettings() {
 	return (
@@ -12,5 +13,5 @@ export default function GeneralSettings() {
 			<UserProfileForm />
 			<UserPreferencesForm />
 		</>
-	);
+	)
 }

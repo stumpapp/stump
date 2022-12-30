@@ -1,6 +1,7 @@
-import '../i18n/config';
-import { useTranslation } from 'react-i18next';
-import { useUserStore } from '@stump/client';
+import '../i18n/config'
+
+import { useUserStore } from '@stump/client'
+import { useTranslation } from 'react-i18next'
 
 export enum Locale {
 	English = 'en',
@@ -8,35 +9,35 @@ export enum Locale {
 }
 
 export type LocaleSelectOption = {
-	label: string;
-	value: Locale;
-};
+	label: string
+	value: Locale
+}
 
 export function useLocale() {
 	// TODO: update DB on changes
-	const { userPreferences, setUserPreferences } = useUserStore();
+	const { userPreferences, setUserPreferences } = useUserStore()
 
 	function setLocaleFromStr(localeStr: string) {
-		let locale = localeStr as Locale;
+		const locale = localeStr as Locale
 
 		if (userPreferences && locale) {
-			setUserPreferences({ ...userPreferences, locale });
+			setUserPreferences({ ...userPreferences, locale })
 		}
 	}
 
 	function setLocale(locale: Locale) {
 		if (userPreferences && locale) {
-			setUserPreferences({ ...userPreferences, locale });
+			setUserPreferences({ ...userPreferences, locale })
 		}
 	}
 
-	const locale: string = userPreferences?.locale || 'en';
+	const locale: string = userPreferences?.locale || 'en'
 
-	const { t } = useTranslation(locale);
+	const { t } = useTranslation(locale)
 
 	const locales: LocaleSelectOption[] = Object.keys(Locale)
 		.map((key) => ({ label: key, value: Locale[key as keyof typeof Locale] }))
-		.filter((option) => typeof option.value === 'string');
+		.filter((option) => typeof option.value === 'string')
 
-	return { locale, setLocale, setLocaleFromStr, t, locales };
+	return { locale, locales, setLocale, setLocaleFromStr, t }
 }

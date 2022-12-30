@@ -38,9 +38,7 @@ model User {
   // The role of the user. Defaults to "MEMBER".
   role            String         @default("MEMBER")
   // The media the user currently has progress on.
-  // TODO: don't love this name but wanted to emphasize plural. I could do something like
-  // `currentlyReading` but that wouldn't match the relation in the Media model. UGH. Naming
-  // is so hard lol.
+  // TODO: rename to `reading_history`
   read_progresses ReadProgress[]
 
   reading_lists ReadingList[]
@@ -158,7 +156,7 @@ model Media {
   // The id of the series this media belongs to.
   series_id       String?
   // The read progresses of the media
-  read_progresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
+  read_progresses ReadProgress[] // TODO: rename to `reading_history`
   // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
   tags            Tag[]
 
@@ -299,10 +297,6 @@ model Log {
   @@map("logs")
 }
 
-// TODO: I think I want to remove the view modes from database persisted preferences.
-// Instead, I'll have a sessionStorage/localStorage store just for those, I think
-// it might be silly to ping the database everytime this gets updated is mainly 
-// the reason. Not sure though...
 model UserPreferences {
   id                     String @id @default(cuid())
   // Flag to indicate if the user wants to reduce some of the animations when using the build-in client
@@ -315,9 +309,8 @@ model UserPreferences {
   collection_layout_mode String @default("GRID")
   // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
   locale                 String @default("en")
-
-  // user User[]
-  user User?
+  // The user which these preferences belong to
+  user                   User?
 
   @@map("user_preferences")
 }
@@ -327,8 +320,6 @@ model ServerPreferences {
   // // Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
   // // If none found, the series name will be the directory name.
   // rename_series    Boolean @default(false)
-  // // Flag indicating whether or not to attempt to convert .cbr files to .cbz files on scan automatically.
-  // convertCbrToCbz Boolean @default(false)
 
   @@map("server_preferences")
 }

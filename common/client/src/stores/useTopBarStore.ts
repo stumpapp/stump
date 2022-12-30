@@ -1,5 +1,6 @@
 import create from 'zustand';
 import { devtools } from 'zustand/middleware';
+
 import { StoreBase } from '.';
 
 export interface TopBarStore extends StoreBase<TopBarStore> {
@@ -14,8 +15,11 @@ export interface TopBarStore extends StoreBase<TopBarStore> {
 
 export const useTopBarStore = create<TopBarStore>()(
 	devtools((set) => ({
-		setTitle(title) {
-			set((store) => ({ ...store, title }));
+		reset() {
+			set(() => ({}));
+		},
+		set(changes) {
+			set((state) => ({ ...state, ...changes }));
 		},
 		setBackwardsUrl(backwardsUrl) {
 			set((store) => ({ ...store, backwardsUrl }));
@@ -23,11 +27,8 @@ export const useTopBarStore = create<TopBarStore>()(
 		setForwardsUrl(forwardsUrl) {
 			set((store) => ({ ...store, forwardsUrl }));
 		},
-		reset() {
-			set(() => ({}));
-		},
-		set(changes) {
-			set((state) => ({ ...state, ...changes }));
+		setTitle(title) {
+			set((store) => ({ ...store, title }));
 		},
 	})),
 );

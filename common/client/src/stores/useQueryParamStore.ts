@@ -2,7 +2,6 @@ import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
 import type { Direction, PageParams } from '../types';
-
 import { StoreBase } from './';
 
 export const DEFAULT_ORDER_BY = 'name';
@@ -20,10 +19,10 @@ export interface QueryParamStore extends Partial<PageParams>, StoreBase<QueryPar
 }
 
 const defaultValues = {
+	direction: 'asc',
 	// zeroBased: false,
 	// pageSize: 20,
 	order_by: 'name',
-	direction: 'asc',
 } as Partial<QueryParamStore>;
 
 export const useQueryParamStore = create<QueryParamStore>()(
@@ -31,19 +30,6 @@ export const useQueryParamStore = create<QueryParamStore>()(
 		persist(
 			(set, get) => ({
 				...defaultValues,
-
-				setZeroBased(zeroBased) {
-					set((store) => ({ ...store, zero_based: zeroBased }));
-				},
-				setPageSize(pageSize) {
-					set((store) => ({ ...store, page_zize: pageSize }));
-				},
-				setOrderBy(orderBy) {
-					set((store) => ({ ...store, order_by: orderBy }));
-				},
-				setDirection(direction) {
-					set((store) => ({ ...store, direction }));
-				},
 
 				getQueryString() {
 					let params = '';
@@ -61,17 +47,30 @@ export const useQueryParamStore = create<QueryParamStore>()(
 
 					return params;
 				},
-
 				reset() {
 					set(() => ({}));
 				},
 				set(changes) {
 					set((state) => ({ ...state, ...changes }));
 				},
+				setDirection(direction) {
+					set((store) => ({ ...store, direction }));
+				},
+
+				setOrderBy(orderBy) {
+					set((store) => ({ ...store, order_by: orderBy }));
+				},
+
+				setPageSize(pageSize) {
+					set((store) => ({ ...store, page_zize: pageSize }));
+				},
+				setZeroBased(zeroBased) {
+					set((store) => ({ ...store, zero_based: zeroBased }));
+				},
 			}),
 			{
-				name: 'stump-query-param-store',
 				getStorage: () => sessionStorage,
+				name: 'stump-query-param-store',
 				partialize(store) {
 					return {
 						direction: store.direction,

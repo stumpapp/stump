@@ -5,8 +5,8 @@ export * from './queries';
 export const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
-			retry: false,
 			refetchOnWindowFocus: false,
+			retry: false,
 			suspense: true,
 		},
 	},

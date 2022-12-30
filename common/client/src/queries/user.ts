@@ -1,8 +1,9 @@
-import type { UserPreferences } from '../types';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ClientQueryParams } from '.';
+
 import { getUserPreferences, updateUserPreferences as updateUserPreferencesFn } from '../api/user';
 import { StumpQueryContext } from '../context';
+import type { UserPreferences } from '../types';
+import { ClientQueryParams } from '.';
 
 interface UseUserPreferencesParams extends ClientQueryParams<UserPreferences> {
 	enableFetchPreferences?: boolean;
@@ -18,25 +19,25 @@ export function useUserPreferences(
 		isFetching,
 		isRefetching,
 	} = useQuery(['getUserPreferences', id], () => getUserPreferences(id!).then((res) => res.data), {
-		enabled: enableFetchPreferences && !!id,
 		context: StumpQueryContext,
+		enabled: enableFetchPreferences && !!id,
 	});
 
 	const { mutateAsync: updateUserPreferences, isLoading: isUpdating } = useMutation(
 		['updateUserPreferences', id],
 		(preferences: UserPreferences) => updateUserPreferencesFn(id!, preferences),
 		{
+			context: StumpQueryContext,
 			onSuccess(res) {
 				onUpdated?.(res.data);
 			},
-			context: StumpQueryContext,
 		},
 	);
 
 	return {
 		isLoadingPreferences: isLoading || isFetching || isRefetching,
-		userPreferences,
-		updateUserPreferences,
 		isUpdating,
+		updateUserPreferences,
+		userPreferences,
 	};
 }

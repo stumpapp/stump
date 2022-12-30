@@ -2,5 +2,6 @@
 . "$(dirname "$0")/_/husky.sh"
 
 npx lint-staged
-pnpm clippy
-pnpm checks
+pnpm -r lint
+pnpm -r check
+cargo clippy --all-targets --workspace -- -D warnings

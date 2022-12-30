@@ -1,0 +1,5 @@
+node_modules/
+*.min.js
+*.map
+*.snap
+**/prisma/src/db.ts

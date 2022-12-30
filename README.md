@@ -43,8 +43,6 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [/core](#core)
 - [Similar Projects 👯](#similar-projects-)
 - [Acknowledgements 🙏](#acknowledgements-)
-    </p>
-  </details>
 
 > **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developing-). Otherwise, stay tuned for the first release!
 
@@ -86,7 +84,7 @@ For more information about getting started, how Stump works and how it manages y
 
 ## Developer Guide 💻
 
-Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) before getting started.
+Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTING.md) before getting started.
 
 A quick summary of the steps required to get going:
 
@@ -124,8 +122,6 @@ Some other good places to start:
 - Docker build optimizations (it is currently _horrendously_ slow).
 - CI pipelines / workflows.
 - And lots more!
-
-I keep track of all non-code contributions in the [CONTRIBUTORS.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTORS.md) file. If you contribute in that manner, please add yourself to the list!
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20?action=collection%2Ffork&collection-url=entityId%3D6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20%26entityType%3Dcollection%26workspaceId%3D722014ea-55eb-4a49-b29d-814300c1016d)
 

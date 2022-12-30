@@ -1,14 +1,15 @@
 import {
+	MutationFunction,
+	MutationKey,
+	QueryFunction,
 	QueryKey,
 	useInfiniteQuery,
-	useQuery as useReactQuery,
 	useMutation as useReactMutation,
-	MutationKey,
-	MutationFunction,
 	UseMutationOptions,
-	QueryFunction,
+	useQuery as useReactQuery,
 	UseQueryOptions,
 } from '@tanstack/react-query';
+
 import { StumpQueryContext } from '../context';
 import type { ApiResult, Pageable, PageableApiResult } from '../types';
 
@@ -19,8 +20,8 @@ export * from './job';
 export * from './library';
 export * from './media';
 export * from './series';
-export * from './tag';
 export * from './server';
+export * from './tag';
 export * from './user';
 
 export interface QueryCallbacks<T> {
@@ -67,6 +68,7 @@ export function usePagedQuery<T>(
 		hasNextPage,
 		...rest
 	} = useInfiniteQuery([key], (ctx) => queryFn(ctx.pageParam || 1, params), {
+		context: StumpQueryContext,
 		getNextPageParam: (lastGroup) => {
 			if (lastGroup?.data._page) {
 				const currentPage = lastGroup.data._page.current_page;
@@ -78,18 +80,17 @@ export function usePagedQuery<T>(
 			}
 		},
 		keepPreviousData: true,
-		context: StumpQueryContext,
 	});
 
 	const data = pageData ? pageData.pages.flatMap((res) => res.data.data) : [];
 
 	return {
 		data,
-		isLoading: isLoading,
-		isFetching: isFetching || isFetchingNextPage,
-		hasMore: hasNextPage,
 		fetchMore: fetchNextPage,
+		hasMore: hasNextPage,
+		isFetching: isFetching || isFetchingNextPage,
 		isFetchingNextPage,
+		isLoading: isLoading,
 		...rest,
 	};
 }

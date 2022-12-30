@@ -1,0 +1,42 @@
+- [ ] Explore, don't dive, into the idea of maybe rewriting rust core in TypeScript, with some crates written in Rust. The compilation times just aren't feasible long term. I'd rather do it before a release than after
+  - More than speed, I care about reliability and memory footprint. Reliability is not really at risk imo, but memory foot print would likely be.
+- [x] Consolidate some GH specific files to `.github`
+- [ ] Change `common` to `packages`
+- [ ] ESLint
+  - [ ] Fix ESLint errors after setup (expect a lot)
+- [ ] Add moon?
+  - Rust-heavy project, so it might not be worth my time or make sense
+  - https://github.com/moonrepo/moon
+- [ ] Nix?
+- [ ] Reorganize and consolidate some of the `client` code, its _very_ messy
+- [ ] Remove the `stump.service` file from GH and just add section in docs with that content
+- [ ] Consolidate some of the config files
+- [ ] Migrate to Axum v0.6
+  - Rebase `axum-upgrade` branch once above chores completed
+  - https://github.com/tokio-rs/axum/releases/tag/axum-v0.6.0
+  - [ ] Consider using https://github.com/maxcountryman/axum-login
+- [ ] Look into sqlite session store at some point to replace the in memory store.
+- [ ] Move `prisma` out of `core`?
+- [ ] Change HTTP endpoints to be **unpaged** by default
+- [ ] Rethink HTTP endpoints allow better range of filter options
+- [ ] Rework `integration_tests` and add unit testing throughout
+  - Mock client inbound -> https://github.com/Brendonovich/prisma-client-rust/issues/230
+- [ ] Add better validation via https://github.com/Keats/validator
+- [ ] Refactor UI sidebar and main container to support resizing via https://github.com/bvaughn/react-resizable-panels
+- [ ] Either use the `optional_struct` dependency or look into https://github.com/Nukesor/inter-struct (or maybe both?)
+- [ ] Refine Stump color palette (gray colors are :barf:)
+- [ ] Start building out, but don't use quite yet, custom UI components in new package `components`
+- [ ] Get major UI sections completed to MVP stage:
+  - [ ] Homepage sections
+    - [x] Continue Reading, Recently Added, Etc.
+    - [ ] Statistics
+  - [ ] Book overview page
+    - [ ] Show progress (if any)
+    - [ ] Show more series information
+  - [ ] Series overview section (on 0th page when browsing a series)
+  - [ ] Settings pages
+- [ ] Tighten logging noise
+- [ ] Revisit rework of `StumpConfig`
+- [ ] Setup self hosted runner using gaming computer
+- [ ] Finish GH workflows/actions
+- [ ] Add some automated system for versioning/releases

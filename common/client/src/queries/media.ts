@@ -1,7 +1,5 @@
-import type { Media, Pageable, ReadProgress } from '../types';
-import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.';
-
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import {
 	getInProgressMedia,
@@ -12,7 +10,8 @@ import {
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
 import { useCounter } from '../hooks/useCounter';
-import { useState } from 'react';
+import type { Media, Pageable, ReadProgress } from '../types';
+import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.';
 
 export const prefetchMedia = async (id: string) => {
 	await queryClient.prefetchQuery(['getMediaById', id], () => getMediaById(id), {
@@ -27,14 +26,14 @@ export function useMedia(id: string, options: QueryCallbacks<Media> = {}) {
 		isFetching,
 		isRefetching,
 	} = useQuery(['getMediaById'], {
-		queryFn: async () => getMediaById(id).then((res) => res.data),
-		onSuccess(data) {
-			options.onSuccess?.(data);
-		},
+		context: StumpQueryContext,
 		onError(err) {
 			options.onError?.(err);
 		},
-		context: StumpQueryContext,
+		onSuccess(data) {
+			options.onSuccess?.(data);
+		},
+		queryFn: async () => getMediaById(id).then((res) => res.data),
 	});
 
 	return { isLoading: isLoading || isFetching || isRefetching, media };
@@ -46,16 +45,16 @@ export function useMediaMutation(id: string, options: MutationCallbacks<ReadProg
 		mutateAsync: updateReadProgressAsync,
 		isLoading,
 	} = useMutation(['updateReadProgress'], (page: number) => updateMediaProgress(id, page), {
-		onSuccess(data) {
-			options.onUpdated?.(data);
-		},
+		context: StumpQueryContext,
 		onError(err) {
 			options.onError?.(err);
 		},
-		context: StumpQueryContext,
+		onSuccess(data) {
+			options.onUpdated?.(data);
+		},
 	});
 
-	return { updateReadProgress, updateReadProgressAsync, isLoading };
+	return { isLoading, updateReadProgress, updateReadProgressAsync };
 }
 
 export function useRecentlyAddedMedia(options: QueryCallbacks<Pageable<Media[]>> = {}) {

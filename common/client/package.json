@@ -11,7 +11,8 @@
 	"scripts": {
 		"dev": "tsc -w",
 		"build": "tsc",
-		"check": "tsc --noEmit"
+		"check": "tsc --noEmit",
+		"lint": "eslint --ext .ts,.tsx,.js,.jsx --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error ."
 	},
 	"dependencies": {
 		"@stump/config": "workspace:*",

@@ -1,8 +1,9 @@
-import type { CoreEvent } from '../types';
 import { useMemo } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
+
 import { API } from '../api';
 import { useStumpStore } from '../stores';
+import type { CoreEvent } from '../types';
 
 interface Props {
 	onEvent(event: CoreEvent): void;
@@ -39,9 +40,9 @@ export function useStumpWs({ onEvent }: Props) {
 	}
 
 	const { readyState } = useWebSocket(socketUrl, {
+		onClose: handleClose,
 		onMessage: handleWsMessage,
 		onOpen: handleOpen,
-		onClose: handleClose,
 	});
 
 	return { readyState };

@@ -1,12 +1,12 @@
 import type {
 	ApiResult,
 	CreateLibraryArgs,
-	UpdateLibraryArgs,
 	LibrariesStats,
 	Library,
+	LibraryScanMode,
 	PageableApiResult,
 	Series,
-	LibraryScanMode,
+	UpdateLibraryArgs,
 } from '../types';
 import { API } from '.';
 

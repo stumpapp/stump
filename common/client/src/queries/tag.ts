@@ -1,12 +1,11 @@
-import type { ApiResult, Tag } from '../types';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
-
-import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { createTags, getAllTags } from '../api/tag';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
+import type { ApiResult, Tag } from '../types';
 
 export interface UseTagsConfig {
 	onQuerySuccess?: (res: ApiResult<Tag[]>) => void;
@@ -27,11 +26,11 @@ export function useTags({
 	onCreateError,
 }: UseTagsConfig = {}) {
 	const { data, isLoading, refetch } = useQuery(['getAllTags'], {
-		queryFn: getAllTags,
-		onSuccess: onQuerySuccess,
-		onError: onQueryError,
-		suspense: false,
 		context: StumpQueryContext,
+		onError: onQueryError,
+		onSuccess: onQuerySuccess,
+		queryFn: getAllTags,
+		suspense: false,
 	});
 
 	const {
@@ -39,14 +38,14 @@ export function useTags({
 		mutateAsync,
 		isLoading: isCreating,
 	} = useMutation(['createTags'], {
+		context: StumpQueryContext,
 		mutationFn: createTags,
+		onError: onCreateError,
 		onSuccess(res) {
 			onCreateSuccess?.(res);
 
 			queryClient.refetchQueries(['getAllTags']);
 		},
-		onError: onCreateError,
-		context: StumpQueryContext,
 	});
 
 	const { tags, options } = useMemo(() => {
@@ -59,19 +58,19 @@ export function useTags({
 					} as TagOption),
 			);
 
-			return { tags: data.data, options: tagOptions };
+			return { options: tagOptions, tags: data.data };
 		}
 
-		return { tags: [], options: [] };
+		return { options: [], tags: [] };
 	}, [data]);
 
 	return {
-		tags,
-		options,
-		isLoading,
-		refetch,
 		createTags: mutate,
 		createTagsAsync: mutateAsync,
 		isCreating,
+		isLoading,
+		options,
+		refetch,
+		tags,
 	};
 }

@@ -1,10 +1,7 @@
-import type { Library, PageInfo } from '../types';
-import type { ClientQueryParams, QueryCallbacks } from '.';
+// import { useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useMemo } from 'react';
-// import { useSearchParams } from 'react-router-dom';
-
-import { useMutation, useQuery } from '@tanstack/react-query';
 
 import {
 	createLibrary,
@@ -19,14 +16,16 @@ import {
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
 import { useQueryParamStore } from '../stores';
+import type { Library, PageInfo } from '../types';
+import type { ClientQueryParams, QueryCallbacks } from '.';
 
 export function useLibrary(id: string, options: QueryCallbacks<Library> = {}) {
 	const { isLoading, data: library } = useQuery(['getLibrary', id], {
-		queryFn: async () => getLibraryById(id).then((res) => res.data),
+		context: StumpQueryContext,
 		onError(err) {
 			options.onError?.(err);
 		},
-		context: StumpQueryContext,
+		queryFn: async () => getLibraryById(id).then((res) => res.data),
 	});
 
 	return { isLoading, library };
@@ -39,9 +38,9 @@ export interface UseLibrariesReturn {
 
 export function useLibraries() {
 	const { data, ...rest } = useQuery(['getLibraries'], getLibraries, {
+		context: StumpQueryContext,
 		// Send all non-401 errors to the error page
 		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
-		context: StumpQueryContext,
 	});
 
 	const { libraries, pageData } = useMemo<UseLibrariesReturn>(() => {
@@ -62,25 +61,25 @@ export function useLibraries() {
 	};
 }
 
-export function useLibrarySeries(libraryId: string, page: number = 1) {
+export function useLibrarySeries(libraryId: string, page = 1) {
 	const { getQueryString, ...paramsStore } = useQueryParamStore();
 
 	const { isLoading, isFetching, isPreviousData, data } = useQuery(
 		['getLibrarySeries', page, libraryId, paramsStore],
 		() =>
 			getLibrarySeries(libraryId, page, getQueryString()).then(({ data }) => ({
-				series: data.data,
 				pageData: data._page,
+				series: data.data,
 			})),
 		{
-			keepPreviousData: true,
 			context: StumpQueryContext,
+			keepPreviousData: true,
 		},
 	);
 
 	const { series, pageData } = data ?? {};
 
-	return { isLoading, isFetching, isPreviousData, series, pageData };
+	return { isFetching, isLoading, isPreviousData, pageData, series };
 }
 
 export function useLibraryStats() {
@@ -93,14 +92,14 @@ export function useLibraryStats() {
 		context: StumpQueryContext,
 	});
 
-	return { libraryStats, isLoading: isLoading || isRefetching || isFetching };
+	return { isLoading: isLoading || isRefetching || isFetching, libraryStats };
 }
 
 export function useScanLibrary({ onError }: ClientQueryParams<unknown> = {}) {
 	const { mutate: scan, mutateAsync: scanAsync } = useMutation(['scanLibary'], {
+		context: StumpQueryContext,
 		mutationFn: scanLibary,
 		onError,
-		context: StumpQueryContext,
 	});
 
 	return { scan, scanAsync };
@@ -117,7 +116,12 @@ export function useLibraryMutation({
 	const { isLoading: createIsLoading, mutateAsync: createLibraryAsync } = useMutation(
 		['createLibrary'],
 		{
+			context: StumpQueryContext,
 			mutationFn: createLibrary,
+			onError: (err) => {
+				// toast.error('Login failed. Please try again.');
+				onError?.(err);
+			},
 			onSuccess: (res) => {
 				if (!res.data) {
 					onCreateFailed?.(res);
@@ -129,16 +133,18 @@ export function useLibraryMutation({
 					// onClose();
 				}
 			},
-			onError: (err) => {
-				// toast.error('Login failed. Please try again.');
-				onError?.(err);
-			},
-			context: StumpQueryContext,
 		},
 	);
 
 	const { isLoading: editIsLoading, mutateAsync: editLibraryAsync } = useMutation(['editLibrary'], {
+		context: StumpQueryContext,
 		mutationFn: editLibrary,
+		onError: (err) => {
+			onError?.(err);
+			// TODO: handle this error
+			// toast.error('Login failed. Please try again.');
+			console.error(err);
+		},
 		onSuccess: (res) => {
 			if (!res.data) {
 				// throw new Error('Something went wrong.');
@@ -152,16 +158,10 @@ export function useLibraryMutation({
 				onUpdated?.(res.data);
 			}
 		},
-		onError: (err) => {
-			onError?.(err);
-			// TODO: handle this error
-			// toast.error('Login failed. Please try again.');
-			console.error(err);
-		},
-		context: StumpQueryContext,
 	});
 
 	const { mutateAsync: deleteLibraryAsync } = useMutation(['deleteLibrary'], {
+		context: StumpQueryContext,
 		mutationFn: deleteLibrary,
 		async onSuccess(res) {
 			// FIXME: just realized invalidateQueries is async... I need to check all my usages of it...
@@ -170,14 +170,13 @@ export function useLibraryMutation({
 
 			onDeleted?.(res.data);
 		},
-		context: StumpQueryContext,
 	});
 
 	return {
 		createIsLoading,
-		editIsLoading,
 		createLibraryAsync,
-		editLibraryAsync,
 		deleteLibraryAsync,
+		editIsLoading,
+		editLibraryAsync,
 	};
 }

@@ -1,13 +1,14 @@
-import type { JobUpdate } from '../types';
+import { produce } from 'immer';
 import create from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { produce } from 'immer';
+
+import type { JobUpdate } from '../types';
 import { StoreBase } from '.';
 
 export const LARGE_JOB_THRESHOLDS = {
 	1000: 50,
-	5000: 100,
 	10000: 150,
+	5000: 100,
 };
 
 interface JobStore extends StoreBase<JobStore> {
@@ -19,10 +20,8 @@ interface JobStore extends StoreBase<JobStore> {
 
 export const useJobStore = create<JobStore>()(
 	devtools((set, get) => ({
-		jobs: {},
-
 		addJob(newJob: JobUpdate) {
-			let job = get().jobs[newJob.runner_id];
+			const job = get().jobs[newJob.runner_id];
 
 			if (job) {
 				get().updateJob(newJob);
@@ -37,10 +36,32 @@ export const useJobStore = create<JobStore>()(
 				);
 			}
 		},
-		updateJob(jobUpdate: JobUpdate) {
-			let jobs = get().jobs;
 
-			let job = jobs[jobUpdate.runner_id];
+		// TODO: delete job? will be in DB so not really needed anymore
+		completeJob(runnerId: string) {
+			const job = get().jobs[runnerId];
+
+			if (job) {
+				set((store) =>
+					produce(store, (draft) => {
+						draft.jobs[runnerId].status = 'COMPLETED';
+					}),
+				);
+			}
+		},
+
+		jobs: {},
+
+		reset() {
+			set(() => ({}));
+		},
+		set(changes) {
+			set((state) => ({ ...state, ...changes }));
+		},
+		updateJob(jobUpdate: JobUpdate) {
+			const jobs = get().jobs;
+
+			const job = jobs[jobUpdate.runner_id];
 
 			if (!job || !Object.keys(jobs).length) {
 				get().addJob(jobUpdate);
@@ -52,9 +73,9 @@ export const useJobStore = create<JobStore>()(
 
 			// if the task_count is greater than 1000, update the store every 50 tasks
 			// otherwise, update the store as is
-			let curr = Number(current_task);
-			let isDifferentCount = task_count !== job.task_count;
-			let isLargeJob = task_count > 1000;
+			const curr = Number(current_task);
+			const isDifferentCount = task_count !== job.task_count;
+			const isLargeJob = task_count > 1000;
 			// if (isLargeJob && !isDifferentCount) {
 			// 	// get the threshold based on the closest key in the LARGE_JOB_THRESHOLDS object
 			// 	let threshold_key = Object.keys(LARGE_JOB_THRESHOLDS).reduce((prev, curr) => {
@@ -85,25 +106,6 @@ export const useJobStore = create<JobStore>()(
 					}
 				}),
 			);
-		},
-
-		// TODO: delete job? will be in DB so not really needed anymore
-		completeJob(runnerId: string) {
-			const job = get().jobs[runnerId];
-
-			if (job) {
-				set((store) =>
-					produce(store, (draft) => {
-						draft.jobs[runnerId].status = 'COMPLETED';
-					}),
-				);
-			}
-		},
-		reset() {
-			set(() => ({}));
-		},
-		set(changes) {
-			set((state) => ({ ...state, ...changes }));
 		},
 	})),
 );

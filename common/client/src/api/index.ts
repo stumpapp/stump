@@ -3,10 +3,10 @@ import axios, { AxiosInstance } from 'axios';
 export * from './auth';
 export * from './config';
 export * from './epub';
-export * from './series';
-export * from './media';
 export * from './job';
 export * from './log';
+export * from './media';
+export * from './series';
 
 export let API: AxiosInstance;
 

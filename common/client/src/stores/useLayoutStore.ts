@@ -1,8 +1,9 @@
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
 import { StoreBase } from '.';
 
-interface LayoutStore extends StoreBase<LayoutStore> {}
+type LayoutStore = StoreBase<LayoutStore>;
 
 export const useLayoutStore = create<LayoutStore>()(
 	devtools(

@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react';
-
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 import { checkIsClaimed } from '../api';
 import { login, me, register } from '../api/auth';
 import { queryClient } from '../client';
-import { ClientQueryParams, QueryCallbacks } from '.';
 import { StumpQueryContext } from '../context';
-
 import type { User } from '../types';
+import { ClientQueryParams, QueryCallbacks } from '.';
 export interface AuthQueryOptions extends QueryCallbacks<User> {
 	disabled?: boolean;
 	// onSuccess?: (user: User | null) => void;
@@ -17,21 +15,21 @@ export interface AuthQueryOptions extends QueryCallbacks<User> {
 
 export function useAuthQuery(options: AuthQueryOptions = {}) {
 	const { data, error, isLoading, isFetching, isRefetching } = useQuery(['getViewer'], me, {
-		onSuccess(res) {
-			options.onSuccess?.(res.data);
-		},
+		context: StumpQueryContext,
+		enabled: options?.enabled,
 		onError(err) {
 			options.onError?.(err);
 		},
+		onSuccess(res) {
+			options.onSuccess?.(res.data);
+		},
 		useErrorBoundary: false,
-		enabled: options?.enabled,
-		context: StumpQueryContext,
 	});
 
 	return {
-		user: data,
 		error,
 		isLoading: isLoading || isFetching || isRefetching,
+		user: data,
 	};
 }
 
@@ -39,8 +37,8 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 	const [isClaimed, setIsClaimed] = useState(true);
 
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(['checkIsClaimed'], {
-		queryFn: checkIsClaimed,
 		context: StumpQueryContext,
+		queryFn: checkIsClaimed,
 	});
 
 	useEffect(() => {
@@ -50,7 +48,11 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 	}, [claimCheck]);
 
 	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation(['loginUser'], {
+		context: StumpQueryContext,
 		mutationFn: login,
+		onError: (err) => {
+			onError?.(err);
+		},
 		onSuccess: (res) => {
 			if (!res.data) {
 				onError?.(res);
@@ -60,23 +62,20 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 				onSuccess?.(res.data);
 			}
 		},
-		onError: (err) => {
-			onError?.(err);
-		},
-		context: StumpQueryContext,
 	});
 
 	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(['registerUser'], {
-		mutationFn: register,
 		// onError(err) {
 		// 	onError?.(err);
 		// },
 		context: StumpQueryContext,
+
+		mutationFn: register,
 	});
 
 	return {
-		isClaimed,
 		isCheckingClaimed,
+		isClaimed,
 		isLoggingIn,
 		isRegistering,
 		loginUser,

@@ -5,7 +5,6 @@ members = [
   "core/prisma", 
   "core/integration-tests", 
   "apps/desktop/src-tauri", 
-  "apps/tui", 
   "apps/server"
 ]
 

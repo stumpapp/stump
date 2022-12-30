@@ -1,4 +1,4 @@
-import { PageInfo, Media, Series, Library } from './core';
+import { Library, Media, PageInfo, Series } from './core';
 import { ApiError } from './server';
 
 export type ApiResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<ApiError>>;
@@ -28,16 +28,16 @@ export type MediaOrderByExclusions = Extract<
 export type MediaOrderByOptions = Partial<Omit<Media, MediaOrderByExclusions>>;
 // TODO: I HATE THIS
 export const mediaOrderByOptions: MediaOrderByOptions = {
-	name: undefined,
-	description: undefined,
-	size: undefined,
-	extension: undefined,
-	pages: undefined,
-	updated_at: undefined,
 	checksum: undefined,
+	description: undefined,
+	extension: undefined,
+	name: undefined,
+	pages: undefined,
 	path: undefined,
-	status: undefined,
 	series_id: undefined,
+	size: undefined,
+	status: undefined,
+	updated_at: undefined,
 };
 
 export type SeriesOrderByExclusions = Extract<
@@ -47,23 +47,23 @@ export type SeriesOrderByExclusions = Extract<
 export type SeriesOrderByOptions = Partial<Omit<Series, SeriesOrderByExclusions>>;
 // TODO: I HATE THIS
 export const seriesOrderByOptions: SeriesOrderByOptions = {
-	name: undefined,
 	description: undefined,
-	updated_at: undefined,
+	library_id: undefined,
+	name: undefined,
 	path: undefined,
 	status: undefined,
-	library_id: undefined,
+	updated_at: undefined,
 };
 
 export type LibraryOrderByExclusions = Extract<keyof Library, 'series' | 'tags' | 'libraryOptions'>;
 export type LibraryOrderByOptions = Partial<Omit<Library, LibraryOrderByExclusions>>;
 // TODO: I HATE THIS
 export const libraryOrderByOptions: LibraryOrderByOptions = {
-	name: undefined,
 	description: undefined,
-	updated_at: undefined,
+	name: undefined,
 	path: undefined,
 	status: undefined,
+	updated_at: undefined,
 };
 
 export * from './core';

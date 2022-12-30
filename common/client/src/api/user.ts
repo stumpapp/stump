@@ -1,4 +1,4 @@
-import type { ApiResult, User, UserPreferences, UpdateUserArgs } from '../types';
+import type { ApiResult, UpdateUserArgs, User, UserPreferences } from '../types';
 import { API } from '.';
 
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {

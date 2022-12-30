@@ -7,7 +7,6 @@
   "scripts": {
     "prisma": "cargo prisma",
     "setup": "cargo prisma generate",
-    "check": "cargo check",
     "build": "cargo build --release",
     "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
     "typegen": "cargo test --package stump_core --lib -- types::tests::codegen --ignored",

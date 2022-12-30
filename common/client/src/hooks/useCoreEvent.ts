@@ -1,7 +1,7 @@
-import type { CoreEvent } from '../types';
 import { queryClient } from '../client';
-import { useStumpSse } from './useStumpSse';
 import { useJobContext } from '../context';
+import type { CoreEvent } from '../types';
+import { useStumpSse } from './useStumpSse';
 
 interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void;

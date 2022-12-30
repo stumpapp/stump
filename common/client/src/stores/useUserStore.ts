@@ -1,7 +1,8 @@
-import type { User, UserPreferences } from '../types';
+import { produce } from 'immer';
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { produce } from 'immer';
+
+import type { User, UserPreferences } from '../types';
 import { StoreBase } from '.';
 
 interface UserStore extends StoreBase<UserStore> {
@@ -16,6 +17,12 @@ export const useUserStore = create<UserStore>()(
 	devtools(
 		persist(
 			(set, get) => ({
+				reset() {
+					set(() => ({}));
+				},
+				set(changes) {
+					set((state) => ({ ...state, ...changes }));
+				},
 				setUser(user?: User | null) {
 					set((state) =>
 						produce(state, (draft) => {
@@ -31,12 +38,6 @@ export const useUserStore = create<UserStore>()(
 							draft.userPreferences = userPreferences;
 						}),
 					);
-				},
-				reset() {
-					set(() => ({}));
-				},
-				set(changes) {
-					set((state) => ({ ...state, ...changes }));
 				},
 			}),
 			{

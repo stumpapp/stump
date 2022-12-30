@@ -1,8 +1,8 @@
-import type { CoreEvent } from '../types';
 import { useEffect, useMemo } from 'react';
 
 import { API } from '../api';
 import { useStumpStore } from '../stores';
+import type { CoreEvent } from '../types';
 
 interface SseOptions {
 	onOpen?: (event: Event) => void;
@@ -85,12 +85,12 @@ export function useStumpSse({ onEvent }: Props) {
 	}
 
 	const { readyState } = useSse(eventSourceUrl, {
+		onClose: () => {
+			setConnected(false);
+		},
 		onMessage: handleMessage,
 		onOpen: () => {
 			setConnected(true);
-		},
-		onClose: () => {
-			setConnected(false);
 		},
 	});
 

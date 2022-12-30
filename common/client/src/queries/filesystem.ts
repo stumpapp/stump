@@ -1,11 +1,10 @@
-import type { DirectoryListing } from '../types';
+import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useMemo, useState } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
-
 import { listDirectory } from '../api/filesystem';
 import { StumpQueryContext } from '../context';
+import type { DirectoryListing } from '../types';
 
 export interface DirectoryListingQueryParams {
 	enabled: boolean;
@@ -24,15 +23,15 @@ export function useDirectoryListing({
 
 	const { isLoading, error } = useQuery(
 		['listDirectory', path, page],
-		() => listDirectory({ path, page }),
+		() => listDirectory({ page, path }),
 		{
+			context: StumpQueryContext,
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
-			suspense: false,
 			onSuccess(res) {
 				setDirectoryListing(res.data.data);
 			},
-			context: StumpQueryContext,
+			suspense: false,
 		},
 	);
 
@@ -51,7 +50,7 @@ export function useDirectoryListing({
 	);
 
 	const errorMessage = useMemo(() => {
-		let err = error as AxiosError;
+		const err = error as AxiosError;
 
 		if (err?.response?.data) {
 			if (err.response.status === 404) {
@@ -65,13 +64,13 @@ export function useDirectoryListing({
 	}, [error]);
 
 	return {
-		isLoading,
+		directories: directoryListing?.files.filter((f) => f.is_directory) ?? [],
+		entries: directoryListing?.files ?? [],
 		error,
 		errorMessage,
-		path,
-		entries: directoryListing?.files ?? [],
+		isLoading,
 		parent: directoryListing?.parent,
-		directories: directoryListing?.files.filter((f) => f.is_directory) ?? [],
+		path,
 		// files: directoryListing?.files.filter((f) => !f.isDirectory) ?? [],
 		...actions,
 	};

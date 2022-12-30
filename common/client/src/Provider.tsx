@@ -1,5 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactElement, useState } from 'react';
+
 import { queryClient } from './client';
 import { ActiveJobContext, StumpQueryContext } from './context';
 import { JobUpdate } from './types';
@@ -16,7 +17,7 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 	const [jobs, setJobs] = useState<Record<string, JobUpdate>>({});
 
 	function addJob(newJob: JobUpdate) {
-		let job = jobs[newJob.runner_id];
+		const job = jobs[newJob.runner_id];
 
 		if (job) {
 			updateJob(newJob);
@@ -63,8 +64,8 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 			value={{
 				activeJobs: jobs,
 				addJob,
-				updateJob,
 				removeJob,
+				updateJob,
 			}}
 		>
 			{children}

@@ -1,5 +1,6 @@
 import create from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
 import { StoreBase } from '.';
 
 interface StumpStore extends StoreBase<StumpStore> {
@@ -18,6 +19,12 @@ export const useStumpStore = create<StumpStore>()(
 		persist(
 			(set) => ({
 				connected: false,
+				reset() {
+					set(() => ({}));
+				},
+				set(changes) {
+					set((state) => ({ ...state, ...changes }));
+				},
 				setBaseUrl(baseUrl: string) {
 					let adjustedBaseUrl = baseUrl;
 
@@ -33,12 +40,6 @@ export const useStumpStore = create<StumpStore>()(
 				},
 				setConnected(connected: boolean) {
 					set({ connected });
-				},
-				reset() {
-					set(() => ({}));
-				},
-				set(changes) {
-					set((state) => ({ ...state, ...changes }));
 				},
 			}),
 			{

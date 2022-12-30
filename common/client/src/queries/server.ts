@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { getStumpVersion } from '../api/server';
 import { StumpQueryContext } from '../context';
 
@@ -7,10 +8,10 @@ export function useStumpVersion() {
 		['stumpVersion'],
 		() => getStumpVersion().then((res) => res.data),
 		{
+			context: StumpQueryContext,
 			onError(err) {
 				console.error('Failed to fetch Stump API version:', err);
 			},
-			context: StumpQueryContext,
 		},
 	);
 

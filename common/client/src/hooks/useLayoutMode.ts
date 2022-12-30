@@ -1,7 +1,8 @@
-import type { LayoutMode } from '../types';
 import { useMemo } from 'react';
+
 import { useUserPreferences } from '../queries';
 import { useUserStore } from '../stores';
+import type { LayoutMode } from '../types';
 
 export type LayoutEntity = 'LIBRARY' | 'SERIES';
 
@@ -12,13 +13,13 @@ export function useLayoutMode(entity: LayoutEntity) {
 	const { user, userPreferences, setUserPreferences } = useUserStore();
 
 	const { updateUserPreferences } = useUserPreferences(user?.id, {
-		onUpdated: setUserPreferences,
 		enableFetchPreferences: !user,
+		onUpdated: setUserPreferences,
 	});
 
 	async function updateLayoutMode(mode: LayoutMode, onError?: (err: unknown) => void) {
 		if (userPreferences) {
-			let key = entity === 'LIBRARY' ? 'library_layout_mode' : 'series_layout_mode';
+			const key = entity === 'LIBRARY' ? 'library_layout_mode' : 'series_layout_mode';
 
 			updateUserPreferences({
 				...userPreferences,

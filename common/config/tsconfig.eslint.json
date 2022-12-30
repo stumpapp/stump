@@ -1,0 +1,21 @@
+{
+	"extends": "./base.tsconfig.json",
+	"include": [
+		"../../apps/**/*",
+		"../../common/**/*",
+		"../../core",
+		"../../.eslintrc.js",
+		"**/*.config.js"
+	],
+	"exclude": [
+		"**/.cache/**/*",
+		"**/build/**/*",
+		"**/cjs/**/*",
+		"**/dist/**/*",
+		"**/dts/**/*",
+		"**/esm/**/*",
+		"**/lib/**/*",
+		"**/mjs/**/*",
+		"**/node_modules/**/*"
+	]
+}

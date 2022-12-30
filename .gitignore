@@ -44,4 +44,3 @@ core/integration-tests/.*
 _next
 
 docker-compose.yaml
-server_old

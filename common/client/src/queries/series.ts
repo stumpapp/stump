@@ -1,14 +1,13 @@
-import type { Media, Pageable, Series } from '../types';
-import { QueryCallbacks, usePagedQuery } from '.';
-import { useMemo } from 'react';
-
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '../api';
 import { queryClient } from '../client';
 import { StumpQueryContext } from '../context';
-import { useQueryParamStore } from '../stores';
 import { useCounter } from '../hooks/useCounter';
+import { useQueryParamStore } from '../stores';
+import type { Media, Pageable, Series } from '../types';
+import { QueryCallbacks, usePagedQuery } from '.';
 
 export const prefetchSeries = async (id: string) => {
 	await queryClient.prefetchQuery(['getSeries', id], () => getSeriesById(id), {
@@ -23,20 +22,20 @@ export function useSeries(id: string, options: QueryCallbacks<Series> = {}) {
 		isRefetching,
 		data: series,
 	} = useQuery(['getSeries'], {
-		queryFn: async () => getSeriesById(id).then((res) => res.data),
-		onSuccess(data) {
-			options.onSuccess?.(data);
-		},
+		context: StumpQueryContext,
 		onError(err) {
 			options.onError?.(err);
 		},
-		context: StumpQueryContext,
+		onSuccess(data) {
+			options.onSuccess?.(data);
+		},
+		queryFn: async () => getSeriesById(id).then((res) => res.data),
 	});
 
 	return { isLoading: isLoading || isFetching || isRefetching, series };
 }
 
-export function useSeriesMedia(seriesId: string, page: number = 1) {
+export function useSeriesMedia(seriesId: string, page = 1) {
 	const { getQueryString, ...paramsStore } = useQueryParamStore();
 
 	const { isLoading, isFetching, isRefetching, isPreviousData, data } = useQuery(
@@ -47,8 +46,8 @@ export function useSeriesMedia(seriesId: string, page: number = 1) {
 				pageData: data._page,
 			})),
 		{
-			keepPreviousData: true,
 			context: StumpQueryContext,
+			keepPreviousData: true,
 		},
 	);
 
@@ -102,13 +101,13 @@ export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {
 		isFetching,
 		isRefetching,
 	} = useQuery(['getNextInSeries', id], () => getNextInSeries(id).then((res) => res.data), {
-		onSuccess(data) {
-			options.onSuccess?.(data);
-		},
+		context: StumpQueryContext,
 		onError(err) {
 			options.onError?.(err);
 		},
-		context: StumpQueryContext,
+		onSuccess(data) {
+			options.onSuccess?.(data);
+		},
 	});
 
 	return { isLoading: isLoading || isFetching || isRefetching, media };

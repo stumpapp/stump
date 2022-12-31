@@ -37,6 +37,7 @@
           cargo-edit
           cargo-watch
 
+          # Tauri
           git
           curl
           wget

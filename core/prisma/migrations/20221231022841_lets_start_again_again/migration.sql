@@ -35,8 +35,8 @@ CREATE TABLE "series" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" DATETIME NOT NULL,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "path" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'READY',
     "library_id" TEXT,
@@ -52,12 +52,16 @@ CREATE TABLE "media" (
     "extension" TEXT NOT NULL,
     "pages" INTEGER NOT NULL,
     "updated_at" DATETIME NOT NULL,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "modified_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "downloaded" BOOLEAN NOT NULL DEFAULT false,
     "checksum" TEXT,
     "path" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'READY',
     "series_id" TEXT,
-    CONSTRAINT "media_series_id_fkey" FOREIGN KEY ("series_id") REFERENCES "series" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "reading_list_id" TEXT,
+    CONSTRAINT "media_series_id_fkey" FOREIGN KEY ("series_id") REFERENCES "series" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "media_reading_list_id_fkey" FOREIGN KEY ("reading_list_id") REFERENCES "reading_lists" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -77,15 +81,6 @@ CREATE TABLE "reading_lists" (
 );
 
 -- CreateTable
-CREATE TABLE "reading_list_access" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "user_id" TEXT NOT NULL,
-    "reading_list_id" TEXT NOT NULL,
-    CONSTRAINT "reading_list_access_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "reading_list_access_reading_list_id_fkey" FOREIGN KEY ("reading_list_id") REFERENCES "reading_lists" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
-);
-
--- CreateTable
 CREATE TABLE "collections" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
@@ -98,6 +93,8 @@ CREATE TABLE "read_progresses" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "page" INTEGER NOT NULL,
     "epubcfi" TEXT,
+    "is_completed" BOOLEAN NOT NULL DEFAULT false,
+    "updated_at" DATETIME NOT NULL,
     "media_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
     CONSTRAINT "read_progresses_media_id_fkey" FOREIGN KEY ("media_id") REFERENCES "media" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -184,9 +181,6 @@ CREATE UNIQUE INDEX "tags_name_key" ON "tags"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "reading_lists_creating_user_id_name_key" ON "reading_lists"("creating_user_id", "name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "reading_list_access_user_id_reading_list_id_key" ON "reading_list_access"("user_id", "reading_list_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "read_progresses_user_id_media_id_key" ON "read_progresses"("user_id", "media_id");

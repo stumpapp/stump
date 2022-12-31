@@ -42,7 +42,7 @@
     - [ ] Show more series information
   - [ ] Series overview section (on 0th page when browsing a series)
   - [ ] Settings pages
-- [ ] Add redirects for unauthed access
+- [x] Add redirects for unauthed access
   - I.e. if I visit `/some-page/1`, and get redirected to `/auth`, should redirect instead with query params to restore state: `/auth?redirect=/some-page/1`
 - [ ] Finish implementing EPUB support
   - [ ] Queries in `client`

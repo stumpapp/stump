@@ -102,9 +102,13 @@ pnpm run setup
 
 4. Start one of the apps:
 
+I use [moonrepo](https://moonrepo.dev/) for Stump's repository management
+
 ```bash
-pnpm dev:web
-pnpm dev:desktop
+# webapp + server
+moon run :dev
+# desktop app + server
+moon run desktop:dev
 ```
 
 And that's it!
@@ -142,6 +146,7 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 - `client`: Everything needed to create a react-based client for Stump. Contains Zustand and React Query configuration, used by the `interface` package, as well as the generated TypeScript types.
 - `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.
 - `interface`: Stump's main React-based interface, shared between the web and desktop applications.
+- `prisma-cli`: A small rust app to run the prisma cli (generating the prisma client)
 
 ### /core
 

@@ -110,7 +110,9 @@ export default function CommandPalette() {
 				<ModalBody p={0}>
 					<Box>
 						<InputGroup py={0.5}>
-							<InputLeftElement pointerEvents="none" children={<MagnifyingGlass />} />
+							<InputLeftElement pointerEvents="none">
+								<MagnifyingGlass />
+							</InputLeftElement>
 							<Input
 								onChange={onInputStop}
 								ref={inputRef}
@@ -122,10 +124,9 @@ export default function CommandPalette() {
 								borderColor={useColorModeValue('gray.400', 'gray.600')}
 							/>
 							{loading && (
-								<InputRightElement
-									pointerEvents="none"
-									children={<Spinner speed="0.5s" size="sm" />}
-								/>
+								<InputRightElement pointerEvents="none">
+									<Spinner speed="0.5s" size="sm" />
+								</InputRightElement>
 							)}
 						</InputGroup>
 					</Box>
@@ -141,6 +142,9 @@ export default function CommandPalette() {
 const fakeBaseUrl = 'https://images.unsplash.com/photo-'
 function QueryResults({ results }: { results?: typeof fakeResults }) {
 	const [selected, setSelected] = useState(0)
+
+	const bgColor = useColorModeValue('gray.300', 'gray.600')
+	const selectedItemDescriptionColor = useColorModeValue('gray.500', 'gray.450')
 
 	useEffect(() => {
 		if (selected !== 0) {
@@ -182,33 +186,35 @@ function QueryResults({ results }: { results?: typeof fakeResults }) {
 						key={`${id}-${title}-listitem`}
 						onClick={() => setSelected(i)}
 						className="px-2 py-1 cursor-pointer rounded-md"
-						bg={selected === i ? useColorModeValue('gray.300', 'gray.600') : undefined}
-						_hover={{ bg: useColorModeValue('gray.300', 'gray.600') }}
+						bg={selected === i ? bgColor : undefined}
+						_hover={{ bg: bgColor }}
 					>
 						<Text noOfLines={1}>{title}</Text>
 					</Box>
 				))}
 			</Stack>
 
-			<VStack justify="flex-start" textAlign="center" h="full" w="50%" px={4} pb={4} pt={2}>
-				<Heading size="sm">{selectedItem.title}</Heading>
-				<img
-					src={`${fakeBaseUrl}${selectedItem.id}`}
-					className="w-24 h-24 object-cover rounded-md"
-				/>
-				<Text fontSize="sm" color={useColorModeValue('gray.500', 'gray.450')} noOfLines={2}>
-					{selectedItem.description}
-				</Text>
+			{selectedItem && (
+				<VStack justify="flex-start" textAlign="center" h="full" w="50%" px={4} pb={4} pt={2}>
+					<Heading size="sm">{selectedItem.title}</Heading>
+					<img
+						src={`${fakeBaseUrl}${selectedItem.id}`}
+						className="w-24 h-24 object-cover rounded-md"
+					/>
+					<Text fontSize="sm" color={selectedItemDescriptionColor} noOfLines={2}>
+						{selectedItem.description}
+					</Text>
 
-				<HStack>
-					<FileStatusBadge status={selectedItem.status as FileStatus} />
-					{selectedItem.tags.map(({ id, name }) => (
-						<Badge textTransform="none" key={`${id}-${name}-tag`}>
-							{name}
-						</Badge>
-					))}
-				</HStack>
-			</VStack>
+					<HStack>
+						<FileStatusBadge status={selectedItem.status as FileStatus} />
+						{selectedItem.tags.map(({ id, name }) => (
+							<Badge textTransform="none" key={`${id}-${name}-tag`}>
+								{name}
+							</Badge>
+						))}
+					</HStack>
+				</VStack>
+			)}
 		</>
 	)
 }

@@ -1,7 +1,6 @@
 import { Box, Progress, Text } from '@chakra-ui/react'
 import { useJobContext } from '@stump/client'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useMemo } from 'react'
 
 export default function JobOverlay() {
 	const context = useJobContext()
@@ -17,9 +16,15 @@ export default function JobOverlay() {
 
 	function formatMessage(message?: string | null) {
 		if (message?.startsWith('Analyzing')) {
-			const filePieces = message.replace(/"/g, '').split('Analyzing ').filter(Boolean)[0].split('/')
+			const filePieces = message
+				.replace(/"/g, '')
+				.split('Analyzing ')
+				.filter(Boolean)[0]
+				?.split('/')
 
-			return `Analyzing ${filePieces.slice(filePieces.length - 1).join('/')}`
+			if (filePieces?.length) {
+				return `Analyzing ${filePieces.slice(filePieces.length - 1).join('/')}`
+			}
 		}
 
 		return message

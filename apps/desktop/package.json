@@ -14,7 +14,7 @@
   "dependencies": {
     "@stump/client": "workspace:*",
     "@stump/interface": "workspace:*",
-    "@tanstack/react-query": "^4.10.3",
+    "@tanstack/react-query": "^4.20.4",
     "@tauri-apps/api": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

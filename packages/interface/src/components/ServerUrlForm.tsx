@@ -13,7 +13,6 @@ import { checkUrl, isUrl } from '@stump/client/api'
 import { CloudCheck, CloudSlash } from 'phosphor-react'
 import { ChangeEvent, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
 import { z } from 'zod'
 
 import Button from '../ui/Button'
@@ -123,6 +122,7 @@ export default function ServerUrlForm() {
 								? 'Failed to connect!'
 								: undefined
 						}
+						// eslint-disable-next-line react/no-children-prop
 						children={InputDecoration}
 					/>
 				</InputGroup>

@@ -16,6 +16,8 @@ import Button, { ModalCloseButton } from '../../ui/Button'
 import LibraryModalForm from './form/LibraryModalForm'
 
 interface Props {
+	// TODO: properly type this
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	trigger?: (props: any) => JSX.Element
 	disabled?: boolean
 }

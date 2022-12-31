@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: remove this when I have time, fix the icon types
 import {
 	Box,
 	Button,
@@ -36,7 +38,7 @@ interface NavItemProps {
 	items?: NavMenuItemProps[]
 }
 
-function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
+function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 	const { isOpen, onToggle } = useDisclosure()
 
 	return (
@@ -54,7 +56,8 @@ function NavMenuItem({ name, items, onClick, ...rest }: NavItemProps) {
 				p={2}
 			>
 				<div className="flex space-x-2">
-					{/* @ts-ignore */}
+					{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+					{/* @ts-ignore: TODO: fixme */}
 					<rest.icon weight="fill" />
 					<span>{name}</span>
 				</div>
@@ -117,7 +120,8 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 			p={2}
 		>
 			<div className="flex space-x-2 justify-start w-full">
-				{/* @ts-ignore */}
+				{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+				{/* @ts-ignore: TODO: fixme */}
 				<rest.icon weight="fill" />
 				<span>{name}</span>
 			</div>
@@ -150,6 +154,8 @@ export function SidebarContent() {
 				// onHover:  () => queryClient.prefetchQuery([])
 			},
 		],
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[libraries, locale],
 	)
 

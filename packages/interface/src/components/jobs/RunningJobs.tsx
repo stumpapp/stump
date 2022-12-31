@@ -43,6 +43,9 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 		}
 	}
 
+	const bgColor = useColorModeValue('whiteAlpha.600', 'blackAlpha.300')
+	const detailsColor = useColorModeValue('gray.600', 'gray.400')
+
 	return (
 		<Stack>
 			<Heading alignSelf="start" size="md">
@@ -52,25 +55,15 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 			{!runningJobs.length && <EmptyState message="No jobs are currently running" />}
 
 			<Stack p={0} m={0}>
-				{runningJobs.map((job) => {
+				{runningJobs.map((job, i) => {
 					return (
-						<VStack
-							align="start"
-							spacing={2}
-							bg={useColorModeValue('whiteAlpha.600', 'blackAlpha.300')}
-							rounded="md"
-							p={3}
-						>
+						<VStack key={job.id || i} align="start" spacing={2} bg={bgColor} rounded="md" p={3}>
 							<div className="w-full flex justify-between items-center">
 								<div className="flex space-x-3 items-center">
 									<Text fontSize="sm" fontWeight="semibold">
 										{readableKind(job.kind)}
 									</Text>
-									<Text
-										color={useColorModeValue('gray.600', 'gray.400')}
-										fontSize="xs"
-										className="italic"
-									>
+									<Text color={detailsColor} fontSize="xs" className="italic">
 										{job.details}
 									</Text>
 								</div>

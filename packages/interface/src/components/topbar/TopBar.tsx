@@ -43,8 +43,8 @@ export default function TopBar() {
 			<HStack w="full" justify="space-between" align="center" spacing="2">
 				<HStack minH={10}>
 					<MobileDrawer />
-
-					{/* @ts-ignore: this seems to work, idky it has type error */}
+					{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+					{/* @ts-ignore: TODO: this seems to work, idky it has type error */}
 					<Heading as="h3" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>
 						{title}
 					</Heading>

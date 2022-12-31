@@ -1,7 +1,7 @@
-import { Library, Media, PageInfo, Series } from './core';
-import { ApiError } from './server';
+import { Library, Media, PageInfo, Series } from './core'
+import { ApiError } from './server'
 
-export type ApiResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<ApiError>>;
+export type ApiResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<ApiError>>
 
 export enum FileStatus {
 	Unknown = 'UNKNOWN',
@@ -13,19 +13,19 @@ export enum FileStatus {
 
 export interface Pageable<T> {
 	// The target data being returned.
-	data: T;
+	data: T
 	// The pagination information (if paginated).
-	_page?: PageInfo;
+	_page?: PageInfo
 }
 
-export type PageableApiResult<T> = ApiResult<Pageable<T>>;
+export type PageableApiResult<T> = ApiResult<Pageable<T>>
 
 // Note: I am separating these options / exclusions in case I want to use either independently.
 export type MediaOrderByExclusions = Extract<
 	keyof Media,
 	'currentPage' | 'series' | 'readProgresses' | 'tags' | 'id'
->;
-export type MediaOrderByOptions = Partial<Omit<Media, MediaOrderByExclusions>>;
+>
+export type MediaOrderByOptions = Partial<Omit<Media, MediaOrderByExclusions>>
 // TODO: I HATE THIS
 export const mediaOrderByOptions: MediaOrderByOptions = {
 	checksum: undefined,
@@ -38,13 +38,13 @@ export const mediaOrderByOptions: MediaOrderByOptions = {
 	size: undefined,
 	status: undefined,
 	updated_at: undefined,
-};
+}
 
 export type SeriesOrderByExclusions = Extract<
 	keyof Series,
 	'library' | 'media' | 'mediaCount' | 'tags'
->;
-export type SeriesOrderByOptions = Partial<Omit<Series, SeriesOrderByExclusions>>;
+>
+export type SeriesOrderByOptions = Partial<Omit<Series, SeriesOrderByExclusions>>
 // TODO: I HATE THIS
 export const seriesOrderByOptions: SeriesOrderByOptions = {
 	description: undefined,
@@ -53,10 +53,10 @@ export const seriesOrderByOptions: SeriesOrderByOptions = {
 	path: undefined,
 	status: undefined,
 	updated_at: undefined,
-};
+}
 
-export type LibraryOrderByExclusions = Extract<keyof Library, 'series' | 'tags' | 'libraryOptions'>;
-export type LibraryOrderByOptions = Partial<Omit<Library, LibraryOrderByExclusions>>;
+export type LibraryOrderByExclusions = Extract<keyof Library, 'series' | 'tags' | 'libraryOptions'>
+export type LibraryOrderByOptions = Partial<Omit<Library, LibraryOrderByExclusions>>
 // TODO: I HATE THIS
 export const libraryOrderByOptions: LibraryOrderByOptions = {
 	description: undefined,
@@ -64,7 +64,7 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 	path: undefined,
 	status: undefined,
 	updated_at: undefined,
-};
+}
 
-export * from './core';
-export * from './server';
+export * from './core'
+export * from './server'

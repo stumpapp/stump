@@ -11,6 +11,7 @@ export default defineConfig({
 		manifest: true,
 		outDir: '../dist',
 	},
+	clearScreen: false,
 	define: {
 		pkgJson: { name, version },
 	},

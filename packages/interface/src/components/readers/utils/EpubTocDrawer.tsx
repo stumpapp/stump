@@ -40,7 +40,7 @@ export default function EpubTocDrawer({
 		if (isOpen) {
 			onClose()
 		}
-	}, [location])
+	}, [location, isOpen, onClose])
 
 	function handleSelect(href: string) {
 		onSelect(href)
@@ -74,7 +74,11 @@ export default function EpubTocDrawer({
 						className="scrollbar-hide"
 					>
 						{toc?.map((item) => (
-							<Text className="cursor-pointer" onClick={() => handleSelect(item.content)}>
+							<Text
+								key={item.label}
+								className="cursor-pointer"
+								onClick={() => handleSelect(item.content)}
+							>
 								{item.label}
 							</Text>
 						))}

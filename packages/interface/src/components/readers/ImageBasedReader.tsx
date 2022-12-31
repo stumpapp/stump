@@ -27,16 +27,21 @@ export default function ImageBasedReader({
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
 	// TODO: is this enough?
-	useEffect(() => {
-		const pageArray = Array.from({ length: media.pages })
+	useEffect(
+		() => {
+			const pageArray = Array.from({ length: media.pages })
 
-		const start = currentPage >= 1 ? currentPage - 1 : 0
+			const start = currentPage >= 1 ? currentPage - 1 : 0
 
-		pageArray.slice(start, 3).forEach((_, i) => {
-			const preloadedImg = new Image()
-			preloadedImg.src = getPageUrl(currentPage + (i + 1))
-		})
-	}, [currentPage, media.pages])
+			pageArray.slice(start, 3).forEach((_, i) => {
+				const preloadedImg = new Image()
+				preloadedImg.src = getPageUrl(currentPage + (i + 1))
+			})
+		},
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[currentPage, media.pages],
+	)
 
 	useEffect(() => {
 		currPageRef.current = currentPage
@@ -84,7 +89,7 @@ export default function ImageBasedReader({
 				className="w-full max-h-full md:w-auto z-30"
 				src={getPageUrl(currentPage)}
 				onError={(err) => {
-					// @ts-ignore
+					// @ts-expect-error: is oke
 					err.target.src = '/favicon.png'
 				}}
 				onClick={toggleToolbar}
@@ -205,27 +210,31 @@ export function AnimatedImageBasedReader({
 		currPageRef.current = currentPage
 	}, [currentPage])
 
-	const imageUrls = useMemo(() => {
-		const urls = []
+	const imageUrls = useMemo(
+		() => {
+			const urls = []
 
-		// if has previous
-		if (currentPage > 1) {
-			urls.push(getPageUrl(currentPage - 1))
-		} else {
-			urls.push(undefined)
-		}
+			// if has previous
+			if (currentPage > 1) {
+				urls.push(getPageUrl(currentPage - 1))
+			} else {
+				urls.push(undefined)
+			}
 
-		urls.push(getPageUrl(currentPage))
+			urls.push(getPageUrl(currentPage))
 
-		// if has next
-		if (currentPage < media.pages) {
-			urls.push(getPageUrl(currentPage + 1))
-		} else {
-			urls.push(undefined)
-		}
+			// if has next
+			if (currentPage < media.pages) {
+				urls.push(getPageUrl(currentPage + 1))
+			} else {
+				urls.push(undefined)
+			}
 
-		return urls
-	}, [currentPage])
+			return urls
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[currentPage],
+	)
 
 	function startNextPageAnimation() {
 		Promise.all([
@@ -245,11 +254,15 @@ export function AnimatedImageBasedReader({
 		})
 	}
 
-	useEffect(() => {
-		controls.set(RESET_CONTROLS)
-		nextControls.set({ left: '100%' })
-		prevControls.set({ right: '100%' })
-	}, [currentPage])
+	useEffect(
+		() => {
+			controls.set(RESET_CONTROLS)
+			nextControls.set({ left: '100%' })
+			prevControls.set({ right: '100%' })
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[currentPage],
+	)
 
 	function handleHotKeyPagination(direction: 'next' | 'prev') {
 		if (direction === 'next' && currPageRef.current < media.pages) {
@@ -283,7 +296,7 @@ export function AnimatedImageBasedReader({
 				currentPage={currentPage}
 				pages={media.pages}
 				visible={toolbarVisible}
-				onPageChange={(_) => alert('TODO;')}
+				onPageChange={() => alert('TODO;')}
 			/>
 
 			{imageUrls[0] && (
@@ -295,7 +308,7 @@ export function AnimatedImageBasedReader({
 					className="absolute w-full max-h-full md:w-auto"
 					src={imageUrls[0]}
 					onError={(err) => {
-						// @ts-ignore
+						// @ts-expect-error: is oke
 						err.target.src = '/src/favicon.png'
 					}}
 				/>
@@ -320,7 +333,7 @@ export function AnimatedImageBasedReader({
 				className="absolute w-full max-h-full md:w-auto z-30"
 				src={imageUrls[1]}
 				onError={(err) => {
-					// @ts-ignore
+					// @ts-expect-error: is oke
 					err.target.src = '/favicon.png'
 				}}
 				// TODO: figure this out, I can't do this anymore with the drag...
@@ -336,7 +349,7 @@ export function AnimatedImageBasedReader({
 					className="absolute w-full max-h-full md:w-auto"
 					src={imageUrls[2]}
 					onError={(err) => {
-						// @ts-ignore
+						// @ts-expect-error: is oke
 						err.target.src = '/favicon.png'
 					}}
 				/>

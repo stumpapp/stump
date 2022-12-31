@@ -26,6 +26,13 @@ tasks:
       - 'web:build'
       # - '~:get-webapp'
 
+  lint:
+    command: 'cargo clippy --package stump_server -- -D warnings'
+    options:
+      mergeArgs: 'replace'
+      mergeDeps: 'replace'
+      mergeInputs: 'replace'
+
   clean:
     command: 'cargo clean'
 

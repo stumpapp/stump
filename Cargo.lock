@@ -236,9 +236,9 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "axum"
-version = "0.5.16"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9e3356844c4d6a6d6467b8da2cffb4a2820be256f50a3a386c9d152bab31043"
+checksum = "08b108ad2665fa3f6e6a517c3d80ec3e77d224c47d605167aefaa5d7ef97fa48"
 dependencies = [
  "async-trait",
  "axum-core",
@@ -256,8 +256,10 @@ dependencies = [
  "mime",
  "percent-encoding",
  "pin-project-lite",
+ "rustversion",
  "serde",
  "serde_json",
+ "serde_path_to_error",
  "serde_urlencoded",
  "sha-1",
  "sync_wrapper",
@@ -271,9 +273,9 @@ dependencies = [
 
 [[package]]
 name = "axum-core"
-version = "0.2.8"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9f0c0a60006f2a293d82d571f635042a72edf927539b7685bd62d361963839b"
+checksum = "79b8558f5a0581152dc94dcd289132a1d377494bdeafcd41869b3258e3e2ad92"
 dependencies = [
  "async-trait",
  "bytes",
@@ -281,15 +283,16 @@ dependencies = [
  "http",
  "http-body",
  "mime",
+ "rustversion",
  "tower-layer",
  "tower-service",
 ]
 
 [[package]]
 name = "axum-extra"
-version = "0.3.7"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69034b3b0fd97923eee2ce8a47540edb21e07f48f87f67d44bb4271cec622bdb"
+checksum = "f9a320103719de37b7b4da4c8eb629d4573f6bcfd3dfe80d3208806895ccf81d"
 dependencies = [
  "axum",
  "bytes",
@@ -307,9 +310,9 @@ dependencies = [
 
 [[package]]
 name = "axum-macros"
-version = "0.2.3"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6293dae2ec708e679da6736e857cf8532886ef258e92930f38279c12641628b8"
+checksum = "e4df0fc33ada14a338b799002f7e8657711422b25d4e16afb032708d6b185621"
 dependencies = [
  "heck 0.4.0",
  "proc-macro2",
@@ -319,9 +322,9 @@ dependencies = [
 
 [[package]]
 name = "axum-sessions"
-version = "0.3.1"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9edac5a983d2aa76c3764a3e0a59e5fa885f5af468de4e4ce2f9182223cf281c"
+checksum = "4b114309d293dd8a6fedebf09d5b8bbb0f7647b3d204ca0dd333b5f797aed5c8"
 dependencies = [
  "async-session",
  "axum",
@@ -2613,9 +2616,9 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 
 [[package]]
 name = "matchit"
-version = "0.5.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73cbba799671b762df5a175adf59ce145165747bb891505c43d09aefbbf38beb"
+checksum = "b87248edafb776e59e6ee64a79086f65890d3510f2c656c000bf2a7e8a0aea40"
 
 [[package]]
 name = "memchr"
@@ -3631,7 +3634,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
 
 [[package]]
-name = "prisma"
+name = "prisma-cli"
 version = "0.1.0"
 dependencies = [
  "prisma-client-rust-cli",
@@ -3640,7 +3643,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust"
 version = "0.6.3"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?tag=0.6.3#e12e6932be7d224410784b52143384cc9235da3b"
+source = "git+https://github.com/Brendonovich/prisma-client-rust.git?tag=0.6.3#e12e6932be7d224410784b52143384cc9235da3b"
 dependencies = [
  "base64 0.13.0",
  "bigdecimal",
@@ -3669,7 +3672,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust-cli"
 version = "0.6.3"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?tag=0.6.3#e12e6932be7d224410784b52143384cc9235da3b"
+source = "git+https://github.com/Brendonovich/prisma-client-rust.git?tag=0.6.3#e12e6932be7d224410784b52143384cc9235da3b"
 dependencies = [
  "datamodel",
  "prisma-client-rust-sdk",
@@ -3685,7 +3688,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust-sdk"
 version = "0.6.3"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?tag=0.6.3#e12e6932be7d224410784b52143384cc9235da3b"
+source = "git+https://github.com/Brendonovich/prisma-client-rust.git?tag=0.6.3#e12e6932be7d224410784b52143384cc9235da3b"
 dependencies = [
  "convert_case 0.5.0",
  "datamodel",
@@ -5627,9 +5630,9 @@ dependencies = [
 
 [[package]]
 name = "tower-http"
-version = "0.3.4"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c530c8675c1dbf98facee631536fa116b5fb6382d7dd6dc1b118d970eafe3ba"
+checksum = "f873044bf02dd1e8239e9c1293ea39dad76dc594ec16185d0a1bf31d8dc8d858"
 dependencies = [
  "bitflags",
  "bytes",
@@ -5652,9 +5655,9 @@ dependencies = [
 
 [[package]]
 name = "tower-layer"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "343bc9466d3fe6b0f960ef45960509f84480bf4fd96f92901afe7ff3df9d3a62"
+checksum = "c20c8dbed6283a09604c3e69b4b7eeb54e298b8a600d4d5ecb5ad39de609f1d0"
 
 [[package]]
 name = "tower-service"

@@ -29,7 +29,9 @@ export default function BookOverview() {
 		return () => {
 			setBackwardsUrl()
 		}
-	}, [media?.series?.id])
+	}, [media, setBackwardsUrl])
+
+	const textColor = useColorModeValue('gray.700', 'gray.400')
 
 	if (isLoading) {
 		return <div>Loading...</div>
@@ -56,12 +58,12 @@ export default function BookOverview() {
 
 				<div className="flex flex-col space-y-2 text-sm pt-2">
 					<Heading fontSize="md">File Information</Heading>
-					<Box className="flex space-x-4" color={useColorModeValue('gray.700', 'gray.400')}>
+					<Box className="flex space-x-4" color={textColor}>
 						<Text>Size: {formatBytes(media.size)}</Text>
 						<Text>Kind: {media.extension.toUpperCase()}</Text>
 					</Box>
-					<Text color={useColorModeValue('gray.700', 'gray.400')}>Checksum: {media.checksum}</Text>
-					<Text color={useColorModeValue('gray.700', 'gray.400')}>Path: {media.path}</Text>
+					<Text color={textColor}>Checksum: {media.checksum}</Text>
+					<Text color={textColor}>Path: {media.path}</Text>
 				</div>
 
 				{/* TODO: series slider, cursor after current? */}

@@ -10,4 +10,4 @@ export type ApiError =
 	| { code: 'ServiceUnavailable'; details: string }
 	| { code: 'BadGateway'; details: string }
 	| { code: 'Unknown'; details: string }
-	| { code: 'Redirect'; details: string };
+	| { code: 'Redirect'; details: string }

@@ -57,11 +57,12 @@ export default function Search() {
 						}
 					}}
 				/>
-				<InputRightElement
-					display={{ base: 'none', md: 'flex' }}
-					children={<Shortcut visible={!expanded} />}
-				/>
-				<InputRightElement display={{ base: 'flex', md: 'none' }} children={<MagnifyingGlass />} />
+				<InputRightElement display={{ base: 'none', md: 'flex' }}>
+					<Shortcut visible={!expanded} />
+				</InputRightElement>
+				<InputRightElement display={{ base: 'flex', md: 'none' }}>
+					<MagnifyingGlass />
+				</InputRightElement>
 			</InputGroup>
 		</form>
 	)

@@ -1,8 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 
 import { getEpubBaseUrl, getEpubById } from '../api/epub'
-import { StumpQueryContext } from '../context'
+import { useQuery } from '../client'
 import type { Epub, EpubContent } from '../types'
 
 export interface EpubOptions {
@@ -33,15 +32,18 @@ export interface UseEpubReturn {
 // epubcfi(/6/4[chap01ref]!/4[body01]/10[para05]/3:10) -> wtf is that lmao
 
 // FIXME: use options
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function useEpub(id: string, options?: EpubOptions) {
+
+export function useEpub(id: string, options?: EpubOptions, enabled?: boolean) {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [chapter, setChapter] = useState(2)
 
-	const { isLoading: isFetchingBook, data: epub } = useQuery(['getEpubById', id], {
-		context: StumpQueryContext,
-		queryFn: () => getEpubById(id).then((res) => res.data),
-	})
+	const { isLoading: isFetchingBook, data: epub } = useQuery(
+		['getEpubById', id],
+		() => getEpubById(id).then((res) => res.data),
+		{
+			enabled,
+		},
+	)
 
 	const actions = useMemo(
 		() => ({
@@ -102,10 +104,7 @@ export function useEpubLazy(id: string, options?: EpubOptions) {
 		isLoading,
 		isRefetching,
 		isFetching,
-	} = useQuery(['getEpubById', id], {
-		context: StumpQueryContext,
-		queryFn: () => getEpubById(id).then((res) => res.data),
-	})
+	} = useQuery(['getEpubById', id], () => getEpubById(id).then((res) => res.data))
 
 	return {
 		epub,

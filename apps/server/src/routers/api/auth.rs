@@ -1,6 +1,7 @@
 use axum::{
+	extract::State,
 	routing::{get, post},
-	Extension, Json, Router,
+	Json, Router,
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
@@ -10,12 +11,12 @@ use stump_core::{
 };
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	utils::{self, verify_password},
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new().nest(
 		"/auth",
 		Router::new()
@@ -34,21 +35,19 @@ async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
 	}
 }
 
-// Wow, this is really ugly syntax for state extraction imo...
 async fn login(
-	Json(input): Json<LoginOrRegisterArgs>,
-	Extension(ctx): State,
 	mut session: WritableSession,
+	State(state): State<AppState>,
+	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
-
 	if let Some(user) = session.get::<User>("user") {
 		if input.username == user.username {
 			return Ok(Json(user));
 		}
 	}
 
-	let fetched_user = db
+	let fetched_user = state
+		.db
 		.user()
 		.find_unique(user::username::equals(input.username.to_owned()))
 		.with(user::user_preferences::fetch())
@@ -76,9 +75,9 @@ async fn logout(mut session: WritableSession) -> ApiResult<()> {
 }
 
 pub async fn register(
-	Json(input): Json<LoginOrRegisterArgs>,
-	Extension(ctx): State,
 	session: ReadableSession,
+	State(ctx): State<AppState>,
+	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 

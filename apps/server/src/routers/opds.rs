@@ -1,8 +1,8 @@
 use axum::{
-	extract::{Path, Query},
+	extract::{Path, Query, State},
 	middleware::from_extractor,
 	routing::get,
-	Extension, Router,
+	Router,
 };
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
@@ -19,7 +19,7 @@ use stump_core::{
 };
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
@@ -28,7 +28,7 @@ use crate::{
 	},
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/opds/v1.2",
@@ -179,7 +179,10 @@ async fn catalog() -> ApiResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn keep_reading(Extension(ctx): State, session: ReadableSession) -> ApiResult<Xml> {
+async fn keep_reading(
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let user_id = get_session_user(&session)?.id;
@@ -246,7 +249,7 @@ async fn keep_reading(Extension(ctx): State, session: ReadableSession) -> ApiRes
 	Ok(Xml(feed.build()?))
 }
 
-async fn get_libraries(Extension(ctx): State) -> ApiResult<Xml> {
+async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
@@ -275,7 +278,7 @@ async fn get_libraries(Extension(ctx): State) -> ApiResult<Xml> {
 }
 
 async fn get_library_by_id(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<Xml> {
@@ -319,7 +322,7 @@ async fn get_library_by_id(
 // /// pagination is zero-indexed.
 async fn get_series(
 	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -353,7 +356,7 @@ async fn get_series(
 
 async fn get_latest_series(
 	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -385,7 +388,7 @@ async fn get_latest_series(
 async fn get_series_by_id(
 	Path(id): Path<String>,
 	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -432,7 +435,7 @@ async fn get_series_by_id(
 
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -453,7 +456,7 @@ async fn get_book_thumbnail(
 
 async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();

@@ -59,7 +59,7 @@ export default function SettingsNavigation({ user }: Props) {
 
 	const activeTab = useMemo(
 		() => pages.find((p) => p.path === location.pathname)?.index ?? 0,
-		[location],
+		[pages, location],
 	)
 
 	function handleChange(index: number) {

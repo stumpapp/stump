@@ -36,25 +36,17 @@ export function AppLayout() {
 		navigate('/settings/general')
 	})
 
-	// TODO: This logic needs to be moved, pretty much every request in Stump should have this
-	// functionality. I have no idea how to do this in a clean way right now though.
-	// On network error, if on desktop app, navigate to a screen to troubleshoot
-	// the connection to the server
 	// FIXME: after switching to SSE again, this seems to break desktop app... kinda annoying bug.
-	const { user, isLoading, error } = useAuthQuery({
+	const { error } = useAuthQuery({
 		enabled: !storeUser,
 		onSuccess: setUser,
 	})
 
-	// @ts-ignore: FIXME: type error no good >:(
+	const mainColor = useColorModeValue('gray.75', 'gray.900')
+
+	// @ts-expect-error: FIXME: type error no good >:(
 	if (error?.code === 'ERR_NETWORK' && appProps?.platform !== 'browser') {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
-	}
-
-	const hasUser = !!user || !!storeUser
-
-	if (!hasUser && !isLoading) {
-		return <Navigate to="/auth" state={{ from: location }} />
 	}
 
 	return (
@@ -75,7 +67,7 @@ export function AppLayout() {
 				}}
 			>
 				{!hideSidebar && <Sidebar />}
-				<Box as="main" w="full" h="full" bg={useColorModeValue('gray.75', 'gray.900')}>
+				<Box as="main" w="full" h="full" bg={mainColor}>
 					{!hideSidebar && <TopBar />}
 					<React.Suspense fallback={<Lazy />}>
 						<Outlet />

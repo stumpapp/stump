@@ -55,7 +55,7 @@ importers:
       '@stump/client': workspace:*
       '@stump/interface': workspace:*
       '@tailwindcss/typography': ^0.5.8
-      '@tanstack/react-query': ^4.10.3
+      '@tanstack/react-query': ^4.20.4
       '@tauri-apps/api': ^1.2.0
       '@tauri-apps/cli': ^1.2.2
       '@types/react': ^18.0.26
@@ -74,7 +74,7 @@ importers:
     dependencies:
       '@stump/client': link:../../packages/client
       '@stump/interface': link:../../packages/interface
-      '@tanstack/react-query': 4.14.1_biqbaboplfbrettd7655fr4n2y
+      '@tanstack/react-query': 4.20.4_biqbaboplfbrettd7655fr4n2y
       '@tauri-apps/api': 1.2.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -106,11 +106,14 @@ importers:
       '@tailwindcss/typography': ^0.5.8
       '@types/react': ^18.0.26
       '@types/react-dom': ^18.0.10
+      '@types/react-router-dom': ^5.3.3
       '@vitejs/plugin-react': ^2.2.0
       autoprefixer: ^10.4.13
       postcss: ^8.4.20
       react: ^18.2.0
       react-dom: ^18.2.0
+      react-router: ^6.6.1
+      react-router-dom: ^6.6.1
       tailwind: ^4.0.0
       tailwind-scrollbar-hide: ^1.1.7
       tailwindcss: ^3.2.4
@@ -122,10 +125,13 @@ importers:
       '@stump/interface': link:../../packages/interface
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      react-router: 6.6.1_react@18.2.0
+      react-router-dom: 6.6.1_biqbaboplfbrettd7655fr4n2y
     devDependencies:
       '@tailwindcss/typography': 0.5.8_tailwindcss@3.2.4
       '@types/react': 18.0.26
       '@types/react-dom': 18.0.10
+      '@types/react-router-dom': 5.3.3
       '@vitejs/plugin-react': 2.2.0_vite@3.2.5
       autoprefixer: 10.4.13_postcss@8.4.20
       postcss: 8.4.20
@@ -141,7 +147,7 @@ importers:
 
   packages/client:
     specifiers:
-      '@tanstack/react-query': ^4.14.1
+      '@tanstack/react-query': ^4.20.4
       '@types/axios': ^0.14.0
       '@types/node': ^18.11.18
       '@types/react': ^18.0.26
@@ -152,7 +158,7 @@ importers:
       typescript: ^4.8.4
       zustand: ^4.1.5
     dependencies:
-      '@tanstack/react-query': 4.14.1
+      '@tanstack/react-query': 4.20.4
       axios: 1.2.2
       immer: 9.0.16
       react-use-websocket: 4.2.0
@@ -181,8 +187,8 @@ importers:
       '@emotion/styled': ^11.10.5
       '@hookform/resolvers': ^2.9.10
       '@stump/client': workspace:*
-      '@tanstack/react-query': ^4.14.1
-      '@tanstack/react-query-devtools': ^4.14.1
+      '@tanstack/react-query': ^4.20.4
+      '@tanstack/react-query-devtools': ^4.20.4
       '@tanstack/react-table': ^8.7.4
       '@tanstack/react-virtual': 3.0.0-beta.18
       '@types/node': ^18.11.18
@@ -193,7 +199,7 @@ importers:
       '@types/react-helmet': ^6.1.6
       '@types/react-router-dom': ^5.3.3
       '@vitejs/plugin-react': ^2.2.0
-      chakra-react-select: ^4.4.0
+      chakra-react-select: ^4.4.3
       class-variance-authority: ^0.2.4
       clsx: ^1.2.1
       dayjs: ^1.11.7
@@ -226,11 +232,11 @@ importers:
       '@emotion/styled': 11.10.5_il7rdtjwk2sxtxzs733ry2sabi
       '@hookform/resolvers': 2.9.10_react-hook-form@7.41.2
       '@stump/client': link:../client
-      '@tanstack/react-query': 4.14.1_react-dom@18.2.0
-      '@tanstack/react-query-devtools': 4.14.1_wpqdmqml25fzjjs7gjcpsq2awy
+      '@tanstack/react-query': 4.20.4_react-dom@18.2.0
+      '@tanstack/react-query-devtools': 4.20.4_ladklsw5ypen6zawmyzg4ubs6i
       '@tanstack/react-table': 8.7.4_react-dom@18.2.0
       '@tanstack/react-virtual': 3.0.0-beta.18
-      chakra-react-select: 4.4.0_vh4zeortp3o52sxd7og7t2ffei
+      chakra-react-select: 4.4.3_vh4zeortp3o52sxd7og7t2ffei
       class-variance-authority: 0.2.4_typescript@4.9.4
       clsx: 1.2.1
       dayjs: 1.11.7
@@ -2761,14 +2767,14 @@ packages:
       - supports-color
     dev: true
 
-  /@floating-ui/core/1.0.1:
-    resolution: {integrity: sha512-bO37brCPfteXQfFY0DyNDGB3+IMe4j150KFQcgJ5aBP295p9nBGeHEs/p0czrRbtlHq4Px/yoPXO/+dOCcF4uA==}
+  /@floating-ui/core/1.0.5:
+    resolution: {integrity: sha512-iDdOsaCHZH/0FM0yNBYt+cJxJF9S5jrYWNtDZOiDFMiZ7uxMJ/71h8eTwoVifEAruv9p9rlMPYCGIgMjOz95FQ==}
     dev: false
 
-  /@floating-ui/dom/1.0.4:
-    resolution: {integrity: sha512-maYJRv+sAXTy4K9mzdv0JPyNW5YPVHrqtY90tEdI6XNpuLOP26Ci2pfwPsKBA/Wh4Z3FX5sUrtUFTdMYj9v+ug==}
+  /@floating-ui/dom/1.1.0:
+    resolution: {integrity: sha512-TSogMPVxbRe77QCj1dt8NmRiJasPvuc+eT5jnJ6YpLqgOD2zXc5UA3S1qwybN+GVCDNdKfpKy1oj8RpzLJvh6A==}
     dependencies:
-      '@floating-ui/core': 1.0.1
+      '@floating-ui/core': 1.0.5
     dev: false
 
   /@hookform/resolvers/2.9.10_react-hook-form@7.41.2:
@@ -3031,33 +3037,33 @@ packages:
       tailwindcss: 3.2.4
     dev: true
 
-  /@tanstack/match-sorter-utils/8.5.14:
-    resolution: {integrity: sha512-lVNhzTcOJ2bZ4IU+PeCPQ36vowBHvviJb2ZfdRFX5uhy7G0jM8N34zAMbmS5ZmVH8D2B7oU82OWo0e/5ZFzQrw==}
+  /@tanstack/match-sorter-utils/8.7.2:
+    resolution: {integrity: sha512-bptNeoexeDB947fWoCPwUchPSx5FA9gwzU0bkXz0du5pT8Ud2+1ob+xOgHj6EF3VN0kdXtLhwjPyhY7/dJglkg==}
     engines: {node: '>=12'}
     dependencies:
       remove-accents: 0.4.2
     dev: false
 
-  /@tanstack/query-core/4.14.1:
-    resolution: {integrity: sha512-mUejKoFDe4NZB8jQJR1uuAl6IwvkUpOD2m8NcuTVPOu0pcxeeFPdrnHaljwOEFPtlqXoiiIIQGYy6whjCMN+iQ==}
+  /@tanstack/query-core/4.20.4:
+    resolution: {integrity: sha512-lhLtGVNJDsJ/DyZXrLzekDEywQqRVykgBqTmkv0La32a/RleILXy6JMLBb7UmS3QCatg/F/0N9/5b0i5j6IKcA==}
     dev: false
 
-  /@tanstack/react-query-devtools/4.14.1_wpqdmqml25fzjjs7gjcpsq2awy:
-    resolution: {integrity: sha512-9n/vlHNMVcCs/KiQZGF+wiOqqq944zEJ6SP+/ghKcMgLhMxVo4wVwKYrN5nT16A94lZp6dzhkTTemv826EkSUA==}
+  /@tanstack/react-query-devtools/4.20.4_ladklsw5ypen6zawmyzg4ubs6i:
+    resolution: {integrity: sha512-4e4wOmqAYjLS1RQ7gRBLCk3koCjbOfCMvbxS3CPCAN5+FLBemLAvoYvFJ/i/7DPsIsltGwsnd7YAFFGMzdSx7A==}
     peerDependencies:
-      '@tanstack/react-query': 4.14.1
+      '@tanstack/react-query': 4.20.4
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@tanstack/match-sorter-utils': 8.5.14
-      '@tanstack/react-query': 4.14.1_react-dom@18.2.0
+      '@tanstack/match-sorter-utils': 8.7.2
+      '@tanstack/react-query': 4.20.4_react-dom@18.2.0
       react-dom: 18.2.0
       superjson: 1.10.0
       use-sync-external-store: 1.2.0
     dev: false
 
-  /@tanstack/react-query/4.14.1:
-    resolution: {integrity: sha512-cRgNzigw4GSPwGlTEkXi8hi/xgUnSEt9jCkiC8oAT3PEIdsQ50onZcpXd+JNJcZk2RTh8KM1fGyWz6xYLiY8bg==}
+  /@tanstack/react-query/4.20.4:
+    resolution: {integrity: sha512-SJRxx13k/csb9lXAJfycgVA1N/yU/h3bvRNWP0+aHMfMjmbyX82FdoAcckDBbOdEyAupvb0byelNHNeypCFSyA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -3068,12 +3074,12 @@ packages:
       react-native:
         optional: true
     dependencies:
-      '@tanstack/query-core': 4.14.1
+      '@tanstack/query-core': 4.20.4
       use-sync-external-store: 1.2.0
     dev: false
 
-  /@tanstack/react-query/4.14.1_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-cRgNzigw4GSPwGlTEkXi8hi/xgUnSEt9jCkiC8oAT3PEIdsQ50onZcpXd+JNJcZk2RTh8KM1fGyWz6xYLiY8bg==}
+  /@tanstack/react-query/4.20.4_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-SJRxx13k/csb9lXAJfycgVA1N/yU/h3bvRNWP0+aHMfMjmbyX82FdoAcckDBbOdEyAupvb0byelNHNeypCFSyA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -3084,14 +3090,14 @@ packages:
       react-native:
         optional: true
     dependencies:
-      '@tanstack/query-core': 4.14.1
+      '@tanstack/query-core': 4.20.4
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
     dev: false
 
-  /@tanstack/react-query/4.14.1_react-dom@18.2.0:
-    resolution: {integrity: sha512-cRgNzigw4GSPwGlTEkXi8hi/xgUnSEt9jCkiC8oAT3PEIdsQ50onZcpXd+JNJcZk2RTh8KM1fGyWz6xYLiY8bg==}
+  /@tanstack/react-query/4.20.4_react-dom@18.2.0:
+    resolution: {integrity: sha512-SJRxx13k/csb9lXAJfycgVA1N/yU/h3bvRNWP0+aHMfMjmbyX82FdoAcckDBbOdEyAupvb0byelNHNeypCFSyA==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -3102,7 +3108,7 @@ packages:
       react-native:
         optional: true
     dependencies:
-      '@tanstack/query-core': 4.14.1
+      '@tanstack/query-core': 4.20.4
       react-dom: 18.2.0
       use-sync-external-store: 1.2.0
     dev: false
@@ -4074,8 +4080,8 @@ packages:
     resolution: {integrity: sha512-511ThLu1hF+5RRRt0zYCf2U2yRr9GPF6m5y90SBCWsvSoYoW7yAGlv/elyPaNfvGCkp6kj/KFZWU0BMA69Prsg==}
     dev: true
 
-  /chakra-react-select/4.4.0_vh4zeortp3o52sxd7og7t2ffei:
-    resolution: {integrity: sha512-7lPPsaxDoaPEH0aPZazDc0mTzsUQq46nB2EAQtp2IWj2p2+ngmp/xHieT3NEGD1kMy9hGcS/y3kcGVcUabL1UQ==}
+  /chakra-react-select/4.4.3_vh4zeortp3o52sxd7og7t2ffei:
+    resolution: {integrity: sha512-anDgJyYUpIapTmUbgXB+Iw5hJ90hOPvgoUPUaYdO5q9zY2VBFhQ1L0gBMqWAQxiKUmuHpwQypf8sPoVtd0b3KA==}
     peerDependencies:
       '@chakra-ui/form-control': ^2.0.0
       '@chakra-ui/icon': ^3.0.0
@@ -4089,7 +4095,7 @@ packages:
     dependencies:
       '@emotion/react': 11.10.5_@types+react@18.0.26
       react-dom: 18.2.0
-      react-select: 5.6.0_o45l33bvmnoaq262t6qp6xzi4a
+      react-select: 5.7.0_o45l33bvmnoaq262t6qp6xzi4a
     transitivePeerDependencies:
       - '@babel/core'
       - '@types/react'
@@ -7299,6 +7305,19 @@ packages:
       use-sidecar: 1.1.2_@types+react@18.0.26
     dev: false
 
+  /react-router-dom/6.6.1_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-u+8BKUtelStKbZD5UcY0NY90WOzktrkJJhyhNg7L0APn9t1qJNLowzrM9CHdpB6+rcPt6qQrlkIXsTvhuXP68g==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.2.1
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      react-router: 6.6.1_react@18.2.0
+    dev: false
+
   /react-router-dom/6.6.1_react-dom@18.2.0:
     resolution: {integrity: sha512-u+8BKUtelStKbZD5UcY0NY90WOzktrkJJhyhNg7L0APn9t1qJNLowzrM9CHdpB6+rcPt6qQrlkIXsTvhuXP68g==}
     engines: {node: '>=14'}
@@ -7320,8 +7339,18 @@ packages:
       '@remix-run/router': 1.2.1
     dev: false
 
-  /react-select/5.6.0_o45l33bvmnoaq262t6qp6xzi4a:
-    resolution: {integrity: sha512-uUvP/72rA8NGhOL16RVBaeC12Wa4NUE0iXIa6hz0YRno9ZgxTmpuMeKzjR7vHcwmigpVCoe0prP+3NVb6Obq8Q==}
+  /react-router/6.6.1_react@18.2.0:
+    resolution: {integrity: sha512-YkvlYRusnI/IN0kDtosUCgxqHeulN5je+ew8W+iA1VvFhf86kA+JEI/X/8NqYcr11hCDDp906S+SGMpBheNeYQ==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      react: '>=16.8'
+    dependencies:
+      '@remix-run/router': 1.2.1
+      react: 18.2.0
+    dev: false
+
+  /react-select/5.7.0_o45l33bvmnoaq262t6qp6xzi4a:
+    resolution: {integrity: sha512-lJGiMxCa3cqnUr2Jjtg9YHsaytiZqeNOKeibv6WF5zbK/fPegZ1hg3y/9P1RZVLhqBTs0PfqQLKuAACednYGhQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -7329,7 +7358,7 @@ packages:
       '@babel/runtime': 7.20.7
       '@emotion/cache': 11.10.5
       '@emotion/react': 11.10.5_@types+react@18.0.26
-      '@floating-ui/dom': 1.0.4
+      '@floating-ui/dom': 1.1.0
       '@types/react-transition-group': 4.4.5
       memoize-one: 6.0.0
       prop-types: 15.8.1

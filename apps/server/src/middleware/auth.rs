@@ -1,10 +1,8 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use axum::{
 	body::BoxBody,
-	extract::{FromRequest, RequestParts},
-	http::{header, Method, StatusCode},
+	extract::FromRequestParts,
+	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Response},
 };
 use axum_sessions::SessionHandle;
@@ -12,28 +10,34 @@ use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{db::models::User, prelude::Ctx, prisma::user};
+use stump_core::{db::models::User, prisma::user};
 use tracing::{error, trace};
 
-use crate::utils::{decode_base64_credentials, verify_password};
+use crate::{
+	config::state::AppState,
+	utils::{decode_base64_credentials, verify_password},
+};
 
 pub struct Auth;
 
 #[async_trait]
-impl<B> FromRequest<B> for Auth
+impl<S> FromRequestParts<S> for Auth
 where
-	B: Send,
+	S: Send + Sync,
 {
 	type Rejection = Response;
 
-	async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+	async fn from_request_parts(
+		parts: &mut Parts,
+		_state: &S,
+	) -> Result<Self, Self::Rejection> {
 		// Note: this is fine, right? I mean, it's not like we're doing anything
 		// on a OPTIONS request, right? Right? 👀
-		if req.method() == Method::OPTIONS {
+		if parts.method == Method::OPTIONS {
 			return Ok(Self);
 		}
 
-		let session_handle = req.extensions().get::<SessionHandle>().unwrap();
+		let session_handle = parts.extensions.get::<SessionHandle>().unwrap();
 		let session = session_handle.read().await;
 
 		if let Some(user) = session.get::<User>("user") {
@@ -44,21 +48,20 @@ where
 		// drop so we don't deadlock when writing to the session lol oy vey
 		drop(session);
 
-		let ctx = req.extensions().get::<Arc<Ctx>>().unwrap();
+		// FIXME: this fails on first load, I assume I need to use the state param but not sure how yet
+		let maybe_ctx = parts.extensions.get::<AppState>();
+		if maybe_ctx.is_none() {
+			return Err((StatusCode::UNAUTHORIZED).into_response());
+		}
 
-		// TODO: figure me out plz
-		// let cookie_jar = req.extensions().get::<CookieJar>().unwrap();
+		let ctx = maybe_ctx.unwrap();
 
-		// if let Some(cookie) = cookie_jar.get("stump_session") {
-		// println!("cookie: {:?}", cookie);
-		// }
-
-		let auth_header = req
-			.headers()
+		let auth_header = parts
+			.headers
 			.get(header::AUTHORIZATION)
 			.and_then(|value| value.to_str().ok());
 
-		let is_opds = req.uri().path().starts_with("/opds");
+		let is_opds = parts.uri.path().starts_with("/opds");
 
 		if auth_header.is_none() {
 			if is_opds {
@@ -141,18 +144,21 @@ where
 pub struct AdminGuard;
 
 #[async_trait]
-impl<B> FromRequest<B> for AdminGuard
+impl<S> FromRequestParts<S> for AdminGuard
 where
-	B: Send,
+	S: Send + Sync,
 {
 	type Rejection = StatusCode;
 
-	async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-		if req.method() == Method::OPTIONS {
+	async fn from_request_parts(
+		parts: &mut Parts,
+		_: &S,
+	) -> Result<Self, Self::Rejection> {
+		if parts.method == Method::OPTIONS {
 			return Ok(Self);
 		}
 
-		let session_handle = req.extensions().get::<SessionHandle>().unwrap();
+		let session_handle = parts.extensions.get::<SessionHandle>().unwrap();
 		let session = session_handle.read().await;
 
 		if let Some(user) = session.get::<User>("user") {

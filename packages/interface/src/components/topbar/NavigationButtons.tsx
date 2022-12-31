@@ -20,7 +20,7 @@ export default function NavigationButtons() {
 		} else if (forwardsUrl !== 0) {
 			navigate(1)
 		}
-	}, [forwardsUrl])
+	}, [navigate, forwardsUrl])
 
 	const navigateBackward = useCallback(() => {
 		if (backwardsUrl) {
@@ -28,7 +28,7 @@ export default function NavigationButtons() {
 		} else if (backwardsUrl !== 0) {
 			navigate(-1)
 		}
-	}, [backwardsUrl])
+	}, [navigate, backwardsUrl])
 
 	// FIXME: this is pretty buggy, but it works for now.
 	// TODO: platform specific keybinds

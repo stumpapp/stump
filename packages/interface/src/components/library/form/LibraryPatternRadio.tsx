@@ -11,8 +11,6 @@ import type { Library, LibraryPattern } from '@stump/client'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import Link from '../../../ui/Link'
-
 interface Option {
 	label: string
 	value: LibraryPattern
@@ -41,17 +39,24 @@ interface LibraryPatternRadioProps {
 // TODO: After 0.1.0 is released, I'm going to start working on a new UI.
 export function LibraryPatternRadio({ library }: LibraryPatternRadioProps) {
 	const form = useFormContext()
+	const boxColor = useColorModeValue('whiteAlpha.100', 'blackAlpha.100')
+	const labelColor = useColorModeValue('gray.500', 'gray.300')
+	const descriptionColor = useColorModeValue('gray.600', 'gray.400')
 
 	const libraryPattern: LibraryPattern = form.watch('library_pattern')
 
 	const disabled = !!library
 
 	// TODO: fix zod form, I should not have to do this.
-	useEffect(() => {
-		if (!libraryPattern) {
-			form.setValue('library_pattern', library?.library_options.library_pattern || 'SERIES_BASED')
-		}
-	}, [])
+	useEffect(
+		() => {
+			if (!libraryPattern) {
+				form.setValue('library_pattern', library?.library_options.library_pattern || 'SERIES_BASED')
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	)
 
 	return (
 		<FormControl
@@ -87,7 +92,7 @@ export function LibraryPatternRadio({ library }: LibraryPatternRadioProps) {
 					return (
 						<Box
 							key={value}
-							bg={disabled ? 'transparent' : useColorModeValue('whiteAlpha.100', 'blackAlpha.100')}
+							bg={disabled ? 'transparent' : boxColor}
 							borderColor={isChecked ? (disabled ? 'brand.400' : 'brand.500') : 'transparent'}
 							borderWidth={1}
 							p={4}
@@ -96,13 +101,10 @@ export function LibraryPatternRadio({ library }: LibraryPatternRadioProps) {
 							cursor={disabled ? 'not-allowed' : 'pointer'}
 							onClick={disabled ? undefined : () => form.setValue('library_pattern', value)}
 						>
-							<Text
-								color={disabled ? useColorModeValue('gray.500', 'gray.300') : undefined}
-								fontWeight="medium"
-							>
+							<Text color={disabled ? labelColor : undefined} fontWeight="medium">
 								{label}
 							</Text>
-							<Text color={useColorModeValue('gray.600', 'gray.400')} fontSize="xs">
+							<Text color={descriptionColor} fontSize="xs">
 								{description}
 							</Text>
 						</Box>

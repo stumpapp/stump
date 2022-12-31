@@ -5,20 +5,21 @@ import EpubReader from '../../components/readers/EpubReader'
 import LazyEpubReader from '../../components/readers/LazyEpubReader'
 
 export default function ReadEpub() {
-	const { id } = useParams()
-
 	const [search] = useSearchParams()
-
 	const loc = search.get('loc')
+	const lazyReader = search.get('stream') && search.get('stream') !== 'true'
 
+	const { id } = useParams()
 	if (!id) {
 		throw new Error('Media id is required')
-	} else if (search.get('stream') && search.get('stream') !== 'true') {
+	}
+
+	const { isFetchingBook, epub, ...rest } = useEpub(id, { loc }, !lazyReader)
+
+	if (lazyReader) {
 		// TODO: remove the loc from search..
 		return <LazyEpubReader id={id} loc={loc} />
 	}
-
-	const { isFetchingBook, epub, ...rest } = useEpub(id, { loc })
 
 	if (isFetchingBook) {
 		return <div>Loading...</div>

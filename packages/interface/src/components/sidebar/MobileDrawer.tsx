@@ -24,12 +24,11 @@ export default function MobileDrawer() {
 		if (isOpen) {
 			onClose()
 		}
-	}, [location])
+	}, [location, isOpen, onClose])
 
 	return (
 		<>
 			<Button
-				// @ts-ignore: FIXME
 				ref={btnRef}
 				display={{ base: 'flex', md: 'none' }}
 				variant="ghost"

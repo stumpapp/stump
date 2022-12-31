@@ -1,7 +1,10 @@
 use std::path::PathBuf;
 
 use axum::{
-	extract::Path, middleware::from_extractor, routing::get, Extension, Json, Router,
+	extract::{Path, State},
+	middleware::from_extractor,
+	routing::get,
+	Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
 use stump_core::{
@@ -11,13 +14,13 @@ use stump_core::{
 };
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{get_session_user, http::BufferResponse},
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/epub/:id",
@@ -32,7 +35,7 @@ pub(crate) fn mount() -> Router {
 /// Get an Epub by ID. The `read_progress` relation is loaded.
 async fn get_epub(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Epub>> {
 	let user_id = get_session_user(&session)?.id;
@@ -66,7 +69,7 @@ async fn get_epub(
 /// the resource path)
 async fn get_epub_chapter(
 	Path((id, chapter)): Path<(String, usize)>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<BufferResponse> {
 	let book = ctx
 		.db
@@ -95,7 +98,7 @@ async fn get_epub_chapter(
 async fn get_epub_meta(
 	// TODO: does this work?
 	Path((id, root, resource)): Path<(String, String, PathBuf)>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<BufferResponse> {
 	let book = ctx
 		.db

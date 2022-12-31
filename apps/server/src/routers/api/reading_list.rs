@@ -1,9 +1,13 @@
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	utils::get_session_user,
 };
-use axum::{extract::Path, routing::get, Extension, Json, Router};
+use axum::{
+	extract::{Path, State},
+	routing::get,
+	Json, Router,
+};
 use axum_sessions::extractors::ReadableSession;
 use stump_core::{
 	db::models::ReadingList,
@@ -12,7 +16,7 @@ use stump_core::{
 };
 use tracing::log::trace;
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route(
 			"/reading-list",
@@ -30,7 +34,7 @@ pub(crate) fn mount() -> Router {
 }
 
 async fn get_reading_list(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Vec<ReadingList>>> {
 	let user_id = get_session_user(&session)?.id;
@@ -48,9 +52,9 @@ async fn get_reading_list(
 }
 
 async fn create_reading_list(
-	Extension(ctx): State,
-	Json(input): Json<CreateReadingList>,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
+	Json(input): Json<CreateReadingList>,
 ) -> ApiResult<Json<ReadingList>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
@@ -76,7 +80,7 @@ async fn create_reading_list(
 
 async fn get_reading_list_by_id(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<ReadingList>> {
 	let _user_id = get_session_user(&session)?.id;
@@ -102,7 +106,7 @@ async fn get_reading_list_by_id(
 
 async fn update_reading_list(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
 ) -> ApiResult<Json<ReadingList>> {
 	let db = ctx.get_db();
@@ -127,7 +131,7 @@ async fn update_reading_list(
 
 async fn delete_reading_list_by_id(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
 

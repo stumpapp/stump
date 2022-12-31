@@ -1,6 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 
-import { StumpQueryContext } from '../context'
 import type { ApiResult, Pageable, PageableApiResult } from '../types'
 
 export * from './auth'
@@ -60,7 +59,6 @@ export function usePagedQuery<T>(
 		hasNextPage,
 		...rest
 	} = useInfiniteQuery([key], (ctx) => queryFn(ctx.pageParam || 1, params), {
-		context: StumpQueryContext,
 		getNextPageParam: (lastGroup) => {
 			if (lastGroup?.data._page) {
 				const currentPage = lastGroup.data._page.current_page
@@ -70,6 +68,7 @@ export function usePagedQuery<T>(
 					return lastGroup.data._page?.current_page + 1
 				}
 			}
+			return undefined
 		},
 		keepPreviousData: true,
 		// ...options,

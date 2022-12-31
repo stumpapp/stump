@@ -1,6 +1,7 @@
 # https://moonrepo.dev/docs/config/global-project
 $schema: 'https://moonrepo.dev/schemas/global-project.json'
 
+# TODO: add rust scopes
 fileGroups:
   # Application specific files
   app: []
@@ -31,23 +32,33 @@ tasks:
   format:
     command:
       - 'prettier'
-      # Use the same config for the entire repo
       - '--config'
       - '@in(4)'
-      # Use the same ignore patterns as well
       - '--ignore-path'
       - '@in(3)'
-      # Fail for unformatted code
       - '--check'
-      # Run in current dir
       - '.'
     inputs:
-      # Source and test files
       - 'src/**/*'
       - 'tests/**/*'
-      # Config and other files
       - '**/*.{md,mdx,yml,yaml,json}'
-      # Root configs, any format
+      - '/.prettierignore'
+      - '/.prettierrc'
+
+  # TODO: scope to ts apps
+  format-fix:
+    command:
+      - 'prettier'
+      - '--config'
+      - '@in(4)'
+      - '--ignore-path'
+      - '@in(3)'
+      - '--write'
+      - '.'
+    inputs:
+      - 'src/**/*'
+      - 'tests/**/*'
+      - '**/*.{md,mdx,yml,yaml,json}'
       - '/.prettierignore'
       - '/.prettierrc'
 

@@ -1,8 +1,8 @@
-import { useStumpVersion } from '@stump/client';
-import { ArrowSquareOut } from 'phosphor-react';
+import { useStumpVersion } from '@stump/client'
+import { ArrowSquareOut } from 'phosphor-react'
 
 export default function ApplicationVersion() {
-	const version = useStumpVersion();
+	const version = useStumpVersion()
 
 	return (
 		<a
@@ -15,5 +15,5 @@ export default function ApplicationVersion() {
 			<span>v{version?.semver}</span>
 			<ArrowSquareOut />
 		</a>
-	);
+	)
 }

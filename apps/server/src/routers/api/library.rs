@@ -1,8 +1,8 @@
 use axum::{
-	extract::{Path, Query},
+	extract::{Path, Query, State},
 	middleware::from_extractor,
 	routing::get,
-	Extension, Json, Router,
+	Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
@@ -28,7 +28,7 @@ use stump_core::{
 };
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
@@ -39,7 +39,7 @@ use crate::{
 
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route("/libraries", get(get_libraries).post(create_library))
 		.route("/libraries/stats", get(get_libraries_stats))
@@ -61,7 +61,7 @@ pub(crate) fn mount() -> Router {
 
 /// Get all libraries
 async fn get_libraries(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let libraries = ctx
@@ -87,7 +87,9 @@ async fn get_libraries(
 }
 
 /// Get stats for all libraries
-async fn get_libraries_stats(Extension(ctx): State) -> ApiResult<Json<LibrariesStats>> {
+async fn get_libraries_stats(
+	State(ctx): State<AppState>,
+) -> ApiResult<Json<LibrariesStats>> {
 	let db = ctx.get_db();
 
 	// TODO: maybe add more, like missingBooks, idk
@@ -113,7 +115,7 @@ async fn get_libraries_stats(Extension(ctx): State) -> ApiResult<Json<LibrariesS
 /// and `tags` relations are loaded on this route.
 async fn get_library_by_id(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
@@ -148,7 +150,7 @@ async fn get_library_by_id(
 async fn get_library_series(
 	Path(id): Path<String>,
 	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
 
@@ -196,7 +198,7 @@ async fn get_library_series(
 // /// Get the thumbnail image for a library by id, if the current user has access to it.
 async fn get_library_thumbnail(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -225,7 +227,7 @@ struct ScanQueryParam {
 /// executed in a separate thread.
 async fn scan_library(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	query: Query<ScanQueryParam>,
 	session: ReadableSession, // TODO: admin middleware
 ) -> Result<(), ApiError> {
@@ -267,8 +269,8 @@ async fn scan_library(
 // FIXME: once transactions are supported I think that will be a much better flow here. for the delete, as well.
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 async fn create_library(
+	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibraryArgs>,
-	Extension(ctx): State,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
@@ -345,7 +347,7 @@ async fn create_library(
 
 /// Update a library by id, if the current user is a SERVER_OWNER.
 async fn update_library(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibraryArgs>,
 ) -> ApiResult<Json<Library>> {
@@ -441,7 +443,7 @@ async fn update_library(
 /// Delete a library by id, if the current user is a SERVER_OWNER.
 async fn delete_library(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
 

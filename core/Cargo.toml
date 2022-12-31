@@ -1,13 +1,13 @@
 [package]
 name = "stump_core"
-version.workspace = true
+version = { workspace = true }
 edition = "2021"
 
 [dependencies]
-tokio.workspace = true
-serde.workspace = true
-prisma-client-rust.workspace = true
-specta.workspace = true
+tokio = { workspace = true }
+serde = { workspace = true }
+prisma-client-rust = { workspace = true }
+specta = { workspace = true }
 
 rayon = "1.5.3"
 futures = "0.3.21"
@@ -37,9 +37,9 @@ data-encoding = "2.3.2"
 ring = "0.16.20"
 
 ## ERROR HANDLING + LOGGING ###
-thiserror.workspace = true
+thiserror = { workspace = true }
 # figment = { version = "0.10.6", features = ["toml", "env"] }
 toml = "0.5.9"
-tracing.workspace = true
+tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
 tracing-appender = "0.2.2"

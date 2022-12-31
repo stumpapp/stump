@@ -3,3 +3,5 @@ node_modules/
 *.map
 *.snap
 **/prisma/src/db.ts
+**/prisma-cli/**
+**/dist/**

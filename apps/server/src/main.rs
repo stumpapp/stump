@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-use axum::{Extension, Router};
+use axum::Router;
 use errors::{ServerError, ServerResult};
 use stump_core::{config::logging::init_tracing, StumpCore};
 use tracing::{error, info, trace};
@@ -55,7 +55,7 @@ async fn main() -> ServerResult<()> {
 
 	let app = Router::new()
 		.merge(routers::mount())
-		.layer(Extension(server_ctx.arced()))
+		.with_state(server_ctx.arced())
 		.layer(session::get_session_layer())
 		.layer(cors::get_cors_layer());
 

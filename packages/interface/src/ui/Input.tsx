@@ -10,7 +10,6 @@ import { Eye, EyeSlash } from 'phosphor-react'
 import React, { useMemo, useState } from 'react'
 
 interface Props extends InputProps {
-	// label?: string;
 	fullWidth?: boolean
 }
 
@@ -57,20 +56,17 @@ export const PasswordInput = forwardRef<Props, 'input'>(({ ...props }, ref) => {
 
 	return (
 		<InputGroup>
-			<Input {...props} type={showPass ? 'text' : 'password'} />
+			<Input {...props} type={showPass ? 'text' : 'password'} ref={ref} />
 
-			<InputRightElement
-				children={
-					// TODO: fades
-					<>
-						{showPass ? (
-							<Eye cursor="pointer" color="white" onClick={toggle} />
-						) : (
-							<EyeSlash cursor="pointer" color="white" onClick={toggle} />
-						)}
-					</>
-				}
-			/>
+			<InputRightElement>
+				<>
+					{showPass ? (
+						<Eye cursor="pointer" color="white" onClick={toggle} />
+					) : (
+						<EyeSlash cursor="pointer" color="white" onClick={toggle} />
+					)}
+				</>
+			</InputRightElement>
 		</InputGroup>
 	)
 })

@@ -5,12 +5,13 @@ use std::fs::File;
 use stump_core::{config::logging::get_log_file, db::models::LogMetadata};
 
 use crate::{
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::get_session_user,
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route("/logs", get(get_log_info).delete(clear_logs))
 		// FIXME: admin middleware

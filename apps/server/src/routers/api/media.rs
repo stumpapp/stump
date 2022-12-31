@@ -1,8 +1,8 @@
 use axum::{
-	extract::{Path, Query},
+	extract::{Path, Query, State},
 	middleware::from_extractor,
 	routing::{get, put},
-	Extension, Json, Router,
+	Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
@@ -24,7 +24,7 @@ use stump_core::{
 use tracing::{debug, trace};
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
@@ -33,7 +33,7 @@ use crate::{
 	},
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route("/media", get(get_media))
 		.route("/media/duplicates", get(get_duplicate_media))
@@ -56,7 +56,7 @@ pub(crate) fn mount() -> Router {
 /// has various pagination params available.
 async fn get_media(
 	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
@@ -103,7 +103,7 @@ async fn get_media(
 /// params available, but hopefully you won't have that many duplicates ;D
 async fn get_duplicate_media(
 	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	_session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let media_dao = MediaDaoImpl::new(ctx.db.clone());
@@ -122,7 +122,7 @@ async fn get_duplicate_media(
 /// Get all media which the requester has progress for that is less than the
 /// total number of pages available (i.e not completed).
 async fn get_in_progress_media(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
@@ -138,7 +138,7 @@ async fn get_in_progress_media(
 }
 
 async fn get_recently_added_media(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
@@ -180,7 +180,7 @@ struct LoadSeries {
 async fn get_media_by_id(
 	Path(id): Path<String>,
 	params: Query<LoadSeries>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Media>> {
 	let db = ctx.get_db();
@@ -210,7 +210,7 @@ async fn get_media_by_id(
 
 async fn get_media_file(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<NamedFile> {
 	let db = ctx.get_db();
 
@@ -235,7 +235,7 @@ async fn get_media_file(
 // TODO: remove this, implement it? maybe?
 async fn convert_media(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 
@@ -267,7 +267,7 @@ async fn convert_media(
 
 async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -303,7 +303,7 @@ async fn get_media_page(
 
 async fn get_media_thumbnail(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
@@ -342,7 +342,7 @@ async fn get_media_thumbnail(
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found
 async fn update_media_progress(
 	Path((id, page)): Path<(String, i32)>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<ReadProgress>> {
 	let db = ctx.get_db();

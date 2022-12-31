@@ -12,13 +12,7 @@ interface ToolbarProps {
 	onPageChange(page: number): void
 }
 
-export default function Toolbar({
-	title,
-	currentPage,
-	pages,
-	visible,
-	onPageChange,
-}: ToolbarProps) {
+export default function Toolbar({ title, pages, visible, onPageChange }: ToolbarProps) {
 	const { id } = useParams()
 
 	if (!id) {

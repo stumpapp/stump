@@ -64,5 +64,5 @@ export default function ReadBook() {
 		)
 	}
 
-	return <div>Not a supported book or i just can't do that yet! :)</div>
+	return <div>Not a supported book or i just can&rsquo;t do that yet! :)</div>
 }

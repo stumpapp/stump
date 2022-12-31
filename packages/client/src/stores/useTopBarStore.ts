@@ -1,34 +1,34 @@
-import create from 'zustand';
-import { devtools } from 'zustand/middleware';
+import create from 'zustand'
+import { devtools } from 'zustand/middleware'
 
-import { StoreBase } from '.';
+import { StoreBase } from '.'
 
 export interface TopBarStore extends StoreBase<TopBarStore> {
-	title?: string;
-	backwardsUrl?: string | number;
-	forwardsUrl?: string | number;
+	title?: string
+	backwardsUrl?: string | number
+	forwardsUrl?: string | number
 
-	setTitle(title?: string): void;
-	setBackwardsUrl(backwardsUrl?: string | number): void;
-	setForwardsUrl(forwardsUrl?: string | number): void;
+	setTitle(title?: string): void
+	setBackwardsUrl(backwardsUrl?: string | number): void
+	setForwardsUrl(forwardsUrl?: string | number): void
 }
 
 export const useTopBarStore = create<TopBarStore>()(
 	devtools((set) => ({
 		reset() {
-			set(() => ({}));
+			set(() => ({}))
 		},
 		set(changes) {
-			set((state) => ({ ...state, ...changes }));
+			set((state) => ({ ...state, ...changes }))
 		},
 		setBackwardsUrl(backwardsUrl) {
-			set((store) => ({ ...store, backwardsUrl }));
+			set((store) => ({ ...store, backwardsUrl }))
 		},
 		setForwardsUrl(forwardsUrl) {
-			set((store) => ({ ...store, forwardsUrl }));
+			set((store) => ({ ...store, forwardsUrl }))
 		},
 		setTitle(title) {
-			set((store) => ({ ...store, title }));
+			set((store) => ({ ...store, title }))
 		},
 	})),
-);
+)

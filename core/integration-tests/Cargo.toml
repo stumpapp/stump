@@ -1,6 +1,6 @@
 [package]
 name = "integration-tests"
-version.workspace = true
+version = { workspace = true }
 autotests = false
 autobenches = false
 edition = "2021"
@@ -11,8 +11,8 @@ path = "tests/lib.rs"
 harness = true
 
 [dev-dependencies]
-serde.workspace = true
-prisma-client-rust.workspace = true
-tokio.workspace = true
+serde = { workspace = true }
+prisma-client-rust = { workspace = true }
+tokio = { workspace = true }
 stump_core = { path = ".." }
 tempfile = "3.3.0"

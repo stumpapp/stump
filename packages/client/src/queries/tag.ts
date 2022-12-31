@@ -1,22 +1,20 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-import { useMemo } from 'react';
+import { AxiosError } from 'axios'
+import { useMemo } from 'react'
 
-import { createTags, getAllTags } from '../api/tag';
-import { queryClient } from '../client';
-import { StumpQueryContext } from '../context';
-import type { ApiResult, Tag } from '../types';
+import { createTags, getAllTags } from '../api/tag'
+import { queryClient, useMutation, useQuery } from '../client'
+import type { ApiResult, Tag } from '../types'
 
 export interface UseTagsConfig {
-	onQuerySuccess?: (res: ApiResult<Tag[]>) => void;
-	onQueryError?: (err: AxiosError) => void;
-	onCreateSuccess?: (res: ApiResult<Tag[]>) => void;
-	onCreateError?: (err: AxiosError) => void;
+	onQuerySuccess?: (res: ApiResult<Tag[]>) => void
+	onQueryError?: (err: AxiosError) => void
+	onCreateSuccess?: (res: ApiResult<Tag[]>) => void
+	onCreateError?: (err: AxiosError) => void
 }
 
 export interface TagOption {
-	label: string;
-	value: string;
+	label: string
+	value: string
 }
 
 export function useTags({
@@ -25,28 +23,24 @@ export function useTags({
 	onCreateSuccess,
 	onCreateError,
 }: UseTagsConfig = {}) {
-	const { data, isLoading, refetch } = useQuery(['getAllTags'], {
-		context: StumpQueryContext,
+	const { data, isLoading, refetch } = useQuery(['getAllTags'], getAllTags, {
 		onError: onQueryError,
 		onSuccess: onQuerySuccess,
-		queryFn: getAllTags,
 		suspense: false,
-	});
+	})
 
 	const {
 		mutate,
 		mutateAsync,
 		isLoading: isCreating,
-	} = useMutation(['createTags'], {
-		context: StumpQueryContext,
-		mutationFn: createTags,
+	} = useMutation(['createTags'], createTags, {
 		onError: onCreateError,
 		onSuccess(res) {
-			onCreateSuccess?.(res);
+			onCreateSuccess?.(res)
 
-			queryClient.refetchQueries(['getAllTags']);
+			queryClient.refetchQueries(['getAllTags'])
 		},
-	});
+	})
 
 	const { tags, options } = useMemo(() => {
 		if (data && data.data) {
@@ -56,13 +50,13 @@ export function useTags({
 						label: tag.name,
 						value: tag.name,
 					} as TagOption),
-			);
+			)
 
-			return { options: tagOptions, tags: data.data };
+			return { options: tagOptions, tags: data.data }
 		}
 
-		return { options: [], tags: [] };
-	}, [data]);
+		return { options: [], tags: [] }
+	}, [data])
 
 	return {
 		createTags: mutate,
@@ -72,5 +66,5 @@ export function useTags({
 		options,
 		refetch,
 		tags,
-	};
+	}
 }

@@ -1,5 +1,8 @@
 use axum::{
-	extract::Path, middleware::from_extractor, routing::get, Extension, Json, Router,
+	extract::{Path, State},
+	middleware::from_extractor,
+	routing::get,
+	Json, Router,
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
@@ -10,7 +13,7 @@ use stump_core::{
 use tracing::debug;
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{get_hash_cost, get_session_user, get_writable_session_user},
@@ -18,7 +21,7 @@ use crate::{
 
 // TODO: move some of these user operations to the UserDao...
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		// TODO: adminguard these first two routes
 		.route("/users", get(get_users).post(create_user))
@@ -40,7 +43,7 @@ pub(crate) fn mount() -> Router {
 }
 
 async fn get_users(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Vec<User>>> {
 	let user = get_session_user(&session)?;
@@ -65,9 +68,9 @@ async fn get_users(
 }
 
 async fn create_user(
-	Extension(ctx): State,
-	Json(input): Json<LoginOrRegisterArgs>,
 	session: ReadableSession,
+	State(ctx): State<AppState>,
+	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
@@ -113,7 +116,7 @@ async fn create_user(
 
 async fn delete_user_by_id(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
@@ -142,7 +145,7 @@ async fn delete_user_by_id(
 
 async fn get_user_by_id(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
@@ -169,10 +172,10 @@ async fn get_user_by_id(
 }
 
 async fn update_user(
+	mut writable_session: WritableSession,
+	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUserArgs>,
-	Extension(ctx): State,
-	mut writable_session: WritableSession,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 	let user = get_writable_session_user(&writable_session)?;
@@ -208,7 +211,7 @@ async fn update_user(
 
 async fn get_user_preferences(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
@@ -239,10 +242,10 @@ async fn get_user_preferences(
 
 #[allow(unused)]
 async fn update_user_preferences(
+	mut writable_session: WritableSession,
+	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UserPreferencesUpdate>,
-	Extension(ctx): State,
-	mut writable_session: WritableSession,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
 

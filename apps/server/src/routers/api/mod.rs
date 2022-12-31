@@ -1,10 +1,11 @@
 use axum::{
+	extract::State,
 	routing::{get, post},
-	Extension, Json, Router,
+	Json, Router,
 };
 use stump_core::prelude::{ClaimResponse, StumpVersion};
 
-use crate::{config::state::State, errors::ApiResult};
+use crate::{config::state::AppState, errors::ApiResult};
 
 mod auth;
 mod epub;
@@ -18,7 +19,7 @@ mod series;
 mod tag;
 mod user;
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new().nest(
 		"/api",
 		Router::new()
@@ -39,7 +40,7 @@ pub(crate) fn mount() -> Router {
 	)
 }
 
-async fn claim(Extension(ctx): State) -> ApiResult<Json<ClaimResponse>> {
+async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
 	let db = ctx.get_db();
 
 	Ok(Json(ClaimResponse {

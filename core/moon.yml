@@ -14,5 +14,17 @@ tasks:
   test:
     command: 'cargo test --all-targets'
 
-  generate:
+  prisma-generate:
     command: 'cargo prisma generate'
+
+  codegen:
+    command: 'cargo test --package stump_core --lib -- types::tests::codegen --ignored'
+    deps:
+      - '~:prisma-generate'
+
+  lint:
+    command: 'cargo clippy --package stump_core -- -D warnings'
+    options:
+      mergeArgs: 'replace'
+      mergeDeps: 'replace'
+      mergeInputs: 'replace'

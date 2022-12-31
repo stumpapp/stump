@@ -1,8 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '../api'
-import { queryClient } from '../client'
-import { StumpQueryContext } from '../context'
+import { queryClient, useQuery } from '../client'
 import { useQueryParamStore } from '../stores'
 import type { Media, Pageable, Series } from '../types'
 import { QueryCallbacks, usePagedQuery } from '.'
@@ -19,16 +16,7 @@ export function useSeries(id: string, options: QueryCallbacks<Series> = {}) {
 		isFetching,
 		isRefetching,
 		data: series,
-	} = useQuery(['getSeries'], {
-		context: StumpQueryContext,
-		onError(err) {
-			options.onError?.(err)
-		},
-		onSuccess(data) {
-			options.onSuccess?.(data)
-		},
-		queryFn: async () => getSeriesById(id).then((res) => res.data),
-	})
+	} = useQuery(['getSeries'], () => getSeriesById(id).then((res) => res.data), options)
 
 	return { isLoading: isLoading || isFetching || isRefetching, series }
 }
@@ -44,7 +32,7 @@ export function useSeriesMedia(seriesId: string, page = 1) {
 				pageData: data._page,
 			})),
 		{
-			context: StumpQueryContext,
+			// context: StumpQueryContext,
 			keepPreviousData: true,
 		},
 	)
@@ -98,15 +86,7 @@ export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {
 		isLoading,
 		isFetching,
 		isRefetching,
-	} = useQuery(['getNextInSeries', id], () => getNextInSeries(id).then((res) => res.data), {
-		context: StumpQueryContext,
-		onError(err) {
-			options.onError?.(err)
-		},
-		onSuccess(data) {
-			options.onSuccess?.(data)
-		},
-	})
+	} = useQuery(['getNextInSeries', id], () => getNextInSeries(id).then((res) => res.data), options)
 
 	return { isLoading: isLoading || isFetching || isRefetching, media }
 }

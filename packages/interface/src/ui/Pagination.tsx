@@ -15,6 +15,9 @@ interface PaginationArrowProps {
 }
 
 function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
+	const disabledText = useColorModeValue('gray.300', 'gray.500')
+	const textColor = useColorModeValue('gray.600', 'gray.300')
+
 	return (
 		<Flex mt="-1px" w={0} flex="1 1 0%" justify={kind === 'next' ? 'flex-end' : 'flex-start'}>
 			<Box
@@ -30,11 +33,7 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 				pr={kind === 'previous' ? '1' : '0'}
 				pl={kind === 'next' ? '1' : '0'}
 				fontSize={{ base: 'xs', md: 'sm' }}
-				color={
-					isDisabled
-						? useColorModeValue('gray.300', 'gray.500')
-						: useColorModeValue('gray.600', 'gray.300')
-				}
+				color={isDisabled ? disabledText : textColor}
 				_hover={{ borderColor: useColorModeValue('gray.300', 'gray.600') }}
 			>
 				{kind === 'previous' ? (
@@ -60,6 +59,8 @@ interface PaginationLinkProps {
 }
 
 function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
+	const nonActiveColor = useColorModeValue('gray.550', 'gray.300')
+	const nonActiveBorder = useColorModeValue('gray.300', 'gray.600')
 	return (
 		<Box
 			as={Link}
@@ -67,10 +68,10 @@ function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
 			pt={4}
 			px={4}
 			fontSize={{ base: 'xs', md: 'sm' }}
-			color={isActive ? 'brand.500' : useColorModeValue('gray.550', 'gray.300')}
+			color={isActive ? 'brand.500' : nonActiveColor}
 			borderColor={isActive ? 'brand.500' : 'transparent'}
 			_hover={{
-				borderColor: isActive ? 'brand.500' : useColorModeValue('gray.300', 'gray.600'),
+				borderColor: isActive ? 'brand.500' : nonActiveBorder,
 			}}
 			className="border-t-2 inline-flex items-center text-sm font-medium"
 		>

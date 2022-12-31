@@ -39,26 +39,25 @@ export default function SlidingCardList({
 		}, []),
 	})
 
-	useEffect(() => {
-		const [lastItem] = [...columnVirtualizer.getVirtualItems()].reverse()
+	useEffect(
+		() => {
+			const [lastItem] = [...columnVirtualizer.getVirtualItems()].reverse()
 
-		if (!lastItem) {
-			return
-		}
+			if (!lastItem) {
+				return
+			}
 
-		if (lastItem.index >= cards.length - 5 && hasNext && !isLoadingNext) {
-			onScrollEnd?.()
-		}
-	}, [
-		hasNext,
-		onScrollEnd,
-		cards.length,
-		isLoadingNext,
-		columnVirtualizer.getVirtualItems().length,
-	])
+			if (lastItem.index >= cards.length - 5 && hasNext && !isLoadingNext) {
+				onScrollEnd?.()
+			}
+		},
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[hasNext, onScrollEnd, cards.length, isLoadingNext, columnVirtualizer.getVirtualItems().length],
+	)
 
 	const handleSkipAhead = (skipValue = 5) => {
-		let nextIndex = visibleRef?.current[1] + skipValue || 10
+		let nextIndex = (visibleRef.current[1] ?? 5) + skipValue || 10
 
 		if (nextIndex > columnVirtualizer.getVirtualItems().length - 1) {
 			nextIndex = columnVirtualizer.getVirtualItems().length - 1
@@ -68,7 +67,7 @@ export default function SlidingCardList({
 	}
 
 	const handleSkipBackward = (skipValue = 5) => {
-		let nextIndex = visibleRef?.current[0] - skipValue || 0
+		let nextIndex = (visibleRef?.current[0] ?? 0) - skipValue || 0
 
 		if (nextIndex < 0) {
 			nextIndex = 0
@@ -77,9 +76,9 @@ export default function SlidingCardList({
 		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
 	}
 
-	const canSkipBackward = visibleRef.current[0] > 0
+	const canSkipBackward = (visibleRef.current[0] ?? 0) > 0
 	// FIXME: wrong, the overscan messes this up I think...
-	const canSkipForward = visibleRef.current[1] * 2 < cards.length
+	const canSkipForward = (visibleRef.current[1] ?? 0) * 2 < cards.length
 
 	return (
 		<div className="w-full flex flex-col space-y-2">

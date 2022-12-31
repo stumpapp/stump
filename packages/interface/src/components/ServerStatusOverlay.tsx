@@ -47,7 +47,7 @@ export default function ServerStatusOverlay() {
 								</span>
 							</div>
 
-							<Heading size="xs">Server isn't connected.</Heading>
+							<Heading size="xs">Server isn&rsquo;t connected.</Heading>
 						</div>
 
 						<Text className="italic" fontSize="sm" color="gray.500">

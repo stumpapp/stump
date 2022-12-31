@@ -14,15 +14,16 @@ import SettingsSection from '../SettingsSection'
 
 export default function ProfileForm() {
 	const { user, setUser } = useUserStore()
+
+	if (!user) {
+		throw new Error('Unauthorized')
+	}
+
 	const { mutateAsync: updateProfile } = useMutation(
 		['updateUserProfile', user?.id],
 		(params: UpdateUserArgs) => updateUser(user!.id, params).then((res) => res.data),
 	)
 	const { t } = useLocale()
-
-	if (!user) {
-		return null
-	}
 
 	const schema = z.object({
 		password: z.string().optional(),
@@ -31,7 +32,7 @@ export default function ProfileForm() {
 
 	const form = useForm({
 		defaultValues: {
-			username: user.username,
+			username: user.username || '',
 		} as FieldValues,
 		resolver: zodResolver(schema),
 	})

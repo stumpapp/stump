@@ -82,6 +82,6 @@ interface PaginationNumberProps {
 }
 
 // TODO: style
-function PaginationNumber({ active, onClick, page }: PaginationNumberProps) {
+function PaginationNumber({ onClick, page }: PaginationNumberProps) {
 	return <Button onClick={onClick}>{page}</Button>
 }

@@ -1,13 +1,13 @@
-import create from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import create from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
 
-import { StoreBase } from '.';
+import { StoreBase } from '.'
 
 interface StumpStore extends StoreBase<StumpStore> {
-	baseUrl?: string;
-	connected: boolean;
-	setBaseUrl(baseUrl: string): void;
-	setConnected(connected: boolean): void;
+	baseUrl?: string
+	connected: boolean
+	setBaseUrl(baseUrl: string): void
+	setConnected(connected: boolean): void
 }
 
 export const useStumpStore = create<StumpStore>()(
@@ -20,34 +20,34 @@ export const useStumpStore = create<StumpStore>()(
 			(set) => ({
 				connected: false,
 				reset() {
-					set(() => ({}));
+					set(() => ({}))
 				},
 				set(changes) {
-					set((state) => ({ ...state, ...changes }));
+					set((state) => ({ ...state, ...changes }))
 				},
 				setBaseUrl(baseUrl: string) {
-					let adjustedBaseUrl = baseUrl;
+					let adjustedBaseUrl = baseUrl
 
 					if (baseUrl.endsWith('/')) {
-						adjustedBaseUrl = baseUrl.slice(0, -1);
+						adjustedBaseUrl = baseUrl.slice(0, -1)
 					}
 
 					if (!baseUrl.endsWith('/api')) {
-						adjustedBaseUrl += '/api';
+						adjustedBaseUrl += '/api'
 					}
 
-					set({ baseUrl: adjustedBaseUrl });
+					set({ baseUrl: adjustedBaseUrl })
 				},
 				setConnected(connected: boolean) {
-					set({ connected });
+					set({ connected })
 				},
 			}),
 			{
 				name: 'stump-config-store',
 				partialize(state) {
-					return { baseUrl: state.baseUrl };
+					return { baseUrl: state.baseUrl }
 				},
 			},
 		),
 	),
-);
+)

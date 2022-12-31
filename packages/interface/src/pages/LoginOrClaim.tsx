@@ -13,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { queryClient, useLoginOrRegister, useUserStore } from '@stump/client'
 import { FieldValues, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useLocale } from '../hooks/useLocale'
@@ -21,6 +21,7 @@ import Form from '../ui/Form'
 import Input from '../ui/Input'
 
 export default function LoginOrClaim() {
+	const [params] = useSearchParams()
 	const { user, setUser } = useUserStore()
 
 	const { t } = useLocale()
@@ -64,7 +65,7 @@ export default function LoginOrClaim() {
 
 	if (user) {
 		queryClient.invalidateQueries(['getLibraries'])
-		return <Navigate to="/" />
+		return <Navigate to={params.get('redirect') || '/'} />
 	} else if (isCheckingClaimed) {
 		return null
 	}

@@ -24,15 +24,21 @@ export default function LibraryOverview() {
 		console.error(err)
 	}
 
+	const { layoutMode } = useLayoutMode('LIBRARY')
 	const { isLoading, library } = useLibrary(id, { onError: handleError })
 
 	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page)
 
-	useEffect(() => {
-		if (!isInView) {
-			containerRef.current?.scrollIntoView()
-		}
-	}, [pageData?.current_page])
+	useEffect(
+		() => {
+			if (!isInView) {
+				containerRef.current?.scrollIntoView()
+			}
+		},
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[pageData?.current_page],
+	)
 
 	if (isLoading) {
 		return null
@@ -40,7 +46,8 @@ export default function LibraryOverview() {
 		throw new Error('Library not found')
 	}
 
-	const { layoutMode } = useLayoutMode('LIBRARY')
+	const { current_page, total_pages } = pageData || {}
+	const hasStuff = total_pages !== undefined && current_page !== undefined
 
 	return (
 		<>
@@ -48,11 +55,11 @@ export default function LibraryOverview() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
-			{/* @ts-ignore */}
+			{/* @ts-expect-error: wrong ref, still okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
 			<div className="p-4 w-full h-full flex flex-col space-y-6">
-				<Pagination pages={pageData?.total_pages!} currentPage={pageData?.current_page!} />
+				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
 
 				{layoutMode === 'GRID' ? (
 					<SeriesGrid isLoading={isLoadingSeries} series={series} />
@@ -62,11 +69,9 @@ export default function LibraryOverview() {
 
 				<Spacer />
 
-				<Pagination
-					position="bottom"
-					pages={pageData?.total_pages!}
-					currentPage={pageData?.current_page!}
-				/>
+				{hasStuff ? (
+					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
+				) : null}
 			</div>
 		</>
 	)

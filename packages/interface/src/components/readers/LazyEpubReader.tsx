@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// FIXME: remove the two above once epub is more completed
 import { useColorMode } from '@chakra-ui/react'
 import { useEpubLazy } from '@stump/client'
 import { API } from '@stump/client/api'
@@ -69,76 +72,84 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		})
 	}
 
-	useEffect(() => {
-		if (!ref.current) return
+	useEffect(
+		() => {
+			if (!ref.current) return
 
-		if (!book) {
-			setBook(
-				new Book(`${API.getUri()}/media/${id}/file`, {
-					openAs: 'epub',
-					// @ts-ignore: more incorrect types >:( I really truly cannot stress enough how much I want to just
-					// rip out my eyes working with epubjs...
-					requestCredentials: true,
-				}),
-			)
-		}
-	}, [ref])
+			if (!book) {
+				setBook(
+					new Book(`${API.getUri()}/media/${id}/file`, {
+						openAs: 'epub',
+						// @ts-ignore: more incorrect types >:( I really truly cannot stress enough how much I want to just
+						// rip out my eyes working with epubjs...
+						requestCredentials: true,
+					}),
+				)
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[ref],
+	)
 
 	// Note: not sure this is possible anymore? epub.js isn't maintained it seems,
 	// and I haven't figured this out yet.
-	function pageAnimation(iframeView: any, _rendition: Rendition) {
-		// console.log('pageAnimation', { iframeView, _rendition });
-		// window.setTimeout(() => {
-		// console.log('in pageAnimation timeout');
-		// }, 100);
-	}
+	// function pageAnimation(_iframeView: any, _rendition: Rendition) {
+	// 	// console.log('pageAnimation', { iframeView, _rendition });
+	// 	// window.setTimeout(() => {
+	// 	// console.log('in pageAnimation timeout');
+	// 	// }, 100);
+	// }
 
-	useEffect(() => {
-		if (!book) return
-		if (!ref.current) return
+	useEffect(
+		() => {
+			if (!book) return
+			if (!ref.current) return
 
-		book.ready.then(() => {
-			if (book.spine) {
-				const defaultLoc = book.rendition?.location?.start?.cfi
+			book.ready.then(() => {
+				if (book.spine) {
+					const defaultLoc = book.rendition?.location?.start?.cfi
 
-				const rendition_ = book.renderTo(ref.current!, {
-					height: '100%',
-					width: '100%',
-				})
+					const rendition_ = book.renderTo(ref.current!, {
+						height: '100%',
+						width: '100%',
+					})
 
-				// TODO more styles, probably separate this out
-				rendition_.themes.register('dark', epubDarkTheme)
+					// TODO more styles, probably separate this out
+					rendition_.themes.register('dark', epubDarkTheme)
 
-				// book.spine.hooks.serialize // Section is being converted to text
-				// book.spine.hooks.content // Section has been loaded and parsed
-				// rendition.hooks.render // Section is rendered to the screen
-				// rendition.hooks.content // Section contents have been loaded
-				// rendition.hooks.unloaded // Section contents are being unloaded
-				rendition_.hooks.render.register(pageAnimation)
+					// book.spine.hooks.serialize // Section is being converted to text
+					// book.spine.hooks.content // Section has been loaded and parsed
+					// rendition.hooks.render // Section is rendered to the screen
+					// rendition.hooks.content // Section contents have been loaded
+					// rendition.hooks.unloaded // Section contents are being unloaded
+					// rendition_.hooks.render.register(pageAnimation)
 
-				rendition_.on('relocated', handleLocationChange)
+					rendition_.on('relocated', handleLocationChange)
 
-				if (colorMode === 'dark') {
-					rendition_.themes.select('dark')
+					if (colorMode === 'dark') {
+						rendition_.themes.select('dark')
+					}
+
+					rendition_.themes.fontSize('13px')
+
+					setRendition(rendition_)
+
+					// Note: this *does* work, returns epubcfi. I might consider this...
+					// console.log(book.spine.get('chapter001.xhtml'));
+
+					if (location?.epubcfi) {
+						rendition_.display(location.epubcfi)
+					} else if (defaultLoc) {
+						rendition_.display(defaultLoc)
+					} else {
+						rendition_.display()
+					}
 				}
-
-				rendition_.themes.fontSize('13px')
-
-				setRendition(rendition_)
-
-				// Note: this *does* work, returns epubcfi. I might consider this...
-				// console.log(book.spine.get('chapter001.xhtml'));
-
-				if (location?.epubcfi) {
-					rendition_.display(location.epubcfi)
-				} else if (defaultLoc) {
-					rendition_.display(defaultLoc)
-				} else {
-					rendition_.display()
-				}
-			}
-		})
-	}, [book])
+			})
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[book],
+	)
 
 	useEffect(() => {
 		if (!rendition) {

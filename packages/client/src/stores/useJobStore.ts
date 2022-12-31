@@ -44,7 +44,7 @@ export const useJobStore = create<JobStore>()(
 			if (job) {
 				set((store) =>
 					produce(store, (draft) => {
-						draft.jobs[runnerId].status = 'COMPLETED'
+						draft.jobs[runnerId]!.status = 'COMPLETED'
 					}),
 				)
 			}
@@ -98,11 +98,11 @@ export const useJobStore = create<JobStore>()(
 
 			set((store) =>
 				produce(store, (draft) => {
-					draft.jobs[jobUpdate.runner_id].current_task = current_task
-					draft.jobs[jobUpdate.runner_id].message = message
+					draft.jobs[jobUpdate.runner_id]!.current_task = current_task
+					draft.jobs[jobUpdate.runner_id]!.message = message
 
 					if (task_count !== store.jobs[jobUpdate.runner_id]?.task_count) {
-						draft.jobs[jobUpdate.runner_id].task_count = task_count
+						draft.jobs[jobUpdate.runner_id]!.task_count = task_count
 					}
 				}),
 			)

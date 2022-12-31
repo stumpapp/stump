@@ -46,26 +46,30 @@ export default function Toolbar({
 
 	// FIXME: this is super scufffed, something is throwing off the scrollToIndex and the
 	// workaround is atrocious...
-	useEffect(() => {
-		if (visible) {
-			// FIXME: why no work
-			// columnVirtualizer.scrollToIndex(currentPage, { smoothScroll: true });
-			setTimeout(() => {
-				const totalSize = columnVirtualizer.getTotalSize()
-				const offset = (totalSize / pages) * currentPage
+	useEffect(
+		() => {
+			if (visible) {
+				// FIXME: why no work
+				// columnVirtualizer.scrollToIndex(currentPage, { smoothScroll: true });
+				setTimeout(() => {
+					const totalSize = columnVirtualizer.getTotalSize()
+					const offset = (totalSize / pages) * currentPage
 
-				const targetID = `${id}-page-${currentPage}`
-				const target = document.getElementById(targetID)
+					const targetID = `${id}-page-${currentPage}`
+					const target = document.getElementById(targetID)
 
-				if (target) {
-					target.scrollIntoView({ behavior: 'smooth', inline: 'center' })
-				} else {
-					// FIXME: this actually doesn't work lol
-					parentRef.current?.scrollTo({ behavior: 'smooth', left: offset })
-				}
-			}, 50)
-		}
-	}, [visible, currentPage])
+					if (target) {
+						target.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+					} else {
+						// FIXME: this actually doesn't work lol
+						parentRef.current?.scrollTo({ behavior: 'smooth', left: offset })
+					}
+				}, 50)
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[visible, currentPage],
+	)
 
 	const variants = (position: 'top' | 'bottom') => ({
 		hidden: {

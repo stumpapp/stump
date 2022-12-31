@@ -1,20 +1,20 @@
 use axum::{
-	extract::Path,
+	extract::{Path, State},
 	middleware::from_extractor,
 	routing::{delete, get},
-	Extension, Json, Router,
+	Json, Router,
 };
 use stump_core::{event::InternalCoreTask, job::JobReport};
 use tokio::sync::oneshot;
 use tracing::debug;
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::{AdminGuard, Auth},
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/jobs",
@@ -27,7 +27,7 @@ pub(crate) fn mount() -> Router {
 }
 
 /// Get all running/pending jobs.
-async fn get_job_reports(Extension(ctx): State) -> ApiResult<Json<Vec<JobReport>>> {
+async fn get_job_reports(State(ctx): State<AppState>) -> ApiResult<Json<Vec<JobReport>>> {
 	let (task_tx, task_rx) = oneshot::channel();
 
 	ctx.internal_task(InternalCoreTask::GetJobReports(task_tx))
@@ -45,13 +45,16 @@ async fn get_job_reports(Extension(ctx): State) -> ApiResult<Json<Vec<JobReport>
 	Ok(Json(res))
 }
 
-async fn delete_job_reports(Extension(ctx): State) -> ApiResult<()> {
+async fn delete_job_reports(State(ctx): State<AppState>) -> ApiResult<()> {
 	let result = ctx.db.job().delete_many(vec![]).exec().await?;
 	debug!("Deleted {} job reports", result);
 	Ok(())
 }
 
-async fn cancel_job(Extension(ctx): State, Path(job_id): Path<String>) -> ApiResult<()> {
+async fn cancel_job(
+	State(ctx): State<AppState>,
+	Path(job_id): Path<String>,
+) -> ApiResult<()> {
 	let (task_tx, task_rx) = oneshot::channel();
 
 	ctx.internal_task(InternalCoreTask::CancelJob {

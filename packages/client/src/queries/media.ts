@@ -1,13 +1,11 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-
 import {
 	getInProgressMedia,
 	getMediaById,
 	getRecentlyAddedMedia,
 	updateMediaProgress,
 } from '../api'
-import { queryClient } from '../client'
-import { StumpQueryContext } from '../context'
+import { useMutation } from '../client'
+import { queryClient, useQuery } from '../client'
 import type { Media, Pageable, ReadProgress } from '../types'
 import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.'
 
@@ -17,21 +15,18 @@ export const prefetchMedia = async (id: string) => {
 	})
 }
 
-export function useMedia(id: string, options: QueryCallbacks<Media> = {}) {
+export function useMedia(id: string, { onError, onSuccess }: QueryCallbacks<Media> = {}) {
 	const {
 		data: media,
 		isLoading,
 		isFetching,
 		isRefetching,
-	} = useQuery(['getMediaById'], {
-		context: StumpQueryContext,
+	} = useQuery(['getMediaById'], () => getMediaById(id).then((res) => res.data), {
 		onError(err) {
-			options.onError?.(err)
+			console.error(err)
+			onError?.(err)
 		},
-		onSuccess(data) {
-			options.onSuccess?.(data)
-		},
-		queryFn: async () => getMediaById(id).then((res) => res.data),
+		onSuccess,
 	})
 
 	return { isLoading: isLoading || isFetching || isRefetching, media }
@@ -43,7 +38,7 @@ export function useMediaMutation(id: string, options: MutationCallbacks<ReadProg
 		mutateAsync: updateReadProgressAsync,
 		isLoading,
 	} = useMutation(['updateReadProgress'], (page: number) => updateMediaProgress(id, page), {
-		context: StumpQueryContext,
+		// context: StumpQueryContext,
 		onError(err) {
 			options.onError?.(err)
 		},

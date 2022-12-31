@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
+// @ts-ignore: ugh, stinky tsconfig i'll deal with this later
 import en from './locales/en.json'
+// @ts-ignore: ugh, stinky tsconfig i'll deal with this later
 import fr from './locales/fr.json'
 
 // NOTE: the fr locale is *NOT* complete or acurrate. Used for testing...
@@ -23,10 +26,8 @@ function parseMissingKeyHandler(missingKey: string) {
 	try {
 		const translation = (missingKey ?? '')
 			.split('.')
-			// @ts-ignore
+			// @ts-expect-error: is fine
 			.reduce((previous, current) => previous[current], resources.en.en)
-
-		// console.log({ translation });
 
 		if (typeof translation === 'string') {
 			return translation

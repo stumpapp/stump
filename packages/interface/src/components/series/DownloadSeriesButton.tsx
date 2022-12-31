@@ -6,6 +6,7 @@ interface Props {
 	seriesId: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function DownloadSeriesButton({ seriesId }: Props) {
 	return (
 		// title="Download series as ZIP archive"

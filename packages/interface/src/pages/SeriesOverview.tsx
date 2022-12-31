@@ -80,7 +80,7 @@ export default function SeriesOverview() {
 				inline: 'start',
 			})
 		}
-	}, [pageData?.current_page])
+	}, [isInView, containerRef, pageData?.current_page])
 
 	useEffect(() => {
 		if (series?.library) {
@@ -90,7 +90,7 @@ export default function SeriesOverview() {
 		return () => {
 			setBackwardsUrl()
 		}
-	}, [series?.library?.id])
+	}, [series, setBackwardsUrl])
 
 	// FIXME: ugly
 	if (isLoadingSeries) {
@@ -98,6 +98,9 @@ export default function SeriesOverview() {
 	} else if (!series) {
 		throw new Error('Series not found')
 	}
+
+	const { current_page, total_pages } = pageData || {}
+	const hasStuff = current_page !== undefined && total_pages !== undefined
 
 	return (
 		<div className="h-full w-full">
@@ -107,10 +110,10 @@ export default function SeriesOverview() {
 
 			<OverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
 
-			{/* @ts-ignore */}
+			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 			<div className="p-4 w-full h-full flex flex-col space-y-6">
-				<Pagination pages={pageData?.total_pages!} currentPage={pageData?.current_page!} />
+				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
 				{layoutMode === 'GRID' ? (
 					<MediaGrid isLoading={isLoadingMedia} media={media} />
 				) : (
@@ -120,11 +123,9 @@ export default function SeriesOverview() {
 				{/* FIXME: spacing when empty */}
 				<Spacer />
 
-				<Pagination
-					position="bottom"
-					pages={pageData?.total_pages!}
-					currentPage={pageData?.current_page!}
-				/>
+				{hasStuff ? (
+					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
+				) : null}
 			</div>
 		</div>
 	)

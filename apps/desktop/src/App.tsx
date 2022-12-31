@@ -1,6 +1,4 @@
-import '@stump/interface/styles'
-
-import { Platform, StumpQueryProvider } from '@stump/client'
+import { Platform } from '@stump/client'
 import StumpInterface from '@stump/interface'
 import { invoke, os } from '@tauri-apps/api'
 import { useEffect, useState } from 'react'
@@ -45,12 +43,10 @@ export default function App() {
 	}
 
 	return (
-		<StumpQueryProvider>
-			<StumpInterface
-				platform={platform}
-				setUseDiscordPresence={setUseDiscordPresence}
-				setDiscordPresence={setDiscordPresence}
-			/>
-		</StumpQueryProvider>
+		<StumpInterface
+			platform={platform}
+			setUseDiscordPresence={setUseDiscordPresence}
+			setDiscordPresence={setDiscordPresence}
+		/>
 	)
 }

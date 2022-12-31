@@ -13,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { Library, LibraryPattern, LibraryScanMode, TagOption } from '@stump/client'
 import { useLibraries } from '@stump/client'
 import { useEffect, useMemo } from 'react'
-import { FieldValues, useForm, useFormContext } from 'react-hook-form'
+import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 import Checkbox from '../../../ui/Checkbox'
@@ -156,18 +156,12 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 							<InputGroup>
 								<Input placeholder="/path/to/library" {...form.register('path')} />
 								{/* FIXME: on small breakpoints, paths are visible behind element */}
-								<InputRightElement
-									// bg="gray.700"
-									// roundedBottomRight="md"
-									// roundedTopRight="md"
-									cursor="pointer"
-									children={
-										<DirectoryPickerModal
-											startingPath={library?.path}
-											onUpdate={(newPath) => form.setValue('path', newPath ?? undefined)}
-										/>
-									}
-								/>
+								<InputRightElement cursor="pointer">
+									<DirectoryPickerModal
+										startingPath={library?.path}
+										onUpdate={(newPath) => form.setValue('path', newPath ?? undefined)}
+									/>
+								</InputRightElement>
 							</InputGroup>
 							{!!errors.path && <FormErrorMessage>{errors.path?.message}</FormErrorMessage>}
 						</FormControl>

@@ -17,7 +17,7 @@ export default function MediaGrid({ media, isLoading }: Props) {
 			<div className="flex flex-1 items-center justify-center">
 				{/* TODO: If I take in pageData, I can determine if it is an out of bounds issue or if the series truly has
 				no media. */}
-				<Heading size="sm">It doesn't look like there is any media here.</Heading>
+				<Heading size="sm">It doesn&rsquo;t look like there is any media here.</Heading>
 			</div>
 		)
 	}

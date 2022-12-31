@@ -14,7 +14,8 @@
       "@stump/client/*": [
         "../client/src/*"
       ]
-    }
+    },
+    "resolveJsonModule": true
   },
   "include": [
     "src"

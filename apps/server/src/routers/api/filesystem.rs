@@ -8,12 +8,13 @@ use stump_core::prelude::{
 use tracing::trace;
 
 use crate::{
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::{AdminGuard, Auth},
 	utils::get_session_user,
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route("/filesystem", post(list_directory))
 		.layer(from_extractor::<AdminGuard>())
@@ -23,9 +24,9 @@ pub(crate) fn mount() -> Router {
 /// List the contents of a directory on the file system at a given (optional) path. If no path
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
-	input: Json<Option<DirectoryListingInput>>,
 	session: ReadableSession,
 	pagination: Query<PagedRequestParams>,
+	input: Json<Option<DirectoryListingInput>>,
 ) -> ApiResult<Json<Pageable<DirectoryListing>>> {
 	let user = get_session_user(&session)?;
 

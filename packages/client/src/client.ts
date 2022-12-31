@@ -9,10 +9,12 @@ import {
 	useQuery as useReactQuery,
 	UseQueryOptions,
 } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 
-import { StumpQueryContext } from './context'
+import { QueryClientContext, useClientContext } from './context'
 
 export * from './queries'
+export { QueryClientProvider } from '@tanstack/react-query'
 
 export const queryClient = new QueryClient({
 	defaultOptions: {
@@ -24,6 +26,15 @@ export const queryClient = new QueryClient({
 	},
 })
 
+export type QueryOptions<
+	TQueryFnData = unknown,
+	TError = unknown,
+	TData = TQueryFnData,
+	TQueryKey extends QueryKey = QueryKey,
+> = Omit<
+	UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
+	'queryKey' | 'queryFn' | 'context'
+>
 export function useQuery<
 	TQueryFnData = unknown,
 	TError = unknown,
@@ -32,11 +43,19 @@ export function useQuery<
 >(
 	queryKey: TQueryKey,
 	queryFn: QueryFunction<TQueryFnData, TQueryKey>,
-	options?: Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'queryKey' | 'queryFn'>,
+	options?: QueryOptions<TQueryFnData, TError, TData, TQueryKey>,
 ) {
+	const { onRedirect } = useClientContext() || {}
+	const { onError, ...restOptions } = options || {}
 	return useReactQuery(queryKey, queryFn, {
-		context: StumpQueryContext,
-		...options,
+		context: QueryClientContext,
+		onError: (err) => {
+			if (isAxiosError(err) && err.response?.status === 401) {
+				onRedirect?.('/auth')
+			}
+			onError?.(err)
+		},
+		...restOptions,
 	})
 }
 
@@ -50,11 +69,20 @@ export function useMutation<
 	mutationFn?: MutationFunction<TData, TVariables>,
 	options?: Omit<
 		UseMutationOptions<TData, TError, TVariables, TContext>,
-		'mutationKey' | 'mutationFn'
+		'mutationKey' | 'mutationFn' | 'context'
 	>,
 ) {
+	const { onRedirect } = useClientContext() || {}
+	const { onError, ...restOptions } = options || {}
+
 	return useReactMutation(mutationKey, mutationFn, {
-		context: StumpQueryContext,
-		...options,
+		context: QueryClientContext,
+		onError: (err, variables, context) => {
+			if (isAxiosError(err) && err.response?.status === 401) {
+				onRedirect?.('/auth')
+			}
+			onError?.(err, variables, context)
+		},
+		...restOptions,
 	})
 }

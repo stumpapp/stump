@@ -31,6 +31,8 @@ interface EpubControlsProps {
 	controls: IEpubControls
 	fontSize: number
 	swipeHandlers: SwipeableHandlers
+	// FIXME: type this
+	/* eslint-disable @typescript-eslint/no-explicit-any */
 	location: any
 	children: React.ReactNode
 	epub: Epub
@@ -51,6 +53,8 @@ function EpubHeaderControls({
 
 	const [visible, { on, off }] = useBoolean(false)
 
+	const chapterColor = useColorModeValue('gray.700', 'gray.400')
+	const entityColor = useColorModeValue('gray.700', 'gray.200')
 	const { isOpen, onOpen, onClose } = useDisclosure()
 
 	function handleMouseEnter() {
@@ -103,19 +107,11 @@ function EpubHeaderControls({
 				<Spacer />
 
 				<VStack textAlign="center" spacing={0}>
-					<Text
-						color={useColorModeValue('gray.700', 'gray.200')}
-						fontSize={['xs', 'sm']}
-						noOfLines={1}
-					>
+					<Text color={entityColor} fontSize={['xs', 'sm']} noOfLines={1}>
 						{epub.media_entity.name}
 					</Text>
 					{location.chapter && (
-						<Text
-							fontSize={['xs', 'sm']}
-							noOfLines={1}
-							color={useColorModeValue('gray.700', 'gray.400')}
-						>
+						<Text fontSize={['xs', 'sm']} noOfLines={1} color={chapterColor}>
 							{location.chapter}
 						</Text>
 					)}

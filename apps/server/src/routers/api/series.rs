@@ -1,8 +1,8 @@
 use axum::{
-	extract::{Path, Query},
+	extract::{Path, Query, State},
 	middleware::from_extractor,
 	routing::get,
-	Extension, Json, Router,
+	Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
@@ -23,7 +23,7 @@ use stump_core::{
 use tracing::trace;
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
@@ -32,7 +32,7 @@ use crate::{
 	},
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route("/series", get(get_series))
 		.route("/series/recently-added", get(get_recently_added_series))
@@ -57,7 +57,7 @@ struct LoadMedia {
 async fn get_series(
 	load: Query<LoadMedia>,
 	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let db = ctx.get_db();
@@ -98,7 +98,7 @@ async fn get_series(
 /// relation (i.e. the media entities will be loaded and sent with the response)
 async fn get_series_by_id(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	load_media: Query<LoadMedia>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Series>> {
@@ -143,7 +143,7 @@ async fn get_series_by_id(
 }
 
 async fn get_recently_added_series(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	pagination: Query<PagedRequestParams>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
@@ -168,7 +168,7 @@ async fn get_recently_added_series(
 // #[get("/series/<id>/thumbnail")]
 async fn get_series_thumbnail(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -201,7 +201,7 @@ async fn get_series_thumbnail(
 // #[get("/series/<id>/media?<unpaged>&<req_params..>")]
 async fn get_series_media(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	pagination: Query<PagedRequestParams>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
@@ -261,7 +261,7 @@ async fn get_series_media(
 // #[get("/series/<id>/media/next")]
 async fn get_next_in_series(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Option<Media>>> {
 	let db = ctx.get_db();

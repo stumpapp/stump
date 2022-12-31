@@ -5,19 +5,25 @@
 - [ ] ESLint
   - [x] Add the base configuration
   - [ ] Fix ESLint errors after setup (expect a lot)
-- [ ] Add moon?
-  - Rust-heavy project, so it might not be worth my time or make sense
-  - https://github.com/moonrepo/moon
+- [x] Add moon
+  - [x] Basic moon config/setup
+  - [x] Clean up all the `package.json` scripts
+    - [ ] Note: the scripts that interact with the FS directly are iffy with moon. I'll need to revisit those, so they will remain.
+- [ ] Audit dependencies, prune where needed
 - [ ] Nix?
 - [ ] Reorganize and consolidate some of the `client` code, its _very_ messy
-- [ ] Remove the `stump.service` file from GH and just add section in docs with that content
-- [ ] Consolidate some of the config files
+- [x] Remove the `stump.service` file from GH and just add section in docs with that content
+- [x] Consolidate some of the config files
+  - [x] Looking at you messy tsconfigs
 - [ ] Migrate to Axum v0.6
   - Rebase `axum-upgrade` branch once above chores completed
   - https://github.com/tokio-rs/axum/releases/tag/axum-v0.6.0
   - [ ] Consider using https://github.com/maxcountryman/axum-login
 - [ ] Look into sqlite session store at some point to replace the in memory store.
-- [ ] Move `prisma` out of `core`?
+- [x] Move `prisma-cli` out of `core`?
+  - [ ] I have plans to eventually maintain a fork of `unrar`, I'll probably use git submodules and create a new `crates` package for that. Once I have that, I'll relocate again there.
+- [ ] Refactor all queries to use more current select/include patterns
+  - https://prisma.brendonovich.dev/reading-data/select-include#many-relation-options
 - [ ] Change HTTP endpoints to be **unpaged** by default
 - [ ] Rethink HTTP endpoints allow better range of filter options
 - [ ] Rework `integration_tests` and add unit testing throughout
@@ -47,8 +53,6 @@
   - [ ] AnimatedImageBased
   - [ ] EPUB
 - [ ] Tighten logging noise
-- [ ] Tighten some of the meh config files
-  - [ ] Looking at you messy tsconfigs
 - [ ] Revisit rework of `StumpConfig`
 - [ ] Setup self hosted runner using gaming computer
 - [ ] Finish GH workflows/actions

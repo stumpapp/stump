@@ -1,10 +1,10 @@
-use axum::{middleware::from_extractor, routing::get, Extension, Json, Router};
+use axum::{extract::State, middleware::from_extractor, routing::get, Json, Router};
 use serde::Deserialize;
 use stump_core::db::models::Tag;
 
-use crate::{config::state::State, errors::ApiResult, middleware::auth::Auth};
+use crate::{config::state::AppState, errors::ApiResult, middleware::auth::Auth};
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route("/tags", get(get_tags).post(create_tags))
 		.layer(from_extractor::<Auth>())
@@ -12,7 +12,7 @@ pub(crate) fn mount() -> Router {
 
 /// Get all tags for all items in the database. Tags are returned in a flat list,
 /// not grouped by the items which they belong to.
-async fn get_tags(Extension(ctx): State) -> ApiResult<Json<Vec<Tag>>> {
+async fn get_tags(State(ctx): State<AppState>) -> ApiResult<Json<Vec<Tag>>> {
 	let db = ctx.get_db();
 
 	Ok(Json(
@@ -32,8 +32,8 @@ pub struct CreateTags {
 }
 
 async fn create_tags(
+	State(ctx): State<AppState>,
 	Json(input): Json<CreateTags>,
-	Extension(ctx): State,
 ) -> ApiResult<Json<Vec<Tag>>> {
 	let db = ctx.get_db();
 

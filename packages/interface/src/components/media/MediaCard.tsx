@@ -25,7 +25,7 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 		prefetchMedia(media.id)
 
 		if (media.current_page) {
-			const _img = prefetchMediaPage(media.id, media.current_page)
+			prefetchMediaPage(media.id, media.current_page)
 		}
 	}
 

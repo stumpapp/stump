@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { JobReport, JobStatus, useJobReport } from '@stump/client'
 import { ColumnDef, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
@@ -10,7 +11,7 @@ const IS_DEV = import.meta.env.DEV
 
 // FIXME: loading state
 export default function JobsTable() {
-	const { isLoading, jobReports } = useJobReport()
+	const { jobReports } = useJobReport()
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 	const columns = useMemo<ColumnDef<JobReport>[]>(
@@ -46,6 +47,7 @@ export default function JobsTable() {
 							if (completed_at) {
 								return dayjs(completed_at).format('YYYY-MM-DD HH:mm:ss')
 							}
+							return undefined
 						},
 						footer: (props) => props.column.id,
 						header: 'Time Completed',

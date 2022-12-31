@@ -7,6 +7,8 @@ import SettingsNavigation from './SettingsNavigation'
 export default function SettingsLayout() {
 	const { user } = useUserStore()
 
+	const bgColor = useColorModeValue('gray.75', 'gray.900')
+
 	if (!user) {
 		return null
 	}
@@ -14,7 +16,7 @@ export default function SettingsLayout() {
 	return (
 		<VStack h="full" w="full">
 			<SettingsNavigation user={user} />
-			<Box w="full" h="full" bg={useColorModeValue('gray.75', 'gray.900')} p="4">
+			<Box w="full" h="full" bg={bgColor} p="4">
 				<Outlet />
 			</Box>
 		</VStack>

@@ -1,8 +1,8 @@
-import type { ApiResult, Media, PageableApiResult, Series } from '../types';
-import { API } from '.';
+import type { ApiResult, Media, PageableApiResult, Series } from '../types'
+import { API } from '.'
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {
-	return API.get(`/series/${id}`);
+	return API.get(`/series/${id}`)
 }
 
 export function getSeriesMedia(
@@ -11,10 +11,10 @@ export function getSeriesMedia(
 	params?: string,
 ): Promise<PageableApiResult<Media[]>> {
 	if (params) {
-		return API.get(`/series/${id}/media?page=${page}&${params}`);
+		return API.get(`/series/${id}/media?page=${page}&${params}`)
 	}
 
-	return API.get(`/series/${id}/media?page=${page}`);
+	return API.get(`/series/${id}/media?page=${page}`)
 }
 
 export function getRecentlyAddedSeries(
@@ -22,17 +22,17 @@ export function getRecentlyAddedSeries(
 	params?: URLSearchParams,
 ): Promise<PageableApiResult<Series[]>> {
 	if (params) {
-		params.set('page', page.toString());
-		return API.get(`/series/recently-added?${params.toString()}`);
+		params.set('page', page.toString())
+		return API.get(`/series/recently-added?${params.toString()}`)
 	}
 
-	return API.get(`/series/recently-added?page=${page}`);
+	return API.get(`/series/recently-added?page=${page}`)
 }
 
 export function getNextInSeries(id: string): Promise<ApiResult<Media | undefined>> {
-	return API.get(`/series/${id}/media/next`);
+	return API.get(`/series/${id}/media/next`)
 }
 
 export function getSeriesThumbnail(id: string): string {
-	return `${API.getUri()}/series/${id}/thumbnail`;
+	return `${API.getUri()}/series/${id}/thumbnail`
 }

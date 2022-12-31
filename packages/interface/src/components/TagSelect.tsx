@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, FormLabel } from '@chakra-ui/react'
+import { FormControl, FormHelperText, FormLabel, SystemStyleObject } from '@chakra-ui/react'
 import { TagOption } from '@stump/client'
 import { CreatableSelect } from 'chakra-react-select'
 import { Controller, useFormContext } from 'react-hook-form'
@@ -55,7 +55,7 @@ export default function TagSelect({
 						placeholder="Select tags"
 						noOptionsMessage={() =>
 							!options.length ? (
-								<p>You haven't created any tags yet</p>
+								<p>You haven&rsquo;t created any tags yet</p>
 							) : (
 								<p>Start typing to create a new tag</p>
 							)
@@ -64,19 +64,19 @@ export default function TagSelect({
 						focusBorderColor="0 0 0 2px rgba(196, 130, 89, 0.6);"
 						// menuIsOpen
 						chakraStyles={{
-							control: (provided: any) => ({
+							control: (provided: SystemStyleObject) => ({
 								...provided,
 								_focus: {
 									boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
 								},
 							}),
-							dropdownIndicator: (provided: any) => ({
+							dropdownIndicator: (provided: SystemStyleObject) => ({
 								...provided,
 								bg: 'transparent',
 								cursor: 'inherit',
 								px: 2,
 							}),
-							indicatorSeparator: (provided: any) => ({
+							indicatorSeparator: (provided: SystemStyleObject) => ({
 								...provided,
 								display: 'none',
 							}),

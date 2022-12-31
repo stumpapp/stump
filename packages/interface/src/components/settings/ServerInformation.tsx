@@ -30,7 +30,7 @@ export function LogStats() {
 		<HStack fontSize="sm" spacing={2} color={useColorModeValue('gray.700', 'gray.300')}>
 			<Text>Log file size: {formatBytes(logMeta?.size)}</Text>
 			<ConfirmationModal isOpen={open} onConfirm={handleClearLogs} onClose={() => setOpen(false)}>
-				<Text>Are you sure you'd like to clear your logfile?</Text>
+				<Text>Are you sure you&rsquo;d like to clear your logfile?</Text>
 			</ConfirmationModal>
 		</HStack>
 	)
@@ -38,6 +38,7 @@ export function LogStats() {
 
 export function ServerVersion() {
 	const stump = useStumpVersion()
+	const textColor = useColorModeValue('gray.700', 'gray.300')
 
 	const commitLink = (rev: string | null) => {
 		if (!rev) {
@@ -52,7 +53,7 @@ export function ServerVersion() {
 	}
 
 	return (
-		<HStack fontSize="sm" spacing={2} color={useColorModeValue('gray.700', 'gray.300')}>
+		<HStack fontSize="sm" spacing={2} color={textColor}>
 			<Link href={commitLink(stump.rev)} isExternal>
 				Commit Hash: {stump.rev}
 			</Link>

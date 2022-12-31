@@ -13,4 +13,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v12
       - name: Building package
-        run: nix-build . -A defaultPackage.x86_64-linux
+        run: nix develop --command cargo check

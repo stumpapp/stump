@@ -20,6 +20,15 @@
         ];
 
         packages = with pkgs; [
+          # node
+          nodePackages.pnpm
+          nodejs
+
+          # rust
+          cargo-deny
+          cargo-edit
+          cargo-watch
+
           git
           curl
           wget

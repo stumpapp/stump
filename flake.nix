@@ -20,6 +20,7 @@
         ];
 
         packages = with pkgs; [
+          git
           curl
           wget
           pkg-config

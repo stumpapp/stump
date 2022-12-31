@@ -156,7 +156,7 @@ impl StumpEnvironment {
 		let port = &self.port.unwrap_or(10801);
 
 		env::set_var("STUMP_PORT", port.to_string());
-		env::set_var("STUMP_VERBOSITY", &self.verbosity.unwrap_or(1).to_string());
+		env::set_var("STUMP_VERBOSITY", self.verbosity.unwrap_or(1).to_string());
 
 		if let Some(config_dir) = &self.config_dir {
 			if !config_dir.is_empty() {

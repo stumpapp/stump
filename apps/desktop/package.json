@@ -12,26 +12,26 @@
     "build:web": "vite build"
   },
   "dependencies": {
-    "@stump/client": "workspace:*",
-    "@stump/interface": "workspace:*",
-    "@tanstack/react-query": "^4.10.3",
-    "@tauri-apps/api": "^1.1.0",
+    "@stump/client": "workspace:0.0.0",
+    "@stump/interface": "workspace:0.0.0",
+    "@tanstack/react-query": "^4.16.1",
+    "@tauri-apps/api": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.7",
-    "@tauri-apps/cli": "^1.1.1",
-    "@types/react": "^18.0.21",
-    "@types/react-dom": "^18.0.6",
-    "@vitejs/plugin-react": "^2.0.0",
-    "autoprefixer": "^10.4.12",
-    "postcss": "^8.4.17",
+    "@tailwindcss/typography": "^0.5.8",
+    "@tauri-apps/cli": "^1.2.0",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react": "^2.2.0",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.19",
     "tailwind": "^4.0.0",
     "tailwind-scrollbar-hide": "^1.1.7",
-    "tailwindcss": "^3.1.8",
-    "typescript": "^4.8.4",
-    "vite": "^3.1.6",
-    "vite-plugin-tsconfig-paths": "^1.1.0"
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.9.3",
+    "vite": "^3.2.4",
+    "vite-plugin-tsconfig-paths": "^1.2.0"
   }
 }

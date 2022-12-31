@@ -25,7 +25,7 @@ pub fn get_log_verbosity() -> u64 {
 pub fn init_tracing() {
 	let config_dir = get_config_dir();
 
-	let file_appender = tracing_appender::rolling::never(&config_dir, "Stump.log");
+	let file_appender = tracing_appender::rolling::never(config_dir, "Stump.log");
 
 	let verbosity = get_log_verbosity();
 	let max_level = match verbosity {

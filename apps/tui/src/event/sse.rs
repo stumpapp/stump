@@ -26,7 +26,7 @@ impl SSEHandler {
 			// https://docs.rs/reqwest-eventsource/latest/reqwest_eventsource/
 			// FIXME: this panics if cannot connect. What a bad implementation...
 			let mut source =
-				EventSource::get(&format!("{}/api/jobs/listen", this_cpy.base_url));
+				EventSource::get(format!("{}/api/jobs/listen", this_cpy.base_url));
 			while let Some(event) = source.next().await {
 				match event {
 					Ok(Event::Open) => {

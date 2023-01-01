@@ -13,4 +13,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v17
       - name: Building package
-        run: nix develop --command "pnpm core run setup && cargo check"
+        run: nix develop --command pnpm core run setup && cargo check

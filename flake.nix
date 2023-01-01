@@ -62,6 +62,7 @@
             }
           )];
 
+          # Needed for rust-analyzer
           RUST_SRC_PATH = "${pkgs.rust-bin.stable.latest.default.override {
               extensions = [ "rust-src" ];
           }}/lib/rustlib/src/rust/library";

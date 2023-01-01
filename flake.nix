@@ -38,7 +38,6 @@
           cargo-watch
 
           # Tauri deps
-          git
           curl
           wget
           pkg-config
@@ -48,11 +47,16 @@
           gtk3
           libsoup
           webkitgtk
+
+          # avoid openssl linking error when local git version isn't compatible with openssl_3 
+          git
         ];
       in
       {
         devShell = pkgs.mkShell {
+        
           buildInputs = packages ++ [(
+            # Needed for rust-analyzer
             pkgs.rust-bin.stable.latest.default.override {
               extensions = [ "rust-src" ];
             }

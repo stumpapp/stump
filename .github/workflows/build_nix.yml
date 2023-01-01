@@ -14,6 +14,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v17
       - name: test
-        run: nix develop --command pkg-config --list-all | grep gdk
+        run: nix develop --command "pkg-config" "--libs" "--cflags" "gdk-3.0" "gdk-3.0 >= 3.22"
    #   - name: Building package
     #    run: nix develop --command pnpm core run setup && cargo check

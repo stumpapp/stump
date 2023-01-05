@@ -1,9 +1,10 @@
 use axum::{
-	extract::{Path, Query, State},
+	extract::{Path, State},
 	middleware::from_extractor,
 	routing::get,
 	Json, Router,
 };
+use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
@@ -17,9 +18,7 @@ use stump_core::{
 	},
 	fs::{image, media_file},
 	job::LibraryScanJob,
-	prelude::{
-		CreateLibraryArgs, Pageable, PagedRequestParams, QueryOrder, UpdateLibraryArgs,
-	},
+	prelude::{CreateLibraryArgs, Pageable, PagedRequestParams, UpdateLibraryArgs},
 	prisma::{
 		library, library_options, media,
 		series::{self, OrderByParam as SeriesOrderByParam},
@@ -34,6 +33,7 @@ use crate::{
 	utils::{
 		get_session_admin_user,
 		http::{ImageResponse, PageableTrait},
+		FilterableQuery, LibraryFilter,
 	},
 };
 
@@ -77,13 +77,11 @@ async fn get_libraries(
 		.map(|l| l.into())
 		.collect::<Vec<Library>>();
 
-	let unpaged = pagination.unpaged.unwrap_or(false);
-
-	if unpaged {
+	if pagination.page.is_none() {
 		return Ok(Json(libraries.into()));
 	}
 
-	Ok(Json((libraries, pagination.page_params()).into()))
+	Ok(Json((libraries, pagination.0.page_params()).into()))
 }
 
 /// Get stats for all libraries
@@ -148,16 +146,21 @@ async fn get_library_by_id(
 // but for now I will have this disgustingly gross and ugly work around...
 ///Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
+	query: Query<FilterableQuery<LibraryFilter>>,
 	Path(id): Path<String>,
-	pagination: Query<PagedRequestParams>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+	let FilterableQuery {
+		ordering,
+		pagination,
+		..
+	} = query.0.get();
+
 	let db = ctx.get_db();
 
-	let unpaged = pagination.unpaged.unwrap_or(false);
+	let unpaged = pagination.page.is_none();
 	let page_params = pagination.page_params();
-	let order_by_param: SeriesOrderByParam =
-		QueryOrder::from(page_params.clone()).try_into()?;
+	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
 	let mut query = db
 		.series()

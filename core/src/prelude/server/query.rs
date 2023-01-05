@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
-	prelude::{errors::CoreError, server::pageable::PageParams},
+	prelude::errors::CoreError,
 	prisma::{media, series},
 };
 
@@ -30,7 +30,8 @@ impl From<Direction> for prisma_client_rust::Direction {
 }
 
 /// Model used in media API to alter sorting/ordering of queried media
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Type)]
+#[serde(default)]
 pub struct QueryOrder {
 	/// The field to order by. Defaults to 'name'
 	pub order_by: String,
@@ -43,15 +44,6 @@ impl Default for QueryOrder {
 		QueryOrder {
 			order_by: "name".to_string(),
 			direction: Direction::Asc,
-		}
-	}
-}
-
-impl From<PageParams> for QueryOrder {
-	fn from(params: PageParams) -> Self {
-		QueryOrder {
-			order_by: params.order_by,
-			direction: params.direction,
 		}
 	}
 }

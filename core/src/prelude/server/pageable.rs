@@ -4,16 +4,11 @@ use tracing::trace;
 
 use crate::prelude::DirectoryListing;
 
-use super::Direction;
-
-#[derive(Debug, Deserialize, Serialize, Type)]
+#[derive(Default, Debug, Deserialize, Serialize, Type)]
 pub struct PagedRequestParams {
-	pub unpaged: Option<bool>,
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
-	pub order_by: Option<String>,
-	pub direction: Option<Direction>,
 }
 
 pub struct PageBounds {
@@ -26,8 +21,6 @@ pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,
 	pub page_size: u32,
-	pub order_by: String,
-	pub direction: Direction,
 }
 
 impl Default for PageParams {
@@ -36,8 +29,6 @@ impl Default for PageParams {
 			zero_based: false,
 			page: 0,
 			page_size: 20,
-			order_by: "name".to_string(),
-			direction: Direction::Asc,
 		}
 	}
 }
@@ -79,8 +70,6 @@ impl From<Option<PagedRequestParams>> for PageParams {
 					page,
 					page_size,
 					zero_based,
-					order_by: params.order_by.unwrap_or_else(|| "name".to_string()),
-					direction: params.direction.unwrap_or_default(),
 				}
 			},
 			None => PageParams::default(),

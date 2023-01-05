@@ -1,9 +1,10 @@
 use axum::{
-	extract::{Path, Query, State},
+	extract::{Path, State},
 	middleware::from_extractor,
 	routing::{get, put},
 	Json, Router,
 };
+use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
 use serde::Deserialize;
@@ -15,9 +16,9 @@ use stump_core::{
 		Dao, MediaDao, MediaDaoImpl,
 	},
 	fs::{image, media_file},
-	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
+	prelude::{ContentType, Pageable, PagedRequestParams},
 	prisma::{
-		media::{self, OrderByParam as MediaOrderByParam},
+		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		read_progress, user,
 	},
 };
@@ -30,6 +31,7 @@ use crate::{
 	utils::{
 		get_session_user,
 		http::{ImageResponse, NamedFile, PageableTrait},
+		FilterableQuery, MediaFilter,
 	},
 };
 
@@ -52,24 +54,49 @@ pub(crate) fn mount() -> Router<AppState> {
 		.layer(from_extractor::<Auth>())
 }
 
+pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
+	let mut _where: Vec<WhereParam> = vec![];
+
+	if !filters.id.is_empty() {
+		_where.push(media::id::in_vec(filters.id))
+	}
+	if !filters.name.is_empty() {
+		_where.push(media::name::in_vec(filters.name))
+	}
+	if !filters.extension.is_empty() {
+		_where.push(media::extension::in_vec(filters.extension))
+	}
+
+	_where
+}
+
 /// Get all media accessible to the requester. This is a paginated request, and
 /// has various pagination params available.
+#[tracing::instrument(skip(ctx, session))]
 async fn get_media(
-	pagination: Query<PagedRequestParams>,
+	query: Query<FilterableQuery<MediaFilter>>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let FilterableQuery {
+		filters,
+		ordering,
+		pagination,
+	} = query.0.get();
+
+	trace!(?filters, ?ordering, ?pagination, "get_media");
+
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let unpaged = pagination.unpaged.unwrap_or(false);
+	let unpaged = pagination.page.is_none();
 	let page_params = pagination.page_params();
-	let order_by_param: MediaOrderByParam =
-		QueryOrder::from(page_params.clone()).try_into()?;
+	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
+	let _where = apply_media_filters(filters);
 	let mut query = db
 		.media()
-		.find_many(vec![])
+		.find_many(_where.clone())
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(user_id),
 		]))
@@ -91,7 +118,7 @@ async fn get_media(
 		return Ok(Json(Pageable::from(media)));
 	}
 
-	let count = db.media_count().await?;
+	let count = db.media().count(_where).exec().await?;
 
 	Ok(Json(Pageable::from((media, count, page_params))))
 }
@@ -108,13 +135,13 @@ async fn get_duplicate_media(
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let media_dao = MediaDaoImpl::new(ctx.db.clone());
 
-	if pagination.unpaged.unwrap_or(false) {
+	if pagination.page.is_none() {
 		return Ok(Json(Pageable::from(media_dao.get_duplicate_media().await?)));
 	}
 
 	Ok(Json(
 		media_dao
-			.get_duplicate_media_page(pagination.page_params())
+			.get_duplicate_media_page(pagination.0.page_params())
 			.await?,
 	))
 }
@@ -128,7 +155,7 @@ async fn get_in_progress_media(
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let user_id = get_session_user(&session)?.id;
 	let media_dao = MediaDaoImpl::new(ctx.db.clone());
-	let page_params = pagination.page_params();
+	let page_params = pagination.0.page_params();
 
 	Ok(Json(
 		media_dao
@@ -143,8 +170,8 @@ async fn get_recently_added_media(
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 
-	let unpaged = pagination.unpaged.unwrap_or(false);
-	let page_params = pagination.page_params();
+	let unpaged = pagination.page.is_none();
+	let page_params = pagination.0.page_params();
 
 	let mut query = db
 		.media()

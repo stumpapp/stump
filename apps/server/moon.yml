@@ -12,8 +12,10 @@ language: 'rust'
 
 tasks:
   dev:
-    command: 'cargo watch --ignore packages -x "run --package stump_server"'
+    command: 'cargo watch --ignore packages -x "run --manifest-path=apps/server/Cargo.toml --package stump_server"'
     local: true
+    options:
+      runFromWorkspaceRoot: true
 
   start:
     command: 'cargo run --release --package stump_server'
@@ -24,7 +26,7 @@ tasks:
     local: true
     deps:
       - 'web:build'
-      # - '~:get-webapp'
+      - '~:get-webapp'
 
   lint:
     command: 'cargo clippy --package stump_server -- -D warnings'
@@ -36,10 +38,12 @@ tasks:
   clean:
     command: 'cargo clean'
 
-  # FIXME: doesn't work
-  # https://moonrepo.dev/docs/config/project#special-commands
-  get-webapp:
-    command: 'trash "dist/*" "!dist/.placeholder" && cpy "../web/dist/**/*" ./dist/'
+  delete-webapp:
+    command: 'rm -rf ./dist'
     platform: 'system'
-    # deps:
-    #   - 'web:build'
+
+  get-webapp:
+    command: 'cp -r ../web/dist ./dist'
+    platform: 'system'
+    deps:
+      - '~:delete-webapp'

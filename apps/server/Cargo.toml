@@ -12,6 +12,7 @@ axum-macros = "0.3.0"
 axum-extra = { version = "0.4.2", features = [
   "spa",
   # "cookie"
+  "query"
 ] }
 tower-http = { version = "0.3.5", features = [
   "fs",

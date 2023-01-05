@@ -1,12 +1,12 @@
 use axum::{
-	extract::{Path, Query, State},
+	extract::{Path, State},
 	middleware::from_extractor,
 	routing::get,
 	Json, Router,
 };
+use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
-use serde::Deserialize;
 use stump_core::{
 	db::{
 		models::{Media, Series},
@@ -29,6 +29,7 @@ use crate::{
 	utils::{
 		get_session_user,
 		http::{ImageResponse, PageableTrait},
+		FilterableQuery, SeriesFilter, SeriesRelation,
 	},
 };
 
@@ -47,23 +48,23 @@ pub(crate) fn mount() -> Router<AppState> {
 		.layer(from_extractor::<Auth>())
 }
 
-#[derive(Deserialize)]
-struct LoadMedia {
-	load_media: Option<bool>,
-}
-
 /// Get all series accessible by user. This is a paginated respone, and
 /// accepts various paginated request params.
 async fn get_series(
-	load: Query<LoadMedia>,
-	pagination: Query<PagedRequestParams>,
+	query: Query<FilterableQuery<SeriesFilter>>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+	let FilterableQuery {
+		filters,
+		ordering,
+		pagination,
+	} = query.0.get();
+
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
-
-	let load_media = load.load_media.unwrap_or(false);
+	let load_media = filters.load_relation.load_media.unwrap_or(false);
+	let order_by = ordering.try_into()?;
 
 	let action = db.series();
 	let action = action.find_many(vec![]);
@@ -73,7 +74,7 @@ async fn get_series(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
-				.order_by(media::name::order(Direction::Asc)),
+				.order_by(order_by),
 		)
 	} else {
 		action
@@ -86,8 +87,7 @@ async fn get_series(
 		.map(|s| s.into())
 		.collect::<Vec<Series>>();
 
-	let unpaged = pagination.unpaged.unwrap_or(false);
-	if unpaged {
+	if pagination.page.is_none() {
 		return Ok(Json(series.into()));
 	}
 
@@ -97,15 +97,15 @@ async fn get_series(
 /// Get a series by ID. Optional query param `load_media` that will load the media
 /// relation (i.e. the media entities will be loaded and sent with the response)
 async fn get_series_by_id(
+	query: Query<SeriesRelation>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	load_media: Query<LoadMedia>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let load_media = load_media.load_media.unwrap_or(false);
+	let load_media = query.load_media.unwrap_or(false);
 	let mut query = db.series().find_unique(series::id::equals(id.clone()));
 
 	if load_media {
@@ -147,14 +147,14 @@ async fn get_recently_added_series(
 	pagination: Query<PagedRequestParams>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
-	if pagination.unpaged.unwrap_or_default() {
+	if pagination.page.is_none() {
 		return Err(ApiError::BadRequest(
 			"Unpaged request not supported for this endpoint".to_string(),
 		));
 	}
 
 	let viewer_id = get_session_user(&session)?.id;
-	let page_params = pagination.page_params();
+	let page_params = pagination.0.page_params();
 	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
 
 	let recently_added_series = series_dao
@@ -200,18 +200,18 @@ async fn get_series_thumbnail(
 /// accepts various paginated request params.
 // #[get("/series/<id>/media?<unpaged>&<req_params..>")]
 async fn get_series_media(
+	pagination: Query<PagedRequestParams>,
+	ordering: Query<Option<QueryOrder>>,
+	session: ReadableSession,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	pagination: Query<PagedRequestParams>,
-	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let unpaged = pagination.unpaged.unwrap_or(false);
-	let page_params = pagination.page_params();
-	let order_by_param: MediaOrderByParam =
-		QueryOrder::from(page_params.clone()).try_into()?;
+	let unpaged = pagination.page.is_none();
+	let page_params = pagination.0.page_params();
+	let order_by_param: MediaOrderByParam = ordering.0.unwrap_or_default().try_into()?;
 
 	let mut query = db
 		.media()

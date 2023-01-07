@@ -35,6 +35,8 @@ use crate::{
 	},
 };
 
+use super::series::apply_series_filters;
+
 pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
 		.route("/media", get(get_media))
@@ -58,13 +60,17 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	let mut _where: Vec<WhereParam> = vec![];
 
 	if !filters.id.is_empty() {
-		_where.push(media::id::in_vec(filters.id))
+		_where.push(media::id::in_vec(filters.id));
 	}
 	if !filters.name.is_empty() {
-		_where.push(media::name::in_vec(filters.name))
+		_where.push(media::name::in_vec(filters.name));
 	}
 	if !filters.extension.is_empty() {
-		_where.push(media::extension::in_vec(filters.extension))
+		_where.push(media::extension::in_vec(filters.extension));
+	}
+
+	if let Some(series_filters) = filters.series {
+		_where.push(media::series::is(apply_series_filters(series_filters)));
 	}
 
 	_where
@@ -93,10 +99,11 @@ async fn get_media(
 	let page_params = pagination.page_params();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
-	let _where = apply_media_filters(filters);
+	let where_conditions = apply_media_filters(filters);
+
 	let mut query = db
 		.media()
-		.find_many(_where.clone())
+		.find_many(where_conditions.clone())
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(user_id),
 		]))
@@ -118,7 +125,7 @@ async fn get_media(
 		return Ok(Json(Pageable::from(media)));
 	}
 
-	let count = db.media().count(_where).exec().await?;
+	let count = db.media().count(where_conditions).exec().await?;
 
 	Ok(Json(Pageable::from((media, count, page_params))))
 }

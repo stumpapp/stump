@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use serde::{de, Deserialize, Deserializer, Serialize};
+use serde_with::with_prefix;
 use std::fmt;
 use stump_core::prelude::{PagedRequestParams, QueryOrder};
 
@@ -57,7 +58,8 @@ where
 	deserializer.deserialize_any(StringOrVec(PhantomData))
 }
 
-#[derive(Default, Deserialize, Serialize)]
+// TODO: tags
+#[derive(Default, Debug, Clone, Deserialize, Serialize)]
 pub struct LibraryFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
@@ -65,22 +67,29 @@ pub struct LibraryFilter {
 	pub name: Vec<String>,
 }
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize)]
 pub struct SeriesRelation {
 	pub load_media: Option<bool>,
 }
 
-#[derive(Default, Deserialize, Serialize)]
+// TODO: I don't like this convention and I'd rather figure out a way around it.
+// I would prefer /series?library[field]=value, but could not get that to work.
+with_prefix!(library_prefix "library_");
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize)]
 pub struct SeriesFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
 
-	#[serde(flatten)]
-	pub load_relation: SeriesRelation,
+	#[serde(flatten, with = "library_prefix")]
+	pub library: Option<LibraryFilter>,
 }
 
+// TODO: I don't like this convention and I'd rather figure out a way around it.
+// I would prefer /media?series[field]=value, but could not get that to work.
+with_prefix!(series_prefix "series_");
 #[derive(Default, Debug, Deserialize, Serialize)]
 pub struct MediaFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -89,4 +98,7 @@ pub struct MediaFilter {
 	pub name: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub extension: Vec<String>,
+
+	#[serde(flatten, with = "series_prefix")]
+	pub series: Option<SeriesFilter>,
 }

@@ -1,5 +1,6 @@
 import type { ApiResult, Media, PageableApiResult, ReadProgress } from '../types'
 import { API } from '.'
+import { urlWithParams } from './utils'
 
 type GetMediaById = ApiResult<Media>
 
@@ -22,7 +23,7 @@ export function getRecentlyAddedMedia(
 ): Promise<PageableApiResult<Media[]>> {
 	if (params) {
 		params.set('page', page.toString())
-		return API.get(`/media/recently-added?${params.toString()}`)
+		return API.get(urlWithParams('/media/recently-added', params))
 	}
 
 	return API.get(`/media/recently-added?page=${page}`)
@@ -34,7 +35,7 @@ export function getInProgressMedia(
 ): Promise<PageableApiResult<Media[]>> {
 	if (params) {
 		params.set('page', page.toString())
-		return API.get(`/media/keep-reading?${params.toString()}`)
+		return API.get(urlWithParams('/media/keep-reading', params))
 	}
 
 	return API.get(`/media/keep-reading?page=${page}`)

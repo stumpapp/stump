@@ -3,7 +3,7 @@ use specta::Type;
 
 use crate::{
 	prelude::errors::CoreError,
-	prisma::{media, series},
+	prisma::{library, media, series},
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]
@@ -67,6 +67,26 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order media by {:?}",
+					self.order_by
+				)))
+			},
+		})
+	}
+}
+
+impl TryInto<library::OrderByParam> for QueryOrder {
+	type Error = CoreError;
+
+	fn try_into(self) -> Result<library::OrderByParam, Self::Error> {
+		let dir: prisma_client_rust::Direction = self.direction.into();
+
+		Ok(match self.order_by.to_lowercase().as_str() {
+			"name" => library::name::order(dir),
+			"path" => library::path::order(dir),
+			"status" => library::status::order(dir),
+			_ => {
+				return Err(CoreError::InvalidQuery(format!(
+					"You cannot order library by {:?}",
 					self.order_by
 				)))
 			},

@@ -17,7 +17,8 @@ use stump_core::{
 	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
-		read_progress, series,
+		read_progress,
+		series::{self, WhereParam},
 	},
 };
 use tracing::trace;
@@ -32,6 +33,8 @@ use crate::{
 		FilterableQuery, SeriesFilter, SeriesRelation,
 	},
 };
+
+use super::library::apply_library_filters;
 
 pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
@@ -48,22 +51,40 @@ pub(crate) fn mount() -> Router<AppState> {
 		.layer(from_extractor::<Auth>())
 }
 
+pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
+	let mut _where: Vec<WhereParam> = vec![];
+
+	if !filters.id.is_empty() {
+		_where.push(series::id::in_vec(filters.id))
+	}
+	if !filters.name.is_empty() {
+		_where.push(series::name::in_vec(filters.name));
+	}
+
+	if let Some(library_filters) = filters.library {
+		_where.push(series::library::is(apply_library_filters(library_filters)));
+	}
+
+	_where
+}
+
 /// Get all series accessible by user. This is a paginated respone, and
 /// accepts various paginated request params.
 async fn get_series(
 	query: Query<FilterableQuery<SeriesFilter>>,
+	relation_query: Query<SeriesRelation>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery {
-		filters,
 		ordering,
 		pagination,
+		..
 	} = query.0.get();
 
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
-	let load_media = filters.load_relation.load_media.unwrap_or(false);
+	let load_media = relation_query.load_media.unwrap_or(false);
 	let order_by = ordering.try_into()?;
 
 	let action = db.series();

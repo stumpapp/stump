@@ -18,9 +18,10 @@ use stump_core::{
 	},
 	fs::{image, media_file},
 	job::LibraryScanJob,
-	prelude::{CreateLibraryArgs, Pageable, PagedRequestParams, UpdateLibraryArgs},
+	prelude::{CreateLibraryArgs, Pageable, UpdateLibraryArgs},
 	prisma::{
-		library, library_options, media,
+		library::{self, WhereParam},
+		library_options, media,
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag,
 	},
@@ -59,18 +60,40 @@ pub(crate) fn mount() -> Router<AppState> {
 		.layer(from_extractor::<Auth>())
 }
 
+pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+	let mut _where: Vec<WhereParam> = vec![];
+
+	if !filters.id.is_empty() {
+		_where.push(library::id::in_vec(filters.id))
+	}
+	if !filters.name.is_empty() {
+		_where.push(library::name::in_vec(filters.name));
+	}
+
+	_where
+}
+
 /// Get all libraries
 async fn get_libraries(
+	query: Query<FilterableQuery<LibraryFilter>>,
 	State(ctx): State<AppState>,
-	pagination: Query<PagedRequestParams>,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
+	let FilterableQuery {
+		filters,
+		ordering,
+		pagination,
+	} = query.0.get();
+
+	let where_conditions = apply_library_filters(filters);
+	let order_by = ordering.try_into()?;
+
 	let libraries = ctx
 		.db
 		.library()
-		.find_many(vec![])
+		.find_many(where_conditions)
 		.with(library::tags::fetch(vec![]))
 		.with(library::library_options::fetch())
-		.order_by(library::name::order(Direction::Asc))
+		.order_by(order_by)
 		.exec()
 		.await?
 		.into_iter()
@@ -81,7 +104,7 @@ async fn get_libraries(
 		return Ok(Json(libraries.into()));
 	}
 
-	Ok(Json((libraries, pagination.0.page_params()).into()))
+	Ok(Json((libraries, pagination.page_params()).into()))
 }
 
 /// Get stats for all libraries

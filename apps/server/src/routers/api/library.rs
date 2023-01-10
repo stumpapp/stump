@@ -18,7 +18,9 @@ use stump_core::{
 	},
 	fs::{image, media_file},
 	job::LibraryScanJob,
-	prelude::{CreateLibraryArgs, Pageable, UpdateLibraryArgs},
+	prelude::{
+		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, UpdateLibraryArgs,
+	},
 	prisma::{
 		library::{self, WhereParam},
 		library_options, media,
@@ -32,9 +34,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_admin_user,
-		http::{ImageResponse, PageableTrait},
-		FilterableQuery, LibraryFilter,
+		get_session_admin_user, http::ImageResponse, FilterableQuery, LibraryFilter,
 	},
 };
 
@@ -75,36 +75,57 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 
 /// Get all libraries
 async fn get_libraries(
-	query: Query<FilterableQuery<LibraryFilter>>,
+	filter_query: Query<FilterableQuery<LibraryFilter>>,
+	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
-	let FilterableQuery {
-		filters,
-		ordering,
-		pagination,
-	} = query.0.get();
+	let FilterableQuery { filters, ordering } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
 
+	let is_unpaged = pagination.is_unpaged();
 	let where_conditions = apply_library_filters(filters);
 	let order_by = ordering.try_into()?;
 
-	let libraries = ctx
+	let mut query = ctx
 		.db
 		.library()
-		.find_many(where_conditions)
+		.find_many(where_conditions.clone())
 		.with(library::tags::fetch(vec![]))
 		.with(library::library_options::fetch())
-		.order_by(order_by)
+		.order_by(order_by);
+
+	if !is_unpaged {
+		match pagination.clone() {
+			Pagination::Page(page_query) => {
+				let (skip, take) = page_query.get_skip_take();
+				query = query.skip(skip).take(take);
+			},
+			Pagination::Cursor(cursor_query) => {
+				if let Some(cursor) = cursor_query.cursor {
+					query = query.cursor(library::id::equals(cursor)).skip(1)
+				}
+				if let Some(limit) = cursor_query.limit {
+					query = query.take(limit)
+				}
+			},
+			_ => unreachable!(),
+		}
+	}
+
+	let libraries = query
 		.exec()
 		.await?
 		.into_iter()
 		.map(|l| l.into())
 		.collect::<Vec<Library>>();
 
-	if pagination.page.is_none() {
+	if is_unpaged {
 		return Ok(Json(libraries.into()));
 	}
 
-	Ok(Json((libraries, pagination.page_params()).into()))
+	let count = ctx.db.library().count(where_conditions).exec().await?;
+
+	Ok(Json((libraries, count, pagination).into()))
 }
 
 /// Get stats for all libraries
@@ -169,31 +190,41 @@ async fn get_library_by_id(
 // but for now I will have this disgustingly gross and ugly work around...
 ///Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
-	query: Query<FilterableQuery<LibraryFilter>>,
+	filter_query: Query<FilterableQuery<LibraryFilter>>,
+	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
-	let FilterableQuery {
-		ordering,
-		pagination,
-		..
-	} = query.0.get();
-
+	let FilterableQuery { ordering, .. } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
 	let db = ctx.get_db();
 
-	let unpaged = pagination.page.is_none();
-	let page_params = pagination.page_params();
+	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
+	let where_conditions = vec![series::library_id::equals(Some(id.clone()))];
 	let mut query = db
 		.series()
 		// TODO: add media relation count....
-		.find_many(vec![series::library_id::equals(Some(id.clone()))])
+		.find_many(where_conditions.clone())
 		.order_by(order_by_param);
 
-	if !unpaged {
-		let (skip, take) = page_params.get_skip_take();
-		query = query.skip(skip).take(take);
+	if !is_unpaged {
+		match pagination.clone() {
+			Pagination::Page(page_query) => {
+				let (skip, take) = page_query.get_skip_take();
+				query = query.skip(skip).take(take);
+			},
+			Pagination::Cursor(cursor_query) => {
+				if let Some(cursor) = cursor_query.cursor {
+					query = query.cursor(series::id::equals(cursor)).skip(1)
+				}
+				if let Some(limit) = cursor_query.limit {
+					query = query.take(limit)
+				}
+			},
+			_ => unreachable!(),
+		}
 	}
 
 	let series = query.exec().await?;
@@ -212,13 +243,17 @@ async fn get_library_series(
 		})
 		.collect::<Vec<Series>>();
 
-	if unpaged {
+	if is_unpaged {
 		return Ok(Json(series.into()));
 	}
 
-	let series_count = db.series_count(id).await?;
+	let series_count = db
+		.series()
+		.count(vec![series::library_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
 
-	Ok(Json((series, series_count, page_params).into()))
+	Ok(Json((series, series_count, pagination).into()))
 }
 
 // /// Get the thumbnail image for a library by id, if the current user has access to it.

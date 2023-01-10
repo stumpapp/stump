@@ -1,6 +1,5 @@
 use axum::{
 	body::{BoxBody, StreamBody},
-	extract::Query,
 	http::{header, HeaderValue, StatusCode},
 	response::{IntoResponse, Response},
 };
@@ -8,7 +7,7 @@ use std::{
 	io,
 	path::{Path, PathBuf},
 };
-use stump_core::prelude::{ContentType, PageParams, PagedRequestParams};
+use stump_core::prelude::ContentType;
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
 
@@ -120,28 +119,6 @@ impl IntoResponse for UnknownBufferResponse {
 		);
 
 		base_response
-	}
-}
-
-pub trait PageableTrait {
-	fn page_params(self) -> PageParams;
-}
-
-impl PageableTrait for PagedRequestParams {
-	fn page_params(self) -> PageParams {
-		let zero_based = self.zero_based.unwrap_or(false);
-
-		PageParams {
-			zero_based,
-			page: self.page.unwrap_or(if zero_based { 0 } else { 1 }),
-			page_size: self.page_size.unwrap_or(20),
-		}
-	}
-}
-
-impl PageableTrait for Query<PagedRequestParams> {
-	fn page_params(self) -> PageParams {
-		self.0.page_params()
 	}
 }
 

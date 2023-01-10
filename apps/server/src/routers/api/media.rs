@@ -16,7 +16,7 @@ use stump_core::{
 		Dao, MediaDao, MediaDaoImpl,
 	},
 	fs::{image, media_file},
-	prelude::{ContentType, Pageable, PagedRequestParams},
+	prelude::{ContentType, PageQuery, Pageable, Pagination, PaginationQuery},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		read_progress, user,
@@ -30,7 +30,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_session_user,
-		http::{ImageResponse, NamedFile, PageableTrait},
+		http::{ImageResponse, NamedFile},
 		FilterableQuery, MediaFilter,
 	},
 };
@@ -80,27 +80,23 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 /// has various pagination params available.
 #[tracing::instrument(skip(ctx, session))]
 async fn get_media(
-	query: Query<FilterableQuery<MediaFilter>>,
+	filter_query: Query<FilterableQuery<MediaFilter>>,
+	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let FilterableQuery {
-		filters,
-		ordering,
-		pagination,
-	} = query.0.get();
+	let FilterableQuery { filters, ordering } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
 
 	trace!(?filters, ?ordering, ?pagination, "get_media");
 
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let unpaged = pagination.page.is_none();
-	let page_params = pagination.page_params();
+	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
 	let where_conditions = apply_media_filters(filters);
-
 	let mut query = db
 		.media()
 		.find_many(where_conditions.clone())
@@ -109,9 +105,22 @@ async fn get_media(
 		]))
 		.order_by(order_by_param);
 
-	if !unpaged {
-		let (skip, take) = page_params.get_skip_take();
-		query = query.skip(skip).take(take);
+	if !is_unpaged {
+		match pagination.clone() {
+			Pagination::Page(page_query) => {
+				let (skip, take) = page_query.get_skip_take();
+				query = query.skip(skip).take(take);
+			},
+			Pagination::Cursor(cursor_query) => {
+				if let Some(cursor) = cursor_query.cursor {
+					query = query.cursor(media::id::equals(cursor)).skip(1)
+				}
+				if let Some(limit) = cursor_query.limit {
+					query = query.take(limit)
+				}
+			},
+			_ => unreachable!(),
+		}
 	}
 
 	let media = query
@@ -121,13 +130,14 @@ async fn get_media(
 		.map(|m| m.into())
 		.collect::<Vec<Media>>();
 
-	if unpaged {
+	if is_unpaged {
 		return Ok(Json(Pageable::from(media)));
 	}
 
-	let count = db.media().count(where_conditions).exec().await?;
+	// let count = db.media().count(where_conditions).exec().await?;
+	let count = db.media().count(vec![]).exec().await?;
 
-	Ok(Json(Pageable::from((media, count, page_params))))
+	Ok(Json(Pageable::from((media, count, pagination))))
 }
 
 /// Get all media with identical checksums. This heavily implies duplicate files,
@@ -136,7 +146,7 @@ async fn get_media(
 /// false positive). This is a paginated request, and has various pagination
 /// params available, but hopefully you won't have that many duplicates ;D
 async fn get_duplicate_media(
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
 	_session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
@@ -158,7 +168,7 @@ async fn get_duplicate_media(
 async fn get_in_progress_media(
 	State(ctx): State<AppState>,
 	session: ReadableSession,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let user_id = get_session_user(&session)?.id;
 	let media_dao = MediaDaoImpl::new(ctx.db.clone());
@@ -173,7 +183,7 @@ async fn get_in_progress_media(
 
 async fn get_recently_added_media(
 	State(ctx): State<AppState>,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 

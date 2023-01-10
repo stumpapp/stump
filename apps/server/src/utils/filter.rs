@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_with::with_prefix;
 use std::fmt;
-use stump_core::prelude::{PagedRequestParams, QueryOrder};
+use stump_core::prelude::QueryOrder;
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct FilterableQuery<T>
@@ -12,8 +12,8 @@ where
 {
 	#[serde(flatten, default)]
 	pub filters: T,
-	#[serde(flatten)]
-	pub pagination: PagedRequestParams,
+	// #[serde(flatten)]
+	// pub pagination: PaginationQuery,
 	#[serde(flatten)]
 	pub ordering: QueryOrder,
 }
@@ -92,13 +92,12 @@ pub struct SeriesFilter {
 with_prefix!(series_prefix "series_");
 #[derive(Default, Debug, Deserialize, Serialize)]
 pub struct MediaFilter {
-	#[serde(default, deserialize_with = "string_or_seq_string")]
+	#[serde(default)]
 	pub id: Vec<String>,
-	#[serde(default, deserialize_with = "string_or_seq_string")]
+	#[serde(default)]
 	pub name: Vec<String>,
-	#[serde(default, deserialize_with = "string_or_seq_string")]
+	#[serde(default)]
 	pub extension: Vec<String>,
-
 	#[serde(flatten, with = "series_prefix")]
 	pub series: Option<SeriesFilter>,
 }

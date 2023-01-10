@@ -95,7 +95,8 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;
 		// Note: this will essentially be Partial<PageParams>...
-		file.write_all(format!("{}\n\n", ts_export::<PagedRequestParams>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
 		// file.write_all(format!("{}\n\n", ts_export::<Pageable>()?).as_bytes())?; // TODO: figure this out
 

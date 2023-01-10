@@ -76,7 +76,7 @@ export type Direction = "asc" | "desc"
 
 export interface PageParams { zero_based: boolean, page: number, page_size: number, order_by: string, direction: Direction }
 
-export interface PagedRequestParams { unpaged: boolean | null, zero_based: boolean | null, page: number | null, page_size: number | null, order_by: string | null, direction: Direction | null }
+export interface PageQuery { unpaged: boolean | null, zero_based: boolean | null, page: number | null, page_size: number | null, order_by: string | null, direction: Direction | null }
 
 export interface PageInfo { total_pages: number, current_page: number, page_size: number, page_offset: number, zero_based: boolean }
 

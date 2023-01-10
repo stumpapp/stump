@@ -4,11 +4,107 @@ use tracing::trace;
 
 use crate::prelude::DirectoryListing;
 
-#[derive(Default, Debug, Deserialize, Serialize, Type)]
-pub struct PagedRequestParams {
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+pub struct PageQuery {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
+}
+
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+pub struct CursorQuery {
+	pub cursor: Option<String>,
+	pub limit: Option<i64>,
+}
+
+#[derive(Default, Debug, Deserialize, Serialize, Type)]
+pub struct PaginationQuery {
+	pub zero_based: Option<bool>,
+	pub page: Option<u32>,
+	pub page_size: Option<u32>,
+	pub cursor: Option<String>,
+	pub limit: Option<u32>,
+}
+
+impl PaginationQuery {
+	pub fn get(self) -> Pagination {
+		Pagination::from(self)
+	}
+}
+
+impl From<PaginationQuery> for Pagination {
+	fn from(p: PaginationQuery) -> Self {
+		if p.cursor.is_some() || p.limit.is_some() {
+			Pagination::Cursor(CursorQuery {
+				cursor: p.cursor,
+				limit: p.limit.map(|val| val.into()),
+			})
+		} else if p.page.is_some() || p.page_size.is_some() || p.zero_based.is_some() {
+			Pagination::Page(PageQuery {
+				page: p.page,
+				page_size: p.page_size,
+				zero_based: p.zero_based,
+			})
+		} else {
+			Pagination::None
+		}
+	}
+}
+
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+#[serde(untagged)]
+pub enum Pagination {
+	#[default]
+	None,
+	Page(PageQuery),
+	Cursor(CursorQuery),
+}
+
+impl Pagination {
+	/// Returns true if pagination is None
+	pub fn is_unpaged(&self) -> bool {
+		matches!(self, Pagination::None)
+	}
+
+	/// Returns true if pagination is Page(..)
+	pub fn is_paged(&self) -> bool {
+		matches!(self, Pagination::Page(..))
+	}
+
+	/// Returns true if pagination is Cursor(..)
+	pub fn is_cursor(&self) -> bool {
+		matches!(self, Pagination::Cursor(..))
+	}
+}
+
+impl PageQuery {
+	/// Returns a tuple of (skip, take) for use in Prisma queries.
+	pub fn get_skip_take(&self) -> (i64, i64) {
+		let zero_based = self.zero_based.unwrap_or(false);
+		let page_size = self.page_size.unwrap_or(20);
+		let default_page = if zero_based { 0 } else { 1 };
+		let page = self.page.unwrap_or(default_page);
+
+		let start = if zero_based {
+			page * page_size
+		} else {
+			(page - 1) * page_size
+		} as i64;
+
+		let take = page_size as i64;
+
+		(start, take)
+	}
+
+	pub fn page_params(self) -> PageParams {
+		let zero_based = self.zero_based.unwrap_or(false);
+
+		PageParams {
+			zero_based,
+			page: self.page.unwrap_or(if zero_based { 0 } else { 1 }),
+			page_size: self.page_size.unwrap_or(20),
+		}
+	}
 }
 
 pub struct PageBounds {
@@ -55,8 +151,8 @@ impl PageParams {
 	}
 }
 
-impl From<Option<PagedRequestParams>> for PageParams {
-	fn from(req_params: Option<PagedRequestParams>) -> Self {
+impl From<Option<PageQuery>> for PageParams {
+	fn from(req_params: Option<PageQuery>) -> Self {
 		match req_params {
 			Some(params) => {
 				let zero_based = params.zero_based.unwrap_or(false);
@@ -120,15 +216,29 @@ impl PageInfo {
 	}
 }
 
+#[derive(Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+pub struct CursorInfo {
+	cursor: Option<String>,
+	limit: Option<i64>,
+}
+
+impl From<CursorQuery> for CursorInfo {
+	fn from(cursor_query: CursorQuery) -> Self {
+		Self {
+			cursor: cursor_query.cursor,
+			limit: cursor_query.limit,
+		}
+	}
+}
+
 #[derive(Serialize, Type)]
 pub struct Pageable<T: Serialize> {
 	/// The target data being returned.
 	pub data: T,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
-	// FIXME: removing for now.
-	// /// The links to other pages (if paginated).
-	// pub _links: Option<PageLinks>,
+	/// The cursor information (if cursor-baesd paginated).
+	pub _cursor: Option<CursorInfo>,
 }
 
 impl<T: Serialize> Pageable<T> {
@@ -136,14 +246,27 @@ impl<T: Serialize> Pageable<T> {
 		Pageable {
 			data,
 			_page: None,
-			// _links: None,
+			_cursor: None,
 		}
 	}
 
-	pub fn new(data: T, page_info: PageInfo) -> Self {
+	pub fn page_paginated(data: T, page_info: PageInfo) -> Self {
+		Self::new(data, Some(page_info), None)
+	}
+
+	pub fn cursor_paginated(data: T, cursor_info: CursorInfo) -> Self {
+		Self::new(data, None, Some(cursor_info))
+	}
+
+	pub fn new(
+		data: T,
+		page_info: Option<PageInfo>,
+		cursor_info: Option<CursorInfo>,
+	) -> Self {
 		Pageable {
 			data,
-			_page: Some(page_info),
+			_page: page_info,
+			_cursor: cursor_info,
 		}
 	}
 
@@ -153,7 +276,7 @@ impl<T: Serialize> Pageable<T> {
 	pub fn with_count(data: T, db_count: i64, page_params: PageParams) -> Self {
 		let total_pages = (db_count as f32 / page_params.page_size as f32).ceil() as u32;
 
-		Pageable::new(data, PageInfo::new(page_params, total_pages))
+		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
 	}
 }
 
@@ -202,15 +325,15 @@ where
 				.to_vec();
 		}
 
-		Pageable::new(data, PageInfo::new(page_params, total_pages))
+		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
 	}
 }
 
-impl<T> From<(Vec<T>, Option<PagedRequestParams>)> for Pageable<Vec<T>>
+impl<T> From<(Vec<T>, Option<PageQuery>)> for Pageable<Vec<T>>
 where
 	T: Serialize + Clone,
 {
-	fn from(tuple: (Vec<T>, Option<PagedRequestParams>)) -> Pageable<Vec<T>> {
+	fn from(tuple: (Vec<T>, Option<PageQuery>)) -> Pageable<Vec<T>> {
 		(tuple.0, PageParams::from(tuple.1)).into()
 	}
 }
@@ -225,7 +348,30 @@ where
 
 		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
 
-		Pageable::new(data, PageInfo::new(page_params, total_pages))
+		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+	}
+}
+
+// Note: this is used when you have to query the database for the total number of pages.
+impl<T> From<(Vec<T>, i64, Pagination)> for Pageable<Vec<T>>
+where
+	T: Serialize + Clone,
+{
+	fn from(tuple: (Vec<T>, i64, Pagination)) -> Pageable<Vec<T>> {
+		let (data, db_total, pagination) = tuple;
+
+		match pagination {
+			Pagination::Page(page_query) => {
+				let page_params = page_query.page_params();
+				let total_pages =
+					(db_total as f32 / page_params.page_size as f32).ceil() as u32;
+				Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
+			},
+			Pagination::Cursor(cursor_query) => {
+				Pageable::cursor_paginated(data, CursorInfo::from(cursor_query))
+			},
+			_ => Pageable::unpaged(data),
+		}
 	}
 }
 
@@ -268,7 +414,7 @@ impl From<(DirectoryListing, u32, u32)> for Pageable<DirectoryListing> {
 			files: truncated_files,
 		};
 
-		Pageable::new(
+		Pageable::page_paginated(
 			truncated_data,
 			PageInfo {
 				total_pages,

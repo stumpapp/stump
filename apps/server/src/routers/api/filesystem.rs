@@ -2,8 +2,7 @@ use axum::{extract::Query, middleware::from_extractor, routing::post, Json, Rout
 use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
 use stump_core::prelude::{
-	DirectoryListing, DirectoryListingFile, DirectoryListingInput, Pageable,
-	PagedRequestParams,
+	DirectoryListing, DirectoryListingFile, DirectoryListingInput, PageQuery, Pageable,
 };
 use tracing::trace;
 
@@ -25,7 +24,7 @@ pub(crate) fn mount() -> Router<AppState> {
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
 	session: ReadableSession,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 	input: Json<Option<DirectoryListingInput>>,
 ) -> ApiResult<Json<Pageable<DirectoryListing>>> {
 	let user = get_session_user(&session)?;

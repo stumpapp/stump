@@ -1,7 +1,6 @@
-- [ ] Explore, don't dive, into the idea of maybe rewriting rust core in TypeScript, with some crates written in Rust. The compilation times just aren't feasible long term. I'd rather do it before a release than after
-  - More than speed, I care about reliability and memory footprint. Reliability is not really at risk imo, but memory foot print would likely be.
 - [x] Consolidate some GH specific files to `.github`
 - [x] Change `common` to `packages`
+- [ ] Create `crates` with submodules for epub-rs?
 - [ ] ESLint
   - [x] Add the base configuration
   - [ ] Fix ESLint errors after setup (expect a lot)
@@ -12,23 +11,23 @@
 - [ ] Audit dependencies, prune where needed
 - [ ] Nix?
 - [ ] Reorganize and consolidate some of the `client` code, its _very_ messy
+  - [ ] Split `api` into separate package to house all the axios functions
 - [x] Remove the `stump.service` file from GH and just add section in docs with that content
 - [x] Consolidate some of the config files
   - [x] Looking at you messy tsconfigs
-- [ ] Migrate to Axum v0.6
+- [x] Migrate to Axum v0.6
   - Rebase `axum-upgrade` branch once above chores completed
   - https://github.com/tokio-rs/axum/releases/tag/axum-v0.6.0
-  - [ ] Consider using https://github.com/maxcountryman/axum-login
 - [ ] Look into sqlite session store at some point to replace the in memory store.
 - [x] Move `prisma-cli` out of `core`?
-  - [ ] I have plans to eventually maintain a fork of `unrar`, I'll probably use git submodules and create a new `crates` package for that. Once I have that, I'll relocate again there.
 - [ ] Refactor all queries to use more current select/include patterns
   - https://prisma.brendonovich.dev/reading-data/select-include#many-relation-options
 - [ ] Change HTTP endpoints to be **unpaged** by default
 - [ ] Rethink HTTP endpoints allow better range of filter options
+  - [x] Basic structure implemented, just a matter of prioritizing it time permitting
 - [ ] Rework `integration_tests` and add unit testing throughout
   - Mock client inbound -> https://github.com/Brendonovich/prisma-client-rust/issues/230
-- [ ] Add better validation via https://github.com/Keats/validator
+- [ ] Look into better validation via https://github.com/Keats/validator
 - [ ] Refactor UI sidebar and main container to support resizing via https://github.com/bvaughn/react-resizable-panels
 - [ ] Either use the `optional_struct` dependency or look into https://github.com/Nukesor/inter-struct (or maybe both?)
 - [ ] Refine Stump color palette (gray colors are :barf:)
@@ -40,10 +39,14 @@
   - [ ] Book overview page
     - [ ] Show progress (if any)
     - [ ] Show more series information
+    - [ ] Next in series (using a new `cursor` page param?)
   - [ ] Series overview section (on 0th page when browsing a series)
   - [ ] Settings pages
 - [x] Add redirects for unauthed access
   - I.e. if I visit `/some-page/1`, and get redirected to `/auth`, should redirect instead with query params to restore state: `/auth?redirect=/some-page/1`
+- [ ] Revisit RAR support with upcoming `0.5` unrar release -> https://github.com/muja/unrar.rs/issues/26
+  - [ ] Move off of custom `read_bytes` implementation
+  - [ ] Test bug after -> https://github.com/aaronleopold/stump/issues/38
 - [ ] Finish implementing EPUB support
   - [ ] Queries in `client`
   - [ ] Lots of parsing in `core`
@@ -57,3 +60,6 @@
 - [ ] Setup self hosted runner using gaming computer
 - [ ] Finish GH workflows/actions
 - [ ] Add some automated system for versioning/releases
+- [ ] Once fully migrated off Chakra UI
+  - [ ] Finalize custom UI components
+  - [ ] Consider feature freeze and migrate over to SolidJS

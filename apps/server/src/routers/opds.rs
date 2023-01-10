@@ -14,7 +14,7 @@ use stump_core::{
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prelude::PagedRequestParams,
+	prelude::PageQuery,
 	prisma::{library, media, read_progress, series},
 };
 
@@ -280,7 +280,7 @@ async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
 async fn get_library_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -321,7 +321,7 @@ async fn get_library_by_id(
 // /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 // /// pagination is zero-indexed.
 async fn get_series(
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
@@ -355,7 +355,7 @@ async fn get_series(
 }
 
 async fn get_latest_series(
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
@@ -387,7 +387,7 @@ async fn get_latest_series(
 
 async fn get_series_by_id(
 	Path(id): Path<String>,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
@@ -457,7 +457,7 @@ async fn get_book_thumbnail(
 async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 

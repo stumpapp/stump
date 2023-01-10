@@ -12,6 +12,7 @@ logs/
 .vscode/**/*
 !.vscode/settings.json
 !.vscode/extensions.json
+!.vscode/*.todo
 
 # Directories
 build/

@@ -14,7 +14,9 @@ use stump_core::{
 		Dao, SeriesDao, SeriesDaoImpl,
 	},
 	fs::{image, media_file},
-	prelude::{ContentType, Pageable, PagedRequestParams, QueryOrder},
+	prelude::{
+		ContentType, PageQuery, Pageable, Pagination, PaginationQuery, QueryOrder,
+	},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,
@@ -28,9 +30,8 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user,
-		http::{ImageResponse, PageableTrait},
-		FilterableQuery, SeriesFilter, SeriesRelation,
+		get_session_user, http::ImageResponse, FilterableQuery, SeriesFilter,
+		SeriesRelation,
 	},
 };
 
@@ -71,25 +72,26 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 /// Get all series accessible by user. This is a paginated respone, and
 /// accepts various paginated request params.
 async fn get_series(
-	query: Query<FilterableQuery<SeriesFilter>>,
+	filter_query: Query<FilterableQuery<SeriesFilter>>,
+	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<SeriesRelation>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
-	let FilterableQuery {
-		ordering,
-		pagination,
-		..
-	} = query.0.get();
+	let FilterableQuery { ordering, filters } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
 
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
+
+	let is_unpaged = pagination.is_unpaged();
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let order_by = ordering.try_into()?;
 
+	let where_conditions = apply_series_filters(filters);
 	let action = db.series();
-	let action = action.find_many(vec![]);
-	let query = if load_media {
+	let action = action.find_many(where_conditions.clone());
+	let mut query = if load_media {
 		action.with(
 			series::media::fetch(vec![])
 				.with(media::read_progresses::fetch(vec![
@@ -101,6 +103,24 @@ async fn get_series(
 		action
 	};
 
+	if !is_unpaged {
+		match pagination.clone() {
+			Pagination::Page(page_query) => {
+				let (skip, take) = page_query.get_skip_take();
+				query = query.skip(skip).take(take);
+			},
+			Pagination::Cursor(cursor_query) => {
+				if let Some(cursor) = cursor_query.cursor {
+					query = query.cursor(series::id::equals(cursor)).skip(1)
+				}
+				if let Some(limit) = cursor_query.limit {
+					query = query.take(limit)
+				}
+			},
+			_ => unreachable!(),
+		}
+	}
+
 	let series = query
 		.exec()
 		.await?
@@ -108,11 +128,13 @@ async fn get_series(
 		.map(|s| s.into())
 		.collect::<Vec<Series>>();
 
-	if pagination.page.is_none() {
+	if is_unpaged {
 		return Ok(Json(series.into()));
 	}
 
-	Ok(Json((series, pagination.page_params()).into()))
+	let series_count = db.series().count(where_conditions).exec().await?;
+
+	Ok(Json((series, series_count, pagination).into()))
 }
 
 /// Get a series by ID. Optional query param `load_media` that will load the media
@@ -165,7 +187,7 @@ async fn get_series_by_id(
 
 async fn get_recently_added_series(
 	State(ctx): State<AppState>,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	if pagination.page.is_none() {
@@ -221,7 +243,7 @@ async fn get_series_thumbnail(
 /// accepts various paginated request params.
 // #[get("/series/<id>/media?<unpaged>&<req_params..>")]
 async fn get_series_media(
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 	ordering: Query<Option<QueryOrder>>,
 	session: ReadableSession,
 	Path(id): Path<String>,

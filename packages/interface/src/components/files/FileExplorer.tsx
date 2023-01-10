@@ -1,8 +1,8 @@
-import { Text } from '@chakra-ui/react';
-import type { DirectoryListingFile } from '@stump/client';
+import { Text } from '@chakra-ui/react'
+import type { DirectoryListingFile } from '@stump/types'
 
 interface FileExplorerProps {
-	files: DirectoryListingFile[];
+	files: DirectoryListingFile[]
 }
 
 // TODO: this needs to be virtualized, as I am not paginating it like other lists/grids throughout Stump.
@@ -15,24 +15,24 @@ export default function FileExplorer({ files }: FileExplorerProps) {
 				<ExplorerFile key={file.path} {...file} />
 			))}
 		</div>
-	);
+	)
 }
 
 // Lol the name is just reversed...
 function ExplorerFile({ name, path, is_directory }: DirectoryListingFile) {
 	function getIconSrc() {
-		const archivePattern = new RegExp(/^.*\.(cbz|zip|rar|cbr)$/gi);
+		const archivePattern = new RegExp(/^.*\.(cbz|zip|rar|cbr)$/gi)
 
 		if (is_directory) {
-			return '/assets/icons/folder.png';
+			return '/assets/icons/folder.png'
 		} else if (archivePattern.test(path)) {
 			// TODO: no lol, I want to try and render a small preview still
 			// will have to create a new endpoint to try and grab a thumbnail by path
-			return '/assets/icons/archive.svg';
+			return '/assets/icons/archive.svg'
 		} else if (path.endsWith('.epub')) {
-			return '/assets/icons/epub.svg';
+			return '/assets/icons/epub.svg'
 		} else {
-			return '';
+			return ''
 		}
 	}
 
@@ -44,5 +44,5 @@ function ExplorerFile({ name, path, is_directory }: DirectoryListingFile) {
 				{name}
 			</Text>
 		</button>
-	);
+	)
 }

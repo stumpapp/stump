@@ -1,3 +1,4 @@
+import { JobUpdate } from '@stump/types'
 import { ReactElement, useState } from 'react'
 
 import { queryClient, QueryClientProvider } from './client'
@@ -7,7 +8,6 @@ import {
 	StumpClientContext,
 	StumpClientContextProps,
 } from './context'
-import { JobUpdate } from './types'
 
 type Props = {
 	children: ReactElement

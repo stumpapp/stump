@@ -1,6 +1,6 @@
+import type { ApiResult, PageableApiResult } from '@stump/api'
+import type { Pageable } from '@stump/types'
 import { useInfiniteQuery } from '@tanstack/react-query'
-
-import type { ApiResult, Pageable, PageableApiResult } from '../types'
 
 export * from './auth'
 export * from './epub'

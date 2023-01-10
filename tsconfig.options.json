@@ -19,7 +19,8 @@
 		"skipLibCheck": true,
 		"paths": {
 			"@stump/client": ["./packages/client"],
-			"@stump/client/api": ["./packages/client/src/api"],
+			"@stump/api": ["./packages/api"],
+			"@stump/types": ["./packages/types"],
 			"@stump/interface": ["./packages/interface"]
 		}
 	}

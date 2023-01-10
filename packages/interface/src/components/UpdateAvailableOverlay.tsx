@@ -4,5 +4,5 @@ export default function UpdateAvailableOverlay() {
 	// 2. server responds with latest versions of client and server, and if update is available
 	//    for either
 
-	return null;
+	return null
 }

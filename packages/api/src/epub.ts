@@ -1,5 +1,7 @@
-import type { ApiResult, Epub } from '../types'
+import type { Epub } from '@stump/types'
+
 import { API } from '.'
+import { ApiResult } from './types'
 
 export function getEpubBaseUrl(id: string): string {
 	return `${API.getUri()}/epub/${id}`

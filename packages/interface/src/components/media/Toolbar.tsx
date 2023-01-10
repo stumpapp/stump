@@ -1,5 +1,5 @@
 import { Heading } from '@chakra-ui/react'
-import { getMediaPage } from '@stump/client/api'
+import { getMediaPage } from '@stump/api'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft } from 'phosphor-react'
 import { Link, useParams } from 'react-router-dom'

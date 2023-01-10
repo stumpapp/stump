@@ -1,8 +1,8 @@
+import { API } from '@stump/api'
+import type { CoreEvent } from '@stump/types'
 import { useEffect, useMemo } from 'react'
 
-import { API } from '../api'
 import { useStumpStore } from '../stores'
-import type { CoreEvent } from '../types'
 
 interface SseOptions {
 	onOpen?: (event: Event) => void

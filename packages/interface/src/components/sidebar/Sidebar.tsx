@@ -10,8 +10,8 @@ import {
 	useDisclosure,
 	VStack,
 } from '@chakra-ui/react'
-import type { Library } from '@stump/client'
 import { useLibraries } from '@stump/client'
+import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
 import { Books, CaretRight, Gear, House } from 'phosphor-react'

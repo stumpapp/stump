@@ -1,9 +1,9 @@
+import { API } from '@stump/api'
+import type { CoreEvent } from '@stump/types'
 import { useMemo } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 
-import { API } from '../api'
 import { useStumpStore } from '../stores'
-import type { CoreEvent } from '../types'
 
 interface Props {
 	onEvent(event: CoreEvent): void

@@ -1,11 +1,13 @@
-import type { ApiResult, Media, PageableApiResult, ReadProgress } from '../types'
-import { API } from '.'
+import type { Media, ReadProgress } from '@stump/types'
+
+import { API } from './index'
+import { ApiResult, PageableApiResult } from './types'
 import { urlWithParams } from './utils'
 
 type GetMediaById = ApiResult<Media>
 
-export function getMedia(): Promise<PageableApiResult<Media[]>> {
-	return API.get('/media?unpaged=true')
+export function getMedia(params?: URLSearchParams): Promise<PageableApiResult<Media[]>> {
+	return API.get(urlWithParams('/media', params))
 }
 
 export function getPaginatedMedia(page: number): Promise<PageableApiResult<Media[]>> {

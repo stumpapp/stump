@@ -1,5 +1,5 @@
+import { getMediaPage } from '@stump/api'
 import { useMedia, useMediaMutation } from '@stump/client'
-import { getMediaPage } from '@stump/client/api'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import ImageBasedReader, {

@@ -8,8 +8,8 @@ import {
 	ModalOverlay,
 	useDisclosure,
 } from '@chakra-ui/react'
-import type { Library } from '@stump/client'
 import { useLibraryMutation } from '@stump/client'
+import type { Library } from '@stump/types'
 import { Trash } from 'phosphor-react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'

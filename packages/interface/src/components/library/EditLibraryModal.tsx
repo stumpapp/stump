@@ -8,8 +8,9 @@ import {
 	ModalOverlay,
 	useDisclosure,
 } from '@chakra-ui/react'
-import type { Library, LibraryOptions, Tag, TagOption } from '@stump/client'
+import type { TagOption } from '@stump/client'
 import { useLibraryMutation, useTags } from '@stump/client'
+import type { Library, LibraryOptions, Tag } from '@stump/types'
 import { NotePencil } from 'phosphor-react'
 import { FieldValues } from 'react-hook-form'
 import toast from 'react-hot-toast'

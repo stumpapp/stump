@@ -1,5 +1,5 @@
 import { Badge } from '@chakra-ui/react'
-import { Tag } from '@stump/client'
+import { Tag } from '@stump/types'
 
 interface Props {
 	tag: Tag

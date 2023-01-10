@@ -1,9 +1,9 @@
+import { listDirectory } from '@stump/api'
+import type { DirectoryListing } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo, useState } from 'react'
 
-import { listDirectory } from '../api/filesystem'
 import { useQuery } from '../client'
-import type { DirectoryListing } from '../types'
 
 export interface DirectoryListingQueryParams {
 	enabled: boolean

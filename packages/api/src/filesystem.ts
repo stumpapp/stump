@@ -1,5 +1,7 @@
-import type { ApiResult, DirectoryListing, DirectoryListingInput, Pageable } from '../types'
+import type { DirectoryListing, DirectoryListingInput, Pageable } from '@stump/types'
+
 import { API } from '.'
+import { ApiResult } from './types'
 
 interface ListDirectoryFnInput extends DirectoryListingInput {
 	page?: number

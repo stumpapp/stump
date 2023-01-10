@@ -1,11 +1,11 @@
-import clsx from 'clsx';
-import { useState } from 'react';
+import clsx from 'clsx'
+import { useState } from 'react'
 
-type Props = React.ComponentProps<'img'>;
+type Props = React.ComponentProps<'img'>
 
 //  TODO: improve image loading here, looks doggy doody right now
 export default function LazyImage({ src, className, ...props }: Props) {
-	const [isLoaded, setIsLoaded] = useState(false);
+	const [isLoaded, setIsLoaded] = useState(false)
 
 	return (
 		<>
@@ -18,5 +18,5 @@ export default function LazyImage({ src, className, ...props }: Props) {
 				onLoad={() => setIsLoaded(true)}
 			/>
 		</>
-	);
+	)
 }

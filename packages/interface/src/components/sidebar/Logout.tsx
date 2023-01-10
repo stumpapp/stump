@@ -7,8 +7,8 @@ import {
 	ModalOverlay,
 	useDisclosure,
 } from '@chakra-ui/react'
+import { logout } from '@stump/api'
 import { useUserStore } from '@stump/client'
-import { logout } from '@stump/client/api'
 import { SignOut } from 'phosphor-react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'

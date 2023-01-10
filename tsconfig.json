@@ -12,6 +12,9 @@
       "path": "apps/web"
     },
     {
+      "path": "packages/api"
+    },
+    {
       "path": "packages/client"
     },
     {
@@ -19,6 +22,9 @@
     },
     {
       "path": "packages/interface"
+    },
+    {
+      "path": "packages/types"
     }
   ]
 }

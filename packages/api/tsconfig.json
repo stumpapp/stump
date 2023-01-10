@@ -2,14 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "skipLibCheck": true,
-    "outDir": "../../.moon/cache/types/packages/client",
+    "outDir": "../../.moon/cache/types/packages/api",
     "paths": {
-      "@stump/api": [
-        "../api/src/index.ts"
-      ],
-      "@stump/api/*": [
-        "../api/src/*"
-      ],
       "@stump/types": [
         "../types/index.ts"
       ],
@@ -25,9 +19,6 @@
     "node_modules"
   ],
   "references": [
-    {
-      "path": "../api"
-    },
     {
       "path": "../types"
     }

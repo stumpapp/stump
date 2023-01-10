@@ -1,9 +1,9 @@
+import { ApiResult, createTags, getAllTags } from '@stump/api'
+import type { Tag } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
-import { createTags, getAllTags } from '../api/tag'
 import { queryClient, useMutation, useQuery } from '../client'
-import type { ApiResult, Tag } from '../types'
 
 export interface UseTagsConfig {
 	onQuerySuccess?: (res: ApiResult<Tag[]>) => void

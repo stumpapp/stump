@@ -1,6 +1,6 @@
-import { Alert, AlertIcon, Container, HStack, Stack, Text } from '@chakra-ui/react';
+import { Alert, AlertIcon, Container, HStack, Stack, Text } from '@chakra-ui/react'
 
-import ServerUrlForm from '../components/ServerUrlForm';
+import ServerUrlForm from '../components/ServerUrlForm'
 
 // Used primarily for setting the correct base url for the api when the app is
 // NOT running in a browser. I.e. when the app is running in Tauri.
@@ -27,5 +27,5 @@ export default function OnBoarding() {
 
 			<ServerUrlForm />
 		</Stack>
-	);
+	)
 }

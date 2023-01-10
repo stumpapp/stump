@@ -1,7 +1,4 @@
 import { Library, Media, PageInfo, Series } from './core'
-import { ApiError } from './server'
-
-export type ApiResult<T> = import('axios').AxiosResponse<T, import('axios').AxiosError<ApiError>>
 
 export enum FileStatus {
 	Unknown = 'UNKNOWN',
@@ -17,8 +14,6 @@ export interface Pageable<T> {
 	// The pagination information (if paginated).
 	_page?: PageInfo
 }
-
-export type PageableApiResult<T> = ApiResult<Pageable<T>>
 
 // Note: I am separating these options / exclusions in case I want to use either independently.
 export type MediaOrderByExclusions = Extract<

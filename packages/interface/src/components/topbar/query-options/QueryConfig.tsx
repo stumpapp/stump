@@ -13,8 +13,8 @@ import {
 	Text,
 	useColorModeValue,
 } from '@chakra-ui/react'
-import type { Direction } from '@stump/client'
-import { mediaOrderByOptions, seriesOrderByOptions, useQueryParamStore } from '@stump/client'
+import { useQueryParamStore } from '@stump/client'
+import type { Direction, mediaOrderByOptions, seriesOrderByOptions } from '@stump/types'
 import { CaretDown, Sliders } from 'phosphor-react'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'

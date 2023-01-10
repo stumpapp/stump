@@ -1,4 +1,5 @@
-import { getStumpVersion } from '../api/server'
+import { getStumpVersion } from '@stump/api'
+
 import { useQuery } from '../client'
 
 export function useStumpVersion() {

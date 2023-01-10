@@ -9,7 +9,7 @@ import {
 	Text,
 	useColorModeValue,
 } from '@chakra-ui/react'
-import type { EpubContent } from '@stump/client'
+import type { EpubContent } from '@stump/types'
 import { ListBullets } from 'phosphor-react'
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'

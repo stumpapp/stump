@@ -1,5 +1,5 @@
 import { Heading } from '@chakra-ui/react'
-import { getMediaPage } from '@stump/client/api'
+import { getMediaPage } from '@stump/api'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'

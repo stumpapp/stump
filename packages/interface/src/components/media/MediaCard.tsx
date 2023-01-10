@@ -1,7 +1,7 @@
 import { Progress, Text, useColorModeValue } from '@chakra-ui/react'
-import type { Media } from '@stump/client'
+import { getMediaThumbnail } from '@stump/api'
 import { prefetchMedia } from '@stump/client'
-import { getMediaThumbnail } from '@stump/client/api'
+import type { Media } from '@stump/types'
 
 import pluralizeStat from '../../utils/pluralize'
 import { prefetchMediaPage } from '../../utils/prefetch'

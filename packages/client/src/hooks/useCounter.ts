@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react'
 
 export function useCounter(initialValue = 0) {
-	const [count, setCount] = useState(initialValue);
+	const [count, setCount] = useState(initialValue)
 
 	const actions = useMemo(
 		() => ({
@@ -11,7 +11,7 @@ export function useCounter(initialValue = 0) {
 			set: (value: number) => setCount(value),
 		}),
 		[initialValue, count],
-	);
+	)
 
-	return [count, actions] as const;
+	return [count, actions] as const
 }

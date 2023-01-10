@@ -1,7 +1,6 @@
+import { JobUpdate } from '@stump/types'
 import { QueryClient } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
-
-import { JobUpdate } from './types'
 
 export const AppPropsContext = createContext<AppProps | null>(null)
 export const QueryClientContext = createContext<QueryClient | undefined>(undefined)

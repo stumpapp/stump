@@ -1,7 +1,7 @@
-import { forwardRef, Textarea, TextareaProps } from '@chakra-ui/react';
+import { forwardRef, Textarea, TextareaProps } from '@chakra-ui/react'
 
 interface Props extends TextareaProps {
-	fullWidth?: boolean;
+	fullWidth?: boolean
 }
 
 export default forwardRef<Props, 'textarea'>(({ fullWidth = true, ...props }, ref) => {
@@ -18,5 +18,5 @@ export default forwardRef<Props, 'textarea'>(({ fullWidth = true, ...props }, re
 				border: 'rgba(196, 130, 89, 0.4);',
 			}}
 		/>
-	);
-});
+	)
+})

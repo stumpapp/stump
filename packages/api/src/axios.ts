@@ -1,34 +1,28 @@
 import axios, { AxiosInstance } from 'axios'
 
-export * from './auth'
-export * from './config'
-export * from './epub'
-export * from './job'
-export * from './log'
-export * from './media'
-export * from './series'
-
 export let API: AxiosInstance
 
-/**
- * Creates an axios instance with the given base URL and assigns it to the global
- * `API` variable.
- */
-export function initializeApi(baseUrl: string) {
+// TODO: make not bad
+export function initializeApi(baseUrl: string, version: string) {
 	let correctedUrl = baseUrl
+	console.log(correctedUrl)
 
 	// remove trailing slash
 	if (correctedUrl.endsWith('/')) {
-		// correctedUrl = correctedUrl.slice(0, -1);
+		correctedUrl = correctedUrl.slice(0, -1)
 	}
+	console.log(correctedUrl)
 
 	// add api to end of URL, don't allow double slashes
-	if (!correctedUrl.endsWith('/api')) {
-		correctedUrl += '/api'
+	if (!correctedUrl.endsWith(`/api/${version}`)) {
+		correctedUrl += `/api/${version}`
 	}
+	console.log(correctedUrl)
 
 	// remove all double slashes AFTER the initial http:// or https:// or whatever
 	correctedUrl = correctedUrl.replace(/([^:]\/)\/+/g, '$1')
+
+	console.log(correctedUrl)
 
 	API = axios.create({
 		baseURL: correctedUrl,
@@ -36,17 +30,21 @@ export function initializeApi(baseUrl: string) {
 	})
 }
 
-// TODO: be better lol
+export function apiIsInitialized() {
+	return !!API
+}
+
+// TODO: make not bad
 export function isUrl(url: string) {
 	return url.startsWith('http://') || url.startsWith('https://')
 }
 
-export async function checkUrl(url: string) {
+export async function checkUrl(url: string, version = 'v1') {
 	if (!isUrl(url)) {
 		return false
 	}
 
-	const res = await fetch(`${url}/api/ping`).catch((err) => err)
+	const res = await fetch(`${url}/api/${version}/ping`).catch((err) => err)
 
 	return res.status === 200
 }

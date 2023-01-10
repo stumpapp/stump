@@ -1,6 +1,7 @@
 import { Progress, Text, useColorModeValue } from '@chakra-ui/react'
-import { prefetchSeries, Series } from '@stump/client'
-import { getSeriesThumbnail } from '@stump/client/api'
+import { getSeriesThumbnail } from '@stump/api'
+import { prefetchSeries } from '@stump/client'
+import { Series } from '@stump/types'
 
 import pluralizeStat from '../../utils/pluralize'
 import Card, { CardBody, CardFooter } from '../Card'

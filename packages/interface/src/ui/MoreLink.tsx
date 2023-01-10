@@ -1,9 +1,8 @@
-import { HStack, useColorModeValue } from '@chakra-ui/react';
-import { ArrowRight } from 'phosphor-react';
-import React from 'react';
+import { HStack, useColorModeValue } from '@chakra-ui/react'
+import { ArrowRight } from 'phosphor-react'
 
 interface Props {
-	href: string;
+	href: string
 }
 
 export default function MoreLink({ href }: Props) {
@@ -17,5 +16,5 @@ export default function MoreLink({ href }: Props) {
 		>
 			<span>More</span> <ArrowRight size="1rem" />
 		</HStack>
-	);
+	)
 }

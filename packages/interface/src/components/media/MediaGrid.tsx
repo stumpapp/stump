@@ -1,5 +1,5 @@
 import { Heading } from '@chakra-ui/react'
-import type { Media } from '@stump/client'
+import type { Media } from '@stump/types'
 
 import { CardGrid } from '../Card'
 import MediaCard from './MediaCard'

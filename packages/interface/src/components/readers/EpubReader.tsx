@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 // FIXME: this file is a mess
+import { getEpubResource } from '@stump/api'
 import { UseEpubReturn } from '@stump/client'
-import { getEpubResource } from '@stump/client/api'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 

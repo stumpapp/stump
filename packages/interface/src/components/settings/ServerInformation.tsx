@@ -1,6 +1,6 @@
 import { HStack, Text, useColorModeValue } from '@chakra-ui/react'
+import { clearLogFile, getLogFileMeta } from '@stump/api'
 import { queryClient, useMutation, useQuery, useStumpVersion } from '@stump/client'
-import { clearLogFile, getLogFileMeta } from '@stump/client/api'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import toast from 'react-hot-toast'

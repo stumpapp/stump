@@ -1,6 +1,7 @@
-import { getUserPreferences, updateUserPreferences as updateUserPreferencesFn } from '../api/user'
+import { getUserPreferences, updateUserPreferences as updateUserPreferencesFn } from '@stump/api'
+import type { UserPreferences } from '@stump/types'
+
 import { useMutation, useQuery } from '../client'
-import type { UserPreferences } from '../types'
 import { ClientQueryParams } from '.'
 
 interface UseUserPreferencesParams extends ClientQueryParams<UserPreferences> {

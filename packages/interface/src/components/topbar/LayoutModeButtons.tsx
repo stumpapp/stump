@@ -1,6 +1,6 @@
 import { ButtonGroup, useColorModeValue } from '@chakra-ui/react'
-import type { LayoutMode } from '@stump/client'
 import { LayoutEntity, useLayoutMode } from '@stump/client'
+import type { LayoutMode } from '@stump/types'
 import { Rows, SquaresFour } from 'phosphor-react'
 import toast from 'react-hot-toast'
 

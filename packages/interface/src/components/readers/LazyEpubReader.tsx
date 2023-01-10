@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // FIXME: remove the two above once epub is more completed
 import { useColorMode } from '@chakra-ui/react'
+import { API } from '@stump/api'
 import { useEpubLazy } from '@stump/client'
-import { API } from '@stump/client/api'
 import { Book, Rendition } from 'epubjs'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'

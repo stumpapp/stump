@@ -10,8 +10,9 @@ import {
 	Tabs,
 } from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import type { Library, LibraryPattern, LibraryScanMode, TagOption } from '@stump/client'
+import type { TagOption } from '@stump/client'
 import { useLibraries } from '@stump/client'
+import type { Library, LibraryPattern, LibraryScanMode } from '@stump/types'
 import { useEffect, useMemo } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'

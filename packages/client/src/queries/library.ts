@@ -1,6 +1,3 @@
-import { AxiosError } from 'axios'
-import { useMemo } from 'react'
-
 import {
 	createLibrary,
 	deleteLibrary,
@@ -10,11 +7,14 @@ import {
 	getLibraryById,
 	getLibrarySeries,
 	scanLibary,
-} from '../api/library'
+} from '@stump/api'
+import type { Library, PageInfo } from '@stump/types'
+import { AxiosError } from 'axios'
+import { useMemo } from 'react'
+
 import { useMutation, useQuery } from '../client'
 import { queryClient } from '../client'
 import { useQueryParamStore } from '../stores'
-import type { Library, PageInfo } from '../types'
 import type { ClientQueryParams, QueryCallbacks } from '.'
 
 export function useLibrary(id: string, { onError }: QueryCallbacks<Library> = {}) {

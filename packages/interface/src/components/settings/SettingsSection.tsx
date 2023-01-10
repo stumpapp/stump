@@ -1,11 +1,11 @@
-import { Heading, Stack, StackProps, Text, useColorModeValue, VStack } from '@chakra-ui/react';
-import React from 'react';
+import { Heading, Stack, StackProps, Text, useColorModeValue, VStack } from '@chakra-ui/react'
+import React from 'react'
 
 export type SettingsSectionProps = {
-	title: string;
-	subtitle: string;
-	children: React.ReactNode;
-} & StackProps;
+	title: string
+	subtitle: string
+	children: React.ReactNode
+} & StackProps
 
 export default function SettingsSection({
 	title,
@@ -26,5 +26,5 @@ export default function SettingsSection({
 
 			{children}
 		</Stack>
-	);
+	)
 }

@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react'
-import type { Library } from '@stump/client'
 import { queryClient, useScanLibrary, useUserStore } from '@stump/client'
+import type { Library } from '@stump/types'
 import { ArrowsClockwise, Binoculars, DotsThreeVertical } from 'phosphor-react'
 import { useNavigate } from 'react-router-dom'
 

@@ -88,7 +88,7 @@ importers:
       postcss: 8.4.20
       tailwind: 4.0.0
       tailwind-scrollbar-hide: 1.1.7
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.20
       typescript: 4.9.4
       vite: 3.2.5
       vite-plugin-tsconfig-paths: 1.2.0_7g3uriyb4kqeq2yf2bucr7z2ea
@@ -137,7 +137,7 @@ importers:
       postcss: 8.4.20
       tailwind: 4.0.0
       tailwind-scrollbar-hide: 1.1.7
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.20
       typescript: 4.9.4
       vite: 3.2.5
       vite-plugin-tsconfig-paths: 1.2.0_7g3uriyb4kqeq2yf2bucr7z2ea
@@ -145,8 +145,21 @@ importers:
   core:
     specifiers: {}
 
+  packages/api:
+    specifiers:
+      '@stump/types': workspace:*
+      axios: ^1.2.2
+      typescript: ^4.9.4
+    dependencies:
+      '@stump/types': link:../types
+      axios: 1.2.2
+    devDependencies:
+      typescript: 4.9.4
+
   packages/client:
     specifiers:
+      '@stump/api': workspace:*
+      '@stump/types': workspace:*
       '@tanstack/react-query': ^4.20.4
       '@types/axios': ^0.14.0
       '@types/node': ^18.11.18
@@ -158,6 +171,8 @@ importers:
       typescript: ^4.8.4
       zustand: ^4.1.5
     dependencies:
+      '@stump/api': link:../api
+      '@stump/types': link:../types
       '@tanstack/react-query': 4.20.4
       axios: 1.2.2
       immer: 9.0.16
@@ -186,7 +201,9 @@ importers:
       '@emotion/react': ^11.10.5
       '@emotion/styled': ^11.10.5
       '@hookform/resolvers': ^2.9.10
+      '@stump/api': workspace:*
       '@stump/client': workspace:*
+      '@stump/types': workspace:*
       '@tanstack/react-query': ^4.20.4
       '@tanstack/react-query-devtools': ^4.20.4
       '@tanstack/react-table': ^8.7.4
@@ -231,7 +248,9 @@ importers:
       '@emotion/react': 11.10.5_@types+react@18.0.26
       '@emotion/styled': 11.10.5_il7rdtjwk2sxtxzs733ry2sabi
       '@hookform/resolvers': 2.9.10_react-hook-form@7.41.2
+      '@stump/api': link:../api
       '@stump/client': link:../client
+      '@stump/types': link:../types
       '@tanstack/react-query': 4.20.4_react-dom@18.2.0
       '@tanstack/react-query-devtools': 4.20.4_ladklsw5ypen6zawmyzg4ubs6i
       '@tanstack/react-table': 8.7.4_react-dom@18.2.0
@@ -272,6 +291,12 @@ importers:
       '@vitejs/plugin-react': 2.2.0_vite@3.2.5
       typescript: 4.9.4
       vite: 3.2.5_@types+node@18.11.18
+
+  packages/types:
+    specifiers:
+      typescript: ^4.9.4
+    devDependencies:
+      typescript: 4.9.4
 
 packages:
 
@@ -3034,7 +3059,7 @@ packages:
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.20
     dev: true
 
   /@tanstack/match-sorter-utils/8.7.2:
@@ -3518,7 +3543,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.19.6_@babel+core@7.20.7
       magic-string: 0.26.7
       react-refresh: 0.14.0
-      vite: 3.2.5_@types+node@18.11.18
+      vite: 3.2.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8123,10 +8148,12 @@ packages:
       - utf-8-validate
     dev: true
 
-  /tailwindcss/3.2.4:
+  /tailwindcss/3.2.4_postcss@8.4.20:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3

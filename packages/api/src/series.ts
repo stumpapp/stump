@@ -1,5 +1,7 @@
-import type { ApiResult, Media, PageableApiResult, Series } from '../types'
-import { API } from '.'
+import type { Media, Series } from '@stump/types'
+
+import { API, getMedia } from '.'
+import { ApiResult, PageableApiResult } from './types'
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 	return API.get(`/series/${id}`)
@@ -31,6 +33,23 @@ export function getRecentlyAddedSeries(
 
 export function getNextInSeries(id: string): Promise<ApiResult<Media | undefined>> {
 	return API.get(`/series/${id}/media/next`)
+}
+
+/** Returns a list of media within a series, ordered after the cursor.
+ *  Default limit is 25.
+ * */
+export function getNextMediaInSeries(
+	series_id: string,
+	media_id: string,
+	limit = 25,
+): Promise<PageableApiResult<Media[]>> {
+	return getMedia(
+		new URLSearchParams({
+			cursor: media_id,
+			limit: limit.toString(),
+			series_id,
+		}),
+	)
 }
 
 export function getSeriesThumbnail(id: string): string {

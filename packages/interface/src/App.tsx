@@ -1,6 +1,7 @@
 import './styles/index.css'
 
 import { ChakraProvider } from '@chakra-ui/react'
+import { initializeApi } from '@stump/api'
 import {
 	AppProps,
 	AppPropsContext,
@@ -10,7 +11,6 @@ import {
 	useStumpStore,
 	useTopBarStore,
 } from '@stump/client'
-import { initializeApi } from '@stump/client/api'
 import { defaultContext, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
@@ -22,6 +22,7 @@ import { AppRouter } from './AppRouter'
 import { chakraTheme } from './chakra'
 import { ErrorFallback } from './components/ErrorFallback'
 import Notifications from './components/Notifications'
+import { API_VERSION } from './index'
 
 function RouterContainer(props: { appProps: AppProps }) {
 	const location = useLocation()
@@ -38,7 +39,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 			if (!baseUrl && appProps.baseUrl) {
 				setBaseUrl(appProps.baseUrl)
 			} else if (baseUrl) {
-				initializeApi(baseUrl)
+				initializeApi(baseUrl, API_VERSION)
 
 				setAppProps((appProps) => ({
 					...appProps,

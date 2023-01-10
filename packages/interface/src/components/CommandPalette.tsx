@@ -18,7 +18,7 @@ import {
 	useColorModeValue,
 	VStack,
 } from '@chakra-ui/react'
-import type { FileStatus } from '@stump/client'
+import type { FileStatus } from '@stump/types'
 import { MagnifyingGlass } from 'phosphor-react'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'

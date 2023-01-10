@@ -1,5 +1,7 @@
-import type { ApiResult, ClaimResponse } from '../types'
+import type { ClaimResponse } from '@stump/types'
+
 import { API } from '.'
+import { ApiResult } from './types'
 
 export function ping() {
 	return API.get('/ping')

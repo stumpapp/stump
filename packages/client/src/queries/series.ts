@@ -1,7 +1,8 @@
-import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '../api'
+import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '@stump/api'
+import type { Media, Pageable, Series } from '@stump/types'
+
 import { queryClient, useQuery } from '../client'
 import { useQueryParamStore } from '../stores'
-import type { Media, Pageable, Series } from '../types'
 import { QueryCallbacks, usePagedQuery } from '.'
 
 export const prefetchSeries = async (id: string) => {

@@ -8,11 +8,23 @@
     "outDir": "../../.moon/cache/types/packages/interface",
     "skipLibCheck": true,
     "paths": {
+      "@stump/api": [
+        "../api/src/index.ts"
+      ],
+      "@stump/api/*": [
+        "../api/src/*"
+      ],
       "@stump/client": [
         "../client/src/index.ts"
       ],
       "@stump/client/*": [
         "../client/src/*"
+      ],
+      "@stump/types": [
+        "../types/index.ts"
+      ],
+      "@stump/types/*": [
+        "../types/*"
       ]
     },
     "resolveJsonModule": true
@@ -22,7 +34,13 @@
   ],
   "references": [
     {
+      "path": "../api"
+    },
+    {
       "path": "../client"
+    },
+    {
+      "path": "../types"
     }
   ]
 }

@@ -1,14 +1,14 @@
 import type {
-	ApiResult,
 	CreateLibraryArgs,
 	LibrariesStats,
 	Library,
 	LibraryScanMode,
-	PageableApiResult,
 	Series,
 	UpdateLibraryArgs,
-} from '../types'
+} from '@stump/types'
+
 import { API } from '.'
+import { ApiResult, PageableApiResult } from './types'
 
 export function getLibraries(): Promise<PageableApiResult<Library[]>> {
 	return API.get('/libraries?unpaged=true')

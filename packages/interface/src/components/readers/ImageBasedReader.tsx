@@ -1,5 +1,5 @@
 import { useBoolean } from '@chakra-ui/react'
-import type { Media } from '@stump/client'
+import type { Media } from '@stump/types'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'

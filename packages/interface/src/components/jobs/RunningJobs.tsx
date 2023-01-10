@@ -1,7 +1,7 @@
 import { Heading, Progress, Stack, Text, useColorModeValue, VStack } from '@chakra-ui/react'
-import type { JobReport } from '@stump/client'
+import { cancelJob } from '@stump/api'
 import { useJobContext } from '@stump/client'
-import { cancelJob } from '@stump/client/api'
+import type { JobReport } from '@stump/types'
 import { useMemo } from 'react'
 import toast from 'react-hot-toast'
 

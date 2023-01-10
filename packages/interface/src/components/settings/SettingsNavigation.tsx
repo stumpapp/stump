@@ -1,5 +1,6 @@
 import { Box, Tab, TabList, Tabs } from '@chakra-ui/react'
-import { AppPropsContext, User } from '@stump/client'
+import { AppPropsContext } from '@stump/client'
+import { User } from '@stump/types'
 import { useContext, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 

@@ -1,8 +1,8 @@
+import type { User, UserPreferences } from '@stump/types'
 import { produce } from 'immer'
 import create from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
-import type { User, UserPreferences } from '../types'
 import { StoreBase } from '.'
 
 interface UserStore extends StoreBase<UserStore> {

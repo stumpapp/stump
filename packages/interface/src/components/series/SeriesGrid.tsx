@@ -1,5 +1,5 @@
 import { Heading } from '@chakra-ui/react'
-import type { Series } from '@stump/client'
+import type { Series } from '@stump/types'
 
 import { CardGrid } from '../Card'
 import SeriesCard from './SeriesCard'

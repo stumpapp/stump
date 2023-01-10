@@ -1,5 +1,5 @@
 import { Badge } from '@chakra-ui/react'
-import type { FileStatus } from '@stump/client'
+import type { FileStatus } from '@stump/types'
 
 export default function FileStatusBadge({ status }: { status: FileStatus }) {
 	const color = (() => {

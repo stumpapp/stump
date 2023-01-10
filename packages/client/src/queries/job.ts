@@ -1,6 +1,7 @@
-import { getJobs } from '../api/job'
+import { getJobs } from '@stump/api'
+import type { JobReport } from '@stump/types'
+
 import { useQuery } from '../client'
-import type { JobReport } from '../types'
 import { QueryCallbacks } from '.'
 
 export function useJobReport({ onSuccess, onError }: QueryCallbacks<JobReport[]> = {}) {

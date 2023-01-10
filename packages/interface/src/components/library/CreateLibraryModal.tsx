@@ -7,8 +7,10 @@ import {
 	ModalOverlay,
 	useDisclosure,
 } from '@chakra-ui/react'
-import type { ApiResult, LibraryOptions, Tag, TagOption } from '@stump/client'
+import type { ApiResult } from '@stump/api'
+import type { TagOption } from '@stump/client'
 import { useLibraryMutation, useTags } from '@stump/client'
+import type { LibraryOptions, Tag } from '@stump/types'
 import { FieldValues } from 'react-hook-form'
 import toast from 'react-hot-toast'
 

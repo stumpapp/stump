@@ -1,9 +1,8 @@
+import { checkIsClaimed, login, me, register } from '@stump/api'
+import type { User } from '@stump/types'
 import { useEffect, useState } from 'react'
 
-import { checkIsClaimed } from '../api'
-import { login, me, register } from '../api/auth'
 import { queryClient, useMutation, useQuery } from '../client'
-import type { User } from '../types'
 import { ClientQueryParams, QueryCallbacks } from '.'
 
 export interface AuthQueryOptions extends QueryCallbacks<User> {

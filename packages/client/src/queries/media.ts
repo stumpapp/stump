@@ -3,10 +3,11 @@ import {
 	getMediaById,
 	getRecentlyAddedMedia,
 	updateMediaProgress,
-} from '../api'
+} from '@stump/api'
+import type { Media, Pageable, ReadProgress } from '@stump/types'
+
 import { useMutation } from '../client'
 import { queryClient, useQuery } from '../client'
-import type { Media, Pageable, ReadProgress } from '../types'
 import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.'
 
 export const prefetchMedia = async (id: string) => {

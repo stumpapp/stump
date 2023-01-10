@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
-import { JobReport, JobStatus, useJobReport } from '@stump/client'
+import { useJobReport } from '@stump/client'
+import type { JobReport, JobStatus } from '@stump/types'
 import { ColumnDef, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { useMemo } from 'react'

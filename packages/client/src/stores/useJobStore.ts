@@ -1,8 +1,8 @@
+import type { JobUpdate } from '@stump/types'
 import { produce } from 'immer'
 import create from 'zustand'
 import { devtools } from 'zustand/middleware'
 
-import type { JobUpdate } from '../types'
 import { StoreBase } from '.'
 
 export const LARGE_JOB_THRESHOLDS = {

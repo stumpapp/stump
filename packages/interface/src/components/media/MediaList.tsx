@@ -1,4 +1,4 @@
-import type { Media } from '@stump/client'
+import type { Media } from '@stump/types'
 
 import ListItem from '../ListItem'
 

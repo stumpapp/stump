@@ -10,7 +10,7 @@ import {
 	useDisclosure,
 	VStack,
 } from '@chakra-ui/react'
-import type { Epub } from '@stump/client'
+import type { Epub } from '@stump/types'
 import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'

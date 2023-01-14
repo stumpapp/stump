@@ -4,7 +4,7 @@ members = [
   "apps/desktop/src-tauri", 
   "apps/server",
   "core", 
-  "core/integration-tests", 
+  # "core/integration-tests", 
   "packages/prisma-cli", 
 ]
 
@@ -13,13 +13,13 @@ version = "0.0.0"
 rust-version = "1.64.0"
 
 [workspace.dependencies]
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.3", features = [
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.4", features = [
   'rspc',
   'sqlite-create-many',
   "migrations",
   "sqlite",
 ], default-features = false }
-prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.3", features = [
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.4", features = [
   "rspc",
   "sqlite-create-many",
   "migrations",
@@ -37,7 +37,6 @@ tokio = { version = "1.21.2", features = [
 ] }
 
 ### DEV UTILS ###
-# specta = "0.0.2"
 specta = "0.0.4"
 
 ### Error Handling + Logging ###

@@ -34,11 +34,11 @@ export interface LibrariesStats { series_count: bigint, book_count: bigint, tota
 
 export interface Series { id: string, name: string, path: string, description: string | null, status: FileStatus, updated_at: string, created_at: string, library_id: string, library: Library | null, media: Array<Media> | null, media_count?: bigint, unread_media_count?: bigint, tags: Array<Tag> | null }
 
-export interface Media { id: string, name: string, description: string | null, size: number, extension: string, pages: number, updated_at: string, created_at: string, checksum: string | null, path: string, status: FileStatus, series_id: string, series: Series | null, read_progresses: Array<ReadProgress> | null, current_page: number | null, tags: Array<Tag> | null }
+export interface Media { id: string, name: string, description: string | null, size: number, extension: string, pages: number, updated_at: string, created_at: string, modified_at: string, checksum: string | null, path: string, status: FileStatus, series_id: string, series?: Series, read_progresses?: Array<ReadProgress>, current_page?: number, is_completed?: boolean, tags?: Array<Tag> }
 
 export interface MediaMetadata { Series: string | null, Number: number | null, Web: string | null, Summary: string | null, Publisher: string | null, Genre: string | null, PageCount: number | null }
 
-export interface ReadProgress { id: string, page: number, media_id: string, media: Media | null, user_id: string, user: User | null }
+export interface ReadProgress { id: string, page: number, is_completed: boolean, media_id: string, media: Media | null, user_id: string, user: User | null }
 
 export interface Tag { id: string, name: string }
 
@@ -74,9 +74,15 @@ export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type Direction = "asc" | "desc"
 
-export interface PageParams { zero_based: boolean, page: number, page_size: number, order_by: string, direction: Direction }
+export interface PageParams { zero_based: boolean, page: number, page_size: number }
 
-export interface PageQuery { unpaged: boolean | null, zero_based: boolean | null, page: number | null, page_size: number | null, order_by: string | null, direction: Direction | null }
+export interface QueryOrder { order_by: string, direction: Direction }
+
+export interface PageQuery { zero_based: boolean | null, page: number | null, page_size: number | null }
+
+export interface CursorQuery { cursor: string | null, limit: bigint | null }
 
 export interface PageInfo { total_pages: number, current_page: number, page_size: number, page_offset: number, zero_based: boolean }
+
+export type Pagination = null | PageQuery | CursorQuery
 

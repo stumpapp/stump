@@ -5,38 +5,47 @@ import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
 
-// @ts-expect-error: FIXME: idek man
-const Home = React.lazy(() => import('./pages/Home'))
-// @ts-expect-error: FIXME: idek man
-const LibraryOverview = React.lazy(() => import('./pages/library/LibraryOverview'))
-// @ts-expect-error: FIXME: idek man
-const LibraryFileExplorer = React.lazy(() => import('./pages/library/LibraryFileExplorer'))
-// @ts-expect-error: FIXME: idek man
-const SeriesOverview = React.lazy(() => import('./pages/SeriesOverview'))
-// @ts-expect-error: FIXME: idek man
-const BookOverview = React.lazy(() => import('./pages/book/BookOverview'))
-// @ts-expect-error: FIXME: idek man
-const ReadBook = React.lazy(() => import('./pages/book/ReadBook'))
-// @ts-expect-error: FIXME: idek man
-const ReadEpub = React.lazy(() => import('./pages/book/ReadEpub'))
-// @ts-expect-error: FIXME: idek man
-const SettingsLayout = React.lazy(() => import('./components/settings/SettingsLayout'))
-// @ts-expect-error: FIXME: idek man
-const GeneralSettings = React.lazy(() => import('./pages/settings/GeneralSettings'))
-// @ts-expect-error: FIXME: idek man
-const JobSettings = React.lazy(() => import('./pages/settings/JobSettings'))
-// @ts-expect-error: FIXME: idek man
-const ServerSettings = React.lazy(() => import('./pages/settings/ServerSettings'))
-// @ts-expect-error: FIXME: idek man
-const UserSettings = React.lazy(() => import('./pages/settings/UserSettings'))
-// @ts-expect-error: FIXME: idek man
-const FourOhFour = React.lazy(() => import('./pages/FourOhFour'))
-// @ts-expect-error: FIXME: idek man
-const ServerConnectionError = React.lazy(() => import('./pages/ServerConnectionError'))
-// @ts-expect-error: FIXME: idek man
-const LoginOrClaim = React.lazy(() => import('./pages/LoginOrClaim'))
-// @ts-expect-error: FIXME: idek man
-const OnBoarding = React.lazy(() => import('./pages/OnBoarding'))
+// FIXME: this is really annoying, and causes a different issue
+type LazyComponent = Promise<{
+	default: React.ComponentType<any>
+}>
+
+const Home = React.lazy(() => import('./pages/Home') as unknown as LazyComponent)
+const LibraryOverview = React.lazy(
+	() => import('./pages/library/LibraryOverview') as unknown as LazyComponent,
+)
+const LibraryFileExplorer = React.lazy(
+	() => import('./pages/library/LibraryFileExplorer') as unknown as LazyComponent,
+)
+const SeriesOverview = React.lazy(
+	() => import('./pages/SeriesOverview') as unknown as LazyComponent,
+)
+const BookOverview = React.lazy(
+	() => import('./pages/book/BookOverview') as unknown as LazyComponent,
+)
+const ReadBook = React.lazy(() => import('./pages/book/ReadBook') as unknown as LazyComponent)
+const ReadEpub = React.lazy(() => import('./pages/book/ReadEpub') as unknown as LazyComponent)
+const SettingsLayout = React.lazy(
+	() => import('./components/settings/SettingsLayout') as unknown as LazyComponent,
+)
+const GeneralSettings = React.lazy(
+	() => import('./pages/settings/GeneralSettings') as unknown as LazyComponent,
+)
+const JobSettings = React.lazy(
+	() => import('./pages/settings/JobSettings') as unknown as LazyComponent,
+)
+const ServerSettings = React.lazy(
+	() => import('./pages/settings/ServerSettings') as unknown as LazyComponent,
+)
+const UserSettings = React.lazy(
+	() => import('./pages/settings/UserSettings') as unknown as LazyComponent,
+)
+const FourOhFour = React.lazy(() => import('./pages/FourOhFour') as unknown as LazyComponent)
+const ServerConnectionError = React.lazy(
+	() => import('./pages/ServerConnectionError') as unknown as LazyComponent,
+)
+const LoginOrClaim = React.lazy(() => import('./pages/LoginOrClaim') as unknown as LazyComponent)
+const OnBoarding = React.lazy(() => import('./pages/OnBoarding') as unknown as LazyComponent)
 
 function OnBoardingRouter() {
 	return (

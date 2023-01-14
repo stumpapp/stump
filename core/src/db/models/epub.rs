@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, path::PathBuf};
+use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
 use epub::doc::{EpubDoc, NavPoint};
 use serde::{Deserialize, Serialize};
@@ -67,7 +67,7 @@ pub struct Epub {
 /// resources/chapters. This struct isn't really used after that first request, everything else is file IO using EpubDoc.
 impl Epub {
 	/// Creates an Epub from a media entity and an open EpubDoc
-	pub fn from(media: media::Data, epub: EpubDoc<File>) -> Epub {
+	pub fn from(media: media::Data, epub: EpubDoc<BufReader<File>>) -> Epub {
 		Epub {
 			media_entity: media.into(),
 			spine: epub.spine,

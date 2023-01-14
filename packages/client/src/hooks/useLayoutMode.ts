@@ -1,8 +1,8 @@
+import type { LayoutMode } from '@stump/types'
 import { useMemo } from 'react'
 
 import { useUserPreferences } from '../queries'
 import { useUserStore } from '../stores'
-import type { LayoutMode } from '@stump/types'
 
 export type LayoutEntity = 'LIBRARY' | 'SERIES'
 

@@ -241,10 +241,9 @@ async fn get_series_thumbnail(
 
 /// Returns the media in a given series. This is a paginated respone, and
 /// accepts various paginated request params.
-// #[get("/series/<id>/media?<unpaged>&<req_params..>")]
 async fn get_series_media(
-	pagination: Query<PageQuery>,
-	ordering: Query<Option<QueryOrder>>,
+	pagination_query: Query<PaginationQuery>,
+	ordering: Query<QueryOrder>,
 	session: ReadableSession,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -252,46 +251,70 @@ async fn get_series_media(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let unpaged = pagination.page.is_none();
-	let page_params = pagination.0.page_params();
-	let order_by_param: MediaOrderByParam = ordering.0.unwrap_or_default().try_into()?;
+	let pagination = pagination_query.0.get();
+	let is_unpaged = pagination.is_unpaged();
+	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
 
-	let mut query = db
-		.media()
-		.find_many(vec![media::series_id::equals(Some(id.clone()))])
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
-		]))
-		.order_by(order_by_param);
+	let pagination_cloned = pagination.clone();
+	let (media, count) = db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(vec![media::series_id::equals(Some(id.clone()))])
+				.with(media::read_progresses::fetch(vec![
+					read_progress::user_id::equals(user_id),
+				]))
+				.order_by(order_by_param);
 
-	if !unpaged {
-		let (skip, take) = page_params.get_skip_take();
-		query = query.skip(skip).take(take);
+			if !is_unpaged {
+				match pagination_cloned {
+					Pagination::Page(page_query) => {
+						let (skip, take) = page_query.get_skip_take();
+						query = query.skip(skip).take(take);
+					},
+					Pagination::Cursor(cursor_query) => {
+						if let Some(cursor) = cursor_query.cursor {
+							query = query.cursor(media::id::equals(cursor)).skip(1)
+						}
+						if let Some(limit) = cursor_query.limit {
+							query = query.take(limit)
+						}
+					},
+					_ => unreachable!(),
+				}
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			// FIXME: PCR doesn't support relation counts yet!
+			// client
+			// 	.media()
+			// 	.count(where_conditions)
+			// 	.exec()
+			// 	.await
+			// 	.map(|count| (media, Some(count)))
+			client
+				.media_in_series_count(id)
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
 	}
 
-	let media = query
-		.exec()
-		.await?
-		.into_iter()
-		.map(Media::from)
-		.collect::<Vec<Media>>();
-
-	if unpaged {
-		return Ok(Json(Pageable::from(media)));
-	}
-
-	// TODO: investigate this, I am getting incorrect counts here...
-	// FIXME: AHAHAHAHAHAHA, PCR doesn't support relation counts! I legit thought I was
-	// going OUTSIDE my fuckin mind
-	// FIXME: PCR doesn't support relation counts yet!
-	// let series_media_count = db
-	// 	.media()
-	// 	.count(vec![media::series_id::equals(Some(id))])
-	// 	.exec()
-	// 	.await?;
-	let series_media_count = db.media_in_series_count(id).await?;
-
-	Ok(Json((media, series_media_count, page_params).into()))
+	Ok(Json(Pageable::from(media)))
 }
 
 // TODO: Should I support ehere too?? Not sure, I have separate routes for epub,

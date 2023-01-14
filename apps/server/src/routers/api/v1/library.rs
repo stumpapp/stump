@@ -188,7 +188,7 @@ async fn get_library_by_id(
 // FIXME: this is absolutely atrocious...
 // This should be much better once https://github.com/Brendonovich/prisma-client-rust/issues/24 is added
 // but for now I will have this disgustingly gross and ugly work around...
-///Returns the series in a given library. Will *not* load the media relation.
+/// Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
 	filter_query: Query<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
@@ -327,7 +327,6 @@ async fn scan_library(
 	Ok(())
 }
 
-// FIXME: once transactions are supported I think that will be a much better flow here. for the delete, as well.
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 async fn create_library(
 	State(ctx): State<AppState>,
@@ -335,7 +334,6 @@ async fn create_library(
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
-	// TODO: check library is not a parent of another library
 	if !path::Path::new(&input.path).exists() {
 		return Err(ApiError::BadRequest(format!(
 			"The library directory does not exist: {}",
@@ -343,67 +341,84 @@ async fn create_library(
 		)));
 	}
 
+	let child_libraries = db
+		.library()
+		.find_many(vec![library::path::starts_with(input.path.clone())])
+		.exec()
+		.await?;
+
+	if !child_libraries.is_empty() {
+		return Err(ApiError::BadRequest(String::from(
+			"You may not create a library that is a parent of another on the filesystem.",
+		)));
+	}
+
 	// TODO: refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+	let library_options_arg = input.library_options.unwrap_or_default();
+	let transaction_result: Result<Library, ApiError> = db
+		._transaction()
+		.run(|client| async move {
+			let library_options = client
+				.library_options()
+				.create(vec![
+					library_options::convert_rar_to_zip::set(
+						library_options_arg.convert_rar_to_zip,
+					),
+					library_options::hard_delete_conversions::set(
+						library_options_arg.hard_delete_conversions,
+					),
+					library_options::create_webp_thumbnails::set(
+						library_options_arg.create_webp_thumbnails,
+					),
+					library_options::library_pattern::set(
+						library_options_arg.library_pattern.to_string(),
+					),
+				])
+				.exec()
+				.await?;
 
-	let library_options_arg = input.library_options.to_owned().unwrap_or_default();
+			let library = client
+				.library()
+				.create(
+					input.name.to_owned(),
+					input.path.to_owned(),
+					library_options::id::equals(library_options.id),
+					vec![library::description::set(input.description.to_owned())],
+				)
+				.exec()
+				.await?;
 
-	// FIXME: until nested create, library_options.library_id will be NULL in the database... unless I run ANOTHER
-	// update. Which I am not doing lol.
-	let library_options = db
-		.library_options()
-		.create(vec![
-			library_options::convert_rar_to_zip::set(
-				library_options_arg.convert_rar_to_zip,
-			),
-			library_options::hard_delete_conversions::set(
-				library_options_arg.hard_delete_conversions,
-			),
-			library_options::create_webp_thumbnails::set(
-				library_options_arg.create_webp_thumbnails,
-			),
-			library_options::library_pattern::set(
-				library_options_arg.library_pattern.to_string(),
-			),
-		])
-		.exec()
-		.await?;
+			// FIXME: try and do multiple connects again soon, batching is WAY better than
+			// previous solution but still...
+			if let Some(tags) = input.tags.to_owned() {
+				let library_id = library.id.clone();
+				let tag_connect = tags.into_iter().map(|tag| {
+					client.library().update(
+						library::id::equals(library_id.clone()),
+						vec![library::tags::connect(vec![tag::id::equals(tag.id)])],
+					)
+				});
 
-	let lib = db
-		.library()
-		.create(
-			input.name.to_owned(),
-			input.path.to_owned(),
-			library_options::id::equals(library_options.id),
-			vec![library::description::set(input.description.to_owned())],
-		)
-		.exec()
-		.await?;
+				client._batch(tag_connect).await?;
+			}
 
-	// FIXME: try and do multiple connects again soon, batching is WAY better than
-	// previous solution but still...
-	if let Some(tags) = input.tags.to_owned() {
-		let tag_connects = tags.into_iter().map(|tag| {
-			db.library().update(
-				library::id::equals(lib.id.clone()),
-				vec![library::tags::connect(vec![tag::id::equals(tag.id)])],
-			)
-		});
-
-		db._batch(tag_connects).await?;
-	}
+			Ok(Library::from(library))
+		})
+		.await;
+	let library = transaction_result?;
 
 	let scan_mode = input.scan_mode.unwrap_or_default();
 
 	// `scan` is not a required field, however it will default to BATCHED if not provided
 	if scan_mode != LibraryScanMode::None {
 		ctx.spawn_job(Box::new(LibraryScanJob {
-			path: lib.path.clone(),
+			path: library.path.clone(),
 			scan_mode,
 		}))?;
 	}
 
-	Ok(Json(lib.into()))
+	Ok(Json(library))
 }
 
 /// Update a library by id, if the current user is a SERVER_OWNER.
@@ -508,7 +523,7 @@ async fn delete_library(
 ) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
 
-	trace!("Attempting to delete library with ID {}", &id);
+	trace!(?id, "Attempting to delete library");
 
 	let deleted = db
 		.library()
@@ -531,8 +546,7 @@ async fn delete_library(
 		.collect::<Vec<_>>();
 
 	if !media_ids.is_empty() {
-		trace!("List of deleted media IDs: {:?}", media_ids);
-
+		trace!(?media_ids, "Deleted media");
 		debug!(
 			"Attempting to delete {} media thumbnails (if present)",
 			media_ids.len()

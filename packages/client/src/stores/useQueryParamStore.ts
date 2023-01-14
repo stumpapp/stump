@@ -1,4 +1,4 @@
-import type { Direction, PageParams } from '@stump/types'
+import type { Direction, PageParams, QueryOrder } from '@stump/types'
 import create from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
@@ -9,7 +9,9 @@ export const DEFAULT_ORDER_DIRECTION = 'asc'
 export const DEFAULT_PAGE_SIZE = 20
 
 // TODO: search?
-export interface QueryParamStore extends Partial<PageParams>, StoreBase<QueryParamStore> {
+export interface QueryParamStore
+	extends Partial<PageParams & QueryOrder>,
+		StoreBase<QueryParamStore> {
 	setZeroBased: (zeroBased?: boolean) => void
 	setPageSize: (pageSize?: number) => void
 	setOrderBy: (orderBy?: string) => void
@@ -18,12 +20,12 @@ export interface QueryParamStore extends Partial<PageParams>, StoreBase<QueryPar
 	getQueryString: () => string
 }
 
-const defaultValues = {
+const defaultValues: Partial<QueryParamStore> = {
 	direction: 'asc',
 	// zeroBased: false,
 	// pageSize: 20,
 	order_by: 'name',
-} as Partial<QueryParamStore>
+}
 
 export const useQueryParamStore = create<QueryParamStore>()(
 	devtools(

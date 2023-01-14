@@ -84,7 +84,7 @@ export default function CommandPalette() {
 		}
 	}, [open])
 
-	useHotkeys('ctrl+k, cmd+k', (e, _hotKeyEvent) => {
+	useHotkeys('ctrl+k, cmd+k', (e) => {
 		e.preventDefault()
 		// TODO: only use cmd+k on mac, ctrl+k on windows, etc.
 		on()
@@ -146,15 +146,20 @@ function QueryResults({ results }: { results?: typeof fakeResults }) {
 	const bgColor = useColorModeValue('gray.300', 'gray.600')
 	const selectedItemDescriptionColor = useColorModeValue('gray.500', 'gray.450')
 
-	useEffect(() => {
-		if (selected !== 0) {
-			setSelected(0)
-		}
+	useEffect(
+		() => {
+			if (selected !== 0) {
+				setSelected(0)
+			}
 
-		return () => {
-			setSelected(0)
-		}
-	}, [results])
+			return () => {
+				setSelected(0)
+			}
+		},
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[results],
+	)
 
 	if (!results) {
 		return null

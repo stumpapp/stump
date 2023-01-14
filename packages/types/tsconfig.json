@@ -5,7 +5,7 @@
     "outDir": "../../.moon/cache/types/packages/types"
   },
   "include": [
-    "src"
+    "*.ts"
   ],
   "exclude": [
     "node_modules"

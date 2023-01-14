@@ -14,7 +14,7 @@ import {
 	useColorModeValue,
 } from '@chakra-ui/react'
 import { useQueryParamStore } from '@stump/client'
-import type { Direction, mediaOrderByOptions, seriesOrderByOptions } from '@stump/types'
+import { Direction, mediaOrderByOptions, seriesOrderByOptions } from '@stump/types'
 import { CaretDown, Sliders } from 'phosphor-react'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -56,6 +56,8 @@ export default function QueryConfig() {
 		} else if (location.pathname.startsWith('/series')) {
 			return intoOptions(Object.keys(mediaOrderByOptions))
 		}
+
+		return null
 	}, [location.pathname])
 
 	const activeRadioFontColor = useColorModeValue('gray.800', 'gray.200')

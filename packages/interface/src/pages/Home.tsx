@@ -20,7 +20,7 @@ export default function Home() {
 	)
 
 	if (isLoading) {
-		return null
+		return <></>
 	}
 
 	if (!libraries?.length) {

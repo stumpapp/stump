@@ -34,7 +34,7 @@ mod tests {
 	fn codegen() -> Result<(), Box<dyn std::error::Error>> {
 		let mut file = File::create(
 			PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-				.join("../packages/client/src/types")
+				.join("../packages/types")
 				.join("core.ts"),
 		)?;
 
@@ -95,9 +95,11 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;
 		// Note: this will essentially be Partial<PageParams>...
+		file.write_all(format!("{}\n\n", ts_export::<QueryOrder>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<Pagination>()?).as_bytes())?;
 		// file.write_all(format!("{}\n\n", ts_export::<Pageable>()?).as_bytes())?; // TODO: figure this out
 
 		Ok(())

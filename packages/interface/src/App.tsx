@@ -54,7 +54,9 @@ function RouterContainer(props: { appProps: AppProps }) {
 		[baseUrl],
 	)
 
-	function handleHelmetChange(newState: any, _: any, __: any) {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore: is oke
+	function handleHelmetChange(newState: any) {
 		if (Array.isArray(newState?.title) && newState.title.length > 0) {
 			if (newState.title.length > 1) {
 				setTitle(newState.title[newState.title.length - 1])

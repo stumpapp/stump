@@ -4,14 +4,14 @@ use tracing::trace;
 
 use crate::prelude::DirectoryListing;
 
-#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
 pub struct PageQuery {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
 }
 
-#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
 pub struct CursorQuery {
 	pub cursor: Option<String>,
 	pub limit: Option<i64>,
@@ -51,7 +51,7 @@ impl From<PaginationQuery> for Pagination {
 	}
 }
 
-#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
 #[serde(untagged)]
 pub enum Pagination {
 	#[default]
@@ -216,7 +216,7 @@ impl PageInfo {
 	}
 }
 
-#[derive(Default, Debug, Deserialize, Serialize, PartialEq, Type)]
+#[derive(Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
 pub struct CursorInfo {
 	cursor: Option<String>,
 	limit: Option<i64>,

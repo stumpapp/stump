@@ -96,48 +96,63 @@ async fn get_media(
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
+	let pagination_cloned = pagination.clone();
 	let where_conditions = apply_media_filters(filters);
-	let mut query = db
-		.media()
-		.find_many(where_conditions.clone())
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
-		]))
-		.order_by(order_by_param);
 
-	if !is_unpaged {
-		match pagination.clone() {
-			Pagination::Page(page_query) => {
-				let (skip, take) = page_query.get_skip_take();
-				query = query.skip(skip).take(take);
-			},
-			Pagination::Cursor(cursor_query) => {
-				if let Some(cursor) = cursor_query.cursor {
-					query = query.cursor(media::id::equals(cursor)).skip(1)
+	let (media, count) = db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(where_conditions.clone())
+				.with(media::read_progresses::fetch(vec![
+					read_progress::user_id::equals(user_id),
+				]))
+				.order_by(order_by_param);
+
+			if !is_unpaged {
+				match pagination_cloned {
+					Pagination::Page(page_query) => {
+						let (skip, take) = page_query.get_skip_take();
+						query = query.skip(skip).take(take);
+					},
+					Pagination::Cursor(cursor_query) => {
+						if let Some(cursor) = cursor_query.cursor {
+							query = query.cursor(media::id::equals(cursor)).skip(1)
+						}
+						if let Some(limit) = cursor_query.limit {
+							query = query.take(limit)
+						}
+					},
+					_ => unreachable!(),
 				}
-				if let Some(limit) = cursor_query.limit {
-					query = query.take(limit)
-				}
-			},
-			_ => unreachable!(),
-		}
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(where_conditions)
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
 	}
 
-	let media = query
-		.exec()
-		.await?
-		.into_iter()
-		.map(|m| m.into())
-		.collect::<Vec<Media>>();
-
-	if is_unpaged {
-		return Ok(Json(Pageable::from(media)));
-	}
-
-	// let count = db.media().count(where_conditions).exec().await?;
-	let count = db.media().count(vec![]).exec().await?;
-
-	Ok(Json(Pageable::from((media, count, pagination))))
+	Ok(Json(Pageable::from(media)))
 }
 
 /// Get all media with identical checksums. This heavily implies duplicate files,

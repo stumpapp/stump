@@ -56,7 +56,7 @@ export function AppLayout() {
 				// className={clsx({ 'overflow-hidden': appProps?.platform !== 'browser' })}
 				w="full"
 				h="full"
-				onContextMenu={(e) => {
+				onContextMenu={() => {
 					// TODO: uncomment once I add custom menu on Tauri side
 					// if (appProps?.platform != 'browser') {
 					// 	e.preventDefault();

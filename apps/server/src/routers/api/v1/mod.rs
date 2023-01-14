@@ -20,24 +20,21 @@ mod tag;
 mod user;
 
 pub(crate) fn mount() -> Router<AppState> {
-	Router::new().nest(
-		"/api/v1",
-		Router::new()
-			.merge(auth::mount())
-			.merge(epub::mount())
-			.merge(library::mount())
-			.merge(media::mount())
-			.merge(filesystem::mount())
-			.merge(job::mount())
-			.merge(log::mount())
-			.merge(series::mount())
-			.merge(tag::mount())
-			.merge(user::mount())
-			.merge(reading_list::mount())
-			.route("/claim", get(claim))
-			.route("/ping", get(ping))
-			.route("/version", post(version)),
-	)
+	Router::new()
+		.merge(auth::mount())
+		.merge(epub::mount())
+		.merge(library::mount())
+		.merge(media::mount())
+		.merge(filesystem::mount())
+		.merge(job::mount())
+		.merge(log::mount())
+		.merge(series::mount())
+		.merge(tag::mount())
+		.merge(user::mount())
+		.merge(reading_list::mount())
+		.route("/claim", get(claim))
+		.route("/ping", get(ping))
+		.route("/version", post(version))
 }
 
 async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {

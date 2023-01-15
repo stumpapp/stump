@@ -7,6 +7,7 @@
     ],
     "outDir": "../../.moon/cache/types/packages/interface",
     "skipLibCheck": true,
+    "jsx": "preserve",
     "paths": {
       "@stump/api": [
         "../api/src/index.ts"

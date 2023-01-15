@@ -1,0 +1,19 @@
+name: "Build legacy Nix package on Ubuntu"
+
+on:
+  push:
+    paths:
+      - flake.nix
+      - flake.lock
+      - .github/workflows/build_nix.yml
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cachix/install-nix-action@v17
+      - name: test
+        run: nix develop --command "pkg-config" "--libs" "--cflags" "gdk-3.0" "gdk-3.0 >= 3.22"
+   #   - name: Building package
+    #    run: nix develop --command pnpm core run setup && cargo check

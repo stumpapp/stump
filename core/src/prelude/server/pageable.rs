@@ -71,7 +71,7 @@ impl From<Option<PagedRequestParams>> for PageParams {
 				let zero_based = params.zero_based.unwrap_or(false);
 				let page_size = params.page_size.unwrap_or(20);
 
-				let default_page = if zero_based { 0 } else { 1 };
+				let default_page = u32::from(!zero_based);
 
 				let page = params.page.unwrap_or(default_page);
 

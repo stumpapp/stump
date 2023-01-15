@@ -135,7 +135,7 @@ impl PageableTrait for Query<PagedRequestParams> {
 
 		PageParams {
 			zero_based,
-			page: params.page.unwrap_or(if zero_based { 0 } else { 1 }),
+			page: params.page.unwrap_or_else(|| u32::from(!zero_based)),
 			page_size: params.page_size.unwrap_or(20),
 			order_by: params.order_by.unwrap_or_else(|| "name".to_string()),
 			direction: params.direction.unwrap_or_default(),

@@ -178,7 +178,7 @@ async fn get_library_series(
 			let media_count = match media_counts.get(&s.id) {
 				Some(count) => count.to_owned(),
 				_ => 0,
-			} as i64;
+			};
 
 			(s.to_owned(), media_count).into()
 		})

@@ -19,6 +19,11 @@ dev_setup() {
   echo
 }
 
+if [ "$name" == "nix-shell" ]; then
+  echo "Running nix-shell"
+  exit 0
+fi
+
 if [ ${_CHECK_CARGO} == 1 ]; then
     which cargo &> /dev/null
     if [ $? -ne 0 ]; then

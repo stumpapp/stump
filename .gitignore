@@ -45,3 +45,7 @@ _next
 
 docker-compose.yaml
 server_old
+
+# nix
+.envrc
+.direnv

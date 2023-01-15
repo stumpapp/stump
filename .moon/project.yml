@@ -1,7 +1,6 @@
 # https://moonrepo.dev/docs/config/global-project
 $schema: 'https://moonrepo.dev/schemas/global-project.json'
 
-# TODO: add rust scopes
 fileGroups:
   # Application specific files
   app: []
@@ -11,6 +10,12 @@ fileGroups:
     - 'public/**/*'
     - 'src/**/*'
     - 'types/**/*'
+  typescript:
+    - 'public/**/*'
+    - 'src/**/*'
+    - 'types/**/*'
+  rust:
+    - 'src/**/*.rs'
   tests:
     - 'tests/**/*.test.*'
     - 'tests/**/*.stories.*'
@@ -22,31 +27,8 @@ fileGroups:
     - '**/*.{scss,css}'
     - '**/*.{md,mdx}'
 
-# A task is an action that is ran within the context of a project, and wraps
-# around an npm or system command. Tasks that are defined here and inherited by all projects
-# within the workspace, but can be overridden per project.
-#
-# This setting requires a map, where the key is a unique name for the task,
-# and the value is an object of task parameters.
 tasks:
   format:
-    command:
-      - 'prettier'
-      - '--config'
-      - '@in(4)'
-      - '--ignore-path'
-      - '@in(3)'
-      - '--check'
-      - '.'
-    inputs:
-      - 'src/**/*'
-      - 'tests/**/*'
-      - '**/*.{md,mdx,yml,yaml,json}'
-      - '/.prettierignore'
-      - '/.prettierrc'
-
-  # TODO: scope to ts apps
-  format-fix:
     command:
       - 'prettier'
       - '--config'
@@ -98,14 +80,3 @@ tasks:
       - 'tsconfig.json'
       - 'tsconfig.*.json'
       - '/tsconfig.options.json'
-
-  # test:
-  #   command:
-  #     - 'jest'
-  #     - '--passWithNoTests'
-  #     - '--preset'
-  #     - 'jest-preset-moon'
-  #   inputs:
-  #     - '@globs(sources)'
-  #     - '@globs(tests)'
-  #     - 'jest.config.*'

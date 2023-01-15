@@ -24,6 +24,13 @@ tasks:
       mergeDeps: 'replace'
       mergeInputs: 'replace'
 
+  format:
+    command: 'cargo fmt --package stump_desktop'
+    options:
+      mergeArgs: 'replace'
+      mergeDeps: 'replace'
+      mergeInputs: 'replace'
+
   # # TODO: need to have more targets.
   # build:
   #   # tauri build --target universal-apple-darwin

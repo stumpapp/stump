@@ -1,4 +1,5 @@
 import { useBoolean } from '@chakra-ui/react'
+import { queryClient } from '@stump/client'
 import type { Media } from '@stump/types'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import React, { useEffect, useMemo, useRef } from 'react'
@@ -46,6 +47,12 @@ export default function ImageBasedReader({
 	useEffect(() => {
 		currPageRef.current = currentPage
 	}, [currentPage])
+
+	useEffect(() => {
+		return () => {
+			queryClient.invalidateQueries(['getInProgressMedia'])
+		}
+	}, [])
 
 	function handlePageChange(newPage: number) {
 		if (newPage < media.pages && newPage > 0) {

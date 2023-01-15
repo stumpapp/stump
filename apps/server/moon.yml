@@ -35,6 +35,13 @@ tasks:
       mergeDeps: 'replace'
       mergeInputs: 'replace'
 
+  format:
+    command: 'cargo fmt --package stump_server'
+    options:
+      mergeArgs: 'replace'
+      mergeDeps: 'replace'
+      mergeInputs: 'replace'
+
   clean:
     command: 'cargo clean'
 

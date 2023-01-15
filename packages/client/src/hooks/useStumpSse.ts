@@ -76,7 +76,7 @@ export function useStumpSse({ onEvent }: Props) {
 	const eventSourceUrl = useMemo(() => {
 		let url = URI
 		// remove /api(/) from end of url
-		url = url.replace(/\/api\/?$/, '')
+		url = url.replace(/\/api(\/v\d)?$/, '')
 
 		return `${url}/sse`
 	}, [URI])

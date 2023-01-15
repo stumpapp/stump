@@ -1,28 +1,28 @@
 {
-  "loginPage": {
-    "claimText": "Ce serveur Stump n'est pas encore réclamé, vous pouvez utiliser le formulaire ci-dessous pour créer un compte utilisateur et le réclamer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
-    "form": {
-      "validation": {
-        "missingUsername": "Nom d'utilisateur est nécessaire",
-        "missingPassword": "Mot de passe est nécessaire"
-      },
-      "labels": {
-        "username": "Nom d'utilisateur",
-        "password": "Mot de passe"
-      },
-      "buttons": {
-        "createAccount": "Créer un Compte",
-        "login": "Connexion"
-      }
-    },
-    "toasts": {
-      "loggingIn": "Se connecter...",
-      "loggedIn": "Content de te revoir! Redirection...",
-      "loggedInFirstTime": "Accueillir! Redirection...",
-      "registering": "La création du compte...",
-      "registered": "Compte créé!",
-      "loginFailed": "Échec de la connexion. Veuillez réessayer.",
-      "registrationFailed": "La création du compte a échoué. Veuillez réessayer."
-    }
-  }
+	"loginPage": {
+		"claimText": "Ce serveur Stump n'est pas encore réclamé, vous pouvez utiliser le formulaire ci-dessous pour créer un compte utilisateur et le réclamer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
+		"form": {
+			"validation": {
+				"missingUsername": "Nom d'utilisateur est nécessaire",
+				"missingPassword": "Mot de passe est nécessaire"
+			},
+			"labels": {
+				"username": "Nom d'utilisateur",
+				"password": "Mot de passe"
+			},
+			"buttons": {
+				"createAccount": "Créer un Compte",
+				"login": "Connexion"
+			}
+		},
+		"toasts": {
+			"loggingIn": "Se connecter...",
+			"loggedIn": "Content de te revoir! Redirection...",
+			"loggedInFirstTime": "Accueillir! Redirection...",
+			"registering": "La création du compte...",
+			"registered": "Compte créé!",
+			"loginFailed": "Échec de la connexion. Veuillez réessayer.",
+			"registrationFailed": "La création du compte a échoué. Veuillez réessayer."
+		}
+	}
 }

@@ -19,6 +19,7 @@
     "@types/axios": "^0.14.0",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
+    "prettier": "^2.8.1",
     "tsconfig": "*",
     "typescript": "^4.8.4"
   },

@@ -33,9 +33,8 @@ export interface UseEpubReturn {
 
 // FIXME: use options
 
-export function useEpub(id: string, options?: EpubOptions, enabled?: boolean) {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [chapter, setChapter] = useState(2)
+export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
+	const [chapter] = useState(2)
 
 	const { isLoading: isFetchingBook, data: epub } = useQuery(
 		['getEpubById', id],
@@ -98,7 +97,7 @@ export function useEpub(id: string, options?: EpubOptions, enabled?: boolean) {
 
 // FIXME: use options
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function useEpubLazy(id: string, options?: EpubOptions) {
+export function useEpubLazy(id: string, _options?: EpubOptions) {
 	const {
 		data: epub,
 		isLoading,

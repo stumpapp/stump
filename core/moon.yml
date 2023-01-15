@@ -28,3 +28,10 @@ tasks:
       mergeArgs: 'replace'
       mergeDeps: 'replace'
       mergeInputs: 'replace'
+
+  format:
+    command: 'cargo fmt --package stump_core'
+    options:
+      mergeArgs: 'replace'
+      mergeDeps: 'replace'
+      mergeInputs: 'replace'

@@ -45,6 +45,9 @@ export function useCoreEventHandler({
 					queryClient.invalidateQueries(['getSeries'])
 					queryClient.invalidateQueries(['getJobReports'])
 
+					queryClient.invalidateQueries(['getRecentlyAddedSeries'])
+					queryClient.invalidateQueries(['getRecentlyAddedMedia'])
+
 					// toast.success(`Job ${data} complete.`);
 					onJobComplete?.(data)
 				}, 750)

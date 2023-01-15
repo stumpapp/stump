@@ -49,6 +49,8 @@ where
 		drop(session);
 
 		// FIXME: this fails on first load, I assume I need to use the state param but not sure how yet
+		// NOTE: this seems to also cause, on first load of webapp, invalid state (e.g.
+		// thinking no libraries exist, etc)
 		let maybe_ctx = parts.extensions.get::<AppState>();
 		if maybe_ctx.is_none() {
 			return Err((StatusCode::UNAUTHORIZED).into_response());

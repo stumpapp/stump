@@ -3,7 +3,7 @@
 // FIXME: remove the two above once epub is more completed
 import { useColorMode } from '@chakra-ui/react'
 import { API } from '@stump/api'
-import { useEpubLazy } from '@stump/client'
+import { queryClient, useEpubLazy } from '@stump/client'
 import { Book, Rendition } from 'epubjs'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -162,6 +162,12 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 			rendition.themes.select('default')
 		}
 	}, [rendition, colorMode])
+
+	useEffect(() => {
+		return () => {
+			queryClient.invalidateQueries(['getInProgressMedia'])
+		}
+	}, [])
 
 	// epubcfi(/6/10!/4/2/2[Chapter1]/48/1:0)
 

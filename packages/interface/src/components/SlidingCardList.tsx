@@ -1,4 +1,4 @@
-import { ButtonGroup, Heading } from '@chakra-ui/react'
+import { ButtonGroup, Heading, Text } from '@chakra-ui/react'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { CaretLeft, CaretRight } from 'phosphor-react'
 import { useCallback, useEffect, useRef } from 'react'
@@ -8,6 +8,7 @@ import ToolTip from '../ui/ToolTip'
 
 interface Props {
 	title?: string
+	emptyMessage?: string
 	cards: JSX.Element[]
 	onScrollEnd?: () => void
 	isLoadingNext?: boolean
@@ -20,6 +21,7 @@ export default function SlidingCardList({
 	isLoadingNext,
 	hasNext,
 	title,
+	emptyMessage,
 }: Props) {
 	const parentRef = useRef<HTMLDivElement>(null)
 	const visibleRef = useRef([0, 0])
@@ -80,6 +82,19 @@ export default function SlidingCardList({
 	// FIXME: wrong, the overscan messes this up I think...
 	const canSkipForward = (visibleRef.current[1] ?? 0) * 2 < cards.length
 
+	const virtualItems = columnVirtualizer.getVirtualItems()
+	const isEmpty = virtualItems.length === 0
+
+	const renderVirtualItems = () => {
+		if (isEmpty) {
+			return <Text>{emptyMessage || 'No items available'}</Text>
+		} else {
+			return columnVirtualizer.getVirtualItems().map((virtualItem) => {
+				return cards[virtualItem.index]
+			})
+		}
+	}
+
 	return (
 		<div className="w-full flex flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
@@ -114,12 +129,10 @@ export default function SlidingCardList({
 				<div
 					className="w-full relative flex flex-row space-x-2"
 					style={{
-						width: `${columnVirtualizer.getTotalSize()}px`,
+						width: isEmpty ? '100%' : `${columnVirtualizer.getTotalSize()}px`,
 					}}
 				>
-					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
-						return cards[virtualItem.index]
-					})}
+					{renderVirtualItems()}
 				</div>
 			</div>
 		</div>

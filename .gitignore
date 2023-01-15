@@ -48,3 +48,7 @@ apps/server/client/*
 .moon/cache
 .moon/dts
 .moon/docker
+
+# nix
+.envrc
+.direnv

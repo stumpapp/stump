@@ -26,6 +26,5 @@ runs:
           ${{ runner.os }}-pnpm-store-
 
     - name: Install dependencies
-      if: steps.pnpm-cache.outputs.cache-hit != 'true'
       shell: bash
       run: pnpm install --no-frozen-lockfile

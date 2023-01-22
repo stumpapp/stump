@@ -9,9 +9,11 @@
   - [x] Clean up all the `package.json` scripts
     - [ ] Note: the scripts that interact with the FS directly are iffy with moon. I'll need to revisit those, so they will remain.
 - [ ] Audit dependencies, prune where needed
-- [ ] Nix?
+- [x] Nix?
+  - https://github.com/aaronleopold/stump/pull/86
 - [ ] Reorganize and consolidate some of the `client` code, its _very_ messy
-  - [ ] Split `api` into separate package to house all the axios functions
+  - [x] Split `api` into separate package to house all the axios functions
+  - [ ] Rework gross hooks + callback types
 - [x] Remove the `stump.service` file from GH and just add section in docs with that content
 - [x] Consolidate some of the config files
   - [x] Looking at you messy tsconfigs

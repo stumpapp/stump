@@ -1,37 +1,34 @@
-use std::path::{Path, PathBuf};
-
-mod batch_scanner;
-mod setup;
-mod sync_scanner;
-mod utils;
-
-use tracing::debug;
+use std::{ffi::OsStr, path::Path};
+use tracing::{error, warn};
 use walkdir::WalkDir;
 
 use crate::{
-	db::models::{LibraryScanMode, Media},
-	fs::media_file::{self, guess_mime},
-	job::runner::RunnerCtx,
-	prelude::{ContentType, CoreResult},
+	fs::{get_content_type_from_mime, guess_mime},
+	prelude::ContentType,
 };
 
-pub async fn scan(
-	ctx: RunnerCtx,
-	path: String,
-	runner_id: String,
-	scan_mode: LibraryScanMode,
-) -> CoreResult<u64> {
-	match scan_mode {
-		LibraryScanMode::Batched => batch_scanner::scan(ctx, path, runner_id).await,
-		LibraryScanMode::Sync => sync_scanner::scan(ctx, path, runner_id).await,
-		_ => unreachable!("A job should not have reached this point if the scan mode is not batch or sync."),
+use super::constants::is_accepted_cover_name;
+
+pub trait OsStrUtils {
+	fn try_to_string(&self) -> Option<String>;
+}
+
+impl OsStrUtils for OsStr {
+	fn try_to_string(&self) -> Option<String> {
+		self.to_str().map(|str| str.to_string())
 	}
 }
 
-// TODO: refactor this trait? yes please
-pub trait ScannedFileTrait {
-	fn get_kind(&self) -> std::io::Result<Option<infer::Type>>;
-	fn is_invisible_file(&self) -> bool;
+pub struct FileParts {
+	file_name: String,
+	file_stem: String,
+	extension: String,
+}
+
+pub trait PathUtils {
+	fn file_parts(&self) -> FileParts;
+	fn infer_kind(&self) -> std::io::Result<Option<infer::Type>>;
+	fn is_hidden_file(&self) -> bool;
 	fn should_ignore(&self) -> bool;
 	fn is_supported(&self) -> bool;
 	fn is_img(&self) -> bool;
@@ -40,19 +37,38 @@ pub trait ScannedFileTrait {
 	fn dir_has_media_deep(&self) -> bool;
 }
 
-impl ScannedFileTrait for Path {
+impl PathUtils for Path {
+	fn file_parts(&self) -> FileParts {
+		let file_name = self
+			.file_name()
+			.and_then(|os_str| os_str.try_to_string())
+			.unwrap_or_default();
+		let file_stem = self
+			.file_stem()
+			.and_then(|os_str| os_str.try_to_string())
+			.unwrap_or_default();
+		let extension = self
+			.extension()
+			.and_then(|os_str| os_str.try_to_string())
+			.unwrap_or_default();
+
+		FileParts {
+			file_name,
+			file_stem,
+			extension,
+		}
+	}
+
 	/// Returns the result of `infer::get_from_path`.
-	fn get_kind(&self) -> std::io::Result<Option<infer::Type>> {
+	fn infer_kind(&self) -> std::io::Result<Option<infer::Type>> {
 		infer::get_from_path(self)
 	}
 
 	/// Returns true if the file is hidden (i.e. starts with a dot).
-	fn is_invisible_file(&self) -> bool {
-		self.file_name()
-			.unwrap_or_default()
-			.to_str()
-			.map(|name| name.starts_with('.'))
-			.unwrap_or(false)
+	fn is_hidden_file(&self) -> bool {
+		let FileParts { file_name, .. } = self.file_parts();
+
+		file_name.starts_with('.')
 	}
 
 	/// Returns true if the file is a supported media file. This is a strict check when
@@ -60,7 +76,7 @@ impl ScannedFileTrait for Path {
 	fn is_supported(&self) -> bool {
 		if let Ok(Some(typ)) = infer::get_from_path(self) {
 			let mime = typ.mime_type();
-			let content_type = media_file::get_content_type_from_mime(mime);
+			let content_type = get_content_type_from_mime(mime);
 
 			return content_type != ContentType::UNKNOWN;
 		}
@@ -69,7 +85,7 @@ impl ScannedFileTrait for Path {
 			return !guessed_mime.starts_with("image/");
 		}
 
-		debug!("Unsupported file {:?}", self);
+		warn!(file = ?self, "Unsupported file");
 
 		false
 	}
@@ -81,7 +97,7 @@ impl ScannedFileTrait for Path {
 	// TODO: This will change in the future to allow for unsupported files to
 	// be added to the database with *minimal* functionality.
 	fn should_ignore(&self) -> bool {
-		if self.is_invisible_file() {
+		if self.is_hidden_file() {
 			return true;
 		}
 
@@ -95,14 +111,11 @@ impl ScannedFileTrait for Path {
 			return file_type.mime_type().starts_with("image/");
 		}
 
-		// TODO: more, or refactor. Too lazy rn
-		self.extension()
-			.map(|ext| {
-				ext.eq_ignore_ascii_case("jpg")
-					|| ext.eq_ignore_ascii_case("png")
-					|| ext.eq_ignore_ascii_case("jpeg")
-			})
-			.unwrap_or(false)
+		let FileParts { extension, .. } = self.file_parts();
+
+		extension.eq_ignore_ascii_case("jpg")
+			|| extension.eq_ignore_ascii_case("png")
+			|| extension.eq_ignore_ascii_case("jpeg")
 	}
 
 	/// Returns true if the file is a thumbnail image. This calls the `is_img` function
@@ -114,17 +127,13 @@ impl ScannedFileTrait for Path {
 	/// These will *potentially* be reserved filenames in the future... Not sure
 	/// if this functionality will be kept.
 	fn is_thumbnail_img(&self) -> bool {
-		self.is_img()
-			&& self
-				.file_stem()
-				.unwrap_or_default()
-				.to_str()
-				.map(|name| {
-					name.eq_ignore_ascii_case("cover")
-						|| name.eq_ignore_ascii_case("thumbnail")
-						|| name.eq_ignore_ascii_case("folder")
-				})
-				.unwrap_or(false)
+		if !self.is_img() {
+			return false;
+		}
+
+		let FileParts { file_stem, .. } = self.file_parts();
+
+		is_accepted_cover_name(&file_stem)
 	}
 
 	/// Returns true if the directory has any media files in it. This is a shallow
@@ -135,14 +144,17 @@ impl ScannedFileTrait for Path {
 		}
 
 		let items = std::fs::read_dir(self);
-
 		if items.is_err() {
+			error!(
+				error = ?items.unwrap_err(),
+				path = ?self,
+				"IOError: failed to read directory"
+			);
 			return false;
 		}
 
-		let items = items.unwrap();
-
 		items
+			.unwrap()
 			.filter_map(|item| item.ok())
 			.filter(|item| item.path() != self)
 			.any(|f| !f.path().should_ignore())
@@ -161,15 +173,4 @@ impl ScannedFileTrait for Path {
 			.filter(|item| item.path() != self)
 			.any(|f| !f.path().should_ignore())
 	}
-}
-
-// FIXME: I don't want to allow this, however Box<Media> won't work
-#[allow(clippy::large_enum_variant)]
-pub enum BatchScanOperation {
-	CreateMedia { path: PathBuf, series_id: String },
-	UpdateMedia(Media),
-	MarkMediaMissing { path: String },
-	// Note: this will be tricky. I will need to have this as a separate operation so I don't chance
-	// issuing concurrent writes to the database. But will be a bit of a pain, not too bad though.
-	// LogFailureEvent { event: CoreEvent },
 }

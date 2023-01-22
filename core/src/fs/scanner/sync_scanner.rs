@@ -10,11 +10,16 @@ use tracing::{debug, error, trace, warn};
 use crate::{
 	db::models::LibraryOptions,
 	event::CoreEvent,
-	fs::scanner::{utils, validate, ScannedFileTrait},
+	fs::scanner::{
+		setup::{setup_series, SeriesSetup},
+		utils, ScannedFileTrait,
+	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
 	prelude::{CoreResult, Ctx},
 	prisma::series,
 };
+
+use super::setup::{setup_library, LibrarySetup};
 
 async fn scan_series(
 	ctx: Ctx,
@@ -25,8 +30,12 @@ async fn scan_series(
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) {
 	debug!(?series, "Scanning series");
-	let (mut visited_media, media_by_path, walkdir, glob_set) =
-		utils::setup_series_scan(&ctx, &series, library_path, &library_options).await;
+	let SeriesSetup {
+		mut visited_media,
+		media_by_path,
+		walkdir,
+		glob_set,
+	} = setup_series(&ctx, &series, library_path, &library_options).await;
 
 	for entry in walkdir
 		.into_iter()
@@ -110,25 +119,29 @@ async fn scan_series(
 pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult<u64> {
 	let core_ctx = ctx.core_ctx.clone();
 
-	let (library, library_options, series, files_to_process) =
-		validate::precheck(&core_ctx, path, &runner_id).await?;
+	let LibrarySetup {
+		library,
+		library_options,
+		library_series,
+		tasks,
+	} = setup_library(&core_ctx, path).await?;
 
 	// Sleep for a little to let the UI breathe.
 	tokio::time::sleep(Duration::from_millis(700)).await;
 
 	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
-	let _job = persist_job_start(&core_ctx, runner_id.clone(), files_to_process).await?;
+	let _job = persist_job_start(&core_ctx, runner_id.clone(), tasks).await?;
 
 	ctx.progress(JobUpdate::job_started(
 		runner_id.clone(),
 		0,
-		files_to_process,
+		tasks,
 		Some(format!("Starting library scan at {}", &library.path)),
 	));
 
 	let counter = Arc::new(AtomicU64::new(0));
 
-	for s in series {
+	for series in library_series {
 		let progress_ctx = ctx.clone();
 		let scanner_ctx = core_ctx.clone();
 		let r_id = runner_id.clone();
@@ -143,7 +156,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		scan_series(
 			scanner_ctx,
 			runner_id,
-			s,
+			series,
 			&library_path,
 			library_options,
 			move |msg| {
@@ -152,7 +165,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 				progress_ctx.progress(JobUpdate::job_progress(
 					r_id.to_owned(),
 					Some(previous + 1),
-					files_to_process,
+					tasks,
 					Some(msg),
 				));
 			},
@@ -163,7 +176,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 	ctx.progress(JobUpdate::job_finishing(
 		runner_id,
 		Some(counter.load(Ordering::SeqCst)),
-		files_to_process,
+		tasks,
 		None,
 	));
 	tokio::time::sleep(Duration::from_millis(1000)).await;

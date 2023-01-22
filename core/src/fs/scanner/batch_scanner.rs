@@ -14,14 +14,17 @@ use crate::{
 	fs::{
 		image,
 		scanner::{
-			utils::{self, batch_media_operations},
-			validate, BatchScanOperation, ScannedFileTrait,
+			setup::{setup_series, SeriesSetup},
+			utils::{batch_media_operations, file_updated_since_scan},
+			BatchScanOperation, ScannedFileTrait,
 		},
 	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
 	prelude::{CoreError, CoreResult, Ctx},
 	prisma::series,
 };
+
+use super::setup::{setup_library, LibrarySetup};
 
 // TODO: return result...
 // TODO: investigate this with LARGE libraries. I am noticing the UI huff and puff a bit
@@ -35,15 +38,19 @@ async fn scan_series(
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Vec<BatchScanOperation> {
 	debug!(?series, "Scanning series");
-	let (mut visited_media, media_by_path, walkdir, glob_set) =
-		utils::setup_series_scan(&ctx, &series, library_path, &library_options).await;
+	let SeriesSetup {
+		mut visited_media,
+		media_by_path,
+		walkdir,
+		glob_set,
+	} = setup_series(&ctx, &series, library_path, &library_options).await;
 
 	let mut operations = vec![];
-	for entry in walkdir
+	let iter = walkdir
 		.into_iter()
 		.filter_map(|e| e.ok())
-		.filter(|e| e.path().is_file())
-	{
+		.filter(|e| e.path().is_file());
+	for entry in iter {
 		let path = entry.path();
 		let path_str = path.to_str().unwrap_or("");
 		trace!(?path, "Scanning file");
@@ -61,15 +68,21 @@ async fn scan_series(
 			trace!(media_path = ?path, "Existing media found");
 
 			let media = media_by_path.get(path_str).unwrap();
-			let check_modified_at =
-				utils::file_updated_since_scan(&entry, media.modified_at.clone());
+			let has_been_modified =
+				file_updated_since_scan(&entry, media.modified_at.clone())
+					.map_err(|err| {
+						error!(
+							error = ?err,
+							path = path_str,
+							"Failed to determine if entry has been modified since last scan"
+						)
+					})
+					.unwrap_or(false);
 
-			if let Ok(has_been_modified) = check_modified_at {
-				// If the file has been modified since the last scan, we need to update it.
-				if has_been_modified {
-					debug!(?media, "Media file has been modified since last scan");
-					operations.push(BatchScanOperation::UpdateMedia(media.clone()));
-				}
+			// If the file has been modified since the last scan, we need to update it.
+			if has_been_modified {
+				debug!(?media, "Media file has been modified since last scan");
+				operations.push(BatchScanOperation::UpdateMedia(media.clone()));
 			}
 
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
@@ -101,17 +114,19 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		Some("Preparing library scan...".to_string()),
 	));
 
-	let (library, library_options, series, files_to_process) =
-		validate::precheck(&core_ctx, path, &runner_id).await?;
+	let LibrarySetup {
+		library,
+		library_options,
+		library_series,
+		tasks,
+	} = setup_library(&core_ctx, path).await?;
 
 	// Sleep for a little to let the UI breathe.
 	tokio::time::sleep(Duration::from_millis(1000)).await;
-
-	let _job = persist_job_start(&core_ctx, runner_id.clone(), files_to_process).await?;
+	persist_job_start(&core_ctx, runner_id.clone(), tasks).await?;
 
 	let counter = Arc::new(AtomicU64::new(0));
-
-	let tasks: Vec<JoinHandle<Vec<BatchScanOperation>>> = series
+	let handles: Vec<JoinHandle<Vec<BatchScanOperation>>> = library_series
 		.into_iter()
 		.map(|s| {
 			let progress_ctx = ctx.clone();
@@ -130,7 +145,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 					progress_ctx.progress(JobUpdate::job_progress(
 						r_id.to_owned(),
 						Some(previous + 1),
-						files_to_process,
+						tasks,
 						Some(msg),
 					));
 				})
@@ -139,7 +154,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		})
 		.collect();
 
-	let operations: Vec<BatchScanOperation> = futures::future::join_all(tasks)
+	let operations: Vec<BatchScanOperation> = futures::future::join_all(handles)
 		.await
 		.into_iter()
 		// TODO: log errors
@@ -168,7 +183,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		ctx.progress(JobUpdate::job_progress(
 			runner_id.clone(),
 			Some(final_count),
-			files_to_process,
+			tasks,
 			Some(format!(
 				"Creating {} WEBP thumbnails (this can take some time)",
 				created_media.len()
@@ -186,7 +201,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 	ctx.progress(JobUpdate::job_finishing(
 		runner_id,
 		Some(final_count),
-		files_to_process,
+		tasks,
 		None,
 	));
 	tokio::time::sleep(Duration::from_millis(1000)).await;

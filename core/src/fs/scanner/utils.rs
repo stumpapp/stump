@@ -1,29 +1,29 @@
 use std::{
-	collections::HashMap,
 	fs::File,
 	io::{BufRead, BufReader},
 	path::{Path, PathBuf},
 };
 
-use globset::{Glob, GlobSet, GlobSetBuilder};
-use itertools::Itertools;
+use globset::{Glob, GlobSetBuilder};
 use prisma_client_rust::{
 	chrono::{DateTime, Utc},
-	raw, PrismaValue, QueryError,
+	QueryError,
 };
 use tracing::{debug, error, trace, warn};
-use walkdir::{DirEntry, WalkDir};
+use walkdir::DirEntry;
 
 use crate::{
 	db::{
 		models::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
-		Dao, DaoBatch, MediaDaoImpl, SeriesDao, SeriesDaoImpl,
+		Dao, DaoBatch, MediaDao, MediaDaoImpl,
 	},
 	fs::{image, media_file, scanner::BatchScanOperation},
 	prelude::{CoreError, CoreResult, Ctx, FileStatus},
 	prisma::{library, media, series},
 };
 
+// TODO: I hate this here, but I don't know where else to put it.
+// Like naming variables, stuff like this is hard lol
 impl MediaBuilder for Media {
 	fn build(path: &Path, series_id: &str) -> CoreResult<Media> {
 		Media::build_with_options(
@@ -89,65 +89,6 @@ impl MediaBuilder for Media {
 	}
 }
 
-pub(crate) async fn setup_series_scan(
-	ctx: &Ctx,
-	series: &series::Data,
-	library_path: &str,
-	library_options: &LibraryOptions,
-) -> (
-	HashMap<String, bool>,
-	HashMap<String, Media>,
-	WalkDir,
-	GlobSet,
-) {
-	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
-	let series_ignore_file = Path::new(series.path.as_str()).join(".stumpignore");
-	let library_ignore_file = Path::new(library_path).join(".stumpignore");
-
-	let media = series_dao
-		.get_series_media(series.id.as_str())
-		.await
-		.unwrap_or_else(|e| {
-			error!(error = ?e, "Error occurred trying to fetch media for series");
-			vec![]
-		});
-
-	let mut visited_media = HashMap::with_capacity(media.len());
-	let mut media_by_path = HashMap::with_capacity(media.len());
-	for m in media {
-		visited_media.insert(m.path.clone(), false);
-		media_by_path.insert(m.path.clone(), m);
-	}
-
-	let mut walkdir = WalkDir::new(&series.path);
-	let is_collection_based = library_options.is_collection_based();
-
-	if !is_collection_based || series.path == library_path {
-		walkdir = walkdir.max_depth(1);
-	}
-
-	let mut builder = GlobSetBuilder::new();
-	if series_ignore_file.exists() || library_ignore_file.exists() {
-		populate_glob_builder(
-			&mut builder,
-			vec![series_ignore_file, library_ignore_file]
-				.into_iter()
-				// We have to remove duplicates here otherwise the glob will double some patterns.
-				// An example would be when the library has media in root. Not the end of the world.
-				.unique()
-				.filter(|p| p.exists())
-				.collect::<Vec<_>>()
-				.as_slice(),
-		);
-	}
-
-	// TODO: make this an error to enforce correct glob patterns in an ignore file.
-	// This way, no scan will ever add things a user wants to ignore.
-	let glob_set = builder.build().unwrap_or_default();
-
-	(visited_media, media_by_path, walkdir, glob_set)
-}
-
 pub(crate) fn file_updated_since_scan(
 	entry: &DirEntry,
 	last_modified_at: String,
@@ -186,28 +127,42 @@ pub(crate) fn file_updated_since_scan(
 pub async fn mark_library_missing(library: library::Data, ctx: &Ctx) -> CoreResult<()> {
 	let db = ctx.get_db();
 
-	db._execute_raw(raw!(
-		"UPDATE series SET status={} WHERE library_id={}",
-		PrismaValue::String("MISSING".to_owned()),
-		PrismaValue::String(library.id.clone())
-	))
-	.exec()
-	.await?;
+	let library_id = library.id.clone();
+	let series_ids = library
+		.series()
+		.unwrap_or(&vec![])
+		.iter()
+		.map(|s| s.id.clone())
+		.collect();
 
-	let media_query = format!(
-		"UPDATE media SET status\"{}\" WHERE seriesId in ({})",
-		"MISSING".to_owned(),
-		library
-			.series()
-			.unwrap_or(&vec![])
-			.iter()
-			.cloned()
-			.map(|s| format!("\"{}\"", s.id))
-			.collect::<Vec<_>>()
-			.join(",")
+	let result = db
+		._transaction()
+		.run(|client| async move {
+			client
+				.series()
+				.update_many(
+					vec![series::library_id::equals(Some(library.id.clone()))],
+					vec![series::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await?;
+
+			client
+				.media()
+				.update_many(
+					vec![media::series_id::in_vec(series_ids)],
+					vec![media::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await
+		})
+		.await?;
+
+	debug!(
+		records_updated = result,
+		?library_id,
+		"Marked library as missing"
 	);
-
-	db._execute_raw(raw!(&media_query)).exec().await?;
 
 	Ok(())
 }
@@ -327,29 +282,26 @@ pub async fn batch_media_operations(
 						acc
 					},
 					BatchScanOperation::UpdateMedia(outdated_media) => {
-						// TODO: do something with media_updates
 						warn!(
 							?outdated_media,
-							"Stump does not support updating media entities yet",
+							"Stump currently has minimal support for updating media. This will be improved in the future.",
 						);
-						acc.1.push(outdated_media);
-						// let build_result = Media::build_with_options(
-						// 	Path::new(&outdated_media.path),
-						// 	MediaBuilderOptions {
-						// 		series_id: outdated_media.series_id.clone(),
-						// 		library_options: library_options.clone(),
-						// 	},
-						// );
+						let build_result = Media::build_with_options(
+							Path::new(&outdated_media.path),
+							MediaBuilderOptions {
+								series_id: outdated_media.series_id.clone(),
+								library_options: library_options.clone(),
+							},
+						);
 
-						// if let Ok(patch_media) = build_result {
-						// 	// outdated_media.apply_options(patch_media);
-						// 	acc.0.push(patch_media);
-						// } else {
-						// 	error!(
-						// 		?build_result,
-						// 		"Error occurred trying to build media entity for update",
-						// 	);
-						// }
+						if let Ok(newer_media) = build_result {
+							acc.1.push(outdated_media.resolve_changes(&newer_media));
+						} else {
+							error!(
+								?build_result,
+								"Error occurred trying to build media entity for update",
+							);
+						}
 
 						acc
 					},
@@ -367,7 +319,15 @@ pub async fn batch_media_operations(
 		"Partitioned batch operations",
 	);
 
-	// TODO: do something with media_updates
+	let update_result = media_dao.update_many(media_updates).await;
+	if let Err(err) = update_result {
+		error!(query_error = ?err, "Error occurred trying to update media entities");
+	} else {
+		debug!(
+			updated_count = update_result.unwrap().len(),
+			"Updated media entities"
+		)
+	}
 
 	let marked_missing_result = mark_media_missing(ctx, missing_paths).await;
 	if let Err(err) = marked_missing_result {
@@ -383,7 +343,6 @@ pub async fn batch_media_operations(
 		"Inserted new media entities",
 	);
 
-	// let updated_media = media_dao.update_many(media_updates).await?;
 	// FIXME: make return generic (not literally)
 	Ok(inserted_media)
 }

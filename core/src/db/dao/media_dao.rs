@@ -23,7 +23,8 @@ pub trait MediaDao: Dao {
 		&self,
 		page_params: PageParams,
 	) -> CoreResult<Pageable<Vec<Media>>>;
-	// async fn patch(&self, media: Media, partial: MediaPatch) -> CoreResult<Media>;
+
+	async fn update_many(&self, data: Vec<Self::Model>) -> CoreResult<Vec<Self::Model>>;
 }
 
 pub struct MediaDaoImpl {
@@ -130,6 +131,29 @@ impl MediaDao for MediaDaoImpl {
 				"A failure occurred when trying to query for the count of duplicate media".to_string(),
 			))
 		}
+	}
+
+	async fn update_many(&self, data: Vec<Media>) -> CoreResult<Vec<Media>> {
+		let queries = data.into_iter().map(|media| {
+			self.client.media().update(
+				media::id::equals(media.id),
+				vec![
+					media::name::set(media.name),
+					media::description::set(media.description),
+					media::size::set(media.size),
+					media::pages::set(media.pages),
+					media::checksum::set(media.checksum),
+				],
+			)
+		});
+
+		Ok(self
+			.client
+			._batch(queries)
+			.await?
+			.into_iter()
+			.map(Media::from)
+			.collect())
 	}
 }
 

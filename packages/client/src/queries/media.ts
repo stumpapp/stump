@@ -17,21 +17,20 @@ export const prefetchMedia = async (id: string) => {
 	})
 }
 
-export function useMedia(id: string, { onError, onSuccess }: QueryOptions<Media> = {}) {
-	const {
-		data: media,
-		isLoading,
-		isFetching,
-		isRefetching,
-	} = useQuery(['getMediaById'], () => getMediaById(id).then((res) => res.data), {
-		onError(err) {
-			console.error(err)
-			onError?.(err)
+export function useMediaById(id: string, { onError }: QueryOptions<Media> = {}) {
+	const { data, isLoading, isFetching, isRefetching } = useQuery(
+		['getMediaById', id],
+		() => getMediaById(id),
+		{
+			keepPreviousData: false,
+			onError(err) {
+				console.error(err)
+				onError?.(err)
+			},
 		},
-		onSuccess,
-	})
+	)
 
-	return { isLoading: isLoading || isFetching || isRefetching, media }
+	return { isLoading: isLoading || isFetching || isRefetching, media: data?.data }
 }
 
 /** Hook for fetching media after a cursor, within a series */
@@ -39,7 +38,7 @@ export function useMediaCursor(afterId: string, seriesId: string) {
 	const searchParams = useMemo(() => {
 		return new URLSearchParams({ cursor: afterId, series_id: seriesId })
 	}, [afterId, seriesId])
-	const { data: media, ...rest } = useCursorQuery(afterId, ['getMediaAfterCursor'], () =>
+	const { data: media, ...rest } = useCursorQuery(afterId, ['getMediaAfterCursor', afterId], () =>
 		getMedia(searchParams),
 	)
 

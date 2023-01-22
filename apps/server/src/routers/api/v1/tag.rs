@@ -1,13 +1,15 @@
-use axum::{extract::State, middleware::from_extractor, routing::get, Json, Router};
+use axum::{
+	extract::State, middleware::from_extractor_with_state, routing::get, Json, Router,
+};
 use serde::Deserialize;
 use stump_core::db::models::Tag;
 
 use crate::{config::state::AppState, errors::ApiResult, middleware::auth::Auth};
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/tags", get(get_tags).post(create_tags))
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 /// Get all tags for all items in the database. Tags are returned in a flat list,

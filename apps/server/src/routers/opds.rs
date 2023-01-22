@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, Query, State},
-	middleware::from_extractor,
+	middleware::from_extractor_with_state,
 	routing::get,
 	Router,
 };
@@ -28,7 +28,7 @@ use crate::{
 	},
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/opds/v1.2",
@@ -55,7 +55,7 @@ pub(crate) fn mount() -> Router<AppState> {
 						.route("/pages/:page", get(get_book_page)),
 				),
 		)
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {

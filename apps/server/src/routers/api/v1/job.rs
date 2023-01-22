@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor,
+	middleware::{from_extractor, from_extractor_with_state},
 	routing::{delete, get},
 	Json, Router,
 };
@@ -14,7 +14,7 @@ use crate::{
 	middleware::auth::{AdminGuard, Auth},
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/jobs",
@@ -23,7 +23,7 @@ pub(crate) fn mount() -> Router<AppState> {
 				.route("/:id/cancel", delete(cancel_job)),
 		)
 		.layer(from_extractor::<AdminGuard>())
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 /// Get all running/pending jobs.

@@ -1,6 +1,6 @@
 import { Box, Heading, Text, useColorModeValue } from '@chakra-ui/react'
-import { useMedia, useTopBarStore } from '@stump/client'
-import { useEffect } from 'react'
+import { useMediaById, useTopBarStore } from '@stump/client'
+import { Suspense, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router-dom'
 
@@ -19,12 +19,12 @@ export default function BookOverview() {
 		throw new Error('Book id is required for this route.')
 	}
 
-	const { media, isLoading } = useMedia(id)
+	const { media, isLoading } = useMediaById(id)
 	const { setBackwardsUrl } = useTopBarStore()
 
 	useEffect(() => {
-		if (media?.series) {
-			setBackwardsUrl(`/libraries/${media.series.id}`)
+		if (media?.series_id) {
+			setBackwardsUrl(`/series/${media.series_id}`)
 		}
 
 		return () => {
@@ -41,7 +41,7 @@ export default function BookOverview() {
 	}
 
 	return (
-		<>
+		<Suspense>
 			<Helmet>
 				<title>Stump | {media.name ?? ''}</title>
 			</Helmet>
@@ -66,15 +66,8 @@ export default function BookOverview() {
 					<Text color={textColor}>Checksum: {media.checksum}</Text>
 					<Text color={textColor}>Path: {media.path}</Text>
 				</div>
-
-				{/* TODO: series slider, cursor after current? */}
 				{media && <BooksAfter media={media} />}
-
-				{/* <div className="pt-6">
-					<Heading fontSize="md">Up Next in Series</Heading>
-					TODO: make me BOB
-				</div> */}
 			</div>
-		</>
+		</Suspense>
 	)
 }

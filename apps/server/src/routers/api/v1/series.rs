@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor,
+	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
@@ -37,7 +37,7 @@ use crate::{
 
 use super::library::apply_library_filters;
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/series", get(get_series))
 		.route("/series/recently-added", get(get_recently_added_series))
@@ -49,7 +49,7 @@ pub(crate) fn mount() -> Router<AppState> {
 				.route("/media/next", get(get_next_in_series))
 				.route("/thumbnail", get(get_series_thumbnail)),
 		)
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {

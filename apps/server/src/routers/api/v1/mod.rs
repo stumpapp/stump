@@ -19,18 +19,18 @@ mod series;
 mod tag;
 mod user;
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.merge(auth::mount())
-		.merge(epub::mount())
-		.merge(library::mount())
-		.merge(media::mount())
-		.merge(filesystem::mount())
-		.merge(job::mount())
-		.merge(log::mount())
-		.merge(series::mount())
-		.merge(tag::mount())
-		.merge(user::mount())
+		.merge(epub::mount(app_state.clone()))
+		.merge(library::mount(app_state.clone()))
+		.merge(media::mount(app_state.clone()))
+		.merge(filesystem::mount(app_state.clone()))
+		.merge(job::mount(app_state.clone()))
+		.merge(log::mount(app_state.clone()))
+		.merge(series::mount(app_state.clone()))
+		.merge(tag::mount(app_state.clone()))
+		.merge(user::mount(app_state))
 		.merge(reading_list::mount())
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))

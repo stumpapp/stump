@@ -83,8 +83,8 @@ export default function SeriesOverview() {
 	}, [isInView, containerRef, pageData?.current_page])
 
 	useEffect(() => {
-		if (series?.library) {
-			setBackwardsUrl(`/libraries/${series.library.id}`)
+		if (series) {
+			setBackwardsUrl(`/libraries/${series.library_id}`)
 		}
 
 		return () => {

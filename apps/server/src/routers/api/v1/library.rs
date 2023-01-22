@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor,
+	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
@@ -40,7 +40,7 @@ use crate::{
 
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/libraries", get(get_libraries).post(create_library))
 		.route("/libraries/stats", get(get_libraries_stats))
@@ -57,7 +57,7 @@ pub(crate) fn mount() -> Router<AppState> {
 				.route("/series", get(get_library_series))
 				.route("/thumbnail", get(get_library_thumbnail)),
 		)
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {

@@ -13,7 +13,7 @@ use crate::{config::state::AppState, utils::shutdown_signal};
 // TODO: do I need auth middleware here? I think so.
 pub(crate) fn mount() -> Router<AppState> {
 	Router::new().route("/sse", get(sse_handler))
-	// .layer(from_extractor::<Auth>())
+	// .layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 async fn sse_handler(

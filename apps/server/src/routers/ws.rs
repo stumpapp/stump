@@ -20,7 +20,7 @@ use crate::config::state::AppState;
 // throwing if off and making it not think there is a session when there is.
 pub(crate) fn mount() -> Router<AppState> {
 	Router::new().route("/ws", get(ws_handler))
-	// .layer(from_extractor::<Auth>())
+	// .layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 async fn ws_handler(

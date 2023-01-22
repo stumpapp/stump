@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use axum::{
 	body::BoxBody,
-	extract::FromRequestParts,
+	extract::{FromRef, FromRequestParts},
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Response},
 };
@@ -23,13 +23,14 @@ pub struct Auth;
 #[async_trait]
 impl<S> FromRequestParts<S> for Auth
 where
+	AppState: FromRef<S>,
 	S: Send + Sync,
 {
 	type Rejection = Response;
 
 	async fn from_request_parts(
 		parts: &mut Parts,
-		_state: &S,
+		state: &S,
 	) -> Result<Self, Self::Rejection> {
 		// Note: this is fine, right? I mean, it's not like we're doing anything
 		// on a OPTIONS request, right? Right? 👀
@@ -37,7 +38,15 @@ where
 			return Ok(Self);
 		}
 
-		let session_handle = parts.extensions.get::<SessionHandle>().unwrap();
+		let state = AppState::from_ref(state);
+		let session_handle =
+			parts.extensions.get::<SessionHandle>().ok_or_else(|| {
+				(
+					StatusCode::INTERNAL_SERVER_ERROR,
+					"Failed to extract session handle",
+				)
+					.into_response()
+			})?;
 		let session = session_handle.read().await;
 
 		if let Some(user) = session.get::<User>("user") {
@@ -48,24 +57,16 @@ where
 		// drop so we don't deadlock when writing to the session lol oy vey
 		drop(session);
 
-		// FIXME: this fails on first load, I assume I need to use the state param but not sure how yet
-		// NOTE: this seems to also cause, on first load of webapp, invalid state (e.g.
-		// thinking no libraries exist, etc)
-		let maybe_ctx = parts.extensions.get::<AppState>();
-		if maybe_ctx.is_none() {
-			return Err((StatusCode::UNAUTHORIZED).into_response());
-		}
-
-		let ctx = maybe_ctx.unwrap();
-
 		let auth_header = parts
 			.headers
 			.get(header::AUTHORIZATION)
 			.and_then(|value| value.to_str().ok());
 
 		let is_opds = parts.uri.path().starts_with("/opds");
+		let has_auth_header = auth_header.is_some();
+		trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
 
-		if auth_header.is_none() {
+		if !has_auth_header {
 			if is_opds {
 				return Err(BasicAuth.into_response());
 			}
@@ -74,7 +75,6 @@ where
 		}
 
 		let auth_header = auth_header.unwrap();
-
 		if !auth_header.starts_with("Basic ") || auth_header.len() <= 6 {
 			return Err((StatusCode::UNAUTHORIZED).into_response());
 		}
@@ -88,7 +88,7 @@ where
 				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
 			})?;
 
-		let user = ctx
+		let user = state
 			.db
 			.user()
 			.find_unique(user::username::equals(decoded_credentials.username.clone()))
@@ -141,7 +141,7 @@ where
 ///
 /// Router::new()
 ///     .layer(from_extractor::<AdminGuard>())
-///     .layer(from_extractor::<Auth>());
+///     .layer(from_extractor_with_state::<Auth, AppState>(app_state));
 /// ```
 pub struct AdminGuard;
 

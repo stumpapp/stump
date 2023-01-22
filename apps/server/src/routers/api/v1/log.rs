@@ -1,4 +1,4 @@
-use axum::{middleware::from_extractor, routing::get, Json, Router};
+use axum::{middleware::from_extractor_with_state, routing::get, Json, Router};
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::chrono::{DateTime, Utc};
 use std::fs::File;
@@ -11,11 +11,11 @@ use crate::{
 	utils::get_session_user,
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/logs", get(get_log_info).delete(clear_logs))
 		// FIXME: admin middleware
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 // TODO: there is a database entity Log. If that stays, I should differenciate between

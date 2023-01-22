@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor,
+	middleware::from_extractor_with_state,
 	routing::{get, put},
 	Json, Router,
 };
@@ -37,7 +37,7 @@ use crate::{
 
 use super::series::apply_series_filters;
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/media", get(get_media))
 		.route("/media/duplicates", get(get_duplicate_media))
@@ -53,7 +53,7 @@ pub(crate) fn mount() -> Router<AppState> {
 				.route("/page/:page", get(get_media_page))
 				.route("/progress/:page", put(update_media_progress)),
 		)
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {

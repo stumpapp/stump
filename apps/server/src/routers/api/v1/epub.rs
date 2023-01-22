@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor,
+	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
@@ -20,7 +20,7 @@ use crate::{
 	utils::{get_session_user, http::BufferResponse},
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/epub/:id",
@@ -29,7 +29,7 @@ pub(crate) fn mount() -> Router<AppState> {
 				.route("/chapter/:chapter", get(get_epub_chapter))
 				.route("/:root/:resource", get(get_epub_meta)),
 		)
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 /// Get an Epub by ID. The `read_progress` relation is loaded.

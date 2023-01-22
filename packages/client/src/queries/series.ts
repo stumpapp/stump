@@ -1,9 +1,9 @@
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '@stump/api'
 import type { Media, Pageable, Series } from '@stump/types'
 
-import { queryClient, useQuery } from '../client'
+import { queryClient, useInfinitePagedQuery, useQuery } from '../client'
 import { useQueryParamStore } from '../stores'
-import { QueryCallbacks, usePagedQuery } from '.'
+import { QueryCallbacks } from '.'
 
 export const prefetchSeries = async (id: string) => {
 	await queryClient.prefetchQuery(['getSeries', id], () => getSeriesById(id), {
@@ -48,11 +48,10 @@ export function useSeriesMedia(seriesId: string, page = 1) {
 	}
 }
 
-export function useRecentlyAddedSeries(options: QueryCallbacks<Pageable<Series[]>> = {}) {
-	return usePagedQuery(
-		'getRecentlyAddedSeries',
+export function useRecentlyAddedSeries() {
+	return useInfinitePagedQuery(
+		['getRecentlyAddedSeries'],
 		getRecentlyAddedSeries,
-		options,
 		new URLSearchParams('page_size=50'),
 	)
 }

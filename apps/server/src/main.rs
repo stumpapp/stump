@@ -50,12 +50,13 @@ async fn main() -> ServerResult<()> {
 	}
 
 	let server_ctx = core.get_context();
+	let app_state = server_ctx.arced();
 
 	info!("{}", core.get_shadow_text());
 
 	let app = Router::new()
-		.merge(routers::mount())
-		.with_state(server_ctx.arced())
+		.merge(routers::mount(app_state.clone()))
+		.with_state(app_state.clone())
 		.layer(session::get_session_layer())
 		.layer(cors::get_cors_layer());
 

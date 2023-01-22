@@ -1,6 +1,6 @@
 use axum::{
 	extract::{Path, State},
-	middleware::from_extractor,
+	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
@@ -21,7 +21,7 @@ use crate::{
 
 // TODO: move some of these user operations to the UserDao...
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		// TODO: adminguard these first two routes
 		.route("/users", get(get_users).post(create_user))
@@ -39,7 +39,7 @@ pub(crate) fn mount() -> Router<AppState> {
 					get(get_user_preferences).put(update_user_preferences),
 				),
 		)
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 async fn get_users(

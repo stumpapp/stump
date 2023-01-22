@@ -1,4 +1,9 @@
-use axum::{extract::Query, middleware::from_extractor, routing::post, Json, Router};
+use axum::{
+	extract::Query,
+	middleware::{from_extractor, from_extractor_with_state},
+	routing::post,
+	Json, Router,
+};
 use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
 use stump_core::prelude::{
@@ -13,11 +18,11 @@ use crate::{
 	utils::get_session_user,
 };
 
-pub(crate) fn mount() -> Router<AppState> {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/filesystem", post(list_directory))
 		.layer(from_extractor::<AdminGuard>())
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 /// List the contents of a directory on the file system at a given (optional) path. If no path

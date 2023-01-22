@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router-dom'
 
+import BooksAfter from '../../components/media/BooksAfter'
 import MediaCard from '../../components/media/MediaCard'
 import TagList from '../../components/tags/TagList'
 import Link from '../../ui/Link'
@@ -52,7 +53,7 @@ export default function BookOverview() {
 						{media.series && <Link to={`/series/${media.series.id}`}>{media.series.name}</Link>}
 
 						{/* TODO: I want this at the bottom of the container here, but layout needs to be tweaked and I am tired. */}
-						<TagList tags={media.tags} />
+						<TagList tags={media.tags || []} />
 					</div>
 				</div>
 
@@ -67,6 +68,7 @@ export default function BookOverview() {
 				</div>
 
 				{/* TODO: series slider, cursor after current? */}
+				{media && <BooksAfter media={media} />}
 
 				{/* <div className="pt-6">
 					<Heading fontSize="md">Up Next in Series</Heading>

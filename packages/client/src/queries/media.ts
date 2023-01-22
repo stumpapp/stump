@@ -1,14 +1,15 @@
 import {
 	getInProgressMedia,
+	getMedia,
 	getMediaById,
 	getRecentlyAddedMedia,
 	updateMediaProgress,
 } from '@stump/api'
-import type { Media, Pageable, ReadProgress } from '@stump/types'
+import type { Media, ReadProgress } from '@stump/types'
+import { useMemo } from 'react'
 
-import { useMutation } from '../client'
+import { QueryOptions, useCursorQuery, useInfinitePagedQuery, useMutation } from '../client'
 import { queryClient, useQuery } from '../client'
-import { MutationCallbacks, QueryCallbacks, usePagedQuery } from '.'
 
 export const prefetchMedia = async (id: string) => {
 	await queryClient.prefetchQuery(['getMediaById', id], () => getMediaById(id), {
@@ -16,7 +17,7 @@ export const prefetchMedia = async (id: string) => {
 	})
 }
 
-export function useMedia(id: string, { onError, onSuccess }: QueryCallbacks<Media> = {}) {
+export function useMedia(id: string, { onError, onSuccess }: QueryOptions<Media> = {}) {
 	const {
 		data: media,
 		isLoading,
@@ -33,7 +34,19 @@ export function useMedia(id: string, { onError, onSuccess }: QueryCallbacks<Medi
 	return { isLoading: isLoading || isFetching || isRefetching, media }
 }
 
-export function useMediaMutation(id: string, options: MutationCallbacks<ReadProgress> = {}) {
+/** Hook for fetching media after a cursor, within a series */
+export function useMediaCursor(afterId: string, seriesId: string) {
+	const searchParams = useMemo(() => {
+		return new URLSearchParams({ cursor: afterId, series_id: seriesId })
+	}, [afterId, seriesId])
+	const { data: media, ...rest } = useCursorQuery(afterId, ['getMediaAfterCursor'], () =>
+		getMedia(searchParams),
+	)
+
+	return { media, ...rest }
+}
+
+export function useMediaMutation(id: string, options: QueryOptions<ReadProgress> = {}) {
 	const {
 		mutate: updateReadProgress,
 		mutateAsync: updateReadProgressAsync,
@@ -44,27 +57,25 @@ export function useMediaMutation(id: string, options: MutationCallbacks<ReadProg
 			options.onError?.(err)
 		},
 		onSuccess(data) {
-			options.onUpdated?.(data)
+			options.onSuccess?.(data)
 		},
 	})
 
 	return { isLoading, updateReadProgress, updateReadProgressAsync }
 }
 
-export function useRecentlyAddedMedia(options: QueryCallbacks<Pageable<Media[]>> = {}) {
-	return usePagedQuery(
-		'getRecentlyAddedMedia',
+export function useRecentlyAddedMedia() {
+	return useInfinitePagedQuery(
+		['getRecentlyAddedMedia'],
 		getRecentlyAddedMedia,
-		options,
 		new URLSearchParams('page_size=10'),
 	)
 }
 
-export function useContinueReading(options: QueryCallbacks<Pageable<Media[]>> = {}) {
-	return usePagedQuery(
-		'getInProgressMedia',
+export function useContinueReading() {
+	return useInfinitePagedQuery(
+		['getInProgressMedia'],
 		getInProgressMedia,
-		options,
 		new URLSearchParams('page_size=10'),
 	)
 }

@@ -24,7 +24,7 @@
 - [x] Move `prisma-cli` out of `core`?
 - [ ] Refactor all queries to use more current select/include patterns
   - https://prisma.brendonovich.dev/reading-data/select-include#many-relation-options
-- [ ] Change HTTP endpoints to be **unpaged** by default
+- [x] Change HTTP endpoints to be **unpaged** by default (except opds)
 - [ ] Rethink HTTP endpoints allow better range of filter options
   - [x] Basic structure implemented, just a matter of prioritizing it time permitting
 - [ ] Rework `integration_tests` and add unit testing throughout

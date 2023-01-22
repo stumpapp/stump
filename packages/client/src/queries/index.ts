@@ -1,6 +1,4 @@
-import type { ApiResult, PageableApiResult } from '@stump/api'
-import type { Pageable } from '@stump/types'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import type { ApiResult } from '@stump/api'
 
 export * from './auth'
 export * from './epub'
@@ -38,51 +36,3 @@ export interface DeleteCallbacks<T> {
 
 export type MutationCallbacks<T> = CreateCallbacks<T> & UpdateCallbacks<T> & DeleteCallbacks<T>
 export type ClientQueryParams<T> = QueryCallbacks<T> & MutationCallbacks<T>
-
-// TODO: I think it would be better to split up some of my mutations into updates
-// and creates. I think that would make it easier to handle errors and loading states.
-
-export function usePagedQuery<T>(
-	key: string,
-	queryFn: (page: number, params?: URLSearchParams) => Promise<PageableApiResult<T[]>>,
-	// FIXME: use this, correct the type
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	options: QueryCallbacks<Pageable<T[]>> = {},
-	params?: URLSearchParams,
-) {
-	const {
-		data: pageData,
-		isLoading,
-		isFetching,
-		isFetchingNextPage,
-		fetchNextPage,
-		hasNextPage,
-		...rest
-	} = useInfiniteQuery([key], (ctx) => queryFn(ctx.pageParam || 1, params), {
-		getNextPageParam: (lastGroup) => {
-			if (lastGroup?.data._page) {
-				const currentPage = lastGroup.data._page.current_page
-				const totalPages = lastGroup.data._page.total_pages
-
-				if (currentPage < totalPages) {
-					return lastGroup.data._page?.current_page + 1
-				}
-			}
-			return undefined
-		},
-		keepPreviousData: true,
-		// ...options,
-	})
-
-	const data = pageData ? pageData.pages.flatMap((res) => res.data.data) : []
-
-	return {
-		data,
-		fetchMore: fetchNextPage,
-		hasMore: hasNextPage,
-		isFetching: isFetching || isFetchingNextPage,
-		isFetchingNextPage,
-		isLoading: isLoading,
-		...rest,
-	}
-}

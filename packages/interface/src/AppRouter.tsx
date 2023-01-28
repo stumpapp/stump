@@ -5,47 +5,29 @@ import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
 
-// FIXME: this is really annoying, and causes a different issue
+// FIXME: this is really annoying
 type LazyComponent = Promise<{
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	default: React.ComponentType<any>
 }>
 
-const Home = React.lazy(() => import('./pages/Home') as unknown as LazyComponent)
-const LibraryOverview = React.lazy(
-	() => import('./pages/library/LibraryOverview') as unknown as LazyComponent,
-)
-const LibraryFileExplorer = React.lazy(
-	() => import('./pages/library/LibraryFileExplorer') as unknown as LazyComponent,
-)
-const SeriesOverview = React.lazy(
-	() => import('./pages/SeriesOverview') as unknown as LazyComponent,
-)
-const BookOverview = React.lazy(
-	() => import('./pages/book/BookOverview') as unknown as LazyComponent,
-)
-const ReadBook = React.lazy(() => import('./pages/book/ReadBook') as unknown as LazyComponent)
-const ReadEpub = React.lazy(() => import('./pages/book/ReadEpub') as unknown as LazyComponent)
-const SettingsLayout = React.lazy(
-	() => import('./components/settings/SettingsLayout') as unknown as LazyComponent,
-)
-const GeneralSettings = React.lazy(
-	() => import('./pages/settings/GeneralSettings') as unknown as LazyComponent,
-)
-const JobSettings = React.lazy(
-	() => import('./pages/settings/JobSettings') as unknown as LazyComponent,
-)
-const ServerSettings = React.lazy(
-	() => import('./pages/settings/ServerSettings') as unknown as LazyComponent,
-)
-const UserSettings = React.lazy(
-	() => import('./pages/settings/UserSettings') as unknown as LazyComponent,
-)
-const FourOhFour = React.lazy(() => import('./pages/FourOhFour') as unknown as LazyComponent)
-const ServerConnectionError = React.lazy(
-	() => import('./pages/ServerConnectionError') as unknown as LazyComponent,
-)
-const LoginOrClaim = React.lazy(() => import('./pages/LoginOrClaim') as unknown as LazyComponent)
-const OnBoarding = React.lazy(() => import('./pages/OnBoarding') as unknown as LazyComponent)
+const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
+const Home = lazily(() => import('./pages/Home'))
+const LibraryOverview = lazily(() => import('./pages/library/LibraryOverview'))
+const LibraryFileExplorer = lazily(() => import('./pages/library/LibraryFileExplorer'))
+const SeriesOverview = lazily(() => import('./pages/SeriesOverview'))
+const BookOverview = lazily(() => import('./pages/book/BookOverview'))
+const ReadBook = lazily(() => import('./pages/book/ReadBook'))
+const ReadEpub = lazily(() => import('./pages/book/ReadEpub'))
+const SettingsLayout = lazily(() => import('./components/settings/SettingsLayout'))
+const GeneralSettings = lazily(() => import('./pages/settings/GeneralSettings'))
+const JobSettings = lazily(() => import('./pages/settings/JobSettings'))
+const ServerSettings = lazily(() => import('./pages/settings/ServerSettings'))
+const UserSettings = lazily(() => import('./pages/settings/UserSettings'))
+const FourOhFour = lazily(() => import('./pages/FourOhFour'))
+const ServerConnectionError = lazily(() => import('./pages/ServerConnectionError'))
+const LoginOrClaim = lazily(() => import('./pages/LoginOrClaim'))
+const OnBoarding = lazily(() => import('./pages/OnBoarding'))
 
 function OnBoardingRouter() {
 	return (

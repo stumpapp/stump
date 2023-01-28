@@ -20,7 +20,7 @@ import Form, { FormControl } from '../ui/Form'
 import { DebouncedInput } from '../ui/Input'
 
 export default function ServerUrlForm() {
-	const { setBaseUrl } = useStumpStore()
+	const { setBaseUrl } = useStumpStore(({ setBaseUrl }) => ({ setBaseUrl }))
 	const [isCheckingUrl, { on, off }] = useBoolean(false)
 	const [sucessfulConnection, setSuccessfulConnection] = useState(false)
 

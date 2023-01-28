@@ -15,7 +15,10 @@ export type LocaleSelectOption = {
 
 export function useLocale() {
 	// TODO: update DB on changes
-	const { userPreferences, setUserPreferences } = useUserStore()
+	const { userPreferences, setUserPreferences } = useUserStore((store) => ({
+		setUserPreferences: store.setUserPreferences,
+		userPreferences: store.userPreferences,
+	}))
 
 	function setLocaleFromStr(localeStr: string) {
 		const locale = localeStr as Locale

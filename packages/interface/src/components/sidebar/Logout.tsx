@@ -19,7 +19,7 @@ import ToolTip from '../../ui/ToolTip'
 export default function Logout() {
 	const { isOpen, onOpen, onClose } = useDisclosure()
 
-	const { setUser } = useUserStore()
+	const setUser = useUserStore((store) => store.setUser)
 
 	const navigate = useNavigate()
 

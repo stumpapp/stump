@@ -60,7 +60,7 @@ export function useLibraries() {
 }
 
 export function useLibrarySeries(libraryId: string, page = 1) {
-	const { getQueryString, ...paramsStore } = useQueryParamStore()
+	const { getQueryString, ...paramsStore } = useQueryParamStore((state) => state)
 
 	const { isLoading, isFetching, isPreviousData, data } = useQuery(
 		['getLibrarySeries', page, libraryId, paramsStore],

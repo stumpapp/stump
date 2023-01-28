@@ -12,7 +12,10 @@ export default function NavigationButtons() {
 
 	// FIXME: still not a perfect solution, but it works for now.
 	// https://github.com/remix-run/react-router/discussions/8782
-	const { backwardsUrl, forwardsUrl } = useTopBarStore()
+	const { backwardsUrl, forwardsUrl } = useTopBarStore(({ backwardsUrl, forwardsUrl }) => ({
+		backwardsUrl,
+		forwardsUrl,
+	}))
 
 	const navigateForward = useCallback(() => {
 		if (forwardsUrl != undefined) {

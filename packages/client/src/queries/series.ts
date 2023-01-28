@@ -23,7 +23,7 @@ export function useSeries(id: string, options: QueryCallbacks<Series> = {}) {
 }
 
 export function useSeriesMedia(seriesId: string, page = 1) {
-	const { getQueryString, ...paramsStore } = useQueryParamStore()
+	const { getQueryString, ...paramsStore } = useQueryParamStore((state) => state)
 
 	const { isLoading, isFetching, isRefetching, isPreviousData, data } = useQuery(
 		['getSeriesMedia', page, seriesId, paramsStore],

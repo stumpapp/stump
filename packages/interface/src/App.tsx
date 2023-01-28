@@ -31,8 +31,12 @@ function RouterContainer(props: { appProps: AppProps }) {
 	const [mounted, setMounted] = useState(false)
 	const [appProps, setAppProps] = useState(props.appProps)
 
-	const { baseUrl, setBaseUrl } = useStumpStore()
-	const { setTitle } = useTopBarStore()
+	const setTitle = useTopBarStore(({ setTitle }) => setTitle)
+
+	const { baseUrl, setBaseUrl } = useStumpStore(({ baseUrl, setBaseUrl }) => ({
+		baseUrl,
+		setBaseUrl,
+	}))
 
 	useEffect(
 		() => {

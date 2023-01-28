@@ -11,7 +11,7 @@ interface Props {
 
 export function useStumpWs({ onEvent }: Props) {
 	const URI = API?.getUri()
-	const { setConnected } = useStumpStore()
+	const { setConnected } = useStumpStore(({ setConnected }) => ({ setConnected }))
 
 	const socketUrl = useMemo(() => {
 		let url = URI

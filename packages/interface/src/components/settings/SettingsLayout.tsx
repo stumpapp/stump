@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom'
 import SettingsNavigation from './SettingsNavigation'
 
 export default function SettingsLayout() {
-	const { user } = useUserStore()
+	const user = useUserStore((store) => store.user)
 
 	const bgColor = useColorModeValue('gray.75', 'gray.900')
 

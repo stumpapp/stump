@@ -27,7 +27,10 @@ export function AppLayout() {
 
 	useCoreEventHandler()
 
-	const { user: storeUser, setUser } = useUserStore()
+	const { storeUser, setUser } = useUserStore((state) => ({
+		setUser: state.setUser,
+		storeUser: state.user,
+	}))
 
 	// TODO: platform specific hotkeys
 	// TODO: cmd+shift+h for home

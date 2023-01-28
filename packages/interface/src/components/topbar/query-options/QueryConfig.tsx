@@ -30,7 +30,12 @@ function QueryConfigSection({ children }: { children: React.ReactNode }) {
 }
 
 export default function QueryConfig() {
-	const { order_by, setOrderBy, direction, setDirection } = useQueryParamStore()
+	const { order_by, setOrderBy, direction, setDirection } = useQueryParamStore((state) => ({
+		direction: state.direction,
+		order_by: state.order_by,
+		setDirection: state.setDirection,
+		setOrderBy: state.setOrderBy,
+	}))
 
 	const location = useLocation()
 

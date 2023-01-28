@@ -14,7 +14,10 @@ import Input, { PasswordInput } from '../../../ui/Input'
 import SettingsSection from '../SettingsSection'
 
 export default function ProfileForm() {
-	const { user, setUser } = useUserStore()
+	const { user, setUser } = useUserStore((store) => ({
+		setUser: store.setUser,
+		user: store.user,
+	}))
 
 	if (!user) {
 		throw new Error('Unauthorized')

@@ -11,7 +11,7 @@ import QueryConfig from './query-options/QueryConfig'
 // sort/view mode buttons are gone, the sort config is gone,and the search bar is meh. I need to
 // plan out the layout for mobile.
 export default function TopBar() {
-	const { title } = useTopBarStore()
+	const title = useTopBarStore(({ title }) => title)
 	const location = useLocation()
 
 	const { entity, showQueryParamOptions } = useMemo(() => {

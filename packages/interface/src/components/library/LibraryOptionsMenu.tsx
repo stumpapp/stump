@@ -14,7 +14,7 @@ interface Props {
 export default function LibraryOptionsMenu({ library }: Props) {
 	const navigate = useNavigate()
 
-	const { user } = useUserStore()
+	const user = useUserStore((store) => store.user)
 
 	const { scanAsync } = useScanLibrary()
 

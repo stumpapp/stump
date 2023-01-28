@@ -20,7 +20,8 @@ export default function BookOverview() {
 	}
 
 	const { media, isLoading } = useMediaById(id)
-	const { setBackwardsUrl } = useTopBarStore()
+
+	const setBackwardsUrl = useTopBarStore((state) => state.setBackwardsUrl)
 
 	useEffect(() => {
 		if (media?.series_id) {

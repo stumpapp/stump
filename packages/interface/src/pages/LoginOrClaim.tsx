@@ -22,7 +22,11 @@ import Input from '../ui/Input'
 
 export default function LoginOrClaim() {
 	const [params] = useSearchParams()
-	const { user, setUser } = useUserStore()
+
+	const { user, setUser } = useUserStore((store) => ({
+		setUser: store.setUser,
+		user: store.user,
+	}))
 
 	const { t } = useLocale()
 

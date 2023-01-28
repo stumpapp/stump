@@ -67,7 +67,8 @@ export default function SeriesOverview() {
 	}
 
 	const { layoutMode } = useLayoutMode('SERIES')
-	const { setBackwardsUrl } = useTopBarStore()
+
+	const setBackwardsUrl = useTopBarStore((state) => state.setBackwardsUrl)
 
 	const { series, isLoading: isLoadingSeries } = useSeries(id)
 

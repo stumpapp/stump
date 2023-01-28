@@ -71,7 +71,8 @@ interface Props {
 
 export function useStumpSse({ onEvent }: Props) {
 	const URI = API?.getUri()
-	const { setConnected } = useStumpStore()
+
+	const setConnected = useStumpStore(({ setConnected }) => setConnected)
 
 	const eventSourceUrl = useMemo(() => {
 		let url = URI

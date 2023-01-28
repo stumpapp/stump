@@ -10,7 +10,11 @@ const DEFAULT_LAYOUT_MODE: LayoutMode = 'GRID'
 
 // TODO: add callbacks for error?
 export function useLayoutMode(entity: LayoutEntity) {
-	const { user, userPreferences, setUserPreferences } = useUserStore()
+	const { user, userPreferences, setUserPreferences } = useUserStore((state) => ({
+		setUserPreferences: state.setUserPreferences,
+		user: state.user,
+		userPreferences: state.userPreferences,
+	}))
 
 	const { updateUserPreferences } = useUserPreferences(user?.id, {
 		enableFetchPreferences: !user,

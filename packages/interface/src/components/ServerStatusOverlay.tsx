@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 // FIXME: make this not as ugly lol
 export default function ServerStatusOverlay() {
-	const { connected } = useStumpStore()
+	const { connected } = useStumpStore(({ connected }) => ({ connected }))
 	const [show, setShow] = useState(false)
 
 	useEffect(() => {

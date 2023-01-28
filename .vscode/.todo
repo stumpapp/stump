@@ -34,6 +34,7 @@
 - [ ] Either use the `optional_struct` dependency or look into https://github.com/Nukesor/inter-struct (or maybe both?)
 - [ ] Refine Stump color palette (gray colors are :barf:)
 - [ ] Start building out, but don't use quite yet, custom UI components in new package `components`
+  - [ ] https://github.com/shadcn/ui
 - [ ] Get major UI sections completed to MVP stage:
   - [ ] Homepage sections
     - [x] Continue Reading, Recently Added, Etc.
@@ -44,6 +45,7 @@
     - [ ] Next in series (using a new `cursor` page param?)
   - [ ] Series overview section (on 0th page when browsing a series)
   - [ ] Settings pages
+- [ ] Remove all those `Loading...` placeholders
 - [x] Add redirects for unauthed access
   - I.e. if I visit `/some-page/1`, and get redirected to `/auth`, should redirect instead with query params to restore state: `/auth?redirect=/some-page/1`
 - [ ] Revisit RAR support with upcoming `0.5` unrar release -> https://github.com/muja/unrar.rs/issues/26

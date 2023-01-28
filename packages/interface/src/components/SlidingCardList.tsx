@@ -13,6 +13,7 @@ interface Props {
 	onScrollEnd?: () => void
 	isLoadingNext?: boolean
 	hasNext?: boolean
+	hideIfEmpty?: boolean
 }
 
 export default function SlidingCardList({
@@ -22,6 +23,7 @@ export default function SlidingCardList({
 	hasNext,
 	title,
 	emptyMessage,
+	hideIfEmpty,
 }: Props) {
 	const parentRef = useRef<HTMLDivElement>(null)
 	const visibleRef = useRef([0, 0])
@@ -93,6 +95,10 @@ export default function SlidingCardList({
 				return cards[virtualItem.index]
 			})
 		}
+	}
+
+	if (hideIfEmpty && isEmpty) {
+		return null
 	}
 
 	return (

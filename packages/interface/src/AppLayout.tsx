@@ -53,7 +53,7 @@ export function AppLayout() {
 	}
 
 	return (
-		<React.Suspense fallback={<>Loading...</>}>
+		<React.Suspense fallback={<Lazy />}>
 			<CommandPalette />
 			<Flex
 				// className={clsx({ 'overflow-hidden': appProps?.platform !== 'browser' })}

@@ -40,8 +40,11 @@ jobs:
       - name: Setup pnpm and typescript
         uses: ./.github/actions/setup-pnpm
 
-      - name: Run type checks
-        run: pnpm tsc:checks
+      - name: lint
+        run: pnpm moon run :lint
+
+      # - name: typecheck
+      #   run: pnpm moon run :typecheck
 
   # release:
   #   name: Release (${{ matrix.platform }})

@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/setup-pnpm
 
       - name: lint
-        run: pnpm moon run :lint
+        run: pnpm lint
 
       # - name: typecheck
       #   run: pnpm moon run :typecheck

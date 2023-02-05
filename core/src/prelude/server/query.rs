@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
-	prelude::{errors::CoreError, server::pageable::PageParams},
-	prisma::{media, series},
+	prelude::errors::CoreError,
+	prisma::{library, media, series},
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]
@@ -30,7 +30,8 @@ impl From<Direction> for prisma_client_rust::Direction {
 }
 
 /// Model used in media API to alter sorting/ordering of queried media
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Type)]
+#[serde(default)]
 pub struct QueryOrder {
 	/// The field to order by. Defaults to 'name'
 	pub order_by: String,
@@ -43,15 +44,6 @@ impl Default for QueryOrder {
 		QueryOrder {
 			order_by: "name".to_string(),
 			direction: Direction::Asc,
-		}
-	}
-}
-
-impl From<PageParams> for QueryOrder {
-	fn from(params: PageParams) -> Self {
-		QueryOrder {
-			order_by: params.order_by,
-			direction: params.direction,
 		}
 	}
 }
@@ -75,6 +67,26 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order media by {:?}",
+					self.order_by
+				)))
+			},
+		})
+	}
+}
+
+impl TryInto<library::OrderByParam> for QueryOrder {
+	type Error = CoreError;
+
+	fn try_into(self) -> Result<library::OrderByParam, Self::Error> {
+		let dir: prisma_client_rust::Direction = self.direction.into();
+
+		Ok(match self.order_by.to_lowercase().as_str() {
+			"name" => library::name::order(dir),
+			"path" => library::path::order(dir),
+			"status" => library::status::order(dir),
+			_ => {
+				return Err(CoreError::InvalidQuery(format!(
+					"You cannot order library by {:?}",
 					self.order_by
 				)))
 			},

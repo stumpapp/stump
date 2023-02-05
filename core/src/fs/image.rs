@@ -9,7 +9,7 @@ use tracing::{debug, error, trace};
 use webp::{Encoder, WebPMemory};
 
 use crate::{
-	config::get_thumbnails_dir, prelude::errors::ProcessFileError, prisma::media,
+	config::get_thumbnails_dir, db::models::Media, prelude::errors::ProcessFileError,
 };
 
 use super::media_file;
@@ -92,9 +92,7 @@ pub fn generate_thumbnail(id: &str, path: &str) -> Result<PathBuf, ProcessFileEr
 }
 
 // TODO: does this need to return a result?
-pub fn generate_thumbnails(
-	media: Vec<media::Data>,
-) -> Result<Vec<PathBuf>, ProcessFileError> {
+pub fn generate_thumbnails(media: &[Media]) -> Result<Vec<PathBuf>, ProcessFileError> {
 	debug!("Enter generate_thumbnails");
 
 	// TODO: this might make the stack overflow lol
@@ -104,7 +102,7 @@ pub fn generate_thumbnails(
 		.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str()))
 		.filter_map(|res| {
 			if res.is_err() {
-				error!("Error generating thumbnail: {:?}", res.err());
+				error!(error = ?res.err(), "Error generating thumbnail");
 				None
 			} else {
 				res.ok()

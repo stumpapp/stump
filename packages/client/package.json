@@ -1,0 +1,29 @@
+{
+  "name": "@stump/client",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@stump/api": "workspace:*",
+    "@stump/types": "workspace:*",
+    "@tanstack/react-query": "^4.20.4",
+    "axios": "^1.2.2",
+    "immer": "^9.0.16",
+    "react-use-websocket": "^4.2.0",
+    "zustand": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.26",
+    "prettier": "^2.8.1",
+    "tsconfig": "*",
+    "typescript": "^4.8.4"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  }
+}

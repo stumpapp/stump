@@ -1,8 +1,0 @@
-{
-	"extends": "../config/base.tsconfig.json",
-	"compilerOptions": {
-		"skipLibCheck": true
-	},
-	"include": ["src"],
-	"exclude": ["node_modules"]
-}

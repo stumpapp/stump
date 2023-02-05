@@ -1,7 +1,6 @@
 use super::{Job, RunnerCtx};
 use crate::{
-	db::models::LibraryScanMode, fs::scanner::library_scanner::scan, job::JobUpdate,
-	prelude::CoreResult,
+	db::models::LibraryScanMode, fs::scanner::scan, job::JobUpdate, prelude::CoreResult,
 };
 use tracing::info;
 

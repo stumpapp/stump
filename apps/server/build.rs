@@ -1,5 +1,5 @@
 use chrono::prelude::{DateTime, Utc};
-use std::process::Command;
+use std::{env, process::Command};
 
 fn get_git_rev() -> Option<String> {
 	let output = Command::new("git")
@@ -23,7 +23,12 @@ fn get_compile_date() -> String {
 fn main() {
 	println!("cargo:rustc-env=STATIC_BUILD_DATE={}", get_compile_date());
 
-	if let Some(rev) = get_git_rev() {
+	let maybe_rev = match env::var("GIT_REV") {
+		Ok(rev) => Some(rev),
+		_ => get_git_rev(),
+	};
+
+	if let Some(rev) = maybe_rev {
 		println!("cargo:rustc-env=GIT_REV={}", rev);
 	}
 }

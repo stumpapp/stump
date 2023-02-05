@@ -1,5 +1,6 @@
 use std::{
 	fs::File,
+	io::BufReader,
 	path::{Path, PathBuf},
 };
 
@@ -44,7 +45,7 @@ pub fn digest(path: &Path, size: u64) -> Option<String> {
 	}
 }
 
-fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
+fn load_epub(path: &str) -> Result<EpubDoc<BufReader<File>>, ProcessFileError> {
 	EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))
 }
 

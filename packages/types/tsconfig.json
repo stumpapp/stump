@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "outDir": "../../.moon/cache/types/packages/types"
+  },
+  "include": [
+    "*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

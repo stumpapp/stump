@@ -1,0 +1,82 @@
+# https://moonrepo.dev/docs/config/global-project
+$schema: 'https://moonrepo.dev/schemas/global-project.json'
+
+fileGroups:
+  # Application specific files
+  app: []
+  configs:
+    - '*.{js,json,yml,yaml}'
+  sources:
+    - 'public/**/*'
+    - 'src/**/*'
+    - 'types/**/*'
+  typescript:
+    - 'public/**/*'
+    - 'src/**/*'
+    - 'types/**/*'
+  rust:
+    - 'src/**/*.rs'
+  tests:
+    - 'tests/**/*.test.*'
+    - 'tests/**/*.stories.*'
+    - '**/__tests__/**/*'
+  assets:
+    - 'assets/**/*'
+    - 'images/**/*'
+    - 'static/**/*'
+    - '**/*.{scss,css}'
+    - '**/*.{md,mdx}'
+
+tasks:
+  format:
+    command:
+      - 'prettier'
+      - '--config'
+      - '@in(4)'
+      - '--ignore-path'
+      - '@in(3)'
+      - '--write'
+      - '.'
+    inputs:
+      - 'src/**/*'
+      - 'tests/**/*'
+      - '**/*.{md,mdx,yml,yaml,json}'
+      - '/.prettierignore'
+      - '/.prettierrc'
+
+  lint:
+    command:
+      - 'eslint'
+      - '--ext'
+      - '.ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs'
+      - '--fix'
+      - '--report-unused-disable-directives'
+      - '--no-error-on-unmatched-pattern'
+      - '--exit-on-fatal-error'
+      - '--ignore-path'
+      - '@in(2)'
+      - '.'
+    inputs:
+      - '*.config.*'
+      - '**/.eslintrc.*'
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+      - 'tsconfig.json'
+      - '/tsconfig.eslint.json'
+      - '/tsconfig.options.json'
+      - '@group(app)'
+      - '@globs(sources)'
+      - '@globs(tests)'
+
+  typecheck:
+    command:
+      - 'tsc'
+      - '--build'
+      - '--verbose'
+    inputs:
+      - '@group(app)'
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - 'tsconfig.json'
+      - 'tsconfig.*.json'
+      - '/tsconfig.options.json'

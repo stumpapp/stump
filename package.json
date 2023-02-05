@@ -1,53 +1,67 @@
 {
-	"name": "@stump/monorepo",
-	"version": "0.0.0",
-	"repository": "https://github.com/aaronleopold/stump.git",
-	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
-	"license": "MIT",
-	"scripts": {
-		"prepare": "husky install",
-		"setup": "pnpm i && pnpm web build && pnpm core run setup",
-		"tsc:checks": "pnpm -r tsc --noEmit",
-		"checks": "pnpm -r check",
-		"clippy": "cargo clippy -- -D warnings",
-		"tests": "pnpm -r test",
-		"start:web": "pnpm run server start",
-		"dev:server": "cargo watch --ignore common -x 'run --manifest-path=apps/server/Cargo.toml --package stump_server'",
-		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"pnpm dev:server\" \"pnpm web dev\"",
-		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm desktop dev\"",
-		"core": "pnpm --filter @stump/core --",
-		"prisma": "pnpm core prisma",
-		"codegen": "pnpm -r codegen",
-		"web": "pnpm --filter @stump/web --",
-		"server": "pnpm --filter @stump/server --",
-		"desktop": "pnpm --filter @stump/desktop --",
-		"interface": "pnpm --filter @stump/interface --",
-		"client": "pnpm --filter @stump/client --",
-		"build:server": "pnpm run server build",
-		"build:web": "pnpm web build && pnpm build:server",
-		"build:desktop": "pnpm desktop build",
-		"build:docker": "docker buildx build --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
-		"cache:docker": "docker buildx build --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
-		"cache:docker-arm": "docker buildx build --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
-		"build:docker-amd": "docker buildx build --push --platform=linux/amd64 -t aaronleopold/stump-preview:latest ."
-	},
-	"devDependencies": {
-		"concurrently": "^7.5.0",
-		"cpy-cli": "^4.2.0",
-		"husky": "^8.0.1",
-		"lint-staged": "^13.0.3",
-		"move-cli": "2.0.0",
-		"prettier": "^2.7.1",
-		"trash-cli": "^5.0.0"
-	},
-	"lint-staged": {
-		"*.{js,jsx,ts,tsx,md}": [
-			"prettier --write"
-		],
-		".rs": [
-			"cargo fmt --manifest-path=core/Cargo.toml --",
-			"cargo fmt --manifest-path=apps/server/Cargo.toml --",
-			"cargo fmt --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
-		]
-	}
+  "name": "@stump/monorepo",
+  "version": "0.0.0",
+  "repository": "https://github.com/aaronleopold/stump.git",
+  "author": "Aaron Leopold <aaronleopold1221@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "husky install",
+    "setup": "pnpm i && pnpm web build && pnpm core run setup",
+    "lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path .gitignore .",
+    "client": "pnpm --filter @stump/client --",
+    "desktop": "pnpm --filter @stump/desktop --",
+    "interface": "pnpm --filter @stump/interface --",
+    "web": "pnpm --filter @stump/web --",
+    "server": "pnpm --filter @stump/server --",
+    "dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm desktop dev\"",
+    "core": "pnpm --filter @stump/core --",
+    "prisma": "pnpm core prisma",
+    "codegen": "pnpm -r codegen",
+    "build:server": "pnpm run server build",
+    "build:web": "pnpm web build && pnpm build:server",
+    "build:desktop": "pnpm desktop build",
+    "build:docker": "docker buildx build -f scripts/release/Dockerfile --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
+    "cache:docker": "docker buildx build -f scripts/release/Dockerfile --load --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
+    "cache:docker-arm": "docker buildx build -f scripts/release/Dockerfile --load --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
+    "build:docker-amd": "docker buildx build -f scripts/release/Dockerfile --push --platform=linux/amd64 -t aaronleopold/stump-preview:latest .",
+    "moon": "moon --color --log trace"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.7",
+    "@moonrepo/cli": "^0.21.3",
+    "@typescript-eslint/eslint-plugin": "^5.47.1",
+    "@typescript-eslint/parser": "^5.47.1",
+    "babel-preset-moon": "^1.1.3",
+    "concurrently": "^7.6.0",
+    "cpy-cli": "^4.2.0",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.31.11",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-simple-import-sort": "^8.0.0",
+    "eslint-plugin-sort-keys-fix": "^1.1.2",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.1.0",
+    "move-cli": "2.0.0",
+    "prettier": "^2.8.1",
+    "prettier-eslint": "^15.0.1",
+    "trash-cli": "^5.0.0",
+    "tsconfig-moon": "^1.2.1",
+    "typescript": "^4.9.4"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,md}": [
+      "prettier --write"
+    ],
+    ".rs": [
+      "cargo fmt --manifest-path=core/Cargo.toml --",
+      "cargo fmt --manifest-path=apps/server/Cargo.toml --",
+      "cargo fmt --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
+    ]
+  },
+  "packageManager": "pnpm@7.18.2",
+  "engines": {
+    "node": "18.12.0"
+  }
 }

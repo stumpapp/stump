@@ -24,6 +24,12 @@ pub struct LoginOrRegisterArgs {
 	pub password: String,
 }
 
+#[derive(Deserialize, Type)]
+pub struct UpdateUserArgs {
+	pub username: String,
+	pub password: Option<String>,
+}
+
 #[derive(Serialize, Type)]
 pub struct ClaimResponse {
 	pub is_claimed: bool,

@@ -1,3 +1,4 @@
+pub mod constants;
 pub mod epub;
 pub mod pdf;
 pub mod rar;

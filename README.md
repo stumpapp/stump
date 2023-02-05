@@ -29,6 +29,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 <img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 90%" />
 </p>
 
+<!-- prettier-ignore: I hate you sometimes prettier -->
 <details>
   <summary><b>Table of Contents</b></summary>
   <p>
@@ -39,12 +40,11 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
-  - [/common](#common)
+  - [/packages](#packages)
   - [/core](#core)
 - [Similar Projects 👯](#similar-projects-)
 - [Acknowledgements 🙏](#acknowledgements-)
-    </p>
-  </details>
+</details>
 
 > **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developing-). Otherwise, stay tuned for the first release!
 
@@ -80,13 +80,13 @@ I am very open to suggestions and ideas, so feel free to reach out if you have a
 
 Stump isn't ready for normal, non-development usage yet. Once a release has been made, this will be updated. For now, follow the [Developing](#developing-) section to build from source and run locally.
 
-There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump-preview) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container.
+There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump-preview) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container. Also keep in mind migrations won't be stacked until a release, so each update until then might require a wipe of the database file.
 
 For more information about getting started, how Stump works and how it manages your library, and much more, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 
 ## Developer Guide 💻
 
-Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](./CONTRIBUTING.md) before getting started.
+Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTING.md) before getting started.
 
 A quick summary of the steps required to get going:
 
@@ -102,9 +102,13 @@ pnpm run setup
 
 4. Start one of the apps:
 
+I use [moonrepo](https://moonrepo.dev/) for Stump's repository management
+
 ```bash
-pnpm dev:web
-pnpm dev:desktop
+# webapp + server
+moon run :dev
+# desktop app + server
+moon run desktop:dev
 ```
 
 And that's it!
@@ -125,8 +129,6 @@ Some other good places to start:
 - CI pipelines / workflows.
 - And lots more!
 
-I keep track of all non-code contributions in the [CONTRIBUTORS.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTORS.md) file. If you contribute in that manner, please add yourself to the list!
-
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20?action=collection%2Ffork&collection-url=entityId%3D6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20%26entityType%3Dcollection%26workspaceId%3D722014ea-55eb-4a49-b29d-814300c1016d)
 
 ## Project Structure 📦
@@ -139,11 +141,12 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 - `server`: An [Axum](https://github.com/tokio-rs/axum) server.
 - `web`: The React application that is served by the Axum server.
 
-### /common
+### /packages
 
 - `client`: Everything needed to create a react-based client for Stump. Contains Zustand and React Query configuration, used by the `interface` package, as well as the generated TypeScript types.
 - `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.
 - `interface`: Stump's main React-based interface, shared between the web and desktop applications.
+- `prisma-cli`: A small rust app to run the prisma cli (generating the prisma client)
 
 ### /core
 

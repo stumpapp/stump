@@ -1,67 +1,164 @@
 use std::sync::Arc;
 
-use prisma_client_rust::{raw, PrismaValue};
+use prisma_client_rust::{raw, Direction, PrismaValue};
 
 use crate::{
-	db::models::Media,
-	prelude::{CoreError, CoreResult, PageBounds},
-	prisma::{media, series, PrismaClient},
+	db::{models::Media, utils::CountQueryReturn},
+	prelude::{CoreError, CoreResult, PageParams, Pageable},
+	prisma::{media, read_progress, series, PrismaClient},
 };
 
 use super::{Dao, DaoBatch};
 
-pub struct MediaDao {
+#[async_trait::async_trait]
+pub trait MediaDao: Dao {
+	async fn get_in_progress_media(
+		&self,
+		viewer_id: &str,
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>>;
+
+	async fn get_duplicate_media(&self) -> CoreResult<Vec<Media>>;
+	async fn get_duplicate_media_page(
+		&self,
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>>;
+
+	async fn update_many(&self, data: Vec<Self::Model>) -> CoreResult<Vec<Self::Model>>;
+}
+
+pub struct MediaDaoImpl {
 	client: Arc<PrismaClient>,
 }
 
-impl MediaDao {
-	// TODO: this can change once I set a `completed` field on the media table, which
-	// would really simplify this query.
-	pub async fn get_in_progress_media(
+#[async_trait::async_trait]
+impl MediaDao for MediaDaoImpl {
+	async fn get_in_progress_media(
 		&self,
 		viewer_id: &str,
-		page_bounds: PageBounds,
-	) -> CoreResult<Vec<Media>> {
-		let media_in_progress = self
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>> {
+		let page_bounds = page_params.get_page_bounds();
+
+		let progresses_with_media = self
+			.client
+			.read_progress()
+			.find_many(vec![
+				read_progress::user_id::equals(viewer_id.to_string()),
+				read_progress::is_completed::equals(false),
+			])
+			.with(read_progress::media::fetch())
+			.order_by(read_progress::updated_at::order(Direction::Desc))
+			.skip(page_bounds.skip)
+			.take(page_bounds.take)
+			.exec()
+			.await?;
+
+		let media_in_progress = progresses_with_media
+			.into_iter()
+			.filter(|progress| progress.media.is_some())
+			.map(Media::try_from)
+			.filter_map(Result::ok)
+			.collect();
+
+		let db_total = self
+			.client
+			.read_progress()
+			.count(vec![
+				read_progress::user_id::equals(viewer_id.to_string()),
+				read_progress::is_completed::equals(false),
+			])
+			.exec()
+			.await?;
+
+		Ok(Pageable::with_count(
+			media_in_progress,
+			db_total,
+			page_params,
+		))
+	}
+
+	async fn get_duplicate_media(&self) -> CoreResult<Vec<Media>> {
+		let duplicates = self.client
+			._query_raw::<Media>(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
+			.exec()
+			.await?;
+
+		Ok(duplicates)
+	}
+
+	async fn get_duplicate_media_page(
+		&self,
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Media>>> {
+		let page_bounds = page_params.get_page_bounds();
+
+		let duplicated_media_page = self
 			.client
 			._query_raw::<Media>(raw!(
 				r#"
-				SELECT
-					media.id AS id,
-					media.name AS name,
-					media.description AS description,
-					media.size AS size,
-					media.extension AS extension,
-					media.pages AS pages,
-					media.updated_at AS updated_at,
-					media.created_at AS created_at,
-					media.checksum AS checksum,
-					media.path AS path,
-					media.status AS status,
-					media.series_id AS series_id,
-					media_progress.page AS current_page
-				FROM
-					media
-					LEFT OUTER JOIN read_progresses media_progress
-						ON media_progress.media_id = media.id
-						AND media_progress.user_id == {} AND media_progress.page < media.pages
-				WHERE current_page IS NOT NULL
-				GROUP BY media.id
-				ORDER BY media.updated_at DESC
+				SELECT * FROM media
+				WHERE checksum IN (
+					SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1
+				)
 				LIMIT {} OFFSET {}"#,
-				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::Int(page_bounds.take),
 				PrismaValue::Int(page_bounds.skip)
 			))
 			.exec()
 			.await?;
 
-		Ok(media_in_progress)
+		let count_result = self
+			.client
+			._query_raw::<CountQueryReturn>(raw!(
+				r#"
+				SELECT COUNT(*) as count FROM media
+				WHERE checksum IN (
+					SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) s> 1
+				)"#
+			))
+			.exec()
+			.await?;
+
+		if let Some(db_total) = count_result.first() {
+			Ok(Pageable::with_count(
+				duplicated_media_page,
+				db_total.count,
+				page_params,
+			))
+		} else {
+			Err(CoreError::InternalError(
+				"A failure occurred when trying to query for the count of duplicate media".to_string(),
+			))
+		}
+	}
+
+	async fn update_many(&self, data: Vec<Media>) -> CoreResult<Vec<Media>> {
+		let queries = data.into_iter().map(|media| {
+			self.client.media().update(
+				media::id::equals(media.id),
+				vec![
+					media::name::set(media.name),
+					media::description::set(media.description),
+					media::size::set(media.size),
+					media::pages::set(media.pages),
+					media::checksum::set(media.checksum),
+				],
+			)
+		});
+
+		Ok(self
+			.client
+			._batch(queries)
+			.await?
+			.into_iter()
+			.map(Media::from)
+			.collect())
 	}
 }
 
 #[async_trait::async_trait]
-impl Dao for MediaDao {
+impl Dao for MediaDaoImpl {
 	type Model = Media;
 
 	fn new(client: Arc<PrismaClient>) -> Self {
@@ -130,23 +227,10 @@ impl Dao for MediaDao {
 
 		Ok(Media::from(media.unwrap()))
 	}
-
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Media>> {
-		let media = self
-			.client
-			.media()
-			.find_many(vec![])
-			.skip(skip)
-			.take(take)
-			.exec()
-			.await?;
-
-		Ok(media.into_iter().map(Media::from).collect())
-	}
 }
 
 #[async_trait::async_trait]
-impl DaoBatch for MediaDao {
+impl DaoBatch for MediaDaoImpl {
 	type Model = Media;
 
 	async fn insert_many(&self, data: Vec<Self::Model>) -> CoreResult<Vec<Self::Model>> {

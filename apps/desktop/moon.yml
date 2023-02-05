@@ -1,0 +1,43 @@
+type: 'application'
+
+workspace:
+  inheritedTasks:
+    exclude: ['buildPackage']
+
+fileGroups:
+  app:
+    - 'src/**/*'
+    - 'src-tauri/**/*'
+
+language: 'rust'
+
+tasks:
+  # Note: naming it not 'dev' so I can run web+server easier
+  desktop-dev:
+    command: 'pnpm tauri dev'
+    local: true
+
+  lint:
+    command: 'cargo clippy --package stump_desktop -- -D warnings'
+    options:
+      mergeArgs: 'replace'
+      mergeDeps: 'replace'
+      mergeInputs: 'replace'
+
+  format:
+    command: 'cargo fmt --package stump_desktop'
+    options:
+      mergeArgs: 'replace'
+      mergeDeps: 'replace'
+      mergeInputs: 'replace'
+
+  # # TODO: need to have more targets.
+  # build:
+  #   # tauri build --target universal-apple-darwin
+  #   command: 'pnpm tauri build'
+  #   local: true
+  #   deps:
+  #     - '~:build-webapp'
+
+  # build-webapp:
+  #   command: 'pnpm vite build'

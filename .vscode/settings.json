@@ -1,4 +1,10 @@
 {
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.renderWhitespace": "boundary",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
 	"[rust]": {
 		"editor.defaultFormatter": "rust-lang.rust-analyzer"
 	},

@@ -60,7 +60,7 @@ async fn digest_rars_synchronous() -> CoreResult<()> {
 	// assert_ne!(rars.len(), 0);
 
 	// TODO: remove this check once I create rar test data
-	if rars.len() == 0 {
+	if rars.is_empty() {
 		println!("STINKY: could not run digest_rars_synchronous test until aaron fixes his stuff");
 		return Ok(());
 	}

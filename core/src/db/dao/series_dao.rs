@@ -3,29 +3,44 @@ use std::sync::Arc;
 use prisma_client_rust::{raw, PrismaValue};
 
 use crate::{
-	db::models::Series,
-	prelude::{CoreError, CoreResult, PageBounds},
-	prisma::{library, series, PrismaClient},
+	db::{
+		models::{Media, Series},
+		utils::CountQueryReturn,
+	},
+	prelude::{CoreError, CoreResult, PageParams, Pageable},
+	prisma::{library, media, series, PrismaClient},
 };
 
 use super::{Dao, DaoCount};
 
-pub struct SeriesDao {
+#[async_trait::async_trait]
+pub trait SeriesDao {
+	async fn get_recently_added_series_page(
+		&self,
+		viewer_id: &str,
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Series>>>;
+	async fn get_series_media(&self, series_id: &str) -> CoreResult<Vec<Media>>;
+}
+
+pub struct SeriesDaoImpl {
 	client: Arc<PrismaClient>,
 }
 
-impl SeriesDao {
-	// TODO: Once PCR is hella more mature, I think this kind of query can be possible without writing raw SQL.
+#[async_trait::async_trait]
+impl SeriesDao for SeriesDaoImpl {
+	// TODO: Once PCR is more mature, I think this kind of query can be possible without writing raw SQL.
 	// I know it's possible in JS prisma, so hopefully these kinds of manual queries can be phased out.
 	/// Returns a vector of [Series] in the order of most recently created in the database.
 	/// The number of books and unread books is included in the resulting [Series] objects.
 	/// This is used to populate the "Recently Added Series" section of the UI.
-	pub async fn find_recently_added(
+	async fn get_recently_added_series_page(
 		&self,
 		viewer_id: &str,
-		page_bounds: PageBounds,
-	) -> CoreResult<Vec<Series>> {
-		let series_with_count = self
+		page_params: PageParams,
+	) -> CoreResult<Pageable<Vec<Series>>> {
+		let page_bounds = page_params.get_page_bounds();
+		let recently_added_series = self
 			.client
 			._query_raw::<Series>(raw!(
 				r#"
@@ -56,12 +71,56 @@ impl SeriesDao {
 			.exec()
 			.await?;
 
-		Ok(series_with_count)
+		let count_result = self
+		.client
+		._query_raw::<CountQueryReturn>(raw!(
+			r#"
+			SELECT
+				COUNT(*) as count
+			FROM 
+				series 
+				LEFT OUTER JOIN media series_media ON series_media.series_id = series.id
+				LEFT OUTER JOIN read_progresses media_progress ON media_progress.media_id = series_media.id AND media_progress.user_id = {}
+			GROUP BY 
+				series.id
+			ORDER BY
+				series.created_at DESC"#,
+			PrismaValue::String(viewer_id.to_string())
+		))
+		.exec()
+		.await?;
+
+		if let Some(db_total) = count_result.first() {
+			Ok(Pageable::with_count(
+				recently_added_series,
+				db_total.count,
+				page_params,
+			))
+		} else {
+			Err(CoreError::InternalError(
+				"A database error occurred while counting recently added series."
+					.to_string(),
+			))
+		}
+	}
+
+	async fn get_series_media(&self, series_id: &str) -> CoreResult<Vec<Media>> {
+		let series_media = self
+			.client
+			.media()
+			.find_many(vec![media::series_id::equals(Some(series_id.to_string()))])
+			.exec()
+			.await?;
+
+		Ok(series_media
+			.into_iter()
+			.map(Media::from)
+			.collect::<Vec<Media>>())
 	}
 }
 
 #[async_trait::async_trait]
-impl DaoCount for SeriesDao {
+impl DaoCount for SeriesDaoImpl {
 	async fn count_all(&self) -> CoreResult<i64> {
 		let count = self.client.series().count(vec![]).exec().await?;
 
@@ -70,7 +129,7 @@ impl DaoCount for SeriesDao {
 }
 
 #[async_trait::async_trait]
-impl Dao for SeriesDao {
+impl Dao for SeriesDaoImpl {
 	type Model = Series;
 
 	fn new(client: Arc<PrismaClient>) -> Self {
@@ -126,19 +185,6 @@ impl Dao for SeriesDao {
 
 	async fn find_all(&self) -> CoreResult<Vec<Self::Model>> {
 		let series = self.client.series().find_many(vec![]).exec().await?;
-
-		Ok(series.into_iter().map(Series::from).collect())
-	}
-
-	async fn find_paginated(&self, skip: i64, take: i64) -> CoreResult<Vec<Self::Model>> {
-		let series = self
-			.client
-			.series()
-			.find_many(vec![])
-			.skip(skip)
-			.take(take)
-			.exec()
-			.await?;
 
 		Ok(series.into_iter().map(Series::from).collect())
 	}

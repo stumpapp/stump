@@ -1,4 +1,4 @@
 packages:
   - 'core'
   - 'apps/*'
-  - 'common/*'
+  - 'packages/*'

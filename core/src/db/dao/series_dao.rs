@@ -71,6 +71,10 @@ impl SeriesDao for SeriesDaoImpl {
 			.exec()
 			.await?;
 
+		// FIXME: this is failing on the following scenario:
+		// 1. There are 0 series in the database.
+		// 2. User starts scan
+		// 3. When react-query invalidates and refetches this query, it fails with a database error.
 		let count_result = self
 		.client
 		._query_raw::<CountQueryReturn>(raw!(

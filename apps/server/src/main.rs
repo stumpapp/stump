@@ -34,6 +34,7 @@ async fn main() -> ServerResult<()> {
 		return Err(ServerError::ServerStartError(err.to_string()));
 	}
 	let stump_environment = stump_environment.unwrap();
+	let port = stump_environment.port.unwrap_or(10801);
 
 	// Note: init_tracing after loading the environment so the correct verbosity
 	// level is used for logging.
@@ -51,6 +52,7 @@ async fn main() -> ServerResult<()> {
 
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
+	let cors_layer = cors::get_cors_layer(port);
 
 	info!("{}", core.get_shadow_text());
 
@@ -58,9 +60,9 @@ async fn main() -> ServerResult<()> {
 		.merge(routers::mount(app_state.clone()))
 		.with_state(app_state.clone())
 		.layer(session::get_session_layer())
-		.layer(cors::get_cors_layer());
+		.layer(cors_layer);
 
-	let addr = SocketAddr::from(([0, 0, 0, 0], stump_environment.port.unwrap_or(10801)));
+	let addr = SocketAddr::from(([0, 0, 0, 0], port));
 	info!("⚡️ Stump HTTP server starting on http://{}", addr);
 
 	axum::Server::bind(&addr)

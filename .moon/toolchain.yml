@@ -11,23 +11,15 @@ node:
   # The version to use. Must be a semantic version that includes major, minor, and patch.
   # We suggest using the latest active LTS version: https://nodejs.org/en/about/releases
   version: '18.12.0'
-
-  # The package manager to use when managing dependencies.
-  # Accepts "npm" (default), "pnpm", or "yarn".
   packageManager: 'pnpm'
-
-  # The version of the package manager (above) to use.
   pnpm:
     version: '7.18.2'
-
   # Add `node.version` as a constraint in the root `package.json` `engines`.
   addEnginesConstraint: true
-
   # Use the `package.json` name as an alias for the respective moon project.
   aliasPackageNames: 'name-and-scope'
-
   # Dedupe dependencies after the lockfile has changed.
-  dedupeOnLockfileChange: true
+  dedupeOnLockfileChange: false
 
   # Version format to use when syncing dependencies within the project's `package.json`.
   # dependencyVersionFormat: 'workspace'

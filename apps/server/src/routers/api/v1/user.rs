@@ -81,7 +81,7 @@ async fn create_user(
 			"You do not have permission to access this resource.".into(),
 		));
 	}
-	let hashed_password = bcrypt::hash(&input.password, get_hash_cost())?;
+	let hashed_password = bcrypt::hash(input.password, get_hash_cost())?;
 
 	let created_user = db
 		.user()
@@ -188,7 +188,7 @@ async fn update_user(
 
 	let mut update_params = vec![user::username::set(input.username)];
 	if let Some(password) = input.password {
-		let hashed_password = bcrypt::hash(&password, get_hash_cost())?;
+		let hashed_password = bcrypt::hash(password, get_hash_cost())?;
 		update_params.push(user::hashed_password::set(hashed_password));
 	}
 

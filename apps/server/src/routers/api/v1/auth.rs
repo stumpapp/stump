@@ -61,7 +61,9 @@ async fn login(
 		}
 
 		let user: User = db_user.into();
-		session.insert("user", user.clone()).unwrap();
+		session
+			.insert("user", user.clone())
+			.expect("Failed to insert user into session");
 
 		return Ok(Json(user));
 	}

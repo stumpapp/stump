@@ -17,6 +17,7 @@ import { isAxiosError } from 'axios'
 import { useMemo } from 'react'
 
 import { QueryClientContext, useClientContext } from './context'
+import { useUserStore } from './index'
 
 export * from './queries'
 export { QueryClientProvider } from '@tanstack/react-query'
@@ -51,11 +52,15 @@ export function useQuery<
 	options?: QueryOptions<TQueryFnData, TError, TData, TQueryKey>,
 ) {
 	const { onRedirect } = useClientContext() || {}
+	const { setUser } = useUserStore((store) => ({
+		setUser: store.setUser,
+	}))
 	const { onError, ...restOptions } = options || {}
 	return useReactQuery(queryKey, queryFn, {
 		context: QueryClientContext,
 		onError: (err) => {
 			if (isAxiosError(err) && err.response?.status === 401) {
+				setUser(null)
 				onRedirect?.('/auth')
 			}
 			onError?.(err)

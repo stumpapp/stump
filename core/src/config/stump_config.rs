@@ -165,7 +165,7 @@ impl StumpConfig {
 		}
 
 		env::set_var("STUMP_PORT", self.port.to_string());
-		env::set_var("STUMP_VERBOSITY", &self.verbosity.to_string());
+		env::set_var("STUMP_VERBOSITY", self.verbosity.to_string());
 
 		if Path::new(self.config_dir.as_str()).exists() {
 			env::set_var("STUMP_CONFIG_DIR", self.config_dir.as_str());

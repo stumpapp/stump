@@ -8,7 +8,7 @@ import {
 	ModalOverlay,
 	useDisclosure,
 } from '@chakra-ui/react'
-import { useLibraryMutation } from '@stump/client'
+import { queryClient, useLibraryMutation } from '@stump/client'
 import type { Library } from '@stump/types'
 import { Trash } from 'phosphor-react'
 import toast from 'react-hot-toast'
@@ -28,6 +28,13 @@ export default function DeleteLibraryModal({ disabled, library }: Props) {
 
 	const { deleteLibraryAsync } = useLibraryMutation({
 		onDeleted() {
+			// TODO: these just needs to be wrapped around some utility at this point with
+			// how often I'm doing it
+			queryClient.invalidateQueries(['getLibrariesStats'])
+			queryClient.invalidateQueries(['getSeries'])
+			queryClient.invalidateQueries(['getRecentlyAddedSeries'])
+			queryClient.invalidateQueries(['getRecentlyAddedMedia'])
+
 			onClose()
 			navigate('/')
 		},

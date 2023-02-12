@@ -31,6 +31,7 @@ serde = { workspace = true }
 axum-sessions = "0.4.1"
 async-trait = "0.1.53"
 async-stream = "0.3.3"
+local-ip-address = "0.5.1"
 
 
 ### Dev Utils ###

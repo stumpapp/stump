@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use prisma_client_rust::{raw, PrismaValue};
+use tracing::{error, trace};
 
 use crate::{
 	db::{
@@ -71,24 +72,32 @@ impl SeriesDao for SeriesDaoImpl {
 			.exec()
 			.await?;
 
+		// NOTE: removed the `GROUP BY` clause from the query below because it would cause an empty count result
+		// set to be returned. This makes sense, but is ~annoying~.
 		let count_result = self
 		.client
 		._query_raw::<CountQueryReturn>(raw!(
 			r#"
 			SELECT
-				COUNT(*) as count
+				COUNT(DISTINCT series.id) as count
 			FROM 
 				series 
 				LEFT OUTER JOIN media series_media ON series_media.series_id = series.id
 				LEFT OUTER JOIN read_progresses media_progress ON media_progress.media_id = series_media.id AND media_progress.user_id = {}
-			GROUP BY 
-				series.id
 			ORDER BY
 				series.created_at DESC"#,
 			PrismaValue::String(viewer_id.to_string())
 		))
 		.exec()
-		.await?;
+		.await.map_err(|e| {
+			error!(error = ?e, "Failed to compute count of recently added series");
+			e
+		})?;
+
+		trace!(
+			?count_result,
+			"Count result for recently added series query."
+		);
 
 		if let Some(db_total) = count_result.first() {
 			Ok(Pageable::with_count(

@@ -67,3 +67,5 @@
 - [ ] Once fully migrated off Chakra UI
   - [ ] Finalize custom UI components
   - [ ] Consider feature freeze and migrate over to SolidJS
+- [ ] Add `Stump.toml` template and/or just list all the config options somewhere
+- [ ] Fix `desktop-dev` command, it spawns a new window over and over :angry:

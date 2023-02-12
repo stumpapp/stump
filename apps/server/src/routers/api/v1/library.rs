@@ -74,6 +74,7 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 }
 
 /// Get all libraries
+#[tracing::instrument(skip(ctx), err)]
 async fn get_libraries(
 	filter_query: Query<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,

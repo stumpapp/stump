@@ -82,7 +82,7 @@ impl PageQuery {
 	pub fn get_skip_take(&self) -> (i64, i64) {
 		let zero_based = self.zero_based.unwrap_or(false);
 		let page_size = self.page_size.unwrap_or(20);
-		let default_page = if zero_based { 0 } else { 1 };
+		let default_page = u32::from(!zero_based);
 		let page = self.page.unwrap_or(default_page);
 
 		let start = if zero_based {
@@ -101,7 +101,7 @@ impl PageQuery {
 
 		PageParams {
 			zero_based,
-			page: self.page.unwrap_or(if zero_based { 0 } else { 1 }),
+			page: self.page.unwrap_or_else(|| u32::from(!zero_based)),
 			page_size: self.page_size.unwrap_or(20),
 		}
 	}

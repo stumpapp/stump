@@ -8,13 +8,29 @@ use local_ip_address::local_ip;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use tracing::{error, trace};
 
-const DEBUG_ALLOWED_ORIGINS: &[&str] = &["http://localhost:3000", "http://0.0.0.0:3000"];
+use crate::config::utils::is_debug;
+
 const DEFAULT_ALLOWED_ORIGINS: &[&str] =
 	&["tauri://localhost", "https://tauri.localhost"];
+const DEBUG_ALLOWED_ORIGINS: &[&str] = &[
+	"tauri://localhost",
+	"https://tauri.localhost",
+	"http://localhost:3000",
+	"http://0.0.0.0:3000",
+];
+
+fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValue> {
+	origins
+		.iter()
+		.map(|origin| origin.to_string())
+		.chain(local_origins.into_iter())
+		.map(|origin| origin.parse())
+		.filter_map(|res| res.ok())
+		.collect::<Vec<HeaderValue>>()
+}
 
 pub fn get_cors_layer(port: u16) -> CorsLayer {
-	let is_debug =
-		env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "debug";
+	let is_debug = is_debug();
 
 	let allowed_origins = match env::var("STUMP_ALLOWED_ORIGINS") {
 		Ok(val) => {
@@ -71,34 +87,18 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 	let mut cors_layer = CorsLayer::new();
 
 	if let Some(origins_list) = allowed_origins {
+		// TODO: consider adding some config to allow for this list to be appended to defaults, rather than
+		// completely overriding them.
 		cors_layer = cors_layer.allow_origin(AllowOrigin::list(origins_list));
 	} else if is_debug {
-		cors_layer = cors_layer.allow_origin(
-			DEBUG_ALLOWED_ORIGINS
-				.iter()
-				.map(|origin| origin.to_string())
-				.chain(local_orgins.into_iter())
-				.map(|origin| origin.parse())
-				.filter_map(|res| res.ok())
-				.collect::<Vec<HeaderValue>>(),
-		);
+		let debug_origins = merge_origins(DEBUG_ALLOWED_ORIGINS, local_orgins);
+		cors_layer = cors_layer.allow_origin(debug_origins);
 	} else {
-		cors_layer = cors_layer.allow_origin(
-			DEFAULT_ALLOWED_ORIGINS
-				.iter()
-				.map(|origin| origin.to_string())
-				.chain(local_orgins.into_iter())
-				.map(|origin| origin.parse())
-				.filter_map(|res| res.ok())
-				.collect::<Vec<HeaderValue>>(),
-		);
+		let release_origins = merge_origins(DEFAULT_ALLOWED_ORIGINS, local_orgins);
+		cors_layer = cors_layer.allow_origin(release_origins);
 	}
 
-	#[cfg(debug_assertions)]
-	trace!(?cors_layer, "Cors configuration complete");
-
-	// TODO: finalize what cors should be... fucking hate cors lmao
-	cors_layer
+	cors_layer = cors_layer
 		.allow_methods([
 			Method::GET,
 			Method::PUT,
@@ -108,5 +108,10 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 			Method::CONNECT,
 		])
 		.allow_headers([ACCEPT, AUTHORIZATION, CONTENT_TYPE])
-		.allow_credentials(true)
+		.allow_credentials(true);
+
+	#[cfg(debug_assertions)]
+	trace!(?cors_layer, "Cors configuration complete");
+
+	cors_layer
 }

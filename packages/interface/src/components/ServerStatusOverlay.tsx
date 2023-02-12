@@ -9,10 +9,10 @@ export default function ServerStatusOverlay() {
 	const [show, setShow] = useState(false)
 
 	useEffect(() => {
-		let timeout: NodeJS.Timeout
+		let timer: NodeJS.Timer
 		// after 4 seconds, if still !connected, show the overlay
 		if (!connected) {
-			timeout = setTimeout(() => {
+			timer = setInterval(() => {
 				if (!connected) {
 					setShow(true)
 				}
@@ -22,7 +22,7 @@ export default function ServerStatusOverlay() {
 		}
 
 		return () => {
-			clearTimeout(timeout)
+			clearInterval(timer)
 		}
 	}, [connected])
 

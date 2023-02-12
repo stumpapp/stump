@@ -3,7 +3,7 @@
 	"build": {
 		"beforeDevCommand": "pnpm vite --clearScreen=false",
 		"devPath": "http://localhost:3000",
-		"distDir": "../dist"
+		"distDir": "../../web/dist"
 	},
 	"package": {
 		"productName": "Stump",

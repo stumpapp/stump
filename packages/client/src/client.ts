@@ -89,6 +89,9 @@ export function useInfinitePagedQuery<Entity, TQueryKey extends QueryKey = Query
 	},
 ) {
 	const { onRedirect } = useClientContext() || {}
+	const { setUser } = useUserStore((store) => ({
+		setUser: store.setUser,
+	}))
 	const { onError } = options || {}
 	const {
 		data: pageData,
@@ -116,6 +119,7 @@ export function useInfinitePagedQuery<Entity, TQueryKey extends QueryKey = Query
 		keepPreviousData: true,
 		onError: (err) => {
 			if (isAxiosError(err) && err.response?.status === 401) {
+				setUser(null)
 				onRedirect?.('/auth')
 			}
 			onError?.(err)
@@ -173,12 +177,16 @@ export function useMutation<
 	>,
 ) {
 	const { onRedirect } = useClientContext() || {}
+	const { setUser } = useUserStore((store) => ({
+		setUser: store.setUser,
+	}))
 	const { onError, ...restOptions } = options || {}
 
 	return useReactMutation(mutationKey, mutationFn, {
 		context: QueryClientContext,
 		onError: (err, variables, context) => {
 			if (isAxiosError(err) && err.response?.status === 401) {
+				setUser(null)
 				onRedirect?.('/auth')
 			}
 			onError?.(err, variables, context)

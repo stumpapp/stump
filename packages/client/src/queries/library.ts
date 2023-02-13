@@ -17,6 +17,7 @@ import { queryClient } from '../client'
 import { useQueryParamStore } from '../stores'
 import type { ClientQueryParams, QueryCallbacks } from '.'
 
+export const refreshUseLibrary = (id: string) => queryClient.invalidateQueries(['getLibrary', id])
 export function useLibrary(id: string, { onError }: QueryCallbacks<Library> = {}) {
 	const { isLoading, data: library } = useQuery(
 		['getLibrary', id],

@@ -40,12 +40,13 @@
     - [x] Continue Reading, Recently Added, Etc.
     - [ ] Statistics
   - [ ] Book overview page
-    - [ ] Show progress (if any)
+    - [x] Show progress (if any)
     - [ ] Show more series information
-    - [ ] Next in series (using a new `cursor` page param?)
+      - [x] Next in series (using a new `cursor` page param?)
   - [ ] Series overview section (on 0th page when browsing a series)
   - [ ] Settings pages
 - [ ] Remove all those `Loading...` placeholders
+- [ ] For listviews, add a tooltip that shows some of the additional information on hover
 - [x] Add redirects for unauthed access
   - I.e. if I visit `/some-page/1`, and get redirected to `/auth`, should redirect instead with query params to restore state: `/auth?redirect=/some-page/1`
 - [ ] Revisit RAR support with upcoming `0.5` unrar release -> https://github.com/muja/unrar.rs/issues/26
@@ -58,6 +59,7 @@
 - [ ] Finish implementing Stump Readers:
   - [ ] ImageBased
   - [ ] AnimatedImageBased
+    - [ ] This was a PAIN IN THE ASS
   - [ ] EPUB
 - [ ] Tighten logging noise
 - [ ] Revisit rework of `StumpConfig`
@@ -69,3 +71,4 @@
   - [ ] Consider feature freeze and migrate over to SolidJS
 - [ ] Add `Stump.toml` template and/or just list all the config options somewhere
 - [ ] Fix `desktop-dev` command, it spawns a new window over and over :angry:
+- [ ] Make light mode look not disgusting lmao

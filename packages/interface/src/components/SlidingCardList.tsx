@@ -1,5 +1,6 @@
 import { ButtonGroup, Heading, Text } from '@chakra-ui/react'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
+import clsx from 'clsx'
 import { CaretLeft, CaretRight } from 'phosphor-react'
 import { useCallback, useEffect, useRef } from 'react'
 
@@ -80,12 +81,21 @@ export default function SlidingCardList({
 		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
 	}
 
-	const canSkipBackward = (visibleRef.current[0] ?? 0) > 0
-	// FIXME: wrong, the overscan messes this up I think...
-	const canSkipForward = (visibleRef.current[1] ?? 0) * 2 < cards.length
+	const [lowerBound, upperBound] = visibleRef.current
+	const canSkipBackward = (lowerBound ?? 0) > 0
+	const canSkipForward = (upperBound ?? 0) > 0 && (upperBound ?? 0) * 2 < cards.length
 
 	const virtualItems = columnVirtualizer.getVirtualItems()
 	const isEmpty = virtualItems.length === 0
+
+	console.debug('SlidingCardList', {
+		canSkipBackward,
+		canSkipForward,
+		cards,
+		isEmpty,
+		virtualItems,
+		visibleBounds: visibleRef.current,
+	})
 
 	const renderVirtualItems = () => {
 		if (isEmpty) {
@@ -105,7 +115,7 @@ export default function SlidingCardList({
 		<div className="w-full flex flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
 				{title && <Heading fontSize="lg">{title}</Heading>}
-				<div className="self-end">
+				<div className={clsx('self-end', { hidden: isEmpty })}>
 					<ButtonGroup isAttached={false}>
 						<ToolTip label="Seek backwards" isDisabled={!canSkipBackward}>
 							<IconButton

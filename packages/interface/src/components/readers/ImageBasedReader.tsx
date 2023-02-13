@@ -88,7 +88,7 @@ export default function ImageBasedReader({
 			/>
 
 			<div
-				className="flex flex-shrink h-full w-full"
+				className="transition-all duration-300 absolute w-[10%] left-0 active:bg-gray-200 active:border active:border-gray-100 dark:active:bg-gray-700 dark:active:border dark:active:border-gray-500 sm:active:bg-transparent z-50 sm:flex sm:flex-shrink h-full sm:w-full"
 				onClick={() => onPageChange(currentPage - 1)}
 			/>
 
@@ -103,7 +103,7 @@ export default function ImageBasedReader({
 			/>
 
 			<div
-				className="flex flex-shrink h-full  w-full"
+				className="transition-all duration-300 absolute w-[10%] right-0 active:bg-gray-200 active:border active:border-gray-100 dark:active:bg-gray-700 dark:active:border dark:active:border-gray-500 sm:active:bg-transparent z-50 sm:flex sm:flex-shrink h-full sm:w-full"
 				onClick={() => onPageChange(currentPage + 1)}
 			/>
 		</div>

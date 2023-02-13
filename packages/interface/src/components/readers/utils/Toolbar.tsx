@@ -1,4 +1,4 @@
-import { Heading } from '@chakra-ui/react'
+import { Heading, useColorMode } from '@chakra-ui/react'
 import { getMediaPage } from '@stump/api'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import clsx from 'clsx'
@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { ArrowLeft } from 'phosphor-react'
 import { useCallback, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
+
+import ThemeToggle from '../../sidebar/ThemeToggle'
 
 interface ToolbarProps {
 	title: string
@@ -91,12 +93,12 @@ export default function Toolbar({
 	})
 
 	return (
-		<div className={!visible ? 'invisible' : 'visible'}>
+		<div>
 			<motion.nav
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed top-0 p-4 w-full bg-opacity-90 bg-gray-700 text-white z-[100]"
+				className="fixed top-0 p-4 w-full bg-opacity-90 z-[100] bg-gray-200 dark:bg-gray-700 dark:text-white"
 			>
 				<div className="flex justify-between items-center w-full">
 					<div className="flex items-center space-x-4">
@@ -106,7 +108,9 @@ export default function Toolbar({
 
 						<Heading size="sm">{title}</Heading>
 					</div>
-					<div className="flex items-center">TODO: idk what</div>
+					<div className="flex items-center">
+						<ThemeToggle />
+					</div>
 				</div>
 			</motion.nav>
 			<motion.nav

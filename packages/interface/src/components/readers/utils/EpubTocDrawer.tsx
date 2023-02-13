@@ -8,6 +8,7 @@ import {
 	Stack,
 	Text,
 	useColorModeValue,
+	usePrevious,
 } from '@chakra-ui/react'
 import type { EpubContent } from '@stump/types'
 import { ListBullets } from 'phosphor-react'
@@ -33,14 +34,15 @@ export default function EpubTocDrawer({
 	onSelect,
 }: EpubTocDrawerProps) {
 	const location = useLocation()
+	const previousLocation = usePrevious(location)
 
 	const btnRef = useRef(null)
 
 	useEffect(() => {
-		if (isOpen) {
+		if (previousLocation?.pathname !== location.pathname && isOpen) {
 			onClose()
 		}
-	}, [location, isOpen, onClose])
+	}, [location, previousLocation, isOpen, onClose])
 
 	function handleSelect(href: string) {
 		onSelect(href)

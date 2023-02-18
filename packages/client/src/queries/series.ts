@@ -1,12 +1,15 @@
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '@stump/api'
-import type { Media, Pageable, Series } from '@stump/types'
+import type { Media, Series } from '@stump/types'
 
 import { queryClient, useInfinitePagedQuery, useQuery } from '../client'
+import { QUERY_KEYS } from '../query_keys'
 import { useQueryParamStore } from '../stores'
 import { QueryCallbacks } from '.'
 
+const SERIES_KEYS = QUERY_KEYS.series
+
 export const prefetchSeries = async (id: string) => {
-	await queryClient.prefetchQuery(['getSeries', id], () => getSeriesById(id), {
+	await queryClient.prefetchQuery([SERIES_KEYS.get_by_id, id], () => getSeriesById(id), {
 		staleTime: 10 * 1000,
 	})
 }
@@ -17,7 +20,11 @@ export function useSeries(id: string, options: QueryCallbacks<Series> = {}) {
 		isFetching,
 		isRefetching,
 		data: series,
-	} = useQuery(['getSeries'], () => getSeriesById(id).then((res) => res.data), options)
+	} = useQuery(
+		[SERIES_KEYS.get_by_id, id],
+		() => getSeriesById(id).then((res) => res.data),
+		options,
+	)
 
 	return { isLoading: isLoading || isFetching || isRefetching, series }
 }
@@ -26,7 +33,7 @@ export function useSeriesMedia(seriesId: string, page = 1) {
 	const { getQueryString, ...paramsStore } = useQueryParamStore((state) => state)
 
 	const { isLoading, isFetching, isRefetching, isPreviousData, data } = useQuery(
-		['getSeriesMedia', page, seriesId, paramsStore],
+		[SERIES_KEYS.media, page, seriesId, paramsStore],
 		() =>
 			getSeriesMedia(seriesId, page, getQueryString()).then(({ data }) => ({
 				media: data.data,
@@ -50,7 +57,7 @@ export function useSeriesMedia(seriesId: string, page = 1) {
 
 export function useRecentlyAddedSeries() {
 	return useInfinitePagedQuery(
-		['getRecentlyAddedSeries'],
+		[SERIES_KEYS.recently_added],
 		getRecentlyAddedSeries,
 		new URLSearchParams('page_size=50'),
 	)
@@ -86,7 +93,11 @@ export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {
 		isLoading,
 		isFetching,
 		isRefetching,
-	} = useQuery(['getNextInSeries', id], () => getNextInSeries(id).then((res) => res.data), options)
+	} = useQuery(
+		[SERIES_KEYS.up_next, id],
+		() => getNextInSeries(id).then((res) => res.data),
+		options,
+	)
 
 	return { isLoading: isLoading || isFetching || isRefetching, media }
 }

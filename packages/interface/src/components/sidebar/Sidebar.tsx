@@ -80,7 +80,7 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 							<CreateLibraryModal />
 						</Box>
 
-						<VStack mt={2} spacing={2} maxH="full" overflow="scroll">
+						<VStack mt={2} spacing={2} maxH="full" overflow="scroll" className="scrollbar-hide">
 							{items!.map(({ onHover, active, ...item }) => (
 								<Box
 									key={item.id}

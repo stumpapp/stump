@@ -1,5 +1,13 @@
-import React from 'react'
+import { Helmet } from 'react-helmet'
 
 export default function UserSettings() {
-	return <div>I am not implemented yet</div>
+	return (
+		<>
+			<Helmet>
+				{/* Doing this so Helmet splits the title into an array, I'm not just insane lol */}
+				<title>Stump | {'User Settings'}</title>
+			</Helmet>
+			<div>I am not implemented yet</div>
+		</>
+	)
 }

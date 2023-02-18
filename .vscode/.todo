@@ -9,6 +9,7 @@
   - [x] Clean up all the `package.json` scripts
     - [ ] Note: the scripts that interact with the FS directly are iffy with moon. I'll need to revisit those, so they will remain.
 - [ ] Audit dependencies, prune where needed
+- [ ] Fix all the peer dependency warnings
 - [x] Nix?
   - https://github.com/aaronleopold/stump/pull/86
 - [ ] Reorganize and consolidate some of the `client` code, its _very_ messy
@@ -58,6 +59,7 @@
   - [ ] Tracking progress
 - [ ] Finish implementing Stump Readers:
   - [ ] ImageBased
+    - [ ] Make toolbar **much** more performant, loading all those images lazily is terrible...
   - [ ] AnimatedImageBased
     - [ ] This was a PAIN IN THE ASS
   - [ ] EPUB

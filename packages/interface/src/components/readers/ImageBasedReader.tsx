@@ -1,6 +1,7 @@
 import { useBoolean } from '@chakra-ui/react'
 import { queryClient } from '@stump/client'
 import type { Media } from '@stump/types'
+import clsx from 'clsx'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -86,12 +87,7 @@ export default function ImageBasedReader({
 				visible={toolbarVisible}
 				onPageChange={handlePageChange}
 			/>
-
-			<div
-				className="transition-all duration-300 absolute w-[10%] left-0 active:bg-gray-200 active:border active:border-gray-100 dark:active:bg-gray-700 dark:active:border dark:active:border-gray-500 sm:active:bg-transparent z-50 sm:flex sm:flex-shrink h-full sm:w-full"
-				onClick={() => onPageChange(currentPage - 1)}
-			/>
-
+			<SideBarControl position="left" onClick={() => onPageChange(currentPage - 1)} />
 			<img
 				className="w-full max-h-full md:w-auto z-30"
 				src={getPageUrl(currentPage)}
@@ -101,12 +97,27 @@ export default function ImageBasedReader({
 				}}
 				onClick={toggleToolbar}
 			/>
-
-			<div
-				className="transition-all duration-300 absolute w-[10%] right-0 active:bg-gray-200 active:border active:border-gray-100 dark:active:bg-gray-700 dark:active:border dark:active:border-gray-500 sm:active:bg-transparent z-50 sm:flex sm:flex-shrink h-full sm:w-full"
-				onClick={() => onPageChange(currentPage + 1)}
-			/>
+			<SideBarControl position="right" onClick={() => onPageChange(currentPage + 1)} />
 		</div>
+	)
+}
+
+type SideBarControlProps = {
+	onClick: () => void
+	position: 'left' | 'right'
+}
+function SideBarControl({ onClick, position }: SideBarControlProps) {
+	return (
+		<div
+			className={clsx(
+				'h-full transition-all duration-300 z-50 border border-transparent',
+				'absolute w-[10%] active:bg-gray-200 active:border-gray-100 dark:active:bg-gray-700 dark:active:border dark:active:border-gray-500',
+				'sm:relative sm:w-full sm:flex sm:flex-shrink sm:active:bg-transparent',
+				{ 'right-0': position === 'right' },
+				{ 'left-0': position === 'left' },
+			)}
+			onClick={onClick}
+		/>
 	)
 }
 

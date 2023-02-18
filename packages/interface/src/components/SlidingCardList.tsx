@@ -88,14 +88,14 @@ export default function SlidingCardList({
 	const virtualItems = columnVirtualizer.getVirtualItems()
 	const isEmpty = virtualItems.length === 0
 
-	console.debug('SlidingCardList', {
-		canSkipBackward,
-		canSkipForward,
-		cards,
-		isEmpty,
-		virtualItems,
-		visibleBounds: visibleRef.current,
-	})
+	// console.debug('SlidingCardList', title, {
+	// 	canSkipBackward,
+	// 	canSkipForward,
+	// 	cards,
+	// 	isEmpty,
+	// 	virtualItems,
+	// 	visibleBounds: visibleRef.current,
+	// })
 
 	const renderVirtualItems = () => {
 		if (isEmpty) {
@@ -119,7 +119,7 @@ export default function SlidingCardList({
 					<ButtonGroup isAttached={false}>
 						<ToolTip label="Seek backwards" isDisabled={!canSkipBackward}>
 							<IconButton
-								disabled={!canSkipBackward}
+								isDisabled={!canSkipBackward}
 								onClick={() => handleSkipBackward()}
 								onDoubleClick={() => handleSkipBackward(20)}
 							>
@@ -128,7 +128,7 @@ export default function SlidingCardList({
 						</ToolTip>
 						<ToolTip label="Seek Ahead" isDisabled={!canSkipForward}>
 							<IconButton
-								disabled={!canSkipForward}
+								isDisabled={!canSkipForward}
 								onClick={() => handleSkipAhead()}
 								onDoubleClick={() => handleSkipAhead(20)}
 							>

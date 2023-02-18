@@ -1,7 +1,7 @@
 import type { CoreEvent } from '@stump/types'
 
-import { queryClient } from '../client'
 import { useJobContext } from '../context'
+import { core_event_triggers, invalidateQueries } from '../invalidate'
 import { useStumpSse } from './useStumpSse'
 
 interface UseCoreEventHandlerParams {
@@ -39,23 +39,14 @@ export function useCoreEventHandler({
 			case 'JobComplete':
 				setTimeout(() => {
 					removeJob(data)
-
-					queryClient.invalidateQueries(['getLibrary'])
-					queryClient.invalidateQueries(['getLibrariesStats'])
-					queryClient.invalidateQueries(['getSeries'])
-					queryClient.invalidateQueries(['getJobReports'])
-
-					queryClient.invalidateQueries(['getRecentlyAddedSeries'])
-					queryClient.invalidateQueries(['getRecentlyAddedMedia'])
-
-					// toast.success(`Job ${data} complete.`);
+					invalidateQueries({ keys: core_event_triggers[key].keys })
 					onJobComplete?.(data)
 				}, 750)
 				break
 			case 'JobFailed':
 				onJobFailed?.(data)
 				removeJob(data.runner_id)
-				queryClient.invalidateQueries(['getJobReports'])
+				invalidateQueries({ keys: core_event_triggers[key].keys })
 
 				break
 			case 'CreatedMedia':
@@ -65,11 +56,7 @@ export function useCoreEventHandler({
 				// one of the books in a new series before triggering a refetch. This is to
 				// prevent the series/media cards from being displayed before there is an image ready.
 				setTimeout(() => {
-					// TODO: I must misunderstand how this function works. Giving multiple keys
-					// does not work, not a huge deal but would rather a one-liner for these.
-					queryClient.invalidateQueries(['getLibrary'])
-					queryClient.invalidateQueries(['getLibrariesStats'])
-					queryClient.invalidateQueries(['getSeries'])
+					invalidateQueries({ keys: core_event_triggers[key].keys })
 				}, 250)
 				break
 			default:

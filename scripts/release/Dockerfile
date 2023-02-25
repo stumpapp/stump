@@ -105,10 +105,6 @@ FROM alpine:latest
 # libc6-compat
 RUN apk add --no-cache libstdc++ binutils
 
-# Create the user/group for stump
-RUN addgroup -g 1000 stump
-RUN adduser -D -s /bin/sh -u 1000 -G stump stump
-
 WORKDIR /
 
 # create the config, data and app directories
@@ -116,19 +112,16 @@ RUN mkdir -p config && \
     mkdir -p data && \
     mkdir -p app
 
-# FIXME: this does not seem to be working...
-# make the stump user own the directories
-RUN chown stump /config && \
-    chown stump /data && \
-    chown stump /app
-
-USER stump
-
 # copy the binary
-COPY --chown=stump:stump --from=core-builder /app/stump ./app/stump
+COPY --from=core-builder /app/stump ./app/stump
 
 # copy the react build
 COPY --from=frontend /app/build ./app/client
+
+# Copy docker entrypoint
+# This will take care of starting the service daemon as a regular user, if desired
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # TODO: replace this with something more elegant lol maybe a bash case statement
 RUN ln -s /lib/ld-musl-aarch64.so.1 /lib/ld-linux-aarch64.so.1; exit 0
@@ -144,4 +137,4 @@ ENV API_VERSION=v1
 
 WORKDIR /app
 
-CMD ["./stump"]
+ENTRYPOINT ["/entrypoint.sh"]

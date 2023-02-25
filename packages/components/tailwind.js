@@ -24,8 +24,9 @@ module.exports = function (app) {
 			'../../packages/*/src/**/*.{js,ts,jsx,tsx,html}',
 			app ? `../../apps/${app}/src/**/*.{js,ts,jsx,tsx,html}` : `./src/**/*.{js,ts,jsx,tsx,html}`,
 		],
-
-		darkMode: 'class',
+		// NOTE: this allows me to sync tailwind dark mode with chakra-ui dark mode *yeet*
+		// so happy I found this!
+		darkMode: ['class', '[data-theme="dark"]'],
 		plugins: [require('tailwind-scrollbar-hide'), require('@tailwindcss/typography')],
 		theme: {
 			extend: {

@@ -35,6 +35,7 @@ tokio = { version = "1.21.2", features = [
   # needed for detecting shutdown signals (e.g. ctrl+c)
   "signal",
 ] }
+async-stream = "0.3.3"
 
 ### DEV UTILS ###
 specta = "0.0.4"
@@ -42,3 +43,7 @@ specta = "0.0.4"
 ### Error Handling + Logging ###
 tracing = "0.1.36"
 thiserror = "1.0.37"
+
+[patch.crates-io]
+# for some reason, async-stream 0.3.4 is getting used instead of 0.3.3 but ONLY IN DOCKER?? So I have to patch it IG?? kms
+async-stream = { git = "https://github.com/tokio-rs/async-stream", rev = "e1373e4dede24f7700452e499a46561fb45ea515" }

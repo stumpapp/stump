@@ -13,13 +13,19 @@ import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
 import { useMutation, useQuery } from '../client'
-import { queryClient } from '../client'
+import { invalidateQueries } from '../invalidate'
+import { QUERY_KEYS } from '../query_keys'
 import { useQueryParamStore } from '../stores'
 import type { ClientQueryParams, QueryCallbacks } from '.'
 
+const LIBRARY_KEYS = QUERY_KEYS.library
+
+export const refreshUseLibrary = (id: string) =>
+	invalidateQueries({ exact: true, queryKey: [LIBRARY_KEYS.get_by_id, id] })
+
 export function useLibrary(id: string, { onError }: QueryCallbacks<Library> = {}) {
 	const { isLoading, data: library } = useQuery(
-		['getLibrary', id],
+		[LIBRARY_KEYS.get_by_id, id],
 		() => getLibraryById(id).then((res) => res.data),
 		{
 			onError,
@@ -35,8 +41,7 @@ export interface UseLibrariesReturn {
 }
 
 export function useLibraries() {
-	const { data, ...rest } = useQuery(['getLibraries'], getLibraries, {
-		// context: StumpQueryContext,
+	const { data, ...rest } = useQuery([LIBRARY_KEYS.get], getLibraries, {
 		// Send all non-401 errors to the error page
 		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
 	})
@@ -63,7 +68,7 @@ export function useLibrarySeries(libraryId: string, page = 1) {
 	const { getQueryString, ...paramsStore } = useQueryParamStore((state) => state)
 
 	const { isLoading, isFetching, isPreviousData, data } = useQuery(
-		['getLibrarySeries', page, libraryId, paramsStore],
+		[LIBRARY_KEYS.series, page, libraryId, paramsStore],
 		() =>
 			getLibrarySeries(libraryId, page, getQueryString()).then(({ data }) => ({
 				pageData: data._page,
@@ -85,15 +90,13 @@ export function useLibraryStats() {
 		isLoading,
 		isRefetching,
 		isFetching,
-	} = useQuery(['getLibraryStats'], () => getLibrariesStats().then((data) => data.data), {
-		// context: StumpQueryContext,
-	})
+	} = useQuery([LIBRARY_KEYS.stats], () => getLibrariesStats().then((data) => data.data), {})
 
 	return { isLoading: isLoading || isRefetching || isFetching, libraryStats }
 }
 
 export function useScanLibrary({ onError }: ClientQueryParams<unknown> = {}) {
-	const { mutate: scan, mutateAsync: scanAsync } = useMutation(['scanLibary'], scanLibary, {
+	const { mutate: scan, mutateAsync: scanAsync } = useMutation([LIBRARY_KEYS.scan], scanLibary, {
 		onError,
 	})
 
@@ -117,9 +120,9 @@ export function useLibraryMutation({
 				if (!res.data) {
 					onCreateFailed?.(res)
 				} else {
-					queryClient.invalidateQueries(['getLibraries'])
-					queryClient.invalidateQueries(['getJobReports'])
-					queryClient.invalidateQueries(['getLibraryStats'])
+					invalidateQueries({
+						keys: [LIBRARY_KEYS.get, LIBRARY_KEYS.stats, QUERY_KEYS.job.get],
+					})
 					onCreated?.(res.data)
 					// onClose();
 				}
@@ -137,9 +140,9 @@ export function useLibraryMutation({
 					console.warn('Update failed:', res)
 					onUpdateFailed?.(res)
 				} else {
-					queryClient.invalidateQueries(['getLibraries'])
-					queryClient.invalidateQueries(['getJobReports'])
-					queryClient.invalidateQueries(['getLibraryStats'])
+					invalidateQueries({
+						keys: [LIBRARY_KEYS.get, LIBRARY_KEYS.stats, QUERY_KEYS.job.get],
+					})
 					onUpdated?.(res.data)
 				}
 			},
@@ -148,8 +151,10 @@ export function useLibraryMutation({
 
 	const { mutateAsync: deleteLibraryAsync } = useMutation(['deleteLibrary'], deleteLibrary, {
 		async onSuccess(res) {
-			await queryClient.invalidateQueries(['getLibraries'])
-			await queryClient.invalidateQueries(['getLibraryStats'])
+			await invalidateQueries({
+				keys: [LIBRARY_KEYS.get, LIBRARY_KEYS.stats],
+			})
+
 			onDeleted?.(res.data)
 		},
 	})

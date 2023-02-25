@@ -10,16 +10,19 @@ import { useMemo } from 'react'
 
 import { QueryOptions, useCursorQuery, useInfinitePagedQuery, useMutation } from '../client'
 import { queryClient, useQuery } from '../client'
+import { QUERY_KEYS } from '../query_keys'
+
+const MEDIA_KEYS = QUERY_KEYS.media
 
 export const prefetchMedia = async (id: string) => {
-	await queryClient.prefetchQuery(['getMediaById', id], () => getMediaById(id), {
+	await queryClient.prefetchQuery([MEDIA_KEYS.get_by_id, id], () => getMediaById(id), {
 		staleTime: 10 * 1000,
 	})
 }
 
 export function useMediaById(id: string, { onError }: QueryOptions<Media> = {}) {
 	const { data, isLoading, isFetching, isRefetching } = useQuery(
-		['getMediaById', id],
+		[MEDIA_KEYS.get_by_id, id],
 		() => getMediaById(id),
 		{
 			keepPreviousData: false,
@@ -38,8 +41,10 @@ export function useMediaCursor(afterId: string, seriesId: string) {
 	const searchParams = useMemo(() => {
 		return new URLSearchParams({ cursor: afterId, series_id: seriesId })
 	}, [afterId, seriesId])
-	const { data: media, ...rest } = useCursorQuery(afterId, ['getMediaAfterCursor', afterId], () =>
-		getMedia(searchParams),
+	const { data: media, ...rest } = useCursorQuery(
+		afterId,
+		[MEDIA_KEYS.get_with_cursor, afterId],
+		() => getMedia(searchParams),
 	)
 
 	return { media, ...rest }
@@ -65,7 +70,7 @@ export function useMediaMutation(id: string, options: QueryOptions<ReadProgress>
 
 export function useRecentlyAddedMedia() {
 	return useInfinitePagedQuery(
-		['getRecentlyAddedMedia'],
+		[MEDIA_KEYS.recently_added],
 		getRecentlyAddedMedia,
 		new URLSearchParams('page_size=10'),
 	)
@@ -73,7 +78,7 @@ export function useRecentlyAddedMedia() {
 
 export function useContinueReading() {
 	return useInfinitePagedQuery(
-		['getInProgressMedia'],
+		[MEDIA_KEYS.in_progress],
 		getInProgressMedia,
 		new URLSearchParams('page_size=10'),
 	)

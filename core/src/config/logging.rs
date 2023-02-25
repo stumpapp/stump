@@ -12,6 +12,7 @@ pub const STUMP_SHADOW_TEXT: &str = include_str!("stump_shadow_text.txt");
 pub fn get_log_file() -> PathBuf {
 	get_config_dir().join("Stump.log")
 }
+
 pub fn get_log_verbosity() -> u64 {
 	match std::env::var("STUMP_VERBOSITY") {
 		Ok(s) => s.parse::<u64>().unwrap_or(1),
@@ -43,12 +44,22 @@ pub fn init_tracing() {
 				.add_directive(
 					"stump_core=trace"
 						.parse()
-						.expect("Error invalid tracing directive!"),
+						.expect("Error invalid tracing directive for stump_core!"),
 				)
 				.add_directive(
 					"stump_server=trace"
 						.parse()
-						.expect("Error invalid tracing directive!"),
+						.expect("Error invalid tracing directive for stump_server!"),
+				)
+				.add_directive(
+					"tower_http=debug"
+						.parse()
+						.expect("Error invalid tracing directive for tower_http!"),
+				)
+				.add_directive(
+					"quaint::connector::metrics=debug"
+						.parse()
+						.expect("Failed to parse tracing directive for quaint!"),
 				),
 		)
 		// Note: I have two layers here, separating the file appender and the stdout.

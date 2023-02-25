@@ -10,13 +10,13 @@ import {
 	useDisclosure,
 	VStack,
 } from '@chakra-ui/react'
-import { useLibraries } from '@stump/client'
+import { refreshUseLibrary, useLibraries } from '@stump/client'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
 import { Books, CaretRight, Gear, House } from 'phosphor-react'
 import { useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useLocale } from '../../hooks/useLocale'
 import ApplicationVersion from '../ApplicationVersion'
@@ -27,7 +27,9 @@ import Logout from './Logout'
 import ThemeToggle from './ThemeToggle'
 
 interface NavMenuItemProps extends Library {
+	active: boolean
 	href: string
+	onHover?: () => void
 }
 
 interface NavItemProps {
@@ -36,13 +38,16 @@ interface NavItemProps {
 	onClick?: (href: string) => void
 	href?: string
 	items?: NavMenuItemProps[]
+	active?: boolean
 }
 
 function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 	const { isOpen, onToggle } = useDisclosure()
 
+	const activeBgColor = useColorModeValue('gray.50', 'gray.750')
+
 	return (
-		<Box w="full">
+		<>
 			<HStack
 				as={Button}
 				_focus={{
@@ -70,13 +75,13 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 
 			<AnimatePresence>
 				{isOpen && (
-					<>
+					<Box w="full" maxH="full">
 						<Box my={2}>
 							<CreateLibraryModal />
 						</Box>
 
-						<VStack mt={2} spacing={2}>
-							{items!.map((item) => (
+						<VStack mt={2} spacing={2} maxH="full" overflow="scroll" className="scrollbar-hide">
+							{items!.map(({ onHover, active, ...item }) => (
 								<Box
 									key={item.id}
 									pl={6}
@@ -85,12 +90,17 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 									color={{ _dark: 'gray.200', _light: 'gray.600' }}
 									_hover={{
 										_dark: { bg: 'gray.700', color: 'gray.100' },
-										bg: 'gray.50',
+										bg: 'gray.75',
 										color: 'gray.900',
 									}}
+									bg={active ? activeBgColor : undefined}
 								>
 									<HStack p={1.5} minH="40px">
-										<Link to={item.href} className="w-full flex-1 pl-1 text-sm">
+										<Link
+											to={item.href}
+											className="w-full flex-1 pl-1 text-sm"
+											onMouseEnter={onHover}
+										>
 											{item.name}
 										</Link>
 										<LibraryOptionsMenu library={item} />
@@ -98,14 +108,16 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 								</Box>
 							))}
 						</VStack>
-					</>
+					</Box>
 				)}
 			</AnimatePresence>
-		</Box>
+		</>
 	)
 }
 
-function NavItem({ name, href, ...rest }: NavItemProps) {
+function NavItem({ name, href, active, ...rest }: NavItemProps) {
+	const activeBgColor = useColorModeValue('gray.50', 'gray.750')
+
 	return (
 		<Button
 			as={Link}
@@ -115,6 +127,7 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 			to={href!}
 			w="full"
 			variant="ghost"
+			bg={active ? activeBgColor : undefined}
 			textAlign="left"
 			display="flex"
 			p={2}
@@ -130,11 +143,24 @@ function NavItem({ name, href, ...rest }: NavItemProps) {
 }
 
 export function SidebarContent() {
+	const location = useLocation()
 	const navigate = useNavigate()
 
 	const { locale, t } = useLocale()
-
 	const { libraries } = useLibraries()
+
+	// TODO: I'd like to also highlight the library when viewing an item from it.
+	// e.g. a book from the library, or a book from a series in the library, etc
+	const libraryIsActive = (id: string) => location.pathname.startsWith(`/libraries/${id}`)
+	const linkIsActive = (href?: string) => {
+		if (!href) {
+			return false
+		} else if (href === '/') {
+			return location.pathname === '/'
+		}
+
+		return location.pathname.startsWith(href)
+	}
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
@@ -143,7 +169,9 @@ export function SidebarContent() {
 				icon: Books as any,
 				items: libraries?.map((library) => ({
 					...library,
+					active: libraryIsActive(library.id),
 					href: `/libraries/${library.id}`,
+					onHover: () => refreshUseLibrary(library.id),
 				})),
 				name: t('sidebar.buttons.libraries'),
 			},
@@ -156,7 +184,7 @@ export function SidebarContent() {
 		],
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[libraries, locale],
+		[libraries, locale, location.pathname],
 	)
 
 	return (
@@ -180,13 +208,12 @@ export function SidebarContent() {
 				<NavigationButtons />
 			</HStack>
 
-			{/* TODO: this needs to scroll on 'overflow' */}
-			<VStack spacing={2} flexGrow={1}>
+			<VStack spacing={2} flexGrow={1} maxH="full" overflow="hidden" p={1}>
 				{links.map((link) =>
 					link.items ? (
 						<NavMenuItem key={link.name} {...link} onClick={(href) => navigate(href)} />
 					) : (
-						<NavItem key={link.name} {...link} />
+						<NavItem key={link.name} {...link} active={linkIsActive(link.href)} />
 					),
 				)}
 			</VStack>
@@ -218,11 +245,12 @@ export default function Sidebar() {
 				bg={useColorModeValue('white', 'gray.800')}
 				borderRight="1px"
 				borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-				w={52}
+				w={56}
 				h="full"
 				px={2}
 				zIndex={10}
 				spacing={4}
+				className="relative"
 			>
 				<SidebarContent />
 			</Stack>

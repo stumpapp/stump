@@ -37,7 +37,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-  - [Where to start?](#where-to-start)
+    - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
   - [/packages](#packages)
@@ -108,7 +108,7 @@ I use [moonrepo](https://moonrepo.dev/) for Stump's repository management
 # webapp + server
 moon run :dev
 # desktop app + server
-moon run desktop:dev
+moon run server:start desktop:desktop-dev
 ```
 
 And that's it!

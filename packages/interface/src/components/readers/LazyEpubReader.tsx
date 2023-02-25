@@ -60,11 +60,8 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		setLocation({
 			// @ts-ignore: types are wrong >:(
 			epubcfi: start.cfi ?? null,
-
 			href: start.href,
-
 			index: start.index,
-
 			// @ts-ignore: types are wrong >:(
 			page: start.displayed?.page,
 			// @ts-ignore: types are wrong >:(

@@ -1,11 +1,13 @@
 import {
 	Drawer,
 	DrawerBody,
+	DrawerCloseButton,
 	DrawerContent,
 	DrawerOverlay,
 	Stack,
 	useColorModeValue,
 	useDisclosure,
+	usePrevious,
 } from '@chakra-ui/react'
 import { List } from 'phosphor-react'
 import { useEffect, useRef } from 'react'
@@ -15,19 +17,21 @@ import Button from '../../ui/Button'
 import { SidebarContent } from './Sidebar'
 
 export default function MobileDrawer() {
-	const location = useLocation()
-
-	const btnRef = useRef(null)
 	const { isOpen, onOpen, onClose } = useDisclosure()
 
+	const location = useLocation()
+	const previousLocation = usePrevious(location)
+	const btnRef = useRef(null)
+
 	useEffect(() => {
-		if (isOpen) {
+		if (previousLocation?.pathname !== location.pathname && isOpen) {
 			onClose()
 		}
-	}, [location, isOpen, onClose])
+	}, [location, previousLocation, isOpen, onClose])
 
+	// NOTE: this div supresses a popper.js warning about not being able to calculate margins
 	return (
-		<>
+		<div>
 			<Button
 				ref={btnRef}
 				display={{ base: 'flex', md: 'none' }}
@@ -42,6 +46,8 @@ export default function MobileDrawer() {
 			<Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
 				<DrawerOverlay />
 				<DrawerContent bg={useColorModeValue('white', 'gray.800')}>
+					<DrawerCloseButton zIndex={1000} />
+
 					<Stack
 						as={DrawerBody}
 						display="flex"
@@ -57,6 +63,6 @@ export default function MobileDrawer() {
 					</Stack>
 				</DrawerContent>
 			</Drawer>
-		</>
+		</div>
 	)
 }

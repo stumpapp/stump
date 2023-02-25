@@ -90,6 +90,8 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 							<Input
 								isInvalid={!!errorMessage}
 								value={path ?? undefined}
+								readOnly
+								// TODO: allow input to be editable
 								// onInputStop={(newPath) => {
 								// 	if (newPath) {
 								// 		onSelect(newPath);

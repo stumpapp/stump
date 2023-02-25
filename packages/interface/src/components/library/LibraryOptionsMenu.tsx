@@ -35,42 +35,44 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	// FIXME: so, disabled on the MenuItem doesn't seem to actually work... how cute.
 	return (
 		// TODO: https://chakra-ui.com/docs/theming/customize-theme#customizing-component-styles
-		<Menu size="sm">
-			<MenuButton
-				disabled={user?.role !== 'SERVER_OWNER'}
-				hidden={user?.role !== 'SERVER_OWNER'}
-				p={1}
-				rounded="full"
-				_hover={{ _dark: { bg: 'gray.700' }, bg: 'gray.200' }}
-				_focus={{
-					boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
-				}}
-				_active={{
-					boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
-				}}
-			>
-				<DotsThreeVertical size={'1.25rem'} />
-			</MenuButton>
-
-			<MenuList>
-				{/* TODO: scanMode */}
-				<MenuItem
+		<div>
+			<Menu size="sm">
+				<MenuButton
 					disabled={user?.role !== 'SERVER_OWNER'}
-					icon={<ArrowsClockwise size={'1rem'} />}
-					onClick={handleScan}
+					hidden={user?.role !== 'SERVER_OWNER'}
+					p={1}
+					rounded="full"
+					_hover={{ _dark: { bg: 'gray.700' }, bg: 'gray.200' }}
+					_focus={{
+						boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+					}}
+					_active={{
+						boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
+					}}
 				>
-					Scan
-				</MenuItem>
-				<EditLibraryModal library={library} disabled={user?.role !== 'SERVER_OWNER'} />
-				<MenuItem
-					icon={<Binoculars size={'1rem'} />}
-					onClick={() => navigate(`libraries/${library.id}/explorer`)}
-				>
-					File Explorer
-				</MenuItem>
-				<MenuDivider />
-				<DeleteLibraryModal library={library} disabled={user?.role !== 'SERVER_OWNER'} />
-			</MenuList>
-		</Menu>
+					<DotsThreeVertical size={'1.25rem'} />
+				</MenuButton>
+
+				<MenuList>
+					{/* TODO: scanMode */}
+					<MenuItem
+						disabled={user?.role !== 'SERVER_OWNER'}
+						icon={<ArrowsClockwise size={'1rem'} />}
+						onClick={handleScan}
+					>
+						Scan
+					</MenuItem>
+					<EditLibraryModal library={library} disabled={user?.role !== 'SERVER_OWNER'} />
+					<MenuItem
+						icon={<Binoculars size={'1rem'} />}
+						onClick={() => navigate(`libraries/${library.id}/explorer`)}
+					>
+						File Explorer
+					</MenuItem>
+					<MenuDivider />
+					<DeleteLibraryModal library={library} disabled={user?.role !== 'SERVER_OWNER'} />
+				</MenuList>
+			</Menu>
+		</div>
 	)
 }

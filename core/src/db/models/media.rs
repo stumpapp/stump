@@ -3,6 +3,7 @@ use std::{path::Path, str::FromStr};
 use optional_struct::OptionalStruct;
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::{
 	prelude::{enums::FileStatus, CoreError, CoreResult},
@@ -11,7 +12,9 @@ use crate::{
 
 use super::{read_progress::ReadProgress, series::Series, tag::Tag, LibraryOptions};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, OptionalStruct)]
+#[derive(
+	Debug, Clone, Deserialize, Serialize, Type, Default, OptionalStruct, ToSchema,
+)]
 #[optional_name = "PartialMedia"]
 #[optional_derive(Deserialize, Serialize)]
 pub struct Media {

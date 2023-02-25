@@ -15,7 +15,7 @@ use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::{AdminGuard, Auth},
-	utils::get_session_user,
+	utils::get_session_admin_user,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -25,6 +25,18 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/filesystem",
+	tag = "filesystem",
+	responses(
+		(status = 200, description = "Successfully retrieved contents of directory", body = PageableDirectoryListing),
+		(status = 400, description = "Invalid request."),
+		(status = 401, description = "No user is logged in (unauthorized)."),
+		(status = 403, description = "User does not have permission to access this resource."),
+		(status = 404, description = "Directory does not exist."),
+	)
+)]
 /// List the contents of a directory on the file system at a given (optional) path. If no path
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
@@ -32,18 +44,7 @@ pub async fn list_directory(
 	pagination: Query<PageQuery>,
 	input: Json<Option<DirectoryListingInput>>,
 ) -> ApiResult<Json<Pageable<DirectoryListing>>> {
-	let user = get_session_user(&session)?;
-
-	// FIXME: The auth extractor middleware doesn't check admin, but I don't want to have this check
-	// here. I thought of making another extractor, but it would be the same code as the auth with
-	// one additional check, which is way too much duplication for me. I'll have to look into
-	// how I can extend middlewares, rather than just copy it from scratch...
-	if !user.is_admin() {
-		return Err(ApiError::Forbidden(
-			"You must be an admin to access this endpoint".to_string(),
-		));
-	}
-
+	let _ = get_session_admin_user(&session)?;
 	let input = input.0.unwrap_or_default();
 
 	let start_path = input.path.unwrap_or_else(|| {

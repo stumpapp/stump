@@ -7,17 +7,17 @@ use stump_core::prelude::{ClaimResponse, StumpVersion};
 
 use crate::{config::state::AppState, errors::ApiResult};
 
-mod auth;
-mod epub;
-mod filesystem;
-mod job;
-mod library;
-mod log;
-mod media;
-mod reading_list;
-mod series;
-mod tag;
-mod user;
+pub(crate) mod auth;
+pub(crate) mod epub;
+pub(crate) mod filesystem;
+pub(crate) mod job;
+pub(crate) mod library;
+pub(crate) mod log;
+pub(crate) mod media;
+pub(crate) mod reading_list;
+pub(crate) mod series;
+pub(crate) mod tag;
+pub(crate) mod user;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -37,6 +37,14 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route("/version", post(version))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/claim",
+	tag = "util",
+	responses(
+		(status = 200, description = "Claim status successfully determined", body = ClaimResponse)
+	)
+)]
 async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
 	let db = ctx.get_db();
 
@@ -45,10 +53,26 @@ async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
 	}))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/ping",
+	tag = "util",
+	responses(
+		(status = 200, description = "Always responds with 'pong'", body = String)
+	)
+)]
 async fn ping() -> ApiResult<String> {
 	Ok("pong".to_string())
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/version",
+	tag = "util",
+	responses(
+		(status = 200, description = "Version information for the Stump server instance", body = StumpVersion)
+	)
+)]
 async fn version() -> ApiResult<Json<StumpVersion>> {
 	Ok(Json(StumpVersion {
 		semver: env!("CARGO_PKG_VERSION").to_string(),

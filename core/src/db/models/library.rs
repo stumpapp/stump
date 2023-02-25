@@ -2,12 +2,13 @@ use std::{fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::prisma;
 
 use super::{series::Series, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Library {
 	pub id: String,
 	/// The name of the library. ex: "Marvel Comics"
@@ -28,7 +29,7 @@ pub struct Library {
 	pub library_options: LibraryOptions,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema)]
 pub enum LibraryPattern {
 	#[serde(rename = "SERIES_BASED")]
 	SeriesBased,
@@ -72,7 +73,7 @@ impl fmt::Display for LibraryPattern {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
 pub struct LibraryOptions {
 	// Note: this isn't really an Option, but I felt it was a little verbose
 	// to create an entirely new struct Create/UpdateLibraryOptions for just one
@@ -108,7 +109,7 @@ impl LibraryOptions {
 // 	}
 // }
 
-#[derive(Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type)]
+#[derive(Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type, ToSchema)]
 pub enum LibraryScanMode {
 	#[serde(rename = "SYNC")]
 	Sync,
@@ -146,7 +147,7 @@ impl Default for LibraryScanMode {
 	}
 }
 
-#[derive(Deserialize, Serialize, Type)]
+#[derive(Deserialize, Serialize, Type, ToSchema)]
 pub struct LibrariesStats {
 	series_count: u64,
 	book_count: u64,

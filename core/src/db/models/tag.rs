@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::prisma;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct Tag {
 	pub id: String,
 	/// The name of the tag. ex: "comic"

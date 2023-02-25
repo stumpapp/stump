@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::prisma;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct User {
 	pub id: String,
 	pub username: String,
@@ -39,7 +40,7 @@ impl From<prisma::user::Data> for User {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 
 pub struct UserPreferences {
 	pub id: String,

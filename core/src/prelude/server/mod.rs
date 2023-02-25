@@ -10,8 +10,9 @@ pub use http::*;
 pub use inputs::*;
 pub use pageable::*;
 pub use query::*;
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Type)]
+#[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct StumpVersion {
 	pub semver: String,
 	pub rev: Option<String>,

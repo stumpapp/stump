@@ -2,19 +2,20 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::event::CoreEvent;
 
 /// Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
-#[derive(Serialize, Deserialize, Type)]
+#[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct LogMetadata {
 	pub path: PathBuf,
 	pub size: u64,
 	pub modified: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Type)]
+#[derive(Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum LogLevel {
 	#[serde(rename = "ERROR")]
 	Error,
@@ -43,7 +44,7 @@ impl std::fmt::Display for LogLevel {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Default, Type)]
+#[derive(Clone, Serialize, Deserialize, Default, Type, ToSchema)]
 pub struct Log {
 	pub id: String,
 	pub level: LogLevel,

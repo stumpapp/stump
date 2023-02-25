@@ -1,5 +1,5 @@
 import type { Direction, PageParams, QueryOrder } from '@stump/types'
-import create from 'zustand'
+import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
 import { StoreBase } from '.'

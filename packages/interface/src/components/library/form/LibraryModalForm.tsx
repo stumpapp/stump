@@ -13,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type { TagOption } from '@stump/client'
 import { useLibraries } from '@stump/client'
 import type { Library, LibraryPattern, LibraryScanMode } from '@stump/types'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -124,9 +124,10 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 	// const convertRarToZip = form.watch('convertRarToZip');
 	const [scanMode, convertRarToZip] = form.watch(['scan_mode', 'convert_rar_to_zip'])
 
+	const resetRef = useRef(form.reset)
 	useEffect(() => {
 		if (reset) {
-			form.reset()
+			resetRef.current()
 		}
 	}, [reset])
 

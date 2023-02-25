@@ -10,6 +10,7 @@ import Lazy from './components/Lazy'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
 import TopBar from './components/topbar/TopBar'
+import { AppContext } from './context'
 
 export function AppLayout() {
 	const appProps = useAppProps()
@@ -39,7 +40,6 @@ export function AppLayout() {
 		navigate('/settings/general')
 	})
 
-	// FIXME: after switching to SSE again, this seems to break desktop app... kinda annoying bug.
 	const { error } = useAuthQuery({
 		enabled: !storeUser,
 		onSuccess: setUser,
@@ -52,34 +52,42 @@ export function AppLayout() {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
 	}
 
+	if (!storeUser) {
+		throw new Error('User was not expected to be null')
+	}
+
 	return (
-		<React.Suspense fallback={<Lazy />}>
-			<CommandPalette />
-			<Flex
-				// className={clsx({ 'overflow-hidden': appProps?.platform !== 'browser' })}
-				w="full"
-				h="full"
-				onContextMenu={() => {
-					// TODO: uncomment once I add custom menu on Tauri side
-					// if (appProps?.platform != 'browser') {
-					// 	e.preventDefault();
-					// 	return false;
-					// }
+		<AppContext.Provider
+			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
+		>
+			<React.Suspense fallback={<Lazy />}>
+				<CommandPalette />
+				<Flex
+					// className={clsx({ 'overflow-hidden': appProps?.platform !== 'browser' })}
+					w="full"
+					h="full"
+					onContextMenu={() => {
+						// TODO: uncomment once I add custom menu on Tauri side
+						// if (appProps?.platform != 'browser') {
+						// 	e.preventDefault();
+						// 	return false;
+						// }
 
-					return true
-				}}
-			>
-				{!hideSidebar && <Sidebar />}
-				<Box as="main" w="full" h="full" bg={mainColor}>
-					{!hideSidebar && <TopBar />}
-					<React.Suspense fallback={<Lazy />}>
-						<Outlet />
-					</React.Suspense>
-				</Box>
-			</Flex>
+						return true
+					}}
+				>
+					{!hideSidebar && <Sidebar />}
+					<Box as="main" w="full" h="full" bg={mainColor}>
+						{!hideSidebar && <TopBar />}
+						<React.Suspense fallback={<Lazy />}>
+							<Outlet />
+						</React.Suspense>
+					</Box>
+				</Flex>
 
-			{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
-			{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
-		</React.Suspense>
+				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
+				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+			</React.Suspense>
+		</AppContext.Provider>
 	)
 }

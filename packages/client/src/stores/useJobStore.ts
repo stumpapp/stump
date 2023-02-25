@@ -1,6 +1,6 @@
 import type { JobUpdate } from '@stump/types'
 import { produce } from 'immer'
-import create from 'zustand'
+import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
 import { StoreBase } from '.'

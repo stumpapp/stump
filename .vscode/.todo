@@ -74,3 +74,5 @@
 - [ ] Add `Stump.toml` template and/or just list all the config options somewhere
 - [ ] Fix `desktop-dev` command, it spawns a new window over and over :angry:
 - [ ] Make light mode look not disgusting lmao
+- [ ] ~Fix poor performance of EditLibraryModal~
+  - [ ] Just replace the modals with dedicated pages for editing and creating libraries

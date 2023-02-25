@@ -1,10 +1,12 @@
 import type { User, UserPreferences } from '@stump/types'
 import { produce } from 'immer'
-import create from 'zustand'
+import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
 import { StoreBase } from '.'
 
+// TODO: isServerOwner computed value
+// https://github.com/cmlarsen/zustand-middleware-computed-state
 interface UserStore extends StoreBase<UserStore> {
 	user?: User | null
 	userPreferences?: UserPreferences | null
@@ -13,6 +15,7 @@ interface UserStore extends StoreBase<UserStore> {
 	setUserPreferences: (userPreferences: UserPreferences | null) => void
 }
 
+// TODO: consider renaming to useAuth
 export const useUserStore = create<UserStore>()(
 	devtools(
 		persist(

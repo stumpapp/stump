@@ -26,6 +26,7 @@ export function useDirectoryListing({
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
+			keepPreviousData: true,
 			onSuccess(res) {
 				setDirectoryListing(res.data.data)
 			},

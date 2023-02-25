@@ -11,10 +11,12 @@ type LazyComponent = Promise<{
 	default: React.ComponentType<any>
 }>
 
+// I'm still so annoyed at this lol
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 const Home = lazily(() => import('./pages/Home'))
 const LibraryOverview = lazily(() => import('./pages/library/LibraryOverview'))
 const LibraryFileExplorer = lazily(() => import('./pages/library/LibraryFileExplorer'))
+const CreateLibrary = lazily(() => import('./pages/library/CreateLibrary'))
 const SeriesOverview = lazily(() => import('./pages/SeriesOverview'))
 const BookOverview = lazily(() => import('./pages/book/BookOverview'))
 const ReadBook = lazily(() => import('./pages/book/ReadBook'))
@@ -55,6 +57,7 @@ export function AppRouter() {
 			<Route path="/" element={<AppLayout />}>
 				<Route path="" element={<Home />} />
 
+				<Route path="libraries/create" element={<CreateLibrary />} />
 				<Route path="libraries/:id" element={<LibraryOverview />} />
 				<Route path="libraries/:id/explorer" element={<LibraryFileExplorer />} />
 

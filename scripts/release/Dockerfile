@@ -120,7 +120,7 @@ COPY --from=frontend /app/build ./app/client
 
 # Copy docker entrypoint
 # This will take care of starting the service daemon as a regular user, if desired
-COPY entrypoint.sh /entrypoint.sh
+COPY scripts/release/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # TODO: replace this with something more elegant lol maybe a bash case statement

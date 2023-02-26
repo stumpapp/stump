@@ -81,3 +81,8 @@ pub struct CreateReadingList {
 	pub id: String,
 	pub media_ids: Vec<String>,
 }
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct CreateTags {
+	pub tags: Vec<String>,
+}

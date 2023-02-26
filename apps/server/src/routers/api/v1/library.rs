@@ -78,8 +78,8 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 	path = "/api/v1/libraries",
 	tag = "library",
 	params(
-		("filter_query" = FilterableLibraryQuery, Query, description = "The library filters"),
-		("pagination_query" = PaginationQuery, Query, description = "The pagination options")
+		("filter_query" = Option<FilterableLibraryQuery>, Query, description = "The library filters"),
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options")
 	),
 	responses(
 		(status = 200, description = "Successfully retrieved libraries", body = PageableLibraries),
@@ -230,8 +230,8 @@ async fn get_library_by_id(
 	tag = "library",
 	params(
 		("id" = String, Path, description = "The library ID"),
-		("filter_query" = FilterableLibraryQuery, Query, description = "The library filters"),
-		("pagination_query" = PaginationQuery, Query, description = "The pagination options")
+		("filter_query" = Option<FilterableLibraryQuery>, Query, description = "The library filters"),
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options")
 	),
 	responses(
 		(status = 200, description = "Successfully retrieved series", body = PageableSeries),

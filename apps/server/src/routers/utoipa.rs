@@ -4,11 +4,12 @@ use stump_core::db::models::{
 };
 use stump_core::job::{JobReport, JobStatus};
 use stump_core::prelude::{
-	ClaimResponse, CreateLibraryArgs, CursorInfo, Direction, DirectoryListing,
-	DirectoryListingFile, DirectoryListingInput, FileStatus, LoginOrRegisterArgs,
-	PageInfo, PageQuery, PageableDirectoryListing, PageableLibraries, PageableMedia,
-	PageableSeries, PaginationQuery, QueryOrder, ScanQueryParam, StumpVersion,
-	UpdateLibraryArgs,
+	ClaimResponse, CreateLibraryArgs, CreateReadingList, CursorInfo, Direction,
+	DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileStatus,
+	LoginOrRegisterArgs, PageInfo, PageQuery, PageableDirectoryListing,
+	PageableLibraries, PageableMedia, PageableSeries, PaginationQuery, QueryOrder,
+	ScanQueryParam, StumpVersion, UpdateLibraryArgs, UpdateUserArgs,
+	UserPreferencesUpdate,
 };
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -16,7 +17,7 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::errors::ApiError;
 use crate::utils::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
-	MediaFilter, SeriesFilter,
+	MediaFilter, SeriesFilter, SeriesRelation,
 };
 
 use super::api;
@@ -57,6 +58,24 @@ use super::api;
         api::v1::media::get_media_page,
         api::v1::media::get_media_thumbnail,
         api::v1::media::update_media_progress,
+        api::v1::reading_list::get_reading_list,
+        api::v1::reading_list::create_reading_list,
+        api::v1::reading_list::get_reading_list_by_id,
+        api::v1::reading_list::update_reading_list,
+        api::v1::reading_list::delete_reading_list_by_id,
+        api::v1::series::get_series,
+        api::v1::series::get_series_by_id,
+        api::v1::series::get_recently_added_series,
+        api::v1::series::get_series_thumbnail,
+        api::v1::series::get_series_media,
+        api::v1::series::get_next_in_series,
+        api::v1::user::get_users,
+        api::v1::user::create_user,
+        api::v1::user::delete_user_by_id,
+        api::v1::user::get_user_by_id,
+        api::v1::user::update_user,
+        api::v1::user::get_user_preferences,
+        api::v1::user::update_user_preferences,
     ),
     components(
         schemas(
@@ -68,7 +87,7 @@ use super::api;
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
             Direction, CreateLibraryArgs, UpdateLibraryArgs, ApiError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, JobReport, LibrariesStats, ScanQueryParam,
-            JobStatus
+            JobStatus, SeriesRelation, CreateReadingList, UserPreferencesUpdate, UpdateUserArgs
         )
     ),
     tags(

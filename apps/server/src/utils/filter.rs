@@ -69,7 +69,7 @@ pub struct LibraryFilter {
 	pub name: Vec<String>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesRelation {
 	pub load_media: Option<bool>,
 }

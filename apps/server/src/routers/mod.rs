@@ -14,10 +14,10 @@ mod ws;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	let mut app_router = Router::new();
 
-	if let Ok(flag) = env::var("ENABLE_SWAGGER_UI") {
-		if flag != "false" || is_debug() {
-			app_router = app_router.merge(utoipa::swagger_ui());
-		}
+	let enable_swagger =
+		env::var("ENABLE_SWAGGER_UI").unwrap_or_else(|_| String::from("true"));
+	if enable_swagger != "false" || is_debug() {
+		app_router = app_router.merge(utoipa::swagger_ui());
 	}
 
 	app_router

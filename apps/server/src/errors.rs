@@ -99,6 +99,14 @@ pub enum ApiError {
 	PrismaError(#[from] QueryError),
 }
 
+impl ApiError {
+	pub fn forbidden_discreet() -> ApiError {
+		ApiError::Forbidden(String::from(
+			"You do not have permission to access this resource.",
+		))
+	}
+}
+
 impl From<CoreError> for ApiError {
 	fn from(err: CoreError) -> Self {
 		match err {

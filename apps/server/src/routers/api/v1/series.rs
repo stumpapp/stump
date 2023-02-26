@@ -23,7 +23,7 @@ use stump_core::{
 		series::{self, WhereParam},
 	},
 };
-use tracing::trace;
+use tracing::{error, trace};
 
 use crate::{
 	config::state::AppState,
@@ -69,8 +69,22 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 	_where
 }
 
-/// Get all series accessible by user. This is a paginated respone, and
-/// accepts various paginated request params.
+#[utoipa::path(
+	get,
+	path = "/api/v1/series",
+	tag = "series",
+	params(
+		("filter_query" = Option<FilterableSeriesQuery>, Query, description = "The filter options"),
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
+		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series.", body = PageableSeries),
+		(status = 401, description = "Unauthorized."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Get all series accessible by user.
 async fn get_series(
 	filter_query: Query<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
@@ -137,6 +151,21 @@ async fn get_series(
 	Ok(Json((series, series_count, pagination).into()))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to fetch"),
+		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series.", body = Series),
+		(status = 401, description = "Unauthorized."),
+		(status = 404, description = "Series not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 /// Get a series by ID. Optional query param `load_media` that will load the media
 /// relation (i.e. the media entities will be loaded and sent with the response)
 async fn get_series_by_id(
@@ -185,6 +214,20 @@ async fn get_series_by_id(
 	Ok(Json(series.unwrap().into()))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/recently-added",
+	tag = "series",
+	params(
+		("pagination" = PageQuery, Query, description = "The pagination params"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched recently added series.", body = PageableSeries),
+		(status = 400, description = "Bad request. Unpaged request not supported for this endpoint."),
+		(status = 401, description = "Unauthorized."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 async fn get_recently_added_series(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -207,8 +250,22 @@ async fn get_recently_added_series(
 	Ok(Json(recently_added_series))
 }
 
+// TODO: ImageResponse type for body
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id/thumbnail",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to fetch the thumbnail for"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series thumbnail."),
+		(status = 401, description = "Unauthorized."),
+		(status = 404, description = "Series not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 /// Returns the thumbnail image for a series
-// #[get("/series/<id>/thumbnail")]
 async fn get_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -230,7 +287,6 @@ async fn get_series_thumbnail(
 	}
 
 	let media = media.unwrap();
-
 	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
 		trace!("Found webp thumbnail for series {}", &id);
 		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
@@ -239,8 +295,23 @@ async fn get_series_thumbnail(
 	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }
 
-/// Returns the media in a given series. This is a paginated respone, and
-/// accepts various paginated request params.
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id/media",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to fetch the media for"),
+		("pagination" = Option<PaginationQuery>, Query, description = "The pagination params"),
+		("ordering" = Option<QueryOrder>, Query, description = "The ordering params"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series media.", body = PageableMedia),
+		(status = 401, description = "Unauthorized."),
+		(status = 404, description = "Series not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Returns the media in a given series.
 async fn get_series_media(
 	pagination_query: Query<PaginationQuery>,
 	ordering: Query<QueryOrder>,
@@ -250,6 +321,20 @@ async fn get_series_media(
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
+
+	let series_exists = db
+		.series()
+		.find_first(vec![series::id::equals(id.clone())])
+		.exec()
+		.await?
+		.is_some();
+
+	if !series_exists {
+		return Err(ApiError::NotFound(format!(
+			"Series with id {} not found",
+			id
+		)));
+	}
 
 	let pagination = pagination_query.0.get();
 	let is_unpaged = pagination.is_unpaged();
@@ -317,14 +402,27 @@ async fn get_series_media(
 	Ok(Json(Pageable::from(media)))
 }
 
-// TODO: Should I support ehere too?? Not sure, I have separate routes for epub,
-// but until I actually implement progress tracking for eI think think I can really
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id/media/next",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to fetch the up-next media for"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media up-next in series", body = Option<Media>),
+		(status = 401, description = "Unauthorized."),
+		(status = 404, description = "Series not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+// TODO: Should I support epub here too?? Not sure, I have separate routes for epub,
+// but until I actually implement progress tracking for epub I think think I can really
 // give a hard answer on what is best...
 /// Get the next media in a series, based on the read progress for the requesting user.
 /// Stump will return the first book in the series without progress, or return the first
 /// with partial progress. E.g. if a user has read pages 32/32 of book 3, then book 4 is
 /// next. If a user has read pages 31/32 of book 4, then book 4 is still next.
-// #[get("/series/<id>/media/next")]
 async fn get_next_in_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -355,13 +453,10 @@ async fn get_next_in_series(
 
 	let series = series.unwrap();
 
-	let media = series.media();
-
-	if media.is_err() {
-		return Ok(Json(None));
-	}
-
-	let media = media.unwrap();
+	let media = series.media().map_err(|e| {
+		error!(error = ?e, "Failed to load media for series");
+		e
+	})?;
 
 	Ok(Json(
 		media

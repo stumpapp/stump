@@ -103,6 +103,7 @@ use super::api;
         (name = "media", description = "Media API"),
         (name = "series", description = "Series API"),
         (name = "tag", description = "Tag API"),
+        (name = "reading-list", description = "Reading List API"),
         (name = "user", description = "User API"),
         (name = "opds", description = "OPDS API"),
     )

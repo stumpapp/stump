@@ -4,8 +4,8 @@ use stump_core::db::models::{
 };
 use stump_core::job::{JobReport, JobStatus};
 use stump_core::prelude::{
-	ClaimResponse, CreateLibraryArgs, CreateReadingList, CursorInfo, Direction,
-	DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileStatus,
+	ClaimResponse, CreateLibraryArgs, CreateReadingList, CreateTags, CursorInfo,
+	Direction, DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileStatus,
 	LoginOrRegisterArgs, PageInfo, PageQuery, PageableDirectoryListing,
 	PageableLibraries, PageableMedia, PageableSeries, PaginationQuery, QueryOrder,
 	ScanQueryParam, StumpVersion, UpdateLibraryArgs, UpdateUserArgs,
@@ -68,6 +68,8 @@ use super::api;
         api::v1::series::get_recently_added_series,
         api::v1::series::get_series_thumbnail,
         api::v1::series::get_series_media,
+        api::v1::tag::get_tags,
+        api::v1::tag::create_tags,
         api::v1::series::get_next_in_series,
         api::v1::user::get_users,
         api::v1::user::create_user,
@@ -87,7 +89,8 @@ use super::api;
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
             Direction, CreateLibraryArgs, UpdateLibraryArgs, ApiError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, JobReport, LibrariesStats, ScanQueryParam,
-            JobStatus, SeriesRelation, CreateReadingList, UserPreferencesUpdate, UpdateUserArgs
+            JobStatus, SeriesRelation, CreateReadingList, UserPreferencesUpdate, UpdateUserArgs,
+            CreateTags
         )
     ),
     tags(

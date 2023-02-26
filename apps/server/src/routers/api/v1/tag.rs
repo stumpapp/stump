@@ -19,7 +19,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 #[utoipa::path(
 	get,
 	path = "/api/v1/tags",
-	tag = "tags",
+	tag = "tag",
 	responses(
 		(status = 200, description = "Successfully fetched tags.", body = [Tag]),
 		(status = 401, description = "Unauthorized."),
@@ -45,7 +45,7 @@ async fn get_tags(State(ctx): State<AppState>) -> ApiResult<Json<Vec<Tag>>> {
 #[utoipa::path(
 	post,
 	path = "/api/v1/tags",
-	tag = "tags",
+	tag = "tag",
 	request_body = CreateTags,
 	responses(
 		(status = 200, description = "Successfully created tags.", body = [Tag]),

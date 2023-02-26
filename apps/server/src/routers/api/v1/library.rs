@@ -7,7 +7,6 @@ use axum::{
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
-use serde::Deserialize;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 
@@ -19,7 +18,8 @@ use stump_core::{
 	fs::{image, media_file},
 	job::LibraryScanJob,
 	prelude::{
-		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, UpdateLibraryArgs,
+		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, ScanQueryParam,
+		UpdateLibraryArgs,
 	},
 	prisma::{
 		library::{self, WhereParam},
@@ -77,6 +77,10 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 	get,
 	path = "/api/v1/libraries",
 	tag = "library",
+	params(
+		("filter_query" = FilterableLibraryQuery, Query, description = "The library filters"),
+		("pagination_query" = PaginationQuery, Query, description = "The pagination options")
+	),
 	responses(
 		(status = 200, description = "Successfully retrieved libraries", body = PageableLibraries),
 		(status = 401, description = "Unauthorized"),
@@ -178,6 +182,9 @@ async fn get_libraries_stats(
 	get,
 	path = "/api/v1/libraries/:id",
 	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
 	responses(
 		(status = 200, description = "Successfully retrieved library", body = Library),
 		(status = 401, description = "Unauthorized"),
@@ -221,6 +228,11 @@ async fn get_library_by_id(
 	get,
 	path = "/api/v1/libraries/:id/series",
 	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+		("filter_query" = FilterableLibraryQuery, Query, description = "The library filters"),
+		("pagination_query" = PaginationQuery, Query, description = "The pagination options")
+	),
 	responses(
 		(status = 200, description = "Successfully retrieved series", body = PageableSeries),
 		(status = 401, description = "Unauthorized"),
@@ -304,6 +316,9 @@ async fn get_library_series(
 	get,
 	path = "/api/v1/libraries/:id/thumbnail",
 	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+	),
 	responses(
 		(status = 200, description = "Successfully retrieved library thumbnail"),
 		(status = 401, description = "Unauthorized"),
@@ -332,15 +347,14 @@ async fn get_library_thumbnail(
 	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }
 
-#[derive(Deserialize)]
-struct ScanQueryParam {
-	scan_mode: Option<String>,
-}
-
 #[utoipa::path(
 	post,
 	path = "/api/v1/libraries/:id/scan",
 	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+		("query" = ScanQueryParam, Query, description = "The scan options"),
+	),
 	responses(
 		(status = 200, description = "Successfully queued library scan"),
 		(status = 401, description = "Unauthorized"),
@@ -354,7 +368,7 @@ async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	query: Query<ScanQueryParam>,
-	session: ReadableSession, // TODO: admin middleware
+	session: ReadableSession,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 	let _user = get_session_admin_user(&session)?;
@@ -395,6 +409,7 @@ async fn scan_library(
 	post,
 	path = "/api/v1/libraries",
 	tag = "library",
+	request_body = CreateLibraryArgs,
 	responses(
 		(status = 200, description = "Successfully created library"),
 		(status = 400, description = "Bad request"),
@@ -503,6 +518,10 @@ async fn create_library(
 	put,
 	path = "/api/v1/libraries/:id",
 	tag = "library",
+	request_body = UpdateLibraryArgs,
+	params(
+		("id" = String, Path, description = "The id of the library to update")
+	),
 	responses(
 		(status = 200, description = "Successfully updated library"),
 		(status = 400, description = "Bad request"),
@@ -613,6 +632,9 @@ async fn update_library(
 	delete,
 	path = "/api/v1/libraries/:id",
 	tag = "library",
+	params(
+		("id" = String, Path, description = "The id of the library to delete")
+	),
 	responses(
 		(status = 200, description = "Successfully deleted library"),
 		(status = 400, description = "Bad request"),

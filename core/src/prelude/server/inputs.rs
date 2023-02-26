@@ -71,6 +71,11 @@ pub struct UpdateLibraryArgs {
 	pub scan_mode: Option<LibraryScanMode>,
 }
 
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct ScanQueryParam {
+	pub scan_mode: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct CreateReadingList {
 	pub id: String,

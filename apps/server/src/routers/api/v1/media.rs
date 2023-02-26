@@ -76,6 +76,21 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	_where
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/media",
+	tag = "media",
+	params(
+		("filter_query" = Option<FilterableMediaQuery>, Query, description = "The optional media filters"),
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media", body = PageableMedia),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 /// Get all media accessible to the requester. This is a paginated request, and
 /// has various pagination params available.
 #[tracing::instrument(skip(ctx, session))]
@@ -155,6 +170,20 @@ async fn get_media(
 	Ok(Json(Pageable::from(media)))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/duplicates",
+	tag = "media",
+	params(
+		("pagination" = Option<PageQuery>, Query, description = "Pagination options")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched duplicate media", body = PageableMedia),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 /// Get all media with identical checksums. This heavily implies duplicate files,
 /// however it is not a guarantee (checksums are generated from the first chunk of
 /// the file, so if a 2 comic books had say the same first 6 pages it might return a
@@ -178,6 +207,20 @@ async fn get_duplicate_media(
 	))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/in-progress",
+	tag = "media",
+	params(
+		("pagination" = Option<PageQuery>, Query, description = "Pagination options")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched in progress media", body = PageableMedia),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 /// Get all media which the requester has progress for that is less than the
 /// total number of pages available (i.e not completed).
 async fn get_in_progress_media(
@@ -196,6 +239,22 @@ async fn get_in_progress_media(
 	))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/recently-added",
+	tag = "media",
+	params(
+		("pagination" = Option<PageQuery>, Query, description = "Pagination options")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched recently added media", body = PageableMedia),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Get all media which was added to the library in descending order of when it
+/// was added.
 async fn get_recently_added_media(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
@@ -236,6 +295,24 @@ struct LoadSeries {
 	load_series: Option<bool>,
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get"),
+		("load_series" = Option<bool>, Query, description = "Whether to load the series relation for the media")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media", body = Media),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Get a media by its ID. If provided, the `load_series` query param will load
+/// the series relation for the media.
 async fn get_media_by_id(
 	Path(id): Path<String>,
 	params: Query<LoadSeries>,
@@ -267,6 +344,23 @@ async fn get_media_by_id(
 	Ok(Json(Media::from(result.unwrap())))
 }
 
+// TODO: type a body
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/file",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media file"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Download the file associated with the media.
 async fn get_media_file(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -291,7 +385,23 @@ async fn get_media_file(
 	Ok(NamedFile::open(media.path.clone()).await?)
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/convert",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media")
+	),
+	responses(
+		(status = 200, description = "Successfully converted media"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 // TODO: remove this, implement it? maybe?
+/// Converts a media file to a different format. Currently UNIMPLEMENTED.
 async fn convert_media(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -320,10 +430,27 @@ async fn convert_media(
 		)));
 	}
 
-	// TODO: write me...
-	unimplemented!()
+	Err(ApiError::NotImplemented)
 }
 
+// TODO: ImageResponse as body type
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/page/:page",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get"),
+		("page" = i32, Path, description = "The page to get")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Get a page of a media
 async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
@@ -360,6 +487,23 @@ async fn get_media_page(
 	}
 }
 
+// TODO: ImageResponse as body type
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/thumbnail",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media thumbnail"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Get the thumbnail image of a media
 async fn get_media_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -398,7 +542,24 @@ async fn get_media_thumbnail(
 	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
 }
 
+#[utoipa::path(
+	put,
+	path = "/api/v1/media/:id/read-progress",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get"),
+		("page" = i32, Path, description = "The page to update the read progress to")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media read progress"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 // FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found
+/// Update the read progress of a media. If the progress doesn't exist, it will be created.
 async fn update_media_progress(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,

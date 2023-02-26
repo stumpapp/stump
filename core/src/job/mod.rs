@@ -3,6 +3,7 @@ pub mod pool;
 pub mod runner;
 
 pub use jobs::*;
+use utoipa::ToSchema;
 
 use std::{fmt::Debug, num::TryFromIntError};
 
@@ -101,7 +102,7 @@ pub enum JobEvent {
 	Failed,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type, ToSchema)]
 pub enum JobStatus {
 	#[serde(rename = "RUNNING")]
 	Running,
@@ -211,7 +212,7 @@ impl JobUpdate {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct JobReport {
 	/// This will actually refer to the job runner id
 	pub id: Option<String>,

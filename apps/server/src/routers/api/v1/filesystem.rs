@@ -29,6 +29,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	post,
 	path = "/api/v1/filesystem",
 	tag = "filesystem",
+	request_body = Option<DirectoryListingInput>,
+	params(
+		("pagination" = Option<PageQuery>, Query, description = "Pagination parameters for the directory listing.")
+	),
 	responses(
 		(status = 200, description = "Successfully retrieved contents of directory", body = PageableDirectoryListing),
 		(status = 400, description = "Invalid request."),

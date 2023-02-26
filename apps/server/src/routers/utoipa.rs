@@ -1,14 +1,23 @@
 use stump_core::db::models::{
-	Library, LibraryOptions, LibraryPattern, LibraryScanMode, LogLevel, Media,
-	ReadProgress, ReadingList, Series, Tag, User, UserPreferences,
+	LibrariesStats, Library, LibraryOptions, LibraryPattern, LibraryScanMode, LogLevel,
+	Media, ReadProgress, ReadingList, Series, Tag, User, UserPreferences,
 };
+use stump_core::job::{JobReport, JobStatus};
 use stump_core::prelude::{
-	ClaimResponse, CursorInfo, DirectoryListing, DirectoryListingFile, FileStatus,
-	PageInfo, PageableDirectoryListing, PageableLibraries, PageableMedia, PageableSeries,
-	StumpVersion,
+	ClaimResponse, CreateLibraryArgs, CursorInfo, Direction, DirectoryListing,
+	DirectoryListingFile, DirectoryListingInput, FileStatus, LoginOrRegisterArgs,
+	PageInfo, PageQuery, PageableDirectoryListing, PageableLibraries, PageableMedia,
+	PageableSeries, PaginationQuery, QueryOrder, ScanQueryParam, StumpVersion,
+	UpdateLibraryArgs,
 };
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+
+use crate::errors::ApiError;
+use crate::utils::{
+	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
+	MediaFilter, SeriesFilter,
+};
 
 use super::api;
 
@@ -38,6 +47,16 @@ use super::api;
         api::v1::library::create_library,
         api::v1::library::update_library,
         api::v1::library::delete_library,
+        api::v1::media::get_media,
+        api::v1::media::get_duplicate_media,
+        api::v1::media::get_in_progress_media,
+        api::v1::media::get_recently_added_media,
+        api::v1::media::get_media_by_id,
+        api::v1::media::get_media_file,
+        api::v1::media::convert_media,
+        api::v1::media::get_media_page,
+        api::v1::media::get_media_thumbnail,
+        api::v1::media::update_media_progress,
     ),
     components(
         schemas(
@@ -45,7 +64,11 @@ use super::api;
             UserPreferences, LibraryPattern, LibraryScanMode, LogLevel, ClaimResponse,
             StumpVersion, FileStatus, PageableDirectoryListing, DirectoryListing,
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
-            PageableMedia, PageableSeries
+            PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
+            PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
+            Direction, CreateLibraryArgs, UpdateLibraryArgs, ApiError, MediaFilter, SeriesFilter,
+            FilterableMediaQuery, FilterableSeriesQuery, JobReport, LibrariesStats, ScanQueryParam,
+            JobStatus
         )
     ),
     tags(

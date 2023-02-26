@@ -4,8 +4,10 @@ use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_with::with_prefix;
 use std::fmt;
 use stump_core::prelude::QueryOrder;
+use utoipa::ToSchema;
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize, ToSchema)]
+#[aliases(FilterableLibraryQuery = FilterableQuery<LibraryFilter>, FilterableSeriesQuery = FilterableQuery<SeriesFilter>, FilterableMediaQuery = FilterableQuery<MediaFilter>)]
 pub struct FilterableQuery<T>
 where
 	T: Sized + Default,
@@ -59,7 +61,7 @@ where
 }
 
 // TODO: tags
-#[derive(Default, Debug, Clone, Deserialize, Serialize)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct LibraryFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
@@ -76,7 +78,7 @@ pub struct SeriesRelation {
 // I would prefer /series?library[field]=value, but could not get that to work.
 with_prefix!(library_prefix "library_");
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
@@ -90,7 +92,7 @@ pub struct SeriesFilter {
 // TODO: I don't like this convention and I'd rather figure out a way around it.
 // I would prefer /media?series[field]=value, but could not get that to work.
 with_prefix!(series_prefix "series_");
-#[derive(Default, Debug, Deserialize, Serialize)]
+#[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
 pub struct MediaFilter {
 	#[serde(default)]
 	pub id: Vec<String>,

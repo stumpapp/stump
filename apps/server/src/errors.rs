@@ -11,6 +11,7 @@ use stump_core::{
 	prelude::{CoreError, ProcessFileError},
 };
 use tokio::sync::mpsc;
+use utoipa::ToSchema;
 
 use std::net;
 use thiserror::Error;
@@ -71,7 +72,7 @@ impl IntoResponse for AuthError {
 }
 
 #[allow(unused)]
-#[derive(Debug, Error)]
+#[derive(Debug, Error, ToSchema)]
 pub enum ApiError {
 	#[error("{0}")]
 	BadRequest(String),
@@ -94,6 +95,7 @@ pub enum ApiError {
 	#[error("{0}")]
 	Redirect(String),
 	#[error("{0}")]
+	#[schema(value_type = String)]
 	PrismaError(#[from] QueryError),
 }
 

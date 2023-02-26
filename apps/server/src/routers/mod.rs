@@ -1,6 +1,8 @@
+use std::env;
+
 use axum::Router;
 
-use crate::config::state::AppState;
+use crate::config::{state::AppState, utils::is_debug};
 
 mod api;
 mod opds;
@@ -10,8 +12,15 @@ mod utoipa;
 mod ws;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
-	Router::new()
-		.merge(utoipa::swagger_ui())
+	let mut app_router = Router::new();
+
+	if let Ok(flag) = env::var("ENABLE_SWAGGER_UI") {
+		if flag != "false" || is_debug() {
+			app_router = app_router.merge(utoipa::swagger_ui());
+		}
+	}
+
+	app_router
 		.merge(spa::mount())
 		.merge(ws::mount())
 		.merge(sse::mount())

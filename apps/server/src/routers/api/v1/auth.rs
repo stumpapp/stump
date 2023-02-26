@@ -50,6 +50,7 @@ async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
 	post,
 	path = "/api/v1/auth/login",
 	tag = "auth",
+	request_body = LoginOrRegisterArgs,
 	responses(
 		(status = 200, description = "Authenticates the user and returns the user object.", body = User),
 		(status = 401, description = "Invalid username or password."),
@@ -118,6 +119,7 @@ async fn logout(mut session: WritableSession) -> ApiResult<()> {
 	post,
 	path = "/api/v1/auth/register",
 	tag = "auth",
+	request_body = LoginOrRegisterArgs,
 	responses(
 		(status = 200, description = "Successfully registered new user.", body = User),
 		(status = 403, description = "Must be server owner to register member accounts."),

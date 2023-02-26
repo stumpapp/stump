@@ -78,6 +78,9 @@ async fn delete_job_reports(State(ctx): State<AppState>) -> ApiResult<()> {
 	delete,
 	path = "/api/v1/jobs/:id/cancel",
 	tag = "job",
+	params(
+		("id" = String, Path, description = "The ID of the job to cancel.")
+	),
 	responses(
 		(status = 200, description = "Successfully cancelled job"),
 		(status = 401, description = "No user is logged in (unauthorized)."),

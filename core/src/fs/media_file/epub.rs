@@ -10,6 +10,9 @@ use std::os::unix::prelude::MetadataExt;
 #[cfg(target_family = "windows")]
 use std::os::windows::prelude::*;
 
+const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
+const DEFAULT_EPUB_COVER_ID: &str = "cover";
+
 use crate::{
 	fs::{
 		checksum,
@@ -18,7 +21,7 @@ use crate::{
 	prelude::{errors::ProcessFileError, fs::ProcessedMediaFile, ContentType},
 };
 use epub::doc::EpubDoc;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, trace, warn};
 
 /*
 epubcfi usually starts with /6, referring to spine element of package file
@@ -76,19 +79,73 @@ pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 }
 
 // TODO: change return type to make more sense
+/// Returns the cover image for the epub file. If a cover image cannot be extracted via the
+/// metadata, it will go through two rounds of fallback methods:
+///
+/// 1. Attempt to find a resource with the default ID of "cover"
+/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
+/// results based on how likely they are to be the cover. For example, if the cover is named
+/// "cover.jpg", it's probably the cover. The entry with the heighest weight, if any, will be
+/// returned.
 pub fn get_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = EpubDoc::new(file).map_err(|e| {
 		error!("Failed to open epub file: {}", e);
 		ProcessFileError::EpubOpenError(e.to_string())
 	})?;
 
-	let cover = epub_file.get_cover().map_err(|e| {
-		error!("Failed to get cover from epub file: {}", e);
-		ProcessFileError::EpubReadError(e.to_string())
-	})?;
+	let cover_id = epub_file.get_cover_id().unwrap_or_else(|_| {
+		warn!("Epub file does not contain cover metadata");
+		DEFAULT_EPUB_COVER_ID.to_string()
+	});
 
-	// FIXME: mime type
-	Ok((get_content_type_from_mime("image/png"), cover))
+	if let Ok(cover) = epub_file.get_resource(&cover_id) {
+		let mime = epub_file
+			.get_resource_mime(&cover_id)
+			.unwrap_or_else(|_| "image/png".to_string());
+
+		return Ok((get_content_type_from_mime(&mime), cover));
+	}
+
+	warn!(
+		"Explicit cover image could not be found, falling back to searching for best match..."
+	);
+	// FIXME: this is hack, i do NOT want to clone this entire hashmap...
+	let cloned_resources = epub_file.resources.clone();
+	let search_result = cloned_resources
+		.iter()
+		.filter(|(_, (_, mime))| {
+			ACCEPTED_EPUB_COVER_MIMES
+				.iter()
+				.any(|accepted_mime| accepted_mime == mime)
+		})
+		.map(|(id, (path, _))| {
+			trace!(name = ?path, "Found possible cover image");
+			// I want to weight the results based on how likely they are to be the cover.
+			// For example, if the cover is named "cover.jpg", it's probably the cover.
+			// TODO: this is SUPER naive, and should be improved at some point...
+			if path.starts_with("cover") {
+				let weight = if path.ends_with("png") { 100 } else { 75 };
+				(weight, id)
+			} else {
+				(0, id)
+			}
+		})
+		.max_by_key(|(weight, _)| *weight);
+
+	if let Some((_, id)) = search_result {
+		if let Ok(c) = epub_file.get_resource(id) {
+			let mime = epub_file
+				.get_resource_mime(id)
+				.unwrap_or_else(|_| "image/png".to_string());
+
+			return Ok((get_content_type_from_mime(&mime), c));
+		}
+	}
+
+	error!("Failed to find cover for epub file");
+	Err(ProcessFileError::EpubReadError(
+		"Failed to find cover for epub file".to_string(),
+	))
 }
 
 pub fn get_epub_chapter(

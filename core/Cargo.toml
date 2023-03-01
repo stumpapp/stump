@@ -31,7 +31,7 @@ infer = "0.7.0"
 image = "0.24.2"
 webp = "0.2.2"
 zip = "0.5.13"
-epub = "1.2.3"
+epub = "1.2.4"
 unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--read-bytes" }
 data-encoding = "2.3.2"
 # include_dir = "0.7.2"

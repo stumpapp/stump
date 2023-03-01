@@ -14,10 +14,7 @@ const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
 const DEFAULT_EPUB_COVER_ID: &str = "cover";
 
 use crate::{
-	fs::{
-		checksum,
-		media_file::{get_content_type_from_mime, guess_content_type},
-	},
+	fs::checksum,
 	prelude::{errors::ProcessFileError, fs::ProcessedMediaFile, ContentType},
 };
 use epub::doc::EpubDoc;
@@ -94,7 +91,7 @@ pub fn get_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError>
 	})?;
 
 	let cover_id = epub_file.get_cover_id().unwrap_or_else(|_| {
-		warn!("Epub file does not contain cover metadata");
+		debug!("Epub file does not contain cover metadata");
 		DEFAULT_EPUB_COVER_ID.to_string()
 	});
 
@@ -103,10 +100,10 @@ pub fn get_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError>
 			.get_resource_mime(&cover_id)
 			.unwrap_or_else(|_| "image/png".to_string());
 
-		return Ok((get_content_type_from_mime(&mime), cover));
+		return Ok((ContentType::from(mime.as_str()), cover));
 	}
 
-	warn!(
+	debug!(
 		"Explicit cover image could not be found, falling back to searching for best match..."
 	);
 	// FIXME: this is hack, i do NOT want to clone this entire hashmap...
@@ -138,7 +135,7 @@ pub fn get_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError>
 				.get_resource_mime(id)
 				.unwrap_or_else(|_| "image/png".to_string());
 
-			return Ok((get_content_type_from_mime(&mime), c));
+			return Ok((ContentType::from(mime.as_str()), c));
 		}
 	}
 
@@ -165,15 +162,15 @@ pub fn get_epub_chapter(
 	})?;
 
 	let content_type = match epub_file.get_current_mime() {
-		Ok(mime) => get_content_type_from_mime(&mime),
+		Ok(mime) => ContentType::from(mime.as_str()),
 		Err(e) => {
-			warn!(
-				"Failed to get explicit definition of resource mime for {}: {}",
-				path, e
+			error!(
+				error = ?e,
+				chapter_path = ?path,
+				"Failed to get explicit resource mime for chapter. Returning default.",
 			);
 
-			// FIXME: when did I write this? lmao
-			guess_content_type("REMOVEME.xhml")
+			ContentType::XHTML
 		},
 	};
 
@@ -196,7 +193,7 @@ pub fn get_epub_resource(
 		ProcessFileError::EpubReadError(e.to_string())
 	})?;
 
-	Ok((get_content_type_from_mime(&content_type), contents))
+	Ok((ContentType::from(content_type.as_str()), contents))
 }
 
 pub fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
@@ -258,7 +255,7 @@ pub fn get_epub_resource_from_path(
 	// package.opf, etc.).
 	let content_type = match epub_file.get_resource_mime_by_path(adjusted_path.as_path())
 	{
-		Ok(mime) => get_content_type_from_mime(&mime),
+		Ok(mime) => ContentType::from(mime.as_str()),
 		Err(e) => {
 			warn!(
 				"Failed to get explicit definition of resource mime for {}: {}",
@@ -266,7 +263,7 @@ pub fn get_epub_resource_from_path(
 				e
 			);
 
-			guess_content_type(adjusted_path.as_path().to_str().unwrap())
+			ContentType::from_path(adjusted_path.as_path())
 		},
 	};
 

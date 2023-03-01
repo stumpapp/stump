@@ -155,7 +155,7 @@ impl IntoResponse for NamedFile {
 		Response::builder()
 			.header(
 				header::CONTENT_TYPE,
-				ContentType::from_infer(&self.path_buf).to_string(),
+				ContentType::from_path(&self.path_buf).to_string(),
 			)
 			.header(
 				header::CONTENT_DISPOSITION,

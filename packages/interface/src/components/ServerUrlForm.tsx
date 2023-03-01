@@ -131,7 +131,7 @@ export default function ServerUrlForm() {
 
 				{sucessfulConnection && (
 					<FormHelperText color="green.300">
-						Sucessfully connected to {form.getValues('baseUrl')}!
+						Successfully connected to {form.getValues('baseUrl')}!
 					</FormHelperText>
 				)}
 			</FormControl>

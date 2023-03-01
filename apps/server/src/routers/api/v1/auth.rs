@@ -27,6 +27,17 @@ pub(crate) fn mount() -> Router<AppState> {
 	)
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/auth/me",
+	tag = "auth",
+	responses(
+		(status = 200, description = "Returns the currently logged in user from the session.", body = User),
+		(status = 401, description = "No user is logged in (unauthorized).")
+	)
+)]
+/// Returns the currently logged in user from the session. If no user is logged in, returns an
+/// unauthorized error.
 async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
 	if let Some(user) = session.get::<User>("user") {
 		Ok(Json(user))
@@ -35,6 +46,19 @@ async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
 	}
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/auth/login",
+	tag = "auth",
+	request_body = LoginOrRegisterArgs,
+	responses(
+		(status = 200, description = "Authenticates the user and returns the user object.", body = User),
+		(status = 401, description = "Invalid username or password."),
+		(status = 500, description = "An internal server error occurred.")
+	)
+)]
+/// Authenticates the user and returns the user object. If the user is already logged in, returns the
+/// user object from the session.
 async fn login(
 	mut session: WritableSession,
 	State(state): State<AppState>,
@@ -63,7 +87,7 @@ async fn login(
 		let user: User = db_user.into();
 		session
 			.insert("user", user.clone())
-			.expect("Failed to insert user into session");
+			.expect("Failed to write user to session");
 
 		return Ok(Json(user));
 	}
@@ -71,11 +95,39 @@ async fn login(
 	Err(ApiError::Unauthorized)
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/auth/logout",
+	tag = "auth",
+	responses(
+		(status = 200, description = "Destroys the session and logs the user out."),
+		(status = 500, description = "Failed to destroy session.")
+	)
+)]
+/// Destroys the session and logs the user out.
 async fn logout(mut session: WritableSession) -> ApiResult<()> {
 	session.destroy();
+	if !session.is_destroyed() {
+		return Err(ApiError::InternalServerError(
+			"Failed to destroy session".to_string(),
+		));
+	}
 	Ok(())
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/auth/register",
+	tag = "auth",
+	request_body = LoginOrRegisterArgs,
+	responses(
+		(status = 200, description = "Successfully registered new user.", body = User),
+		(status = 403, description = "Must be server owner to register member accounts."),
+		(status = 500, description = "An internal server error occurred.")
+	)
+)]
+/// Attempts to register a new user. If no users exist in the database, the user is registered as a server owner.
+/// Otherwise, the registration is rejected by all users except the server owner.
 pub async fn register(
 	session: ReadableSession,
 	State(ctx): State<AppState>,
@@ -87,13 +139,20 @@ pub async fn register(
 
 	let mut user_role = UserRole::default();
 
-	// server owners must register member accounts
-	if session.get::<User>("user").is_none() && has_users {
-		return Err(ApiError::Forbidden(
-			"Must be server owner to register member accounts".to_string(),
-		));
+	let session_user = session.get::<User>("user");
+
+	// TODO: move nested if to if let once stable
+	if let Some(user) = session_user {
+		if !user.is_admin() {
+			return Err(ApiError::Forbidden(String::from(
+				"You do not have permission to access this resource.",
+			)));
+		}
+	} else if session_user.is_none() && has_users {
+		// if users exist, a valid session is required to register a new user
+		return Err(ApiError::Unauthorized);
 	} else if !has_users {
-		// register the user as owner
+		// if no users present, the user is automatically a server owner
 		user_role = UserRole::ServerOwner;
 	}
 
@@ -119,7 +178,7 @@ pub async fn register(
 		.exec()
 		.await?;
 
-	// This *really* shouldn't fail, so I am using unwrap here. It also doesn't
+	// This *really* shouldn't fail, so I am using expect here. It also doesn't
 	// matter too much in the long run since this query will go away once above fixme
 	// is resolved.
 	let user = db
@@ -128,7 +187,7 @@ pub async fn register(
 		.with(user::user_preferences::fetch())
 		.exec()
 		.await?
-		.unwrap();
+		.expect("Failed to fetch user after registration.");
 
 	Ok(Json(user.into()))
 }

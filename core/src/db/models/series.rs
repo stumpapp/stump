@@ -2,12 +2,13 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::{prelude::enums::FileStatus, prisma};
 
 use super::{library::Library, media::Media, tag::Tag};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Series {
 	pub id: String,
 	/// The name of the series. ex: "The Amazing Spider-Man (2018)"

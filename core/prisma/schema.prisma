@@ -81,7 +81,7 @@ model LibraryOptions {
   id                      String  @id @default(uuid())
   // Flag indicating whether or not to attempt to convert rar files to zip on scans.
   convert_rar_to_zip      Boolean @default(false)
-  // Flag indicating whether or not to *hard* delete rar files that were sucessfully converted to zip.
+  // Flag indicating whether or not to *hard* delete rar files that were successfully converted to zip.
   // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
   // trash location, or a custom location when running in Docker (which will clear on an interval).
   hard_delete_conversions Boolean @default(false)

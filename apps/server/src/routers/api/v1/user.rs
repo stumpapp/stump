@@ -10,13 +10,16 @@ use stump_core::{
 	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
 	prisma::{user, user_preferences},
 };
-use tracing::debug;
+use tracing::{debug, trace};
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::{get_hash_cost, get_session_user, get_writable_session_user},
+	utils::{
+		get_hash_cost, get_session_admin_user, get_session_user,
+		get_writable_session_user,
+	},
 };
 
 // TODO: move some of these user operations to the UserDao...
@@ -42,19 +45,22 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/users",
+	tag = "user",
+	responses(
+		(status = 200, description = "Successfully fetched users.", body = [User]),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 async fn get_users(
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Vec<User>>> {
-	let user = get_session_user(&session)?;
-
-	// FIXME: admin middleware
-	if !user.is_admin() {
-		return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource.".into(),
-		));
-	}
-
+	get_session_admin_user(&session)?;
 	Ok(Json(
 		ctx.db
 			.user()
@@ -62,27 +68,32 @@ async fn get_users(
 			.exec()
 			.await?
 			.into_iter()
-			.map(|u| u.into())
+			.map(User::from)
 			.collect::<Vec<User>>(),
 	))
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/users",
+	tag = "user",
+	request_body = LoginOrRegisterArgs,
+	responses(
+		(status = 200, description = "Successfully created user.", body = User),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Creates a new user.
 async fn create_user(
 	session: ReadableSession,
 	State(ctx): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
+	get_session_admin_user(&session)?;
 	let db = ctx.get_db();
-	let user = get_session_user(&session)?;
-
-	// TODO: admin middleware instead
-	if !user.is_admin() {
-		return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource.".into(),
-		));
-	}
 	let hashed_password = bcrypt::hash(input.password, get_hash_cost())?;
-
 	let created_user = db
 		.user()
 		.create(input.username.to_owned(), hashed_password, vec![])
@@ -114,19 +125,31 @@ async fn create_user(
 	Ok(Json(user.into()))
 }
 
+#[utoipa::path(
+	delete,
+	path = "/api/v1/users/:id",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's id.", example = "1ab2c3d4")
+	),
+	responses(
+		(status = 200, description = "Successfully deleted user.", body = String),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "User not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Deletes a user by ID.
 async fn delete_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<String>> {
 	let db = ctx.get_db();
-	let user = get_session_user(&session)?;
+	let user = get_session_admin_user(&session)?;
 
-	if !user.is_admin() {
-		return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource.".into(),
-		));
-	} else if user.id == id {
+	if user.id == id {
 		return Err(ApiError::BadRequest(
 			"You cannot delete your own account.".into(),
 		));
@@ -143,20 +166,29 @@ async fn delete_user_by_id(
 	Ok(Json(deleted_user.id))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/:id",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched user.", body = User),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "User not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Gets a user by ID.
 async fn get_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<User>> {
+	get_session_admin_user(&session)?;
 	let db = ctx.get_db();
-	let user = get_session_user(&session)?;
-
-	if !user.is_admin() {
-		return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource.".into(),
-		));
-	}
-
 	let user_by_id = db
 		.user()
 		.find_unique(user::id::equals(id.clone()))
@@ -171,6 +203,22 @@ async fn get_user_by_id(
 	Ok(Json(User::from(user_by_id.unwrap())))
 }
 
+#[utoipa::path(
+	put,
+	path = "/api/v1/users/:id",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	request_body = UpdateUserArgs,
+	responses(
+		(status = 200, description = "Successfully updated user.", body = User),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Updates a user by ID.
 async fn update_user(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
@@ -181,9 +229,7 @@ async fn update_user(
 	let user = get_writable_session_user(&writable_session)?;
 
 	if user.id != id {
-		return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource.".into(),
-		));
+		return Err(ApiError::forbidden_discreet());
 	}
 
 	let mut update_params = vec![user::username::set(input.username)];
@@ -209,6 +255,22 @@ async fn update_user(
 	Ok(Json(updated_user))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/:id/preferences",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched user preferences.", body = UserPreferences),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "User preferences not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Gets the user's preferences.
 async fn get_user_preferences(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -218,9 +280,7 @@ async fn get_user_preferences(
 	let user = get_session_user(&session)?;
 
 	if id != user.id {
-		return Err(ApiError::Forbidden(
-			"You do not have permission to access this resource.".into(),
-		));
+		return Err(ApiError::forbidden_discreet());
 	}
 
 	let user_preferences = db
@@ -240,22 +300,36 @@ async fn get_user_preferences(
 	Ok(Json(UserPreferences::from(user_preferences.unwrap())))
 }
 
-#[allow(unused)]
+#[utoipa::path(
+	put,
+	path = "/api/v1/users/:id/preferences",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	request_body = UserPreferencesUpdate,
+	responses(
+		(status = 200, description = "Successfully updated user preferences.", body = UserPreferences),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Updates a user's preferences.
 async fn update_user_preferences(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UserPreferencesUpdate>,
 ) -> ApiResult<Json<UserPreferences>> {
+	trace!(?id, ?input, "Updating user preferences");
 	let db = ctx.get_db();
 
 	let user = get_writable_session_user(&writable_session)?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	if user_preferences.id != input.id {
-		return Err(ApiError::Forbidden(
-			"You cannot update another user's preferences".into(),
-		));
+		return Err(ApiError::forbidden_discreet());
 	}
 
 	let updated_preferences = db

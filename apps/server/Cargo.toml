@@ -36,6 +36,8 @@ local-ip-address = "0.5.1"
 
 ### Dev Utils ###
 rand = "0.8.5"
+utoipa = { version = "3.0.3", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "3.0.2", features = ["axum"] }
 
 ### Error Handling + Logging ###
 tracing = { workspace = true }

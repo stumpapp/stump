@@ -45,6 +45,18 @@ pub fn get_writable_session_user(session: &WritableSession) -> ApiResult<User> {
 	}
 }
 
+// pub fn get_writable_session_admin_user(session: &WritableSession) -> ApiResult<User> {
+// 	let user = get_writable_session_user(session)?;
+
+// 	if user.is_admin() {
+// 		Ok(user)
+// 	} else {
+// 		Err(ApiError::Forbidden(
+// 			"You do not have permission to access this resource.".to_string(),
+// 		))
+// 	}
+// }
+
 pub fn get_session_admin_user(session: &ReadableSession) -> ApiResult<User> {
 	let user = get_session_user(session)?;
 

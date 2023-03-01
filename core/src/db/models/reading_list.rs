@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::{db::models::Media, prisma::reading_list};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Default)]
 pub struct ReadingList {
 	pub id: String,
 	pub name: String,

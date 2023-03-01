@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::db::models::{LibraryOptions, LibraryScanMode, Tag};
 
-#[derive(Debug, Clone, Deserialize, Type)]
+#[derive(Debug, Clone, Deserialize, Type, ToSchema)]
 pub struct UserPreferencesUpdate {
 	pub id: String,
 	pub locale: String,
@@ -18,24 +19,24 @@ pub struct DecodedCredentials {
 	pub password: String,
 }
 
-#[derive(Deserialize, Type)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct LoginOrRegisterArgs {
 	pub username: String,
 	pub password: String,
 }
 
-#[derive(Deserialize, Type)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct UpdateUserArgs {
 	pub username: String,
 	pub password: Option<String>,
 }
 
-#[derive(Serialize, Type)]
+#[derive(Serialize, Type, ToSchema)]
 pub struct ClaimResponse {
 	pub is_claimed: bool,
 }
 
-#[derive(Deserialize, Debug, Type)]
+#[derive(Deserialize, Debug, Type, ToSchema)]
 pub struct CreateLibraryArgs {
 	/// The name of the library to create.
 	pub name: String,
@@ -51,7 +52,7 @@ pub struct CreateLibraryArgs {
 	pub library_options: Option<LibraryOptions>,
 }
 
-#[derive(Deserialize, Debug, Type)]
+#[derive(Deserialize, Debug, Type, ToSchema)]
 pub struct UpdateLibraryArgs {
 	pub id: String,
 	/// The updated name of the library.
@@ -70,8 +71,18 @@ pub struct UpdateLibraryArgs {
 	pub scan_mode: Option<LibraryScanMode>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct ScanQueryParam {
+	pub scan_mode: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct CreateReadingList {
 	pub id: String,
 	pub media_ids: Vec<String>,
+}
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct CreateTags {
+	pub tags: Vec<String>,
 }

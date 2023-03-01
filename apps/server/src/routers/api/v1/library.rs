@@ -7,7 +7,6 @@ use axum::{
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
-use serde::Deserialize;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 
@@ -19,7 +18,8 @@ use stump_core::{
 	fs::{image, media_file},
 	job::LibraryScanJob,
 	prelude::{
-		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, UpdateLibraryArgs,
+		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, ScanQueryParam,
+		UpdateLibraryArgs,
 	},
 	prisma::{
 		library::{self, WhereParam},
@@ -73,6 +73,20 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 	_where
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries",
+	tag = "library",
+	params(
+		("filter_query" = Option<FilterableLibraryQuery>, Query, description = "The library filters"),
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options")
+	),
+	responses(
+		(status = 200, description = "Successfully retrieved libraries", body = PageableLibraries),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 /// Get all libraries
 #[tracing::instrument(skip(ctx), err)]
 async fn get_libraries(
@@ -129,6 +143,16 @@ async fn get_libraries(
 	Ok(Json((libraries, count, pagination).into()))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/stats",
+	tag = "library",
+	responses(
+		(status = 200, description = "Successfully fetched stats", body = LibrariesStats),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 /// Get stats for all libraries
 async fn get_libraries_stats(
 	State(ctx): State<AppState>,
@@ -154,6 +178,20 @@ async fn get_libraries_stats(
 	Ok(Json(stats.unwrap()))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/:id",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully retrieved library", body = Library),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 /// Get a library by id, if the current user has access to it. Library `series`, `media`
 /// and `tags` relations are loaded on this route.
 async fn get_library_by_id(
@@ -186,6 +224,22 @@ async fn get_library_by_id(
 	Ok(Json(library.into()))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/:id/series",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+		("filter_query" = Option<FilterableLibraryQuery>, Query, description = "The library filters"),
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options")
+	),
+	responses(
+		(status = 200, description = "Successfully retrieved series", body = PageableSeries),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 // FIXME: this is absolutely atrocious...
 // This should be much better once https://github.com/Brendonovich/prisma-client-rust/issues/24 is added
 // but for now I will have this disgustingly gross and ugly work around...
@@ -257,7 +311,22 @@ async fn get_library_series(
 	Ok(Json((series, series_count, pagination).into()))
 }
 
-// /// Get the thumbnail image for a library by id, if the current user has access to it.
+// TODO: ImageResponse for utoipa
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/:id/thumbnail",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+	),
+	responses(
+		(status = 200, description = "Successfully retrieved library thumbnail"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+/// Get the thumbnail image for a library by id, if the current user has access to it.
 async fn get_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -272,26 +341,34 @@ async fn get_library_thumbnail(
 		.await?;
 
 	// TODO: error handling
-
-	let series = library_series.first().unwrap();
-
-	let media = series.media()?.first().unwrap();
+	let series = library_series.first().expect("No series in library");
+	let media = series.media()?.first().expect("No media in series");
 
 	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }
 
-#[derive(Deserialize)]
-struct ScanQueryParam {
-	scan_mode: Option<String>,
-}
-
+#[utoipa::path(
+	post,
+	path = "/api/v1/libraries/:id/scan",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+		("query" = ScanQueryParam, Query, description = "The scan options"),
+	),
+	responses(
+		(status = 200, description = "Successfully queued library scan"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 /// Queue a ScannerJob to scan the library by id. The job, when started, is
 /// executed in a separate thread.
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	query: Query<ScanQueryParam>,
-	session: ReadableSession, // TODO: admin middleware
+	session: ReadableSession,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 	let _user = get_session_admin_user(&session)?;
@@ -328,11 +405,27 @@ async fn scan_library(
 	Ok(())
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/libraries",
+	tag = "library",
+	request_body = CreateLibraryArgs,
+	responses(
+		(status = 200, description = "Successfully created library"),
+		(status = 400, description = "Bad request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 async fn create_library(
+	session: ReadableSession,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibraryArgs>,
 ) -> ApiResult<Json<Library>> {
+	get_session_admin_user(&session)?;
+
 	let db = ctx.get_db();
 
 	if !path::Path::new(&input.path).exists() {
@@ -407,10 +500,9 @@ async fn create_library(
 			Ok(Library::from(library))
 		})
 		.await;
+
 	let library = transaction_result?;
-
 	let scan_mode = input.scan_mode.unwrap_or_default();
-
 	// `scan` is not a required field, however it will default to BATCHED if not provided
 	if scan_mode != LibraryScanMode::None {
 		ctx.spawn_job(Box::new(LibraryScanJob {
@@ -422,12 +514,31 @@ async fn create_library(
 	Ok(Json(library))
 }
 
+#[utoipa::path(
+	put,
+	path = "/api/v1/libraries/:id",
+	tag = "library",
+	request_body = UpdateLibraryArgs,
+	params(
+		("id" = String, Path, description = "The id of the library to update")
+	),
+	responses(
+		(status = 200, description = "Successfully updated library"),
+		(status = 400, description = "Bad request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 /// Update a library by id, if the current user is a SERVER_OWNER.
 async fn update_library(
+	session: ReadableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibraryArgs>,
 ) -> ApiResult<Json<Library>> {
+	get_session_admin_user(&session)?;
 	let db = ctx.get_db();
 
 	if !path::Path::new(&input.path).exists() {
@@ -517,11 +628,29 @@ async fn update_library(
 	Ok(Json(updated.into()))
 }
 
-/// Delete a library by id, if the current user is a SERVER_OWNER.
+#[utoipa::path(
+	delete,
+	path = "/api/v1/libraries/:id",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The id of the library to delete")
+	),
+	responses(
+		(status = 200, description = "Successfully deleted library"),
+		(status = 400, description = "Bad request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+/// Delete a library by id
 async fn delete_library(
+	session: ReadableSession,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {
+	get_session_admin_user(&session)?;
 	let db = ctx.get_db();
 
 	trace!(?id, "Attempting to delete library");

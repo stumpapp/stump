@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct DirectoryListingInput {
 	pub path: Option<String>,
 }
@@ -14,13 +15,13 @@ impl Default for DirectoryListingInput {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct DirectoryListing {
 	pub parent: Option<String>,
 	pub files: Vec<DirectoryListingFile>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct DirectoryListingFile {
 	pub is_directory: bool,
 	pub name: String,

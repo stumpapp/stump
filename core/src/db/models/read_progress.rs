@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tracing::trace;
+use utoipa::ToSchema;
 
 use crate::prisma;
 
 use super::{media::Media, user::User};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
 pub struct ReadProgress {
 	pub id: String,
 	/// The current page

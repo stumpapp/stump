@@ -1,23 +1,31 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use tracing::trace;
+use utoipa::ToSchema;
 
-use crate::prelude::DirectoryListing;
+use crate::{
+	db::models::{Library, Media, Series},
+	prelude::DirectoryListing,
+};
 
-#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
+#[derive(
+	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
+)]
 pub struct PageQuery {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
 }
 
-#[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
+#[derive(
+	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
+)]
 pub struct CursorQuery {
 	pub cursor: Option<String>,
 	pub limit: Option<i64>,
 }
 
-#[derive(Default, Debug, Deserialize, Serialize, Type)]
+#[derive(Default, Debug, Deserialize, Serialize, Type, ToSchema)]
 pub struct PaginationQuery {
 	pub zero_based: Option<bool>,
 	pub page: Option<u32>,
@@ -51,6 +59,7 @@ impl From<PaginationQuery> for Pagination {
 	}
 }
 
+// FIXME: , ToSchema, not working...
 #[derive(Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
 #[serde(untagged)]
 pub enum Pagination {
@@ -112,7 +121,7 @@ pub struct PageBounds {
 	pub take: i64,
 }
 
-#[derive(Debug, Serialize, Clone, Type)]
+#[derive(Debug, Serialize, Clone, Type, ToSchema)]
 pub struct PageParams {
 	pub zero_based: bool,
 	pub page: u32,
@@ -186,7 +195,7 @@ pub struct PageLinks {
 	pub next: Option<String>,
 }
 
-#[derive(Serialize, Type)]
+#[derive(Serialize, Type, ToSchema)]
 pub struct PageInfo {
 	/// The number of pages available.
 	pub total_pages: u32,
@@ -216,7 +225,7 @@ impl PageInfo {
 	}
 }
 
-#[derive(Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type)]
+#[derive(Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema)]
 pub struct CursorInfo {
 	cursor: Option<String>,
 	limit: Option<i64>,
@@ -231,10 +240,24 @@ impl From<CursorQuery> for CursorInfo {
 	}
 }
 
-#[derive(Serialize, Type)]
+#[derive(Serialize, Type, ToSchema)]
+// OK, this is SO annoying...
+#[aliases(PageableDirectoryListing = Pageable<DirectoryListing>)]
 pub struct Pageable<T: Serialize> {
 	/// The target data being returned.
 	pub data: T,
+	/// The pagination information (if paginated).
+	pub _page: Option<PageInfo>,
+	/// The cursor information (if cursor-baesd paginated).
+	pub _cursor: Option<CursorInfo>,
+}
+
+// NOTE: this is an infuriating workaround for getting Pageable<Vec<T>> to work with utoipa
+#[derive(Serialize, Type, ToSchema)]
+#[aliases(PageableLibraries = PageableArray<Library>, PageableSeries = PageableArray<Series>, PageableMedia = PageableArray<Media>)]
+pub struct PageableArray<T: Serialize> {
+	/// The target data being returned.
+	pub data: Vec<T>,
 	/// The pagination information (if paginated).
 	pub _page: Option<PageInfo>,
 	/// The cursor information (if cursor-baesd paginated).

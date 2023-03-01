@@ -2,8 +2,9 @@ use std::{fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Type)]
+#[derive(Serialize, Deserialize, Type, ToSchema)]
 pub enum UserRole {
 	#[serde(rename = "SERVER_OWNER")]
 	ServerOwner,
@@ -11,7 +12,7 @@ pub enum UserRole {
 	Member,
 }
 
-#[derive(Serialize, Deserialize, Type)]
+#[derive(Serialize, Deserialize, Type, ToSchema)]
 pub enum LayoutMode {
 	#[serde(rename = "GRID")]
 	Grid,
@@ -19,7 +20,7 @@ pub enum LayoutMode {
 	List,
 }
 
-#[derive(Debug, Deserialize, Serialize, Type, Clone, Copy)]
+#[derive(Debug, Deserialize, Serialize, Type, ToSchema, Clone, Copy)]
 pub enum FileStatus {
 	#[serde(rename = "UNKNOWN")]
 	Unknown,

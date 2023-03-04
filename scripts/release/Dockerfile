@@ -75,17 +75,35 @@ WORKDIR /app
 
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
-COPY .cargo .cargo
-COPY . .
-
 RUN rustup update && rustup target add x86_64-unknown-linux-musl
 
-# prisma uses some `include_str!` macros that are mapped to locations on the host machine. so
-# when we build in docker, we need to correct these paths according to the docker workdir. 
-# it's a bit of a hack, but it works lol
+COPY .cargo .cargo
+COPY ./Cargo.{toml,lock} .
+
+# Run the build utils script to fix the prisma paths, remove unnecessary workspaces, and
+# create the dummy rust files for core and server
 RUN set -ex; \
-    sed -i 's|\/.*\/core\/prisma\/schema.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
-    sed -i 's|\/.*\/core\/prisma\/migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs
+    mkdir  -p ./core/src; \
+    mkdir  -p ./server/src; \
+    ./scripts/release/build-utils.sh -pwd 'core'; \
+    ./scripts/release/build-utils.sh -d 'server'
+
+# Copy the core and server Cargo.toml and Cargo.lock files
+COPY ./server/Cargo.{toml,lock} ./server/
+COPY ./core/Cargo.{toml,lock} ./core/
+
+# This is where the ~magic~ happens. We build the server (which pulls the core as a dependency) with
+# the dummy files we created above. This ~should~ allow caching until the dependencies themselves change.
+RUN set -ex; \
+    cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl; \
+    rm -rf apps/server/src; \
+    rm -rf apps/core/src
+
+# Now we can copy the real source files and build the server
+COPY . .
+
+# TODO: I am not sure if the stump_core will be built correctly with this caching trick. I might just have to run a build for it...
+# RUN cargo build --package stump_core --release --target x86_64-unknown-linux-musl ??
 
 RUN cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl && \
     cp target/x86_64-unknown-linux-musl/release/stump_server ./stump

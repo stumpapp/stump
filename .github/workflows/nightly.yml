@@ -1,64 +1,102 @@
-name: Stump-nightly
-
-# on:
-#   schedule:
-#     # * is a special character in YAML so you have to quote this string
-#     - cron: '0 1 * * *'
-#   workflow_dispatch:
+name: 'Stump nightly build and release'
 
 on:
+  # TODO: REMOVE THIS after testing... replace with push instead.
   pull_request:
     branches:
-      - 'nightly'
+      - develop
+  # push:
+  #   branches:
+  #     - develop
 
 jobs:
-  build-web:
-    strategy:
-      fail-fast: true
-      matrix:
-        plaform: [ubuntu-20.04]
-    name: Build web application
-    runs-on: ${{ matrix.plaform }}
+  # TODO: extract this into a reusable action that takes tags as input
+  docker-build:
+    name: Build docker image
+    runs-on: [self-hosted]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build web
-        uses: ./.github/actions/build-web
+      - name: Get commit short sha
+        run: echo "::set-output name=GIT_REV::$(git rev-parse --short "$GITHUB_SHA")"
 
-      - name: Upload web build
-        uses: ./.github/actions/upload-artifact
+      - name: Setup rust
+        uses: ./.github/actions/setup-system
+
+      - name: Generate Prisma client
+        uses: ./.github/actions/setup-prisma
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          upload-name: web
-          upload-path: apps/web/dist
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  build-server:
-    strategy:
-      fail-fast: true
-      matrix:
-        plaform: [ubuntu-20.04] # We should probably build for window and macos
-    name: Build server and desktop
-    runs-on: ${{ matrix.plaform }}
-    needs: build-web
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Build server
-        uses: ./.github/actions/build-server
+      - name: Build and push
+        uses: docker/build-push-action@v4
         with:
-          platform: ${{ matrix.plaform }}
+          context: .
+          file: scripts/release/Dockerfile
+          # platforms: linux/arm64/v8,linux/amd64
+          platforms: linux/amd64
+          push: true
+          tags: aaronleopold/stump:nightly
 
-      - name: Upload stump server
-        uses: ./.github/actions/upload-artifact
-        with:
-          upload-name: stump_server
-          upload-path: target/release/stump_server
+  # TODO: uncomment once I resolve cross compilation with my single self-hosted runner
+  # build-web:
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       plaform: [ubuntu-20.04]
+  #   name: Build web application
+  #   runs-on: ${{ matrix.plaform }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - uses: tauri-apps/tauri-action@v0
+  #     - name: Build web
+  #       uses: ./.github/actions/build-web
 
-      - name: Upload desktop
-        uses: ./.github/actions/upload-artifact
-        with:
-          upload-name: stump-desktop
-          upload-path: target/release/bundle
+  #     - name: Upload web build
+  #       uses: ./.github/actions/upload-artifact
+  #       with:
+  #         upload-name: web
+  #         upload-path: apps/web/dist
+
+  # build-server:
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       plaform: [ubuntu-20.04] # We should probably build for window and macos
+  #   name: Build server and desktop
+  #   runs-on: ${{ matrix.plaform }}
+  #   needs: build-web
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Build server
+  #       uses: ./.github/actions/build-server
+  #       with:
+  #         platform: ${{ matrix.plaform }}
+
+  #     - name: Upload stump server
+  #       uses: ./.github/actions/upload-artifact
+  #       with:
+  #         upload-name: stump_server
+  #         upload-path: target/release/stump_server
+
+  #     - uses: tauri-apps/tauri-action@v0
+
+  #     - name: Upload desktop
+  #       uses: ./.github/actions/upload-artifact
+  #       with:
+  #         upload-name: stump-desktop
+  #         upload-path: target/release/bundle

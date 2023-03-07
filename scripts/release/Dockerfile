@@ -80,12 +80,11 @@ RUN rustup update && rustup target add x86_64-unknown-linux-musl
 COPY .cargo .cargo
 COPY ./Cargo.{toml,lock} .
 
-# Run the build utils script to fix the prisma paths, remove unnecessary workspaces, and
-# create the dummy rust files for core and server
+# Run the build utils script to create the dummy rust files for core and server
 RUN set -ex; \
     mkdir  -p ./core/src; \
     mkdir  -p ./server/src; \
-    ./scripts/release/build-utils.sh -pwd 'core'; \
+    ./scripts/release/build-utils.sh -d 'core'; \
     ./scripts/release/build-utils.sh -d 'server'
 
 # Copy the core and server Cargo.toml and Cargo.lock files
@@ -102,10 +101,11 @@ RUN set -ex; \
 # Now we can copy the real source files and build the server
 COPY . .
 
-# TODO: I am not sure if the stump_core will be built correctly with this caching trick. I might just have to run a build for it...
-# RUN cargo build --package stump_core --release --target x86_64-unknown-linux-musl ??
-
-RUN cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl && \
+RUN set -ex; \
+    ./scripts/release/build-utils.sh -wp 'core'; \
+    # TODO: determine if this is necessary (building core again)
+    cargo build --package stump_core --release --target x86_64-unknown-linux-musl; \
+    cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl; \
     cp target/x86_64-unknown-linux-musl/release/stump_server ./stump
 
 ######################

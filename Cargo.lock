@@ -2544,8 +2544,7 @@ dependencies = [
 [[package]]
 name = "local-ip-address"
 version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "faa9d02443a1741e9f51dafdfcbffb3863b2a89c457d762b40337d6c5153ef81"
+source = "git+https://github.com/EstebanBorai/local-ip-address.git?tag=v0.5.1#efb3a0b074ea9540bb055f1fe8f0fc5a5591b6bf"
 dependencies = [
  "libc",
  "neli",

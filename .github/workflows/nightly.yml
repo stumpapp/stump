@@ -22,9 +22,7 @@ jobs:
         run: echo "::set-output name=GIT_REV::$(git rev-parse --short "$GITHUB_SHA")"
 
       - name: Setup rust
-        # I have to use a variable prefixed by RUNNER_WORKSPACE_PATH because of this issue:
-        # https://github.com/actions/runner/issues/1676
-        uses: ./.github/actions/setup-system
+        uses: ./.github/actions/setup-cargo
 
       - name: Generate Prisma client
         uses: ./.github/actions/setup-prisma

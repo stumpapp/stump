@@ -127,7 +127,7 @@ COPY . .
 
 RUN set -ex; \
     ./scripts/release/build-utils.sh -p 'core'; \
-    cat ./core/src/prisma.rs; \
+    # cat ./core/src/prisma.rs; \
     # TODO: determine if this is necessary (building core again)
     cargo build --package stump_core --release --target x86_64-unknown-linux-musl; \
     cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl; \

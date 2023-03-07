@@ -76,3 +76,4 @@
 - [ ] Make light mode look not disgusting lmao
 - [ ] ~Fix poor performance of EditLibraryModal~
   - [ ] Just replace the modals with dedicated pages for editing and creating libraries
+- [ ] `local-ip-address` doesn't compile to arm64.... need to either guard it or correct it.

@@ -2,8 +2,8 @@
 
 create_dummy_rust_file() {
     local path=$1
+    echo "Creating dummy Rust file in $path"
     mkdir -p $path/src
-    cp $path/**/Cargo.{toml,lock} $path/src
     echo 'fn main() { println!("Wow, such empty!"); }' > $path/src/main.rs
 }
 
@@ -20,5 +20,6 @@ workspaces_sed_correction() {
     set -ex; \
         sed -i '/core\/integration-tests/d' Cargo.toml; \
         sed -i '/apps\/desktop\/src-tauri/d' Cargo.toml; \
-        sed -i '/apps\/tui/d' Cargo.toml
+        sed -i '/apps\/tui/d' Cargo.toml; \
+        sed -i '/packages\/prisma-cli/d' Cargo.toml
 }

@@ -8,4 +8,4 @@ GIT_REV=$(git rev-parse --short HEAD)
 set GIT_REV=$GIT_REV
 
 # docker buildx build -f ./scripts/release/Dockerfile --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .
-docker buildx build -f ./scripts/release/Dockerfile --push --progress=$FORMAT --platform=$PLATFORMS -t aaronleopold/stump-preview:$TAG .
+docker buildx build -f ./scripts/release/Dockerfile --load --progress=$FORMAT --platform=$PLATFORMS -t aaronleopold/stump-preview:$TAG .

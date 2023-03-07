@@ -31,18 +31,39 @@ FROM messense/rust-musl-cross:aarch64-musl AS arm64-backend
 
 WORKDIR /app
 
-COPY .cargo .cargo
-COPY . .
-
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
-
 RUN rustup target add aarch64-unknown-linux-musl
 
-RUN set -ex; \
-    sed -i 's|\/.*\/core\/prisma\/schema.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
-    sed -i 's|\/.*\/core\/prisma\/migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs
+COPY .cargo .cargo
+COPY scripts scripts
+COPY Cargo.toml .
 
-RUN cargo build --package stump_server --bin stump_server --release --target aarch64-unknown-linux-musl && \
+# Run the build utils script to create the dummy rust files for core and server
+RUN set -ex; \
+    ./scripts/release/build-utils.sh -w; \
+    mkdir  -p ./core/src; \
+    mkdir  -p ./apps/server/src; \
+    ./scripts/release/build-utils.sh -d 'core'; \
+    ./scripts/release/build-utils.sh -d 'apps/server'
+
+COPY ./apps/server/Cargo.toml ./apps/server/
+COPY ./core/Cargo.toml ./core/
+
+# This is where the ~magic~ happens. We build the server (which pulls the core as a dependency) with
+# the dummy files we created above. This ~should~ allow caching until the dependencies themselves change.
+RUN set -ex; \
+    cargo build --package stump_server --bin stump_server --release --target aarch64-unknown-linux-musl; \
+    rm -rf ./apps/server/src; \
+    rm -rf ./core/src
+
+# Now we can copy the real source files and build the server
+COPY . .
+
+RUN set -ex; \
+    ./scripts/release/build-utils.sh -p 'core'; \
+    # TODO: determine if this is necessary (building core again)
+    cargo build --package stump_core --release --target aarch64-unknown-linux-musl; \
+    cargo build --package stump_server --bin stump_server --release --target aarch64-unknown-linux-musl; \
     cp target/aarch64-unknown-linux-musl/release/stump_server ./stump
 
 ######################
@@ -77,32 +98,35 @@ ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 RUN rustup update && rustup target add x86_64-unknown-linux-musl
 
+# TODO: make one-liner
 COPY .cargo .cargo
-COPY ./Cargo.{toml,lock} .
+COPY scripts scripts
+COPY Cargo.toml .
 
 # Run the build utils script to create the dummy rust files for core and server
 RUN set -ex; \
+    ./scripts/release/build-utils.sh -w; \
     mkdir  -p ./core/src; \
-    mkdir  -p ./server/src; \
+    mkdir  -p ./apps/server/src; \
     ./scripts/release/build-utils.sh -d 'core'; \
-    ./scripts/release/build-utils.sh -d 'server'
+    ./scripts/release/build-utils.sh -d 'apps/server'
 
 # Copy the core and server Cargo.toml and Cargo.lock files
-COPY ./server/Cargo.{toml,lock} ./server/
-COPY ./core/Cargo.{toml,lock} ./core/
+COPY ./apps/server/Cargo.toml ./apps/server/
+COPY ./core/Cargo.toml ./core/
 
 # This is where the ~magic~ happens. We build the server (which pulls the core as a dependency) with
 # the dummy files we created above. This ~should~ allow caching until the dependencies themselves change.
 RUN set -ex; \
     cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl; \
     rm -rf apps/server/src; \
-    rm -rf apps/core/src
+    rm -rf core/src
 
 # Now we can copy the real source files and build the server
 COPY . .
 
 RUN set -ex; \
-    ./scripts/release/build-utils.sh -wp 'core'; \
+    ./scripts/release/build-utils.sh -p 'core'; \
     # TODO: determine if this is necessary (building core again)
     cargo build --package stump_core --release --target x86_64-unknown-linux-musl; \
     cargo build --package stump_server --bin stump_server --release --target x86_64-unknown-linux-musl; \

@@ -50,7 +50,6 @@ async fn get_logs() -> ApiResult<()> {
 )]
 /// Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
-// #[get("/logs")]
 async fn get_logfile_info(session: ReadableSession) -> ApiResult<Json<LogMetadata>> {
 	get_session_admin_user(&session)?;
 	let log_file_path = get_log_file();

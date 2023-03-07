@@ -22,10 +22,12 @@ jobs:
         run: echo "::set-output name=GIT_REV::$(git rev-parse --short "$GITHUB_SHA")"
 
       - name: Setup rust
-        uses: ./.github/actions/setup-system
+        # I have to use a variable prefixed by RUNNER_WORKSPACE_PATH because of this issue:
+        # https://github.com/actions/runner/issues/1676
+        uses: ${{ vars.RUNNER_WORKSPACE_PATH }}/.github/actions/setup-system
 
       - name: Generate Prisma client
-        uses: ./.github/actions/setup-prisma
+        uses: ${{ vars.RUNNER_WORKSPACE_PATH }}/.github/actions/setup-prisma
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

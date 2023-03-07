@@ -24,12 +24,12 @@ jobs:
       - name: Setup rust
         # I have to use a variable prefixed by RUNNER_WORKSPACE_PATH because of this issue:
         # https://github.com/actions/runner/issues/1676
-        working-directory: ${{ env.RUNNER_WORKSPACE_PATH }}
+        working-directory: ./stump
         uses: ./.github/actions/setup-system
 
       - name: Generate Prisma client
         # TODO: kms
-        working-directory: ${{ env.RUNNER_WORKSPACE_PATH }}
+        working-directory: ./stump
         uses: ./.github/actions/setup-prisma
 
       - name: Set up QEMU

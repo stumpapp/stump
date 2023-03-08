@@ -4,7 +4,12 @@ create_dummy_rust_file() {
     local path=$1
     echo "Creating dummy Rust file in $path"
     mkdir -p $path/src
-    echo 'fn main() { println!("Wow, such empty!"); }' > $path/src/main.rs
+    if [[ $path == "core" ]]; then
+        echo 'fn foo() { println!("Wow, such empty!"); }' > $path/src/lib.rs
+    else
+        echo 'fn main() { println!("Wow, such empty!"); }' > $path/src/main.rs
+    fi
+
 }
 
 # prisma uses some `include_str!` macros that are mapped to locations on the host machine. so

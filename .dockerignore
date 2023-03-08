@@ -5,8 +5,6 @@ dist
 static
 apps/server/client
 target
-*.lock
-*-lock.*
 *.log
 *.db
 

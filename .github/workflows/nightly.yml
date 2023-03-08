@@ -44,8 +44,8 @@ jobs:
         with:
           context: .
           file: scripts/release/Dockerfile
-          # platforms: linux/arm64/v8,linux/amd64
-          platforms: linux/amd64
+          platforms: linux/arm64/v8,linux/amd64
+          # platforms: linux/amd64
           push: true
           tags: aaronleopold/stump:nightly
 

@@ -27,8 +27,22 @@ jobs:
       - name: Generate Prisma client
         uses: ./.github/actions/setup-prisma
 
+      - name: Setup buildx platforms
+        # if github.event_name == 'pull_request', platform is only linux/amd64. Otherwise, we
+        # build for the existing vars.SUPPORTED_DOCKER_PLATFORMS
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "SUPPORTED_DOCKER_PLATFORMS=linux/amd64" >> $GITHUB_ENV
+            echo "SETUP_QEMU=0" >> $GITHUB_ENV
+          else
+            echo "SUPPORTED_DOCKER_PLATFORMS=${{ vars.SUPPORTED_DOCKER_PLATFORMS }}" >> $GITHUB_ENV
+            echo "SETUP_QEMU=1" >> $GITHUB_ENV
+          fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
+        # Only setup qemu if we're not only building for linux/amd64
+        if: ${{ env.SETUP_QEMU == 1 }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -46,7 +60,7 @@ jobs:
           build-args: |
             "GIT_REV=${{ env.GIT_REV }}"
           file: scripts/release/Dockerfile
-          platforms: ${{ vars.SUPPORTED_DOCKER_PLATFORMS}}
+          platforms: ${{ env.SUPPORTED_DOCKER_PLATFORMS }}
           # When a PR is opened against develop, we want to build the image but not push it.
           load: ${{ github.event_name == 'pull_request' }}
           # When a PR is merged into develop, we want to build and push the image. Note that

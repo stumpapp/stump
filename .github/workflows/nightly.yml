@@ -48,11 +48,11 @@ jobs:
           file: scripts/release/Dockerfile
           platforms: ${{ vars.SUPPORTED_DOCKER_PLATFORMS}}
           # When a PR is opened against develop, we want to build the image but not push it.
-          load: github.event_name == 'pull_request'
+          load: ${{ github.event_name == 'pull_request' }}
           # When a PR is merged into develop, we want to build and push the image. Note that
           # unless there was a push without a PR, much of the docker build will come out of
           # the cache.
-          push: github.event_name != 'pull_request'
+          push: ${{ github.event_name == 'push' }}
           tags: aaronleopold/stump:nightly
 
   # TODO: uncomment once I resolve cross compilation with my single self-hosted runner

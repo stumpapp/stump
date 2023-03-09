@@ -1,13 +1,12 @@
 name: 'Stump nightly build and release'
 
 on:
-  # TODO: REMOVE THIS after testing... replace with push instead.
   pull_request:
     branches:
       - develop
-  # push:
-  #   branches:
-  #     - develop
+  push:
+    branches:
+      - develop
 
 jobs:
   # TODO: extract this into a reusable action that takes tags as input
@@ -19,7 +18,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Get commit short sha
-        run: echo "::set-output name=GIT_REV::$(git rev-parse --short "$GITHUB_SHA")"
+        # run: echo "::set-output name=GIT_REV::$(git rev-parse --short "$GITHUB_SHA")"
+        run: echo "GIT_REV=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
 
       - name: Setup rust
         uses: ./.github/actions/setup-cargo
@@ -39,14 +39,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Run buildx build
         uses: docker/build-push-action@v4
         with:
           context: .
+          build-args: |
+            "GIT_REV=${{ env.GIT_REV }}"
           file: scripts/release/Dockerfile
-          platforms: linux/arm64/v8,linux/amd64
-          # platforms: linux/amd64
-          push: true
+          platforms: ${{ vars.SUPPORTED_DOCKER_PLATFORMS}}
+          # When a PR is opened against develop, we want to build the image but not push it.
+          load: github.event_name == 'pull_request'
+          # When a PR is merged into develop, we want to build and push the image. Note that
+          # unless there was a push without a PR, much of the docker build will come out of
+          # the cache.
+          push: github.event_name != 'pull_request'
           tags: aaronleopold/stump:nightly
 
   # TODO: uncomment once I resolve cross compilation with my single self-hosted runner

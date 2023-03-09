@@ -71,5 +71,7 @@ async fn main() -> ServerResult<()> {
 		.await
 		.expect("Failed to start Stump HTTP server!");
 
+	println!("Simulate server codebase change...");
+
 	Ok(())
 }

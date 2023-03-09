@@ -52,6 +52,7 @@ impl StumpCore {
 
 		let core_ctx = Ctx::new(internal_channel.0).await;
 		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
+		println!("Simulate core codebase change...");
 
 		StumpCore {
 			ctx: core_ctx,

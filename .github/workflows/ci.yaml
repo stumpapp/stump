@@ -6,6 +6,7 @@ on:
     branches:
       - main
 
+# TODO: figure out how to use moon here.
 jobs:
   check-rust:
     name: Rust checks
@@ -36,10 +37,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup pnpm and typescript
+      - name: Setup PNPM and TypeScript
         uses: ./.github/actions/setup-pnpm
 
-      - name: lint
+      - name: Run TypeScript lints
         run: pnpm lint
 
       # - name: typecheck

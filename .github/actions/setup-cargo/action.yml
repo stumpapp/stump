@@ -4,13 +4,16 @@ description: 'Install system dependencies and setup cache'
 runs:
   using: 'composite'
   steps:
+    - name: Configure environment
+      run: |
+        if [[ ${{ runner.name }} == 'manjaro-az' || ${{ runner.os }} == 'Windows' ]]; then
+          echo "RUN_SETUP=false" >> $GITHUB_ENV
+        else
+          echo "RUN_SETUP=true" >> $GITHUB_ENV
+        fi
+
     - name: System setup
-      # TODO: determine if this is actually OK... I keep getting locked out of sudo
-      # because the setup script has a few sudo commands that fail. I either need to setup
-      # some sort of askpass or (ideally) not run setup if it isn't needed on the self-hosted runner...
-      # Only run if we're NOT on a self-hosted runner. This check is really naive and should
-      # be changed. I doubt I'll host more than one runner, so this is fine for now.
-      if: runner.name != 'manjaro-az'
+      if: ${{ env.RUN_SETUP == 'true' }}
       shell: bash
       run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
 

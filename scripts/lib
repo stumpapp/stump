@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+log_error() {
+    echo $1 1>&2
+    exit 1
+}
+
 create_dummy_rust_file() {
     local path=$1
     echo "Creating dummy Rust file in $path"

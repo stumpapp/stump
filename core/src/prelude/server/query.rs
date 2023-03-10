@@ -7,18 +7,13 @@ use crate::{
 	prisma::{library, media, series},
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone, Type, ToSchema)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
 pub enum Direction {
 	#[serde(rename = "asc")]
 	Asc,
 	#[serde(rename = "desc")]
+	#[default]
 	Desc,
-}
-
-impl Default for Direction {
-	fn default() -> Self {
-		Direction::Asc
-	}
 }
 
 impl From<Direction> for prisma_client_rust::Direction {

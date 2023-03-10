@@ -23,6 +23,7 @@ runs:
 
     - name: Get commit short sha
       run: echo "GIT_REV=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_ENV
+      shell: bash
 
     - name: Format tags
       run: |
@@ -52,6 +53,7 @@ runs:
         else
           echo "SETUP_QEMU=0" >> $GITHUB_OUTPUT
         fi
+      shell: bash
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -86,3 +88,4 @@ runs:
       run: |
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      shell: bash

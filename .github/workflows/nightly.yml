@@ -8,10 +8,6 @@ on:
     branches:
       - develop
 
-concurrency:
-  group: ${{ github.head_ref }}
-  cancel-in-progress: true
-
 jobs:
   # TODO: extract this into a reusable action that takes tags as input
   docker-build:

@@ -20,10 +20,6 @@
     "build:server": "pnpm run server build",
     "build:web": "pnpm web build && pnpm build:server",
     "build:desktop": "pnpm desktop build",
-    "build:docker": "docker buildx build -f scripts/release/Dockerfile --push --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
-    "cache:docker": "docker buildx build -f scripts/release/Dockerfile --load --platform=linux/arm64/v8,linux/amd64 -t aaronleopold/stump-preview:latest .",
-    "cache:docker-arm": "docker buildx build -f scripts/release/Dockerfile --load --platform=linux/arm64/v8 -t aaronleopold/stump-preview:latest .",
-    "build:docker-amd": "docker buildx build -f scripts/release/Dockerfile --push --platform=linux/amd64 -t aaronleopold/stump-preview:latest .",
     "moon": "moon --color --log trace"
   },
   "devDependencies": {

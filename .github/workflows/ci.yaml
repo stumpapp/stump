@@ -1,4 +1,4 @@
-name: Stump-CI
+name: 'Stump Checks CI'
 
 on:
   pull_request:
@@ -9,7 +9,6 @@ on:
 # TODO: figure out how to use moon here.
 jobs:
   check-rust:
-    if: false
     name: Rust checks
     runs-on: [self-hosted]
     steps:
@@ -32,7 +31,6 @@ jobs:
       #     cargo integration-tests
 
   check-typescript:
-    if: false
     name: TypeScript checks
     runs-on: [self-hosted]
     steps:

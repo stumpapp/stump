@@ -1,4 +1,4 @@
-name: 'Build legacy Nix package on Ubuntu'
+name: 'Stump Nix CI'
 
 on:
   push:

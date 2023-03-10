@@ -1,4 +1,4 @@
-name: 'Stump nightly build'
+name: 'Stump Nightly CI'
 
 on:
   pull_request:

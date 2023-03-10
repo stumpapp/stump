@@ -1,4 +1,4 @@
-name: 'Stump nightly build and release'
+name: 'Stump nightly build'
 
 on:
   pull_request:
@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - develop
+
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
   # TODO: extract this into a reusable action that takes tags as input

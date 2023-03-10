@@ -1,7 +1,7 @@
 name: Stump-CI
 
 on:
-  # pull_request:
+  pull_request:
   push:
     branches:
       - main
@@ -44,33 +44,3 @@ jobs:
 
       # - name: typecheck
       #   run: pnpm moon run :typecheck
-
-  # release:
-  #   name: Release (${{ matrix.platform }})
-  #   runs-on: ${{ matrix.platform }}
-  #   # Release only runs on push to main. TODO: can I make this trigger on tag?
-  #   if: github.event_name != 'pull_request'
-  #   strategy:
-  #     fail-fast: true
-  #     matrix:
-  #       platform: [ubuntu-latest, macos-latest, windows-latest]
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-
-  #     - name: Install Rust
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #         profile: minimal
-  #         override: true
-  #         # TODO: clippy??
-  #         components: rustfmt, rust-src
-
-  #     # TODO: figure out caching for rust deps
-
-  #     - name: Generate Prisma client
-  #       uses: ./.github/actions/generate-prisma-client
-
-  # TODO: pnpm setup
-  # TODO: docker builds -> maybe this helps? https://github.com/devture/matrix-corporal/blob/master/.gitlab-ci.yml

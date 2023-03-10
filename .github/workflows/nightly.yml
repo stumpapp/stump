@@ -38,6 +38,8 @@ jobs:
       - name: Setup and build docker image
         uses: ./.github/actions/build-docker
         with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           tags: 'nightly'
           load: ${{ env.LOAD }}
           push: ${{ env.PUSH }}

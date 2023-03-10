@@ -11,6 +11,7 @@ runs:
         else
           echo "RUN_SETUP=true" >> $GITHUB_ENV
         fi
+      shell: bash
 
     - name: System setup
       if: ${{ env.RUN_SETUP == 'true' }}

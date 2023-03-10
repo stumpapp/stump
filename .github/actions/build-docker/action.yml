@@ -27,6 +27,7 @@ runs:
     - name: Format tags
       run: |
         echo "TAGS=$(echo ${{ inputs.tags }} | sed -e 's/,/,aaronleopold\/stump:/g' | sed -e 's/^/aaronleopold\/stump:/')" >> $GITHUB_ENV
+      shell: bash
 
     - name: Setup rust
       uses: ./.github/actions/setup-cargo

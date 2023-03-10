@@ -24,6 +24,9 @@ jobs:
     name: Build docker image
     runs-on: [self-hosted]
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       # On PRs, we will only load the image into docker for the quickest platform
       # (i.e. linux/amd64). This is mostly a smoke test, just rather ignorant verification
       # that the image can be built. On pushes, we will actually build and push for

@@ -88,16 +88,18 @@ if [ ${_CHECK_NODE} == 1 ]; then
   fi
 fi
 
+# TODO: group these?
+# https://tauri.app/v1/guides/getting-started/prerequisites/#1-system-dependencies
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
-    sudo apt-get -y install pkg-config libssl-dev libdbus-1-dev libsoup2.4-dev libwebkit2gtk-4.0-dev curl wget libgtk-3-dev libappindicator3-dev librsvg2-dev build-essential
+    sudo apt-get -y install pkg-config libssl-dev libdbus-1-dev libsoup2.4-dev libwebkit2gtk-4.0-dev curl wget libgtk-3-dev libappindicator3-dev librsvg2-dev build-essential libayatana-appindicator3-dev
   elif which pacman &> /dev/null; then
     sudo pacman -Syu
-    sudo pacman -S --needed base-devel openssl
+    sudo pacman -S --needed webkit2gtk base-devel curl wget openssl appmenu-gtk-module gtk3 libappindicator-gtk3 librsvg libvips
   elif which dnf &> /dev/null; then
     sudo dnf check-update
-    sudo dnf install "openssl-devel"
+    sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel
     sudo dnf group install "C Development Tools and Libraries"
   else
     echo "Your distro '$(lsb_release -s -d)' is not supported by this script. Please consider adding support for it: https://github.com/aaronleopold/stump/issues"

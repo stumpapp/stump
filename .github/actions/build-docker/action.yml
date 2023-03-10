@@ -39,13 +39,14 @@ runs:
     - name: Generate Prisma client
       uses: ./.github/actions/setup-prisma
 
-    - name: Setup Docker layers cache
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-
+    # TODO: uncomment once cache stuff is resolved...
+    # - name: Setup Docker layers cache
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: /tmp/.buildx-cache
+    #     key: ${{ runner.os }}-buildx-${{ github.sha }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-buildx-
 
     # We only need QEMU when an arm* platform is targeted
     - name: Check QEMU requirement
@@ -82,13 +83,15 @@ runs:
         load: ${{ inputs.load }}
         push: ${{ inputs.push }}
         tags: ${{ env.TAGS }}
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+        # TODO: uncomment once cache stuff is resolved...
+        # cache-from: type=local,src=/tmp/.buildx-cache
+        # cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       # https://github.com/docker/build-push-action/issues/252
       # TODO: https://github.com/moby/buildkit/issues/1896
-    - name: Move buildx cache
-      run: |
-        rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-      shell: bash
+    # TODO: uncomment once cache stuff is resolved...
+    # - name: Move buildx cache
+    #   run: |
+    #     rm -rf /tmp/.buildx-cache
+    #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+    #   shell: bash

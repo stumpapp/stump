@@ -1,5 +1,5 @@
-name: 'Build Stump server'
-description: 'Compile the Stump Rust server'
+name: 'Build Stump desktop app'
+description: 'Compile the Stump desktop app'
 
 inputs:
   platform:
@@ -30,8 +30,8 @@ runs:
       uses: actions/download-artifact@v3
       with:
         name: webapp
-        path: ./apps/server/dist
+        path: ./apps/desktop/dist
 
-    - name: Compile server
+    - name: Compile desktop app
       shell: bash
-      run: cargo build --package stump_server --release
+      run: cargo build --package stump_desktop --release

@@ -18,7 +18,8 @@ logs/
 build/
 coverage/
 cjs/
-dist/
+**/*/dist/**/*
+!**/*/dist/.placeholder
 dts/
 esm/
 lib/

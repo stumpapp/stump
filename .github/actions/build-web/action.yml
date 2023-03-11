@@ -1,14 +1,27 @@
-name: 'Build Web Application'
-description: "Build web application and upload it's artifacts"
+name: 'Compile Web Application'
+description: 'Compile stump web'
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    - name: Build
-      uses: ./.github/actions/compile-web
+    - name: Checkout project
+      uses: actions/checkout@v3
 
-    - name: Upload
+    - name: Setup pnpm
+      uses: ./.github/actions/setup-pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install
+      working-directory: apps/web
+
+    - name: Build app
+      shell: bash
+      run: pnpm run build
+      working-directory: apps/web
+
+    - name: Upload bundle
       uses: ./.github/actions/upload-artifact
       with:
-        upload-name: web
+        upload-name: webapp
         upload-path: apps/web/dist

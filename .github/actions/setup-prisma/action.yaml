@@ -11,7 +11,7 @@ runs:
         key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
 
     - name: Generate Prisma client
-      working-directory: core
+      # working-directory: core
       if: steps.cache-prisma.outputs.cache-hit != 'true'
       shell: bash
-      run: cargo run -p prisma --release -- generate
+      run: cargo prisma generate --schema=./core/prisma/schema.prisma

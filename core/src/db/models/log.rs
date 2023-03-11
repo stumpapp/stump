@@ -15,22 +15,17 @@ pub struct LogMetadata {
 	pub modified: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Clone, Default, Serialize, Deserialize, Type, ToSchema)]
 pub enum LogLevel {
 	#[serde(rename = "ERROR")]
 	Error,
 	#[serde(rename = "WARN")]
 	Warn,
 	#[serde(rename = "INFO")]
+	#[default]
 	Info,
 	#[serde(rename = "DEBUG")]
 	Debug,
-}
-
-impl Default for LogLevel {
-	fn default() -> Self {
-		LogLevel::Info
-	}
 }
 
 impl std::fmt::Display for LogLevel {

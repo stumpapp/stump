@@ -31,7 +31,10 @@ serde = { workspace = true }
 axum-sessions = "0.4.1"
 async-trait = "0.1.53"
 async-stream = { workspace = true }
-local-ip-address = "0.5.1"
+# TODO: figure out this super fucking annoying cargo dependency resolution issue. This is the second time
+# cargo, in docker, has ignored the workspace version of this dep and instead used the latest version from crates.io
+# local-ip-address = "0.5.1"
+local-ip-address = { git = "https://github.com/EstebanBorai/local-ip-address.git", tag = "v0.5.1" }
 
 
 ### Dev Utils ###

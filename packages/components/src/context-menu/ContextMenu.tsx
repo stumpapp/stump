@@ -34,14 +34,14 @@ type BaseProps = {
 	contentWrapperClassName?: string
 	subContentWrapperClassName?: string
 }
-export type ContextMenuMenuProps = GenericMenu<ContextMenuItem, ContextMenuItemGroup> & BaseProps
+export type ContextMenuProps = GenericMenu<ContextMenuItem, ContextMenuItemGroup> & BaseProps
 
 export function ContextMenu({
 	children,
 	groups,
 	contentWrapperClassName,
 	subContentWrapperClassName,
-}: ContextMenuMenuProps) {
+}: ContextMenuProps) {
 	const renderItems = (items: ContextMenuItem[]) => {
 		return items.map((item, itemIndex) => {
 			const key = `context-menu-item-${itemIndex}-${item.label}`

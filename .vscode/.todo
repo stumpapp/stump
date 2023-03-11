@@ -68,9 +68,8 @@
 - [ ] Setup self hosted runner using gaming computer
 - [ ] Finish GH workflows/actions
 - [ ] Add some automated system for versioning/releases
-- [ ] Once fully migrated off Chakra UI
-  - [ ] Finalize custom UI components
-  - [ ] Consider feature freeze and migrate over to SolidJS
+- [ ] Migrate off of Chakra UI in favor of Radix
+  - [ ] Fix dark-mode storybook integration
 - [ ] Add `Stump.toml` template and/or just list all the config options somewhere
 - [ ] Fix `desktop-dev` command, it spawns a new window over and over :angry:
 - [ ] Make light mode look not disgusting lmao
@@ -78,3 +77,4 @@
   - [ ] Just replace the modals with dedicated pages for editing and creating libraries
 - [ ] `local-ip-address` check if release yoinked comes back okay
 - [ ] cargo report future-incompatibilities --id 4 --package rustc-serialize@0.3.24
+- [ ] Consider feature freeze and migrate over to SolidJS

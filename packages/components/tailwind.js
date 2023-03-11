@@ -14,7 +14,7 @@ const brand = {
 
 /**
  *
- * @param {string} app The name of the app
+ * @param {string | undefined} app The name of the app
  * @returns tailwind config object
  */
 module.exports = function (app) {
@@ -27,9 +27,17 @@ module.exports = function (app) {
 		// NOTE: this allows me to sync tailwind dark mode with chakra-ui dark mode *yeet*
 		// so happy I found this!
 		darkMode: ['class', '[data-theme="dark"]'],
-		plugins: [require('tailwind-scrollbar-hide'), require('@tailwindcss/typography')],
+		plugins: [
+			require('tailwind-scrollbar-hide'),
+			require('@tailwindcss/typography'),
+			require('tailwindcss-animate'),
+		],
 		theme: {
 			extend: {
+				animation: {
+					'accordion-down': 'accordion-down 0.2s ease-out',
+					'accordion-up': 'accordion-up 0.2s ease-out',
+				},
 				colors: {
 					brand,
 					gray: {
@@ -57,6 +65,16 @@ module.exports = function (app) {
 						850: '#191D28',
 						900: '#171923',
 						950: '#11121A',
+					},
+				},
+				keyframes: {
+					'accordion-down': {
+						from: { height: 0 },
+						to: { height: 'var(--radix-accordion-content-height)' },
+					},
+					'accordion-up': {
+						from: { height: 'var(--radix-accordion-content-height)' },
+						to: { height: 0 },
 					},
 				},
 				ringColor: {

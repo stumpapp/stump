@@ -42,6 +42,7 @@
     "move-cli": "2.0.0",
     "prettier": "^2.8.4",
     "prettier-eslint": "^15.0.1",
+    "prettier-plugin-tailwindcss": "^0.2.4",
     "trash-cli": "^5.0.0",
     "tsconfig-moon": "^1.2.1",
     "typescript": "^4.9.5"

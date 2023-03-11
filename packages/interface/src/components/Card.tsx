@@ -40,7 +40,7 @@ export default function Card({ to, overlay, children, variant, className, ...res
 			}
 			_dark={{ bg: 'gray.750' }}
 			className={cardVariants({
-				class: clsx('relative flex flex-col overflow-hidden flex-1 space-y-1', className),
+				class: clsx('relative flex flex-1 flex-col space-y-1 overflow-hidden', className),
 				variant,
 			})}
 		>
@@ -83,7 +83,7 @@ export function CardFooter({ children, ...props }: CardFooterProps) {
 
 export function CardGrid({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="flex-1 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:gap-2 2xl:grid-cols-7 4xl:grid-cols-8 items-start justify-center md:justify-start pb-4">
+		<div className="4xl:grid-cols-8 grid flex-1 grid-cols-2 items-start justify-center gap-4 pb-4 sm:grid-cols-3 md:justify-start lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-7 2xl:gap-2">
 			{children}
 		</div>
 	)

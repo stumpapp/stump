@@ -42,7 +42,7 @@ tasks:
       - 'tests/**/*'
       - '**/*.{md,mdx,yml,yaml,json}'
       - '/.prettierignore'
-      - '/.prettierrc'
+      - '/prettier.config.js'
 
   lint:
     command:

@@ -190,7 +190,7 @@ function QueryResults({ results }: { results?: typeof fakeResults }) {
 					<Box
 						key={`${id}-${title}-listitem`}
 						onClick={() => setSelected(i)}
-						className="px-2 py-1 cursor-pointer rounded-md"
+						className="cursor-pointer rounded-md px-2 py-1"
 						bg={selected === i ? bgColor : undefined}
 						_hover={{ bg: bgColor }}
 					>
@@ -204,7 +204,7 @@ function QueryResults({ results }: { results?: typeof fakeResults }) {
 					<Heading size="sm">{selectedItem.title}</Heading>
 					<img
 						src={`${fakeBaseUrl}${selectedItem.id}`}
-						className="w-24 h-24 object-cover rounded-md"
+						className="h-24 w-24 rounded-md object-cover"
 					/>
 					<Text fontSize="sm" color={selectedItemDescriptionColor} noOfLines={2}>
 						{selectedItem.description}

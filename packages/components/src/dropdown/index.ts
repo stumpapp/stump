@@ -16,3 +16,17 @@ export {
 	DropdownPrimitiveSubTrigger,
 	DropdownPrimitiveTrigger,
 } from './primitives'
+
+export type GenericMenuItem = {
+	label: string
+	subItems?: GenericMenuItem[]
+}
+
+export type GenericMenuItemGroup<I extends GenericMenuItem> = {
+	title?: string
+	items: I[]
+}
+
+export type GenericMenu<I extends GenericMenuItem, G = GenericMenuItemGroup<I>> = {
+	groups: G[]
+}

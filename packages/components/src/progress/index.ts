@@ -1,2 +1,4 @@
-export { ProgressBar } from './ProgressBar'
+export { type ProgressBarProps, ProgressBar } from './ProgressBar'
 export { ProgressSpinner } from './ProgressSpinner'
+
+// export type ProgressState = 'complete' | 'indeterminate' | 'loading'

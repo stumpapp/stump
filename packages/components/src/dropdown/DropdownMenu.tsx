@@ -2,6 +2,7 @@ import React from 'react'
 
 import { Button } from '../button/Button'
 import { cn } from '../utils'
+import { GenericMenu } from '.'
 import {
 	DropdownPrimitive,
 	DropdownPrimitiveContent,
@@ -36,11 +37,11 @@ type LabelOrTrigger =
 	| {
 			trigger: React.ReactElement<React.ComponentPropsWithRef<'button'>>
 	  }
-export type DropdownMenuProps = {
-	groups: DropdownItemGroup[]
+type BaseProps = LabelOrTrigger & {
 	contentWrapperClassName?: string
 	subContentWrapperClassName?: string
-} & LabelOrTrigger
+}
+export type DropdownMenuProps = GenericMenu<DropdownItem, DropdownItemGroup> & BaseProps
 
 export function DropdownMenu({
 	groups,
@@ -63,7 +64,7 @@ export function DropdownMenu({
 							)}
 						</DropdownPrimitiveSubTrigger>
 						<DropdownPrimitivePortal>
-							<DropdownPrimitiveSubContent className={subContentWrapperClassName}>
+							<DropdownPrimitiveSubContent className={cn('w-44', subContentWrapperClassName)}>
 								{renderItems(item.subItems)}
 							</DropdownPrimitiveSubContent>
 						</DropdownPrimitivePortal>

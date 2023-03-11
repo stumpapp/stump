@@ -10,7 +10,7 @@ members = [
 
 [workspace.package]
 version = "0.0.0"
-rust-version = "1.64.0"
+rust-version = "1.68.0"
 
 [workspace.dependencies]
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.4", features = [

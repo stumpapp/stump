@@ -16,8 +16,8 @@
   <!-- <a href="./.github/CHANGELOG.md">
     <img src="https://img.shields.io/github/package-json/v/aaronleopold/stump?logo=azurepipelines&amp;color=0aa8d2" alt="Current Version">
   </a> -->
-  <a href="https://hub.docker.com/r/aaronleopold/stump-preview">
-    <img src="https://img.shields.io/docker/pulls/aaronleopold/stump-preview?logo=docker&color=0aa8d2&logoColor=fff" alt="Docker Pulls">
+  <a href="https://hub.docker.com/r/aaronleopold/stump">
+    <img src="https://img.shields.io/docker/pulls/aaronleopold/stump?logo=docker&color=0aa8d2&logoColor=fff" alt="Docker Pulls">
   </a>
 </p>
 
@@ -37,7 +37,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Roadmap 🗺](#roadmap-)
 - [Getting Started 🚀](#getting-started-)
 - [Developer Guide 💻](#developer-guide-)
-    - [Where to start?](#where-to-start)
+  - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
   - [/packages](#packages)
@@ -80,7 +80,7 @@ I am very open to suggestions and ideas, so feel free to reach out if you have a
 
 Stump isn't ready for normal, non-development usage yet. Once a release has been made, this will be updated. For now, follow the [Developing](#developing-) section to build from source and run locally.
 
-There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump-preview) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container. Also keep in mind migrations won't be stacked until a release, so each update until then might require a wipe of the database file.
+There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container. Also keep in mind migrations won't be stacked until a release, so each update until then might require a wipe of the database file.
 
 For more information about getting started, how Stump works and how it manages your library, and much more, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 

@@ -5,10 +5,9 @@ dist
 static
 apps/server/client
 target
-*.lock
-*-lock.*
 *.log
 *.db
+.git
 
 # ignore contents in excess directories, some are kept only so cargo 
 # doesn't yell at me

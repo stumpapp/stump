@@ -1,24 +1,65 @@
-name: Stump-nightly
-
-# on:
-#   schedule:
-#     # * is a special character in YAML so you have to quote this string
-#     - cron: '0 1 * * *'
-#   workflow_dispatch:
+name: 'Stump Nightly CI'
 
 on:
   pull_request:
     branches:
-      - 'nightly'
+      - develop
+      - main
+  push:
+    branches:
+      - develop
+
+# TODO: should I push nightly on main pushes? then on tag, an actual tagged release?
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
+  docker-build:
+    name: Build docker image
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # On PRs, we will only load the image into docker for the quickest platform
+      # (i.e. linux/amd64). This is mostly a smoke test, just rather ignorant verification
+      # that the image can be built. On pushes, we will actually build and push for
+      # all supported platforms.
+      - name: Configure environment
+        run: |
+          echo "LOAD=${{ github.event_name == 'pull_request' }}" >> $GITHUB_ENV
+          echo "PUSH=${{ github.event_name == 'push' }}" >> $GITHUB_ENV
+
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            echo "PLATFORMS=${{ vars.SUPPORTED_PR_DOCKER_PLATFORMS }}" >> $GITHUB_ENV
+          else
+            echo "PLATFORMS=${{ vars.SUPPORTED_DOCKER_PLATFORMS }}" >> $GITHUB_ENV
+          fi
+
+      - name: Setup and build docker image
+        uses: ./.github/actions/build-docker
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+          tags: 'nightly'
+          load: ${{ env.LOAD }}
+          push: ${{ env.PUSH }}
+          platforms: ${{ env.PLATFORMS }}
+
+  # TODO: build executables for apple(x86_64,darwin?),linux(x86_64,arm64?), and windows(x86_64)
+  # These should be uploaded to the nightly release as artifacts. Old artifacts should be deleted
+  # before uploading new ones.
+
   build-web:
-    strategy:
-      fail-fast: true
-      matrix:
-        plaform: [ubuntu-20.04]
-    name: Build web application
-    runs-on: ${{ matrix.plaform }}
+    name: Bundle web app
+    runs-on: [self-hosted]
+    if: false # TODO: don't do that
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -29,17 +70,14 @@ jobs:
       - name: Upload web build
         uses: ./.github/actions/upload-artifact
         with:
-          upload-name: web
+          upload-name: webapp
           upload-path: apps/web/dist
 
-  build-server:
-    strategy:
-      fail-fast: true
-      matrix:
-        plaform: [ubuntu-20.04] # We should probably build for window and macos
-    name: Build server and desktop
-    runs-on: ${{ matrix.plaform }}
+  build-linux-server:
+    name: Compile server app (self-hosted linux)
     needs: build-web
+    runs-on: [self-hosted]
+    if: false # TODO: don't do that
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -47,18 +85,88 @@ jobs:
       - name: Build server
         uses: ./.github/actions/build-server
         with:
-          platform: ${{ matrix.plaform }}
+          platform: 'linux'
 
       - name: Upload stump server
         uses: ./.github/actions/upload-artifact
         with:
-          upload-name: stump_server
+          upload-name: stump_server-linux
           upload-path: target/release/stump_server
 
-      - uses: tauri-apps/tauri-action@v0
+  build-server:
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [macos, windows]
+    name: Compile server app
+    needs: build-web
+    runs-on: ${{ matrix.platform }}
+    if: false # TODO: don't do that
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Upload desktop
+      - name: Build server
+        uses: ./.github/actions/build-server
+        with:
+          platform: ${{ matrix.platform }}
+
+      - name: Upload stump server
         uses: ./.github/actions/upload-artifact
         with:
-          upload-name: stump-desktop
-          upload-path: target/release/bundle
+          upload-name: stump_server-${{ matrix.platform }}
+          upload-path: target/release/stump_server
+
+  # build-linux-desktop:
+  #   name: Compile desktop app (self-hosted linux)
+  #   needs: build-web
+  #   runs-on: [self-hosted]
+  #   if: false # TODO: don't do that
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Build desktop
+  #       uses: ./.github/actions/build-desktop
+  #       with:
+  #         platform: 'linux'
+
+  #     - name: Upload desktop
+  #       uses: ./.github/actions/upload-artifact
+  #       with:
+  #         upload-name: stump-desktop-linux
+  #         upload-path: target/release/bundle
+
+  build-desktop:
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [macos, windows]
+    name: Compile desktop app
+    needs: build-web
+    runs-on: ${{ matrix.platform }}
+    if: false # TODO: don't do that
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build desktop
+        uses: ./.github/actions/build-desktop
+        with:
+          platform: ${{ matrix.platform }}
+
+      # https://github.com/tauri-apps/tauri-action
+      # - uses: tauri-apps/tauri-action@v0
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     tagName: stump-desktop-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+      #     releaseName: 'Stump Desktop v__VERSION__'
+      #     releaseBody: 'See the assets to download this version and install.'
+      #     releaseDraft: true
+      #     prerelease: true
+
+      # - name: Upload desktop
+      #   uses: ./.github/actions/upload-artifact
+      #   with:
+      #     upload-name: stump-desktop-${{ matrix.platform }}
+      #     upload-path: target/release/bundle

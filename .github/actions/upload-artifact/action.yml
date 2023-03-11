@@ -2,7 +2,6 @@ name: 'Upload Local'
 description: 'Upload artifact to local action'
 
 inputs:
-  # Upload
   upload-name:
     required: true
     description: 'Name of the upload'

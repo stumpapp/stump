@@ -4,11 +4,12 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Type, ToSchema, Default)]
 pub enum UserRole {
 	#[serde(rename = "SERVER_OWNER")]
 	ServerOwner,
 	#[serde(rename = "MEMBER")]
+	#[default]
 	Member,
 }
 
@@ -64,12 +65,6 @@ impl FromStr for FileStatus {
 			"MISSING" => Ok(FileStatus::Missing),
 			_ => Err(()),
 		}
-	}
-}
-
-impl Default for UserRole {
-	fn default() -> Self {
-		UserRole::Member
 	}
 }
 

@@ -1,4 +1,4 @@
-name: "Build legacy Nix package on Ubuntu"
+name: 'Stump Nix CI'
 
 on:
   push:
@@ -15,5 +15,5 @@ jobs:
       - uses: cachix/install-nix-action@v17
       - name: test
         run: nix develop --command "pkg-config" "--libs" "--cflags" "gdk-3.0" "gdk-3.0 >= 3.22"
-   #   - name: Building package
+    #   - name: Building package
     #    run: nix develop --command pnpm core run setup && cargo check

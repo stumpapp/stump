@@ -58,8 +58,8 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 				{runningJobs.map((job, i) => {
 					return (
 						<VStack key={job.id || i} align="start" spacing={2} bg={bgColor} rounded="md" p={3}>
-							<div className="w-full flex justify-between items-center">
-								<div className="flex space-x-3 items-center">
+							<div className="flex w-full items-center justify-between">
+								<div className="flex items-center space-x-3">
 									<Text fontSize="sm" fontWeight="semibold">
 										{readableKind(job.kind)}
 									</Text>
@@ -72,7 +72,7 @@ export function RunningJobs({ jobReports }: { jobReports: JobReport[] }) {
 								</Button>
 							</div>
 
-							<div className="flex flex-col space-y-2 w-full text-xs">
+							<div className="flex w-full flex-col space-y-2 text-xs">
 								<Text fontWeight="medium">{job.message}</Text>
 								<div className="flex items-center space-x-2">
 									<Progress

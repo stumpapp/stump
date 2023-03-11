@@ -27,6 +27,8 @@ fileGroups:
     - '**/*.{scss,css}'
     - '**/*.{md,mdx}'
 
+# TODO: ignore formatting of tsconfig/other .json files
+# in CI/pre-comiit hook
 tasks:
   format:
     command:

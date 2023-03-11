@@ -83,7 +83,7 @@ export default function Table<T, V>({
 	return (
 		<Box
 			bg={useColorModeValue('whiteAlpha.600', 'blackAlpha.300')}
-			className="block max-w-full overflow-x-scroll overflow-y-hidden scrollbar-hide"
+			className="block max-w-full overflow-y-hidden overflow-x-scroll scrollbar-hide"
 			rounded="md"
 			p={3}
 		>
@@ -140,7 +140,7 @@ export default function Table<T, V>({
 					</span>
 
 					<select
-						className="rounded-md text-sm py-0.5"
+						className="rounded-md py-0.5 text-sm"
 						value={pageSize}
 						onChange={(e) => {
 							table.setPageSize(Number(e.target.value))
@@ -169,7 +169,7 @@ export default function Table<T, V>({
 									ref={filterColRef}
 									id="currency"
 									name="currency"
-									className="appearance-none h-full rounded-md border-transparent bg-transparent py-0 px-4 text-sm text-center focus:outline-brand"
+									className="h-full appearance-none rounded-md border-transparent bg-transparent py-0 px-4 text-center text-sm focus:outline-brand"
 								>
 									{headers.map((column) => (
 										<option key={column.id} value={column.id}>

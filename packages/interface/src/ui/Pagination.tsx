@@ -27,7 +27,7 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 				// FIXME: I need to figure out how to disable the link while not removing pointer events
 				className={clsx(
 					isDisabled && 'pointer-events-none cursor-not-allowed',
-					'border-t-2 border-transparent inline-flex items-center text-sm font-medium',
+					'inline-flex items-center border-t-2 border-transparent text-sm font-medium',
 				)}
 				pt={4}
 				pr={kind === 'previous' ? '1' : '0'}
@@ -38,13 +38,13 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 			>
 				{kind === 'previous' ? (
 					<>
-						<ArrowLeft className="mr-3 h-4 w-4 md:h-5 md:w-5 text-gray-600" aria-hidden="true" />
+						<ArrowLeft className="mr-3 h-4 w-4 text-gray-600 md:h-5 md:w-5" aria-hidden="true" />
 						Previous
 					</>
 				) : (
 					<>
 						Next
-						<ArrowRight className="ml-3 h-4 w-4 md:h-5 md:w-5 text-gray-600" aria-hidden="true" />
+						<ArrowRight className="ml-3 h-4 w-4 text-gray-600 md:h-5 md:w-5" aria-hidden="true" />
 					</>
 				)}
 			</Box>
@@ -73,7 +73,7 @@ function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
 			_hover={{
 				borderColor: isActive ? 'brand.500' : nonActiveBorder,
 			}}
-			className="border-t-2 inline-flex items-center text-sm font-medium"
+			className="inline-flex items-center border-t-2 text-sm font-medium"
 		>
 			{value}
 		</Box>
@@ -150,7 +150,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 									as={'button'}
 									pt={4}
 									px={4}
-									className="text-sm font-medium inline-flex items-center cursor-pointer focus:outline-none active:outline-none"
+									className="inline-flex cursor-pointer items-center text-sm font-medium focus:outline-none active:outline-none"
 								>
 									<DotsThree />
 								</Box>

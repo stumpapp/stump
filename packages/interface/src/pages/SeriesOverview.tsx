@@ -27,18 +27,18 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 	}
 
 	return (
-		<div className="p-4 flex items-start space-x-4">
+		<div className="flex items-start space-x-4 p-4">
 			<div>
 				<Box shadow="base" bg="gray.50" _dark={{ bg: 'gray.750' }} rounded="md" maxW="16rem">
 					<Box px={1.5}>
 						<img
-							className="min-h-96 object-cover w-full [aspect-ratio:663/1024]"
+							className="min-h-96 w-full object-cover [aspect-ratio:663/1024]"
 							src={getSeriesThumbnail(series.id)}
 						/>
 					</Box>
 				</Box>
 			</div>
-			<div className="flex-1 flex flex-col space-y-4 h-full">
+			<div className="flex h-full flex-1 flex-col space-y-4">
 				<Heading size="sm" noOfLines={1}>
 					{series.name}
 				</Heading>
@@ -113,7 +113,7 @@ export default function SeriesOverview() {
 
 			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
-			<div className="p-4 w-full h-full flex flex-col space-y-6">
+			<div className="flex h-full w-full flex-col space-y-6 p-4">
 				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
 				{layoutMode === 'GRID' ? (
 					<MediaGrid isLoading={isLoadingMedia} media={media} />

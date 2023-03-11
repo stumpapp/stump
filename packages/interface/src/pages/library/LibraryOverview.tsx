@@ -58,7 +58,7 @@ export default function LibraryOverview() {
 			{/* @ts-expect-error: wrong ref, still okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-			<div className="p-4 w-full h-full flex flex-col space-y-6">
+			<div className="flex h-full w-full flex-col space-y-6 p-4">
 				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
 
 				{layoutMode === 'GRID' ? (

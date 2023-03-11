@@ -98,9 +98,9 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed top-0 p-4 w-full bg-opacity-90 z-[100] bg-gray-200 dark:bg-gray-700 dark:text-white"
+				className="fixed top-0 z-[100] w-full bg-gray-200 bg-opacity-90 p-4 dark:bg-gray-700 dark:text-white"
 			>
-				<div className="flex justify-between items-center w-full">
+				<div className="flex w-full items-center justify-between">
 					<div className="flex items-center space-x-4">
 						<Link className="flex items-center" title="Go to media overview" to={`/books/${id}`}>
 							<ArrowLeft size={'1.25rem'} />
@@ -117,10 +117,10 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('bottom')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed bottom-0 p-4 w-full bg-opacity-75 shadow-lg text-white z-[100] overflow-x-scroll"
+				className="fixed bottom-0 z-[100] w-full overflow-x-scroll bg-opacity-75 p-4 text-white shadow-lg"
 			>
 				<div
-					className="flex space-x-2 w-full bottom-0 select-none relative"
+					className="relative bottom-0 flex w-full select-none space-x-2"
 					ref={parentRef}
 					style={{
 						width: `${columnVirtualizer.getTotalSize()}px`,
@@ -135,7 +135,7 @@ export default function Toolbar({
 							src={getMediaPage(id, idx + 1)}
 							className={clsx(
 								currentPage === idx + 1 ? '-translate-y-1 border-brand' : 'border-transparent',
-								'cursor-pointer h-32 w-auto rounded-md transition duration-300 hover:-translate-y-2 shadow-xl border-solid border-2 hover:border-brand',
+								'h-32 w-auto cursor-pointer rounded-md border-2 border-solid shadow-xl transition duration-300 hover:-translate-y-2 hover:border-brand',
 							)}
 							onClick={() => onPageChange(idx + 1)}
 						/>

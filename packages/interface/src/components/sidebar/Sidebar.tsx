@@ -132,7 +132,7 @@ function NavItem({ name, href, active, ...rest }: NavItemProps) {
 			display="flex"
 			p={2}
 		>
-			<div className="flex space-x-2 justify-start w-full">
+			<div className="flex w-full justify-start space-x-2">
 				{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
 				{/* @ts-ignore: TODO: fixme */}
 				<rest.icon weight="fill" />

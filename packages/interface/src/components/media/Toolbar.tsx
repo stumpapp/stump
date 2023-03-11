@@ -29,9 +29,9 @@ export default function Toolbar({ title, pages, visible, onPageChange }: Toolbar
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: -100 }}
 						transition={{ duration: 0.2, ease: 'easeInOut' }}
-						className="fixed top-0 p-4 w-full bg-opacity-90 bg-gray-700 text-white z-[100]"
+						className="fixed top-0 z-[100] w-full bg-gray-700 bg-opacity-90 p-4 text-white"
 					>
-						<div className="flex justify-between items-center w-full">
+						<div className="flex w-full items-center justify-between">
 							<div className="flex items-center space-x-4">
 								<Link
 									className="flex items-center"
@@ -51,9 +51,9 @@ export default function Toolbar({ title, pages, visible, onPageChange }: Toolbar
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: 100 }}
 						transition={{ duration: 0.2, ease: 'easeInOut' }}
-						className="fixed bottom-0 p-4 w-full overflow-x-scroll bg-opacity-75 shadow-lg text-white z-[100]"
+						className="fixed bottom-0 z-[100] w-full overflow-x-scroll bg-opacity-75 p-4 text-white shadow-lg"
 					>
-						<div className="flex space-x-2 w-full bottom-0 select-none">
+						<div className="bottom-0 flex w-full select-none space-x-2">
 							{/* TODO:  don't do this, terrible loading for most people */}
 							{/* TODO: scroll to center current page */}
 							{/* TODO: tool tips? */}
@@ -62,7 +62,7 @@ export default function Toolbar({ title, pages, visible, onPageChange }: Toolbar
 								<img
 									key={i}
 									src={getMediaPage(id, i + 1)}
-									className="cursor-pointer h-32 w-auto rounded-md transition duration-300 hover:-translate-y-2 shadow-xl"
+									className="h-32 w-auto cursor-pointer rounded-md shadow-xl transition duration-300 hover:-translate-y-2"
 									onClick={() => onPageChange(i + 1)}
 								/>
 							))}

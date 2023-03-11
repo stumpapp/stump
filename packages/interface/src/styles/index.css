@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-	@apply font-sans antialiased h-full;
+	@apply h-full font-sans antialiased;
 }
 
 #root,
@@ -12,7 +12,7 @@ html {
 }
 
 main {
-	@apply h-full w-full overflow-y-scroll scrollbar-hide overflow-x-hidden flex flex-col !important;
+	@apply flex h-full w-full flex-col overflow-x-hidden overflow-y-scroll scrollbar-hide !important;
 }
 
 form {
@@ -39,5 +39,5 @@ form {
 	@apply pointer-events-none z-50;
 }
 #nprogress .bar {
-	@apply bg-brand-500 fixed top-0 left-0 z-50 h-0.5 w-full;
+	@apply fixed top-0 left-0 z-50 h-0.5 w-full bg-brand-500;
 }

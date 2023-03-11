@@ -22,7 +22,7 @@ export default function SeriesList({ series, isLoading }: Props) {
 	}
 
 	return (
-		<div className="flex flex-col space-y-2 flex-1">
+		<div className="flex flex-1 flex-col space-y-2">
 			{series.map(({ id, name, description }, i) => (
 				<ListItem
 					key={id}

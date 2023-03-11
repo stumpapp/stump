@@ -112,7 +112,7 @@ export default function SlidingCardList({
 	}
 
 	return (
-		<div className="w-full flex flex-col space-y-2">
+		<div className="flex w-full flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
 				{title && <Heading fontSize="lg">{title}</Heading>}
 				<div className={clsx('self-end', { hidden: isEmpty })}>
@@ -139,11 +139,11 @@ export default function SlidingCardList({
 				</div>
 			</div>
 			<div
-				className="w-full flex flex-row space-x-2 overflow-x-scroll pb-4 scrollbar-hide"
+				className="flex w-full flex-row space-x-2 overflow-x-scroll pb-4 scrollbar-hide"
 				ref={parentRef}
 			>
 				<div
-					className="w-full relative flex flex-row space-x-2"
+					className="relative flex w-full flex-row space-x-2"
 					style={{
 						width: isEmpty ? '100%' : `${columnVirtualizer.getTotalSize()}px`,
 					}}

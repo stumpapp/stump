@@ -24,7 +24,7 @@ export default function SeriesCard({ series, fixed }: SeriesCardProps) {
 		>
 			<CardBody
 				p={0}
-				className="relative aspect-[2/3] bg-center bg-cover"
+				className="relative aspect-[2/3] bg-cover bg-center"
 				style={{
 					backgroundImage: `url('${getSeriesThumbnail(series.id)}')`,
 				}}

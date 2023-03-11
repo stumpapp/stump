@@ -37,12 +37,12 @@ export default function JobOverlay() {
 					as={motion.div}
 					bg={'white'}
 					_dark={{ bg: 'gray.700' }}
-					className="fixed right-[1rem] bottom-[1rem] rounded-md shadow p-2 flex flex-col justify-center items-center w-52"
+					className="fixed right-[1rem] bottom-[1rem] flex w-52 flex-col items-center justify-center rounded-md p-2 shadow"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
 				>
-					<div className="flex flex-col space-y-2 p-2 w-full text-xs">
+					<div className="flex w-full flex-col space-y-2 p-2 text-xs">
 						<Text fontWeight="medium">{formatMessage(jobShown.message) ?? 'Job in Progress'}</Text>
 						<Progress
 							isIndeterminate={!jobShown.current_task || !jobShown.task_count}

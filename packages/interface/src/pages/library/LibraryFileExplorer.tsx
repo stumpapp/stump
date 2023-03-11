@@ -52,7 +52,7 @@ export default function LibraryFileExplorer() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
-			<div className="p-4 w-full h-full flex flex-col space-y-6">
+			<div className="flex h-full w-full flex-col space-y-6 p-4">
 				<FileExplorer files={entries} />
 			</div>
 		</>

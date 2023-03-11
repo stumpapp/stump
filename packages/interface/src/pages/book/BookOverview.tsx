@@ -45,10 +45,10 @@ export default function BookOverview() {
 			<Helmet>
 				<title>Stump | {media?.name ?? ''}</title>
 			</Helmet>
-			<div className="p-4 h-full w-full flex flex-col space-y-3">
+			<div className="flex h-full w-full flex-col space-y-3 p-4">
 				<div className="flex items-start space-x-4">
 					<MediaCard media={media!} readingLink />
-					<div className="flex-1 flex flex-col space-y-4 h-full">
+					<div className="flex h-full flex-1 flex-col space-y-4">
 						<ReadMore text={media?.description} />
 						{media?.series && <Link to={`/series/${media?.series.id}`}>{media?.series.name}</Link>}
 
@@ -57,7 +57,7 @@ export default function BookOverview() {
 					</div>
 				</div>
 
-				<div className="flex flex-col space-y-2 text-sm pt-2">
+				<div className="flex flex-col space-y-2 pt-2 text-sm">
 					<Heading fontSize="md">File Information</Heading>
 					<Box className="flex space-x-4" color={textColor}>
 						<Text>Size: {formatBytes(media?.size)}</Text>

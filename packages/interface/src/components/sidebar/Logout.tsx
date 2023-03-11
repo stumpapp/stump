@@ -49,7 +49,7 @@ export default function Logout() {
 					}}
 					onClick={onOpen}
 				>
-					<SignOut className="transform -scale-x-[1]" />
+					<SignOut className="-scale-x-[1] transform" />
 				</Button>
 			</ToolTip>
 

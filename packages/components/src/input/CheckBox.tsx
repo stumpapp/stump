@@ -1,5 +1,3 @@
- 
-
 import React from 'react'
 
 import { type RawCheckBoxRef, RawCheckBox, RawCheckBoxProps } from './RawCheckBox'

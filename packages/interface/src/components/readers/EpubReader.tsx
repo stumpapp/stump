@@ -62,7 +62,7 @@ export default function EpubReader({ epub, actions, ...rest }: UseEpubReturn) {
 	}
 
 	return (
-		<div className="w-full h-full">
+		<div className="h-full w-full">
 			{content && <div onClick={handleClickEvent} dangerouslySetInnerHTML={{ __html: content }} />}
 		</div>
 	)

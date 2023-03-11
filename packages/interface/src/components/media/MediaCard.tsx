@@ -38,7 +38,7 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 		>
 			<CardBody
 				p={0}
-				className="relative aspect-[2/3] bg-center bg-cover"
+				className="relative aspect-[2/3] bg-cover bg-center"
 				style={{
 					// TODO: figure out how to do fallback ONLY on error... url('/assets/fallbacks/image-file.svg')
 					backgroundImage: `url('${getMediaThumbnail(media.id)}')`,

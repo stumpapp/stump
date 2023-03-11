@@ -34,7 +34,7 @@ export default function TopBar() {
 	return (
 		<Box
 			as="header"
-			className="sticky top-0 w-full px-4 py-2 md:py-3 z-10"
+			className="sticky top-0 z-10 w-full px-4 py-2 md:py-3"
 			bg={{
 				base: useColorModeValue('white', 'gray.800'),
 				md: useColorModeValue('gray.75', 'gray.900'),

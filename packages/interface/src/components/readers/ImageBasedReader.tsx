@@ -89,7 +89,7 @@ export default function ImageBasedReader({
 			/>
 			<SideBarControl position="left" onClick={() => onPageChange(currentPage - 1)} />
 			<img
-				className="w-full max-h-full md:w-auto z-30"
+				className="z-30 max-h-full w-full md:w-auto"
 				src={getPageUrl(currentPage)}
 				onError={(err) => {
 					// @ts-expect-error: is oke
@@ -110,9 +110,9 @@ function SideBarControl({ onClick, position }: SideBarControlProps) {
 	return (
 		<div
 			className={clsx(
-				'h-full transition-all duration-300 z-50 border border-transparent',
-				'absolute w-[10%] active:bg-gray-200 active:border-gray-100 dark:active:bg-gray-700 dark:active:border dark:active:border-gray-500',
-				'sm:relative sm:w-full sm:flex sm:flex-shrink sm:active:bg-transparent',
+				'z-50 h-full border border-transparent transition-all duration-300',
+				'absolute w-[10%] active:border-gray-100 active:bg-gray-200 dark:active:border dark:active:border-gray-500 dark:active:bg-gray-700',
+				'sm:relative sm:flex sm:w-full sm:flex-shrink sm:active:bg-transparent',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}
@@ -323,7 +323,7 @@ export function AnimatedImageBasedReader({
 					animate={prevControls}
 					transition={{ ease: 'easeOut' }}
 					style={{ x: prevX }}
-					className="absolute w-full max-h-full md:w-auto"
+					className="absolute max-h-full w-full md:w-auto"
 					src={imageUrls[0]}
 					onError={(err) => {
 						// @ts-expect-error: is oke
@@ -348,7 +348,7 @@ export function AnimatedImageBasedReader({
 				}}
 				transition={{ ease: 'easeOut' }}
 				style={{ x }}
-				className="absolute w-full max-h-full md:w-auto z-30"
+				className="absolute z-30 max-h-full w-full md:w-auto"
 				src={imageUrls[1]}
 				onError={(err) => {
 					// @ts-expect-error: is oke
@@ -364,7 +364,7 @@ export function AnimatedImageBasedReader({
 					animate={nextControls}
 					transition={{ ease: 'easeOut' }}
 					style={{ x: nextX }}
-					className="absolute w-full max-h-full md:w-auto"
+					className="absolute max-h-full w-full md:w-auto"
 					src={imageUrls[2]}
 					onError={(err) => {
 						// @ts-expect-error: is oke

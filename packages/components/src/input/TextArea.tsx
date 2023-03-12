@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Label } from '../label/Label'
+import { Label } from '../text/Label'
 import { RawTextArea, RawTextAreaProps, RawTextAreaRef } from './RawTextArea'
 
 // TODO: variant that changes ring color to primary...
@@ -19,9 +19,7 @@ const TextArea = React.forwardRef<RawTextAreaRef, TextAreaProps>(
 			<div className="grid items-center gap-1.5">
 				<Label htmlFor={props.id}>{label}</Label>
 				<RawTextArea ref={ref} {...props} />
-				{description && (
-					<p className="text-sm text-slate-500">Your message will be copied to the support team.</p>
-				)}
+				{description && <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>}
 			</div>
 		)
 	},

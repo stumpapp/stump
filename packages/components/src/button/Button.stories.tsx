@@ -61,3 +61,18 @@ LargePrimary.args = {
 	size: 'lg',
 	variant: 'primary',
 }
+
+export const Danger = Template.bind({})
+Danger.args = {
+	variant: 'danger',
+}
+
+export const Outline = Template.bind({})
+Outline.args = {
+	variant: 'outline',
+}
+
+export const Subtle = Template.bind({})
+Subtle.args = {
+	variant: 'subtle',
+}

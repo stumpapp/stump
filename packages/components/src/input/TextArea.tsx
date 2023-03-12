@@ -3,12 +3,8 @@ import React from 'react'
 import { Label } from '../form'
 import { RawTextArea, RawTextAreaProps, RawTextAreaRef } from './raw'
 
-// TODO: variant that changes ring color to primary...
 // TODO: error state
-
-// FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 export type TextAreaProps = {
-	id?: string
 	label: string
 	description?: string
 } & RawTextAreaProps

@@ -21,3 +21,9 @@ WithLabel.args = {
 	label: 'My Label',
 	placeholder: 'Enter your text here...',
 }
+
+export const Primary = Template.bind({})
+Primary.args = {
+	placeholder: 'Enter your text here...',
+	variant: 'primary',
+}

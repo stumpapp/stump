@@ -59,7 +59,9 @@ const defaultArgs: Omit<ComponentProps<typeof ContextMenu>, 'children'> = {
 	],
 }
 const Story = (args: StoryProps) => (
-	<ContextMenu groups={args.groups || defaultArgs.groups}>Right click me!</ContextMenu>
+	<ContextMenu groups={args.groups || defaultArgs.groups}>
+		<span className="dark:text-gray-50">Right click me</span>
+	</ContextMenu>
 )
 const Template: ComponentStory<typeof Story> = (args) => <Story {...args} />
 

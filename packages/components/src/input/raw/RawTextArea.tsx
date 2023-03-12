@@ -1,23 +1,32 @@
+import { cva, VariantProps } from 'class-variance-authority'
 import React from 'react'
 
 import { cn } from '../../utils'
+import { RAW_INPUT_BASE_CLASSES, RAW_INPUT_VARIANTS } from './RawInput'
 
-// TODO: variant that changes ring color to primary...
+export const RAW_TEXT_AREA_SIZE_VARIANTS = {
+	default: 'h-20 py-2 px-3',
+}
+export const textAreaVariants = cva(RAW_INPUT_BASE_CLASSES, {
+	defaultVariants: {
+		size: 'default',
+		variant: 'default',
+	},
+	variants: {
+		size: RAW_TEXT_AREA_SIZE_VARIANTS,
+		variant: RAW_INPUT_VARIANTS,
+	},
+})
 
 export type RawTextAreaRef = HTMLTextAreaElement
-// FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
-export type RawTextAreaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-	className?: string
-}
+export type RawTextAreaProps = VariantProps<typeof textAreaVariants> &
+	React.TextareaHTMLAttributes<HTMLTextAreaElement>
 
 const RawTextArea = React.forwardRef<RawTextAreaRef, RawTextAreaProps>(
-	({ className, ...props }, ref) => {
+	({ className, variant, size, ...props }, ref) => {
 		return (
 			<textarea
-				className={cn(
-					'flex h-20 w-full rounded-md border border-gray-300 bg-transparent py-2 px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-50 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900',
-					className,
-				)}
+				className={cn(textAreaVariants({ className, size, variant }))}
 				ref={ref}
 				{...props}
 			/>

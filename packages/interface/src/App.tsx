@@ -10,6 +10,7 @@ import {
 	StumpClientContextProvider,
 	useStumpStore,
 	useTopBarStore,
+	useUserStore,
 } from '@stump/client'
 import { defaultContext, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -33,6 +34,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	const setTitle = useTopBarStore(({ setTitle }) => setTitle)
 
+	const { userPreferences } = useUserStore(({ userPreferences }) => ({ userPreferences }))
 	const { baseUrl, setBaseUrl } = useStumpStore(({ baseUrl, setBaseUrl }) => ({
 		baseUrl,
 		setBaseUrl,
@@ -57,6 +59,15 @@ function RouterContainer(props: { appProps: AppProps }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[baseUrl],
 	)
+
+	const appTheme = (userPreferences?.app_theme ?? 'light').toLowerCase()
+	useEffect(() => {
+		if (appTheme === 'light') {
+			document.querySelector('html')?.classList.remove('dark')
+		} else {
+			document.querySelector('html')?.classList.add('dark')
+		}
+	}, [appTheme])
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function handleHelmetChange(newState: any) {

@@ -20,7 +20,7 @@ const textVariants = cva('', {
 		},
 		variant: {
 			default: 'text-gray-900 dark:text-gray-100',
-			muted: 'text-gray-500 dark:text-gray-400',
+			muted: 'text-gray-500 dark:text-gray-450',
 			primary: 'text-brand',
 			secondary: 'text-gray-700 dark:text-gray-300',
 		},

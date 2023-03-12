@@ -1,1 +1,1 @@
-module.exports = require('../../packages/components/tailwind.js')('web')
+module.exports = require('../../packages/components/tailwind.js')('apps/web')

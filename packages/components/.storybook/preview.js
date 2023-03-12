@@ -1,6 +1,7 @@
 import { themes } from '@storybook/theming'
 
-import '../styles/tailwind.css'
+import '../src/styles/tailwind.css'
+import '../src/styles/preview.css'
 
 // TODO: I think the dark variants are being purged? I honestly don't know, but
 // dark mode toggle isn't working and it is so annoying.
@@ -19,6 +20,7 @@ export const parameters = {
 			textColor: '#f5f5f5',
 		},
 		light: themes.normal,
-		classTarget: 'html',
+		darkClass: 'dark',
+		classTarget: 'body',
 	},
 }

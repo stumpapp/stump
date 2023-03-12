@@ -21,6 +21,12 @@
       "@stump/client/*": [
         "../client/src/*"
       ],
+      "@stump/components": [
+        "../components/src/index.ts"
+      ],
+      "@stump/components/*": [
+        "../components/src/*"
+      ],
       "@stump/types": [
         "../types/index.ts"
       ],
@@ -39,6 +45,9 @@
     },
     {
       "path": "../client"
+    },
+    {
+      "path": "../components"
     },
     {
       "path": "../types"

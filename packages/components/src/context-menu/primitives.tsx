@@ -23,7 +23,7 @@ const ContextMenuPrimitiveSubTrigger = React.forwardRef<
 	<ContextMenu.SubTrigger
 		ref={ref}
 		className={cn(
-			'flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-gray-100 data-[state=open]:bg-gray-100 dark:focus:bg-gray-700 dark:data-[state=open]:bg-gray-700',
+			'flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-gray-75 data-[state=open]:bg-gray-75 dark:focus:bg-gray-700 dark:data-[state=open]:bg-gray-700',
 			inset && 'pl-8',
 			className,
 		)}
@@ -42,7 +42,7 @@ const ContextMenuPrimitiveSubContent = React.forwardRef<
 	<ContextMenu.SubContent
 		ref={ref}
 		className={cn(
-			'z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white p-1 shadow-md animate-in slide-in-from-left-1 dark:border-gray-700 dark:bg-gray-800',
+			'z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white p-1 shadow-md animate-in slide-in-from-left-1 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-150',
 			className,
 		)}
 		{...props}
@@ -58,7 +58,7 @@ const ContextMenuPrimitiveContent = React.forwardRef<
 		<ContextMenu.Content
 			ref={ref}
 			className={cn(
-				'z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white p-1 text-gray-700 shadow-md animate-in fade-in-80 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400',
+				'z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white p-1 text-gray-800 shadow-md animate-in fade-in-80 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-150',
 				className,
 			)}
 			{...props}
@@ -76,7 +76,7 @@ const ContextMenuPrimitiveItem = React.forwardRef<
 	<ContextMenu.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
 			inset && 'pl-8',
 			className,
 		)}
@@ -92,7 +92,7 @@ const ContextMenuPrimitiveCheckboxItem = React.forwardRef<
 	<ContextMenu.CheckboxItem
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
 			className,
 		)}
 		checked={checked}
@@ -115,7 +115,7 @@ const ContextMenuPrimitiveRadioItem = React.forwardRef<
 	<ContextMenu.RadioItem
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
 			className,
 		)}
 		{...props}
@@ -139,7 +139,7 @@ const ContextMenuPrimitiveLabel = React.forwardRef<
 	<ContextMenu.Label
 		ref={ref}
 		className={cn(
-			'px-2 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-300',
+			'px-2 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100',
 			inset && 'pl-8',
 			className,
 		)}
@@ -154,7 +154,7 @@ const ContextMenuPrimitiveSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<ContextMenu.Separator
 		ref={ref}
-		className={cn('-mx-1 my-1 h-px bg-gray-100 dark:bg-gray-700', className)}
+		className={cn('-mx-1 my-1 h-px bg-gray-75 dark:bg-gray-700', className)}
 		{...props}
 	/>
 ))
@@ -165,7 +165,7 @@ const ContextMenuPrimitiveShortcut = ({
 	...props
 }: React.HTMLAttributes<HTMLSpanElement>) => {
 	return (
-		<span className={cn('ml-auto text-xs tracking-widest text-gray-500', className)} {...props} />
+		<span className={cn('ml-auto text-xs tracking-widest text-gray-600', className)} {...props} />
 	)
 }
 ContextMenuPrimitiveShortcut.displayName = 'ContextMenuPrimitiveShortcut'

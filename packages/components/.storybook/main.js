@@ -1,22 +1,46 @@
+const path = require('path')
+
 module.exports = {
 	stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
 	addons: [
 		'@storybook/addon-links',
 		'@storybook/addon-essentials',
 		'@storybook/addon-interactions',
-		// FIXME: this is not working :sob:
-		'storybook-dark-mode',
-		{
-			name: '@storybook/addon-postcss',
-			options: {
-				postcssLoaderOptions: {
-					implementation: require('postcss'),
-				},
-			},
-		},
+		// FIXME: I want storybook-dark-mode ideally because it toggles all of the storybook UI
+		// accordinly, but their logic for toggling dark mode is broken. So for now I am using
+		// storybook-tailwind-dark-mode, but it doesn't toggle the storybook UI (just the dark class)
+		// 'storybook-dark-mode',
+		'storybook-tailwind-dark-mode',
+		// NOTE: this wasn't working, workaround is to use webpackFinal below.
+		// {
+		// 	name: '@storybook/addon-postcss',
+		// 	options: {
+		// 		postcssLoaderOptions: {
+		// 			implementation: require('postcss'),
+		// 		},
+		// 	},
+		// },
 	],
 	core: {
 		builder: '@storybook/builder-webpack5',
+	},
+	webpackFinal: async (config) => {
+		config.module.rules.push({
+			test: /\.css$/,
+			use: [
+				{
+					loader: 'postcss-loader',
+					options: {
+						postcssOptions: {
+							plugins: [require('tailwindcss'), require('autoprefixer')],
+						},
+					},
+				},
+			],
+			include: path.resolve(__dirname, '../'),
+		})
+
+		return config
 	},
 	framework: '@storybook/react',
 }

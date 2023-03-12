@@ -19,3 +19,9 @@ WithDescription.args = {
 	description: 'My Description',
 	label: 'My Label',
 }
+
+export const Primary = Template.bind({})
+Primary.args = {
+	label: 'My Label',
+	variant: 'primary',
+}

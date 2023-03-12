@@ -44,7 +44,11 @@
 		"@storybook/addon-interactions": "^6.5.12",
 		"@storybook/addon-links": "^6.5.12",
 		"@storybook/addon-postcss": "^2.0.0",
+		"@storybook/addons": "^6.2.9",
+		"@storybook/api": "^6.2.9",
 		"@storybook/builder-webpack5": "^6.5.12",
+		"@storybook/components": "^6.2.9",
+		"@storybook/core-events": "^6.2.9",
 		"@storybook/manager-webpack5": "^6.5.12",
 		"@storybook/react": "^6.5.12",
 		"@storybook/testing-library": "^0.0.13",
@@ -54,9 +58,13 @@
 		"@types/react-dom": "^18.0.6",
 		"babel-loader": "^9.1.2",
 		"css-loader": "^6.7.1",
+		"postcss-loader": "^7.0.2",
+		"require-from-string": "^2.0.2",
 		"storybook-dark-mode": "^2.1.1",
+		"storybook-tailwind-dark-mode": "^1.0.15",
 		"style-loader": "^3.3.1",
 		"tailwind-scrollbar-hide": "^1.1.7",
-		"typescript": "^4.9.5"
+		"typescript": "^4.9.5",
+		"webpack": "5.76.1"
 	}
 }

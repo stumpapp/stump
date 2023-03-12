@@ -14,3 +14,17 @@ Default.args = {
 	id: 'my-label',
 	label: 'My Label',
 }
+
+export const Primary = Template.bind({})
+Primary.args = {
+	id: 'my-label',
+	label: 'My Label',
+	variant: 'primary',
+}
+
+export const Description = Template.bind({})
+Description.args = {
+	description: 'This is a description',
+	id: 'my-label',
+	label: 'My Label',
+}

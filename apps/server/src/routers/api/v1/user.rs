@@ -105,9 +105,10 @@ async fn create_user(
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let _user_preferences = db
 		.user_preferences()
-		.create(vec![user_preferences::user::connect(user::id::equals(
-			created_user.id.clone(),
-		))])
+		.create(vec![
+			user_preferences::user::connect(user::id::equals(created_user.id.clone())),
+			user_preferences::user_id::set(Some(created_user.id.clone())),
+		])
 		.exec()
 		.await?;
 
@@ -285,7 +286,7 @@ async fn get_user_preferences(
 
 	let user_preferences = db
 		.user_preferences()
-		.find_unique(user_preferences::id::equals(id.clone()))
+		.find_unique(user_preferences::user_id::equals(id.clone()))
 		.exec()
 		.await?;
 	debug!(id, ?user_preferences, "Fetched user preferences");
@@ -344,6 +345,7 @@ async fn update_user_preferences(
 				user_preferences::series_layout_mode::set(
 					input.series_layout_mode.to_owned(),
 				),
+				user_preferences::app_theme::set(input.app_theme.to_owned()),
 			],
 		)
 		.exec()

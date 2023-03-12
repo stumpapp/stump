@@ -1,0 +1,7 @@
+html:not(.dark) > .sb-show-main {
+	@apply !bg-white;
+}
+
+.dark > .sb-show-main {
+	@apply !bg-gray-950;
+}

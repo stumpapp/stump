@@ -1,8 +1,8 @@
 import React from 'react'
 
+import { Label } from '../form'
+import { Text } from '../text'
 import { type RawCheckBoxRef, RawCheckBox, RawCheckBoxProps } from './raw'
-
-// TODO: Color variants
 
 export type CheckBoxProps = {
 	/** The optional label for the checkbox. */
@@ -20,15 +20,12 @@ export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 
 			return (
 				<div className="grid gap-1.5 leading-none">
-					{label && (
-						<label
-							htmlFor={props.id}
-							className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-						>
-							{label}
-						</label>
+					{label && <Label htmlFor={props.id}>{label}</Label>}
+					{description && (
+						<Text size="sm" variant="muted">
+							{description}
+						</Text>
 					)}
-					{description && <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>}
 				</div>
 			)
 		}

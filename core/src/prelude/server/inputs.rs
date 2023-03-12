@@ -11,6 +11,7 @@ pub struct UserPreferencesUpdate {
 	pub library_layout_mode: String,
 	pub series_layout_mode: String,
 	pub collection_layout_mode: String,
+	pub app_theme: String,
 }
 
 #[derive(Debug)]

@@ -4,7 +4,7 @@ import { Label } from './Label'
 
 export default {
 	component: Label,
-	title: 'label/Label',
+	title: 'form/Label',
 } as ComponentMeta<typeof Label>
 
 const Template: ComponentStory<typeof Label> = (args) => <Label {...args} />

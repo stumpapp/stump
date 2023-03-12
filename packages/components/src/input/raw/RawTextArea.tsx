@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { cn } from '../utils'
+import { cn } from '../../utils'
 
 // TODO: variant that changes ring color to primary...
 

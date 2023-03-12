@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { Label } from '../text/Label'
-import { RawTextArea, RawTextAreaProps, RawTextAreaRef } from './RawTextArea'
+import { Label } from '../form'
+import { RawTextArea, RawTextAreaProps, RawTextAreaRef } from './raw'
 
 // TODO: variant that changes ring color to primary...
 // TODO: error state

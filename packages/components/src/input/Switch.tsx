@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { Label } from '../text'
-import { RawSwitch, RawSwitchProps, RawSwitchRef } from './RawSwitch'
+import { Label } from '../form'
+import { RawSwitch, RawSwitchProps, RawSwitchRef } from './raw'
 
 // TODO: orientations (horizontal, vertical)
 

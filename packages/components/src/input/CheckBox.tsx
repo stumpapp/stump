@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { type RawCheckBoxRef, RawCheckBox, RawCheckBoxProps } from './RawCheckBox'
+import { type RawCheckBoxRef, RawCheckBox, RawCheckBoxProps } from './raw'
 
 // TODO: Color variants
 

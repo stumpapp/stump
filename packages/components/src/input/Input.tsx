@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 
-import { Label } from '../text'
-import { RawInput } from './RawInput'
+import { Label } from '../form'
+import { RawInput } from './raw'
 
 export type InputProps = {
 	label: string

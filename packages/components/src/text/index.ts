@@ -1,1 +1,2 @@
-export { type LabelProps, Label } from './Label'
+export { type HeadingProps, Heading } from './Heading'
+export { type TextProps, Text } from './Text'

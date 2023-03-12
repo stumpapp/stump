@@ -1,9 +1,11 @@
 /* eslint-disable react/prop-types */
 import React from 'react'
 
-import { cn } from '../utils'
+import { cn } from '../../utils'
 
 export type RawInputProps = React.InputHTMLAttributes<HTMLInputElement>
+
+// TODO: size variants?
 
 export const RawInput = React.forwardRef<HTMLInputElement, RawInputProps>(
 	({ className, ...props }, ref) => {

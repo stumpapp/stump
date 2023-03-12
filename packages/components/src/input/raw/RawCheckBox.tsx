@@ -4,7 +4,7 @@ import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
 import React from 'react'
 
-import { cn } from '../utils'
+import { cn } from '../../utils'
 
 export type RawCheckBoxRef = React.ElementRef<typeof CheckboxPrimitive.Root>
 export type RawCheckBoxProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>

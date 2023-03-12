@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import * as SwitchPrimitives from '@radix-ui/react-switch'
 import { cva, VariantProps } from 'class-variance-authority'
 import React from 'react'

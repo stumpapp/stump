@@ -337,6 +337,7 @@ importers:
       framer-motion: ^7.10.3
       i18next: ^21.10.0
       immer: ^9.0.19
+      lucide-react: ^0.125.0
       nprogress: ^0.2.0
       phosphor-react: ^1.4.1
       pluralize: ^8.0.0
@@ -377,6 +378,7 @@ importers:
       framer-motion: 7.10.3_react-dom@18.2.0
       i18next: 21.10.0
       immer: 9.0.19
+      lucide-react: 0.125.0
       nprogress: 0.2.0
       phosphor-react: 1.4.1
       pluralize: 8.0.0
@@ -7465,7 +7467,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.19.6_@babel+core@7.20.12
       magic-string: 0.26.7
       react-refresh: 0.14.0
-      vite: 3.2.5
+      vite: 3.2.5_@types+node@18.14.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -13457,6 +13459,12 @@ packages:
     dependencies:
       yallist: 4.0.0
     dev: true
+
+  /lucide-react/0.125.0:
+    resolution: {integrity: sha512-tadphtB6TPytEitR9vX75hqu9PQT/uz5RcvXMq976nC190eukAM9+cHMgBxfvfEGDXwIhIT9aFxTUGdAjxw9uQ==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0
+    dev: false
 
   /lucide-react/0.125.0_react@18.2.0:
     resolution: {integrity: sha512-tadphtB6TPytEitR9vX75hqu9PQT/uz5RcvXMq976nC190eukAM9+cHMgBxfvfEGDXwIhIT9aFxTUGdAjxw9uQ==}

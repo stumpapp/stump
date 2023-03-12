@@ -4,7 +4,6 @@ import {
 	Box,
 	Button,
 	HStack,
-	Stack,
 	Text,
 	useColorModeValue,
 	useDisclosure,
@@ -189,8 +188,8 @@ export function SidebarContent() {
 
 	return (
 		<>
-			<HStack px={2} justifyContent="space-between" alignItems="center">
-				<HStack as={Link} to="/" flexShrink={0} justifyContent="start" alignItems="center">
+			<div className="flex items-center justify-between px-2">
+				<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
 					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
 					<Text
 						bgGradient="linear(to-r, brand.600, brand.500)"
@@ -203,12 +202,12 @@ export function SidebarContent() {
 					>
 						Stump
 					</Text>
-				</HStack>
+				</Link>
 
 				<NavigationButtons />
-			</HStack>
+			</div>
 
-			<VStack spacing={2} flexGrow={1} maxH="full" overflow="hidden" p={1}>
+			<div className="flex max-h-full grow flex-col gap-2 overflow-hidden p-1">
 				{links.map((link) =>
 					link.items ? (
 						<NavMenuItem key={link.name} {...link} onClick={(href) => navigate(href)} />
@@ -216,44 +215,26 @@ export function SidebarContent() {
 						<NavItem key={link.name} {...link} active={linkIsActive(link.href)} />
 					),
 				)}
-			</VStack>
+			</div>
 
-			<HStack as="footer" px={2} alignItems="center" justifyContent="space-between">
+			<footer className="flex items-center justify-between px-2">
 				<ApplicationVersion />
 
-				<HStack>
+				<div className="flex items-center gap-2">
 					<Logout />
 					<ThemeToggle />
-				</HStack>
-			</HStack>
+				</div>
+			</footer>
 		</>
 	)
 }
 
 export default function Sidebar() {
 	return (
-		<Box
-			display={{ base: 'none', md: 'initial' }}
-			minH="100%"
-			bg={useColorModeValue('gray.100', 'gray.900')}
-			as="aside"
-		>
-			<Stack
-				display="flex"
-				flexShrink={0}
-				py={4}
-				bg={useColorModeValue('white', 'gray.800')}
-				borderRight="1px"
-				borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-				w={56}
-				h="full"
-				px={2}
-				zIndex={10}
-				spacing={4}
-				className="relative"
-			>
+		<aside className="hidden min-h-full md:inline-block">
+			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 py-4 px-2 dark:border-gray-900 dark:bg-gray-1000">
 				<SidebarContent />
-			</Stack>
-		</Box>
+			</div>
+		</aside>
 	)
 }

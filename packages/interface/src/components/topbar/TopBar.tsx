@@ -1,5 +1,5 @@
-import { Box, Heading, HStack, useColorModeValue } from '@chakra-ui/react'
 import { LayoutEntity, useTopBarStore } from '@stump/client'
+import { Heading } from '@stump/components'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
@@ -32,32 +32,26 @@ export default function TopBar() {
 	}, [location])
 
 	return (
-		<Box
-			as="header"
-			className="sticky top-0 z-10 w-full px-4 py-2 md:py-3"
-			bg={{
-				base: useColorModeValue('white', 'gray.800'),
-				md: useColorModeValue('gray.75', 'gray.900'),
-			}}
-		>
-			<HStack w="full" justify="space-between" align="center" spacing="2">
-				<HStack minH={10}>
+		<header className="dark:bg-gray-975 sticky top-0 z-10 w-full border-b border-gray-50 bg-white px-4 py-2 dark:border-gray-900 md:py-3">
+			<div className="flex w-full items-center justify-between space-x-2">
+				<div className="flex min-h-[2.5rem] flex-col justify-center">
 					<MobileDrawer />
-					{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-					{/* @ts-ignore: TODO: this seems to work, idky it has type error */}
-					<Heading as="h3" fontSize={{ base: 'sm', md: 'md' }} noOfLines={1}>
+					<Heading
+						size="xs"
+						// noOfLines={1}
+					>
 						{title}
 					</Heading>
-				</HStack>
+				</div>
 
 				{showQueryParamOptions && (
-					<HStack>
+					<div className="flex items-center space-x-2">
 						<LayoutModeButtons entity={entity} />
 						<QueryConfig />
 						{/* <OrderByConfig /> */}
-					</HStack>
+					</div>
 				)}
-			</HStack>
-		</Box>
+			</div>
+		</header>
 	)
 }

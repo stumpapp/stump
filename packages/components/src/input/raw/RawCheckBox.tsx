@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { cva, VariantProps } from 'class-variance-authority'

@@ -9,11 +9,12 @@ import {
 } from '@chakra-ui/react'
 import { logout } from '@stump/api'
 import { useUserStore } from '@stump/client'
-import { SignOut } from 'phosphor-react'
+import { Button, IconButton } from '@stump/components'
+import { LogOut } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
-import Button, { ModalCloseButton } from '../../ui/Button'
+import { ModalCloseButton } from '../../ui/Button'
 import ToolTip from '../../ui/ToolTip'
 
 export default function Logout() {
@@ -39,18 +40,9 @@ export default function Logout() {
 	return (
 		<>
 			<ToolTip label="Sign out">
-				<Button
-					variant="ghost"
-					cursor={'pointer'}
-					p={0.5}
-					size="sm"
-					_focus={{
-						boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
-					}}
-					onClick={onOpen}
-				>
-					<SignOut className="-scale-x-[1] transform" />
-				</Button>
+				<IconButton variant="ghost" size="sm" onClick={onOpen}>
+					<LogOut className="h-4 w-4 -scale-x-[1] transform" />
+				</IconButton>
 			</ToolTip>
 
 			<Modal isCentered size="lg" isOpen={isOpen} onClose={onClose}>
@@ -63,10 +55,10 @@ export default function Logout() {
 					</ModalBody>
 
 					<ModalFooter>
-						<Button mr={3} onClick={onClose}>
+						<Button variant="outline" onClick={onClose} className="mr-3">
 							Cancel
 						</Button>
-						<Button colorScheme="red" onClick={handleLogout}>
+						<Button variant="danger" onClick={handleLogout}>
 							Sign out
 						</Button>
 					</ModalFooter>

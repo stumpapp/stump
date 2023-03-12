@@ -8,7 +8,11 @@ body {
 
 #root,
 html {
-	@apply h-full;
+	@apply h-full dark:bg-gray-950;
+}
+
+body {
+	@apply dark:bg-gray-950;
 }
 
 main {

@@ -25,15 +25,24 @@ const iconButtonVariants = cva(BUTTON_BASE_CLASSES, {
 export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
 	VariantProps<typeof iconButtonVariants> & {
 		pressEffect?: boolean
+		primaryFocus?: boolean
 	}
 
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-	({ className, variant, size, rounded, pressEffect = true, ...props }, ref) => {
+	(
+		{ className, variant, size, rounded, pressEffect = true, primaryFocus = true, ...props },
+		ref,
+	) => {
 		return (
 			<button
-				className={cn(iconButtonVariants({ className, rounded, size, variant }), {
-					'active:scale-95': pressEffect,
-				})}
+				className={cn(
+					iconButtonVariants({ className, rounded, size, variant }),
+					{
+						'active:scale-95': pressEffect,
+						'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
+					},
+					className,
+				)}
 				ref={ref}
 				{...props}
 			/>

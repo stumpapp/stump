@@ -61,10 +61,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 	) => {
 		return (
 			<button
-				className={cn(buttonVariants({ className, rounded, size, variant }), {
-					'active:scale-95': pressEffect,
-					'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
-				})}
+				className={cn(
+					buttonVariants({ className, rounded, size, variant }),
+					{
+						'active:scale-95': pressEffect,
+						'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
+					},
+					className,
+				)}
 				ref={ref}
 				{...props}
 			/>

@@ -1,4 +1,3 @@
-import { Box, Flex, useColorModeValue } from '@chakra-ui/react'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
 import React, { useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -45,8 +44,6 @@ export function AppLayout() {
 		onSuccess: setUser,
 	})
 
-	const mainColor = useColorModeValue('gray.75', 'gray.900')
-
 	// @ts-expect-error: FIXME: type error no good >:(
 	if (error?.code === 'ERR_NETWORK' && appProps?.platform !== 'browser') {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
@@ -62,28 +59,15 @@ export function AppLayout() {
 		>
 			<React.Suspense fallback={<Lazy />}>
 				<CommandPalette />
-				<Flex
-					// className={clsx({ 'overflow-hidden': appProps?.platform !== 'browser' })}
-					w="full"
-					h="full"
-					onContextMenu={() => {
-						// TODO: uncomment once I add custom menu on Tauri side
-						// if (appProps?.platform != 'browser') {
-						// 	e.preventDefault();
-						// 	return false;
-						// }
-
-						return true
-					}}
-				>
+				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
-					<Box as="main" w="full" h="full" bg={mainColor}>
+					<main className="dark:bg-gray-975 h-full w-full bg-white">
 						{!hideSidebar && <TopBar />}
 						<React.Suspense fallback={<Lazy />}>
 							<Outlet />
 						</React.Suspense>
-					</Box>
-				</Flex>
+					</main>
+				</div>
 
 				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
 				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}

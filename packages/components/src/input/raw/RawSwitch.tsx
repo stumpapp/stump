@@ -1,4 +1,3 @@
- 
 import * as SwitchPrimitives from '@radix-ui/react-switch'
 import { cva, VariantProps } from 'class-variance-authority'
 import React from 'react'
@@ -31,22 +30,42 @@ export const switchVariants = cva(SWITCH_BASE_CLASSES, {
 })
 
 export type RawSwitchRef = React.ElementRef<typeof SwitchPrimitives.Root>
+// TODO: figure out icon(s)
+// type SwitchIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => JSX.Element
 export type RawSwitchProps = VariantProps<typeof switchVariants> &
 	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
+// & {
+// 	CheckedIcon?: SwitchIcon
+// 	UnCheckedIcon?: SwitchIcon
+// }
 
 export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
-	({ className, variant, size, ...props }, ref) => (
-		<SwitchPrimitives.Root
-			className={cn(switchVariants({ className, size, variant }))}
-			{...props}
-			ref={ref}
-		>
-			<SwitchPrimitives.Thumb
-				className={cn(
-					'pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 data-[state=checked]:translate-x-5',
-				)}
-			/>
-		</SwitchPrimitives.Root>
-	),
+	({ className, variant, size, ...props }, ref) => {
+		// const renderIcon = () => {
+		// 	if (!CheckedIcon && !UnCheckedIcon) return null
+
+		// 	const color = cn({ '': variant === 'default' }, { '': variant === 'primary' })
+
+		// 	return (
+		// 		<>
+		// 			{CheckedIcon && <CheckedIcon className={cn('data-[state=unchecked]:hidden')} />}
+		// 			{UnCheckedIcon && <UnCheckedIcon className={cn('data-[state=checked]:hidden')} />}
+		// 		</>
+		// 	)
+		// }
+		return (
+			<SwitchPrimitives.Root
+				className={cn(switchVariants({ className, size, variant }))}
+				{...props}
+				ref={ref}
+			>
+				<SwitchPrimitives.Thumb
+					className={cn(
+						'pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=unchecked]:translate-x-0 data-[state=checked]:translate-x-5',
+					)}
+				/>
+			</SwitchPrimitives.Root>
+		)
+	},
 )
 RawSwitch.displayName = SwitchPrimitives.Root.displayName

@@ -2,7 +2,7 @@
 // TODO: remove this when I have time, fix the icon types
 import {
 	Box,
-	Button,
+	Button as ChakraButton,
 	HStack,
 	Text,
 	useColorModeValue,
@@ -10,10 +10,18 @@ import {
 	VStack,
 } from '@chakra-ui/react'
 import { refreshUseLibrary, useLibraries } from '@stump/client'
+import { Button, ButtonOrLink, cn, ContextMenu, Heading } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
-import { Books, CaretRight, Gear, House } from 'phosphor-react'
+import {
+	type LucideProps,
+	ChevronRight,
+	ExternalLink,
+	Home,
+	Library as LibraryIcon,
+	Settings,
+} from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
@@ -33,7 +41,8 @@ interface NavMenuItemProps extends Library {
 
 interface NavItemProps {
 	name: string
-	icon: React.ReactNode
+	// type should be a component that takes svg props
+	icon: (props: LucideProps) => JSX.Element
 	onClick?: (href: string) => void
 	href?: string
 	items?: NavMenuItemProps[]
@@ -44,57 +53,54 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 	const { isOpen, onToggle } = useDisclosure()
 
 	const activeBgColor = useColorModeValue('gray.50', 'gray.750')
+	const Icon = rest.icon
 
 	return (
 		<>
-			<HStack
-				as={Button}
-				_focus={{
-					boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
-				}}
-				w="full"
+			<Button
 				variant="ghost"
-				justifyContent="space-between"
-				alignItems="center"
+				className="flex w-full items-center justify-between"
+				size="lg"
 				onClick={onToggle}
-				p={2}
+				pressEffect={false}
 			>
-				<div className="flex space-x-2">
-					{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-					{/* @ts-ignore: TODO: fixme */}
-					<rest.icon weight="fill" />
+				<div className="flex items-center space-x-2">
+					<Icon className="h-5 w-5" />
 					<span>{name}</span>
 				</div>
 				<Box p={1} rounded="full">
-					<CaretRight
-						className={clsx(isOpen ? 'rotate-90' : 'rotate-270', 'transition-all duration-100')}
+					<ChevronRight
+						className={clsx(
+							isOpen ? 'rotate-90' : 'rotate-270',
+							'h-4 w-4 transition-all duration-100',
+						)}
 					/>
 				</Box>
-			</HStack>
+			</Button>
 
 			<AnimatePresence>
 				{isOpen && (
-					<Box w="full" maxH="full">
-						<Box my={2}>
-							<CreateLibraryModal />
-						</Box>
+					<div className="max-h-full w-full">
+						<ButtonOrLink
+							className="group flex w-full items-center justify-between"
+							variant="outline"
+							href="/libraries/create"
+							size="md"
+						>
+							Create Library
+							<ExternalLink className="h-4 w-4 opacity-0 transition-opacity duration-300 group-hover:opacity-80" />
+						</ButtonOrLink>
 
-						<VStack mt={2} spacing={2} maxH="full" overflow="scroll" className="scrollbar-hide">
+						<div className="mt-2 flex max-h-full flex-col gap-2 overflow-y-scroll scrollbar-hide">
 							{items!.map(({ onHover, active, ...item }) => (
-								<Box
+								<div
 									key={item.id}
-									pl={6}
-									w="full"
-									rounded="md"
-									color={{ _dark: 'gray.200', _light: 'gray.600' }}
-									_hover={{
-										_dark: { bg: 'gray.700', color: 'gray.100' },
-										bg: 'gray.75',
-										color: 'gray.900',
-									}}
-									bg={active ? activeBgColor : undefined}
+									className={cn(
+										'w-full rounded-md pl-6 text-gray-600 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100',
+										{ 'bg-gray-50 dark:bg-gray-750': active },
+									)}
 								>
-									<HStack p={1.5} minH="40px">
+									<div className="flex max-h-[40px] items-center p-1.5">
 										<Link
 											to={item.href}
 											className="w-full flex-1 pl-1 text-sm"
@@ -103,11 +109,11 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 											{item.name}
 										</Link>
 										<LibraryOptionsMenu library={item} />
-									</HStack>
-								</Box>
+									</div>
+								</div>
 							))}
-						</VStack>
-					</Box>
+						</div>
+					</div>
 				)}
 			</AnimatePresence>
 		</>
@@ -115,29 +121,20 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 }
 
 function NavItem({ name, href, active, ...rest }: NavItemProps) {
-	const activeBgColor = useColorModeValue('gray.50', 'gray.750')
+	const Icon = rest.icon
 
 	return (
-		<Button
-			as={Link}
-			_focus={{
-				boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
-			}}
-			to={href!}
-			w="full"
+		<ButtonOrLink
+			size="lg"
+			className={clsx('flex w-full justify-start', { 'bg-gray-50 dark:bg-gray-750': active })}
+			href={href}
 			variant="ghost"
-			bg={active ? activeBgColor : undefined}
-			textAlign="left"
-			display="flex"
-			p={2}
 		>
-			<div className="flex w-full justify-start space-x-2">
-				{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-				{/* @ts-ignore: TODO: fixme */}
-				<rest.icon weight="fill" />
+			<div className="flex items-center space-x-2">
+				<Icon className="h-5 w-5" />
 				<span>{name}</span>
 			</div>
-		</Button>
+		</ButtonOrLink>
 	)
 }
 
@@ -163,9 +160,9 @@ export function SidebarContent() {
 
 	const links: Array<NavItemProps> = useMemo(
 		() => [
-			{ href: '/', icon: House as any, name: t('sidebar.buttons.home') },
+			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
 			{
-				icon: Books as any,
+				icon: LibraryIcon,
 				items: libraries?.map((library) => ({
 					...library,
 					active: libraryIsActive(library.id),
@@ -176,7 +173,7 @@ export function SidebarContent() {
 			},
 			{
 				href: '/settings',
-				icon: Gear as any,
+				icon: Settings,
 				name: t('sidebar.buttons.settings'),
 				// onHover:  () => queryClient.prefetchQuery([])
 			},
@@ -188,20 +185,15 @@ export function SidebarContent() {
 
 	return (
 		<>
-			<div className="flex items-center justify-between px-2">
+			<div className="flex items-center justify-between px-4">
 				<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
 					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
-					<Text
-						bgGradient="linear(to-r, brand.600, brand.500)"
-						bgClip="text"
-						fontSize="md"
-						fontWeight="bold"
-						_dark={{
-							bgGradient: 'linear(to-r, brand.600, brand.400)',
-						}}
+					<Heading
+						size="xs"
+						className="bg-gradient-to-r from-brand-600 to-brand-500 bg-clip-text text-transparent"
 					>
 						Stump
-					</Text>
+					</Heading>
 				</Link>
 
 				<NavigationButtons />

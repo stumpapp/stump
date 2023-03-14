@@ -20,3 +20,11 @@ pnpm run storybook
 ## Structure
 
 The components are organized and grouped into folders based on their most abstracted use case / category. For example, all variants of a button are grouped together in the `button` folder. This is to make it easier to find the component you are looking for, as well as to group the Storybook stories together in the same way you would find them in the Storybook UI.
+
+## Resources
+
+- [Lucide](https://lucide.dev/) - The icon library used in this package
+- [Radix UI](https://radix-ui.com/) - The React component library used in this package
+  - [shadcn/ui](https://ui.shadcn.com/docs) - The collection of base radix-ui components
+- [TailwindCSS](https://tailwindcss.com/) - The CSS framework used in this package
+- [Storybook](https://storybook.js.org/) - Used for isolated development and documentation of components

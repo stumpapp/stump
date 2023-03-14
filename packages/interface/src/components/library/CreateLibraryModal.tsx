@@ -10,11 +10,12 @@ import {
 import type { ApiResult } from '@stump/api'
 import type { TagOption } from '@stump/client'
 import { useLibraryMutation, useTags } from '@stump/client'
+import { Button } from '@stump/components'
 import type { LibraryOptions, Tag } from '@stump/types'
 import { FieldValues } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
-import Button, { ModalCloseButton } from '../../ui/Button'
+import { ModalCloseButton } from '../../ui/Button'
 import LibraryModalForm from './form/LibraryModalForm'
 
 interface Props {
@@ -96,22 +97,7 @@ export default function CreateLibraryModal({ disabled, ...props }: Props) {
 			{props.trigger ? (
 				<props.trigger onClick={handleOpen} />
 			) : (
-				<Button
-					variant="outline"
-					key="CreateLibraryModalTrigger"
-					w="full"
-					rounded="md"
-					size="sm"
-					color={{ _dark: 'gray.200', _light: 'gray.600' }}
-					_hover={{
-						_dark: { bg: 'gray.700', color: 'gray.100' },
-						bg: 'gray.50',
-						color: 'gray.900',
-					}}
-					fontSize="sm"
-					fontWeight={'medium'}
-					onClick={handleOpen}
-				>
+				<Button className="w-full" variant="outline" pressEffect={false} onClick={handleOpen}>
 					Create Library
 				</Button>
 			)}

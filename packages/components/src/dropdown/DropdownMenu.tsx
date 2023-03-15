@@ -1,21 +1,23 @@
 import React from 'react'
 
+import { XOR } from '../'
 import { Button } from '../button/Button'
 import { cn } from '../utils'
 import { GenericMenu } from '.'
 import {
-	DropdownPrimitive,
-	DropdownPrimitiveContent,
-	DropdownPrimitiveGroup,
-	DropdownPrimitiveItem,
-	DropdownPrimitiveLabel,
-	DropdownPrimitivePortal,
-	DropdownPrimitiveSeparator,
-	DropdownPrimitiveShortcut,
-	DropdownPrimitiveSub,
-	DropdownPrimitiveSubContent,
-	DropdownPrimitiveSubTrigger,
-	DropdownPrimitiveTrigger,
+	type DropdownContentProps,
+	Dropdown,
+	DropdownContent,
+	DropdownGroup,
+	DropdownItem,
+	DropdownLabel,
+	DropdownPortal,
+	DropdownSeparator,
+	DropdownShortcut,
+	DropdownSub,
+	DropdownSubContent,
+	DropdownSubTrigger,
+	DropdownTrigger,
 } from './primitives'
 
 export type DropdownItem = {
@@ -30,23 +32,32 @@ export type DropdownItemGroup = {
 	items: DropdownItem[]
 }
 
-type LabelOrTrigger =
-	| {
-			label: string
-	  }
-	| {
-			trigger: React.ReactElement<React.ComponentPropsWithRef<'button'>>
-	  }
-type BaseProps = LabelOrTrigger & {
-	contentWrapperClassName?: string
-	subContentWrapperClassName?: string
+type LabelProps = {
+	label: string
 }
+type TriggerProps = {
+	trigger: React.ReactElement<React.ComponentPropsWithRef<'button'>>
+}
+type LabelOrTrigger = XOR<TriggerProps, LabelProps>
+type ContentProps = Pick<DropdownContentProps, 'align'>
+type BaseProps = LabelOrTrigger &
+	ContentProps & {
+		contentWrapperClassName?: string
+		subContentWrapperClassName?: string
+	}
 export type DropdownMenuProps = GenericMenu<DropdownItem, DropdownItemGroup> & BaseProps
 
+/** An all-batteries-included dropdown menu component.
+ *
+ *  NOTE: This should really only be used for
+ *  *very* simplistic dropdown menus. For more complex menus, create more custom dropdowns
+ *  using the primitives exported from this package.
+ */
 export function DropdownMenu({
 	groups,
 	contentWrapperClassName,
 	subContentWrapperClassName,
+	align,
 	...props
 }: DropdownMenuProps) {
 	const renderItems = (items: DropdownItem[]) => {
@@ -55,29 +66,27 @@ export function DropdownMenu({
 
 			if (item.subItems) {
 				return (
-					<DropdownPrimitiveSub key={key}>
-						<DropdownPrimitiveSubTrigger>
+					<DropdownSub key={key}>
+						<DropdownSubTrigger>
 							{item.leftIcon}
 							<span>{item.label}</span>
-							{item.shortCut && (
-								<DropdownPrimitiveShortcut>{item.shortCut}</DropdownPrimitiveShortcut>
-							)}
-						</DropdownPrimitiveSubTrigger>
-						<DropdownPrimitivePortal>
-							<DropdownPrimitiveSubContent className={cn('w-44', subContentWrapperClassName)}>
+							{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
+						</DropdownSubTrigger>
+						<DropdownPortal>
+							<DropdownSubContent className={cn('w-44', subContentWrapperClassName)}>
 								{renderItems(item.subItems)}
-							</DropdownPrimitiveSubContent>
-						</DropdownPrimitivePortal>
-					</DropdownPrimitiveSub>
+							</DropdownSubContent>
+						</DropdownPortal>
+					</DropdownSub>
 				)
 			}
 
 			return (
-				<DropdownPrimitiveItem key={key}>
+				<DropdownItem key={key}>
 					{item.leftIcon}
 					<span>{item.label}</span>
-					{item.shortCut && <DropdownPrimitiveShortcut>{item.shortCut}</DropdownPrimitiveShortcut>}
-				</DropdownPrimitiveItem>
+					{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
+				</DropdownItem>
 			)
 		})
 	}
@@ -93,18 +102,18 @@ export function DropdownMenu({
 	}
 
 	return (
-		<DropdownPrimitive>
-			<DropdownPrimitiveTrigger asChild>{renderTrigger()}</DropdownPrimitiveTrigger>
+		<Dropdown>
+			<DropdownTrigger asChild>{renderTrigger()}</DropdownTrigger>
 
-			<DropdownPrimitiveContent className={cn('w-56', contentWrapperClassName)}>
+			<DropdownContent className={cn('w-56', contentWrapperClassName)} align={align}>
 				{groups.map((group, groupIndex) => (
 					<React.Fragment key={groupIndex}>
-						{group.title && <DropdownPrimitiveLabel>{group.title}</DropdownPrimitiveLabel>}
-						{groupIndex > 0 && <DropdownPrimitiveSeparator />}
-						<DropdownPrimitiveGroup>{renderItems(group.items)}</DropdownPrimitiveGroup>
+						{group.title && <DropdownLabel>{group.title}</DropdownLabel>}
+						{groupIndex > 0 && <DropdownSeparator />}
+						<DropdownGroup>{renderItems(group.items)}</DropdownGroup>
 					</React.Fragment>
 				))}
-			</DropdownPrimitiveContent>
-		</DropdownPrimitive>
+			</DropdownContent>
+		</Dropdown>
 	)
 }

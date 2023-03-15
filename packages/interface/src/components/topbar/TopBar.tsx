@@ -32,7 +32,7 @@ export default function TopBar() {
 	}, [location])
 
 	return (
-		<header className="dark:bg-gray-975 sticky top-0 z-10 w-full border-b border-gray-50 bg-white px-4 py-2 dark:border-gray-900 md:py-3">
+		<header className="sticky top-0 z-10 w-full border-b border-gray-50 bg-white px-4 py-2 dark:border-gray-900 dark:bg-gray-975 md:py-3">
 			<div className="flex w-full items-center justify-between space-x-2">
 				<div className="flex min-h-[2.5rem] flex-col justify-center">
 					<MobileDrawer />

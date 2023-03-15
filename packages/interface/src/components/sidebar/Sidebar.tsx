@@ -1,14 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // TODO: remove this when I have time, fix the icon types
-import {
-	Box,
-	Button as ChakraButton,
-	HStack,
-	Text,
-	useColorModeValue,
-	useDisclosure,
-	VStack,
-} from '@chakra-ui/react'
+import { Box, useDisclosure } from '@chakra-ui/react'
 import { refreshUseLibrary, useLibraries } from '@stump/client'
 import { Button, ButtonOrLink, cn, ContextMenu, Heading } from '@stump/components'
 import type { Library } from '@stump/types'
@@ -27,7 +19,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useLocale } from '../../hooks/useLocale'
 import ApplicationVersion from '../ApplicationVersion'
-import CreateLibraryModal from '../library/CreateLibraryModal'
 import LibraryOptionsMenu from '../library/LibraryOptionsMenu'
 import NavigationButtons from '../topbar/NavigationButtons'
 import Logout from './Logout'
@@ -52,7 +43,6 @@ interface NavItemProps {
 function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 	const { isOpen, onToggle } = useDisclosure()
 
-	const activeBgColor = useColorModeValue('gray.50', 'gray.750')
 	const Icon = rest.icon
 
 	return (
@@ -82,13 +72,12 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 				{isOpen && (
 					<div className="max-h-full w-full">
 						<ButtonOrLink
-							className="group flex w-full items-center justify-between"
+							className="w-full text-center hover:bg-gray-75"
 							variant="outline"
 							href="/libraries/create"
 							size="md"
 						>
 							Create Library
-							<ExternalLink className="h-4 w-4 opacity-0 transition-opacity duration-300 group-hover:opacity-80" />
 						</ButtonOrLink>
 
 						<div className="mt-2 flex max-h-full flex-col gap-2 overflow-y-scroll scrollbar-hide">
@@ -96,11 +85,11 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 								<div
 									key={item.id}
 									className={cn(
-										'w-full rounded-md pl-6 text-gray-600 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100',
+										'w-full rounded-md text-gray-600 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100',
 										{ 'bg-gray-50 dark:bg-gray-750': active },
 									)}
 								>
-									<div className="flex max-h-[40px] items-center p-1.5">
+									<div className="flex max-h-[40px] items-center py-2 px-4">
 										<Link
 											to={item.href}
 											className="w-full flex-1 pl-1 text-sm"
@@ -126,7 +115,7 @@ function NavItem({ name, href, active, ...rest }: NavItemProps) {
 	return (
 		<ButtonOrLink
 			size="lg"
-			className={clsx('flex w-full justify-start', { 'bg-gray-50 dark:bg-gray-750': active })}
+			className={clsx('flex w-full justify-start', { 'bg-gray-50 dark:bg-gray-850': active })}
 			href={href}
 			variant="ghost"
 		>

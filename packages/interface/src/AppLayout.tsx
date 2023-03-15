@@ -61,7 +61,7 @@ export function AppLayout() {
 				<CommandPalette />
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
-					<main className="dark:bg-gray-975 h-full w-full bg-white">
+					<main className="h-full w-full bg-white dark:bg-gray-975">
 						{!hideSidebar && <TopBar />}
 						<React.Suspense fallback={<Lazy />}>
 							<Outlet />

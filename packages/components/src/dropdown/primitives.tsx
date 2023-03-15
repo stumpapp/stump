@@ -6,14 +6,16 @@ import React from 'react'
 
 import { cn } from '../utils'
 
-const DropdownPrimitive = DropdownMenuPrimitive.Root
-const DropdownPrimitiveTrigger = DropdownMenuPrimitive.Trigger
-const DropdownPrimitiveGroup = DropdownMenuPrimitive.Group
-const DropdownPrimitivePortal = DropdownMenuPrimitive.Portal
-const DropdownPrimitiveSub = DropdownMenuPrimitive.Sub
-const DropdownPrimitiveRadioGroup = DropdownMenuPrimitive.RadioGroup
+const Dropdown = DropdownMenuPrimitive.Root as typeof DropdownMenuPrimitive.Root &
+	DropdownSubComponents
 
-const DropdownPrimitiveSubTrigger = React.forwardRef<
+const DropdownTrigger = DropdownMenuPrimitive.Trigger
+const DropdownGroup = DropdownMenuPrimitive.Group
+const DropdownPortal = DropdownMenuPrimitive.Portal
+const DropdownSub = DropdownMenuPrimitive.Sub
+const DropdownRadioGroup = DropdownMenuPrimitive.RadioGroup
+
+const DropdownSubTrigger = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
 	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
 		inset?: boolean
@@ -32,9 +34,9 @@ const DropdownPrimitiveSubTrigger = React.forwardRef<
 		<ChevronRight className="ml-auto h-4 w-4" />
 	</DropdownMenuPrimitive.SubTrigger>
 ))
-DropdownPrimitiveSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName
+DropdownSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayName
 
-const DropdownPrimitiveSubContent = React.forwardRef<
+const DropdownSubContent = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
 	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
 >(({ className, ...props }, ref) => (
@@ -47,11 +49,14 @@ const DropdownPrimitiveSubContent = React.forwardRef<
 		{...props}
 	/>
 ))
-DropdownPrimitiveSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName
+DropdownSubContent.displayName = DropdownMenuPrimitive.SubContent.displayName
 
-const DropdownPrimitiveContent = React.forwardRef<
+export type DropdownContentProps = React.ComponentPropsWithoutRef<
+	typeof DropdownMenuPrimitive.Content
+>
+const DropdownContent = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
+	DropdownContentProps
 >(({ className, sideOffset = 4, ...props }, ref) => (
 	<DropdownMenuPrimitive.Portal>
 		<DropdownMenuPrimitive.Content
@@ -65,9 +70,9 @@ const DropdownPrimitiveContent = React.forwardRef<
 		/>
 	</DropdownMenuPrimitive.Portal>
 ))
-DropdownPrimitiveContent.displayName = DropdownMenuPrimitive.Content.displayName
+DropdownContent.displayName = DropdownMenuPrimitive.Content.displayName
 
-const DropdownPrimitiveItem = React.forwardRef<
+const DropdownItem = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.Item>,
 	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
 		inset?: boolean
@@ -83,9 +88,9 @@ const DropdownPrimitiveItem = React.forwardRef<
 		{...props}
 	/>
 ))
-DropdownPrimitiveItem.displayName = DropdownMenuPrimitive.Item.displayName
+DropdownItem.displayName = DropdownMenuPrimitive.Item.displayName
 
-const DropdownPrimitiveCheckboxItem = React.forwardRef<
+const DropdownCheckboxItem = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
 	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
 >(({ className, children, checked, ...props }, ref) => (
@@ -106,9 +111,9 @@ const DropdownPrimitiveCheckboxItem = React.forwardRef<
 		{children}
 	</DropdownMenuPrimitive.CheckboxItem>
 ))
-DropdownPrimitiveCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName
+DropdownCheckboxItem.displayName = DropdownMenuPrimitive.CheckboxItem.displayName
 
-const DropdownPrimitiveRadioItem = React.forwardRef<
+const DropdownRadioItem = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
 	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
 >(({ className, children, ...props }, ref) => (
@@ -128,9 +133,9 @@ const DropdownPrimitiveRadioItem = React.forwardRef<
 		{children}
 	</DropdownMenuPrimitive.RadioItem>
 ))
-DropdownPrimitiveRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
+DropdownRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
 
-const DropdownPrimitiveLabel = React.forwardRef<
+const DropdownLabel = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.Label>,
 	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
 		inset?: boolean
@@ -146,9 +151,9 @@ const DropdownPrimitiveLabel = React.forwardRef<
 		{...props}
 	/>
 ))
-DropdownPrimitiveLabel.displayName = DropdownMenuPrimitive.Label.displayName
+DropdownLabel.displayName = DropdownMenuPrimitive.Label.displayName
 
-const DropdownPrimitiveSeparator = React.forwardRef<
+const DropdownSeparator = React.forwardRef<
 	React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
 	React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
 >(({ className, ...props }, ref) => (
@@ -158,32 +163,61 @@ const DropdownPrimitiveSeparator = React.forwardRef<
 		{...props}
 	/>
 ))
-DropdownPrimitiveSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
+DropdownSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
 
-const DropdownPrimitiveShortcut = ({
-	className,
-	...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
+const DropdownShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
 	return (
 		<span className={cn('ml-auto text-xs tracking-widest text-gray-500', className)} {...props} />
 	)
 }
-DropdownPrimitiveShortcut.displayName = 'DropdownMenuShortcut'
+DropdownShortcut.displayName = 'DropdownMenuShortcut'
+
+type DropdownSubComponents = {
+	Content: typeof DropdownContent
+	Group: typeof DropdownGroup
+	Item: typeof DropdownItem
+	Label: typeof DropdownLabel
+	Portal: typeof DropdownPortal
+	CheckboxItem: typeof DropdownCheckboxItem
+	RadioGroup: typeof DropdownRadioGroup
+	RadioItem: typeof DropdownRadioItem
+	Separator: typeof DropdownSeparator
+	Shortcut: typeof DropdownShortcut
+	Sub: typeof DropdownSub
+	SubContent: typeof DropdownSubContent
+	SubTrigger: typeof DropdownSubTrigger
+	Trigger: typeof DropdownTrigger
+}
+
+Dropdown.Content = DropdownContent
+Dropdown.Group = DropdownGroup
+Dropdown.Item = DropdownItem
+Dropdown.Label = DropdownLabel
+Dropdown.Portal = DropdownPortal
+Dropdown.CheckboxItem = DropdownCheckboxItem
+Dropdown.RadioGroup = DropdownRadioGroup
+Dropdown.RadioItem = DropdownRadioItem
+Dropdown.Separator = DropdownSeparator
+Dropdown.Shortcut = DropdownShortcut
+Dropdown.Sub = DropdownSub
+Dropdown.SubContent = DropdownSubContent
+Dropdown.SubTrigger = DropdownSubTrigger
+Dropdown.Trigger = DropdownTrigger
 
 export {
-	DropdownPrimitive,
-	DropdownPrimitiveCheckboxItem,
-	DropdownPrimitiveContent,
-	DropdownPrimitiveGroup,
-	DropdownPrimitiveItem,
-	DropdownPrimitiveLabel,
-	DropdownPrimitivePortal,
-	DropdownPrimitiveRadioGroup,
-	DropdownPrimitiveRadioItem,
-	DropdownPrimitiveSeparator,
-	DropdownPrimitiveShortcut,
-	DropdownPrimitiveSub,
-	DropdownPrimitiveSubContent,
-	DropdownPrimitiveSubTrigger,
-	DropdownPrimitiveTrigger,
+	Dropdown,
+	DropdownCheckboxItem,
+	DropdownContent,
+	DropdownGroup,
+	DropdownItem,
+	DropdownLabel,
+	DropdownPortal,
+	DropdownRadioGroup,
+	DropdownRadioItem,
+	DropdownSeparator,
+	DropdownShortcut,
+	DropdownSub,
+	DropdownSubContent,
+	DropdownSubTrigger,
+	DropdownTrigger,
 }

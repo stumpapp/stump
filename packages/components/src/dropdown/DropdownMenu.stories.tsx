@@ -5,9 +5,7 @@ import { ComponentProps } from 'react'
 import { DropdownMenu } from './DropdownMenu'
 
 export default {
-	argTypes: {},
 	component: DropdownMenu,
-
 	title: 'dropdown/DropdownMenu',
 } as ComponentMeta<typeof DropdownMenu>
 
@@ -61,18 +59,30 @@ const defaultArgs: ComponentProps<typeof DropdownMenu> = {
 			],
 		},
 	],
-	label: 'Dropdown',
+	label: 'DropdownMenu',
 }
-const Story = (args: StoryProps) => (
+const Story = ({ align, ...args }: StoryProps) => (
 	<DropdownMenu
-		// @ts-expect-error: its fine
 		label={args.label || defaultArgs.label}
 		groups={args.groups || defaultArgs.groups}
+		align={align}
 	/>
 )
 const Template: ComponentStory<typeof Story> = (args) => <Story {...args} />
 
 export const Default = Template.bind({})
 Default.args = {
+	label: 'Dropdown',
+}
+
+export const StartAligned = Template.bind({})
+StartAligned.args = {
+	align: 'start',
+	label: 'Dropdown',
+}
+
+export const CenterAligned = Template.bind({})
+CenterAligned.args = {
+	align: 'center',
 	label: 'Dropdown',
 }

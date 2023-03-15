@@ -40,4 +40,4 @@ const Text = React.forwardRef<React.ElementRef<'p'>, TextProps>(
 )
 Text.displayName = 'Text'
 
-export { Text }
+export { Text, textVariants }

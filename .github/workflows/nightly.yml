@@ -51,6 +51,7 @@ jobs:
           load: ${{ env.LOAD }}
           push: ${{ env.PUSH }}
           platforms: ${{ env.PLATFORMS }}
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
   # TODO: build executables for apple(x86_64,darwin?),linux(x86_64,arm64?), and windows(x86_64)
   # These should be uploaded to the nightly release as artifacts. Old artifacts should be deleted

@@ -20,6 +20,9 @@ inputs:
   platforms:
     description: 'List of platforms to build'
     required: true
+  discord-webhook:
+    description: 'Discord webhook to send notifications to'
+    required: true
 
 runs:
   using: composite
@@ -99,7 +102,7 @@ runs:
     - name: Discord notification
       if: ${{ success() }}
       env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
       uses: 'Ilshidur/action-discord@0.3.2'
       with:
         args: 'Successfully pushed the following image tags to registry: ${{ env.TAGS }}'

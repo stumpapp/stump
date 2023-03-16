@@ -46,6 +46,7 @@ const DropdownSubContent = React.forwardRef<
 			'z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white p-1 text-gray-800 shadow-md animate-in slide-in-from-left-1 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-150',
 			className,
 		)}
+		sideOffset={6}
 		{...props}
 	/>
 ))

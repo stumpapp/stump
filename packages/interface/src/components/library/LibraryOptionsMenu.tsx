@@ -1,24 +1,26 @@
 import { queryClient, useScanLibrary, useUserStore } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
-import type { Library } from '@stump/types'
-import { Edit, FileScan, FolderSearch2, MoreVertical, Trash } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-
-// import DeleteLibraryModal from './DeleteLibraryModal'
-// import EditLibraryModal from './EditLibraryModal'
+import type { Library, LibraryScanMode } from '@stump/types'
+import {
+	Edit,
+	FileScan,
+	FolderSearch2,
+	MoreVertical,
+	ScanFace,
+	ScanLine,
+	Trash,
+} from 'lucide-react'
 
 interface Props {
 	library: Library
 }
 
 export default function LibraryOptionsMenu({ library }: Props) {
-	const navigate = useNavigate()
-
 	const user = useUserStore((store) => store.user)
 
 	const { scanAsync } = useScanLibrary()
 
-	function handleScan() {
+	function handleScan(mode: LibraryScanMode) {
 		// extra protection, should not be possible to reach this.
 		if (user?.role !== 'SERVER_OWNER') {
 			throw new Error('You do not have permission to scan libraries.')
@@ -27,10 +29,12 @@ export default function LibraryOptionsMenu({ library }: Props) {
 		// The UI will receive updates from SSE in fractions of ms lol and it can get bogged down.
 		// So, add a slight delay so the close animation of the menu can finish cleanly.
 		setTimeout(async () => {
-			await scanAsync(library.id)
+			await scanAsync({ id: library.id, mode })
 			await queryClient.invalidateQueries(['getJobReports'])
 		}, 50)
 	}
+
+	const iconStyle = 'mr-2 h-4 w-4'
 
 	return (
 		<DropdownMenu
@@ -44,31 +48,38 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					items: [
 						{
 							label: 'Scan Library',
-							leftIcon: <FileScan className="mr-2 h-4 w-4" />,
+							leftIcon: <FileScan className={iconStyle} />,
 							subItems: [
 								{
 									label: 'Batched Scan',
+									leftIcon: <ScanFace className={iconStyle} />,
+									onClick: () => handleScan('BATCHED'),
 								},
 								{
 									label: 'Synchronous Scan',
+									leftIcon: <ScanLine className={iconStyle} />,
+									onClick: () => handleScan('SYNC'),
 								},
 							],
 						},
 						{
+							href: `/libraries/${library.id}/explorer`,
 							label: 'File Explorer',
-							leftIcon: <FolderSearch2 className="mr-2 h-4 w-4" />,
+							leftIcon: <FolderSearch2 className={iconStyle} />,
 						},
 					],
 				},
 				{
 					items: [
 						{
+							href: `/libraries/${library.id}/edit`,
 							label: 'Edit Library',
-							leftIcon: <Edit className="mr-2 h-4 w-4" />,
+							leftIcon: <Edit className={iconStyle} />,
 						},
 						{
 							label: 'Delete Library',
-							leftIcon: <Trash className="mr-2 h-4 w-4" />,
+							leftIcon: <Trash className={iconStyle} />,
+							onClick: () => alert('TODO'),
 						},
 					],
 				},

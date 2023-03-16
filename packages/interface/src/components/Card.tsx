@@ -1,21 +1,24 @@
-import { Box, BoxProps } from '@chakra-ui/react'
+import { cn } from '@stump/components'
 import { cva, VariantProps } from 'class-variance-authority'
-import clsx from 'clsx'
 import { ComponentProps } from 'react'
 import { Link } from 'react-router-dom'
 
-// FIXME: what's not to fix here lol just not a great variant pattern...
-export const cardVariants = cva('relative shadow rounded-md', {
-	defaultVariants: {},
-	variants: {
-		variant: {
-			default: '',
-			fixedImage: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
-			image:
-				'min-w-[10rem] min-h-[15rem] sm:min-w-[10.666rem] sm:min-h-[16rem] md:min-w-[12rem] md:min-h-[18.666rem]',
+// FIXME: rewrite this terrible component lol
+
+export const cardVariants = cva(
+	'relative flex flex-1 flex-col space-y-1 overflow-hidden shadow rounded-md bg-gray-50/50 border-[1.5px] border-transparent dark:bg-gray-950',
+	{
+		defaultVariants: {},
+		variants: {
+			variant: {
+				default: '',
+				fixedImage: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
+				image:
+					'min-w-[10rem] min-h-[15rem] sm:min-w-[10.666rem] sm:min-h-[16rem] md:min-w-[12rem] md:min-h-[18.666rem]',
+			},
 		},
 	},
-})
+)
 type CardBaseProps = ComponentProps<'div'> & {
 	to?: string
 	overlay?: React.ReactNode
@@ -24,30 +27,29 @@ type CardBaseProps = ComponentProps<'div'> & {
 export type CardProps = VariantProps<typeof cardVariants> & CardBaseProps
 
 // TODO: fix tab focus
-export default function Card({ to, overlay, children, variant, className, ...rest }: CardProps) {
+export default function EntityCard({
+	to,
+	overlay,
+	children,
+	variant,
+	className,
+	...rest
+}: CardProps) {
 	const card = (
-		<Box
+		<div
 			{...rest}
-			bg="gray.50"
-			border="1.5px solid"
-			borderColor="transparent"
-			_hover={
-				to
-					? {
-							borderColor: 'brand.500',
-					  }
-					: undefined
-			}
-			_dark={{ bg: 'gray.750' }}
-			className={cardVariants({
-				class: clsx('relative flex flex-1 flex-col space-y-1 overflow-hidden', className),
-				variant,
-			})}
+			className={cn(
+				{ 'hover:border-brand': !!to },
+				cardVariants({
+					variant,
+				}),
+				className,
+			)}
 		>
 			{overlay}
 
 			{children}
-		</Box>
+		</div>
 	)
 
 	if (to) {
@@ -57,27 +59,27 @@ export default function Card({ to, overlay, children, variant, className, ...res
 	return card
 }
 
-interface CardBodyProps extends Omit<BoxProps, 'children'> {
+interface CardBodyProps extends Omit<ComponentProps<'div'>, 'children'> {
 	children: React.ReactNode
 }
 
 export function CardBody({ children, className, ...props }: CardBodyProps) {
 	return (
-		<Box px={1.5} {...props} className={clsx('flex-1', className)}>
+		<div {...props} className={cn('flex-1 px-1.5', className)}>
 			{children}
-		</Box>
+		</div>
 	)
 }
 
-interface CardFooterProps extends Omit<BoxProps, 'children'> {
+interface CardFooterProps extends Omit<ComponentProps<'div'>, 'children'> {
 	children: React.ReactNode
 }
 
-export function CardFooter({ children, ...props }: CardFooterProps) {
+export function CardFooter({ children, className, ...props }: CardFooterProps) {
 	return (
-		<Box p={1.5} {...props}>
+		<div {...props} className={cn('px-1.5', className)}>
 			{children}
-		</Box>
+		</div>
 	)
 }
 
@@ -88,22 +90,3 @@ export function CardGrid({ children }: { children: React.ReactNode }) {
 		</div>
 	)
 }
-
-// function CardCornerDecoration() {
-// 	return (
-// 		<Box
-// 			className="absolute top-0 right-0"
-// 			bg="brand.500"
-// 			shadow="lg"
-// 			color="white"
-// 			fontSize="xs"
-// 			fontWeight="bold"
-// 			rounded="md"
-// 			py={0.5}
-// 			px={1}
-// 			m={1}
-// 		>
-// 			{children}
-// 		</Box>
-// 	);
-// }

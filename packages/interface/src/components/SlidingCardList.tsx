@@ -1,10 +1,9 @@
-import { ButtonGroup, Heading, Text } from '@chakra-ui/react'
+import { Heading, IconButton, Text } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import clsx from 'clsx'
 import { CaretLeft, CaretRight } from 'phosphor-react'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { IconButton } from '../ui/Button'
 import ToolTip from '../ui/ToolTip'
 
 interface Props {
@@ -88,15 +87,6 @@ export default function SlidingCardList({
 	const virtualItems = columnVirtualizer.getVirtualItems()
 	const isEmpty = virtualItems.length === 0
 
-	// console.debug('SlidingCardList', title, {
-	// 	canSkipBackward,
-	// 	canSkipForward,
-	// 	cards,
-	// 	isEmpty,
-	// 	virtualItems,
-	// 	visibleBounds: visibleRef.current,
-	// })
-
 	const renderVirtualItems = () => {
 		if (isEmpty) {
 			return <Text>{emptyMessage || 'No items available'}</Text>
@@ -114,12 +104,15 @@ export default function SlidingCardList({
 	return (
 		<div className="flex w-full flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
-				{title && <Heading fontSize="lg">{title}</Heading>}
+				{title && <Heading size="md">{title}</Heading>}
 				<div className={clsx('self-end', { hidden: isEmpty })}>
-					<ButtonGroup isAttached={false}>
+					{/* TODO: <ButtonGroup isAttached={false}> */}
+					<div className="flex gap-2">
 						<ToolTip label="Seek backwards" isDisabled={!canSkipBackward}>
 							<IconButton
-								isDisabled={!canSkipBackward}
+								variant="ghost"
+								size="sm"
+								disabled={!canSkipBackward}
 								onClick={() => handleSkipBackward()}
 								onDoubleClick={() => handleSkipBackward(20)}
 							>
@@ -128,14 +121,16 @@ export default function SlidingCardList({
 						</ToolTip>
 						<ToolTip label="Seek Ahead" isDisabled={!canSkipForward}>
 							<IconButton
-								isDisabled={!canSkipForward}
+								variant="ghost"
+								size="sm"
+								disabled={!canSkipForward}
 								onClick={() => handleSkipAhead()}
 								onDoubleClick={() => handleSkipAhead(20)}
 							>
 								<CaretRight />
 							</IconButton>
 						</ToolTip>
-					</ButtonGroup>
+					</div>
 				</div>
 			</div>
 			<div

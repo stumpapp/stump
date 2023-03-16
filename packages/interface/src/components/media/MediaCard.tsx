@@ -1,11 +1,14 @@
-import { Progress, Text, useColorModeValue } from '@chakra-ui/react'
+import { Progress } from '@chakra-ui/react'
 import { getMediaThumbnail } from '@stump/api'
 import { prefetchMedia } from '@stump/client'
+import { Text } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import pluralizeStat from '../../utils/pluralize'
 import { prefetchMediaPage } from '../../utils/prefetch'
 import Card, { CardBody, CardFooter } from '../Card'
+
+// FIXME: rewrite this terrible(!!!!) component lol
 
 export type MediaCardProps = {
 	media: Media
@@ -37,8 +40,7 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 			title={readingLink ? `Continue reading ${media.name}` : media.name}
 		>
 			<CardBody
-				p={0}
-				className="relative aspect-[2/3] bg-cover bg-center"
+				className="relative aspect-[2/3] bg-cover bg-center p-0"
 				style={{
 					// TODO: figure out how to do fallback ONLY on error... url('/assets/fallbacks/image-file.svg')
 					backgroundImage: `url('${getMediaThumbnail(media.id)}')`,
@@ -57,13 +59,13 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 					</div>
 				)}
 			</CardBody>
-			<CardFooter p={1} className="flex flex-col gap-1">
+			<CardFooter className="flex flex-col gap-1 py-1">
 				{/* TODO: figure out how to make this not look like shit with 2 lines */}
-				<Text fontSize="sm" as="h3" fontWeight="semibold" className="[hyphens:auto]" noOfLines={1}>
+				<Text size="sm" className="font-md" noOfLines={1}>
 					{media.name}
 				</Text>
 
-				<Text fontSize="xs" color={useColorModeValue('gray.700', 'gray.300')} noOfLines={1}>
+				<Text size="xs" className="text-gray-700 dark:text-gray-300">
 					{pluralizeStat('pages', media.pages)}
 				</Text>
 			</CardFooter>

@@ -46,9 +46,10 @@ type StatisticCountUpNumberProps = Omit<StatisticNumberProps, 'children'> & {
 	duration?: number
 	decimal?: boolean
 	enabled?: boolean
+	unit?: string
 }
 const StatisticCountUpNumber = forwardRef<HTMLElement, StatisticCountUpNumberProps>(
-	({ value, duration = 1.5, decimal = false, enabled = true, ...props }, ref) => {
+	({ value, duration = 1.5, decimal = false, enabled = true, unit, ...props }, ref) => {
 		const { value: currentValue } = useCountUp({
 			duration,
 			// FIXME: not safe!?
@@ -65,7 +66,7 @@ const StatisticCountUpNumber = forwardRef<HTMLElement, StatisticCountUpNumberPro
 
 		return (
 			<StatisticNumber ref={ref} {...props}>
-				{currentValue}
+				{currentValue} {unit}
 			</StatisticNumber>
 		)
 	},

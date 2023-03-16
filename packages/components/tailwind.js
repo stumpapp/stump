@@ -145,6 +145,7 @@ module.exports = function (relativeFromRoot) {
 			require('tailwind-scrollbar-hide'),
 			require('@tailwindcss/typography'),
 			require('tailwindcss-animate'),
+			require('@tailwindcss/line-clamp'),
 		],
 		theme: {
 			extend: {

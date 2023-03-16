@@ -1,4 +1,3 @@
- 
 // TODO: remove this when I have time, fix the icon types
 import { Box, useDisclosure } from '@chakra-ui/react'
 import { refreshUseLibrary, useLibraries } from '@stump/client'

@@ -1,6 +1,7 @@
-import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react'
+// import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react'
 import { getSeriesThumbnail } from '@stump/api'
 import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client'
+import { Heading } from '@stump/components'
 import type { Series } from '@stump/types'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
@@ -29,23 +30,23 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 	return (
 		<div className="flex items-start space-x-4 p-4">
 			<div>
-				<Box shadow="base" bg="gray.50" _dark={{ bg: 'gray.750' }} rounded="md" maxW="16rem">
-					<Box px={1.5}>
+				<div className="max-w-[16rem] rounded-md bg-gray-50 shadow dark:bg-gray-950">
+					<div className="px-1.5">
 						<img
 							className="min-h-96 w-full object-cover [aspect-ratio:663/1024]"
 							src={getSeriesThumbnail(series.id)}
 						/>
-					</Box>
-				</Box>
+					</div>
+				</div>
 			</div>
 			<div className="flex h-full flex-1 flex-col space-y-4">
-				<Heading size="sm" noOfLines={1}>
-					{series.name}
-				</Heading>
-				<ButtonGroup>
+				{/* noOfLines={1} */}
+				<Heading size="sm">{series.name}</Heading>
+				{/* <ButtonGroup> */}
+				<div className="flex items-center gap-2">
 					<UpNextInSeriesButton seriesId={series.id} />
 					<DownloadSeriesButton seriesId={series.id} />
-				</ButtonGroup>
+				</div>
 
 				<ReadMore text={series.description} />
 
@@ -106,7 +107,7 @@ export default function SeriesOverview() {
 	return (
 		<div className="h-full w-full">
 			<Helmet>
-				<title>Stump | {series.name}</title>
+				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
 			<OverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
@@ -122,7 +123,8 @@ export default function SeriesOverview() {
 				)}
 
 				{/* FIXME: spacing when empty */}
-				<Spacer />
+				{/* <Spacer /> */}
+				<div className="flex-1" />
 
 				{hasStuff ? (
 					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />

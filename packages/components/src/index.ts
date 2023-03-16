@@ -1,3 +1,6 @@
+export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
+export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U
+
 export {
 	type ButtonOrLinkProps,
 	type ButtonProps,
@@ -18,8 +21,12 @@ export { type CheckBoxProps, type TextAreaProps, CheckBox, TextArea } from './in
 export { Link } from './link'
 export { PopOver, ToolTip } from './overlay'
 export { type ProgressBarProps, ProgressBar } from './progress'
-export { type HeadingProps, type TextProps, Heading, Text } from './text'
-export { cn } from './utils'
-
-export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
-export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U
+export {
+	type HeadingProps,
+	type StatisticProps,
+	type TextProps,
+	Heading,
+	Statistic,
+	Text,
+} from './text'
+export { cn, cx } from './utils'

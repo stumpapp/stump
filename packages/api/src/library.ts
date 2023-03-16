@@ -37,8 +37,11 @@ export function getLibrarySeries(
 // FIXME: type this lol
 // TODO: narrow mode type to exclude NONE
 // TODO: fix function signature to work with react-query
-export function scanLibary(id: string, mode?: LibraryScanMode): Promise<ApiResult<unknown>> {
-	return API.get(`/libraries/${id}/scan?scan_mode=${mode ?? 'BATCHED'}`)
+export function scanLibary(params: {
+	id: string
+	mode?: LibraryScanMode
+}): Promise<ApiResult<unknown>> {
+	return API.get(`/libraries/${params.id}/scan?scan_mode=${params.mode ?? 'BATCHED'}`)
 }
 
 // TODO: type this

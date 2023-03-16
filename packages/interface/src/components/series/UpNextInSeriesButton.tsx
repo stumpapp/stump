@@ -1,12 +1,10 @@
 import { useUpNextInSeries } from '@stump/client'
-import { Link } from 'react-router-dom'
-
-import Button, { ButtonProps } from '../../ui/Button'
+import { ButtonOrLink } from '@stump/components'
 
 type Props = {
 	seriesId: string
 	title?: string
-} & ButtonProps
+}
 
 export default function UpNextInSeriesButton({ seriesId, title, ...props }: Props) {
 	const { media, isLoading } = useUpNextInSeries(seriesId)
@@ -17,16 +15,14 @@ export default function UpNextInSeriesButton({ seriesId, title, ...props }: Prop
 	}
 
 	return (
-		<Button
-			isDisabled={!isLoading && !media}
-			as={Link}
-			to={`/books/${media?.id}/pages/${media?.current_page || 1}`}
-			disabled={!media}
+		<ButtonOrLink
+			variant="primary"
+			disabled={!isLoading && !media}
+			href={`/books/${media?.id}/pages/${media?.current_page || 1}`}
 			title={`Continue reading ${media?.name || 'from where you left off'}`}
-			colorScheme="brand"
 			{...props}
 		>
 			{title || 'Continue Reading'}
-		</Button>
+		</ButtonOrLink>
 	)
 }

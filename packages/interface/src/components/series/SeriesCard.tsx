@@ -1,6 +1,7 @@
-import { Progress, Text, useColorModeValue } from '@chakra-ui/react'
+import { Progress } from '@chakra-ui/react'
 import { getSeriesThumbnail } from '@stump/api'
 import { prefetchSeries } from '@stump/client'
+import { Text } from '@stump/components'
 import { Series } from '@stump/types'
 
 import pluralizeStat from '../../utils/pluralize'
@@ -23,7 +24,7 @@ export default function SeriesCard({ series, fixed }: SeriesCardProps) {
 			title={series.name}
 		>
 			<CardBody
-				p={0}
+				// p={0}
 				className="relative aspect-[2/3] bg-cover bg-center"
 				style={{
 					backgroundImage: `url('${getSeriesThumbnail(series.id)}')`,
@@ -41,13 +42,13 @@ export default function SeriesCard({ series, fixed }: SeriesCardProps) {
 					</div>
 				)}
 			</CardBody>
-			<CardFooter p={1} className="flex flex-col gap-1">
+			<CardFooter className="flex flex-col gap-1 p-1">
 				{/* TODO: figure out how to make this not look like shit with 2 lines */}
-				<Text fontSize="sm" as="h3" fontWeight="semibold" className="[hyphens:auto]" noOfLines={1}>
+				<Text size="sm" className="font-md" noOfLines={1}>
 					{series.name}
 				</Text>
 
-				<Text fontSize="xs" color={useColorModeValue('gray.700', 'gray.300')} noOfLines={1}>
+				<Text size="xs" className="text-gray-700 dark:text-gray-300">
 					{pluralizeStat('book', Number(bookCount))}
 				</Text>
 			</CardFooter>

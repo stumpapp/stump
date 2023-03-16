@@ -1,4 +1,4 @@
-import { Heading } from '@chakra-ui/react'
+import { Heading } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import { CardGrid } from '../Card'

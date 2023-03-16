@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { XOR } from '../'
+import { Link, XOR } from '../'
 import { Button } from '../button/Button'
 import { cn } from '../utils'
 import { GenericMenu } from '.'
@@ -25,6 +25,7 @@ export type DropdownItem = {
 	leftIcon?: React.ReactNode
 	shortCut?: React.ReactNode
 	onClick?: () => void
+	href?: string
 	subItems?: DropdownItem[]
 }
 export type DropdownItemGroup = {
@@ -81,12 +82,19 @@ export function DropdownMenu({
 				)
 			}
 
+			const Container = item.href ? Link : React.Fragment
+			const containerProps = item.href
+				? { className: 'hover:no-underline', href: item.href, underline: false }
+				: {}
+
 			return (
-				<DropdownItem key={key}>
-					{item.leftIcon}
-					<span>{item.label}</span>
-					{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
-				</DropdownItem>
+				<Container {...containerProps} key={key}>
+					<DropdownItem onClick={item.onClick}>
+						{item.leftIcon}
+						<span>{item.label}</span>
+						{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
+					</DropdownItem>
+				</Container>
 			)
 		})
 	}

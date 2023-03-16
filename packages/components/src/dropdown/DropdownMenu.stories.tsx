@@ -54,6 +54,7 @@ const defaultArgs: ComponentProps<typeof DropdownMenu> = {
 					label: 'Vicky',
 				},
 				{
+					href: '#',
 					label: 'Something something',
 				},
 			],

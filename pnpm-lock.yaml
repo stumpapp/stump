@@ -226,6 +226,7 @@ importers:
       '@storybook/testing-library': ^0.0.13
       '@storybook/theming': ^6.5.16
       '@tailwindcss/forms': ^0.5.3
+      '@tailwindcss/line-clamp': ^0.4.2
       '@tailwindcss/typography': ^0.5.9
       '@types/react': ^18.0.20
       '@types/react-dom': ^18.0.6
@@ -295,6 +296,7 @@ importers:
       '@storybook/react': 6.5.16_uhsbxffu76br2o62m2yghge6pu
       '@storybook/testing-library': 0.0.13_biqbaboplfbrettd7655fr4n2y
       '@storybook/theming': 6.5.16_biqbaboplfbrettd7655fr4n2y
+      '@tailwindcss/line-clamp': 0.4.2_tailwindcss@3.2.7
       '@tailwindcss/typography': 0.5.9_tailwindcss@3.2.7
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -6788,6 +6790,14 @@ packages:
       mini-svg-data-uri: 1.4.4
       tailwindcss: 3.2.7_postcss@8.4.21
     dev: false
+
+  /@tailwindcss/line-clamp/0.4.2_tailwindcss@3.2.7:
+    resolution: {integrity: sha512-HFzAQuqYCjyy/SX9sLGB1lroPzmcnWv1FHkIpmypte10hptf4oPUfucryMKovZh2u0uiS9U5Ty3GghWfEJGwVw==}
+    peerDependencies:
+      tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
+    dependencies:
+      tailwindcss: 3.2.7_postcss@8.4.21
+    dev: true
 
   /@tailwindcss/typography/0.5.9_tailwindcss@3.2.7:
     resolution: {integrity: sha512-t8Sg3DyynFysV9f4JDOVISGsjazNb48AeIYQwcL+Bsq5uf4RYL75C1giZ43KISjeDGBaTN3Kxh7Xj/vRSMJUUg==}

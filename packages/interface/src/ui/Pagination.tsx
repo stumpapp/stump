@@ -1,6 +1,5 @@
-import { Box, Flex, HStack, useColorModeValue } from '@chakra-ui/react'
-import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react'
+import { cx } from '@stump/components'
+import { ArrowLeft, ArrowRight, MoreHorizontal } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useWindowSize } from 'rooks'
@@ -15,40 +14,44 @@ interface PaginationArrowProps {
 }
 
 function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
-	const disabledText = useColorModeValue('gray.300', 'gray.500')
-	const textColor = useColorModeValue('gray.600', 'gray.300')
+	const ArrowIcon = kind === 'previous' ? ArrowLeft : ArrowRight
 
+	// NOTE: notice I am wrapping the link (which will have pointer-events-none when
+	// disabled) in a div with cursor-not-allowed. This lets me have the cursor while
+	// disabling the link.
 	return (
-		<Flex mt="-1px" w={0} flex="1 1 0%" justify={kind === 'next' ? 'flex-end' : 'flex-start'}>
-			<Box
-				as={Link}
-				aria-disabled={isDisabled}
+		<div
+			className={cx('-mt-[1px]', kind === 'next' ? 'justify-end text-right' : 'justify-start', {
+				'cursor-not-allowed': isDisabled,
+			})}
+		>
+			<Link
 				to={href}
-				// FIXME: I need to figure out how to disable the link while not removing pointer events
-				className={clsx(
-					isDisabled && 'pointer-events-none cursor-not-allowed',
-					'inline-flex items-center border-t-2 border-transparent text-sm font-medium',
-				)}
-				pt={4}
-				pr={kind === 'previous' ? '1' : '0'}
-				pl={kind === 'next' ? '1' : '0'}
-				fontSize={{ base: 'xs', md: 'sm' }}
-				color={isDisabled ? disabledText : textColor}
-				_hover={{ borderColor: useColorModeValue('gray.300', 'gray.600') }}
+				aria-disabled={isDisabled}
+				className={cx({ 'pointer-events-none': isDisabled })}
 			>
-				{kind === 'previous' ? (
-					<>
-						<ArrowLeft className="mr-3 h-4 w-4 text-gray-600 md:h-5 md:w-5" aria-hidden="true" />
-						Previous
-					</>
-				) : (
-					<>
-						Next
-						<ArrowRight className="ml-3 h-4 w-4 text-gray-600 md:h-5 md:w-5" aria-hidden="true" />
-					</>
-				)}
-			</Box>
-		</Flex>
+				<div
+					className={cx(
+						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-gray-300 dark:hover:border-gray-600 md:text-sm',
+						isDisabled && 'pointer-events-none cursor-not-allowed text-gray-300 dark:text-gray-500',
+						{ 'pr-1 pl-0': kind === 'previous' },
+						{ 'pl-1 pr-0': kind === 'next' },
+					)}
+				>
+					{kind === 'next' && 'Next'}
+					<ArrowIcon
+						className={cx(
+							'h-4 w-4 md:h-5 md:w-5',
+							kind === 'previous' ? 'mr-3' : 'ml-3',
+							// TODO: dark different color?? idk, doesn't look THAT bad
+							isDisabled ? 'text-gray-300 dark:text-gray-500' : 'text-gray-600',
+						)}
+						aria-hidden="true"
+					/>
+					{kind === 'previous' && 'Previous'}
+				</div>
+			</Link>
+		</div>
 	)
 }
 
@@ -59,24 +62,23 @@ interface PaginationLinkProps {
 }
 
 function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
-	const nonActiveColor = useColorModeValue('gray.550', 'gray.300')
-	const nonActiveBorder = useColorModeValue('gray.300', 'gray.600')
 	return (
-		<Box
-			as={Link}
-			to={href}
-			pt={4}
-			px={4}
-			fontSize={{ base: 'xs', md: 'sm' }}
-			color={isActive ? 'brand.500' : nonActiveColor}
-			borderColor={isActive ? 'brand.500' : 'transparent'}
-			_hover={{
-				borderColor: isActive ? 'brand.500' : nonActiveBorder,
-			}}
-			className="inline-flex items-center border-t-2 text-sm font-medium"
-		>
-			{value}
-		</Box>
+		<Link to={href}>
+			<div
+				className={cx(
+					'inline-flex items-center border-t-2 px-4 pt-4 text-xs font-medium text-gray-550 dark:text-gray-300 md:text-sm',
+					{
+						'border-brand text-brand hover:border-brand-600 dark:hover:border-brand-400': isActive,
+					},
+					{
+						'border-transparent text-gray-300 hover:border-gray-300 dark:text-gray-600 dark:hover:border-gray-600':
+							!isActive,
+					},
+				)}
+			>
+				{value}
+			</div>
+		</Link>
 	)
 }
 
@@ -113,12 +115,11 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 	}
 
 	return (
-		<HStack
-			borderTop="1px solid"
-			borderColor={useColorModeValue('gray.200', 'gray.700')}
-			justify="space-between"
-			align="center"
-			pb={position === 'bottom' ? 8 : 0}
+		<div
+			className={cx(
+				'flex items-center justify-between gap-2 border-t border-gray-200 dark:border-gray-700',
+				{ 'pb-8': position === 'bottom' },
+			)}
 		>
 			<PaginationArrow
 				kind="previous"
@@ -126,7 +127,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 				isDisabled={currentPage === 1}
 			/>
 
-			<HStack align="center">
+			<div className="-mt-1 flex items-center">
 				{pageRange.map((page, i) => {
 					if (typeof page === 'number') {
 						return (
@@ -146,25 +147,20 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 							totalPages={pages}
 							onPageChange={handleEllipsisNavigate}
 							trigger={
-								<Box
-									as={'button'}
-									pt={4}
-									px={4}
-									className="inline-flex cursor-pointer items-center text-sm font-medium focus:outline-none active:outline-none"
-								>
-									<DotsThree />
-								</Box>
+								<button className="inline-flex cursor-pointer items-center px-4 pt-4 text-sm font-medium focus:outline-none active:outline-none">
+									<MoreHorizontal />
+								</button>
 							}
 						/>
 					)
 				})}
-			</HStack>
+			</div>
 
 			<PaginationArrow
 				kind="next"
 				href={`${location.pathname}?page=${currentPage + 1}`}
 				isDisabled={currentPage >= pages}
 			/>
-		</HStack>
+		</div>
 	)
 }

@@ -65,6 +65,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 					buttonVariants({ className, rounded, size, variant }),
 					{
 						'active:scale-95': pressEffect,
+						'cursor-not-allowed': props.disabled,
 						'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
 					},
 					className,

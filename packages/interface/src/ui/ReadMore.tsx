@@ -1,11 +1,14 @@
-import { Text, TextProps, useBoolean } from '@chakra-ui/react'
+import { useBoolean } from '@chakra-ui/react'
+import { Text } from '@stump/components'
+import { ComponentProps } from 'react'
 
 import { DEBUG_ENV } from '..'
 
-interface Props extends Omit<TextProps, 'children'> {
+interface Props extends Omit<ComponentProps<typeof Text>, 'children'> {
 	text?: string | null
 }
 
+// TODO: import {Collapsible} from '@stump/components' and use that instead of this.
 // TODO: markdown rendering... will probably fix below FIXME, as well.
 // FIXME: does not render new lines properly, this is pretty basic and needs changing.
 export default function ReadMore({ text, ...props }: Props) {

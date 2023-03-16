@@ -1,6 +1,5 @@
-import { CloudArrowDown } from 'phosphor-react'
-
-import { IconButton } from '../../ui/Button'
+import { IconButton } from '@stump/components'
+import { DownloadCloud } from 'lucide-react'
 
 interface Props {
 	seriesId: string
@@ -10,8 +9,8 @@ interface Props {
 export default function DownloadSeriesButton({ seriesId }: Props) {
 	return (
 		// title="Download series as ZIP archive"
-		<IconButton title="I can't do that yet!" disabled size="md">
-			<CloudArrowDown size="1.25rem" />
+		<IconButton size="sm" variant="ghost" title="I can't do that yet!" disabled>
+			<DownloadCloud size="1.25rem" />
 		</IconButton>
 	)
 }

@@ -1,5 +1,6 @@
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '@stump/api'
 import type { Media, Series } from '@stump/types'
+import { Axios, isAxiosError } from 'axios'
 
 import { queryClient, useInfinitePagedQuery, useQuery } from '../client'
 import { QUERY_KEYS } from '../query_keys'
@@ -22,7 +23,7 @@ export function useSeries(id: string, options: QueryCallbacks<Series> = {}) {
 		data: series,
 	} = useQuery(
 		[SERIES_KEYS.get_by_id, id],
-		() => getSeriesById(id).then((res) => res.data),
+		() => getSeriesById(id).then(({ data }) => data),
 		options,
 	)
 
@@ -93,11 +94,10 @@ export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {
 		isLoading,
 		isFetching,
 		isRefetching,
-	} = useQuery(
-		[SERIES_KEYS.up_next, id],
-		() => getNextInSeries(id).then((res) => res.data),
-		options,
-	)
+	} = useQuery([SERIES_KEYS.up_next, id], () => getNextInSeries(id).then((res) => res.data), {
+		...options,
+		useErrorBoundary: false,
+	})
 
 	return { isLoading: isLoading || isFetching || isRefetching, media }
 }

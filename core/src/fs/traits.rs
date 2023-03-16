@@ -1,11 +1,8 @@
 use std::{ffi::OsStr, path::Path};
-use tracing::{error, warn};
+use tracing::error;
 use walkdir::WalkDir;
 
-use crate::{
-	fs::{get_content_type_from_mime, guess_mime},
-	prelude::ContentType,
-};
+use crate::prelude::ContentType;
 
 use super::constants::is_accepted_cover_name;
 
@@ -74,20 +71,8 @@ impl PathUtils for Path {
 	/// Returns true if the file is a supported media file. This is a strict check when
 	/// infer can determine the file type, and a loose extension-based check when infer cannot.
 	fn is_supported(&self) -> bool {
-		if let Ok(Some(typ)) = infer::get_from_path(self) {
-			let mime = typ.mime_type();
-			let content_type = get_content_type_from_mime(mime);
-
-			return content_type != ContentType::UNKNOWN;
-		}
-
-		if let Some(guessed_mime) = guess_mime(self) {
-			return !guessed_mime.starts_with("image/");
-		}
-
-		warn!(file = ?self, "Unsupported file");
-
-		false
+		let content_type = ContentType::from_path(self);
+		content_type != ContentType::UNKNOWN && !content_type.is_image()
 	}
 
 	/// Returns true when the scanner should not persist the file to the database.

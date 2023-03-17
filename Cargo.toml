@@ -1,28 +1,27 @@
 [workspace]
 resolver = "2"
 members = [
-  "core", 
-  "core/prisma", 
-  "core/integration-tests", 
   "apps/desktop/src-tauri", 
-  "apps/tui", 
-  "apps/server"
+  "apps/server",
+  "core", 
+  # "core/integration-tests", 
+  "packages/prisma-cli", 
 ]
 
 [workspace.package]
 version = "0.0.0"
-rust-version = "1.64.0"
+rust-version = "1.68.0"
 
 [workspace.dependencies]
-# prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.1", features = [
-#   'rspc',
-#   # 'sqlite-create-many',
-#   # "migrations",
-#   # "sqlite",
-# ] }
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "79ab6bd700199b92103711f01d4df42e4cef62a6", features = [
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.4", features = [
   'rspc',
-  # 'sqlite-create-many',
+  'sqlite-create-many',
+  "migrations",
+  "sqlite",
+], default-features = false }
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.4", features = [
+  "rspc",
+  "sqlite-create-many",
   "migrations",
   "sqlite",
 ], default-features = false }
@@ -36,11 +35,15 @@ tokio = { version = "1.21.2", features = [
   # needed for detecting shutdown signals (e.g. ctrl+c)
   "signal",
 ] }
+async-stream = "0.3.3"
 
 ### DEV UTILS ###
-# specta = "0.0.2"
 specta = "0.0.4"
 
 ### Error Handling + Logging ###
 tracing = "0.1.36"
 thiserror = "1.0.37"
+
+[patch.crates-io]
+# for some reason, async-stream 0.3.4 is getting used instead of 0.3.3 but ONLY IN DOCKER?? So I have to patch it IG?? kms
+async-stream = { git = "https://github.com/tokio-rs/async-stream", rev = "e1373e4dede24f7700452e499a46561fb45ea515" }

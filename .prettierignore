@@ -2,3 +2,5 @@
 node_modules
 .svelte-kit
 build
+core.ts
+dist

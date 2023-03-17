@@ -8,9 +8,10 @@ use prisma_client_rust::{
 };
 use stump_core::{
 	event::InternalCoreTask,
-	types::{errors::ProcessFileError, CoreError},
+	prelude::{CoreError, ProcessFileError},
 };
 use tokio::sync::mpsc;
+use utoipa::ToSchema;
 
 use std::net;
 use thiserror::Error;
@@ -71,7 +72,7 @@ impl IntoResponse for AuthError {
 }
 
 #[allow(unused)]
-#[derive(Debug, Error)]
+#[derive(Debug, Error, ToSchema)]
 pub enum ApiError {
 	#[error("{0}")]
 	BadRequest(String),
@@ -94,7 +95,16 @@ pub enum ApiError {
 	#[error("{0}")]
 	Redirect(String),
 	#[error("{0}")]
+	#[schema(value_type = String)]
 	PrismaError(#[from] QueryError),
+}
+
+impl ApiError {
+	pub fn forbidden_discreet() -> ApiError {
+		ApiError::Forbidden(String::from(
+			"You do not have permission to access this resource.",
+		))
+	}
 }
 
 impl From<CoreError> for ApiError {

@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.options.json",
+  "files": [],
+  "references": [
+    {
+      "path": "apps/desktop"
+    },
+    {
+      "path": "apps/mobile"
+    },
+    {
+      "path": "apps/web"
+    },
+    {
+      "path": "packages/api"
+    },
+    {
+      "path": "packages/client"
+    },
+    {
+      "path": "packages/components"
+    },
+    {
+      "path": "packages/interface"
+    },
+    {
+      "path": "packages/types"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+log_error() {
+    echo $1 1>&2
+    exit 1
+}
+
+create_dummy_rust_file() {
+    local path=$1
+    echo "Creating dummy Rust file in $path"
+    mkdir -p $path/src
+    if [[ $path == "core" ]]; then
+        echo 'fn foo() { println!("Wow, such empty!"); }' > $path/src/lib.rs
+    else
+        echo 'fn main() { println!("Wow, such empty!"); }' > $path/src/main.rs
+    fi
+
+}
+
+# prisma uses some `include_str!` macros that are mapped to locations on the host machine. so
+# when we build in docker, we need to correct these paths according to the docker workdir. 
+# it's a bit of a hack, but it works lol
+prisma_sed_correction() {
+    set -ex; \
+        sed -i 's|\/.*\/core\/prisma\/schema.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
+        sed -i 's|\/.*\/core\/prisma\/migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs
+}
+
+workspaces_sed_correction() {
+    set -ex; \
+        sed -i '/core\/integration-tests/d' Cargo.toml; \
+        sed -i '/apps\/desktop\/src-tauri/d' Cargo.toml; \
+        sed -i '/apps\/tui/d' Cargo.toml; \
+        sed -i '/packages\/prisma-cli/d' Cargo.toml
+}

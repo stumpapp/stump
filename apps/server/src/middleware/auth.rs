@@ -1,10 +1,8 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use axum::{
 	body::BoxBody,
-	extract::{FromRequest, RequestParts},
-	http::{header, Method, StatusCode},
+	extract::{FromRef, FromRequestParts},
+	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Response},
 };
 use axum_sessions::SessionHandle;
@@ -12,28 +10,43 @@ use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{config::Ctx, prisma::user, types::User};
+use stump_core::{db::models::User, prisma::user};
 use tracing::{error, trace};
 
-use crate::utils::{decode_base64_credentials, verify_password};
+use crate::{
+	config::state::AppState,
+	utils::{decode_base64_credentials, verify_password},
+};
 
 pub struct Auth;
 
 #[async_trait]
-impl<B> FromRequest<B> for Auth
+impl<S> FromRequestParts<S> for Auth
 where
-	B: Send,
+	AppState: FromRef<S>,
+	S: Send + Sync,
 {
 	type Rejection = Response;
 
-	async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+	async fn from_request_parts(
+		parts: &mut Parts,
+		state: &S,
+	) -> Result<Self, Self::Rejection> {
 		// Note: this is fine, right? I mean, it's not like we're doing anything
 		// on a OPTIONS request, right? Right? 👀
-		if req.method() == Method::OPTIONS {
+		if parts.method == Method::OPTIONS {
 			return Ok(Self);
 		}
 
-		let session_handle = req.extensions().get::<SessionHandle>().unwrap();
+		let state = AppState::from_ref(state);
+		let session_handle =
+			parts.extensions.get::<SessionHandle>().ok_or_else(|| {
+				(
+					StatusCode::INTERNAL_SERVER_ERROR,
+					"Failed to extract session handle",
+				)
+					.into_response()
+			})?;
 		let session = session_handle.read().await;
 
 		if let Some(user) = session.get::<User>("user") {
@@ -44,23 +57,16 @@ where
 		// drop so we don't deadlock when writing to the session lol oy vey
 		drop(session);
 
-		let ctx = req.extensions().get::<Arc<Ctx>>().unwrap();
-
-		// TODO: figure me out plz
-		// let cookie_jar = req.extensions().get::<CookieJar>().unwrap();
-
-		// if let Some(cookie) = cookie_jar.get("stump_session") {
-		// println!("cookie: {:?}", cookie);
-		// }
-
-		let auth_header = req
-			.headers()
+		let auth_header = parts
+			.headers
 			.get(header::AUTHORIZATION)
 			.and_then(|value| value.to_str().ok());
 
-		let is_opds = req.uri().path().starts_with("/opds");
+		let is_opds = parts.uri.path().starts_with("/opds");
+		let has_auth_header = auth_header.is_some();
+		trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
 
-		if auth_header.is_none() {
+		if !has_auth_header {
 			if is_opds {
 				return Err(BasicAuth.into_response());
 			}
@@ -69,7 +75,6 @@ where
 		}
 
 		let auth_header = auth_header.unwrap();
-
 		if !auth_header.starts_with("Basic ") || auth_header.len() <= 6 {
 			return Err((StatusCode::UNAUTHORIZED).into_response());
 		}
@@ -83,7 +88,7 @@ where
 				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
 			})?;
 
-		let user = ctx
+		let user = state
 			.db
 			.user()
 			.find_unique(user::username::equals(decoded_credentials.username.clone()))
@@ -136,23 +141,26 @@ where
 ///
 /// Router::new()
 ///     .layer(from_extractor::<AdminGuard>())
-///     .layer(from_extractor::<Auth>());
+///     .layer(from_extractor_with_state::<Auth, AppState>(app_state));
 /// ```
 pub struct AdminGuard;
 
 #[async_trait]
-impl<B> FromRequest<B> for AdminGuard
+impl<S> FromRequestParts<S> for AdminGuard
 where
-	B: Send,
+	S: Send + Sync,
 {
 	type Rejection = StatusCode;
 
-	async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-		if req.method() == Method::OPTIONS {
+	async fn from_request_parts(
+		parts: &mut Parts,
+		_: &S,
+	) -> Result<Self, Self::Rejection> {
+		if parts.method == Method::OPTIONS {
 			return Ok(Self);
 		}
 
-		let session_handle = req.extensions().get::<SessionHandle>().unwrap();
+		let session_handle = parts.extensions.get::<SessionHandle>().unwrap();
 		let session = session_handle.read().await;
 
 		if let Some(user) = session.get::<User>("user") {

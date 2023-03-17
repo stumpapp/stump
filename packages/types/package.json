@@ -1,0 +1,14 @@
+{
+	"name": "@stump/types",
+	"version": "0.0.0",
+	"description": "",
+	"main": "index.ts",
+	"exports": {
+		".": "./index.ts",
+		"./server": "./server.ts"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "^4.9.5"
+	}
+}

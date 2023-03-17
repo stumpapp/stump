@@ -4,12 +4,14 @@ use std::{fs, path::PathBuf};
 use tempfile::{Builder, NamedTempFile, TempDir};
 
 use stump_core::{
-	config::Ctx,
-	db::migration::run_migrations,
-	fs::scanner::library_scanner::{scan_batch, scan_sync},
+	db::{
+		migration::run_migrations,
+		models::{LibraryPattern, LibraryScanMode},
+	},
+	fs::scanner::scan,
 	job::{persist_new_job, runner::RunnerCtx, LibraryScanJob},
+	prelude::{CoreResult, Ctx},
 	prisma::{library, library_options, PrismaClient},
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 // https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/second-edition/ch11-03-test-organization.html
@@ -219,7 +221,7 @@ pub async fn init_db() {
 
 	// TODO: once migration engine is built into pcr, replace with commented out code below
 	// client._db_push().await.expect("Failed to push database schema");
-	let migration_result = run_migrations(&client).await;
+	let migration_result = run_migrations(client).await;
 
 	assert!(
 		migration_result.is_ok(),
@@ -269,7 +271,7 @@ pub fn get_test_data_dir() -> PathBuf {
 
 pub fn get_test_file_contents(name: &str) -> Vec<u8> {
 	let path = get_test_data_dir().join(name);
-	fs::read(path).expect(format!("Failed to read test file: {}", name).as_str())
+	fs::read(path).unwrap_or_else(|_| panic!("Failed to read test file: {}", name))
 }
 
 pub async fn persist_test_job(
@@ -294,19 +296,21 @@ pub async fn run_test_scan(
 	library: &library::Data,
 	scan_mode: LibraryScanMode,
 ) -> CoreResult<u64> {
-	persist_test_job(&library.id, &ctx, &library, scan_mode).await?;
+	persist_test_job(&library.id, ctx, library, scan_mode).await?;
 
 	let fake_runner_ctx = RunnerCtx::new(ctx.get_ctx(), library.id.clone());
 
 	if scan_mode == LibraryScanMode::None {
 		return Ok(0);
-	} else if scan_mode == LibraryScanMode::Batched {
-		return scan_batch(fake_runner_ctx, library.path.clone(), library.id.clone())
-			.await;
-	} else {
-		return scan_sync(fake_runner_ctx, library.path.clone(), library.id.clone())
-			.await;
 	}
+
+	scan(
+		fake_runner_ctx,
+		library.path.clone(),
+		library.id.clone(),
+		scan_mode,
+	)
+	.await
 }
 
 /// Creates a library with the given name, path, and pattern. If the scan mode is

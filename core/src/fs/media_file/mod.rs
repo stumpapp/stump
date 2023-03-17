@@ -1,31 +1,20 @@
+pub mod constants;
 pub mod epub;
 pub mod pdf;
 pub mod rar;
 pub mod zip;
 
 use std::path::Path;
-use tracing::{debug, warn};
+use tracing::debug;
 
 use crate::{
-	fs::media_file::{epub::process_epub, rar::process_rar, zip::process_zip},
-	types::{
+	db::models::LibraryOptions,
+	prelude::{
 		errors::ProcessFileError,
-		models::{
-			library::LibraryOptions,
-			media::{MediaMetadata, ProcessedMediaFile},
-		},
+		fs::media_file::{MediaMetadata, ProcessedMediaFile},
 		ContentType,
 	},
 };
-
-use self::{epub::get_epub_cover, rar::get_rar_image, zip::get_zip_image};
-
-// FIXME: this module does way too much. It should be cleaned up, way too many vaguely
-// similar things shoved in here with little distinction.
-
-// TODO: replace all these match statements with an custom enum that handles it all.
-// The enum itself will have some repetition, however it'll be cleaner than
-// doing this stuff over and over as this file currently does.
 
 // TODO: move trait, maybe merge with another.
 pub trait IsImage {
@@ -43,110 +32,27 @@ pub fn process_comic_info(buffer: String) -> Option<MediaMetadata> {
 	}
 }
 
-fn temporary_content_workarounds(extension: &str) -> ContentType {
-	if extension == "opf" || extension == "ncx" {
-		return ContentType::XML;
-	}
-
-	ContentType::UNKNOWN
-}
-
-pub fn guess_content_type(file: &str) -> ContentType {
-	let file = Path::new(file);
-
-	let extension = file.extension().unwrap_or_default();
-	let extension = extension.to_string_lossy().to_string();
-
-	// TODO: if this fails manually check the extension
-	match ContentType::from_extension(&extension) {
-		Some(content_type) => content_type,
-		// None => ContentType::Any,
-		None => temporary_content_workarounds(&extension),
-	}
-}
-
-pub fn get_content_type_from_mime(mime: &str) -> ContentType {
-	ContentType::from(mime)
-}
-
-/// Guess the MIME type of a file based on its extension.
-pub fn guess_mime(path: &Path) -> Option<String> {
-	let extension = path.extension().and_then(|ext| ext.to_str());
-
-	if extension.is_none() {
-		warn!(
-			"Unable to guess mime for file without extension: {:?}",
-			path
-		);
-		return None;
-	}
-
-	let extension = extension.unwrap();
-
-	let content_type = ContentType::from_extension(extension);
-
-	if let Some(content_type) = content_type {
-		return Some(content_type.to_string());
-	}
-
-	// TODO: add more?
-	match extension.to_lowercase().as_str() {
-		"pdf" => Some("application/pdf".to_string()),
-		"epub" => Some("application/epub+zip".to_string()),
-		"zip" => Some("application/zip".to_string()),
-		"cbz" => Some("application/vnd.comicbook+zip".to_string()),
-		"rar" => Some("application/vnd.rar".to_string()),
-		"cbr" => Some("application/vnd.comicbook-rar".to_string()),
-		"png" => Some("image/png".to_string()),
-		"jpg" => Some("image/jpeg".to_string()),
-		"jpeg" => Some("image/jpeg".to_string()),
-		"webp" => Some("image/webp".to_string()),
-		"gif" => Some("image/gif".to_string()),
-		_ => None,
-	}
-}
-
-/// Infer the MIME type of a file. If the MIME type cannot be inferred via reading
-/// the first few bytes of the file, then the file extension is used via `guess_mime`.
-pub fn infer_mime_from_path(path: &Path) -> Option<String> {
-	match infer::get_from_path(path) {
-		Ok(mime) => {
-			debug!("Inferred mime for file {:?}: {:?}", path, mime);
-			mime.map(|m| m.mime_type().to_string())
-		},
-		Err(e) => {
-			warn!(
-				"Unable to infer mime for file {:?}: {:?}",
-				path,
-				e.to_string()
-			);
-
-			guess_mime(path)
-		},
-	}
-}
-
 pub fn get_page(
 	file: &str,
 	page: i32,
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
-	let mime = guess_mime(Path::new(file));
+	let mime = ContentType::from_file(file).mime_type();
 
-	match mime.as_deref() {
-		Some("application/zip") => get_zip_image(file, page),
-		Some("application/vnd.comicbook+zip") => get_zip_image(file, page),
-		Some("application/vnd.rar") => get_rar_image(file, page),
-		Some("application/vnd.comicbook-rar") => get_rar_image(file, page),
-		Some("application/epub+zip") => {
+	match mime.as_str() {
+		"application/zip" => zip::get_image(file, page),
+		"application/vnd.comicbook+zip" => zip::get_image(file, page),
+		"application/vnd.rar" => rar::get_image(file, page),
+		"application/vnd.comicbook-rar" => rar::get_image(file, page),
+		"application/epub+zip" => {
 			if page == 1 {
-				get_epub_cover(file)
+				epub::get_cover(file)
 			} else {
 				Err(ProcessFileError::UnsupportedFileType(
 					"You may only request the cover page (first page) for epub files on this endpoint".into()
 				))
 			}
 		},
-		None => Err(ProcessFileError::Unknown(format!(
+		"unknown" => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
 			file
 		))),
@@ -154,21 +60,32 @@ pub fn get_page(
 	}
 }
 
+fn process_rar(
+	convert: bool,
+	path: &Path,
+) -> Result<ProcessedMediaFile, ProcessFileError> {
+	if convert {
+		let zip_path = rar::convert_to_zip(path)?;
+		zip::process(zip_path.as_path())
+	} else {
+		rar::process(path)
+	}
+}
+
 pub fn process(
 	path: &Path,
 	options: &LibraryOptions,
 ) -> Result<ProcessedMediaFile, ProcessFileError> {
-	debug!("Processing entry {:?} with options: {:?}", path, options);
+	debug!(?path, ?options, "Processing entry");
+	let mime = ContentType::from_path(path).mime_type();
 
-	let mime = infer_mime_from_path(path);
-
-	match mime.as_deref() {
-		Some("application/zip") => process_zip(path),
-		Some("application/vnd.comicbook+zip") => process_zip(path),
-		Some("application/vnd.rar") => process_rar(path, options),
-		Some("application/vnd.comicbook-rar") => process_rar(path, options),
-		Some("application/epub+zip") => process_epub(path),
-		None => Err(ProcessFileError::Unknown(format!(
+	match mime.as_str() {
+		"application/zip" => zip::process(path),
+		"application/vnd.comicbook+zip" => zip::process(path),
+		"application/vnd.rar" => process_rar(options.convert_rar_to_zip, path),
+		"application/vnd.comicbook-rar" => process_rar(options.convert_rar_to_zip, path),
+		"application/epub+zip" => epub::process(path),
+		"unknown" => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
 			path
 		))),

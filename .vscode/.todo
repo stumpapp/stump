@@ -1,0 +1,80 @@
+- [x] Consolidate some GH specific files to `.github`
+- [x] Change `common` to `packages`
+- [ ] Create `crates` with submodules for epub-rs?
+- [ ] ESLint
+  - [x] Add the base configuration
+  - [ ] Fix ESLint errors after setup (expect a lot)
+- [x] Add moon
+  - [x] Basic moon config/setup
+  - [x] Clean up all the `package.json` scripts
+    - [ ] Note: the scripts that interact with the FS directly are iffy with moon. I'll need to revisit those, so they will remain.
+- [ ] Audit dependencies, prune where needed
+- [ ] Fix all the peer dependency warnings
+- [x] Nix?
+  - https://github.com/aaronleopold/stump/pull/86
+- [ ] Reorganize and consolidate some of the `client` code, its _very_ messy
+  - [x] Split `api` into separate package to house all the axios functions
+  - [ ] Rework gross hooks + callback types
+- [x] Remove the `stump.service` file from GH and just add section in docs with that content
+- [x] Consolidate some of the config files
+  - [x] Looking at you messy tsconfigs
+- [x] Migrate to Axum v0.6
+  - Rebase `axum-upgrade` branch once above chores completed
+  - https://github.com/tokio-rs/axum/releases/tag/axum-v0.6.0
+- [ ] Look into sqlite session store at some point to replace the in memory store.
+- [x] Move `prisma-cli` out of `core`?
+- [ ] Refactor all queries to use more current select/include patterns
+  - https://prisma.brendonovich.dev/reading-data/select-include#many-relation-options
+- [x] Change HTTP endpoints to be **unpaged** by default (except opds)
+- [ ] Rethink HTTP endpoints allow better range of filter options
+  - [x] Basic structure implemented, just a matter of prioritizing it time permitting
+- [ ] Rework `integration_tests` and add unit testing throughout
+  - Mock client inbound -> https://github.com/Brendonovich/prisma-client-rust/issues/230
+- [ ] Look into better validation via https://github.com/Keats/validator
+- [ ] Refactor UI sidebar and main container to support resizing via https://github.com/bvaughn/react-resizable-panels
+- [ ] Either use the `optional_struct` dependency or look into https://github.com/Nukesor/inter-struct (or maybe both?)
+- [ ] Refine Stump color palette (gray colors are :barf:)
+- [ ] Start building out, but don't use quite yet, custom UI components in new package `components`
+  - [ ] https://github.com/shadcn/ui
+- [ ] Get major UI sections completed to MVP stage:
+  - [ ] Homepage sections
+    - [x] Continue Reading, Recently Added, Etc.
+    - [ ] Statistics
+  - [ ] Book overview page
+    - [x] Show progress (if any)
+    - [ ] Show more series information
+      - [x] Next in series (using a new `cursor` page param?)
+  - [ ] Series overview section (on 0th page when browsing a series)
+  - [ ] Settings pages
+- [ ] Remove all those `Loading...` placeholders
+- [ ] For listviews, add a tooltip that shows some of the additional information on hover
+- [x] Add redirects for unauthed access
+  - I.e. if I visit `/some-page/1`, and get redirected to `/auth`, should redirect instead with query params to restore state: `/auth?redirect=/some-page/1`
+- [ ] Revisit RAR support with upcoming `0.5` unrar release -> https://github.com/muja/unrar.rs/issues/26
+  - [ ] Move off of custom `read_bytes` implementation
+  - [ ] Test bug after -> https://github.com/aaronleopold/stump/issues/38
+- [ ] Finish implementing EPUB support
+  - [ ] Queries in `client`
+  - [ ] Lots of parsing in `core`
+  - [ ] Tracking progress
+- [ ] Finish implementing Stump Readers:
+  - [ ] ImageBased
+    - [ ] Make toolbar **much** more performant, loading all those images lazily is terrible...
+  - [ ] AnimatedImageBased
+    - [ ] This was a PAIN IN THE ASS
+  - [ ] EPUB
+- [ ] Tighten logging noise
+- [ ] Revisit rework of `StumpConfig`
+- [ ] Setup self hosted runner using gaming computer
+- [ ] Finish GH workflows/actions
+- [ ] Add some automated system for versioning/releases
+- [ ] Once fully migrated off Chakra UI
+  - [ ] Finalize custom UI components
+  - [ ] Consider feature freeze and migrate over to SolidJS
+- [ ] Add `Stump.toml` template and/or just list all the config options somewhere
+- [ ] Fix `desktop-dev` command, it spawns a new window over and over :angry:
+- [ ] Make light mode look not disgusting lmao
+- [ ] ~Fix poor performance of EditLibraryModal~
+  - [ ] Just replace the modals with dedicated pages for editing and creating libraries
+- [ ] `local-ip-address` check if release yoinked comes back okay
+- [ ] cargo report future-incompatibilities --id 4 --package rustc-serialize@0.3.24

@@ -12,6 +12,7 @@ pub const STUMP_SHADOW_TEXT: &str = include_str!("stump_shadow_text.txt");
 pub fn get_log_file() -> PathBuf {
 	get_config_dir().join("Stump.log")
 }
+
 pub fn get_log_verbosity() -> u64 {
 	match std::env::var("STUMP_VERBOSITY") {
 		Ok(s) => s.parse::<u64>().unwrap_or(1),
@@ -19,13 +20,14 @@ pub fn get_log_verbosity() -> u64 {
 	}
 }
 
+// TODO: allow for overriding of format
 /// Initializes the logging system, which uses the [tracing] crate. Logs are written to
 /// both the console and a file in the config directory. The file is called `Stump.log`
 /// by default.
 pub fn init_tracing() {
 	let config_dir = get_config_dir();
 
-	let file_appender = tracing_appender::rolling::never(&config_dir, "Stump.log");
+	let file_appender = tracing_appender::rolling::never(config_dir, "Stump.log");
 
 	let verbosity = get_log_verbosity();
 	let max_level = match verbosity {
@@ -42,12 +44,22 @@ pub fn init_tracing() {
 				.add_directive(
 					"stump_core=trace"
 						.parse()
-						.expect("Error invalid tracing directive!"),
+						.expect("Error invalid tracing directive for stump_core!"),
 				)
 				.add_directive(
 					"stump_server=trace"
 						.parse()
-						.expect("Error invalid tracing directive!"),
+						.expect("Error invalid tracing directive for stump_server!"),
+				)
+				.add_directive(
+					"tower_http=debug"
+						.parse()
+						.expect("Error invalid tracing directive for tower_http!"),
+				)
+				.add_directive(
+					"quaint::connector::metrics=debug"
+						.parse()
+						.expect("Failed to parse tracing directive for quaint!"),
 				),
 		)
 		// Note: I have two layers here, separating the file appender and the stdout.

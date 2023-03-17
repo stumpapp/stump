@@ -1,0 +1,47 @@
+name: 'Stump Checks CI'
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# TODO: figure out how to use moon here.
+jobs:
+  check-rust:
+    name: Rust checks
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup cargo
+        uses: ./.github/actions/setup-cargo
+
+      - name: Setup prisma
+        uses: ./.github/actions/setup-prisma
+
+      - name: Run cargo checks
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy -- -D warnings
+      # TODO: fix the tests, then uncomment this
+      # - name: Run tests
+      #   run: |
+      #     cargo integration-tests
+
+  check-typescript:
+    name: TypeScript checks
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup PNPM and TypeScript
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Run TypeScript lints
+        run: pnpm lint
+
+      # - name: typecheck
+      #   run: pnpm moon run :typecheck

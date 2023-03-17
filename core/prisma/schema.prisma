@@ -38,9 +38,7 @@ model User {
   // The role of the user. Defaults to "MEMBER".
   role            String         @default("MEMBER")
   // The media the user currently has progress on.
-  // TODO: don't love this name but wanted to emphasize plural. I could do something like
-  // `currentlyReading` but that wouldn't match the relation in the Media model. UGH. Naming
-  // is so hard lol.
+  // TODO: rename to `reading_history`
   read_progresses ReadProgress[]
 
   reading_lists ReadingList[]
@@ -83,7 +81,7 @@ model LibraryOptions {
   id                      String  @id @default(uuid())
   // Flag indicating whether or not to attempt to convert rar files to zip on scans.
   convert_rar_to_zip      Boolean @default(false)
-  // Flag indicating whether or not to *hard* delete rar files that were sucessfully converted to zip.
+  // Flag indicating whether or not to *hard* delete rar files that were successfully converted to zip.
   // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
   // trash location, or a custom location when running in Docker (which will clear on an interval).
   hard_delete_conversions Boolean @default(false)
@@ -109,6 +107,8 @@ model Series {
   description String?
   // The date in which the series was last updated in the FS. ex: "2020-01-01"
   updated_at  DateTime @updatedAt
+  // The date in which the series was created. ex: "2020-01-01"
+  created_at  DateTime @default(now())
   // The url of the series. ex: "/home/user/media/comics/The Amazing Spider-Man"
   path        String
   // The status of the series since last scan or access
@@ -139,6 +139,10 @@ model Media {
   pages           Int
   // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
   updated_at      DateTime       @updatedAt
+  // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
+  created_at      DateTime       @default(now())
+  // The date in which the file was last modified. Defaults to now() for safety.
+  modified_at     DateTime       @default(now())
   // Whether or not the media is downloaded to the client. ex: true
   downloaded      Boolean        @default(false)
   // The checksum hash of the file contents. Used to find multuple instances of a file in the database
@@ -152,13 +156,13 @@ model Media {
   // The id of the series this media belongs to.
   series_id       String?
   // The read progresses of the media
-  read_progresses ReadProgress[] // TODO: don't love this name but wanted to emphasize plural
+  read_progresses ReadProgress[] // TODO: rename to `reading_history`
   // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
   tags            Tag[]
 
   // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
   // readingListId String?
-  reading_list   ReadingList? @relation(fields: [reading_list_id], references: [id])
+  reading_list    ReadingList? @relation(fields: [reading_list_id], references: [id])
   reading_list_id String?
 
   @@map("media")
@@ -239,6 +243,9 @@ model ReadProgress {
 
   epubcfi String?
 
+  is_completed Boolean  @default(false)
+  updated_at   DateTime @updatedAt
+
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
 
@@ -290,10 +297,6 @@ model Log {
   @@map("logs")
 }
 
-// TODO: I think I want to remove the view modes from database persisted preferences.
-// Instead, I'll have a sessionStorage/localStorage store just for those, I think
-// it might be silly to ping the database everytime this gets updated is mainly 
-// the reason. Not sure though...
 model UserPreferences {
   id                     String @id @default(cuid())
   // Flag to indicate if the user wants to reduce some of the animations when using the build-in client
@@ -306,9 +309,8 @@ model UserPreferences {
   collection_layout_mode String @default("GRID")
   // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
   locale                 String @default("en")
-
-  // user User[]
-  user User?
+  // The user which these preferences belong to
+  user                   User?
 
   @@map("user_preferences")
 }
@@ -318,8 +320,6 @@ model ServerPreferences {
   // // Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
   // // If none found, the series name will be the directory name.
   // rename_series    Boolean @default(false)
-  // // Flag indicating whether or not to attempt to convert .cbr files to .cbz files on scan automatically.
-  // convertCbrToCbz Boolean @default(false)
 
   @@map("server_preferences")
 }

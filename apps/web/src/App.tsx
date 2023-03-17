@@ -1,14 +1,12 @@
-import StumpInterface from '@stump/interface';
-import { StumpQueryProvider } from '@stump/client';
+import StumpInterface from '@stump/interface'
 
-import '@stump/interface/styles';
+const getDebugUrl = () => {
+	const { hostname } = window.location
+	return `http://${hostname}:10801`
+}
 
-export const baseUrl = import.meta.env.PROD ? window.location.href : 'http://localhost:10801';
+export const baseUrl = import.meta.env.PROD ? window.location.href : getDebugUrl()
 
 export default function App() {
-	return (
-		<StumpQueryProvider>
-			<StumpInterface platform={'browser'} baseUrl={baseUrl} />
-		</StumpQueryProvider>
-	);
+	return <StumpInterface platform={'browser'} baseUrl={baseUrl} />
 }

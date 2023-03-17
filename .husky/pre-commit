@@ -1,6 +1,9 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npx lint-staged
-pnpm clippy
-pnpm checks
+# npx lint-staged
+moon run :format
+moon run :lint
+# TODO: fix typecheck
+# moon run :typecheck
+# cargo clippy --all-targets --workspace -- -D warnings

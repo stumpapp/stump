@@ -1,10 +1,10 @@
 use std::path::{Path, PathBuf};
 
-pub(crate) mod context;
-pub use context::Ctx;
-
 pub mod env;
 pub mod logging;
+mod stump_config;
+
+pub use stump_config::*;
 
 /// Gets the home directory of the system running Stump
 fn home() -> PathBuf {

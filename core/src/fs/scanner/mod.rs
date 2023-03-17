@@ -1,15 +1,30 @@
 use std::path::{Path, PathBuf};
 
-pub mod library_scanner;
-pub mod utils;
-use tracing::debug;
+mod batch_scanner;
+mod setup;
+mod sync_scanner;
+mod utils;
 
 use walkdir::WalkDir;
 
 use crate::{
-	fs::media_file::{self, guess_mime},
-	types::ContentType,
+	db::models::{LibraryScanMode, Media},
+	job::runner::RunnerCtx,
+	prelude::{ContentType, CoreResult},
 };
+
+pub async fn scan(
+	ctx: RunnerCtx,
+	path: String,
+	runner_id: String,
+	scan_mode: LibraryScanMode,
+) -> CoreResult<u64> {
+	match scan_mode {
+		LibraryScanMode::Batched => batch_scanner::scan(ctx, path, runner_id).await,
+		LibraryScanMode::Sync => sync_scanner::scan(ctx, path, runner_id).await,
+		_ => unreachable!("A job should not have reached this point if the scan mode is not batch or sync."),
+	}
+}
 
 // TODO: refactor this trait? yes please
 pub trait ScannedFileTrait {
@@ -41,20 +56,8 @@ impl ScannedFileTrait for Path {
 	/// Returns true if the file is a supported media file. This is a strict check when
 	/// infer can determine the file type, and a loose extension-based check when infer cannot.
 	fn is_supported(&self) -> bool {
-		if let Ok(Some(typ)) = infer::get_from_path(self) {
-			let mime = typ.mime_type();
-			let content_type = media_file::get_content_type_from_mime(mime);
-
-			return content_type != ContentType::UNKNOWN;
-		}
-
-		if let Some(guessed_mime) = guess_mime(self) {
-			return !guessed_mime.starts_with("image/");
-		}
-
-		debug!("Unsupported file {:?}", self);
-
-		false
+		let content_type = ContentType::from_path(self);
+		content_type != ContentType::UNKNOWN && !content_type.is_image()
 	}
 
 	/// Returns true when the scanner should not persist the file to the database.
@@ -74,18 +77,7 @@ impl ScannedFileTrait for Path {
 	/// Returns true if the file is an image. This is a strict check when infer
 	/// can determine the file type, and a loose extension-based check when infer cannot.
 	fn is_img(&self) -> bool {
-		if let Ok(Some(file_type)) = infer::get_from_path(self) {
-			return file_type.mime_type().starts_with("image/");
-		}
-
-		// TODO: more, or refactor. Too lazy rn
-		self.extension()
-			.map(|ext| {
-				ext.eq_ignore_ascii_case("jpg")
-					|| ext.eq_ignore_ascii_case("png")
-					|| ext.eq_ignore_ascii_case("jpeg")
-			})
-			.unwrap_or(false)
+		ContentType::from_path(self).is_image()
 	}
 
 	/// Returns true if the file is a thumbnail image. This calls the `is_img` function
@@ -146,8 +138,11 @@ impl ScannedFileTrait for Path {
 	}
 }
 
+// FIXME: I don't want to allow this, however Box<Media> won't work
+#[allow(clippy::large_enum_variant)]
 pub enum BatchScanOperation {
 	CreateMedia { path: PathBuf, series_id: String },
+	UpdateMedia(Media),
 	MarkMediaMissing { path: String },
 	// Note: this will be tricky. I will need to have this as a separate operation so I don't chance
 	// issuing concurrent writes to the database. But will be a bit of a pain, not too bad though.

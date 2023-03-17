@@ -1,6 +1,5 @@
 use axum::{
 	body::{BoxBody, StreamBody},
-	extract::Query,
 	http::{header, HeaderValue, StatusCode},
 	response::{IntoResponse, Response},
 };
@@ -8,7 +7,7 @@ use std::{
 	io,
 	path::{Path, PathBuf},
 };
-use stump_core::types::{ContentType, PageParams, PagedRequestParams};
+use stump_core::prelude::ContentType;
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
 
@@ -123,26 +122,6 @@ impl IntoResponse for UnknownBufferResponse {
 	}
 }
 
-pub trait PageableTrait {
-	fn page_params(self) -> PageParams;
-}
-
-impl PageableTrait for Query<PagedRequestParams> {
-	fn page_params(self) -> PageParams {
-		let params = self.0;
-
-		let zero_based = params.zero_based.unwrap_or(false);
-
-		PageParams {
-			zero_based,
-			page: params.page.unwrap_or(if zero_based { 0 } else { 1 }),
-			page_size: params.page_size.unwrap_or(20),
-			order_by: params.order_by.unwrap_or_else(|| "name".to_string()),
-			direction: params.direction.unwrap_or_default(),
-		}
-	}
-}
-
 // TODO: I think it would be cool to support some variant of a named file with
 // range request support. I'm not sure how to do that yet, but it would be cool.
 // maybe something here -> https://docs.rs/tower-http/latest/tower_http/services/fs/index.html
@@ -176,7 +155,7 @@ impl IntoResponse for NamedFile {
 		Response::builder()
 			.header(
 				header::CONTENT_TYPE,
-				ContentType::from_infer(&self.path_buf).to_string(),
+				ContentType::from_path(&self.path_buf).to_string(),
 			)
 			.header(
 				header::CONTENT_DISPOSITION,

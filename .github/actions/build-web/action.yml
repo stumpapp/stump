@@ -1,0 +1,27 @@
+name: 'Compile Web Application'
+description: 'Compile stump web'
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout project
+      uses: actions/checkout@v3
+
+    - name: Setup pnpm
+      uses: ./.github/actions/setup-pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install
+      working-directory: apps/web
+
+    - name: Build app
+      shell: bash
+      run: pnpm run build
+      working-directory: apps/web
+
+    - name: Upload bundle
+      uses: ./.github/actions/upload-artifact
+      with:
+        upload-name: webapp
+        upload-path: apps/web/dist

@@ -1,10 +1,9 @@
 [alias]
-prisma = "run --package prisma --"
+prisma = "run --package prisma-cli --"
 integration-tests = "test --package integration-tests -- --test-threads 1"
 doc-tests = "cargo test --doc -- --show-output"
 build-server = "build --package stump_server --bin stump_server --release --"
 
-# this caused me such an unbearable headache...
 [target.x86_64-apple-darwin]
 rustflags = [
   "-C", "link-arg=-undefined",

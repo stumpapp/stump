@@ -3,6 +3,7 @@ pub mod pool;
 pub mod runner;
 
 pub use jobs::*;
+use utoipa::ToSchema;
 
 use std::{fmt::Debug, num::TryFromIntError};
 
@@ -11,11 +12,10 @@ use specta::Type;
 // use tracing::error;
 
 use crate::{
-	config::context::Ctx,
 	event::CoreEvent,
 	job::runner::RunnerCtx,
+	prelude::{errors::CoreError, CoreResult, Ctx},
 	prisma::{self},
-	types::{errors::CoreError, CoreResult},
 };
 
 #[async_trait::async_trait]
@@ -102,7 +102,7 @@ pub enum JobEvent {
 	Failed,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type, ToSchema)]
 pub enum JobStatus {
 	#[serde(rename = "RUNNING")]
 	Running,
@@ -212,7 +212,7 @@ impl JobUpdate {
 	}
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[derive(Clone, Serialize, Deserialize, Debug, Type, ToSchema)]
 pub struct JobReport {
 	/// This will actually refer to the job runner id
 	pub id: Option<String>,

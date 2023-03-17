@@ -1,0 +1,17 @@
+name: Prisma Setup
+description: Generate/cache Prisma client
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache Prisma client
+      id: cache-prisma
+      uses: actions/cache@v3
+      with:
+        path: core/src/prisma.rs
+        key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
+
+    - name: Generate Prisma client
+      # working-directory: core
+      if: steps.cache-prisma.outputs.cache-hit != 'true'
+      shell: bash
+      run: cargo prisma generate --schema=./core/prisma/schema.prisma

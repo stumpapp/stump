@@ -1,9 +1,9 @@
 use crate::utils::{init_test, run_test_scan, TempLibrary};
 
 use stump_core::{
-	config::Ctx,
+	db::models::{LibraryPattern, LibraryScanMode},
+	prelude::{CoreResult, Ctx},
 	prisma::{library, PrismaClient},
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 async fn check_library_post_scan(
@@ -32,12 +32,11 @@ async fn check_library_post_scan(
 	let library_series = library.series;
 	assert_eq!(library_series.len(), series_count);
 
-	let library_media = library_series
+	let library_media_count = library_series
 		.into_iter()
-		.map(|series| series.media)
-		.flatten()
-		.collect::<Vec<_>>();
-	assert_eq!(library_media.len(), media_count);
+		.flat_map(|series| series.media)
+		.count();
+	assert_eq!(library_media_count, media_count);
 
 	Ok(())
 }
@@ -111,7 +110,7 @@ async fn massive_library_batch_scan() -> CoreResult<()> {
 	let client = ctx.get_db();
 
 	let temp_library = TempLibrary::massive_library(10000, LibraryPattern::SeriesBased)?;
-	let (library, _options) = temp_library.insert(&client, LibraryScanMode::None).await?;
+	let (library, _options) = temp_library.insert(client, LibraryScanMode::None).await?;
 	let scan_result = run_test_scan(&ctx, &library, LibraryScanMode::Batched).await;
 
 	assert!(

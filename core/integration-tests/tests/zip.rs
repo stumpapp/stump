@@ -1,8 +1,8 @@
 use stump_core::{
-	config::Ctx,
-	fs::{checksum, media_file::zip::zip_sample},
+	db::models::{LibraryPattern, LibraryScanMode},
+	fs::{checksum, media_file::zip},
+	prelude::{CoreResult, Ctx},
 	prisma::media,
-	types::{CoreResult, LibraryPattern, LibraryScanMode},
 };
 
 use crate::utils::{init_test, TempLibrary};
@@ -33,7 +33,7 @@ async fn digest_zips() -> CoreResult<()> {
 	assert_ne!(zips.len(), 0);
 
 	for zip in zips {
-		let zip_sample = zip_sample(&zip.path);
+		let zip_sample = zip::sample_size(&zip.path);
 
 		let digest_result = checksum::digest(&zip.path, zip_sample);
 		assert!(digest_result.is_ok());

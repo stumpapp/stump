@@ -1,5 +1,5 @@
-use axum_sessions::extractors::ReadableSession;
-use stump_core::types::{DecodedCredentials, User};
+use axum_sessions::extractors::{ReadableSession, WritableSession};
+use stump_core::{db::models::User, prelude::DecodedCredentials};
 
 use crate::errors::{ApiError, ApiResult, AuthError};
 
@@ -36,6 +36,26 @@ pub fn get_session_user(session: &ReadableSession) -> ApiResult<User> {
 		Err(ApiError::Unauthorized)
 	}
 }
+
+pub fn get_writable_session_user(session: &WritableSession) -> ApiResult<User> {
+	if let Some(user) = session.get::<User>("user") {
+		Ok(user)
+	} else {
+		Err(ApiError::Unauthorized)
+	}
+}
+
+// pub fn get_writable_session_admin_user(session: &WritableSession) -> ApiResult<User> {
+// 	let user = get_writable_session_user(session)?;
+
+// 	if user.is_admin() {
+// 		Ok(user)
+// 	} else {
+// 		Err(ApiError::Forbidden(
+// 			"You do not have permission to access this resource.".to_string(),
+// 		))
+// 	}
+// }
 
 pub fn get_session_admin_user(session: &ReadableSession) -> ApiResult<User> {
 	let user = get_session_user(session)?;

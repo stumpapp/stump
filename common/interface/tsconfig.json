@@ -1,9 +1,0 @@
-{
-	"extends": "../config/base.tsconfig.json",
-	"compilerOptions": {
-		"types": ["vite/client", "node"],
-		"outDir": "./dist",
-		"skipLibCheck": true
-	},
-	"include": ["src"]
-}

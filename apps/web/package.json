@@ -4,28 +4,29 @@
   "description": "",
   "license": "MIT",
   "scripts": {
-    "start": "vite preview",
-    "dev": "vite --host",
     "build": "vite build"
   },
   "dependencies": {
     "@stump/client": "workspace:*",
     "@stump/interface": "workspace:*",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router": "^6.8.1",
+    "react-router-dom": "^6.8.1"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.7",
-    "@types/react": "^18.0.21",
-    "@types/react-dom": "^18.0.6",
-    "@vitejs/plugin-react": "^2.0.0",
-    "autoprefixer": "^10.4.12",
-    "postcss": "^8.4.17",
+    "@tailwindcss/typography": "^0.5.9",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^2.2.0",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
     "tailwind": "^4.0.0",
     "tailwind-scrollbar-hide": "^1.1.7",
-    "tailwindcss": "^3.1.8",
-    "typescript": "^4.8.4",
-    "vite": "^3.1.6",
+    "tailwindcss": "^3.2.7",
+    "typescript": "^4.9.5",
+    "vite": "^3.2.5",
     "vite-plugin-tsconfig-paths": "^1.1.0"
   }
 }

@@ -13,7 +13,7 @@ pub(crate) fn zip_dir(
 	destination: &Path,
 	prefix: &Path,
 ) -> zip::result::ZipResult<()> {
-	let zip_file = std::fs::File::create(&destination).unwrap();
+	let zip_file = std::fs::File::create(destination).unwrap();
 
 	let mut zip_writer = zip::ZipWriter::new(zip_file);
 
@@ -40,7 +40,7 @@ pub(crate) fn zip_dir(
 			let mut f = File::open(path)?;
 
 			f.read_to_end(&mut buffer)?;
-			zip_writer.write_all(&*buffer)?;
+			zip_writer.write_all(&buffer)?;
 
 			buffer.clear();
 		} else if !name.as_os_str().is_empty() {

@@ -1,22 +1,23 @@
 use std::convert::Infallible;
 
 use axum::{
+	extract::State,
 	response::sse::{Event, Sse},
 	routing::get,
-	Extension, Router,
+	Router,
 };
 use futures_util::{stream::Stream, StreamExt};
 
-use crate::{config::state::State, utils::shutdown_signal};
+use crate::{config::state::AppState, utils::shutdown_signal};
 
 // TODO: do I need auth middleware here? I think so.
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount() -> Router<AppState> {
 	Router::new().route("/sse", get(sse_handler))
-	// .layer(from_extractor::<Auth>())
+	// .layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 async fn sse_handler(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 	let mut rx = ctx.get_client_receiver();
 

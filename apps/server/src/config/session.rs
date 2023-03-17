@@ -25,13 +25,20 @@ pub fn get_session_layer() -> SessionLayer<MemoryStore> {
 		.with_session_ttl(Some(Duration::from_secs(3600 * 24 * 3)))
 		.with_cookie_path("/");
 
-	if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "release" {
-		sesssion_layer
-			.with_same_site_policy(SameSite::None)
-			.with_secure(true)
-	} else {
-		sesssion_layer
-			.with_same_site_policy(SameSite::Lax)
-			.with_secure(false)
-	}
+	sesssion_layer
+		.with_same_site_policy(SameSite::Lax)
+		.with_secure(false)
+
+	// FIXME: I think this can be configurable, but most people are going to be insecurely
+	// running this, which means `secure` needs to be false otherwise the cookie won't
+	// be sent.
+	// if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "release" {
+	// 	sesssion_layer
+	// 		.with_same_site_policy(SameSite::None)
+	// 		.with_secure(true)
+	// } else {
+	// 	sesssion_layer
+	// 		.with_same_site_policy(SameSite::Lax)
+	// 		.with_secure(false)
+	// }
 }

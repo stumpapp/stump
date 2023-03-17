@@ -3,12 +3,12 @@ use std::path::PathBuf;
 use crate::utils::{init_test, TempLibrary};
 
 use stump_core::{
-	config::Ctx,
+	db::models::Epub,
 	fs::media_file::epub::{
 		get_epub_chapter, get_epub_resource, normalize_resource_path,
 	},
+	prelude::{ContentType, CoreResult, Ctx},
 	prisma::media,
-	types::{models::epub::Epub, ContentType, CoreResult},
 };
 
 #[tokio::test]
@@ -108,7 +108,7 @@ async fn can_get_chapter() -> CoreResult<()> {
 
 	let get_chapter_result = get_chapter_result.unwrap();
 
-	assert!(get_chapter_result.1.len() > 0);
+	assert!(!get_chapter_result.1.is_empty());
 
 	Ok(())
 }

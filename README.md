@@ -16,8 +16,8 @@
   <!-- <a href="./.github/CHANGELOG.md">
     <img src="https://img.shields.io/github/package-json/v/aaronleopold/stump?logo=azurepipelines&amp;color=0aa8d2" alt="Current Version">
   </a> -->
-  <a href="https://hub.docker.com/r/aaronleopold/stump-preview">
-    <img src="https://img.shields.io/docker/pulls/aaronleopold/stump-preview?logo=docker&color=0aa8d2&logoColor=fff" alt="Docker Pulls">
+  <a href="https://hub.docker.com/r/aaronleopold/stump">
+    <img src="https://img.shields.io/docker/pulls/aaronleopold/stump?logo=docker&color=0aa8d2&logoColor=fff" alt="Docker Pulls">
   </a>
 </p>
 
@@ -29,6 +29,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 <img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 90%" />
 </p>
 
+<!-- prettier-ignore: I hate you sometimes prettier -->
 <details>
   <summary><b>Table of Contents</b></summary>
   <p>
@@ -39,14 +40,13 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
-  - [/common](#common)
+  - [/packages](#packages)
   - [/core](#core)
 - [Similar Projects 👯](#similar-projects-)
 - [Acknowledgements 🙏](#acknowledgements-)
-    </p>
-  </details>
+</details>
 
-> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please see the [contributing guide](https://www.stumpapp.dev/contributing) for more information on how you can help. Otherwise, stay tuned for the first release!
+> **🚧 Disclaimer 🚧**: Stump is _very much_ an ongoing **WIP**, under active development. Anyone is welcome to try it out, but please keep in mind that installation and general usage at this point should be for **testing purposes only**. Do **not** expect a fully featured, bug-free experience if you spin up a development environment or use a testing Docker image. Before the first release, I will likely flatten the migrations anyways, which would break anyone's Stump installations. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developing-). Otherwise, stay tuned for the first release!
 
 ## Roadmap 🗺
 
@@ -65,9 +65,12 @@ The following items are the major targets for Stump's first release:
 
 Things you can expect to see after the first release:
 
-- 🖥️ Desktop app ([Tauri](https://tauri.app/))
+- 🖥️ Desktop app ([Tauri](https://github.com/aaronleopold/stump/tree/main/apps/desktop))
 - 📱 Mobile app ([Tachiyomi](https://github.com/aaronleopold/tachiyomi-extensions) and/or [custom application](https://github.com/aaronleopold/stump/tree/main/apps/mobile))
-- 📺 A utility [TUI](https://github.com/aaronleopold/stump/tree/main/apps/tui) for managing a Stump instance from the command line
+
+Things you might see in the future:
+
+- 📺 A utility [TUI](https://github.com/aaronleopold/stump/tree/main/apps/tui) for managing a Stump instance(s) from the command line
 
 I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
 
@@ -77,13 +80,13 @@ I am very open to suggestions and ideas, so feel free to reach out if you have a
 
 Stump isn't ready for normal, non-development usage yet. Once a release has been made, this will be updated. For now, follow the [Developing](#developing-) section to build from source and run locally.
 
-There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump-preview) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container.
+There is a [docker image](https://hub.docker.com/repository/docker/aaronleopold/stump) available for those interested. However, **this is only meant for testing purposes and will not be updated frequently**, so do not expect a fully featured, bug-free experience if you spin up a container. Also keep in mind migrations won't be stacked until a release, so each update until then might require a wipe of the database file.
 
 For more information about getting started, how Stump works and how it manages your library, and much more, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 
 ## Developer Guide 💻
 
-Contributions are very **encouraged** and **welcome**! Please review the [contributing guide](https://www.stumpapp.dev/contributing) for more thorough information on how to get started.
+Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTING.md) before getting started.
 
 A quick summary of the steps required to get going:
 
@@ -99,9 +102,13 @@ pnpm run setup
 
 4. Start one of the apps:
 
+I use [moonrepo](https://moonrepo.dev/) for Stump's repository management
+
 ```bash
-pnpm dev:web # Web app
-pnpm dev:desktop # Desktop app
+# webapp + server
+moon run :dev
+# desktop app + server
+moon run server:start desktop:desktop-dev
 ```
 
 And that's it!
@@ -116,14 +123,11 @@ Some other good places to start:
 
 - Translation, so Stump is accessible to non-English speakers.
   - An automated translation system would be immensely helpful! If you're knowledgeable in this area, please reach out!
-- Writing comprehensive integration tests.
-  - [look here](https://github.com/aaronleopold/stump/tree/develop/core/integration-tests)
+- Writing comprehensive [integration tests](https://github.com/aaronleopold/stump/tree/develop/core/integration-tests).
 - Designing and/or implementing UI elements.
 - Docker build optimizations (it is currently _horrendously_ slow).
-- CI pipelines / workflows (given above issue with Docker is resolved).
+- CI pipelines / workflows.
 - And lots more!
-
-I keep track of all non-code contributions in the [CONTRIBUTORS.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTORS.md) file. If you contribute in that manner, please add yourself to the list!
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20?action=collection%2Ffork&collection-url=entityId%3D6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20%26entityType%3Dcollection%26workspaceId%3D722014ea-55eb-4a49-b29d-814300c1016d)
 
@@ -137,15 +141,16 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 - `server`: An [Axum](https://github.com/tokio-rs/axum) server.
 - `web`: The React application that is served by the Axum server.
 
-### /common
+### /packages
 
 - `client`: Everything needed to create a react-based client for Stump. Contains Zustand and React Query configuration, used by the `interface` package, as well as the generated TypeScript types.
 - `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.
 - `interface`: Stump's main React-based interface, shared between the web and desktop applications.
+- `prisma-cli`: A small rust app to run the prisma cli (generating the prisma client)
 
 ### /core
 
-- `core`: Stump's 'core' functionality is located here, written in Rust. The `server` was previously part of the core, but was extracted to support integration testing.
+- `core`: Stump's 'core' functionality is located here, written in Rust. The `server` was previously part of the core, but was extracted for better isolation.
 
 ## Similar Projects 👯
 

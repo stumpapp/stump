@@ -1,8 +1,8 @@
 use axum::{
-	extract::{Path, Query},
-	middleware::from_extractor,
+	extract::{Path, Query, State},
+	middleware::from_extractor_with_state,
 	routing::get,
-	Extension, Router,
+	Router,
 };
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
@@ -14,12 +14,12 @@ use stump_core::{
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
+	prelude::PageQuery,
 	prisma::{library, media, read_progress, series},
-	types::PagedRequestParams,
 };
 
 use crate::{
-	config::state::State,
+	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
@@ -28,7 +28,7 @@ use crate::{
 	},
 };
 
-pub(crate) fn mount() -> Router {
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.nest(
 			"/opds/v1.2",
@@ -55,7 +55,7 @@ pub(crate) fn mount() -> Router {
 						.route("/pages/:page", get(get_book_page)),
 				),
 		)
-		.layer(from_extractor::<Auth>())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
@@ -179,7 +179,10 @@ async fn catalog() -> ApiResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn keep_reading(Extension(ctx): State, session: ReadableSession) -> ApiResult<Xml> {
+async fn keep_reading(
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let user_id = get_session_user(&session)?.id;
@@ -246,7 +249,7 @@ async fn keep_reading(Extension(ctx): State, session: ReadableSession) -> ApiRes
 	Ok(Xml(feed.build()?))
 }
 
-async fn get_libraries(Extension(ctx): State) -> ApiResult<Xml> {
+async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
@@ -275,9 +278,9 @@ async fn get_libraries(Extension(ctx): State) -> ApiResult<Xml> {
 }
 
 async fn get_library_by_id(
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	pagination: Query<PagedRequestParams>,
+	pagination: Query<PageQuery>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -318,8 +321,8 @@ async fn get_library_by_id(
 // /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 // /// pagination is zero-indexed.
 async fn get_series(
-	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	pagination: Query<PageQuery>,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -352,8 +355,8 @@ async fn get_series(
 }
 
 async fn get_latest_series(
-	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	pagination: Query<PageQuery>,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -384,8 +387,8 @@ async fn get_latest_series(
 
 async fn get_series_by_id(
 	Path(id): Path<String>,
-	pagination: Query<PagedRequestParams>,
-	Extension(ctx): State,
+	pagination: Query<PageQuery>,
+	State(ctx): State<AppState>,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -432,7 +435,7 @@ async fn get_series_by_id(
 
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
-	Extension(ctx): State,
+	State(ctx): State<AppState>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -453,8 +456,8 @@ async fn get_book_thumbnail(
 
 async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
-	Extension(ctx): State,
-	pagination: Query<PagedRequestParams>,
+	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -479,7 +482,7 @@ async fn get_book_page(
 	let book = book.unwrap();
 
 	if book.path.ends_with(".epub") && correct_page == 1 {
-		return Ok(epub::get_epub_cover(&book.path)?.into());
+		return Ok(epub::get_cover(&book.path)?.into());
 	}
 
 	Ok(media_file::get_page(book.path.as_str(), correct_page)?.into())

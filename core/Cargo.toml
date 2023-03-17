@@ -1,13 +1,13 @@
 [package]
 name = "stump_core"
-version.workspace = true
+version = { workspace = true }
 edition = "2021"
 
 [dependencies]
-tokio.workspace = true
-serde.workspace = true
-prisma-client-rust.workspace = true
-specta.workspace = true
+tokio = { workspace = true }
+serde = { workspace = true }
+prisma-client-rust = { workspace = true }
+specta = { workspace = true }
 
 rayon = "1.5.3"
 futures = "0.3.21"
@@ -19,6 +19,8 @@ cuid = "1.2.0"
 xml-rs = "0.8.4" # used for creating XML docs
 serde-xml-rs = "0.5.1" # used for serializing/deserializing xml
 itertools = "0.10.5"
+optional_struct = "0.2.0"
+utoipa = { version = "3.0.3" }
 
 ### FILESYSTEM UTILS ###
 walkdir = "2.3.2"
@@ -29,16 +31,16 @@ infer = "0.7.0"
 image = "0.24.2"
 webp = "0.2.2"
 zip = "0.5.13"
-epub = "1.2.3"
+epub = "1.2.4"
 unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--read-bytes" }
 data-encoding = "2.3.2"
 # include_dir = "0.7.2"
 ring = "0.16.20"
 
 ## ERROR HANDLING + LOGGING ###
-thiserror.workspace = true
+thiserror = { workspace = true }
 # figment = { version = "0.10.6", features = ["toml", "env"] }
 toml = "0.5.9"
-tracing.workspace = true
+tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
 tracing-appender = "0.2.2"

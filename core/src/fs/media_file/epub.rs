@@ -1,5 +1,6 @@
 use std::{
 	fs::File,
+	io::BufReader,
 	path::{Path, PathBuf},
 };
 
@@ -9,22 +10,22 @@ use std::os::unix::prelude::MetadataExt;
 #[cfg(target_family = "windows")]
 use std::os::windows::prelude::*;
 
+const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
+const DEFAULT_EPUB_COVER_ID: &str = "cover";
+
 use crate::{
-	fs::{
-		checksum,
-		media_file::{get_content_type_from_mime, guess_content_type},
-	},
-	types::{errors::ProcessFileError, models::media::ProcessedMediaFile, ContentType},
+	fs::checksum,
+	prelude::{errors::ProcessFileError, fs::ProcessedMediaFile, ContentType},
 };
 use epub::doc::EpubDoc;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, trace, warn};
 
 /*
 epubcfi usually starts with /6, referring to spine element of package file
 file has three groups of elements: metadata, manifest and spine.
 */
 // TODO: options: &LibraryOptions
-pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
+pub fn digest(path: &Path, size: u64) -> Option<String> {
 	let mut bytes_to_read = size;
 
 	// FIXME: this isn't ideal
@@ -44,11 +45,11 @@ pub fn digest_epub(path: &Path, size: u64) -> Option<String> {
 	}
 }
 
-fn load_epub(path: &str) -> Result<EpubDoc<File>, ProcessFileError> {
+fn load_epub(path: &str) -> Result<EpubDoc<BufReader<File>>, ProcessFileError> {
 	EpubDoc::new(path).map_err(|e| ProcessFileError::EpubOpenError(e.to_string()))
 }
 
-pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
+pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 	debug!("Processing Epub: {}", path.display());
 
 	let epub_file = load_epub(path.to_str().unwrap())?;
@@ -68,26 +69,80 @@ pub fn process_epub(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError>
 	Ok(ProcessedMediaFile {
 		thumbnail_path: None,
 		path: path.to_path_buf(),
-		checksum: digest_epub(path, file_size),
+		checksum: digest(path, file_size),
 		metadata: None,
 		pages,
 	})
 }
 
 // TODO: change return type to make more sense
-pub fn get_epub_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
+/// Returns the cover image for the epub file. If a cover image cannot be extracted via the
+/// metadata, it will go through two rounds of fallback methods:
+///
+/// 1. Attempt to find a resource with the default ID of "cover"
+/// 2. Attempt to find a resource with a mime type of "image/jpeg" or "image/png", and weight the
+/// results based on how likely they are to be the cover. For example, if the cover is named
+/// "cover.jpg", it's probably the cover. The entry with the heighest weight, if any, will be
+/// returned.
+pub fn get_cover(file: &str) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
 	let mut epub_file = EpubDoc::new(file).map_err(|e| {
 		error!("Failed to open epub file: {}", e);
 		ProcessFileError::EpubOpenError(e.to_string())
 	})?;
 
-	let cover = epub_file.get_cover().map_err(|e| {
-		error!("Failed to get cover from epub file: {}", e);
-		ProcessFileError::EpubReadError(e.to_string())
-	})?;
+	let cover_id = epub_file.get_cover_id().unwrap_or_else(|_| {
+		debug!("Epub file does not contain cover metadata");
+		DEFAULT_EPUB_COVER_ID.to_string()
+	});
 
-	// FIXME: mime type
-	Ok((get_content_type_from_mime("image/png"), cover))
+	if let Ok(cover) = epub_file.get_resource(&cover_id) {
+		let mime = epub_file
+			.get_resource_mime(&cover_id)
+			.unwrap_or_else(|_| "image/png".to_string());
+
+		return Ok((ContentType::from(mime.as_str()), cover));
+	}
+
+	debug!(
+		"Explicit cover image could not be found, falling back to searching for best match..."
+	);
+	// FIXME: this is hack, i do NOT want to clone this entire hashmap...
+	let cloned_resources = epub_file.resources.clone();
+	let search_result = cloned_resources
+		.iter()
+		.filter(|(_, (_, mime))| {
+			ACCEPTED_EPUB_COVER_MIMES
+				.iter()
+				.any(|accepted_mime| accepted_mime == mime)
+		})
+		.map(|(id, (path, _))| {
+			trace!(name = ?path, "Found possible cover image");
+			// I want to weight the results based on how likely they are to be the cover.
+			// For example, if the cover is named "cover.jpg", it's probably the cover.
+			// TODO: this is SUPER naive, and should be improved at some point...
+			if path.starts_with("cover") {
+				let weight = if path.ends_with("png") { 100 } else { 75 };
+				(weight, id)
+			} else {
+				(0, id)
+			}
+		})
+		.max_by_key(|(weight, _)| *weight);
+
+	if let Some((_, id)) = search_result {
+		if let Ok(c) = epub_file.get_resource(id) {
+			let mime = epub_file
+				.get_resource_mime(id)
+				.unwrap_or_else(|_| "image/png".to_string());
+
+			return Ok((ContentType::from(mime.as_str()), c));
+		}
+	}
+
+	error!("Failed to find cover for epub file");
+	Err(ProcessFileError::EpubReadError(
+		"Failed to find cover for epub file".to_string(),
+	))
 }
 
 pub fn get_epub_chapter(
@@ -107,15 +162,15 @@ pub fn get_epub_chapter(
 	})?;
 
 	let content_type = match epub_file.get_current_mime() {
-		Ok(mime) => get_content_type_from_mime(&mime),
+		Ok(mime) => ContentType::from(mime.as_str()),
 		Err(e) => {
-			warn!(
-				"Failed to get explicit definition of resource mime for {}: {}",
-				path, e
+			error!(
+				error = ?e,
+				chapter_path = ?path,
+				"Failed to get explicit resource mime for chapter. Returning default.",
 			);
 
-			// FIXME: when did I write this? lmao
-			guess_content_type("REMOVEME.xhml")
+			ContentType::XHTML
 		},
 	};
 
@@ -138,7 +193,7 @@ pub fn get_epub_resource(
 		ProcessFileError::EpubReadError(e.to_string())
 	})?;
 
-	Ok((get_content_type_from_mime(&content_type), contents))
+	Ok((ContentType::from(content_type.as_str()), contents))
 }
 
 pub fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
@@ -200,7 +255,7 @@ pub fn get_epub_resource_from_path(
 	// package.opf, etc.).
 	let content_type = match epub_file.get_resource_mime_by_path(adjusted_path.as_path())
 	{
-		Ok(mime) => get_content_type_from_mime(&mime),
+		Ok(mime) => ContentType::from(mime.as_str()),
 		Err(e) => {
 			warn!(
 				"Failed to get explicit definition of resource mime for {}: {}",
@@ -208,7 +263,7 @@ pub fn get_epub_resource_from_path(
 				e
 			);
 
-			guess_content_type(adjusted_path.as_path().to_str().unwrap())
+			ContentType::from_path(adjusted_path.as_path())
 		},
 	};
 

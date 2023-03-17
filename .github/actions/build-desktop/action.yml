@@ -1,0 +1,37 @@
+name: 'Build Stump desktop app'
+description: 'Compile the Stump desktop app'
+
+inputs:
+  platform:
+    description: 'The plaform of the runner'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout project
+      uses: actions/checkout@v3
+
+    # - name: Configure environment
+    #   run: |
+    #     if [[ ${{ inputs.platform }} == 'linux' || ${{ inputs.platform }} == 'windows' ]]; then
+    #       echo "RUN_SETUP=false" >> $GITHUB_ENV
+    #     else
+    #       echo "RUN_SETUP=true" >> $GITHUB_ENV
+    #     fi
+
+    - name: Setup rust
+      uses: ./.github/actions/setup-cargo
+
+    - name: Generate Prisma client
+      uses: ./.github/actions/setup-prisma
+
+    - name: Copy bundled web app
+      uses: actions/download-artifact@v3
+      with:
+        name: webapp
+        path: ./apps/desktop/dist
+
+    - name: Compile desktop app
+      shell: bash
+      run: cargo build --package stump_desktop --release

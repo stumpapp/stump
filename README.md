@@ -138,19 +138,20 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 ### /apps
 
 - `desktop`: A Tauri application.
-- `server`: An [Axum](https://github.com/tokio-rs/axum) server.
+- `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server.
 - `web`: The React application that is served by the Axum server.
 
 ### /packages
 
-- `client`: Everything needed to create a react-based client for Stump. Contains Zustand and React Query configuration, used by the `interface` package, as well as the generated TypeScript types.
-- `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.
-- `interface`: Stump's main React-based interface, shared between the web and desktop applications.
+- `client`: API functions, react-query hooks, and other client-side utilities utilities for interacting with the Stump API.
+- `components`: Shared React components for the web and desktop applications.
+- `interface`: Exports a React component which renders the Stump interface for web and desktop applications.
 - `prisma-cli`: A small rust app to run the prisma cli (generating the prisma client)
+- `types`: TypeScript types for interfacing with Stump's core and API
 
 ### /core
 
-- `core`: Stump's 'core' functionality is located here, written in Rust. The `server` was previously part of the core, but was extracted for better isolation.
+- `core`: A Rust crate containing Stump's core functionalities.
 
 ## Similar Projects 👯
 

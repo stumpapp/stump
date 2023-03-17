@@ -1,6 +1,7 @@
 import { cva, VariantProps } from 'class-variance-authority'
 import React from 'react'
 
+import { ProgressSpinner } from '../progress/ProgressSpinner'
 import { cn } from '../utils'
 
 export const BUTTON_BASE_CLASSES =
@@ -10,7 +11,7 @@ export const BUTTON_VARIANTS = {
 	danger:
 		'bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600 focus:ring-red-400 dark:focus:ring-red-400',
 	default:
-		'bg-gray-900 text-white hover:bg-gray-700 dark:bg-gray-50 dark:text-gray-900 focus:ring-brand-400',
+		'dark:bg-gray-900 dark:text-white dark:hover:bg-gray-700 bg-gray-50 hover:bg-gray-75 text-gray-900 focus:ring-brand-400',
 	ghost:
 		'bg-transparent hover:bg-gray-75 dark:hover:bg-gray-800 dark:text-gray-100 dark:hover:text-gray-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
 	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
@@ -52,11 +53,22 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
 	VariantProps<typeof buttonVariants> & {
 		pressEffect?: boolean
 		primaryFocus?: boolean
+		isLoading?: boolean
 	}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 	(
-		{ className, variant, size, rounded, pressEffect = true, primaryFocus = true, ...props },
+		{
+			className,
+			variant,
+			size,
+			rounded,
+			pressEffect = false,
+			primaryFocus = true,
+			isLoading,
+			children,
+			...props
+		},
 		ref,
 	) => {
 		return (
@@ -72,7 +84,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 				)}
 				ref={ref}
 				{...props}
-			/>
+			>
+				{isLoading ? (
+					<ProgressSpinner variant={variant === 'primary' ? 'primary' : 'default'} size={size} />
+				) : (
+					children
+				)}
+			</button>
 		)
 	},
 )

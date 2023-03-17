@@ -1,22 +1,15 @@
-import { Heading, Stack, Text } from '@chakra-ui/react'
+import { Button, Heading, Text } from '@stump/components'
 
 import CreateLibraryModal from './CreateLibraryModal'
 
 export default function NoLibraries() {
 	return (
-		<Stack className="flex-1 items-center justify-center" p={4}>
+		<div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
 			<Heading size="md">You don&rsquo;t have any libraries configured</Heading>
-			<Text fontSize="lg">
-				That&rsquo;s okay! To get started, click{' '}
-				<CreateLibraryModal
-					trigger={({ onClick }) => (
-						<span onClick={onClick} className="cursor-pointer text-brand">
-							here
-						</span>
-					)}
-				/>{' '}
-				to add your first one.
-			</Text>
-		</Stack>
+
+			<CreateLibraryModal
+				trigger={({ onClick }) => <Button onClick={onClick}>Create a library</Button>}
+			/>
+		</div>
 	)
 }

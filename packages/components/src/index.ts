@@ -1,5 +1,6 @@
 export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U
+export type PickSelect<T, K extends keyof T> = T[K]
 
 export {
 	type ButtonOrLinkProps,
@@ -12,7 +13,7 @@ export {
 export { type CardProps, type HoverCardProps, Card, HoverCard } from './card'
 export { Container, Layout } from './container'
 export { type ContextMenuProps, ContextMenu } from './context-menu'
-export { CommandPrompt, Dialog } from './dialog'
+export { type ConfirmationModalProps, ConfirmationModal, Dialog } from './dialog'
 export { type DropdownMenuProps, DropdownMenu } from './dropdown'
 export { type LabelProps, Label } from './form'
 export { useBodyLock, useToast } from './hooks'

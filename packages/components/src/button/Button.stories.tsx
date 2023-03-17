@@ -76,3 +76,8 @@ export const Subtle = Template.bind({})
 Subtle.args = {
 	variant: 'subtle',
 }
+
+export const Loading = Template.bind({})
+Loading.args = {
+	isLoading: true,
+}

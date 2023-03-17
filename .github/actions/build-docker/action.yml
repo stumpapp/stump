@@ -100,7 +100,7 @@ runs:
     #   shell: bash
 
     - name: Discord notification
-      if: ${{ success() }}
+      if: ${{ success() && inputs.push == 'true' }}
       env:
         DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
       uses: 'Ilshidur/action-discord@0.3.2'

@@ -1,6 +1,8 @@
 // import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react'
 import { getSeriesThumbnail } from '@stump/api'
 import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client'
+import { invalidateQueries } from '@stump/client/invalidate'
+import { QUERY_KEYS } from '@stump/client/query_keys'
 import { Heading } from '@stump/components'
 import type { Series } from '@stump/types'
 import { useEffect } from 'react'
@@ -67,12 +69,10 @@ export default function SeriesOverview() {
 		throw new Error('Series id is required')
 	}
 
-	const { layoutMode } = useLayoutMode('SERIES')
-
 	const setBackwardsUrl = useTopBarStore((state) => state.setBackwardsUrl)
 
+	const { layoutMode } = useLayoutMode('SERIES')
 	const { series, isLoading: isLoadingSeries } = useSeries(id)
-
 	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMedia(id, page)
 
 	useEffect(() => {
@@ -91,6 +91,11 @@ export default function SeriesOverview() {
 
 		return () => {
 			setBackwardsUrl()
+			// FIXME: why do I need to do this??? What I found was happening was that
+			// the next series returned from `useSeries` would be ~correct~ BUT it would
+			// be wrapped in an axios response, i.e. `{ data: { ... } }`. This doesn't make a
+			// lick of sense to me yet...
+			invalidateQueries({ keys: [QUERY_KEYS.series.get_by_id] })
 		}
 	}, [series, setBackwardsUrl])
 

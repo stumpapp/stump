@@ -13,16 +13,10 @@ use crate::{
 };
 
 impl<'a> IsImage for ZipFile<'a> {
-	// FIXME: use infer here
 	fn is_image(&self) -> bool {
 		if self.is_file() {
-			let content_type = media_file::guess_content_type(self.name());
-			trace!(
-				"Content type of file {:?} is {:?}",
-				self.name(),
-				content_type
-			);
-
+			let content_type = ContentType::from_file(self.name());
+			trace!(name = self.name(), content_type = ?content_type, "ContentType of file");
 			return content_type.is_image();
 		}
 
@@ -147,7 +141,7 @@ pub fn get_image(
 		let mut contents = Vec::new();
 		// Note: guessing mime here since this file isn't accessible from the filesystem,
 		// it lives inside the zip file.
-		let content_type = media_file::guess_content_type(name);
+		let content_type = ContentType::from_file(name);
 
 		if images_seen + 1 == page && file.is_image() {
 			trace!("Found target image: {}", name);

@@ -50,7 +50,8 @@ export function AppLayout() {
 	}
 
 	if (!storeUser) {
-		throw new Error('User was not expected to be null')
+		return null
+		// throw new Error('User was not expected to be null')
 	}
 
 	return (

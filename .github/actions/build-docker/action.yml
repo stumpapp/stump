@@ -10,15 +10,18 @@ inputs:
     required: true
   load:
     description: 'Set output-type to docker'
-    default: true
+    default: 'true'
   push:
     description: 'Set output-type to registry'
-    default: false
+    default: 'false'
   tags:
     description: 'List of tags to assigned to the image'
     default: 'nightly'
   platforms:
     description: 'List of platforms to build'
+    required: true
+  discord-webhook:
+    description: 'Discord webhook to send notifications to'
     required: true
 
 runs:
@@ -95,3 +98,11 @@ runs:
     #     rm -rf /tmp/.buildx-cache
     #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
     #   shell: bash
+
+    - name: Discord notification
+      if: ${{ success() && inputs.push == 'true' }}
+      env:
+        DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
+      uses: 'Ilshidur/action-discord@0.3.2'
+      with:
+        args: 'Successfully pushed the following image tags to registry: ${{ env.TAGS }}'

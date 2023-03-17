@@ -1,8 +1,7 @@
 use std::path::Path;
 
 use serde::Serialize;
-
-use crate::fs::media_file::infer_mime_from_path;
+use tracing::{debug, warn};
 
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
@@ -25,38 +24,86 @@ pub enum ContentType {
 	UNKNOWN,
 }
 
+fn temporary_content_workarounds(extension: &str) -> ContentType {
+	if extension == "opf" || extension == "ncx" {
+		return ContentType::XML;
+	}
+
+	ContentType::UNKNOWN
+}
+
+fn infer_mime(path: &Path) -> Option<String> {
+	match infer::get_from_path(path) {
+		Ok(result) => {
+			debug!(?path, ?result, "Infer result for path");
+			result.map(|infer_type| infer_type.mime_type().to_string())
+		},
+		Err(e) => {
+			warn!(error = ?e, ?path, "Unable to infer mime for file",);
+			None
+		},
+	}
+}
+
 impl ContentType {
-	/// Returns the content type from the file extension.
+	/// Infer the MIME type of a file extension.
 	///
-	/// ## Examples
+	/// ### Examples
 	/// ```rust
 	/// use stump_core::types::server::http::ContentType;
 	///
 	/// let content_type = ContentType::from_extension("png");
 	/// assert_eq!(content_type, Some(ContentType::PNG));
 	/// ```
-	pub fn from_extension(extension: &str) -> Option<ContentType> {
+	pub fn from_extension(extension: &str) -> ContentType {
 		match extension.to_lowercase().as_str() {
-			"xhtml" => Some(ContentType::XHTML),
-			"xml" => Some(ContentType::XML),
-			"html" => Some(ContentType::HTML),
-			"pdf" => Some(ContentType::PDF),
-			"epub" => Some(ContentType::EPUB_ZIP),
-			"zip" => Some(ContentType::ZIP),
-			"cbz" => Some(ContentType::COMIC_ZIP),
-			"rar" => Some(ContentType::RAR),
-			"cbr" => Some(ContentType::COMIC_RAR),
-			"png" => Some(ContentType::PNG),
-			"jpg" => Some(ContentType::JPEG),
-			"jpeg" => Some(ContentType::JPEG),
-			"webp" => Some(ContentType::WEBP),
-			"gif" => Some(ContentType::GIF),
-			_ => None,
+			"xhtml" => ContentType::XHTML,
+			"xml" => ContentType::XML,
+			"html" => ContentType::HTML,
+			"pdf" => ContentType::PDF,
+			"epub" => ContentType::EPUB_ZIP,
+			"zip" => ContentType::ZIP,
+			"cbz" => ContentType::COMIC_ZIP,
+			"rar" => ContentType::RAR,
+			"cbr" => ContentType::COMIC_RAR,
+			"png" => ContentType::PNG,
+			"jpg" => ContentType::JPEG,
+			"jpeg" => ContentType::JPEG,
+			"webp" => ContentType::WEBP,
+			"gif" => ContentType::GIF,
+			_ => temporary_content_workarounds(extension),
 		}
 	}
 
-	pub fn from_infer(path: &Path) -> ContentType {
-		infer_mime_from_path(path)
+	/// Infer the MIME type of a file using the [infer] crate. If the MIME type cannot be inferred,
+	/// then the file extension is used to determine the content type.
+	///
+	/// ### Examples
+	/// ```rust
+	/// use stump_core::types::server::http::ContentType;
+	///
+	/// let content_type = ContentType::from_file("test.png");
+	/// assert_eq!(content_type, ContentType::PNG);
+	/// ```
+	pub fn from_file(file_path: &str) -> ContentType {
+		let path = Path::new(file_path);
+		ContentType::from_path(path)
+	}
+
+	/// Infer the MIME type of a [Path] using the [infer] crate. If the MIME type cannot be inferred,
+	/// then the extension of the path is used to determine the content type.
+	///
+	/// ### Examples
+	/// ```rust
+	/// use stump_core::types::server::http::ContentType;
+	/// use std::path::Path;
+	///
+	/// let path = Path::new("test.png");
+	/// let content_type = ContentType::from_path(path);
+	/// assert_eq!(content_type, ContentType::PNG);
+	/// ```
+	pub fn from_path(path: &Path) -> ContentType {
+		infer_mime(path)
 			.map(|mime| ContentType::from(mime.as_str()))
 			.unwrap_or_else(|| {
 				ContentType::from_extension(
@@ -65,13 +112,17 @@ impl ContentType {
 						.to_str()
 						.unwrap_or_default(),
 				)
-				.unwrap_or(ContentType::UNKNOWN)
 			})
+	}
+
+	/// Returns the string representation of the MIME type.
+	pub fn mime_type(&self) -> String {
+		self.to_string()
 	}
 
 	/// Returns true if the content type is an image.
 	///
-	/// # Examples
+	/// ## Examples
 	/// ```rust
 	/// use stump_core::types::server::http::ContentType;
 	///
@@ -84,9 +135,55 @@ impl ContentType {
 	pub fn is_image(&self) -> bool {
 		self.to_string().starts_with("image")
 	}
+
+	/// Returns true if the content type is a ZIP archive.
+	///
+	/// ## Examples
+	///
+	/// ```rust
+	/// use stump_core::types::server::http::ContentType;
+	///
+	/// let content_type = ContentType::ZIP;
+	/// assert!(content_type.is_zip());
+	/// ```
+	pub fn is_zip(&self) -> bool {
+		self == &ContentType::ZIP || self == &ContentType::COMIC_ZIP
+	}
+
+	/// Returns true if the content type is a RAR archive.
+	///
+	/// ## Examples
+	///
+	/// ```rust
+	/// use stump_core::types::server::http::ContentType;
+	///
+	/// let content_type = ContentType::RAR;
+	/// assert!(content_type.is_rar());
+	/// ```
+	pub fn is_rar(&self) -> bool {
+		self == &ContentType::RAR || self == &ContentType::COMIC_RAR
+	}
+
+	/// Returns true if the content type is an EPUB archive.
+	///
+	/// ## Examples
+	///
+	/// ```rust
+	/// use stump_core::types::server::http::ContentType;
+	///
+	/// let content_type = ContentType::EPUB_ZIP;
+	/// assert!(content_type.is_epub());
+	/// ```
+	pub fn is_epub(&self) -> bool {
+		self == &ContentType::EPUB_ZIP
+	}
 }
 
 impl From<&str> for ContentType {
+	/// Returns the content type from the string.
+	///
+	/// NOTE: It is assumed that the string is a valid representation of a content type.
+	/// **Do not** use this method to parse a file path or extension.
 	fn from(s: &str) -> Self {
 		match s.to_lowercase().as_str() {
 			"application/xhtml+xml" => ContentType::XHTML,

@@ -28,10 +28,15 @@ export type LinkProps = {
 
 export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
 	({ underline = true, to, href, className, variant, ...props }, ref) => {
-		const location = {
+		const destination = {
 			[to ? 'to' : 'href']: to ?? href,
 		}
-		const isExternal = (location.to || location.href || '').startsWith('http')
+		const isExternal = (destination.to || destination.href || '').startsWith('http')
+		const location = {
+			...destination,
+			...(isExternal ? { rel: 'noopener noreferrer', target: '_blank' } : {}),
+		}
+
 		const LinkComponent = isExternal || !to ? 'a' : RouterLink
 
 		return (

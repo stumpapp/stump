@@ -1,3 +1,4 @@
+use futures::StreamExt;
 use std::{
 	sync::{
 		atomic::{AtomicU64, Ordering},
@@ -5,7 +6,6 @@ use std::{
 	},
 	time::Duration,
 };
-use tokio::{self, task::JoinHandle};
 use tracing::{debug, error, trace};
 
 use crate::{
@@ -126,44 +126,38 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 	persist_job_start(&core_ctx, runner_id.clone(), tasks).await?;
 
 	let counter = Arc::new(AtomicU64::new(0));
-	let handles: Vec<JoinHandle<Vec<BatchScanOperation>>> = library_series
-		.into_iter()
-		.map(|s| {
-			let progress_ctx = ctx.clone();
-			let scanner_ctx = core_ctx.clone();
+	let handle_iter = library_series.into_iter().map(|s| async {
+		let progress_ctx = ctx.clone();
+		let scanner_ctx = core_ctx.clone();
 
-			let r_id = runner_id.clone();
-			let counter_ref = counter.clone();
-			let library_path = library.path.clone();
+		let r_id = runner_id.clone();
+		let counter_ref = counter.clone();
+		let library_path = library.path.clone();
 
-			let library_options = library_options.clone();
+		let library_options = library_options.clone();
+		scan_series(scanner_ctx, s, &library_path, library_options, move |msg| {
+			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
 
-			tokio::spawn(async move {
-				scan_series(scanner_ctx, s, &library_path, library_options, move |msg| {
-					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
-
-					progress_ctx.progress(JobUpdate::job_progress(
-						r_id.to_owned(),
-						Some(previous + 1),
-						tasks,
-						Some(msg),
-					));
-				})
-				.await
-			})
+			progress_ctx.progress(JobUpdate::job_progress(
+				r_id.to_owned(),
+				Some(previous + 1),
+				tasks,
+				Some(msg),
+			));
 		})
-		.collect();
+		.await
+	});
 
-	let operations: Vec<BatchScanOperation> = futures::future::join_all(handles)
+	let operations = futures::stream::iter(handle_iter)
+		// Execute up to 10 in parallel
+		.buffer_unordered(10)
+		.collect::<Vec<_>>()
 		.await
 		.into_iter()
-		// TODO: log errors
-		.filter_map(|res| res.ok())
 		.flatten()
 		.collect();
 
 	let final_count = counter.load(Ordering::SeqCst);
-
 	let created_media = batch_media_operations(&core_ctx, operations, &library_options)
 		.await
 		.map_err(|e| {

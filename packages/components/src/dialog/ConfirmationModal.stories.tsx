@@ -15,6 +15,6 @@ Default.args = {
 	closeIcon: true,
 	confirmText: 'Yuh huh',
 	description: 'This action cannot be undone, tho',
-	label: 'Open',
 	title: 'Are you sure?',
+	trigger: 'Open',
 }

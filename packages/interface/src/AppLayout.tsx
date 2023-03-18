@@ -44,14 +44,16 @@ export function AppLayout() {
 		onSuccess: setUser,
 	})
 
+	// TODO: I should def throw error, but something about throwing error causes
+	// an async error
 	// @ts-expect-error: FIXME: type error no good >:(
-	if (error?.code === 'ERR_NETWORK' && appProps?.platform !== 'browser') {
+	const isNetworkError = error?.code === 'ERR_NETWORK'
+	if (isNetworkError && appProps?.platform !== 'browser') {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
 	}
 
 	if (!storeUser) {
 		return null
-		// throw new Error('User was not expected to be null')
 	}
 
 	return (
@@ -63,7 +65,7 @@ export function AppLayout() {
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
 					<main className="h-full w-full bg-white dark:bg-gray-975">
-						{!hideSidebar && <TopBar />}
+						{/* {!hideSidebar && <TopBar />} */}
 						<React.Suspense fallback={<Lazy />}>
 							<Outlet />
 						</React.Suspense>

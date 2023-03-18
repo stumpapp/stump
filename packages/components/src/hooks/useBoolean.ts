@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 export function useBoolean(initialState?: boolean) {
-	const [state, setState] = useState(initialState)
+	const [state, setState] = useState(initialState || false)
 
 	const actions = useMemo(
 		() => ({

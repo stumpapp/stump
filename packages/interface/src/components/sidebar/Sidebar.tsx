@@ -1,14 +1,13 @@
 // TODO: remove this when I have time, fix the icon types
 import { Box, useDisclosure } from '@chakra-ui/react'
 import { refreshUseLibrary, useLibraries } from '@stump/client'
-import { Button, ButtonOrLink, cn, ContextMenu, Heading } from '@stump/components'
+import { Button, ButtonOrLink, cn, Heading } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
 import {
 	type LucideProps,
 	ChevronRight,
-	ExternalLink,
 	Home,
 	Library as LibraryIcon,
 	Settings,
@@ -73,7 +72,7 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 						<ButtonOrLink
 							className="w-full text-center hover:bg-gray-75"
 							variant="outline"
-							href="/libraries/create"
+							href="/library/create"
 							size="md"
 						>
 							Create Library
@@ -154,7 +153,7 @@ export function SidebarContent() {
 				items: libraries?.map((library) => ({
 					...library,
 					active: libraryIsActive(library.id),
-					href: `/libraries/${library.id}`,
+					href: `/library/${library.id}`,
 					onHover: () => refreshUseLibrary(library.id),
 				})),
 				name: t('sidebar.buttons.libraries'),

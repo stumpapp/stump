@@ -16,11 +16,11 @@ export { type ContextMenuProps, ContextMenu } from './context-menu'
 export { type ConfirmationModalProps, ConfirmationModal, Dialog } from './dialog'
 export { type DropdownMenuProps, DropdownMenu } from './dropdown'
 export { type LabelProps, Label } from './form'
-export { useBodyLock, useToast } from './hooks'
+export { useBodyLock, useBoolean, useToast } from './hooks'
 export { AspectRatio, Image } from './image'
 export { type CheckBoxProps, type TextAreaProps, CheckBox, TextArea } from './input'
 export { Link } from './link'
-export { PopOver, ToolTip } from './overlay'
+export { Popover } from './popover'
 export { type ProgressBarProps, ProgressBar } from './progress'
 export {
 	type HeadingProps,
@@ -30,4 +30,5 @@ export {
 	Statistic,
 	Text,
 } from './text'
+export { type ToolTipProps, ToolTip } from './tooltip'
 export { cn, cx } from './utils'

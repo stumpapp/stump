@@ -209,6 +209,7 @@ importers:
       '@radix-ui/react-popover': ^1.0.5
       '@radix-ui/react-progress': ^1.0.2
       '@radix-ui/react-select': ^1.2.1
+      '@radix-ui/react-separator': ^1.0.2
       '@radix-ui/react-switch': ^1.0.2
       '@radix-ui/react-toast': ^1.1.3
       '@radix-ui/react-tooltip': ^1.0.5
@@ -267,6 +268,7 @@ importers:
       '@radix-ui/react-popover': 1.0.5_zula6vjvt3wdocc4mwcxqa6nzi
       '@radix-ui/react-progress': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-select': 1.2.1_zula6vjvt3wdocc4mwcxqa6nzi
+      '@radix-ui/react-separator': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-switch': 1.0.2_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-toast': 1.1.3_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-tooltip': 1.0.5_zula6vjvt3wdocc4mwcxqa6nzi
@@ -5246,6 +5248,18 @@ packages:
       react-remove-scroll: 2.5.5_pmekkgnqduwlme35zpnqhenc34
     transitivePeerDependencies:
       - '@types/react'
+    dev: false
+
+  /@radix-ui/react-separator/1.0.2_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-lZoAG/rS2jzb/OSvyBrpN3dmikw20ewmWx1GkM1VldbDyD0DACCbH9LIXSrqyS/2mE1VYKOHmyq5W90Dx4ryqA==}
+    peerDependencies:
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    dependencies:
+      '@babel/runtime': 7.20.13
+      '@radix-ui/react-primitive': 1.0.2_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     dev: false
 
   /@radix-ui/react-slot/1.0.0_react@18.2.0:

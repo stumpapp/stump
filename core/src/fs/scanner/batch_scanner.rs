@@ -126,7 +126,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 	persist_job_start(&core_ctx, runner_id.clone(), tasks).await?;
 
 	let counter = Arc::new(AtomicU64::new(0));
-	let handle_iter = library_series.into_iter().map(|s| async {
+	let future_iter = library_series.into_iter().map(|s| async {
 		let progress_ctx = ctx.clone();
 		let scanner_ctx = core_ctx.clone();
 
@@ -148,7 +148,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		.await
 	});
 
-	let operations = futures::stream::iter(handle_iter)
+	let operations = futures::stream::iter(future_iter)
 		// Execute up to 10 in parallel
 		.buffer_unordered(10)
 		.collect::<Vec<_>>()

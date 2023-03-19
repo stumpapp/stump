@@ -63,7 +63,7 @@ export default function LoginOrClaimScene() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col items-center gap-8 p-4">
+		<div className="flex h-full w-full flex-col items-center gap-8 bg-white p-4 dark:bg-gray-975">
 			<div className="flex flex-shrink-0 items-center justify-center gap-4 px-2">
 				<img src="/assets/favicon.png" width="120" height="120" />
 				<Heading variant="gradient" size="3xl" className="font-bold">
@@ -83,6 +83,7 @@ export default function LoginOrClaimScene() {
 					id="username"
 					label={t('loginPage.form.labels.username')}
 					variant="primary"
+					autoComplete="username"
 					autoFocus
 					{...form.register('username')}
 				/>
@@ -92,6 +93,7 @@ export default function LoginOrClaimScene() {
 					label={t('loginPage.form.labels.password')}
 					variant="primary"
 					type="password"
+					autoComplete="current-password"
 					{...form.register('password')}
 				/>
 

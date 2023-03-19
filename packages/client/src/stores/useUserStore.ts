@@ -33,7 +33,12 @@ export const useUserStore = create<UserStore>()(
 						}),
 					)
 
-					get().setUserPreferences(user?.user_preferences ?? null)
+					// NOTE: I am not killing the user preferences when a user logs out. This might
+					// be 'controversial' but I think it's net postive. Otherwise, certain things
+					// like locality, theme, etc. will be lost.
+					if (user?.user_preferences) {
+						get().setUserPreferences(user.user_preferences)
+					}
 				},
 				setUserPreferences(userPreferences: UserPreferences | null) {
 					set((state) =>

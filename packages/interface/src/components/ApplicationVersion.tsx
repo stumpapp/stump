@@ -1,8 +1,8 @@
 import { useStumpVersion } from '@stump/client'
-import { Heading, HoverCard, Link } from '@stump/components'
+import { Heading, HoverCard, Link, Text, TEXT_VARIANTS } from '@stump/components'
 import dayjs from 'dayjs'
 import LocalizedFormat from 'dayjs/plugin/localizedFormat'
-import { ArrowSquareOut } from 'phosphor-react'
+import { ExternalLink } from 'lucide-react'
 
 dayjs.extend(LocalizedFormat)
 
@@ -20,7 +20,7 @@ export default function ApplicationVersion() {
 					underline={false}
 				>
 					<span>v{version?.semver}</span>
-					<ArrowSquareOut />
+					<ExternalLink className="h-3 w-3" />
 				</Link>
 			}
 		>
@@ -30,10 +30,23 @@ export default function ApplicationVersion() {
 					<Heading className="text-xs">Version Information</Heading>
 				</div>
 				<div className="flex flex-col gap-1">
-					{version?.semver && <span className="text-xs">Semantic Version: {version.semver}</span>}
-					{version?.rev && <span className="text-xs">Commit: {version.rev}</span>}
+					{version?.semver && (
+						<Text className="text-xs">
+							Semantic Version: <span className={TEXT_VARIANTS.muted}>{version.semver}</span>
+						</Text>
+					)}
+					{version?.rev && (
+						<Text className="text-xs">
+							Commit: <span className={TEXT_VARIANTS.muted}>{version.rev}</span>
+						</Text>
+					)}
 					{version?.compile_time && (
-						<span className="text-xs">Build Date: {dayjs(version.compile_time).format('LLL')}</span>
+						<Text className="text-xs">
+							Build Date:{' '}
+							<span className={TEXT_VARIANTS.muted}>
+								{dayjs(version.compile_time).format('LLL')}
+							</span>
+						</Text>
 					)}
 				</div>
 			</div>

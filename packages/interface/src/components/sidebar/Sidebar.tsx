@@ -175,10 +175,7 @@ export function SidebarContent() {
 			<div className="flex items-center justify-between px-4">
 				<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
 					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
-					<Heading
-						size="xs"
-						className="bg-gradient-to-r from-brand-600 to-brand-500 bg-clip-text text-transparent"
-					>
+					<Heading variant="gradient" size="xs">
 						Stump
 					</Heading>
 				</Link>

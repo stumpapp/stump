@@ -15,7 +15,7 @@ export type LazyComponent = Promise<{
 // I'm still so annoyed at this lol
 export const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
-const Home = lazily(() => import('./pages/Home'))
+const HomeScene = lazily(() => import('./scenes/home/HomeScene'))
 const SeriesOverview = lazily(() => import('./pages/SeriesOverview'))
 const BookOverview = lazily(() => import('./pages/book/BookOverview'))
 const ReadBook = lazily(() => import('./pages/book/ReadBook'))
@@ -27,7 +27,7 @@ const ServerSettings = lazily(() => import('./pages/settings/ServerSettings'))
 const UserSettings = lazily(() => import('./pages/settings/UserSettings'))
 const FourOhFour = lazily(() => import('./pages/FourOhFour'))
 const ServerConnectionError = lazily(() => import('./pages/ServerConnectionError'))
-const LoginOrClaim = lazily(() => import('./pages/LoginOrClaim'))
+const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene'))
 const OnBoarding = lazily(() => import('./pages/OnBoarding'))
 
 function OnBoardingRouter() {
@@ -54,7 +54,7 @@ export function AppRouter() {
 	return (
 		<Routes>
 			<Route path="/" element={<AppLayout />}>
-				<Route path="" element={<Home />} />
+				<Route path="" element={<HomeScene />} />
 
 				<Route path="library/*" element={<LibraryRouter />} />
 
@@ -74,7 +74,7 @@ export function AppRouter() {
 				</Route>
 			</Route>
 
-			<Route path="/auth" element={<LoginOrClaim />} />
+			<Route path="/auth" element={<LoginOrClaimScene />} />
 			{appProps?.platform !== 'browser' && (
 				<Route path="/server-connection-error" element={<ServerConnectionError />} />
 			)}

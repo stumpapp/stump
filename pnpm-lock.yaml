@@ -243,6 +243,7 @@ importers:
       postcss-loader: ^7.0.2
       react: ^18.2.0
       react-dom: ^18.2.0
+      react-hook-form: ^7.43.1
       react-router-dom: ^6.8.1
       require-from-string: ^2.0.2
       storybook-dark-mode: ^2.1.1
@@ -281,6 +282,7 @@ importers:
       postcss: 8.4.21
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      react-hook-form: 7.43.1_react@18.2.0
       react-router-dom: 6.8.1_biqbaboplfbrettd7655fr4n2y
       tailwind-merge: 1.10.0
       tailwindcss: 3.2.7_postcss@8.4.21
@@ -15673,6 +15675,15 @@ packages:
     engines: {node: '>=12.22.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18
+    dev: false
+
+  /react-hook-form/7.43.1_react@18.2.0:
+    resolution: {integrity: sha512-+s3+s8LLytRMriwwuSqeLStVjRXFGxgjjx2jED7Z+wz1J/88vpxieRQGvJVvzrzVxshZ0BRuocFERb779m2kNg==}
+    engines: {node: '>=12.22.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react-hot-toast/2.4.0_react-dom@18.2.0:

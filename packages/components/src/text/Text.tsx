@@ -4,6 +4,12 @@ import React from 'react'
 import { cn } from '../utils'
 
 // TODO: common combination shortcuts, e.g. description, subtitle, etc.
+export const TEXT_VARIANTS = {
+	default: 'text-gray-900 dark:text-gray-100',
+	muted: 'text-gray-500 dark:text-gray-450',
+	primary: 'text-brand',
+	secondary: 'text-gray-700 dark:text-gray-300',
+}
 
 const textVariants = cva('', {
 	defaultVariants: {
@@ -18,12 +24,7 @@ const textVariants = cva('', {
 			xl: 'text-xl',
 			xs: 'text-xs',
 		},
-		variant: {
-			default: 'text-gray-900 dark:text-gray-100',
-			muted: 'text-gray-500 dark:text-gray-450',
-			primary: 'text-brand',
-			secondary: 'text-gray-700 dark:text-gray-300',
-		},
+		variant: TEXT_VARIANTS,
 	},
 })
 

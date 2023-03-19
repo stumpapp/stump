@@ -20,13 +20,16 @@ type BaseProps = VariantProps<typeof toolTipVariants> & Pick<ToolTipContentProps
 export type ToolTipProps = {
 	children: React.ReactNode
 	content: string | React.ReactNode
+	isDisabled?: boolean
 } & BaseProps
 
-export function ToolTip({ children, content, align, size }: ToolTipProps) {
+export function ToolTip({ children, content, align, size, isDisabled }: ToolTipProps) {
 	return (
 		<ToolTipProvider>
 			<ToolTipPrimitive>
-				<ToolTipPrimitive.Trigger asChild>{children}</ToolTipPrimitive.Trigger>
+				<ToolTipPrimitive.Trigger asChild disabled={isDisabled}>
+					{children}
+				</ToolTipPrimitive.Trigger>
 				<ToolTipPrimitive.Content align={align} className={toolTipVariants({ size })}>
 					{content}
 				</ToolTipPrimitive.Content>

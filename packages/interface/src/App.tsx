@@ -1,6 +1,5 @@
 import './styles/index.css'
 
-import { ChakraProvider } from '@chakra-ui/react'
 import { initializeApi } from '@stump/api'
 import {
 	AppProps,
@@ -20,7 +19,6 @@ import { Helmet } from 'react-helmet'
 import { BrowserRouter, createSearchParams, useLocation, useNavigate } from 'react-router-dom'
 
 import { AppRouter } from './AppRouter'
-import { chakraTheme } from './chakra'
 import { ErrorFallback } from './components/ErrorFallback'
 import Notifications from './components/Notifications'
 import { API_VERSION } from './index'
@@ -116,7 +114,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 export default function StumpInterface(props: AppProps) {
 	return (
-		<ChakraProvider theme={chakraTheme}>
+		<>
 			<ErrorBoundary FallbackComponent={ErrorFallback}>
 				<QueryClientProvider
 					client={queryClient}
@@ -132,6 +130,6 @@ export default function StumpInterface(props: AppProps) {
 				</QueryClientProvider>
 			</ErrorBoundary>
 			<Notifications />
-		</ChakraProvider>
+		</>
 	)
 }

@@ -1,7 +1,7 @@
 import { useContinueReading } from '@stump/client'
 
-import SlidingCardList from '../SlidingCardList'
-import MediaCard from './MediaCard'
+import MediaCard from '../../components/media/MediaCard'
+import SlidingCardList from '../../components/SlidingCardList'
 
 // TODO: better empty state
 export default function ContinueReadingMedia() {

@@ -2,6 +2,7 @@ export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U
 export type PickSelect<T, K extends keyof T> = T[K]
 
+export { type BadgeProps, Badge } from './badge'
 export {
 	type ButtonOrLinkProps,
 	type ButtonProps,
@@ -15,10 +16,10 @@ export { Container, Layout } from './container'
 export { type ContextMenuProps, ContextMenu } from './context-menu'
 export { type ConfirmationModalProps, ConfirmationModal, Dialog } from './dialog'
 export { type DropdownMenuProps, DropdownMenu } from './dropdown'
-export { type LabelProps, Label } from './form'
+export { type FormProps, type LabelProps, Form, Label } from './form'
 export { useBodyLock, useBoolean, useToast } from './hooks'
 export { AspectRatio, Image } from './image'
-export { type CheckBoxProps, type TextAreaProps, CheckBox, TextArea } from './input'
+export { type CheckBoxProps, type TextAreaProps, CheckBox, Input, TextArea } from './input'
 export { Link } from './link'
 export { Popover } from './popover'
 export { type ProgressBarProps, ProgressBar } from './progress'
@@ -29,6 +30,7 @@ export {
 	Heading,
 	Statistic,
 	Text,
+	TEXT_VARIANTS,
 } from './text'
 export { type ToolTipProps, ToolTip } from './tooltip'
 export { cn, cx } from './utils'

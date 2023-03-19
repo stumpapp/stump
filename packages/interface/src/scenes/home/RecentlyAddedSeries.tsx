@@ -1,7 +1,7 @@
 import { useRecentlyAddedSeries } from '@stump/client'
 
-import SlidingCardList from '../SlidingCardList'
-import SeriesCard from './SeriesCard'
+import SeriesCard from '../../components/series/SeriesCard'
+import SlidingCardList from '../../components/SlidingCardList'
 
 // TODO: better empty state
 export default function RecentlyAddedSeries() {

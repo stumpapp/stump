@@ -1,10 +1,8 @@
-import { Heading, IconButton, Text } from '@stump/components'
+import { Heading, IconButton, Text, ToolTip } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import clsx from 'clsx'
-import { CaretLeft, CaretRight } from 'phosphor-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
-
-import ToolTip from '../ui/ToolTip'
 
 interface Props {
 	title?: string
@@ -106,9 +104,8 @@ export default function SlidingCardList({
 			<div className="flex flex-row items-center justify-between">
 				{title && <Heading size="md">{title}</Heading>}
 				<div className={clsx('self-end', { hidden: isEmpty })}>
-					{/* TODO: <ButtonGroup isAttached={false}> */}
 					<div className="flex gap-2">
-						<ToolTip label="Seek backwards" isDisabled={!canSkipBackward}>
+						<ToolTip content="Seek backwards" isDisabled={!canSkipBackward}>
 							<IconButton
 								variant="ghost"
 								size="sm"
@@ -116,10 +113,10 @@ export default function SlidingCardList({
 								onClick={() => handleSkipBackward()}
 								onDoubleClick={() => handleSkipBackward(20)}
 							>
-								<CaretLeft />
+								<ChevronLeft className="h-4 w-4" />
 							</IconButton>
 						</ToolTip>
-						<ToolTip label="Seek Ahead" isDisabled={!canSkipForward}>
+						<ToolTip content="Seek Ahead" isDisabled={!canSkipForward}>
 							<IconButton
 								variant="ghost"
 								size="sm"
@@ -127,7 +124,7 @@ export default function SlidingCardList({
 								onClick={() => handleSkipAhead()}
 								onDoubleClick={() => handleSkipAhead(20)}
 							>
-								<CaretRight />
+								<ChevronRight className="h-4 w-4" />
 							</IconButton>
 						</ToolTip>
 					</div>

@@ -1,26 +1,15 @@
-import {
-	Alert,
-	AlertIcon,
-	Button,
-	Container,
-	FormControl,
-	FormLabel,
-	HStack,
-	Stack,
-	Text,
-} from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { queryClient, useLoginOrRegister, useUserStore } from '@stump/client'
+import { Button, Form, Heading, Input } from '@stump/components'
 import { FieldValues, useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
+import { Navigate } from 'react-router'
+import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { useLocale } from '../hooks/useLocale'
-import Form from '../ui/Form'
-import Input from '../ui/Input'
+import { useLocale } from '../../hooks/useLocale'
 
-export default function LoginOrClaim() {
+export default function LoginOrClaimScene() {
 	const [params] = useSearchParams()
 
 	const { user, setUser } = useUserStore((store) => ({
@@ -29,7 +18,6 @@ export default function LoginOrClaim() {
 	}))
 
 	const { t } = useLocale()
-
 	const { isClaimed, isCheckingClaimed, loginUser, registerUser, isLoggingIn, isRegistering } =
 		useLoginOrRegister({
 			onSuccess: setUser,
@@ -75,49 +63,44 @@ export default function LoginOrClaim() {
 	}
 
 	return (
-		<Stack as={Container} p="4" spacing={4}>
-			<HStack px={2} flexShrink={0} justifyContent="center" alignItems="center" spacing="4">
+		<div className="flex h-full w-full flex-col items-center gap-8 p-4">
+			<div className="flex flex-shrink-0 items-center justify-center gap-4 px-2">
 				<img src="/assets/favicon.png" width="120" height="120" />
-				<Text
-					bgGradient="linear(to-r, brand.600, brand.200)"
-					bgClip="text"
-					fontSize="4xl"
-					fontWeight="bold"
-				>
+				<Heading variant="gradient" size="3xl" className="font-bold">
 					Stump
-				</Text>
-			</HStack>
+				</Heading>
+			</div>
 
-			{!isClaimed && (
+			{/* {!isClaimed && (
 				<Alert status="warning" rounded="md">
 					<AlertIcon />
 					{t('loginPage.claimText')}
 				</Alert>
-			)}
+			)} */}
 
-			<Form form={form} onSubmit={handleSubmit}>
-				<FormControl>
-					<FormLabel htmlFor="username">{t('loginPage.form.labels.username')}</FormLabel>
-					<Input type="text" autoFocus {...form.register('username')} />
-				</FormControl>
+			<Form form={form} onSubmit={handleSubmit} className="min-w-[20rem]">
+				<Input
+					id="username"
+					label={t('loginPage.form.labels.username')}
+					variant="primary"
+					autoFocus
+					{...form.register('username')}
+				/>
 
-				<FormControl>
-					<FormLabel htmlFor="passowrd">{t('loginPage.form.labels.password')}</FormLabel>
-					<Input type="password" {...form.register('password')} />
-				</FormControl>
+				<Input
+					id="password"
+					label={t('loginPage.form.labels.password')}
+					variant="primary"
+					type="password"
+					{...form.register('password')}
+				/>
 
-				<Button
-					isLoading={isLoggingIn || isRegistering}
-					type="submit"
-					color="gray.100"
-					bgGradient="linear(to-r, brand.600, brand.400)"
-					_hover={{ bgGradient: 'linear(to-r, brand.700, brand.500)' }}
-				>
+				<Button size="md" type="submit" variant="primary" isLoading={isLoggingIn || isRegistering}>
 					{isClaimed
 						? t('loginPage.form.buttons.login')
 						: t('loginPage.form.buttons.createAccount')}
 				</Button>
 			</Form>
-		</Stack>
+		</div>
 	)
 }

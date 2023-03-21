@@ -11,6 +11,7 @@ import { useLocale } from '../../hooks/useLocale'
 
 export default function LoginOrClaimScene() {
 	const [params] = useSearchParams()
+	const redirect = params.get('redirect') || '/'
 
 	const { user, setUser } = useUserStore((store) => ({
 		setUser: store.setUser,
@@ -57,7 +58,14 @@ export default function LoginOrClaimScene() {
 
 	if (user) {
 		queryClient.invalidateQueries(['getLibraries'])
-		return <Navigate to={params.get('redirect') || '/'} />
+		// NOTE: if swagger UI, we need a redirect outside of react-router context, otherwise
+		// we will get a 404 trying to route to a server-rendered page via react-router
+		if (redirect.includes('/swagger')) {
+			window.location.href = redirect
+			return null
+		}
+
+		return <Navigate to={redirect} />
 	} else if (isCheckingClaimed) {
 		return null
 	}

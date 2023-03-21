@@ -3,12 +3,12 @@ import React, { useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import CommandPalette from './components/CommandPalette'
+// import CommandPalette from './components/CommandPalette'
 import JobOverlay from './components/jobs/JobOverlay'
 import Lazy from './components/Lazy'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
-import TopBar from './components/topbar/TopBar'
+// import TopBar from './components/topbar/TopBar'
 import { AppContext } from './context'
 
 export function AppLayout() {
@@ -61,7 +61,7 @@ export function AppLayout() {
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
 			<React.Suspense fallback={<Lazy />}>
-				<CommandPalette />
+				{/* <CommandPalette /> */}
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
 					<main className="h-full w-full bg-white dark:bg-gray-975">

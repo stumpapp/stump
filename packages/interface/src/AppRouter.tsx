@@ -1,9 +1,10 @@
 import { useAppProps } from '@stump/client'
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Navigate } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
+import Lazy from './components/Lazy'
 import LibraryRouter from './scenes/library/LibraryRouter'
 
 // FIXME: this is really annoying
@@ -52,33 +53,35 @@ export function AppRouter() {
 	}
 
 	return (
-		<Routes>
-			<Route path="/" element={<AppLayout />}>
-				<Route path="" element={<HomeScene />} />
+		<Suspense fallback={<Lazy />}>
+			<Routes>
+				<Route path="/" element={<AppLayout />}>
+					<Route path="" element={<HomeScene />} />
 
-				<Route path="library/*" element={<LibraryRouter />} />
+					<Route path="library/*" element={<LibraryRouter />} />
 
-				<Route path="series/:id" element={<SeriesOverview />} />
+					<Route path="series/:id" element={<SeriesOverview />} />
 
-				<Route path="books/:id" element={<BookOverview />} />
-				<Route path="books/:id/pages/:page" element={<ReadBook />} />
-				<Route path="epub/:id" element={<ReadEpub />} />
+					<Route path="books/:id" element={<BookOverview />} />
+					<Route path="books/:id/pages/:page" element={<ReadBook />} />
+					<Route path="epub/:id" element={<ReadEpub />} />
 
-				<Route path="settings" element={<SettingsLayout />}>
-					<Route path="" element={<Navigate to="/settings/general" replace />} />
-					<Route path="general" element={<GeneralSettings />} />
-					<Route path="users" element={<UserSettings />} />
-					<Route path="server" element={<ServerSettings />} />
-					<Route path="jobs" element={<JobSettings />} />
-					{appProps?.platform !== 'browser' && <Route path="desktop" element={<>Desktop!</>} />}
+					<Route path="settings" element={<SettingsLayout />}>
+						<Route path="" element={<Navigate to="/settings/general" replace />} />
+						<Route path="general" element={<GeneralSettings />} />
+						<Route path="users" element={<UserSettings />} />
+						<Route path="server" element={<ServerSettings />} />
+						<Route path="jobs" element={<JobSettings />} />
+						{appProps?.platform !== 'browser' && <Route path="desktop" element={<>Desktop!</>} />}
+					</Route>
 				</Route>
-			</Route>
 
-			<Route path="/auth" element={<LoginOrClaimScene />} />
-			{appProps?.platform !== 'browser' && (
-				<Route path="/server-connection-error" element={<ServerConnectionError />} />
-			)}
-			<Route path="*" element={<FourOhFour />} />
-		</Routes>
+				<Route path="/auth" element={<LoginOrClaimScene />} />
+				{appProps?.platform !== 'browser' && (
+					<Route path="/server-connection-error" element={<ServerConnectionError />} />
+				)}
+				<Route path="*" element={<FourOhFour />} />
+			</Routes>
+		</Suspense>
 	)
 }

@@ -8,12 +8,14 @@ const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyCompo
 
 const CreateLibraryScene = lazily(() => import('./admins/CreateLibraryScene'))
 const UpdateLibraryScene = lazily(() => import('./admins/UpdateLibraryScene'))
-const LibraryExplorerScene = lazily(() => import('./LibraryExplorerScene'))
+const LibraryExplorerScene = lazily(() => import('./explorer/LibraryExplorerScene'))
+const LibraryOverviewScene = lazily(() => import('./LibraryOverviewScene'))
 
 export default function LibraryRouter() {
 	return (
 		<Routes>
 			<Route path=":id/explore" element={<LibraryExplorerScene />} />
+			<Route path=":id" element={<LibraryOverviewScene />} />
 			<Route element={<LibraryAdminLayout />}>
 				<Route path="create" element={<CreateLibraryScene />} />
 				<Route path=":id/edit" element={<UpdateLibraryScene />} />

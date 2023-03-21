@@ -9,7 +9,7 @@ import RecentlyAddedMedia from './RecentlyAddedMedia'
 import RecentlyAddedSeries from './RecentlyAddedSeries'
 
 // TODO: account for new accounts, i.e. no media at all
-export default function Home() {
+export default function HomeScene() {
 	const { libraries, isLoading } = useLibraries()
 
 	const helmet = (

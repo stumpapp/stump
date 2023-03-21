@@ -115,21 +115,21 @@ function RouterContainer(props: { appProps: AppProps }) {
 export default function StumpInterface(props: AppProps) {
 	return (
 		<>
-			<ErrorBoundary FallbackComponent={ErrorFallback}>
-				<QueryClientProvider
-					client={queryClient}
-					// FIXME: this will be removed... https://github.com/TanStack/query/discussions/4252
-					contextSharing={true}
-				>
-					{import.meta.env.MODE === 'development' && (
-						<ReactQueryDevtools position="bottom-right" context={defaultContext} />
-					)}
-					<BrowserRouter>
+			<BrowserRouter>
+				<ErrorBoundary FallbackComponent={ErrorFallback}>
+					<QueryClientProvider
+						client={queryClient}
+						// FIXME: this will be removed... https://github.com/TanStack/query/discussions/4252
+						contextSharing={true}
+					>
+						{import.meta.env.MODE === 'development' && (
+							<ReactQueryDevtools position="bottom-right" context={defaultContext} />
+						)}
 						<RouterContainer appProps={props} />
-					</BrowserRouter>
-				</QueryClientProvider>
-			</ErrorBoundary>
-			<Notifications />
+					</QueryClientProvider>
+				</ErrorBoundary>
+				<Notifications />
+			</BrowserRouter>
 		</>
 	)
 }

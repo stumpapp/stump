@@ -51,19 +51,19 @@ export default function LibraryOptionsMenu({ library }: Props) {
 							leftIcon: <FileScan className={iconStyle} />,
 							subItems: [
 								{
-									label: 'Batched Scan',
+									label: 'Parallel Scan',
 									leftIcon: <ScanFace className={iconStyle} />,
 									onClick: () => handleScan('BATCHED'),
 								},
 								{
-									label: 'Synchronous Scan',
+									label: 'In-Order Scan',
 									leftIcon: <ScanLine className={iconStyle} />,
 									onClick: () => handleScan('SYNC'),
 								},
 							],
 						},
 						{
-							href: `/libraries/${library.id}/explorer`,
+							href: `/library/${library.id}/explore`,
 							label: 'File Explorer',
 							leftIcon: <FolderSearch2 className={iconStyle} />,
 						},
@@ -72,7 +72,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 				{
 					items: [
 						{
-							href: `/libraries/${library.id}/edit`,
+							href: `/library/${library.id}/edit`,
 							label: 'Edit Library',
 							leftIcon: <Edit className={iconStyle} />,
 						},
@@ -87,48 +87,4 @@ export default function LibraryOptionsMenu({ library }: Props) {
 			align="start"
 		/>
 	)
-
-	// // FIXME: so, disabled on the MenuItem doesn't seem to actually work... how cute.
-	// return (
-	// 	// TODO: https://chakra-ui.com/docs/theming/customize-theme#customizing-component-styles
-	// 	<div>
-	// 		<Menu size="sm">
-	// 			<MenuButton
-	// 				disabled={user?.role !== 'SERVER_OWNER'}
-	// 				hidden={user?.role !== 'SERVER_OWNER'}
-	// 				p={1}
-	// 				rounded="full"
-	// 				_hover={{ _dark: { bg: 'gray.700' }, bg: 'gray.200' }}
-	// 				_focus={{
-	// 					boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
-	// 				}}
-	// 				_active={{
-	// 					boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
-	// 				}}
-	// 			>
-	// 				{/* <DotsThreeVertical size={'1.25rem'} /> */}
-	// 			</MenuButton>
-
-	// 			<MenuList>
-	// 				{/* TODO: scanMode */}
-	// 				<MenuItem
-	// 					disabled={user?.role !== 'SERVER_OWNER'}
-	// 					// icon={<ArrowsClockwise size={'1rem'} />}
-	// 					onClick={handleScan}
-	// 				>
-	// 					Scan
-	// 				</MenuItem>
-	// 				<EditLibraryModal library={library} disabled={user?.role !== 'SERVER_OWNER'} />
-	// 				<MenuItem
-	// 					// icon={<Binoculars size={'1rem'} />}
-	// 					onClick={() => navigate(`libraries/${library.id}/explorer`)}
-	// 				>
-	// 					File Explorer
-	// 				</MenuItem>
-	// 				<MenuDivider />
-	// 				<DeleteLibraryModal library={library} disabled={user?.role !== 'SERVER_OWNER'} />
-	// 			</MenuList>
-	// 		</Menu>
-	// 	</div>
-	// )
 }

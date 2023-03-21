@@ -4,12 +4,12 @@ import { Helmet } from 'react-helmet'
 import toast from 'react-hot-toast'
 import { useParams } from 'react-router-dom'
 
-import FileExplorer from '../../components/files/FileExplorer'
+import FileExplorer from './FileExplorer'
 
 // TODO: this is just a concept right now, its pretty ugly and I won't spend much more time on it
 // until more of stump is compelted. That being said, if someone wants to run with this go for it!
 // most of what would be needed on the backend is in place.
-export default function LibraryFileExplorer() {
+export default function LibraryExplorerScene() {
 	const mounted = useRef(false)
 
 	const { id } = useParams()

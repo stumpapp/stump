@@ -1,4 +1,4 @@
-import { Text } from '@chakra-ui/react'
+import { Text } from '@stump/components'
 import type { DirectoryListingFile } from '@stump/types'
 
 interface FileExplorerProps {
@@ -40,7 +40,7 @@ function ExplorerFile({ name, path, is_directory }: DirectoryListingFile) {
 		<button className="flex flex-col items-center justify-center space-y-2">
 			{/* FIXME: don't use images for svg fallbacks... or, just set color of images... */}
 			<img src={getIconSrc()} className="h-20 w-20 active:scale-[.99]" />
-			<Text maxW="20" fontSize="xs" noOfLines={2}>
+			<Text className="max-w-[5rem]" size="xs" noOfLines={2}>
 				{name}
 			</Text>
 		</button>

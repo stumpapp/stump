@@ -1,7 +1,4 @@
-'use client'
-
 import { Button, PickSelect } from '..'
-import { useBoolean } from '../hooks/useBoolean'
 import { Dialog } from './primitives'
 
 type ButtonVariant = PickSelect<React.ComponentProps<typeof Button>, 'variant'>

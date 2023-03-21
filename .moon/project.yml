@@ -10,6 +10,8 @@ fileGroups:
     - 'public/**/*'
     - 'src/**/*'
     - 'types/**/*'
+    # TODO: stop pulling dist from cache :weary:
+    # - '!**/dist'
   typescript:
     - 'public/**/*'
     - 'src/**/*'

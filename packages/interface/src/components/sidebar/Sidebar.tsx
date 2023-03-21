@@ -1,7 +1,5 @@
-// TODO: remove this when I have time, fix the icon types
-import { Box, useDisclosure } from '@chakra-ui/react'
 import { refreshUseLibrary, useLibraries } from '@stump/client'
-import { Button, ButtonOrLink, cn, Heading } from '@stump/components'
+import { Button, ButtonOrLink, cn, Heading, useBoolean } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
@@ -12,13 +10,13 @@ import {
 	Library as LibraryIcon,
 	Settings,
 } from 'lucide-react'
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useLocale } from '../../hooks/useLocale'
 import ApplicationVersion from '../ApplicationVersion'
-import LibraryOptionsMenu from '../library/LibraryOptionsMenu'
 import NavigationButtons from '../topbar/NavigationButtons'
+import LibraryOptionsMenu from './LibraryOptionsMenu'
 import Logout from './Logout'
 import ThemeToggle from './ThemeToggle'
 
@@ -38,41 +36,43 @@ interface NavItemProps {
 	active?: boolean
 }
 
-function NavMenuItem({ name, items, ...rest }: NavItemProps) {
-	const { isOpen, onToggle } = useDisclosure()
+function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
+	const [isOpen, { toggle }] = useBoolean()
 
 	const Icon = rest.icon
 
 	return (
-		<>
+		<Suspense fallback={null}>
 			<Button
 				variant="ghost"
 				className="flex w-full items-center justify-between"
 				size="lg"
-				onClick={onToggle}
+				onClick={toggle}
 				pressEffect={false}
 			>
 				<div className="flex items-center space-x-2">
 					<Icon className="h-5 w-5" />
 					<span>{name}</span>
 				</div>
-				<Box p={1} rounded="full">
+				<div className="rounded-full p-1">
 					<ChevronRight
 						className={clsx(
 							isOpen ? 'rotate-90' : 'rotate-270',
 							'h-4 w-4 transition-all duration-100',
 						)}
 					/>
-				</Box>
+				</div>
 			</Button>
 
 			<AnimatePresence>
 				{isOpen && (
 					<div className="max-h-full w-full">
+						{/* TODO: disabled state looks not disabled */}
 						<ButtonOrLink
+							href="/library/create"
+							disabled={active}
 							className="w-full text-center hover:bg-gray-75"
 							variant="outline"
-							href="/library/create"
 							size="md"
 						>
 							Create Library
@@ -103,7 +103,7 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 					</div>
 				)}
 			</AnimatePresence>
-		</>
+		</Suspense>
 	)
 }
 
@@ -112,9 +112,9 @@ function NavItem({ name, href, active, ...rest }: NavItemProps) {
 
 	return (
 		<ButtonOrLink
+			href={href}
 			size="lg"
 			className={clsx('flex w-full justify-start', { 'bg-gray-50 dark:bg-gray-850': active })}
-			href={href}
 			variant="ghost"
 		>
 			<div className="flex items-center space-x-2">
@@ -149,6 +149,7 @@ export function SidebarContent() {
 		() => [
 			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
 			{
+				active: location.pathname === 'library/create',
 				icon: LibraryIcon,
 				items: libraries?.map((library) => ({
 					...library,

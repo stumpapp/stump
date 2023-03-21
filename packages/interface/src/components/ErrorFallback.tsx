@@ -1,4 +1,3 @@
-import { Code } from '@chakra-ui/react'
 import { Button, ButtonOrLink, Heading, Text } from '@stump/components'
 import { ExternalLink } from 'lucide-react'
 import { FallbackProps } from 'react-error-boundary'
@@ -19,7 +18,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 	return (
 		<div
 			data-tauri-drag-region
-			className="flex flex-col items-center justify-center gap-2 pt-12 md:pt-16"
+			className="mx-auto flex flex-col items-center justify-center gap-2 pt-12 md:pt-16"
 		>
 			<Heading as="h4" size="sm">
 				lol, oops
@@ -33,11 +32,13 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 				{error.message}
 			</Text>
 
-			<div className="flex flex-col gap-2">
+			<div className="mx-auto mt-4 flex flex-col gap-2">
 				{error.stack && (
-					<Code rounded="md" maxW="4xl" maxH={72} overflowY="scroll" p={4}>
-						{error.stack}
-					</Code>
+					<code className="rounded-md bg-gray-75 p-4 dark:bg-gray-800">
+						<Text className="max-h-96 max-w-4xl overflow-auto">
+							<code>{error.stack}</code>
+						</Text>
+					</code>
 				)}
 
 				<div className="flex w-full items-center justify-between pt-3">

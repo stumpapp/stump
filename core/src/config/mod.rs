@@ -66,5 +66,27 @@ pub fn get_thumbnails_dir() -> PathBuf {
 }
 
 pub fn stump_in_docker() -> bool {
-	std::env::var("STUMP_IN_DOCKER").is_ok()
+	let env_set = std::env::var("STUMP_IN_DOCKER").is_ok();
+	if env_set {
+		return true;
+	}
+
+	let container_env = std::fs::metadata("/run/.containerenv").is_ok();
+	let docker_env = std::fs::metadata("/.dockerenv").is_ok();
+	if container_env || docker_env {
+		return true;
+	}
+
+	// NOTE: this should never hit, since I manually set the env var in the Dockerfile... However,
+	// in case someone decides to run Stump in a container while overriding that var, this should
+	// prevent any issues.
+	let cgroup = std::fs::read_to_string("/proc/self/cgroup")
+		.map(|cgroup| {
+			cgroup
+				.lines()
+				.any(|line| line.contains("docker") || line.contains("containerd"))
+		})
+		.unwrap_or(false);
+
+	cgroup
 }

@@ -25,3 +25,11 @@ Primary.args = {
 	label: 'My Label',
 	variant: 'primary',
 }
+
+export const AutoComplete = Template.bind({})
+AutoComplete.args = {
+	autoComplete: 'username',
+	id: 'username',
+	label: 'My Label',
+	variant: 'primary',
+}

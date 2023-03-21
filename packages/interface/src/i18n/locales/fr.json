@@ -1,28 +1,77 @@
 {
 	"loginPage": {
-		"claimText": "Ce serveur Stump n'est pas encore réclamé, vous pouvez utiliser le formulaire ci-dessous pour créer un compte utilisateur et le réclamer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
+		"claimText": "Ce serveur Stump n'a pas encore été revendiqué, vous pouvez utiliser le formulaire ci-dessous pour créer un compte d'utilisateur et le revendiquer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
 		"form": {
 			"validation": {
-				"missingUsername": "Nom d'utilisateur est nécessaire",
-				"missingPassword": "Mot de passe est nécessaire"
+				"missingUsername": "Le nom d'utilisateur est requis",
+				"missingPassword": "Le mot de passe est requis"
 			},
 			"labels": {
 				"username": "Nom d'utilisateur",
 				"password": "Mot de passe"
 			},
 			"buttons": {
-				"createAccount": "Créer un Compte",
-				"login": "Connexion"
+				"createAccount": "Créer un compte",
+				"login": "Se connecter"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Se connecter...",
-			"loggedIn": "Content de te revoir! Redirection...",
-			"loggedInFirstTime": "Accueillir! Redirection...",
-			"registering": "La création du compte...",
-			"registered": "Compte créé!",
-			"loginFailed": "Échec de la connexion. Veuillez réessayer.",
-			"registrationFailed": "La création du compte a échoué. Veuillez réessayer."
+			"loggingIn": "Connexion en cours...",
+			"loggedIn": "Bienvenue de retour! Redirection...",
+			"loggedInFirstTime": "Bienvenue! Redirection...",
+			"registering": "Inscription en cours...",
+			"registered": "Inscrit!",
+			"loginFailed": "La connexion a échoué. Veuillez réessayer.",
+			"registrationFailed": "L'inscription a échoué. Veuillez réessayer."
 		}
+	},
+	"signOutModal": {
+		"title": "Se déconnecter",
+		"message": "Êtes-vous sûr de vouloir vous déconnecter?",
+		"buttons": {
+			"cancel": "Annuler",
+			"signOut": "Se déconnecter"
+		}
+	},
+	"settingsPage": {
+		"navigation": {
+			"generalSettings": "Paramètres généraux",
+			"serverSettings": "Paramètres du serveur",
+			"jobHistory": "Historique des travaux"
+		},
+		"general": {
+			"profileForm": {
+				"validation": {},
+				"labels": {
+					"username": "Nom d'utilisateur",
+					"password": "Mot de passe"
+				},
+				"buttons": {}
+			}
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "Accueil",
+			"libraries": "Bibliothèques",
+			"settings": "Paramètres"
+		}
+	},
+	"libraryModalForm": {
+		"createLibraryHeading": "Créer une nouvelle bibliothèque",
+		"labels": {
+			"libraryName": "Nom de la bibliothèque",
+			"libraryPath": "Chemin de la bibliothèque",
+			"libraryDescription": "Description de la bibliothèque",
+			"libraryTags": "Mots clés de la bibliothèque"
+		},
+		"buttons": {
+			"cancel": "Annuler",
+			"editLibrary": "Enregistrer les modifications",
+			"createLibrary": "Créer une bibliothèque"
+		}
+	},
+	"search": {
+		"placeholder": "Recherche"
 	}
 }

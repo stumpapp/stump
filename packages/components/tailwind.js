@@ -146,6 +146,9 @@ module.exports = function (relativeFromRoot) {
 			require('@tailwindcss/typography'),
 			require('tailwindcss-animate'),
 			require('@tailwindcss/line-clamp'),
+			require('tailwindcss-autofill'),
+			require('tailwindcss-text-fill'),
+			require('tailwindcss-shadow-fill'),
 		],
 		theme: {
 			extend: {
@@ -180,6 +183,9 @@ module.exports = function (relativeFromRoot) {
 		variants: {
 			extend: {
 				backgroundImage: ['dark'],
+				// borderColor: ['autofill'],
+				// shadowFill: ['autofill'],
+				// textFill: ['autofill'],
 			},
 		},
 	}

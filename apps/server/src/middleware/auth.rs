@@ -3,7 +3,7 @@ use axum::{
 	body::BoxBody,
 	extract::{FromRef, FromRequestParts},
 	http::{header, request::Parts, Method, StatusCode},
-	response::{IntoResponse, Response},
+	response::{IntoResponse, Redirect, Response},
 };
 use axum_sessions::SessionHandle;
 use prisma_client_rust::{
@@ -63,12 +63,15 @@ where
 			.and_then(|value| value.to_str().ok());
 
 		let is_opds = parts.uri.path().starts_with("/opds");
+		let is_swagger = parts.uri.path().starts_with("/swagger-ui");
 		let has_auth_header = auth_header.is_some();
 		trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
 
 		if !has_auth_header {
 			if is_opds {
 				return Err(BasicAuth.into_response());
+			} else if is_swagger {
+				return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
 			}
 
 			return Err((StatusCode::UNAUTHORIZED).into_response());

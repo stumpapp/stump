@@ -13,7 +13,7 @@ import {
 import { Suspense, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { useLocale } from '../../hooks/useLocale'
+import { useLocaleContext } from '../../i18n'
 import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
@@ -37,6 +37,8 @@ interface NavItemProps {
 }
 
 function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
+	const { t } = useLocaleContext()
+
 	const [isOpen, { toggle }] = useBoolean()
 
 	const Icon = rest.icon
@@ -75,7 +77,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 							variant="outline"
 							size="md"
 						>
-							Create Library
+							{t('sidebar.buttons.createLibrary')}
 						</ButtonOrLink>
 
 						<div className="mt-2 flex max-h-full flex-col gap-2 overflow-y-scroll scrollbar-hide">
@@ -129,7 +131,7 @@ export function SidebarContent() {
 	const location = useLocation()
 	const navigate = useNavigate()
 
-	const { locale, t } = useLocale()
+	const { locale, t } = useLocaleContext()
 	const { libraries } = useLibraries()
 
 	// TODO: I'd like to also highlight the library when viewing an item from it.

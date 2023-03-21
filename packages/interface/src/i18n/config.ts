@@ -21,6 +21,7 @@ export const resources = {
 		fr,
 	},
 } as const
+export type AllowedLocale = keyof typeof resources
 
 function parseMissingKeyHandler(missingKey: string) {
 	try {

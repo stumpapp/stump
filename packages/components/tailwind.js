@@ -183,9 +183,6 @@ module.exports = function (relativeFromRoot) {
 		variants: {
 			extend: {
 				backgroundImage: ['dark'],
-				// borderColor: ['autofill'],
-				// shadowFill: ['autofill'],
-				// textFill: ['autofill'],
 			},
 		},
 	}

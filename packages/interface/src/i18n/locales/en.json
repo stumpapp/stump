@@ -1,5 +1,5 @@
 {
-	"loginPage": {
+	"authScene": {
 		"claimText": "This Stump server is not yet claimed, you can use the form below to create a user account and claim it. Enter your preferred username and password.",
 		"form": {
 			"validation": {
@@ -25,15 +25,64 @@
 			"registrationFailed": "Registration failed. Please try again."
 		}
 	},
-	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
-		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below.",
+			"subtitleEditing": "A preview of your library edits will be shown below."
 		}
 	},
-	"settingsPage": {
+	"createLibraryScene": {
+		"heading": "Create New Library",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
+		"form": {
+			"labels": {
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server.",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Create Library"
+			}
+		}
+	},
+	"editLibraryScene": {
+		"heading": "Edit Library",
+		"subtitle": "Use the below form to edit your library. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
+		"form": {
+			"labels": {
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server.",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Save Changes"
+			}
+		}
+	},
+	"libraryStats": {
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
+	},
+	"homeScene": {
+		"continueReading": "Continue Reading",
+		"recentlyAddedSeries": "Recently Added Series",
+		"recentlyAddedBooks": "Recently Added Books"
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
+		}
+	},
+	"settingsScene": {
 		"navigation": {
 			"generalSettings": "General Settings",
 			"serverSettings": "Server Settings",
@@ -50,28 +99,62 @@
 			}
 		}
 	},
+	"pagination": {
+		"buttons": {
+			"next": "Next",
+			"previous": "Previous"
+		},
+		"popover": {
+			"heading": "Go to page",
+			"buttons": {
+				"confirm": "Go",
+				"cancel": "Cancel"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
+		"buttons": {
+			"cancel": "Cancel",
+			"signOut": "Sign out"
+		}
+	},
 	"sidebar": {
 		"buttons": {
 			"home": "Home",
 			"libraries": "Libraries",
-			"settings": "Settings"
-		}
-	},
-	"libraryModalForm": {
-		"createLibraryHeading": "Create a new library",
-		"labels": {
-			"libraryName": "Library Name",
-			"libraryPath": "Library Path",
-			"libraryDescription": "Library Description",
-			"libraryTags": "Library Tags"
+			"createLibrary": "Create Library",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back"
 		},
-		"buttons": {
-			"cancel": "Cancel",
-			"editLibrary": "Save Changes",
-			"createLibrary": "Create Library"
+		"libraryOptions": {
+			"scanLibrary": {
+				"base": "Scan Library",
+				"parallel": "Parallel Scan",
+				"inOrder": "In Order Scan"
+			},
+			"fileExplorer": "File Explorer",
+			"editLibrary": "Edit Library",
+			"deleteLibrary": "Delete Library"
+		},
+		"versionInformation": {
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
 		"placeholder": "Search"
+	},
+	"slidingList": {
+		"empty": "No items to display",
+		"buttons": {
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
+		}
 	}
 }

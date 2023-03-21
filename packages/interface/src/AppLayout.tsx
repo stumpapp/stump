@@ -10,6 +10,7 @@ import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
 // import TopBar from './components/topbar/TopBar'
 import { AppContext } from './context'
+import { LocaleProvider } from './i18n'
 
 export function AppLayout() {
 	const appProps = useAppProps()
@@ -60,21 +61,23 @@ export function AppLayout() {
 		<AppContext.Provider
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
-			<React.Suspense fallback={<Lazy />}>
-				{/* <CommandPalette /> */}
-				<div className="flex h-full w-full">
-					{!hideSidebar && <Sidebar />}
-					<main className="h-full w-full bg-white dark:bg-gray-975">
-						{/* {!hideSidebar && <TopBar />} */}
-						<React.Suspense fallback={<Lazy />}>
-							<Outlet />
-						</React.Suspense>
-					</main>
-				</div>
+			<LocaleProvider>
+				<React.Suspense fallback={<Lazy />}>
+					{/* <CommandPalette /> */}
+					<div className="flex h-full w-full">
+						{!hideSidebar && <Sidebar />}
+						<main className="h-full w-full bg-white dark:bg-gray-975">
+							{/* {!hideSidebar && <TopBar />} */}
+							<React.Suspense fallback={<Lazy />}>
+								<Outlet />
+							</React.Suspense>
+						</main>
+					</div>
 
-				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
-				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
-			</React.Suspense>
+					{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
+					{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+				</React.Suspense>
+			</LocaleProvider>
 		</AppContext.Provider>
 	)
 }

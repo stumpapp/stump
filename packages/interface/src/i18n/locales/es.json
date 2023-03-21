@@ -1,5 +1,5 @@
 {
-  "loginPage": {
+  "authScene": {
     "claimText": "Este servidor Stump todavía no está reclamado, puede usar el formulario a continuación para crear una cuenta de usuario y reclamarlo. Ingrese su nombre de usuario y contraseña preferidos.",
     "form": {
       "validation": {
@@ -33,7 +33,7 @@
       "signOut": "Cerrar sesión"
     }
   },
-  "settingsPage": {
+  "settingsScene": {
     "navigation": {
       "generalSettings": "Configuraciones generales",
       "serverSettings": "Configuraciones del servidor",

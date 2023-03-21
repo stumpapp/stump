@@ -31,7 +31,7 @@ export default function ProfileForm() {
 
 	const schema = z.object({
 		password: z.string().optional(),
-		username: z.string().min(1, { message: t('loginPage.form.validation.missingUsername') }),
+		username: z.string().min(1, { message: t('authScene.form.validation.missingUsername') }),
 	})
 
 	const form = useForm({
@@ -45,9 +45,9 @@ export default function ProfileForm() {
 		try {
 			const updatedUser = await updateProfile(values as UpdateUserArgs)
 			setUser(updatedUser)
-			toast.success(t('settingsPage.profileForm.success'))
+			toast.success(t('settingsScene.profileForm.success'))
 		} catch (error) {
-			toast.error(t('settingsPage.profileForm.error'))
+			toast.error(t('settingsScene.profileForm.error'))
 		}
 	}
 
@@ -56,7 +56,7 @@ export default function ProfileForm() {
 			<Form form={form} onSubmit={handleSubmit}>
 				<FormControl>
 					<FormLabel htmlFor="username">
-						{t('settingsPage.general.profileForm.labels.username')}
+						{t('settingsScene.general.profileForm.labels.username')}
 					</FormLabel>
 					<Input
 						variant="flushed"
@@ -69,7 +69,7 @@ export default function ProfileForm() {
 
 				<FormControl>
 					<FormLabel htmlFor="password">
-						{t('settingsPage.general.profileForm.labels.password')}
+						{t('settingsScene.general.profileForm.labels.password')}
 					</FormLabel>
 
 					<PasswordInput

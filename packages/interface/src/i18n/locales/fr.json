@@ -1,5 +1,5 @@
 {
-	"loginPage": {
+	"authScene": {
 		"claimText": "Ce serveur Stump n'a pas encore été revendiqué, vous pouvez utiliser le formulaire ci-dessous pour créer un compte d'utilisateur et le revendiquer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
 		"form": {
 			"validation": {
@@ -33,7 +33,7 @@
 			"signOut": "Se déconnecter"
 		}
 	},
-	"settingsPage": {
+	"settingsScene": {
 		"navigation": {
 			"generalSettings": "Paramètres généraux",
 			"serverSettings": "Paramètres du serveur",

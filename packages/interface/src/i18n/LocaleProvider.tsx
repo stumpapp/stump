@@ -1,0 +1,28 @@
+import { useUserStore } from '@stump/client'
+import { useTranslation } from 'react-i18next'
+
+import { AllowedLocale } from './config'
+import { LocaleContext } from './context'
+
+type Props = {
+	children: React.ReactNode
+}
+export default function LocaleProvider({ children }: Props) {
+	const { userPreferences } = useUserStore((store) => ({
+		userPreferences: store.userPreferences,
+	}))
+
+	const locale = (userPreferences?.locale || 'en') as AllowedLocale
+	const { t } = useTranslation(locale)
+
+	return (
+		<LocaleContext.Provider
+			value={{
+				locale,
+				t,
+			}}
+		>
+			{children}
+		</LocaleContext.Provider>
+	)
+}

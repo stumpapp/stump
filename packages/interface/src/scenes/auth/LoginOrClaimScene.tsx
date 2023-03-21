@@ -25,8 +25,8 @@ export default function LoginOrClaimScene() {
 		})
 
 	const schema = z.object({
-		password: z.string().min(1, { message: t('loginPage.form.validation.missingPassword') }),
-		username: z.string().min(1, { message: t('loginPage.form.validation.missingUsername') }),
+		password: z.string().min(1, { message: t('authScene.form.validation.missingPassword') }),
+		username: z.string().min(1, { message: t('authScene.form.validation.missingUsername') }),
 	})
 
 	const form = useForm({
@@ -37,20 +37,20 @@ export default function LoginOrClaimScene() {
 		const { username, password } = values
 		const doLogin = async (firstTime = false) =>
 			toast.promise(loginUser({ password, username }), {
-				error: t('loginPage.toasts.loginFailed'),
-				loading: t('loginPage.toasts.loggingIn'),
+				error: t('authScene.toasts.loginFailed'),
+				loading: t('authScene.toasts.loggingIn'),
 				success: firstTime
-					? t('loginPage.toasts.loggedInFirstTime')
-					: t('loginPage.toasts.loggedIn'),
+					? t('authScene.toasts.loggedInFirstTime')
+					: t('authScene.toasts.loggedIn'),
 			})
 		if (isClaimed) {
 			await doLogin()
 		} else {
 			toast
 				.promise(registerUser({ password, username }), {
-					error: t('loginPage.toasts.registrationFailed'),
-					loading: t('loginPage.toasts.registering'),
-					success: t('loginPage.toasts.registered'),
+					error: t('authScene.toasts.registrationFailed'),
+					loading: t('authScene.toasts.registering'),
+					success: t('authScene.toasts.registered'),
 				})
 				.then(() => doLogin(true))
 		}
@@ -82,14 +82,14 @@ export default function LoginOrClaimScene() {
 			{/* {!isClaimed && (
 				<Alert status="warning" rounded="md">
 					<AlertIcon />
-					{t('loginPage.claimText')}
+					{t('authScene.claimText')}
 				</Alert>
 			)} */}
 
 			<Form form={form} onSubmit={handleSubmit} className="min-w-[20rem]">
 				<Input
 					id="username"
-					label={t('loginPage.form.labels.username')}
+					label={t('authScene.form.labels.username')}
 					variant="primary"
 					autoComplete="username"
 					autoFocus
@@ -98,7 +98,7 @@ export default function LoginOrClaimScene() {
 
 				<Input
 					id="password"
-					label={t('loginPage.form.labels.password')}
+					label={t('authScene.form.labels.password')}
 					variant="primary"
 					type="password"
 					autoComplete="current-password"
@@ -107,8 +107,8 @@ export default function LoginOrClaimScene() {
 
 				<Button size="md" type="submit" variant="primary" isLoading={isLoggingIn || isRegistering}>
 					{isClaimed
-						? t('loginPage.form.buttons.login')
-						: t('loginPage.form.buttons.createAccount')}
+						? t('authScene.form.buttons.login')
+						: t('authScene.form.buttons.createAccount')}
 				</Button>
 			</Form>
 		</div>

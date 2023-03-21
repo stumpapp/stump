@@ -21,7 +21,7 @@ export default function OnBoarding() {
 			</HStack>
 			<Alert status="info" rounded="md">
 				<AlertIcon />
-				{/* {t('loginPage.claimText')} */}
+				{/* {t('authScene.claimText')} */}
 				Welcome to Stump! To get started, please enter the base URL of your Stump server below.
 			</Alert>
 

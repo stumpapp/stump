@@ -3,9 +3,6 @@ const path = require('path')
 module.exports = {
 	pluginSearchDirs: [path.resolve(__dirname)],
 	plugins: [require('prettier-plugin-tailwindcss')],
-	// plugins: Object.keys(require('./package.json').devDependencies)
-	// 	.filter((dep) => dep.includes('prettier-plugin-'))
-	// 	.map((pkg) => require(pkg)),
 	printWidth: 100,
 	semi: false,
 	singleQuote: true,

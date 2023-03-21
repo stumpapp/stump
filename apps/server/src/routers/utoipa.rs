@@ -1,4 +1,5 @@
 // use axum::middleware::from_extractor_with_state;
+use axum::middleware::from_extractor_with_state;
 use axum::Router;
 use stump_core::db::models::{
 	LibrariesStats, Library, LibraryOptions, LibraryPattern, LibraryScanMode, LogLevel,
@@ -18,6 +19,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::ApiError;
+use crate::middleware::auth::Auth;
 // use crate::middleware::auth::Auth;
 use crate::utils::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
@@ -114,10 +116,10 @@ use super::api;
 )]
 struct ApiDoc;
 
-// FIXME: this seems to break something...
-pub(crate) fn mount(_: AppState) -> Router<AppState> {
-	Router::new().merge(swagger_ui())
-	// .layer(from_extractor_with_state::<Auth, AppState>(app_state))
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	Router::new()
+		.merge(swagger_ui())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
 pub(crate) fn swagger_ui() -> SwaggerUi {

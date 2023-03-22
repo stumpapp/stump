@@ -59,7 +59,11 @@ export function AppRouter() {
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />
 
-					<Route path="library/*" element={<LibraryRouter />} />
+					<Route path="hi" element={<div>Hi!</div>} />
+					<Route path="bye" element={<div>Bye!</div>} />
+					<Route path="haha" element={<div>Haha!</div>} />
+
+					{/* <Route path="library/*" element={<LibraryRouter />} />
 
 					<Route path="series/:id" element={<SeriesOverviewScene />} />
 
@@ -74,7 +78,7 @@ export function AppRouter() {
 						<Route path="server" element={<ServerSettings />} />
 						<Route path="jobs" element={<JobSettings />} />
 						{appProps?.platform !== 'browser' && <Route path="desktop" element={<>Desktop!</>} />}
-					</Route>
+					</Route> */}
 				</Route>
 
 				<Route path="/auth" element={<LoginOrClaimScene />} />

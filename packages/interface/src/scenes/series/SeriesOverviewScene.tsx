@@ -1,23 +1,23 @@
-// import { Box, ButtonGroup, Heading, Spacer } from '@chakra-ui/react'
 import { getSeriesThumbnail } from '@stump/api'
 import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client'
-import { invalidateQueries } from '@stump/client/invalidate'
-import { QUERY_KEYS } from '@stump/client/query_keys'
+import { invalidateQueries, QUERY_KEYS } from '@stump/client'
 import { Heading } from '@stump/components'
 import type { Series } from '@stump/types'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router-dom'
 
-import MediaGrid from '../components/media/MediaGrid'
-import MediaList from '../components/media/MediaList'
-import DownloadSeriesButton from '../components/series/DownloadSeriesButton'
-import UpNextInSeriesButton from '../components/series/UpNextInSeriesButton'
-import TagList from '../components/tags/TagList'
-import { useGetPage } from '../hooks/useGetPage'
-import useIsInView from '../hooks/useIsInView'
-import Pagination from '../ui/Pagination'
-import ReadMore from '../ui/ReadMore'
+import MediaList from '../../components/media/MediaList'
+import SceneContainer from '../../components/SceneContainer'
+import TagList from '../../components/tags/TagList'
+import { useGetPage } from '../../hooks/useGetPage'
+import useIsInView from '../../hooks/useIsInView'
+import Pagination from '../../ui/Pagination'
+import ReadMore from '../../ui/ReadMore'
+import DownloadSeriesButton from './DownloadSeriesButton'
+import MediaGrid from './MediaGrid'
+import SeriesLibraryLink from './SeriesLibraryLink'
+import UpNextInSeriesButton from './UpNextInSeriesButton'
 
 interface OverviewTitleSectionProps {
 	isVisible: boolean
@@ -42,9 +42,10 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 				</div>
 			</div>
 			<div className="flex h-full flex-1 flex-col space-y-4">
-				{/* noOfLines={1} */}
-				<Heading size="sm">{series.name}</Heading>
-				{/* <ButtonGroup> */}
+				<div>
+					<Heading size="sm">{series.name}</Heading>
+					<SeriesLibraryLink id={series.library_id} />
+				</div>
 				<div className="flex items-center gap-2">
 					<UpNextInSeriesButton seriesId={series.id} />
 					<DownloadSeriesButton seriesId={series.id} />
@@ -59,7 +60,7 @@ function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) 
 	)
 }
 
-export default function SeriesOverview() {
+export default function SeriesOverviewScene() {
 	const [containerRef, isInView] = useIsInView()
 
 	const { id } = useParams()
@@ -86,7 +87,7 @@ export default function SeriesOverview() {
 
 	useEffect(() => {
 		if (series) {
-			setBackwardsUrl(`/libraries/${series.library_id}`)
+			setBackwardsUrl(`/library/${series.library_id}`)
 		}
 
 		return () => {
@@ -99,9 +100,8 @@ export default function SeriesOverview() {
 		}
 	}, [series, setBackwardsUrl])
 
-	// FIXME: ugly
 	if (isLoadingSeries) {
-		return <div>Loading...</div>
+		return null
 	} else if (!series) {
 		throw new Error('Series not found')
 	}
@@ -110,7 +110,7 @@ export default function SeriesOverview() {
 	const hasStuff = current_page !== undefined && total_pages !== undefined
 
 	return (
-		<div className="h-full w-full">
+		<SceneContainer>
 			<Helmet>
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
@@ -127,14 +127,13 @@ export default function SeriesOverview() {
 					<MediaList isLoading={isLoadingMedia} media={media} />
 				)}
 
-				{/* FIXME: spacing when empty */}
 				{/* <Spacer /> */}
 				<div className="flex-1" />
 
-				{hasStuff ? (
+				{hasStuff && (
 					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
-				) : null}
+				)}
 			</div>
-		</div>
+		</SceneContainer>
 	)
 }

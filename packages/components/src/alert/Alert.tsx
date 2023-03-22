@@ -3,6 +3,7 @@ import { AlertCircle, AlertTriangle, CheckCircle, Info, LucideIcon } from 'lucid
 import { forwardRef } from 'react'
 
 import { cn, cx } from '../utils'
+import { AlertContext } from './context'
 
 export const ALERT_ICONS = {
 	error: AlertCircle,
@@ -24,20 +25,26 @@ export const ALERT_VARIANTS: Record<keyof typeof ALERT_ICONS, string> = {
 const alertVariants = cva('p-4', {
 	defaultVariants: {
 		level: 'info',
+		rounded: 'default',
 	},
 	variants: {
 		level: ALERT_VARIANTS,
+		rounded: {
+			default: 'rounded-md',
+			lg: 'rounded-lg',
+			none: 'rounded-none',
+		},
 	},
 })
 
 export type AlertProps = {
 	icon?: LucideIcon
+	alignIcon?: 'center' | 'start'
 } & VariantProps<typeof alertVariants> &
 	React.ComponentPropsWithoutRef<'div'>
 
-// TODO: this just needs to be separated into things like Alert.Header, Alert.Content, etc. So that the text can be styled differently.
-export const Alert = forwardRef<HTMLDivElement, AlertProps>(
-	({ className, level, icon, children, ...props }, ref) => {
+const Alert = forwardRef<HTMLDivElement, AlertProps>(
+	({ className, level, rounded, icon, alignIcon = 'center', children, ...props }, ref) => {
 		// TODO: implement me, inspriation from https://chakra-ui.com/docs/components/alert/usage
 
 		const renderIcon = () => {
@@ -58,13 +65,69 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(
 		}
 
 		return (
-			<div ref={ref} {...props} className={cn(alertVariants({ className, level }), className)}>
-				<div className="flex">
-					<div className="flex-shrink-0">{renderIcon()}</div>
-					<div className="ml-3 flex-1 md:flex md:justify-between">{children}</div>
+			<AlertContext.Provider value={{ level: level || 'info' }}>
+				<div
+					ref={ref}
+					{...props}
+					className={cn(alertVariants({ className, level, rounded }), className)}
+				>
+					<div
+						className={cx(
+							'flex',
+							{ 'items-center': alignIcon === 'center' },
+							{ 'items-start': alignIcon === 'start' },
+						)}
+					>
+						<div className="flex-shrink-0">{renderIcon()}</div>
+						{children}
+					</div>
 				</div>
-			</div>
+			</AlertContext.Provider>
 		)
 	},
 )
 Alert.displayName = 'Alert'
+
+const AlertContent = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+	({ className, ...props }, ref) => {
+		return (
+			<div
+				ref={ref}
+				{...props}
+				className={cn('ml-3 flex-1 md:flex md:justify-between', className)}
+			/>
+		)
+	},
+)
+AlertContent.displayName = 'AlertContent'
+
+const AlertTitle = forwardRef<HTMLHeadingElement, React.ComponentPropsWithoutRef<'h2'>>(
+	({ className, ...props }, ref) => {
+		return (
+			<AlertContext.Consumer>
+				{({ level }) => (
+					<h2
+						ref={ref}
+						{...props}
+						className={cn(
+							'text-base font-medium',
+							ALERT_VARIANTS[level || 'info'] || ALERT_VARIANTS.info,
+							className,
+						)}
+					/>
+				)}
+			</AlertContext.Consumer>
+		)
+	},
+)
+AlertTitle.displayName = 'AlertTitle'
+
+type AlertSubComponents = {
+	Title: typeof AlertTitle
+	Content: typeof AlertContent
+}
+const TypedAlert = Alert as typeof Alert & AlertSubComponents
+TypedAlert.Title = AlertTitle
+TypedAlert.Content = AlertContent
+
+export { TypedAlert as Alert }

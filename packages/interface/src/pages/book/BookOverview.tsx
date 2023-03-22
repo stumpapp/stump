@@ -41,7 +41,7 @@ export default function BookOverview() {
 	}
 
 	return (
-		<Suspense fallback={<Lazy />}>
+		<Suspense>
 			<Helmet>
 				<title>Stump | {media?.name ?? ''}</title>
 			</Helmet>

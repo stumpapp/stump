@@ -10,7 +10,6 @@ import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
 // import TopBar from './components/topbar/TopBar'
 import { AppContext } from './context'
-import { LocaleProvider } from './i18n'
 
 export function AppLayout() {
 	const appProps = useAppProps()
@@ -49,7 +48,7 @@ export function AppLayout() {
 	// an async error
 	// @ts-expect-error: FIXME: type error no good >:(
 	const isNetworkError = error?.code === 'ERR_NETWORK'
-	if (isNetworkError && appProps?.platform !== 'browser') {
+	if (isNetworkError) {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
 	}
 
@@ -61,23 +60,19 @@ export function AppLayout() {
 		<AppContext.Provider
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
-			<LocaleProvider>
-				<React.Suspense fallback={<Lazy />}>
-					{/* <CommandPalette /> */}
-					<div className="flex h-full w-full">
-						{!hideSidebar && <Sidebar />}
-						<main className="h-full w-full bg-white dark:bg-gray-975">
-							{/* {!hideSidebar && <TopBar />} */}
-							<React.Suspense fallback={<Lazy />}>
-								<Outlet />
-							</React.Suspense>
-						</main>
-					</div>
+			<React.Suspense fallback={<Lazy />}>
+				{/* <CommandPalette /> */}
+				<div className="flex h-full w-full">
+					{!hideSidebar && <Sidebar />}
 
-					{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
-					{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
-				</React.Suspense>
-			</LocaleProvider>
+					<main className="h-full w-full bg-white dark:bg-gray-975">
+						<Outlet />
+					</main>
+				</div>
+
+				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
+				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+			</React.Suspense>
 		</AppContext.Provider>
 	)
 }

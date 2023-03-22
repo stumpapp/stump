@@ -32,6 +32,18 @@
 			"subtitleEditing": "A preview of your library edits will be shown below."
 		}
 	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "File Information",
+			"labels": {
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
+				"fileChecksum": "Checksum"
+			}
+		},
+		"nextInSeries": "Next in Series"
+	},
 	"createLibraryScene": {
 		"heading": "Create New Library",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
@@ -66,10 +78,14 @@
 			}
 		}
 	},
-	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
+	"errorScene": {
+		"heading": "lol, oops",
+		"message": "An error occurred:",
+		"buttons": {
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
+		}
 	},
 	"homeScene": {
 		"continueReading": "Continue Reading",
@@ -97,7 +113,18 @@
 				},
 				"buttons": {}
 			}
-		}
+		},
+		"job": {},
+		"server": {},
+		"users": {}
+	},
+	"jobOverlay": {
+		"backupHeading": "Job in Progress"
+	},
+	"libraryStats": {
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
 	},
 	"pagination": {
 		"buttons": {
@@ -150,11 +177,27 @@
 	"search": {
 		"placeholder": "Search"
 	},
+	"serverSOS": {
+		"heading": "Server Unavailable",
+		"desktop": {
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below."
+		},
+		"web": {
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device."
+		},
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
+	},
+	"serverStatusOverlay": {},
 	"slidingList": {
 		"empty": "No items to display",
 		"buttons": {
 			"next": "Seek Ahead",
 			"previous": "Seek Backwards"
 		}
+	},
+	"tagSelect": {
+		"placholder": "Select or create tag",
+		"placeholderNoTags": "No tags available"
 	}
 }

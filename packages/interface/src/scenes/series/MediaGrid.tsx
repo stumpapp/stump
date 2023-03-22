@@ -1,8 +1,8 @@
 import { Heading } from '@stump/components'
 import type { Media } from '@stump/types'
 
-import { CardGrid } from '../Card'
-import MediaCard from './MediaCard'
+import { CardGrid } from '../../components/Card'
+import MediaCard from '../../components/media/MediaCard'
 
 interface Props {
 	isLoading: boolean

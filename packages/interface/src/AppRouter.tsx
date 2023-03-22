@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
 import Lazy from './components/Lazy'
+import LocaleProvider from './i18n/LocaleProvider'
 import LibraryRouter from './scenes/library/LibraryRouter'
 
 // FIXME: this is really annoying
@@ -17,7 +18,7 @@ export type LazyComponent = Promise<{
 export const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const HomeScene = lazily(() => import('./scenes/home/HomeScene'))
-const SeriesOverview = lazily(() => import('./pages/SeriesOverview'))
+const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewScene'))
 const BookOverview = lazily(() => import('./pages/book/BookOverview'))
 const ReadBook = lazily(() => import('./pages/book/ReadBook'))
 const ReadEpub = lazily(() => import('./pages/book/ReadEpub'))
@@ -53,14 +54,14 @@ export function AppRouter() {
 	}
 
 	return (
-		<Suspense fallback={<Lazy />}>
+		<LocaleProvider>
 			<Routes>
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />
 
 					<Route path="library/*" element={<LibraryRouter />} />
 
-					<Route path="series/:id" element={<SeriesOverview />} />
+					<Route path="series/:id" element={<SeriesOverviewScene />} />
 
 					<Route path="books/:id" element={<BookOverview />} />
 					<Route path="books/:id/pages/:page" element={<ReadBook />} />
@@ -77,11 +78,9 @@ export function AppRouter() {
 				</Route>
 
 				<Route path="/auth" element={<LoginOrClaimScene />} />
-				{appProps?.platform !== 'browser' && (
-					<Route path="/server-connection-error" element={<ServerConnectionError />} />
-				)}
+				<Route path="/server-connection-error" element={<ServerConnectionError />} />
 				<Route path="*" element={<FourOhFour />} />
 			</Routes>
-		</Suspense>
+		</LocaleProvider>
 	)
 }

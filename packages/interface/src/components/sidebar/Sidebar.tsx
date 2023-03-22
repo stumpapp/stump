@@ -44,7 +44,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 	const Icon = rest.icon
 
 	return (
-		<Suspense fallback={null}>
+		<>
 			<Button
 				variant="ghost"
 				className="flex w-full items-center justify-between"
@@ -105,7 +105,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 					</div>
 				)}
 			</AnimatePresence>
-		</Suspense>
+		</>
 	)
 }
 
@@ -136,7 +136,7 @@ export function SidebarContent() {
 
 	// TODO: I'd like to also highlight the library when viewing an item from it.
 	// e.g. a book from the library, or a book from a series in the library, etc
-	const libraryIsActive = (id: string) => location.pathname.startsWith(`/libraries/${id}`)
+	const libraryIsActive = (id: string) => location.pathname.startsWith(`/library/${id}`)
 	const linkIsActive = (href?: string) => {
 		if (!href) {
 			return false
@@ -213,6 +213,8 @@ export default function Sidebar() {
 		<aside className="hidden min-h-full md:inline-block">
 			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 py-4 px-2 dark:border-gray-900 dark:bg-gray-1000">
 				<SidebarContent />
+				{/* <Link to="/">Home</Link>
+				<Link to="/library/fc0468ae-91c8-4643-94e3-378dcbd3f592">Library</Link> */}
 			</div>
 		</aside>
 	)

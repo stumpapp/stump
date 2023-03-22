@@ -28,6 +28,7 @@ export function useLibrary(id: string, { onError }: QueryCallbacks<Library> = {}
 		[LIBRARY_KEYS.get_by_id, id],
 		() => getLibraryById(id).then((res) => res.data),
 		{
+			enabled: !!id,
 			onError,
 		},
 	)

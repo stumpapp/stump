@@ -100,11 +100,15 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"generalSettings": "General Settings",
-			"serverSettings": "Server Settings",
-			"jobHistory": "Job History"
+			"general": "General",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management"
 		},
 		"general": {
+			"helmet": "General Settings",
+			"heading": "General Settings",
+			"subtitle": "Use the forms below to manage your preferences and account settings.",
 			"profileForm": {
 				"validation": {},
 				"labels": {
@@ -114,9 +118,21 @@
 				"buttons": {}
 			}
 		},
-		"job": {},
-		"server": {},
-		"users": {}
+		"jobs": {
+			"helmet": "Jobs and Configuration",
+			"heading": "Jobs and Configuration",
+			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling."
+		},
+		"server": {
+			"helmet": "Server Settings",
+			"heading": "Server Settings",
+			"subtitle": "Manage various configurable options for your Stump server instance, itself."
+		},
+		"users": {
+			"helmet": "User Management",
+			"heading": "User Management",
+			"subtitle": "Manage the users on this server, including creating new users and changing their permissions."
+		}
 	},
 	"jobOverlay": {
 		"backupHeading": "Job in Progress"

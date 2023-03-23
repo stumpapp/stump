@@ -1,35 +1,57 @@
 {
-	"extends": "../../tsconfig.json",
-	"compilerOptions": {
-		"types": ["vite/client", "node"],
-		"outDir": "../../.moon/cache/types/packages/interface",
-		"skipLibCheck": true,
-		"jsx": "preserve",
-		"paths": {
-			"@stump/api": ["../api/src/index.ts"],
-			"@stump/api/*": ["../api/src/*"],
-			"@stump/client": ["../client/src/index.ts"],
-			"@stump/client/*": ["../client/src/*"],
-			"@stump/components": ["../components/src/index.ts"],
-			"@stump/components/*": ["../components/src/*"],
-			"@stump/types": ["../types/index.ts"],
-			"@stump/types/*": ["../types/*"]
-		},
-		"resolveJsonModule": true
-	},
-	"include": ["src", "src/**/*.json"],
-	"references": [
-		{
-			"path": "../api"
-		},
-		{
-			"path": "../client"
-		},
-		{
-			"path": "../components"
-		},
-		{
-			"path": "../types"
-		}
-	]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "outDir": "../../.moon/cache/types/packages/interface",
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "paths": {
+      "@stump/api": [
+        "../api/src/index.ts"
+      ],
+      "@stump/api/*": [
+        "../api/src/*"
+      ],
+      "@stump/client": [
+        "../client/src/index.ts"
+      ],
+      "@stump/client/*": [
+        "../client/src/*"
+      ],
+      "@stump/components": [
+        "../components/src/index.ts"
+      ],
+      "@stump/components/*": [
+        "../components/src/*"
+      ],
+      "@stump/types": [
+        "../types/index.ts"
+      ],
+      "@stump/types/*": [
+        "../types/*"
+      ]
+    },
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src",
+    "src/**/*.json"
+  ],
+  "references": [
+    {
+      "path": "../api"
+    },
+    {
+      "path": "../client"
+    },
+    {
+      "path": "../components"
+    },
+    {
+      "path": "../types"
+    }
+  ]
 }

@@ -14,10 +14,11 @@ const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
 
 export type TabsProps = {
 	variant?: TabsVariant
+	activeOnHover?: boolean
 } & React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
 const Tabs = React.forwardRef<React.ElementRef<typeof TabsPrimitive.Root>, TabsProps>(
-	({ variant = 'default', ...props }, ref) => (
-		<TabsContext.Provider value={{ variant }}>
+	({ variant = 'default', activeOnHover, ...props }, ref) => (
+		<TabsContext.Provider value={{ activeOnHover, variant }}>
 			<TabsPrimitive.Root ref={ref} {...props} />
 		</TabsContext.Provider>
 	),
@@ -28,14 +29,19 @@ const TabsList = React.forwardRef<
 	React.ElementRef<typeof TabsPrimitive.List>,
 	React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
-	<TabsPrimitive.List
-		ref={ref}
-		className={cn(
-			'inline-flex items-center justify-center rounded-md border border-gray-75 bg-transparent p-1 dark:border-gray-850',
-			className,
+	<TabsContext.Consumer>
+		{({ activeOnHover }) => (
+			<TabsPrimitive.List
+				ref={ref}
+				className={cn(
+					'inline-flex items-center justify-center rounded-md border border-gray-75 bg-transparent p-1 dark:border-gray-850',
+					{ 'gap-1': activeOnHover },
+					className,
+				)}
+				{...props}
+			/>
 		)}
-		{...props}
-	/>
+	</TabsContext.Consumer>
 ))
 TabsList.displayName = TabsPrimitive.List.displayName
 
@@ -44,11 +50,15 @@ const TabsTrigger = React.forwardRef<
 	React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >(({ className, ...props }, ref) => (
 	<TabsContext.Consumer>
-		{({ variant }) => (
+		{({ variant, activeOnHover }) => (
 			<TabsPrimitive.Trigger
 				className={cn(
-					'inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] px-3 py-1.5 text-sm font-medium transition-all  disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm',
+					'inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] px-3 py-1.5 text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm',
 					TABS_CONTENT_VARIANTS[variant] || TABS_CONTENT_VARIANTS.default,
+					{
+						'hover:data-[state=inactive]:bg-gray-75 dark:hover:data-[state=inactive]:bg-gray-850':
+							activeOnHover,
+					},
 					className,
 				)}
 				{...props}

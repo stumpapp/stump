@@ -15,7 +15,7 @@ export default function LocaleProvider({ children }: Props) {
 
 	const locale = (userPreferences?.locale || 'en') as AllowedLocale
 
-	const { t } = useTranslation(locale)
+	const { t } = useTranslation(locale, { useSuspense: false })
 
 	useEffect(() => {
 		i18n.changeLanguage(locale)

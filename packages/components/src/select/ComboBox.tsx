@@ -1,10 +1,9 @@
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 
-import { Button, Command, Popover } from '..'
+import { Button, Command, Label, Popover, Text } from '..'
 import { cn } from '../utils'
 
-// TODO: consider generics to support not just strings...
 // TODO: customize multi display value, e.g. "2 items selected"
 export type ComboBoxOption = {
 	label: string
@@ -12,7 +11,7 @@ export type ComboBoxOption = {
 }
 
 type SingleSelectComboBoxProps = {
-	isMultiSelect: false
+	isMultiSelect?: false
 	value?: string
 	onChange?: (value?: string) => void
 }
@@ -31,6 +30,8 @@ const SIZE_VARIANTS = {
 }
 
 export type ComboBoxProps = {
+	label?: string
+	description?: string
 	options: ComboBoxOption[]
 	size?: keyof typeof SIZE_VARIANTS
 	triggerClassName?: string
@@ -42,6 +43,8 @@ export type ComboBoxProps = {
 } & (SingleSelectComboBoxProps | MultiSelectComboBoxProps)
 
 export function ComboBox({
+	label,
+	description,
 	isMultiSelect,
 	options,
 	value,
@@ -90,45 +93,61 @@ export function ComboBox({
 		}
 	}
 
-	return (
-		<Popover open={open} onOpenChange={setOpen}>
-			<Popover.Trigger asChild>
-				<Button
-					variant="outline"
-					role="combobox"
-					aria-expanded={open}
-					className={cn(SIZE_VARIANTS[size], 'justify-between truncate', triggerClassName)}
-				>
-					{renderSelected()}
-					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-				</Button>
-			</Popover.Trigger>
-			<Popover.Content className={cn(SIZE_VARIANTS[size], 'p-0', wrapperClassName)}>
-				<Command>
-					{filterable && (
-						<>
-							<Command.Input placeholder={filterPlaceholder} />
-							<Command.Empty>{filterEmptyMessage}</Command.Empty>
-						</>
-					)}
-					<Command.Group>
-						{options.map((option) => {
-							const isSelected = value?.includes(option.value) || false
+	const Container = label || description ? 'div' : Fragment
+	const containerProps = {
+		...((label || description) && { className: 'flex flex-col gap-1.5' }),
+	}
 
-							return (
-								<Command.Item
-									key={option.value}
-									onSelect={handleChange}
-									className={cn('transition-all duration-75', { 'text-brand': isSelected })}
-								>
-									<Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-									{option.label}
-								</Command.Item>
-							)
-						})}
-					</Command.Group>
-				</Command>
-			</Popover.Content>
-		</Popover>
+	return (
+		<Container {...containerProps}>
+			{label && <Label>{label}</Label>}
+			<Popover open={open} onOpenChange={setOpen}>
+				<Popover.Trigger asChild>
+					<Button
+						variant="outline"
+						role="combobox"
+						aria-expanded={open}
+						className={cn(SIZE_VARIANTS[size], 'justify-between truncate', triggerClassName)}
+					>
+						{renderSelected()}
+						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+					</Button>
+				</Popover.Trigger>
+				<Popover.Content className={cn(SIZE_VARIANTS[size], 'p-0', wrapperClassName)}>
+					<Command>
+						{filterable && (
+							<>
+								<Command.Input placeholder={filterPlaceholder} />
+								<Command.Empty>{filterEmptyMessage}</Command.Empty>
+							</>
+						)}
+						<Command.Group>
+							{options.map((option) => {
+								const isSelected = value?.includes(option.value) || false
+
+								return (
+									<Command.Item
+										key={option.value}
+										onSelect={handleChange}
+										className={cn('transition-all duration-75', { 'text-brand': isSelected })}
+										value={option.value}
+									>
+										<Check
+											className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')}
+										/>
+										{option.label}
+									</Command.Item>
+								)
+							})}
+						</Command.Group>
+					</Command>
+				</Popover.Content>
+			</Popover>
+			{description && (
+				<Text size="sm" variant="muted">
+					{description}
+				</Text>
+			)}
+		</Container>
 	)
 }

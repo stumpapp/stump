@@ -8,3 +8,6 @@ An overview of this package's contents, relative to `client/src`.
 - `stores`: Zustand stores that are used to manage global app state.
 - `client.ts`: The react-query client instance.
 - `context.ts`: The app context definition.
+
+TODO: remove all these `onUpdated` vs `onSuccess` vs `onDeleted`, etc. Just create different
+hooks for each of these cases. It's getting way too messy and complicated!

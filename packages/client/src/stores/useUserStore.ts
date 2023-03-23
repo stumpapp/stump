@@ -62,3 +62,5 @@ export const useUserStore = create<UserStore>()(
 		),
 	),
 )
+
+export const useUser = () => useUserStore((store) => store.user)

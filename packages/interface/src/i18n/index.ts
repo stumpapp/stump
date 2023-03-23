@@ -8,3 +8,7 @@ export const localeNames: Record<AllowedLocale, string> = {
 	es: 'Español',
 	fr: 'Français',
 }
+
+export function isLocale(value: string): value is AllowedLocale {
+	return Object.keys(localeNames).includes(value)
+}

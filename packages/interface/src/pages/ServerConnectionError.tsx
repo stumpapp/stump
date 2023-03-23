@@ -65,7 +65,9 @@ export default function ServerConnectionError() {
 	)
 
 	if (goHome) {
-		return <Navigate to={location.state?.from || '/'} />
+		const from = location.state?.from || '/'
+		const to = from === '/server-connection-error' ? '/' : from
+		return <Navigate to={to} />
 	}
 
 	return (

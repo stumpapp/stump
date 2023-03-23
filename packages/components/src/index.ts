@@ -26,6 +26,7 @@ export { Link } from './link'
 export { Popover } from './popover'
 export { type ProgressBarProps, FullScreenLoader, ProgressBar } from './progress'
 export { type ComboBoxProps, ComboBox } from './select'
+export { Tabs } from './tabs'
 export {
 	type HeadingProps,
 	type StatisticProps,

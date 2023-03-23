@@ -1,5 +1,5 @@
 import { useLayoutMode, useLibrary, useLibrarySeries } from '@stump/client'
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
@@ -25,7 +25,7 @@ export default function LibraryOverviewScene() {
 	}
 
 	const { layoutMode } = useLayoutMode('LIBRARY')
-	const { isLoading, library } = useLibrary(id, { onError: handleError })
+	const { isLoading, library } = useLibrary(id)
 
 	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page)
 

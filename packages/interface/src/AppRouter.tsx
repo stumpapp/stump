@@ -1,12 +1,11 @@
 import { useAppProps } from '@stump/client'
-import React, { Suspense } from 'react'
-import { Navigate } from 'react-router'
+import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
-import Lazy from './components/Lazy'
 import LocaleProvider from './i18n/LocaleProvider'
 import LibraryRouter from './scenes/library/LibraryRouter'
+import SettingsRouter from './scenes/settings/SettingsRouter'
 
 // FIXME: this is really annoying
 export type LazyComponent = Promise<{
@@ -22,11 +21,6 @@ const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewS
 const BookOverview = lazily(() => import('./pages/book/BookOverview'))
 const ReadBook = lazily(() => import('./pages/book/ReadBook'))
 const ReadEpub = lazily(() => import('./pages/book/ReadEpub'))
-const SettingsLayout = lazily(() => import('./components/settings/SettingsLayout'))
-const GeneralSettings = lazily(() => import('./pages/settings/GeneralSettings'))
-const JobSettings = lazily(() => import('./pages/settings/JobSettings'))
-const ServerSettings = lazily(() => import('./pages/settings/ServerSettings'))
-const UserSettings = lazily(() => import('./pages/settings/UserSettings'))
 const FourOhFour = lazily(() => import('./pages/FourOhFour'))
 const ServerConnectionError = lazily(() => import('./pages/ServerConnectionError'))
 const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene'))
@@ -59,11 +53,7 @@ export function AppRouter() {
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />
 
-					<Route path="hi" element={<div>Hi!</div>} />
-					<Route path="bye" element={<div>Bye!</div>} />
-					<Route path="haha" element={<div>Haha!</div>} />
-
-					{/* <Route path="library/*" element={<LibraryRouter />} />
+					<Route path="library/*" element={<LibraryRouter />} />
 
 					<Route path="series/:id" element={<SeriesOverviewScene />} />
 
@@ -71,14 +61,7 @@ export function AppRouter() {
 					<Route path="books/:id/pages/:page" element={<ReadBook />} />
 					<Route path="epub/:id" element={<ReadEpub />} />
 
-					<Route path="settings" element={<SettingsLayout />}>
-						<Route path="" element={<Navigate to="/settings/general" replace />} />
-						<Route path="general" element={<GeneralSettings />} />
-						<Route path="users" element={<UserSettings />} />
-						<Route path="server" element={<ServerSettings />} />
-						<Route path="jobs" element={<JobSettings />} />
-						{appProps?.platform !== 'browser' && <Route path="desktop" element={<>Desktop!</>} />}
-					</Route> */}
+					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 
 				<Route path="/auth" element={<LoginOrClaimScene />} />

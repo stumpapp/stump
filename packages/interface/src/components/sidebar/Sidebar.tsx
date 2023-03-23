@@ -212,11 +212,11 @@ export default function Sidebar() {
 	return (
 		<aside className="hidden min-h-full md:inline-block">
 			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 py-4 px-2 dark:border-gray-900 dark:bg-gray-1000">
-				{/* <SidebarContent /> */}
-				<Link to="/">Home</Link>
+				<SidebarContent />
+				{/* <Link to="/">Home</Link>
 				<Link to="/hi">Hi</Link>
 				<Link to="/bye">Bye</Link>
-				<Link to="/haha">Haha</Link>
+				<Link to="/haha">Haha</Link> */}
 
 				{/* <Link to="/library/fc0468ae-91c8-4643-94e3-378dcbd3f592">Library</Link> */}
 			</div>

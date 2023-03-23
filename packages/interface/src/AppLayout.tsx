@@ -1,5 +1,5 @@
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import React, { useMemo } from 'react'
+import React, { Suspense, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -66,7 +66,9 @@ export function AppLayout() {
 					{!hideSidebar && <Sidebar />}
 
 					<main className="h-full w-full bg-white dark:bg-gray-975">
-						<Outlet />
+						<Suspense>
+							<Outlet />
+						</Suspense>
 					</main>
 				</div>
 

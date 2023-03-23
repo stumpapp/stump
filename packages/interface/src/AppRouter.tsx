@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from './AppLayout'
 import LocaleProvider from './i18n/LocaleProvider'
 import LibraryRouter from './scenes/library/LibraryRouter'
+import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter'
 import SettingsRouter from './scenes/settings/SettingsRouter'
 
 // FIXME: this is really annoying
@@ -21,20 +22,9 @@ const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewS
 const BookOverview = lazily(() => import('./pages/book/BookOverview'))
 const ReadBook = lazily(() => import('./pages/book/ReadBook'))
 const ReadEpub = lazily(() => import('./pages/book/ReadEpub'))
-const FourOhFour = lazily(() => import('./pages/FourOhFour'))
-const ServerConnectionError = lazily(() => import('./pages/ServerConnectionError'))
+const FourOhFour = lazily(() => import('./scenes/error/FourOhFour'))
+const ServerConnectionErrorScene = lazily(() => import('./scenes/error/ServerConnectionErrorScene'))
 const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene'))
-const OnBoarding = lazily(() => import('./pages/OnBoarding'))
-
-function OnBoardingRouter() {
-	return (
-		<React.Suspense>
-			<Routes>
-				<Route path="/" element={<OnBoarding />} />
-			</Routes>
-		</React.Suspense>
-	)
-}
 
 export function AppRouter() {
 	const appProps = useAppProps()
@@ -65,7 +55,7 @@ export function AppRouter() {
 				</Route>
 
 				<Route path="/auth" element={<LoginOrClaimScene />} />
-				<Route path="/server-connection-error" element={<ServerConnectionError />} />
+				<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
 				<Route path="*" element={<FourOhFour />} />
 			</Routes>
 		</LocaleProvider>

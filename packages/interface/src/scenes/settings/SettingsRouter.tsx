@@ -9,7 +9,7 @@ const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyCompo
 const GeneralSettingsScene = lazily(() => import('./general/GeneralSettingsScene'))
 const JobSettingsScene = lazily(() => import('./job/JobSettingsScene'))
 const ServerSettingsScene = lazily(() => import('./server/ServerSettingsScene'))
-const UserSettingsScene = lazily(() => import('./user/UserSettingsScene'))
+const UserManagementScene = lazily(() => import('./user/UserManagementScene'))
 
 export default function SettingsRouter() {
 	const appProps = useAppProps()
@@ -19,7 +19,7 @@ export default function SettingsRouter() {
 			<Route element={<SettingsLayout />}>
 				<Route path="" element={<Navigate to="/settings/general" replace />} />
 				<Route path="general" element={<GeneralSettingsScene />} />
-				<Route path="users" element={<UserSettingsScene />} />
+				<Route path="users" element={<UserManagementScene />} />
 				<Route path="server" element={<ServerSettingsScene />} />
 				<Route path="jobs" element={<JobSettingsScene />} />
 				{appProps?.platform !== 'browser' && <Route path="desktop" element={<>Desktop!</>} />}

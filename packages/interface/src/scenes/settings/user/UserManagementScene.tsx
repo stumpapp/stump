@@ -1,11 +1,18 @@
 import { Heading, Text } from '@stump/components'
 import { Helmet } from 'react-helmet'
+import { Navigate } from 'react-router'
 
 import SceneContainer from '../../../components/SceneContainer'
-import { useLocaleContext } from '../../../i18n'
+import { useAppContext } from '../../../context'
+import { useLocaleContext } from '../../../i18n/index'
 
-export default function UserSettingsScene() {
+export default function UserManagementScene() {
 	const { t } = useLocaleContext()
+	const { isServerOwner } = useAppContext()
+
+	if (!isServerOwner) {
+		return <Navigate to="/404" />
+	}
 
 	return (
 		<SceneContainer>

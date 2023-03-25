@@ -113,9 +113,31 @@
 				"validation": {},
 				"labels": {
 					"username": "Username",
-					"password": "Password"
+					"password": "Password",
+					"activeChangesPrompt": "You have unsaved changes"
 				},
-				"buttons": {}
+				"avatarPicker": {
+					"heading": "Set your Avatar Image",
+					"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
+					"preview": "A preview will appear here once you have entered a URL.",
+					"labels": {
+						"imageUrl": "Image URL",
+						"customAvatar": "Custom Avatar"
+					},
+					"buttons": {
+						"confirm": "Confirm Image",
+						"cancel": "Cancel",
+						"edit": "Edit",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image"
+					}
+				},
+				"buttons": {
+					"confirm": "Save Changes"
+				}
+			},
+			"localeSelector": {
+				"label": "Language"
 			}
 		},
 		"jobs": {

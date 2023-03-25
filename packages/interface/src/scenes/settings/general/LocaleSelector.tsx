@@ -1,7 +1,8 @@
 import { useUserPreferences, useUserStore } from '@stump/client'
 import { ComboBox } from '@stump/components'
 
-import { isLocale, localeNames, useLocaleContext } from '../../../i18n'
+import { isLocale, localeNames } from '../../../i18n'
+import { useLocaleContext } from '../../../i18n/context'
 
 const options = Object.entries(localeNames).map(([value, label]) => ({
 	label,
@@ -12,8 +13,10 @@ const options = Object.entries(localeNames).map(([value, label]) => ({
 // 2. On consecutive change, the locale visible is the previous locale
 // The above will happen over and over (lagging behind by 1) until a full
 // refresh is done, at which point the locale will be correct.
+// NOTE: UPATE: So WEIRDLY, the ProfileForm updates the locale correctly!
+// But no other component does....
 export default function LocaleSelector() {
-	const { locale } = useLocaleContext()
+	const { t, locale } = useLocaleContext()
 	const { user, setUserPreferences, userPreferences } = useUserStore((store) => ({
 		setUserPreferences: store.setUserPreferences,
 		user: store.user,
@@ -31,6 +34,12 @@ export default function LocaleSelector() {
 	}
 
 	return (
-		<ComboBox label="Locale" value={locale} options={options} filterable onChange={handleChange} />
+		<ComboBox
+			label={t('settingsScene.general.localeSelector.label')}
+			value={locale}
+			options={options}
+			filterable
+			onChange={handleChange}
+		/>
 	)
 }

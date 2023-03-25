@@ -3,12 +3,12 @@ import { Suspense, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
+import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
 import SeriesGrid from '../../components/series/SeriesGrid'
 import SeriesList from '../../components/series/SeriesList'
 import { useGetPage } from '../../hooks/useGetPage'
 import useIsInView from '../../hooks/useIsInView'
-import Pagination from '../../ui/Pagination'
 
 export default function LibraryOverviewScene() {
 	const { id } = useParams()

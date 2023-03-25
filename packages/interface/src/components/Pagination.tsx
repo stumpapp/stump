@@ -4,8 +4,8 @@ import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useWindowSize } from 'rooks'
 
-import PagePopoverForm from '../components/PagePopoverForm'
 import { usePagination } from '../hooks/usePagination'
+import PagePopoverForm from './PagePopoverForm'
 
 interface PaginationArrowProps {
 	kind: 'previous' | 'next'
@@ -21,7 +21,7 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 	// disabling the link.
 	return (
 		<div
-			className={cx('-mt-[1px]', kind === 'next' ? 'justify-end text-right' : 'justify-start', {
+			className={cx('-mt-1', kind === 'next' ? 'justify-end text-right' : 'justify-start', {
 				'cursor-not-allowed': isDisabled,
 			})}
 		>
@@ -33,6 +33,7 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 				<div
 					className={cx(
 						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-gray-300 dark:hover:border-gray-600 md:text-sm',
+						!isDisabled && 'dark:text-gray-300 dark:hover:text-gray-100',
 						isDisabled && 'pointer-events-none cursor-not-allowed text-gray-300 dark:text-gray-500',
 						{ 'pr-1 pl-0': kind === 'previous' },
 						{ 'pl-1 pr-0': kind === 'next' },

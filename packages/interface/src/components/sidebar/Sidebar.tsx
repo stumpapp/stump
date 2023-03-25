@@ -10,10 +10,10 @@ import {
 	Library as LibraryIcon,
 	Settings,
 } from 'lucide-react'
-import { Suspense, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { useLocaleContext } from '../../i18n'
+import { useLocaleContext } from '../../i18n/context'
 import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
@@ -213,12 +213,6 @@ export default function Sidebar() {
 		<aside className="hidden min-h-full md:inline-block">
 			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 py-4 px-2 dark:border-gray-900 dark:bg-gray-1000">
 				<SidebarContent />
-				{/* <Link to="/">Home</Link>
-				<Link to="/hi">Hi</Link>
-				<Link to="/bye">Bye</Link>
-				<Link to="/haha">Haha</Link> */}
-
-				{/* <Link to="/library/fc0468ae-91c8-4643-94e3-378dcbd3f592">Library</Link> */}
 			</div>
 		</aside>
 	)

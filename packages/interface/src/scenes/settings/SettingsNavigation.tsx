@@ -1,6 +1,6 @@
 // import { Box, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { AppPropsContext } from '@stump/client'
-import { Tabs } from '@stump/components'
+import { NativeSelect, Tabs } from '@stump/components'
 import { User } from '@stump/types'
 import { Suspense, useContext, useMemo } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -43,27 +43,22 @@ type Props = {
 
 // TODO: mobile looks bad, use select instead when on mobile
 export default function SettingsNavigation({ user }: Props) {
+	const navigate = useNavigate()
 	const appProps = useContext(AppPropsContext)
 	const location = useLocation()
 
 	const { t } = useLocaleContext()
 
-	// function handleChange(index: number) {
-	// 	const page = pages.find((p) => p.index === index)
-
-	// 	if (page && index !== activeTab) {
-	// 		navigate(`/settings/${page.shortName}`)
-	// 	}
-	// }
-
 	const tabs = useMemo(() => {
 		let base = DEFAULT_PAGES
 
 		if (appProps?.platform !== 'browser') {
+			// Desktop page is only available on desktop app
 			base = [...base.slice(0, 1), DESKTOP_PAGE, ...base.slice(1)]
 		}
 
 		if (user?.role !== 'SERVER_OWNER') {
+			// Remove all pages except general and desktop for base users
 			base = base.filter((page) => page.shortName === 'general' || page.shortName === 'desktop')
 		}
 
@@ -72,11 +67,30 @@ export default function SettingsNavigation({ user }: Props) {
 
 	return (
 		<SceneContainer className="pb-0">
-			<Tabs value={location.pathname} variant="primary" activeOnHover>
+			<NativeSelect
+				className="md:hidden"
+				options={tabs.map((tab) => ({
+					label: t(tab.localeKey),
+					value: tab.path,
+				}))}
+				value={location.pathname}
+				onChange={(e) => {
+					navigate(e.target.value)
+				}}
+			/>
+
+			<Tabs
+				value={location.pathname}
+				variant="primary"
+				activeOnHover
+				className="hidden md:inline-flex"
+			>
 				<Tabs.List>
 					{tabs.map((tab) => (
 						<Tabs.Trigger key={tab.path} value={tab.path} asChild>
-							<Link to={tab.path}>{t(tab.localeKey)}</Link>
+							<Link className="truncate" to={tab.path}>
+								{t(tab.localeKey)}
+							</Link>
 						</Tabs.Trigger>
 					))}
 				</Tabs.List>

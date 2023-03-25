@@ -10,6 +10,7 @@ pub struct User {
 	pub username: String,
 	pub role: String,
 	pub user_preferences: Option<UserPreferences>,
+	pub avatar_url: Option<String>,
 }
 
 impl User {
@@ -36,6 +37,7 @@ impl From<prisma::user::Data> for User {
 			username: data.username,
 			role: data.role,
 			user_preferences,
+			avatar_url: data.avatar_url,
 		}
 	}
 }

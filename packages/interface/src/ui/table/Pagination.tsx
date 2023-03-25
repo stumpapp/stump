@@ -4,8 +4,8 @@ import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
 
 import PagePopoverForm from '../../components/PagePopoverForm'
+import { PaginationProps } from '../../components/Pagination'
 import { usePagination } from '../../hooks/usePagination'
-import { PaginationProps } from '../Pagination'
 
 interface TablePaginationProps extends Omit<PaginationProps, 'position'> {
 	onPageChange: (page: number) => void

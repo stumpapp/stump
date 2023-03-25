@@ -2,7 +2,8 @@
 	"name": "@stump/components",
 	"version": "0.0.0",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./styles/overrides.css": "./src/styles/overrides.css"
 	},
 	"scripts": {
 		"build": "tsc",

@@ -2,7 +2,7 @@
 
 export interface StumpVersion { semver: string, rev: string | null, compile_time: string }
 
-export interface User { id: string, username: string, role: string, user_preferences: UserPreferences | null }
+export interface User { id: string, username: string, role: string, user_preferences: UserPreferences | null, avatar_url: string | null }
 
 export type UserRole = "SERVER_OWNER" | "MEMBER"
 
@@ -10,7 +10,7 @@ export interface UserPreferences { id: string, locale: string, library_layout_mo
 
 export interface UpdateUserArgs { username: string, password: string | null }
 
-export interface UserPreferencesUpdate { id: string, locale: string, library_layout_mode: string, series_layout_mode: string, collection_layout_mode: string }
+export interface UserPreferencesUpdate { id: string, locale: string, library_layout_mode: string, series_layout_mode: string, collection_layout_mode: string, app_theme: string }
 
 export interface LoginOrRegisterArgs { username: string, password: string }
 

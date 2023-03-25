@@ -1,4 +1,5 @@
 import './styles/index.css'
+import '@stump/components/styles/overrides.css'
 
 import { initializeApi } from '@stump/api'
 import {

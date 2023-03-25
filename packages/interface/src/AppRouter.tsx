@@ -1,6 +1,6 @@
 import { useAppProps } from '@stump/client'
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
 import LocaleProvider from './i18n/LocaleProvider'
@@ -56,7 +56,8 @@ export function AppRouter() {
 
 				<Route path="/auth" element={<LoginOrClaimScene />} />
 				<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
-				<Route path="*" element={<FourOhFour />} />
+				<Route path="/404" element={<FourOhFour />} />
+				<Route path="*" element={<Navigate to="/404" />} />
 			</Routes>
 		</LocaleProvider>
 	)

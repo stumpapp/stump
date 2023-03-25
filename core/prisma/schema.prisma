@@ -37,6 +37,8 @@ model User {
   hashed_password String
   // The role of the user. Defaults to "MEMBER".
   role            String         @default("MEMBER")
+  // The URL of the user's optional avatar.
+  avatar_url      String?
   // The media the user currently has progress on.
   // TODO: rename to `reading_history`
   read_progresses ReadProgress[]

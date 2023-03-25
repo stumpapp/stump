@@ -136,8 +136,24 @@
 					"confirm": "Save Changes"
 				}
 			},
-			"localeSelector": {
-				"label": "Language"
+			"theme": {
+				"heading": "Application Theme",
+				"subtitle": "Stump supports both light and dark themes, which can be set below.",
+				"dark": {
+					"label": "Dark Theme",
+					"description": "Use a dark theme for Stump, which is the correct theme."
+				},
+				"light": {
+					"label": "Light Theme",
+					"description": "Use a light theme for Stump, which is the incorrect theme."
+				}
+			},
+			"locale": {
+				"localeSelector": {
+					"label": "Language"
+				},
+				"heading": "Language and Locale Settings",
+				"subtitle": "Stump supports multiple languages and locales, set your preferences below."
 			}
 		},
 		"jobs": {

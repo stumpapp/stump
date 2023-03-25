@@ -72,7 +72,7 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 				</Dialog.Content>
 			</Dialog>
 
-			<div className="flex flex-col gap-2.5">
+			<div className="flex flex-col gap-2.5 self-center">
 				<Label>{t('settingsScene.general.profileForm.avatarPicker.labels.customAvatar')}</Label>
 				<span className="relative">
 					<Avatar

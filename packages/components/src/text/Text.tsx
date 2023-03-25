@@ -18,6 +18,9 @@ const textVariants = cva('', {
 	},
 	variants: {
 		size: {
+			'2xl': 'text-2xl',
+			'3xl': 'text-3xl',
+			'4xl': 'text-4xl',
 			lg: 'text-lg',
 			md: 'text-base',
 			sm: 'text-sm',

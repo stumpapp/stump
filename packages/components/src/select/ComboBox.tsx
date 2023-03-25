@@ -95,7 +95,7 @@ export function ComboBox({
 
 	const Container = label || description ? 'div' : Fragment
 	const containerProps = {
-		...((label || description) && { className: 'flex flex-col gap-1.5' }),
+		...((label || description) && { className: 'flex flex-col gap-2' }),
 	}
 
 	return (

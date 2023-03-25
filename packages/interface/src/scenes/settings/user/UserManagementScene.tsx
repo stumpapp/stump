@@ -1,10 +1,13 @@
-import { Heading, Text } from '@stump/components'
+import { Divider, Heading, Text } from '@stump/components'
 import { Helmet } from 'react-helmet'
 import { Navigate } from 'react-router'
 
 import SceneContainer from '../../../components/SceneContainer'
 import { useAppContext } from '../../../context'
 import { useLocaleContext } from '../../../i18n/index'
+import { SettingsContent, SettingsHeading } from '../SettingsLayout'
+import UserManagementStats from './UserManagementStats'
+import UserTable from './UserTable'
 
 export default function UserManagementScene() {
 	const { t } = useLocaleContext()
@@ -20,10 +23,15 @@ export default function UserManagementScene() {
 				<title>Stump | {t('settingsScene.users.helmet')}</title>
 			</Helmet>
 
-			<Heading>{t('settingsScene.users.heading')}</Heading>
-			<Text size="sm" variant="muted" className="mt-1">
-				{t('settingsScene.users.subtitle')}
-			</Text>
+			<SettingsHeading
+				heading={t('settingsScene.users.heading')}
+				subtitle={t('settingsScene.users.subtitle')}
+			/>
+
+			<SettingsContent>
+				<UserManagementStats />
+				<UserTable />
+			</SettingsContent>
 		</SceneContainer>
 	)
 }

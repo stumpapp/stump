@@ -24,7 +24,16 @@ export { type DropdownMenuProps, DropdownMenu } from './dropdown'
 export { type FormProps, type LabelProps, Form, Label } from './form'
 export { useBodyLock, useBoolean, useToast } from './hooks'
 export { AspectRatio, Avatar, Image } from './image'
-export { type CheckBoxProps, type TextAreaProps, CheckBox, Input, TextArea } from './input'
+export {
+	type CheckBoxProps,
+	type SwitchProps,
+	type TextAreaProps,
+	CheckBox,
+	Input,
+	RawSwitch,
+	Switch,
+	TextArea,
+} from './input'
 export { Link } from './link'
 export { Popover } from './popover'
 export { type ProgressBarProps, FullScreenLoader, ProgressBar } from './progress'

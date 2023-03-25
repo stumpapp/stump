@@ -1,5 +1,5 @@
 import { useUserStore } from '@stump/client'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { AllowedLocale, i18n } from './config'
@@ -23,6 +23,7 @@ export default function LocaleProvider({ children }: Props) {
 
 	return (
 		<LocaleContext.Provider
+			// key={locale}
 			value={{
 				locale,
 				t,

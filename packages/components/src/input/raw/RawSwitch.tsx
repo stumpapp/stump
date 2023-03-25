@@ -33,14 +33,14 @@ export type RawSwitchRef = React.ElementRef<typeof SwitchPrimitives.Root>
 // TODO: figure out icon(s)
 // type SwitchIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => JSX.Element
 export type RawSwitchProps = VariantProps<typeof switchVariants> &
-	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
-// & {
-// 	CheckedIcon?: SwitchIcon
-// 	UnCheckedIcon?: SwitchIcon
-// }
+	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & {
+		primaryRing?: boolean
+		// CheckedIcon?: SwitchIcon
+		// UnCheckedIcon?: SwitchIcon
+	}
 
 export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
-	({ className, variant, size, ...props }, ref) => {
+	({ className, variant, size, primaryRing, ...props }, ref) => {
 		// const renderIcon = () => {
 		// 	if (!CheckedIcon && !UnCheckedIcon) return null
 
@@ -55,7 +55,9 @@ export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
 		// }
 		return (
 			<SwitchPrimitives.Root
-				className={cn(switchVariants({ className, size, variant }))}
+				className={cn(switchVariants({ className, size, variant }), {
+					'focus:ring-brand-400 dark:focus:ring-brand-400': primaryRing,
+				})}
 				{...props}
 				ref={ref}
 			>

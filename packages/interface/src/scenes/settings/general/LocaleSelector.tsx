@@ -15,6 +15,7 @@ const options = Object.entries(localeNames).map(([value, label]) => ({
 // refresh is done, at which point the locale will be correct.
 // NOTE: UPATE: So WEIRDLY, the ProfileForm updates the locale correctly!
 // But no other component does....
+// IDEA: maybe it needs memoization?
 export default function LocaleSelector() {
 	const { t, locale } = useLocaleContext()
 	const { user, setUserPreferences, userPreferences } = useUserStore((store) => ({
@@ -35,7 +36,7 @@ export default function LocaleSelector() {
 
 	return (
 		<ComboBox
-			label={t('settingsScene.general.localeSelector.label')}
+			label={t('settingsScene.general.locale.localeSelector.label')}
 			value={locale}
 			options={options}
 			filterable

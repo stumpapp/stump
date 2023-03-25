@@ -1,77 +1,77 @@
 {
-  "authScene": {
-    "claimText": "Este servidor Stump todavía no está reclamado, puede usar el formulario a continuación para crear una cuenta de usuario y reclamarlo. Ingrese su nombre de usuario y contraseña preferidos.",
-    "form": {
-      "validation": {
-        "missingUsername": "Nombre de usuario requerido",
-        "missingPassword": "Contraseña requerida"
-      },
-      "labels": {
-        "username": "Nombre de usuario",
-        "password": "Contraseña"
-      },
-      "buttons": {
-        "createAccount": "Crear cuenta",
-        "login": "Iniciar sesión"
-      }
-    },
-    "toasts": {
-      "loggingIn": "Iniciando sesión...",
-      "loggedIn": "¡Bienvenido de nuevo! Redireccionando...",
-      "loggedInFirstTime": "¡Bienvenido! Redireccionando...",
-      "registering": "Registrando...",
-      "registered": "Registrado!",
-      "loginFailed": "Inicio de sesión fallido. Inténtalo de nuevo.",
-      "registrationFailed": "Registro fallido. Inténtalo de nuevo."
-    }
-  },
-  "signOutModal": {
-    "title": "Cerrar sesión",
-    "message": "¿Está seguro de que desea cerrar sesión?",
-    "buttons": {
-      "cancel": "Cancelar",
-      "signOut": "Cerrar sesión"
-    }
-  },
-  "settingsScene": {
-    "navigation": {
-      "generalSettings": "Configuraciones generales",
-      "serverSettings": "Configuraciones del servidor",
-      "jobHistory": "Historial de trabajos"
-    },
-    "general": {
-      "profileForm": {
-        "validation": {},
-        "labels": {
-          "username": "Nombre de usuario",
-          "password": "Contraseña"
-        },
-        "buttons": {}
-      }
-    }
-  },
-  "sidebar": {
-    "buttons": {
-      "home": "Inicio",
-      "libraries": "Bibliotecas",
-      "settings": "Configuraciones"
-    }
-  },
-  "libraryModalForm": {
-    "createLibraryHeading": "Crear una nueva biblioteca",
-    "labels": {
-      "libraryName": "Nombre de la biblioteca",
-      "libraryPath": "Ruta de la biblioteca",
-      "libraryDescription": "Descripción de la biblioteca",
-      "libraryTags": "Etiquetas de la biblioteca"
-    },
-    "buttons": {
-      "cancel": "Cancelar",
-      "editLibrary": "Guardar cambios",
-      "createLibrary": "Crear biblioteca"
-    }
-  },
-  "search": {
-    "placeholder": "Buscar"
-  }
+	"authScene": {
+		"claimText": "Este servidor Stump todavía no está reclamado, puede usar el formulario a continuación para crear una cuenta de usuario y reclamarlo. Ingrese su nombre de usuario y contraseña preferidos.",
+		"form": {
+			"validation": {
+				"missingUsername": "Nombre de usuario requerido",
+				"missingPassword": "Contraseña requerida"
+			},
+			"labels": {
+				"username": "Nombre de usuario",
+				"password": "Contraseña"
+			},
+			"buttons": {
+				"createAccount": "Crear cuenta",
+				"login": "Iniciar sesión"
+			}
+		},
+		"toasts": {
+			"loggingIn": "Iniciando sesión...",
+			"loggedIn": "¡Bienvenido de nuevo! Redireccionando...",
+			"loggedInFirstTime": "¡Bienvenido! Redireccionando...",
+			"registering": "Registrando...",
+			"registered": "Registrado!",
+			"loginFailed": "Inicio de sesión fallido. Inténtalo de nuevo.",
+			"registrationFailed": "Registro fallido. Inténtalo de nuevo."
+		}
+	},
+	"signOutModal": {
+		"title": "Cerrar sesión",
+		"message": "¿Está seguro de que desea cerrar sesión?",
+		"buttons": {
+			"cancel": "Cancelar",
+			"signOut": "Cerrar sesión"
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"generalSettings": "Configuraciones generales",
+			"serverSettings": "Configuraciones del servidor",
+			"jobHistory": "Historial de trabajos"
+		},
+		"general": {
+			"profileForm": {
+				"validation": {},
+				"labels": {
+					"username": "Nombre de usuario",
+					"password": "Contraseña"
+				},
+				"buttons": {}
+			}
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "Inicio",
+			"libraries": "Bibliotecas",
+			"settings": "Configuraciones"
+		}
+	},
+	"libraryModalForm": {
+		"createLibraryHeading": "Crear una nueva biblioteca",
+		"labels": {
+			"libraryName": "Nombre de la biblioteca",
+			"libraryPath": "Ruta de la biblioteca",
+			"libraryDescription": "Descripción de la biblioteca",
+			"libraryTags": "Etiquetas de la biblioteca"
+		},
+		"buttons": {
+			"cancel": "Cancelar",
+			"editLibrary": "Guardar cambios",
+			"createLibrary": "Crear biblioteca"
+		}
+	},
+	"search": {
+		"placeholder": "Buscar"
+	}
 }

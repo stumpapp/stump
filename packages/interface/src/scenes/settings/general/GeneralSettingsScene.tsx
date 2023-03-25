@@ -1,10 +1,11 @@
-import { Divider, Heading, Text } from '@stump/components'
 import { Helmet } from 'react-helmet'
 
 import SceneContainer from '../../../components/SceneContainer'
 import { useLocaleContext } from '../../../i18n'
-import LocaleSelector from './LocaleSelector'
+import { SettingsContent, SettingsHeading } from '../SettingsLayout'
+import LocalePreferences from './LocalePreferences'
 import ProfileForm from './ProfileForm'
+import SystemThemeForm from './SystemThemeForm'
 
 export default function GeneralSettingsScene() {
 	const { t } = useLocaleContext()
@@ -15,17 +16,16 @@ export default function GeneralSettingsScene() {
 				<title>Stump | {t('settingsScene.general.helmet')}</title>
 			</Helmet>
 
-			<Heading>{t('settingsScene.general.heading')}</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5">
-				{t('settingsScene.general.subtitle')}
-			</Text>
+			<SettingsHeading
+				heading={t('settingsScene.general.heading')}
+				subtitle={t('settingsScene.general.subtitle')}
+			/>
 
-			<Divider variant="muted" className="my-3.5" />
-
-			<div className="mt-6 flex flex-col gap-12">
+			<SettingsContent>
 				<ProfileForm />
-				<LocaleSelector />
-			</div>
+				<SystemThemeForm />
+				<LocalePreferences />
+			</SettingsContent>
 		</SceneContainer>
 	)
 }

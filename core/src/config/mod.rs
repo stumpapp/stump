@@ -80,13 +80,11 @@ pub fn stump_in_docker() -> bool {
 	// NOTE: this should never hit, since I manually set the env var in the Dockerfile... However,
 	// in case someone decides to run Stump in a container while overriding that var, this should
 	// prevent any issues.
-	let cgroup = std::fs::read_to_string("/proc/self/cgroup")
+	std::fs::read_to_string("/proc/self/cgroup")
 		.map(|cgroup| {
 			cgroup
 				.lines()
 				.any(|line| line.contains("docker") || line.contains("containerd"))
 		})
-		.unwrap_or(false);
-
-	cgroup
+		.unwrap_or(false)
 }

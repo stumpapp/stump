@@ -110,11 +110,17 @@
 			"heading": "General Settings",
 			"subtitle": "Use the forms below to manage your preferences and account settings.",
 			"profileForm": {
-				"validation": {},
+				"validation": {
+					"invalidUrl": "Please enter a valid URL",
+					"missingUsername": "Username is required"
+				},
 				"labels": {
 					"username": "Username",
 					"password": "Password",
 					"activeChangesPrompt": "You have unsaved changes"
+				},
+				"errors": {
+					"updateFailed": "A server error occurred while updating your profile. Please try again."
 				},
 				"avatarPicker": {
 					"heading": "Set your Avatar Image",
@@ -153,7 +159,11 @@
 					"label": "Language"
 				},
 				"heading": "Language and Locale Settings",
-				"subtitle": "Stump supports multiple languages and locales, set your preferences below."
+				"subtitle": [
+					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+					"Stump's translations",
+					"if you're able to!"
+				]
 			}
 		},
 		"jobs": {
@@ -242,7 +252,14 @@
 		"reconnected": "Reconnected to server! Redirecting...",
 		"reconnectionFailed": "Something went wrong!"
 	},
-	"serverStatusOverlay": {},
+	"serverStatusOverlay": {
+		"heading": "Server isn't connected.",
+		"message": [
+			"Please check your internet connection.",
+			"Click here",
+			"to change your server URL."
+		]
+	},
 	"slidingList": {
 		"empty": "No items to display",
 		"buttons": {

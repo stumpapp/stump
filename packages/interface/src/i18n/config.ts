@@ -1,7 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
-import { en, es, fr } from './locales'
+import { en, es, fr, it } from './locales'
 
 export const resources = {
 	en: {
@@ -12,6 +12,9 @@ export const resources = {
 	},
 	fr: {
 		fr,
+	},
+	it: {
+		it,
 	},
 } as const
 export type AllowedLocale = keyof typeof resources

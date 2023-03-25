@@ -12,6 +12,7 @@ import {
 	UseMutationOptions,
 	useQuery as useReactQuery,
 	UseQueryOptions,
+	UseQueryResult,
 } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useMemo } from 'react'
@@ -41,6 +42,17 @@ export type QueryOptions<
 	UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
 	'queryKey' | 'queryFn' | 'context'
 >
+export type QueryHook = <
+	TQueryFnData = unknown,
+	TError = unknown,
+	TData = TQueryFnData,
+	TQueryKey extends QueryKey = QueryKey,
+>(
+	queryKey: TQueryKey,
+	queryFn: QueryFunction<TQueryFnData, TQueryKey>,
+	options?: QueryOptions<TQueryFnData, TError, TData, TQueryKey>,
+) => UseQueryResult<TData, TError>
+
 export function useQuery<
 	TQueryFnData = unknown,
 	TError = unknown,
@@ -163,6 +175,16 @@ export function useCursorQuery<Entity, TQueryKey extends QueryKey = QueryKey>(
 	)
 }
 
+export type MutationOptions<
+	TData = unknown,
+	TError = unknown,
+	TVariables = void,
+	TContext = unknown,
+> = Omit<
+	UseMutationOptions<TData, TError, TVariables, TContext>,
+	'mutationKey' | 'mutationFn' | 'context'
+>
+
 export function useMutation<
 	TData = unknown,
 	TError = unknown,
@@ -171,10 +193,7 @@ export function useMutation<
 >(
 	mutationKey: MutationKey,
 	mutationFn?: MutationFunction<TData, TVariables>,
-	options?: Omit<
-		UseMutationOptions<TData, TError, TVariables, TContext>,
-		'mutationKey' | 'mutationFn' | 'context'
-	>,
+	options?: MutationOptions<TData, TError, TVariables, TContext>,
 ) {
 	const { onRedirect } = useClientContext() || {}
 	const { setUser } = useUserStore((store) => ({

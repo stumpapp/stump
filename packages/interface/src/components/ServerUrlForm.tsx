@@ -15,10 +15,6 @@ import { ChangeEvent, useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import Button from '../ui/Button'
-import Form, { FormControl } from '../ui/Form'
-import { DebouncedInput } from '../ui/Input'
-
 export default function ServerUrlForm() {
 	const { setBaseUrl } = useStumpStore(({ setBaseUrl }) => ({ setBaseUrl }))
 	const [isCheckingUrl, { on, off }] = useBoolean(false)

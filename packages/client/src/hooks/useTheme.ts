@@ -1,4 +1,4 @@
-import { useUserPreferences, useUserStore } from '../index'
+import { useUpdatePreferences, useUserStore } from '..'
 
 export type UseThemeParams = {
 	onError?: (err: unknown) => void
@@ -9,15 +9,12 @@ export type UseThemeParams = {
  *  is handled by the `interface` package.
  **/
 export function useTheme({ onError }: UseThemeParams = {}) {
-	const { user, userPreferences, setUserPreferences } = useUserStore((state) => ({
+	const { userPreferences, setUserPreferences } = useUserStore((state) => ({
 		setUserPreferences: state.setUserPreferences,
 		user: state.user,
 		userPreferences: state.userPreferences,
 	}))
-
-	const { updateUserPreferences } = useUserPreferences(user?.id, {
-		enableFetchPreferences: !!user,
-	})
+	const { update } = useUpdatePreferences()
 
 	const isDark = (userPreferences?.app_theme || 'light').toLowerCase() === 'dark'
 
@@ -30,7 +27,7 @@ export function useTheme({ onError }: UseThemeParams = {}) {
 			})
 
 			try {
-				await updateUserPreferences({
+				await update({
 					...userPreferences,
 					app_theme: newTheme,
 				})

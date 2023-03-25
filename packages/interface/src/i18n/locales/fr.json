@@ -1,6 +1,6 @@
 {
 	"authScene": {
-		"claimText": "Ce serveur Stump n'a pas encore été revendiqué, vous pouvez utiliser le formulaire ci-dessous pour créer un compte d'utilisateur et le revendiquer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
+		"claimText": "Ce serveur Stump n'est pas encore réclamé, vous pouvez utiliser le formulaire ci-dessous pour créer un compte utilisateur et le réclamer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
 		"form": {
 			"validation": {
 				"missingUsername": "Le nom d'utilisateur est requis",
@@ -12,66 +12,259 @@
 			},
 			"buttons": {
 				"createAccount": "Créer un compte",
-				"login": "Se connecter"
+				"login": "Connexion"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Connexion en cours...",
-			"loggedIn": "Bienvenue de retour! Redirection...",
-			"loggedInFirstTime": "Bienvenue! Redirection...",
-			"registering": "Inscription en cours...",
-			"registered": "Inscrit!",
-			"loginFailed": "La connexion a échoué. Veuillez réessayer.",
-			"registrationFailed": "L'inscription a échoué. Veuillez réessayer."
+			"loggedIn": "Bienvenue de retour ! Redirection en cours...",
+			"loggedInFirstTime": "Bienvenue ! Redirection en cours...",
+			"registering": "Enregistrement en cours...",
+			"registered": "Enregistré !",
+			"loginFailed": "Échec de la connexion. Veuillez réessayer.",
+			"registrationFailed": "Échec de l'enregistrement. Veuillez réessayer."
 		}
 	},
-	"signOutModal": {
-		"title": "Se déconnecter",
-		"message": "Êtes-vous sûr de vouloir vous déconnecter?",
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "Configuration de la bibliothèque",
+			"subtitleCreating": "Un aperçu de votre nouvelle bibliothèque sera affiché ci-dessous.",
+			"subtitleEditing": "Un aperçu des modifications de votre bibliothèque sera affiché ci-dessous."
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "Informations sur le fichier",
+			"labels": {
+				"fileSize": "Taille du fichier",
+				"fileType": "Type de fichier",
+				"fileLocation": "Emplacement du fichier",
+				"fileChecksum": "Somme de contrôle"
+			}
+		},
+		"nextInSeries": "Suivant dans la série"
+	},
+	"createLibraryScene": {
+		"heading": "Créer une nouvelle bibliothèque",
+		"subtitle": "Les bibliothèques sont utilisées pour regrouper vos livres. Si vous souhaitez en savoir plus sur les bibliothèques et leur fonctionnement, consultez la",
+		"subtitleLink": "documentation correspondante",
+		"form": {
+			"labels": {
+				"libraryName": "Nom",
+				"libraryPath": "Chemin d'accès",
+				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur.",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Créer la bibliothèque"
+			}
+		}
+	},
+	"editLibraryScene": {
+		"heading": "Modifier la bibliothèque",
+		"subtitle": "Utilisez le formulaire ci-dessous pour modifier votre bibliothèque. Si vous souhaitez en savoir plus sur les bibliothèques et leur fonctionnement, consultez la",
+		"subtitleLink": "documentation correspondante",
+		"form": {
+			"labels": {
+				"libraryName": "Nom",
+				"libraryPath": "Chemin d'accès",
+				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur.",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Enregistrer les modifications"
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "lol, oups",
+		"message": "Une erreur s'est produite :",
 		"buttons": {
-			"cancel": "Annuler",
-			"signOut": "Se déconnecter"
+			"report": "Signaler un bug",
+			"copy": "Copier les détails de l'erreur",
+			"goHome": "Aller à la page d'accueil"
+		}
+	},
+	"homeScene": {
+		"continueReading": "Continuer la lecture",
+		"recentlyAddedSeries": "Séries récemment ajoutées",
+		"recentlyAddedBooks": "Livres récemment ajoutés"
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "Continuer la lecture",
+			"downloadSeries": "Télécharger la série"
 		}
 	},
 	"settingsScene": {
 		"navigation": {
-			"generalSettings": "Paramètres généraux",
-			"serverSettings": "Paramètres du serveur",
-			"jobHistory": "Historique des travaux"
+			"general": "Général",
+			"server": "Serveur",
+			"jobs": "Tâches et Configuration",
+			"users": "Gestion des Utilisateurs"
 		},
 		"general": {
+			"helmet": "Paramètres Généraux",
+			"heading": "Paramètres Généraux",
+			"subtitle": "Utilisez les formulaires ci-dessous pour gérer vos préférences et les paramètres de votre compte.",
 			"profileForm": {
-				"validation": {},
+				"validation": {
+					"invalidUrl": "Veuillez entrer une URL valide",
+					"missingUsername": "Le nom d'utilisateur est requis"
+				},
 				"labels": {
 					"username": "Nom d'utilisateur",
-					"password": "Mot de passe"
+					"password": "Mot de passe",
+					"activeChangesPrompt": "Vous avez des modifications non enregistrées"
 				},
-				"buttons": {}
+				"errors": {
+					"updateFailed": "Une erreur de serveur est survenue lors de la mise à jour de votre profil. Veuillez réessayer."
+				},
+				"avatarPicker": {
+					"heading": "Définir votre image d'avatar",
+					"subtitle": "Stump prend en charge les avatars personnalisés, qui peuvent être définis en fournissant une URL vers une image. Les téléchargements d'images ne sont pas pris en charge pour réduire la quantité de données stockées sur le serveur.",
+					"preview": "Un aperçu apparaîtra ici une fois que vous aurez entré une URL.",
+					"labels": {
+						"imageUrl": "URL de l'image",
+						"customAvatar": "Avatar personnalisé"
+					},
+					"buttons": {
+						"confirm": "Confirmer l'image",
+						"cancel": "Annuler",
+						"edit": "Modifier",
+						"changeImage": "Changer l'image",
+						"removeImage": "Supprimer l'image"
+					}
+				},
+				"buttons": {
+					"confirm": "Enregistrer les modifications"
+				}
+			},
+			"theme": {
+				"heading": "Thème de l'application",
+				"subtitle": "Stump prend en charge les thèmes clairs et foncés, qui peuvent être définis ci-dessous.",
+				"dark": {
+					"label": "Thème Foncé",
+					"description": "Utilisez un thème sombre pour Stump, qui est le thème correct."
+				},
+				"light": {
+					"label": "Thème Clair",
+					"description": "Utilisez un thème clair pour Stump, qui est le thème incorrect."
+				}
+			},
+			"locale": {
+				"localeSelector": {
+					"label": "Langue"
+				},
+				"heading": "Paramètres de Langue et Locale",
+				"subtitle": "Stump prend en charge plusieurs langues et locales, définissez vos préférences ci-dessous."
 			}
+		},
+		"jobs": {
+			"helmet": "Tâches et Configuration",
+			"heading": "Tâches et Configuration",
+			"subtitle": "Affichez et gérez les tâches en arrière-plan disponibles sur ce serveur, y compris les analyses de bibliothèques et la planification."
+		},
+		"server": {
+			"helmet": "Paramètres du Serveur",
+			"heading": "Paramètres du Serveur",
+			"subtitle": "Gérez différentes options configurables pour votre instance de serveur Stump."
+		},
+		"users": {
+			"helmet": "Gestion des Utilisateurs",
+			"heading": "Gestion des Utilisateurs",
+			"subtitle": "Gérez les utilisateurs sur ce serveur, y compris la création de nouveaux utilisateurs et la modification de leurs autorisations."
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "Traitement en cours"
+	},
+	"libraryStats": {
+		"seriesCount": "Total des séries",
+		"bookCount": "Total des livres",
+		"diskUsage": "Utilisation du disque"
+	},
+	"pagination": {
+		"buttons": {
+			"next": "Suivant",
+			"previous": "Précédent"
+		},
+		"popover": {
+			"heading": "Aller à la page",
+			"buttons": {
+				"confirm": "Aller",
+				"cancel": "Annuler"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "Déconnexion",
+		"message": "Êtes-vous sûr(e) de vouloir vous déconnecter ?",
+		"buttons": {
+			"cancel": "Annuler",
+			"signOut": "Se déconnecter"
 		}
 	},
 	"sidebar": {
 		"buttons": {
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
-			"settings": "Paramètres"
-		}
-	},
-	"libraryModalForm": {
-		"createLibraryHeading": "Créer une nouvelle bibliothèque",
-		"labels": {
-			"libraryName": "Nom de la bibliothèque",
-			"libraryPath": "Chemin de la bibliothèque",
-			"libraryDescription": "Description de la bibliothèque",
-			"libraryTags": "Mots clés de la bibliothèque"
+			"createLibrary": "Créer une bibliothèque",
+			"settings": "Paramètres",
+			"themeToggle": "Changer de thème",
+			"goForward": "Aller en avant",
+			"goBack": "Aller en arrière"
 		},
-		"buttons": {
-			"cancel": "Annuler",
-			"editLibrary": "Enregistrer les modifications",
-			"createLibrary": "Créer une bibliothèque"
+		"libraryOptions": {
+			"scanLibrary": {
+				"base": "Scanner la bibliothèque",
+				"parallel": "Scanner en parallèle",
+				"inOrder": "Scanner dans l'ordre"
+			},
+			"fileExplorer": "Explorateur de fichiers",
+			"editLibrary": "Modifier la bibliothèque",
+			"deleteLibrary": "Supprimer la bibliothèque"
+		},
+		"versionInformation": {
+			"heading": "Informations de version",
+			"semVer": "Version sémantique",
+			"commitHash": "Hachage de validation",
+			"buildDate": "Date de construction"
 		}
 	},
 	"search": {
 		"placeholder": "Recherche"
+	},
+	"serverSOS": {
+		"heading": "Serveur non disponible",
+		"desktop": {
+			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil.\nSi l'URL de votre serveur a changé, vous pouvez la mettre à jour à l'aide du formulaire ci-dessous."
+		},
+		"web": {
+			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil."
+		},
+		"reconnected": "Reconnecté au serveur! Redirection...",
+		"reconnectionFailed": "Quelque chose s'est mal passé!"
+	},
+	"serverStatusOverlay": {
+		"heading": "Le serveur n'est pas connecté.",
+		"message": [
+			"Veuillez vérifier votre connexion Internet.",
+			"Cliquez ici",
+			"pour changer l'URL de votre serveur."
+		]
+	},
+	"slidingList": {
+		"empty": "Aucun élément à afficher",
+		"buttons": {
+			"next": "Avancer",
+			"previous": "Reculer"
+		}
+	},
+	"tagSelect": {
+		"placeholder": "Sélectionner ou créer un tag",
+		"placeholderNoTags": "Aucun tag disponible"
 	}
 }

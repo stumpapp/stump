@@ -170,7 +170,7 @@ export function SidebarContent() {
 		],
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[libraries, locale, location.pathname],
+		[libraries, locale, location.pathname, t],
 	)
 
 	return (

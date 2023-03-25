@@ -1,32 +1,36 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isUrl } from '@stump/api'
-import { useUser } from '@stump/client'
+import { useUpdateUser, useUser } from '@stump/client'
 import { Button, Form, Input, Text } from '@stump/components'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-hot-toast'
 import { z } from 'zod'
 
 import { useLocaleContext } from '../../../i18n/context'
 import AvatarPicker from './AvatarPicker'
 
-// TODO: move schema into component so translations can be used
-const schema = z.object({
-	avatarUrl: z
-		.string()
-		.optional()
-		.nullable()
-		.refine(
-			(url) => !url || isUrl(url),
-			(url) => ({ message: `Invalid URL: ${url}` }),
-		),
-	name: z.string().optional(),
-	password: z.string().optional(),
-	username: z.string().min(1, { message: 'Username is required' }),
-})
-type Schema = z.infer<typeof schema>
-
 export default function ProfileForm() {
 	const { t } = useLocaleContext()
-	const user = useUser()
+	const { update } = useUpdateUser()
+
+	const { user, setUser } = useUser()
+
+	const schema = z.object({
+		avatarUrl: z
+			.string()
+			.optional()
+			.nullable()
+			.refine(
+				(url) => !url || isUrl(url),
+				() => ({ message: t('settingsScene.general.profileForm.validation.invalidUrl') }),
+			),
+		name: z.string().optional(),
+		password: z.string().optional(),
+		username: z
+			.string()
+			.min(1, { message: t('settingsScene.general.profileForm.validation.missingUsername') }),
+	})
+	type Schema = z.infer<typeof schema>
 
 	const form = useForm<Schema>({
 		defaultValues: {
@@ -37,18 +41,44 @@ export default function ProfileForm() {
 		resolver: zodResolver(schema),
 	})
 
-	const [avatarUrl] = form.watch(['avatarUrl'])
+	const [avatarUrl, newUsername, newPassword] = form.watch(['avatarUrl', 'username', 'password'], {
+		avatarUrl: user?.avatar_url,
+		username: user?.username,
+	})
+
+	const isChangingPassword = !!newPassword
+	const hasChanges =
+		avatarUrl !== user?.avatar_url || newUsername !== user?.username || isChangingPassword
 
 	const handleImageChange = (url?: string) => {
 		form.setValue('avatarUrl', url, { shouldValidate: true })
 	}
 
 	const handleSubmit = async (values: Schema) => {
-		const { username } = values
-	}
+		if (!hasChanges) return
 
-	// FIXME: wrong logic, just compare the form values to the user values
-	const hasUnsavedChanges = form.formState.isDirty
+		try {
+			await update(
+				{
+					avatar_url: values.avatarUrl || null,
+					password: values.password || null,
+					username: values.username,
+				},
+				{
+					onSuccess: (user) => {
+						setUser(user)
+						form.reset({
+							avatarUrl: user.avatar_url,
+							...user,
+						})
+					},
+				},
+			)
+		} catch (error) {
+			console.error(error)
+			toast.error(t('settingsScene.general.profileForm.errors.updateFailed'))
+		}
+	}
 
 	return (
 		<Form form={form} onSubmit={handleSubmit}>
@@ -77,7 +107,7 @@ export default function ProfileForm() {
 							{t('settingsScene.general.profileForm.buttons.confirm')}
 						</Button>
 
-						{hasUnsavedChanges && (
+						{hasChanges && (
 							<Text variant="muted" size="xs">
 								{t('settingsScene.general.profileForm.labels.activeChangesPrompt')}
 							</Text>

@@ -7,6 +7,18 @@ export function getUserPreferences(userId: string): Promise<ApiResult<UserPrefer
 	return API.get(`/users/${userId}/preferences`)
 }
 
+/**
+ * Update the current user's preferences
+ */
+export function updatePreferences(
+	preferences: UserPreferences,
+): Promise<ApiResult<UserPreferences>> {
+	return API.put(`/users/me/preferences`, preferences)
+}
+
+/**
+ * Update the a user's preferences by their ID
+ */
 export function updateUserPreferences(
 	userId: string,
 	preferences: UserPreferences,
@@ -16,4 +28,8 @@ export function updateUserPreferences(
 
 export function updateUser(userId: string, params: UpdateUserArgs): Promise<ApiResult<User>> {
 	return API.put(`/users/${userId}`, params)
+}
+
+export function updateViewer(params: UpdateUserArgs): Promise<ApiResult<User>> {
+	return API.put(`/users/me`, params)
 }

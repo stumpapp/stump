@@ -37,31 +37,49 @@ export function SettingsContent({ children }: SettingsContentProps) {
 
 type SettingsHeadingProps = {
 	heading: string
-	subtitle: string
+	subtitle: string | React.ReactNode
 }
 
 export function SettingsHeading({ heading, subtitle }: SettingsHeadingProps) {
+	const renderSubtitle = () => {
+		if (typeof subtitle === 'string') {
+			return (
+				<Text size="sm" variant="muted" className="mt-1">
+					{subtitle}
+				</Text>
+			)
+		}
+
+		return subtitle
+	}
+
 	return (
 		<>
 			<Heading>{heading}</Heading>
-			<Text size="sm" variant="muted" className="mt-1">
-				{subtitle}
-			</Text>
+			{renderSubtitle()}
 		</>
 	)
 }
 type SettingsSubSectionProps = SettingsContentProps & SettingsHeadingProps
 
 export function SettingsSubSection({ heading, subtitle, children }: SettingsSubSectionProps) {
+	const renderSubtitle = () => {
+		if (typeof subtitle === 'string') {
+			return (
+				<Text size="sm" variant="muted" className="mt-1.5">
+					{subtitle}
+				</Text>
+			)
+		}
+
+		return subtitle
+	}
+
 	return (
 		<>
 			<Heading size="xs">{heading}</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5">
-				{subtitle}
-			</Text>
-
+			{renderSubtitle()}
 			<Divider variant="muted" className="my-3.5" />
-
 			{children}
 		</>
 	)

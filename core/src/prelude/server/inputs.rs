@@ -30,6 +30,7 @@ pub struct LoginOrRegisterArgs {
 pub struct UpdateUserArgs {
 	pub username: String,
 	pub password: Option<String>,
+	pub avatar_url: Option<String>,
 }
 
 #[derive(Serialize, Type, ToSchema)]

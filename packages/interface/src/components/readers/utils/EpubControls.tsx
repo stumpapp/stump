@@ -91,7 +91,10 @@ function EpubHeaderControls({
 				align="flex-start"
 			>
 				<ButtonGroup isAttached>
-					<IconButton variant="ghost" onClick={() => navigate(`/books/${epub.media_entity.id}`)}>
+					{/* FIXME: This navigate(-3) is effectively going back three times.
+						Likely related unwanted exta pushing on the routes stack when 
+						opening an epub */}
+					<IconButton variant="ghost" onClick={() => navigate(-3)}>
 						<ArrowLeft className="text-lg" weight="regular" />
 					</IconButton>
 

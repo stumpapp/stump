@@ -1,4 +1,4 @@
-import { refreshUseLibrary, useLibraries } from '@stump/client'
+import { refreshUseLibrary, useAppProps, useLibraries } from '@stump/client'
 import { Button, ButtonOrLink, cn, Heading, useBoolean } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
@@ -173,6 +173,8 @@ export function SidebarContent() {
 		[libraries, locale, location.pathname, t],
 	)
 
+	const isBrowser = useAppProps()?.platform === 'browser'
+
 	return (
 		<>
 			<div className="flex items-center justify-between px-4">
@@ -183,7 +185,7 @@ export function SidebarContent() {
 					</Heading>
 				</Link>
 
-				<NavigationButtons />
+				{!isBrowser && <NavigationButtons />}
 			</div>
 
 			<div className="flex max-h-full grow flex-col gap-2 overflow-hidden p-1">

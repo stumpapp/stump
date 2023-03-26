@@ -1,5 +1,5 @@
 import { getSeriesThumbnail } from '@stump/api'
-import { useLayoutMode, useSeries, useSeriesMedia, useTopBarStore } from '@stump/client'
+import { useLayoutMode, useSeries, useSeriesMedia } from '@stump/client'
 import { invalidateQueries, QUERY_KEYS } from '@stump/client'
 import { Heading } from '@stump/components'
 import type { Series } from '@stump/types'
@@ -70,8 +70,6 @@ export default function SeriesOverviewScene() {
 		throw new Error('Series id is required')
 	}
 
-	const setBackwardsUrl = useTopBarStore((state) => state.setBackwardsUrl)
-
 	const { layoutMode } = useLayoutMode('SERIES')
 	const { series, isLoading: isLoadingSeries } = useSeries(id)
 	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMedia(id, page)
@@ -86,19 +84,14 @@ export default function SeriesOverviewScene() {
 	}, [isInView, containerRef, pageData?.current_page])
 
 	useEffect(() => {
-		if (series) {
-			setBackwardsUrl(`/library/${series.library_id}`)
-		}
-
 		return () => {
-			setBackwardsUrl()
 			// FIXME: why do I need to do this??? What I found was happening was that
 			// the next series returned from `useSeries` would be ~correct~ BUT it would
 			// be wrapped in an axios response, i.e. `{ data: { ... } }`. This doesn't make a
 			// lick of sense to me yet...
 			invalidateQueries({ keys: [QUERY_KEYS.series.get_by_id] })
 		}
-	}, [series, setBackwardsUrl])
+	}, [series])
 
 	if (isLoadingSeries) {
 		return null

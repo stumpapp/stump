@@ -1,6 +1,6 @@
 import { Box, Heading, Text, useColorModeValue } from '@chakra-ui/react'
-import { useMediaById, useTopBarStore } from '@stump/client'
-import { Suspense, useEffect } from 'react'
+import { useMediaById } from '@stump/client'
+import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router-dom'
 
@@ -21,18 +21,6 @@ export default function BookOverview() {
 	}
 
 	const { media, isLoading } = useMediaById(id)
-
-	const setBackwardsUrl = useTopBarStore((state) => state.setBackwardsUrl)
-
-	useEffect(() => {
-		if (media?.series_id) {
-			setBackwardsUrl(`/series/${media.series_id}`)
-		}
-
-		return () => {
-			setBackwardsUrl()
-		}
-	}, [media, setBackwardsUrl])
 
 	const textColor = useColorModeValue('gray.700', 'gray.400')
 

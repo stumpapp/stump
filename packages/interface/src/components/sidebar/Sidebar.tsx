@@ -10,7 +10,7 @@ import {
 	useDisclosure,
 	VStack,
 } from '@chakra-ui/react'
-import { refreshUseLibrary, useLibraries } from '@stump/client'
+import { refreshUseLibrary, useAppProps, useLibraries } from '@stump/client'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
@@ -187,6 +187,8 @@ export function SidebarContent() {
 		[libraries, locale, location.pathname],
 	)
 
+	const isBrowser = useAppProps()?.platform === 'browser'
+
 	return (
 		<>
 			<HStack px={2} justifyContent="space-between" alignItems="center">
@@ -205,7 +207,7 @@ export function SidebarContent() {
 					</Text>
 				</HStack>
 
-				<NavigationButtons />
+				{!isBrowser && <NavigationButtons />}
 			</HStack>
 
 			<VStack spacing={2} flexGrow={1} maxH="full" overflow="hidden" p={1}>

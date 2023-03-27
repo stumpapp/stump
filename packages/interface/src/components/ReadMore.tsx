@@ -2,7 +2,7 @@ import { useBoolean } from '@chakra-ui/react'
 import { Text } from '@stump/components'
 import { ComponentProps } from 'react'
 
-import { DEBUG_ENV } from '..'
+import { DEBUG_ENV } from '../index'
 
 interface Props extends Omit<ComponentProps<typeof Text>, 'children'> {
 	text?: string | null

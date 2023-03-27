@@ -8,6 +8,7 @@ import JobOverlay from './components/jobs/JobOverlay'
 import Lazy from './components/Lazy'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
+import TopBar from './components/topbar/TopBar'
 // import TopBar from './components/topbar/TopBar'
 import { AppContext } from './context'
 
@@ -61,10 +62,9 @@ export function AppLayout() {
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
 			<React.Suspense fallback={<Lazy />}>
-				{/* <CommandPalette /> */}
+				<TopBar />
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
-
 					<main className="h-full w-full bg-white dark:bg-gray-975">
 						<Suspense>
 							<Outlet />

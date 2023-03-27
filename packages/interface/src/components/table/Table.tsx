@@ -1,4 +1,4 @@
-import { Box, useColorModeValue } from '@chakra-ui/react'
+import { Heading } from '@stump/components'
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -14,7 +14,6 @@ import clsx from 'clsx'
 import { SortAscending, SortDescending } from 'phosphor-react'
 import { useRef, useState } from 'react'
 
-import { DebouncedInput } from '../Input'
 import TablePagination from './Pagination'
 
 export interface TableProps<T = unknown, V = unknown> {
@@ -76,44 +75,44 @@ export default function Table<T, V>({
 		if (filterCol === 'GLOBAL_FILTER') {
 			setGlobalFilter(value || '')
 		} else if (filterCol) {
-			table.getColumn(filterCol).setFilterValue(value)
+			table.getColumn(filterCol)?.setFilterValue(value)
 		}
 	}
 
 	return (
-		<Box
-			bg={useColorModeValue('whiteAlpha.600', 'blackAlpha.300')}
-			className="block max-w-full overflow-y-hidden overflow-x-scroll scrollbar-hide"
-			rounded="md"
-			p={3}
-		>
-			<table className={clsx({ 'w-full': props.fullWidth })}>
-				<thead className="text-left">
-					{table.getHeaderGroups().map((headerGroup) => (
-						<tr key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
-								return (
-									<th key={header.id} colSpan={header.colSpan}>
-										<div
-											className={clsx('flex items-center', {
-												'cursor-pointer select-none': header.column.getCanSort() && sortable,
-											})}
-											onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
-										>
-											{flexRender(header.column.columnDef.header, header.getContext())}
-											{sortable && (
-												<SortIcon
-													direction={(header.column.getIsSorted() as SortDirection) ?? null}
-												/>
-											)}
-										</div>
-									</th>
-								)
-							})}
-						</tr>
-					))}
+		<div className="divide block max-w-full overflow-y-hidden overflow-x-scroll p-3 scrollbar-hide">
+			<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
+				<thead className="border-b border-gray-75 text-left dark:border-gray-800">
+					{table
+						.getHeaderGroups()
+						.slice(1)
+						.map((headerGroup) => (
+							<tr key={headerGroup.id}>
+								{headerGroup.headers.map((header) => {
+									return (
+										<th key={header.id} colSpan={header.colSpan} className="py-2.5">
+											<div
+												className={clsx('flex items-center', {
+													'cursor-pointer select-none': header.column.getCanSort() && sortable,
+												})}
+												onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
+											>
+												<Heading className="text-sm font-medium">
+													{flexRender(header.column.columnDef.header, header.getContext())}
+												</Heading>
+												{sortable && (
+													<SortIcon
+														direction={(header.column.getIsSorted() as SortDirection) ?? null}
+													/>
+												)}
+											</div>
+										</th>
+									)
+								})}
+							</tr>
+						))}
 				</thead>
-				<tbody className="divide-y">
+				<tbody className="divide-y divide-gray-75 dark:divide-gray-800">
 					{table.getRowModel().rows.map((row) => {
 						return (
 							<tr key={row.id}>
@@ -154,7 +153,7 @@ export default function Table<T, V>({
 					</select>
 
 					{/* FIXME: scuffed */}
-					{searchable && (
+					{/* {searchable && (
 						<div className="relative rounded-md shadow-sm">
 							<DebouncedInput
 								placeholder="Filter"
@@ -179,7 +178,7 @@ export default function Table<T, V>({
 								</select>
 							</div>
 						</div>
-					)}
+					)} */}
 				</div>
 
 				<TablePagination
@@ -188,7 +187,7 @@ export default function Table<T, V>({
 					onPageChange={(page) => table.setPageIndex(page)}
 				/>
 			</div>
-		</Box>
+		</div>
 	)
 }
 

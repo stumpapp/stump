@@ -1,5 +1,6 @@
 import {
 	getUserPreferences,
+	getUsers,
 	updatePreferences,
 	updateUser,
 	updateUserPreferences as updateUserPreferencesFn,
@@ -8,8 +9,19 @@ import {
 import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { MutationOptions, useMutation, useQuery } from '../client'
+import { MutationOptions, QueryOptions, useMutation, useQuery } from '../client'
 import { ClientQueryParams } from '.'
+
+type UseUsersQueryParams = QueryOptions<User[], AxiosError, User[]>
+export function useUsersQuery(params: UseUsersQueryParams = {}) {
+	const { data: users, ...ret } = useQuery(
+		['getUsers'],
+		() => getUsers().then((res) => res.data),
+		params,
+	)
+
+	return { users, ...ret }
+}
 
 interface UseUserPreferencesParams extends ClientQueryParams<UserPreferences> {
 	enableFetchPreferences?: boolean

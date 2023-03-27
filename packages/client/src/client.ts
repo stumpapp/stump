@@ -12,7 +12,6 @@ import {
 	UseMutationOptions,
 	useQuery as useReactQuery,
 	UseQueryOptions,
-	UseQueryResult,
 } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useMemo } from 'react'
@@ -33,35 +32,15 @@ export const queryClient = new QueryClient({
 	},
 })
 
-export type QueryOptions<
-	TQueryFnData = unknown,
-	TError = unknown,
-	TData = TQueryFnData,
-	TQueryKey extends QueryKey = QueryKey,
-> = Omit<
-	UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
+export type QueryOptions<TQueryFnData = unknown, TError = unknown, TData = TQueryFnData> = Omit<
+	UseQueryOptions<TQueryFnData, TError, TData, QueryKey>,
 	'queryKey' | 'queryFn' | 'context'
 >
-export type QueryHook = <
-	TQueryFnData = unknown,
-	TError = unknown,
-	TData = TQueryFnData,
-	TQueryKey extends QueryKey = QueryKey,
->(
-	queryKey: TQueryKey,
-	queryFn: QueryFunction<TQueryFnData, TQueryKey>,
-	options?: QueryOptions<TQueryFnData, TError, TData, TQueryKey>,
-) => UseQueryResult<TData, TError>
 
-export function useQuery<
-	TQueryFnData = unknown,
-	TError = unknown,
-	TData = TQueryFnData,
-	TQueryKey extends QueryKey = QueryKey,
->(
-	queryKey: TQueryKey,
-	queryFn: QueryFunction<TQueryFnData, TQueryKey>,
-	options?: QueryOptions<TQueryFnData, TError, TData, TQueryKey>,
+export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQueryFnData>(
+	queryKey: QueryKey,
+	queryFn: QueryFunction<TQueryFnData, QueryKey>,
+	options?: QueryOptions<TQueryFnData, TError, TData>,
 ) {
 	const { onRedirect } = useClientContext() || {}
 	const { setUser } = useUserStore((store) => ({

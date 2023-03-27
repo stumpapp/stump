@@ -1,15 +1,14 @@
 import { Box, Heading, Text, useColorModeValue } from '@chakra-ui/react'
 import { useMediaById } from '@stump/client'
+import { Link } from '@stump/components'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router-dom'
 
-import Lazy from '../../components/Lazy'
 import BooksAfter from '../../components/media/BooksAfter'
 import MediaCard from '../../components/media/MediaCard'
+import ReadMore from '../../components/ReadMore'
 import TagList from '../../components/tags/TagList'
-import Link from '../../ui/Link'
-import ReadMore from '../../ui/ReadMore'
 import { formatBytes } from '../../utils/format'
 
 // TODO: looks shit on mobile
@@ -38,7 +37,9 @@ export default function BookOverview() {
 					<MediaCard media={media!} readingLink />
 					<div className="flex h-full flex-1 flex-col space-y-4">
 						<ReadMore text={media?.description} />
-						{media?.series && <Link to={`/series/${media?.series.id}`}>{media?.series.name}</Link>}
+						{media?.series && (
+							<Link href={`/series/${media?.series.id}`}>{media?.series.name}</Link>
+						)}
 
 						{/* TODO: I want this at the bottom of the container here, but layout needs to be tweaked and I am tired. */}
 						<TagList tags={media?.tags || []} />

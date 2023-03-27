@@ -56,7 +56,10 @@ async fn update_user_inner(
 	user_id: String,
 	input: UpdateUserArgs,
 ) -> ApiResult<User> {
-	let mut update_params = vec![user::username::set(input.username)];
+	let mut update_params = vec![
+		user::username::set(input.username),
+		user::avatar_url::set(input.avatar_url),
+	];
 	if let Some(password) = input.password {
 		let hashed_password = bcrypt::hash(password, get_hash_cost())?;
 		update_params.push(user::hashed_password::set(hashed_password));

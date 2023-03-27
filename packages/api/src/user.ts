@@ -3,6 +3,10 @@ import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
 import { API } from '.'
 import { ApiResult } from './types'
 
+export function getUsers(): Promise<ApiResult<User[]>> {
+	return API.get('/users')
+}
+
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {
 	return API.get(`/users/${userId}/preferences`)
 }

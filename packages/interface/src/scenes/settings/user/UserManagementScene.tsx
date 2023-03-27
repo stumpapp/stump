@@ -1,4 +1,3 @@
-import { Divider, Heading, Text } from '@stump/components'
 import { Helmet } from 'react-helmet'
 import { Navigate } from 'react-router'
 
@@ -6,9 +5,12 @@ import SceneContainer from '../../../components/SceneContainer'
 import { useAppContext } from '../../../context'
 import { useLocaleContext } from '../../../i18n/index'
 import { SettingsContent, SettingsHeading } from '../SettingsLayout'
+import UserTable from './user-table/UserTable'
 import UserManagementStats from './UserManagementStats'
-import UserTable from './UserTable'
 
+// TODO: I might want to turn this into a tiny Router with breadcrumbs? Not enirely sure yet,
+// the only sub-scene I can think of is user creation which isn't essential to have perfect UX
+// out the gate
 export default function UserManagementScene() {
 	const { t } = useLocaleContext()
 	const { isServerOwner } = useAppContext()

@@ -6,10 +6,15 @@ import React from 'react'
 
 import { cn } from '../utils'
 
-const Sheet = SheetPrimitive.Root
-
+const Sheet = SheetPrimitive.Root as typeof SheetPrimitive.Root & SheetSubComponents
 const SheetTrigger = SheetPrimitive.Trigger
 
+const FLOATING_PORTAL_VARIANTS = {
+	bottom: 'bottom-4 inset-x-4 z-50',
+	left: 'left-4 inset-y-4 z-50',
+	right: 'right-4 inset-y-4 z-50',
+	top: 'top-4 inset-x-4 z-50',
+}
 const portalVariants = cva('fixed inset-0 z-50 flex', {
 	defaultVariants: { position: 'right' },
 	variants: {
@@ -22,21 +27,31 @@ const portalVariants = cva('fixed inset-0 z-50 flex', {
 	},
 })
 
-interface SheetPortalProps
-	extends SheetPrimitive.DialogPortalProps,
-		VariantProps<typeof portalVariants> {}
-
-const SheetPortal = ({ position, className, children, ...props }: SheetPortalProps) => (
+export type SheetPortalProps = {
+	floating?: boolean
+} & SheetPrimitive.DialogPortalProps &
+	VariantProps<typeof portalVariants>
+const SheetPortal = ({ position, className, children, floating, ...props }: SheetPortalProps) => (
 	<SheetPrimitive.Portal className={cn(className)} {...props}>
-		<div className={portalVariants({ position })}>{children}</div>
+		<div
+			className={cn(portalVariants({ position }), {
+				[FLOATING_PORTAL_VARIANTS[position || 'right']]: !!floating,
+			})}
+		>
+			{children}
+		</div>
 	</SheetPrimitive.Portal>
 )
 SheetPortal.displayName = SheetPrimitive.Portal.displayName
 
+export type SheetOverlayProps = Omit<
+	React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>,
+	'children'
+>
 const SheetOverlay = React.forwardRef<
 	React.ElementRef<typeof SheetPrimitive.Overlay>,
-	React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
->(({ className, children, ...props }, ref) => (
+	SheetOverlayProps
+>(({ className, ...props }, ref) => (
 	<SheetPrimitive.Overlay
 		className={cn(
 			'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-all duration-100 data-[state=closed]:animate-out data-[state=open]:fade-in data-[state=closed]:fade-out',
@@ -133,26 +148,45 @@ const sheetVariants = cva('fixed z-50 scale-100 gap-4 bg-white p-6 opacity-100 d
 	},
 })
 
-export interface DialogContentProps
-	extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-		VariantProps<typeof sheetVariants> {}
+const FLOATING_CONTENT_VARIANTS = {
+	bottom: 'max-w-[calc(100%-2rem)]',
+	left: 'max-h-[calc(100%-2rem)]',
+	right: 'max-h-[calc(100%-2rem)]',
+	top: 'max-w-[calc(100%-2rem)]',
+}
+
+export type SheetContentProps = {
+	closeIcon?: boolean
+	floating?: boolean
+	rounded?: boolean
+} & React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> &
+	VariantProps<typeof sheetVariants>
 
 const SheetContent = React.forwardRef<
 	React.ElementRef<typeof SheetPrimitive.Content>,
-	DialogContentProps
->(({ position, size, className, children, ...props }, ref) => (
-	<SheetPortal position={position}>
+	SheetContentProps
+>(({ position, size, className, children, closeIcon, floating, rounded, ...props }, ref) => (
+	<SheetPortal position={position} floating={floating}>
 		<SheetOverlay />
 		<SheetPrimitive.Content
 			ref={ref}
-			className={cn(sheetVariants({ position, size }), className)}
+			className={cn(
+				sheetVariants({ position, size }),
+				{
+					[FLOATING_CONTENT_VARIANTS[position || 'right']]: !!floating,
+				},
+				rounded && 'rounded-md',
+				className,
+			)}
 			{...props}
 		>
 			{children}
-			<SheetPrimitive.Close className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900 dark:data-[state=open]:bg-gray-800">
-				<X className="h-4 w-4" />
-				<span className="sr-only">Close</span>
-			</SheetPrimitive.Close>
+			{closeIcon && (
+				<SheetPrimitive.Close className="absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-100 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900 dark:data-[state=open]:bg-gray-800">
+					<X className="h-4 w-4" />
+					<span className="sr-only">Close</span>
+				</SheetPrimitive.Close>
+			)}
 		</SheetPrimitive.Content>
 	</SheetPortal>
 ))
@@ -195,4 +229,34 @@ const SheetDescription = React.forwardRef<
 ))
 SheetDescription.displayName = SheetPrimitive.Description.displayName
 
-export { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger }
+type SheetSubComponents = {
+	Header: typeof SheetHeader
+	Title: typeof SheetTitle
+	Content: typeof SheetContent
+	Footer: typeof SheetFooter
+	Trigger: typeof SheetTrigger
+	Portal: typeof SheetPortal
+	Overlay: typeof SheetOverlay
+	Description: typeof SheetDescription
+	Close: typeof SheetPrimitive.Close
+}
+
+Sheet.Header = SheetHeader
+Sheet.Title = SheetTitle
+Sheet.Content = SheetContent
+Sheet.Footer = SheetFooter
+Sheet.Trigger = SheetTrigger
+Sheet.Portal = SheetPortal
+Sheet.Overlay = SheetOverlay
+Sheet.Description = SheetDescription
+Sheet.Close = SheetPrimitive.Close
+
+export {
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	Sheet as SheetPrimitive,
+	SheetTitle,
+	SheetTrigger,
+}

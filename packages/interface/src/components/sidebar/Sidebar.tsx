@@ -127,7 +127,28 @@ function NavItem({ name, href, active, ...rest }: NavItemProps) {
 	)
 }
 
-export function SidebarContent() {
+export function SidebarHeader() {
+	const isBrowser = useAppProps()?.platform === 'browser'
+
+	return (
+		<div className="flex items-center justify-between px-4">
+			<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
+				<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
+				<Heading variant="gradient" size="xs">
+					Stump
+				</Heading>
+			</Link>
+
+			{!isBrowser && <NavigationButtons />}
+		</div>
+	)
+}
+
+type SidebarContentProps = {
+	isMobileSheet?: boolean
+}
+
+export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 	const location = useLocation()
 	const navigate = useNavigate()
 
@@ -173,20 +194,9 @@ export function SidebarContent() {
 		[libraries, locale, location.pathname, t],
 	)
 
-	const isBrowser = useAppProps()?.platform === 'browser'
-
 	return (
 		<>
-			<div className="flex items-center justify-between px-4">
-				<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
-					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
-					<Heading variant="gradient" size="xs">
-						Stump
-					</Heading>
-				</Link>
-
-				{!isBrowser && <NavigationButtons />}
-			</div>
+			{!isMobileSheet && <SidebarHeader />}
 
 			<div className="flex max-h-full grow flex-col gap-2 overflow-hidden p-1">
 				{links.map((link) =>

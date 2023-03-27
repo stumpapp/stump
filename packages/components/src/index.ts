@@ -38,6 +38,7 @@ export { Link } from './link'
 export { Popover } from './popover'
 export { type ProgressBarProps, FullScreenLoader, ProgressBar } from './progress'
 export { type ComboBoxProps, type NativeSelectProps, ComboBox, NativeSelect } from './select'
+export { Sheet, SheetPrimitive } from './sheet'
 export { Tabs } from './tabs'
 export {
 	type HeadingProps,

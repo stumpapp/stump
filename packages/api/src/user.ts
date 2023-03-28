@@ -37,3 +37,21 @@ export function updateUser(userId: string, params: UpdateUserArgs): Promise<ApiR
 export function updateViewer(params: UpdateUserArgs): Promise<ApiResult<User>> {
 	return API.put(`/users/me`, params)
 }
+
+const userApi = {
+	getUserPreferences,
+	getUsers,
+	updatePreferences,
+	updateUser,
+	updateUserPreferences,
+	updateViewer,
+}
+
+export const userQueryKeys: Record<keyof typeof userApi, string> = {
+	getUserPreferences: 'user.getUserPreferences',
+	getUsers: 'user.getUsers',
+	updatePreferences: 'user.updatePreferences',
+	updateUser: 'user.updateUser',
+	updateUserPreferences: 'user.updateUserPreferences',
+	updateViewer: 'user.updateViewer',
+}

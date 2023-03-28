@@ -1,11 +1,11 @@
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import React, { Suspense, useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 // import CommandPalette from './components/CommandPalette'
 import JobOverlay from './components/jobs/JobOverlay'
-import Lazy from './components/Lazy'
+import RouteLoadingIndicator from './components/RouteLoadingIndicator'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
 import TopBar from './components/topbar/TopBar'
@@ -61,12 +61,12 @@ export function AppLayout() {
 		<AppContext.Provider
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
-			<React.Suspense fallback={<Lazy />}>
+			<Suspense fallback={<RouteLoadingIndicator />}>
 				<TopBar />
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
 					<main className="h-full w-full bg-white dark:bg-gray-975">
-						<Suspense>
+						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />
 						</Suspense>
 					</main>
@@ -74,7 +74,7 @@ export function AppLayout() {
 
 				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
 				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
-			</React.Suspense>
+			</Suspense>
 		</AppContext.Provider>
 	)
 }

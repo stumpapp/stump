@@ -25,7 +25,9 @@ export default function MediaCard({ media, readingLink, fixed }: MediaCardProps)
 		: `/books/${media.id}`
 
 	function handleMouseOver() {
-		prefetchMedia(media.id)
+		if (!readingLink) {
+			prefetchMedia(media.id)
+		}
 
 		if (media.current_page) {
 			prefetchMediaPage(media.id, media.current_page)

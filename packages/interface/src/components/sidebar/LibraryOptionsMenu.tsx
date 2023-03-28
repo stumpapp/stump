@@ -10,6 +10,7 @@ import {
 	ScanLine,
 	Trash,
 } from 'lucide-react'
+import { useMediaMatch } from 'rooks'
 
 interface Props {
 	library: Library
@@ -19,6 +20,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const user = useUserStore((store) => store.user)
 
 	const { scanAsync } = useScanLibrary()
+	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	function handleScan(mode: LibraryScanMode) {
 		// extra protection, should not be possible to reach this.
@@ -84,7 +86,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					],
 				},
 			]}
-			align="start"
+			align={isMobile ? 'end' : 'start'}
 		/>
 	)
 }

@@ -60,8 +60,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	})
 }
 
-// FIXME: not very happy with the types here for infinite queries, a little more
-// tedious than normal query wrappers
+// FIXME: terrible types!!!!!!!!!
 export type InfiniteQueryOptions<
 	TQueryFnData = unknown,
 	TError = unknown,
@@ -134,7 +133,7 @@ export function useInfinitePagedQuery<Entity, TQueryKey extends QueryKey = Query
 	}
 }
 
-// FIXME: make this independent of the paged query, API now supports `_cursor` param
+// FIXME: terrible types!!!!!!!!!
 export function useCursorQuery<Entity, TQueryKey extends QueryKey = QueryKey>(
 	cursor: string,
 	queryKey: TQueryKey,

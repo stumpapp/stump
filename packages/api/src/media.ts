@@ -54,3 +54,25 @@ export function getMediaPage(id: string, page: number): string {
 export function updateMediaProgress(id: string, page: number): Promise<ReadProgress> {
 	return API.put(`/media/${id}/progress/${page}`)
 }
+
+const mediaApi = {
+	getInProgressMedia,
+	getMedia,
+	getMediaById,
+	getMediaPage,
+	getMediaThumbnail,
+	getPaginatedMedia,
+	getRecentlyAddedMedia,
+	updateMediaProgress,
+}
+
+export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
+	getInProgressMedia: 'media.getInProgress',
+	getMedia: 'media.get',
+	getMediaById: 'media.getById',
+	getMediaPage: 'media.getPage',
+	getMediaThumbnail: 'media.getThumbnail',
+	getPaginatedMedia: 'media.getPaginated',
+	getRecentlyAddedMedia: 'media.getRecentlyAdded',
+	updateMediaProgress: 'media.updateProgress',
+}

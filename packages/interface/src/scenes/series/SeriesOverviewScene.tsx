@@ -89,7 +89,7 @@ export default function SeriesOverviewScene() {
 			// the next series returned from `useSeries` would be ~correct~ BUT it would
 			// be wrapped in an axios response, i.e. `{ data: { ... } }`. This doesn't make a
 			// lick of sense to me yet...
-			invalidateQueries({ keys: [QUERY_KEYS.series.get_by_id] })
+			invalidateQueries({ keys: [QUERY_KEYS.series.getSeriesById] })
 		}
 	}, [series])
 

@@ -1,5 +1,5 @@
 import { getMediaPage } from '@stump/api'
-import { useMediaById, useMediaMutation } from '@stump/client'
+import { useMediaByIdQuery, useMediaMutation } from '@stump/client'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import ImageBasedReader, {
@@ -18,7 +18,7 @@ export default function ReadBook() {
 		throw new Error('Media id is required')
 	}
 
-	const { isLoading: fetchingBook, media } = useMediaById(id)
+	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
 
 	const { updateReadProgress } = useMediaMutation(id, {
 		onError(err) {

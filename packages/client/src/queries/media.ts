@@ -6,6 +6,7 @@ import {
 	updateMediaProgress,
 } from '@stump/api'
 import type { Media, ReadProgress } from '@stump/types'
+import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
 import { QueryOptions, useCursorQuery, useInfinitePagedQuery, useMutation } from '../client'
@@ -15,27 +16,31 @@ import { QUERY_KEYS } from '../query_keys'
 const MEDIA_KEYS = QUERY_KEYS.media
 
 export const prefetchMedia = async (id: string) => {
-	await queryClient.prefetchQuery([MEDIA_KEYS.get_by_id, id], () => getMediaById(id), {
+	await queryClient.prefetchQuery([MEDIA_KEYS.getMediaById, id], () => getMediaById(id), {
 		staleTime: 10 * 1000,
 	})
 }
 
-export function useMediaById(id: string, { onError }: QueryOptions<Media> = {}) {
-	const { data, isLoading, isFetching, isRefetching } = useQuery(
-		[MEDIA_KEYS.get_by_id, id],
-		() => getMediaById(id),
+type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
+	TQueryFnData,
+	AxiosError,
+	TData
+>
+
+export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = {}) {
+	const { data, ...ret } = useQuery(
+		[MEDIA_KEYS.getMediaById, id],
+		() => getMediaById(id).then(({ data }) => data),
 		{
 			keepPreviousData: false,
-			onError(err) {
-				console.error(err)
-				onError?.(err)
-			},
+			...params,
 		},
 	)
 
-	return { isLoading: isLoading || isFetching || isRefetching, media: data?.data }
+	return { media: data, ...ret }
 }
 
+// TODO: refactor once types are better in client.ts
 /** Hook for fetching media after a cursor, within a series */
 export function useMediaCursor(afterId: string, seriesId: string) {
 	const searchParams = useMemo(() => {
@@ -43,7 +48,7 @@ export function useMediaCursor(afterId: string, seriesId: string) {
 	}, [afterId, seriesId])
 	const { data: media, ...rest } = useCursorQuery(
 		afterId,
-		[MEDIA_KEYS.get_with_cursor, afterId],
+		[MEDIA_KEYS.getMediaWithCursor, afterId],
 		() => getMedia(searchParams),
 	)
 
@@ -70,7 +75,7 @@ export function useMediaMutation(id: string, options: QueryOptions<ReadProgress>
 
 export function useRecentlyAddedMedia() {
 	return useInfinitePagedQuery(
-		[MEDIA_KEYS.recently_added],
+		[MEDIA_KEYS.getRecentlyAddedMedia],
 		getRecentlyAddedMedia,
 		new URLSearchParams('page_size=10'),
 	)
@@ -78,7 +83,7 @@ export function useRecentlyAddedMedia() {
 
 export function useContinueReading() {
 	return useInfinitePagedQuery(
-		[MEDIA_KEYS.in_progress],
+		[MEDIA_KEYS.getInProgressMedia],
 		getInProgressMedia,
 		new URLSearchParams('page_size=10'),
 	)

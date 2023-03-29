@@ -10,7 +10,7 @@ import {
 } from './context'
 
 type Props = {
-	children: ReactElement
+	children: React.ReactNode
 } & StumpClientContextProps
 export function StumpClientContextProvider({ children, onRedirect }: Props) {
 	// lol this is so scuffed

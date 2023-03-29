@@ -4,7 +4,7 @@ use tracing::trace;
 use utoipa::ToSchema;
 
 use crate::{
-	db::models::{Library, Media, Series},
+	db::models::{Cursorable, Library, Media, Series},
 	prelude::DirectoryListing,
 };
 
@@ -227,15 +227,17 @@ impl PageInfo {
 
 #[derive(Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema)]
 pub struct CursorInfo {
-	cursor: Option<String>,
+	current_cursor: Option<String>,
 	limit: Option<i64>,
+	next_cursor: Option<String>,
 }
 
 impl From<CursorQuery> for CursorInfo {
 	fn from(cursor_query: CursorQuery) -> Self {
 		Self {
-			cursor: cursor_query.cursor,
+			current_cursor: cursor_query.cursor,
 			limit: cursor_query.limit,
+			next_cursor: None,
 		}
 	}
 }
@@ -378,7 +380,7 @@ where
 // Note: this is used when you have to query the database for the total number of pages.
 impl<T> From<(Vec<T>, i64, Pagination)> for Pageable<Vec<T>>
 where
-	T: Serialize + Clone,
+	T: Serialize + Clone + Cursorable,
 {
 	fn from(tuple: (Vec<T>, i64, Pagination)) -> Pageable<Vec<T>> {
 		let (data, db_total, pagination) = tuple;
@@ -391,7 +393,14 @@ where
 				Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
 			},
 			Pagination::Cursor(cursor_query) => {
-				Pageable::cursor_paginated(data, CursorInfo::from(cursor_query))
+				let next_cursor = data.last().map(|item| item.cursor());
+				Pageable::cursor_paginated(
+					data,
+					CursorInfo {
+						next_cursor,
+						..cursor_query.into()
+					},
+				)
 			},
 			_ => Pageable::unpaged(data),
 		}

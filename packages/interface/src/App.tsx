@@ -101,6 +101,9 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	return (
 		<StumpClientContextProvider onRedirect={handleRedirect}>
+			{import.meta.env.MODE === 'development' && (
+				<ReactQueryDevtools position="bottom-right" context={defaultContext} />
+			)}
 			<AppPropsContext.Provider value={appProps}>
 				<Helmet defaultTitle="Stump" onChangeClientState={handleHelmetChange}>
 					<title>Stump</title>
@@ -118,16 +121,7 @@ export default function StumpInterface(props: AppProps) {
 		<>
 			<BrowserRouter>
 				<ErrorBoundary FallbackComponent={ErrorFallback}>
-					<QueryClientProvider
-						client={queryClient}
-						// FIXME: this will be removed... https://github.com/TanStack/query/discussions/4252
-						contextSharing={true}
-					>
-						{import.meta.env.MODE === 'development' && (
-							<ReactQueryDevtools position="bottom-right" context={defaultContext} />
-						)}
-						<RouterContainer appProps={props} />
-					</QueryClientProvider>
+					<RouterContainer appProps={props} />
 				</ErrorBoundary>
 				<Notifications />
 			</BrowserRouter>

@@ -1,7 +1,7 @@
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '@stump/api'
 import type { Media, Series } from '@stump/types'
 
-import { queryClient, useInfinitePagedQuery, useQuery } from '../client'
+import { queryClient, useQuery } from '../client'
 import { QUERY_KEYS } from '../query_keys'
 import { useQueryParamStore } from '../stores'
 import { QueryCallbacks } from '.'
@@ -56,11 +56,11 @@ export function useSeriesMedia(seriesId: string, page = 1) {
 }
 
 export function useRecentlyAddedSeries() {
-	return useInfinitePagedQuery(
-		[SERIES_KEYS.getRecentlyAddedSeries],
-		getRecentlyAddedSeries,
-		new URLSearchParams('page_size=50'),
-	)
+	// return useInfinitePagedQuery(
+	// 	[SERIES_KEYS.getRecentlyAddedSeries],
+	// 	getRecentlyAddedSeries,
+	// 	new URLSearchParams('page_size=50'),
+	// )
 }
 
 // export function useInfinite() {

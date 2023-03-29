@@ -67,6 +67,7 @@ export default function ServerConnectionErrorScene() {
 	if (goHome) {
 		const from = location.state?.from || '/'
 		const to = from === '/server-connection-error' ? '/' : from
+		// FIXME: first time fails to redirect
 		return <Navigate to={to} />
 	}
 

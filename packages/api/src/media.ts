@@ -1,13 +1,28 @@
 import type { Media, ReadProgress } from '@stump/types'
 
 import { API } from './index'
-import { ApiResult, PageableApiResult } from './types'
+import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
 import { urlWithParams } from './utils'
 
 type GetMediaById = ApiResult<Media>
 
 export function getMedia(params?: URLSearchParams): Promise<PageableApiResult<Media[]>> {
 	return API.get(urlWithParams('/media', params))
+}
+
+export function getMediaWithCursor({
+	afterId,
+	limit,
+	params,
+}: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
+	const searchParams = new URLSearchParams(params)
+	searchParams.set('cursor', afterId)
+	if (limit) {
+		searchParams.set('limit', limit.toString())
+	}
+	// searchParams.set('series_id', 'a3610abf-cba3-44a9-b5a0-d3d43f82ad41')
+
+	return API.get(urlWithParams('/media', searchParams))
 }
 
 export function getPaginatedMedia(page: number): Promise<PageableApiResult<Media[]>> {

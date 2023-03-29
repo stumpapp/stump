@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
-use super::{series::Series, tag::Tag};
+use super::{series::Series, tag::Tag, Cursorable};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Library {
@@ -27,6 +27,12 @@ pub struct Library {
 	pub tags: Option<Vec<Tag>>,
 	/// The options of the library. Will be Default only if the relation is not loaded.
 	pub library_options: LibraryOptions,
+}
+
+impl Cursorable for Library {
+	fn cursor(&self) -> String {
+		self.id.clone()
+	}
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema)]

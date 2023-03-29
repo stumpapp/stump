@@ -82,6 +82,8 @@ export interface PageQuery { zero_based: boolean | null, page: number | null, pa
 
 export interface CursorQuery { cursor: string | null, limit: bigint | null }
 
+export interface CursorInfo { current_cursor: string | null, limit: bigint | null, next_cursor: string | null }
+
 export interface PageInfo { total_pages: number, current_page: number, page_size: number, page_offset: number, zero_based: boolean }
 
 export type Pagination = null | PageQuery | CursorQuery

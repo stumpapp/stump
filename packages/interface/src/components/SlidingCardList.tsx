@@ -25,13 +25,12 @@ export default function SlidingCardList({
 }: Props) {
 	const parentRef = useRef<HTMLDivElement>(null)
 	const visibleRef = useRef([0, 0])
+
 	const columnVirtualizer = useVirtualizer({
 		count: cards.length,
 		enableSmoothScroll: true,
 		estimateSize: () => 350,
-
 		getScrollElement: () => parentRef.current,
-
 		horizontal: true,
 		// FIXME: this is an absurd overscan... needs to change, however I cannot get it to work with less
 		overscan: 75,

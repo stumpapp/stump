@@ -9,9 +9,8 @@ import {
 	Stack,
 	Text,
 } from '@chakra-ui/react'
+import { IconButton } from '@stump/components'
 import { TextAa } from 'phosphor-react'
-
-import { IconButton } from '../../../ui/Button'
 
 interface Props {
 	changeFontSize(size: number): void
@@ -37,7 +36,7 @@ export default function FontSelection({ changeFontSize, fontSize }: Props) {
 								<IconButton
 									onClick={() => changeFontSize(fontSize - 1)}
 									variant="ghost"
-									fontSize="sm"
+									// fontSize="sm"
 									title="Decrease font size"
 								>
 									A
@@ -46,7 +45,7 @@ export default function FontSelection({ changeFontSize, fontSize }: Props) {
 								<IconButton
 									onClick={() => changeFontSize(fontSize + 1)}
 									variant="ghost"
-									fontSize="2xl"
+									// fontSize="2xl"
 									title="Increase font size"
 								>
 									A

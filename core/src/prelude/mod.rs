@@ -98,6 +98,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<QueryOrder>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageQuery>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CursorQuery>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<CursorInfo>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageInfo>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Pagination>()?).as_bytes())?;
 		// file.write_all(format!("{}\n\n", ts_export::<Pageable>()?).as_bytes())?; // TODO: figure this out

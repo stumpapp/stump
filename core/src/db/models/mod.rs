@@ -18,3 +18,8 @@ pub use reading_list::*;
 pub use series::*;
 pub use tag::*;
 pub use user::*;
+
+// TODO: move this
+pub trait Cursorable {
+	fn cursor(&self) -> String;
+}

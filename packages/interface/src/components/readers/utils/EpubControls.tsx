@@ -10,13 +10,13 @@ import {
 	useDisclosure,
 	VStack,
 } from '@chakra-ui/react'
+import { Button, IconButton } from '@stump/components'
 import type { Epub } from '@stump/types'
 import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SwipeableHandlers } from 'react-swipeable'
 
-import Button, { IconButton } from '../../../ui/Button'
 import EpubTocDrawer from './EpubTocDrawer'
 import FontSelection from './FontSelection'
 
@@ -185,10 +185,10 @@ export default function EpubControls({
 				>
 					<Button
 						size="sm"
-						display={['none', 'flex']}
-						hidden={!visibleNav}
+						// display={['none', 'flex']}
+						// hidden={!visibleNav}
 						variant="ghost"
-						p={0}
+						// p={0}
 						onClick={prev}
 					>
 						<CaretLeft />
@@ -207,10 +207,10 @@ export default function EpubControls({
 				>
 					<Button
 						size="sm"
-						display={['none', 'flex']}
-						hidden={!visibleNav}
+						// display={['none', 'flex']}
+						// hidden={!visibleNav}
 						variant="ghost"
-						p={0}
+						// p={0}
 						onClick={next}
 					>
 						<CaretRight />

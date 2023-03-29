@@ -19,28 +19,6 @@ export const Card = React.forwardRef<React.ElementRef<'div'>, CardProps>(
 				{...props}
 			/>
 		)
-
-		// 	return <Box
-		//   {...rest}
-		//   bg="gray.50"
-		//   border="1.5px solid"
-		//   borderColor="transparent"
-		//   _hover={
-		//     to
-		//       ? {
-		//           borderColor: 'brand.500',
-		//         }
-		//       : undefined
-		//   }
-		//   _dark={{ bg: 'gray.750' }}
-		//   className={cardVariants({
-		//     class: clsx('relative flex flex-col overflow-hidden flex-1 space-y-1', className),
-		//     variant,
-		//   })}
-		// >
-		//   {overlay}
-		//   {children}
-		// </Box>
 	},
 )
 Card.displayName = 'Card'

@@ -1,4 +1,5 @@
 import { getMediaThumbnail } from '@stump/api'
+import { EntityCard } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { Fragment, useCallback, useEffect, useRef } from 'react'
 
@@ -36,43 +37,30 @@ export default function HorizontalCardList({ items, fetchNext }: Props) {
 	// console.log('count', virtualItems.length)
 	// console.log('size', columnVirtualizer.getTotalSize())
 
-	useEffect(
-		() => {
-			const [lastItem] = [...virtualItems].reverse()
+	useEffect(() => {
+		const [lastItem] = [...virtualItems].reverse()
 
-			if (!lastItem) {
-				return
-			}
+		if (!lastItem) {
+			return
+		}
 
-			const [_, upperBound] = visibleRef.current
+		const [, upperBound] = visibleRef.current
 
-			const closeToEnd = upperBound && lastItem.index - upperBound <= 5
+		const closeToEnd = upperBound && lastItem.index - upperBound <= 5
 
-			// console.log('lastItem.index', lastItem.index)
-			// console.log('upperBound', upperBound)
-			// console.log('closeToEnd', closeToEnd)
+		// console.log('lastItem.index', lastItem.index)
+		// console.log('upperBound', upperBound)
+		// console.log('closeToEnd', closeToEnd)
 
-			if (closeToEnd) {
-				fetchNext?.()
-			}
-
-			// if (lastItem.index >= (upperBound || 0 - 8)) {
-			// 	fetchNext?.()
-			// }
-
-			// if (lastItem.index >= cards.length - 5 && hasNext && !isLoadingNext) {
-			// 	onScrollEnd?.()
-			// }
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[virtualItems],
-	)
+		if (closeToEnd) {
+			fetchNext?.()
+		}
+	}, [virtualItems, fetchNext])
 
 	return (
 		<div className="flex h-full w-full flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between"></div>
-			<div ref={parentRef} className="h-[21.3rem] overflow-x-auto pb-4 scrollbar-hide">
+			<div ref={parentRef} className="h-[24rem] overflow-x-auto overflow-y-hidden scrollbar-hide">
 				<div
 					className="relative inline-flex h-full"
 					style={{
@@ -82,6 +70,7 @@ export default function HorizontalCardList({ items, fetchNext }: Props) {
 					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
 						const media = items[virtualItem.index]
 
+						// FIXME: translate needs to change according to match media
 						return (
 							<div
 								key={virtualItem.key}
@@ -90,20 +79,18 @@ export default function HorizontalCardList({ items, fetchNext }: Props) {
 									left: 0,
 									position: 'absolute',
 									top: 0,
-									transform: `translateX(${virtualItem.start}px)`,
+									// I want a gap between the cards, but I don't want to add a margin to the cards
+									transform: `translateX(calc(${virtualItem.start}px + ${
+										virtualItem.index * 2.5
+									}rem))`,
 									width: `${virtualItem.size}px`,
 								}}
 							>
-								<MediaCard media={media} fixed />
-								{/* {items[virtualItem.index]} */}
-
-								{/* <div
-									className="relative aspect-[2/3] bg-cover bg-center p-0"
-									style={{
-										// TODO: figure out how to do fallback ONLY on error... url('/assets/fallbacks/image-file.svg')
-										backgroundImage: `url('${getMediaThumbnail(media.id)}')`,
-									}}
-								/> */}
+								<EntityCard
+									title={media.name}
+									href={`/media/${media.id}`}
+									imageUrl={getMediaThumbnail(media.id)}
+								/>
 							</div>
 						)
 					})}
@@ -111,32 +98,4 @@ export default function HorizontalCardList({ items, fetchNext }: Props) {
 			</div>
 		</div>
 	)
-}
-
-{
-	/* <div
-className="relative inline-flex h-full"
-style={{
-	width: `${columnVirtualizer.getTotalSize()}px`,
-}}
->
-{columnVirtualizer.getVirtualItems().map((virtualItem) => (
-	<div
-		className="h-full"
-		key={virtualItem.key}
-		ref={(el) => {
-			virtualItem.measureElement(el)
-		}}
-		style={{
-			bottom: 0,
-			left: 0,
-			position: 'absolute',
-			top: 0,
-			transform: `translateX(${virtualItem.start}px)`,
-		}}
-	>
-		{items[virtualItem.index]}
-	</div>
-))}
-</div> */
 }

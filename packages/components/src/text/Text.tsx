@@ -35,6 +35,7 @@ type BaseProps = VariantProps<typeof textVariants> & React.ComponentPropsWithout
 // FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 export type TextProps = {
 	className?: string
+	// FIXME: not template string
 	noOfLines?: number
 } & BaseProps
 

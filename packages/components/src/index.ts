@@ -15,7 +15,7 @@ export {
 	ButtonOrLink,
 	IconButton,
 } from './button'
-export { type CardProps, type HoverCardProps, Card, HoverCard } from './card'
+export { type CardProps, type HoverCardProps, Card, EntityCard, HoverCard } from './card'
 export { type CommandProps, Command } from './command'
 export { Container, Divider, Layout } from './container'
 export { type ContextMenuProps, ContextMenu } from './context-menu'

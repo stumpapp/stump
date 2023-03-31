@@ -2,7 +2,7 @@ import type { Media, ReadProgress } from '@stump/types'
 
 import { API } from './index'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
-import { urlWithParams } from './utils'
+import { mergeCursorParams, urlWithParams } from './utils'
 
 type GetMediaById = ApiResult<Media>
 
@@ -15,11 +15,7 @@ export function getMediaWithCursor({
 	limit,
 	params,
 }: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
-	const searchParams = new URLSearchParams(params)
-	searchParams.set('cursor', afterId)
-	if (limit) {
-		searchParams.set('limit', limit.toString())
-	}
+	const searchParams = mergeCursorParams({ afterId, limit, params })
 	// searchParams.set('series_id', 'a3610abf-cba3-44a9-b5a0-d3d43f82ad41')
 
 	return API.get(urlWithParams('/media', searchParams))
@@ -33,17 +29,13 @@ export function getMediaById(id: string): Promise<GetMediaById> {
 	return API.get(`/media/${id}?load_series=true`)
 }
 
-// TODO: I see myself using this pattern a lot, so I should make a helper/wrapper for it...
-export function getRecentlyAddedMedia(
-	page: number,
-	params?: URLSearchParams,
-): Promise<PageableApiResult<Media[]>> {
-	if (params) {
-		params.set('page', page.toString())
-		return API.get(urlWithParams('/media/recently-added', params))
-	}
-
-	return API.get(`/media/recently-added?page=${page}`)
+export function getRecentlyAddedMedia({
+	afterId,
+	limit,
+	params,
+}: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
+	const searchParams = mergeCursorParams({ afterId, limit, params })
+	return API.get(urlWithParams('/media/recently-added', searchParams))
 }
 
 export function getInProgressMedia(

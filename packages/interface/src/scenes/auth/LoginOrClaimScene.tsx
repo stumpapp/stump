@@ -7,7 +7,7 @@ import { Navigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { useLocale } from '../../hooks/useLocale'
+import { useLocaleContext } from '../../i18n/context'
 
 export default function LoginOrClaimScene() {
 	const [params] = useSearchParams()
@@ -18,7 +18,7 @@ export default function LoginOrClaimScene() {
 		user: store.user,
 	}))
 
-	const { t } = useLocale()
+	const { t } = useLocaleContext()
 	const { isClaimed, isCheckingClaimed, loginUser, registerUser, isLoggingIn, isRegistering } =
 		useLoginOrRegister({
 			onSuccess: setUser,

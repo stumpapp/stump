@@ -140,6 +140,59 @@ export function useRecentlyAddedMedia() {
 	// )
 }
 
+type UseRecentlyAddedMediaParams = Omit<
+	InfiniteQueryOptions<Pageable<Media[]>, AxiosError>,
+	'getNextPageParam' | 'getPreviousPageParam'
+> & {
+	limit: number
+	filters?: Record<string, string>
+}
+export function useRecentlyAddedMediaQuery({ limit, ...params }: UseRecentlyAddedMediaParams) {
+	const { filters, ...restParams } = params
+
+	const { data, ...rest } = useInfiniteQuery(
+		['media', limit, filters],
+		async ({ pageParam }) => {
+			const { data } = await getMediaWithCursor({
+				afterId: pageParam,
+				limit,
+				params: new URLSearchParams(filters),
+			})
+			return data
+		},
+		{
+			getNextPageParam: (lastPage) => {
+				const hasData = !!lastPage.data.length
+				if (!hasData) {
+					return undefined
+				}
+
+				if (lastPage._cursor?.next_cursor) {
+					return lastPage._cursor?.next_cursor
+				}
+
+				return undefined
+			},
+			getPreviousPageParam: (firstPage) => {
+				const hasCursor = !!firstPage?._cursor?.current_cursor
+				if (hasCursor) {
+					return firstPage?._cursor?.current_cursor
+				}
+				return undefined
+			},
+			...restParams,
+		},
+	)
+
+	const media = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		media,
+		...rest,
+	}
+}
+
 export function useContinueReading() {
 	// return useInfinitePagedQuery(
 	// 	[MEDIA_KEYS.getInProgressMedia],

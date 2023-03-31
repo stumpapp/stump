@@ -9,7 +9,7 @@ export type PagedQueryParams = {
 }
 
 export type CursorQueryParams = {
-	afterId: string
+	afterId?: string
 	limit?: number
 	params?: URLSearchParams
 }

@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
 import { cva, VariantProps } from 'class-variance-authority'
-import React, { forwardRef, Fragment } from 'react'
+import React, { forwardRef } from 'react'
 import { Link } from 'react-router-dom'
 
-import { Text } from '../index'
+import { ProgressBar, Text } from '../index'
 import { cn, cx } from '../utils'
 
 const entityCardVariants = cva('', {
@@ -25,11 +25,23 @@ type EntityCardProps = {
 	imageUrl: string
 	href?: string
 	fullWidth?: boolean
+	progress?: number
 } & VariantProps<typeof entityCardVariants> &
 	Omit<React.ComponentPropsWithoutRef<'div'>, 'children'>
 export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 	(
-		{ variant, size, href, imageUrl, title, subtitle, fullWidth = true, className, ...props },
+		{
+			variant,
+			size,
+			href,
+			imageUrl,
+			title,
+			subtitle,
+			fullWidth = true,
+			progress,
+			className,
+			...props
+		},
 		ref,
 	) => {
 		const Container = href ? Link : 'div'
@@ -44,7 +56,7 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 		const renderTitle = () => {
 			if (typeof title === 'string') {
 				return (
-					<Text size="sm" className="line-clamp-2">
+					<Text size="sm" className="line-clamp-2 h-[40px]">
 						{title}
 					</Text>
 				)
@@ -53,16 +65,23 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 			return title
 		}
 
+		const renderProgress = () => {
+			if (progress) {
+				return <ProgressBar value={progress} variant="primary-dark" size="sm" className="!-mt-1" />
+			}
+
+			return null
+		}
+
 		return (
 			// @ts-expect-error: naive type oop
 			<Container {...containerProps} className={cx({ 'flex w-full': fullWidth })}>
 				<div
 					ref={ref}
 					className={cn(
-						'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-transparent bg-gray-50/50 shadow dark:bg-gray-950',
+						'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-gray-75 bg-white shadow-sm transition-colors duration-100 dark:border-gray-850 dark:bg-gray-950',
 						entityCardVariants({ className, size, variant }),
-						{ 'hover:border-brand': !!href },
-
+						{ 'hover:border-brand dark:hover:border-brand': !!href },
 						className,
 					)}
 					{...props}
@@ -73,8 +92,12 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 							backgroundImage: `url('${imageUrl}')`,
 						}}
 					/>
+					{renderProgress()}
 
-					<div className="flex flex-1 flex-col space-y-1 px-1.5 pb-1">{renderTitle()}</div>
+					<div className="flex flex-1 flex-col space-y-2 px-1.5 pb-1">
+						{renderTitle()}
+						{subtitle}
+					</div>
 				</div>
 			</Container>
 		)

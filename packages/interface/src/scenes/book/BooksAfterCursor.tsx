@@ -1,9 +1,8 @@
-import { getMediaThumbnail } from '@stump/api'
 import { useMediaAfterCursorQuery } from '@stump/client'
-import { EntityCard } from '@stump/components'
 import { Media } from '@stump/types'
 
 import HorizontalCardList from '../../components/HorizontalCardList'
+import MediaCard from '../../components/media/MediaCard'
 
 type Props = {
 	cursor: Media
@@ -16,16 +15,7 @@ export default function BooksAfterCurrent({ cursor }: Props) {
 	})
 
 	const title = cursor.series ? `Next in ${cursor.series.name}` : 'Next in Series'
-
-	const cards = media.map((media) => (
-		<EntityCard
-			key={media.id}
-			title={media.name}
-			href={`/books/${media.id}`}
-			imageUrl={getMediaThumbnail(media.id)}
-			fullWidth={false}
-		/>
-	))
+	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
 
 	return (
 		<HorizontalCardList

@@ -3,7 +3,6 @@ import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-vi
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 import { useMediaMatch } from 'rooks'
-// import { useMediaMatch } from 'rooks'
 
 // fixed cards: w-[10rem] sm:w-[10.666rem] md:w-[12rem] h-[21.333rem] sm:h-[22.666rem] md:h-[25.333rem]
 // container: min-h-[26rem]
@@ -37,19 +36,10 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 	const virtualItems = columnVirtualizer.getVirtualItems()
 	const isEmpty = virtualItems.length === 0
 
-	// FIXME: this bound is straight up wrong
 	const [lowerBound, upperBound] = visibleRef.current
 
 	const canSkipBackward = (lowerBound ?? 0) > 0
-	// TODO: this is likely wrong since it doesnt factor hasMore
-	const canSkipForward = !!cards.length && (upperBound ?? 0) < cards.length - 1
-
-	// console.log('cards.length', cards.length)
-	// console.log('virtualItems.length', virtualItems.length)
-	// console.log('lowerBound', lowerBound)
-	// console.log('canSkipBackward', canSkipBackward)
-	// console.log('upperBound', upperBound)
-	// console.log('canSkipForward', canSkipForward)
+	const canSkipForward = !!cards.length && (upperBound || 0) <= cards.length
 
 	useEffect(() => {
 		const [lastItem] = [...virtualItems].reverse()
@@ -57,7 +47,11 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 			return
 		}
 
-		const closeToEnd = upperBound && lastItem.index - upperBound <= 5
+		// if we are 80% of the way to the end, fetch more
+		const start = upperBound || 0
+		const threshold = lastItem.index * 0.8
+		const closeToEnd = start >= threshold
+
 		if (closeToEnd) {
 			fetchNext?.()
 		}
@@ -73,9 +67,23 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 		}
 	}
 
-	const handleSkipAhead = (skipValue = 5) => {
-		const nextIndex = (upperBound ?? 5) + skipValue || 10
-		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
+	const handleSkipAhead = async (skipValue = 5) => {
+		const nextIndex = (upperBound || 5) + skipValue || 10
+		const virtualItem = virtualItems.find((item) => item.index === nextIndex)
+
+		// FIXME: this doesn't work :sob: it breaks on *really* long lists
+		// This is sort of a hack. Sometimes, the virtual list thinks its at the end, but
+		// really a few items are still hidden off screen. When this happens, I am assuming that
+		// means we are at the end of this section, and we can just scroll to the edge of the list,
+		// considering both the gap offsets and just a little extra padding.
+		if (!virtualItem) {
+			columnVirtualizer.scrollToOffset(
+				columnVirtualizer.getTotalSize() + getItemOffset(nextIndex) + 500,
+				{ smoothScroll: true },
+			)
+		} else {
+			columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
+		}
 	}
 
 	const handleSkipBackward = (skipValue = 5) => {

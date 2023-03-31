@@ -4,20 +4,31 @@ import React from 'react'
 
 import { cn, cx } from '../utils'
 
-type ProgressBarColorVariants = 'default' | 'primary'
+type ProgressBarColorVariants = 'default' | 'primary' | 'primary-dark'
 type ColorVariant = Record<ProgressBarColorVariants, string>
 
 export const PROGRESS_BAR_COLOR_VARIANTS: ColorVariant = {
 	default: 'bg-gray-200 dark:bg-gray-800',
 	primary: 'bg-brand-100 dark:bg-brand-300/80',
+	'primary-dark': 'bg-brand-200 dark:bg-brand-250',
 }
 export const PROGRESS_BAR_INDICATOR_COLOR_VARIANTS: ColorVariant = {
 	default: 'bg-gray-800 dark:bg-gray-400',
 	primary: 'bg-brand-500 dark:bg-brand-400',
+	'primary-dark': 'bg-brand-600 dark:bg-brand-500',
 }
 
-const progressVariants = cva('relative w-full overflow-hidden rounded-full', {
+const progressVariants = cva('relative w-full overflow-hidden', {
 	variants: {
+		defaultVariants: {
+			rounded: 'default',
+			size: 'default',
+			variant: 'default',
+		},
+		rounded: {
+			default: 'rounded-full',
+			none: '',
+		},
 		size: {
 			default: 'h-2',
 			lg: 'h-4',
@@ -40,11 +51,12 @@ export type ProgressBarProps = {
 export const ProgressBar = React.forwardRef<
 	React.ElementRef<typeof ProgressPrimitive.Root>,
 	ProgressBarProps
->(({ className, value, variant, size, ...props }, ref) => (
+>(({ className, value, variant, size, rounded, ...props }, ref) => (
 	<ProgressPrimitive.Root
 		ref={ref}
 		className={cn(
 			progressVariants({
+				rounded,
 				size,
 				variant,
 			}),

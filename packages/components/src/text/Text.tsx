@@ -45,7 +45,7 @@ const Text = React.forwardRef<React.ElementRef<'p'>, TextProps>(
 			ref={ref}
 			className={cn(
 				textVariants({ className, size, variant }),
-				{ [`line-clamp-${noOfLines} [hyphens:auto]`]: noOfLines !== undefined },
+				// { [`line-clamp-${noOfLines} [hyphens:auto]`]: noOfLines !== undefined },
 				className,
 			)}
 			{...props}

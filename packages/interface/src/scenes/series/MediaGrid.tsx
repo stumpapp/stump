@@ -3,6 +3,7 @@ import { EntityCard, Heading } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import { CardGrid } from '../../components/Card'
+import MediaCard from '../../components/media/MediaCard'
 
 interface Props {
 	isLoading: boolean
@@ -23,12 +24,7 @@ export default function MediaGrid({ media, isLoading }: Props) {
 	return (
 		<CardGrid>
 			{media.map((m) => (
-				<EntityCard
-					key={m.id}
-					title={m.name}
-					href={`/books/${m.id}`}
-					imageUrl={getMediaThumbnail(m.id)}
-				/>
+				<MediaCard key={m.id} media={m} />
 			))}
 		</CardGrid>
 	)

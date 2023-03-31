@@ -164,7 +164,7 @@ async fn get_media(
 		.await?;
 
 	if let Some(count) = count {
-		return Ok(Json(Pageable::from((media, count, pagination))));
+		return Ok(Json(Pageable::from((media, count as u32, pagination))));
 	}
 
 	Ok(Json(Pageable::from(media)))

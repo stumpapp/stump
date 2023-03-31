@@ -1,4 +1,4 @@
-import { useAppProps } from '@stump/client'
+import { queryClient, useAppProps } from '@stump/client'
 import { Alert } from '@stump/components'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -26,6 +26,7 @@ export default function ServerConnectionErrorScene() {
 				if (res.ok) {
 					const data = await res.text()
 					if (data === 'pong') {
+						queryClient.resetQueries()
 						setBackOnline(true)
 					}
 				}

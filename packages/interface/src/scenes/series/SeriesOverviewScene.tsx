@@ -112,16 +112,14 @@ export default function SeriesOverviewScene() {
 
 			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
-			<div className="flex h-full w-full flex-col space-y-6 p-4">
+			<div className="flex w-full flex-col space-y-6 p-4">
 				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
+
 				{layoutMode === 'GRID' ? (
 					<MediaGrid isLoading={isLoadingMedia} media={media} />
 				) : (
 					<MediaList isLoading={isLoadingMedia} media={media} />
 				)}
-
-				{/* <Spacer /> */}
-				<div className="flex-1" />
 
 				{hasStuff && (
 					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />

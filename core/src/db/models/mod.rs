@@ -19,6 +19,10 @@ pub use series::*;
 pub use tag::*;
 pub use user::*;
 
+// TODO: RESTRUCTURE THIS CRATE
+// I don't think I need the `models` and `dao` sub crates anymore. I want to simplify and flatten.
+// I also will house all of the prisma select/include macros in the corresponding file(s).
+
 // TODO: move this
 pub trait Cursorable {
 	fn cursor(&self) -> String;

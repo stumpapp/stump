@@ -85,7 +85,7 @@ export function CardFooter({ children, className, ...props }: CardFooterProps) {
 
 export function CardGrid({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="4xl:grid-cols-8 grid flex-1 grid-cols-2 items-start justify-center gap-4 pb-4 sm:grid-cols-3 md:justify-start lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-7 2xl:gap-2">
+		<div className="4xl:grid-cols-8 grid grid-cols-2 items-start justify-center gap-4 sm:grid-cols-3 md:justify-start lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-7 2xl:gap-2">
 			{children}
 		</div>
 	)

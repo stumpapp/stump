@@ -4,7 +4,7 @@ import React, { forwardRef, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Text } from '../index'
-import { cn } from '../utils'
+import { cn, cx } from '../utils'
 
 const entityCardVariants = cva('', {
 	defaultVariants: {
@@ -24,18 +24,21 @@ type EntityCardProps = {
 	subtitle?: string | React.ReactNode
 	imageUrl: string
 	href?: string
+	fullWidth?: boolean
 } & VariantProps<typeof entityCardVariants> &
 	Omit<React.ComponentPropsWithoutRef<'div'>, 'children'>
 export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
-	({ variant, size, href, key, imageUrl, title, subtitle, className, ...props }, ref) => {
-		const Container = href ? Link : Fragment
+	(
+		{ variant, size, href, imageUrl, title, subtitle, fullWidth = true, className, ...props },
+		ref,
+	) => {
+		const Container = href ? Link : 'div'
 		const containerProps = {
 			...(href
 				? {
-						key,
 						to: href,
 				  }
-				: { key }),
+				: {}),
 		}
 
 		const renderTitle = () => {
@@ -52,7 +55,7 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 
 		return (
 			// @ts-expect-error: naive type oop
-			<Container {...containerProps}>
+			<Container {...containerProps} className={cx({ 'flex w-full': fullWidth })}>
 				<div
 					ref={ref}
 					className={cn(

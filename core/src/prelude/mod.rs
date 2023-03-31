@@ -16,7 +16,10 @@ pub use server::*;
 mod tests {
 	use std::{fs::File, io::Write, path::PathBuf};
 
-	use specta::ts_export;
+	use specta::{
+		ts::{export, TsExportError},
+		NamedType,
+	};
 
 	use crate::{
 		db::models::{
@@ -28,6 +31,14 @@ mod tests {
 	};
 
 	use super::{enums::*, errors::*, fs::*, inputs::*, server::*};
+
+	#[allow(dead_code)]
+	fn ts_export<T>() -> Result<String, TsExportError>
+	where
+		T: NamedType,
+	{
+		export::<T>(&Default::default())
+	}
 
 	#[test]
 	#[ignore]

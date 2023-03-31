@@ -4,9 +4,23 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma;
+use crate::prisma::{self, library};
 
 use super::{series::Series, tag::Tag, Cursorable};
+
+//////////////////////////////////////////////
+//////////////// PRISMA MACROS ///////////////
+//////////////////////////////////////////////
+
+library::include!(library_series_ids_media_ids_include {
+	series: include {
+		media: select { id }
+	}
+});
+
+///////////////////////////////////////////////
+//////////////////// MODELS ///////////////////
+///////////////////////////////////////////////
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Library {
@@ -155,10 +169,14 @@ impl Default for LibraryScanMode {
 
 #[derive(Deserialize, Serialize, Type, ToSchema)]
 pub struct LibrariesStats {
-	series_count: u64,
-	book_count: u64,
-	total_bytes: u64,
+	series_count: u32,
+	book_count: u32,
+	total_bytes: u32,
 }
+
+///////////////////////////////////////////////
+////////////////// CONVERSIONS ////////////////
+///////////////////////////////////////////////
 
 impl From<prisma::library_options::Data> for LibraryOptions {
 	fn from(data: prisma::library_options::Data) -> LibraryOptions {

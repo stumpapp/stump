@@ -313,7 +313,7 @@ async fn get_library_by_id(
 		format!("libraries/{}", &library.id).as_str(),
 		library.series().unwrap_or(&Vec::new()).to_owned(),
 		page.into(),
-		series_count,
+		series_count as u32,
 	)
 	.build()?))
 }
@@ -349,7 +349,7 @@ async fn get_series(
 		"series",
 		series,
 		page.into(),
-		series_count,
+		series_count as u32,
 	)
 	.build()?))
 }
@@ -380,7 +380,7 @@ async fn get_latest_series(
 		"series/latest",
 		series,
 		page.into(),
-		series_count,
+		series_count as u32,
 	)
 	.build()?))
 }

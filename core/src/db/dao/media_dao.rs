@@ -73,7 +73,7 @@ impl MediaDao for MediaDaoImpl {
 
 		Ok(Pageable::with_count(
 			media_in_progress,
-			db_total,
+			db_total as u32,
 			page_params,
 		))
 	}

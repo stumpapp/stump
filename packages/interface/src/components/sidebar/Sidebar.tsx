@@ -1,13 +1,13 @@
 import { refreshUseLibrary, useAppProps, useLibraries } from '@stump/client'
-import { Button, ButtonOrLink, cn, Heading, useBoolean } from '@stump/components'
+import { Button, ButtonOrLink, cn, Heading, Spacer, useBoolean } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
 import {
-	type LucideProps,
 	ChevronRight,
 	Home,
 	Library as LibraryIcon,
+	type LucideProps,
 	Settings,
 } from 'lucide-react'
 import { useMemo } from 'react'
@@ -207,6 +207,8 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 					),
 				)}
 			</div>
+
+			<Spacer />
 
 			<footer className="flex items-center justify-between px-2">
 				<ApplicationVersion />

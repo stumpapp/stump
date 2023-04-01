@@ -11,9 +11,17 @@ export type MediaCardProps = {
 	media: Media
 	readingLink?: boolean
 	fullWidth?: boolean
+	variant?: 'cover' | 'default'
 }
 
-export default function MediaCard({ media, readingLink, fullWidth }: MediaCardProps) {
+export default function MediaCard({
+	media,
+	readingLink,
+	fullWidth,
+	variant = 'default',
+}: MediaCardProps) {
+	const isCoverOnly = variant === 'cover'
+
 	const handleHover = () => {
 		if (!readingLink) {
 			prefetchMedia(media.id)
@@ -25,6 +33,10 @@ export default function MediaCard({ media, readingLink, fullWidth }: MediaCardPr
 	}
 
 	const getSubtitle = (media: Media) => {
+		if (isCoverOnly) {
+			return null
+		}
+
 		const isMissing = media.status === FileStatus.Missing
 		if (isMissing) {
 			return (
@@ -58,8 +70,8 @@ export default function MediaCard({ media, readingLink, fullWidth }: MediaCardPr
 		)
 	}
 
-	function getProgress(page: number | undefined, pages: number) {
-		if (!page) {
+	function getProgress(page: number | null | undefined, pages: number) {
+		if (isCoverOnly || !page) {
 			return undefined
 		}
 
@@ -76,6 +88,16 @@ export default function MediaCard({ media, readingLink, fullWidth }: MediaCardPr
 			? `/books/${media.id}/pages/${media.current_page ?? 1}`
 			: `/books/${media.id}`
 
+	const overrides = isCoverOnly
+		? {
+				className: 'flex-shrink',
+				href: undefined,
+				progress: undefined,
+				subtitle: undefined,
+				title: undefined,
+		  }
+		: {}
+
 	return (
 		<EntityCard
 			key={media.id}
@@ -86,6 +108,8 @@ export default function MediaCard({ media, readingLink, fullWidth }: MediaCardPr
 			progress={getProgress(media.current_page, media.pages)}
 			subtitle={getSubtitle(media)}
 			onMouseEnter={handleHover}
+			size={isCoverOnly ? 'lg' : 'default'}
+			{...overrides}
 		/>
 	)
 }

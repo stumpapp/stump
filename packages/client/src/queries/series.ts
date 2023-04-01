@@ -1,7 +1,8 @@
 import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '@stump/api'
 import type { Media, Series } from '@stump/types'
+import { AxiosError } from 'axios'
 
-import { queryClient, useQuery } from '../client'
+import { queryClient, QueryOptions, useQuery } from '../client'
 import { QUERY_KEYS } from '../query_keys'
 import { useQueryParamStore } from '../stores'
 import { QueryCallbacks } from '.'
@@ -14,19 +15,14 @@ export const prefetchSeries = async (id: string) => {
 	})
 }
 
-export function useSeries(id: string, options: QueryCallbacks<Series> = {}) {
-	const {
-		isLoading,
-		isFetching,
-		isRefetching,
-		data: series,
-	} = useQuery(
+export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, AxiosError>) {
+	const { data, ...ret } = useQuery(
 		[SERIES_KEYS.getSeriesById, id],
 		() => getSeriesById(id).then(({ data }) => data),
-		options,
+		params,
 	)
 
-	return { isLoading: isLoading || isFetching || isRefetching, series }
+	return { series: data, ...ret }
 }
 
 export function useSeriesMedia(seriesId: string, page = 1) {

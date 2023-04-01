@@ -1,6 +1,7 @@
 import { cva, VariantProps } from 'class-variance-authority'
 import { forwardRef } from 'react'
 
+import { useButtonContext } from '../button/context'
 import { cn } from '../utils'
 
 export const SPINNER_VARIANTS = {
@@ -32,11 +33,21 @@ export type ProgressSpinnerProps = VariantProps<typeof spinnerVariants> &
 // TODO: make this component not indeterminate, i.e. take in progress...
 export const ProgressSpinner = forwardRef<React.ElementRef<'svg'>, ProgressSpinnerProps>(
 	({ className, variant, size, ...props }, ref) => {
+		const buttonContext = useButtonContext()
+
 		return (
 			<svg
 				ref={ref}
 				aria-hidden="true"
-				className={cn(spinnerVariants({ className, size, variant }), className)}
+				className={cn(
+					spinnerVariants({ className, size, variant }),
+					{
+						'fill-gray-700 dark:fill-gray-100 dark:text-zinc-500':
+							buttonContext?.variant === 'primary',
+					},
+
+					className,
+				)}
 				viewBox="0 0 100 101"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"

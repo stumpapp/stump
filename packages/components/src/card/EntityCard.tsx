@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { cva, VariantProps } from 'class-variance-authority'
-import React, { forwardRef } from 'react'
+import React, { forwardRef, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 
 import { ProgressBar, Text } from '../index'
@@ -14,13 +14,14 @@ const entityCardVariants = cva('', {
 		size: {
 			// md:{h-[22.406rem], w-[12rem]}
 			default: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
+			lg: 'w-full max-w-[16rem]',
 		},
 		variant: {},
 	},
 })
 
 type EntityCardProps = {
-	title: string | React.ReactNode
+	title?: string | React.ReactNode
 	subtitle?: string | React.ReactNode
 	imageUrl: string
 	href?: string
@@ -44,10 +45,11 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 		},
 		ref,
 	) => {
-		const Container = href ? Link : 'div'
+		const Container = href ? Link : Fragment
 		const containerProps = {
 			...(href
 				? {
+						className: cx({ 'flex w-full': fullWidth }),
 						to: href,
 				  }
 				: {}),
@@ -73,9 +75,22 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 			return null
 		}
 
+		const renderFooter = () => {
+			if (title || subtitle) {
+				return (
+					<div className="flex flex-1 flex-col space-y-2 px-1.5 pb-1">
+						{renderTitle()}
+						{subtitle}
+					</div>
+				)
+			}
+
+			return null
+		}
+
 		return (
 			// @ts-expect-error: naive type oop
-			<Container {...containerProps} className={cx({ 'flex w-full': fullWidth })}>
+			<Container {...containerProps}>
 				<div
 					ref={ref}
 					className={cn(
@@ -87,17 +102,15 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 					{...props}
 				>
 					<div
-						className="relative aspect-[2/3] bg-cover bg-center p-0"
+						className={cx('relative aspect-[2/3] bg-cover bg-center p-0', {
+							'min-h-96 w-full': size === 'lg',
+						})}
 						style={{
 							backgroundImage: `url('${imageUrl}')`,
 						}}
 					/>
 					{renderProgress()}
-
-					<div className="flex flex-1 flex-col space-y-2 px-1.5 pb-1">
-						{renderTitle()}
-						{subtitle}
-					</div>
+					{renderFooter()}
 				</div>
 			</Container>
 		)

@@ -31,17 +31,17 @@ pub struct Series {
 	pub media: Option<Vec<Media>>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	/// The number of media in this series. Optional for safety, but should be loaded if possible.
-	pub media_count: Option<u32>,
+	pub media_count: Option<i64>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	/// The number of media in this series which have not been read. Only loaded on some queries.
-	pub unread_media_count: Option<u32>,
+	pub unread_media_count: Option<i64>,
 	/// The user assigned tags for the series. ex: ["comic", "family"]. Will be `None` only if the relation is not loaded.
 	pub tags: Option<Vec<Tag>>,
 }
 
 impl Series {
 	// Note: this is not great practice, and will eventually change...
-	pub fn without_media(mut series: Series, media_count: u32) -> Series {
+	pub fn without_media(mut series: Series, media_count: i64) -> Series {
 		series.media = None;
 
 		Series {
@@ -50,7 +50,7 @@ impl Series {
 		}
 	}
 
-	pub fn set_media_count(&mut self, count: u32) {
+	pub fn set_media_count(&mut self, count: i64) {
 		self.media_count = Some(count);
 	}
 }
@@ -74,7 +74,7 @@ impl From<prisma::series::Data> for Series {
 					.iter()
 					.map(|m| m.to_owned().into())
 					.collect::<Vec<Media>>();
-				let m_ct = media.len() as u32;
+				let m_ct = media.len() as i64;
 
 				(Some(m), Some(m_ct))
 			},
@@ -104,8 +104,8 @@ impl From<prisma::series::Data> for Series {
 	}
 }
 
-impl From<(prisma::series::Data, u32)> for Series {
-	fn from(tuple: (prisma::series::Data, u32)) -> Series {
+impl From<(prisma::series::Data, i64)> for Series {
+	fn from(tuple: (prisma::series::Data, i64)) -> Series {
 		let (series, media_count) = tuple;
 
 		Series::without_media(series.into(), media_count)

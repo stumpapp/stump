@@ -1,3 +1,5 @@
+import { CursorQueryParams } from '@stump/api'
+import { Pageable } from '@stump/types'
 import {
 	MutationFunction,
 	MutationKey,
@@ -12,7 +14,7 @@ import {
 	useQuery as useReactQuery,
 	UseQueryOptions,
 } from '@tanstack/react-query'
-import { isAxiosError } from 'axios'
+import { AxiosError, isAxiosError } from 'axios'
 
 import { QueryClientContext, useClientContext } from './context'
 import { useUserStore } from './index'
@@ -68,11 +70,6 @@ export type InfiniteQueryOptions<
 	UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, QueryKey>,
 	'queryKey' | 'queryFn' | 'context'
 >
-// export type PageParam = {
-// 	page: number
-// 	cursor?: string
-// 	params?: URLSearchParams
-// }
 export function useInfiniteQuery<TQueryFnData = unknown, TError = unknown, TData = TQueryFnData>(
 	queryKey: QueryKey,
 	queryFn: QueryFunction<TQueryFnData, QueryKey>,
@@ -96,98 +93,74 @@ export function useInfiniteQuery<TQueryFnData = unknown, TError = unknown, TData
 	})
 }
 
-// FIXME: terrible types!!!!!!!!!
-// export type InfiniteQueryOptions<
-// 	TQueryFnData = unknown,
-// 	TError = unknown,
-// 	TData = TQueryFnData,
-// 	TQueryKey extends QueryKey = QueryKey,
-// > = Omit<
-// 	UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, TQueryKey>,
-// 	'queryKey' | 'queryFn' | 'context'
-// >
-// export function useInfinitePagedQuery<Entity, TQueryKey extends QueryKey = QueryKey>(
-// 	queryKey: TQueryKey,
-// 	queryFn: (page: number, searchParams?: URLSearchParams) => Promise<ApiResult<Pageable<Entity[]>>>,
-// 	searchParams = new URLSearchParams(),
-// 	options?: {
-// 		onError?: (err: unknown) => void
-// 	},
-// ) {
-// 	const { onRedirect } = useClientContext() || {}
-// 	const { setUser } = useUserStore((store) => ({
-// 		setUser: store.setUser,
-// 	}))
-// 	const { onError } = options || {}
-// 	const {
-// 		data: pageData,
-// 		fetchNextPage,
-// 		hasNextPage,
-// 		isFetching,
-// 		isFetchingNextPage,
-// 		isLoading,
-// 		...rest
-// 	} = useInfiniteQuery(queryKey, (ctx) => queryFn(ctx.pageParam || 1, searchParams), {
-// 		context: QueryClientContext,
-// 		getNextPageParam: (res) => {
-// 			const lastGroup = res.data
-// 			if (lastGroup._page) {
-// 				const currentPage = lastGroup._page.current_page
-// 				const totalPages = lastGroup._page.total_pages
+export type UseCursorQueryParams = {
+	initialCursor?: string
+	limit?: number
+	filters?: Record<string, string>
+}
+export type UseCursorQueryOptions<
+	Entity = unknown,
+	TQueryFnData extends Pageable<Array<Entity>> = Pageable<Array<Entity>>,
+	TError = AxiosError,
+	TData = TQueryFnData,
+> = UseCursorQueryParams &
+	Omit<
+		UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, QueryKey>,
+		'queryKey' | 'queryFn' | 'context' | 'getNextPageParam' | 'getPreviousPageParam'
+	>
 
-// 				if (currentPage < totalPages) {
-// 					return lastGroup._page?.current_page + 1
-// 				}
-// 			}
+export type UseCursorQueryFunction<E> = (
+	params: CursorQueryParams,
+) => Pageable<Array<E>> | Promise<Pageable<Array<E>>>
 
-// 			return undefined
-// 		},
-// 		keepPreviousData: true,
-// 		onError: (err) => {
-// 			if (isAxiosError(err) && err.response?.status === 401) {
-// 				setUser(null)
-// 				onRedirect?.('/auth')
-// 			}
-// 			onError?.(err)
-// 		},
-// 	})
+type CursorQueryContext = {
+	pageParam?: string
+}
+export function useCursorQuery<Entity = unknown, TError = AxiosError>(
+	queryKey: QueryKey,
+	queryFn: UseCursorQueryFunction<Entity>,
+	options?: UseCursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+) {
+	const { initialCursor, limit, filters, ...restOptions } = options || {}
 
-// 	const data =
-// 		pageData?.pages.flatMap((res) => {
-// 			const pageable = res.data
-// 			return pageable.data
-// 		}) ?? []
+	const { data, ...rest } = useInfiniteQuery(
+		[...queryKey, initialCursor, limit, filters],
+		async ({ pageParam }: CursorQueryContext) => {
+			return queryFn({
+				afterId: pageParam,
+				limit: limit || 20,
+				params: new URLSearchParams(filters),
+			})
+		},
+		{
+			getNextPageParam: (lastPage) => {
+				const hasData = !!lastPage.data.length
+				if (!hasData) {
+					return undefined
+				}
 
-// 	return {
-// 		data,
-// 		fetchMore: fetchNextPage,
-// 		hasMore: hasNextPage,
-// 		isFetching: isFetching || isFetchingNextPage,
-// 		isFetchingNextPage,
-// 		isLoading: isLoading,
-// 		...rest,
-// 	}
-// }
+				if (lastPage._cursor?.next_cursor) {
+					return lastPage._cursor?.next_cursor
+				}
 
-// // FIXME: terrible types!!!!!!!!!
-// export function useCursorQuery<Entity, TQueryKey extends QueryKey = QueryKey>(
-// 	cursor: string,
-// 	queryKey: TQueryKey,
-// 	queryFn: (page: number, searchParams?: URLSearchParams) => Promise<ApiResult<Pageable<Entity[]>>>,
-// 	searchParams = new URLSearchParams(),
-// ) {
-// 	const params = useMemo(() => {
-// 		const params = new URLSearchParams(searchParams)
-// 		params.set('cursor', cursor)
-// 		return params
-// 	}, [cursor, searchParams])
+				return undefined
+			},
+			getPreviousPageParam: (firstPage) => {
+				const hasCursor = !!firstPage?._cursor?.current_cursor
+				if (hasCursor) {
+					return firstPage?._cursor?.current_cursor
+				}
+				return undefined
+			},
+			...restOptions,
+		},
+	)
 
-// 	return useInfinitePagedQuery<Entity, TQueryKey>(
-// 		queryKey,
-// 		(page, searchParams) => queryFn(page, searchParams),
-// 		params,
-// 	)
-// }
+	return {
+		data,
+		...rest,
+	}
+}
 
 export type MutationOptions<
 	TData = unknown,

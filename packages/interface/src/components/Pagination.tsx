@@ -21,7 +21,7 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 	// disabling the link.
 	return (
 		<div
-			className={cx('-mt-1', kind === 'next' ? 'justify-end text-right' : 'justify-start', {
+			className={cx('items-center', kind === 'next' ? 'justify-end text-right' : 'justify-start', {
 				'cursor-not-allowed': isDisabled,
 			})}
 		>
@@ -119,7 +119,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 		<nav className="w-full">
 			<div
 				className={cx(
-					'flex items-center justify-between gap-2 border-t border-gray-200 dark:border-gray-700',
+					'flex items-start justify-between gap-2 border-t border-gray-200 dark:border-gray-700',
 					{ 'mt-7': position === 'bottom' },
 				)}
 			>
@@ -129,7 +129,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 					isDisabled={currentPage === 1}
 				/>
 
-				<div className="-mt-1 flex items-center">
+				<div className="flex items-center">
 					{pageRange.map((page, i) => {
 						if (typeof page === 'number') {
 							return (

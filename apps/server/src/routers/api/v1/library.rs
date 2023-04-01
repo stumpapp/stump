@@ -143,7 +143,7 @@ async fn get_libraries(
 
 	let count = ctx.db.library().count(where_conditions).exec().await?;
 
-	Ok(Json((libraries, count as u32, pagination).into()))
+	Ok(Json((libraries, count, pagination).into()))
 }
 
 #[utoipa::path(
@@ -311,7 +311,7 @@ async fn get_library_series(
 		.exec()
 		.await?;
 
-	Ok(Json((series, series_count as u32, pagination).into()))
+	Ok(Json((series, series_count, pagination).into()))
 }
 
 // TODO: ImageResponse for utoipa

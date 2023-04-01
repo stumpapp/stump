@@ -26,7 +26,7 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 		estimateSize: () => 160,
 		getScrollElement: () => parentRef.current,
 		horizontal: true,
-		overscan: 10,
+		overscan: 15,
 		rangeExtractor: useCallback((range: Range) => {
 			visibleRef.current = [range.startIndex, range.endIndex]
 			return defaultRangeExtractor(range)
@@ -57,6 +57,21 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 		}
 	}, [virtualItems, fetchNext, upperBound])
 
+	// based on the number of cards, and how we calculate the offset, we need to know
+	// how much total offset is added for each index.
+	const getTotalOffsetAmount = () => {
+		if (isMobile) {
+			// 0.75rem per card
+			return cards.length * 0.75
+		} else if (isAtLeastMedium) {
+			// 2.5rem per card
+			return cards.length * 2.5
+		} else {
+			// 2rem per card
+			return cards.length * 2
+		}
+	}
+
 	const getItemOffset = (index: number) => {
 		if (isMobile) {
 			return index * 0.75
@@ -77,10 +92,12 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 		// means we are at the end of this section, and we can just scroll to the edge of the list,
 		// considering both the gap offsets and just a little extra padding.
 		if (!virtualItem) {
-			columnVirtualizer.scrollToOffset(
-				columnVirtualizer.getTotalSize() + getItemOffset(nextIndex) + 500,
-				{ smoothScroll: true },
-			)
+			if (cards.length < 50) {
+				columnVirtualizer.scrollToOffset(
+					columnVirtualizer.getTotalSize() + getItemOffset(nextIndex) + 500,
+					{ smoothScroll: true },
+				)
+			}
 		} else {
 			columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
 		}
@@ -130,7 +147,7 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 				<div
 					className="relative inline-flex h-full"
 					style={{
-						width: `${columnVirtualizer.getTotalSize()}px`,
+						width: `calc(${columnVirtualizer.getTotalSize()}px + ${getTotalOffsetAmount()}rem)`,
 					}}
 				>
 					{columnVirtualizer.getVirtualItems().map((virtualItem) => {

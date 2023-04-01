@@ -7,13 +7,13 @@ use crate::{prelude::CoreResult, prisma::PrismaClient};
 
 #[derive(Deserialize, Debug, Default)]
 pub struct CountQueryReturn {
-	pub count: u32,
+	pub count: i64,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct SeriesMediaCountQueryReturn {
 	pub series_id: String,
-	pub count: u32,
+	pub count: i64,
 }
 
 // TODO: Replace pretty much all of these once prisma client suports relation counts. That's
@@ -21,19 +21,19 @@ pub struct SeriesMediaCountQueryReturn {
 // PCR doesn't support relation counts yet!
 #[async_trait::async_trait]
 pub trait PrismaCountTrait {
-	async fn media_count(&self) -> CoreResult<u32>;
-	async fn media_in_series_count(&self, series_id: String) -> CoreResult<u32>;
-	async fn series_count_all(&self) -> CoreResult<u32>;
-	async fn series_count(&self, library_id: String) -> CoreResult<u32>;
+	async fn media_count(&self) -> CoreResult<i64>;
+	async fn media_in_series_count(&self, series_id: String) -> CoreResult<i64>;
+	async fn series_count_all(&self) -> CoreResult<i64>;
+	async fn series_count(&self, library_id: String) -> CoreResult<i64>;
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> CoreResult<HashMap<String, u32>>;
+	) -> CoreResult<HashMap<String, i64>>;
 }
 
 #[async_trait::async_trait]
 impl PrismaCountTrait for PrismaClient {
-	async fn media_count(&self) -> CoreResult<u32> {
+	async fn media_count(&self) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM media"))
 			.exec()
@@ -45,7 +45,7 @@ impl PrismaCountTrait for PrismaClient {
 		})
 	}
 
-	async fn media_in_series_count(&self, series_id: String) -> CoreResult<u32> {
+	async fn media_in_series_count(&self, series_id: String) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!(
 				"SELECT COUNT(*) as count FROM media WHERE series_id={}",
@@ -60,7 +60,7 @@ impl PrismaCountTrait for PrismaClient {
 		})
 	}
 
-	async fn series_count_all(&self) -> CoreResult<u32> {
+	async fn series_count_all(&self) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!("SELECT COUNT(*) as count FROM series"))
 			.exec()
@@ -72,7 +72,7 @@ impl PrismaCountTrait for PrismaClient {
 		})
 	}
 
-	async fn series_count(&self, library_id: String) -> CoreResult<u32> {
+	async fn series_count(&self, library_id: String) -> CoreResult<i64> {
 		let count_res: Vec<CountQueryReturn> = self
 			._query_raw(raw!(
 				"SELECT COUNT(*) as count FROM series WHERE library_id={}",
@@ -92,7 +92,7 @@ impl PrismaCountTrait for PrismaClient {
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> CoreResult<HashMap<String, u32>> {
+	) -> CoreResult<HashMap<String, i64>> {
 		let count_res: Vec<SeriesMediaCountQueryReturn> = self
 		._query_raw(raw!(format!("SELECT DISTINCT series_id as series_id, COUNT(*) as count FROM media WHERE series_id in ({}) GROUP BY series_id",
 		series_ids

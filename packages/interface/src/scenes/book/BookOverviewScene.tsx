@@ -5,11 +5,15 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
 import MediaCard from '../../components/media/MediaCard'
+import ReadMore from '../../components/ReadMore'
 import TagList from '../../components/tags/TagList'
+import { useAppContext } from '../../context'
 import { formatBytes } from '../../utils/format'
+import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 import BooksAfterCursor from './BooksAfterCursor'
 
 export default function BookOverviewScene() {
+	const { isServerOwner } = useAppContext()
 	const { id } = useParams()
 
 	if (!id) {
@@ -30,32 +34,36 @@ export default function BookOverviewScene() {
 				<title>Stump | {media.name || ''}</title>
 			</Helmet>
 
-			<div className="flex h-full w-full flex-col space-y-3 p-4">
+			<div className="flex h-full w-full flex-col gap-3 p-4">
 				<div className="flex items-start space-x-4">
-					<MediaCard media={media!} readingLink />
+					<MediaCard media={media} readingLink variant="cover" />
+
 					<div className="flex h-full flex-1 flex-col space-y-4">
 						<div>
 							<Heading size="sm">{media.name}</Heading>
-							{media?.series && (
-								<Link href={`/series/${media.series.id}`}>{media.series.name}</Link>
-							)}
+							<BookLibrarySeriesLinks
+								libraryId={media.series?.library_id}
+								seriesId={media.series_id}
+								series={media.series}
+							/>
 						</div>
 
-						{/* <ReadMore text={media.description} /> */}
+						<ReadMore text={media.description} />
 						{/* TODO: I want this at the bottom of the container here, but layout needs to be tweaked and I am tired. */}
 						<TagList tags={media.tags || null} />
 					</div>
 				</div>
 
-				<div className="flex flex-col space-y-2 pt-2 text-sm">
-					<Heading size="md">File Information</Heading>
+				<div className="flex flex-col space-y-1.5 pb-3 pt-2 text-sm">
+					<Heading size="xs">File Information</Heading>
 					<div className="flex space-x-4">
-						<Text>Size: {formatBytes(media.size)}</Text>
-						<Text>Kind: {media.extension?.toUpperCase()}</Text>
+						<Text size="sm">Size: {formatBytes(media.size)}</Text>
+						<Text size="sm">Kind: {media.extension?.toUpperCase()}</Text>
 					</div>
-					<Text>Checksum: {media.checksum}</Text>
-					<Text>Path: {media.path}</Text>
+					<Text size="sm">Checksum: {media.checksum}</Text>
+					{isServerOwner && <Text size="sm">Path: {media.path}</Text>}
 				</div>
+
 				<BooksAfterCursor cursor={media} />
 			</div>
 		</Suspense>

@@ -52,7 +52,6 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 				onError?.(res)
 			} else {
 				queryClient.invalidateQueries(['getLibraries'])
-
 				onSuccess?.(res.data)
 			}
 		},

@@ -31,7 +31,7 @@ pub struct PaginationQuery {
 	pub page: Option<u32>,
 	pub page_size: Option<u32>,
 	pub cursor: Option<String>,
-	pub limit: Option<u32>,
+	pub limit: Option<i64>,
 }
 
 impl PaginationQuery {
@@ -228,7 +228,7 @@ impl PageInfo {
 #[derive(Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema)]
 pub struct CursorInfo {
 	current_cursor: Option<String>,
-	limit: Option<u32>,
+	limit: Option<i64>,
 	next_cursor: Option<String>,
 }
 
@@ -236,7 +236,7 @@ impl From<CursorQuery> for CursorInfo {
 	fn from(cursor_query: CursorQuery) -> Self {
 		Self {
 			current_cursor: cursor_query.cursor,
-			limit: cursor_query.limit.map(|l| l as u32),
+			limit: cursor_query.limit,
 			next_cursor: None,
 		}
 	}
@@ -298,7 +298,7 @@ impl<T: Serialize> Pageable<T> {
 	/// Generates a Pageable instance using an explicitly provided count and page params. This is useful for
 	/// when the data provided is not the full set available, but rather a subset of the data (e.g. a query with
 	/// a limit).
-	pub fn with_count(data: T, db_count: u32, page_params: PageParams) -> Self {
+	pub fn with_count(data: T, db_count: i64, page_params: PageParams) -> Self {
 		let total_pages = (db_count as f32 / page_params.page_size as f32).ceil() as u32;
 
 		Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
@@ -364,11 +364,11 @@ where
 }
 
 // Note: this is used when you have to query the database for the total number of pages.
-impl<T> From<(Vec<T>, u32, PageParams)> for Pageable<Vec<T>>
+impl<T> From<(Vec<T>, i64, PageParams)> for Pageable<Vec<T>>
 where
 	T: Serialize + Clone,
 {
-	fn from(tuple: (Vec<T>, u32, PageParams)) -> Pageable<Vec<T>> {
+	fn from(tuple: (Vec<T>, i64, PageParams)) -> Pageable<Vec<T>> {
 		let (data, db_total, page_params) = tuple;
 
 		let total_pages = (db_total as f32 / page_params.page_size as f32).ceil() as u32;
@@ -378,11 +378,11 @@ where
 }
 
 // Note: this is used when you have to query the database for the total number of pages.
-impl<T> From<(Vec<T>, u32, Pagination)> for Pageable<Vec<T>>
+impl<T> From<(Vec<T>, i64, Pagination)> for Pageable<Vec<T>>
 where
 	T: Serialize + Clone + Cursorable,
 {
-	fn from(tuple: (Vec<T>, u32, Pagination)) -> Pageable<Vec<T>> {
+	fn from(tuple: (Vec<T>, i64, Pagination)) -> Pageable<Vec<T>> {
 		let (data, db_total, pagination) = tuple;
 
 		match pagination {

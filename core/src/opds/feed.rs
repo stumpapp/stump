@@ -41,8 +41,8 @@ impl OpdsFeed {
 		title: &str,
 		href_postfix: &str,
 		data: Vec<T>,
-		page: u32,
-		count: u32,
+		page: i64,
+		count: i64,
 	) -> OpdsFeed
 	where
 		OpdsEntry: From<T>,
@@ -126,8 +126,8 @@ impl From<library::Data> for OpdsFeed {
 	}
 }
 
-impl From<(library::Data, u32, u32)> for OpdsFeed {
-	fn from((library, page, count): (library::Data, u32, u32)) -> Self {
+impl From<(library::Data, i64, i64)> for OpdsFeed {
+	fn from((library, page, count): (library::Data, i64, i64)) -> Self {
 		let id = library.id.clone();
 		let title = library.name.clone();
 
@@ -180,10 +180,10 @@ impl From<(library::Data, u32, u32)> for OpdsFeed {
 	}
 }
 
-impl From<(String, Vec<series::Data>, u32, u32)> for OpdsFeed {
+impl From<(String, Vec<series::Data>, i64, i64)> for OpdsFeed {
 	/// Used in /opds/series?page={page}, converting the raw Vector of series into an OPDS feed.
 	/// The page URL param is also passed in, and is used when generating the OPDS links.
-	fn from((title, series, page, count): (String, Vec<series::Data>, u32, u32)) -> Self {
+	fn from((title, series, page, count): (String, Vec<series::Data>, i64, i64)) -> Self {
 		let entries = series.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
 
 		let mut links = vec![
@@ -211,7 +211,7 @@ impl From<(String, Vec<series::Data>, u32, u32)> for OpdsFeed {
 		// not sure..
 		let total_pages = (count as f32 / 20.0).ceil() as u32;
 
-		if page < total_pages as u32 && entries.len() == 20 {
+		if page < total_pages as i64 && entries.len() == 20 {
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Next,
@@ -223,11 +223,11 @@ impl From<(String, Vec<series::Data>, u32, u32)> for OpdsFeed {
 	}
 }
 
-impl<T> From<(String, String, String, Vec<T>, u32, u32)> for OpdsFeed
+impl<T> From<(String, String, String, Vec<T>, i64, i64)> for OpdsFeed
 where
 	OpdsEntry: From<T>,
 {
-	fn from(tuple: (String, String, String, Vec<T>, u32, u32)) -> OpdsFeed {
+	fn from(tuple: (String, String, String, Vec<T>, i64, i64)) -> OpdsFeed {
 		let (id, title, href_postfix, data, page, count) = tuple;
 
 		let entries = data.into_iter().map(OpdsEntry::from).collect::<Vec<_>>();
@@ -257,7 +257,7 @@ where
 		// not sure..
 		let total_pages = (count as f32 / 20.0).ceil() as u32;
 
-		if page < total_pages as u32 && entries.len() == 20 {
+		if page < total_pages as i64 && entries.len() == 20 {
 			links.push(OpdsLink {
 				link_type: OpdsLinkType::Navigation,
 				rel: OpdsLinkRel::Next,

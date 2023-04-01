@@ -14,13 +14,13 @@ rust-version = "1.68.0"
 
 [workspace.dependencies]
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.7", features = [
-  'specta',
+  # 'specta',
   'sqlite-create-many',
   "migrations",
   "sqlite",
 ], default-features = false }
 prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.7", features = [
-  "specta",
+  # "specta",
   "sqlite-create-many",
   "migrations",
   "sqlite",

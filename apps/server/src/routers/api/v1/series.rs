@@ -148,7 +148,7 @@ async fn get_series(
 
 	let series_count = db.series().count(where_conditions).exec().await?;
 
-	Ok(Json((series, series_count as u32, pagination).into()))
+	Ok(Json((series, series_count, pagination).into()))
 }
 
 #[utoipa::path(

@@ -9,7 +9,14 @@ import {
 import type { Media, Pageable, ReadProgress } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { InfiniteQueryOptions, QueryOptions, useInfiniteQuery, useMutation } from '../client'
+import {
+	InfiniteQueryOptions,
+	type QueryOptions,
+	useCursorQuery,
+	type UseCursorQueryOptions,
+	useInfiniteQuery,
+	useMutation,
+} from '../client'
 import { queryClient, useQuery } from '../client'
 import { QUERY_KEYS } from '../query_keys'
 
@@ -132,56 +139,15 @@ export function useMediaMutation(id: string, options: QueryOptions<ReadProgress>
 	return { isLoading, updateReadProgress, updateReadProgressAsync }
 }
 
-export function useRecentlyAddedMedia() {
-	// return useInfinitePagedQuery(
-	// 	[MEDIA_KEYS.getRecentlyAddedMedia],
-	// 	getRecentlyAddedMedia,
-	// 	new URLSearchParams('page_size=10'),
-	// )
-}
-
-type UseRecentlyAddedMediaParams = Omit<
-	InfiniteQueryOptions<Pageable<Media[]>, AxiosError>,
-	'getNextPageParam' | 'getPreviousPageParam'
-> & {
-	limit: number
-	filters?: Record<string, string>
-}
-export function useRecentlyAddedMediaQuery({ limit, ...params }: UseRecentlyAddedMediaParams) {
-	const { filters, ...restParams } = params
-
-	const { data, ...rest } = useInfiniteQuery(
-		['media', limit, filters],
-		async ({ pageParam }) => {
-			const { data } = await getMediaWithCursor({
-				afterId: pageParam,
-				limit,
-				params: new URLSearchParams(filters),
-			})
+type UseRecentlyAddedMediaParams = UseCursorQueryOptions<Media>
+export function useRecentlyAddedMediaQuery(options: UseRecentlyAddedMediaParams) {
+	const { data, ...restReturn } = useCursorQuery(
+		[MEDIA_KEYS.getRecentlyAddedMedia],
+		async (params) => {
+			const { data } = await getRecentlyAddedMedia(params)
 			return data
 		},
-		{
-			getNextPageParam: (lastPage) => {
-				const hasData = !!lastPage.data.length
-				if (!hasData) {
-					return undefined
-				}
-
-				if (lastPage._cursor?.next_cursor) {
-					return lastPage._cursor?.next_cursor
-				}
-
-				return undefined
-			},
-			getPreviousPageParam: (firstPage) => {
-				const hasCursor = !!firstPage?._cursor?.current_cursor
-				if (hasCursor) {
-					return firstPage?._cursor?.current_cursor
-				}
-				return undefined
-			},
-			...restParams,
-		},
+		options,
 	)
 
 	const media = data ? data.pages.flatMap((page) => page.data) : []
@@ -189,7 +155,7 @@ export function useRecentlyAddedMediaQuery({ limit, ...params }: UseRecentlyAdde
 	return {
 		data,
 		media,
-		...rest,
+		...restReturn,
 	}
 }
 

@@ -51,27 +51,29 @@ export type ProgressBarProps = {
 export const ProgressBar = React.forwardRef<
 	React.ElementRef<typeof ProgressPrimitive.Root>,
 	ProgressBarProps
->(({ className, value, variant, size, rounded, ...props }, ref) => (
-	<ProgressPrimitive.Root
-		ref={ref}
-		className={cn(
-			progressVariants({
-				rounded,
-				size,
-				variant,
-			}),
-			className,
-		)}
-		value={value}
-		{...props}
-	>
-		<ProgressPrimitive.Indicator
-			className={cx(
-				'h-full w-full flex-1 transition-all',
-				PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
+>(({ className, value, variant, size, rounded, ...props }, ref) => {
+	return (
+		<ProgressPrimitive.Root
+			ref={ref}
+			className={cn(
+				progressVariants({
+					rounded,
+					size,
+					variant,
+				}),
+				className,
 			)}
-			style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-		/>
-	</ProgressPrimitive.Root>
-))
+			value={value}
+			{...props}
+		>
+			<ProgressPrimitive.Indicator
+				className={cx(
+					'h-full w-full flex-1 transition-all',
+					PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
+				)}
+				style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+			/>
+		</ProgressPrimitive.Root>
+	)
+})
 ProgressBar.displayName = ProgressPrimitive.Root.displayName

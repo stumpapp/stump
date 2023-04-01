@@ -55,3 +55,21 @@ export function getNextMediaInSeries(
 export function getSeriesThumbnail(id: string): string {
 	return `${API.getUri()}/series/${id}/thumbnail`
 }
+
+export const seriesApi = {
+	getNextInSeries,
+	getNextMediaInSeries,
+	getRecentlyAddedSeries,
+	getSeriesById,
+	getSeriesMedia,
+	getSeriesThumbnail,
+}
+
+export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
+	getNextInSeries: 'series.getNextInSeries',
+	getNextMediaInSeries: 'series.getNextMediaInSeries',
+	getRecentlyAddedSeries: 'series.getRecentlyAddedSeries',
+	getSeriesById: 'series.getSeriesById',
+	getSeriesMedia: 'series.getSeriesMedia',
+	getSeriesThumbnail: 'series.getSeriesThumbnail',
+}

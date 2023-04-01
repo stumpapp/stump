@@ -25,13 +25,12 @@ export default function SlidingCardList({
 }: Props) {
 	const parentRef = useRef<HTMLDivElement>(null)
 	const visibleRef = useRef([0, 0])
+
 	const columnVirtualizer = useVirtualizer({
 		count: cards.length,
 		enableSmoothScroll: true,
 		estimateSize: () => 350,
-
 		getScrollElement: () => parentRef.current,
-
 		horizontal: true,
 		// FIXME: this is an absurd overscan... needs to change, however I cannot get it to work with less
 		overscan: 75,
@@ -102,7 +101,7 @@ export default function SlidingCardList({
 	return (
 		<div className="flex w-full flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
-				{title && <Heading size="md">{title}</Heading>}
+				{title && <Heading size="sm">{title}</Heading>}
 				<div className={clsx('self-end', { hidden: isEmpty })}>
 					<div className="flex gap-2">
 						<ToolTip content="Seek backwards" isDisabled={!canSkipBackward}>

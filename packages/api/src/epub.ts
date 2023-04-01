@@ -20,3 +20,15 @@ export function getEpubResource(payload: {
 }): Promise<ApiResult<unknown>> {
 	return API.get(`/epub/${payload.id}/${payload.root ?? 'META-INF'}/${payload.resourceId}`)
 }
+
+const epubApi = {
+	getEpubBaseUrl,
+	getEpubById,
+	getEpubResource,
+}
+
+export const epubQueryKeys: Record<keyof typeof epubApi, string> = {
+	getEpubBaseUrl: 'epub.getEpubBaseUrl',
+	getEpubById: 'epub.getEpubById',
+	getEpubResource: 'epub.getEpubResource',
+}

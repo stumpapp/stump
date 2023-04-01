@@ -35,6 +35,7 @@ type BaseProps = VariantProps<typeof textVariants> & React.ComponentPropsWithout
 // FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 export type TextProps = {
 	className?: string
+	// FIXME: not template string
 	noOfLines?: number
 } & BaseProps
 
@@ -44,7 +45,7 @@ const Text = React.forwardRef<React.ElementRef<'p'>, TextProps>(
 			ref={ref}
 			className={cn(
 				textVariants({ className, size, variant }),
-				{ [`line-clamp-${noOfLines} [hyphens:auto]`]: noOfLines !== undefined },
+				// { [`line-clamp-${noOfLines} [hyphens:auto]`]: noOfLines !== undefined },
 				className,
 			)}
 			{...props}

@@ -10,12 +10,13 @@ import {
 	useColorModeValue,
 	usePrevious,
 } from '@chakra-ui/react'
+import { IconButton } from '@stump/components'
 import type { EpubContent } from '@stump/types'
 import { ListBullets } from 'phosphor-react'
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { IconButton } from '../../../ui/Button'
+// import { IconButton } from '../../../ui/Button'
 interface EpubTocDrawerProps {
 	isOpen: boolean
 	onClose(): void

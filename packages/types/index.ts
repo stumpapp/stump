@@ -1,4 +1,4 @@
-import { Library, Media, PageInfo, Series } from './core'
+import { CursorInfo, Library, Media, PageInfo, Series } from './core'
 
 export enum FileStatus {
 	Unknown = 'UNKNOWN',
@@ -13,6 +13,8 @@ export interface Pageable<T> {
 	data: T
 	// The pagination information (if paginated).
 	_page?: PageInfo
+	// The cursor information (if cursor based).
+	_cursor?: CursorInfo
 }
 
 // Note: I am separating these options / exclusions in case I want to use either independently.

@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom'
 
 import MobileSheet from './MobileSheet'
 
+/**
+ * The top bar of Stump, only visible on mobile. This is mostly because many scenes
+ * have their own topbar, and they are too different from each other to be generalized
+ * into a single component like this one.
+ */
 export default function TopBar() {
 	return (
 		<header className="sticky top-0 z-10 w-full border-b border-gray-50 bg-gray-50 px-4 py-2 dark:border-gray-900 dark:bg-gray-1000 md:hidden">

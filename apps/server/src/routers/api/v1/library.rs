@@ -12,7 +12,10 @@ use tracing::{debug, error, trace};
 
 use stump_core::{
 	db::{
-		models::{LibrariesStats, Library, LibraryScanMode, Series},
+		models::{
+			library_series_ids_media_ids_include, LibrariesStats, Library,
+			LibraryScanMode, Series,
+		},
 		utils::PrismaCountTrait,
 	},
 	fs::{image, media_file},
@@ -658,13 +661,7 @@ async fn delete_library(
 	let deleted = db
 		.library()
 		.delete(library::id::equals(id.clone()))
-		.include(library::include!({
-			series: include {
-				media: select {
-					id
-				}
-			}
-		}))
+		.include(library_series_ids_media_ids_include::include())
 		.exec()
 		.await?;
 

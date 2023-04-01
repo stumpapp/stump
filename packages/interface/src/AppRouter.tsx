@@ -19,7 +19,7 @@ export const lazily = (loader: () => unknown) => React.lazy(() => loader() as La
 
 const HomeScene = lazily(() => import('./scenes/home/HomeScene'))
 const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewScene'))
-const BookOverview = lazily(() => import('./pages/book/BookOverview'))
+const BookOverviewScene = lazily(() => import('./scenes/book/BookOverviewScene'))
 const ReadBook = lazily(() => import('./pages/book/ReadBook'))
 const ReadEpub = lazily(() => import('./pages/book/ReadEpub'))
 const FourOhFour = lazily(() => import('./scenes/error/FourOhFour'))
@@ -47,7 +47,7 @@ export function AppRouter() {
 
 					<Route path="series/:id" element={<SeriesOverviewScene />} />
 
-					<Route path="books/:id" element={<BookOverview />} />
+					<Route path="books/:id" element={<BookOverviewScene />} />
 					<Route path="books/:id/pages/:page" element={<ReadBook />} />
 					<Route path="epub/:id" element={<ReadEpub />} />
 

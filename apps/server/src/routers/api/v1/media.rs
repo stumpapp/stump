@@ -12,7 +12,6 @@ use stump_core::{
 	config::get_config_dir,
 	db::{
 		models::{Media, ReadProgress},
-		utils::PrismaCountTrait,
 		Dao, MediaDao, MediaDaoImpl,
 	},
 	fs::{image, media_file},
@@ -74,6 +73,40 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	}
 
 	_where
+}
+
+pub(crate) fn apply_pagination<'a>(
+	query: media::FindMany<'a>,
+	pagination: &Pagination,
+) -> media::FindMany<'a> {
+	// let mut query = client
+	// .media()
+	// .find_many(where_conditions.clone())
+	// .with(media::read_progresses::fetch(vec![
+	// 	read_progress::user_id::equals(user_id),
+	// ]))
+	// .order_by(order_by_param)
+	// .order_by(media::created_at::order(Direction::Desc));
+
+	match pagination {
+		Pagination::Page(page_query) => {
+			let (skip, take) = page_query.get_skip_take();
+			query.skip(skip).take(take)
+		},
+		Pagination::Cursor(cursor_params) => {
+			let mut cursor_query = query;
+			if let Some(cursor) = cursor_params.cursor.as_deref() {
+				cursor_query = cursor_query
+					.cursor(media::id::equals(cursor.to_string()))
+					.skip(1);
+			}
+			if let Some(limit) = cursor_params.limit {
+				cursor_query = cursor_query.take(limit);
+			}
+			cursor_query
+		},
+		_ => query,
+	}
 }
 
 #[utoipa::path(
@@ -256,38 +289,66 @@ async fn get_in_progress_media(
 /// Get all media which was added to the library in descending order of when it
 /// was added.
 async fn get_recently_added_media(
+	filter_query: Query<FilterableQuery<MediaFilter>>,
+	pagination_query: Query<PaginationQuery>,
+	session: ReadableSession,
 	State(ctx): State<AppState>,
-	pagination: Query<PageQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
 
-	let unpaged = pagination.page.is_none();
-	let page_params = pagination.0.page_params();
+	let FilterableQuery { filters, ordering } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
 
-	let mut query = db
-		.media()
-		.find_many(vec![])
-		.order_by(media::created_at::order(Direction::Desc));
+	trace!(?filters, ?ordering, ?pagination, "get_recently_added_media");
 
-	if !unpaged {
-		let (skip, take) = page_params.get_skip_take();
-		query = query.skip(skip).take(take);
+	let is_unpaged = pagination.is_unpaged();
+	let order_by_param: MediaOrderByParam = ordering.try_into()?;
+
+	let pagination_cloned = pagination.clone();
+	let where_conditions = apply_media_filters(filters);
+
+	let (media, count) = db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(where_conditions.clone())
+				.with(media::read_progresses::fetch(vec![
+					read_progress::user_id::equals(user_id),
+				]))
+				.order_by(order_by_param)
+				.order_by(media::created_at::order(Direction::Desc));
+
+			if !is_unpaged {
+				query = apply_pagination(query, &pagination_cloned);
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(where_conditions)
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
 	}
 
-	let media = query
-		.exec()
-		.await?
-		.into_iter()
-		.map(|m| m.into())
-		.collect::<Vec<Media>>();
-
-	if unpaged {
-		return Ok(Json(Pageable::from(media)));
-	}
-
-	let count = db.media_count().await?;
-
-	Ok(Json(Pageable::from((media, count, page_params))))
+	Ok(Json(Pageable::from(media)))
 }
 
 #[derive(Deserialize)]

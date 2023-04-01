@@ -1,4 +1,5 @@
-import { Heading } from '@stump/components'
+import { getMediaThumbnail } from '@stump/api'
+import { EntityCard, Heading } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import { CardGrid } from '../../components/Card'
@@ -15,8 +16,6 @@ export default function MediaGrid({ media, isLoading }: Props) {
 	} else if (!media || !media.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">
-				{/* TODO: If I take in pageData, I can determine if it is an out of bounds issue or if the series truly has
-				no media. */}
 				<Heading size="sm">It doesn&rsquo;t look like there is any media here.</Heading>
 			</div>
 		)

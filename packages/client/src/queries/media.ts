@@ -2,52 +2,123 @@ import {
 	getInProgressMedia,
 	getMedia,
 	getMediaById,
+	getMediaWithCursor,
 	getRecentlyAddedMedia,
 	updateMediaProgress,
 } from '@stump/api'
-import type { Media, ReadProgress } from '@stump/types'
-import { useMemo } from 'react'
+import type { Media, Pageable, ReadProgress } from '@stump/types'
+import { AxiosError } from 'axios'
 
-import { QueryOptions, useCursorQuery, useInfinitePagedQuery, useMutation } from '../client'
+import {
+	InfiniteQueryOptions,
+	type QueryOptions,
+	useCursorQuery,
+	type UseCursorQueryOptions,
+	useInfiniteQuery,
+	useMutation,
+} from '../client'
 import { queryClient, useQuery } from '../client'
 import { QUERY_KEYS } from '../query_keys'
 
 const MEDIA_KEYS = QUERY_KEYS.media
 
 export const prefetchMedia = async (id: string) => {
-	await queryClient.prefetchQuery([MEDIA_KEYS.get_by_id, id], () => getMediaById(id), {
+	await queryClient.prefetchQuery([MEDIA_KEYS.getMediaById, id], () => getMediaById(id), {
 		staleTime: 10 * 1000,
 	})
 }
 
-export function useMediaById(id: string, { onError }: QueryOptions<Media> = {}) {
-	const { data, isLoading, isFetching, isRefetching } = useQuery(
-		[MEDIA_KEYS.get_by_id, id],
-		() => getMediaById(id),
+type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
+	TQueryFnData,
+	AxiosError,
+	TData
+>
+
+export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = {}) {
+	const { data, ...ret } = useQuery(
+		[MEDIA_KEYS.getMediaById, id],
+		() => getMediaById(id).then(({ data }) => data),
 		{
 			keepPreviousData: false,
-			onError(err) {
-				console.error(err)
-				onError?.(err)
-			},
+			...params,
 		},
 	)
 
-	return { isLoading: isLoading || isFetching || isRefetching, media: data?.data }
+	return { media: data, ...ret }
 }
 
-/** Hook for fetching media after a cursor, within a series */
-export function useMediaCursor(afterId: string, seriesId: string) {
-	const searchParams = useMemo(() => {
-		return new URLSearchParams({ cursor: afterId, series_id: seriesId })
-	}, [afterId, seriesId])
-	const { data: media, ...rest } = useCursorQuery(
-		afterId,
-		[MEDIA_KEYS.get_with_cursor, afterId],
-		() => getMedia(searchParams),
+type UseMediaAfterCursorParams = Omit<
+	InfiniteQueryOptions<Pageable<Media[]>, AxiosError>,
+	'getNextPageParam' | 'getPreviousPageParam'
+> & {
+	filters?: Record<string, string>
+}
+export function useMediaAfterCursorQuery(
+	initialCursor: string,
+	limit: number,
+	params: UseMediaAfterCursorParams = {},
+) {
+	const { filters, ...restParams } = params
+
+	const { data, ...rest } = useInfiniteQuery(
+		['media', initialCursor, limit, filters],
+		async ({ pageParam }) => {
+			const { data } = await getMediaWithCursor({
+				afterId: pageParam || initialCursor,
+				limit,
+				params: new URLSearchParams(filters),
+			})
+			return data
+		},
+		{
+			getNextPageParam: (lastPage) => {
+				const hasData = !!lastPage.data.length
+				if (!hasData) {
+					return undefined
+				}
+
+				if (lastPage._cursor?.next_cursor) {
+					return lastPage._cursor?.next_cursor
+				}
+
+				return undefined
+			},
+			getPreviousPageParam: (firstPage) => {
+				const hasCursor = !!firstPage?._cursor?.current_cursor
+				const isNotInitialCursor = firstPage?._cursor?.current_cursor !== initialCursor
+				if (hasCursor && isNotInitialCursor) {
+					return firstPage?._cursor?.current_cursor
+				}
+				return undefined
+			},
+			...restParams,
+		},
 	)
 
-	return { media, ...rest }
+	const media = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		media,
+		...rest,
+	}
+}
+
+// TODO: refactor once types are better in client.ts
+/** Hook for fetching media after a cursor, within a series */
+export function useMediaCursor(afterId: string, seriesId: string) {
+	// const searchParams = useMemo(() => {
+	// 	return new URLSearchParams({ cursor: afterId, series_id: seriesId })
+	// }, [afterId, seriesId])
+	// const { data: media, ...rest } = useCursorQuery(
+	// 	afterId,
+	// 	[MEDIA_KEYS.getMediaWithCursor, afterId],
+	// 	() => getMedia(searchParams),
+	// )
+
+	// return { media, ...rest }
+
+	return { isLoading: false, media: [] }
 }
 
 export function useMediaMutation(id: string, options: QueryOptions<ReadProgress> = {}) {
@@ -68,18 +139,30 @@ export function useMediaMutation(id: string, options: QueryOptions<ReadProgress>
 	return { isLoading, updateReadProgress, updateReadProgressAsync }
 }
 
-export function useRecentlyAddedMedia() {
-	return useInfinitePagedQuery(
-		[MEDIA_KEYS.recently_added],
-		getRecentlyAddedMedia,
-		new URLSearchParams('page_size=10'),
+type UseRecentlyAddedMediaParams = UseCursorQueryOptions<Media>
+export function useRecentlyAddedMediaQuery(options: UseRecentlyAddedMediaParams) {
+	const { data, ...restReturn } = useCursorQuery(
+		[MEDIA_KEYS.getRecentlyAddedMedia],
+		async (params) => {
+			const { data } = await getRecentlyAddedMedia(params)
+			return data
+		},
+		options,
 	)
+
+	const media = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		media,
+		...restReturn,
+	}
 }
 
 export function useContinueReading() {
-	return useInfinitePagedQuery(
-		[MEDIA_KEYS.in_progress],
-		getInProgressMedia,
-		new URLSearchParams('page_size=10'),
-	)
+	// return useInfinitePagedQuery(
+	// 	[MEDIA_KEYS.getInProgressMedia],
+	// 	getInProgressMedia,
+	// 	new URLSearchParams('page_size=10'),
+	// )
 }

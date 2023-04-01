@@ -11,6 +11,8 @@ export * from './server'
 export * from './tag'
 export * from './user'
 
+// TODO: remove all these!!
+
 export interface QueryCallbacks<T> {
 	onSuccess?: (data?: T | null) => void
 	onError?: (data: unknown) => void

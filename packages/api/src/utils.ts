@@ -1,3 +1,5 @@
+import { CursorQueryParams } from './types'
+
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
 	const paramString = params?.toString()
@@ -28,4 +30,19 @@ export const toUrlParams = <T extends object>(
 	})
 
 	return params
+}
+
+export const mergeCursorParams = ({
+	afterId,
+	limit,
+	params,
+}: CursorQueryParams): URLSearchParams => {
+	const searchParams = new URLSearchParams(params)
+	if (afterId) {
+		searchParams.set('cursor', afterId)
+	}
+	if (limit) {
+		searchParams.set('limit', limit.toString())
+	}
+	return searchParams
 }

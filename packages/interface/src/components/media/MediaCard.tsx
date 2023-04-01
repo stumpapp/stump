@@ -1,74 +1,115 @@
-import { Progress } from '@chakra-ui/react'
 import { getMediaThumbnail } from '@stump/api'
 import { prefetchMedia } from '@stump/client'
-import { Text } from '@stump/components'
-import type { Media } from '@stump/types'
+import { EntityCard, Text } from '@stump/components'
+import { FileStatus, Media } from '@stump/types'
+import pluralize from 'pluralize'
 
-import pluralizeStat from '../../utils/pluralize'
+import { formatBytes } from '../../utils/format'
 import { prefetchMediaPage } from '../../utils/prefetch'
-import Card, { CardBody, CardFooter } from '../Card'
-
-// FIXME: rewrite this terrible(!!!!) component lol
 
 export type MediaCardProps = {
 	media: Media
-	// changes the card link to go directly to a reader, rather than overview page
 	readingLink?: boolean
-	// Used on the home page to set the height/width of the card for the sliding flex layout
-	fixed?: boolean
+	fullWidth?: boolean
+	variant?: 'cover' | 'default'
 }
 
-export default function MediaCard({ media, readingLink, fixed }: MediaCardProps) {
-	const pagesLeft = media.current_page ? media.pages - media.current_page : undefined
-	const link = readingLink
-		? `/books/${media.id}/pages/${media.current_page ?? 1}`
-		: `/books/${media.id}`
+export default function MediaCard({
+	media,
+	readingLink,
+	fullWidth,
+	variant = 'default',
+}: MediaCardProps) {
+	const isCoverOnly = variant === 'cover'
 
-	function handleMouseOver() {
-		prefetchMedia(media.id)
+	const handleHover = () => {
+		if (!readingLink) {
+			prefetchMedia(media.id)
+		}
 
 		if (media.current_page) {
 			prefetchMediaPage(media.id, media.current_page)
 		}
 	}
 
-	return (
-		<Card
-			variant={fixed ? 'fixedImage' : 'image'}
-			to={link}
-			onMouseEnter={handleMouseOver}
-			title={readingLink ? `Continue reading ${media.name}` : media.name}
-		>
-			<CardBody
-				className="relative aspect-[2/3] bg-cover bg-center p-0"
-				style={{
-					// TODO: figure out how to do fallback ONLY on error... url('/assets/fallbacks/image-file.svg')
-					backgroundImage: `url('${getMediaThumbnail(media.id)}')`,
-				}}
-			>
-				{!!pagesLeft && pagesLeft !== media.pages && (
-					<div className="absolute bottom-0 left-0 w-full">
-						<Progress
-							shadow="xl"
-							value={media.pages - Number(pagesLeft)}
-							max={media.pages}
-							w="full"
-							size="xs"
-							colorScheme="orange"
-						/>
-					</div>
-				)}
-			</CardBody>
-			<CardFooter className="flex flex-col gap-1 py-1">
-				{/* TODO: figure out how to make this not look like shit with 2 lines */}
-				<Text size="sm" className="font-md" noOfLines={1}>
-					{media.name}
-				</Text>
+	const getSubtitle = (media: Media) => {
+		if (isCoverOnly) {
+			return null
+		}
 
-				<Text size="xs" className="text-gray-700 dark:text-gray-300">
-					{pluralizeStat('pages', media.pages)}
+		const isMissing = media.status === FileStatus.Missing
+		if (isMissing) {
+			return (
+				<Text size="xs" className="uppercase text-amber-500 dark:text-amber-400">
+					File Missing
 				</Text>
-			</CardFooter>
-		</Card>
+			)
+		}
+
+		const hasProgress = (media.current_page || 0) > 0
+		if (hasProgress) {
+			const pagesLeft = media.pages - (media.current_page || 0)
+			return (
+				<div className="flex items-center justify-between">
+					<Text size="xs" variant="muted">
+						{getProgress(media.current_page, media.pages)}%
+					</Text>
+					<Text size="xs" variant="muted">
+						{pagesLeft} {pluralize('page', pagesLeft)} left
+					</Text>
+				</div>
+			)
+		}
+
+		return (
+			<div className="flex items-center justify-between">
+				<Text size="xs" variant="muted">
+					{formatBytes(media.size)}
+				</Text>
+			</div>
+		)
+	}
+
+	function getProgress(page: number | null | undefined, pages: number) {
+		if (isCoverOnly || !page) {
+			return undefined
+		}
+
+		const percent = Math.round((page / pages) * 100)
+		if (percent > 100) {
+			return 100
+		}
+
+		return percent
+	}
+
+	const href =
+		readingLink && media.current_page
+			? `/books/${media.id}/pages/${media.current_page ?? 1}`
+			: `/books/${media.id}`
+
+	const overrides = isCoverOnly
+		? {
+				className: 'flex-shrink',
+				href: undefined,
+				progress: undefined,
+				subtitle: undefined,
+				title: undefined,
+		  }
+		: {}
+
+	return (
+		<EntityCard
+			key={media.id}
+			title={media.name}
+			href={href}
+			fullWidth={fullWidth}
+			imageUrl={getMediaThumbnail(media.id)}
+			progress={getProgress(media.current_page, media.pages)}
+			subtitle={getSubtitle(media)}
+			onMouseEnter={handleHover}
+			size={isCoverOnly ? 'lg' : 'default'}
+			{...overrides}
+		/>
 	)
 }

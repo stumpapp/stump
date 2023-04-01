@@ -7,7 +7,7 @@ import { Navigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
-import { useLocale } from '../../hooks/useLocale'
+import { useLocaleContext } from '../../i18n/context'
 
 export default function LoginOrClaimScene() {
 	const [params] = useSearchParams()
@@ -18,7 +18,7 @@ export default function LoginOrClaimScene() {
 		user: store.user,
 	}))
 
-	const { t } = useLocale()
+	const { t } = useLocaleContext()
 	const { isClaimed, isCheckingClaimed, loginUser, registerUser, isLoggingIn, isRegistering } =
 		useLoginOrRegister({
 			onSuccess: setUser,
@@ -44,7 +44,14 @@ export default function LoginOrClaimScene() {
 					: t('authScene.toasts.loggedIn'),
 			})
 		if (isClaimed) {
-			await doLogin()
+			try {
+				await doLogin()
+			} catch (_) {
+				// We already report the error from above with toast, but
+				// it still throws there error (annoyingly). In order for
+				// the form to not log up (i.e. get stuck in submitting state)
+				// we need to at the very least catch the error here
+			}
 		} else {
 			toast
 				.promise(registerUser({ password, username }), {

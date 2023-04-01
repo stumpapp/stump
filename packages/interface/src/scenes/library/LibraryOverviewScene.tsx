@@ -20,10 +20,6 @@ export default function LibraryOverviewScene() {
 		throw new Error('Library id is required')
 	}
 
-	function handleError(err: unknown) {
-		console.error(err)
-	}
-
 	const { layoutMode } = useLayoutMode('LIBRARY')
 	const { isLoading, library } = useLibrary(id)
 
@@ -60,15 +56,11 @@ export default function LibraryOverviewScene() {
 
 			<div className="flex h-full w-full flex-col space-y-6 p-4">
 				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
-
 				{layoutMode === 'GRID' ? (
 					<SeriesGrid isLoading={isLoadingSeries} series={series} />
 				) : (
 					<SeriesList isLoading={isLoadingSeries} series={series} />
 				)}
-
-				<div className="flex-1" />
-
 				{hasStuff ? (
 					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
 				) : null}

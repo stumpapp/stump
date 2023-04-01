@@ -17,7 +17,7 @@ pub struct MediaMetadata {
 	#[serde(rename = "Series")]
 	pub series: Option<String>,
 	#[serde(rename = "Number")]
-	pub number: Option<usize>,
+	pub number: Option<u32>,
 	#[serde(rename = "Web")]
 	pub web: Option<String>,
 	#[serde(rename = "Summary")]
@@ -27,7 +27,7 @@ pub struct MediaMetadata {
 	#[serde(rename = "Genre")]
 	pub genre: Option<String>,
 	#[serde(rename = "PageCount")]
-	pub page_count: Option<usize>,
+	pub page_count: Option<u32>,
 }
 
 // impl MediaMetadata {

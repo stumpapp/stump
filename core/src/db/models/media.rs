@@ -10,7 +10,9 @@ use crate::{
 	prisma::{media, read_progress},
 };
 
-use super::{read_progress::ReadProgress, series::Series, tag::Tag, LibraryOptions};
+use super::{
+	read_progress::ReadProgress, series::Series, tag::Tag, Cursorable, LibraryOptions,
+};
 
 #[derive(
 	Debug, Clone, Deserialize, Serialize, Type, Default, OptionalStruct, ToSchema,
@@ -83,6 +85,12 @@ impl Media {
 			checksum: newer.checksum.clone().or_else(|| self.checksum.clone()),
 			..self.clone()
 		}
+	}
+}
+
+impl Cursorable for Media {
+	fn cursor(&self) -> String {
+		self.id.clone()
 	}
 }
 

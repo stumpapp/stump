@@ -5,6 +5,7 @@
   ],
   "references": [],
   "compilerOptions": {
-    "outDir": "../../.moon/cache/types/packages/components"
+    "outDir": "../../.moon/cache/types/packages/components",
+    "esModuleInterop": true
   }
 }

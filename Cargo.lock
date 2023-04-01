@@ -5322,6 +5322,7 @@ dependencies = [
  "tokio-util",
  "tower-http",
  "tracing",
+ "urlencoding",
  "utoipa",
  "utoipa-swagger-ui",
 ]

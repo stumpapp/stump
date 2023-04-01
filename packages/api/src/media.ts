@@ -6,7 +6,8 @@ import { mergeCursorParams, urlWithParams } from './utils'
 
 type GetMediaById = ApiResult<Media>
 
-export function getMedia(params?: URLSearchParams): Promise<PageableApiResult<Media[]>> {
+export function getMedia(filters?: Record<string, string>): Promise<PageableApiResult<Media[]>> {
+	const params = new URLSearchParams(filters)
 	return API.get(urlWithParams('/media', params))
 }
 
@@ -38,16 +39,13 @@ export function getRecentlyAddedMedia({
 	return API.get(urlWithParams('/media/recently-added', searchParams))
 }
 
-export function getInProgressMedia(
-	page: number,
-	params?: URLSearchParams,
-): Promise<PageableApiResult<Media[]>> {
-	if (params) {
-		params.set('page', page.toString())
-		return API.get(urlWithParams('/media/keep-reading', params))
-	}
-
-	return API.get(`/media/keep-reading?page=${page}`)
+export function getInProgressMedia({
+	afterId,
+	limit,
+	params,
+}: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
+	const searchParams = mergeCursorParams({ afterId, limit, params })
+	return API.get(urlWithParams('/media/keep-reading', searchParams))
 }
 
 export function getMediaThumbnail(id: string): string {

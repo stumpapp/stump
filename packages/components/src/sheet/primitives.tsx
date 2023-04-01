@@ -2,12 +2,16 @@
 import * as SheetPrimitive from '@radix-ui/react-dialog'
 import { cva, VariantProps } from 'class-variance-authority'
 import { X } from 'lucide-react'
-import React from 'react'
+import React, { ComponentProps } from 'react'
 
 import { cn } from '../utils'
 
-const Sheet = SheetPrimitive.Root as typeof SheetPrimitive.Root & SheetSubComponents
-const SheetTrigger = SheetPrimitive.Trigger
+const Sheet = (props: ComponentProps<typeof SheetPrimitive.Root>) => (
+	<SheetPrimitive.Root {...props} />
+)
+const SheetTrigger = (props: ComponentProps<typeof SheetPrimitive.Trigger>) => (
+	<SheetPrimitive.Trigger {...props} />
+)
 
 const FLOATING_PORTAL_VARIANTS = {
 	bottom: 'bottom-4 inset-x-4 z-50',
@@ -240,23 +244,23 @@ type SheetSubComponents = {
 	Description: typeof SheetDescription
 	Close: typeof SheetPrimitive.Close
 }
-
-Sheet.Header = SheetHeader
-Sheet.Title = SheetTitle
-Sheet.Content = SheetContent
-Sheet.Footer = SheetFooter
-Sheet.Trigger = SheetTrigger
-Sheet.Portal = SheetPortal
-Sheet.Overlay = SheetOverlay
-Sheet.Description = SheetDescription
-Sheet.Close = SheetPrimitive.Close
+const TypedSheet = Sheet as typeof Sheet & SheetSubComponents
+TypedSheet.Header = SheetHeader
+TypedSheet.Title = SheetTitle
+TypedSheet.Content = SheetContent
+TypedSheet.Footer = SheetFooter
+TypedSheet.Trigger = SheetTrigger
+TypedSheet.Portal = SheetPortal
+TypedSheet.Overlay = SheetOverlay
+TypedSheet.Description = SheetDescription
+TypedSheet.Close = SheetPrimitive.Close
 
 export {
 	SheetContent,
 	SheetDescription,
 	SheetFooter,
 	SheetHeader,
-	Sheet as SheetPrimitive,
+	TypedSheet as SheetPrimitive,
 	SheetTitle,
 	SheetTrigger,
 }

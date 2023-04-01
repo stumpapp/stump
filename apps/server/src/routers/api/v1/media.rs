@@ -28,7 +28,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user,
+		decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
 		FilterableQuery, MediaFilter,
 	},
@@ -66,6 +66,10 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	}
 	if !filters.extension.is_empty() {
 		_where.push(media::extension::in_vec(filters.extension));
+	}
+	if !filters.path.is_empty() {
+		let decoded_paths = decode_path_filter(filters.path);
+		_where.push(media::path::in_vec(decoded_paths));
 	}
 
 	if let Some(series_filters) = filters.series {

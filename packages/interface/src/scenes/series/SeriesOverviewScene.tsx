@@ -1,6 +1,6 @@
 import { getSeriesThumbnail } from '@stump/api'
-import { useLayoutMode, useSeriesByIdQuery, useSeriesMedia } from '@stump/client'
-import { EntityCard, Heading, Spacer } from '@stump/components'
+import { useLayoutMode, useSeriesByIdQuery, useSeriesMediaQuery } from '@stump/client'
+import { EntityCard, Heading } from '@stump/components'
 import type { Series } from '@stump/types'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
@@ -30,7 +30,7 @@ export default function SeriesOverviewScene() {
 
 	const { layoutMode } = useLayoutMode('SERIES')
 	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(id)
-	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMedia(id, page)
+	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMediaQuery(id, { page })
 
 	useEffect(() => {
 		if (!isInView) {

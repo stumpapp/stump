@@ -31,7 +31,7 @@ export type CreateLibraryArgs = { name: string; path: string; description: strin
 
 export type UpdateLibraryArgs = { id: string; name: string; path: string; description: string | null; tags: Tag[] | null; removed_tags: Tag[] | null; library_options: LibraryOptions; scan_mode: LibraryScanMode | null }
 
-export type LibrariesStats = { series_count: number; book_count: number; total_bytes: number }
+export type LibrariesStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt }
 
 export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; media_count?: BigInt | null; unread_media_count?: BigInt | null; tags: Tag[] | null }
 

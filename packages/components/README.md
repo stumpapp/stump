@@ -28,3 +28,7 @@ The components are organized and grouped into folders based on their most abstra
   - [shadcn/ui](https://ui.shadcn.com/docs) - The collection of base radix-ui components
 - [TailwindCSS](https://tailwindcss.com/) - The CSS framework used in this package
 - [Storybook](https://storybook.js.org/) - Used for isolated development and documentation of components
+
+> :warning: Bug alert :warning:
+> I had to downgrade TypeScript version to < v5 https://github.com/storybookjs/storybook/issues/21642
+> I want to eventually revisit this and upgrade to v5

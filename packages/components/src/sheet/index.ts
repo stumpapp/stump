@@ -1,2 +1,2 @@
 export { type SheetContentProps, SheetPrimitive } from './primitives'
-export { type SheetProps, Sheet } from './Sheet'
+export { Sheet, type SheetProps } from './Sheet'

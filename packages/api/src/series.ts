@@ -43,13 +43,11 @@ export function getNextMediaInSeries(
 	media_id: string,
 	limit = 25,
 ): Promise<PageableApiResult<Media[]>> {
-	return getMedia(
-		new URLSearchParams({
-			cursor: media_id,
-			limit: limit.toString(),
-			series_id,
-		}),
-	)
+	return getMedia({
+		cursor: media_id,
+		limit: limit.toString(),
+		series_id,
+	})
 }
 
 export function getSeriesThumbnail(id: string): string {

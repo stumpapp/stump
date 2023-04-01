@@ -5,7 +5,6 @@ import {
 	MutationKey,
 	QueryClient,
 	QueryFunction,
-	QueryFunctionContext,
 	QueryKey,
 	useInfiniteQuery as useReactInfiniteQuery,
 	UseInfiniteQueryOptions,
@@ -32,9 +31,18 @@ export const queryClient = new QueryClient({
 	},
 })
 
-// TQueryFnData - The type of the data returned by the query function
-// TError - The type of the error to expect from the query function
-// TData - The type our data will ~eventually~ have
+// NOTE for future onlookers of this file: react-query has LOTS of generics. It can
+// be hard to keep track of things if you're just starting, so refer to these few big
+// types as a guide to understand how they use the generics:
+//
+// 1. TQueryFnData - The type of the data returned by the query function
+// 2. TError - The type of the error to expect from the query function
+// 3. TData - The type our data will ~eventually~ have
+//
+// A few of these base hooks have an additional generic, like Entity, which is mostly
+// shorthand to derive the the others. For example, PageQueryOptions<Media> handles all
+// the other generics to get a paginated API response containing Media objects.
+
 export type QueryOptions<TQueryFnData = unknown, TError = unknown, TData = TQueryFnData> = Omit<
 	UseQueryOptions<TQueryFnData, TError, TData, QueryKey>,
 	'queryKey' | 'queryFn' | 'context'
@@ -60,6 +68,49 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 		},
 		...restOptions,
 	})
+}
+
+type PageQueryParams = {
+	/** The page to fetch */
+	page?: number
+	/** The number of items per page */
+	pageSize?: number
+	/** Filters to apply to the query. The name can be a bit misleading,
+	 *  since ordering and other things can be applied as well. */
+	filters?: Record<string, string>
+}
+export type PageQueryFunction<E, P extends PageQueryParams = PageQueryParams> = (
+	params: P,
+) => Pageable<Array<E>> | Promise<Pageable<Array<E>>>
+
+export type PageQueryOptions<
+	Entity = unknown,
+	TQueryFnData extends Pageable<Array<Entity>> = Pageable<Array<Entity>>,
+	TError = AxiosError,
+	TData = TQueryFnData,
+> = Omit<
+	UseQueryOptions<TQueryFnData, TError, TData, QueryKey>,
+	'queryKey' | 'queryFn' | 'context'
+> &
+	PageQueryParams
+
+export function usePageQuery<Entity = unknown, Error = AxiosError>(
+	queryKey: QueryKey,
+	queryFn: PageQueryFunction<Entity>,
+	{
+		page = 1,
+		pageSize = 20,
+		filters,
+		...options
+	}: PageQueryOptions<Entity, Pageable<Entity[]>, Error, Pageable<Entity[]>> = {},
+) {
+	return useQuery(
+		[...queryKey, page, pageSize, filters],
+		async () => queryFn({ filters, page, pageSize }),
+		{
+			...options,
+		},
+	)
 }
 
 export type InfiniteQueryOptions<
@@ -98,16 +149,16 @@ export type UseCursorQueryParams = {
 	limit?: number
 	filters?: Record<string, string>
 }
-export type UseCursorQueryOptions<
+export type CursorQueryOptions<
 	Entity = unknown,
 	TQueryFnData extends Pageable<Array<Entity>> = Pageable<Array<Entity>>,
 	TError = AxiosError,
 	TData = TQueryFnData,
-> = UseCursorQueryParams &
-	Omit<
-		UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, QueryKey>,
-		'queryKey' | 'queryFn' | 'context' | 'getNextPageParam' | 'getPreviousPageParam'
-	>
+> = Omit<
+	UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, QueryKey>,
+	'queryKey' | 'queryFn' | 'context' | 'getNextPageParam' | 'getPreviousPageParam'
+> &
+	UseCursorQueryParams
 
 export type UseCursorQueryFunction<E> = (
 	params: CursorQueryParams,
@@ -119,7 +170,7 @@ type CursorQueryContext = {
 export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 	queryKey: QueryKey,
 	queryFn: UseCursorQueryFunction<Entity>,
-	options?: UseCursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+	options?: CursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
 ) {
 	const { initialCursor, limit, filters, ...restOptions } = options || {}
 
@@ -127,7 +178,7 @@ export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 		[...queryKey, initialCursor, limit, filters],
 		async ({ pageParam }: CursorQueryContext) => {
 			return queryFn({
-				afterId: pageParam,
+				afterId: pageParam || initialCursor,
 				limit: limit || 20,
 				params: new URLSearchParams(filters),
 			})

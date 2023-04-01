@@ -1,10 +1,9 @@
-import { getNextInSeries, getRecentlyAddedSeries, getSeriesById, getSeriesMedia } from '@stump/api'
+import { getNextInSeries, getSeriesById, getSeriesMedia } from '@stump/api'
 import type { Media, Series } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { queryClient, QueryOptions, useQuery } from '../client'
+import { PageQueryOptions, queryClient, QueryOptions, usePageQuery, useQuery } from '../client'
 import { QUERY_KEYS } from '../query_keys'
-import { useQueryParamStore } from '../stores'
 import { QueryCallbacks } from '.'
 
 const SERIES_KEYS = QUERY_KEYS.series
@@ -25,29 +24,27 @@ export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, Axi
 	return { series: data, ...ret }
 }
 
-export function useSeriesMedia(seriesId: string, page = 1) {
-	const { getQueryString, ...paramsStore } = useQueryParamStore((state) => state)
-
-	const { isLoading, isFetching, isRefetching, isPreviousData, data } = useQuery(
-		[SERIES_KEYS.getSeriesMedia, page, seriesId, paramsStore],
-		() =>
-			getSeriesMedia(seriesId, page, getQueryString()).then(({ data }) => ({
-				media: data.data,
-				pageData: data._page,
-			})),
+export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<Media>) {
+	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
+		[SERIES_KEYS.getSeriesMedia, seriesId],
+		async ({ page = 1 }) => {
+			const { data } = await getSeriesMedia(seriesId, page)
+			return data
+		},
 		{
-			// context: StumpQueryContext,
+			...options,
 			keepPreviousData: true,
 		},
 	)
 
-	const { media, pageData } = data ?? {}
+	const media = data?.data
+	const pageData = data?._page
 
 	return {
 		isLoading: isLoading || isFetching || isRefetching,
-		isPreviousData,
 		media,
 		pageData,
+		...restReturn,
 	}
 }
 
@@ -58,30 +55,6 @@ export function useRecentlyAddedSeries() {
 	// 	new URLSearchParams('page_size=50'),
 	// )
 }
-
-// export function useInfinite() {
-// 	const {
-// 		status,
-// 		data: pageData,
-// 		error,
-// 		isFetching,
-// 		isFetchingNextPage,
-// 		fetchNextPage,
-// 		hasNextPage,
-// 	} = useInfiniteQuery(
-// 		['getRecentlyAddedSeries'],
-// 		(ctx) => getRecentlyAddedSeries(ctx.pageParam, new URLSearchParams('page_size=50')),
-// 		{
-// 			getNextPageParam: (_lastGroup, groups) => groups.length,
-// 		},
-// 	);
-
-// 	const data = pageData ? pageData.pages.flatMap((res) => res.data.data) : [];
-
-// 	return {
-// 		data,
-// 	};
-// }
 
 export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {}) {
 	const {

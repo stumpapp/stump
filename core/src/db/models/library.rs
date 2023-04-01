@@ -169,9 +169,9 @@ impl Default for LibraryScanMode {
 
 #[derive(Deserialize, Serialize, Type, ToSchema)]
 pub struct LibrariesStats {
-	series_count: u32,
-	book_count: u32,
-	total_bytes: u32,
+	series_count: u64,
+	book_count: u64,
+	total_bytes: u64,
 }
 
 ///////////////////////////////////////////////

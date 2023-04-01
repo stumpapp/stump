@@ -1,4 +1,3 @@
-import { HStack } from '@chakra-ui/react'
 import { useLibraryStats } from '@stump/client'
 import { Statistic } from '@stump/components'
 import { useMemo } from 'react'
@@ -11,13 +10,13 @@ export default function LibrariesStats() {
 	const { libraryStats } = useLibraryStats()
 
 	const libraryUsage = useMemo(() => {
-		return formatBytesSeparate(libraryStats?.total_bytes)
+		return formatBytesSeparate(libraryStats?.total_bytes as bigint | undefined)
 	}, [libraryStats?.total_bytes])
 
 	if (!libraryStats || !libraryUsage) return null
 
 	return (
-		<HStack spacing={4}>
+		<div className="flex items-center gap-4">
 			<Statistic>
 				<Statistic.Label>Total Series</Statistic.Label>
 				<Statistic.CountUpNumber value={Number(libraryStats.series_count)} />
@@ -36,6 +35,6 @@ export default function LibrariesStats() {
 					decimal={true}
 				/>
 			</Statistic>
-		</HStack>
+		</div>
 	)
 }

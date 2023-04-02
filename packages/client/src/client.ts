@@ -1,4 +1,4 @@
-import { CursorQueryParams } from '@stump/api'
+import { CursorQueryParams, PagedQueryParams } from '@stump/api'
 import { Pageable } from '@stump/types'
 import {
 	MutationFunction,
@@ -74,13 +74,13 @@ type PageQueryParams = {
 	/** The page to fetch */
 	page?: number
 	/** The number of items per page */
-	pageSize?: number
+	page_size?: number
 	/** Filters to apply to the query. The name can be a bit misleading,
 	 *  since ordering and other things can be applied as well. */
 	filters?: Record<string, string>
 }
-export type PageQueryFunction<E, P extends PageQueryParams = PageQueryParams> = (
-	params: P,
+export type PageQueryFunction<E> = (
+	params: PagedQueryParams,
 ) => Pageable<Array<E>> | Promise<Pageable<Array<E>>>
 
 export type PageQueryOptions<
@@ -99,14 +99,14 @@ export function usePageQuery<Entity = unknown, Error = AxiosError>(
 	queryFn: PageQueryFunction<Entity>,
 	{
 		page = 1,
-		pageSize = 20,
+		page_size = 20,
 		filters,
 		...options
 	}: PageQueryOptions<Entity, Pageable<Entity[]>, Error, Pageable<Entity[]>> = {},
 ) {
 	return useQuery(
-		[...queryKey, page, pageSize, filters],
-		async () => queryFn({ filters, page, pageSize }),
+		[...queryKey, page, page_size, filters],
+		async () => queryFn({ page, page_size, params: new URLSearchParams(filters) }),
 		{
 			...options,
 		},

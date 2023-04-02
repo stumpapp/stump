@@ -16,7 +16,6 @@ export interface QueryParamStore
 	setPageSize: (pageSize?: number) => void
 	setOrderBy: (orderBy?: string) => void
 	setDirection: (direction?: Direction) => void
-
 	getQueryString: () => string
 }
 

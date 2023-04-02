@@ -4,6 +4,7 @@ import type { DirectoryListingFile } from '@stump/types'
 import { useEffect, useState } from 'react'
 
 import { useFileExplorerContext } from './context'
+import FileExplorerHeader from './FileExplorerHeader'
 
 interface FileExplorerProps {
 	files: DirectoryListingFile[]
@@ -14,11 +15,14 @@ interface FileExplorerProps {
 // TODO: this needs to have grid and list layout options
 export default function FileExplorer({ files }: FileExplorerProps) {
 	return (
-		<div className="grid grid-cols-4 items-start justify-center gap-6 sm:grid-cols-5 md:grid-cols-7 md:justify-start lg:grid-cols-9">
-			{files.map((file) => (
-				<ExplorerFile key={file.path} {...file} />
-			))}
-		</div>
+		<>
+			<FileExplorerHeader />
+			<div className="grid grid-cols-4 items-start justify-center gap-6 sm:grid-cols-5 md:grid-cols-7 md:justify-start lg:grid-cols-9">
+				{files.map((file) => (
+					<ExplorerFile key={file.path} {...file} />
+				))}
+			</div>
+		</>
 	)
 }
 

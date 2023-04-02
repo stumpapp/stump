@@ -8,29 +8,31 @@ import { useParams } from 'react-router-dom'
 
 import MediaList from '../../components/media/MediaList'
 import Pagination from '../../components/Pagination'
-import ReadMore from '../../components/ReadMore'
 import SceneContainer from '../../components/SceneContainer'
-import TagList from '../../components/tags/TagList'
 import { useGetPage } from '../../hooks/useGetPage'
 import useIsInView from '../../hooks/useIsInView'
-import DownloadSeriesButton from './DownloadSeriesButton'
+import { useSeriesOverviewContext } from './context'
 import MediaGrid from './MediaGrid'
-import SeriesLibraryLink from './SeriesLibraryLink'
-import UpNextInSeriesButton from './UpNextInSeriesButton'
+import SeriesOverviewContextProvider from './SeriesOverviewContextProvider'
+import SeriesOverviewTitleSection from './SeriesOverviewTitleSection'
 
-export default function SeriesOverviewScene() {
+function SeriesOverviewScene() {
 	const [containerRef, isInView] = useIsInView()
 
-	const { id } = useParams()
 	const { page } = useGetPage()
 
-	if (!id) {
-		throw new Error('Series id is required')
+	const { seriesId, page_size, filters } = useSeriesOverviewContext()
+	if (!seriesId) {
+		throw new Error('Series ID is required for this route.')
 	}
 
 	const { layoutMode } = useLayoutMode('SERIES')
-	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(id)
-	const { isLoading: isLoadingMedia, media, pageData } = useSeriesMediaQuery(id, { page })
+	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(seriesId)
+	const {
+		isLoading: isLoadingMedia,
+		media,
+		pageData,
+	} = useSeriesMediaQuery(seriesId, { filters, page, page_size })
 
 	useEffect(() => {
 		if (!isInView) {
@@ -56,7 +58,7 @@ export default function SeriesOverviewScene() {
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
-			<OverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
+			<SeriesOverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
 
 			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
@@ -77,33 +79,12 @@ export default function SeriesOverviewScene() {
 	)
 }
 
-interface OverviewTitleSectionProps {
-	isVisible: boolean
-	series: Series
-}
-
-function OverviewTitleSection({ isVisible, series }: OverviewTitleSectionProps) {
-	if (!isVisible) {
-		return null
-	}
+export default function SeriesOverviewSceneWrapper() {
+	const { id } = useParams()
 
 	return (
-		<div className="flex flex-1 items-start space-x-4 p-4">
-			<EntityCard imageUrl={getSeriesThumbnail(series.id)} size="lg" fullWidth={false} />
-
-			<div className="flex flex-1 flex-col gap-3">
-				<div>
-					<Heading size="sm">{series.name}</Heading>
-					<SeriesLibraryLink id={series.library_id} />
-				</div>
-				<div className="flex items-center gap-2">
-					<UpNextInSeriesButton seriesId={series.id} />
-					<DownloadSeriesButton seriesId={series.id} />
-				</div>
-
-				<ReadMore text={series.description} />
-				<TagList tags={series.tags} />
-			</div>
-		</div>
+		<SeriesOverviewContextProvider seriesId={id}>
+			<SeriesOverviewScene />
+		</SeriesOverviewContextProvider>
 	)
 }

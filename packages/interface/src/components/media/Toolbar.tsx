@@ -33,11 +33,7 @@ export default function Toolbar({ title, pages, visible, onPageChange }: Toolbar
 					>
 						<div className="flex w-full items-center justify-between">
 							<div className="flex items-center space-x-4">
-								<Link
-									className="flex items-center"
-									title="Go to media overview"
-									to={`/books/${id}`}
-								>
+								<Link className="flex items-center" title="Go to media overview" to={`/book/${id}`}>
 									<ArrowLeft size={'1.25rem'} />
 								</Link>
 

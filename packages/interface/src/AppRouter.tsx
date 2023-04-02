@@ -47,8 +47,8 @@ export function AppRouter() {
 
 					<Route path="series/:id" element={<SeriesOverviewScene />} />
 
-					<Route path="books/:id" element={<BookOverviewScene />} />
-					<Route path="books/:id/pages/:page" element={<ReadBook />} />
+					<Route path="book/:id" element={<BookOverviewScene />} />
+					<Route path="book/:id/pages/:page" element={<ReadBook />} />
 					<Route path="epub/:id" element={<ReadEpub />} />
 
 					<Route path="settings/*" element={<SettingsRouter />} />

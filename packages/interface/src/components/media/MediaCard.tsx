@@ -85,8 +85,8 @@ export default function MediaCard({
 
 	const href =
 		readingLink && media.current_page
-			? `/books/${media.id}/pages/${media.current_page ?? 1}`
-			: `/books/${media.id}`
+			? `/book/${media.id}/pages/${media.current_page ?? 1}`
+			: `/book/${media.id}`
 
 	const overrides = isCoverOnly
 		? {

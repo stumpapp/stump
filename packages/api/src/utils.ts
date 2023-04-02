@@ -1,4 +1,4 @@
-import { CursorQueryParams } from './types'
+import { CursorQueryParams, PagedQueryParams } from './types'
 
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
@@ -43,6 +43,17 @@ export const mergeCursorParams = ({
 	}
 	if (limit) {
 		searchParams.set('limit', limit.toString())
+	}
+	return searchParams
+}
+
+export const mergePageParams = ({ page, page_size, params }: PagedQueryParams): URLSearchParams => {
+	const searchParams = new URLSearchParams(params)
+	if (page) {
+		searchParams.set('page', page.toString())
+	}
+	if (page_size) {
+		searchParams.set('page_size', page_size.toString())
 	}
 	return searchParams
 }

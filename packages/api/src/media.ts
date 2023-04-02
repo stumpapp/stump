@@ -17,8 +17,6 @@ export function getMediaWithCursor({
 	params,
 }: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
 	const searchParams = mergeCursorParams({ afterId, limit, params })
-	// searchParams.set('series_id', 'a3610abf-cba3-44a9-b5a0-d3d43f82ad41')
-
 	return API.get(urlWithParams('/media', searchParams))
 }
 

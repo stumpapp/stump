@@ -1,5 +1,4 @@
-import { getMediaThumbnail } from '@stump/api'
-import { EntityCard, Heading } from '@stump/components'
+import { Heading } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import { CardGrid } from '../../components/Card'

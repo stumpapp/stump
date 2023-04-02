@@ -1,7 +1,7 @@
 import { getMedia } from '@stump/api'
 import { useDirectoryListing, useLibrary } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
-import { useEffect, useRef } from 'react'
+import { useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import toast from 'react-hot-toast'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -13,8 +13,6 @@ import FileExplorer from './FileExplorer'
 // until more of stump is compelted. That being said, if someone wants to run with this go for it!
 // most of what would be needed on the backend is in place.
 export default function LibraryExplorerScene() {
-	const mounted = useRef(false)
-
 	const navigate = useNavigate()
 	const { state } = useLocation()
 
@@ -24,26 +22,38 @@ export default function LibraryExplorerScene() {
 		throw new Error('Library id is required')
 	}
 
-	useEffect(() => {
-		if (!mounted.current) {
-			toast('This feature is planned. No functionality is implemented yet.')
-
-			mounted.current = true
-		}
-	}, [])
-
 	const { library, isLoading } = useLibrary(id, {
 		onError(err) {
 			console.error(err)
 		},
 	})
 
-	// TODO: make different hook for explorer, will need a separate endpoint to
-	// compare paths with DB media entries to pair them up (used for navigation and file icons)
-	const { entries, onSelect, path } = useDirectoryListing({
+	const handleGoForward = (callback: (path: string) => void) => {
+		if (state?.starting_path) {
+			callback(state.starting_path)
+			navigate('.', { replace: true, state: { starting_path: path } })
+		}
+
+		console.debug('No starting path found: ', state)
+	}
+
+	const handleGoBack = (currentPath: string | null) => {
+		navigate('.', { replace: true, state: { starting_path: currentPath } })
+	}
+
+	const { entries, onSelect, path, parent, goForward, goBack } = useDirectoryListing({
 		enabled: !!library?.path,
+		goBack: handleGoBack,
+		goForward: handleGoForward,
 		startingPath: state?.starting_path || library?.path,
 	})
+
+	const canGoForward = useMemo(
+		() => !!state?.starting_path && state.starting_path !== path,
+		[state?.starting_path, path],
+	)
+
+	// console.log('canGoForward', canGoForward, { path, state })
 
 	const handleSelect = async (entry: DirectoryListingFile) => {
 		if (entry.is_directory) {
@@ -79,7 +89,16 @@ export default function LibraryExplorerScene() {
 	}
 
 	return (
-		<LibraryExplorerContext.Provider value={{ onSelect: handleSelect }}>
+		<LibraryExplorerContext.Provider
+			value={{
+				canGoBack: !!parent,
+				canGoForward,
+				files: entries,
+				goBack,
+				goForward,
+				onSelect: handleSelect,
+			}}
+		>
 			<Helmet>
 				<title>Stump | {library.name}</title>
 			</Helmet>

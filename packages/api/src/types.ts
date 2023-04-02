@@ -4,7 +4,8 @@ export type ApiResult<T> = import('axios').AxiosResponse<T, import('axios').Axio
 export type PageableApiResult<T> = ApiResult<Pageable<T>>
 
 export type PagedQueryParams = {
-	page: number
+	page?: number
+	page_size?: number
 	params?: URLSearchParams
 }
 

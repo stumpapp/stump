@@ -1,7 +1,7 @@
 import type { Media, Series } from '@stump/types'
 
-import { API, getMedia } from '.'
-import { ApiResult, PageableApiResult } from './types'
+import { API, getMedia, mergePageParams, urlWithParams } from '.'
+import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 	return API.get(`/series/${id}`)
@@ -9,14 +9,10 @@ export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 
 export function getSeriesMedia(
 	id: string,
-	page: number,
-	params?: string,
+	{ page, page_size, params }: PagedQueryParams,
 ): Promise<PageableApiResult<Media[]>> {
-	if (params) {
-		return API.get(`/series/${id}/media?page=${page}&${params}`)
-	}
-
-	return API.get(`/series/${id}/media?page=${page}`)
+	const searchParams = mergePageParams({ page, page_size, params })
+	return API.get(urlWithParams(`/series/${id}/media`, searchParams))
 }
 
 export function getRecentlyAddedSeries(

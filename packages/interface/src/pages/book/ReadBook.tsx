@@ -28,7 +28,7 @@ export default function ReadBook() {
 
 	function handleChangePage(newPage: number) {
 		updateReadProgress(newPage)
-		navigate(`/books/${id}/pages/${newPage}`)
+		navigate(`/book/${id}/pages/${newPage}`)
 	}
 
 	if (fetchingBook) {

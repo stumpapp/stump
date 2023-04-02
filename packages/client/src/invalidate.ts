@@ -21,38 +21,58 @@ const { library, series, media, job } = QUERY_KEYS
 // TODO: this is still rather verbose, but it's a start
 export const core_event_triggers = {
 	CreateEntityFailed: {
-		keys: [job.get],
+		keys: [job.getJobs],
 	},
 	CreatedMedia: {
-		keys: [library.get_by_id, library.stats, series.get, media.recently_added],
+		keys: [
+			library.getLibraryById,
+			library.getLibrariesStats,
+			series.getSeriesById,
+			media.getRecentlyAddedMedia,
+		],
 	},
 	CreatedMediaBatch: {
-		keys: [library.get_by_id, library.stats, series.get, media.recently_added],
+		keys: [
+			library.getLibraryById,
+			library.getLibrariesStats,
+			series.getSeriesById,
+			media.getRecentlyAddedMedia,
+		],
 	},
 	CreatedSeries: {
-		keys: [library.get_by_id, library.stats, series.get, media.recently_added],
+		keys: [
+			library.getLibraryById,
+			library.getLibrariesStats,
+			series.getSeriesById,
+			media.getRecentlyAddedMedia,
+		],
 	},
 	CreatedSeriesBatch: {
-		keys: [library.get_by_id, library.stats, series.get, media.recently_added],
+		keys: [
+			library.getLibraryById,
+			library.getLibrariesStats,
+			series.getSeriesById,
+			media.getRecentlyAddedMedia,
+		],
 	},
 	JobComplete: {
 		keys: [
-			library.get_by_id,
-			library.stats,
-			job.get,
-			series.get,
-			series.recently_added,
-			media.recently_added,
+			library.getLibraryById,
+			library.getLibrariesStats,
+			job.getJobs,
+			series.getSeriesById,
+			series.getRecentlyAddedSeries,
+			media.getRecentlyAddedMedia,
 		],
 	},
 	JobFailed: {
-		keys: [job.get],
+		keys: [job.getJobs],
 	},
 	JobProgress: {
-		keys: [job.get],
+		keys: [job.getJobs],
 	},
 	JobStarted: {
-		keys: [job.get],
+		keys: [job.getJobs],
 	},
 } satisfies Record<CoreEventTrigger, InvalidateFnArgs>
 

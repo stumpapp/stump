@@ -6,7 +6,7 @@ import SeriesLibraryLink from '../series/SeriesLibraryLink'
 
 type Props = {
 	libraryId?: string
-	series?: Series
+	series?: Series | null
 	seriesId: string
 }
 

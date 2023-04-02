@@ -27,8 +27,8 @@ export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, Axi
 export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<Media>) {
 	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
 		[SERIES_KEYS.getSeriesMedia, seriesId],
-		async ({ page = 1 }) => {
-			const { data } = await getSeriesMedia(seriesId, page)
+		async ({ page = 1, ...rest }) => {
+			const { data } = await getSeriesMedia(seriesId, { page, ...rest })
 			return data
 		},
 		{

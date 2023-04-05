@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
 import LocaleProvider from './i18n/LocaleProvider'
+import BookRouter from './scenes/book/BookRouter'
 import LibraryRouter from './scenes/library/LibraryRouter'
 import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter'
 import SettingsRouter from './scenes/settings/SettingsRouter'
@@ -19,9 +20,6 @@ export const lazily = (loader: () => unknown) => React.lazy(() => loader() as La
 
 const HomeScene = lazily(() => import('./scenes/home/HomeScene'))
 const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewScene'))
-const BookOverviewScene = lazily(() => import('./scenes/book/BookOverviewScene'))
-const ReadBook = lazily(() => import('./pages/book/ReadBook'))
-const ReadEpub = lazily(() => import('./pages/book/ReadEpub'))
 const FourOhFour = lazily(() => import('./scenes/error/FourOhFour'))
 const ServerConnectionErrorScene = lazily(() => import('./scenes/error/ServerConnectionErrorScene'))
 const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene'))
@@ -46,11 +44,7 @@ export function AppRouter() {
 					<Route path="library/*" element={<LibraryRouter />} />
 
 					<Route path="series/:id" element={<SeriesOverviewScene />} />
-
-					<Route path="book/:id" element={<BookOverviewScene />} />
-					<Route path="book/:id/pages/:page" element={<ReadBook />} />
-					<Route path="epub/:id" element={<ReadEpub />} />
-
+					<Route path="book/*" element={<BookRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 

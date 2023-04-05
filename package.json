@@ -48,7 +48,7 @@
     "typescript": "^5.0.2"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md}": [
+    "*.{js,jsx,ts,tsx,md,json}": [
       "prettier --write"
     ],
     ".rs": [

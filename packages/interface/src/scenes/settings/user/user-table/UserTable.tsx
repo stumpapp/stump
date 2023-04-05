@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useUsersQuery } from '@stump/client'
 import { CheckBox, Text } from '@stump/components'
 import { User } from '@stump/types'

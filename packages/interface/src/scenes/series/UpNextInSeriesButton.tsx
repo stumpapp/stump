@@ -1,6 +1,8 @@
 import { useUpNextInSeries } from '@stump/client'
 import { ButtonOrLink } from '@stump/components'
 
+import paths from '../../paths'
+
 type Props = {
 	seriesId: string
 	title?: string
@@ -18,7 +20,7 @@ export default function UpNextInSeriesButton({ seriesId, title, ...props }: Prop
 		<ButtonOrLink
 			variant="primary"
 			disabled={!isLoading && !media}
-			href={`/books/${media?.id}/pages/${media?.current_page || 1}`}
+			href={paths.bookReader(media?.id || '', { page: media?.current_page || 1 })}
 			title={`Continue reading ${media?.name || 'from where you left off'}`}
 			{...props}
 		>

@@ -10,7 +10,10 @@ import {
 	ScanLine,
 	Trash,
 } from 'lucide-react'
+import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
+
+import DeleteLibraryConfirmation from '../library/DeleteLibraryConfirmation'
 
 interface Props {
 	library: Library
@@ -18,8 +21,9 @@ interface Props {
 
 export default function LibraryOptionsMenu({ library }: Props) {
 	const user = useUserStore((store) => store.user)
-
+	const [isDeleting, setIsDeleting] = useState(false)
 	const { scanAsync } = useScanLibrary()
+
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	function handleScan(mode: LibraryScanMode) {
@@ -39,54 +43,61 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const iconStyle = 'mr-2 h-4 w-4'
 
 	return (
-		<DropdownMenu
-			trigger={
-				<IconButton variant="ghost" rounded="full" size="xs">
-					<MoreVertical className="h-4 w-4" />
-				</IconButton>
-			}
-			groups={[
-				{
-					items: [
-						{
-							label: 'Scan Library',
-							leftIcon: <FileScan className={iconStyle} />,
-							subItems: [
-								{
-									label: 'Parallel Scan',
-									leftIcon: <ScanFace className={iconStyle} />,
-									onClick: () => handleScan('BATCHED'),
-								},
-								{
-									label: 'In-Order Scan',
-									leftIcon: <ScanLine className={iconStyle} />,
-									onClick: () => handleScan('SYNC'),
-								},
-							],
-						},
-						{
-							href: `/library/${library.id}/explore`,
-							label: 'File Explorer',
-							leftIcon: <FolderSearch2 className={iconStyle} />,
-						},
-					],
-				},
-				{
-					items: [
-						{
-							href: `/library/${library.id}/edit`,
-							label: 'Edit Library',
-							leftIcon: <Edit className={iconStyle} />,
-						},
-						{
-							label: 'Delete Library',
-							leftIcon: <Trash className={iconStyle} />,
-							onClick: () => alert('TODO'),
-						},
-					],
-				},
-			]}
-			align={isMobile ? 'end' : 'start'}
-		/>
+		<>
+			<DeleteLibraryConfirmation
+				isOpen={isDeleting}
+				onClose={() => setIsDeleting(false)}
+				libraryId={library.id}
+			/>
+			<DropdownMenu
+				trigger={
+					<IconButton variant="ghost" rounded="full" size="xs">
+						<MoreVertical className="h-4 w-4" />
+					</IconButton>
+				}
+				groups={[
+					{
+						items: [
+							{
+								label: 'Scan Library',
+								leftIcon: <FileScan className={iconStyle} />,
+								subItems: [
+									{
+										label: 'Parallel Scan',
+										leftIcon: <ScanFace className={iconStyle} />,
+										onClick: () => handleScan('BATCHED'),
+									},
+									{
+										label: 'In-Order Scan',
+										leftIcon: <ScanLine className={iconStyle} />,
+										onClick: () => handleScan('SYNC'),
+									},
+								],
+							},
+							{
+								href: `/library/${library.id}/explore`,
+								label: 'File Explorer',
+								leftIcon: <FolderSearch2 className={iconStyle} />,
+							},
+						],
+					},
+					{
+						items: [
+							{
+								href: `/library/${library.id}/edit`,
+								label: 'Edit Library',
+								leftIcon: <Edit className={iconStyle} />,
+							},
+							{
+								label: 'Delete Library',
+								leftIcon: <Trash className={iconStyle} />,
+								onClick: () => setIsDeleting(true),
+							},
+						],
+					},
+				]}
+				align={isMobile ? 'end' : 'start'}
+			/>
+		</>
 	)
 }

@@ -35,7 +35,7 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-gray-300 dark:hover:border-gray-600 md:text-sm',
 						!isDisabled && 'dark:text-gray-300 dark:hover:text-gray-100',
 						isDisabled && 'pointer-events-none cursor-not-allowed text-gray-300 dark:text-gray-500',
-						{ 'pr-1 pl-0': kind === 'previous' },
+						{ 'pl-0 pr-1': kind === 'previous' },
 						{ 'pl-1 pr-0': kind === 'next' },
 					)}
 				>
@@ -118,51 +118,52 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 	return (
 		<nav className="w-full">
 			<div
-				className={cx(
-					'flex items-start justify-between gap-2 border-t border-gray-200 dark:border-gray-700',
-					{ 'mt-7': position === 'bottom' },
-				)}
+				className={cx('w-full border-t border-gray-200 dark:border-gray-700', {
+					'mt-7': position === 'bottom',
+				})}
 			>
-				<PaginationArrow
-					kind="previous"
-					href={`${location.pathname}?page=${currentPage - 1}`}
-					isDisabled={currentPage === 1}
-				/>
+				<div className="-mt-px flex w-full items-start justify-between gap-2">
+					<PaginationArrow
+						kind="previous"
+						href={`${location.pathname}?page=${currentPage - 1}`}
+						isDisabled={currentPage === 1}
+					/>
 
-				<div className="flex items-center">
-					{pageRange.map((page, i) => {
-						if (typeof page === 'number') {
+					<div className="flex items-center">
+						{pageRange.map((page, i) => {
+							if (typeof page === 'number') {
+								return (
+									<PaginationLink
+										key={`${i}, pagination-${page}`}
+										href={`${location.pathname}?page=${page}`}
+										isActive={page === currentPage}
+										value={page}
+									/>
+								)
+							}
+
 							return (
-								<PaginationLink
-									key={`${i}, pagination-${page}`}
-									href={`${location.pathname}?page=${page}`}
-									isActive={page === currentPage}
-									value={page}
+								<PagePopoverForm
+									pos={i}
+									key={`${i}-pagination-ellipsis`}
+									totalPages={pages}
+									onPageChange={handleEllipsisNavigate}
+									trigger={
+										<button className="inline-flex cursor-pointer items-center px-4 pt-4 text-sm font-medium focus:outline-none active:outline-none">
+											<MoreHorizontal />
+										</button>
+									}
 								/>
 							)
-						}
+						})}
+					</div>
 
-						return (
-							<PagePopoverForm
-								pos={i}
-								key={`${i}-pagination-ellipsis`}
-								totalPages={pages}
-								onPageChange={handleEllipsisNavigate}
-								trigger={
-									<button className="inline-flex cursor-pointer items-center px-4 pt-4 text-sm font-medium focus:outline-none active:outline-none">
-										<MoreHorizontal />
-									</button>
-								}
-							/>
-						)
-					})}
+					<PaginationArrow
+						kind="next"
+						href={`${location.pathname}?page=${currentPage + 1}`}
+						isDisabled={currentPage >= pages}
+					/>
 				</div>
-
-				<PaginationArrow
-					kind="next"
-					href={`${location.pathname}?page=${currentPage + 1}`}
-					isDisabled={currentPage >= pages}
-				/>
 			</div>
 		</nav>
 	)

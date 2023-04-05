@@ -4,6 +4,7 @@ import { Media } from '@stump/types'
 import { useAppContext } from '../../context'
 import { formatBytes } from '../../utils/format'
 
+// FIXME: awful on mobile...
 type Props = {
 	media: Media
 }

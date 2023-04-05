@@ -57,7 +57,7 @@ export function editLibrary(payload: UpdateLibraryArgs): Promise<ApiResult<Libra
 	return API.put(`/libraries/${payload.id}`, payload)
 }
 
-const libraryApi = {
+export const libraryApi = {
 	createLibrary,
 	deleteLibrary,
 	editLibrary,

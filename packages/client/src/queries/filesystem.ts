@@ -1,4 +1,4 @@
-import { listDirectory } from '@stump/api'
+import { filesystemApi, filesystemQueryKeys } from '@stump/api'
 import type { DirectoryListing } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo, useState } from 'react'
@@ -24,8 +24,8 @@ export function useDirectoryListing({
 	const [directoryListing, setDirectoryListing] = useState<DirectoryListing>()
 
 	const { isLoading, error } = useQuery(
-		['listDirectory', path, page],
-		() => listDirectory({ page, path }),
+		[filesystemQueryKeys.listDirectory, path, page],
+		() => filesystemApi.listDirectory({ page, path }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,

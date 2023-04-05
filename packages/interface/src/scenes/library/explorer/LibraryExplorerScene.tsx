@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet'
 import toast from 'react-hot-toast'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
+import paths from '../../../paths'
 import { LibraryExplorerContext } from './context'
 import FileExplorer from './FileExplorer'
 
@@ -66,7 +67,7 @@ export default function LibraryExplorerScene() {
 				const entity = response.data.data?.at(0)
 
 				if (entity) {
-					navigate(`/books/${entity.id}`, {
+					navigate(paths.bookOverview(entity.id), {
 						state: {
 							starting_path: path,
 						},

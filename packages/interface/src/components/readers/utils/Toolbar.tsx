@@ -1,12 +1,13 @@
-import { Heading, useColorMode } from '@chakra-ui/react'
+import { Heading } from '@chakra-ui/react'
 import { getMediaPage } from '@stump/api'
+import { cx } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
-import clsx from 'clsx'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'phosphor-react'
 import { useCallback, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+import paths from '../../../paths'
 import ThemeToggle from '../../sidebar/ThemeToggle'
 
 interface ToolbarProps {
@@ -25,10 +26,8 @@ export default function Toolbar({
 	onPageChange,
 }: ToolbarProps) {
 	const { id } = useParams()
-
 	if (!id) {
-		// should never happen
-		throw new Error('No ID provided')
+		throw new Error('This reader must be rendered within a book route with an ID.')
 	}
 
 	const parentRef = useRef<HTMLDivElement>(null)
@@ -47,31 +46,24 @@ export default function Toolbar({
 	})
 
 	// FIXME: this is super scufffed, something is throwing off the scrollToIndex and the
-	// workaround is atrocious...
-	useEffect(
-		() => {
-			if (visible) {
-				// FIXME: why no work
-				// columnVirtualizer.scrollToIndex(currentPage, { smoothScroll: true });
-				setTimeout(() => {
-					const totalSize = columnVirtualizer.getTotalSize()
-					const offset = (totalSize / pages) * currentPage
+	// workarounds are atrocious...
+	const totalSize = columnVirtualizer.getTotalSize()
+	useEffect(() => {
+		if (visible) {
+			const offset = (totalSize / pages) * currentPage
 
-					const targetID = `${id}-page-${currentPage}`
-					const target = document.getElementById(targetID)
+			const targetID = `${id}-page-${currentPage}`
+			const target = document.getElementById(targetID)
 
-					if (target) {
-						target.scrollIntoView({ behavior: 'smooth', inline: 'center' })
-					} else {
-						// FIXME: this actually doesn't work lol
-						parentRef.current?.scrollTo({ behavior: 'smooth', left: offset })
-					}
-				}, 50)
+			// NOTE: workaround 1
+			if (target) {
+				target.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+			} else {
+				// NOTE: workaround 2 (backup), doesn't even work...
+				parentRef.current?.scrollTo({ behavior: 'smooth', left: offset })
 			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[visible, currentPage],
-	)
+		}
+	}, [visible, currentPage, id, pages, totalSize])
 
 	const variants = (position: 'top' | 'bottom') => ({
 		hidden: {
@@ -98,11 +90,15 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed top-0 z-[100] w-full bg-gray-200 bg-opacity-90 p-4 dark:bg-gray-700 dark:text-white"
+				className="fixed top-0 z-[100] w-full bg-gray-100/95 p-4 dark:bg-gray-1000/95 dark:text-white"
 			>
 				<div className="flex w-full items-center justify-between">
 					<div className="flex items-center space-x-4">
-						<Link className="flex items-center" title="Go to media overview" to={`/books/${id}`}>
+						<Link
+							className="flex items-center"
+							title="Go to media overview"
+							to={paths.bookOverview(id)}
+						>
 							<ArrowLeft size={'1.25rem'} />
 						</Link>
 
@@ -133,7 +129,7 @@ export default function Toolbar({
 							id={`${id}-page-${idx + 1}`}
 							key={virtualItem.key}
 							src={getMediaPage(id, idx + 1)}
-							className={clsx(
+							className={cx(
 								currentPage === idx + 1 ? '-translate-y-1 border-brand' : 'border-transparent',
 								'h-32 w-auto cursor-pointer rounded-md border-2 border-solid shadow-xl transition duration-300 hover:-translate-y-2 hover:border-brand',
 							)}

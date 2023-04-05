@@ -1,6 +1,6 @@
 import type { Media, Series } from '@stump/types'
 
-import { API, getMedia, mergePageParams, urlWithParams } from '.'
+import { API, mediaApi, mergePageParams, urlWithParams } from '.'
 import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {
@@ -39,7 +39,7 @@ export function getNextMediaInSeries(
 	media_id: string,
 	limit = 25,
 ): Promise<PageableApiResult<Media[]>> {
-	return getMedia({
+	return mediaApi.getMedia({
 		cursor: media_id,
 		limit: limit.toString(),
 		series_id,

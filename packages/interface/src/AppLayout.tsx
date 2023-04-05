@@ -21,9 +21,7 @@ export function AppLayout() {
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
 		// TODO: replace with single regex, I am lazy rn
-		return (
-			location.pathname.match(/\/books\/.+\/pages\/.+/) || location.pathname.match(/\/epub\/.+/)
-		)
+		return location.pathname.match(/\/book\/.+\/page\/.+/) || location.pathname.match(/\/epub\/.+/)
 	}, [location])
 
 	useCoreEventHandler()

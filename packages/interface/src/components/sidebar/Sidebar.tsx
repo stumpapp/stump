@@ -85,11 +85,11 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 								<div
 									key={item.id}
 									className={cn(
-										'w-full rounded-md text-gray-600 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100',
+										'w-full rounded-md text-gray-800 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100',
 										{ 'bg-gray-50 dark:bg-gray-750': active },
 									)}
 								>
-									<div className="flex max-h-[40px] items-center py-2 px-4">
+									<div className="flex max-h-[40px] items-center px-4 py-2">
 										<Link
 											to={item.href}
 											className="w-full flex-1 pl-1 text-sm"
@@ -225,7 +225,7 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 export default function Sidebar() {
 	return (
 		<aside className="hidden min-h-full md:inline-block">
-			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 py-4 px-2 dark:border-gray-900 dark:bg-gray-1000">
+			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 px-2 py-4 dark:border-gray-900 dark:bg-gray-1000">
 				<SidebarContent />
 			</div>
 		</aside>

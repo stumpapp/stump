@@ -1,7 +1,4 @@
-import { getSeriesThumbnail } from '@stump/api'
 import { useLayoutMode, useSeriesByIdQuery, useSeriesMediaQuery } from '@stump/client'
-import { EntityCard, Heading } from '@stump/components'
-import type { Series } from '@stump/types'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router-dom'
@@ -64,13 +61,11 @@ function SeriesOverviewScene() {
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 			<div className="flex w-full flex-col space-y-6 p-4">
 				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
-
 				{layoutMode === 'GRID' ? (
 					<MediaGrid isLoading={isLoadingMedia} media={media} />
 				) : (
 					<MediaList isLoading={isLoadingMedia} media={media} />
 				)}
-
 				{hasStuff && (
 					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
 				)}

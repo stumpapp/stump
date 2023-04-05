@@ -50,20 +50,22 @@ export function getMediaThumbnail(id: string): string {
 	return `${API.getUri()}/media/${id}/thumbnail`
 }
 
+// TODO: misleading, sounds like paged API response but is actualy a page image
 export function getMediaPage(id: string, page: number): string {
 	return `${API.getUri()}/media/${id}/page/${page}`
 }
 
-export function updateMediaProgress(id: string, page: number): Promise<ReadProgress> {
+export function updateMediaProgress(id: string, page: number): Promise<ApiResult<ReadProgress>> {
 	return API.put(`/media/${id}/progress/${page}`)
 }
 
-const mediaApi = {
+export const mediaApi = {
 	getInProgressMedia,
 	getMedia,
 	getMediaById,
 	getMediaPage,
 	getMediaThumbnail,
+	getMediaWithCursor,
 	getPaginatedMedia,
 	getRecentlyAddedMedia,
 	updateMediaProgress,
@@ -75,6 +77,7 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getMediaById: 'media.getById',
 	getMediaPage: 'media.getPage',
 	getMediaThumbnail: 'media.getThumbnail',
+	getMediaWithCursor: 'media.getWithCursor',
 	getPaginatedMedia: 'media.getPaginated',
 	getRecentlyAddedMedia: 'media.getRecentlyAdded',
 	updateMediaProgress: 'media.updateProgress',

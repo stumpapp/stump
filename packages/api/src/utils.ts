@@ -1,3 +1,5 @@
+import axios, { AxiosError } from 'axios'
+
 import { CursorQueryParams, PagedQueryParams } from './types'
 
 /** Formats a string with UrlSearchParams */
@@ -56,4 +58,8 @@ export const mergePageParams = ({ page, page_size, params }: PagedQueryParams): 
 		searchParams.set('page_size', page_size.toString())
 	}
 	return searchParams
+}
+
+export const isAxiosError = (error: unknown): error is AxiosError => {
+	return axios.isAxiosError(error)
 }

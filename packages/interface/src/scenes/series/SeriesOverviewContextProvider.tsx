@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { createFilterStore } from '@stump/client'
+import { useMemo, useState } from 'react'
 
 import { SeriesOverviewContext } from './context'
 
@@ -13,14 +13,23 @@ type Props = {
 // and use URL params but honestly I am not sure it is worth anymore. I think it would be much simplier
 // to make a couple of stores...
 export default function SeriesOverviewContextProvider({ children, seriesId }: Props) {
-	const [searchParams, setSearchParams] = useSearchParams()
+	const [store] = useState(() => createFilterStore('series-overview-filters'))
+	const filterValues = store(({ direction, order_by, page_size, show_unsupported }) => ({
+		direction,
+		order_by,
+		page_size,
+		show_unsupported,
+	}))
 
 	const filters = useMemo(() => {
-		return Object.fromEntries(searchParams)
-	}, [searchParams])
+		// only return filters that have a value, ensure result is a string
+		return Object.fromEntries(
+			Object.entries(filterValues).filter(([_, value]) => value !== undefined),
+		) as Record<string, string>
+	}, [filterValues])
 
 	return (
-		<SeriesOverviewContext.Provider value={{ filters, searchParams, seriesId }}>
+		<SeriesOverviewContext.Provider value={{ filters, seriesId }}>
 			{children}
 		</SeriesOverviewContext.Provider>
 	)

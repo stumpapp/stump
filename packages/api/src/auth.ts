@@ -21,7 +21,7 @@ export function logout(): Promise<ApiResult<never>> {
 	return API.post('/auth/logout')
 }
 
-const authApi = {
+export const authApi = {
 	login,
 	logout,
 	me,

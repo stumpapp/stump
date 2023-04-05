@@ -21,7 +21,7 @@ export function getEpubResource(payload: {
 	return API.get(`/epub/${payload.id}/${payload.root ?? 'META-INF'}/${payload.resourceId}`)
 }
 
-const epubApi = {
+export const epubApi = {
 	getEpubBaseUrl,
 	getEpubById,
 	getEpubResource,

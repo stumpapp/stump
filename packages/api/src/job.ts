@@ -12,7 +12,7 @@ export function cancelJob(id: string): Promise<ApiResult<unknown>> {
 	return API.delete(`/jobs/${id}/cancel`)
 }
 
-const jobApi = {
+export const jobApi = {
 	cancelJob,
 	getJobs,
 }

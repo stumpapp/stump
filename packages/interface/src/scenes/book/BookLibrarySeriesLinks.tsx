@@ -22,15 +22,17 @@ export default function BookLibrarySeriesLinks({ libraryId, seriesId, series }: 
 		}
 
 		return (
-			<div>
+			<>
 				<span className="mx-2 text-gray-500 dark:text-gray-450">/</span>
-				<Link href={`/series/${resolvedSeries.id}`}>{resolvedSeries.name}</Link>
-			</div>
+				<Link href={`/series/${resolvedSeries.id}`} className="line-clamp-1">
+					{resolvedSeries.name}
+				</Link>
+			</>
 		)
 	}
 
 	return (
-		<div className="flex items-center">
+		<div className="flex items-center text-sm md:text-base">
 			{resolvedLibraryId && <SeriesLibraryLink id={resolvedLibraryId} />}
 			{renderSeriesLink()}
 		</div>

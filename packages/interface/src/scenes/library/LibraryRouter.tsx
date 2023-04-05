@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 
 import { LazyComponent } from '../../AppRouter'
 import LibraryAdminLayout from './admins/LibraryAdminLayout'
@@ -20,6 +20,7 @@ export default function LibraryRouter() {
 				<Route path="create" element={<CreateLibraryScene />} />
 				<Route path=":id/edit" element={<EditLibraryScene />} />
 			</Route>
+			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>
 	)
 }

@@ -1,26 +1,24 @@
 import { getMediaPage } from '@stump/api'
-import { useMediaByIdQuery, useMediaMutation } from '@stump/client'
+import { useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import ImageBasedReader, {
 	AnimatedImageBasedReader,
 } from '../../components/readers/ImageBasedReader'
+import paths from '../../paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '../../utils/patterns'
 
-export default function ReadBook() {
+export default function BookReaderScene() {
+	const [search] = useSearchParams()
 	const navigate = useNavigate()
 
 	const { id, page } = useParams()
-
-	const [search] = useSearchParams()
-
 	if (!id) {
-		throw new Error('Media id is required')
+		throw new Error('You must provide a book ID for the reader.')
 	}
 
 	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
-
-	const { updateReadProgress } = useMediaMutation(id, {
+	const { updateReadProgress } = useUpdateMediaProgress(id, {
 		onError(err) {
 			console.error(err)
 		},
@@ -28,23 +26,21 @@ export default function ReadBook() {
 
 	function handleChangePage(newPage: number) {
 		updateReadProgress(newPage)
-		navigate(`/book/${id}/pages/${newPage}`)
+		navigate(paths.bookReader(id!, { page: newPage }))
 	}
 
 	if (fetchingBook) {
 		return <div>Loading...</div>
-	}
-
-	if (!media) {
-		throw new Error('Media not found')
+	} else if (!media) {
+		return <Navigate to={paths.notFound()} />
 	}
 
 	if (media.extension.match(EBOOK_EXTENSION)) {
-		return <Navigate to={`/epub/${id}?stream=false`} />
+		return <Navigate to={paths.bookReader(id, { isEpub: true })} />
 	} else if (!page || parseInt(page, 10) <= 0) {
-		return <Navigate to={`/books/${id}/pages/1`} />
+		return <Navigate to={paths.bookReader(id, { page: 1 })} />
 	} else if (parseInt(page, 10) > media.pages) {
-		return <Navigate to={`/books/${id}/pages/${media.pages}`} />
+		return <Navigate to={paths.bookReader(id, { page: media.pages })} />
 	}
 
 	if (media.extension.match(ARCHIVE_EXTENSION)) {

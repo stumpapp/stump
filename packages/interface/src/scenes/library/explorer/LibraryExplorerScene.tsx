@@ -1,4 +1,4 @@
-import { getMedia } from '@stump/api'
+import { mediaApi } from '@stump/api'
 import { useDirectoryListing, useLibrary } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
 import { useMemo } from 'react'
@@ -61,7 +61,7 @@ export default function LibraryExplorerScene() {
 			onSelect(entry.path)
 		} else {
 			try {
-				const response = await getMedia({
+				const response = await mediaApi.getMedia({
 					path: entry.path,
 				})
 				const entity = response.data.data?.at(0)

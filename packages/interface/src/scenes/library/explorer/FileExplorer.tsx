@@ -1,4 +1,4 @@
-import { getMedia, getMediaThumbnail } from '@stump/api'
+import { getMediaThumbnail, mediaApi } from '@stump/api'
 import { Button, cx, Text } from '@stump/components'
 import type { DirectoryListingFile } from '@stump/types'
 import { useEffect, useState } from 'react'
@@ -52,7 +52,7 @@ function ExplorerFile(file: DirectoryListingFile) {
 	useEffect(() => {
 		async function tryGetMedia() {
 			try {
-				const response = await getMedia({
+				const response = await mediaApi.getMedia({
 					path,
 				})
 				const entity = response.data.data?.at(0)

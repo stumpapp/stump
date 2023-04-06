@@ -16,6 +16,14 @@ export default function UpNextInSeriesButton({ seriesId, title, ...props }: Prop
 		return null
 	}
 
+	const getContent = () => {
+		if (media?.current_page) {
+			return 'Continue Reading'
+		} else {
+			return 'Start Reading'
+		}
+	}
+
 	return (
 		<ButtonOrLink
 			variant="primary"
@@ -24,7 +32,7 @@ export default function UpNextInSeriesButton({ seriesId, title, ...props }: Prop
 			title={`Continue reading ${media?.name || 'from where you left off'}`}
 			{...props}
 		>
-			{title || 'Continue Reading'}
+			{title || getContent()}
 		</ButtonOrLink>
 	)
 }

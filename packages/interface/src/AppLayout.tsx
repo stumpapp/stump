@@ -60,7 +60,7 @@ export function AppLayout() {
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
 			<Suspense fallback={<RouteLoadingIndicator />}>
-				<TopBar />
+				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
 					<main className="h-full w-full bg-white dark:bg-gray-975">

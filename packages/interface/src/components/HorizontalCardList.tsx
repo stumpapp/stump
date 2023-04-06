@@ -4,9 +4,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 import { useMediaMatch } from 'rooks'
 
-// fixed cards: w-[10rem] sm:w-[10.666rem] md:w-[12rem] h-[21.333rem] sm:h-[22.666rem] md:h-[25.333rem]
-// container: min-h-[26rem]
-
 type Props = {
 	cards: JSX.Element[]
 	title?: string
@@ -17,13 +14,26 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 	const parentRef = useRef<HTMLDivElement>(null)
 	const visibleRef = useRef([0, 0])
 
-	const isMobile = useMediaMatch('(max-width: 768px)')
+	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
+
+	// NOTE: "When this function's memoization changes, the entire list is recalculated"
+	// Sure doesn't seem like it! >:( I had to create an effect that calls measure() when the
+	// memoization changes. This feels like a bug TBH.
+	const estimateSize = useCallback(() => {
+		if (!isAtLeastSmall) {
+			return 170
+		} else if (!isAtLeastMedium) {
+			return 185
+		} else {
+			return 205
+		}
+	}, [isAtLeastSmall, isAtLeastMedium])
 
 	const columnVirtualizer = useVirtualizer({
 		count: cards.length,
 		enableSmoothScroll: true,
-		estimateSize: () => 160,
+		estimateSize,
 		getScrollElement: () => parentRef.current,
 		horizontal: true,
 		overscan: 15,
@@ -41,6 +51,14 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 	const canSkipBackward = (lowerBound ?? 0) > 0
 	const canSkipForward = !!cards.length && (upperBound || 0) <= cards.length
 
+	useEffect(
+		() => {
+			columnVirtualizer.measure()
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[isAtLeastMedium, isAtLeastSmall],
+	)
+
 	useEffect(() => {
 		const [lastItem] = [...virtualItems].reverse()
 		if (!lastItem) {
@@ -57,47 +75,17 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 		}
 	}, [virtualItems, fetchNext, upperBound])
 
-	// based on the number of cards, and how we calculate the offset, we need to know
-	// how much total offset is added for each index.
-	const getTotalOffsetAmount = () => {
-		if (isMobile) {
-			// 0.75rem per card
-			return cards.length * 0.75
-		} else if (isAtLeastMedium) {
-			// 2.5rem per card
-			return cards.length * 2.5
-		} else {
-			// 2rem per card
-			return cards.length * 2
-		}
-	}
-
 	const getItemOffset = (index: number) => {
-		if (isMobile) {
-			return index * 0.75
-		} else if (isAtLeastMedium) {
-			return index * 2.5
-		} else {
-			return index * 2
-		}
+		return index * estimateSize()
 	}
 
 	const handleSkipAhead = async (skipValue = 5) => {
 		const nextIndex = (upperBound || 5) + skipValue || 10
 		const virtualItem = virtualItems.find((item) => item.index === nextIndex)
 
-		// FIXME: this doesn't work :sob: it breaks on *really* long lists
-		// This is sort of a hack. Sometimes, the virtual list thinks its at the end, but
-		// really a few items are still hidden off screen. When this happens, I am assuming that
-		// means we are at the end of this section, and we can just scroll to the edge of the list,
-		// considering both the gap offsets and just a little extra padding.
 		if (!virtualItem) {
-			if (cards.length < 50) {
-				columnVirtualizer.scrollToOffset(
-					columnVirtualizer.getTotalSize() + getItemOffset(nextIndex) + 500,
-					{ smoothScroll: true },
-				)
-			}
+			// NOTE: this is really just a guess, and this should never ~really~ happen
+			columnVirtualizer.scrollToOffset(getItemOffset(nextIndex), { smoothScroll: true })
 		} else {
 			columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
 		}
@@ -147,7 +135,7 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 				<div
 					className="relative inline-flex h-full"
 					style={{
-						width: `calc(${columnVirtualizer.getTotalSize()}px + ${getTotalOffsetAmount()}rem)`,
+						width: `${columnVirtualizer.getTotalSize()}px`,
 					}}
 				>
 					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
@@ -161,10 +149,8 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 									left: 0,
 									position: 'absolute',
 									top: 0,
-									transform: `translateX(calc(${virtualItem.start}px + ${getItemOffset(
-										virtualItem.index,
-									)}rem))`,
-									width: `${virtualItem.size}px`,
+									transform: `translateX(${virtualItem.start}px)`,
+									width: `${estimateSize()}px`,
 								}}
 							>
 								{card}

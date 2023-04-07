@@ -1,7 +1,8 @@
 import { useUserStore } from '@stump/client'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { AllowedLocale } from './config'
+import { AllowedLocale, i18n } from './config'
 import { LocaleContext } from './context'
 
 type Props = {
@@ -14,6 +15,9 @@ export default function LocaleProvider({ children }: Props) {
 
 	const locale = (userPreferences?.locale || 'en') as AllowedLocale
 	const { t } = useTranslation(locale)
+	useEffect(() => {
+		i18n.changeLanguage(locale)
+	}, [locale])
 
 	return (
 		<LocaleContext.Provider

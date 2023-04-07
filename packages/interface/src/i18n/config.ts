@@ -49,3 +49,5 @@ i18n.use(initReactI18next).init({
 	parseMissingKeyHandler,
 	resources,
 })
+
+export { i18n }

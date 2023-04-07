@@ -115,7 +115,7 @@ And that's it!
 
 #### Where to start?
 
-If you aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs work.
+If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/aaronleopold/stump/issues) and the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs work.
 
 You can also check out the [v0.1.0 milestone](https://github.com/aaronleopold/stump/milestone/1) for a more filtered list of major features planned for that 0.1.0 release.
 
@@ -133,7 +133,7 @@ Some other good places to start:
 
 ## Project Structure 📦
 
-Stump has a monorepo structure that follows a similar pattern to that of [Spacedrive](https://www.spacedrive.com/).
+Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/workspaces) and [moonrepo](https://moonrepo.dev/):
 
 ### /apps
 
@@ -146,8 +146,8 @@ Stump has a monorepo structure that follows a similar pattern to that of [Spaced
 - `client`: API functions, react-query hooks, and other client-side utilities utilities for interacting with the Stump API.
 - `components`: Shared React components for the web and desktop applications.
 - `interface`: Exports a React component which renders the Stump interface for web and desktop applications.
-- `prisma-cli`: A small rust app to run the prisma cli (generating the prisma client)
-- `types`: TypeScript types for interfacing with Stump's core and API
+- `prisma-cli`: A small rust app to run the Prisma CLI.
+- `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 ### /core
 

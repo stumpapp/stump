@@ -56,3 +56,25 @@ export function createLibrary(payload: CreateLibraryArgs): Promise<ApiResult<Lib
 export function editLibrary(payload: UpdateLibraryArgs): Promise<ApiResult<Library>> {
 	return API.put(`/libraries/${payload.id}`, payload)
 }
+
+export const libraryApi = {
+	createLibrary,
+	deleteLibrary,
+	editLibrary,
+	getLibraries,
+	getLibrariesStats,
+	getLibraryById,
+	getLibrarySeries,
+	scanLibary,
+}
+
+export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
+	createLibrary: 'library.createLibrary',
+	deleteLibrary: 'library.deleteLibrary',
+	editLibrary: 'library.editLibrary',
+	getLibraries: 'library.getLibraries',
+	getLibrariesStats: 'library.getLibrariesStats',
+	getLibraryById: 'library.getLibraryById',
+	getLibrarySeries: 'library.getLibrarySeries',
+	scanLibary: 'library.scanLibary',
+}

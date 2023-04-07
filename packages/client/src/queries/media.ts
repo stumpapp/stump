@@ -1,85 +1,125 @@
-import {
-	getInProgressMedia,
-	getMedia,
-	getMediaById,
-	getRecentlyAddedMedia,
-	updateMediaProgress,
-} from '@stump/api'
+import { mediaApi, mediaQueryKeys } from '@stump/api'
 import type { Media, ReadProgress } from '@stump/types'
-import { useMemo } from 'react'
+import { AxiosError } from 'axios'
 
-import { QueryOptions, useCursorQuery, useInfinitePagedQuery, useMutation } from '../client'
+import {
+	type CursorQueryOptions,
+	MutationOptions,
+	type QueryOptions,
+	useCursorQuery,
+	useMutation,
+} from '../client'
 import { queryClient, useQuery } from '../client'
 import { QUERY_KEYS } from '../query_keys'
 
 const MEDIA_KEYS = QUERY_KEYS.media
 
 export const prefetchMedia = async (id: string) => {
-	await queryClient.prefetchQuery([MEDIA_KEYS.get_by_id, id], () => getMediaById(id), {
+	await queryClient.prefetchQuery([MEDIA_KEYS.getMediaById, id], () => mediaApi.getMediaById(id), {
 		staleTime: 10 * 1000,
 	})
 }
 
-export function useMediaById(id: string, { onError }: QueryOptions<Media> = {}) {
-	const { data, isLoading, isFetching, isRefetching } = useQuery(
-		[MEDIA_KEYS.get_by_id, id],
-		() => getMediaById(id),
+type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
+	TQueryFnData,
+	AxiosError,
+	TData
+>
+
+export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = {}) {
+	const { data, ...ret } = useQuery(
+		[MEDIA_KEYS.getMediaById, id],
+		() => mediaApi.getMediaById(id).then(({ data }) => data),
 		{
 			keepPreviousData: false,
-			onError(err) {
-				console.error(err)
-				onError?.(err)
-			},
+			...params,
 		},
 	)
 
-	return { isLoading: isLoading || isFetching || isRefetching, media: data?.data }
+	return { media: data, ...ret }
 }
 
-/** Hook for fetching media after a cursor, within a series */
-export function useMediaCursor(afterId: string, seriesId: string) {
-	const searchParams = useMemo(() => {
-		return new URLSearchParams({ cursor: afterId, series_id: seriesId })
-	}, [afterId, seriesId])
-	const { data: media, ...rest } = useCursorQuery(
-		afterId,
-		[MEDIA_KEYS.get_with_cursor, afterId],
-		() => getMedia(searchParams),
+export function useMediaAfterCursorQuery(
+	initialCursor: string,
+	options: Omit<CursorQueryOptions<Media>, 'initialCursor'> = {},
+) {
+	const { data, ...restReturn } = useCursorQuery(
+		[MEDIA_KEYS.getMedia],
+		async (params) => {
+			const { data } = await mediaApi.getMediaWithCursor(params)
+			return data
+		},
+		{
+			initialCursor,
+			...options,
+		},
 	)
 
-	return { media, ...rest }
+	const media = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		media,
+		...restReturn,
+	}
 }
 
-export function useMediaMutation(id: string, options: QueryOptions<ReadProgress> = {}) {
+// TODO: the TVariables generic will need to change once epub can update their
+// progress, since this is focused around page numbers.
+export function useUpdateMediaProgress(
+	mediaId: string,
+	options?: MutationOptions<ReadProgress, AxiosError, number>,
+) {
 	const {
 		mutate: updateReadProgress,
 		mutateAsync: updateReadProgressAsync,
 		isLoading,
-	} = useMutation(['updateReadProgress'], (page: number) => updateMediaProgress(id, page), {
-		// context: StumpQueryContext,
-		onError(err) {
-			options.onError?.(err)
+	} = useMutation(
+		[mediaQueryKeys.updateMediaProgress, mediaId],
+		async (page: number) => {
+			const { data } = await mediaApi.updateMediaProgress(mediaId, page)
+			return data
 		},
-		onSuccess(data) {
-			options.onSuccess?.(data)
-		},
-	})
+		options,
+	)
 
 	return { isLoading, updateReadProgress, updateReadProgressAsync }
 }
 
-export function useRecentlyAddedMedia() {
-	return useInfinitePagedQuery(
-		[MEDIA_KEYS.recently_added],
-		getRecentlyAddedMedia,
-		new URLSearchParams('page_size=10'),
+export function useRecentlyAddedMediaQuery(options: CursorQueryOptions<Media>) {
+	const { data, ...restReturn } = useCursorQuery(
+		[MEDIA_KEYS.getRecentlyAddedMedia],
+		async (params) => {
+			const { data } = await mediaApi.getRecentlyAddedMedia(params)
+			return data
+		},
+		options,
 	)
+
+	const media = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		media,
+		...restReturn,
+	}
 }
 
-export function useContinueReading() {
-	return useInfinitePagedQuery(
-		[MEDIA_KEYS.in_progress],
-		getInProgressMedia,
-		new URLSearchParams('page_size=10'),
+export function useContinueReading(options: CursorQueryOptions<Media>) {
+	const { data, ...restReturn } = useCursorQuery(
+		[MEDIA_KEYS.getInProgressMedia],
+		async (params) => {
+			const { data } = await mediaApi.getInProgressMedia(params)
+			return data
+		},
+		options,
 	)
+
+	const media = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		media,
+		...restReturn,
+	}
 }

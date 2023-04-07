@@ -62,8 +62,8 @@ export function DropdownMenu({
 	...props
 }: DropdownMenuProps) {
 	const renderItems = (items: DropdownItem[]) => {
-		return items.map((item, itemIndex) => {
-			const key = `dropdown-item-${itemIndex}-${item.label}`
+		return items.map((item) => {
+			const key = `dropdown-item-${item.label}`
 
 			if (item.subItems) {
 				return (
@@ -84,7 +84,7 @@ export function DropdownMenu({
 
 			const Container = item.href ? Link : React.Fragment
 			const containerProps = item.href
-				? { className: 'hover:no-underline', href: item.href, underline: false }
+				? { className: 'hover:no-underline', to: item.href, underline: false }
 				: {}
 
 			return (

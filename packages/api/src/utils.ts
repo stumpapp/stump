@@ -1,3 +1,7 @@
+import axios, { AxiosError } from 'axios'
+
+import { CursorQueryParams, PagedQueryParams } from './types'
+
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
 	const paramString = params?.toString()
@@ -28,4 +32,34 @@ export const toUrlParams = <T extends object>(
 	})
 
 	return params
+}
+
+export const mergeCursorParams = ({
+	afterId,
+	limit,
+	params,
+}: CursorQueryParams): URLSearchParams => {
+	const searchParams = new URLSearchParams(params)
+	if (afterId) {
+		searchParams.set('cursor', afterId)
+	}
+	if (limit) {
+		searchParams.set('limit', limit.toString())
+	}
+	return searchParams
+}
+
+export const mergePageParams = ({ page, page_size, params }: PagedQueryParams): URLSearchParams => {
+	const searchParams = new URLSearchParams(params)
+	if (page) {
+		searchParams.set('page', page.toString())
+	}
+	if (page_size) {
+		searchParams.set('page_size', page_size.toString())
+	}
+	return searchParams
+}
+
+export const isAxiosError = (error: unknown): error is AxiosError => {
+	return axios.isAxiosError(error)
 }

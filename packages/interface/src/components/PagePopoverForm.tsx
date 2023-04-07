@@ -13,13 +13,10 @@ import {
 	useDisclosure,
 } from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Button, Form, Input } from '@stump/components'
 import React, { useMemo, useRef } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
-
-import Button from '../ui/Button'
-import Form, { FormControl } from '../ui/Form'
-import Input from '../ui/Input'
 
 interface PagePopoverFormProps {
 	pos: number
@@ -88,24 +85,22 @@ export default function PagePopoverForm({
 				<PopoverArrow />
 				<PopoverBody>
 					<Form id={`pagination-page-entry-form-${pos}`} form={form} onSubmit={handleSubmit}>
-						<FormControl isInvalid={!!errors.goTo}>
-							<FormLabel htmlFor="goTo">Enter page</FormLabel>
-							{/* TODO: auto focus not working */}
-							<Input
-								type="number"
-								autoFocus
-								max={totalPages}
-								{...register}
-								ref={(ref) => {
-									if (ref) {
-										register.ref(ref)
-										inputRef.current = ref
-									}
-								}}
-							/>
-							{/* FIXME: Updates seem to have broken types here, need to look into this... */}
-							{!!errors.goTo && <FormErrorMessage>{errors.goTo?.message as any}</FormErrorMessage>}
-						</FormControl>
+						<FormLabel htmlFor="goTo">Enter page</FormLabel>
+						<Input
+							type="number"
+							autoFocus
+							max={totalPages}
+							{...register}
+							// @ts-expect-error: FIXME: remove chakra
+							ref={(ref) => {
+								if (ref) {
+									register.ref(ref)
+									inputRef.current = ref
+								}
+							}}
+						/>
+						{/* FIXME: Updates seem to have broken types here, need to look into this... */}
+						{!!errors.goTo && <FormErrorMessage>{errors.goTo?.message as any}</FormErrorMessage>}
 					</Form>
 				</PopoverBody>
 				<PopoverFooter
@@ -117,7 +112,7 @@ export default function PagePopoverForm({
 				>
 					<ButtonGroup size="sm">
 						<Button onClick={onClose}>Cancel</Button>
-						<Button colorScheme="brand" type="submit" form={`pagination-page-entry-form-${pos}`}>
+						<Button variant="primary" type="submit" form={`pagination-page-entry-form-${pos}`}>
 							Go
 						</Button>
 					</ButtonGroup>

@@ -1,19 +1,19 @@
-import { refreshUseLibrary, useLibraries } from '@stump/client'
-import { Button, ButtonOrLink, cn, Heading, useBoolean } from '@stump/components'
+import { refreshUseLibrary, useAppProps, useLibraries } from '@stump/client'
+import { Button, ButtonOrLink, cn, Heading, Spacer, useBoolean } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
 import {
-	type LucideProps,
 	ChevronRight,
 	Home,
 	Library as LibraryIcon,
+	type LucideProps,
 	Settings,
 } from 'lucide-react'
-import { Suspense, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { useLocaleContext } from '../../i18n'
+import { useLocaleContext } from '../../i18n/context'
 import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
@@ -44,7 +44,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 	const Icon = rest.icon
 
 	return (
-		<Suspense fallback={null}>
+		<>
 			<Button
 				variant="ghost"
 				className="flex w-full items-center justify-between"
@@ -85,11 +85,11 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 								<div
 									key={item.id}
 									className={cn(
-										'w-full rounded-md text-gray-600 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100',
+										'w-full rounded-md text-gray-800 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100',
 										{ 'bg-gray-50 dark:bg-gray-750': active },
 									)}
 								>
-									<div className="flex max-h-[40px] items-center py-2 px-4">
+									<div className="flex max-h-[40px] items-center px-4 py-2">
 										<Link
 											to={item.href}
 											className="w-full flex-1 pl-1 text-sm"
@@ -105,7 +105,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 					</div>
 				)}
 			</AnimatePresence>
-		</Suspense>
+		</>
 	)
 }
 
@@ -127,7 +127,28 @@ function NavItem({ name, href, active, ...rest }: NavItemProps) {
 	)
 }
 
-export function SidebarContent() {
+export function SidebarHeader() {
+	const isBrowser = useAppProps()?.platform === 'browser'
+
+	return (
+		<div className="flex items-center justify-between px-4">
+			<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
+				<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
+				<Heading variant="gradient" size="xs">
+					Stump
+				</Heading>
+			</Link>
+
+			{!isBrowser && <NavigationButtons />}
+		</div>
+	)
+}
+
+type SidebarContentProps = {
+	isMobileSheet?: boolean
+}
+
+export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 	const location = useLocation()
 	const navigate = useNavigate()
 
@@ -136,7 +157,7 @@ export function SidebarContent() {
 
 	// TODO: I'd like to also highlight the library when viewing an item from it.
 	// e.g. a book from the library, or a book from a series in the library, etc
-	const libraryIsActive = (id: string) => location.pathname.startsWith(`/libraries/${id}`)
+	const libraryIsActive = (id: string) => location.pathname.startsWith(`/library/${id}`)
 	const linkIsActive = (href?: string) => {
 		if (!href) {
 			return false
@@ -170,21 +191,12 @@ export function SidebarContent() {
 		],
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[libraries, locale, location.pathname],
+		[libraries, locale, location.pathname, t],
 	)
 
 	return (
 		<>
-			<div className="flex items-center justify-between px-4">
-				<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
-					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
-					<Heading variant="gradient" size="xs">
-						Stump
-					</Heading>
-				</Link>
-
-				<NavigationButtons />
-			</div>
+			{!isMobileSheet && <SidebarHeader />}
 
 			<div className="flex max-h-full grow flex-col gap-2 overflow-hidden p-1">
 				{links.map((link) =>
@@ -195,6 +207,8 @@ export function SidebarContent() {
 					),
 				)}
 			</div>
+
+			<Spacer />
 
 			<footer className="flex items-center justify-between px-2">
 				<ApplicationVersion />
@@ -211,7 +225,7 @@ export function SidebarContent() {
 export default function Sidebar() {
 	return (
 		<aside className="hidden min-h-full md:inline-block">
-			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 py-4 px-2 dark:border-gray-900 dark:bg-gray-1000">
+			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 px-2 py-4 dark:border-gray-900 dark:bg-gray-1000">
 				<SidebarContent />
 			</div>
 		</aside>

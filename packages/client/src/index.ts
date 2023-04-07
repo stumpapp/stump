@@ -1,5 +1,7 @@
 export * from './client'
 export * from './context'
 export * from './hooks'
+export * from './invalidate'
 export * from './Provider'
+export * from './query_keys'
 export * from './stores'

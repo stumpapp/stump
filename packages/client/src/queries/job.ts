@@ -1,10 +1,9 @@
 import { getJobs } from '@stump/api'
 import type { JobReport } from '@stump/types'
 
-import { useQuery } from '../client'
-import { QueryCallbacks } from '.'
+import { QueryOptions, useQuery } from '../client'
 
-export function useJobReport({ onSuccess, onError }: QueryCallbacks<JobReport[]> = {}) {
+export function useJobReport({ onSuccess, onError, ...options }: QueryOptions<JobReport[]> = {}) {
 	const {
 		data: jobReports,
 		isLoading,
@@ -13,6 +12,7 @@ export function useJobReport({ onSuccess, onError }: QueryCallbacks<JobReport[]>
 	} = useQuery(['getJobReports'], () => getJobs().then((res) => res.data), {
 		onError,
 		onSuccess,
+		...options,
 	})
 
 	return { isLoading: isLoading || isRefetching || isFetching, jobReports }

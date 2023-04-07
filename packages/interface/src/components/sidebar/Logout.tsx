@@ -1,6 +1,6 @@
-import { logout } from '@stump/api'
+import { authApi } from '@stump/api'
 import { useUserStore } from '@stump/client'
-import { Button, ConfirmationModal, IconButton, ToolTip, useBoolean } from '@stump/components'
+import { ConfirmationModal, IconButton, ToolTip, useBoolean } from '@stump/components'
 import { LogOut } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
@@ -13,7 +13,7 @@ export default function Logout() {
 
 	async function handleLogout() {
 		toast
-			.promise(logout(), {
+			.promise(authApi.logout(), {
 				error: 'There was an error logging you out. Please try again.',
 				loading: null,
 				success: 'You have been logged out. Redirecting...',

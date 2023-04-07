@@ -1,10 +1,10 @@
-export { type ConfirmationModalProps, ConfirmationModal } from './ConfirmationModal'
+export { ConfirmationModal, type ConfirmationModalProps } from './ConfirmationModal'
 export {
-	type DialogContentProps,
-	type DialogProps,
 	Dialog,
 	DialogContent,
+	type DialogContentProps,
 	DialogFooter,
 	DialogHeader,
+	type DialogProps,
 	DialogTitle,
 } from './primitives'

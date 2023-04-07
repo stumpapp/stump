@@ -3,10 +3,12 @@ import React from 'react'
 
 import { ProgressSpinner } from '../progress/ProgressSpinner'
 import { cn } from '../utils'
+import { ButtonContext } from './context'
 
 export const BUTTON_BASE_CLASSES =
-	'inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:hover:bg-gray-800 dark:hover:text-gray-100 disabled:opacity-50 dark:focus:ring-gray-400 disabled:pointer-events-none dark:focus:ring-offset-gray-900 data-[state=open]:bg-gray-100 dark:data-[state=open]:bg-gray-800'
+	'inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:hover:bg-gray-800 dark:hover:text-gray-100 disabled:opacity-50 dark:focus:ring-gray-400 disabled:pointer-events-none dark:focus:ring-offset-gray-900 data-[state=open]:bg-gray-75 dark:data-[state=open]:bg-gray-800'
 
+// TODO: hone these variants
 export const BUTTON_VARIANTS = {
 	danger:
 		'bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600 focus:ring-red-400 dark:focus:ring-red-400',
@@ -20,6 +22,8 @@ export const BUTTON_VARIANTS = {
 	primary:
 		'bg-brand-500 text-white hover:bg-brand-600 dark:hover:bg-brand-600 focus:ring-brand-400',
 	subtle: 'bg-gray-75 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100',
+	'subtle-dark':
+		'bg-white data-[state=open]:bg-gray-50 dark:bg-gray-975 text-gray-900 hover:bg-gray-50 dark:hover:bg-gray-950 dark:data-[state=open]:bg-gray-900 dark:text-gray-100',
 }
 
 export const BUTTON_ROUNDED_VARIANTS = {
@@ -72,25 +76,27 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 		ref,
 	) => {
 		return (
-			<button
-				className={cn(
-					buttonVariants({ className, rounded, size, variant }),
-					{
-						'active:scale-95': pressEffect,
-						'cursor-not-allowed': props.disabled,
-						'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
-					},
-					className,
-				)}
-				ref={ref}
-				{...props}
-			>
-				{isLoading ? (
-					<ProgressSpinner variant={variant === 'primary' ? 'primary' : 'default'} size={size} />
-				) : (
-					children
-				)}
-			</button>
+			<ButtonContext.Provider value={{ variant }}>
+				<button
+					className={cn(
+						buttonVariants({ className, rounded, size, variant }),
+						{
+							'active:scale-95': pressEffect,
+							'cursor-not-allowed': props.disabled,
+							'focus:ring-brand-400 dark:focus:ring-brand-400': primaryFocus,
+						},
+						className,
+					)}
+					ref={ref}
+					{...props}
+				>
+					{isLoading ? (
+						<ProgressSpinner variant={variant === 'primary' ? 'primary' : 'default'} size={size} />
+					) : (
+						children
+					)}
+				</button>
+			</ButtonContext.Provider>
 		)
 	},
 )

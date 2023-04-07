@@ -1,22 +1,21 @@
-import React, { forwardRef } from 'react'
+import React from 'react'
 import { FieldValues, FormProvider, SubmitHandler, UseFormReturn } from 'react-hook-form'
 
-export type FormProps = {
-	form: UseFormReturn<FieldValues>
-	onSubmit: SubmitHandler<FieldValues>
-} & React.ComponentPropsWithoutRef<'form'>
+import { type Any } from '..'
 
-export const Form = forwardRef<HTMLFormElement, FormProps>(
-	({ form, onSubmit, children, ...props }, ref) => {
-		return (
-			<FormProvider {...form}>
-				<form ref={ref} onSubmit={form.handleSubmit(onSubmit)} {...props}>
-					<fieldset className="flex flex-col gap-4" disabled={form.formState.isSubmitting}>
-						{children}
-					</fieldset>
-				</form>
-			</FormProvider>
-		)
-	},
-)
-Form.displayName = 'Form'
+type FormProps<T extends FieldValues = Any> = {
+	form: UseFormReturn<T>
+	onSubmit: SubmitHandler<T>
+} & Omit<React.ComponentProps<'form'>, 'onSubmit'>
+
+export function Form<T extends FieldValues>({ form, onSubmit, children, ...props }: FormProps<T>) {
+	return (
+		<FormProvider {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} {...props}>
+				<fieldset className="flex flex-col gap-4" disabled={form.formState.isSubmitting}>
+					{children}
+				</fieldset>
+			</form>
+		</FormProvider>
+	)
+}

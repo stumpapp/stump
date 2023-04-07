@@ -1,14 +1,14 @@
 import { useLayoutMode, useLibrary, useLibrarySeries } from '@stump/client'
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
+import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
 import SeriesGrid from '../../components/series/SeriesGrid'
 import SeriesList from '../../components/series/SeriesList'
 import { useGetPage } from '../../hooks/useGetPage'
 import useIsInView from '../../hooks/useIsInView'
-import Pagination from '../../ui/Pagination'
 
 export default function LibraryOverviewScene() {
 	const { id } = useParams()
@@ -20,12 +20,8 @@ export default function LibraryOverviewScene() {
 		throw new Error('Library id is required')
 	}
 
-	function handleError(err: unknown) {
-		console.error(err)
-	}
-
 	const { layoutMode } = useLayoutMode('LIBRARY')
-	const { isLoading, library } = useLibrary(id, { onError: handleError })
+	const { isLoading, library } = useLibrary(id)
 
 	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page)
 
@@ -60,15 +56,11 @@ export default function LibraryOverviewScene() {
 
 			<div className="flex h-full w-full flex-col space-y-6 p-4">
 				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
-
 				{layoutMode === 'GRID' ? (
 					<SeriesGrid isLoading={isLoadingSeries} series={series} />
 				) : (
 					<SeriesList isLoading={isLoadingSeries} series={series} />
 				)}
-
-				<div className="flex-1" />
-
 				{hasStuff ? (
 					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
 				) : null}

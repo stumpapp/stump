@@ -1,14 +1,14 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::get,
+	routing::{get, put},
 	Json, Router,
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
 	db::models::{User, UserPreferences},
 	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
-	prisma::{user, user_preferences},
+	prisma::{user, user_preferences, PrismaClient},
 };
 use tracing::{debug, trace};
 
@@ -29,6 +29,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		// TODO: adminguard these first two routes
 		.route("/users", get(get_users).post(create_user))
 		.nest(
+			"/users/me",
+			Router::new()
+				.route("/", put(update_current_user))
+				.route("/preferences", put(update_current_user_preferences)),
+		)
+		.nest(
 			"/users/:id",
 			Router::new()
 				.route(
@@ -43,6 +49,58 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+}
+
+async fn update_user_inner(
+	client: &PrismaClient,
+	user_id: String,
+	input: UpdateUserArgs,
+) -> ApiResult<User> {
+	let mut update_params = vec![
+		user::username::set(input.username),
+		user::avatar_url::set(input.avatar_url),
+	];
+	if let Some(password) = input.password {
+		let hashed_password = bcrypt::hash(password, get_hash_cost())?;
+		update_params.push(user::hashed_password::set(hashed_password));
+	}
+
+	let updated_user_data = client
+		.user()
+		.update(user::id::equals(user_id), update_params)
+		// NOTE: we have to fetch preferences because if we update session without
+		// it then it effectively removes the preferences from the session
+		.with(user::user_preferences::fetch())
+		.exec()
+		.await?;
+
+	Ok(User::from(updated_user_data))
+}
+
+async fn update_preferences_inner(
+	client: &PrismaClient,
+	preferences_id: String,
+	input: UserPreferencesUpdate,
+) -> ApiResult<UserPreferences> {
+	let updated_preferences = client
+		.user_preferences()
+		.update(
+			user_preferences::id::equals(preferences_id),
+			vec![
+				user_preferences::locale::set(input.locale.to_owned()),
+				user_preferences::library_layout_mode::set(
+					input.library_layout_mode.to_owned(),
+				),
+				user_preferences::series_layout_mode::set(
+					input.series_layout_mode.to_owned(),
+				),
+				user_preferences::app_theme::set(input.app_theme.to_owned()),
+			],
+		)
+		.exec()
+		.await?;
+
+	Ok(UserPreferences::from(updated_preferences))
 }
 
 #[utoipa::path(
@@ -124,6 +182,83 @@ async fn create_user(
 		.unwrap();
 
 	Ok(Json(user.into()))
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/users/me",
+	tag = "user",
+	request_body = UpdateUserArgs,
+	responses(
+		(status = 200, description = "Successfully updated user.", body = User),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Updates the session user
+async fn update_current_user(
+	mut writable_session: WritableSession,
+	State(ctx): State<AppState>,
+	Json(input): Json<UpdateUserArgs>,
+) -> ApiResult<Json<User>> {
+	let db = ctx.get_db();
+	let user = get_writable_session_user(&writable_session)?;
+
+	let updated_user = update_user_inner(db, user.id, input).await?;
+	debug!(?updated_user, "Updated user");
+
+	writable_session
+		.insert("user", updated_user.clone())
+		.map_err(|e| {
+			ApiError::InternalServerError(format!("Failed to update session: {}", e))
+		})?;
+
+	Ok(Json(updated_user))
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/users/me/preferences",
+	tag = "user",
+	request_body = UserPreferencesUpdate,
+	responses(
+		(status = 200, description = "Successfully updated user preferences.", body = UserPreferences),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Updates a user's preferences.
+async fn update_current_user_preferences(
+	mut writable_session: WritableSession,
+	State(ctx): State<AppState>,
+	Json(input): Json<UserPreferencesUpdate>,
+) -> ApiResult<Json<UserPreferences>> {
+	let db = ctx.get_db();
+
+	let user = get_writable_session_user(&writable_session)?;
+	let user_preferences = user.user_preferences.clone().unwrap_or_default();
+
+	trace!(user_id = ?user.id, ?user_preferences, updates = ?input, "Updating viewer's preferences");
+
+	let updated_preferences =
+		update_preferences_inner(db, user_preferences.id, input).await?;
+	debug!(?updated_preferences, "Updated user preferences");
+
+	writable_session
+		.insert(
+			"user",
+			User {
+				user_preferences: Some(updated_preferences.clone()),
+				..user
+			},
+		)
+		.map_err(|e| {
+			ApiError::InternalServerError(format!("Failed to update session: {}", e))
+		})?;
+
+	Ok(Json(updated_preferences))
 }
 
 #[utoipa::path(
@@ -229,22 +364,12 @@ async fn update_user(
 	let db = ctx.get_db();
 	let user = get_writable_session_user(&writable_session)?;
 
+	// TODO: determine what a server owner can update.
 	if user.id != id {
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let mut update_params = vec![user::username::set(input.username)];
-	if let Some(password) = input.password {
-		let hashed_password = bcrypt::hash(password, get_hash_cost())?;
-		update_params.push(user::hashed_password::set(hashed_password));
-	}
-
-	let updated_user_data = db
-		.user()
-		.update(user::id::equals(user.id.clone()), update_params)
-		.exec()
-		.await?;
-	let updated_user = User::from(updated_user_data);
+	let updated_user = update_user_inner(db, id, input).await?;
 	debug!(?updated_user, "Updated user");
 
 	writable_session
@@ -301,6 +426,7 @@ async fn get_user_preferences(
 	Ok(Json(UserPreferences::from(user_preferences.unwrap())))
 }
 
+// TODO: this is now a duplicate, do I need it? I think to remain RESTful, yes...
 #[utoipa::path(
 	put,
 	path = "/api/v1/users/:id/preferences",
@@ -333,32 +459,15 @@ async fn update_user_preferences(
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_preferences = db
-		.user_preferences()
-		.update(
-			user_preferences::id::equals(user_preferences.id.clone()),
-			vec![
-				user_preferences::locale::set(input.locale.to_owned()),
-				user_preferences::library_layout_mode::set(
-					input.library_layout_mode.to_owned(),
-				),
-				user_preferences::series_layout_mode::set(
-					input.series_layout_mode.to_owned(),
-				),
-				user_preferences::app_theme::set(input.app_theme.to_owned()),
-			],
-		)
-		.exec()
-		.await?;
+	let updated_preferences =
+		update_preferences_inner(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
 	writable_session
 		.insert(
 			"user",
 			User {
-				user_preferences: Some(UserPreferences::from(
-					updated_preferences.clone(),
-				)),
+				user_preferences: Some(updated_preferences.clone()),
 				..user
 			},
 		)
@@ -366,5 +475,5 @@ async fn update_user_preferences(
 			ApiError::InternalServerError(format!("Failed to update session: {}", e))
 		})?;
 
-	Ok(Json(UserPreferences::from(updated_preferences)))
+	Ok(Json(updated_preferences))
 }

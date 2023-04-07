@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Command as CommandPrimitive } from 'cmdk'
-import { type LucideIcon, Icon, LucideProps, Search } from 'lucide-react'
+import { type LucideIcon, Search } from 'lucide-react'
 import React from 'react'
 
 import { Dialog, DialogProps } from '../dialog'
@@ -44,7 +44,7 @@ const CommandInput = React.forwardRef<
 		// eslint-disable-next-line react/no-unknown-property
 		cmdk-input-wrapper=""
 	>
-		<Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+		<Search className="mr-2 h-4 w-4 shrink-0 opacity-50 dark:text-gray-300" />
 		<CommandPrimitive.Input
 			ref={ref}
 			className={cn(
@@ -87,7 +87,7 @@ const CommandGroup = React.forwardRef<
 	<CommandPrimitive.Group
 		ref={ref}
 		className={cn(
-			'overflow-hidden py-3 px-2 text-gray-700 dark:text-gray-400 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:text-sm [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-gray-900 [&_[cmdk-group-heading]]:dark:text-gray-300',
+			'overflow-hidden py-3 px-2 text-gray-800 dark:text-gray-400 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:text-sm [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-gray-900 [&_[cmdk-group-heading]]:dark:text-gray-300',
 			className,
 		)}
 		{...props}
@@ -115,7 +115,7 @@ const CommandItem = React.forwardRef<
 	<CommandPrimitive.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-md py-1.5 px-2 text-sm font-medium outline-none aria-selected:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:aria-selected:bg-gray-700',
+			'relative flex cursor-default select-none items-center rounded-md py-1.5 px-2 text-sm font-medium outline-none aria-selected:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:aria-selected:bg-gray-700',
 			className,
 		)}
 		{...props}

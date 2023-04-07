@@ -1,16 +1,16 @@
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import React, { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 // import CommandPalette from './components/CommandPalette'
 import JobOverlay from './components/jobs/JobOverlay'
-import Lazy from './components/Lazy'
+import RouteLoadingIndicator from './components/RouteLoadingIndicator'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
+import TopBar from './components/topbar/TopBar'
 // import TopBar from './components/topbar/TopBar'
 import { AppContext } from './context'
-import { LocaleProvider } from './i18n'
 
 export function AppLayout() {
 	const appProps = useAppProps()
@@ -21,9 +21,7 @@ export function AppLayout() {
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/pages/:page or /epub/
 		// TODO: replace with single regex, I am lazy rn
-		return (
-			location.pathname.match(/\/books\/.+\/pages\/.+/) || location.pathname.match(/\/epub\/.+/)
-		)
+		return location.pathname.match(/\/book\/.+\/page\/.+/) || location.pathname.match(/\/epub\/.+/)
 	}, [location])
 
 	useCoreEventHandler()
@@ -49,7 +47,7 @@ export function AppLayout() {
 	// an async error
 	// @ts-expect-error: FIXME: type error no good >:(
 	const isNetworkError = error?.code === 'ERR_NETWORK'
-	if (isNetworkError && appProps?.platform !== 'browser') {
+	if (isNetworkError) {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
 	}
 
@@ -61,23 +59,20 @@ export function AppLayout() {
 		<AppContext.Provider
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
-			<LocaleProvider>
-				<React.Suspense fallback={<Lazy />}>
-					{/* <CommandPalette /> */}
-					<div className="flex h-full w-full">
-						{!hideSidebar && <Sidebar />}
-						<main className="h-full w-full bg-white dark:bg-gray-975">
-							{/* {!hideSidebar && <TopBar />} */}
-							<React.Suspense fallback={<Lazy />}>
-								<Outlet />
-							</React.Suspense>
-						</main>
-					</div>
+			<Suspense fallback={<RouteLoadingIndicator />}>
+				{!hideSidebar && <TopBar />}
+				<div className="flex h-full w-full">
+					{!hideSidebar && <Sidebar />}
+					<main className="h-full w-full bg-white dark:bg-gray-975">
+						<Suspense fallback={<RouteLoadingIndicator />}>
+							<Outlet />
+						</Suspense>
+					</main>
+				</div>
 
-					{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
-					{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
-				</React.Suspense>
-			</LocaleProvider>
+				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
+				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+			</Suspense>
 		</AppContext.Provider>
 	)
 }

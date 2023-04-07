@@ -1,7 +1,7 @@
 import type { Media, Series } from '@stump/types'
 
-import { API, getMedia } from '.'
-import { ApiResult, PageableApiResult } from './types'
+import { API, mediaApi, mergePageParams, urlWithParams } from '.'
+import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 	return API.get(`/series/${id}`)
@@ -9,14 +9,10 @@ export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 
 export function getSeriesMedia(
 	id: string,
-	page: number,
-	params?: string,
+	{ page, page_size, params }: PagedQueryParams,
 ): Promise<PageableApiResult<Media[]>> {
-	if (params) {
-		return API.get(`/series/${id}/media?page=${page}&${params}`)
-	}
-
-	return API.get(`/series/${id}/media?page=${page}`)
+	const searchParams = mergePageParams({ page, page_size, params })
+	return API.get(urlWithParams(`/series/${id}/media`, searchParams))
 }
 
 export function getRecentlyAddedSeries(
@@ -43,15 +39,31 @@ export function getNextMediaInSeries(
 	media_id: string,
 	limit = 25,
 ): Promise<PageableApiResult<Media[]>> {
-	return getMedia(
-		new URLSearchParams({
-			cursor: media_id,
-			limit: limit.toString(),
-			series_id,
-		}),
-	)
+	return mediaApi.getMedia({
+		cursor: media_id,
+		limit: limit.toString(),
+		series_id,
+	})
 }
 
 export function getSeriesThumbnail(id: string): string {
 	return `${API.getUri()}/series/${id}/thumbnail`
+}
+
+export const seriesApi = {
+	getNextInSeries,
+	getNextMediaInSeries,
+	getRecentlyAddedSeries,
+	getSeriesById,
+	getSeriesMedia,
+	getSeriesThumbnail,
+}
+
+export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
+	getNextInSeries: 'series.getNextInSeries',
+	getNextMediaInSeries: 'series.getNextMediaInSeries',
+	getRecentlyAddedSeries: 'series.getRecentlyAddedSeries',
+	getSeriesById: 'series.getSeriesById',
+	getSeriesMedia: 'series.getSeriesMedia',
+	getSeriesThumbnail: 'series.getSeriesThumbnail',
 }

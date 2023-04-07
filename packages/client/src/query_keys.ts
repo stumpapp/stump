@@ -1,34 +1,31 @@
+import {
+	authQueryKeys,
+	jobQueryKeys,
+	libraryQueryKeys,
+	mediaQueryKeys,
+	seriesQueryKeys,
+} from '@stump/api'
+
 export const QUERY_KEYS = {
+	auth: {
+		_group_prefix: 'auth',
+		...authQueryKeys,
+	},
 	job: {
 		_group_prefix: 'job',
-		get: 'job.get',
-		get_by_id: 'job.get_by_id',
+		...jobQueryKeys,
 	},
 	library: {
 		_group_prefix: 'library',
-		create: 'library.create',
-		delete: 'library.delete',
-		get: 'library.get',
-		get_by_id: 'library.get_by_id',
-		scan: 'library.scan',
-		series: 'library.series',
-		stats: 'library.stats',
-		update: 'library.update',
+		...libraryQueryKeys,
 	},
 	media: {
 		_group_prefix: 'media',
-		get: 'media.get',
-		get_by_id: 'media.get_by_id',
-		get_with_cursor: 'media.get_with_cursor',
-		in_progress: 'media.in_progress',
-		recently_added: 'media.recently_added',
+		...mediaQueryKeys,
+		getMediaWithCursor: 'media.getMediaWithCursor',
 	},
 	series: {
 		_group_prefix: 'series',
-		get: 'series.get',
-		get_by_id: 'series.get_by_id',
-		media: 'series.media',
-		recently_added: 'series.recently_added',
-		up_next: 'series.up_next',
+		...seriesQueryKeys,
 	},
-}
+} as const

@@ -1,4 +1,4 @@
-import { listDirectory } from '@stump/api'
+import { filesystemApi, filesystemQueryKeys } from '@stump/api'
 import type { DirectoryListing } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo, useState } from 'react'
@@ -9,20 +9,23 @@ export interface DirectoryListingQueryParams {
 	enabled: boolean
 	startingPath?: string
 	page?: number
+	goForward?: (callback: (path: string) => void) => void
+	goBack?: (path: string | null) => void
 }
 
 export function useDirectoryListing({
 	enabled,
 	startingPath,
 	page = 1,
+	...props
 }: DirectoryListingQueryParams) {
 	const [path, setPath] = useState(startingPath || null)
 
 	const [directoryListing, setDirectoryListing] = useState<DirectoryListing>()
 
 	const { isLoading, error } = useQuery(
-		['listDirectory', path, page],
-		() => listDirectory({ page, path }),
+		[filesystemQueryKeys.listDirectory, path, page],
+		() => filesystemApi.listDirectory({ page, path }),
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
@@ -36,16 +39,21 @@ export function useDirectoryListing({
 
 	const actions = useMemo(
 		() => ({
+			// FIXME: does not work as expected. Need more complicated annoying solution.
 			goBack() {
 				if (directoryListing?.parent) {
+					props.goBack?.(path)
 					setPath(directoryListing.parent)
 				}
+			},
+			goForward() {
+				props.goForward?.((path) => setPath(path))
 			},
 			onSelect(directory: string) {
 				setPath(directory)
 			},
 		}),
-		[directoryListing],
+		[directoryListing, props, path],
 	)
 
 	const errorMessage = useMemo(() => {
@@ -70,7 +78,6 @@ export function useDirectoryListing({
 		isLoading,
 		parent: directoryListing?.parent,
 		path,
-		// files: directoryListing?.files.filter((f) => !f.isDirectory) ?? [],
 		...actions,
 	}
 }

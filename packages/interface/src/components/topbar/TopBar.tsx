@@ -1,56 +1,29 @@
-import { LayoutEntity, useTopBarStore } from '@stump/client'
 import { Heading } from '@stump/components'
-import { useMemo } from 'react'
-import { useLocation } from 'react-router'
+import { Link } from 'react-router-dom'
 
-import MobileDrawer from '../sidebar/MobileDrawer'
-import LayoutModeButtons from './LayoutModeButtons'
-import QueryConfig from './query-options/QueryConfig'
+import MobileSheet from './MobileSheet'
 
-// FIXME: this is not good AT ALL for mobile. It *looks* fine, but the navigation is gone, the
-// sort/view mode buttons are gone, the sort config is gone,and the search bar is meh. I need to
-// plan out the layout for mobile.
+/**
+ * The top bar of Stump, only visible on mobile. This is mostly because many scenes
+ * have their own topbar, and they are too different from each other to be generalized
+ * into a single component like this one.
+ */
 export default function TopBar() {
-	const title = useTopBarStore(({ title }) => title)
-	const location = useLocation()
-
-	const { entity, showQueryParamOptions } = useMemo(() => {
-		const match =
-			location.pathname.match(/\/libraries\/.+$/) || location.pathname.match(/\/series\/.+$/)
-
-		let _entity: LayoutEntity = 'SERIES'
-
-		// TODO: what if not either of these?
-		if (location.pathname.startsWith('/libraries')) {
-			_entity = 'LIBRARY'
-		}
-
-		return {
-			entity: _entity,
-			showQueryParamOptions: !!match,
-		}
-	}, [location])
-
 	return (
-		<header className="sticky top-0 z-10 w-full border-b border-gray-50 bg-white px-4 py-2 dark:border-gray-900 dark:bg-gray-975 md:py-3">
-			<div className="flex w-full items-center justify-between space-x-2">
-				<div className="flex min-h-[2.5rem] flex-col justify-center">
-					<MobileDrawer />
-					<Heading
-						size="xs"
-						// noOfLines={1}
-					>
-						{title}
-					</Heading>
+		<header className="sticky top-0 z-10 w-full border-b border-gray-50 bg-gray-50 px-4 py-2 dark:border-gray-900 dark:bg-gray-1000 md:hidden">
+			<div className="grid grid-cols-8 items-center gap-2">
+				<div className="col-span-1">
+					<MobileSheet />
 				</div>
-
-				{showQueryParamOptions && (
-					<div className="flex items-center space-x-2">
-						<LayoutModeButtons entity={entity} />
-						<QueryConfig />
-						{/* <OrderByConfig /> */}
-					</div>
-				)}
+				<div className="col-span-6 flex items-center justify-center gap-2">
+					<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
+						<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
+						<Heading variant="gradient" size="xs">
+							Stump
+						</Heading>
+					</Link>
+				</div>
+				<div className="col-span-1" />
 			</div>
 		</header>
 	)

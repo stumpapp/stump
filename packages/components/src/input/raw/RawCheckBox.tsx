@@ -6,7 +6,7 @@ import React from 'react'
 import { cn } from '../../utils'
 
 export const RAW_CHECKBOX_BASE_CLASSES =
-	'shrink-0 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+	'shrink-0 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-gray-900'
 export const RAW_CHECKBOX_SIZE_VARIANTS = {
 	default: 'h-4 w-4',
 	lg: 'h-6 w-6',
@@ -19,8 +19,7 @@ export const RAW_CHECKBOX_ROUND_VARIANTS = {
 	none: 'rounded-none',
 }
 export const RAW_CHECKBOX_VARIANTS = {
-	default:
-		'focus:ring-gray-400  dark:text-gray-50 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900',
+	default: 'focus:ring-gray-400  dark:text-gray-50 dark:focus:ring-gray-400',
 	primary: 'focus:ring-brand-400 text-brand-400',
 }
 export const checkboxVariants = cva(RAW_CHECKBOX_BASE_CLASSES, {

@@ -22,7 +22,7 @@ export default function MediaList({ media, isLoading }: Props) {
 					id={id}
 					title={name}
 					subtitle={description}
-					href={`/books/${id}`}
+					href={`/book/${id}`}
 					even={i % 2 === 0}
 				/>
 			))}

@@ -13,7 +13,7 @@ use super::media::Media;
 pub struct EpubContent {
 	label: String,
 	content: PathBuf,
-	play_order: usize,
+	play_order: u32,
 }
 
 impl From<NavPoint> for EpubContent {
@@ -21,7 +21,7 @@ impl From<NavPoint> for EpubContent {
 		EpubContent {
 			label: nav_point.label,
 			content: nav_point.content,
-			play_order: nav_point.play_order,
+			play_order: nav_point.play_order as u32,
 		}
 	}
 }

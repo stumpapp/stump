@@ -8,10 +8,10 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useWindowSize } from 'rooks'
 
 import Toolbar from './utils/Toolbar'
+
 export interface ImageBasedReaderProps {
 	currentPage: number
 	media: Media
-
 	onPageChange: (page: number) => void
 	getPageUrl(page: number): string
 }
@@ -61,8 +61,9 @@ export default function ImageBasedReader({
 		}
 	}
 
-	useHotkeys('right, left, space, esc', (_, handler) => {
-		switch (handler.key) {
+	useHotkeys('right, left, space, escape', (_, handler) => {
+		const targetKey = handler.keys?.at(0)
+		switch (targetKey) {
 			case 'right':
 				handlePageChange(currPageRef.current + 1)
 				break
@@ -72,8 +73,10 @@ export default function ImageBasedReader({
 			case 'space':
 				toggleToolbar()
 				break
-			case 'esc':
+			case 'escape':
 				hideToolbar()
+				break
+			default:
 				break
 		}
 	})
@@ -89,7 +92,7 @@ export default function ImageBasedReader({
 			/>
 			<SideBarControl position="left" onClick={() => onPageChange(currentPage - 1)} />
 			<img
-				className="z-30 max-h-full w-full md:w-auto"
+				className="z-30 max-h-full w-full select-none md:w-auto"
 				src={getPageUrl(currentPage)}
 				onError={(err) => {
 					// @ts-expect-error: is oke
@@ -290,8 +293,9 @@ export function AnimatedImageBasedReader({
 		}
 	}
 
-	useHotkeys('right, left, space, esc', (_, handler) => {
-		switch (handler.key) {
+	useHotkeys('right, left, space, escape', (_, handler) => {
+		const targetKey = handler.keys?.at(0)
+		switch (targetKey) {
 			case 'right':
 				handleHotKeyPagination('next')
 				break
@@ -301,8 +305,10 @@ export function AnimatedImageBasedReader({
 			case 'space':
 				toggleToolbar()
 				break
-			case 'esc':
+			case 'escape':
 				hideToolbar()
+				break
+			default:
 				break
 		}
 	})

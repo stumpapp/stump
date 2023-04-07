@@ -1,5 +1,7 @@
 export { type CheckBoxProps, CheckBox } from './CheckBox'
 export { type InputProps, Input } from './Input'
 export { type RawCheckBoxProps, RawCheckBox } from './raw/RawCheckBox'
+export { RawSwitch } from './raw/RawSwitch'
 export { type RawTextAreaProps, RawTextArea } from './raw/RawTextArea'
+export { type SwitchProps, Switch } from './Switch'
 export { type TextAreaProps, TextArea } from './TextArea'

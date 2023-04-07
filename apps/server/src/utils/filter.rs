@@ -60,6 +60,15 @@ where
 	deserializer.deserialize_any(StringOrVec(PhantomData))
 }
 
+pub(crate) fn decode_path_filter(paths: Vec<String>) -> Vec<String> {
+	paths
+		.iter()
+		.map(|path| urlencoding::decode(path))
+		.filter_map(Result::ok)
+		.map(|cow_str| cow_str.into_owned())
+		.collect::<Vec<String>>()
+}
+
 // TODO: tags
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct LibraryFilter {
@@ -94,12 +103,14 @@ pub struct SeriesFilter {
 with_prefix!(series_prefix "series_");
 #[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
 pub struct MediaFilter {
-	#[serde(default)]
+	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
-	#[serde(default)]
+	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
-	#[serde(default)]
+	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub extension: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub path: Vec<String>,
 	#[serde(flatten, with = "series_prefix")]
 	pub series: Option<SeriesFilter>,
 }

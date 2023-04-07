@@ -9,6 +9,7 @@ export type ConfirmationModalProps = {
 	description?: string
 	children?: React.ReactNode
 	confirmText?: string
+	confirmIsLoading?: boolean
 	cancelText?: string
 	closeIcon?: boolean
 	triggerVariant?: ButtonVariant
@@ -26,6 +27,7 @@ export function ConfirmationModal({
 	trigger,
 	confirmText,
 	cancelText,
+	confirmIsLoading,
 	closeIcon = true,
 	triggerVariant,
 	confirmVariant = 'primary',
@@ -59,7 +61,7 @@ export function ConfirmationModal({
 					<Button variant={cancelVariant} onClick={onClose}>
 						{cancelText || 'Cancel'}
 					</Button>
-					<Button variant={confirmVariant} onClick={onConfirm}>
+					<Button variant={confirmVariant} onClick={onConfirm} isLoading={confirmIsLoading}>
 						{confirmText || 'Confirm'}
 					</Button>
 				</Dialog.Footer>

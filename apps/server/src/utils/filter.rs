@@ -81,6 +81,7 @@ pub struct LibraryFilter {
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesRelation {
 	pub load_media: Option<bool>,
+	pub count_media: Option<bool>,
 }
 
 // TODO: I don't like this convention and I'd rather figure out a way around it.

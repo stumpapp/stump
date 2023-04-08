@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::Direction;
+use prisma_client_rust::{and, Direction};
 use serde::Deserialize;
 use stump_core::{
 	config::get_config_dir,
@@ -79,19 +79,11 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	_where
 }
 
+// TODO: move this to core?
 pub(crate) fn apply_pagination<'a>(
 	query: media::FindMany<'a>,
 	pagination: &Pagination,
 ) -> media::FindMany<'a> {
-	// let mut query = client
-	// .media()
-	// .find_many(where_conditions.clone())
-	// .with(media::read_progresses::fetch(vec![
-	// 	read_progress::user_id::equals(user_id),
-	// ]))
-	// .order_by(order_by_param)
-	// .order_by(media::created_at::order(Direction::Desc));
-
 	match pagination {
 		Pagination::Page(page_query) => {
 			let (skip, take) = page_query.get_skip_take();
@@ -212,7 +204,7 @@ async fn get_media(
 	path = "/api/v1/media/duplicates",
 	tag = "media",
 	params(
-		("pagination" = Option<PageQuery>, Query, description = "Pagination options")
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched duplicate media", body = PageableMedia),
@@ -263,17 +255,68 @@ async fn get_duplicate_media(
 async fn get_in_progress_media(
 	State(ctx): State<AppState>,
 	session: ReadableSession,
-	pagination: Query<PageQuery>,
+	pagination_query: Query<PaginationQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let user_id = get_session_user(&session)?.id;
-	let media_dao = MediaDaoImpl::new(ctx.db.clone());
-	let page_params = pagination.0.page_params();
+	let pagination = pagination_query.0.get();
 
-	Ok(Json(
-		media_dao
-			.get_in_progress_media(&user_id, page_params)
-			.await?,
-	))
+	let pagination_cloned = pagination.clone();
+	let is_unpaged = pagination.is_unpaged();
+
+	let read_progress_filter = and![
+		read_progress::user_id::equals(user_id.clone()),
+		read_progress::is_completed::equals(false)
+	];
+
+	let (media, count) = ctx
+		.db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(vec![media::read_progresses::some(vec![
+					read_progress_filter.clone(),
+				])])
+				.with(media::read_progresses::fetch(vec![
+					read_progress_filter.clone()
+				]))
+				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
+				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
+				// I think this just means whenever progress updates I should update the media
+				// updated_at field, but that's a bit annoying TBH...
+				.order_by(media::updated_at::order(Direction::Desc));
+
+			if !is_unpaged {
+				query = apply_pagination(query, &pagination_cloned);
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(vec![media::read_progresses::some(vec![
+					read_progress_filter,
+				])])
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
+	}
+
+	Ok(Json(Pageable::from(media)))
 }
 
 #[utoipa::path(

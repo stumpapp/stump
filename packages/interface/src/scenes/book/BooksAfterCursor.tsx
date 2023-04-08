@@ -1,4 +1,4 @@
-import { useMediaAfterCursorQuery } from '@stump/client'
+import { useMediaCursorQuery } from '@stump/client'
 import { Media } from '@stump/types'
 
 import HorizontalCardList from '../../components/HorizontalCardList'
@@ -8,11 +8,12 @@ type Props = {
 	cursor: Media
 }
 export default function BooksAfterCurrent({ cursor }: Props) {
-	const { media, fetchNextPage, hasNextPage } = useMediaAfterCursorQuery(cursor.id, {
-		filters: {
+	const { media, fetchNextPage, hasNextPage } = useMediaCursorQuery({
+		initialCursor: cursor.id,
+		limit: 20,
+		params: {
 			series_id: cursor.series_id,
 		},
-		limit: 20,
 	})
 
 	const title = cursor.series ? `Next in ${cursor.series.name}` : 'Next in Series'

@@ -1,26 +1,21 @@
 import { useContinueReading } from '@stump/client'
 
+import HorizontalCardList from '../../components/HorizontalCardList'
 import MediaCard from '../../components/media/MediaCard'
-import SlidingCardList from '../../components/SlidingCardList'
 
-// TODO: better empty state
 export default function ContinueReadingMedia() {
-	return null
-	// const { data, isLoading, hasMore, fetchMore } = useContinueReading()
+	const { media, fetchNextPage, hasNextPage } = useContinueReading({
+		limit: 20,
+	})
 
-	// if (isLoading || !data) {
-	// 	return null
-	// }
+	const cards = media.map((media) => <MediaCard media={media} key={media.id} fullWidth={false} />)
 
-	// return (
-	// 	<SlidingCardList
-	// 		title="Continue Reading"
-	// 		cards={data.map((media) => (
-	// 			<MediaCard key={media.id} media={media} fixed readingLink />
-	// 		))}
-	// 		isLoadingNext={isLoading}
-	// 		hasNext={hasMore}
-	// 		onScrollEnd={fetchMore}
-	// 	/>
-	// )
+	return (
+		<HorizontalCardList
+			title="Continue Reading"
+			cards={cards}
+			fetchNext={fetchNextPage}
+			hasMore={hasNextPage}
+		/>
+	)
 }

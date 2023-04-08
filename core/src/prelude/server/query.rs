@@ -80,6 +80,8 @@ impl TryInto<library::OrderByParam> for QueryOrder {
 			"name" => library::name::order(dir),
 			"path" => library::path::order(dir),
 			"status" => library::status::order(dir),
+			"updated_at" => library::updated_at::order(dir),
+			// "created_at" => library::created_at::order(dir),
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order library by {:?}",
@@ -100,6 +102,7 @@ impl TryInto<series::OrderByParam> for QueryOrder {
 			"name" => series::name::order(dir),
 			"description" => series::description::order(dir),
 			"updated_at" => series::updated_at::order(dir),
+			"created_at" => series::created_at::order(dir),
 			"path" => series::path::order(dir),
 			"status" => series::status::order(dir),
 			"library_id" => series::library_id::order(dir),

@@ -2,7 +2,15 @@ import { seriesApi, seriesQueryKeys } from '@stump/api'
 import type { Media, Series } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { PageQueryOptions, queryClient, QueryOptions, usePageQuery, useQuery } from '../client'
+import {
+	CursorQueryOptions,
+	PageQueryOptions,
+	queryClient,
+	QueryOptions,
+	useCursorQuery,
+	usePageQuery,
+	useQuery,
+} from '../client'
 import { QueryCallbacks } from '.'
 
 export const prefetchSeries = async (id: string) => {
@@ -23,6 +31,25 @@ export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, Axi
 	)
 
 	return { series: data, ...ret }
+}
+
+export function useSeriesCursorQuery(options: CursorQueryOptions<Series>) {
+	const { data, ...restReturn } = useCursorQuery(
+		[seriesQueryKeys.getSeriesWithCursor],
+		async (params) => {
+			const { data } = await seriesApi.getSeriesWithCursor(params)
+			return data
+		},
+		options,
+	)
+
+	const series = data ? data.pages.flatMap((page) => page.data) : []
+
+	return {
+		data,
+		series,
+		...restReturn,
+	}
 }
 
 export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<Media>) {

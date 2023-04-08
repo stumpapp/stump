@@ -18,7 +18,7 @@ function SeriesOverviewScene() {
 
 	const { page } = useGetPage()
 
-	const { seriesId, page_size, filters } = useSeriesOverviewContext()
+	const { seriesId, page_size, params } = useSeriesOverviewContext()
 	if (!seriesId) {
 		throw new Error('Series ID is required for this route.')
 	}
@@ -29,7 +29,7 @@ function SeriesOverviewScene() {
 		isLoading: isLoadingMedia,
 		media,
 		pageData,
-	} = useSeriesMediaQuery(seriesId, { filters, page, page_size })
+	} = useSeriesMediaQuery(seriesId, { page, page_size, params })
 
 	useEffect(() => {
 		if (!isInView) {

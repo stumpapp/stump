@@ -33,10 +33,12 @@ export type ComboBoxProps = {
 	label?: string
 	description?: string
 	options: ComboBoxOption[]
-	size?: keyof typeof SIZE_VARIANTS
+	size?: keyof typeof SIZE_VARIANTS | null
 	/** Classes applied to the trigger button for the combobox */
 	triggerClassName?: string
+	triggerRef?: React.LegacyRef<HTMLDivElement> | undefined
 	wrapperClassName?: string
+	wrapperStyle?: React.CSSProperties
 	placeholder?: string
 	filterable?: boolean
 	filterPlaceholder?: string
@@ -52,7 +54,9 @@ export function ComboBox({
 	onChange,
 	size = 'default',
 	triggerClassName,
+	triggerRef,
 	wrapperClassName,
+	wrapperStyle,
 	placeholder = 'Select...',
 	filterable = false,
 	filterPlaceholder = 'Filter...',
@@ -94,6 +98,7 @@ export function ComboBox({
 		}
 	}
 
+	const hasSelectedSomething = isMultiSelect ? !!value?.length : !!value
 	const Container = label || description ? 'div' : Fragment
 	const containerProps = {
 		...((label || description) && { className: 'flex flex-col gap-2' }),
@@ -104,14 +109,16 @@ export function ComboBox({
 			{label && <Label>{label}</Label>}
 			<Popover open={open} onOpenChange={setOpen}>
 				<Popover.Trigger asChild>
-					{/* TODO: style like an input better, a little too dark rn */}
 					<Button
+						// @ts-expect-error: wrong type for ref, but it's fineeee
+						ref={triggerRef}
 						variant="outline"
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							SIZE_VARIANTS[size],
-							'h-[unset] justify-between truncate',
+							'h-[unset] justify-between truncate hover:bg-gray-50/50 data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-brand-400 data-[state=open]:ring-offset-2 dark:hover:bg-gray-900/50 dark:data-[state=open]:bg-transparent dark:data-[state=open]:ring-offset-gray-900',
+							{ [SIZE_VARIANTS[size || 'default']]: !!size },
+							{ 'text-gray-400 dark:text-gray-300': !hasSelectedSomething },
 							triggerClassName,
 						)}
 					>
@@ -119,7 +126,14 @@ export function ComboBox({
 						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 					</Button>
 				</Popover.Trigger>
-				<Popover.Content className={cn(SIZE_VARIANTS[size], 'p-0', wrapperClassName)}>
+				<Popover.Content
+					className={cn(
+						{ [SIZE_VARIANTS[size || 'default']]: !!size },
+						'mt-1 p-0',
+						wrapperClassName,
+					)}
+					style={wrapperStyle}
+				>
 					<Command>
 						{filterable && (
 							<>

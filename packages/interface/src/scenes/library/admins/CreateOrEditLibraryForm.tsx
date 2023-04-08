@@ -22,6 +22,7 @@ import { z } from 'zod'
 import DirectoryPickerModal from '../../../components/DirectoryPickerModal'
 import TagSelect from '../../../components/TagSelect'
 import { useLocaleContext } from '../../../i18n'
+import { useLibraryAdminContext } from './context'
 import LibraryPatternRadioGroup from './LibraryPatternRadioGroup'
 
 type Props = {
@@ -30,6 +31,8 @@ type Props = {
 }
 
 export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
+	const { syncLibraryPreview } = useLibraryAdminContext()
+
 	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
@@ -104,6 +107,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			scan_mode: 'BATCHED',
 			tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
 		},
+		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),
 	})
 
@@ -124,8 +128,39 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		return form.formState.errors
 	}, [form.formState.errors])
 
-	const [scanMode, convertRarToZip, hardDeleteConversions] = form.watch([
+	const formValues = form.watch()
+	const libraryPreview = useMemo(() => {
+		const {
+			tags,
+			library_pattern,
+			convert_rar_to_zip,
+			create_webp_thumbnails,
+			hard_delete_conversions,
+			...preview
+		} = formValues
+
+		return {
+			...preview,
+			library_options: {
+				...(library?.library_options ?? {
+					id: '',
+					library_id: '',
+				}),
+				convert_rar_to_zip,
+				create_webp_thumbnails,
+				hard_delete_conversions,
+				library_pattern,
+			},
+			tags: tags?.map((tag) => ({
+				id: tag.value,
+				name: tag.value,
+			})),
+		} satisfies Partial<Library>
+	}, [formValues, library?.library_options])
+
+	const [scanMode, createThumnails, convertRarToZip, hardDeleteConversions] = form.watch([
 		'scan_mode',
+		'create_webp_thumbnails',
 		'convert_rar_to_zip',
 		'hard_delete_conversions',
 	])
@@ -149,6 +184,11 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		[convertRarToZip, hardDeleteConversions],
 	)
 
+	// FIXME: this causes infinite rerender...
+	// useEffect(() => {
+	// 	syncLibraryPreview(libraryPreview)
+	// }, [libraryPreview, syncLibraryPreview])
+
 	return (
 		<>
 			<DirectoryPickerModal
@@ -167,6 +207,8 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 						label="Library Name"
 						placeholder="My Library"
 						containerClassName="max-w-full md:max-w-sm"
+						required
+						errorMessage={errors.name?.message}
 						{...form.register('name')}
 					/>
 					<Input
@@ -184,6 +226,8 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 								<Folder className="h-4 w-4 text-gray-700 dark:text-gray-300" />
 							</IconButton>
 						}
+						required
+						errorMessage={errors.path?.message}
 						{...form.register('path')}
 					/>
 
@@ -226,7 +270,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 							<div className="flex flex-grow flex-col gap-2 text-right">
 								<Label>Parallel Scan</Label>
 								<Text size="xs" variant="muted">
-									Scans your library in groups of multiple file batches at a time, in parallel.
+									A faster scan that indexes your library files in parallel
 								</Text>
 							</div>
 						</div>
@@ -242,7 +286,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 							<div className="flex flex-grow flex-col gap-2 text-right">
 								<Label>In-Order Scan</Label>
 								<Text size="xs" variant="muted">
-									Scans your library in order of the files on disk, one at a time.
+									A standard scan that indexes your library files one at a time
 								</Text>
 							</div>
 						</div>
@@ -251,7 +295,12 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 					<div className="flex flex-auto gap-12 pt-4">
 						{/* TODO: thumbnails will eventually be a separate subform, as it will get a little complex with
 							the future options */}
-						<Switch label="Create Webp Thumbnails" {...form.register('create_webp_thumbnails')} />
+						<Switch
+							label="Create Webp Thumbnails"
+							checked={createThumnails}
+							onClick={() => form.setValue('create_webp_thumbnails', !createThumnails)}
+							{...form.register('create_webp_thumbnails')}
+						/>
 						<Switch
 							checked={convertRarToZip}
 							label="Convert .rar files to .zip"

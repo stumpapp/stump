@@ -15,6 +15,8 @@ export type InputProps = {
 	description?: string
 	/** The optional props for the description. */
 	descriptionProps?: Omit<React.ComponentPropsWithoutRef<typeof Text>, 'children'>
+	/** The optional error message to display. */
+	errorMessage?: string
 	/** The optional class name for the container. */
 	containerClassName?: string
 	/** An optional right icon to display inset the input */
@@ -23,7 +25,17 @@ export type InputProps = {
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	(
-		{ label, description, labelProps, descriptionProps, containerClassName, icon, ...props },
+		{
+			label,
+			description,
+			labelProps,
+			descriptionProps,
+			containerClassName,
+			icon,
+			variant,
+			errorMessage,
+			...props
+		},
 		ref,
 	) => {
 		const renderIcon = () => {
@@ -34,17 +46,26 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			return null
 		}
 
+		const isInvalid = !!errorMessage
+
 		return (
 			<div className={cn('grid w-full max-w-sm items-center gap-1.5', containerClassName)}>
 				{label && (
 					<Label htmlFor={props.id} {...(labelProps || {})}>
 						{label}
+						{props.required && <span className="text-red-400"> *</span>}
 					</Label>
 				)}
 				<div className="relative w-full">
-					<RawInput {...props} ref={ref} />
+					<RawInput variant={isInvalid ? 'error' : variant} {...props} ref={ref} />
 					{renderIcon()}
 				</div>
+
+				{errorMessage && (
+					<Text variant="danger" size="xs" className="break-all">
+						{errorMessage}
+					</Text>
+				)}
 
 				{description && (
 					<Text variant="muted" size="sm" {...(descriptionProps || {})}>

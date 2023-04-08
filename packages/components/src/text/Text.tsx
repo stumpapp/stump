@@ -5,6 +5,7 @@ import { cn } from '../utils'
 
 // TODO: common combination shortcuts, e.g. description, subtitle, etc.
 export const TEXT_VARIANTS = {
+	danger: 'text-red-600 dark:text-red-400',
 	default: 'text-gray-900 dark:text-gray-100',
 	muted: 'text-gray-500 dark:text-gray-450',
 	primary: 'text-brand',
@@ -35,21 +36,11 @@ type BaseProps = VariantProps<typeof textVariants> & React.ComponentPropsWithout
 // FIXME: https://github.com/jsx-eslint/eslint-plugin-react/issues/3284
 export type TextProps = {
 	className?: string
-	// FIXME: not template string
-	noOfLines?: number
 } & BaseProps
 
 const Text = React.forwardRef<React.ElementRef<'p'>, TextProps>(
-	({ className, variant, size, noOfLines, ...props }, ref) => (
-		<p
-			ref={ref}
-			className={cn(
-				textVariants({ className, size, variant }),
-				// { [`line-clamp-${noOfLines} [hyphens:auto]`]: noOfLines !== undefined },
-				className,
-			)}
-			{...props}
-		/>
+	({ className, variant, size, ...props }, ref) => (
+		<p ref={ref} className={cn(textVariants({ className, size, variant }), className)} {...props} />
 	),
 )
 Text.displayName = 'Text'

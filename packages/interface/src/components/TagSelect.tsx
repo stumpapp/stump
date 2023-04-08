@@ -3,6 +3,7 @@ import { TagOption } from '@stump/client'
 import { ComboBox } from '@stump/components'
 // import { CreatableSelect } from 'chakra-react-select'
 import { useFormContext } from 'react-hook-form'
+import { useDimensionsRef } from 'rooks'
 
 interface TagSelectProps {
 	name?: string
@@ -26,8 +27,24 @@ export default function TagSelect({
 	hint,
 }: TagSelectProps) {
 	const form = useFormContext()
+
+	const [containerRef, size] = useDimensionsRef({ updateOnResize: true })
+	const wrapperStyle = size?.width ? { width: size.width } : undefined
+
 	return (
-		<ComboBox label="Tags (not working)" filterable isMultiSelect options={options} size="lg" />
+		<div className="w-full">
+			<ComboBox
+				label="Tags (not working)"
+				filterable
+				isMultiSelect
+				options={options}
+				size={null}
+				triggerClassName="w-full md:w-[24rem]"
+				wrapperClassName="w-full md:w-[24rem]"
+				triggerRef={containerRef}
+				wrapperStyle={wrapperStyle}
+			/>
+		</div>
 	)
 	/*return (
 		<Controller

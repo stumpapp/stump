@@ -8,7 +8,7 @@ body {
 
 #root,
 html {
-	@apply h-full dark:bg-gray-950;
+	@apply h-full overflow-hidden dark:bg-gray-950;
 }
 
 body {
@@ -16,7 +16,7 @@ body {
 }
 
 main {
-	@apply flex h-full w-full flex-col overflow-x-hidden overflow-y-scroll scrollbar-hide !important;
+	@apply flex h-full w-full flex-col overflow-x-hidden overflow-y-scroll !important;
 }
 
 form {

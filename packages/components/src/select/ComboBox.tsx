@@ -104,11 +104,16 @@ export function ComboBox({
 			{label && <Label>{label}</Label>}
 			<Popover open={open} onOpenChange={setOpen}>
 				<Popover.Trigger asChild>
+					{/* TODO: style like an input better, a little too dark rn */}
 					<Button
 						variant="outline"
 						role="combobox"
 						aria-expanded={open}
-						className={cn(SIZE_VARIANTS[size], 'justify-between truncate', triggerClassName)}
+						className={cn(
+							SIZE_VARIANTS[size],
+							'h-[unset] justify-between truncate',
+							triggerClassName,
+						)}
 					>
 						{renderSelected()}
 						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

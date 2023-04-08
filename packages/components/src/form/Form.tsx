@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { FieldValues, FormProvider, SubmitHandler, UseFormReturn } from 'react-hook-form'
 
 import { type Any } from '..'
@@ -12,10 +12,21 @@ export function Form<T extends FieldValues>({ form, onSubmit, children, ...props
 	return (
 		<FormProvider {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} {...props}>
-				<fieldset className="flex flex-col gap-4" disabled={form.formState.isSubmitting}>
+				<fieldset className="flex min-w-0 flex-col gap-4" disabled={form.formState.isSubmitting}>
 					{children}
 				</fieldset>
 			</form>
 		</FormProvider>
 	)
 }
+
+export const FormSection = forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
+	({ children, ...props }, ref) => {
+		return (
+			<div ref={ref} {...props}>
+				{children}
+			</div>
+		)
+	},
+)
+FormSection.displayName = 'FormSection'

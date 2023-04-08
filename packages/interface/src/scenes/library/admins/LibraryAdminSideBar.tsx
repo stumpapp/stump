@@ -15,7 +15,7 @@ export default function LibraryAdminSideBar() {
 	const isEditingLibrary = location.pathname.includes('/edit')
 
 	return (
-		<aside className="hidden min-h-full md:flex md:flex-col">
+		<aside className="hidden h-full lg:fixed lg:flex lg:flex-col">
 			<div className="relative z-10 flex h-full w-[12.5rem] flex-1 shrink-0 flex-col gap-4 border-r border-gray-75 p-4 dark:border-gray-850/70">
 				<Heading size="xs">{t('adminLibrarySidebar.libraryConfiguration.heading')}</Heading>
 				<nav className="flex h-full w-full flex-1 flex-col gap-4">
@@ -26,6 +26,10 @@ export default function LibraryAdminSideBar() {
 							}`,
 						)}
 					</Text>
+
+					<div>
+						<Text size="sm">Sorry folks, not yet.</Text>
+					</div>
 				</nav>
 			</div>
 		</aside>

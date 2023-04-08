@@ -11,7 +11,7 @@ interface TagSelectProps {
 	defaultValue?: TagOption[]
 	isLoading?: boolean
 	hint?: string
-	// onCreateTag: (name: string) => Promise<void>
+	onCreateTag: (name: string) => Promise<void>
 }
 
 // TODO: make this work:
@@ -26,7 +26,9 @@ export default function TagSelect({
 	hint,
 }: TagSelectProps) {
 	const form = useFormContext()
-	return <ComboBox label="WIP" filterable isMultiSelect options={options} size="lg" />
+	return (
+		<ComboBox label="Tags (not working)" filterable isMultiSelect options={options} size="lg" />
+	)
 	/*return (
 		<Controller
 			name={name}

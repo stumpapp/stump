@@ -2,12 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTags } from '@stump/client'
 import {
 	Button,
-	cx,
+	Divider,
 	Form,
 	Heading,
 	IconButton,
 	Input,
-	Link,
+	Label,
+	RawSwitch,
 	Switch,
 	Text,
 	TextArea,
@@ -18,6 +19,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import DirectoryPickerModal from '../../../components/DirectoryPickerModal'
 import TagSelect from '../../../components/TagSelect'
 import { useLocaleContext } from '../../../i18n'
 import LibraryPatternRadioGroup from './LibraryPatternRadioGroup'
@@ -30,11 +32,7 @@ type Props = {
 export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
 	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
 
-	const isEditing = !!library
-
-	const [scantype, changeType] = useState('')
-	const [rar, rarToggle] = useState(false)
-	const [deleterar, forceUncheck] = useState(false)
+	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
 	const { t } = useLocaleContext()
 
@@ -89,113 +87,193 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 					label: z.string(),
 					value: z.string(),
 				}),
-				// z.any(),
 			)
 			.optional(),
 	})
+	type Schema = z.infer<typeof schema>
 
-	const form = useForm({
-		defaultValues: library
-			? {
-					convert_rar_to_zip: library.library_options.convert_rar_to_zip,
-					create_webp_thumbnails: library.library_options.create_webp_thumbnails,
-					description: library.description,
-					hard_delete_conversions: library.library_options.hard_delete_conversions,
-					library_pattern: library.library_options.library_pattern,
-					name: library.name,
-					path: library.path,
-					scan_mode: 'BATCHED',
-					tags: library.tags?.map((t) => ({ label: t.name, value: t.name })),
-			  }
-			: {},
+	const form = useForm<Schema>({
+		defaultValues: {
+			convert_rar_to_zip: library?.library_options.convert_rar_to_zip ?? false,
+			create_webp_thumbnails: library?.library_options.create_webp_thumbnails ?? false,
+			description: library?.description,
+			hard_delete_conversions: library?.library_options.hard_delete_conversions ?? false,
+			library_pattern: library?.library_options.library_pattern ?? 'SERIES_BASED',
+			name: library?.name,
+			path: library?.path,
+			scan_mode: 'BATCHED',
+			tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
+		},
 		resolver: zodResolver(schema),
 	})
+
+	const handleCreateTag = async (tag: string) => {
+		try {
+			await createTagsAsync([tag])
+		} catch (err) {
+			console.error(err)
+			// TODO: toast error
+		}
+	}
+
+	const handleSubmit = async (values: Schema) => {
+		alert(JSON.stringify(values, null, 2))
+	}
 
 	const errors = useMemo(() => {
 		return form.formState.errors
 	}, [form.formState.errors])
 
-	// const convertRarToZip = form.watch('convertRarToZip');
 	const [scanMode, convertRarToZip, hardDeleteConversions] = form.watch([
 		'scan_mode',
 		'convert_rar_to_zip',
 		'hard_delete_conversions',
 	])
 
-	useEffect(() => {
-		if (!rar && deleterar) {
-			forceUncheck(false)
+	const handleChangeScanMode = (newMode: LibraryScanMode) => {
+		if (newMode === scanMode) {
+			form.setValue('scan_mode', 'NONE')
+		} else {
+			form.setValue('scan_mode', newMode)
 		}
-	}, [rar, deleterar])
+	}
+
+	useEffect(
+		() => {
+			if (!convertRarToZip && hardDeleteConversions) {
+				form.setValue('hard_delete_conversions', false)
+			}
+		},
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[convertRarToZip, hardDeleteConversions],
+	)
 
 	return (
-		// @ts-expect-error: FIXME: invalid type error, aaron fix your shit
-		<Form form={form}>
-			<div className="flex flex-col gap-4">
-				<Heading size="md"> {'General'}</Heading>
-				<Input label="Library Name" placeholder="My Library" {...form.register('name')} />
-				<div className="relative flex flex-row items-center">
-					<Input label="Library path" placeholder="/path/to/library" {...form.register('path')} />
-
-					{/* <div className="absolute">
-						<IconButton size="xs">
-							<Folder className="font-xs" />
-						</IconButton>
-					</div> */}
-				</div>
-
-				<TagSelect
-					isLoading={isLoadingTags}
-					options={tags.map((tag) => ({ label: tag.name, value: tag.name }))}
-					defaultValue={library?.tags?.map((tag) => ({ label: tag.name, value: tag.name }))}
-				/>
-
-				<TextArea
-					className="flex w-96"
-					label="Description"
-					placeholder="A short description of your library (optional)"
-					{...form.register('description')}
-				/>
-			</div>
-			<div className="flex flex-col gap-4">
-				<Heading size="md">{'Options'}</Heading>
-
-				<LibraryPatternRadioGroup />
-
-				<div className="flex flex-auto gap-12">
-					<Switch
-						id="sync"
-						label="Synchronous Scan"
-						checked={scantype == 'synchronous'}
-						onClick={() => (
-							scantype == 'synchronous' ? changeType('') : changeType('synchronous'),
-							form.setValue('scan_mode', 'SYNC')
-						)}
+		<>
+			<DirectoryPickerModal
+				isOpen={showDirectoryPicker}
+				onClose={() => setShowDirectoryPicker(false)}
+				onPathChange={(path) => {
+					if (path) {
+						form.setValue('path', path)
+					}
+				}}
+			/>
+			<Form form={form} onSubmit={handleSubmit} className="">
+				<div className="flex flex-grow flex-col gap-6">
+					<Input
+						variant="primary"
+						label="Library Name"
+						placeholder="My Library"
+						containerClassName="max-w-full md:max-w-sm"
+						{...form.register('name')}
 					/>
-					<Switch
-						label="Batched Scan"
-						checked={scantype == 'batch'}
-						onClick={() => (
-							scantype == 'batch' ? changeType('') : changeType('batch'),
-							form.setValue('scan_mode', 'BATCHED')
-						)}
+					<Input
+						variant="primary"
+						label="Library path"
+						placeholder="/path/to/library"
+						containerClassName="max-w-full md:max-w-sm"
+						icon={
+							<IconButton
+								size="xs"
+								variant="ghost"
+								type="button"
+								onClick={() => setShowDirectoryPicker(true)}
+							>
+								<Folder className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+							</IconButton>
+						}
+						{...form.register('path')}
 					/>
-					<Switch label="Create Webp Thumbnails" {...form.register('create_webp_thumbnails')} />
-					<Switch
-						checked={rar}
-						label="Convert .rar files to .zip"
-						onClick={() => rarToggle(!rar)}
-						{...form.register('convert_rar_to_zip')}
+
+					<TagSelect
+						isLoading={isLoadingTags}
+						options={tags.map((tag) => ({ label: tag.name, value: tag.name }))}
+						defaultValue={library?.tags?.map((tag) => ({ label: tag.name, value: tag.name }))}
+						onCreateTag={handleCreateTag}
 					/>
-					<Switch
-						checked={deleterar}
-						onClick={() => forceUncheck(!deleterar)}
-						disabled={!rar}
-						label="Permanently delete .rar files after conversion"
-						{...form.register('hard_delete_conversions')}
+
+					<TextArea
+						className="flex"
+						variant="primary"
+						label="Description"
+						placeholder="A short description of your library (optional)"
+						containerClassName="max-w-full md:max-w-sm"
+						{...form.register('description')}
 					/>
 				</div>
-			</div>
-		</Form>
+
+				<div className="py-2">
+					<Heading size="xs">Library Options</Heading>
+					<Text size="sm" variant="muted" className="mt-1.5">
+						The following options are configurable for your library and affect how it is scanned.
+					</Text>
+
+					<Divider variant="muted" className="my-3.5" />
+
+					<LibraryPatternRadioGroup />
+
+					<div className="flex max-w-2xl flex-col gap-3 divide-y divide-gray-75 py-2 dark:divide-gray-900">
+						<div className="flex items-center justify-between py-6 md:items-start">
+							<RawSwitch
+								className="text-gray-900"
+								checked={scanMode === 'BATCHED'}
+								onClick={() => handleChangeScanMode('BATCHED')}
+								primaryRing
+							/>
+
+							<div className="flex flex-grow flex-col gap-2 text-right">
+								<Label>Parallel Scan</Label>
+								<Text size="xs" variant="muted">
+									Scans your library in groups of multiple file batches at a time, in parallel.
+								</Text>
+							</div>
+						</div>
+
+						<div className="flex items-center justify-between py-6 md:items-start">
+							<RawSwitch
+								className="text-gray-900"
+								checked={scanMode === 'SYNC'}
+								onClick={() => handleChangeScanMode('SYNC')}
+								primaryRing
+							/>
+
+							<div className="flex flex-grow flex-col gap-2 text-right">
+								<Label>In-Order Scan</Label>
+								<Text size="xs" variant="muted">
+									Scans your library in order of the files on disk, one at a time.
+								</Text>
+							</div>
+						</div>
+					</div>
+
+					<div className="flex flex-auto gap-12 pt-4">
+						{/* TODO: thumbnails will eventually be a separate subform, as it will get a little complex with
+							the future options */}
+						<Switch label="Create Webp Thumbnails" {...form.register('create_webp_thumbnails')} />
+						<Switch
+							checked={convertRarToZip}
+							label="Convert .rar files to .zip"
+							onClick={() => form.setValue('convert_rar_to_zip', !convertRarToZip)}
+							{...form.register('convert_rar_to_zip')}
+						/>
+						<Switch
+							checked={hardDeleteConversions}
+							disabled={!convertRarToZip}
+							label="Permanently delete .rar files after conversion"
+							onClick={() => form.setValue('hard_delete_conversions', !hardDeleteConversions)}
+							{...form.register('hard_delete_conversions')}
+						/>
+					</div>
+				</div>
+
+				<div className="mt-4 flex w-full md:max-w-sm">
+					<Button className="w-full md:max-w-sm" variant="primary">
+						Create Library
+					</Button>
+				</div>
+			</Form>
+		</>
 	)
 }

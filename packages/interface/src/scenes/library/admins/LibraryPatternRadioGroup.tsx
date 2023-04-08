@@ -1,4 +1,4 @@
-import { cx, Heading, Link, Text } from '@stump/components'
+import { cx, Heading, Label, Link, Text } from '@stump/components'
 import { LibraryPattern } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
 
@@ -17,12 +17,11 @@ export default function LibraryPatternRadioGroup() {
 	}
 
 	return (
-		<div>
-			<Text size="sm" variant="muted">
-				{'Select a library pattern:'}
-			</Text>
+		<div className="flex flex-col gap-2 py-2">
+			<Label>Library Pattern</Label>
 			<input type="hidden" {...form.register('library_pattern')} />
-			<div className="flex w-1/3 gap-12">
+
+			<div className="flex gap-12">
 				<LibraryPatternRadio
 					selected={!isCollectionBasedSelected}
 					onChange={() => handleChange('SERIES_BASED')}
@@ -42,7 +41,8 @@ export default function LibraryPatternRadioGroup() {
 					</Text>
 				</LibraryPatternRadio>
 			</div>
-			<Text size="xs" variant="muted">
+
+			<Text size="xs" variant="muted" className="mt-1">
 				{'Not sure which to choose? '}
 				<Link href="https://stumpapp.dev/guides/libraries#library-patterns">
 					{t('Click here to learn more.')}
@@ -63,9 +63,9 @@ function LibraryPatternRadio({ selected, onChange, children }: LibraryPatternRad
 	return (
 		<div
 			className={cx(
-				'cursor-pointer rounded-md border-[1.5px] p-4 text-center transition-colors duration-200 hover:border-brand dark:hover:border-brand',
+				'flex cursor-pointer flex-col gap-3 rounded-md border-2 p-4 text-left transition-colors duration-200 hover:border-brand dark:hover:border-brand',
 				{
-					'border-gray-75 dark:border-gray-800': !selected,
+					'border-gray-100 dark:border-gray-800': !selected,
 				},
 				{
 					'border-brand': selected,

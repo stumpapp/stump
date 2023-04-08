@@ -63,7 +63,7 @@ export function AppLayout() {
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
-					<main className="h-full w-full bg-white dark:bg-gray-975">
+					<main className="min-h-full w-full bg-white dark:bg-gray-975">
 						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />
 						</Suspense>

@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::Direction;
+use prisma_client_rust::{and, Direction};
 use serde::Deserialize;
 use stump_core::{
 	config::get_config_dir,
@@ -263,6 +263,11 @@ async fn get_in_progress_media(
 	let pagination_cloned = pagination.clone();
 	let is_unpaged = pagination.is_unpaged();
 
+	let read_progress_filter = and![
+		read_progress::user_id::equals(user_id.clone()),
+		read_progress::is_completed::equals(false)
+	];
+
 	let (media, count) = ctx
 		.db
 		._transaction()
@@ -270,12 +275,10 @@ async fn get_in_progress_media(
 			let mut query = client
 				.media()
 				.find_many(vec![media::read_progresses::some(vec![
-					read_progress::user_id::equals(user_id.clone()),
-					read_progress::is_completed::equals(false),
+					read_progress_filter.clone(),
 				])])
 				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id.clone()),
-					read_progress::is_completed::equals(false),
+					read_progress_filter.clone()
 				]))
 				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
@@ -301,8 +304,7 @@ async fn get_in_progress_media(
 			client
 				.media()
 				.count(vec![media::read_progresses::some(vec![
-					read_progress::user_id::equals(user_id),
-					read_progress::is_completed::equals(false),
+					read_progress_filter,
 				])])
 				.exec()
 				.await

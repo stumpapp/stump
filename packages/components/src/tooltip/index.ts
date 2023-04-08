@@ -1,2 +1,2 @@
 export { ToolTipPrimitive, ToolTipProvider } from './primitives'
-export { type ToolTipProps, ToolTip } from './ToolTip'
+export { ToolTip, type ToolTipProps } from './ToolTip'

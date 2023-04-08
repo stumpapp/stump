@@ -114,7 +114,6 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 			: {},
 		resolver: zodResolver(schema),
 	})
-
 	// TODO: maybe check if each error has a message? then if not, log it for
 	// debugging purposes.
 	const errors = useMemo(() => {
@@ -122,7 +121,18 @@ export default function LibraryModalForm({ tags, onSubmit, fetchingTags, reset, 
 	}, [form.formState.errors])
 
 	// const convertRarToZip = form.watch('convertRarToZip');
-	const [scanMode, convertRarToZip] = form.watch(['scan_mode', 'convert_rar_to_zip'])
+	const [scanMode, convertRarToZip, hardDeleteConversions] = form.watch([
+		'scan_mode',
+		'convert_rar_to_zip',
+		'hard_delete_conversions',
+	])
+
+	const setValueRef = useRef(form.setValue)
+	useEffect(() => {
+		if (!convertRarToZip && hardDeleteConversions) {
+			setValueRef.current('hard_delete_conversions', false)
+		}
+	}, [convertRarToZip, hardDeleteConversions])
 
 	const resetRef = useRef(form.reset)
 	useEffect(() => {

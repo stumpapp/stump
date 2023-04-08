@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Label } from '../form'
 import { Text } from '../text'
-import { type RawCheckBoxRef, RawCheckBox, RawCheckBoxProps } from './raw'
+import { RawCheckBox, RawCheckBoxProps, type RawCheckBoxRef } from './raw'
 
 export type CheckBoxProps = {
 	/** The optional label for the checkbox. */

@@ -1,9 +1,13 @@
+import { useLibraries } from '@stump/client'
 import { Heading, Link, Text } from '@stump/components'
 
 import { useLocaleContext } from '../../../i18n'
+import CreateOrEditLibraryForm from './CreateOrEditLibraryForm'
 
 export default function CreateLibraryScene() {
 	const { t } = useLocaleContext()
+
+	const { libraries } = useLibraries()
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -16,6 +20,8 @@ export default function CreateLibraryScene() {
 					</Link>
 				</Text>
 			</header>
+
+			{libraries && <CreateOrEditLibraryForm existingLibraries={libraries} />}
 		</div>
 	)
 }

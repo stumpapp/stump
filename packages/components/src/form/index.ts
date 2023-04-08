@@ -1,5 +1,5 @@
-export { type FormProps, Form } from './Form'
-export { type LabelProps, Label } from './Label'
+export { Form, type FormProps } from './Form'
+export { Label, type LabelProps } from './Label'
 
 export type FormControlElementProps = {
 	isInvalid?: boolean

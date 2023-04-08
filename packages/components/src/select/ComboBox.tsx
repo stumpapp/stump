@@ -34,6 +34,7 @@ export type ComboBoxProps = {
 	description?: string
 	options: ComboBoxOption[]
 	size?: keyof typeof SIZE_VARIANTS
+	/** Classes applied to the trigger button for the combobox */
 	triggerClassName?: string
 	wrapperClassName?: string
 	placeholder?: string

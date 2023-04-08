@@ -1,7 +1,8 @@
-import { FormControl, FormHelperText, FormLabel, SystemStyleObject } from '@chakra-ui/react'
+// import { FormControl, FormHelperText, FormLabel, SystemStyleObject } from '@chakra-ui/react'
 import { TagOption } from '@stump/client'
-import { CreatableSelect } from 'chakra-react-select'
-import { Controller, useFormContext } from 'react-hook-form'
+import { ComboBox } from '@stump/components'
+// import { CreatableSelect } from 'chakra-react-select'
+import { useFormContext } from 'react-hook-form'
 
 interface TagSelectProps {
 	name?: string
@@ -10,8 +11,12 @@ interface TagSelectProps {
 	defaultValue?: TagOption[]
 	isLoading?: boolean
 	hint?: string
+	// onCreateTag: (name: string) => Promise<void>
 }
 
+// TODO: make this work:
+// 1. select tags to update form
+// 2. if no tag matches filter, add option to create the tag.
 export default function TagSelect({
 	name = 'tags',
 	label = 'Tags',
@@ -21,8 +26,8 @@ export default function TagSelect({
 	hint,
 }: TagSelectProps) {
 	const form = useFormContext()
-
-	return (
+	return <ComboBox label="WIP" filterable isMultiSelect options={options} size="lg" />
+	/*return (
 		<Controller
 			name={name}
 			control={form.control}
@@ -87,5 +92,5 @@ export default function TagSelect({
 				</FormControl>
 			)}
 		/>
-	)
+	)*/
 }

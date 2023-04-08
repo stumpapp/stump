@@ -33,7 +33,7 @@ export default function ServerStatusOverlay() {
 					as={motion.div}
 					bg={'white'}
 					_dark={{ bg: 'gray.700' }}
-					className="fixed right-[1rem] bottom-[1rem] flex w-64 flex-col items-center justify-center rounded-md p-2 shadow"
+					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md p-2 shadow"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}

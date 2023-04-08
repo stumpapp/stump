@@ -43,5 +43,5 @@ form {
 	@apply pointer-events-none z-50;
 }
 #nprogress .bar {
-	@apply fixed top-0 left-0 z-50 h-0.5 w-full bg-brand-500;
+	@apply fixed left-0 top-0 z-50 h-0.5 w-full bg-brand-500;
 }

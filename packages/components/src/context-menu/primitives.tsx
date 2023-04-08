@@ -23,7 +23,7 @@ const ContextMenuPrimitiveSubTrigger = React.forwardRef<
 	<ContextMenu.SubTrigger
 		ref={ref}
 		className={cn(
-			'flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-gray-75 data-[state=open]:bg-gray-75 dark:focus:bg-gray-700 dark:data-[state=open]:bg-gray-700',
+			'flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium outline-none focus:bg-gray-75 data-[state=open]:bg-gray-75 dark:focus:bg-gray-700 dark:data-[state=open]:bg-gray-700',
 			inset && 'pl-8',
 			className,
 		)}
@@ -76,7 +76,7 @@ const ContextMenuPrimitiveItem = React.forwardRef<
 	<ContextMenu.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm font-medium outline-none focus:bg-gray-75 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
 			inset && 'pl-8',
 			className,
 		)}

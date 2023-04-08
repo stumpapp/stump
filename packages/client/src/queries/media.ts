@@ -39,20 +39,14 @@ export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = 
 	return { media: data, ...ret }
 }
 
-export function useMediaAfterCursorQuery(
-	initialCursor: string,
-	options: Omit<CursorQueryOptions<Media>, 'initialCursor'> = {},
-) {
+export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
 	const { data, ...restReturn } = useCursorQuery(
 		[MEDIA_KEYS.getMedia],
 		async (params) => {
 			const { data } = await mediaApi.getMediaWithCursor(params)
 			return data
 		},
-		{
-			initialCursor,
-			...options,
-		},
+		options,
 	)
 
 	const media = data ? data.pages.flatMap((page) => page.data) : []

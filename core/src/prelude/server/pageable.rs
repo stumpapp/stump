@@ -45,7 +45,7 @@ impl From<PaginationQuery> for Pagination {
 		if p.cursor.is_some() || p.limit.is_some() {
 			Pagination::Cursor(CursorQuery {
 				cursor: p.cursor,
-				limit: p.limit.map(|val| val.into()),
+				limit: p.limit,
 			})
 		} else if p.page.is_some() || p.page_size.is_some() || p.zero_based.is_some() {
 			Pagination::Page(PageQuery {
@@ -393,7 +393,12 @@ where
 				Pageable::page_paginated(data, PageInfo::new(page_params, total_pages))
 			},
 			Pagination::Cursor(cursor_query) => {
-				let next_cursor = data.last().map(|item| item.cursor());
+				let next_cursor = if data.len() == db_total as usize {
+					None
+				} else {
+					data.last().map(|item| item.cursor())
+				};
+
 				Pageable::cursor_paginated(
 					data,
 					CursorInfo {

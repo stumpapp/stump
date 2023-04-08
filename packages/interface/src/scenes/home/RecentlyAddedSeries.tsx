@@ -1,24 +1,28 @@
-import { useRecentlyAddedSeries } from '@stump/client'
+import { useSeriesCursorQuery } from '@stump/client'
 
+import HorizontalCardList from '../../components/HorizontalCardList'
 import SeriesCard from '../../components/series/SeriesCard'
-import SlidingCardList from '../../components/SlidingCardList'
 
-// TODO: better empty state
 export default function RecentlyAddedSeries() {
-	return null
-	// const { data, isLoading, hasMore, fetchMore } = useRecentlyAddedSeries()
-	// if (isLoading || !data) {
-	// 	return null
-	// }
-	// return (
-	// 	<SlidingCardList
-	// 		title="Recently Added Series"
-	// 		cards={data.map((series) => (
-	// 			<SeriesCard key={series.id} series={series} fixed />
-	// 		))}
-	// 		isLoadingNext={isLoading}
-	// 		hasNext={hasMore}
-	// 		onScrollEnd={fetchMore}
-	// 	/>
-	// )
+	const { series, fetchNextPage, hasNextPage } = useSeriesCursorQuery({
+		limit: 20,
+		params: {
+			count_media: true,
+			direction: 'desc',
+			order_by: 'created_at',
+		},
+	})
+
+	const cards = series.map((series) => (
+		<SeriesCard series={series} key={series.id} fullWidth={false} />
+	))
+
+	return (
+		<HorizontalCardList
+			title="Recently Added Series"
+			cards={cards}
+			fetchNext={fetchNextPage}
+			hasMore={hasNextPage}
+		/>
+	)
 }

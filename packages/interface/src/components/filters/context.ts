@@ -1,6 +1,8 @@
 import { Library, Media, PageParams, QueryOrder, Series } from '@stump/types'
 import { createContext } from 'react'
 
+// TODO: rename??
+
 export const DEFAULT_ORDER_BY = 'name'
 export const DEFAULT_ORDER_DIRECTION = 'asc'
 export const DEFAULT_PAGE_SIZE = 20
@@ -12,7 +14,7 @@ export type Filters = {
 	QueryOrder
 export type FilterContext = Partial<
 	{
-		filters?: Record<string, string>
+		params?: Record<string, string>
 		searchParams?: URLSearchParams
 	} & Filters
 >

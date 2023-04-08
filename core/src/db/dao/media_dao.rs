@@ -38,6 +38,29 @@ impl MediaDao for MediaDaoImpl {
 		viewer_id: &str,
 		page_params: PageParams,
 	) -> CoreResult<Pageable<Vec<Media>>> {
+		// TODO: do this
+		// let pagination_cloned = pagination.clone();
+		// let is_unpaged = pagination.is_unpaged();
+
+		// let (media, count) = self
+		// 	.client
+		// 	._transaction()
+		// 	.run(|client| async move {
+		// 		let mut query = client
+		// 			.read_progress()
+		// 			.find_many(vec![
+		// 				read_progress::user_id::equals(viewer_id.to_string()),
+		// 				read_progress::is_completed::equals(false),
+		// 			])
+		// 			.with(read_progress::media::fetch())
+		// 			.order_by(read_progress::updated_at::order(Direction::Desc));
+
+		// 		if !is_unpaged {
+		// 			// query = apply_pagination(query, &pagination_cloned);
+		// 		}
+		// 	})
+		// 	.await?;
+
 		let page_bounds = page_params.get_page_bounds();
 
 		let progresses_with_media = self

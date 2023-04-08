@@ -1,57 +1,85 @@
-import { Progress } from '@chakra-ui/react'
 import { getSeriesThumbnail } from '@stump/api'
 import { prefetchSeries } from '@stump/client'
-import { Text } from '@stump/components'
-import { Series } from '@stump/types'
+import { EntityCard, Text } from '@stump/components'
+import { FileStatus, Series } from '@stump/types'
 
+import paths from '../../paths'
 import pluralizeStat from '../../utils/pluralize'
-import Card, { CardBody, CardFooter } from '../Card'
 
 export type SeriesCardProps = {
 	series: Series
-	fixed?: boolean
+	fullWidth?: boolean
+	variant?: 'cover' | 'default'
 }
 
-export default function SeriesCard({ series, fixed }: SeriesCardProps) {
+export default function SeriesCard({ series, fullWidth, variant = 'default' }: SeriesCardProps) {
+	const isCoverOnly = variant === 'cover'
+
 	const bookCount = Number(series.media ? series.media.length : series.media_count ?? 0)
-	const unreadCount = series.unread_media_count
+	const booksUnread = series.unread_media_count
 
-	return (
-		<Card
-			variant={fixed ? 'fixedImage' : 'image'}
-			to={`/series/${series.id}`}
-			onMouseEnter={() => prefetchSeries(series.id)}
-			title={series.name}
-		>
-			<CardBody
-				// p={0}
-				className="relative aspect-[2/3] bg-cover bg-center"
-				style={{
-					backgroundImage: `url('${getSeriesThumbnail(series.id)}')`,
-				}}
-			>
-				{!!unreadCount && Number(unreadCount) !== bookCount && (
-					<div className="absolute bottom-0 left-0 w-full">
-						<Progress
-							value={bookCount - Number(unreadCount)}
-							max={bookCount}
-							w="full"
-							size="xs"
-							colorScheme="brand"
-						/>
-					</div>
-				)}
-			</CardBody>
-			<CardFooter className="flex flex-col gap-1 p-1">
-				{/* TODO: figure out how to make this not look like shit with 2 lines */}
-				<Text size="sm" className="font-md" noOfLines={1}>
-					{series.name}
+	const handleHover = () => {
+		prefetchSeries(series.id)
+	}
+
+	function getProgress() {
+		if (isCoverOnly || booksUnread == null) {
+			return undefined
+		}
+
+		const percent = Math.round((1 - Number(booksUnread) / bookCount) * 100)
+		if (percent > 100) {
+			return 100
+		}
+
+		return percent
+	}
+
+	const getSubtitle = (series: Series) => {
+		if (isCoverOnly) {
+			return null
+		}
+
+		const isMissing = series.status === FileStatus.Missing
+		if (isMissing) {
+			return (
+				<Text size="xs" className="uppercase text-amber-500 dark:text-amber-400">
+					Series Missing
 				</Text>
+			)
+		}
 
-				<Text size="xs" className="text-gray-700 dark:text-gray-300">
+		return (
+			<div className="flex items-center justify-between">
+				<Text size="xs" variant="muted">
 					{pluralizeStat('book', Number(bookCount))}
 				</Text>
-			</CardFooter>
-		</Card>
+			</div>
+		)
+	}
+
+	const overrides = isCoverOnly
+		? {
+				className: 'flex-shrink',
+				href: undefined,
+				progress: undefined,
+				subtitle: undefined,
+				title: undefined,
+		  }
+		: {}
+
+	return (
+		<EntityCard
+			key={series.id}
+			title={series.name}
+			fullWidth={fullWidth}
+			href={paths.seriesOverview(series.id)}
+			imageUrl={getSeriesThumbnail(series.id)}
+			progress={getProgress()}
+			subtitle={getSubtitle(series)}
+			onMouseEnter={handleHover}
+			size={isCoverOnly ? 'lg' : 'default'}
+			{...overrides}
+		/>
 	)
 }

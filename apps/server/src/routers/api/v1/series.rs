@@ -20,7 +20,7 @@ use stump_core::{
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,
-		series::{self, WhereParam},
+		series::{self, OrderByParam, WhereParam},
 	},
 };
 use tracing::{error, trace};
@@ -94,61 +94,92 @@ async fn get_series(
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+	let pagination_cloned = pagination.clone();
+
+	trace!(?filters, ?ordering, ?pagination, "get_series");
 
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
 	let is_unpaged = pagination.is_unpaged();
+	let order_by: OrderByParam = ordering.try_into()?;
+
 	let load_media = relation_query.load_media.unwrap_or(false);
-	let order_by = ordering.try_into()?;
+	let count_media = relation_query.count_media.unwrap_or(false);
 
 	let where_conditions = apply_series_filters(filters);
-	let action = db.series();
-	let action = action.find_many(where_conditions.clone());
-	let mut query = if load_media {
-		action.with(
-			series::media::fetch(vec![])
-				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id),
-				]))
-				.order_by(order_by),
-		)
-	} else {
-		action
-	};
 
-	if !is_unpaged {
-		match pagination.clone() {
-			Pagination::Page(page_query) => {
-				let (skip, take) = page_query.get_skip_take();
-				query = query.skip(skip).take(take);
-			},
-			Pagination::Cursor(cursor_query) => {
-				if let Some(cursor) = cursor_query.cursor {
-					query = query.cursor(series::id::equals(cursor)).skip(1)
+	// series, total series count
+	let (series, series_count) = db
+		._transaction()
+		.run(|client| async move {
+			let mut query = db.series().find_many(where_conditions.clone());
+			if load_media {
+				query = query.with(series::media::fetch(vec![]).with(
+					media::read_progresses::fetch(vec![read_progress::user_id::equals(
+						user_id,
+					)]),
+				));
+			}
+
+			if !is_unpaged {
+				match pagination_cloned {
+					Pagination::Page(page_query) => {
+						let (skip, take) = page_query.get_skip_take();
+						query = query.skip(skip).take(take);
+					},
+					Pagination::Cursor(cursor_query) => {
+						if let Some(cursor) = cursor_query.cursor {
+							query = query.cursor(series::id::equals(cursor)).skip(1)
+						}
+						if let Some(limit) = cursor_query.limit {
+							query = query.take(limit)
+						}
+					},
+					_ => unreachable!(),
 				}
-				if let Some(limit) = cursor_query.limit {
-					query = query.take(limit)
-				}
-			},
-			_ => unreachable!(),
-		}
+			}
+
+			let series = query.order_by(order_by).exec().await?;
+			// If we don't load the media relations, then the media_count field of Series
+			// will not be automatically populated. So, if the request has the count_media
+			// flag set, an additional query is needed to get the media counts.
+			let series: Vec<Series> = if count_media && !load_media {
+				let series_ids = series.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
+				let media_counts = client.series_media_count(series_ids).await?;
+				series
+					.into_iter()
+					.map(|s| {
+						let series_media_count = media_counts.get(&s.id).copied();
+						if let Some(count) = series_media_count {
+							Series::from((s, count))
+						} else {
+							Series::from(s)
+						}
+					})
+					.collect()
+			} else {
+				series.into_iter().map(Series::from).collect()
+			};
+
+			if is_unpaged {
+				return Ok((series, None));
+			}
+
+			client
+				.series()
+				.count(where_conditions.clone())
+				.exec()
+				.await
+				.map(|count| (series, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = series_count {
+		return Ok(Json(Pageable::from((series, count, pagination))));
 	}
 
-	let series = query
-		.exec()
-		.await?
-		.into_iter()
-		.map(|s| s.into())
-		.collect::<Vec<Series>>();
-
-	if is_unpaged {
-		return Ok(Json(series.into()));
-	}
-
-	let series_count = db.series().count(where_conditions).exec().await?;
-
-	Ok(Json((series, series_count, pagination).into()))
+	Ok(Json(Pageable::from(series)))
 }
 
 #[utoipa::path(

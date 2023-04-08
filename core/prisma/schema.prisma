@@ -68,6 +68,8 @@ model Library {
   status      String   @default("READY")
   // The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
   updated_at  DateTime @updatedAt
+  // The date in which the library was created. ex: "2022-04-20 04:20:69"
+  created_at  DateTime @default(now())
   // The series in the library
   series      Series[]
 

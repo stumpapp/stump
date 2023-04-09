@@ -10,9 +10,6 @@
     "./assets/*": "./src/assets/*"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.5.1",
-    "@emotion/react": "^11.10.6",
-    "@emotion/styled": "^11.10.6",
     "@hookform/resolvers": "^3.0.0",
     "@stump/api": "workspace:*",
     "@stump/client": "workspace:*",
@@ -22,7 +19,6 @@
     "@tanstack/react-query-devtools": "^4.28.0",
     "@tanstack/react-table": "^8.8.4",
     "@tanstack/react-virtual": "3.0.0-beta.18",
-    "chakra-react-select": "^4.4.3",
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
     "dayjs": "^1.11.7",

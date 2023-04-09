@@ -1,7 +1,6 @@
-import { Heading } from '@stump/components'
+import { CardGrid, Heading } from '@stump/components'
 import type { Media } from '@stump/types'
 
-import { CardGrid } from '../../components/Card'
 import MediaCard from '../../components/media/MediaCard'
 
 interface Props {

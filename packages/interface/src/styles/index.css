@@ -16,20 +16,12 @@ body {
 }
 
 main {
-	@apply flex h-full w-full flex-col overflow-x-hidden overflow-y-scroll !important;
+	@apply flex h-full w-full flex-col overflow-y-auto overflow-x-hidden !important;
 }
 
 form {
 	margin-block-end: 0;
 }
-
-.chakra-popover__popper {
-	z-index: 100 !important;
-}
-
-/* input:-webkit-autofill {
-	-webkit-text-fill-color: theme('colors.gray.800') !important;
-} */
 
 .card-title {
 	display: -webkit-box;

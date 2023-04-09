@@ -29,7 +29,7 @@ function SeriesOverviewScene() {
 		isLoading: isLoadingMedia,
 		media,
 		pageData,
-	} = useSeriesMediaQuery(seriesId, { page, page_size, params })
+	} = useSeriesMediaQuery(seriesId, { page, page_size: 1, params })
 
 	useEffect(() => {
 		if (!isInView) {

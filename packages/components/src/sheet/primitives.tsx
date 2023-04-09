@@ -19,7 +19,7 @@ const FLOATING_PORTAL_VARIANTS = {
 	right: 'right-4 inset-y-4 z-50',
 	top: 'top-4 inset-x-4 z-50',
 }
-const portalVariants = cva('fixed inset-0 z-50 flex', {
+const portalVariants = cva('fixed inset-0 z-[105] flex', {
 	defaultVariants: { position: 'right' },
 	variants: {
 		position: {

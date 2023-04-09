@@ -1,7 +1,5 @@
-// import { FormControl, FormHelperText, FormLabel, SystemStyleObject } from '@chakra-ui/react'
 import { TagOption } from '@stump/client'
 import { ComboBox } from '@stump/components'
-// import { CreatableSelect } from 'chakra-react-select'
 import { useFormContext } from 'react-hook-form'
 import { useDimensionsRef } from 'rooks'
 

@@ -111,6 +111,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 					<AppRouter />
 				</JobContextProvider>
 			</AppPropsContext.Provider>
+			<Notifications />
 		</StumpClientContextProvider>
 	)
 }
@@ -122,7 +123,6 @@ export default function StumpInterface(props: AppProps) {
 				<ErrorBoundary FallbackComponent={ErrorFallback}>
 					<RouterContainer appProps={props} />
 				</ErrorBoundary>
-				<Notifications />
 			</BrowserRouter>
 		</>
 	)

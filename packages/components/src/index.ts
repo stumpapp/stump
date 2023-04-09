@@ -15,7 +15,7 @@ export {
 	IconButton,
 	type IconButtonProps,
 } from './button'
-export { Card, type CardProps, EntityCard, HoverCard, type HoverCardProps } from './card'
+export { Card, CardGrid, type CardProps, EntityCard, HoverCard, type HoverCardProps } from './card'
 export { Command, type CommandProps } from './command'
 export { Container, Divider, Layout, Spacer, type SpacerProps } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
@@ -36,7 +36,7 @@ export {
 } from './input'
 export { Link } from './link'
 export { Popover } from './popover'
-export { FullScreenLoader, ProgressBar, type ProgressBarProps } from './progress'
+export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
 export { Sheet, SheetPrimitive } from './sheet'
 export { Tabs } from './tabs'

@@ -1,16 +1,4 @@
-import {
-	Box,
-	ButtonGroup,
-	HStack,
-	Spacer,
-	Stack,
-	Text,
-	useBoolean,
-	useColorModeValue,
-	useDisclosure,
-	VStack,
-} from '@chakra-ui/react'
-import { Button, IconButton } from '@stump/components'
+import { Button, cx, IconButton, Spacer, Text, useBoolean } from '@stump/components'
 import type { Epub } from '@stump/types'
 import { ArrowLeft, CaretLeft, CaretRight, MagnifyingGlass } from 'phosphor-react'
 import React from 'react'
@@ -19,6 +7,9 @@ import { SwipeableHandlers } from 'react-swipeable'
 
 import EpubTocDrawer from './EpubTocDrawer'
 import FontSelection from './FontSelection'
+
+// FIXME: I briefly worked on this file to remove chakra, but it needs a LOT of work.
+// it is very ugly. stinky doody code, too.
 
 interface IEpubControls {
 	next(): Promise<void>
@@ -53,19 +44,16 @@ function EpubHeaderControls({
 
 	const [visible, { on, off }] = useBoolean(false)
 
-	const chapterColor = useColorModeValue('gray.700', 'gray.400')
-	const entityColor = useColorModeValue('gray.700', 'gray.200')
-	const { isOpen, onOpen, onClose } = useDisclosure()
+	const [isOpen, drawerActions] = useBoolean(false)
 
 	function handleMouseEnter() {
-		if (!visible) {
-			on()
-		}
+		on()
 	}
 
 	function handleMouseLeave() {
 		if (visible && !isOpen) {
 			setTimeout(() => {
+				// I think this just requires two states: isHovering an isOpen...
 				// TODO: need to check if still in div before shutting off
 				off()
 			}, 500)
@@ -73,63 +61,55 @@ function EpubHeaderControls({
 	}
 
 	return (
-		<Box
-			px={4}
-			// py={[2, 0]}
-			h={10}
+		<div
+			className="fixed z-[100] h-10 w-full"
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
-			position={['fixed', 'unset']}
-			className="z-[100]"
 		>
-			<HStack
-				pt={2}
-				pb={[2, 2]}
-				className="transition-opacity duration-150"
-				opacity={visible || isOpen ? 1.0 : 0}
-				bg={[useColorModeValue('white', 'gray.750'), 'transparent']}
-				align="flex-start"
+			<div
+				className={cx(
+					'flex items-center gap-1 bg-white pt-2 pb-2 transition-opacity duration-150 dark:bg-gray-800 md:bg-transparent',
+					visible || isOpen ? 'opacity-100' : 'opacity-0',
+				)}
 			>
-				<ButtonGroup isAttached>
-					{/* FIXME: This navigate(-3) is effectively going back three times.
+				{/* FIXME: This navigate(-3) is effectively going back three times.
 						Likely related unwanted exta pushing on the routes stack when 
 						opening an epub */}
-					<IconButton variant="ghost" onClick={() => navigate(-3)}>
-						<ArrowLeft className="text-lg" weight="regular" />
-					</IconButton>
+				<IconButton variant="ghost" onClick={() => navigate(-3)}>
+					<ArrowLeft className="text-lg" weight="regular" />
+				</IconButton>
 
-					<EpubTocDrawer
-						isOpen={isOpen}
-						onOpen={onOpen}
-						onClose={onClose}
-						toc={epub.toc}
-						onSelect={goTo}
-					/>
-				</ButtonGroup>
+				<EpubTocDrawer
+					isOpen={isOpen}
+					onOpen={drawerActions.on}
+					onClose={drawerActions.off}
+					toc={epub.toc}
+					onSelect={goTo}
+				/>
 
 				<Spacer />
 
-				<VStack textAlign="center" spacing={0}>
-					<Text color={entityColor} fontSize={['xs', 'sm']} noOfLines={1}>
+				<div className="flex flex-col text-center">
+					<Text size="sm" className="line-clamp-1">
 						{epub.media_entity.name}
 					</Text>
 					{location.chapter && (
-						<Text fontSize={['xs', 'sm']} noOfLines={1} color={chapterColor}>
+						<Text size="sm" className="line-clamp-1">
 							{location.chapter}
 						</Text>
 					)}
-				</VStack>
+				</div>
 
 				<Spacer />
 
-				<ButtonGroup isAttached>
+				<div>
 					<FontSelection changeFontSize={changeFontSize} fontSize={fontSize} />
 					<IconButton variant="ghost" disabled>
 						<MagnifyingGlass className="text-lg" weight="regular" />
 					</IconButton>
-				</ButtonGroup>
-			</HStack>
-		</Box>
+				</div>
+			</div>
+		</div>
 	)
 }
 
@@ -168,7 +148,7 @@ export default function EpubControls({
 	}
 
 	return (
-		<Stack className="relative" h="full" w="full" bg={useColorModeValue('white', 'gray.750')}>
+		<div className="relative flex h-full w-full flex-col gap-1">
 			<EpubHeaderControls
 				fontSize={fontSize}
 				changeFontSize={changeFontSize}
@@ -177,20 +157,13 @@ export default function EpubControls({
 				goTo={controls.goTo}
 			/>
 
-			<HStack className="relative h-full w-full" p={4} pt={0}>
+			<div className="relative flex h-full w-full items-center gap-1">
 				<div
 					className="fixed left-2 z-[100] hidden h-1/2 w-12 items-center md:flex"
 					onMouseEnter={handleMouseEnterNav}
 					onMouseLeave={handleMouseLeaveNav}
 				>
-					<Button
-						size="sm"
-						// display={['none', 'flex']}
-						// hidden={!visibleNav}
-						variant="ghost"
-						// p={0}
-						onClick={prev}
-					>
+					<Button size="sm" className={cx({ hidden: !visibleNav })} variant="ghost" onClick={prev}>
 						<CaretLeft />
 					</Button>
 				</div>
@@ -201,22 +174,15 @@ export default function EpubControls({
 				/>
 				{children}
 				<div
-					className="fixed right-2 z-[100] hidden h-1/2  w-12 items-center md:flex"
+					className="fixed right-2 z-[100] hidden h-1/2 w-12 items-center justify-end md:flex"
 					onMouseEnter={handleMouseEnterNav}
 					onMouseLeave={handleMouseLeaveNav}
 				>
-					<Button
-						size="sm"
-						// display={['none', 'flex']}
-						// hidden={!visibleNav}
-						variant="ghost"
-						// p={0}
-						onClick={next}
-					>
+					<Button size="sm" className={cx({ hidden: !visibleNav })} variant="ghost" onClick={next}>
 						<CaretRight />
 					</Button>
 				</div>
-			</HStack>
-		</Stack>
+			</div>
+		</div>
 	)
 }

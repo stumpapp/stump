@@ -1,4 +1,4 @@
-import { Heading } from '@chakra-ui/react'
+import { Heading } from '@stump/components'
 import type { Series } from '@stump/types'
 
 import ListItem from '../ListItem'

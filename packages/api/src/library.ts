@@ -22,6 +22,10 @@ export function getLibraryById(id: string): Promise<ApiResult<Library>> {
 	return API.get(`/libraries/${id}`)
 }
 
+export function getLibraryThumbnail(id: string): string {
+	return `${API.defaults.baseURL}/libraries/${id}/thumbnail`
+}
+
 export function getLibrarySeries(
 	id: string,
 	page: number,

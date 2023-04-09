@@ -1,5 +1,5 @@
-import { Box, Heading, Text } from '@chakra-ui/react'
 import { useStumpStore } from '@stump/client'
+import { Heading, Text } from '@stump/components'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
@@ -29,11 +29,8 @@ export default function ServerStatusOverlay() {
 	return (
 		<AnimatePresence>
 			{show && (
-				<Box
-					as={motion.div}
-					bg={'white'}
-					_dark={{ bg: 'gray.700' }}
-					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md p-2 shadow"
+				<motion.div
+					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md bg-white p-2 shadow dark:bg-gray-700"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
@@ -50,7 +47,7 @@ export default function ServerStatusOverlay() {
 							<Heading size="xs">Server isn&rsquo;t connected.</Heading>
 						</div>
 
-						<Text className="italic" fontSize="sm" color="gray.500">
+						<Text className="italic" size="sm" variant="muted">
 							Please check your internet connection.{' '}
 							<a className="hover:underline" href="/server-connection-error">
 								Click here
@@ -58,7 +55,7 @@ export default function ServerStatusOverlay() {
 							to change your server URL.
 						</Text>
 					</div>
-				</Box>
+				</motion.div>
 			)}
 		</AnimatePresence>
 	)

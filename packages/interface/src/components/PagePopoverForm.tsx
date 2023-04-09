@@ -1,25 +1,12 @@
-import {
-	ButtonGroup,
-	FormErrorMessage,
-	FormLabel,
-	Popover,
-	PopoverArrow,
-	PopoverBody,
-	PopoverContent,
-	PopoverFooter,
-	PopoverHeader,
-	PopoverTrigger,
-	useColorModeValue,
-	useDisclosure,
-} from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Form, Input } from '@stump/components'
+import { Form, Input, Popover, useBoolean } from '@stump/components'
 import React, { useMemo, useRef } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 interface PagePopoverFormProps {
 	pos: number
+	currentPage: number
 	totalPages: number
 	onPageChange: (page: number) => void
 	trigger: React.ReactElement
@@ -27,13 +14,14 @@ interface PagePopoverFormProps {
 
 export default function PagePopoverForm({
 	totalPages,
+	currentPage,
 	onPageChange,
 	pos,
 	trigger,
 }: PagePopoverFormProps) {
 	const inputRef = useRef<any>(null)
 
-	const { isOpen, onOpen, onClose } = useDisclosure()
+	const [isOpen, { on, off }] = useBoolean()
 
 	const schema = z.object({
 		goTo: z.string().refine(
@@ -60,7 +48,7 @@ export default function PagePopoverForm({
 
 	function handleSubmit(values: FieldValues) {
 		if (values.goTo) {
-			onClose()
+			off()
 			setTimeout(() => {
 				form.reset()
 				onPageChange(values.goTo)
@@ -68,30 +56,30 @@ export default function PagePopoverForm({
 		}
 	}
 
+	const handleOpenChange = (nowOpen: boolean) => {
+		if (nowOpen) {
+			on()
+		} else {
+			off()
+		}
+	}
+
 	return (
-		<Popover
-			isOpen={isOpen}
-			onOpen={onOpen}
-			onClose={onClose}
-			placement="top"
-			closeOnBlur={true}
-			initialFocusRef={inputRef}
-		>
-			<PopoverTrigger>{trigger}</PopoverTrigger>
-			<PopoverContent borderColor={useColorModeValue('gray.200', 'gray.650')}>
-				<PopoverHeader pt={4} fontWeight="bold" border="0">
-					Go to page
-				</PopoverHeader>
-				<PopoverArrow />
-				<PopoverBody>
+		<Popover open={isOpen} onOpenChange={handleOpenChange}>
+			<Popover.Trigger>{trigger}</Popover.Trigger>
+			<Popover.Content size="md">
+				<div className="flex flex-col gap-2">
 					<Form id={`pagination-page-entry-form-${pos}`} form={form} onSubmit={handleSubmit}>
-						<FormLabel htmlFor="goTo">Enter page</FormLabel>
 						<Input
+							label="Jump to another page"
+							variant="primary"
 							type="number"
 							autoFocus
 							max={totalPages}
+							defaultValue={currentPage}
+							errorMessage={errors.goTo?.message as string}
+							description={`Enter a number from 1 to ${totalPages}.`}
 							{...register}
-							// @ts-expect-error: FIXME: remove chakra
 							ref={(ref) => {
 								if (ref) {
 									register.ref(ref)
@@ -99,25 +87,9 @@ export default function PagePopoverForm({
 								}
 							}}
 						/>
-						{/* FIXME: Updates seem to have broken types here, need to look into this... */}
-						{!!errors.goTo && <FormErrorMessage>{errors.goTo?.message as any}</FormErrorMessage>}
 					</Form>
-				</PopoverBody>
-				<PopoverFooter
-					border="0"
-					display="flex"
-					alignItems="center"
-					justifyContent="flex-end"
-					pb={4}
-				>
-					<ButtonGroup size="sm">
-						<Button onClick={onClose}>Cancel</Button>
-						<Button variant="primary" type="submit" form={`pagination-page-entry-form-${pos}`}>
-							Go
-						</Button>
-					</ButtonGroup>
-				</PopoverFooter>
-			</PopoverContent>
+				</div>
+			</Popover.Content>
 		</Popover>
 	)
 }

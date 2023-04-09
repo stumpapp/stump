@@ -1,21 +1,18 @@
-import { Badge } from '@chakra-ui/react'
+import { Badge, BadgeProps, PickSelect } from '@stump/components'
 import type { FileStatus } from '@stump/types'
+import { useMemo } from 'react'
 
 export default function FileStatusBadge({ status }: { status: FileStatus }) {
-	const color = (() => {
+	const variant: PickSelect<BadgeProps, 'variant'> = useMemo(() => {
 		if (status === 'READY') {
-			return 'green'
+			return 'success'
 		} else if (status === 'MISSING') {
-			return 'yellow'
+			return 'warning'
 		} else if (status === 'ERROR') {
-			return 'red'
+			return 'error'
 		}
-		return 'gray'
-	})()
+		return 'default'
+	}, [status])
 
-	return (
-		<Badge textTransform="none" bg={color} rounded="md">
-			{status}
-		</Badge>
-	)
+	return <Badge variant={variant}>{status}</Badge>
 }

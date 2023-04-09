@@ -1,5 +1,4 @@
-import { useBoolean } from '@chakra-ui/react'
-import { Text } from '@stump/components'
+import { Text, useBoolean } from '@stump/components'
 import { ComponentProps } from 'react'
 
 import { DEBUG_ENV } from '../index'

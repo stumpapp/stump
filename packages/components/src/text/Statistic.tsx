@@ -86,10 +86,10 @@ Statistic.Number = StatisticNumber
 Statistic.CountUpNumber = StatisticCountUpNumber
 
 export {
-	type StatisticLabelProps,
-	type StatisticNumberProps,
-	type StatisticProps,
 	Statistic,
 	StatisticLabel,
+	type StatisticLabelProps,
 	StatisticNumber,
+	type StatisticNumberProps,
+	type StatisticProps,
 }

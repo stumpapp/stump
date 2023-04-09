@@ -1,1 +1,1 @@
-export { type CommandProps, Command } from './primitives'
+export { Command, type CommandProps } from './primitives'

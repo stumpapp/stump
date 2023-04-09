@@ -1,15 +1,4 @@
-import {
-	HStack,
-	Popover,
-	PopoverArrow,
-	PopoverBody,
-	PopoverContent,
-	PopoverTrigger,
-	Portal,
-	Stack,
-	Text,
-} from '@chakra-ui/react'
-import { IconButton } from '@stump/components'
+import { IconButton, Popover, Text } from '@stump/components'
 import { TextAa } from 'phosphor-react'
 
 interface Props {
@@ -17,44 +6,42 @@ interface Props {
 	fontSize: number
 }
 
+// FIXME: I briefly worked on this file to remove chakra, but it needs a LOT of work.
+// it is very ugly. stinky doody code, too.
+
 export default function FontSelection({ changeFontSize, fontSize }: Props) {
 	return (
-		<Popover size="sm">
-			<PopoverTrigger>
+		<Popover>
+			<Popover.Trigger>
 				<IconButton variant="ghost">
 					<TextAa className="text-lg" weight="regular" />
 				</IconButton>
-			</PopoverTrigger>
-			<Portal>
-				<PopoverContent>
-					<PopoverArrow />
-					<PopoverBody>
-						<Stack>
-							<Text textAlign="center">{fontSize}px</Text>
+			</Popover.Trigger>
+			<Popover.Content size="sm">
+				<div className="flex flex-col gap-2">
+					<Text className="text-center">{fontSize}px</Text>
 
-							<HStack justify="center">
-								<IconButton
-									onClick={() => changeFontSize(fontSize - 1)}
-									variant="ghost"
-									// fontSize="sm"
-									title="Decrease font size"
-								>
-									A
-								</IconButton>
+					<div className="flex items-center justify-center gap-1">
+						<IconButton
+							onClick={() => changeFontSize(fontSize - 1)}
+							variant="ghost"
+							// fontSize="sm"
+							title="Decrease font size"
+						>
+							A
+						</IconButton>
 
-								<IconButton
-									onClick={() => changeFontSize(fontSize + 1)}
-									variant="ghost"
-									// fontSize="2xl"
-									title="Increase font size"
-								>
-									A
-								</IconButton>
-							</HStack>
-						</Stack>
-					</PopoverBody>
-				</PopoverContent>
-			</Portal>
+						<IconButton
+							onClick={() => changeFontSize(fontSize + 1)}
+							variant="ghost"
+							// fontSize="2xl"
+							title="Increase font size"
+						>
+							A
+						</IconButton>
+					</div>
+				</div>
+			</Popover.Content>
 		</Popover>
 	)
 }

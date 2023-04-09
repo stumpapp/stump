@@ -1,3 +1,3 @@
-export { type HeadingProps, Heading } from './Heading'
-export { type StatisticProps, Statistic } from './Statistic'
-export { type TextProps, Text, TEXT_VARIANTS } from './Text'
+export { Heading, type HeadingProps } from './Heading'
+export { Statistic, type StatisticProps } from './Statistic'
+export { Text, TEXT_VARIANTS, type TextProps } from './Text'

@@ -1,5 +1,5 @@
-import { useLayoutMode, useLibrary, useLibrarySeries } from '@stump/client'
-import { Suspense, useEffect } from 'react'
+import { useLayoutMode, useLibraryByIdQuery, useLibrarySeries } from '@stump/client'
+import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
@@ -9,6 +9,7 @@ import SeriesGrid from '../../components/series/SeriesGrid'
 import SeriesList from '../../components/series/SeriesList'
 import { useGetPage } from '../../hooks/useGetPage'
 import useIsInView from '../../hooks/useIsInView'
+import LibraryOverviewTitleSection from './LibraryOverviewTitleSection'
 
 export default function LibraryOverviewScene() {
 	const { id } = useParams()
@@ -21,19 +22,23 @@ export default function LibraryOverviewScene() {
 	}
 
 	const { layoutMode } = useLayoutMode('LIBRARY')
-	const { isLoading, library } = useLibrary(id)
+	const { isLoading, library } = useLibraryByIdQuery(id)
 
 	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page)
 
+	const { current_page, total_pages } = pageData || {}
+	const isOnFirstPage = current_page === 1
+	const hasStuff = total_pages !== undefined && current_page !== undefined
+
 	useEffect(
 		() => {
-			if (!isInView) {
+			if (!isInView && !isOnFirstPage) {
 				containerRef.current?.scrollIntoView()
 			}
 		},
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[pageData?.current_page],
+		[pageData?.current_page, isOnFirstPage],
 	)
 
 	if (isLoading) {
@@ -42,8 +47,13 @@ export default function LibraryOverviewScene() {
 		throw new Error('Library not found')
 	}
 
-	const { current_page, total_pages } = pageData || {}
-	const hasStuff = total_pages !== undefined && current_page !== undefined
+	const renderContent = () => {
+		if (layoutMode === 'GRID') {
+			return <SeriesGrid isLoading={isLoadingSeries} series={series} />
+		} else {
+			return <SeriesList isLoading={isLoadingSeries} series={series} />
+		}
+	}
 
 	return (
 		<SceneContainer>
@@ -51,19 +61,17 @@ export default function LibraryOverviewScene() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
+			<LibraryOverviewTitleSection library={library} isVisible={current_page === 1} />
+
 			{/* @ts-expect-error: wrong ref, still okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
 
-			<div className="flex h-full w-full flex-col space-y-6 p-4">
-				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
-				{layoutMode === 'GRID' ? (
-					<SeriesGrid isLoading={isLoadingSeries} series={series} />
-				) : (
-					<SeriesList isLoading={isLoadingSeries} series={series} />
-				)}
-				{hasStuff ? (
+			<div className="flex w-full flex-col space-y-6 p-4">
+				{hasStuff && <Pagination pages={total_pages} currentPage={current_page} />}
+				{renderContent()}
+				{hasStuff && (
 					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
-				) : null}
+				)}
 			</div>
 		</SceneContainer>
 	)

@@ -1,6 +1,5 @@
-import { Heading } from '@chakra-ui/react'
 import { getMediaPage } from '@stump/api'
-import { cx } from '@stump/components'
+import { cx, Heading } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'phosphor-react'

@@ -1,5 +1,5 @@
 import { mediaApi } from '@stump/api'
-import { useDirectoryListing, useLibrary } from '@stump/client'
+import { useDirectoryListing, useLibraryByIdQuery } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
 import { useMemo } from 'react'
 import { Helmet } from 'react-helmet'
@@ -23,11 +23,7 @@ export default function LibraryExplorerScene() {
 		throw new Error('Library id is required')
 	}
 
-	const { library, isLoading } = useLibrary(id, {
-		onError(err) {
-			console.error(err)
-		},
-	})
+	const { library, isLoading } = useLibraryByIdQuery(id)
 
 	const handleGoForward = (callback: (path: string) => void) => {
 		if (state?.starting_path) {

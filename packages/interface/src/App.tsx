@@ -6,13 +6,12 @@ import {
 	AppProps,
 	AppPropsContext,
 	JobContextProvider,
-	queryClient,
 	StumpClientContextProvider,
 	useStumpStore,
 	useTopBarStore,
 	useUserStore,
 } from '@stump/client'
-import { defaultContext, QueryClientProvider } from '@tanstack/react-query'
+import { defaultContext } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -112,6 +111,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 					<AppRouter />
 				</JobContextProvider>
 			</AppPropsContext.Provider>
+			<Notifications />
 		</StumpClientContextProvider>
 	)
 }
@@ -123,7 +123,6 @@ export default function StumpInterface(props: AppProps) {
 				<ErrorBoundary FallbackComponent={ErrorFallback}>
 					<RouterContainer appProps={props} />
 				</ErrorBoundary>
-				<Notifications />
 			</BrowserRouter>
 		</>
 	)

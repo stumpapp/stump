@@ -1,9 +1,8 @@
-// import { Box, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { AppPropsContext } from '@stump/client'
 import { NativeSelect, Tabs } from '@stump/components'
 import { User } from '@stump/types'
-import { Suspense, useContext, useMemo } from 'react'
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useContext, useMemo } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import SceneContainer from '../../components/SceneContainer'
 import { useLocaleContext } from '../../i18n/context'

@@ -10,6 +10,8 @@ export const RAW_INPUT_SIZE_VARIANTS = {
 }
 export const RAW_INPUT_VARIANTS = {
 	default: 'focus:ring-gray-400 dark:focus:ring-gray-400',
+	error:
+		'focus:ring-red-400 dark:focus:ring-red-400 border border-red-300 border-opacity-70 dark:border-red-400 dark:border-opacity-70',
 	primary: 'focus:ring-brand-400 dark:focus:ring-brand-400',
 }
 export const inputVariants = cva(RAW_INPUT_BASE_CLASSES, {

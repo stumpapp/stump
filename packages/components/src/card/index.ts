@@ -1,3 +1,3 @@
-export { type CardProps, Card } from './Card'
+export { Card, CardGrid, type CardProps } from './Card'
 export { EntityCard } from './EntityCard'
-export { type HoverCardProps, HoverCard } from './HoverCard'
+export { HoverCard, type HoverCardProps } from './HoverCard'

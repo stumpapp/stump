@@ -1,30 +1,26 @@
-import { Alert, AlertIcon, Container, HStack, Stack, Text } from '@chakra-ui/react'
-
+import { Heading } from '@stump/components'
 // import ServerUrlForm from '../components/ServerUrlForm'
 
 // Used primarily for setting the correct base url for the api when the app is
 // NOT running in a browser. I.e. when the app is running in Tauri.
 // TODO: locale!
+// TODO: finish this component after I gutted it to remove chakra
 export default function OnBoardingScene() {
 	return (
-		<Stack as={Container} p="4" spacing={4} h="full" justify="center">
-			<HStack px={2} flexShrink={0} justifyContent="center" alignItems="center" spacing="4">
+		<div className="flex h-full flex-col items-center justify-center gap-4">
+			<div className="flex shrink-0 items-center justify-center gap-4 px-2">
 				<img src="/assets/favicon.png" width="120" height="120" />
-				<Text
-					bgGradient="linear(to-r, brand.600, brand.200)"
-					bgClip="text"
-					fontSize="4xl"
-					fontWeight="bold"
-				>
+				<Heading variant="gradient" size="2xl">
 					Stump
-				</Text>
-			</HStack>
-			<Alert status="info" rounded="md">
+				</Heading>
+			</div>
+
+			{/* <Alert status="info" rounded="md">
 				<AlertIcon />
 				Welcome to Stump! To get started, please enter the base URL of your Stump server below.
-			</Alert>
+			</Alert> */}
 
 			{/* <ServerUrlForm /> */}
-		</Stack>
+		</div>
 	)
 }

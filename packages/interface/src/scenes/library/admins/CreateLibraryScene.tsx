@@ -1,21 +1,28 @@
-import { Heading, Link, Text } from '@stump/components'
+import { useLibraries } from '@stump/client'
+import { Divider, Heading, Link, Text } from '@stump/components'
 
 import { useLocaleContext } from '../../../i18n'
+import CreateOrEditLibraryForm from './CreateOrEditLibraryForm'
 
 export default function CreateLibraryScene() {
 	const { t } = useLocaleContext()
 
+	const { libraries } = useLibraries()
+
 	return (
-		<div className="flex flex-col gap-4">
-			<header className="flex flex-col gap-2">
-				<Heading size="lg">{t('createLibraryScene.heading')}</Heading>
-				<Text size="sm" variant="muted">
-					{t('createLibraryScene.subtitle')}{' '}
-					<Link href="https://stumpapp.dev/guides/libraries">
-						{t('createLibraryScene.subtitleLink')}.
-					</Link>
-				</Text>
-			</header>
-		</div>
+		<>
+			<Heading size="lg">{t('createLibraryScene.heading')}</Heading>
+			<Text size="sm" variant="muted" className="mt-1.5">
+				{t('createLibraryScene.subtitle')}{' '}
+				<Link href="https://stumpapp.dev/guides/libraries">
+					{t('createLibraryScene.subtitleLink')}.
+				</Link>
+			</Text>
+
+			<Divider variant="muted" className="my-3.5" />
+			<div className="flex flex-col gap-12 pt-2">
+				{libraries && <CreateOrEditLibraryForm existingLibraries={libraries} />}
+			</div>
+		</>
 	)
 }

@@ -3,7 +3,7 @@
 // CardContent
 // CardOverlay
 
-import React from 'react'
+import React, { forwardRef } from 'react'
 
 import { cn } from '../utils'
 
@@ -22,3 +22,19 @@ export const Card = React.forwardRef<React.ElementRef<'div'>, CardProps>(
 	},
 )
 Card.displayName = 'Card'
+
+export const CardGrid = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+	({ className, ...props }, ref) => {
+		return (
+			<div
+				ref={ref}
+				className={cn(
+					'4xl:grid-cols-8 grid grid-cols-2 items-start justify-center gap-4 sm:grid-cols-3 md:justify-start lg:grid-cols-4 xl:grid-cols-5 xl:gap-4 2xl:grid-cols-7 2xl:gap-2',
+					className,
+				)}
+				{...props}
+			/>
+		)
+	},
+)
+CardGrid.displayName = 'CardGrid'

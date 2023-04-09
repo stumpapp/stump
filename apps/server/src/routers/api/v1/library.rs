@@ -11,6 +11,7 @@ use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 
 use stump_core::{
+	config::get_config_dir,
 	db::{
 		models::{
 			library_series_ids_media_ids_include, LibrariesStats, Library,
@@ -21,8 +22,8 @@ use stump_core::{
 	fs::{image, media_file},
 	job::LibraryScanJob,
 	prelude::{
-		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, ScanQueryParam,
-		UpdateLibraryArgs,
+		ContentType, CreateLibraryArgs, Pageable, Pagination, PaginationQuery,
+		ScanQueryParam, UpdateLibraryArgs,
 	},
 	prisma::{
 		library::{self, WhereParam},
@@ -336,16 +337,32 @@ async fn get_library_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
+	let webp_path = get_config_dir()
+		.join("thumbnails")
+		.join(format!("{}.webp", id));
+
+	if webp_path.exists() {
+		trace!("Found webp thumbnail for library {}", id);
+		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
+	}
+
 	let library_series = db
 		.series()
-		.find_many(vec![series::library_id::equals(Some(id.clone()))])
-		.with(series::media::fetch(vec![]).order_by(media::name::order(Direction::Asc)))
+		.find_first(vec![series::library_id::equals(Some(id.clone()))])
+		.with(
+			series::media::fetch(vec![])
+				.take(1)
+				.order_by(media::name::order(Direction::Asc)),
+		)
 		.exec()
 		.await?;
 
-	// TODO: error handling
-	let series = library_series.first().expect("No series in library");
-	let media = series.media()?.first().expect("No media in series");
+	let series = library_series.ok_or_else(|| {
+		ApiError::NotFound("Library has no series to get thumbnail from".to_string())
+	})?;
+	let media = series.media()?.first().ok_or_else(|| {
+		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
+	})?;
 
 	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }

@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { cva, VariantProps } from 'class-variance-authority'
 import React, { forwardRef, Fragment } from 'react'
 import { Link } from 'react-router-dom'

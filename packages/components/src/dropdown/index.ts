@@ -1,4 +1,4 @@
-export { type DropdownMenuProps, DropdownMenu } from './DropdownMenu'
+export { DropdownMenu, type DropdownMenuProps } from './DropdownMenu'
 export {
 	Dropdown,
 	DropdownCheckboxItem,

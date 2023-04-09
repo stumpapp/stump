@@ -3,6 +3,7 @@ import { Suspense, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
+import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
 // import CommandPalette from './components/CommandPalette'
 import JobOverlay from './components/jobs/JobOverlay'
 import RouteLoadingIndicator from './components/RouteLoadingIndicator'
@@ -19,9 +20,8 @@ export function AppLayout() {
 	const location = useLocation()
 
 	const hideSidebar = useMemo(() => {
-		// hide sidebar when on /books/:id/pages/:page or /epub/
-		// TODO: replace with single regex, I am lazy rn
-		return location.pathname.match(/\/book\/.+\/page\/.+/) || location.pathname.match(/\/epub\/.+/)
+		// hide sidebar when on /books/:id/page/:page or book/:id/epub-reader
+		return location.pathname.match(/\/book\/.+\/(page|epub-reader)/)
 	}, [location])
 
 	useCoreEventHandler()
@@ -63,7 +63,9 @@ export function AppLayout() {
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
-					<main className="h-full w-full bg-white dark:bg-gray-975">
+					<main className="min-h-full w-full bg-white dark:bg-gray-975">
+						<BackgroundFetchIndicator />
+
 						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />
 						</Suspense>

@@ -5,9 +5,9 @@ import { Button } from '../button/Button'
 import { cn } from '../utils'
 import { GenericMenu } from '.'
 import {
-	type DropdownContentProps,
 	Dropdown,
 	DropdownContent,
+	type DropdownContentProps,
 	DropdownGroup,
 	DropdownItem,
 	DropdownLabel,

@@ -1,5 +1,5 @@
-import { useBoolean } from '@chakra-ui/react'
 import { queryClient } from '@stump/client'
+import { useBoolean } from '@stump/components'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'

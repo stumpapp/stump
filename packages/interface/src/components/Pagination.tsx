@@ -146,12 +146,15 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 								<PagePopoverForm
 									pos={i}
 									key={`${i}-pagination-ellipsis`}
+									currentPage={currentPage}
 									totalPages={pages}
 									onPageChange={handleEllipsisNavigate}
 									trigger={
-										<button className="inline-flex cursor-pointer items-center px-4 pt-4 text-sm font-medium focus:outline-none active:outline-none">
-											<MoreHorizontal />
-										</button>
+										<div className="-mt-1">
+											<button className="flex items-center border-t-2 border-transparent px-4 pt-4 text-xs font-medium text-gray-300 hover:border-gray-300 focus:outline-none dark:text-gray-600 dark:hover:border-gray-600 md:text-sm">
+												<MoreHorizontal className="h-4 w-4" />
+											</button>
+										</div>
 									}
 								/>
 							)

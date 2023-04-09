@@ -15,6 +15,7 @@ export type SheetProps = {
 	size?: PickSelect<SheetContentProps, 'size'>
 	rounded?: PickSelect<SheetContentProps, 'rounded'>
 	floating?: PickSelect<SheetPortalProps, 'floating'>
+	contentClassName?: string
 	onOpen?: () => void
 	onClose?: () => void
 	open?: boolean
@@ -32,6 +33,7 @@ export function Sheet({
 	title,
 	description,
 	closeIcon = true,
+	contentClassName,
 	...contentProps
 }: SheetProps) {
 	const location = useLocation()
@@ -63,7 +65,7 @@ export function Sheet({
 	return (
 		<SheetPrimitive open={open} onOpenChange={handleOpenChange}>
 			<SheetPrimitive.Trigger asChild>{renderTrigger()}</SheetPrimitive.Trigger>
-			<SheetPrimitive.Content closeIcon={closeIcon} {...contentProps}>
+			<SheetPrimitive.Content closeIcon={closeIcon} {...contentProps} className={contentClassName}>
 				<SheetPrimitive.Header>
 					<SheetPrimitive.Title>{title}</SheetPrimitive.Title>
 					{description && <SheetPrimitive.Description>{description}</SheetPrimitive.Description>}

@@ -1,7 +1,6 @@
-import { Heading } from '@stump/components'
+import { CardGrid, Heading } from '@stump/components'
 import type { Media } from '@stump/types'
 
-import { CardGrid } from '../../components/Card'
 import MediaCard from '../../components/media/MediaCard'
 
 interface Props {
@@ -11,11 +10,11 @@ interface Props {
 
 export default function MediaGrid({ media, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>
+		return null
 	} else if (!media || !media.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">
-				<Heading size="sm">It doesn&rsquo;t look like there is any media here.</Heading>
+				<Heading size="sm">It doesn&rsquo;t look like there are any books here.</Heading>
 			</div>
 		)
 	}

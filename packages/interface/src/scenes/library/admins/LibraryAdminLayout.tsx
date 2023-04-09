@@ -1,8 +1,9 @@
 import { Library } from '@stump/types'
 import { useState } from 'react'
-import { Outlet } from 'react-router'
+import { Navigate, Outlet } from 'react-router'
 
 import SceneContainer from '../../../components/SceneContainer'
+import { useAppContext } from '../../../context'
 import { LibraryAdminContext } from './context'
 import LibraryAdminSideBar from './LibraryAdminSideBar'
 
@@ -15,8 +16,14 @@ import LibraryAdminSideBar from './LibraryAdminSideBar'
 export default function LibraryAdminLayout() {
 	const [libraryPreview, setLibraryPreview] = useState<Partial<Library>>({})
 
+	const { isServerOwner } = useAppContext()
+
 	const syncLibraryPreview = (library: Partial<Library>) => {
 		setLibraryPreview(library)
+	}
+
+	if (!isServerOwner) {
+		return <Navigate to="/404" />
 	}
 
 	return (

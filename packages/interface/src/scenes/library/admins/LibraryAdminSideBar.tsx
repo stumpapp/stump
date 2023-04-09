@@ -34,6 +34,12 @@ export default function LibraryAdminSideBar() {
 	}
 
 	const renderBasicInfo = () => {
+		const hasAtLeastOne = libraryPreview.name || libraryPreview.description || libraryPreview.path
+
+		if (!hasAtLeastOne) {
+			return null
+		}
+
 		return (
 			<div className="flex flex-col gap-1.5 py-3">
 				<Text size="sm" className="mb-1 font-semibold">

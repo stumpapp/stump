@@ -1,4 +1,5 @@
 import { cva, VariantProps } from 'class-variance-authority'
+import { forwardRef } from 'react'
 
 import { ToolTipContentProps, ToolTipPrimitive, ToolTipProvider } from './primitives'
 
@@ -23,17 +24,20 @@ export type ToolTipProps = {
 	isDisabled?: boolean
 } & BaseProps
 
-export function ToolTip({ children, content, align, size, isDisabled }: ToolTipProps) {
-	return (
-		<ToolTipProvider>
-			<ToolTipPrimitive>
-				<ToolTipPrimitive.Trigger asChild disabled={isDisabled}>
-					{children}
-				</ToolTipPrimitive.Trigger>
-				<ToolTipPrimitive.Content align={align} className={toolTipVariants({ size })}>
-					{content}
-				</ToolTipPrimitive.Content>
-			</ToolTipPrimitive>
-		</ToolTipProvider>
-	)
-}
+export const ToolTip = forwardRef<HTMLButtonElement, ToolTipProps>(
+	({ children, content, align, size, isDisabled }, ref) => {
+		return (
+			<ToolTipProvider>
+				<ToolTipPrimitive>
+					<ToolTipPrimitive.Trigger asChild disabled={isDisabled} ref={ref}>
+						{children}
+					</ToolTipPrimitive.Trigger>
+					<ToolTipPrimitive.Content align={align} className={toolTipVariants({ size })}>
+						{content}
+					</ToolTipPrimitive.Content>
+				</ToolTipPrimitive>
+			</ToolTipProvider>
+		)
+	},
+)
+ToolTip.displayName = 'ToolTip'

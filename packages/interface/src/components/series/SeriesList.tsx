@@ -10,7 +10,7 @@ interface Props {
 
 export default function SeriesList({ series, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>
+		return null
 	} else if (!series || !series.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">

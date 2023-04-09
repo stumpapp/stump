@@ -9,10 +9,9 @@ export default function Notifications() {
 			{(t) => (
 				<ToastBar
 					toast={t}
-					// this is so gross, I miss tailwind
 					style={{
-						backgroundColor: isDark ? '#3D4759' : '',
-						color: isDark ? '#E2E8F0' : '',
+						backgroundColor: isDark ? '#3D4759' : undefined,
+						color: isDark ? '#E2E8F0' : undefined,
 					}}
 				>
 					{({ icon, message }) => (

@@ -30,7 +30,7 @@ export default function BookReaderScene() {
 	}
 
 	if (fetchingBook) {
-		return <div>Loading...</div>
+		return null
 	} else if (!media) {
 		return <Navigate to={paths.notFound()} />
 	}

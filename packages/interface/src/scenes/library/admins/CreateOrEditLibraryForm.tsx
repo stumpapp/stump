@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useTags } from '@stump/client'
+import { useCreateLibraryMutation, useEditLibraryMutation, useTags } from '@stump/client'
 import {
 	Button,
 	Divider,
@@ -13,15 +13,18 @@ import {
 	Text,
 	TextArea,
 } from '@stump/components'
-import type { Library, LibraryPattern, LibraryScanMode } from '@stump/types'
+import type { Library, LibraryOptions, LibraryPattern, LibraryScanMode } from '@stump/types'
 import { Folder } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-hot-toast'
+import { useNavigate } from 'react-router'
 import { z } from 'zod'
 
 import DirectoryPickerModal from '../../../components/DirectoryPickerModal'
 import TagSelect from '../../../components/TagSelect'
 import { useLocaleContext } from '../../../i18n'
+import paths from '../../../paths'
 import { useLibraryAdminContext } from './context'
 import LibraryPatternRadioGroup from './LibraryPatternRadioGroup'
 
@@ -30,7 +33,13 @@ type Props = {
 	existingLibraries: Library[]
 }
 
+// TODO: this component is a big one. It should be split up where possible I think to isolate some of this
+// logic into smaller components.
+// I can think at least the library options can be a separate sub form component.
 export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
+	const isCreatingLibrary = !library
+	const navigate = useNavigate()
+
 	const { syncLibraryPreview } = useLibraryAdminContext()
 
 	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
@@ -45,14 +54,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 
 	function isLibraryPattern(input: string): input is LibraryPattern {
 		return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
-	}
-
-	function getNewScanMode(value: string) {
-		if (value === scanMode) {
-			return 'NONE'
-		}
-
-		return value
 	}
 
 	const schema = z.object({
@@ -111,6 +112,21 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		resolver: zodResolver(schema),
 	})
 
+	const { createLibraryAsync } = useCreateLibraryMutation({
+		onSuccess: () => {
+			form.reset()
+			setTimeout(() => navigate(paths.home()), 750)
+		},
+	})
+
+	const { editLibraryAsync } = useEditLibraryMutation({
+		onSuccess: () => {
+			form.reset()
+			// TODO: maybe somewhere else?
+			setTimeout(() => navigate(paths.home()), 750)
+		},
+	})
+
 	const handleCreateTag = async (tag: string) => {
 		try {
 			await createTagsAsync([tag])
@@ -120,16 +136,111 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		}
 	}
 
-	const handleSubmit = async (values: Schema) => {
-		alert(JSON.stringify(values, null, 2))
+	const handleCreateLibrary = async (values: Schema) => {
+		const { name, path, description, tags: formTags, scan_mode, ...library_options } = values
+
+		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))
+		const tagsToCreate = formTags
+			?.map((tag) => tag.value)
+			.filter((tagName: string) => !existingTags.some((t) => t.name === tagName))
+
+		if (tagsToCreate && tagsToCreate.length > 0) {
+			// TODO: Re-add this logic...
+			// const res: ApiResult<Tag[]> = await tryCreateTags(tagsToCreate)
+			// if (res.status > 201) {
+			// 	toast.error('Something went wrong when creating the tags.')
+			// 	return
+			// }
+			// existingTags = existingTags.concat(res.data)
+		}
+
+		toast.promise(
+			createLibraryAsync({
+				description,
+				// FIXME: this isn't dangerous, but the server needs to be adjusted as to not enforce the id field
+				// for the library_options object, as we won't have one until after creation
+				library_options: library_options as LibraryOptions,
+				name,
+				path,
+				scan_mode,
+				tags: existingTags,
+			}),
+			{
+				error: 'Something went wrong.',
+				loading: 'Creating library...',
+				success: 'Library created!',
+			},
+		)
+	}
+
+	const handleUpdateLibrary = async (values: Schema) => {
+		if (!library) {
+			return
+		}
+
+		const { name, path, description, tags: formTags, scan_mode, ...rest } = values
+
+		const library_options = {
+			...rest,
+			id: library.library_options.id,
+		} as LibraryOptions
+
+		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))
+
+		// const tagsToCreate = formTags
+		// 	?.map((tag) => tag.value)
+		// 	.filter((tagName: string) => !existingTags.some((t) => t.name === tagName))
+
+		// let removedTags = getRemovedTags(formTags)
+
+		// if (!removedTags?.length) {
+		// 	removedTags = null
+		// }
+
+		// if (tagsToCreate.length) {
+		// 	const res = await tryCreateTags(tagsToCreate)
+
+		// 	if (res.status > 201) {
+		// 		toast.error('Something went wrong when creating the tags.')
+		// 		return
+		// 	}
+
+		// 	existingTags = existingTags.concat(res.data)
+		// }
+
+		toast.promise(
+			editLibraryAsync({
+				...library,
+				description,
+				library_options,
+				name,
+				path,
+				// removed_tags: removedTags,
+				removed_tags: [],
+				scan_mode,
+				tags: existingTags,
+			}),
+			{
+				error: 'Something went wrong.',
+				loading: 'Updating library...',
+				success: 'Updates saved!',
+			},
+		)
+	}
+
+	const handleSubmit = (values: Schema) => {
+		if (isCreatingLibrary) {
+			handleCreateLibrary(values)
+		} else {
+			handleUpdateLibrary(values)
+		}
 	}
 
 	const errors = useMemo(() => {
 		return form.formState.errors
 	}, [form.formState.errors])
 
-	const formValues = form.watch()
-	const libraryPreview = useMemo(() => {
+	form.watch((updatedValues) => {
 		const {
 			tags,
 			library_pattern,
@@ -137,9 +248,10 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			create_webp_thumbnails,
 			hard_delete_conversions,
 			...preview
-		} = formValues
+		} = updatedValues
 
-		return {
+		// TODO: Investigate this type error more, I don't like casting...
+		syncLibraryPreview({
 			...preview,
 			library_options: {
 				...(library?.library_options ?? {
@@ -152,13 +264,13 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 				library_pattern,
 			},
 			tags: tags?.map((tag) => ({
-				id: tag.value,
-				name: tag.value,
+				id: tag?.value,
+				name: tag?.value,
 			})),
-		} satisfies Partial<Library>
-	}, [formValues, library?.library_options])
-
-	const [scanMode, createThumnails, convertRarToZip, hardDeleteConversions] = form.watch([
+		} as Partial<Library>)
+	})
+	const [formPath, scanMode, createThumnails, convertRarToZip, hardDeleteConversions] = form.watch([
+		'path',
 		'scan_mode',
 		'create_webp_thumbnails',
 		'convert_rar_to_zip',
@@ -184,17 +296,12 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		[convertRarToZip, hardDeleteConversions],
 	)
 
-	// FIXME: this causes infinite rerender...
-	// useEffect(() => {
-	// 	syncLibraryPreview(libraryPreview)
-	// }, [libraryPreview, syncLibraryPreview])
-
 	return (
 		<>
 			<DirectoryPickerModal
 				isOpen={showDirectoryPicker}
 				onClose={() => setShowDirectoryPicker(false)}
-				startingPath={libraryPreview.path}
+				startingPath={formPath}
 				onPathChange={(path) => {
 					if (path) {
 						form.setValue('path', path)
@@ -257,7 +364,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 
 					<Divider variant="muted" className="my-3.5" />
 
-					<LibraryPatternRadioGroup />
+					{isCreatingLibrary && <LibraryPatternRadioGroup />}
 
 					<div className="flex max-w-2xl flex-col gap-3 divide-y divide-gray-75 py-2 dark:divide-gray-900">
 						<div className="flex items-center justify-between py-6 md:items-start">
@@ -293,6 +400,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 						</div>
 					</div>
 
+					{/* TODO: I think these are better as checkboxes eventually */}
 					<div className="flex flex-auto gap-12 pt-4">
 						{/* TODO: thumbnails will eventually be a separate subform, as it will get a little complex with
 							the future options */}
@@ -318,9 +426,9 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 					</div>
 				</div>
 
-				<div className="mt-4 flex w-full md:max-w-sm">
+				<div className="mt-6 flex w-full md:max-w-sm">
 					<Button className="w-full md:max-w-sm" variant="primary">
-						Create Library
+						{isCreatingLibrary ? 'Create' : 'Edit'} Library
 					</Button>
 				</div>
 			</Form>

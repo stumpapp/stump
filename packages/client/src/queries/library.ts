@@ -10,17 +10,14 @@ import { useQueryParamStore } from '../stores'
 export const refreshUseLibrary = (id: string) =>
 	invalidateQueries({ exact: true, queryKey: [libraryQueryKeys.getLibraryById, id] })
 
-export function useLibrary(id: string, { enabled, ...options }: QueryOptions<Library> = {}) {
-	const { isLoading, data: library } = useQuery(
+export function useLibraryByIdQuery(id: string, options?: QueryOptions<Library>) {
+	const { data, ...rest } = useQuery(
 		[libraryQueryKeys.getLibraryById, id],
 		() => libraryApi.getLibraryById(id).then((res) => res.data),
-		{
-			enabled: !!id || !!enabled,
-			...options,
-		},
+		options,
 	)
 
-	return { isLoading, library }
+	return { library: data, ...rest }
 }
 
 export interface UseLibrariesReturn {

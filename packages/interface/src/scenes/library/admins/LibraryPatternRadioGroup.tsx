@@ -4,6 +4,7 @@ import { useFormContext } from 'react-hook-form'
 
 import { useLocaleContext } from '../../../i18n/context'
 
+// TODO: disable this if the library is being updated, I don't support changing patterns (yet?)
 export default function LibraryPatternRadioGroup() {
 	const form = useFormContext()
 

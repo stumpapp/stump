@@ -194,6 +194,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			<DirectoryPickerModal
 				isOpen={showDirectoryPicker}
 				onClose={() => setShowDirectoryPicker(false)}
+				startingPath={libraryPreview.path}
 				onPathChange={(path) => {
 					if (path) {
 						form.setValue('path', path)

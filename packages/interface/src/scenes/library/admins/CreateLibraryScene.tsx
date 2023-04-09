@@ -10,7 +10,7 @@ export default function CreateLibraryScene() {
 	const { libraries } = useLibraries()
 
 	return (
-		<div className="">
+		<>
 			<Heading size="lg">{t('createLibraryScene.heading')}</Heading>
 			<Text size="sm" variant="muted" className="mt-1.5">
 				{t('createLibraryScene.subtitle')}{' '}
@@ -23,6 +23,6 @@ export default function CreateLibraryScene() {
 			<div className="flex flex-col gap-12 pt-2">
 				{libraries && <CreateOrEditLibraryForm existingLibraries={libraries} />}
 			</div>
-		</div>
+		</>
 	)
 }

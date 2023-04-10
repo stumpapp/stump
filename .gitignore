@@ -29,6 +29,9 @@ umd/
 node_modules/
 target/
 .next
+.netlify
+.pnpm-store
+.vercel
 
 # Custom
 *.min.js

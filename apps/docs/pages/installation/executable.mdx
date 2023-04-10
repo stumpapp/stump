@@ -1,0 +1,43 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Executable
+
+<Callout emoji="☢️">
+	Any present tense information in this section is not accurate. Once a release is made, the
+	following information will apply shortly thereafter.
+</Callout>
+
+On [GitHub](https://github.com/aaronleopold/stump/releases), Stump has pre-built binaries, for both the Stump server and desktop application, for Linux, macOS, and Windows platforms.
+
+Follow the instructions below for your operating system to install Stump.
+
+## Linux
+
+Coming Soon!
+
+## macOS
+
+Coming Soon!
+
+## Windows
+
+Coming Soon!
+
+Example Windows service file provided by [@KrautByte](https://github.com/KrautByte):
+
+```
+[Unit]
+Description=Stump Book Server
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=stump
+WorkingDirectory=/opt/stump
+ExecStart=pnpm start core
+
+[Install]
+WantedBy=multi-user.target
+```

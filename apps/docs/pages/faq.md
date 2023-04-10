@@ -60,7 +60,7 @@ TODO
 
 ## Similar Projects
 
-There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there (_heck, it isn't even in beta yet_)! If Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
+There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there. If Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
 
 - [Komga](https://github.com/gotson/komga)
 - [Kavita](https://github.com/Kareadita/Kavita)

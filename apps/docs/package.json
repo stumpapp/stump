@@ -8,8 +8,7 @@
 		"build": "next build",
 		"export": "next export",
 		"start": "next start",
-		"lint": "next lint",
-		"deploy": "netlify deploy --build --dir=.next"
+		"lint": "next lint"
 	},
 	"keywords": [],
 	"author": "",

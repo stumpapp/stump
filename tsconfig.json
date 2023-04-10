@@ -6,6 +6,9 @@
       "path": "apps/desktop"
     },
     {
+      "path": "apps/docs"
+    },
+    {
       "path": "apps/mobile"
     },
     {

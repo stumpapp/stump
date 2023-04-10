@@ -28,6 +28,7 @@ tmp/
 umd/
 node_modules/
 target/
+.next
 
 # Custom
 *.min.js

@@ -33,7 +33,7 @@
 		"metro": "^0.73.7",
 		"metro-resolver": "^0.73.7"
 	},
-	"name": "mobile",
+	"name": "@stump/mobile",
 	"version": "1.0.0",
 	"private": true
 }

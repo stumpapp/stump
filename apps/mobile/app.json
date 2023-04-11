@@ -1,10 +1,10 @@
 {
 	"expo": {
-		"scheme": "acme",
+		"scheme": "stump",
 		"web": {
 			"bundler": "metro"
 		},
-		"name": "mobile",
-		"slug": "mobile"
+		"name": "stump",
+		"slug": "stump"
 	}
 }

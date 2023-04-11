@@ -1,9 +1,6 @@
 {
 	"expo": {
 		"scheme": "stump",
-		"web": {
-			"bundler": "metro"
-		},
 		"name": "stump",
 		"slug": "stump"
 	}

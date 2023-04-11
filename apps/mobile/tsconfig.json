@@ -1,8 +1,6 @@
 {
-	"extends": "../../tsconfig.options.json",
-	"include": ["**/*"],
-	"references": [],
-	"compilerOptions": {
-		"outDir": "../../.moon/cache/types/apps/mobile"
-	}
+  "compilerOptions": {
+    "outDir": "../../.moon/cache/types/apps/mobile"
+  },
+  "extends": "expo/tsconfig.base"
 }

@@ -1,0 +1,25 @@
+type: 'application'
+
+workspace:
+  inheritedTasks:
+    exclude: ['buildPackage']
+
+fileGroups:
+  app:
+    - 'pages/**/*'
+    - 'components/**/*'
+
+language: 'typescript'
+
+tasks:
+  dev:
+    command: 'next dev'
+    local: true
+
+  build:
+    command: 'next build'
+    local: true
+
+  deploy:
+    command: 'vercel'
+    local: true

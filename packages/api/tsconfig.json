@@ -1,26 +1,18 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "skipLibCheck": true,
-    "outDir": "../../.moon/cache/types/packages/api",
-    "paths": {
-      "@stump/types": [
-        "../types/index.ts"
-      ],
-      "@stump/types/*": [
-        "../types/*"
-      ]
-    }
-  },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
-  "references": [
-    {
-      "path": "../types"
-    }
-  ]
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"skipLibCheck": true,
+		"outDir": "../../.moon/cache/types/packages/api",
+		"paths": {
+			"@stump/types": ["../types/index.ts"],
+			"@stump/types/*": ["../types/*"]
+		}
+	},
+	"include": ["src"],
+	"exclude": ["node_modules"],
+	"references": [
+		{
+			"path": "../types"
+		}
+	]
 }

@@ -1,69 +1,69 @@
 {
-  "name": "@stump/interface",
-  "version": "0.0.0",
-  "description": "",
-  "license": "MIT",
-  "private": true,
-  "main": "src/index.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./assets/*": "./src/assets/*"
-  },
-  "dependencies": {
-    "@chakra-ui/react": "^2.5.1",
-    "@emotion/react": "^11.10.6",
-    "@emotion/styled": "^11.10.6",
-    "@hookform/resolvers": "^2.9.11",
-    "@stump/api": "workspace:*",
-    "@stump/client": "workspace:*",
-    "@stump/types": "workspace:*",
-    "@tanstack/react-query": "^4.20.4",
-    "@tanstack/react-query-devtools": "^4.20.4",
-    "@tanstack/react-table": "^8.7.9",
-    "@tanstack/react-virtual": "3.0.0-beta.18",
-    "chakra-react-select": "^4.4.3",
-    "class-variance-authority": "^0.2.4",
-    "clsx": "^1.2.1",
-    "dayjs": "^1.11.7",
-    "epubjs": "^0.3.93",
-    "framer-motion": "^7.10.3",
-    "i18next": "^21.10.0",
-    "immer": "^9.0.19",
-    "nprogress": "^0.2.0",
-    "phosphor-react": "^1.4.1",
-    "pluralize": "^8.0.0",
-    "react-dom": "^18.2.0",
-    "react-error-boundary": "^3.1.4",
-    "react-helmet": "^6.1.0",
-    "react-hook-form": "^7.43.1",
-    "react-hot-toast": "^2.4.0",
-    "react-hotkeys-hook": "^3.4.7",
-    "react-i18next": "^11.18.6",
-    "react-router": "^6.8.1",
-    "react-router-dom": "^6.8.1",
-    "react-swipeable": "^7.0.0",
-    "rooks": "^7.4.3",
-    "use-count-up": "^3.0.1",
-    "zod": "^3.20.6",
-    "zustand": "^4.3.3"
-  },
-  "devDependencies": {
-    "@types/node": "^18.14.0",
-    "@types/nprogress": "^0.2.0",
-    "@types/pluralize": "^0.0.29",
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11",
-    "@types/react-helmet": "^6.1.6",
-    "@types/react-router-dom": "^5.3.3",
-    "@vitejs/plugin-react": "^2.2.0",
-    "typescript": "^4.9.5",
-    "vite": "^3.2.5"
-  },
-  "pnpm": {
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "@babel/core"
-      ]
-    }
-  }
+	"name": "@stump/interface",
+	"version": "0.0.0",
+	"description": "",
+	"license": "MIT",
+	"private": true,
+	"main": "src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./assets/*": "./src/assets/*"
+	},
+	"dependencies": {
+		"@chakra-ui/react": "^2.5.1",
+		"@emotion/react": "^11.10.6",
+		"@emotion/styled": "^11.10.6",
+		"@hookform/resolvers": "^2.9.11",
+		"@stump/api": "workspace:*",
+		"@stump/client": "workspace:*",
+		"@stump/types": "workspace:*",
+		"@tanstack/react-query": "^4.20.4",
+		"@tanstack/react-query-devtools": "^4.20.4",
+		"@tanstack/react-table": "^8.7.9",
+		"@tanstack/react-virtual": "3.0.0-beta.18",
+		"chakra-react-select": "^4.4.3",
+		"class-variance-authority": "^0.2.4",
+		"clsx": "^1.2.1",
+		"dayjs": "^1.11.7",
+		"epubjs": "^0.3.93",
+		"framer-motion": "^7.10.3",
+		"i18next": "^21.10.0",
+		"immer": "^9.0.19",
+		"nprogress": "^0.2.0",
+		"phosphor-react": "^1.4.1",
+		"pluralize": "^8.0.0",
+		"react-dom": "^18.2.0",
+		"react-error-boundary": "^3.1.4",
+		"react-helmet": "^6.1.0",
+		"react-hook-form": "^7.43.1",
+		"react-hot-toast": "^2.4.0",
+		"react-hotkeys-hook": "^3.4.7",
+		"react-i18next": "^11.18.6",
+		"react-router": "^6.8.1",
+		"react-router-dom": "^6.8.1",
+		"react-swipeable": "^7.0.0",
+		"rooks": "^7.4.3",
+		"use-count-up": "^3.0.1",
+		"zod": "^3.20.6",
+		"zustand": "^4.3.3"
+	},
+	"devDependencies": {
+		"@types/node": "^18.14.0",
+		"@types/nprogress": "^0.2.0",
+		"@types/pluralize": "^0.0.29",
+		"@types/react": "^18.0.28",
+		"@types/react-dom": "^18.0.11",
+		"@types/react-helmet": "^6.1.6",
+		"@types/react-router-dom": "^5.3.3",
+		"@vitejs/plugin-react": "^2.2.0",
+		"typescript": "^4.9.5",
+		"vite": "^3.2.5"
+	},
+	"pnpm": {
+		"peerDependencyRules": {
+			"ignoreMissing": [
+				"@babel/core"
+			]
+		}
+	}
 }

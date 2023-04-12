@@ -72,7 +72,6 @@ tasks:
       - 'eslint'
       - '--ext'
       - '.ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs'
-      - '--fix'
       - '--report-unused-disable-directives'
       - '--no-error-on-unmatched-pattern'
       - '--exit-on-fatal-error'

@@ -7,5 +7,5 @@ node_modules
 target
 dist
 build
-.moon
+.moon/cache
 .next

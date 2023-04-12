@@ -1,12 +1,22 @@
-import React from 'react'
-import { SplashScreen, Stack } from 'expo-router'
+import React, { useEffect } from 'react'
+import { Stack, useRootNavigationState, useRouter } from 'expo-router'
 
 export default function Layout() {
-	const isLoaded = true
+	const navigationState = useRootNavigationState()
+	const router = useRouter()
 
-	if (!isLoaded) {
-		return <SplashScreen />
-	}
+	// TODO: Replace redirect logic with auth.
+	useEffect(() => {
+		// Temporary fix for the router not being ready.
+		if (!navigationState?.key) return
+
+		if (false) {
+			router.replace('/home')
+			return
+		}
+
+		router.replace('/connect')
+	}, [navigationState?.key])
 
 	return <Stack />
 }

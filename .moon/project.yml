@@ -29,8 +29,11 @@ fileGroups:
     - '**/*.{scss,css}'
     - '**/*.{md,mdx}'
 
-# TODO: ignore formatting of tsconfig/other .json files
-# in CI/pre-comiit hook
+#! FIXME: for some god forsaken reason, I cannot for the life of me get the moon
+#! prettier run to align with the config file... The biggest annoyance is for .json
+#! files, it seems to not use hard tabs. Drives me wild.
+#* https://moonrepo.dev/docs/guides/examples/prettier
+
 tasks:
   format:
     command:
@@ -40,6 +43,22 @@ tasks:
       - '--ignore-path'
       - '@in(3)'
       - '--write'
+      - '.'
+    inputs:
+      - 'src/**/*'
+      - 'tests/**/*'
+      - '**/*.{md,mdx,yml,yaml,json}'
+      - '/.prettierignore'
+      - '/prettier.config.js'
+
+  format-check:
+    command:
+      - 'prettier'
+      - '--config'
+      - '@in(4)'
+      - '--ignore-path'
+      - '@in(3)'
+      - '--check'
       - '.'
     inputs:
       - 'src/**/*'

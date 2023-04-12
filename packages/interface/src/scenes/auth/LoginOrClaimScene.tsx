@@ -29,7 +29,7 @@ export default function LoginOrClaimScene() {
 		username: z.string().min(1, { message: t('authScene.form.validation.missingUsername') }),
 	})
 
-	const form = useForm({
+	const form = useForm<z.infer<typeof schema>>({
 		resolver: zodResolver(schema),
 	})
 

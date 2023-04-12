@@ -1,12 +1,10 @@
 {
-  "extends": "../../tsconfig.options.json",
-  "include": [
-    "src"
-  ],
-  "references": [],
-  "compilerOptions": {
-    "outDir": "../../.moon/cache/types/packages/components",
-    "jsx": "preserve",
-    "esModuleInterop": true
-  }
+	"extends": "../../tsconfig.options.json",
+	"include": ["src"],
+	"references": [],
+	"compilerOptions": {
+		"outDir": "../../.moon/cache/types/packages/components",
+		"jsx": "preserve",
+		"esModuleInterop": true
+	}
 }

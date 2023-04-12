@@ -18,11 +18,13 @@ export type LazyComponent = Promise<{
 // I'm still so annoyed at this lol
 export const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
-const HomeScene = lazily(() => import('./scenes/home/HomeScene'))
-const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewScene'))
-const FourOhFour = lazily(() => import('./scenes/error/FourOhFour'))
-const ServerConnectionErrorScene = lazily(() => import('./scenes/error/ServerConnectionErrorScene'))
-const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene'))
+const HomeScene = lazily(() => import('./scenes/home/HomeScene.tsx'))
+const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewScene.tsx'))
+const FourOhFour = lazily(() => import('./scenes/error/FourOhFour.tsx'))
+const ServerConnectionErrorScene = lazily(
+	() => import('./scenes/error/ServerConnectionErrorScene.tsx'),
+)
+const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene.tsx'))
 
 export function AppRouter() {
 	const appProps = useAppProps()

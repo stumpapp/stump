@@ -1,7 +1,24 @@
 import { motion } from 'framer-motion'
+import { useTheme } from 'nextra-theme-docs'
+import { useEffect } from 'react'
 
-// TODO: optimize images
 export default function AppPreview() {
+	const { resolvedTheme } = useTheme()
+
+	//* This is a workaround to preload the other image in the background so if a user
+	//* switches themes, the image will already be loaded and there won't be a stutter.
+	// ! NOTE: There is a chance that 'system' will pop up first, only then resolving to
+	// ! either 'dark' or 'light'. I don't see this as much of an issue, TBH.
+	useEffect(() => {
+		let imageUrl = 'demo-fallback--light.png'
+		if (resolvedTheme !== 'dark') {
+			imageUrl = 'demo-fallback--dark.png'
+		}
+
+		const image = new Image()
+		image.src = `/${imageUrl}`
+	}, [resolvedTheme])
+
 	return (
 		<div className="relative -mt-7 h-[432px] w-full sm:p-0 lg:h-[700px]">
 			<div className="relative h-full">

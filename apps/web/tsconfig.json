@@ -1,35 +1,23 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "types": [
-      "vite/client"
-    ],
-    "jsx": "preserve",
-    "outDir": "../../.moon/cache/types/apps/web",
-    "paths": {
-      "@stump/client": [
-        "../../packages/client/src/index.ts"
-      ],
-      "@stump/client/*": [
-        "../../packages/client/src/*"
-      ],
-      "@stump/interface": [
-        "../../packages/interface/src/index.ts"
-      ],
-      "@stump/interface/*": [
-        "../../packages/interface/src/*"
-      ]
-    }
-  },
-  "include": [
-    "src"
-  ],
-  "references": [
-    {
-      "path": "../../packages/client"
-    },
-    {
-      "path": "../../packages/interface"
-    }
-  ]
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"types": ["vite/client"],
+		"jsx": "preserve",
+		"outDir": "../../.moon/cache/types/apps/web",
+		"paths": {
+			"@stump/client": ["../../packages/client/src/index.ts"],
+			"@stump/client/*": ["../../packages/client/src/*"],
+			"@stump/interface": ["../../packages/interface/src/index.ts"],
+			"@stump/interface/*": ["../../packages/interface/src/*"]
+		}
+	},
+	"include": ["src"],
+	"references": [
+		{
+			"path": "../../packages/client"
+		},
+		{
+			"path": "../../packages/interface"
+		}
+	]
 }

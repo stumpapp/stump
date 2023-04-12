@@ -1,21 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCreateLibraryMutation, useEditLibraryMutation, useTags } from '@stump/client'
-import {
-	Button,
-	Divider,
-	Form,
-	Heading,
-	IconButton,
-	Input,
-	Label,
-	RawSwitch,
-	Switch,
-	Text,
-	TextArea,
-} from '@stump/components'
+import { Button, Form, IconButton, Input, TextArea } from '@stump/components'
 import type { Library, LibraryOptions, LibraryPattern, LibraryScanMode } from '@stump/types'
 import { Folder } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
@@ -26,37 +14,19 @@ import TagSelect from '../../../components/TagSelect'
 import { useLocaleContext } from '../../../i18n'
 import paths from '../../../paths'
 import { useLibraryAdminContext } from './context'
-import LibraryPatternRadioGroup from './LibraryPatternRadioGroup'
+import LibraryOptionsForm from './LibraryOptionsForm'
+import ScanModeForm from './ScanModeForm'
 
-type Props = {
-	library?: Library
-	existingLibraries: Library[]
+function isLibraryScanMode(input: string): input is LibraryScanMode {
+	return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input
 }
 
-// TODO: this component is a big one. It should be split up where possible I think to isolate some of this
-// logic into smaller components.
-// I can think at least the library options can be a separate sub form component.
-export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
-	const isCreatingLibrary = !library
-	const navigate = useNavigate()
+function isLibraryPattern(input: string): input is LibraryPattern {
+	return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
+}
 
-	const { syncLibraryPreview } = useLibraryAdminContext()
-
-	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
-
-	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
-
-	const { t } = useLocaleContext()
-
-	function isLibraryScanMode(input: string): input is LibraryScanMode {
-		return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input
-	}
-
-	function isLibraryPattern(input: string): input is LibraryPattern {
-		return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
-	}
-
-	const schema = z.object({
+const buildScema = (existingLibraries: Library[], library?: Library) =>
+	z.object({
 		convert_rar_to_zip: z.boolean().default(false),
 		create_webp_thumbnails: z.boolean().default(false),
 		description: z.string().nullable(),
@@ -94,8 +64,26 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			)
 			.optional(),
 	})
-	type Schema = z.infer<typeof schema>
+export type Schema = z.infer<ReturnType<typeof buildScema>>
 
+type Props = {
+	library?: Library
+	existingLibraries: Library[]
+}
+
+export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
+	const isCreatingLibrary = !library
+	const navigate = useNavigate()
+
+	const { syncLibraryPreview } = useLibraryAdminContext()
+
+	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
+
+	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
+
+	const { t } = useLocaleContext()
+
+	const schema = buildScema(existingLibraries, library)
 	const form = useForm<Schema>({
 		defaultValues: {
 			convert_rar_to_zip: library?.library_options.convert_rar_to_zip ?? false,
@@ -269,32 +257,8 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			})),
 		} as Partial<Library>)
 	})
-	const [formPath, scanMode, createThumnails, convertRarToZip, hardDeleteConversions] = form.watch([
-		'path',
-		'scan_mode',
-		'create_webp_thumbnails',
-		'convert_rar_to_zip',
-		'hard_delete_conversions',
-	])
 
-	const handleChangeScanMode = (newMode: LibraryScanMode) => {
-		if (newMode === scanMode) {
-			form.setValue('scan_mode', 'NONE')
-		} else {
-			form.setValue('scan_mode', newMode)
-		}
-	}
-
-	useEffect(
-		() => {
-			if (!convertRarToZip && hardDeleteConversions) {
-				form.setValue('hard_delete_conversions', false)
-			}
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[convertRarToZip, hardDeleteConversions],
-	)
+	const [formPath] = form.watch(['path'])
 
 	return (
 		<>
@@ -356,75 +320,9 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 					/>
 				</div>
 
-				<div className="py-2">
-					<Heading size="xs">Library Options</Heading>
-					<Text size="sm" variant="muted" className="mt-1.5">
-						The following options are configurable for your library and affect how it is scanned.
-					</Text>
+				<ScanModeForm isCreatingLibrary={isCreatingLibrary} />
 
-					<Divider variant="muted" className="my-3.5" />
-
-					{isCreatingLibrary && <LibraryPatternRadioGroup />}
-
-					<div className="flex max-w-2xl flex-col gap-3 divide-y divide-gray-75 py-2 dark:divide-gray-900">
-						<div className="flex items-center justify-between py-6 md:items-start">
-							<RawSwitch
-								className="text-gray-900"
-								checked={scanMode === 'BATCHED'}
-								onClick={() => handleChangeScanMode('BATCHED')}
-								primaryRing
-							/>
-
-							<div className="flex flex-grow flex-col gap-2 text-right">
-								<Label>Parallel Scan</Label>
-								<Text size="xs" variant="muted">
-									A faster scan that indexes your library files in parallel
-								</Text>
-							</div>
-						</div>
-
-						<div className="flex items-center justify-between py-6 md:items-start">
-							<RawSwitch
-								className="text-gray-900"
-								checked={scanMode === 'SYNC'}
-								onClick={() => handleChangeScanMode('SYNC')}
-								primaryRing
-							/>
-
-							<div className="flex flex-grow flex-col gap-2 text-right">
-								<Label>In-Order Scan</Label>
-								<Text size="xs" variant="muted">
-									A standard scan that indexes your library files one at a time
-								</Text>
-							</div>
-						</div>
-					</div>
-
-					{/* TODO: I think these are better as checkboxes eventually */}
-					<div className="flex flex-auto gap-12 pt-4">
-						{/* TODO: thumbnails will eventually be a separate subform, as it will get a little complex with
-							the future options */}
-						<Switch
-							label="Create Webp Thumbnails"
-							checked={createThumnails}
-							onClick={() => form.setValue('create_webp_thumbnails', !createThumnails)}
-							{...form.register('create_webp_thumbnails')}
-						/>
-						<Switch
-							checked={convertRarToZip}
-							label="Convert .rar files to .zip"
-							onClick={() => form.setValue('convert_rar_to_zip', !convertRarToZip)}
-							{...form.register('convert_rar_to_zip')}
-						/>
-						<Switch
-							checked={hardDeleteConversions}
-							disabled={!convertRarToZip}
-							label="Permanently delete .rar files after conversion"
-							onClick={() => form.setValue('hard_delete_conversions', !hardDeleteConversions)}
-							{...form.register('hard_delete_conversions')}
-						/>
-					</div>
-				</div>
+				<LibraryOptionsForm isCreatingLibrary={isCreatingLibrary} />
 
 				<div className="mt-6 flex w-full md:max-w-sm">
 					<Button className="w-full md:max-w-sm" variant="primary">

@@ -10,9 +10,6 @@
   <a href="https://github.com/aaronleopold/stump/blob/main/LICENSE">
     <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=CF9977" />
   </a>
-  <!-- <a href="https://app.getpostman.com/run-collection/6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20?action=collection%2Ffork&collection-url=entityId%3D6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20%26entityType%3Dcollection%26workspaceId%3D722014ea-55eb-4a49-b29d-814300c1016d">
-    <img src="https://run.pstmn.io/button.svg">
-  </a> -->
   <!-- <a href="./.github/CHANGELOG.md">
     <img src="https://img.shields.io/github/package-json/v/aaronleopold/stump?logo=azurepipelines&amp;color=0aa8d2" alt="Current Version">
   </a> -->
@@ -138,12 +135,14 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 ### /apps
 
 - `desktop`: A Tauri application.
+- `docs`: A NextJS application for the Stump documentation site.
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server.
 - `web`: The React application that is served by the Axum server.
 
 ### /packages
 
-- `client`: API functions, react-query hooks, and other client-side utilities utilities for interacting with the Stump API.
+- `api`: All of the API functions used by the `client` package.
+- `client`: React-query config, hooks, and other client-side utilities utilities.
 - `components`: Shared React components for the web and desktop applications.
 - `interface`: Exports a React component which renders the Stump interface for web and desktop applications.
 - `prisma-cli`: A small rust app to run the Prisma CLI.

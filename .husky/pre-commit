@@ -1,8 +1,8 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# npx lint-staged
-moon run :format
+npx lint-staged
+# moon run :format
 moon run :lint
 # TODO: fix typecheck
 # moon run :typecheck

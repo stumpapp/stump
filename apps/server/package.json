@@ -1,10 +1,10 @@
 {
-  "name": "@stump/server",
-  "private": true,
-  "version": "0.0.0",
-  "scripts": {
-    "build": "pnpm get-client && cargo build --release && pnpm move-client",
-    "get-client": "trash \"dist/*\" \"!dist/.placeholder\" && cpy \"../web/dist/**/*\" ./dist/",
-    "move-client": "trash ../../target/release/dist && cp -r ./dist ../../target/release/dist"
-  }
+	"name": "@stump/server",
+	"private": true,
+	"version": "0.0.0",
+	"scripts": {
+		"build": "pnpm get-client && cargo build --release && pnpm move-client",
+		"get-client": "trash \"dist/*\" \"!dist/.placeholder\" && cpy \"../web/dist/**/*\" ./dist/",
+		"move-client": "trash ../../target/release/dist && cp -r ./dist ../../target/release/dist"
+	}
 }

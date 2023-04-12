@@ -4,10 +4,12 @@ import {
 	MutationFunction,
 	MutationKey,
 	QueryClient,
+	QueryFilters,
 	QueryFunction,
 	QueryKey,
 	useInfiniteQuery as useReactInfiniteQuery,
 	UseInfiniteQueryOptions,
+	useIsFetching as useReactIsFetching,
 	useMutation as useReactMutation,
 	UseMutationOptions,
 	useQuery as useReactQuery,
@@ -30,6 +32,10 @@ export const queryClient = new QueryClient({
 		},
 	},
 })
+
+export function useIsFetching(filters?: QueryFilters) {
+	return useReactIsFetching(filters, { context: QueryClientContext })
+}
 
 // NOTE for future onlookers of this file: react-query has LOTS of generics. It can
 // be hard to keep track of things if you're just starting, so refer to these few big

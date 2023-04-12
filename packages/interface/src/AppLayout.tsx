@@ -3,14 +3,12 @@ import { Suspense, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
-// import CommandPalette from './components/CommandPalette'
+// import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
 import JobOverlay from './components/jobs/JobOverlay'
 import RouteLoadingIndicator from './components/RouteLoadingIndicator'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
 import TopBar from './components/topbar/TopBar'
-// import TopBar from './components/topbar/TopBar'
 import { AppContext } from './context'
 
 export function AppLayout() {
@@ -64,8 +62,7 @@ export function AppLayout() {
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
 					<main className="min-h-full w-full bg-white dark:bg-gray-975">
-						<BackgroundFetchIndicator />
-
+						{/* <BackgroundFetchIndicator /> */}
 						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />
 						</Suspense>

@@ -1,4 +1,4 @@
-import { useIsFetching } from '@tanstack/react-query'
+import { useIsFetching } from '@stump/client'
 import { useEffect, useState } from 'react'
 
 // TODO: I'm honestly not sure how much I love this loader. I think a more generic spinner

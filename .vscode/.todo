@@ -1,2 +1,3 @@
-- [ ] figure out what the proper resolution for changing all the i64s to u32s
-  - [ ] Pretty much all `as u32` needs to be evaluated and made safer, as well
+- [ ] remove prelude crate and put all the structs/enums/etc in corresponding files
+  - [ ] things only used in `apps/server` should be moved there, rather than living in `core`
+- [ ] explore https://prisma.brendonovich.dev/extra/partial-types

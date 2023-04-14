@@ -16,14 +16,24 @@ There are way too many varying organizational preferences for Stump to support a
 
 ### Collection-Priority Library
 
-A collection-priority library is useful for libraries that have many nested folders that you'd like to be grouped by the top most folder.
+A collection-priority library is useful for libraries that have many nested folders that you'd like to be grouped by the top most folder. **Only direct descendants of the library root will be considered for series creation**, so long as they contain media files at some point in their hierarchy.
+
+### Series-Priority Library
+
+A series-priority library is useful for libraries which should be grouped by any directory that directly contains media files. **Any descendant directories (including the library root itself) will be considered for series creation**, so long as they directly contain media files.
+
+### Examples
+
+A few examples to help illustrate the difference between the two library patterns and how Stump will interpret their differing structures.
+
+#### Example 1
 
 Consider the following example:
 
 Library name: `Ebooks`
 
 ```
-.LIBRARY ROOT
+.LIBRARY ROOT FOLDER
 ├── Shannon, Samantha
 │   └── The Priory of the Orange Tree.epub
 ├── Sanderson, Brandon
@@ -75,16 +85,14 @@ Ebooks
     └── The Return of the King.epub
 ```
 
-### Series-Priority Library
-
-A series-priority library is useful for libraries which should be grouped by any directory that directly contains media files.
+#### Example 2
 
 Consider the following example:
 
 Library name: `Comics`
 
 ```
-.LIBRARY ROOT
+.LIBRARY ROOT FOLDER
 ├── Daredevil
 │   ├── Daredevil 001.cbz
 │   ├── Daredevil 002.cbz
@@ -107,12 +115,12 @@ Comics
     └── The Amazing Spider-Man 002 (2018).cbz
 ```
 
-### Complicated Example
+#### Complicated Example
 
 Let's consider the following filesystem for a library:
 
 ```
-.Ebooks
+.LIBRARY ROOT FOLDER
 ├── Martin, George R R
 │   └── A Song of Ice and Fire
 │       ├── A Dance With Dragons (2012).epub
@@ -208,7 +216,7 @@ In general, if you plan on having nested folders in your library that can be gro
 
 Personally, I use a collection-priority library for my ebooks and a series-priority library for my comics. I find that the collection-priority library works well for ebooks, as I can group them all by author, regardless of how I organize the underlying filesystem, and the series-priority library works well for comics, as I can group them by major arcs.
 
-### Alternative Options
+#### Alternative Options
 
 Unfortunately, Stump does not support any other patterns, as there are simply too many ways to organize a library to support them all. If you have a library that doesn't quite fit either of these patterns, or you just prefer a differnt organization method, you can always use the [Library File Explorer](/guides/library-explorer) to navigate your library. This is akin to using a native file explorer to navigate your filesystem.
 

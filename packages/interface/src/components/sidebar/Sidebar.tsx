@@ -7,6 +7,7 @@ import {
 	ChevronRight,
 	Home,
 	Library as LibraryIcon,
+	List,
 	type LucideProps,
 	Settings,
 } from 'lucide-react'
@@ -36,6 +37,7 @@ interface NavItemProps {
 	active?: boolean
 }
 
+// TODO: make this NOT library specific.
 function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 	const { t } = useLocaleContext()
 
@@ -152,12 +154,11 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 	const location = useLocation()
 	const navigate = useNavigate()
 
-	const { locale, t } = useLocaleContext()
+	const { t } = useLocaleContext()
 	const { libraries } = useLibraries()
 
 	// TODO: I'd like to also highlight the library when viewing an item from it.
 	// e.g. a book from the library, or a book from a series in the library, etc
-	const libraryIsActive = (id: string) => location.pathname.startsWith(`/library/${id}`)
 	const linkIsActive = (href?: string) => {
 		if (!href) {
 			return false
@@ -168,8 +169,10 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 		return location.pathname.startsWith(href)
 	}
 
-	const links: Array<NavItemProps> = useMemo(
-		() => [
+	const links: Array<NavItemProps> = useMemo(() => {
+		const libraryIsActive = (id: string) => location.pathname.startsWith(`/library/${id}`)
+
+		return [
 			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
 			{
 				active: location.pathname === 'library/create',
@@ -183,16 +186,20 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 				name: t('sidebar.buttons.libraries'),
 			},
 			{
+				icon: List,
+				name: 'Reading Lists',
+			},
+			// {
+			// 	icon: LayoutGrid,
+			// 	name: 'Collections',
+			// },
+			{
 				href: '/settings',
 				icon: Settings,
 				name: t('sidebar.buttons.settings'),
-				// onHover:  () => queryClient.prefetchQuery([])
 			},
-		],
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[libraries, locale, location.pathname, t],
-	)
+		]
+	}, [libraries, location.pathname, t])
 
 	return (
 		<>

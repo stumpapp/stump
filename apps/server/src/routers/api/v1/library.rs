@@ -15,7 +15,7 @@ use stump_core::{
 	db::{
 		models::{
 			library_series_ids_media_ids_include, LibrariesStats, Library,
-			LibraryScanMode, Series,
+			LibraryScanMode, Media, Series,
 		},
 		utils::PrismaCountTrait,
 	},
@@ -28,6 +28,7 @@ use stump_core::{
 	prisma::{
 		library::{self, WhereParam},
 		library_options, media,
+		media::OrderByParam as MediaOrderByParam,
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag,
 	},
@@ -39,6 +40,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_session_admin_user, http::ImageResponse, FilterableQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 };
 
@@ -59,6 +61,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.route("/scan", get(scan_library))
 				.route("/series", get(get_library_series))
+				.route("/media", get(get_library_media))
 				.route("/thumbnail", get(get_library_thumbnail)),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -249,7 +252,7 @@ async fn get_library_by_id(
 // but for now I will have this disgustingly gross and ugly work around...
 /// Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
-	filter_query: Query<FilterableQuery<LibraryFilter>>,
+	filter_query: Query<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -313,6 +316,66 @@ async fn get_library_series(
 		.await?;
 
 	Ok(Json((series, series_count, pagination).into()))
+}
+
+async fn get_library_media(
+	filter_query: Query<FilterableQuery<MediaFilter>>,
+	pagination_query: Query<PaginationQuery>,
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let FilterableQuery { ordering, filters } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
+	let pagination_cloned = pagination.clone();
+
+	let is_unpaged = pagination.is_unpaged();
+	let order_by_param: MediaOrderByParam = ordering.try_into()?;
+
+	let mut media_conditions = super::media::apply_media_filters(filters);
+	media_conditions.push(media::series::is(vec![series::library_id::equals(Some(
+		id.clone(),
+	))]));
+
+	let media_conditions_cloned = media_conditions.clone();
+
+	let (media, count) = ctx
+		.db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(media_conditions_cloned.clone())
+				.order_by(order_by_param);
+
+			if !is_unpaged {
+				query = super::media::apply_pagination(query, &pagination_cloned)
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(media_conditions_cloned)
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
+	}
+
+	Ok(Json(Pageable::from(media)))
 }
 
 // TODO: ImageResponse for utoipa

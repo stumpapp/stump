@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { queryClient, useLoginOrRegister, useUserStore } from '@stump/client'
-import { Button, Form, Heading, Input } from '@stump/components'
+import { Alert, Button, Form, Heading, Input } from '@stump/components'
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { Navigate } from 'react-router'
@@ -86,20 +86,20 @@ export default function LoginOrClaimScene() {
 				</Heading>
 			</div>
 
-			{/* {!isClaimed && (
-				<Alert status="warning" rounded="md">
-					<AlertIcon />
-					{t('authScene.claimText')}
-				</Alert>
-			)} */}
-
 			<Form form={form} onSubmit={handleSubmit} className="min-w-[20rem]">
+				{!isClaimed && (
+					<Alert level="warning" className="max-w-md">
+						<Alert.Content>{t('authScene.claimText')}</Alert.Content>
+					</Alert>
+				)}
+
 				<Input
 					id="username"
 					label={t('authScene.form.labels.username')}
 					variant="primary"
 					autoComplete="username"
 					autoFocus
+					fullWidth
 					{...form.register('username')}
 				/>
 
@@ -109,6 +109,7 @@ export default function LoginOrClaimScene() {
 					variant="primary"
 					type="password"
 					autoComplete="current-password"
+					fullWidth
 					{...form.register('password')}
 				/>
 

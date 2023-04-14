@@ -8,14 +8,11 @@ use tracing::{debug, error, trace};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	db::{
-		models::{LibraryOptions, Media},
-		Dao, SeriesDao, SeriesDaoImpl,
-	},
+	db::models::{LibraryOptions, Media},
 	event::CoreEvent,
 	fs::scanner::utils::{insert_series_batch, mark_library_missing},
 	prelude::{CoreError, CoreResult, Ctx, FileStatus},
-	prisma::{library, series},
+	prisma::{library, media, series},
 };
 
 use super::{utils::populate_glob_builder, ScannedFileTrait};
@@ -212,12 +209,14 @@ pub(crate) async fn setup_series(
 	library_path: &str,
 	library_options: &LibraryOptions,
 ) -> SeriesSetup {
-	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
 	let series_ignore_file = Path::new(series.path.as_str()).join(".stumpignore");
 	let library_ignore_file = Path::new(library_path).join(".stumpignore");
 
-	let media = series_dao
-		.get_series_media(series.id.as_str())
+	let media = ctx
+		.db
+		.media()
+		.find_many(vec![media::series_id::equals(Some(series.id.clone()))])
+		.exec()
 		.await
 		.unwrap_or_else(|e| {
 			error!(error = ?e, "Error occurred trying to fetch media for series");
@@ -228,7 +227,7 @@ pub(crate) async fn setup_series(
 	let mut media_by_path = HashMap::with_capacity(media.len());
 	for m in media {
 		visited_media.insert(m.path.clone(), false);
-		media_by_path.insert(m.path.clone(), m);
+		media_by_path.insert(m.path.clone(), Media::from(m));
 	}
 
 	let mut walkdir = WalkDir::new(&series.path);

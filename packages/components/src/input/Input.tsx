@@ -15,6 +15,8 @@ export type InputProps = {
 	description?: string
 	/** The optional props for the description. */
 	descriptionProps?: Omit<React.ComponentPropsWithoutRef<typeof Text>, 'children'>
+	/** The optional variant for the input. */
+	fullWidth?: boolean
 	/** The optional error message to display. */
 	errorMessage?: string
 	/** The optional class name for the container. */
@@ -30,6 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			description,
 			labelProps,
 			descriptionProps,
+			fullWidth,
 			containerClassName,
 			icon,
 			variant,
@@ -49,7 +52,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		const isInvalid = !!errorMessage
 
 		return (
-			<div className={cn('grid w-full max-w-sm items-center gap-1.5', containerClassName)}>
+			<div
+				className={cn(
+					'grid w-full items-center gap-1.5',
+					{ 'max-w-sm': !fullWidth },
+					containerClassName,
+				)}
+			>
 				{label && (
 					<Label htmlFor={props.id} {...(labelProps || {})}>
 						{label}

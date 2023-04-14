@@ -1,4 +1,4 @@
-import { cx, Heading, IconButton, ToolTip } from '@stump/components'
+import { cx, Heading, IconButton, Text, ToolTip } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
@@ -100,6 +100,43 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 		columnVirtualizer.scrollToIndex(nextIndex, { smoothScroll: true })
 	}
 
+	const renderContent = () => {
+		if (!cards.length) {
+			return <Text size="md">No items to display</Text>
+		}
+
+		return (
+			<div ref={parentRef} className="h-[24rem] overflow-x-auto overflow-y-hidden scrollbar-hide">
+				<div
+					className="relative inline-flex h-full"
+					style={{
+						width: `${columnVirtualizer.getTotalSize()}px`,
+					}}
+				>
+					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
+						const card = cards[virtualItem.index]
+
+						return (
+							<div
+								key={virtualItem.key}
+								style={{
+									height: '100%',
+									left: 0,
+									position: 'absolute',
+									top: 0,
+									transform: `translateX(${virtualItem.start}px)`,
+									width: `${estimateSize()}px`,
+								}}
+							>
+								{card}
+							</div>
+						)
+					})}
+				</div>
+			</div>
+		)
+	}
+
 	return (
 		<div className="flex h-full w-full flex-col space-y-2">
 			<div className="flex flex-row items-center justify-between">
@@ -131,34 +168,7 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 					</div>
 				</div>
 			</div>
-			<div ref={parentRef} className="h-[24rem] overflow-x-auto overflow-y-hidden scrollbar-hide">
-				<div
-					className="relative inline-flex h-full"
-					style={{
-						width: `${columnVirtualizer.getTotalSize()}px`,
-					}}
-				>
-					{columnVirtualizer.getVirtualItems().map((virtualItem) => {
-						const card = cards[virtualItem.index]
-
-						return (
-							<div
-								key={virtualItem.key}
-								style={{
-									height: '100%',
-									left: 0,
-									position: 'absolute',
-									top: 0,
-									transform: `translateX(${virtualItem.start}px)`,
-									width: `${estimateSize()}px`,
-								}}
-							>
-								{card}
-							</div>
-						)
-					})}
-				</div>
-			</div>
+			{renderContent()}
 		</div>
 	)
 }

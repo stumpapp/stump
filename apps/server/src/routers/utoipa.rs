@@ -71,7 +71,7 @@ use super::api;
         api::v1::reading_list::delete_reading_list_by_id,
         api::v1::series::get_series,
         api::v1::series::get_series_by_id,
-        api::v1::series::get_recently_added_series,
+        api::v1::series::get_recently_added_series_handler,
         api::v1::series::get_series_thumbnail,
         api::v1::series::get_series_media,
         api::v1::tag::get_tags,

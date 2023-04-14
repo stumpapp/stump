@@ -40,7 +40,10 @@ use super::library::apply_library_filters;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/series", get(get_series))
-		.route("/series/recently-added", get(get_recently_added_series))
+		.route(
+			"/series/recently-added",
+			get(get_recently_added_series_handler),
+		)
 		.nest(
 			"/series/:id",
 			Router::new()
@@ -245,6 +248,10 @@ async fn get_series_by_id(
 	Ok(Json(series.unwrap().into()))
 }
 
+// async fn get_recently_added_series() {
+// 	unimplemented!()
+// }
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/recently-added",
@@ -259,7 +266,7 @@ async fn get_series_by_id(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-async fn get_recently_added_series(
+async fn get_recently_added_series_handler(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	session: ReadableSession,
@@ -274,6 +281,8 @@ async fn get_recently_added_series(
 	let page_params = pagination.0.page_params();
 	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
 
+	// TODO: don't use DAO just create separate function `get_recently_added_series` and make
+	// this one `get_recently_added_series_handler`.
 	let recently_added_series = series_dao
 		.get_recently_added_series_page(&viewer_id, page_params)
 		.await?;

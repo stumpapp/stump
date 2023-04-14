@@ -13,7 +13,7 @@ language: 'typescript'
 
 tasks:
   dev:
-    command: 'next dev'
+    command: 'next dev -p 3001'
     local: true
 
   build:

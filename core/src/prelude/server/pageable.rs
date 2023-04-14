@@ -8,6 +8,9 @@ use crate::{
 	prelude::DirectoryListing,
 };
 
+// TODO: this entire file belongs in server app, not here. It is currently used by DAOs, which are
+// very much going BYE BYE
+
 #[derive(
 	Clone, Default, Debug, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema,
 )]

@@ -33,7 +33,7 @@ This will install the project dependencies, build the frontend bundle (required 
 
 ### Running Stump
 
-I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. You'll want to read a bit about how it works, but below are two examples:
+I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. You'll want to read a bit about how it works, but below are two useful examples executing moon tasks concurrently:
 
 ```bash
 # webapp + server
@@ -43,8 +43,6 @@ moon run server:start desktop:desktop-dev
 ```
 
 Notice the general format is `moon run <app>:<command>`. You can supply multiple `<app>:<command>` pairs to run multiple tasks concurrently.
-
-At this point, you're pretty much all set to start contributing!
 
 ## Notes and Tips
 
@@ -57,14 +55,21 @@ If you aren't sure what to work on, I recommend taking a look at some of the ope
 In general, some good places to start might be:
 
 - Translation, so Stump is accessible to non-English speakers.
-  - An automated translation system would be immensely helpful! If you're knowledgeable in this area, please reach out! As of right now, it is just planned as a future feature.
-- Writing comprehensive [integration tests](https://github.com/aaronleopold/stump/tree/develop/core/integration-tests).
+- Implementing a comprehensive test suite for both the Rust `core` and `server`.
 - Designing and/or implementing UI elements.
-- Docker build optimizations (it is currently _horrendous_).
+- Docker build optimizations and caching strategies.
 - CI pipelines / workflows.
 - And lots more!
 
 ### Code Style, Formatting, and Linting
+
+<Callout emoji="🚧">
+	moonrepo will format `yaml` and `json` files in a way that deviates from the repo configurations
+	outlined below. This is something that [currently cannot be
+	changed](https://moonrepo.dev/docs/faq#how-to-stop-moon-formatting-json-and-yaml-files). Because
+	of this, it is very likely the pre-commit hook will fail, so often times you will have to run
+	`pnpm prettify` to fix the format issues caused by moonrepo.
+</Callout>
 
 Stump is developed using primarily [Rust](https://www.rust-lang.org/) and [TypeScript](https://www.typescriptlang.org/).
 

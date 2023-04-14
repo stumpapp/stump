@@ -7,6 +7,8 @@ use crate::{
 	prisma::{library, media, series},
 };
 
+// TODO: put these elsewhere, maybe in db crate?
+
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
 pub enum Direction {
 	#[serde(rename = "asc")]
@@ -115,29 +117,3 @@ impl TryInto<series::OrderByParam> for QueryOrder {
 		})
 	}
 }
-
-// pub trait FindManyTrait {
-// 	fn paginated(self, page_params: PageParams) -> Self;
-// }
-
-// impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
-// 	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
-// where
-// 	Where: Into<SerializedWhereInput>,
-// 	With: Into<Selection>,
-// 	OrderBy: Into<(String, PrismaValue)>,
-// 	Cursor: Into<Where>,
-// 	Set: Into<(String, PrismaValue)>,
-// 	Data: DeserializeOwned,
-// {
-// 	fn paginated(self, page_params: PageParams) -> Self {
-// 		let skip = match page_params.zero_based {
-// 			true => page_params.page * page_params.page_size,
-// 			false => (page_params.page - 1) * page_params.page_size,
-// 		} as i64;
-
-// 		let take = page_params.page_size as i64;
-
-// 		self.skip(skip).take(take)
-// 	}
-// }

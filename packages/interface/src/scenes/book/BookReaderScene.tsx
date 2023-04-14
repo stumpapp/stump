@@ -12,10 +12,13 @@ export default function BookReaderScene() {
 	const [search] = useSearchParams()
 	const navigate = useNavigate()
 
-	const { id, page } = useParams()
+	const { id } = useParams()
 	if (!id) {
 		throw new Error('You must provide a book ID for the reader.')
 	}
+
+	const page = search.get('page')
+	const isAnimated = search.get('animated') === 'true'
 
 	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
 	const { updateReadProgress } = useUpdateMediaProgress(id, {
@@ -26,7 +29,7 @@ export default function BookReaderScene() {
 
 	function handleChangePage(newPage: number) {
 		updateReadProgress(newPage)
-		navigate(paths.bookReader(id!, { page: newPage }))
+		navigate(paths.bookReader(id!, { isAnimated, page: newPage }))
 	}
 
 	if (fetchingBook) {
@@ -36,11 +39,11 @@ export default function BookReaderScene() {
 	}
 
 	if (media.extension.match(EBOOK_EXTENSION)) {
-		return <Navigate to={paths.bookReader(id, { isEpub: true })} />
+		return <Navigate to={paths.bookReader(id, { isAnimated, isEpub: true })} />
 	} else if (!page || parseInt(page, 10) <= 0) {
-		return <Navigate to={paths.bookReader(id, { page: 1 })} />
+		return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
 	} else if (parseInt(page, 10) > media.pages) {
-		return <Navigate to={paths.bookReader(id, { page: media.pages })} />
+		return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
 	}
 
 	if (media.extension.match(ARCHIVE_EXTENSION)) {

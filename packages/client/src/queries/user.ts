@@ -10,7 +10,6 @@ import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
 import { AxiosError } from 'axios'
 
 import { MutationOptions, QueryOptions, useMutation, useQuery } from '../client'
-import { ClientQueryParams } from '.'
 
 type UseUsersQueryParams = QueryOptions<User[], AxiosError, User[]>
 export function useUsersQuery(params: UseUsersQueryParams = {}) {
@@ -23,13 +22,13 @@ export function useUsersQuery(params: UseUsersQueryParams = {}) {
 	return { users, ...ret }
 }
 
-interface UseUserPreferencesParams extends ClientQueryParams<UserPreferences> {
+type UseUserPreferencesParams = {
 	enableFetchPreferences?: boolean
-}
+} & MutationOptions<UserPreferences, AxiosError, UserPreferences>
 
 export function useUserPreferences(
 	id?: string,
-	{ enableFetchPreferences, onUpdated }: UseUserPreferencesParams = {},
+	{ enableFetchPreferences, ...mutationOptions }: UseUserPreferencesParams = {},
 ) {
 	const {
 		data: userPreferences,
@@ -42,12 +41,9 @@ export function useUserPreferences(
 
 	const { mutateAsync: updateUserPreferences, isLoading: isUpdating } = useMutation(
 		['updateUserPreferences', id],
-		(preferences: UserPreferences) => updateUserPreferencesFn(id!, preferences),
-		{
-			onSuccess(res) {
-				onUpdated?.(res.data)
-			},
-		},
+		(preferences: UserPreferences) =>
+			updateUserPreferencesFn(id!, preferences).then((res) => res.data),
+		mutationOptions,
 	)
 
 	return {

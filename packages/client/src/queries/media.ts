@@ -10,14 +10,15 @@ import {
 	useMutation,
 } from '../client'
 import { queryClient, useQuery } from '../client'
-import { QUERY_KEYS } from '../query_keys'
-
-const MEDIA_KEYS = QUERY_KEYS.media
 
 export const prefetchMedia = async (id: string) => {
-	await queryClient.prefetchQuery([MEDIA_KEYS.getMediaById, id], () => mediaApi.getMediaById(id), {
-		staleTime: 10 * 1000,
-	})
+	await queryClient.prefetchQuery(
+		[mediaQueryKeys.getMediaById, id],
+		() => mediaApi.getMediaById(id),
+		{
+			staleTime: 10 * 1000,
+		},
+	)
 }
 
 type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
@@ -28,7 +29,7 @@ type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 
 export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = {}) {
 	const { data, ...ret } = useQuery(
-		[MEDIA_KEYS.getMediaById, id],
+		[mediaQueryKeys.getMediaById, id],
 		() => mediaApi.getMediaById(id).then(({ data }) => data),
 		{
 			keepPreviousData: false,
@@ -41,7 +42,7 @@ export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = 
 
 export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
 	const { data, ...restReturn } = useCursorQuery(
-		[MEDIA_KEYS.getMedia],
+		[mediaQueryKeys.getMedia],
 		async (params) => {
 			const { data } = await mediaApi.getMediaWithCursor(params)
 			return data
@@ -82,7 +83,7 @@ export function useUpdateMediaProgress(
 
 export function useRecentlyAddedMediaQuery(options: CursorQueryOptions<Media>) {
 	const { data, ...restReturn } = useCursorQuery(
-		[MEDIA_KEYS.getRecentlyAddedMedia],
+		[mediaQueryKeys.getRecentlyAddedMedia],
 		async (params) => {
 			const { data } = await mediaApi.getRecentlyAddedMedia(params)
 			return data
@@ -101,7 +102,7 @@ export function useRecentlyAddedMediaQuery(options: CursorQueryOptions<Media>) {
 
 export function useContinueReading(options: CursorQueryOptions<Media>) {
 	const { data, ...restReturn } = useCursorQuery(
-		[MEDIA_KEYS.getInProgressMedia],
+		[mediaQueryKeys.getInProgressMedia],
 		async (params) => {
 			const { data } = await mediaApi.getInProgressMedia(params)
 			return data

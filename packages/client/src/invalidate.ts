@@ -1,8 +1,8 @@
+import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from '@stump/api'
 import { CoreEvent } from '@stump/types'
 import { QueryKey } from '@tanstack/react-query'
 
 import { queryClient } from './index'
-import { QUERY_KEYS } from './query_keys'
 
 type CoreEventTrigger = CoreEvent['key']
 type InvalidateFnArgs = {
@@ -16,63 +16,61 @@ type InvalidateFnArgs = {
 	  }
 )
 
-const { library, series, media, job } = QUERY_KEYS
-
 // TODO: this is still rather verbose, but it's a start
 export const core_event_triggers = {
 	CreateEntityFailed: {
-		keys: [job.getJobs],
+		keys: [jobQueryKeys.getJobs],
 	},
 	CreatedMedia: {
 		keys: [
-			library.getLibraryById,
-			library.getLibrariesStats,
-			series.getSeriesById,
-			media.getRecentlyAddedMedia,
+			libraryQueryKeys.getLibraryById,
+			libraryQueryKeys.getLibrariesStats,
+			seriesQueryKeys.getSeriesById,
+			mediaQueryKeys.getRecentlyAddedMedia,
 		],
 	},
 	CreatedMediaBatch: {
 		keys: [
-			library.getLibraryById,
-			library.getLibrariesStats,
-			series.getSeriesById,
-			media.getRecentlyAddedMedia,
+			libraryQueryKeys.getLibraryById,
+			libraryQueryKeys.getLibrariesStats,
+			seriesQueryKeys.getSeriesById,
+			mediaQueryKeys.getRecentlyAddedMedia,
 		],
 	},
 	CreatedSeries: {
 		keys: [
-			library.getLibraryById,
-			library.getLibrariesStats,
-			series.getSeriesById,
-			media.getRecentlyAddedMedia,
+			libraryQueryKeys.getLibraryById,
+			libraryQueryKeys.getLibrariesStats,
+			seriesQueryKeys.getSeriesById,
+			mediaQueryKeys.getRecentlyAddedMedia,
 		],
 	},
 	CreatedSeriesBatch: {
 		keys: [
-			library.getLibraryById,
-			library.getLibrariesStats,
-			series.getSeriesById,
-			media.getRecentlyAddedMedia,
+			libraryQueryKeys.getLibraryById,
+			libraryQueryKeys.getLibrariesStats,
+			seriesQueryKeys.getSeriesById,
+			mediaQueryKeys.getRecentlyAddedMedia,
 		],
 	},
 	JobComplete: {
 		keys: [
-			library.getLibraryById,
-			library.getLibrariesStats,
-			job.getJobs,
-			series.getSeriesById,
-			series.getRecentlyAddedSeries,
-			media.getRecentlyAddedMedia,
+			libraryQueryKeys.getLibraryById,
+			libraryQueryKeys.getLibrariesStats,
+			jobQueryKeys.getJobs,
+			seriesQueryKeys.getSeriesById,
+			seriesQueryKeys.getRecentlyAddedSeries,
+			mediaQueryKeys.getRecentlyAddedMedia,
 		],
 	},
 	JobFailed: {
-		keys: [job.getJobs],
+		keys: [jobQueryKeys.getJobs],
 	},
 	JobProgress: {
-		keys: [job.getJobs],
+		keys: [jobQueryKeys.getJobs],
 	},
 	JobStarted: {
-		keys: [job.getJobs],
+		keys: [jobQueryKeys.getJobs],
 	},
 } satisfies Record<CoreEventTrigger, InvalidateFnArgs>
 

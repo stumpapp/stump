@@ -11,7 +11,6 @@ import {
 	usePageQuery,
 	useQuery,
 } from '../client'
-import { QueryCallbacks } from '.'
 
 export const prefetchSeries = async (id: string) => {
 	await queryClient.prefetchQuery(
@@ -84,7 +83,7 @@ export function useRecentlyAddedSeries() {
 	// )
 }
 
-export function useUpNextInSeries(id: string, options: QueryCallbacks<Media> = {}) {
+export function useUpNextInSeries(id: string, options: QueryOptions<Media | undefined> = {}) {
 	const {
 		data: media,
 		isLoading,

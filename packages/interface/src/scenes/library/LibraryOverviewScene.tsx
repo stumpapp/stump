@@ -1,4 +1,4 @@
-import { useLayoutMode, useLibraryByIdQuery, useLibrarySeries } from '@stump/client'
+import { useLayoutMode, useLibraryByIdQuery, useLibrarySeriesQuery } from '@stump/client'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
@@ -24,7 +24,7 @@ export default function LibraryOverviewScene() {
 	const { layoutMode } = useLayoutMode('LIBRARY')
 	const { isLoading, library } = useLibraryByIdQuery(id)
 
-	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeries(id, page)
+	const { isLoading: isLoadingSeries, series, pageData } = useLibrarySeriesQuery(id, { page })
 
 	const { current_page, total_pages } = pageData || {}
 	const isOnFirstPage = current_page === 1

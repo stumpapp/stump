@@ -7,8 +7,8 @@ import type {
 	UpdateLibraryArgs,
 } from '@stump/types'
 
-import { API } from '.'
-import { ApiResult, PageableApiResult } from './types'
+import { API, mergePageParams, urlWithParams } from '.'
+import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
 
 export function getLibraries(): Promise<PageableApiResult<Library[]>> {
 	return API.get('/libraries?unpaged=true')
@@ -28,14 +28,10 @@ export function getLibraryThumbnail(id: string): string {
 
 export function getLibrarySeries(
 	id: string,
-	page: number,
-	params?: string,
+	{ page, page_size, params }: PagedQueryParams,
 ): Promise<PageableApiResult<Series[]>> {
-	if (params) {
-		return API.get(`/libraries/${id}/series?page=${page}&${params}`)
-	}
-
-	return API.get(`/libraries/${id}/series?page=${page}`)
+	const searchParams = mergePageParams({ page, page_size, params })
+	return API.get(urlWithParams(`/libraries/${id}/series`, searchParams))
 }
 
 // FIXME: type this lol

@@ -20,7 +20,6 @@ import { AxiosError, isAxiosError } from 'axios'
 import { QueryClientContext, useClientContext } from './context'
 import { useUserStore } from './index'
 
-export * from './queries'
 export { QueryClientProvider } from '@tanstack/react-query'
 
 export const queryClient = new QueryClient({

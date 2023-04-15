@@ -3,7 +3,8 @@
 	"version": "0.0.0",
 	"exports": {
 		".": "./src/index.ts",
-		"./styles/overrides.css": "./src/styles/overrides.css"
+		"./styles/overrides.css": "./src/styles/overrides.css",
+		"./tailwind/tailwind.js": "./tailwind/tailwind.js"
 	},
 	"scripts": {
 		"build": "tsc",

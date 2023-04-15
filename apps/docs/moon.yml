@@ -20,6 +20,20 @@ tasks:
     command: 'next build'
     local: true
 
-  deploy:
+  deploy-preview:
     command: 'vercel'
     local: true
+    runFromWorkspaceRoot: false
+    platform: 'system'
+    options:
+      shell: true
+
+  deploy:
+    command: 'vercel'
+    args:
+      - '--prod'
+    local: true
+    runFromWorkspaceRoot: false
+    platform: 'system'
+    options:
+      shell: true

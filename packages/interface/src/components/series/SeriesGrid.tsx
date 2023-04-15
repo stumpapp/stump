@@ -1,7 +1,6 @@
-import { Heading } from '@chakra-ui/react'
-import type { Series } from '@stump/types'
+import { CardGrid, Heading } from '@stump/components'
+import { type Series } from '@stump/types'
 
-import { CardGrid } from '../Card'
 import SeriesCard from './SeriesCard'
 
 interface Props {
@@ -9,15 +8,12 @@ interface Props {
 	series?: Series[]
 }
 
-// TODO: I think this *might* need a redesign... Not sure, gotta do some UX research about this
 export default function SeriesGrid({ series, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>
+		return null
 	} else if (!series || !series.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">
-				{/* TODO: If I take in pageData, I can determine if it is an out of bounds issue or if the series truly has
-				no media. */}
 				<Heading size="sm">It doesn&rsquo;t look like there are any series here.</Heading>
 			</div>
 		)

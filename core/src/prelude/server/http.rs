@@ -3,6 +3,8 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::{debug, warn};
 
+// TODO: move this into fs crate
+
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
 #[allow(non_camel_case_types)]

@@ -1,38 +1,29 @@
-import {
-	createLibrary,
-	deleteLibrary,
-	editLibrary,
-	getLibraries,
-	getLibrariesStats,
-	getLibraryById,
-	getLibrarySeries,
-	scanLibary,
-} from '@stump/api'
-import type { Library, PageInfo } from '@stump/types'
+import { jobQueryKeys, libraryApi, libraryQueryKeys } from '@stump/api'
+import type { CreateLibraryArgs, Library, PageInfo, Series, UpdateLibraryArgs } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
-import { useMutation, useQuery } from '../client'
+import {
+	MutationOptions,
+	PageQueryOptions,
+	QueryOptions,
+	useMutation,
+	usePageQuery,
+	useQuery,
+} from '../client'
 import { invalidateQueries } from '../invalidate'
-import { QUERY_KEYS } from '../query_keys'
-import { useQueryParamStore } from '../stores'
-import type { ClientQueryParams, QueryCallbacks } from '.'
-
-const LIBRARY_KEYS = QUERY_KEYS.library
 
 export const refreshUseLibrary = (id: string) =>
-	invalidateQueries({ exact: true, queryKey: [LIBRARY_KEYS.get_by_id, id] })
+	invalidateQueries({ exact: true, queryKey: [libraryQueryKeys.getLibraryById, id] })
 
-export function useLibrary(id: string, { onError }: QueryCallbacks<Library> = {}) {
-	const { isLoading, data: library } = useQuery(
-		[LIBRARY_KEYS.get_by_id, id],
-		() => getLibraryById(id).then((res) => res.data),
-		{
-			onError,
-		},
+export function useLibraryByIdQuery(id: string, options?: QueryOptions<Library>) {
+	const { data, ...rest } = useQuery(
+		[libraryQueryKeys.getLibraryById, id],
+		() => libraryApi.getLibraryById(id).then((res) => res.data),
+		options,
 	)
 
-	return { isLoading, library }
+	return { library: data, ...rest }
 }
 
 export interface UseLibrariesReturn {
@@ -41,7 +32,7 @@ export interface UseLibrariesReturn {
 }
 
 export function useLibraries() {
-	const { data, ...rest } = useQuery([LIBRARY_KEYS.get], getLibraries, {
+	const { data, ...rest } = useQuery([libraryQueryKeys.getLibraries], libraryApi.getLibraries, {
 		// Send all non-401 errors to the error page
 		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
 	})
@@ -64,24 +55,28 @@ export function useLibraries() {
 	}
 }
 
-export function useLibrarySeries(libraryId: string, page = 1) {
-	const { getQueryString, ...paramsStore } = useQueryParamStore((state) => state)
-
-	const { isLoading, isFetching, isPreviousData, data } = useQuery(
-		[LIBRARY_KEYS.series, page, libraryId, paramsStore],
-		() =>
-			getLibrarySeries(libraryId, page, getQueryString()).then(({ data }) => ({
-				pageData: data._page,
-				series: data.data,
-			})),
+export function useLibrarySeriesQuery(libraryId: string, options: PageQueryOptions<Series>) {
+	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
+		[libraryQueryKeys.getLibrarySeries, libraryId],
+		async ({ page = 1, ...rest }) => {
+			const { data } = await libraryApi.getLibrarySeries(libraryId, { page, ...rest })
+			return data
+		},
 		{
+			...options,
 			keepPreviousData: true,
 		},
 	)
 
-	const { series, pageData } = data ?? {}
+	const series = data?.data
+	const pageData = data?._page
 
-	return { isFetching, isLoading, isPreviousData, pageData, series }
+	return {
+		isLoading: isLoading || isFetching || isRefetching,
+		pageData,
+		series,
+		...restReturn,
+	}
 }
 
 export function useLibraryStats() {
@@ -90,80 +85,112 @@ export function useLibraryStats() {
 		isLoading,
 		isRefetching,
 		isFetching,
-	} = useQuery([LIBRARY_KEYS.stats], () => getLibrariesStats().then((data) => data.data), {})
+	} = useQuery(
+		[libraryQueryKeys.getLibrariesStats],
+		() => libraryApi.getLibrariesStats().then((data) => data.data),
+		{},
+	)
 
 	return { isLoading: isLoading || isRefetching || isFetching, libraryStats }
 }
 
-export function useScanLibrary({ onError }: ClientQueryParams<unknown> = {}) {
-	const { mutate: scan, mutateAsync: scanAsync } = useMutation([LIBRARY_KEYS.scan], scanLibary, {
-		onError,
-	})
+export function useScanLibrary({ onError }: Pick<QueryOptions<unknown>, 'onError'> = {}) {
+	const { mutate: scan, mutateAsync: scanAsync } = useMutation(
+		[libraryQueryKeys.scanLibary],
+		libraryApi.scanLibary,
+		{
+			onError,
+		},
+	)
 
 	return { scan, scanAsync }
 }
 
-export function useLibraryMutation({
-	onCreated,
-	onUpdated,
-	onDeleted,
-	onCreateFailed,
-	onUpdateFailed,
-	onError,
-}: ClientQueryParams<Library> = {}) {
-	const { isLoading: createIsLoading, mutateAsync: createLibraryAsync } = useMutation(
-		['createLibrary'],
-		createLibrary,
+export function useCreateLibraryMutation(
+	options: MutationOptions<Library, AxiosError, CreateLibraryArgs> = {},
+) {
+	const {
+		mutate: createLibrary,
+		mutateAsync: createLibraryAsync,
+		...rest
+	} = useMutation(
+		[libraryQueryKeys.createLibrary],
+		async (variables) => {
+			const { data } = await libraryApi.createLibrary(variables)
+			return data
+		},
 		{
-			onError,
-			onSuccess: (res) => {
-				if (!res.data) {
-					onCreateFailed?.(res)
-				} else {
-					invalidateQueries({
-						keys: [LIBRARY_KEYS.get, LIBRARY_KEYS.stats, QUERY_KEYS.job.get],
-					})
-					onCreated?.(res.data)
-					// onClose();
-				}
+			...options,
+			onSuccess: async (library, _, __) => {
+				await invalidateQueries({
+					keys: [
+						libraryQueryKeys.getLibraries,
+						libraryQueryKeys.getLibrariesStats,
+						jobQueryKeys.getJobs,
+					],
+				})
+				options.onSuccess?.(library, _, __)
 			},
 		},
 	)
 
-	const { isLoading: editIsLoading, mutateAsync: editLibraryAsync } = useMutation(
-		['editLibrary'],
-		editLibrary,
+	return { createLibrary, createLibraryAsync, ...rest }
+}
+
+export function useEditLibraryMutation(
+	options: MutationOptions<Library, AxiosError, UpdateLibraryArgs> = {},
+) {
+	const {
+		mutate: editLibrary,
+		mutateAsync: editLibraryAsync,
+		...rest
+	} = useMutation(
+		[libraryQueryKeys.editLibrary],
+		async (variables) => {
+			const { data } = await libraryApi.editLibrary(variables)
+			return data
+		},
 		{
-			onError,
-			onSuccess: (res) => {
-				if (!res.data) {
-					console.warn('Update failed:', res)
-					onUpdateFailed?.(res)
-				} else {
-					invalidateQueries({
-						keys: [LIBRARY_KEYS.get, LIBRARY_KEYS.stats, QUERY_KEYS.job.get],
-					})
-					onUpdated?.(res.data)
-				}
+			...options,
+			onSuccess: async (library, _, __) => {
+				await invalidateQueries({
+					keys: [
+						libraryQueryKeys.getLibraries,
+						libraryQueryKeys.getLibrariesStats,
+						jobQueryKeys.getJobs,
+					],
+				})
+				options.onSuccess?.(library, _, __)
 			},
 		},
 	)
 
-	const { mutateAsync: deleteLibraryAsync } = useMutation(['deleteLibrary'], deleteLibrary, {
-		async onSuccess(res) {
-			await invalidateQueries({
-				keys: [LIBRARY_KEYS.get, LIBRARY_KEYS.stats],
-			})
+	return { editLibrary, editLibraryAsync, ...rest }
+}
 
-			onDeleted?.(res.data)
+export function useDeleteLibraryMutation(
+	options: MutationOptions<Library, AxiosError, string> = {},
+) {
+	const {
+		mutate: deleteLibrary,
+		mutateAsync: deleteLibraryAsync,
+		...rest
+	} = useMutation(
+		[libraryQueryKeys.deleteLibrary],
+		async (id) => {
+			const { data } = await libraryApi.deleteLibrary(id)
+			return data
 		},
-	})
+		{
+			...options,
+			onSuccess: async (library, _, __) => {
+				await invalidateQueries({
+					keys: [libraryQueryKeys.getLibraries, libraryQueryKeys.getLibrariesStats],
+				})
+				options.onSuccess?.(library, _, __)
+			},
+		},
+	)
 
-	return {
-		createIsLoading,
-		createLibraryAsync,
-		deleteLibraryAsync,
-		editIsLoading,
-		editLibraryAsync,
-	}
+	return { deleteLibrary, deleteLibraryAsync, ...rest }
 }

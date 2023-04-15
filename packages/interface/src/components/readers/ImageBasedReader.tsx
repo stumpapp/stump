@@ -1,5 +1,5 @@
-import { useBoolean } from '@chakra-ui/react'
 import { queryClient } from '@stump/client'
+import { useBoolean } from '@stump/components'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
@@ -8,10 +8,10 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useWindowSize } from 'rooks'
 
 import Toolbar from './utils/Toolbar'
+
 export interface ImageBasedReaderProps {
 	currentPage: number
 	media: Media
-
 	onPageChange: (page: number) => void
 	getPageUrl(page: number): string
 }
@@ -61,8 +61,9 @@ export default function ImageBasedReader({
 		}
 	}
 
-	useHotkeys('right, left, space, esc', (_, handler) => {
-		switch (handler.key) {
+	useHotkeys('right, left, space, escape', (_, handler) => {
+		const targetKey = handler.keys?.at(0)
+		switch (targetKey) {
 			case 'right':
 				handlePageChange(currPageRef.current + 1)
 				break
@@ -72,8 +73,10 @@ export default function ImageBasedReader({
 			case 'space':
 				toggleToolbar()
 				break
-			case 'esc':
+			case 'escape':
 				hideToolbar()
+				break
+			default:
 				break
 		}
 	})
@@ -89,7 +92,7 @@ export default function ImageBasedReader({
 			/>
 			<SideBarControl position="left" onClick={() => onPageChange(currentPage - 1)} />
 			<img
-				className="w-full max-h-full md:w-auto z-30"
+				className="z-30 max-h-full w-full select-none md:w-auto"
 				src={getPageUrl(currentPage)}
 				onError={(err) => {
 					// @ts-expect-error: is oke
@@ -110,9 +113,9 @@ function SideBarControl({ onClick, position }: SideBarControlProps) {
 	return (
 		<div
 			className={clsx(
-				'h-full transition-all duration-300 z-50 border border-transparent',
-				'absolute w-[10%] active:bg-gray-200 active:border-gray-100 dark:active:bg-gray-700 dark:active:border dark:active:border-gray-500',
-				'sm:relative sm:w-full sm:flex sm:flex-shrink sm:active:bg-transparent',
+				'z-50 h-full border border-transparent transition-all duration-300',
+				'absolute w-[10%] active:border-gray-100 active:bg-gray-200 dark:active:border dark:active:border-gray-500 dark:active:bg-gray-700',
+				'sm:relative sm:flex sm:w-full sm:flex-shrink sm:active:bg-transparent',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },
 			)}
@@ -290,8 +293,9 @@ export function AnimatedImageBasedReader({
 		}
 	}
 
-	useHotkeys('right, left, space, esc', (_, handler) => {
-		switch (handler.key) {
+	useHotkeys('right, left, space, escape', (_, handler) => {
+		const targetKey = handler.keys?.at(0)
+		switch (targetKey) {
 			case 'right':
 				handleHotKeyPagination('next')
 				break
@@ -301,8 +305,10 @@ export function AnimatedImageBasedReader({
 			case 'space':
 				toggleToolbar()
 				break
-			case 'esc':
+			case 'escape':
 				hideToolbar()
+				break
+			default:
 				break
 		}
 	})
@@ -323,7 +329,7 @@ export function AnimatedImageBasedReader({
 					animate={prevControls}
 					transition={{ ease: 'easeOut' }}
 					style={{ x: prevX }}
-					className="absolute w-full max-h-full md:w-auto"
+					className="absolute max-h-full w-full md:w-auto"
 					src={imageUrls[0]}
 					onError={(err) => {
 						// @ts-expect-error: is oke
@@ -348,7 +354,7 @@ export function AnimatedImageBasedReader({
 				}}
 				transition={{ ease: 'easeOut' }}
 				style={{ x }}
-				className="absolute w-full max-h-full md:w-auto z-30"
+				className="absolute z-30 max-h-full w-full md:w-auto"
 				src={imageUrls[1]}
 				onError={(err) => {
 					// @ts-expect-error: is oke
@@ -364,7 +370,7 @@ export function AnimatedImageBasedReader({
 					animate={nextControls}
 					transition={{ ease: 'easeOut' }}
 					style={{ x: nextX }}
-					className="absolute w-full max-h-full md:w-auto"
+					className="absolute max-h-full w-full md:w-auto"
 					src={imageUrls[2]}
 					onError={(err) => {
 						// @ts-expect-error: is oke

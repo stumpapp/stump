@@ -1,21 +1,13 @@
-import {
-	Box,
-	Drawer,
-	DrawerBody,
-	DrawerContent,
-	DrawerOverlay,
-	Heading,
-	Stack,
-	Text,
-	useColorModeValue,
-	usePrevious,
-} from '@chakra-ui/react'
+import { Button, IconButton, Sheet, Text } from '@stump/components'
 import type { EpubContent } from '@stump/types'
 import { ListBullets } from 'phosphor-react'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { usePreviousDifferent } from 'rooks'
 
-import { IconButton } from '../../../ui/Button'
+// FIXME: I briefly worked on this file to remove chakra, but it needs a LOT of work.
+// it is very ugly. stinky doody code, too.
+
 interface EpubTocDrawerProps {
 	isOpen: boolean
 	onClose(): void
@@ -34,9 +26,7 @@ export default function EpubTocDrawer({
 	onSelect,
 }: EpubTocDrawerProps) {
 	const location = useLocation()
-	const previousLocation = usePrevious(location)
-
-	const btnRef = useRef(null)
+	const previousLocation = usePreviousDifferent(location)
 
 	useEffect(() => {
 		if (previousLocation?.pathname !== location.pathname && isOpen) {
@@ -51,42 +41,32 @@ export default function EpubTocDrawer({
 
 	return (
 		<>
-			<IconButton variant="ghost" ref={btnRef} onClick={onOpen}>
-				<ListBullets className="text-lg" weight="regular" />
-			</IconButton>
-
-			<Drawer isOpen={isOpen} placement="left" onClose={onClose} finalFocusRef={btnRef}>
-				<DrawerOverlay />
-				<DrawerContent className="relative" bg={useColorModeValue('white', 'gray.800')}>
-					<Box p={2} mt={2} className="sticky top-0">
-						<Heading size="sm" textAlign="center">
-							Table of Contents
-						</Heading>
-					</Box>
-					<Stack
-						as={DrawerBody}
-						display="flex"
-						flexShrink={0}
-						py={4}
-						h="full"
-						w="full"
-						px={4}
-						zIndex={10}
-						spacing={4}
-						className="scrollbar-hide"
-					>
-						{toc?.map((item) => (
-							<Text
-								key={item.label}
-								className="cursor-pointer"
-								onClick={() => handleSelect(item.content)}
-							>
-								{item.label}
-							</Text>
-						))}
-					</Stack>
-				</DrawerContent>
-			</Drawer>
+			<Sheet
+				open={isOpen}
+				onClose={onClose}
+				onOpen={onOpen}
+				title="Table of Contents"
+				description="Click on a chapter to jump to it."
+				trigger={
+					<IconButton variant="ghost">
+						<ListBullets className="text-lg" weight="regular" />
+					</IconButton>
+				}
+				size="lg"
+			>
+				<div className="flex max-h-full flex-col gap-1 overflow-y-auto px-2 pt-4 scrollbar-hide">
+					{toc?.map((item, i) => (
+						<Button
+							key={item.label}
+							className="justify-start text-left"
+							onClick={() => handleSelect(item.content)}
+							variant={i % 2 === 0 ? 'subtle' : 'ghost'}
+						>
+							<Text>{item.label}</Text>
+						</Button>
+					))}
+				</div>
+			</Sheet>
 		</>
 	)
 }

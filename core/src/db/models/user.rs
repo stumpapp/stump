@@ -10,6 +10,7 @@ pub struct User {
 	pub username: String,
 	pub role: String,
 	pub user_preferences: Option<UserPreferences>,
+	pub avatar_url: Option<String>,
 }
 
 impl User {
@@ -36,6 +37,7 @@ impl From<prisma::user::Data> for User {
 			username: data.username,
 			role: data.role,
 			user_preferences,
+			avatar_url: data.avatar_url,
 		}
 	}
 }
@@ -49,6 +51,7 @@ pub struct UserPreferences {
 	pub library_layout_mode: String,
 	pub series_layout_mode: String,
 	pub collection_layout_mode: String,
+	pub app_theme: String,
 }
 
 impl Default for UserPreferences {
@@ -60,6 +63,7 @@ impl Default for UserPreferences {
 			library_layout_mode: "GRID".to_string(),
 			series_layout_mode: "GRID".to_string(),
 			collection_layout_mode: "GRID".to_string(),
+			app_theme: "LIGHT".to_string(),
 		}
 	}
 }
@@ -73,6 +77,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			library_layout_mode: data.library_layout_mode,
 			series_layout_mode: data.series_layout_mode,
 			collection_layout_mode: data.collection_layout_mode,
+			app_theme: data.app_theme,
 		}
 	}
 }

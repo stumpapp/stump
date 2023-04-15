@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use prisma_client_rust::{raw, PrismaValue};
+use prisma_client_rust::{raw, PrismaValue, QueryError};
 use serde::Deserialize;
 
 use crate::{prelude::CoreResult, prisma::PrismaClient};
@@ -28,7 +28,7 @@ pub trait PrismaCountTrait {
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> CoreResult<HashMap<String, i64>>;
+	) -> Result<HashMap<String, i64>, QueryError>;
 }
 
 #[async_trait::async_trait]
@@ -92,7 +92,7 @@ impl PrismaCountTrait for PrismaClient {
 	async fn series_media_count(
 		&self,
 		series_ids: Vec<String>,
-	) -> CoreResult<HashMap<String, i64>> {
+	) -> Result<HashMap<String, i64>, QueryError> {
 		let count_res: Vec<SeriesMediaCountQueryReturn> = self
 		._query_raw(raw!(format!("SELECT DISTINCT series_id as series_id, COUNT(*) as count FROM media WHERE series_id in ({}) GROUP BY series_id",
 		series_ids

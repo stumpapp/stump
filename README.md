@@ -10,9 +10,6 @@
   <a href="https://github.com/aaronleopold/stump/blob/main/LICENSE">
     <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=CF9977" />
   </a>
-  <!-- <a href="https://app.getpostman.com/run-collection/6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20?action=collection%2Ffork&collection-url=entityId%3D6434946-9cf51d71-d680-46f5-89da-7b6cf7213a20%26entityType%3Dcollection%26workspaceId%3D722014ea-55eb-4a49-b29d-814300c1016d">
-    <img src="https://run.pstmn.io/button.svg">
-  </a> -->
   <!-- <a href="./.github/CHANGELOG.md">
     <img src="https://img.shields.io/github/package-json/v/aaronleopold/stump?logo=azurepipelines&amp;color=0aa8d2" alt="Current Version">
   </a> -->
@@ -115,7 +112,7 @@ And that's it!
 
 #### Where to start?
 
-If you aren't sure where to start, I recommend taking a look at the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs work.
+If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/aaronleopold/stump/issues) and the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs work.
 
 You can also check out the [v0.1.0 milestone](https://github.com/aaronleopold/stump/milestone/1) for a more filtered list of major features planned for that 0.1.0 release.
 
@@ -133,24 +130,27 @@ Some other good places to start:
 
 ## Project Structure 📦
 
-Stump has a monorepo structure that follows a similar pattern to that of [Spacedrive](https://www.spacedrive.com/).
+Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/workspaces) and [moonrepo](https://moonrepo.dev/):
 
 ### /apps
 
 - `desktop`: A Tauri application.
-- `server`: An [Axum](https://github.com/tokio-rs/axum) server.
+- `docs`: A NextJS application for the Stump documentation site.
+- `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server.
 - `web`: The React application that is served by the Axum server.
 
 ### /packages
 
-- `client`: Everything needed to create a react-based client for Stump. Contains Zustand and React Query configuration, used by the `interface` package, as well as the generated TypeScript types.
-- `config`: Configuration files for the project, e.g. `tsconfig.json`, etc.
-- `interface`: Stump's main React-based interface, shared between the web and desktop applications.
-- `prisma-cli`: A small rust app to run the prisma cli (generating the prisma client)
+- `api`: All of the API functions used by the `client` package.
+- `client`: React-query config, hooks, and other client-side utilities utilities.
+- `components`: Shared React components for the web and desktop applications.
+- `interface`: Exports a React component which renders the Stump interface for web and desktop applications.
+- `prisma-cli`: A small rust app to run the Prisma CLI.
+- `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 ### /core
 
-- `core`: Stump's 'core' functionality is located here, written in Rust. The `server` was previously part of the core, but was extracted for better isolation.
+- `core`: A Rust crate containing Stump's core functionalities.
 
 ## Similar Projects 👯
 

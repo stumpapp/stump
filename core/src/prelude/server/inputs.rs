@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::db::models::{LibraryOptions, LibraryScanMode, Tag};
+use crate::db::models::{LibraryOptions, LibraryScanMode, ReadingListVisibility, Tag};
+
+// TODO: put these adjacent to the types they're used for, remove this file
 
 #[derive(Debug, Clone, Deserialize, Type, ToSchema)]
 pub struct UserPreferencesUpdate {
@@ -11,6 +13,7 @@ pub struct UserPreferencesUpdate {
 	pub library_layout_mode: String,
 	pub series_layout_mode: String,
 	pub collection_layout_mode: String,
+	pub app_theme: String,
 }
 
 #[derive(Debug)]
@@ -29,6 +32,7 @@ pub struct LoginOrRegisterArgs {
 pub struct UpdateUserArgs {
 	pub username: String,
 	pub password: Option<String>,
+	pub avatar_url: Option<String>,
 }
 
 #[derive(Serialize, Type, ToSchema)]
@@ -80,6 +84,7 @@ pub struct ScanQueryParam {
 pub struct CreateReadingList {
 	pub id: String,
 	pub media_ids: Vec<String>,
+	pub visibility: Option<ReadingListVisibility>,
 }
 
 #[derive(Deserialize, Type, ToSchema)]

@@ -10,6 +10,8 @@ fileGroups:
     - 'public/**/*'
     - 'src/**/*'
     - 'types/**/*'
+    # TODO: stop pulling dist from cache :weary:
+    # - '!**/dist'
   typescript:
     - 'public/**/*'
     - 'src/**/*'
@@ -27,6 +29,11 @@ fileGroups:
     - '**/*.{scss,css}'
     - '**/*.{md,mdx}'
 
+#! FIXME: for some god forsaken reason, I cannot for the life of me get the moon
+#! prettier run to align with the config file... The biggest annoyance is for .json
+#! files, it seems to not use hard tabs. Drives me wild.
+#* https://moonrepo.dev/docs/guides/examples/prettier
+
 tasks:
   format:
     command:
@@ -42,14 +49,29 @@ tasks:
       - 'tests/**/*'
       - '**/*.{md,mdx,yml,yaml,json}'
       - '/.prettierignore'
-      - '/.prettierrc'
+      - '/prettier.config.js'
+
+  format-check:
+    command:
+      - 'prettier'
+      - '--config'
+      - '@in(4)'
+      - '--ignore-path'
+      - '@in(3)'
+      - '--check'
+      - '.'
+    inputs:
+      - 'src/**/*'
+      - 'tests/**/*'
+      - '**/*.{md,mdx,yml,yaml,json}'
+      - '/.prettierignore'
+      - '/prettier.config.js'
 
   lint:
     command:
       - 'eslint'
       - '--ext'
       - '.ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs'
-      - '--fix'
       - '--report-unused-disable-directives'
       - '--no-error-on-unmatched-pattern'
       - '--exit-on-fatal-error'

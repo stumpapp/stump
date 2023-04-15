@@ -10,7 +10,7 @@ export default function Hero() {
 					initial={{ opacity: 0, y: -40 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
-					className="text-4xl tracking-tight font-extrabold text-neutral-900 dark:text-neutral-100 sm:text-5xl md:text-6xl"
+					className="text-4xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-5xl md:text-6xl"
 				>
 					<span className="block xl:inline">A lightning fast</span>{' '}
 					<span className="block xl:inline">media server.</span>
@@ -19,13 +19,13 @@ export default function Hero() {
 					initial={{ opacity: 0, y: 40 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.25, duration: 0.5 }}
-					className="mt-3 max-w-md mx-auto text-base text-neutral-650 dark:text-neutral-400 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl"
+					className="text-neutral-650 mx-auto mt-3 max-w-md text-base dark:text-neutral-400 sm:text-lg md:mt-5 md:max-w-3xl md:text-xl"
 				>
 					Free, open source, self-hosting for all your comic books, manga and digital book
 					collections. Supports the most popular reading formats.
 				</motion.p>
 
-				<div className="mt-5 max-w-md mx-auto flex justify-center space-x-2 md:mt-8">
+				<div className="mx-auto mt-5 flex max-w-md justify-center space-x-2 md:mt-8">
 					<motion.div
 						className="flex"
 						initial={{ opacity: 0, scale: 0.5 }}
@@ -33,7 +33,7 @@ export default function Hero() {
 						transition={{ delay: 1.1, duration: 0.5 }}
 					>
 						<Link
-							className="cursor-pointer border rounded-md flex items-center transition-all duration-300 focus:outline-none dark:bg-opacity-90 dark:hover:bg-opacity-100 dark:active:opacity-90 bg-neutral-650 dark:bg-neutral-700 dark:hover:bg-neutral-650 border-neutral-500 dark:border-neutral-500 hover:border-neutral-450 active:border-neutral-450 dark:active:border-neutral-450 dark:hover:border-neutral-450 dark:shadow-sm hover:bg-neutral-600 active:bg-neutral-50 dark:hover:bg-neutral-700 dark:active:bg-neutral-650 text-neutral-800 hover:text-white active:text-white dark:text-neutral-200 dark:active:text-white dark:hover:text-white py-1.5 px-3 text-sm font-medium"
+							className="bg-neutral-650 dark:hover:bg-neutral-650 hover:border-neutral-450 active:border-neutral-450 dark:active:border-neutral-450 dark:hover:border-neutral-450 dark:active:bg-neutral-650 flex cursor-pointer items-center rounded-md border border-neutral-500 py-1.5 px-3 text-sm font-medium text-neutral-800 transition-all duration-300 hover:bg-neutral-600 hover:text-white focus:outline-none active:bg-neutral-50 active:text-white dark:border-neutral-500 dark:bg-neutral-700 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white dark:active:opacity-90"
 							href="/installation"
 						>
 							<span>Read Documentation</span>
@@ -47,7 +47,7 @@ export default function Hero() {
 						transition={{ delay: 1.3, duration: 0.5 }}
 					>
 						<Link
-							className="cursor-pointer border rounded-md transition-all duration-300 focus:outline-none dark:bg-opacity-90 dark:hover:bg-opacity-100 dark:active:opacity-90 bg-transparent border-transparent hover:border-neutral-200 active:border-neutral-200 dark:active:border-neutral-650 dark:hover:border-neutral-500 dark:shadow-sm hover:bg-neutral-50 active:bg-neutral-50 dark:hover:bg-neutral-700 dark:active:bg-neutral-650 text-neutral-700 hover:text-neutral-900 active:text-neutral-600 dark:text-neutral-200 dark:active:text-white dark:hover:text-white py-1.5 px-3 text-sm font-medium flex items-center space-x-2"
+							className="dark:active:border-neutral-650 dark:active:bg-neutral-650 flex cursor-pointer items-center space-x-2 rounded-md border border-transparent bg-transparent py-1.5 px-3 text-sm font-medium text-neutral-700 transition-all duration-300 hover:border-neutral-200 hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none active:border-neutral-200 active:bg-neutral-50 active:text-neutral-600 dark:bg-opacity-90 dark:text-neutral-200 dark:shadow-sm dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:bg-opacity-100 dark:hover:text-white dark:active:text-white dark:active:opacity-90"
 							href="https://www.github.com/aaronleopold/stump"
 							target="_blank"
 						>

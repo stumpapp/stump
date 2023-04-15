@@ -1,4 +1,4 @@
-import { Heading, HStack, Text, useColorModeValue } from '@chakra-ui/react'
+import { cx, Heading, Text } from '@stump/components'
 import { Link } from 'react-router-dom'
 
 interface Props {
@@ -12,42 +12,27 @@ interface Props {
 // Used to render the items in the series list and media list
 export default function ListItem({ id, title, subtitle, href, even }: Props) {
 	return (
-		<HStack
+		<Link
 			tabIndex={0}
-			as={Link}
 			title={title}
-			to={href}
 			key={id}
-			bg={useColorModeValue(even ? 'transparent' : 'gray.200', even ? 'transparent' : 'gray.750')}
-			_focus={{
-				boxShadow: '0 0 0 2px rgba(196, 130, 89, 0.6);',
-				outline: 'none',
-			}}
-			_hover={{
-				bg: useColorModeValue('gray.250', 'gray.700'),
-			}}
-			p={2}
-			h={'40px'}
-			rounded="lg"
-			className="flex w-full"
+			to={href}
+			className="dark:hover-bg-gray-800 flex h-[40px] w-full rounded-lg p-2 hover:bg-gray-100"
 		>
 			<Heading
-				noOfLines={1}
 				size="sm"
-				w={subtitle ? { base: '50%', lg: '25%', md: '30%', xl: '23%' } : 'full'}
-				className="shrink-0"
+				className={cx(
+					'line-clamp-1 shrink-0',
+					{ ' w-1/2 md:w-1/3 lg:w-1/4 xl:w-[23%]': !!subtitle },
+					{ 'w-full': !subtitle },
+				)}
 			>
 				{title}
 			</Heading>
 
-			<Text
-				fontSize="sm"
-				className="flex-1"
-				noOfLines={1}
-				color={useColorModeValue('gray.500', 'gray.450')}
-			>
+			<Text size="sm" className="line-clamp-1 flex-1" variant="muted">
 				{subtitle}
 			</Text>
-		</HStack>
+		</Link>
 	)
 }

@@ -31,14 +31,14 @@ async fn sse_handler(
 		}
 	};
 
-	let guarded_stream = or_until_shutdown(stream);
+	let guarded_stream = stream_shutdown_guard(stream);
 
 	Sse::new(guarded_stream)
 }
 
 // Solution: https://github.com/hyperium/hyper/issues/2787
 /// Run a stream until it completes or we receive the shutdown signal.
-fn or_until_shutdown<S>(stream: S) -> impl Stream<Item = S::Item>
+pub(crate) fn stream_shutdown_guard<S>(stream: S) -> impl Stream<Item = S::Item>
 where
 	S: Stream,
 {

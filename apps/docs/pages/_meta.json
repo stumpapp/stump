@@ -8,14 +8,8 @@
 			"toc": false
 		}
 	},
-	"installation": {
-		"type": "page",
-		"title": "Installation"
-	},
-	"guides": {
-		"type": "page",
-		"title": "Guides"
-	},
+	"installation": "Installation",
+	"guides": "Guides",
 	"contributing": "Contributing",
 	"faq": "FAQ"
 }

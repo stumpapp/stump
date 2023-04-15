@@ -13,13 +13,27 @@ language: 'typescript'
 
 tasks:
   dev:
-    command: 'next dev'
+    command: 'next dev -p 3001'
     local: true
 
   build:
     command: 'next build'
     local: true
 
-  deploy:
+  deploy-preview:
     command: 'vercel'
     local: true
+    runFromWorkspaceRoot: false
+    platform: 'system'
+    options:
+      shell: true
+
+  deploy:
+    command: 'vercel'
+    args:
+      - '--prod'
+    local: true
+    runFromWorkspaceRoot: false
+    platform: 'system'
+    options:
+      shell: true

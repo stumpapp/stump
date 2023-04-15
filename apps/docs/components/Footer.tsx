@@ -40,11 +40,11 @@ const navigation = {
 export default function Footer() {
 	return (
 		<footer
-			className="bg-[#FAFAFA] dark:bg-[#0E0E0E] w-full border-t dark:border-neutral-800"
+			className="w-full border-t bg-[#FAFAFA] dark:border-neutral-800 dark:bg-[#0E0E0E]"
 			aria-labelledby="footer-heading"
 		>
-			<div className="flex flex-col space-y-7 items-center justify-center max-w-[85rem] mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-				<div className="flex space-x-8 items-center">
+			<div className="mx-auto flex max-w-[85rem] flex-col items-center justify-center space-y-7 py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+				<div className="flex items-center space-x-8">
 					{navigation.nav.map((item) => (
 						<Link
 							key={item.href}
@@ -60,7 +60,7 @@ export default function Footer() {
 						</Link>
 					))}
 				</div>
-				<div className="flex space-x-6 items-center">
+				<div className="flex items-center space-x-6">
 					{navigation.social.map((item) => (
 						<a
 							key={item.name}

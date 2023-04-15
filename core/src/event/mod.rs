@@ -5,10 +5,9 @@ use specta::Type;
 use tokio::sync::oneshot;
 
 use crate::{
-	db::models::Media,
+	db::models::{Media, Series},
 	job::{Job, JobReport, JobStatus, JobUpdate},
 	prelude::CoreResult,
-	prisma,
 };
 
 pub enum InternalCoreTask {
@@ -44,7 +43,7 @@ pub enum CoreEvent {
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
 	CreatedMediaBatch(u64),
-	CreatedSeries(prisma::series::Data),
+	CreatedSeries(Series),
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
 	CreatedSeriesBatch(u64),

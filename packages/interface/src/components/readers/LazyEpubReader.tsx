@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // FIXME: remove the two above once epub is more completed
-import { useColorMode } from '@chakra-ui/react'
 import { API } from '@stump/api'
-import { queryClient, useEpubLazy } from '@stump/client'
+import { queryClient, useEpubLazy, useTheme } from '@stump/client'
 import { Book, Rendition } from 'epubjs'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -30,7 +29,7 @@ interface LazyEpubReaderProps {
 // TODO: https://github.com/FormidableLabs/react-swipeable#how-to-share-ref-from-useswipeable
 
 export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
-	const { colorMode } = useColorMode()
+	const { isDark } = useTheme()
 
 	const ref = useRef<HTMLDivElement>(null)
 
@@ -69,24 +68,20 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 		})
 	}
 
-	useEffect(
-		() => {
-			if (!ref.current) return
+	useEffect(() => {
+		if (!ref.current) return
 
-			if (!book) {
-				setBook(
-					new Book(`${API.getUri()}/media/${id}/file`, {
-						openAs: 'epub',
-						// @ts-ignore: more incorrect types >:( I really truly cannot stress enough how much I want to just
-						// rip out my eyes working with epubjs...
-						requestCredentials: true,
-					}),
-				)
-			}
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[ref],
-	)
+		if (!book) {
+			setBook(
+				new Book(`${API.getUri()}/media/${id}/file`, {
+					openAs: 'epub',
+					// @ts-ignore: more incorrect types >:( I really truly cannot stress enough how much I want to just
+					// rip out my eyes working with epubjs...
+					requestCredentials: true,
+				}),
+			)
+		}
+	}, [book, epub, id])
 
 	// Note: not sure this is possible anymore? epub.js isn't maintained it seems,
 	// and I haven't figured this out yet.
@@ -123,7 +118,7 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 
 					rendition_.on('relocated', handleLocationChange)
 
-					if (colorMode === 'dark') {
+					if (isDark) {
 						rendition_.themes.select('dark')
 					}
 
@@ -153,12 +148,12 @@ export default function LazyEpubReader({ id, loc }: LazyEpubReaderProps) {
 			return
 		}
 
-		if (colorMode === 'dark') {
+		if (isDark) {
 			rendition.themes.select('dark')
 		} else {
 			rendition.themes.select('default')
 		}
-	}, [rendition, colorMode])
+	}, [rendition, isDark])
 
 	useEffect(() => {
 		return () => {

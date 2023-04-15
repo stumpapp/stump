@@ -1,17 +1,16 @@
 import './styles/index.css'
+import '@stump/components/styles/overrides.css'
 
-import { ChakraProvider } from '@chakra-ui/react'
 import { initializeApi } from '@stump/api'
 import {
 	AppProps,
 	AppPropsContext,
 	JobContextProvider,
-	queryClient,
 	StumpClientContextProvider,
 	useStumpStore,
-	useTopBarStore,
+	useUserStore,
 } from '@stump/client'
-import { defaultContext, QueryClientProvider } from '@tanstack/react-query'
+import { defaultContext } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -19,7 +18,6 @@ import { Helmet } from 'react-helmet'
 import { BrowserRouter, createSearchParams, useLocation, useNavigate } from 'react-router-dom'
 
 import { AppRouter } from './AppRouter'
-import { chakraTheme } from './chakra'
 import { ErrorFallback } from './components/ErrorFallback'
 import Notifications from './components/Notifications'
 import { API_VERSION } from './index'
@@ -31,8 +29,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 	const [mounted, setMounted] = useState(false)
 	const [appProps, setAppProps] = useState(props.appProps)
 
-	const setTitle = useTopBarStore(({ setTitle }) => setTitle)
-
+	const { userPreferences } = useUserStore(({ userPreferences }) => ({ userPreferences }))
 	const { baseUrl, setBaseUrl } = useStumpStore(({ baseUrl, setBaseUrl }) => ({
 		baseUrl,
 		setBaseUrl,
@@ -58,22 +55,14 @@ function RouterContainer(props: { appProps: AppProps }) {
 		[baseUrl],
 	)
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function handleHelmetChange(newState: any) {
-		if (Array.isArray(newState?.title) && newState.title.length > 0) {
-			if (newState.title.length > 1) {
-				setTitle(newState.title[newState.title.length - 1])
-			} else {
-				setTitle(newState.title[0])
-			}
-		} else if (typeof newState?.title === 'string') {
-			if (newState.title === 'Stump') {
-				setTitle('')
-			} else {
-				setTitle(newState.title)
-			}
+	const appTheme = (userPreferences?.app_theme ?? 'light').toLowerCase()
+	useEffect(() => {
+		if (appTheme === 'light') {
+			document.querySelector('html')?.classList.remove('dark')
+		} else {
+			document.querySelector('html')?.classList.add('dark')
 		}
-	}
+	}, [appTheme])
 
 	const handleRedirect = (url: string) => {
 		navigate({
@@ -91,36 +80,30 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	return (
 		<StumpClientContextProvider onRedirect={handleRedirect}>
+			{import.meta.env.MODE === 'development' && (
+				<ReactQueryDevtools position="bottom-right" context={defaultContext} />
+			)}
 			<AppPropsContext.Provider value={appProps}>
-				<Helmet defaultTitle="Stump" onChangeClientState={handleHelmetChange}>
+				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>
 				<JobContextProvider>
 					<AppRouter />
 				</JobContextProvider>
 			</AppPropsContext.Provider>
+			<Notifications />
 		</StumpClientContextProvider>
 	)
 }
 
 export default function StumpInterface(props: AppProps) {
 	return (
-		<ChakraProvider theme={chakraTheme}>
-			<ErrorBoundary FallbackComponent={ErrorFallback}>
-				<QueryClientProvider
-					client={queryClient}
-					// FIXME: this will be removed... https://github.com/TanStack/query/discussions/4252
-					contextSharing={true}
-				>
-					{import.meta.env.MODE === 'development' && (
-						<ReactQueryDevtools position="bottom-right" context={defaultContext} />
-					)}
-					<BrowserRouter>
-						<RouterContainer appProps={props} />
-					</BrowserRouter>
-				</QueryClientProvider>
-			</ErrorBoundary>
-			<Notifications />
-		</ChakraProvider>
+		<>
+			<BrowserRouter>
+				<ErrorBoundary FallbackComponent={ErrorFallback}>
+					<RouterContainer appProps={props} />
+				</ErrorBoundary>
+			</BrowserRouter>
+		</>
 	)
 }

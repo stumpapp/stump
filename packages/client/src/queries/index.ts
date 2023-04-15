@@ -1,38 +1,35 @@
-import type { ApiResult } from '@stump/api'
-
-export * from './auth'
-export * from './epub'
-export * from './filesystem'
-export * from './job'
-export * from './library'
-export * from './media'
-export * from './series'
-export * from './server'
-export * from './tag'
-export * from './user'
-
-export interface QueryCallbacks<T> {
-	onSuccess?: (data?: T | null) => void
-	onError?: (data: unknown) => void
-}
-
-export interface CreateCallbacks<T> {
-	onCreated?: (data: T) => void
-	onCreateFailed?: (res: ApiResult<T>) => void
-	onError?: (data: unknown) => void
-}
-
-export interface UpdateCallbacks<T> {
-	onUpdated?: (data: T) => void
-	onUpdateFailed?: (res: ApiResult<T>) => void
-	onError?: (data: unknown) => void
-}
-
-export interface DeleteCallbacks<T> {
-	onDeleted?: (data: T) => void
-	onDeleteFailed?: (res: ApiResult<T>) => void
-	onError?: (data: unknown) => void
-}
-
-export type MutationCallbacks<T> = CreateCallbacks<T> & UpdateCallbacks<T> & DeleteCallbacks<T>
-export type ClientQueryParams<T> = QueryCallbacks<T> & MutationCallbacks<T>
+export { useAuthQuery, useLoginOrRegister } from './auth'
+export { type EpubActions, useEpub, useEpubLazy } from './epub'
+export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
+export { useJobReport } from './job'
+export {
+	refreshUseLibrary,
+	useCreateLibraryMutation,
+	useDeleteLibraryMutation,
+	useEditLibraryMutation,
+	useLibraries,
+	type UseLibrariesReturn,
+	useLibraryByIdQuery,
+	useLibrarySeriesQuery,
+	useLibraryStats,
+	useScanLibrary,
+} from './library'
+export {
+	prefetchMedia,
+	useContinueReading,
+	useMediaByIdQuery,
+	useMediaCursorQuery,
+	useRecentlyAddedMediaQuery,
+	useUpdateMediaProgress,
+} from './media'
+export {
+	prefetchSeries,
+	useRecentlyAddedSeries,
+	useSeriesByIdQuery,
+	useSeriesCursorQuery,
+	useSeriesMediaQuery,
+	useUpNextInSeries,
+} from './series'
+export { useStumpVersion } from './server'
+export { type TagOption, useTags, type UseTagsConfig } from './tag'
+export { useUpdatePreferences, useUpdateUser, useUserPreferences, useUsersQuery } from './user'

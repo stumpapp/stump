@@ -18,7 +18,7 @@ export function useLayoutMode(entity: LayoutEntity) {
 
 	const { updateUserPreferences } = useUserPreferences(user?.id, {
 		enableFetchPreferences: !user,
-		onUpdated: setUserPreferences,
+		onSuccess: setUserPreferences,
 	})
 
 	async function updateLayoutMode(mode: LayoutMode, onError?: (err: unknown) => void) {

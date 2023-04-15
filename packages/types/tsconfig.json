@@ -4,10 +4,6 @@
 		"skipLibCheck": true,
 		"outDir": "../../.moon/cache/types/packages/types"
 	},
-	"include": [
-		"*.ts"
-	],
-	"exclude": [
-		"node_modules"
-	]
+	"include": ["*.ts"],
+	"exclude": ["node_modules"]
 }

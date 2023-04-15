@@ -1,16 +1,30 @@
 type BookReaderParams = {
 	page?: number
 	isEpub?: boolean
+	isAnimated?: boolean
 }
 
 const paths = {
 	bookOverview: (id: string) => `/book/${id}`,
-	bookReader: (id: string, { page, isEpub }: BookReaderParams) => {
+	bookReader: (id: string, { page, isEpub, isAnimated }: BookReaderParams) => {
 		const baseUrl = paths.bookOverview(id)
-		if (isEpub) {
-			return `${baseUrl}/epub-reader?stream=false`
+		const searchParams = new URLSearchParams()
+
+		if (isAnimated) {
+			searchParams.append('animated', 'true')
 		}
-		return `${baseUrl}/page/${page || 1}`
+
+		if (isEpub) {
+			searchParams.append('stream', 'false')
+			return `${baseUrl}/epub-reader?${searchParams.toString()}`
+		}
+
+		if (page) {
+			searchParams.append('page', page.toString())
+		}
+
+		return `${baseUrl}/reader?${searchParams.toString()}`
+		// return `${baseUrl}/reader/${page || 1}?${searchParams.toString()}`
 	},
 	home: () => '/',
 	libraryCreate: () => '/library/create',

@@ -1,8 +1,6 @@
 {
 	"extends": "../../tsconfig.options.json",
-	"include": [
-		"src"
-	],
+	"include": ["src"],
 	"references": [],
 	"compilerOptions": {
 		"outDir": "../../.moon/cache/types/packages/components",

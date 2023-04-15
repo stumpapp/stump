@@ -5,26 +5,14 @@
 		"skipLibCheck": true,
 		"outDir": "../../.moon/cache/types/packages/client",
 		"paths": {
-			"@stump/api": [
-				"../api/src/index.ts"
-			],
-			"@stump/api/*": [
-				"../api/src/*"
-			],
-			"@stump/types": [
-				"../types/index.ts"
-			],
-			"@stump/types/*": [
-				"../types/*"
-			]
+			"@stump/api": ["../api/src/index.ts"],
+			"@stump/api/*": ["../api/src/*"],
+			"@stump/types": ["../types/index.ts"],
+			"@stump/types/*": ["../types/*"]
 		}
 	},
-	"include": [
-		"src"
-	],
-	"exclude": [
-		"node_modules"
-	],
+	"include": ["src"],
+	"exclude": ["node_modules"],
 	"references": [
 		{
 			"path": "../api"

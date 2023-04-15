@@ -19,7 +19,7 @@ export function AppLayout() {
 
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when on /books/:id/page/:page or book/:id/epub-reader
-		return location.pathname.match(/\/book\/.+\/(page|epub-reader)/)
+		return location.pathname.match(/\/book\/.+\/(reader|epub-reader)/)
 	}, [location])
 
 	useCoreEventHandler()

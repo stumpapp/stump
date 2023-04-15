@@ -1,11 +1,17 @@
 import { jobQueryKeys, libraryApi, libraryQueryKeys } from '@stump/api'
-import type { CreateLibraryArgs, Library, PageInfo, UpdateLibraryArgs } from '@stump/types'
+import type { CreateLibraryArgs, Library, PageInfo, Series, UpdateLibraryArgs } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
-import { MutationOptions, QueryOptions, useMutation, useQuery } from '../client'
+import {
+	MutationOptions,
+	PageQueryOptions,
+	QueryOptions,
+	useMutation,
+	usePageQuery,
+	useQuery,
+} from '../client'
 import { invalidateQueries } from '../invalidate'
-import { useQueryParamStore } from '../stores'
 
 export const refreshUseLibrary = (id: string) =>
 	invalidateQueries({ exact: true, queryKey: [libraryQueryKeys.getLibraryById, id] })
@@ -49,24 +55,28 @@ export function useLibraries() {
 	}
 }
 
-export function useLibrarySeries(libraryId: string, page = 1) {
-	const { getQueryString, ...paramsStore } = useQueryParamStore((state) => state)
-
-	const { isLoading, isFetching, isPreviousData, data } = useQuery(
-		[libraryQueryKeys.getLibrarySeries, page, libraryId, paramsStore],
-		() =>
-			libraryApi.getLibrarySeries(libraryId, page, getQueryString()).then(({ data }) => ({
-				pageData: data._page,
-				series: data.data,
-			})),
+export function useLibrarySeriesQuery(libraryId: string, options: PageQueryOptions<Series>) {
+	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
+		[libraryQueryKeys.getLibrarySeries, libraryId],
+		async ({ page = 1, ...rest }) => {
+			const { data } = await libraryApi.getLibrarySeries(libraryId, { page, ...rest })
+			return data
+		},
 		{
+			...options,
 			keepPreviousData: true,
 		},
 	)
 
-	const { series, pageData } = data ?? {}
+	const series = data?.data
+	const pageData = data?._page
 
-	return { isFetching, isLoading, isPreviousData, pageData, series }
+	return {
+		isLoading: isLoading || isFetching || isRefetching,
+		pageData,
+		series,
+		...restReturn,
+	}
 }
 
 export function useLibraryStats() {

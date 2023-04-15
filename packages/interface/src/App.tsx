@@ -8,7 +8,6 @@ import {
 	JobContextProvider,
 	StumpClientContextProvider,
 	useStumpStore,
-	useTopBarStore,
 	useUserStore,
 } from '@stump/client'
 import { defaultContext } from '@tanstack/react-query'
@@ -29,8 +28,6 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	const [mounted, setMounted] = useState(false)
 	const [appProps, setAppProps] = useState(props.appProps)
-
-	const setTitle = useTopBarStore(({ setTitle }) => setTitle)
 
 	const { userPreferences } = useUserStore(({ userPreferences }) => ({ userPreferences }))
 	const { baseUrl, setBaseUrl } = useStumpStore(({ baseUrl, setBaseUrl }) => ({
@@ -67,23 +64,6 @@ function RouterContainer(props: { appProps: AppProps }) {
 		}
 	}, [appTheme])
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function handleHelmetChange(newState: any) {
-		if (Array.isArray(newState?.title) && newState.title.length > 0) {
-			if (newState.title.length > 1) {
-				setTitle(newState.title[newState.title.length - 1])
-			} else {
-				setTitle(newState.title[0])
-			}
-		} else if (typeof newState?.title === 'string') {
-			if (newState.title === 'Stump') {
-				setTitle('')
-			} else {
-				setTitle(newState.title)
-			}
-		}
-	}
-
 	const handleRedirect = (url: string) => {
 		navigate({
 			pathname: url,
@@ -104,7 +84,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 				<ReactQueryDevtools position="bottom-right" context={defaultContext} />
 			)}
 			<AppPropsContext.Provider value={appProps}>
-				<Helmet defaultTitle="Stump" onChangeClientState={handleHelmetChange}>
+				<Helmet defaultTitle="Stump">
 					<title>Stump</title>
 				</Helmet>
 				<JobContextProvider>

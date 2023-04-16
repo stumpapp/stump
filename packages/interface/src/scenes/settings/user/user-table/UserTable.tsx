@@ -6,15 +6,20 @@ import dayjs from 'dayjs'
 import { useMemo } from 'react'
 
 import Table from '../../../../components/table/Table'
-import { useAppContext } from '../../../../context'
 import { useLocaleContext } from '../../../../i18n/context'
-import { SettingsSubSection } from '../../SettingsLayout'
+import { useUserManagementContext } from '../context'
 import UsernameRow from './UsernameRow'
+
+// TODO: eventually I'd like to integrate some RBAC management here, as well. E.g.
+// 1. See all of the reading lists a user has access to
+// 2. Revoke access to a reading list
+// 3. Grant access to a reading list
+// 4. etc.
 
 export default function UserTable() {
 	const { t } = useLocaleContext()
-	const { isServerOwner } = useAppContext()
-	const { users } = useUsersQuery({ enabled: isServerOwner })
+
+	const { users } = useUserManagementContext()
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 	const columns = useMemo<ColumnDef<User>[]>(
@@ -62,40 +67,28 @@ export default function UserTable() {
 					},
 				],
 				enableGrouping: false,
-
 				id: 'user',
 			},
 		],
 		[],
 	)
 
-	const fakeUsers = Array.from({ length: 100 }, (_, i) => ({
-		...users?.[i % users.length],
-	})) as User[]
-
 	return (
-		<div className="pb-2">
-			<SettingsSubSection
-				heading="User Table"
-				subtitle="View and manage your users using the table below."
-			>
-				<Table
-					sortable
-					searchable
-					columns={columns}
-					options={{
-						debugColumns: true,
-						debugHeaders: true,
-						// If only doing manual pagination, you don't need this
-						debugTable: true,
-						getCoreRowModel: getCoreRowModel(),
-						// TODO: change to manual once API endpoint is ready
-						getPaginationRowModel: getPaginationRowModel(),
-					}}
-					data={fakeUsers ?? []}
-					fullWidth
-				/>
-			</SettingsSubSection>
-		</div>
+		<Table
+			sortable
+			searchable
+			columns={columns}
+			options={{
+				debugColumns: true,
+				debugHeaders: true,
+				// If only doing manual pagination, you don't need this
+				debugTable: true,
+				getCoreRowModel: getCoreRowModel(),
+				// TODO: change to manual once API endpoint is ready
+				getPaginationRowModel: getPaginationRowModel(),
+			}}
+			data={users}
+			fullWidth
+		/>
 	)
 }

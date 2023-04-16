@@ -1,3 +1,4 @@
+import { useUsersQuery } from '@stump/client'
 import { Helmet } from 'react-helmet'
 import { Navigate } from 'react-router'
 
@@ -5,7 +6,8 @@ import SceneContainer from '../../../components/SceneContainer'
 import { useAppContext } from '../../../context'
 import { useLocaleContext } from '../../../i18n/index'
 import { SettingsContent, SettingsHeading } from '../SettingsLayout'
-import UserTable from './user-table/UserTable'
+import { UserManagementContext } from './context'
+import UserTableSection from './user-table/UserTableSection'
 import UserManagementStats from './UserManagementStats'
 
 // TODO: I might want to turn this into a tiny Router with breadcrumbs? Not enirely sure yet,
@@ -14,26 +16,35 @@ import UserManagementStats from './UserManagementStats'
 export default function UserManagementScene() {
 	const { t } = useLocaleContext()
 	const { isServerOwner } = useAppContext()
+	const { users, isRefetching: isRefetchingUsers } = useUsersQuery({
+		enabled: isServerOwner,
+		params: {
+			// TODO: add support for this flag in server
+			include_read_progresses: true,
+		},
+	})
 
 	if (!isServerOwner) {
 		return <Navigate to="/404" />
 	}
 
 	return (
-		<SceneContainer>
-			<Helmet>
-				<title>Stump | {t('settingsScene.users.helmet')}</title>
-			</Helmet>
+		<UserManagementContext.Provider value={{ isRefetchingUsers, users: users || [] }}>
+			<SceneContainer>
+				<Helmet>
+					<title>Stump | {t('settingsScene.users.helmet')}</title>
+				</Helmet>
 
-			<SettingsHeading
-				heading={t('settingsScene.users.heading')}
-				subtitle={t('settingsScene.users.subtitle')}
-			/>
+				<SettingsHeading
+					heading={t('settingsScene.users.heading')}
+					subtitle={t('settingsScene.users.subtitle')}
+				/>
 
-			<SettingsContent>
-				<UserManagementStats />
-				<UserTable />
-			</SettingsContent>
-		</SceneContainer>
+				<SettingsContent>
+					<UserManagementStats />
+					<UserTableSection />
+				</SettingsContent>
+			</SceneContainer>
+		</UserManagementContext.Provider>
 	)
 }

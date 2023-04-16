@@ -5,18 +5,21 @@ import {
 	updateUser,
 	updateUserPreferences as updateUserPreferencesFn,
 	updateViewer,
+	userApi,
 } from '@stump/api'
-import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
+import type { LoginOrRegisterArgs, UpdateUserArgs, User, UserPreferences } from '@stump/types'
 import { AxiosError } from 'axios'
 
 import { MutationOptions, QueryOptions, useMutation, useQuery } from '../client'
 
-type UseUsersQueryParams = QueryOptions<User[], AxiosError, User[]>
-export function useUsersQuery(params: UseUsersQueryParams = {}) {
+type UseUsersQueryParams = QueryOptions<User[], AxiosError, User[]> & {
+	params?: Record<string, unknown>
+}
+export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) {
 	const { data: users, ...ret } = useQuery(
-		['getUsers'],
-		() => getUsers().then((res) => res.data),
-		params,
+		['getUsers', params],
+		() => getUsers(params).then((res) => res.data),
+		options,
 	)
 
 	return { users, ...ret }
@@ -88,5 +91,28 @@ export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 	return {
 		isLoading,
 		update,
+	}
+}
+
+export function useCreateUser(options?: MutationOptions<User, AxiosError, LoginOrRegisterArgs>) {
+	const {
+		mutateAsync: createAsync,
+		mutate: create,
+		isLoading,
+		...restReturn
+	} = useMutation(
+		['createUser'],
+		async (params: LoginOrRegisterArgs) => {
+			const { data } = await userApi.createUser(params)
+			return data
+		},
+		options,
+	)
+
+	return {
+		create,
+		createAsync,
+		isLoading,
+		...restReturn,
 	}
 }

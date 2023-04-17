@@ -79,9 +79,14 @@ pub struct LibraryFilter {
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
-pub struct SeriesRelation {
+pub struct SeriesQueryRelation {
 	pub load_media: Option<bool>,
 	pub count_media: Option<bool>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct UserQueryRelation {
+	pub include_read_progresses: Option<bool>,
 }
 
 // TODO: I don't like this convention and I'd rather figure out a way around it.

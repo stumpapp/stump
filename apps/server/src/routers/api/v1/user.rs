@@ -4,6 +4,7 @@ use axum::{
 	routing::{get, put},
 	Json, Router,
 };
+use axum_extra::extract::Query;
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
 	db::models::{User, UserPreferences},
@@ -18,7 +19,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_hash_cost, get_session_admin_user, get_session_user,
-		get_writable_session_user,
+		get_writable_session_user, UserQueryRelation,
 	},
 };
 
@@ -40,7 +41,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/",
 					get(get_user_by_id)
-						.put(update_user)
+						.put(update_user_handler)
 						.delete(delete_user_by_id),
 				)
 				.route(
@@ -51,7 +52,41 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-async fn update_user_inner(
+#[utoipa::path(
+	get,
+	path = "/api/v1/users",
+	tag = "user",
+	params(
+		("relation_query" = Option<UserQueryRelation>, Query, description = "The relations to include"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched users.", body = [User]),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn get_users(
+	State(ctx): State<AppState>,
+	relation_query: Query<UserQueryRelation>,
+	session: ReadableSession,
+) -> ApiResult<Json<Vec<User>>> {
+	get_session_admin_user(&session)?;
+
+	let mut query = ctx.db.user().find_many(vec![]);
+	let include_user_progress =
+		relation_query.include_read_progresses.unwrap_or_default();
+
+	if include_user_progress {
+		query = query.with(user::read_progresses::fetch(vec![]));
+	}
+
+	let users = query.exec().await?;
+
+	Ok(Json(users.into_iter().map(User::from).collect()))
+}
+
+async fn update_user(
 	client: &PrismaClient,
 	user_id: String,
 	input: UpdateUserArgs,
@@ -77,7 +112,7 @@ async fn update_user_inner(
 	Ok(User::from(updated_user_data))
 }
 
-async fn update_preferences_inner(
+async fn update_preferences(
 	client: &PrismaClient,
 	preferences_id: String,
 	input: UserPreferencesUpdate,
@@ -101,34 +136,6 @@ async fn update_preferences_inner(
 		.await?;
 
 	Ok(UserPreferences::from(updated_preferences))
-}
-
-#[utoipa::path(
-	get,
-	path = "/api/v1/users",
-	tag = "user",
-	responses(
-		(status = 200, description = "Successfully fetched users.", body = [User]),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
-	)
-)]
-async fn get_users(
-	State(ctx): State<AppState>,
-	session: ReadableSession,
-) -> ApiResult<Json<Vec<User>>> {
-	get_session_admin_user(&session)?;
-	Ok(Json(
-		ctx.db
-			.user()
-			.find_many(vec![])
-			.exec()
-			.await?
-			.into_iter()
-			.map(User::from)
-			.collect::<Vec<User>>(),
-	))
 }
 
 #[utoipa::path(
@@ -205,7 +212,7 @@ async fn update_current_user(
 	let db = ctx.get_db();
 	let user = get_writable_session_user(&writable_session)?;
 
-	let updated_user = update_user_inner(db, user.id, input).await?;
+	let updated_user = update_user(db, user.id, input).await?;
 	debug!(?updated_user, "Updated user");
 
 	writable_session
@@ -242,8 +249,7 @@ async fn update_current_user_preferences(
 
 	trace!(user_id = ?user.id, ?user_preferences, updates = ?input, "Updating viewer's preferences");
 
-	let updated_preferences =
-		update_preferences_inner(db, user_preferences.id, input).await?;
+	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
 	writable_session
@@ -355,7 +361,7 @@ async fn get_user_by_id(
 	)
 )]
 /// Updates a user by ID.
-async fn update_user(
+async fn update_user_handler(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -369,7 +375,7 @@ async fn update_user(
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_user = update_user_inner(db, id, input).await?;
+	let updated_user = update_user(db, id, input).await?;
 	debug!(?updated_user, "Updated user");
 
 	writable_session
@@ -459,8 +465,7 @@ async fn update_user_preferences(
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_preferences =
-		update_preferences_inner(db, user_preferences.id, input).await?;
+	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
 	writable_session

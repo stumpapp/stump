@@ -3,7 +3,7 @@
 
 export type StumpVersion = { semver: string; rev: string | null; compile_time: string }
 
-export type User = { id: string; username: string; role: string; user_preferences: UserPreferences | null; avatar_url: string | null }
+export type User = { id: string; username: string; role: string; user_preferences: UserPreferences | null; avatar_url: string | null; read_progresses: ReadProgress[] | null }
 
 export type UserRole = "SERVER_OWNER" | "MEMBER"
 
@@ -57,9 +57,9 @@ export type JobReport = { id: string | null; kind: string; details: string | nul
 
 export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { runner_id: string; message: string } } | { key: "CreateEntityFailed"; data: { runner_id: string | null; path: string; message: string } } | { key: "CreatedMedia"; data: Media } | { key: "CreatedMediaBatch"; data: BigInt } | { key: "CreatedSeries"; data: Series } | { key: "CreatedSeriesBatch"; data: BigInt }
 
-export type ReadingList = { id: string; name: string; creating_user_id: string; description: string | null; media: Media[] | null }
+export type ReadingList = { id: string; name: string; creating_user_id: string; visibility: ReadingListVisibility; description: string | null; items: ReadingListItem[] | null }
 
-export type CreateReadingList = { id: string; media_ids: string[] }
+export type CreateReadingList = { id: string; media_ids: string[]; visibility: ReadingListVisibility | null }
 
 export type DirectoryListing = { parent: string | null; files: DirectoryListingFile[] }
 

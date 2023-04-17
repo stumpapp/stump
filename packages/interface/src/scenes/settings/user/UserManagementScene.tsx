@@ -19,7 +19,6 @@ export default function UserManagementScene() {
 	const { users, isRefetching: isRefetchingUsers } = useUsersQuery({
 		enabled: isServerOwner,
 		params: {
-			// TODO: add support for this flag in server
 			include_read_progresses: true,
 		},
 	})

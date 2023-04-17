@@ -1,3 +1,4 @@
 - [ ] remove prelude crate and put all the structs/enums/etc in corresponding files
   - [ ] things only used in `apps/server` should be moved there, rather than living in `core`
 - [ ] explore https://prisma.brendonovich.dev/extra/partial-types
+- [ ] find all `NOTE: EPUB feature tracking!` comments once I have time to start epub progress tracking..

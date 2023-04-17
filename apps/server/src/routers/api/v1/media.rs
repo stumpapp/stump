@@ -681,10 +681,7 @@ async fn update_media_progress(
 			let read_progress = client
 				.read_progress()
 				.upsert(
-					read_progress::UniqueWhereParam::UserIdMediaIdEquals(
-						user_id.clone(),
-						id.clone(),
-					),
+					read_progress::user_id_media_id(user_id.clone(), id.clone()),
 					(
 						page,
 						media::id::equals(id.clone()),

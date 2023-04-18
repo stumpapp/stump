@@ -33,6 +33,8 @@ model User {
   user_preferences_id String?          @unique
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
+  media_annotations MediaAnnotation[]
+
   @@map("users")
 }
 
@@ -164,8 +166,36 @@ model Media {
   tags               Tag[]
   // The associated reading list items for this media
   reading_list_items ReadingListItem[]
+  // The associated annotations for this media
+  annotations        MediaAnnotation[]
 
   @@map("media")
+}
+
+//* NOTE: Only EPUB files currently support annotations. I expect maybe someday
+//* PDFs might, as well. I don't intend on adding support for annotations to archive
+//* formats like CBZ or CBR, unless there is demand for it.
+model MediaAnnotation {
+  id      String  @id @default(uuid())
+  // The kind of annotation. ex: "HIGHLIGHT" or "ANNOTATION" or "BOOKMARK"
+  kind    String
+  // The epubcfi associated with the annotation. This can be a range or a single point.
+  epubcfi String?
+  // The text associated with the annotation. This can be a user entered note, or some 
+  // visual indicator of the annotation.
+  text    String?
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The user who created the annotation
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // The media this annotation belongs to
+  media_id String
+  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
 }
 
 model Tag {
@@ -295,7 +325,8 @@ model ReadProgress {
   // for epubs (maybe)
   page Int
 
-  epubcfi String?
+  percentage_completed Float? // 0.0 - 1.0
+  epubcfi              String?
 
   is_completed Boolean  @default(false)
   updated_at   DateTime @updatedAt

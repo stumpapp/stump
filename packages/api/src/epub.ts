@@ -1,4 +1,4 @@
-import type { Epub } from '@stump/types'
+import type { Epub, ReadProgress, UpdateEpubProgress } from '@stump/types'
 
 import { API } from '.'
 import { ApiResult } from './types'
@@ -9,6 +9,12 @@ export function getEpubBaseUrl(id: string): string {
 
 export function getEpubById(id: string): Promise<ApiResult<Epub>> {
 	return API.get(`/epub/${id}`)
+}
+
+export function updateEpubProgress(
+	payload: UpdateEpubProgress & { id: string },
+): Promise<ApiResult<ReadProgress>> {
+	return API.put(`/epub/${payload.id}/progress`, payload)
 }
 
 // This returns raw epub data (e.g. HTML, XHTML, CSS, etc.)

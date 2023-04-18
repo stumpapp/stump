@@ -1,13 +1,12 @@
 // import { useEpub } from '@stump/client'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
-// import EpubReader from '../../../components/readers/EpubReader'
-import LazyEpubReader from '../../../components/readers/LazyEpubReader'
+import EpubJsReader from '../../../components/readers/EpubJsReader'
 import paths from '../../../paths'
 
 export default function EpubReaderScene() {
 	const [search, setSearch] = useSearchParams()
-	const loc = search.get('loc')
+	const initialCfi = decodeURIComponent(search.get('cfi') || '')
 	const lazyReader = search.get('stream') && search.get('stream') !== 'true'
 
 	const { id } = useParams()
@@ -15,12 +14,8 @@ export default function EpubReaderScene() {
 		throw new Error('Media id is required')
 	}
 
-	// const { isFetchingBook, epub, ...rest } = useEpub(id, { loc }, !lazyReader)
 	if (lazyReader) {
-		// FIXME: infinite loop
-		// search.delete('loc')
-		// setSearch(search)
-		return <LazyEpubReader id={id} loc={loc} />
+		return <EpubJsReader id={id} initialCfi={initialCfi} />
 	} else {
 		search.set('stream', 'true')
 		setSearch(search)

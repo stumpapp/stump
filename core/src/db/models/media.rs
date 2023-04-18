@@ -7,7 +7,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	prelude::{enums::FileStatus, CoreError, CoreResult},
-	prisma::{media, read_progress},
+	prisma::{media, media_annotation, read_progress},
 };
 
 use super::{
@@ -55,6 +55,9 @@ pub struct Media {
 	/// if the `read_progresses` relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub current_page: Option<i32>,
+	/// The current progress in terms of epubcfi
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub current_epubcfi: Option<String>,
 	/// Whether or not the media is completed. Only None if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub is_completed: Option<bool>,
@@ -91,6 +94,72 @@ impl Media {
 impl Cursorable for Media {
 	fn cursor(&self) -> String {
 		self.id.clone()
+	}
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
+pub enum MediaAnnotationKind {
+	#[serde(rename = "HIGHLIGHT")]
+	Highlight,
+	#[serde(rename = "NOTE")]
+	Note,
+	#[serde(rename = "BOOKMARK")]
+	#[default]
+	Bookmark,
+}
+
+impl FromStr for MediaAnnotationKind {
+	type Err = CoreError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"HIGHLIGHT" => Ok(MediaAnnotationKind::Highlight),
+			"NOTE" => Ok(MediaAnnotationKind::Note),
+			"BOOKMARK" => Ok(MediaAnnotationKind::Bookmark),
+			_ => Err(CoreError::InternalError(format!(
+				"Invalid media annotation kind: {}",
+				s
+			))),
+		}
+	}
+}
+
+impl From<String> for MediaAnnotationKind {
+	fn from(s: String) -> MediaAnnotationKind {
+		MediaAnnotationKind::from_str(s.as_str()).unwrap_or_default()
+	}
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
+pub struct MediaAnnotation {
+	pub id: String,
+	// The kind of annotation
+	pub kind: MediaAnnotationKind,
+	// The epubcfi associated with the annotation. This can be a range or a single point.
+	pub epubcfi: Option<String>,
+	// The text associated with the annotation. This can be a user entered note, or some
+	// visual indicator of the annotation.
+	pub text: Option<String>,
+	// The media this annotation belongs to
+	pub media_id: String,
+	pub media: Option<Media>,
+}
+
+impl From<media_annotation::Data> for MediaAnnotation {
+	fn from(data: media_annotation::Data) -> Self {
+		let media = match data.media() {
+			Ok(media) => Some(Media::from(media.to_owned())),
+			Err(_) => None,
+		};
+
+		MediaAnnotation {
+			id: data.id,
+			kind: MediaAnnotationKind::from(data.kind),
+			epubcfi: data.epubcfi,
+			text: data.text,
+			media_id: data.media_id,
+			media,
+		}
 	}
 }
 
@@ -135,22 +204,28 @@ impl From<media::Data> for Media {
 			Err(_e) => None,
 		};
 
-		let (read_progresses, current_page, is_completed) = match data.read_progresses() {
-			Ok(read_progresses) => {
-				let progress = read_progresses
-					.iter()
-					.map(|rp| rp.to_owned().into())
-					.collect::<Vec<ReadProgress>>();
+		let (read_progresses, current_page, is_completed, epubcfi) =
+			match data.read_progresses() {
+				Ok(read_progresses) => {
+					let progress = read_progresses
+						.iter()
+						.map(|rp| rp.to_owned().into())
+						.collect::<Vec<ReadProgress>>();
 
-				// Note: ugh.
-				if let Some(p) = progress.first().cloned() {
-					(Some(progress), Some(p.page), Some(p.is_completed))
-				} else {
-					(Some(progress), None, None)
-				}
-			},
-			Err(_e) => (None, None, None),
-		};
+					// Note: ugh.
+					if let Some(p) = progress.first().cloned() {
+						(
+							Some(progress),
+							Some(p.page),
+							Some(p.is_completed),
+							p.epubcfi,
+						)
+					} else {
+						(Some(progress), None, None, None)
+					}
+				},
+				Err(_e) => (None, None, None, None),
+			};
 
 		let tags = match data.tags() {
 			Ok(tags) => Some(tags.iter().map(|tag| tag.to_owned().into()).collect()),
@@ -174,6 +249,7 @@ impl From<media::Data> for Media {
 			series,
 			read_progresses,
 			current_page,
+			current_epubcfi: epubcfi,
 			is_completed,
 			tags,
 		}

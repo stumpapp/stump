@@ -1,7 +1,7 @@
 // TODO: remove these export *
 export { authApi, authQueryKeys } from './auth'
 export { API, apiIsInitialized, checkUrl, initializeApi, isUrl } from './axios'
-export { epubApi, epubQueryKeys, getEpubResource } from './epub'
+export { epubApi, epubQueryKeys, getEpubResource, updateEpubProgress } from './epub'
 export { filesystemApi, filesystemQueryKeys } from './filesystem'
 export * from './job'
 export { getLibraryThumbnail, libraryApi, libraryQueryKeys } from './library'

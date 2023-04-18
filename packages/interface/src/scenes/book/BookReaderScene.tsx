@@ -39,7 +39,15 @@ export default function BookReaderScene() {
 	}
 
 	if (media.extension.match(EBOOK_EXTENSION)) {
-		return <Navigate to={paths.bookReader(id, { isAnimated, isEpub: true })} />
+		return (
+			<Navigate
+				to={paths.bookReader(id, {
+					epubcfi: media.current_epubcfi || null,
+					isAnimated,
+					isEpub: true,
+				})}
+			/>
+		)
 	} else if (!page || parseInt(page, 10) <= 0) {
 		return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
 	} else if (parseInt(page, 10) > media.pages) {

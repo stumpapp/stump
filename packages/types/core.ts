@@ -35,17 +35,19 @@ export type LibrariesStats = { series_count: BigInt; book_count: BigInt; total_b
 
 export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; media_count?: BigInt | null; unread_media_count?: BigInt | null; tags: Tag[] | null }
 
-export type Media = { id: string; name: string; description: string | null; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string; checksum: string | null; path: string; status: FileStatus; series_id: string; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; is_completed?: boolean | null; tags?: Tag[] | null }
+export type Media = { id: string; name: string; description: string | null; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string; checksum: string | null; path: string; status: FileStatus; series_id: string; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null }
 
 export type MediaMetadata = { Series: string | null; Number: number | null; Web: string | null; Summary: string | null; Publisher: string | null; Genre: string | null; PageCount: number | null }
 
-export type ReadProgress = { id: string; page: number; is_completed: boolean; media_id: string; media: Media | null; user_id: string; user: User | null }
+export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; media_id: string; media: Media | null; user_id: string; user: User | null }
 
 export type Tag = { id: string; name: string }
 
 export type LayoutMode = "GRID" | "LIST"
 
-export type Epub = { media_entity: Media; spine: string[]; resources: { [key: string]: [string, string] }; toc: EpubContent[]; metadata: { [key: string]: string[] }; root_base: string; root_file: string; extra_css: string[] }
+export type Epub = { media_entity: Media; spine: string[]; resources: { [key: string]: [string, string] }; toc: EpubContent[]; metadata: { [key: string]: string[] }; annotations: MediaAnnotation[] | null; root_base: string; root_file: string; extra_css: string[] }
+
+export type UpdateEpubProgress = { epubcfi: string; percentage: number; is_complete: boolean | null }
 
 export type EpubContent = { label: string; content: string; play_order: number }
 
@@ -57,9 +59,9 @@ export type JobReport = { id: string | null; kind: string; details: string | nul
 
 export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { runner_id: string; message: string } } | { key: "CreateEntityFailed"; data: { runner_id: string | null; path: string; message: string } } | { key: "CreatedMedia"; data: Media } | { key: "CreatedMediaBatch"; data: BigInt } | { key: "CreatedSeries"; data: Series } | { key: "CreatedSeriesBatch"; data: BigInt }
 
-export type ReadingList = { id: string; name: string; creating_user_id: string; description: string | null; media: Media[] | null }
+export type ReadingList = { id: string; name: string; creating_user_id: string; visibility: ReadingListVisibility; description: string | null; items: ReadingListItem[] | null }
 
-export type CreateReadingList = { id: string; media_ids: string[] }
+export type CreateReadingList = { id: string; media_ids: string[]; visibility: ReadingListVisibility | null }
 
 export type DirectoryListing = { parent: string | null; files: DirectoryListingFile[] }
 

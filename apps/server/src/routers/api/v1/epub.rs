@@ -3,14 +3,14 @@ use std::path::PathBuf;
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::get,
+	routing::{get, put},
 	Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
 use stump_core::{
-	db::models::Epub,
+	db::models::{Epub, ReadProgress, UpdateEpubProgress},
 	fs::epub,
-	prisma::{media, read_progress},
+	prisma::{media, media_annotation, read_progress, user},
 };
 
 use crate::{
@@ -25,7 +25,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.nest(
 			"/epub/:id",
 			Router::new()
-				.route("/", get(get_epub))
+				.route("/", get(get_epub_by_id))
+				.route("/progress", put(update_epub_progress))
 				.route("/chapter/:chapter", get(get_epub_chapter))
 				.route("/:root/:resource", get(get_epub_meta)),
 		)
@@ -33,7 +34,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 /// Get an Epub by ID. The `read_progress` relation is loaded.
-async fn get_epub(
+async fn get_epub_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
@@ -45,7 +46,10 @@ async fn get_epub(
 		.media()
 		.find_unique(media::id::equals(id.clone()))
 		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
+			read_progress::user_id::equals(user_id.clone()),
+		]))
+		.with(media::annotations::fetch(vec![
+			media_annotation::user_id::equals(user_id),
 		]))
 		.exec()
 		.await?;
@@ -60,6 +64,45 @@ async fn get_epub(
 	let book = book.unwrap();
 
 	Ok(Json(Epub::try_from(book)?))
+}
+
+async fn update_epub_progress(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+	Json(input): Json<UpdateEpubProgress>,
+) -> ApiResult<Json<ReadProgress>> {
+	let db = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let progress = db
+		.read_progress()
+		.upsert(
+			read_progress::user_id_media_id(user_id.clone(), id.clone()),
+			(
+				-1,
+				media::id::equals(id.clone()),
+				user::id::equals(user_id),
+				vec![
+					read_progress::epubcfi::set(Some(input.epubcfi.clone())),
+					read_progress::is_completed::set(
+						input.is_complete.unwrap_or(input.percentage >= 1.0),
+					),
+					read_progress::percentage_completed::set(Some(input.percentage)),
+				],
+			),
+			vec![
+				read_progress::epubcfi::set(Some(input.epubcfi)),
+				read_progress::is_completed::set(
+					input.is_complete.unwrap_or(input.percentage >= 1.0),
+				),
+				read_progress::percentage_completed::set(Some(input.percentage)),
+			],
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(ReadProgress::from(progress)))
 }
 
 /// Get a resource from an epub file. META-INF is a reserved `root` query parameter, which will

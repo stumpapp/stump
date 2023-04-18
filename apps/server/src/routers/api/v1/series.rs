@@ -362,6 +362,14 @@ async fn get_series_media(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
+	let pagination = pagination_query.0.get();
+	let pagination_cloned = pagination.clone();
+	let is_unpaged = pagination.is_unpaged();
+
+	trace!(?ordering, ?pagination, "get_series_media");
+
+	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
+
 	let series_exists = db
 		.series()
 		.find_first(vec![series::id::equals(id.clone())])
@@ -376,11 +384,6 @@ async fn get_series_media(
 		)));
 	}
 
-	let pagination = pagination_query.0.get();
-	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
-
-	let pagination_cloned = pagination.clone();
 	let (media, count) = db
 		._transaction()
 		.run(|client| async move {
@@ -434,6 +437,8 @@ async fn get_series_media(
 				.map(|count| (media, Some(count)))
 		})
 		.await?;
+
+	// trace!(?media, "got media");
 
 	if let Some(count) = count {
 		return Ok(Json(Pageable::from((media, count, pagination))));

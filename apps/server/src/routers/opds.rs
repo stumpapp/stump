@@ -17,6 +17,7 @@ use stump_core::{
 	prelude::PageQuery,
 	prisma::{library, media, read_progress, series},
 };
+use tracing::trace;
 
 use crate::{
 	config::state::AppState,
@@ -24,7 +25,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_session_user,
-		http::{ImageResponse, Xml},
+		http::{ImageResponse, NamedFile, Xml},
 	},
 };
 
@@ -52,7 +53,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/books/:id",
 					Router::new()
 						.route("/thumbnail", get(get_book_thumbnail))
-						.route("/pages/:page", get(get_book_page)),
+						.route("/pages/:page", get(get_book_page))
+						.route("/file/:filename", get(download_book)),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -215,7 +217,6 @@ async fn keep_reading(
 				}
 
 				let progress = &progresses[0];
-
 				if let Some(_epubcfi) = progress.epubcfi.as_ref() {
 					// TODO: figure something out... might just need a `completed` field in progress TBH.
 					false
@@ -486,4 +487,26 @@ async fn get_book_page(
 	}
 
 	Ok(media_file::get_page(book.path.as_str(), correct_page)?.into())
+}
+
+/// Download the file associated with the book.
+async fn download_book(
+	Path((id, filename)): Path<(String, String)>,
+	State(ctx): State<AppState>,
+) -> ApiResult<NamedFile> {
+	let db = ctx.get_db();
+
+	trace!(?id, ?filename, "download_book");
+
+	let book = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.exec()
+		.await?;
+
+	if let Some(book) = book {
+		Ok(NamedFile::open(book.path.clone()).await?)
+	} else {
+		Err(ApiError::NotFound(format!("Book with id {} not found", id)))
+	}
 }

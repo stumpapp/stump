@@ -12,9 +12,17 @@ export default function BookReaderLink({ book }: Props) {
 	}
 
 	const currentPage = book.current_page || -1
-	const hasProgress = currentPage > -1 || !!book.current_epubcfi
 
-	const title = `${hasProgress ? 'Continue' : 'Start'} reading`
+	const getTitle = () => {
+		if (book.is_completed || currentPage === book.pages) {
+			return 'Read again'
+		} else if (currentPage > -1 || !!book.current_epubcfi) {
+			return 'Continue reading'
+		} else {
+			return 'Start reading'
+		}
+	}
+
 	const getHref = () => {
 		if (book.current_epubcfi) {
 			return paths.bookReader(book.id, {
@@ -25,6 +33,8 @@ export default function BookReaderLink({ book }: Props) {
 			return paths.bookReader(book?.id || '', { page: book?.current_page || 1 })
 		}
 	}
+
+	const title = getTitle()
 
 	return (
 		<div className="flex w-full md:w-auto">

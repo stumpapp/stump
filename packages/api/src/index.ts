@@ -6,7 +6,13 @@ export { filesystemApi, filesystemQueryKeys } from './filesystem'
 export * from './job'
 export { getLibraryThumbnail, libraryApi, libraryQueryKeys } from './library'
 export * from './log'
-export { getMediaPage, getMediaThumbnail, mediaApi, mediaQueryKeys } from './media'
+export {
+	getMediaDownloadUrl,
+	getMediaPage,
+	getMediaThumbnail,
+	mediaApi,
+	mediaQueryKeys,
+} from './media'
 export {
 	getNextInSeries,
 	getNextMediaInSeries,

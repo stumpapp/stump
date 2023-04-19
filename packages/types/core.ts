@@ -39,7 +39,7 @@ export type Media = { id: string; name: string; description: string | null; size
 
 export type MediaMetadata = { Series: string | null; Number: number | null; Web: string | null; Summary: string | null; Publisher: string | null; Genre: string | null; PageCount: number | null }
 
-export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; media_id: string; media: Media | null; user_id: string; user: User | null }
+export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
 export type Tag = { id: string; name: string }
 

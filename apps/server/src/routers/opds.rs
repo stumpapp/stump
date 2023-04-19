@@ -7,15 +7,16 @@ use axum::{
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
+	config::get_config_dir,
 	db::utils::PrismaCountTrait,
-	fs::{epub, media_file},
+	fs::{epub, image, media_file},
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prelude::PageQuery,
-	prisma::{library, media, read_progress, series},
+	prelude::{ContentType, PageQuery},
+	prisma::{library, media, series},
 };
 use tracing::trace;
 
@@ -28,6 +29,8 @@ use crate::{
 		http::{ImageResponse, NamedFile, Xml},
 	},
 };
+
+use super::api::v1::media::apply_in_progress_filter_for_user;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -188,21 +191,14 @@ async fn keep_reading(
 	let db = ctx.get_db();
 
 	let user_id = get_session_user(&session)?.id;
+	let read_progress_conditions = vec![apply_in_progress_filter_for_user(user_id)];
 
-	// FIXME: not sure how to go about fixing this query. I kind of need to load all the
-	// media, so I know which ones are 'completed'. I think the solution here is to just create
-	// a new field on read_progress called 'completed'.
-	// Lol just noticed I already said that below. Guess I'll do that before next PR.
 	let media = db
 		.media()
-		.find_many(vec![media::read_progresses::some(vec![
-			read_progress::user_id::equals(user_id.clone()),
-			read_progress::page::gt(0),
-		])])
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
-			read_progress::page::gt(0),
-		]))
+		.find_many(vec![media::read_progresses::some(
+			read_progress_conditions.clone(),
+		)])
+		.with(media::read_progresses::fetch(read_progress_conditions))
 		.order_by(media::name::order(Direction::Asc))
 		.exec()
 		.await?
@@ -218,8 +214,12 @@ async fn keep_reading(
 
 				let progress = &progresses[0];
 				if let Some(_epubcfi) = progress.epubcfi.as_ref() {
-					// TODO: figure something out... might just need a `completed` field in progress TBH.
-					false
+					// TODO: check/test this logic
+					!progress.is_completed
+						|| progress
+							.percentage_completed
+							.map(|value| value < 1.0)
+							.unwrap_or(false)
 				} else {
 					progress.page < m.pages
 				}
@@ -254,7 +254,6 @@ async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
-
 	let entries = libraries.into_iter().map(OpdsEntry::from).collect();
 
 	let feed = OpdsFeed::new(
@@ -285,42 +284,50 @@ async fn get_library_by_id(
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
+	let library_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	// FIXME: PCR doesn't support relation counts yet!
-	let series_count = db
-		.series()
-		.count(vec![series::library_id::equals(Some(id.clone()))])
-		.exec()
+	let tx_result = db
+		._transaction()
+		.run(|client| async move {
+			let library = client
+				.library()
+				.find_unique(library::id::equals(id.clone()))
+				.with(library::series::fetch(vec![]).skip(skip).take(take))
+				.exec()
+				.await?;
+
+			// FIXME: PCR doesn't support relation counts yet!
+			client
+				.series()
+				.count(vec![series::library_id::equals(Some(id.clone()))])
+				.exec()
+				.await
+				.map(|count| (library, Some(count)))
+		})
 		.await?;
 
-	let library = db
-		.library()
-		.find_unique(library::id::equals(id.clone()))
-		.with(library::series::fetch(vec![]).skip(skip).take(take))
-		.exec()
-		.await?;
-
-	if library.is_none() {
-		return Err(ApiError::NotFound(format!("Library {} not found", id)));
+	if let (Some(library), Some(library_series_count)) = tx_result {
+		Ok(Xml(OpdsFeed::paginated(
+			library.id.as_str(),
+			library.name.as_str(),
+			format!("libraries/{}", &library.id).as_str(),
+			library.series().unwrap_or(&Vec::new()).to_owned(),
+			page.into(),
+			library_series_count,
+		)
+		.build()?))
+	} else {
+		Err(ApiError::NotFound(format!(
+			"Library {} not found",
+			library_id
+		)))
 	}
-
-	let library = library.unwrap();
-
-	Ok(Xml(OpdsFeed::paginated(
-		library.id.as_str(),
-		library.name.as_str(),
-		format!("libraries/{}", &library.id).as_str(),
-		library.series().unwrap_or(&Vec::new()).to_owned(),
-		page.into(),
-		series_count,
-	)
-	.build()?))
 }
 
-// /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
-// /// pagination is zero-indexed.
+/// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
+/// pagination is zero-indexed.
 async fn get_series(
 	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
@@ -330,18 +337,24 @@ async fn get_series(
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	// FIXME: like other areas throughout Stump's paginated routes, I do not love
-	// that I need to make 2 queries. Hopefully this get's better as prisma client matures
-	// and introduces potential other work arounds.
+	let (series, count) = db
+		._transaction()
+		.run(|client| async move {
+			let series = client
+				.series()
+				.find_many(vec![])
+				.skip(skip)
+				.take(take)
+				.exec()
+				.await?;
 
-	let series_count = db.series().count(vec![]).exec().await?;
-
-	let series = db
-		.series()
-		.find_many(vec![])
-		.skip(skip)
-		.take(take)
-		.exec()
+			client
+				.series()
+				.count(vec![])
+				.exec()
+				.await
+				.map(|count| (series, count))
+		})
 		.await?;
 
 	Ok(Xml(OpdsFeed::paginated(
@@ -350,7 +363,7 @@ async fn get_series(
 		"series",
 		series,
 		page.into(),
-		series_count,
+		count,
 	)
 	.build()?))
 }
@@ -364,15 +377,25 @@ async fn get_latest_series(
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	let series_count = db.series().count(vec![]).exec().await?;
+	let (series, count) = db
+		._transaction()
+		.run(|client| async move {
+			let series = client
+				.series()
+				.find_many(vec![])
+				.order_by(series::updated_at::order(Direction::Desc))
+				.skip(skip)
+				.take(take)
+				.exec()
+				.await?;
 
-	let series = db
-		.series()
-		.find_many(vec![])
-		.order_by(series::updated_at::order(Direction::Desc))
-		.skip(skip)
-		.take(take)
-		.exec()
+			client
+				.series()
+				.count(vec![])
+				.exec()
+				.await
+				.map(|count| (series, count))
+		})
 		.await?;
 
 	Ok(Xml(OpdsFeed::paginated(
@@ -381,7 +404,7 @@ async fn get_latest_series(
 		"series/latest",
 		series,
 		page.into(),
-		series_count,
+		count,
 	)
 	.build()?))
 }
@@ -393,45 +416,55 @@ async fn get_series_by_id(
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
+	let series_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
-	// FIXME: PCR doesn't support relation counts yet!
-	// let series_media_count = db
-	// 	.media()
-	// 	.count(vec![media::series_id::equals(Some(id.clone()))])
-	// 	.exec()
-	// 	.await?;
+	let tx_result = db
+		._transaction()
+		.run(|client| async move {
+			let series = db
+				.series()
+				.find_unique(series::id::equals(id.clone()))
+				.with(
+					series::media::fetch(vec![])
+						.skip(skip)
+						.take(take)
+						.order_by(media::name::order(Direction::Asc)),
+				)
+				.exec()
+				.await?;
 
-	let series_media_count = db.media_in_series_count(id.clone()).await?;
-
-	let series = db
-		.series()
-		.find_unique(series::id::equals(id.clone()))
-		.with(
-			series::media::fetch(vec![])
-				.skip(skip)
-				.take(take)
-				.order_by(media::name::order(Direction::Asc)),
-		)
-		.exec()
+			// FIXME: PCR doesn't support relation counts yet!
+			// let series_media_count = client
+			// 	.media()
+			// 	.count(vec![media::series_id::equals(Some(id.clone()))])
+			// 	.exec()
+			// 	.await
+			// .map(|count| (series, Some(count)))
+			client
+				.media_in_series_count(id)
+				.await
+				.map(|count| (series, Some(count)))
+		})
 		.await?;
 
-	if series.is_none() {
-		return Err(ApiError::NotFound(format!("Series {} not found", id)));
+	if let (Some(series), Some(series_book_count)) = tx_result {
+		Ok(Xml(OpdsFeed::paginated(
+			series.id.as_str(),
+			series.name.as_str(),
+			format!("series/{}", &series.id).as_str(),
+			series.media().unwrap_or(&Vec::new()).to_owned(),
+			page.into(),
+			series_book_count,
+		)
+		.build()?))
+	} else {
+		Err(ApiError::NotFound(format!(
+			"Series {} not found",
+			series_id
+		)))
 	}
-
-	let series = series.unwrap();
-
-	Ok(Xml(OpdsFeed::paginated(
-		series.id.as_str(),
-		series.name.as_str(),
-		format!("series/{}", &series.id).as_str(),
-		series.media().unwrap_or(&Vec::new()).to_owned(),
-		page.into(),
-		series_media_count,
-	)
-	.build()?))
 }
 
 async fn get_book_thumbnail(
@@ -440,19 +473,29 @@ async fn get_book_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let book = db
+	let webp_path = get_config_dir()
+		.join("thumbnails")
+		.join(format!("{}.webp", id));
+
+	if webp_path.exists() {
+		trace!("Found webp thumbnail for media {}", id);
+		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
+	}
+
+	let result = db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
 		.exec()
 		.await?;
 
-	if book.is_none() {
-		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
+	if let Some(book) = result {
+		Ok(media_file::get_page(book.path.as_str(), 1)?.into())
+	} else {
+		Err(ApiError::NotFound(format!(
+			"Media with id {} not found",
+			id
+		)))
 	}
-
-	let book = book.unwrap();
-
-	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
 }
 
 async fn get_book_page(
@@ -463,7 +506,7 @@ async fn get_book_page(
 	let db = ctx.get_db();
 
 	// OPDS defaults to zero-indexed pages, I don't even think it allows the
-	// ?zero_based query param to be set.
+	// zero_based query param to be set.
 	let zero_based = pagination.zero_based.unwrap_or(true);
 	let book = db
 		.media()

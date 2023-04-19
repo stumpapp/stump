@@ -328,8 +328,10 @@ model ReadProgress {
   percentage_completed Float? // 0.0 - 1.0
   epubcfi              String?
 
-  is_completed Boolean  @default(false)
-  updated_at   DateTime @updatedAt
+  is_completed Boolean   @default(false)
+  completed_at DateTime?
+
+  updated_at DateTime @updatedAt
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////

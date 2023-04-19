@@ -7,6 +7,7 @@ use axum::{
 	Json, Router,
 };
 use axum_sessions::extractors::ReadableSession;
+use prisma_client_rust::chrono::Utc;
 use stump_core::{
 	db::models::{Epub, ReadProgress, UpdateEpubProgress},
 	fs::epub,
@@ -66,6 +67,9 @@ async fn get_epub_by_id(
 	Ok(Json(Epub::try_from(book)?))
 }
 
+/// Update the progress of an epub. This is separate from media progress updates
+/// since there is enough epub-specific data that needs to be updated that would
+/// convolute the media progress update.
 async fn update_epub_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -75,31 +79,65 @@ async fn update_epub_progress(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
+	let input_is_complete = input.is_complete.unwrap_or(input.percentage >= 1.0);
+	let input_completed_at = if input_is_complete {
+		Some(Utc::now().into())
+	} else {
+		None
+	};
+
+	// NOTE: I am running this in a transaction with 2 queries because I don't want to update the
+	// is_complete and completed_at unless a book is *newly* completed.
+	// TODO: I will eventually add a way to set a book as uncompleted
 	let progress = db
-		.read_progress()
-		.upsert(
-			read_progress::user_id_media_id(user_id.clone(), id.clone()),
-			(
-				-1,
-				media::id::equals(id.clone()),
-				user::id::equals(user_id),
-				vec![
-					read_progress::epubcfi::set(Some(input.epubcfi.clone())),
-					read_progress::is_completed::set(
-						input.is_complete.unwrap_or(input.percentage >= 1.0),
-					),
-					read_progress::percentage_completed::set(Some(input.percentage)),
-				],
-			),
-			vec![
-				read_progress::epubcfi::set(Some(input.epubcfi)),
-				read_progress::is_completed::set(
-					input.is_complete.unwrap_or(input.percentage >= 1.0),
-				),
-				read_progress::percentage_completed::set(Some(input.percentage)),
-			],
-		)
-		.exec()
+		._transaction()
+		.run(|client| async move {
+			let existing_progress = client
+				.read_progress()
+				.find_unique(read_progress::user_id_media_id(user_id.clone(), id.clone()))
+				.exec()
+				.await?;
+
+			if let Some(progress) = existing_progress {
+				let already_completed = progress.is_completed;
+				let is_completed = already_completed || input_is_complete;
+				let completed_at = progress.completed_at.or(input_completed_at);
+
+				client
+					.read_progress()
+					.update(
+						read_progress::user_id_media_id(user_id.clone(), id.clone()),
+						vec![
+							read_progress::epubcfi::set(Some(input.epubcfi)),
+							read_progress::is_completed::set(is_completed),
+							read_progress::percentage_completed::set(Some(
+								input.percentage,
+							)),
+							read_progress::completed_at::set(completed_at),
+						],
+					)
+					.exec()
+					.await
+			} else {
+				client
+					.read_progress()
+					.create(
+						-1,
+						media::id::equals(id),
+						user::id::equals(user_id),
+						vec![
+							read_progress::epubcfi::set(Some(input.epubcfi)),
+							read_progress::is_completed::set(input_is_complete),
+							read_progress::percentage_completed::set(Some(
+								input.percentage,
+							)),
+							read_progress::completed_at::set(input_completed_at),
+						],
+					)
+					.exec()
+					.await
+			}
+		})
 		.await?;
 
 	Ok(Json(ReadProgress::from(progress)))

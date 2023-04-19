@@ -27,8 +27,9 @@ export default function MediaCard({
 			prefetchMedia(media.id)
 		}
 
-		if (media.current_page) {
-			prefetchMediaPage(media.id, media.current_page)
+		const currentPage = media.current_page || -1
+		if (currentPage > 0) {
+			prefetchMediaPage(media.id, currentPage)
 		}
 	}
 
@@ -106,7 +107,7 @@ export default function MediaCard({
 
 	const overrides = isCoverOnly
 		? {
-				className: 'flex-shrink',
+				className: 'flex-shrink-0 flex-auto',
 				href: undefined,
 				progress: undefined,
 				subtitle: undefined,

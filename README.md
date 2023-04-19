@@ -158,10 +158,11 @@ There are a number of other projects that are similar to Stump, it certainly isn
 
 - [Komga](https://github.com/gotson/komga)
 - [Kavita](https://github.com/Kareadita/Kavita)
+- [oqurum](https://github.com/oqurum)
 - [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
 - [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
 
 ## Acknowledgements 🙏
 
 - [Komga](https://github.com/gotson/komga) is a huge inspiration for Stump, an amazing comics/manga media server written in Kotlin.
-- [Brendonovich](https://github.com/Brendonovich) for building [prisma client rust](https://github.com/Brendonovich/prisma-client-rust), which allows me to use Prisma with Rust. Stump previously used SeaORM, but the DX simply can't compare to Prisma.
+- [Brendonovich](https://github.com/Brendonovich) for building [prisma client rust](https://github.com/Brendonovich/prisma-client-rust), which allows me to use Prisma with Rust. Stump originally used SeaORM, but the DX simply can't compare to Prisma.

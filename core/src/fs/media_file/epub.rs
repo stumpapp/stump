@@ -178,7 +178,7 @@ pub fn get_epub_chapter(
 	Ok((content_type, content))
 }
 
-pub fn get_epub_resource(
+pub fn get_epub_resource_by_id(
 	path: &str,
 	resource_id: &str,
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {

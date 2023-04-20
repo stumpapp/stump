@@ -9,11 +9,13 @@ import { useSwipeable } from 'react-swipeable'
 import EpubControls from './EpubControls'
 import { stumpDark } from './themes'
 
+/** The props for the EpubJsReader component */
 type EpubJsReaderProps = {
 	id: string
 	initialCfi: string | null
 }
 
+/** Location information as it is structured internally in epubjs */
 type EpubLocation = {
 	cfi: string
 	displayed: {
@@ -26,6 +28,7 @@ type EpubLocation = {
 	percentage: number
 }
 
+/** The epubjs location state */
 type EpubLocationState = {
 	atStart?: boolean
 	atEnd?: boolean
@@ -33,6 +36,13 @@ type EpubLocationState = {
 	end: EpubLocation
 }
 
+/**
+ * A component for rendering a reader capable of reading epub files. This component uses
+ * epubjs internally for the main rendering logic.
+ *
+ * Note: At some point in the future, I will be prioritizing some sort of streamable
+ * epub reader as an additional option.
+ */
 export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const { isDark } = useTheme()
 
@@ -47,6 +57,12 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 
 	const { epub, isLoading } = useEpubLazy(id)
 
+	/**
+	 * Syncs the current location with local state whenever epubjs internal location
+	 * changes. It will also try and determine the current chapter information.
+	 *
+	 * @param changeState The new location state of the epub
+	 */
 	function handleLocationChange(changeState: EpubLocationState) {
 		const start = changeState.start
 
@@ -64,6 +80,15 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		setCurrentLocation(changeState)
 	}
 
+	/**
+	 * This effect is responsible for initializing the epubjs book, which gets stored in
+	 * this component's state. It will only run once when media entity is fetched from the
+	 * Stump server.
+	 *
+	 * Note: epubjs uses the download endpoint from the Stump server to locally load the
+	 * epub file. This is why the requestCredentials option is set to true, as it would
+	 * otherwise not be able to authenticate with the server.
+	 */
 	useEffect(() => {
 		if (!ref.current) return
 
@@ -71,14 +96,18 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			setBook(
 				new Book(`${API.getUri()}/media/${id}/file`, {
 					openAs: 'epub',
-					// @ts-expect-error: more incorrect types >:( I really truly cannot stress enough how
-					// much I want to just rip out my eyes working with epubjs...
+					// @ts-expect-error: epubjs has incorrect types
 					requestCredentials: true,
 				}),
 			)
 		}
 	}, [book, epub, id])
 
+	/**
+	 * This effect is responsible for rendering the epub to the screen. It will only run once
+	 * when the book is has been loaded. It will also set the initial location and theme
+	 * for the rendition.
+	 */
 	useEffect(
 		() => {
 			if (!book) return
@@ -119,6 +148,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book],
 	)
 
+	/**
+	 * This effect is responsible for updating the epub theme when the selected theme changes.
+	 * If the rendition is not set, this effect will do nothing.
+	 */
 	useEffect(() => {
 		if (!rendition) {
 			return
@@ -249,8 +282,23 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	)
 
 	const spineSize = epub?.spine.length
+	/**
+	 * This effect is responsible for syncing the current epub progress information to
+	 * the Stump server. If not location information is available, this effect will do nothing.
+	 *
+	 * Note: This effect has some poor assumptions during the calculation of the percentage
+	 * completed number. This is largely due to epubjs not providing reliable means of getting
+	 * this information, or the pieces of information needed to calculate it. Be sure to
+	 * review the comments in this effect carefully before making any changes.
+	 */
 	useEffect(
 		() => {
+			/**
+			 *
+			 * @param payload The payload to send to the server. Contains all of the information
+			 * needed to update the progress of the epub.
+			 * @returns A promise which resolves to the updated progress information.
+			 */
 			const handleUpdateProgress = async (payload: UpdateEpubProgress) => {
 				if (!epub) return
 
@@ -317,7 +365,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	})
 
 	if (isLoading) {
-		return <div>Loading TODO.....</div>
+		return null
 	}
 
 	return (

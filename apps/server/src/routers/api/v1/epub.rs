@@ -42,7 +42,7 @@ async fn get_epub_by_id(
 ) -> ApiResult<Json<Epub>> {
 	let user_id = get_session_user(&session)?.id;
 
-	let book = ctx
+	let result = ctx
 		.db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
@@ -55,16 +55,14 @@ async fn get_epub_by_id(
 		.exec()
 		.await?;
 
-	if book.is_none() {
-		return Err(ApiError::NotFound(format!(
+	if let Some(book) = result {
+		Ok(Json(Epub::try_from(book)?))
+	} else {
+		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
-		)));
+		)))
 	}
-
-	let book = book.unwrap();
-
-	Ok(Json(Epub::try_from(book)?))
 }
 
 /// Update the progress of an epub. This is separate from media progress updates
@@ -80,11 +78,7 @@ async fn update_epub_progress(
 	let user_id = get_session_user(&session)?.id;
 
 	let input_is_complete = input.is_complete.unwrap_or(input.percentage >= 1.0);
-	let input_completed_at = if input_is_complete {
-		Some(Utc::now().into())
-	} else {
-		None
-	};
+	let input_completed_at = input_is_complete.then(|| Utc::now().into());
 
 	// NOTE: I am running this in a transaction with 2 queries because I don't want to update the
 	// is_complete and completed_at unless a book is *newly* completed.
@@ -152,23 +146,21 @@ async fn get_epub_chapter(
 	Path((id, chapter)): Path<(String, usize)>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<BufferResponse> {
-	let book = ctx
+	let result = ctx
 		.db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
 		.exec()
 		.await?;
 
-	if book.is_none() {
-		return Err(ApiError::NotFound(format!(
+	if let Some(book) = result {
+		Ok(epub::get_epub_chapter(book.path.as_str(), chapter)?.into())
+	} else {
+		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
-		)));
+		)))
 	}
-
-	let book = book.unwrap();
-
-	Ok(epub::get_epub_chapter(book.path.as_str(), chapter)?.into())
 }
 
 /// Get a resource from an epub file. META-INF is a reserved `root` query parameter, which will
@@ -177,39 +169,38 @@ async fn get_epub_chapter(
 /// resource. (e.g. `/EPUB/chapter1.xhtml`, where `EPUB` is the root and `chapter1.xhtml` is
 /// the resource path)
 async fn get_epub_meta(
-	// TODO: does this work?
 	Path((id, root, resource)): Path<(String, String, PathBuf)>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<BufferResponse> {
-	let book = ctx
+	let result = ctx
 		.db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
 		.exec()
 		.await?;
 
-	if book.is_none() {
-		return Err(ApiError::NotFound(format!(
+	if let Some(book) = result {
+		let (content_type, buffer) = if root == "META-INF" {
+			// reserved for accessing resources via resource id
+			epub::get_epub_resource_by_id(
+				book.path.as_str(),
+				resource.to_str().unwrap_or_default(),
+			)?
+		} else {
+			// NOTE: when a resource is loaded from a path, it is likely something inside the contents of an epub page,
+			// such as a css file or an image file.
+			epub::get_epub_resource_from_path(
+				book.path.as_str(),
+				root.as_str(),
+				resource,
+			)?
+		};
+
+		Ok(BufferResponse::new(content_type, buffer).into())
+	} else {
+		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
-		)));
+		)))
 	}
-
-	let book = book.unwrap();
-
-	// reserved for accessing resources via resource id
-	if root == "META-INF" {
-		return Ok(epub::get_epub_resource(
-			book.path.as_str(),
-			resource.to_str().unwrap(),
-		)?
-		.into());
-	}
-
-	// when a resource is loaded from a path, it is likely something inside the contents of an epub page,
-	// such as a css file or an image file.
-	Ok(
-		epub::get_epub_resource_from_path(book.path.as_str(), root.as_str(), resource)?
-			.into(),
-	)
 }

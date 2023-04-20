@@ -16,6 +16,9 @@ use crate::{
 
 use super::media_file;
 
+// TODO: Split this crate into subcrates, e.g. jpeg.rs, webp.rs, etc with a standardized API for each, e.g. create_from_path, create_from_bytes, write, etc
+// TODO: add a quality.rs file that handles the common options for https://github.com/aaronleopold/stump/issues/44
+
 pub fn get_bytes<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, ProcessFileError> {
 	let mut file = File::open(path)?;
 

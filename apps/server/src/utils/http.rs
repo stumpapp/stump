@@ -10,6 +10,7 @@ use std::{
 use stump_core::prelude::ContentType;
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
+use tracing::error;
 
 /// A helper function to send an error response when something breaks *hard*. I only
 /// anticipate this being used when an error occurs when building custom [Response]
@@ -47,8 +48,12 @@ impl IntoResponse for ImageResponse {
 
 		base_response.headers_mut().insert(
 			header::CONTENT_TYPE,
-			HeaderValue::from_str(self.content_type.to_string().as_str())
-				.unwrap_or(HeaderValue::from_static("image/png")),
+			HeaderValue::from_str(self.content_type.to_string().as_str()).unwrap_or_else(
+				|err| {
+					error!(?err, "Failed to derive explicit content type");
+					HeaderValue::from_static("image/jpeg")
+				},
+			),
 		);
 		base_response.headers_mut().insert(
 			header::CACHE_CONTROL,
@@ -86,6 +91,12 @@ pub struct BufferResponse {
 	pub data: Vec<u8>,
 }
 
+impl BufferResponse {
+	pub fn new(content_type: ContentType, data: Vec<u8>) -> Self {
+		Self { content_type, data }
+	}
+}
+
 impl From<(ContentType, Vec<u8>)> for BufferResponse {
 	fn from((content_type, data): (ContentType, Vec<u8>)) -> Self {
 		Self { content_type, data }
@@ -117,14 +128,16 @@ pub struct UnknownBufferResponse {
 impl IntoResponse for UnknownBufferResponse {
 	fn into_response(self) -> Response {
 		let mut base_response = self.data.into_response();
+		let header_result = HeaderValue::from_str(self.content_type.as_str());
 
-		base_response.headers_mut().insert(
-			header::CONTENT_TYPE,
-			HeaderValue::from_str(self.content_type.as_str())
-				.expect("Failed to parse content type"),
-		);
-
-		base_response
+		if let Ok(header) = header_result {
+			base_response
+				.headers_mut()
+				.insert(header::CONTENT_TYPE, header);
+			base_response
+		} else {
+			unexpected_error(header_result.err().unwrap()).into_response()
+		}
 	}
 }
 
@@ -155,8 +168,11 @@ impl IntoResponse for NamedFile {
 		let stream = ReaderStream::new(self.file);
 		let body = StreamBody::new(stream);
 
-		// FIXME: unsafe unwraps
-		let filename = self.path_buf.file_name().unwrap().to_str().unwrap();
+		let filename = self
+			.path_buf
+			.file_name()
+			.and_then(|os_str| os_str.to_str())
+			.unwrap_or_default();
 
 		Response::builder()
 			.header(

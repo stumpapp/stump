@@ -1,8 +1,10 @@
-use image::{imageops, io::Reader, DynamicImage, EncodableLayout, GenericImageView};
+use image::{
+	imageops, io::Reader, DynamicImage, EncodableLayout, GenericImageView, ImageFormat,
+};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use std::{
 	fs::File,
-	io::{Read, Write},
+	io::{Cursor, Read, Write},
 	path::{Path, PathBuf},
 };
 use tracing::{debug, error, trace};
@@ -49,6 +51,26 @@ pub fn webp_from_path<P: AsRef<Path>>(file_path: P) -> Result<Vec<u8>, ProcessFi
 	Ok(encoded_webp.as_bytes().to_vec())
 }
 
+pub fn jpeg_from_path<P: AsRef<Path>>(file_path: P) -> Result<Vec<u8>, ProcessFileError> {
+	let image = Reader::open(file_path.as_ref())?
+		.with_guessed_format()?
+		.decode()?;
+
+	let mut buffer = Cursor::new(vec![]);
+	image.write_to(&mut buffer, ImageFormat::Jpeg)?;
+
+	Ok(buffer.into_inner())
+}
+
+pub fn jpeg_from_bytes(bytes: &[u8]) -> Result<Vec<u8>, ProcessFileError> {
+	let image = image::load_from_memory(bytes)?;
+
+	let mut buffer = Cursor::new(vec![]);
+	image.write_to(&mut buffer, ImageFormat::Jpeg)?;
+
+	Ok(buffer.into_inner())
+}
+
 // TODO: this is **super** slow!!!!
 pub fn webp_from_bytes(bytes: &[u8]) -> Result<Vec<u8>, ProcessFileError> {
 	let image = image::load_from_memory(bytes)?;
@@ -74,6 +96,7 @@ pub fn webp_from_bytes(bytes: &[u8]) -> Result<Vec<u8>, ProcessFileError> {
 	Ok(encoded_webp.as_bytes().to_vec())
 }
 
+// FIXME: I won't sugar coat it, the output here looks like shit. Fuzzy, blurry, just bad...
 pub fn generate_thumbnail(id: &str, path: &str) -> Result<PathBuf, ProcessFileError> {
 	let (_, buf) = media_file::get_page(path, 1)?;
 	let webp_buf = webp_from_bytes(&buf)?;
@@ -93,26 +116,33 @@ pub fn generate_thumbnail(id: &str, path: &str) -> Result<PathBuf, ProcessFileEr
 
 // TODO: does this need to return a result?
 pub fn generate_thumbnails(media: &[Media]) -> Result<Vec<PathBuf>, ProcessFileError> {
-	debug!("Enter generate_thumbnails");
+	trace!("Enter generate_thumbnails");
 
-	// TODO: this might make the stack overflow lol
-	let results = media
-		.into_par_iter()
-		// .with_max_len(5)
-		.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str()))
-		.filter_map(|res| {
-			if res.is_err() {
-				error!(error = ?res.err(), "Error generating thumbnail");
-				None
-			} else {
-				res.ok()
-			}
-		})
-		.collect::<Vec<PathBuf>>();
+	let mut generated_paths = Vec::with_capacity(media.len());
 
-	debug!("Generated the following thumbnails: {:?}", results);
+	// Split the array into chunks of 10 images
+	for (idx, chunk) in media.chunks(10).enumerate() {
+		trace!(chunk = idx, "Processing chunk for thumbnail generation...");
+		let results = chunk
+			.into_par_iter()
+			// .with_max_len(5)
+			.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str()))
+			.filter_map(|res| {
+				if res.is_err() {
+					error!(error = ?res.err(), "Error generating thumbnail!");
+					None
+				} else {
+					res.ok()
+				}
+			})
+			.collect::<Vec<PathBuf>>();
 
-	Ok(results)
+		debug!(num_generated = results.len(), "Generated thumbnail batch");
+
+		generated_paths.extend(results);
+	}
+
+	Ok(generated_paths)
 }
 
 pub fn get_thumbnail_path(id: &str) -> Option<PathBuf> {

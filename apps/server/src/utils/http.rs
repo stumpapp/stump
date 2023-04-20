@@ -29,6 +29,12 @@ pub struct ImageResponse {
 	pub data: Vec<u8>,
 }
 
+impl ImageResponse {
+	pub fn new(content_type: ContentType, data: Vec<u8>) -> Self {
+		Self { content_type, data }
+	}
+}
+
 impl From<(ContentType, Vec<u8>)> for ImageResponse {
 	fn from((content_type, data): (ContentType, Vec<u8>)) -> Self {
 		Self { content_type, data }

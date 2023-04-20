@@ -2,9 +2,8 @@ import { getMediaPage } from '@stump/api'
 import { useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import ImageBasedReader, {
-	AnimatedImageBasedReader,
-} from '../../components/readers/ImageBasedReader'
+import AnimatedImageBasedReader from '../../components/readers/image-based/AnimatedImageBasedReader'
+import ImageBasedReader from '../../components/readers/image-based/ImageBasedReader'
 import paths from '../../paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '../../utils/patterns'
 
@@ -57,8 +56,6 @@ export default function BookReaderScene() {
 	if (media.extension.match(ARCHIVE_EXTENSION)) {
 		const animated = !!search.get('animated')
 
-		// TODO: this will be merged under ImageBasedReader once animations get stable. animation will become a prop
-		// eventually. This is just a debug tool for me right now, and will not remain as separate components in the future.
 		const Component = animated ? AnimatedImageBasedReader : ImageBasedReader
 
 		return (

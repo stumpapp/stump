@@ -7,7 +7,6 @@ use axum::{
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
-	config::get_config_dir,
 	db::utils::PrismaCountTrait,
 	fs::{epub, image, media_file},
 	opds::{
@@ -18,7 +17,7 @@ use stump_core::{
 	prelude::{ContentType, PageQuery},
 	prisma::{library, media, series},
 };
-use tracing::trace;
+use tracing::{trace, warn};
 
 use crate::{
 	config::state::AppState,
@@ -467,20 +466,29 @@ async fn get_series_by_id(
 	}
 }
 
+fn handle_opds_image_response(
+	content_type: ContentType,
+	image_buffer: Vec<u8>,
+) -> ApiResult<ImageResponse> {
+	if content_type.is_opds_legacy_image() {
+		trace!("OPDS legacy image detected, returning as-is");
+		Ok(ImageResponse::new(content_type, image_buffer))
+	} else {
+		warn!(
+			?content_type,
+			"Unsupported image for OPDS detected, converting to JPEG"
+		);
+		let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
+	}
+}
+
+/// A handler for GET /opds/v1.2/books/{id}/thumbnail, returns the thumbnail
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
-
-	let webp_path = get_config_dir()
-		.join("thumbnails")
-		.join(format!("{}.webp", id));
-
-	if webp_path.exists() {
-		trace!("Found webp thumbnail for media {}", id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
-	}
 
 	let result = db
 		.media()
@@ -489,7 +497,8 @@ async fn get_book_thumbnail(
 		.await?;
 
 	if let Some(book) = result {
-		Ok(media_file::get_page(book.path.as_str(), 1)?.into())
+		let (content_type, image_buffer) = media_file::get_page(book.path.as_str(), 1)?;
+		handle_opds_image_response(content_type, image_buffer)
 	} else {
 		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
@@ -498,6 +507,7 @@ async fn get_book_thumbnail(
 	}
 }
 
+/// A handler for GET /opds/v1.2/books/{id}/page/{page}, returns the page
 async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
@@ -508,7 +518,7 @@ async fn get_book_page(
 	// OPDS defaults to zero-indexed pages, I don't even think it allows the
 	// zero_based query param to be set.
 	let zero_based = pagination.zero_based.unwrap_or(true);
-	let book = db
+	let result = db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
 		.exec()
@@ -519,20 +529,21 @@ async fn get_book_page(
 		correct_page = page + 1;
 	}
 
-	if book.is_none() {
-		return Err(ApiError::NotFound(format!("Book {} not found", &id)));
+	if let Some(book) = result {
+		let (content_type, image_buffer) =
+			if book.path.ends_with(".epub") && correct_page == 1 {
+				epub::get_cover(&book.path)?
+			} else {
+				media_file::get_page(book.path.as_str(), correct_page)?
+			};
+
+		handle_opds_image_response(content_type, image_buffer)
+	} else {
+		Err(ApiError::NotFound(format!("Book {} not found", &id)))
 	}
-
-	let book = book.unwrap();
-
-	if book.path.ends_with(".epub") && correct_page == 1 {
-		return Ok(epub::get_cover(&book.path)?.into());
-	}
-
-	Ok(media_file::get_page(book.path.as_str(), correct_page)?.into())
 }
 
-/// Download the file associated with the book.
+/// A handler for GET /opds/v1.2/books/{id}/file/{filename}, returns the book
 async fn download_book(
 	Path((id, filename)): Path<(String, String)>,
 	State(ctx): State<AppState>,

@@ -1,9 +1,9 @@
-// import { useEpub } from '@stump/client'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
-import EpubJsReader from '../../../components/readers/EpubJsReader'
+import EpubJsReader from '../../../components/readers/epub/EpubJsReader'
 import paths from '../../../paths'
 
+//! NOTE: Only the epub.js reader is supported for now :sob:
 export default function EpubReaderScene() {
 	const [search, setSearch] = useSearchParams()
 	const initialCfi = decodeURIComponent(search.get('cfi') || '')
@@ -21,16 +21,4 @@ export default function EpubReaderScene() {
 		setSearch(search)
 		return <Navigate to={paths.bookReader(id, { isEpub: true })} />
 	}
-
-	// if (isFetchingBook) {
-	// 	return <div>Loading...</div>
-	// } else if (!epub) {
-	// 	throw new Error('Epub not found')
-	// }
-
-	// if (!epub.media_entity.extension.match(/epub/)) {
-	// 	return <Navigate to={paths.bookReader(id, { page: epub.media_entity.current_page ?? 1 })} />
-	// }
-
-	// return <EpubReader isFetchingBook={isFetchingBook} epub={epub} {...rest} />
 }

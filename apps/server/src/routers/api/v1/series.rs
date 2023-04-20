@@ -461,9 +461,6 @@ async fn get_series_media(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-// TODO: Should I support epub here too?? Not sure, I have separate routes for epub,
-// but until I actually implement progress tracking for epub I think think I can really
-// give a hard answer on what is best...
 /// Get the next media in a series, based on the read progress for the requesting user.
 /// Stump will return the first book in the series without progress, or return the first
 /// with partial progress. E.g. if a user has read pages 32/32 of book 3, then book 4 is
@@ -476,7 +473,7 @@ async fn get_next_in_series(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let series = db
+	let result = db
 		.series()
 		.find_unique(series::id::equals(id.clone()))
 		.with(
@@ -489,46 +486,44 @@ async fn get_next_in_series(
 		.exec()
 		.await?;
 
-	if series.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} no found.",
-			id
-		)));
-	}
+	if let Some(series) = result {
+		let media = series.media().map_err(|e| {
+			error!(error = ?e, "Failed to load media for series");
+			e
+		})?;
 
-	let series = series.unwrap();
-
-	let media = series.media().map_err(|e| {
-		error!(error = ?e, "Failed to load media for series");
-		e
-	})?;
-
-	Ok(Json(
-		media
+		let next_book = media
 			.iter()
 			.find(|m| {
-				// I don't really know that this is valid... When I load in the
-				// relation, this will NEVER be None. It will default to an empty
-				// vector. But, for safety I guess I will leave this for now.
-				if m.read_progresses.is_none() {
-					return true;
-				}
-
-				let progresses = m.read_progresses.as_ref().unwrap();
-
-				// No progress means it is up next (for this user)!
-				if progresses.is_empty() {
-					true
+				if let Some(progress_list) = m.read_progresses.as_ref() {
+					// No progress means it is up next (for this user)!
+					if progress_list.is_empty() {
+						true
+					} else {
+						// Note: this should never really exceed len == 1, but :shrug:
+						progress_list
+							.get(0)
+							.map(|rp| {
+								!rp.is_completed
+									|| rp
+										.percentage_completed
+										.map(|pc| pc <= 1.0)
+										.unwrap_or(false) || (rp.page < m.pages && rp.page > 0)
+							})
+							.unwrap_or(true)
+					}
 				} else {
-					// Note: this should never really exceed len == 1, but :shrug:
-					let progress = progresses.get(0).unwrap();
-
-					progress.page < m.pages && progress.page > 0
+					// case unread should be first in queue
+					true
 				}
 			})
-			.or_else(|| media.get(0))
-			.map(|data| data.to_owned().into()),
-	))
-}
+			.or_else(|| media.get(0));
 
-// async fn download_series()
+		Ok(Json(next_book.map(|data| Media::from(data.to_owned()))))
+	} else {
+		Err(ApiError::NotFound(format!(
+			"Series with id {} no found.",
+			id
+		)))
+	}
+}

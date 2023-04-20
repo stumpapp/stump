@@ -34,18 +34,16 @@ export default function Toolbar({
 	const columnVirtualizer = useVirtualizer({
 		count: pages,
 		enableSmoothScroll: true,
-		estimateSize: () => 80,
+		estimateSize: () => 85,
 		getScrollElement: () => parentRef.current,
 		horizontal: true,
-		overscan: 5,
+		overscan: 3,
 		rangeExtractor: useCallback((range: Range) => {
 			rangeRef.current = [range.startIndex, range.endIndex]
 			return defaultRangeExtractor(range)
 		}, []),
 	})
 
-	// FIXME: this is super scufffed, something is throwing off the scrollToIndex and the
-	// workarounds are atrocious...
 	const totalSize = columnVirtualizer.getTotalSize()
 	useEffect(() => {
 		if (visible) {
@@ -89,7 +87,7 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed top-0 z-[100] w-full bg-gray-100/95 p-4 dark:bg-gray-1000/95 dark:text-white"
+				className="fixed left-0 top-0 z-[100] w-full bg-gray-100/95 p-4 dark:bg-gray-1000/95 dark:text-white"
 			>
 				<div className="flex w-full items-center justify-between">
 					<div className="flex items-center space-x-4">
@@ -112,29 +110,46 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('bottom')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed bottom-0 z-[100] w-full overflow-x-scroll bg-opacity-75 p-4 text-white shadow-lg"
+				className="fixed left-0 bottom-0 z-[100] w-full bg-opacity-75 text-white shadow-lg"
 			>
-				<div
-					className="relative bottom-0 flex w-full select-none space-x-2"
-					ref={parentRef}
-					style={{
-						width: `${columnVirtualizer.getTotalSize()}px`,
-					}}
-				>
-					{/* TODO: tool tips? */}
-					{/* FIXME: styling isn't quite right, should have space on either side... */}
-					{columnVirtualizer.getVirtualItems().map((virtualItem, idx) => (
-						<img
-							id={`${id}-page-${idx + 1}`}
-							key={virtualItem.key}
-							src={getMediaPage(id, idx + 1)}
-							className={cx(
-								currentPage === idx + 1 ? '-translate-y-1 border-brand' : 'border-transparent',
-								'h-32 w-auto cursor-pointer rounded-md border-2 border-solid shadow-xl transition duration-300 hover:-translate-y-2 hover:border-brand',
-							)}
-							onClick={() => onPageChange(idx + 1)}
-						/>
-					))}
+				<div ref={parentRef} className="h-[150px] overflow-x-auto py-4 scrollbar-hide">
+					<div
+						className="relative inline-flex h-full"
+						style={{
+							width: `${columnVirtualizer.getTotalSize()}px`,
+						}}
+					>
+						{columnVirtualizer.getVirtualItems().map((virtualItem) => {
+							const page = virtualItem.index + 1
+							const imageUrl = getMediaPage(id, page)
+
+							return (
+								<div
+									className="z-[101]"
+									key={virtualItem.key}
+									style={{
+										height: '100%',
+										left: 0,
+										position: 'absolute',
+										top: 0,
+										transform: `translateX(${virtualItem.start}px)`,
+										width: `80px`,
+									}}
+								>
+									<img
+										id={`${id}-page-${page}`}
+										key={virtualItem.key}
+										src={imageUrl}
+										className={cx(
+											currentPage === page ? '-translate-y-1 border-brand' : 'border-transparent',
+											'h-32 w-auto cursor-pointer rounded-md border-2 border-solid shadow-xl transition duration-300 hover:-translate-y-2 hover:border-brand',
+										)}
+										onClick={() => onPageChange(page)}
+									/>
+								</div>
+							)
+						})}
+					</div>
 				</div>
 			</motion.nav>
 		</div>

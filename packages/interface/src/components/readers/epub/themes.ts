@@ -3,7 +3,7 @@ export interface EpubTheme {
 }
 
 // Note: Not React CSS, has to be true CSS fields. E.g. font-size not fontSize.
-export const epubDarkTheme: EpubTheme = {
+export const stumpDark: EpubTheme = {
 	a: { color: '#4299E1' },
 	body: { background: '#1B1C1E' },
 	h1: { color: '#E8EDF4' },

@@ -359,13 +359,12 @@ async fn get_recently_added_media(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let FilterableQuery { filters, ordering } = filter_query.0.get();
+	let FilterableQuery { filters, .. } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
-	trace!(?filters, ?ordering, ?pagination, "get_recently_added_media");
+	trace!(?filters, ?pagination, "get_recently_added_media");
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
 	let pagination_cloned = pagination.clone();
 	let where_conditions = apply_media_filters(filters);
@@ -379,7 +378,6 @@ async fn get_recently_added_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
-				.order_by(order_by_param)
 				.order_by(media::created_at::order(Direction::Desc));
 
 			if !is_unpaged {

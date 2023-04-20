@@ -2,6 +2,7 @@ import { ButtonOrLink } from '@stump/components'
 import { Media } from '@stump/types'
 
 import paths from '../../paths'
+import { EBOOK_EXTENSION } from '../../utils/patterns'
 
 type Props = {
 	book?: Media
@@ -24,7 +25,7 @@ export default function BookReaderLink({ book }: Props) {
 	}
 
 	const getHref = () => {
-		if (book.current_epubcfi) {
+		if (book.current_epubcfi || book.extension?.match(EBOOK_EXTENSION)) {
 			return paths.bookReader(book.id, {
 				epubcfi: book.current_epubcfi,
 				isEpub: true,

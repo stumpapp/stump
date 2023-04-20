@@ -217,25 +217,16 @@ model Tag {
   @@map("tags")
 }
 
-//? This is what I am thinking for the RBAC model. I am hopeful that this will mesh
-//? well oso, but I think until I actually start implementing it I won't know for sure.
-//? The basic idea is:
 //? - Reading lists can be made PUBLIC, PRIVATE, or SHARED.
-//? - Reading list RBAC have 3 roles: creator, collaborator, reader. Users with the role "creator" can fully read, edit, and delete. 
-//?   Users with the role "collaborator" can read or edit (add). Users with the role "reader" can only read.
+//? - Reading list RBAC have 4 roles: creator, collaborator, reader, excluded. Users with the role "creator" can fully read, edit, and delete. 
+//?   Users with the role "collaborator" can read or edit (add). Users with the role "reader" can only read. Users with the role "excluded" can do nothing.
 //? - Reading lists default to PRIVATE, which will have a corresponding RBAC so only users with the role "creator" 
 //?   can access the reading list. This means creating a reading list will automatically create a RBAC for the creator.
 //? - Reading lists can be made SHARED, which will behave similarly to PRIVATE, but will also create a RBAC for each user invited.
 //? - Reading lists can be made PUBLIC, which WON'T generate a RBAC. This means that anyone has read access the reading list.
-//? This overall is a little verbose, as it will sort of require the same pattern for each entity I want to apply RBAC to. 
-//? It also kinda complicates the querying a lot. As a user going to a reading list page, the query would effectively have to:
-//? - Get all reading lists where the user is the creator OR reading lists set to PUBLIC OR reading lists where an RBAC exists for the user,
-//?   and then paginate it.
-//? Not lovely. That's why I'd really like to nail down a good pattern for this early, 
-//? even if 0.1.0 doesn't have the most robust RBAC implementation.
 model ReadingListRBAC {
   // The role associated this access control rule, as a number for easy querying.
-  // 0: none, 1: reader, 2: collaborator, 3: creator
+  // 0: excluded, 1: reader, 2: collaborator, 3: creator
   role Int
 
   /////////////////////////////////////////////
@@ -405,6 +396,9 @@ model UserPreferences {
   locale                 String @default("en")
   // The theme the user has selected. E.g. 'LIGHT' or 'DARK'. Default is 'LIGHT'
   app_theme              String @default("LIGHT")
+  // The theme the user has selected for the epub reader. This is different than
+  // app_theme because there will be more options available for the epub reader.
+  // epub_reader_theme      String @default("LIGHT")
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////

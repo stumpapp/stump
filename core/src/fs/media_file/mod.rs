@@ -4,7 +4,7 @@ pub mod pdf;
 pub mod rar;
 pub mod zip;
 
-use std::path::Path;
+use std::{collections::HashMap, path::Path};
 use tracing::debug;
 
 use crate::{
@@ -52,6 +52,26 @@ pub fn get_page(
 				))
 			}
 		},
+		"unknown" => Err(ProcessFileError::Unknown(format!(
+			"Unable to determine mime type for file: {:?}",
+			file
+		))),
+		_ => Err(ProcessFileError::UnsupportedFileType(file.to_string())),
+	}
+}
+
+pub fn get_content_types_for_pages(
+	file: &str,
+	pages: Vec<i32>,
+) -> Result<HashMap<i32, ContentType>, ProcessFileError> {
+	let mime = ContentType::from_file(file).mime_type();
+
+	match mime.as_str() {
+		"application/zip" => zip::get_content_types_for_pages(file, pages),
+		"application/vnd.comicbook+zip" => zip::get_content_types_for_pages(file, pages),
+		"application/vnd.rar" => rar::get_content_types_for_pages(file, pages),
+		"application/vnd.comicbook-rar" => rar::get_content_types_for_pages(file, pages),
+		"application/epub+zip" => epub::get_content_types_for_chapters(file, pages),
 		"unknown" => Err(ProcessFileError::Unknown(format!(
 			"Unable to determine mime type for file: {:?}",
 			file

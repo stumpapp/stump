@@ -6,8 +6,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSwipeable } from 'react-swipeable'
 
-import { epubDarkTheme } from '../../utils/epubTheme'
-import EpubControls from './utils/EpubControls'
+import EpubControls from './EpubControls'
+import { stumpDark } from './themes'
 
 type EpubJsReaderProps = {
 	id: string
@@ -94,7 +94,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					})
 
 					//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
-					rendition_.themes.register('dark', epubDarkTheme)
+					rendition_.themes.register('dark', stumpDark)
 					rendition_.on('relocated', handleLocationChange)
 
 					if (isDark) {

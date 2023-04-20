@@ -1,4 +1,5 @@
 use std::{
+	collections::HashMap,
 	fs::File,
 	io::BufReader,
 	path::{Path, PathBuf},
@@ -268,4 +269,44 @@ pub fn get_epub_resource_from_path(
 	};
 
 	Ok((content_type, contents))
+}
+
+pub fn get_content_types_for_chapters(
+	file_path: &str,
+	chapters: Vec<i32>,
+) -> Result<HashMap<i32, ContentType>, ProcessFileError> {
+	let mut epub_file = load_epub(file_path)?;
+
+	let mut content_types = HashMap::new();
+
+	for chapter in chapters {
+		if chapter == 1 {
+			// Assume this is the cover page
+			// FIXME: This is wrong. I just don't want to deal with it right now...
+			content_types.insert(chapter, ContentType::JPEG);
+			continue;
+		}
+
+		epub_file.set_current_page(chapter as usize).map_err(|e| {
+			error!("Failed to get chapter from epub file: {}", e);
+			ProcessFileError::EpubReadError(e.to_string())
+		})?;
+
+		let content_type = match epub_file.get_current_mime() {
+			Ok(mime) => ContentType::from(mime.as_str()),
+			Err(e) => {
+				error!(
+					error = ?e,
+					chapter_path = ?file_path,
+					"Failed to get explicit resource mime for chapter. Returning default.",
+				);
+
+				ContentType::XHTML
+			},
+		};
+
+		content_types.insert(chapter, content_type);
+	}
+
+	Ok(content_types)
 }

@@ -196,7 +196,7 @@ async fn get_epub_meta(
 			)?
 		};
 
-		Ok(BufferResponse::new(content_type, buffer).into())
+		Ok(BufferResponse::new(content_type, buffer))
 	} else {
 		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",

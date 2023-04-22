@@ -271,7 +271,7 @@ importers:
       clsx: ^1.2.1
       cmdk: ^0.2.0
       css-loader: ^6.7.1
-      lucide-react: ^0.128.0
+      lucide-react: ^0.171.0
       postcss: ^8.4.16
       postcss-loader: ^7.1.0
       react: ^18.2.0
@@ -316,7 +316,7 @@ importers:
       class-variance-authority: 0.4.0_typescript@4.9.5
       clsx: 1.2.1
       cmdk: 0.2.0_puuzjadfv64tjpjwi3qllwuniy
-      lucide-react: 0.128.0_react@18.2.0
+      lucide-react: 0.171.0_react@18.2.0
       postcss: 8.4.21
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -386,7 +386,7 @@ importers:
       framer-motion: ^10.9.2
       i18next: ^22.4.13
       immer: ^9.0.21
-      lucide-react: ^0.128.0
+      lucide-react: ^0.171.0
       nprogress: ^0.2.0
       phosphor-react: ^1.4.1
       pluralize: ^8.0.0
@@ -424,7 +424,7 @@ importers:
       framer-motion: 10.11.2_biqbaboplfbrettd7655fr4n2y
       i18next: 22.4.14
       immer: 9.0.21
-      lucide-react: 0.128.0_react@18.2.0
+      lucide-react: 0.171.0_react@18.2.0
       nprogress: 0.2.0
       phosphor-react: 1.4.1_react@18.2.0
       pluralize: 8.0.0
@@ -12707,8 +12707,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /lucide-react/0.128.0_react@18.2.0:
-    resolution: {integrity: sha512-m7a6vJm7yX1c5RIad6Ff7BWNL1JQf1Nwz18/Qd1sH9KntRzmAFb+KHGSGcIYN1JdoWR2+Uquxv0aHzEb7rxS2Q==}
+  /lucide-react/0.171.0_react@18.2.0:
+    resolution: {integrity: sha512-iCcpl4wfilDMeG1WtTkYTf47RMOx5KO5Kn5N8SSWq5KBxUELkHT7+p8+6wRz7GETxScA8fvjz22tFBmODnlYRg==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:

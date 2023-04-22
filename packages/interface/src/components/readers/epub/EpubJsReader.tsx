@@ -1,30 +1,46 @@
 import { API, updateEpubProgress } from '@stump/api'
-import { queryClient, useEpubLazy, useTheme } from '@stump/client'
+import {
+	type EpubReaderPreferences,
+	queryClient,
+	useEpubLazy,
+	useEpubReader,
+	useTheme,
+} from '@stump/client'
 import { UpdateEpubProgress } from '@stump/types'
 import { Book, Rendition } from 'epubjs'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useSwipeable } from 'react-swipeable'
 
-import EpubControls from './EpubControls'
+// import { useSwipeable } from 'react-swipeable'
+import EpubReaderContainer from './EpubReaderContainer'
 import { stumpDark } from './themes'
 
 /** The props for the EpubJsReader component */
 type EpubJsReaderProps = {
+	/** The ID of the associated media entitiy for this epub */
 	id: string
+	/** The initial cfi to start the reader at, i.e. where the read left off */
 	initialCfi: string | null
 }
 
 /** Location information as it is structured internally in epubjs */
 type EpubLocation = {
+	/** The epubcfi for the location */
 	cfi: string
+	/** The chapter display information */
 	displayed: {
+		/** The current page within the chapter */
 		page: number
+		/** The total pages in the chapter */
 		total: number
 	}
+	/** The href as it is represented in the epub */
 	href: string
+	/** The index of this location, relative to the spine */
 	index: number
+	// TODO: i don't remember lol
 	location: number
+	// TODO: i don't remember lol
 	percentage: number
 }
 
@@ -52,8 +68,25 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const [rendition, setRendition] = useState<Rendition | null>(null)
 
 	const [currentLocation, setCurrentLocation] = useState<EpubLocationState>()
-	const [chapter, setChapter] = useState<string>('')
-	const [fontSize, setFontSize] = useState<number>(13)
+
+	const { epubPreferences } = useEpubReader((state) => ({
+		epubPreferences: state.preferences,
+	}))
+
+	//* Note: some books have entries in the spine for each href, some don't. It seems
+	//* mostly just a matter of if the epub is good.
+	const { chapter, chapterName } = useMemo(() => {
+		let name: string | undefined
+
+		const currentHref = currentLocation?.start.href
+		const position = book?.navigation?.toc?.findIndex((toc) => toc.href === currentHref)
+
+		if (position !== undefined && position !== -1) {
+			name = book?.navigation.toc[position]?.label.trim()
+		}
+
+		return { chapter: position, chapterName: name }
+	}, [book, currentLocation])
 
 	const { epub, isLoading } = useEpubLazy(id)
 
@@ -70,11 +103,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		//* adding this extra check as a precaution.
 		if (!start) {
 			return
-		}
-
-		const newChapter = controls.getChapter(start.href)
-		if (newChapter) {
-			setChapter(newChapter)
 		}
 
 		setCurrentLocation(changeState)
@@ -104,6 +132,20 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [book, epub, id])
 
 	/**
+	 *	A function for applying the epub reader preferences to the epubjs rendition instance
+	 *
+	 * @param rendition: The epubjs rendition instance
+	 * @param preferences The epub reader preferences
+	 */
+	const applyEpubPreferences = (rendition: Rendition, preferences: EpubReaderPreferences) => {
+		if (isDark) {
+			rendition.themes.select('stump-dark')
+		}
+
+		rendition.themes.fontSize(`${preferences.fontSize}px`)
+	}
+
+	/**
 	 * This effect is responsible for rendering the epub to the screen. It will only run once
 	 * when the book is has been loaded. It will also set the initial location and theme
 	 * for the rendition.
@@ -122,20 +164,17 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 						width: '100%',
 					})
 
+					//? TODO: I guess here I would need to wait for and load in custom theme blobs...
 					//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
-					rendition_.themes.register('dark', stumpDark)
+					rendition_.themes.register('stump-dark', stumpDark)
 					rendition_.on('relocated', handleLocationChange)
 
-					if (isDark) {
-						rendition_.themes.select('dark')
-					}
-
-					rendition_.themes.fontSize('13px')
-
+					applyEpubPreferences(rendition_, epubPreferences)
 					setRendition(rendition_)
 
-					if (initialCfi) {
-						rendition_.display(initialCfi)
+					const targetCfi = epub?.media_entity.read_progresses?.at(0)?.epubcfi ?? initialCfi
+					if (targetCfi) {
+						rendition_.display(targetCfi)
 					} else if (defaultLoc) {
 						rendition_.display(defaultLoc)
 					} else {
@@ -149,138 +188,116 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	)
 
 	/**
-	 * This effect is responsible for updating the epub theme when the selected theme changes.
-	 * If the rendition is not set, this effect will do nothing.
+	 * This effect is responsible for updating the epub theme options whenever the epub
+	 * preferences change. It will only run when the epub preferences change and the
+	 * rendition instance is set.
 	 */
-	useEffect(() => {
-		if (!rendition) {
-			return
-		}
+	useEffect(
+		() => {
+			if (rendition) {
+				applyEpubPreferences(rendition, epubPreferences)
+			}
+		},
 
-		if (isDark) {
-			rendition.themes.select('dark')
-		} else {
-			rendition.themes.select('default')
-		}
-	}, [rendition, isDark])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[rendition, epubPreferences],
+	)
 
+	/**
+	 * This effect is responsible for invalidating the in progress media query whenever
+	 * the epub reader is unmounted. This is so that the in progress media query will
+	 * refetch the updated progress information.
+	 */
 	useEffect(() => {
 		return () => {
 			queryClient.invalidateQueries(['getInProgressMedia'])
 		}
 	}, [])
 
-	const controls = useMemo(
-		() => ({
-			changeFontSize(size: number) {
-				if (rendition) {
-					setFontSize(size)
-					rendition.themes.fontSize(`${size}px`)
-				}
-			},
+	/**
+	 * A callback for when the reader should paginate forward. This will only run if the
+	 * rendition instance is set.
+	 */
+	const onPaginateForward = useCallback(async () => {
+		if (rendition) {
+			try {
+				await rendition.next()
+			} catch (err) {
+				console.error(err)
+				toast.error('')
+			}
+		}
+	}, [rendition])
 
-			// Note: some books have entries in the spine for each href, some don't. This means for some
-			// books the chapter will be null after the first page of that chapter. This function is
-			// used to get the current chapter, which will only work, in some cases, on the first page
-			// of the chapter. The chapter state will only get updated when this function returns a non-null
-			// value.
-			getChapter(href: string): string | null {
-				if (book) {
-					const filteredToc = book.navigation.toc.filter((toc) => toc.href === href)
+	/**
+	 * A callback for when the reader should paginate backward. This will only run if the
+	 * rendition instance is set.
+	 */
+	const onPaginateBackward = useCallback(async () => {
+		if (rendition) {
+			try {
+				await rendition.prev()
+			} catch (err) {
+				console.error(err)
+				toast.error('Something went wrong!')
+			}
+		}
+	}, [rendition])
 
-					return filteredToc[0]?.label.trim() ?? null
-				}
+	/**
+	 * A callback for when the user clicks on a link embedded in the epub. This will only run
+	 * if the rendition instance is set.
+	 */
+	const onLinkClick = useCallback(
+		async (href: string) => {
+			if (!book || !rendition || !ref.current) {
+				return
+			}
 
-				return null
-			},
+			const failureMessage = 'Failed to navigate, please check the integrity of the epub file.'
+			const adjusted = href.split('#')[0]
 
-			getCurrentEpubCfi() {
-				const start = rendition?.location?.start.cfi
-				const end = rendition?.location?.end.cfi
-				return start ?? end
-			},
+			let spineItem = book.spine.get(adjusted)
+			if (!spineItem) {
+				// @ts-expect-error: epubjs has incorrect types
+				const matches = book.spine.items
+					.filter((item: Record<string, unknown>) => {
+						const withPrefix = `/${adjusted}`
+						return (
+							item.url === adjusted ||
+							item.canonical == adjusted ||
+							item.url === withPrefix ||
+							item.canonical === withPrefix
+						)
+					})
+					.map((item: Record<string, unknown>) => book.spine.get(item.index as number))
+					.filter(Boolean)
 
-			async goTo(href: string) {
-				if (!book || !rendition || !ref.current) {
+				if (matches.length > 0) {
+					spineItem = matches[0]
+				} else {
+					console.error('Could not find spine item for href', href)
+					toast.error(failureMessage)
 					return
 				}
+			}
 
-				const adjusted = href.split('#')[0]
-
-				let match = book.spine.get(adjusted)
-
-				if (!match) {
-					// @ts-expect-error: types are wrong >:(
-					// Note: epubjs it literally terrible and this should be classified as torture dealing
-					// with this terrible library. The fact that I have to do this really blows my mind.
-					const matches = book.spine.items
-						.filter((item: Record<string, unknown>) => {
-							const withPrefix = `/${adjusted}`
-							return (
-								item.url === adjusted ||
-								item.canonical == adjusted ||
-								item.url === withPrefix ||
-								item.canonical === withPrefix
-							)
-						})
-						.map((item: Record<string, unknown>) => book.spine.get(item.index as number))
-						.filter(Boolean)
-
-					if (matches.length > 0) {
-						match = matches[0]
-					} else {
-						console.error(`Could not find ${href}`)
-						return
-					}
-				}
-
-				const epubcfi = match.cfiFromElement(ref.current)
-				if (epubcfi) {
-					try {
-						await rendition.display(epubcfi)
-					} catch (err) {
-						console.error(err)
-					}
-				} else {
-					toast.error('Could not generate a valid epubcfi.')
-				}
-			},
-
-			async goToCfi(cfi: string) {
+			const epubcfi = spineItem.cfiFromElement(ref.current)
+			if (epubcfi) {
 				try {
-					await rendition?.display(cfi)
+					await rendition.display(epubcfi)
 				} catch (err) {
 					console.error(err)
 				}
-			},
-
-			async next() {
-				if (rendition) {
-					try {
-						await rendition.next()
-						// rendition.hooks.render.trigger(pageAnimation);
-					} catch (err) {
-						console.error(err)
-						toast.error('Something went wrong!')
-					}
-				}
-			},
-
-			async prev() {
-				if (rendition) {
-					try {
-						await rendition.prev()
-						// rendition.hooks.render.trigger(pageAnimation);
-					} catch (err) {
-						console.error(err)
-						toast.error('Something went wrong!')
-					}
-				}
-			},
-		}),
-		[rendition, book, ref],
+			} else {
+				console.error('Could not get cfi for href', href)
+				toast.error(failureMessage)
+			}
+		},
+		[book, rendition],
 	)
 
+	// TODO: suppport icognito mode that doesn't sync progress...
 	const spineSize = epub?.spine.length
 	/**
 	 * This effect is responsible for syncing the current epub progress information to
@@ -293,6 +310,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 */
 	useEffect(
 		() => {
+			//* We can't do anything without the entity, so short circuit. This shouldn't
+			//* really happen, though.
+			if (!epub) return
+
 			/**
 			 *
 			 * @param payload The payload to send to the server. Contains all of the information
@@ -300,8 +321,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			 * @returns A promise which resolves to the updated progress information.
 			 */
 			const handleUpdateProgress = async (payload: UpdateEpubProgress) => {
-				if (!epub) return
-
 				try {
 					await updateEpubProgress({ ...payload, id: epub.media_entity.id })
 				} catch (err) {
@@ -358,25 +377,35 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[currentLocation, spineSize],
 	)
 
-	const swipeHandlers = useSwipeable({
-		onSwipedLeft: controls.next,
-		onSwipedRight: controls.prev,
-		preventScrollOnSwipe: true,
-	})
-
-	if (isLoading) {
+	if (isLoading || !epub) {
 		return null
 	}
 
 	return (
-		<EpubControls
-			controls={controls}
-			fontSize={fontSize}
-			swipeHandlers={swipeHandlers}
-			location={{ ...location, chapter }}
-			epub={epub!}
+		<EpubReaderContainer
+			readerMeta={{
+				bookEntity: epub.media_entity,
+				bookMeta: {
+					chapter: {
+						currentPage: [
+							currentLocation?.start.displayed.page,
+							currentLocation?.end.displayed.page,
+						],
+						name: chapterName,
+						position: chapter,
+						totalPages: currentLocation?.start.displayed.total,
+					},
+					toc: epub.toc,
+				},
+				progress: epub.media_entity.read_progresses?.[0]?.percentage_completed || null,
+			}}
+			controls={{
+				onLinkClick,
+				onPaginateBackward,
+				onPaginateForward,
+			}}
 		>
 			<div className="h-full w-full" ref={ref} />
-		</EpubControls>
+		</EpubReaderContainer>
 	)
 }

@@ -1,4 +1,5 @@
 {
+	"main": "index.js",
 	"scripts": {
 		"start": "expo start",
 		"android": "expo start --android",
@@ -6,6 +7,7 @@
 		"web": "expo start --web"
 	},
 	"dependencies": {
+		"@tanstack/react-query": "^4.20.4",
 		"expo": "^48.0.7",
 		"expo-constants": "~14.2.1",
 		"expo-linking": "~4.0.1",

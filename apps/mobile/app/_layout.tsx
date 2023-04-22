@@ -1,22 +1,13 @@
-import React, { useEffect } from 'react'
-import { Stack, useRootNavigationState, useRouter } from 'expo-router'
+import { QueryClientContext, QueryClientProvider, queryClient } from '@stump/client'
+import { Slot } from 'expo-router'
+import React from 'react'
 
 export default function Layout() {
-	const navigationState = useRootNavigationState()
-	const router = useRouter()
-
-	// TODO: Replace redirect logic with auth.
-	useEffect(() => {
-		// Temporary fix for the router not being ready.
-		if (!navigationState?.key) return
-
-		if (false) {
-			router.replace('/home')
-			return
-		}
-
-		router.replace('/connect')
-	}, [navigationState?.key])
-
-	return <Stack />
+	return (
+		<QueryClientContext.Provider value={queryClient}>
+			<QueryClientProvider client={queryClient}>
+				<Slot />
+			</QueryClientProvider>
+		</QueryClientContext.Provider>
+	)
 }

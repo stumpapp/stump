@@ -1,5 +1,5 @@
 import { queryClient, QueryClientContext, QueryClientProvider, useUserStore } from '@stump/client'
-import { Slot, useRootNavigationState, useRouter } from 'expo-router'
+import {Slot, useRootNavigationState, useRouter} from 'expo-router'
 import React, { Suspense, useEffect } from 'react'
 import { Text } from 'react-native'
 
@@ -17,11 +17,11 @@ export default function Layout() {
 
 		if (user) {
 			queryClient.invalidateQueries(['getLibraries'])
-			router.push('/home')
+			router.replace('/home')
 			return
 		}
 
-		router.push('/connect')
+		router.replace('/connect')
 	}, [navigationState?.key, user])
 
 	return (

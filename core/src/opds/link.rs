@@ -1,18 +1,33 @@
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::prelude::CoreResult;
+use crate::prelude::{ContentType, CoreResult};
 
 use super::util::OpdsEnumStr;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum OpdsLinkType {
 	Acquisition, // "application/atom+xml;profile=opds-catalog;kind=acquisition",
-	Image,       // "image/jpeg",
+	ImageJpeg,   // "image/jpeg",
+	ImagePng,    // "image/png",
+	ImageGif,    // "image/gif",
 	Navigation,  // "application/atom+xml;profile=opds-catalog;kind=navigation",
 	OctetStream, // "application/octet-stream",
 	Zip,         // "application/zip"
 	Epub,        // "application/epub+zip"
 	Search,      // "application/opensearchdescription+xml"
+}
+
+impl TryFrom<ContentType> for OpdsLinkType {
+	type Error = String;
+
+	fn try_from(content_type: ContentType) -> Result<Self, Self::Error> {
+		match content_type {
+			ContentType::JPEG => Ok(OpdsLinkType::ImageJpeg),
+			ContentType::PNG => Ok(OpdsLinkType::ImagePng),
+			ContentType::GIF => Ok(OpdsLinkType::ImageGif),
+			_ => Err(format!("Unsupported content type: {}", content_type)),
+		}
+	}
 }
 
 impl OpdsEnumStr for OpdsLinkType {
@@ -21,7 +36,9 @@ impl OpdsEnumStr for OpdsLinkType {
 			OpdsLinkType::Acquisition => {
 				"application/atom+xml;profile=opds-catalog;kind=acquisition"
 			},
-			OpdsLinkType::Image => "image/jpeg",
+			OpdsLinkType::ImageJpeg => "image/jpeg",
+			OpdsLinkType::ImagePng => "image/png",
+			OpdsLinkType::ImageGif => "image/gif",
 			OpdsLinkType::Navigation => {
 				"application/atom+xml;profile=opds-catalog;kind=navigation"
 			},
@@ -101,9 +118,9 @@ impl OpdsLink {
 pub struct OpdsStreamLink {
 	pub book_id: String,
 	pub count: String,
-	// TODO: change to enum?
 	pub mime_type: String,
 	pub last_read: Option<String>,
+	pub last_read_date: Option<String>,
 }
 
 impl OpdsStreamLink {
@@ -112,12 +129,14 @@ impl OpdsStreamLink {
 		count: String,
 		mime_type: String,
 		last_read: Option<String>,
+		last_read_date: Option<String>,
 	) -> Self {
 		Self {
 			book_id,
 			count,
 			mime_type,
 			last_read,
+			last_read_date,
 		}
 	}
 
@@ -127,17 +146,19 @@ impl OpdsStreamLink {
 			self.book_id
 		);
 
-		// FIXME: the wstxns1 needs to be dynamic to wstxns{positionInXmlDocument} >:(
-		// or not?? https://vaemendis.net/opds-pse/
 		let mut link = XmlEvent::start_element("link")
-			.attr("xmlns:wstxns1", "http://vaemendis.net/opds-pse/ns")
 			.attr("href", href.as_str())
-			.attr("wstxns1:count", &self.count)
 			.attr("type", &self.mime_type)
-			.attr("rel", "http://vaemendis.net/opds-pse/stream");
+			.attr("rel", "http://vaemendis.net/opds-pse/stream")
+			// .attr("xmlns:pse", "http://vaemendis.net/opds-pse/ns")
+			.attr("pse:count", &self.count);
 
 		if let Some(last_read) = &self.last_read {
 			link = link.attr("wstxns1:lastRead", last_read);
+		}
+
+		if let Some(last_read_date) = &self.last_read_date {
+			link = link.attr("wstxns1:lastReadDate", last_read_date);
 		}
 
 		writer.write(link)?;

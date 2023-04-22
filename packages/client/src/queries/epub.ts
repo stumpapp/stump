@@ -101,18 +101,13 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 	} as UseEpubReturn
 }
 
-// FIXME: use options
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function useEpubLazy(id: string, _options?: EpubOptions) {
-	const {
-		data: epub,
-		isLoading,
-		isRefetching,
-		isFetching,
-	} = useQuery(['getEpubById', id], () => epubApi.getEpubById(id).then((res) => res.data))
+export function useEpubLazy(id: string) {
+	const { data: epub, ...restReturn } = useQuery(['getEpubById', id], () =>
+		epubApi.getEpubById(id).then((res) => res.data),
+	)
 
 	return {
 		epub,
-		isLoading: isLoading || isRefetching || isFetching,
+		...restReturn,
 	}
 }

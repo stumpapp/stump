@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom'
 		- much more
 	Some of this has been started, but not finished.
 */
-export default function EpubReader({ epub, actions, ...rest }: UseEpubReturn) {
+export default function EpubStreamReader({ epub, actions, ...rest }: UseEpubReturn) {
 	const navigate = useNavigate()
 
 	// const { isLoading: isFetchingResource, data: content } = useQuery(

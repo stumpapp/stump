@@ -1,128 +1,11 @@
-import { queryClient } from '@stump/client'
 import { useBoolean } from '@stump/components'
-import type { Media } from '@stump/types'
-import clsx from 'clsx'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
-import React, { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useWindowSize } from 'rooks'
 
-import Toolbar from './utils/Toolbar'
-
-export interface ImageBasedReaderProps {
-	currentPage: number
-	media: Media
-	onPageChange: (page: number) => void
-	getPageUrl(page: number): string
-}
-
-// TODO: merge with AnimatedImageBasedReader once animates aren't ass
-// TODO: obviously mobile pretty much doesn't work really. I'll fix that later
-export default function ImageBasedReader({
-	currentPage,
-	media,
-	onPageChange,
-	getPageUrl,
-}: ImageBasedReaderProps) {
-	const currPageRef = React.useRef(currentPage)
-
-	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
-
-	// TODO: is this enough?
-	useEffect(
-		() => {
-			const pageArray = Array.from({ length: media.pages })
-
-			const start = currentPage >= 1 ? currentPage - 1 : 0
-
-			pageArray.slice(start, 3).forEach((_, i) => {
-				const preloadedImg = new Image()
-				preloadedImg.src = getPageUrl(currentPage + (i + 1))
-			})
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentPage, media.pages],
-	)
-
-	useEffect(() => {
-		currPageRef.current = currentPage
-	}, [currentPage])
-
-	useEffect(() => {
-		return () => {
-			queryClient.invalidateQueries(['getInProgressMedia'])
-		}
-	}, [])
-
-	function handlePageChange(newPage: number) {
-		if (newPage < media.pages && newPage > 0) {
-			onPageChange(newPage)
-		}
-	}
-
-	useHotkeys('right, left, space, escape', (_, handler) => {
-		const targetKey = handler.keys?.at(0)
-		switch (targetKey) {
-			case 'right':
-				handlePageChange(currPageRef.current + 1)
-				break
-			case 'left':
-				handlePageChange(currPageRef.current - 1)
-				break
-			case 'space':
-				toggleToolbar()
-				break
-			case 'escape':
-				hideToolbar()
-				break
-			default:
-				break
-		}
-	})
-
-	return (
-		<div className="relative flex h-full items-center justify-center">
-			<Toolbar
-				title={media.name}
-				currentPage={currentPage}
-				pages={media.pages}
-				visible={toolbarVisible}
-				onPageChange={handlePageChange}
-			/>
-			<SideBarControl position="left" onClick={() => onPageChange(currentPage - 1)} />
-			<img
-				className="z-30 max-h-full w-full select-none md:w-auto"
-				src={getPageUrl(currentPage)}
-				onError={(err) => {
-					// @ts-expect-error: is oke
-					err.target.src = '/favicon.png'
-				}}
-				onClick={toggleToolbar}
-			/>
-			<SideBarControl position="right" onClick={() => onPageChange(currentPage + 1)} />
-		</div>
-	)
-}
-
-type SideBarControlProps = {
-	onClick: () => void
-	position: 'left' | 'right'
-}
-function SideBarControl({ onClick, position }: SideBarControlProps) {
-	return (
-		<div
-			className={clsx(
-				'z-50 h-full border border-transparent transition-all duration-300',
-				'absolute w-[10%] active:border-gray-100 active:bg-gray-200 dark:active:border dark:active:border-gray-500 dark:active:bg-gray-700',
-				'sm:relative sm:flex sm:w-full sm:flex-shrink sm:active:bg-transparent',
-				{ 'right-0': position === 'right' },
-				{ 'left-0': position === 'left' },
-			)}
-			onClick={onClick}
-		/>
-	)
-}
+import { ImageBasedReaderProps } from './ImageBasedReader'
+import Toolbar from './Toolbar'
 
 const RESET_CONTROLS = {
 	x: '0%',
@@ -155,7 +38,7 @@ const BACKWARD_START_ANIMATION = {
 // FIXME: animation on mobile without drag looks bad
 // TODO: slow down the animations to test better
 // TODO: kill me, and then make the animations togglable
-export function AnimatedImageBasedReader({
+export default function AnimatedImageBasedReader({
 	currentPage,
 	media,
 	onPageChange,
@@ -225,7 +108,7 @@ export function AnimatedImageBasedReader({
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
 	// This is for the hotkeys
-	const currPageRef = React.useRef(currentPage)
+	const currPageRef = useRef(currentPage)
 
 	useEffect(() => {
 		currPageRef.current = currentPage
@@ -381,3 +264,51 @@ export function AnimatedImageBasedReader({
 		</div>
 	)
 }
+
+// export default function AnimatedImageBasedReader({
+// 	media,
+// 	currentPage,
+// 	getPageUrl,
+// 	onPageChange,
+// }: ImageBasedReaderProps) {
+// 	const pageCount = media.pages
+// 	// Calculate the indexes of the currently visible pages
+// 	const startIndex = currentPage - 2 >= 1 ? currentPage - 2 : 0
+// 	const endIndex = startIndex + 3 >= pageCount ? pageCount - 1 : startIndex + 3
+
+// 	// Set up motion values for the swipe animation
+// 	const x = useMotionValue(0)
+// 	const pageWidth = useTransform(x, [0, 1], [0, -100 / pageCount])
+
+// 	// Handle swipe navigation
+// 	const handleSwipe = (event, info) => {
+// 		if (info.offset.x > 0 && currentPage > 1) {
+// 			// setCurrentPage(currentPage - 1)
+// 			onPageChange(currentPage - 1)
+// 		} else if (info.offset.x < 0 && currentPage < pageCount) {
+// 			// setCurrentPage(currentPage + 1)
+// 			onPageChange(currentPage + 1)
+// 		}
+// 	}
+
+// 	return (
+// 		<div className="relative flex h-full w-full items-center justify-center">
+// 			{Array.from({ length: pageCount })
+// 				.slice(startIndex, endIndex + 1)
+// 				.map((_, index) => (
+// 					<motion.img
+// 						className="z-30 max-h-full w-full select-none md:w-auto"
+// 						key={index}
+// 						src={getPageUrl(startIndex + index + 1)}
+// 						alt={`Page ${startIndex + index + 1}`}
+// 						drag="x"
+// 						dragConstraints={{ left: 0, right: 0 }}
+// 						dragElastic={1}
+// 						dragMomentum={false}
+// 						onDragEnd={handleSwipe}
+// 						style={{ x: index === 1 ? x : pageWidth }}
+// 					/>
+// 				))}
+// 		</div>
+// 	)
+// }

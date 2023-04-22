@@ -84,12 +84,7 @@ export function useRecentlyAddedSeries() {
 }
 
 export function useUpNextInSeries(id: string, options: QueryOptions<Media | undefined> = {}) {
-	const {
-		data: media,
-		isLoading,
-		isFetching,
-		isRefetching,
-	} = useQuery(
+	const { data: media, ...restReturn } = useQuery(
 		[seriesQueryKeys.getNextInSeries, id],
 		() => seriesApi.getNextInSeries(id).then((res) => res.data),
 		{
@@ -98,5 +93,5 @@ export function useUpNextInSeries(id: string, options: QueryOptions<Media | unde
 		},
 	)
 
-	return { isLoading: isLoading || isFetching || isRefetching, media }
+	return { ...restReturn, media }
 }

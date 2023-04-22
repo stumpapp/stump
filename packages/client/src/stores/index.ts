@@ -1,3 +1,4 @@
+export { type EpubReaderPreferences, type EpubReaderStore, useEpubReader } from './useEpubReader'
 export { createFilterStore } from './useFilterStore'
 export { useStumpStore } from './useStumpStore'
 export { useUser, useUserStore } from './useUserStore'

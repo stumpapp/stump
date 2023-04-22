@@ -42,18 +42,22 @@ export default function LibraryOptionsForm({ isCreatingLibrary }: Props) {
 			{/* TODO: I think these are better as checkboxes eventually */}
 			<div className="flex flex-auto gap-12 pt-4">
 				<Switch
+					variant="primary"
 					label="Create Webp Thumbnails"
 					checked={createThumnails}
 					onClick={() => form.setValue('create_webp_thumbnails', !createThumnails)}
+					disabled
 					{...form.register('create_webp_thumbnails')}
 				/>
 				<Switch
+					variant="primary"
 					checked={convertRarToZip}
 					label="Convert .rar files to .zip"
 					onClick={() => form.setValue('convert_rar_to_zip', !convertRarToZip)}
 					{...form.register('convert_rar_to_zip')}
 				/>
 				<Switch
+					variant="primary"
 					checked={hardDeleteConversions}
 					disabled={!convertRarToZip}
 					label="Permanently delete .rar files after conversion"

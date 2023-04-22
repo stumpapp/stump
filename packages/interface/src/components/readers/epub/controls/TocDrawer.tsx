@@ -1,55 +1,42 @@
 import { Button, IconButton, Sheet, Text } from '@stump/components'
-import type { EpubContent } from '@stump/types'
-import { ListBullets } from 'phosphor-react'
-import { useEffect } from 'react'
+import { List } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { usePreviousDifferent } from 'rooks'
 
-// FIXME: I briefly worked on this file to remove chakra, but it needs a LOT of work.
-// it is very ugly. stinky doody code, too.
+import { useEpubReaderContext } from '../context'
 
-interface EpubTocDrawerProps {
-	isOpen: boolean
-	onClose(): void
-	onOpen(): void
+export default function TocDrawer() {
+	const { readerMeta, controls } = useEpubReaderContext()
+	const { toc } = readerMeta.bookMeta || {}
 
-	// TODO: TYPE THESE, has to work both with epubjs and streaming epub engine (not built yet)
-	toc: EpubContent[]
-	onSelect(tocItem: string): void
-}
-
-export default function EpubTocDrawer({
-	isOpen,
-	onOpen,
-	onClose,
-	toc,
-	onSelect,
-}: EpubTocDrawerProps) {
 	const location = useLocation()
 	const previousLocation = usePreviousDifferent(location)
 
+	const [isOpen, setIsOpen] = useState(false)
+
 	useEffect(() => {
 		if (previousLocation?.pathname !== location.pathname && isOpen) {
-			onClose()
+			setIsOpen(false)
 		}
-	}, [location, previousLocation, isOpen, onClose])
+	}, [location, previousLocation, isOpen])
 
 	function handleSelect(href: string) {
-		onSelect(href)
-		onClose()
+		controls.onLinkClick(href)
+		setIsOpen(false)
 	}
 
 	return (
 		<>
 			<Sheet
 				open={isOpen}
-				onClose={onClose}
-				onOpen={onOpen}
+				onClose={() => setIsOpen(false)}
+				onOpen={() => setIsOpen(true)}
 				title="Table of Contents"
 				description="Click on a chapter to jump to it."
 				trigger={
-					<IconButton variant="ghost">
-						<ListBullets className="text-lg" weight="regular" />
+					<IconButton variant="ghost" rounded="none" size="xs">
+						<List className="h-5 w-5" />
 					</IconButton>
 				}
 				size="lg"

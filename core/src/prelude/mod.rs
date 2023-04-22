@@ -82,6 +82,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<LayoutMode>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<Epub>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UpdateEpubProgress>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;

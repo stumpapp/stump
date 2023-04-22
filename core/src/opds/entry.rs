@@ -1,8 +1,11 @@
+use std::vec;
+
 use prisma_client_rust::chrono::DateTime;
 use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
+use crate::fs::get_content_types_for_pages;
 use crate::prelude::CoreResult;
 use crate::{
 	opds::link::OpdsStreamLink,
@@ -143,20 +146,57 @@ impl From<series::Data> for OpdsEntry {
 	}
 }
 
+// FIXME: needs to be a TryFrom for the error handling....
 impl From<media::Data> for OpdsEntry {
 	fn from(m: media::Data) -> Self {
 		let base_url = format!("/opds/v1.2/books/{}", m.id);
 		let file_name = format!("{}.{}", m.name, m.extension);
 		let file_name_encoded = encode(&file_name);
 
+		let progress_info = m
+			.read_progresses()
+			.ok()
+			.and_then(|progresses| progresses.first());
+
+		let (current_page, last_read_at) = if let Some(progress) = progress_info {
+			(Some(progress.page), Some(progress.updated_at))
+		} else {
+			(None, None)
+		};
+
+		let mut target_pages = vec![1];
+		if let Some(page) = current_page {
+			target_pages.push(page);
+		}
+
+		let page_content_types = get_content_types_for_pages(&m.path, target_pages)
+			.expect("Failed to get content types for pages");
+
+		let thumbnail_link_type = page_content_types
+			.get(&1)
+			.expect("Failed to get content type for thumbnail")
+			.to_owned();
+
+		let current_page_link_type = if let Some(page) = current_page {
+			page_content_types
+				.get(&page)
+				.expect("Failed to get content type for current page")
+				.to_owned()
+		} else {
+			thumbnail_link_type.to_owned()
+		};
+
+		let thumbnail_opds_link_type = OpdsLinkType::try_from(thumbnail_link_type)
+			.expect("Failed to convert thumbnail link type to OPDS link type");
+
 		let links = vec![
 			OpdsLink::new(
-				OpdsLinkType::Image,
+				thumbnail_opds_link_type,
 				OpdsLinkRel::Thumbnail,
 				format!("{}/thumbnail", base_url),
 			),
 			OpdsLink::new(
-				OpdsLinkType::Image,
+				thumbnail_opds_link_type,
 				OpdsLinkRel::Image,
 				format!("{}/pages/1", base_url),
 			),
@@ -167,21 +207,12 @@ impl From<media::Data> for OpdsEntry {
 			),
 		];
 
-		let current_page = match m.read_progresses() {
-			Ok(progresses) => progresses
-				.get(0)
-				.map(|p| Some(p.page.to_string()))
-				.unwrap_or(None),
-			// Most likely the relation was not loaded. Which is fine.
-			Err(_) => None,
-		};
-
 		let stream_link = OpdsStreamLink::new(
 			m.id.clone(),
 			m.pages.to_string(),
-			// FIXME:
-			"image/jpeg".to_string(),
-			current_page,
+			current_page_link_type.to_string(),
+			current_page.map(|page| page.to_string()),
+			last_read_at.map(|date| date.to_string()),
 		);
 
 		let mib = m.size as f64 / (1024.0 * 1024.0);

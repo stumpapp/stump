@@ -1,4 +1,4 @@
-use std::{fs::File, io::Read, path::Path};
+use std::{collections::HashMap, fs::File, io::Read, path::Path};
 use tracing::{debug, error, trace};
 use zip::read::ZipFile;
 
@@ -112,50 +112,113 @@ pub fn process(path: &Path) -> Result<ProcessedMediaFile, ProcessFileError> {
 
 // FIXME: this solution is terrible, was just fighting with borrow checker and wanted
 // a quick solve. TODO: rework this!
-/// Get an image from a zip file by index (page).
+/// Get an image from a zip file by page number. The page number is 1-indexed.
 pub fn get_image(
-	file: &str,
+	file_path: &str,
 	page: i32,
 ) -> Result<(ContentType, Vec<u8>), ProcessFileError> {
-	let zip_file = File::open(file)?;
+	let zip_file = File::open(file_path)?;
 
 	let mut archive = zip::ZipArchive::new(&zip_file)?;
-	// FIXME: stinky clone here
 	let file_names_archive = archive.clone();
 
 	if archive.is_empty() {
-		error!("Zip file {} is empty", file);
+		error!(file_path, "Empty zip file");
 		return Err(ProcessFileError::ArchiveEmptyError);
 	}
 
 	let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
-	// NOTE: I noticed some zip files *also* come back out of order >:(
-	// TODO: look more into this!
-	// file_names.sort_by(|a, b| a.cmp(b));
 	file_names.sort();
 
 	let mut images_seen = 0;
 	for name in file_names {
 		let mut file = archive.by_name(name)?;
 
-		let mut contents = Vec::new();
-		// Note: guessing mime here since this file isn't accessible from the filesystem,
-		// it lives inside the zip file.
-		let content_type = ContentType::from_file(name);
+		let file_size = file.size();
+		let buff_size = if file_size < 5 { file_size } else { 5 };
 
-		if images_seen + 1 == page && file.is_image() {
-			trace!("Found target image: {}", name);
+		if buff_size < 5 {
+			trace!(?name, buff_size, ?file_path, "found small zip entry");
+		}
+
+		let extension = Path::new(name)
+			.extension()
+			.and_then(|e| e.to_str())
+			.unwrap_or_default();
+
+		let mut buff = vec![0; buff_size as usize]; // read first buff_size bytes of file
+		file.read_exact(&mut buff)?;
+		let content_type = ContentType::from_bytes_with_fallback(&buff, extension);
+
+		if images_seen + 1 == page && content_type.is_image() {
+			trace!(?name, page, ?content_type, "found target zip entry");
+			// read_to_end maintains the current cursor, so we want to start
+			// with what we already read
+			let mut contents = buff.to_vec();
 			file.read_to_end(&mut contents)?;
+
 			return Ok((content_type, contents));
-		} else if file.is_image() {
+		} else if content_type.is_image() {
 			images_seen += 1;
 		}
 	}
 
-	error!(
-		"Could not find image for page {} in zip file {}",
-		page, file
-	);
+	error!(page, file_path, "Failed to find valid image");
 
 	Err(ProcessFileError::NoImageError)
+}
+
+/// Get the content types for a set of pages in a zip file. The page numbers are 1-indexed.
+pub fn get_content_types_for_pages(
+	file_path: &str,
+	pages: Vec<i32>,
+) -> Result<HashMap<i32, ContentType>, ProcessFileError> {
+	let zip_file = File::open(file_path)?;
+	let mut archive = zip::ZipArchive::new(&zip_file)?;
+
+	if archive.is_empty() {
+		return Err(ProcessFileError::ArchiveEmptyError);
+	}
+
+	let file_names_archive = archive.clone();
+	let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
+	file_names.sort();
+
+	let mut content_types = HashMap::new();
+
+	let mut images_seen = 0;
+	// TODO: I reused this pattern twice, it is annoying enough to warrant abstraction!
+	for name in file_names {
+		let mut file = archive.by_name(name)?;
+		let file_size = file.size();
+		let buff_size = if file_size < 5 { file_size } else { 5 };
+
+		if buff_size < 5 {
+			trace!(?name, buff_size, ?file_path, "found small zip entry");
+		}
+
+		let extension = Path::new(name)
+			.extension()
+			.and_then(|e| e.to_str())
+			.unwrap_or_default();
+
+		let is_page_in_target = pages.contains(&(images_seen + 1));
+		let mut buff = vec![0; buff_size as usize];
+		file.read_exact(&mut buff)?;
+		let content_type = ContentType::from_bytes_with_fallback(&buff, extension);
+
+		if is_page_in_target && content_type.is_image() {
+			trace!(?name, ?content_type, "found a targeted zip entry");
+			content_types.insert(images_seen + 1, content_type);
+			images_seen += 1;
+		} else if content_type.is_image() {
+			images_seen += 1;
+		}
+
+		if images_seen == pages.len() as i32 {
+			break;
+		}
+	}
+
+	Ok(content_types)
 }

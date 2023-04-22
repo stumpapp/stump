@@ -27,8 +27,9 @@ export default function MediaCard({
 			prefetchMedia(media.id)
 		}
 
-		if (media.current_page) {
-			prefetchMediaPage(media.id, media.current_page)
+		const currentPage = media.current_page || -1
+		if (currentPage > 0) {
+			prefetchMediaPage(media.id, currentPage)
 		}
 	}
 
@@ -46,17 +47,21 @@ export default function MediaCard({
 			)
 		}
 
-		const hasProgress = (media.current_page || 0) > 0
-		if (hasProgress) {
+		const progressString = getProgress()
+		if (progressString) {
+			const isEpubProgress = !!media.current_epubcfi
+
 			const pagesLeft = media.pages - (media.current_page || 0)
 			return (
 				<div className="flex items-center justify-between">
 					<Text size="xs" variant="muted">
-						{getProgress(media.current_page, media.pages)}%
+						{getProgress()}%
 					</Text>
-					<Text size="xs" variant="muted">
-						{pagesLeft} {pluralize('page', pagesLeft)} left
-					</Text>
+					{!isEpubProgress && (
+						<Text size="xs" variant="muted">
+							{pagesLeft} {pluralize('page', pagesLeft)} left
+						</Text>
+					)}
 				</div>
 			)
 		}
@@ -70,17 +75,29 @@ export default function MediaCard({
 		)
 	}
 
-	function getProgress(page: number | null | undefined, pages: number) {
-		if (isCoverOnly || !page) {
-			return undefined
+	function getProgress() {
+		if (isCoverOnly || !media.current_page) {
+			return null
 		}
 
-		const percent = Math.round((page / pages) * 100)
-		if (percent > 100) {
-			return 100
+		if (media.current_epubcfi) {
+			const firstWithPercent = media.read_progresses?.find((rp) => !!rp.percentage_completed)
+			if (firstWithPercent) {
+				return Math.round(firstWithPercent.percentage_completed! * 100)
+			}
+		} else {
+			const page = media.current_page
+			const pages = media.pages
+
+			const percent = Math.round((page / pages) * 100)
+			if (percent > 100) {
+				return 100
+			}
+
+			return percent
 		}
 
-		return percent
+		return null
 	}
 
 	const href =
@@ -90,7 +107,7 @@ export default function MediaCard({
 
 	const overrides = isCoverOnly
 		? {
-				className: 'flex-shrink',
+				className: 'flex-shrink-0 flex-auto',
 				href: undefined,
 				progress: undefined,
 				subtitle: undefined,
@@ -105,7 +122,7 @@ export default function MediaCard({
 			href={href}
 			fullWidth={fullWidth}
 			imageUrl={getMediaThumbnail(media.id)}
-			progress={getProgress(media.current_page, media.pages)}
+			progress={getProgress()}
 			subtitle={getSubtitle(media)}
 			onMouseEnter={handleHover}
 			size={isCoverOnly ? 'lg' : 'default'}

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use serde::Serialize;
-use tracing::trace;
+use tracing::{trace, warn};
 
 // TODO: move this into fs crate
 
@@ -42,11 +42,11 @@ fn infer_mime_from_bytes(bytes: &[u8]) -> Option<String> {
 fn infer_mime(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(result) => {
-			trace!(?path, ?result, "Infered mime for file");
+			trace!(?path, ?result, "infered mime");
 			result.map(|infer_type| infer_type.mime_type().to_string())
 		},
 		Err(e) => {
-			trace!(error = ?e, ?path, "Unable to infer mime for file");
+			trace!(error = ?e, ?path, "infer failed");
 			None
 		},
 	}
@@ -114,6 +114,33 @@ impl ContentType {
 			.unwrap_or_default()
 	}
 
+	/// Infer the MIME type of a [Vec] of bytes using the [infer] crate. If the MIME type cannot be
+	/// inferred, then the extension is used to determine the content type.
+	///
+	/// ### Example
+	/// ```rust
+	/// use stump_core::prelude::server::http::ContentType;
+	///
+	/// // This is NOT a valid PNG buff
+	/// let buf = [0xFF, 0xD8, 0xBB, 0xBB];
+	/// let content_type = ContentType::from_bytes_with_fallback(&buf, "png");
+	/// assert_eq!(content_type, ContentType::PNG);
+	/// ```
+	pub fn from_bytes_with_fallback(bytes: &[u8], extension: &str) -> ContentType {
+		infer_mime_from_bytes(bytes)
+			.map(|mime| ContentType::from(mime.as_str()))
+			.unwrap_or_else(|| {
+				// NOTE: I am logging at warn level because inference from bytes is a little more
+				// accurate, so if it fails it may be indicative of a problem.
+				warn!(
+					?bytes,
+					?extension,
+					"failed to infer content type, falling back to extension"
+				);
+				ContentType::from_extension(extension)
+			})
+	}
+
 	/// Infer the MIME type of a [Path] using the [infer] crate. If the MIME type cannot be inferred,
 	/// then the extension of the path is used to determine the content type.
 	///
@@ -158,6 +185,23 @@ impl ContentType {
 	/// ```
 	pub fn is_image(&self) -> bool {
 		self.to_string().starts_with("image")
+	}
+
+	/// Returns true if the content type is in accordance with the OPDS 1.2 specification.
+	/// This includes PNG, JPEG, and GIF images.
+	///
+	/// ## Example
+	///
+	/// ```rust
+	/// use stump_core::prelude::server::http::ContentType;
+	///
+	/// let content_type = ContentType::PNG;
+	/// assert!(content_type.is_opds_legacy_image());
+	/// ```
+	pub fn is_opds_legacy_image(&self) -> bool {
+		self == &ContentType::PNG
+			|| self == &ContentType::JPEG
+			|| self == &ContentType::GIF
 	}
 
 	/// Returns true if the content type is a ZIP archive.

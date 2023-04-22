@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, Direction};
+use prisma_client_rust::{and, or, Direction};
 use serde::Deserialize;
 use stump_core::{
 	config::get_config_dir,
@@ -103,6 +103,21 @@ pub(crate) fn apply_pagination<'a>(
 		},
 		_ => query,
 	}
+}
+
+/// Generates a single where condition for a media progress query to enforce media which
+/// is currently in progress
+pub(crate) fn apply_in_progress_filter_for_user(
+	user_id: String,
+) -> read_progress::WhereParam {
+	and![
+		read_progress::user_id::equals(user_id),
+		or![
+			read_progress::page::gt(0),
+			read_progress::epubcfi::not(None),
+			read_progress::is_completed::equals(false)
+		]
+	]
 }
 
 #[utoipa::path(
@@ -344,13 +359,12 @@ async fn get_recently_added_media(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let FilterableQuery { filters, ordering } = filter_query.0.get();
+	let FilterableQuery { filters, .. } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
-	trace!(?filters, ?ordering, ?pagination, "get_recently_added_media");
+	trace!(?filters, ?pagination, "get_recently_added_media");
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
 	let pagination_cloned = pagination.clone();
 	let where_conditions = apply_media_filters(filters);
@@ -364,7 +378,6 @@ async fn get_recently_added_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
-				.order_by(order_by_param)
 				.order_by(media::created_at::order(Direction::Desc));
 
 			if !is_unpaged {
@@ -615,10 +628,8 @@ async fn get_media_page(
 async fn get_media_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
 
 	let webp_path = get_config_dir()
 		.join("thumbnails")
@@ -629,25 +640,20 @@ async fn get_media_thumbnail(
 		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
 	}
 
-	let book = db
+	let result = db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
-		]))
 		.exec()
 		.await?;
 
-	if book.is_none() {
-		return Err(ApiError::NotFound(format!(
+	if let Some(book) = result {
+		Ok(media_file::get_page(book.path.as_str(), 1)?.into())
+	} else {
+		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
-		)));
+		)))
 	}
-
-	let book = book.unwrap();
-
-	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
 }
 
 #[utoipa::path(

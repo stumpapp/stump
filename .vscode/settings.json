@@ -10,5 +10,6 @@
 	},
 	"tailwindCSS.experimental.classRegex": [["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]],
 	"tailwindCSS.classAttributes": ["class", "className", ".*CLASSES", ".*VARIANTS"],
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"vue.features.codeActions.enable": false
 }

@@ -50,6 +50,10 @@ export function getMediaThumbnail(id: string): string {
 	return `${API.getUri()}/media/${id}/thumbnail`
 }
 
+export function getMediaDownloadUrl(id: string): string {
+	return `${API.getUri()}/media/${id}/file`
+}
+
 // TODO: misleading, sounds like paged API response but is actualy a page image
 export function getMediaPage(id: string, page: number): string {
 	return `${API.getUri()}/media/${id}/page/${page}`

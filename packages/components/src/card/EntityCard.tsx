@@ -25,7 +25,7 @@ type EntityCardProps = {
 	imageUrl: string
 	href?: string
 	fullWidth?: boolean
-	progress?: number
+	progress?: number | null
 } & VariantProps<typeof entityCardVariants> &
 	Omit<React.ComponentPropsWithoutRef<'div'>, 'children'>
 export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(

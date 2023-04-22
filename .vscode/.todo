@@ -2,3 +2,5 @@
   - [ ] things only used in `apps/server` should be moved there, rather than living in `core`
 - [ ] explore https://prisma.brendonovich.dev/extra/partial-types
 - [ ] find all `NOTE: EPUB feature tracking!` comments once I have time to start epub progress tracking..
+- [ ] start documenting code better!!
+  - honestly it will be much easier I think 1. to maintain and 2. to onboard new contributors if everything and every decision is documented

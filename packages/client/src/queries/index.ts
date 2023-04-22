@@ -1,5 +1,5 @@
 export { useAuthQuery, useLoginOrRegister } from './auth'
-export { type EpubActions, useEpub, useEpubLazy } from './epub'
+export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
 export { useJobReport } from './job'
 export {

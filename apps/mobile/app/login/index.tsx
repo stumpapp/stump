@@ -1,7 +1,6 @@
-import { API, apiIsInitialized } from '@stump/api'
 import { useLoginOrRegister, useUserStore } from '@stump/client'
 import { Stack } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import { ErrorSnack } from '../../components/SnackMessage'
@@ -11,6 +10,7 @@ export default function Login() {
 	const [password, setPassword] = useState('')
 	const [error, setError] = useState<string | undefined>(undefined)
 
+	/// reset error when username or password changes
 	useEffect(() => {
 		setError(undefined)
 	}, [username, password])
@@ -25,17 +25,12 @@ export default function Login() {
 			onSuccess: setUser,
 		})
 
-	useEffect(() => {
-		console.log('isClaimed changed', isClaimed)
-	}, [isClaimed])
-
 	const handleSubmit = () => {
 		if (isClaimed) {
 			loginUser({ password, username })
 			return
 		}
 
-		console.log('Registering user')
 		registerUser({ password, username }).then(() => {
 			loginUser({ password, username })
 		})

@@ -3,7 +3,7 @@ import type { ClaimResponse } from '@stump/types'
 import { API } from '.'
 import { ApiResult } from './types'
 
-export function ping() {
+export function ping(): Promise<ApiResult<string>> {
 	return API.get('/ping')
 }
 

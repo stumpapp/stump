@@ -36,7 +36,7 @@ impl From<prisma::user::Data> for User {
 		};
 
 		let read_progresses = match data.read_progresses() {
-			Ok(rp) => Some(rp.to_owned().into_iter().map(ReadProgress::from).collect()),
+			Ok(rp) => Some(rp.iter().cloned().map(ReadProgress::from).collect()),
 			Err(_e) => None,
 		};
 

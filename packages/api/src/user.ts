@@ -1,6 +1,6 @@
 import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
 
-import { API } from '.'
+import { API } from './axios'
 import { ApiResult } from './types'
 
 export function getUsers(): Promise<ApiResult<User[]>> {

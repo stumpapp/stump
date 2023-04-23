@@ -7,6 +7,7 @@
 		"web": "expo start --web"
 	},
 	"dependencies": {
+		"@stump/api": "workspace:*",
 		"@tanstack/react-query": "^4.20.4",
 		"expo": "^48.0.7",
 		"expo-constants": "~14.2.1",

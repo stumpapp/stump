@@ -1,6 +1,6 @@
 import type { Tag } from '@stump/types'
 
-import { API } from '.'
+import { API } from './axios'
 import { ApiResult } from './types'
 
 export function getAllTags(): Promise<ApiResult<Tag[]>> {

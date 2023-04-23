@@ -1,6 +1,6 @@
 import type { JobReport } from '@stump/types'
 
-import { API } from '.'
+import { API } from './axios'
 import { ApiResult } from './types'
 
 export function getJobs(): Promise<ApiResult<JobReport[]>> {

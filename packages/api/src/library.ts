@@ -7,8 +7,9 @@ import type {
 	UpdateLibraryArgs,
 } from '@stump/types'
 
-import { API, mergePageParams, urlWithParams } from '.'
+import { API } from './axios'
 import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
+import { mergePageParams, urlWithParams } from './utils'
 
 export function getLibraries(): Promise<PageableApiResult<Library[]>> {
 	return API.get('/libraries?unpaged=true')

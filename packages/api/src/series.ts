@@ -1,7 +1,9 @@
 import type { Media, Series } from '@stump/types'
 
-import { API, mediaApi, mergeCursorParams, mergePageParams, urlWithParams } from '.'
+import { API } from './axios'
+import { mediaApi } from './media'
 import { ApiResult, CursorQueryParams, PageableApiResult, PagedQueryParams } from './types'
+import { mergeCursorParams, mergePageParams, urlWithParams } from './utils'
 
 export function getSeriesById(id: string): Promise<ApiResult<Series>> {
 	return API.get(`/series/${id}`)

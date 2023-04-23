@@ -29,6 +29,10 @@ where
 	}
 }
 
+// pub fn get_prisma_joiner<T>(joiner_str: &str) {
+// 	let joiner = prisma_joiner!(joiner_str);
+// }
+
 fn string_or_seq_string<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
 where
 	D: Deserializer<'de>,

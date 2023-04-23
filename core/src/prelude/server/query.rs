@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -8,6 +10,35 @@ use crate::{
 };
 
 // TODO: put these elsewhere, maybe in db crate?
+
+pub enum PrismaJoiner {
+	And,
+	Or,
+	Not,
+}
+
+impl Display for PrismaJoiner {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			PrismaJoiner::And => write!(f, "and"),
+			PrismaJoiner::Or => write!(f, "or"),
+			PrismaJoiner::Not => write!(f, "not"),
+		}
+	}
+}
+
+impl TryFrom<&str> for PrismaJoiner {
+	type Error = CoreError;
+
+	fn try_from(s: &str) -> Result<Self, Self::Error> {
+		match s {
+			"and" => Ok(PrismaJoiner::And),
+			"or" => Ok(PrismaJoiner::Or),
+			"not" => Ok(PrismaJoiner::Not),
+			_ => Err(CoreError::InvalidQuery("Invalid joiner".to_string())),
+		}
+	}
+}
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
 pub enum Direction {

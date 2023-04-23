@@ -8,6 +8,7 @@ use tracing::{error, info, trace};
 
 mod config;
 mod errors;
+mod macros;
 mod middleware;
 mod routers;
 mod utils;

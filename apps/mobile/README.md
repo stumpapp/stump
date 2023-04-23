@@ -50,4 +50,3 @@ With the `v0.1.0` release of the Stump server (very) slowly approaching, the mob
 ## Acknowledgements 🙏
 
 - Thanks to [@dancamdev](https://github.com/dancamdev) for bootstrapping this Expo project 🙌
-

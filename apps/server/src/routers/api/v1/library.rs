@@ -11,19 +11,24 @@ use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 
 use stump_core::{
+	config::get_config_dir,
 	db::{
-		models::{LibrariesStats, Library, LibraryScanMode, Series},
+		models::{
+			library_series_ids_media_ids_include, LibrariesStats, Library,
+			LibraryScanMode, Media, Series,
+		},
 		utils::PrismaCountTrait,
 	},
 	fs::{image, media_file},
 	job::LibraryScanJob,
 	prelude::{
-		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, ScanQueryParam,
-		UpdateLibraryArgs,
+		ContentType, CreateLibraryArgs, Pageable, Pagination, PaginationQuery,
+		ScanQueryParam, UpdateLibraryArgs,
 	},
 	prisma::{
 		library::{self, WhereParam},
 		library_options, media,
+		media::OrderByParam as MediaOrderByParam,
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag,
 	},
@@ -35,6 +40,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_session_admin_user, http::ImageResponse, FilterableQuery, LibraryFilter,
+		MediaFilter, SeriesFilter,
 	},
 };
 
@@ -55,6 +61,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				)
 				.route("/scan", get(scan_library))
 				.route("/series", get(get_library_series))
+				.route("/media", get(get_library_media))
 				.route("/thumbnail", get(get_library_thumbnail)),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -245,7 +252,7 @@ async fn get_library_by_id(
 // but for now I will have this disgustingly gross and ugly work around...
 /// Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
-	filter_query: Query<FilterableQuery<LibraryFilter>>,
+	filter_query: Query<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -311,6 +318,66 @@ async fn get_library_series(
 	Ok(Json((series, series_count, pagination).into()))
 }
 
+async fn get_library_media(
+	filter_query: Query<FilterableQuery<MediaFilter>>,
+	pagination_query: Query<PaginationQuery>,
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let FilterableQuery { ordering, filters } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
+	let pagination_cloned = pagination.clone();
+
+	let is_unpaged = pagination.is_unpaged();
+	let order_by_param: MediaOrderByParam = ordering.try_into()?;
+
+	let mut media_conditions = super::media::apply_media_filters(filters);
+	media_conditions.push(media::series::is(vec![series::library_id::equals(Some(
+		id.clone(),
+	))]));
+
+	let media_conditions_cloned = media_conditions.clone();
+
+	let (media, count) = ctx
+		.db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(media_conditions_cloned.clone())
+				.order_by(order_by_param);
+
+			if !is_unpaged {
+				query = super::media::apply_pagination(query, &pagination_cloned)
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(media_conditions_cloned)
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
+	}
+
+	Ok(Json(Pageable::from(media)))
+}
+
 // TODO: ImageResponse for utoipa
 #[utoipa::path(
 	get,
@@ -333,16 +400,32 @@ async fn get_library_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
+	let webp_path = get_config_dir()
+		.join("thumbnails")
+		.join(format!("{}.webp", id));
+
+	if webp_path.exists() {
+		trace!("Found webp thumbnail for library {}", id);
+		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
+	}
+
 	let library_series = db
 		.series()
-		.find_many(vec![series::library_id::equals(Some(id.clone()))])
-		.with(series::media::fetch(vec![]).order_by(media::name::order(Direction::Asc)))
+		.find_first(vec![series::library_id::equals(Some(id.clone()))])
+		.with(
+			series::media::fetch(vec![])
+				.take(1)
+				.order_by(media::name::order(Direction::Asc)),
+		)
 		.exec()
 		.await?;
 
-	// TODO: error handling
-	let series = library_series.first().expect("No series in library");
-	let media = series.media()?.first().expect("No media in series");
+	let series = library_series.ok_or_else(|| {
+		ApiError::NotFound("Library has no series to get thumbnail from".to_string())
+	})?;
+	let media = series.media()?.first().ok_or_else(|| {
+		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
+	})?;
 
 	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }
@@ -658,13 +741,7 @@ async fn delete_library(
 	let deleted = db
 		.library()
 		.delete(library::id::equals(id.clone()))
-		.include(library::include!({
-			series: include {
-				media: select {
-					id
-				}
-			}
-		}))
+		.include(library_series_ids_media_ids_include::include())
 		.exec()
 		.await?;
 

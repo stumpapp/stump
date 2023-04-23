@@ -18,8 +18,11 @@ pub async fn create_client() -> prisma::PrismaClient {
 		.to_string();
 
 	let profile = std::env::var("STUMP_PROFILE").unwrap_or_else(|_| "debug".to_string());
+	let db_override = std::env::var("STUMP_DB_PATH").ok();
 
-	if profile == "release" {
+	if let Some(path) = db_override {
+		create_client_with_url(&format!("file:{}/stump.db", &path)).await
+	} else if profile == "release" {
 		trace!(
 			"Creating Prisma client with url: file:{}/stump.db",
 			&config_dir

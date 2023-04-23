@@ -10,3 +10,13 @@ export function getLogFileMeta(): Promise<ApiResult<LogMetadata>> {
 export function clearLogFile() {
 	return API.delete('/logs')
 }
+
+const logApi = {
+	clearLogFile,
+	getLogFileMeta,
+}
+
+export const logQueryKeys: Record<keyof typeof logApi, string> = {
+	clearLogFile: 'log.clearLogFile',
+	getLogFileMeta: 'log.getLogFileMeta',
+}

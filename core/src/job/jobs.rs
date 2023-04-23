@@ -29,7 +29,6 @@ impl Job for LibraryScanJob {
 			self.scan_mode,
 			self.path.clone(),
 		);
-		// persist_job_end(&ctx, runner_id, completed_tasks, duration.as_millis()).await?;
 
 		Ok(result)
 	}

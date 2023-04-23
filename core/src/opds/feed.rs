@@ -168,7 +168,7 @@ impl From<(library::Data, i64, i64)> for OpdsFeed {
 
 		// let total_pages = (count as f32 / 20.0).ceil() as u32;
 
-		// if page < total_pages as i64 && entries.len() == 20 {
+		// if page < total_pages as u32 && entries.len() == 20 {
 		// 	links.push(OpdsLink {
 		// 		link_type: OpdsLinkType::Navigation,
 		// 		rel: OpdsLinkRel::Next,

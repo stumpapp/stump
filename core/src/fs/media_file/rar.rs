@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+	collections::HashMap,
+	path::{Path, PathBuf},
+};
 use tracing::{debug, error, trace, warn};
 use unrar::archive::Entry;
 
@@ -298,4 +301,58 @@ pub fn get_image(
 	// }
 
 	// Err(ProcessFileError::RarReadError)
+}
+
+pub fn get_content_types_for_pages(
+	file_path: &str,
+	pages: Vec<i32>,
+) -> Result<HashMap<i32, ContentType>, ProcessFileError> {
+	if stump_in_docker() || cfg!(windows) {
+		return Err(ProcessFileError::UnsupportedFileType(
+			"Stump cannot support cbr/rar files in docker containers or Windows for now."
+				.into(),
+		));
+	}
+
+	let archive = unrar::Archive::new(file_path)?;
+
+	let mut entries: Vec<_> = archive
+		.list_extract()
+		.map_err(|e| {
+			error!("Failed to read rar archive: {:?}", e);
+			ProcessFileError::RarReadError
+		})?
+		.filter_map(|e| e.ok())
+		.filter(|e: &Entry| e.is_image())
+		.collect();
+
+	entries.sort_by(|a, b| a.filename.cmp(&b.filename));
+
+	let mut content_types = HashMap::new();
+
+	for (idx, mut entry) in entries.into_iter().enumerate() {
+		let page = (idx + 1) as i32;
+
+		if pages.contains(&page) {
+			let path = entry.filename.clone();
+			let extension = path
+				.extension()
+				.and_then(|s| s.to_str())
+				.unwrap_or_default();
+
+			// NOTE: as with the rest of this file that uses `read_bytes`, this is a hack.
+			// Although, in this case, it is even more unideal because instead of reading
+			// the first few bytes of the file, we are reading the entire file. I hate it here.
+			let contents = entry.read_bytes().map_err(|_e| {
+				error!("Failed to read bytes from rar archive");
+				ProcessFileError::RarReadError
+			})?;
+			content_types.insert(
+				page,
+				ContentType::from_bytes_with_fallback(&contents, extension),
+			);
+		}
+	}
+
+	Ok(content_types)
 }

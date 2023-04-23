@@ -5,6 +5,7 @@
 		"rust-lang.rust-analyzer",
 		"bradlc.vscode-tailwindcss",
 		"Gruntfuggly.todo-tree",
-		"mike-co.import-sorter"
+		"mike-co.import-sorter",
+		"aaron-bond.better-comments"
 	]
 }

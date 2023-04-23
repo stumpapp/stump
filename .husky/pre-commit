@@ -1,9 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# npx lint-staged
-moon run :format
-moon run :lint
-# TODO: fix typecheck
-# moon run :typecheck
-# cargo clippy --all-targets --workspace -- -D warnings
+npx lint-staged
+# https://moonrepo.dev/docs/faq#how-to-stop-moon-formatting-json-and-yaml-files
+# moon run :lint && pnpm prettify

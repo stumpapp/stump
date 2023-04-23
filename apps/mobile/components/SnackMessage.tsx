@@ -14,9 +14,9 @@ export const ErrorSnack = ({ message }: { message: string }) => {
 
 	return (
 		show && (
-			<View className="absolute bottom-5 flex flex-row justify-center items-center w-full bg-red-600 p-4 rounded-md">
+			<View className="absolute bottom-5 flex w-full flex-row items-center justify-center rounded-md bg-red-600 p-4">
 				<Warning color="#fff" />
-				<Text className="text-white font-medium ml-5">{message}</Text>
+				<Text className="ml-5 font-medium text-white">{message}</Text>
 			</View>
 		)
 	)

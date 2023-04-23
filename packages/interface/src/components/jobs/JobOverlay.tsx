@@ -1,5 +1,5 @@
-import { Box, Progress, Text } from '@chakra-ui/react'
 import { useJobContext } from '@stump/client'
+import { ProgressBar, Text } from '@stump/components'
 import { AnimatePresence, motion } from 'framer-motion'
 
 export default function JobOverlay() {
@@ -33,35 +33,31 @@ export default function JobOverlay() {
 	return (
 		<AnimatePresence>
 			{jobShown && (
-				<Box
-					as={motion.div}
-					bg={'white'}
-					_dark={{ bg: 'gray.700' }}
-					className="fixed right-[1rem] bottom-[1rem] rounded-md shadow p-2 flex flex-col justify-center items-center w-52"
+				<motion.div
+					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md bg-white p-2 shadow dark:bg-gray-800"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}
 				>
-					<div className="flex flex-col space-y-2 p-2 w-full text-xs">
-						<Text fontWeight="medium">{formatMessage(jobShown.message) ?? 'Job in Progress'}</Text>
-						<Progress
-							isIndeterminate={!jobShown.current_task || !jobShown.task_count}
-							value={Number(jobShown.current_task)}
-							max={Number(jobShown.task_count)}
-							rounded="md"
-							w="full"
-							size="xs"
-							colorScheme="brand"
+					<div className="flex w-full flex-col space-y-2 p-2 text-xs">
+						<Text size="sm">{formatMessage(jobShown.message) ?? 'Job in Progress'}</Text>
+						<ProgressBar
+							// isIndeterminate={!jobShown.current_task || !jobShown.task_count}
+							value={(Number(jobShown.current_task) / Number(jobShown.task_count)) * 100}
+							// max={Number(jobShown.task_count)}
+							// size="xs"
+							size="sm"
+							variant="primary"
 						/>
 						{jobShown.current_task != undefined && !!jobShown.task_count && (
-							<Text>
+							<Text size="xs" variant="muted">
 								<>
 									Task {jobShown.current_task} of {jobShown.task_count}
 								</>
 							</Text>
 						)}
 					</div>
-				</Box>
+				</motion.div>
 			)}
 		</AnimatePresence>
 	)

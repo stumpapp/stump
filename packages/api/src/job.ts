@@ -11,3 +11,13 @@ export function getJobs(): Promise<ApiResult<JobReport[]>> {
 export function cancelJob(id: string): Promise<ApiResult<unknown>> {
 	return API.delete(`/jobs/${id}/cancel`)
 }
+
+export const jobApi = {
+	cancelJob,
+	getJobs,
+}
+
+export const jobQueryKeys: Record<keyof typeof jobApi, string> = {
+	cancelJob: 'job.cancelJob',
+	getJobs: 'job.get',
+}

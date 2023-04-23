@@ -35,16 +35,16 @@ export default function Connect() {
 	}
 
 	return (
-		<View className="flex flex-1 justify-center items-center px-5">
+		<View className="flex flex-1 items-center justify-center px-5">
 			<Stack.Screen options={{ title: 'Connect to Stump' }} />
 			<TextInput
-				className="border border-black w-full py-3 px-5"
+				className="w-full border border-black px-5 py-3"
 				placeholder="http(s)://"
 				placeholderTextColor={'#999'}
 				value={connectionUrl}
 				onChangeText={setConnectionUrl}
 			/>
-			<TouchableOpacity className="bg-gray-900 rounded-lg p-3 px-6 mx-auto mt-10" onPress={connect}>
+			<TouchableOpacity className="mx-auto mt-10 rounded-lg bg-gray-900 p-3 px-6" onPress={connect}>
 				<Text className="text-white">Connect</Text>
 			</TouchableOpacity>
 

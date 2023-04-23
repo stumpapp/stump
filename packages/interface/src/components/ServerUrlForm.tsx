@@ -1,24 +1,14 @@
-import {
-	FormErrorMessage,
-	FormHelperText,
-	FormLabel,
-	InputGroup,
-	InputRightElement,
-	Spinner,
-	useBoolean,
-} from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUrl, isUrl } from '@stump/api'
 import { useStumpStore } from '@stump/client'
+import { Button, Form, Input, ProgressSpinner, Text, useBoolean } from '@stump/components'
 import { CloudCheck, CloudSlash } from 'phosphor-react'
-import { ChangeEvent, useMemo, useState } from 'react'
-import { FieldValues, useForm } from 'react-hook-form'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useDebounce } from 'rooks'
 import { z } from 'zod'
 
-import Button from '../ui/Button'
-import Form, { FormControl } from '../ui/Form'
-import { DebouncedInput } from '../ui/Input'
-
+// TODO: retest this component. I blindly refactored it when migrating off chakra...
 export default function ServerUrlForm() {
 	const { setBaseUrl } = useStumpStore(({ setBaseUrl }) => ({ setBaseUrl }))
 	const [isCheckingUrl, { on, off }] = useBoolean(false)
@@ -31,47 +21,58 @@ export default function ServerUrlForm() {
 			.refine(isUrl, { message: 'Invalid URL' })
 			.refine(checkUrl, (url) => ({ message: `Failed to connect to ${url}` })),
 	})
+	type Schema = z.infer<typeof schema>
 
-	const form = useForm({
+	const form = useForm<Schema>({
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	})
+	const [baseUrl] = form.watch('baseUrl')
 
-	async function validateUrl() {
-		on()
-		const url = form.getValues('baseUrl')
+	useEffect(
+		() => {
+			async function validateUrl() {
+				if (!baseUrl) {
+					return
+				}
 
-		if (!url) {
-			off()
-			return
-		}
+				on()
 
-		let errorMessage: string
+				let errorMessage: string
 
-		// TODO: this function doesn't work lol
-		if (!isUrl(url)) {
-			errorMessage = 'Invalid URL'
-		} else {
-			const isValid = await checkUrl(url)
+				// TODO: this function doesn't work lol
+				if (!isUrl(baseUrl)) {
+					errorMessage = 'Invalid URL'
+				} else {
+					const isValid = await checkUrl(baseUrl)
 
-			if (!isValid) {
-				errorMessage = `Failed to connect to ${url}`
-			} else {
-				setSuccessfulConnection(true)
+					if (!isValid) {
+						errorMessage = `Failed to connect to ${baseUrl}`
+					} else {
+						setSuccessfulConnection(true)
+					}
+				}
+
+				setTimeout(() => {
+					off()
+					if (errorMessage) {
+						form.setError('baseUrl', {
+							message: `Failed to connect to ${baseUrl}`,
+						})
+					}
+				}, 300)
 			}
-		}
 
-		setTimeout(() => {
-			off()
-			if (errorMessage) {
-				form.setError('baseUrl', {
-					message: `Failed to connect to ${url}`,
-				})
+			if (baseUrl) {
+				validateUrl()
 			}
-		}, 300)
-	}
+		},
 
-	async function handleSubmit(values: FieldValues) {
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[baseUrl],
+	)
+
+	async function handleSubmit(values: Schema) {
 		const { baseUrl } = values
 
 		setBaseUrl(baseUrl)
@@ -82,7 +83,7 @@ export default function ServerUrlForm() {
 
 	const InputDecoration = useMemo(() => {
 		if (isCheckingUrl) {
-			return <Spinner size="sm" />
+			return <ProgressSpinner size="sm" />
 		} else if (Object.keys(form.formState.errors).length > 0) {
 			return <CloudSlash size="1.25rem" color="#F56565" />
 		} else if (sucessfulConnection) {
@@ -92,52 +93,27 @@ export default function ServerUrlForm() {
 		return null
 	}, [isCheckingUrl, form.formState.errors, sucessfulConnection])
 
-	const { onChange, ...register } = form.register('baseUrl')
-
-	function handleChange(e: ChangeEvent<HTMLInputElement>) {
-		setSuccessfulConnection(false)
-		form.clearErrors('baseUrl')
-
-		onChange(e)
-	}
+	const setUrlDebounced = useDebounce((value: string) => form.setValue('baseUrl', value), 500)
 
 	return (
-		<Form onSubmit={handleSubmit} form={form}>
-			<FormControl label="Server URL" isInvalid={!!form.formState.errors.baseUrl}>
-				<FormLabel htmlFor="baseUrl">Server URL</FormLabel>
+		<Form form={form} onSubmit={handleSubmit}>
+			<input className="hidden" {...form.register('baseUrl')} />
+			<Input
+				label="Server URL"
+				icon={InputDecoration}
+				variant="primary"
+				errorMessage={form.formState.errors.baseUrl?.message}
+				onChange={(e) => setUrlDebounced(e.target.value)}
+			/>
 
-				<InputGroup>
-					<DebouncedInput
-						borderColor={sucessfulConnection ? 'green.500' : undefined}
-						{...register}
-						onChange={handleChange}
-						onInputStop={validateUrl}
-					/>
-					<InputRightElement
-						title={
-							// TODO: remove ternary, yuck
-							isCheckingUrl
-								? 'Testing connection...'
-								: InputDecoration
-								? 'Failed to connect!'
-								: undefined
-						}
-						// eslint-disable-next-line react/no-children-prop
-						children={InputDecoration}
-					/>
-				</InputGroup>
+			{sucessfulConnection && (
+				<Text className="text-green-400">
+					Successfully connected to {form.getValues('baseUrl')}!
+				</Text>
+			)}
 
-				<FormErrorMessage>{form.formState.errors.baseUrl?.message as string}</FormErrorMessage>
-
-				{sucessfulConnection && (
-					<FormHelperText color="green.300">
-						Successfully connected to {form.getValues('baseUrl')}!
-					</FormHelperText>
-				)}
-			</FormControl>
-
-			<Button colorScheme="brand" type="submit">
-				Submit Form
+			<Button variant="primary" type="submit" isLoading={isCheckingUrl}>
+				Submit
 			</Button>
 		</Form>
 	)

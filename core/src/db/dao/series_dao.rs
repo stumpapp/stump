@@ -30,11 +30,7 @@ pub struct SeriesDaoImpl {
 
 #[async_trait::async_trait]
 impl SeriesDao for SeriesDaoImpl {
-	// TODO: Once PCR is more mature, I think this kind of query can be possible without writing raw SQL.
-	// I know it's possible in JS prisma, so hopefully these kinds of manual queries can be phased out.
-	/// Returns a vector of [Series] in the order of most recently created in the database.
-	/// The number of books and unread books is included in the resulting [Series] objects.
-	/// This is used to populate the "Recently Added Series" section of the UI.
+	// TODO: Just move this query out of this file...
 	async fn get_recently_added_series_page(
 		&self,
 		viewer_id: &str,

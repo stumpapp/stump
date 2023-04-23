@@ -1,4 +1,4 @@
-import { getEpubBaseUrl, getEpubById } from '@stump/api'
+import { epubApi } from '@stump/api'
 import type { Epub, EpubContent } from '@stump/types'
 import { useMemo, useState } from 'react'
 
@@ -38,7 +38,7 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 
 	const { isLoading: isFetchingBook, data: epub } = useQuery(
 		['getEpubById', id],
-		() => getEpubById(id).then((res) => res.data),
+		() => epubApi.getEpubById(id).then((res) => res.data),
 		{
 			enabled,
 		},
@@ -73,14 +73,20 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 		const invalidSources = corrected.match(/src="[^"]+"/g)
 
 		invalidSources?.forEach((entry) => {
-			const src = entry.replace('src="', `src="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`)
+			const src = entry.replace(
+				'src="',
+				`src="${epubApi.getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`,
+			)
 			corrected = corrected.replace(entry, src)
 		})
 
 		const invlalidHrefs = corrected.match(/href="[^"]+"/g)
 
 		invlalidHrefs?.forEach((entry) => {
-			const href = entry.replace('href="', `href="${getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`)
+			const href = entry.replace(
+				'href="',
+				`href="${epubApi.getEpubBaseUrl(id)}/${epub?.root_base ?? ''}/`,
+			)
 			corrected = corrected.replace(entry, href)
 		})
 
@@ -95,18 +101,13 @@ export function useEpub(id: string, _options?: EpubOptions, enabled?: boolean) {
 	} as UseEpubReturn
 }
 
-// FIXME: use options
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function useEpubLazy(id: string, _options?: EpubOptions) {
-	const {
-		data: epub,
-		isLoading,
-		isRefetching,
-		isFetching,
-	} = useQuery(['getEpubById', id], () => getEpubById(id).then((res) => res.data))
+export function useEpubLazy(id: string) {
+	const { data: epub, ...restReturn } = useQuery(['getEpubById', id], () =>
+		epubApi.getEpubById(id).then((res) => res.data),
+	)
 
 	return {
 		epub,
-		isLoading: isLoading || isRefetching || isFetching,
+		...restReturn,
 	}
 }

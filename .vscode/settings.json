@@ -8,5 +8,8 @@
 	"[rust]": {
 		"editor.defaultFormatter": "rust-lang.rust-analyzer"
 	},
-	"tailwindCSS.experimental.classRegex": [["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]]
+	"tailwindCSS.experimental.classRegex": [["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]],
+	"tailwindCSS.classAttributes": ["class", "className", ".*CLASSES", ".*VARIANTS"],
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"vue.features.codeActions.enable": false
 }

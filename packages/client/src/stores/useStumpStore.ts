@@ -3,6 +3,8 @@ import { devtools, persist } from 'zustand/middleware'
 
 import { StoreBase } from '.'
 
+// TODO: remove this!! Just use app props context
+
 interface StumpStore extends StoreBase<StumpStore> {
 	baseUrl?: string
 	connected: boolean

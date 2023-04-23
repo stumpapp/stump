@@ -10,7 +10,7 @@ export default function LibraryStatsCard({ stats }: { stats: LibrariesStats }) {
 	}, [stats?.total_bytes])
 
 	return (
-		<View className="h-30 bg-gray-200 flex flex-row justify-around p-5 my-5 rounded-md">
+		<View className="h-30 my-5 flex flex-row justify-around rounded-md bg-gray-200 p-5">
 			<_StatsItem label="Total Series" value={stats.series_count} />
 			<_StatsItem label="Total Books" value={stats.book_count} />
 			<_StatsItem label="Space Used" value={`${libraryUsage.value} ${libraryUsage.unit}`} />
@@ -21,7 +21,7 @@ export default function LibraryStatsCard({ stats }: { stats: LibrariesStats }) {
 const _StatsItem = ({ label, value }: { label: string; value: number | bigint | string }) => {
 	return (
 		<View className="flex justify-between">
-			<Text className="font-medium text-lg">{label}</Text>
+			<Text className="text-lg font-medium">{label}</Text>
 			<Text className="text-lg">{`${value}`}</Text>
 		</View>
 	)

@@ -1,16 +1,34 @@
-import { getUserPreferences, updateUserPreferences as updateUserPreferencesFn } from '@stump/api'
-import type { UserPreferences } from '@stump/types'
+import {
+	getUserPreferences,
+	getUsers,
+	updatePreferences,
+	updateUser,
+	updateUserPreferences as updateUserPreferencesFn,
+	updateViewer,
+} from '@stump/api'
+import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
+import { AxiosError } from 'axios'
 
-import { useMutation, useQuery } from '../client'
-import { ClientQueryParams } from '.'
+import { MutationOptions, QueryOptions, useMutation, useQuery } from '../client'
 
-interface UseUserPreferencesParams extends ClientQueryParams<UserPreferences> {
-	enableFetchPreferences?: boolean
+type UseUsersQueryParams = QueryOptions<User[], AxiosError, User[]>
+export function useUsersQuery(params: UseUsersQueryParams = {}) {
+	const { data: users, ...ret } = useQuery(
+		['getUsers'],
+		() => getUsers().then((res) => res.data),
+		params,
+	)
+
+	return { users, ...ret }
 }
+
+type UseUserPreferencesParams = {
+	enableFetchPreferences?: boolean
+} & MutationOptions<UserPreferences, AxiosError, UserPreferences>
 
 export function useUserPreferences(
 	id?: string,
-	{ enableFetchPreferences, onUpdated }: UseUserPreferencesParams = {},
+	{ enableFetchPreferences, ...mutationOptions }: UseUserPreferencesParams = {},
 ) {
 	const {
 		data: userPreferences,
@@ -23,12 +41,9 @@ export function useUserPreferences(
 
 	const { mutateAsync: updateUserPreferences, isLoading: isUpdating } = useMutation(
 		['updateUserPreferences', id],
-		(preferences: UserPreferences) => updateUserPreferencesFn(id!, preferences),
-		{
-			onSuccess(res) {
-				onUpdated?.(res.data)
-			},
-		},
+		(preferences: UserPreferences) =>
+			updateUserPreferencesFn(id!, preferences).then((res) => res.data),
+		mutationOptions,
 	)
 
 	return {
@@ -36,5 +51,42 @@ export function useUserPreferences(
 		isUpdating,
 		updateUserPreferences,
 		userPreferences,
+	}
+}
+
+type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUserArgs>
+export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
+	updateViewer
+
+	const { mutateAsync: update, isLoading } = useMutation(
+		['updateUser', id],
+		async (params: UpdateUserArgs) => {
+			const response = id ? await updateUser(id, params) : await updateViewer(params)
+			return response.data
+		},
+		params,
+	)
+
+	return {
+		isLoading,
+		update,
+	}
+}
+
+type UseUpdatePreferencesParams = MutationOptions<UserPreferences, AxiosError, UserPreferences>
+
+export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
+	const { mutateAsync: update, isLoading } = useMutation(
+		['updateUserPreferences'],
+		async (preferences: UserPreferences) => {
+			const response = await updatePreferences(preferences)
+			return response.data
+		},
+		params,
+	)
+
+	return {
+		isLoading,
+		update,
 	}
 }

@@ -1,4 +1,4 @@
-import { Heading } from '@chakra-ui/react'
+import { Heading } from '@stump/components'
 import type { Series } from '@stump/types'
 
 import ListItem from '../ListItem'
@@ -10,7 +10,7 @@ interface Props {
 
 export default function SeriesList({ series, isLoading }: Props) {
 	if (isLoading) {
-		return <div>Loading...</div>
+		return null
 	} else if (!series || !series.length) {
 		return (
 			<div className="flex flex-1 items-center justify-center">
@@ -22,7 +22,7 @@ export default function SeriesList({ series, isLoading }: Props) {
 	}
 
 	return (
-		<div className="flex flex-col space-y-2 flex-1">
+		<div className="flex flex-1 flex-col space-y-2">
 			{series.map(({ id, name, description }, i) => (
 				<ListItem
 					key={id}

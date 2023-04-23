@@ -1,6 +1,11 @@
-.svelte-kit
-node_modules
-.svelte-kit
-build
+# Files
 core.ts
+*-lock.*
+
+# Directories
+node_modules
+target
 dist
+build
+.moon/cache
+.next

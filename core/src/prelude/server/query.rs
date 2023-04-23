@@ -7,6 +7,8 @@ use crate::{
 	prisma::{library, media, series},
 };
 
+// TODO: put these elsewhere, maybe in db crate?
+
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
 pub enum Direction {
 	#[serde(rename = "asc")]
@@ -80,6 +82,8 @@ impl TryInto<library::OrderByParam> for QueryOrder {
 			"name" => library::name::order(dir),
 			"path" => library::path::order(dir),
 			"status" => library::status::order(dir),
+			"updated_at" => library::updated_at::order(dir),
+			// "created_at" => library::created_at::order(dir),
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order library by {:?}",
@@ -100,6 +104,7 @@ impl TryInto<series::OrderByParam> for QueryOrder {
 			"name" => series::name::order(dir),
 			"description" => series::description::order(dir),
 			"updated_at" => series::updated_at::order(dir),
+			"created_at" => series::created_at::order(dir),
 			"path" => series::path::order(dir),
 			"status" => series::status::order(dir),
 			"library_id" => series::library_id::order(dir),
@@ -112,29 +117,3 @@ impl TryInto<series::OrderByParam> for QueryOrder {
 		})
 	}
 }
-
-// pub trait FindManyTrait {
-// 	fn paginated(self, page_params: PageParams) -> Self;
-// }
-
-// impl<Where, With, OrderBy, Cursor, Set, Data> FindManyTrait
-// 	for FindMany<'_, Where, With, OrderBy, Cursor, Set, Data>
-// where
-// 	Where: Into<SerializedWhereInput>,
-// 	With: Into<Selection>,
-// 	OrderBy: Into<(String, PrismaValue)>,
-// 	Cursor: Into<Where>,
-// 	Set: Into<(String, PrismaValue)>,
-// 	Data: DeserializeOwned,
-// {
-// 	fn paginated(self, page_params: PageParams) -> Self {
-// 		let skip = match page_params.zero_based {
-// 			true => page_params.page * page_params.page_size,
-// 			false => (page_params.page - 1) * page_params.page_size,
-// 		} as i64;
-
-// 		let take = page_params.page_size as i64;
-
-// 		self.skip(skip).take(take)
-// 	}
-// }

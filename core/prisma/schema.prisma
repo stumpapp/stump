@@ -8,40 +8,24 @@ generator client {
   output   = "../src/prisma.rs"
 }
 
-// https://github.com/prisma/prisma/issues/2219
-// CHORE: once/if above is resolved, use enums
-// enum UserRole {
-//   Owner,
-//   Member,
-// }
-// enum FileStatus {
-//     Unknown,
-//     Error,
-//     Ready,
-//     Unsupported,
-//     Outdated,
-//     Missing,
-// }
-// enum LogLevel {
-//     Error,
-//     Warn,
-//     Info,
-//     Debug,
-// }
-
 model User {
-  id              String         @id @default(cuid())
+  id              String  @id @default(cuid())
   // The username of the user. E.g. "oromei"
-  username        String         @unique
+  username        String  @unique
   // The password of the user. This will a hash - not the actual password.
   hashed_password String
   // The role of the user. Defaults to "MEMBER".
-  role            String         @default("MEMBER")
-  // The media the user currently has progress on.
-  // TODO: rename to `reading_history`
-  read_progresses ReadProgress[]
+  role            String  @default("MEMBER")
+  // The URL of the user's optional avatar.
+  avatar_url      String?
 
-  reading_lists ReadingList[]
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The media the user currently has progress on.
+  read_progresses ReadProgress[]
+  reading_lists   ReadingList[]
 
   // shared_reading_lists ReadingListAccess[]
 
@@ -49,11 +33,11 @@ model User {
   user_preferences_id String?          @unique
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
+  media_annotations MediaAnnotation[]
+
   @@map("users")
 }
 
-// TODO: access control for individual libraries. E.g. a managed user account that may only
-// access libraries a, b and c.
 model Library {
   id          String   @id @default(uuid())
   // The name of the library. ex: "Marvel Comics"
@@ -66,8 +50,15 @@ model Library {
   status      String   @default("READY")
   // The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
   updated_at  DateTime @updatedAt
+  // The date in which the library was created. ex: "2022-04-20 04:20:69"
+  created_at  DateTime @default(now())
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
   // The series in the library
-  series      Series[]
+  series Series[]
 
   library_options    LibraryOptions @relation(fields: [library_options_id], references: [id])
   library_options_id String         @unique
@@ -92,6 +83,10 @@ model LibraryOptions {
   // two valid options. Default is SERIES_BASED.
   library_pattern         String  @default("SERIES_BASED")
 
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
   // The ID of the library which these options belong to.
   library_id String?
   library    Library?
@@ -113,12 +108,17 @@ model Series {
   path        String
   // The status of the series since last scan or access
   status      String   @default("READY")
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
   // The id of the library this series belongs to.
-  library_id  String?
+  library_id String?
   // The library this series belongs to.
-  library     Library? @relation(fields: [library_id], references: [id], onDelete: Cascade)
+  library    Library? @relation(fields: [library_id], references: [id], onDelete: Cascade)
   // The media files in the series.
-  media       Media[]
+  media      Media[]
 
   tags Tag[]
 
@@ -126,52 +126,87 @@ model Series {
 }
 
 model Media {
-  id              String         @id @default(uuid())
+  id          String   @id @default(uuid())
   // The name of the media. ex: "The Amazing Spider-Man (2018) #69"
-  name            String
+  name        String
   // The description of the media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
-  description     String?
+  description String?
   // The size of the media in bytes.
-  size            Int
+  size        Int
   // The file extension of the media. ex: "cbz"
-  extension       String
+  extension   String
   // The number of pages in the media. ex: "69"
-  pages           Int
+  pages       Int
   // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
-  updated_at      DateTime       @updatedAt
+  updated_at  DateTime @updatedAt
   // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
-  created_at      DateTime       @default(now())
+  created_at  DateTime @default(now())
   // The date in which the file was last modified. Defaults to now() for safety.
-  modified_at     DateTime       @default(now())
+  modified_at DateTime @default(now())
   // Whether or not the media is downloaded to the client. ex: true
-  downloaded      Boolean        @default(false)
+  downloaded  Boolean  @default(false)
   // The checksum hash of the file contents. Used to find multuple instances of a file in the database
-  checksum        String?
+  checksum    String?
   // The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
-  path            String
+  path        String
   // The status of the series since last scan or access
-  status          String         @default("READY")
-  // The series this media belongs to.
-  series          Series?        @relation(fields: [series_id], references: [id], onDelete: Cascade)
-  // The id of the series this media belongs to.
-  series_id       String?
-  // The read progresses of the media
-  read_progresses ReadProgress[] // TODO: rename to `reading_history`
-  // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
-  tags            Tag[]
+  status      String   @default("READY")
 
-  // readingList   ReadingList? @relation(fields: [readingListId], references: [id])
-  // readingListId String?
-  reading_list    ReadingList? @relation(fields: [reading_list_id], references: [id])
-  reading_list_id String?
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The series this media belongs to.
+  series             Series?           @relation(fields: [series_id], references: [id], onDelete: Cascade)
+  // The id of the series this media belongs to.
+  series_id          String?
+  // The read progresses of the media
+  read_progresses    ReadProgress[]
+  // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
+  tags               Tag[]
+  // The associated reading list items for this media
+  reading_list_items ReadingListItem[]
+  // The associated annotations for this media
+  annotations        MediaAnnotation[]
 
   @@map("media")
 }
 
+//* NOTE: Only EPUB files currently support annotations. I expect maybe someday
+//* PDFs might, as well. I don't intend on adding support for annotations to archive
+//* formats like CBZ or CBR, unless there is demand for it.
+model MediaAnnotation {
+  id      String  @id @default(uuid())
+  // The kind of annotation. ex: "HIGHLIGHT" or "ANNOTATION" or "BOOKMARK"
+  kind    String
+  // The epubcfi associated with the annotation. This can be a range or a single point.
+  epubcfi String?
+  // The text associated with the annotation. This can be a user entered note, or some 
+  // visual indicator of the annotation.
+  text    String?
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The user who created the annotation
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // The media this annotation belongs to
+  media_id String
+  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+}
+
 model Tag {
-  id        String    @id @default(cuid())
+  id   String @id @default(cuid())
   // The name of the tag. ex: "Action"
-  name      String    @unique
+  name String @unique
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
   // media which have this tag associated
   media     Media[]
   // series which have this tag associated
@@ -182,7 +217,51 @@ model Tag {
   @@map("tags")
 }
 
-// TODO: A user is the owning entity for reading lists and may share reading lists with other users
+//? - Reading lists can be made PUBLIC, PRIVATE, or SHARED.
+//? - Reading list RBAC have 4 roles: creator, collaborator, reader, excluded. Users with the role "creator" can fully read, edit, and delete. 
+//?   Users with the role "collaborator" can read or edit (add). Users with the role "reader" can only read. Users with the role "excluded" can do nothing.
+//? - Reading lists default to PRIVATE, which will have a corresponding RBAC so only users with the role "creator" 
+//?   can access the reading list. This means creating a reading list will automatically create a RBAC for the creator.
+//? - Reading lists can be made SHARED, which will behave similarly to PRIVATE, but will also create a RBAC for each user invited.
+//? - Reading lists can be made PUBLIC, which WON'T generate a RBAC. This means that anyone has read access the reading list.
+model ReadingListRBAC {
+  // The role associated this access control rule, as a number for easy querying.
+  // 0: excluded, 1: reader, 2: collaborator, 3: creator
+  role Int
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The ID of the user who this rule applies to
+  user_id         String
+  // The ID of the reading list associated with this rule
+  reading_list_id String
+  // The reading list associated with this rule
+  reading_list    ReadingList? @relation(fields: [reading_list_id], references: [id])
+
+  @@unique([user_id, reading_list_id])
+  @@map("reading_list_rules")
+}
+
+model ReadingListItem {
+  // The order in which the media should be displayed in the reading list. ex: 1
+  display_order Int
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  media_id String
+  media    Media? @relation(fields: [media_id], references: [id])
+
+  reading_list    ReadingList @relation(fields: [reading_list_id], references: [id])
+  reading_list_id String
+
+  @@unique([media_id, reading_list_id])
+  @@map("reading_list_items")
+}
+
 model ReadingList {
   id          String   @id @default(cuid())
   // The name of the reading list. ex: "Summer Reading"
@@ -191,36 +270,27 @@ model ReadingList {
   description String?
   // The date in which the reading list was last updated. ex: "2022-04-20 04:20:69"
   updated_at  DateTime @updatedAt
-  // The media in the reading list.
-  media       Media[]
+  // The visibility of the reading list. ex: "PUBLIC", "PRIVATE" or "SHARED"
+  visibility  String   @default("PRIVATE")
 
-  creating_user    User   @relation(fields: [creating_user_id], references: [id], onDelete: Cascade)
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The access control rules for this reading list
+  access_control   ReadingListRBAC[]
+  // The items in the reading list.
+  items            ReadingListItem[]
+  // The user who created the reading list.
+  creating_user    User              @relation(fields: [creating_user_id], references: [id], onDelete: Cascade)
+  // The id of the user who created the reading list.
   creating_user_id String
-
-  // access_information ReadingListAccess[]
 
   // A user can only have one reading list with the same name
   @@unique([creating_user_id, name])
   @@map("reading_lists")
 }
 
-// Who may access a reading list created by a user
-// model ReadingListAccess {
-// id String @id @default(cuid())
-
-// The user who may access the reading list
-// user    User   @relation(fields: [user_id], references: [id])
-// user_id String
-
-// The reading list that may be accessed
-// reading_list    ReadingList @relation(fields: [reading_list_id], references: [id])
-// reading_list_id String
-
-// @@unique([user_id, reading_list_id])
-// @@map("reading_list_access")
-// }
-
-// TODO: A user is the owning entity for collections and may share collections with other users
 model Collection {
   id          String   @id @default(cuid())
   // The name of the collection. ex: "Spider-Man Comics"
@@ -229,6 +299,11 @@ model Collection {
   description String?
   // The date in which the collection was last updated. ex: "2022-04-20 04:20:69"
   updated_at  DateTime @updatedAt
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
   // The series in the collection.
   // series       Series[]
 
@@ -241,10 +316,17 @@ model ReadProgress {
   // for epubs (maybe)
   page Int
 
-  epubcfi String?
+  percentage_completed Float? // 0.0 - 1.0
+  epubcfi              String?
 
-  is_completed Boolean  @default(false)
-  updated_at   DateTime @updatedAt
+  is_completed Boolean   @default(false)
+  completed_at DateTime?
+
+  updated_at DateTime @updatedAt
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
 
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
@@ -270,12 +352,13 @@ model Job {
   // The total number of tasks completed (i.e. without error/failure)
   completed_task_count Int      @default(0)
   // The time (in milliseconds) to complete the job
-  // TODO: I might have to change this. Initial lookup shows the max integer value for 
-  // sqlite is LARGE (9223372036854775807) which is 106751991167.3 days lol BUT should
-  // do some testing...
   ms_elapsed           BigInt   @default(0)
   // The datetime stamp of when the job completed
   completed_at         DateTime @default(now())
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
 
   logs Log[]
 
@@ -291,6 +374,10 @@ model Log {
   // The datetime in which the log was created. ex: "2022-04-20 04:20:69"
   created_at DateTime @default(now())
 
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
   job    Job?    @relation(fields: [job_id], references: [id], onDelete: Cascade)
   job_id String?
 
@@ -299,8 +386,6 @@ model Log {
 
 model UserPreferences {
   id                     String @id @default(cuid())
-  // Flag to indicate if the user wants to reduce some of the animations when using the build-in client
-  // reduceAnimations   Boolean @default(false)
   // Whether the user wants to see the series in a library as a grid or list
   library_layout_mode    String @default("GRID")
   // Whether the user wants to see the media in a series as a grid or list
@@ -309,8 +394,20 @@ model UserPreferences {
   collection_layout_mode String @default("GRID")
   // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
   locale                 String @default("en")
+  // The theme the user has selected. E.g. 'LIGHT' or 'DARK'. Default is 'LIGHT'
+  app_theme              String @default("LIGHT")
+  // The theme the user has selected for the epub reader. This is different than
+  // app_theme because there will be more options available for the epub reader.
+  // epub_reader_theme      String @default("LIGHT")
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
   // The user which these preferences belong to
-  user                   User?
+  user    User?
+  // The user id which these preferences belong to
+  user_id String? @unique
 
   @@map("user_preferences")
 }
@@ -323,3 +420,6 @@ model ServerPreferences {
 
   @@map("server_preferences")
 }
+
+// https://github.com/prisma/prisma/issues/2219
+// CHORE: once/if above is resolved, use enums

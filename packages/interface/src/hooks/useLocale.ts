@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 export enum Locale {
 	English = 'en',
 	French = 'fr',
+	Spanish = 'es',
 }
 
 export type LocaleSelectOption = {
@@ -13,6 +14,7 @@ export type LocaleSelectOption = {
 	value: Locale
 }
 
+// TODO: remove in favor of useLocaleContext
 export function useLocale() {
 	// TODO: update DB on changes
 	const { userPreferences, setUserPreferences } = useUserStore((store) => ({

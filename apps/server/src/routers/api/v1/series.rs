@@ -20,7 +20,7 @@ use stump_core::{
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,
-		series::{self, WhereParam},
+		series::{self, OrderByParam, WhereParam},
 	},
 };
 use tracing::{error, trace};
@@ -40,7 +40,10 @@ use super::library::apply_library_filters;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/series", get(get_series))
-		.route("/series/recently-added", get(get_recently_added_series))
+		.route(
+			"/series/recently-added",
+			get(get_recently_added_series_handler),
+		)
 		.nest(
 			"/series/:id",
 			Router::new()
@@ -94,61 +97,92 @@ async fn get_series(
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+	let pagination_cloned = pagination.clone();
+
+	trace!(?filters, ?ordering, ?pagination, "get_series");
 
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
 	let is_unpaged = pagination.is_unpaged();
+	let order_by: OrderByParam = ordering.try_into()?;
+
 	let load_media = relation_query.load_media.unwrap_or(false);
-	let order_by = ordering.try_into()?;
+	let count_media = relation_query.count_media.unwrap_or(false);
 
 	let where_conditions = apply_series_filters(filters);
-	let action = db.series();
-	let action = action.find_many(where_conditions.clone());
-	let mut query = if load_media {
-		action.with(
-			series::media::fetch(vec![])
-				.with(media::read_progresses::fetch(vec![
-					read_progress::user_id::equals(user_id),
-				]))
-				.order_by(order_by),
-		)
-	} else {
-		action
-	};
 
-	if !is_unpaged {
-		match pagination.clone() {
-			Pagination::Page(page_query) => {
-				let (skip, take) = page_query.get_skip_take();
-				query = query.skip(skip).take(take);
-			},
-			Pagination::Cursor(cursor_query) => {
-				if let Some(cursor) = cursor_query.cursor {
-					query = query.cursor(series::id::equals(cursor)).skip(1)
+	// series, total series count
+	let (series, series_count) = db
+		._transaction()
+		.run(|client| async move {
+			let mut query = db.series().find_many(where_conditions.clone());
+			if load_media {
+				query = query.with(series::media::fetch(vec![]).with(
+					media::read_progresses::fetch(vec![read_progress::user_id::equals(
+						user_id,
+					)]),
+				));
+			}
+
+			if !is_unpaged {
+				match pagination_cloned {
+					Pagination::Page(page_query) => {
+						let (skip, take) = page_query.get_skip_take();
+						query = query.skip(skip).take(take);
+					},
+					Pagination::Cursor(cursor_query) => {
+						if let Some(cursor) = cursor_query.cursor {
+							query = query.cursor(series::id::equals(cursor)).skip(1)
+						}
+						if let Some(limit) = cursor_query.limit {
+							query = query.take(limit)
+						}
+					},
+					_ => unreachable!(),
 				}
-				if let Some(limit) = cursor_query.limit {
-					query = query.take(limit)
-				}
-			},
-			_ => unreachable!(),
-		}
+			}
+
+			let series = query.order_by(order_by).exec().await?;
+			// If we don't load the media relations, then the media_count field of Series
+			// will not be automatically populated. So, if the request has the count_media
+			// flag set, an additional query is needed to get the media counts.
+			let series: Vec<Series> = if count_media && !load_media {
+				let series_ids = series.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
+				let media_counts = client.series_media_count(series_ids).await?;
+				series
+					.into_iter()
+					.map(|s| {
+						let series_media_count = media_counts.get(&s.id).copied();
+						if let Some(count) = series_media_count {
+							Series::from((s, count))
+						} else {
+							Series::from(s)
+						}
+					})
+					.collect()
+			} else {
+				series.into_iter().map(Series::from).collect()
+			};
+
+			if is_unpaged {
+				return Ok((series, None));
+			}
+
+			client
+				.series()
+				.count(where_conditions.clone())
+				.exec()
+				.await
+				.map(|count| (series, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = series_count {
+		return Ok(Json(Pageable::from((series, count, pagination))));
 	}
 
-	let series = query
-		.exec()
-		.await?
-		.into_iter()
-		.map(|s| s.into())
-		.collect::<Vec<Series>>();
-
-	if is_unpaged {
-		return Ok(Json(series.into()));
-	}
-
-	let series_count = db.series().count(where_conditions).exec().await?;
-
-	Ok(Json((series, series_count, pagination).into()))
+	Ok(Json(Pageable::from(series)))
 }
 
 #[utoipa::path(
@@ -214,6 +248,10 @@ async fn get_series_by_id(
 	Ok(Json(series.unwrap().into()))
 }
 
+// async fn get_recently_added_series() {
+// 	unimplemented!()
+// }
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/recently-added",
@@ -228,7 +266,7 @@ async fn get_series_by_id(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-async fn get_recently_added_series(
+async fn get_recently_added_series_handler(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	session: ReadableSession,
@@ -243,6 +281,8 @@ async fn get_recently_added_series(
 	let page_params = pagination.0.page_params();
 	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
 
+	// TODO: don't use DAO just create separate function `get_recently_added_series` and make
+	// this one `get_recently_added_series_handler`.
 	let recently_added_series = series_dao
 		.get_recently_added_series_page(&viewer_id, page_params)
 		.await?;
@@ -322,6 +362,14 @@ async fn get_series_media(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
+	let pagination = pagination_query.0.get();
+	let pagination_cloned = pagination.clone();
+	let is_unpaged = pagination.is_unpaged();
+
+	trace!(?ordering, ?pagination, "get_series_media");
+
+	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
+
 	let series_exists = db
 		.series()
 		.find_first(vec![series::id::equals(id.clone())])
@@ -336,11 +384,6 @@ async fn get_series_media(
 		)));
 	}
 
-	let pagination = pagination_query.0.get();
-	let is_unpaged = pagination.is_unpaged();
-	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
-
-	let pagination_cloned = pagination.clone();
 	let (media, count) = db
 		._transaction()
 		.run(|client| async move {
@@ -395,6 +438,8 @@ async fn get_series_media(
 		})
 		.await?;
 
+	// trace!(?media, "got media");
+
 	if let Some(count) = count {
 		return Ok(Json(Pageable::from((media, count, pagination))));
 	}
@@ -416,9 +461,6 @@ async fn get_series_media(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-// TODO: Should I support epub here too?? Not sure, I have separate routes for epub,
-// but until I actually implement progress tracking for epub I think think I can really
-// give a hard answer on what is best...
 /// Get the next media in a series, based on the read progress for the requesting user.
 /// Stump will return the first book in the series without progress, or return the first
 /// with partial progress. E.g. if a user has read pages 32/32 of book 3, then book 4 is
@@ -431,7 +473,7 @@ async fn get_next_in_series(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let series = db
+	let result = db
 		.series()
 		.find_unique(series::id::equals(id.clone()))
 		.with(
@@ -444,46 +486,44 @@ async fn get_next_in_series(
 		.exec()
 		.await?;
 
-	if series.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} no found.",
-			id
-		)));
-	}
+	if let Some(series) = result {
+		let media = series.media().map_err(|e| {
+			error!(error = ?e, "Failed to load media for series");
+			e
+		})?;
 
-	let series = series.unwrap();
-
-	let media = series.media().map_err(|e| {
-		error!(error = ?e, "Failed to load media for series");
-		e
-	})?;
-
-	Ok(Json(
-		media
+		let next_book = media
 			.iter()
 			.find(|m| {
-				// I don't really know that this is valid... When I load in the
-				// relation, this will NEVER be None. It will default to an empty
-				// vector. But, for safety I guess I will leave this for now.
-				if m.read_progresses.is_none() {
-					return true;
-				}
-
-				let progresses = m.read_progresses.as_ref().unwrap();
-
-				// No progress means it is up next (for this user)!
-				if progresses.is_empty() {
-					true
+				if let Some(progress_list) = m.read_progresses.as_ref() {
+					// No progress means it is up next (for this user)!
+					if progress_list.is_empty() {
+						true
+					} else {
+						// Note: this should never really exceed len == 1, but :shrug:
+						progress_list
+							.get(0)
+							.map(|rp| {
+								!rp.is_completed
+									|| rp
+										.percentage_completed
+										.map(|pc| pc <= 1.0)
+										.unwrap_or(false) || (rp.page < m.pages && rp.page > 0)
+							})
+							.unwrap_or(true)
+					}
 				} else {
-					// Note: this should never really exceed len == 1, but :shrug:
-					let progress = progresses.get(0).unwrap();
-
-					progress.page < m.pages && progress.page > 0
+					// case unread should be first in queue
+					true
 				}
 			})
-			.or_else(|| media.get(0))
-			.map(|data| data.to_owned().into()),
-	))
-}
+			.or_else(|| media.get(0));
 
-// async fn download_series()
+		Ok(Json(next_book.map(|data| Media::from(data.to_owned()))))
+	} else {
+		Err(ApiError::NotFound(format!(
+			"Series with id {} no found.",
+			id
+		)))
+	}
+}

@@ -1,36 +1,28 @@
-import { Button, useColorMode } from '@chakra-ui/react'
+import { useTheme } from '@stump/client'
+import { IconButton, ToolTip } from '@stump/components'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Moon, Sun } from 'phosphor-react'
-
-import ToolTip from '../../ui/ToolTip'
+import { Moon, Sun } from 'lucide-react'
 
 export default function ThemeToggle() {
-	const { colorMode, toggleColorMode } = useColorMode()
+	const { isDark, toggleTheme } = useTheme()
+
+	const iconSize = 'w-4 h-4'
 
 	return (
 		<div>
 			<AnimatePresence mode="wait" initial={false}>
-				<ToolTip label="Toggle theme">
-					<Button
-						variant="ghost"
-						cursor={'pointer'}
-						p={0.5}
-						size="sm"
-						_focus={{
-							boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
-						}}
-						onClick={toggleColorMode}
-					>
+				<ToolTip content="Toggle theme">
+					<IconButton variant="ghost" size="sm" onClick={toggleTheme}>
 						<motion.span
-							key={colorMode === 'dark' ? 'moon' : 'sun'}
+							key={isDark ? 'moon' : 'sun'}
 							initial={{ opacity: 0, y: -30 }}
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: 30 }}
-							transition={{ duration: 0.2 }}
+							transition={{ duration: 0.3, ease: 'easeIn' }}
 						>
-							{colorMode === 'dark' ? <Moon /> : <Sun />}
+							{isDark ? <Moon className={iconSize} /> : <Sun className={iconSize} />}
 						</motion.span>
-					</Button>
+					</IconButton>
 				</ToolTip>
 			</AnimatePresence>
 		</div>

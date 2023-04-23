@@ -1,3 +1,6 @@
+// use axum::middleware::from_extractor_with_state;
+use axum::middleware::from_extractor_with_state;
+use axum::Router;
 use stump_core::db::models::{
 	LibrariesStats, Library, LibraryOptions, LibraryPattern, LibraryScanMode, LogLevel,
 	Media, ReadProgress, ReadingList, Series, Tag, User, UserPreferences,
@@ -14,7 +17,10 @@ use stump_core::prelude::{
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+use crate::config::state::AppState;
 use crate::errors::ApiError;
+use crate::middleware::auth::Auth;
+// use crate::middleware::auth::Auth;
 use crate::utils::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesRelation,
@@ -65,7 +71,7 @@ use super::api;
         api::v1::reading_list::delete_reading_list_by_id,
         api::v1::series::get_series,
         api::v1::series::get_series_by_id,
-        api::v1::series::get_recently_added_series,
+        api::v1::series::get_recently_added_series_handler,
         api::v1::series::get_series_thumbnail,
         api::v1::series::get_series_media,
         api::v1::tag::get_tags,
@@ -109,6 +115,12 @@ use super::api;
     )
 )]
 struct ApiDoc;
+
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	Router::new()
+		.merge(swagger_ui())
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+}
 
 pub(crate) fn swagger_ui() -> SwaggerUi {
 	SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi())

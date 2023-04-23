@@ -1,0 +1,10 @@
+fileGroups:
+  app:
+    - 'src/**/*'
+
+language: 'typescript'
+
+tasks:
+  storybook:
+    command: 'start-storybook -p 6006'
+    local: true

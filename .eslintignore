@@ -5,3 +5,5 @@ node_modules/
 **/prisma/src/db.ts
 **/prisma-cli/**
 **/dist/**
+**/target/**
+.moon/

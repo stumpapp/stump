@@ -16,3 +16,11 @@ export function listDirectory(
 
 	return API.post('/filesystem', input)
 }
+
+export const filesystemApi = {
+	listDirectory,
+}
+
+export const filesystemQueryKeys: Record<keyof typeof filesystemApi, string> = {
+	listDirectory: 'filesystem.listDirectory',
+}

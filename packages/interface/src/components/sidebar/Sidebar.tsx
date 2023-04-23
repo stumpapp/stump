@@ -1,28 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// TODO: remove this when I have time, fix the icon types
-import {
-	Box,
-	Button,
-	HStack,
-	Stack,
-	Text,
-	useColorModeValue,
-	useDisclosure,
-	VStack,
-} from '@chakra-ui/react'
-import { refreshUseLibrary, useLibraries } from '@stump/client'
+import { refreshUseLibrary, useAppProps, useLibraries } from '@stump/client'
+import { Button, ButtonOrLink, cn, Heading, Spacer, useBoolean } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
-import { Books, CaretRight, Gear, House } from 'phosphor-react'
+import {
+	ChevronRight,
+	Home,
+	Library as LibraryIcon,
+	List,
+	type LucideProps,
+	Settings,
+} from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { useLocale } from '../../hooks/useLocale'
+import { useLocaleContext } from '../../i18n/context'
 import ApplicationVersion from '../ApplicationVersion'
-import CreateLibraryModal from '../library/CreateLibraryModal'
-import LibraryOptionsMenu from '../library/LibraryOptionsMenu'
 import NavigationButtons from '../topbar/NavigationButtons'
+import LibraryOptionsMenu from './LibraryOptionsMenu'
 import Logout from './Logout'
 import ThemeToggle from './ThemeToggle'
 
@@ -34,68 +29,69 @@ interface NavMenuItemProps extends Library {
 
 interface NavItemProps {
 	name: string
-	icon: React.ReactNode
+	// type should be a component that takes svg props
+	icon: (props: LucideProps) => JSX.Element
 	onClick?: (href: string) => void
 	href?: string
 	items?: NavMenuItemProps[]
 	active?: boolean
 }
 
-function NavMenuItem({ name, items, ...rest }: NavItemProps) {
-	const { isOpen, onToggle } = useDisclosure()
+// TODO: make this NOT library specific.
+function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
+	const { t } = useLocaleContext()
 
-	const activeBgColor = useColorModeValue('gray.50', 'gray.750')
+	const [isOpen, { toggle }] = useBoolean()
+
+	const Icon = rest.icon
 
 	return (
 		<>
-			<HStack
-				as={Button}
-				_focus={{
-					boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
-				}}
-				w="full"
+			<Button
 				variant="ghost"
-				justifyContent="space-between"
-				alignItems="center"
-				onClick={onToggle}
-				p={2}
+				className="flex w-full items-center justify-between"
+				size="lg"
+				onClick={toggle}
+				pressEffect={false}
 			>
-				<div className="flex space-x-2">
-					{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-					{/* @ts-ignore: TODO: fixme */}
-					<rest.icon weight="fill" />
+				<div className="flex items-center space-x-2">
+					<Icon className="h-5 w-5" />
 					<span>{name}</span>
 				</div>
-				<Box p={1} rounded="full">
-					<CaretRight
-						className={clsx(isOpen ? 'rotate-90' : 'rotate-270', 'transition-all duration-100')}
+				<div className="rounded-full p-1">
+					<ChevronRight
+						className={clsx(
+							isOpen ? 'rotate-90' : 'rotate-270',
+							'h-4 w-4 transition-all duration-100',
+						)}
 					/>
-				</Box>
-			</HStack>
+				</div>
+			</Button>
 
 			<AnimatePresence>
 				{isOpen && (
-					<Box w="full" maxH="full">
-						<Box my={2}>
-							<CreateLibraryModal />
-						</Box>
+					<div className="max-h-full w-full">
+						{/* TODO: disabled state looks not disabled */}
+						<ButtonOrLink
+							href="/library/create"
+							disabled={active}
+							className="w-full text-center hover:bg-gray-75"
+							variant="outline"
+							size="md"
+						>
+							{t('sidebar.buttons.createLibrary')}
+						</ButtonOrLink>
 
-						<VStack mt={2} spacing={2} maxH="full" overflow="scroll" className="scrollbar-hide">
+						<div className="mt-2 flex max-h-full flex-col gap-2 overflow-y-scroll scrollbar-hide">
 							{items!.map(({ onHover, active, ...item }) => (
-								<Box
+								<div
 									key={item.id}
-									pl={6}
-									w="full"
-									rounded="md"
-									color={{ _dark: 'gray.200', _light: 'gray.600' }}
-									_hover={{
-										_dark: { bg: 'gray.700', color: 'gray.100' },
-										bg: 'gray.75',
-										color: 'gray.900',
-									}}
-									bg={active ? activeBgColor : undefined}
+									className={cn(
+										'w-full rounded-md text-gray-800 hover:bg-gray-75 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100',
+										{ 'bg-gray-50 dark:bg-gray-750': active },
+									)}
 								>
-									<HStack p={1.5} minH="40px">
+									<div className="flex max-h-[40px] items-center px-4 py-2">
 										<Link
 											to={item.href}
 											className="w-full flex-1 pl-1 text-sm"
@@ -104,11 +100,11 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 											{item.name}
 										</Link>
 										<LibraryOptionsMenu library={item} />
-									</HStack>
-								</Box>
+									</div>
+								</div>
 							))}
-						</VStack>
-					</Box>
+						</div>
+					</div>
 				)}
 			</AnimatePresence>
 		</>
@@ -116,42 +112,53 @@ function NavMenuItem({ name, items, ...rest }: NavItemProps) {
 }
 
 function NavItem({ name, href, active, ...rest }: NavItemProps) {
-	const activeBgColor = useColorModeValue('gray.50', 'gray.750')
+	const Icon = rest.icon
 
 	return (
-		<Button
-			as={Link}
-			_focus={{
-				boxShadow: '0 0 0 3px rgba(196, 130, 89, 0.6);',
-			}}
-			to={href!}
-			w="full"
+		<ButtonOrLink
+			href={href}
+			size="lg"
+			className={clsx('flex w-full justify-start', { 'bg-gray-50 dark:bg-gray-850': active })}
 			variant="ghost"
-			bg={active ? activeBgColor : undefined}
-			textAlign="left"
-			display="flex"
-			p={2}
 		>
-			<div className="flex space-x-2 justify-start w-full">
-				{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-				{/* @ts-ignore: TODO: fixme */}
-				<rest.icon weight="fill" />
+			<div className="flex items-center space-x-2">
+				<Icon className="h-5 w-5" />
 				<span>{name}</span>
 			</div>
-		</Button>
+		</ButtonOrLink>
 	)
 }
 
-export function SidebarContent() {
+export function SidebarHeader() {
+	const isBrowser = useAppProps()?.platform === 'browser'
+
+	return (
+		<div className="flex items-center justify-between px-4">
+			<Link to="/" className="flex shrink-0 items-center justify-start gap-2">
+				<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
+				<Heading variant="gradient" size="xs">
+					Stump
+				</Heading>
+			</Link>
+
+			{!isBrowser && <NavigationButtons />}
+		</div>
+	)
+}
+
+type SidebarContentProps = {
+	isMobileSheet?: boolean
+}
+
+export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 	const location = useLocation()
 	const navigate = useNavigate()
 
-	const { locale, t } = useLocale()
+	const { t } = useLocaleContext()
 	const { libraries } = useLibraries()
 
 	// TODO: I'd like to also highlight the library when viewing an item from it.
 	// e.g. a book from the library, or a book from a series in the library, etc
-	const libraryIsActive = (id: string) => location.pathname.startsWith(`/libraries/${id}`)
 	const linkIsActive = (href?: string) => {
 		if (!href) {
 			return false
@@ -162,53 +169,43 @@ export function SidebarContent() {
 		return location.pathname.startsWith(href)
 	}
 
-	const links: Array<NavItemProps> = useMemo(
-		() => [
-			{ href: '/', icon: House as any, name: t('sidebar.buttons.home') },
+	const links: Array<NavItemProps> = useMemo(() => {
+		const libraryIsActive = (id: string) => location.pathname.startsWith(`/library/${id}`)
+
+		return [
+			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
 			{
-				icon: Books as any,
+				active: location.pathname === 'library/create',
+				icon: LibraryIcon,
 				items: libraries?.map((library) => ({
 					...library,
 					active: libraryIsActive(library.id),
-					href: `/libraries/${library.id}`,
+					href: `/library/${library.id}`,
 					onHover: () => refreshUseLibrary(library.id),
 				})),
 				name: t('sidebar.buttons.libraries'),
 			},
 			{
-				href: '/settings',
-				icon: Gear as any,
-				name: t('sidebar.buttons.settings'),
-				// onHover:  () => queryClient.prefetchQuery([])
+				icon: List,
+				name: 'Reading Lists',
 			},
-		],
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[libraries, locale, location.pathname],
-	)
+			// {
+			// 	icon: LayoutGrid,
+			// 	name: 'Collections',
+			// },
+			{
+				href: '/settings',
+				icon: Settings,
+				name: t('sidebar.buttons.settings'),
+			},
+		]
+	}, [libraries, location.pathname, t])
 
 	return (
 		<>
-			<HStack px={2} justifyContent="space-between" alignItems="center">
-				<HStack as={Link} to="/" flexShrink={0} justifyContent="start" alignItems="center">
-					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
-					<Text
-						bgGradient="linear(to-r, brand.600, brand.500)"
-						bgClip="text"
-						fontSize="md"
-						fontWeight="bold"
-						_dark={{
-							bgGradient: 'linear(to-r, brand.600, brand.400)',
-						}}
-					>
-						Stump
-					</Text>
-				</HStack>
+			{!isMobileSheet && <SidebarHeader />}
 
-				<NavigationButtons />
-			</HStack>
-
-			<VStack spacing={2} flexGrow={1} maxH="full" overflow="hidden" p={1}>
+			<div className="flex max-h-full grow flex-col gap-2 overflow-hidden p-1">
 				{links.map((link) =>
 					link.items ? (
 						<NavMenuItem key={link.name} {...link} onClick={(href) => navigate(href)} />
@@ -216,44 +213,28 @@ export function SidebarContent() {
 						<NavItem key={link.name} {...link} active={linkIsActive(link.href)} />
 					),
 				)}
-			</VStack>
+			</div>
 
-			<HStack as="footer" px={2} alignItems="center" justifyContent="space-between">
+			<Spacer />
+
+			<footer className="flex items-center justify-between px-2">
 				<ApplicationVersion />
 
-				<HStack>
+				<div className="flex items-center gap-2">
 					<Logout />
 					<ThemeToggle />
-				</HStack>
-			</HStack>
+				</div>
+			</footer>
 		</>
 	)
 }
 
 export default function Sidebar() {
 	return (
-		<Box
-			display={{ base: 'none', md: 'initial' }}
-			minH="100%"
-			bg={useColorModeValue('gray.100', 'gray.900')}
-			as="aside"
-		>
-			<Stack
-				display="flex"
-				flexShrink={0}
-				py={4}
-				bg={useColorModeValue('white', 'gray.800')}
-				borderRight="1px"
-				borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-				w={56}
-				h="full"
-				px={2}
-				zIndex={10}
-				spacing={4}
-				className="relative"
-			>
+		<aside className="hidden min-h-full md:inline-block">
+			<div className="relative z-10 flex h-full w-56 shrink-0 flex-col gap-4 border-r border-gray-75 px-2 py-4 dark:border-gray-900 dark:bg-gray-1000">
 				<SidebarContent />
-			</Stack>
-		</Box>
+			</div>
+		</aside>
 	)
 }

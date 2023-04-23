@@ -9,7 +9,7 @@ export default function LazyImage({ src, className, ...props }: Props) {
 
 	return (
 		<>
-			<img className={clsx({ hidden: isLoaded }, 'bg-transparent h-full', className)} {...props} />
+			<img className={clsx({ hidden: isLoaded }, 'h-full bg-transparent', className)} {...props} />
 
 			<img
 				src={src}

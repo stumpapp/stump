@@ -20,3 +20,17 @@ export function register(payload: LoginOrRegisterArgs) {
 export function logout(): Promise<ApiResult<never>> {
 	return API.post('/auth/logout')
 }
+
+export const authApi = {
+	login,
+	logout,
+	me,
+	register,
+}
+
+export const authQueryKeys: Record<keyof typeof authApi, string> = {
+	login: 'auth.login',
+	logout: 'auth.logout',
+	me: 'auth.me',
+	register: 'auth.register',
+}

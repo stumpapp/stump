@@ -1,5 +1,24 @@
-export * from './client'
+export {
+	type CursorQueryCursorOptions,
+	type CursorQueryOptions,
+	type InfiniteQueryOptions,
+	type MutationOptions,
+	type PageQueryFunction,
+	type PageQueryOptions,
+	queryClient,
+	QueryClientProvider,
+	type QueryOptions,
+	useCursorQuery,
+	type UseCursorQueryFunction,
+	useInfiniteQuery,
+	useIsFetching,
+	useMutation,
+	usePageQuery,
+	useQuery,
+} from './client'
 export * from './context'
 export * from './hooks'
-export * from './Provider'
+export { core_event_triggers, invalidateQueries } from './invalidate'
+export { JobContextProvider, StumpClientContextProvider } from './Provider'
+export * from './queries'
 export * from './stores'

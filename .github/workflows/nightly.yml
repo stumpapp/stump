@@ -27,6 +27,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # FIXME: vars.SUPPORTED_PR_DOCKER_PLATFORMS and vars.SUPPORTED_DOCKER_PLATFORMS
+      # suddenly doesn't work anymore??? super annoying...
       # On PRs, we will only load the image into docker for the quickest platform
       # (i.e. linux/amd64). This is mostly a smoke test, just rather ignorant verification
       # that the image can be built. On pushes, we will actually build and push for
@@ -37,9 +39,9 @@ jobs:
           echo "PUSH=${{ github.event_name == 'push' }}" >> $GITHUB_ENV
 
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            echo "PLATFORMS=${{ vars.SUPPORTED_PR_DOCKER_PLATFORMS }}" >> $GITHUB_ENV
+            echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
           else
-            echo "PLATFORMS=${{ vars.SUPPORTED_DOCKER_PLATFORMS }}" >> $GITHUB_ENV
+            echo "PLATFORMS=linux/arm64/v8,linux/amd64" >> $GITHUB_ENV
           fi
 
       - name: Setup and build docker image

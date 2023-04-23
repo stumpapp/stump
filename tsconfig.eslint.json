@@ -6,7 +6,8 @@
 		"crates/**/*",
 		"packages/**/*",
 		"**/.eslintrc.js",
-		"**/*.config.js"
+		"**/*.config.js",
+		"prettier.config.js"
 	],
 	"exclude": [
 		"**/.cache/**/*",

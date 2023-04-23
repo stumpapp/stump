@@ -1,12 +1,11 @@
-import { Box, Flex, useColorModeValue } from '@chakra-ui/react'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import React, { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import CommandPalette from './components/CommandPalette'
+// import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
 import JobOverlay from './components/jobs/JobOverlay'
-import Lazy from './components/Lazy'
+import RouteLoadingIndicator from './components/RouteLoadingIndicator'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
 import Sidebar from './components/sidebar/Sidebar'
 import TopBar from './components/topbar/TopBar'
@@ -19,11 +18,8 @@ export function AppLayout() {
 	const location = useLocation()
 
 	const hideSidebar = useMemo(() => {
-		// hide sidebar when on /books/:id/pages/:page or /epub/
-		// TODO: replace with single regex, I am lazy rn
-		return (
-			location.pathname.match(/\/books\/.+\/pages\/.+/) || location.pathname.match(/\/epub\/.+/)
-		)
+		// hide sidebar when on /books/:id/page/:page or book/:id/epub-reader
+		return location.pathname.match(/\/book\/.+\/(reader|epub-reader)/)
 	}, [location])
 
 	useCoreEventHandler()
@@ -45,50 +41,37 @@ export function AppLayout() {
 		onSuccess: setUser,
 	})
 
-	const mainColor = useColorModeValue('gray.75', 'gray.900')
-
+	// TODO: I should def throw error, but something about throwing error causes
+	// an async error
 	// @ts-expect-error: FIXME: type error no good >:(
-	if (error?.code === 'ERR_NETWORK' && appProps?.platform !== 'browser') {
+	const isNetworkError = error?.code === 'ERR_NETWORK'
+	if (isNetworkError) {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
 	}
 
 	if (!storeUser) {
 		return null
-		// throw new Error('User was not expected to be null')
 	}
 
 	return (
 		<AppContext.Provider
 			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
 		>
-			<React.Suspense fallback={<Lazy />}>
-				<CommandPalette />
-				<Flex
-					// className={clsx({ 'overflow-hidden': appProps?.platform !== 'browser' })}
-					w="full"
-					h="full"
-					onContextMenu={() => {
-						// TODO: uncomment once I add custom menu on Tauri side
-						// if (appProps?.platform != 'browser') {
-						// 	e.preventDefault();
-						// 	return false;
-						// }
-
-						return true
-					}}
-				>
+			<Suspense fallback={<RouteLoadingIndicator />}>
+				{!hideSidebar && <TopBar />}
+				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
-					<Box as="main" w="full" h="full" bg={mainColor}>
-						{!hideSidebar && <TopBar />}
-						<React.Suspense fallback={<Lazy />}>
+					<main className="min-h-full w-full bg-white dark:bg-gray-975">
+						{/* <BackgroundFetchIndicator /> */}
+						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />
-						</React.Suspense>
-					</Box>
-				</Flex>
+						</Suspense>
+					</main>
+				</div>
 
 				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
 				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
-			</React.Suspense>
+			</Suspense>
 		</AppContext.Provider>
 	)
 }

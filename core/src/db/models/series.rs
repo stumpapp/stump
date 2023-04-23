@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::{prelude::enums::FileStatus, prisma};
 
-use super::{library::Library, media::Media, tag::Tag};
+use super::{library::Library, media::Media, tag::Tag, Cursorable};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Series {
@@ -52,6 +52,12 @@ impl Series {
 
 	pub fn set_media_count(&mut self, count: i64) {
 		self.media_count = Some(count);
+	}
+}
+
+impl Cursorable for Series {
+	fn cursor(&self) -> String {
+		self.id.clone()
 	}
 }
 

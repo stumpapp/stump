@@ -6,13 +6,12 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::Direction;
+use prisma_client_rust::{and, or, Direction};
 use serde::Deserialize;
 use stump_core::{
 	config::get_config_dir,
 	db::{
 		models::{Media, ReadProgress},
-		utils::PrismaCountTrait,
 		Dao, MediaDao, MediaDaoImpl,
 	},
 	fs::{image, media_file},
@@ -29,7 +28,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user,
+		decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
 		FilterableQuery, MediaFilter,
 	},
@@ -68,12 +67,57 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	if !filters.extension.is_empty() {
 		_where.push(media::extension::in_vec(filters.extension));
 	}
+	if !filters.path.is_empty() {
+		let decoded_paths = decode_path_filter(filters.path);
+		_where.push(media::path::in_vec(decoded_paths));
+	}
 
 	if let Some(series_filters) = filters.series {
 		_where.push(media::series::is(apply_series_filters(series_filters)));
 	}
 
 	_where
+}
+
+// TODO: move this to core?
+pub(crate) fn apply_pagination<'a>(
+	query: media::FindMany<'a>,
+	pagination: &Pagination,
+) -> media::FindMany<'a> {
+	match pagination {
+		Pagination::Page(page_query) => {
+			let (skip, take) = page_query.get_skip_take();
+			query.skip(skip).take(take)
+		},
+		Pagination::Cursor(cursor_params) => {
+			let mut cursor_query = query;
+			if let Some(cursor) = cursor_params.cursor.as_deref() {
+				cursor_query = cursor_query
+					.cursor(media::id::equals(cursor.to_string()))
+					.skip(1);
+			}
+			if let Some(limit) = cursor_params.limit {
+				cursor_query = cursor_query.take(limit);
+			}
+			cursor_query
+		},
+		_ => query,
+	}
+}
+
+/// Generates a single where condition for a media progress query to enforce media which
+/// is currently in progress
+pub(crate) fn apply_in_progress_filter_for_user(
+	user_id: String,
+) -> read_progress::WhereParam {
+	and![
+		read_progress::user_id::equals(user_id),
+		or![
+			read_progress::page::gt(0),
+			read_progress::epubcfi::not(None),
+			read_progress::is_completed::equals(false)
+		]
+	]
 }
 
 #[utoipa::path(
@@ -175,7 +219,7 @@ async fn get_media(
 	path = "/api/v1/media/duplicates",
 	tag = "media",
 	params(
-		("pagination" = Option<PageQuery>, Query, description = "Pagination options")
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched duplicate media", body = PageableMedia),
@@ -226,17 +270,68 @@ async fn get_duplicate_media(
 async fn get_in_progress_media(
 	State(ctx): State<AppState>,
 	session: ReadableSession,
-	pagination: Query<PageQuery>,
+	pagination_query: Query<PaginationQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let user_id = get_session_user(&session)?.id;
-	let media_dao = MediaDaoImpl::new(ctx.db.clone());
-	let page_params = pagination.0.page_params();
+	let pagination = pagination_query.0.get();
 
-	Ok(Json(
-		media_dao
-			.get_in_progress_media(&user_id, page_params)
-			.await?,
-	))
+	let pagination_cloned = pagination.clone();
+	let is_unpaged = pagination.is_unpaged();
+
+	let read_progress_filter = and![
+		read_progress::user_id::equals(user_id.clone()),
+		read_progress::is_completed::equals(false)
+	];
+
+	let (media, count) = ctx
+		.db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(vec![media::read_progresses::some(vec![
+					read_progress_filter.clone(),
+				])])
+				.with(media::read_progresses::fetch(vec![
+					read_progress_filter.clone()
+				]))
+				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
+				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
+				// I think this just means whenever progress updates I should update the media
+				// updated_at field, but that's a bit annoying TBH...
+				.order_by(media::updated_at::order(Direction::Desc));
+
+			if !is_unpaged {
+				query = apply_pagination(query, &pagination_cloned);
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(vec![media::read_progresses::some(vec![
+					read_progress_filter,
+				])])
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
+	}
+
+	Ok(Json(Pageable::from(media)))
 }
 
 #[utoipa::path(
@@ -256,38 +351,64 @@ async fn get_in_progress_media(
 /// Get all media which was added to the library in descending order of when it
 /// was added.
 async fn get_recently_added_media(
+	filter_query: Query<FilterableQuery<MediaFilter>>,
+	pagination_query: Query<PaginationQuery>,
+	session: ReadableSession,
 	State(ctx): State<AppState>,
-	pagination: Query<PageQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
 
-	let unpaged = pagination.page.is_none();
-	let page_params = pagination.0.page_params();
+	let FilterableQuery { filters, .. } = filter_query.0.get();
+	let pagination = pagination_query.0.get();
 
-	let mut query = db
-		.media()
-		.find_many(vec![])
-		.order_by(media::created_at::order(Direction::Desc));
+	trace!(?filters, ?pagination, "get_recently_added_media");
 
-	if !unpaged {
-		let (skip, take) = page_params.get_skip_take();
-		query = query.skip(skip).take(take);
+	let is_unpaged = pagination.is_unpaged();
+
+	let pagination_cloned = pagination.clone();
+	let where_conditions = apply_media_filters(filters);
+
+	let (media, count) = db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client
+				.media()
+				.find_many(where_conditions.clone())
+				.with(media::read_progresses::fetch(vec![
+					read_progress::user_id::equals(user_id),
+				]))
+				.order_by(media::created_at::order(Direction::Desc));
+
+			if !is_unpaged {
+				query = apply_pagination(query, &pagination_cloned);
+			}
+
+			let media = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(|m| m.into())
+				.collect::<Vec<Media>>();
+
+			if is_unpaged {
+				return Ok((media, None));
+			}
+
+			client
+				.media()
+				.count(where_conditions)
+				.exec()
+				.await
+				.map(|count| (media, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((media, count, pagination))));
 	}
 
-	let media = query
-		.exec()
-		.await?
-		.into_iter()
-		.map(|m| m.into())
-		.collect::<Vec<Media>>();
-
-	if unpaged {
-		return Ok(Json(Pageable::from(media)));
-	}
-
-	let count = db.media_count().await?;
-
-	Ok(Json(Pageable::from((media, count, page_params))))
+	Ok(Json(Pageable::from(media)))
 }
 
 #[derive(Deserialize)]
@@ -507,10 +628,8 @@ async fn get_media_page(
 async fn get_media_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
 
 	let webp_path = get_config_dir()
 		.join("thumbnails")
@@ -521,25 +640,20 @@ async fn get_media_thumbnail(
 		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
 	}
 
-	let book = db
+	let result = db
 		.media()
 		.find_unique(media::id::equals(id.clone()))
-		.with(media::read_progresses::fetch(vec![
-			read_progress::user_id::equals(user_id),
-		]))
 		.exec()
 		.await?;
 
-	if book.is_none() {
-		return Err(ApiError::NotFound(format!(
+	if let Some(book) = result {
+		Ok(media_file::get_page(book.path.as_str(), 1)?.into())
+	} else {
+		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
-		)));
+		)))
 	}
-
-	let book = book.unwrap();
-
-	Ok(media_file::get_page(book.path.as_str(), 1)?.into())
 }
 
 #[utoipa::path(

@@ -1,26 +1,21 @@
-import { checkIsClaimed, login, me, register } from '@stump/api'
+import { authApi, authQueryKeys, checkIsClaimed, serverQueryKeys } from '@stump/api'
 import type { User } from '@stump/types'
 import { useEffect, useState } from 'react'
 
-import { queryClient, useMutation, useQuery } from '../client'
-import { ClientQueryParams, QueryCallbacks } from '.'
+import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
 
-export interface AuthQueryOptions extends QueryCallbacks<User> {
-	disabled?: boolean
-	enabled?: boolean
-}
-
-export function useAuthQuery(options: AuthQueryOptions = {}) {
-	const { data, error, isLoading, isFetching, isRefetching } = useQuery(['getViewer'], me, {
-		enabled: options?.enabled,
-		onError(err) {
-			options.onError?.(err)
+export function useAuthQuery(options: QueryOptions<User> = {}) {
+	const { data, error, isLoading, isFetching, isRefetching } = useQuery(
+		['getViewer'],
+		async () => {
+			const { data } = await authApi.me()
+			return data
 		},
-		onSuccess(res) {
-			options.onSuccess?.(res.data)
+		{
+			useErrorBoundary: false,
+			...options,
 		},
-		useErrorBoundary: false,
-	})
+	)
 
 	return {
 		error,
@@ -29,11 +24,16 @@ export function useAuthQuery(options: AuthQueryOptions = {}) {
 	}
 }
 
-export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<User>) {
+type UseLoginOrRegisterOptions = {
+	onSuccess?: (data?: User | null | undefined) => void
+	onError?: (data: unknown) => void
+}
+
+export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOptions) {
 	const [isClaimed, setIsClaimed] = useState(true)
 
 	const { data: claimCheck, isLoading: isCheckingClaimed } = useQuery(
-		['checkIsClaimed'],
+		[serverQueryKeys.checkIsClaimed],
 		checkIsClaimed,
 	)
 
@@ -43,24 +43,27 @@ export function useLoginOrRegister({ onSuccess, onError }: ClientQueryParams<Use
 		}
 	}, [claimCheck])
 
-	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation(['loginUser'], login, {
-		onError: (err) => {
-			onError?.(err)
+	const { isLoading: isLoggingIn, mutateAsync: loginUser } = useMutation(
+		['loginUser'],
+		authApi.login,
+		{
+			onError: (err) => {
+				onError?.(err)
+			},
+			onSuccess: (res) => {
+				if (!res.data) {
+					onError?.(res)
+				} else {
+					queryClient.invalidateQueries(['getLibraries'])
+					onSuccess?.(res.data)
+				}
+			},
 		},
-		onSuccess: (res) => {
-			if (!res.data) {
-				onError?.(res)
-			} else {
-				queryClient.invalidateQueries(['getLibraries'])
-
-				onSuccess?.(res.data)
-			}
-		},
-	})
+	)
 
 	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(
-		['registerUser'],
-		register,
+		[authQueryKeys.register],
+		authApi.register,
 	)
 
 	return {

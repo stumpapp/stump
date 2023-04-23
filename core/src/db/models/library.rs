@@ -4,9 +4,23 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma;
+use crate::prisma::{self, library};
 
-use super::{series::Series, tag::Tag};
+use super::{series::Series, tag::Tag, Cursorable};
+
+//////////////////////////////////////////////
+//////////////// PRISMA MACROS ///////////////
+//////////////////////////////////////////////
+
+library::include!(library_series_ids_media_ids_include {
+	series: include {
+		media: select { id }
+	}
+});
+
+///////////////////////////////////////////////
+//////////////////// MODELS ///////////////////
+///////////////////////////////////////////////
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Library {
@@ -27,6 +41,12 @@ pub struct Library {
 	pub tags: Option<Vec<Tag>>,
 	/// The options of the library. Will be Default only if the relation is not loaded.
 	pub library_options: LibraryOptions,
+}
+
+impl Cursorable for Library {
+	fn cursor(&self) -> String {
+		self.id.clone()
+	}
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Type, ToSchema)]
@@ -153,6 +173,10 @@ pub struct LibrariesStats {
 	book_count: u64,
 	total_bytes: u64,
 }
+
+///////////////////////////////////////////////
+////////////////// CONVERSIONS ////////////////
+///////////////////////////////////////////////
 
 impl From<prisma::library_options::Data> for LibraryOptions {
 	fn from(data: prisma::library_options::Data) -> LibraryOptions {

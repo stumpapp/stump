@@ -5,6 +5,7 @@
 		"strict": true,
 		"allowJs": true,
 		"moduleResolution": "nodenext",
+		"verbatimModuleSyntax": false,
 		"target": "es2022",
 		"composite": true,
 		"declaration": true,

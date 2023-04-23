@@ -1,16 +1,16 @@
 {
-  "name": "@stump/core",
-  "version": "0.0.0",
-  "description": "",
-  "keywords": [],
-  "license": "MIT",
-  "scripts": {
-    "prisma": "cargo prisma",
-    "setup": "cargo prisma generate",
-    "build": "cargo build --release",
-    "fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
-    "typegen": "cargo test --package stump_core --lib -- types::tests::codegen --ignored",
-    "codegen": "pnpm prisma generate && pnpm typegen",
-    "integration-tests": "cargo integration-tests"
-  }
+	"name": "@stump/core",
+	"version": "0.0.0",
+	"description": "",
+	"keywords": [],
+	"license": "MIT",
+	"scripts": {
+		"prisma": "cargo prisma",
+		"setup": "cargo prisma generate",
+		"build": "cargo build --release",
+		"fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
+		"typegen": "cargo test --package stump_core --lib -- types::tests::codegen --ignored",
+		"codegen": "pnpm prisma generate && pnpm typegen",
+		"integration-tests": "cargo integration-tests"
+	}
 }

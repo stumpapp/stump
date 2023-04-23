@@ -1,35 +1,22 @@
-import {
-	Checkbox,
-	Flex,
-	HStack,
-	Modal,
-	ModalBody,
-	ModalContent,
-	ModalFooter,
-	ModalHeader,
-	ModalOverlay,
-	Stack,
-	Text,
-	useBoolean,
-	useDisclosure,
-} from '@chakra-ui/react'
 import { useDirectoryListing } from '@stump/client'
-import { ArrowLeft, Folder, FolderNotch } from 'phosphor-react'
+import { Button, CheckBox, Dialog, Input, Text, useBoolean } from '@stump/components'
+import { ArrowLeft, Folder } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 
-import Button, { ModalCloseButton } from '../ui/Button'
-import Input from '../ui/Input'
-import ToolTip from '../ui/ToolTip'
-
 interface Props {
+	isOpen: boolean
+	onClose(): void
 	startingPath?: string
-	onUpdate(path: string | null): void
+	onPathChange(path: string | null): void
 }
 
-export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) {
-	const { isOpen, onOpen, onClose } = useDisclosure()
-
+export default function DirectoryPickerModal({
+	isOpen,
+	onClose,
+	startingPath,
+	onPathChange,
+}: Props) {
 	const [showHidden, { toggle }] = useBoolean(false)
 
 	// FIXME: This component needs to render a *virtual* list AND pass a page param as the user scrolls
@@ -41,9 +28,9 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 		// TODO: page
 	})
 
-	function handleUpdate() {
+	function handleConfirm() {
 		if (!errorMessage) {
-			onUpdate(path)
+			onPathChange(path)
 			onClose()
 		}
 	}
@@ -62,107 +49,86 @@ export default function DirectoryPickerModal({ startingPath, onUpdate }: Props) 
 		return directories.filter((d) => !d.name.startsWith('.'))
 	}, [directories, showHidden])
 
+	const handleOpenChange = (nowOpen: boolean) => {
+		if (!nowOpen) {
+			onClose()
+		}
+	}
+
 	return (
-		<>
-			<ToolTip label="Select folder">
-				<Folder onClick={onOpen} />
-			</ToolTip>
+		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
+			<Dialog.Content size="md">
+				<Dialog.Header>
+					<Dialog.Title>Select a Directory</Dialog.Title>
+					<Dialog.Description>
+						Specify the directory where your library is located.
+					</Dialog.Description>
+					<Dialog.Close onClick={onClose} />
+				</Dialog.Header>
 
-			<Modal isCentered size={{ base: 'sm', sm: 'xl' }} isOpen={isOpen} onClose={onClose}>
-				<ModalOverlay />
-				<ModalContent>
-					<ModalHeader>Select a Directory</ModalHeader>
-					<ModalCloseButton />
-					<ModalBody className="flex flex-col space-y-2" w="full">
-						<HStack>
+				<div className="flex flex-col space-y-2">
+					<div className="flex items-center space-x-2">
+						<Button
+							className="h-8 w-8 p-0 text-sm"
+							disabled={!parent}
+							onClick={goBack}
+							variant="ghost"
+						>
+							<ArrowLeft size="1.25rem" />
+						</Button>
+
+						{/* TODO: error message display */}
+						<Input
+							className="line-clamp-1 h-[37px]"
+							containerClassName="max-w-full"
+							// isInvalid={!!errorMessage}
+							value={path ?? undefined}
+							readOnly
+							variant="primary"
+							// TODO: allow input to be editable
+							// onInputStop={(newPath) => {
+							// 	if (newPath) {
+							// 		onSelect(newPath);
+							// 	}
+							// }}
+						/>
+					</div>
+
+					<div className="flex h-[20rem] flex-col space-y-1 overflow-y-scroll px-1 pt-1 scrollbar-hide">
+						{directoryList.map((directory, i) => (
 							<Button
-								disabled={!parent}
-								onClick={goBack}
-								h="37px"
-								p={0}
-								fontSize="sm"
-								rounded="md"
-								variant="ghost"
+								className="justify-start px-1 py-2"
+								key={directory.path}
+								variant={i % 2 === 0 ? 'ghost' : 'subtle'}
+								onClick={() => onSelect(directory.path)}
 							>
-								<ArrowLeft size="1.25rem" />
+								<div className="flex items-center gap-4">
+									<Folder size="1.25rem" />{' '}
+									<Text className="line-clamp-1" size="sm">
+										{directory.name}
+									</Text>
+								</div>
 							</Button>
+						))}
+					</div>
+				</div>
 
-							<Input
-								isInvalid={!!errorMessage}
-								value={path ?? undefined}
-								readOnly
-								// TODO: allow input to be editable
-								// onInputStop={(newPath) => {
-								// 	if (newPath) {
-								// 		onSelect(newPath);
-								// 	}
-								// }}
-								noOfLines={0}
-								p={2}
-								rounded="md"
-								h="37px"
-							/>
-						</HStack>
+				<Dialog.Footer className="w-full items-center gap-3 sm:justify-between sm:gap-0">
+					<CheckBox
+						variant="primary"
+						label="Show Hidden Directories"
+						checked={showHidden}
+						onClick={toggle}
+					/>
 
-						<Stack
-							pt={1}
-							spacing={1}
-							px={1}
-							className="scrollbar-hide"
-							h="20rem"
-							overflowY="scroll"
-						>
-							{directoryList.map((directory) => (
-								<Button
-									key={directory.path}
-									justifyContent="flex-start"
-									py={2}
-									px={1}
-									variant="ghost"
-									onClick={() => onSelect(directory.path)}
-								>
-									<HStack align="center">
-										<FolderNotch weight="fill" size="1.25rem" /> <Text>{directory.name}</Text>
-									</HStack>
-								</Button>
-							))}
-						</Stack>
-					</ModalBody>
-
-					<ModalFooter>
-						<Flex
-							w="full"
-							// align={{ base: 'flex-start', sm: 'center' }}
-							direction={{ base: 'column', sm: 'row' }}
-						>
-							<Checkbox
-								colorScheme="brand"
-								checked={showHidden}
-								onChange={toggle}
-								mb={{ base: 3, sm: 0 }}
-								w="full"
-							>
-								Show Hidden Directories
-							</Checkbox>
-
-							<HStack w="full" justify="flex-end">
-								<Button mr={3} onClick={onClose} w={{ base: 'full', md: 'auto' }}>
-									Cancel
-								</Button>
-								<Button
-									disabled={!!errorMessage}
-									title="Select the current directory"
-									colorScheme="brand"
-									onClick={handleUpdate}
-									w={{ base: 'full', md: 'auto' }}
-								>
-									Choose
-								</Button>
-							</HStack>
-						</Flex>
-					</ModalFooter>
-				</ModalContent>
-			</Modal>
-		</>
+					<div className="flex w-full flex-col-reverse space-y-2 space-y-reverse sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0">
+						<Button onClick={onClose}>Cancel</Button>
+						<Button variant="primary" onClick={handleConfirm}>
+							Confirm
+						</Button>
+					</div>
+				</Dialog.Footer>
+			</Dialog.Content>
+		</Dialog>
 	)
 }

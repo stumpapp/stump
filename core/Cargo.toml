@@ -14,7 +14,7 @@ futures = "0.3.21"
 async-trait = "0.1.53"
 
 ### MISC UTILS ###
-urlencoding = "2.1.0"
+urlencoding = { workspace = true }
 cuid = "1.2.0"
 xml-rs = "0.8.4" # used for creating XML docs
 serde-xml-rs = "0.5.1" # used for serializing/deserializing xml
@@ -34,7 +34,6 @@ zip = "0.5.13"
 epub = "1.2.4"
 unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--read-bytes" }
 data-encoding = "2.3.2"
-# include_dir = "0.7.2"
 ring = "0.16.20"
 
 ## ERROR HANDLING + LOGGING ###

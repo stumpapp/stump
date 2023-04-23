@@ -1,12 +1,14 @@
 use std::path::Path;
 
 use serde::Serialize;
-use tracing::{debug, warn};
+use tracing::{trace, warn};
+
+// TODO: move this into fs crate
 
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
 #[allow(non_camel_case_types)]
-#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ContentType {
 	XHTML,
 	XML,
@@ -21,6 +23,7 @@ pub enum ContentType {
 	JPEG,
 	WEBP,
 	GIF,
+	#[default]
 	UNKNOWN,
 }
 
@@ -32,14 +35,18 @@ fn temporary_content_workarounds(extension: &str) -> ContentType {
 	ContentType::UNKNOWN
 }
 
+fn infer_mime_from_bytes(bytes: &[u8]) -> Option<String> {
+	infer::get(bytes).map(|infer_type| infer_type.mime_type().to_string())
+}
+
 fn infer_mime(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(result) => {
-			debug!(?path, ?result, "Infer result for path");
+			trace!(?path, ?result, "infered mime");
 			result.map(|infer_type| infer_type.mime_type().to_string())
 		},
 		Err(e) => {
-			warn!(error = ?e, ?path, "Unable to infer mime for file",);
+			trace!(error = ?e, ?path, "infer failed");
 			None
 		},
 	}
@@ -90,6 +97,50 @@ impl ContentType {
 		ContentType::from_path(path)
 	}
 
+	/// Infer the MIME type of a [Vec] of bytes using the [infer] crate. If the MIME type cannot be
+	/// inferred, then the content type is set to [ContentType::UNKNOWN].
+	///
+	/// ### Example
+	/// ```rust
+	/// use stump_core::prelude::server::http::ContentType;
+	///
+	/// let buf = [0xFF, 0xD8, 0xFF, 0xAA];
+	/// let content_type = ContentType::from_bytes(&buf);
+	/// assert_eq!(content_type, ContentType::JPEG);
+	/// ```
+	pub fn from_bytes(bytes: &[u8]) -> ContentType {
+		infer_mime_from_bytes(bytes)
+			.map(|mime| ContentType::from(mime.as_str()))
+			.unwrap_or_default()
+	}
+
+	/// Infer the MIME type of a [Vec] of bytes using the [infer] crate. If the MIME type cannot be
+	/// inferred, then the extension is used to determine the content type.
+	///
+	/// ### Example
+	/// ```rust
+	/// use stump_core::prelude::server::http::ContentType;
+	///
+	/// // This is NOT a valid PNG buff
+	/// let buf = [0xFF, 0xD8, 0xBB, 0xBB];
+	/// let content_type = ContentType::from_bytes_with_fallback(&buf, "png");
+	/// assert_eq!(content_type, ContentType::PNG);
+	/// ```
+	pub fn from_bytes_with_fallback(bytes: &[u8], extension: &str) -> ContentType {
+		infer_mime_from_bytes(bytes)
+			.map(|mime| ContentType::from(mime.as_str()))
+			.unwrap_or_else(|| {
+				// NOTE: I am logging at warn level because inference from bytes is a little more
+				// accurate, so if it fails it may be indicative of a problem.
+				warn!(
+					?bytes,
+					?extension,
+					"failed to infer content type, falling back to extension"
+				);
+				ContentType::from_extension(extension)
+			})
+	}
+
 	/// Infer the MIME type of a [Path] using the [infer] crate. If the MIME type cannot be inferred,
 	/// then the extension of the path is used to determine the content type.
 	///
@@ -136,12 +187,29 @@ impl ContentType {
 		self.to_string().starts_with("image")
 	}
 
+	/// Returns true if the content type is in accordance with the OPDS 1.2 specification.
+	/// This includes PNG, JPEG, and GIF images.
+	///
+	/// ## Example
+	///
+	/// ```rust
+	/// use stump_core::prelude::server::http::ContentType;
+	///
+	/// let content_type = ContentType::PNG;
+	/// assert!(content_type.is_opds_legacy_image());
+	/// ```
+	pub fn is_opds_legacy_image(&self) -> bool {
+		self == &ContentType::PNG
+			|| self == &ContentType::JPEG
+			|| self == &ContentType::GIF
+	}
+
 	/// Returns true if the content type is a ZIP archive.
 	///
 	/// ## Examples
 	///
 	/// ```rust
-	/// use stump_core::types::server::http::ContentType;
+	/// use stump_core::prelude::server::http::ContentType;
 	///
 	/// let content_type = ContentType::ZIP;
 	/// assert!(content_type.is_zip());
@@ -155,7 +223,7 @@ impl ContentType {
 	/// ## Examples
 	///
 	/// ```rust
-	/// use stump_core::types::server::http::ContentType;
+	/// use stump_core::prelude::server::http::ContentType;
 	///
 	/// let content_type = ContentType::RAR;
 	/// assert!(content_type.is_rar());
@@ -169,7 +237,7 @@ impl ContentType {
 	/// ## Examples
 	///
 	/// ```rust
-	/// use stump_core::types::server::http::ContentType;
+	/// use stump_core::prelude::server::http::ContentType;
 	///
 	/// let content_type = ContentType::EPUB_ZIP;
 	/// assert!(content_type.is_epub());

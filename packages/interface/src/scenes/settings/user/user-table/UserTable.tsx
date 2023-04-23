@@ -1,12 +1,10 @@
-import { useUsersQuery } from '@stump/client'
 import { CheckBox, Text } from '@stump/components'
 import { User } from '@stump/types'
-import { ColumnDef, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table'
+import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { useMemo } from 'react'
 
 import Table from '../../../../components/table/Table'
-import { useLocaleContext } from '../../../../i18n/context'
 import { useUserManagementContext } from '../context'
 import UsernameRow from './UsernameRow'
 
@@ -16,10 +14,10 @@ import UsernameRow from './UsernameRow'
 // 3. Grant access to a reading list
 // 4. etc.
 
-export default function UserTable() {
-	const { t } = useLocaleContext()
+const debugFlag = import.meta.env.DEV
 
-	const { users } = useUserManagementContext()
+export default function UserTable() {
+	const { users, pageCount, pagination, setPagination } = useUserManagementContext()
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 	const columns = useMemo<ColumnDef<User>[]>(
@@ -40,10 +38,11 @@ export default function UserTable() {
 							return <UsernameRow {...user} />
 						},
 						header: 'Username',
-						id: 'username',
 					},
 					{
 						accessorKey: 'role',
+						// TODO: This will probably change once another role (or two?) is added. RBAC
+						// system is not fully thought out yet.
 						cell: (info) => {
 							return (
 								<Text size="sm">
@@ -52,7 +51,6 @@ export default function UserTable() {
 							)
 						},
 						header: 'Role',
-						id: 'role',
 					},
 					{
 						cell: () => {
@@ -79,13 +77,16 @@ export default function UserTable() {
 			searchable
 			columns={columns}
 			options={{
-				debugColumns: true,
-				debugHeaders: true,
-				// If only doing manual pagination, you don't need this
-				debugTable: true,
+				debugColumns: debugFlag,
+				debugHeaders: debugFlag,
+				debugTable: debugFlag,
 				getCoreRowModel: getCoreRowModel(),
-				// TODO: change to manual once API endpoint is ready
-				getPaginationRowModel: getPaginationRowModel(),
+				manualPagination: true,
+				onPaginationChange: setPagination,
+				pageCount,
+				state: {
+					pagination,
+				},
 			}}
 			data={users}
 			fullWidth

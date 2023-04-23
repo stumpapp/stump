@@ -9,7 +9,7 @@ use crate::{
 	prisma::{reading_list, reading_list_item},
 };
 
-use super::Cursorable;
+use super::Cursor;
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ReadingListVisibility {
@@ -63,7 +63,7 @@ pub struct ReadingList {
 	pub items: Option<Vec<ReadingListItem>>,
 }
 
-impl Cursorable for ReadingList {
+impl Cursor for ReadingList {
 	fn cursor(&self) -> String {
 		self.id.clone()
 	}

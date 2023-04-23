@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
-use super::ReadProgress;
+use super::{Cursor, ReadProgress};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct User {
@@ -26,6 +26,12 @@ impl User {
 	}
 
 	// TODO: other utilities based off of preferences
+}
+
+impl Cursor for User {
+	fn cursor(&self) -> String {
+		self.id.clone()
+	}
 }
 
 impl From<prisma::user::Data> for User {

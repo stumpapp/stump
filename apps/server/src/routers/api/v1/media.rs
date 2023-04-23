@@ -79,7 +79,6 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	_where
 }
 
-// TODO: move this to core?
 pub(crate) fn apply_pagination<'a>(
 	query: media::FindMany<'a>,
 	pagination: &Pagination,

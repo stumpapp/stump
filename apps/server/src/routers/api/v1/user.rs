@@ -8,7 +8,10 @@ use axum_extra::extract::Query;
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
 	db::models::{User, UserPreferences},
-	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
+	prelude::{
+		LoginOrRegisterArgs, Pageable, Pagination, PaginationQuery, UpdateUserArgs,
+		UserPreferencesUpdate,
+	},
 	prisma::{user, user_preferences, PrismaClient},
 };
 use tracing::{debug, trace};
@@ -52,11 +55,37 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+pub(crate) fn apply_pagination<'a>(
+	query: user::FindMany<'a>,
+	pagination: &Pagination,
+) -> user::FindMany<'a> {
+	match pagination {
+		Pagination::Page(page_query) => {
+			let (skip, take) = page_query.get_skip_take();
+			query.skip(skip).take(take)
+		},
+		Pagination::Cursor(cursor_params) => {
+			let mut cursor_query = query;
+			if let Some(cursor) = cursor_params.cursor.as_deref() {
+				cursor_query = cursor_query
+					.cursor(user::id::equals(cursor.to_string()))
+					.skip(1);
+			}
+			if let Some(limit) = cursor_params.limit {
+				cursor_query = cursor_query.take(limit);
+			}
+			cursor_query
+		},
+		_ => query,
+	}
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/users",
 	tag = "user",
 	params(
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination query."),
 		("relation_query" = Option<UserQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
@@ -69,21 +98,52 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn get_users(
 	State(ctx): State<AppState>,
 	relation_query: Query<UserQueryRelation>,
+	pagination_query: Query<PaginationQuery>,
 	session: ReadableSession,
-) -> ApiResult<Json<Vec<User>>> {
+) -> ApiResult<Json<Pageable<Vec<User>>>> {
 	get_session_admin_user(&session)?;
 
-	let mut query = ctx.db.user().find_many(vec![]);
-	let include_user_progress =
-		relation_query.include_read_progresses.unwrap_or_default();
+	let pagination = pagination_query.0.get();
+	let is_unpaged = pagination.is_unpaged();
+	let pagination_cloned = pagination.clone();
 
-	if include_user_progress {
-		query = query.with(user::read_progresses::fetch(vec![]));
+	let (users, count) = ctx
+		.db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client.user().find_many(vec![]);
+
+			let include_user_read_progress =
+				relation_query.include_read_progresses.unwrap_or_default();
+
+			if include_user_read_progress {
+				query = query.with(user::read_progresses::fetch(vec![]));
+			}
+
+			if !is_unpaged {
+				query = apply_pagination(query, &pagination_cloned);
+			}
+
+			let users = query.exec().await?.into_iter().map(User::from).collect();
+
+			if is_unpaged {
+				return Ok((users, None));
+			}
+
+			client
+				.user()
+				.count(vec![])
+				.exec()
+				.await
+				.map(|count| (users, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((users, count, pagination))));
 	}
 
-	let users = query.exec().await?;
-
-	Ok(Json(users.into_iter().map(User::from).collect()))
+	Ok(Json(Pageable::from(users)))
 }
 
 async fn update_user(

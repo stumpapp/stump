@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useCreateUser } from '@stump/client'
+import { userQueryKeys } from '@stump/api'
+import { invalidateQueries, useCreateUser } from '@stump/client'
 import { Alert, Button, Dialog, Form, IconButton, Input } from '@stump/components'
 import { Eye, EyeOff, Plus, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
@@ -58,6 +59,7 @@ export default function CreateUserModal() {
 	const handleSubmit = async ({ username, password }: Schema) => {
 		try {
 			await createAsync({ password, username })
+			await invalidateQueries({ exact: true, queryKey: [userQueryKeys.getUsers] })
 			setIsOpen(false)
 			toast.success('User created successfully')
 		} catch (error) {

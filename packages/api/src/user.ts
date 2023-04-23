@@ -1,9 +1,9 @@
 import type { LoginOrRegisterArgs, UpdateUserArgs, User, UserPreferences } from '@stump/types'
 
 import { API, toUrlParams } from '.'
-import { ApiResult } from './types'
+import { ApiResult, PageableApiResult } from './types'
 
-export function getUsers(params?: Record<string, unknown>): Promise<ApiResult<User[]>> {
+export function getUsers(params?: Record<string, unknown>): Promise<PageableApiResult<User[]>> {
 	if (params) {
 		const searchParams = toUrlParams(params)
 		return API.get(`/users?${searchParams.toString()}`)

@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::prisma::{self, library};
 
-use super::{series::Series, tag::Tag, Cursorable};
+use super::{series::Series, tag::Tag, Cursor};
 
 //////////////////////////////////////////////
 //////////////// PRISMA MACROS ///////////////
@@ -43,7 +43,7 @@ pub struct Library {
 	pub library_options: LibraryOptions,
 }
 
-impl Cursorable for Library {
+impl Cursor for Library {
 	fn cursor(&self) -> String {
 		self.id.clone()
 	}

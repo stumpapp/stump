@@ -9,15 +9,17 @@ generator client {
 }
 
 model User {
-  id              String  @id @default(cuid())
+  id              String    @id @default(cuid())
   // The username of the user. E.g. "oromei"
-  username        String  @unique
+  username        String    @unique
   // The password of the user. This will a hash - not the actual password.
   hashed_password String
   // The role of the user. Defaults to "MEMBER".
-  role            String  @default("MEMBER")
+  role            String    @default("MEMBER")
   // The URL of the user's optional avatar.
   avatar_url      String?
+  // The timestamp of the user's last login.
+  last_login      DateTime?
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////

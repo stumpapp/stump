@@ -1,6 +1,5 @@
 import {
 	getUserPreferences,
-	getUsers,
 	updatePreferences,
 	updateUser,
 	updateUserPreferences as updateUserPreferencesFn,
@@ -10,19 +9,32 @@ import {
 import type { LoginOrRegisterArgs, UpdateUserArgs, User, UserPreferences } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { MutationOptions, QueryOptions, useMutation, useQuery } from '../client'
+import { MutationOptions, PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
 
-type UseUsersQueryParams = QueryOptions<User[], AxiosError, User[]> & {
+type UseUsersQueryParams = PageQueryOptions<User> & {
 	params?: Record<string, unknown>
 }
 export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) {
-	const { data: users, ...ret } = useQuery(
+	const { data, ...restReturn } = usePageQuery(
 		['getUsers', params],
-		() => getUsers(params).then((res) => res.data),
-		options,
+		async ({ page = 1, ...rest }) => {
+			const { data } = await userApi.getUsers({ page, ...rest })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
 	)
 
-	return { users, ...ret }
+	const users = data?.data
+	const pageData = data?._page
+
+	return {
+		pageData,
+		users,
+		...restReturn,
+	}
 }
 
 type UseUserPreferencesParams = {

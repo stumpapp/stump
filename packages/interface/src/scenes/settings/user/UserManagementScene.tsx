@@ -1,4 +1,6 @@
 import { useUsersQuery } from '@stump/client'
+import { PaginationState } from '@tanstack/react-table'
+import { useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { Navigate } from 'react-router'
 
@@ -14,10 +16,21 @@ import UserManagementStats from './UserManagementStats'
 // the only sub-scene I can think of is user creation which isn't essential to have perfect UX
 // out the gate
 export default function UserManagementScene() {
+	const [pagination, setPagination] = useState<PaginationState>({
+		pageIndex: 0,
+		pageSize: 10,
+	})
+
 	const { t } = useLocaleContext()
 	const { isServerOwner } = useAppContext()
-	const { users, isRefetching: isRefetchingUsers } = useUsersQuery({
+	const {
+		users,
+		pageData,
+		isRefetching: isRefetchingUsers,
+	} = useUsersQuery({
 		enabled: isServerOwner,
+		page: pagination.pageIndex,
+		page_size: pagination.pageSize,
 		params: {
 			include_read_progresses: true,
 		},
@@ -28,7 +41,15 @@ export default function UserManagementScene() {
 	}
 
 	return (
-		<UserManagementContext.Provider value={{ isRefetchingUsers, users: users || [] }}>
+		<UserManagementContext.Provider
+			value={{
+				isRefetchingUsers,
+				pageCount: pageData?.total_pages || -1,
+				pagination,
+				setPagination,
+				users: users || [],
+			}}
+		>
 			<SceneContainer>
 				<Helmet>
 					<title>Stump | {t('settingsScene.users.helmet')}</title>

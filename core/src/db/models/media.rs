@@ -11,7 +11,7 @@ use crate::{
 };
 
 use super::{
-	read_progress::ReadProgress, series::Series, tag::Tag, Cursorable, LibraryOptions,
+	read_progress::ReadProgress, series::Series, tag::Tag, Cursor, LibraryOptions,
 };
 
 #[derive(
@@ -91,7 +91,7 @@ impl Media {
 	}
 }
 
-impl Cursorable for Media {
+impl Cursor for Media {
 	fn cursor(&self) -> String {
 		self.id.clone()
 	}

@@ -24,6 +24,6 @@ pub use user::*;
 // I also will house all of the prisma select/include macros in the corresponding file(s).
 
 // TODO: move this
-pub trait Cursorable {
+pub trait Cursor {
 	fn cursor(&self) -> String;
 }

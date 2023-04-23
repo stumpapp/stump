@@ -5,19 +5,28 @@ import { devtools, persist } from 'zustand/middleware'
 
 import { StoreBase } from '.'
 
-// TODO: just move this all into context at this point...
-
-// TODO: isServerOwner computed value
-// https://github.com/cmlarsen/zustand-middleware-computed-state
-interface UserStore extends StoreBase<UserStore> {
+type UserStore = {
 	user?: User | null
 	userPreferences?: UserPreferences | null
-
 	setUser: (user?: User | null) => void
 	setUserPreferences: (userPreferences: UserPreferences | null) => void
-}
+} & StoreBase<UserStore>
 
-// TODO: consider renaming to useAuth
+// FIXME: So this definitely was an oversight when I initially considered using Zustand for both
+// react and react-native. Effectively, I need the storage backend to be dynamic, i.e. localStorage
+// for react and AsyncStorage for react-native. This is possible by doing something like:
+// export const useUserStore = (storageBackend) => create<UserStore>()(persist(..., { storage: createJSONStorage(() => storageBackend) })
+// but would then make usage awkard: const {user} = useUserStore(localStorage)(store => ...)
+// alternatively, what I could do is update the client/src/stores to more of a `create store` pattern. So this file would instead
+// export:
+// export const createUserStore = (storageBackend) => create<UserStore>()(persist(..., { storage: createJSONStorage(() => storageBackend) })
+// and then the interface package would need `interface/src/stores/user.ts`:
+// export const useUserStore = createUserStore(localStorage)
+// and the mobile package would do:
+// export const useUserStore = createUserStore(AsyncStorage)
+// OR, just move this all to React context and manually sync with the appropriate storage backend for the
+// values that need persisting (really only the preferences)...
+// https://github.com/pmndrs/zustand/blob/main/docs/integrations/persisting-store-data.md#options
 export const useUserStore = create<UserStore>()(
 	devtools(
 		persist(

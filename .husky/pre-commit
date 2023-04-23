@@ -2,11 +2,5 @@
 . "$(dirname "$0")/_/husky.sh"
 
 npx lint-staged
-#! damn moon kinda annoying me lately. So I added an .editorconfig
-#! file so it would stop replacing tabs with spaces, but it still formats
-#! config files (e.g. tsconfig) wrong...
-#* https://moonrepo.dev/docs/faq#how-to-stop-moon-formatting-json-and-yaml-files
-moon run :lint && pnpm prettify
-
-# moon run :typecheck
-# cargo clippy --all-targets --workspace -- -D warnings
+# https://moonrepo.dev/docs/faq#how-to-stop-moon-formatting-json-and-yaml-files
+# moon run :lint && pnpm prettify

@@ -38,7 +38,13 @@ export default function Connect() {
 
 	return (
 		<>
-			<Stack.Screen options={{ title: 'Connect to Stump' }} />
+			<Stack.Screen
+				options={{
+					gestureEnabled: false,
+					headerBackButtonMenuEnabled: false,
+					title: 'Connect to Stump',
+				}}
+			/>
 			<View className="flex flex-1 items-center justify-center px-5">
 				<TextField
 					label="Connection URL"

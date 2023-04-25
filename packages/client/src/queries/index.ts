@@ -34,6 +34,7 @@ export { useStumpVersion } from './server'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {
 	useCreateUser,
+	useDeleteUser,
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,

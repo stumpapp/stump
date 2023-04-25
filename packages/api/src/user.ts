@@ -47,8 +47,22 @@ export function updateViewer(params: UpdateUserArgs): Promise<ApiResult<User>> {
 	return API.put(`/users/me`, params)
 }
 
+type DeleteUser = {
+	userId: string
+	hardDelete?: boolean
+}
+
+export function deleteUser({ userId, hardDelete }: DeleteUser): Promise<ApiResult<User>> {
+	return API.delete(`/users/${userId}`, {
+		params: {
+			hard_delete: hardDelete,
+		},
+	})
+}
+
 export const userApi = {
 	createUser,
+	deleteUser,
 	getUserPreferences,
 	getUsers,
 	updatePreferences,
@@ -59,6 +73,7 @@ export const userApi = {
 
 export const userQueryKeys: Record<keyof typeof userApi, string> = {
 	createUser: 'user.createUser',
+	deleteUser: 'user.deleteUser',
 	getUserPreferences: 'user.getUserPreferences',
 	getUsers: 'user.getUsers',
 	updatePreferences: 'user.updatePreferences',

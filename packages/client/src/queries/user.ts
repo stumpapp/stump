@@ -5,6 +5,7 @@ import {
 	updateUserPreferences as updateUserPreferencesFn,
 	updateViewer,
 	userApi,
+	userQueryKeys,
 } from '@stump/api'
 import type { LoginOrRegisterArgs, UpdateUserArgs, User, UserPreferences } from '@stump/types'
 import { AxiosError } from 'axios'
@@ -125,6 +126,27 @@ export function useCreateUser(options?: MutationOptions<User, AxiosError, LoginO
 		create,
 		createAsync,
 		isLoading,
+		...restReturn,
+	}
+}
+
+export type UseDeleteUserOptions = {
+	userId: string
+	hardDelete?: boolean
+} & MutationOptions<User, AxiosError>
+export function useDeleteUser(options: UseDeleteUserOptions) {
+	const { hardDelete, userId, ...mutationOptions } = options
+	const { mutateAsync: deleteAsync, ...restReturn } = useMutation(
+		[userQueryKeys.deleteUser, userId, hardDelete],
+		async () => {
+			const { data } = await userApi.deleteUser({ hardDelete, userId })
+			return data
+		},
+		mutationOptions,
+	)
+
+	return {
+		deleteAsync,
 		...restReturn,
 	}
 }

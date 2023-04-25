@@ -26,7 +26,7 @@ export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 					resolvedStr = fallback.slice(0, 2).toUpperCase()
 				}
 
-				return <Text className="text-3xl font-medium tracking-widest">{resolvedStr}</Text>
+				return <Text>{resolvedStr}</Text>
 			}
 			return fallback
 		}

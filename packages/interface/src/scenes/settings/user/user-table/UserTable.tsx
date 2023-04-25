@@ -2,7 +2,7 @@ import { CheckBox, Text } from '@stump/components'
 import { User } from '@stump/types'
 import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
@@ -17,19 +17,41 @@ import UsernameRow from './UsernameRow'
 const debugFlag = import.meta.env.DEV
 
 export default function UserTable() {
-	const { users, pageCount, pagination, setPagination } = useUserManagementContext()
+	const { users, pageCount, pagination, setPagination, selectedUser, setSelectedUser } =
+		useUserManagementContext()
 
+	const handleSelectUser = useCallback(
+		(userId: string) => {
+			if (selectedUser?.id === userId) {
+				setSelectedUser(null)
+			} else {
+				const user = users.find((u) => u.id === userId)
+				setSelectedUser(user || null)
+			}
+		},
+		[selectedUser, users, setSelectedUser],
+	)
+
+	// FIXME: bad performance in memo...
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
+	// FIXME: sorting not working
 	const columns = useMemo<ColumnDef<User>[]>(
 		() => [
 			{
 				columns: [
 					{
-						cell: () => {
-							// const user = info.row.original
-							return <CheckBox variant="primary" />
+						cell: (info) => {
+							const user = info.row.original
+							const isSelected = selectedUser?.id === user.id
+							return (
+								<CheckBox
+									variant="primary"
+									checked={isSelected}
+									onClick={() => handleSelectUser(user.id)}
+								/>
+							)
 						},
-						header: <CheckBox variant="primary" />,
+						// header: <CheckBox variant="primary" />,
 						id: 'select',
 					},
 					{
@@ -37,7 +59,14 @@ export default function UserTable() {
 							const user = info.row.original
 							return <UsernameRow {...user} />
 						},
+						// enableSorting: true,
 						header: 'Username',
+						// sortingFn: (a, b) => {
+						// 	const aUser = a.original
+						// 	const bUser = b.original
+
+						// 	return aUser.username.localeCompare(bUser.username)
+						// },
 					},
 					{
 						accessorKey: 'role',
@@ -68,13 +97,13 @@ export default function UserTable() {
 				id: 'user',
 			},
 		],
-		[],
+		[selectedUser, handleSelectUser],
 	)
 
 	return (
 		<Table
 			sortable
-			searchable
+			// searchable
 			columns={columns}
 			options={{
 				debugColumns: debugFlag,

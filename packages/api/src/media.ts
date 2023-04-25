@@ -1,6 +1,6 @@
 import type { Media, ReadProgress } from '@stump/types'
 
-import { API } from './index'
+import { API } from './axios'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
 import { mergeCursorParams, urlWithParams } from './utils'
 

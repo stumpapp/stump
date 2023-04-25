@@ -1,4 +1,5 @@
-import { useUpdatePreferences, useUserStore } from '..'
+import { useUpdatePreferences } from '../queries/user'
+import { useUserStore } from '../stores/useUserStore'
 
 export type UseThemeParams = {
 	onError?: (err: unknown) => void

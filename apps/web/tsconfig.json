@@ -2,6 +2,7 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"types": ["vite/client"],
+		"jsx": "preserve",
 		"outDir": "../../.moon/cache/types/apps/web",
 		"paths": {
 			"@stump/client": ["../../packages/client/src/index.ts"],

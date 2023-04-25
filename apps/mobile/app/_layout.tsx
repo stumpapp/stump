@@ -1,5 +1,5 @@
 import { queryClient, QueryClientContext, QueryClientProvider, useUserStore } from '@stump/client'
-import {Slot, useRootNavigationState, useRouter} from 'expo-router'
+import { Slot, useRootNavigationState, useRouter } from 'expo-router'
 import React, { Suspense, useEffect } from 'react'
 import { Text } from 'react-native'
 

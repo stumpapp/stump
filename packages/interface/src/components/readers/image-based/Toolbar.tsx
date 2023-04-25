@@ -110,7 +110,7 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('bottom')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed left-0 bottom-0 z-[100] w-full bg-opacity-75 text-white shadow-lg"
+				className="fixed bottom-0 left-0 z-[100] w-full bg-opacity-75 text-white shadow-lg"
 			>
 				<div ref={parentRef} className="h-[150px] overflow-x-auto py-4 scrollbar-hide">
 					<div

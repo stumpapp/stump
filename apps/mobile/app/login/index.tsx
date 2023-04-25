@@ -45,23 +45,23 @@ export default function Login() {
 	}
 
 	return (
-		<View className="flex-1 justify-center px-10 bg-gray-950">
+		<View className="flex-1 justify-center bg-gray-950 px-10">
 			<Stack.Screen options={{ title: 'Login to Stump' }} />
 			<Text className="mb-2 font-medium">Username</Text>
 			<TextInput
-				className="border border-black w-full py-3 px-5 rounded-md"
+				className="w-full rounded-md border border-black px-5 py-3"
 				placeholder="username"
 				placeholderTextColor={'#999'}
 				onChangeText={setUsername}
 			/>
 			<Text className="mb-2 mt-5 font-medium">Password</Text>
 			<TextInput
-				className="border border-black w-full py-3 px-5 rounded-md"
+				className="w-full rounded-md border border-black px-5 py-3"
 				secureTextEntry
 				onChangeText={setPassword}
 			/>
 			<TouchableOpacity
-				className="bg-gray-900 rounded-lg p-3 px-6 mx-auto mt-10"
+				className="mx-auto mt-10 rounded-lg bg-gray-900 p-3 px-6"
 				onPress={!isRegistering && !isLoggingIn && handleSubmit}
 			>
 				<Text className="text-white">Login</Text>

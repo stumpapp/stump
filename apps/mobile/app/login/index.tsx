@@ -47,9 +47,10 @@ export default function Login() {
 	}
 
 	return (
-		<View className="flex-1 justify-center bg-gray-950 px-10">
+		<View className="flex-1 justify-center px-10">
 			<Stack.Screen options={{ title: 'Login to Stump' }} />
 			<TextField label="Username" onChange={setUsername} placeholder={'username'} />
+			<View className={'mt-5'} />
 			<TextField label="Password" onChange={setPassword} placeholder={'password'} secureTextEntry />
 			<PrimaryButton
 				label={isClaimed ? 'Login' : 'Register'}

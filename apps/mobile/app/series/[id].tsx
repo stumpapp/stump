@@ -1,17 +1,19 @@
 import { API } from '@stump/api'
-import { useLibrarySeries } from '@stump/client'
+import { useLibrarySeriesQuery } from '@stump/client'
 import { Series } from '@stump/types'
 import { Link, useSearchParams } from 'expo-router'
 import { Image, SafeAreaView, Text, View } from 'react-native'
 
+import { TitleText } from '../../components/primitives/Text'
+
 export default function Library() {
 	const { id } = useSearchParams()
 
-	const { series } = useLibrarySeries(id as string)
+	const { series } = useLibrarySeriesQuery(id as string, {})
 
 	return (
 		<SafeAreaView className="mx-5 mt-10 flex-1">
-			<Text className="text-2xl font-semibold">Series</Text>
+			<TitleText text={'Series'} />
 			<View className="mt-5 flex flex-row flex-wrap">
 				{series && series.map((series) => <SeriesCard key={series.id} series={series} />)}
 			</View>

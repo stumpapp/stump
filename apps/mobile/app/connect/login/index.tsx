@@ -3,9 +3,9 @@ import { Stack } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
 
-import { PrimaryButton } from '../../components/primitives/Buttons'
-import TextField from '../../components/primitives/TextField'
-import { ErrorSnack } from '../../components/SnackMessage'
+import { PrimaryButton } from '../../../components/primitives/Buttons'
+import TextField from '../../../components/primitives/TextField'
+import { ErrorSnack } from '../../../components/SnackMessage'
 
 export default function Login() {
 	const [username, setUsername] = useState('')

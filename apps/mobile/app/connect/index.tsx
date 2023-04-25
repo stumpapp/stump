@@ -1,5 +1,5 @@
 import { initializeApi, ping } from '@stump/api'
-import { useRouter } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 
@@ -37,16 +37,19 @@ export default function Connect() {
 	}
 
 	return (
-		<View className="flex flex-1 items-center justify-center px-5">
-			<TextField
-				label="Connection URL"
-				placeholder="http(s)://"
-				onChange={setConnectionUrl}
-				value={connectionUrl}
-			/>
-			<PrimaryButton label={'Connect'} onTap={connect} />
+		<>
+			<Stack.Screen options={{ title: 'Connect to Stump' }} />
+			<View className="flex flex-1 items-center justify-center px-5">
+				<TextField
+					label="Connection URL"
+					placeholder="http(s)://"
+					onChange={setConnectionUrl}
+					value={connectionUrl}
+				/>
+				<PrimaryButton label={'Connect'} onTap={connect} />
 
-			{error && <ErrorSnack message={error} />}
-		</View>
+				{error && <ErrorSnack message={error} />}
+			</View>
+		</>
 	)
 }

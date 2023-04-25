@@ -48,7 +48,7 @@ export default function Login() {
 
 	return (
 		<View className="flex-1 justify-center px-10">
-			<Stack.Screen options={{ title: 'Login to Stump' }} />
+			<Stack.Screen options={{ title: 'Log in to Stump' }} />
 			<TextField label="Username" onChange={setUsername} placeholder={'username'} />
 			<View className={'mt-5'} />
 			<TextField label="Password" onChange={setPassword} placeholder={'password'} secureTextEntry />

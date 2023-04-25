@@ -1,8 +1,10 @@
 import { useLoginOrRegister, useUserStore } from '@stump/client'
 import { Stack } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Text, View } from 'react-native'
 
+import { PrimaryButton } from '../../components/primitives/Buttons'
+import TextField from '../../components/primitives/TextField'
 import { ErrorSnack } from '../../components/SnackMessage'
 
 export default function Login() {
@@ -45,27 +47,15 @@ export default function Login() {
 	}
 
 	return (
-		<View className="flex-1 justify-center bg-gray-950 px-10">
+		<View className="flex-1 justify-center px-10">
 			<Stack.Screen options={{ title: 'Login to Stump' }} />
-			<Text className="mb-2 font-medium">Username</Text>
-			<TextInput
-				className="w-full rounded-md border border-black px-5 py-3"
-				placeholder="username"
-				placeholderTextColor={'#999'}
-				onChangeText={setUsername}
+			<TextField label="Username" onChange={setUsername} placeholder={'username'} />
+			<View className={'mt-5'} />
+			<TextField label="Password" onChange={setPassword} placeholder={'password'} secureTextEntry />
+			<PrimaryButton
+				label={isClaimed ? 'Login' : 'Register'}
+				onTap={!isRegistering && !isLoggingIn && handleSubmit}
 			/>
-			<Text className="mb-2 mt-5 font-medium">Password</Text>
-			<TextInput
-				className="w-full rounded-md border border-black px-5 py-3"
-				secureTextEntry
-				onChangeText={setPassword}
-			/>
-			<TouchableOpacity
-				className="mx-auto mt-10 rounded-lg bg-gray-900 p-3 px-6"
-				onPress={!isRegistering && !isLoggingIn && handleSubmit}
-			>
-				<Text className="text-white">Login</Text>
-			</TouchableOpacity>
 
 			{error && <ErrorSnack message={error} />}
 		</View>

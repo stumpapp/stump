@@ -2,7 +2,7 @@ import { LibrariesStats } from '@stump/types'
 import { useMemo } from 'react'
 import { Text, View } from 'react-native'
 
-import { formatBytesSeparate } from '../utils/format'
+import { formatBytesSeparate } from '../../utils/format'
 
 export default function LibraryStatsCard({ stats }: { stats: LibrariesStats }) {
 	const libraryUsage = useMemo(() => {

@@ -52,7 +52,7 @@
 		"*.{js,jsx,ts,tsx,md,json}": [
 			"prettier --config prettier.config.js --check"
 		],
-		".rs": [
+		"*.rs": [
 			"cargo fmt --check --manifest-path=core/Cargo.toml --",
 			"cargo fmt --check --manifest-path=apps/server/Cargo.toml --",
 			"cargo fmt --check --manifest-path=apps/desktop/src-tauri/Cargo.toml --"

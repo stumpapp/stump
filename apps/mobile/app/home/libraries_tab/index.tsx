@@ -3,7 +3,7 @@ import { useLibraries } from '@stump/client'
 import { Library } from '@stump/types'
 import { Stack, useRouter } from 'expo-router'
 import { TouchableOpacity } from 'nativewind/dist/preflight'
-import { Image, Text, View } from 'react-native'
+import { Image, ScrollView, Text, View } from 'react-native'
 
 export default function LibrariesTab() {
 	const { libraries } = useLibraries()
@@ -11,12 +11,14 @@ export default function LibrariesTab() {
 	return (
 		<>
 			<Stack.Screen options={{ headerShown: false }} />
-			<View className="flex-1">
-				<View className="flex flex-row flex-wrap">
-					{libraries &&
-						libraries.map((library) => <LibraryCard key={library.id} library={library} />)}
+			<ScrollView>
+				<View className="flex-1">
+					<View className="flex flex-row flex-wrap">
+						{libraries &&
+							libraries.map((library) => <LibraryCard key={library.id} library={library} />)}
+					</View>
 				</View>
-			</View>
+			</ScrollView>
 		</>
 	)
 }

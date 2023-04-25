@@ -1,21 +1,21 @@
 import { API } from '@stump/api'
-import { useLibrarySeriesQuery } from '@stump/client'
-import { Series } from '@stump/types'
+import { useSeriesMediaQuery } from '@stump/client'
+import { Media } from '@stump/types'
 import { Stack, useRouter, useSearchParams } from 'expo-router'
 import { Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export default function Library() {
 	const { id } = useSearchParams()
 
-	const { series } = useLibrarySeriesQuery(id as string)
+	const { media } = useSeriesMediaQuery(id as string)
 
 	return (
 		<>
-			<Stack.Screen options={{ title: 'Series' }} />
+			<Stack.Screen options={{ title: 'Media' }} />
 			<ScrollView>
 				<SafeAreaView className="flex-1">
 					<View className="flex flex-row flex-wrap">
-						{series && series.map((series) => <SeriesCard key={series.id} series={series} />)}
+						{media && media.map((media) => <SeriesCard key={media.id} media={media} />)}
 					</View>
 				</SafeAreaView>
 			</ScrollView>
@@ -23,19 +23,18 @@ export default function Library() {
 	)
 }
 
-const SeriesCard = ({ series }: { series: Series }) => {
-	const router = useRouter()
+const SeriesCard = ({ media }: { media: Media }) => {
+	const imageUrl = `${API.defaults.baseURL}/media/${media.id}/thumbnail`
 
-	const imageUrl = `${API.defaults.baseURL}/series/${series.id}/thumbnail`
-
-	const onPress = () => router.push(`/media/${series.id}`)
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	const onPress = () => {}
 
 	return (
-		<TouchableOpacity className="flex h-56 w-1/2 p-2 md:h-64 md:w-52" onPress={onPress}>
+		<TouchableOpacity className="mb-16 flex h-56 w-1/2 p-2 md:h-64 md:w-52" onPress={onPress}>
 			<View className="rounded-md bg-gray-200">
 				<View className="flex items-center rounded-md">
 					<Image className="h-60 w-full rounded-t-md" source={{ uri: imageUrl }} />
-					<Text className="text-md py-2 font-medium">{series.name}</Text>
+					<Text className="text-md py-2 font-medium">{media.name}</Text>
 				</View>
 			</View>
 		</TouchableOpacity>

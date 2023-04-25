@@ -8,7 +8,7 @@ export default function HomeLayout() {
 		<Tabs>
 			<Tabs.Screen
 				options={{
-					headerRight: (props) => <_HeaderRight props={props} />,
+					headerRight: () => <_HeaderRight />,
 					tabBarIcon: ({ color }) => <House color={color} />,
 					title: 'Home',
 				}}
@@ -16,7 +16,7 @@ export default function HomeLayout() {
 			/>
 			<Tabs.Screen
 				options={{
-					headerRight: (props) => <_HeaderRight props={props} />,
+					headerRight: () => <_HeaderRight />,
 					tabBarIcon: ({ color }) => <Books color={color} />,
 					title: 'Libraries',
 				}}

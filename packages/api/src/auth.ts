@@ -10,12 +10,10 @@ export function me(): Promise<ApiResult<User>> {
 }
 
 export function login(input: LoginOrRegisterArgs): Promise<ApiResult<User>> {
-	console.log('login', input)
 	return API.post('/auth/login', input)
 }
 
 export function register(payload: LoginOrRegisterArgs) {
-	console.log('register', payload)
 	return API.post('/auth/register', payload)
 }
 

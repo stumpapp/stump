@@ -1,8 +1,10 @@
 import { initializeApi, ping } from '@stump/api'
-import { Stack, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { View } from 'react-native'
 
+import { PrimaryButton } from '../../components/primitives/Buttons'
+import TextField from '../../components/primitives/TextField'
 import { ErrorSnack } from '../../components/SnackMessage'
 
 export default function Connect() {
@@ -36,17 +38,13 @@ export default function Connect() {
 
 	return (
 		<View className="flex flex-1 items-center justify-center px-5">
-			<Stack.Screen options={{ title: 'Connect to Stump' }} />
-			<TextInput
-				className="w-full border border-black px-5 py-3"
+			<TextField
+				label="Connection URL"
 				placeholder="http(s)://"
-				placeholderTextColor={'#999'}
+				onChange={setConnectionUrl}
 				value={connectionUrl}
-				onChangeText={setConnectionUrl}
 			/>
-			<TouchableOpacity className="mx-auto mt-10 rounded-lg bg-gray-900 p-3 px-6" onPress={connect}>
-				<Text className="text-white">Connect</Text>
-			</TouchableOpacity>
+			<PrimaryButton label={'Connect'} onTap={connect} />
 
 			{error && <ErrorSnack message={error} />}
 		</View>

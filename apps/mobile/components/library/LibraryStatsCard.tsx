@@ -21,8 +21,8 @@ export default function LibraryStatsCard({ stats }: { stats: LibrariesStats }) {
 const _StatsItem = ({ label, value }: { label: string; value: number | bigint | string }) => {
 	return (
 		<View className="flex justify-between">
-			<Text className="text-lg font-medium">{label}</Text>
-			<Text className="text-lg">{`${value}`}</Text>
+			<Text className="font-medium md:text-lg">{label}</Text>
+			<Text className="md:text-lg">{`${value}`}</Text>
 		</View>
 	)
 }

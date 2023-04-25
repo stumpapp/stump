@@ -1,6 +1,6 @@
 import { Link, Stack, Tabs } from 'expo-router'
-import { View } from 'nativewind/dist/preflight'
 import { Books, Gear, House } from 'phosphor-react-native'
+import { View } from 'react-native'
 import { SafeAreaView } from 'react-native'
 
 export default function HomeLayout() {

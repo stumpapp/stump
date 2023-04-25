@@ -33,7 +33,7 @@ export default function Connect() {
 			return
 		}
 
-		router.push('/login')
+		router.push('/connect/login')
 	}
 
 	return (

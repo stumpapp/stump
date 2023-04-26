@@ -20,6 +20,8 @@ model User {
   avatar_url      String?
   // The timestamp of the user's last login.
   last_login      DateTime?
+  // The timestamp of when the user was created.
+  created_at      DateTime  @default(now())
   // The timestamp of when the user was *soft* deleted.
   deleted_at      DateTime?
 

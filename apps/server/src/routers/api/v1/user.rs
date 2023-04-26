@@ -6,11 +6,12 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::{ReadableSession, WritableSession};
+use prisma_client_rust::chrono::Utc;
 use stump_core::{
 	db::models::{User, UserPreferences},
 	prelude::{
-		LoginOrRegisterArgs, Pageable, Pagination, PaginationQuery, UpdateUserArgs,
-		UserPreferencesUpdate,
+		DeleteUser, LoginOrRegisterArgs, Pageable, Pagination, PaginationQuery,
+		UpdateUserArgs, UserPreferencesUpdate,
 	},
 	prisma::{user, user_preferences, PrismaClient},
 };
@@ -335,7 +336,7 @@ async fn update_current_user_preferences(
 		("id" = String, Path, description = "The user's id.", example = "1ab2c3d4")
 	),
 	responses(
-		(status = 200, description = "Successfully deleted user.", body = String),
+		(status = 200, description = "Successfully deleted user.", body = User),
 		(status = 401, description = "Unauthorized."),
 		(status = 403, description = "Forbidden."),
 		(status = 404, description = "User not found."),
@@ -347,7 +348,8 @@ async fn delete_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
-) -> ApiResult<Json<String>> {
+	Json(input): Json<DeleteUser>,
+) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 	let user = get_session_admin_user(&session)?;
 
@@ -357,15 +359,23 @@ async fn delete_user_by_id(
 		));
 	}
 
-	let deleted_user = db
-		.user()
-		.delete(user::id::equals(id.clone()))
-		.exec()
-		.await?;
+	let hard_delete = input.hard_delete.unwrap_or(false);
+
+	let deleted_user = if hard_delete {
+		db.user().delete(user::id::equals(id.clone())).exec().await
+	} else {
+		db.user()
+			.update(
+				user::id::equals(id.clone()),
+				vec![user::deleted_at::set(Some(Utc::now().into()))],
+			)
+			.exec()
+			.await
+	}?;
 
 	debug!(?deleted_user, "Deleted user");
 
-	Ok(Json(deleted_user.id))
+	Ok(Json(User::from(deleted_user)))
 }
 
 #[utoipa::path(

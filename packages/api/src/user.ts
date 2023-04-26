@@ -54,7 +54,7 @@ type DeleteUser = {
 
 export function deleteUser({ userId, hardDelete }: DeleteUser): Promise<ApiResult<User>> {
 	return API.delete(`/users/${userId}`, {
-		params: {
+		data: {
 			hard_delete: hardDelete,
 		},
 	})

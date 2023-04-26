@@ -17,7 +17,7 @@ type UseUsersQueryParams = PageQueryOptions<User> & {
 }
 export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) {
 	const { data, ...restReturn } = usePageQuery(
-		['getUsers', params],
+		[userQueryKeys.getUsers, params],
 		async ({ page = 1, ...rest }) => {
 			const { data } = await userApi.getUsers({ page, ...rest })
 			return data
@@ -51,12 +51,16 @@ export function useUserPreferences(
 		isLoading,
 		isFetching,
 		isRefetching,
-	} = useQuery(['getUserPreferences', id], () => getUserPreferences(id!).then((res) => res.data), {
-		enabled: enableFetchPreferences && !!id,
-	})
+	} = useQuery(
+		[userQueryKeys.getUserPreferences, id],
+		() => getUserPreferences(id!).then((res) => res.data),
+		{
+			enabled: enableFetchPreferences && !!id,
+		},
+	)
 
 	const { mutateAsync: updateUserPreferences, isLoading: isUpdating } = useMutation(
-		['updateUserPreferences', id],
+		[userQueryKeys.updateUserPreferences, id],
 		(preferences: UserPreferences) =>
 			updateUserPreferencesFn(id!, preferences).then((res) => res.data),
 		mutationOptions,
@@ -75,7 +79,7 @@ export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	updateViewer
 
 	const { mutateAsync: update, isLoading } = useMutation(
-		['updateUser', id],
+		[userQueryKeys.updateUser, id],
 		async (params: UpdateUserArgs) => {
 			const response = id ? await updateUser(id, params) : await updateViewer(params)
 			return response.data
@@ -93,7 +97,7 @@ type UseUpdatePreferencesParams = MutationOptions<UserPreferences, AxiosError, U
 
 export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 	const { mutateAsync: update, isLoading } = useMutation(
-		['updateUserPreferences'],
+		[userQueryKeys.updateUserPreferences],
 		async (preferences: UserPreferences) => {
 			const response = await updatePreferences(preferences)
 			return response.data
@@ -114,7 +118,7 @@ export function useCreateUser(options?: MutationOptions<User, AxiosError, LoginO
 		isLoading,
 		...restReturn
 	} = useMutation(
-		['createUser'],
+		[userQueryKeys.createUser],
 		async (params: LoginOrRegisterArgs) => {
 			const { data } = await userApi.createUser(params)
 			return data

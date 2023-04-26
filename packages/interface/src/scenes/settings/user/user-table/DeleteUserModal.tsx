@@ -37,7 +37,7 @@ export default function DeleteUserModal() {
 		} else {
 			try {
 				await deleteAsync()
-				await invalidateQueries({ queryKey: [userQueryKeys.deleteUser] })
+				await invalidateQueries({ queryKey: [userQueryKeys.getUsers] })
 				setSelectedUser(null)
 				setIsOpen(false)
 			} catch (error) {

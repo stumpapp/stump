@@ -59,7 +59,7 @@ export default function CreateUserModal() {
 	const handleSubmit = async ({ username, password }: Schema) => {
 		try {
 			await createAsync({ password, username })
-			await invalidateQueries({ exact: true, queryKey: [userQueryKeys.getUsers] })
+			await invalidateQueries({ queryKey: [userQueryKeys.getUsers] })
 			setIsOpen(false)
 			toast.success('User created successfully')
 		} catch (error) {

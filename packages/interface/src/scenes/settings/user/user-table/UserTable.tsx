@@ -2,7 +2,7 @@ import { CheckBox, Text } from '@stump/components'
 import { User } from '@stump/types'
 import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
@@ -32,9 +32,9 @@ export default function UserTable() {
 		[selectedUser, users, setSelectedUser],
 	)
 
-	// FIXME: bad performance in memo...
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
-	// FIXME: sorting not working
+	// FIXME: sorting not working (because tied to query and needs state :weary:)
+	// TODO: https://tanstack.com/table/v8/docs/examples/react/row-selection
 	const columns = useMemo<ColumnDef<User>[]>(
 		() => [
 			{
@@ -103,7 +103,6 @@ export default function UserTable() {
 	return (
 		<Table
 			sortable
-			// searchable
 			columns={columns}
 			options={{
 				debugColumns: debugFlag,

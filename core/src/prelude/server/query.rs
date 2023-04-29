@@ -3,7 +3,7 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	prelude::errors::CoreError,
+	error::CoreError,
 	prisma::{library, media, series},
 };
 

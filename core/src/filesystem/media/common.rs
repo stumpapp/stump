@@ -1,4 +1,4 @@
-pub(crate) fn is_accepted_cover_name(name: &str) -> bool {
+pub fn is_accepted_cover_name(name: &str) -> bool {
 	let cover_file_names = vec!["cover", "thumbnail", "folder"];
 	cover_file_names
 		.iter()

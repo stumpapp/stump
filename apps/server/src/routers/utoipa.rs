@@ -1,7 +1,7 @@
 // use axum::middleware::from_extractor_with_state;
 use axum::middleware::from_extractor_with_state;
 use axum::Router;
-use stump_core::db::models::{
+use stump_core::db::entity::{
 	LibrariesStats, Library, LibraryOptions, LibraryPattern, LibraryScanMode, LogLevel,
 	Media, ReadProgress, ReadingList, Series, Tag, User, UserPreferences,
 };

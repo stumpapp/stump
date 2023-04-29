@@ -9,8 +9,8 @@ use axum::{
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::chrono::Utc;
 use stump_core::{
-	db::models::{Epub, ReadProgress, UpdateEpubProgress},
-	fs::epub,
+	db::entity::{Epub, ReadProgress, UpdateEpubProgress},
+	filesystem::media::EpubProcessor,
 	prisma::{media, media_annotation, read_progress, user},
 };
 
@@ -154,7 +154,7 @@ async fn get_epub_chapter(
 		.await?;
 
 	if let Some(book) = result {
-		Ok(epub::get_epub_chapter(book.path.as_str(), chapter)?.into())
+		Ok(EpubProcessor::get_chapter(book.path.as_str(), chapter)?.into())
 	} else {
 		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
@@ -182,14 +182,14 @@ async fn get_epub_meta(
 	if let Some(book) = result {
 		let (content_type, buffer) = if root == "META-INF" {
 			// reserved for accessing resources via resource id
-			epub::get_epub_resource_by_id(
+			EpubProcessor::get_resource_by_id(
 				book.path.as_str(),
 				resource.to_str().unwrap_or_default(),
 			)?
 		} else {
 			// NOTE: when a resource is loaded from a path, it is likely something inside the contents of an epub page,
 			// such as a css file or an image file.
-			epub::get_epub_resource_from_path(
+			EpubProcessor::get_resource_by_path(
 				book.path.as_str(),
 				root.as_str(),
 				resource,

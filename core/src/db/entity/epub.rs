@@ -6,7 +6,7 @@ use specta::Type;
 use tracing::error;
 use utoipa::ToSchema;
 
-use crate::{prelude::errors::ProcessFileError, prisma::media};
+use crate::{filesystem::FileError, prisma::media};
 
 use super::{media::Media, MediaAnnotation};
 
@@ -95,10 +95,10 @@ impl Epub {
 
 	/// Attempts to create an Epub from a media entity. Internally, this will attempt to open
 	/// an EpubDoc from the media's path. If this fails, it will return an EpubOpenError.
-	pub fn try_from(media: media::Data) -> Result<Epub, ProcessFileError> {
+	pub fn try_from(media: media::Data) -> Result<Epub, FileError> {
 		let epub_file = EpubDoc::new(media.path.as_str()).map_err(|e| {
 			error!("Failed to open epub {}: {}", &media.path, e);
-			ProcessFileError::EpubOpenError(e.to_string())
+			FileError::EpubOpenError(e.to_string())
 		})?;
 
 		Ok(Epub::from(media, epub_file))

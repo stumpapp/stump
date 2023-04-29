@@ -1,6 +1,6 @@
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::prelude::{ContentType, CoreResult};
+use crate::{error::CoreResult, filesystem::ContentType};
 
 use super::util::OpdsEnumStr;
 

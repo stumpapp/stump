@@ -1,5 +1,5 @@
 use axum_sessions::extractors::{ReadableSession, WritableSession};
-use stump_core::{db::models::User, prelude::DecodedCredentials};
+use stump_core::{db::entity::User, prelude::DecodedCredentials};
 
 use crate::errors::{ApiError, ApiResult, AuthError};
 

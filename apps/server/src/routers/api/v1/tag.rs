@@ -1,7 +1,7 @@
 use axum::{
 	extract::State, middleware::from_extractor_with_state, routing::get, Json, Router,
 };
-use stump_core::{db::models::Tag, prelude::CreateTags, prisma::tag};
+use stump_core::{db::entity::Tag, prelude::CreateTags, prisma::tag};
 use tracing::error;
 
 use crate::{

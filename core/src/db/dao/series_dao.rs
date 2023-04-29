@@ -5,10 +5,11 @@ use tracing::{error, trace};
 
 use crate::{
 	db::{
-		models::{Media, Series},
-		utils::CountQueryReturn,
+		common::CountQueryReturn,
+		entity::{Media, Series},
 	},
-	prelude::{CoreError, CoreResult, PageParams, Pageable},
+	error::{CoreError, CoreResult},
+	prelude::{PageParams, Pageable},
 	prisma::{library, media, series, PrismaClient},
 };
 

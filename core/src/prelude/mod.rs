@@ -1,14 +1,10 @@
 pub mod context;
 pub mod enums;
-pub mod errors;
 pub mod fs;
 pub mod server;
 
-pub type CoreResult<T> = Result<T, CoreError>;
-
 pub use context::*;
 pub use enums::*;
-pub use errors::*;
 pub use fs::*;
 pub use server::*;
 
@@ -22,7 +18,7 @@ mod tests {
 	};
 
 	use crate::{
-		db::models::{
+		db::entity::{
 			epub::*, library::*, log::*, media::*, read_progress::*, reading_list::*,
 			series::*, tag::*, user::*,
 		},
@@ -30,7 +26,7 @@ mod tests {
 		job::*,
 	};
 
-	use super::{enums::*, errors::*, fs::*, inputs::*, server::*};
+	use super::{enums::*, fs::*, inputs::*, server::*};
 
 	#[allow(dead_code)]
 	fn ts_export<T>() -> Result<String, TsExportError>

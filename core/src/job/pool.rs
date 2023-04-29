@@ -8,8 +8,9 @@ use tracing::error;
 
 use super::{persist_job_cancelled, runner::Runner, Job, JobReport};
 use crate::{
+	error::{CoreError, CoreResult},
 	event::{CoreEvent, InternalCoreTask},
-	prelude::{CoreError, CoreResult, Ctx},
+	prelude::Ctx,
 	prisma::job,
 };
 

@@ -9,14 +9,11 @@ use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
 use stump_core::{
 	db::{
-		models::{Media, Series},
-		utils::PrismaCountTrait,
-		Dao, SeriesDao, SeriesDaoImpl,
+		entity::{Media, Series},
+		Dao, PrismaCountTrait, SeriesDao, SeriesDaoImpl,
 	},
-	fs::{image, media_file},
-	prelude::{
-		ContentType, PageQuery, Pageable, Pagination, PaginationQuery, QueryOrder,
-	},
+	filesystem::{image, media::get_page, ContentType},
+	prelude::{PageQuery, Pageable, Pagination, PaginationQuery, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,
@@ -332,7 +329,7 @@ async fn get_series_thumbnail(
 		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
 	}
 
-	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
+	Ok(get_page(media.path.as_str(), 1)?.into())
 }
 
 #[utoipa::path(

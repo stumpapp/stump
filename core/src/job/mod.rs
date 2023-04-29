@@ -12,9 +12,10 @@ use specta::Type;
 // use tracing::error;
 
 use crate::{
+	error::{CoreError, CoreResult},
 	event::CoreEvent,
 	job::runner::RunnerCtx,
-	prelude::{errors::CoreError, CoreResult, Ctx},
+	prelude::Ctx,
 	prisma::{self},
 };
 

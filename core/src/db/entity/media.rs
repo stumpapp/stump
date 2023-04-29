@@ -6,7 +6,8 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	prelude::{enums::FileStatus, CoreError, CoreResult},
+	error::{CoreError, CoreResult},
+	prelude::enums::FileStatus,
 	prisma::{media, media_annotation, read_progress},
 };
 

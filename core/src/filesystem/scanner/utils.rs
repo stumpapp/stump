@@ -14,11 +14,12 @@ use walkdir::DirEntry;
 
 use crate::{
 	db::{
-		models::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
+		entity::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
 		Dao, DaoBatch, MediaDao, MediaDaoImpl,
 	},
-	fs::{image, media_file, scanner::BatchScanOperation},
-	prelude::{CoreError, CoreResult, Ctx, FileStatus},
+	error::{CoreError, CoreResult},
+	filesystem::{image, media::process, scanner::BatchScanOperation},
+	prelude::{Ctx, FileStatus},
 	prisma::{library, media, series},
 };
 
@@ -39,7 +40,7 @@ impl MediaBuilder for Media {
 		path: &Path,
 		options: MediaBuilderOptions,
 	) -> CoreResult<Media> {
-		let processed_entry = media_file::process(path, &options.library_options)?;
+		let processed_entry = process(path, options.library_options.into())?;
 
 		let pathbuf = processed_entry.path;
 		let path = pathbuf.as_path();
@@ -81,7 +82,7 @@ impl MediaBuilder for Media {
 				Some(count) => count as i32,
 				None => processed_entry.pages,
 			},
-			checksum: processed_entry.checksum,
+			checksum: processed_entry.hash,
 			path: path_str,
 			series_id: options.series_id,
 			..Default::default()
@@ -188,8 +189,9 @@ pub async fn insert_media(
 
 	if library_options.create_webp_thumbnails {
 		debug!("Attempting to create WEBP thumbnail");
-		let thumbnail_path = image::generate_thumbnail(&created_media.id, &path_str)?;
-		debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
+		// TODO: Add me back!
+		// let thumbnail_path = image::generate_thumbnail(&created_media.id, &path_str)?;
+		// debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
 	}
 
 	debug!("Media for {} created successfully", path_str);

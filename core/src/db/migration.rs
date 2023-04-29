@@ -1,6 +1,6 @@
 use tracing::{debug, info};
 
-use crate::{prelude::CoreResult, prisma, CoreError};
+use crate::{error::CoreResult, prisma, CoreError};
 
 pub async fn run_migrations(client: &prisma::PrismaClient) -> CoreResult<()> {
 	info!("Running migrations...");

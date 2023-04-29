@@ -11,11 +11,11 @@ use serde::Deserialize;
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		models::{Media, ReadProgress},
+		entity::{Media, ReadProgress},
 		Dao, MediaDao, MediaDaoImpl,
 	},
-	fs::{image, media_file},
-	prelude::{ContentType, PageQuery, Pageable, Pagination, PaginationQuery},
+	filesystem::{image, media::get_page, ContentType},
+	prelude::{PageQuery, Pageable, Pagination, PaginationQuery},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		read_progress, user,
@@ -598,7 +598,7 @@ async fn get_media_page(
 					id, book.pages
 				)))
 			} else {
-				Ok(media_file::get_page(&book.path, page)?.into())
+				Ok(get_page(&book.path, page)?.into())
 			}
 		},
 		None => Err(ApiError::NotFound(format!(
@@ -647,7 +647,7 @@ async fn get_media_thumbnail(
 		.await?;
 
 	if let Some(book) = result {
-		Ok(media_file::get_page(book.path.as_str(), 1)?.into())
+		Ok(get_page(book.path.as_str(), 1)?.into())
 	} else {
 		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",

@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
-	db::models::{User, UserPreferences},
+	db::entity::{User, UserPreferences},
 	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
 	prisma::{user, user_preferences, PrismaClient},
 };

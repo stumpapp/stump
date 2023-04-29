@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::db::models::{LibraryOptions, LibraryScanMode, ReadingListVisibility, Tag};
+use crate::db::entity::{LibraryOptions, LibraryScanMode, ReadingListVisibility, Tag};
 
 // TODO: put these adjacent to the types they're used for, remove this file
 

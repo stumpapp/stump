@@ -6,7 +6,7 @@ use tokio::sync::{
 };
 
 use crate::{
-	db::{self, models::Log},
+	db::{self, entity::Log},
 	event::{CoreEvent, InternalCoreTask},
 	job::Job,
 	prisma,

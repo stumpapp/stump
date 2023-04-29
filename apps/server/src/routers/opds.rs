@@ -7,14 +7,14 @@ use axum::{
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
-	db::utils::PrismaCountTrait,
-	fs::{epub, image, media_file},
+	db::PrismaCountTrait,
+	filesystem::{image, media::get_page, ContentType},
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prelude::{ContentType, PageQuery},
+	prelude::PageQuery,
 	prisma::{library, media, series},
 };
 use tracing::{trace, warn};
@@ -497,7 +497,7 @@ async fn get_book_thumbnail(
 		.await?;
 
 	if let Some(book) = result {
-		let (content_type, image_buffer) = media_file::get_page(book.path.as_str(), 1)?;
+		let (content_type, image_buffer) = get_page(book.path.as_str(), 1)?;
 		handle_opds_image_response(content_type, image_buffer)
 	} else {
 		Err(ApiError::NotFound(format!(
@@ -530,13 +530,7 @@ async fn get_book_page(
 	}
 
 	if let Some(book) = result {
-		let (content_type, image_buffer) =
-			if book.path.ends_with(".epub") && correct_page == 1 {
-				epub::get_cover(&book.path)?
-			} else {
-				media_file::get_page(book.path.as_str(), correct_page)?
-			};
-
+		let (content_type, image_buffer) = get_page(book.path.as_str(), correct_page)?;
 		handle_opds_image_response(content_type, image_buffer)
 	} else {
 		Err(ApiError::NotFound(format!("Book {} not found", &id)))

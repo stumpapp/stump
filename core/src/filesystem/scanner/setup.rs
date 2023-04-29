@@ -8,10 +8,11 @@ use tracing::{debug, error, trace};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	db::models::{LibraryOptions, Media},
+	db::entity::{LibraryOptions, Media},
+	error::{CoreError, CoreResult},
 	event::CoreEvent,
-	fs::scanner::utils::{insert_series_batch, mark_library_missing},
-	prelude::{CoreError, CoreResult, Ctx, FileStatus},
+	filesystem::scanner::utils::{insert_series_batch, mark_library_missing},
+	prelude::{Ctx, FileStatus},
 	prisma::{library, media, series},
 };
 

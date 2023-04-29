@@ -5,7 +5,7 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	db::models::Media,
+	db::entity::Media,
 	prisma::{reading_list, reading_list_item},
 };
 

@@ -13,17 +13,17 @@ use tracing::{debug, error, trace};
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		models::{
+		entity::{
 			library_series_ids_media_ids_include, LibrariesStats, Library,
 			LibraryScanMode, Media, Series,
 		},
-		utils::PrismaCountTrait,
+		PrismaCountTrait,
 	},
-	fs::{image, media_file},
+	filesystem::{get_page, image, ContentType},
 	job::LibraryScanJob,
 	prelude::{
-		ContentType, CreateLibraryArgs, Pageable, Pagination, PaginationQuery,
-		ScanQueryParam, UpdateLibraryArgs,
+		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, ScanQueryParam,
+		UpdateLibraryArgs,
 	},
 	prisma::{
 		library::{self, WhereParam},
@@ -427,7 +427,7 @@ async fn get_library_thumbnail(
 		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
 	})?;
 
-	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
+	Ok(get_page(media.path.as_str(), 1)?.into())
 }
 
 #[utoipa::path(

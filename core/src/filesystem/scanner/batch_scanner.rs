@@ -9,9 +9,10 @@ use std::{
 use tracing::{debug, error, trace};
 
 use crate::{
-	db::models::LibraryOptions,
+	db::entity::LibraryOptions,
+	error::{CoreError, CoreResult},
 	event::CoreEvent,
-	fs::{
+	filesystem::{
 		image,
 		scanner::{
 			setup::{setup_series, SeriesSetup},
@@ -20,7 +21,7 @@ use crate::{
 		},
 	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
-	prelude::{CoreError, CoreResult, Ctx},
+	prelude::Ctx,
 	prisma::series,
 };
 
@@ -187,9 +188,10 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		// sleep for a bit to let client catch up
 		tokio::time::sleep(Duration::from_millis(50)).await;
 
-		if let Err(err) = image::generate_thumbnails(&created_media) {
-			error!("Failed to generate thumbnails: {:?}", err);
-		}
+		// TODO: add me back!
+		// if let Err(err) = image::generate_thumbnails(&created_media) {
+		// 	error!("Failed to generate thumbnails: {:?}", err);
+		// }
 	}
 
 	ctx.progress(JobUpdate::job_finishing(

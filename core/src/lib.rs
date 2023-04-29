@@ -6,17 +6,19 @@ use std::sync::Arc;
 pub mod config;
 pub mod db;
 pub mod event;
-pub mod fs;
+pub mod filesystem;
 pub mod job;
 pub mod opds;
 
+pub mod error;
 pub mod prelude;
 pub mod prisma;
 
 use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
+use error::{CoreError, CoreResult};
 use event::{event_manager::EventManager, InternalCoreTask};
-use prelude::{CoreError, CoreResult, Ctx};
+use prelude::Ctx;
 use tokio::sync::mpsc::unbounded_channel;
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump

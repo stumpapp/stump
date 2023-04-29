@@ -8,14 +8,15 @@ use std::{
 use tracing::{debug, error, trace, warn};
 
 use crate::{
-	db::models::LibraryOptions,
+	db::entity::LibraryOptions,
+	error::CoreResult,
 	event::CoreEvent,
-	fs::scanner::{
+	filesystem::scanner::{
 		setup::{setup_series, SeriesSetup},
 		utils, ScannedFileTrait,
 	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
-	prelude::{CoreResult, Ctx},
+	prelude::Ctx,
 	prisma::series,
 };
 

@@ -1,8 +1,17 @@
-use std::{ffi::OsStr, path::Path};
+use std::{ffi::OsStr, fs::File, io::Read, path::Path};
 use tracing::error;
 use walkdir::WalkDir;
 
-use super::{media::is_accepted_cover_name, ContentType};
+use super::{media::is_accepted_cover_name, ContentType, FileError};
+
+pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
+	let mut file = File::open(path)?;
+
+	let mut buf = Vec::new();
+	file.read_to_end(&mut buf)?;
+
+	Ok(buf)
+}
 
 pub trait IsImage {
 	fn is_image(&self) -> bool;

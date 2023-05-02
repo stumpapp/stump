@@ -16,17 +16,26 @@ use super::{rar::RarProcessor, zip::ZipProcessor};
 
 // TODO: impl From<LibraryOptions> for FileProcessorOptions
 #[derive(Debug)]
-pub struct FileProcessorOptions {}
+pub struct FileProcessorOptions {
+	pub convert_rar_to_zip: bool,
+	pub delete_conversion_source: bool,
+}
 
 impl From<LibraryOptions> for FileProcessorOptions {
 	fn from(options: LibraryOptions) -> Self {
-		Self {}
+		Self {
+			convert_rar_to_zip: options.convert_rar_to_zip,
+			delete_conversion_source: options.hard_delete_conversions,
+		}
 	}
 }
 
 impl From<&LibraryOptions> for FileProcessorOptions {
 	fn from(options: &LibraryOptions) -> Self {
-		Self {}
+		Self {
+			convert_rar_to_zip: options.convert_rar_to_zip,
+			delete_conversion_source: options.hard_delete_conversions,
+		}
 	}
 }
 
@@ -139,15 +148,3 @@ pub fn get_content_types_for_pages(
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
 	}
 }
-
-// fn process_rar(
-// 	convert: bool,
-// 	path: &Path,
-// ) -> Result<ProcessedMediaFile, ProcessFileError> {
-// 	if convert {
-// 		let zip_path = rar::convert_to_zip(path)?;
-// 		zip::process(zip_path.as_path())
-// 	} else {
-// 		rar::process(path)
-// 	}
-// }

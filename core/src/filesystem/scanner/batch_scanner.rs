@@ -13,7 +13,7 @@ use crate::{
 	error::{CoreError, CoreResult},
 	event::CoreEvent,
 	filesystem::{
-		image,
+		image::generate_thumbnails,
 		scanner::{
 			setup::{setup_series, SeriesSetup},
 			utils::{batch_media_operations, file_updated_since_scan},
@@ -172,7 +172,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 	}
 
 	// TODO: change task_count and send progress?
-	if library_options.create_webp_thumbnails {
+	if let Some(thumbnail_config) = library_options.thumbnail_config {
 		trace!("Library configured to create WEBP thumbnails.");
 
 		ctx.progress(JobUpdate::job_progress(
@@ -189,9 +189,9 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		tokio::time::sleep(Duration::from_millis(50)).await;
 
 		// TODO: add me back!
-		// if let Err(err) = image::generate_thumbnails(&created_media) {
-		// 	error!("Failed to generate thumbnails: {:?}", err);
-		// }
+		if let Err(err) = generate_thumbnails(&created_media, thumbnail_config) {
+			error!("Failed to generate thumbnails: {:?}", err);
+		}
 	}
 
 	ctx.progress(JobUpdate::job_finishing(

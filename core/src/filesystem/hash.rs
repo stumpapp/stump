@@ -1,6 +1,6 @@
 use data_encoding::HEXLOWER;
 use ring::digest::{Context, SHA256};
-use std::io::{self, Read};
+use std::io;
 use tracing::debug;
 
 // use std::fs::File;
@@ -9,8 +9,6 @@ use std::os::unix::prelude::FileExt;
 
 #[cfg(target_family = "windows")]
 use std::os::windows::prelude::*;
-
-use crate::CoreError;
 
 pub const HASH_SAMPLE_SIZE: u64 = 10000;
 pub const HASH_SAMPLE_COUNT: u64 = 4;
@@ -61,23 +59,23 @@ pub fn generate(path: &str, bytes: u64) -> Result<String, io::Error> {
 	Ok(encoded_digest)
 }
 
-pub fn generate_from_reader<R: Read>(mut reader: R) -> Result<String, CoreError> {
-	let mut ring_context = Context::new(&SHA256);
+// pub fn generate_from_reader<R: Read>(mut reader: R) -> Result<String, CoreError> {
+// 	let mut ring_context = Context::new(&SHA256);
 
-	let mut buffer = [0; 1024];
+// 	let mut buffer = [0; 1024];
 
-	loop {
-		let count = reader.read(&mut buffer)?;
+// 	loop {
+// 		let count = reader.read(&mut buffer)?;
 
-		// This reader has reached its "end of file"
-		if count == 0 {
-			break;
-		}
+// 		// This reader has reached its "end of file"
+// 		if count == 0 {
+// 			break;
+// 		}
 
-		ring_context.update(&buffer[..count]);
-	}
+// 		ring_context.update(&buffer[..count]);
+// 	}
 
-	let digest = ring_context.finish();
+// 	let digest = ring_context.finish();
 
-	Ok(HEXLOWER.encode(digest.as_ref()))
-}
+// 	Ok(HEXLOWER.encode(digest.as_ref()))
+// }

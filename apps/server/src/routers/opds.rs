@@ -8,7 +8,11 @@ use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
 	db::PrismaCountTrait,
-	filesystem::{image, media::get_page, ContentType},
+	filesystem::{
+		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
+		media::get_page,
+		ContentType,
+	},
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
@@ -478,7 +482,11 @@ fn handle_opds_image_response(
 			?content_type,
 			"Unsupported image for OPDS detected, converting to JPEG"
 		);
-		let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+		// let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+		let jpeg_buffer = GenericImageProcessor::generate(
+			&image_buffer,
+			ImageProcessorOptions::jpeg(),
+		)?;
 		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 	}
 }

@@ -14,7 +14,7 @@ use stump_core::{
 		entity::{Media, ReadProgress},
 		Dao, MediaDao, MediaDaoImpl,
 	},
-	filesystem::{image, media::get_page, ContentType},
+	filesystem::{media::get_page, read_entire_file, ContentType},
 	prelude::{PageQuery, Pageable, Pagination, PaginationQuery},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
@@ -637,7 +637,7 @@ async fn get_media_thumbnail(
 
 	if webp_path.exists() {
 		trace!("Found webp thumbnail for media {}", id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
+		return Ok((ContentType::WEBP, read_entire_file(webp_path)?).into());
 	}
 
 	let result = db

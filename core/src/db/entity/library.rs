@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::{self, library};
+use crate::{
+	filesystem::image::ImageProcessorOptions,
+	prisma::{self, library},
+};
 
 use super::{series::Series, tag::Tag, Cursorable};
 
@@ -101,8 +104,8 @@ pub struct LibraryOptions {
 	pub id: Option<String>,
 	pub convert_rar_to_zip: bool,
 	pub hard_delete_conversions: bool,
-	pub create_webp_thumbnails: bool,
 	pub library_pattern: LibraryPattern,
+	pub thumbnail_config: Option<ImageProcessorOptions>,
 	// TODO: don't make Option after pcr supports nested create
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	pub library_id: Option<String>,
@@ -184,8 +187,10 @@ impl From<prisma::library_options::Data> for LibraryOptions {
 			id: Some(data.id),
 			convert_rar_to_zip: data.convert_rar_to_zip,
 			hard_delete_conversions: data.hard_delete_conversions,
-			create_webp_thumbnails: data.create_webp_thumbnails,
 			library_pattern: LibraryPattern::from(data.library_pattern),
+			thumbnail_config: data.thumbnail_config.map(|config| {
+				ImageProcessorOptions::try_from(config).unwrap_or_default()
+			}),
 			library_id: data.library_id,
 		}
 	}
@@ -197,8 +202,10 @@ impl From<&prisma::library_options::Data> for LibraryOptions {
 			id: Some(data.id.clone()),
 			convert_rar_to_zip: data.convert_rar_to_zip,
 			hard_delete_conversions: data.hard_delete_conversions,
-			create_webp_thumbnails: data.create_webp_thumbnails,
 			library_pattern: LibraryPattern::from(data.library_pattern.clone()),
+			thumbnail_config: data.thumbnail_config.clone().map(|config| {
+				ImageProcessorOptions::try_from(config).unwrap_or_default()
+			}),
 			library_id: data.library_id.clone(),
 		}
 	}

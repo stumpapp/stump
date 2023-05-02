@@ -19,7 +19,31 @@ pub struct EpubProcessor;
 
 impl FileProcessor for EpubProcessor {
 	fn get_sample_size(file: &str) -> Result<u64, FileError> {
-		unimplemented!()
+		let mut epub_file = Self::open(file)?;
+
+		let mut sample_size = 0;
+		let page_count = epub_file.get_num_pages();
+
+		for i in 0..page_count {
+			if i > 5 {
+				break;
+			}
+
+			if i > 0 {
+				epub_file
+					.set_current_page(i)
+					.map_err(|e| FileError::EpubReadError(e.to_string()))?;
+			}
+
+			let chapter_buffer = epub_file
+				.get_current()
+				.map_err(|e| FileError::EpubReadError(e.to_string()))?;
+			let chapter_size = chapter_buffer.len() as u64;
+
+			sample_size += chapter_size;
+		}
+
+		Ok(sample_size)
 	}
 
 	fn hash(path: &str) -> Option<String> {
@@ -38,14 +62,11 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
-	fn process(
-		path: &str,
-		options: FileProcessorOptions,
-	) -> Result<ProcessedFile, FileError> {
+	fn process(path: &str, _: FileProcessorOptions) -> Result<ProcessedFile, FileError> {
 		debug!(?path, "processing epub");
 
 		let path_buf = PathBuf::from(path);
-		let epub_file = open_epub_file(path)?;
+		let epub_file = Self::open(path)?;
 
 		let pages = epub_file.get_num_pages() as i32;
 
@@ -81,7 +102,7 @@ impl FileProcessor for EpubProcessor {
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
-		let mut epub_file = open_epub_file(path)?;
+		let mut epub_file = Self::open(path)?;
 
 		let mut content_types = HashMap::new();
 
@@ -119,6 +140,10 @@ impl FileProcessor for EpubProcessor {
 }
 
 impl EpubProcessor {
+	pub fn open(path: &str) -> Result<EpubDoc<BufReader<File>>, FileError> {
+		EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
+	}
+
 	/// Returns the cover image for the epub file. If a cover image cannot be extracted via the
 	/// metadata, it will go through two rounds of fallback methods:
 	///
@@ -192,7 +217,7 @@ impl EpubProcessor {
 		path: &str,
 		chapter: usize,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		let mut epub_file = open_epub_file(path)?;
+		let mut epub_file = Self::open(path)?;
 
 		epub_file.set_current_page(chapter).map_err(|e| {
 			error!("Failed to get chapter from epub file: {}", e);
@@ -224,7 +249,7 @@ impl EpubProcessor {
 		path: &str,
 		resource_id: &str,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		let mut epub_file = open_epub_file(path)?;
+		let mut epub_file = Self::open(path)?;
 
 		let contents = epub_file.get_resource(resource_id).map_err(|e| {
 			error!("Failed to get resource: {}", e);
@@ -244,7 +269,7 @@ impl EpubProcessor {
 		root: &str,
 		resource_path: PathBuf,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		let mut epub_file = open_epub_file(path)?;
+		let mut epub_file = Self::open(path)?;
 
 		let adjusted_path = normalize_resource_path(resource_path, root);
 
@@ -274,10 +299,8 @@ impl EpubProcessor {
 
 		Ok((content_type, contents))
 	}
-}
-
-pub(crate) fn open_epub_file(path: &str) -> Result<EpubDoc<BufReader<File>>, FileError> {
-	EpubDoc::new(path).map_err(|e| FileError::EpubOpenError(e.to_string()))
+	// TODO: add all of the HTML sanitization and URL replacement stuff here
+	// as methods on this struct
 }
 
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {

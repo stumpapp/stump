@@ -18,7 +18,7 @@ use crate::{
 		Dao, DaoBatch, MediaDao, MediaDaoImpl,
 	},
 	error::{CoreError, CoreResult},
-	filesystem::{image, media::process, scanner::BatchScanOperation},
+	filesystem::{media::process, scanner::BatchScanOperation},
 	prelude::{Ctx, FileStatus},
 	prisma::{library, media, series},
 };
@@ -187,12 +187,12 @@ pub async fn insert_media(
 
 	trace!("Media entity created: {:?}", created_media);
 
-	if library_options.create_webp_thumbnails {
-		debug!("Attempting to create WEBP thumbnail");
-		// TODO: Add me back!
-		// let thumbnail_path = image::generate_thumbnail(&created_media.id, &path_str)?;
-		// debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
-	}
+	// TODO: Add me back!
+	// if library_options.create_webp_thumbnails {
+	// 	debug!("Attempting to create WEBP thumbnail");
+	// 	// let thumbnail_path = image::generate_thumbnail(&created_media.id, &path_str)?;
+	// 	// debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
+	// }
 
 	debug!("Media for {} created successfully", path_str);
 

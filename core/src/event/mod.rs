@@ -6,8 +6,8 @@ use tokio::sync::oneshot;
 
 use crate::{
 	db::entity::{Media, Series},
-	job::{Job, JobReport, JobStatus, JobUpdate},
 	error::CoreResult,
+	job::{Job, JobReport, JobStatus, JobUpdate},
 };
 
 pub enum InternalCoreTask {

@@ -51,10 +51,7 @@ impl FileProcessor for ZipProcessor {
 		}
 	}
 
-	fn process(
-		path: &str,
-		options: FileProcessorOptions,
-	) -> Result<ProcessedFile, FileError> {
+	fn process(path: &str, _: FileProcessorOptions) -> Result<ProcessedFile, FileError> {
 		debug!(path, "Processing zip");
 
 		let hash = ZipProcessor::hash(path);

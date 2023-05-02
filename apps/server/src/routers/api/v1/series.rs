@@ -12,7 +12,9 @@ use stump_core::{
 		entity::{Media, Series},
 		Dao, PrismaCountTrait, SeriesDao, SeriesDaoImpl,
 	},
-	filesystem::{image, media::get_page, ContentType},
+	filesystem::{
+		image::get_thumbnail_path, media::get_page, read_entire_file, ContentType,
+	},
 	prelude::{PageQuery, Pageable, Pagination, PaginationQuery, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
@@ -324,9 +326,9 @@ async fn get_series_thumbnail(
 	}
 
 	let media = media.unwrap();
-	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
+	if let Some(webp_path) = get_thumbnail_path(&media.id) {
 		trace!("Found webp thumbnail for series {}", &id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
+		return Ok((ContentType::WEBP, read_entire_file(webp_path)?).into());
 	}
 
 	Ok(get_page(media.path.as_str(), 1)?.into())

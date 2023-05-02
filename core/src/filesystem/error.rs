@@ -55,8 +55,6 @@ pub enum ScanError {
 	QueryError(String),
 	#[error("Unsupported file: {0}")]
 	UnsupportedFile(String),
-	#[error("{0}")]
-	FileParseError(String),
 	#[error("Failed to build globset from invalid .stumpignore file: {0}")]
 	GlobParseError(#[from] globset::Error),
 	#[error("{0}")]

@@ -76,12 +76,13 @@ model LibraryOptions {
   // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
   // trash location, or a custom location when running in Docker (which will clear on an interval).
   hard_delete_conversions Boolean @default(false)
-  // Flag indicating whether or not to create WEBP thumbnails for scanned media.
-  create_webp_thumbnails  Boolean @default(false)
   // The pattern which this library follows. Used primarily during scanning, affects how Stump
   // will define its series. SERIES_BASED and COLLECTION_BASED are the only
   // two valid options. Default is SERIES_BASED.
   library_pattern         String  @default("SERIES_BASED")
+  // The thumbnail configuration for this library. This is a JSON blob in the form of:
+  // { size_factor: "...", format: "...", quality: ... }
+  thumbnail_config        Bytes?
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////

@@ -19,7 +19,7 @@ use stump_core::{
 		},
 		PrismaCountTrait,
 	},
-	filesystem::{get_page, image, ContentType},
+	filesystem::{get_page, image, read_entire_file, ContentType},
 	job::LibraryScanJob,
 	prelude::{
 		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, ScanQueryParam,
@@ -406,7 +406,7 @@ async fn get_library_thumbnail(
 
 	if webp_path.exists() {
 		trace!("Found webp thumbnail for library {}", id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
+		return Ok((ContentType::WEBP, read_entire_file(webp_path)?).into());
 	}
 
 	let library_series = db
@@ -545,9 +545,6 @@ async fn create_library(
 					library_options::hard_delete_conversions::set(
 						library_options_arg.hard_delete_conversions,
 					),
-					library_options::create_webp_thumbnails::set(
-						library_options_arg.create_webp_thumbnails,
-					),
 					library_options::library_pattern::set(
 						library_options_arg.library_pattern.to_string(),
 					),
@@ -642,9 +639,6 @@ async fn update_library(
 				),
 				library_options::hard_delete_conversions::set(
 					library_options.hard_delete_conversions,
-				),
-				library_options::create_webp_thumbnails::set(
-					library_options.create_webp_thumbnails,
 				),
 			],
 		)

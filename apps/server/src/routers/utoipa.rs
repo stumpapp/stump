@@ -1,32 +1,30 @@
 // use axum::middleware::from_extractor_with_state;
 use axum::middleware::from_extractor_with_state;
 use axum::Router;
-use stump_core::db::entity::{
-	LibrariesStats, Library, LibraryOptions, LibraryPattern, LibraryScanMode, LogLevel,
-	Media, ReadProgress, ReadingList, Series, Tag, User, UserPreferences,
+use stump_core::db::entity::*;
+use stump_core::db::query::{ordering::*, pagination::*};
+use stump_core::filesystem::{
+	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
 };
 use stump_core::job::{JobReport, JobStatus};
-use stump_core::prelude::{
-	ClaimResponse, CreateLibraryArgs, CreateReadingList, CreateTags, CursorInfo,
-	Direction, DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileStatus,
-	LoginOrRegisterArgs, PageInfo, PageQuery, PageableDirectoryListing,
-	PageableLibraries, PageableMedia, PageableSeries, PaginationQuery, QueryOrder,
-	ScanQueryParam, StumpVersion, UpdateLibraryArgs, UpdateUserArgs,
-	UserPreferencesUpdate,
-};
+
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::ApiError;
 use crate::middleware::auth::Auth;
-// use crate::middleware::auth::Auth;
 use crate::utils::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesRelation,
 };
 
-use super::api;
+use super::api::{
+	self,
+	v1::{
+		auth::LoginOrRegisterArgs, library::ScanQueryParam, ClaimResponse, StumpVersion,
+	},
+};
 
 // NOTE: it is very easy to indirectly cause fmt failures by not adhering to the
 // rustfmt rules, since cargo fmt will not format the code in the macro.
@@ -93,9 +91,9 @@ use super::api;
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
             PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
-            Direction, CreateLibraryArgs, UpdateLibraryArgs, ApiError, MediaFilter, SeriesFilter,
+            Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, JobReport, LibrariesStats, ScanQueryParam,
-            JobStatus, SeriesRelation, CreateReadingList, UserPreferencesUpdate, UpdateUserArgs,
+            JobStatus, SeriesRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags
         )
     ),

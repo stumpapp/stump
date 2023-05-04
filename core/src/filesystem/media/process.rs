@@ -14,7 +14,6 @@ use crate::{
 
 use super::{rar::RarProcessor, zip::ZipProcessor};
 
-// TODO: impl From<LibraryOptions> for FileProcessorOptions
 #[derive(Debug)]
 pub struct FileProcessorOptions {
 	pub convert_rar_to_zip: bool,

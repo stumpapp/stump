@@ -1,7 +1,13 @@
 use axum_sessions::extractors::{ReadableSession, WritableSession};
-use stump_core::{db::entity::User, prelude::DecodedCredentials};
+use stump_core::db::entity::User;
 
 use crate::errors::{ApiError, ApiResult, AuthError};
+
+#[derive(Debug)]
+pub struct DecodedCredentials {
+	pub username: String,
+	pub password: String,
+}
 
 pub fn get_hash_cost() -> u32 {
 	std::env::var("HASH_COST")

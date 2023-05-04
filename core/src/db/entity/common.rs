@@ -4,13 +4,8 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Type, ToSchema, Default)]
-pub enum UserRole {
-	#[serde(rename = "SERVER_OWNER")]
-	ServerOwner,
-	#[serde(rename = "MEMBER")]
-	#[default]
-	Member,
+pub trait Cursorable {
+	fn cursor(&self) -> String;
 }
 
 #[derive(Serialize, Deserialize, Type, ToSchema)]
@@ -64,24 +59,6 @@ impl FromStr for FileStatus {
 			"ERROR" => Ok(FileStatus::Error),
 			"MISSING" => Ok(FileStatus::Missing),
 			_ => Err(()),
-		}
-	}
-}
-
-impl From<UserRole> for String {
-	fn from(role: UserRole) -> String {
-		match role {
-			UserRole::ServerOwner => "SERVER_OWNER".to_string(),
-			UserRole::Member => "MEMBER".to_string(),
-		}
-	}
-}
-
-impl fmt::Display for UserRole {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		match self {
-			UserRole::ServerOwner => write!(f, "SERVER_OWNER"),
-			UserRole::Member => write!(f, "MEMBER"),
 		}
 	}
 }

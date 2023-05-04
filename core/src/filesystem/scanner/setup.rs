@@ -8,12 +8,12 @@ use tracing::{debug, error, trace};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	db::entity::{LibraryOptions, Media},
+	db::entity::{common::FileStatus, LibraryOptions, Media},
 	error::{CoreError, CoreResult},
 	event::CoreEvent,
 	filesystem::scanner::utils::{insert_series_batch, mark_library_missing},
-	prelude::{Ctx, FileStatus},
 	prisma::{library, media, series},
+	Ctx,
 };
 
 use super::{utils::populate_glob_builder, ScannedFileTrait};

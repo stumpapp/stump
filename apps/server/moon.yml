@@ -21,6 +21,9 @@ tasks:
     command: 'cargo run --release --package stump_server'
     local: true
 
+  codegen:
+    command: 'cargo test --package stump_server  --bin stump_server -- routers::api::tests::codegen --ignored'
+
   build:
     command: 'cargo build --release --package stump_server'
     local: true

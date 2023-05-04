@@ -7,9 +7,9 @@ use crate::{
 	db::{
 		common::CountQueryReturn,
 		entity::{Media, Series},
+		query::pagination::{PageParams, Pageable},
 	},
 	error::{CoreError, CoreResult},
-	prelude::{PageParams, Pageable},
 	prisma::{library, media, series, PrismaClient},
 };
 

@@ -11,6 +11,10 @@ use crate::{
 
 use super::Cursorable;
 
+///////////////////////////////////////////////
+//////////////////// MODELS ///////////////////
+///////////////////////////////////////////////
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ReadingListVisibility {
 	#[serde(rename = "PUBLIC")]
@@ -84,6 +88,21 @@ impl From<reading_list_item::Data> for ReadingListItem {
 		}
 	}
 }
+
+//////////////////////////////////////////////
+//////////////////// INPUTS //////////////////
+//////////////////////////////////////////////
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub struct CreateReadingList {
+	pub id: String,
+	pub media_ids: Vec<String>,
+	pub visibility: Option<ReadingListVisibility>,
+}
+
+///////////////////////////////////////////////
+////////////////// CONVERSIONS ////////////////
+///////////////////////////////////////////////
 
 impl From<reading_list::Data> for ReadingList {
 	fn from(data: reading_list::Data) -> ReadingList {

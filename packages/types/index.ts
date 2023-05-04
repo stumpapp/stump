@@ -8,6 +8,18 @@ export enum FileStatus {
 	Missing = 'MISSING',
 }
 
+export type ApiError =
+	| { code: 'BadRequest'; details: string }
+	| { code: 'NotFound'; details: string }
+	| { code: 'InternalServerError'; details: string }
+	| { code: 'Unauthorized'; details: string }
+	| { code: 'Forbidden'; details: string }
+	| { code: 'NotImplemented'; details: string }
+	| { code: 'ServiceUnavailable'; details: string }
+	| { code: 'BadGateway'; details: string }
+	| { code: 'Unknown'; details: string }
+	| { code: 'Redirect'; details: string }
+
 export interface Pageable<T> {
 	// The target data being returned.
 	data: T

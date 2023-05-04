@@ -7,12 +7,12 @@ use utoipa::ToSchema;
 
 use crate::{
 	error::{CoreError, CoreResult},
-	prelude::enums::FileStatus,
 	prisma::{media, media_annotation, read_progress},
 };
 
 use super::{
-	read_progress::ReadProgress, series::Series, tag::Tag, Cursorable, LibraryOptions,
+	common::FileStatus, read_progress::ReadProgress, series::Series, tag::Tag,
+	Cursorable, LibraryOptions,
 };
 
 #[derive(

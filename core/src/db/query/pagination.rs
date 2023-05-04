@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::entity::{Cursorable, Library, Media, Series},
-	prelude::DirectoryListing,
+	filesystem::DirectoryListing,
 };
 
 // TODO: this entire file belongs in server app, not here. It is currently used by DAOs, which are

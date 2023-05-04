@@ -7,24 +7,23 @@ use axum::{
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
+use serde::Deserialize;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
+use utoipa::ToSchema;
 
 use stump_core::{
 	config::get_config_dir,
 	db::{
 		entity::{
-			library_series_ids_media_ids_include, LibrariesStats, Library,
-			LibraryScanMode, Media, Series,
+			library_series_ids_media_ids_include, CreateLibrary, LibrariesStats, Library,
+			LibraryScanMode, Media, Series, UpdateLibrary,
 		},
+		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
 	},
 	filesystem::{get_page, image, read_entire_file, ContentType},
 	job::LibraryScanJob,
-	prelude::{
-		CreateLibraryArgs, Pageable, Pagination, PaginationQuery, ScanQueryParam,
-		UpdateLibraryArgs,
-	},
 	prisma::{
 		library::{self, WhereParam},
 		library_options, media,
@@ -430,6 +429,11 @@ async fn get_library_thumbnail(
 	Ok(get_page(media.path.as_str(), 1)?.into())
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ScanQueryParam {
+	scan_mode: Option<String>,
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/libraries/:id/scan",
@@ -492,7 +496,7 @@ async fn scan_library(
 	post,
 	path = "/api/v1/libraries",
 	tag = "library",
-	request_body = CreateLibraryArgs,
+	request_body = CreateLibrary,
 	responses(
 		(status = 200, description = "Successfully created library"),
 		(status = 400, description = "Bad request"),
@@ -505,7 +509,7 @@ async fn scan_library(
 async fn create_library(
 	session: ReadableSession,
 	State(ctx): State<AppState>,
-	Json(input): Json<CreateLibraryArgs>,
+	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
 	get_session_admin_user(&session)?;
 
@@ -598,7 +602,7 @@ async fn create_library(
 	put,
 	path = "/api/v1/libraries/:id",
 	tag = "library",
-	request_body = UpdateLibraryArgs,
+	request_body = UpdateLibrary,
 	params(
 		("id" = String, Path, description = "The id of the library to update")
 	),
@@ -616,7 +620,7 @@ async fn update_library(
 	session: ReadableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Json(input): Json<UpdateLibraryArgs>,
+	Json(input): Json<UpdateLibrary>,
 ) -> ApiResult<Json<Library>> {
 	get_session_admin_user(&session)?;
 	let db = ctx.get_db();

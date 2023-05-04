@@ -1,6 +1,6 @@
 // TODO: fix all these pub uses
 
-mod common;
+pub(crate) mod common;
 pub mod epub;
 pub mod library;
 pub mod log;
@@ -11,8 +11,8 @@ pub mod series;
 pub mod tag;
 pub mod user;
 
-pub use crate::db::entity::epub::*;
-pub use crate::db::entity::log::*;
+pub use self::epub::*;
+pub use self::log::*;
 
 pub use library::*;
 pub use media::*;
@@ -22,7 +22,5 @@ pub use series::*;
 pub use tag::*;
 pub use user::*;
 
-// TODO: move this
-pub trait Cursorable {
-	fn cursor(&self) -> String;
-}
+pub(crate) use common::Cursorable;
+pub use common::{FileStatus, LayoutMode};

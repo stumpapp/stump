@@ -14,13 +14,15 @@ use walkdir::DirEntry;
 
 use crate::{
 	db::{
-		entity::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
+		entity::{
+			common::FileStatus, LibraryOptions, Media, MediaBuilder, MediaBuilderOptions,
+		},
 		Dao, DaoBatch, MediaDao, MediaDaoImpl,
 	},
 	error::{CoreError, CoreResult},
 	filesystem::{media::process, scanner::BatchScanOperation},
-	prelude::{Ctx, FileStatus},
 	prisma::{library, media, series},
+	Ctx,
 };
 
 // TODO: I hate this here, but I don't know where else to put it.

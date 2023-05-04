@@ -12,8 +12,10 @@ use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{and, or};
 use stump_core::{
-	db::entity::ReadingList,
-	prelude::{CreateReadingList, Pageable, Pagination, PaginationQuery},
+	db::{
+		entity::{CreateReadingList, ReadingList},
+		query::pagination::{Pageable, Pagination, PaginationQuery},
+	},
 	prisma::{reading_list, reading_list_rbac, user},
 };
 use tracing::trace;

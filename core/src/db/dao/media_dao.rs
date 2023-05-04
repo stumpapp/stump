@@ -3,9 +3,12 @@ use std::sync::Arc;
 use prisma_client_rust::{raw, Direction, PrismaValue};
 
 use crate::{
-	db::{common::CountQueryReturn, entity::Media},
+	db::{
+		common::CountQueryReturn,
+		entity::Media,
+		query::pagination::{PageParams, Pageable},
+	},
 	error::{CoreError, CoreResult},
-	prelude::{PageParams, Pageable},
 	prisma::{media, read_progress, series, PrismaClient},
 };
 

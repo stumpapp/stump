@@ -6,8 +6,7 @@ use axum::{
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::{
-	db::entity::{User, UserPreferences},
-	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
+	db::entity::{UpdateUser, UpdateUserPreferences, User, UserPreferences},
 	prisma::{user, user_preferences, PrismaClient},
 };
 use tracing::{debug, trace};
@@ -21,6 +20,8 @@ use crate::{
 		get_writable_session_user,
 	},
 };
+
+use super::auth::LoginOrRegisterArgs;
 
 // TODO: move some of these user operations to the UserDao...
 
@@ -54,7 +55,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn update_user_inner(
 	client: &PrismaClient,
 	user_id: String,
-	input: UpdateUserArgs,
+	input: UpdateUser,
 ) -> ApiResult<User> {
 	let mut update_params = vec![
 		user::username::set(input.username),
@@ -80,7 +81,7 @@ async fn update_user_inner(
 async fn update_preferences_inner(
 	client: &PrismaClient,
 	preferences_id: String,
-	input: UserPreferencesUpdate,
+	input: UpdateUserPreferences,
 ) -> ApiResult<UserPreferences> {
 	let updated_preferences = client
 		.user_preferences()
@@ -188,7 +189,7 @@ async fn create_user(
 	put,
 	path = "/api/v1/users/me",
 	tag = "user",
-	request_body = UpdateUserArgs,
+	request_body = UpdateUser,
 	responses(
 		(status = 200, description = "Successfully updated user.", body = User),
 		(status = 401, description = "Unauthorized."),
@@ -200,7 +201,7 @@ async fn create_user(
 async fn update_current_user(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
-	Json(input): Json<UpdateUserArgs>,
+	Json(input): Json<UpdateUser>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 	let user = get_writable_session_user(&writable_session)?;
@@ -221,7 +222,7 @@ async fn update_current_user(
 	put,
 	path = "/api/v1/users/me/preferences",
 	tag = "user",
-	request_body = UserPreferencesUpdate,
+	request_body = UpdateUserPreferences,
 	responses(
 		(status = 200, description = "Successfully updated user preferences.", body = UserPreferences),
 		(status = 401, description = "Unauthorized."),
@@ -233,7 +234,7 @@ async fn update_current_user(
 async fn update_current_user_preferences(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
-	Json(input): Json<UserPreferencesUpdate>,
+	Json(input): Json<UpdateUserPreferences>,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
 
@@ -346,7 +347,7 @@ async fn get_user_by_id(
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
 	),
-	request_body = UpdateUserArgs,
+	request_body = UpdateUser,
 	responses(
 		(status = 200, description = "Successfully updated user.", body = User),
 		(status = 401, description = "Unauthorized."),
@@ -359,7 +360,7 @@ async fn update_user(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Json(input): Json<UpdateUserArgs>,
+	Json(input): Json<UpdateUser>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 	let user = get_writable_session_user(&writable_session)?;
@@ -434,7 +435,7 @@ async fn get_user_preferences(
 	params(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
 	),
-	request_body = UserPreferencesUpdate,
+	request_body = UpdateUserPreferences,
 	responses(
 		(status = 200, description = "Successfully updated user preferences.", body = UserPreferences),
 		(status = 401, description = "Unauthorized."),
@@ -447,7 +448,7 @@ async fn update_user_preferences(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Json(input): Json<UserPreferencesUpdate>,
+	Json(input): Json<UpdateUserPreferences>,
 ) -> ApiResult<Json<UserPreferences>> {
 	trace!(?id, ?input, "Updating user preferences");
 	let db = ctx.get_db();

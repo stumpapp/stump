@@ -7,7 +7,7 @@ use axum::{
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
-	db::PrismaCountTrait,
+	db::{query::pagination::PageQuery, PrismaCountTrait},
 	filesystem::{
 		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
 		media::get_page,
@@ -18,7 +18,6 @@ use stump_core::{
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prelude::PageQuery,
 	prisma::{library, media, series},
 };
 use tracing::{trace, warn};

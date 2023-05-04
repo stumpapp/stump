@@ -1,10 +1,10 @@
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
-#[cfg(target_family = "unix")]
-use std::os::unix::prelude::MetadataExt;
+// #[cfg(target_family = "unix")]
+// use std::os::unix::prelude::MetadataExt;
 
-#[cfg(target_family = "windows")]
-use std::os::windows::prelude::*;
+// #[cfg(target_family = "windows")]
+// use std::os::windows::prelude::*;
 
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
 const DEFAULT_EPUB_COVER_ID: &str = "cover";
@@ -70,15 +70,11 @@ impl FileProcessor for EpubProcessor {
 
 		let pages = epub_file.get_num_pages() as i32;
 
-		let file_metadata = path_buf.metadata().map_err(|e| {
-			error!("Failed to get metadata for epub file: {}", e.to_string());
-			FileError::EpubReadError(e.to_string())
-		})?;
-
-		#[cfg(target_family = "unix")]
-		let file_size = file_metadata.size();
-		#[cfg(target_family = "windows")]
-		let file_size = file_metadata.file_size();
+		// TODO: Get metadata
+		// let metadata = path_buf.metadata().map_err(|e| {
+		// 	error!("Failed to get metadata for epub file: {}", e.to_string());
+		// 	FileError::EpubReadError(e.to_string())
+		// })?;
 
 		Ok(ProcessedFile {
 			thumbnail_path: None,

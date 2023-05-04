@@ -12,10 +12,10 @@ use stump_core::{
 	config::get_config_dir,
 	db::{
 		entity::{Media, ReadProgress},
+		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		Dao, MediaDao, MediaDaoImpl,
 	},
 	filesystem::{media::get_page, read_entire_file, ContentType},
-	prelude::{PageQuery, Pageable, Pagination, PaginationQuery},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		read_progress, user,

@@ -16,8 +16,6 @@ type InternalSender = UnboundedSender<InternalCoreTask>;
 
 type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 
-// TODO: write more doc comments...
-
 /// Struct that holds the main context for a Stump application. This is passed around
 /// to all the different parts of the application, and is used to access the database
 /// and manage the event channels.

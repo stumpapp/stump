@@ -7,8 +7,6 @@ use crate::{
 	prisma::{library, media, series},
 };
 
-// TODO: put these elsewhere, maybe in db crate?
-
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
 pub enum Direction {
 	#[serde(rename = "asc")]

@@ -3,6 +3,7 @@ mod common;
 pub(crate) mod dao;
 pub mod entity;
 pub mod migration;
+pub mod query;
 
 pub use dao::*;
 

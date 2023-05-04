@@ -10,12 +10,15 @@ use prisma_client_rust::Direction;
 use stump_core::{
 	db::{
 		entity::{Media, Series},
+		query::{
+			ordering::QueryOrder,
+			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
+		},
 		Dao, PrismaCountTrait, SeriesDao, SeriesDaoImpl,
 	},
 	filesystem::{
 		image::get_thumbnail_path, media::get_page, read_entire_file, ContentType,
 	},
-	prelude::{PageQuery, Pageable, Pagination, PaginationQuery, QueryOrder},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,

@@ -137,7 +137,6 @@ impl FileProcessor for ZipProcessor {
 		let mut content_types = HashMap::new();
 
 		let mut images_seen = 0;
-		// TODO: I reused this pattern twice, it is annoying enough to warrant abstraction!
 		for name in file_names {
 			let mut file = archive.by_name(name)?;
 			let (content_type, _) = get_zip_entry_content_type(&mut file)?;

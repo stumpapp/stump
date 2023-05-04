@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{prelude::enums::FileStatus, prisma};
+use crate::prisma;
 
-use super::{library::Library, media::Media, tag::Tag, Cursorable};
+use super::{common::FileStatus, library::Library, media::Media, tag::Tag, Cursorable};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Series {

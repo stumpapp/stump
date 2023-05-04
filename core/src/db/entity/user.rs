@@ -1,8 +1,13 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use std::fmt;
 use utoipa::ToSchema;
 
 use crate::prisma;
+
+///////////////////////////////////////////////
+//////////////////// MODELS ///////////////////
+///////////////////////////////////////////////
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct User {
@@ -42,11 +47,36 @@ impl From<prisma::user::Data> for User {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Type, ToSchema, Default)]
+pub enum UserRole {
+	#[serde(rename = "SERVER_OWNER")]
+	ServerOwner,
+	#[serde(rename = "MEMBER")]
+	#[default]
+	Member,
+}
 
+impl From<UserRole> for String {
+	fn from(role: UserRole) -> String {
+		match role {
+			UserRole::ServerOwner => "SERVER_OWNER".to_string(),
+			UserRole::Member => "MEMBER".to_string(),
+		}
+	}
+}
+
+impl fmt::Display for UserRole {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			UserRole::ServerOwner => write!(f, "SERVER_OWNER"),
+			UserRole::Member => write!(f, "MEMBER"),
+		}
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct UserPreferences {
 	pub id: String,
-	// pub reduce_animations: bool,
 	pub locale: String,
 	pub library_layout_mode: String,
 	pub series_layout_mode: String,
@@ -59,7 +89,6 @@ impl Default for UserPreferences {
 		Self {
 			id: "DEFAULT".to_string(),
 			locale: "en".to_string(),
-			// reduce_animations: false,
 			library_layout_mode: "GRID".to_string(),
 			series_layout_mode: "GRID".to_string(),
 			collection_layout_mode: "GRID".to_string(),
@@ -67,6 +96,31 @@ impl Default for UserPreferences {
 		}
 	}
 }
+
+//////////////////////////////////////////////
+//////////////////// INPUTS //////////////////
+//////////////////////////////////////////////
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct UpdateUser {
+	pub username: String,
+	pub password: Option<String>,
+	pub avatar_url: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, Type, ToSchema)]
+pub struct UpdateUserPreferences {
+	pub id: String,
+	pub locale: String,
+	pub library_layout_mode: String,
+	pub series_layout_mode: String,
+	pub collection_layout_mode: String,
+	pub app_theme: String,
+}
+
+///////////////////////////////////////////////
+////////////////// CONVERSIONS ////////////////
+///////////////////////////////////////////////
 
 impl From<prisma::user_preferences::Data> for UserPreferences {
 	fn from(data: prisma::user_preferences::Data) -> UserPreferences {

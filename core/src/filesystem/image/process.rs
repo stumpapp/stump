@@ -106,3 +106,25 @@ pub fn resized_dimensions(
 		ImageSizeFactor::Sized(height, width) => (height, width),
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_resized_dimensions() {
+		let (height, width) = resized_dimensions(100, 100, ImageSizeFactor::Scaled(0.5));
+		assert_eq!(height, 50);
+		assert_eq!(width, 50);
+
+		let (height, width) =
+			resized_dimensions(100, 100, ImageSizeFactor::CustomScaled(0.5, 0.5));
+		assert_eq!(height, 50);
+		assert_eq!(width, 50);
+
+		let (height, width) =
+			resized_dimensions(100, 100, ImageSizeFactor::Sized(50, 50));
+		assert_eq!(height, 50);
+		assert_eq!(width, 50);
+	}
+}

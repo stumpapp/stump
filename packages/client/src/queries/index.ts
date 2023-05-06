@@ -32,4 +32,11 @@ export {
 } from './series'
 export { useStumpVersion } from './server'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
-export { useUpdatePreferences, useUpdateUser, useUserPreferences, useUsersQuery } from './user'
+export {
+	useCreateUser,
+	useDeleteUser,
+	useUpdatePreferences,
+	useUpdateUser,
+	useUserPreferences,
+	useUsersQuery,
+} from './user'

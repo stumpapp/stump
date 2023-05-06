@@ -4,7 +4,7 @@ use tracing::trace;
 use utoipa::ToSchema;
 
 use crate::{
-	db::entity::{Cursorable, Library, Media, Series},
+	db::entity::{Cursor, Library, Media, Series},
 	filesystem::DirectoryListing,
 };
 
@@ -95,7 +95,11 @@ impl PageQuery {
 		let zero_based = self.zero_based.unwrap_or(false);
 		let page_size = self.page_size.unwrap_or(20);
 		let default_page = u32::from(!zero_based);
-		let page = self.page.unwrap_or(default_page);
+		let mut page = self.page.unwrap_or(default_page);
+
+		if !zero_based && page == 0 {
+			page = 1;
+		}
 
 		let start = if zero_based {
 			page * page_size
@@ -383,7 +387,7 @@ where
 // Note: this is used when you have to query the database for the total number of pages.
 impl<T> From<(Vec<T>, i64, Pagination)> for Pageable<Vec<T>>
 where
-	T: Serialize + Clone + Cursorable,
+	T: Serialize + Clone + Cursor,
 {
 	fn from(tuple: (Vec<T>, i64, Pagination)) -> Pageable<Vec<T>> {
 		let (data, db_total, pagination) = tuple;

@@ -80,6 +80,7 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 						src={imageUrl || undefined}
 						fallback={fallback}
 						fallbackColor="brand"
+						fallbackWrapperClassName="text-3xl font-medium tracking-widest"
 					/>
 					<span className="absolute bottom-0 left-0 block translate-x-2 transform">
 						<DropdownMenu

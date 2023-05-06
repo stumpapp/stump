@@ -1,10 +1,15 @@
-import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
+import type { LoginOrRegisterArgs, UpdateUserArgs, User, UserPreferences } from '@stump/types'
 
-import { API } from '.'
-import { ApiResult } from './types'
+import { API, toUrlParams } from '.'
+import { ApiResult, PageableApiResult } from './types'
 
-export function getUsers(): Promise<ApiResult<User[]>> {
-	return API.get('/users')
+export function getUsers(params?: Record<string, unknown>): Promise<PageableApiResult<User[]>> {
+	if (params) {
+		const searchParams = toUrlParams(params)
+		return API.get(`/users?${searchParams.toString()}`)
+	} else {
+		return API.get('/users')
+	}
 }
 
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {
@@ -30,6 +35,10 @@ export function updateUserPreferences(
 	return API.put(`/users/${userId}/preferences`, preferences)
 }
 
+export function createUser(params: LoginOrRegisterArgs): Promise<ApiResult<User>> {
+	return API.post(`/users`, params)
+}
+
 export function updateUser(userId: string, params: UpdateUserArgs): Promise<ApiResult<User>> {
 	return API.put(`/users/${userId}`, params)
 }
@@ -38,7 +47,22 @@ export function updateViewer(params: UpdateUserArgs): Promise<ApiResult<User>> {
 	return API.put(`/users/me`, params)
 }
 
-const userApi = {
+type DeleteUser = {
+	userId: string
+	hardDelete?: boolean
+}
+
+export function deleteUser({ userId, hardDelete }: DeleteUser): Promise<ApiResult<User>> {
+	return API.delete(`/users/${userId}`, {
+		data: {
+			hard_delete: hardDelete,
+		},
+	})
+}
+
+export const userApi = {
+	createUser,
+	deleteUser,
 	getUserPreferences,
 	getUsers,
 	updatePreferences,
@@ -48,6 +72,8 @@ const userApi = {
 }
 
 export const userQueryKeys: Record<keyof typeof userApi, string> = {
+	createUser: 'user.createUser',
+	deleteUser: 'user.deleteUser',
 	getUserPreferences: 'user.getUserPreferences',
 	getUsers: 'user.getUsers',
 	updatePreferences: 'user.updatePreferences',

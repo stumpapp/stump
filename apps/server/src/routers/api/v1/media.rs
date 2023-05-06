@@ -79,7 +79,6 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 	_where
 }
 
-// TODO: move this to core?
 pub(crate) fn apply_pagination<'a>(
 	query: media::FindMany<'a>,
 	pagination: &Pagination,
@@ -672,7 +671,6 @@ async fn get_media_thumbnail(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-// FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found
 /// Update the read progress of a media. If the progress doesn't exist, it will be created.
 async fn update_media_progress(
 	Path((id, page)): Path<(String, i32)>,
@@ -682,24 +680,48 @@ async fn update_media_progress(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	// update the progress, otherwise create it
-	Ok(Json(
-		db.read_progress()
-			.upsert(
-				read_progress::UniqueWhereParam::UserIdMediaIdEquals(
-					user_id.clone(),
-					id.clone(),
-				),
-				(
-					page,
-					media::id::equals(id.clone()),
-					user::id::equals(user_id.clone()),
-					vec![],
-				),
-				vec![read_progress::page::set(page)],
-			)
-			.exec()
-			.await?
-			.into(),
-	))
+	let read_progress = db
+		._transaction()
+		.run(|client| async move {
+			let read_progress = client
+				.read_progress()
+				.upsert(
+					read_progress::user_id_media_id(user_id.clone(), id.clone()),
+					(
+						page,
+						media::id::equals(id.clone()),
+						user::id::equals(user_id.clone()),
+						vec![],
+					),
+					vec![read_progress::page::set(page)],
+				)
+				.with(read_progress::media::fetch())
+				.exec()
+				.await?;
+
+			// NOTE: EPUB feature tracking!
+			// This pattern only works for page-based media... So will have to be
+			// considered/revisited once that feature gets prioritized
+			let is_completed = read_progress
+				.media
+				.as_ref()
+				.map(|media| media.pages == page)
+				.unwrap_or_default();
+
+			if is_completed {
+				client
+					.read_progress()
+					.update(
+						read_progress::id::equals(read_progress.id.clone()),
+						vec![read_progress::is_completed::set(true)],
+					)
+					.exec()
+					.await
+			} else {
+				Ok(read_progress)
+			}
+		})
+		.await?;
+
+	Ok(Json(ReadProgress::from(read_progress)))
 }

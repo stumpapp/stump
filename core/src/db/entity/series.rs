@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
-use super::{common::FileStatus, library::Library, media::Media, tag::Tag, Cursorable};
+use super::{common::FileStatus, library::Library, media::Media, tag::Tag, Cursor};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Series {
@@ -55,7 +55,7 @@ impl Series {
 	}
 }
 
-impl Cursorable for Series {
+impl Cursor for Series {
 	fn cursor(&self) -> String {
 		self.id.clone()
 	}

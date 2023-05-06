@@ -3,7 +3,7 @@
 	"build": {
 		"beforeDevCommand": "pnpm vite --clearScreen=false",
 		"devPath": "http://localhost:3000",
-		"distDir": "../../web/dist"
+		"distDir": "../dist"
 	},
 	"package": {
 		"productName": "Stump",
@@ -62,6 +62,18 @@
 				"decorations": true,
 				"transparent": false,
 				"center": true
+			},
+			{
+				"fullscreen": false,
+				"height": 700,
+				"resizable": true,
+				"title": "Stump",
+				"width": 1200,
+				"decorations": true,
+				"transparent": false,
+				"center": true,
+				"url": "splash-screen.html",
+				"label": "splashscreen"
 			}
 		]
 	}

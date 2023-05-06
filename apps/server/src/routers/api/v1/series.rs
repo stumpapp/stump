@@ -33,7 +33,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_session_user, http::ImageResponse, FilterableQuery, SeriesFilter,
-		SeriesRelation,
+		SeriesQueryRelation,
 	},
 };
 
@@ -81,7 +81,7 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 	params(
 		("filter_query" = Option<FilterableSeriesQuery>, Query, description = "The filter options"),
 		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
-		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+		("relation_query" = Option<SeriesQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched series.", body = PageableSeries),
@@ -93,7 +93,7 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 async fn get_series(
 	filter_query: Query<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
-	relation_query: Query<SeriesRelation>,
+	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
@@ -193,7 +193,7 @@ async fn get_series(
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch"),
-		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+		("relation_query" = Option<SeriesQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched series.", body = Series),
@@ -205,7 +205,7 @@ async fn get_series(
 /// Get a series by ID. Optional query param `load_media` that will load the media
 /// relation (i.e. the media entities will be loaded and sent with the response)
 async fn get_series_by_id(
-	query: Query<SeriesRelation>,
+	query: Query<SeriesQueryRelation>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,

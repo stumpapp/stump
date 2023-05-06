@@ -16,7 +16,7 @@ use crate::errors::ApiError;
 use crate::middleware::auth::Auth;
 use crate::utils::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
-	MediaFilter, SeriesFilter, SeriesRelation,
+	MediaFilter, SeriesFilter, SeriesQueryRelation,
 };
 
 use super::api::{
@@ -79,7 +79,7 @@ use super::api::{
         api::v1::user::create_user,
         api::v1::user::delete_user_by_id,
         api::v1::user::get_user_by_id,
-        api::v1::user::update_user,
+        api::v1::user::update_user_handler,
         api::v1::user::get_user_preferences,
         api::v1::user::update_user_preferences,
     ),
@@ -93,7 +93,7 @@ use super::api::{
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
             Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, JobReport, LibrariesStats, ScanQueryParam,
-            JobStatus, SeriesRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
+            JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags
         )
     ),

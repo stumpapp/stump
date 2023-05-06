@@ -22,5 +22,5 @@ pub use series::*;
 pub use tag::*;
 pub use user::*;
 
-pub(crate) use common::Cursorable;
+pub(crate) use common::Cursor;
 pub use common::{FileStatus, LayoutMode};

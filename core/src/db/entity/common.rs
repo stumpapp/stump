@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-pub trait Cursorable {
+pub trait Cursor {
 	fn cursor(&self) -> String;
 }
 

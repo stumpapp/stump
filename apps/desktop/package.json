@@ -7,9 +7,8 @@
 		"tauri": "tauri",
 		"vite": "vite --",
 		"dev": "tauri dev",
-		"build": "pnpm build:web && tauri build",
-		"build:mac": "pnpm build:web && tauri build --target universal-apple-darwin",
-		"build:web": "vite build"
+		"build": "vite build && tauri build",
+		"build:mac": "vite build && tauri build --target universal-apple-darwin"
 	},
 	"dependencies": {
 		"@stump/client": "workspace:*",

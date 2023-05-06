@@ -81,7 +81,10 @@ async fn login(
 	let fetched_user = state
 		.db
 		.user()
-		.find_unique(user::username::equals(input.username.to_owned()))
+		.find_first(vec![
+			user::username::equals(input.username.to_owned()),
+			user::deleted_at::equals(None),
+		])
 		.with(user::user_preferences::fetch())
 		.exec()
 		.await?;

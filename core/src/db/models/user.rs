@@ -4,6 +4,8 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
+use super::{Cursor, ReadProgress};
+
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct User {
 	pub id: String,
@@ -11,6 +13,7 @@ pub struct User {
 	pub role: String,
 	pub user_preferences: Option<UserPreferences>,
 	pub avatar_url: Option<String>,
+	pub read_progresses: Option<Vec<ReadProgress>>,
 }
 
 impl User {
@@ -25,10 +28,21 @@ impl User {
 	// TODO: other utilities based off of preferences
 }
 
+impl Cursor for User {
+	fn cursor(&self) -> String {
+		self.id.clone()
+	}
+}
+
 impl From<prisma::user::Data> for User {
 	fn from(data: prisma::user::Data) -> User {
 		let user_preferences = match data.user_preferences() {
 			Ok(up) => Some(up.unwrap().to_owned().into()),
+			Err(_e) => None,
+		};
+
+		let read_progresses = match data.read_progresses() {
+			Ok(rp) => Some(rp.iter().cloned().map(ReadProgress::from).collect()),
 			Err(_e) => None,
 		};
 
@@ -38,6 +52,7 @@ impl From<prisma::user::Data> for User {
 			role: data.role,
 			user_preferences,
 			avatar_url: data.avatar_url,
+			read_progresses,
 		}
 	}
 }

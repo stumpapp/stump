@@ -29,6 +29,10 @@ where
 	}
 }
 
+// pub fn get_prisma_joiner<T>(joiner_str: &str) {
+// 	let joiner = prisma_joiner!(joiner_str);
+// }
+
 fn string_or_seq_string<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
 where
 	D: Deserializer<'de>,
@@ -79,9 +83,14 @@ pub struct LibraryFilter {
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
-pub struct SeriesRelation {
+pub struct SeriesQueryRelation {
 	pub load_media: Option<bool>,
 	pub count_media: Option<bool>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct UserQueryRelation {
+	pub include_read_progresses: Option<bool>,
 }
 
 // TODO: I don't like this convention and I'd rather figure out a way around it.

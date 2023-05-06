@@ -3,7 +3,7 @@
 
 export type StumpVersion = { semver: string; rev: string | null; compile_time: string }
 
-export type User = { id: string; username: string; role: string; user_preferences: UserPreferences | null; avatar_url: string | null }
+export type User = { id: string; username: string; role: string; user_preferences: UserPreferences | null; avatar_url: string | null; read_progresses: ReadProgress[] | null }
 
 export type UserRole = "SERVER_OWNER" | "MEMBER"
 

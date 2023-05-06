@@ -91,3 +91,8 @@ pub struct CreateReadingList {
 pub struct CreateTags {
 	pub tags: Vec<String>,
 }
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct DeleteUser {
+	pub hard_delete: Option<bool>,
+}

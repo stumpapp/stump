@@ -55,9 +55,9 @@ fn infer_mime(path: &Path) -> Option<String> {
 impl ContentType {
 	/// Infer the MIME type of a file extension.
 	///
-	/// ### Examples
+	/// ### Example
 	/// ```rust
-	/// use stump_core::types::server::http::ContentType;
+	/// use stump_core::prelude::server::http::ContentType;
 	///
 	/// let content_type = ContentType::from_extension("png");
 	/// assert_eq!(content_type, Some(ContentType::PNG));
@@ -85,9 +85,9 @@ impl ContentType {
 	/// Infer the MIME type of a file using the [infer] crate. If the MIME type cannot be inferred,
 	/// then the file extension is used to determine the content type.
 	///
-	/// ### Examples
+	/// ### Example
 	/// ```rust
-	/// use stump_core::types::server::http::ContentType;
+	/// use stump_core::prelude::server::http::ContentType;
 	///
 	/// let content_type = ContentType::from_file("test.png");
 	/// assert_eq!(content_type, ContentType::PNG);
@@ -144,9 +144,9 @@ impl ContentType {
 	/// Infer the MIME type of a [Path] using the [infer] crate. If the MIME type cannot be inferred,
 	/// then the extension of the path is used to determine the content type.
 	///
-	/// ### Examples
+	/// ### Example
 	/// ```rust
-	/// use stump_core::types::server::http::ContentType;
+	/// use stump_core::types::server::http::preludentType;
 	/// use std::path::Path;
 	///
 	/// let path = Path::new("test.png");
@@ -173,9 +173,9 @@ impl ContentType {
 
 	/// Returns true if the content type is an image.
 	///
-	/// ## Examples
+	/// ## Example
 	/// ```rust
-	/// use stump_core::types::server::http::ContentType;
+	/// use stump_core::prelude::server::http::ContentType;
 	///
 	/// let content_type = ContentType::PNG;
 	/// assert!(content_type.is_image());
@@ -206,7 +206,7 @@ impl ContentType {
 
 	/// Returns true if the content type is a ZIP archive.
 	///
-	/// ## Examples
+	/// ## Example
 	///
 	/// ```rust
 	/// use stump_core::prelude::server::http::ContentType;
@@ -220,7 +220,7 @@ impl ContentType {
 
 	/// Returns true if the content type is a RAR archive.
 	///
-	/// ## Examples
+	/// ## Example
 	///
 	/// ```rust
 	/// use stump_core::prelude::server::http::ContentType;
@@ -234,7 +234,7 @@ impl ContentType {
 
 	/// Returns true if the content type is an EPUB archive.
 	///
-	/// ## Examples
+	/// ## Example
 	///
 	/// ```rust
 	/// use stump_core::prelude::server::http::ContentType;

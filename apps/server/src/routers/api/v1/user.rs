@@ -4,10 +4,15 @@ use axum::{
 	routing::{get, put},
 	Json, Router,
 };
+use axum_extra::extract::Query;
 use axum_sessions::extractors::{ReadableSession, WritableSession};
+use prisma_client_rust::chrono::Utc;
 use stump_core::{
 	db::models::{User, UserPreferences},
-	prelude::{LoginOrRegisterArgs, UpdateUserArgs, UserPreferencesUpdate},
+	prelude::{
+		DeleteUser, LoginOrRegisterArgs, Pageable, Pagination, PaginationQuery,
+		UpdateUserArgs, UserPreferencesUpdate,
+	},
 	prisma::{user, user_preferences, PrismaClient},
 };
 use tracing::{debug, trace};
@@ -18,7 +23,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		get_hash_cost, get_session_admin_user, get_session_user,
-		get_writable_session_user,
+		get_writable_session_user, UserQueryRelation,
 	},
 };
 
@@ -40,7 +45,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/",
 					get(get_user_by_id)
-						.put(update_user)
+						.put(update_user_handler)
 						.delete(delete_user_by_id),
 				)
 				.route(
@@ -51,7 +56,98 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-async fn update_user_inner(
+pub(crate) fn apply_pagination<'a>(
+	query: user::FindMany<'a>,
+	pagination: &Pagination,
+) -> user::FindMany<'a> {
+	match pagination {
+		Pagination::Page(page_query) => {
+			let (skip, take) = page_query.get_skip_take();
+			query.skip(skip).take(take)
+		},
+		Pagination::Cursor(cursor_params) => {
+			let mut cursor_query = query;
+			if let Some(cursor) = cursor_params.cursor.as_deref() {
+				cursor_query = cursor_query
+					.cursor(user::id::equals(cursor.to_string()))
+					.skip(1);
+			}
+			if let Some(limit) = cursor_params.limit {
+				cursor_query = cursor_query.take(limit);
+			}
+			cursor_query
+		},
+		_ => query,
+	}
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/users",
+	tag = "user",
+	params(
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination query."),
+		("relation_query" = Option<UserQueryRelation>, Query, description = "The relations to include"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched users.", body = [User]),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn get_users(
+	State(ctx): State<AppState>,
+	relation_query: Query<UserQueryRelation>,
+	pagination_query: Query<PaginationQuery>,
+	session: ReadableSession,
+) -> ApiResult<Json<Pageable<Vec<User>>>> {
+	get_session_admin_user(&session)?;
+
+	let pagination = pagination_query.0.get();
+	let is_unpaged = pagination.is_unpaged();
+	let pagination_cloned = pagination.clone();
+
+	let (users, count) = ctx
+		.db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client.user().find_many(vec![]);
+
+			let include_user_read_progress =
+				relation_query.include_read_progresses.unwrap_or_default();
+
+			if include_user_read_progress {
+				query = query.with(user::read_progresses::fetch(vec![]));
+			}
+
+			if !is_unpaged {
+				query = apply_pagination(query, &pagination_cloned);
+			}
+
+			let users = query.exec().await?.into_iter().map(User::from).collect();
+
+			if is_unpaged {
+				return Ok((users, None));
+			}
+
+			client
+				.user()
+				.count(vec![])
+				.exec()
+				.await
+				.map(|count| (users, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((users, count, pagination))));
+	}
+
+	Ok(Json(Pageable::from(users)))
+}
+
+async fn update_user(
 	client: &PrismaClient,
 	user_id: String,
 	input: UpdateUserArgs,
@@ -77,7 +173,7 @@ async fn update_user_inner(
 	Ok(User::from(updated_user_data))
 }
 
-async fn update_preferences_inner(
+async fn update_preferences(
 	client: &PrismaClient,
 	preferences_id: String,
 	input: UserPreferencesUpdate,
@@ -101,34 +197,6 @@ async fn update_preferences_inner(
 		.await?;
 
 	Ok(UserPreferences::from(updated_preferences))
-}
-
-#[utoipa::path(
-	get,
-	path = "/api/v1/users",
-	tag = "user",
-	responses(
-		(status = 200, description = "Successfully fetched users.", body = [User]),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
-	)
-)]
-async fn get_users(
-	State(ctx): State<AppState>,
-	session: ReadableSession,
-) -> ApiResult<Json<Vec<User>>> {
-	get_session_admin_user(&session)?;
-	Ok(Json(
-		ctx.db
-			.user()
-			.find_many(vec![])
-			.exec()
-			.await?
-			.into_iter()
-			.map(User::from)
-			.collect::<Vec<User>>(),
-	))
 }
 
 #[utoipa::path(
@@ -205,7 +273,7 @@ async fn update_current_user(
 	let db = ctx.get_db();
 	let user = get_writable_session_user(&writable_session)?;
 
-	let updated_user = update_user_inner(db, user.id, input).await?;
+	let updated_user = update_user(db, user.id, input).await?;
 	debug!(?updated_user, "Updated user");
 
 	writable_session
@@ -242,8 +310,7 @@ async fn update_current_user_preferences(
 
 	trace!(user_id = ?user.id, ?user_preferences, updates = ?input, "Updating viewer's preferences");
 
-	let updated_preferences =
-		update_preferences_inner(db, user_preferences.id, input).await?;
+	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
 	writable_session
@@ -269,7 +336,7 @@ async fn update_current_user_preferences(
 		("id" = String, Path, description = "The user's id.", example = "1ab2c3d4")
 	),
 	responses(
-		(status = 200, description = "Successfully deleted user.", body = String),
+		(status = 200, description = "Successfully deleted user.", body = User),
 		(status = 401, description = "Unauthorized."),
 		(status = 403, description = "Forbidden."),
 		(status = 404, description = "User not found."),
@@ -281,7 +348,8 @@ async fn delete_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
-) -> ApiResult<Json<String>> {
+	Json(input): Json<DeleteUser>,
+) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
 	let user = get_session_admin_user(&session)?;
 
@@ -291,15 +359,23 @@ async fn delete_user_by_id(
 		));
 	}
 
-	let deleted_user = db
-		.user()
-		.delete(user::id::equals(id.clone()))
-		.exec()
-		.await?;
+	let hard_delete = input.hard_delete.unwrap_or(false);
+
+	let deleted_user = if hard_delete {
+		db.user().delete(user::id::equals(id.clone())).exec().await
+	} else {
+		db.user()
+			.update(
+				user::id::equals(id.clone()),
+				vec![user::deleted_at::set(Some(Utc::now().into()))],
+			)
+			.exec()
+			.await
+	}?;
 
 	debug!(?deleted_user, "Deleted user");
 
-	Ok(Json(deleted_user.id))
+	Ok(Json(User::from(deleted_user)))
 }
 
 #[utoipa::path(
@@ -355,7 +431,7 @@ async fn get_user_by_id(
 	)
 )]
 /// Updates a user by ID.
-async fn update_user(
+async fn update_user_handler(
 	mut writable_session: WritableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
@@ -369,7 +445,7 @@ async fn update_user(
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_user = update_user_inner(db, id, input).await?;
+	let updated_user = update_user(db, id, input).await?;
 	debug!(?updated_user, "Updated user");
 
 	writable_session
@@ -459,8 +535,7 @@ async fn update_user_preferences(
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_preferences =
-		update_preferences_inner(db, user_preferences.id, input).await?;
+	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
 	writable_session

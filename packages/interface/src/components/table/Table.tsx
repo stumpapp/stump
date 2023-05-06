@@ -1,4 +1,4 @@
-import { Heading } from '@stump/components'
+import { Heading, NativeSelect, Text } from '@stump/components'
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -12,9 +12,11 @@ import {
 } from '@tanstack/react-table'
 import clsx from 'clsx'
 import { SortAscending, SortDescending } from 'phosphor-react'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import TablePagination from './Pagination'
+import TableFilterInput from './TableFilterInput'
+import TableFilterSelect from './TableFilterSelect'
 
 export interface TableProps<T = unknown, V = unknown> {
 	data: T[]
@@ -25,6 +27,7 @@ export interface TableProps<T = unknown, V = unknown> {
 	sortable?: boolean
 }
 
+// TODO: move into components package!
 // TODO: loading state
 export default function Table<T, V>({
 	data,
@@ -57,18 +60,41 @@ export default function Table<T, V>({
 		},
 	})
 
-	const headers = [{ header: 'All', id: 'GLOBAL_FILTER' }].concat(
-		table
-			.getAllColumns()
-			.map((col) => col.columns.map((c) => ({ header: c.columnDef.header as string, id: c.id })))
-			.flat(),
-	)
+	// const headers = [{ header: 'All', id: 'GLOBAL_FILTER' }].concat(
+	// 	table
+	// 		.getAllColumns()
+	// 		.map((col) => col.columns.map((c) => ({ header: c.columnDef.header as string, id: c.id })))
+	// 		.flat(),
+	// )
 
 	const { pageSize, pageIndex } = table.getState().pagination
 
 	const pageCount = table.getPageCount()
-	const lastIndex = (pageIndex + 1) * pageSize
-	const firstIndex = lastIndex - (pageSize - 1)
+	const dataCount = data.length
+	const viewBounds = useMemo(() => {
+		const isLessThanPage = dataCount < pageSize
+
+		const expectedLastIndex = (pageIndex + 1) * pageSize
+		const expectedFirstIndex = expectedLastIndex - (pageSize - 1)
+		const expectedTotalCount = pageCount * pageSize
+
+		if (isLessThanPage) {
+			return {
+				// firstIndex will still be expectedFirstIndex
+				firstIndex: expectedFirstIndex,
+				// lastIndex will be expectedLastIndex - (pageSize - data.length)
+				lastIndex: expectedLastIndex - (pageSize - dataCount),
+				// totalCount will be expectedTotalCount - (pageSize - data.length)
+				totalCount: expectedTotalCount - (pageSize - dataCount),
+			}
+		}
+
+		return {
+			firstIndex: expectedFirstIndex,
+			lastIndex: expectedLastIndex,
+			totalCount: expectedTotalCount,
+		}
+	}, [pageCount, pageSize, dataCount, pageIndex])
 
 	function handleFilter(value?: string) {
 		const filterCol = filterColRef.current?.value
@@ -130,55 +156,38 @@ export default function Table<T, V>({
 			</table>
 			<div className="h-2" />
 			<div className="flex items-center justify-between">
-				<div className="flex items-center space-x-2">
-					<span className="flex items-center gap-1">
-						<div>
-							Showing <strong>{firstIndex}</strong> to <strong>{lastIndex}</strong>
-						</div>
-						of <strong>{table.getPageCount() * pageSize}</strong>
-					</span>
+				<div className="flex items-center gap-4">
+					<Text variant="muted" className="flex flex-shrink-0 items-center gap-1" size="sm">
+						<span>
+							Showing <strong>{viewBounds.firstIndex}</strong> to{' '}
+							<strong>{viewBounds.lastIndex}</strong>
+						</span>
+						of <strong>{viewBounds.totalCount}</strong>
+					</Text>
 
-					<select
-						className="rounded-md py-0.5 text-sm"
-						value={pageSize}
+					<NativeSelect
+						disabled={pageCount <= 1 && dataCount <= pageSize}
+						size="sm"
+						options={[10, 20, 30, 40, 50].map((pageSize) => ({
+							label: `Show ${pageSize} rows`,
+							// FIXME: don't cast once my select can consume numbers :nomnom:
+							value: pageSize.toString(),
+						}))}
+						value={pageSize.toString()}
 						onChange={(e) => {
-							table.setPageSize(Number(e.target.value))
+							const parsed = parseInt(e.target.value, 10)
+							if (!isNaN(parsed) && parsed > 0) {
+								table.setPageSize(parsed)
+							}
 						}}
-					>
-						{[10, 20, 30, 40, 50].map((pageSize) => (
-							<option key={pageSize} value={pageSize}>
-								Show {pageSize}
-							</option>
-						))}
-					</select>
+					/>
 
-					{/* FIXME: scuffed */}
-					{/* {searchable && (
-						<div className="relative rounded-md shadow-sm">
-							<DebouncedInput
-								placeholder="Filter"
-								fullWidth
-								className="pr-12"
-								onInputStop={(value) => handleFilter(value)}
-								size="sm"
-								rounded="md"
-							/>
-							<div className="absolute inset-y-0 right-0 flex items-center">
-								<select
-									ref={filterColRef}
-									id="currency"
-									name="currency"
-									className="h-full appearance-none rounded-md border-transparent bg-transparent py-0 px-4 text-center text-sm focus:outline-brand"
-								>
-									{headers.map((column) => (
-										<option key={column.id} value={column.id}>
-											{column.header}
-										</option>
-									))}
-								</select>
-							</div>
-						</div>
-					)} */}
+					{searchable && (
+						<>
+							<TableFilterInput onChange={handleFilter} />
+							<TableFilterSelect />
+						</>
+					)}
 				</div>
 
 				<TablePagination

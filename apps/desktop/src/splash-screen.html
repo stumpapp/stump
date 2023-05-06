@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<title>Stump</title>
+		<script>
+			try {
+				const zustandState = JSON.parse(
+					localStorage.get('stump-user-store') || '{"state": {}}',
+				).state
+				if (zustandState.userPreferences && zustandState.userPreferences.app_theme === 'dark') {
+					document.querySelector('html').classList.add('dark')
+				}
+			} catch {}
+		</script>
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			html.dark {
+				background-color: #1b1c1e;
+			}
+			#app {
+				height: 100vh;
+				width: 100vw;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<img src="/assets/stump-splash.gif" alt="loading" style="max-width: 12rem" />
+		</div>
+	</body>
+</html>

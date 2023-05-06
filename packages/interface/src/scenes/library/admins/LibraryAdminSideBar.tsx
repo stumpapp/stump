@@ -67,17 +67,17 @@ export default function LibraryAdminSideBar() {
 	}
 
 	const renderOptions = () => {
-		const createThumbnails = libraryPreview?.library_options?.create_webp_thumbnails
+		return null
 		return (
 			<div className="flex flex-col gap-1.5 py-3">
-				{createThumbnails && (
+				{/* {createThumbnails && (
 					<>
 						<Label className="text-xs">Generate Thumbnails</Label>
 						<Text size="xs" variant="muted">
 							WEBP (lossless)
 						</Text>
 					</>
-				)}
+				)} */}
 			</div>
 		)
 	}

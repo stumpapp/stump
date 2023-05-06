@@ -4,9 +4,9 @@ use specta::Type;
 use crate::filesystem::error::FileError;
 
 /// The size factor to use when generating a thumbnail. This can be a
-/// scaled factor, where the height and width are scaled by the same factor, a
-/// a custom factor, where the height and width are scaled by different factors,
-/// or a specific size, where the height and width are set to the specified size.
+/// scaled factor (height and width are scaled by the same factor), a
+/// a custom factor (height and width are scaled by different factors),
+/// or a specific size (height and width are set to the specified size).
 ///
 /// All floats are clamped to the range [0.0, 1.0].
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]

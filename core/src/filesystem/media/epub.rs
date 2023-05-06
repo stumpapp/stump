@@ -295,8 +295,39 @@ impl EpubProcessor {
 
 		Ok((content_type, contents))
 	}
-	// TODO: add all of the HTML sanitization and URL replacement stuff here
-	// as methods on this struct
+
+	// TODO: write me, maybe using https://docs.rs/regex/latest/regex/
+	pub fn sanitize_html(
+		base_url: &str,
+		root: PathBuf,
+		content: Vec<u8>,
+	) -> Result<Vec<u8>, FileError> {
+		// replace all src attributes with `{epubBaseURl}/{root}/{src}`
+		// replace all href attributes with `{epubBaseURl}/{root}/{href}`
+		// base_url/root/
+		let resolved_base = PathBuf::from(base_url).join(root);
+		dbg!(resolved_base);
+
+		// 1. convert to string
+		// 2. match all elements with src or href attributes
+		// 3. iterate over all elements
+		// 4. if element has src or href attribute, replace it
+		// 5. convert back to string
+		// 6. convert back to bytes
+
+		let content_str = String::from_utf8(content).map_err(|e| {
+			error!(error = ?e, "Failed to HTML buffer content to string");
+			FileError::EpubReadError(e.to_string())
+		})?;
+
+		// use regex to replace all src and href attributes, e.g. invalid_elements = content_str.match(/src="[^"]+"/g)
+		// for each invalid_element, replace it with the correct value
+		// e.g. content_str.replace(invalid_element, `src="${epub_base_url}/${root}/${invalid_element}"`)
+
+		let content_bytes = content_str.as_bytes().to_vec();
+
+		Ok(content_bytes)
+	}
 }
 
 pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {

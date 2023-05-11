@@ -8,12 +8,12 @@ import {
 	RawSwitch,
 	Text,
 } from '@stump/components'
+import { ImageResizeMode, ImageResizeOptions } from '@stump/types'
 import { Fragment, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { Schema } from './CreateOrEditLibraryForm'
 
-type Option = 'disabled' | 'sized' | 'scaled' | 'custom-scaled'
 const formatOptions = [
 	{ label: 'WebP', value: 'Webp' },
 	{ label: 'JPEG', value: 'Jpeg' },
@@ -22,41 +22,23 @@ const formatOptions = [
 export default function ThumbnailConfigForm() {
 	const form = useFormContext<Schema>()
 
-	const thumbnail_config = form.watch('thumbnail_config')
+	const resize_options = form.watch('thumbnail_config.resize_options')
 
-	// NOTE: this is so ugly... but it works for now
-	const getInitialSelection = () => {
-		if (!thumbnail_config || !thumbnail_config.enabled) {
-			return 'disabled'
-		} else if (typeof thumbnail_config.size_factor === 'number') {
-			return 'scaled'
+	const handleSelection = (option: ImageResizeMode | 'disabled') => {
+		if (option === 'disabled' || option === resize_options?.mode) {
+			form.setValue('thumbnail_config.enabled', false)
+			form.setValue('thumbnail_config.resize_options', undefined)
 		} else {
-			const [width, height] = thumbnail_config.size_factor || []
-			if (width === undefined || height === undefined) {
-				return 'disabled'
-			}
-
-			// if either number is a decimal, then it's a custom scale
-			if (width % 1 !== 0 || height % 1 !== 0) {
-				return 'custom-scaled'
-			}
-
-			return 'sized'
+			const newOptions = {
+				mode: option,
+			} as ImageResizeOptions
+			form.setValue('thumbnail_config.resize_options', newOptions)
+			form.setValue('thumbnail_config.enabled', true)
 		}
 	}
 
-	const [selection, setSelection] = useState<Option>(getInitialSelection())
-
-	// const handleSizeFactorChange = () => {}
-
-	const handleSelection = (option: Option) => {
-		if (selection === option) {
-			setSelection('disabled')
-		} else {
-			setSelection(option)
-		}
-	}
-
+	// console.log(form.formState.errors)
+	console.log(resize_options)
 	return (
 		<div className="py-2">
 			<Heading size="xs">Thumbnail Configuration</Heading>
@@ -72,24 +54,33 @@ export default function ThumbnailConfigForm() {
 				<SwitchRow
 					label="Disabled"
 					description="No thumbnails will be generated for this library"
-					checked={selection === 'disabled'}
-					onClick={() => setSelection('disabled')}
+					checked={!resize_options}
+					onClick={() => handleSelection('disabled')}
 				/>
 
 				<SwitchRow
 					label="Explicitly Sized"
 					description="A fixed height and width (in pixels)"
-					checked={selection === 'sized'}
-					onClick={() => handleSelection('sized')}
+					checked={resize_options?.mode === 'Sized'}
+					onClick={() => handleSelection('Sized')}
 				>
-					<fieldset className="flex justify-end gap-2" disabled={selection !== 'sized'}>
+					<fieldset
+						className="flex justify-end gap-2"
+						disabled={!!resize_options && resize_options.mode !== 'Sized'}
+					>
 						<Input
 							variant="primary"
 							label="Width"
 							pattern="[0-9]*"
 							placeholder="200"
-							{...(selection === 'sized'
-								? form.register('thumbnail_config.size_factor.0', { valueAsNumber: true })
+							{...(resize_options?.mode === 'Sized'
+								? form.register('thumbnail_config.resize_options.width', { valueAsNumber: true })
+								: {})}
+							{...(resize_options?.mode === 'Sized'
+								? {
+										errorMessage:
+											form.formState.errors.thumbnail_config?.resize_options?.width?.message,
+								  }
 								: {})}
 						/>
 						<Input
@@ -97,48 +88,36 @@ export default function ThumbnailConfigForm() {
 							label="Height"
 							pattern="[0-9]*"
 							placeholder="350"
-							{...(selection === 'sized'
-								? form.register('thumbnail_config.size_factor.1', { valueAsNumber: true })
+							{...(resize_options?.mode === 'Sized'
+								? form.register('thumbnail_config.resize_options.height', { valueAsNumber: true })
 								: {})}
 						/>
 					</fieldset>
 				</SwitchRow>
 
 				<SwitchRow
-					label="Evenly Scaled"
-					description="A fixed scale that applies to each dimension"
-					checked={selection === 'scaled'}
-					onClick={() => handleSelection('scaled')}
-				>
-					<div className="flex w-full justify-end">
-						<Input
-							containerClassName="w-full max-w-[unset] sm:w-unset sm:max-w-sm"
-							variant="primary"
-							label="Scale"
-							pattern="[0-9]*"
-							disabled={selection !== 'scaled'}
-							placeholder="0.75"
-							{...(selection === 'scaled'
-								? form.register('thumbnail_config.size_factor', { valueAsNumber: true })
-								: {})}
-						/>
-					</div>
-				</SwitchRow>
-
-				<SwitchRow
 					label="Custom Scaled"
 					description="A custom scale for each dimension"
-					checked={selection === 'custom-scaled'}
-					onClick={() => handleSelection('custom-scaled')}
+					checked={resize_options?.mode === 'Scaled'}
+					onClick={() => handleSelection('Scaled')}
 				>
-					<fieldset className="flex justify-end gap-2" disabled={selection !== 'custom-scaled'}>
+					<fieldset
+						className="flex justify-end gap-2"
+						disabled={!resize_options || (!!resize_options && resize_options.mode !== 'Scaled')}
+					>
 						<Input
 							variant="primary"
 							label="Width Scale"
 							pattern="[0-9]*"
 							placeholder="0.65"
-							{...(selection === 'custom-scaled'
-								? form.register('thumbnail_config.size_factor.0', { valueAsNumber: true })
+							{...(resize_options?.mode === 'Scaled'
+								? form.register('thumbnail_config.resize_options.width', { valueAsNumber: true })
+								: {})}
+							{...(resize_options?.mode === 'Scaled'
+								? {
+										errorMessage:
+											form.formState.errors.thumbnail_config?.resize_options?.width?.message,
+								  }
 								: {})}
 						/>
 						<Input
@@ -146,8 +125,8 @@ export default function ThumbnailConfigForm() {
 							label="Height Scale"
 							pattern="[0-9]*"
 							placeholder="0.65"
-							{...(selection === 'custom-scaled'
-								? form.register('thumbnail_config.size_factor.1', { valueAsNumber: true })
+							{...(resize_options?.mode === 'Scaled'
+								? form.register('thumbnail_config.resize_options.height', { valueAsNumber: true })
 								: {})}
 						/>
 					</fieldset>
@@ -158,7 +137,7 @@ export default function ThumbnailConfigForm() {
 						<Label>Image Format</Label>
 						<NativeSelect
 							options={formatOptions}
-							disabled={selection === 'disabled'}
+							disabled={!resize_options}
 							{...form.register('thumbnail_config.format')}
 						/>
 						<Text size="xs" variant="muted">
@@ -169,7 +148,7 @@ export default function ThumbnailConfigForm() {
 					<Input
 						variant="primary"
 						label="Image Quality"
-						disabled={selection === 'disabled'}
+						disabled={!resize_options}
 						descriptionProps={{ className: 'text-xs' }}
 						description="The quality of the generated thumbnail, between 0 and 1.0"
 						errorMessage={form.formState.errors.thumbnail_config?.quality?.message}

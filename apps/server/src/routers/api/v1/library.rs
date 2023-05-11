@@ -511,9 +511,13 @@ async fn create_library(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	get_session_admin_user(&session)?;
-
+	let user = get_session_admin_user(&session)?;
 	let db = ctx.get_db();
+
+	debug!(user_id = user.id, ?input, "Creating library");
+	return Err(ApiError::BadRequest(String::from(
+		"Library creation is currently disabled.",
+	)));
 
 	if !path::Path::new(&input.path).exists() {
 		return Err(ApiError::BadRequest(format!(

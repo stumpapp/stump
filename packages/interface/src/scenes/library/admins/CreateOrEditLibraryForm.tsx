@@ -31,7 +31,20 @@ const imageFormatSchema = z.union([
 	// z.literal('JpegXl'),
 	z.literal('Png'),
 ])
-const sizeFactorSchema = z.union([z.number(), z.array(z.number()).length(2)])
+const resizeOptionsSchema = z
+	.object({
+		height: z.number(),
+		mode: z.union([z.literal('Scaled'), z.literal('Sized')]),
+		width: z.number(),
+	})
+	.refine((value) => {
+		if (value.mode === 'Scaled') {
+			const isInCorrectRange = (num: number) => num > 0 && num <= 1
+			return isInCorrectRange(value.height) && isInCorrectRange(value.width)
+		} else {
+			return value.height > 0 && value.width > 0
+		}
+	})
 const buildScema = (existingLibraries: Library[], library?: Library) =>
 	z.object({
 		convert_rar_to_zip: z.boolean().default(false),
@@ -71,7 +84,7 @@ const buildScema = (existingLibraries: Library[], library?: Library) =>
 			.optional(),
 		thumbnail_config: z.object({
 			enabled: z.boolean().default(false),
-			format: imageFormatSchema.optional(),
+			format: imageFormatSchema.default('Webp'),
 			quality: z
 				.number()
 				.optional()
@@ -81,7 +94,7 @@ const buildScema = (existingLibraries: Library[], library?: Library) =>
 						message: 'Thumbnail quality must be between 0 and 1.0',
 					}),
 				),
-			size_factor: sizeFactorSchema.optional(),
+			resize_options: resizeOptionsSchema.optional(),
 		}),
 	})
 export type Schema = z.infer<ReturnType<typeof buildScema>>
@@ -108,8 +121,8 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			description: library?.description,
 			hard_delete_conversions: library?.library_options.hard_delete_conversions ?? false,
 			library_pattern: library?.library_options.library_pattern ?? 'SERIES_BASED',
-			name: library?.name,
-			path: library?.path,
+			name: library?.name ?? 'Comics',
+			path: library?.path ?? '/Users/aaronleopold/Documents/Stump/mylar-downloads',
 			scan_mode: 'BATCHED',
 			tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
 		},
@@ -143,7 +156,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 
 	const handleCreateLibrary = async (values: Schema) => {
 		console.log(values)
-		return
 		const { name, path, description, tags: formTags, scan_mode, ...options } = values
 
 		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))

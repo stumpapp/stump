@@ -110,10 +110,7 @@ mod tests {
 			query::{ordering::*, pagination::*},
 		},
 		event::*,
-		filesystem::{
-			image::{ImageFormat, ImageProcessorOptions, ImageSizeFactor},
-			*,
-		},
+		filesystem::{image::*, *},
 		job::*,
 	};
 
@@ -181,7 +178,8 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<ReadingList>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateReadingList>()?).as_bytes())?;
 
-		file.write_all(format!("{}\n\n", ts_export::<ImageSizeFactor>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ImageResizeMode>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<ImageResizeOptions>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ImageFormat>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ImageProcessorOptions>()?).as_bytes(),

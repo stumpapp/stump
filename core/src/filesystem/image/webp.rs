@@ -3,7 +3,7 @@ use webp::Encoder;
 
 use crate::filesystem::{error::FileError, image::process::resized_dimensions};
 
-use super::process::{ImageProcessor, ImageProcessorOptions, ImageSizeFactor};
+use super::process::{ImageProcessor, ImageProcessorOptions, ImageResizeOptions};
 
 pub struct WebpProcessor;
 
@@ -14,8 +14,8 @@ impl ImageProcessor for WebpProcessor {
 	) -> Result<Vec<u8>, FileError> {
 		let mut image = image::load_from_memory(buffer)?;
 
-		if let Some(size_factor) = options.size_factor {
-			let resized_image = WebpProcessor::resize_image(image, size_factor);
+		if let Some(resize_options) = options.resize_options {
+			let resized_image = WebpProcessor::resize_image(image, resize_options);
 			image = resized_image;
 		}
 
@@ -36,10 +36,13 @@ impl ImageProcessor for WebpProcessor {
 }
 
 impl WebpProcessor {
-	fn resize_image(image: DynamicImage, size_factor: ImageSizeFactor) -> DynamicImage {
+	fn resize_image(
+		image: DynamicImage,
+		resize_options: ImageResizeOptions,
+	) -> DynamicImage {
 		let (current_width, current_height) = image.dimensions();
 		let (height, width) =
-			resized_dimensions(current_height, current_width, size_factor);
+			resized_dimensions(current_height, current_width, resize_options);
 
 		DynamicImage::ImageRgba8(imageops::resize(
 			&image,

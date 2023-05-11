@@ -17,10 +17,10 @@ impl ImageProcessor for GenericImageProcessor {
 	) -> Result<Vec<u8>, FileError> {
 		let mut image = image::load_from_memory(buffer)?;
 
-		if let Some(size_factor) = options.size_factor {
+		if let Some(resize_options) = options.resize_options {
 			let (current_width, current_height) = image.dimensions();
 			let (height, width) =
-				resized_dimensions(current_height, current_width, size_factor);
+				resized_dimensions(current_height, current_width, resize_options);
 
 			let resized_image = DynamicImage::ImageRgba8(imageops::resize(
 				&image,

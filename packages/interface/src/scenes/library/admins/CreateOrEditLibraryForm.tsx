@@ -33,18 +33,26 @@ const imageFormatSchema = z.union([
 ])
 const resizeOptionsSchema = z
 	.object({
-		height: z.number(),
+		height: z.number().refine((value) => value > 0, { message: 'Must be greater than 0' }),
 		mode: z.union([z.literal('Scaled'), z.literal('Sized')]),
-		width: z.number(),
+		width: z.number().refine((value) => value > 0, { message: 'Must be greater than 0' }),
 	})
-	.refine((value) => {
-		if (value.mode === 'Scaled') {
-			const isInCorrectRange = (num: number) => num > 0 && num <= 1
-			return isInCorrectRange(value.height) && isInCorrectRange(value.width)
-		} else {
-			return value.height > 0 && value.width > 0
-		}
-	})
+	.refine(
+		(value) => {
+			if (value.mode === 'Scaled') {
+				const isInCorrectRange = (num: number) => num > 0 && num <= 1
+				return isInCorrectRange(value.height) && isInCorrectRange(value.width)
+			} else {
+				return value.height > 0 && value.width > 0
+			}
+		},
+		(value) => ({
+			message:
+				value.mode === 'Scaled'
+					? 'Height and width must be between 0 and 1'
+					: 'Height and width must be greater than 0',
+		}),
+	)
 const buildScema = (existingLibraries: Library[], library?: Library) =>
 	z.object({
 		convert_rar_to_zip: z.boolean().default(false),
@@ -155,7 +163,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	}
 
 	const handleCreateLibrary = async (values: Schema) => {
-		console.log(values)
 		const { name, path, description, tags: formTags, scan_mode, ...options } = values
 
 		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))

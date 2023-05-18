@@ -49,9 +49,10 @@ pub fn generate_thumbnails(
 
 	let mut generated_paths = Vec::with_capacity(media.len());
 
-	// Split the array into chunks of 10 images
-	for (idx, chunk) in media.chunks(10).enumerate() {
-		trace!(chunk = idx, "Processing chunk for thumbnail generation");
+	// TODO: configurable chunk size?
+	// Split the array into chunks of 5 images
+	for (idx, chunk) in media.chunks(5).enumerate() {
+		trace!(chunk = idx + 1, "Processing chunk for thumbnail generation");
 		let results = chunk
 			.into_par_iter()
 			.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str(), options.clone()))

@@ -265,3 +265,34 @@ impl From<prisma::library::Data> for Library {
 		}
 	}
 }
+
+impl From<(prisma::library::Data, prisma::library_options::Data)> for Library {
+	fn from(
+		(library, library_options): (
+			prisma::library::Data,
+			prisma::library_options::Data,
+		),
+	) -> Library {
+		let series = match library.series() {
+			Ok(series) => Some(series.iter().map(|s| s.to_owned().into()).collect()),
+			Err(_e) => None,
+		};
+
+		let tags = match library.tags() {
+			Ok(tags) => Some(tags.iter().map(|tag| tag.to_owned().into()).collect()),
+			Err(_e) => None,
+		};
+
+		Library {
+			id: library.id,
+			name: library.name,
+			description: library.description,
+			path: library.path,
+			status: library.status,
+			updated_at: library.updated_at.to_string(),
+			series,
+			tags,
+			library_options: LibraryOptions::from(library_options),
+		}
+	}
+}

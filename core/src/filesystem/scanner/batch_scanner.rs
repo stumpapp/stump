@@ -188,7 +188,6 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		// sleep for a bit to let client catch up
 		tokio::time::sleep(Duration::from_millis(50)).await;
 
-		// TODO: add me back!
 		if let Err(err) = generate_thumbnails(&created_media, thumbnail_config) {
 			error!("Failed to generate thumbnails: {:?}", err);
 		}

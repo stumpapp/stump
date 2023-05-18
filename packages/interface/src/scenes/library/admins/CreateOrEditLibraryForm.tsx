@@ -28,7 +28,7 @@ function isLibraryPattern(input: string): input is LibraryPattern {
 const imageFormatSchema = z.union([
 	z.literal('Webp'),
 	z.literal('Jpeg'),
-	// z.literal('JpegXl'),
+	z.literal('JpegXl'),
 	z.literal('Png'),
 ])
 const resizeOptionsSchema = z
@@ -128,11 +128,18 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			convert_rar_to_zip: library?.library_options.convert_rar_to_zip ?? false,
 			description: library?.description,
 			hard_delete_conversions: library?.library_options.hard_delete_conversions ?? false,
-			library_pattern: library?.library_options.library_pattern ?? 'SERIES_BASED',
-			name: library?.name ?? 'Comics',
-			path: library?.path ?? '/Users/aaronleopold/Documents/Stump/mylar-downloads',
+			library_pattern: library?.library_options.library_pattern,
+			name: library?.name,
+			path: library?.path,
 			scan_mode: 'BATCHED',
 			tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
+			// @ts-expect-error: mostly null vs undefined issues
+			thumbnail_config: library?.library_options.thumbnail_config
+				? {
+						enabled: true,
+						...library?.library_options.thumbnail_config,
+				  }
+				: undefined,
 		},
 		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),

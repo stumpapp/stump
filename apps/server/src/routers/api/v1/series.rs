@@ -16,9 +16,6 @@ use stump_core::{
 		},
 		Dao, PrismaCountTrait, SeriesDao, SeriesDaoImpl,
 	},
-	filesystem::{
-		image::get_thumbnail_path, media::get_page, read_entire_file, ContentType,
-	},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,
@@ -314,27 +311,20 @@ async fn get_series_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let media = db
+	let result = db
 		.media()
 		.find_first(vec![media::series_id::equals(Some(id.clone()))])
 		.order_by(media::name::order(Direction::Asc))
 		.exec()
 		.await?;
 
-	if media.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} not found",
-			id
-		)));
+	if let Some(media) = result {
+		super::media::get_media_thumbnail(media.id.clone(), db)
+			.await
+			.map(ImageResponse::from)
+	} else {
+		Err(ApiError::NotFound(String::from("Series has no media")))
 	}
-
-	let media = media.unwrap();
-	if let Some(webp_path) = get_thumbnail_path(&media.id) {
-		trace!("Found webp thumbnail for series {}", &id);
-		return Ok((ContentType::WEBP, read_entire_file(webp_path)?).into());
-	}
-
-	Ok(get_page(media.path.as_str(), 1)?.into())
 }
 
 #[utoipa::path(

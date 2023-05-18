@@ -13,7 +13,6 @@ use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
 use stump_core::{
-	config::get_config_dir,
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, CreateLibrary, LibrariesStats, Library,
@@ -22,7 +21,7 @@ use stump_core::{
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
 	},
-	filesystem::{get_page, image, read_entire_file, ContentType},
+	filesystem::image,
 	job::LibraryScanJob,
 	prisma::{
 		library::{self, WhereParam},
@@ -399,15 +398,6 @@ async fn get_library_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let webp_path = get_config_dir()
-		.join("thumbnails")
-		.join(format!("{}.webp", id));
-
-	if webp_path.exists() {
-		trace!("Found webp thumbnail for library {}", id);
-		return Ok((ContentType::WEBP, read_entire_file(webp_path)?).into());
-	}
-
 	let library_series = db
 		.series()
 		.find_first(vec![series::library_id::equals(Some(id.clone()))])
@@ -426,7 +416,9 @@ async fn get_library_thumbnail(
 		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
 	})?;
 
-	Ok(get_page(media.path.as_str(), 1)?.into())
+	super::media::get_media_thumbnail(media.id.clone(), db)
+		.await
+		.map(ImageResponse::from)
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -515,9 +507,6 @@ async fn create_library(
 	let db = ctx.get_db();
 
 	debug!(user_id = user.id, ?input, "Creating library");
-	return Err(ApiError::BadRequest(String::from(
-		"Library creation is currently disabled.",
-	)));
 
 	if !path::Path::new(&input.path).exists() {
 		return Err(ApiError::BadRequest(format!(
@@ -556,6 +545,11 @@ async fn create_library(
 					library_options::library_pattern::set(
 						library_options_arg.library_pattern.to_string(),
 					),
+					library_options::thumbnail_config::set(
+						library_options_arg.thumbnail_config.map(|options| {
+							serde_json::to_vec(&options).unwrap_or_default()
+						}),
+					),
 				])
 				.exec()
 				.await?;
@@ -565,8 +559,22 @@ async fn create_library(
 				.create(
 					input.name.to_owned(),
 					input.path.to_owned(),
-					library_options::id::equals(library_options.id),
+					library_options::id::equals(library_options.id.clone()),
 					vec![library::description::set(input.description.to_owned())],
+				)
+				.exec()
+				.await?;
+
+			let library_options = client
+				.library_options()
+				.update(
+					library_options::id::equals(library_options.id),
+					vec![
+						library_options::library::connect(library::id::equals(
+							library.id.clone(),
+						)),
+						library_options::library_id::set(Some(library.id.clone())),
+					],
 				)
 				.exec()
 				.await?;
@@ -585,7 +593,7 @@ async fn create_library(
 				client._batch(tag_connect).await?;
 			}
 
-			Ok(Library::from(library))
+			Ok(Library::from((library, library_options)))
 		})
 		.await;
 

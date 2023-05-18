@@ -3,6 +3,8 @@ use std::path::Path;
 use serde::Serialize;
 use tracing::{trace, warn};
 
+use super::image::ImageFormat;
+
 // TODO: move this into fs crate
 
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
@@ -289,6 +291,17 @@ impl std::fmt::Display for ContentType {
 			ContentType::WEBP => write!(f, "image/webp"),
 			ContentType::GIF => write!(f, "image/gif"),
 			ContentType::UNKNOWN => write!(f, "unknown"),
+		}
+	}
+}
+
+impl From<ImageFormat> for ContentType {
+	fn from(format: ImageFormat) -> Self {
+		match format {
+			ImageFormat::Jpeg => ContentType::JPEG,
+			ImageFormat::JpegXl => ContentType::JPEG,
+			ImageFormat::Png => ContentType::PNG,
+			ImageFormat::Webp => ContentType::WEBP,
 		}
 	}
 }

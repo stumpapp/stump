@@ -60,7 +60,7 @@ use super::api::{
         api::v1::media::get_media_file,
         api::v1::media::convert_media,
         api::v1::media::get_media_page,
-        api::v1::media::get_media_thumbnail,
+        api::v1::media::get_media_thumbnail_handler,
         api::v1::media::update_media_progress,
         api::v1::reading_list::get_reading_list,
         api::v1::reading_list::create_reading_list,

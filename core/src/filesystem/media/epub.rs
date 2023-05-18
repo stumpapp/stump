@@ -1,11 +1,5 @@
 use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 
-// #[cfg(target_family = "unix")]
-// use std::os::unix::prelude::MetadataExt;
-
-// #[cfg(target_family = "windows")]
-// use std::os::windows::prelude::*;
-
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
 const DEFAULT_EPUB_COVER_ID: &str = "cover";
 

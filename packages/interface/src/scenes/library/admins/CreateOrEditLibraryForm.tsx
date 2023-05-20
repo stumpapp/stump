@@ -128,7 +128,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			convert_rar_to_zip: library?.library_options.convert_rar_to_zip ?? false,
 			description: library?.description,
 			hard_delete_conversions: library?.library_options.hard_delete_conversions ?? false,
-			library_pattern: library?.library_options.library_pattern,
+			library_pattern: library?.library_options.library_pattern || 'SERIES_BASED',
 			name: library?.name,
 			path: library?.path,
 			scan_mode: 'BATCHED',

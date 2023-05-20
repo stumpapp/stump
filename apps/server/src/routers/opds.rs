@@ -20,7 +20,7 @@ use stump_core::{
 	},
 	prisma::{library, media, series},
 };
-use tracing::{trace, warn};
+use tracing::{debug, trace, warn};
 
 use crate::{
 	config::state::AppState,
@@ -67,9 +67,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
 	let skip = page * page_size;
-	let take = skip + page_size;
-
-	(skip, take)
+	(skip, page_size)
 }
 
 // TODO auth middleware....
@@ -289,6 +287,7 @@ async fn get_library_by_id(
 	let library_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
+	debug!(skip, take, page, library_id, "opds get_library_by_id");
 
 	let tx_result = db
 		._transaction()
@@ -309,13 +308,21 @@ async fn get_library_by_id(
 				.map(|count| (library, Some(count)))
 		})
 		.await?;
+	trace!(result = ?tx_result, "opds get_library_by_id transaction");
 
 	if let (Some(library), Some(library_series_count)) = tx_result {
+		let library_series = library.series().unwrap_or(&Vec::new()).to_owned();
+		debug!(
+			page,
+			series_in_page = library_series.len(),
+			library_series_count,
+			"Fetched library with series"
+		);
 		Ok(Xml(OpdsFeed::paginated(
 			library.id.as_str(),
 			library.name.as_str(),
 			format!("libraries/{}", &library.id).as_str(),
-			library.series().unwrap_or(&Vec::new()).to_owned(),
+			library_series,
 			page.into(),
 			library_series_count,
 		)

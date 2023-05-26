@@ -4753,9 +4753,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.91"
+version = "1.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "877c235533714907a8c2464236f5c4b2a17262ef1bd71f38f35ea592c8da6883"
+checksum = "057d394a50403bcac12672b2b18fb387ab6d289d957dab67dd201875391e52f1"
 dependencies = [
  "indexmap",
  "itoa 1.0.5",
@@ -5265,6 +5265,7 @@ dependencies = [
  "ring",
  "serde",
  "serde-xml-rs",
+ "serde_json",
  "specta",
  "thiserror",
  "tokio",
@@ -5316,6 +5317,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_with 2.2.0",
+ "specta",
  "stump_core",
  "thiserror",
  "tokio",

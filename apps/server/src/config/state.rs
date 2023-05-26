@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::extract::State;
 use axum_macros::FromRequestParts;
-use stump_core::prelude::Ctx;
+use stump_core::Ctx;
 
 // TODO: I don't feel like I need this module... Unless I add things to it..
 pub type AppState = Arc<Ctx>;

@@ -5,8 +5,8 @@ use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::fs::get_content_types_for_pages;
-use crate::prelude::CoreResult;
+use crate::error::CoreResult;
+use crate::filesystem::media::get_content_types_for_pages;
 use crate::{
 	opds::link::OpdsStreamLink,
 	prisma::{library, media, series},

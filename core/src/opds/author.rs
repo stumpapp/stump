@@ -1,6 +1,6 @@
 use xml::EventWriter;
 
-use crate::prelude::CoreResult;
+use crate::error::CoreResult;
 
 use super::util;
 

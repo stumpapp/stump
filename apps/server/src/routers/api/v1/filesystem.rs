@@ -6,8 +6,9 @@ use axum::{
 };
 use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
-use stump_core::prelude::{
-	DirectoryListing, DirectoryListingFile, DirectoryListingInput, PageQuery, Pageable,
+use stump_core::{
+	db::query::pagination::{PageQuery, Pageable},
+	filesystem::{DirectoryListing, DirectoryListingFile, DirectoryListingInput},
 };
 use tracing::trace;
 

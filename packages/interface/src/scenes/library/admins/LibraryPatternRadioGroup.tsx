@@ -1,4 +1,4 @@
-import { cx, Heading, Label, Link, Text } from '@stump/components'
+import { Label, Link, RadioGroup, Text } from '@stump/components'
 import { LibraryPattern } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
 
@@ -22,26 +22,27 @@ export default function LibraryPatternRadioGroup() {
 			<Label>Library Pattern</Label>
 			<input type="hidden" {...form.register('library_pattern')} />
 
-			<div className="flex gap-12">
-				<LibraryPatternRadio
-					selected={!isCollectionBasedSelected}
-					onChange={() => handleChange('SERIES_BASED')}
-				>
-					<Heading size="xs">{'Series Based'}</Heading>
-					<Text size="xs" variant="muted">
-						{"Creates a series from the bottom-most level of the library's directory."}
-					</Text>
-				</LibraryPatternRadio>
-				<LibraryPatternRadio
-					selected={isCollectionBasedSelected}
-					onChange={() => handleChange('COLLECTION_BASED')}
-				>
-					<Heading size="xs">{'Collection Based'}</Heading>
-					<Text size="xs" variant="muted">
-						{"Creates a series from the top-most level of the library's directory."}
-					</Text>
-				</LibraryPatternRadio>
-			</div>
+			<RadioGroup
+				value={libraryPattern}
+				onValueChange={handleChange}
+				className="mt-1 flex flex-col sm:flex-row"
+			>
+				<RadioGroup.CardItem
+					label="Collection Based"
+					description="Creates a series from the top-most level of the library's directory."
+					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
+					isActive={isCollectionBasedSelected}
+					value="COLLECTION_BASED"
+				/>
+
+				<RadioGroup.CardItem
+					label="Series Based"
+					description="Creates a series from the bottom-most level of the library's directory."
+					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
+					isActive={!isCollectionBasedSelected}
+					value="SERIES_BASED"
+				/>
+			</RadioGroup>
 
 			<Text size="xs" variant="muted" className="mt-1">
 				{'Not sure which to choose? '}
@@ -50,31 +51,6 @@ export default function LibraryPatternRadioGroup() {
 				</Link>
 				{<i> You cannot change this setting later.</i>}
 			</Text>
-		</div>
-	)
-}
-
-type LibraryPatternRadioProps = {
-	selected: boolean
-	onChange: () => void
-	children: React.ReactNode
-}
-
-function LibraryPatternRadio({ selected, onChange, children }: LibraryPatternRadioProps) {
-	return (
-		<div
-			className={cx(
-				'flex cursor-pointer flex-col gap-3 rounded-md border-2 p-4 text-left transition-colors duration-200 hover:border-brand dark:hover:border-brand',
-				{
-					'border-gray-100 dark:border-gray-800': !selected,
-				},
-				{
-					'border-brand': selected,
-				},
-			)}
-			onClick={onChange}
-		>
-			{children}
 		</div>
 	)
 }

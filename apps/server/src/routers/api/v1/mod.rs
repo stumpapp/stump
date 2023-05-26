@@ -3,7 +3,9 @@ use axum::{
 	routing::{get, post},
 	Json, Router,
 };
-use stump_core::prelude::{ClaimResponse, StumpVersion};
+use serde::{Deserialize, Serialize};
+use specta::Type;
+use utoipa::ToSchema;
 
 use crate::{config::state::AppState, errors::ApiResult};
 
@@ -37,6 +39,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route("/version", post(version))
 }
 
+#[derive(Serialize, Type, ToSchema)]
+pub struct ClaimResponse {
+	pub is_claimed: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/claim",
@@ -63,6 +70,13 @@ async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
 )]
 async fn ping() -> ApiResult<String> {
 	Ok("pong".to_string())
+}
+
+#[derive(Serialize, Deserialize, Type, ToSchema)]
+pub struct StumpVersion {
+	pub semver: String,
+	pub rev: Option<String>,
+	pub compile_time: String,
 }
 
 #[utoipa::path(

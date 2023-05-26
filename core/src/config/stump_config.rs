@@ -6,7 +6,7 @@ use tracing::debug;
 
 use crate::{
 	config::get_config_dir,
-	prelude::{errors::CoreError, CoreResult},
+	error::{CoreError, CoreResult},
 };
 
 // TODO: before I actually use this, test to see if it works well.

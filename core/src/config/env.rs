@@ -5,7 +5,7 @@ use tracing::debug;
 
 use crate::{
 	config::get_config_dir,
-	prelude::{errors::CoreError, CoreResult},
+	error::{CoreError, CoreResult},
 };
 
 /// [`StumpEnvironment`] is the the representation of the Stump configuration file.

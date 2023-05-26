@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_with::with_prefix;
 use std::fmt;
-use stump_core::prelude::QueryOrder;
+use stump_core::db::query::ordering::QueryOrder;
 use utoipa::ToSchema;
 
 #[derive(Debug, Default, Deserialize, Serialize, ToSchema)]

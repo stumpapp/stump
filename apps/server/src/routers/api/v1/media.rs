@@ -11,14 +11,15 @@ use serde::Deserialize;
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		models::{Media, ReadProgress},
+		entity::{LibraryOptions, Media, ReadProgress},
+		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		Dao, MediaDao, MediaDaoImpl,
 	},
-	fs::{image, media_file},
-	prelude::{ContentType, PageQuery, Pageable, Pagination, PaginationQuery},
+	filesystem::{media::get_page, read_entire_file, ContentType},
 	prisma::{
+		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		read_progress, user,
+		read_progress, user, PrismaClient,
 	},
 };
 use tracing::{debug, trace};
@@ -48,7 +49,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_media_by_id))
 				.route("/file", get(get_media_file))
 				.route("/convert", get(convert_media))
-				.route("/thumbnail", get(get_media_thumbnail))
+				.route("/thumbnail", get(get_media_thumbnail_handler))
 				.route("/page/:page", get(get_media_page))
 				.route("/progress/:page", put(update_media_progress)),
 		)
@@ -597,10 +598,75 @@ async fn get_media_page(
 					id, book.pages
 				)))
 			} else {
-				Ok(media_file::get_page(&book.path, page)?.into())
+				Ok(get_page(&book.path, page)?.into())
 			}
 		},
 		None => Err(ApiError::NotFound(format!(
+			"Media with id {} not found",
+			id
+		))),
+	}
+}
+
+pub(crate) async fn get_media_thumbnail(
+	id: String,
+	db: &PrismaClient,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnail_dir = get_config_dir().join("thumbnails");
+
+	let book_id = id.clone();
+	let result = db
+		._transaction()
+		.run(|client| async move {
+			let book = client
+				.media()
+				.find_unique(media::id::equals(book_id))
+				.with(media::series::fetch())
+				.exec()
+				.await?;
+
+			if let Some(book) = book {
+				let library_id = match book.series() {
+					Ok(Some(series)) => Some(series.library_id.clone()),
+					_ => None,
+				}
+				.flatten();
+
+				client
+					.library_options()
+					.find_first(vec![library_options::library_id::equals(library_id)])
+					.exec()
+					.await
+					.map(|options| (Some(book), options))
+			} else {
+				Ok((None, None))
+			}
+		})
+		.await?;
+	trace!(?result, "get_media_thumbnail transaction completed");
+
+	match result {
+		(Some(book), Some(options)) => {
+			let library_options = LibraryOptions::from(options);
+			if let Some(config) = library_options.thumbnail_config {
+				let thumbnail_path = thumbnail_dir.join(format!(
+					"{}.{}",
+					book.id,
+					config.format.extension()
+				));
+				if thumbnail_path.exists() {
+					trace!(path = ?thumbnail_path, media_id = ?id, "Found generated media thumbnail");
+					return Ok((
+						ContentType::from(config.format),
+						read_entire_file(thumbnail_path)?,
+					));
+				}
+			}
+
+			Ok(get_page(book.path.as_str(), 1)?)
+		},
+		(Some(book), None) => Ok(get_page(book.path.as_str(), 1)?),
+		_ => Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
 		))),
@@ -624,35 +690,13 @@ async fn get_media_page(
 	)
 )]
 /// Get the thumbnail image of a media
-async fn get_media_thumbnail(
+async fn get_media_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<ImageResponse> {
+	trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
-
-	let webp_path = get_config_dir()
-		.join("thumbnails")
-		.join(format!("{}.webp", id));
-
-	if webp_path.exists() {
-		trace!("Found webp thumbnail for media {}", id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
-	}
-
-	let result = db
-		.media()
-		.find_unique(media::id::equals(id.clone()))
-		.exec()
-		.await?;
-
-	if let Some(book) = result {
-		Ok(media_file::get_page(book.path.as_str(), 1)?.into())
-	} else {
-		Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)))
-	}
+	get_media_thumbnail(id, db).await.map(ImageResponse::from)
 }
 
 #[utoipa::path(

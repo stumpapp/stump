@@ -6,7 +6,7 @@ mod series_dao;
 pub use media_dao::*;
 pub use series_dao::*;
 
-use crate::{prelude::CoreResult, prisma::PrismaClient};
+use crate::{error::CoreResult, prisma::PrismaClient};
 
 // TODO: once my dao impls are more complete, add some integration tests.
 

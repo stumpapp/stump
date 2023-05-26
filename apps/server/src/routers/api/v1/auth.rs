@@ -4,11 +4,13 @@ use axum::{
 	Json, Router,
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
+use serde::Deserialize;
+use specta::Type;
 use stump_core::{
-	db::models::User,
-	prelude::{LoginOrRegisterArgs, UserRole},
+	db::entity::{User, UserRole},
 	prisma::{user, user_preferences},
 };
+use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
@@ -25,6 +27,12 @@ pub(crate) fn mount() -> Router<AppState> {
 			.route("/logout", post(logout))
 			.route("/register", post(register)),
 	)
+}
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct LoginOrRegisterArgs {
+	pub username: String,
+	pub password: String,
 }
 
 #[utoipa::path(

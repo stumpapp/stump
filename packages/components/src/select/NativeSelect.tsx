@@ -4,7 +4,7 @@ import { cn } from '../utils'
 import { SelectOption } from './index'
 
 export const SELECT_SIZES = {
-	default: 'h-10  py-2',
+	default: 'h-10 py-2',
 	lg: 'h-12  py-2',
 	sm: 'h-8',
 	xs: 'h-6',
@@ -19,7 +19,7 @@ export type NativeSelectProps = {
 // TODO: reuse variants from primitives when created!
 // TODO: properly implement this component, lazy rn
 export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
-	({ options, className, size, ...props }, ref) => {
+	({ options, className, size = 'default', ...props }, ref) => {
 		return (
 			<select
 				ref={ref}

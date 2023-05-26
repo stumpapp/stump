@@ -11,11 +11,11 @@ import { z } from 'zod'
 
 import DirectoryPickerModal from '../../../components/DirectoryPickerModal'
 import TagSelect from '../../../components/TagSelect'
-import { useLocaleContext } from '../../../i18n'
 import paths from '../../../paths'
 import { useLibraryAdminContext } from './context'
 import LibraryOptionsForm from './LibraryOptionsForm'
 import ScanModeForm from './ScanModeForm'
+import ThumbnailConfigForm from './ThumbnailConfigForm'
 
 function isLibraryScanMode(input: string): input is LibraryScanMode {
 	return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input
@@ -25,10 +25,37 @@ function isLibraryPattern(input: string): input is LibraryPattern {
 	return input === 'SERIES_BASED' || input === 'COLLECTION_BASED' || !input
 }
 
+const imageFormatSchema = z.union([
+	z.literal('Webp'),
+	z.literal('Jpeg'),
+	z.literal('JpegXl'),
+	z.literal('Png'),
+])
+const resizeOptionsSchema = z
+	.object({
+		height: z.number().refine((value) => value > 0, { message: 'Must be greater than 0' }),
+		mode: z.union([z.literal('Scaled'), z.literal('Sized')]),
+		width: z.number().refine((value) => value > 0, { message: 'Must be greater than 0' }),
+	})
+	.refine(
+		(value) => {
+			if (value.mode === 'Scaled') {
+				const isInCorrectRange = (num: number) => num > 0 && num <= 1
+				return isInCorrectRange(value.height) && isInCorrectRange(value.width)
+			} else {
+				return value.height > 0 && value.width > 0
+			}
+		},
+		(value) => ({
+			message:
+				value.mode === 'Scaled'
+					? 'Height and width must be between 0 and 1'
+					: 'Height and width must be greater than 0',
+		}),
+	)
 const buildScema = (existingLibraries: Library[], library?: Library) =>
 	z.object({
 		convert_rar_to_zip: z.boolean().default(false),
-		create_webp_thumbnails: z.boolean().default(false),
 		description: z.string().nullable(),
 		hard_delete_conversions: z.boolean().default(false),
 		library_pattern: z.string().refine(isLibraryPattern).default('SERIES_BASED'),
@@ -63,6 +90,20 @@ const buildScema = (existingLibraries: Library[], library?: Library) =>
 				}),
 			)
 			.optional(),
+		thumbnail_config: z.object({
+			enabled: z.boolean().default(false),
+			format: imageFormatSchema.default('Webp'),
+			quality: z
+				.number()
+				.optional()
+				.refine(
+					(value) => value === undefined || (value > 0 && value <= 1.0),
+					() => ({
+						message: 'Thumbnail quality must be between 0 and 1.0',
+					}),
+				),
+			resize_options: resizeOptionsSchema.optional(),
+		}),
 	})
 export type Schema = z.infer<ReturnType<typeof buildScema>>
 
@@ -81,20 +122,24 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
-	const { t } = useLocaleContext()
-
 	const schema = buildScema(existingLibraries, library)
 	const form = useForm<Schema>({
 		defaultValues: {
 			convert_rar_to_zip: library?.library_options.convert_rar_to_zip ?? false,
-			create_webp_thumbnails: library?.library_options.create_webp_thumbnails ?? false,
 			description: library?.description,
 			hard_delete_conversions: library?.library_options.hard_delete_conversions ?? false,
-			library_pattern: library?.library_options.library_pattern ?? 'SERIES_BASED',
+			library_pattern: library?.library_options.library_pattern || 'SERIES_BASED',
 			name: library?.name,
 			path: library?.path,
 			scan_mode: 'BATCHED',
 			tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
+			// @ts-expect-error: mostly null vs undefined issues
+			thumbnail_config: library?.library_options.thumbnail_config
+				? {
+						enabled: true,
+						...library?.library_options.thumbnail_config,
+				  }
+				: undefined,
 		},
 		reValidateMode: 'onChange',
 		resolver: zodResolver(schema),
@@ -125,7 +170,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	}
 
 	const handleCreateLibrary = async (values: Schema) => {
-		const { name, path, description, tags: formTags, scan_mode, ...library_options } = values
+		const { name, path, description, tags: formTags, scan_mode, ...options } = values
 
 		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))
 		const tagsToCreate = formTags
@@ -142,12 +187,15 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			// existingTags = existingTags.concat(res.data)
 		}
 
+		const library_options = {
+			...options,
+			thumbnail_config: options.thumbnail_config.enabled ? options.thumbnail_config : null,
+		} as LibraryOptions
+
 		toast.promise(
 			createLibraryAsync({
 				description,
-				// FIXME: this isn't dangerous, but the server needs to be adjusted as to not enforce the id field
-				// for the library_options object, as we won't have one until after creation
-				library_options: library_options as LibraryOptions,
+				library_options,
 				name,
 				path,
 				scan_mode,
@@ -171,6 +219,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		const library_options = {
 			...rest,
 			id: library.library_options.id,
+			library_id: library.library_options.library_id,
 		} as LibraryOptions
 
 		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))
@@ -229,14 +278,8 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	}, [form.formState.errors])
 
 	form.watch((updatedValues) => {
-		const {
-			tags,
-			library_pattern,
-			convert_rar_to_zip,
-			create_webp_thumbnails,
-			hard_delete_conversions,
-			...preview
-		} = updatedValues
+		const { tags, library_pattern, convert_rar_to_zip, hard_delete_conversions, ...preview } =
+			updatedValues
 
 		// TODO: Investigate this type error more, I don't like casting...
 		syncLibraryPreview({
@@ -247,7 +290,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 					library_id: '',
 				}),
 				convert_rar_to_zip,
-				create_webp_thumbnails,
 				hard_delete_conversions,
 				library_pattern,
 			},
@@ -320,9 +362,11 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 					/>
 				</div>
 
-				<ScanModeForm isCreatingLibrary={isCreatingLibrary} />
-
 				<LibraryOptionsForm isCreatingLibrary={isCreatingLibrary} />
+
+				<ThumbnailConfigForm />
+
+				<ScanModeForm isCreatingLibrary={isCreatingLibrary} />
 
 				<div className="mt-6 flex w-full md:max-w-sm">
 					<Button className="w-full md:max-w-sm" variant="primary">

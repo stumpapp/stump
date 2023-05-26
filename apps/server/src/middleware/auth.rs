@@ -10,7 +10,7 @@ use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{db::models::User, prisma::user};
+use stump_core::{db::entity::User, prisma::user};
 use tracing::{error, trace};
 
 use crate::{

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{event::InternalCoreTask, job::pool::JobPool, prelude::Ctx};
+use crate::{event::InternalCoreTask, job::pool::JobPool, Ctx};
 use tokio::{self, sync::mpsc};
 use tracing::error;
 

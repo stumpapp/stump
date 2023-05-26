@@ -135,6 +135,7 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 
 - `desktop`: A React+Tauri application.
 - `docs`: A NextJS application for the Stump documentation site.
+- `mobile`: A React Native application.
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server.
 - `web`: A React application.
 

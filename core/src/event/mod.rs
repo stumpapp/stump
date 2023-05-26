@@ -5,9 +5,9 @@ use specta::Type;
 use tokio::sync::oneshot;
 
 use crate::{
-	db::models::{Media, Series},
+	db::entity::{Media, Series},
+	error::CoreResult,
 	job::{Job, JobReport, JobStatus, JobUpdate},
-	prelude::CoreResult,
 };
 
 pub enum InternalCoreTask {

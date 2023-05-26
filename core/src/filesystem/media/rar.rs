@@ -1,16 +1,18 @@
+use itertools::Itertools;
 use std::{
 	collections::HashMap,
 	fs::File,
 	path::{Path, PathBuf},
 };
 use tracing::{debug, error, trace, warn};
-use unrar::archive::Entry;
+// TODO: fix this in fork...
+// use unrar::open_archive::FileHeader;
+use unrar::Archive;
 
 use crate::{
-	config::{self, stump_in_docker},
+	config,
 	filesystem::{
 		archive::create_zip_archive,
-		common::IsImage,
 		content_type::ContentType,
 		error::FileError,
 		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
@@ -20,8 +22,8 @@ use crate::{
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
-const RAR_UNSUPPORTED_MSG: &str =
-	"Stump cannot currently support RAR files in Docker or Windows.";
+// const RAR_UNSUPPORTED_MSG: &str =
+// 	"Stump cannot currently support RAR files in Docker or Windows.";
 
 pub struct RarProcessor;
 
@@ -67,14 +69,6 @@ impl FileProcessor for RarProcessor {
 		path: &str,
 		options: FileProcessorOptions,
 	) -> Result<ProcessedFile, FileError> {
-		// or platform is windows
-		if stump_in_docker() || cfg!(windows) {
-			return Err(FileError::UnsupportedFileType(
-				RAR_UNSUPPORTED_MSG.to_string(),
-			));
-		}
-
-		// TODO: add this to options...
 		if options.convert_rar_to_zip {
 			let zip_path_buf =
 				RarProcessor::convert_to_zip(path, options.delete_conversion_source)?;
@@ -90,41 +84,25 @@ impl FileProcessor for RarProcessor {
 
 		let hash: Option<String> = RarProcessor::hash(path);
 
-		let archive = unrar::Archive::new(&path)?;
-
-		// #[allow(unused_mut)]
-		// let mut metadata_buf = Vec::<u8>::new();
+		let mut archive = Archive::new(&path).open_for_processing()?;
 		let mut pages = 0;
+		#[allow(unused)]
+		let mut metadata_buf = None;
 
-		match archive.list_extract() {
-			Ok(open_archive) => {
-				for entry in open_archive {
-					match entry {
-						Ok(e) => {
-							// https://github.com/aaronleopold/unrar.rs/tree/aleopold--read-bytes
-							let filename = e.filename.to_string_lossy().to_string();
-
-							if filename.eq("ComicInfo.xml") {
-								// FIXME: This was segfaulting in Docker. I have a feeling it is because
-								// of my subpar implementation of the `read_bytes`.
-								// metadata_buf = match e.read_bytes() {
-								// 	Ok(b) => b,
-								// 	Err(_e) => {
-								// 		// error!("Error reading metadata: {}", e);
-								// 		// todo!()
-								// 		vec![]
-								// 	},
-								// }
-							} else {
-								pages += 1;
-							}
-						},
-						Err(_e) => return Err(FileError::RarReadError),
-					}
-				}
-			},
-			Err(_e) => return Err(FileError::RarOpenError),
-		};
+		while let Some(header) = archive.read_header() {
+			let header = header?;
+			let entry = header.entry();
+			#[allow(unused_assignments)]
+			if entry.filename.as_os_str() == "ComicInfo.xml" {
+				let (data, rest) = header.read()?;
+				metadata_buf = Some(data);
+				archive = rest;
+			} else {
+				// TODO: check for valid page type before incrementing
+				pages += 1;
+				archive = header.skip()?;
+			}
+		}
 
 		Ok(ProcessedFile {
 			thumbnail_path: None,
@@ -139,96 +117,100 @@ impl FileProcessor for RarProcessor {
 	}
 
 	fn get_page(file: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
-		if stump_in_docker() || cfg!(windows) {
-			return Err(FileError::UnsupportedFileType(
-				RAR_UNSUPPORTED_MSG.to_string(),
-			));
+		let archive = Archive::new(file).open_for_listing()?;
+
+		let mut valid_entries = archive
+			.into_iter()
+			.filter_map(|entry| entry.ok())
+			.filter(|entry| {
+				if entry.is_file() {
+					let filename =
+						entry.filename.as_path().to_string_lossy().to_lowercase();
+					filename.ends_with(".jpg")
+						|| filename.ends_with(".jpeg")
+						|| filename.ends_with(".png")
+				} else {
+					false
+				}
+			})
+			.collect::<Vec<_>>();
+		valid_entries.sort_by(|a, b| a.filename.cmp(&b.filename));
+
+		let target_entry = valid_entries
+			.into_iter()
+			.nth((page - 1) as usize)
+			.ok_or(FileError::RarReadError)?;
+
+		let mut bytes = None;
+		let mut archive = Archive::new(file).open_for_processing()?;
+		while let Some(header) = archive.read_header() {
+			let header = header?;
+			let is_target =
+				header.entry().filename.as_os_str() == target_entry.filename.as_os_str();
+			if is_target {
+				let (data, _) = header.read()?;
+				bytes = Some(data);
+				break;
+			} else {
+				archive = header.skip()?;
+			}
 		}
 
-		let archive = unrar::Archive::new(file)?;
-
-		let mut entries: Vec<_> = archive
-			.list_extract()
-			.map_err(|e| {
-				error!("Failed to read rar archive: {:?}", e);
-
-				FileError::RarReadError
-			})?
-			.filter_map(|e| e.ok())
-			.filter(|e| e.is_image())
-			.collect();
-
-		entries.sort_by(|a, b| a.filename.cmp(&b.filename));
-
-		let entry = entries.into_iter().nth((page - 1) as usize).unwrap();
-
-		let archive = unrar::Archive::new(file)?;
-
-		let bytes = archive
-			.list_extract()
-			.map_err(|e| {
-				error!("Failed to read rar archive: {:?}", e);
-
-				FileError::RarReadError
-			})?
-			.filter_map(|e| e.ok())
-			.find(|e| e.filename == entry.filename)
-			// .next()
-			// FIXME: remove this unwrap...
-			.unwrap()
-			.read_bytes()
-			.map_err(|_e| FileError::RarReadError)?;
-
-		Ok((ContentType::JPEG, bytes))
+		// TODO: don't hard code content type!
+		Ok((ContentType::JPEG, bytes.ok_or(FileError::NoImageError)?))
 	}
 
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
-		if stump_in_docker() || cfg!(windows) {
-			return Err(FileError::UnsupportedFileType(
-				RAR_UNSUPPORTED_MSG.to_string(),
-			));
-		}
+		let archive = Archive::new(path).open_for_listing()?;
 
-		let archive = unrar::Archive::new(path)?;
-
-		let mut entries: Vec<_> = archive
-			.list_extract()
-			.map_err(|e| {
-				error!("Failed to read rar archive: {:?}", e);
-				FileError::RarReadError
-			})?
-			.filter_map(|e| e.ok())
-			.filter(|e: &Entry| e.is_image())
-			.collect();
-
-		entries.sort_by(|a, b| a.filename.cmp(&b.filename));
+		let entries = archive
+			.into_iter()
+			.filter_map(|entry| entry.ok())
+			.filter(|entry| {
+				if entry.is_file() {
+					let filename =
+						entry.filename.as_path().to_string_lossy().to_lowercase();
+					filename.ends_with(".jpg")
+						|| filename.ends_with(".jpeg")
+						|| filename.ends_with(".png")
+				} else {
+					false
+				}
+			})
+			.sorted_by(|a, b| a.filename.cmp(&b.filename))
+			.enumerate()
+			.map(|(idx, header)| (PathBuf::from(header.filename.as_os_str()), idx))
+			.collect::<HashMap<_, _>>();
 
 		let mut content_types = HashMap::new();
+		let mut archive = Archive::new(path).open_for_processing()?;
+		while let Some(header) = archive.read_header() {
+			let header = header?;
+			archive = if let Some(tuple) =
+				entries.get_key_value(&PathBuf::from(header.entry().filename.as_os_str()))
+			{
+				let page = *tuple.1 as i32;
+				if pages.contains(&page) {
+					let (data, rest) = header.read()?;
+					let path = Path::new(tuple.0);
+					let extension = path
+						.extension()
+						.and_then(|s| s.to_str())
+						.unwrap_or_default();
 
-		for (idx, mut entry) in entries.into_iter().enumerate() {
-			let page = (idx + 1) as i32;
-
-			if pages.contains(&page) {
-				let path = entry.filename.clone();
-				let extension = path
-					.extension()
-					.and_then(|s| s.to_str())
-					.unwrap_or_default();
-
-				// NOTE: as with the rest of this file that uses `read_bytes`, this is a hack.
-				// Although, in this case, it is even more unideal because instead of reading
-				// the first few bytes of the file, we are reading the entire file. I hate it here.
-				let contents = entry.read_bytes().map_err(|_e| {
-					error!("Failed to read bytes from rar archive");
-					FileError::RarReadError
-				})?;
-				content_types.insert(
-					page,
-					ContentType::from_bytes_with_fallback(&contents, extension),
-				);
+					content_types.insert(
+						page,
+						ContentType::from_bytes_with_fallback(&data, extension),
+					);
+					rest
+				} else {
+					header.skip()?
+				}
+			} else {
+				header.skip()?
 			}
 		}
 
@@ -239,8 +221,6 @@ impl FileProcessor for RarProcessor {
 impl RarProcessor {
 	pub fn convert_to_zip(path: &str, delete_source: bool) -> Result<PathBuf, FileError> {
 		debug!(path, "Converting RAR to ZIP");
-
-		let archive = unrar::Archive::new(path)?;
 
 		// TODO: remove these defaults and bubble up an error...
 		let path_buf = PathBuf::from(path);
@@ -260,18 +240,15 @@ impl RarProcessor {
 
 		trace!(?unpacked_path, "Extracting RAR to cache");
 
-		// TODO: fix this mess...
-		archive
-			.extract_to(&unpacked_path)
-			.map_err(|e| {
-				error!("Failed to open archive: {:?}", e.to_string());
-				FileError::RarOpenError
-			})?
-			.process()
-			.map_err(|e| {
-				error!("Failed to extract archive: {:?}", e.to_string());
-				FileError::RarExtractError(e.to_string())
-			})?;
+		let mut archive = Archive::new(path).open_for_processing()?;
+		while let Some(header) = archive.read_header() {
+			let header = header?;
+			archive = if header.entry().is_file() {
+				header.extract_to(&unpacked_path)?
+			} else {
+				header.skip()?
+			};
+		}
 
 		let zip_path =
 			create_zip_archive(&unpacked_path, dir_name, original_ext, parent)?;
@@ -295,18 +272,5 @@ impl RarProcessor {
 		}
 
 		Ok(zip_path)
-	}
-}
-
-impl IsImage for Entry {
-	fn is_image(&self) -> bool {
-		if self.is_file() {
-			let file_name = self.filename.as_path().to_string_lossy().to_lowercase();
-			return file_name.ends_with(".jpg")
-				|| file_name.ends_with(".jpeg")
-				|| file_name.ends_with(".png");
-		}
-
-		false
 	}
 }

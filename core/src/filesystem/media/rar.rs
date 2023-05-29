@@ -16,14 +16,12 @@ use crate::{
 		content_type::ContentType,
 		error::FileError,
 		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
+		media::common::metadata_from_buf,
 		zip::ZipProcessor,
 	},
 };
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
-
-// const RAR_UNSUPPORTED_MSG: &str =
-// 	"Stump cannot currently support RAR files in Docker or Windows.";
 
 pub struct RarProcessor;
 
@@ -86,13 +84,11 @@ impl FileProcessor for RarProcessor {
 
 		let mut archive = Archive::new(&path).open_for_processing()?;
 		let mut pages = 0;
-		#[allow(unused)]
 		let mut metadata_buf = None;
 
 		while let Some(header) = archive.read_header() {
 			let header = header?;
 			let entry = header.entry();
-			#[allow(unused_assignments)]
 			if entry.filename.as_os_str() == "ComicInfo.xml" {
 				let (data, rest) = header.read()?;
 				metadata_buf = Some(data);
@@ -104,14 +100,17 @@ impl FileProcessor for RarProcessor {
 			}
 		}
 
+		let metadata = if let Some(buf) = metadata_buf {
+			let content_str = std::str::from_utf8(&buf)?;
+			metadata_from_buf(content_str.to_string())
+		} else {
+			None
+		};
+
 		Ok(ProcessedFile {
-			thumbnail_path: None,
 			path: PathBuf::from(path),
 			hash,
-			metadata: None,
-			// metadata: media::process_comic_info(
-			// 	std::str::from_utf8(&metadata_buf)?.to_owned(),
-			// ),
+			metadata,
 			pages,
 		})
 	}

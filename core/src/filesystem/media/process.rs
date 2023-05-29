@@ -57,7 +57,6 @@ pub trait FileProcessor {
 /// Struct representing a processed file. This is the output of the `process` function
 /// on a `FileProcessor` implementation.
 pub struct ProcessedFile {
-	pub thumbnail_path: Option<PathBuf>,
 	pub path: PathBuf,
 	pub hash: Option<String>,
 	pub metadata: Option<Metadata>,
@@ -66,6 +65,7 @@ pub struct ProcessedFile {
 
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
+// TODO: string array for some of these
 /// Struct representing the metadata for a processed file.
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Type, Default)]
 pub struct Metadata {
@@ -85,6 +85,33 @@ pub struct Metadata {
 	pub page_count: Option<u32>,
 }
 
+impl From<HashMap<String, Vec<String>>> for Metadata {
+	fn from(map: HashMap<String, Vec<String>>) -> Self {
+		let mut metadata = Metadata::default();
+
+		for (key, value) in map {
+			match key.to_lowercase().as_str() {
+				"series" => metadata.series = Some(value.join("\n").to_string()),
+				"number" => {
+					metadata.number =
+						value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				"web" => metadata.web = value.into_iter().next(),
+				"summary" => metadata.summary = Some(value.join("\n").to_string()),
+				"publisher" => metadata.publisher = Some(value.join("\n").to_string()),
+				"genre" => metadata.genre = Some(value.join("\n").to_string()),
+				"pagecount" => {
+					metadata.page_count =
+						value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				_ => (),
+			}
+		}
+
+		metadata
+	}
+}
+
 pub fn process(
 	path: &Path,
 	options: FileProcessorOptions,
@@ -101,17 +128,6 @@ pub fn process(
 		"application/vnd.comicbook-rar" => RarProcessor::process(path_str, options),
 		"application/epub+zip" => EpubProcessor::process(path_str, options),
 		_ => Err(FileError::UnsupportedFileType(path.display().to_string())),
-	}
-}
-
-pub fn process_metadata(contents: String) -> Option<Metadata> {
-	if contents.is_empty() {
-		return None;
-	}
-
-	match serde_xml_rs::from_str(&contents) {
-		Ok(meta) => Some(meta),
-		_ => None,
 	}
 }
 

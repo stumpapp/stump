@@ -53,7 +53,7 @@ impl FileProcessor for RarProcessor {
 			match hash::generate(path, sample) {
 				Ok(digest) => Some(digest),
 				Err(e) => {
-					debug!(error = ?e, path, "Failed to digest RAR file",);
+					debug!(error = ?e, path, "Failed to digest RAR file");
 
 					None
 				},

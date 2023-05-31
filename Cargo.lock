@@ -6068,7 +6068,7 @@ checksum = "39ec24b3121d976906ece63c9daad25b85969647682eee313cb5779fdd69e14e"
 [[package]]
 name = "unrar"
 version = "0.4.4"
-source = "git+https://github.com/stumpapp/unrar.rs?branch=feature/typestate#38bbe4c28e360e630a084baea290d86e1acc0784"
+source = "git+https://github.com/stumpapp/unrar.rs?branch=feature/typestate#9c023b2d58e5131f43036805e8f35ccf28697efd"
 dependencies = [
  "bitflags",
  "lazy_static",
@@ -6080,7 +6080,7 @@ dependencies = [
 [[package]]
 name = "unrar_sys"
 version = "0.2.1"
-source = "git+https://github.com/stumpapp/unrar.rs?branch=feature/typestate#38bbe4c28e360e630a084baea290d86e1acc0784"
+source = "git+https://github.com/stumpapp/unrar.rs?branch=feature/typestate#9c023b2d58e5131f43036805e8f35ccf28697efd"
 dependencies = [
  "cc",
  "libc",

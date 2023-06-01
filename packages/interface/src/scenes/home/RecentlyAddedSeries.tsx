@@ -1,3 +1,4 @@
+import { seriesQueryKeys } from '@stump/api'
 import { useSeriesCursorQuery } from '@stump/client'
 
 import HorizontalCardList from '../../components/HorizontalCardList'
@@ -11,6 +12,7 @@ export default function RecentlyAddedSeries() {
 			direction: 'desc',
 			order_by: 'created_at',
 		},
+		queryKey: [seriesQueryKeys.getRecentlyAddedSeries],
 	})
 
 	const cards = series.map((series) => (

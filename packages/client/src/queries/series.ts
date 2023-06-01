@@ -32,9 +32,9 @@ export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, Axi
 	return { series: data, ...ret }
 }
 
-export function useSeriesCursorQuery(options: CursorQueryOptions<Series>) {
+export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
 	const { data, ...restReturn } = useCursorQuery(
-		[seriesQueryKeys.getSeriesWithCursor],
+		queryKey ?? [seriesQueryKeys.getSeriesWithCursor],
 		async (params) => {
 			const { data } = await seriesApi.getSeriesWithCursor(params)
 			return data

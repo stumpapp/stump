@@ -34,6 +34,7 @@ webp = "0.2.2"
 zip = "0.5.13"
 epub = "1.2.4"
 unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typestate" }
+# unrar = { path = "../../unrar.rs" }
 data-encoding = "2.3.2"
 ring = "0.16.20"
 

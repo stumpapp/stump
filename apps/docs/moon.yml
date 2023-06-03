@@ -23,17 +23,17 @@ tasks:
   deploy-preview:
     command: 'vercel'
     local: true
-    runFromWorkspaceRoot: false
     platform: 'system'
     options:
       shell: true
+      runFromWorkspaceRoot: false
 
   deploy:
     command: 'vercel'
     args:
       - '--prod'
     local: true
-    runFromWorkspaceRoot: false
     platform: 'system'
     options:
       shell: true
+      runFromWorkspaceRoot: false

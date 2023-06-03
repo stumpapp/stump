@@ -23,8 +23,7 @@ use crate::{
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
-const RAR_UNSUPPORTED_MSG: &str =
-	"Stump cannot currently support RAR files in Docker.";
+const RAR_UNSUPPORTED_MSG: &str = "Stump cannot currently support RAR files in Docker.";
 
 pub struct RarProcessor;
 

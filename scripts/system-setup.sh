@@ -90,7 +90,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
-    sudo apt-get -y install pkg-config libssl-dev libdbus-1-dev libsoup2.4-dev libwebkit2gtk-4.0-dev curl wget libgtk-3-dev libappindicator3-dev librsvg2-dev build-essential libayatana-appindicator3-dev
+    sudo apt-get -y install pkg-config javascriptcoregtk-4.0 libssl-dev libdbus-1-dev libsoup2.4-dev libwebkit2gtk-4.0-dev curl wget libgtk-3-dev libappindicator3-dev librsvg2-dev build-essential libayatana-appindicator3-dev gobject-2.0 libcairo2-dev libatk1.0-dev libgdk-pixbuf2.0-dev
   elif which pacman &> /dev/null; then
     sudo pacman -Syu
     sudo pacman -S --needed webkit2gtk base-devel curl wget openssl appmenu-gtk-module gtk3 libappindicator-gtk3 librsvg libvips

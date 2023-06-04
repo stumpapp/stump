@@ -10,7 +10,7 @@ use tracing::{debug, error, trace, warn};
 use unrar::Archive;
 
 use crate::{
-	config,
+	config::{self, stump_in_docker},
 	filesystem::{
 		archive::create_zip_archive,
 		content_type::ContentType,
@@ -22,6 +22,9 @@ use crate::{
 };
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
+
+const RAR_UNSUPPORTED_MSG: &str =
+	"Stump cannot currently support RAR files in Docker.";
 
 pub struct RarProcessor;
 
@@ -67,7 +70,11 @@ impl FileProcessor for RarProcessor {
 		path: &str,
 		options: FileProcessorOptions,
 	) -> Result<ProcessedFile, FileError> {
-		if options.convert_rar_to_zip {
+		if stump_in_docker() {
+			return Err(FileError::UnsupportedFileType(
+				RAR_UNSUPPORTED_MSG.to_string(),
+			));
+		} else if options.convert_rar_to_zip {
 			let zip_path_buf =
 				RarProcessor::convert_to_zip(path, options.delete_conversion_source)?;
 			let zip_path = zip_path_buf.to_str().ok_or_else(|| {
@@ -116,6 +123,12 @@ impl FileProcessor for RarProcessor {
 	}
 
 	fn get_page(file: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
+		if stump_in_docker() {
+			return Err(FileError::UnsupportedFileType(
+				RAR_UNSUPPORTED_MSG.to_string(),
+			));
+		}
+
 		let archive = Archive::new(file).open_for_listing()?;
 
 		let mut valid_entries = archive
@@ -163,6 +176,12 @@ impl FileProcessor for RarProcessor {
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
+		if stump_in_docker() {
+			return Err(FileError::UnsupportedFileType(
+				RAR_UNSUPPORTED_MSG.to_string(),
+			));
+		}
+
 		let archive = Archive::new(path).open_for_listing()?;
 
 		let entries = archive

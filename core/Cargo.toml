@@ -33,13 +33,13 @@ image = "0.24.2"
 webp = "0.2.2"
 zip = "0.5.13"
 epub = "1.2.4"
-unrar = { git = "https://github.com/aaronleopold/unrar.rs", branch = "aleopold--read-bytes" }
+unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typestate" }
+# unrar = { path = "../../unrar.rs" }
 data-encoding = "2.3.2"
 ring = "0.16.20"
 
 ## ERROR HANDLING + LOGGING ###
 thiserror = { workspace = true }
-# figment = { version = "0.10.6", features = ["toml", "env"] }
 toml = "0.5.9"
 tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }

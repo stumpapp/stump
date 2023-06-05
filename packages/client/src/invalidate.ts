@@ -42,6 +42,7 @@ export const core_event_triggers = {
 			libraryQueryKeys.getLibraryById,
 			libraryQueryKeys.getLibrariesStats,
 			seriesQueryKeys.getSeriesById,
+			seriesQueryKeys.getRecentlyAddedSeries,
 			mediaQueryKeys.getRecentlyAddedMedia,
 		],
 	},
@@ -51,6 +52,7 @@ export const core_event_triggers = {
 			libraryQueryKeys.getLibrariesStats,
 			seriesQueryKeys.getSeriesById,
 			mediaQueryKeys.getRecentlyAddedMedia,
+			seriesQueryKeys.getRecentlyAddedSeries,
 		],
 	},
 	JobComplete: {

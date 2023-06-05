@@ -6,6 +6,7 @@
 	"license": "MIT",
 	"scripts": {
 		"prisma": "cargo prisma",
+		"studio": "npx prisma studio",
 		"setup": "cargo prisma generate",
 		"build": "cargo build --release",
 		"fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",

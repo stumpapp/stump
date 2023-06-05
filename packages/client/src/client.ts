@@ -163,7 +163,9 @@ export type CursorQueryOptions<
 	UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, QueryKey>,
 	'queryKey' | 'queryFn' | 'context' | 'getNextPageParam' | 'getPreviousPageParam'
 > &
-	CursorQueryCursorOptions
+	CursorQueryCursorOptions & {
+		queryKey?: QueryKey
+	}
 
 export type UseCursorQueryFunction<E> = (
 	params: CursorQueryParams,
@@ -175,7 +177,10 @@ type CursorQueryContext = {
 export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 	queryKey: QueryKey,
 	queryFn: UseCursorQueryFunction<Entity>,
-	options?: CursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+	options?: Omit<
+		CursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+		'queryKey'
+	>,
 ) {
 	const { initialCursor, limit, params, ...restOptions } = options || {}
 

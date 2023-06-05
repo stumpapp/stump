@@ -1,6 +1,7 @@
 use std::io;
 
 use thiserror::Error;
+use unrar::error::UnrarError;
 use zip::result::ZipError;
 
 use crate::error::CoreError;
@@ -19,6 +20,8 @@ pub enum FileError {
 	EpubReadError(String),
 	#[error("Could not find an image")]
 	NoImageError,
+	#[error("{0}")]
+	RarError(#[from] UnrarError),
 	#[error("Failed to open rar archive: {0}")]
 	RarNulError(#[from] unrar::error::NulError),
 	#[error("Could not open rar file")]

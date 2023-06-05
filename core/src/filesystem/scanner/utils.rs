@@ -43,12 +43,14 @@ impl MediaBuilder for Media {
 		options: MediaBuilderOptions,
 	) -> CoreResult<Media> {
 		let processed_entry = process(path, options.library_options.into())?;
+		let metadata = processed_entry.metadata.unwrap_or_default();
 
 		let pathbuf = processed_entry.path;
 		let path = pathbuf.as_path();
 
 		let path_str = path.to_str().unwrap_or_default().to_string();
 
+		// TODO: use more of metadata here, based on options passed in
 		let name = path
 			.file_stem()
 			.unwrap_or_default()
@@ -69,18 +71,16 @@ impl MediaBuilder for Media {
 			_ => 0,
 		};
 
-		let comic_info = processed_entry.metadata.unwrap_or_default();
-
 		Ok(Media {
 			name,
-			description: comic_info.summary,
+			description: metadata.summary,
 			size: size.try_into().unwrap_or_else(|e| {
 				error!("Failed to calculate file size: {:?}", e);
 
 				0
 			}),
 			extension: ext,
-			pages: match comic_info.page_count {
+			pages: match metadata.page_count {
 				Some(count) => count as i32,
 				None => processed_entry.pages,
 			},

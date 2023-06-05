@@ -3,7 +3,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use specta::Type;
 use tracing::debug;
 
@@ -57,32 +57,135 @@ pub trait FileProcessor {
 /// Struct representing a processed file. This is the output of the `process` function
 /// on a `FileProcessor` implementation.
 pub struct ProcessedFile {
-	pub thumbnail_path: Option<PathBuf>,
 	pub path: PathBuf,
 	pub hash: Option<String>,
 	pub metadata: Option<Metadata>,
 	pub pages: i32,
 }
 
+fn string_list_deserializer<'de, D>(
+	deserializer: D,
+) -> Result<Option<Vec<String>>, D::Error>
+where
+	D: Deserializer<'de>,
+{
+	let str_sequence = String::deserialize(deserializer)?;
+	Ok(Some(
+		str_sequence
+			.split(',')
+			.map(|item| item.trim().to_owned())
+			.collect(),
+	))
+}
+
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
+// TODO: string array for some of these, figure out which ones...
 /// Struct representing the metadata for a processed file.
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Type, Default)]
 pub struct Metadata {
+	#[serde(alias = "Title")]
+	pub title: Option<String>,
 	#[serde(alias = "Series")]
 	pub series: Option<String>,
 	#[serde(alias = "Number")]
 	pub number: Option<u32>,
-	#[serde(alias = "Web")]
-	pub web: Option<String>,
+	#[serde(alias = "Volume")]
+	pub volume: Option<u32>,
 	#[serde(alias = "Summary")]
 	pub summary: Option<String>,
+	#[serde(alias = "Notes")]
+	pub notes: Option<String>,
+	#[serde(alias = "Genre", deserialize_with = "string_list_deserializer")]
+	pub genre: Option<Vec<String>>,
+
+	#[serde(alias = "Year")]
+	pub year: Option<u32>,
+	#[serde(alias = "Month")]
+	pub month: Option<u32>,
+	#[serde(alias = "Day")]
+	pub day: Option<u32>,
+
+	#[serde(alias = "Writer", deserialize_with = "string_list_deserializer")]
+	pub writers: Option<Vec<String>>,
+	#[serde(alias = "Penciller")]
+	pub penciller: Option<String>,
+	#[serde(alias = "Inker")]
+	pub inker: Option<String>,
+	#[serde(alias = "Colorist")]
+	pub colorist: Option<String>,
+	#[serde(alias = "Letterer")]
+	pub letterer: Option<String>,
+	#[serde(alias = "CoverArtist")]
+	pub cover_artist: Option<String>,
+	#[serde(alias = "Editor")]
+	pub editor: Option<String>,
 	#[serde(alias = "Publisher")]
 	pub publisher: Option<String>,
-	#[serde(alias = "Genre")]
-	pub genre: Option<String>,
+	#[serde(alias = "Web", deserialize_with = "string_list_deserializer")]
+	pub links: Option<Vec<String>>,
+	#[serde(alias = "Characters", deserialize_with = "string_list_deserializer")]
+	pub characters: Option<Vec<String>>,
+	#[serde(alias = "Teams", deserialize_with = "string_list_deserializer")]
+	pub teams: Option<Vec<String>>,
+
 	#[serde(alias = "PageCount")]
 	pub page_count: Option<u32>,
+	// TODO: pages, e.g. <Pages><Page Image="0" Type="FrontCover" ImageSize="741291" /></Pages>
+}
+
+// NOTE: this is primarily used for converting the EPUB metadata into a common Metadata struct
+impl From<HashMap<String, Vec<String>>> for Metadata {
+	fn from(map: HashMap<String, Vec<String>>) -> Self {
+		let mut metadata = Metadata::default();
+
+		for (key, value) in map {
+			match key.to_lowercase().as_str() {
+				"title" => metadata.title = Some(value.join("\n").to_string()),
+				"series" => metadata.series = Some(value.join("\n").to_string()),
+				"number" => {
+					metadata.number =
+						value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				"volume" => {
+					metadata.volume =
+						value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				"summary" => metadata.summary = Some(value.join("\n").to_string()),
+				"notes" => metadata.notes = Some(value.join("\n").to_string()),
+				"genre" => metadata.genre = Some(value),
+				"year" => {
+					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				"month" => {
+					metadata.month = value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				"day" => {
+					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				"writers" => metadata.writers = Some(value),
+				"penciller" => metadata.penciller = Some(value.join("\n").to_string()),
+				"inker" => metadata.inker = Some(value.join("\n").to_string()),
+				"colorist" => metadata.colorist = Some(value.join("\n").to_string()),
+				"letterer" => metadata.letterer = Some(value.join("\n").to_string()),
+				"coverartist" => {
+					metadata.cover_artist = Some(value.join("\n").to_string())
+				},
+				"editor" => metadata.editor = Some(value.join("\n").to_string()),
+				"publisher" => metadata.publisher = Some(value.join("\n").to_string()),
+				"links" => metadata.links = Some(value),
+				"characters" => metadata.characters = Some(value),
+				"teams" => metadata.teams = Some(value),
+				"pagecount" => {
+					metadata.page_count =
+						value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				_ => (),
+			}
+		}
+
+		metadata
+	}
 }
 
 pub fn process(
@@ -101,17 +204,6 @@ pub fn process(
 		"application/vnd.comicbook-rar" => RarProcessor::process(path_str, options),
 		"application/epub+zip" => EpubProcessor::process(path_str, options),
 		_ => Err(FileError::UnsupportedFileType(path.display().to_string())),
-	}
-}
-
-pub fn process_metadata(contents: String) -> Option<Metadata> {
-	if contents.is_empty() {
-		return None;
-	}
-
-	match serde_xml_rs::from_str(&contents) {
-		Ok(meta) => Some(meta),
-		_ => None,
 	}
 }
 

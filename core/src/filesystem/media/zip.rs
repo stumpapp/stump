@@ -7,9 +7,11 @@ use std::{
 use tracing::{debug, error, trace};
 use zip::read::ZipFile;
 
-use crate::filesystem::{content_type::ContentType, error::FileError, hash};
+use crate::filesystem::{
+	content_type::ContentType, error::FileError, hash, media::common::metadata_from_buf,
+};
 
-use super::{process_metadata, FileProcessor, FileProcessorOptions, ProcessedFile};
+use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
 pub struct ZipProcessor;
 
@@ -67,14 +69,13 @@ impl FileProcessor for ZipProcessor {
 			if file.name() == "ComicInfo.xml" {
 				let mut contents = String::new();
 				file.read_to_string(&mut contents)?;
-				metadata = process_metadata(contents);
+				metadata = metadata_from_buf(contents);
 			} else if content_type.is_image() {
 				pages += 1;
 			}
 		}
 
 		Ok(ProcessedFile {
-			thumbnail_path: None,
 			path: PathBuf::from(path),
 			hash,
 			metadata,

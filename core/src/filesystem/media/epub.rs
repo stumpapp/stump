@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
 const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
 const DEFAULT_EPUB_COVER_ID: &str = "cover";
 
-use crate::filesystem::{content_type::ContentType, error::FileError, hash};
+use crate::filesystem::{content_type::ContentType, error::FileError, hash, Metadata};
 use epub::doc::EpubDoc;
 use tracing::{debug, error, trace, warn};
 
@@ -63,18 +63,12 @@ impl FileProcessor for EpubProcessor {
 		let epub_file = Self::open(path)?;
 
 		let pages = epub_file.get_num_pages() as i32;
-
-		// TODO: Get metadata
-		// let metadata = path_buf.metadata().map_err(|e| {
-		// 	error!("Failed to get metadata for epub file: {}", e.to_string());
-		// 	FileError::EpubReadError(e.to_string())
-		// })?;
+		let metadata = Metadata::from(epub_file.metadata);
 
 		Ok(ProcessedFile {
-			thumbnail_path: None,
 			path: path_buf,
 			hash: EpubProcessor::hash(path),
-			metadata: None,
+			metadata: Some(metadata),
 			pages,
 		})
 	}

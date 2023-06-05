@@ -21,7 +21,7 @@ export function useCoreEventHandler({
 
 	const { addJob, updateJob, removeJob } = context
 
-	function handleCoreEvent(event: CoreEvent) {
+	async function handleCoreEvent(event: CoreEvent) {
 		const { key, data } = event
 
 		switch (key) {
@@ -37,11 +37,9 @@ export function useCoreEventHandler({
 				updateJob(data)
 				break
 			case 'JobComplete':
-				setTimeout(() => {
-					removeJob(data)
-					invalidateQueries({ keys: core_event_triggers[key].keys })
-					onJobComplete?.(data)
-				}, 750)
+				removeJob(data)
+				await invalidateQueries({ keys: core_event_triggers[key].keys })
+				onJobComplete?.(data)
 				break
 			case 'JobFailed':
 				onJobFailed?.(data)

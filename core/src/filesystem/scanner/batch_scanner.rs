@@ -69,8 +69,8 @@ async fn scan_series(
 			trace!(media_path = ?path, "Existing media found");
 
 			let media = media_by_path.get(path_str).unwrap();
-			let has_been_modified =
-				file_updated_since_scan(&entry, media.modified_at.clone())
+			let has_been_modified = if let Some(dt) = media.modified_at.clone() {
+				file_updated_since_scan(&entry, dt)
 					.map_err(|err| {
 						error!(
 							error = ?err,
@@ -78,7 +78,10 @@ async fn scan_series(
 							"Failed to determine if entry has been modified since last scan"
 						)
 					})
-					.unwrap_or(false);
+					.unwrap_or(false)
+			} else {
+				false
+			};
 
 			// If the file has been modified since the last scan, we need to update it.
 			if has_been_modified {

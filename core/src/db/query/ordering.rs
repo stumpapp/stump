@@ -53,7 +53,6 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 		Ok(match self.order_by.to_lowercase().as_str() {
 			"name" => media::name::order(dir),
 			"size" => media::size::order(dir),
-			"description" => media::description::order(dir),
 			"extension" => media::extension::order(dir),
 			"updated_at" => media::updated_at::order(dir),
 			"status" => media::status::order(dir),

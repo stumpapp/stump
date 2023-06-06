@@ -107,7 +107,7 @@ impl MediaDao for MediaDaoImpl {
 
 	async fn get_duplicate_media(&self) -> CoreResult<Vec<Media>> {
 		let duplicates = self.client
-			._query_raw::<Media>(raw!("SELECT * FROM media WHERE checksum IN (SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1)"))
+			._query_raw::<Media>(raw!("SELECT * FROM media WHERE hash IN (SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1)"))
 			.exec()
 			.await?;
 
@@ -125,8 +125,8 @@ impl MediaDao for MediaDaoImpl {
 			._query_raw::<Media>(raw!(
 				r#"
 				SELECT * FROM media
-				WHERE checksum IN (
-					SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) > 1
+				WHERE hash IN (
+					SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1
 				)
 				LIMIT {} OFFSET {}"#,
 				PrismaValue::Int(page_bounds.take),
@@ -140,8 +140,8 @@ impl MediaDao for MediaDaoImpl {
 			._query_raw::<CountQueryReturn>(raw!(
 				r#"
 				SELECT COUNT(*) as count FROM media
-				WHERE checksum IN (
-					SELECT checksum FROM media GROUP BY checksum HAVING COUNT(*) s> 1
+				WHERE hash IN (
+					SELECT hash FROM media GROUP BY hash HAVING COUNT(*) s> 1
 				)"#
 			))
 			.exec()
@@ -166,10 +166,9 @@ impl MediaDao for MediaDaoImpl {
 				media::id::equals(media.id),
 				vec![
 					media::name::set(media.name),
-					media::description::set(media.description),
 					media::size::set(media.size),
 					media::pages::set(media.pages),
-					media::checksum::set(media.checksum),
+					media::hash::set(media.hash),
 				],
 			)
 		});
@@ -203,8 +202,7 @@ impl Dao for MediaDaoImpl {
 				data.pages,
 				data.path.to_owned(),
 				vec![
-					media::checksum::set(data.checksum.to_owned()),
-					media::description::set(data.description.to_owned()),
+					media::hash::set(data.hash.to_owned()),
 					media::series::connect(series::id::equals(data.series_id.to_owned())),
 				],
 			)
@@ -269,8 +267,7 @@ impl DaoBatch for MediaDaoImpl {
 				media.pages,
 				media.path,
 				vec![
-					media::checksum::set(media.checksum),
-					media::description::set(media.description),
+					media::hash::set(media.hash),
 					media::series::connect(series::id::equals(media.series_id)),
 				],
 			)
@@ -297,8 +294,7 @@ impl DaoBatch for MediaDaoImpl {
 				media.pages,
 				media.path,
 				vec![
-					media::checksum::set(media.checksum),
-					media::description::set(media.description),
+					media::hash::set(media.hash),
 					media::series::connect(series::id::equals(media.series_id)),
 				],
 			)
@@ -346,7 +342,7 @@ impl DaoBatch for MediaDaoImpl {
 // 					data.pages,
 // 					data.path.clone(),
 // 					vec![
-// 						media::checksum::set(data.checksum.clone()),
+// 						media::hash::set(data.hash.clone()),
 // 						media::description::set(data.description.clone()),
 // 						media::series::connect(series::id::equals(
 // 							data.series_id.clone(),
@@ -359,7 +355,7 @@ impl DaoBatch for MediaDaoImpl {
 // 					media::extension::set(data.extension.clone()),
 // 					media::pages::set(data.pages),
 // 					media::path::set(data.path.clone()),
-// 					media::checksum::set(data.checksum.clone()),
+// 					media::hash::set(data.hash.clone()),
 // 					media::description::set(data.description.clone()),
 // 					media::series::connect(series::id::equals(data.series_id.clone())),
 // 				],

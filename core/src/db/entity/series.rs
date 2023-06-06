@@ -6,7 +6,10 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
-use super::{common::FileStatus, library::Library, media::Media, tag::Tag, Cursor};
+use super::{
+	common::FileStatus, library::Library, media::Media, metadata::SeriesMetadata,
+	tag::Tag, Cursor,
+};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Series {
@@ -53,6 +56,12 @@ impl Series {
 	pub fn set_media_count(&mut self, count: i64) {
 		self.media_count = Some(count);
 	}
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SeriesJson {
+	version: Option<String>,
+	metadata: SeriesMetadata,
 }
 
 impl Cursor for Series {

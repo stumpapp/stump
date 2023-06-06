@@ -59,20 +59,20 @@ async fn scan_series(
 		} else if visited_media.get(path_str).is_some() {
 			trace!(media_path = ?path, "Existing media found");
 			let media = media_by_path.get(path_str).unwrap();
-			let check_modified_at =
-				utils::file_updated_since_scan(&entry, media.modified_at.clone());
+			// let check_modified_at =
+			// 	utils::file_updated_since_scan(&entry, media.modified_at.clone());
 
-			if let Ok(has_been_modified) = check_modified_at {
-				// If the file has been modified since the last scan, we need to update it.
-				if has_been_modified {
-					debug!(?media, "Media file has been modified since last scan");
-					// TODO: do something with media_updates
-					warn!(
-						outdated_media = ?media,
-						"Stump does not support updating media entities yet",
-					);
-				}
-			}
+			// if let Ok(has_been_modified) = check_modified_at {
+			// 	// If the file has been modified since the last scan, we need to update it.
+			// 	if has_been_modified {
+			// 		debug!(?media, "Media file has been modified since last scan");
+			// 		// TODO: do something with media_updates
+			// 		warn!(
+			// 			outdated_media = ?media,
+			// 			"Stump does not support updating media entities yet",
+			// 		);
+			// 	}
+			// }
 
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;

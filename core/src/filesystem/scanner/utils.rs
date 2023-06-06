@@ -73,7 +73,7 @@ impl MediaBuilder for Media {
 
 		Ok(Media {
 			name,
-			description: metadata.summary,
+			// description: metadata.summary,
 			size: size.try_into().unwrap_or_else(|e| {
 				error!("Failed to calculate file size: {:?}", e);
 
@@ -84,7 +84,7 @@ impl MediaBuilder for Media {
 				Some(count) => count as i32,
 				None => processed_entry.pages,
 			},
-			checksum: processed_entry.hash,
+			hash: processed_entry.hash,
 			path: path_str,
 			series_id: options.series_id,
 			..Default::default()

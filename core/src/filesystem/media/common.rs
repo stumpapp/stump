@@ -1,4 +1,4 @@
-use super::Metadata;
+use crate::db::entity::metadata::MediaMetadata;
 
 pub fn is_accepted_cover_name(name: &str) -> bool {
 	let cover_file_names = vec!["cover", "thumbnail", "folder"];
@@ -7,7 +7,7 @@ pub fn is_accepted_cover_name(name: &str) -> bool {
 		.any(|&cover_name| name.eq_ignore_ascii_case(cover_name))
 }
 
-pub(crate) fn metadata_from_buf(contents: String) -> Option<Metadata> {
+pub(crate) fn metadata_from_buf(contents: String) -> Option<MediaMetadata> {
 	if contents.is_empty() {
 		return None;
 	}

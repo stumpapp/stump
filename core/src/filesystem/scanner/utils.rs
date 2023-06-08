@@ -15,13 +15,14 @@ use walkdir::DirEntry;
 use crate::{
 	db::{
 		entity::{
-			common::FileStatus, LibraryOptions, Media, MediaBuilder, MediaBuilderOptions,
+			common::FileStatus, metadata::SeriesMetadata, LibraryOptions, Media,
+			MediaBuilder, MediaBuilderOptions,
 		},
 		Dao, DaoBatch, MediaDao, MediaDaoImpl,
 	},
 	error::{CoreError, CoreResult},
-	filesystem::{media::process, scanner::BatchScanOperation},
-	prisma::{library, media, series},
+	filesystem::{media::process, scanner::BatchScanOperation, SeriesJson},
+	prisma::{library, media, series, series_metadata, PrismaClient},
 	Ctx,
 };
 
@@ -201,12 +202,71 @@ pub async fn insert_media(
 	Ok(created_media)
 }
 
+fn get_series_metadata(path: &Path) -> Option<SeriesMetadata> {
+	let series_json_path = path.join("series.json");
+	if series_json_path.exists() {
+		// TODO: log this error if it occurs
+		SeriesJson::from_file(&series_json_path)
+			.map(|json| json.metadata)
+			.ok()
+	} else {
+		None
+	}
+}
+
+async fn do_insert_series_batch(
+	client: &PrismaClient,
+	library_id: String,
+	series_and_meta: Vec<(String, String, Option<SeriesMetadata>)>,
+) -> CoreResult<Vec<series::Data>> {
+	let mut created_series = vec![];
+	for (filename, path, meta) in series_and_meta {
+		let series = client
+			.series()
+			.create(
+				filename,
+				path,
+				vec![series::library::connect(library::id::equals(
+					library_id.clone(),
+				))],
+			)
+			.exec()
+			.await?;
+
+		if let Some(metadata) = meta {
+			let (meta_type, params) = metadata.create_action();
+			let created_metadata = client
+				.series_metadata()
+				.create(meta_type, series::id::equals(series.id.clone()), params)
+				.exec()
+				.await?;
+			let updated_series = client
+				.series()
+				.update(
+					series::id::equals(series.id),
+					vec![series::metadata::connect(
+						series_metadata::series_id::equals(created_metadata.series_id),
+					)],
+				)
+				.with(series::metadata::fetch())
+				.exec()
+				.await?;
+
+			created_series.push(updated_series);
+		} else {
+			created_series.push(series);
+		}
+	}
+
+	Ok(created_series)
+}
+
 pub async fn insert_series_batch(
 	ctx: &Ctx,
 	entries: Vec<DirEntry>,
 	library_id: String,
 ) -> CoreResult<Vec<series::Data>> {
-	let series_creates = entries
+	let series_and_meta = entries
 		.into_iter()
 		.map(|entry| {
 			let path = entry.path();
@@ -215,26 +275,37 @@ pub async fn insert_series_batch(
 				.file_name()
 				.and_then(|file_name| file_name.to_str().map(String::from));
 			let path_str = path.to_str().map(String::from);
+			let metadata = get_series_metadata(path);
 
-			debug!(
-				file_name,
-				path_str, "Parsing series name and path from file"
-			);
-
-			(file_name, path_str)
+			debug!(file_name, path_str, ?metadata, "Parsed series information");
+			(file_name, path_str, metadata)
 		})
-		.filter_map(|result| match result {
-			(Some(file_name), Some(path_str)) => Some(ctx.db.series().create(
-				file_name,
-				path_str,
-				vec![series::library::connect(library::id::equals(
-					library_id.clone(),
-				))],
-			)),
-			_ => None,
-		});
+		.filter_map(
+			|(file_name, path_str, metadata)| match (file_name, path_str) {
+				(Some(file_name), Some(path_str)) => {
+					Some((file_name, path_str, metadata))
+				},
+				_ => None,
+			},
+		)
+		.collect();
 
-	Ok(ctx.db._batch(series_creates).await?)
+	// FIXME: this is so vile lol refactor once neseted create is supported:
+	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+	let (tx, client) = ctx.db._transaction().begin().await?;
+	let result = match do_insert_series_batch(&client, library_id, series_and_meta).await
+	{
+		Ok(v) => {
+			tx.commit(client).await?;
+			Ok(v)
+		},
+		Err(e) => {
+			tx.rollback(client).await?;
+			Err(e)
+		},
+	};
+
+	Ok(result?)
 }
 
 pub async fn mark_media_missing(

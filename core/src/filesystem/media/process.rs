@@ -1,12 +1,18 @@
 use std::{
 	collections::HashMap,
+	fs::File,
+	io::BufReader,
 	path::{Path, PathBuf},
 };
 
+use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 use crate::{
-	db::entity::{metadata::MediaMetadata, LibraryOptions},
+	db::entity::{
+		metadata::{MediaMetadata, SeriesMetadata},
+		LibraryOptions,
+	},
 	filesystem::{content_type::ContentType, epub::EpubProcessor, error::FileError},
 };
 
@@ -50,6 +56,22 @@ pub trait FileProcessor {
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError>;
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SeriesJson {
+	pub version: Option<String>,
+	pub metadata: SeriesMetadata,
+}
+
+impl SeriesJson {
+	// TODO: async?
+	pub fn from_file(path: &Path) -> Result<SeriesJson, FileError> {
+		let file = File::open(path)?;
+		let reader = BufReader::new(file);
+		let series_json: SeriesJson = serde_json::from_reader(reader)?;
+		Ok(series_json)
+	}
 }
 
 /// Struct representing a processed file. This is the output of the `process` function

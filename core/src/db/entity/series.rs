@@ -32,6 +32,8 @@ pub struct Series {
 	pub library: Option<Library>,
 	/// The media that are in this series. Will be `None` only if the relation is not loaded.
 	pub media: Option<Vec<Media>>,
+	/// The metadata for this series. Will be `None` if the relation is not loaded or if the series has no metadata.
+	pub metadata: Option<SeriesMetadata>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	/// The number of media in this series. Optional for safety, but should be loaded if possible.
 	pub media_count: Option<i64>,
@@ -56,12 +58,6 @@ impl Series {
 	pub fn set_media_count(&mut self, count: i64) {
 		self.media_count = Some(count);
 	}
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct SeriesJson {
-	version: Option<String>,
-	metadata: SeriesMetadata,
 }
 
 impl Cursor for Series {
@@ -95,6 +91,11 @@ impl From<prisma::series::Data> for Series {
 			Err(_e) => None,
 		};
 
+		let metadata = match data.metadata() {
+			Ok(m) => m.map(|m| SeriesMetadata::from(m.to_owned())),
+			Err(_e) => None,
+		};
+
 		Series {
 			id: data.id,
 			name: data.name,
@@ -106,6 +107,7 @@ impl From<prisma::series::Data> for Series {
 			library_id: data.library_id.unwrap(),
 			library,
 			media,
+			metadata,
 			media_count,
 			unread_media_count: None,
 			tags,

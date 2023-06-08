@@ -102,29 +102,48 @@ pub struct MediaMetadata {
 	// TODO: pages, e.g. <Pages><Page Image="0" Type="FrontCover" ImageSize="741291" /></Pages>
 }
 
-#[derive(Debug, Deserialize, Serialize, Type)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct SeriesMetadata {
 	/// The type of series. ex: "comicSeries"
 	#[serde(alias = "type")]
-	_type: String,
+	pub _type: String,
 	/// The title of the series, renamed from 'name' to keep consistency with the rest of the models
-	title: Option<String>,
+	pub title: Option<String>,
 	/// The associated series' description, renamed from 'description' to keep consistency with the rest of the models
-	summary: Option<String>,
+	pub summary: Option<String>,
 	/// The publisher of the associated series
-	publisher: Option<String>,
+	pub publisher: Option<String>,
 	/// The name of the imprint while under the publisher
-	imprint: Option<String>,
+	pub imprint: Option<String>,
 	/// The ComicVine id of the associated series
-	comicid: Option<i32>,
+	pub comicid: Option<i32>,
 	/// The volume of the series in relation to other titles (this can be either numerical or the series year)
-	volume: Option<i32>,
+	pub volume: Option<i32>,
 	/// The booktype of the series, e.g. Print, OneShot, TPB or GN
-	booktype: Option<String>,
+	pub booktype: Option<String>,
 	/// The age rating of the associated series
-	age_rating: Option<String>,
+	pub age_rating: Option<String>,
 	/// The status of the associated series, e.g. Continuing, Ended
-	status: Option<String>,
+	pub status: Option<String>,
+}
+
+impl SeriesMetadata {
+	pub fn create_action(self) -> (String, Vec<series_metadata::SetParam>) {
+		(
+			self._type,
+			vec![
+				series_metadata::title::set(self.title),
+				series_metadata::summary::set(self.summary),
+				series_metadata::publisher::set(self.publisher),
+				series_metadata::imprint::set(self.imprint),
+				series_metadata::comicid::set(self.comicid),
+				series_metadata::volume::set(self.volume),
+				series_metadata::booktype::set(self.booktype),
+				series_metadata::age_rating::set(self.age_rating),
+				series_metadata::status::set(self.status),
+			],
+		)
+	}
 }
 
 ///////////////////////////////////////////////
@@ -213,5 +232,22 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 		}
 
 		metadata
+	}
+}
+
+impl From<series_metadata::Data> for SeriesMetadata {
+	fn from(metadata: series_metadata::Data) -> Self {
+		SeriesMetadata {
+			_type: metadata.meta_type,
+			title: metadata.title,
+			summary: metadata.summary,
+			publisher: metadata.publisher,
+			imprint: metadata.imprint,
+			comicid: metadata.comicid,
+			volume: metadata.volume,
+			booktype: metadata.booktype,
+			age_rating: metadata.age_rating,
+			status: metadata.status,
+		}
 	}
 }

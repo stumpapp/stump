@@ -14,6 +14,8 @@ pub enum FileError {
 	ZipFileError(#[from] ZipError),
 	#[error("Archive contains no files")]
 	ArchiveEmptyError,
+	#[error("Failed to deserialize file: {0}")]
+	DeserializeError(#[from] serde_json::Error),
 	#[error("Unable to open .epub file: {0}")]
 	EpubOpenError(String),
 	#[error("Error while attempting to read .epub file: {0}")]

@@ -119,7 +119,7 @@ model Series {
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
   /////////////////////////////////////////////
-  metadata SeriesMetadata[]
+  metadata SeriesMetadata?
 
   // The id of the library this series belongs to.
   library_id String?
@@ -138,7 +138,7 @@ model Series {
 // https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
 model SeriesMetadata {
   // The type of series. ex: "comicSeries"
-  type       String
+  meta_type  String
   // The title of the series, renamed from 'name' to keep consistency with the rest of the models
   title      String?
   // The associated series' description, renamed from 'description' to keep consistency with the rest of the models

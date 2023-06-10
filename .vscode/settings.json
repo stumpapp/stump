@@ -11,5 +11,8 @@
 	"tailwindCSS.experimental.classRegex": [["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]],
 	"tailwindCSS.classAttributes": ["class", "className", ".*CLASSES", ".*VARIANTS"],
 	"typescript.tsdk": "node_modules/typescript/lib",
-	"vue.features.codeActions.enable": false
+	"vue.features.codeActions.enable": false,
+	"yaml.schemas": {
+		"https://json.schemastore.org/yamllint.json": "file:///Users/aaronleopold/Projects/stumpapp/stump/.moon/tasks/typescript.yml"
+	}
 }

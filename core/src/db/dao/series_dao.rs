@@ -1,38 +1,54 @@
-use std::sync::Arc;
-
 use prisma_client_rust::{raw, PrismaValue};
+use std::sync::Arc;
 use tracing::{error, trace};
 
 use crate::{
 	db::{
-		common::CountQueryReturn,
-		entity::{Media, Series},
+		entity::Series,
 		query::pagination::{PageParams, Pageable},
+		CountQueryReturn,
 	},
-	error::{CoreError, CoreResult},
-	prisma::{library, media, series, PrismaClient},
+	prisma::{series, series_metadata, PrismaClient},
+	CoreError, CoreResult,
 };
 
-use super::{Dao, DaoCount};
+use super::DAO;
 
-#[async_trait::async_trait]
-pub trait SeriesDao {
-	async fn get_recently_added_series_page(
-		&self,
-		viewer_id: &str,
-		page_params: PageParams,
-	) -> CoreResult<Pageable<Vec<Series>>>;
-	async fn get_series_media(&self, series_id: &str) -> CoreResult<Vec<Media>>;
-}
-
-pub struct SeriesDaoImpl {
+pub struct SeriesDAO {
 	client: Arc<PrismaClient>,
 }
 
-#[async_trait::async_trait]
-impl SeriesDao for SeriesDaoImpl {
-	// TODO: Just move this query out of this file...
-	async fn get_recently_added_series_page(
+impl DAO for SeriesDAO {
+	type Entity = Series;
+
+	fn new(client: Arc<PrismaClient>) -> Self {
+		Self { client }
+	}
+}
+
+impl SeriesDAO {
+	/// Creates many series in the database from the given list within a transaction.
+	/// Will also create and connect metadata if it is present.
+	///
+	/// NOTE: Internally invokes `do_create_many` to handle the transaction logic.
+	/// This function serves as a wrapper to handle the transaction commit/rollback.
+	pub async fn create_many(&self, series: Vec<Series>) -> CoreResult<Vec<Series>> {
+		// FIXME: this is so vile lol refactor once neseted create is supported:
+		// https://github.com/Brendonovich/prisma-client-rust/issues/44
+		let (tx, client) = self.client._transaction().begin().await?;
+		match do_create_many(&client, series).await {
+			Ok(v) => {
+				tx.commit(client).await?;
+				Ok(v)
+			},
+			Err(e) => {
+				tx.rollback(client).await?;
+				Err(e)
+			},
+		}
+	}
+
+	pub async fn get_recently_added_series(
 		&self,
 		viewer_id: &str,
 		page_params: PageParams,
@@ -109,89 +125,48 @@ impl SeriesDao for SeriesDaoImpl {
 			))
 		}
 	}
-
-	async fn get_series_media(&self, series_id: &str) -> CoreResult<Vec<Media>> {
-		let series_media = self
-			.client
-			.media()
-			.find_many(vec![media::series_id::equals(Some(series_id.to_string()))])
-			.exec()
-			.await?;
-
-		Ok(series_media
-			.into_iter()
-			.map(Media::from)
-			.collect::<Vec<Media>>())
-	}
 }
 
-#[async_trait::async_trait]
-impl DaoCount for SeriesDaoImpl {
-	async fn count_all(&self) -> CoreResult<i64> {
-		let count = self.client.series().count(vec![]).exec().await?;
-
-		Ok(count)
-	}
-}
-
-#[async_trait::async_trait]
-impl Dao for SeriesDaoImpl {
-	type Model = Series;
-
-	fn new(client: Arc<PrismaClient>) -> Self {
-		Self { client }
-	}
-
-	async fn insert(&self, data: Self::Model) -> CoreResult<Self::Model> {
-		let created_series = self
-			.client
+async fn do_create_many(
+	client: &PrismaClient,
+	series_list: Vec<Series>,
+) -> CoreResult<Vec<Series>> {
+	let mut ret = vec![];
+	for series in series_list {
+		let (filename, path, params, meta_params) = series.create_action();
+		let created_series = client
 			.series()
-			.create(
-				data.name,
-				data.path,
-				vec![
-					series::library::connect(library::id::equals(data.library_id)),
-					series::status::set(data.status.to_string()),
-				],
-			)
+			.create(filename, path, params)
 			.exec()
 			.await?;
 
-		Ok(Self::Model::from(created_series))
-	}
+		if let Some((meta_type, params)) = meta_params {
+			let created_metadata = client
+				.series_metadata()
+				.create(
+					meta_type,
+					series::id::equals(created_series.id.clone()),
+					params,
+				)
+				.exec()
+				.await?;
+			let updated_series = client
+				.series()
+				.update(
+					series::id::equals(created_series.id),
+					vec![series::metadata::connect(
+						series_metadata::series_id::equals(created_metadata.series_id),
+					)],
+				)
+				.with(series::metadata::fetch())
+				.exec()
+				.await?;
 
-	async fn delete(&self, id: &str) -> CoreResult<Self::Model> {
-		let deleted_series = self
-			.client
-			.series()
-			.delete(series::id::equals(id.to_string()))
-			.exec()
-			.await?;
-
-		Ok(Series::from(deleted_series))
-	}
-
-	async fn find_by_id(&self, id: &str) -> CoreResult<Self::Model> {
-		let series = self
-			.client
-			.series()
-			.find_unique(series::id::equals(id.to_string()))
-			.exec()
-			.await?;
-
-		if series.is_none() {
-			return Err(CoreError::NotFound(format!(
-				"Series with id {} not found",
-				id
-			)));
+			ret.push(Series::from(updated_series));
+		} else {
+			ret.push(Series::from(created_series));
 		}
-
-		Ok(Series::from(series.unwrap()))
 	}
 
-	async fn find_all(&self) -> CoreResult<Vec<Self::Model>> {
-		let series = self.client.series().find_many(vec![]).exec().await?;
-
-		Ok(series.into_iter().map(Series::from).collect())
-	}
+	Ok(ret)
 }

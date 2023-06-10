@@ -164,6 +164,8 @@ model SeriesMetadata {
 
   series_id String @id
   series    Series @relation(fields: [series_id], references: [id])
+
+  @@map("series_metadata")
 }
 
 model Media {
@@ -196,8 +198,8 @@ model Media {
   ///////////////// RELATIONS /////////////////
   /////////////////////////////////////////////
 
-  metadata    MediaMetadata?
-  metadata_id String?
+  metadata    MediaMetadata? @relation(fields: [metadata_id], references: [id], onDelete: Cascade)
+  metadata_id String?        @unique
 
   // The series this media belongs to.
   series             Series?           @relation(fields: [series_id], references: [id], onDelete: Cascade)
@@ -220,6 +222,9 @@ model Media {
 // This is because Prisma doesn't support String[] for SQLite. These will be 
 // denoted with a comment.
 model MediaMetadata {
+  // TODO: remove this once nested create is supported, just use media_id
+  id String @id @default(cuid())
+
   title   String?
   series  String?
   number  Int?
@@ -271,8 +276,10 @@ model MediaMetadata {
   ///////////////// RELATIONS /////////////////
   /////////////////////////////////////////////
 
-  media_id String @id
-  media    Media  @relation(fields: [media_id], references: [id])
+  // TODO: make unique once nested create is supported
+  media_id String?
+  // TODO: don't make optional once nested create is supported
+  media    Media?
 
   @@map("media_metadata")
 }
@@ -301,6 +308,8 @@ model MediaAnnotation {
   // The media this annotation belongs to
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  @@map("media_annotations")
 }
 
 model Tag {

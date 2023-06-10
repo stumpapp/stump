@@ -8,15 +8,20 @@ use std::{
 use tracing::{debug, error, trace, warn};
 
 use crate::{
-	db::entity::LibraryOptions,
+	db::{
+		entity::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions, Series},
+		MediaDAO, DAO,
+	},
 	error::CoreResult,
 	event::CoreEvent,
-	filesystem::scanner::{
-		setup::{setup_series, SeriesSetup},
-		utils, ScannedFileTrait,
+	filesystem::{
+		scanner::{
+			setup::{setup_series, SeriesSetup},
+			utils,
+		},
+		PathUtils,
 	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
-	prisma::series,
 	Ctx,
 };
 
@@ -25,7 +30,7 @@ use super::setup::{setup_library, LibrarySetup};
 async fn scan_series(
 	ctx: Ctx,
 	runner_id: String,
-	series: series::Data,
+	series: Series,
 	library_path: &str,
 	library_options: LibraryOptions,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
@@ -37,6 +42,7 @@ async fn scan_series(
 		walkdir,
 		glob_set,
 	} = setup_series(&ctx, &series, library_path, &library_options).await;
+	let media_dao = MediaDAO::new(ctx.db.clone());
 
 	for entry in walkdir
 		.into_iter()
@@ -59,40 +65,55 @@ async fn scan_series(
 		} else if visited_media.get(path_str).is_some() {
 			trace!(media_path = ?path, "Existing media found");
 			let media = media_by_path.get(path_str).unwrap();
-			// let check_modified_at =
-			// 	utils::file_updated_since_scan(&entry, media.modified_at.clone());
+			if let Some(modified_at) = media.modified_at.clone() {
+				let result = utils::file_updated_since_scan(&entry, modified_at);
 
-			// if let Ok(has_been_modified) = check_modified_at {
-			// 	// If the file has been modified since the last scan, we need to update it.
-			// 	if has_been_modified {
-			// 		debug!(?media, "Media file has been modified since last scan");
-			// 		// TODO: do something with media_updates
-			// 		warn!(
-			// 			outdated_media = ?media,
-			// 			"Stump does not support updating media entities yet",
-			// 		);
-			// 	}
-			// }
+				if let Ok(has_been_modified) = result {
+					// If the file has been modified since the last scan, we need to update it.
+					if has_been_modified {
+						debug!(?media, "Media file has been modified since last scan");
+						// TODO: do something with media_updates
+						warn!(
+							outdated_media = ?media,
+							"Stump does not support updating media entities yet",
+						);
+					}
+				}
+			}
 
 			*visited_media.entry(path_str.to_string()).or_insert(true) = true;
 			continue;
 		}
 
-		debug!(series_id = ?series.id, new_media_path = ?path, "New media found in series");
-		match utils::insert_media(&ctx, path, series.id.clone(), &library_options).await {
-			Ok(media) => {
-				visited_media.insert(media.path.clone(), true);
-				ctx.emit_client_event(CoreEvent::CreatedMedia(Box::new(media)));
+		trace!(series_id = ?series.id, new_media_path = ?path, "New media found in series");
+		let build_result = Media::build_with_options(
+			path,
+			MediaBuilderOptions {
+				series_id: series.id.clone(),
+				library_options: library_options.clone(),
 			},
-			Err(e) => {
-				error!(error = ?e, "Failed to create media");
-				ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
-					runner_id: Some(runner_id.clone()),
-					path: path.to_str().unwrap_or_default().to_string(),
-					message: e.to_string(),
-				})
-				.await;
-			},
+		);
+		if let Ok(generated) = build_result {
+			match media_dao.create(generated).await {
+				Ok(created_media) => {
+					visited_media.insert(created_media.path.clone(), true);
+					ctx.emit_client_event(CoreEvent::CreatedMedia(Box::new(
+						created_media,
+					)));
+				},
+				Err(e) => {
+					error!(error = ?e, "Failed to create media");
+					ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
+						runner_id: Some(runner_id.clone()),
+						path: path.to_str().unwrap_or_default().to_string(),
+						message: e.to_string(),
+					})
+					.await;
+				},
+			}
+		} else {
+			error!(error = ?build_result.err(), "Failed to build media");
+			continue;
 		}
 	}
 
@@ -102,17 +123,20 @@ async fn scan_series(
 		.map(|(path, _)| path)
 		.collect::<Vec<String>>();
 
-	if missing_media.is_empty() {
+	if !missing_media.is_empty() {
 		warn!(
 			missing_paths = ?missing_media,
-			"Some media files could not be located during scan."
+			"Some paths were not visited during series scan"
 		);
-		let result = utils::mark_media_missing(&ctx, missing_media).await;
+		let result = media_dao.mark_paths_missing(missing_media).await;
 
 		if let Err(err) = result {
-			error!(error = ?err, "Failed to mark media as MISSING");
+			error!(error = ?err, "Error trying to mark missing media");
 		} else {
-			debug!("Marked {} media as MISSING", result.unwrap());
+			debug!(
+				affected_rows = result.unwrap_or_default(),
+				"Marked missing media"
+			);
 		}
 	}
 }

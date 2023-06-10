@@ -13,7 +13,7 @@ use stump_core::{
 	db::{
 		entity::{LibraryOptions, Media, ReadProgress},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
-		Dao, MediaDao, MediaDaoImpl,
+		MediaDAO, DAO,
 	},
 	filesystem::{media::get_page, read_entire_file, ContentType},
 	prisma::{
@@ -167,6 +167,7 @@ async fn get_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
+				.with(media::metadata::fetch())
 				.order_by(order_by_param);
 
 			if !is_unpaged {
@@ -238,15 +239,17 @@ async fn get_duplicate_media(
 	State(ctx): State<AppState>,
 	_session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let media_dao = MediaDaoImpl::new(ctx.db.clone());
+	let media_dao = MediaDAO::new(ctx.db.clone());
 
 	if pagination.page.is_none() {
-		return Ok(Json(Pageable::from(media_dao.get_duplicate_media().await?)));
+		return Err(ApiError::BadRequest(
+			"Pagination is required for this request".to_string(),
+		));
 	}
 
 	Ok(Json(
 		media_dao
-			.get_duplicate_media_page(pagination.0.page_params())
+			.get_duplicate_media(pagination.0.page_params())
 			.await?,
 	))
 }
@@ -295,6 +298,7 @@ async fn get_in_progress_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress_filter.clone()
 				]))
+				.with(media::metadata::fetch())
 				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
 				// I think this just means whenever progress updates I should update the media
@@ -378,6 +382,7 @@ async fn get_recently_added_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
+				.with(media::metadata::fetch())
 				.order_by(media::created_at::order(Direction::Desc));
 
 			if !is_unpaged {
@@ -443,9 +448,13 @@ async fn get_media_by_id(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let mut query = db.media().find_unique(media::id::equals(id.clone())).with(
-		media::read_progresses::fetch(vec![read_progress::user_id::equals(user_id)]),
-	);
+	let mut query = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.with(media::read_progresses::fetch(vec![
+			read_progress::user_id::equals(user_id),
+		]))
+		.with(media::metadata::fetch());
 
 	if params.load_series.unwrap_or_default() {
 		trace!(media_id = id, "Loading series relation for media");

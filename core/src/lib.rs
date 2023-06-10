@@ -104,8 +104,8 @@ mod tests {
 	use crate::{
 		db::{
 			entity::{
-				epub::*, library::*, log::*, media::*, read_progress::*, reading_list::*,
-				series::*, tag::*, user::*, FileStatus, LayoutMode,
+				epub::*, library::*, log::*, media::*, metadata::*, read_progress::*,
+				reading_list::*, series::*, tag::*, user::*, FileStatus, LayoutMode,
 			},
 			query::{ordering::*, pagination::*},
 		},
@@ -151,7 +151,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibrariesStats>()?).as_bytes())?;
 
+		file.write_all(format!("{}\n\n", ts_export::<SeriesMetadata>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaAnnotationKind>()?).as_bytes(),

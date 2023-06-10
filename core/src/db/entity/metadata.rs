@@ -21,6 +21,33 @@ where
 	))
 }
 
+/*
+   TODO: write A proc macro that is shorthand for:
+
+   #[serde(
+	   alias = INPUT
+	   deserialize_with = "string_list_deserializer",
+	   default = "Option::default"
+   )]
+
+   So I can do this:
+   #[string_list(alias = "Genre")]
+   pub genre: Option<Vec<String>>,
+
+   Something like:
+
+   #[macro_export]
+	macro_rules! string_list {
+		(alias = $alias:literal) => {
+			#[serde(
+				alias = $alias,
+				deserialize_with = "string_list_deserializer",
+				default = "Option::default"
+			)]
+		};
+	}
+*/
+
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
 /// Struct representing the metadata for a processed file.
@@ -47,7 +74,11 @@ pub struct MediaMetadata {
 	#[serde(alias = "Notes")]
 	pub notes: Option<String>,
 	/// The genre(s) the media belongs to.
-	#[serde(alias = "Genre", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Genre",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub genre: Option<Vec<String>>,
 
 	/// The year the media was published.
@@ -61,38 +92,78 @@ pub struct MediaMetadata {
 	pub day: Option<i32>,
 
 	/// The writer(s) of the associated media
-	#[serde(alias = "Writer", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Writer",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub writers: Option<Vec<String>>,
 	/// The penciller(s) of the associated media
-	#[serde(alias = "Penciller", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Penciller",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub pencillers: Option<Vec<String>>,
 	/// The inker(s) of the associated media
-	#[serde(alias = "Inker", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Inker",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub inkers: Option<Vec<String>>,
 	/// The colorist(s) of the associated media
-	#[serde(alias = "Colorist", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Colorist",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub colorists: Option<Vec<String>>,
 	/// The letterer(s) of the associated media
-	#[serde(alias = "Letterer", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Letterer",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub letterers: Option<Vec<String>>,
 	/// The cover artist(s) of the associated media
-	#[serde(alias = "CoverArtist", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "CoverArtist",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub cover_artists: Option<Vec<String>>,
 	/// The editor(s) of the associated media
-	#[serde(alias = "Editor", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Editor",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub editors: Option<Vec<String>>,
 	/// The publisher of the associated media
 	#[serde(alias = "Publisher")]
 	pub publisher: Option<String>,
 
 	/// Link(s) to the associated media, e.g. a comixology link
-	#[serde(alias = "Web", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Web",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub links: Option<Vec<String>>,
 	/// A list of characters that appear in the associated media
-	#[serde(alias = "Characters", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Characters",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub characters: Option<Vec<String>>,
 	/// A list of teams that appear in the associated media
-	#[serde(alias = "Teams", deserialize_with = "string_list_deserializer")]
+	#[serde(
+		alias = "Teams",
+		deserialize_with = "string_list_deserializer",
+		default = "Option::default"
+	)]
 	pub teams: Option<Vec<String>>,
 
 	/// The number of pages in the associated media. This does *not* take priority over
@@ -100,6 +171,35 @@ pub struct MediaMetadata {
 	#[serde(alias = "PageCount")]
 	pub page_count: Option<i32>,
 	// TODO: pages, e.g. <Pages><Page Image="0" Type="FrontCover" ImageSize="741291" /></Pages>
+}
+
+impl MediaMetadata {
+	pub fn create_action(self) -> Vec<media_metadata::SetParam> {
+		vec![
+			media_metadata::title::set(self.title),
+			media_metadata::series::set(self.series),
+			media_metadata::number::set(self.number),
+			media_metadata::volume::set(self.volume),
+			media_metadata::summary::set(self.summary),
+			media_metadata::notes::set(self.notes),
+			media_metadata::genre::set(self.genre.map(|v| v.join(", "))),
+			media_metadata::year::set(self.year),
+			media_metadata::month::set(self.month),
+			media_metadata::day::set(self.day),
+			media_metadata::writers::set(self.writers.map(|v| v.join(", "))),
+			media_metadata::pencillers::set(self.pencillers.map(|v| v.join(", "))),
+			media_metadata::inkers::set(self.inkers.map(|v| v.join(", "))),
+			media_metadata::colorists::set(self.colorists.map(|v| v.join(", "))),
+			media_metadata::letterers::set(self.letterers.map(|v| v.join(", "))),
+			media_metadata::cover_artists::set(self.cover_artists.map(|v| v.join(", "))),
+			media_metadata::editors::set(self.editors.map(|v| v.join(", "))),
+			media_metadata::publisher::set(self.publisher),
+			media_metadata::links::set(self.links.map(|v| v.join(", "))),
+			media_metadata::characters::set(self.characters.map(|v| v.join(", "))),
+			media_metadata::teams::set(self.teams.map(|v| v.join(", "))),
+			media_metadata::page_count::set(self.page_count),
+		]
+	}
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
@@ -126,6 +226,8 @@ pub struct SeriesMetadata {
 	/// The status of the associated series, e.g. Continuing, Ended
 	pub status: Option<String>,
 }
+
+pub type SeriesMetadataCreateAction = (String, Vec<series_metadata::SetParam>);
 
 impl SeriesMetadata {
 	pub fn create_action(self) -> (String, Vec<series_metadata::SetParam>) {

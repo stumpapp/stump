@@ -9,19 +9,19 @@ use std::{
 use tracing::{debug, error, trace};
 
 use crate::{
-	db::entity::LibraryOptions,
+	db::entity::{LibraryOptions, Series},
 	error::{CoreError, CoreResult},
 	event::CoreEvent,
 	filesystem::{
 		image::generate_thumbnails,
 		scanner::{
+			common::BatchScanOperation,
 			setup::{setup_series, SeriesSetup},
 			utils::{batch_media_operations, file_updated_since_scan},
-			BatchScanOperation, ScannedFileTrait,
 		},
+		PathUtils,
 	},
 	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
-	prisma::series,
 	Ctx,
 };
 
@@ -33,7 +33,7 @@ use super::setup::{setup_library, LibrarySetup};
 // updates to the UI when libraries reach a certain size and send updates in batches instead.
 async fn scan_series(
 	ctx: Ctx,
-	series: series::Data,
+	series: Series,
 	library_path: &str,
 	library_options: LibraryOptions,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,

@@ -14,7 +14,7 @@ use stump_core::{
 			ordering::QueryOrder,
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		},
-		Dao, PrismaCountTrait, SeriesDao, SeriesDaoImpl,
+		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
@@ -278,12 +278,10 @@ async fn get_recently_added_series_handler(
 
 	let viewer_id = get_session_user(&session)?.id;
 	let page_params = pagination.0.page_params();
-	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
+	let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	// TODO: don't use DAO just create separate function `get_recently_added_series` and make
-	// this one `get_recently_added_series_handler`.
 	let recently_added_series = series_dao
-		.get_recently_added_series_page(&viewer_id, page_params)
+		.get_recently_added_series(&viewer_id, page_params)
 		.await?;
 
 	Ok(Json(recently_added_series))

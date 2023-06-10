@@ -1,28 +1,16 @@
-use std::{
-	fs::File,
-	io::{BufRead, BufReader},
-	path::{Path, PathBuf},
-};
+use std::path::Path;
 
-use globset::{Glob, GlobSetBuilder};
-use prisma_client_rust::{
-	chrono::{DateTime, Utc},
-	QueryError,
-};
+use prisma_client_rust::chrono::{DateTime, Utc};
 use tracing::{debug, error, trace, warn};
 use walkdir::DirEntry;
 
 use crate::{
 	db::{
-		entity::{
-			common::FileStatus, metadata::SeriesMetadata, LibraryOptions, Media,
-			MediaBuilder, MediaBuilderOptions,
-		},
-		Dao, DaoBatch, MediaDao, MediaDaoImpl,
+		entity::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
+		MediaDAO, DAO,
 	},
 	error::{CoreError, CoreResult},
-	filesystem::{media::process, scanner::BatchScanOperation, SeriesJson},
-	prisma::{library, media, series, series_metadata, PrismaClient},
+	filesystem::{media::process, scanner::common::BatchScanOperation},
 	Ctx,
 };
 
@@ -44,14 +32,13 @@ impl MediaBuilder for Media {
 		options: MediaBuilderOptions,
 	) -> CoreResult<Media> {
 		let processed_entry = process(path, options.library_options.into())?;
-		let metadata = processed_entry.metadata.unwrap_or_default();
+		trace!(?processed_entry, "Processed entry");
 
 		let pathbuf = processed_entry.path;
 		let path = pathbuf.as_path();
 
 		let path_str = path.to_str().unwrap_or_default().to_string();
 
-		// TODO: use more of metadata here, based on options passed in
 		let name = path
 			.file_stem()
 			.unwrap_or_default()
@@ -71,23 +58,24 @@ impl MediaBuilder for Media {
 			Ok(metadata) => metadata.len(),
 			_ => 0,
 		};
+		let pages = if let Some(metadata) = &processed_entry.metadata {
+			metadata.page_count.unwrap_or(processed_entry.pages)
+		} else {
+			processed_entry.pages
+		};
 
 		Ok(Media {
 			name,
-			// description: metadata.summary,
 			size: size.try_into().unwrap_or_else(|e| {
-				error!("Failed to calculate file size: {:?}", e);
-
+				error!(error = ?e, "Error occurred trying to calculate file size");
 				0
 			}),
 			extension: ext,
-			pages: match metadata.page_count {
-				Some(count) => count as i32,
-				None => processed_entry.pages,
-			},
+			pages,
 			hash: processed_entry.hash,
 			path: path_str,
 			series_id: options.series_id,
+			metadata: processed_entry.metadata,
 			..Default::default()
 		})
 	}
@@ -126,211 +114,14 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
-/// Will mark all series and media within the library as MISSING. Requires the
-/// series and series.media relations to have been loaded to function properly.
-pub async fn mark_library_missing(library: library::Data, ctx: &Ctx) -> CoreResult<()> {
-	let db = ctx.get_db();
-
-	let library_id = library.id.clone();
-	let series_ids = library
-		.series()
-		.unwrap_or(&vec![])
-		.iter()
-		.map(|s| s.id.clone())
-		.collect();
-
-	let result = db
-		._transaction()
-		.run(|client| async move {
-			client
-				.series()
-				.update_many(
-					vec![series::library_id::equals(Some(library.id.clone()))],
-					vec![series::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await?;
-
-			client
-				.media()
-				.update_many(
-					vec![media::series_id::in_vec(series_ids)],
-					vec![media::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await
-		})
-		.await?;
-
-	debug!(
-		records_updated = result,
-		?library_id,
-		"Marked library as missing"
-	);
-
-	Ok(())
-}
-
-pub async fn insert_media(
-	ctx: &Ctx,
-	path: &Path,
-	series_id: String,
-	library_options: &LibraryOptions,
-) -> CoreResult<Media> {
-	let path_str = path.to_str().unwrap_or_default().to_string();
-	let media_dao = MediaDaoImpl::new(ctx.db.clone());
-	let media = Media::build_with_options(
-		path,
-		MediaBuilderOptions {
-			series_id,
-			library_options: library_options.clone(),
-		},
-	)?;
-	let created_media = media_dao.insert(media).await?;
-
-	trace!("Media entity created: {:?}", created_media);
-
-	// TODO: Add me back!
-	// if library_options.create_webp_thumbnails {
-	// 	debug!("Attempting to create WEBP thumbnail");
-	// 	// let thumbnail_path = image::generate_thumbnail(&created_media.id, &path_str)?;
-	// 	// debug!("Created WEBP thumbnail: {:?}", thumbnail_path);
-	// }
-
-	debug!("Media for {} created successfully", path_str);
-
-	Ok(created_media)
-}
-
-fn get_series_metadata(path: &Path) -> Option<SeriesMetadata> {
-	let series_json_path = path.join("series.json");
-	if series_json_path.exists() {
-		// TODO: log this error if it occurs
-		SeriesJson::from_file(&series_json_path)
-			.map(|json| json.metadata)
-			.ok()
-	} else {
-		None
-	}
-}
-
-async fn do_insert_series_batch(
-	client: &PrismaClient,
-	library_id: String,
-	series_and_meta: Vec<(String, String, Option<SeriesMetadata>)>,
-) -> CoreResult<Vec<series::Data>> {
-	let mut created_series = vec![];
-	for (filename, path, meta) in series_and_meta {
-		let series = client
-			.series()
-			.create(
-				filename,
-				path,
-				vec![series::library::connect(library::id::equals(
-					library_id.clone(),
-				))],
-			)
-			.exec()
-			.await?;
-
-		if let Some(metadata) = meta {
-			let (meta_type, params) = metadata.create_action();
-			let created_metadata = client
-				.series_metadata()
-				.create(meta_type, series::id::equals(series.id.clone()), params)
-				.exec()
-				.await?;
-			let updated_series = client
-				.series()
-				.update(
-					series::id::equals(series.id),
-					vec![series::metadata::connect(
-						series_metadata::series_id::equals(created_metadata.series_id),
-					)],
-				)
-				.with(series::metadata::fetch())
-				.exec()
-				.await?;
-
-			created_series.push(updated_series);
-		} else {
-			created_series.push(series);
-		}
-	}
-
-	Ok(created_series)
-}
-
-pub async fn insert_series_batch(
-	ctx: &Ctx,
-	entries: Vec<DirEntry>,
-	library_id: String,
-) -> CoreResult<Vec<series::Data>> {
-	let series_and_meta = entries
-		.into_iter()
-		.map(|entry| {
-			let path = entry.path();
-
-			let file_name = path
-				.file_name()
-				.and_then(|file_name| file_name.to_str().map(String::from));
-			let path_str = path.to_str().map(String::from);
-			let metadata = get_series_metadata(path);
-
-			debug!(file_name, path_str, ?metadata, "Parsed series information");
-			(file_name, path_str, metadata)
-		})
-		.filter_map(
-			|(file_name, path_str, metadata)| match (file_name, path_str) {
-				(Some(file_name), Some(path_str)) => {
-					Some((file_name, path_str, metadata))
-				},
-				_ => None,
-			},
-		)
-		.collect();
-
-	// FIXME: this is so vile lol refactor once neseted create is supported:
-	// https://github.com/Brendonovich/prisma-client-rust/issues/44
-	let (tx, client) = ctx.db._transaction().begin().await?;
-	let result = match do_insert_series_batch(&client, library_id, series_and_meta).await
-	{
-		Ok(v) => {
-			tx.commit(client).await?;
-			Ok(v)
-		},
-		Err(e) => {
-			tx.rollback(client).await?;
-			Err(e)
-		},
-	};
-
-	Ok(result?)
-}
-
-pub async fn mark_media_missing(
-	ctx: &Ctx,
-	paths: Vec<String>,
-) -> Result<i64, QueryError> {
-	let db = ctx.get_db();
-
-	db.media()
-		.update_many(
-			vec![media::path::in_vec(paths)],
-			vec![media::status::set(FileStatus::Missing.to_string())],
-		)
-		.exec()
-		.await
-}
-
 pub async fn batch_media_operations(
 	ctx: &Ctx,
 	operations: Vec<BatchScanOperation>,
 	library_options: &LibraryOptions,
 ) -> CoreResult<Vec<Media>> {
-	let media_dao = MediaDaoImpl::new(ctx.db.clone());
+	let media_dao = MediaDAO::new(ctx.db.clone());
 
-	let (media_creates, media_updates, missing_paths) =
+	let (media_to_create, media_to_update, missing_paths) =
 		operations
 			.into_iter()
 			.fold(
@@ -388,23 +179,23 @@ pub async fn batch_media_operations(
 			);
 
 	trace!(
-		media_creates_len = media_creates.len(),
-		media_updates_len = media_updates.len(),
+		media_creates_len = media_to_create.len(),
+		media_updates_len = media_to_update.len(),
 		missing_paths_len = missing_paths.len(),
 		"Partitioned batch operations",
 	);
 
-	let update_result = media_dao.update_many(media_updates).await;
+	let update_result = media_dao.update_many(media_to_update).await;
 	if let Err(err) = update_result {
 		error!(query_error = ?err, "Error occurred trying to update media entities");
 	} else {
 		debug!(
 			updated_count = update_result.unwrap().len(),
-			"Updated media entities"
+			"Updated media"
 		)
 	}
 
-	let marked_missing_result = mark_media_missing(ctx, missing_paths).await;
+	let marked_missing_result = media_dao.mark_paths_missing(missing_paths).await;
 	if let Err(err) = marked_missing_result {
 		error!(
 			query_error = ?err,
@@ -412,38 +203,9 @@ pub async fn batch_media_operations(
 		);
 	}
 
-	let inserted_media = media_dao.insert_many(media_creates).await?;
-	debug!(
-		inserted_media_len = inserted_media.len(),
-		"Inserted new media entities",
-	);
+	let created_media = media_dao.create_many(media_to_create).await?;
+	debug!(created_media_len = created_media.len(), "Created media");
 
 	// FIXME: make return generic (not literally)
-	Ok(inserted_media)
-}
-
-pub fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathBuf]) {
-	for path in paths {
-		let open_result = File::open(path);
-		if let Ok(file) = open_result {
-			// read the lines of the file, and add each line as a glob pattern in the builder
-			for line in BufReader::new(file).lines() {
-				if let Err(e) = line {
-					error!(
-						error = ?e,
-						"Error occurred trying to read line from glob file",
-					);
-					continue;
-				}
-
-				builder.add(Glob::new(&line.unwrap()).unwrap());
-			}
-		} else {
-			error!(
-				error = ?open_result.err(),
-				?path,
-				"Failed to open file",
-			);
-		}
-	}
+	Ok(created_media)
 }

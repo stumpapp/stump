@@ -65,17 +65,22 @@ pub struct SeriesJson {
 }
 
 impl SeriesJson {
-	// TODO: async?
 	pub fn from_file(path: &Path) -> Result<SeriesJson, FileError> {
 		let file = File::open(path)?;
 		let reader = BufReader::new(file);
 		let series_json: SeriesJson = serde_json::from_reader(reader)?;
 		Ok(series_json)
 	}
+
+	pub fn from_folder(folder: &Path) -> Result<SeriesJson, FileError> {
+		let series_json_path = folder.join("series.json");
+		SeriesJson::from_file(&series_json_path)
+	}
 }
 
 /// Struct representing a processed file. This is the output of the `process` function
 /// on a `FileProcessor` implementation.
+#[derive(Debug)]
 pub struct ProcessedFile {
 	pub path: PathBuf,
 	pub hash: Option<String>,

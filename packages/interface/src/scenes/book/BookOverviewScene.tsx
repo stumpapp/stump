@@ -65,7 +65,7 @@ export default function BookOverviewScene() {
 								Completed on {dayjs(completedAt).format('LLL')}
 							</Text>
 						)}
-						{isAtLeastMedium && <ReadMore text={media.description} />}
+						{isAtLeastMedium && <ReadMore text={media.metadata?.summary} />}
 						{!isAtLeastMedium && <Spacer />}
 
 						<div className="flex w-full flex-col-reverse gap-1 md:flex-row md:gap-2">

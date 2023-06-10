@@ -4,24 +4,27 @@ use globset::{GlobSet, GlobSetBuilder};
 use itertools::Itertools;
 use rayon::prelude::{ParallelBridge, ParallelIterator};
 use tokio::task::JoinHandle;
-use tracing::{debug, error, trace};
+use tracing::{debug, error};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	db::entity::{common::FileStatus, LibraryOptions, Media},
+	db::{
+		entity::{common::FileStatus, LibraryOptions, Media, Series},
+		LibraryDAO, SeriesDAO, DAO,
+	},
 	error::{CoreError, CoreResult},
 	event::CoreEvent,
-	filesystem::scanner::utils::{insert_series_batch, mark_library_missing},
+	filesystem::PathUtils,
 	prisma::{library, media, series},
 	Ctx,
 };
 
-use super::{utils::populate_glob_builder, ScannedFileTrait};
+use super::common::populate_glob_builder;
 
 pub struct LibrarySetup {
 	pub library: library::Data,
 	pub library_options: LibraryOptions,
-	pub library_series: Vec<series::Data>,
+	pub library_series: Vec<Series>,
 	pub tasks: u64,
 }
 
@@ -44,7 +47,8 @@ pub(crate) async fn setup_library(ctx: &Ctx, path: String) -> CoreResult<Library
 	let library = library.unwrap();
 
 	if !Path::new(&path).exists() {
-		mark_library_missing(library, ctx).await?;
+		let library_dao = LibraryDAO::new(ctx.db.clone());
+		library_dao.mark_library_missing(&library).await?;
 
 		return Err(CoreError::FileNotFound(format!(
 			"Library path does not exist in fs: {}",
@@ -113,9 +117,13 @@ async fn setup_library_series(
 	ctx: &Ctx,
 	library: &library::Data,
 	is_collection_based: bool,
-) -> CoreResult<Vec<series::Data>> {
+) -> CoreResult<Vec<Series>> {
 	let library_path = library.path.clone();
-	let mut series = library.series()?.to_owned();
+	let mut series = library
+		.series()?
+		.iter()
+		.map(|s| Series::from(s.to_owned()))
+		.collect::<Vec<_>>();
 	let series_map = series
 		.iter()
 		.map(|data| (data.path.as_str(), false))
@@ -173,24 +181,31 @@ async fn setup_library_series(
 	}
 
 	if !new_entries.is_empty() {
-		trace!(new_series_count = new_entries.len(), "Inserting new series");
-		// TODO: replace with dao?
-		let result = insert_series_batch(ctx, new_entries, library.id.clone()).await;
-		if let Err(e) = result {
-			error!("Failed to batch insert series: {}", e);
-
-		// TODO: uncomment once ctx has runner_id
-		// ctx.emit_client_event(CoreEvent::CreateEntityFailed {
-		// 	runner_id: Some(runner_id.to_string()),
-		// 	message: format!("Failed to batch insert series: {}", e),
-		// 	path: library_path.clone(),
-		// });
-		} else {
-			let mut inserted_series = result.unwrap();
-			ctx.emit_client_event(CoreEvent::CreatedSeriesBatch(
-				inserted_series.len() as u64
-			));
-			series.append(&mut inserted_series);
+		// trace!(new_series_count = new_entries.len(), "Inserting new series");
+		let series_dao = SeriesDAO::new(ctx.db.clone());
+		let series_to_create = new_entries
+			.iter()
+			.map(|e| Series::try_from_entry(&library.id, e))
+			.filter_map(|res| {
+				if let Err(e) = res {
+					error!(error = ?e, "Failed to create series from entry");
+					None
+				} else {
+					res.ok()
+				}
+			})
+			.collect();
+		let result = series_dao.create_many(series_to_create).await;
+		match result {
+			Ok(mut created_series) => {
+				ctx.emit_client_event(CoreEvent::CreatedSeriesBatch(
+					created_series.len() as u64,
+				));
+				series.append(&mut created_series);
+			},
+			Err(e) => {
+				error!(error = ?e, "Failed to batch insert series");
+			},
 		}
 	}
 
@@ -206,7 +221,7 @@ pub struct SeriesSetup {
 
 pub(crate) async fn setup_series(
 	ctx: &Ctx,
-	series: &series::Data,
+	series: &Series,
 	library_path: &str,
 	library_options: &LibraryOptions,
 ) -> SeriesSetup {

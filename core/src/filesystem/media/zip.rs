@@ -65,10 +65,14 @@ impl FileProcessor for ZipProcessor {
 
 		for i in 0..archive.len() {
 			let mut file = archive.by_index(i)?;
-			let (content_type, _) = get_zip_entry_content_type(&mut file)?;
+			let (content_type, buf) = get_zip_entry_content_type(&mut file)?;
 			if file.name() == "ComicInfo.xml" {
-				let mut contents = String::new();
-				file.read_to_string(&mut contents)?;
+				trace!("Found ComicInfo.xml");
+				// we have the first few bytes of the file in buf, so we need to read the rest and make it a string
+				let mut contents = buf.to_vec();
+				file.read_to_end(&mut contents)?;
+				let contents = String::from_utf8_lossy(&contents).to_string();
+				trace!(contents_len = contents.len(), "Read ComicInfo.xml");
 				metadata = metadata_from_buf(contents);
 			} else if content_type.is_image() {
 				pages += 1;

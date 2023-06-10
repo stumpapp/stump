@@ -1,120 +1,111 @@
 use std::sync::Arc;
 
-use prisma_client_rust::{raw, Direction, PrismaValue};
+use prisma_client_rust::{raw, PrismaValue, QueryError};
+use tracing::trace;
 
 use crate::{
 	db::{
-		common::CountQueryReturn,
-		entity::Media,
+		entity::{FileStatus, Media},
 		query::pagination::{PageParams, Pageable},
+		CountQueryReturn,
 	},
-	error::{CoreError, CoreResult},
-	prisma::{media, read_progress, series, PrismaClient},
+	prisma::{media, series, PrismaClient},
+	CoreError, CoreResult,
 };
 
-use super::{Dao, DaoBatch};
+use super::DAO;
 
-#[async_trait::async_trait]
-pub trait MediaDao: Dao {
-	async fn get_in_progress_media(
-		&self,
-		viewer_id: &str,
-		page_params: PageParams,
-	) -> CoreResult<Pageable<Vec<Media>>>;
-
-	async fn get_duplicate_media(&self) -> CoreResult<Vec<Media>>;
-	async fn get_duplicate_media_page(
-		&self,
-		page_params: PageParams,
-	) -> CoreResult<Pageable<Vec<Media>>>;
-
-	async fn update_many(&self, data: Vec<Self::Model>) -> CoreResult<Vec<Self::Model>>;
-}
-
-pub struct MediaDaoImpl {
+pub struct MediaDAO {
 	client: Arc<PrismaClient>,
 }
 
-#[async_trait::async_trait]
-impl MediaDao for MediaDaoImpl {
-	async fn get_in_progress_media(
-		&self,
-		viewer_id: &str,
-		page_params: PageParams,
-	) -> CoreResult<Pageable<Vec<Media>>> {
-		// TODO: do this
-		// let pagination_cloned = pagination.clone();
-		// let is_unpaged = pagination.is_unpaged();
+impl DAO for MediaDAO {
+	type Entity = Media;
 
-		// let (media, count) = self
-		// 	.client
-		// 	._transaction()
-		// 	.run(|client| async move {
-		// 		let mut query = client
-		// 			.read_progress()
-		// 			.find_many(vec![
-		// 				read_progress::user_id::equals(viewer_id.to_string()),
-		// 				read_progress::is_completed::equals(false),
-		// 			])
-		// 			.with(read_progress::media::fetch())
-		// 			.order_by(read_progress::updated_at::order(Direction::Desc));
+	fn new(client: Arc<PrismaClient>) -> Self {
+		Self { client }
+	}
+}
 
-		// 		if !is_unpaged {
-		// 			// query = apply_pagination(query, &pagination_cloned);
-		// 		}
-		// 	})
-		// 	.await?;
-
-		let page_bounds = page_params.get_page_bounds();
-
-		let progresses_with_media = self
-			.client
-			.read_progress()
-			.find_many(vec![
-				read_progress::user_id::equals(viewer_id.to_string()),
-				read_progress::is_completed::equals(false),
-			])
-			.with(read_progress::media::fetch())
-			.order_by(read_progress::updated_at::order(Direction::Desc))
-			.skip(page_bounds.skip)
-			.take(page_bounds.take)
-			.exec()
-			.await?;
-
-		let media_in_progress = progresses_with_media
-			.into_iter()
-			.filter(|progress| progress.media.is_some())
-			.map(Media::try_from)
-			.filter_map(Result::ok)
-			.collect();
-
-		let db_total = self
-			.client
-			.read_progress()
-			.count(vec![
-				read_progress::user_id::equals(viewer_id.to_string()),
-				read_progress::is_completed::equals(false),
-			])
-			.exec()
-			.await?;
-
-		Ok(Pageable::with_count(
-			media_in_progress,
-			db_total,
-			page_params,
-		))
+impl MediaDAO {
+	/// Creates a new media in the database. To reduce code duplication, internally
+	/// this function invokes `create_many` with a single element.
+	pub async fn create(&self, media: Media) -> CoreResult<Media> {
+		let result = Self::create_many(self, vec![media]).await?;
+		Ok(result
+			.first()
+			.ok_or(CoreError::Unknown("Failed to insert media".to_string()))?
+			.to_owned())
 	}
 
-	async fn get_duplicate_media(&self) -> CoreResult<Vec<Media>> {
-		let duplicates = self.client
-			._query_raw::<Media>(raw!("SELECT * FROM media WHERE hash IN (SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1)"))
-			.exec()
-			.await?;
+	/// Creates many media in the database from the given list within a transaction.
+	/// Will also create and connect metadata if it is present.
+	// 	// FIXME: this is so vile lol refactor once neseted create is supported:
+	// 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+	pub async fn create_many(&self, media: Vec<Media>) -> CoreResult<Vec<Media>> {
+		let result: Result<Vec<Media>, QueryError> = self
+			.client
+			._transaction()
+			.run(|client| async move {
+				let mut ret = vec![];
 
-		Ok(duplicates)
+				for media in media {
+					let created_metadata = if let Some(metadata) = media.metadata {
+						let params = metadata.create_action();
+						let created_metadata =
+							client.media_metadata().create(params).exec().await?;
+						Some(created_metadata)
+					} else {
+						None
+					};
+					trace!(?created_metadata, "Metadata insertion result");
+
+					let created_media = client
+						.media()
+						.create(
+							media.name,
+							media.size,
+							media.extension,
+							media.pages,
+							media.path,
+							vec![
+								media::hash::set(media.hash),
+								media::series::connect(series::id::equals(
+									media.series_id,
+								)),
+							],
+						)
+						.exec()
+						.await?;
+					trace!(?created_media, "Media insertion result");
+
+					if let Some(media_metadata) = created_metadata {
+						let updated_media = client
+							.media()
+							.update(
+								media::id::equals(created_media.id),
+								vec![media::metadata_id::set(Some(media_metadata.id))],
+							)
+							.with(media::metadata::fetch())
+							.exec()
+							.await?;
+						trace!(?updated_media, "Media update result");
+
+						ret.push(Media::from(updated_media));
+					} else {
+						ret.push(Media::from(created_media));
+					}
+				}
+
+				Ok(ret)
+			})
+			.await;
+
+		Ok(result?)
 	}
 
-	async fn get_duplicate_media_page(
+	/// Gets a page of media with matching file hashes.
+	pub async fn get_duplicate_media(
 		&self,
 		page_params: PageParams,
 	) -> CoreResult<Pageable<Vec<Media>>> {
@@ -160,8 +151,9 @@ impl MediaDao for MediaDaoImpl {
 		}
 	}
 
-	async fn update_many(&self, data: Vec<Media>) -> CoreResult<Vec<Media>> {
-		let queries = data.into_iter().map(|media| {
+	/// Updates the given media in the database.
+	pub async fn update_many(&self, media: Vec<Media>) -> CoreResult<Vec<Media>> {
+		let queries = media.into_iter().map(|media| {
 			self.client.media().update(
 				media::id::equals(media.id),
 				vec![
@@ -173,196 +165,22 @@ impl MediaDao for MediaDaoImpl {
 			)
 		});
 
-		Ok(self
-			.client
-			._batch(queries)
-			.await?
-			.into_iter()
-			.map(Media::from)
-			.collect())
-	}
-}
-
-#[async_trait::async_trait]
-impl Dao for MediaDaoImpl {
-	type Model = Media;
-
-	fn new(client: Arc<PrismaClient>) -> Self {
-		Self { client }
+		let updated_media = self.client._batch(queries).await?;
+		Ok(updated_media.into_iter().map(Media::from).collect())
 	}
 
-	async fn insert(&self, data: Self::Model) -> CoreResult<Self::Model> {
-		let created_media = self
+	/// Marks all media in the given paths as missing. Returns the number of rows affected.
+	pub async fn mark_paths_missing(&self, paths: Vec<String>) -> CoreResult<i64> {
+		let rows_affected = self
 			.client
 			.media()
-			.create(
-				data.name.to_owned(),
-				data.size,
-				data.extension.to_owned(),
-				data.pages,
-				data.path.to_owned(),
-				vec![
-					media::hash::set(data.hash.to_owned()),
-					media::series::connect(series::id::equals(data.series_id.to_owned())),
-				],
+			.update_many(
+				vec![media::path::in_vec(paths)],
+				vec![media::status::set(FileStatus::Missing.to_string())],
 			)
 			.exec()
 			.await?;
 
-		Ok(Media::from(created_media))
-	}
-
-	async fn delete(&self, id: &str) -> CoreResult<Self::Model> {
-		let deleted_media = self
-			.client
-			.media()
-			.delete(media::id::equals(id.to_string()))
-			.exec()
-			.await?;
-
-		Ok(Media::from(deleted_media))
-	}
-
-	async fn find_all(&self) -> CoreResult<Vec<Self::Model>> {
-		Ok(self
-			.client
-			.media()
-			.find_many(vec![])
-			.exec()
-			.await?
-			.into_iter()
-			.map(Media::from)
-			.collect())
-	}
-
-	async fn find_by_id(&self, id: &str) -> CoreResult<Self::Model> {
-		let media = self
-			.client
-			.media()
-			.find_unique(media::id::equals(id.to_string()))
-			.exec()
-			.await?;
-
-		if media.is_none() {
-			return Err(CoreError::NotFound(format!(
-				"Media with id {} not found.",
-				id
-			)));
-		}
-
-		Ok(Media::from(media.unwrap()))
+		Ok(rows_affected)
 	}
 }
-
-#[async_trait::async_trait]
-impl DaoBatch for MediaDaoImpl {
-	type Model = Media;
-
-	async fn insert_many(&self, data: Vec<Self::Model>) -> CoreResult<Vec<Self::Model>> {
-		let queries = data.into_iter().map(|media| {
-			self.client.media().create(
-				media.name,
-				media.size,
-				media.extension,
-				media.pages,
-				media.path,
-				vec![
-					media::hash::set(media.hash),
-					media::series::connect(series::id::equals(media.series_id)),
-				],
-			)
-		});
-
-		Ok(self
-			.client
-			._batch(queries)
-			.await?
-			.into_iter()
-			.map(Media::from)
-			.collect())
-	}
-
-	async fn _insert_batch<T>(&self, models: T) -> CoreResult<Vec<Self::Model>>
-	where
-		T: Iterator<Item = Self::Model> + Send + Sync,
-	{
-		let queries = models.map(|media| {
-			self.client.media().create(
-				media.name,
-				media.size,
-				media.extension,
-				media.pages,
-				media.path,
-				vec![
-					media::hash::set(media.hash),
-					media::series::connect(series::id::equals(media.series_id)),
-				],
-			)
-		});
-
-		let created_media = self.client._batch(queries).await?;
-
-		Ok(created_media.into_iter().map(Media::from).collect())
-	}
-
-	async fn delete_many(&self, ids: Vec<String>) -> CoreResult<i64> {
-		Ok(self
-			.client
-			.media()
-			.delete_many(vec![media::id::in_vec(ids)])
-			.exec()
-			.await?)
-	}
-
-	async fn _delete_batch(&self, ids: Vec<String>) -> CoreResult<Vec<Self::Model>> {
-		let queries = ids
-			.into_iter()
-			.map(|id| self.client.media().delete(media::id::equals(id)));
-
-		let deleted_media = self.client._batch(queries).await?;
-
-		Ok(deleted_media.into_iter().map(Media::from).collect())
-	}
-}
-
-// #[async_trait::async_trait]
-// impl DaoUpsert for MediaDao {
-// 	type Model = Media;
-
-// 	async fn upsert(&self, data: &Self::Model) -> CoreResult<Self::Model> {
-// 		let client = self.client;
-// 		let resulting_media = client
-// 			.media()
-// 			.upsert(
-// 				media::id::equals(data.id.clone()),
-// 				(
-// 					data.name.clone(),
-// 					data.size,
-// 					data.extension.clone(),
-// 					data.pages,
-// 					data.path.clone(),
-// 					vec![
-// 						media::hash::set(data.hash.clone()),
-// 						media::description::set(data.description.clone()),
-// 						media::series::connect(series::id::equals(
-// 							data.series_id.clone(),
-// 						)),
-// 					],
-// 				),
-// 				vec![
-// 					media::name::set(data.name.clone()),
-// 					media::size::set(data.size),
-// 					media::extension::set(data.extension.clone()),
-// 					media::pages::set(data.pages),
-// 					media::path::set(data.path.clone()),
-// 					media::hash::set(data.hash.clone()),
-// 					media::description::set(data.description.clone()),
-// 					media::series::connect(series::id::equals(data.series_id.clone())),
-// 				],
-// 			)
-// 			.exec()
-// 			.await?;
-
-// 		Ok(Media::from(resulting_media))
-// 	}
-// }

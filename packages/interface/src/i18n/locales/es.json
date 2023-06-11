@@ -39,7 +39,7 @@
 				"fileSize": "Tamaño del archivo",
 				"fileType": "Tipo de archivo",
 				"fileLocation": "Ubicación del archivo",
-				"fileChecksum": "Checksum"
+				"fileChecksum": "Suma de verificación (Checksum)"
 			}
 		},
 		"nextInSeries": "Siguiente en la serie"
@@ -160,9 +160,9 @@
 				},
 				"heading": "Configuraciones de Idioma y Localización",
 				"subtitle": [
-					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-					"Stump's translations",
-					"if you're able to!"
+					"Stump soporta varios idiomas, establezca sus preferencias a continuación. Por favor, considera ayudar a mejorar la calidad de",
+					"Traducciones de Stump",
+					"¡si puedes!"
 				]
 			}
 		},
@@ -268,7 +268,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
+		"placholder": "Seleccionar o crear etiqueta",
 		"placeholderNoTags": "No hay etiquetas disponibles"
 	}
 }

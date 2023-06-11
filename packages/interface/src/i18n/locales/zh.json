@@ -1,0 +1,274 @@
+{
+	"authScene": {
+		"claimText": "This Stump server is not yet claimed, you can use the form below to create a user account and claim it. Enter your preferred username and password.",
+		"form": {
+			"validation": {
+				"missingUsername": "Username is required",
+				"missingPassword": "Password is required"
+			},
+			"labels": {
+				"username": "Username",
+				"password": "Password"
+			},
+			"buttons": {
+				"createAccount": "Create Account",
+				"login": "Login"
+			}
+		},
+		"toasts": {
+			"loggingIn": "Logging in...",
+			"loggedIn": "Welcome back! Redirecting...",
+			"loggedInFirstTime": "Welcome! Redirecting...",
+			"registering": "Registering...",
+			"registered": "Registered!",
+			"loginFailed": "Login failed. Please try again.",
+			"registrationFailed": "Registration failed. Please try again."
+		}
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below.",
+			"subtitleEditing": "A preview of your library edits will be shown below."
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "File Information",
+			"labels": {
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
+				"fileChecksum": "Checksum"
+			}
+		},
+		"nextInSeries": "Next in Series"
+	},
+	"createLibraryScene": {
+		"heading": "Create New Library",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
+		"form": {
+			"labels": {
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server.",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Create Library"
+			}
+		}
+	},
+	"editLibraryScene": {
+		"heading": "Edit Library",
+		"subtitle": "Use the below form to edit your library. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
+		"form": {
+			"labels": {
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server.",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Save Changes"
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "lol, oops",
+		"message": "An error occurred:",
+		"buttons": {
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
+		}
+	},
+	"homeScene": {
+		"continueReading": "Continue Reading",
+		"recentlyAddedSeries": "Recently Added Series",
+		"recentlyAddedBooks": "Recently Added Books"
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"general": "General",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management"
+		},
+		"general": {
+			"helmet": "General Settings",
+			"heading": "General Settings",
+			"subtitle": "Use the forms below to manage your preferences and account settings.",
+			"profileForm": {
+				"validation": {
+					"invalidUrl": "Please enter a valid URL",
+					"missingUsername": "Username is required"
+				},
+				"labels": {
+					"username": "Username",
+					"password": "Password",
+					"activeChangesPrompt": "You have unsaved changes"
+				},
+				"errors": {
+					"updateFailed": "A server error occurred while updating your profile. Please try again."
+				},
+				"avatarPicker": {
+					"heading": "Set your Avatar Image",
+					"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
+					"preview": "A preview will appear here once you have entered a URL.",
+					"labels": {
+						"imageUrl": "Image URL",
+						"customAvatar": "Custom Avatar"
+					},
+					"buttons": {
+						"confirm": "Confirm Image",
+						"cancel": "Cancel",
+						"edit": "Edit",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image"
+					}
+				},
+				"buttons": {
+					"confirm": "Save Changes"
+				}
+			},
+			"theme": {
+				"heading": "Application Theme",
+				"subtitle": "Stump supports both light and dark themes, which can be set below.",
+				"dark": {
+					"label": "Dark Theme",
+					"description": "Use a dark theme for Stump, which is the correct theme."
+				},
+				"light": {
+					"label": "Light Theme",
+					"description": "Use a light theme for Stump, which is the incorrect theme."
+				}
+			},
+			"locale": {
+				"localeSelector": {
+					"label": "Language"
+				},
+				"heading": "Language and Locale Settings",
+				"subtitle": [
+					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+					"Stump's translations",
+					"if you're able to!"
+				]
+			}
+		},
+		"jobs": {
+			"helmet": "Jobs and Configuration",
+			"heading": "Jobs and Configuration",
+			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling."
+		},
+		"server": {
+			"helmet": "Server Settings",
+			"heading": "Server Settings",
+			"subtitle": "Manage various configurable options for your Stump server instance, itself."
+		},
+		"users": {
+			"helmet": "User Management",
+			"heading": "User Management",
+			"subtitle": "Manage the users on this server, including creating new users and changing their permissions."
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "Job in Progress"
+	},
+	"libraryStats": {
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
+	},
+	"pagination": {
+		"buttons": {
+			"next": "Next",
+			"previous": "Previous"
+		},
+		"popover": {
+			"heading": "Go to page",
+			"buttons": {
+				"confirm": "Go",
+				"cancel": "Cancel"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
+		"buttons": {
+			"cancel": "Cancel",
+			"signOut": "Sign out"
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "Home",
+			"libraries": "Libraries",
+			"createLibrary": "Create Library",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back"
+		},
+		"libraryOptions": {
+			"scanLibrary": {
+				"base": "Scan Library",
+				"parallel": "Parallel Scan",
+				"inOrder": "In Order Scan"
+			},
+			"fileExplorer": "File Explorer",
+			"editLibrary": "Edit Library",
+			"deleteLibrary": "Delete Library"
+		},
+		"versionInformation": {
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
+		}
+	},
+	"search": {
+		"placeholder": "Search"
+	},
+	"serverSOS": {
+		"heading": "Server Unavailable",
+		"desktop": {
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below."
+		},
+		"web": {
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device."
+		},
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
+	},
+	"serverStatusOverlay": {
+		"heading": "Server isn't connected.",
+		"message": [
+			"Please check your internet connection.",
+			"Click here",
+			"to change your server URL."
+		]
+	},
+	"slidingList": {
+		"empty": "No items to display",
+		"buttons": {
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
+		}
+	},
+	"tagSelect": {
+		"placholder": "Select or create tag",
+		"placeholderNoTags": "No tags available"
+	}
+}

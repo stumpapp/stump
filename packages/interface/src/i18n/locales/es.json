@@ -159,7 +159,11 @@
 					"label": "Idioma"
 				},
 				"heading": "Configuraciones de Idioma y Localización",
-				"subtitle": "Stump admite varios idiomas y localizaciones, establece tus preferencias a continuación."
+				"subtitle": [
+					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+					"Stump's translations",
+					"if you're able to!"
+				]
 			}
 		},
 		"jobs": {
@@ -264,7 +268,7 @@
 		}
 	},
 	"tagSelect": {
-		"placeholder": "Seleccionar o crear etiqueta",
+		"placholder": "Select or create tag",
 		"placeholderNoTags": "No hay etiquetas disponibles"
 	}
 }

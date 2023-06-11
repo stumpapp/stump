@@ -23,7 +23,7 @@ const navigation = {
 			name: 'Twitter',
 		},
 		{
-			href: 'https://github.com/aaronleopold/stump',
+			href: 'https://github.com/stumpapp/stump',
 			icon: SiGithub,
 			isExternal: true,
 			name: 'GitHub',

@@ -7,7 +7,7 @@
   <a href="https://discord.gg/63Ybb7J3as">
     <img src="https://img.shields.io/discord/972593831172272148?label=Discord&color=5865F2" />
   </a>
-  <a href="https://github.com/aaronleopold/stump/blob/main/LICENSE">
+  <a href="https://github.com/stumpapp/stump/blob/main/LICENSE">
     <img src="https://img.shields.io/static/v1?label=License&message=MIT&color=CF9977" />
   </a>
   <!-- <a href="./.github/CHANGELOG.md">
@@ -57,7 +57,7 @@ The following items are the major targets for Stump's first release:
 - 👀 Fully responsive, built-in UI with a dark mode
 - 🏃 Low resource utilization with excellent performance
 - 🧰 Easily consumable and documented REST API, so community tools and scripts can interact with Stump
-- 🌏 Language support _(see [this issue](https://github.com/aaronleopold/stump/issues/106))_
+- 🌏 Language support _(see [this issue](https://github.com/stumpapp/stump/issues/106))_
 - 🌈 And more!
 
 Things you can expect to see after the first release:
@@ -66,11 +66,11 @@ Things you can expect to see after the first release:
 - 📖 [Tachiyomi](https://github.com/stumpapp/tachiyomi-extensions) support
 - 📱 In-house mobile app _(Android, iOS)_
 - 🔎 Versitile full-text search _(blocked by [prisma#9414](https://github.com/prisma/prisma/issues/9414))_
-- 👥 Configurable book clubs _(see [this issue](https://github.com/aaronleopold/stump/issues/120))_
+- 👥 Configurable book clubs _(see [this issue](https://github.com/stumpapp/stump/issues/120))_
 
 I am very open to suggestions and ideas, so feel free to reach out if you have anything you'd like to see!
 
-> For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're interested in tracking the development of specific features, you can take a look at the [open issues](https://github.com/aaronleopold/stump/issues).
+> For more, feel free to view the [FAQ](https://stumpapp.dev/faq) page. If you're interested in tracking the development of specific features, you can take a look at the [open issues](https://github.com/stumpapp/stump/issues).
 
 ## Getting Started 🚀
 
@@ -80,7 +80,7 @@ For more information about getting started, how Stump works, how it manages your
 
 ## Developer Guide 💻
 
-Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/tree/develop/.github/CONTRIBUTING.md) before getting started.
+Contributions are very **encouraged** and **welcome**! Please review the [CONTRIBUTING.md](https://github.com/stumpapp/stump/tree/develop/.github/CONTRIBUTING.md) before getting started.
 
 A quick summary of the steps required to get going:
 
@@ -111,9 +111,9 @@ And that's it!
 
 #### Where to start?
 
-If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/aaronleopold/stump/issues) and the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs to be done.
+If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/stumpapp/stump/issues) and the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs to be done.
 
-You can also check out the [milestones](https://github.com/aaronleopold/stump/milestones) page for a more curated list of issues that need to be addressed. I typically organize issues into milestones based on the non-patch version they will be released in.
+You can also check out the [milestones](https://github.com/stumpapp/stump/milestones) page for a more curated list of issues that need to be addressed. I typically organize issues into milestones based on the non-patch version they will be released in.
 
 Some other good places to start:
 

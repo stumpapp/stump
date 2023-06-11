@@ -7,7 +7,7 @@ Stump configuration and pre-startup complete!
 ███████║   ██║   ╚██████╔╝██║ ╚═╝ ██║██║         
 ╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝╚═╝
 
-If you face any issues, or encounter any bugs: https://github.com/aaronleopold/stump/issues/new/choose
+If you face any issues, or encounter any bugs: https://github.com/stumpapp/stump/issues/new/choose
 If you would like to join the Stump Community Discord Server: https://discord.gg/63Ybb7J3as
 
 Enjoy!

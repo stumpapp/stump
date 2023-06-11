@@ -13,7 +13,7 @@ export default function ApplicationVersion() {
 		<HoverCard
 			trigger={
 				<Link
-					href="https://github.com/aaronleopold/stump"
+					href="https://github.com/stumpapp/stump"
 					target="__blank"
 					rel="noopener noreferrer"
 					className="flex items-center space-x-2 text-sm"

@@ -35,7 +35,7 @@ The hardware requirements vary and should serve **only as a guide**. Generally s
 
 ## What is on the roadmap?
 
-The current `0.1.0` release roadmap can be found on [GitHub](https://github.com/aaronleopold/stump/issues/107). That linked ticket outlines the major features planned for the first release candidate of Stump. In general, you can expect the following features for `0.1.0`:
+The current `0.1.0` release roadmap can be found on [GitHub](https://github.com/stumpapp/stump/issues/107). That linked ticket outlines the major features planned for the first release candidate of Stump. In general, you can expect the following features for `0.1.0`:
 
 - Full OPDS + OPDS Page Streaming support
 - EPUB and CBZ/CBR support
@@ -69,4 +69,4 @@ There are a number of other projects that are similar to Stump, it certainly isn
 
 ## More questions?
 
-If you want to know more about how to use, configure or set up Stump, be sure to review the [Getting Started](/installation) guide. Otherwise, if you have any other questions, or want to report any issues, please feel free to let us know on [GitHub](https://github.com/aaronleopold/stump/issues/new/choose) or by joining our [Discord](https://discord.gg/63Ybb7J3as) server for support.
+If you want to know more about how to use, configure or set up Stump, be sure to review the [Getting Started](/installation) guide. Otherwise, if you have any other questions, or want to report any issues, please feel free to let us know on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) or by joining our [Discord](https://discord.gg/63Ybb7J3as) server for support.

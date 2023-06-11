@@ -8,7 +8,7 @@ For example, if you are running Stump on your local machine, with the default po
 
 `http://localhost:10801/opds/v1.2/catalog`
 
-Each OPDS client might have a different way of collecting this information during their onboarding steps. If you have any trouble using your preferred client, please open an issue on [GitHub](https://github.com/aaronleopold/stump/issues/new/choose) or feel free to pop into the Stump [Discord](https://discord.gg/63Ybb7J3as) server and ask for help.
+Each OPDS client might have a different way of collecting this information during their onboarding steps. If you have any trouble using your preferred client, please open an issue on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) or feel free to pop into the Stump [Discord](https://discord.gg/63Ybb7J3as) server and ask for help.
 
 ## Tested OPDS clients
 

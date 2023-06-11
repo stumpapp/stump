@@ -26,7 +26,7 @@ set -ex; \
 
 echo "Targets installed."
 
-CALL_TO_ACTION_LOL="Please consider helping to expand support for your system: https://github.com/aaronleopold/stump/issues"
+CALL_TO_ACTION_LOL="Please consider helping to expand support for your system: https://github.com/stumpapp/stump/issues"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $CALL_TO_ACTION_LOL"

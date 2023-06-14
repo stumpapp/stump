@@ -198,8 +198,7 @@ model Media {
   ///////////////// RELATIONS /////////////////
   /////////////////////////////////////////////
 
-  metadata    MediaMetadata? @relation(fields: [metadata_id], references: [id], onDelete: Cascade)
-  metadata_id String?        @unique
+  metadata MediaMetadata?
 
   // The series this media belongs to.
   series             Series?           @relation(fields: [series_id], references: [id], onDelete: Cascade)
@@ -276,10 +275,10 @@ model MediaMetadata {
   ///////////////// RELATIONS /////////////////
   /////////////////////////////////////////////
 
-  // TODO: make unique once nested create is supported
-  media_id String?
   // TODO: don't make optional once nested create is supported
-  media    Media?
+  media    Media?  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  // TODO: make unique once nested create is supported
+  media_id String? @unique
 
   @@map("media_metadata")
 }

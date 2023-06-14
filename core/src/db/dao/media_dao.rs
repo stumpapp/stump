@@ -9,7 +9,7 @@ use crate::{
 		query::pagination::{PageParams, Pageable},
 		CountQueryReturn,
 	},
-	prisma::{media, series, PrismaClient},
+	prisma::{media, media_metadata, series, PrismaClient},
 	CoreError, CoreResult,
 };
 
@@ -40,8 +40,8 @@ impl MediaDAO {
 
 	/// Creates many media in the database from the given list within a transaction.
 	/// Will also create and connect metadata if it is present.
-	// 	// FIXME: this is so vile lol refactor once neseted create is supported:
-	// 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
+	// FIXME: this is so vile lol refactor once neseted create is supported:
+	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	pub async fn create_many(&self, media: Vec<Media>) -> CoreResult<Vec<Media>> {
 		let result: Result<Vec<Media>, QueryError> = self
 			.client
@@ -84,7 +84,10 @@ impl MediaDAO {
 							.media()
 							.update(
 								media::id::equals(created_media.id),
-								vec![media::metadata_id::set(Some(media_metadata.id))],
+								// vec![media::metadata_id::set(Some(media_metadata.id))],
+								vec![media::metadata::connect(
+									media_metadata::id::equals(media_metadata.id),
+								)],
 							)
 							.with(media::metadata::fetch())
 							.exec()

@@ -29,8 +29,8 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user, http::ImageResponse, FilterableQuery, SeriesFilter,
-		SeriesQueryRelation,
+		chain_optional_iter, get_session_user, http::ImageResponse, FilterableQuery,
+		SeriesFilter, SeriesQueryRelation,
 	},
 };
 
@@ -55,20 +55,17 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(series::id::in_vec(filters.id))
-	}
-	if !filters.name.is_empty() {
-		_where.push(series::name::in_vec(filters.name));
-	}
-
-	if let Some(library_filters) = filters.library {
-		_where.push(series::library::is(apply_library_filters(library_filters)));
-	}
-
-	_where
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
+			filters
+				.library
+				.map(apply_library_filters)
+				.map(series::library::is),
+		],
+	)
 }
 
 #[utoipa::path(

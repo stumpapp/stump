@@ -266,9 +266,6 @@ importers:
       qs:
         specifier: ^6.11.2
         version: 6.11.2
-      query-string:
-        specifier: ^8.1.0
-        version: 8.1.0
     devDependencies:
       '@types/qs':
         specifier: ^6.9.7
@@ -9366,11 +9363,6 @@ packages:
     engines: {node: '>=0.10'}
     dev: true
 
-  /decode-uri-component@0.4.1:
-    resolution: {integrity: sha512-+8VxcR21HhTy8nOt6jf20w0c9CADrw1O8d+VZ/YzzCt4bJ3uBjw+D1q2osAB8RnpwwaeYBxy0HyKQxD5JBMuuQ==}
-    engines: {node: '>=14.16'}
-    dev: false
-
   /decompress-response@6.0.0:
     resolution: {integrity: sha512-aW35yZM6Bb/4oJlZncMH2LCoZtJXTRxES17vE3hoRiowU2kWHaJKFkSBDnDR+cm9J+9QhXmREyIfv0pji9ejCQ==}
     engines: {node: '>=10'}
@@ -10780,11 +10772,6 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       to-regex-range: 5.0.1
-
-  /filter-obj@5.1.0:
-    resolution: {integrity: sha512-qWeTREPoT7I0bifpPUXtxkZJ1XJzxWtfoWWkdVGqa+eCr3SHW/Ocp89o8vLvbUuQnadybJpjOKu4V+RwO6sGng==}
-    engines: {node: '>=14.16'}
-    dev: false
 
   /finalhandler@1.1.1:
     resolution: {integrity: sha512-Y1GUDo39ez4aHAw7MysnUD5JzYX+WaIj8I57kO3aEPT1fFRL4sr7mjei97FgnwhAyyzRYmQZaTHb2+9uZ1dPtg==}
@@ -16150,15 +16137,6 @@ packages:
     engines: {node: '>=0.6'}
     dev: true
 
-  /query-string@8.1.0:
-    resolution: {integrity: sha512-BFQeWxJOZxZGix7y+SByG3F36dA0AbTy9o6pSmKFcFz7DAj0re9Frkty3saBn3nHo3D0oZJ/+rx3r8H8r8Jbpw==}
-    engines: {node: '>=14.16'}
-    dependencies:
-      decode-uri-component: 0.4.1
-      filter-obj: 5.1.0
-      split-on-first: 3.0.0
-    dev: false
-
   /querystring-es3@0.2.1:
     resolution: {integrity: sha512-773xhDQnZBMFobEiztv8LIl70ch5MSF/jUQVlhwFyBILqq96anmoctVIYz+ZRp0qbCKATTn6ev02M3r7Ga5vqA==}
     engines: {node: '>=0.4.x'}
@@ -17719,11 +17697,6 @@ packages:
   /spdx-license-ids@3.0.13:
     resolution: {integrity: sha512-XkD+zwiqXHikFZm4AX/7JSCXA98U5Db4AFd5XUg/+9UNtnH75+Z9KxtpYiJZx36mUDVOwH83pl7yvCer6ewM3w==}
     dev: true
-
-  /split-on-first@3.0.0:
-    resolution: {integrity: sha512-qxQJTx2ryR0Dw0ITYyekNQWpz6f8dGd7vffGNflQQ3Iqj9NJ6qiZ7ELpZsJ/QBhIVAiDfXdag3+Gp8RvWa62AA==}
-    engines: {node: '>=12'}
-    dev: false
 
   /split-string@3.1.0:
     resolution: {integrity: sha512-NzNVhJDYpwceVVii8/Hu6DKfD2G+NrQHlS/V/qgv763EYudVwEcMQNxd2lh+0VrUByXN/oJkl5grOhYWvQUYiw==}

@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
 
 use serde::{de, Deserialize, Deserializer, Serialize};
-use serde_with::with_prefix;
 use std::fmt;
 use stump_core::db::query::ordering::QueryOrder;
 use utoipa::ToSchema;
@@ -99,9 +98,6 @@ pub struct UserQueryRelation {
 	pub include_read_progresses: Option<bool>,
 }
 
-// TODO: I don't like this convention and I'd rather figure out a way around it.
-// I would prefer /series?library[field]=value, but could not get that to work.
-with_prefix!(library_prefix "library_");
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -109,7 +105,7 @@ pub struct SeriesFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
 
-	#[serde(flatten, with = "library_prefix")]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub library: Option<LibraryFilter>,
 }
 

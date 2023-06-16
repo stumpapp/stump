@@ -12,7 +12,9 @@ export default function BooksAfterCurrent({ cursor }: Props) {
 		initialCursor: cursor.id,
 		limit: 20,
 		params: {
-			series_id: cursor.series_id,
+			series: {
+				id: cursor.series_id,
+			},
 		},
 	})
 

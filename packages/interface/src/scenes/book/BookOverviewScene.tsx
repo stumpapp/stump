@@ -1,5 +1,5 @@
 import { useMediaByIdQuery } from '@stump/client'
-import { Heading, Spacer, Text } from '@stump/components'
+import { Badge, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
@@ -18,6 +18,12 @@ import DownloadMediaButton from './DownloadMediaButton'
 // TODO: frankly, I think this looks like ass. I really want to redesign this page...
 // It looks especially bad on mobile. Also, pretty much all of the other overview pages
 // look identical, which means they all look poop.
+// TODO: with metadata being collected now, there is a lot more information to display:
+// - publish date
+// - publisher
+// - pencillers, authors, etc
+// - links
+// - featured characters
 export default function BookOverviewScene() {
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
@@ -44,6 +50,8 @@ export default function BookOverviewScene() {
 					seriesId={media.series_id}
 					series={media.series}
 				/>
+
+				<TagList tags={media.tags || null} />
 			</div>
 		)
 	}
@@ -74,9 +82,14 @@ export default function BookOverviewScene() {
 						</div>
 					</div>
 				</div>
-				{/* {renderDetails()} */}
 
-				<TagList tags={media.tags || null} />
+				<div className="flex flex-row space-x-2">
+					{media.metadata?.genre?.map((genre) => (
+						<Badge key={genre} variant="primary">
+							{genre}
+						</Badge>
+					))}
+				</div>
 				<BookFileInformation media={media} />
 				<BooksAfterCursor cursor={media} />
 			</div>

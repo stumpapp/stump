@@ -18,7 +18,7 @@ Stump **is not** a tool used for fetching or downloading any kind of media. It i
 
 There are some really solid, self-hostable, OPDS media servers out there. I've personally used [Komga](https://komga.org) the most. I started developing Stump becuase I thought it would be cool to learn what goes into making something like Komga myself.
 
-In general, Stump strives to achive the following:
+In general, Stump strives for the following:
 
 - Tiny footprint (~24MB compressed Docker image, ~36.8 MB compiled executable)
 - Efficiency and performance, even on less powerful hardware (e.g. Raspberry Pi)
@@ -27,11 +27,15 @@ In general, Stump strives to achive the following:
 
 ## What's compatibility like?
 
-Stump works on all major browsers and operating systems.
+Stump _will_ work on all major browsers and operating systems.
 
 The hardware requirements vary and should serve **only as a guide**. Generally speaking, 1GB of RAM and disk space is more than enough. Stump also runs well on low-powered ARM-based single board computers, such as a Raspberry Pi.
 
 **This section will be revisited once the first beta release is out.**
+
+## When will Stump be released?
+
+Stump is currently under development. The primary developer is working on it in their free time, mostly on the weekends, and there aren't many active contributors, so it's hard to say when it will be ready for a first release. That said, ideally the first release candidate will be ready by the end of 2023. If you're interested in expediting the development of Stump, please consider contributing to the project. You can find more information on how to contribute in the [Contributing](/contributing) guide.
 
 ## What is on the roadmap?
 
@@ -52,11 +56,7 @@ The current `0.1.0` release roadmap can be found on [GitHub](https://github.com/
   - Controlled, fine-grained access planned for `0.2.0`
 - Multi-language support
 
-If you're interested in tracking the broader development of features, you can take a look at the GitHub [task board](https://github.com/users/aaronleopold/projects/2).
-
-## Benchmarks
-
-TODO
+If you're interested in tracking the broader development of features, you can take a look at [GitHub issues](https://github.com/stumpapp/stump/issues).
 
 ## Similar Projects
 
@@ -69,4 +69,4 @@ There are a number of other projects that are similar to Stump, it certainly isn
 
 ## More questions?
 
-If you want to know more about how to use, configure or set up Stump, be sure to review the [Getting Started](/installation) guide. Otherwise, if you have any other questions, or want to report any issues, please feel free to let us know on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) or by joining our [Discord](https://discord.gg/63Ybb7J3as) server for support.
+If you want to know more about how to use, configure or set up Stump, be sure to review the [installation guide](/installation). Otherwise, if you have any other questions, or want to report any issues, please feel free to let us know on [GitHub](https://github.com/stumpapp/stump/issues/new/choose) or by joining our [Discord](https://discord.gg/63Ybb7J3as) server for support.

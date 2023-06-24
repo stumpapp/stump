@@ -4,4 +4,20 @@ const withNextra = require('nextra')({
 	themeConfig: './theme.config.tsx',
 })
 
-module.exports = withNextra()
+module.exports = {
+	...withNextra(),
+	async redirects() {
+		return [
+			{
+				destination: '/installation/getting-started',
+				permanent: true,
+				source: '/installation',
+			},
+			{
+				destination: '/guides/overview',
+				permanent: true,
+				source: '/guides',
+			},
+		]
+	},
+}

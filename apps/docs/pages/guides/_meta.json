@@ -1,10 +1,11 @@
 {
-	"index": "Overview",
+	"overview": "Overview",
 	"configuration": "Configuration",
 	"libraries": "Libraries",
 	"library-explorer": "Library Explorer",
 	"series": "Series",
 	"reading-list": "Reading List",
+	"book-club": "Book Club",
 	"tagging": "Tagging",
 	"jobs": "Background Jobs",
 	"filesystem-scans": "Filesystem Scans",

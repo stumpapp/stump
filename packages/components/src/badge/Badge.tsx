@@ -4,7 +4,7 @@ import { forwardRef } from 'react'
 import { cn } from '../utils'
 
 export const BADGE_VARIANTS = {
-	default: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100',
+	default: 'bg-gray-75 dark:bg-gray-800 text-gray-800 dark:text-gray-100',
 	error: 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-50',
 	primary: 'bg-brand-100 text-brand-800 dark:bg-brand-700 dark:text-brand-50',
 	secondary: 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100',

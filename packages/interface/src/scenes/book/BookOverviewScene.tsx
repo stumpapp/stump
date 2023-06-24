@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
+import LinkBadge from '../../components/LinkBadge'
 import MediaCard from '../../components/media/MediaCard'
 import ReadMore from '../../components/ReadMore'
 import TagList from '../../components/tags/TagList'
@@ -90,6 +91,13 @@ export default function BookOverviewScene() {
 						</Badge>
 					))}
 				</div>
+
+				<div className="flex flex-row space-x-2">
+					{media.metadata?.links?.map((link) => (
+						<LinkBadge key={link} href={link} />
+					))}
+				</div>
+
 				<BookFileInformation media={media} />
 				<BooksAfterCursor cursor={media} />
 			</div>

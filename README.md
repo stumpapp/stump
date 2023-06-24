@@ -111,14 +111,12 @@ And that's it!
 
 #### Where to start?
 
-If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/stumpapp/stump/issues) and the [task board](https://github.com/users/aaronleopold/projects/2). This is where I track the broader development items for Stump. It is mostly for my own personal organization, but should still hopefully give you an idea of what needs to be done.
-
-You can also check out the [milestones](https://github.com/stumpapp/stump/milestones) page for a more curated list of issues that need to be addressed. I typically organize issues into milestones based on the non-patch version they will be released in.
+If you aren't sure where to start, I recommend taking a look at [open issues](https://github.com/stumpapp/stump/issues). You can also check out the [milestones](https://github.com/stumpapp/stump/milestones) page for a more curated list of issues that need to be addressed. I typically organize issues into milestones based on the non-patch version they will be released in.
 
 Some other good places to start:
 
 - Translation, so Stump is accessible to non-English speakers.
-  - An automated translation system would be immensely helpful! If you're knowledgeable in this area, please reach out!
+  - Stump uses Crowdin for translations. You can find the project [here](https://crowdin.com/project/stump).
 - Writing comprehensive tests.
 - Designing UI elements/sections or improving the existing UI/UX.
 - Docker build optimizations, caching, etc.

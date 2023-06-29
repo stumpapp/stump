@@ -2,7 +2,6 @@
 $schema: 'https://moonrepo.dev/schemas/global-project.json'
 
 fileGroups:
-  # Application specific files
   app: []
   configs:
     - '*.{js,json,yml,yaml}'
@@ -10,17 +9,8 @@ fileGroups:
     - 'public/**/*'
     - 'src/**/*'
     - 'types/**/*'
-    # TODO: stop pulling dist from cache :weary:
-    # - '!**/dist'
-  typescript:
-    - 'public/**/*'
-    - 'src/**/*'
-    - 'types/**/*'
-  rust:
-    - 'src/**/*.rs'
   tests:
     - 'tests/**/*.test.*'
-    - 'tests/**/*.stories.*'
     - '**/__tests__/**/*'
   assets:
     - 'assets/**/*'

@@ -35,6 +35,7 @@ export const core_event_triggers = {
 			libraryQueryKeys.getLibrariesStats,
 			seriesQueryKeys.getSeriesById,
 			mediaQueryKeys.getRecentlyAddedMedia,
+			seriesQueryKeys.getRecentlyAddedSeries,
 		],
 	},
 	CreatedSeries: {

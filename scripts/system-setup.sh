@@ -81,7 +81,7 @@ if [ ${_CHECK_NODE} == 1 ]; then
   fi
 fi
 
-CALL_TO_ACTION_LOL="Please consider helping to expand support for your system: https://github.com/aaronleopold/stump/issues"
+CALL_TO_ACTION_LOL="Please consider helping to expand support for your system: https://github.com/stumpapp/stump/issues"
 
 # TODO: group these? so lines aren't so long...
 # https://tauri.app/v1/guides/getting-started/prerequisites/#1-system-dependencies

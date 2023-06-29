@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
 
 use serde::{de, Deserialize, Deserializer, Serialize};
-use serde_with::with_prefix;
 use std::fmt;
 use stump_core::db::query::ordering::QueryOrder;
 use utoipa::ToSchema;
@@ -14,8 +13,6 @@ where
 {
 	#[serde(flatten, default)]
 	pub filters: T,
-	// #[serde(flatten)]
-	// pub pagination: PaginationQuery,
 	#[serde(flatten)]
 	pub ordering: QueryOrder,
 }
@@ -28,10 +25,6 @@ where
 		self
 	}
 }
-
-// pub fn get_prisma_joiner<T>(joiner_str: &str) {
-// 	let joiner = prisma_joiner!(joiner_str);
-// }
 
 fn string_or_seq_string<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
 where
@@ -73,6 +66,18 @@ pub(crate) fn decode_path_filter(paths: Vec<String>) -> Vec<String> {
 		.collect::<Vec<String>>()
 }
 
+pub fn chain_optional_iter<T>(
+	required: impl IntoIterator<Item = T>,
+	optional: impl IntoIterator<Item = Option<T>>,
+) -> Vec<T> {
+	required
+		.into_iter()
+		.map(Some)
+		.chain(optional)
+		.flatten()
+		.collect()
+}
+
 // TODO: tags
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct LibraryFilter {
@@ -93,10 +98,6 @@ pub struct UserQueryRelation {
 	pub include_read_progresses: Option<bool>,
 }
 
-// TODO: I don't like this convention and I'd rather figure out a way around it.
-// I would prefer /series?library[field]=value, but could not get that to work.
-with_prefix!(library_prefix "library_");
-
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -104,13 +105,18 @@ pub struct SeriesFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
 
-	#[serde(flatten, with = "library_prefix")]
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub library: Option<LibraryFilter>,
 }
 
-// TODO: I don't like this convention and I'd rather figure out a way around it.
-// I would prefer /media?series[field]=value, but could not get that to work.
-with_prefix!(series_prefix "series_");
+#[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
+pub struct MediaMedataFilter {
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub publisher: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub genre: Vec<String>,
+}
+
 #[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
 pub struct MediaFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -121,6 +127,9 @@ pub struct MediaFilter {
 	pub extension: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub path: Vec<String>,
-	#[serde(flatten, with = "series_prefix")]
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub metadata: Option<MediaMedataFilter>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<SeriesFilter>,
 }

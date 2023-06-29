@@ -13,7 +13,7 @@ interface Props extends Omit<ComponentProps<typeof Text>, 'children'> {
 export default function ReadMore({ text, ...props }: Props) {
 	const [showingAll, { toggle }] = useBoolean(false)
 
-	const resolvedText = text ?? DEBUG_ENV ? DEBUG_FAKE_TEXT : ('' as string)
+	const resolvedText = text ? text : DEBUG_ENV ? DEBUG_FAKE_TEXT : ''
 	const canReadMore = resolvedText.length > 250
 
 	if (!resolvedText && !DEBUG_ENV) {

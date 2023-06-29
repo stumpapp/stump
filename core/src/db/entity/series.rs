@@ -2,13 +2,26 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use tracing::debug;
 use utoipa::ToSchema;
+use walkdir::DirEntry;
 
-use crate::prisma;
+use crate::{
+	filesystem::SeriesJson,
+	prisma::{library, series},
+	CoreError, CoreResult,
+};
 
-use super::{common::FileStatus, library::Library, media::Media, tag::Tag, Cursor};
+use super::{
+	common::FileStatus,
+	library::Library,
+	media::Media,
+	metadata::{SeriesMetadata, SeriesMetadataCreateAction},
+	tag::Tag,
+	Cursor,
+};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct Series {
 	pub id: String,
 	/// The name of the series. ex: "The Amazing Spider-Man (2018)"
@@ -29,6 +42,8 @@ pub struct Series {
 	pub library: Option<Library>,
 	/// The media that are in this series. Will be `None` only if the relation is not loaded.
 	pub media: Option<Vec<Media>>,
+	/// The metadata for this series. Will be `None` if the relation is not loaded or if the series has no metadata.
+	pub metadata: Option<SeriesMetadata>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	/// The number of media in this series. Optional for safety, but should be loaded if possible.
 	pub media_count: Option<i64>,
@@ -50,8 +65,55 @@ impl Series {
 		}
 	}
 
+	pub fn try_from_entry(library_id: &str, entry: &DirEntry) -> CoreResult<Series> {
+		let path = entry.path();
+
+		let file_name = path
+			.file_name()
+			.and_then(|file_name| file_name.to_str().map(String::from))
+			.ok_or(CoreError::InternalError(
+				"Could not convert series file name to string".to_string(),
+			))?;
+		let path_str =
+			path.to_str()
+				.map(String::from)
+				.ok_or(CoreError::InternalError(
+					"Could not convert series path to string".to_string(),
+				))?;
+		let metadata = SeriesJson::from_folder(path).map(|json| json.metadata).ok();
+
+		debug!(file_name, path_str, ?metadata, "Parsed series information");
+
+		Ok(Series {
+			path: path_str,
+			name: file_name,
+			library_id: library_id.to_string(),
+			metadata,
+			..Default::default()
+		})
+	}
+
 	pub fn set_media_count(&mut self, count: i64) {
 		self.media_count = Some(count);
+	}
+
+	// TODO: change once nested creates are supported
+	pub fn create_action(
+		self,
+	) -> (
+		String,
+		String,
+		Vec<series::SetParam>,
+		Option<SeriesMetadataCreateAction>,
+	) {
+		(
+			self.name,
+			self.path,
+			vec![series::library::connect(library::id::equals(
+				self.library_id,
+			))],
+			self.metadata.map(|m| m.create_action()),
+		)
 	}
 }
 
@@ -61,8 +123,8 @@ impl Cursor for Series {
 	}
 }
 
-impl From<prisma::series::Data> for Series {
-	fn from(data: prisma::series::Data) -> Series {
+impl From<series::Data> for Series {
+	fn from(data: series::Data) -> Series {
 		let library = match data.library() {
 			Ok(library) => Some(library.unwrap().to_owned().into()),
 			Err(_e) => None,
@@ -86,6 +148,11 @@ impl From<prisma::series::Data> for Series {
 			Err(_e) => None,
 		};
 
+		let metadata = match data.metadata() {
+			Ok(m) => m.map(|m| SeriesMetadata::from(m.to_owned())),
+			Err(_e) => None,
+		};
+
 		Series {
 			id: data.id,
 			name: data.name,
@@ -97,6 +164,7 @@ impl From<prisma::series::Data> for Series {
 			library_id: data.library_id.unwrap(),
 			library,
 			media,
+			metadata,
 			media_count,
 			unread_media_count: None,
 			tags,
@@ -104,8 +172,8 @@ impl From<prisma::series::Data> for Series {
 	}
 }
 
-impl From<(prisma::series::Data, i64)> for Series {
-	fn from(tuple: (prisma::series::Data, i64)) -> Series {
+impl From<(series::Data, i64)> for Series {
+	fn from(tuple: (series::Data, i64)) -> Series {
 		let (series, media_count) = tuple;
 
 		Series::without_media(series.into(), media_count)

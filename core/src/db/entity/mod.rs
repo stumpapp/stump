@@ -5,6 +5,7 @@ pub mod epub;
 pub mod library;
 pub mod log;
 pub mod media;
+pub mod metadata;
 pub mod read_progress;
 pub mod reading_list;
 pub mod series;

@@ -1,0 +1,51 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Book Club
+
+<Callout emoji="🚧">
+	This feature is not yet available. You can track the progress on this feature in [this
+	issue](https://github.com/stumpapp/stump/issues/120). If you'd like to help out, please comment on
+	the issue! This is a personal favorite feature of mine, so I'd love to get it out as soon as
+	possible.
+</Callout>
+
+You can use Stump to host your own book club! This guide will overview how this feature works, what functionalities are available, and walk you through the process of setting up a book club in Stump.
+
+## Basic requirements
+
+To set up a book club in Stump, you'll need:
+
+- A Stump instance
+- A managed user account (otherwise, it would be a club of one)
+- Some books to read
+
+## How it works
+
+Book clubs in Stump are effectively just a group of users that all have access to special pages and functionalities that are only available to members of a book club. There can be multiple book clubs in a single Stump instance, and users can be members of multiple book clubs.
+
+### RBAC and book clubs
+
+Only users with the `book_club_creator` role, or the server owner, can create book clubs. The server owner can assign the `book_club_creator` role to other users in the user management settings page.
+
+As a book club creator, you control:
+
+- The name of the book club
+- The description of the book club (optional)
+- The book club's icon (optional)
+- The book club's members (requires an invite for users to join)
+- The book club's reading schedule
+
+### Reading schedule
+
+The reading schedule is a loose schedule of what books the club will be reading and when. While it is mostly used as an organizational tool, it also has some functionality built into it:
+
+- Users cannot access the book club's books until the reading schedule has started for it
+- Configurable downtime between book rotations, to allow for discussion of the previous book
+
+The schedule also provides a way for Stump to display things like `Current Book` and `Up Next` on the book club's page.
+
+<Callout emoji="👀">
+	There are plans to add more functionality to the reading schedule in the future, such as members
+	voting on what books to read next. If you have any other ideas, please feel free to open an
+	[issue](https://github.com/stumpapp/stump/issues/new/choose)!
+</Callout>

@@ -37,10 +37,12 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_admin_user, http::ImageResponse, FilterableQuery, LibraryFilter,
-		MediaFilter, SeriesFilter,
+		chain_optional_iter, get_session_admin_user, http::ImageResponse,
+		FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
 	},
 };
+
+use super::media::{apply_media_filters, apply_media_pagination};
 
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
@@ -66,16 +68,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(library::id::in_vec(filters.id))
-	}
-	if !filters.name.is_empty() {
-		_where.push(library::name::in_vec(filters.name));
-	}
-
-	_where
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
+		],
+	)
 }
 
 #[utoipa::path(
@@ -329,7 +328,7 @@ async fn get_library_media(
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
-	let mut media_conditions = super::media::apply_media_filters(filters);
+	let mut media_conditions = apply_media_filters(filters);
 	media_conditions.push(media::series::is(vec![series::library_id::equals(Some(
 		id.clone(),
 	))]));
@@ -346,7 +345,7 @@ async fn get_library_media(
 				.order_by(order_by_param);
 
 			if !is_unpaged {
-				query = super::media::apply_pagination(query, &pagination_cloned)
+				query = apply_media_pagination(query, &pagination_cloned)
 			}
 
 			let media = query

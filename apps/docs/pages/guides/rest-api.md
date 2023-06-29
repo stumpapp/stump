@@ -4,7 +4,7 @@ Stump exposes a REST API that allows you to interact with your Stump server.
 
 ## Accessing Swagger UI
 
-Stump's REST API is documented using Swagger. You can access Swagger UI by visiting visiting `http(s)://your-server(:10801)/swagger-ui`. If you aren't familiar with Swagger, you can read more about it [here](https://swagger.io/). Under the hood, Stump uses [utoipa](https://github.com/juhaku/utoipa) for semi-automated Swagger generation. If you find any issues or inconsistencies with the API options available while using the Swagger UI, please open an [issue](https://github.com/aaronleopold/stump/issues) outlining the problem.
+Stump's REST API is documented using Swagger. You can access Swagger UI by visiting visiting `http(s)://your-server(:10801)/swagger-ui`. If you aren't familiar with Swagger, you can read more about it [here](https://swagger.io/). Under the hood, Stump uses [utoipa](https://github.com/juhaku/utoipa) for semi-automated Swagger generation. If you find any issues or inconsistencies with the API options available while using the Swagger UI, please open an [issue](https://github.com/stumpapp/stump/issues) outlining the problem.
 
 ### Disabling Swagger UI
 

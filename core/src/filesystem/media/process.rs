@@ -1,14 +1,18 @@
 use std::{
 	collections::HashMap,
+	fs::File,
+	io::BufReader,
 	path::{Path, PathBuf},
 };
 
-use serde::{Deserialize, Deserializer, Serialize};
-use specta::Type;
+use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 use crate::{
-	db::entity::LibraryOptions,
+	db::entity::{
+		metadata::{MediaMetadata, SeriesMetadata},
+		LibraryOptions,
+	},
 	filesystem::{content_type::ContentType, epub::EpubProcessor, error::FileError},
 };
 
@@ -54,138 +58,34 @@ pub trait FileProcessor {
 	) -> Result<HashMap<i32, ContentType>, FileError>;
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SeriesJson {
+	pub version: Option<String>,
+	pub metadata: SeriesMetadata,
+}
+
+impl SeriesJson {
+	pub fn from_file(path: &Path) -> Result<SeriesJson, FileError> {
+		let file = File::open(path)?;
+		let reader = BufReader::new(file);
+		let series_json: SeriesJson = serde_json::from_reader(reader)?;
+		Ok(series_json)
+	}
+
+	pub fn from_folder(folder: &Path) -> Result<SeriesJson, FileError> {
+		let series_json_path = folder.join("series.json");
+		SeriesJson::from_file(&series_json_path)
+	}
+}
+
 /// Struct representing a processed file. This is the output of the `process` function
 /// on a `FileProcessor` implementation.
+#[derive(Debug)]
 pub struct ProcessedFile {
 	pub path: PathBuf,
 	pub hash: Option<String>,
-	pub metadata: Option<Metadata>,
+	pub metadata: Option<MediaMetadata>,
 	pub pages: i32,
-}
-
-fn string_list_deserializer<'de, D>(
-	deserializer: D,
-) -> Result<Option<Vec<String>>, D::Error>
-where
-	D: Deserializer<'de>,
-{
-	let str_sequence = String::deserialize(deserializer)?;
-	Ok(Some(
-		str_sequence
-			.split(',')
-			.map(|item| item.trim().to_owned())
-			.collect(),
-	))
-}
-
-// NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
-// is formatted in PascalCase
-// TODO: string array for some of these, figure out which ones...
-/// Struct representing the metadata for a processed file.
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Type, Default)]
-pub struct Metadata {
-	#[serde(alias = "Title")]
-	pub title: Option<String>,
-	#[serde(alias = "Series")]
-	pub series: Option<String>,
-	#[serde(alias = "Number")]
-	pub number: Option<u32>,
-	#[serde(alias = "Volume")]
-	pub volume: Option<u32>,
-	#[serde(alias = "Summary")]
-	pub summary: Option<String>,
-	#[serde(alias = "Notes")]
-	pub notes: Option<String>,
-	#[serde(alias = "Genre", deserialize_with = "string_list_deserializer")]
-	pub genre: Option<Vec<String>>,
-
-	#[serde(alias = "Year")]
-	pub year: Option<u32>,
-	#[serde(alias = "Month")]
-	pub month: Option<u32>,
-	#[serde(alias = "Day")]
-	pub day: Option<u32>,
-
-	#[serde(alias = "Writer", deserialize_with = "string_list_deserializer")]
-	pub writers: Option<Vec<String>>,
-	#[serde(alias = "Penciller")]
-	pub penciller: Option<String>,
-	#[serde(alias = "Inker")]
-	pub inker: Option<String>,
-	#[serde(alias = "Colorist")]
-	pub colorist: Option<String>,
-	#[serde(alias = "Letterer")]
-	pub letterer: Option<String>,
-	#[serde(alias = "CoverArtist")]
-	pub cover_artist: Option<String>,
-	#[serde(alias = "Editor")]
-	pub editor: Option<String>,
-	#[serde(alias = "Publisher")]
-	pub publisher: Option<String>,
-	#[serde(alias = "Web", deserialize_with = "string_list_deserializer")]
-	pub links: Option<Vec<String>>,
-	#[serde(alias = "Characters", deserialize_with = "string_list_deserializer")]
-	pub characters: Option<Vec<String>>,
-	#[serde(alias = "Teams", deserialize_with = "string_list_deserializer")]
-	pub teams: Option<Vec<String>>,
-
-	#[serde(alias = "PageCount")]
-	pub page_count: Option<u32>,
-	// TODO: pages, e.g. <Pages><Page Image="0" Type="FrontCover" ImageSize="741291" /></Pages>
-}
-
-// NOTE: this is primarily used for converting the EPUB metadata into a common Metadata struct
-impl From<HashMap<String, Vec<String>>> for Metadata {
-	fn from(map: HashMap<String, Vec<String>>) -> Self {
-		let mut metadata = Metadata::default();
-
-		for (key, value) in map {
-			match key.to_lowercase().as_str() {
-				"title" => metadata.title = Some(value.join("\n").to_string()),
-				"series" => metadata.series = Some(value.join("\n").to_string()),
-				"number" => {
-					metadata.number =
-						value.into_iter().next().and_then(|n| n.parse().ok())
-				},
-				"volume" => {
-					metadata.volume =
-						value.into_iter().next().and_then(|n| n.parse().ok())
-				},
-				"summary" => metadata.summary = Some(value.join("\n").to_string()),
-				"notes" => metadata.notes = Some(value.join("\n").to_string()),
-				"genre" => metadata.genre = Some(value),
-				"year" => {
-					metadata.year = value.into_iter().next().and_then(|n| n.parse().ok())
-				},
-				"month" => {
-					metadata.month = value.into_iter().next().and_then(|n| n.parse().ok())
-				},
-				"day" => {
-					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok())
-				},
-				"writers" => metadata.writers = Some(value),
-				"penciller" => metadata.penciller = Some(value.join("\n").to_string()),
-				"inker" => metadata.inker = Some(value.join("\n").to_string()),
-				"colorist" => metadata.colorist = Some(value.join("\n").to_string()),
-				"letterer" => metadata.letterer = Some(value.join("\n").to_string()),
-				"coverartist" => {
-					metadata.cover_artist = Some(value.join("\n").to_string())
-				},
-				"editor" => metadata.editor = Some(value.join("\n").to_string()),
-				"publisher" => metadata.publisher = Some(value.join("\n").to_string()),
-				"links" => metadata.links = Some(value),
-				"characters" => metadata.characters = Some(value),
-				"teams" => metadata.teams = Some(value),
-				"pagecount" => {
-					metadata.page_count =
-						value.into_iter().next().and_then(|n| n.parse().ok())
-				},
-				_ => (),
-			}
-		}
-
-		metadata
-	}
 }
 
 pub fn process(

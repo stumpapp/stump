@@ -2,40 +2,15 @@
 $schema: 'https://moonrepo.dev/schemas/toolchain.json'
 
 node:
-  # The version to use. Must be a semantic version that includes major, minor, and patch.
-  # We suggest using the latest active LTS version: https://nodejs.org/en/about/releases
-  version: '18.12.0'
+  version: '18.16.0'
   packageManager: 'pnpm'
   pnpm:
-    version: '7.18.2'
-  # Add `node.version` as a constraint in the root `package.json` `engines`.
-  addEnginesConstraint: true
-  # Use the `package.json` name as an alias for the respective moon project.
-  aliasPackageNames: 'name-and-scope'
-  # Dedupe dependencies after the lockfile has changed.
-  dedupeOnLockfileChange: false
-
-  # Infer and automatically create moon tasks from `package.json` scripts, per project.
-  inferTasksFromScripts: false
-
-  # Sync a project's `dependsOn` as dependencies within the project's `package.json`.
-  syncProjectWorkspaceDependencies: true
+    version: '8.6.1'
 
 typescript:
-  # When `syncProjectReferences` is enabled and a dependent project reference
-  # *does not* have a `tsconfig.json`, automatically create one.
   createMissingConfig: true
-
-  # Update a project's `tsconfig.json` to route the `outDir` compiler option
-  # to moon's `.moon/cache` directory.
   routeOutDirToCache: true
-
-  # Sync a project's `dependsOn` as project references within the
-  # project's `tsconfig.json` and the workspace root `tsconfig.json`.
   syncProjectReferences: true
-
-  # Sync a project's project references as import aliases to the `paths`
-  # compiler option in each applicable project.
   syncProjectReferencesToPaths: true
 
 rust:

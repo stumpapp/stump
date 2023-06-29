@@ -8,18 +8,19 @@ use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{and, or, Direction};
 use serde::Deserialize;
+use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::get_config_dir,
 	db::{
 		entity::{LibraryOptions, Media, ReadProgress},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
-		Dao, MediaDao, MediaDaoImpl,
+		MediaDAO, DAO,
 	},
 	filesystem::{media::get_page, read_entire_file, ContentType},
 	prisma::{
 		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		read_progress, user, PrismaClient,
+		media_metadata, read_progress, user, PrismaClient,
 	},
 };
 use tracing::{debug, trace};
@@ -29,9 +30,9 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		decode_path_filter, get_session_user,
+		chain_optional_iter, decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
-		FilterableQuery, MediaFilter,
+		FilterableQuery, MediaFilter, MediaMedataFilter,
 	},
 };
 
@@ -57,30 +58,44 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(media::id::in_vec(filters.id));
-	}
-	if !filters.name.is_empty() {
-		_where.push(media::name::in_vec(filters.name));
-	}
-	if !filters.extension.is_empty() {
-		_where.push(media::extension::in_vec(filters.extension));
-	}
-	if !filters.path.is_empty() {
-		let decoded_paths = decode_path_filter(filters.path);
-		_where.push(media::path::in_vec(decoded_paths));
-	}
-
-	if let Some(series_filters) = filters.series {
-		_where.push(media::series::is(apply_series_filters(series_filters)));
-	}
-
-	_where
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| media::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| media::name::in_vec(filters.name)),
+			(!filters.extension.is_empty())
+				.then(|| media::extension::in_vec(filters.extension)),
+			(!filters.path.is_empty()).then(|| {
+				let decoded_paths = decode_path_filter(filters.path);
+				media::path::in_vec(decoded_paths)
+			}),
+			filters
+				.metadata
+				.map(apply_media_metadata_filters)
+				.map(media::metadata::is),
+			filters
+				.series
+				.map(apply_series_filters)
+				.map(media::series::is),
+		],
+	)
 }
 
-pub(crate) fn apply_pagination<'a>(
+pub(crate) fn apply_media_metadata_filters(
+	filters: MediaMedataFilter,
+) -> Vec<media_metadata::WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			(!filters.genre.is_empty())
+				.then(|| media_metadata::genre::in_vec(filters.genre)),
+			(!filters.publisher.is_empty())
+				.then(|| media_metadata::publisher::in_vec(filters.publisher)),
+		],
+	)
+}
+
+pub(crate) fn apply_media_pagination<'a>(
 	query: media::FindMany<'a>,
 	pagination: &Pagination,
 ) -> media::FindMany<'a> {
@@ -139,7 +154,7 @@ pub(crate) fn apply_in_progress_filter_for_user(
 /// has various pagination params available.
 #[tracing::instrument(skip(ctx, session))]
 async fn get_media(
-	filter_query: Query<FilterableQuery<MediaFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
@@ -167,6 +182,7 @@ async fn get_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
+				.with(media::metadata::fetch())
 				.order_by(order_by_param);
 
 			if !is_unpaged {
@@ -238,15 +254,17 @@ async fn get_duplicate_media(
 	State(ctx): State<AppState>,
 	_session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let media_dao = MediaDaoImpl::new(ctx.db.clone());
+	let media_dao = MediaDAO::new(ctx.db.clone());
 
 	if pagination.page.is_none() {
-		return Ok(Json(Pageable::from(media_dao.get_duplicate_media().await?)));
+		return Err(ApiError::BadRequest(
+			"Pagination is required for this request".to_string(),
+		));
 	}
 
 	Ok(Json(
 		media_dao
-			.get_duplicate_media_page(pagination.0.page_params())
+			.get_duplicate_media(pagination.0.page_params())
 			.await?,
 	))
 }
@@ -295,6 +313,7 @@ async fn get_in_progress_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress_filter.clone()
 				]))
+				.with(media::metadata::fetch())
 				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
 				// I think this just means whenever progress updates I should update the media
@@ -302,7 +321,7 @@ async fn get_in_progress_media(
 				.order_by(media::updated_at::order(Direction::Desc));
 
 			if !is_unpaged {
-				query = apply_pagination(query, &pagination_cloned);
+				query = apply_media_pagination(query, &pagination_cloned);
 			}
 
 			let media = query
@@ -351,7 +370,7 @@ async fn get_in_progress_media(
 /// Get all media which was added to the library in descending order of when it
 /// was added.
 async fn get_recently_added_media(
-	filter_query: Query<FilterableQuery<MediaFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	session: ReadableSession,
 	State(ctx): State<AppState>,
@@ -378,10 +397,11 @@ async fn get_recently_added_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
+				.with(media::metadata::fetch())
 				.order_by(media::created_at::order(Direction::Desc));
 
 			if !is_unpaged {
-				query = apply_pagination(query, &pagination_cloned);
+				query = apply_media_pagination(query, &pagination_cloned);
 			}
 
 			let media = query
@@ -443,9 +463,13 @@ async fn get_media_by_id(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let mut query = db.media().find_unique(media::id::equals(id.clone())).with(
-		media::read_progresses::fetch(vec![read_progress::user_id::equals(user_id)]),
-	);
+	let mut query = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.with(media::read_progresses::fetch(vec![
+			read_progress::user_id::equals(user_id),
+		]))
+		.with(media::metadata::fetch());
 
 	if params.load_series.unwrap_or_default() {
 		trace!(media_id = id, "Loading series relation for media");

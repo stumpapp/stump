@@ -14,7 +14,7 @@ use stump_core::{
 			ordering::QueryOrder,
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		},
-		Dao, PrismaCountTrait, SeriesDao, SeriesDaoImpl,
+		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
@@ -29,8 +29,8 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user, http::ImageResponse, FilterableQuery, SeriesFilter,
-		SeriesQueryRelation,
+		chain_optional_iter, get_session_user, http::ImageResponse, FilterableQuery,
+		SeriesFilter, SeriesQueryRelation,
 	},
 };
 
@@ -55,20 +55,17 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(series::id::in_vec(filters.id))
-	}
-	if !filters.name.is_empty() {
-		_where.push(series::name::in_vec(filters.name));
-	}
-
-	if let Some(library_filters) = filters.library {
-		_where.push(series::library::is(apply_library_filters(library_filters)));
-	}
-
-	_where
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
+			filters
+				.library
+				.map(apply_library_filters)
+				.map(series::library::is),
+		],
+	)
 }
 
 #[utoipa::path(
@@ -278,12 +275,10 @@ async fn get_recently_added_series_handler(
 
 	let viewer_id = get_session_user(&session)?.id;
 	let page_params = pagination.0.page_params();
-	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
+	let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	// TODO: don't use DAO just create separate function `get_recently_added_series` and make
-	// this one `get_recently_added_series_handler`.
 	let recently_added_series = series_dao
-		.get_recently_added_series_page(&viewer_id, page_params)
+		.get_recently_added_series(&viewer_id, page_params)
 		.await?;
 
 	Ok(Json(recently_added_series))

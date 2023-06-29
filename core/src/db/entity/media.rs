@@ -11,8 +11,8 @@ use crate::{
 };
 
 use super::{
-	common::FileStatus, read_progress::ReadProgress, series::Series, tag::Tag, Cursor,
-	LibraryOptions,
+	common::FileStatus, metadata::MediaMetadata, read_progress::ReadProgress,
+	series::Series, tag::Tag, Cursor, LibraryOptions,
 };
 
 #[derive(
@@ -24,8 +24,6 @@ pub struct Media {
 	pub id: String,
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
 	pub name: String,
-	/// The description of the media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
-	pub description: Option<String>,
 	/// The size of the media in bytes.
 	pub size: i32,
 	/// The file extension of the media. ex: "cbz"
@@ -36,16 +34,19 @@ pub struct Media {
 	pub updated_at: String,
 	/// The timestamp when the media was created.
 	pub created_at: String,
-	/// The timestamp when the file was last modified.
-	pub modified_at: String,
-	/// The checksum hash of the file contents. Used to ensure only one instance of a file in the database.
-	pub checksum: Option<String>,
+	/// The timestamp when the file was last modified on disk.
+	pub modified_at: Option<String>,
+	/// The hash of the file contents. Used to ensure only one instance of a file in the database.
+	pub hash: Option<String>,
 	/// The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
 	pub path: String,
 	/// The status of the media
 	pub status: FileStatus,
 	/// The ID of the series this media belongs to.
 	pub series_id: String,
+	/// Optional metadata for the media. Will be `None` if the relation is not loaded, or if the
+	/// media has no metadata.
+	pub metadata: Option<MediaMetadata>,
 	// The series this media belongs to. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<Series>,
@@ -81,12 +82,11 @@ impl Media {
 	pub fn resolve_changes(&self, newer: &Media) -> Media {
 		Media {
 			name: newer.name.clone(),
-			description: newer.description.clone(),
 			size: newer.size,
 			pages: newer.pages,
 			modified_at: newer.modified_at.clone(),
 			status: newer.status,
-			checksum: newer.checksum.clone().or_else(|| self.checksum.clone()),
+			hash: newer.hash.clone().or_else(|| self.hash.clone()),
 			..self.clone()
 		}
 	}
@@ -233,20 +233,25 @@ impl From<media::Data> for Media {
 			Err(_e) => None,
 		};
 
+		let metadata = match data.metadata() {
+			Ok(opt) => opt.map(|m| MediaMetadata::from(m.to_owned())),
+			Err(_e) => None,
+		};
+
 		Media {
 			id: data.id,
 			name: data.name,
-			description: data.description,
 			size: data.size,
 			extension: data.extension,
 			pages: data.pages,
 			updated_at: data.updated_at.to_string(),
 			created_at: data.created_at.to_string(),
-			modified_at: data.modified_at.to_string(),
-			checksum: data.checksum,
+			modified_at: data.modified_at.map(|dt| dt.to_string()),
+			hash: data.hash,
 			path: data.path,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),
 			series_id: data.series_id.unwrap(),
+			metadata,
 			series,
 			read_progresses,
 			current_page,

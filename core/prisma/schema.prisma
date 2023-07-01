@@ -458,12 +458,17 @@ model ReadProgress {
 
 model Job {
   id                   String   @id
-  // The kind of log, e.g. LibraryScan
-  kind                 String
-  // The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
-  details              String?
+  // The name of the job, e.g. Library Scan
+  name                 String
+  // The extra description
+  description          String?
   // The status of the job (i.e. RUNNING, COMPLETED, FAILED, CANCELLED).
   status               String   @default("RUNNING")
+  // The state of the job. This is primarily stored in order to support pausing/resuming
+  // jobs, as it will hold the state of the job at the time it was paused.
+  state                Bytes?
+  // A JSON blob of optional, extra metadata
+  extra_metadata       Bytes?
   // The total number of tasks
   task_count           Int      @default(1)
   // The total number of tasks completed (i.e. without error/failure)

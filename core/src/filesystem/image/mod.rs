@@ -1,6 +1,7 @@
 mod generic;
 mod process;
 mod thumbnail;
+mod thumbnail_job;
 mod webp;
 
 pub use self::webp::WebpProcessor;
@@ -13,3 +14,4 @@ pub use thumbnail::{
 	generate_thumbnail, generate_thumbnails, get_thumbnail_path, remove_thumbnail,
 	remove_thumbnails,
 };
+pub use thumbnail_job::{ThumbnailJob, ThumbnailJobConfig, THUMBNAIL_JOB_NAME};

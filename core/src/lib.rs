@@ -170,7 +170,7 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobReport>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<JobDetail>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;

@@ -7,6 +7,7 @@ use crate::{
 	config::get_thumbnails_dir,
 	db::entity::Media,
 	filesystem::{media, FileError},
+	prisma::media as prisma_media,
 };
 
 use super::{
@@ -43,6 +44,39 @@ pub fn generate_thumbnail(
 // TODO: does this need to return a result?
 pub fn generate_thumbnails(
 	media: &[Media],
+	options: ImageProcessorOptions,
+) -> Result<Vec<PathBuf>, FileError> {
+	trace!("Enter generate_thumbnails");
+
+	let mut generated_paths = Vec::with_capacity(media.len());
+
+	// TODO: configurable chunk size?
+	// Split the array into chunks of 5 images
+	for (idx, chunk) in media.chunks(5).enumerate() {
+		trace!(chunk = idx + 1, "Processing chunk for thumbnail generation");
+		let results = chunk
+			.into_par_iter()
+			.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str(), options.clone()))
+			.filter_map(|res| {
+				if res.is_err() {
+					error!(error = ?res.err(), "Error generating thumbnail!");
+					None
+				} else {
+					res.ok()
+				}
+			})
+			.collect::<Vec<PathBuf>>();
+
+		debug!(num_generated = results.len(), "Generated thumbnail batch");
+
+		generated_paths.extend(results);
+	}
+
+	Ok(generated_paths)
+}
+
+pub fn generate_thumbnails_for_media(
+	media: Vec<prisma_media::Data>,
 	options: ImageProcessorOptions,
 ) -> Result<Vec<PathBuf>, FileError> {
 	trace!("Enter generate_thumbnails");

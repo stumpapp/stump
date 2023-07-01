@@ -198,9 +198,9 @@ async fn setup_library_series(
 		let result = series_dao.create_many(series_to_create).await;
 		match result {
 			Ok(mut created_series) => {
-				ctx.emit_client_event(CoreEvent::CreatedSeriesBatch(
-					created_series.len() as u64,
-				));
+				ctx.emit_event(
+					CoreEvent::CreatedSeriesBatch(created_series.len() as u64),
+				);
 				series.append(&mut created_series);
 			},
 			Err(e) => {

@@ -117,7 +117,7 @@ impl LibraryOptions {
 	}
 }
 
-#[derive(Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type, ToSchema)]
 pub enum LibraryScanMode {
 	#[serde(rename = "SYNC")]
 	Sync,

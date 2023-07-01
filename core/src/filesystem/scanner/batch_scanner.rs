@@ -13,7 +13,7 @@ use crate::{
 	error::{CoreError, CoreResult},
 	event::CoreEvent,
 	filesystem::{
-		image::generate_thumbnails,
+		image::{ThumbnailJob, ThumbnailJobConfig},
 		scanner::{
 			common::BatchScanOperation,
 			setup::{setup_series, SeriesSetup},
@@ -21,7 +21,7 @@ use crate::{
 		},
 		PathUtils,
 	},
-	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
+	job::{utils::persist_job_start, JobUpdate, WorkerCtx},
 	Ctx,
 };
 
@@ -32,7 +32,7 @@ use super::setup::{setup_library, LibrarySetup};
 // trying to keep up with the shear amount of updates it gets. I might have to throttle the
 // updates to the UI when libraries reach a certain size and send updates in batches instead.
 async fn scan_series(
-	ctx: Ctx,
+	ctx: Arc<Ctx>,
 	series: Series,
 	library_path: &str,
 	library_options: LibraryOptions,
@@ -110,41 +110,38 @@ async fn scan_series(
 	operations
 }
 
-pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult<u64> {
+pub async fn scan_library(ctx: WorkerCtx, library_path: String) -> CoreResult<u64> {
+	ctx.emit_job_started(0, Some("Preparing library scan".to_string()));
+
 	let core_ctx = ctx.core_ctx.clone();
-
-	ctx.progress(JobUpdate::job_initializing(
-		runner_id.clone(),
-		Some("Preparing library scan...".to_string()),
-	));
-
 	let LibrarySetup {
 		library,
 		library_options,
 		library_series,
 		tasks,
-	} = setup_library(&core_ctx, path).await?;
+	} = setup_library(&core_ctx, library_path).await?;
+
+	let job_id = ctx.job_id.clone();
+	persist_job_start(&core_ctx, job_id.clone(), tasks).await?;
 
 	// Sleep for a little to let the UI breathe.
-	tokio::time::sleep(Duration::from_millis(1000)).await;
-	persist_job_start(&core_ctx, runner_id.clone(), tasks).await?;
+	tokio::time::sleep(Duration::from_millis(500)).await;
 
 	let counter = Arc::new(AtomicU64::new(0));
 	let future_iter = library_series.into_iter().map(|s| async {
 		let progress_ctx = ctx.clone();
 		let scanner_ctx = core_ctx.clone();
 
-		let r_id = runner_id.clone();
+		let job_id = progress_ctx.job_id().to_string();
 		let counter_ref = counter.clone();
 		let library_path = library.path.clone();
 
 		let library_options = library_options.clone();
 		scan_series(scanner_ctx, s, &library_path, library_options, move |msg| {
 			let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
-
-			progress_ctx.progress(JobUpdate::job_progress(
-				r_id.to_owned(),
-				Some(previous + 1),
+			progress_ctx.emit_progress(JobUpdate::tick(
+				job_id.clone(),
+				previous + 1,
 				tasks,
 				Some(msg),
 			));
@@ -170,39 +167,22 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		})?;
 
 	if !created_media.is_empty() {
-		core_ctx
-			.emit_client_event(CoreEvent::CreatedMediaBatch(created_media.len() as u64));
+		core_ctx.emit_event(CoreEvent::CreatedMediaBatch(created_media.len() as u64));
 	}
 
-	// TODO: change task_count and send progress?
-	if let Some(thumbnail_config) = library_options.thumbnail_config {
-		trace!("Library configured to create WEBP thumbnails.");
-
-		ctx.progress(JobUpdate::job_progress(
-			runner_id.clone(),
-			Some(final_count),
-			tasks,
-			Some(format!(
-				"Creating {} WEBP thumbnails (this can take some time)",
-				created_media.len()
-			)),
+	if let Some(options) = library_options.thumbnail_config {
+		let dispatch_result = core_ctx.dispatch_job(ThumbnailJob::new(
+			options,
+			ThumbnailJobConfig::MediaGroup(
+				created_media.iter().map(|m| m.id.clone()).collect(),
+			),
 		));
-
-		// sleep for a bit to let client catch up
-		tokio::time::sleep(Duration::from_millis(50)).await;
-
-		if let Err(err) = generate_thumbnails(&created_media, thumbnail_config) {
-			error!("Failed to generate thumbnails: {:?}", err);
+		if let Err(_) = dispatch_result {
+			error!("Failed to dispatch thumbnail job!");
 		}
 	}
 
-	ctx.progress(JobUpdate::job_finishing(
-		runner_id,
-		Some(final_count),
-		tasks,
-		None,
-	));
-	tokio::time::sleep(Duration::from_millis(1000)).await;
+	tokio::time::sleep(Duration::from_millis(500)).await;
 
 	Ok(final_count)
 }

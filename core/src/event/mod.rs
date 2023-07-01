@@ -5,22 +5,22 @@ use specta::Type;
 use tokio::sync::oneshot;
 
 use crate::{
-	db::entity::{Media, Series},
-	error::CoreResult,
-	job::{Job, JobReport, JobStatus, JobUpdate},
+	db::entity::Media,
+	job::{JobDetail, JobExecutorTrait, JobManagerResult, JobStatus, JobUpdate},
+	prisma, CoreResult,
 };
 
 pub enum InternalCoreTask {
-	QueueJob(Box<dyn Job>),
-	GetJobReports(oneshot::Sender<CoreResult<Vec<JobReport>>>),
+	EnqueueJob(Box<dyn JobExecutorTrait>),
+	GetJobs(oneshot::Sender<CoreResult<Vec<JobDetail>>>),
 	CancelJob {
 		job_id: String,
-		return_sender: oneshot::Sender<CoreResult<()>>,
+		return_sender: oneshot::Sender<JobManagerResult<()>>,
 	},
 }
 
 pub enum ClientResponse {
-	GetJobReports(Vec<JobReport>),
+	GetJobDetails(Vec<JobDetail>),
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Type)]
@@ -43,7 +43,7 @@ pub enum CoreEvent {
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
 	CreatedMediaBatch(u64),
-	CreatedSeries(Series),
+	CreatedSeries(prisma::series::Data),
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
 	CreatedSeriesBatch(u64),
@@ -51,13 +51,13 @@ pub enum CoreEvent {
 
 impl CoreEvent {
 	pub fn job_started(
-		runner_id: String,
+		job_id: String,
 		current_task: u64,
 		task_count: u64,
 		message: Option<String>,
 	) -> Self {
 		CoreEvent::JobStarted(JobUpdate {
-			runner_id,
+			job_id,
 			current_task: Some(current_task),
 			task_count,
 			message,
@@ -66,13 +66,13 @@ impl CoreEvent {
 	}
 
 	pub fn job_progress(
-		runner_id: String,
+		job_id: String,
 		current_task: Option<u64>,
 		task_count: u64,
 		message: Option<String>,
 	) -> Self {
 		CoreEvent::JobProgress(JobUpdate {
-			runner_id,
+			job_id,
 			current_task,
 			task_count,
 			message,

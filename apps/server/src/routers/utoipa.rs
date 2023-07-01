@@ -6,7 +6,7 @@ use stump_core::db::query::{ordering::*, pagination::*};
 use stump_core::filesystem::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
 };
-use stump_core::job::{JobReport, JobStatus};
+use stump_core::job::{JobDetail, JobStatus};
 
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -92,7 +92,7 @@ use super::api::{
             PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
             Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
-            FilterableMediaQuery, FilterableSeriesQuery, JobReport, LibrariesStats, ScanQueryParam,
+            FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags
         )

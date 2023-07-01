@@ -3697,6 +3697,7 @@ dependencies = [
  "serde",
  "serde-value",
  "serde_json",
+ "specta",
  "tempdir",
  "thiserror",
  "tokio",
@@ -3733,6 +3734,7 @@ dependencies = [
  "convert_case 0.6.0",
  "proc-macro2",
  "quote 1.0.23",
+ "specta",
  "syn 1.0.107",
 ]
 
@@ -4887,7 +4889,9 @@ version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4be6d92bb3d2a34fd5da2463089b44e67d6e83eedff074a82ba0b3e830dbff7c"
 dependencies = [
+ "chrono",
  "document-features",
+ "indexmap",
  "indoc",
  "once_cell",
  "paste",
@@ -4895,6 +4899,7 @@ dependencies = [
  "serde_json",
  "specta-macros",
  "thiserror",
+ "uuid 1.2.2",
 ]
 
 [[package]]

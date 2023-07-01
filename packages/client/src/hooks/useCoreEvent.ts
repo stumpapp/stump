@@ -6,7 +6,7 @@ import { useStumpSse } from './useStumpSse'
 
 interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void
-	onJobFailed?: (err: { runner_id: string; message: string }) => void
+	onJobFailed?: (err: { job_id: string; message: string }) => void
 }
 
 export function useCoreEventHandler({
@@ -34,6 +34,7 @@ export function useCoreEventHandler({
 				// in this store function where if the task_count is greater than 1000, it will
 				// only update the store every 50 tasks. This is a temporary fix. The UI is still pretty
 				// slow when this happens, but is usable. A better solution needs to be found.
+				// setTimeout(() => updateJob(data), 1000)
 				updateJob(data)
 				break
 			case 'JobComplete':
@@ -43,7 +44,7 @@ export function useCoreEventHandler({
 				break
 			case 'JobFailed':
 				onJobFailed?.(data)
-				removeJob(data.runner_id)
+				removeJob(data.job_id)
 				invalidateQueries({ keys: core_event_triggers[key].keys })
 
 				break

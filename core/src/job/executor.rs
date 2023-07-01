@@ -2,6 +2,7 @@ use super::{
 	utils::persist_job_end, JobDetail, JobError, JobStatus, JobTrait, WorkerCtx,
 };
 use tracing::{error, trace};
+use uuid::Uuid;
 
 #[async_trait::async_trait]
 pub trait JobExecutorTrait: Send + Sync {
@@ -27,7 +28,7 @@ impl<InnerJob: JobTrait> Job<InnerJob> {
 	pub fn new(inner_job: InnerJob) -> Box<Self> {
 		Box::new(Self {
 			detail: Some(JobDetail::new(
-				"test".to_string(),
+				Uuid::new_v4().to_string(),
 				inner_job.name().to_string(),
 				inner_job.description().map(|s| s.to_string()),
 			)),
@@ -121,14 +122,14 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 			}
 		}
 
-		unimplemented!()
+		Ok(())
 	}
 
 	// TODO: Once Stump supports pausing and resuming jobs, this will need to be properly implemented.
 	async fn finish(
 		&self,
 		job_result: Result<(), JobError>,
-		_: WorkerCtx,
+		ctx: WorkerCtx,
 	) -> Result<(), JobError> {
 		trace!(?job_result, "Job finished!");
 		// let resolved_state = if let Err(e) = result {
@@ -144,6 +145,8 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 		// let _ =
 		// 	persist_job_state(ctx.core_ctx.clone(), resolved_state, ctx.job_id.clone())
 		// 		.await;
+
+		ctx.emit_job_complete();
 
 		Ok(())
 	}

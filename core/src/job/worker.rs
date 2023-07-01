@@ -37,6 +37,11 @@ impl WorkerCtx {
 				message,
 			)))
 	}
+
+	pub fn emit_job_complete(&self) {
+		self.core_ctx
+			.emit_event(CoreEvent::JobComplete(self.job_id.clone()))
+	}
 }
 
 pub struct Worker {

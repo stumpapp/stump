@@ -4,7 +4,10 @@ use std::{
 };
 use tokio::sync::{broadcast, Mutex, RwLock};
 
-use crate::{job::WorkerCtx, Ctx};
+use crate::{
+	job::{utils::persist_new_job, WorkerCtx},
+	CoreError, Ctx,
+};
 
 use super::{worker::Worker, JobExecutorTrait};
 
@@ -27,6 +30,14 @@ pub enum JobManagerError {
 	WorkerSpawnFailed,
 	#[error("Job not found {0}")]
 	JobNotFound(String),
+	#[error("An unknown error occurred {0}")]
+	Unknown(String),
+}
+
+impl From<CoreError> for JobManagerError {
+	fn from(err: CoreError) -> Self {
+		JobManagerError::Unknown(err.to_string())
+	}
 }
 
 pub type JobManagerResult<T> = Result<T, JobManagerError>;
@@ -120,6 +131,16 @@ impl JobManager {
 				.expect("Job initialized without state!");
 
 			let job_id = job_detail.id.clone();
+			let job_name = job.name().to_string();
+			let job_description = job.description().map(|s| s.to_string());
+			let _ = persist_new_job(
+				&self.core_ctx,
+				job_id.clone(),
+				job_name,
+				job_description,
+			)
+			.await?;
+
 			let worker = Worker::new(job, job_detail);
 			let worker_mtx = Arc::new(Mutex::new(worker));
 			let worker_ctx = WorkerCtx {
@@ -136,6 +157,7 @@ impl JobManager {
 				})?;
 			workers.insert(job_id, worker_mtx);
 		} else {
+			println!("Queuing job: {}", job.name());
 			self.job_queue.write().await.push_back(job);
 		}
 

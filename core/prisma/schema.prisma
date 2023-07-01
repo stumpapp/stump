@@ -462,8 +462,8 @@ model Job {
   name                 String
   // The extra description
   description          String?
-  // The status of the job (i.e. RUNNING, COMPLETED, FAILED, CANCELLED).
-  status               String   @default("RUNNING")
+  // The status of the job (i.e. QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED).
+  status               String   @default("QUEUED")
   // The state of the job. This is primarily stored in order to support pausing/resuming
   // jobs, as it will hold the state of the job at the time it was paused.
   state                Bytes?

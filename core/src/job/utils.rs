@@ -1,8 +1,24 @@
-use std::num::TryFromIntError;
-
 use crate::{prisma::job, CoreError, CoreResult, Ctx};
+use std::num::TryFromIntError;
+use tracing::trace;
 
 use super::JobStatus;
+
+pub async fn persist_new_job(
+	core_ctx: &Ctx,
+	id: String,
+	name: String,
+	description: Option<String>,
+) -> CoreResult<job::Data> {
+	let db = core_ctx.get_db();
+	let job = db
+		.job()
+		.create(id, name, vec![job::description::set(description)])
+		.exec()
+		.await?;
+	trace!(?job, "Persisted new job to database");
+	Ok(job)
+}
 
 pub async fn persist_job_start(
 	core_ctx: &Ctx,
@@ -10,6 +26,7 @@ pub async fn persist_job_start(
 	task_count: u64,
 ) -> CoreResult<()> {
 	let db = core_ctx.get_db();
+	// TODO: needs to be create....
 	let _ = db
 		.job()
 		.update(

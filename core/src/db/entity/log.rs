@@ -51,20 +51,20 @@ pub struct Log {
 impl From<CoreEvent> for Log {
 	fn from(event: CoreEvent) -> Self {
 		match event {
-			CoreEvent::JobFailed { runner_id, message } => Self {
+			CoreEvent::JobFailed { job_id, message } => Self {
 				level: LogLevel::Error,
 				message,
-				job_id: Some(runner_id),
+				job_id: Some(job_id),
 				..Default::default()
 			},
 			CoreEvent::CreateEntityFailed {
-				runner_id,
+				job_id,
 				path,
 				message,
 			} => Self {
 				level: LogLevel::Error,
 				message: format!("{}: {}", path, message),
-				job_id: runner_id,
+				job_id: job_id,
 				..Default::default()
 			},
 			_ => unimplemented!(),

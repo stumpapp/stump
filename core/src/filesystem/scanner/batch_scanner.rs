@@ -179,6 +179,8 @@ pub async fn scan_library(ctx: WorkerCtx, library_path: String) -> CoreResult<u6
 		));
 		if let Err(_) = dispatch_result {
 			error!("Failed to dispatch thumbnail job!");
+		} else {
+			debug!("Dispatched thumbnail job!")
 		}
 	}
 

@@ -5,9 +5,9 @@ use specta::Type;
 use tokio::sync::oneshot;
 
 use crate::{
-	db::entity::Media,
+	db::entity::{Media, Series},
 	job::{JobDetail, JobExecutorTrait, JobManagerResult, JobStatus, JobUpdate},
-	prisma, CoreResult,
+	CoreResult,
 };
 
 pub enum InternalCoreTask {
@@ -31,11 +31,11 @@ pub enum CoreEvent {
 	// TODO: change from string...
 	JobComplete(String),
 	JobFailed {
-		runner_id: String,
+		job_id: String,
 		message: String,
 	},
 	CreateEntityFailed {
-		runner_id: Option<String>,
+		job_id: Option<String>,
 		path: String,
 		message: String,
 	},
@@ -43,7 +43,7 @@ pub enum CoreEvent {
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
 	CreatedMediaBatch(u64),
-	CreatedSeries(prisma::series::Data),
+	CreatedSeries(Series),
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
 	CreatedSeriesBatch(u64),

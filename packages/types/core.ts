@@ -54,13 +54,13 @@ export type UpdateEpubProgress = { epubcfi: string; percentage: number; is_compl
 
 export type EpubContent = { label: string; content: string; play_order: number }
 
-export type JobStatus = "RUNNING" | "QUEUED" | "COMPLETED" | "CANCELLED" | "FAILED"
+export type JobStatus = "RUNNING" | "COMPLETED" | "CANCELLED" | "FAILED" | "Queued"
 
-export type JobUpdate = { runner_id: string; current_task: BigInt | null; task_count: BigInt; message: string | null; status: JobStatus | null }
+export type JobUpdate = { job_id: string; current_task: BigInt | null; task_count: BigInt; message: string | null; status: JobStatus | null }
 
-export type JobReport = { id: string | null; kind: string; details: string | null; status: JobStatus; task_count: number | null; completed_task_count: number | null; ms_elapsed: BigInt | null; completed_at: string | null }
+export type JobDetail = { id: string; name: string; description: string | null; status: JobStatus; task_count: number | null; completed_task_count: number | null; ms_elapsed: BigInt | null; completed_at: string | null }
 
-export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { runner_id: string; message: string } } | { key: "CreateEntityFailed"; data: { runner_id: string | null; path: string; message: string } } | { key: "CreatedMedia"; data: Media } | { key: "CreatedMediaBatch"; data: BigInt } | { key: "CreatedSeries"; data: Series } | { key: "CreatedSeriesBatch"; data: BigInt }
+export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { job_id: string; message: string } } | { key: "CreateEntityFailed"; data: { job_id: string | null; path: string; message: string } } | { key: "CreatedMedia"; data: Media } | { key: "CreatedMediaBatch"; data: BigInt } | { key: "CreatedSeries"; data: Series } | { key: "CreatedSeriesBatch"; data: BigInt }
 
 export type ReadingListItem = { display_order: number; media_id: string; reading_list_id: string; media: Media | null }
 

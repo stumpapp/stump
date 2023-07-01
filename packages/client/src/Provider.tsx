@@ -27,38 +27,45 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 	const [jobs, setJobs] = useState<Record<string, JobUpdate>>({})
 
 	function addJob(newJob: JobUpdate) {
-		const job = jobs[newJob.runner_id]
+		setJobs((jobs) => {
+			const target = jobs[newJob.job_id]
 
-		if (job) {
-			updateJob(newJob)
-		} else {
-			setJobs((jobs) => ({
-				...jobs,
-				[newJob.runner_id]: newJob,
-			}))
-		}
+			if (target) {
+				return {
+					...jobs,
+					[newJob.job_id]: {
+						...target,
+						...newJob,
+					},
+				}
+			} else {
+				return {
+					...jobs,
+					[newJob.job_id]: newJob,
+				}
+			}
+		})
 	}
 
 	function updateJob(jobUpdate: JobUpdate) {
-		const job = jobs[jobUpdate.runner_id]
+		setJobs((jobs) => {
+			const target = jobs[jobUpdate.job_id]
 
-		if (!job || !Object.keys(jobs).length) {
-			addJob(jobUpdate)
-			return
-		}
-
-		const { current_task, message, task_count } = jobUpdate
-		const updatedJob = {
-			...job,
-			current_task,
-			message,
-			task_count,
-		}
-
-		setJobs((jobs) => ({
-			...jobs,
-			[jobUpdate.runner_id]: updatedJob,
-		}))
+			if (target) {
+				return {
+					...jobs,
+					[jobUpdate.job_id]: {
+						...target,
+						...jobUpdate,
+					},
+				}
+			} else {
+				return {
+					...jobs,
+					[jobUpdate.job_id]: jobUpdate,
+				}
+			}
+		})
 	}
 
 	function removeJob(jobId: string) {

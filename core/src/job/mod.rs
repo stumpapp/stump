@@ -171,7 +171,7 @@ impl JobUpdate {
 			current_task: Some(current_task),
 			task_count,
 			message,
-			status: None,
+			status: Some(JobStatus::Running),
 		}
 	}
 }

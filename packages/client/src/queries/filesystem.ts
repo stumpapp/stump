@@ -1,10 +1,11 @@
 import { filesystemApi, filesystemQueryKeys } from '@stump/api'
 import type { DirectoryListing } from '@stump/types'
 import { AxiosError } from 'axios'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useQuery } from '../client'
 
+// TODO: use QueryOptions and usePageQuery instead of DirectoryListingQueryParams
 export interface DirectoryListingQueryParams {
 	enabled: boolean
 	startingPath?: string
@@ -36,6 +37,13 @@ export function useDirectoryListing({
 			suspense: false,
 		},
 	)
+
+	// Re-set path if startingPath changes.
+	useEffect(() => {
+		if (startingPath) {
+			setPath(startingPath)
+		}
+	}, [startingPath])
 
 	const actions = useMemo(
 		() => ({

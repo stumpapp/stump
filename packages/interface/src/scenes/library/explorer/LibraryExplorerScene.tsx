@@ -1,10 +1,9 @@
 import { mediaApi } from '@stump/api'
 import { useDirectoryListing, useLibraryByIdQuery } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
-import { useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import toast from 'react-hot-toast'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import paths from '../../../paths'
 import { LibraryExplorerContext } from './context'
@@ -15,43 +14,20 @@ import FileExplorer from './FileExplorer'
 // most of what would be needed on the backend is in place.
 export default function LibraryExplorerScene() {
 	const navigate = useNavigate()
-	const { state } = useLocation()
 
 	const { id } = useParams()
-
 	if (!id) {
 		throw new Error('Library id is required')
 	}
 
 	const { library, isLoading } = useLibraryByIdQuery(id)
 
-	const handleGoForward = (callback: (path: string) => void) => {
-		if (state?.starting_path) {
-			callback(state.starting_path)
-			navigate('.', { replace: true, state: { starting_path: path } })
-		}
-
-		console.debug('No starting path found: ', state)
-	}
-
-	const handleGoBack = (currentPath: string | null) => {
-		navigate('.', { replace: true, state: { starting_path: currentPath } })
-	}
-
-	const { entries, onSelect, path, parent, goForward, goBack } = useDirectoryListing({
-		enabled: !!library?.path,
-		enforcedRoot: library?.path,
-		onGoBack: handleGoBack,
-		onGoForward: handleGoForward,
-		startingPath: state?.starting_path || library?.path,
-	})
-
-	const canGoForward = useMemo(
-		() => !!state?.starting_path && state.starting_path !== path,
-		[state?.starting_path, path],
-	)
-
-	// console.log('canGoForward', canGoForward, { path, state })
+	const { entries, onSelect, currentPath, goForward, goBack, canGoBack, canGoForward } =
+		useDirectoryListing({
+			enabled: !!library?.path,
+			enforcedRoot: library?.path,
+			initialPath: library?.path,
+		})
 
 	const handleSelect = async (entry: DirectoryListingFile) => {
 		if (entry.is_directory) {
@@ -66,7 +42,7 @@ export default function LibraryExplorerScene() {
 				if (entity) {
 					navigate(paths.bookOverview(entity.id), {
 						state: {
-							starting_path: path,
+							forward_path: currentPath,
 						},
 					})
 				} else {
@@ -89,7 +65,9 @@ export default function LibraryExplorerScene() {
 	return (
 		<LibraryExplorerContext.Provider
 			value={{
-				canGoBack: !!parent,
+				// FIXME: this is not correct. When you exit the library explorer and then re-enter (e.g. back button)
+				// it needs to be able to go backwards to the previous path WITHOUT any history (i.e. using parent path).
+				canGoBack,
 				canGoForward,
 				files: entries,
 				goBack,

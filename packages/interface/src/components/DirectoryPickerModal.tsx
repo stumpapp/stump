@@ -22,15 +22,15 @@ export default function DirectoryPickerModal({
 	// FIXME: This component needs to render a *virtual* list AND pass a page param as the user scrolls
 	// down the list. I recently tested a directory with 1000+ files and it took a while to load. So,
 	// I am paging the results to 100 per page. Might reduce to 50.
-	const { errorMessage, path, parent, directories, onSelect, goBack } = useDirectoryListing({
+	const { errorMessage, currentPath, parent, directories, onSelect, goBack } = useDirectoryListing({
 		enabled: isOpen,
-		startingPath,
+		initialPath: startingPath,
 		// TODO: page
 	})
 
 	function handleConfirm() {
 		if (!errorMessage) {
-			onPathChange(path)
+			onPathChange(currentPath)
 			onClose()
 		}
 	}
@@ -82,7 +82,7 @@ export default function DirectoryPickerModal({
 							className="line-clamp-1 h-[37px]"
 							containerClassName="max-w-full"
 							// isInvalid={!!errorMessage}
-							value={path ?? undefined}
+							value={currentPath ?? undefined}
 							readOnly
 							variant="primary"
 							// TODO: allow input to be editable

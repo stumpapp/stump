@@ -9,16 +9,24 @@ import { useQuery } from '../client'
 export interface DirectoryListingQueryParams {
 	enabled: boolean
 	startingPath?: string
+	// TODO: I kind of hate this name...
+	/**
+	 * The minimum path that can be queried for. This is useful for enforcing no access to parent
+	 * directories relative to the enforcedRoot.
+	 */
+	enforcedRoot?: string
 	page?: number
-	goForward?: (callback: (path: string) => void) => void
-	goBack?: (path: string | null) => void
+	onGoForward?: (callback: (path: string) => void) => void
+	onGoBack?: (path: string | null) => void
 }
 
 export function useDirectoryListing({
 	enabled,
 	startingPath,
+	enforcedRoot,
 	page = 1,
-	...props
+	onGoForward,
+	onGoBack,
 }: DirectoryListingQueryParams) {
 	const [path, setPath] = useState(startingPath || null)
 
@@ -49,19 +57,35 @@ export function useDirectoryListing({
 		() => ({
 			// FIXME: does not work as expected. Need more complicated annoying solution.
 			goBack() {
+				const parent = directoryListing?.parent || ''
+				// If there is no parent, we are at the root directory, so we don't want to go back.
+				if (!parent) {
+					return
+				}
+
+				// if parent comes BEFORE enforcedRoot, then we are trying to go back to a parent
+				// directory that is not allowed. In this case, we don't want to go back.
+				if (enforcedRoot !== parent && enforcedRoot?.startsWith(parent)) {
+					return
+				}
+
 				if (directoryListing?.parent) {
-					props.goBack?.(path)
+					onGoBack?.(path)
 					setPath(directoryListing.parent)
 				}
 			},
 			goForward() {
-				props.goForward?.((path) => setPath(path))
+				if (!onGoForward) {
+					console.warn('goForward was called without an onGoForward callback')
+				} else {
+					onGoForward((path) => setPath(path))
+				}
 			},
 			onSelect(directory: string) {
 				setPath(directory)
 			},
 		}),
-		[directoryListing, props, path],
+		[directoryListing, onGoBack, onGoForward, path, enforcedRoot],
 	)
 
 	const errorMessage = useMemo(() => {

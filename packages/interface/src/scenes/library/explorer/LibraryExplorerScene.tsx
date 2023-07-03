@@ -40,8 +40,9 @@ export default function LibraryExplorerScene() {
 
 	const { entries, onSelect, path, parent, goForward, goBack } = useDirectoryListing({
 		enabled: !!library?.path,
-		goBack: handleGoBack,
-		goForward: handleGoForward,
+		enforcedRoot: library?.path,
+		onGoBack: handleGoBack,
+		onGoForward: handleGoForward,
 		startingPath: state?.starting_path || library?.path,
 	})
 

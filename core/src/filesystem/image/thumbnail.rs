@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, path::PathBuf};
+use std::{fs::File, io::Write, path::PathBuf, sync::Arc};
 
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use tracing::{debug, error, trace};
@@ -78,8 +78,9 @@ pub fn generate_thumbnails(
 pub fn generate_thumbnails_for_media(
 	media: Vec<prisma_media::Data>,
 	options: ImageProcessorOptions,
+	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Result<Vec<PathBuf>, FileError> {
-	trace!("Enter generate_thumbnails");
+	trace!(media_count = media.len(), "Enter generate_thumbnails");
 
 	let mut generated_paths = Vec::with_capacity(media.len());
 
@@ -87,6 +88,14 @@ pub fn generate_thumbnails_for_media(
 	// Split the array into chunks of 5 images
 	for (idx, chunk) in media.chunks(5).enumerate() {
 		trace!(chunk = idx + 1, "Processing chunk for thumbnail generation");
+		on_progress(
+			format!(
+				"Processing group {} of {} for thumbnail generation",
+				idx + 1,
+				media.len() / 5
+			)
+			.to_string(),
+		);
 		let results = chunk
 			.into_par_iter()
 			.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str(), options.clone()))

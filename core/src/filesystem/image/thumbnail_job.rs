@@ -1,9 +1,14 @@
+use std::sync::{
+	atomic::{AtomicU64, Ordering},
+	Arc,
+};
+
 use serde::{Deserialize, Serialize};
-use tracing::info;
+use tracing::{info, trace};
 
 use crate::{
 	filesystem::image::thumbnail::generate_thumbnails_for_media,
-	job::{Job, JobError, JobTrait, WorkerCtx},
+	job::{utils::persist_job_start, Job, JobError, JobTrait, JobUpdate, WorkerCtx},
 	prisma::media,
 };
 
@@ -52,6 +57,15 @@ impl JobTrait for ThumbnailJob {
 	}
 
 	async fn run(&mut self, ctx: WorkerCtx) -> Result<u64, JobError> {
+		ctx.emit_job_started(0, Some("Preparing thumbnail generation".to_string()));
+
+		let core_ctx = ctx.core_ctx.clone();
+
+		let counter = Arc::new(AtomicU64::new(0));
+		let progress_ctx = ctx.clone();
+		let job_id = progress_ctx.job_id().to_string();
+		let counter_ref = counter.clone();
+
 		let created_thumbnail_paths = match &self.config {
 			ThumbnailJobConfig::SingleLibrary(_) => {
 				Err(JobError::Unknown(String::from("Not yet supported!")))
@@ -60,7 +74,22 @@ impl JobTrait for ThumbnailJob {
 				Err(JobError::Unknown(String::from("Not yet supported!")))
 			},
 			ThumbnailJobConfig::MediaGroup(media_group_ids) => {
-				// TODO: move this elsewhere
+				let tasks = (media_group_ids.len() as f64 / 5.0).ceil() as u64;
+				let on_progress = move |msg| {
+					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
+					progress_ctx.emit_progress(JobUpdate::tick(
+						job_id.clone(),
+						previous + 1,
+						tasks,
+						Some(msg),
+					));
+				};
+				persist_job_start(&core_ctx, ctx.job_id.clone(), tasks).await?;
+
+				trace!(
+					media_group_ids_count = media_group_ids.len(),
+					"Generating thumbnails for media group"
+				);
 				let client = ctx.core_ctx.get_db();
 				let media = client
 					.media()
@@ -70,6 +99,7 @@ impl JobTrait for ThumbnailJob {
 				Ok(generate_thumbnails_for_media(
 					media,
 					self.options.to_owned(),
+					on_progress,
 				)?)
 			},
 		}?;

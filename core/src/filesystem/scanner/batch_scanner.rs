@@ -180,8 +180,13 @@ pub async fn scan_library(ctx: WorkerCtx, library_path: String) -> CoreResult<u6
 		if let Err(_) = dispatch_result {
 			error!("Failed to dispatch thumbnail job!");
 		} else {
-			debug!("Dispatched thumbnail job!")
+			debug!(
+				expected_thumbnail_count = created_media.len(),
+				"Dispatched thumbnail job!"
+			)
 		}
+	} else {
+		debug!("No thumbnail config found, skipping thumbnail job dispatch");
 	}
 
 	tokio::time::sleep(Duration::from_millis(500)).await;

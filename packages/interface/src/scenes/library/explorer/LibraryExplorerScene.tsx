@@ -22,7 +22,9 @@ export default function LibraryExplorerScene() {
 
 	const { library, isLoading } = useLibraryByIdQuery(id)
 
-	const { entries, onSelect, currentPath, goForward, goBack, canGoBack, canGoForward } =
+	// TODO: I need to store location.state somewhere so that when the user uses native navigation,
+	// their history, or at the very least where they left off, is persisted.
+	const { entries, setPath, path, goForward, goBack, canGoBack, canGoForward } =
 		useDirectoryListing({
 			enabled: !!library?.path,
 			enforcedRoot: library?.path,
@@ -31,7 +33,7 @@ export default function LibraryExplorerScene() {
 
 	const handleSelect = async (entry: DirectoryListingFile) => {
 		if (entry.is_directory) {
-			onSelect(entry.path)
+			setPath(entry.path)
 		} else {
 			try {
 				const response = await mediaApi.getMedia({
@@ -42,11 +44,11 @@ export default function LibraryExplorerScene() {
 				if (entity) {
 					navigate(paths.bookOverview(entity.id), {
 						state: {
-							forward_path: currentPath,
+							forward_path: path,
 						},
 					})
 				} else {
-					toast.error('Media not found for selected file')
+					toast.error('No associated DB entry found for this file')
 				}
 			} catch (err) {
 				console.error(err)
@@ -55,18 +57,17 @@ export default function LibraryExplorerScene() {
 		}
 	}
 
-	// TODO: loading state
+	// TODO: loading state ugly
 	if (isLoading) {
 		return null
 	} else if (!library) {
+		// TODO: render a proper not found image or something
 		throw new Error('Library not found')
 	}
 
 	return (
 		<LibraryExplorerContext.Provider
 			value={{
-				// FIXME: this is not correct. When you exit the library explorer and then re-enter (e.g. back button)
-				// it needs to be able to go backwards to the previous path WITHOUT any history (i.e. using parent path).
 				canGoBack,
 				canGoForward,
 				files: entries,

@@ -5,8 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useQuery } from '../client'
 
-// TODO: use QueryOptions and usePageQuery instead of DirectoryListingQueryParams
-export interface DirectoryListingQueryParams {
+export type DirectoryListingQueryParams = {
 	enabled: boolean
 	/**
 	 * The initial path to query for. If not provided, the root directory will be queried for.
@@ -17,6 +16,10 @@ export interface DirectoryListingQueryParams {
 	 * directories relative to the enforcedRoot.
 	 */
 	enforcedRoot?: string
+	/**
+	 * The current page of the paginated result. If not provided, the query result will
+	 * be unpaginated.
+	 */
 	page?: number
 	/**
 	 * A callback that will be called when navigating forward in the directory listing.
@@ -41,6 +44,7 @@ export function useDirectoryListing({
 	const [currentIndex, setCurrentIndex] = useState(0)
 
 	const [directoryListing, setDirectoryListing] = useState<DirectoryListing>()
+	const parent = directoryListing?.parent
 
 	const { isLoading, error } = useQuery(
 		[filesystemQueryKeys.listDirectory, currentPath, page],
@@ -62,20 +66,57 @@ export function useDirectoryListing({
 			setHistory((curr) => {
 				if (curr.length === 0) {
 					return [initialPath]
-				} else {
-					// TODO: I think this is right, but am lazy rn to add a ref lol
-					// return curr.slice(0, currentIndex + 1).concat(initialPath)
+				} else if (!curr.includes(initialPath)) {
 					return [...curr, initialPath]
+				} else {
+					return curr
 				}
 			})
 		}
 	}, [initialPath])
 
-	const canGoBack = useMemo(() => {
+	const isPathAllowed = useCallback(
+		(path: string) => {
+			if (!path || (enforcedRoot !== path && enforcedRoot?.startsWith(path))) {
+				return false
+			}
+			return true
+		},
+		[enforcedRoot],
+	)
+
+	const setPath = useCallback(
+		(directory: string, direction: 1 | -1 = 1) => {
+			let newIndex = currentIndex + direction
+			let newHistory: string[]
+			// A -1 indicates that we don't have previous history when we called setPath, so we
+			// need to add the current path to the history ahead of where we are going next.
+			setHistory((curr) => {
+				if (direction === -1) {
+					newHistory = [...curr.slice(0, currentIndex + 1), directory]
+				} else {
+					// When we manually set the path, history needs to be reset, keeping
+					// the current path as the first entry and the new path as the second.
+					newHistory = [curr[0] || '', directory].filter(Boolean)
+				}
+				newIndex = newHistory.length - 1
+				return newHistory
+			})
+			setCurrentPath(directory)
+			setCurrentIndex(newIndex)
+		},
+		[currentIndex],
+	)
+
+	const hasBackHistory = useMemo(() => {
 		return currentIndex > 0
 	}, [currentIndex])
 
-	const goBack = useCallback(() => {
+	const canGoBack = useMemo(() => {
+		return hasBackHistory || isPathAllowed(parent || '')
+	}, [hasBackHistory, parent, isPathAllowed])
+
+	const goBackInHistory = useCallback(() => {
 		const parent = directoryListing?.parent || ''
 		// If there is no parent, we are at the root directory, so we don't want to go back.
 		if (!parent) {
@@ -95,6 +136,15 @@ export function useDirectoryListing({
 		}
 	}, [enforcedRoot, directoryListing, onGoBack])
 
+	const goBack = useCallback(() => {
+		if (!canGoBack) return
+		if (hasBackHistory) {
+			goBackInHistory()
+		} else {
+			setPath(parent || '', -1)
+		}
+	}, [hasBackHistory, canGoBack, goBackInHistory, parent, setPath])
+
 	const canGoForward = useMemo(() => {
 		return history.length > currentIndex + 1
 	}, [history, currentIndex])
@@ -107,17 +157,6 @@ export function useDirectoryListing({
 			setCurrentIndex((prev) => prev + 1)
 		}
 	}, [history, currentIndex, onGoForward])
-
-	const onSelect = useCallback(
-		(directory: string) => {
-			setCurrentPath(directory)
-			// we need to splice anything after the current index, because we are creating a new
-			// history branch.
-			setHistory((prev) => prev.slice(0, currentIndex + 1).concat(directory))
-			setCurrentIndex((prev) => prev + 1)
-		},
-		[currentIndex],
-	)
 
 	const errorMessage = useMemo(() => {
 		const err = error as AxiosError
@@ -136,7 +175,6 @@ export function useDirectoryListing({
 	return {
 		canGoBack,
 		canGoForward,
-		currentPath,
 		directories: directoryListing?.files.filter((f) => f.is_directory) ?? [],
 		entries: directoryListing?.files ?? [],
 		error,
@@ -144,7 +182,9 @@ export function useDirectoryListing({
 		goBack,
 		goForward,
 		isLoading,
-		onSelect,
+		isPathAllowed,
 		parent: directoryListing?.parent,
+		path: currentPath,
+		setPath,
 	}
 }

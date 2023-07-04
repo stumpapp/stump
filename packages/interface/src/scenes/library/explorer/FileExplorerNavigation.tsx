@@ -4,11 +4,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useFileExplorerContext } from './context'
 
 export default function FileExplorerNavigation() {
-	const { goBack, goForward, canGoForward } = useFileExplorerContext()
+	const { goBack, goForward, canGoBack, canGoForward } = useFileExplorerContext()
 
 	return (
 		<div className="m-0 hidden items-center gap-1 md:flex">
-			<IconButton variant="ghost" size="sm" onClick={goBack}>
+			<IconButton variant="ghost" size="sm" onClick={goBack} disabled={!canGoBack}>
 				<ChevronLeft size="0.75rem" />
 			</IconButton>
 

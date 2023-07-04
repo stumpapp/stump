@@ -1,10 +1,9 @@
 import { mediaApi } from '@stump/api'
 import { useDirectoryListing, useLibraryByIdQuery } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
-import { useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import toast from 'react-hot-toast'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import paths from '../../../paths'
 import { LibraryExplorerContext } from './context'
@@ -15,46 +14,26 @@ import FileExplorer from './FileExplorer'
 // most of what would be needed on the backend is in place.
 export default function LibraryExplorerScene() {
 	const navigate = useNavigate()
-	const { state } = useLocation()
 
 	const { id } = useParams()
-
 	if (!id) {
 		throw new Error('Library id is required')
 	}
 
 	const { library, isLoading } = useLibraryByIdQuery(id)
 
-	const handleGoForward = (callback: (path: string) => void) => {
-		if (state?.starting_path) {
-			callback(state.starting_path)
-			navigate('.', { replace: true, state: { starting_path: path } })
-		}
-
-		console.debug('No starting path found: ', state)
-	}
-
-	const handleGoBack = (currentPath: string | null) => {
-		navigate('.', { replace: true, state: { starting_path: currentPath } })
-	}
-
-	const { entries, onSelect, path, parent, goForward, goBack } = useDirectoryListing({
-		enabled: !!library?.path,
-		goBack: handleGoBack,
-		goForward: handleGoForward,
-		startingPath: state?.starting_path || library?.path,
-	})
-
-	const canGoForward = useMemo(
-		() => !!state?.starting_path && state.starting_path !== path,
-		[state?.starting_path, path],
-	)
-
-	// console.log('canGoForward', canGoForward, { path, state })
+	// TODO: I need to store location.state somewhere so that when the user uses native navigation,
+	// their history, or at the very least where they left off, is persisted.
+	const { entries, setPath, path, goForward, goBack, canGoBack, canGoForward } =
+		useDirectoryListing({
+			enabled: !!library?.path,
+			enforcedRoot: library?.path,
+			initialPath: library?.path,
+		})
 
 	const handleSelect = async (entry: DirectoryListingFile) => {
 		if (entry.is_directory) {
-			onSelect(entry.path)
+			setPath(entry.path)
 		} else {
 			try {
 				const response = await mediaApi.getMedia({
@@ -65,11 +44,11 @@ export default function LibraryExplorerScene() {
 				if (entity) {
 					navigate(paths.bookOverview(entity.id), {
 						state: {
-							starting_path: path,
+							forward_path: path,
 						},
 					})
 				} else {
-					toast.error('Media not found for selected file')
+					toast.error('No associated DB entry found for this file')
 				}
 			} catch (err) {
 				console.error(err)
@@ -78,17 +57,18 @@ export default function LibraryExplorerScene() {
 		}
 	}
 
-	// TODO: loading state
+	// TODO: loading state ugly
 	if (isLoading) {
 		return null
 	} else if (!library) {
+		// TODO: render a proper not found image or something
 		throw new Error('Library not found')
 	}
 
 	return (
 		<LibraryExplorerContext.Provider
 			value={{
-				canGoBack: !!parent,
+				canGoBack,
 				canGoForward,
 				files: entries,
 				goBack,

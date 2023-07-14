@@ -37,6 +37,7 @@ export {
 export { Link } from './link'
 export { Popover } from './popover'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
+export { RadioGroup } from './radio'
 export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
 export { Sheet, SheetPrimitive } from './sheet'
 export { Tabs } from './tabs'

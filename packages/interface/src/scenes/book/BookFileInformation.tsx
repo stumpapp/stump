@@ -15,11 +15,21 @@ export default function BookFileInformation({ media }: Props) {
 		<div className="flex flex-col space-y-1.5 pb-3 pt-2 text-sm">
 			<Heading size="xs">File Information</Heading>
 			<div className="flex space-x-4">
-				<Text size="sm">Size: {formatBytes(media.size)}</Text>
-				<Text size="sm">Kind: {media.extension?.toUpperCase()}</Text>
+				<Text size="sm" variant="muted">
+					Size: {formatBytes(media.size)}
+				</Text>
+				<Text size="sm" variant="muted">
+					Kind: {media.extension?.toUpperCase()}
+				</Text>
 			</div>
-			<Text size="sm">Checksum: {media.checksum}</Text>
-			{isServerOwner && <Text size="sm">Path: {media.path}</Text>}
+			<Text size="sm" variant="muted">
+				Hash: {media.hash}
+			</Text>
+			{isServerOwner && (
+				<Text size="sm" variant="muted">
+					Path: {media.path}
+				</Text>
+			)}
 		</div>
 	)
 }

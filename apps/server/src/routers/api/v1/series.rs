@@ -9,13 +9,12 @@ use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::Direction;
 use stump_core::{
 	db::{
-		models::{Media, Series},
-		utils::PrismaCountTrait,
-		Dao, SeriesDao, SeriesDaoImpl,
-	},
-	fs::{image, media_file},
-	prelude::{
-		ContentType, PageQuery, Pageable, Pagination, PaginationQuery, QueryOrder,
+		entity::{Media, Series},
+		query::{
+			ordering::QueryOrder,
+			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
+		},
+		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
@@ -30,8 +29,8 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user, http::ImageResponse, FilterableQuery, SeriesFilter,
-		SeriesRelation,
+		chain_optional_iter, get_session_user, http::ImageResponse, FilterableQuery,
+		SeriesFilter, SeriesQueryRelation,
 	},
 };
 
@@ -56,20 +55,17 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(series::id::in_vec(filters.id))
-	}
-	if !filters.name.is_empty() {
-		_where.push(series::name::in_vec(filters.name));
-	}
-
-	if let Some(library_filters) = filters.library {
-		_where.push(series::library::is(apply_library_filters(library_filters)));
-	}
-
-	_where
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
+			filters
+				.library
+				.map(apply_library_filters)
+				.map(series::library::is),
+		],
+	)
 }
 
 #[utoipa::path(
@@ -79,7 +75,7 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 	params(
 		("filter_query" = Option<FilterableSeriesQuery>, Query, description = "The filter options"),
 		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
-		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+		("relation_query" = Option<SeriesQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched series.", body = PageableSeries),
@@ -91,7 +87,7 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 async fn get_series(
 	filter_query: Query<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
-	relation_query: Query<SeriesRelation>,
+	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
@@ -191,7 +187,7 @@ async fn get_series(
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch"),
-		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+		("relation_query" = Option<SeriesQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched series.", body = Series),
@@ -203,7 +199,7 @@ async fn get_series(
 /// Get a series by ID. Optional query param `load_media` that will load the media
 /// relation (i.e. the media entities will be loaded and sent with the response)
 async fn get_series_by_id(
-	query: Query<SeriesRelation>,
+	query: Query<SeriesQueryRelation>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
@@ -279,12 +275,10 @@ async fn get_recently_added_series_handler(
 
 	let viewer_id = get_session_user(&session)?.id;
 	let page_params = pagination.0.page_params();
-	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
+	let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	// TODO: don't use DAO just create separate function `get_recently_added_series` and make
-	// this one `get_recently_added_series_handler`.
 	let recently_added_series = series_dao
-		.get_recently_added_series_page(&viewer_id, page_params)
+		.get_recently_added_series(&viewer_id, page_params)
 		.await?;
 
 	Ok(Json(recently_added_series))
@@ -312,27 +306,20 @@ async fn get_series_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let media = db
+	let result = db
 		.media()
 		.find_first(vec![media::series_id::equals(Some(id.clone()))])
 		.order_by(media::name::order(Direction::Asc))
 		.exec()
 		.await?;
 
-	if media.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} not found",
-			id
-		)));
+	if let Some(media) = result {
+		super::media::get_media_thumbnail(media.id.clone(), db)
+			.await
+			.map(ImageResponse::from)
+	} else {
+		Err(ApiError::NotFound(String::from("Series has no media")))
 	}
-
-	let media = media.unwrap();
-	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
-		trace!("Found webp thumbnail for series {}", &id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
-	}
-
-	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
 }
 
 #[utoipa::path(

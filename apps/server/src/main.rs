@@ -8,6 +8,7 @@ use tracing::{error, info, trace};
 
 mod config;
 mod errors;
+mod macros;
 mod middleware;
 mod routers;
 mod utils;
@@ -17,7 +18,7 @@ use config::{cors, session};
 fn debug_setup() {
 	std::env::set_var(
 		"STUMP_CLIENT_DIR",
-		env!("CARGO_MANIFEST_DIR").to_string() + "/dist",
+		env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist",
 	);
 	std::env::set_var("STUMP_PROFILE", "debug");
 }

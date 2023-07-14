@@ -7,17 +7,20 @@ use axum::{
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
-	db::utils::PrismaCountTrait,
-	fs::{epub, image, media_file},
+	db::{query::pagination::PageQuery, PrismaCountTrait},
+	filesystem::{
+		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
+		media::get_page,
+		ContentType,
+	},
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prelude::{ContentType, PageQuery},
 	prisma::{library, media, series},
 };
-use tracing::{trace, warn};
+use tracing::{debug, trace, warn};
 
 use crate::{
 	config::state::AppState,
@@ -64,9 +67,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
 	let skip = page * page_size;
-	let take = skip + page_size;
-
-	(skip, take)
+	(skip, page_size)
 }
 
 // TODO auth middleware....
@@ -286,6 +287,7 @@ async fn get_library_by_id(
 	let library_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
+	debug!(skip, take, page, library_id, "opds get_library_by_id");
 
 	let tx_result = db
 		._transaction()
@@ -306,13 +308,21 @@ async fn get_library_by_id(
 				.map(|count| (library, Some(count)))
 		})
 		.await?;
+	trace!(result = ?tx_result, "opds get_library_by_id transaction");
 
 	if let (Some(library), Some(library_series_count)) = tx_result {
+		let library_series = library.series().unwrap_or(&Vec::new()).to_owned();
+		debug!(
+			page,
+			series_in_page = library_series.len(),
+			library_series_count,
+			"Fetched library with series"
+		);
 		Ok(Xml(OpdsFeed::paginated(
 			library.id.as_str(),
 			library.name.as_str(),
 			format!("libraries/{}", &library.id).as_str(),
-			library.series().unwrap_or(&Vec::new()).to_owned(),
+			library_series,
 			page.into(),
 			library_series_count,
 		)
@@ -478,7 +488,11 @@ fn handle_opds_image_response(
 			?content_type,
 			"Unsupported image for OPDS detected, converting to JPEG"
 		);
-		let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+		// let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+		let jpeg_buffer = GenericImageProcessor::generate(
+			&image_buffer,
+			ImageProcessorOptions::jpeg(),
+		)?;
 		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 	}
 }
@@ -497,7 +511,7 @@ async fn get_book_thumbnail(
 		.await?;
 
 	if let Some(book) = result {
-		let (content_type, image_buffer) = media_file::get_page(book.path.as_str(), 1)?;
+		let (content_type, image_buffer) = get_page(book.path.as_str(), 1)?;
 		handle_opds_image_response(content_type, image_buffer)
 	} else {
 		Err(ApiError::NotFound(format!(
@@ -530,13 +544,7 @@ async fn get_book_page(
 	}
 
 	if let Some(book) = result {
-		let (content_type, image_buffer) =
-			if book.path.ends_with(".epub") && correct_page == 1 {
-				epub::get_cover(&book.path)?
-			} else {
-				media_file::get_page(book.path.as_str(), correct_page)?
-			};
-
+		let (content_type, image_buffer) = get_page(book.path.as_str(), correct_page)?;
 		handle_opds_image_response(content_type, image_buffer)
 	} else {
 		Err(ApiError::NotFound(format!("Book {} not found", &id)))

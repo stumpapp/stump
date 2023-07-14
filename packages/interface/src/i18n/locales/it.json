@@ -159,7 +159,11 @@
 					"label": "Lingua"
 				},
 				"heading": "Impostazioni lingua e località",
-				"subtitle": "Stump supporta molte lingue e località, imposta le tue preferenze di seguito."
+				"subtitle": [
+					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+					"Stump's translations",
+					"if you're able to!"
+				]
 			}
 		},
 		"jobs": {

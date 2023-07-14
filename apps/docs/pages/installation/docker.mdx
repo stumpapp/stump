@@ -29,7 +29,7 @@ docker create \
   --volume "/Users/aaronleopold/.stump:/config" \
   --volume "/Users/aaronleopold/Documents/Stump:/data" \
   --restart unless-stopped \
-  aaronleopold/stump
+  aaronleopold/stump:nightly
 ```
 
 If you prefer bind mounts, you can swap out the two `--volume` lines with:
@@ -68,7 +68,7 @@ Below is an example of a Docker Compose file you can use to bootstrap your Stump
 version: '3.3'
 services:
   stump:
-    image: aaronleopold/stump
+    image: aaronleopold/stump:nightly
     container_name: stump
     # Replace my paths (prior to the colons) with your own
     volumes:
@@ -99,7 +99,7 @@ As with starting Stump, updating your container is slightly different depending 
 
 ### Update using docker CLI
 
-1. Update the image: `docker pull aaronleopold/stump`
+1. Update the image: `docker pull aaronleopold/stump:nightly`
 2. Stop the running container: `docker stop stump`
 3. Delete the container: `docker rm stump`
 4. Recreate your container (see [using-docker-run](#using-docker-run))
@@ -110,5 +110,5 @@ To remove the old dangling images you have installed: `docker image prune`
 ### Update using docker compose
 
 1. Stop the running container: `docker compose down`
-2. Update the image: `docker compose pull` or `docker compose pull aaronleopold/stump`
+2. Update the image: `docker compose pull` or `docker compose pull aaronleopold/stump:nightly`
 3. Start the container again: `docker-compose up`

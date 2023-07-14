@@ -1,10 +1,11 @@
 import axios, { AxiosError } from 'axios'
+import qs from 'qs'
 
 import { CursorQueryParams, PagedQueryParams } from './types'
 
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
-	const paramString = params?.toString()
+	const paramString = decodeURIComponent(params?.toString() || '')
 	if (paramString?.length) {
 		return `${url}?${paramString}`
 	}
@@ -16,62 +17,18 @@ export const urlWithParams = (url: string, params?: URLSearchParams) => {
  *
  * @example
  * ```ts
- * toUrlParams({ a: 1, b: { c: 2, d: 3 } }) // a=1&b_c=2&b_d=3
- * toUrlParams({ a: [1, 2, 3] }) // a=1&a=2&a=3
+ * toUrlParams({ a: 1, b: { c: 2, d: 3 } }) // a=1&b[c]=2&b[d]=3
+ * toUrlParams({ a: [1, 2, 3] }) // a[]=1&a[]=2&a[]=3
+ * toUrlParams({ a: 1, b: { c: [1, 2, 3], d: 3 } }) // a=1&b[c][]=1&b[c][]=2&b[c][]=3&b[d]=3
+ * toUrlParams({ a: [1], b: { c: [1, 2, 3], d: 3 } }) // a[]=1&b[c][]=1&b[c][]=2&b[c][]=3&b[d]=3
  * ```
  */
-export const toUrlParams = <T extends object>(
-	obj?: T,
-	params = new URLSearchParams(),
-	prefix?: string,
-) => {
+export const toUrlParams = <T extends object>(obj?: T, params = new URLSearchParams()) => {
 	if (!obj) {
 		return params
 	}
 
-	const getStringValue = (value: unknown) => {
-		return String(value)
-	}
-
-	let newParams: URLSearchParams = params
-	Object.keys(obj).forEach((key) => {
-		const value = obj[key as keyof T]
-
-		if (value == null) {
-			// continue
-			return
-		}
-
-		const isArray = Array.isArray(value)
-		const isObject = typeof value === 'object' && !isArray
-
-		if (isObject) {
-			if (prefix) {
-				newParams = toUrlParams(value, newParams, `${prefix}_${key}`)
-			} else {
-				newParams = toUrlParams(value, newParams, key)
-			}
-		} else if (isArray) {
-			value.forEach((item) => {
-				// const subItemIsArray = Array.isArray(item)
-				// const subItemIsObject = typeof item === 'object' && !subItemIsArray
-				// FIXME: I have a feeling this is not 100% correct, but until I add some sort of
-				// unit testing I'll leave it like this. I imagine something like nested arrays
-				// or objects will not work as expected? mostly with the prefix logic...
-				if (typeof item === 'object') {
-					newParams = toUrlParams(item, newParams)
-				} else {
-					newParams.append(key, item)
-				}
-			})
-		} else if (prefix) {
-			newParams.append(`${prefix}_${key}`, getStringValue(value))
-		} else {
-			newParams.append(key, getStringValue(value))
-		}
-	})
-
-	return newParams
+	return new URLSearchParams(qs.stringify(obj, { arrayFormat: 'brackets' }))
 }
 
 export const mergeCursorParams = ({

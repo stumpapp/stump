@@ -7,24 +7,22 @@ use axum::{
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
+use serde::Deserialize;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
+use utoipa::ToSchema;
 
 use stump_core::{
-	config::get_config_dir,
 	db::{
-		models::{
-			library_series_ids_media_ids_include, LibrariesStats, Library,
-			LibraryScanMode, Media, Series,
+		entity::{
+			library_series_ids_media_ids_include, CreateLibrary, LibrariesStats, Library,
+			LibraryScanMode, Media, Series, UpdateLibrary,
 		},
-		utils::PrismaCountTrait,
+		query::pagination::{Pageable, Pagination, PaginationQuery},
+		PrismaCountTrait,
 	},
-	fs::{image, media_file},
+	filesystem::image,
 	job::LibraryScanJob,
-	prelude::{
-		ContentType, CreateLibraryArgs, Pageable, Pagination, PaginationQuery,
-		ScanQueryParam, UpdateLibraryArgs,
-	},
 	prisma::{
 		library::{self, WhereParam},
 		library_options, media,
@@ -39,10 +37,12 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		get_session_admin_user, http::ImageResponse, FilterableQuery, LibraryFilter,
-		MediaFilter, SeriesFilter,
+		chain_optional_iter, get_session_admin_user, http::ImageResponse,
+		FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
 	},
 };
+
+use super::media::{apply_media_filters, apply_media_pagination};
 
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
@@ -68,16 +68,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(library::id::in_vec(filters.id))
-	}
-	if !filters.name.is_empty() {
-		_where.push(library::name::in_vec(filters.name));
-	}
-
-	_where
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
+		],
+	)
 }
 
 #[utoipa::path(
@@ -331,7 +328,7 @@ async fn get_library_media(
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
-	let mut media_conditions = super::media::apply_media_filters(filters);
+	let mut media_conditions = apply_media_filters(filters);
 	media_conditions.push(media::series::is(vec![series::library_id::equals(Some(
 		id.clone(),
 	))]));
@@ -348,7 +345,7 @@ async fn get_library_media(
 				.order_by(order_by_param);
 
 			if !is_unpaged {
-				query = super::media::apply_pagination(query, &pagination_cloned)
+				query = apply_media_pagination(query, &pagination_cloned)
 			}
 
 			let media = query
@@ -400,15 +397,6 @@ async fn get_library_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let webp_path = get_config_dir()
-		.join("thumbnails")
-		.join(format!("{}.webp", id));
-
-	if webp_path.exists() {
-		trace!("Found webp thumbnail for library {}", id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
-	}
-
 	let library_series = db
 		.series()
 		.find_first(vec![series::library_id::equals(Some(id.clone()))])
@@ -427,7 +415,14 @@ async fn get_library_thumbnail(
 		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
 	})?;
 
-	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
+	super::media::get_media_thumbnail(media.id.clone(), db)
+		.await
+		.map(ImageResponse::from)
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ScanQueryParam {
+	scan_mode: Option<String>,
 }
 
 #[utoipa::path(
@@ -492,7 +487,7 @@ async fn scan_library(
 	post,
 	path = "/api/v1/libraries",
 	tag = "library",
-	request_body = CreateLibraryArgs,
+	request_body = CreateLibrary,
 	responses(
 		(status = 200, description = "Successfully created library"),
 		(status = 400, description = "Bad request"),
@@ -505,11 +500,12 @@ async fn scan_library(
 async fn create_library(
 	session: ReadableSession,
 	State(ctx): State<AppState>,
-	Json(input): Json<CreateLibraryArgs>,
+	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	get_session_admin_user(&session)?;
-
+	let user = get_session_admin_user(&session)?;
 	let db = ctx.get_db();
+
+	debug!(user_id = user.id, ?input, "Creating library");
 
 	if !path::Path::new(&input.path).exists() {
 		return Err(ApiError::BadRequest(format!(
@@ -545,11 +541,13 @@ async fn create_library(
 					library_options::hard_delete_conversions::set(
 						library_options_arg.hard_delete_conversions,
 					),
-					library_options::create_webp_thumbnails::set(
-						library_options_arg.create_webp_thumbnails,
-					),
 					library_options::library_pattern::set(
 						library_options_arg.library_pattern.to_string(),
+					),
+					library_options::thumbnail_config::set(
+						library_options_arg.thumbnail_config.map(|options| {
+							serde_json::to_vec(&options).unwrap_or_default()
+						}),
 					),
 				])
 				.exec()
@@ -560,8 +558,22 @@ async fn create_library(
 				.create(
 					input.name.to_owned(),
 					input.path.to_owned(),
-					library_options::id::equals(library_options.id),
+					library_options::id::equals(library_options.id.clone()),
 					vec![library::description::set(input.description.to_owned())],
+				)
+				.exec()
+				.await?;
+
+			let library_options = client
+				.library_options()
+				.update(
+					library_options::id::equals(library_options.id),
+					vec![
+						library_options::library::connect(library::id::equals(
+							library.id.clone(),
+						)),
+						library_options::library_id::set(Some(library.id.clone())),
+					],
 				)
 				.exec()
 				.await?;
@@ -580,7 +592,7 @@ async fn create_library(
 				client._batch(tag_connect).await?;
 			}
 
-			Ok(Library::from(library))
+			Ok(Library::from((library, library_options)))
 		})
 		.await;
 
@@ -601,7 +613,7 @@ async fn create_library(
 	put,
 	path = "/api/v1/libraries/:id",
 	tag = "library",
-	request_body = UpdateLibraryArgs,
+	request_body = UpdateLibrary,
 	params(
 		("id" = String, Path, description = "The id of the library to update")
 	),
@@ -619,7 +631,7 @@ async fn update_library(
 	session: ReadableSession,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
-	Json(input): Json<UpdateLibraryArgs>,
+	Json(input): Json<UpdateLibrary>,
 ) -> ApiResult<Json<Library>> {
 	get_session_admin_user(&session)?;
 	let db = ctx.get_db();
@@ -642,9 +654,6 @@ async fn update_library(
 				),
 				library_options::hard_delete_conversions::set(
 					library_options.hard_delete_conversions,
-				),
-				library_options::create_webp_thumbnails::set(
-					library_options.create_webp_thumbnails,
 				),
 			],
 		)

@@ -82,7 +82,7 @@ type PageQueryParams = {
 	page_size?: number
 	/** Filters to apply to the query. The name can be a bit misleading,
 	 *  since ordering and other things can be applied as well. */
-	params?: Record<string, string>
+	params?: Record<string, unknown>
 }
 export type PageQueryFunction<E> = (
 	params: PagedQueryParams,
@@ -111,7 +111,7 @@ export function usePageQuery<Entity = unknown, Error = AxiosError>(
 ) {
 	return useQuery(
 		[...queryKey, page, page_size, params],
-		async () => queryFn({ page, page_size, params: new URLSearchParams(params) }),
+		async () => queryFn({ page, page_size, params: toUrlParams(params) }),
 		{
 			...options,
 		},
@@ -163,7 +163,9 @@ export type CursorQueryOptions<
 	UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, QueryKey>,
 	'queryKey' | 'queryFn' | 'context' | 'getNextPageParam' | 'getPreviousPageParam'
 > &
-	CursorQueryCursorOptions
+	CursorQueryCursorOptions & {
+		queryKey?: QueryKey
+	}
 
 export type UseCursorQueryFunction<E> = (
 	params: CursorQueryParams,
@@ -175,7 +177,10 @@ type CursorQueryContext = {
 export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 	queryKey: QueryKey,
 	queryFn: UseCursorQueryFunction<Entity>,
-	options?: CursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+	options?: Omit<
+		CursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+		'queryKey'
+	>,
 ) {
 	const { initialCursor, limit, params, ...restOptions } = options || {}
 

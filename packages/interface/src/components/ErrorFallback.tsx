@@ -45,7 +45,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 					<div className="flex items-center gap-2">
 						<ButtonOrLink
 							title="Report this error as a potential bug on GitHub"
-							href="https://github.com/aaronleopold/stump/issues/new/choose"
+							href="https://github.com/stumpapp/stump/issues/new/choose"
 							target="_blank"
 						>
 							Report Bug <ExternalLink className="ml-2 h-4 w-4" />

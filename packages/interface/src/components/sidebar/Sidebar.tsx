@@ -14,6 +14,7 @@ import {
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { useAppContext } from '../../context'
 import { useLocaleContext } from '../../i18n/context'
 import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
@@ -40,6 +41,7 @@ interface NavItemProps {
 // TODO: make this NOT library specific.
 function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 	const { t } = useLocaleContext()
+	const { isServerOwner } = useAppContext()
 
 	const [isOpen, { toggle }] = useBoolean()
 
@@ -72,15 +74,17 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 				{isOpen && (
 					<div className="max-h-full w-full">
 						{/* TODO: disabled state looks not disabled */}
-						<ButtonOrLink
-							href="/library/create"
-							disabled={active}
-							className="w-full text-center hover:bg-gray-75"
-							variant="outline"
-							size="md"
-						>
-							{t('sidebar.buttons.createLibrary')}
-						</ButtonOrLink>
+						{isServerOwner && (
+							<ButtonOrLink
+								href="/library/create"
+								disabled={active}
+								className="w-full text-center hover:bg-gray-75"
+								variant="outline"
+								size="md"
+							>
+								{t('sidebar.buttons.createLibrary')}
+							</ButtonOrLink>
+						)}
 
 						<div className="mt-2 flex max-h-full flex-col gap-2 overflow-y-scroll scrollbar-hide">
 							{items!.map(({ onHover, active, ...item }) => (

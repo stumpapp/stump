@@ -11,8 +11,7 @@ type Props = {
 export default function LibraryOptionsForm({ isCreatingLibrary }: Props) {
 	const form = useFormContext<Schema>()
 
-	const [createThumnails, convertRarToZip, hardDeleteConversions] = form.watch([
-		'create_webp_thumbnails',
+	const [convertRarToZip, hardDeleteConversions] = form.watch([
 		'convert_rar_to_zip',
 		'hard_delete_conversions',
 	])
@@ -43,16 +42,8 @@ export default function LibraryOptionsForm({ isCreatingLibrary }: Props) {
 			<div className="flex flex-auto gap-12 pt-4">
 				<Switch
 					variant="primary"
-					label="Create Webp Thumbnails"
-					checked={createThumnails}
-					onClick={() => form.setValue('create_webp_thumbnails', !createThumnails)}
-					disabled
-					{...form.register('create_webp_thumbnails')}
-				/>
-				<Switch
-					variant="primary"
 					checked={convertRarToZip}
-					label="Convert .rar files to .zip"
+					label="Convert RAR files to ZIP"
 					onClick={() => form.setValue('convert_rar_to_zip', !convertRarToZip)}
 					{...form.register('convert_rar_to_zip')}
 				/>
@@ -60,7 +51,7 @@ export default function LibraryOptionsForm({ isCreatingLibrary }: Props) {
 					variant="primary"
 					checked={hardDeleteConversions}
 					disabled={!convertRarToZip}
-					label="Permanently delete .rar files after conversion"
+					label="Delete RAR files after conversion"
 					onClick={() => form.setValue('hard_delete_conversions', !hardDeleteConversions)}
 					{...form.register('hard_delete_conversions')}
 				/>

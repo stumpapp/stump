@@ -6,7 +6,7 @@ import HelpDocsCTA from './components/HelpDocsCTA'
 import NavBar, { ExtraContent } from './components/NavBar'
 import StumpLogo from './components/StumpLogo'
 
-export const STUMP_REPO = 'https://github.com/aaronleopold/stump'
+export const STUMP_REPO = 'https://github.com/stumpapp/stump'
 const DOCS_PAGES_HREF = `${STUMP_REPO}/tree/main/apps/docs/pages`
 
 export default {
@@ -31,7 +31,7 @@ export default {
 	},
 	primaryHue: 28,
 	project: {
-		link: 'https://github.com/aaronleopold/stump',
+		link: 'https://github.com/stumpapp/stump',
 	},
 	useNextSeoProps() {
 		const { asPath } = useRouter()

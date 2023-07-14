@@ -13,7 +13,7 @@ use std::{
 	fs::File,
 	io::{Read, Seek, SeekFrom},
 };
-use stump_core::{config::logging::get_log_file, db::models::LogMetadata};
+use stump_core::{config::logging::get_log_file, db::entity::LogMetadata};
 use tokio::sync::broadcast;
 
 use crate::{

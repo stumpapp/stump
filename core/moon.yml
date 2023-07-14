@@ -17,8 +17,11 @@ tasks:
   prisma-generate:
     command: 'cargo prisma generate'
 
+  prisma-studio:
+    command: 'pnpm dlx prisma studio'
+
   codegen:
-    command: 'cargo test --package stump_core --lib -- prelude::tests::codegen --ignored'
+    command: 'cargo test --package stump_core --lib -- tests::codegen --ignored'
     deps:
       - '~:prisma-generate'
 

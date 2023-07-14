@@ -1,7 +1,7 @@
 {
 	"name": "@stump/monorepo",
 	"version": "0.0.0",
-	"repository": "https://github.com/aaronleopold/stump.git",
+	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
 	"scripts": {
@@ -25,7 +25,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",
-		"@moonrepo/cli": "^0.21.4",
+		"@moonrepo/cli": "^1.7.3",
 		"@typescript-eslint/eslint-plugin": "^5.57.0",
 		"@typescript-eslint/parser": "^5.57.0",
 		"babel-preset-moon": "^1.1.4",
@@ -52,15 +52,15 @@
 		"*.{js,jsx,ts,tsx,md,json}": [
 			"prettier --config prettier.config.js --check"
 		],
-		".rs": [
+		"*.rs": [
 			"cargo fmt --check --manifest-path=core/Cargo.toml --",
 			"cargo fmt --check --manifest-path=apps/server/Cargo.toml --",
 			"cargo fmt --check --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
 		]
 	},
-	"packageManager": "pnpm@7.18.2",
+	"packageManager": "pnpm@8.6.1",
 	"engines": {
-		"node": "18.12.0"
+		"node": "18.16.0"
 	},
 	"resolutions": {
 		"esbuild": "^0.15.13"

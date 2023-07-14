@@ -31,7 +31,7 @@ export default function TagList({ tags }: Props) {
 	}
 
 	return (
-		<div className="flex flex-row space-x-2">
+		<div className="flex flex-row space-x-2 pt-4">
 			{(tags ?? DEBUG_TAGS).map((tag) => (
 				<TagComponent key={tag.id} tag={tag} />
 			))}

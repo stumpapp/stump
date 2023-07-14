@@ -23,7 +23,7 @@ const navigation = {
 			name: 'Twitter',
 		},
 		{
-			href: 'https://github.com/aaronleopold/stump',
+			href: 'https://github.com/stumpapp/stump',
 			icon: SiGithub,
 			isExternal: true,
 			name: 'GitHub',
@@ -43,7 +43,7 @@ export default function Footer() {
 			className="w-full border-t bg-[#FAFAFA] dark:border-neutral-800 dark:bg-[#0E0E0E]"
 			aria-labelledby="footer-heading"
 		>
-			<div className="mx-auto flex max-w-[85rem] flex-col items-center justify-center space-y-7 py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+			<div className="mx-auto flex max-w-[85rem] flex-col items-center justify-center space-y-7 px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
 				<div className="flex items-center space-x-8">
 					{navigation.nav.map((item) => (
 						<Link

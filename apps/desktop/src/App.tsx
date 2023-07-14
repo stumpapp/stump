@@ -23,18 +23,22 @@ export default function App() {
 	const setUseDiscordPresence = (connect: boolean) =>
 		invoke<unknown>('set_use_discord_connection', { connect })
 
+	const hideSplashScreen = () => invoke<unknown>('close_splashscreen')
+
 	const [platform, setPlatform] = useState<Platform>('unknown')
 	const [mounted, setMounted] = useState(false)
 
 	useEffect(() => {
-		os.platform().then((platform) => {
+		async function init() {
+			const platform = await os.platform()
 			setPlatform(getPlatform(platform))
-			// TODO: remove this, should be handled in the interface :D
 			setUseDiscordPresence(true)
 			setDiscordPresence()
-			// ^^
 			setMounted(true)
-		})
+			setTimeout(hideSplashScreen, 1000)
+		}
+
+		init()
 	}, [])
 
 	// I want to wait until platform is properly set before rendering the interface

@@ -39,11 +39,9 @@ export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose }
 					toast.error('An error occurred while deleting the library')
 				}
 			}
+		} else {
+			throw new Error('You do not have permission to delete libraries.')
 		}
-	}
-
-	if (!isServerOwner) {
-		throw new Error('You are not the server owner')
 	}
 
 	return (

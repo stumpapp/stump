@@ -9,15 +9,21 @@ generator client {
 }
 
 model User {
-  id              String  @id @default(cuid())
+  id              String    @id @default(cuid())
   // The username of the user. E.g. "oromei"
-  username        String  @unique
+  username        String    @unique
   // The password of the user. This will a hash - not the actual password.
   hashed_password String
   // The role of the user. Defaults to "MEMBER".
-  role            String  @default("MEMBER")
+  role            String    @default("MEMBER")
   // The URL of the user's optional avatar.
   avatar_url      String?
+  // The timestamp of the user's last login.
+  last_login      DateTime?
+  // The timestamp of when the user was created.
+  created_at      DateTime  @default(now())
+  // The timestamp of when the user was *soft* deleted.
+  deleted_at      DateTime?
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
@@ -76,12 +82,13 @@ model LibraryOptions {
   // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
   // trash location, or a custom location when running in Docker (which will clear on an interval).
   hard_delete_conversions Boolean @default(false)
-  // Flag indicating whether or not to create WEBP thumbnails for scanned media.
-  create_webp_thumbnails  Boolean @default(false)
   // The pattern which this library follows. Used primarily during scanning, affects how Stump
   // will define its series. SERIES_BASED and COLLECTION_BASED are the only
   // two valid options. Default is SERIES_BASED.
   library_pattern         String  @default("SERIES_BASED")
+  // The thumbnail configuration for this library. This is a JSON blob in the form of:
+  // { size_factor: "...", format: "...", quality: ... }
+  thumbnail_config        Bytes?
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
@@ -112,6 +119,7 @@ model Series {
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
   /////////////////////////////////////////////
+  metadata SeriesMetadata?
 
   // The id of the library this series belongs to.
   library_id String?
@@ -125,36 +133,72 @@ model Series {
   @@map("series")
 }
 
-model Media {
-  id          String   @id @default(uuid())
-  // The name of the media. ex: "The Amazing Spider-Man (2018) #69"
-  name        String
-  // The description of the media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
-  description String?
-  // The size of the media in bytes.
-  size        Int
-  // The file extension of the media. ex: "cbz"
-  extension   String
-  // The number of pages in the media. ex: "69"
-  pages       Int
-  // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
-  updated_at  DateTime @updatedAt
-  // The date in which the media was last updated. ex: "2022-04-20 04:20:69"
-  created_at  DateTime @default(now())
-  // The date in which the file was last modified. Defaults to now() for safety.
-  modified_at DateTime @default(now())
-  // Whether or not the media is downloaded to the client. ex: true
-  downloaded  Boolean  @default(false)
-  // The checksum hash of the file contents. Used to find multuple instances of a file in the database
-  checksum    String?
-  // The path of the media. ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
-  path        String
-  // The status of the series since last scan or access
-  status      String   @default("READY")
+// TODO: determine what is optional and what is safe to make required
+// This is primarily derived from a series.json file. Refer to:
+// https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
+model SeriesMetadata {
+  // The type of series. ex: "comicSeries"
+  meta_type  String
+  // The title of the series, renamed from 'name' to keep consistency with the rest of the models
+  title      String?
+  // The associated series' description, renamed from 'description' to keep consistency with the rest of the models
+  summary    String?
+  // The publisher of the associated series
+  publisher  String?
+  // The name of the imprint while under the publisher
+  imprint    String?
+  // The ComicVine id of the associated series
+  comicid    Int?
+  // The volume of the series in relation to other titles (this can be either numerical or the series year)
+  volume     Int?
+  // The booktype of the series, e.g. Print, OneShot, TPB or GN
+  booktype   String?
+  // The age rating of the associated series
+  age_rating String?
+  // The status of the associated series, e.g. Continuing, Ended
+  status     String?
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
   /////////////////////////////////////////////
+
+  series_id String @id
+  series    Series @relation(fields: [series_id], references: [id])
+
+  @@map("series_metadata")
+}
+
+model Media {
+  id          String    @id @default(uuid())
+  // The name of the media. This is derived from the associated file. ex: "The Amazing Spider-Man (2018) #69"
+  name        String
+  // The size of the media file in bytes.
+  size        Int
+  // The extension of the media file. ex: "cbz"
+  extension   String
+  // The number of pages in the media. ex: "69"
+  pages       Int
+  // The date in which the media entity was last updated. ex: "2022-04-20 04:20:69"
+  updated_at  DateTime  @updatedAt
+  // The date in which the media entity was first created. ex: "2022-04-20 04:20:69"
+  created_at  DateTime  @default(now())
+  // The date in which the file itself was last modified. This is derived directly from the 
+  // filesystem. ex: "2022-04-20 04:20:69"
+  modified_at DateTime?
+  // The hash of the file contents. Used primarily to find multiple instances of a file in the database
+  // This is **not** an integrity check(sum), and is not used to verify the file contents.
+  hash        String?
+  // The full path of the media as it exists on the filesystem. 
+  // ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
+  path        String
+  // The status of the series since last scan or access
+  status      String    @default("READY")
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  metadata MediaMetadata?
 
   // The series this media belongs to.
   series             Series?           @relation(fields: [series_id], references: [id], onDelete: Cascade)
@@ -170,6 +214,73 @@ model Media {
   annotations        MediaAnnotation[]
 
   @@map("media")
+}
+
+// TODO: determine what is optional and what is safe to make required
+// NOTE: There will be some fields that are of String[] type but are stored as a String.
+// This is because Prisma doesn't support String[] for SQLite. These will be 
+// denoted with a comment.
+model MediaMetadata {
+  // TODO: remove this once nested create is supported, just use media_id
+  id String @id @default(cuid())
+
+  title   String?
+  series  String?
+  number  Int?
+  volume  Int?
+  // The summary of the associated media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
+  summary String?
+  notes   String?
+  // *** This is stored as a String, but is a String[] ***
+  genre   String?
+
+  // The year the media was published. ex: "2021"
+  year  Int?
+  // The month the media was published. ex: "1"
+  month Int?
+  // The day the media was published. ex: "1"
+  day   Int?
+
+  // *** This entire group will store as a String, but they are all String[] ***
+  // The writer(s) of the associated media
+  writers       String?
+  // The penciller(s) of the associated media
+  pencillers    String?
+  // The inker(s) of the associated media
+  inkers        String?
+  // The colorist(s) of the associated media
+  colorists     String?
+  // The letterer(s) of the associated media
+  letterers     String?
+  // The cover artist(s) of the associated media
+  cover_artists String?
+  // The editor(s) of the associated media
+  editors       String?
+  // *** End of group ***
+  // The publisher of the associated media
+  publisher     String?
+
+  // *** This entire group will store as a String, but they are all String[] ***
+  // Link(s) to the associated media, e.g. a comixology link
+  links      String?
+  // A list of characters that appear in the associated media
+  characters String?
+  // A list of teams that appear in the associated media
+  teams      String?
+  // *** End of group ***
+
+  page_count Int?
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // TODO: don't make optional once nested create is supported
+  media    Media?  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+  // TODO: make unique once nested create is supported
+  media_id String? @unique
+
+  @@map("media_metadata")
 }
 
 //* NOTE: Only EPUB files currently support annotations. I expect maybe someday
@@ -196,6 +307,8 @@ model MediaAnnotation {
   // The media this annotation belongs to
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  @@map("media_annotations")
 }
 
 model Tag {
@@ -246,6 +359,7 @@ model ReadingListRBAC {
 
 model ReadingListItem {
   // The order in which the media should be displayed in the reading list. ex: 1
+  // This will be ignored if the reading list ordering is not set to "MANUAL"
   display_order Int
 
   /////////////////////////////////////////////
@@ -272,6 +386,9 @@ model ReadingList {
   updated_at  DateTime @updatedAt
   // The visibility of the reading list. ex: "PUBLIC", "PRIVATE" or "SHARED"
   visibility  String   @default("PRIVATE")
+  // The ordering of the reading list. This will either be "MANUAL" or a specific
+  // field on the media. ex: 'name', 'created_at', 'pushlish_date', etc.
+  ordering    String   @default("MANUAL")
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////

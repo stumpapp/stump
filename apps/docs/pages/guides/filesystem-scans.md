@@ -26,4 +26,6 @@ It is generally recommend to use parallel scanning whenever possible because it 
 
 ## Scheduled Scans
 
+TODO: this isn't implemented yet!
+
 By default, Stump schedules regular automated scans of your library folders. However, you can update or disable this functionality in the server configuration section. For more information, please refer to the [relevant documentation](#).

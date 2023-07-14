@@ -56,7 +56,7 @@ The directory the contains the web bundle for the web UI
 
 | Type   | Default Value |
 | ------ | ------------- |
-| String |               |
+| String | `./dist`      |
 
 #### STUMP_PROFILE
 

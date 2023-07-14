@@ -5,8 +5,9 @@ use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::fs::get_content_types_for_pages;
-use crate::prelude::CoreResult;
+use crate::db::entity::metadata::MediaMetadata;
+use crate::error::CoreResult;
+use crate::filesystem::media::get_content_types_for_pages;
 use crate::{
 	opds::link::OpdsStreamLink,
 	prisma::{library, media, series},
@@ -217,11 +218,17 @@ impl From<media::Data> for OpdsEntry {
 
 		let mib = m.size as f64 / (1024.0 * 1024.0);
 
-		let content = match m.description {
-			Some(description) => Some(format!(
-				"{:.1} MiB - {}<br/><br/>{}",
-				mib, m.extension, description
-			)),
+		let metadata = m
+			.metadata()
+			.ok()
+			.and_then(|m| m.map(|m| MediaMetadata::from(m.to_owned())));
+		let description = metadata
+			.as_ref()
+			.and_then(|m| m.summary.as_ref())
+			.map(|s| s.to_owned());
+
+		let content = match description {
+			Some(s) => Some(format!("{:.1} MiB - {}<br/><br/>{}", mib, m.extension, s)),
 			None => Some(format!("{:.1} MiB - {}", mib, m.extension)),
 		};
 

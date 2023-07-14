@@ -8,17 +8,19 @@ use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{and, or, Direction};
 use serde::Deserialize;
+use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		models::{Media, ReadProgress},
-		Dao, MediaDao, MediaDaoImpl,
+		entity::{LibraryOptions, Media, ReadProgress},
+		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
+		MediaDAO, DAO,
 	},
-	fs::{image, media_file},
-	prelude::{ContentType, PageQuery, Pageable, Pagination, PaginationQuery},
+	filesystem::{media::get_page, read_entire_file, ContentType},
 	prisma::{
+		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		read_progress, user,
+		media_metadata, read_progress, user, PrismaClient,
 	},
 };
 use tracing::{debug, trace};
@@ -28,9 +30,9 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		decode_path_filter, get_session_user,
+		chain_optional_iter, decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
-		FilterableQuery, MediaFilter,
+		FilterableQuery, MediaFilter, MediaMedataFilter,
 	},
 };
 
@@ -48,7 +50,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_media_by_id))
 				.route("/file", get(get_media_file))
 				.route("/convert", get(convert_media))
-				.route("/thumbnail", get(get_media_thumbnail))
+				.route("/thumbnail", get(get_media_thumbnail_handler))
 				.route("/page/:page", get(get_media_page))
 				.route("/progress/:page", put(update_media_progress)),
 		)
@@ -56,31 +58,44 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(media::id::in_vec(filters.id));
-	}
-	if !filters.name.is_empty() {
-		_where.push(media::name::in_vec(filters.name));
-	}
-	if !filters.extension.is_empty() {
-		_where.push(media::extension::in_vec(filters.extension));
-	}
-	if !filters.path.is_empty() {
-		let decoded_paths = decode_path_filter(filters.path);
-		_where.push(media::path::in_vec(decoded_paths));
-	}
-
-	if let Some(series_filters) = filters.series {
-		_where.push(media::series::is(apply_series_filters(series_filters)));
-	}
-
-	_where
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| media::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| media::name::in_vec(filters.name)),
+			(!filters.extension.is_empty())
+				.then(|| media::extension::in_vec(filters.extension)),
+			(!filters.path.is_empty()).then(|| {
+				let decoded_paths = decode_path_filter(filters.path);
+				media::path::in_vec(decoded_paths)
+			}),
+			filters
+				.metadata
+				.map(apply_media_metadata_filters)
+				.map(media::metadata::is),
+			filters
+				.series
+				.map(apply_series_filters)
+				.map(media::series::is),
+		],
+	)
 }
 
-// TODO: move this to core?
-pub(crate) fn apply_pagination<'a>(
+pub(crate) fn apply_media_metadata_filters(
+	filters: MediaMedataFilter,
+) -> Vec<media_metadata::WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			(!filters.genre.is_empty())
+				.then(|| media_metadata::genre::in_vec(filters.genre)),
+			(!filters.publisher.is_empty())
+				.then(|| media_metadata::publisher::in_vec(filters.publisher)),
+		],
+	)
+}
+
+pub(crate) fn apply_media_pagination<'a>(
 	query: media::FindMany<'a>,
 	pagination: &Pagination,
 ) -> media::FindMany<'a> {
@@ -139,7 +154,7 @@ pub(crate) fn apply_in_progress_filter_for_user(
 /// has various pagination params available.
 #[tracing::instrument(skip(ctx, session))]
 async fn get_media(
-	filter_query: Query<FilterableQuery<MediaFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
@@ -167,6 +182,7 @@ async fn get_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
+				.with(media::metadata::fetch())
 				.order_by(order_by_param);
 
 			if !is_unpaged {
@@ -238,15 +254,17 @@ async fn get_duplicate_media(
 	State(ctx): State<AppState>,
 	_session: ReadableSession,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let media_dao = MediaDaoImpl::new(ctx.db.clone());
+	let media_dao = MediaDAO::new(ctx.db.clone());
 
 	if pagination.page.is_none() {
-		return Ok(Json(Pageable::from(media_dao.get_duplicate_media().await?)));
+		return Err(ApiError::BadRequest(
+			"Pagination is required for this request".to_string(),
+		));
 	}
 
 	Ok(Json(
 		media_dao
-			.get_duplicate_media_page(pagination.0.page_params())
+			.get_duplicate_media(pagination.0.page_params())
 			.await?,
 	))
 }
@@ -295,6 +313,7 @@ async fn get_in_progress_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress_filter.clone()
 				]))
+				.with(media::metadata::fetch())
 				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
 				// I think this just means whenever progress updates I should update the media
@@ -302,7 +321,7 @@ async fn get_in_progress_media(
 				.order_by(media::updated_at::order(Direction::Desc));
 
 			if !is_unpaged {
-				query = apply_pagination(query, &pagination_cloned);
+				query = apply_media_pagination(query, &pagination_cloned);
 			}
 
 			let media = query
@@ -351,7 +370,7 @@ async fn get_in_progress_media(
 /// Get all media which was added to the library in descending order of when it
 /// was added.
 async fn get_recently_added_media(
-	filter_query: Query<FilterableQuery<MediaFilter>>,
+	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	session: ReadableSession,
 	State(ctx): State<AppState>,
@@ -378,10 +397,11 @@ async fn get_recently_added_media(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
+				.with(media::metadata::fetch())
 				.order_by(media::created_at::order(Direction::Desc));
 
 			if !is_unpaged {
-				query = apply_pagination(query, &pagination_cloned);
+				query = apply_media_pagination(query, &pagination_cloned);
 			}
 
 			let media = query
@@ -443,9 +463,13 @@ async fn get_media_by_id(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	let mut query = db.media().find_unique(media::id::equals(id.clone())).with(
-		media::read_progresses::fetch(vec![read_progress::user_id::equals(user_id)]),
-	);
+	let mut query = db
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.with(media::read_progresses::fetch(vec![
+			read_progress::user_id::equals(user_id),
+		]))
+		.with(media::metadata::fetch());
 
 	if params.load_series.unwrap_or_default() {
 		trace!(media_id = id, "Loading series relation for media");
@@ -598,10 +622,75 @@ async fn get_media_page(
 					id, book.pages
 				)))
 			} else {
-				Ok(media_file::get_page(&book.path, page)?.into())
+				Ok(get_page(&book.path, page)?.into())
 			}
 		},
 		None => Err(ApiError::NotFound(format!(
+			"Media with id {} not found",
+			id
+		))),
+	}
+}
+
+pub(crate) async fn get_media_thumbnail(
+	id: String,
+	db: &PrismaClient,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnail_dir = get_config_dir().join("thumbnails");
+
+	let book_id = id.clone();
+	let result = db
+		._transaction()
+		.run(|client| async move {
+			let book = client
+				.media()
+				.find_unique(media::id::equals(book_id))
+				.with(media::series::fetch())
+				.exec()
+				.await?;
+
+			if let Some(book) = book {
+				let library_id = match book.series() {
+					Ok(Some(series)) => Some(series.library_id.clone()),
+					_ => None,
+				}
+				.flatten();
+
+				client
+					.library_options()
+					.find_first(vec![library_options::library_id::equals(library_id)])
+					.exec()
+					.await
+					.map(|options| (Some(book), options))
+			} else {
+				Ok((None, None))
+			}
+		})
+		.await?;
+	trace!(?result, "get_media_thumbnail transaction completed");
+
+	match result {
+		(Some(book), Some(options)) => {
+			let library_options = LibraryOptions::from(options);
+			if let Some(config) = library_options.thumbnail_config {
+				let thumbnail_path = thumbnail_dir.join(format!(
+					"{}.{}",
+					book.id,
+					config.format.extension()
+				));
+				if thumbnail_path.exists() {
+					trace!(path = ?thumbnail_path, media_id = ?id, "Found generated media thumbnail");
+					return Ok((
+						ContentType::from(config.format),
+						read_entire_file(thumbnail_path)?,
+					));
+				}
+			}
+
+			Ok(get_page(book.path.as_str(), 1)?)
+		},
+		(Some(book), None) => Ok(get_page(book.path.as_str(), 1)?),
+		_ => Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
 			id
 		))),
@@ -625,35 +714,13 @@ async fn get_media_page(
 	)
 )]
 /// Get the thumbnail image of a media
-async fn get_media_thumbnail(
+async fn get_media_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<ImageResponse> {
+	trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
-
-	let webp_path = get_config_dir()
-		.join("thumbnails")
-		.join(format!("{}.webp", id));
-
-	if webp_path.exists() {
-		trace!("Found webp thumbnail for media {}", id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
-	}
-
-	let result = db
-		.media()
-		.find_unique(media::id::equals(id.clone()))
-		.exec()
-		.await?;
-
-	if let Some(book) = result {
-		Ok(media_file::get_page(book.path.as_str(), 1)?.into())
-	} else {
-		Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)))
-	}
+	get_media_thumbnail(id, db).await.map(ImageResponse::from)
 }
 
 #[utoipa::path(
@@ -672,7 +739,6 @@ async fn get_media_thumbnail(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-// FIXME: this doesn't really handle certain errors correctly, e.g. media/user not found
 /// Update the read progress of a media. If the progress doesn't exist, it will be created.
 async fn update_media_progress(
 	Path((id, page)): Path<(String, i32)>,
@@ -682,24 +748,48 @@ async fn update_media_progress(
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
 
-	// update the progress, otherwise create it
-	Ok(Json(
-		db.read_progress()
-			.upsert(
-				read_progress::UniqueWhereParam::UserIdMediaIdEquals(
-					user_id.clone(),
-					id.clone(),
-				),
-				(
-					page,
-					media::id::equals(id.clone()),
-					user::id::equals(user_id.clone()),
-					vec![],
-				),
-				vec![read_progress::page::set(page)],
-			)
-			.exec()
-			.await?
-			.into(),
-	))
+	let read_progress = db
+		._transaction()
+		.run(|client| async move {
+			let read_progress = client
+				.read_progress()
+				.upsert(
+					read_progress::user_id_media_id(user_id.clone(), id.clone()),
+					(
+						page,
+						media::id::equals(id.clone()),
+						user::id::equals(user_id.clone()),
+						vec![],
+					),
+					vec![read_progress::page::set(page)],
+				)
+				.with(read_progress::media::fetch())
+				.exec()
+				.await?;
+
+			// NOTE: EPUB feature tracking!
+			// This pattern only works for page-based media... So will have to be
+			// considered/revisited once that feature gets prioritized
+			let is_completed = read_progress
+				.media
+				.as_ref()
+				.map(|media| media.pages == page)
+				.unwrap_or_default();
+
+			if is_completed {
+				client
+					.read_progress()
+					.update(
+						read_progress::id::equals(read_progress.id.clone()),
+						vec![read_progress::is_completed::set(true)],
+					)
+					.exec()
+					.await
+			} else {
+				Ok(read_progress)
+			}
+		})
+		.await?;
+
+	Ok(Json(ReadProgress::from(read_progress)))
 }

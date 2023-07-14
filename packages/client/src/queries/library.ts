@@ -55,7 +55,7 @@ export function useLibraries() {
 	}
 }
 
-export function useLibrarySeriesQuery(libraryId: string, options: PageQueryOptions<Series>) {
+export function useLibrarySeriesQuery(libraryId: string, options?: PageQueryOptions<Series>) {
 	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
 		[libraryQueryKeys.getLibrarySeries, libraryId],
 		async ({ page = 1, ...rest }) => {

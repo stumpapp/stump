@@ -1,5 +1,5 @@
 import { queryClient, QueryClientContext, QueryClientProvider, useUserStore } from '@stump/client'
-import { Slot, useRootNavigationState, useRouter } from 'expo-router'
+import { Stack, useRootNavigationState, useRouter } from 'expo-router'
 import React, { Suspense, useEffect } from 'react'
 import { Text } from 'react-native'
 
@@ -28,7 +28,7 @@ export default function Layout() {
 		<QueryClientContext.Provider value={queryClient}>
 			<QueryClientProvider client={queryClient}>
 				<Suspense fallback={<Text>Loading...</Text>}>
-					<Slot />
+					<Stack />
 				</Suspense>
 			</QueryClientProvider>
 		</QueryClientContext.Provider>

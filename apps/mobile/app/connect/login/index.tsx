@@ -3,9 +3,9 @@ import { Stack } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
 
-import { PrimaryButton } from '../../components/primitives/Buttons'
-import TextField from '../../components/primitives/TextField'
-import { ErrorSnack } from '../../components/SnackMessage'
+import { PrimaryButton } from '../../../components/primitives/Buttons'
+import TextField from '../../../components/primitives/TextField'
+import { ErrorSnack } from '../../../components/SnackMessage'
 
 export default function Login() {
 	const [username, setUsername] = useState('')
@@ -48,7 +48,7 @@ export default function Login() {
 
 	return (
 		<View className="flex-1 justify-center px-10">
-			<Stack.Screen options={{ title: 'Login to Stump' }} />
+			<Stack.Screen options={{ title: 'Log in to Stump' }} />
 			<TextField label="Username" onChange={setUsername} placeholder={'username'} />
 			<View className={'mt-5'} />
 			<TextField label="Password" onChange={setPassword} placeholder={'password'} secureTextEntry />

@@ -51,7 +51,7 @@ export function useSeriesCursorQuery(options: CursorQueryOptions<Series>) {
 	}
 }
 
-export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<Media>) {
+export function useSeriesMediaQuery(seriesId: string, options?: PageQueryOptions<Media>) {
 	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
 		[seriesQueryKeys.getSeriesMedia, seriesId],
 		async ({ page = 1, ...rest }) => {

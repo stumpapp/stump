@@ -61,7 +61,7 @@
 			}
 		}
 	},
-	"editLibraryScene": {
+	"manageLibraryScene": {
 		"heading": "Modifier la bibliothèque",
 		"subtitle": "Utilisez le formulaire ci-dessous pour modifier votre bibliothèque. Si vous souhaitez en savoir plus sur les bibliothèques et leur fonctionnement, consultez la",
 		"subtitleLink": "documentation correspondante",

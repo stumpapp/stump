@@ -7,7 +7,7 @@ import LibraryAdminLayout from './admins/LibraryAdminLayout'
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const CreateLibraryScene = lazily(() => import('./admins/CreateLibraryScene.tsx'))
-const EditLibraryScene = lazily(() => import('./admins/EditLibraryScene.tsx'))
+const ManageLibraryScene = lazily(() => import('./admins/EditLibraryScene.tsx'))
 const LibraryExplorerScene = lazily(() => import('./explorer/LibraryExplorerScene.tsx'))
 const LibraryOverviewScene = lazily(() => import('./LibraryOverviewScene.tsx'))
 
@@ -18,7 +18,7 @@ export default function LibraryRouter() {
 			<Route path=":id" element={<LibraryOverviewScene />} />
 			<Route element={<LibraryAdminLayout />}>
 				<Route path="create" element={<CreateLibraryScene />} />
-				<Route path=":id/edit" element={<EditLibraryScene />} />
+				<Route path=":id/manage" element={<ManageLibraryScene />} />
 			</Route>
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>

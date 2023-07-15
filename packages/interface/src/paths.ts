@@ -31,7 +31,8 @@ const paths = {
 	},
 	home: () => '/',
 	libraryCreate: () => '/library/create',
-	libraryEdit: (id: string) => `/library/${id}/edit`,
+	libraryFileExplorer: (id: string) => `/library/${id}/explorer`,
+	libraryManage: (id: string) => `/library/${id}/manage`,
 	libraryOverview: (id: string, page?: number) => {
 		if (page !== undefined) {
 			return `/library/${id}/${page}`

@@ -47,6 +47,7 @@ pub enum CoreEvent {
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
 	CreatedSeriesBatch(u64),
+	GeneratedThumbnailBatch(u64),
 }
 
 impl CoreEvent {

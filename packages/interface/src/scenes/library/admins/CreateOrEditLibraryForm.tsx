@@ -1,6 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCreateLibraryMutation, useEditLibraryMutation, useTags } from '@stump/client'
-import { Button, Form, IconButton, Input, TextArea } from '@stump/components'
+import {
+	Button,
+	Divider,
+	Form,
+	Heading,
+	IconButton,
+	Input,
+	Text,
+	TextArea,
+} from '@stump/components'
 import type { Library, LibraryOptions, LibraryPattern, LibraryScanMode } from '@stump/types'
 import { Folder } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -12,7 +21,6 @@ import { z } from 'zod'
 import DirectoryPickerModal from '../../../components/DirectoryPickerModal'
 import TagSelect from '../../../components/TagSelect'
 import paths from '../../../paths'
-import { useLibraryAdminContext } from './context'
 import LibraryOptionsForm from './LibraryOptionsForm'
 import ScanModeForm from './ScanModeForm'
 import ThumbnailConfigForm from './ThumbnailConfigForm'
@@ -115,8 +123,6 @@ type Props = {
 export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
 	const isCreatingLibrary = !library
 	const navigate = useNavigate()
-
-	const { syncLibraryPreview } = useLibraryAdminContext()
 
 	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
 
@@ -277,29 +283,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		return form.formState.errors
 	}, [form.formState.errors])
 
-	form.watch((updatedValues) => {
-		const { tags, library_pattern, convert_rar_to_zip, hard_delete_conversions, ...preview } =
-			updatedValues
-
-		// TODO: Investigate this type error more, I don't like casting...
-		syncLibraryPreview({
-			...preview,
-			library_options: {
-				...(library?.library_options ?? {
-					id: '',
-					library_id: '',
-				}),
-				convert_rar_to_zip,
-				hard_delete_conversions,
-				library_pattern,
-			},
-			tags: tags?.map((tag) => ({
-				id: tag?.value,
-				name: tag?.value,
-			})),
-		} as Partial<Library>)
-	})
-
 	const [formPath] = form.watch(['path'])
 
 	return (
@@ -314,7 +297,15 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 					}
 				}}
 			/>
-			<Form form={form} onSubmit={handleSubmit} className="">
+			<Form form={form} onSubmit={handleSubmit}>
+				<div>
+					<Heading size="xs">Basic Library Details</Heading>
+					<Text size="sm" variant="muted" className="mt-1.5">
+						These are the basic details about your library.
+					</Text>
+
+					<Divider variant="muted" className="my-3.5" />
+				</div>
 				<div className="flex flex-grow flex-col gap-6">
 					<Input
 						variant="primary"
@@ -337,7 +328,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 								type="button"
 								onClick={() => setShowDirectoryPicker(true)}
 							>
-								<Folder className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+								<Folder className="h-4 w-4 text-gray-400 dark:text-gray-500" />
 							</IconButton>
 						}
 						required
@@ -370,7 +361,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 
 				<div className="mt-6 flex w-full md:max-w-sm">
 					<Button className="w-full md:max-w-sm" variant="primary">
-						{isCreatingLibrary ? 'Create' : 'Edit'} Library
+						{isCreatingLibrary ? 'Create library' : 'Save changes'}
 					</Button>
 				</div>
 			</Form>

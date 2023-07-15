@@ -16,6 +16,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAppContext } from '../../context'
 import { useLocaleContext } from '../../i18n/context'
+import paths from '../../paths'
 import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
@@ -76,7 +77,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 						{/* TODO: disabled state looks not disabled */}
 						{isServerOwner && (
 							<ButtonOrLink
-								href="/library/create"
+								href={paths.libraryCreate()}
 								disabled={active}
 								className="w-full text-center hover:bg-gray-75"
 								variant="outline"

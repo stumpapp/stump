@@ -4,9 +4,11 @@ use std::sync::{
 };
 
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use tracing::{info, trace};
 
 use crate::{
+	event::CoreEvent,
 	filesystem::image::thumbnail::generate_thumbnails_for_media,
 	job::{utils::persist_job_start, Job, JobError, JobTrait, JobUpdate, WorkerCtx},
 	prisma::media,
@@ -16,7 +18,7 @@ use super::ImageProcessorOptions;
 
 pub const THUMBNAIL_JOB_NAME: &str = "thumbnail_generation";
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Type)]
 pub enum ThumbnailJobConfig {
 	SingleLibrary(String),
 	SingleSeries(String),
@@ -107,6 +109,9 @@ impl JobTrait for ThumbnailJob {
 			created_thumbnail_count = created_thumbnail_paths.len(),
 			"Thumbnail generation completed"
 		);
+		ctx.core_ctx.emit_event(CoreEvent::GeneratedThumbnailBatch(
+			created_thumbnail_paths.len() as u64,
+		));
 		Ok(created_thumbnail_paths.len() as u64)
 	}
 }

@@ -26,7 +26,6 @@ pub async fn persist_job_start(
 	task_count: u64,
 ) -> CoreResult<()> {
 	let db = core_ctx.get_db();
-	// TODO: needs to be create....
 	let _ = db
 		.job()
 		.update(

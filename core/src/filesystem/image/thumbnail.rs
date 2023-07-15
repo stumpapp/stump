@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, path::PathBuf, sync::Arc};
+use std::{fs::File, io::Write, path::PathBuf};
 
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use tracing::{debug, error, trace};

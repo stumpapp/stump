@@ -1,100 +1,100 @@
 {
 	"authScene": {
-		"claimText": "This Stump server is not yet claimed, you can use the form below to create a user account and claim it. Enter your preferred username and password.",
+		"claimText": "Este servidor de Stump ainda não foi reivindicado, você pode usar o formulário abaixo para criar uma conta de usuário e reivindicá-lo. Digite seu nome de usuário e senha preferidos.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required"
+				"missingUsername": "O nome de usuário é necessário",
+				"missingPassword": "A senha é necessária"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "Nome de usuário",
+				"password": "Senha"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
-				"login": "Login"
+				"createAccount": "Criar Conta",
+				"login": "Entrar"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back! Redirecting...",
-			"loggedInFirstTime": "Welcome! Redirecting...",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again.",
-			"registrationFailed": "Registration failed. Please try again."
+			"loggingIn": "Entrando...",
+			"loggedIn": "Bem-vindo de volta! Redirecionando...",
+			"loggedInFirstTime": "Bem vindo! Redirecionando...",
+			"registering": "Registrando...",
+			"registered": "Registrado!",
+			"loginFailed": "Falha ao iniciar sessão. Tente novamente.",
+			"registrationFailed": "Falha ao registrar. Por favor, tente novamente."
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below.",
-			"subtitleEditing": "A preview of your library edits will be shown below."
+			"heading": "Configuração da Biblioteca",
+			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo.",
+			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo."
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "Informações do Arquivo",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
+				"fileSize": "Tamanho do arquivo",
+				"fileType": "Tipo de arquivo",
+				"fileLocation": "Localização do Arquivo",
 				"fileChecksum": "Checksum"
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Seguinte na série"
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Criar nova biblioteca",
+		"subtitle": "As bibliotecas são usadas para agrupar seus livros. Se você quer uma atualização sobre as bibliotecas e como elas funcionam, confira",
+		"subtitleLink": "documentação relevante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server.",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Nome",
+				"libraryPath": "Caminho",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe no seu servidor.",
+				"libraryDescription": "Descrição",
+				"libraryTags": "Etiquetas"
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "Criar Biblioteca"
 			}
 		}
 	},
 	"editLibraryScene": {
-		"heading": "Edit Library",
-		"subtitle": "Use the below form to edit your library. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Editar biblioteca",
+		"subtitle": "Use o formulário abaixo para editar sua biblioteca. Se você estiver desejando uma atualização em bibliotecas e como elas funcionam, confira",
+		"subtitleLink": "documentação relevante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server.",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Nome",
+				"libraryPath": "Caminho",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe no seu servidor.",
+				"libraryDescription": "Descrição",
+				"libraryTags": "Etiquetas"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Gravar as alterações"
 			}
 		}
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"message": "Ocorreu um erro:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "Reportar Bug",
+			"copy": "Copiar os detalhes do erro",
+			"goHome": "Ir ao Início"
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continue Reading",
-		"recentlyAddedSeries": "Recently Added Series",
-		"recentlyAddedBooks": "Recently Added Books"
+		"continueReading": "Continuar Lendo",
+		"recentlyAddedSeries": "Séries adicionadas recentemente",
+		"recentlyAddedBooks": "Livros adicionados recentemente"
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
+			"continueReading": "Continuar Lendo",
 			"downloadSeries": "Download Series"
 		}
 	},
@@ -193,46 +193,46 @@
 	"pagination": {
 		"buttons": {
 			"next": "Next",
-			"previous": "Previous"
+			"previous": "Anterior"
 		},
 		"popover": {
-			"heading": "Go to page",
+			"heading": "Ir para a página",
 			"buttons": {
-				"confirm": "Go",
-				"cancel": "Cancel"
+				"confirm": "Ir",
+				"cancel": "Cancelar"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
+		"title": "Terminar Sessão",
+		"message": "Você tem certeza que deseja sair?",
 		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
+			"cancel": "Cancelar",
+			"signOut": "Terminar Sessão"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Home",
-			"libraries": "Libraries",
-			"createLibrary": "Create Library",
-			"settings": "Settings",
-			"themeToggle": "Toggle Theme",
-			"goForward": "Go Forward",
-			"goBack": "Go Back"
+			"home": "Início",
+			"libraries": "Bibliotecas",
+			"createLibrary": "Criar Biblioteca",
+			"settings": "Configurações",
+			"themeToggle": "Alternar tema",
+			"goForward": "Ir adiante",
+			"goBack": "Retornar"
 		},
 		"libraryOptions": {
 			"scanLibrary": {
-				"base": "Scan Library",
-				"parallel": "Parallel Scan",
-				"inOrder": "In Order Scan"
+				"base": "Escanear Biblioteca",
+				"parallel": "Escaneamento paralelo",
+				"inOrder": "Em ordem de escaneamento"
 			},
-			"fileExplorer": "File Explorer",
-			"editLibrary": "Edit Library",
-			"deleteLibrary": "Delete Library"
+			"fileExplorer": "Explorador de Arquivos",
+			"editLibrary": "Editar biblioteca",
+			"deleteLibrary": "Excluir Biblioteca"
 		},
 		"versionInformation": {
-			"heading": "Version Information",
+			"heading": "Informações da versão",
 			"semVer": "Semantic Version",
 			"commitHash": "Commit Hash",
 			"buildDate": "Build Date"

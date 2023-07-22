@@ -61,9 +61,6 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 		let shutdown_rx_fut = shutdown_rx.recv();
 		tokio::pin!(shutdown_rx_fut);
 
-		// let job_fn = self.inner_job.run(ctx.clone(), &mut self.state);
-		// tokio::pin!(job_fn);
-
 		let start = std::time::Instant::now();
 
 		let mut running = true;
@@ -101,8 +98,9 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 				// TODO: I think this might be wrong for pausing, in that even if the signal is
 				// meant to pause, it will kill the future above? Unless I pin it maybe?
 				shutdown_result = &mut shutdown_rx_fut => {
-					let duration = start.elapsed();
-					if let Ok(signal_type) = shutdown_result {
+					let duration = start.elapsed().as_millis() as u64;
+					if let Ok(_signal_type) = shutdown_result {
+						// TODO: this is where we would save state once jobs are stateful some day
 						// match signal_type {
 						// 	JobManagerShutdownSignal::Worker(id) if &id == ctx.job_id()  => {
 						// 		let state = serde_json::to_vec(&self.state).expect("Failed to serialize job state");
@@ -114,8 +112,36 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 						// 	_ => {}
 						// }
 						// unimplemented!()
+						let persist_result = persist_job_end(
+							&ctx.core_ctx,
+							ctx.job_id.clone(),
+							JobStatus::Failed,
+							duration,
+							None,
+						)
+						.await;
+
+						if let Err(err) = persist_result {
+							error!(?err, "Failed to persist job end");
+						}
+
 						return Err(JobError::Cancelled);
 					} else if let Err(err) = shutdown_result {
+						error!(?err, "Failed to receive shutdown signal");
+
+						let persist_result = persist_job_end(
+							&ctx.core_ctx,
+							ctx.job_id.clone(),
+							JobStatus::Failed,
+							duration,
+							None,
+						)
+						.await;
+
+						if let Err(err) = persist_result {
+							error!(?err, "Failed to persist job end");
+						}
+
 						return Err(JobError::Unknown(err.to_string()));
 					}
 				}

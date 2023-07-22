@@ -70,13 +70,12 @@ impl EventManager {
 					.send(result)
 					.expect("Fatal error: failed to send cancel job result");
 			},
-			InternalCoreTask::GetJobs(_) => {
-				// let job_report = self.clone().job_manager.clone().report().await;
+			InternalCoreTask::GetJobs(return_sender) => {
+				let job_report = self.clone().job_manager.clone().report().await;
 
-				// return_sender
-				// 	.send(job_report)
-				// 	.expect("Fatal error: failed to send job report");
-				unimplemented!()
+				return_sender
+					.send(job_report)
+					.expect("Fatal error: failed to send job report");
 			},
 		}
 	}

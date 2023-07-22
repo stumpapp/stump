@@ -9,7 +9,7 @@ use tracing::{info, trace};
 
 use crate::{
 	event::CoreEvent,
-	filesystem::image::thumbnail::generate_thumbnails_for_media,
+	filesystem::image::thumbnail::{generate_thumbnails_for_media, THUMBNAIL_CHUNK_SIZE},
 	job::{utils::persist_job_start, Job, JobError, JobTrait, JobUpdate, WorkerCtx},
 	prisma::media,
 };
@@ -20,18 +20,24 @@ pub const THUMBNAIL_JOB_NAME: &str = "thumbnail_generation";
 
 #[derive(Serialize, Deserialize, Type)]
 pub enum ThumbnailJobConfig {
-	SingleLibrary(String),
-	SingleSeries(String),
+	SingleLibrary {
+		library_id: String,
+		force_regenerate: bool,
+	},
+	SingleSeries {
+		series_id: String,
+		force_regenerate: bool,
+	},
 	MediaGroup(Vec<String>),
 }
 
 impl ToString for ThumbnailJobConfig {
 	fn to_string(&self) -> String {
 		match self {
-			ThumbnailJobConfig::SingleLibrary(library_id) => {
+			ThumbnailJobConfig::SingleLibrary { library_id, .. } => {
 				format!("Thumbnail generation for library {}", library_id)
 			},
-			ThumbnailJobConfig::SingleSeries(series_id) => {
+			ThumbnailJobConfig::SingleSeries { series_id, .. } => {
 				format!("Thumbnail generation for series {}", series_id)
 			},
 			ThumbnailJobConfig::MediaGroup(media_group_ids) => {
@@ -69,19 +75,27 @@ impl JobTrait for ThumbnailJob {
 		let counter_ref = counter.clone();
 
 		let created_thumbnail_paths = match &self.config {
-			ThumbnailJobConfig::SingleLibrary(_) => {
+			//? I think for the SingleLibrary and SingleSeries the same pattern can be followed:
+			//?
+			//? 1. if force regenerate is true, generate for **all** media in the library/series
+			//? 2. otherwise, generate for all media that don't have a thumbnail
+			//?
+			//? Some libraries might be HUGE, so batching the media might be necessary.
+			ThumbnailJobConfig::SingleLibrary { .. } => {
+				// TODO(aaron): implement this
 				Err(JobError::Unknown(String::from("Not yet supported!")))
 			},
-			ThumbnailJobConfig::SingleSeries(_) => {
+			ThumbnailJobConfig::SingleSeries { .. } => {
+				// TODO(aaron): implement this
 				Err(JobError::Unknown(String::from("Not yet supported!")))
 			},
 			ThumbnailJobConfig::MediaGroup(media_group_ids) => {
-				let tasks = (media_group_ids.len() as f64 / 5.0).ceil() as u64;
+				let tasks = media_group_ids.len() as u64;
 				let on_progress = move |msg| {
-					let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
+					let previous = counter_ref.fetch_add(5, Ordering::SeqCst);
 					progress_ctx.emit_progress(JobUpdate::tick(
 						job_id.clone(),
-						previous + 1,
+						previous + THUMBNAIL_CHUNK_SIZE as u64,
 						tasks,
 						Some(msg),
 					));
@@ -98,11 +112,12 @@ impl JobTrait for ThumbnailJob {
 					.find_many(vec![media::id::in_vec(media_group_ids.to_owned())])
 					.exec()
 					.await?;
-				Ok(generate_thumbnails_for_media(
+				let generated_thumbnail_paths = generate_thumbnails_for_media(
 					media,
 					self.options.to_owned(),
 					on_progress,
-				)?)
+				)?;
+				Ok(generated_thumbnail_paths)
 			},
 		}?;
 		info!(

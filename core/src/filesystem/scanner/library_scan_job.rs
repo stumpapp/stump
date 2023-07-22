@@ -7,7 +7,7 @@ use crate::{
 	CoreError,
 };
 
-use super::batch_scanner;
+use super::{batch_scanner, sync_scanner};
 
 pub const LIBRARY_SCAN_JOB_NAME: &str = "library_scan";
 
@@ -33,7 +33,7 @@ impl JobTrait for LibraryScanJob {
 				batch_scanner::scan_library(ctx, self.library_path.clone()).await
 			},
 			LibraryScanMode::Sync => {
-				unimplemented!()
+				sync_scanner::scan_library(ctx, self.library_path.clone()).await
 			},
 			LibraryScanMode::None => Err(CoreError::JobInitializationError(
 				String::from("Library scan mode is set to NONE"),

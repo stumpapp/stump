@@ -1,3 +1,4 @@
+use prisma_client_rust::Direction;
 use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
@@ -6,10 +7,11 @@ use tokio::sync::{broadcast, Mutex, RwLock};
 
 use crate::{
 	job::{utils::persist_new_job, WorkerCtx},
+	prisma::job,
 	CoreError, Ctx,
 };
 
-use super::{worker::Worker, JobExecutorTrait};
+use super::{worker::Worker, JobDetail, JobExecutorTrait};
 
 // TODO: add pause variant for a single worker.
 #[derive(Debug, Clone)]
@@ -30,6 +32,8 @@ pub enum JobManagerError {
 	WorkerSpawnFailed,
 	#[error("Job not found {0}")]
 	JobNotFound(String),
+	#[error("A query error occurred {0}")]
+	QueryError(#[from] prisma_client_rust::QueryError),
 	#[error("An unknown error occurred {0}")]
 	Unknown(String),
 }
@@ -208,29 +212,29 @@ impl JobManager {
 		})
 	}
 
-	// pub async fn report(self: Arc<Self>) -> CoreResult<Vec<JobReport>> {
-	// 	let db = self.core_ctx.get_db();
+	pub async fn report(self: Arc<Self>) -> JobManagerResult<Vec<JobDetail>> {
+		let db = self.core_ctx.get_db();
 
-	// 	let mut jobs = db
-	// 		.job()
-	// 		.find_many(vec![])
-	// 		.order_by(job::completed_at::order(Direction::Desc))
-	// 		.exec()
-	// 		.await?
-	// 		.into_iter()
-	// 		.map(JobReport::from)
-	// 		.collect::<Vec<JobReport>>();
+		let jobs = db
+			.job()
+			.find_many(vec![])
+			.order_by(job::completed_at::order(Direction::Desc))
+			.exec()
+			.await?
+			.into_iter()
+			.map(JobDetail::from)
+			.collect::<Vec<JobDetail>>();
 
-	// 	jobs.append(
-	// 		&mut self
-	// 			.job_queue
-	// 			.write()
-	// 			.await
-	// 			.iter()
-	// 			.map(JobReport::from)
-	// 			.collect::<Vec<JobReport>>(),
-	// 	);
+		// jobs.append(
+		// 	&mut self
+		// 		.job_queue
+		// 		.write()
+		// 		.await
+		// 		.iter()
+		// 		.map(JobDetail::from)
+		// 		.collect::<Vec<JobDetail>>(),
+		// );
 
-	// 	Ok(jobs)
-	// }
+		Ok(jobs)
+	}
 }

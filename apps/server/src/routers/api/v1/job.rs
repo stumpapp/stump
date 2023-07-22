@@ -103,9 +103,7 @@ async fn cancel_job(
 		ApiError::InternalServerError(format!("Failed to submit internal task: {}", e))
 	})?;
 
-	// FIXME:
-	unimplemented!()
-	// Ok(task_rx.await.map_err(|e| {
-	// 	ApiError::InternalServerError(format!("Failed to cancel job: {}", e))
-	// })??)
+	Ok(task_rx.await.map_err(|e| {
+		ApiError::InternalServerError(format!("Failed to cancel job: {}", e))
+	})??)
 }

@@ -21,15 +21,15 @@ use crate::{
 		},
 		PathUtils,
 	},
-	job::{persist_job_start, runner::RunnerCtx, JobUpdate},
+	job::{utils::persist_job_start, JobUpdate, WorkerCtx},
 	Ctx,
 };
 
 use super::setup::{setup_library, LibrarySetup};
 
 async fn scan_series(
-	ctx: Ctx,
-	runner_id: String,
+	ctx: Arc<Ctx>,
+	job_id: String,
 	series: Series,
 	library_path: &str,
 	library_options: LibraryOptions,
@@ -97,14 +97,12 @@ async fn scan_series(
 			match media_dao.create(generated).await {
 				Ok(created_media) => {
 					visited_media.insert(created_media.path.clone(), true);
-					ctx.emit_client_event(CoreEvent::CreatedMedia(Box::new(
-						created_media,
-					)));
+					ctx.emit_event(CoreEvent::CreatedMedia(Box::new(created_media)));
 				},
 				Err(e) => {
 					error!(error = ?e, "Failed to create media");
 					ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
-						runner_id: Some(runner_id.clone()),
+						job_id: Some(job_id.clone()),
 						path: path.to_str().unwrap_or_default().to_string(),
 						message: e.to_string(),
 					})
@@ -141,9 +139,10 @@ async fn scan_series(
 	}
 }
 
-pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult<u64> {
-	let core_ctx = ctx.core_ctx.clone();
+pub async fn scan_library(ctx: WorkerCtx, path: String) -> CoreResult<u64> {
+	ctx.emit_job_started(0, Some("Preparing library scan".to_string()));
 
+	let core_ctx = ctx.core_ctx.clone();
 	let LibrarySetup {
 		library,
 		library_options,
@@ -151,28 +150,19 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		tasks,
 	} = setup_library(&core_ctx, path).await?;
 
+	let job_id = ctx.job_id.clone();
+	persist_job_start(&core_ctx, job_id.clone(), tasks).await?;
+
 	// Sleep for a little to let the UI breathe.
-	tokio::time::sleep(Duration::from_millis(700)).await;
-
-	// TODO: I am not sure if jobs should fail when the job fails to persist to DB.
-	let _job = persist_job_start(&core_ctx, runner_id.clone(), tasks).await?;
-
-	ctx.progress(JobUpdate::job_started(
-		runner_id.clone(),
-		0,
-		tasks,
-		Some(format!("Starting library scan at {}", &library.path)),
-	));
+	tokio::time::sleep(Duration::from_millis(500)).await;
 
 	let counter = Arc::new(AtomicU64::new(0));
-
 	for series in library_series {
 		let progress_ctx = ctx.clone();
 		let scanner_ctx = core_ctx.clone();
-		let r_id = runner_id.clone();
 
+		let job_id = progress_ctx.job_id().to_string();
 		let counter_ref = counter.clone();
-		let runner_id = runner_id.clone();
 		let library_path = library.path.clone();
 		// Note: I don't ~love~ having to clone this struct each iteration. I think it's fine for now,
 		// considering it consists of just a few booleans.
@@ -180,16 +170,15 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 
 		scan_series(
 			scanner_ctx,
-			runner_id,
+			job_id.clone(),
 			series,
 			&library_path,
 			library_options,
 			move |msg| {
 				let previous = counter_ref.fetch_add(1, Ordering::SeqCst);
-
-				progress_ctx.progress(JobUpdate::job_progress(
-					r_id.to_owned(),
-					Some(previous + 1),
+				progress_ctx.emit_progress(JobUpdate::tick(
+					job_id.clone(),
+					previous + 1,
 					tasks,
 					Some(msg),
 				));
@@ -198,13 +187,7 @@ pub async fn scan(ctx: RunnerCtx, path: String, runner_id: String) -> CoreResult
 		.await;
 	}
 
-	ctx.progress(JobUpdate::job_finishing(
-		runner_id,
-		Some(counter.load(Ordering::SeqCst)),
-		tasks,
-		None,
-	));
-	tokio::time::sleep(Duration::from_millis(1000)).await;
+	tokio::time::sleep(Duration::from_millis(500)).await;
 
 	Ok(counter.load(Ordering::SeqCst))
 }

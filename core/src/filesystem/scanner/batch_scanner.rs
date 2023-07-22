@@ -177,7 +177,7 @@ pub async fn scan_library(ctx: WorkerCtx, library_path: String) -> CoreResult<u6
 				created_media.iter().map(|m| m.id.clone()).collect(),
 			),
 		));
-		if let Err(_) = dispatch_result {
+		if dispatch_result.is_err() {
 			error!("Failed to dispatch thumbnail job!");
 		} else {
 			debug!(

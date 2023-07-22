@@ -64,7 +64,7 @@ impl From<CoreEvent> for Log {
 			} => Self {
 				level: LogLevel::Error,
 				message: format!("{}: {}", path, message),
-				job_id: job_id,
+				job_id,
 				..Default::default()
 			},
 			_ => unimplemented!(),

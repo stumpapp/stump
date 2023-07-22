@@ -7,12 +7,11 @@ use tokio::sync::oneshot;
 use crate::{
 	db::entity::{Media, Series},
 	job::{JobDetail, JobExecutorTrait, JobManagerResult, JobStatus, JobUpdate},
-	CoreResult,
 };
 
 pub enum InternalCoreTask {
 	EnqueueJob(Box<dyn JobExecutorTrait>),
-	GetJobs(oneshot::Sender<CoreResult<Vec<JobDetail>>>),
+	GetJobs(oneshot::Sender<JobManagerResult<Vec<JobDetail>>>),
 	CancelJob {
 		job_id: String,
 		return_sender: oneshot::Sender<JobManagerResult<()>>,

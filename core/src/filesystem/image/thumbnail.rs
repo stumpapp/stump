@@ -75,6 +75,8 @@ pub fn generate_thumbnails(
 	Ok(generated_paths)
 }
 
+pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
+
 pub fn generate_thumbnails_for_media(
 	media: Vec<prisma_media::Data>,
 	options: ImageProcessorOptions,
@@ -84,15 +86,13 @@ pub fn generate_thumbnails_for_media(
 
 	let mut generated_paths = Vec::with_capacity(media.len());
 
-	// TODO: configurable chunk size?
-	// Split the array into chunks of 5 images
-	for (idx, chunk) in media.chunks(5).enumerate() {
+	for (idx, chunk) in media.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
 		trace!(chunk = idx + 1, "Processing chunk for thumbnail generation");
 		on_progress(
 			format!(
 				"Processing group {} of {} for thumbnail generation",
 				idx + 1,
-				media.len() / 5
+				media.len() / THUMBNAIL_CHUNK_SIZE
 			)
 			.to_string(),
 		);

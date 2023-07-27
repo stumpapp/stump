@@ -299,9 +299,9 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
 				<div>
-					<Heading size="xs">Basic Library Details</Heading>
+					<Heading size="xs">Library Details</Heading>
 					<Text size="sm" variant="muted" className="mt-1.5">
-						These are the basic details about your library.
+						Basic information and settings for your library.
 					</Text>
 
 					<Divider variant="muted" className="my-3.5" />

@@ -45,8 +45,8 @@ export default function ThumbnailConfigForm() {
 		<div className="py-2">
 			<Heading size="xs">Thumbnail Generation</Heading>
 			<Text size="sm" variant="muted" className="mt-1.5">
-				Control how thumbnails are generated for your library, if at all. These options include
-				quality, size, and format, and can be changed at any time. Changes{' '}
+				Control how thumbnails are generated for your library, if at all. These options can be
+				changed at any time, but{' '}
 				<span className="font-medium text-gray-700 dark:text-gray-300">
 					will not affect existing
 				</span>{' '}

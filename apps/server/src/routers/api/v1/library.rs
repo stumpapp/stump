@@ -689,13 +689,8 @@ async fn update_library(
 
 	let scan_mode = input.scan_mode.unwrap_or_default();
 
-	// `scan` is not a required field, however it will default to BATCHED if not provided
 	if scan_mode != LibraryScanMode::None {
-		// FIXME: AH
-		// ctx.spawn_job(Box::new(LibraryScanJob {
-		// 	path: updated.path.clone(),
-		// 	scan_mode,
-		// }))?;
+		ctx.dispatch_job(LibraryScanJob::new(updated.path.clone(), scan_mode))?;
 	}
 
 	Ok(Json(updated.into()))

@@ -1,3 +1,8 @@
+// This was added as a fix for https://github.com/stumpapp/stump/issues/146
+// I am not entirely sure why this issue cropped up all of the sudden, but
+// this seems to resolve it in a musl environment.
+#![recursion_limit = "256"]
+
 use std::sync::Arc;
 
 // TODO: for these crates, some should NOT hoist entire crate, I need to restrict it
@@ -12,6 +17,8 @@ pub mod opds;
 
 mod context;
 pub mod error;
+
+#[allow(warnings, unused)]
 pub mod prisma;
 
 use config::env::StumpEnvironment;

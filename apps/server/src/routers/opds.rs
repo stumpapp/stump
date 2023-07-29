@@ -5,7 +5,7 @@ use axum::{
 	Router,
 };
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::chrono;
+use prisma_client_rust::{chrono, Direction};
 use stump_core::{
 	db::{query::pagination::PageQuery, PrismaCountTrait},
 	filesystem::{
@@ -18,7 +18,7 @@ use stump_core::{
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prisma::{library, media, series, SortOrder},
+	prisma::{library, media, series},
 };
 use tracing::{debug, trace, warn};
 
@@ -199,7 +199,7 @@ async fn keep_reading(
 			read_progress_conditions.clone(),
 		)])
 		.with(media::read_progresses::fetch(read_progress_conditions))
-		.order_by(media::name::order(SortOrder::Asc))
+		.order_by(media::name::order(Direction::Asc))
 		.exec()
 		.await?
 		.into_iter()
@@ -392,7 +392,7 @@ async fn get_latest_series(
 			let series = client
 				.series()
 				.find_many(vec![])
-				.order_by(series::updated_at::order(SortOrder::Desc))
+				.order_by(series::updated_at::order(Direction::Desc))
 				.skip(skip)
 				.take(take)
 				.exec()
@@ -439,7 +439,7 @@ async fn get_series_by_id(
 					series::media::fetch(vec![])
 						.skip(skip)
 						.take(take)
-						.order_by(media::name::order(SortOrder::Asc)),
+						.order_by(media::name::order(Direction::Asc)),
 				)
 				.exec()
 				.await?;

@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	error::CoreError,
-	prisma::{library, media, series, SortOrder},
+	prisma::{library, media, series},
 };
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
@@ -16,11 +16,11 @@ pub enum Direction {
 	Desc,
 }
 
-impl From<Direction> for SortOrder {
-	fn from(direction: Direction) -> SortOrder {
+impl From<Direction> for prisma_client_rust::Direction {
+	fn from(direction: Direction) -> prisma_client_rust::Direction {
 		match direction {
-			Direction::Asc => SortOrder::Asc,
-			Direction::Desc => SortOrder::Desc,
+			Direction::Asc => prisma_client_rust::Direction::Asc,
+			Direction::Desc => prisma_client_rust::Direction::Desc,
 		}
 	}
 }
@@ -44,11 +44,11 @@ impl Default for QueryOrder {
 	}
 }
 
-impl TryInto<media::OrderByWithRelationParam> for QueryOrder {
+impl TryInto<media::OrderByParam> for QueryOrder {
 	type Error = CoreError;
 
-	fn try_into(self) -> Result<media::OrderByWithRelationParam, Self::Error> {
-		let dir: SortOrder = self.direction.into();
+	fn try_into(self) -> Result<media::OrderByParam, Self::Error> {
+		let dir: prisma_client_rust::Direction = self.direction.into();
 
 		Ok(match self.order_by.to_lowercase().as_str() {
 			"name" => media::name::order(dir),
@@ -69,11 +69,11 @@ impl TryInto<media::OrderByWithRelationParam> for QueryOrder {
 	}
 }
 
-impl TryInto<library::OrderByWithRelationParam> for QueryOrder {
+impl TryInto<library::OrderByParam> for QueryOrder {
 	type Error = CoreError;
 
-	fn try_into(self) -> Result<library::OrderByWithRelationParam, Self::Error> {
-		let dir: SortOrder = self.direction.into();
+	fn try_into(self) -> Result<library::OrderByParam, Self::Error> {
+		let dir: prisma_client_rust::Direction = self.direction.into();
 
 		Ok(match self.order_by.to_lowercase().as_str() {
 			"name" => library::name::order(dir),
@@ -91,11 +91,11 @@ impl TryInto<library::OrderByWithRelationParam> for QueryOrder {
 	}
 }
 
-impl TryInto<series::OrderByWithRelationParam> for QueryOrder {
+impl TryInto<series::OrderByParam> for QueryOrder {
 	type Error = CoreError;
 
-	fn try_into(self) -> Result<series::OrderByWithRelationParam, Self::Error> {
-		let dir: SortOrder = self.direction.into();
+	fn try_into(self) -> Result<series::OrderByParam, Self::Error> {
+		let dir: prisma_client_rust::Direction = self.direction.into();
 
 		Ok(match self.order_by.to_lowercase().as_str() {
 			"name" => series::name::order(dir),

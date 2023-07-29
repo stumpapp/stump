@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::raw;
+use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
@@ -25,9 +25,9 @@ use stump_core::{
 	prisma::{
 		library::{self, WhereParam},
 		library_options, media,
-		media::OrderByWithRelationParam as MediaOrderByParam,
-		series::{self, OrderByWithRelationParam as SeriesOrderByParam},
-		tag, SortOrder,
+		media::OrderByParam as MediaOrderByParam,
+		series::{self, OrderByParam as SeriesOrderByParam},
+		tag,
 	},
 };
 
@@ -402,7 +402,7 @@ async fn get_library_thumbnail(
 		.with(
 			series::media::fetch(vec![])
 				.take(1)
-				.order_by(media::name::order(SortOrder::Asc)),
+				.order_by(media::name::order(Direction::Asc)),
 		)
 		.exec()
 		.await?;

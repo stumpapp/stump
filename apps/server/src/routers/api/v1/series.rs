@@ -6,6 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
+use prisma_client_rust::Direction;
 use stump_core::{
 	db::{
 		entity::{Media, Series},
@@ -16,10 +17,9 @@ use stump_core::{
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	prisma::{
-		media::{self, OrderByWithRelationParam as MediaOrderByParam},
+		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,
-		series::{self, OrderByWithRelationParam as SeriesOrderByParam, WhereParam},
-		SortOrder,
+		series::{self, OrderByParam, WhereParam},
 	},
 };
 use tracing::{error, trace};
@@ -101,7 +101,7 @@ async fn get_series(
 	let user_id = get_session_user(&session)?.id;
 
 	let is_unpaged = pagination.is_unpaged();
-	let order_by: SeriesOrderByParam = ordering.try_into()?;
+	let order_by: OrderByParam = ordering.try_into()?;
 
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);
@@ -216,7 +216,7 @@ async fn get_series_by_id(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
-				.order_by(media::name::order(SortOrder::Asc)),
+				.order_by(media::name::order(Direction::Asc)),
 		);
 	}
 
@@ -309,7 +309,7 @@ async fn get_series_thumbnail(
 	let result = db
 		.media()
 		.find_first(vec![media::series_id::equals(Some(id.clone()))])
-		.order_by(media::name::order(SortOrder::Asc))
+		.order_by(media::name::order(Direction::Asc))
 		.exec()
 		.await?;
 
@@ -468,7 +468,7 @@ async fn get_next_in_series(
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
-				.order_by(media::name::order(SortOrder::Asc)),
+				.order_by(media::name::order(Direction::Asc)),
 		)
 		.exec()
 		.await?;

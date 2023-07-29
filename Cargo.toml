@@ -30,7 +30,7 @@ prisma-client-rust-cli = { git = "https://github.com/stumpapp/prisma-client-rust
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.85"
-tokio = { version = "=1.29.1", features = [
+tokio = { version = "1.21.2", features = [
   # feature for the internal channels (internal communication)
   "sync", 
   # this is needed for tokio::spawn multi-threaded

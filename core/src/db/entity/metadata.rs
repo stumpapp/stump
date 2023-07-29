@@ -51,9 +51,7 @@ where
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
 /// Struct representing the metadata for a processed file.
-#[derive(
-	Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Type, Default, ToSchema,
-)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Default, ToSchema)]
 pub struct MediaMetadata {
 	/// The title of the media.
 	#[serde(alias = "Title")]
@@ -63,8 +61,10 @@ pub struct MediaMetadata {
 	/// series name as it was interpreted by Stump.
 	#[serde(alias = "Series")]
 	pub series: Option<String>,
+	/// The number this media is in the series. This can be a float, e.g. 20.1,
+	/// which typically represents a one-shot or special issue.
 	#[serde(alias = "Number")]
-	pub number: Option<i32>,
+	pub number: Option<f64>,
 	#[serde(alias = "Volume")]
 	pub volume: Option<i32>,
 	/// The summary of the media.

@@ -13,12 +13,12 @@ version = "0.0.0"
 rust-version = "1.68.0"
 
 [workspace.dependencies]
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.7", features = [
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", rev = "37ffd66291e4da8104f88251157881993112acd6", features = [
   'sqlite-create-many',
   "migrations",
   "sqlite",
 ], default-features = false }
-prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.7", features = [
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", rev = "37ffd66291e4da8104f88251157881993112acd6", features = [
   "sqlite-create-many",
   "migrations",
   "sqlite",
@@ -26,7 +26,7 @@ prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.85"
-tokio = { version = "1.21.2", features = [
+tokio = { version = "=1.29.1", features = [
   # feature for the internal channels (internal communication)
   "sync", 
   # this is needed for tokio::spawn multi-threaded

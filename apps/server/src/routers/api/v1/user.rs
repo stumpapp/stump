@@ -58,9 +58,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 }
 
 pub(crate) fn apply_pagination<'a>(
-	query: user::FindMany<'a>,
+	query: user::FindManyQuery<'a>,
 	pagination: &Pagination,
-) -> user::FindMany<'a> {
+) -> user::FindManyQuery<'a> {
 	match pagination {
 		Pagination::Page(page_query) => {
 			let (skip, take) = page_query.get_skip_take();

@@ -164,7 +164,8 @@ impl Ctx {
 			.create(
 				log.message,
 				vec![
-					log::job_id::set(log.job_id),
+					// FIXME: this breaks after upgrading prisma!!????
+					// log::job_id::set(log.job_id),
 					log::level::set(log.level.to_string()),
 				],
 			)

@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, or, Direction};
+use prisma_client_rust::{and, or};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -19,8 +19,8 @@ use stump_core::{
 	filesystem::{media::get_page, read_entire_file, ContentType},
 	prisma::{
 		library_options,
-		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, read_progress, user, PrismaClient,
+		media::{self, OrderByWithRelationParam as MediaOrderByParam, WhereParam},
+		media_metadata, read_progress, user, PrismaClient, SortOrder,
 	},
 };
 use tracing::{debug, trace};
@@ -96,9 +96,9 @@ pub(crate) fn apply_media_metadata_filters(
 }
 
 pub(crate) fn apply_media_pagination<'a>(
-	query: media::FindMany<'a>,
+	query: media::FindManyQuery<'a>,
 	pagination: &Pagination,
-) -> media::FindMany<'a> {
+) -> media::FindManyQuery<'a> {
 	match pagination {
 		Pagination::Page(page_query) => {
 			let (skip, take) = page_query.get_skip_take();
@@ -318,7 +318,7 @@ async fn get_in_progress_media(
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
 				// I think this just means whenever progress updates I should update the media
 				// updated_at field, but that's a bit annoying TBH...
-				.order_by(media::updated_at::order(Direction::Desc));
+				.order_by(media::updated_at::order(SortOrder::Desc));
 
 			if !is_unpaged {
 				query = apply_media_pagination(query, &pagination_cloned);
@@ -398,7 +398,7 @@ async fn get_recently_added_media(
 					read_progress::user_id::equals(user_id),
 				]))
 				.with(media::metadata::fetch())
-				.order_by(media::created_at::order(Direction::Desc));
+				.order_by(media::created_at::order(SortOrder::Desc));
 
 			if !is_unpaged {
 				query = apply_media_pagination(query, &pagination_cloned);
@@ -755,7 +755,7 @@ async fn update_media_progress(
 				.read_progress()
 				.upsert(
 					read_progress::user_id_media_id(user_id.clone(), id.clone()),
-					(
+					read_progress::create(
 						page,
 						media::id::equals(id.clone()),
 						user::id::equals(user_id.clone()),

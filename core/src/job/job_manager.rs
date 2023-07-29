@@ -1,4 +1,3 @@
-use prisma_client_rust::Direction;
 use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
@@ -7,7 +6,7 @@ use tokio::sync::{broadcast, Mutex, RwLock};
 
 use crate::{
 	job::{utils::persist_new_job, WorkerCtx},
-	prisma::job,
+	prisma::{job, SortOrder},
 	CoreError, Ctx,
 };
 
@@ -218,7 +217,7 @@ impl JobManager {
 		let jobs = db
 			.job()
 			.find_many(vec![])
-			.order_by(job::completed_at::order(Direction::Desc))
+			.order_by(job::completed_at::order(SortOrder::Desc))
 			.exec()
 			.await?
 			.into_iter()

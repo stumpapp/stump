@@ -31,5 +31,5 @@ workspaces_sed_correction() {
         sed -i '/core\/integration-tests/d' Cargo.toml; \
         sed -i '/apps\/desktop\/src-tauri/d' Cargo.toml; \
         sed -i '/apps\/tui/d' Cargo.toml; \
-        sed -i '/packages\/prisma-cli/d' Cargo.toml
+        sed -i '/crates\/prisma-cli/d' Cargo.toml
 }

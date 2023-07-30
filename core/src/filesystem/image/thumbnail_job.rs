@@ -93,9 +93,14 @@ impl JobTrait for ThumbnailJob {
 				let tasks = media_group_ids.len() as u64;
 				let on_progress = move |msg| {
 					let previous = counter_ref.fetch_add(5, Ordering::SeqCst);
+					let next = if previous + THUMBNAIL_CHUNK_SIZE as u64 > tasks {
+						tasks
+					} else {
+						previous + THUMBNAIL_CHUNK_SIZE as u64
+					};
 					progress_ctx.emit_progress(JobUpdate::tick(
 						job_id.clone(),
-						previous + THUMBNAIL_CHUNK_SIZE as u64,
+						next,
 						tasks,
 						Some(msg),
 					));

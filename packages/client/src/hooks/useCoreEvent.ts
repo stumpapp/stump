@@ -2,7 +2,7 @@ import type { CoreEvent } from '@stump/types'
 
 import { useJobContext } from '../context'
 import { core_event_triggers, invalidateQueries } from '../invalidate'
-import { useStumpSse } from './useStumpSse'
+import { useStumpWs } from '.'
 
 interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void
@@ -65,5 +65,6 @@ export function useCoreEventHandler({
 		}
 	}
 
-	useStumpSse({ onEvent: handleCoreEvent })
+	// useStumpSse({ onEvent: handleCoreEvent })
+	useStumpWs({ onEvent: handleCoreEvent })
 }

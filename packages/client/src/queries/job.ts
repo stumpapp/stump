@@ -1,9 +1,9 @@
 import { getJobs } from '@stump/api'
-import type { JobReport } from '@stump/types'
+import type { JobDetail } from '@stump/types'
 
 import { QueryOptions, useQuery } from '../client'
 
-export function useJobReport({ onSuccess, onError, ...options }: QueryOptions<JobReport[]> = {}) {
+export function useJobReport({ onSuccess, onError, ...options }: QueryOptions<JobDetail[]> = {}) {
 	const {
 		data: jobReports,
 		isLoading,

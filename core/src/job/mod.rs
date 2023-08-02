@@ -7,13 +7,13 @@ pub use executor::{Job, JobExecutorTrait};
 pub use job_manager::{
 	JobManager, JobManagerError, JobManagerResult, JobManagerShutdownSignal,
 };
-use prisma_client_rust::QueryError;
+use prisma_client_rust::{chrono::Utc, QueryError};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 pub use worker::{Worker, WorkerCtx};
 
-use crate::{filesystem::FileError, prisma, CoreError};
+use crate::{db::entity::Cursor, filesystem::FileError, prisma, CoreError};
 
 #[derive(Clone, Debug)]
 pub enum JobError {
@@ -105,8 +105,16 @@ pub struct JobDetail {
 	pub completed_task_count: Option<i32>,
 	/// The time (in milliseconds) to complete the job
 	pub ms_elapsed: Option<u64>,
+	/// The datetime stamp of when the job was created
+	pub created_at: Option<String>,
 	/// The datetime stamp of when the job completed
 	pub completed_at: Option<String>,
+}
+
+impl Cursor for JobDetail {
+	fn cursor(&self) -> String {
+		self.id.clone()
+	}
 }
 
 impl JobDetail {
@@ -119,6 +127,7 @@ impl JobDetail {
 			task_count: None,
 			completed_task_count: None,
 			ms_elapsed: None,
+			created_at: Some(Utc::now().to_string()),
 			completed_at: None,
 		}
 	}
@@ -134,7 +143,8 @@ impl From<prisma::job::Data> for JobDetail {
 			task_count: Some(data.task_count),
 			completed_task_count: Some(data.completed_task_count),
 			ms_elapsed: Some(data.ms_elapsed as u64),
-			completed_at: Some(data.completed_at.to_string()),
+			created_at: Some(data.created_at.to_string()),
+			completed_at: data.completed_at.map(|dt| dt.to_string()),
 		}
 	}
 }

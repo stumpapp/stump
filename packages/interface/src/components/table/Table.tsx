@@ -111,7 +111,7 @@ export default function Table<T, V>({
 				<thead className="border-b border-gray-75 text-left dark:border-gray-800">
 					{table
 						.getHeaderGroups()
-						.slice(1)
+						// .slice(1)
 						.map((headerGroup) => (
 							<tr key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {

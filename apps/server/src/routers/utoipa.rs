@@ -40,7 +40,7 @@ use super::api::{
         api::v1::auth::register,
         // TODO: epub here
         api::v1::filesystem::list_directory,
-        api::v1::job::get_job_reports,
+        api::v1::job::get_jobs,
         api::v1::job::delete_job_reports,
         api::v1::job::cancel_job,
         api::v1::library::get_libraries,

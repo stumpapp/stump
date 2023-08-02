@@ -1,4 +1,5 @@
 use crate::{prisma::job, CoreError, CoreResult, Ctx};
+use prisma_client_rust::chrono::Utc;
 use std::num::TryFromIntError;
 use tracing::trace;
 
@@ -59,6 +60,7 @@ pub async fn persist_job_end(
 				.map_err(|e: TryFromIntError| CoreError::InternalError(e.to_string()))?,
 		),
 		job::status::set(status.to_string()),
+		job::completed_at::set(Some(Utc::now().into())),
 	];
 	if let Some(count) = completed_task_count {
 		params.push(job::completed_task_count::set(count.try_into().map_err(
@@ -66,6 +68,7 @@ pub async fn persist_job_end(
 		)?));
 	}
 
+	// NOTE: this error get's handled by caller FYI
 	let _ = db
 		.job()
 		.update(job::id::equals(job_id.clone()), params)

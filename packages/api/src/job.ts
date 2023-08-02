@@ -1,10 +1,15 @@
-import type { JobReport } from '@stump/types'
+import type { JobDetail } from '@stump/types'
 
-import { API } from '.'
-import { ApiResult } from './types'
+import { API, toUrlParams } from '.'
+import { ApiResult, PageableApiResult } from './types'
 
-export function getJobs(): Promise<ApiResult<JobReport[]>> {
-	return API.get('/jobs')
+export function getJobs(params?: Record<string, unknown>): Promise<PageableApiResult<JobDetail[]>> {
+	if (params) {
+		const searchParams = toUrlParams(params)
+		return API.get(`/jobs?${searchParams.toString()}`)
+	} else {
+		return API.get('/jobs')
+	}
 }
 
 // TODO: type this

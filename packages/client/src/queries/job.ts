@@ -1,19 +1,30 @@
-import { getJobs } from '@stump/api'
+import { jobApi, jobQueryKeys } from '@stump/api'
 import type { JobDetail } from '@stump/types'
 
-import { QueryOptions, useQuery } from '../client'
+import { PageQueryOptions, usePageQuery } from '../client'
 
-export function useJobReport({ onSuccess, onError, ...options }: QueryOptions<JobDetail[]> = {}) {
-	const {
-		data: jobReports,
-		isLoading,
-		isRefetching,
-		isFetching,
-	} = useQuery(['getJobReports'], () => getJobs().then((res) => res.data), {
-		onError,
-		onSuccess,
-		...options,
-	})
+type UseJobsQueryParmas = PageQueryOptions<JobDetail> & {
+	params?: Record<string, unknown>
+}
+export function useJobsQuery({ params, ...options }: UseJobsQueryParmas = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[jobQueryKeys.getJobs, params],
+		async ({ page = 1, ...rest }) => {
+			const { data } = await jobApi.getJobs({ page, ...rest })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
+	)
 
-	return { isLoading: isLoading || isRefetching || isFetching, jobReports }
+	const jobs = data?.data
+	const pageData = data?._page
+
+	return {
+		jobs,
+		pageData,
+		...restReturn,
+	}
 }

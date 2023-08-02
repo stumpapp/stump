@@ -38,63 +38,57 @@ export default function UserTable() {
 	const columns = useMemo<ColumnDef<User>[]>(
 		() => [
 			{
-				columns: [
-					{
-						cell: (info) => {
-							const user = info.row.original
-							const isSelected = selectedUser?.id === user.id
-							return (
-								<CheckBox
-									variant="primary"
-									checked={isSelected}
-									onClick={() => handleSelectUser(user.id)}
-								/>
-							)
-						},
-						// header: <CheckBox variant="primary" />,
-						id: 'select',
-					},
-					{
-						cell: (info) => {
-							const user = info.row.original
-							return <UsernameRow {...user} />
-						},
-						// enableSorting: true,
-						header: 'Username',
-						// sortingFn: (a, b) => {
-						// 	const aUser = a.original
-						// 	const bUser = b.original
+				cell: (info) => {
+					const user = info.row.original
+					const isSelected = selectedUser?.id === user.id
+					return (
+						<CheckBox
+							variant="primary"
+							checked={isSelected}
+							onClick={() => handleSelectUser(user.id)}
+						/>
+					)
+				},
+				// header: <CheckBox variant="primary" />,
+				id: 'select',
+			},
+			{
+				cell: (info) => {
+					const user = info.row.original
+					return <UsernameRow {...user} />
+				},
+				// enableSorting: true,
+				header: 'Username',
+				// sortingFn: (a, b) => {
+				// 	const aUser = a.original
+				// 	const bUser = b.original
 
-						// 	return aUser.username.localeCompare(bUser.username)
-						// },
-					},
-					{
-						accessorKey: 'role',
-						// TODO: This will probably change once another role (or two?) is added. RBAC
-						// system is not fully thought out yet.
-						cell: (info) => {
-							return (
-								<Text size="sm">
-									{info.getValue()?.toLowerCase() === 'server_owner' ? 'Admin' : 'Member'}
-								</Text>
-							)
-						},
-						header: 'Role',
-					},
-					{
-						cell: () => {
-							return (
-								<Text size="sm" variant="muted">
-									{dayjs().format('LL')}
-								</Text>
-							)
-						},
-						header: 'Last Seen',
-						id: 'username',
-					},
-				],
-				enableGrouping: false,
-				id: 'user',
+				// 	return aUser.username.localeCompare(bUser.username)
+				// },
+			},
+			{
+				accessorKey: 'role',
+				// TODO: This will probably change once another role (or two?) is added. RBAC
+				// system is not fully thought out yet.
+				cell: (info) => {
+					return (
+						<Text size="sm">
+							{info.getValue<string>()?.toLowerCase() === 'server_owner' ? 'Admin' : 'Member'}
+						</Text>
+					)
+				},
+				header: 'Role',
+			},
+			{
+				cell: () => {
+					return (
+						<Text size="sm" variant="muted">
+							{dayjs().format('LL')}
+						</Text>
+					)
+				},
+				header: 'Last Seen',
+				id: 'username',
 			},
 		],
 		[selectedUser, handleSelectUser],

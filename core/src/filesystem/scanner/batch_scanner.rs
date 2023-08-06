@@ -190,6 +190,8 @@ pub async fn scan_library(ctx: WorkerCtx, library_path: String) -> CoreResult<u6
 	}
 
 	tokio::time::sleep(Duration::from_millis(500)).await;
+	// TODO: remove this once testing is done...
+	// tokio::time::sleep(Duration::from_secs(20)).await;
 
 	Ok(final_count)
 }

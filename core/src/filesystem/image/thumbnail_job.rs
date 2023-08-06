@@ -47,6 +47,23 @@ impl ToString for ThumbnailJobConfig {
 	}
 }
 
+// impl AsRef<str> for ThumbnailJobConfig {
+// 	fn as_ref(&self) -> &str {
+// 		match self {
+// 			ThumbnailJobConfig::SingleLibrary { library_id, .. } => {
+// 				format!("Thumbnail generation for library {}", library_id).as_str()
+// 			},
+// 			ThumbnailJobConfig::SingleSeries { series_id, .. } => {
+// 				format!("Thumbnail generation for series {}", series_id).as_str()
+// 			},
+// 			ThumbnailJobConfig::MediaGroup(media_group_ids) => {
+// 				format!("Thumbnail generation for media group {:?}", media_group_ids)
+// 					.as_str()
+// 			},
+// 		}
+// 	}
+// }
+
 #[derive(Serialize, Deserialize)]
 pub struct ThumbnailJob {
 	options: ImageProcessorOptions,
@@ -62,6 +79,7 @@ impl JobTrait for ThumbnailJob {
 	fn description(&self) -> Option<Box<&str>> {
 		// TODO: figure this out...
 		None
+		// Some(Box::new(self.config.as_ref()))
 	}
 
 	async fn run(&mut self, ctx: WorkerCtx) -> Result<u64, JobError> {

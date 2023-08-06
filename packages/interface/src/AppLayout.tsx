@@ -70,7 +70,8 @@ export function AppLayout() {
 				</div>
 
 				{appProps?.platform !== 'browser' && <ServerStatusOverlay />}
-				{!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />}
+				{/* {!location.pathname.match(/\/settings\/jobs/) && <JobOverlay />} */}
+				<JobOverlay />
 			</Suspense>
 		</AppContext.Provider>
 	)

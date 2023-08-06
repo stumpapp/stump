@@ -115,7 +115,7 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 						let persist_result = persist_job_end(
 							&ctx.core_ctx,
 							ctx.job_id.clone(),
-							JobStatus::Failed,
+							JobStatus::Cancelled,
 							duration,
 							None,
 						)

@@ -59,6 +59,7 @@ pub enum JobStatus {
 	#[serde(rename = "FAILED")]
 	Failed,
 	#[default]
+	#[serde(rename = "QUEUED")]
 	Queued,
 }
 

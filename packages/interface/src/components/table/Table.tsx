@@ -25,6 +25,7 @@ export interface TableProps<T = unknown, V = unknown> {
 	fullWidth?: boolean
 	searchable?: boolean
 	sortable?: boolean
+	emptyRenderer?: () => React.ReactNode
 }
 
 // TODO: move into components package!
@@ -35,6 +36,7 @@ export default function Table<T, V>({
 	options,
 	searchable,
 	sortable,
+	emptyRenderer,
 	...props
 }: TableProps<T, V>) {
 	const [sorting, setSorting] = useState<SortingState>([])
@@ -105,41 +107,40 @@ export default function Table<T, V>({
 		}
 	}
 
+	const tableRows = table.getRowModel().rows
+
 	return (
 		<div className="divide block max-w-full overflow-y-hidden overflow-x-scroll p-3 scrollbar-hide">
 			<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
 				<thead className="border-b border-gray-75 text-left dark:border-gray-800">
-					{table
-						.getHeaderGroups()
-						// .slice(1)
-						.map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
-									return (
-										<th key={header.id} colSpan={header.colSpan} className="py-2.5">
-											<div
-												className={clsx('flex items-center', {
-													'cursor-pointer select-none': header.column.getCanSort() && sortable,
-												})}
-												onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
-											>
-												<Heading className="text-sm font-medium">
-													{flexRender(header.column.columnDef.header, header.getContext())}
-												</Heading>
-												{sortable && (
-													<SortIcon
-														direction={(header.column.getIsSorted() as SortDirection) ?? null}
-													/>
-												)}
-											</div>
-										</th>
-									)
-								})}
-							</tr>
-						))}
+					{table.getHeaderGroups().map((headerGroup) => (
+						<tr key={headerGroup.id}>
+							{headerGroup.headers.map((header) => {
+								return (
+									<th key={header.id} colSpan={header.colSpan} className="py-2.5">
+										<div
+											className={clsx('flex items-center', {
+												'cursor-pointer select-none': header.column.getCanSort() && sortable,
+											})}
+											onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
+										>
+											<Heading className="text-sm font-medium">
+												{flexRender(header.column.columnDef.header, header.getContext())}
+											</Heading>
+											{sortable && (
+												<SortIcon
+													direction={(header.column.getIsSorted() as SortDirection) ?? null}
+												/>
+											)}
+										</div>
+									</th>
+								)
+							})}
+						</tr>
+					))}
 				</thead>
 				<tbody className="divide-y divide-gray-75 dark:divide-gray-800">
-					{table.getRowModel().rows.map((row) => {
+					{tableRows.map((row) => {
 						return (
 							<tr key={row.id}>
 								{row.getVisibleCells().map((cell) => {
@@ -152,17 +153,28 @@ export default function Table<T, V>({
 							</tr>
 						)
 					})}
+					{tableRows.length === 0 && emptyRenderer && (
+						<tr>
+							<td colSpan={columns.length}>{emptyRenderer()}</td>
+						</tr>
+					)}
 				</tbody>
 			</table>
 			<div className="h-2" />
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-4">
 					<Text variant="muted" className="flex flex-shrink-0 items-center gap-1" size="sm">
-						<span>
-							Showing <strong>{viewBounds.firstIndex}</strong> to{' '}
-							<strong>{viewBounds.lastIndex}</strong>
-						</span>
-						of <strong>{viewBounds.totalCount}</strong>
+						{tableRows.length > 0 ? (
+							<>
+								<span>
+									Showing <strong>{viewBounds.firstIndex}</strong> to{' '}
+									<strong>{viewBounds.lastIndex}</strong>
+								</span>
+								of <strong>{viewBounds.totalCount}</strong>
+							</>
+						) : (
+							'Nothing to show'
+						)}
 					</Text>
 
 					<NativeSelect

@@ -41,6 +41,7 @@ pub async fn persist_job_start(
 		)
 		.exec()
 		.await?;
+
 	Ok(())
 }
 

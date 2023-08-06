@@ -40,7 +40,7 @@ export type TextProps = {
 
 const Text = React.forwardRef<React.ElementRef<'p'>, TextProps>(
 	({ className, variant, size, ...props }, ref) => (
-		<p ref={ref} className={cn(textVariants({ className, size, variant }), className)} {...props} />
+		<p ref={ref} className={cn(textVariants({ className, size, variant }))} {...props} />
 	),
 )
 Text.displayName = 'Text'

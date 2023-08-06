@@ -1,9 +1,11 @@
+import { jobQueryKeys } from '@stump/api'
 import { JobUpdate } from '@stump/types'
 import { ReactElement, useState } from 'react'
 
+import { invalidateQueries } from '.'
 import { queryClient, QueryClientProvider } from './client'
 import {
-	ActiveJobContext,
+	JobContext,
 	QueryClientContext,
 	StumpClientContext,
 	StumpClientContextProps,
@@ -45,6 +47,8 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 				}
 			}
 		})
+
+		invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 	}
 
 	function updateJob(jobUpdate: JobUpdate) {
@@ -77,7 +81,7 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 	}
 
 	return (
-		<ActiveJobContext.Provider
+		<JobContext.Provider
 			value={{
 				activeJobs: jobs,
 				addJob,
@@ -86,6 +90,6 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 			}}
 		>
 			{children}
-		</ActiveJobContext.Provider>
+		</JobContext.Provider>
 	)
 }

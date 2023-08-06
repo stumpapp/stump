@@ -15,7 +15,7 @@ export const ALERT_ICONS = {
 
 // TODO: adjust colors
 export const ALERT_VARIANTS: Record<keyof typeof ALERT_ICONS, string> = {
-	error: 'bg-red-50 text-red-700',
+	error: 'bg-red-50 text-red-700 dark:bg-red-300',
 	grayscale: 'bg-gray-50 text-gray-700',
 	info: 'bg-blue-50 text-blue-700',
 	success: 'bg-green-50 text-green-700',
@@ -33,12 +33,13 @@ const alertVariants = cva('p-4', {
 			default: 'rounded-md',
 			lg: 'rounded-lg',
 			none: 'rounded-none',
+			sm: 'rounded-sm',
 		},
 	},
 })
 
 export type AlertProps = {
-	icon?: LucideIcon
+	icon?: LucideIcon | keyof typeof ALERT_ICONS
 	alignIcon?: 'center' | 'start'
 } & VariantProps<typeof alertVariants> &
 	React.ComponentPropsWithoutRef<'div'>
@@ -48,12 +49,16 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 		// TODO: implement me, inspriation from https://chakra-ui.com/docs/components/alert/usage
 
 		const renderIcon = () => {
-			let Icon: LucideIcon
+			let Icon: LucideIcon | null = null
 
-			if (icon) {
-				Icon = icon
-			} else {
+			if (typeof icon === 'string') {
 				Icon = ALERT_ICONS[level || 'info'] || ALERT_ICONS.info
+			} else if (icon) {
+				Icon = icon
+			}
+
+			if (!Icon) {
+				return null
 			}
 
 			return (
@@ -94,7 +99,7 @@ const AlertContent = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'
 			<div
 				ref={ref}
 				{...props}
-				className={cn('ml-3 flex-1 md:flex md:justify-between', className)}
+				className={cn('ml-3 flex-1 md:flex md:items-center md:justify-between', className)}
 			/>
 		)
 	},

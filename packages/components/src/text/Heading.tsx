@@ -22,6 +22,7 @@ const headingVariants = cva(HEADING_BASE_CLASSES, {
 			sm: 'text-lg',
 			xl: 'text-3xl',
 			xs: 'text-base',
+			xxs: 'text-sm',
 		},
 		variant: {
 			default: 'dark:text-gray-100',

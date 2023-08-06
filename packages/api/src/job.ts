@@ -12,17 +12,28 @@ export function getJobs(params?: Record<string, unknown>): Promise<PageableApiRe
 	}
 }
 
-// TODO: type this
-export function cancelJob(id: string): Promise<ApiResult<unknown>> {
+export function cancelJob(id: string): Promise<ApiResult<void>> {
 	return API.delete(`/jobs/${id}/cancel`)
+}
+
+export function deleteJob(id: string): Promise<ApiResult<void>> {
+	return API.delete(`/jobs/${id}`)
+}
+
+export function deleteAllJobs(): Promise<ApiResult<void>> {
+	return API.delete('/jobs')
 }
 
 export const jobApi = {
 	cancelJob,
+	deleteAllJobs,
+	deleteJob,
 	getJobs,
 }
 
 export const jobQueryKeys: Record<keyof typeof jobApi, string> = {
 	cancelJob: 'job.cancelJob',
+	deleteAllJobs: 'job.deleteAll',
+	deleteJob: 'job.delete',
 	getJobs: 'job.get',
 }

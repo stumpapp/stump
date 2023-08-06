@@ -184,7 +184,11 @@
 					"tasks": "Tasks"
 				},
 				"emptyHeading": "There are no jobs to display",
-				"emptySubtitle": "You can't have a job if you don't have a job"
+				"emptySubtitle": "You can't have a job if you don't have a job",
+				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
+				"deleteAllConfirmButton": "Clear history",
+				"deleteAllConfirmButtonTitle": "Clear all job history",
+				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
 			}
 		},
 		"server": {

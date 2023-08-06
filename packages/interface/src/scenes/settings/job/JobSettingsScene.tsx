@@ -6,12 +6,15 @@ import { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
 import SceneContainer from '../../../components/SceneContainer'
+import { useAppContext } from '../../../context.ts'
 import { useLocaleContext } from '../../../i18n'
 import { JobSettingsContext } from './context'
+import DeleteAllSection from './DeleteAllSection.tsx'
 import JobScheduler from './JobScheduler'
 import JobTable from './JobTable'
 
 export default function JobSettingsScene() {
+	const { isServerOwner } = useAppContext()
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
 		pageSize: 10,
@@ -26,6 +29,7 @@ export default function JobSettingsScene() {
 		isRefetching,
 		pageData,
 	} = useJobsQuery({
+		enabled: isServerOwner,
 		page: pagination.pageIndex,
 		page_size: pagination.pageSize,
 		params: {
@@ -91,6 +95,7 @@ export default function JobSettingsScene() {
 					<Divider variant="muted" className="my-3.5" />
 				</div>
 				<JobTable />
+				<DeleteAllSection />
 			</SceneContainer>
 		</JobSettingsContext.Provider>
 	)

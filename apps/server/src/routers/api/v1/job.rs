@@ -28,8 +28,13 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.nest(
 			"/jobs",
 			Router::new()
-				.route("/", get(get_jobs).delete(delete_job_reports))
-				.route("/:id/cancel", delete(cancel_job)),
+				.route("/", get(get_jobs).delete(delete_jobs))
+				.nest(
+					"/:id",
+					Router::new()
+						.route("/", delete(delete_job_by_id))
+						.route("/cancel", delete(cancel_job_by_id)),
+				),
 		)
 		.layer(from_extractor::<AdminGuard>())
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -139,10 +144,32 @@ async fn get_jobs(
 		(status = 500, description = "Internal server error."),
 	)
 )]
-/// Delete all job reports.
-async fn delete_job_reports(State(ctx): State<AppState>) -> ApiResult<()> {
+/// Delete all jobs from the database.
+async fn delete_jobs(State(ctx): State<AppState>) -> ApiResult<()> {
 	let result = ctx.db.job().delete_many(vec![]).exec().await?;
 	debug!("Deleted {} job reports", result);
+	Ok(())
+}
+
+#[utoipa::path(
+	delete,
+	path = "/api/v1/jobs/:id",
+	tag = "job",
+	responses(
+		(status = 200, description = "Successfully deleted job"),
+		(status = 401, description = "No user is logged in (unauthorized)."),
+		(status = 403, description = "User does not have permission to access this resource."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+/// Delete a job by its ID
+async fn delete_job_by_id(
+	State(ctx): State<AppState>,
+	Path(job_id): Path<String>,
+) -> ApiResult<()> {
+	let _ = ctx.db.job().delete(job::id::equals(job_id)).exec().await?;
+	// TODO(aaron): debug why this breaks Axum...
+	// Ok(JobDetail::from(result))
 	Ok(())
 }
 
@@ -161,7 +188,7 @@ async fn delete_job_reports(State(ctx): State<AppState>) -> ApiResult<()> {
 	)
 )]
 /// Cancel a running job. This will not delete the job report.
-async fn cancel_job(
+async fn cancel_job_by_id(
 	State(ctx): State<AppState>,
 	Path(job_id): Path<String>,
 ) -> ApiResult<()> {

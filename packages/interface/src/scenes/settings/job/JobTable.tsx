@@ -8,6 +8,7 @@ import { CircleSlash2 } from 'lucide-react'
 import React, { useMemo } from 'react'
 
 import { Table } from '../../../components/table'
+import { useAppContext } from '../../../context.ts'
 import { useLocaleContext } from '../../../i18n'
 import { useJobSettingsContext } from './context'
 import JobActionMenu from './JobActionMenu'
@@ -20,6 +21,7 @@ const DEBUG = import.meta.env.DEV
 const LOCALE_BASE = 'settingsScene.jobs.historyTable'
 
 export default function JobTable() {
+	const { isServerOwner } = useAppContext()
 	const { t } = useLocaleContext()
 	const { jobs, pagination, setPagination, pageCount } = useJobSettingsContext()
 
@@ -132,18 +134,11 @@ export default function JobTable() {
 				id: 'ms_elapsed',
 			},
 			{
-				cell: ({ row }) => {
-					const job = row.original
-					if (job.status !== 'RUNNING' && job.status !== 'QUEUED') {
-						return null
-					}
-
-					return <JobActionMenu job={job} />
-				},
+				cell: ({ row }) => (isServerOwner ? <JobActionMenu job={row.original} /> : null),
 				id: 'actions',
 			},
 		],
-		[t],
+		[t, isServerOwner],
 	)
 
 	return (
@@ -165,6 +160,7 @@ export default function JobTable() {
 			}}
 			data={jobs}
 			fullWidth
+			// TODO(aaron): loader
 			emptyRenderer={() => (
 				<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
 					<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />

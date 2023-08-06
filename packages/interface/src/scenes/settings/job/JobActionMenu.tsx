@@ -3,7 +3,7 @@ import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { JobDetail } from '@stump/types'
 import { Ban, MoreVertical, Trash2 } from 'lucide-react'
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 
 type Props = {
@@ -25,7 +25,7 @@ export default function JobActionMenu({ job }: Props) {
 	/**
 	 * Cancels the running job.
 	 */
-	const handleCancel = async () => {
+	const handleCancel = useCallback(async () => {
 		if (job.status !== 'RUNNING' && job.status !== 'QUEUED') {
 			// This shouldn't happen, but just in case we will refresh the jobs
 			// and just return.
@@ -40,12 +40,12 @@ export default function JobActionMenu({ job }: Props) {
 		} finally {
 			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 		}
-	}
+	}, [job.id, job.status])
 
 	/**
 	 * Deletes the record of the job from the database.
 	 */
-	const handleDelete = async () => {
+	const handleDelete = useCallback(async () => {
 		// We don't allow deletion for in-flight/queued jobs
 		if (job.status === 'RUNNING' || job.status === 'QUEUED') {
 			return
@@ -58,7 +58,7 @@ export default function JobActionMenu({ job }: Props) {
 		} finally {
 			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 		}
-	}
+	}, [job.id, job.status])
 
 	const items = useMemo(
 		() => [
@@ -81,7 +81,7 @@ export default function JobActionMenu({ job }: Props) {
 				  ]
 				: []),
 		],
-		[job.status],
+		[job.status, handleCancel, handleDelete],
 	)
 
 	return (

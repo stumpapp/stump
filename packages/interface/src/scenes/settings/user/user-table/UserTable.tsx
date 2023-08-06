@@ -6,6 +6,7 @@ import { useCallback, useMemo } from 'react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
+import UserActionMenu from './UserActionMenu'
 import UsernameRow from './UsernameRow'
 
 // TODO: eventually I'd like to integrate some RBAC management here, as well. E.g.
@@ -17,20 +18,7 @@ import UsernameRow from './UsernameRow'
 const debugFlag = import.meta.env.DEV
 
 export default function UserTable() {
-	const { users, pageCount, pagination, setPagination, selectedUser, setSelectedUser } =
-		useUserManagementContext()
-
-	const handleSelectUser = useCallback(
-		(userId: string) => {
-			if (selectedUser?.id === userId) {
-				setSelectedUser(null)
-			} else {
-				const user = users.find((u) => u.id === userId)
-				setSelectedUser(user || null)
-			}
-		},
-		[selectedUser, users, setSelectedUser],
-	)
+	const { users, pageCount, pagination, setPagination } = useUserManagementContext()
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 	// FIXME: sorting not working (because tied to query and needs state :weary:)
@@ -38,33 +26,12 @@ export default function UserTable() {
 	const columns = useMemo<ColumnDef<User>[]>(
 		() => [
 			{
-				cell: (info) => {
-					const user = info.row.original
-					const isSelected = selectedUser?.id === user.id
-					return (
-						<CheckBox
-							variant="primary"
-							checked={isSelected}
-							onClick={() => handleSelectUser(user.id)}
-						/>
-					)
-				},
-				// header: <CheckBox variant="primary" />,
-				id: 'select',
-			},
-			{
+				accessorKey: 'username',
 				cell: (info) => {
 					const user = info.row.original
 					return <UsernameRow {...user} />
 				},
-				// enableSorting: true,
 				header: 'Username',
-				// sortingFn: (a, b) => {
-				// 	const aUser = a.original
-				// 	const bUser = b.original
-
-				// 	return aUser.username.localeCompare(bUser.username)
-				// },
 			},
 			{
 				accessorKey: 'role',
@@ -80,18 +47,37 @@ export default function UserTable() {
 				header: 'Role',
 			},
 			{
-				cell: () => {
+				accessorKey: 'created_at',
+				cell: ({ row }) => {
 					return (
 						<Text size="sm" variant="muted">
-							{dayjs().format('LL')}
+							{dayjs(row.original.created_at).format('LL')}
 						</Text>
 					)
 				},
-				header: 'Last Seen',
-				id: 'username',
+				header: 'Created at',
+			},
+			{
+				cell: ({ row }) => {
+					return (
+						<Text size="sm" variant="muted">
+							{dayjs(row.original.last_login).format('LL')}
+						</Text>
+					)
+				},
+				header: 'Last Login',
+				id: 'lastLogin',
+			},
+			{
+				cell: ({ row }) => (
+					<div className="inline-flex items-end md:w-2">
+						<UserActionMenu user={row.original} />
+					</div>
+				),
+				id: 'actions',
 			},
 		],
-		[selectedUser, handleSelectUser],
+		[],
 	)
 
 	return (

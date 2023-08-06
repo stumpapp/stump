@@ -6,8 +6,8 @@ import { noop } from '../../../utils/misc'
 
 export type UserManagementContextProps = {
 	users: User[]
-	selectedUser: User | null
-	setSelectedUser: (user: User | null) => void
+	deletingUser: User | null
+	setDeletingUser: (user: User | null) => void
 	isRefetchingUsers: boolean
 	pageCount: number
 	pagination: PaginationState
@@ -15,15 +15,15 @@ export type UserManagementContextProps = {
 }
 
 export const UserManagementContext = createContext<UserManagementContextProps>({
+	deletingUser: null,
 	isRefetchingUsers: false,
 	pageCount: 0,
 	pagination: {
 		pageIndex: 0,
 		pageSize: 10,
 	},
-	selectedUser: null,
+	setDeletingUser: noop,
 	setPagination: noop,
-	setSelectedUser: noop,
 	users: [],
 })
 export const useUserManagementContext = () => useContext(UserManagementContext)

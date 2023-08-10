@@ -1,8 +1,8 @@
-import { CheckBox, Text } from '@stump/components'
+import { Text } from '@stump/components'
 import { User } from '@stump/types'
 import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
@@ -59,9 +59,16 @@ export default function UserTable() {
 			},
 			{
 				cell: ({ row }) => {
+					const renderDate = () => {
+						if (row.original.last_login) {
+							return dayjs(row.original.last_login).format('LL')
+						} else {
+							return 'Never'
+						}
+					}
 					return (
 						<Text size="sm" variant="muted">
-							{dayjs(row.original.last_login).format('LL')}
+							{renderDate()}
 						</Text>
 					)
 				},

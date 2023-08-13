@@ -21,6 +21,13 @@ library::include!(library_series_ids_media_ids_include {
 	}
 });
 
+library::include!(library_thumbnails_deletion_include {
+	series: include {
+		media: select { id }
+	}
+	library_options: select { thumbnail_config }
+});
+
 ///////////////////////////////////////////////
 //////////////////// MODELS ///////////////////
 ///////////////////////////////////////////////

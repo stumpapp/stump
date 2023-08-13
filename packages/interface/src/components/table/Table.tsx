@@ -71,7 +71,7 @@ export default function Table<T, V>({
 
 	const { pageSize, pageIndex } = table.getState().pagination
 
-	const pageCount = table.getPageCount()
+	const pageCount = options.pageCount ?? table.getPageCount()
 	const dataCount = data.length
 	const viewBounds = useMemo(() => {
 		const isLessThanPage = dataCount < pageSize
@@ -205,7 +205,7 @@ export default function Table<T, V>({
 				<TablePagination
 					currentPage={pageIndex + 1}
 					pages={pageCount}
-					onPageChange={(page) => table.setPageIndex(page)}
+					onPageChange={(page) => table.setPageIndex(page - 1)}
 				/>
 			</div>
 		</div>

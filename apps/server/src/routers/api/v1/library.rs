@@ -15,13 +15,19 @@ use utoipa::ToSchema;
 use stump_core::{
 	db::{
 		entity::{
-			library_series_ids_media_ids_include, CreateLibrary, LibrariesStats, Library,
-			LibraryScanMode, Media, Series, UpdateLibrary,
+			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
+			CreateLibrary, LibrariesStats, Library, LibraryScanMode, Media, Series,
+			UpdateLibrary,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
 	},
-	filesystem::{image, scanner::LibraryScanJob},
+	filesystem::{
+		image::{
+			self, remove_thumbnails, remove_thumbnails_of_type, ImageProcessorOptions,
+		},
+		scanner::LibraryScanJob,
+	},
 	prisma::{
 		library::{self, WhereParam},
 		library_options, media,
@@ -61,7 +67,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/scan", get(scan_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
-				.route("/thumbnail", get(get_library_thumbnail)),
+				.route(
+					"/thumbnail",
+					get(get_library_thumbnail).delete(delete_library_thumbnails),
+				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
@@ -213,16 +222,8 @@ async fn get_library_by_id(
 		.with(library::library_options::fetch())
 		.with(library::tags::fetch(vec![]))
 		.exec()
-		.await?;
-
-	if library.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Library with id {} not found",
-			id
-		)));
-	}
-
-	let library = library.unwrap();
+		.await?
+		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
 
 	Ok(Json(library.into()))
 }
@@ -417,6 +418,58 @@ async fn get_library_thumbnail(
 	super::media::get_media_thumbnail(media.id.clone(), db)
 		.await
 		.map(ImageResponse::from)
+}
+
+#[utoipa::path(
+	delete,
+	path = "/api/v1/libraries/:id/thumbnail",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+	),
+	responses(
+		(status = 200, description = "Successfully deleted library thumbnails"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+// TODO: make this a queuable job
+async fn delete_library_thumbnails(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+) -> ApiResult<Json<()>> {
+	let db = ctx.get_db();
+
+	let result = db
+		.library()
+		.find_unique(library::id::equals(id.clone()))
+		.include(library_thumbnails_deletion_include::include())
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+
+	let thumbnail_config = result.library_options.thumbnail_config;
+	let extension = if let Some(config) = thumbnail_config {
+		ImageProcessorOptions::try_from(config).ok()
+	} else {
+		None
+	}
+	.map(|config| config.format.extension());
+
+	let media_ids = result
+		.series
+		.iter()
+		.flat_map(|s| s.media.iter().map(|m| m.id.clone()))
+		.collect::<Vec<String>>();
+
+	if let Some(ext) = extension {
+		remove_thumbnails_of_type(&media_ids, ext)?;
+	} else {
+		remove_thumbnails(&media_ids)?;
+	}
+
+	Ok(Json(()))
 }
 
 #[derive(Debug, Deserialize, ToSchema)]

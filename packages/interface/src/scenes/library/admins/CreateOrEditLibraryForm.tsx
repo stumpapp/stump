@@ -121,8 +121,9 @@ type Props = {
 }
 
 export default function CreateOrEditLibraryForm({ library, existingLibraries }: Props) {
-	const isCreatingLibrary = !library
 	const navigate = useNavigate()
+
+	const isCreatingLibrary = !library
 
 	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
 
@@ -301,7 +302,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 				<div>
 					<Heading size="xs">Library Details</Heading>
 					<Text size="sm" variant="muted" className="mt-1.5">
-						Basic information and settings for your library.
+						Basic information and settings for your library
 					</Text>
 
 					<Divider variant="muted" className="my-3.5" />

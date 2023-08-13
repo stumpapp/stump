@@ -42,6 +42,8 @@ pub enum FileError {
 	WebpEncodeError(String),
 	#[error("An unknown error occurred: {0}")]
 	UnknownError(String),
+	#[error("Failed to read directory")]
+	DirectoryReadError,
 }
 
 impl From<FileError> for CoreError {

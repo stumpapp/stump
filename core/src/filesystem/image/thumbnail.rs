@@ -117,33 +117,70 @@ pub fn generate_thumbnails_for_media(
 	Ok(generated_paths)
 }
 
-pub fn get_thumbnail_path(id: &str) -> Option<PathBuf> {
-	let thumbnail_path = get_thumbnails_dir().join(format!("{}.webp", id));
+pub fn remove_thumbnails(id_list: &[String]) -> Result<(), FileError> {
+	let thumbnails_dir = get_thumbnails_dir();
+	let found_thumbnails = thumbnails_dir
+		.read_dir()
+		.ok()
+		.map(|dir| dir.into_iter())
+		.map(|iter| {
+			iter.filter_map(|entry| {
+				entry.ok().and_then(|entry| {
+					let path = entry.path();
+					let file_name = path.file_name()?.to_str()?.to_string();
 
-	if thumbnail_path.exists() {
-		Some(thumbnail_path)
-	} else {
-		None
-	}
-}
+					if id_list.iter().any(|id| file_name.starts_with(id)) {
+						Some(path)
+					} else {
+						None
+					}
+				})
+			})
+		})
+		.map(|iter| iter.collect::<Vec<PathBuf>>())
+		.unwrap_or_default();
 
-pub fn remove_thumbnail(id: &str) -> Result<(), FileError> {
-	let thumbnail_path = get_thumbnails_dir().join(format!("{}.webp", id));
+	let found_thumbnails_count = found_thumbnails.len();
+	tracing::debug!(found_thumbnails_count, "Found thumbnails to remove");
 
-	if thumbnail_path.exists() {
-		std::fs::remove_file(thumbnail_path)?;
+	for path in found_thumbnails {
+		std::fs::remove_file(path)?;
 	}
 
 	Ok(())
 }
 
-pub fn remove_thumbnails(id_list: &[String]) -> Result<(), FileError> {
-	for id in id_list {
-		// TODO: not sure I want the entire process to fail if one thumbnail fails to delete...
-		// for now, I will leave it as is. I can't see to many cases where this would happen, but
-		// it's obviously possible.
-		remove_thumbnail(id)?;
+pub fn remove_thumbnails_of_type(
+	ids: &[String],
+	extension: &str,
+) -> Result<(), FileError> {
+	let thumbnails_dir = get_thumbnails_dir();
+
+	for (idx, chunk) in ids.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
+		trace!(chunk = idx + 1, "Processing chunk for thumbnail removal");
+		let results = chunk
+			.into_par_iter()
+			.map(|id| {
+				let thumbnail_path = thumbnails_dir.join(format!("{}.{}", id, extension));
+				if thumbnail_path.exists() {
+					std::fs::remove_file(thumbnail_path)?;
+				}
+				Ok(())
+			})
+			.filter_map(|res: Result<(), FileError>| {
+				if res.is_err() {
+					error!(error = ?res.err(), "Error generating thumbnail!");
+					None
+				} else {
+					res.ok()
+				}
+			})
+			.collect::<Vec<()>>();
+
+		debug!(deleted_count = results.len(), "Deleted thumbnail batch");
 	}
+
+	debug!("Finished deleting thumbnails");
 
 	Ok(())
 }

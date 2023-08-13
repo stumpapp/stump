@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 
 import { useLocaleContext } from '../../../i18n/context'
 import CreateOrEditLibraryForm from './CreateOrEditLibraryForm'
+import QuickActions from './QuickActions'
 
 export default function EditLibraryScene() {
 	const { id } = useParams()
@@ -31,7 +32,12 @@ export default function EditLibraryScene() {
 
 			<Divider variant="muted" className="my-3.5" />
 			<div className="flex flex-col gap-12 pt-2">
-				{libraries && <CreateOrEditLibraryForm existingLibraries={libraries} library={library} />}
+				{libraries && (
+					<>
+						<QuickActions />
+						<CreateOrEditLibraryForm existingLibraries={libraries} library={library} />
+					</>
+				)}
 			</div>
 		</>
 	)

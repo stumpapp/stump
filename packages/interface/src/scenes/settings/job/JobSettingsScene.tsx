@@ -35,6 +35,7 @@ export default function JobSettingsScene() {
 		params: {
 			order_by: 'created_at',
 			order_direction: 'desc',
+			zero_based: true,
 		},
 	})
 
@@ -59,7 +60,7 @@ export default function JobSettingsScene() {
 			value={{
 				isRefetchingJobs: isRefetching,
 				jobs,
-				pageCount: pageData?.total_pages ?? jobs.length ? 1 : 0,
+				pageCount: pageData?.total_pages ?? 1,
 				pagination,
 				setPagination,
 			}}
@@ -75,6 +76,11 @@ export default function JobSettingsScene() {
 						{t('settingsScene.jobs.subtitle')}
 					</Text>
 				</div>
+
+				{/* 
+					TODO(aaron): on mobile only, add a section for managing the running job. Doing it all 
+					through the table on mobile would prolly suck
+				*/}
 
 				<div>
 					<Heading size="xs">{t('settingsScene.jobs.schedulingHeading')}</Heading>

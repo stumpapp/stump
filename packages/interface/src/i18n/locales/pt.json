@@ -3,46 +3,46 @@
 		"claimText": "Este servidor de Stump ainda não foi reivindicado, você pode usar o formulário abaixo para criar uma conta de usuário e reivindicá-lo. Digite seu nome de usuário e senha preferidos.",
 		"form": {
 			"validation": {
-				"missingUsername": "O nome de usuário é necessário",
-				"missingPassword": "A senha é necessária"
+				"missingUsername": "O nome é obrigatório",
+				"missingPassword": "A senha é obrigatória"
 			},
 			"labels": {
 				"username": "Nome de usuário",
 				"password": "Senha"
 			},
 			"buttons": {
-				"createAccount": "Criar Conta",
+				"createAccount": "Criar uma Conta",
 				"login": "Entrar"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Entrando...",
-			"loggedIn": "Bem-vindo de volta! Redirecionando...",
-			"loggedInFirstTime": "Bem vindo! Redirecionando...",
+			"loggingIn": "A autenticar...",
+			"loggedIn": "Boas-vindas! Redirecionando...",
+			"loggedInFirstTime": "Bem-vindo(a)! Redirecionando...",
 			"registering": "Registrando...",
 			"registered": "Registrado!",
-			"loginFailed": "Falha ao iniciar sessão. Tente novamente.",
-			"registrationFailed": "Falha ao registrar. Por favor, tente novamente."
+			"loginFailed": "Falha no login, por favor tente novamente.",
+			"registrationFailed": "A solicitação falhou. Por favor, tente novamente."
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Configuração da Biblioteca",
+			"heading": "Configuração da biblioteca",
 			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo.",
 			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo."
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Informações do Arquivo",
+			"heading": "Informações do arquivo",
 			"labels": {
 				"fileSize": "Tamanho do arquivo",
-				"fileType": "Tipo de arquivo",
+				"fileType": "Tipo do Arquivo",
 				"fileLocation": "Localização do Arquivo",
-				"fileChecksum": "Checksum"
+				"fileChecksum": "Soma de verificação"
 			}
 		},
-		"nextInSeries": "Seguinte na série"
+		"nextInSeries": "Próximo na série:"
 	},
 	"createLibraryScene": {
 		"heading": "Criar nova biblioteca",
@@ -51,10 +51,10 @@
 		"form": {
 			"labels": {
 				"libraryName": "Nome",
-				"libraryPath": "Caminho",
-				"libraryPathDescription": "O caminho para a biblioteca como ela existe no seu servidor.",
+				"libraryPath": "Caminho:",
+				"libraryPathDescription": "O caminho para a biblioteca que existe no seu servidor.",
 				"libraryDescription": "Descrição",
-				"libraryTags": "Etiquetas"
+				"libraryTags": "Tags"
 			},
 			"buttons": {
 				"confirm": "Criar Biblioteca"
@@ -62,213 +62,213 @@
 		}
 	},
 	"editLibraryScene": {
-		"heading": "Editar biblioteca",
-		"subtitle": "Use o formulário abaixo para editar sua biblioteca. Se você estiver desejando uma atualização em bibliotecas e como elas funcionam, confira",
-		"subtitleLink": "documentação relevante",
+		"heading": "Edit Library",
+		"subtitle": "Use the below form to edit your library. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "Nome",
-				"libraryPath": "Caminho",
-				"libraryPathDescription": "O caminho para a biblioteca como ela existe no seu servidor.",
-				"libraryDescription": "Descrição",
-				"libraryTags": "Etiquetas"
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server.",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
 			},
 			"buttons": {
-				"confirm": "Gravar as alterações"
+				"confirm": "Save Changes"
 			}
 		}
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "Ocorreu um erro:",
+		"message": "An error occurred:",
 		"buttons": {
-			"report": "Reportar Bug",
-			"copy": "Copiar os detalhes do erro",
-			"goHome": "Ir ao Início"
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continuar Lendo",
-		"recentlyAddedSeries": "Séries adicionadas recentemente",
-		"recentlyAddedBooks": "Livros adicionados recentemente"
+		"continueReading": "Continue Reading",
+		"recentlyAddedSeries": "Recently Added Series",
+		"recentlyAddedBooks": "Recently Added Books"
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continuar Lendo",
-			"downloadSeries": "Baixar Séries"
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
 		}
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "Geral",
-			"server": "Servidor",
-			"jobs": "Ações e configurações",
-			"users": "Gerenciamento de usuários"
+			"general": "General",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management"
 		},
 		"general": {
-			"helmet": "Configurações Gerais",
-			"heading": "Configurações Gerais",
-			"subtitle": "Use os formulários abaixo para gerenciar suas preferências e configurações de conta.",
+			"helmet": "General Settings",
+			"heading": "General Settings",
+			"subtitle": "Use the forms below to manage your preferences and account settings.",
 			"profileForm": {
 				"validation": {
-					"invalidUrl": "Por favor insira um URL válido",
-					"missingUsername": "Nome de usuário é necessário"
+					"invalidUrl": "Please enter a valid URL",
+					"missingUsername": "Username is required"
 				},
 				"labels": {
-					"username": "Nome de usuário",
-					"password": "Senha",
-					"activeChangesPrompt": "Você tem modificações não salvas"
+					"username": "Username",
+					"password": "Password",
+					"activeChangesPrompt": "You have unsaved changes"
 				},
 				"errors": {
-					"updateFailed": "Ocorreu um erro ao carregar seu conteúdo. Por favor, tente novamente."
+					"updateFailed": "A server error occurred while updating your profile. Please try again."
 				},
 				"avatarPicker": {
-					"heading": "Defina sua imagem de avatar",
-					"subtitle": "Stump suporta avatares personalizados, que podem ser configurados fornecendo uma URL para uma imagem. Envio de imagens não é suportado para reduzir a quantidade de dados armazenados no servidor.",
-					"preview": "Uma pré-visualização aparecerá aqui uma vez que você inseriu uma URL.",
+					"heading": "Set your Avatar Image",
+					"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
+					"preview": "A preview will appear here once you have entered a URL.",
 					"labels": {
-						"imageUrl": "URL da Imagem",
-						"customAvatar": "Avatar personalizado"
+						"imageUrl": "Image URL",
+						"customAvatar": "Custom Avatar"
 					},
 					"buttons": {
-						"confirm": "Confirmar Imagem",
-						"cancel": "Cancelar",
-						"edit": "Editar",
-						"changeImage": "Mudar Imagem",
-						"removeImage": "Remover imagem"
+						"confirm": "Confirm Image",
+						"cancel": "Cancel",
+						"edit": "Edit",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image"
 					}
 				},
 				"buttons": {
-					"confirm": "Gravar as alterações"
+					"confirm": "Save Changes"
 				}
 			},
 			"theme": {
-				"heading": "Tema do aplicativo",
-				"subtitle": "Stump suporta os temas claro e escuro, que podem ser definidos abaixo.",
+				"heading": "Application Theme",
+				"subtitle": "Stump supports both light and dark themes, which can be set below.",
 				"dark": {
-					"label": "Tema escuro",
-					"description": "Use um tema escuro para o Stump, que é o tema correto."
+					"label": "Dark Theme",
+					"description": "Use a dark theme for Stump, which is the correct theme."
 				},
 				"light": {
-					"label": "Tema claro",
-					"description": "Use um tema claro para o Stump, que é o tema incorreto."
+					"label": "Light Theme",
+					"description": "Use a light theme for Stump, which is the incorrect theme."
 				}
 			},
 			"locale": {
 				"localeSelector": {
-					"label": "Idioma"
+					"label": "Language"
 				},
-				"heading": "Configurações de idioma e região",
+				"heading": "Language and Locale Settings",
 				"subtitle": [
-					"O Stump suporta vários idiomas e idiomas, defina suas preferências abaixo. Por favor considere ajudar a melhorar a qualidade de",
-					"Traduções do stump",
-					"se você puder!"
+					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+					"Stump's translations",
+					"if you're able to!"
 				]
 			}
 		},
 		"jobs": {
-			"helmet": "Ações e configurações",
-			"heading": "Ações e configurações",
-			"subtitle": "Ver e gerenciar as tarefas em segundo plano disponíveis neste servidor, incluindo varreduras de biblioteca e agendamento."
+			"helmet": "Jobs and Configuration",
+			"heading": "Jobs and Configuration",
+			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling."
 		},
 		"server": {
-			"helmet": "Configurações do servidor",
-			"heading": "Configurações do servidor",
-			"subtitle": "Gerencie várias opções configuráveis para a instância do servidor Stumpe, em si."
+			"helmet": "Server Settings",
+			"heading": "Server Settings",
+			"subtitle": "Manage various configurable options for your Stump server instance, itself."
 		},
 		"users": {
-			"helmet": "Gerenciamento de usuários",
-			"heading": "Gerenciamento de usuários",
-			"subtitle": "Gerenciar os usuários deste servidor, incluindo a criação de novos usuários e a alteração de suas permissões."
+			"helmet": "User Management",
+			"heading": "User Management",
+			"subtitle": "Manage the users on this server, including creating new users and changing their permissions."
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Trabalho em Progresso"
+		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "Total de Séries",
-		"bookCount": "Número Total de Livros",
-		"diskUsage": "Uso de disco"
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Próxima",
-			"previous": "Anterior"
+			"next": "Next",
+			"previous": "Previous"
 		},
 		"popover": {
-			"heading": "Ir para a página",
+			"heading": "Go to page",
 			"buttons": {
-				"confirm": "Ir",
-				"cancel": "Cancelar"
+				"confirm": "Go",
+				"cancel": "Cancel"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Terminar Sessão",
-		"message": "Você tem certeza que deseja sair?",
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
 		"buttons": {
-			"cancel": "Cancelar",
-			"signOut": "Terminar Sessão"
+			"cancel": "Cancel",
+			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Início",
-			"libraries": "Bibliotecas",
-			"createLibrary": "Criar Biblioteca",
-			"settings": "Configurações",
-			"themeToggle": "Alternar tema",
-			"goForward": "Ir adiante",
-			"goBack": "Retornar"
+			"home": "Home",
+			"libraries": "Libraries",
+			"createLibrary": "Create Library",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back"
 		},
 		"libraryOptions": {
 			"scanLibrary": {
-				"base": "Escanear Biblioteca",
-				"parallel": "Escaneamento paralelo",
-				"inOrder": "Em ordem de escaneamento"
+				"base": "Scan Library",
+				"parallel": "Parallel Scan",
+				"inOrder": "In Order Scan"
 			},
-			"fileExplorer": "Explorador de Arquivos",
-			"editLibrary": "Editar biblioteca",
-			"deleteLibrary": "Excluir Biblioteca"
+			"fileExplorer": "File Explorer",
+			"editLibrary": "Edit Library",
+			"deleteLibrary": "Delete Library"
 		},
 		"versionInformation": {
-			"heading": "Informações da versão",
-			"semVer": "Versionamento Semântico",
-			"commitHash": "Hash do Commit",
-			"buildDate": "Data da Compilação"
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
-		"placeholder": "Pesquisar"
+		"placeholder": "Search"
 	},
 	"serverSOS": {
-		"heading": "Servidor indisponível",
+		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo."
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below."
 		},
 		"web": {
-			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo."
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device."
 		},
-		"reconnected": "Reconectado ao servidor! Redirecionando...",
-		"reconnectionFailed": "Algo deu errado!"
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Servidor não está conectado.",
+		"heading": "Server isn't connected.",
 		"message": [
-			"Por favor, verifique sua conexão com a internet.",
-			"Clique aqui",
-			"para mudar a URL de seu servidor."
+			"Please check your internet connection.",
+			"Click here",
+			"to change your server URL."
 		]
 	},
 	"slidingList": {
-		"empty": "Nenhum item para exibir",
+		"empty": "No items to display",
 		"buttons": {
-			"next": "Buscar à frente",
-			"previous": "Procurar Anterior"
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Selecionar ou criar etiqueta",
-		"placeholderNoTags": "Não há tags disponíveis"
+		"placholder": "Select or create tag",
+		"placeholderNoTags": "No tags available"
 	}
 }

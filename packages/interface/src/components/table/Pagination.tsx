@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@stump/components'
+import { Button, cn, IconButton } from '@stump/components'
 import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react'
 import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
@@ -9,12 +9,14 @@ import { PaginationProps } from '../Pagination'
 
 type TablePaginationProps = Omit<PaginationProps, 'position'> & {
 	onPageChange: (page: number) => void
+	isZeroBasedPagination?: boolean
 }
 
 export default function TablePagination({
 	pages,
 	currentPage,
 	onPageChange,
+	isZeroBasedPagination,
 }: TablePaginationProps) {
 	const { innerWidth: screenWidth } = useWindowSize()
 
@@ -36,16 +38,16 @@ export default function TablePagination({
 
 	return (
 		<div className="flex items-center gap-1">
-			<Button disabled={currentPage <= 1} onClick={() => onPageChange(currentPage - 1)}>
+			<IconButton disabled={currentPage <= 1} onClick={() => onPageChange(currentPage - 1)}>
 				<ArrowLeft />
-			</Button>
+			</IconButton>
 
 			{pageRange.map((page, i) => {
 				if (typeof page === 'number') {
 					return (
 						<PaginationNumber
 							key={`${i}, pagination-${page}`}
-							active={page === currentPage}
+							isActive={page === currentPage}
 							onClick={() => onPageChange(page)}
 							page={page}
 						/>
@@ -68,23 +70,28 @@ export default function TablePagination({
 				)
 			})}
 
-			<Button disabled={currentPage >= pages} onClick={() => onPageChange(currentPage + 1)}>
+			<IconButton disabled={currentPage >= pages} onClick={() => onPageChange(currentPage + 1)}>
 				<ArrowRight />
-			</Button>
+			</IconButton>
 		</div>
 	)
 }
 
 interface PaginationNumberProps {
 	page: number
-	active: boolean
+	isActive: boolean
 	onClick: () => void
 }
 
 // TODO: style
-function PaginationNumber({ onClick, page }: PaginationNumberProps) {
+function PaginationNumber({ onClick, page, isActive }: PaginationNumberProps) {
 	return (
-		<IconButton size="xs" onClick={onClick} variant="ghost">
+		<IconButton
+			size="xs"
+			onClick={onClick}
+			variant="ghost"
+			className={cn('h-5 w-5', isActive ? '!text-brand' : '')}
+		>
 			{page}
 		</IconButton>
 	)

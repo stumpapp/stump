@@ -26,10 +26,12 @@ export interface TableProps<T = unknown, V = unknown> {
 	searchable?: boolean
 	sortable?: boolean
 	emptyRenderer?: () => React.ReactNode
+	isZeroBasedPagination?: boolean
 }
 
 // TODO: move into components package!
 // TODO: loading state
+// TODO: total count for pagination...
 export default function Table<T, V>({
 	data,
 	columns,
@@ -37,6 +39,7 @@ export default function Table<T, V>({
 	searchable,
 	sortable,
 	emptyRenderer,
+	isZeroBasedPagination,
 	...props
 }: TableProps<T, V>) {
 	const [sorting, setSorting] = useState<SortingState>([])
@@ -61,13 +64,6 @@ export default function Table<T, V>({
 			sorting,
 		},
 	})
-
-	// const headers = [{ header: 'All', id: 'GLOBAL_FILTER' }].concat(
-	// 	table
-	// 		.getAllColumns()
-	// 		.map((col) => col.columns.map((c) => ({ header: c.columnDef.header as string, id: c.id })))
-	// 		.flat(),
-	// )
 
 	const { pageSize, pageIndex } = table.getState().pagination
 
@@ -98,13 +94,17 @@ export default function Table<T, V>({
 		}
 	}, [pageCount, pageSize, dataCount, pageIndex])
 
-	function handleFilter(value?: string) {
+	const handleFilter = (value?: string) => {
 		const filterCol = filterColRef.current?.value
 		if (filterCol === 'GLOBAL_FILTER') {
 			setGlobalFilter(value || '')
 		} else if (filterCol) {
 			table.getColumn(filterCol)?.setFilterValue(value)
 		}
+	}
+
+	const handlePageChanged = (page: number) => {
+		table.setPageIndex(isZeroBasedPagination ? page - 1 : page)
 	}
 
 	const tableRows = table.getRowModel().rows
@@ -205,7 +205,8 @@ export default function Table<T, V>({
 				<TablePagination
 					currentPage={pageIndex + 1}
 					pages={pageCount}
-					onPageChange={(page) => table.setPageIndex(page - 1)}
+					onPageChange={handlePageChanged}
+					isZeroBasedPagination={isZeroBasedPagination}
 				/>
 			</div>
 		</div>

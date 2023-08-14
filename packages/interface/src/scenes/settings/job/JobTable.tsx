@@ -170,6 +170,7 @@ export default function JobTable() {
 					</Text>
 				</div>
 			)}
+			isZeroBasedPagination
 		/>
 	)
 }

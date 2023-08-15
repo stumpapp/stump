@@ -78,3 +78,21 @@ pub async fn persist_job_end(
 
 	Ok(())
 }
+
+pub async fn update_job_status(
+	core_ctx: &Ctx,
+	job_id: String,
+	status: JobStatus,
+) -> CoreResult<()> {
+	let db = core_ctx.get_db();
+	let _ = db
+		.job()
+		.update(
+			job::id::equals(job_id.clone()),
+			vec![job::status::set(status.to_string())],
+		)
+		.exec()
+		.await?;
+
+	Ok(())
+}

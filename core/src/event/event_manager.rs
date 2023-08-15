@@ -77,6 +77,23 @@ impl EventManager {
 					.send(job_report)
 					.expect("Fatal error: failed to send job report");
 			},
+			InternalCoreTask::Shutdown { return_sender } => {
+				let result = self.clone().job_manager.clone().shutdown().await;
+
+				// TODO: this is a hack, but I'm not sure how to handle this yet
+				// The job manager shutdown just uses another channel to shutdown
+				// any running jobs, so the timing is a bit unknown. For now, I'll
+				// give it 3 seconds to shutdown before returning the result.
+				tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+
+				return_sender
+					.send(result)
+					.expect("Fatal error: failed to send shutdown result");
+			},
 		}
+	}
+
+	pub fn get_job_manager(&self) -> Arc<JobManager> {
+		self.job_manager.clone()
 	}
 }

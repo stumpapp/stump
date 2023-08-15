@@ -16,6 +16,9 @@ pub enum InternalCoreTask {
 		job_id: String,
 		return_sender: oneshot::Sender<JobManagerResult<()>>,
 	},
+	Shutdown {
+		return_sender: oneshot::Sender<()>,
+	},
 }
 
 pub enum ClientResponse {

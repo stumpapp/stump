@@ -4,6 +4,7 @@ use std::{
 	sync::Arc,
 };
 use tokio::sync::{broadcast, Mutex, RwLock};
+use tracing::error;
 
 use crate::{
 	job::{utils::persist_new_job, WorkerCtx},
@@ -11,7 +12,9 @@ use crate::{
 	CoreError, Ctx,
 };
 
-use super::{worker::Worker, JobDetail, JobExecutorTrait};
+use super::{
+	utils::update_job_status, worker::Worker, JobDetail, JobExecutorTrait, JobStatus,
+};
 
 // TODO: add pause variant for a single worker.
 #[derive(Debug, Clone)]
@@ -32,6 +35,8 @@ pub enum JobManagerError {
 	WorkerSpawnFailed,
 	#[error("Job not found {0}")]
 	JobNotFound(String),
+	#[error("Job missing ID")]
+	JobMissingId,
 	#[error("A query error occurred {0}")]
 	QueryError(#[from] prisma_client_rust::QueryError),
 	#[error("An unknown error occurred {0}")]
@@ -192,13 +197,51 @@ impl JobManager {
 	}
 
 	async fn dequeue_pending_job(self: Arc<Self>, index: usize) -> JobManagerResult<()> {
-		self.job_queue.write().await.remove(index);
+		let result = self.job_queue.write().await.remove(index);
+		if let Some(job) = result {
+			let job_id = job
+				.detail()
+				.as_ref()
+				.map(|detail| detail.id.clone())
+				.ok_or(JobManagerError::JobMissingId)?;
+
+			update_job_status(&self.core_ctx, job_id, JobStatus::Cancelled).await?;
+		}
 		Ok(())
 	}
 
 	/// Clears the job queue. Will not cancel any jobs that are currently running.
 	pub async fn clear_queue(self: Arc<Self>) {
-		self.job_queue.write().await.clear();
+		let writer = self.job_queue.write().await;
+
+		let queued_job_ids = writer
+			.iter()
+			.map(|job| {
+				let job_id = job
+					.detail()
+					.as_ref()
+					.map(|detail| detail.id.clone())
+					.ok_or(JobManagerError::JobMissingId);
+
+				job_id
+			})
+			.filter_map(|job_id| job_id.ok())
+			.collect::<Vec<String>>();
+		let queued_job_count = queued_job_ids.len();
+		tracing::debug!(queued_job_count, "Clearing job queue");
+
+		let client = self.core_ctx.get_db();
+		let result = client
+			.job()
+			.update_many(
+				vec![job::id::in_vec(queued_job_ids)],
+				vec![job::status::set(JobStatus::Cancelled.to_string())],
+			)
+			.exec()
+			.await;
+		if let Err(error) = result {
+			error!(?error, "Failed to clear job queue");
+		}
 	}
 
 	async fn get_queued_job_index(&self, job_id: &str) -> Option<usize> {
@@ -212,6 +255,7 @@ impl JobManager {
 		})
 	}
 
+	// TODO: remove this...
 	pub async fn report(self: Arc<Self>) -> JobManagerResult<Vec<JobDetail>> {
 		let db = self.core_ctx.get_db();
 
@@ -225,16 +269,18 @@ impl JobManager {
 			.map(JobDetail::from)
 			.collect::<Vec<JobDetail>>();
 
-		// jobs.append(
-		// 	&mut self
-		// 		.job_queue
-		// 		.write()
-		// 		.await
-		// 		.iter()
-		// 		.map(JobDetail::from)
-		// 		.collect::<Vec<JobDetail>>(),
-		// );
-
 		Ok(jobs)
+	}
+
+	pub async fn shutdown(self: Arc<Self>) {
+		let workers = self.workers.read().await;
+		if !workers.is_empty() {
+			tracing::debug!(workers = workers.len(), "Shutting down workers");
+			self.shutdown_tx
+				.send(JobManagerShutdownSignal::All)
+				.expect("Failed to send shutdown signal to workers");
+		}
+		drop(workers);
+		self.clear_queue().await;
 	}
 }

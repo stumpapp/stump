@@ -2,7 +2,8 @@ use std::net::SocketAddr;
 
 use axum::Router;
 use errors::{ServerError, ServerResult};
-use stump_core::{config::logging::init_tracing, StumpCore};
+use stump_core::{config::logging::init_tracing, event::InternalCoreTask, StumpCore};
+use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
 use tracing::{error, info, trace};
 
@@ -14,6 +15,7 @@ mod routers;
 mod utils;
 
 use config::{cors, session};
+use utils::shutdown_signal_with_cleanup;
 
 fn debug_setup() {
 	std::env::set_var(
@@ -72,9 +74,26 @@ async fn main() -> ServerResult<()> {
 	let addr = SocketAddr::from(([0, 0, 0, 0], port));
 	info!("⚡️ Stump HTTP server starting on http://{}", addr);
 
+	// TODO: might need to refactor to use https://docs.rs/async-shutdown/latest/async_shutdown/
+	let cleanup = || async move {
+		println!("Initializing graceful shutdown...");
+
+		let (shutdown_tx, shutdown_rx) = oneshot::channel();
+
+		let _ = core
+			.get_context()
+			.dispatch_task(InternalCoreTask::Shutdown {
+				return_sender: shutdown_tx,
+			});
+
+		let _ = shutdown_rx
+			.await
+			.expect("Failed to successfully handle shutdown");
+	};
+
 	axum::Server::bind(&addr)
 		.serve(app.into_make_service())
-		.with_graceful_shutdown(utils::shutdown_signal())
+		.with_graceful_shutdown(shutdown_signal_with_cleanup(Some(cleanup)))
 		.await
 		.expect("Failed to start Stump HTTP server!");
 

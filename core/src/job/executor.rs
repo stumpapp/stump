@@ -99,7 +99,8 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 				// meant to pause, it will kill the future above? Unless I pin it maybe?
 				shutdown_result = &mut shutdown_rx_fut => {
 					let duration = start.elapsed().as_millis() as u64;
-					if let Ok(_signal_type) = shutdown_result {
+					if let Ok(signal) = shutdown_result {
+						tracing::debug!(?signal, "Received shutdown signal");
 						// TODO: this is where we would save state once jobs are stateful some day
 						// match signal_type {
 						// 	JobManagerShutdownSignal::Worker(id) if &id == ctx.job_id()  => {

@@ -21,15 +21,15 @@
 			"loggedInFirstTime": "¡Bienvenido! Redireccionando...",
 			"registering": "Registrando...",
 			"registered": "¡Registrado!",
-			"loginFailed": "Error de inicio de sesión. Inténtalo de nuevo.",
-			"registrationFailed": "Error de registro. Inténtalo de nuevo."
+			"loginFailed": "Login failed. Please try again",
+			"registrationFailed": "Registration failed. Please try again"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Configuración de la biblioteca",
-			"subtitleCreating": "Se mostrará una vista previa de tu nueva biblioteca a continuación.",
-			"subtitleEditing": "Se mostrará una vista previa de los cambios que hagas en tu biblioteca a continuación."
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
@@ -52,7 +52,7 @@
 			"labels": {
 				"libraryName": "Nombre",
 				"libraryPath": "Ruta",
-				"libraryPathDescription": "La ruta de la biblioteca tal como existe en tu servidor.",
+				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Descripción",
 				"libraryTags": "Etiquetas"
 			},
@@ -62,19 +62,19 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Editar biblioteca",
-		"subtitle": "Utilice el siguiente formulario para editar su biblioteca. Si desea obtener información actualizada sobre bibliotecas y cómo funcionan, consulte la",
-		"subtitleLink": "documentación relevante",
+		"heading": "Manage Library",
+		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "Nombre",
-				"libraryPath": "Ruta",
-				"libraryPathDescription": "La ruta a la biblioteca tal como existe en su servidor.",
-				"libraryDescription": "Descripción",
-				"libraryTags": "Etiquetas"
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
 			},
 			"buttons": {
-				"confirm": "Guardar cambios"
+				"confirm": "Save Changes"
 			}
 		}
 	},
@@ -169,17 +169,37 @@
 		"jobs": {
 			"helmet": "Trabajos y Configuración",
 			"heading": "Trabajos y Configuración",
-			"subtitle": "Ver y gestionar los trabajos en segundo plano disponibles en este servidor, incluidos los escaneos de biblioteca y la programación."
+			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
+			"schedulingHeading": "Job Scheduling",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
+			"historyHeading": "Job History",
+			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"historyTable": {
+				"columns": {
+					"name": "Type",
+					"description": "Description",
+					"status": "Status",
+					"createdAt": "Started At",
+					"elapsed": "Elapsed",
+					"tasks": "Tasks"
+				},
+				"emptyHeading": "There are no jobs to display",
+				"emptySubtitle": "You can't have a job if you don't have a job",
+				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
+				"deleteAllConfirmButton": "Clear history",
+				"deleteAllConfirmButtonTitle": "Clear all job history",
+				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+			}
 		},
 		"server": {
 			"helmet": "Configuración del servidor",
 			"heading": "Configuración del servidor",
-			"subtitle": "Administre varias opciones configurables para su instancia del servidor Stump."
+			"subtitle": "Manage various configurable options for your Stump server instance, itself"
 		},
 		"users": {
 			"helmet": "Administración de usuarios",
 			"heading": "Administración de usuarios",
-			"subtitle": "Administre los usuarios en este servidor, incluida la creación de nuevos usuarios y el cambio de sus permisos."
+			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
 		}
 	},
 	"jobOverlay": {
@@ -244,20 +264,20 @@
 	"serverSOS": {
 		"heading": "Servidor no disponible",
 		"desktop": {
-			"message": "Ocurrió un error de red que sugiere que su servidor Stump no está disponible en este momento. Asegúrese de que se esté ejecutando y sea accesible desde este dispositivo.\nSi su URL del servidor ha cambiado, puede actualizarla utilizando el formulario a continuación."
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "Ocurrió un error de red que sugiere que su servidor Stump no está disponible en este momento. Asegúrese de que se esté ejecutando y sea accesible desde este dispositivo."
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
 		"reconnected": "¡Reconectado al servidor! Redirigiendo...",
 		"reconnectionFailed": "¡Algo salió mal!"
 	},
 	"serverStatusOverlay": {
-		"heading": "El servidor no está conectado.",
+		"heading": "Server isn't connected",
 		"message": [
-			"Por favor, verifique su conexión a internet.",
+			"Please check your internet connection",
 			"Haga clic aquí",
-			"para cambiar su URL de servidor."
+			"to change your server URL"
 		]
 	},
 	"slidingList": {

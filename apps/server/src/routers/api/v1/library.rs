@@ -47,7 +47,10 @@ use crate::{
 	},
 };
 
-use super::media::{apply_media_filters, apply_media_pagination};
+use super::{
+	media::{apply_media_filters, apply_media_pagination},
+	series::{apply_series_base_filters, apply_series_filters},
+};
 
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
@@ -81,6 +84,10 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 		[
 			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
 			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
+			filters
+				.series
+				.map(apply_series_base_filters)
+				.map(library::series::some),
 		],
 	)
 }
@@ -254,14 +261,19 @@ async fn get_library_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
-	let FilterableQuery { ordering, .. } = filter_query.0.get();
+	let FilterableQuery {
+		ordering, filters, ..
+	} = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+	tracing::debug!(?filters, ?ordering, ?pagination, "get_library_series");
+
 	let db = ctx.get_db();
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
-	let where_conditions = vec![series::library_id::equals(Some(id.clone()))];
+	let mut where_conditions = apply_series_filters(filters);
+	where_conditions.push(series::library_id::equals(Some(id.clone())));
 	let mut query = db
 		.series()
 		// TODO: add media relation count....

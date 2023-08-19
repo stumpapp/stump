@@ -22,7 +22,9 @@ export type InputProps = {
 	/** The optional class name for the container. */
 	containerClassName?: string
 	/** An optional right icon to display inset the input */
-	icon?: React.ReactNode
+	leftDecoration?: React.ReactNode
+	/** An optional right icon to display inset the input */
+	rightDecoration?: React.ReactNode
 } & RawInputProps
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -34,22 +36,33 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			descriptionProps,
 			fullWidth,
 			containerClassName,
-			icon,
-			variant,
+			leftDecoration,
+			rightDecoration,
 			errorMessage,
+			className,
 			...props
 		},
 		ref,
 	) => {
-		const renderIcon = () => {
-			if (icon) {
-				return <div className="absolute inset-y-0 right-0 flex items-center pr-3">{icon}</div>
+		const renderLeftDecoration = () => {
+			if (leftDecoration) {
+				return (
+					<div className="absolute inset-y-0 left-0 flex items-center pl-3">{leftDecoration}</div>
+				)
 			}
 
 			return null
 		}
 
-		const isInvalid = !!errorMessage
+		const renderRightDecoration = () => {
+			if (rightDecoration) {
+				return (
+					<div className="absolute inset-y-0 right-0 flex items-center pr-3">{rightDecoration}</div>
+				)
+			}
+
+			return null
+		}
 
 		return (
 			<div
@@ -66,8 +79,19 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					</Label>
 				)}
 				<div className="relative w-full">
-					<RawInput variant={isInvalid ? 'error' : variant} {...props} ref={ref} />
-					{renderIcon()}
+					{renderLeftDecoration()}
+					<RawInput
+						{...props}
+						ref={ref}
+						isInvalid={!!errorMessage || props.isInvalid}
+						className={cn(
+							{
+								'pl-10': !!leftDecoration,
+							},
+							className,
+						)}
+					/>
+					{renderRightDecoration()}
 				</div>
 
 				{errorMessage && (

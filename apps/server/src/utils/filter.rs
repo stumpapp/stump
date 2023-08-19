@@ -85,6 +85,9 @@ pub struct LibraryFilter {
 	pub id: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub series: Option<SeriesBaseFilter>,
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
@@ -98,12 +101,26 @@ pub struct UserQueryRelation {
 	pub include_read_progresses: Option<bool>,
 }
 
+// TODO: create a macro to generate these 'base' filters...
+// NOTE: I have to do this to avoid recursive issues with LibraryFilter...
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct SeriesBaseFilter {
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub id: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub name: Vec<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub search: Option<String>,
+}
+
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub search: Option<String>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub library: Option<LibraryFilter>,

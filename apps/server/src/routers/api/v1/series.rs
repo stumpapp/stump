@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::Direction;
+use prisma_client_rust::{or, Direction};
 use stump_core::{
 	db::{
 		entity::{Media, Series},
@@ -30,7 +30,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		chain_optional_iter, get_session_user, http::ImageResponse, FilterableQuery,
-		SeriesFilter, SeriesQueryRelation,
+		SeriesBaseFilter, SeriesFilter, SeriesQueryRelation,
 	},
 };
 
@@ -64,6 +64,30 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 				.library
 				.map(apply_library_filters)
 				.map(series::library::is),
+			// TODO: revisit once proper full text search is implemented
+			filters.search.map(|s| {
+				or![
+					series::name::contains(s.clone()),
+					series::description::contains(s),
+				]
+			}),
+		],
+	)
+}
+
+// TODO: bad pattern, figure out a way to reduce duplication...
+pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
+			filters.search.map(|s| {
+				or![
+					series::name::contains(s.clone()),
+					series::description::contains(s),
+				]
+			}),
 		],
 	)
 }

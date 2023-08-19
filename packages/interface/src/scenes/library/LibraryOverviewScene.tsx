@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
+import Search from '../../components/filters/Search'
 import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
 import SeriesGrid from '../../components/series/SeriesGrid'
@@ -64,7 +65,16 @@ export default function LibraryOverviewScene() {
 			<LibraryOverviewTitleSection library={library} isVisible={current_page === 1} />
 
 			{/* @ts-expect-error: wrong ref, still okay */}
-			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
+
+			<header className="flex h-12 flex-col gap-2 px-4">
+				<Search
+					placeholder="Search series by name or description"
+					onChange={() => {
+						console.log('search')
+					}}
+				/>
+			</header>
 
 			<div className="flex w-full flex-col space-y-6 p-4">
 				{hasStuff && <Pagination pages={total_pages} currentPage={current_page} />}

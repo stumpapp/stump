@@ -322,7 +322,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 						label="Library path"
 						placeholder="/path/to/library"
 						containerClassName="max-w-full md:max-w-sm"
-						icon={
+						rightDecoration={
 							<IconButton
 								size="xs"
 								variant="ghost"

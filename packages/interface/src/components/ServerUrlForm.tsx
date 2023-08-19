@@ -100,7 +100,7 @@ export default function ServerUrlForm() {
 			<input className="hidden" {...form.register('baseUrl')} />
 			<Input
 				label="Server URL"
-				icon={InputDecoration}
+				rightDecoration={InputDecoration}
 				variant="primary"
 				errorMessage={form.formState.errors.baseUrl?.message}
 				onChange={(e) => setUrlDebounced(e.target.value)}

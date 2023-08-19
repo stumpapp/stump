@@ -3,22 +3,22 @@
 		"claimText": "Este servidor de Stump ainda não foi reivindicado, você pode usar o formulário abaixo para criar uma conta de usuário e reivindicá-lo. Digite seu nome de usuário e senha preferidos.",
 		"form": {
 			"validation": {
-				"missingUsername": "O nome é obrigatório",
-				"missingPassword": "A senha é obrigatória"
+				"missingUsername": "O nome de usuário é necessário",
+				"missingPassword": "A senha é necessária"
 			},
 			"labels": {
 				"username": "Nome de usuário",
 				"password": "Senha"
 			},
 			"buttons": {
-				"createAccount": "Criar uma Conta",
+				"createAccount": "Criar Conta",
 				"login": "Entrar"
 			}
 		},
 		"toasts": {
-			"loggingIn": "A autenticar...",
-			"loggedIn": "Boas-vindas! Redirecionando...",
-			"loggedInFirstTime": "Bem-vindo(a)! Redirecionando...",
+			"loggingIn": "Entrando...",
+			"loggedIn": "Bem-vindo de volta! Redirecionando...",
+			"loggedInFirstTime": "Bem vindo! Redirecionando...",
 			"registering": "Registrando...",
 			"registered": "Registrado!",
 			"loginFailed": "Login failed. Please try again",
@@ -27,22 +27,22 @@
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Configuração da biblioteca",
+			"heading": "Configuração da Biblioteca",
 			"subtitleCreating": "A preview of your new library will be shown below",
 			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Informações do arquivo",
+			"heading": "Informações do Arquivo",
 			"labels": {
 				"fileSize": "Tamanho do arquivo",
-				"fileType": "Tipo do Arquivo",
+				"fileType": "Tipo de arquivo",
 				"fileLocation": "Localização do Arquivo",
-				"fileChecksum": "Soma de verificação"
+				"fileChecksum": "Checksum"
 			}
 		},
-		"nextInSeries": "Próximo na série:"
+		"nextInSeries": "Seguinte na série"
 	},
 	"createLibraryScene": {
 		"heading": "Criar nova biblioteca",
@@ -51,10 +51,10 @@
 		"form": {
 			"labels": {
 				"libraryName": "Nome",
-				"libraryPath": "Caminho:",
+				"libraryPath": "Caminho",
 				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Descrição",
-				"libraryTags": "Tags"
+				"libraryTags": "Etiquetas"
 			},
 			"buttons": {
 				"confirm": "Criar Biblioteca"
@@ -79,22 +79,22 @@
 		}
 	},
 	"errorScene": {
-		"heading": "haha, oops!",
-		"message": "Ocorreu um erro: ",
+		"heading": "lol, oops",
+		"message": "Ocorreu um erro:",
 		"buttons": {
-			"report": "Reportar Erro",
-			"copy": "Copiar detalhes do erro",
-			"goHome": "Voltar ao início"
+			"report": "Reportar Bug",
+			"copy": "Copiar os detalhes do erro",
+			"goHome": "Ir ao Início"
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continue lendo",
+		"continueReading": "Continuar Lendo",
 		"recentlyAddedSeries": "Séries adicionadas recentemente",
-		"recentlyAddedBooks": "Livros Adicionados Recentemente"
+		"recentlyAddedBooks": "Livros adicionados recentemente"
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue lendo",
+			"continueReading": "Continuar Lendo",
 			"downloadSeries": "Baixar Séries"
 		}
 	},
@@ -102,55 +102,55 @@
 		"navigation": {
 			"general": "Geral",
 			"server": "Servidor",
-			"jobs": "Trabalhos e Configuração",
-			"users": "Gerenciamento De Usuário"
+			"jobs": "Ações e configurações",
+			"users": "Gerenciamento de usuários"
 		},
 		"general": {
-			"helmet": "Configurações gerais",
-			"heading": "Configurações gerais",
+			"helmet": "Configurações Gerais",
+			"heading": "Configurações Gerais",
 			"subtitle": "Use os formulários abaixo para gerenciar suas preferências e configurações de conta.",
 			"profileForm": {
 				"validation": {
-					"invalidUrl": "Por favor, digite um URL válido",
-					"missingUsername": "O nome é obrigatório"
+					"invalidUrl": "Por favor insira um URL válido",
+					"missingUsername": "Nome de usuário é necessário"
 				},
 				"labels": {
 					"username": "Nome de usuário",
 					"password": "Senha",
-					"activeChangesPrompt": "Você tem alterações não salvas"
+					"activeChangesPrompt": "Você tem modificações não salvas"
 				},
 				"errors": {
-					"updateFailed": "Ocorreu um erro no servidor ao atualizar seu perfil. Por favor, tente novamente."
+					"updateFailed": "Ocorreu um erro ao carregar seu conteúdo. Por favor, tente novamente."
 				},
 				"avatarPicker": {
-					"heading": "Defina sua imagem do avatar",
+					"heading": "Defina sua imagem de avatar",
 					"subtitle": "Stump suporta avatares personalizados, que podem ser configurados fornecendo uma URL para uma imagem. Envio de imagens não é suportado para reduzir a quantidade de dados armazenados no servidor.",
 					"preview": "Uma pré-visualização aparecerá aqui uma vez que você inseriu uma URL.",
 					"labels": {
-						"imageUrl": "URL da imagem",
-						"customAvatar": "Personalizar avatar"
+						"imageUrl": "URL da Imagem",
+						"customAvatar": "Avatar personalizado"
 					},
 					"buttons": {
 						"confirm": "Confirmar Imagem",
 						"cancel": "Cancelar",
 						"edit": "Editar",
-						"changeImage": "Alterar Imagem",
+						"changeImage": "Mudar Imagem",
 						"removeImage": "Remover imagem"
 					}
 				},
 				"buttons": {
-					"confirm": "Salvar Alterações"
+					"confirm": "Gravar as alterações"
 				}
 			},
 			"theme": {
-				"heading": "Tema da Aplicação",
+				"heading": "Tema do aplicativo",
 				"subtitle": "Stump suporta os temas claro e escuro, que podem ser definidos abaixo.",
 				"dark": {
 					"label": "Tema escuro",
 					"description": "Use um tema escuro para o Stump, que é o tema correto."
 				},
 				"light": {
-					"label": "Tema Claro",
+					"label": "Tema claro",
 					"description": "Use um tema claro para o Stump, que é o tema incorreto."
 				}
 			},
@@ -158,17 +158,17 @@
 				"localeSelector": {
 					"label": "Idioma"
 				},
-				"heading": "Configurações de idioma e local",
+				"heading": "Configurações de idioma e região",
 				"subtitle": [
 					"O Stump suporta vários idiomas e idiomas, defina suas preferências abaixo. Por favor considere ajudar a melhorar a qualidade de",
-					"Traduções do Stump",
+					"Traduções do stump",
 					"se você puder!"
 				]
 			}
 		},
 		"jobs": {
-			"helmet": "Trabalhos e Configuração",
-			"heading": "Trabalhos e Configuração",
+			"helmet": "Ações e configurações",
+			"heading": "Ações e configurações",
 			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
 			"schedulingHeading": "Job Scheduling",
 			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
@@ -192,13 +192,13 @@
 			}
 		},
 		"server": {
-			"helmet": "Configurações do Servidor",
+			"helmet": "Configurações do servidor",
 			"heading": "Configurações do servidor",
 			"subtitle": "Manage various configurable options for your Stump server instance, itself"
 		},
 		"users": {
-			"helmet": "Gerenciamento De Usuário",
-			"heading": "Gerenciamento De Usuário",
+			"helmet": "Gerenciamento de usuários",
+			"heading": "Gerenciamento de usuários",
 			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
 		}
 	},
@@ -207,12 +207,12 @@
 	},
 	"libraryStats": {
 		"seriesCount": "Total de Séries",
-		"bookCount": "Total de Livros",
+		"bookCount": "Número Total de Livros",
 		"diskUsage": "Uso de disco"
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Avançar",
+			"next": "Próxima",
 			"previous": "Anterior"
 		},
 		"popover": {
@@ -224,38 +224,38 @@
 		}
 	},
 	"signOutModal": {
-		"title": "Terminar sessão",
-		"message": "Tem certeza de que deseja terminar a sessão?",
+		"title": "Terminar Sessão",
+		"message": "Você tem certeza que deseja sair?",
 		"buttons": {
 			"cancel": "Cancelar",
-			"signOut": "Terminar sessão"
+			"signOut": "Terminar Sessão"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Página inicial",
+			"home": "Início",
 			"libraries": "Bibliotecas",
 			"createLibrary": "Criar Biblioteca",
 			"settings": "Configurações",
 			"themeToggle": "Alternar tema",
-			"goForward": "Avançar",
-			"goBack": "Voltar"
+			"goForward": "Ir adiante",
+			"goBack": "Retornar"
 		},
 		"libraryOptions": {
 			"scanLibrary": {
 				"base": "Escanear Biblioteca",
 				"parallel": "Escaneamento paralelo",
-				"inOrder": "Escaneamento em ordem"
+				"inOrder": "Em ordem de escaneamento"
 			},
-			"fileExplorer": "Explorador de arquivos",
-			"editLibrary": "Editar Biblioteca",
-			"deleteLibrary": "Excluir a biblioteca"
+			"fileExplorer": "Explorador de Arquivos",
+			"editLibrary": "Editar biblioteca",
+			"deleteLibrary": "Excluir Biblioteca"
 		},
 		"versionInformation": {
-			"heading": "Informações de Versão",
-			"semVer": "Versão semântica",
-			"commitHash": "Criar \"Hash\"",
-			"buildDate": "Data da compilação"
+			"heading": "Informações da versão",
+			"semVer": "Versionamento Semântico",
+			"commitHash": "Hash do Commit",
+			"buildDate": "Data da Compilação"
 		}
 	},
 	"search": {
@@ -270,7 +270,7 @@
 			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
 		"reconnected": "Reconectado ao servidor! Redirecionando...",
-		"reconnectionFailed": "Ocorreu algo de errado!"
+		"reconnectionFailed": "Algo deu errado!"
 	},
 	"serverStatusOverlay": {
 		"heading": "Server isn't connected",
@@ -281,14 +281,14 @@
 		]
 	},
 	"slidingList": {
-		"empty": "Não há itens para exibir",
+		"empty": "Nenhum item para exibir",
 		"buttons": {
 			"next": "Buscar à frente",
-			"previous": "Procurar para trás"
+			"previous": "Procurar Anterior"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Selecionar ou criar tag",
-		"placeholderNoTags": "Sem tags disponíveis"
+		"placholder": "Selecionar ou criar etiqueta",
+		"placeholderNoTags": "Não há tags disponíveis"
 	}
 }

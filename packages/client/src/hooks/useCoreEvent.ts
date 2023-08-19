@@ -2,11 +2,11 @@ import type { CoreEvent } from '@stump/types'
 
 import { useJobContext } from '../context'
 import { core_event_triggers, invalidateQueries } from '../invalidate'
-import { useStumpSse } from './useStumpSse'
+import { useStumpWs } from '.'
 
 interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void
-	onJobFailed?: (err: { runner_id: string; message: string }) => void
+	onJobFailed?: (err: { job_id: string; message: string }) => void
 }
 
 export function useCoreEventHandler({
@@ -29,11 +29,6 @@ export function useCoreEventHandler({
 				addJob(data)
 				break
 			case 'JobProgress':
-				// FIXME:  Testing with a test library containing over 10k cbz files, there are so
-				//  many updates that around 2000k it just dies. I have implemented a check to
-				// in this store function where if the task_count is greater than 1000, it will
-				// only update the store every 50 tasks. This is a temporary fix. The UI is still pretty
-				// slow when this happens, but is usable. A better solution needs to be found.
 				updateJob(data)
 				break
 			case 'JobComplete':
@@ -43,7 +38,7 @@ export function useCoreEventHandler({
 				break
 			case 'JobFailed':
 				onJobFailed?.(data)
-				removeJob(data.runner_id)
+				removeJob(data.job_id)
 				invalidateQueries({ keys: core_event_triggers[key].keys })
 
 				break
@@ -64,5 +59,6 @@ export function useCoreEventHandler({
 		}
 	}
 
-	useStumpSse({ onEvent: handleCoreEvent })
+	// useStumpSse({ onEvent: handleCoreEvent })
+	useStumpWs({ onEvent: handleCoreEvent })
 }

@@ -31,6 +31,8 @@ pub enum CoreError {
 	XmlWriteError(#[from] xml::writer::Error),
 	#[error("Failed to create string: {0}")]
 	Utf8ConversionError(#[from] std::string::FromUtf8Error),
+	#[error("Failed to initialize job: {0}")]
+	JobInitializationError(String),
 	#[error("Something went wrong: {0}")]
 	InternalError(String),
 	#[error("This feature is not yet implemented: {0}")]

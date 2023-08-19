@@ -1,4 +1,4 @@
-import type { LoginOrRegisterArgs, UpdateUserArgs, User, UserPreferences } from '@stump/types'
+import type { LoginOrRegisterArgs, UpdateUser, User, UserPreferences } from '@stump/types'
 
 import { API, toUrlParams } from '.'
 import { ApiResult, PageableApiResult } from './types'
@@ -39,11 +39,11 @@ export function createUser(params: LoginOrRegisterArgs): Promise<ApiResult<User>
 	return API.post(`/users`, params)
 }
 
-export function updateUser(userId: string, params: UpdateUserArgs): Promise<ApiResult<User>> {
+export function updateUser(userId: string, params: UpdateUser): Promise<ApiResult<User>> {
 	return API.put(`/users/${userId}`, params)
 }
 
-export function updateViewer(params: UpdateUserArgs): Promise<ApiResult<User>> {
+export function updateViewer(params: UpdateUser): Promise<ApiResult<User>> {
 	return API.put(`/users/me`, params)
 }
 

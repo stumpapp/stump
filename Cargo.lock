@@ -1223,7 +1223,7 @@ dependencies = [
  "schema-ast",
  "serde",
  "serde_json",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
@@ -3673,8 +3673,8 @@ dependencies = [
 
 [[package]]
 name = "prisma-client-rust"
-version = "0.6.7"
-source = "git+https://github.com/Brendonovich/prisma-client-rust.git?tag=0.6.7#f71ad9122537c4ed29bf496a4a643947a5fe9aef"
+version = "0.6.8"
+source = "git+https://github.com/stumpapp/prisma-client-rust?rev=4e9c79c8355dcbb098169ccbc85a9349f8c7882d#4e9c79c8355dcbb098169ccbc85a9349f8c7882d"
 dependencies = [
  "base64 0.13.1",
  "bigdecimal",
@@ -3702,13 +3702,13 @@ dependencies = [
  "tokio",
  "tracing",
  "user-facing-errors",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
 name = "prisma-client-rust-cli"
-version = "0.6.7"
-source = "git+https://github.com/Brendonovich/prisma-client-rust.git?tag=0.6.7#f71ad9122537c4ed29bf496a4a643947a5fe9aef"
+version = "0.6.8"
+source = "git+https://github.com/stumpapp/prisma-client-rust?rev=4e9c79c8355dcbb098169ccbc85a9349f8c7882d#4e9c79c8355dcbb098169ccbc85a9349f8c7882d"
 dependencies = [
  "directories",
  "flate2",
@@ -3727,8 +3727,8 @@ dependencies = [
 
 [[package]]
 name = "prisma-client-rust-macros"
-version = "0.6.7"
-source = "git+https://github.com/Brendonovich/prisma-client-rust.git?tag=0.6.7#f71ad9122537c4ed29bf496a4a643947a5fe9aef"
+version = "0.6.8"
+source = "git+https://github.com/stumpapp/prisma-client-rust?rev=4e9c79c8355dcbb098169ccbc85a9349f8c7882d#4e9c79c8355dcbb098169ccbc85a9349f8c7882d"
 dependencies = [
  "convert_case 0.6.0",
  "proc-macro2",
@@ -3738,8 +3738,8 @@ dependencies = [
 
 [[package]]
 name = "prisma-client-rust-sdk"
-version = "0.6.7"
-source = "git+https://github.com/Brendonovich/prisma-client-rust.git?tag=0.6.7#f71ad9122537c4ed29bf496a4a643947a5fe9aef"
+version = "0.6.8"
+source = "git+https://github.com/stumpapp/prisma-client-rust?rev=4e9c79c8355dcbb098169ccbc85a9349f8c7882d#4e9c79c8355dcbb098169ccbc85a9349f8c7882d"
 dependencies = [
  "convert_case 0.5.0",
  "dml",
@@ -3785,7 +3785,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
@@ -3895,7 +3895,7 @@ dependencies = [
  "tracing",
  "tracing-core",
  "url",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
@@ -3931,7 +3931,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "user-facing-errors",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
@@ -3975,7 +3975,7 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "user-facing-errors",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
@@ -4979,7 +4979,7 @@ dependencies = [
  "tracing-futures",
  "url",
  "user-facing-errors",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
@@ -5010,7 +5010,7 @@ dependencies = [
  "tracing-futures",
  "tracing-opentelemetry",
  "user-facing-errors",
- "uuid 1.2.2",
+ "uuid 1.4.0",
 ]
 
 [[package]]
@@ -5144,6 +5144,7 @@ dependencies = [
  "unrar",
  "urlencoding",
  "utoipa",
+ "uuid 1.4.0",
  "walkdir",
  "webp",
  "xml-rs",
@@ -5305,7 +5306,7 @@ dependencies = [
  "scopeguard",
  "serde",
  "unicode-segmentation",
- "uuid 1.2.2",
+ "uuid 1.4.0",
  "windows 0.39.0",
  "windows-implement",
  "x11-dl",
@@ -5369,7 +5370,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "url",
- "uuid 1.2.2",
+ "uuid 1.4.0",
  "webkit2gtk",
  "webview2-com",
  "windows 0.39.0",
@@ -5413,7 +5414,7 @@ dependencies = [
  "tauri-utils",
  "thiserror",
  "time 0.3.17",
- "uuid 1.2.2",
+ "uuid 1.4.0",
  "walkdir",
 ]
 
@@ -5446,7 +5447,7 @@ dependencies = [
  "serde_json",
  "tauri-utils",
  "thiserror",
- "uuid 1.2.2",
+ "uuid 1.4.0",
  "webview2-com",
  "windows 0.39.0",
 ]
@@ -5464,7 +5465,7 @@ dependencies = [
  "raw-window-handle",
  "tauri-runtime",
  "tauri-utils",
- "uuid 1.2.2",
+ "uuid 1.4.0",
  "webkit2gtk",
  "webview2-com",
  "windows 0.39.0",
@@ -6151,9 +6152,9 @@ dependencies = [
 
 [[package]]
 name = "uuid"
-version = "1.2.2"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "422ee0de9031b5b948b97a8fc04e3aa35230001a722ddd27943e0be31564ce4c"
+checksum = "d023da39d1fde5a8a3fe1f3e01ca9632ada0a63e9797de55a879d6e2236277be"
 dependencies = [
  "getrandom 0.2.8",
  "serde",

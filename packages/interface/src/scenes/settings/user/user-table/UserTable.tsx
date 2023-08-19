@@ -1,11 +1,12 @@
-import { CheckBox, Text } from '@stump/components'
+import { Text } from '@stump/components'
 import { User } from '@stump/types'
 import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
+import UserActionMenu from './UserActionMenu'
 import UsernameRow from './UsernameRow'
 
 // TODO: eventually I'd like to integrate some RBAC management here, as well. E.g.
@@ -17,20 +18,7 @@ import UsernameRow from './UsernameRow'
 const debugFlag = import.meta.env.DEV
 
 export default function UserTable() {
-	const { users, pageCount, pagination, setPagination, selectedUser, setSelectedUser } =
-		useUserManagementContext()
-
-	const handleSelectUser = useCallback(
-		(userId: string) => {
-			if (selectedUser?.id === userId) {
-				setSelectedUser(null)
-			} else {
-				const user = users.find((u) => u.id === userId)
-				setSelectedUser(user || null)
-			}
-		},
-		[selectedUser, users, setSelectedUser],
-	)
+	const { users, pageCount, pagination, setPagination } = useUserManagementContext()
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 	// FIXME: sorting not working (because tied to query and needs state :weary:)
@@ -38,66 +26,65 @@ export default function UserTable() {
 	const columns = useMemo<ColumnDef<User>[]>(
 		() => [
 			{
-				columns: [
-					{
-						cell: (info) => {
-							const user = info.row.original
-							const isSelected = selectedUser?.id === user.id
-							return (
-								<CheckBox
-									variant="primary"
-									checked={isSelected}
-									onClick={() => handleSelectUser(user.id)}
-								/>
-							)
-						},
-						// header: <CheckBox variant="primary" />,
-						id: 'select',
-					},
-					{
-						cell: (info) => {
-							const user = info.row.original
-							return <UsernameRow {...user} />
-						},
-						// enableSorting: true,
-						header: 'Username',
-						// sortingFn: (a, b) => {
-						// 	const aUser = a.original
-						// 	const bUser = b.original
-
-						// 	return aUser.username.localeCompare(bUser.username)
-						// },
-					},
-					{
-						accessorKey: 'role',
-						// TODO: This will probably change once another role (or two?) is added. RBAC
-						// system is not fully thought out yet.
-						cell: (info) => {
-							return (
-								<Text size="sm">
-									{info.getValue()?.toLowerCase() === 'server_owner' ? 'Admin' : 'Member'}
-								</Text>
-							)
-						},
-						header: 'Role',
-					},
-					{
-						cell: () => {
-							return (
-								<Text size="sm" variant="muted">
-									{dayjs().format('LL')}
-								</Text>
-							)
-						},
-						header: 'Last Seen',
-						id: 'username',
-					},
-				],
-				enableGrouping: false,
-				id: 'user',
+				accessorKey: 'username',
+				cell: (info) => {
+					const user = info.row.original
+					return <UsernameRow {...user} />
+				},
+				header: 'Username',
+			},
+			{
+				accessorKey: 'role',
+				// TODO: This will probably change once another role (or two?) is added. RBAC
+				// system is not fully thought out yet.
+				cell: (info) => {
+					return (
+						<Text size="sm">
+							{info.getValue<string>()?.toLowerCase() === 'server_owner' ? 'Admin' : 'Member'}
+						</Text>
+					)
+				},
+				header: 'Role',
+			},
+			{
+				accessorKey: 'created_at',
+				cell: ({ row }) => {
+					return (
+						<Text size="sm" variant="muted">
+							{dayjs(row.original.created_at).format('LL')}
+						</Text>
+					)
+				},
+				header: 'Created at',
+			},
+			{
+				cell: ({ row }) => {
+					const renderDate = () => {
+						if (row.original.last_login) {
+							return dayjs(row.original.last_login).format('LL')
+						} else {
+							return 'Never'
+						}
+					}
+					return (
+						<Text size="sm" variant="muted">
+							{renderDate()}
+						</Text>
+					)
+				},
+				header: 'Last Login',
+				id: 'lastLogin',
+			},
+			{
+				cell: ({ row }) => (
+					<div className="inline-flex items-end md:w-2">
+						<UserActionMenu user={row.original} />
+					</div>
+				),
+				id: 'actions',
 			},
 		],
-		[selectedUser, handleSelectUser],
+		[],
 	)
 
 	return (

@@ -61,7 +61,7 @@
 			}
 		}
 	},
-	"editLibraryScene": {
+	"manageLibraryScene": {
 		"heading": "Editar Biblioteca",
 		"subtitle": "Use o formulário abaixo para editar sua biblioteca. Se você estiver desejando uma atualização em bibliotecas e como elas funcionam, confira",
 		"subtitleLink": "documentação relevante",

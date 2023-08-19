@@ -226,7 +226,7 @@ model MediaMetadata {
 
   title   String?
   series  String?
-  number  Int?
+  number  Float?
   volume  Int?
   // The summary of the associated media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
   summary String?
@@ -457,21 +457,28 @@ model ReadProgress {
 }
 
 model Job {
-  id                   String   @id
-  // The kind of log, e.g. LibraryScan
-  kind                 String
-  // The extra details of the job, e.g. "/Users/oromei/Documents/Stump/MainLibrary"
-  details              String?
-  // The status of the job (i.e. RUNNING, COMPLETED, FAILED, CANCELLED).
-  status               String   @default("RUNNING")
+  id                   String    @id
+  // The name of the job, e.g. Library Scan
+  name                 String
+  // The extra description
+  description          String?
+  // The status of the job (i.e. QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED).
+  status               String    @default("QUEUED")
+  // The state of the job. This is primarily stored in order to support pausing/resuming
+  // jobs, as it will hold the state of the job at the time it was paused.
+  state                Bytes?
+  // A JSON blob of optional, extra metadata
+  extra_metadata       Bytes?
   // The total number of tasks
-  task_count           Int      @default(1)
+  task_count           Int       @default(1)
   // The total number of tasks completed (i.e. without error/failure)
-  completed_task_count Int      @default(0)
+  completed_task_count Int       @default(0)
   // The time (in milliseconds) to complete the job
-  ms_elapsed           BigInt   @default(0)
+  ms_elapsed           BigInt    @default(0)
+  // The datetime stamp of when the job was created
+  created_at           DateTime  @default(now())
   // The datetime stamp of when the job completed
-  completed_at         DateTime @default(now())
+  completed_at         DateTime?
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////

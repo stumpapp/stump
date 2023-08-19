@@ -1,4 +1,4 @@
-import { Divider, Heading, Label, RawSwitch, Text } from '@stump/components'
+import { Divider, Heading, RadioGroup, Text } from '@stump/components'
 import { LibraryScanMode } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
 
@@ -12,12 +12,8 @@ export default function ScanModeForm({ isCreatingLibrary }: Props) {
 
 	const [scanMode] = form.watch(['scan_mode'])
 
-	const handleChangeScanMode = (newMode: LibraryScanMode) => {
-		if (newMode === scanMode) {
-			form.setValue('scan_mode', 'NONE')
-		} else {
-			form.setValue('scan_mode', newMode)
-		}
+	const handleChange = (newMode: LibraryScanMode) => {
+		form.setValue('scan_mode', newMode)
 	}
 
 	return (
@@ -28,44 +24,36 @@ export default function ScanModeForm({ isCreatingLibrary }: Props) {
 				{isCreatingLibrary
 					? 'once it is registered in the database'
 					: 'once your edits are persisted'}
-				. You may skip the scan entirely if you would rather perform a scan manually at later time.
+				. This is optional, and can be done later
 			</Text>
 
 			<Divider variant="muted" className="my-3.5" />
 
-			<div className="flex max-w-2xl flex-col gap-3 divide-y divide-gray-75 py-2 dark:divide-gray-900">
-				<div className="flex items-center justify-between py-6 md:items-start">
-					<RawSwitch
-						className="text-gray-900"
-						checked={scanMode === 'BATCHED'}
-						onClick={() => handleChangeScanMode('BATCHED')}
-						primaryRing
-					/>
+			<RadioGroup value={scanMode} onValueChange={handleChange} className="max-w-2xl gap-4">
+				<RadioGroup.CardItem
+					label="Skip the scan"
+					description="You can perform a scan manually at a later time."
+					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
+					isActive={scanMode === 'NONE'}
+					value="NONE"
+				/>
 
-					<div className="flex flex-grow flex-col gap-2 text-right">
-						<Label>Parallel Scan</Label>
-						<Text size="xs" variant="muted">
-							A faster scan that indexes your library files in parallel
-						</Text>
-					</div>
-				</div>
+				<RadioGroup.CardItem
+					label="Parallel scan"
+					description="A faster scan that indexes your library files in parallel."
+					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
+					isActive={scanMode === 'BATCHED'}
+					value="BATCHED"
+				/>
 
-				<div className="flex items-center justify-between py-6 md:items-start">
-					<RawSwitch
-						className="text-gray-900"
-						checked={scanMode === 'SYNC'}
-						onClick={() => handleChangeScanMode('SYNC')}
-						primaryRing
-					/>
-
-					<div className="flex flex-grow flex-col gap-2 text-right">
-						<Label>In-Order Scan</Label>
-						<Text size="xs" variant="muted">
-							A standard scan that indexes your library files one at a time
-						</Text>
-					</div>
-				</div>
-			</div>
+				<RadioGroup.CardItem
+					label="In-order scan"
+					description="A standard scan that indexes your library files one at a time."
+					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
+					isActive={scanMode === 'SYNC'}
+					value="SYNC"
+				/>
+			</RadioGroup>
 		</div>
 	)
 }

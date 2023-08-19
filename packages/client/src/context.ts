@@ -22,15 +22,14 @@ export interface AppProps {
 	setDiscordPresence?: (status?: string, details?: string) => void
 }
 
-export interface JobContext {
+export interface IJobContext {
 	activeJobs: Record<string, JobUpdate>
 
 	addJob(job: JobUpdate): void
 	updateJob(job: JobUpdate): void
 	removeJob(runnerId: string): void
 }
-export const ActiveJobContext = createContext<JobContext | null>(null)
-
+export const JobContext = createContext<IJobContext | null>(null)
 export const useAppProps = () => useContext(AppPropsContext)
-export const useJobContext = () => useContext(ActiveJobContext)
+export const useJobContext = () => useContext(JobContext)
 export const useClientContext = () => useContext(StumpClientContext)

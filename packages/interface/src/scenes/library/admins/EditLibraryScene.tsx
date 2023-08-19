@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 
 import { useLocaleContext } from '../../../i18n/context'
 import CreateOrEditLibraryForm from './CreateOrEditLibraryForm'
+import QuickActions from './QuickActions'
 
 export default function EditLibraryScene() {
 	const { id } = useParams()
@@ -21,17 +22,22 @@ export default function EditLibraryScene() {
 
 	return (
 		<>
-			<Heading size="lg">{t('editLibraryScene.heading')}</Heading>
+			<Heading size="lg">{t('manageLibraryScene.heading')}</Heading>
 			<Text size="sm" variant="muted">
-				{t('editLibraryScene.subtitle')}{' '}
+				{t('manageLibraryScene.subtitle')}{' '}
 				<Link href="https://stumpapp.dev/guides/libraries">
-					{t('editLibraryScene.subtitleLink')}.
+					{t('manageLibraryScene.subtitleLink')}.
 				</Link>
 			</Text>
 
 			<Divider variant="muted" className="my-3.5" />
 			<div className="flex flex-col gap-12 pt-2">
-				{libraries && <CreateOrEditLibraryForm existingLibraries={libraries} library={library} />}
+				{libraries && (
+					<>
+						<QuickActions />
+						<CreateOrEditLibraryForm existingLibraries={libraries} library={library} />
+					</>
+				)}
 			</div>
 		</>
 	)

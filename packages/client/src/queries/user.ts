@@ -7,7 +7,7 @@ import {
 	userApi,
 	userQueryKeys,
 } from '@stump/api'
-import type { LoginOrRegisterArgs, UpdateUserArgs, User, UserPreferences } from '@stump/types'
+import type { LoginOrRegisterArgs, UpdateUser, User, UserPreferences } from '@stump/types'
 import { AxiosError } from 'axios'
 
 import { MutationOptions, PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
@@ -74,13 +74,13 @@ export function useUserPreferences(
 	}
 }
 
-type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUserArgs>
+type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUser>
 export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	updateViewer
 
 	const { mutateAsync: update, isLoading } = useMutation(
 		[userQueryKeys.updateUser, id],
-		async (params: UpdateUserArgs) => {
+		async (params: UpdateUser) => {
 			const response = id ? await updateUser(id, params) : await updateViewer(params)
 			return response.data
 		},

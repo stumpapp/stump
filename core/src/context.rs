@@ -8,7 +8,7 @@ use tokio::sync::{
 use crate::{
 	db::{self, entity::Log},
 	event::{CoreEvent, InternalCoreTask},
-	job::Job,
+	job::JobExecutorTrait,
 	prisma,
 };
 
@@ -105,7 +105,7 @@ impl Ctx {
 		}
 	}
 
-	/// Returns the reciever for the CoreEvent channel. See [`emit_client_event`]
+	/// Returns the reciever for the CoreEvent channel. See [`emit_event`]
 	/// for more information and an example usage.
 	pub fn get_client_receiver(&self) -> Receiver<CoreEvent> {
 		self.response_channel.0.subscribe()
@@ -142,10 +142,10 @@ impl Ctx {
 	///        }
 	///    });
 	///
-	///    ctx.emit_client_event(event.clone());
+	///    ctx.emit_event(event.clone());
 	/// }
 	/// ```
-	pub fn emit_client_event(&self, event: CoreEvent) {
+	pub fn emit_event(&self, event: CoreEvent) {
 		let _ = self.response_channel.0.send(event);
 	}
 
@@ -153,7 +153,7 @@ impl Ctx {
 	pub async fn handle_failure_event(&self, event: CoreEvent) {
 		use prisma::log;
 
-		self.emit_client_event(event.clone());
+		self.emit_event(event.clone());
 
 		let log = Log::from(event);
 
@@ -173,18 +173,18 @@ impl Ctx {
 	}
 
 	/// Sends in internal task
-	pub fn internal_task(
+	pub fn dispatch_task(
 		&self,
 		task: InternalCoreTask,
 	) -> Result<(), SendError<InternalCoreTask>> {
 		self.internal_sender.send(task)
 	}
 
-	/// Sends a QueueJob task to the event manager.
-	pub fn spawn_job(
+	/// Sends an EnqueueJob task to the event manager.
+	pub fn dispatch_job(
 		&self,
-		job: Box<dyn Job>,
+		job: Box<dyn JobExecutorTrait>,
 	) -> Result<(), SendError<InternalCoreTask>> {
-		self.internal_sender.send(InternalCoreTask::QueueJob(job))
+		self.dispatch_task(InternalCoreTask::EnqueueJob(job))
 	}
 }

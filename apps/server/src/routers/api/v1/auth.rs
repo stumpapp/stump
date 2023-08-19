@@ -4,12 +4,14 @@ use axum::{
 	Json, Router,
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
+use prisma_client_rust::chrono::Utc;
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
 	db::entity::{User, UserRole},
 	prisma::{user, user_preferences},
 };
+use tracing::error;
 use utoipa::ToSchema;
 
 use crate::{
@@ -95,7 +97,24 @@ async fn login(
 			return Err(ApiError::Unauthorized);
 		}
 
-		let user: User = db_user.into();
+		let updated_user = state
+			.db
+			.user()
+			.update(
+				user::id::equals(db_user.id.clone()),
+				vec![user::last_login::set(Some(Utc::now().into()))],
+			)
+			.exec()
+			.await
+			.unwrap_or_else(|err| {
+				error!(error = ?err, "Failed to update user last login!");
+				user::Data {
+					last_login: Some(Utc::now().into()),
+					..db_user
+				}
+			});
+
+		let user = User::from(updated_user);
 		session
 			.insert("user", user.clone())
 			.expect("Failed to write user to session");

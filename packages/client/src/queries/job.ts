@@ -1,19 +1,33 @@
-import { getJobs } from '@stump/api'
-import type { JobReport } from '@stump/types'
+import { jobApi, jobQueryKeys } from '@stump/api'
+import type { JobDetail } from '@stump/types'
 
-import { QueryOptions, useQuery } from '../client'
+import { PageQueryOptions, usePageQuery } from '../client'
 
-export function useJobReport({ onSuccess, onError, ...options }: QueryOptions<JobReport[]> = {}) {
-	const {
-		data: jobReports,
-		isLoading,
-		isRefetching,
-		isFetching,
-	} = useQuery(['getJobReports'], () => getJobs().then((res) => res.data), {
-		onError,
-		onSuccess,
-		...options,
-	})
+type UseJobsQueryParmas = PageQueryOptions<JobDetail> & {
+	params?: Record<string, unknown>
+}
+// TODO(aaron): investigate why params from queryFn is not being properly populated, i.e.
+// it is empty when the params from the useJobsQuery args is not empty. usePageQuery
+// is supposed to track and pass the params to the queryFn...
+export function useJobsQuery({ params, ...options }: UseJobsQueryParmas = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[jobQueryKeys.getJobs, params],
+		async ({ page = 1, page_size = 10 }) => {
+			const { data } = await jobApi.getJobs({ page, page_size, ...params })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
+	)
 
-	return { isLoading: isLoading || isRefetching || isFetching, jobReports }
+	const jobs = data?.data
+	const pageData = data?._page
+
+	return {
+		jobs,
+		pageData,
+		...restReturn,
+	}
 }

@@ -5,7 +5,7 @@ members = [
   "apps/server",
   "core", 
   # "core/integration-tests", 
-  "crates/prisma-cli", 
+  "crates/*", 
 ]
 
 [workspace.package]

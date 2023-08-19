@@ -50,7 +50,7 @@ export default function ThumbnailConfigForm() {
 				<span className="font-medium text-gray-700 dark:text-gray-300">
 					will not affect existing
 				</span>{' '}
-				thumbnails.
+				thumbnails
 			</Text>
 
 			<Divider variant="muted" className="my-3.5" />

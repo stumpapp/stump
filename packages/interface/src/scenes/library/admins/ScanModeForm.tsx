@@ -24,7 +24,7 @@ export default function ScanModeForm({ isCreatingLibrary }: Props) {
 				{isCreatingLibrary
 					? 'once it is registered in the database'
 					: 'once your edits are persisted'}
-				. This is optional, and can be done later.
+				. This is optional, and can be done later
 			</Text>
 
 			<Divider variant="muted" className="my-3.5" />

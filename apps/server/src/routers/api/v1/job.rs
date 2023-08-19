@@ -112,20 +112,6 @@ async fn get_jobs(
 		})
 		.await?;
 
-	// let (task_tx, task_rx) = oneshot::channel();
-
-	// ctx.dispatch_task(InternalCoreTask::GetJobs(task_tx))
-	// 	.map_err(|e| {
-	// 		ApiError::InternalServerError(format!(
-	// 			"Failed to submit internal task: {}",
-	// 			e
-	// 		))
-	// 	})?;
-
-	// let res = task_rx.await.map_err(|e| {
-	// 	ApiError::InternalServerError(format!("Failed to get job report: {}", e))
-	// })??;
-
 	if let Some(count) = count {
 		return Ok(Json(Pageable::from((jobs, count, pagination))));
 	}

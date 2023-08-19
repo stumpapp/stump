@@ -86,7 +86,7 @@ async fn main() -> ServerResult<()> {
 				return_sender: shutdown_tx,
 			});
 
-		let _ = shutdown_rx
+		shutdown_rx
 			.await
 			.expect("Failed to successfully handle shutdown");
 	};

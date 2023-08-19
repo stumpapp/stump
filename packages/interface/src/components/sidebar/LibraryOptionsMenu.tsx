@@ -89,7 +89,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 						items: [
 							{
 								href: paths.libraryManage(library.id),
-								label: 'Edit Library',
+								label: 'Manage Library',
 								leftIcon: <Edit className={iconStyle} />,
 							},
 							{

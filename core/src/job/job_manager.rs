@@ -16,7 +16,6 @@ use super::{
 	utils::update_job_status, worker::Worker, JobDetail, JobExecutorTrait, JobStatus,
 };
 
-// TODO: add pause variant for a single worker.
 #[derive(Debug, Clone)]
 pub enum JobManagerShutdownSignal {
 	All,
@@ -74,14 +73,17 @@ impl JobManager {
 		}
 	}
 
+	/// Wrap the job manager in an Arc.
 	pub fn arced(self) -> Arc<Self> {
 		Arc::new(self)
 	}
 
+	/// Returns a reference to the shutdown signal sender.
 	pub fn get_shutdown_tx(&self) -> Arc<broadcast::Sender<JobManagerShutdownSignal>> {
 		Arc::clone(&self.shutdown_tx)
 	}
 
+	/// Cancels a job by ID. If the job is not running but in the queue, it will be removed.
 	pub async fn cancel_job(self: Arc<Self>, job_id: String) -> JobManagerResult<()> {
 		let mut workers = self.workers.write().await;
 		if workers.get(&job_id).is_some() {
@@ -111,6 +113,8 @@ impl JobManager {
 		Err(JobManagerError::WorkerNotFound(job_id))
 	}
 
+	/// DONT USE: This won't work as expected until pausing is supported. This will
+	/// cancel the running job.
 	pub async fn pause_job(self: Arc<Self>, job_id: String) -> JobManagerResult<()> {
 		let mut workers = self.workers.write().await;
 
@@ -125,6 +129,7 @@ impl JobManager {
 		}
 	}
 
+	/// Enqueues a job to be run in a worker thread.
 	pub async fn enqueue_job(
 		self: Arc<Self>,
 		mut job: Box<dyn JobExecutorTrait>,
@@ -196,6 +201,7 @@ impl JobManager {
 		Ok(())
 	}
 
+	/// Removes a job from the pending queue by index.
 	async fn dequeue_pending_job(self: Arc<Self>, index: usize) -> JobManagerResult<()> {
 		let result = self.job_queue.write().await.remove(index);
 		if let Some(job) = result {
@@ -244,6 +250,7 @@ impl JobManager {
 		}
 	}
 
+	/// Returns the index of a job in the pending queue by ID.
 	async fn get_queued_job_index(&self, job_id: &str) -> Option<usize> {
 		let job_queue = self.job_queue.read().await;
 		job_queue.iter().position(|job| {
@@ -272,6 +279,7 @@ impl JobManager {
 		Ok(jobs)
 	}
 
+	/// Shuts down all workers and clears the job queue.
 	pub async fn shutdown(self: Arc<Self>) {
 		let workers = self.workers.read().await;
 		if !workers.is_empty() {

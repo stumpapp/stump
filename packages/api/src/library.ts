@@ -1,10 +1,10 @@
 import type {
-	CreateLibraryArgs,
+	CreateLibrary,
 	LibrariesStats,
 	Library,
 	LibraryScanMode,
 	Series,
-	UpdateLibraryArgs,
+	UpdateLibrary,
 } from '@stump/types'
 
 import { API, mergePageParams, urlWithParams } from '.'
@@ -49,17 +49,24 @@ export function deleteLibrary(id: string) {
 	return API.delete(`/libraries/${id}`)
 }
 
-export function createLibrary(payload: CreateLibraryArgs): Promise<ApiResult<Library>> {
+export function deleteLibraryThumbnails(id: string) {
+	// TODO: libraries don't have a configurable thumbnail, but eventually
+	// they might. So this endpoint might need to change.
+	return API.delete(`/libraries/${id}/thumbnail`)
+}
+
+export function createLibrary(payload: CreateLibrary): Promise<ApiResult<Library>> {
 	return API.post('/libraries', payload)
 }
 
-export function editLibrary(payload: UpdateLibraryArgs): Promise<ApiResult<Library>> {
+export function editLibrary(payload: UpdateLibrary): Promise<ApiResult<Library>> {
 	return API.put(`/libraries/${payload.id}`, payload)
 }
 
 export const libraryApi = {
 	createLibrary,
 	deleteLibrary,
+	deleteLibraryThumbnails,
 	editLibrary,
 	getLibraries,
 	getLibrariesStats,
@@ -71,6 +78,7 @@ export const libraryApi = {
 export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	createLibrary: 'library.createLibrary',
 	deleteLibrary: 'library.deleteLibrary',
+	deleteLibraryThumbnails: 'library.deleteLibraryThumbnails',
 	editLibrary: 'library.editLibrary',
 	getLibraries: 'library.getLibraries',
 	getLibrariesStats: 'library.getLibrariesStats',

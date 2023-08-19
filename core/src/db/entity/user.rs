@@ -19,6 +19,8 @@ pub struct User {
 	pub user_preferences: Option<UserPreferences>,
 	pub avatar_url: Option<String>,
 	pub read_progresses: Option<Vec<ReadProgress>>,
+	pub created_at: String,
+	pub last_login: Option<String>,
 }
 
 impl User {
@@ -58,6 +60,8 @@ impl From<prisma::user::Data> for User {
 			user_preferences,
 			avatar_url: data.avatar_url,
 			read_progresses,
+			created_at: data.created_at.to_string(),
+			last_login: data.last_login.map(|dt| dt.to_string()),
 		}
 	}
 }

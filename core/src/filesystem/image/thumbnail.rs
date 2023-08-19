@@ -7,6 +7,7 @@ use crate::{
 	config::get_thumbnails_dir,
 	db::entity::Media,
 	filesystem::{media, FileError},
+	prisma::media as prisma_media,
 };
 
 use super::{
@@ -74,33 +75,112 @@ pub fn generate_thumbnails(
 	Ok(generated_paths)
 }
 
-pub fn get_thumbnail_path(id: &str) -> Option<PathBuf> {
-	let thumbnail_path = get_thumbnails_dir().join(format!("{}.webp", id));
+pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
 
-	if thumbnail_path.exists() {
-		Some(thumbnail_path)
-	} else {
-		None
+pub fn generate_thumbnails_for_media(
+	media: Vec<prisma_media::Data>,
+	options: ImageProcessorOptions,
+	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
+) -> Result<Vec<PathBuf>, FileError> {
+	trace!(media_count = media.len(), "Enter generate_thumbnails");
+
+	let mut generated_paths = Vec::with_capacity(media.len());
+
+	for (idx, chunk) in media.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
+		trace!(chunk = idx + 1, "Processing chunk for thumbnail generation");
+		on_progress(
+			format!(
+				"Processing group {} of {} for thumbnail generation",
+				idx + 1,
+				media.len() / THUMBNAIL_CHUNK_SIZE
+			)
+			.to_string(),
+		);
+		let results = chunk
+			.into_par_iter()
+			.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str(), options.clone()))
+			.filter_map(|res| {
+				if res.is_err() {
+					error!(error = ?res.err(), "Error generating thumbnail!");
+					None
+				} else {
+					res.ok()
+				}
+			})
+			.collect::<Vec<PathBuf>>();
+
+		debug!(num_generated = results.len(), "Generated thumbnail batch");
+
+		generated_paths.extend(results);
 	}
+
+	Ok(generated_paths)
 }
 
-pub fn remove_thumbnail(id: &str) -> Result<(), FileError> {
-	let thumbnail_path = get_thumbnails_dir().join(format!("{}.webp", id));
+pub fn remove_thumbnails(id_list: &[String]) -> Result<(), FileError> {
+	let thumbnails_dir = get_thumbnails_dir();
+	let found_thumbnails = thumbnails_dir
+		.read_dir()
+		.ok()
+		.map(|dir| dir.into_iter())
+		.map(|iter| {
+			iter.filter_map(|entry| {
+				entry.ok().and_then(|entry| {
+					let path = entry.path();
+					let file_name = path.file_name()?.to_str()?.to_string();
 
-	if thumbnail_path.exists() {
-		std::fs::remove_file(thumbnail_path)?;
+					if id_list.iter().any(|id| file_name.starts_with(id)) {
+						Some(path)
+					} else {
+						None
+					}
+				})
+			})
+		})
+		.map(|iter| iter.collect::<Vec<PathBuf>>())
+		.unwrap_or_default();
+
+	let found_thumbnails_count = found_thumbnails.len();
+	tracing::debug!(found_thumbnails_count, "Found thumbnails to remove");
+
+	for path in found_thumbnails {
+		std::fs::remove_file(path)?;
 	}
 
 	Ok(())
 }
 
-pub fn remove_thumbnails(id_list: &[String]) -> Result<(), FileError> {
-	for id in id_list {
-		// TODO: not sure I want the entire process to fail if one thumbnail fails to delete...
-		// for now, I will leave it as is. I can't see to many cases where this would happen, but
-		// it's obviously possible.
-		remove_thumbnail(id)?;
+pub fn remove_thumbnails_of_type(
+	ids: &[String],
+	extension: &str,
+) -> Result<(), FileError> {
+	let thumbnails_dir = get_thumbnails_dir();
+
+	for (idx, chunk) in ids.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
+		trace!(chunk = idx + 1, "Processing chunk for thumbnail removal");
+		let results = chunk
+			.into_par_iter()
+			.map(|id| {
+				let thumbnail_path = thumbnails_dir.join(format!("{}.{}", id, extension));
+				if thumbnail_path.exists() {
+					std::fs::remove_file(thumbnail_path)?;
+				}
+				Ok(())
+			})
+			.filter_map(|res: Result<(), FileError>| {
+				if res.is_err() {
+					error!(error = ?res.err(), "Error generating thumbnail!");
+					None
+				} else {
+					res.ok()
+				}
+			})
+			.collect::<Vec<()>>();
+
+		debug!(deleted_count = results.len(), "Deleted thumbnail batch");
 	}
+
+	debug!("Finished deleting thumbnails");
 
 	Ok(())
 }

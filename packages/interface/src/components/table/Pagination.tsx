@@ -1,19 +1,22 @@
-import { IconButton } from '@stump/components'
+import { Button, cn, IconButton } from '@stump/components'
 import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react'
 import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
 
 import { usePagination } from '../../hooks/usePagination'
+import PagePopoverForm from '../PagePopoverForm'
 import { PaginationProps } from '../Pagination'
 
-interface TablePaginationProps extends Omit<PaginationProps, 'position'> {
+type TablePaginationProps = Omit<PaginationProps, 'position'> & {
 	onPageChange: (page: number) => void
+	isZeroBasedPagination?: boolean
 }
 
 export default function TablePagination({
 	pages,
 	currentPage,
 	onPageChange,
+	isZeroBasedPagination,
 }: TablePaginationProps) {
 	const { innerWidth: screenWidth } = useWindowSize()
 
@@ -33,57 +36,62 @@ export default function TablePagination({
 
 	const { pageRange } = usePagination({ currentPage, numbersToShow, totalPages: pages })
 
-	return null
-	// return (
-	// 	<ButtonGroup size="sm" isAttached variant="outline">
-	// 		<Button onClick={() => onPageChange(currentPage - 1)}>
-	// 			<ArrowLeft />
-	// 		</Button>
+	return (
+		<div className="flex items-center gap-1">
+			<IconButton disabled={currentPage <= 1} onClick={() => onPageChange(currentPage - 1)}>
+				<ArrowLeft />
+			</IconButton>
 
-	// 		{pageRange.map((page, i) => {
-	// 			if (typeof page === 'number') {
-	// 				return (
-	// 					<PaginationNumber
-	// 						key={`${i}, pagination-${page}`}
-	// 						active={page === currentPage}
-	// 						onClick={() => onPageChange(page)}
-	// 						page={page}
-	// 					/>
-	// 				)
-	// 			}
+			{pageRange.map((page, i) => {
+				if (typeof page === 'number') {
+					return (
+						<PaginationNumber
+							key={`${i}, pagination-${page}`}
+							isActive={page === currentPage}
+							onClick={() => onPageChange(page)}
+							page={page}
+						/>
+					)
+				}
 
-	// 			return (
-	// 				<PagePopoverForm
-	// 					pos={i}
-	// 					key={`${i}, pagination-${page}`}
-	// 					totalPages={pages}
-	// 					onPageChange={onPageChange}
-	// 					trigger={
-	// 						<Button>
-	// 							<DotsThree />
-	// 						</Button>
-	// 					}
-	// 				/>
-	// 			)
-	// 		})}
+				return (
+					<PagePopoverForm
+						currentPage={currentPage}
+						pos={i}
+						key={`${i}, pagination-${page}`}
+						totalPages={pages}
+						onPageChange={onPageChange}
+						trigger={
+							<Button>
+								<DotsThree />
+							</Button>
+						}
+					/>
+				)
+			})}
 
-	// 		<Button isDisabled={currentPage >= pages} onClick={() => onPageChange(currentPage + 1)}>
-	// 			<ArrowRight />
-	// 		</Button>
-	// 	</ButtonGroup>
-	// )
+			<IconButton disabled={currentPage >= pages} onClick={() => onPageChange(currentPage + 1)}>
+				<ArrowRight />
+			</IconButton>
+		</div>
+	)
 }
 
 interface PaginationNumberProps {
 	page: number
-	active: boolean
+	isActive: boolean
 	onClick: () => void
 }
 
 // TODO: style
-function PaginationNumber({ onClick, page }: PaginationNumberProps) {
+function PaginationNumber({ onClick, page, isActive }: PaginationNumberProps) {
 	return (
-		<IconButton size="xs" onClick={onClick}>
+		<IconButton
+			size="xs"
+			onClick={onClick}
+			variant="ghost"
+			className={cn('h-5 w-5', isActive ? '!text-brand' : '')}
+		>
 			{page}
 		</IconButton>
 	)

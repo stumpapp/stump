@@ -6,7 +6,10 @@ use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{error::CoreError, event::InternalCoreTask, filesystem::FileError};
+use stump_core::{
+	error::CoreError, event::InternalCoreTask, filesystem::FileError,
+	job::JobManagerError,
+};
 use tokio::sync::mpsc;
 use utoipa::ToSchema;
 
@@ -120,6 +123,12 @@ impl From<CoreError> for ApiError {
 			},
 			_ => ApiError::InternalServerError(err.to_string()),
 		}
+	}
+}
+
+impl From<JobManagerError> for ApiError {
+	fn from(error: JobManagerError) -> Self {
+		ApiError::InternalServerError(error.to_string())
 	}
 }
 

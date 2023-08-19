@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { useAppContext } from '../../context'
+import paths from '../../paths'
 import DeleteLibraryConfirmation from '../library/DeleteLibraryConfirmation'
 
 interface Props {
@@ -78,7 +79,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 								],
 							},
 							{
-								href: `/library/${library.id}/explore`,
+								href: paths.libraryFileExplorer(library.id),
 								label: 'File Explorer',
 								leftIcon: <FolderSearch2 className={iconStyle} />,
 							},
@@ -87,8 +88,8 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					{
 						items: [
 							{
-								href: `/library/${library.id}/edit`,
-								label: 'Edit Library',
+								href: paths.libraryManage(library.id),
+								label: 'Manage Library',
 								leftIcon: <Edit className={iconStyle} />,
 							},
 							{

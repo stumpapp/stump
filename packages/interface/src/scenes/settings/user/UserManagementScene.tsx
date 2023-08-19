@@ -17,7 +17,7 @@ import UserManagementStats from './UserManagementStats'
 // the only sub-scene I can think of is user creation which isn't essential to have perfect UX
 // out the gate
 export default function UserManagementScene() {
-	const [selectedUser, setSelectedUser] = useState<User | null>(null)
+	const [deletingUser, setDeletingUser] = useState<User | null>(null)
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
 		pageSize: 10,
@@ -45,12 +45,12 @@ export default function UserManagementScene() {
 	return (
 		<UserManagementContext.Provider
 			value={{
+				deletingUser,
 				isRefetchingUsers,
 				pageCount: pageData?.total_pages || -1,
 				pagination,
-				selectedUser,
+				setDeletingUser,
 				setPagination,
-				setSelectedUser,
 				users: users || [],
 			}}
 		>

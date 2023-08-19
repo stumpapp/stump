@@ -61,7 +61,7 @@
 			}
 		}
 	},
-	"editLibraryScene": {
+	"manageLibraryScene": {
 		"heading": "Modifica biblioteca",
 		"subtitle": "Usa il seguente modulo per modificare la tua biblioteca. Se vuoi un ripasso sulle biblioteche e su come funzionano, dai un'occhiata alla",
 		"subtitleLink": "documentazione correlata",

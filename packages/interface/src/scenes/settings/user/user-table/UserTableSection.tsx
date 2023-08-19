@@ -16,7 +16,7 @@ export default function UserTableSection() {
 			</div>
 
 			<Text size="sm" variant="muted" className="mt-1.5">
-				View and manage your users using the table below.
+				View and manage your users using the table below
 			</Text>
 			<Divider variant="muted" className="my-3.5" />
 			<UserTable />

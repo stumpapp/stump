@@ -114,6 +114,7 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
+// TODO: parallelize this
 pub async fn batch_media_operations(
 	ctx: &Ctx,
 	operations: Vec<BatchScanOperation>,

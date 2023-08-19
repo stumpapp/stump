@@ -9,7 +9,7 @@ import {
 	useBoolean,
 } from '@stump/components'
 import { Edit } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useLocaleContext } from '../../../i18n'
 
@@ -34,6 +34,12 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 		onImageChange(newUrl || undefined)
 		off()
 	}
+
+	useEffect(() => {
+		if (!imageUrl) {
+			setNewUrl('')
+		}
+	}, [imageUrl])
 
 	return (
 		<>
@@ -106,6 +112,7 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 											onClick: on,
 										},
 										{
+											disabled: !imageUrl && !newUrl,
 											label: t(
 												'settingsScene.general.profileForm.avatarPicker.buttons.removeImage',
 											),

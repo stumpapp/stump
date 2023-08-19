@@ -21,6 +21,13 @@ library::include!(library_series_ids_media_ids_include {
 	}
 });
 
+library::include!(library_thumbnails_deletion_include {
+	series: include {
+		media: select { id }
+	}
+	library_options: select { thumbnail_config }
+});
+
 ///////////////////////////////////////////////
 //////////////////// MODELS ///////////////////
 ///////////////////////////////////////////////
@@ -117,7 +124,7 @@ impl LibraryOptions {
 	}
 }
 
-#[derive(Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type, ToSchema)]
 pub enum LibraryScanMode {
 	#[serde(rename = "SYNC")]
 	Sync,

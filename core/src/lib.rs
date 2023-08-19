@@ -46,12 +46,10 @@ pub use error::{CoreError, CoreResult};
 ///    assert!(StumpCore::init_environment().is_ok());
 ///
 ///    let core = StumpCore::new().await;
-///    // do stuff with core
 /// }
 /// ```
 pub struct StumpCore {
 	ctx: Ctx,
-	#[allow(dead_code)]
 	event_manager: Arc<EventManager>,
 }
 
@@ -85,6 +83,10 @@ impl StumpCore {
 	/// prividing access to the database and internal channels.
 	pub fn get_context(&self) -> Ctx {
 		self.ctx.get_ctx()
+	}
+
+	pub fn get_job_manager(&self) -> Arc<job::JobManager> {
+		self.event_manager.get_job_manager()
 	}
 
 	/// Returns the shadow text for the core. This is just the fun ascii art that
@@ -177,7 +179,7 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobReport>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<JobDetail>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;

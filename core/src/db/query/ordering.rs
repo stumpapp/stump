@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	error::CoreError,
-	prisma::{library, media, series},
+	prisma::{job, library, media, series},
 };
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
@@ -108,6 +108,29 @@ impl TryInto<series::OrderByParam> for QueryOrder {
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order series by {:?}",
+					self.order_by
+				)))
+			},
+		})
+	}
+}
+
+impl TryInto<job::OrderByParam> for QueryOrder {
+	type Error = CoreError;
+
+	fn try_into(self) -> Result<job::OrderByParam, Self::Error> {
+		let dir: prisma_client_rust::Direction = self.direction.into();
+
+		Ok(match self.order_by.to_lowercase().as_str() {
+			"name" => job::name::order(dir),
+			"status" => job::status::order(dir),
+			"created_at" => job::created_at::order(dir),
+			"completed_at" => job::completed_at::order(dir),
+			"task_count" => job::task_count::order(dir),
+			"ms_elapsed" => job::ms_elapsed::order(dir),
+			_ => {
+				return Err(CoreError::InvalidQuery(format!(
+					"You cannot order jobs by {:?}",
 					self.order_by
 				)))
 			},

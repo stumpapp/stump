@@ -6,7 +6,7 @@ use stump_core::db::query::{ordering::*, pagination::*};
 use stump_core::filesystem::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
 };
-use stump_core::job::{JobReport, JobStatus};
+use stump_core::job::{JobDetail, JobStatus};
 
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -40,14 +40,16 @@ use super::api::{
         api::v1::auth::register,
         // TODO: epub here
         api::v1::filesystem::list_directory,
-        api::v1::job::get_job_reports,
-        api::v1::job::delete_job_reports,
-        api::v1::job::cancel_job,
+        api::v1::job::get_jobs,
+        api::v1::job::delete_jobs,
+        api::v1::job::delete_job_by_id,
+        api::v1::job::cancel_job_by_id,
         api::v1::library::get_libraries,
         api::v1::library::get_libraries_stats,
         api::v1::library::get_library_by_id,
         api::v1::library::get_library_series,
         api::v1::library::get_library_thumbnail,
+        api::v1::library::delete_library_thumbnails,
         api::v1::library::scan_library,
         api::v1::library::create_library,
         api::v1::library::update_library,
@@ -92,7 +94,7 @@ use super::api::{
             PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
             Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
-            FilterableMediaQuery, FilterableSeriesQuery, JobReport, LibrariesStats, ScanQueryParam,
+            FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags
         )

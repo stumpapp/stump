@@ -61,7 +61,7 @@
 			}
 		}
 	},
-	"editLibraryScene": {
+	"manageLibraryScene": {
 		"heading": "Edit Library",
 		"subtitle": "Use the below form to edit your library. If you're wanting a refresh on libraries and how they work, check out the",
 		"subtitleLink": "relevant documentation",

@@ -21,15 +21,15 @@
 			"loggedInFirstTime": "Welcome! Redirecting...",
 			"registering": "Registering...",
 			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again.",
-			"registrationFailed": "Registration failed. Please try again."
+			"loginFailed": "Login failed. Please try again",
+			"registrationFailed": "Registration failed. Please try again"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below.",
-			"subtitleEditing": "A preview of your library edits will be shown below."
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
@@ -52,7 +52,7 @@
 			"labels": {
 				"libraryName": "Name",
 				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server.",
+				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Description",
 				"libraryTags": "Tags"
 			},
@@ -62,14 +62,14 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Edit Library",
-		"subtitle": "Use the below form to edit your library. If you're wanting a refresh on libraries and how they work, check out the",
+		"heading": "Manage Library",
+		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
 		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
 				"libraryName": "Name",
 				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server.",
+				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Description",
 				"libraryTags": "Tags"
 			},
@@ -169,17 +169,37 @@
 		"jobs": {
 			"helmet": "Jobs and Configuration",
 			"heading": "Jobs and Configuration",
-			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling."
+			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
+			"schedulingHeading": "Job Scheduling",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
+			"historyHeading": "Job History",
+			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"historyTable": {
+				"columns": {
+					"name": "Type",
+					"description": "Description",
+					"status": "Status",
+					"createdAt": "Started At",
+					"elapsed": "Elapsed",
+					"tasks": "Tasks"
+				},
+				"emptyHeading": "There are no jobs to display",
+				"emptySubtitle": "You can't have a job if you don't have a job",
+				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
+				"deleteAllConfirmButton": "Clear history",
+				"deleteAllConfirmButtonTitle": "Clear all job history",
+				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+			}
 		},
 		"server": {
 			"helmet": "Server Settings",
 			"heading": "Server Settings",
-			"subtitle": "Manage various configurable options for your Stump server instance, itself."
+			"subtitle": "Manage various configurable options for your Stump server instance, itself"
 		},
 		"users": {
 			"helmet": "User Management",
 			"heading": "User Management",
-			"subtitle": "Manage the users on this server, including creating new users and changing their permissions."
+			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
 		}
 	},
 	"jobOverlay": {
@@ -244,20 +264,20 @@
 	"serverSOS": {
 		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below."
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device."
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
 		"reconnected": "Reconnected to server! Redirecting...",
 		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected.",
+		"heading": "Server isn't connected",
 		"message": [
-			"Please check your internet connection.",
+			"Please check your internet connection",
 			"Click here",
-			"to change your server URL."
+			"to change your server URL"
 		]
 	},
 	"slidingList": {

@@ -21,14 +21,14 @@
 			"loggedInFirstTime": "Bem vindo! Redirecionando...",
 			"registering": "Registrando...",
 			"registered": "Registrado!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loginFailed": "Falha no login. Tente novamente",
+			"registrationFailed": "Falha ao registrar. Por favor, tente novamente"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Configuração da Biblioteca",
-			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
 			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},

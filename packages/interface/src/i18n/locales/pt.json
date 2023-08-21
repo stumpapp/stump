@@ -29,7 +29,7 @@
 		"libraryConfiguration": {
 			"heading": "Configuração da Biblioteca",
 			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
 		}
 	},
 	"bookOverviewScene": {
@@ -52,7 +52,7 @@
 			"labels": {
 				"libraryName": "Nome",
 				"libraryPath": "Caminho",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
 				"libraryDescription": "Descrição",
 				"libraryTags": "Etiquetas"
 			},
@@ -62,19 +62,19 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Gerenciar Biblioteca",
+		"subtitle": "Atualize os detalhes ou a configuração da sua biblioteca, altere as regras de acesso de controle ou arquivos de verificação. Se você está querendo uma atualização das bibliotecas e como elas funcionam, confira a",
+		"subtitleLink": "documentação relevante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Nome",
+				"libraryPath": "Caminho",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
+				"libraryDescription": "Descrição",
+				"libraryTags": "Marcadores"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Salvar Alterações"
 			}
 		}
 	},
@@ -169,37 +169,37 @@
 		"jobs": {
 			"helmet": "Ações e configurações",
 			"heading": "Ações e configurações",
-			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
-			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
-			"historyHeading": "Job History",
-			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"subtitle": "Ver e gerenciar as tarefas em segundo plano disponíveis neste servidor, incluindo varreduras da biblioteca e tarefas agendadas",
+			"schedulingHeading": "Agendar Tarefas",
+			"schedulingSubtitle": "Gerenciar o agendamento de tarefas em segundo plano neste servidor",
+			"historyHeading": "Histórico de Tarefas",
+			"historySubtitle": "Gerenciar tarefas em execução e ver o histórico de tarefas concluídas",
 			"historyTable": {
 				"columns": {
-					"name": "Type",
-					"description": "Description",
-					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
-					"tasks": "Tasks"
+					"name": "Tipo",
+					"description": "Descrição",
+					"status": "Estado",
+					"createdAt": "Iniciou em",
+					"elapsed": "Decorrido",
+					"tasks": "Tarefas"
 				},
-				"emptyHeading": "There are no jobs to display",
-				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
-				"deleteAllConfirmButton": "Clear history",
-				"deleteAllConfirmButtonTitle": "Clear all job history",
-				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+				"emptyHeading": "Não há tarefas para exibir",
+				"emptySubtitle": "Você não pode ter uma tarefa se não tiver um nenhuma",
+				"deleteAllMessage": "O histórico de tarefas e as estatísticas de todos os trabalhos podem ser excluídas a qualquer momento e não afetarão os trabalhos em execução. No entanto, esta ação não pode ser desfeita e eliminará da base de dados todo o histórico de tarefas.",
+				"deleteAllConfirmButton": "Limpar histórico",
+				"deleteAllConfirmButtonTitle": "Limpar todo o histórico de tarefas",
+				"deleteAllConfirmButtonTitleNoJobs": "Sem tarefas para limpar"
 			}
 		},
 		"server": {
 			"helmet": "Configurações do servidor",
 			"heading": "Configurações do servidor",
-			"subtitle": "Manage various configurable options for your Stump server instance, itself"
+			"subtitle": "Gerencie várias opções configuráveis para a instância do servidor Stumpe, em si"
 		},
 		"users": {
 			"helmet": "Gerenciamento de usuários",
 			"heading": "Gerenciamento de usuários",
-			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
+			"subtitle": "Gerenciar os usuários deste servidor, incluindo a criação de novos usuários e a alteração de suas permissões"
 		}
 	},
 	"jobOverlay": {
@@ -264,20 +264,20 @@
 	"serverSOS": {
 		"heading": "Servidor indisponível",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
 		},
 		"reconnected": "Reconectado ao servidor! Redirecionando...",
 		"reconnectionFailed": "Algo deu errado!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Servidor não está conectado",
 		"message": [
-			"Please check your internet connection",
+			"Por favor, verifique sua conexão com a internet",
 			"Clique aqui",
-			"to change your server URL"
+			"para mudar a URL de seu servidor"
 		]
 	},
 	"slidingList": {

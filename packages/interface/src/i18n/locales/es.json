@@ -21,15 +21,15 @@
 			"loggedInFirstTime": "¡Bienvenido! Redireccionando...",
 			"registering": "Registrando...",
 			"registered": "¡Registrado!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loginFailed": "Error de inicio de sesión. Por favor, inténtelo de nuevo",
+			"registrationFailed": "Registro fallido. Por favor, inténtelo de nuevo"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Configuración de la biblioteca",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"subtitleCreating": "A continuación se mostrará una vista previa de su nueva biblioteca",
+			"subtitleEditing": "A continuación se mostrará una vista previa de las ediciones de su biblioteca"
 		}
 	},
 	"bookOverviewScene": {
@@ -52,7 +52,7 @@
 			"labels": {
 				"libraryName": "Nombre",
 				"libraryPath": "Ruta",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "La ruta a la biblioteca tal como existe en su servidor",
 				"libraryDescription": "Descripción",
 				"libraryTags": "Etiquetas"
 			},
@@ -62,19 +62,19 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Gestionar biblioteca",
+		"subtitle": "Actualice los detalles o la configuración de su biblioteca, cambie las reglas de control del acceso o escanee los archivos. Si quieres actualizar las librerías y cómo funcionan, revisa el",
+		"subtitleLink": "documentación importante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Nombre",
+				"libraryPath": "Ruta",
+				"libraryPathDescription": "La ruta a la biblioteca tal como existe en su servidor",
+				"libraryDescription": "Descripción",
+				"libraryTags": "Etiquetas"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Guardar cambios"
 			}
 		}
 	},

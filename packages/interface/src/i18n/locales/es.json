@@ -169,37 +169,37 @@
 		"jobs": {
 			"helmet": "Trabajos y Configuración",
 			"heading": "Trabajos y Configuración",
-			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
-			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
-			"historyHeading": "Job History",
-			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"subtitle": "Ver y administrar las tareas en segundo plano disponibles en este servidor, incluyendo los escaneos de la biblioteca y la programación",
+			"schedulingHeading": "Programación de tareas",
+			"schedulingSubtitle": "Gestionar la programación de tareas en segundo plano en este servidor",
+			"historyHeading": "Historial de tareas",
+			"historySubtitle": "Gestionar tareas en ejecución y ver el historial de tareas completadas",
 			"historyTable": {
 				"columns": {
-					"name": "Type",
-					"description": "Description",
-					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
-					"tasks": "Tasks"
+					"name": "Tipo",
+					"description": "Descripción",
+					"status": "Estado",
+					"createdAt": "Iniciado el",
+					"elapsed": "Transcurrido",
+					"tasks": "Tareas"
 				},
-				"emptyHeading": "There are no jobs to display",
-				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
-				"deleteAllConfirmButton": "Clear history",
-				"deleteAllConfirmButtonTitle": "Clear all job history",
-				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+				"emptyHeading": "No hay tareas para mostrar",
+				"emptySubtitle": "No puede tener una tarea si no tienes una tarea",
+				"deleteAllMessage": "El historial de tareas y las estadísticas de todas las tareas pueden ser eliminadas en cualquier momento, y no afectarán a la ejecución de las tareas. Esta acción, sin embargo, no se puede deshacer y eliminará todo el historial de tareas de la base de datos.",
+				"deleteAllConfirmButton": "Eliminar historial",
+				"deleteAllConfirmButtonTitle": "Eliminar todo el historial de tareas",
+				"deleteAllConfirmButtonTitleNoJobs": "No hay tareas para eliminar"
 			}
 		},
 		"server": {
 			"helmet": "Configuración del servidor",
 			"heading": "Configuración del servidor",
-			"subtitle": "Manage various configurable options for your Stump server instance, itself"
+			"subtitle": "Gestiona varias opciones configurables para su servidor Stump en si mismo"
 		},
 		"users": {
 			"helmet": "Administración de usuarios",
 			"heading": "Administración de usuarios",
-			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
+			"subtitle": "Gestionar los usuarios en este servidor, incluyendo la creación de nuevos usuarios y cambiar sus permisos"
 		}
 	},
 	"jobOverlay": {
@@ -264,20 +264,20 @@
 	"serverSOS": {
 		"heading": "Servidor no disponible",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Ocurrió un error de red que sugiere que su servidor Stump no está disponible en este momento. Por favor, asegúrese de que se esté ejecutando y sea accesible desde este dispositivo.\nSi su URL del servidor ha cambiado, puede actualizarla utilizando el formulario a continuación"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Se ha producido un error de red que sugiere que su servidor Stump no está disponible actualmente. Por favor, asegúrate de que se está ejecutando y de que es accesible desde este dispositivo"
 		},
 		"reconnected": "¡Reconectado al servidor! Redirigiendo...",
 		"reconnectionFailed": "¡Algo salió mal!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "El servidor no está conectado",
 		"message": [
-			"Please check your internet connection",
+			"Por favor, verifique su conexión a internet",
 			"Haga clic aquí",
-			"to change your server URL"
+			"para cambiar su URL del servidor"
 		]
 	},
 	"slidingList": {

@@ -22,7 +22,7 @@ export { ContextMenu, type ContextMenuProps } from './context-menu'
 export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
 export { DropdownMenu, type DropdownMenuProps } from './dropdown'
 export { Form, type FormProps, Label, type LabelProps } from './form'
-export { useBodyLock, useBoolean, useToast } from './hooks'
+export { useBodyLock, useBoolean, usePrevious, usePreviousIsDifferent, useToast } from './hooks'
 export { AspectRatio, Avatar, Image } from './image'
 export {
 	CheckBox,

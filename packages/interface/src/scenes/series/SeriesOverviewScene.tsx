@@ -6,17 +6,18 @@ import { useParams } from 'react-router-dom'
 import MediaList from '../../components/media/MediaList'
 import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
-import { useGetPage } from '../../hooks/useGetPage'
 import useIsInView from '../../hooks/useIsInView'
+import { usePageParam } from '../../hooks/usePageParam'
 import { useSeriesOverviewContext } from './context'
 import MediaGrid from './MediaGrid'
 import SeriesOverviewContextProvider from './SeriesOverviewContextProvider'
 import SeriesOverviewTitleSection from './SeriesOverviewTitleSection'
 
+// TODO: fix pagination
 function SeriesOverviewScene() {
 	const [containerRef, isInView] = useIsInView()
 
-	const { page } = useGetPage()
+	const { page } = usePageParam()
 
 	const { seriesId, page_size, params } = useSeriesOverviewContext()
 	if (!seriesId) {

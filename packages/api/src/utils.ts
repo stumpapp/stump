@@ -31,6 +31,21 @@ export const toUrlParams = <T extends object>(obj?: T, params = new URLSearchPar
 	return new URLSearchParams(qs.stringify(obj, { arrayFormat: 'brackets' }))
 }
 
+export const toObjectParams = <T extends object>(
+	params?: URLSearchParams,
+	ignoreKeys?: string[],
+): T => {
+	if (!params) {
+		return {} as T
+	}
+
+	for (const key of ignoreKeys || []) {
+		params.delete(key)
+	}
+
+	return qs.parse(params.toString(), { ignoreQueryPrefix: true }) as T
+}
+
 export const mergeCursorParams = ({
 	afterId,
 	limit,

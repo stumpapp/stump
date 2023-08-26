@@ -1,5 +1,5 @@
 import { jobQueryKeys, libraryApi, libraryQueryKeys } from '@stump/api'
-import type { CreateLibraryArgs, Library, PageInfo, Series, UpdateLibraryArgs } from '@stump/types'
+import type { CreateLibrary, Library, PageInfo, Series, UpdateLibrary } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
 
@@ -31,6 +31,7 @@ export interface UseLibrariesReturn {
 	pageData?: PageInfo
 }
 
+// TODO: https://github.com/microsoft/TypeScript/issues/49055 fix this type error!!
 export function useLibraries() {
 	const { data, ...rest } = useQuery([libraryQueryKeys.getLibraries], libraryApi.getLibraries, {
 		// Send all non-401 errors to the error page
@@ -56,8 +57,8 @@ export function useLibraries() {
 }
 
 export function useLibrarySeriesQuery(libraryId: string, options: PageQueryOptions<Series>) {
-	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
-		[libraryQueryKeys.getLibrarySeries, libraryId],
+	const { data, ...restReturn } = usePageQuery(
+		[libraryQueryKeys.getLibrarySeries, libraryId, options.params],
 		async ({ page = 1, ...rest }) => {
 			const { data } = await libraryApi.getLibrarySeries(libraryId, { page, ...rest })
 			return data
@@ -72,7 +73,6 @@ export function useLibrarySeriesQuery(libraryId: string, options: PageQueryOptio
 	const pageData = data?._page
 
 	return {
-		isLoading: isLoading || isFetching || isRefetching,
 		pageData,
 		series,
 		...restReturn,
@@ -107,7 +107,7 @@ export function useScanLibrary({ onError }: Pick<QueryOptions<unknown>, 'onError
 }
 
 export function useCreateLibraryMutation(
-	options: MutationOptions<Library, AxiosError, CreateLibraryArgs> = {},
+	options: MutationOptions<Library, AxiosError, CreateLibrary> = {},
 ) {
 	const {
 		mutate: createLibrary,
@@ -138,7 +138,7 @@ export function useCreateLibraryMutation(
 }
 
 export function useEditLibraryMutation(
-	options: MutationOptions<Library, AxiosError, UpdateLibraryArgs> = {},
+	options: MutationOptions<Library, AxiosError, UpdateLibrary> = {},
 ) {
 	const {
 		mutate: editLibrary,

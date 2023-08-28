@@ -145,7 +145,8 @@ impl FileProcessor for RarProcessor {
 				}
 			})
 			.collect::<Vec<_>>();
-		valid_entries.sort_by(|a, b| a.filename.cmp(&b.filename));
+		valid_entries
+			.sort_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename));
 
 		let target_entry = valid_entries
 			.into_iter()
@@ -197,7 +198,7 @@ impl FileProcessor for RarProcessor {
 					false
 				}
 			})
-			.sorted_by(|a, b| a.filename.cmp(&b.filename))
+			.sorted_by(|a, b| alphanumeric_sort::compare_path(&a.filename, &b.filename))
 			.enumerate()
 			.map(|(idx, header)| (PathBuf::from(header.filename.as_os_str()), idx))
 			.collect::<HashMap<_, _>>();

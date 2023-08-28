@@ -25,3 +25,45 @@ pub(crate) fn metadata_from_buf(contents: String) -> Option<MediaMetadata> {
 		},
 	}
 }
+
+pub(crate) fn sort_file_names<S>(file_names: &mut [S])
+where
+	S: AsRef<str>,
+{
+	alphanumeric_sort::sort_str_slice(file_names);
+}
+
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn test_is_accepted_cover_name() {
+		let cover_file_names = vec!["cover", "thumbnail", "folder"];
+		for cover_name in cover_file_names {
+			assert!(super::is_accepted_cover_name(cover_name));
+		}
+	}
+
+	#[test]
+	fn test_is_not_accepted_cover_name() {
+		let cover_file_names = vec!["cover1", "thumbnail1", "folder1"];
+		for cover_name in cover_file_names {
+			assert!(!super::is_accepted_cover_name(cover_name));
+		}
+	}
+
+	#[test]
+	fn test_sort_numeric_file_names() {
+		let mut names = ["3.jpg", "1.jpg", "5.jpg", "2.jpg", "4.jpg"];
+		super::sort_file_names(&mut names);
+		let expected = ["1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg"];
+		assert_eq!(names, expected);
+	}
+
+	#[test]
+	fn test_sort_alphanumeric_file_names() {
+		let mut names = ["shot-2", "shot-1", "shot-11", "shot-10", "shot-3"];
+		super::sort_file_names(&mut names);
+		let expected = ["shot-1", "shot-2", "shot-3", "shot-10", "shot-11"];
+		assert_eq!(names, expected);
+	}
+}

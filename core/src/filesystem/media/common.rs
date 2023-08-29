@@ -3,7 +3,7 @@ use tracing::error;
 use crate::db::entity::metadata::MediaMetadata;
 
 pub fn is_accepted_cover_name(name: &str) -> bool {
-	let cover_file_names = vec!["cover", "thumbnail", "folder"];
+	let cover_file_names = ["cover", "thumbnail", "folder"];
 	cover_file_names
 		.iter()
 		.any(|&cover_name| name.eq_ignore_ascii_case(cover_name))
@@ -37,7 +37,7 @@ where
 mod tests {
 	#[test]
 	fn test_is_accepted_cover_name() {
-		let cover_file_names = vec!["cover", "thumbnail", "folder"];
+		let cover_file_names = ["cover", "thumbnail", "folder"];
 		for cover_name in cover_file_names {
 			assert!(super::is_accepted_cover_name(cover_name));
 		}

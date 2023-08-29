@@ -2,12 +2,12 @@ import type { Media, ReadProgress } from '@stump/types'
 
 import { API } from './index'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
-import { mergeCursorParams, urlWithParams } from './utils'
+import { mergeCursorParams, toUrlParams, urlWithParams } from './utils'
 
 type GetMediaById = ApiResult<Media>
 
-export function getMedia(filters?: Record<string, string>): Promise<PageableApiResult<Media[]>> {
-	const params = new URLSearchParams(filters)
+export function getMedia(filters?: Record<string, unknown>): Promise<PageableApiResult<Media[]>> {
+	const params = toUrlParams(filters)
 	return API.get(urlWithParams('/media', params))
 }
 

@@ -19,6 +19,7 @@ export {
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,
+	usePagedMediaQuery,
 	useRecentlyAddedMediaQuery,
 	useUpdateMediaProgress,
 } from './media'

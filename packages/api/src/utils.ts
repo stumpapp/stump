@@ -51,7 +51,7 @@ export const mergeCursorParams = ({
 	limit,
 	params,
 }: CursorQueryParams): URLSearchParams => {
-	const searchParams = new URLSearchParams(params)
+	const searchParams = toUrlParams(params)
 	if (afterId) {
 		searchParams.set('cursor', afterId)
 	}
@@ -62,7 +62,7 @@ export const mergeCursorParams = ({
 }
 
 export const mergePageParams = ({ page, page_size, params }: PagedQueryParams): URLSearchParams => {
-	const searchParams = new URLSearchParams(params)
+	const searchParams = toUrlParams(params)
 	if (page) {
 		searchParams.set('page', page.toString())
 	}

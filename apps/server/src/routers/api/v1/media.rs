@@ -69,6 +69,15 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 				let decoded_paths = decode_path_filter(filters.path);
 				media::path::in_vec(decoded_paths)
 			}),
+			filters.search.map(|s| {
+				or![
+					media::name::contains(s.clone()),
+					media::metadata::is(vec![or![
+						media_metadata::title::contains(s.clone()),
+						media_metadata::summary::contains(s.clone()),
+					]])
+				]
+			}),
 			filters
 				.metadata
 				.map(apply_media_metadata_filters)

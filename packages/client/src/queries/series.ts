@@ -52,7 +52,7 @@ export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOption
 }
 
 export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<Media>) {
-	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
+	const { data, ...restReturn } = usePageQuery(
 		[seriesQueryKeys.getSeriesMedia, seriesId],
 		async ({ page = 1, ...rest }) => {
 			const { data } = await seriesApi.getSeriesMedia(seriesId, { page, ...rest })
@@ -68,7 +68,6 @@ export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<
 	const pageData = data?._page
 
 	return {
-		isLoading: isLoading || isFetching || isRefetching,
 		media,
 		pageData,
 		...restReturn,

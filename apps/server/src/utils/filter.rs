@@ -146,6 +146,9 @@ pub struct MediaFilter {
 	pub path: Vec<String>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
+	pub search: Option<String>,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub metadata: Option<MediaMedataFilter>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<SeriesFilter>,

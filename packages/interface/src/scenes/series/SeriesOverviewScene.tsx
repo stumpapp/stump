@@ -1,36 +1,52 @@
-import { useLayoutMode, useSeriesByIdQuery, useSeriesMediaQuery } from '@stump/client'
+import {
+	useLayoutMode,
+	usePagedMediaQuery,
+	useSeriesByIdQuery,
+	useSeriesMediaQuery,
+} from '@stump/client'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
+import { useFilterContext } from '../../components/filters/context_new'
+import FilterProvider from '../../components/filters/FilterProvider'
+import Search from '../../components/filters/Search'
 import MediaList from '../../components/media/MediaList'
 import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
 import useIsInView from '../../hooks/useIsInView'
 import { usePageParam } from '../../hooks/usePageParam'
-import { useSeriesOverviewContext } from './context'
 import MediaGrid from './MediaGrid'
-import SeriesOverviewContextProvider from './SeriesOverviewContextProvider'
 import SeriesOverviewTitleSection from './SeriesOverviewTitleSection'
 
 // TODO: fix pagination
 function SeriesOverviewScene() {
 	const [containerRef, isInView] = useIsInView()
 
-	const { page } = usePageParam()
+	const { page, setPage } = usePageParam()
 
-	const { seriesId, page_size, params } = useSeriesOverviewContext()
+	const seriesId = useParams<{ id: string }>()?.id
 	if (!seriesId) {
 		throw new Error('Series ID is required for this route.')
 	}
 
 	const { layoutMode } = useLayoutMode('SERIES')
 	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(seriesId)
+	const { filters, setFilter, removeFilter } = useFilterContext()
 	const {
 		isLoading: isLoadingMedia,
+		isRefetching: isRefetchingMedia,
 		media,
 		pageData,
-	} = useSeriesMediaQuery(seriesId, { page, page_size, params })
+	} = usePagedMediaQuery({
+		page,
+		params: {
+			...filters,
+			series: {
+				id: seriesId,
+			},
+		},
+	})
 
 	useEffect(() => {
 		if (!isInView) {
@@ -59,16 +75,39 @@ function SeriesOverviewScene() {
 			<SeriesOverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
 
 			{/* @ts-expect-error: wrong ref but is okay */}
-			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
+			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
+
+			<header className="flex h-12 flex-col gap-2 px-4">
+				<Search
+					initialValue={filters?.search as string}
+					placeholder="Search by media name or description"
+					onChange={(value) => {
+						if (value) {
+							setFilter('search', value)
+						} else {
+							removeFilter('search')
+						}
+					}}
+					isLoading={isRefetchingMedia}
+				/>
+			</header>
+
 			<div className="flex w-full flex-col space-y-6 p-4">
-				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
+				{hasStuff ? (
+					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
+				) : null}
 				{layoutMode === 'GRID' ? (
 					<MediaGrid isLoading={isLoadingMedia} media={media} />
 				) : (
 					<MediaList isLoading={isLoadingMedia} media={media} />
 				)}
 				{hasStuff && (
-					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
+					<Pagination
+						position="bottom"
+						pages={total_pages}
+						currentPage={current_page}
+						onChangePage={setPage}
+					/>
 				)}
 			</div>
 		</SceneContainer>
@@ -76,11 +115,9 @@ function SeriesOverviewScene() {
 }
 
 export default function SeriesOverviewSceneWrapper() {
-	const { id } = useParams()
-
 	return (
-		<SeriesOverviewContextProvider seriesId={id}>
+		<FilterProvider>
 			<SeriesOverviewScene />
-		</SeriesOverviewContextProvider>
+		</FilterProvider>
 	)
 }

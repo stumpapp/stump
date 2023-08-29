@@ -346,6 +346,7 @@ async fn get_series_thumbnail(
 	}
 }
 
+// TODO: media filtering...
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/:id/media",

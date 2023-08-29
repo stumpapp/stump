@@ -8,7 +8,10 @@ use tracing::{debug, error, trace};
 use zip::read::ZipFile;
 
 use crate::filesystem::{
-	content_type::ContentType, error::FileError, hash, media::common::metadata_from_buf,
+	content_type::ContentType,
+	error::FileError,
+	hash,
+	media::common::{metadata_from_buf, sort_file_names},
 };
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
@@ -99,7 +102,7 @@ impl FileProcessor for ZipProcessor {
 		}
 
 		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
-		file_names.sort();
+		sort_file_names(&mut file_names);
 
 		let mut images_seen = 0;
 		for name in file_names {
@@ -137,7 +140,7 @@ impl FileProcessor for ZipProcessor {
 
 		let file_names_archive = archive.clone();
 		let mut file_names = file_names_archive.file_names().collect::<Vec<_>>();
-		file_names.sort();
+		sort_file_names(&mut file_names);
 
 		let mut content_types = HashMap::new();
 

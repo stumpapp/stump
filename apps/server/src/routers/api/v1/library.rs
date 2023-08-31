@@ -42,8 +42,9 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, get_session_admin_user, http::ImageResponse,
-		FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		http::ImageResponse, FilterableQuery, LibraryBaseFilter, LibraryFilter,
+		LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
 };
 
@@ -78,18 +79,38 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+pub(crate) fn apply_library_base_filters(filters: LibraryBaseFilter) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
 		[
 			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
 			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
-			filters
-				.series
-				.map(apply_series_base_filters)
-				.map(library::series::some),
+			(!filters.path.is_empty()).then(|| {
+				let decoded_paths = decode_path_filter(filters.path);
+				library::path::in_vec(decoded_paths)
+			}),
+			filters.search.map(library::name::contains),
 		],
 	)
+}
+
+pub(crate) fn apply_library_relation_filters(
+	filters: LibraryRelationFilter,
+) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[filters
+			.series
+			.map(apply_series_base_filters)
+			.map(library::series::some)],
+	)
+}
+
+pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+	apply_library_base_filters(filters.base_filter)
+		.into_iter()
+		.chain(apply_library_relation_filters(filters.relation_filter))
+		.collect()
 }
 
 #[utoipa::path(

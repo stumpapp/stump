@@ -1,16 +1,9 @@
-import {
-	useLayoutMode,
-	usePagedMediaQuery,
-	useSeriesByIdQuery,
-	useSeriesMediaQuery,
-} from '@stump/client'
+import { useLayoutMode, usePagedMediaQuery, useSeriesByIdQuery } from '@stump/client'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
-import { useFilterContext } from '../../components/filters/context_new'
-import FilterProvider from '../../components/filters/FilterProvider'
-import Search from '../../components/filters/Search'
+import { FilterProvider, FilterToolBar, useFilterContext } from '../../components/filters'
 import MediaList from '../../components/media/MediaList'
 import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
@@ -32,7 +25,7 @@ function SeriesOverviewScene() {
 
 	const { layoutMode } = useLayoutMode('SERIES')
 	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(seriesId)
-	const { filters, setFilter, removeFilter } = useFilterContext()
+	const { filters } = useFilterContext()
 	const {
 		isLoading: isLoadingMedia,
 		isRefetching: isRefetchingMedia,
@@ -49,7 +42,7 @@ function SeriesOverviewScene() {
 	})
 
 	useEffect(() => {
-		if (!isInView) {
+		if (!isInView && pageData?.current_page !== 1) {
 			containerRef.current?.scrollIntoView({
 				block: 'nearest',
 				inline: 'start',
@@ -77,29 +70,27 @@ function SeriesOverviewScene() {
 			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
 
-			<header className="flex h-12 flex-col gap-2 px-4">
-				<Search
-					initialValue={filters?.search as string}
-					placeholder="Search by media name or description"
-					onChange={(value) => {
-						if (value) {
-							setFilter('search', value)
-						} else {
-							removeFilter('search')
-						}
-					}}
-					isLoading={isRefetchingMedia}
-				/>
-			</header>
+			<FilterToolBar
+				isRefetching={isRefetchingMedia}
+				searchPlaceholder="Search media in series by name or description."
+			/>
 
 			<div className="flex w-full flex-col space-y-6 p-4">
 				{hasStuff ? (
 					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
 				) : null}
 				{layoutMode === 'GRID' ? (
-					<MediaGrid isLoading={isLoadingMedia} media={media} />
+					<MediaGrid
+						isLoading={isLoadingMedia}
+						media={media}
+						hasFilters={Object.keys(filters || {}).length > 0}
+					/>
 				) : (
-					<MediaList isLoading={isLoadingMedia} media={media} />
+					<MediaList
+						isLoading={isLoadingMedia}
+						media={media}
+						hasFilters={Object.keys(filters || {}).length > 0}
+					/>
 				)}
 				{hasStuff && (
 					<Pagination

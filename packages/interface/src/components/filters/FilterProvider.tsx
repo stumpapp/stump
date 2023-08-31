@@ -2,7 +2,7 @@ import { toObjectParams, toUrlParams } from '@stump/api'
 import React, { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { FilterContext } from './context_new'
+import { FilterContext } from './context'
 
 type Props = {
 	children: React.ReactNode

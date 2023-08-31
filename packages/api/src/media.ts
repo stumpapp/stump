@@ -63,7 +63,12 @@ export function updateMediaProgress(id: string, page: number): Promise<ApiResult
 	return API.put(`/media/${id}/progress/${page}`)
 }
 
+export function getAvailableGenres(): Promise<ApiResult<string[]>> {
+	return API.get('/media/genres')
+}
+
 export const mediaApi = {
+	getAvailableGenres,
 	getInProgressMedia,
 	getMedia,
 	getMediaById,
@@ -76,6 +81,7 @@ export const mediaApi = {
 }
 
 export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
+	getAvailableGenres: 'media.getAvailableGenres',
 	getInProgressMedia: 'media.getInProgress',
 	getMedia: 'media.get',
 	getMediaById: 'media.getById',

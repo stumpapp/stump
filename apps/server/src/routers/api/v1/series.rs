@@ -29,12 +29,13 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, get_session_user, http::ImageResponse, FilterableQuery,
-		SeriesBaseFilter, SeriesFilter, SeriesQueryRelation,
+		chain_optional_iter, decode_path_filter, get_session_user, http::ImageResponse,
+		FilterableQuery, SeriesBaseFilter, SeriesFilter, SeriesQueryRelation,
+		SeriesRelationFilter,
 	},
 };
 
-use super::library::apply_library_filters;
+use super::{library::apply_library_base_filters, media::apply_media_base_filters};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -54,17 +55,16 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
+pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
 		[
 			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
 			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
-			filters
-				.library
-				.map(apply_library_filters)
-				.map(series::library::is),
-			// TODO: revisit once proper full text search is implemented
+			(!filters.path.is_empty()).then(|| {
+				let decoded_paths = decode_path_filter(filters.path);
+				series::path::in_vec(decoded_paths)
+			}),
 			filters.search.map(|s| {
 				or![
 					series::name::contains(s.clone()),
@@ -75,21 +75,29 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 	)
 }
 
-// TODO: bad pattern, figure out a way to reduce duplication...
-pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
+pub(crate) fn apply_series_relation_filters(
+	filters: SeriesRelationFilter,
+) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
 		[
-			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
-			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
-			filters.search.map(|s| {
-				or![
-					series::name::contains(s.clone()),
-					series::description::contains(s),
-				]
-			}),
+			filters
+				.library
+				.map(apply_library_base_filters)
+				.map(series::library::is),
+			filters
+				.media
+				.map(apply_media_base_filters)
+				.map(series::media::some),
 		],
 	)
+}
+
+pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
+	apply_series_base_filters(filters.base_filter)
+		.into_iter()
+		.chain(apply_series_relation_filters(filters.relation_filter))
+		.collect()
 }
 
 #[utoipa::path(

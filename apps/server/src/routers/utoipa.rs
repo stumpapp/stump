@@ -55,6 +55,7 @@ use super::api::{
         api::v1::library::update_library,
         api::v1::library::delete_library,
         api::v1::media::get_media,
+        api::v1::media::get_available_genres,
         api::v1::media::get_duplicate_media,
         api::v1::media::get_in_progress_media,
         api::v1::media::get_recently_added_media,

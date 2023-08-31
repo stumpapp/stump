@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
@@ -6,13 +8,16 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, or, Direction};
+use prisma_client_rust::{and, operator::or, or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		entity::{LibraryOptions, Media, ReadProgress},
+		entity::{
+			metadata::metadata_available_genre_select, LibraryOptions, Media,
+			ReadProgress,
+		},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		MediaDAO, DAO,
 	},
@@ -32,7 +37,8 @@ use crate::{
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
-		FilterableQuery, MediaFilter, MediaMedataFilter,
+		FilterableQuery, MediaBaseFilter, MediaFilter, MediaMedataFilter,
+		MediaRelationFilter,
 	},
 };
 
@@ -41,6 +47,7 @@ use super::series::apply_series_filters;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/media", get(get_media))
+		.route("/media/genres", get(get_available_genres))
 		.route("/media/duplicates", get(get_duplicate_media))
 		.route("/media/keep-reading", get(get_in_progress_media))
 		.route("/media/recently-added", get(get_recently_added_media))
@@ -57,7 +64,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
+pub(crate) fn apply_media_base_filters(filters: MediaBaseFilter) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
 		[
@@ -74,7 +81,7 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 					media::name::contains(s.clone()),
 					media::metadata::is(vec![or![
 						media_metadata::title::contains(s.clone()),
-						media_metadata::summary::contains(s.clone()),
+						media_metadata::summary::contains(s),
 					]])
 				]
 			}),
@@ -82,12 +89,27 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 				.metadata
 				.map(apply_media_metadata_filters)
 				.map(media::metadata::is),
-			filters
-				.series
-				.map(apply_series_filters)
-				.map(media::series::is),
 		],
 	)
+}
+
+pub(crate) fn apply_media_relation_filters(
+	filters: MediaRelationFilter,
+) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[filters
+			.series
+			.map(apply_series_filters)
+			.map(media::series::is)],
+	)
+}
+
+pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
+	apply_media_base_filters(filters.base_filter)
+		.into_iter()
+		.chain(apply_media_relation_filters(filters.relation_filter))
+		.collect()
 }
 
 pub(crate) fn apply_media_metadata_filters(
@@ -96,8 +118,16 @@ pub(crate) fn apply_media_metadata_filters(
 	chain_optional_iter(
 		[],
 		[
-			(!filters.genre.is_empty())
-				.then(|| media_metadata::genre::in_vec(filters.genre)),
+			(!filters.genre.is_empty()).then(|| {
+				// Genre is stored as a list right now. This isn't ideal, but the workaround
+				// for filtering has to be to have OR'd contains queries for each genre in
+				// the list.
+				or(filters
+					.genre
+					.into_iter()
+					.map(media_metadata::genre::contains)
+					.collect::<Vec<_>>())
+			}),
 			(!filters.publisher.is_empty())
 				.then(|| media_metadata::publisher::in_vec(filters.publisher)),
 		],
@@ -237,6 +267,43 @@ async fn get_media(
 	}
 
 	Ok(Json(Pageable::from(media)))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/genres",
+	tag = "media",
+	responses(
+		(status = 200, description = "Successfully fetched media", body = Vec<String>),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+// TODO: move this, I don't think it necessarily belongs here...
+async fn get_available_genres(
+	State(ctx): State<AppState>,
+	_: ReadableSession,
+) -> ApiResult<Json<Vec<String>>> {
+	let db = ctx.get_db();
+
+	let genres = db
+		.media_metadata()
+		.find_many(vec![])
+		.order_by(media_metadata::genre::order(Direction::Asc))
+		.select(metadata_available_genre_select::select())
+		.exec()
+		.await?;
+
+	let all_genres = genres.into_iter().filter_map(|d| d.genre).flat_map(|g| {
+		g.split(',')
+			.map(|s| s.trim().to_string())
+			.collect::<Vec<String>>()
+	});
+	// BTreeSet to maintain order
+	let set = BTreeSet::<String>::from_iter(all_genres);
+
+	Ok(Json(set.into_iter().collect::<Vec<String>>()))
 }
 
 #[utoipa::path(

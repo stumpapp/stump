@@ -4,9 +4,7 @@ import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
-import { useFilterContext } from '../../components/filters/context_new'
-import FilterProvider from '../../components/filters/FilterProvider'
-import Search from '../../components/filters/Search'
+import { FilterProvider, FilterToolBar, useFilterContext } from '../../components/filters'
 import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
 import SeriesGrid from '../../components/series/SeriesGrid'
@@ -28,10 +26,7 @@ function LibraryOverviewScene() {
 	const { layoutMode } = useLayoutMode('LIBRARY')
 	const { isLoading, library } = useLibraryByIdQuery(id)
 
-	// TODO: a little bit complicated of a situation, but whenever filters change but the page doesn't
-	// we MIGHT need to change to page to 1. This is because the filters might have changed the total,
-	// and we might be on a page that doesn't exist anymore.
-	const { filters, setFilter, removeFilter } = useFilterContext()
+	const { filters } = useFilterContext()
 	const {
 		isLoading: isLoadingSeries,
 		isRefetching: isRefetchingSeries,
@@ -47,6 +42,7 @@ function LibraryOverviewScene() {
 	}, [differentSearch, setPage])
 
 	const { current_page, total_pages } = pageData || {}
+
 	const isOnFirstPage = current_page === 1
 	const hasStuff = total_pages !== undefined && current_page !== undefined
 
@@ -86,20 +82,10 @@ function LibraryOverviewScene() {
 			{/* @ts-expect-error: wrong ref, still okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
 
-			<header className="flex h-12 flex-col gap-2 px-4">
-				<Search
-					initialValue={filters?.search as string}
-					placeholder="Search series by name or description"
-					onChange={(value) => {
-						if (value) {
-							setFilter('search', value)
-						} else {
-							removeFilter('search')
-						}
-					}}
-					isLoading={isRefetchingSeries}
-				/>
-			</header>
+			<FilterToolBar
+				isRefetching={isRefetchingSeries}
+				searchPlaceholder="Search series in this library by name or description."
+			/>
 
 			<div className="flex w-full flex-col space-y-6 p-4">
 				{hasStuff && (

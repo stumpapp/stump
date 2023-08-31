@@ -6,6 +6,16 @@ use utoipa::ToSchema;
 
 use crate::prisma::{media_metadata, series_metadata};
 
+//////////////////////////////////////////////
+//////////////// PRISMA MACROS ///////////////
+//////////////////////////////////////////////
+
+media_metadata::select!(metadata_available_genre_select { genre });
+
+///////////////////////////////////////////////
+//////////////////// MODELS ///////////////////
+///////////////////////////////////////////////
+
 fn string_list_deserializer<'de, D>(
 	deserializer: D,
 ) -> Result<Option<Vec<String>>, D::Error>
@@ -20,33 +30,6 @@ where
 			.collect(),
 	))
 }
-
-/*
-   TODO: write A proc macro that is shorthand for:
-
-   #[serde(
-	   alias = INPUT
-	   deserialize_with = "string_list_deserializer",
-	   default = "Option::default"
-   )]
-
-   So I can do this:
-   #[string_list(alias = "Genre")]
-   pub genre: Option<Vec<String>>,
-
-   Something like:
-
-   #[macro_export]
-	macro_rules! string_list {
-		(alias = $alias:literal) => {
-			#[serde(
-				alias = $alias,
-				deserialize_with = "string_list_deserializer",
-				default = "Option::default"
-			)]
-		};
-	}
-*/
 
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase

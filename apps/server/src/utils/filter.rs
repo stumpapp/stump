@@ -78,16 +78,42 @@ pub fn chain_optional_iter<T>(
 		.collect()
 }
 
-// TODO: tags
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
-pub struct LibraryFilter {
+pub struct BaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub path: Vec<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub search: Option<String>,
+}
 
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct LibraryBaseFilter {
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub id: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub name: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub path: Vec<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub search: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct LibraryRelationFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<SeriesBaseFilter>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct LibraryFilter {
+	#[serde(flatten)]
+	pub base_filter: LibraryBaseFilter,
+	#[serde(flatten)]
+	pub relation_filter: LibraryRelationFilter,
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
@@ -101,32 +127,35 @@ pub struct UserQueryRelation {
 	pub include_read_progresses: Option<bool>,
 }
 
-// TODO: create a macro to generate these 'base' filters...
-// NOTE: I have to do this to avoid recursive issues with LibraryFilter...
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesBaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub name: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub path: Vec<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub search: Option<String>,
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
-pub struct SeriesFilter {
-	#[serde(default, deserialize_with = "string_or_seq_string")]
-	pub id: Vec<String>,
-	#[serde(default, deserialize_with = "string_or_seq_string")]
-	pub name: Vec<String>,
+pub struct SeriesRelationFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub search: Option<String>,
-
+	pub library: Option<LibraryBaseFilter>,
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub library: Option<LibraryFilter>,
+	pub media: Option<MediaBaseFilter>,
 }
 
-#[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct SeriesFilter {
+	#[serde(flatten)]
+	pub base_filter: SeriesBaseFilter,
+	#[serde(flatten)]
+	pub relation_filter: SeriesRelationFilter,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct MediaMedataFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub publisher: Vec<String>,
@@ -134,8 +163,8 @@ pub struct MediaMedataFilter {
 	pub genre: Vec<String>,
 }
 
-#[derive(Default, Debug, Deserialize, Serialize, ToSchema)]
-pub struct MediaFilter {
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct MediaBaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -144,12 +173,22 @@ pub struct MediaFilter {
 	pub extension: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub path: Vec<String>,
-
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub search: Option<String>,
-
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub metadata: Option<MediaMedataFilter>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct MediaRelationFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub series: Option<SeriesFilter>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct MediaFilter {
+	#[serde(flatten)]
+	pub base_filter: MediaBaseFilter,
+	#[serde(flatten)]
+	pub relation_filter: MediaRelationFilter,
 }

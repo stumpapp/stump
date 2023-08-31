@@ -16,8 +16,10 @@ pub struct User {
 	pub id: String,
 	pub username: String,
 	pub role: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user_preferences: Option<UserPreferences>,
 	pub avatar_url: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub read_progresses: Option<Vec<ReadProgress>>,
 	pub created_at: String,
 	pub last_login: Option<String>,

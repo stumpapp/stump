@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{or, Direction};
+use prisma_client_rust::{operator::and, or, Direction};
 use stump_core::{
 	db::{
 		entity::{Media, Series},
@@ -20,6 +20,7 @@ use stump_core::{
 		media::{self, OrderByParam as MediaOrderByParam},
 		read_progress,
 		series::{self, OrderByParam, WhereParam},
+		series_metadata,
 	},
 };
 use tracing::{error, trace};
@@ -30,8 +31,8 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_user, http::ImageResponse,
-		FilterableQuery, SeriesBaseFilter, SeriesFilter, SeriesQueryRelation,
-		SeriesRelationFilter,
+		FilterableQuery, SeriesBaseFilter, SeriesFilter, SeriesMedataFilter,
+		SeriesQueryRelation, SeriesRelationFilter, ValueOrRange,
 	},
 };
 
@@ -55,6 +56,31 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+pub(crate) fn apply_series_metadata_filters(
+	filters: SeriesMedataFilter,
+) -> Vec<series_metadata::WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			(!filters.meta_type.is_empty())
+				.then(|| series_metadata::meta_type::in_vec(filters.meta_type)),
+			(!filters.publisher.is_empty())
+				.then(|| series_metadata::publisher::in_vec(filters.publisher)),
+			(!filters.age_rating.is_empty())
+				.then(|| series_metadata::age_rating::in_vec(filters.age_rating)),
+			(!filters.status.is_empty())
+				.then(|| series_metadata::status::in_vec(filters.status)),
+			filters.volume.map(|v| match v {
+				ValueOrRange::Value(v) => series_metadata::volume::equals(Some(v)),
+				ValueOrRange::Range(range) => and(range.into_prisma(
+					series_metadata::volume::gte,
+					series_metadata::volume::lte,
+				)),
+			}),
+		],
+	)
+}
+
 pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
@@ -68,9 +94,17 @@ pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereP
 			filters.search.map(|s| {
 				or![
 					series::name::contains(s.clone()),
-					series::description::contains(s),
+					series::description::contains(s.clone()),
+					series::metadata::is(vec![or![
+						series_metadata::title::contains(s.clone()),
+						series_metadata::summary::contains(s),
+					]])
 				]
 			}),
+			filters
+				.metadata
+				.map(apply_series_metadata_filters)
+				.map(series::metadata::is),
 		],
 	)
 }

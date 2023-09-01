@@ -8,7 +8,11 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, operator::or, or, Direction};
+use prisma_client_rust::{
+	and,
+	operator::{and, or},
+	or, Direction,
+};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -38,7 +42,7 @@ use crate::{
 		chain_optional_iter, decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
 		FilterableQuery, MediaBaseFilter, MediaFilter, MediaMedataFilter,
-		MediaRelationFilter,
+		MediaRelationFilter, ValueOrRange,
 	},
 };
 
@@ -119,7 +123,7 @@ pub(crate) fn apply_media_metadata_filters(
 		[],
 		[
 			(!filters.genre.is_empty()).then(|| {
-				// Genre is stored as a list right now. This isn't ideal, but the workaround
+				// A few list fields are stored as a string right now. This isn't ideal, but the workaround
 				// for filtering has to be to have OR'd contains queries for each genre in
 				// the list.
 				or(filters
@@ -128,8 +132,20 @@ pub(crate) fn apply_media_metadata_filters(
 					.map(media_metadata::genre::contains)
 					.collect::<Vec<_>>())
 			}),
+			(!filters.character.is_empty()).then(|| {
+				or(filters
+					.character
+					.into_iter()
+					.map(media_metadata::characters::contains)
+					.collect::<Vec<_>>())
+			}),
 			(!filters.publisher.is_empty())
 				.then(|| media_metadata::publisher::in_vec(filters.publisher)),
+			filters.year.map(|v| match v {
+				ValueOrRange::Value(v) => media_metadata::year::equals(Some(v)),
+				ValueOrRange::Range(range) => and(range
+					.into_prisma(media_metadata::year::gte, media_metadata::year::lte)),
+			}),
 		],
 	)
 }

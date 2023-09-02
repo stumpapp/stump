@@ -7,6 +7,11 @@ import { FilterContext } from './context'
 type Props = {
 	children: React.ReactNode
 }
+
+/**
+ * A context provider to handle filter state. This component is used throughout the
+ * entity overview pages (e.g. /media, /series, etc.)
+ */
 export default function FilterProvider({ children }: Props) {
 	const [filters, setFilters] = useSearchParams()
 
@@ -14,7 +19,8 @@ export default function FilterProvider({ children }: Props) {
 	 * An object representation of the url params
 	 */
 	const params = useMemo(
-		() => toObjectParams<Record<string, unknown>>(filters, ['page']),
+		() =>
+			toObjectParams<Record<string, unknown>>(filters, { ignoreKeys: ['page'], removeEmpty: true }),
 		[filters],
 	)
 
@@ -22,7 +28,7 @@ export default function FilterProvider({ children }: Props) {
 	 * Replace the current filters with the provided filters
 	 */
 	const handleSetFilters = (newFilters: Record<string, unknown>) => {
-		setFilters(toUrlParams(newFilters))
+		setFilters(toUrlParams(newFilters, undefined, { removeEmpty: true }))
 	}
 
 	/**

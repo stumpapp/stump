@@ -272,6 +272,18 @@ pub struct MediaMedataFilter {
 	pub genre: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub character: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub colorist: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub writer: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub penciller: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub inker: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub letterer: Vec<String>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub editor: Vec<String>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub year: Option<ValueOrRange<i32>>,

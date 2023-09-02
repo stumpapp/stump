@@ -85,6 +85,7 @@ function LibraryOverviewScene() {
 			<FilterToolBar
 				isRefetching={isRefetchingSeries}
 				searchPlaceholder="Search series in this library by name or description."
+				slideOverForm="series"
 			/>
 
 			<div className="flex w-full flex-col space-y-6 p-4">

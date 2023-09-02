@@ -73,6 +73,7 @@ function SeriesOverviewScene() {
 			<FilterToolBar
 				isRefetching={isRefetchingMedia}
 				searchPlaceholder="Search media in series by name or description."
+				slideOverForm="media"
 			/>
 
 			<div className="flex w-full flex-col space-y-6 p-4">

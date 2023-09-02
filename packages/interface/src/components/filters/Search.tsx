@@ -4,10 +4,26 @@ import React, { useEffect, useState } from 'react'
 import { useDebouncedValue } from 'rooks'
 
 type Props = {
+	/**
+	 * The initial value of the search input. This is useful for when you load onto
+	 * a page with a search already in the URL.
+	 */
 	initialValue?: string
+	/**
+	 * The label to display above the search input.
+	 */
 	label?: string
+	/**
+	 * The placeholder text to display in the search input.
+	 */
 	placeholder?: string
+	/**
+	 * The function to call when the search input changes. This is debounced by 500ms.
+	 */
 	onChange: (value: string) => void
+	/**
+	 * Whether or not the search input should display a loading indicator.
+	 */
 	isLoading?: boolean
 }
 

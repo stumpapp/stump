@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
@@ -18,10 +16,7 @@ use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		entity::{
-			metadata::metadata_available_genre_select, LibraryOptions, Media,
-			ReadProgress,
-		},
+		entity::{LibraryOptions, Media, ReadProgress},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		MediaDAO, DAO,
 	},
@@ -51,7 +46,6 @@ use super::series::apply_series_filters;
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/media", get(get_media))
-		.route("/media/genres", get(get_available_genres))
 		.route("/media/duplicates", get(get_duplicate_media))
 		.route("/media/keep-reading", get(get_in_progress_media))
 		.route("/media/recently-added", get(get_recently_added_media))
@@ -116,6 +110,13 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 		.collect()
 }
 
+fn list_str_to_params<R: From<prisma_client_rust::Operator<R>>>(
+	iter: impl Iterator<Item = String>,
+	op: impl Fn(String) -> R,
+) -> Vec<R> {
+	iter.into_iter().map(op).collect::<Vec<_>>()
+}
+
 pub(crate) fn apply_media_metadata_filters(
 	filters: MediaMedataFilter,
 ) -> Vec<media_metadata::WhereParam> {
@@ -126,18 +127,46 @@ pub(crate) fn apply_media_metadata_filters(
 				// A few list fields are stored as a string right now. This isn't ideal, but the workaround
 				// for filtering has to be to have OR'd contains queries for each genre in
 				// the list.
-				or(filters
-					.genre
-					.into_iter()
-					.map(media_metadata::genre::contains)
-					.collect::<Vec<_>>())
+				or(list_str_to_params(
+					filters.genre.into_iter(),
+					media_metadata::genre::contains,
+				))
 			}),
 			(!filters.character.is_empty()).then(|| {
-				or(filters
-					.character
-					.into_iter()
-					.map(media_metadata::characters::contains)
-					.collect::<Vec<_>>())
+				or(list_str_to_params(
+					filters.character.into_iter(),
+					media_metadata::characters::contains,
+				))
+			}),
+			(!filters.colorist.is_empty()).then(|| {
+				or(list_str_to_params(
+					filters.colorist.into_iter(),
+					media_metadata::colorists::contains,
+				))
+			}),
+			(!filters.writer.is_empty()).then(|| {
+				or(list_str_to_params(
+					filters.writer.into_iter(),
+					media_metadata::writers::contains,
+				))
+			}),
+			(!filters.penciller.is_empty()).then(|| {
+				or(list_str_to_params(
+					filters.penciller.into_iter(),
+					media_metadata::pencillers::contains,
+				))
+			}),
+			(!filters.inker.is_empty()).then(|| {
+				or(list_str_to_params(
+					filters.inker.into_iter(),
+					media_metadata::inkers::contains,
+				))
+			}),
+			(!filters.editor.is_empty()).then(|| {
+				or(list_str_to_params(
+					filters.editor.into_iter(),
+					media_metadata::editors::contains,
+				))
 			}),
 			(!filters.publisher.is_empty())
 				.then(|| media_metadata::publisher::in_vec(filters.publisher)),
@@ -283,43 +312,6 @@ async fn get_media(
 	}
 
 	Ok(Json(Pageable::from(media)))
-}
-
-#[utoipa::path(
-	get,
-	path = "/api/v1/media/genres",
-	tag = "media",
-	responses(
-		(status = 200, description = "Successfully fetched media", body = Vec<String>),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
-	)
-)]
-// TODO: move this, I don't think it necessarily belongs here...
-async fn get_available_genres(
-	State(ctx): State<AppState>,
-	_: ReadableSession,
-) -> ApiResult<Json<Vec<String>>> {
-	let db = ctx.get_db();
-
-	let genres = db
-		.media_metadata()
-		.find_many(vec![])
-		.order_by(media_metadata::genre::order(Direction::Asc))
-		.select(metadata_available_genre_select::select())
-		.exec()
-		.await?;
-
-	let all_genres = genres.into_iter().filter_map(|d| d.genre).flat_map(|g| {
-		g.split(',')
-			.map(|s| s.trim().to_string())
-			.collect::<Vec<String>>()
-	});
-	// BTreeSet to maintain order
-	let set = BTreeSet::<String>::from_iter(all_genres);
-
-	Ok(Json(set.into_iter().collect::<Vec<String>>()))
 }
 
 #[utoipa::path(

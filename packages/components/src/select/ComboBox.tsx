@@ -126,10 +126,11 @@ export function ComboBox({
 						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 					</Button>
 				</Popover.Trigger>
+				{/* FIXME: this does NOT scroll right... */}
 				<Popover.Content
 					className={cn(
 						{ [SIZE_VARIANTS[size || 'default']]: !!size },
-						'mt-1 p-0',
+						'z-[1000] mt-1 max-h-96 overflow-y-auto p-0',
 						wrapperClassName,
 					)}
 					style={wrapperStyle}

@@ -12,6 +12,10 @@ export const urlWithParams = (url: string, params?: URLSearchParams) => {
 	return url
 }
 
+type ToUrlParamsOptions = {
+	removeEmpty?: boolean
+}
+
 /**
  * Convert an object to `UrlSearchParams`. Will work for deeply nested objects, as well as arrays.
  *
@@ -23,17 +27,25 @@ export const urlWithParams = (url: string, params?: URLSearchParams) => {
  * toUrlParams({ a: [1], b: { c: [1, 2, 3], d: 3 } }) // a[]=1&b[c][]=1&b[c][]=2&b[c][]=3&b[d]=3
  * ```
  */
-export const toUrlParams = <T extends object>(obj?: T, params = new URLSearchParams()) => {
+export const toUrlParams = <T extends object>(
+	obj?: T,
+	params = new URLSearchParams(),
+	{ removeEmpty }: ToUrlParamsOptions = {},
+) => {
 	if (!obj) {
 		return params
 	}
 
-	return new URLSearchParams(qs.stringify(obj, { arrayFormat: 'brackets' }))
+	return new URLSearchParams(qs.stringify(obj, { arrayFormat: 'brackets', skipNulls: removeEmpty }))
 }
 
+type ToObjectParamsOptions = {
+	ignoreKeys?: string[]
+	removeEmpty?: boolean
+}
 export const toObjectParams = <T extends object>(
 	params?: URLSearchParams,
-	ignoreKeys?: string[],
+	{ ignoreKeys, removeEmpty }: ToObjectParamsOptions = {},
 ): T => {
 	if (!params) {
 		return {} as T
@@ -41,6 +53,14 @@ export const toObjectParams = <T extends object>(
 
 	for (const key of ignoreKeys || []) {
 		params.delete(key)
+	}
+
+	if (removeEmpty) {
+		for (const [key, value] of params.entries()) {
+			if (!value) {
+				params.delete(key)
+			}
+		}
 	}
 
 	return qs.parse(params.toString(), { ignoreQueryPrefix: true }) as T

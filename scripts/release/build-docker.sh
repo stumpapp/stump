@@ -6,4 +6,4 @@ TAG=${3:-nightly}
 GIT_REV=$(git rev-parse --short HEAD)
 
 # docker buildx build -f ./scripts/release/Dockerfile --load --progress=$FORMAT --platform=$PLATFORMS -t aaronleopold/stump:$TAG --build-arg GIT_REV=$GIT_REV .
-docker buildx build -f ./scripts/release/Dockerfile.debian --progress=$FORMAT -t aaronleopold/stump-debian:$TAG --build-arg GIT_REV=$GIT_REV .
+docker buildx build -f ./scripts/release/Dockerfile.debian --progress=$FORMAT --platform=$PLATFORMS -t aaronleopold/stump-debian:$TAG --build-arg GIT_REV=$GIT_REV .

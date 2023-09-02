@@ -81,11 +81,14 @@ runs:
         context: .
         build-args: |
           "GIT_REV=${{ env.GIT_REV }}"
-        file: scripts/release/Dockerfile
-        platforms: ${{ inputs.platforms }}
-        load: ${{ inputs.load }}
-        push: ${{ inputs.push }}
-        tags: ${{ env.TAGS }}
+        file: scripts/release/Dockerfile.debian
+        platforms: 'linux/amd64,linux/arm64/v8'
+        push: true
+        tags: 'experimental'
+        # platforms: ${{ inputs.platforms }}
+        # load: ${{ inputs.load }}
+        # push: ${{ inputs.push }}
+        # tags: ${{ env.TAGS }}
         # TODO: uncomment once cache stuff is resolved...
         # cache-from: type=local,src=/tmp/.buildx-cache
         # cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max

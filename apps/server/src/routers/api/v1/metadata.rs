@@ -5,6 +5,7 @@ use axum::{
 };
 use prisma_client_rust::Direction;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use stump_core::{
 	db::entity::metadata::{
 		metadata_available_characters_select, metadata_available_colorists_select,
@@ -51,7 +52,7 @@ fn list_str_to_vec(list: String) -> Vec<String> {
 
 // TODO: accept optional series_id for filter!!
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Type)]
 pub struct MediaMetadataOverview {
 	genres: Vec<String>,
 	writers: Vec<String>,

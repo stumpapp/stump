@@ -13,15 +13,19 @@ type Props = {
 	 * The label to display for the combo box.
 	 */
 	label: string
-	/**
-	 * The query key to use for the query responsible for fetching the options.
-	 */
-	queryKey: string
-	/**
-	 * The query function to use for the query responsible for fetching the options.
-	 * @returns An array of strings.
-	 */
-	queryFn: () => Promise<ApiResult<string[]>>
+	options: {
+		label: string
+		value: string
+	}[]
+	// /**
+	//  * The query key to use for the query responsible for fetching the options.
+	//  */
+	// queryKey: string
+	// /**
+	//  * The query function to use for the query responsible for fetching the options.
+	//  * @returns An array of strings.
+	//  */
+	// queryFn: () => Promise<ApiResult<string[]>>
 }
 
 /**
@@ -30,8 +34,8 @@ type Props = {
  * component does not take in a ref, so a name and label are required to properly
  * update the form context.
  */
-export default function GenericFilterMultiselect({ name, label, queryKey, queryFn }: Props) {
-	const { data } = useQuery([queryKey], () => queryFn().then((res) => res.data))
+export default function GenericFilterMultiselect({ name, label, options }: Props) {
+	// const { data } = useQuery([queryKey], () => queryFn().then((res) => res.data))
 
 	const form = useFormContext()
 	const [value, setValue] = useState<string[] | undefined>(() => form.getValues(name))
@@ -43,7 +47,8 @@ export default function GenericFilterMultiselect({ name, label, queryKey, queryF
 	return (
 		<ComboBox
 			label={label}
-			options={data?.map((str) => ({ label: str, value: str.toLowerCase() })) || []}
+			// options={data?.map((str) => ({ label: str, value: str.toLowerCase() })) || []}
+			options={options}
 			isMultiSelect
 			filterable
 			value={value}

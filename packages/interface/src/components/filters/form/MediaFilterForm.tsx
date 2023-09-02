@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { metadataApi, metadataQueryKeys } from '@stump/api'
-import { Form } from '@stump/components'
-import React from 'react'
+import { useQuery } from '@stump/client'
+import { CheckBox, Form } from '@stump/components'
+import React, { useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
@@ -26,9 +27,6 @@ const schema = z.object({
 		.optional(),
 })
 
-// TODO: consider performance of ALL these queries. Maybe just use the root metadata endpoint
-// which performs all of these queries at once within one transaction?
-
 /**
  * A crude function that removes empty values from an object. Should probably be tested
  * or sm idk
@@ -46,6 +44,26 @@ const removeEmpty = (obj: Record<string, unknown>) => {
 
 export default function MediaFilterForm() {
 	const { filters, setFilters } = useFilterContext()
+
+	const [onlyFromSeries, setOnlyFromSeries] = useState(false)
+
+	const params = useMemo(() => {
+		if (onlyFromSeries) {
+			return {
+				media: {
+					series: {
+						id: '',
+					},
+				},
+			}
+		}
+		return {}
+	}, [onlyFromSeries])
+
+	const { data } = useQuery(
+		[metadataQueryKeys.getMediaMetadataOverview, params?.media?.series?.id],
+		() => metadataApi.getMediaMetadataOverview(params).then((res) => res.data),
+	)
 
 	const form = useForm({
 		defaultValues: {
@@ -72,74 +90,96 @@ export default function MediaFilterForm() {
 
 	return (
 		<Form
-			className="flex max-h-full grow flex-col overflow-x-visible overflow-y-scroll px-6 scrollbar-hide"
+			className="flex max-h-full grow flex-col overflow-x-visible overflow-y-scroll px-6 py-2 scrollbar-hide"
 			id="filter-form"
 			form={form}
 			onSubmit={handleSubmit}
 		>
+			<CheckBox
+				label="Only show options available from series"
+				checked={onlyFromSeries}
+				onClick={() => setOnlyFromSeries((prev) => !prev)}
+			/>
+
 			<ExtensionSelect />
 
 			<GenericFilterMultiselect
 				name="metadata.genre"
 				label="Genre"
-				queryKey={metadataQueryKeys.getGenres}
-				queryFn={metadataApi.getGenres}
+				options={data?.genres.map((genre) => ({ label: genre, value: genre.toLowerCase() })) || []}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.writer"
 				label="Writer"
-				queryKey={metadataQueryKeys.getWriters}
-				queryFn={metadataApi.getWriters}
+				options={
+					data?.writers.map((writer) => ({ label: writer, value: writer.toLowerCase() })) || []
+				}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.penciller"
 				label="Penciller"
-				queryKey={metadataQueryKeys.getPencillers}
-				queryFn={metadataApi.getPencillers}
+				options={
+					data?.pencillers.map((penciller) => ({
+						label: penciller,
+						value: penciller.toLowerCase(),
+					})) || []
+				}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.colorist"
 				label="Colorist"
-				queryKey={metadataQueryKeys.getColorists}
-				queryFn={metadataApi.getColorists}
+				options={
+					data?.colorists.map((colorist) => ({ label: colorist, value: colorist.toLowerCase() })) ||
+					[]
+				}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.letterer"
 				label="Letterer"
-				queryKey={metadataQueryKeys.getLetterers}
-				queryFn={metadataApi.getLetterers}
+				options={
+					data?.letterers.map((letterer) => ({ label: letterer, value: letterer.toLowerCase() })) ||
+					[]
+				}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.inker"
 				label="Inker"
-				queryKey={metadataQueryKeys.getInkers}
-				queryFn={metadataApi.getInkers}
+				options={data?.inkers.map((inker) => ({ label: inker, value: inker.toLowerCase() })) || []}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.publisher"
 				label="Publisher"
-				queryKey={metadataQueryKeys.getPublishers}
-				queryFn={metadataApi.getPublishers}
+				options={
+					data?.publishers.map((publisher) => ({
+						label: publisher,
+						value: publisher.toLowerCase(),
+					})) || []
+				}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.editor"
 				label="Editor"
-				queryKey={metadataQueryKeys.getEditors}
-				queryFn={metadataApi.getEditors}
+				options={
+					data?.editors.map((editor) => ({ label: editor, value: editor.toLowerCase() })) || []
+				}
 			/>
 
 			<GenericFilterMultiselect
 				name="metadata.character"
 				label="Character"
-				queryKey={metadataQueryKeys.getCharacters}
-				queryFn={metadataApi.getCharacters}
+				options={
+					data?.characters.map((character) => ({
+						label: character,
+						value: character.toLowerCase(),
+					})) || []
+				}
 			/>
 		</Form>
 	)

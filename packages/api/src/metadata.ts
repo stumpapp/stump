@@ -1,5 +1,14 @@
-import { API } from './index'
+import { MediaMetadataOverview } from '@stump/types'
+
+import { API, toUrlParams } from './index'
 import { ApiResult } from './types'
+
+export function getMediaMetadataOverview(
+	params?: Record<string, unknown>,
+): Promise<ApiResult<MediaMetadataOverview>> {
+	const qs = toUrlParams(params)
+	return API.get(`/metadata/media?${qs.toString()}`)
+}
 
 export function getGenres(): Promise<ApiResult<string[]>> {
 	return API.get('/metadata/media/genres')
@@ -48,6 +57,7 @@ export const metadataApi = {
 	getGenres,
 	getInkers,
 	getLetterers,
+	getMediaMetadataOverview,
 	getPencillers,
 	getPublishers,
 	getTeams,
@@ -61,6 +71,7 @@ export const metadataQueryKeys: Record<keyof typeof metadataApi, string> = {
 	getGenres: 'metadata.getGenres',
 	getInkers: 'metadata.getInkers',
 	getLetterers: 'metadata.getLetterers',
+	getMediaMetadataOverview: 'metadata.getMediaMetadataOverview',
 	getPencillers: 'metadata.getPencillers',
 	getPublishers: 'metadata.getPublishers',
 	getTeams: 'metadata.getTeams',

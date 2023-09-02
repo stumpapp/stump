@@ -82,9 +82,9 @@ runs:
         build-args: |
           "GIT_REV=${{ env.GIT_REV }}"
         file: scripts/release/Dockerfile.debian
-        platforms: 'linux/amd64,linux/arm64/v8'
+        platforms: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
         push: true
-        tags: 'experimental'
+        tags: 'aaronleopold/stump:experimental'
         # platforms: ${{ inputs.platforms }}
         # load: ${{ inputs.load }}
         # push: ${{ inputs.push }}
@@ -103,7 +103,8 @@ runs:
     #   shell: bash
 
     - name: Discord notification
-      if: ${{ success() && inputs.push == 'true' }}
+      # if: ${{ success() && inputs.push == 'true' }}
+      if: ${{ success() }}
       env:
         DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
       uses: 'Ilshidur/action-discord@0.3.2'

@@ -175,6 +175,13 @@ pub(crate) fn apply_media_metadata_filters(
 				ValueOrRange::Range(range) => and(range
 					.into_prisma(media_metadata::year::gte, media_metadata::year::lte)),
 			}),
+			filters.age_rating.map(|min_age| {
+				and![
+					// TODO: do we want this enforced with AND?
+					media_metadata::age_rating::not(None),
+					media_metadata::age_rating::gte(min_age)
+				]
+			}),
 		],
 	)
 }

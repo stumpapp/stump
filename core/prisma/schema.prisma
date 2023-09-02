@@ -33,7 +33,7 @@ model User {
   read_progresses ReadProgress[]
   reading_lists   ReadingList[]
 
-  // shared_reading_lists ReadingListAccess[]
+  age_restriction AgeRestriction?
 
   // Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44, then making it mandatory
   user_preferences_id String?          @unique
@@ -42,6 +42,17 @@ model User {
   media_annotations MediaAnnotation[]
 
   @@map("users")
+}
+
+model AgeRestriction {
+  // The minimum age for the user. Ex: if age is 10, then 
+  age               Int
+  // If true, the user will be restricted from accessing any media without an explicit age rating set on either
+  // the media or its series.
+  restrict_on_unset Boolean @default(false)
+
+  user_id String @unique
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model Library {
@@ -154,7 +165,7 @@ model SeriesMetadata {
   // The booktype of the series, e.g. Print, OneShot, TPB or GN
   booktype   String?
   // The age rating of the associated series
-  age_rating String?
+  age_rating Int?
   // The status of the associated series, e.g. Continuing, Ended
   status     String?
 
@@ -224,15 +235,16 @@ model MediaMetadata {
   // TODO: remove this once nested create is supported, just use media_id
   id String @id @default(cuid())
 
-  title   String?
-  series  String?
-  number  Float?
-  volume  Int?
+  title      String?
+  series     String?
+  number     Float?
+  volume     Int?
   // The summary of the associated media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
-  summary String?
-  notes   String?
+  summary    String?
+  notes      String?
+  age_rating Int?
   // *** This is stored as a String, but is a String[] ***
-  genre   String?
+  genre      String?
 
   // The year the media was published. ex: "2021"
   year  Int?

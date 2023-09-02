@@ -60,6 +60,46 @@ where
 	deserializer.deserialize_any(StringOrVec(PhantomData))
 }
 
+fn i32_or_seq_i32<'de, D>(deserializer: D) -> Result<Vec<i32>, D::Error>
+where
+	D: Deserializer<'de>,
+{
+	struct I32OrVec(PhantomData<Vec<i32>>);
+
+	impl<'de> de::Visitor<'de> for I32OrVec {
+		type Value = Vec<i32>;
+
+		fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+			formatter.write_str("i32 or list of i32s")
+		}
+
+		fn visit_i32<E>(self, value: i32) -> Result<Self::Value, E>
+		where
+			E: de::Error,
+		{
+			Ok(vec![value])
+		}
+
+		fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+		where
+			E: de::Error,
+		{
+			v.parse::<i32>()
+				.map(|v| vec![v])
+				.map_err(|_| de::Error::custom(format!("invalid i32: {}", v)))
+		}
+
+		fn visit_seq<S>(self, visitor: S) -> Result<Self::Value, S::Error>
+		where
+			S: de::SeqAccess<'de>,
+		{
+			Deserialize::deserialize(de::value::SeqAccessDeserializer::new(visitor))
+		}
+	}
+
+	deserializer.deserialize_any(I32OrVec(PhantomData))
+}
+
 // See https://github.com/nox/serde_urlencoded/issues/26 and the workaroud solution
 // https://docs.rs/serde_qs/0.6.1/serde_qs/#flatten-workaround
 // TLDR; there are issues deserializing flattened structs, esp with nested enums.
@@ -224,8 +264,8 @@ pub struct SeriesMedataFilter {
 	pub meta_type: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub publisher: Vec<String>,
-	#[serde(default, deserialize_with = "string_or_seq_string")]
-	pub age_rating: Vec<String>,
+	#[serde(default, deserialize_with = "i32_or_seq_i32")]
+	pub age_rating: Vec<i32>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub status: Vec<String>,
 
@@ -284,7 +324,8 @@ pub struct MediaMedataFilter {
 	pub letterer: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub editor: Vec<String>,
-
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub age_rating: Option<i32>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub year: Option<ValueOrRange<i32>>,
 }

@@ -82,7 +82,7 @@ runs:
         build-args: |
           "GIT_REV=${{ env.GIT_REV }}"
         file: scripts/release/Dockerfile.debian
-        platforms: 'linux/amd64,linux/arm64/v8,linux/arm/v7'
+        platforms: 'linux/amd64,linux/arm64/v8'
         push: true
         tags: 'aaronleopold/stump:experimental'
         # platforms: ${{ inputs.platforms }}

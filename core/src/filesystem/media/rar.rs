@@ -69,7 +69,7 @@ impl FileProcessor for RarProcessor {
 		path: &str,
 		options: FileProcessorOptions,
 	) -> Result<ProcessedFile, FileError> {
-		if stump_in_docker() {
+		if false && stump_in_docker() {
 			return Err(FileError::UnsupportedFileType(
 				RAR_UNSUPPORTED_MSG.to_string(),
 			));
@@ -122,7 +122,7 @@ impl FileProcessor for RarProcessor {
 	}
 
 	fn get_page(file: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
-		if stump_in_docker() {
+		if false && stump_in_docker() {
 			return Err(FileError::UnsupportedFileType(
 				RAR_UNSUPPORTED_MSG.to_string(),
 			));
@@ -175,7 +175,7 @@ impl FileProcessor for RarProcessor {
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
-		if stump_in_docker() {
+		if false && stump_in_docker() {
 			return Err(FileError::UnsupportedFileType(
 				RAR_UNSUPPORTED_MSG.to_string(),
 			));

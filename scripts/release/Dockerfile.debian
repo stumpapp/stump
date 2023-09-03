@@ -1,0 +1,78 @@
+# ------------------------------------------------------------------------------
+# Frontend Build Stage
+# ------------------------------------------------------------------------------
+
+FROM node:16-alpine3.14 as frontend
+ARG TARGETARCH
+
+WORKDIR /app
+
+# Note: I don't like copying ~everything~ but since I now use types exported from
+# the core, and use pnpm specific means of accessing it via the workspace, I kind
+# of need to maintain the structure of the workspace and use pnpm
+COPY . .
+
+RUN npm install -g pnpm
+
+RUN pnpm i
+RUN pnpm web build
+
+RUN mv ./apps/web/dist build
+
+# ------------------------------------------------------------------------------
+# Cargo Build Stage
+# ------------------------------------------------------------------------------
+
+FROM rust:1.68.0-slim-buster AS builder
+
+ARG GIT_REV
+ENV GIT_REV=${GIT_REV}
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libssl-dev \
+    pkg-config \
+    libsqlite3-dev;
+
+
+COPY . .
+RUN ./scripts/release/build-utils.sh -w;
+
+RUN set -ex; \
+    ./scripts/release/build-utils.sh -p; \
+    cargo build --package stump_server --bin stump_server --release; \
+    cp ./target/release/stump_server ./stump_server
+
+# ------------------------------------------------------------------------------
+# Final Stage
+# ------------------------------------------------------------------------------
+
+FROM debian:buster-slim
+
+WORKDIR /
+
+RUN mkdir -p config && mkdir -p data && mkdir -p app
+
+COPY --from=builder /app/stump_server /app/stump
+COPY --from=frontend /app/build /app/client
+
+COPY scripts/release/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Default Stump environment variables
+ENV STUMP_CONFIG_DIR=/config
+ENV STUMP_CLIENT_DIR=/app/client
+ENV STUMP_PROFILE=release
+ENV STUMP_PORT=10801
+ENV STUMP_IN_DOCKER=true
+
+
+ENV API_VERSION=v1
+
+WORKDIR /app
+
+ENTRYPOINT ["/entrypoint.sh"]

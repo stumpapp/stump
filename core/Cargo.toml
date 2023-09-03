@@ -24,6 +24,7 @@ optional_struct = "0.2.0"
 utoipa = { version = "3.0.3" }
 uuid = "1.4.0"
 regex = "1.9.5"
+alphanumeric-sort = "1.5.1"
 
 ### FILESYSTEM UTILS ###
 walkdir = "2.3.2"

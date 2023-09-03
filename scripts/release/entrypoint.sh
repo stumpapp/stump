@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Depending on the values passed for PUID/PGID via environment variables,
 # either starts the stump server daemon as root or as a regular user

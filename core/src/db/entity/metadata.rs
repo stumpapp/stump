@@ -52,7 +52,16 @@ fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Er
 where
 	D: Deserializer<'de>,
 {
-	let str_sequence = String::deserialize(deserializer)?;
+	// if exists and is empty, return None
+	let str_sequence = Option::<String>::deserialize(deserializer)?
+		.filter(|s| !s.is_empty())
+		.map(|s| s.trim().to_owned());
+
+	if str_sequence.is_none() {
+		return Ok(None);
+	}
+
+	let str_sequence = str_sequence.unwrap();
 
 	// check for the first case G/PG/PG-13/R
 	let age = match str_sequence.to_lowercase().as_str() {
@@ -139,7 +148,12 @@ pub struct MediaMetadata {
 	pub notes: Option<String>,
 	/// The age rating of the media. This varies a lot between media, but Stump will try
 	/// to normalize it to a number between 0 and 18.
-	#[serde(alias = "AgeRating", deserialize_with = "age_rating_deserializer")]
+	#[serde(
+		default,
+		alias = "AgeRating",
+		deserialize_with = "age_rating_deserializer",
+		skip_serializing_if = "Option::is_none"
+	)]
 	pub age_rating: Option<i32>,
 	/// The genre(s) the media belongs to.
 	#[serde(

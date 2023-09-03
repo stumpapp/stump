@@ -53,6 +53,8 @@ model AgeRestriction {
 
   user_id String @unique
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("age_restrictions")
 }
 
 model Library {

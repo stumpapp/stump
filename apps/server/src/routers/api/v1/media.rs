@@ -6,11 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{
-	and,
-	operator::{and, or},
-	or, Direction,
-};
+use prisma_client_rust::{and, or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -36,12 +32,11 @@ use crate::{
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
-		FilterableQuery, MediaBaseFilter, MediaFilter, MediaMedataFilter,
-		MediaRelationFilter, ValueOrRange,
+		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter,
 	},
 };
 
-use super::series::apply_series_filters;
+use super::{metadata::apply_media_metadata_base_filters, series::apply_series_filters};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -85,7 +80,7 @@ pub(crate) fn apply_media_base_filters(filters: MediaBaseFilter) -> Vec<WherePar
 			}),
 			filters
 				.metadata
-				.map(apply_media_metadata_filters)
+				.map(apply_media_metadata_base_filters)
 				.map(media::metadata::is),
 		],
 	)
@@ -108,82 +103,6 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 		.into_iter()
 		.chain(apply_media_relation_filters(filters.relation_filter))
 		.collect()
-}
-
-fn list_str_to_params<R: From<prisma_client_rust::Operator<R>>>(
-	iter: impl Iterator<Item = String>,
-	op: impl Fn(String) -> R,
-) -> Vec<R> {
-	iter.into_iter().map(op).collect::<Vec<_>>()
-}
-
-pub(crate) fn apply_media_metadata_filters(
-	filters: MediaMedataFilter,
-) -> Vec<media_metadata::WhereParam> {
-	chain_optional_iter(
-		[],
-		[
-			(!filters.genre.is_empty()).then(|| {
-				// A few list fields are stored as a string right now. This isn't ideal, but the workaround
-				// for filtering has to be to have OR'd contains queries for each genre in
-				// the list.
-				or(list_str_to_params(
-					filters.genre.into_iter(),
-					media_metadata::genre::contains,
-				))
-			}),
-			(!filters.character.is_empty()).then(|| {
-				or(list_str_to_params(
-					filters.character.into_iter(),
-					media_metadata::characters::contains,
-				))
-			}),
-			(!filters.colorist.is_empty()).then(|| {
-				or(list_str_to_params(
-					filters.colorist.into_iter(),
-					media_metadata::colorists::contains,
-				))
-			}),
-			(!filters.writer.is_empty()).then(|| {
-				or(list_str_to_params(
-					filters.writer.into_iter(),
-					media_metadata::writers::contains,
-				))
-			}),
-			(!filters.penciller.is_empty()).then(|| {
-				or(list_str_to_params(
-					filters.penciller.into_iter(),
-					media_metadata::pencillers::contains,
-				))
-			}),
-			(!filters.inker.is_empty()).then(|| {
-				or(list_str_to_params(
-					filters.inker.into_iter(),
-					media_metadata::inkers::contains,
-				))
-			}),
-			(!filters.editor.is_empty()).then(|| {
-				or(list_str_to_params(
-					filters.editor.into_iter(),
-					media_metadata::editors::contains,
-				))
-			}),
-			(!filters.publisher.is_empty())
-				.then(|| media_metadata::publisher::in_vec(filters.publisher)),
-			filters.year.map(|v| match v {
-				ValueOrRange::Value(v) => media_metadata::year::equals(Some(v)),
-				ValueOrRange::Range(range) => and(range
-					.into_prisma(media_metadata::year::gte, media_metadata::year::lte)),
-			}),
-			filters.age_rating.map(|min_age| {
-				and![
-					// TODO: do we want this enforced with AND?
-					media_metadata::age_rating::not(None),
-					media_metadata::age_rating::gte(min_age)
-				]
-			}),
-		],
-	)
 }
 
 pub(crate) fn apply_media_pagination<'a>(

@@ -305,7 +305,7 @@ pub struct SeriesFilter {
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
-pub struct MediaMedataFilter {
+pub struct MediaMetadataBaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub publisher: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -331,6 +331,20 @@ pub struct MediaMedataFilter {
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct MediaMetadataRelationFilter {
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub media: Option<MediaFilter>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct MediaMetadataFilter {
+	#[serde(flatten)]
+	pub base_filter: MediaMetadataBaseFilter,
+	#[serde(flatten)]
+	pub relation_filter: MediaMetadataRelationFilter,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct MediaBaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub id: Vec<String>,
@@ -343,7 +357,7 @@ pub struct MediaBaseFilter {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub search: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]
-	pub metadata: Option<MediaMedataFilter>,
+	pub metadata: Option<MediaMetadataBaseFilter>,
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]

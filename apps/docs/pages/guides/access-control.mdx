@@ -49,7 +49,7 @@ If a book or a book's series has an age restriction set, Stump will use that age
 If a book doesn't have an age restriction set, but a user with an age restriction attempts to access it, Stump will use the following logic to determine whether or not the book is allowed:
 
 - If the book is part of a series, and that series has an age restriction set, that age restriction will be used
-- If the book nor the series has an age restriction set, the book will be considered allowed UNLESS a user has an age restriction with the `restrict_on_unset` option set.
+- If neither the book nor the series has an age restriction set, the book will be considered allowed UNLESS a user has an age restriction with the `restrict_on_unset` option set.
 
 Stump doesn't currently support editing metadata directly, but it is planned for the future! For now, if you need to set age restrictions on your books, you'll need to use a third-party tool to edit the metadata, then re-scan your library.
 

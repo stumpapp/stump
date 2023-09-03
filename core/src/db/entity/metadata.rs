@@ -41,6 +41,7 @@ where
 	))
 }
 
+// TODO: support range? e.g. 13-17
 /// Deserializes a string into an age rating. This isn't the fanciest deserializer,
 /// but it's fine. It will support the following conversions:
 /// - G/PG/PG-13/R -> 0/13/17

@@ -88,6 +88,7 @@ async fn login(
 			user::deleted_at::equals(None),
 		])
 		.with(user::user_preferences::fetch())
+		.with(user::age_restriction::fetch())
 		.exec()
 		.await?;
 
@@ -104,6 +105,8 @@ async fn login(
 				user::id::equals(db_user.id.clone()),
 				vec![user::last_login::set(Some(Utc::now().into()))],
 			)
+			.with(user::user_preferences::fetch())
+			.with(user::age_restriction::fetch())
 			.exec()
 			.await
 			.unwrap_or_else(|err| {
@@ -215,6 +218,7 @@ pub async fn register(
 		.user()
 		.find_unique(user::id::equals(created_user.id))
 		.with(user::user_preferences::fetch())
+		.with(user::age_restriction::fetch())
 		.exec()
 		.await?
 		.expect("Failed to fetch user after registration.");

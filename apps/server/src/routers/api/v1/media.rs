@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, or, Direction};
+use prisma_client_rust::{and, operator::or, or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -20,7 +20,7 @@ use stump_core::{
 	prisma::{
 		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, read_progress, user, PrismaClient,
+		media_metadata, read_progress, series, series_metadata, user, PrismaClient,
 	},
 };
 use tracing::{debug, trace};
@@ -145,6 +145,35 @@ pub(crate) fn apply_in_progress_filter_for_user(
 	]
 }
 
+/// Generates a condition to enforce age restrictions on media and their corresponding
+/// series.
+pub(crate) fn apply_age_restriction(min_age: i32, allow_unset: bool) -> WhereParam {
+	and![
+		media::metadata::is(if allow_unset {
+			vec![or![
+				media_metadata::age_rating::equals(None),
+				media_metadata::age_rating::lte(min_age)
+			]]
+		} else {
+			vec![
+				media_metadata::age_rating::not(None),
+				media_metadata::age_rating::lte(min_age),
+			]
+		}),
+		media::series::is(vec![series::metadata::is(if allow_unset {
+			vec![or![
+				series_metadata::age_rating::equals(None),
+				series_metadata::age_rating::lte(min_age)
+			]]
+		} else {
+			vec![
+				series_metadata::age_rating::not(None),
+				series_metadata::age_rating::lte(min_age),
+			]
+		})])
+	]
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/media",
@@ -175,13 +204,25 @@ async fn get_media(
 	trace!(?filters, ?ordering, ?pagination, "get_media");
 
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
 	let pagination_cloned = pagination.clone();
-	let where_conditions = apply_media_filters(filters);
+	let where_conditions = apply_media_filters(filters)
+		.into_iter()
+		.chain(
+			age_restrictions
+				.map(|ar| vec![ar])
+				.unwrap_or_else(|| vec![]),
+		)
+		.collect::<Vec<WhereParam>>();
 
 	let (media, count) = db
 		._transaction()

@@ -6,7 +6,8 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{operator::and, or, Direction};
+use prisma_client_rust::{or, Direction};
+use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
 		entity::{Media, Series},
@@ -31,12 +32,16 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_user, http::ImageResponse,
-		FilterableQuery, SeriesBaseFilter, SeriesFilter, SeriesMedataFilter,
-		SeriesQueryRelation, SeriesRelationFilter, ValueOrRange,
+		FilterableQuery, SeriesBaseFilter, SeriesFilter, SeriesQueryRelation,
+		SeriesRelationFilter,
 	},
 };
 
-use super::{library::apply_library_base_filters, media::apply_media_base_filters};
+use super::{
+	library::apply_library_base_filters,
+	media::{apply_media_age_restriction, apply_media_base_filters},
+	metadata::apply_series_metadata_filters,
+};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -54,31 +59,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/thumbnail", get(get_series_thumbnail)),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
-}
-
-pub(crate) fn apply_series_metadata_filters(
-	filters: SeriesMedataFilter,
-) -> Vec<series_metadata::WhereParam> {
-	chain_optional_iter(
-		[],
-		[
-			(!filters.meta_type.is_empty())
-				.then(|| series_metadata::meta_type::in_vec(filters.meta_type)),
-			(!filters.publisher.is_empty())
-				.then(|| series_metadata::publisher::in_vec(filters.publisher)),
-			(!filters.age_rating.is_empty())
-				.then(|| series_metadata::age_rating::in_vec(filters.age_rating)),
-			(!filters.status.is_empty())
-				.then(|| series_metadata::status::in_vec(filters.status)),
-			filters.volume.map(|v| match v {
-				ValueOrRange::Value(v) => series_metadata::volume::equals(Some(v)),
-				ValueOrRange::Range(range) => and(range.into_prisma(
-					series_metadata::volume::gte,
-					series_metadata::volume::lte,
-				)),
-			}),
-		],
-	)
 }
 
 pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
@@ -170,7 +150,7 @@ pub(crate) fn apply_series_age_restriction(
 )]
 /// Get all series accessible by user.
 async fn get_series(
-	filter_query: Query<FilterableQuery<SeriesFilter>>,
+	filter_query: QsQuery<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
@@ -183,7 +163,12 @@ async fn get_series(
 	trace!(?filters, ?ordering, ?pagination, "get_series");
 
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by: OrderByParam = ordering.try_into()?;
@@ -191,7 +176,10 @@ async fn get_series(
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);
 
-	let where_conditions = apply_series_filters(filters);
+	let where_conditions = apply_series_filters(filters)
+		.into_iter()
+		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
+		.collect::<Vec<WhereParam>>();
 
 	// series, total series count
 	let (series, series_count) = db
@@ -290,10 +278,19 @@ async fn get_series_by_id(
 	session: ReadableSession,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let load_media = query.load_media.unwrap_or(false);
-	let mut query = db.series().find_unique(series::id::equals(id.clone()));
+	let mut query = db.series().find_first(chain_optional_iter(
+		[series::id::equals(id.clone())],
+		[age_restrictions],
+	));
 
 	if load_media {
 		query = query.with(
@@ -305,14 +302,10 @@ async fn get_series_by_id(
 		);
 	}
 
-	let series = query.exec().await?;
-
-	if series.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} not found",
-			id
-		)));
-	}
+	let series = query
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
 
 	if !load_media {
 		// FIXME: PCR doesn't support relation counts yet!
@@ -323,16 +316,13 @@ async fn get_series_by_id(
 		// 	.await?;
 		let series_media_count = db.media_in_series_count(id).await?;
 
-		return Ok(Json((series.unwrap(), series_media_count).into()));
+		return Ok(Json((series, series_media_count).into()));
 	}
 
-	Ok(Json(series.unwrap().into()))
+	Ok(Json(series.into()))
 }
 
-// async fn get_recently_added_series() {
-// 	unimplemented!()
-// }
-
+// FIXME: This hand written SQL needs to factor in age restrictions!
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/recently-added",
@@ -392,22 +382,29 @@ async fn get_series_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let result = db
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
+	let media = db
 		.media()
-		.find_first(vec![media::series_id::equals(Some(id.clone()))])
+		.find_first(chain_optional_iter(
+			[media::series_id::equals(Some(id.clone()))],
+			[age_restrictions],
+		))
 		.order_by(media::name::order(Direction::Asc))
 		.exec()
-		.await?;
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
 
-	if let Some(media) = result {
-		super::media::get_media_thumbnail(media.id.clone(), db, &session)
-			.await
-			.map(ImageResponse::from)
-	} else {
-		Err(ApiError::NotFound(String::from("Series has no media")))
-	}
+	super::media::get_media_thumbnail(media.id.clone(), db, &session)
+		.await
+		.map(ImageResponse::from)
 }
 
+// FIXME: age restrictions mess up the counts since PCR doesn't support relation counts yet!
 // TODO: media filtering...
 #[utoipa::path(
 	get,
@@ -434,7 +431,15 @@ async fn get_series_media(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user.age_restriction.as_ref().map(|ar| {
+		(
+			apply_series_age_restriction(ar.age, ar.restrict_on_unset),
+			apply_media_age_restriction(ar.age, ar.restrict_on_unset),
+		)
+	});
 
 	let pagination = pagination_query.0.get();
 	let pagination_cloned = pagination.clone();
@@ -444,26 +449,24 @@ async fn get_series_media(
 
 	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
 
-	let series_exists = db
-		.series()
-		.find_first(vec![series::id::equals(id.clone())])
+	db.series()
+		.find_first(chain_optional_iter(
+			[series::id::equals(id.clone())],
+			[age_restrictions.as_ref().map(|(sr, _)| sr.clone())],
+		))
 		.exec()
 		.await?
-		.is_some();
-
-	if !series_exists {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} not found",
-			id
-		)));
-	}
+		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
 
 	let (media, count) = db
 		._transaction()
 		.run(|client| async move {
 			let mut query = client
 				.media()
-				.find_many(vec![media::series_id::equals(Some(id.clone()))])
+				.find_many(chain_optional_iter(
+					[media::series_id::equals(Some(id.clone()))],
+					[age_restrictions.as_ref().map(|(_, mr)| mr.clone())],
+				))
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))

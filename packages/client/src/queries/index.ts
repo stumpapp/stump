@@ -25,6 +25,7 @@ export {
 } from './media'
 export {
 	prefetchSeries,
+	usePagedSeriesQuery,
 	useRecentlyAddedSeries,
 	useSeriesByIdQuery,
 	useSeriesCursorQuery,

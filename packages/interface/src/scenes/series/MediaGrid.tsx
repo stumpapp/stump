@@ -1,4 +1,4 @@
-import { CardGrid, Heading } from '@stump/components'
+import { CardGrid } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import GenericEmptyState from '../../components/GenericEmptyState'

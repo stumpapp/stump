@@ -43,6 +43,7 @@ export default function GenericFilterMultiselect({ name, label, options }: Props
 			onChange={(selected) => {
 				setValue(selected)
 			}}
+			size="full"
 		/>
 	)
 }

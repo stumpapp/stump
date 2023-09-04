@@ -9,6 +9,7 @@ import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
 import useIsInView from '../../hooks/useIsInView'
 import { usePageParam } from '../../hooks/usePageParam'
+import { SeriesContext, useSeriesContext } from './context'
 import MediaGrid from './MediaGrid'
 import SeriesOverviewTitleSection from './SeriesOverviewTitleSection'
 
@@ -17,11 +18,7 @@ function SeriesOverviewScene() {
 	const [containerRef, isInView] = useIsInView()
 
 	const { page, setPage } = usePageParam()
-
-	const seriesId = useParams<{ id: string }>()?.id
-	if (!seriesId) {
-		throw new Error('Series ID is required for this route.')
-	}
+	const { seriesId } = useSeriesContext()
 
 	const { layoutMode } = useLayoutMode('SERIES')
 	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(seriesId)
@@ -77,9 +74,9 @@ function SeriesOverviewScene() {
 			/>
 
 			<div className="flex w-full flex-col space-y-6 p-4">
-				{hasStuff ? (
+				{hasStuff && (
 					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
-				) : null}
+				)}
 				{layoutMode === 'GRID' ? (
 					<MediaGrid
 						isLoading={isLoadingMedia}
@@ -107,9 +104,17 @@ function SeriesOverviewScene() {
 }
 
 export default function SeriesOverviewSceneWrapper() {
+	const seriesId = useParams<{ id: string }>()?.id
+
+	if (!seriesId) {
+		throw new Error('Series ID is required for this route.')
+	}
+
 	return (
-		<FilterProvider>
-			<SeriesOverviewScene />
-		</FilterProvider>
+		<SeriesContext.Provider value={{ seriesId }}>
+			<FilterProvider>
+				<SeriesOverviewScene />
+			</FilterProvider>
+		</SeriesContext.Provider>
 	)
 }

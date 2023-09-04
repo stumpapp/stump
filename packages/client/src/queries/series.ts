@@ -32,6 +32,29 @@ export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, Axi
 	return { series: data, ...ret }
 }
 
+export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[seriesQueryKeys.getSeries, options],
+		async ({ page, page_size, params }) => {
+			const { data } = await seriesApi.getSeries({ page, page_size, ...(params ?? {}) })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
+	)
+
+	const series = data?.data
+	const pageData = data?._page
+
+	return {
+		pageData,
+		series,
+		...restReturn,
+	}
+}
+
 export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
 	const { data, ...restReturn } = useCursorQuery(
 		queryKey ?? [seriesQueryKeys.getSeriesWithCursor],

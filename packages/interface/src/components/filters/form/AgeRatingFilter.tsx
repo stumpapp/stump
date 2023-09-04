@@ -2,12 +2,16 @@ import { Input, Label, RadioGroup } from '@stump/components'
 import React, { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
+type Props = {
+	variant?: 'media' | 'series'
+}
+
 /**
  * A radio component that allows configuring the age rating filter in one of two ways:
  * 1. Any age rating (default, no filter)
  * 2. X and up (where X is a number from 0 to 18)
  */
-export default function AgeRatingFilter() {
+export default function AgeRatingFilter({ variant = 'media' }: Props) {
 	const form = useFormContext<{
 		metadata: {
 			age_rating: number | null
@@ -44,7 +48,7 @@ export default function AgeRatingFilter() {
 			>
 				<RadioGroup.CardItem
 					isActive={selection === null}
-					label="Any Age"
+					label="Any age"
 					description="No age rating filter will be applied"
 					value="any-age"
 					innerContainerClassName="flex-col sm:items-start sm:justify-start gap-1.5"
@@ -52,8 +56,8 @@ export default function AgeRatingFilter() {
 
 				<RadioGroup.CardItem
 					isActive={selection !== null}
-					label="Aged X and up"
-					description="Only media with an age rating of X or lower will be shown"
+					label="Aged N and up"
+					description={`Only ${variant} with an age rating of N or lower will be shown, where N is the number you enter below`}
 					value="custom"
 					innerContainerClassName="flex-col sm:items-start sm:justify-start gap-1.5"
 				>

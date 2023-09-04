@@ -1,4 +1,4 @@
-import { useLayoutMode, useLibraryByIdQuery, useLibrarySeriesQuery } from '@stump/client'
+import { useLayoutMode, useLibraryByIdQuery, usePagedSeriesQuery } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
@@ -32,7 +32,16 @@ function LibraryOverviewScene() {
 		isRefetching: isRefetchingSeries,
 		series,
 		pageData,
-	} = useLibrarySeriesQuery(id, { page, params: filters })
+	} = usePagedSeriesQuery({
+		page,
+		params: {
+			...filters,
+			count_media: true,
+			library: {
+				id,
+			},
+		},
+	})
 
 	const differentSearch = usePreviousIsDifferent(filters?.search as string)
 	useEffect(() => {
@@ -44,7 +53,10 @@ function LibraryOverviewScene() {
 	const { current_page, total_pages } = pageData || {}
 
 	const isOnFirstPage = current_page === 1
+	const hasFilters = Object.keys(filters || {}).length > 0
 	const hasStuff = total_pages !== undefined && current_page !== undefined
+	// we show on the first page, but if there are filters and no stuff we show it
+	const showOverview = isOnFirstPage || (hasFilters && !hasStuff)
 
 	useEffect(
 		() => {
@@ -65,7 +77,7 @@ function LibraryOverviewScene() {
 
 	const renderContent = () => {
 		if (layoutMode === 'GRID') {
-			return <SeriesGrid isLoading={isLoadingSeries} series={series} />
+			return <SeriesGrid isLoading={isLoadingSeries} series={series} hasFilters={hasFilters} />
 		} else {
 			return <SeriesList isLoading={isLoadingSeries} series={series} />
 		}
@@ -77,7 +89,7 @@ function LibraryOverviewScene() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
-			<LibraryOverviewTitleSection library={library} isVisible={current_page === 1} />
+			<LibraryOverviewTitleSection library={library} isVisible={showOverview} />
 
 			{/* @ts-expect-error: wrong ref, still okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />

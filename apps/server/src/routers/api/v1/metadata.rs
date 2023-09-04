@@ -4,7 +4,6 @@ use axum::{
 	extract::State, middleware::from_extractor_with_state, routing::get, Json, Router,
 };
 use prisma_client_rust::{
-	and,
 	operator::{and, or},
 	Direction,
 };
@@ -19,8 +18,9 @@ use stump_core::{
 		metadata_available_pencillers_select, metadata_available_publisher_select,
 		metadata_available_teams_select, metadata_available_writers_select,
 	},
-	prisma::{media_metadata, PrismaClient},
+	prisma::{media_metadata, series_metadata, PrismaClient},
 };
+use tracing::trace;
 use utoipa::ToSchema;
 
 use crate::{
@@ -29,7 +29,8 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		chain_optional_iter, FilterableQuery, MediaMetadataBaseFilter,
-		MediaMetadataFilter, MediaMetadataRelationFilter, ValueOrRange,
+		MediaMetadataFilter, MediaMetadataRelationFilter, SeriesMedataFilter,
+		ValueOrRange,
 	},
 };
 
@@ -132,13 +133,7 @@ pub(crate) fn apply_media_metadata_base_filters(
 				ValueOrRange::Range(range) => and(range
 					.into_prisma(media_metadata::year::gte, media_metadata::year::lte)),
 			}),
-			filters.age_rating.map(|min_age| {
-				and![
-					// TODO: do we want this enforced with AND?
-					media_metadata::age_rating::not(None),
-					media_metadata::age_rating::lte(min_age)
-				]
-			}),
+			filters.age_rating.map(media_metadata::age_rating::lte),
 		],
 	)
 }
@@ -152,6 +147,30 @@ pub(crate) fn apply_media_metadata_filters(
 			filters.relation_filter,
 		))
 		.collect()
+}
+
+pub(crate) fn apply_series_metadata_filters(
+	filters: SeriesMedataFilter,
+) -> Vec<series_metadata::WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			(!filters.meta_type.is_empty())
+				.then(|| series_metadata::meta_type::in_vec(filters.meta_type)),
+			(!filters.publisher.is_empty())
+				.then(|| series_metadata::publisher::in_vec(filters.publisher)),
+			(!filters.status.is_empty())
+				.then(|| series_metadata::status::in_vec(filters.status)),
+			filters.volume.map(|v| match v {
+				ValueOrRange::Value(v) => series_metadata::volume::equals(Some(v)),
+				ValueOrRange::Range(range) => and(range.into_prisma(
+					series_metadata::volume::gte,
+					series_metadata::volume::lte,
+				)),
+			}),
+			filters.age_rating.map(series_metadata::age_rating::lte),
+		],
+	)
 }
 
 fn make_unique(iter: impl Iterator<Item = String>) -> Vec<String> {
@@ -194,6 +213,8 @@ async fn get_metadata_overview(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<MediaMetadataOverview>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
+
+	trace!(?filters, "get_metadata_overview");
 
 	let db = ctx.get_db();
 

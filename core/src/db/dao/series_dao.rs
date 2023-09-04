@@ -48,6 +48,7 @@ impl SeriesDAO {
 		}
 	}
 
+	// FIXME: This hand written SQL needs to factor in age restrictions!
 	pub async fn get_recently_added_series(
 		&self,
 		viewer_id: &str,

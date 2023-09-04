@@ -6,10 +6,12 @@ import React, { useMemo, useState } from 'react'
 import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
+import { useSeriesContext } from '../../../scenes/series/context'
 import { useFilterContext } from '..'
 import AgeRatingFilter from './AgeRatingFilter'
 import ExtensionSelect from './ExtensionSelect'
 import GenericFilterMultiselect from './GenericFilterMultiselect'
+import { removeEmpty } from './utils'
 
 const schema = z.object({
 	extension: z.string().optional(),
@@ -34,23 +36,9 @@ const schema = z.object({
 })
 export type MediaFilterFormSchema = z.infer<typeof schema>
 
-/**
- * A crude function that removes empty values from an object. Should probably be tested
- * or sm idk
- */
-const removeEmpty = (obj: Record<string, unknown>) => {
-	return Object.entries(obj).reduce((acc, [key, value]) => {
-		if (typeof value === 'object' && value != null) {
-			acc[key] = removeEmpty(value as Record<string, unknown>)
-		} else if (value != null && value !== '') {
-			acc[key] = value
-		}
-		return acc
-	}, {} as Record<string, unknown>)
-}
-
 export default function MediaFilterForm() {
 	const { filters, setFilters } = useFilterContext()
+	const { seriesId } = useSeriesContext()
 
 	const [onlyFromSeries, setOnlyFromSeries] = useState(false)
 
@@ -59,17 +47,16 @@ export default function MediaFilterForm() {
 			return {
 				media: {
 					series: {
-						id: '',
+						id: seriesId,
 					},
 				},
 			}
 		}
 		return {}
-	}, [onlyFromSeries])
+	}, [onlyFromSeries, seriesId])
 
-	const { data } = useQuery(
-		[metadataQueryKeys.getMediaMetadataOverview, params?.media?.series?.id],
-		() => metadataApi.getMediaMetadataOverview(params).then((res) => res.data),
+	const { data } = useQuery([metadataQueryKeys.getMediaMetadataOverview, params], () =>
+		metadataApi.getMediaMetadataOverview(params).then((res) => res.data),
 	)
 
 	const form = useForm({
@@ -112,6 +99,7 @@ export default function MediaFilterForm() {
 			/>
 
 			<ExtensionSelect />
+
 			<AgeRatingFilter />
 
 			<GenericFilterMultiselect

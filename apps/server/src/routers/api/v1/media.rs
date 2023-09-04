@@ -20,7 +20,7 @@ use stump_core::{
 	prisma::{
 		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, read_progress, series, series_metadata, user, PrismaClient,
+		media_metadata, read_progress, user, PrismaClient,
 	},
 };
 use tracing::trace;
@@ -208,11 +208,7 @@ async fn get_media(
 	let pagination_cloned = pagination.clone();
 	let where_conditions = apply_media_filters(filters)
 		.into_iter()
-		.chain(
-			age_restrictions
-				.map(|ar| vec![ar])
-				.unwrap_or_else(|| vec![]),
-		)
+		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
 		.collect::<Vec<WhereParam>>();
 
 	let (media, count) = db
@@ -353,11 +349,7 @@ async fn get_in_progress_media(
 		read_progress_filter.clone()
 	])]
 	.into_iter()
-	.chain(
-		age_restrictions
-			.map(|ar| vec![ar])
-			.unwrap_or_else(|| vec![]),
-	)
+	.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
 	.collect::<Vec<WhereParam>>();
 
 	let (media, count) = ctx
@@ -446,11 +438,7 @@ async fn get_recently_added_media(
 	let pagination_cloned = pagination.clone();
 	let where_conditions = apply_media_filters(filters)
 		.into_iter()
-		.chain(
-			age_restrictions
-				.map(|ar| vec![ar])
-				.unwrap_or_else(|| vec![]),
-		)
+		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
 		.collect::<Vec<WhereParam>>();
 
 	let (media, count) = db
@@ -711,7 +699,7 @@ pub(crate) async fn get_media_thumbnail(
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let thumbnail_dir = get_config_dir().join("thumbnails");
 
-	let user = get_session_user(&session)?;
+	let user = get_session_user(session)?;
 	let age_restrictions = user
 		.age_restriction
 		.as_ref()

@@ -1,5 +1,5 @@
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { Fragment, MutableRefObject, RefCallback, useRef, useState } from 'react'
 
 import { Button, Command, Label, Popover, Text } from '..'
 import { cn } from '../utils'
@@ -36,7 +36,7 @@ export type ComboBoxProps = {
 	size?: keyof typeof SIZE_VARIANTS | null
 	/** Classes applied to the trigger button for the combobox */
 	triggerClassName?: string
-	triggerRef?: React.LegacyRef<HTMLDivElement> | undefined
+	triggerRef?: React.RefObject<HTMLButtonElement>
 	wrapperClassName?: string
 	wrapperStyle?: React.CSSProperties
 	placeholder?: string
@@ -44,6 +44,24 @@ export type ComboBoxProps = {
 	filterPlaceholder?: string
 	filterEmptyMessage?: string
 } & (SingleSelectComboBoxProps | MultiSelectComboBoxProps)
+
+type MutableRefList<T> = Array<RefCallback<T> | MutableRefObject<T> | undefined | null>
+
+function setRef<T>(val: T, ...refs: MutableRefList<T>): void {
+	refs.forEach((ref) => {
+		if (typeof ref === 'function') {
+			ref(val)
+		} else if (ref != null) {
+			ref.current = val
+		}
+	})
+}
+
+function mergeRefs<T>(...refs: MutableRefList<T>): RefCallback<T> {
+	return (val: T) => {
+		setRef(val, ...refs)
+	}
+}
 
 export function ComboBox({
 	label,
@@ -54,7 +72,7 @@ export function ComboBox({
 	onChange,
 	size = 'default',
 	triggerClassName,
-	triggerRef,
+	triggerRef: triggerRefProps,
 	wrapperClassName,
 	wrapperStyle,
 	placeholder = 'Select...',
@@ -62,6 +80,7 @@ export function ComboBox({
 	filterPlaceholder = 'Filter...',
 	filterEmptyMessage = 'No results found',
 }: ComboBoxProps) {
+	const triggerRef = useRef<HTMLButtonElement | null>(null)
 	const [open, setOpen] = useState(false)
 
 	const handleChange = (selected: string) => {
@@ -104,14 +123,22 @@ export function ComboBox({
 		...((label || description) && { className: 'flex flex-col gap-2' }),
 	}
 
+	const contentStyle = {
+		...(size === 'full'
+			? {
+					width: triggerRef?.current?.offsetWidth,
+			  }
+			: {}),
+		...(wrapperStyle || {}),
+	}
+
 	return (
 		<Container {...containerProps}>
 			{label && <Label>{label}</Label>}
 			<Popover open={open} onOpenChange={setOpen}>
 				<Popover.Trigger asChild>
 					<Button
-						// @ts-expect-error: wrong type for ref, but it's fineeee
-						ref={triggerRef}
+						ref={mergeRefs(triggerRef, triggerRefProps)}
 						variant="outline"
 						role="combobox"
 						aria-expanded={open}
@@ -133,7 +160,7 @@ export function ComboBox({
 						'z-[1000] mt-1 max-h-96 overflow-y-auto p-0',
 						wrapperClassName,
 					)}
-					style={wrapperStyle}
+					style={contentStyle}
 				>
 					<Command>
 						{filterable && (

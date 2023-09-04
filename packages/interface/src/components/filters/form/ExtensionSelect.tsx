@@ -2,8 +2,10 @@ import { Label, NativeSelect } from '@stump/components'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
+import { MediaFilterFormSchema } from './MediaFilterForm'
+
 export default function ExtensionSelect() {
-	const form = useFormContext()
+	const form = useFormContext<MediaFilterFormSchema>()
 
 	return (
 		<div className="py-1.5">

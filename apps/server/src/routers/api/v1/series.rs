@@ -134,6 +134,25 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 		.collect()
 }
 
+pub(crate) fn apply_series_age_restriction(
+	min_age: i32,
+	allow_unset: bool,
+) -> WhereParam {
+	series::metadata::is(if allow_unset {
+		vec![or![
+			series_metadata::age_rating::equals(None),
+			series_metadata::age_rating::lte(min_age)
+		]]
+	} else {
+		vec![
+			series_metadata::age_rating::not(None),
+			series_metadata::age_rating::lte(min_age),
+		]
+	})
+}
+
+// TODO: use age restrictions!
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/series",
@@ -369,6 +388,7 @@ async fn get_recently_added_series_handler(
 async fn get_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -380,7 +400,7 @@ async fn get_series_thumbnail(
 		.await?;
 
 	if let Some(media) = result {
-		super::media::get_media_thumbnail(media.id.clone(), db)
+		super::media::get_media_thumbnail(media.id.clone(), db, &session)
 			.await
 			.map(ImageResponse::from)
 	} else {

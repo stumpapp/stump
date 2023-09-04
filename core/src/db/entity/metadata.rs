@@ -49,7 +49,7 @@ where
 /// - \d and up -> \d
 /// - \d+ -> \d
 /// - None -> None
-fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
+pub fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
 where
 	D: Deserializer<'de>,
 {

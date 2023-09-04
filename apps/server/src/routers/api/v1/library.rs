@@ -427,6 +427,7 @@ async fn get_library_media(
 async fn get_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -448,7 +449,7 @@ async fn get_library_thumbnail(
 		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
 	})?;
 
-	super::media::get_media_thumbnail(media.id.clone(), db)
+	super::media::get_media_thumbnail(media.id.clone(), db, &session)
 		.await
 		.map(ImageResponse::from)
 }

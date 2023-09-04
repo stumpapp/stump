@@ -136,7 +136,7 @@ pub(crate) fn apply_media_metadata_base_filters(
 				and![
 					// TODO: do we want this enforced with AND?
 					media_metadata::age_rating::not(None),
-					media_metadata::age_rating::gte(min_age)
+					media_metadata::age_rating::lte(min_age)
 				]
 			}),
 		],

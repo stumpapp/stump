@@ -3,7 +3,9 @@ use std::marker::PhantomData;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_untagged::UntaggedEnumVisitor;
 use std::fmt;
-use stump_core::db::query::ordering::QueryOrder;
+use stump_core::db::{
+	entity::metadata::age_rating_deserializer, query::ordering::QueryOrder,
+};
 use utoipa::ToSchema;
 
 // TODO: I'd love to support `not` operations somehow
@@ -324,7 +326,10 @@ pub struct MediaMetadataBaseFilter {
 	pub letterer: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub editor: Vec<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
+	#[serde(
+		skip_serializing_if = "Option::is_none",
+		deserialize_with = "age_rating_deserializer"
+	)]
 	pub age_rating: Option<i32>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub year: Option<ValueOrRange<i32>>,

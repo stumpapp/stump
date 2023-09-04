@@ -7,6 +7,7 @@ import { FieldValues, useForm } from 'react-hook-form'
 import z from 'zod'
 
 import { useFilterContext } from '..'
+import AgeRatingFilter from './AgeRatingFilter'
 import ExtensionSelect from './ExtensionSelect'
 import GenericFilterMultiselect from './GenericFilterMultiselect'
 
@@ -14,6 +15,11 @@ const schema = z.object({
 	extension: z.string().optional(),
 	metadata: z
 		.object({
+			age_rating: z
+				.number()
+				.optional()
+				.nullable()
+				.refine((val) => val == null || (val >= 0 && val <= 18)),
 			character: z.array(z.string()).optional(),
 			colorist: z.array(z.string()).optional(),
 			editor: z.array(z.string()).optional(),
@@ -26,6 +32,7 @@ const schema = z.object({
 		})
 		.optional(),
 })
+export type MediaFilterFormSchema = z.infer<typeof schema>
 
 /**
  * A crude function that removes empty values from an object. Should probably be tested
@@ -33,9 +40,9 @@ const schema = z.object({
  */
 const removeEmpty = (obj: Record<string, unknown>) => {
 	return Object.entries(obj).reduce((acc, [key, value]) => {
-		if (typeof value === 'object' && value !== null) {
+		if (typeof value === 'object' && value != null) {
 			acc[key] = removeEmpty(value as Record<string, unknown>)
-		} else if (value !== null) {
+		} else if (value != null && value !== '') {
 			acc[key] = value
 		}
 		return acc
@@ -68,7 +75,10 @@ export default function MediaFilterForm() {
 	const form = useForm({
 		defaultValues: {
 			extension: filters?.extension as string,
-			metadata: filters?.metadata as Record<string, string[]>,
+			metadata: {
+				...((filters?.metadata as Record<string, string[]>) || {}),
+				age_rating: (filters?.metadata as Record<string, unknown>)?.age_rating ?? null,
+			},
 		},
 		resolver: zodResolver(schema),
 	})
@@ -102,6 +112,7 @@ export default function MediaFilterForm() {
 			/>
 
 			<ExtensionSelect />
+			<AgeRatingFilter />
 
 			<GenericFilterMultiselect
 				name="metadata.genre"

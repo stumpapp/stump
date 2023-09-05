@@ -49,7 +49,7 @@ export default function FilterDisplay() {
 	}
 
 	return (
-		<Card className="p-4">
+		<Card className="hidden p-4 md:inline-block">
 			<div className="flex items-center gap-4">
 				{Object.entries(filterMapping).map(([key, values]) => {
 					return (

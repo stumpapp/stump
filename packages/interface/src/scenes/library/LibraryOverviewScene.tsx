@@ -58,6 +58,7 @@ function LibraryOverviewScene() {
 	// we show on the first page, but if there are filters and no stuff we show it
 	const showOverview = isOnFirstPage || (hasFilters && !hasStuff)
 
+	// TODO: detect if going from page > 1 to page = 1 and scroll to top
 	useEffect(
 		() => {
 			if (!isInView && !isOnFirstPage) {

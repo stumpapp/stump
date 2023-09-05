@@ -38,14 +38,26 @@ function SeriesOverviewScene() {
 		},
 	})
 
-	useEffect(() => {
-		if (!isInView && pageData?.current_page !== 1) {
-			containerRef.current?.scrollIntoView({
-				block: 'nearest',
-				inline: 'start',
-			})
-		}
-	}, [isInView, containerRef, pageData?.current_page])
+	const { current_page, total_pages } = pageData || {}
+	const isOnFirstPage = current_page === 1
+	const hasFilters = Object.keys(filters || {}).length > 0
+	const hasStuff = total_pages !== undefined && current_page !== undefined
+	// we show on the first page, but if there are filters and no stuff we show it
+	const showOverview = isOnFirstPage || (hasFilters && !hasStuff)
+
+	// TODO: detect if going from page > 1 to page = 1 and scroll to top
+	useEffect(
+		() => {
+			if (!isInView && !isOnFirstPage) {
+				containerRef.current?.scrollIntoView({
+					block: 'nearest',
+					inline: 'start',
+				})
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[current_page, isOnFirstPage],
+	)
 
 	if (isLoadingSeries) {
 		return null
@@ -53,16 +65,13 @@ function SeriesOverviewScene() {
 		throw new Error('Series not found')
 	}
 
-	const { current_page, total_pages } = pageData || {}
-	const hasStuff = current_page !== undefined && total_pages !== undefined
-
 	return (
 		<SceneContainer>
 			<Helmet>
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
-			<SeriesOverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
+			<SeriesOverviewTitleSection series={series} isVisible={showOverview} />
 
 			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />

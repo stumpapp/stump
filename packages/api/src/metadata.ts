@@ -1,13 +1,12 @@
 import { MediaMetadataOverview } from '@stump/types'
 
-import { API, toUrlParams } from './index'
+import { API, toUrlParams, urlWithParams } from './index'
 import { ApiResult } from './types'
 
 export function getMediaMetadataOverview(
 	params?: Record<string, unknown>,
 ): Promise<ApiResult<MediaMetadataOverview>> {
-	const qs = toUrlParams(params)
-	return API.get(`/metadata/media?${qs.toString()}`)
+	return API.get(urlWithParams('/metadata/media', toUrlParams(params)))
 }
 
 export function getGenres(): Promise<ApiResult<string[]>> {

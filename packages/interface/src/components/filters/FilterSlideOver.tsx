@@ -22,7 +22,7 @@ type Props = {
  * A component that renders a slide over with filter options.
  */
 export default function FilterSlideOver({ prompt, formVariant }: Props) {
-	const { filters } = useFilterContext()
+	const { filters, setFilters } = useFilterContext()
 
 	const [isOpen, setIsOpen] = useState(false)
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -33,6 +33,10 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 
 	const onClose = () => setIsOpen(false)
 	const onOpen = () => setIsOpen(true)
+
+	const handleClearFilters = () => {
+		setFilters({})
+	}
 
 	/**
 	 * A simple function that renders the correct form variant based on the formVariant prop.
@@ -63,7 +67,11 @@ export default function FilterSlideOver({ prompt, formVariant }: Props) {
 			}
 			size={isMobile ? 'xl' : 'default'}
 			footer={
-				<div className="py-2">
+				<div className="flex items-center gap-4 py-2">
+					<Button type="button" variant="danger" onClick={handleClearFilters}>
+						Clear filters
+					</Button>
+
 					<Button type="submit" form="filter-form">
 						Apply filters
 					</Button>

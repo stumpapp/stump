@@ -43,16 +43,17 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_admin_user,
-		http::ImageResponse, FilterableQuery, LibraryBaseFilter, LibraryFilter,
-		LibraryRelationFilter, MediaFilter, SeriesFilter,
+		get_session_user, http::ImageResponse, FilterableQuery, LibraryBaseFilter,
+		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
 };
 
 use super::{
-	media::{apply_media_filters, apply_media_pagination},
+	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
 	series::{apply_series_base_filters, apply_series_filters},
 };
 
+// TODO: age restrictions!
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -431,11 +432,17 @@ async fn get_library_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
+	let user = get_session_user(&session)?;
+	let age_restriction = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let library_series = db
 		.series()
 		.find_first(vec![series::library_id::equals(Some(id.clone()))])
 		.with(
-			series::media::fetch(vec![])
+			series::media::fetch(chain_optional_iter([], [age_restriction]))
 				.take(1)
 				.order_by(media::name::order(Direction::Asc)),
 		)
@@ -493,8 +500,8 @@ async fn delete_library_thumbnails(
 
 	let media_ids = result
 		.series
-		.iter()
-		.flat_map(|s| s.media.iter().map(|m| m.id.clone()))
+		.into_iter()
+		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
 	if let Some(ext) = extension {

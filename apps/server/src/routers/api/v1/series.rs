@@ -19,7 +19,7 @@ use stump_core::{
 	},
 	prisma::{
 		media::{self, OrderByParam as MediaOrderByParam},
-		read_progress,
+		media_metadata, read_progress,
 		series::{self, OrderByParam, WhereParam},
 		series_metadata,
 	},
@@ -114,21 +114,37 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 		.collect()
 }
 
+// TODO: this is wrong
 pub(crate) fn apply_series_age_restriction(
 	min_age: i32,
-	allow_unset: bool,
+	restrict_on_unset: bool,
 ) -> WhereParam {
-	series::metadata::is(if allow_unset {
-		vec![or![
-			series_metadata::age_rating::equals(None),
-			series_metadata::age_rating::lte(min_age)
-		]]
-	} else {
+	let direct_restriction = series::metadata::is(if restrict_on_unset {
 		vec![
 			series_metadata::age_rating::not(None),
 			series_metadata::age_rating::lte(min_age),
 		]
-	})
+	} else {
+		vec![or![
+			series_metadata::age_rating::equals(None),
+			series_metadata::age_rating::lte(min_age)
+		]]
+	});
+
+	let media_restriction =
+		series::media::some(vec![media::metadata::is(if restrict_on_unset {
+			vec![
+				media_metadata::age_rating::not(None),
+				media_metadata::age_rating::lte(min_age),
+			]
+		} else {
+			vec![or![
+				media_metadata::age_rating::equals(None),
+				media_metadata::age_rating::lte(min_age)
+			]]
+		})]);
+
+	or![direct_restriction, media_restriction]
 }
 
 // TODO: use age restrictions!

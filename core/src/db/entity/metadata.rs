@@ -41,14 +41,9 @@ where
 	))
 }
 
-// TODO: support range? e.g. 13-17
+// https://anansi-project.github.io/docs/comicinfo/schemas/v2.1
 /// Deserializes a string into an age rating. This isn't the fanciest deserializer,
-/// but it's fine. It will support the following conversions:
-/// - G/PG/PG-13/R -> 0/13/17
-/// - All Ages/Teen/Teen+/Mature -> 0/13/16/18
-/// - \d and up -> \d
-/// - \d+ -> \d
-/// - None -> None
+/// but it's fine.
 pub fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
 where
 	D: Deserializer<'de>,
@@ -79,9 +74,18 @@ where
 	// check for the second case All Ages/Teen/Teen+/Mature
 	let age = match str_sequence.to_lowercase().as_str() {
 		"all ages" => Some(0),
+		"everyone" => Some(0),
+		"early childhood" => Some(8), // TODO: this is a guess
+		"everyone 10+" => Some(10),
 		"teen" => Some(13),
 		"teen+" => Some(16),
+		"ma15+" => Some(15),
+		"mature 17+" => Some(17),
+		"m" => Some(18),
 		"mature" => Some(18),
+		"adults only 18+" => Some(18),
+		"r18+" => Some(18),
+		"x18+" => Some(18),
 		_ => None,
 	};
 

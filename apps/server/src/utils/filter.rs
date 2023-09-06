@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, str::FromStr};
 
 use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_untagged::UntaggedEnumVisitor;
@@ -7,6 +7,8 @@ use stump_core::db::{
 	entity::metadata::age_rating_deserializer, query::ordering::QueryOrder,
 };
 use utoipa::ToSchema;
+
+use crate::errors::ApiError;
 
 // TODO: I'd love to support `not` operations somehow
 
@@ -60,6 +62,39 @@ where
 	}
 
 	deserializer.deserialize_any(StringOrVec(PhantomData))
+}
+
+fn read_status_or_seq_read_status<'de, D>(
+	deserializer: D,
+) -> Result<Vec<ReadStatus>, D::Error>
+where
+	D: Deserializer<'de>,
+{
+	struct ReadStatusOrVec(PhantomData<Vec<ReadStatus>>);
+
+	impl<'de> de::Visitor<'de> for ReadStatusOrVec {
+		type Value = Vec<ReadStatus>;
+
+		fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+			formatter.write_str("string or list of strings")
+		}
+
+		fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+		where
+			E: de::Error,
+		{
+			Ok(vec![ReadStatus::from_str(value).map_err(de::Error::custom)?])
+		}
+
+		fn visit_seq<S>(self, visitor: S) -> Result<Self::Value, S::Error>
+		where
+			S: de::SeqAccess<'de>,
+		{
+			Deserialize::deserialize(de::value::SeqAccessDeserializer::new(visitor))
+		}
+	}
+
+	deserializer.deserialize_any(ReadStatusOrVec(PhantomData))
 }
 
 // See https://github.com/nox/serde_urlencoded/issues/26 and the workaroud solution
@@ -315,6 +350,32 @@ pub struct MediaMetadataFilter {
 	pub relation_filter: MediaMetadataRelationFilter,
 }
 
+/// A user-friendly representation of a media's read_progress. This will map to
+/// a query condition that will be used to filter the media.
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub enum ReadStatus {
+	#[default]
+	#[serde(alias = "unread")]
+	Unread,
+	#[serde(alias = "reading")]
+	Reading,
+	#[serde(alias = "completed")]
+	Completed,
+}
+
+impl FromStr for ReadStatus {
+	type Err = ApiError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s.to_lowercase().as_str() {
+			"unread" => Ok(ReadStatus::Unread),
+			"reading" => Ok(ReadStatus::Reading),
+			"completed" => Ok(ReadStatus::Completed),
+			_ => Err(ApiError::BadRequest(format!("invalid read status: {}", s))),
+		}
+	}
+}
+
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct MediaBaseFilter {
 	#[serde(default, deserialize_with = "string_or_seq_string")]
@@ -325,6 +386,9 @@ pub struct MediaBaseFilter {
 	pub extension: Vec<String>,
 	#[serde(default, deserialize_with = "string_or_seq_string")]
 	pub path: Vec<String>,
+	#[serde(default, deserialize_with = "read_status_or_seq_read_status")]
+	pub read_status: Vec<ReadStatus>,
+
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub search: Option<String>,
 	#[serde(skip_serializing_if = "Option::is_none")]

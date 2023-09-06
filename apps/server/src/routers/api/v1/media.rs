@@ -6,13 +6,13 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, or, Direction};
+use prisma_client_rust::{and, operator::or, or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		entity::{LibraryOptions, Media, ReadProgress},
+		entity::{LibraryOptions, Media, ReadProgress, User},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		MediaDAO, DAO,
 	},
@@ -20,7 +20,7 @@ use stump_core::{
 	prisma::{
 		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, read_progress, user, PrismaClient,
+		media_metadata, read_progress, series, series_metadata, user, PrismaClient,
 	},
 };
 use tracing::trace;
@@ -29,11 +29,10 @@ use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	routers::api::v1::series::apply_series_age_restriction,
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
-		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter,
+		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter, ReadStatus,
 	},
 };
 
@@ -56,6 +55,33 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/progress/:page", put(update_media_progress)),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
+}
+
+pub(crate) fn apply_media_read_status_filter(
+	user_id: String,
+	read_status: Vec<ReadStatus>,
+) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[(!read_status.is_empty()).then(|| {
+			or(read_status
+				.into_iter()
+				.map(|rs| match rs {
+					ReadStatus::Reading => media::read_progresses::some(vec![and![
+						read_progress::user_id::equals(user_id.clone()),
+						read_progress::is_completed::equals(false)
+					]]),
+					ReadStatus::Completed => media::read_progresses::some(vec![and![
+						read_progress::user_id::equals(user_id.clone()),
+						read_progress::is_completed::equals(true)
+					]]),
+					ReadStatus::Unread => media::read_progresses::none(vec![
+						read_progress::user_id::equals(user_id.clone()),
+					]),
+				})
+				.collect())
+		})],
+	)
 }
 
 pub(crate) fn apply_media_base_filters(filters: MediaBaseFilter) -> Vec<WhereParam> {
@@ -106,6 +132,24 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 		.collect()
 }
 
+pub(crate) fn apply_media_filters_for_user(
+	filters: MediaFilter,
+	user: &User,
+) -> Vec<WhereParam> {
+	let user_id = user.id.clone();
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
+	let read_status_filters = filters.base_filter.read_status.clone();
+	apply_media_filters(filters)
+		.into_iter()
+		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+		.chain(apply_media_read_status_filter(user_id, read_status_filters))
+		.collect::<Vec<WhereParam>>()
+}
+
 pub(crate) fn apply_media_pagination<'a>(
 	query: media::FindMany<'a>,
 	pagination: &Pagination,
@@ -148,21 +192,47 @@ pub(crate) fn apply_in_progress_filter_for_user(
 
 /// Generates a condition to enforce age restrictions on media and their corresponding
 /// series.
-pub(crate) fn apply_media_age_restriction(min_age: i32, allow_unset: bool) -> WhereParam {
-	and![
-		media::metadata::is(if allow_unset {
-			vec![or![
-				media_metadata::age_rating::equals(None),
-				media_metadata::age_rating::lte(min_age)
-			]]
-		} else {
-			vec![
+pub(crate) fn apply_media_age_restriction(
+	min_age: i32,
+	restrict_on_unset: bool,
+) -> WhereParam {
+	if restrict_on_unset {
+		or![
+			// If the media has no age rating, then we can defer to the series age rating.
+			and![
+				media::metadata::is(vec![media_metadata::age_rating::equals(None)]),
+				media::series::is(vec![series::metadata::is(vec![
+					series_metadata::age_rating::not(None),
+					series_metadata::age_rating::lte(min_age),
+				])])
+			],
+			// If the media has an age rating, it must be under the user age restriction
+			media::metadata::is(vec![
 				media_metadata::age_rating::not(None),
 				media_metadata::age_rating::lte(min_age),
-			]
-		}),
-		media::series::is(vec![apply_series_age_restriction(min_age, allow_unset)])
-	]
+			]),
+		]
+	} else {
+		or![
+			and![
+				// If the media has no age rating, and restrict on unset is disabled, it can be allowed
+				// so long as the series has no age rating OR it is under
+				media::metadata::is(vec![media_metadata::age_rating::equals(None)]),
+				media::series::is(vec![or![
+					series::metadata::is(vec![
+						series_metadata::age_rating::not(None),
+						series_metadata::age_rating::lte(min_age),
+					]),
+					series::metadata::is(vec![series_metadata::age_rating::equals(None)])
+				]])
+			],
+			// If the media has an age rating, it must be under the user age restriction
+			media::metadata::is(vec![
+				media_metadata::age_rating::not(None),
+				media_metadata::age_rating::lte(min_age),
+			]),
+		]
+	}
 }
 
 #[utoipa::path(
@@ -196,20 +266,13 @@ async fn get_media(
 
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
-	let user_id = user.id;
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
 	let pagination_cloned = pagination.clone();
-	let where_conditions = apply_media_filters(filters)
-		.into_iter()
-		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
-		.collect::<Vec<WhereParam>>();
+	let where_conditions = apply_media_filters_for_user(filters, &user);
 
 	let (media, count) = db
 		._transaction()
@@ -427,19 +490,12 @@ async fn get_recently_added_media(
 
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
-	let user_id = user.id;
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
 
 	let pagination_cloned = pagination.clone();
-	let where_conditions = apply_media_filters(filters)
-		.into_iter()
-		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
-		.collect::<Vec<WhereParam>>();
+	let where_conditions = apply_media_filters_for_user(filters, &user);
 
 	let (media, count) = db
 		._transaction()

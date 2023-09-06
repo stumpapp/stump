@@ -11,6 +11,7 @@ import { useFilterContext } from '..'
 import AgeRatingFilter from './AgeRatingFilter'
 import ExtensionSelect from './ExtensionSelect'
 import GenericFilterMultiselect from './GenericFilterMultiselect'
+import ReadStatusSelect from './ReadStatusSelect'
 import { removeEmpty } from './utils'
 
 const schema = z.object({
@@ -33,6 +34,7 @@ const schema = z.object({
 			writer: z.array(z.string()).optional(),
 		})
 		.optional(),
+	read_status: z.array(z.enum(['completed', 'reading', 'unread'])).optional(),
 })
 export type MediaFilterFormSchema = z.infer<typeof schema>
 
@@ -99,7 +101,7 @@ export default function MediaFilterForm() {
 			/>
 
 			<ExtensionSelect />
-
+			<ReadStatusSelect />
 			<AgeRatingFilter />
 
 			<GenericFilterMultiselect

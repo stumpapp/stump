@@ -43,7 +43,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Acknowledgements 🙏](#acknowledgements-)
 </details>
 
-> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **do not** expect a fully featured, bug-free experience. Some features will be missing and/or broken. Additionally, I will likely flatten the migrations immediately prior to the `0.1.0` release, which would break existing Stump databases. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developing-). Otherwise, stay tuned!
+> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **do not** expect a fully featured, bug-free experience. Some features will be missing and/or broken. Additionally, I will likely flatten the migrations immediately prior to the `0.1.0` release, which would break existing Stump databases. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-). Otherwise, stay tuned!
 
 ## Roadmap 🗺
 
@@ -74,7 +74,7 @@ I am very open to suggestions and ideas, so feel free to reach out if you have a
 
 ## Getting Started 🚀
 
-Stump isn't ready for normal usage yet. For now, follow the [Developing](#developing-) section to build from source and run locally, or use the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump) to give it a try.
+Stump isn't ready for normal usage yet. For now, follow the [Developing](#developer-guide-) section to build from source and run locally, or use the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump) to give it a try.
 
 For more information about getting started, how Stump works, how it manages your library, and much more, please visit [stumpapp.dev](https://stumpapp.dev/guides).
 

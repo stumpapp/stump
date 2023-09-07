@@ -1,7 +1,6 @@
 import { jobQueryKeys, libraryApi, libraryQueryKeys } from '@stump/api'
-import type { CreateLibrary, Library, PageInfo, Series, UpdateLibrary } from '@stump/types'
+import type { CreateLibrary, Library, UpdateLibrary } from '@stump/types'
 import { AxiosError } from 'axios'
-import { useMemo } from 'react'
 
 import {
 	MutationOptions,
@@ -26,55 +25,27 @@ export function useLibraryByIdQuery(id: string, options?: QueryOptions<Library>)
 	return { library: data, ...rest }
 }
 
-export interface UseLibrariesReturn {
-	libraries: Library[]
-	pageData?: PageInfo
-}
+export function useLibraries(options: PageQueryOptions<Library> = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[libraryQueryKeys.getLibraries, options],
+		async () => {
+			const { data } = await libraryApi.getLibraries()
+			return data
+		},
+		{
+			keepPreviousData: true,
+			// Send all non-401 errors to the error page
+			useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
+			...options,
+		},
+	)
 
-// TODO: https://github.com/microsoft/TypeScript/issues/49055 fix this type error!!
-export function useLibraries() {
-	const { data, ...rest } = useQuery([libraryQueryKeys.getLibraries], libraryApi.getLibraries, {
-		// Send all non-401 errors to the error page
-		useErrorBoundary: (err: AxiosError) => !err || (err.response?.status ?? 500) !== 401,
-	})
-
-	const { libraries, pageData } = useMemo<UseLibrariesReturn>(() => {
-		if (data?.data) {
-			return {
-				libraries: data.data.data,
-				pageData: data.data._page,
-			}
-		}
-
-		return { libraries: [] }
-	}, [data])
+	const libraries = data?.data
+	const pageData = data?._page
 
 	return {
 		libraries,
 		pageData,
-		...rest,
-	}
-}
-
-export function useLibrarySeriesQuery(libraryId: string, options: PageQueryOptions<Series>) {
-	const { data, ...restReturn } = usePageQuery(
-		[libraryQueryKeys.getLibrarySeries, libraryId, options.params],
-		async ({ page = 1, ...rest }) => {
-			const { data } = await libraryApi.getLibrarySeries(libraryId, { page, ...rest })
-			return data
-		},
-		{
-			...options,
-			keepPreviousData: true,
-		},
-	)
-
-	const series = data?.data
-	const pageData = data?._page
-
-	return {
-		pageData,
-		series,
 		...restReturn,
 	}
 }
@@ -94,6 +65,7 @@ export function useLibraryStats() {
 	return { isLoading: isLoading || isRefetching || isFetching, libraryStats }
 }
 
+// TODO: fix type error :grimacing:
 export function useScanLibrary({ onError }: Pick<QueryOptions<unknown>, 'onError'> = {}) {
 	const { mutate: scan, mutateAsync: scanAsync } = useMutation(
 		[libraryQueryKeys.scanLibary],

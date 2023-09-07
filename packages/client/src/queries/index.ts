@@ -8,9 +8,7 @@ export {
 	useDeleteLibraryMutation,
 	useEditLibraryMutation,
 	useLibraries,
-	type UseLibrariesReturn,
 	useLibraryByIdQuery,
-	useLibrarySeriesQuery,
 	useLibraryStats,
 	useScanLibrary,
 } from './library'
@@ -26,10 +24,8 @@ export {
 export {
 	prefetchSeries,
 	usePagedSeriesQuery,
-	useRecentlyAddedSeries,
 	useSeriesByIdQuery,
 	useSeriesCursorQuery,
-	useSeriesMediaQuery,
 	useUpNextInSeries,
 } from './series'
 export { useStumpVersion } from './server'

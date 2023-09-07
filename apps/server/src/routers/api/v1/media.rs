@@ -412,7 +412,7 @@ async fn get_in_progress_media(
 		read_progress_filter.clone()
 	])]
 	.into_iter()
-	.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
+	.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
 	.collect::<Vec<WhereParam>>();
 
 	let (media, count) = ctx

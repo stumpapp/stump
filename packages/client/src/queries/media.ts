@@ -135,7 +135,7 @@ export function useContinueReading(options: CursorQueryOptions<Media>) {
 		options,
 	)
 
-	const media = data ? data.pages.flatMap((page) => page.data) : []
+	const media = data?.pages.flatMap((page) => page.data) || []
 
 	return {
 		data,

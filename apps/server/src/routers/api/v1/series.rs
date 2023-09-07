@@ -194,7 +194,7 @@ async fn get_series(
 
 	let where_conditions = apply_series_filters(filters)
 		.into_iter()
-		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_else(Vec::new))
+		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
 		.collect::<Vec<WhereParam>>();
 
 	// series, total series count

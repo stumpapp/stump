@@ -22,6 +22,8 @@ const flattenObject = (obj: object, prefix = ''): Record<string, unknown[]> => {
 	}, {} as Record<string, unknown[]>)
 }
 
+// TODO: handle overflow/excessively long filter display better!
+// TODO: remove individual filters from the filter display
 /**
  * A component that displays the current filters in a human-readable format.
  */
@@ -50,7 +52,7 @@ export default function FilterDisplay() {
 
 	return (
 		<Card className="hidden p-4 md:inline-block">
-			<div className="flex items-center gap-4">
+			<div className="flex max-h-60 flex-wrap items-center gap-4 overflow-y-scroll scrollbar-hide">
 				{Object.entries(filterMapping).map(([key, values]) => {
 					return (
 						<div key={key} className="flex items-center gap-1">

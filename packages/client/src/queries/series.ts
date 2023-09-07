@@ -74,37 +74,6 @@ export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOption
 	}
 }
 
-export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<Media>) {
-	const { data, ...restReturn } = usePageQuery(
-		[seriesQueryKeys.getSeriesMedia, seriesId],
-		async ({ page = 1, ...rest }) => {
-			const { data } = await seriesApi.getSeriesMedia(seriesId, { page, ...rest })
-			return data
-		},
-		{
-			...options,
-			keepPreviousData: true,
-		},
-	)
-
-	const media = data?.data
-	const pageData = data?._page
-
-	return {
-		media,
-		pageData,
-		...restReturn,
-	}
-}
-
-export function useRecentlyAddedSeries() {
-	// return useInfinitePagedQuery(
-	// 	[seriesQueryKeys.getRecentlyAddedSeries],
-	// 	getRecentlyAddedSeries,
-	// 	new URLSearchParams('page_size=50'),
-	// )
-}
-
 export function useUpNextInSeries(id: string, options: QueryOptions<Media | undefined> = {}) {
 	const { data: media, ...restReturn } = useQuery(
 		[seriesQueryKeys.getNextInSeries, id],

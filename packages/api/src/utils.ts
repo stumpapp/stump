@@ -6,7 +6,7 @@ import { CursorQueryParams, PagedQueryParams } from './types'
 /** Formats a string with UrlSearchParams */
 export const urlWithParams = (url: string, params?: URLSearchParams) => {
 	// NOTE: it is important to decode the params because qs.stringify will encode them
-	// EVENT WITH the encode: false option set >:(
+	// EVEN WITH the encode: false option set >:(
 	const paramString = decodeURIComponent(params?.toString() || '')
 	if (paramString?.length) {
 		return `${url}?${paramString}`

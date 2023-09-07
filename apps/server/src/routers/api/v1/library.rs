@@ -50,7 +50,9 @@ use crate::{
 
 use super::{
 	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
-	series::{apply_series_base_filters, apply_series_filters},
+	series::{
+		apply_series_age_restriction, apply_series_base_filters, apply_series_filters,
+	},
 };
 
 // TODO: age restrictions!
@@ -294,8 +296,10 @@ async fn get_library_series(
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
-	let mut where_conditions = apply_series_filters(filters);
-	where_conditions.push(series::library_id::equals(Some(id.clone())));
+	let where_conditions = apply_series_filters(filters)
+		.into_iter()
+		.chain(vec![series::library_id::equals(Some(id.clone()))])
+		.collect::<Vec<series::WhereParam>>();
 	let mut query = db
 		.series()
 		// TODO: add media relation count....
@@ -433,28 +437,37 @@ async fn get_library_thumbnail(
 	let db = ctx.get_db();
 
 	let user = get_session_user(&session)?;
-	let age_restriction = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let age_restriction = user.age_restriction;
 
 	let library_series = db
 		.series()
-		.find_first(vec![series::library_id::equals(Some(id.clone()))])
+		// Find the first series in the library which satisfies the age restriction
+		.find_first(chain_optional_iter(
+			[series::library_id::equals(Some(id.clone()))],
+			[age_restriction
+				.as_ref()
+				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+		))
 		.with(
-			series::media::fetch(chain_optional_iter([], [age_restriction]))
-				.take(1)
-				.order_by(media::name::order(Direction::Asc)),
+			// Then load the first media in that series which satisfies the age restriction
+			series::media::fetch(chain_optional_iter(
+				[],
+				[age_restriction
+					.as_ref()
+					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+			))
+			.take(1)
+			.order_by(media::name::order(Direction::Asc)),
 		)
 		.exec()
 		.await?;
 
-	let series = library_series.ok_or_else(|| {
-		ApiError::NotFound("Library has no series to get thumbnail from".to_string())
-	})?;
-	let media = series.media()?.first().ok_or_else(|| {
-		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
-	})?;
+	let series = library_series.ok_or(ApiError::NotFound(
+		"Library has no series to get thumbnail from".to_string(),
+	))?;
+	let media = series.media()?.first().ok_or(ApiError::NotFound(
+		"Library has no media to get thumbnail from".to_string(),
+	))?;
 
 	super::media::get_media_thumbnail(media.id.clone(), db, &session)
 		.await

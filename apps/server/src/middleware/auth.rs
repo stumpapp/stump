@@ -96,6 +96,7 @@ where
 			.user()
 			.find_unique(user::username::equals(decoded_credentials.username.clone()))
 			.with(user::user_preferences::fetch())
+			.with(user::age_restriction::fetch())
 			.exec()
 			.await
 			.map_err(|e| map_prisma_error(e).into_response())?;
@@ -115,9 +116,11 @@ where
 
 		if is_match {
 			trace!(
-				"Basic authentication sucessful. Creating session for user: {}",
-				&user.username
+				username = &user.username,
+				"Basic authentication sucessful. Creating session for user"
 			);
+			// TODO: why did I use user as key here? I need to revisit the docs for this library because
+			// that doesn't seem right.
 			session_handle
 				.write()
 				.await

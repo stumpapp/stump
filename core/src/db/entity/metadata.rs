@@ -1,10 +1,30 @@
 use std::collections::HashMap;
 
+use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::prisma::{media_metadata, series_metadata};
+
+//////////////////////////////////////////////
+//////////////// PRISMA MACROS ///////////////
+//////////////////////////////////////////////
+
+media_metadata::select!(metadata_available_genre_select { genre });
+media_metadata::select!(metadata_available_writers_select { writers });
+media_metadata::select!(metadata_available_pencillers_select { pencillers });
+media_metadata::select!(metadata_available_inkers_select { inkers });
+media_metadata::select!(metadata_available_colorists_select { colorists });
+media_metadata::select!(metadata_available_letterers_select { letterers });
+media_metadata::select!(metadata_available_editors_select { editors });
+media_metadata::select!(metadata_available_publisher_select { publisher });
+media_metadata::select!(metadata_available_characters_select { characters });
+media_metadata::select!(metadata_available_teams_select { teams });
+
+///////////////////////////////////////////////
+//////////////////// MODELS ///////////////////
+///////////////////////////////////////////////
 
 fn string_list_deserializer<'de, D>(
 	deserializer: D,
@@ -21,32 +41,91 @@ where
 	))
 }
 
-/*
-   TODO: write A proc macro that is shorthand for:
+// https://anansi-project.github.io/docs/comicinfo/schemas/v2.1
+/// Deserializes a string into an age rating. This isn't the fanciest deserializer,
+/// but it's fine.
+pub fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
+where
+	D: Deserializer<'de>,
+{
+	// if exists and is empty, return None
+	let str_sequence = Option::<String>::deserialize(deserializer)?
+		.filter(|s| !s.is_empty())
+		.map(|s| s.trim().to_owned());
 
-   #[serde(
-	   alias = INPUT
-	   deserialize_with = "string_list_deserializer",
-	   default = "Option::default"
-   )]
-
-   So I can do this:
-   #[string_list(alias = "Genre")]
-   pub genre: Option<Vec<String>>,
-
-   Something like:
-
-   #[macro_export]
-	macro_rules! string_list {
-		(alias = $alias:literal) => {
-			#[serde(
-				alias = $alias,
-				deserialize_with = "string_list_deserializer",
-				default = "Option::default"
-			)]
-		};
+	if str_sequence.is_none() {
+		return Ok(None);
 	}
-*/
+
+	let str_sequence = str_sequence.unwrap();
+
+	// check for the first case G/PG/PG-13/R
+	let age = match str_sequence.to_lowercase().as_str() {
+		"g" | "pg" => Some(0),
+		"pg-13" => Some(13),
+		"r" => Some(17),
+		_ => None,
+	};
+
+	if age.is_some() {
+		return Ok(age);
+	}
+
+	// check for the second case All Ages/Teen/Teen+/Mature
+	let age = match str_sequence.to_lowercase().as_str() {
+		"all ages" => Some(0),
+		"everyone" => Some(0),
+		"early childhood" => Some(8), // TODO: this is a guess
+		"everyone 10+" => Some(10),
+		"teen" => Some(13),
+		"teen+" => Some(16),
+		"ma15+" => Some(15),
+		"mature 17+" => Some(17),
+		"m" => Some(18),
+		"mature" => Some(18),
+		"adults only 18+" => Some(18),
+		"r18+" => Some(18),
+		"x18+" => Some(18),
+		_ => None,
+	};
+
+	if age.is_some() {
+		return Ok(age);
+	}
+
+	// check for the third case \d and up
+	if let Ok(re) = Regex::new(r"(\d+) and up") {
+		let age = re
+			.captures(&str_sequence)
+			.and_then(|c| c.get(1))
+			.and_then(|m| m.as_str().parse().ok());
+
+		if age.is_some() {
+			return Ok(age);
+		}
+	} else {
+		tracing::error!("Failed to create regex for age rating deserializer");
+	}
+
+	// check for the fourth case \d+
+	if let Ok(re) = Regex::new(r"(\d+)") {
+		let age = re
+			.captures(&str_sequence)
+			.and_then(|c| c.get(1))
+			.and_then(|m| m.as_str().parse().ok());
+
+		if age.is_some() {
+			return Ok(age);
+		}
+	} else {
+		tracing::error!("Failed to create regex for age rating deserializer");
+	}
+
+	// check final case of just a number
+	let age = str_sequence.parse().ok();
+
+	Ok(age)
+}
 
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
@@ -56,7 +135,6 @@ pub struct MediaMetadata {
 	/// The title of the media.
 	#[serde(alias = "Title")]
 	pub title: Option<String>,
-	// TODO: sync?
 	/// The series name which the media belongs to. This isn't necessarily the same as the
 	/// series name as it was interpreted by Stump.
 	#[serde(alias = "Series")]
@@ -73,6 +151,15 @@ pub struct MediaMetadata {
 	/// Optional notes about the media.
 	#[serde(alias = "Notes")]
 	pub notes: Option<String>,
+	/// The age rating of the media. This varies a lot between media, but Stump will try
+	/// to normalize it to a number between 0 and 18.
+	#[serde(
+		default,
+		alias = "AgeRating",
+		deserialize_with = "age_rating_deserializer",
+		skip_serializing_if = "Option::is_none"
+	)]
+	pub age_rating: Option<i32>,
 	/// The genre(s) the media belongs to.
 	#[serde(
 		alias = "Genre",
@@ -182,6 +269,7 @@ impl MediaMetadata {
 			media_metadata::volume::set(self.volume),
 			media_metadata::summary::set(self.summary),
 			media_metadata::notes::set(self.notes),
+			media_metadata::age_rating::set(self.age_rating),
 			media_metadata::genre::set(self.genre.map(|v| v.join(", "))),
 			media_metadata::year::set(self.year),
 			media_metadata::month::set(self.month),
@@ -222,7 +310,8 @@ pub struct SeriesMetadata {
 	/// The booktype of the series, e.g. Print, OneShot, TPB or GN
 	pub booktype: Option<String>,
 	/// The age rating of the associated series
-	pub age_rating: Option<String>,
+	#[serde(deserialize_with = "age_rating_deserializer")]
+	pub age_rating: Option<i32>,
 	/// The status of the associated series, e.g. Continuing, Ended
 	pub status: Option<String>,
 }
@@ -265,6 +354,7 @@ impl From<media_metadata::Data> for MediaMetadata {
 			volume: metadata.volume,
 			summary: metadata.summary,
 			notes: metadata.notes,
+			age_rating: metadata.age_rating,
 			genre: metadata.genre.map(comma_separated_list_to_vec),
 			year: metadata.year,
 			month: metadata.month,

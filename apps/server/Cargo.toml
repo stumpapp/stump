@@ -33,6 +33,7 @@ local-ip-address = { git = "https://github.com/EstebanBorai/local-ip-address.git
 notify = "5.1.0"
 urlencoding = { workspace = true }
 serde_qs = { version = "0.12.0", features = ["axum"] }
+serde-untagged = "0.1"
 
 
 ### Dev Utils ###

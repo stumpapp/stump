@@ -32,6 +32,29 @@ export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, Axi
 	return { series: data, ...ret }
 }
 
+export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[seriesQueryKeys.getSeries, options],
+		async ({ page, page_size, params }) => {
+			const { data } = await seriesApi.getSeries({ page, page_size, ...(params ?? {}) })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
+	)
+
+	const series = data?.data
+	const pageData = data?._page
+
+	return {
+		pageData,
+		series,
+		...restReturn,
+	}
+}
+
 export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
 	const { data, ...restReturn } = useCursorQuery(
 		queryKey ?? [seriesQueryKeys.getSeriesWithCursor],
@@ -49,38 +72,6 @@ export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOption
 		series,
 		...restReturn,
 	}
-}
-
-export function useSeriesMediaQuery(seriesId: string, options: PageQueryOptions<Media>) {
-	const { data, isLoading, isFetching, isRefetching, ...restReturn } = usePageQuery(
-		[seriesQueryKeys.getSeriesMedia, seriesId],
-		async ({ page = 1, ...rest }) => {
-			const { data } = await seriesApi.getSeriesMedia(seriesId, { page, ...rest })
-			return data
-		},
-		{
-			...options,
-			keepPreviousData: true,
-		},
-	)
-
-	const media = data?.data
-	const pageData = data?._page
-
-	return {
-		isLoading: isLoading || isFetching || isRefetching,
-		media,
-		pageData,
-		...restReturn,
-	}
-}
-
-export function useRecentlyAddedSeries() {
-	// return useInfinitePagedQuery(
-	// 	[seriesQueryKeys.getRecentlyAddedSeries],
-	// 	getRecentlyAddedSeries,
-	// 	new URLSearchParams('page_size=50'),
-	// )
 }
 
 export function useUpNextInSeries(id: string, options: QueryOptions<Media | undefined> = {}) {

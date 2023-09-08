@@ -54,6 +54,7 @@ impl SeriesDAO {
 		page_params: PageParams,
 	) -> CoreResult<Pageable<Vec<Series>>> {
 		let page_bounds = page_params.get_page_bounds();
+		// TODO: Not sure yet if OR or AND is better for this query...
 		let recently_added_series = self
 			.client
 			._query_raw::<Series>(raw!(
@@ -70,14 +71,24 @@ impl SeriesDAO {
 					COUNT(series_media.id) AS media_count,
 					COUNT(series_media.id) - COUNT(media_progress.id) AS unread_media_count
 				FROM 
-					series 
+					series
+					LEFT OUTER JOIN series_metadata sm ON sm.series_id = series.id
 					LEFT OUTER JOIN media series_media ON series_media.series_id = series.id
+					LEFT OUTER JOIN media_metadata mm ON mm.media_id = series_media.id
 					LEFT OUTER JOIN read_progresses media_progress ON media_progress.media_id = series_media.id AND media_progress.user_id = {}
+					LEFT OUTER JOIN age_restrictions ar ON ar.user_id = {}
+				WHERE
+					ar.age IS NULL OR (
+						(ar.restrict_on_unset = FALSE AND mm.age_rating IS NULL) OR mm.age_rating <= ar.age
+					) OR (
+						(ar.restrict_on_unset = FALSE AND sm.age_rating IS NULL) OR sm.age_rating <= ar.age
+					)
 				GROUP BY 
 					series.id
 				ORDER BY
 					series.created_at DESC
 				LIMIT {} OFFSET {}"#,
+				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::Int(page_bounds.take),
 				PrismaValue::Int(page_bounds.skip)
@@ -85,6 +96,7 @@ impl SeriesDAO {
 			.exec()
 			.await?;
 
+		// TODO: Not sure yet if OR or AND is better for this query...
 		// NOTE: removed the `GROUP BY` clause from the query below because it would cause an empty count result
 		// set to be returned. This makes sense, but is ~annoying~.
 		let count_result = self
@@ -95,10 +107,20 @@ impl SeriesDAO {
 				COUNT(DISTINCT series.id) as count
 			FROM 
 				series 
+				LEFT OUTER JOIN series_metadata sm ON sm.series_id = series.id
 				LEFT OUTER JOIN media series_media ON series_media.series_id = series.id
+				LEFT OUTER JOIN media_metadata mm ON mm.media_id = series_media.id
 				LEFT OUTER JOIN read_progresses media_progress ON media_progress.media_id = series_media.id AND media_progress.user_id = {}
+				LEFT OUTER JOIN age_restrictions ar ON ar.user_id = {}
+			WHERE
+				ar.age IS NULL OR (
+					(ar.restrict_on_unset = FALSE AND mm.age_rating IS NULL) OR mm.age_rating <= ar.age
+				) OR (
+					(ar.restrict_on_unset = FALSE AND sm.age_rating IS NULL) OR sm.age_rating <= ar.age
+				)
 			ORDER BY
 				series.created_at DESC"#,
+			PrismaValue::String(viewer_id.to_string()),
 			PrismaValue::String(viewer_id.to_string())
 		))
 		.exec()

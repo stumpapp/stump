@@ -274,11 +274,7 @@
 	},
 	"serverStatusOverlay": {
 		"heading": "Server isn't connected",
-		"message": [
-			"Please check your internet connection",
-			"Cliquez ici",
-			"to change your server URL"
-		]
+		"message": ["Please check your internet connection", "Cliquez ici", "to change your server URL"]
 	},
 	"slidingList": {
 		"empty": "Aucun élément à afficher",

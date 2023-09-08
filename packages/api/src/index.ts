@@ -13,6 +13,7 @@ export {
 	mediaApi,
 	mediaQueryKeys,
 } from './media'
+export { metadataApi, metadataQueryKeys } from './metadata'
 export {
 	getNextInSeries,
 	getNextMediaInSeries,

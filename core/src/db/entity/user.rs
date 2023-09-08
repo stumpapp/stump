@@ -12,12 +12,22 @@ use super::{Cursor, ReadProgress};
 ///////////////////////////////////////////////
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub struct AgeRestriction {
+	pub age: i32,
+	pub restrict_on_unset: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct User {
 	pub id: String,
 	pub username: String,
 	pub role: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user_preferences: Option<UserPreferences>,
 	pub avatar_url: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub age_restriction: Option<AgeRestriction>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub read_progresses: Option<Vec<ReadProgress>>,
 	pub created_at: String,
 	pub last_login: Option<String>,
@@ -41,17 +51,31 @@ impl Cursor for User {
 	}
 }
 
+impl From<prisma::age_restriction::Data> for AgeRestriction {
+	fn from(data: prisma::age_restriction::Data) -> AgeRestriction {
+		AgeRestriction {
+			age: data.age,
+			restrict_on_unset: data.restrict_on_unset,
+		}
+	}
+}
+
 impl From<prisma::user::Data> for User {
 	fn from(data: prisma::user::Data) -> User {
-		let user_preferences = match data.user_preferences() {
-			Ok(up) => Some(up.unwrap().to_owned().into()),
-			Err(_e) => None,
-		};
-
-		let read_progresses = match data.read_progresses() {
-			Ok(rp) => Some(rp.iter().cloned().map(ReadProgress::from).collect()),
-			Err(_e) => None,
-		};
+		let user_preferences = data
+			.user_preferences()
+			.map(|up| up.cloned().map(UserPreferences::from))
+			.ok()
+			.flatten();
+		let read_progresses = data
+			.read_progresses()
+			.map(|rps| rps.iter().cloned().map(ReadProgress::from).collect())
+			.ok();
+		let age_restriction = data
+			.age_restriction()
+			.map(|ar| ar.cloned().map(AgeRestriction::from))
+			.ok()
+			.flatten();
 
 		User {
 			id: data.id,
@@ -59,6 +83,7 @@ impl From<prisma::user::Data> for User {
 			role: data.role,
 			user_preferences,
 			avatar_url: data.avatar_url,
+			age_restriction,
 			read_progresses,
 			created_at: data.created_at.to_string(),
 			last_login: data.last_login.map(|dt| dt.to_string()),

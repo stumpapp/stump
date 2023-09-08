@@ -6,13 +6,13 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, or, Direction};
+use prisma_client_rust::{and, operator::or, or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::get_config_dir,
 	db::{
-		entity::{LibraryOptions, Media, ReadProgress},
+		entity::{LibraryOptions, Media, ReadProgress, User},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		MediaDAO, DAO,
 	},
@@ -20,10 +20,10 @@ use stump_core::{
 	prisma::{
 		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, read_progress, user, PrismaClient,
+		media_metadata, read_progress, series, series_metadata, user, PrismaClient,
 	},
 };
-use tracing::{debug, trace};
+use tracing::trace;
 
 use crate::{
 	config::state::AppState,
@@ -32,11 +32,11 @@ use crate::{
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_user,
 		http::{ImageResponse, NamedFile},
-		FilterableQuery, MediaFilter, MediaMedataFilter,
+		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter, ReadStatus,
 	},
 };
 
-use super::series::apply_series_filters;
+use super::{metadata::apply_media_metadata_base_filters, series::apply_series_filters};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -57,7 +57,34 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
+pub(crate) fn apply_media_read_status_filter(
+	user_id: String,
+	read_status: Vec<ReadStatus>,
+) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[(!read_status.is_empty()).then(|| {
+			or(read_status
+				.into_iter()
+				.map(|rs| match rs {
+					ReadStatus::Reading => media::read_progresses::some(vec![and![
+						read_progress::user_id::equals(user_id.clone()),
+						read_progress::is_completed::equals(false)
+					]]),
+					ReadStatus::Completed => media::read_progresses::some(vec![and![
+						read_progress::user_id::equals(user_id.clone()),
+						read_progress::is_completed::equals(true)
+					]]),
+					ReadStatus::Unread => media::read_progresses::none(vec![
+						read_progress::user_id::equals(user_id.clone()),
+					]),
+				})
+				.collect())
+		})],
+	)
+}
+
+pub(crate) fn apply_media_base_filters(filters: MediaBaseFilter) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
 		[
@@ -69,30 +96,58 @@ pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
 				let decoded_paths = decode_path_filter(filters.path);
 				media::path::in_vec(decoded_paths)
 			}),
+			filters.search.map(|s| {
+				or![
+					media::name::contains(s.clone()),
+					media::metadata::is(vec![or![
+						media_metadata::title::contains(s.clone()),
+						media_metadata::summary::contains(s),
+					]])
+				]
+			}),
 			filters
 				.metadata
-				.map(apply_media_metadata_filters)
+				.map(apply_media_metadata_base_filters)
 				.map(media::metadata::is),
-			filters
-				.series
-				.map(apply_series_filters)
-				.map(media::series::is),
 		],
 	)
 }
 
-pub(crate) fn apply_media_metadata_filters(
-	filters: MediaMedataFilter,
-) -> Vec<media_metadata::WhereParam> {
+pub(crate) fn apply_media_relation_filters(
+	filters: MediaRelationFilter,
+) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
-		[
-			(!filters.genre.is_empty())
-				.then(|| media_metadata::genre::in_vec(filters.genre)),
-			(!filters.publisher.is_empty())
-				.then(|| media_metadata::publisher::in_vec(filters.publisher)),
-		],
+		[filters
+			.series
+			.map(apply_series_filters)
+			.map(media::series::is)],
 	)
+}
+
+pub(crate) fn apply_media_filters(filters: MediaFilter) -> Vec<WhereParam> {
+	apply_media_base_filters(filters.base_filter)
+		.into_iter()
+		.chain(apply_media_relation_filters(filters.relation_filter))
+		.collect()
+}
+
+pub(crate) fn apply_media_filters_for_user(
+	filters: MediaFilter,
+	user: &User,
+) -> Vec<WhereParam> {
+	let user_id = user.id.clone();
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
+	let read_status_filters = filters.base_filter.read_status.clone();
+	apply_media_filters(filters)
+		.into_iter()
+		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+		.chain(apply_media_read_status_filter(user_id, read_status_filters))
+		.collect::<Vec<WhereParam>>()
 }
 
 pub(crate) fn apply_media_pagination<'a>(
@@ -135,6 +190,51 @@ pub(crate) fn apply_in_progress_filter_for_user(
 	]
 }
 
+/// Generates a condition to enforce age restrictions on media and their corresponding
+/// series.
+pub(crate) fn apply_media_age_restriction(
+	min_age: i32,
+	restrict_on_unset: bool,
+) -> WhereParam {
+	if restrict_on_unset {
+		or![
+			// If the media has no age rating, then we can defer to the series age rating.
+			and![
+				media::metadata::is(vec![media_metadata::age_rating::equals(None)]),
+				media::series::is(vec![series::metadata::is(vec![
+					series_metadata::age_rating::not(None),
+					series_metadata::age_rating::lte(min_age),
+				])])
+			],
+			// If the media has an age rating, it must be under the user age restriction
+			media::metadata::is(vec![
+				media_metadata::age_rating::not(None),
+				media_metadata::age_rating::lte(min_age),
+			]),
+		]
+	} else {
+		or![
+			and![
+				// If the media has no age rating, and restrict on unset is disabled, it can be allowed
+				// so long as the series has no age rating OR it is under
+				media::metadata::is(vec![media_metadata::age_rating::equals(None)]),
+				media::series::is(vec![or![
+					series::metadata::is(vec![
+						series_metadata::age_rating::not(None),
+						series_metadata::age_rating::lte(min_age),
+					]),
+					series::metadata::is(vec![series_metadata::age_rating::equals(None)])
+				]])
+			],
+			// If the media has an age rating, it must be under the user age restriction
+			media::metadata::is(vec![
+				media_metadata::age_rating::not(None),
+				media_metadata::age_rating::lte(min_age),
+			]),
+		]
+	}
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/media",
@@ -165,13 +265,14 @@ async fn get_media(
 	trace!(?filters, ?ordering, ?pagination, "get_media");
 
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+	let user = get_session_user(&session)?;
+	let user_id = user.id.clone();
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
 	let pagination_cloned = pagination.clone();
-	let where_conditions = apply_media_filters(filters);
+	let where_conditions = apply_media_filters_for_user(filters, &user);
 
 	let (media, count) = db
 		._transaction()
@@ -290,7 +391,13 @@ async fn get_in_progress_media(
 	session: ReadableSession,
 	pagination_query: Query<PaginationQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let user_id = get_session_user(&session)?.id;
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let pagination = pagination_query.0.get();
 
 	let pagination_cloned = pagination.clone();
@@ -301,18 +408,21 @@ async fn get_in_progress_media(
 		read_progress::is_completed::equals(false)
 	];
 
+	let where_conditions = vec![media::read_progresses::some(vec![
+		read_progress_filter.clone()
+	])]
+	.into_iter()
+	.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+	.collect::<Vec<WhereParam>>();
+
 	let (media, count) = ctx
 		.db
 		._transaction()
 		.run(|client| async move {
 			let mut query = client
 				.media()
-				.find_many(vec![media::read_progresses::some(vec![
-					read_progress_filter.clone(),
-				])])
-				.with(media::read_progresses::fetch(vec![
-					read_progress_filter.clone()
-				]))
+				.find_many(where_conditions.clone())
+				.with(media::read_progresses::fetch(vec![read_progress_filter]))
 				.with(media::metadata::fetch())
 				// TODO: check back in -> https://github.com/prisma/prisma/issues/18188
 				// FIXME: not the proper ordering, BUT I cannot order based on a relation...
@@ -337,9 +447,7 @@ async fn get_in_progress_media(
 
 			client
 				.media()
-				.count(vec![media::read_progresses::some(vec![
-					read_progress_filter,
-				])])
+				.count(where_conditions)
 				.exec()
 				.await
 				.map(|count| (media, Some(count)))
@@ -375,18 +483,19 @@ async fn get_recently_added_media(
 	session: ReadableSession,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
-
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
 	trace!(?filters, ?pagination, "get_recently_added_media");
 
+	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
+	let user_id = user.id.clone();
+
 	let is_unpaged = pagination.is_unpaged();
 
 	let pagination_cloned = pagination.clone();
-	let where_conditions = apply_media_filters(filters);
+	let where_conditions = apply_media_filters_for_user(filters, &user);
 
 	let (media, count) = db
 		._transaction()
@@ -461,11 +570,19 @@ async fn get_media_by_id(
 	session: ReadableSession,
 ) -> ApiResult<Json<Media>> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let mut query = db
 		.media()
-		.find_unique(media::id::equals(id.clone()))
+		.find_first(chain_optional_iter(
+			[media::id::equals(id.clone())],
+			[age_restrictions],
+		))
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(user_id),
 		]))
@@ -476,17 +593,12 @@ async fn get_media_by_id(
 		query = query.with(media::series::fetch());
 	}
 
-	let result = query.exec().await?;
-	debug!(media_id = id, ?result, "Get media by id");
+	let media = query
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
 
-	if result.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)));
-	}
-
-	Ok(Json(Media::from(result.unwrap())))
+	Ok(Json(Media::from(media)))
 }
 
 // TODO: type a body
@@ -509,23 +621,25 @@ async fn get_media_by_id(
 async fn get_media_file(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 ) -> ApiResult<NamedFile> {
 	let db = ctx.get_db();
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let media = db
 		.media()
-		.find_unique(media::id::equals(id.clone()))
+		.find_first(chain_optional_iter(
+			[media::id::equals(id.clone())],
+			[age_restrictions],
+		))
 		.exec()
-		.await?;
-
-	if media.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)));
-	}
-
-	let media = media.unwrap();
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
 
 	Ok(NamedFile::open(media.path.clone()).await?)
 }
@@ -550,28 +664,29 @@ async fn get_media_file(
 async fn convert_media(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let media = db
 		.media()
-		.find_unique(media::id::equals(id.clone()))
+		.find_first(chain_optional_iter(
+			[media::id::equals(id.clone())],
+			[age_restrictions],
+		))
 		.exec()
-		.await?;
-
-	if media.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)));
-	}
-
-	let media = media.unwrap();
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
 
 	if media.extension != "cbr" || media.extension != "rar" {
-		return Err(ApiError::BadRequest(format!(
-			"Media with id {} is not a rar file. Stump only supports converting rar/cbr files to zip/cbz.",
-			id
+		return Err(ApiError::BadRequest(String::from(
+			"Stump only supports RAR to ZIP conversions at this time",
 		)));
 	}
 
@@ -602,49 +717,58 @@ async fn get_media_page(
 	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
 
-	let book = db
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+
+	let media = db
 		.media()
-		.find_unique(media::id::equals(id.clone()))
+		.find_first(chain_optional_iter(
+			[media::id::equals(id.clone())],
+			[age_restrictions],
+		))
 		.with(media::read_progresses::fetch(vec![
 			read_progress::user_id::equals(user_id),
 		]))
 		.exec()
-		.await?;
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
 
-	match book {
-		Some(book) => {
-			if page > book.pages {
-				// FIXME: probably won't work lol
-				Err(ApiError::Redirect(format!(
-					"/book/{}/read?page={}",
-					id, book.pages
-				)))
-			} else {
-				Ok(get_page(&book.path, page)?.into())
-			}
-		},
-		None => Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		))),
+	if page > media.pages {
+		Err(ApiError::BadRequest(format!(
+			"Page {} is out of bounds for media {}",
+			page, id
+		)))
+	} else {
+		Ok(get_page(&media.path, page)?.into())
 	}
 }
 
 pub(crate) async fn get_media_thumbnail(
 	id: String,
 	db: &PrismaClient,
+	session: &ReadableSession,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let thumbnail_dir = get_config_dir().join("thumbnails");
 
-	let book_id = id.clone();
+	let user = get_session_user(session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let where_conditions =
+		chain_optional_iter([media::id::equals(id.clone())], [age_restrictions]);
+
 	let result = db
 		._transaction()
 		.run(|client| async move {
 			let book = client
 				.media()
-				.find_unique(media::id::equals(book_id))
+				.find_first(where_conditions)
 				.with(media::series::fetch())
 				.exec()
 				.await?;
@@ -690,10 +814,7 @@ pub(crate) async fn get_media_thumbnail(
 			Ok(get_page(book.path.as_str(), 1)?)
 		},
 		(Some(book), None) => Ok(get_page(book.path.as_str(), 1)?),
-		_ => Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		))),
+		_ => Err(ApiError::NotFound(String::from("Media not found"))),
 	}
 }
 
@@ -717,10 +838,13 @@ pub(crate) async fn get_media_thumbnail(
 async fn get_media_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
-	get_media_thumbnail(id, db).await.map(ImageResponse::from)
+	get_media_thumbnail(id, db, &session)
+		.await
+		.map(ImageResponse::from)
 }
 
 #[utoipa::path(

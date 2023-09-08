@@ -17,7 +17,10 @@ mod tests {
 		NamedType,
 	};
 
-	use super::v1::{auth::LoginOrRegisterArgs, ClaimResponse, StumpVersion};
+	use super::v1::{
+		auth::LoginOrRegisterArgs, metadata::MediaMetadataOverview, ClaimResponse,
+		StumpVersion,
+	};
 
 	#[allow(dead_code)]
 	fn ts_export<T>() -> Result<String, TsExportError>
@@ -44,6 +47,9 @@ mod tests {
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
+		)?;
 
 		Ok(())
 	}

@@ -36,7 +36,7 @@ impl From<prisma::read_progress::Data> for ReadProgress {
 			Err(_) => None,
 		};
 
-		let user = data.user().ok().map(|u| User::from(u.to_owned()));
+		let user = data.user().ok().cloned().map(User::from);
 
 		ReadProgress {
 			id: data.id,

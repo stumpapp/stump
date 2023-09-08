@@ -5,9 +5,11 @@ import { AxiosError } from 'axios'
 import {
 	type CursorQueryOptions,
 	MutationOptions,
+	PageQueryOptions,
 	type QueryOptions,
 	useCursorQuery,
 	useMutation,
+	usePageQuery,
 } from '../client'
 import { queryClient, useQuery } from '../client'
 
@@ -38,6 +40,29 @@ export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = 
 	)
 
 	return { media: data, ...ret }
+}
+
+export function usePagedMediaQuery(options: PageQueryOptions<Media> = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[mediaQueryKeys.getMedia, options],
+		async ({ page, page_size, params }) => {
+			const { data } = await mediaApi.getMedia({ page, page_size, ...(params ?? {}) })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
+	)
+
+	const media = data?.data
+	const pageData = data?._page
+
+	return {
+		media,
+		pageData,
+		...restReturn,
+	}
 }
 
 export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
@@ -110,7 +135,7 @@ export function useContinueReading(options: CursorQueryOptions<Media>) {
 		options,
 	)
 
-	const media = data ? data.pages.flatMap((page) => page.data) : []
+	const media = data?.pages.flatMap((page) => page.data) || []
 
 	return {
 		data,

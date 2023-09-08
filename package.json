@@ -14,6 +14,7 @@
 		"web": "pnpm --filter @stump/web --",
 		"server": "pnpm --filter @stump/server --",
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm desktop dev\"",
+		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm web dev\"",
 		"core": "pnpm --filter @stump/core --",
 		"prisma": "pnpm core prisma",
 		"codegen": "pnpm -r codegen",

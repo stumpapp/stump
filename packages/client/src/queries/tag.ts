@@ -17,6 +17,7 @@ export interface TagOption {
 	value: string
 }
 
+// TODO: fix type error :grimacing:
 export function useTags({
 	onQuerySuccess,
 	onQueryError,

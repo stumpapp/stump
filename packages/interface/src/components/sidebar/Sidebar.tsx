@@ -151,6 +151,19 @@ export function SidebarHeader() {
 	)
 }
 
+export function SidebarFooter() {
+	return (
+		<footer className="flex items-center justify-between px-2 py-2 sm:py-0">
+			<ApplicationVersion />
+
+			<div className="flex items-center gap-2">
+				<Logout />
+				<ThemeToggle />
+			</div>
+		</footer>
+	)
+}
+
 type SidebarContentProps = {
 	isMobileSheet?: boolean
 }
@@ -222,14 +235,7 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 
 			<Spacer />
 
-			<footer className="flex items-center justify-between px-2">
-				<ApplicationVersion />
-
-				<div className="flex items-center gap-2">
-					<Logout />
-					<ThemeToggle />
-				</div>
-			</footer>
+			{!isMobileSheet && <SidebarFooter />}
 		</>
 	)
 }

@@ -5,8 +5,6 @@ use std::{
 	path::{Path, PathBuf},
 };
 use tracing::{debug, error, trace, warn};
-// TODO: fix this in fork...
-// use unrar::open_archive::FileHeader;
 use unrar::Archive;
 
 use crate::{

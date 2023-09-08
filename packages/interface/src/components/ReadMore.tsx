@@ -1,16 +1,13 @@
-import { Text, useBoolean } from '@stump/components'
-import { ComponentProps } from 'react'
+import { useBoolean } from '@stump/components'
 
-import { DEBUG_ENV } from '../index'
+import { DEBUG_ENV } from '../index.ts'
+import Markdown from './Markdown.tsx'
 
-interface Props extends Omit<ComponentProps<typeof Text>, 'children'> {
+type Props = {
 	text?: string | null
 }
 
-// TODO: import {Collapsible} from '@stump/components' and use that instead of this.
-// TODO: markdown rendering... will probably fix below FIXME, as well.
-// FIXME: does not render new lines properly, this is pretty basic and needs changing.
-export default function ReadMore({ text, ...props }: Props) {
+export default function ReadMore({ text }: Props) {
 	const [showingAll, { toggle }] = useBoolean(false)
 
 	const resolvedText = text ? text : DEBUG_ENV ? DEBUG_FAKE_TEXT : ''
@@ -21,16 +18,16 @@ export default function ReadMore({ text, ...props }: Props) {
 	}
 
 	if (!canReadMore) {
-		return <Text {...props}>{resolvedText}</Text>
+		return <Markdown>{resolvedText}</Markdown>
 	}
 
 	return (
-		<Text {...props}>
-			{showingAll ? resolvedText : resolvedText.slice(0, 250)}
-			<span onClick={toggle} className="cursor-pointer font-semibold">
-				{showingAll ? ' Read less' : '... Read more'}
-			</span>
-		</Text>
+		<div>
+			<Markdown>{showingAll ? resolvedText : resolvedText.slice(0, 250) + '...'}</Markdown>
+			<button onClick={toggle} className="cursor-pointer font-semibold dark:text-gray-100">
+				{showingAll ? ' Read less' : 'Read more'}
+			</button>
+		</div>
 	)
 }
 

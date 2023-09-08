@@ -605,6 +605,9 @@ importers:
       react-i18next:
         specifier: ^12.2.0
         version: 12.2.0(i18next@22.4.13)(react-dom@18.2.0)(react@18.2.0)
+      react-markdown:
+        specifier: ^8.0.7
+        version: 8.0.7(@types/react@18.0.31)(react@18.2.0)
       react-router:
         specifier: ^6.9.0
         version: 6.9.0(react@18.2.0)
@@ -614,6 +617,9 @@ importers:
       react-swipeable:
         specifier: ^7.0.0
         version: 7.0.0(react@18.2.0)
+      remark-gfm:
+        specifier: ^3.0.1
+        version: 3.0.1
       rooks:
         specifier: ^7.9.0
         version: 7.9.0(react-dom@18.2.0)(react@18.2.0)
@@ -1025,6 +1031,7 @@ packages:
   /@babel/plugin-proposal-class-properties@7.18.6(@babel/core@7.21.3):
     resolution: {integrity: sha512-cumfXOF0+nzZrrN8Rf0t7M+tF6sZc7vhQwYQck9q1/5w2OExlD+b4v4RpMJFaV1Z7WcDRgO6FqvxqxGlwo+RHQ==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1065,6 +1072,7 @@ packages:
   /@babel/plugin-proposal-export-namespace-from@7.18.9(@babel/core@7.21.3):
     resolution: {integrity: sha512-k1NtHyOMvlDDFeb9G5PhUXuGj8m/wiwojgQVEhJ/fsVsMCpLyOP4h0uGEjYJKrRI+EVPlb5Jk+Gt9P97lOGwtA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-export-namespace-from instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1076,6 +1084,7 @@ packages:
   /@babel/plugin-proposal-nullish-coalescing-operator@7.18.6(@babel/core@7.21.3):
     resolution: {integrity: sha512-wQxQzxYeJqHcfppzBDnm1yAY0jSRkUXR2z8RePZYrKwMKgMlE8+Z6LUno+bd6LvbGh8Gltvy74+9pIYkr+XkKA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1086,6 +1095,7 @@ packages:
 
   /@babel/plugin-proposal-object-rest-spread@7.12.1(@babel/core@7.12.9):
     resolution: {integrity: sha512-s6SowJIjzlhx8o7lsFx5zmY4At6CTtDvgNQDdPzkBQucle58A6b/TTeEBYtyDgmcXjUTM+vE8YOGHZzzbc/ioA==}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-object-rest-spread instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1098,6 +1108,7 @@ packages:
   /@babel/plugin-proposal-object-rest-spread@7.20.7(@babel/core@7.21.3):
     resolution: {integrity: sha512-d2S98yCiLxDVmBmE8UjGcfPvNEUbA1U5q5WxaWFUGRzJSVAZqm5W6MbPct0jxnegUZ0niLeNX+IOzEs7wYg9Dg==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-object-rest-spread instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1112,6 +1123,7 @@ packages:
   /@babel/plugin-proposal-optional-chaining@7.21.0(@babel/core@7.21.3):
     resolution: {integrity: sha512-p4zeefM72gpmEe2fkUr/OnOXpWEf8nAgk7ZYVqqfFiyIG7oFfVZcCrU64hWn5xp4tQ9LkV4bTIa5rD0KANpKNA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1124,6 +1136,7 @@ packages:
   /@babel/plugin-proposal-private-methods@7.18.6(@babel/core@7.21.3):
     resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1146,6 +1159,7 @@ packages:
   /@babel/plugin-proposal-private-property-in-object@7.21.11(@babel/core@7.21.3):
     resolution: {integrity: sha512-0QZ8qP/3RLDVBwBFoWAwCtgcDZJVwA5LUJRZU8x2YFfKNuFq161wK3cuGrALu5yiPu+vzwTAg/sMWVNeWeNyaw==}
     engines: {node: '>=6.9.0'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-property-in-object instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -1161,6 +1175,7 @@ packages:
   /@babel/plugin-proposal-unicode-property-regex@7.18.6(@babel/core@7.21.3):
     resolution: {integrity: sha512-2BShG/d5yoZyXZfVePH91urL5wTG6ASZU9M4o03lKK8u8UW1y08OMttBSOADTcJrnPMpvDXRG3G8fyLh4ovs8w==}
     engines: {node: '>=4'}
+    deprecated: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-unicode-property-regex instead.
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
@@ -15026,6 +15041,7 @@ packages:
 
   /ohmyfetch@0.4.21:
     resolution: {integrity: sha512-VG7f/JRvqvBOYvL0tHyEIEG7XHWm7OqIfAs6/HqwWwDfjiJ1g0huIpe5sFEmyb+7hpFa1EGNH2aERWR72tlClw==}
+    deprecated: Package renamed to https://github.com/unjs/ofetch
     dependencies:
       destr: 1.2.2
       node-fetch-native: 0.1.8
@@ -16382,9 +16398,40 @@ packages:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
     dev: true
 
+  /react-is@18.2.0:
+    resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+    dev: false
+
   /react-lifecycles-compat@3.0.4:
     resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
     dev: true
+
+  /react-markdown@8.0.7(@types/react@18.0.31)(react@18.2.0):
+    resolution: {integrity: sha512-bvWbzG4MtOU62XqBx3Xx+zB2raaFFsq4mYiAzfjXJMEz2sixgeAfraA3tvzULF02ZdOMUOKTBFFaZJDDrq+BJQ==}
+    peerDependencies:
+      '@types/react': '>=16'
+      react: '>=16'
+    dependencies:
+      '@types/hast': 2.3.4
+      '@types/prop-types': 15.7.5
+      '@types/react': 18.0.31
+      '@types/unist': 2.0.6
+      comma-separated-tokens: 2.0.3
+      hast-util-whitespace: 2.0.1
+      prop-types: 15.8.1
+      property-information: 6.2.0
+      react: 18.2.0
+      react-is: 18.2.0
+      remark-parse: 10.0.2
+      remark-rehype: 10.1.0
+      space-separated-tokens: 2.0.2
+      style-to-object: 0.4.1
+      unified: 10.1.2
+      unist-util-visit: 4.1.2
+      vfile: 5.3.7
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /react-merge-refs@1.1.0:
     resolution: {integrity: sha512-alTKsjEL0dKH/ru1Iyn7vliS2QRcBp9zZPGoWxUOvRGWPUYgjo+V01is7p04It6KhgrzhJGnIj9GgX8W4bZoCQ==}

@@ -128,7 +128,7 @@ impl JobDetail {
 			task_count: None,
 			completed_task_count: None,
 			ms_elapsed: None,
-			created_at: Some(Utc::now().to_string()),
+			created_at: Some(Utc::now().to_rfc3339()),
 			completed_at: None,
 		}
 	}
@@ -144,8 +144,8 @@ impl From<prisma::job::Data> for JobDetail {
 			task_count: Some(data.task_count),
 			completed_task_count: Some(data.completed_task_count),
 			ms_elapsed: Some(data.ms_elapsed as u64),
-			created_at: Some(data.created_at.to_string()),
-			completed_at: data.completed_at.map(|dt| dt.to_string()),
+			created_at: Some(data.created_at.to_rfc3339()),
+			completed_at: data.completed_at.map(|dt| dt.to_rfc3339()),
 		}
 	}
 }

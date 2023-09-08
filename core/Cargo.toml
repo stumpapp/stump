@@ -23,6 +23,7 @@ itertools = "0.10.5"
 optional_struct = "0.2.0"
 utoipa = { version = "3.0.3" }
 uuid = "1.4.0"
+regex = "1.9.5"
 alphanumeric-sort = "1.5.1"
 
 ### FILESYSTEM UTILS ###
@@ -36,7 +37,7 @@ webp = "0.2.2"
 zip = "0.5.13"
 epub = "1.2.4"
 unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typestate" }
-# unrar = { path = "../../unrar.rs" }
+# unrar = { version = "0.5.1" }
 data-encoding = "2.3.2"
 ring = "0.16.20"
 

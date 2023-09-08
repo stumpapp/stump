@@ -10,6 +10,7 @@
 	"jobs": "Background Jobs",
 	"filesystem-scans": "Filesystem Scans",
 	"user-management": "User Management",
+	"access-control": "Access Control",
 	"read-progress": "Progress Tracking",
 	"readers": "Stump Readers",
 	"opds": "OPDS",

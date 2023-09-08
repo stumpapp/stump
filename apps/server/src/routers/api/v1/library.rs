@@ -42,13 +42,20 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, get_session_admin_user, http::ImageResponse,
-		FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		get_session_user, http::ImageResponse, FilterableQuery, LibraryBaseFilter,
+		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
 };
 
-use super::media::{apply_media_filters, apply_media_pagination};
+use super::{
+	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
+	series::{
+		apply_series_age_restriction, apply_series_base_filters, apply_series_filters,
+	},
+};
 
+// TODO: age restrictions!
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -75,14 +82,38 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+pub(crate) fn apply_library_base_filters(filters: LibraryBaseFilter) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
 		[
 			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
 			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
+			(!filters.path.is_empty()).then(|| {
+				let decoded_paths = decode_path_filter(filters.path);
+				library::path::in_vec(decoded_paths)
+			}),
+			filters.search.map(library::name::contains),
 		],
 	)
+}
+
+pub(crate) fn apply_library_relation_filters(
+	filters: LibraryRelationFilter,
+) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[filters
+			.series
+			.map(apply_series_base_filters)
+			.map(library::series::some)],
+	)
+}
+
+pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+	apply_library_base_filters(filters.base_filter)
+		.into_iter()
+		.chain(apply_library_relation_filters(filters.relation_filter))
+		.collect()
 }
 
 #[utoipa::path(
@@ -254,14 +285,21 @@ async fn get_library_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
-	let FilterableQuery { ordering, .. } = filter_query.0.get();
+	let FilterableQuery {
+		ordering, filters, ..
+	} = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+	tracing::debug!(?filters, ?ordering, ?pagination, "get_library_series");
+
 	let db = ctx.get_db();
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
-	let where_conditions = vec![series::library_id::equals(Some(id.clone()))];
+	let where_conditions = apply_series_filters(filters)
+		.into_iter()
+		.chain(vec![series::library_id::equals(Some(id.clone()))])
+		.collect::<Vec<series::WhereParam>>();
 	let mut query = db
 		.series()
 		// TODO: add media relation count....
@@ -394,28 +432,44 @@ async fn get_library_media(
 async fn get_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
+	let user = get_session_user(&session)?;
+	let age_restriction = user.age_restriction;
+
 	let library_series = db
 		.series()
-		.find_first(vec![series::library_id::equals(Some(id.clone()))])
+		// Find the first series in the library which satisfies the age restriction
+		.find_first(chain_optional_iter(
+			[series::library_id::equals(Some(id.clone()))],
+			[age_restriction
+				.as_ref()
+				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+		))
 		.with(
-			series::media::fetch(vec![])
-				.take(1)
-				.order_by(media::name::order(Direction::Asc)),
+			// Then load the first media in that series which satisfies the age restriction
+			series::media::fetch(chain_optional_iter(
+				[],
+				[age_restriction
+					.as_ref()
+					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+			))
+			.take(1)
+			.order_by(media::name::order(Direction::Asc)),
 		)
 		.exec()
 		.await?;
 
-	let series = library_series.ok_or_else(|| {
-		ApiError::NotFound("Library has no series to get thumbnail from".to_string())
-	})?;
-	let media = series.media()?.first().ok_or_else(|| {
-		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
-	})?;
+	let series = library_series.ok_or(ApiError::NotFound(
+		"Library has no series to get thumbnail from".to_string(),
+	))?;
+	let media = series.media()?.first().ok_or(ApiError::NotFound(
+		"Library has no media to get thumbnail from".to_string(),
+	))?;
 
-	super::media::get_media_thumbnail(media.id.clone(), db)
+	super::media::get_media_thumbnail(media.id.clone(), db, &session)
 		.await
 		.map(ImageResponse::from)
 }
@@ -459,8 +513,8 @@ async fn delete_library_thumbnails(
 
 	let media_ids = result
 		.series
-		.iter()
-		.flat_map(|s| s.media.iter().map(|m| m.id.clone()))
+		.into_iter()
+		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
 	if let Some(ext) = extension {

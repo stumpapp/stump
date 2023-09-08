@@ -19,7 +19,7 @@ export default function PagePopoverForm({
 	pos,
 	trigger,
 }: PagePopoverFormProps) {
-	const inputRef = useRef<any>(null)
+	const inputRef = useRef<HTMLInputElement | null>(null)
 
 	const [isOpen, { on, off }] = useBoolean()
 

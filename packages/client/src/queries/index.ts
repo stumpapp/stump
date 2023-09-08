@@ -8,9 +8,7 @@ export {
 	useDeleteLibraryMutation,
 	useEditLibraryMutation,
 	useLibraries,
-	type UseLibrariesReturn,
 	useLibraryByIdQuery,
-	useLibrarySeriesQuery,
 	useLibraryStats,
 	useScanLibrary,
 } from './library'
@@ -19,15 +17,15 @@ export {
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,
+	usePagedMediaQuery,
 	useRecentlyAddedMediaQuery,
 	useUpdateMediaProgress,
 } from './media'
 export {
 	prefetchSeries,
-	useRecentlyAddedSeries,
+	usePagedSeriesQuery,
 	useSeriesByIdQuery,
 	useSeriesCursorQuery,
-	useSeriesMediaQuery,
 	useUpNextInSeries,
 } from './series'
 export { useStumpVersion } from './server'

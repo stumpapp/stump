@@ -23,6 +23,8 @@ pub enum FileError {
 	#[error("Could not find an image")]
 	NoImageError,
 	#[error("{0}")]
+	PdfError(#[from] pdf::error::PdfError),
+	#[error("{0}")]
 	RarError(#[from] UnrarError),
 	#[error("Failed to open rar archive: {0}")]
 	RarNulError(#[from] unrar::error::NulError),

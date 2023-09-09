@@ -16,6 +16,7 @@ use crate::filesystem::{
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
+/// A file processor for ZIP files.
 pub struct ZipProcessor;
 
 impl FileProcessor for ZipProcessor {

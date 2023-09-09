@@ -97,33 +97,33 @@ A quick summary of the steps required to get going:
 
 4. Start one of the apps:
 
-I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. A few example commands are:
+   I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. A few example commands are:
 
-```bash
-# run the webapp + server
-moon run server:dev web:dev
-# run the desktop app + server
-moon run server:start desktop:dev
-# run the docs website
-moon run docs:dev
-```
+   ```bash
+   # run the webapp + server
+   moon run server:dev web:dev
+   # run the desktop app + server
+   moon run server:start desktop:dev
+   # run the docs website
+   moon run docs:dev
+   ```
 
-This isn't a requirement though! You can also run the apps directly with `pnpm`:
+   This isn't a requirement though! You can also run the apps directly with `pnpm`:
 
-```bash
-# run the webapp + server
-pnpm dev:web
-# run the desktop app + server
-pnpm dev:desktop
-# run the docs website
-pnpm docs dev
-```
+   ```bash
+   # run the webapp + server
+   pnpm dev:web
+   # run the desktop app + server
+   pnpm dev:desktop
+   # run the docs website
+   pnpm docs dev
+   ```
 
-Or just `cargo` for the server:
+   Or just `cargo` for the server:
 
-```bash
-cargo run --package stump_server --bin stump_server
-```
+   ```bash
+   cargo run --package stump_server --bin stump_server
+   ```
 
 And that's it!
 
@@ -134,7 +134,7 @@ If you aren't sure where to start, I recommend taking a look at [open issues](ht
 In general, the following areas are good places to start:
 
 - Translation, so Stump is accessible to as many people as possible
-  - Stump uses Crowdin for translations. You can find the project [here](https://crowdin.com/project/stump)
+  - [Crowdin](https://crowdin.com/project/stump) is being used for translations
 - Writing comprehensive tests
 - Designing UI elements/sections or improving the existing UI/UX
 - Docker build optimizations, caching, etc

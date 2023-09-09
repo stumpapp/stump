@@ -5,7 +5,7 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-
 import AnimatedImageBasedReader from '../../components/readers/image-based/AnimatedImageBasedReader'
 import ImageBasedReader from '../../components/readers/image-based/ImageBasedReader'
 import paths from '../../paths'
-import { ARCHIVE_EXTENSION, EBOOK_EXTENSION } from '../../utils/patterns'
+import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
 
 export default function BookReaderScene() {
 	const [search] = useSearchParams()
@@ -44,6 +44,14 @@ export default function BookReaderScene() {
 					epubcfi: media.current_epubcfi || null,
 					isAnimated,
 					isEpub: true,
+				})}
+			/>
+		)
+	} else if (media.extension.match(PDF_EXTENSION)) {
+		return (
+			<Navigate
+				to={paths.bookReader(id, {
+					isPdf: true,
 				})}
 			/>
 		)

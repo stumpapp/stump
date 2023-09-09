@@ -21,6 +21,7 @@ use crate::{
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
+/// A file processor for RAR files.
 pub struct RarProcessor;
 
 impl FileProcessor for RarProcessor {

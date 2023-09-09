@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use pdf::primitive::Dictionary;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize};
 use specta::Type;
@@ -127,6 +128,7 @@ where
 	Ok(age)
 }
 
+// TODO: author field?
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
 // is formatted in PascalCase
 /// Struct representing the metadata for a processed file.
@@ -424,6 +426,19 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 		}
 
 		metadata
+	}
+}
+
+impl From<Dictionary> for MediaMetadata {
+	fn from(dict: Dictionary) -> Self {
+		// FIXME: this is pretty hacky! I need to match on the type of the value
+		let map = dict
+			.into_iter()
+			.map(|(k, v)| v.to_string().map(|v| (k, v)))
+			.filter_map(|result| result.ok())
+			.map(|(k, v)| (k.to_lowercase(), vec![v]))
+			.collect::<HashMap<String, Vec<String>>>();
+		Self::from(map)
 	}
 }
 

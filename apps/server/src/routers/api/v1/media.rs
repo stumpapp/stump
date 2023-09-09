@@ -641,6 +641,8 @@ async fn get_media_file(
 		.await?
 		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
 
+	trace!(?media, "Downloading media file");
+
 	Ok(NamedFile::open(media.path.clone()).await?)
 }
 

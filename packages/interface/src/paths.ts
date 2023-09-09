@@ -4,11 +4,15 @@ type BookReaderParams = {
 	isPdf?: boolean
 	epubcfi?: string | null
 	isAnimated?: boolean
+	isStreaming?: boolean
 }
 
 const paths = {
 	bookOverview: (id: string) => `/book/${id}`,
-	bookReader: (id: string, { isEpub, isPdf, epubcfi, isAnimated, page }: BookReaderParams) => {
+	bookReader: (
+		id: string,
+		{ isEpub, isPdf, epubcfi, isAnimated, page, isStreaming }: BookReaderParams,
+	) => {
 		const baseUrl = paths.bookOverview(id)
 		const searchParams = new URLSearchParams()
 
@@ -20,8 +24,7 @@ const paths = {
 			return `${baseUrl}/epub-reader?${searchParams.toString()}`
 		}
 
-		if (isPdf) {
-			// searchParams.append('native', 'true')
+		if (isPdf && !isStreaming) {
 			return `${baseUrl}/pdf-reader?${searchParams.toString()}`
 		}
 

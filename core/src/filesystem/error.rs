@@ -25,6 +25,12 @@ pub enum FileError {
 	#[error("{0}")]
 	PdfError(#[from] pdf::error::PdfError),
 	#[error("{0}")]
+	PdfRendererError(#[from] pdfium_render::error::PdfiumError),
+	#[error("Stump is not properly configured to render PDFs")]
+	PdfConfigurationError,
+	#[error("Failed to process PDF file: {0}")]
+	PdfProcessingError(String),
+	#[error("{0}")]
 	RarError(#[from] UnrarError),
 	#[error("Failed to open rar archive: {0}")]
 	RarNulError(#[from] unrar::error::NulError),

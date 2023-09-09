@@ -35,6 +35,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Project Structure 📦](#project-structure-)
   - [/apps](#apps)
   - [/core](#core)
+  - [/crates](#crates)
   - [/packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
 - [Acknowledgements 🙏](#acknowledgements-)
@@ -159,13 +160,16 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 
 - `core`: A Rust crate containing Stump's core functionalities.
 
+### /crates
+
+- `prisma-cli`: A small rust app to run the Prisma CLI.
+
 ### /packages
 
 - `api`: All of the API functions used by the `client` package.
 - `client`: React-query config, hooks, and other client-side utilities.
 - `components`: Shared React components for the web and desktop applications.
 - `interface`: A React component responsible for the main UI layout for the web and desktop applications.
-- `prisma-cli`: A small rust app to run the Prisma CLI.
 - `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 ## Similar Projects 👯

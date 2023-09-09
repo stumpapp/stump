@@ -15,7 +15,7 @@ The following table outlines the supported formats for books in Stump:
 | ZIP Archive | `.cbz` `.zip` | ✅    | ✅        | ✅   |                                                                                                                                        |
 | RAR Archive | `.cbr` `.rar` | ✅    | ✅        | ✅   |                                                                                                                                        |
 | EPUB        | `.epub`       | ✅    | ❌        | ❌   | Epub files aren't generally supported by ODPS. Chapter HTML can be streamed from the server, however the UI does not utilize this yet. |
-| PDF         | `.pdf`        | ✅    | ❌        | ❌   | PDF support is _very_ barebones                                                                                                        |
+| PDF         | `.pdf`        | ✅    | ✅        | ✅   |                                                                                                                                        |
 
 - **Basic**: Basic support encapsulates the minimally viable functionality for a given format. In general, this will include things like:
   - File discovery

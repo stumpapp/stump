@@ -18,6 +18,7 @@ export default function BookReaderScene() {
 
 	const page = search.get('page')
 	const isAnimated = search.get('animated') === 'true'
+	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
 
 	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
 	const { updateReadProgress } = useUpdateMediaProgress(id, {
@@ -47,11 +48,12 @@ export default function BookReaderScene() {
 				})}
 			/>
 		)
-	} else if (media.extension.match(PDF_EXTENSION)) {
+	} else if (media.extension.match(PDF_EXTENSION) && !isStreaming) {
 		return (
 			<Navigate
 				to={paths.bookReader(id, {
 					isPdf: true,
+					isStreaming: false,
 				})}
 			/>
 		)
@@ -61,9 +63,8 @@ export default function BookReaderScene() {
 		return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
 	}
 
-	if (media.extension.match(ARCHIVE_EXTENSION)) {
+	if (media.extension.match(ARCHIVE_EXTENSION) || media.extension.match(PDF_EXTENSION)) {
 		const animated = !!search.get('animated')
-
 		const Component = animated ? AnimatedImageBasedReader : ImageBasedReader
 
 		return (

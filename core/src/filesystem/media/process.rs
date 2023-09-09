@@ -129,6 +129,7 @@ pub fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileErr
 		"application/vnd.rar" => RarProcessor::get_page(path, page),
 		"application/vnd.comicbook-rar" => RarProcessor::get_page(path, page),
 		"application/epub+zip" => EpubProcessor::get_page(path, page),
+		"application/pdf" => PdfProcessor::get_page(path, page),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
 	}
 }

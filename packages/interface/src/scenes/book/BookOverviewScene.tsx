@@ -1,5 +1,5 @@
 import { useMediaByIdQuery } from '@stump/client'
-import { Badge, Heading, Spacer, Text } from '@stump/components'
+import { Badge, ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import { Suspense } from 'react'
 import { Helmet } from 'react-helmet'
@@ -10,6 +10,8 @@ import LinkBadge from '../../components/LinkBadge'
 import MediaCard from '../../components/media/MediaCard'
 import ReadMore from '../../components/ReadMore'
 import TagList from '../../components/tags/TagList'
+import paths from '../../paths'
+import { PDF_EXTENSION } from '../../utils/patterns'
 import BookFileInformation from './BookFileInformation'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 import BookReaderLink from './BookReaderLink'
@@ -79,6 +81,16 @@ export default function BookOverviewScene() {
 
 						<div className="flex w-full flex-col-reverse gap-1 md:flex-row md:gap-2">
 							<BookReaderLink book={media} />
+							{media.extension?.match(PDF_EXTENSION) && (
+								<ButtonOrLink
+									variant="outline"
+									href={paths.bookReader(media.id, { isPdf: true, isStreaming: false })}
+									title="Read with the native PDF viewer"
+									className="w-full md:w-auto"
+								>
+									Read with the native PDF viewer
+								</ButtonOrLink>
+							)}
 							<DownloadMediaButton media={media} />
 						</div>
 					</div>

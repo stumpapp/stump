@@ -20,7 +20,7 @@ export default function TocDrawer() {
 		if (pathHasChanged && isOpen) {
 			setIsOpen(false)
 		}
-	}, [location, pathHasChanged, isOpen])
+	}, [pathHasChanged, isOpen])
 
 	function handleSelect(href: string) {
 		controls.onLinkClick(href)

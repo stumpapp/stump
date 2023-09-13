@@ -3,7 +3,8 @@
 SCRIPTS_DIR="${BASH_SOURCE%/*}/.."
 source "${SCRIPTS_DIR}/lib"
 
-while getopts "pwd:" opt; do
+# TODO: use words instead...
+while getopts "pwdg:" opt; do
   case $opt in
     p)
       prisma_sed_correction
@@ -15,6 +16,11 @@ while getopts "pwd:" opt; do
       path="$OPTARG"
       echo "The path provided is $OPTARG"
       create_dummy_rust_file $path
+    ;;
+    g)
+      arch="$OPTARG"
+      echo "The arch provided is $OPTARG"
+      download_pdfium $arch
     ;;
     ?) 
       echo "Invalid option -$OPTARG" >&2

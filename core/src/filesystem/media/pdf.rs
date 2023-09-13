@@ -1,4 +1,9 @@
-use std::{collections::HashMap, io::Cursor, num::TryFromIntError, path::PathBuf};
+use std::{
+	collections::HashMap,
+	io::Cursor,
+	num::TryFromIntError,
+	path::{Path, PathBuf},
+};
 
 use pdf::file::FileOptions;
 use pdfium_render::{prelude::Pdfium, render_config::PdfRenderConfig};
@@ -6,10 +11,13 @@ use pdfium_render::{prelude::Pdfium, render_config::PdfRenderConfig};
 use crate::{
 	config,
 	db::entity::metadata::MediaMetadata,
-	filesystem::{error::FileError, hash, ContentType},
+	filesystem::{
+		archive::create_zip_archive, error::FileError, hash, image::ImageFormat,
+		ContentType, FileParts, PathUtils,
+	},
 };
 
-use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
+use super::{process::FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for PDF files.
 pub struct PdfProcessor;
@@ -64,6 +72,7 @@ impl FileProcessor for PdfProcessor {
 		})
 	}
 
+	// TODO: The decision to use PNG should be a configuration option
 	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
 		let pdfium = PdfProcessor::renderer()?;
 
@@ -76,7 +85,7 @@ impl FileProcessor for PdfProcessor {
 		let render_config = PdfRenderConfig::new();
 
 		let bitmap = document_page.render_with_config(&render_config)?;
-		let dyn_image = bitmap.as_image(); // Renders this page to an image::DynamicImage...
+		let dyn_image = bitmap.as_image();
 
 		if let Some(image) = dyn_image.as_rgba8() {
 			let mut buffer = Cursor::new(vec![]);
@@ -134,5 +143,104 @@ impl PdfProcessor {
 				.map(Pdfium::new)
 				.map_err(|_| FileError::PdfConfigurationError)
 		}
+	}
+}
+
+impl FileConverter for PdfProcessor {
+	fn to_zip(
+		path: &str,
+		delete_source: bool,
+		format: Option<ImageFormat>,
+	) -> Result<PathBuf, FileError> {
+		let pdfium = PdfProcessor::renderer()?;
+
+		let document = pdfium.load_pdf_from_file(path, None)?;
+		let iter = document.pages().iter();
+
+		let render_config = PdfRenderConfig::new();
+
+		let output_format = format
+			.clone()
+			.map(image::ImageOutputFormat::from)
+			.unwrap_or(image::ImageOutputFormat::Png);
+		let converted_pages = iter
+			.enumerate()
+			.map(|(idx, page)| {
+				let bitmap = page.render_with_config(&render_config)?;
+				let dyn_image = bitmap.as_image();
+
+				if let Some(image) = dyn_image.as_rgba8() {
+					let mut buffer = Cursor::new(vec![]);
+					image
+						.write_to(&mut buffer, output_format.clone())
+						.map_err(|e| {
+							tracing::error!(error = ?e, "Failed to write image to buffer");
+							FileError::PdfProcessingError(String::from(
+								"An image could not be rendered from the PDF page",
+							))
+						})?;
+					Ok(buffer.into_inner())
+				} else {
+					tracing::warn!(
+						path,
+						page = idx + 1,
+						"An image could not be rendered from the PDF page"
+					);
+					Err(FileError::PdfProcessingError(String::from(
+						"An image could not be rendered from the PDF page",
+					)))
+				}
+			})
+			.filter_map(Result::ok)
+			.collect::<Vec<Vec<u8>>>();
+
+		let path_buf = PathBuf::from(path);
+		let parent = path_buf.parent().unwrap_or_else(|| Path::new("/"));
+		let FileParts {
+			file_name,
+			file_stem,
+			extension,
+		} = path_buf.as_path().file_parts();
+
+		let cache_dir = config::get_cache_dir();
+		let unpacked_path = cache_dir.join(&file_stem);
+
+		// create folder for the zip
+		std::fs::create_dir_all(&unpacked_path)?;
+
+		// write each image to the folder
+		for image_buf in converted_pages {
+			// write the image to file with proper extension
+			let output_extension =
+				format.as_ref().map(|f| f.extension()).unwrap_or("png");
+
+			let image_path =
+				unpacked_path.join(format!("{}.{}", file_name, output_extension));
+
+			// NOTE: This isn't bubbling up because I don't think at this point it should
+			// kill the whole conversion process.
+			if let Err(err) = std::fs::write(image_path, image_buf) {
+				tracing::error!(error = ?err, "Failed to write image to file");
+			}
+		}
+
+		let zip_path =
+			create_zip_archive(&unpacked_path, &file_name, &extension, parent)?;
+
+		// TODO: won't work in docker
+		if delete_source {
+			if let Err(err) = trash::delete(path) {
+				tracing::error!(error = ?err, path, "Failed to delete converted PDF source file");
+			}
+		}
+
+		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
+		if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
+			tracing::error!(
+				error = ?err, ?cache_dir, ?unpacked_path, "Failed to delete unpacked contents in cache",
+			);
+		}
+
+		Ok(zip_path)
 	}
 }

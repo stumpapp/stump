@@ -14,12 +14,14 @@ use crate::{
 		content_type::ContentType,
 		error::FileError,
 		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
+		image::ImageFormat,
 		media::common::metadata_from_buf,
 		zip::ZipProcessor,
+		FileParts, PathUtils,
 	},
 };
 
-use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
+use super::{process::FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for RAR files.
 pub struct RarProcessor;
@@ -258,6 +260,59 @@ impl RarProcessor {
 			// This error won't be 'fatal' in that it won't cause an error to be returned.
 			// TODO: maybe persist a log here? Or make more compliacated return?
 			// something like ConvertResult { ConvertedMoveFailed, etc. }
+			if let Err(err) = trash::delete(path) {
+				warn!(error = ?err, path,"Failed to delete converted RAR file");
+			}
+		}
+
+		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
+		if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
+			error!(
+				error = ?err, ?cache_dir, ?unpacked_path, "Failed to delete unpacked RAR contents in cache",
+			);
+		}
+
+		Ok(zip_path)
+	}
+}
+
+impl FileConverter for RarProcessor {
+	fn to_zip(
+		path: &str,
+		delete_source: bool,
+		_: Option<ImageFormat>,
+	) -> Result<PathBuf, FileError> {
+		debug!(path, "Converting RAR to ZIP");
+
+		// TODO: remove these defaults and bubble up an error...
+		let path_buf = PathBuf::from(path);
+		let parent = path_buf.parent().unwrap_or_else(|| Path::new("/"));
+		let FileParts {
+			extension,
+			file_stem,
+			file_name,
+		} = path_buf.as_path().file_parts();
+
+		let cache_dir = config::get_cache_dir();
+		let unpacked_path = cache_dir.join(file_stem);
+
+		trace!(?unpacked_path, "Extracting RAR to cache");
+
+		let mut archive = Archive::new(path).open_for_processing()?;
+		while let Some(header) = archive.read_header() {
+			let header = header?;
+			archive = if header.entry().is_file() {
+				header.extract_to(&unpacked_path)?
+			} else {
+				header.skip()?
+			};
+		}
+
+		let zip_path =
+			create_zip_archive(&unpacked_path, &file_name, &extension, parent)?;
+
+		// TODO: won't work in docker
+		if delete_source {
 			if let Err(err) = trash::delete(path) {
 				warn!(error = ?err, path,"Failed to delete converted RAR file");
 			}

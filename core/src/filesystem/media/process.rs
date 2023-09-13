@@ -15,7 +15,7 @@ use crate::{
 	},
 	filesystem::{
 		content_type::ContentType, epub::EpubProcessor, error::FileError,
-		pdf::PdfProcessor,
+		image::ImageFormat, pdf::PdfProcessor,
 	},
 };
 
@@ -68,6 +68,15 @@ pub trait FileProcessor {
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError>;
+}
+
+/// Trait defining a standard API for converting files throughout Stump.
+pub trait FileConverter {
+	fn to_zip(
+		path: &str,
+		delete_source: bool,
+		image_format: Option<ImageFormat>,
+	) -> Result<PathBuf, FileError>;
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -59,6 +59,21 @@ impl ImageFormat {
 	}
 }
 
+impl From<ImageFormat> for image::ImageOutputFormat {
+	fn from(val: ImageFormat) -> Self {
+		match val {
+			ImageFormat::Webp => {
+				image::ImageOutputFormat::Unsupported(String::from("webp"))
+			},
+			ImageFormat::Jpeg => image::ImageOutputFormat::Jpeg(100),
+			ImageFormat::JpegXl => {
+				image::ImageOutputFormat::Unsupported(String::from("jxl"))
+			},
+			ImageFormat::Png => image::ImageOutputFormat::Png,
+		}
+	}
+}
+
 /// Options for processing images throughout Stump.
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
 pub struct ImageProcessorOptions {

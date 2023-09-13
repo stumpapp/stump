@@ -70,7 +70,7 @@ impl FileProcessor for RarProcessor {
 	) -> Result<ProcessedFile, FileError> {
 		if options.convert_rar_to_zip {
 			let zip_path_buf =
-				RarProcessor::convert_to_zip(path, options.delete_conversion_source)?;
+				RarProcessor::to_zip(path, options.delete_conversion_source, None)?;
 			let zip_path = zip_path_buf.to_str().ok_or_else(|| {
 				FileError::UnknownError(
 					"Converted RAR file failed to be discovered".to_string(),
@@ -216,63 +216,6 @@ impl FileProcessor for RarProcessor {
 		}
 
 		Ok(content_types)
-	}
-}
-
-impl RarProcessor {
-	pub fn convert_to_zip(path: &str, delete_source: bool) -> Result<PathBuf, FileError> {
-		debug!(path, "Converting RAR to ZIP");
-
-		// TODO: remove these defaults and bubble up an error...
-		let path_buf = PathBuf::from(path);
-		let parent = path_buf.parent().unwrap_or_else(|| Path::new("/"));
-		let dir_name = path_buf
-			.file_stem()
-			.and_then(|s| s.to_str())
-			.unwrap_or_default();
-		let original_ext = path_buf
-			.extension()
-			.unwrap_or_default()
-			.to_str()
-			.unwrap_or_default();
-
-		let cache_dir = config::get_cache_dir();
-		let unpacked_path = cache_dir.join(dir_name);
-
-		trace!(?unpacked_path, "Extracting RAR to cache");
-
-		let mut archive = Archive::new(path).open_for_processing()?;
-		while let Some(header) = archive.read_header() {
-			let header = header?;
-			archive = if header.entry().is_file() {
-				header.extract_to(&unpacked_path)?
-			} else {
-				header.skip()?
-			};
-		}
-
-		let zip_path =
-			create_zip_archive(&unpacked_path, dir_name, original_ext, parent)?;
-
-		if delete_source {
-			// Note: this will put the file in the 'trash' according to the user's platform.
-			// Rather than hard deleting it, I figured this would be desirable.
-			// This error won't be 'fatal' in that it won't cause an error to be returned.
-			// TODO: maybe persist a log here? Or make more compliacated return?
-			// something like ConvertResult { ConvertedMoveFailed, etc. }
-			if let Err(err) = trash::delete(path) {
-				warn!(error = ?err, path,"Failed to delete converted RAR file");
-			}
-		}
-
-		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
-		if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
-			error!(
-				error = ?err, ?cache_dir, ?unpacked_path, "Failed to delete unpacked RAR contents in cache",
-			);
-		}
-
-		Ok(zip_path)
 	}
 }
 

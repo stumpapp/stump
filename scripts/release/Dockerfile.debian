@@ -80,11 +80,13 @@ WORKDIR /
 RUN mkdir -p config && mkdir -p data && mkdir -p app
 
 COPY --from=builder /app/stump_server /app/stump
-COPY --from=pdfium /pdfium /lib/pdfium
+COPY --from=pdfium /pdfium /opt/pdfium
 COPY --from=frontend /app/build /app/client
 
 COPY scripts/release/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+RUN ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so
     
 # Default Stump environment variables
 ENV STUMP_CONFIG_DIR=/config
@@ -92,7 +94,7 @@ ENV STUMP_CLIENT_DIR=/app/client
 ENV STUMP_PROFILE=release
 ENV STUMP_PORT=10801
 ENV STUMP_IN_DOCKER=true
-ENV PDFIUM_PATH=/lib/pdfium
+ENV PDFIUM_PATH=/lib/libpdfium.so
 
 
 ENV API_VERSION=v1

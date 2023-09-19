@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::filesystem::error::FileError;
 
 /// The resize mode to use when generating a thumbnail.
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ImageResizeMode {
 	Scaled,
 	Sized,
@@ -12,7 +13,7 @@ pub enum ImageResizeMode {
 
 /// The resize options to use when generating a thumbnail.
 /// When using `Scaled`, the height and width will be scaled by the given factor.
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct ImageResizeOptions {
 	pub mode: ImageResizeMode,
 	pub height: f32,
@@ -40,8 +41,8 @@ impl ImageResizeOptions {
 /// Supported image formats for processing images throughout Stump.
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
 pub enum ImageFormat {
-	#[default]
 	Webp,
+	#[default]
 	Jpeg,
 	JpegXl,
 	Png,
@@ -75,7 +76,7 @@ impl From<ImageFormat> for image::ImageOutputFormat {
 }
 
 /// Options for processing images throughout Stump.
-#[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct ImageProcessorOptions {
 	/// The size factor to use when generating an image. See [`ImageResizeOptions`]
 	pub resize_options: Option<ImageResizeOptions>,

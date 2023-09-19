@@ -34,7 +34,7 @@ export default function EditLibraryScene() {
 			<div className="flex flex-col gap-12 pt-2">
 				{libraries && (
 					<>
-						<QuickActions />
+						<QuickActions library={library} />
 						<CreateOrEditLibraryForm existingLibraries={libraries} library={library} />
 					</>
 				)}

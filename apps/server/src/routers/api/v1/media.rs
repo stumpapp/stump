@@ -16,14 +16,16 @@ use stump_core::{
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		MediaDAO, DAO,
 	},
-	filesystem::{media::get_page, read_entire_file, ContentType},
+	filesystem::{
+		get_unknown_thumnail, image::ImageFormat, media::get_page, read_entire_file,
+		ContentType, FileParts, PathUtils,
+	},
 	prisma::{
 		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		media_metadata, read_progress, series, series_metadata, user, PrismaClient,
 	},
 };
-use tracing::trace;
 
 use crate::{
 	config::state::AppState,
@@ -262,7 +264,7 @@ async fn get_media(
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
-	trace!(?filters, ?ordering, ?pagination, "get_media");
+	tracing::trace!(?filters, ?ordering, ?pagination, "get_media");
 
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
@@ -486,7 +488,7 @@ async fn get_recently_added_media(
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
-	trace!(?filters, ?pagination, "get_recently_added_media");
+	tracing::trace!(?filters, ?pagination, "get_recently_added_media");
 
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
@@ -589,7 +591,7 @@ async fn get_media_by_id(
 		.with(media::metadata::fetch());
 
 	if params.load_series.unwrap_or_default() {
-		trace!(media_id = id, "Loading series relation for media");
+		tracing::trace!(media_id = id, "Loading series relation for media");
 		query = query.with(media::series::fetch());
 	}
 
@@ -641,7 +643,7 @@ async fn get_media_file(
 		.await?
 		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
 
-	trace!(?media, "Downloading media file");
+	tracing::trace!(?media, "Downloading media file");
 
 	Ok(NamedFile::open(media.path.clone()).await?)
 }
@@ -750,13 +752,11 @@ async fn get_media_page(
 	}
 }
 
-pub(crate) async fn get_media_thumbnail(
+pub(crate) async fn get_media_thumbnail_by_id(
 	id: String,
 	db: &PrismaClient,
 	session: &ReadableSession,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
-	let thumbnail_dir = get_config_dir().join("thumbnails");
-
 	let user = get_session_user(session)?;
 	let age_restrictions = user
 		.age_restriction
@@ -787,37 +787,49 @@ pub(crate) async fn get_media_thumbnail(
 					.find_first(vec![library_options::library_id::equals(library_id)])
 					.exec()
 					.await
-					.map(|options| (Some(book), options))
+					.map(|options| (Some(book), options.map(LibraryOptions::from)))
 			} else {
 				Ok((None, None))
 			}
 		})
 		.await?;
-	trace!(?result, "get_media_thumbnail transaction completed");
+	tracing::trace!(?result, "get_media_thumbnail transaction completed");
 
 	match result {
-		(Some(book), Some(options)) => {
-			let library_options = LibraryOptions::from(options);
-			if let Some(config) = library_options.thumbnail_config {
-				let thumbnail_path = thumbnail_dir.join(format!(
-					"{}.{}",
-					book.id,
-					config.format.extension()
-				));
-				if thumbnail_path.exists() {
-					trace!(path = ?thumbnail_path, media_id = ?id, "Found generated media thumbnail");
-					return Ok((
-						ContentType::from(config.format),
-						read_entire_file(thumbnail_path)?,
-					));
-				}
-			}
-
-			Ok(get_page(book.path.as_str(), 1)?)
-		},
-		(Some(book), None) => Ok(get_page(book.path.as_str(), 1)?),
+		(Some(book), Some(options)) => get_media_thumbnail(
+			&book,
+			options.thumbnail_config.map(|config| config.format),
+		),
+		(Some(book), None) => get_media_thumbnail(&book, None),
 		_ => Err(ApiError::NotFound(String::from("Media not found"))),
 	}
+}
+
+pub(crate) fn get_media_thumbnail(
+	media: &media::Data,
+	target_format: Option<ImageFormat>,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnail_dir = get_config_dir().join("thumbnails");
+	if let Some(format) = target_format {
+		let extension = format.extension();
+		let thumbnail_path = thumbnail_dir.join(format!("{}.{}", media.id, extension));
+		if thumbnail_path.exists() {
+			tracing::trace!(path = ?thumbnail_path, media_id = ?media.id, "Found generated media thumbnail");
+			return Ok((ContentType::from(format), read_entire_file(thumbnail_path)?));
+		}
+	} else if let Some(path) = get_unknown_thumnail(&media.id) {
+		// If there exists a file that starts with the media id in the thumbnails dir,
+		// then return it. This might happen if a user manually regenerates thumbnails
+		// via the API without updating the thumbnail config...
+		tracing::debug!(path = ?path, media_id = ?media.id, "Found media thumbnail that does not align with config");
+		let FileParts { extension, .. } = path.file_parts();
+		return Ok((
+			ContentType::from_extension(extension.as_str()),
+			read_entire_file(path)?,
+		));
+	}
+
+	Ok(get_page(media.path.as_str(), 1)?)
 }
 
 // TODO: ImageResponse as body type
@@ -842,9 +854,9 @@ async fn get_media_thumbnail_handler(
 	State(ctx): State<AppState>,
 	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
-	trace!(?id, "get_media_thumbnail");
+	tracing::trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
-	get_media_thumbnail(id, db, &session)
+	get_media_thumbnail_by_id(id, db, &session)
 		.await
 		.map(ImageResponse::from)
 }

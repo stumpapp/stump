@@ -61,6 +61,12 @@ impl StumpCore {
 		let core_ctx = Ctx::new(internal_channel.0).await;
 		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
 
+		event_manager
+			.get_job_manager()
+			.init()
+			.await
+			.expect("Failed to init job manager");
+
 		StumpCore {
 			ctx: core_ctx,
 			event_manager,

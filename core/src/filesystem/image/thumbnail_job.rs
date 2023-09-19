@@ -1,6 +1,9 @@
-use std::sync::{
-	atomic::{AtomicU64, Ordering},
-	Arc,
+use std::{
+	path::PathBuf,
+	sync::{
+		atomic::{AtomicU64, Ordering},
+		Arc,
+	},
 };
 
 use serde::{Deserialize, Serialize};
@@ -8,17 +11,23 @@ use specta::Type;
 use tracing::{info, trace};
 
 use crate::{
+	config::get_thumbnails_dir,
 	event::CoreEvent,
-	filesystem::image::thumbnail::{generate_thumbnails_for_media, THUMBNAIL_CHUNK_SIZE},
+	filesystem::{
+		image::thumbnail::{
+			generate_thumbnails_for_media, remove_thumbnails, THUMBNAIL_CHUNK_SIZE,
+		},
+		PathUtils,
+	},
 	job::{utils::persist_job_start, Job, JobError, JobTrait, JobUpdate, WorkerCtx},
-	prisma::media,
+	prisma::{media, series},
 };
 
 use super::ImageProcessorOptions;
 
 pub const THUMBNAIL_JOB_NAME: &str = "thumbnail_generation";
 
-#[derive(Serialize, Deserialize, Type)]
+#[derive(Debug, Serialize, Deserialize, Type)]
 pub enum ThumbnailJobConfig {
 	SingleLibrary {
 		library_id: String,
@@ -92,20 +101,204 @@ impl JobTrait for ThumbnailJob {
 		let job_id = progress_ctx.job_id().to_string();
 		let counter_ref = counter.clone();
 
-		let created_thumbnail_paths = match &self.config {
-			//? I think for the SingleLibrary and SingleSeries the same pattern can be followed:
-			//?
-			//? 1. if force regenerate is true, generate for **all** media in the library/series
-			//? 2. otherwise, generate for all media that don't have a thumbnail
-			//?
-			//? Some libraries might be HUGE, so batching the media might be necessary.
-			ThumbnailJobConfig::SingleLibrary { .. } => {
-				// TODO(aaron): implement this
-				Err(JobError::Unknown(String::from("Not yet supported!")))
+		// FIXME: a lot of code duplication and a bit crude of an implementation. I need to account
+		// for massive media groups better than this.
+		let result: Result<Vec<PathBuf>, JobError> = match &self.config {
+			ThumbnailJobConfig::SingleLibrary {
+				library_id,
+				force_regenerate,
+			} => {
+				let thumbnail_dir = get_thumbnails_dir();
+				let library_media = core_ctx
+					.db
+					.media()
+					.find_many(vec![media::series::is(vec![series::library_id::equals(
+						Some(library_id.clone()),
+					)])])
+					.exec()
+					.await?;
+
+				let readdir_hash_set = thumbnail_dir
+					.read_dir()
+					.ok()
+					.map(|dir| dir.into_iter())
+					.map(|iter| {
+						iter.filter_map(|entry| entry.ok())
+							.map(|entry| entry.path().file_parts().file_name)
+					})
+					.map(|iter| iter.collect::<std::collections::HashSet<String>>())
+					.unwrap_or_default();
+
+				if *force_regenerate {
+					remove_thumbnails(
+						&library_media
+							.iter()
+							.filter(|m| readdir_hash_set.contains(&m.id))
+							.map(|m| m.id.to_owned())
+							.collect::<Vec<String>>(),
+					)?;
+					// Generate thumbnails for all media in the library
+					let tasks = library_media.len() as u64;
+					let on_progress = move |msg| {
+						let previous = counter_ref.fetch_add(5, Ordering::SeqCst);
+						let next = if previous + THUMBNAIL_CHUNK_SIZE as u64 > tasks {
+							tasks
+						} else {
+							previous + THUMBNAIL_CHUNK_SIZE as u64
+						};
+						progress_ctx.emit_progress(JobUpdate::tick(
+							job_id.clone(),
+							next,
+							tasks,
+							Some(msg),
+						));
+					};
+
+					persist_job_start(&core_ctx, ctx.job_id.clone(), tasks).await?;
+
+					trace!(
+						media_count = library_media.len(),
+						"Generating thumbnails for library"
+					);
+
+					let generated_thumbnail_paths = generate_thumbnails_for_media(
+						library_media,
+						self.options.to_owned(),
+						on_progress,
+					)?;
+
+					Ok(generated_thumbnail_paths)
+				} else {
+					let media_without_thumbnails = library_media
+						.into_iter()
+						.filter(|m| !readdir_hash_set.contains(&m.id))
+						.collect::<Vec<media::Data>>();
+
+					let tasks = media_without_thumbnails.len() as u64;
+					let on_progress = move |msg| {
+						let previous = counter_ref.fetch_add(5, Ordering::SeqCst);
+						let next = if previous + THUMBNAIL_CHUNK_SIZE as u64 > tasks {
+							tasks
+						} else {
+							previous + THUMBNAIL_CHUNK_SIZE as u64
+						};
+						progress_ctx.emit_progress(JobUpdate::tick(
+							job_id.clone(),
+							next,
+							tasks,
+							Some(msg),
+						));
+					};
+					persist_job_start(&core_ctx, ctx.job_id.clone(), tasks).await?;
+
+					trace!(
+						media_count = media_without_thumbnails.len(),
+						"Generating thumbnails for library"
+					);
+					let generated_thumbnail_paths = generate_thumbnails_for_media(
+						media_without_thumbnails,
+						self.options.to_owned(),
+						on_progress,
+					)?;
+					Ok(generated_thumbnail_paths)
+				}
 			},
-			ThumbnailJobConfig::SingleSeries { .. } => {
-				// TODO(aaron): implement this
-				Err(JobError::Unknown(String::from("Not yet supported!")))
+			ThumbnailJobConfig::SingleSeries {
+				series_id,
+				force_regenerate,
+			} => {
+				let thumbnail_dir = get_thumbnails_dir();
+
+				let series_media = core_ctx
+					.db
+					.media()
+					.find_many(vec![media::series_id::equals(Some(series_id.clone()))])
+					.exec()
+					.await?;
+
+				let readdir_hash_set = thumbnail_dir
+					.read_dir()
+					.ok()
+					.map(|dir| dir.into_iter())
+					.map(|iter| {
+						iter.filter_map(|entry| entry.ok())
+							.map(|entry| entry.path().file_parts().file_name)
+					})
+					.map(|iter| iter.collect::<std::collections::HashSet<String>>())
+					.unwrap_or_default();
+
+				if *force_regenerate {
+					remove_thumbnails(
+						&series_media
+							.iter()
+							.filter(|m| readdir_hash_set.contains(&m.id))
+							.map(|m| m.id.to_owned())
+							.collect::<Vec<String>>(),
+					)?;
+
+					let tasks = series_media.len() as u64;
+					let on_progress = move |msg| {
+						let previous = counter_ref.fetch_add(5, Ordering::SeqCst);
+						let next = if previous + THUMBNAIL_CHUNK_SIZE as u64 > tasks {
+							tasks
+						} else {
+							previous + THUMBNAIL_CHUNK_SIZE as u64
+						};
+						progress_ctx.emit_progress(JobUpdate::tick(
+							job_id.clone(),
+							next,
+							tasks,
+							Some(msg),
+						));
+					};
+
+					persist_job_start(&core_ctx, ctx.job_id.clone(), tasks).await?;
+
+					trace!(
+						media_count = series_media.len(),
+						"Generating thumbnails for series"
+					);
+
+					let generated_thumbnail_paths = generate_thumbnails_for_media(
+						series_media,
+						self.options.to_owned(),
+						on_progress,
+					)?;
+					Ok(generated_thumbnail_paths)
+				} else {
+					let media_without_thumbnails = series_media
+						.into_iter()
+						.filter(|m| !readdir_hash_set.contains(&m.id))
+						.collect::<Vec<media::Data>>();
+
+					let tasks = media_without_thumbnails.len() as u64;
+					let on_progress = move |msg| {
+						let previous = counter_ref.fetch_add(5, Ordering::SeqCst);
+						let next = if previous + THUMBNAIL_CHUNK_SIZE as u64 > tasks {
+							tasks
+						} else {
+							previous + THUMBNAIL_CHUNK_SIZE as u64
+						};
+						progress_ctx.emit_progress(JobUpdate::tick(
+							job_id.clone(),
+							next,
+							tasks,
+							Some(msg),
+						));
+					};
+					persist_job_start(&core_ctx, ctx.job_id.clone(), tasks).await?;
+
+					trace!(
+						media_count = media_without_thumbnails.len(),
+						"Generating thumbnails for library"
+					);
+					let generated_thumbnail_paths = generate_thumbnails_for_media(
+						media_without_thumbnails,
+						self.options.to_owned(),
+						on_progress,
+					)?;
+					Ok(generated_thumbnail_paths)
+				}
 			},
 			ThumbnailJobConfig::MediaGroup(media_group_ids) => {
 				let tasks = media_group_ids.len() as u64;
@@ -142,7 +335,8 @@ impl JobTrait for ThumbnailJob {
 				)?;
 				Ok(generated_thumbnail_paths)
 			},
-		}?;
+		};
+		let created_thumbnail_paths = result?;
 		info!(
 			created_thumbnail_count = created_thumbnail_paths.len(),
 			"Thumbnail generation completed"

@@ -279,6 +279,27 @@ impl JobManager {
 		Ok(jobs)
 	}
 
+	// TODO: this will eventually go away!
+	pub async fn init(self: Arc<Self>) -> JobManagerResult<()> {
+		let result = self
+			.core_ctx
+			.db
+			.job()
+			.update_many(
+				vec![job::status::equals(JobStatus::Running.to_string())],
+				vec![
+					job::status::set(JobStatus::Cancelled.to_string()),
+					job::completed_at::set(None),
+				],
+			)
+			.exec()
+			.await?;
+
+		tracing::trace!(canceled_count = ?result, "Canceling running jobs on startup");
+
+		Ok(())
+	}
+
 	/// Shuts down all workers and clears the job queue.
 	pub async fn shutdown(self: Arc<Self>) {
 		let workers = self.workers.read().await;

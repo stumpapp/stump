@@ -55,6 +55,10 @@ export function deleteLibraryThumbnails(id: string) {
 	return API.delete(`/libraries/${id}/thumbnail`)
 }
 
+export function regenerateThumbnails(id: string, force?: boolean) {
+	return API.post(`/libraries/${id}/thumbnail/generate`, { force_regenerate: !!force })
+}
+
 export function createLibrary(payload: CreateLibrary): Promise<ApiResult<Library>> {
 	return API.post('/libraries', payload)
 }
@@ -72,6 +76,7 @@ export const libraryApi = {
 	getLibrariesStats,
 	getLibraryById,
 	getLibrarySeries,
+	regenerateThumbnails,
 	scanLibary,
 }
 
@@ -84,5 +89,6 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	getLibrariesStats: 'library.getLibrariesStats',
 	getLibraryById: 'library.getLibraryById',
 	getLibrarySeries: 'library.getLibrarySeries',
+	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
 }

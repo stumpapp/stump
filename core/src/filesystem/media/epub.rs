@@ -12,6 +12,7 @@ use tracing::{debug, error, trace, warn};
 
 use super::process::{FileProcessor, FileProcessorOptions, ProcessedFile};
 
+/// A file processor for EPUB files.
 pub struct EpubProcessor;
 
 impl FileProcessor for EpubProcessor {

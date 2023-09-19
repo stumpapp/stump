@@ -38,7 +38,6 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libsqlite3-dev;
 
-
 COPY . .
 RUN ./scripts/release/build-utils.sh -w;
 
@@ -46,6 +45,29 @@ RUN set -ex; \
     ./scripts/release/build-utils.sh -p; \
     cargo build --package stump_server --bin stump_server --release; \
     cp ./target/release/stump_server ./stump_server
+
+# ------------------------------------------------------------------------------
+# PDFium Stage
+# ------------------------------------------------------------------------------
+
+FROM debian:buster-slim AS pdfium
+ARG TARGETARCH
+
+WORKDIR /
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    tar;
+
+RUN set -ex; \
+    mkdir -p pdfium; \
+    if [ "$TARGETARCH" = "amd64" ]; then \
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-x86.tgz; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-arm64.tgz; \
+    fi; \
+    tar -xzvf pdfium.tgz -C ./pdfium; \
+    rm pdfium.tgz
 
 # ------------------------------------------------------------------------------
 # Final Stage
@@ -58,17 +80,21 @@ WORKDIR /
 RUN mkdir -p config && mkdir -p data && mkdir -p app
 
 COPY --from=builder /app/stump_server /app/stump
+COPY --from=pdfium /pdfium /opt/pdfium
 COPY --from=frontend /app/build /app/client
 
 COPY scripts/release/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+RUN ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so
+    
 # Default Stump environment variables
 ENV STUMP_CONFIG_DIR=/config
 ENV STUMP_CLIENT_DIR=/app/client
 ENV STUMP_PROFILE=release
 ENV STUMP_PORT=10801
 ENV STUMP_IN_DOCKER=true
+ENV PDFIUM_PATH=/lib/libpdfium.so
 
 
 ENV API_VERSION=v1

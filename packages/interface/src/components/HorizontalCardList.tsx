@@ -49,7 +49,7 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 	const [lowerBound, upperBound] = visibleRef.current
 
 	const canSkipBackward = (lowerBound ?? 0) > 0
-	const canSkipForward = !!cards.length && (upperBound || 0) <= cards.length
+	const canSkipForward = !!cards.length && (upperBound || 0) + 1 < cards.length
 
 	useEffect(
 		() => {

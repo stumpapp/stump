@@ -19,7 +19,7 @@ export function AppLayout() {
 
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when reading a book
-		return location.pathname.match(/\/book\/.+\/(.*-?reader)/)
+		return location.pathname.match(/\/book(s?)\/.+\/(.*-?reader)/)
 	}, [location])
 
 	useCoreEventHandler()

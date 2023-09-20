@@ -1,10 +1,9 @@
 import { queryClient, useAppProps } from '@stump/client'
-import { Alert } from '@stump/components'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { Navigate, useLocation } from 'react-router'
 
-// import ServerUrlForm from '../../components/ServerUrlForm'
+import ServerUrlForm from '../../components/ServerUrlForm'
 import { useLocaleContext } from '../../i18n/index'
 
 export default function ServerConnectionErrorScene() {
@@ -38,7 +37,7 @@ export default function ServerConnectionErrorScene() {
 		if (baseURL) {
 			const interval = setInterval(() => {
 				checkServer()
-			}, 5000)
+			}, 2000)
 
 			return () => {
 				clearInterval(interval)
@@ -74,15 +73,18 @@ export default function ServerConnectionErrorScene() {
 	return (
 		<div
 			data-tauri-drag-region
-			className="mx-auto flex flex-col items-center justify-center gap-2 pt-12 md:pt-16"
+			className="mx-auto flex h-full w-full max-w-sm flex-col items-center justify-center gap-6 sm:max-w-md md:max-w-xl"
 		>
-			<Alert level="error" className="max-w-3xl">
-				<Alert.Content className="flex-col gap-1">
-					<Alert.Title>{t('serverSOS.heading')}</Alert.Title>
-					{t(localeKey)}
-				</Alert.Content>
-			</Alert>
-			{/* {showForm && <ServerUrlForm />} */}
+			<div className="text-left">
+				<h1 className="text-4xl font-semibold dark:text-gray-50">{t('serverSOS.heading')}</h1>
+				<p className="mt-1.5 text-base text-gray-700 dark:text-gray-150">{t(localeKey)}</p>
+			</div>
+
+			{showForm && (
+				<div className="w-full">
+					<ServerUrlForm />
+				</div>
+			)}
 		</div>
 	)
 }

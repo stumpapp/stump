@@ -4,10 +4,10 @@ import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
 import {
+	Book,
 	ChevronRight,
 	Home,
 	Library as LibraryIcon,
-	List,
 	type LucideProps,
 	Settings,
 } from 'lucide-react'
@@ -188,28 +188,30 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 	}
 
 	const links: Array<NavItemProps> = useMemo(() => {
-		const libraryIsActive = (id: string) => location.pathname.startsWith(`/library/${id}`)
+		const libraryIsActive = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
 
 		return [
 			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
 			{
-				active: location.pathname === 'library/create',
+				active: location.pathname === 'libraries/create',
 				icon: LibraryIcon,
 				items: libraries?.map((library) => ({
 					...library,
 					active: libraryIsActive(library.id),
-					href: `/library/${library.id}`,
+					href: paths.libraryOverview(library.id),
 					onHover: () => refreshUseLibrary(library.id),
 				})),
 				name: t('sidebar.buttons.libraries'),
 			},
 			{
-				icon: List,
-				name: 'Reading Lists',
+				active: location.pathname === 'books',
+				href: paths.bookSearch(),
+				icon: Book,
+				name: t('sidebar.buttons.books'),
 			},
 			// {
-			// 	icon: LayoutGrid,
-			// 	name: 'Collections',
+			// 	icon: List,
+			// 	name: 'Reading Lists',
 			// },
 			{
 				href: '/settings',

@@ -10,6 +10,7 @@ type Props = {
 export default function BooksAfterCurrent({ cursor }: Props) {
 	const { media, fetchNextPage, hasNextPage } = useMediaCursorQuery({
 		initialCursor: cursor.id,
+		keepPreviousData: false,
 		limit: 20,
 		params: {
 			series: {

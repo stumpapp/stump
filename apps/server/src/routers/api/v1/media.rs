@@ -23,7 +23,7 @@ use stump_core::{
 	prisma::{
 		library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
-		media_metadata, read_progress, series, series_metadata, user, PrismaClient,
+		media_metadata, read_progress, series, series_metadata, tag, user, PrismaClient,
 	},
 };
 
@@ -98,6 +98,8 @@ pub(crate) fn apply_media_base_filters(filters: MediaBaseFilter) -> Vec<WherePar
 				let decoded_paths = decode_path_filter(filters.path);
 				media::path::in_vec(decoded_paths)
 			}),
+			(!filters.tags.is_empty())
+				.then(|| media::tags::some(vec![tag::name::in_vec(filters.tags)])),
 			filters.search.map(|s| {
 				or![
 					media::name::contains(s.clone()),

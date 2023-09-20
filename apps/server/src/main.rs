@@ -56,6 +56,11 @@ async fn main() -> ServerResult<()> {
 		return Err(ServerError::ServerStartError(err.to_string()));
 	}
 
+	core.get_job_manager()
+		.init()
+		.await
+		.expect("Failed to init job manager");
+
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
 	let cors_layer = cors::get_cors_layer(port);

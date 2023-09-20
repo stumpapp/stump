@@ -42,18 +42,15 @@ export function AppRouter() {
 			<Routes>
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />
-
-					<Route path="library/*" element={<LibraryRouter />} />
-
+					<Route path="libraries/*" element={<LibraryRouter />} />
 					<Route path="series/:id" element={<SeriesOverviewScene />} />
-					<Route path="book/*" element={<BookRouter />} />
+					<Route path="books/*" element={<BookRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 
 				<Route path="/auth" element={<LoginOrClaimScene />} />
 				<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
-				<Route path="/404" element={<FourOhFour />} />
-				<Route path="*" element={<Navigate to="/404" />} />
+				<Route path="*" element={<FourOhFour />} />
 			</Routes>
 		</LocaleProvider>
 	)

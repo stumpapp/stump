@@ -1,12 +1,12 @@
 import { libraryApi } from '@stump/api'
-import { Alert, Button, ConfirmationModal, Text } from '@stump/components'
+import { Button, ConfirmationModal } from '@stump/components'
 import React, { useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 type Props = {
 	libraryId: string
 }
-export default function DeleteLibraryThumbnailsSection({ libraryId }: Props) {
+export default function DeleteLibraryThumbnails({ libraryId }: Props) {
 	// This is a naive way to prevent the user from deleting the thumbnails multiple times
 	// in a row. I don't feel it would be worth it to implement a more robust solution.
 	const [justDeleted, setJustDeleted] = useState(false)
@@ -36,7 +36,7 @@ export default function DeleteLibraryThumbnailsSection({ libraryId }: Props) {
 		<>
 			<ConfirmationModal
 				title="Delete library thumbnails"
-				description="Are you sure you want to delete all thumbnails for this library? This action cannot be undone."
+				description="Are you sure you want to delete all thumbnails for this library? You will have to manually regenerate them."
 				confirmText="Delete thumbnails"
 				confirmVariant="danger"
 				isOpen={showConfirmation}
@@ -45,24 +45,16 @@ export default function DeleteLibraryThumbnailsSection({ libraryId }: Props) {
 				confirmIsLoading={isDeleting}
 			/>
 
-			<Alert level="error" rounded="sm" className="max-w-2xl dark:bg-red-300/25">
-				<Alert.Content>
-					<Text className="flex-shrink pb-4 text-sm dark:text-white md:mr-2 md:pb-0">
-						You can delete all generated thumbnails associated with this library. On your next scan,
-						they will be regenerated according to your thumbnail configuration.
-					</Text>
-					<Button
-						type="button"
-						variant="danger"
-						onClick={() => setShowConfirmation(true)}
-						className="flex-shrink-0"
-						size="sm"
-						disabled={justDeleted || isDeleting}
-					>
-						Delete thumbnails
-					</Button>
-				</Alert.Content>
-			</Alert>
+			<Button
+				type="button"
+				variant="danger"
+				onClick={() => setShowConfirmation(true)}
+				className="flex-shrink-0"
+				size="md"
+				disabled={justDeleted || isDeleting}
+			>
+				Delete thumbnails
+			</Button>
 		</>
 	)
 }

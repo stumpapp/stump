@@ -10,6 +10,7 @@ import LinkBadge from '../../components/LinkBadge'
 import MediaCard from '../../components/media/MediaCard'
 import ReadMore from '../../components/ReadMore'
 import TagList from '../../components/tags/TagList'
+import { useAppContext } from '../../context'
 import paths from '../../paths'
 import { PDF_EXTENSION } from '../../utils/patterns'
 import BookFileInformation from './BookFileInformation'
@@ -28,6 +29,7 @@ import DownloadMediaButton from './DownloadMediaButton'
 // - links
 // - featured characters
 export default function BookOverviewScene() {
+	const { isServerOwner } = useAppContext()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
 	const { id } = useParams()
@@ -54,7 +56,7 @@ export default function BookOverviewScene() {
 					series={media.series}
 				/>
 
-				<TagList tags={media.tags || null} />
+				<TagList tags={media.tags || null} baseUrl={paths.bookSearch()} />
 			</div>
 		)
 	}
@@ -96,21 +98,25 @@ export default function BookOverviewScene() {
 					</div>
 				</div>
 
-				<div className="flex flex-row space-x-2">
-					{media.metadata?.genre?.map((genre) => (
-						<Badge key={genre} variant="primary">
-							{genre}
-						</Badge>
-					))}
-				</div>
+				{!!media.metadata?.genre?.length && (
+					<div className="flex flex-row space-x-2">
+						{media.metadata?.genre?.map((genre) => (
+							<Badge key={genre} variant="primary">
+								{genre}
+							</Badge>
+						))}
+					</div>
+				)}
 
-				<div className="flex flex-row space-x-2">
-					{media.metadata?.links?.map((link) => (
-						<LinkBadge key={link} href={link} />
-					))}
-				</div>
+				{!!media.metadata?.links?.length && (
+					<div className="flex flex-row space-x-2">
+						{media.metadata?.links?.map((link) => (
+							<LinkBadge key={link} href={link} />
+						))}
+					</div>
+				)}
 
-				<BookFileInformation media={media} />
+				{isServerOwner && <BookFileInformation media={media} />}
 				<BooksAfterCursor cursor={media} />
 			</div>
 		</Suspense>

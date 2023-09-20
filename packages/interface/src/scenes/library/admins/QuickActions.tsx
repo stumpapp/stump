@@ -1,11 +1,12 @@
 import { libraryApi, libraryQueryKeys } from '@stump/api'
 import { useMutation } from '@stump/client'
-import { Divider, Heading, Text } from '@stump/components'
+import { ButtonOrLink, Divider, Heading, Text } from '@stump/components'
 import { Library } from '@stump/types'
 import React from 'react'
 
 import { useAppContext } from '../../../context'
-import DeleteLibraryThumbnailsSection from './DeleteLibraryThumbnailsSection'
+import paths from '../../../paths'
+import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import RegenerateThumbnails from './RegenerateThumbnails'
 
 type Props = {
@@ -27,7 +28,6 @@ export default function QuickActions({ library }: Props) {
 		mutate(force)
 	}
 
-	// TODO: looks awful and scuffed!
 	return (
 		<div>
 			<Heading size="xs">Quick Actions</Heading>
@@ -36,9 +36,16 @@ export default function QuickActions({ library }: Props) {
 			</Text>
 
 			<Divider variant="muted" className="my-3.5" />
-			<div className="flex flex-col gap-2 md:flex-row md:items-center">
-				<DeleteLibraryThumbnailsSection libraryId={library.id} />
-				{hasThumbnailConfig && <RegenerateThumbnails onRegenerate={handleRegenerateThumbnails} />}
+			<div className="flex flex-wrap items-center gap-2">
+				{hasThumbnailConfig && (
+					<>
+						<RegenerateThumbnails onRegenerate={handleRegenerateThumbnails} />
+						<DeleteLibraryThumbnails libraryId={library.id} />
+					</>
+				)}
+				<ButtonOrLink href={paths.libraryFileExplorer(library.id)} size="md" variant="outline">
+					Open file explorer
+				</ButtonOrLink>
 			</div>
 		</div>
 	)

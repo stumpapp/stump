@@ -33,8 +33,8 @@ export default function JobSettingsScene() {
 		page: pagination.pageIndex,
 		page_size: pagination.pageSize,
 		params: {
+			direction: 'desc',
 			order_by: 'created_at',
-			order_direction: 'desc',
 			zero_based: true,
 		},
 	})

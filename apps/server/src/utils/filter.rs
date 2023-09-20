@@ -388,6 +388,8 @@ pub struct MediaBaseFilter {
 	pub path: Vec<String>,
 	#[serde(default, deserialize_with = "read_status_or_seq_read_status")]
 	pub read_status: Vec<ReadStatus>,
+	#[serde(default, deserialize_with = "string_or_seq_string")]
+	pub tags: Vec<String>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub search: Option<String>,

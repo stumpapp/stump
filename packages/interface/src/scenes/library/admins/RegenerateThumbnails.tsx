@@ -1,5 +1,5 @@
 import { Button, DropdownMenu } from '@stump/components'
-import { AlertTriangle, FolderSearch2 } from 'lucide-react'
+import { AlertTriangle, ChevronDown, FolderSearch2, ImagePlus } from 'lucide-react'
 import React from 'react'
 
 type Props = {
@@ -10,23 +10,29 @@ export default function RegenerateThumbnails({ onRegenerate }: Props) {
 
 	return (
 		<DropdownMenu
-			trigger={<Button>Regenerate Thumbnails</Button>}
+			trigger={
+				<Button size="md" variant="outline">
+					Create thumbnails
+					<ChevronDown className="ml-2 h-4 w-4" />
+				</Button>
+			}
 			groups={[
 				{
 					items: [
 						{
-							label: 'Generate missing',
-							leftIcon: <FolderSearch2 className={iconStyle} />,
+							label: 'Create missing only',
+							leftIcon: <ImagePlus className={iconStyle} />,
 							onClick: () => onRegenerate(false),
 						},
 						{
-							label: 'Regenerate all',
+							label: 'Force recreate all',
 							leftIcon: <AlertTriangle className={iconStyle} />,
 							onClick: () => onRegenerate(true),
 						},
 					],
 				},
 			]}
+			align="start"
 		/>
 	)
 }

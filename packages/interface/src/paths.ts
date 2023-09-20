@@ -8,7 +8,7 @@ type BookReaderParams = {
 }
 
 const paths = {
-	bookOverview: (id: string) => `/book/${id}`,
+	bookOverview: (id: string) => `/books/${id}`,
 	bookReader: (
 		id: string,
 		{ isEpub, isPdf, epubcfi, isAnimated, page, isStreaming }: BookReaderParams,
@@ -16,7 +16,7 @@ const paths = {
 		const baseUrl = paths.bookOverview(id)
 		const searchParams = new URLSearchParams()
 
-		if (isEpub) {
+		if (isEpub || !!epubcfi) {
 			searchParams.append('stream', 'false')
 			if (epubcfi) {
 				searchParams.append('cfi', encodeURIComponent(epubcfi))
@@ -38,15 +38,16 @@ const paths = {
 
 		return `${baseUrl}/reader?${searchParams.toString()}`
 	},
+	bookSearch: () => '/books',
 	home: () => '/',
-	libraryCreate: () => '/library/create',
-	libraryFileExplorer: (id: string) => `/library/${id}/explore`,
-	libraryManage: (id: string) => `/library/${id}/manage`,
+	libraryCreate: () => '/libraries/create',
+	libraryFileExplorer: (id: string) => `/libraries/${id}/explore`,
+	libraryManage: (id: string) => `/libraries/${id}/manage`,
 	libraryOverview: (id: string, page?: number) => {
 		if (page !== undefined) {
-			return `/library/${id}?page=${page}`
+			return `/libraries/${id}?page=${page}`
 		}
-		return `/library/${id}`
+		return `/libraries/${id}`
 	},
 	notFound: () => '/404',
 	seriesOverview: (id: string, page?: number) => {

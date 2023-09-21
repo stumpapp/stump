@@ -50,14 +50,14 @@
 		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
+				"libraryName": "Naam",
 				"libraryPath": "Path",
 				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Description",
 				"libraryTags": "Tags"
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "Bibliotheek creëren"
 			}
 		}
 	},
@@ -67,10 +67,10 @@
 		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
+				"libraryName": "Naam",
+				"libraryPath": "Locatie",
 				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
+				"libraryDescription": "Beschrijving",
 				"libraryTags": "Tags"
 			},
 			"buttons": {
@@ -80,7 +80,7 @@
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"message": "Er is een fout opgetreden:",
 		"buttons": {
 			"report": "Report Bug",
 			"copy": "Copy Error Details",
@@ -88,7 +88,7 @@
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continue Reading",
+		"continueReading": "Verder lezen",
 		"recentlyAddedSeries": "Recently Added Series",
 		"recentlyAddedBooks": "Recently Added Books"
 	},
@@ -132,7 +132,7 @@
 					},
 					"buttons": {
 						"confirm": "Confirm Image",
-						"cancel": "Cancel",
+						"cancel": "Annuleren",
 						"edit": "Edit",
 						"changeImage": "Change Image",
 						"removeImage": "Remove Image"
@@ -179,9 +179,9 @@
 					"name": "Type",
 					"description": "Description",
 					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
-					"tasks": "Tasks"
+					"createdAt": "Begonnen om",
+					"elapsed": "Verstreken",
+					"tasks": "Taken"
 				},
 				"emptyHeading": "There are no jobs to display",
 				"emptySubtitle": "You can't have a job if you don't have a job",
@@ -192,8 +192,8 @@
 			}
 		},
 		"server": {
-			"helmet": "Server Settings",
-			"heading": "Server Settings",
+			"helmet": "Serverinstellingen",
+			"heading": "Serverinstellingen",
 			"subtitle": "Manage various configurable options for your Stump server instance, itself"
 		},
 		"users": {

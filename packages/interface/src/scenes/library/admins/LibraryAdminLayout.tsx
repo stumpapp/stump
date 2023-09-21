@@ -13,7 +13,7 @@ export default function LibraryAdminLayout() {
 	const { isServerOwner } = useAppContext()
 
 	if (!isServerOwner) {
-		return <Navigate to="/404" />
+		return <Navigate to=".." replace />
 	}
 
 	return (

@@ -1,5 +1,5 @@
 import { Button, DropdownMenu } from '@stump/components'
-import { AlertTriangle, ChevronDown, FolderSearch2, ImagePlus } from 'lucide-react'
+import { AlertTriangle, ChevronDown, ImagePlus } from 'lucide-react'
 import React from 'react'
 
 type Props = {

@@ -192,6 +192,9 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 
 		return [
 			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
+			// TODO: clicking Libraries should be disabled when:
+			// 1. there are no libraries
+			// 2. user is not server owner (i.e. cannot create libraries)
 			{
 				active: location.pathname === 'libraries/create',
 				icon: LibraryIcon,

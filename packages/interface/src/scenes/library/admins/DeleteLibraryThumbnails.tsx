@@ -33,7 +33,7 @@ export default function DeleteLibraryThumbnails({ libraryId }: Props) {
 	}
 
 	return (
-		<>
+		<div>
 			<ConfirmationModal
 				title="Delete library thumbnails"
 				description="Are you sure you want to delete all thumbnails for this library? You will have to manually regenerate them."
@@ -55,6 +55,6 @@ export default function DeleteLibraryThumbnails({ libraryId }: Props) {
 			>
 				Delete thumbnails
 			</Button>
-		</>
+		</div>
 	)
 }

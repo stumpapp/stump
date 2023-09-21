@@ -1,4 +1,5 @@
-import { useBoolean } from '@stump/components'
+import { ScrollArea, useBoolean } from '@stump/components'
+import { Fragment } from 'react'
 
 import { DEBUG_ENV } from '../index.ts'
 import Markdown from './Markdown.tsx'
@@ -21,9 +22,15 @@ export default function ReadMore({ text }: Props) {
 		return <Markdown>{resolvedText}</Markdown>
 	}
 
+	// TODO: I don't like how this looks...
+	const MarkdownContainer = showingAll ? ScrollArea : Fragment
+	const markdownContainerProps = showingAll ? { className: 'h-[200px]' } : {}
+
 	return (
 		<div>
-			<Markdown>{showingAll ? resolvedText : resolvedText.slice(0, 250) + '...'}</Markdown>
+			<MarkdownContainer {...markdownContainerProps}>
+				<Markdown>{showingAll ? resolvedText : resolvedText.slice(0, 250) + '...'}</Markdown>
+			</MarkdownContainer>
 			<button onClick={toggle} className="cursor-pointer font-semibold dark:text-gray-100">
 				{showingAll ? ' Read less' : 'Read more'}
 			</button>

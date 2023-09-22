@@ -45,7 +45,7 @@ export default function MediaFilterForm() {
 	const [onlyFromSeries, setOnlyFromSeries] = useState(false)
 
 	const params = useMemo(() => {
-		if (onlyFromSeries) {
+		if (onlyFromSeries && !!seriesId) {
 			return {
 				media: {
 					series: {
@@ -94,11 +94,13 @@ export default function MediaFilterForm() {
 			form={form}
 			onSubmit={handleSubmit}
 		>
-			<CheckBox
-				label="Only show options available from series"
-				checked={onlyFromSeries}
-				onClick={() => setOnlyFromSeries((prev) => !prev)}
-			/>
+			{!!seriesId && (
+				<CheckBox
+					label="Only show options available from series"
+					checked={onlyFromSeries}
+					onClick={() => setOnlyFromSeries((prev) => !prev)}
+				/>
+			)}
 
 			<ExtensionSelect />
 			<ReadStatusSelect />

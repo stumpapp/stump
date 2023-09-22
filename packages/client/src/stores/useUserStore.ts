@@ -32,20 +32,25 @@ export const useUserStore = create<UserStore>()(
 					set((state) =>
 						produce(state, (draft) => {
 							draft.user = user
+							if (user?.user_preferences) {
+								// NOTE: I am not killing the user preferences when a user logs out. This ensures
+								// certain things like locality, theme, etc. will be lost. Nothing sensitive is
+								// stored in user preferences, so I think this is fine.
+								draft.userPreferences = user.user_preferences
+							}
 						}),
 					)
-
-					// NOTE: I am not killing the user preferences when a user logs out. This might
-					// be 'controversial' but I think it's net postive. Otherwise, certain things
-					// like locality, theme, etc. will be lost.
-					if (user?.user_preferences) {
-						get().setUserPreferences(user.user_preferences)
-					}
 				},
 				setUserPreferences(userPreferences: UserPreferences | null) {
 					set((state) =>
 						produce(state, (draft) => {
 							draft.userPreferences = userPreferences
+							if (state.user) {
+								draft.user = {
+									...state.user,
+									user_preferences: userPreferences,
+								}
+							}
 						}),
 					)
 				},

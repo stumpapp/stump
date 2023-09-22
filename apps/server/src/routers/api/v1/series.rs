@@ -10,7 +10,7 @@ use prisma_client_rust::{or, Direction};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
-		entity::{Media, Series},
+		entity::{LibraryOptions, Media, Series},
 		query::{
 			ordering::QueryOrder,
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
@@ -18,6 +18,7 @@ use stump_core::{
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	prisma::{
+		library,
 		media::{self, OrderByParam as MediaOrderByParam},
 		media_metadata, read_progress,
 		series::{self, OrderByParam, WhereParam},
@@ -39,7 +40,7 @@ use crate::{
 
 use super::{
 	library::apply_library_base_filters,
-	media::{apply_media_age_restriction, apply_media_base_filters},
+	media::{apply_media_age_restriction, apply_media_base_filters, get_media_thumbnail},
 	metadata::apply_series_metadata_filters,
 };
 
@@ -404,20 +405,43 @@ async fn get_series_thumbnail(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 
-	let media = db
-		.media()
-		.find_first(chain_optional_iter(
-			[media::series_id::equals(Some(id.clone()))],
-			[age_restrictions],
-		))
-		.order_by(media::name::order(Direction::Asc))
-		.exec()
-		.await?
-		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
+	let (library, media) = db
+		._transaction()
+		.run(|client| async move {
+			let library = client
+				.library()
+				.find_first(vec![library::series::some(vec![series::id::equals(
+					id.clone(),
+				)])])
+				.with(library::library_options::fetch())
+				.exec()
+				.await?;
 
-	super::media::get_media_thumbnail(media.id.clone(), db, &session)
-		.await
-		.map(ImageResponse::from)
+			client
+				.media()
+				.find_first(chain_optional_iter(
+					[media::series_id::equals(Some(id.clone()))],
+					[age_restrictions],
+				))
+				.order_by(media::name::order(Direction::Asc))
+				.exec()
+				.await?
+				.ok_or(ApiError::NotFound(String::from("Series not found")))
+				.map(|media| (library, media))
+		})
+		.await?;
+
+	let image_format = if let Some(library) = library {
+		library
+			.library_options()
+			.map(LibraryOptions::from)?
+			.thumbnail_config
+			.map(|config| config.format)
+	} else {
+		None
+	};
+
+	get_media_thumbnail(&media, image_format).map(ImageResponse::from)
 }
 
 // FIXME: age restrictions mess up the counts since PCR doesn't support relation counts yet!

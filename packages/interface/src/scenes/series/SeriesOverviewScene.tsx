@@ -71,7 +71,7 @@ function SeriesOverviewScene() {
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
-			<SeriesOverviewTitleSection series={series} isVisible={showOverview} />
+			{showOverview && <SeriesOverviewTitleSection series={series} />}
 
 			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
@@ -82,7 +82,7 @@ function SeriesOverviewScene() {
 				slideOverForm="media"
 			/>
 
-			<div className="flex w-full flex-col space-y-6 p-4">
+			<div className="flex w-full flex-col space-y-6 pt-4">
 				{hasStuff && (
 					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
 				)}

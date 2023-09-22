@@ -35,7 +35,7 @@ export default function FilterToolBar({
 }: Props) {
 	const { filters, setFilter, removeFilter } = useFilterContext()
 	return (
-		<header className="flex flex-col gap-2 px-4">
+		<header className="flex flex-col gap-2">
 			<div className="flex items-center justify-between gap-2">
 				<Search
 					initialValue={filters?.search as string}

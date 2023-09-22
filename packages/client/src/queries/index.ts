@@ -9,6 +9,7 @@ export {
 	useEditLibraryMutation,
 	useLibraries,
 	useLibraryByIdQuery,
+	useLibraryQuery,
 	useLibraryStats,
 	useScanLibrary,
 } from './library'

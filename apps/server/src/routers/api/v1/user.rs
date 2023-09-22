@@ -109,14 +109,16 @@ async fn get_users(
 	let is_unpaged = pagination.is_unpaged();
 	let pagination_cloned = pagination.clone();
 
+	tracing::debug!(?relation_query, "get_users");
+
+	let include_user_read_progress =
+		relation_query.include_read_progresses.unwrap_or_default();
+
 	let (users, count) = ctx
 		.db
 		._transaction()
 		.run(|client| async move {
 			let mut query = client.user().find_many(vec![]);
-
-			let include_user_read_progress =
-				relation_query.include_read_progresses.unwrap_or_default();
 
 			if include_user_read_progress {
 				query = query.with(user::read_progresses::fetch(vec![]));
@@ -192,6 +194,7 @@ async fn update_preferences(
 					input.series_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::show_query_indicator::set(input.show_query_indicator),
 			],
 		)
 		.exec()

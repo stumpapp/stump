@@ -17,8 +17,8 @@
 		},
 		"toasts": {
 			"loggingIn": "Accesso in corso...",
-			"loggedIn": "Bentornato! Redirezione in corso...",
-			"loggedInFirstTime": "Benvenuto! Redirezione in corso...",
+			"loggedIn": "Bentornato!",
+			"loggedInFirstTime": "Benvenuto!",
 			"registering": "Registrazione in corso...",
 			"registered": "Registrazione completata!",
 			"loginFailed": "Login failed. Please try again",

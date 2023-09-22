@@ -1,6 +1,13 @@
-use std::{ffi::OsStr, fs::File, io::Read, path::Path};
+use std::{
+	ffi::OsStr,
+	fs::File,
+	io::Read,
+	path::{Path, PathBuf},
+};
 use tracing::error;
 use walkdir::WalkDir;
+
+use crate::config::get_thumbnails_dir;
 
 use super::{media::is_accepted_cover_name, ContentType, FileError};
 
@@ -11,6 +18,25 @@ pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
 	file.read_to_end(&mut buf)?;
 
 	Ok(buf)
+}
+
+/// A function that returns the path of a thumbnail image, if it exists.
+/// This should be used when the thumbnail extension is not known.
+pub fn get_unknown_thumnail(id: &str) -> Option<PathBuf> {
+	let mut path = get_thumbnails_dir();
+
+	let accepted_extensions = ["jpg", "png", "jpeg", "webp"];
+	for extension in accepted_extensions.iter() {
+		path.push(format!("{}.{}", id, extension));
+
+		if path.exists() {
+			return Some(path);
+		}
+
+		path.pop();
+	}
+
+	None
 }
 
 pub trait IsImage {

@@ -1,7 +1,6 @@
 import { useLibraries } from '@stump/client'
 import { Helmet } from 'react-helmet'
 
-import LibrariesStats from '../../components/library/LibrariesStats'
 import SceneContainer from '../../components/SceneContainer'
 import ContinueReadingMedia from './ContinueReading'
 import NoLibraries from './NoLibraries'
@@ -35,7 +34,6 @@ export default function HomeScene() {
 	return (
 		<SceneContainer className="flex flex-col gap-4">
 			{helmet}
-			<LibrariesStats />
 			<ContinueReadingMedia />
 			<RecentlyAddedMedia />
 			<RecentlyAddedSeries />

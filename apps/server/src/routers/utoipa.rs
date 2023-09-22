@@ -50,6 +50,7 @@ use super::api::{
         api::v1::library::get_library_series,
         api::v1::library::get_library_thumbnail,
         api::v1::library::delete_library_thumbnails,
+        api::v1::library::generate_library_thumbnails,
         api::v1::library::scan_library,
         api::v1::library::create_library,
         api::v1::library::update_library,

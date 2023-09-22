@@ -1,13 +1,14 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::get,
+	routing::{get, post},
 	Json, Router,
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
+use serde_qs::axum::QsQuery;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
@@ -16,8 +17,8 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			CreateLibrary, LibrariesStats, Library, LibraryScanMode, Media, Series,
-			UpdateLibrary,
+			CreateLibrary, LibrariesStats, Library, LibraryOptions, LibraryScanMode,
+			Media, Series, UpdateLibrary,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -25,6 +26,7 @@ use stump_core::{
 	filesystem::{
 		image::{
 			self, remove_thumbnails, remove_thumbnails_of_type, ImageProcessorOptions,
+			ThumbnailJob, ThumbnailJobConfig,
 		},
 		scanner::LibraryScanJob,
 	},
@@ -49,7 +51,10 @@ use crate::{
 };
 
 use super::{
-	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
+	media::{
+		apply_media_age_restriction, apply_media_filters, apply_media_pagination,
+		get_media_thumbnail,
+	},
 	series::{
 		apply_series_age_restriction, apply_series_base_filters, apply_series_filters,
 	},
@@ -74,9 +79,14 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/scan", get(scan_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
-				.route(
+				.nest(
 					"/thumbnail",
-					get(get_library_thumbnail).delete(delete_library_thumbnails),
+					Router::new()
+						.route(
+							"/",
+							get(get_library_thumbnail).delete(delete_library_thumbnails),
+						)
+						.route("/generate", post(generate_library_thumbnails)),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -133,12 +143,14 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 /// Get all libraries
 #[tracing::instrument(skip(ctx), err)]
 async fn get_libraries(
-	filter_query: Query<FilterableQuery<LibraryFilter>>,
+	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+
+	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
 
 	let is_unpaged = pagination.is_unpaged();
 	let where_conditions = apply_library_filters(filters);
@@ -459,6 +471,7 @@ async fn get_library_thumbnail(
 			.take(1)
 			.order_by(media::name::order(Direction::Asc)),
 		)
+		.with(series::library::fetch().with(library::library_options::fetch()))
 		.exec()
 		.await?;
 
@@ -468,12 +481,19 @@ async fn get_library_thumbnail(
 	let media = series.media()?.first().ok_or(ApiError::NotFound(
 		"Library has no media to get thumbnail from".to_string(),
 	))?;
+	let library = series
+		.library()?
+		.ok_or(ApiError::Unknown(String::from("Failed to load library")))?;
+	let image_format = library
+		.library_options()
+		.map(LibraryOptions::from)?
+		.thumbnail_config
+		.map(|config| config.format);
 
-	super::media::get_media_thumbnail(media.id.clone(), db, &session)
-		.await
-		.map(ImageResponse::from)
+	get_media_thumbnail(media, image_format).map(ImageResponse::from)
 }
 
+/// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
 	path = "/api/v1/libraries/:id/thumbnail",
@@ -522,6 +542,61 @@ async fn delete_library_thumbnails(
 	} else {
 		remove_thumbnails(&media_ids)?;
 	}
+
+	Ok(Json(()))
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct GenerateLibraryThumbnails {
+	pub image_options: Option<ImageProcessorOptions>,
+	#[serde(default)]
+	pub force_regenerate: bool,
+}
+
+/// Generate thumbnails for all the media in a library by id, if the current user has access to it.
+#[utoipa::path(
+	post,
+	path = "/api/v1/libraries/:id/thumbnail/generate",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+	),
+	responses(
+		(status = 200, description = "Successfully queued job"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn generate_library_thumbnails(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Json(input): Json<GenerateLibraryThumbnails>,
+) -> ApiResult<Json<()>> {
+	let library = ctx
+		.db
+		.library()
+		.find_unique(library::id::equals(id.clone()))
+		.with(library::library_options::fetch())
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+	let library_options = library.library_options()?.to_owned();
+	let existing_options = if let Some(config) = library_options.thumbnail_config {
+		// I hard error here so that we don't accidentally generate thumbnails in an invalid or
+		// otherwise undesired way per the existing (but not properly parsed) config
+		Some(ImageProcessorOptions::try_from(config)?)
+	} else {
+		None
+	};
+	let options = input.image_options.or(existing_options).unwrap_or_default();
+	let config = ThumbnailJobConfig::SingleLibrary {
+		library_id: library.id,
+		force_regenerate: input.force_regenerate,
+	};
+	tracing::trace!(?options, ?config, "Dispatching thumbnail job");
+
+	ctx.dispatch_job(ThumbnailJob::new(options, config))?;
 
 	Ok(Json(()))
 }
@@ -735,14 +810,21 @@ async fn update_library(
 	db.library_options()
 		.update(
 			library_options::id::equals(library_options.id.unwrap_or_default()),
-			vec![
-				library_options::convert_rar_to_zip::set(
-					library_options.convert_rar_to_zip,
-				),
-				library_options::hard_delete_conversions::set(
-					library_options.hard_delete_conversions,
-				),
-			],
+			chain_optional_iter(
+				[
+					library_options::convert_rar_to_zip::set(
+						library_options.convert_rar_to_zip,
+					),
+					library_options::hard_delete_conversions::set(
+						library_options.hard_delete_conversions,
+					),
+				],
+				[library_options.thumbnail_config.map(|config| {
+					library_options::thumbnail_config::set(Some(
+						serde_json::to_vec(&config).unwrap_or_default(),
+					))
+				})],
+			),
 		)
 		.exec()
 		.await?;

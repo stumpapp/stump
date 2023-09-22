@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useWindowSize } from 'rooks'
 
-import { ImageBasedReaderProps } from './ImageBasedReader'
+import { PagedReaderProps } from './PagedReader'
 import Toolbar from './Toolbar'
 
 const RESET_CONTROLS = {
@@ -38,12 +38,12 @@ const BACKWARD_START_ANIMATION = {
 // FIXME: animation on mobile without drag looks bad
 // TODO: slow down the animations to test better
 // TODO: kill me, and then make the animations togglable
-export default function AnimatedImageBasedReader({
+export default function AnimatedPagedReader({
 	currentPage,
 	media,
 	onPageChange,
 	getPageUrl,
-}: ImageBasedReaderProps) {
+}: PagedReaderProps) {
 	const { innerWidth } = useWindowSize()
 
 	const prevRef = useRef<HTMLImageElement>(null)
@@ -265,12 +265,12 @@ export default function AnimatedImageBasedReader({
 	)
 }
 
-// export default function AnimatedImageBasedReader({
+// export default function AnimatedPagedReader({
 // 	media,
 // 	currentPage,
 // 	getPageUrl,
 // 	onPageChange,
-// }: ImageBasedReaderProps) {
+// }: PagedReaderProps) {
 // 	const pageCount = media.pages
 // 	// Calculate the indexes of the currently visible pages
 // 	const startIndex = currentPage - 2 >= 1 ? currentPage - 2 : 0

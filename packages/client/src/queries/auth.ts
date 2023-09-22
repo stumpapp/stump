@@ -6,7 +6,7 @@ import { queryClient, QueryOptions, useMutation, useQuery } from '../client'
 
 export function useAuthQuery(options: QueryOptions<User> = {}) {
 	const { data, error, isLoading, isFetching, isRefetching } = useQuery(
-		['getViewer'],
+		[authQueryKeys.me],
 		async () => {
 			const { data } = await authApi.me()
 			return data

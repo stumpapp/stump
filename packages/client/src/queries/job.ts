@@ -12,7 +12,7 @@ type UseJobsQueryParmas = PageQueryOptions<JobDetail> & {
 export function useJobsQuery({ params, ...options }: UseJobsQueryParmas = {}) {
 	const { data, ...restReturn } = usePageQuery(
 		[jobQueryKeys.getJobs, params],
-		async ({ page = 1, page_size = 10, params = {} }) => {
+		async ({ page = 1, page_size = 10 }) => {
 			const { data } = await jobApi.getJobs({ page, page_size, ...params })
 			return data
 		},

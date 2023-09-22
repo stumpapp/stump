@@ -18,13 +18,13 @@ export default function MediaGrid({ media, isLoading, hasFilters }: Props) {
 			<GenericEmptyState
 				title={
 					hasFilters
-						? 'No media matches your search'
+						? 'No books match your search'
 						: "It doesn't look like there are any books here"
 				}
 				subtitle={
 					hasFilters
-						? 'Try removing some filters to see more media'
-						: 'Try adding some media to your library'
+						? 'Try removing some filters to see more books'
+						: 'Do you have any books in your library?'
 				}
 			/>
 		)

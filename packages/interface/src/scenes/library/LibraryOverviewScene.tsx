@@ -90,7 +90,7 @@ function LibraryOverviewScene() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
-			<LibraryOverviewTitleSection library={library} isVisible={showOverview} />
+			{showOverview && <LibraryOverviewTitleSection library={library} />}
 
 			{/* @ts-expect-error: wrong ref, still okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />

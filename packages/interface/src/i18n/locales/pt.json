@@ -17,8 +17,8 @@
 		},
 		"toasts": {
 			"loggingIn": "Entrando...",
-			"loggedIn": "Bem-vindo de volta! Redirecionando...",
-			"loggedInFirstTime": "Bem vindo! Redirecionando...",
+			"loggedIn": "Bem-vindo de volta!",
+			"loggedInFirstTime": "Bem vindo!",
 			"registering": "Registrando...",
 			"registered": "Registrado!",
 			"loginFailed": "Falha no login. Tente novamente",

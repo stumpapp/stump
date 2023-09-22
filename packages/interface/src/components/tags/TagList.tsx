@@ -21,20 +21,27 @@ export const DEBUG_TAGS: Tag[] = [
 	},
 ]
 
-interface Props {
+type Props = {
 	tags: Tag[] | null
+	baseUrl?: string
 }
 
-export default function TagList({ tags }: Props) {
+export default function TagList({ tags, baseUrl }: Props) {
 	if (!tags && !import.meta.env.DEV) {
 		return null
 	}
 
 	return (
 		<div className="flex flex-row space-x-2 pt-4">
-			{(tags ?? DEBUG_TAGS).map((tag) => (
-				<TagComponent key={tag.id} tag={tag} />
-			))}
+			{(tags ?? DEBUG_TAGS)
+				.filter((tag) => !!tag.name)
+				.map((tag) => (
+					<TagComponent
+						key={tag.id}
+						tag={tag}
+						{...(baseUrl ? { href: `${baseUrl}?tags[]=${tag.name}` } : {})}
+					/>
+				))}
 		</div>
 	)
 }

@@ -17,19 +17,25 @@ pub fn get_session_layer() -> SessionLayer<MemoryStore> {
 		.map(|s| s.into_bytes())
 		.unwrap_or_else(|_| rand_secret());
 
-	// FIXME: I need to figure out which is correct. What currently gets returned in
-	// dev breaks the desktop client on windows? But what I have for release makes it
-	// so I can't run postman.
+	let ttl = env::var("SESSION_TTL")
+		.map(|s| {
+			s.parse::<u64>().unwrap_or_else(|e| {
+				tracing::error!(error = ?e, "Failed to parse provided SESSION_TTL");
+				3600 * 24 * 3
+			})
+		})
+		.unwrap_or(3600 * 24 * 3);
+
 	let sesssion_layer = SessionLayer::new(store, &secret)
 		.with_cookie_name("stump_session")
-		.with_session_ttl(Some(Duration::from_secs(3600 * 24 * 3)))
+		.with_session_ttl(Some(Duration::from_secs(ttl)))
 		.with_cookie_path("/");
 
 	sesssion_layer
 		.with_same_site_policy(SameSite::Lax)
 		.with_secure(false)
 
-	// FIXME: I think this can be configurable, but most people are going to be insecurely
+	// TODO: I think this can be configurable, but most people are going to be insecurely
 	// running this, which means `secure` needs to be false otherwise the cookie won't
 	// be sent.
 	// if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "release" {

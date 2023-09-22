@@ -25,6 +25,22 @@ export function useLibraryByIdQuery(id: string, options?: QueryOptions<Library>)
 	return { library: data, ...rest }
 }
 
+type UseLibraryQueryOptions = QueryOptions<Library | undefined> & {
+	params?: Record<string, unknown>
+}
+export function useLibraryQuery({ params, ...options }: UseLibraryQueryOptions = {}) {
+	const { data: library, ...restReturn } = useQuery(
+		[libraryQueryKeys.getLibraries, params],
+		async () => {
+			const { data } = await libraryApi.getLibraries(params)
+			return data?.data?.at(0)
+		},
+		options,
+	)
+
+	return { library, ...restReturn }
+}
+
 export function useLibraries(options: PageQueryOptions<Library> = {}) {
 	const { data, ...restReturn } = usePageQuery(
 		[libraryQueryKeys.getLibraries, options],

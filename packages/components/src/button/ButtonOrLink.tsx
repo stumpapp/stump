@@ -40,6 +40,10 @@ export function ButtonOrLink({
 					? cn(
 							buttonVariants({ className, rounded, size, variant }),
 							'focus:ring-brand-400 dark:focus:ring-brand-400',
+							{
+								'cursor-not-allowed bg-gray-75 opacity-50 dark:bg-gray-850 dark:hover:bg-gray-850':
+									props.disabled,
+							},
 							className,
 					  )
 					: undefined

@@ -1,16 +1,22 @@
-import { Text } from '@stump/components'
+import { Link, Text } from '@stump/components'
 import { Tag } from '@stump/types'
+import { Fragment } from 'react'
 
-interface Props {
+type Props = {
 	tag: Tag
+	href?: string
 }
 
 // TODO: more styling
-// TODO: optional link to filter by tag
-export default function TagComponent({ tag }: Props) {
+export default function TagComponent({ tag, href }: Props) {
+	const Container = href ? Link : Fragment
+	const containerProps = href ? { href, underline: false } : {}
+
 	return (
-		<Text variant="muted" size="xs">
-			#{tag.name}
-		</Text>
+		<Container {...containerProps}>
+			<Text variant="muted" size="xs">
+				#{tag.name}
+			</Text>
+		</Container>
 	)
 }

@@ -2,6 +2,7 @@ import { useSeriesByIdQuery } from '@stump/client'
 import { Link } from '@stump/components'
 import { Series } from '@stump/types'
 
+import paths from '../../paths'
 import SeriesLibraryLink from '../series/SeriesLibraryLink'
 
 type Props = {
@@ -24,7 +25,7 @@ export default function BookLibrarySeriesLinks({ libraryId, seriesId, series }: 
 		return (
 			<>
 				<span className="mx-2 text-gray-500 dark:text-gray-450">/</span>
-				<Link href={`/series/${resolvedSeries.id}`} className="line-clamp-1">
+				<Link to={paths.seriesOverview(resolvedSeries.id)} className="line-clamp-1">
 					{resolvedSeries.name}
 				</Link>
 			</>

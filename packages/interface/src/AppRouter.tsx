@@ -1,6 +1,6 @@
 import { useAppProps } from '@stump/client'
 import React from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
 import LocaleProvider from './i18n/LocaleProvider'

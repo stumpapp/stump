@@ -80,9 +80,9 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	return (
 		<StumpClientContextProvider onRedirect={handleRedirect}>
-			{import.meta.env.MODE === 'development' && (
+			{/* {import.meta.env.MODE === 'development' && (
 				<ReactQueryDevtools position="bottom-right" context={defaultContext} />
-			)}
+			)} */}
 			<AppPropsContext.Provider value={appProps}>
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>

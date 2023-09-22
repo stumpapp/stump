@@ -33,13 +33,15 @@ export default function TagList({ tags, baseUrl }: Props) {
 
 	return (
 		<div className="flex flex-row space-x-2 pt-4">
-			{(tags ?? DEBUG_TAGS).map((tag) => (
-				<TagComponent
-					key={tag.id}
-					tag={tag}
-					{...(baseUrl ? { href: `${baseUrl}?tags[]=${tag.name}` } : {})}
-				/>
-			))}
+			{(tags ?? DEBUG_TAGS)
+				.filter((tag) => !!tag.name)
+				.map((tag) => (
+					<TagComponent
+						key={tag.id}
+						tag={tag}
+						{...(baseUrl ? { href: `${baseUrl}?tags[]=${tag.name}` } : {})}
+					/>
+				))}
 		</div>
 	)
 }

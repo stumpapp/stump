@@ -8,6 +8,7 @@ use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
+use serde_qs::axum::QsQuery;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
@@ -142,12 +143,14 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 /// Get all libraries
 #[tracing::instrument(skip(ctx), err)]
 async fn get_libraries(
-	filter_query: Query<FilterableQuery<LibraryFilter>>,
+	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+
+	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
 
 	let is_unpaged = pagination.is_unpaged();
 	let where_conditions = apply_library_filters(filters);

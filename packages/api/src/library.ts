@@ -7,11 +7,13 @@ import type {
 	UpdateLibrary,
 } from '@stump/types'
 
-import { API, mergePageParams, urlWithParams } from '.'
+import { API, mergePageParams, toUrlParams, urlWithParams } from '.'
 import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
 
-export function getLibraries(): Promise<PageableApiResult<Library[]>> {
-	return API.get('/libraries?unpaged=true')
+export function getLibraries(
+	params: Record<string, unknown> = { unpaged: true },
+): Promise<PageableApiResult<Library[]>> {
+	return API.get(urlWithParams('/libraries', toUrlParams(params)))
 }
 
 export function getLibrariesStats(): Promise<ApiResult<LibrariesStats>> {

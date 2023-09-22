@@ -59,13 +59,14 @@ export default function UserManagementScene() {
 					<title>Stump | {t('settingsScene.users.helmet')}</title>
 				</Helmet>
 
+				<UserManagementStats />
+
 				<SettingsHeading
 					heading={t('settingsScene.users.heading')}
 					subtitle={t('settingsScene.users.subtitle')}
 				/>
 
 				<SettingsContent>
-					<UserManagementStats />
 					<UserTableSection />
 				</SettingsContent>
 			</SceneContainer>

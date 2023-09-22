@@ -104,7 +104,8 @@
 			"general": "General",
 			"server": "Server",
 			"jobs": "Jobs and Configuration",
-			"users": "User Management"
+			"users": "User Management",
+			"desktop": "Desktop"
 		},
 		"general": {
 			"helmet": "General Settings",

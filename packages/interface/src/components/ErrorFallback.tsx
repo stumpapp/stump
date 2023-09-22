@@ -1,4 +1,4 @@
-import { Button, ButtonOrLink, Heading, Text } from '@stump/components'
+import { Button, ButtonOrLink, useBodyLock } from '@stump/components'
 import { ExternalLink } from 'lucide-react'
 import { FallbackProps } from 'react-error-boundary'
 import toast from 'react-hot-toast'
@@ -7,6 +7,8 @@ import { copyTextToClipboard } from '../utils/misc'
 
 // TODO: take in platform?
 export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+	useBodyLock()
+
 	function copyErrorStack() {
 		if (error.stack) {
 			copyTextToClipboard(error.stack).then(() => {
@@ -18,60 +20,41 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 	return (
 		<div
 			data-tauri-drag-region
-			className="mx-auto flex flex-col items-center justify-center gap-2 pt-12 md:pt-16"
+			className="flex h-full w-full flex-col items-center justify-center overflow-hidden"
 		>
-			<Heading as="h4" size="sm">
-				lol, oops
-			</Heading>
-
-			<Heading as="h2" size="lg">
-				An error occurred:
-			</Heading>
-
-			<Text className="max-w-4xl text-center" size="lg">
-				{error.message}
-			</Text>
-
-			<div className="mx-auto mt-4 flex flex-col gap-2">
-				{error.stack && (
-					<code className="rounded-md bg-gray-75 p-4 dark:bg-gray-800">
-						<Text className="max-h-96 max-w-4xl overflow-auto">
-							<code>{error.stack}</code>
-						</Text>
-					</code>
-				)}
-
-				<div className="flex w-full items-center justify-between pt-3">
-					<div className="flex items-center gap-2">
-						<ButtonOrLink
-							title="Report this error as a potential bug on GitHub"
-							href="https://github.com/stumpapp/stump/issues/new/choose"
-							target="_blank"
+			<div className="max-w-sm sm:max-w-md md:max-w-xl">
+				<div className="text-left">
+					<h1 className="text-4xl font-semibold dark:text-gray-50">A critical error occurred</h1>
+					<p className="mt-1.5 text-lg text-gray-700 dark:text-gray-150">
+						{error.message || 'The error message was empty.'}
+					</p>
+				</div>
+				<div className="flex w-full items-center gap-3 pt-3">
+					<ButtonOrLink
+						variant="primary"
+						onClick={resetErrorBoundary}
+						title="Go back to the homepage"
+						forceAnchor
+						href="/"
+					>
+						Go Home
+					</ButtonOrLink>
+					<ButtonOrLink
+						title="Report this error as a potential bug on GitHub"
+						href="https://github.com/stumpapp/stump/issues/new/choose"
+						target="_blank"
+					>
+						Report Bug <ExternalLink className="ml-2 h-4 w-4" />
+					</ButtonOrLink>
+					{error.stack && (
+						<Button
+							title="Copy the error details to your clipboard"
+							onClick={copyErrorStack}
+							variant="ghost"
 						>
-							Report Bug <ExternalLink className="ml-2 h-4 w-4" />
-						</ButtonOrLink>
-						{error.stack && (
-							<Button
-								title="Copy the error details to your clipboard"
-								onClick={copyErrorStack}
-								variant="ghost"
-							>
-								Copy Error Details
-							</Button>
-						)}
-					</div>
-
-					<div className="flex items-center gap-2">
-						<ButtonOrLink
-							variant="primary"
-							onClick={resetErrorBoundary}
-							title="Go back to the homepage"
-							forceAnchor
-							href="/"
-						>
-							Go Home
-						</ButtonOrLink>
-					</div>
+							Copy Error Details
+						</Button>
+					)}
 				</div>
 			</div>
 		</div>

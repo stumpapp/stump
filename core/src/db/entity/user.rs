@@ -85,8 +85,8 @@ impl From<prisma::user::Data> for User {
 			avatar_url: data.avatar_url,
 			age_restriction,
 			read_progresses,
-			created_at: data.created_at.to_string(),
-			last_login: data.last_login.map(|dt| dt.to_string()),
+			created_at: data.created_at.to_rfc3339(),
+			last_login: data.last_login.map(|dt| dt.to_rfc3339()),
 		}
 	}
 }
@@ -126,6 +126,7 @@ pub struct UserPreferences {
 	pub series_layout_mode: String,
 	pub collection_layout_mode: String,
 	pub app_theme: String,
+	pub show_query_indicator: bool,
 }
 
 impl Default for UserPreferences {
@@ -137,6 +138,7 @@ impl Default for UserPreferences {
 			series_layout_mode: "GRID".to_string(),
 			collection_layout_mode: "GRID".to_string(),
 			app_theme: "LIGHT".to_string(),
+			show_query_indicator: false,
 		}
 	}
 }
@@ -165,6 +167,7 @@ pub struct UpdateUserPreferences {
 	pub series_layout_mode: String,
 	pub collection_layout_mode: String,
 	pub app_theme: String,
+	pub show_query_indicator: bool,
 }
 
 ///////////////////////////////////////////////
@@ -176,11 +179,11 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 		UserPreferences {
 			id: data.id,
 			locale: data.locale,
-			// reduce_animations: data.reduce_animations,
 			library_layout_mode: data.library_layout_mode,
 			series_layout_mode: data.series_layout_mode,
 			collection_layout_mode: data.collection_layout_mode,
 			app_theme: data.app_theme,
+			show_query_indicator: data.show_query_indicator,
 		}
 	}
 }

@@ -9,8 +9,14 @@ type Props = {
 	title?: string
 	hasMore?: boolean
 	fetchNext?: () => void
+	emptyMessage?: string | (() => React.ReactNode)
 }
-export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
+export default function HorizontalCardList({
+	cards,
+	title,
+	fetchNext,
+	emptyMessage = 'No items to display',
+}: Props) {
 	const parentRef = useRef<HTMLDivElement>(null)
 	const visibleRef = useRef([0, 0])
 
@@ -102,7 +108,11 @@ export default function HorizontalCardList({ cards, title, fetchNext }: Props) {
 
 	const renderContent = () => {
 		if (!cards.length) {
-			return <Text size="md">No items to display</Text>
+			return typeof emptyMessage === 'string' ? (
+				<Text size="md">{emptyMessage}</Text>
+			) : (
+				emptyMessage()
+			)
 		}
 
 		return (

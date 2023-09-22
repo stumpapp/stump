@@ -18,8 +18,8 @@ type UseUsersQueryParams = PageQueryOptions<User> & {
 export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) {
 	const { data, ...restReturn } = usePageQuery(
 		[userQueryKeys.getUsers, params],
-		async ({ page = 1, ...rest }) => {
-			const { data } = await userApi.getUsers({ page, ...rest })
+		async ({ page = 1, page_size }) => {
+			const { data } = await userApi.getUsers({ page, page_size, ...params })
 			return data
 		},
 		{

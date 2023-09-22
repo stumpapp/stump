@@ -25,7 +25,7 @@ export default function BookLibrarySeriesLinks({ libraryId, seriesId, series }: 
 		return (
 			<>
 				<span className="mx-2 text-gray-500 dark:text-gray-450">/</span>
-				<Link href={paths.seriesOverview(resolvedSeries.id)} className="line-clamp-1">
+				<Link to={paths.seriesOverview(resolvedSeries.id)} className="line-clamp-1">
 					{resolvedSeries.name}
 				</Link>
 			</>

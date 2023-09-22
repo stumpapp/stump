@@ -3,7 +3,7 @@ import { Suspense, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-// import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
+import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
 import JobOverlay from './components/jobs/JobOverlay'
 import RouteLoadingIndicator from './components/RouteLoadingIndicator'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
@@ -62,7 +62,7 @@ export function AppLayout() {
 				<div className="flex h-full w-full">
 					{!hideSidebar && <Sidebar />}
 					<main className="min-h-full w-full bg-white dark:bg-gray-975">
-						{/* <BackgroundFetchIndicator /> */}
+						{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />
 						</Suspense>

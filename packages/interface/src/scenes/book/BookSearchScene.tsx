@@ -63,7 +63,7 @@ function BookSearchScene() {
 				slideOverForm="media"
 			/>
 
-			<div className="flex w-full flex-col space-y-6 p-4">
+			<div className="flex w-full flex-col space-y-6 pt-4">
 				{hasStuff && (
 					<Pagination
 						pages={total_pages}

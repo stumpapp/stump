@@ -16,6 +16,10 @@ tasks:
     command: 'pnpm tauri dev'
     local: true
 
+  start:
+    command: 'pnpm tauri dev --no-watch'
+    local: true
+
   lint:
     command: 'cargo clippy --package stump_desktop -- -D warnings'
     options:

@@ -52,7 +52,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 		<>
 			<Button
 				variant="ghost"
-				className="flex w-full items-center justify-between"
+				className="flex w-full flex-shrink-0 items-center justify-between"
 				size="lg"
 				onClick={toggle}
 				pressEffect={false}
@@ -123,7 +123,9 @@ function NavItem({ name, href, active, ...rest }: NavItemProps) {
 		<ButtonOrLink
 			href={href}
 			size="lg"
-			className={clsx('flex w-full justify-start', { 'bg-gray-50 dark:bg-gray-850': active })}
+			className={clsx('flex w-full flex-shrink-0 justify-start', {
+				'bg-gray-50 dark:bg-gray-850': active,
+			})}
 			variant="ghost"
 		>
 			<div className="flex items-center space-x-2">
@@ -196,7 +198,7 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 			// 1. there are no libraries
 			// 2. user is not server owner (i.e. cannot create libraries)
 			{
-				active: location.pathname === 'libraries/create',
+				active: location.pathname === '/libraries/create',
 				icon: LibraryIcon,
 				items: libraries?.map((library) => ({
 					...library,
@@ -207,7 +209,7 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 				name: t('sidebar.buttons.libraries'),
 			},
 			{
-				active: location.pathname === 'books',
+				active: location.pathname === '/books',
 				href: paths.bookSearch(),
 				icon: Book,
 				name: t('sidebar.buttons.books'),
@@ -228,12 +230,12 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 		<>
 			{!isMobileSheet && <SidebarHeader />}
 
-			<div className="flex max-h-full grow flex-col gap-2 overflow-hidden p-1">
+			<div className="flex max-h-full grow flex-col gap-2 overflow-y-scroll p-1 scrollbar-hide">
 				{links.map((link) =>
 					link.items ? (
 						<NavMenuItem key={link.name} {...link} onClick={(href) => navigate(href)} />
 					) : (
-						<NavItem key={link.name} {...link} active={linkIsActive(link.href)} />
+						<NavItem key={link.name} {...link} active={link.active ?? linkIsActive(link.href)} />
 					),
 				)}
 			</div>

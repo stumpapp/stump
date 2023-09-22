@@ -66,17 +66,19 @@ export default function SettingsNavigation({ user }: Props) {
 
 	return (
 		<SceneContainer className="pb-0">
-			<NativeSelect
-				className="md:hidden"
-				options={tabs.map((tab) => ({
-					label: t(tab.localeKey),
-					value: tab.path,
-				}))}
-				value={location.pathname}
-				onChange={(e) => {
-					navigate(e.target.value)
-				}}
-			/>
+			{tabs.length > 1 && (
+				<NativeSelect
+					className="md:hidden"
+					options={tabs.map((tab) => ({
+						label: t(tab.localeKey),
+						value: tab.path,
+					}))}
+					value={location.pathname}
+					onChange={(e) => {
+						navigate(e.target.value)
+					}}
+				/>
+			)}
 
 			<Tabs
 				value={location.pathname}

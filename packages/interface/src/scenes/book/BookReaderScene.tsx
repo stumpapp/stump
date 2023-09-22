@@ -2,8 +2,8 @@ import { getMediaPage } from '@stump/api'
 import { useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import AnimatedImageBasedReader from '../../components/readers/image-based/AnimatedImageBasedReader'
-import ImageBasedReader from '../../components/readers/image-based/ImageBasedReader'
+import AnimatedPagedReader from '../../components/readers/image-based/AnimatedPagedReader'
+import PagedReader from '../../components/readers/image-based/PagedReader'
 import paths from '../../paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
 
@@ -65,7 +65,7 @@ export default function BookReaderScene() {
 
 	if (media.extension.match(ARCHIVE_EXTENSION) || media.extension.match(PDF_EXTENSION)) {
 		const animated = !!search.get('animated')
-		const Component = animated ? AnimatedImageBasedReader : ImageBasedReader
+		const Component = animated ? AnimatedPagedReader : PagedReader
 
 		return (
 			<Component

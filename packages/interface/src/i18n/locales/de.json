@@ -1,6 +1,7 @@
 {
 	"authScene": {
-		"claimText": "This Stump server is not yet claimed, you can use the form below to create a user account and claim it. Enter your preferred username and password.",
+		"claimHeading": "Initialize your server",
+		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
 				"missingUsername": "Der Benutzername ist erforderlich",
@@ -12,13 +13,13 @@
 			},
 			"buttons": {
 				"createAccount": "Konto erstellen",
-				"login": "Anmelden"
+				"login": "Log in"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Anmeldung läuft...",
-			"loggedIn": "Willkommen zurück! Weiterleitung...",
-			"loggedInFirstTime": "Willkommen! Weiterleitung...",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
 			"registering": "Registrierung läuft...",
 			"registered": "Registriert!",
 			"loginFailed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
@@ -103,7 +104,8 @@
 			"general": "General",
 			"server": "Server",
 			"jobs": "Jobs and Configuration",
-			"users": "User Management"
+			"users": "User Management",
+			"desktop": "Desktop"
 		},
 		"general": {
 			"helmet": "General Settings",
@@ -235,6 +237,7 @@
 		"buttons": {
 			"home": "Startseite",
 			"libraries": "Bibliotheken",
+			"books": "Explore Books",
 			"createLibrary": "Bibliothek erstellen",
 			"settings": "Einstellungen",
 			"themeToggle": "Design wechseln",

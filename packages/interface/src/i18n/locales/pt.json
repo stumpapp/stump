@@ -1,48 +1,49 @@
 {
 	"authScene": {
-		"claimText": "Este servidor de Stump ainda não foi reivindicado, você pode usar o formulário abaixo para criar uma conta de usuário e reivindicá-lo. Digite seu nome de usuário e senha preferidos.",
+		"claimHeading": "Initialize your server",
+		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "O nome é obrigatório",
-				"missingPassword": "A senha é obrigatória"
+				"missingUsername": "O nome de usuário é necessário",
+				"missingPassword": "A senha é necessária"
 			},
 			"labels": {
 				"username": "Nome de usuário",
 				"password": "Senha"
 			},
 			"buttons": {
-				"createAccount": "Criar uma Conta",
-				"login": "Entrar"
+				"createAccount": "Criar Conta",
+				"login": "Log in"
 			}
 		},
 		"toasts": {
-			"loggingIn": "A autenticar...",
-			"loggedIn": "Boas-vindas! Redirecionando...",
-			"loggedInFirstTime": "Bem-vindo(a)! Redirecionando...",
+			"loggingIn": "Entrando...",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
 			"registering": "Registrando...",
 			"registered": "Registrado!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loginFailed": "Falha no login. Tente novamente",
+			"registrationFailed": "Falha ao registrar. Por favor, tente novamente"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Configuração da biblioteca",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Configuração da Biblioteca",
+			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
+			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "Informações do arquivo",
+			"heading": "Informações do Arquivo",
 			"labels": {
 				"fileSize": "Tamanho do arquivo",
-				"fileType": "Tipo do Arquivo",
+				"fileType": "Tipo de arquivo",
 				"fileLocation": "Localização do Arquivo",
-				"fileChecksum": "Soma de verificação"
+				"fileChecksum": "Checksum"
 			}
 		},
-		"nextInSeries": "Próximo na série:"
+		"nextInSeries": "Seguinte na série"
 	},
 	"createLibraryScene": {
 		"heading": "Criar nova biblioteca",
@@ -51,10 +52,10 @@
 		"form": {
 			"labels": {
 				"libraryName": "Nome",
-				"libraryPath": "Caminho:",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPath": "Caminho",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
 				"libraryDescription": "Descrição",
-				"libraryTags": "Tags"
+				"libraryTags": "Etiquetas"
 			},
 			"buttons": {
 				"confirm": "Criar Biblioteca"
@@ -62,39 +63,39 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Gerenciar Biblioteca",
+		"subtitle": "Atualize os detalhes ou a configuração da sua biblioteca, altere as regras de acesso de controle ou arquivos de verificação. Se você está querendo uma atualização das bibliotecas e como elas funcionam, confira a",
+		"subtitleLink": "documentação relevante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Nome",
+				"libraryPath": "Caminho",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
+				"libraryDescription": "Descrição",
+				"libraryTags": "Marcadores"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Salvar Alterações"
 			}
 		}
 	},
 	"errorScene": {
-		"heading": "haha, oops!",
-		"message": "Ocorreu um erro: ",
+		"heading": "lol, oops",
+		"message": "Ocorreu um erro:",
 		"buttons": {
-			"report": "Reportar Erro",
-			"copy": "Copiar detalhes do erro",
-			"goHome": "Voltar ao início"
+			"report": "Reportar Bug",
+			"copy": "Copiar os detalhes do erro",
+			"goHome": "Ir ao Início"
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continue lendo",
+		"continueReading": "Continuar Lendo",
 		"recentlyAddedSeries": "Séries adicionadas recentemente",
-		"recentlyAddedBooks": "Livros Adicionados Recentemente"
+		"recentlyAddedBooks": "Livros adicionados recentemente"
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue lendo",
+			"continueReading": "Continuar Lendo",
 			"downloadSeries": "Baixar Séries"
 		}
 	},
@@ -102,55 +103,56 @@
 		"navigation": {
 			"general": "Geral",
 			"server": "Servidor",
-			"jobs": "Trabalhos e Configuração",
-			"users": "Gerenciamento De Usuário"
+			"jobs": "Ações e configurações",
+			"users": "Gerenciamento de usuários",
+			"desktop": "Desktop"
 		},
 		"general": {
-			"helmet": "Configurações gerais",
-			"heading": "Configurações gerais",
+			"helmet": "Configurações Gerais",
+			"heading": "Configurações Gerais",
 			"subtitle": "Use os formulários abaixo para gerenciar suas preferências e configurações de conta.",
 			"profileForm": {
 				"validation": {
-					"invalidUrl": "Por favor, digite um URL válido",
-					"missingUsername": "O nome é obrigatório"
+					"invalidUrl": "Por favor insira um URL válido",
+					"missingUsername": "Nome de usuário é necessário"
 				},
 				"labels": {
 					"username": "Nome de usuário",
 					"password": "Senha",
-					"activeChangesPrompt": "Você tem alterações não salvas"
+					"activeChangesPrompt": "Você tem modificações não salvas"
 				},
 				"errors": {
-					"updateFailed": "Ocorreu um erro no servidor ao atualizar seu perfil. Por favor, tente novamente."
+					"updateFailed": "Ocorreu um erro ao carregar seu conteúdo. Por favor, tente novamente."
 				},
 				"avatarPicker": {
-					"heading": "Defina sua imagem do avatar",
+					"heading": "Defina sua imagem de avatar",
 					"subtitle": "Stump suporta avatares personalizados, que podem ser configurados fornecendo uma URL para uma imagem. Envio de imagens não é suportado para reduzir a quantidade de dados armazenados no servidor.",
 					"preview": "Uma pré-visualização aparecerá aqui uma vez que você inseriu uma URL.",
 					"labels": {
-						"imageUrl": "URL da imagem",
-						"customAvatar": "Personalizar avatar"
+						"imageUrl": "URL da Imagem",
+						"customAvatar": "Avatar personalizado"
 					},
 					"buttons": {
 						"confirm": "Confirmar Imagem",
 						"cancel": "Cancelar",
 						"edit": "Editar",
-						"changeImage": "Alterar Imagem",
+						"changeImage": "Mudar Imagem",
 						"removeImage": "Remover imagem"
 					}
 				},
 				"buttons": {
-					"confirm": "Salvar Alterações"
+					"confirm": "Gravar as alterações"
 				}
 			},
 			"theme": {
-				"heading": "Tema da Aplicação",
+				"heading": "Tema do aplicativo",
 				"subtitle": "Stump suporta os temas claro e escuro, que podem ser definidos abaixo.",
 				"dark": {
 					"label": "Tema escuro",
 					"description": "Use um tema escuro para o Stump, que é o tema correto."
 				},
 				"light": {
-					"label": "Tema Claro",
+					"label": "Tema claro",
 					"description": "Use um tema claro para o Stump, que é o tema incorreto."
 				}
 			},
@@ -158,48 +160,48 @@
 				"localeSelector": {
 					"label": "Idioma"
 				},
-				"heading": "Configurações de idioma e local",
+				"heading": "Configurações de idioma e região",
 				"subtitle": [
 					"O Stump suporta vários idiomas e idiomas, defina suas preferências abaixo. Por favor considere ajudar a melhorar a qualidade de",
-					"Traduções do Stump",
+					"Traduções do stump",
 					"se você puder!"
 				]
 			}
 		},
 		"jobs": {
-			"helmet": "Trabalhos e Configuração",
-			"heading": "Trabalhos e Configuração",
-			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
-			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
-			"historyHeading": "Job History",
-			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"helmet": "Ações e configurações",
+			"heading": "Ações e configurações",
+			"subtitle": "Ver e gerenciar as tarefas em segundo plano disponíveis neste servidor, incluindo varreduras da biblioteca e tarefas agendadas",
+			"schedulingHeading": "Agendar Tarefas",
+			"schedulingSubtitle": "Gerenciar o agendamento de tarefas em segundo plano neste servidor",
+			"historyHeading": "Histórico de Tarefas",
+			"historySubtitle": "Gerenciar tarefas em execução e ver o histórico de tarefas concluídas",
 			"historyTable": {
 				"columns": {
-					"name": "Type",
-					"description": "Description",
-					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
-					"tasks": "Tasks"
+					"name": "Tipo",
+					"description": "Descrição",
+					"status": "Estado",
+					"createdAt": "Iniciou em",
+					"elapsed": "Decorrido",
+					"tasks": "Tarefas"
 				},
-				"emptyHeading": "There are no jobs to display",
-				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
-				"deleteAllConfirmButton": "Clear history",
-				"deleteAllConfirmButtonTitle": "Clear all job history",
-				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+				"emptyHeading": "Não há tarefas para exibir",
+				"emptySubtitle": "Você não pode ter uma tarefa se não tiver um nenhuma",
+				"deleteAllMessage": "O histórico de tarefas e as estatísticas de todos os trabalhos podem ser excluídas a qualquer momento e não afetarão os trabalhos em execução. No entanto, esta ação não pode ser desfeita e eliminará da base de dados todo o histórico de tarefas.",
+				"deleteAllConfirmButton": "Limpar histórico",
+				"deleteAllConfirmButtonTitle": "Limpar todo o histórico de tarefas",
+				"deleteAllConfirmButtonTitleNoJobs": "Sem tarefas para limpar"
 			}
 		},
 		"server": {
-			"helmet": "Configurações do Servidor",
+			"helmet": "Configurações do servidor",
 			"heading": "Configurações do servidor",
-			"subtitle": "Manage various configurable options for your Stump server instance, itself"
+			"subtitle": "Gerencie várias opções configuráveis para a instância do servidor Stumpe, em si"
 		},
 		"users": {
-			"helmet": "Gerenciamento De Usuário",
-			"heading": "Gerenciamento De Usuário",
-			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
+			"helmet": "Gerenciamento de usuários",
+			"heading": "Gerenciamento de usuários",
+			"subtitle": "Gerenciar os usuários deste servidor, incluindo a criação de novos usuários e a alteração de suas permissões"
 		}
 	},
 	"jobOverlay": {
@@ -207,12 +209,12 @@
 	},
 	"libraryStats": {
 		"seriesCount": "Total de Séries",
-		"bookCount": "Total de Livros",
+		"bookCount": "Número Total de Livros",
 		"diskUsage": "Uso de disco"
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Avançar",
+			"next": "Próxima",
 			"previous": "Anterior"
 		},
 		"popover": {
@@ -224,38 +226,39 @@
 		}
 	},
 	"signOutModal": {
-		"title": "Terminar sessão",
-		"message": "Tem certeza de que deseja terminar a sessão?",
+		"title": "Terminar Sessão",
+		"message": "Você tem certeza que deseja sair?",
 		"buttons": {
 			"cancel": "Cancelar",
-			"signOut": "Terminar sessão"
+			"signOut": "Terminar Sessão"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Página inicial",
+			"home": "Início",
 			"libraries": "Bibliotecas",
+			"books": "Explore Books",
 			"createLibrary": "Criar Biblioteca",
 			"settings": "Configurações",
 			"themeToggle": "Alternar tema",
-			"goForward": "Avançar",
-			"goBack": "Voltar"
+			"goForward": "Ir adiante",
+			"goBack": "Retornar"
 		},
 		"libraryOptions": {
 			"scanLibrary": {
 				"base": "Escanear Biblioteca",
 				"parallel": "Escaneamento paralelo",
-				"inOrder": "Escaneamento em ordem"
+				"inOrder": "Em ordem de escaneamento"
 			},
-			"fileExplorer": "Explorador de arquivos",
-			"editLibrary": "Editar Biblioteca",
-			"deleteLibrary": "Excluir a biblioteca"
+			"fileExplorer": "Explorador de Arquivos",
+			"editLibrary": "Editar biblioteca",
+			"deleteLibrary": "Excluir Biblioteca"
 		},
 		"versionInformation": {
-			"heading": "Informações de Versão",
-			"semVer": "Versão semântica",
-			"commitHash": "Criar \"Hash\"",
-			"buildDate": "Data da compilação"
+			"heading": "Informações da versão",
+			"semVer": "Versionamento Semântico",
+			"commitHash": "Hash do Commit",
+			"buildDate": "Data da Compilação"
 		}
 	},
 	"search": {
@@ -264,31 +267,31 @@
 	"serverSOS": {
 		"heading": "Servidor indisponível",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
 		},
 		"reconnected": "Reconectado ao servidor! Redirecionando...",
-		"reconnectionFailed": "Ocorreu algo de errado!"
+		"reconnectionFailed": "Algo deu errado!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Servidor não está conectado",
 		"message": [
-			"Please check your internet connection",
+			"Por favor, verifique sua conexão com a internet",
 			"Clique aqui",
-			"to change your server URL"
+			"para mudar a URL de seu servidor"
 		]
 	},
 	"slidingList": {
-		"empty": "Não há itens para exibir",
+		"empty": "Nenhum item para exibir",
 		"buttons": {
 			"next": "Buscar à frente",
-			"previous": "Procurar para trás"
+			"previous": "Procurar Anterior"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Selecionar ou criar tag",
-		"placeholderNoTags": "Sem tags disponíveis"
+		"placholder": "Selecionar ou criar etiqueta",
+		"placeholderNoTags": "Não há tags disponíveis"
 	}
 }

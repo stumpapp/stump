@@ -1,10 +1,10 @@
 use crate::Notifier;
 
-use super::error::NotifierResult;
+use super::{error::NotifierResult, NotifierEvent};
 
 pub struct TelegramClient {
-	token: String,
-	chat_id: String,
+	pub token: String,
+	pub chat_id: String,
 }
 
 impl TelegramClient {
@@ -15,7 +15,10 @@ impl TelegramClient {
 
 #[async_trait::async_trait]
 impl Notifier for TelegramClient {
-	async fn send_message(&self, message: &str) -> NotifierResult<()> {
+	fn payload_from_event(_event: NotifierEvent) -> serde_json::Value {
+		unimplemented!()
+	}
+	async fn send_message(&self, _event: NotifierEvent) -> NotifierResult<()> {
 		unimplemented!("TelegramClient::send_message")
 	}
 }

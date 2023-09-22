@@ -11,3 +11,4 @@ thiserror = "1.0.37"
 
 [dev-dependencies]
 tokio = { version = "1.32.0", features = [ "full" ] }
+dotenv = "0.15.0"

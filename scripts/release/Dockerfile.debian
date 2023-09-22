@@ -62,7 +62,7 @@ RUN apt-get update && apt-get install -y \
 RUN set -ex; \
     mkdir -p pdfium; \
     if [ "$TARGETARCH" = "amd64" ]; then \
-        # FIXME: should this be https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F6015/pdfium-linux-x64.tgz
+        # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
         curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-x64.tgz; \
     elif [ "$TARGETARCH" = "arm64" ]; then \
         curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-arm64.tgz; \

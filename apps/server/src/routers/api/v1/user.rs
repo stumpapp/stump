@@ -121,7 +121,6 @@ async fn get_users(
 			let mut query = client.user().find_many(vec![]);
 
 			if include_user_read_progress {
-				tracing::trace!("Including user read progresses");
 				query = query.with(user::read_progresses::fetch(vec![]));
 			}
 

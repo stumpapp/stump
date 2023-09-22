@@ -1,6 +1,7 @@
 {
 	"authScene": {
-		"claimText": "Ce serveur Stump n'est pas encore réclamé, vous pouvez utiliser le formulaire ci-dessous pour créer un compte utilisateur et le réclamer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
+		"claimHeading": "Initialize your server",
+		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
 				"missingUsername": "Le nom d'utilisateur est requis",
@@ -12,13 +13,13 @@
 			},
 			"buttons": {
 				"createAccount": "Créer un compte",
-				"login": "Connexion"
+				"login": "Log in"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Connexion en cours...",
-			"loggedIn": "Bienvenue de retour ! Redirection en cours...",
-			"loggedInFirstTime": "Bienvenue ! Redirection en cours...",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
 			"registering": "Enregistrement en cours...",
 			"registered": "Enregistré !",
 			"loginFailed": "Login failed. Please try again",
@@ -103,7 +104,8 @@
 			"general": "Général",
 			"server": "Serveur",
 			"jobs": "Tâches et Configuration",
-			"users": "Gestion des Utilisateurs"
+			"users": "Gestion des Utilisateurs",
+			"desktop": "Desktop"
 		},
 		"general": {
 			"helmet": "Paramètres Généraux",
@@ -235,6 +237,7 @@
 		"buttons": {
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
+			"books": "Explore Books",
 			"createLibrary": "Créer une bibliothèque",
 			"settings": "Paramètres",
 			"themeToggle": "Changer de thème",

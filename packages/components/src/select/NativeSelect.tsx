@@ -12,7 +12,7 @@ export const SELECT_SIZES = {
 
 export type NativeSelectProps = {
 	options: SelectOption[]
-	value?: string
+	value?: string | number
 	size?: keyof typeof SELECT_SIZES
 } & Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'>
 

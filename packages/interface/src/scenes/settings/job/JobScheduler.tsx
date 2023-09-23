@@ -1,9 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useJobSchedulerConfig, useLibraries } from '@stump/client'
-import { Alert, ComboBox, Form } from '@stump/components'
+import { Alert, ComboBox, Form, Input, Label, NativeSelect } from '@stump/components'
 import { Construction } from 'lucide-react'
-import React from 'react'
-import { FieldValues, useForm } from 'react-hook-form'
+import React, { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import z from 'zod'
 
@@ -13,9 +13,19 @@ const schema = z.object({
 })
 type FormValues = z.infer<typeof schema>
 
+const INTERVAL_PRESETS = [
+	{ label: 'Custom', value: -1 },
+	{ label: 'Once a day', value: 86400 },
+	{ label: 'Every 12 hours', value: 43200 },
+	{ label: 'Once a week', value: 604800 },
+	{ label: 'Once a month', value: 2592000 },
+]
+
 export default function JobScheduler() {
 	const { libraries } = useLibraries()
 	const { config, update } = useJobSchedulerConfig()
+
+	const [intervalPreset, setIntervalPreset] = useState<number>()
 
 	const form = useForm({
 		defaultValues: {
@@ -36,9 +46,22 @@ export default function JobScheduler() {
 		})
 	}
 
+	const handleIntervalPresetChange = (value: string) => {
+		const parsed = parseInt(value, 10)
+		if (!isNaN(parsed)) {
+			setIntervalPreset(parsed)
+		}
+	}
+
+	useEffect(() => {
+		if (intervalPreset !== undefined && intervalPreset !== -1) {
+			form.setValue('interval_secs', intervalPreset)
+		}
+	}, [form, intervalPreset])
+
 	return (
-		<div className="flex flex-col gap-3">
-			<Alert level="warning" rounded="sm" className="dark:bg-red-300/25" icon={Construction}>
+		<div className="-mt-4 flex flex-col gap-6">
+			<Alert level="warning" rounded="sm" icon={Construction}>
 				<Alert.Content>
 					Stump currently only supports scheduling scanner jobs. This will be extended to support
 					other job types in the future.
@@ -46,8 +69,31 @@ export default function JobScheduler() {
 			</Alert>
 
 			<Form form={form} onSubmit={handleSubmit}>
+				<div className="flex w-full items-end gap-2">
+					<Input
+						type="number"
+						label="Interval"
+						description="How often the scheduler should initiate scans (in seconds)"
+						descriptionPosition="top"
+						placeholder='e.g. "86400" for once a day'
+						{...form.register('interval_secs')}
+					/>
+
+					<div>
+						{/* TODO: this doesn't work as expected, update UX */}
+						<Label htmlFor="intervalPreset">Interval preset</Label>
+						<NativeSelect
+							value={intervalPreset ?? -1}
+							options={INTERVAL_PRESETS}
+							onChange={(e) => handleIntervalPresetChange(e.target.value)}
+						/>
+					</div>
+				</div>
+
 				<ComboBox
 					label="Excluded libraries"
+					description="Libraries that will be excluded from the scheduled scans"
+					descriptionPosition="top"
 					isMultiSelect
 					value={excluded_library_ids}
 					options={(libraries || []).map((library) => ({

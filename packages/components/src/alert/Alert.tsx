@@ -15,11 +15,11 @@ export const ALERT_ICONS = {
 
 // TODO: adjust colors
 export const ALERT_VARIANTS: Record<keyof typeof ALERT_ICONS, string> = {
-	error: 'bg-red-50 text-red-700 dark:bg-red-300',
+	error: 'bg-red-50 text-red-700 dark:bg-red-300/25',
 	grayscale: 'bg-gray-50 text-gray-700',
 	info: 'bg-blue-50 text-blue-700',
 	success: 'bg-green-50 text-green-700',
-	warning: 'bg-yellow-50 text-yellow-700',
+	warning: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-700/30 dark:text-yellow-600',
 }
 
 const alertVariants = cva('p-4', {
@@ -63,7 +63,11 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 
 			return (
 				<Icon
-					className={cx('h-5 w-5', ALERT_VARIANTS[level || 'info'] || ALERT_VARIANTS.info)}
+					className={cn(
+						'h-5 w-5',
+						ALERT_VARIANTS[level || 'info'] || ALERT_VARIANTS.info,
+						'bg-transparent dark:bg-transparent',
+					)}
 					aria-hidden="true"
 				/>
 			)

@@ -3,5 +3,5 @@ export { NativeSelect, type NativeSelectProps } from './NativeSelect'
 
 export type SelectOption = {
 	label: string
-	value: string
+	value: string | number
 }

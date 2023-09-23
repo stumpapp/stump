@@ -173,7 +173,7 @@
 			"heading": "Jobs and Configuration",
 			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
 			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
 			"historyHeading": "Job History",
 			"historySubtitle": "Manage running jobs and view the history of completed jobs",
 			"historyTable": {

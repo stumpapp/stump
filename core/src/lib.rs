@@ -24,6 +24,7 @@ pub mod prisma;
 use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
 use event::{event_manager::EventManager, InternalCoreTask};
+use job::JobScheduler;
 use tokio::sync::mpsc::unbounded_channel;
 
 pub use context::Ctx;
@@ -98,6 +99,32 @@ impl StumpCore {
 	/// Runs the database migrations. This will be updated with PCR 0.6.2
 	pub async fn run_migrations(&self) -> Result<(), CoreError> {
 		db::migration::run_migrations(&self.ctx.db).await
+	}
+
+	pub async fn init_server_config(&self) -> Result<(), CoreError> {
+		let config_exists = self
+			.ctx
+			.db
+			.server_preferences()
+			.find_first(vec![])
+			.exec()
+			.await?
+			.is_some();
+
+		if !config_exists {
+			self.ctx
+				.db
+				.server_preferences()
+				.create(vec![])
+				.exec()
+				.await?;
+		}
+
+		Ok(())
+	}
+
+	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
+		JobScheduler::init(self.ctx.arced()).await
 	}
 }
 

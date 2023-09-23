@@ -39,9 +39,32 @@ model User {
   user_preferences_id String?          @unique
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
+  login_activity    UserLoginActivity[]
   media_annotations MediaAnnotation[]
 
   @@map("users")
+}
+
+model UserLoginActivity {
+  id                        String   @id @default(uuid())
+  // The IP address of the login activity.
+  ip_address                String
+  // The user agent of the login activity.
+  user_agent                String
+  // Whether or not the login was successful.
+  authentication_successful Boolean
+  // The timestamp of the login activity.
+  timestamp                 DateTime @default(now())
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The user who logged in.
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_login_activity")
 }
 
 model AgeRestriction {
@@ -83,6 +106,8 @@ model Library {
   library_options_id String         @unique
 
   tags Tag[]
+
+  job_schedules JobScheduleConfig[]
 
   @@map("libraries")
 }
@@ -549,11 +574,30 @@ model UserPreferences {
   @@map("user_preferences")
 }
 
+model JobScheduleConfig {
+  id            String @id @default(cuid())
+  // The interval (in seconds) in which to run the scheduled confu
+  interval_secs Int    @default(86400)
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The libraries to exclude from scheduled scans, if any
+  excluded_libraries Library[]
+  // The associated server preferences. There will only ever be one instance of ServerPreferences in the database.
+  server_preferences ServerPreferences?
+
+  @@map("job_schedule_configs")
+}
+
 model ServerPreferences {
   id String @id @default(cuid())
-  // // Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
-  // // If none found, the series name will be the directory name.
-  // rename_series    Boolean @default(false)
+
+  // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
+  // The schedule configuration. If not set, no scheduled scans will be run.
+  job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
+  job_schedule_config_id String?            @unique
 
   @@map("server_preferences")
 }

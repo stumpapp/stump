@@ -6,13 +6,19 @@ use axum::{
 };
 use serde_qs::axum::QsQuery;
 use stump_core::{
-	db::query::{
-		ordering::QueryOrder,
-		pagination::{Pageable, Pagination, PaginationQuery},
+	db::{
+		entity::server_config::JobSchedulerConfig,
+		query::{
+			ordering::QueryOrder,
+			pagination::{Pageable, Pagination, PaginationQuery},
+		},
 	},
 	event::InternalCoreTask,
 	job::JobDetail,
-	prisma::job::{self, OrderByParam as JobOrderByParam},
+	prisma::{
+		job::{self, OrderByParam as JobOrderByParam},
+		server_preferences,
+	},
 };
 use tokio::sync::oneshot;
 use tracing::{debug, trace};
@@ -34,6 +40,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					Router::new()
 						.route("/", delete(delete_job_by_id))
 						.route("/cancel", delete(cancel_job_by_id)),
+				)
+				.route(
+					"/scheduler-config",
+					get(get_scheduler_config).post(update_scheduler_config),
 				),
 		)
 		.layer(from_extractor::<AdminGuard>())
@@ -192,3 +202,30 @@ async fn cancel_job_by_id(
 		ApiError::InternalServerError(format!("Failed to cancel job: {}", e))
 	})??)
 }
+
+async fn get_scheduler_config(
+	State(ctx): State<AppState>,
+) -> ApiResult<Json<JobSchedulerConfig>> {
+	let client = ctx.get_db();
+
+	let server_config = client
+		.server_preferences()
+		.find_first(vec![])
+		.with(server_preferences::job_schedule_config::fetch())
+		.exec()
+		.await?
+		.ok_or(ApiError::InternalServerError(
+			"Server preferences have not been initialized".to_string(),
+		))?;
+
+	let config = server_config
+		.job_schedule_config()?
+		.map(|c| c.to_owned())
+		.ok_or(ApiError::NotFound(
+			"Job scheduler config has not been initialized".to_string(),
+		))?;
+
+	Ok(Json(JobSchedulerConfig::from(config)))
+}
+
+async fn update_scheduler_config() {}

@@ -1,6 +1,7 @@
 {
 	"authScene": {
-		"claimText": "Ce serveur Stump n'est pas encore réclamé, vous pouvez utiliser le formulaire ci-dessous pour créer un compte utilisateur et le réclamer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
+		"claimHeading": "Initialisez votre serveur",
+		"claimText": "Ce serveur Stump n'est pas initialisé. Utilisez le formulaire ci-dessous pour créer votre compte. Une fois créé, vous aurez un accès complet à toutes les fonctionnalités du serveur.",
 		"form": {
 			"validation": {
 				"missingUsername": "Le nom d'utilisateur est requis",
@@ -12,24 +13,24 @@
 			},
 			"buttons": {
 				"createAccount": "Créer un compte",
-				"login": "Connexion"
+				"login": "S'identifier"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Connexion en cours...",
-			"loggedIn": "Bienvenue de retour !",
+			"loggedIn": "Nous sommes heureux de vous revoir !",
 			"loggedInFirstTime": "Bienvenue !",
 			"registering": "Enregistrement en cours...",
 			"registered": "Enregistré !",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"loginFailed": "Échec de la connexion. Veuillez réessayer",
+			"registrationFailed": "Échec de l'inscription. Veuillez réessayer"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Configuration de la bibliothèque",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"subtitleCreating": "Un aperçu de votre nouvelle bibliothèque sera affiché ci-dessous",
+			"subtitleEditing": "Un aperçu des modifications de votre bibliothèque sera affiché ci-dessous"
 		}
 	},
 	"bookOverviewScene": {
@@ -52,9 +53,9 @@
 			"labels": {
 				"libraryName": "Nom",
 				"libraryPath": "Chemin d'accès",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur",
 				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryTags": "Étiquettes"
 			},
 			"buttons": {
 				"confirm": "Créer la bibliothèque"
@@ -62,19 +63,19 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Gérer la Bibliothèque",
+		"subtitle": "Mettez à jour les détails ou la configuration de votre bibliothèque, modifiez les règles d'accès ou scannez des fichiers. Si vous voulez une mise à jour sur les bibliothèques et comment elles fonctionnent, consultez la",
+		"subtitleLink": "documentation correspondante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryName": "Nom",
+				"libraryPath": "Chemin d'accès",
+				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur",
 				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryTags": "Étiquettes"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Enregistrer les modifications"
 			}
 		}
 	},
@@ -103,7 +104,8 @@
 			"general": "Général",
 			"server": "Serveur",
 			"jobs": "Tâches et Configuration",
-			"users": "Gestion des Utilisateurs"
+			"users": "Gestion des Utilisateurs",
+			"desktop": "Bureau"
 		},
 		"general": {
 			"helmet": "Paramètres Généraux",
@@ -160,46 +162,46 @@
 				},
 				"heading": "Paramètres de Langue et Locale",
 				"subtitle": [
-					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-					"Stump's translations",
-					"if you're able to!"
+					"Stump prend en charge plusieurs langues, définissez vos préférences ci-dessous. Pensez à aider à améliorer la qualité des",
+					"Traductions de Stump",
+					"si vous le pouvez !"
 				]
 			}
 		},
 		"jobs": {
 			"helmet": "Tâches et Configuration",
 			"heading": "Tâches et Configuration",
-			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
-			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
-			"historyHeading": "Job History",
-			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"subtitle": "Affichez et gérez les tâches en arrière-plan disponibles sur ce serveur, y compris les analyses de bibliothèques et la planification",
+			"schedulingHeading": "Planification des tâches",
+			"schedulingSubtitle": "Gérer la planification des tâches en arrière-plan sur ce serveur",
+			"historyHeading": "Historique des tâches",
+			"historySubtitle": "Gérer les tâches en cours et afficher l'historique des tâches terminées",
 			"historyTable": {
 				"columns": {
 					"name": "Type",
 					"description": "Description",
-					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
-					"tasks": "Tasks"
+					"status": "État",
+					"createdAt": "Commencé à",
+					"elapsed": "Écoulé",
+					"tasks": "Tâches"
 				},
-				"emptyHeading": "There are no jobs to display",
-				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
-				"deleteAllConfirmButton": "Clear history",
-				"deleteAllConfirmButtonTitle": "Clear all job history",
-				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+				"emptyHeading": "Il n'y a aucune tâche à afficher",
+				"emptySubtitle": "Vous ne pouvez pas avoir une tâche si vous n'avez pas une tâche",
+				"deleteAllMessage": "L'historique des tâches et les statistiques de toutes les tâches peuvent être supprimés à tout moment et n'affecteront pas les tâches en cours. Cette action ne peut cependant pas être annulée et supprimera tout l'historique des tâches de la base de données.",
+				"deleteAllConfirmButton": "Effacer l'historique",
+				"deleteAllConfirmButtonTitle": "Effacer l'historique des tâches",
+				"deleteAllConfirmButtonTitleNoJobs": "Aucune tâche à effacer"
 			}
 		},
 		"server": {
 			"helmet": "Paramètres du Serveur",
 			"heading": "Paramètres du Serveur",
-			"subtitle": "Manage various configurable options for your Stump server instance, itself"
+			"subtitle": "Gérez différentes options configurables pour votre instance de serveur Stump"
 		},
 		"users": {
 			"helmet": "Gestion des Utilisateurs",
 			"heading": "Gestion des Utilisateurs",
-			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
+			"subtitle": "Gérez les utilisateurs sur ce serveur, y compris la création de nouveaux utilisateurs et la modification de leurs autorisations"
 		}
 	},
 	"jobOverlay": {
@@ -235,6 +237,7 @@
 		"buttons": {
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
+			"books": "Explorer les livres",
 			"createLibrary": "Créer une bibliothèque",
 			"settings": "Paramètres",
 			"themeToggle": "Changer de thème",
@@ -264,17 +267,21 @@
 	"serverSOS": {
 		"heading": "Serveur non disponible",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil.\nSi l'URL de votre serveur a changé, vous pouvez la mettre à jour à l'aide du formulaire ci-dessous"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
 		},
 		"reconnected": "Reconnecté au serveur! Redirection...",
 		"reconnectionFailed": "Quelque chose s'est mal passé!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
-		"message": ["Please check your internet connection", "Cliquez ici", "to change your server URL"]
+		"heading": "Le serveur n'est pas connecté",
+		"message": [
+			"Veuillez vérifier votre connexion internet",
+			"Cliquez ici",
+			"pour changer l'URL de votre serveur"
+		]
 	},
 	"slidingList": {
 		"empty": "Aucun élément à afficher",
@@ -284,7 +291,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
-		"placeholderNoTags": "Aucun tag disponible"
+		"placholder": "Choisissez ou créez une étiquette",
+		"placeholderNoTags": "Aucune étiquette disponible"
 	}
 }

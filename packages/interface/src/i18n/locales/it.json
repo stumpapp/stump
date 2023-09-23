@@ -1,6 +1,7 @@
 {
 	"authScene": {
-		"claimText": "Questo server Stump non è ancora stato reclamizzato, puoi utilizzare il modulo sottostante per creare un account utente e reclamarlo. Inserisci il tuo nome utente e la tua password preferiti.",
+		"claimHeading": "Initialize your server",
+		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
 				"missingUsername": "Il nome utente è obbligatorio",
@@ -12,7 +13,7 @@
 			},
 			"buttons": {
 				"createAccount": "Crea un account",
-				"login": "Accedi"
+				"login": "Log in"
 			}
 		},
 		"toasts": {
@@ -103,7 +104,8 @@
 			"general": "Generale",
 			"server": "Server",
 			"jobs": "Lavori e configurazione",
-			"users": "Gestione utenti"
+			"users": "Gestione utenti",
+			"desktop": "Desktop"
 		},
 		"general": {
 			"helmet": "Impostazioni generali",
@@ -235,6 +237,7 @@
 		"buttons": {
 			"home": "Casa",
 			"libraries": "Biblioteche",
+			"books": "Explore Books",
 			"createLibrary": "Creare Libreria",
 			"settings": "Impostazioni",
 			"themeToggle": "Cambia Tema",

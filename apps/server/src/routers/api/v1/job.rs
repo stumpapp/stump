@@ -4,6 +4,7 @@ use axum::{
 	routing::{delete, get},
 	Json, Router,
 };
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
@@ -17,16 +18,18 @@ use stump_core::{
 	job::JobDetail,
 	prisma::{
 		job::{self, OrderByParam as JobOrderByParam},
-		server_preferences,
+		job_schedule_config, library, server_preferences,
 	},
 };
 use tokio::sync::oneshot;
 use tracing::{debug, trace};
+use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::{AdminGuard, Auth},
+	utils::chain_optional_iter,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -203,6 +206,17 @@ async fn cancel_job_by_id(
 	})??)
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/jobs/scheduler-config",
+	tag = "job",
+	responses(
+		(status = 200, description = "Successfully fetched JobSchedulerConfig", body = JobSchedulerConfig),
+		(status = 401, description = "No user is not logged in (unauthorized)."),
+		(status = 403, description = "User does not have permission to access this resource."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
 async fn get_scheduler_config(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<JobSchedulerConfig>> {
@@ -211,7 +225,10 @@ async fn get_scheduler_config(
 	let server_config = client
 		.server_preferences()
 		.find_first(vec![])
-		.with(server_preferences::job_schedule_config::fetch())
+		.with(
+			server_preferences::job_schedule_config::fetch()
+				.with(job_schedule_config::excluded_libraries::fetch(vec![])),
+		)
 		.exec()
 		.await?
 		.ok_or(ApiError::InternalServerError(
@@ -228,4 +245,100 @@ async fn get_scheduler_config(
 	Ok(Json(JobSchedulerConfig::from(config)))
 }
 
-async fn update_scheduler_config() {}
+#[derive(Deserialize, Serialize, ToSchema)]
+pub struct UpdateSchedulerConfig {
+	pub interval_secs: Option<i32>,
+	pub excluded_libraries_ids: Option<Vec<String>>,
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/jobs/scheduler-config",
+	tag = "job",
+	responses(
+		(status = 200, description = "Successfully updated JobSchedulerConfig", body = Option<JobSchedulerConfig>),
+		(status = 401, description = "No user is not logged in (unauthorized)."),
+		(status = 403, description = "User does not have permission to access this resource."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn update_scheduler_config(
+	State(ctx): State<AppState>,
+	Json(input): Json<UpdateSchedulerConfig>,
+) -> ApiResult<Json<Option<JobSchedulerConfig>>> {
+	let db = ctx.get_db();
+
+	let should_remove_config =
+		input.excluded_libraries_ids.is_none() && input.interval_secs.is_none();
+
+	let result: Result<Option<JobSchedulerConfig>, ApiError> = db
+		._transaction()
+		.run(|client| async move {
+			let server_preferences = client
+				.server_preferences()
+				.find_first(vec![])
+				.with(server_preferences::job_schedule_config::fetch())
+				.exec()
+				.await?
+				.ok_or(ApiError::InternalServerError(String::from(
+					"Server preferences are missing!",
+				)))?;
+
+			let existing_config = server_preferences.job_schedule_config()?.cloned();
+			let set_params = [
+				input
+					.interval_secs
+					.map(job_schedule_config::interval_secs::set),
+				input.excluded_libraries_ids.map(|list| {
+					job_schedule_config::excluded_libraries::connect(
+						list.into_iter().map(library::id::equals).collect(),
+					)
+				}),
+				// existing_config.map(|config| {
+				// 	let test = config.excluded_libraries.map(|libraries| {
+				// 		libraries.iter().map(|l| library::id::equals(l.id.clone()))
+				// 	});
+				// 	job_schedule_config::excluded_libraries::disconnect(
+				// 		chain_optional_iter([], []),
+				// 	)
+				// }),
+			];
+
+			if let Some(existing_config_id) = server_preferences.job_schedule_config_id {
+				let updated_config = client
+					.job_schedule_config()
+					.update(
+						job_schedule_config::id::equals(existing_config_id),
+						chain_optional_iter([], set_params.clone()),
+					)
+					.with(job_schedule_config::excluded_libraries::fetch(vec![]))
+					.exec()
+					.await?;
+				Ok(Some(JobSchedulerConfig::from(updated_config)))
+			} else if !should_remove_config {
+				let created_config = client
+					.job_schedule_config()
+					.create(chain_optional_iter(
+						[job_schedule_config::server_preferences::connect(
+							server_preferences::id::equals(server_preferences.id),
+						)],
+						set_params,
+					))
+					.with(job_schedule_config::excluded_libraries::fetch(vec![]))
+					.exec()
+					.await?;
+				Ok(Some(JobSchedulerConfig::from(created_config)))
+			} else {
+				client
+					.job_schedule_config()
+					.delete_many(vec![])
+					.exec()
+					.await?;
+				Ok(None)
+			}
+		})
+		.await;
+	let updated_or_deleted_config = result?;
+
+	Ok(Json(updated_or_deleted_config))
+}

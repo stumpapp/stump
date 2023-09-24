@@ -14,12 +14,13 @@ export type NativeSelectProps = {
 	options: SelectOption[]
 	value?: string | number
 	size?: keyof typeof SELECT_SIZES
+	emptyOption?: { label: string; value?: string | number }
 } & Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'>
 
 // TODO: reuse variants from primitives when created!
 // TODO: properly implement this component, lazy rn
 export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
-	({ options, className, size = 'default', ...props }, ref) => {
+	({ options, className, size = 'default', emptyOption, ...props }, ref) => {
 		return (
 			<select
 				ref={ref}
@@ -28,10 +29,18 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 					{
 						[SELECT_SIZES[size ?? 'default']]: size,
 					},
+					{
+						'text-gray-500 dark:text-gray-400': !!emptyOption && props.value === emptyOption.value,
+					},
 					className,
 				)}
 				{...props}
 			>
+				{emptyOption && (
+					<option value={emptyOption.value} disabled selected>
+						{emptyOption.label}
+					</option>
+				)}
 				{options.map((option) => (
 					<option key={option.value} value={option.value}>
 						{option.label}

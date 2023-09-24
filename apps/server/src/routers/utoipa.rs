@@ -44,6 +44,8 @@ use super::api::{
         api::v1::job::delete_jobs,
         api::v1::job::delete_job_by_id,
         api::v1::job::cancel_job_by_id,
+        api::v1::job::get_scheduler_config,
+        api::v1::job::update_scheduler_config,
         api::v1::library::get_libraries,
         api::v1::library::get_libraries_stats,
         api::v1::library::get_library_by_id,

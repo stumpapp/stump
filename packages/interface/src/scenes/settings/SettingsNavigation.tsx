@@ -40,7 +40,9 @@ type Props = {
 	user?: User | null
 }
 
-// TODO: mobile looks bad, use select instead when on mobile
+/**
+ * A component that renders the navigation for the settings scene.
+ */
 export default function SettingsNavigation({ user }: Props) {
 	const navigate = useNavigate()
 	const appProps = useContext(AppPropsContext)
@@ -64,22 +66,26 @@ export default function SettingsNavigation({ user }: Props) {
 		return base.map((page, i) => ({ ...page, index: i }))
 	}, [appProps?.platform, user?.role])
 
+	if (tabs.length <= 1) {
+		// Don't render navigation if there's only one available page,
+		// this indicates the user doesn't have access to any other pages and is
+		// silly to render a navigation with only one tab
+		return null
+	}
+
 	return (
 		<SceneContainer className="pb-0">
-			{tabs.length > 1 && (
-				<NativeSelect
-					className="md:hidden"
-					options={tabs.map((tab) => ({
-						label: t(tab.localeKey),
-						value: tab.path,
-					}))}
-					value={location.pathname}
-					onChange={(e) => {
-						navigate(e.target.value)
-					}}
-				/>
-			)}
-
+			<NativeSelect
+				className="md:hidden"
+				options={tabs.map((tab) => ({
+					label: t(tab.localeKey),
+					value: tab.path,
+				}))}
+				value={location.pathname}
+				onChange={(e) => {
+					navigate(e.target.value)
+				}}
+			/>
 			<Tabs
 				value={location.pathname}
 				variant="primary"

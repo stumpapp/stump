@@ -51,7 +51,7 @@
 		"typescript": "^5.0.2"
 	},
 	"lint-staged": {
-		"*.{js,jsx,ts,tsx,md,json}": [
+		"!(packages/interface/src/i18n/locales/**/*)*.{js,jsx,ts,tsx,md,json}": [
 			"prettier --config prettier.config.js --check"
 		],
 		"*.rs": [

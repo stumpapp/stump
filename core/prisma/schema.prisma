@@ -107,7 +107,8 @@ model Library {
 
   tags Tag[]
 
-  job_schedules JobScheduleConfig[]
+  job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
+  job_schedule_config_id String?
 
   @@map("libraries")
 }

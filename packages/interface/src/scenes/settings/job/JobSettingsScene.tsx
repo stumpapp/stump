@@ -89,8 +89,9 @@ export default function JobSettingsScene() {
 					</Text>
 
 					<Divider variant="muted" className="my-3.5" />
+
+					<JobScheduler />
 				</div>
-				<JobScheduler />
 
 				<div>
 					<Heading size="xs">{t('settingsScene.jobs.historyHeading')}</Heading>
@@ -99,9 +100,12 @@ export default function JobSettingsScene() {
 					</Text>
 
 					<Divider variant="muted" className="my-3.5" />
+
+					<div className="flex flex-col gap-3">
+						<JobTable />
+						<DeleteAllSection />
+					</div>
 				</div>
-				<JobTable />
-				<DeleteAllSection />
 			</SceneContainer>
 		</JobSettingsContext.Provider>
 	)

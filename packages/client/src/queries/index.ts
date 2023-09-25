@@ -34,6 +34,7 @@ export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {
 	useCreateUser,
 	useDeleteUser,
+	useLoginActivityQuery,
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,

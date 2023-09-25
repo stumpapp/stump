@@ -1,4 +1,10 @@
-import type { LoginOrRegisterArgs, UpdateUser, User, UserPreferences } from '@stump/types'
+import type {
+	LoginActivity,
+	LoginOrRegisterArgs,
+	UpdateUser,
+	User,
+	UserPreferences,
+} from '@stump/types'
 
 import { API, toUrlParams } from '.'
 import { ApiResult, PageableApiResult } from './types'
@@ -60,9 +66,19 @@ export function deleteUser({ userId, hardDelete }: DeleteUser): Promise<ApiResul
 	})
 }
 
+export function getLoginActivityForUser(userId: string): Promise<ApiResult<LoginActivity[]>> {
+	return API.get(`/users/${userId}/login-activity`)
+}
+
+export function getLoginActivity(): Promise<ApiResult<LoginActivity[]>> {
+	return API.get(`/users/login-activity`)
+}
+
 export const userApi = {
 	createUser,
 	deleteUser,
+	getLoginActivity,
+	getLoginActivityForUser,
 	getUserPreferences,
 	getUsers,
 	updatePreferences,
@@ -74,6 +90,8 @@ export const userApi = {
 export const userQueryKeys: Record<keyof typeof userApi, string> = {
 	createUser: 'user.createUser',
 	deleteUser: 'user.deleteUser',
+	getLoginActivity: 'user.getLoginActivity',
+	getLoginActivityForUser: 'user.getLoginActivityForUser',
 	getUserPreferences: 'user.getUserPreferences',
 	getUsers: 'user.getUsers',
 	updatePreferences: 'user.updatePreferences',

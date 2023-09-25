@@ -245,10 +245,10 @@ async fn get_scheduler_config(
 	Ok(Json(JobSchedulerConfig::from(config)))
 }
 
-#[derive(Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct UpdateSchedulerConfig {
 	pub interval_secs: Option<i32>,
-	pub excluded_libraries_ids: Option<Vec<String>>,
+	pub excluded_library_ids: Option<Vec<String>>,
 }
 
 #[utoipa::path(
@@ -269,7 +269,9 @@ async fn update_scheduler_config(
 	let db = ctx.get_db();
 
 	let should_remove_config =
-		input.excluded_libraries_ids.is_none() && input.interval_secs.is_none();
+		input.excluded_library_ids.is_none() && input.interval_secs.is_none();
+
+	tracing::trace!(should_remove_config, ?input, "update_scheduler_config");
 
 	let result: Result<Option<JobSchedulerConfig>, ApiError> = db
 		._transaction()
@@ -289,33 +291,32 @@ async fn update_scheduler_config(
 				input
 					.interval_secs
 					.map(job_schedule_config::interval_secs::set),
-				input.excluded_libraries_ids.map(|list| {
-					job_schedule_config::excluded_libraries::connect(
+				input.excluded_library_ids.map(|list| {
+					job_schedule_config::excluded_libraries::set(
 						list.into_iter().map(library::id::equals).collect(),
 					)
 				}),
-				// existing_config.map(|config| {
-				// 	let test = config.excluded_libraries.map(|libraries| {
-				// 		libraries.iter().map(|l| library::id::equals(l.id.clone()))
-				// 	});
-				// 	job_schedule_config::excluded_libraries::disconnect(
-				// 		chain_optional_iter([], []),
-				// 	)
-				// }),
 			];
 
-			if let Some(existing_config_id) = server_preferences.job_schedule_config_id {
+			if should_remove_config {
+				client
+					.job_schedule_config()
+					.delete_many(vec![])
+					.exec()
+					.await?;
+				Ok(None)
+			} else if let Some(config) = existing_config {
 				let updated_config = client
 					.job_schedule_config()
 					.update(
-						job_schedule_config::id::equals(existing_config_id),
+						job_schedule_config::id::equals(config.id),
 						chain_optional_iter([], set_params.clone()),
 					)
 					.with(job_schedule_config::excluded_libraries::fetch(vec![]))
 					.exec()
 					.await?;
 				Ok(Some(JobSchedulerConfig::from(updated_config)))
-			} else if !should_remove_config {
+			} else {
 				let created_config = client
 					.job_schedule_config()
 					.create(chain_optional_iter(
@@ -328,13 +329,6 @@ async fn update_scheduler_config(
 					.exec()
 					.await?;
 				Ok(Some(JobSchedulerConfig::from(created_config)))
-			} else {
-				client
-					.job_schedule_config()
-					.delete_many(vec![])
-					.exec()
-					.await?;
-				Ok(None)
 			}
 		})
 		.await;

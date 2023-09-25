@@ -56,6 +56,9 @@ export default function JobScheduler() {
 				console.error(error)
 				toast.error('Failed to update job scheduler config')
 			},
+			onSuccess: () => {
+				toast.success('Scheduler config updated!')
+			},
 		})
 	}
 
@@ -94,7 +97,7 @@ export default function JobScheduler() {
 	}, [form, config])
 
 	return (
-		<div className="-mt-4 flex flex-col gap-6">
+		<div className="my-2 flex flex-col gap-6">
 			<Alert level="warning" rounded="sm" icon={Construction}>
 				<Alert.Content>
 					Stump currently only supports scheduling scanner jobs. This will be extended to support

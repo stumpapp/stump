@@ -15,7 +15,7 @@ export const ALERT_ICONS = {
 
 // TODO: adjust colors
 export const ALERT_VARIANTS: Record<keyof typeof ALERT_ICONS, string> = {
-	error: 'bg-red-50 text-red-700 dark:bg-red-300/25',
+	error: 'bg-red-50 text-red-700 dark:bg-red-700/30 dark:text-red-400',
 	grayscale: 'bg-gray-50 text-gray-700',
 	info: 'bg-blue-50 text-blue-700',
 	success: 'bg-green-50 text-green-700',

@@ -173,6 +173,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserRole>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateUser>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UpdateUserPreferences>()?).as_bytes(),

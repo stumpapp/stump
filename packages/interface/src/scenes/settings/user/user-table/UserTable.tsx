@@ -2,7 +2,7 @@ import { Text } from '@stump/components'
 import { User } from '@stump/types'
 import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
@@ -14,8 +14,6 @@ import UsernameRow from './UsernameRow'
 // 2. Revoke access to a reading list
 // 3. Grant access to a reading list
 // 4. etc.
-
-const debugFlag = import.meta.env.DEV
 
 export default function UserTable() {
 	const { users, pageCount, pagination, setPagination } = useUserManagementContext()
@@ -92,9 +90,6 @@ export default function UserTable() {
 			sortable
 			columns={columns}
 			options={{
-				debugColumns: debugFlag,
-				debugHeaders: debugFlag,
-				debugTable: debugFlag,
 				getCoreRowModel: getCoreRowModel(),
 				manualPagination: true,
 				onPaginationChange: setPagination,

@@ -37,7 +37,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		// TODO: adminguard these first two routes
 		.route("/users", get(get_users).post(create_user))
-		.route("/users/login-activity", get(get_user_login_activity))
+		.route(
+			"/users/login-activity",
+			get(get_user_login_activity).delete(delete_user_login_activity),
+		)
 		.nest(
 			"/users/me",
 			Router::new()
@@ -161,11 +164,10 @@ async fn get_users(
 	path = "/api/v1/users/login-activity",
 	tag = "user",
 	responses(
-		(status = 200, description = "Successfully fetched user.", body = Vec<LoginActivity>),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "User not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully fetched user", body = Vec<LoginActivity>),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 async fn get_user_login_activity(
@@ -187,6 +189,34 @@ async fn get_user_login_activity(
 	Ok(Json(
 		user_activity.into_iter().map(LoginActivity::from).collect(),
 	))
+}
+
+#[utoipa::path(
+	delete,
+	path = "/api/v1/users/login-activity",
+	tag = "user",
+	responses(
+		(status = 200, description = "Successfully deleted user login activity", body = Vec<LoginActivity>),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn delete_user_login_activity(
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+) -> ApiResult<Json<()>> {
+	get_session_admin_user(&session)?;
+
+	let client = ctx.get_db();
+
+	client
+		.user_login_activity()
+		.delete_many(vec![])
+		.exec()
+		.await?;
+
+	Ok(Json(()))
 }
 
 async fn update_user(

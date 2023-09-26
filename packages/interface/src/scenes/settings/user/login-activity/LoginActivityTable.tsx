@@ -1,11 +1,16 @@
 import { useLoginActivityQuery } from '@stump/client'
 import { Avatar, Badge, Text, ToolTip } from '@stump/components'
 import { LoginActivity } from '@stump/types'
-import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
+import {
+	createColumnHelper,
+	getCoreRowModel,
+	getPaginationRowModel,
+	PaginationState,
+} from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import React from 'react'
+import React, { useState } from 'react'
 
-import { Table } from '../../../components/table'
+import { Table } from '../../../../components/table'
 
 const columnHelper = createColumnHelper<LoginActivity>()
 
@@ -40,7 +45,7 @@ const baseColumns = [
 	}),
 	columnHelper.accessor('user_agent', {
 		cell: ({ row: { original: activity } }) => (
-			<Text size="sm" variant="muted">
+			<Text size="sm" variant="muted" className="line-clamp-1" title={activity.user_agent}>
 				{activity.user_agent}
 			</Text>
 		),
@@ -57,10 +62,15 @@ const baseColumns = [
 	}),
 ]
 
-// TODO: add pagination
 export default function LoginActivityTable() {
 	const { loginActivity } = useLoginActivityQuery({})
 
+	const [pagination, setPagination] = useState<PaginationState>({
+		pageIndex: 0,
+		pageSize: 10,
+	})
+
+	// FIXME: doesn't scale well on mobile
 	return (
 		<Table
 			data={loginActivity || []}
@@ -68,7 +78,13 @@ export default function LoginActivityTable() {
 			fullWidth
 			options={{
 				getCoreRowModel: getCoreRowModel(),
+				getPaginationRowModel: getPaginationRowModel(),
+				onPaginationChange: setPagination,
+				state: {
+					pagination,
+				},
 			}}
+			isZeroBasedPagination
 		/>
 	)
 }

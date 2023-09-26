@@ -74,8 +74,13 @@ export function getLoginActivity(): Promise<ApiResult<LoginActivity[]>> {
 	return API.get(`/users/login-activity`)
 }
 
+export function deleteAllLoginActivity(): Promise<ApiResult<void>> {
+	return API.delete(`/users/login-activity`)
+}
+
 export const userApi = {
 	createUser,
+	deleteAllLoginActivity,
 	deleteUser,
 	getLoginActivity,
 	getLoginActivityForUser,
@@ -89,6 +94,7 @@ export const userApi = {
 
 export const userQueryKeys: Record<keyof typeof userApi, string> = {
 	createUser: 'user.createUser',
+	deleteAllLoginActivity: 'user.deleteAllLoginActivity',
 	deleteUser: 'user.deleteUser',
 	getLoginActivity: 'user.getLoginActivity',
 	getLoginActivityForUser: 'user.getLoginActivityForUser',

@@ -10,7 +10,7 @@ import { useAppContext } from '../../../context'
 import { useLocaleContext } from '../../../i18n/index'
 import { SettingsContent, SettingsHeading } from '../SettingsLayout'
 import { UserManagementContext } from './context'
-import LoginActivitySection from './LoginActivitySection'
+import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
 import UserManagementStats from './UserManagementStats'
 

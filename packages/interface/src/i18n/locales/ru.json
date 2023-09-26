@@ -153,36 +153,36 @@
 				},
 				"light": {
 					"label": "Светлая тема",
-					"description": "Use a light theme for Stump, which is the incorrect theme."
+					"description": "Используйте светлую тему для Stump."
 				}
 			},
 			"locale": {
 				"localeSelector": {
-					"label": "Language"
+					"label": "Язык"
 				},
-				"heading": "Language and Locale Settings",
+				"heading": "Настройки языка и локали",
 				"subtitle": [
-					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-					"Stump's translations",
-					"if you're able to!"
+					"Stump поддерживает несколько языков, установите предпочитаемый. Пожалуйста, подумайте о помощи в улучшении качества",
+					"Переводы Stump",
+					"если вы можете!"
 				]
 			}
 		},
 		"jobs": {
-			"helmet": "Jobs and Configuration",
-			"heading": "Jobs and Configuration",
-			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
-			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
-			"historyHeading": "Job History",
-			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"helmet": "Задачи и настройки",
+			"heading": "Задачи и настройки",
+			"subtitle": "Просмотр и управление фоновой заданиями на этом сервере, включая сканирование библиотек и планирование",
+			"schedulingHeading": "Планировщик заданий",
+			"schedulingSubtitle": "Управление планированием фоновых задач на этом сервере",
+			"historyHeading": "История заданий",
+			"historySubtitle": "Управление запущенными задачами и просмотр завершенных",
 			"historyTable": {
 				"columns": {
-					"name": "Type",
-					"description": "Description",
-					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
+					"name": "Тип",
+					"description": "Описание",
+					"status": "Статус",
+					"createdAt": "Запущено",
+					"elapsed": "Прошло времени",
 					"tasks": "Задачи"
 				},
 				"emptyHeading": "Нет заданий",
@@ -276,22 +276,22 @@
 		"reconnectionFailed": "Что-то пошло не так!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Сервер не подключен",
 		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
+			"Пожалуйста, проверьте ваше интернет-соединение",
+			"Нажмите сюда",
+			"чтобы изменить URL сервера"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "Нет элементов для отображения",
 		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
+			"next": "Перемотка вперед",
+			"previous": "Перемотка назад"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
+		"placholder": "Выберите или создайте тег",
+		"placeholderNoTags": "Нет доступных тегов"
 	}
 }

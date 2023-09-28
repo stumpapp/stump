@@ -173,7 +173,8 @@ type UseLoginActivityQueryOptions = {
 } & QueryOptions<LoginActivity[]>
 export function useLoginActivityQuery({ userId, ...options }: UseLoginActivityQueryOptions) {
 	const { data: loginActivity, ...restReturn } = useQuery(
-		[userQueryKeys.getLoginActivity, userId],
+		// This is a bit pedantic and not strictly necessary, but w/e
+		[userId ? userQueryKeys.getLoginActivityForUser : userQueryKeys.getLoginActivity, userId],
 		async () => {
 			const response = userId
 				? await userApi.getLoginActivityForUser(userId)

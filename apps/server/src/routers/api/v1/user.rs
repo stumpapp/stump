@@ -31,11 +31,8 @@ use crate::{
 
 use super::auth::LoginOrRegisterArgs;
 
-// TODO: move some of these user operations to the UserDao...
-
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		// TODO: adminguard these first two routes
 		.route("/users", get(get_users).post(create_user))
 		.route(
 			"/users/login-activity",
@@ -164,7 +161,7 @@ async fn get_users(
 	path = "/api/v1/users/login-activity",
 	tag = "user",
 	responses(
-		(status = 200, description = "Successfully fetched user", body = Vec<LoginActivity>),
+		(status = 200, description = "Successfully fetched login activity"),
 		(status = 401, description = "Unauthorized"),
 		(status = 403, description = "Forbidden"),
 		(status = 500, description = "Internal server error"),
@@ -196,7 +193,7 @@ async fn get_user_login_activity(
 	path = "/api/v1/users/login-activity",
 	tag = "user",
 	responses(
-		(status = 200, description = "Successfully deleted user login activity", body = Vec<LoginActivity>),
+		(status = 200, description = "Successfully deleted user login activity"),
 		(status = 401, description = "Unauthorized"),
 		(status = 403, description = "Forbidden"),
 		(status = 500, description = "Internal server error"),

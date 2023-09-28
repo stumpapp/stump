@@ -77,42 +77,6 @@ async fn main() -> ServerResult<()> {
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
-	// // create dummy scheduler for now
-	// if cfg!(debug_assertions) {
-	// 	use stump_core::prisma::{scan_schedule_config, server_preferences};
-	// 	let ctx = core.get_context();
-	// 	let config = ctx
-	// 		.db
-	// 		.scan_schedule_config()
-	// 		.create(vec![scan_schedule_config::scan_interval_secs::set(60)])
-	// 		.exec()
-	// 		.await
-	// 		.expect("Failed to create scan schedule config");
-	// 	let preferences = ctx
-	// 		.db
-	// 		.server_preferences()
-	// 		.find_first(vec![])
-	// 		.exec()
-	// 		.await
-	// 		.expect("Failed to find server preferences")
-	// 		.expect("Server preferences not found");
-
-	// 	let _ = ctx
-	// 		.db
-	// 		.server_preferences()
-	// 		.update(
-	// 			server_preferences::id::equals(preferences.id.clone()),
-	// 			vec![server_preferences::scan_schedule_config::connect(
-	// 				scan_schedule_config::id::equals(config.id.clone()),
-	// 			)],
-	// 		)
-	// 		.exec()
-	// 		.await
-	// 		.expect("Failed to update server preferences");
-
-	// 	println!("Created and linked scan schedule config: {:?}", config);
-	// }
-
 	// Initialize the scheduler
 	core.init_scheduler()
 		.await

@@ -20,7 +20,7 @@ pub fn generate_thumbnail(
 	media_path: &str,
 	options: ImageProcessorOptions,
 ) -> Result<PathBuf, FileError> {
-	let (_, buf) = media::get_page(media_path, 1)?;
+	let (_, buf) = media::get_page(media_path, options.page.unwrap_or(1))?;
 	let ext = options.format.extension();
 
 	let thumbnail_path = get_thumbnails_dir().join(format!("{}.{}", &id, ext));

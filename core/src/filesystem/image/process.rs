@@ -86,6 +86,11 @@ pub struct ImageProcessorOptions {
 	/// where 100.0 is the highest quality. Omitting this value will use the default quality
 	/// of 100.0.
 	pub quality: Option<f32>,
+	// TODO: this implementation is not overly ideal, and is really only here for one-off generation.
+	// I would like to iterate after the initial release to make this more robust so that these choices
+	// are stored in the database
+	/// The page to use when generating an image. This is not applicable to all media formats.
+	pub page: Option<i32>,
 }
 
 impl ImageProcessorOptions {
@@ -95,6 +100,13 @@ impl ImageProcessorOptions {
 		Self {
 			format: ImageFormat::Jpeg,
 			..Default::default()
+		}
+	}
+
+	pub fn with_page(self, page: i32) -> Self {
+		Self {
+			page: Some(page),
+			..self
 		}
 	}
 }

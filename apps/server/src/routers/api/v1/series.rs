@@ -7,6 +7,7 @@ use axum::{
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{or, Direction};
+use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
@@ -17,6 +18,10 @@ use stump_core::{
 		},
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
+	filesystem::{
+		image::{generate_thumbnail, ImageProcessorOptions},
+		read_entire_file, ContentType,
+	},
 	prisma::{
 		library,
 		media::{self, OrderByParam as MediaOrderByParam},
@@ -26,6 +31,7 @@ use stump_core::{
 	},
 };
 use tracing::{error, trace};
+use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
@@ -57,7 +63,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_series_by_id))
 				.route("/media", get(get_series_media))
 				.route("/media/next", get(get_next_in_series))
-				.route("/thumbnail", get(get_series_thumbnail)),
+				.route(
+					"/thumbnail",
+					get(get_series_thumbnail).patch(patch_series_thumbnail),
+				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
@@ -442,6 +451,94 @@ async fn get_series_thumbnail(
 	};
 
 	get_media_thumbnail(&media, image_format).map(ImageResponse::from)
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct PatchSeriesThumbnail {
+	/// The ID of the media inside the series to fetch
+	media_id: String,
+	/// The page of the media to use for the thumbnail
+	page: i32,
+	/// A flag indicating whether the page is zero based
+	is_zero_based: Option<bool>,
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/series/:id/thumbnail",
+    tag = "series",
+    params(
+        ("id" = String, Path, description = "The ID of the series")
+    ),
+    responses(
+        (status = 200, description = "Successfully updated series thumbnail"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Series not found"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
+async fn patch_series_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Json(body): Json<PatchSeriesThumbnail>,
+) -> ApiResult<ImageResponse> {
+	let client = ctx.get_db();
+
+	let target_page = body
+		.is_zero_based
+		.map(|is_zero_based| {
+			if is_zero_based {
+				body.page + 1
+			} else {
+				body.page
+			}
+		})
+		.unwrap_or(body.page);
+
+	let media = client
+		.media()
+		.find_first(vec![
+			media::series_id::equals(Some(id.clone())),
+			media::id::equals(body.media_id),
+		])
+		.with(
+			media::series::fetch()
+				.with(series::library::fetch().with(library::library_options::fetch())),
+		)
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	if media.extension == "epub" {
+		return Err(ApiError::NotSupported);
+	}
+
+	let library = media
+		.series()?
+		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+	let thumbnail_options = library
+		.library_options()?
+		.thumbnail_config
+		.to_owned()
+		.map(ImageProcessorOptions::try_from)
+		.transpose()?
+		.unwrap_or_else(|| {
+			tracing::warn!(
+				"Failed to parse existing thumbnail config! Using a default config"
+			);
+			ImageProcessorOptions::default()
+		})
+		.with_page(target_page);
+
+	let format = thumbnail_options.format.clone();
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	Ok(ImageResponse::from((
+		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
 }
 
 // FIXME: age restrictions mess up the counts since PCR doesn't support relation counts yet!

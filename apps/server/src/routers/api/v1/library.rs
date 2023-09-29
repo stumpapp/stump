@@ -25,10 +25,12 @@ use stump_core::{
 	},
 	filesystem::{
 		image::{
-			self, remove_thumbnails, remove_thumbnails_of_type, ImageProcessorOptions,
-			ThumbnailJob, ThumbnailJobConfig,
+			self, generate_thumbnail, remove_thumbnails, remove_thumbnails_of_type,
+			ImageProcessorOptions, ThumbnailJob, ThumbnailJobConfig,
 		},
+		read_entire_file,
 		scanner::LibraryScanJob,
+		ContentType,
 	},
 	prisma::{
 		library::{self, WhereParam},
@@ -84,7 +86,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					Router::new()
 						.route(
 							"/",
-							get(get_library_thumbnail).delete(delete_library_thumbnails),
+							get(get_library_thumbnail)
+								.patch(patch_library_thumbnail)
+								.delete(delete_library_thumbnails),
 						)
 						.route("/generate", post(generate_library_thumbnails)),
 				),
@@ -491,6 +495,94 @@ async fn get_library_thumbnail(
 		.map(|config| config.format);
 
 	get_media_thumbnail(media, image_format).map(ImageResponse::from)
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct PatchLibraryThumbnail {
+	/// The ID of the media inside the series to fetch
+	media_id: String,
+	/// The page of the media to use for the thumbnail
+	page: i32,
+	/// A flag indicating whether the page is zero based
+	is_zero_based: Option<bool>,
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/libraries/:id/thumbnail",
+    tag = "library",
+    params(
+        ("id" = String, Path, description = "The ID of the library")
+    ),
+    responses(
+        (status = 200, description = "Successfully updated library thumbnail"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Series not found"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
+async fn patch_library_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Json(body): Json<PatchLibraryThumbnail>,
+) -> ApiResult<ImageResponse> {
+	let client = ctx.get_db();
+
+	let target_page = body
+		.is_zero_based
+		.map(|is_zero_based| {
+			if is_zero_based {
+				body.page + 1
+			} else {
+				body.page
+			}
+		})
+		.unwrap_or(body.page);
+
+	let media = client
+		.media()
+		.find_first(vec![
+			media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
+			media::id::equals(body.media_id),
+		])
+		.with(
+			media::series::fetch()
+				.with(series::library::fetch().with(library::library_options::fetch())),
+		)
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	if media.extension == "epub" {
+		return Err(ApiError::NotSupported);
+	}
+
+	let library = media
+		.series()?
+		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+	let thumbnail_options = library
+		.library_options()?
+		.thumbnail_config
+		.to_owned()
+		.map(ImageProcessorOptions::try_from)
+		.transpose()?
+		.unwrap_or_else(|| {
+			tracing::warn!(
+				"Failed to parse existing thumbnail config! Using a default config"
+			);
+			ImageProcessorOptions::default()
+		})
+		.with_page(target_page);
+
+	let format = thumbnail_options.format.clone();
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	Ok(ImageResponse::from((
+		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
 }
 
 /// Deletes all media thumbnails in a library by id, if the current user has access to it.

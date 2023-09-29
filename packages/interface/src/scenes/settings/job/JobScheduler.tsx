@@ -35,7 +35,9 @@ export default function JobScheduler() {
 	const { config, update } = useJobSchedulerConfig()
 
 	const isSmallViewport = useMediaMatch('(max-width: 768px)')
-	const [intervalPreset, setIntervalPreset] = useState(-1)
+	const [intervalPreset, setIntervalPreset] = useState(
+		getCorrespondingPreset(config?.interval_secs || -1)?.value ?? -1,
+	)
 
 	const form = useForm({
 		defaultValues: {
@@ -50,16 +52,22 @@ export default function JobScheduler() {
 		'interval_secs',
 	])
 
-	const handleSubmit = async (values: FormValues) => {
-		update(values, {
-			onError: (error) => {
-				console.error(error)
-				toast.error('Failed to update job scheduler config')
+	const handleSubmit = async ({ interval_secs, excluded_library_ids }: FormValues) => {
+		update(
+			{
+				excluded_library_ids: excluded_library_ids ?? null,
+				interval_secs: interval_secs ?? null,
 			},
-			onSuccess: () => {
-				toast.success('Scheduler config updated!')
+			{
+				onError: (error) => {
+					console.error(error)
+					toast.error('Failed to update job scheduler config')
+				},
+				onSuccess: () => {
+					toast.success('Scheduler config updated!')
+				},
 			},
-		})
+		)
 	}
 
 	const handleIntervalPresetChange = (value?: string) => {
@@ -93,6 +101,7 @@ export default function JobScheduler() {
 				'excluded_library_ids',
 				config.excluded_libraries.map(({ id }) => id),
 			)
+			form.setValue('interval_secs', config.interval_secs)
 		}
 	}, [form, config])
 

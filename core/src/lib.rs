@@ -141,7 +141,8 @@ mod tests {
 		db::{
 			entity::{
 				epub::*, library::*, log::*, media::*, metadata::*, read_progress::*,
-				reading_list::*, series::*, tag::*, user::*, FileStatus, LayoutMode,
+				reading_list::*, series::*, server_config::*, tag::*, user::*,
+				FileStatus, LayoutMode,
 			},
 			query::{ordering::*, pagination::*},
 		},
@@ -208,6 +209,8 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobDetail>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;

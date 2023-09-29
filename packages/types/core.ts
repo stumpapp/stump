@@ -62,6 +62,8 @@ export type JobUpdate = { job_id: string; current_task: BigInt | null; task_coun
 
 export type JobDetail = { id: string; name: string; description: string | null; status: JobStatus; task_count: number | null; completed_task_count: number | null; ms_elapsed: BigInt | null; created_at: string | null; completed_at: string | null }
 
+export type JobSchedulerConfig = { id: string; interval_secs: number; excluded_libraries: Library[] }
+
 export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { job_id: string; message: string } } | { key: "CreateEntityFailed"; data: { job_id: string | null; path: string; message: string } } | { key: "CreatedMedia"; data: Media } | { key: "CreatedMediaBatch"; data: BigInt } | { key: "CreatedSeries"; data: Series } | { key: "CreatedSeriesBatch"; data: BigInt } | { key: "GeneratedThumbnailBatch"; data: BigInt }
 
 export type ReadingListItem = { display_order: number; media_id: string; reading_list_id: string; media: Media | null }

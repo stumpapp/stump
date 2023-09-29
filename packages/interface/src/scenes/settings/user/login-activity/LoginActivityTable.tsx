@@ -41,11 +41,16 @@ const baseColumns = [
 	}),
 	columnHelper.accessor('ip_address', {
 		cell: ({ row: { original: activity } }) => <Text size="sm">{activity.ip_address}</Text>,
-		header: 'IP Address',
+		header: 'IP address',
 	}),
 	columnHelper.accessor('user_agent', {
 		cell: ({ row: { original: activity } }) => (
-			<Text size="sm" variant="muted" className="line-clamp-1" title={activity.user_agent}>
+			<Text
+				size="sm"
+				variant="muted"
+				className="line-clamp-1 max-w-sm md:max-w-xl"
+				title={activity.user_agent}
+			>
 				{activity.user_agent}
 			</Text>
 		),
@@ -57,7 +62,7 @@ const baseColumns = [
 				{activity.authentication_successful ? 'Successful' : 'Failure'}
 			</Badge>
 		),
-		header: '',
+		header: 'Auth result',
 		id: 'authentication_successful',
 	}),
 ]

@@ -1,4 +1,4 @@
-import type { JobDetail, Library } from '@stump/types'
+import type { JobDetail, JobSchedulerConfig, UpdateSchedulerConfig } from '@stump/types'
 
 import { API, toUrlParams } from '.'
 import { ApiResult, PageableApiResult } from './types'
@@ -24,23 +24,13 @@ export function deleteAllJobs(): Promise<ApiResult<void>> {
 	return API.delete('/jobs')
 }
 
-// TODO: types!
-export function getJobSchedulerConfig(): Promise<
-	ApiResult<{
-		id: string
-		interval_secs: number
-		excluded_libraries: Library[]
-	}>
-> {
+export function getJobSchedulerConfig(): Promise<ApiResult<JobSchedulerConfig>> {
 	return API.get('/jobs/scheduler-config')
 }
 
-// TODO: types!
-type UpdateJobSchedulerConfig = {
-	interval_secs?: number
-	excluded_library_ids?: string[]
-}
-export function updateJobSchedulerConfig(config: UpdateJobSchedulerConfig) {
+export function updateJobSchedulerConfig(
+	config: UpdateSchedulerConfig,
+): Promise<ApiResult<JobSchedulerConfig>> {
 	return API.post('/jobs/scheduler-config', config)
 }
 

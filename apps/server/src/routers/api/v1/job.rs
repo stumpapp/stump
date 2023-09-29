@@ -245,7 +245,7 @@ async fn get_scheduler_config(
 	Ok(Json(JobSchedulerConfig::from(config)))
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema, specta::Type)]
 pub struct UpdateSchedulerConfig {
 	pub interval_secs: Option<i32>,
 	pub excluded_library_ids: Option<Vec<String>>,
@@ -287,16 +287,6 @@ async fn update_scheduler_config(
 				)))?;
 
 			let existing_config = server_preferences.job_schedule_config()?.cloned();
-			let set_params = [
-				input
-					.interval_secs
-					.map(job_schedule_config::interval_secs::set),
-				input.excluded_library_ids.map(|list| {
-					job_schedule_config::excluded_libraries::set(
-						list.into_iter().map(library::id::equals).collect(),
-					)
-				}),
-			];
 
 			if should_remove_config {
 				client
@@ -310,7 +300,21 @@ async fn update_scheduler_config(
 					.job_schedule_config()
 					.update(
 						job_schedule_config::id::equals(config.id),
-						chain_optional_iter([], set_params.clone()),
+						chain_optional_iter(
+							[],
+							[
+								input
+									.interval_secs
+									.map(job_schedule_config::interval_secs::set),
+								input.excluded_library_ids.map(|list| {
+									job_schedule_config::excluded_libraries::set(
+										list.into_iter()
+											.map(library::id::equals)
+											.collect(),
+									)
+								}),
+							],
+						),
 					)
 					.with(job_schedule_config::excluded_libraries::fetch(vec![]))
 					.exec()
@@ -323,7 +327,16 @@ async fn update_scheduler_config(
 						[job_schedule_config::server_preferences::connect(
 							server_preferences::id::equals(server_preferences.id),
 						)],
-						set_params,
+						[
+							input
+								.interval_secs
+								.map(job_schedule_config::interval_secs::set),
+							input.excluded_library_ids.map(|list| {
+								job_schedule_config::excluded_libraries::connect(
+									list.into_iter().map(library::id::equals).collect(),
+								)
+							}),
+						],
 					))
 					.with(job_schedule_config::excluded_libraries::fetch(vec![]))
 					.exec()

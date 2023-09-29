@@ -18,8 +18,8 @@ mod tests {
 	};
 
 	use super::v1::{
-		auth::LoginOrRegisterArgs, metadata::MediaMetadataOverview, ClaimResponse,
-		StumpVersion,
+		auth::LoginOrRegisterArgs, job::UpdateSchedulerConfig,
+		metadata::MediaMetadataOverview, ClaimResponse, StumpVersion,
 	};
 
 	#[allow(dead_code)]
@@ -49,6 +49,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),
 		)?;
 
 		Ok(())

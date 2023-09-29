@@ -173,7 +173,7 @@
 			"heading": "Tâches et Configuration",
 			"subtitle": "Affichez et gérez les tâches en arrière-plan disponibles sur ce serveur, y compris les analyses de bibliothèques et la planification",
 			"schedulingHeading": "Planification des tâches",
-			"schedulingSubtitle": "Gérer la planification des tâches en arrière-plan sur ce serveur",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
 			"historyHeading": "Historique des tâches",
 			"historySubtitle": "Gérer les tâches en cours et afficher l'historique des tâches terminées",
 			"historyTable": {
@@ -187,7 +187,7 @@
 				},
 				"emptyHeading": "Il n'y a aucune tâche à afficher",
 				"emptySubtitle": "Vous ne pouvez pas avoir une tâche si vous n'avez pas une tâche",
-				"deleteAllMessage": "L'historique des tâches et les statistiques de toutes les tâches peuvent être supprimés à tout moment et n'affecteront pas les tâches en cours. Cette action ne peut cependant pas être annulée et supprimera tout l'historique des tâches de la base de données.",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
 				"deleteAllConfirmButton": "Effacer l'historique",
 				"deleteAllConfirmButtonTitle": "Effacer l'historique des tâches",
 				"deleteAllConfirmButtonTitleNoJobs": "Aucune tâche à effacer"

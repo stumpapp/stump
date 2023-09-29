@@ -18,8 +18,8 @@
 		},
 		"toasts": {
 			"loggingIn": "Iniciando sesión...",
-			"loggedIn": "¡Bienvenido de vuelta!",
-			"loggedInFirstTime": "¡Bienvenido!",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
 			"registering": "Registrando...",
 			"registered": "¡Registrado!",
 			"loginFailed": "Error de inicio de sesión. Por favor, inténtelo de nuevo",
@@ -173,7 +173,7 @@
 			"heading": "Trabajos y Configuración",
 			"subtitle": "Ver y administrar las tareas en segundo plano disponibles en este servidor, incluyendo los escaneos de la biblioteca y la programación",
 			"schedulingHeading": "Programación de tareas",
-			"schedulingSubtitle": "Gestionar la programación de tareas en segundo plano en este servidor",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
 			"historyHeading": "Historial de tareas",
 			"historySubtitle": "Gestionar tareas en ejecución y ver el historial de tareas completadas",
 			"historyTable": {
@@ -187,7 +187,7 @@
 				},
 				"emptyHeading": "No hay tareas para mostrar",
 				"emptySubtitle": "No puede tener una tarea si no tienes una tarea",
-				"deleteAllMessage": "El historial de tareas y las estadísticas de todas las tareas pueden ser eliminadas en cualquier momento, y no afectarán a la ejecución de las tareas. Esta acción, sin embargo, no se puede deshacer y eliminará todo el historial de tareas de la base de datos.",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
 				"deleteAllConfirmButton": "Eliminar historial",
 				"deleteAllConfirmButtonTitle": "Eliminar todo el historial de tareas",
 				"deleteAllConfirmButtonTitleNoJobs": "No hay tareas para eliminar"

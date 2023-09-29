@@ -17,9 +17,9 @@
 			}
 		},
 		"toasts": {
-			"loggingIn": "Entrando...",
-			"loggedIn": "Bem-vindo de volta!",
-			"loggedInFirstTime": "Bem vindo!",
+			"loggingIn": "A autenticar...",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
 			"registering": "Registrando...",
 			"registered": "Registrado!",
 			"loginFailed": "Login failed. Please try again",
@@ -173,7 +173,7 @@
 			"heading": "Trabalhos e Configuração",
 			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
 			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
 			"historyHeading": "Job History",
 			"historySubtitle": "Manage running jobs and view the history of completed jobs",
 			"historyTable": {
@@ -187,7 +187,7 @@
 				},
 				"emptyHeading": "There are no jobs to display",
 				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
 				"deleteAllConfirmButton": "Clear history",
 				"deleteAllConfirmButtonTitle": "Clear all job history",
 				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"

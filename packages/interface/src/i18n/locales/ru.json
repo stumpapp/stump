@@ -173,7 +173,7 @@
 			"heading": "Задачи и настройки",
 			"subtitle": "Просмотр и управление фоновой заданиями на этом сервере, включая сканирование библиотек и планирование",
 			"schedulingHeading": "Планировщик заданий",
-			"schedulingSubtitle": "Управление планированием фоновых задач на этом сервере",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
 			"historyHeading": "История заданий",
 			"historySubtitle": "Управление запущенными задачами и просмотр завершенных",
 			"historyTable": {
@@ -187,7 +187,7 @@
 				},
 				"emptyHeading": "Нет заданий",
 				"emptySubtitle": "У вас не может быт задач, если у вас нет задач",
-				"deleteAllMessage": "История заданий и статистика по всем заданиям могут быть удалены в любое время и не повлияют на выполняемые задания. Это действие, однако, не может быть отменено и удалит всю историю задач из базы данных.",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
 				"deleteAllConfirmButton": "Очистить историю",
 				"deleteAllConfirmButtonTitle": "Очистить историю задач",
 				"deleteAllConfirmButtonTitleNoJobs": "Нет задач для очистки"

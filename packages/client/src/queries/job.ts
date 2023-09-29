@@ -1,7 +1,7 @@
 import { jobApi, jobQueryKeys } from '@stump/api'
 import type { JobDetail } from '@stump/types'
 
-import { PageQueryOptions, usePageQuery } from '../client'
+import { PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
 
 type UseJobsQueryParmas = PageQueryOptions<JobDetail> & {
 	params?: Record<string, unknown>
@@ -30,4 +30,18 @@ export function useJobsQuery({ params, ...options }: UseJobsQueryParmas = {}) {
 		pageData,
 		...restReturn,
 	}
+}
+
+export function useJobSchedulerConfig() {
+	const { data: config, ...restReturn } = useQuery([jobQueryKeys.getJobSchedulerConfig], () =>
+		jobApi.getJobSchedulerConfig().then((res) => res.data),
+	)
+
+	const {
+		mutate: update,
+		isLoading: isUpdating,
+		isError: isUpdateError,
+	} = useMutation([jobQueryKeys.updateJobSchedulerConfig], jobApi.updateJobSchedulerConfig)
+
+	return { config, isUpdateError, isUpdating, update, ...restReturn }
 }

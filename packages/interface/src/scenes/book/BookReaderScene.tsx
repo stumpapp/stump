@@ -1,5 +1,6 @@
-import { getMediaPage } from '@stump/api'
-import { useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
+import { getMediaPage, mediaQueryKeys } from '@stump/api'
+import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
+import { useEffect } from 'react'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import AnimatedPagedReader from '../../components/readers/image-based/AnimatedPagedReader'
@@ -26,6 +27,16 @@ export default function BookReaderScene() {
 			console.error(err)
 		},
 	})
+
+	/**
+	 * An effect to invalidate the in progress media query when the component unmounts
+	 * so that the in progress media list is updated when the user returns to that section
+	 */
+	useEffect(() => {
+		return () => {
+			invalidateQueries({ keys: [mediaQueryKeys.getInProgressMedia] })
+		}
+	}, [])
 
 	function handleChangePage(newPage: number) {
 		updateReadProgress(newPage)

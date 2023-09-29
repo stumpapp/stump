@@ -32,6 +32,7 @@ const SIZE_VARIANTS = {
 export type ComboBoxProps = {
 	label?: string
 	description?: string
+	descriptionPosition?: 'top' | 'bottom'
 	options: ComboBoxOption[]
 	size?: keyof typeof SIZE_VARIANTS | null
 	/** Classes applied to the trigger button for the combobox */
@@ -66,6 +67,7 @@ function mergeRefs<T>(...refs: MutableRefList<T>): RefCallback<T> {
 export function ComboBox({
 	label,
 	description,
+	descriptionPosition = 'bottom',
 	isMultiSelect,
 	options,
 	value,
@@ -132,9 +134,17 @@ export function ComboBox({
 		...(wrapperStyle || {}),
 	}
 
+	const topDescription = description && descriptionPosition === 'top'
+	const bottomDescription = description && descriptionPosition === 'bottom'
+
 	return (
 		<Container {...containerProps}>
 			{label && <Label>{label}</Label>}
+			{topDescription && (
+				<Text size="sm" variant="muted">
+					{description}
+				</Text>
+			)}
 			<Popover open={open} onOpenChange={setOpen}>
 				<Popover.Trigger asChild>
 					<Button
@@ -191,7 +201,7 @@ export function ComboBox({
 					</Command>
 				</Popover.Content>
 			</Popover>
-			{description && (
+			{bottomDescription && (
 				<Text size="sm" variant="muted">
 					{description}
 				</Text>

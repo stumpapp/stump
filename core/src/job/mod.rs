@@ -1,5 +1,6 @@
 mod executor;
 mod job_manager;
+mod scheduler;
 pub(crate) mod utils;
 mod worker;
 
@@ -8,6 +9,7 @@ pub use job_manager::{
 	JobManager, JobManagerError, JobManagerResult, JobManagerShutdownSignal,
 };
 use prisma_client_rust::{chrono::Utc, QueryError};
+pub use scheduler::JobScheduler;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;

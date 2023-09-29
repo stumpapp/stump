@@ -13,6 +13,8 @@ export type InputProps = {
 	labelProps?: Omit<React.ComponentPropsWithoutRef<typeof Label>, 'children'>
 	/** The optional description for the input. */
 	description?: string
+	/** The optional position for the description. */
+	descriptionPosition?: 'top' | 'bottom'
 	/** The optional props for the description. */
 	descriptionProps?: Omit<React.ComponentPropsWithoutRef<typeof Text>, 'children'>
 	/** The optional variant for the input. */
@@ -32,6 +34,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		{
 			label,
 			description,
+			descriptionPosition = 'bottom',
 			labelProps,
 			descriptionProps,
 			fullWidth,
@@ -64,6 +67,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			return null
 		}
 
+		const topDescription = description && descriptionPosition === 'top'
+		const bottomDescription = description && descriptionPosition === 'bottom'
+
 		return (
 			<div
 				className={cn(
@@ -78,6 +84,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 						{props.required && <span className="text-red-400"> *</span>}
 					</Label>
 				)}
+
+				{topDescription && (
+					<Text variant="muted" size="sm" {...(descriptionProps || {})}>
+						{description}
+					</Text>
+				)}
+
 				<div className="relative w-full">
 					{renderLeftDecoration()}
 					<RawInput
@@ -100,7 +113,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					</Text>
 				)}
 
-				{description && (
+				{bottomDescription && (
 					<Text variant="muted" size="sm" {...(descriptionProps || {})}>
 						{description}
 					</Text>

@@ -7,15 +7,7 @@ export type LoginOrRegisterArgs = { username: string; password: string }
 
 export type ClaimResponse = { is_claimed: boolean }
 
-export type MediaMetadataOverview = {
-	genres: string[]
-	writers: string[]
-	pencillers: string[]
-	inkers: string[]
-	colorists: string[]
-	letterers: string[]
-	editors: string[]
-	publishers: string[]
-	characters: string[]
-	teams: string[]
-}
+export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
+
+export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_library_ids: string[] | null }
+

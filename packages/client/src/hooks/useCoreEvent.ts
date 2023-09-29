@@ -33,6 +33,7 @@ export function useCoreEventHandler({
 				break
 			case 'JobComplete':
 				removeJob(data)
+				await new Promise((resolve) => setTimeout(resolve, 300))
 				await invalidateQueries({ keys: core_event_triggers[key].keys })
 				onJobComplete?.(data)
 				break

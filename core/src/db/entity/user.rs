@@ -31,10 +31,28 @@ pub struct User {
 	pub read_progresses: Option<Vec<ReadProgress>>,
 	pub created_at: String,
 	pub last_login: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub login_activity: Option<Vec<LoginActivity>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+pub struct LoginActivity {
+	pub id: String,
+	pub ip_address: String,
+	pub user_agent: String,
+	pub authentication_successful: bool,
+	pub timestamp: String,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub user: Option<User>,
 }
 
 impl User {
 	pub fn is_admin(&self) -> bool {
+		self.role == "SERVER_OWNER"
+	}
+
+	pub fn is_server_owner(&self) -> bool {
 		self.role == "SERVER_OWNER"
 	}
 
@@ -76,6 +94,10 @@ impl From<prisma::user::Data> for User {
 			.map(|ar| ar.cloned().map(AgeRestriction::from))
 			.ok()
 			.flatten();
+		let login_activity = data
+			.login_activity()
+			.map(|la| la.clone().into_iter().map(LoginActivity::from).collect())
+			.ok();
 
 		User {
 			id: data.id,
@@ -87,6 +109,7 @@ impl From<prisma::user::Data> for User {
 			read_progresses,
 			created_at: data.created_at.to_rfc3339(),
 			last_login: data.last_login.map(|dt| dt.to_rfc3339()),
+			login_activity,
 		}
 	}
 }
@@ -184,6 +207,20 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			collection_layout_mode: data.collection_layout_mode,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
+		}
+	}
+}
+
+impl From<prisma::user_login_activity::Data> for LoginActivity {
+	fn from(data: prisma::user_login_activity::Data) -> LoginActivity {
+		let user = data.user().cloned().map(User::from).ok();
+		LoginActivity {
+			id: data.id,
+			authentication_successful: data.authentication_successful,
+			ip_address: data.ip_address,
+			timestamp: data.timestamp.to_rfc3339(),
+			user_agent: data.user_agent,
+			user,
 		}
 	}
 }

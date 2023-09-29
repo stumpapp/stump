@@ -9,6 +9,7 @@ pub mod metadata;
 pub mod read_progress;
 pub mod reading_list;
 pub mod series;
+pub mod server_config;
 pub mod tag;
 pub mod user;
 

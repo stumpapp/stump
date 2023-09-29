@@ -79,5 +79,5 @@ pub fn init_tracing() {
 		)
 		.init();
 
-	tracing::debug!("Tracing initialized with verbosity {}", verbosity);
+	tracing::debug!(verbosity, "Tracing initialized");
 }

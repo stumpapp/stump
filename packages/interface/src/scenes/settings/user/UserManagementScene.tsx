@@ -10,6 +10,7 @@ import { useAppContext } from '../../../context'
 import { useLocaleContext } from '../../../i18n/index'
 import { SettingsContent, SettingsHeading } from '../SettingsLayout'
 import { UserManagementContext } from './context'
+import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
 import UserManagementStats from './UserManagementStats'
 
@@ -68,6 +69,7 @@ export default function UserManagementScene() {
 
 				<SettingsContent>
 					<UserTableSection />
+					<LoginActivitySection />
 				</SettingsContent>
 			</SceneContainer>
 		</UserManagementContext.Provider>

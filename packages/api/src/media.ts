@@ -1,4 +1,4 @@
-import type { Media, ReadProgress } from '@stump/types'
+import type { Media, PatchMediaThumbnail, ReadProgress } from '@stump/types'
 
 import { API } from './index'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
@@ -63,6 +63,10 @@ export function updateMediaProgress(id: string, page: number): Promise<ApiResult
 	return API.put(`/media/${id}/progress/${page}`)
 }
 
+export function patchMediaThumbnail(id: string, params: PatchMediaThumbnail) {
+	return API.patch(`/media/${id}/thumbnail`, params)
+}
+
 export const mediaApi = {
 	getInProgressMedia,
 	getMedia,
@@ -72,6 +76,7 @@ export const mediaApi = {
 	getMediaWithCursor,
 	getPaginatedMedia,
 	getRecentlyAddedMedia,
+	patchMediaThumbnail,
 	updateMediaProgress,
 }
 
@@ -84,5 +89,6 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getMediaWithCursor: 'media.getWithCursor',
 	getPaginatedMedia: 'media.getPaginated',
 	getRecentlyAddedMedia: 'media.getRecentlyAdded',
+	patchMediaThumbnail: 'media.patchThumbnail',
 	updateMediaProgress: 'media.updateProgress',
 }

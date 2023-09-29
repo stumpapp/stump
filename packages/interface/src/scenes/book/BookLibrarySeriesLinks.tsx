@@ -1,6 +1,7 @@
 import { useSeriesByIdQuery } from '@stump/client'
-import { Link } from '@stump/components'
+import { cx, Link, Text } from '@stump/components'
 import { Series } from '@stump/types'
+import React from 'react'
 
 import paths from '../../paths'
 import SeriesLibraryLink from '../series/SeriesLibraryLink'
@@ -9,9 +10,19 @@ type Props = {
 	libraryId?: string
 	series?: Series | null
 	seriesId: string
+	linkSegments?: {
+		to?: string
+		label: string
+		noShrink?: boolean
+	}[]
 }
 
-export default function BookLibrarySeriesLinks({ libraryId, seriesId, series }: Props) {
+export default function BookLibrarySeriesLinks({
+	libraryId,
+	seriesId,
+	series,
+	linkSegments,
+}: Props) {
 	const { series: fetchedSeries } = useSeriesByIdQuery(seriesId, { enabled: !!series })
 
 	const resolvedSeries = series || fetchedSeries
@@ -36,6 +47,21 @@ export default function BookLibrarySeriesLinks({ libraryId, seriesId, series }: 
 		<div className="flex items-center text-sm md:text-base">
 			{resolvedLibraryId && <SeriesLibraryLink id={resolvedLibraryId} />}
 			{renderSeriesLink()}
+			{linkSegments?.map((segment) => {
+				const Component = segment.to ? Link : Text
+
+				return (
+					<React.Fragment key={segment.label}>
+						<span className="mx-2 text-gray-500 dark:text-gray-450">/</span>
+						<Component
+							className={cx('line-clamp-1', { 'shrink-0': segment.noShrink })}
+							{...(segment.to ? { to: segment.to } : {})}
+						>
+							{segment.label}
+						</Component>
+					</React.Fragment>
+				)
+			})}
 		</div>
 	)
 }

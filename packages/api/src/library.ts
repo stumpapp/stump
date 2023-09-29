@@ -3,6 +3,7 @@ import type {
 	LibrariesStats,
 	Library,
 	LibraryScanMode,
+	PatchLibraryThumbnail,
 	Series,
 	UpdateLibrary,
 } from '@stump/types'
@@ -69,6 +70,10 @@ export function editLibrary(payload: UpdateLibrary): Promise<ApiResult<Library>>
 	return API.put(`/libraries/${payload.id}`, payload)
 }
 
+export function patchLibraryThumbnail(id: string, params: PatchLibraryThumbnail) {
+	return API.patch(`/libraries/${id}/thumbnail`, params)
+}
+
 export const libraryApi = {
 	createLibrary,
 	deleteLibrary,
@@ -78,6 +83,7 @@ export const libraryApi = {
 	getLibrariesStats,
 	getLibraryById,
 	getLibrarySeries,
+	patchLibraryThumbnail,
 	regenerateThumbnails,
 	scanLibary,
 }
@@ -91,6 +97,7 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	getLibrariesStats: 'library.getLibrariesStats',
 	getLibraryById: 'library.getLibraryById',
 	getLibrarySeries: 'library.getLibrarySeries',
+	patchLibraryThumbnail: 'library.patchLibraryThumbnail',
 	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
 }

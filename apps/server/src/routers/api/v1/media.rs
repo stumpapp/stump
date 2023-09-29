@@ -869,9 +869,10 @@ async fn get_media_thumbnail_handler(
 		.map(ImageResponse::from)
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, ToSchema, specta::Type)]
 pub struct PatchMediaThumbnail {
 	page: i32,
+	#[specta(optional)]
 	is_zero_based: Option<bool>,
 }
 

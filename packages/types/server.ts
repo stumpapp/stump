@@ -11,3 +11,9 @@ export type MediaMetadataOverview = { genres: string[]; writers: string[]; penci
 
 export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_library_ids: string[] | null }
 
+export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null }
+
+export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
+
+export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
+

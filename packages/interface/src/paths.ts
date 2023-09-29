@@ -8,6 +8,7 @@ type BookReaderParams = {
 }
 
 const paths = {
+	bookManagement: (id: string) => `/books/${id}/manage`,
 	bookOverview: (id: string) => `/books/${id}`,
 	bookReader: (
 		id: string,

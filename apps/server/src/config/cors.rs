@@ -103,6 +103,7 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 			Method::GET,
 			Method::PUT,
 			Method::POST,
+			Method::PATCH,
 			Method::DELETE,
 			Method::OPTIONS,
 			Method::CONNECT,

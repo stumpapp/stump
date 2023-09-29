@@ -453,12 +453,13 @@ async fn get_series_thumbnail(
 	get_media_thumbnail(&media, image_format).map(ImageResponse::from)
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, ToSchema, specta::Type)]
 pub struct PatchSeriesThumbnail {
 	/// The ID of the media inside the series to fetch
 	media_id: String,
 	/// The page of the media to use for the thumbnail
 	page: i32,
+	#[specta(optional)]
 	/// A flag indicating whether the page is zero based
 	is_zero_based: Option<bool>,
 }

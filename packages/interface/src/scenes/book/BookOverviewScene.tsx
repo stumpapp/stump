@@ -106,6 +106,11 @@ export default function BookOverviewScene() {
 										Read with the native PDF viewer
 									</ButtonOrLink>
 								)}
+								{isServerOwner && (
+									<ButtonOrLink variant="subtle" href={paths.bookManagement(media.id)}>
+										Manage
+									</ButtonOrLink>
+								)}
 								<DownloadMediaButton media={media} />
 							</div>
 

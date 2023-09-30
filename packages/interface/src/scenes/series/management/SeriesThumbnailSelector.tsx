@@ -1,19 +1,21 @@
-import { getMediaPage, getMediaThumbnail, mediaApi } from '@stump/api'
+import { getMediaPage, getSeriesThumbnail, seriesApi } from '@stump/api'
 import { Button, Dialog, EntityCard } from '@stump/components'
-import { Media } from '@stump/types'
+import { Media, Series } from '@stump/types'
 import { Edit } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import BookPageGrid from './BookPageGrid'
+import BookPageGrid from '../../book/management/BookPageGrid'
+import SeriesBookGrid from './SeriesBookGrid'
 
 type Props = {
-	book: Media
+	series: Series
 }
 // TODO: this looks doody, but it's a start
-export default function BookThumbnailSelector({ book }: Props) {
-	const [isOpen, setIsOpen] = useState(false)
+export default function SeriesThumbnailSelector({ series }: Props) {
+	const [selectedBook, setSelectedBook] = useState<Media>()
 	const [page, setPage] = useState<number>()
+	const [isOpen, setIsOpen] = useState(false)
 
 	const handleOpenChange = (nowOpen: boolean) => {
 		if (!nowOpen) {
@@ -29,14 +31,12 @@ export default function BookThumbnailSelector({ book }: Props) {
 	}
 
 	const handleConfirm = async () => {
-		if (!page) return
+		if (!selectedBook || !page) return
 
 		try {
-			await mediaApi.patchMediaThumbnail(book.id, { page })
-
+			await seriesApi.patchSeriesThumbnail(series.id, { media_id: selectedBook.id, page })
 			// TODO: The browser is caching the image, so we need to force remove it and ensure
 			// the new one is loaded instead
-
 			setIsOpen(false)
 		} catch (error) {
 			console.error(error)
@@ -44,9 +44,35 @@ export default function BookThumbnailSelector({ book }: Props) {
 		}
 	}
 
+	const renderContent = () => {
+		if (selectedBook) {
+			return (
+				<BookPageGrid
+					bookId={selectedBook.id}
+					pages={selectedBook.pages}
+					selectedPage={page}
+					onSelectPage={setPage}
+				/>
+			)
+		} else {
+			return <SeriesBookGrid seriesId={series.id} onSelectBook={setSelectedBook} />
+		}
+	}
+
+	useEffect(() => {
+		return () => {
+			setSelectedBook(undefined)
+			setPage(undefined)
+		}
+	}, [isOpen])
+
 	return (
 		<div className="relative">
-			<EntityCard imageUrl={page ? getMediaPage(book.id, page) : getMediaThumbnail(book.id)} />
+			<EntityCard
+				imageUrl={
+					selectedBook && page ? getMediaPage(selectedBook.id, page) : getSeriesThumbnail(series.id)
+				}
+			/>
 
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 				<Dialog.Trigger asChild>
@@ -66,23 +92,32 @@ export default function BookThumbnailSelector({ book }: Props) {
 					<Dialog.Header>
 						<Dialog.Title>Select a thumbnail</Dialog.Title>
 						<Dialog.Description>
-							Choose a page from this book to use as the new thumbnail
+							{selectedBook
+								? 'Choose a page from this book to use as the new thumbnail'
+								: 'Select a book from the series'}
+
+							{selectedBook && (
+								<span
+									className="ml-2 cursor-pointer underline"
+									onClick={() => {
+										setSelectedBook(undefined)
+										setPage(undefined)
+									}}
+								>
+									Go back
+								</span>
+							)}
 						</Dialog.Description>
 						<Dialog.Close onClick={() => setIsOpen(false)} />
 					</Dialog.Header>
 
-					<BookPageGrid
-						bookId={book.id}
-						pages={book.pages}
-						selectedPage={page}
-						onSelectPage={setPage}
-					/>
+					{renderContent()}
 
 					<Dialog.Footer>
 						<Button variant="default" onClick={handleCancel}>
 							Cancel
 						</Button>
-						<Button variant="primary" onClick={handleConfirm} disabled={!page}>
+						<Button variant="primary" onClick={handleConfirm} disabled={!selectedBook || !page}>
 							Confirm selection
 						</Button>
 					</Dialog.Footer>

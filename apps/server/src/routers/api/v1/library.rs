@@ -526,8 +526,11 @@ pub struct PatchLibraryThumbnail {
 async fn patch_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> ApiResult<ImageResponse> {
+	get_session_admin_user(&session)?;
+
 	let client = ctx.get_db();
 
 	let target_page = body

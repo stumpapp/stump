@@ -1,10 +1,12 @@
 import { getSeriesThumbnail } from '@stump/api'
-import { EntityCard, Heading } from '@stump/components'
+import { ButtonOrLink, EntityCard, Heading } from '@stump/components'
 import { Series } from '@stump/types'
 import { useMediaMatch } from 'rooks'
 
 import ReadMore from '../../components/ReadMore'
 import TagList from '../../components/tags/TagList'
+import { useAppContext } from '../../context'
+import paths from '../../paths'
 import DownloadSeriesButton from './DownloadSeriesButton'
 import SeriesLibraryLink from './SeriesLibraryLink'
 import UpNextInSeriesButton from './UpNextInSeriesButton'
@@ -13,6 +15,7 @@ type Props = {
 	series: Series
 }
 export default function SeriesOverviewTitleSection({ series }: Props) {
+	const { isServerOwner } = useAppContext()
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
 	const summary = series.description ?? series.metadata?.summary
@@ -35,6 +38,11 @@ export default function SeriesOverviewTitleSection({ series }: Props) {
 
 				<div className="flex w-full flex-col gap-2 md:flex-row">
 					<UpNextInSeriesButton seriesId={series.id} />
+					{isServerOwner && (
+						<ButtonOrLink variant="subtle" href={paths.seriesManagement(series.id)}>
+							Manage
+						</ButtonOrLink>
+					)}
 					<DownloadSeriesButton seriesId={series.id} />
 				</div>
 

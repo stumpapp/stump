@@ -8,8 +8,11 @@ export function getSeries(filters?: Record<string, unknown>): Promise<PageableAp
 	return API.get(urlWithParams('/series', params))
 }
 
-export function getSeriesById(id: string): Promise<ApiResult<Series>> {
-	return API.get(`/series/${id}`)
+export function getSeriesById(
+	id: string,
+	params?: Record<string, unknown>,
+): Promise<ApiResult<Series>> {
+	return API.get(urlWithParams(`/series/${id}`, toUrlParams(params)))
 }
 
 export function getSeriesWithCursor(

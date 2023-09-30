@@ -29,5 +29,8 @@
 		{
 			"path": "packages/types"
 		}
-	]
+	],
+	"compilerOptions": {
+		"module": "NodeNext"
+	}
 }

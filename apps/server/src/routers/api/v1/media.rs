@@ -35,7 +35,8 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_user,
+		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		get_session_user,
 		http::{ImageResponse, NamedFile},
 		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter, ReadStatus,
 	},
@@ -894,8 +895,11 @@ pub struct PatchMediaThumbnail {
 async fn patch_media_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 	Json(body): Json<PatchMediaThumbnail>,
 ) -> ApiResult<ImageResponse> {
+	get_session_admin_user(&session)?;
+
 	let client = ctx.get_db();
 
 	let target_page = body

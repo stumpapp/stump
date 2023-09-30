@@ -2,7 +2,8 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"skipLibCheck": true,
-		"outDir": "../../.moon/cache/types/packages/types"
+		"outDir": "../../.moon/cache/types/packages/types",
+		"module": "NodeNext"
 	},
 	"include": ["*.ts"],
 	"exclude": ["node_modules"]

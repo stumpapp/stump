@@ -51,6 +51,7 @@ const paths = {
 		return `/libraries/${id}`
 	},
 	notFound: () => '/404',
+	seriesManagement: (id: string) => `/series/${id}/manage`,
 	seriesOverview: (id: string, page?: number) => {
 		if (page !== undefined) {
 			return `/series/${id}?page=${page}`

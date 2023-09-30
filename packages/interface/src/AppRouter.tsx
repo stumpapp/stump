@@ -7,6 +7,7 @@ import LocaleProvider from './i18n/LocaleProvider'
 import BookRouter from './scenes/book/BookRouter'
 import LibraryRouter from './scenes/library/LibraryRouter'
 import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter'
+import SeriesRouter from './scenes/series/SeriesRouter'
 import SettingsRouter from './scenes/settings/SettingsRouter'
 
 // FIXME: this is really annoying
@@ -19,7 +20,6 @@ export type LazyComponent = Promise<{
 export const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const HomeScene = lazily(() => import('./scenes/home/HomeScene.tsx'))
-const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewScene.tsx'))
 const FourOhFour = lazily(() => import('./scenes/error/FourOhFour.tsx'))
 const ServerConnectionErrorScene = lazily(
 	() => import('./scenes/error/ServerConnectionErrorScene.tsx'),
@@ -43,7 +43,7 @@ export function AppRouter() {
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />
 					<Route path="libraries/*" element={<LibraryRouter />} />
-					<Route path="series/:id" element={<SeriesOverviewScene />} />
+					<Route path="series/*" element={<SeriesRouter />} />
 					<Route path="books/*" element={<BookRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>

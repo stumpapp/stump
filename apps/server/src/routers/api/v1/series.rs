@@ -10,6 +10,7 @@ use prisma_client_rust::{or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
+	config::get_config_dir,
 	db::{
 		entity::{LibraryOptions, Media, Series},
 		query::{
@@ -19,8 +20,9 @@ use stump_core::{
 		PrismaCountTrait, SeriesDAO, DAO,
 	},
 	filesystem::{
+		get_unknown_thumnail,
 		image::{generate_thumbnail, ImageProcessorOptions},
-		read_entire_file, ContentType,
+		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
 		library,
@@ -38,9 +40,9 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_user, http::ImageResponse,
-		FilterableQuery, SeriesBaseFilter, SeriesFilter, SeriesQueryRelation,
-		SeriesRelationFilter,
+		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		get_session_user, http::ImageResponse, FilterableQuery, SeriesBaseFilter,
+		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
 	},
 };
 
@@ -313,6 +315,7 @@ async fn get_series_by_id(
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let load_media = query.load_media.unwrap_or(false);
+	let load_library = query.load_library.unwrap_or(false);
 	let mut query = db.series().find_first(chain_optional_iter(
 		[series::id::equals(id.clone())],
 		[age_restrictions],
@@ -326,6 +329,10 @@ async fn get_series_by_id(
 				]))
 				.order_by(media::name::order(Direction::Asc)),
 		);
+	}
+
+	if load_library {
+		query = query.with(series::library::fetch());
 	}
 
 	let series = query
@@ -414,6 +421,7 @@ async fn get_series_thumbnail(
 		.as_ref()
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 
+	let series_id = id.clone();
 	let (library, media) = db
 		._transaction()
 		.run(|client| async move {
@@ -450,6 +458,40 @@ async fn get_series_thumbnail(
 		None
 	};
 
+	// TODO: this is a bit of a mess, clean it up! Also duplicating some lookups, but I am LAZY
+	// right now!
+	let thumbnail_dir = get_config_dir().join("thumbnails");
+	if let Some(format) = image_format.clone() {
+		let extension = format.extension();
+		let media_thumbnail_path =
+			thumbnail_dir.join(format!("{}.{}", media.id, extension));
+		let series_thumbnail_path =
+			thumbnail_dir.join(format!("{}.{}", series_id, extension));
+
+		if media_thumbnail_path.exists() {
+			tracing::trace!(path = ?media_thumbnail_path, media_id = ?media.id, "Found generated series thumbnail");
+			return Ok(ImageResponse::from((
+				ContentType::from(format),
+				read_entire_file(media_thumbnail_path)?,
+			)));
+		} else if series_thumbnail_path.exists() {
+			tracing::trace!(path = ?series_thumbnail_path, series_id, "Found generated series thumbnail");
+			return Ok(ImageResponse::from((
+				ContentType::from(format),
+				read_entire_file(series_thumbnail_path)?,
+			)));
+		}
+	} else if let Some(path) =
+		get_unknown_thumnail(&series_id).or(get_unknown_thumnail(&media.id))
+	{
+		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
+		let FileParts { extension, .. } = path.file_parts();
+		return Ok(ImageResponse::from((
+			ContentType::from_extension(extension.as_str()),
+			read_entire_file(path)?,
+		)));
+	}
+
 	get_media_thumbnail(&media, image_format).map(ImageResponse::from)
 }
 
@@ -482,8 +524,11 @@ pub struct PatchSeriesThumbnail {
 async fn patch_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 	Json(body): Json<PatchSeriesThumbnail>,
 ) -> ApiResult<ImageResponse> {
+	get_session_admin_user(&session)?;
+
 	let client = ctx.get_db();
 
 	let target_page = body

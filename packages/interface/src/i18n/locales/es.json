@@ -1,7 +1,7 @@
 {
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Inicialice su servidor",
+		"claimText": "Este servidor Stump no está inicializado. Usa el formulario de abajo para crear tu cuenta. Una vez creada, tendrás acceso completo a todas las funciones del servidor.",
 		"form": {
 			"validation": {
 				"missingUsername": "Se requiere el nombre de usuario",
@@ -13,13 +13,13 @@
 			},
 			"buttons": {
 				"createAccount": "Crear cuenta",
-				"login": "Log in"
+				"login": "Iniciar sesión"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Iniciando sesión...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
+			"loggedIn": "¡Bienvenido de nuevo!",
+			"loggedInFirstTime": "¡Bienvenido!",
 			"registering": "Registrando...",
 			"registered": "¡Registrado!",
 			"loginFailed": "Error de inicio de sesión. Por favor, inténtelo de nuevo",
@@ -105,7 +105,7 @@
 			"server": "Servidor",
 			"jobs": "Trabajos y Configuración",
 			"users": "Gestión de Usuarios",
-			"desktop": "Desktop"
+			"desktop": "Escritorio"
 		},
 		"general": {
 			"helmet": "Configuraciones Generales",
@@ -173,7 +173,7 @@
 			"heading": "Trabajos y Configuración",
 			"subtitle": "Ver y administrar las tareas en segundo plano disponibles en este servidor, incluyendo los escaneos de la biblioteca y la programación",
 			"schedulingHeading": "Programación de tareas",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
+			"schedulingSubtitle": "Administrar la programación de tareas en segundo plano en este servidor. Los cambios en esta configuración surtirán efecto después de reiniciar el servidor",
 			"historyHeading": "Historial de tareas",
 			"historySubtitle": "Gestionar tareas en ejecución y ver el historial de tareas completadas",
 			"historyTable": {
@@ -187,7 +187,7 @@
 				},
 				"emptyHeading": "No hay tareas para mostrar",
 				"emptySubtitle": "No puede tener una tarea si no tienes una tarea",
-				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
+				"deleteAllMessage": "El historial de tareas y las estadísticas pueden ser eliminadas de la base de datos en cualquier momento. Esta acción no se puede deshacer",
 				"deleteAllConfirmButton": "Eliminar historial",
 				"deleteAllConfirmButtonTitle": "Eliminar todo el historial de tareas",
 				"deleteAllConfirmButtonTitleNoJobs": "No hay tareas para eliminar"
@@ -237,7 +237,7 @@
 		"buttons": {
 			"home": "Inicio",
 			"libraries": "Bibliotecas",
-			"books": "Explore Books",
+			"books": "Explorar libros",
 			"createLibrary": "Crear Biblioteca",
 			"settings": "Ajustes",
 			"themeToggle": "Alternar Tema",

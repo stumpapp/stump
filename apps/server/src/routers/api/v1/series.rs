@@ -21,7 +21,7 @@ use stump_core::{
 	},
 	filesystem::{
 		get_unknown_thumnail,
-		image::{generate_thumbnail, ImageProcessorOptions},
+		image::{generate_thumbnail, ImageFormat, ImageProcessorOptions},
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
@@ -67,7 +67,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/media/next", get(get_next_in_series))
 				.route(
 					"/thumbnail",
-					get(get_series_thumbnail).patch(patch_series_thumbnail),
+					get(get_series_thumbnail_handler).patch(patch_series_thumbnail),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -392,6 +392,35 @@ async fn get_recently_added_series_handler(
 	Ok(Json(recently_added_series))
 }
 
+pub(crate) fn get_series_thumbnail(
+	series: &series::Data,
+	first_book: &media::Data,
+	image_format: Option<ImageFormat>,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnails = get_config_dir().join("thumbnails");
+	let series_id = series.id.clone();
+
+	if let Some(format) = image_format.clone() {
+		let extension = format.extension();
+
+		let path = thumbnails.join(format!("{}.{}", series_id, extension));
+
+		if path.exists() {
+			tracing::trace!(?path, series_id, "Found generated series thumbnail");
+			return Ok((ContentType::from(format), read_entire_file(path)?));
+		}
+	} else if let Some(path) = get_unknown_thumnail(&series_id) {
+		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
+		let FileParts { extension, .. } = path.file_parts();
+		return Ok((
+			ContentType::from_extension(extension.as_str()),
+			read_entire_file(path)?,
+		));
+	}
+
+	get_media_thumbnail(first_book, image_format)
+}
+
 // TODO: ImageResponse type for body
 #[utoipa::path(
 	get,
@@ -408,7 +437,7 @@ async fn get_recently_added_series_handler(
 	)
 )]
 /// Returns the thumbnail image for a series
-async fn get_series_thumbnail(
+async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
@@ -416,83 +445,51 @@ async fn get_series_thumbnail(
 	let db = ctx.get_db();
 
 	let user = get_session_user(&session)?;
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let age_restriction = user.age_restriction;
 
-	let series_id = id.clone();
-	let (library, media) = db
-		._transaction()
-		.run(|client| async move {
-			let library = client
-				.library()
-				.find_first(vec![library::series::some(vec![series::id::equals(
-					id.clone(),
-				)])])
-				.with(library::library_options::fetch())
-				.exec()
-				.await?;
+	let series = db
+		.series()
+		// Find the first series in the library which satisfies the age restriction
+		.find_first(chain_optional_iter(
+			[series::id::equals(id.clone())],
+			[age_restriction
+				.as_ref()
+				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+		))
+		.with(
+			// Then load the first media in that series which satisfies the age restriction
+			series::media::fetch(chain_optional_iter(
+				[],
+				[age_restriction
+					.as_ref()
+					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+			))
+			.take(1)
+			.order_by(media::name::order(Direction::Asc)),
+		)
+		.with(series::library::fetch().with(library::library_options::fetch()))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Series not found".to_string()))?;
 
-			client
-				.media()
-				.find_first(chain_optional_iter(
-					[media::series_id::equals(Some(id.clone()))],
-					[age_restrictions],
-				))
-				.order_by(media::name::order(Direction::Asc))
-				.exec()
-				.await?
-				.ok_or(ApiError::NotFound(String::from("Series not found")))
-				.map(|media| (library, media))
-		})
-		.await?;
+	let library = series
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
 
-	let image_format = if let Some(library) = library {
-		library
-			.library_options()
-			.map(LibraryOptions::from)?
-			.thumbnail_config
-			.map(|config| config.format)
-	} else {
-		None
-	};
+	let first_book = series
+		.media()?
+		.first()
+		.ok_or(ApiError::NotFound(String::from(
+			"Series does not have any media",
+		)))?;
 
-	// TODO: this is a bit of a mess, clean it up! Also duplicating some lookups, but I am LAZY
-	// right now!
-	let thumbnail_dir = get_config_dir().join("thumbnails");
-	if let Some(format) = image_format.clone() {
-		let extension = format.extension();
-		let media_thumbnail_path =
-			thumbnail_dir.join(format!("{}.{}", media.id, extension));
-		let series_thumbnail_path =
-			thumbnail_dir.join(format!("{}.{}", series_id, extension));
+	let image_format = library
+		.library_options()
+		.map(LibraryOptions::from)?
+		.thumbnail_config
+		.map(|config| config.format);
 
-		if media_thumbnail_path.exists() {
-			tracing::trace!(path = ?media_thumbnail_path, media_id = ?media.id, "Found generated series thumbnail");
-			return Ok(ImageResponse::from((
-				ContentType::from(format),
-				read_entire_file(media_thumbnail_path)?,
-			)));
-		} else if series_thumbnail_path.exists() {
-			tracing::trace!(path = ?series_thumbnail_path, series_id, "Found generated series thumbnail");
-			return Ok(ImageResponse::from((
-				ContentType::from(format),
-				read_entire_file(series_thumbnail_path)?,
-			)));
-		}
-	} else if let Some(path) =
-		get_unknown_thumnail(&series_id).or(get_unknown_thumnail(&media.id))
-	{
-		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
-		let FileParts { extension, .. } = path.file_parts();
-		return Ok(ImageResponse::from((
-			ContentType::from_extension(extension.as_str()),
-			read_entire_file(path)?,
-		)));
-	}
-
-	get_media_thumbnail(&media, image_format).map(ImageResponse::from)
+	get_series_thumbnail(&series, first_book, image_format).map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]

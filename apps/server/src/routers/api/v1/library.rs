@@ -14,6 +14,7 @@ use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
 use stump_core::{
+	config::get_config_dir,
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
@@ -24,13 +25,14 @@ use stump_core::{
 		PrismaCountTrait,
 	},
 	filesystem::{
+		get_unknown_thumnail,
 		image::{
 			self, generate_thumbnail, remove_thumbnails, remove_thumbnails_of_type,
-			ImageProcessorOptions, ThumbnailJob, ThumbnailJobConfig,
+			ImageFormat, ImageProcessorOptions, ThumbnailJob, ThumbnailJobConfig,
 		},
 		read_entire_file,
 		scanner::LibraryScanJob,
-		ContentType,
+		ContentType, FileParts, PathUtils,
 	},
 	prisma::{
 		library::{self, WhereParam},
@@ -53,12 +55,10 @@ use crate::{
 };
 
 use super::{
-	media::{
-		apply_media_age_restriction, apply_media_filters, apply_media_pagination,
-		get_media_thumbnail,
-	},
+	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
 	series::{
 		apply_series_age_restriction, apply_series_base_filters, apply_series_filters,
+		get_series_thumbnail,
 	},
 };
 
@@ -86,7 +86,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					Router::new()
 						.route(
 							"/",
-							get(get_library_thumbnail)
+							get(get_library_thumbnail_handler)
 								.patch(patch_library_thumbnail)
 								.delete(delete_library_thumbnails),
 						)
@@ -429,6 +429,36 @@ async fn get_library_media(
 	Ok(Json(Pageable::from(media)))
 }
 
+pub(crate) fn get_library_thumbnail(
+	library: &library::Data,
+	first_series: &series::Data,
+	first_book: &media::Data,
+	image_format: Option<ImageFormat>,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnails = get_config_dir().join("thumbnails");
+	let library_id = library.id.clone();
+
+	if let Some(format) = image_format.clone() {
+		let extension = format.extension();
+
+		let path = thumbnails.join(format!("{}.{}", library_id, extension));
+
+		if path.exists() {
+			tracing::trace!(?path, library_id, "Found generated library thumbnail");
+			return Ok((ContentType::from(format), read_entire_file(path)?));
+		}
+	} else if let Some(path) = get_unknown_thumnail(&library_id) {
+		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
+		let FileParts { extension, .. } = path.file_parts();
+		return Ok((
+			ContentType::from_extension(extension.as_str()),
+			read_entire_file(path)?,
+		));
+	}
+
+	get_series_thumbnail(first_series, first_book, image_format)
+}
+
 // TODO: ImageResponse for utoipa
 #[utoipa::path(
 	get,
@@ -445,7 +475,7 @@ async fn get_library_media(
 	)
 )]
 /// Get the thumbnail image for a library by id, if the current user has access to it.
-async fn get_library_thumbnail(
+async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
@@ -455,7 +485,7 @@ async fn get_library_thumbnail(
 	let user = get_session_user(&session)?;
 	let age_restriction = user.age_restriction;
 
-	let library_series = db
+	let first_series = db
 		.series()
 		// Find the first series in the library which satisfies the age restriction
 		.find_first(chain_optional_iter(
@@ -477,15 +507,10 @@ async fn get_library_thumbnail(
 		)
 		.with(series::library::fetch().with(library::library_options::fetch()))
 		.exec()
-		.await?;
+		.await?
+		.ok_or(ApiError::NotFound("Library has no series".to_string()))?;
 
-	let series = library_series.ok_or(ApiError::NotFound(
-		"Library has no series to get thumbnail from".to_string(),
-	))?;
-	let media = series.media()?.first().ok_or(ApiError::NotFound(
-		"Library has no media to get thumbnail from".to_string(),
-	))?;
-	let library = series
+	let library = first_series
 		.library()?
 		.ok_or(ApiError::Unknown(String::from("Failed to load library")))?;
 	let image_format = library
@@ -494,7 +519,12 @@ async fn get_library_thumbnail(
 		.thumbnail_config
 		.map(|config| config.format);
 
-	get_media_thumbnail(media, image_format).map(ImageResponse::from)
+	let first_book = first_series.media()?.first().ok_or(ApiError::NotFound(
+		"Library has no media to get thumbnail from".to_string(),
+	))?;
+
+	get_library_thumbnail(library, &first_series, first_book, image_format)
+		.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]

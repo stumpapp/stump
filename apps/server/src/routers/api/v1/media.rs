@@ -17,22 +17,26 @@ use stump_core::{
 		MediaDAO, DAO,
 	},
 	filesystem::{
-		get_unknown_thumnail, image::ImageFormat, media::get_page, read_entire_file,
-		ContentType, FileParts, PathUtils,
+		get_unknown_thumnail,
+		image::{generate_thumbnail, ImageFormat, ImageProcessorOptions},
+		media::get_page,
+		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
-		library_options,
+		library, library_options,
 		media::{self, OrderByParam as MediaOrderByParam, WhereParam},
 		media_metadata, read_progress, series, series_metadata, tag, user, PrismaClient,
 	},
 };
+use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_user,
+		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		get_session_user,
 		http::{ImageResponse, NamedFile},
 		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter, ReadStatus,
 	},
@@ -52,7 +56,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_media_by_id))
 				.route("/file", get(get_media_file))
 				.route("/convert", get(convert_media))
-				.route("/thumbnail", get(get_media_thumbnail_handler))
+				.route(
+					"/thumbnail",
+					get(get_media_thumbnail_handler).patch(patch_media_thumbnail),
+				)
 				.route("/page/:page", get(get_media_page))
 				.route("/progress/:page", put(update_media_progress)),
 		)
@@ -773,6 +780,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 			let book = client
 				.media()
 				.find_first(where_conditions)
+				.order_by(media::name::order(Direction::Asc))
 				.with(media::series::fetch())
 				.exec()
 				.await?;
@@ -861,6 +869,91 @@ async fn get_media_thumbnail_handler(
 	get_media_thumbnail_by_id(id, db, &session)
 		.await
 		.map(ImageResponse::from)
+}
+
+#[derive(Deserialize, ToSchema, specta::Type)]
+pub struct PatchMediaThumbnail {
+	page: i32,
+	#[specta(optional)]
+	is_zero_based: Option<bool>,
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/media/:id/thumbnail",
+    tag = "media",
+    params(
+        ("id" = String, Path, description = "The ID of the media to get")
+    ),
+    responses(
+        (status = 200, description = "Successfully updated media thumbnail"),
+        (status = 401, description = "Unauthorized."),
+        (status = 403, description = "Forbidden."),
+        (status = 404, description = "Media not found."),
+        (status = 500, description = "Internal server error."),
+    )
+)]
+async fn patch_media_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+	Json(body): Json<PatchMediaThumbnail>,
+) -> ApiResult<ImageResponse> {
+	get_session_admin_user(&session)?;
+
+	let client = ctx.get_db();
+
+	let target_page = body
+		.is_zero_based
+		.map(|is_zero_based| {
+			if is_zero_based {
+				body.page + 1
+			} else {
+				body.page
+			}
+		})
+		.unwrap_or(body.page);
+
+	let media = client
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.with(
+			media::series::fetch()
+				.with(series::library::fetch().with(library::library_options::fetch())),
+		)
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	if media.extension == "epub" {
+		return Err(ApiError::NotSupported);
+	}
+
+	let library = media
+		.series()?
+		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+	let thumbnail_options = library
+		.library_options()?
+		.thumbnail_config
+		.to_owned()
+		.map(ImageProcessorOptions::try_from)
+		.transpose()?
+		.unwrap_or_else(|| {
+			tracing::warn!(
+				"Failed to parse existing thumbnail config! Using a default config"
+			);
+			ImageProcessorOptions::default()
+		})
+		.with_page(target_page);
+
+	let format = thumbnail_options.format.clone();
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	Ok(ImageResponse::from((
+		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
 }
 
 #[utoipa::path(

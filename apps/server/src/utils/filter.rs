@@ -246,6 +246,7 @@ pub struct LibraryFilter {
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct SeriesQueryRelation {
 	pub load_media: Option<bool>,
+	pub load_library: Option<bool>,
 	pub count_media: Option<bool>,
 }
 

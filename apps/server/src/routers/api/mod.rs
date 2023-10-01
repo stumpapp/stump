@@ -19,7 +19,9 @@ mod tests {
 
 	use super::v1::{
 		auth::LoginOrRegisterArgs, job::UpdateSchedulerConfig,
-		metadata::MediaMetadataOverview, ClaimResponse, StumpVersion,
+		library::PatchLibraryThumbnail, media::PatchMediaThumbnail,
+		metadata::MediaMetadataOverview, series::PatchSeriesThumbnail, ClaimResponse,
+		StumpVersion,
 	};
 
 	#[allow(dead_code)]
@@ -52,6 +54,16 @@ mod tests {
 		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),
+		)?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<PatchMediaThumbnail>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PatchSeriesThumbnail>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PatchLibraryThumbnail>()?).as_bytes(),
 		)?;
 
 		Ok(())

@@ -1,4 +1,4 @@
-import type { Media, Series } from '@stump/types'
+import type { Media, PatchSeriesThumbnail, Series } from '@stump/types'
 
 import { API, mediaApi, mergeCursorParams, mergePageParams, toUrlParams, urlWithParams } from '.'
 import { ApiResult, CursorQueryParams, PageableApiResult, PagedQueryParams } from './types'
@@ -8,8 +8,11 @@ export function getSeries(filters?: Record<string, unknown>): Promise<PageableAp
 	return API.get(urlWithParams('/series', params))
 }
 
-export function getSeriesById(id: string): Promise<ApiResult<Series>> {
-	return API.get(`/series/${id}`)
+export function getSeriesById(
+	id: string,
+	params?: Record<string, unknown>,
+): Promise<ApiResult<Series>> {
+	return API.get(urlWithParams(`/series/${id}`, toUrlParams(params)))
 }
 
 export function getSeriesWithCursor(
@@ -62,6 +65,10 @@ export function getSeriesThumbnail(id: string): string {
 	return `${API.getUri()}/series/${id}/thumbnail`
 }
 
+export function patchSeriesThumbnail(id: string, params: PatchSeriesThumbnail) {
+	return API.patch(`/series/${id}/thumbnail`, params)
+}
+
 export const seriesApi = {
 	getNextInSeries,
 	getNextMediaInSeries,
@@ -71,6 +78,7 @@ export const seriesApi = {
 	getSeriesMedia,
 	getSeriesThumbnail,
 	getSeriesWithCursor,
+	patchSeriesThumbnail,
 }
 
 export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
@@ -82,4 +90,5 @@ export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
 	getSeriesMedia: 'series.getSeriesMedia',
 	getSeriesThumbnail: 'series.getSeriesThumbnail',
 	getSeriesWithCursor: 'series.getSeriesWithCursor',
+	patchSeriesThumbnail: 'series.patchSeriesThumbnail',
 }

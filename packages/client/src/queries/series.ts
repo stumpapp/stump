@@ -22,11 +22,14 @@ export const prefetchSeries = async (id: string) => {
 	)
 }
 
-export function useSeriesByIdQuery(id: string, params?: QueryOptions<Series, AxiosError>) {
+type SeriesByIdOptions = {
+	params?: Record<string, unknown>
+} & QueryOptions<Series, AxiosError>
+export function useSeriesByIdQuery(id: string, { params, ...options }: SeriesByIdOptions = {}) {
 	const { data, ...ret } = useQuery(
-		[seriesQueryKeys.getSeriesById, id],
-		() => seriesApi.getSeriesById(id).then(({ data }) => data),
-		params,
+		[seriesQueryKeys.getSeriesById, id, params],
+		() => seriesApi.getSeriesById(id, params).then(({ data }) => data),
+		options,
 	)
 
 	return { series: data, ...ret }

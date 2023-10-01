@@ -6,8 +6,7 @@
 		"paths": {
 			"@stump/types": ["../types/index.ts"],
 			"@stump/types/*": ["../types/*"]
-		},
-		"moduleResolution": "node"
+		}
 	},
 	"include": ["src"],
 	"exclude": ["node_modules"],

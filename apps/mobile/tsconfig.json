@@ -3,6 +3,7 @@
 	"include": ["**/*"],
 	"references": [],
 	"compilerOptions": {
-		"outDir": "../../.moon/cache/types/apps/mobile"
+		"outDir": "../../.moon/cache/types/apps/mobile",
+		"module": "NodeNext"
 	}
 }

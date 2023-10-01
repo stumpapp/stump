@@ -7,8 +7,10 @@ use axum::{
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{or, Direction};
+use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
+	config::get_config_dir,
 	db::{
 		entity::{LibraryOptions, Media, Series},
 		query::{
@@ -16,6 +18,11 @@ use stump_core::{
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		},
 		PrismaCountTrait, SeriesDAO, DAO,
+	},
+	filesystem::{
+		get_unknown_thumnail,
+		image::{generate_thumbnail, ImageFormat, ImageProcessorOptions},
+		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
 		library,
@@ -26,15 +33,16 @@ use stump_core::{
 	},
 };
 use tracing::{error, trace};
+use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_user, http::ImageResponse,
-		FilterableQuery, SeriesBaseFilter, SeriesFilter, SeriesQueryRelation,
-		SeriesRelationFilter,
+		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		get_session_user, http::ImageResponse, FilterableQuery, SeriesBaseFilter,
+		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
 	},
 };
 
@@ -57,7 +65,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_series_by_id))
 				.route("/media", get(get_series_media))
 				.route("/media/next", get(get_next_in_series))
-				.route("/thumbnail", get(get_series_thumbnail)),
+				.route(
+					"/thumbnail",
+					get(get_series_thumbnail_handler).patch(patch_series_thumbnail),
+				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
@@ -304,6 +315,7 @@ async fn get_series_by_id(
 		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let load_media = query.load_media.unwrap_or(false);
+	let load_library = query.load_library.unwrap_or(false);
 	let mut query = db.series().find_first(chain_optional_iter(
 		[series::id::equals(id.clone())],
 		[age_restrictions],
@@ -317,6 +329,10 @@ async fn get_series_by_id(
 				]))
 				.order_by(media::name::order(Direction::Asc)),
 		);
+	}
+
+	if load_library {
+		query = query.with(series::library::fetch());
 	}
 
 	let series = query
@@ -376,6 +392,35 @@ async fn get_recently_added_series_handler(
 	Ok(Json(recently_added_series))
 }
 
+pub(crate) fn get_series_thumbnail(
+	series: &series::Data,
+	first_book: &media::Data,
+	image_format: Option<ImageFormat>,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnails = get_config_dir().join("thumbnails");
+	let series_id = series.id.clone();
+
+	if let Some(format) = image_format.clone() {
+		let extension = format.extension();
+
+		let path = thumbnails.join(format!("{}.{}", series_id, extension));
+
+		if path.exists() {
+			tracing::trace!(?path, series_id, "Found generated series thumbnail");
+			return Ok((ContentType::from(format), read_entire_file(path)?));
+		}
+	} else if let Some(path) = get_unknown_thumnail(&series_id) {
+		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
+		let FileParts { extension, .. } = path.file_parts();
+		return Ok((
+			ContentType::from_extension(extension.as_str()),
+			read_entire_file(path)?,
+		));
+	}
+
+	get_media_thumbnail(first_book, image_format)
+}
+
 // TODO: ImageResponse type for body
 #[utoipa::path(
 	get,
@@ -392,7 +437,7 @@ async fn get_recently_added_series_handler(
 	)
 )]
 /// Returns the thumbnail image for a series
-async fn get_series_thumbnail(
+async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: ReadableSession,
@@ -400,48 +445,144 @@ async fn get_series_thumbnail(
 	let db = ctx.get_db();
 
 	let user = get_session_user(&session)?;
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let age_restriction = user.age_restriction;
 
-	let (library, media) = db
-		._transaction()
-		.run(|client| async move {
-			let library = client
-				.library()
-				.find_first(vec![library::series::some(vec![series::id::equals(
-					id.clone(),
-				)])])
-				.with(library::library_options::fetch())
-				.exec()
-				.await?;
+	let series = db
+		.series()
+		// Find the first series in the library which satisfies the age restriction
+		.find_first(chain_optional_iter(
+			[series::id::equals(id.clone())],
+			[age_restriction
+				.as_ref()
+				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+		))
+		.with(
+			// Then load the first media in that series which satisfies the age restriction
+			series::media::fetch(chain_optional_iter(
+				[],
+				[age_restriction
+					.as_ref()
+					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+			))
+			.take(1)
+			.order_by(media::name::order(Direction::Asc)),
+		)
+		.with(series::library::fetch().with(library::library_options::fetch()))
+		.order_by(series::name::order(Direction::Asc))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Series not found".to_string()))?;
 
-			client
-				.media()
-				.find_first(chain_optional_iter(
-					[media::series_id::equals(Some(id.clone()))],
-					[age_restrictions],
-				))
-				.order_by(media::name::order(Direction::Asc))
-				.exec()
-				.await?
-				.ok_or(ApiError::NotFound(String::from("Series not found")))
-				.map(|media| (library, media))
+	let library = series
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+
+	let first_book = series
+		.media()?
+		.first()
+		.ok_or(ApiError::NotFound(String::from(
+			"Series does not have any media",
+		)))?;
+
+	let image_format = library
+		.library_options()
+		.map(LibraryOptions::from)?
+		.thumbnail_config
+		.map(|config| config.format);
+
+	get_series_thumbnail(&series, first_book, image_format).map(ImageResponse::from)
+}
+
+#[derive(Deserialize, ToSchema, specta::Type)]
+pub struct PatchSeriesThumbnail {
+	/// The ID of the media inside the series to fetch
+	media_id: String,
+	/// The page of the media to use for the thumbnail
+	page: i32,
+	#[specta(optional)]
+	/// A flag indicating whether the page is zero based
+	is_zero_based: Option<bool>,
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/series/:id/thumbnail",
+    tag = "series",
+    params(
+        ("id" = String, Path, description = "The ID of the series")
+    ),
+    responses(
+        (status = 200, description = "Successfully updated series thumbnail"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Series not found"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
+async fn patch_series_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+	Json(body): Json<PatchSeriesThumbnail>,
+) -> ApiResult<ImageResponse> {
+	get_session_admin_user(&session)?;
+
+	let client = ctx.get_db();
+
+	let target_page = body
+		.is_zero_based
+		.map(|is_zero_based| {
+			if is_zero_based {
+				body.page + 1
+			} else {
+				body.page
+			}
 		})
-		.await?;
+		.unwrap_or(body.page);
 
-	let image_format = if let Some(library) = library {
-		library
-			.library_options()
-			.map(LibraryOptions::from)?
-			.thumbnail_config
-			.map(|config| config.format)
-	} else {
-		None
-	};
+	let media = client
+		.media()
+		.find_first(vec![
+			media::series_id::equals(Some(id.clone())),
+			media::id::equals(body.media_id),
+		])
+		.with(
+			media::series::fetch()
+				.with(series::library::fetch().with(library::library_options::fetch())),
+		)
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
 
-	get_media_thumbnail(&media, image_format).map(ImageResponse::from)
+	if media.extension == "epub" {
+		return Err(ApiError::NotSupported);
+	}
+
+	let library = media
+		.series()?
+		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+	let thumbnail_options = library
+		.library_options()?
+		.thumbnail_config
+		.to_owned()
+		.map(ImageProcessorOptions::try_from)
+		.transpose()?
+		.unwrap_or_else(|| {
+			tracing::warn!(
+				"Failed to parse existing thumbnail config! Using a default config"
+			);
+			ImageProcessorOptions::default()
+		})
+		.with_page(target_page);
+
+	let format = thumbnail_options.format.clone();
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	Ok(ImageResponse::from((
+		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
 }
 
 // FIXME: age restrictions mess up the counts since PCR doesn't support relation counts yet!

@@ -780,6 +780,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 			let book = client
 				.media()
 				.find_first(where_conditions)
+				.order_by(media::name::order(Direction::Asc))
 				.with(media::series::fetch())
 				.exec()
 				.await?;

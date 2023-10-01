@@ -506,6 +506,7 @@ async fn get_library_thumbnail_handler(
 			.order_by(media::name::order(Direction::Asc)),
 		)
 		.with(series::library::fetch().with(library::library_options::fetch()))
+		.order_by(series::name::order(Direction::Asc))
 		.exec()
 		.await?
 		.ok_or(ApiError::NotFound("Library has no series".to_string()))?;

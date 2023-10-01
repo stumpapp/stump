@@ -76,15 +76,24 @@ impl PathUtils for Path {
 		let file_name = self
 			.file_name()
 			.and_then(|os_str| os_str.try_to_string())
-			.unwrap_or_default();
+			.unwrap_or_else(|| {
+				tracing::warn!(path = ?self, "Failed to get file name");
+				String::default()
+			});
 		let file_stem = self
 			.file_stem()
 			.and_then(|os_str| os_str.try_to_string())
-			.unwrap_or_default();
+			.unwrap_or_else(|| {
+				tracing::warn!(path = ?self, "Failed to get file stem");
+				String::default()
+			});
 		let extension = self
 			.extension()
 			.and_then(|os_str| os_str.try_to_string())
-			.unwrap_or_default();
+			.unwrap_or_else(|| {
+				tracing::warn!(path = ?self, "Failed to get file extension");
+				String::default()
+			});
 
 		FileParts {
 			file_name,

@@ -8,7 +8,10 @@ use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
 use stump_core::{
 	db::query::pagination::{PageQuery, Pageable},
-	filesystem::{DirectoryListing, DirectoryListingFile, DirectoryListingInput},
+	filesystem::{
+		DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileParts,
+		PathUtils,
+	},
 };
 use tracing::trace;
 
@@ -76,6 +79,7 @@ pub async fn list_directory(
 	let page = pagination.page.unwrap_or(1);
 	let page_size = pagination.page_size.unwrap_or(100);
 
+	// TODO: I haven't touched this logic in a year, it needs a bit of a refatctor (lets see how long it takes me to get to it lol)
 	let mut files = listing
 		.filter_map(|e| e.ok())
 		.filter_map(|f| {
@@ -93,12 +97,12 @@ pub async fn list_directory(
 
 			let path = entry.path();
 
-			let name = path.file_name().unwrap().to_str().unwrap().to_string();
+			let FileParts { file_name, .. } = path.file_parts();
 			let is_directory = path.is_dir();
 			let path = path.to_string_lossy().to_string();
 
 			DirectoryListingFile {
-				name,
+				name: file_name,
 				is_directory,
 				path,
 			}

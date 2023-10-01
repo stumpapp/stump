@@ -10,6 +10,7 @@ type Props = {
 	seriesId: string
 	onSelectBook: (book: Media) => void
 }
+// TODO: Create generlized VirtualizedGrid component and trim the reused logic
 export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 	const {
 		media: books,
@@ -39,16 +40,18 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 		}
 	}, [isAtLeastSmall, isAtLeastMedium])
 
+	const rowCount = books.length > 4 ? books.length / 4 : 1
 	const rowVirtualizer = useVirtualizer({
-		count: books.length / 4,
+		count: rowCount,
 		// ratio is 2:3, so we take the result of estimateWidth and multiply by 3/2
 		estimateSize: useCallback(() => estimateWidth() * 1.5, [estimateWidth]),
 		getScrollElement: () => parentRef.current,
 		overscan: 5,
 	})
 
+	const columnCount = books.length > 4 ? 4 : books.length
 	const columnVirtualizer = useVirtualizer({
-		count: 4,
+		count: columnCount,
 		estimateSize: estimateWidth,
 		getScrollElement: () => parentRef.current,
 		horizontal: true,
@@ -103,15 +106,6 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 										return (
 											<div
 												key={virtualColumn.index}
-												className={
-													virtualColumn.index % 2
-														? virtualRow.index % 2 === 0
-															? 'ListItemOdd'
-															: 'ListItemEven'
-														: virtualRow.index % 2
-														? 'ListItemOdd'
-														: 'ListItemEven'
-												}
 												style={{
 													height: `${virtualRow.size}px`,
 													left: 0,

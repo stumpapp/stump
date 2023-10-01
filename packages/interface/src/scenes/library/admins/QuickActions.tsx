@@ -7,6 +7,7 @@ import React from 'react'
 import { useAppContext } from '../../../context'
 import paths from '../../../paths'
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
+import LibraryThumbnailSelector from './LibraryThumbnailSelector'
 import RegenerateThumbnails from './RegenerateThumbnails'
 
 type Props = {
@@ -36,16 +37,19 @@ export default function QuickActions({ library }: Props) {
 			</Text>
 
 			<Divider variant="muted" className="my-3.5" />
-			<div className="flex flex-wrap items-center gap-2">
-				{hasThumbnailConfig && (
-					<>
-						<RegenerateThumbnails onRegenerate={handleRegenerateThumbnails} />
-						<DeleteLibraryThumbnails libraryId={library.id} />
-					</>
-				)}
-				<ButtonOrLink href={paths.libraryFileExplorer(library.id)} size="md" variant="outline">
-					Open file explorer
-				</ButtonOrLink>
+			<div className="flex items-start gap-4">
+				<LibraryThumbnailSelector library={library} />
+				<div className="flex flex-wrap items-center gap-2">
+					{hasThumbnailConfig && (
+						<>
+							<RegenerateThumbnails onRegenerate={handleRegenerateThumbnails} />
+							<DeleteLibraryThumbnails libraryId={library.id} />
+						</>
+					)}
+					<ButtonOrLink href={paths.libraryFileExplorer(library.id)} size="md" variant="outline">
+						Open file explorer
+					</ButtonOrLink>
+				</div>
 			</div>
 		</div>
 	)

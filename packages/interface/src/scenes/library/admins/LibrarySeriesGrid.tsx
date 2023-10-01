@@ -1,18 +1,26 @@
-import { getMediaPage } from '@stump/api'
-import { cx } from '@stump/components'
+import { getSeriesThumbnail } from '@stump/api'
+import { useSeriesCursorQuery } from '@stump/client'
+import { Series } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React, { useCallback, useEffect } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { useMediaMatch } from 'rooks'
 
 type Props = {
-	selectedPage?: number
-	onSelectPage: (page?: number) => void
-	bookId: string
-	pages: number
+	libraryId: string
+	onSelectSeries: (series: Series) => void
 }
 // TODO: Create generlized VirtualizedGrid component and trim the reused logic
-export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage }: Props) {
+export default function LibrarySeriesGrid({ libraryId, onSelectSeries }: Props) {
+	const { series, fetchNextPage, hasNextPage } = useSeriesCursorQuery({
+		limit: 50,
+		params: {
+			library: {
+				id: libraryId,
+			},
+		},
+	})
+
 	const parentRef = React.useRef<HTMLDivElement>(null)
 
 	const isAtLeastSmall = useMediaMatch('(min-width: 640px)')
@@ -28,7 +36,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 		}
 	}, [isAtLeastSmall, isAtLeastMedium])
 
-	const rowCount = pages > 4 ? pages / 4 : 1
+	const rowCount = series.length > 4 ? series.length / 4 : 1
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
 		// ratio is 2:3, so we take the result of estimateWidth and multiply by 3/2
@@ -37,7 +45,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 		overscan: 5,
 	})
 
-	const columnCount = pages > 4 ? 4 : pages
+	const columnCount = series.length > 4 ? 4 : series.length
 	const columnVirtualizer = useVirtualizer({
 		count: columnCount,
 		estimateSize: estimateWidth,
@@ -55,6 +63,16 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 		[isAtLeastMedium, isAtLeastSmall],
 	)
 
+	const handleScroll = () => {
+		if (!hasNextPage) return
+
+		const { scrollHeight, scrollTop, clientHeight } = parentRef.current!
+
+		if (scrollHeight - scrollTop === clientHeight) {
+			fetchNextPage()
+		}
+	}
+
 	return (
 		<div className="h-96 w-full flex-1">
 			<AutoSizer>
@@ -66,6 +84,7 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 							height,
 							width,
 						}}
+						onScroll={handleScroll}
 					>
 						<div
 							style={{
@@ -78,7 +97,8 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 								<React.Fragment key={virtualRow.index}>
 									{columnVirtualizer.getVirtualItems().map((virtualColumn) => {
 										const virtualPage = virtualRow.index * 4 + virtualColumn.index + 1
-										const imageUrl = getMediaPage(bookId, virtualPage)
+										const thisSeries = series[virtualPage - 1]
+										const imageUrl = getSeriesThumbnail(thisSeries?.id || '')
 										return (
 											<div
 												key={virtualColumn.index}
@@ -92,11 +112,8 @@ export default function BookPageGrid({ bookId, pages, selectedPage, onSelectPage
 												}}
 											>
 												<div
-													className={cx(
-														'relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-gray-75 bg-white shadow-sm transition-colors duration-100 hover:border-brand dark:border-gray-850 dark:bg-gray-950 dark:hover:border-brand sm:w-[7.666rem] md:w-[9rem]',
-														{ 'border-brand dark:border-brand': virtualPage === selectedPage },
-													)}
-													onClick={() => onSelectPage(virtualPage)}
+													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-gray-75 bg-white shadow-sm transition-colors duration-100 hover:border-brand dark:border-gray-850 dark:bg-gray-950 dark:hover:border-brand sm:w-[7.666rem] md:w-[9rem]"
+													onClick={() => onSelectSeries(thisSeries!)}
 												>
 													<div
 														className="relative aspect-[2/3] bg-cover bg-center p-0"

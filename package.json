@@ -12,8 +12,10 @@
 		"desktop": "pnpm --filter @stump/desktop --",
 		"interface": "pnpm --filter @stump/interface --",
 		"web": "pnpm --filter @stump/web --",
+		"docs": "pnpm --filter @stump/docs --",
 		"server": "pnpm --filter @stump/server --",
 		"dev:desktop": "concurrently -n server,desktop -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm desktop dev\"",
+		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm web dev\"",
 		"core": "pnpm --filter @stump/core --",
 		"prisma": "pnpm core prisma",
 		"codegen": "pnpm -r codegen",
@@ -25,7 +27,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",
-		"@moonrepo/cli": "^1.7.3",
+		"@moonrepo/cli": "^1.13.5",
 		"@typescript-eslint/eslint-plugin": "^5.57.0",
 		"@typescript-eslint/parser": "^5.57.0",
 		"babel-preset-moon": "^1.1.4",
@@ -49,7 +51,7 @@
 		"typescript": "^5.0.2"
 	},
 	"lint-staged": {
-		"*.{js,jsx,ts,tsx,md,json}": [
+		"!(packages/interface/src/i18n/locales/**/*)*.{js,jsx,ts,tsx,md,json}": [
 			"prettier --config prettier.config.js --check"
 		],
 		"*.rs": [

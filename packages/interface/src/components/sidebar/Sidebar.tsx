@@ -4,10 +4,10 @@ import type { Library } from '@stump/types'
 import clsx from 'clsx'
 import { AnimatePresence } from 'framer-motion'
 import {
+	Book,
 	ChevronRight,
 	Home,
 	Library as LibraryIcon,
-	List,
 	type LucideProps,
 	Settings,
 } from 'lucide-react'
@@ -52,7 +52,7 @@ function NavMenuItem({ name, items, active, ...rest }: NavItemProps) {
 		<>
 			<Button
 				variant="ghost"
-				className="flex w-full items-center justify-between"
+				className="flex w-full flex-shrink-0 items-center justify-between"
 				size="lg"
 				onClick={toggle}
 				pressEffect={false}
@@ -123,7 +123,9 @@ function NavItem({ name, href, active, ...rest }: NavItemProps) {
 		<ButtonOrLink
 			href={href}
 			size="lg"
-			className={clsx('flex w-full justify-start', { 'bg-gray-50 dark:bg-gray-850': active })}
+			className={clsx('flex w-full flex-shrink-0 justify-start', {
+				'bg-gray-50 dark:bg-gray-850': active,
+			})}
 			variant="ghost"
 		>
 			<div className="flex items-center space-x-2">
@@ -151,6 +153,19 @@ export function SidebarHeader() {
 	)
 }
 
+export function SidebarFooter() {
+	return (
+		<footer className="flex items-center justify-between px-2 py-2 sm:py-0">
+			<ApplicationVersion />
+
+			<div className="flex items-center gap-2">
+				<Logout />
+				<ThemeToggle />
+			</div>
+		</footer>
+	)
+}
+
 type SidebarContentProps = {
 	isMobileSheet?: boolean
 }
@@ -175,28 +190,33 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 	}
 
 	const links: Array<NavItemProps> = useMemo(() => {
-		const libraryIsActive = (id: string) => location.pathname.startsWith(`/library/${id}`)
+		const libraryIsActive = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
 
 		return [
 			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
+			// TODO: clicking Libraries should be disabled when:
+			// 1. there are no libraries
+			// 2. user is not server owner (i.e. cannot create libraries)
 			{
-				active: location.pathname === 'library/create',
+				active: location.pathname === '/libraries/create',
 				icon: LibraryIcon,
 				items: libraries?.map((library) => ({
 					...library,
 					active: libraryIsActive(library.id),
-					href: `/library/${library.id}`,
+					href: paths.libraryOverview(library.id),
 					onHover: () => refreshUseLibrary(library.id),
 				})),
 				name: t('sidebar.buttons.libraries'),
 			},
 			{
-				icon: List,
-				name: 'Reading Lists',
+				active: location.pathname === '/books',
+				href: paths.bookSearch(),
+				icon: Book,
+				name: t('sidebar.buttons.books'),
 			},
 			// {
-			// 	icon: LayoutGrid,
-			// 	name: 'Collections',
+			// 	icon: List,
+			// 	name: 'Reading Lists',
 			// },
 			{
 				href: '/settings',
@@ -210,26 +230,19 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 		<>
 			{!isMobileSheet && <SidebarHeader />}
 
-			<div className="flex max-h-full grow flex-col gap-2 overflow-hidden p-1">
+			<div className="flex max-h-full grow flex-col gap-2 overflow-y-scroll p-1 scrollbar-hide">
 				{links.map((link) =>
 					link.items ? (
 						<NavMenuItem key={link.name} {...link} onClick={(href) => navigate(href)} />
 					) : (
-						<NavItem key={link.name} {...link} active={linkIsActive(link.href)} />
+						<NavItem key={link.name} {...link} active={link.active ?? linkIsActive(link.href)} />
 					),
 				)}
 			</div>
 
 			<Spacer />
 
-			<footer className="flex items-center justify-between px-2">
-				<ApplicationVersion />
-
-				<div className="flex items-center gap-2">
-					<Logout />
-					<ThemeToggle />
-				</div>
-			</footer>
+			{!isMobileSheet && <SidebarFooter />}
 		</>
 	)
 }

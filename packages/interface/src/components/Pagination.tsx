@@ -10,10 +10,10 @@ import PagePopoverForm from './PagePopoverForm'
 interface PaginationArrowProps {
 	kind: 'previous' | 'next'
 	isDisabled?: boolean
-	href: string
+	onClick: () => void
 }
 
-function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
+function PaginationArrow({ kind, isDisabled, onClick }: PaginationArrowProps) {
 	const ArrowIcon = kind === 'previous' ? ArrowLeft : ArrowRight
 
 	// NOTE: notice I am wrapping the link (which will have pointer-events-none when
@@ -25,8 +25,9 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 				'cursor-not-allowed': isDisabled,
 			})}
 		>
-			<Link
-				to={href}
+			<button
+				onClick={onClick}
+				disabled={isDisabled}
 				aria-disabled={isDisabled}
 				className={cx({ 'pointer-events-none': isDisabled })}
 			>
@@ -51,35 +52,34 @@ function PaginationArrow({ kind, isDisabled, href }: PaginationArrowProps) {
 					/>
 					{kind === 'previous' && 'Previous'}
 				</div>
-			</Link>
+			</button>
 		</div>
 	)
 }
 
 interface PaginationLinkProps {
-	href: string
+	onClick?: () => void
 	value: number
 	isActive: boolean
 }
 
-function PaginationLink({ value, href, isActive }: PaginationLinkProps) {
+function PaginationLink({ value, onClick, isActive }: PaginationLinkProps) {
 	return (
-		<Link to={href}>
-			<div
-				className={cx(
-					'inline-flex items-center border-t-2 px-4 pt-4 text-xs font-medium text-gray-550 dark:text-gray-300 md:text-sm',
-					{
-						'border-brand text-brand hover:border-brand-600 dark:hover:border-brand-400': isActive,
-					},
-					{
-						'border-transparent text-gray-300 hover:border-gray-300 dark:text-gray-600 dark:hover:border-gray-600':
-							!isActive,
-					},
-				)}
-			>
-				{value}
-			</div>
-		</Link>
+		<span
+			onClick={onClick}
+			className={cx(
+				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-gray-550 dark:text-gray-300 md:text-sm',
+				{
+					'border-brand text-brand hover:border-brand-600 dark:hover:border-brand-400': isActive,
+				},
+				{
+					'border-transparent text-gray-300 hover:border-gray-300 dark:text-gray-600 dark:hover:border-gray-600':
+						!isActive,
+				},
+			)}
+		>
+			{value}
+		</span>
 	)
 }
 
@@ -87,12 +87,15 @@ export interface PaginationProps {
 	position?: 'top' | 'bottom'
 	pages: number
 	currentPage: number
+	onChangePage: (page: number) => void
 }
 
-export default function Pagination({ position = 'top', pages, currentPage }: PaginationProps) {
-	const navigate = useNavigate()
-	const location = useLocation()
-
+export default function Pagination({
+	position = 'top',
+	pages,
+	currentPage,
+	onChangePage,
+}: PaginationProps) {
 	const { innerWidth: screenWidth } = useWindowSize()
 
 	const numbersToShow = useMemo(() => {
@@ -112,7 +115,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 	const { pageRange } = usePagination({ currentPage, numbersToShow, totalPages: pages })
 
 	function handleEllipsisNavigate(page: number) {
-		navigate(`${location.pathname}?page=${page}`)
+		onChangePage(page)
 	}
 
 	return (
@@ -125,7 +128,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 				<div className="-mt-px flex w-full items-start justify-between gap-2">
 					<PaginationArrow
 						kind="previous"
-						href={`${location.pathname}?page=${currentPage - 1}`}
+						onClick={() => onChangePage(currentPage - 1)}
 						isDisabled={currentPage === 1}
 					/>
 
@@ -135,7 +138,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 								return (
 									<PaginationLink
 										key={`${i}, pagination-${page}`}
-										href={`${location.pathname}?page=${page}`}
+										onClick={() => onChangePage(page)}
 										isActive={page === currentPage}
 										value={page}
 									/>
@@ -163,7 +166,7 @@ export default function Pagination({ position = 'top', pages, currentPage }: Pag
 
 					<PaginationArrow
 						kind="next"
-						href={`${location.pathname}?page=${currentPage + 1}`}
+						onClick={() => onChangePage(currentPage + 1)}
 						isDisabled={currentPage >= pages}
 					/>
 				</div>

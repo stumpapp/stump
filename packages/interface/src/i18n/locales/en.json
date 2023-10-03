@@ -1,6 +1,7 @@
 {
 	"authScene": {
-		"claimText": "This Stump server is not yet claimed, you can use the form below to create a user account and claim it. Enter your preferred username and password.",
+		"claimHeading": "Initialize your server",
+		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
 				"missingUsername": "Username is required",
@@ -12,13 +13,13 @@
 			},
 			"buttons": {
 				"createAccount": "Create Account",
-				"login": "Login"
+				"login": "Log in"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Logging in...",
-			"loggedIn": "Welcome back! Redirecting...",
-			"loggedInFirstTime": "Welcome! Redirecting...",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
 			"registering": "Registering...",
 			"registered": "Registered!",
 			"loginFailed": "Login failed. Please try again",
@@ -103,7 +104,8 @@
 			"general": "General",
 			"server": "Server",
 			"jobs": "Jobs and Configuration",
-			"users": "User Management"
+			"users": "User Management",
+			"desktop": "Desktop"
 		},
 		"general": {
 			"helmet": "General Settings",
@@ -171,7 +173,7 @@
 			"heading": "Jobs and Configuration",
 			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
 			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
 			"historyHeading": "Job History",
 			"historySubtitle": "Manage running jobs and view the history of completed jobs",
 			"historyTable": {
@@ -185,7 +187,7 @@
 				},
 				"emptyHeading": "There are no jobs to display",
 				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics for all jobs may be deleted at any time, and will not affect running jobs. This action, however, cannot be undone and will remove all job history from the database.",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
 				"deleteAllConfirmButton": "Clear history",
 				"deleteAllConfirmButtonTitle": "Clear all job history",
 				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
@@ -235,6 +237,7 @@
 		"buttons": {
 			"home": "Home",
 			"libraries": "Libraries",
+			"books": "Explore Books",
 			"createLibrary": "Create Library",
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
@@ -274,7 +277,11 @@
 	},
 	"serverStatusOverlay": {
 		"heading": "Server isn't connected",
-		"message": ["Please check your internet connection", "Click here", "to change your server URL"]
+		"message": [
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
+		]
 	},
 	"slidingList": {
 		"empty": "No items to display",

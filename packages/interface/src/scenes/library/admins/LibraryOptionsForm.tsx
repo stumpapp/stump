@@ -1,4 +1,4 @@
-import { CheckBox, Switch } from '@stump/components'
+import { CheckBox } from '@stump/components'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 

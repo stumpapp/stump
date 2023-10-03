@@ -1,6 +1,6 @@
 import { Badge, Heading, Text } from '@stump/components'
 import { JobDetail, JobStatus } from '@stump/types'
-import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
+import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -20,48 +20,49 @@ dayjs.extend(relativeTime)
 const DEBUG = import.meta.env.DEV
 const LOCALE_BASE = 'settingsScene.jobs.historyTable'
 
+const columnHelper = createColumnHelper<JobDetail>()
+
 export default function JobTable() {
 	const { isServerOwner } = useAppContext()
 	const { t } = useLocaleContext()
 	const { jobs, pagination, setPagination, pageCount } = useJobSettingsContext()
 
-	const columns = useMemo<ColumnDef<JobDetail>[]>(
+	const columns = useMemo(
 		() => [
-			{
-				// TODO(aaron): monospace font?
-				accessorKey: 'name',
-				cell: (info) => (
+			columnHelper.accessor('name', {
+				cell: ({
+					row: {
+						original: { name },
+					},
+				}) => (
 					<Text size="sm" className="line-clamp-1">
-						{info.getValue<string>()}
+						{name}
 					</Text>
 				),
 				header: t(`${LOCALE_BASE}.columns.name`),
-				id: 'type',
-			},
-			{
-				accessorKey: 'description',
-				cell: (info) => (
+			}),
+			columnHelper.accessor('description', {
+				cell: ({
+					row: {
+						original: { description },
+					},
+				}) => (
 					<Text size="sm" variant="muted" className="line-clamp-1">
-						{info.getValue<string>()}
+						{description}
 					</Text>
 				),
 				header: t(`${LOCALE_BASE}.columns.description`),
-				id: 'description',
-			},
-			{
-				accessorFn: (job) => `${job.completed_task_count}/${job.task_count}`,
+			}),
+			columnHelper.accessor((job) => `${job.completed_task_count}/${job.task_count}`, {
 				cell: ({ row }) => (
 					<Text size="sm" variant="muted" className="line-clamp-1">
 						{row.original.completed_task_count}/{row.original.task_count}
 					</Text>
 				),
 				header: t(`${LOCALE_BASE}.columns.tasks`),
-				id: 'tasks',
-			},
-			{
-				accessorKey: 'created_at',
-				cell: ({ row }) => {
-					const job = row.original
+			}),
+			columnHelper.accessor('created_at', {
+				cell: ({ row: { original: job } }) => {
 					if (job.created_at) {
 						return (
 							<Text size="sm" variant="muted" className="line-clamp-1">
@@ -73,10 +74,8 @@ export default function JobTable() {
 					return null
 				},
 				header: t(`${LOCALE_BASE}.columns.createdAt`),
-				id: 'created_at',
-			},
-			{
-				accessorKey: 'status',
+			}),
+			columnHelper.display({
 				cell: ({ row }) => {
 					const getBadgeVariant = (status: JobStatus) => {
 						if (status === 'COMPLETED') {
@@ -100,12 +99,9 @@ export default function JobTable() {
 				},
 				header: 'Status',
 				id: 'status',
-			},
-			{
-				accessorKey: 'ms_elapsed',
-				cell: ({ row }) => {
-					const job = row.original
-
+			}),
+			columnHelper.display({
+				cell: ({ row: { original: job } }) => {
 					const displayDuration = (duration: duration.Duration) => {
 						//? TODO(aaron): This might be funny to have two formats, I think I should
 						//? either just always show ms or just accept the 'rounding' of the duration
@@ -132,11 +128,11 @@ export default function JobTable() {
 				},
 				header: t(`${LOCALE_BASE}.columns.elapsed`),
 				id: 'ms_elapsed',
-			},
-			{
+			}),
+			columnHelper.display({
 				cell: ({ row }) => (isServerOwner ? <JobActionMenu job={row.original} /> : null),
 				id: 'actions',
-			},
+			}),
 		],
 		[t, isServerOwner],
 	)

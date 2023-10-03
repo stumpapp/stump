@@ -1,4 +1,4 @@
-import { CursorQueryParams, PagedQueryParams, toUrlParams } from '@stump/api'
+import { CursorQueryParams, PagedQueryParams } from '@stump/api'
 import { Pageable } from '@stump/types'
 import {
 	MutationFunction,
@@ -111,7 +111,7 @@ export function usePageQuery<Entity = unknown, Error = AxiosError>(
 ) {
 	return useQuery(
 		[...queryKey, page, page_size, params],
-		async () => queryFn({ page, page_size, params: toUrlParams(params) }),
+		async () => queryFn({ page, page_size, params }),
 		{
 			...options,
 		},
@@ -185,12 +185,12 @@ export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 	const { initialCursor, limit, params, ...restOptions } = options || {}
 
 	const { data, ...rest } = useInfiniteQuery(
-		[...queryKey, initialCursor, limit, params],
+		[initialCursor, limit, params, ...queryKey],
 		async ({ pageParam }: CursorQueryContext) => {
 			return queryFn({
 				afterId: pageParam || initialCursor,
 				limit: limit || 20,
-				params: toUrlParams(params),
+				params,
 			})
 		},
 		{

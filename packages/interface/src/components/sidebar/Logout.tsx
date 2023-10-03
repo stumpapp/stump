@@ -1,5 +1,5 @@
-import { authApi } from '@stump/api'
-import { useUserStore } from '@stump/client'
+import { authApi, serverQueryKeys } from '@stump/api'
+import { invalidateQueries, useUserStore } from '@stump/client'
 import { ConfirmationModal, IconButton, ToolTip, useBoolean } from '@stump/components'
 import { LogOut } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -19,6 +19,7 @@ export default function Logout() {
 				success: 'You have been logged out. Redirecting...',
 			})
 			.then(() => {
+				invalidateQueries({ keys: [serverQueryKeys.checkIsClaimed] })
 				setUser(null)
 				navigate('/auth')
 			})

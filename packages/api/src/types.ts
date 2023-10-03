@@ -6,11 +6,11 @@ export type PageableApiResult<T> = ApiResult<Pageable<T>>
 export type PagedQueryParams = {
 	page?: number
 	page_size?: number
-	params?: URLSearchParams
+	params?: Record<string, unknown>
 }
 
 export type CursorQueryParams = {
 	afterId?: string
 	limit?: number
-	params?: URLSearchParams
+	params?: Record<string, unknown>
 }

@@ -17,7 +17,12 @@ mod tests {
 		NamedType,
 	};
 
-	use super::v1::{auth::LoginOrRegisterArgs, ClaimResponse, StumpVersion};
+	use super::v1::{
+		auth::LoginOrRegisterArgs, job::UpdateSchedulerConfig,
+		library::PatchLibraryThumbnail, media::PatchMediaThumbnail,
+		metadata::MediaMetadataOverview, series::PatchSeriesThumbnail, ClaimResponse,
+		StumpVersion,
+	};
 
 	#[allow(dead_code)]
 	fn ts_export<T>() -> Result<String, TsExportError>
@@ -44,6 +49,22 @@ mod tests {
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),
+		)?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<PatchMediaThumbnail>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PatchSeriesThumbnail>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<PatchLibraryThumbnail>()?).as_bytes(),
+		)?;
 
 		Ok(())
 	}

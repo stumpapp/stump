@@ -11,13 +11,12 @@ import {
 	Trash,
 } from 'lucide-react'
 import { useState } from 'react'
-import { useMediaMatch } from 'rooks'
 
 import { useAppContext } from '../../context'
 import paths from '../../paths'
 import DeleteLibraryConfirmation from '../library/DeleteLibraryConfirmation'
 
-interface Props {
+type Props = {
 	library: Library
 }
 
@@ -25,8 +24,6 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const { scanAsync } = useScanLibrary()
 	const { isServerOwner } = useAppContext()
-
-	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	function handleScan(mode: LibraryScanMode) {
 		// extra protection, should not be possible to reach this.
@@ -100,7 +97,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 						],
 					},
 				]}
-				align={isMobile ? 'end' : 'start'}
+				align="start"
 			/>
 		</>
 	)

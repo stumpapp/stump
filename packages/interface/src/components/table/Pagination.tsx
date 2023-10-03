@@ -7,16 +7,12 @@ import { usePagination } from '../../hooks/usePagination'
 import PagePopoverForm from '../PagePopoverForm'
 import { PaginationProps } from '../Pagination'
 
-type TablePaginationProps = Omit<PaginationProps, 'position'> & {
-	onPageChange: (page: number) => void
-	isZeroBasedPagination?: boolean
-}
+type TablePaginationProps = Omit<PaginationProps, 'position'>
 
 export default function TablePagination({
 	pages,
 	currentPage,
-	onPageChange,
-	isZeroBasedPagination,
+	onChangePage,
 }: TablePaginationProps) {
 	const { innerWidth: screenWidth } = useWindowSize()
 
@@ -38,7 +34,7 @@ export default function TablePagination({
 
 	return (
 		<div className="flex items-center gap-1">
-			<IconButton disabled={currentPage <= 1} onClick={() => onPageChange(currentPage - 1)}>
+			<IconButton disabled={currentPage <= 1} onClick={() => onChangePage(currentPage - 1)}>
 				<ArrowLeft />
 			</IconButton>
 
@@ -48,7 +44,7 @@ export default function TablePagination({
 						<PaginationNumber
 							key={`${i}, pagination-${page}`}
 							isActive={page === currentPage}
-							onClick={() => onPageChange(page)}
+							onClick={() => onChangePage(page)}
 							page={page}
 						/>
 					)
@@ -60,7 +56,7 @@ export default function TablePagination({
 						pos={i}
 						key={`${i}, pagination-${page}`}
 						totalPages={pages}
-						onPageChange={onPageChange}
+						onPageChange={onChangePage}
 						trigger={
 							<Button>
 								<DotsThree />
@@ -70,7 +66,7 @@ export default function TablePagination({
 				)
 			})}
 
-			<IconButton disabled={currentPage >= pages} onClick={() => onPageChange(currentPage + 1)}>
+			<IconButton disabled={currentPage >= pages} onClick={() => onChangePage(currentPage + 1)}>
 				<ArrowRight />
 			</IconButton>
 		</div>

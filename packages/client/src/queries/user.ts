@@ -7,10 +7,23 @@ import {
 	userApi,
 	userQueryKeys,
 } from '@stump/api'
-import type { LoginOrRegisterArgs, UpdateUser, User, UserPreferences } from '@stump/types'
+import type {
+	LoginActivity,
+	LoginOrRegisterArgs,
+	UpdateUser,
+	User,
+	UserPreferences,
+} from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { MutationOptions, PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
+import {
+	MutationOptions,
+	PageQueryOptions,
+	QueryOptions,
+	useMutation,
+	usePageQuery,
+	useQuery,
+} from '../client'
 
 type UseUsersQueryParams = PageQueryOptions<User> & {
 	params?: Record<string, unknown>
@@ -18,8 +31,8 @@ type UseUsersQueryParams = PageQueryOptions<User> & {
 export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) {
 	const { data, ...restReturn } = usePageQuery(
 		[userQueryKeys.getUsers, params],
-		async ({ page = 1, ...rest }) => {
-			const { data } = await userApi.getUsers({ page, ...rest })
+		async ({ page = 1, page_size }) => {
+			const { data } = await userApi.getUsers({ page, page_size, ...params })
 			return data
 		},
 		{
@@ -151,6 +164,28 @@ export function useDeleteUser(options: UseDeleteUserOptions) {
 
 	return {
 		deleteAsync,
+		...restReturn,
+	}
+}
+
+type UseLoginActivityQueryOptions = {
+	userId?: string
+} & QueryOptions<LoginActivity[]>
+export function useLoginActivityQuery({ userId, ...options }: UseLoginActivityQueryOptions) {
+	const { data: loginActivity, ...restReturn } = useQuery(
+		// This is a bit pedantic and not strictly necessary, but w/e
+		[userId ? userQueryKeys.getLoginActivityForUser : userQueryKeys.getLoginActivity, userId],
+		async () => {
+			const response = userId
+				? await userApi.getLoginActivityForUser(userId)
+				: await userApi.getLoginActivity()
+			return response.data
+		},
+		options,
+	)
+
+	return {
+		loginActivity,
 		...restReturn,
 	}
 }

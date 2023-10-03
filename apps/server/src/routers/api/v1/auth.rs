@@ -1,7 +1,8 @@
 use axum::{
-	extract::State,
+	extract::{ConnectInfo, State},
+	headers::UserAgent,
 	routing::{get, post},
-	Json, Router,
+	Json, Router, TypedHeader,
 };
 use axum_sessions::extractors::{ReadableSession, WritableSession};
 use prisma_client_rust::chrono::Utc;
@@ -9,7 +10,7 @@ use serde::Deserialize;
 use specta::Type;
 use stump_core::{
 	db::entity::{User, UserRole},
-	prisma::{user, user_preferences},
+	prisma::{user, user_login_activity, user_preferences, PrismaClient},
 };
 use tracing::error;
 use utoipa::ToSchema;
@@ -18,6 +19,7 @@ use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	utils::{self, verify_password},
+	StumpRequestInfo,
 };
 
 pub(crate) fn mount() -> Router<AppState> {
@@ -56,6 +58,27 @@ async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
 	}
 }
 
+async fn handle_login_attempt(
+	client: &PrismaClient,
+	for_user: user::Data,
+	user_agent: UserAgent,
+	request_info: StumpRequestInfo,
+	success: bool,
+) -> ApiResult<user_login_activity::Data> {
+	let login_activity = client
+		.user_login_activity()
+		.create(
+			request_info.ip_addr.to_string(),
+			user_agent.to_string(),
+			success,
+			user::id::equals(for_user.id),
+			vec![],
+		)
+		.exec()
+		.await?;
+	Ok(login_activity)
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/auth/login",
@@ -70,6 +93,8 @@ async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
 /// Authenticates the user and returns the user object. If the user is already logged in, returns the
 /// user object from the session.
 async fn login(
+	TypedHeader(user_agent): TypedHeader<UserAgent>,
+	ConnectInfo(request_info): ConnectInfo<StumpRequestInfo>,
 	mut session: WritableSession,
 	State(state): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
@@ -88,12 +113,15 @@ async fn login(
 			user::deleted_at::equals(None),
 		])
 		.with(user::user_preferences::fetch())
+		.with(user::age_restriction::fetch())
 		.exec()
 		.await?;
 
 	if let Some(db_user) = fetched_user {
 		let matches = verify_password(&db_user.hashed_password, &input.password)?;
 		if !matches {
+			handle_login_attempt(&state.db, db_user, user_agent, request_info, false)
+				.await?;
 			return Err(ApiError::Unauthorized);
 		}
 
@@ -104,6 +132,8 @@ async fn login(
 				user::id::equals(db_user.id.clone()),
 				vec![user::last_login::set(Some(Utc::now().into()))],
 			)
+			.with(user::user_preferences::fetch())
+			.with(user::age_restriction::fetch())
 			.exec()
 			.await
 			.unwrap_or_else(|err| {
@@ -113,6 +143,18 @@ async fn login(
 					..db_user
 				}
 			});
+		let login_track_result = handle_login_attempt(
+			&state.db,
+			updated_user.clone(),
+			user_agent,
+			request_info,
+			true,
+		)
+		.await;
+		// I don't want to kill the login here, so not bubbling up the error
+		if let Err(err) = login_track_result {
+			error!(error = ?err, "Failed to track login attempt!");
+		}
 
 		let user = User::from(updated_user);
 		session
@@ -215,6 +257,7 @@ pub async fn register(
 		.user()
 		.find_unique(user::id::equals(created_user.id))
 		.with(user::user_preferences::fetch())
+		.with(user::age_restriction::fetch())
 		.exec()
 		.await?
 		.expect("Failed to fetch user after registration.");

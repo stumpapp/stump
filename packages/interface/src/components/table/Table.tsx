@@ -205,8 +205,7 @@ export default function Table<T, V>({
 				<TablePagination
 					currentPage={pageIndex + 1}
 					pages={pageCount}
-					onPageChange={handlePageChanged}
-					isZeroBasedPagination={isZeroBasedPagination}
+					onChangePage={handlePageChanged}
 				/>
 			</div>
 		</div>

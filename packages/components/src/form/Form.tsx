@@ -1,9 +1,7 @@
 import React, { forwardRef } from 'react'
 import { FieldValues, FormProvider, SubmitHandler, UseFormReturn } from 'react-hook-form'
 
-import { type Any } from '..'
-
-type FormProps<T extends FieldValues = Any> = {
+type FormProps<T extends FieldValues> = {
 	form: UseFormReturn<T>
 	onSubmit: SubmitHandler<T>
 } & Omit<React.ComponentProps<'form'>, 'onSubmit'>

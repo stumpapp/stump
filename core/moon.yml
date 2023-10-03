@@ -1,4 +1,4 @@
-type: 'application'
+type: 'library'
 
 workspace:
   inheritedTasks:

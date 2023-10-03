@@ -1,7 +1,8 @@
 use std::net::SocketAddr;
 
-use axum::Router;
+use axum::{extract::connect_info::Connected, Router};
 use errors::{ServerError, ServerResult};
+use hyper::server::conn::AddrStream;
 use stump_core::{config::logging::init_tracing, event::InternalCoreTask, StumpCore};
 use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
@@ -25,10 +26,19 @@ fn debug_setup() {
 	std::env::set_var("STUMP_PROFILE", "debug");
 }
 
-// FIXME: ever since bumping rust, I get false postive errors on this line:
-// no method `expect` on type `<Graceful<AddrIncoming, IntoMakeService<Router<(), Body>>, impl Future<Output = ()>, Exec> as IntoFuture>::Output`
-// https://docs.rs/tokio/latest/tokio/attr.main.html#using-the-multi-thread-runtime
-// TODO: Do I need to annotate with flavor?? I don't ~think~ so, but I'm not sure.
+#[derive(Clone, Debug)]
+pub struct StumpRequestInfo {
+	pub ip_addr: std::net::IpAddr,
+}
+
+impl Connected<&AddrStream> for StumpRequestInfo {
+	fn connect_info(target: &AddrStream) -> Self {
+		StumpRequestInfo {
+			ip_addr: target.remote_addr().ip(),
+		}
+	}
+}
+
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> ServerResult<()> {
 	#[cfg(debug_assertions)]
@@ -55,6 +65,22 @@ async fn main() -> ServerResult<()> {
 		error!("Failed to run migrations: {:?}", err);
 		return Err(ServerError::ServerStartError(err.to_string()));
 	}
+
+	// Initialize the server configuration. If it already exists, nothing will happen.
+	core.init_server_config()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
+	// Initialize the job manager
+	core.get_job_manager()
+		.init()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
+	// Initialize the scheduler
+	core.init_scheduler()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
@@ -92,7 +118,7 @@ async fn main() -> ServerResult<()> {
 	};
 
 	axum::Server::bind(&addr)
-		.serve(app.into_make_service())
+		.serve(app.into_make_service_with_connect_info::<StumpRequestInfo>())
 		.with_graceful_shutdown(shutdown_signal_with_cleanup(Some(cleanup)))
 		.await
 		.expect("Failed to start Stump HTTP server!");

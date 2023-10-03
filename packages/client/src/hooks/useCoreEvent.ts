@@ -33,6 +33,7 @@ export function useCoreEventHandler({
 				break
 			case 'JobComplete':
 				removeJob(data)
+				await new Promise((resolve) => setTimeout(resolve, 300))
 				await invalidateQueries({ keys: core_event_triggers[key].keys })
 				onJobComplete?.(data)
 				break
@@ -45,6 +46,8 @@ export function useCoreEventHandler({
 			case 'CreatedMedia':
 			case 'CreatedMediaBatch':
 			case 'CreatedSeries':
+			case 'CreatedSeriesBatch':
+			case 'GeneratedThumbnailBatch':
 				// I set a timeout here to give the backend a little time to analyze at least
 				// one of the books in a new series before triggering a refetch. This is to
 				// prevent the series/media cards from being displayed before there is an image ready.

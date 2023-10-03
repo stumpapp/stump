@@ -24,6 +24,7 @@ pub mod prisma;
 use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
 use event::{event_manager::EventManager, InternalCoreTask};
+use job::JobScheduler;
 use tokio::sync::mpsc::unbounded_channel;
 
 pub use context::Ctx;
@@ -99,6 +100,32 @@ impl StumpCore {
 	pub async fn run_migrations(&self) -> Result<(), CoreError> {
 		db::migration::run_migrations(&self.ctx.db).await
 	}
+
+	pub async fn init_server_config(&self) -> Result<(), CoreError> {
+		let config_exists = self
+			.ctx
+			.db
+			.server_preferences()
+			.find_first(vec![])
+			.exec()
+			.await?
+			.is_some();
+
+		if !config_exists {
+			self.ctx
+				.db
+				.server_preferences()
+				.create(vec![])
+				.exec()
+				.await?;
+		}
+
+		Ok(())
+	}
+
+	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {
+		JobScheduler::init(self.ctx.arced()).await
+	}
 }
 
 #[allow(unused_imports)]
@@ -114,7 +141,8 @@ mod tests {
 		db::{
 			entity::{
 				epub::*, library::*, log::*, media::*, metadata::*, read_progress::*,
-				reading_list::*, series::*, tag::*, user::*, FileStatus, LayoutMode,
+				reading_list::*, series::*, server_config::*, tag::*, user::*,
+				FileStatus, LayoutMode,
 			},
 			query::{ordering::*, pagination::*},
 		},
@@ -146,6 +174,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserRole>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateUser>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UpdateUserPreferences>()?).as_bytes(),
@@ -180,6 +209,8 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobDetail>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;

@@ -24,6 +24,30 @@ The version of the Stump API to use. This should really be left alone and **not*
 
 This corresponds to the `api_version` configuration option in the `Stump.toml` file.
 
+### PDFIUM_PATH
+
+The path to the PDFium binary. This is only required if you want PDF support and you're running Stump outside of Docker, since the PDFium binary is included in the Docker image. You'll want to find and download the PDFium binary for your platform from [here](https://github.com/bblanchon/pdfium-binaries/releases), and then set this environment variable to the path of the binary.
+
+| Type   | Default Value                 |
+| ------ | ----------------------------- |
+| String | `/lib/libpdfium.so` in Docker |
+
+### SESSION_SECRET
+
+The secret key used to sign session cookies. This should be a random string of characters. If you don't set this, Stump will generate a random string for you. Only set this if you want to use a specific secret key.
+
+| Type   | Default Value              |
+| ------ | -------------------------- |
+| String | _Randomly generated value_ |
+
+### SESSION_TTL
+
+The time-to-live for session cookies. This is the amount of time that a session cookie will be valid for _in seconds_. The default value is `259200`, or 3 days. You can set this to a different value if you want sessions to expire sooner or later, depending on your needs.
+
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | `259200`      |
+
 #### STUMP_ALLOWED_ORIGINS
 
 The allowed origins for the Stump API. If you're trying to access the API from a different domain, you'll need to add it to this list. By default, origins corresponding to the Tauri desktop application are allowed, and the host machine's IP address with the configured port is allowed for both HTTP and HTTPS.

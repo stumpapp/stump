@@ -108,7 +108,7 @@ export default function CreateUserModal() {
 						errorMessage={form.formState.errors.password?.message}
 						type={passwordVisible ? 'text' : 'password'}
 						autoComplete="off"
-						icon={
+						rightDecoration={
 							<IconButton
 								type="button"
 								size="xs"

@@ -67,90 +67,95 @@ const SheetOverlay = React.forwardRef<
 ))
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
-const sheetVariants = cva('fixed z-50 scale-100 gap-4 bg-white p-6 opacity-100 dark:bg-gray-900', {
-	compoundVariants: [
-		{
-			class: 'max-h-screen',
-			position: ['top', 'bottom'],
-			size: 'content',
-		},
-		{
-			class: 'h-1/3',
-			position: ['top', 'bottom'],
+const sheetVariants = cva(
+	'fixed z-50 scale-100 gap-4 bg-white opacity-100 dark:bg-gray-900 flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300 transition ease-in-out',
+	{
+		compoundVariants: [
+			{
+				class: 'max-h-screen',
+				position: ['top', 'bottom'],
+				size: 'content',
+			},
+			{
+				class: 'h-1/3',
+				position: ['top', 'bottom'],
+				size: 'default',
+			},
+			{
+				class: 'h-1/4',
+				position: ['top', 'bottom'],
+				size: 'sm',
+			},
+			{
+				class: 'h-1/2',
+				position: ['top', 'bottom'],
+				size: 'lg',
+			},
+			{
+				class: 'h-5/6',
+				position: ['top', 'bottom'],
+				size: 'xl',
+			},
+			{
+				class: 'h-screen',
+				position: ['top', 'bottom'],
+				size: 'full',
+			},
+			{
+				class: 'max-w-screen',
+				position: ['right', 'left'],
+				size: 'content',
+			},
+			{
+				class: 'w-1/3',
+				position: ['right', 'left'],
+				size: 'default',
+			},
+			{
+				class: 'w-1/4',
+				position: ['right', 'left'],
+				size: 'sm',
+			},
+			{
+				class: 'w-1/2',
+				position: ['right', 'left'],
+				size: 'lg',
+			},
+			{
+				class: 'w-5/6',
+				position: ['right', 'left'],
+				size: 'xl',
+			},
+			{
+				class: 'w-screen',
+				position: ['right', 'left'],
+				size: 'full',
+			},
+		],
+		defaultVariants: {
+			position: 'right',
 			size: 'default',
 		},
-		{
-			class: 'h-1/4',
-			position: ['top', 'bottom'],
-			size: 'sm',
-		},
-		{
-			class: 'h-1/2',
-			position: ['top', 'bottom'],
-			size: 'lg',
-		},
-		{
-			class: 'h-5/6',
-			position: ['top', 'bottom'],
-			size: 'xl',
-		},
-		{
-			class: 'h-screen',
-			position: ['top', 'bottom'],
-			size: 'full',
-		},
-		{
-			class: 'max-w-screen',
-			position: ['right', 'left'],
-			size: 'content',
-		},
-		{
-			class: 'w-1/3',
-			position: ['right', 'left'],
-			size: 'default',
-		},
-		{
-			class: 'w-1/4',
-			position: ['right', 'left'],
-			size: 'sm',
-		},
-		{
-			class: 'w-1/2',
-			position: ['right', 'left'],
-			size: 'lg',
-		},
-		{
-			class: 'w-5/6',
-			position: ['right', 'left'],
-			size: 'xl',
-		},
-		{
-			class: 'w-screen',
-			position: ['right', 'left'],
-			size: 'full',
-		},
-	],
-	defaultVariants: {
-		position: 'right',
-		size: 'default',
-	},
-	variants: {
-		position: {
-			bottom: 'animate-in slide-in-from-bottom w-full duration-300',
-			left: 'animate-in slide-in-from-left h-full duration-300',
-			right: 'animate-in slide-in-from-right h-full duration-300',
-			top: 'animate-in slide-in-from-top w-full duration-300',
-		},
-		size: {
-			content: '',
-			default: '',
-			full: '',
-			lg: '',
-			sm: '',
-			xl: '',
+		// FIXME: animate out not working
+		variants: {
+			position: {
+				bottom: 'data-[state=open]:slide-in-from-bottom w-full',
+				left: 'data-[state=open]:slide-in-from-left h-full',
+				right:
+					'data-[state=open]:slide-in-from-right h-full data-[state=closed]:slide-out-to-right ',
+				top: 'data-[state=open]:slide-in-from-top w-full',
+			},
+			size: {
+				content: '',
+				default: '',
+				full: '',
+				lg: '',
+				sm: '',
+				xl: '',
+			},
 		},
 	},
-})
+)
 
 const FLOATING_CONTENT_VARIANTS = {
 	bottom: 'max-w-[calc(100%-2rem)]',
@@ -197,13 +202,16 @@ const SheetContent = React.forwardRef<
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-	<div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
+	<div
+		className={cn('flex flex-col space-y-2 pb-2 pt-4 text-center sm:text-left', className)}
+		{...props}
+	/>
 )
 SheetHeader.displayName = 'SheetHeader'
 
 const SheetFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
+		className={cn('flex flex-col-reverse px-6 sm:flex-row sm:justify-end sm:space-x-2', className)}
 		{...props}
 	/>
 )
@@ -215,7 +223,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Title
 		ref={ref}
-		className={cn('text-lg font-semibold text-gray-900', 'dark:text-gray-50', className)}
+		className={cn('text-lg font-semibold text-gray-900', 'px-6 dark:text-gray-50', className)}
 		{...props}
 	/>
 ))
@@ -227,7 +235,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Description
 		ref={ref}
-		className={cn('text-sm text-gray-500', 'dark:text-gray-400', className)}
+		className={cn('px-6 text-sm text-gray-500', 'dark:text-gray-400', className)}
 		{...props}
 	/>
 ))

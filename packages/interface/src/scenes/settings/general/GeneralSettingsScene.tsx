@@ -6,6 +6,7 @@ import { SettingsContent, SettingsHeading } from '../SettingsLayout'
 import LocalePreferences from './LocalePreferences'
 import ProfileForm from './ProfileForm'
 import SystemThemeForm from './SystemThemeForm'
+import UiPreferences from './UiPreferences'
 
 export default function GeneralSettingsScene() {
 	const { t } = useLocaleContext()
@@ -25,6 +26,7 @@ export default function GeneralSettingsScene() {
 				<ProfileForm />
 				<SystemThemeForm />
 				<LocalePreferences />
+				<UiPreferences />
 			</SettingsContent>
 		</SceneContainer>
 	)

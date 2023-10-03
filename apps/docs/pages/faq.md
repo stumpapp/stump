@@ -35,7 +35,14 @@ The hardware requirements vary and should serve **only as a guide**. Generally s
 
 ## When will Stump be released?
 
-Stump is currently under development. The primary developer is working on it in their free time, mostly on the weekends, and there aren't many active contributors, so it's hard to say when it will be ready for a first release. That said, ideally the first release candidate will be ready by the end of 2023. If you're interested in expediting the development of Stump, please consider contributing to the project. You can find more information on how to contribute in the [Contributing](/contributing) guide.
+Stump is currently under development. The primary developer is working on it in their free time, mostly on the weekends. There aren't many active contributors, so it's hard to say when it will be release ready. Ideally the first release candidate will be ready by the end of 2023. Please consider contributing to the project if you're interested in expediting the development. You can find more information on ways to contribute in the [contributing](/contributing) guide.
+
+## Can I try it out?
+
+I am working on setting up a public demo instance. If it is available, you will find it at [demo.stumpapp.dev](https://demo.stumpapp.dev). The login credentials are:
+
+- **Username:** `demouser`
+- **Password:** `demouser10801`
 
 ## What is on the roadmap?
 
@@ -57,15 +64,6 @@ The current `0.1.0` release roadmap can be found on [GitHub](https://github.com/
 - Multi-language support
 
 If you're interested in tracking the broader development of features, you can take a look at [GitHub issues](https://github.com/stumpapp/stump/issues).
-
-## Similar Projects
-
-There are a number of other projects that are similar to Stump, it certainly isn't the first or only digital book media server out there. If Stump isn't for you, or you want to check out similar projects in the rust and/or self hosting spaces, consider checking out these other open source projects:
-
-- [Komga](https://github.com/gotson/komga)
-- [Kavita](https://github.com/Kareadita/Kavita)
-- [audiobookshelf](https://github.com/advplyr/audiobookshelf) (_Audio books, Podcasts_)
-- [Dim](https://github.com/Dusk-Labs/dim) (_Video, Audio_) (✨*Rust*✨)
 
 ## More questions?
 

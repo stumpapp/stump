@@ -28,6 +28,7 @@ type EntityCardProps = {
 	progress?: number | null
 } & VariantProps<typeof entityCardVariants> &
 	Omit<React.ComponentPropsWithoutRef<'div'>, 'children'>
+// TODO: fix the tab focus state, it looks weird!
 export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 	(
 		{

@@ -1,32 +1,38 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::get,
+	routing::{get, post},
 	Json, Router,
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
+use serde_qs::axum::QsQuery;
 use std::{path, str::FromStr};
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
 use stump_core::{
+	config::get_config_dir,
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			CreateLibrary, LibrariesStats, Library, LibraryScanMode, Media, Series,
-			UpdateLibrary,
+			CreateLibrary, LibrariesStats, Library, LibraryOptions, LibraryScanMode,
+			Media, Series, UpdateLibrary,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
 	},
 	filesystem::{
+		get_unknown_thumnail,
 		image::{
-			self, remove_thumbnails, remove_thumbnails_of_type, ImageProcessorOptions,
+			self, generate_thumbnail, remove_thumbnails, remove_thumbnails_of_type,
+			ImageFormat, ImageProcessorOptions, ThumbnailJob, ThumbnailJobConfig,
 		},
+		read_entire_file,
 		scanner::LibraryScanJob,
+		ContentType, FileParts, PathUtils,
 	},
 	prisma::{
 		library::{self, WhereParam},
@@ -42,13 +48,21 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, get_session_admin_user, http::ImageResponse,
-		FilterableQuery, LibraryFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		get_session_user, http::ImageResponse, FilterableQuery, LibraryBaseFilter,
+		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
 };
 
-use super::media::{apply_media_filters, apply_media_pagination};
+use super::{
+	media::{apply_media_age_restriction, apply_media_filters, apply_media_pagination},
+	series::{
+		apply_series_age_restriction, apply_series_base_filters, apply_series_filters,
+		get_series_thumbnail,
+	},
+};
 
+// TODO: age restrictions!
 // TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
 // of the nesting
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -67,22 +81,53 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/scan", get(scan_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
-				.route(
+				.nest(
 					"/thumbnail",
-					get(get_library_thumbnail).delete(delete_library_thumbnails),
+					Router::new()
+						.route(
+							"/",
+							get(get_library_thumbnail_handler)
+								.patch(patch_library_thumbnail)
+								.delete(delete_library_thumbnails),
+						)
+						.route("/generate", post(generate_library_thumbnails)),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+pub(crate) fn apply_library_base_filters(filters: LibraryBaseFilter) -> Vec<WhereParam> {
 	chain_optional_iter(
 		[],
 		[
 			(!filters.id.is_empty()).then(|| library::id::in_vec(filters.id)),
 			(!filters.name.is_empty()).then(|| library::name::in_vec(filters.name)),
+			(!filters.path.is_empty()).then(|| {
+				let decoded_paths = decode_path_filter(filters.path);
+				library::path::in_vec(decoded_paths)
+			}),
+			filters.search.map(library::name::contains),
 		],
 	)
+}
+
+pub(crate) fn apply_library_relation_filters(
+	filters: LibraryRelationFilter,
+) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[filters
+			.series
+			.map(apply_series_base_filters)
+			.map(library::series::some)],
+	)
+}
+
+pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+	apply_library_base_filters(filters.base_filter)
+		.into_iter()
+		.chain(apply_library_relation_filters(filters.relation_filter))
+		.collect()
 }
 
 #[utoipa::path(
@@ -102,12 +147,14 @@ pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
 /// Get all libraries
 #[tracing::instrument(skip(ctx), err)]
 async fn get_libraries(
-	filter_query: Query<FilterableQuery<LibraryFilter>>,
+	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+
+	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
 
 	let is_unpaged = pagination.is_unpaged();
 	let where_conditions = apply_library_filters(filters);
@@ -254,14 +301,21 @@ async fn get_library_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
-	let FilterableQuery { ordering, .. } = filter_query.0.get();
+	let FilterableQuery {
+		ordering, filters, ..
+	} = filter_query.0.get();
 	let pagination = pagination_query.0.get();
+	tracing::debug!(?filters, ?ordering, ?pagination, "get_library_series");
+
 	let db = ctx.get_db();
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
-	let where_conditions = vec![series::library_id::equals(Some(id.clone()))];
+	let where_conditions = apply_series_filters(filters)
+		.into_iter()
+		.chain(vec![series::library_id::equals(Some(id.clone()))])
+		.collect::<Vec<series::WhereParam>>();
 	let mut query = db
 		.series()
 		// TODO: add media relation count....
@@ -375,6 +429,36 @@ async fn get_library_media(
 	Ok(Json(Pageable::from(media)))
 }
 
+pub(crate) fn get_library_thumbnail(
+	library: &library::Data,
+	first_series: &series::Data,
+	first_book: &media::Data,
+	image_format: Option<ImageFormat>,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnails = get_config_dir().join("thumbnails");
+	let library_id = library.id.clone();
+
+	if let Some(format) = image_format.clone() {
+		let extension = format.extension();
+
+		let path = thumbnails.join(format!("{}.{}", library_id, extension));
+
+		if path.exists() {
+			tracing::trace!(?path, library_id, "Found generated library thumbnail");
+			return Ok((ContentType::from(format), read_entire_file(path)?));
+		}
+	} else if let Some(path) = get_unknown_thumnail(&library_id) {
+		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
+		let FileParts { extension, .. } = path.file_parts();
+		return Ok((
+			ContentType::from_extension(extension.as_str()),
+			read_entire_file(path)?,
+		));
+	}
+
+	get_series_thumbnail(first_series, first_book, image_format)
+}
+
 // TODO: ImageResponse for utoipa
 #[utoipa::path(
 	get,
@@ -391,35 +475,152 @@ async fn get_library_media(
 	)
 )]
 /// Get the thumbnail image for a library by id, if the current user has access to it.
-async fn get_library_thumbnail(
+async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: ReadableSession,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let library_series = db
+	let user = get_session_user(&session)?;
+	let age_restriction = user.age_restriction;
+
+	let first_series = db
 		.series()
-		.find_first(vec![series::library_id::equals(Some(id.clone()))])
+		// Find the first series in the library which satisfies the age restriction
+		.find_first(chain_optional_iter(
+			[series::library_id::equals(Some(id.clone()))],
+			[age_restriction
+				.as_ref()
+				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+		))
 		.with(
-			series::media::fetch(vec![])
-				.take(1)
-				.order_by(media::name::order(Direction::Asc)),
+			// Then load the first media in that series which satisfies the age restriction
+			series::media::fetch(chain_optional_iter(
+				[],
+				[age_restriction
+					.as_ref()
+					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+			))
+			.take(1)
+			.order_by(media::name::order(Direction::Asc)),
 		)
+		.with(series::library::fetch().with(library::library_options::fetch()))
+		.order_by(series::name::order(Direction::Asc))
 		.exec()
-		.await?;
+		.await?
+		.ok_or(ApiError::NotFound("Library has no series".to_string()))?;
 
-	let series = library_series.ok_or_else(|| {
-		ApiError::NotFound("Library has no series to get thumbnail from".to_string())
-	})?;
-	let media = series.media()?.first().ok_or_else(|| {
-		ApiError::NotFound("Library has no media to get thumbnail from".to_string())
-	})?;
+	let library = first_series
+		.library()?
+		.ok_or(ApiError::Unknown(String::from("Failed to load library")))?;
+	let image_format = library
+		.library_options()
+		.map(LibraryOptions::from)?
+		.thumbnail_config
+		.map(|config| config.format);
 
-	super::media::get_media_thumbnail(media.id.clone(), db)
-		.await
+	let first_book = first_series.media()?.first().ok_or(ApiError::NotFound(
+		"Library has no media to get thumbnail from".to_string(),
+	))?;
+
+	get_library_thumbnail(library, &first_series, first_book, image_format)
 		.map(ImageResponse::from)
 }
 
+#[derive(Deserialize, ToSchema, specta::Type)]
+pub struct PatchLibraryThumbnail {
+	/// The ID of the media inside the series to fetch
+	media_id: String,
+	/// The page of the media to use for the thumbnail
+	page: i32,
+	#[specta(optional)]
+	/// A flag indicating whether the page is zero based
+	is_zero_based: Option<bool>,
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/libraries/:id/thumbnail",
+    tag = "library",
+    params(
+        ("id" = String, Path, description = "The ID of the library")
+    ),
+    responses(
+        (status = 200, description = "Successfully updated library thumbnail"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Series not found"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
+async fn patch_library_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+	Json(body): Json<PatchLibraryThumbnail>,
+) -> ApiResult<ImageResponse> {
+	get_session_admin_user(&session)?;
+
+	let client = ctx.get_db();
+
+	let target_page = body
+		.is_zero_based
+		.map(|is_zero_based| {
+			if is_zero_based {
+				body.page + 1
+			} else {
+				body.page
+			}
+		})
+		.unwrap_or(body.page);
+
+	let media = client
+		.media()
+		.find_first(vec![
+			media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
+			media::id::equals(body.media_id),
+		])
+		.with(
+			media::series::fetch()
+				.with(series::library::fetch().with(library::library_options::fetch())),
+		)
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	if media.extension == "epub" {
+		return Err(ApiError::NotSupported);
+	}
+
+	let library = media
+		.series()?
+		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+	let thumbnail_options = library
+		.library_options()?
+		.thumbnail_config
+		.to_owned()
+		.map(ImageProcessorOptions::try_from)
+		.transpose()?
+		.unwrap_or_else(|| {
+			tracing::warn!(
+				"Failed to parse existing thumbnail config! Using a default config"
+			);
+			ImageProcessorOptions::default()
+		})
+		.with_page(target_page);
+
+	let format = thumbnail_options.format.clone();
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	Ok(ImageResponse::from((
+		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
+}
+
+/// Deletes all media thumbnails in a library by id, if the current user has access to it.
 #[utoipa::path(
 	delete,
 	path = "/api/v1/libraries/:id/thumbnail",
@@ -459,8 +660,8 @@ async fn delete_library_thumbnails(
 
 	let media_ids = result
 		.series
-		.iter()
-		.flat_map(|s| s.media.iter().map(|m| m.id.clone()))
+		.into_iter()
+		.flat_map(|s| s.media.into_iter().map(|m| m.id))
 		.collect::<Vec<String>>();
 
 	if let Some(ext) = extension {
@@ -468,6 +669,61 @@ async fn delete_library_thumbnails(
 	} else {
 		remove_thumbnails(&media_ids)?;
 	}
+
+	Ok(Json(()))
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct GenerateLibraryThumbnails {
+	pub image_options: Option<ImageProcessorOptions>,
+	#[serde(default)]
+	pub force_regenerate: bool,
+}
+
+/// Generate thumbnails for all the media in a library by id, if the current user has access to it.
+#[utoipa::path(
+	post,
+	path = "/api/v1/libraries/:id/thumbnail/generate",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID"),
+	),
+	responses(
+		(status = 200, description = "Successfully queued job"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn generate_library_thumbnails(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Json(input): Json<GenerateLibraryThumbnails>,
+) -> ApiResult<Json<()>> {
+	let library = ctx
+		.db
+		.library()
+		.find_unique(library::id::equals(id.clone()))
+		.with(library::library_options::fetch())
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+	let library_options = library.library_options()?.to_owned();
+	let existing_options = if let Some(config) = library_options.thumbnail_config {
+		// I hard error here so that we don't accidentally generate thumbnails in an invalid or
+		// otherwise undesired way per the existing (but not properly parsed) config
+		Some(ImageProcessorOptions::try_from(config)?)
+	} else {
+		None
+	};
+	let options = input.image_options.or(existing_options).unwrap_or_default();
+	let config = ThumbnailJobConfig::SingleLibrary {
+		library_id: library.id,
+		force_regenerate: input.force_regenerate,
+	};
+	tracing::trace!(?options, ?config, "Dispatching thumbnail job");
+
+	ctx.dispatch_job(ThumbnailJob::new(options, config))?;
 
 	Ok(Json(()))
 }
@@ -681,14 +937,21 @@ async fn update_library(
 	db.library_options()
 		.update(
 			library_options::id::equals(library_options.id.unwrap_or_default()),
-			vec![
-				library_options::convert_rar_to_zip::set(
-					library_options.convert_rar_to_zip,
-				),
-				library_options::hard_delete_conversions::set(
-					library_options.hard_delete_conversions,
-				),
-			],
+			chain_optional_iter(
+				[
+					library_options::convert_rar_to_zip::set(
+						library_options.convert_rar_to_zip,
+					),
+					library_options::hard_delete_conversions::set(
+						library_options.hard_delete_conversions,
+					),
+				],
+				[library_options.thumbnail_config.map(|config| {
+					library_options::thumbnail_config::set(Some(
+						serde_json::to_vec(&config).unwrap_or_default(),
+					))
+				})],
+			),
 		)
 		.exec()
 		.await?;

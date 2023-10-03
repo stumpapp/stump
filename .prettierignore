@@ -1,5 +1,6 @@
 # Files
 core.ts
+packages/types/server.ts
 *-lock.*
 
 # Directories

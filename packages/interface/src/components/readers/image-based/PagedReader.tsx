@@ -8,7 +8,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 
 import Toolbar from './Toolbar'
 
-export type ImageBasedReaderProps = {
+export type PagedReaderProps = {
 	/** The current page which the reader should render */
 	currentPage: number
 	/** The media entity associated with the reader */
@@ -23,15 +23,15 @@ export type ImageBasedReaderProps = {
  * A component that renders a reader for image-based media. Images are displayed one at a time,
  * however preloading is done to reduce wait times for consecutive pages.
  *
- * Note: This component lacks animations between pages. The `AnimatedImageBasedReader` component
+ * Note: This component lacks animations between pages. The `AnimatedPagedReader` component
  * has animations, as the name suggests lol.
  */
-export default function ImageBasedReader({
+export default function PagedReader({
 	currentPage,
 	media,
 	onPageChange,
 	getPageUrl,
-}: ImageBasedReaderProps) {
+}: PagedReaderProps) {
 	const currPageRef = React.useRef(currentPage)
 
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
@@ -150,7 +150,7 @@ type SideBarControlProps = {
 
 /**
  * A component that renders an invisible div on either the left or right side of the screen that, when
- * clicked, will call the onClick callback. This is used in the `ImageBasedReader` component for
+ * clicked, will call the onClick callback. This is used in the `PagedReader` component for
  * navigating to the next/previous page.
  */
 function SideBarControl({ onClick, position }: SideBarControlProps) {

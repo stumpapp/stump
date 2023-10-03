@@ -6,13 +6,16 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use axum_sessions::extractors::{ReadableSession, WritableSession};
-use prisma_client_rust::chrono::Utc;
+use prisma_client_rust::{chrono::Utc, Direction};
 use stump_core::{
 	db::{
-		entity::{DeleteUser, UpdateUser, UpdateUserPreferences, User, UserPreferences},
+		entity::{
+			DeleteUser, LoginActivity, UpdateUser, UpdateUserPreferences, User,
+			UserPreferences,
+		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	prisma::{user, user_preferences, PrismaClient},
+	prisma::{user, user_login_activity, user_preferences, PrismaClient},
 };
 use tracing::{debug, trace};
 
@@ -28,12 +31,13 @@ use crate::{
 
 use super::auth::LoginOrRegisterArgs;
 
-// TODO: move some of these user operations to the UserDao...
-
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		// TODO: adminguard these first two routes
 		.route("/users", get(get_users).post(create_user))
+		.route(
+			"/users/login-activity",
+			get(get_user_login_activity).delete(delete_user_login_activity),
+		)
 		.nest(
 			"/users/me",
 			Router::new()
@@ -49,6 +53,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.put(update_user_handler)
 						.delete(delete_user_by_id),
 				)
+				.route("/login-activity", get(get_user_login_activity_by_id))
 				.route(
 					"/preferences",
 					get(get_user_preferences).put(update_user_preferences),
@@ -109,14 +114,16 @@ async fn get_users(
 	let is_unpaged = pagination.is_unpaged();
 	let pagination_cloned = pagination.clone();
 
+	tracing::debug!(?relation_query, "get_users");
+
+	let include_user_read_progress =
+		relation_query.include_read_progresses.unwrap_or_default();
+
 	let (users, count) = ctx
 		.db
 		._transaction()
 		.run(|client| async move {
 			let mut query = client.user().find_many(vec![]);
-
-			let include_user_read_progress =
-				relation_query.include_read_progresses.unwrap_or_default();
 
 			if include_user_read_progress {
 				query = query.with(user::read_progresses::fetch(vec![]));
@@ -146,6 +153,67 @@ async fn get_users(
 	}
 
 	Ok(Json(Pageable::from(users)))
+}
+
+// TODO: pagination!
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/login-activity",
+	tag = "user",
+	responses(
+		(status = 200, description = "Successfully fetched login activity"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_user_login_activity(
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+) -> ApiResult<Json<Vec<LoginActivity>>> {
+	get_session_admin_user(&session)?;
+
+	let client = ctx.get_db();
+
+	let user_activity = client
+		.user_login_activity()
+		.find_many(vec![])
+		.with(user_login_activity::user::fetch())
+		.order_by(user_login_activity::timestamp::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	Ok(Json(
+		user_activity.into_iter().map(LoginActivity::from).collect(),
+	))
+}
+
+#[utoipa::path(
+	delete,
+	path = "/api/v1/users/login-activity",
+	tag = "user",
+	responses(
+		(status = 200, description = "Successfully deleted user login activity"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn delete_user_login_activity(
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+) -> ApiResult<Json<()>> {
+	get_session_admin_user(&session)?;
+
+	let client = ctx.get_db();
+
+	client
+		.user_login_activity()
+		.delete_many(vec![])
+		.exec()
+		.await?;
+
+	Ok(Json(()))
 }
 
 async fn update_user(
@@ -192,6 +260,7 @@ async fn update_preferences(
 					input.series_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::show_query_indicator::set(input.show_query_indicator),
 			],
 		)
 		.exec()
@@ -414,6 +483,49 @@ async fn get_user_by_id(
 	}
 
 	Ok(Json(User::from(user_by_id.unwrap())))
+}
+
+// TODO: pagination!
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/:id/login-activity",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched user.", body = Vec<LoginActivity>),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "User not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn get_user_login_activity_by_id(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: ReadableSession,
+) -> ApiResult<Json<Vec<LoginActivity>>> {
+	let user = get_session_user(&session)?;
+
+	let client = ctx.get_db();
+
+	if user.id != id && !user.is_server_owner() {
+		return Err(ApiError::Forbidden(String::from(
+			"You cannot access this resource",
+		)));
+	}
+
+	let user_activity = client
+		.user_login_activity()
+		.find_many(vec![user_login_activity::user_id::equals(id)])
+		.order_by(user_login_activity::timestamp::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	Ok(Json(
+		user_activity.into_iter().map(LoginActivity::from).collect(),
+	))
 }
 
 #[utoipa::path(

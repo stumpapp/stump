@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::filesystem::error::FileError;
 
 /// The resize mode to use when generating a thumbnail.
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum ImageResizeMode {
 	Scaled,
 	Sized,
@@ -12,7 +13,7 @@ pub enum ImageResizeMode {
 
 /// The resize options to use when generating a thumbnail.
 /// When using `Scaled`, the height and width will be scaled by the given factor.
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct ImageResizeOptions {
 	pub mode: ImageResizeMode,
 	pub height: f32,
@@ -40,8 +41,8 @@ impl ImageResizeOptions {
 /// Supported image formats for processing images throughout Stump.
 #[derive(Default, Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq)]
 pub enum ImageFormat {
-	#[default]
 	Webp,
+	#[default]
 	Jpeg,
 	JpegXl,
 	Png,
@@ -59,8 +60,23 @@ impl ImageFormat {
 	}
 }
 
+impl From<ImageFormat> for image::ImageOutputFormat {
+	fn from(val: ImageFormat) -> Self {
+		match val {
+			ImageFormat::Webp => {
+				image::ImageOutputFormat::Unsupported(String::from("webp"))
+			},
+			ImageFormat::Jpeg => image::ImageOutputFormat::Jpeg(100),
+			ImageFormat::JpegXl => {
+				image::ImageOutputFormat::Unsupported(String::from("jxl"))
+			},
+			ImageFormat::Png => image::ImageOutputFormat::Png,
+		}
+	}
+}
+
 /// Options for processing images throughout Stump.
-#[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct ImageProcessorOptions {
 	/// The size factor to use when generating an image. See [`ImageResizeOptions`]
 	pub resize_options: Option<ImageResizeOptions>,
@@ -70,6 +86,11 @@ pub struct ImageProcessorOptions {
 	/// where 100.0 is the highest quality. Omitting this value will use the default quality
 	/// of 100.0.
 	pub quality: Option<f32>,
+	// TODO: this implementation is not overly ideal, and is really only here for one-off generation.
+	// I would like to iterate after the initial release to make this more robust so that these choices
+	// are stored in the database
+	/// The page to use when generating an image. This is not applicable to all media formats.
+	pub page: Option<i32>,
 }
 
 impl ImageProcessorOptions {
@@ -79,6 +100,13 @@ impl ImageProcessorOptions {
 		Self {
 			format: ImageFormat::Jpeg,
 			..Default::default()
+		}
+	}
+
+	pub fn with_page(self, page: i32) -> Self {
+		Self {
+			page: Some(page),
+			..self
 		}
 	}
 }

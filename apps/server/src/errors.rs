@@ -86,6 +86,8 @@ pub enum ApiError {
 	Forbidden(String),
 	#[error("This functionality has not been implemented yet")]
 	NotImplemented,
+	#[error("This functionality is not supported")]
+	NotSupported,
 	#[error("{0}")]
 	ServiceUnavailable(String),
 	#[error("{0}")]

@@ -162,7 +162,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	const { editLibraryAsync } = useEditLibraryMutation({
 		onSuccess: () => {
 			form.reset()
-			// TODO: maybe somewhere else?
 			setTimeout(() => navigate(paths.home()), 750)
 		},
 	})
@@ -224,9 +223,12 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		const { name, path, description, tags: formTags, scan_mode, ...rest } = values
 
 		const library_options = {
+			...library.library_options,
 			...rest,
-			id: library.library_options.id,
-			library_id: library.library_options.library_id,
+			thumbnail_config: {
+				...(library.library_options.thumbnail_config || {}),
+				...rest.thumbnail_config,
+			},
 		} as LibraryOptions
 
 		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))
@@ -322,7 +324,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 						label="Library path"
 						placeholder="/path/to/library"
 						containerClassName="max-w-full md:max-w-sm"
-						icon={
+						rightDecoration={
 							<IconButton
 								size="xs"
 								variant="ghost"

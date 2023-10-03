@@ -88,3 +88,7 @@ pub fn stump_in_docker() -> bool {
 		})
 		.unwrap_or(false)
 }
+
+pub fn get_pdfium_path() -> Option<PathBuf> {
+	std::env::var("PDFIUM_PATH").ok().map(PathBuf::from)
+}

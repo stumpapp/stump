@@ -27,7 +27,7 @@ export default function ServerUrlForm() {
 		mode: 'onSubmit',
 		resolver: zodResolver(schema),
 	})
-	const [baseUrl] = form.watch('baseUrl')
+	const baseUrl = form.watch('baseUrl')
 
 	useEffect(
 		() => {
@@ -100,7 +100,7 @@ export default function ServerUrlForm() {
 			<input className="hidden" {...form.register('baseUrl')} />
 			<Input
 				label="Server URL"
-				icon={InputDecoration}
+				rightDecoration={InputDecoration}
 				variant="primary"
 				errorMessage={form.formState.errors.baseUrl?.message}
 				onChange={(e) => setUrlDebounced(e.target.value)}
@@ -112,9 +112,11 @@ export default function ServerUrlForm() {
 				</Text>
 			)}
 
-			<Button variant="primary" type="submit" isLoading={isCheckingUrl}>
-				Submit
-			</Button>
+			<div className="w-full md:w-1/3">
+				<Button className="w-full" variant="primary" type="submit" isLoading={isCheckingUrl}>
+					Submit
+				</Button>
+			</div>
 		</Form>
 	)
 }

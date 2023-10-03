@@ -1,44 +1,63 @@
-import { useLayoutMode, useSeriesByIdQuery, useSeriesMediaQuery } from '@stump/client'
+import { useLayoutMode, usePagedMediaQuery, useSeriesByIdQuery } from '@stump/client'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
+import { FilterProvider, FilterToolBar, useFilterContext } from '../../components/filters'
 import MediaList from '../../components/media/MediaList'
 import Pagination from '../../components/Pagination'
 import SceneContainer from '../../components/SceneContainer'
-import { useGetPage } from '../../hooks/useGetPage'
 import useIsInView from '../../hooks/useIsInView'
-import { useSeriesOverviewContext } from './context'
+import { usePageParam } from '../../hooks/usePageParam'
+import { SeriesContext, useSeriesContext } from './context'
 import MediaGrid from './MediaGrid'
-import SeriesOverviewContextProvider from './SeriesOverviewContextProvider'
 import SeriesOverviewTitleSection from './SeriesOverviewTitleSection'
 
+// TODO: fix pagination
 function SeriesOverviewScene() {
 	const [containerRef, isInView] = useIsInView()
 
-	const { page } = useGetPage()
-
-	const { seriesId, page_size, params } = useSeriesOverviewContext()
-	if (!seriesId) {
-		throw new Error('Series ID is required for this route.')
-	}
+	const { page, setPage } = usePageParam()
+	const { seriesId } = useSeriesContext()
 
 	const { layoutMode } = useLayoutMode('SERIES')
 	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(seriesId)
+	const { filters } = useFilterContext()
 	const {
 		isLoading: isLoadingMedia,
+		isRefetching: isRefetchingMedia,
 		media,
 		pageData,
-	} = useSeriesMediaQuery(seriesId, { page, page_size, params })
+	} = usePagedMediaQuery({
+		page,
+		params: {
+			...filters,
+			series: {
+				id: seriesId,
+			},
+		},
+	})
 
-	useEffect(() => {
-		if (!isInView) {
-			containerRef.current?.scrollIntoView({
-				block: 'nearest',
-				inline: 'start',
-			})
-		}
-	}, [isInView, containerRef, pageData?.current_page])
+	const { current_page, total_pages } = pageData || {}
+	const isOnFirstPage = current_page === 1
+	const hasFilters = Object.keys(filters || {}).length > 0
+	const hasStuff = total_pages !== undefined && current_page !== undefined
+	// we show on the first page, but if there are filters and no stuff we show it
+	const showOverview = isOnFirstPage || (hasFilters && !hasStuff)
+
+	// TODO: detect if going from page > 1 to page = 1 and scroll to top
+	useEffect(
+		() => {
+			if (!isInView && !isOnFirstPage) {
+				containerRef.current?.scrollIntoView({
+					block: 'nearest',
+					inline: 'start',
+				})
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[current_page, isOnFirstPage],
+	)
 
 	if (isLoadingSeries) {
 		return null
@@ -46,28 +65,47 @@ function SeriesOverviewScene() {
 		throw new Error('Series not found')
 	}
 
-	const { current_page, total_pages } = pageData || {}
-	const hasStuff = current_page !== undefined && total_pages !== undefined
-
 	return (
 		<SceneContainer>
 			<Helmet>
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
-			<SeriesOverviewTitleSection series={series} isVisible={pageData?.current_page === 1} />
+			{showOverview && <SeriesOverviewTitleSection series={series} />}
 
 			{/* @ts-expect-error: wrong ref but is okay */}
-			<section ref={containerRef} id="grid-top-indicator" className="h-0" />
-			<div className="flex w-full flex-col space-y-6 p-4">
-				{hasStuff ? <Pagination pages={total_pages} currentPage={current_page} /> : null}
+			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
+
+			<FilterToolBar
+				isRefetching={isRefetchingMedia}
+				searchPlaceholder="Search media in series by name or description."
+				slideOverForm="media"
+			/>
+
+			<div className="flex w-full flex-col space-y-6 pt-4">
+				{hasStuff && (
+					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
+				)}
 				{layoutMode === 'GRID' ? (
-					<MediaGrid isLoading={isLoadingMedia} media={media} />
+					<MediaGrid
+						isLoading={isLoadingMedia}
+						media={media}
+						hasFilters={Object.keys(filters || {}).length > 0}
+					/>
 				) : (
-					<MediaList isLoading={isLoadingMedia} media={media} />
+					<MediaList
+						isLoading={isLoadingMedia}
+						media={media}
+						hasFilters={Object.keys(filters || {}).length > 0}
+					/>
 				)}
 				{hasStuff && (
-					<Pagination position="bottom" pages={total_pages} currentPage={current_page} />
+					<Pagination
+						position="bottom"
+						pages={total_pages}
+						currentPage={current_page}
+						onChangePage={setPage}
+					/>
 				)}
 			</div>
 		</SceneContainer>
@@ -75,11 +113,17 @@ function SeriesOverviewScene() {
 }
 
 export default function SeriesOverviewSceneWrapper() {
-	const { id } = useParams()
+	const seriesId = useParams<{ id: string }>()?.id
+
+	if (!seriesId) {
+		throw new Error('Series ID is required for this route.')
+	}
 
 	return (
-		<SeriesOverviewContextProvider seriesId={id}>
-			<SeriesOverviewScene />
-		</SeriesOverviewContextProvider>
+		<SeriesContext.Provider value={{ seriesId }}>
+			<FilterProvider>
+				<SeriesOverviewScene />
+			</FilterProvider>
+		</SeriesContext.Provider>
 	)
 }

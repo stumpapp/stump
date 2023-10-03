@@ -4,7 +4,6 @@ use axum::{
 	routing::post,
 	Json, Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
 use stump_core::{
 	db::query::pagination::{PageQuery, Pageable},
@@ -13,6 +12,7 @@ use stump_core::{
 		PathUtils,
 	},
 };
+use tower_sessions::Session;
 use tracing::trace;
 
 use crate::{
@@ -48,7 +48,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// List the contents of a directory on the file system at a given (optional) path. If no path
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
-	session: ReadableSession,
+	session: Session,
 	pagination: Query<PageQuery>,
 	input: Json<Option<DirectoryListingInput>>,
 ) -> ApiResult<Json<Pageable<DirectoryListing>>> {

@@ -1,6 +1,6 @@
 import { DropdownMenu, IconButton } from '@stump/components'
 import { User } from '@stump/types'
-import { MoreVertical, Pencil, Trash } from 'lucide-react'
+import { Lock, MoreVertical, Pencil, Trash, Unlock } from 'lucide-react'
 import React, { useMemo } from 'react'
 
 import { useAppContext } from '../../../../context.ts'
@@ -31,11 +31,21 @@ export default function UserActionMenu({ user }: Props) {
 				leftIcon: <Trash className="mr-2 h-4 w-4" />,
 				onClick: () => setDeletingUser(user),
 			},
+			{
+				disabled: isSelf,
+				label: `${user.is_locked ? 'Unlock' : 'Lock'} account`,
+				leftIcon: user.is_locked ? (
+					<Unlock className="mr-2 h-4 w-4" />
+				) : (
+					<Lock className="mr-2 h-4 w-4" />
+				),
+				onClick: noop,
+			},
 		],
 		[setDeletingUser, user, isSelf],
 	)
 
-	if (!isServerOwner) {
+	if (!isServerOwner || isSelf) {
 		return null
 	}
 

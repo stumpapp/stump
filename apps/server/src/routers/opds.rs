@@ -4,7 +4,6 @@ use axum::{
 	routing::get,
 	Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
 	db::{query::pagination::PageQuery, PrismaCountTrait},
@@ -20,6 +19,7 @@ use stump_core::{
 	},
 	prisma::{library, media, read_progress, series, user},
 };
+use tower_sessions::Session;
 use tracing::{debug, trace, warn};
 
 use crate::{
@@ -185,10 +185,7 @@ async fn catalog() -> ApiResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn keep_reading(
-	State(ctx): State<AppState>,
-	session: ReadableSession,
-) -> ApiResult<Xml> {
+async fn keep_reading(State(ctx): State<AppState>, session: Session) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let user_id = get_session_user(&session)?.id;
@@ -507,7 +504,7 @@ fn handle_opds_image_response(
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
@@ -535,7 +532,7 @@ async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -600,7 +597,7 @@ async fn get_book_page(
 async fn download_book(
 	Path((id, filename)): Path<(String, String)>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<NamedFile> {
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;

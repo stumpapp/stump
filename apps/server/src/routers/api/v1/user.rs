@@ -5,7 +5,6 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_sessions::extractors::{ReadableSession, WritableSession};
 use prisma_client_rust::{chrono::Utc, Direction};
 use stump_core::{
 	db::{
@@ -17,16 +16,14 @@ use stump_core::{
 	},
 	prisma::{user, user_login_activity, user_preferences, PrismaClient},
 };
+use tower_sessions::Session;
 use tracing::{debug, trace};
 
 use crate::{
-	config::state::AppState,
+	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::{
-		get_hash_cost, get_session_admin_user, get_session_user,
-		get_writable_session_user, UserQueryRelation,
-	},
+	utils::{get_hash_cost, get_session_admin_user, get_session_user, UserQueryRelation},
 };
 
 use super::auth::LoginOrRegisterArgs;
@@ -106,7 +103,7 @@ async fn get_users(
 	State(ctx): State<AppState>,
 	relation_query: Query<UserQueryRelation>,
 	pagination_query: Query<PaginationQuery>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<User>>>> {
 	get_session_admin_user(&session)?;
 
@@ -169,7 +166,7 @@ async fn get_users(
 )]
 async fn get_user_login_activity(
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Vec<LoginActivity>>> {
 	get_session_admin_user(&session)?;
 
@@ -201,7 +198,7 @@ async fn get_user_login_activity(
 )]
 async fn delete_user_login_activity(
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<()>> {
 	get_session_admin_user(&session)?;
 
@@ -283,7 +280,7 @@ async fn update_preferences(
 )]
 /// Creates a new user.
 async fn create_user(
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
@@ -336,18 +333,18 @@ async fn create_user(
 )]
 /// Updates the session user
 async fn update_current_user(
-	mut writable_session: WritableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUser>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
-	let user = get_writable_session_user(&writable_session)?;
+	let user = get_session_user(&session)?;
 
 	let updated_user = update_user(db, user.id, input).await?;
 	debug!(?updated_user, "Updated user");
 
-	writable_session
-		.insert("user", updated_user.clone())
+	session
+		.insert(SESSION_USER_KEY, updated_user.clone())
 		.map_err(|e| {
 			ApiError::InternalServerError(format!("Failed to update session: {}", e))
 		})?;
@@ -369,13 +366,13 @@ async fn update_current_user(
 )]
 /// Updates a user's preferences.
 async fn update_current_user_preferences(
-	mut writable_session: WritableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUserPreferences>,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
 
-	let user = get_writable_session_user(&writable_session)?;
+	let user = get_session_user(&session)?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	trace!(user_id = ?user.id, ?user_preferences, updates = ?input, "Updating viewer's preferences");
@@ -383,7 +380,7 @@ async fn update_current_user_preferences(
 	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
-	writable_session
+	session
 		.insert(
 			"user",
 			User {
@@ -417,7 +414,7 @@ async fn update_current_user_preferences(
 async fn delete_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	Json(input): Json<DeleteUser>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
@@ -467,7 +464,7 @@ async fn delete_user_by_id(
 async fn get_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<User>> {
 	get_session_admin_user(&session)?;
 	let db = ctx.get_db();
@@ -504,7 +501,7 @@ async fn get_user_by_id(
 async fn get_user_login_activity_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Vec<LoginActivity>>> {
 	let user = get_session_user(&session)?;
 
@@ -545,13 +542,13 @@ async fn get_user_login_activity_by_id(
 )]
 /// Updates a user by ID.
 async fn update_user_handler(
-	mut writable_session: WritableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUser>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
-	let user = get_writable_session_user(&writable_session)?;
+	let user = get_session_user(&session)?;
 
 	// TODO: determine what a server owner can update.
 	if user.id != id {
@@ -561,8 +558,8 @@ async fn update_user_handler(
 	let updated_user = update_user(db, id, input).await?;
 	debug!(?updated_user, "Updated user");
 
-	writable_session
-		.insert("user", updated_user.clone())
+	session
+		.insert(SESSION_USER_KEY, updated_user.clone())
 		.map_err(|e| {
 			ApiError::InternalServerError(format!("Failed to update session: {}", e))
 		})?;
@@ -589,7 +586,7 @@ async fn update_user_handler(
 async fn get_user_preferences(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<UserPreferences>> {
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
@@ -633,7 +630,7 @@ async fn get_user_preferences(
 )]
 /// Updates a user's preferences.
 async fn update_user_preferences(
-	mut writable_session: WritableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUserPreferences>,
@@ -641,7 +638,7 @@ async fn update_user_preferences(
 	trace!(?id, ?input, "Updating user preferences");
 	let db = ctx.get_db();
 
-	let user = get_writable_session_user(&writable_session)?;
+	let user = get_session_user(&session)?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	if user_preferences.id != input.id {
@@ -651,9 +648,9 @@ async fn update_user_preferences(
 	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
 	debug!(?updated_preferences, "Updated user preferences");
 
-	writable_session
+	session
 		.insert(
-			"user",
+			SESSION_USER_KEY,
 			User {
 				user_preferences: Some(updated_preferences.clone()),
 				..user

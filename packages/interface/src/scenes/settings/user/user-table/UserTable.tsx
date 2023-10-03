@@ -1,4 +1,4 @@
-import { Text } from '@stump/components'
+import { Badge, Text } from '@stump/components'
 import { User } from '@stump/types'
 import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
@@ -52,6 +52,15 @@ const baseColumns = [
 			</Text>
 		),
 		header: 'Last login',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original } }) => (
+			<Badge size="xs" variant={original.is_locked ? 'error' : 'success'}>
+				{original.is_locked ? 'Locked' : 'Active'}
+			</Badge>
+		),
+		header: 'Status',
+		id: 'is_locked',
 	}),
 	columnHelper.display({
 		cell: ({ row: { original } }) => (

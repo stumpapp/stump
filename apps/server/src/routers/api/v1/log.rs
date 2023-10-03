@@ -4,7 +4,6 @@ use axum::{
 	routing::get,
 	Json, Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use futures_util::Stream;
 use notify::{EventKind, RecursiveMode, Watcher};
 use prisma_client_rust::chrono::{DateTime, Utc};
@@ -15,6 +14,7 @@ use std::{
 };
 use stump_core::{config::logging::get_log_file, db::entity::LogMetadata};
 use tokio::sync::broadcast;
+use tower_sessions::Session;
 
 use crate::{
 	config::state::AppState,
@@ -131,7 +131,7 @@ async fn tail_log_file() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 )]
 /// Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
-async fn get_logfile_info(session: ReadableSession) -> ApiResult<Json<LogMetadata>> {
+async fn get_logfile_info(session: Session) -> ApiResult<Json<LogMetadata>> {
 	get_session_admin_user(&session)?;
 	let log_file_path = get_log_file();
 
@@ -164,7 +164,7 @@ async fn get_logfile_info(session: ReadableSession) -> ApiResult<Json<LogMetadat
 // a resource. This is not semantically correct, but I want it to be clear that
 // this route *WILL* delete all of the file contents.
 // #[delete("/logs")]
-async fn clear_logs(session: ReadableSession) -> ApiResult<()> {
+async fn clear_logs(session: Session) -> ApiResult<()> {
 	get_session_admin_user(&session)?;
 	let log_file_path = get_log_file();
 

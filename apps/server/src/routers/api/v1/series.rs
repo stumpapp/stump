@@ -5,7 +5,6 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
@@ -32,6 +31,7 @@ use stump_core::{
 		series_metadata,
 	},
 };
+use tower_sessions::Session;
 use tracing::{error, trace};
 use utoipa::ToSchema;
 
@@ -182,7 +182,7 @@ async fn get_series(
 	pagination_query: Query<PaginationQuery>,
 	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -303,7 +303,7 @@ async fn get_series_by_id(
 	query: Query<SeriesQueryRelation>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
 
@@ -373,7 +373,7 @@ async fn get_series_by_id(
 async fn get_recently_added_series_handler(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	if pagination.page.is_none() {
 		return Err(ApiError::BadRequest(
@@ -440,7 +440,7 @@ pub(crate) fn get_series_thumbnail(
 async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -522,7 +522,7 @@ pub struct PatchSeriesThumbnail {
 async fn patch_series_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	Json(body): Json<PatchSeriesThumbnail>,
 ) -> ApiResult<ImageResponse> {
 	get_session_admin_user(&session)?;
@@ -607,7 +607,7 @@ async fn patch_series_thumbnail(
 async fn get_series_media(
 	pagination_query: Query<PaginationQuery>,
 	ordering: Query<QueryOrder>,
-	session: ReadableSession,
+	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
@@ -726,7 +726,7 @@ async fn get_series_media(
 async fn get_next_in_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Option<Media>>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;

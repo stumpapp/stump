@@ -5,11 +5,11 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use std::{path, str::FromStr};
+use tower_sessions::Session;
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
@@ -478,7 +478,7 @@ pub(crate) fn get_library_thumbnail(
 async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -557,7 +557,7 @@ pub struct PatchLibraryThumbnail {
 async fn patch_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> ApiResult<ImageResponse> {
 	get_session_admin_user(&session)?;
@@ -754,7 +754,7 @@ async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	query: Query<ScanQueryParam>,
-	session: ReadableSession,
+	session: Session,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 	let _user = get_session_admin_user(&session)?;
@@ -793,7 +793,7 @@ async fn scan_library(
 )]
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 async fn create_library(
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
@@ -917,7 +917,7 @@ async fn create_library(
 )]
 /// Update a library by id, if the current user is a SERVER_OWNER.
 async fn update_library(
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
@@ -1030,7 +1030,7 @@ async fn update_library(
 )]
 /// Delete a library by id
 async fn delete_library(
-	session: ReadableSession,
+	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {

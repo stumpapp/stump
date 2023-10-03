@@ -24,6 +24,8 @@ model User {
   created_at      DateTime  @default(now())
   // The timestamp of when the user was *soft* deleted.
   deleted_at      DateTime?
+  // A flag indicating whether or not the user is locked. A locked user will not be able to login.
+  is_locked       Boolean   @default(false)
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
@@ -41,6 +43,7 @@ model User {
 
   login_activity    UserLoginActivity[]
   media_annotations MediaAnnotation[]
+  sessions          Session[]
 
   @@map("users")
 }
@@ -65,6 +68,26 @@ model UserLoginActivity {
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_login_activity")
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  // The timestamp of when the session was created.
+  created_at DateTime @default(now())
+  // The timestamp of when the session expires.
+  expires_at DateTime
+  // The session data. This is a JSON blob.
+  data       Bytes
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The user who owns the session.
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  @@map("sessions")
 }
 
 model AgeRestriction {

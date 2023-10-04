@@ -101,6 +101,7 @@ use super::api::{
         api::v1::user::update_user_handler,
         api::v1::user::get_user_preferences,
         api::v1::user::update_user_preferences,
+        api::v1::user::update_user_lock_status
     ),
     components(
         schemas(

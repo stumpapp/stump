@@ -151,7 +151,7 @@ async fn login(
 					.login_activity
 					.as_ref()
 					// If there are 9 or more failed login attempts _in a row_, within a 24 hour period, lock the account
-					.map(|activity| activity.iter().find(|activity| activity.authentication_successful).is_none() && activity.len() >= 9)
+					.map(|activity| !activity.iter().any(|activity| activity.authentication_successful) && activity.len() >= 9)
 					.unwrap_or(false);
 
 				handle_login_attempt(&client, db_user, user_agent, request_info, false)

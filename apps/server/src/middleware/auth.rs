@@ -39,13 +39,7 @@ where
 		}
 
 		let state = AppState::from_ref(state);
-		// let session = parts.extensions.get::<Session>().ok_or_else(|| {
-		// 	(
-		// 		StatusCode::INTERNAL_SERVER_ERROR,
-		// 		"Failed to extract session handle",
-		// 	)
-		// 		.into_response()
-		// })?;
+
 		let session = Session::from_request_parts(parts, &state)
 			.await
 			.map_err(|e| {

@@ -48,7 +48,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
 		get_session_user, http::ImageResponse, FilterableQuery, LibraryBaseFilter,
 		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
 	},
@@ -560,7 +560,7 @@ async fn patch_library_thumbnail(
 	session: Session,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> ApiResult<ImageResponse> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
 
@@ -757,7 +757,7 @@ async fn scan_library(
 	session: Session,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
-	let _user = get_session_admin_user(&session)?;
+	let _user = get_session_server_owner_user(&session)?;
 
 	let library = db
 		.library()
@@ -797,7 +797,7 @@ async fn create_library(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	let user = get_session_admin_user(&session)?;
+	let user = get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
 	debug!(user_id = user.id, ?input, "Creating library");
@@ -922,7 +922,7 @@ async fn update_library(
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
 	if !path::Path::new(&input.path).exists() {
@@ -1034,7 +1034,7 @@ async fn delete_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
 	trace!(?id, "Attempting to delete library");

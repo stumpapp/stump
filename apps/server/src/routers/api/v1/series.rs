@@ -40,7 +40,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
 		get_session_user, http::ImageResponse, FilterableQuery, SeriesBaseFilter,
 		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
 	},
@@ -525,7 +525,7 @@ async fn patch_series_thumbnail(
 	session: Session,
 	Json(body): Json<PatchSeriesThumbnail>,
 ) -> ApiResult<ImageResponse> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
 

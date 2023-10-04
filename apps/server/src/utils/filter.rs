@@ -253,6 +253,7 @@ pub struct SeriesQueryRelation {
 #[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
 pub struct UserQueryRelation {
 	pub include_read_progresses: Option<bool>,
+	pub include_session_count: Option<bool>,
 }
 
 // TODO: decide what others to include

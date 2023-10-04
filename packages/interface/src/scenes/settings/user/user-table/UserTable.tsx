@@ -55,6 +55,15 @@ const baseColumns = [
 	}),
 	columnHelper.display({
 		cell: ({ row: { original } }) => (
+			<Text size="sm" variant="muted">
+				{original.login_sessions_count}
+			</Text>
+		),
+		header: 'Active sessions',
+		id: 'login_sessions_count',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original } }) => (
 			<Badge size="xs" variant={original.is_locked ? 'error' : 'success'}>
 				{original.is_locked ? 'Locked' : 'Active'}
 			</Badge>
@@ -69,6 +78,7 @@ const baseColumns = [
 			</div>
 		),
 		id: 'actions',
+		size: 28,
 	}),
 ]
 

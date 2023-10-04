@@ -28,6 +28,9 @@ pub struct User {
 	pub is_locked: bool,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
+	pub login_sessions_count: Option<i32>,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user_preferences: Option<UserPreferences>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub login_activity: Option<Vec<LoginActivity>>,
@@ -100,6 +103,8 @@ impl From<prisma::user::Data> for User {
 			.login_activity()
 			.map(|la| la.clone().into_iter().map(LoginActivity::from).collect())
 			.ok();
+		let login_sessions_count =
+			data.sessions().map(|sessions| sessions.len() as i32).ok();
 
 		User {
 			id: data.id,
@@ -113,6 +118,7 @@ impl From<prisma::user::Data> for User {
 			last_login: data.last_login.map(|dt| dt.to_rfc3339()),
 			login_activity,
 			is_locked: data.is_locked,
+			login_sessions_count,
 		}
 	}
 }

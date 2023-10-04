@@ -2,7 +2,10 @@ use std::{thread, time::Duration};
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Password};
-use stump_core::{db::create_client, prisma::user};
+use stump_core::{
+	db::create_client,
+	prisma::{session, user},
+};
 
 use crate::{commands::chain_optional_iter, error::CliResult, CliConfig, CliError};
 
@@ -64,11 +67,22 @@ async fn set_account_lock_status(username: String, lock: bool) -> CliResult<()> 
 	let affected_rows = client
 		.user()
 		.update_many(
-			vec![user::username::equals(username)],
+			vec![user::username::equals(username.clone())],
 			vec![user::is_locked::set(lock)],
 		)
 		.exec()
 		.await?;
+
+	if lock {
+		progress.set_message("Removing active login sessions...");
+		client
+			.session()
+			.delete_many(vec![session::user::is(vec![user::username::equals(
+				username,
+			)])])
+			.exec()
+			.await?;
+	}
 
 	thread::sleep(Duration::from_millis(500));
 

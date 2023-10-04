@@ -21,7 +21,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	routers::sse::stream_shutdown_guard,
-	utils::get_session_admin_user,
+	utils::get_session_server_owner_user,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -132,7 +132,7 @@ async fn tail_log_file() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 /// Get information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
 async fn get_logfile_info(session: Session) -> ApiResult<Json<LogMetadata>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let log_file_path = get_log_file();
 
 	let file = File::open(log_file_path.as_path())?;
@@ -165,7 +165,7 @@ async fn get_logfile_info(session: Session) -> ApiResult<Json<LogMetadata>> {
 // this route *WILL* delete all of the file contents.
 // #[delete("/logs")]
 async fn clear_logs(session: Session) -> ApiResult<()> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let log_file_path = get_log_file();
 
 	File::create(log_file_path.as_path())?;

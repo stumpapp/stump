@@ -6,6 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Utc, Direction};
+use serde::Deserialize;
 use stump_core::{
 	db::{
 		entity::{
@@ -14,16 +15,19 @@ use stump_core::{
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	prisma::{user, user_login_activity, user_preferences, PrismaClient},
+	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
 };
 use tower_sessions::Session;
 use tracing::{debug, trace};
+use utoipa::ToSchema;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::{get_hash_cost, get_session_admin_user, get_session_user, UserQueryRelation},
+	utils::{
+		get_hash_cost, get_session_server_owner_user, get_session_user, UserQueryRelation,
+	},
 };
 
 use super::auth::LoginOrRegisterArgs;
@@ -50,6 +54,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.put(update_user_handler)
 						.delete(delete_user_by_id),
 				)
+				.route("/lock", put(update_user_lock_status))
 				.route("/login-activity", get(get_user_login_activity_by_id))
 				.route(
 					"/preferences",
@@ -105,7 +110,7 @@ async fn get_users(
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<User>>>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 
 	let pagination = pagination_query.0.get();
 	let is_unpaged = pagination.is_unpaged();
@@ -115,6 +120,7 @@ async fn get_users(
 
 	let include_user_read_progress =
 		relation_query.include_read_progresses.unwrap_or_default();
+	let include_session_count = relation_query.include_session_count.unwrap_or_default();
 
 	let (users, count) = ctx
 		.db
@@ -124,6 +130,10 @@ async fn get_users(
 
 			if include_user_read_progress {
 				query = query.with(user::read_progresses::fetch(vec![]));
+			}
+
+			if include_session_count {
+				query = query.with(user::sessions::fetch(vec![]));
 			}
 
 			if !is_unpaged {
@@ -168,7 +178,7 @@ async fn get_user_login_activity(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Vec<LoginActivity>>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
 
@@ -200,7 +210,7 @@ async fn delete_user_login_activity(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<()>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
 
@@ -284,7 +294,7 @@ async fn create_user(
 	State(ctx): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 	let hashed_password = bcrypt::hash(input.password, get_hash_cost())?;
 	let created_user = db
@@ -418,7 +428,7 @@ async fn delete_user_by_id(
 	Json(input): Json<DeleteUser>,
 ) -> ApiResult<Json<User>> {
 	let db = ctx.get_db();
-	let user = get_session_admin_user(&session)?;
+	let user = get_session_server_owner_user(&session)?;
 
 	if user.id == id {
 		return Err(ApiError::BadRequest(
@@ -466,7 +476,7 @@ async fn get_user_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<User>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 	let user_by_id = db
 		.user()
@@ -565,6 +575,63 @@ async fn update_user_handler(
 		})?;
 
 	Ok(Json(updated_user))
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct UpdateAccountLock {
+	lock: bool,
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/users/:id/lock",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	request_body = UpdateAccountLock,
+	responses(
+		(status = 200, description = "Successfully updated user lock status.", body = User),
+		(status = 400, description = "You cannot lock your own account."),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn update_user_lock_status(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(input): Json<UpdateAccountLock>,
+) -> ApiResult<Json<User>> {
+	let user = get_session_server_owner_user(&session)?;
+	if user.id == id {
+		return Err(ApiError::BadRequest(
+			"You cannot lock your own account.".into(),
+		));
+	}
+
+	let db = ctx.get_db();
+	let updated_user = db
+		.user()
+		.update(
+			user::id::equals(id.clone()),
+			vec![user::is_locked::set(input.lock)],
+		)
+		.exec()
+		.await?;
+
+	if input.lock {
+		// Delete all sessions for this user if they are being locked
+		let removed_sessions = db
+			.session()
+			.delete_many(vec![session::user_id::equals(id)])
+			.exec()
+			.await?;
+		tracing::trace!(?removed_sessions, "Removed sessions for locked user");
+	}
+
+	Ok(Json(User::from(updated_user)))
 }
 
 #[utoipa::path(

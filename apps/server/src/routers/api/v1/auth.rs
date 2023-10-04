@@ -110,7 +110,7 @@ async fn login(
 
 	let client = state.db.clone();
 	let today: DateTime<FixedOffset> = Utc::now().into();
-	// TODO: make this configuration option via environment variable
+	// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
 	let twenty_four_hours_ago = today - Duration::hours(24);
 
 	let fetch_result = client
@@ -146,10 +146,12 @@ async fn login(
 			let user_id = db_user.id.clone();
 			let matches = verify_password(&db_user.hashed_password, &input.password)?;
 			if !matches {
+				// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
 				let should_lock_account = db_user
 					.login_activity
 					.as_ref()
-					.map(|activity| activity.len() >= 9)
+					// If there are 9 or more failed login attempts _in a row_, within a 24 hour period, lock the account
+					.map(|activity| activity.iter().find(|activity| activity.authentication_successful).is_none() && activity.len() >= 9)
 					.unwrap_or(false);
 
 				handle_login_attempt(&client, db_user, user_agent, request_info, false)

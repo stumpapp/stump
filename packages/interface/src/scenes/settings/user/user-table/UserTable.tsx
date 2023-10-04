@@ -19,7 +19,7 @@ const columnHelper = createColumnHelper<User>()
 const baseColumns = [
 	columnHelper.accessor('username', {
 		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
-		header: 'Username',
+		header: 'User',
 	}),
 	columnHelper.accessor('role', {
 		cell: (info) => (

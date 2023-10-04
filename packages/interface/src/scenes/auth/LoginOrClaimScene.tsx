@@ -114,7 +114,9 @@ export default function LoginOrClaimScene() {
 		if (!loginError) return null
 
 		// If the response is a 403, and we are NOT claiming, it is likely because
-		// the account login is disabled (i.e. the account is locked).
+		// the account login is disabled (i.e. the account is locked). Additionally,
+		// authentication had to have passed, otherwise we would have gotten a 401. So,
+		// we can safely display the error message from the server.
 		if (isAxiosError(loginError) && loginError.response?.status === 403) {
 			const message = loginError.response?.data as string
 			return (

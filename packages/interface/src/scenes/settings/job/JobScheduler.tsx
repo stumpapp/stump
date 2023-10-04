@@ -120,7 +120,7 @@ export default function JobScheduler() {
 						variant="primary"
 						type="number"
 						label="Interval"
-						description="How often the scheduler should initiate scans (in seconds)"
+						description="How often the scheduler should initiate scans (in seconds). If left empty, the scheduler will be disabled"
 						descriptionPosition="top"
 						placeholder='e.g. "86400" for once a day'
 						fullWidth
@@ -162,7 +162,7 @@ export default function JobScheduler() {
 						disabled={form.formState.isSubmitting}
 						className="flex-shrink-0"
 					>
-						Save changes
+						Save scheduler changes
 					</Button>
 				</div>
 			</Form>

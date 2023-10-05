@@ -19,7 +19,7 @@ export type Library = { id: string; name: string; description: string | null; pa
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
-export type LibraryScanMode = "SYNC" | "BATCHED" | "NONE"
+export type LibraryScanMode = "DEFAULT" | "QUICK" | "NONE"
 
 export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
 

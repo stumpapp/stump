@@ -65,7 +65,7 @@ const baseColumns = [
 	columnHelper.display({
 		cell: ({ row: { original: activity } }) => (
 			<Badge variant={activity.authentication_successful ? 'success' : 'error'} size="xs">
-				{activity.authentication_successful ? 'Successful' : 'Failure'}
+				{activity.authentication_successful ? 'Success' : 'Failure'}
 			</Badge>
 		),
 		header: 'Auth result',

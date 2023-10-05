@@ -93,7 +93,7 @@ impl SessionStore for PrismaSessionStore {
 			.exec()
 			.await?;
 
-		tracing::trace!(result = ?result, "Upserted session");
+		tracing::trace!(session_id = result.id, "Upserted session");
 
 		Ok(())
 	}
@@ -112,8 +112,7 @@ impl SessionStore for PrismaSessionStore {
 			.await?;
 
 		if let Some(result) = record {
-			tracing::trace!(result = ?result, "Found session");
-
+			tracing::trace!("Found session");
 			let timestamp = result.expires_at.timestamp();
 			let expiration_time = OffsetDateTime::from_unix_timestamp(timestamp)
 				.expect("Failed to convert timestamp to OffsetDateTime");

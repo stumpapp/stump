@@ -1,7 +1,8 @@
-import { Badge, Text } from '@stump/components'
+import { Badge, Text, ToolTip } from '@stump/components'
 import { User } from '@stump/types'
 import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
+import { HelpCircle } from 'lucide-react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
@@ -59,7 +60,14 @@ const baseColumns = [
 				{original.login_sessions_count}
 			</Text>
 		),
-		header: 'Active sessions',
+		header: () => (
+			<div className="flex w-full items-center gap-2">
+				<span>Active sessions</span>
+				<ToolTip content="The number of non-expired login sessions for this user">
+					<HelpCircle className="h-3 w-3" />
+				</ToolTip>
+			</div>
+		),
 		id: 'login_sessions_count',
 	}),
 	columnHelper.display({

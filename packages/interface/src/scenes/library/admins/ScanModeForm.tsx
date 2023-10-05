@@ -31,27 +31,27 @@ export default function ScanModeForm({ isCreatingLibrary }: Props) {
 
 			<RadioGroup value={scanMode} onValueChange={handleChange} className="max-w-2xl gap-4">
 				<RadioGroup.CardItem
+					label="Default scan"
+					description="A standard scan that indexes your library files one at a time"
+					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
+					isActive={scanMode === 'DEFAULT'}
+					value="DEFAULT"
+				/>
+
+				<RadioGroup.CardItem
+					label="Quick scan"
+					description="A faster scan that indexes your library files in parallel"
+					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
+					isActive={scanMode === 'QUICK'}
+					value="QUICK"
+				/>
+
+				<RadioGroup.CardItem
 					label="Skip the scan"
-					description="You can perform a scan manually at a later time."
+					description="You can perform a scan manually at a later time"
 					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
 					isActive={scanMode === 'NONE'}
 					value="NONE"
-				/>
-
-				<RadioGroup.CardItem
-					label="Parallel scan"
-					description="A faster scan that indexes your library files in parallel."
-					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-					isActive={scanMode === 'BATCHED'}
-					value="BATCHED"
-				/>
-
-				<RadioGroup.CardItem
-					label="In-order scan"
-					description="A standard scan that indexes your library files one at a time."
-					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-					isActive={scanMode === 'SYNC'}
-					value="SYNC"
 				/>
 			</RadioGroup>
 		</div>

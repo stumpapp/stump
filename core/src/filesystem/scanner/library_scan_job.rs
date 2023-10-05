@@ -29,10 +29,10 @@ impl JobTrait for LibraryScanJob {
 
 	async fn run(&mut self, ctx: WorkerCtx) -> Result<u64, JobError> {
 		let completed_task_count = match self.scan_mode {
-			LibraryScanMode::Batched => {
+			LibraryScanMode::Quick => {
 				batch_scanner::scan_library(ctx, self.library_path.clone()).await
 			},
-			LibraryScanMode::Sync => {
+			LibraryScanMode::Default => {
 				sync_scanner::scan_library(ctx, self.library_path.clone()).await
 			},
 			LibraryScanMode::None => Err(CoreError::JobInitializationError(

@@ -128,7 +128,7 @@ export default function Table<T, V>({
 													width: header.getSize(),
 												}}
 											>
-												<Heading className="line-clamp-1 text-sm font-medium">
+												<Heading className="line-clamp-1 w-full text-sm font-medium">
 													{flexRender(header.column.columnDef.header, header.getContext())}
 												</Heading>
 												{sortable && (

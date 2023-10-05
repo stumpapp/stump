@@ -26,7 +26,7 @@ import ScanModeForm from './ScanModeForm'
 import ThumbnailConfigForm from './ThumbnailConfigForm'
 
 function isLibraryScanMode(input: string): input is LibraryScanMode {
-	return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input
+	return input === 'DEFAULT' || input === 'QUICK' || input === 'NONE' || !input
 }
 
 function isLibraryPattern(input: string): input is LibraryPattern {
@@ -89,7 +89,7 @@ const buildScema = (existingLibraries: Library[], library?: Library) =>
 					message: 'Invalid library, parent directory already exists as library.',
 				}),
 			),
-		scan_mode: z.string().refine(isLibraryScanMode).default('BATCHED'),
+		scan_mode: z.string().refine(isLibraryScanMode).default('DEFAULT'),
 		tags: z
 			.array(
 				z.object({
@@ -138,7 +138,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			library_pattern: library?.library_options.library_pattern || 'SERIES_BASED',
 			name: library?.name,
 			path: library?.path,
-			scan_mode: 'BATCHED',
+			scan_mode: 'DEFAULT',
 			tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
 			// @ts-expect-error: mostly null vs undefined issues
 			thumbnail_config: library?.library_options.thumbnail_config
@@ -317,6 +317,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 						containerClassName="max-w-full md:max-w-sm"
 						required
 						errorMessage={errors.name?.message}
+						data-1p-ignore
 						{...form.register('name')}
 					/>
 					<Input

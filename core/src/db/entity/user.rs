@@ -22,17 +22,22 @@ pub struct User {
 	pub id: String,
 	pub username: String,
 	pub role: String,
+	pub avatar_url: Option<String>,
+	pub created_at: String,
+	pub last_login: Option<String>,
+	pub is_locked: bool,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub login_sessions_count: Option<i32>,
+
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user_preferences: Option<UserPreferences>,
-	pub avatar_url: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub login_activity: Option<Vec<LoginActivity>>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub age_restriction: Option<AgeRestriction>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub read_progresses: Option<Vec<ReadProgress>>,
-	pub created_at: String,
-	pub last_login: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub login_activity: Option<Vec<LoginActivity>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
@@ -98,6 +103,8 @@ impl From<prisma::user::Data> for User {
 			.login_activity()
 			.map(|la| la.clone().into_iter().map(LoginActivity::from).collect())
 			.ok();
+		let login_sessions_count =
+			data.sessions().map(|sessions| sessions.len() as i32).ok();
 
 		User {
 			id: data.id,
@@ -110,6 +117,8 @@ impl From<prisma::user::Data> for User {
 			created_at: data.created_at.to_rfc3339(),
 			last_login: data.last_login.map(|dt| dt.to_rfc3339()),
 			login_activity,
+			is_locked: data.is_locked,
+			login_sessions_count,
 		}
 	}
 }

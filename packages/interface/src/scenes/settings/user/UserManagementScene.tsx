@@ -36,6 +36,7 @@ export default function UserManagementScene() {
 		page_size: pagination.pageSize,
 		params: {
 			include_read_progresses: true,
+			include_session_count: true,
 		},
 	})
 

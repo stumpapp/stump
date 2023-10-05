@@ -1,7 +1,8 @@
-import { Text } from '@stump/components'
+import { Badge, Text, ToolTip } from '@stump/components'
 import { User } from '@stump/types'
 import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
+import { HelpCircle } from 'lucide-react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
@@ -19,7 +20,7 @@ const columnHelper = createColumnHelper<User>()
 const baseColumns = [
 	columnHelper.accessor('username', {
 		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
-		header: 'Username',
+		header: 'User',
 	}),
 	columnHelper.accessor('role', {
 		cell: (info) => (
@@ -55,11 +56,37 @@ const baseColumns = [
 	}),
 	columnHelper.display({
 		cell: ({ row: { original } }) => (
+			<Text size="sm" variant="muted">
+				{original.login_sessions_count}
+			</Text>
+		),
+		header: () => (
+			<div className="flex w-full items-center gap-2">
+				<span>Active sessions</span>
+				<ToolTip content="The number of non-expired login sessions for this user">
+					<HelpCircle className="h-3 w-3" />
+				</ToolTip>
+			</div>
+		),
+		id: 'login_sessions_count',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original } }) => (
+			<Badge size="xs" variant={original.is_locked ? 'error' : 'success'}>
+				{original.is_locked ? 'Locked' : 'Active'}
+			</Badge>
+		),
+		header: 'Status',
+		id: 'is_locked',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original } }) => (
 			<div className="inline-flex items-end md:w-2">
 				<UserActionMenu user={original} />
 			</div>
 		),
 		id: 'actions',
+		size: 28,
 	}),
 ]
 

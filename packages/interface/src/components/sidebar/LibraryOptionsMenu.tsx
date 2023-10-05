@@ -60,24 +60,24 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					{
 						items: [
 							{
-								label: 'Scan Library',
+								label: 'Scan',
 								leftIcon: <FileScan className={iconStyle} />,
 								subItems: [
 									{
-										label: 'Parallel Scan',
-										leftIcon: <ScanFace className={iconStyle} />,
-										onClick: () => handleScan('BATCHED'),
+										label: 'Default',
+										leftIcon: <ScanLine className={iconStyle} />,
+										onClick: () => handleScan('DEFAULT'),
 									},
 									{
-										label: 'In-Order Scan',
-										leftIcon: <ScanLine className={iconStyle} />,
-										onClick: () => handleScan('SYNC'),
+										label: 'Quick',
+										leftIcon: <ScanFace className={iconStyle} />,
+										onClick: () => handleScan('QUICK'),
 									},
 								],
 							},
 							{
 								href: paths.libraryFileExplorer(library.id),
-								label: 'File Explorer',
+								label: 'File explorer',
 								leftIcon: <FolderSearch2 className={iconStyle} />,
 							},
 						],
@@ -86,11 +86,11 @@ export default function LibraryOptionsMenu({ library }: Props) {
 						items: [
 							{
 								href: paths.libraryManage(library.id),
-								label: 'Manage Library',
+								label: 'Manage',
 								leftIcon: <Edit className={iconStyle} />,
 							},
 							{
-								label: 'Delete Library',
+								label: 'Delete',
 								leftIcon: <Trash className={iconStyle} />,
 								onClick: () => setIsDeleting(true),
 							},

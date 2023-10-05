@@ -23,7 +23,7 @@ fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValu
 	origins
 		.iter()
 		.map(|origin| origin.to_string())
-		.chain(local_origins.into_iter())
+		.chain(local_origins)
 		.map(|origin| origin.parse())
 		.filter_map(|res| res.ok())
 		.collect::<Vec<HeaderValue>>()

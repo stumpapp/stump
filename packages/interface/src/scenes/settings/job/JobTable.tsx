@@ -132,6 +132,7 @@ export default function JobTable() {
 			columnHelper.display({
 				cell: ({ row }) => (isServerOwner ? <JobActionMenu job={row.original} /> : null),
 				id: 'actions',
+				size: 28,
 			}),
 		],
 		[t, isServerOwner],

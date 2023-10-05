@@ -1,5 +1,5 @@
 import { useLoginActivityQuery } from '@stump/client'
-import { Avatar, Badge, Text, ToolTip } from '@stump/components'
+import { Badge, Text } from '@stump/components'
 import { LoginActivity } from '@stump/types'
 import {
 	createColumnHelper,
@@ -11,6 +11,7 @@ import dayjs from 'dayjs'
 import React, { useState } from 'react'
 
 import { Table } from '../../../../components/table'
+import UsernameRow from '../user-table/UsernameRow'
 
 const columnHelper = createColumnHelper<LoginActivity>()
 
@@ -25,23 +26,28 @@ const baseColumns = [
 				return null
 			}
 
-			return (
-				<ToolTip content={user.username}>
-					<Avatar className="h-8 w-8" src={user.avatar_url || undefined} fallback={user.username} />
-				</ToolTip>
-			)
+			return <UsernameRow {...user} />
 		},
+		header: 'User',
 		id: 'user',
+		size: 100,
 	}),
 	columnHelper.accessor('timestamp', {
 		cell: ({ row: { original: activity } }) => (
-			<Text size="sm">{dayjs(activity.timestamp).format('LLL')}</Text>
+			<Text title={dayjs(activity.timestamp).format('LLL')} className="line-clamp-1" size="sm">
+				{dayjs(activity.timestamp).format('LLL')}
+			</Text>
 		),
 		header: 'Timestamp',
 	}),
 	columnHelper.accessor('ip_address', {
-		cell: ({ row: { original: activity } }) => <Text size="sm">{activity.ip_address}</Text>,
+		cell: ({ row: { original: activity } }) => (
+			<Text className="line-clamp-1 " size="sm">
+				{activity.ip_address}
+			</Text>
+		),
 		header: 'IP address',
+		size: 75,
 	}),
 	columnHelper.accessor('user_agent', {
 		cell: ({ row: { original: activity } }) => (
@@ -59,7 +65,7 @@ const baseColumns = [
 	columnHelper.display({
 		cell: ({ row: { original: activity } }) => (
 			<Badge variant={activity.authentication_successful ? 'success' : 'error'} size="xs">
-				{activity.authentication_successful ? 'Successful' : 'Failure'}
+				{activity.authentication_successful ? 'Success' : 'Failure'}
 			</Badge>
 		),
 		header: 'Auth result',
@@ -82,6 +88,10 @@ export default function LoginActivityTable() {
 			columns={baseColumns}
 			fullWidth
 			options={{
+				defaultColumn: {
+					minSize: 100,
+					size: 150,
+				},
 				getCoreRowModel: getCoreRowModel(),
 				getPaginationRowModel: getPaginationRowModel(),
 				onPaginationChange: setPagination,

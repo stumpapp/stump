@@ -32,13 +32,13 @@ The path to the PDFium binary. This is only required if you want PDF support and
 | ------ | ----------------------------- |
 | String | `/lib/libpdfium.so` in Docker |
 
-### SESSION_SECRET
+### SESSION_EXPIRY_CLEANUP_INTERVAL
 
-The secret key used to sign session cookies. This should be a random string of characters. If you don't set this, Stump will generate a random string for you. Only set this if you want to use a specific secret key.
+The time (_in seconds_) between each session expiry cleanup check. The check will remove any expired sessions from the database.
 
-| Type   | Default Value              |
-| ------ | -------------------------- |
-| String | _Randomly generated value_ |
+| Type    | Default Value |
+| ------- | ------------- |
+| Integer | `60`          |
 
 ### SESSION_TTL
 

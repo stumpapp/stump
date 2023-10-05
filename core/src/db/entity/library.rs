@@ -126,10 +126,10 @@ impl LibraryOptions {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Copy, Clone, Type, ToSchema)]
 pub enum LibraryScanMode {
-	#[serde(rename = "SYNC")]
-	Sync,
-	#[serde(rename = "BATCHED")]
-	Batched,
+	#[serde(rename = "DEFAULT")]
+	Default,
+	#[serde(rename = "QUICK")]
+	Quick,
 	#[serde(rename = "NONE")]
 	None,
 }
@@ -141,8 +141,8 @@ impl FromStr for LibraryScanMode {
 		let uppercase = s.to_uppercase();
 
 		match uppercase.as_str() {
-			"SYNC" => Ok(LibraryScanMode::Sync),
-			"BATCHED" => Ok(LibraryScanMode::Batched),
+			"DEFAULT" => Ok(LibraryScanMode::Default),
+			"QUICK" => Ok(LibraryScanMode::Quick),
 			"NONE" => Ok(LibraryScanMode::None),
 			"" => Ok(LibraryScanMode::default()),
 			_ => Err(format!("Invalid library scan mode: {}", s)),
@@ -158,7 +158,7 @@ impl From<String> for LibraryScanMode {
 
 impl Default for LibraryScanMode {
 	fn default() -> Self {
-		Self::Batched
+		Self::Default
 	}
 }
 

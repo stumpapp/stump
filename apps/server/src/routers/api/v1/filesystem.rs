@@ -4,7 +4,6 @@ use axum::{
 	routing::post,
 	Json, Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
 use stump_core::{
 	db::query::pagination::{PageQuery, Pageable},
@@ -13,13 +12,14 @@ use stump_core::{
 		PathUtils,
 	},
 };
+use tower_sessions::Session;
 use tracing::trace;
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::{AdminGuard, Auth},
-	utils::get_session_admin_user,
+	utils::get_session_server_owner_user,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -48,11 +48,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// List the contents of a directory on the file system at a given (optional) path. If no path
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
-	session: ReadableSession,
+	session: Session,
 	pagination: Query<PageQuery>,
 	input: Json<Option<DirectoryListingInput>>,
 ) -> ApiResult<Json<Pageable<DirectoryListing>>> {
-	let _ = get_session_admin_user(&session)?;
+	let _ = get_session_server_owner_user(&session)?;
 	let input = input.0.unwrap_or_default();
 
 	let start_path = input.path.unwrap_or_else(|| {

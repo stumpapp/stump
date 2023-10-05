@@ -1,6 +1,5 @@
 use std::{path::Path, str::FromStr};
 
-use optional_struct::OptionalStruct;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -15,11 +14,7 @@ use super::{
 	series::Series, tag::Tag, Cursor, LibraryOptions,
 };
 
-#[derive(
-	Debug, Clone, Deserialize, Serialize, Type, Default, OptionalStruct, ToSchema,
-)]
-#[optional_name = "PartialMedia"]
-#[optional_derive(Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
 pub struct Media {
 	pub id: String,
 	/// The name of the media. ex: "The Amazing Spider-Man (2018) #69"
@@ -244,9 +239,9 @@ impl From<media::Data> for Media {
 			size: data.size,
 			extension: data.extension,
 			pages: data.pages,
-			updated_at: data.updated_at.to_string(),
-			created_at: data.created_at.to_string(),
-			modified_at: data.modified_at.map(|dt| dt.to_string()),
+			updated_at: data.updated_at.to_rfc3339(),
+			created_at: data.created_at.to_rfc3339(),
+			modified_at: data.modified_at.map(|dt| dt.to_rfc3339()),
 			hash: data.hash,
 			path: data.path,
 			status: FileStatus::from_str(&data.status).unwrap_or(FileStatus::Error),

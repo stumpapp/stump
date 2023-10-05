@@ -56,6 +56,13 @@ export const core_event_triggers = {
 			seriesQueryKeys.getRecentlyAddedSeries,
 		],
 	},
+	GeneratedThumbnailBatch: {
+		keys: [
+			seriesQueryKeys.getSeriesById,
+			mediaQueryKeys.getRecentlyAddedMedia,
+			seriesQueryKeys.getRecentlyAddedSeries,
+		],
+	},
 	JobComplete: {
 		keys: [
 			libraryQueryKeys.getLibraryById,

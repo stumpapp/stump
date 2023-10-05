@@ -1,6 +1,7 @@
 {
 	"authScene": {
-		"claimText": "Este servidor Stump aún no ha sido reclamado, puedes usar el formulario de abajo para crear una cuenta de usuario y reclamarlo. Ingresa tu nombre de usuario y contraseña preferidos.",
+		"claimHeading": "Inicialice su servidor",
+		"claimText": "Este servidor Stump no está inicializado. Usa el formulario de abajo para crear tu cuenta. Una vez creada, tendrás acceso completo a todas las funciones del servidor.",
 		"form": {
 			"validation": {
 				"missingUsername": "Se requiere el nombre de usuario",
@@ -17,19 +18,19 @@
 		},
 		"toasts": {
 			"loggingIn": "Iniciando sesión...",
-			"loggedIn": "¡Bienvenido de vuelta! Redireccionando...",
-			"loggedInFirstTime": "¡Bienvenido! Redireccionando...",
+			"loggedIn": "¡Bienvenido de nuevo!",
+			"loggedInFirstTime": "¡Bienvenido!",
 			"registering": "Registrando...",
 			"registered": "¡Registrado!",
-			"loginFailed": "Error de inicio de sesión. Inténtalo de nuevo.",
-			"registrationFailed": "Error de registro. Inténtalo de nuevo."
+			"loginFailed": "Error de inicio de sesión. Por favor, inténtelo de nuevo",
+			"registrationFailed": "Registro fallido. Por favor, inténtelo de nuevo"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Configuración de la biblioteca",
-			"subtitleCreating": "Se mostrará una vista previa de tu nueva biblioteca a continuación.",
-			"subtitleEditing": "Se mostrará una vista previa de los cambios que hagas en tu biblioteca a continuación."
+			"subtitleCreating": "A continuación se mostrará una vista previa de su nueva biblioteca",
+			"subtitleEditing": "A continuación se mostrará una vista previa de las ediciones de su biblioteca"
 		}
 	},
 	"bookOverviewScene": {
@@ -52,7 +53,7 @@
 			"labels": {
 				"libraryName": "Nombre",
 				"libraryPath": "Ruta",
-				"libraryPathDescription": "La ruta de la biblioteca tal como existe en tu servidor.",
+				"libraryPathDescription": "La ruta a la biblioteca tal como existe en su servidor",
 				"libraryDescription": "Descripción",
 				"libraryTags": "Etiquetas"
 			},
@@ -62,14 +63,14 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Editar biblioteca",
-		"subtitle": "Utilice el siguiente formulario para editar su biblioteca. Si desea obtener información actualizada sobre bibliotecas y cómo funcionan, consulte la",
-		"subtitleLink": "documentación relevante",
+		"heading": "Gestionar biblioteca",
+		"subtitle": "Actualice los detalles o la configuración de su biblioteca, cambie las reglas de control del acceso o escanee los archivos. Si quieres actualizar las librerías y cómo funcionan, revisa el",
+		"subtitleLink": "documentación importante",
 		"form": {
 			"labels": {
 				"libraryName": "Nombre",
 				"libraryPath": "Ruta",
-				"libraryPathDescription": "La ruta a la biblioteca tal como existe en su servidor.",
+				"libraryPathDescription": "La ruta a la biblioteca tal como existe en su servidor",
 				"libraryDescription": "Descripción",
 				"libraryTags": "Etiquetas"
 			},
@@ -103,7 +104,8 @@
 			"general": "General",
 			"server": "Servidor",
 			"jobs": "Trabajos y Configuración",
-			"users": "Gestión de Usuarios"
+			"users": "Gestión de Usuarios",
+			"desktop": "Escritorio"
 		},
 		"general": {
 			"helmet": "Configuraciones Generales",
@@ -169,17 +171,37 @@
 		"jobs": {
 			"helmet": "Trabajos y Configuración",
 			"heading": "Trabajos y Configuración",
-			"subtitle": "Ver y gestionar los trabajos en segundo plano disponibles en este servidor, incluidos los escaneos de biblioteca y la programación."
+			"subtitle": "Ver y administrar las tareas en segundo plano disponibles en este servidor, incluyendo los escaneos de la biblioteca y la programación",
+			"schedulingHeading": "Programación de tareas",
+			"schedulingSubtitle": "Administrar la programación de tareas en segundo plano en este servidor. Los cambios en esta configuración surtirán efecto después de reiniciar el servidor",
+			"historyHeading": "Historial de tareas",
+			"historySubtitle": "Gestionar tareas en ejecución y ver el historial de tareas completadas",
+			"historyTable": {
+				"columns": {
+					"name": "Tipo",
+					"description": "Descripción",
+					"status": "Estado",
+					"createdAt": "Iniciado el",
+					"elapsed": "Transcurrido",
+					"tasks": "Tareas"
+				},
+				"emptyHeading": "No hay tareas para mostrar",
+				"emptySubtitle": "No puede tener una tarea si no tienes una tarea",
+				"deleteAllMessage": "El historial de tareas y las estadísticas pueden ser eliminadas de la base de datos en cualquier momento. Esta acción no se puede deshacer",
+				"deleteAllConfirmButton": "Eliminar historial",
+				"deleteAllConfirmButtonTitle": "Eliminar todo el historial de tareas",
+				"deleteAllConfirmButtonTitleNoJobs": "No hay tareas para eliminar"
+			}
 		},
 		"server": {
 			"helmet": "Configuración del servidor",
 			"heading": "Configuración del servidor",
-			"subtitle": "Administre varias opciones configurables para su instancia del servidor Stump."
+			"subtitle": "Gestiona varias opciones configurables para su servidor Stump en si mismo"
 		},
 		"users": {
 			"helmet": "Administración de usuarios",
 			"heading": "Administración de usuarios",
-			"subtitle": "Administre los usuarios en este servidor, incluida la creación de nuevos usuarios y el cambio de sus permisos."
+			"subtitle": "Gestionar los usuarios en este servidor, incluyendo la creación de nuevos usuarios y cambiar sus permisos"
 		}
 	},
 	"jobOverlay": {
@@ -215,6 +237,7 @@
 		"buttons": {
 			"home": "Inicio",
 			"libraries": "Bibliotecas",
+			"books": "Explorar libros",
 			"createLibrary": "Crear Biblioteca",
 			"settings": "Ajustes",
 			"themeToggle": "Alternar Tema",
@@ -244,20 +267,20 @@
 	"serverSOS": {
 		"heading": "Servidor no disponible",
 		"desktop": {
-			"message": "Ocurrió un error de red que sugiere que su servidor Stump no está disponible en este momento. Asegúrese de que se esté ejecutando y sea accesible desde este dispositivo.\nSi su URL del servidor ha cambiado, puede actualizarla utilizando el formulario a continuación."
+			"message": "Ocurrió un error de red que sugiere que su servidor Stump no está disponible en este momento. Por favor, asegúrese de que se esté ejecutando y sea accesible desde este dispositivo.\nSi su URL del servidor ha cambiado, puede actualizarla utilizando el formulario a continuación"
 		},
 		"web": {
-			"message": "Ocurrió un error de red que sugiere que su servidor Stump no está disponible en este momento. Asegúrese de que se esté ejecutando y sea accesible desde este dispositivo."
+			"message": "Se ha producido un error de red que sugiere que su servidor Stump no está disponible actualmente. Por favor, asegúrate de que se está ejecutando y de que es accesible desde este dispositivo"
 		},
 		"reconnected": "¡Reconectado al servidor! Redirigiendo...",
 		"reconnectionFailed": "¡Algo salió mal!"
 	},
 	"serverStatusOverlay": {
-		"heading": "El servidor no está conectado.",
+		"heading": "El servidor no está conectado",
 		"message": [
-			"Por favor, verifique su conexión a internet.",
+			"Por favor, verifique su conexión a internet",
 			"Haga clic aquí",
-			"para cambiar su URL de servidor."
+			"para cambiar su URL del servidor"
 		]
 	},
 	"slidingList": {

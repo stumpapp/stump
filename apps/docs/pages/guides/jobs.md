@@ -1,6 +1,8 @@
-# The Job Queue
+<!-- TODO: separate background jobs into a new category, and then each job as a sub page -->
 
-With Stump, you can queue various types of jobs that do a variety of things in the background. For all jobs available, you can expect:
+# Background jobs
+
+There are a variety of jobs running in the background of your server instance. In general, for all jobs, you can expect:
 
 - Live, visual progress updates
 - Accessible logging and reporting

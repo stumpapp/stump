@@ -16,6 +16,7 @@ pub(crate) mod job;
 pub(crate) mod library;
 pub(crate) mod log;
 pub(crate) mod media;
+pub(crate) mod metadata;
 pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod tag;
@@ -27,6 +28,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(epub::mount(app_state.clone()))
 		.merge(library::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
+		.merge(metadata::mount(app_state.clone()))
 		.merge(filesystem::mount(app_state.clone()))
 		.merge(job::mount(app_state.clone()))
 		.merge(log::mount(app_state.clone()))

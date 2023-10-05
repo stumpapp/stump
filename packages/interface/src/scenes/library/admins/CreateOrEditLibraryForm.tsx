@@ -26,7 +26,7 @@ import ScanModeForm from './ScanModeForm'
 import ThumbnailConfigForm from './ThumbnailConfigForm'
 
 function isLibraryScanMode(input: string): input is LibraryScanMode {
-	return input === 'SYNC' || input === 'BATCHED' || input === 'NONE' || !input
+	return input === 'DEFAULT' || input === 'QUICK' || input === 'NONE' || !input
 }
 
 function isLibraryPattern(input: string): input is LibraryPattern {
@@ -89,7 +89,7 @@ const buildScema = (existingLibraries: Library[], library?: Library) =>
 					message: 'Invalid library, parent directory already exists as library.',
 				}),
 			),
-		scan_mode: z.string().refine(isLibraryScanMode).default('BATCHED'),
+		scan_mode: z.string().refine(isLibraryScanMode).default('DEFAULT'),
 		tags: z
 			.array(
 				z.object({
@@ -138,7 +138,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 			library_pattern: library?.library_options.library_pattern || 'SERIES_BASED',
 			name: library?.name,
 			path: library?.path,
-			scan_mode: 'BATCHED',
+			scan_mode: 'DEFAULT',
 			tags: library?.tags?.map((t) => ({ label: t.name, value: t.name })),
 			// @ts-expect-error: mostly null vs undefined issues
 			thumbnail_config: library?.library_options.thumbnail_config
@@ -162,7 +162,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	const { editLibraryAsync } = useEditLibraryMutation({
 		onSuccess: () => {
 			form.reset()
-			// TODO: maybe somewhere else?
 			setTimeout(() => navigate(paths.home()), 750)
 		},
 	})
@@ -224,9 +223,12 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		const { name, path, description, tags: formTags, scan_mode, ...rest } = values
 
 		const library_options = {
+			...library.library_options,
 			...rest,
-			id: library.library_options.id,
-			library_id: library.library_options.library_id,
+			thumbnail_config: {
+				...(library.library_options.thumbnail_config || {}),
+				...rest.thumbnail_config,
+			},
 		} as LibraryOptions
 
 		const existingTags = tags.filter((tag) => formTags?.some((t) => t.value === tag.name))
@@ -315,6 +317,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 						containerClassName="max-w-full md:max-w-sm"
 						required
 						errorMessage={errors.name?.message}
+						data-1p-ignore
 						{...form.register('name')}
 					/>
 					<Input
@@ -322,7 +325,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 						label="Library path"
 						placeholder="/path/to/library"
 						containerClassName="max-w-full md:max-w-sm"
-						icon={
+						rightDecoration={
 							<IconButton
 								size="xs"
 								variant="ghost"

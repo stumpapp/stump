@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Depending on the values passed for PUID/PGID via environment variables,
 # either starts the stump server daemon as root or as a regular user
@@ -10,16 +10,16 @@ PGID=${PGID:-0}
 USER=stump
 GROUP=stump
 
-# echo warning if the GUID is 1-99, as these are typically reserved for system use
-if [[ "$PGID" -lt 100 ]]; then
-    echo "Warning: PGID is below 100. This is typically reserved for system use and may cause unexpected behavior."
+# GUID between 1-99 are typically reserved for system use, so we warn the user
+if [[ "$PUID" -lt 100 && "$PUID" -ne 0 ]]; then
+    echo "The provided PGID is below 100. This is typically reserved for system use and may cause unexpected behavior."
 fi
 
 
 ## Add stump group if it doesn't already exist
 if [[ -z "$(getent group "$PGID" | cut -d':' -f1)" ]]; then
     echo "Adding group $GROUP with gid $PGID"
-    addgroup -g "$PGID" "$GROUP"
+    addgroup --gid "$PGID" "$GROUP"
 else
     echo "Group gid $PGID already exists"
     # If the group name is not stump, we need to update GROUP as to avoid errors later
@@ -32,10 +32,15 @@ fi
 ## Add stump user if it doesn't already exist
 if [[ -z "$(getent passwd "$PUID" | cut -d':' -f1)" ]]; then
     echo "Adding user $USER with uid $PUID"
-    adduser -D -s /bin/sh -u "$PUID" -G "$GROUP" "$USER"
+    adduser --system --shell /bin/bash --no-create-home --uid "$PUID" --gid "$PGID" "$USER"
 else
     echo "User $USER with uid $PUID already exists"
-    # TODO: we may wind up needing a similar work around for the user name as we did for the group name 
+    # If the user name is not stump, we need to update USER as to avoid errors later
+    if [[ "$(getent passwd "$PUID" | cut -d':' -f1)" != "$USER" ]]; then
+        USER="$(getent passwd "$PUID" | cut -d':' -f1)"
+        echo "User name '$USER' does not match expected name 'stump'. Using '$USER' instead."
+    fi
+
 fi
 
 # Change current working directory

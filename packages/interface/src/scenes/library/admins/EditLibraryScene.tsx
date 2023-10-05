@@ -6,7 +6,7 @@ import { useLocaleContext } from '../../../i18n/context'
 import CreateOrEditLibraryForm from './CreateOrEditLibraryForm'
 import QuickActions from './QuickActions'
 
-export default function EditLibraryScene() {
+export default function ManageLibraryScene() {
 	const { id } = useParams()
 	const { t } = useLocaleContext()
 	const { libraries } = useLibraries()
@@ -34,7 +34,7 @@ export default function EditLibraryScene() {
 			<div className="flex flex-col gap-12 pt-2">
 				{libraries && (
 					<>
-						<QuickActions />
+						<QuickActions library={library} />
 						<CreateOrEditLibraryForm existingLibraries={libraries} library={library} />
 					</>
 				)}

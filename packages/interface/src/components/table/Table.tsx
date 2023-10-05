@@ -110,60 +110,68 @@ export default function Table<T, V>({
 	const tableRows = table.getRowModel().rows
 
 	return (
-		<div className="divide block max-w-full overflow-y-hidden overflow-x-scroll p-3 scrollbar-hide">
-			<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
-				<thead className="border-b border-gray-75 text-left dark:border-gray-800">
-					{table.getHeaderGroups().map((headerGroup) => (
-						<tr key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
-								return (
-									<th key={header.id} colSpan={header.colSpan} className="py-2.5">
-										<div
-											className={clsx('flex items-center', {
-												'cursor-pointer select-none': header.column.getCanSort() && sortable,
-											})}
-											onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
-										>
-											<Heading className="text-sm font-medium">
-												{flexRender(header.column.columnDef.header, header.getContext())}
-											</Heading>
-											{sortable && (
-												<SortIcon
-													direction={(header.column.getIsSorted() as SortDirection) ?? null}
-												/>
-											)}
-										</div>
-									</th>
-								)
-							})}
-						</tr>
-					))}
-				</thead>
-				<tbody className="divide-y divide-gray-75 dark:divide-gray-800">
-					{tableRows.map((row) => {
-						return (
-							<tr key={row.id}>
-								{row.getVisibleCells().map((cell) => {
+		<>
+			<div className="divide block max-w-full overflow-y-hidden overflow-x-scroll p-3 scrollbar-hide">
+				<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
+					<thead className="border-b border-gray-75 text-left dark:border-gray-800">
+						{table.getHeaderGroups().map((headerGroup) => (
+							<tr key={headerGroup.id}>
+								{headerGroup.headers.map((header) => {
 									return (
-										<td key={cell.id} className="py-2">
-											{flexRender(cell.column.columnDef.cell, cell.getContext())}
-										</td>
+										<th key={header.id} colSpan={header.colSpan} className="py-2.5">
+											<div
+												className={clsx('flex items-center', {
+													'cursor-pointer select-none': header.column.getCanSort() && sortable,
+												})}
+												onClick={sortable ? header.column.getToggleSortingHandler() : undefined}
+												style={{
+													width: header.getSize(),
+												}}
+											>
+												<Heading className="line-clamp-1 w-full text-sm font-medium">
+													{flexRender(header.column.columnDef.header, header.getContext())}
+												</Heading>
+												{sortable && (
+													<SortIcon
+														direction={(header.column.getIsSorted() as SortDirection) ?? null}
+													/>
+												)}
+											</div>
+										</th>
 									)
 								})}
 							</tr>
-						)
-					})}
-					{tableRows.length === 0 && emptyRenderer && (
-						<tr>
-							<td colSpan={columns.length}>{emptyRenderer()}</td>
-						</tr>
-					)}
-				</tbody>
-			</table>
-			<div className="h-2" />
+						))}
+					</thead>
+					<tbody className="divide-y divide-gray-75 dark:divide-gray-800">
+						{tableRows.map((row) => {
+							return (
+								<tr key={row.id}>
+									{row.getVisibleCells().map((cell) => {
+										return (
+											<td key={cell.id} className="py-2">
+												{flexRender(cell.column.columnDef.cell, cell.getContext())}
+											</td>
+										)
+									})}
+								</tr>
+							)
+						})}
+						{tableRows.length === 0 && emptyRenderer && (
+							<tr>
+								<td colSpan={columns.length}>{emptyRenderer()}</td>
+							</tr>
+						)}
+					</tbody>
+				</table>
+			</div>
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-4">
-					<Text variant="muted" className="flex flex-shrink-0 items-center gap-1" size="sm">
+					<Text
+						variant="muted"
+						className="hidden flex-shrink-0 items-center gap-1 md:flex"
+						size="sm"
+					>
 						{tableRows.length > 0 ? (
 							<>
 								<span>
@@ -205,11 +213,10 @@ export default function Table<T, V>({
 				<TablePagination
 					currentPage={pageIndex + 1}
 					pages={pageCount}
-					onPageChange={handlePageChanged}
-					isZeroBasedPagination={isZeroBasedPagination}
+					onChangePage={handlePageChanged}
 				/>
 			</div>
-		</div>
+		</>
 	)
 }
 

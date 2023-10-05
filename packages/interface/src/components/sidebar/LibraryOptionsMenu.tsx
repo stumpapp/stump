@@ -11,13 +11,12 @@ import {
 	Trash,
 } from 'lucide-react'
 import { useState } from 'react'
-import { useMediaMatch } from 'rooks'
 
 import { useAppContext } from '../../context'
 import paths from '../../paths'
 import DeleteLibraryConfirmation from '../library/DeleteLibraryConfirmation'
 
-interface Props {
+type Props = {
 	library: Library
 }
 
@@ -25,8 +24,6 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const { scanAsync } = useScanLibrary()
 	const { isServerOwner } = useAppContext()
-
-	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	function handleScan(mode: LibraryScanMode) {
 		// extra protection, should not be possible to reach this.
@@ -63,24 +60,24 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					{
 						items: [
 							{
-								label: 'Scan Library',
+								label: 'Scan',
 								leftIcon: <FileScan className={iconStyle} />,
 								subItems: [
 									{
-										label: 'Parallel Scan',
-										leftIcon: <ScanFace className={iconStyle} />,
-										onClick: () => handleScan('BATCHED'),
+										label: 'Default',
+										leftIcon: <ScanLine className={iconStyle} />,
+										onClick: () => handleScan('DEFAULT'),
 									},
 									{
-										label: 'In-Order Scan',
-										leftIcon: <ScanLine className={iconStyle} />,
-										onClick: () => handleScan('SYNC'),
+										label: 'Quick',
+										leftIcon: <ScanFace className={iconStyle} />,
+										onClick: () => handleScan('QUICK'),
 									},
 								],
 							},
 							{
 								href: paths.libraryFileExplorer(library.id),
-								label: 'File Explorer',
+								label: 'File explorer',
 								leftIcon: <FolderSearch2 className={iconStyle} />,
 							},
 						],
@@ -89,18 +86,18 @@ export default function LibraryOptionsMenu({ library }: Props) {
 						items: [
 							{
 								href: paths.libraryManage(library.id),
-								label: 'Manage Library',
+								label: 'Manage',
 								leftIcon: <Edit className={iconStyle} />,
 							},
 							{
-								label: 'Delete Library',
+								label: 'Delete',
 								leftIcon: <Trash className={iconStyle} />,
 								onClick: () => setIsDeleting(true),
 							},
 						],
 					},
 				]}
-				align={isMobile ? 'end' : 'start'}
+				align="start"
 			/>
 		</>
 	)

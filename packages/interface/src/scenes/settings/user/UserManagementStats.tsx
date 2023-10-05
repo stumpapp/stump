@@ -1,5 +1,6 @@
 import { Statistic } from '@stump/components'
 import { User } from '@stump/types'
+import pluralize from 'pluralize'
 
 import { useUserManagementContext } from './context'
 
@@ -52,35 +53,33 @@ export default function UserManagementStats() {
 	)
 
 	return (
-		<div className="grid grid-cols-2 items-center justify-between gap-14 py-6 md:grid-cols-4 md:px-16 md:py-8">
-			<Statistic className="col-span-1 gap-3 text-center">
-				<Statistic.Label className="text-base md:text-lg">User Accounts</Statistic.Label>
-				<Statistic.CountUpNumber className="text-lg md:text-3xl" value={users.length} />
+		<div className="flex items-center gap-4 divide-x divide-gray-100/60 overflow-x-scroll pb-8 scrollbar-hide dark:divide-gray-800/80">
+			<Statistic className="shrink-0 pr-5 md:pr-10">
+				<Statistic.Label>Users</Statistic.Label>
+				<Statistic.CountUpNumber value={users.length} />
 			</Statistic>
 
-			<Statistic className="col-span-1 gap-3 text-center">
-				<Statistic.Label className="text-base md:text-lg">Books Completed</Statistic.Label>
-				<Statistic.CountUpNumber
-					className="text-lg md:text-3xl"
-					value={booksRead.finishedBookCount}
-				/>
+			<Statistic className="shrink-0 px-5 md:px-10">
+				<Statistic.Label>Books completed</Statistic.Label>
+				<Statistic.CountUpNumber value={booksRead.finishedBookCount} />
 			</Statistic>
 
-			<Statistic className="col-span-1 gap-3 text-center">
-				<Statistic.Label className="text-base md:text-lg">Books In Progress</Statistic.Label>
-				<Statistic.CountUpNumber
-					className="text-lg md:text-3xl"
-					value={booksRead.inProgressCount}
-				/>
+			<Statistic className="shrink-0 px-5 md:px-10">
+				<Statistic.Label>Books in progress</Statistic.Label>
+				<Statistic.CountUpNumber value={booksRead.inProgressCount} />
 			</Statistic>
 
-			<Statistic className="col-span-1 gap-3 text-center">
-				<Statistic.Label className="text-base md:text-lg">Power Reader</Statistic.Label>
-				<Statistic.CountUpNumber
-					className="text-lg md:text-3xl"
-					value={powerReader.finishedBookCount}
-				/>
-			</Statistic>
+			{!!powerReader.user && (
+				<Statistic className="shrink-0 pl-5 md:pl-10">
+					<Statistic.Label>Power Reader</Statistic.Label>
+					<Statistic.StringValue>
+						{powerReader.user.username}{' '}
+						<span className="text-sm font-normal">
+							({powerReader.finishedBookCount} {pluralize('book', powerReader.finishedBookCount)})
+						</span>
+					</Statistic.StringValue>
+				</Statistic>
+			)}
 		</div>
 	)
 }

@@ -43,6 +43,7 @@ pub struct StumpEnvironment {
 	pub client_dir: Option<String>,
 	pub config_dir: Option<String>,
 	pub allowed_origins: Option<Vec<String>>,
+	pub pdfium_path: Option<String>,
 }
 
 impl Default for StumpEnvironment {
@@ -55,6 +56,7 @@ impl Default for StumpEnvironment {
 			client_dir: Some(String::from("client")),
 			config_dir: None,
 			allowed_origins: None,
+			pdfium_path: None,
 		}
 	}
 }
@@ -124,6 +126,10 @@ impl StumpEnvironment {
 
 		env.config_dir = Some(get_config_dir().to_string_lossy().to_string());
 
+		if let Ok(pdfium_path) = env::var("PDFIUM_PATH") {
+			env.pdfium_path = Some(pdfium_path);
+		}
+
 		env.write()?;
 
 		Ok(env)
@@ -173,6 +179,12 @@ impl StumpEnvironment {
 		if let Some(allowed_origins) = &self.allowed_origins {
 			if !allowed_origins.is_empty() {
 				env::set_var("STUMP_ALLOWED_ORIGINS", allowed_origins.join(","));
+			}
+		}
+
+		if let Some(pdfium_path) = &self.pdfium_path {
+			if !pdfium_path.is_empty() {
+				env::set_var("PDFIUM_PATH", pdfium_path);
 			}
 		}
 

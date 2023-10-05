@@ -10,6 +10,7 @@ import { useAppContext } from '../../../context'
 import { useLocaleContext } from '../../../i18n/index'
 import { SettingsContent, SettingsHeading } from '../SettingsLayout'
 import { UserManagementContext } from './context'
+import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
 import UserManagementStats from './UserManagementStats'
 
@@ -35,6 +36,7 @@ export default function UserManagementScene() {
 		page_size: pagination.pageSize,
 		params: {
 			include_read_progresses: true,
+			include_session_count: true,
 		},
 	})
 
@@ -59,14 +61,16 @@ export default function UserManagementScene() {
 					<title>Stump | {t('settingsScene.users.helmet')}</title>
 				</Helmet>
 
+				<UserManagementStats />
+
 				<SettingsHeading
 					heading={t('settingsScene.users.heading')}
 					subtitle={t('settingsScene.users.subtitle')}
 				/>
 
 				<SettingsContent>
-					<UserManagementStats />
 					<UserTableSection />
+					<LoginActivitySection />
 				</SettingsContent>
 			</SceneContainer>
 		</UserManagementContext.Provider>

@@ -21,6 +21,8 @@ export const BUTTON_VARIANTS = {
 		'bg-transparent border border-gray-200 hover:bg-gray-75 dark:border-gray-700 dark:text-gray-100',
 	primary:
 		'bg-brand-500 text-white hover:bg-brand-600 dark:hover:bg-brand-600 focus:ring-brand-400',
+	secondary:
+		'bg-gray-900 text-gray-50 hover:bg-gray-900/90 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:hover:text-gray-900',
 	subtle: 'bg-gray-75 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100',
 	'subtle-dark':
 		'bg-white data-[state=open]:bg-gray-50 dark:bg-gray-975 text-gray-900 hover:bg-gray-50 dark:hover:bg-gray-950 dark:data-[state=open]:bg-gray-900 dark:text-gray-100',

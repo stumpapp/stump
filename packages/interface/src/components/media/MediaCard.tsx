@@ -4,6 +4,7 @@ import { EntityCard, Text } from '@stump/components'
 import { FileStatus, Media } from '@stump/types'
 import pluralize from 'pluralize'
 
+import paths from '../../paths'
 import { formatBytes } from '../../utils/format'
 import { prefetchMediaPage } from '../../utils/prefetch'
 
@@ -100,10 +101,12 @@ export default function MediaCard({
 		return null
 	}
 
-	const href =
-		readingLink && media.current_page
-			? `/book/${media.id}/pages/${media.current_page ?? 1}`
-			: `/book/${media.id}`
+	const href = readingLink
+		? paths.bookReader(media.id, {
+				epubcfi: media.current_epubcfi,
+				page: media.current_page || undefined,
+		  })
+		: paths.bookOverview(media.id)
 
 	const overrides = isCoverOnly
 		? {

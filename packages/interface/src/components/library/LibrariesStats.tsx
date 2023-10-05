@@ -16,18 +16,18 @@ export default function LibrariesStats() {
 	if (!libraryStats || !libraryUsage) return null
 
 	return (
-		<div className="flex items-center gap-4">
-			<Statistic>
+		<div className="flex items-center gap-4 divide-x divide-gray-100/60 dark:divide-gray-800/80">
+			<Statistic className="pr-10">
 				<Statistic.Label>Total Series</Statistic.Label>
 				<Statistic.CountUpNumber value={Number(libraryStats.series_count)} />
 			</Statistic>
 
-			<Statistic>
+			<Statistic className="px-10">
 				<Statistic.Label>Total Books</Statistic.Label>
 				<Statistic.CountUpNumber value={Number(libraryStats.book_count)} />
 			</Statistic>
 
-			<Statistic>
+			<Statistic className="pl-10">
 				<Statistic.Label>Disk Usage</Statistic.Label>
 				<Statistic.CountUpNumber
 					unit={libraryUsage.unit}

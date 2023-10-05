@@ -13,7 +13,10 @@ use crate::{
 		metadata::{MediaMetadata, SeriesMetadata},
 		LibraryOptions,
 	},
-	filesystem::{content_type::ContentType, epub::EpubProcessor, error::FileError},
+	filesystem::{
+		content_type::ContentType, epub::EpubProcessor, error::FileError,
+		image::ImageFormat, pdf::PdfProcessor,
+	},
 };
 
 use super::{rar::RarProcessor, zip::ZipProcessor};
@@ -45,17 +48,35 @@ impl From<&LibraryOptions> for FileProcessorOptions {
 /// Trait defining a standard API for processing files throughout Stump. Every
 /// supported file type should implement this trait.
 pub trait FileProcessor {
+	/// Get the sample size for a file. This is used for generating a hash of the file.
 	fn get_sample_size(path: &str) -> Result<u64, FileError>;
+	/// Generate a hash of the file. In most cases, the hash is generated from select pages
+	/// of the file, rather than the entire file. This is to prevent the hash from changing
+	/// when the metadata of the file changes.
 	fn hash(path: &str) -> Option<String>;
+	/// Process a file. Should gather the basic metadata and information required for
+	/// processing the file.
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
 	) -> Result<ProcessedFile, FileError>;
+	/// Get the bytes of a page of the file.
 	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError>;
+	/// Get the content types of a list of pages of the file. This should determine content
+	/// types by actually testing the bytes for each page.
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError>;
+}
+
+/// Trait defining a standard API for converting files throughout Stump.
+pub trait FileConverter {
+	fn to_zip(
+		path: &str,
+		delete_source: bool,
+		image_format: Option<ImageFormat>,
+	) -> Result<PathBuf, FileError>;
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -103,6 +124,7 @@ pub fn process(
 		"application/vnd.rar" => RarProcessor::process(path_str, options),
 		"application/vnd.comicbook-rar" => RarProcessor::process(path_str, options),
 		"application/epub+zip" => EpubProcessor::process(path_str, options),
+		"application/pdf" => PdfProcessor::process(path_str, options),
 		_ => Err(FileError::UnsupportedFileType(path.display().to_string())),
 	}
 }
@@ -116,6 +138,7 @@ pub fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileErr
 		"application/vnd.rar" => RarProcessor::get_page(path, page),
 		"application/vnd.comicbook-rar" => RarProcessor::get_page(path, page),
 		"application/epub+zip" => EpubProcessor::get_page(path, page),
+		"application/pdf" => PdfProcessor::get_page(path, page),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
 	}
 }

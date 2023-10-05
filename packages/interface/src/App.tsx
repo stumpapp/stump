@@ -22,6 +22,8 @@ import { ErrorFallback } from './components/ErrorFallback'
 import Notifications from './components/Notifications'
 import { API_VERSION } from './index'
 
+const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
+
 function RouterContainer(props: { appProps: AppProps }) {
 	const location = useLocation()
 	const navigate = useNavigate()
@@ -80,9 +82,7 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	return (
 		<StumpClientContextProvider onRedirect={handleRedirect}>
-			{import.meta.env.MODE === 'development' && (
-				<ReactQueryDevtools position="bottom-right" context={defaultContext} />
-			)}
+			{IS_DEVELOPMENT && <ReactQueryDevtools position="bottom-right" context={defaultContext} />}
 			<AppPropsContext.Provider value={appProps}>
 				<Helmet defaultTitle="Stump">
 					<title>Stump</title>

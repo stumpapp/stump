@@ -1,7 +1,10 @@
-use axum_sessions::extractors::{ReadableSession, WritableSession};
 use stump_core::db::entity::User;
+use tower_sessions::Session;
 
-use crate::errors::{ApiError, ApiResult, AuthError};
+use crate::{
+	config::session::SESSION_USER_KEY,
+	errors::{ApiError, ApiResult, AuthError},
+};
 
 #[derive(Debug)]
 pub struct DecodedCredentials {
@@ -35,38 +38,18 @@ pub fn decode_base64_credentials(
 	Ok(DecodedCredentials { username, password })
 }
 
-pub fn get_session_user(session: &ReadableSession) -> ApiResult<User> {
-	if let Some(user) = session.get::<User>("user") {
+pub fn get_session_user(session: &Session) -> ApiResult<User> {
+	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
 		Ok(user)
 	} else {
 		Err(ApiError::Unauthorized)
 	}
 }
 
-pub fn get_writable_session_user(session: &WritableSession) -> ApiResult<User> {
-	if let Some(user) = session.get::<User>("user") {
-		Ok(user)
-	} else {
-		Err(ApiError::Unauthorized)
-	}
-}
-
-// pub fn get_writable_session_admin_user(session: &WritableSession) -> ApiResult<User> {
-// 	let user = get_writable_session_user(session)?;
-
-// 	if user.is_admin() {
-// 		Ok(user)
-// 	} else {
-// 		Err(ApiError::Forbidden(
-// 			"You do not have permission to access this resource.".to_string(),
-// 		))
-// 	}
-// }
-
-pub fn get_session_admin_user(session: &ReadableSession) -> ApiResult<User> {
+pub fn get_session_server_owner_user(session: &Session) -> ApiResult<User> {
 	let user = get_session_user(session)?;
 
-	if user.is_admin() {
+	if user.is_server_owner() {
 		Ok(user)
 	} else {
 		Err(ApiError::Forbidden(

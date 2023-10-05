@@ -1,16 +1,15 @@
 export { useAuthQuery, useLoginOrRegister } from './auth'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
-export { useJobsQuery } from './job'
+export { useJobSchedulerConfig, useJobsQuery } from './job'
 export {
 	refreshUseLibrary,
 	useCreateLibraryMutation,
 	useDeleteLibraryMutation,
 	useEditLibraryMutation,
 	useLibraries,
-	type UseLibrariesReturn,
 	useLibraryByIdQuery,
-	useLibrarySeriesQuery,
+	useLibraryQuery,
 	useLibraryStats,
 	useScanLibrary,
 } from './library'
@@ -19,15 +18,15 @@ export {
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,
+	usePagedMediaQuery,
 	useRecentlyAddedMediaQuery,
 	useUpdateMediaProgress,
 } from './media'
 export {
 	prefetchSeries,
-	useRecentlyAddedSeries,
+	usePagedSeriesQuery,
 	useSeriesByIdQuery,
 	useSeriesCursorQuery,
-	useSeriesMediaQuery,
 	useUpNextInSeries,
 } from './series'
 export { useStumpVersion } from './server'
@@ -35,6 +34,7 @@ export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {
 	useCreateUser,
 	useDeleteUser,
+	useLoginActivityQuery,
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,

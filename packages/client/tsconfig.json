@@ -9,7 +9,8 @@
 			"@stump/api/*": ["../api/src/*"],
 			"@stump/types": ["../types/index.ts"],
 			"@stump/types/*": ["../types/*"]
-		}
+		},
+		"module": "NodeNext"
 	},
 	"include": ["src"],
 	"exclude": ["node_modules"],

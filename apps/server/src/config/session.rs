@@ -1,44 +1,54 @@
-use std::{env, time::Duration};
+use std::{env, sync::Arc};
+use stump_core::prisma::PrismaClient;
+use time::Duration;
 
-use axum_sessions::{async_session::MemoryStore, SameSite, SessionLayer};
-use rand::{thread_rng, Rng};
+use tower_sessions::{cookie::SameSite, SessionManagerLayer};
 
-fn rand_secret() -> Vec<u8> {
-	let mut rng = thread_rng();
-	let mut arr = [0u8; 128];
-	rng.fill(&mut arr);
-	arr.to_vec()
+use super::prisma_session_store::PrismaSessionStore;
+
+pub(crate) const SESSION_USER_KEY: &str = "user";
+
+pub(crate) fn get_session_ttl() -> i64 {
+	env::var("SESSION_TTL")
+		.map(|s| {
+			s.parse::<i64>().unwrap_or_else(|e| {
+				tracing::error!(error = ?e, "Failed to parse provided SESSION_TTL");
+				3600 * 24 * 3
+			})
+		})
+		.unwrap_or(3600 * 24 * 3)
 }
 
-pub fn get_session_layer() -> SessionLayer<MemoryStore> {
-	let store = MemoryStore::new();
+pub(crate) fn get_session_expiry_cleanup_interval() -> u64 {
+	env::var("SESSION_EXPIRY_CLEANUP_INTERVAL")
+		.map(|s| {
+			s.parse::<u64>().unwrap_or_else(|e| {
+				tracing::error!(error = ?e, "Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL");
+				60
+			})
+		})
+		.unwrap_or(60)
+}
 
-	let secret = env::var("SESSION_SECRET")
-		.map(|s| s.into_bytes())
-		.unwrap_or_else(|_| rand_secret());
+pub fn get_session_layer(
+	client: Arc<PrismaClient>,
+) -> SessionManagerLayer<PrismaSessionStore> {
+	let store = PrismaSessionStore::new(client);
 
-	// FIXME: I need to figure out which is correct. What currently gets returned in
-	// dev breaks the desktop client on windows? But what I have for release makes it
-	// so I can't run postman.
-	let sesssion_layer = SessionLayer::new(store, &secret)
-		.with_cookie_name("stump_session")
-		.with_session_ttl(Some(Duration::from_secs(3600 * 24 * 3)))
-		.with_cookie_path("/");
+	let cleanup_interval = get_session_expiry_cleanup_interval();
+	tokio::task::spawn(
+		store
+			.clone()
+			.continuously_delete_expired(tokio::time::Duration::from_secs(
+				cleanup_interval,
+			)),
+	);
+	let session_ttl = get_session_ttl();
 
-	sesssion_layer
-		.with_same_site_policy(SameSite::Lax)
+	SessionManagerLayer::new(store)
+		.with_name("stump_session")
+		.with_max_age(Duration::seconds(session_ttl))
+		.with_path("/".to_string())
+		.with_same_site(SameSite::Lax)
 		.with_secure(false)
-
-	// FIXME: I think this can be configurable, but most people are going to be insecurely
-	// running this, which means `secure` needs to be false otherwise the cookie won't
-	// be sent.
-	// if env::var("STUMP_PROFILE").unwrap_or_else(|_| "release".into()) == "release" {
-	// 	sesssion_layer
-	// 		.with_same_site_policy(SameSite::None)
-	// 		.with_secure(true)
-	// } else {
-	// 	sesssion_layer
-	// 		.with_same_site_policy(SameSite::Lax)
-	// 		.with_secure(false)
-	// }
 }

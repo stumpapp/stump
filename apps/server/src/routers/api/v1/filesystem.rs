@@ -4,19 +4,22 @@ use axum::{
 	routing::post,
 	Json, Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use std::path::Path;
 use stump_core::{
 	db::query::pagination::{PageQuery, Pageable},
-	filesystem::{DirectoryListing, DirectoryListingFile, DirectoryListingInput},
+	filesystem::{
+		DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileParts,
+		PathUtils,
+	},
 };
+use tower_sessions::Session;
 use tracing::trace;
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::{AdminGuard, Auth},
-	utils::get_session_admin_user,
+	utils::get_session_server_owner_user,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -45,11 +48,11 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// List the contents of a directory on the file system at a given (optional) path. If no path
 /// is provided, the file system root directory contents is returned.
 pub async fn list_directory(
-	session: ReadableSession,
+	session: Session,
 	pagination: Query<PageQuery>,
 	input: Json<Option<DirectoryListingInput>>,
 ) -> ApiResult<Json<Pageable<DirectoryListing>>> {
-	let _ = get_session_admin_user(&session)?;
+	let _ = get_session_server_owner_user(&session)?;
 	let input = input.0.unwrap_or_default();
 
 	let start_path = input.path.unwrap_or_else(|| {
@@ -76,6 +79,7 @@ pub async fn list_directory(
 	let page = pagination.page.unwrap_or(1);
 	let page_size = pagination.page_size.unwrap_or(100);
 
+	// TODO: I haven't touched this logic in a year, it needs a bit of a refatctor (lets see how long it takes me to get to it lol)
 	let mut files = listing
 		.filter_map(|e| e.ok())
 		.filter_map(|f| {
@@ -93,12 +97,12 @@ pub async fn list_directory(
 
 			let path = entry.path();
 
-			let name = path.file_name().unwrap().to_str().unwrap().to_string();
+			let FileParts { file_name, .. } = path.file_parts();
 			let is_directory = path.is_dir();
 			let path = path.to_string_lossy().to_string();
 
 			DirectoryListingFile {
-				name,
+				name: file_name,
 				is_directory,
 				path,
 			}

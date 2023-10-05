@@ -1,6 +1,7 @@
 {
 	"authScene": {
-		"claimText": "Ce serveur Stump n'est pas encore réclamé, vous pouvez utiliser le formulaire ci-dessous pour créer un compte utilisateur et le réclamer. Entrez votre nom d'utilisateur et votre mot de passe préférés.",
+		"claimHeading": "Initialisez votre serveur",
+		"claimText": "Ce serveur Stump n'est pas initialisé. Utilisez le formulaire ci-dessous pour créer votre compte. Une fois créé, vous aurez un accès complet à toutes les fonctionnalités du serveur.",
 		"form": {
 			"validation": {
 				"missingUsername": "Le nom d'utilisateur est requis",
@@ -12,24 +13,24 @@
 			},
 			"buttons": {
 				"createAccount": "Créer un compte",
-				"login": "Connexion"
+				"login": "S'identifier"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Connexion en cours...",
-			"loggedIn": "Bienvenue de retour ! Redirection en cours...",
-			"loggedInFirstTime": "Bienvenue ! Redirection en cours...",
+			"loggedIn": "Nous sommes heureux de vous revoir !",
+			"loggedInFirstTime": "Bienvenue !",
 			"registering": "Enregistrement en cours...",
 			"registered": "Enregistré !",
-			"loginFailed": "Échec de la connexion. Veuillez réessayer.",
-			"registrationFailed": "Échec de l'enregistrement. Veuillez réessayer."
+			"loginFailed": "Échec de la connexion. Veuillez réessayer",
+			"registrationFailed": "Échec de l'inscription. Veuillez réessayer"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "Configuration de la bibliothèque",
-			"subtitleCreating": "Un aperçu de votre nouvelle bibliothèque sera affiché ci-dessous.",
-			"subtitleEditing": "Un aperçu des modifications de votre bibliothèque sera affiché ci-dessous."
+			"subtitleCreating": "Un aperçu de votre nouvelle bibliothèque sera affiché ci-dessous",
+			"subtitleEditing": "Un aperçu des modifications de votre bibliothèque sera affiché ci-dessous"
 		}
 	},
 	"bookOverviewScene": {
@@ -52,9 +53,9 @@
 			"labels": {
 				"libraryName": "Nom",
 				"libraryPath": "Chemin d'accès",
-				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur.",
+				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur",
 				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryTags": "Étiquettes"
 			},
 			"buttons": {
 				"confirm": "Créer la bibliothèque"
@@ -62,16 +63,16 @@
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Modifier la bibliothèque",
-		"subtitle": "Utilisez le formulaire ci-dessous pour modifier votre bibliothèque. Si vous souhaitez en savoir plus sur les bibliothèques et leur fonctionnement, consultez la",
+		"heading": "Gérer la Bibliothèque",
+		"subtitle": "Mettez à jour les détails ou la configuration de votre bibliothèque, modifiez les règles d'accès ou scannez des fichiers. Si vous voulez une mise à jour sur les bibliothèques et comment elles fonctionnent, consultez la",
 		"subtitleLink": "documentation correspondante",
 		"form": {
 			"labels": {
 				"libraryName": "Nom",
 				"libraryPath": "Chemin d'accès",
-				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur.",
+				"libraryPathDescription": "Le chemin d'accès à la bibliothèque tel qu'il existe sur votre serveur",
 				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryTags": "Étiquettes"
 			},
 			"buttons": {
 				"confirm": "Enregistrer les modifications"
@@ -103,7 +104,8 @@
 			"general": "Général",
 			"server": "Serveur",
 			"jobs": "Tâches et Configuration",
-			"users": "Gestion des Utilisateurs"
+			"users": "Gestion des Utilisateurs",
+			"desktop": "Bureau"
 		},
 		"general": {
 			"helmet": "Paramètres Généraux",
@@ -160,26 +162,46 @@
 				},
 				"heading": "Paramètres de Langue et Locale",
 				"subtitle": [
-					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-					"Stump's translations",
-					"if you're able to!"
+					"Stump prend en charge plusieurs langues, définissez vos préférences ci-dessous. Pensez à aider à améliorer la qualité des",
+					"Traductions de Stump",
+					"si vous le pouvez !"
 				]
 			}
 		},
 		"jobs": {
 			"helmet": "Tâches et Configuration",
 			"heading": "Tâches et Configuration",
-			"subtitle": "Affichez et gérez les tâches en arrière-plan disponibles sur ce serveur, y compris les analyses de bibliothèques et la planification."
+			"subtitle": "Affichez et gérez les tâches en arrière-plan disponibles sur ce serveur, y compris les analyses de bibliothèques et la planification",
+			"schedulingHeading": "Planification des tâches",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
+			"historyHeading": "Historique des tâches",
+			"historySubtitle": "Gérer les tâches en cours et afficher l'historique des tâches terminées",
+			"historyTable": {
+				"columns": {
+					"name": "Type",
+					"description": "Description",
+					"status": "État",
+					"createdAt": "Commencé à",
+					"elapsed": "Écoulé",
+					"tasks": "Tâches"
+				},
+				"emptyHeading": "Il n'y a aucune tâche à afficher",
+				"emptySubtitle": "Vous ne pouvez pas avoir une tâche si vous n'avez pas une tâche",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
+				"deleteAllConfirmButton": "Effacer l'historique",
+				"deleteAllConfirmButtonTitle": "Effacer l'historique des tâches",
+				"deleteAllConfirmButtonTitleNoJobs": "Aucune tâche à effacer"
+			}
 		},
 		"server": {
 			"helmet": "Paramètres du Serveur",
 			"heading": "Paramètres du Serveur",
-			"subtitle": "Gérez différentes options configurables pour votre instance de serveur Stump."
+			"subtitle": "Gérez différentes options configurables pour votre instance de serveur Stump"
 		},
 		"users": {
 			"helmet": "Gestion des Utilisateurs",
 			"heading": "Gestion des Utilisateurs",
-			"subtitle": "Gérez les utilisateurs sur ce serveur, y compris la création de nouveaux utilisateurs et la modification de leurs autorisations."
+			"subtitle": "Gérez les utilisateurs sur ce serveur, y compris la création de nouveaux utilisateurs et la modification de leurs autorisations"
 		}
 	},
 	"jobOverlay": {
@@ -215,6 +237,7 @@
 		"buttons": {
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
+			"books": "Explorer les livres",
 			"createLibrary": "Créer une bibliothèque",
 			"settings": "Paramètres",
 			"themeToggle": "Changer de thème",
@@ -244,20 +267,20 @@
 	"serverSOS": {
 		"heading": "Serveur non disponible",
 		"desktop": {
-			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil.\nSi l'URL de votre serveur a changé, vous pouvez la mettre à jour à l'aide du formulaire ci-dessous."
+			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil.\nSi l'URL de votre serveur a changé, vous pouvez la mettre à jour à l'aide du formulaire ci-dessous"
 		},
 		"web": {
-			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil."
+			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
 		},
 		"reconnected": "Reconnecté au serveur! Redirection...",
 		"reconnectionFailed": "Quelque chose s'est mal passé!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Le serveur n'est pas connecté.",
+		"heading": "Le serveur n'est pas connecté",
 		"message": [
-			"Veuillez vérifier votre connexion Internet.",
+			"Veuillez vérifier votre connexion internet",
 			"Cliquez ici",
-			"pour changer l'URL de votre serveur."
+			"pour changer l'URL de votre serveur"
 		]
 	},
 	"slidingList": {
@@ -268,7 +291,7 @@
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
-		"placeholderNoTags": "Aucun tag disponible"
+		"placholder": "Choisissez ou créez une étiquette",
+		"placeholderNoTags": "Aucune étiquette disponible"
 	}
 }

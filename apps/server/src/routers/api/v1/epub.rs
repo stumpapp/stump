@@ -6,13 +6,13 @@ use axum::{
 	routing::{get, put},
 	Json, Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::chrono::Utc;
 use stump_core::{
 	db::entity::{Epub, ReadProgress, UpdateEpubProgress},
 	filesystem::media::EpubProcessor,
 	prisma::{media, media_annotation, read_progress, user},
 };
+use tower_sessions::Session;
 
 use crate::{
 	config::state::AppState,
@@ -38,7 +38,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn get_epub_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Epub>> {
 	let user_id = get_session_user(&session)?.id;
 
@@ -71,7 +71,7 @@ async fn get_epub_by_id(
 async fn update_epub_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	Json(input): Json<UpdateEpubProgress>,
 ) -> ApiResult<Json<ReadProgress>> {
 	let db = ctx.get_db();

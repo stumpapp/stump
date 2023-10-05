@@ -70,7 +70,7 @@ export default function CreateUserModal() {
 	return (
 		<Dialog open={isOpen} onOpenChange={handleOpenStateChange}>
 			<Dialog.Trigger asChild>
-				<Button variant="outline" size="sm">
+				<Button variant="outline" size="sm" className="mb-3 md:mb-0">
 					<Plus className="mr-1.5 h-4 w-4" />
 					Create User
 				</Button>
@@ -108,7 +108,7 @@ export default function CreateUserModal() {
 						errorMessage={form.formState.errors.password?.message}
 						type={passwordVisible ? 'text' : 'password'}
 						autoComplete="off"
-						icon={
+						rightDecoration={
 							<IconButton
 								type="button"
 								size="xs"

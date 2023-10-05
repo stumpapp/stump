@@ -6,7 +6,7 @@ If you're interested in supporting Stump's development, and you know how to code
 
 ## Developer Guide
 
-Contributions are very **encouraged** and **welcome**! Be sure to review the [CONTRIBUTING.md](https://github.com/stumpapp/stump/blob/main/CONTRIBUTING.md) before getting started with your contribution.
+Contributions are very **encouraged** and **welcome**! Be sure to review the [CONTRIBUTING.md](https://github.com/stumpapp/stump/blob/main/.github/CONTRIBUTING.md) before getting started with your contribution.
 
 If you're completely new to rust and/or web development, I put together a small set of [resources](#developer-resources) to get you started with Stump.
 
@@ -43,6 +43,23 @@ moon run server:start desktop:desktop-dev
 ```
 
 Notice the general format is `moon run <app>:<command>`. You can supply multiple `<app>:<command>` pairs to run multiple tasks concurrently.
+
+This isn't a requirement though! You can also run the apps directly with `pnpm`:
+
+```bash
+# run the webapp + server
+pnpm dev:web
+# run the desktop app + server
+pnpm dev:desktop
+# run the docs website
+pnpm docs dev
+```
+
+Or just `cargo` for the server:
+
+```bash
+cargo run --package stump_server --bin stump_server
+```
 
 ## Notes and Tips
 
@@ -98,6 +115,10 @@ Below is a list of resources that I've found helpful in developing Stump. I'll t
 - [OPDS Page Streaming](https://vaemendis.net/opds-pse/#:~:text=The%20OPDS%20Page%20Streaming%20Extension,having%20to%20download%20it%20completely.)
 - [Getting started with React](https://reactjs.org/docs/getting-started.html)
 - [Tailwind CSS](https://tailwindcss.com/)
+
+## Translations
+
+If you'd like to help translate Stump into other languages, you can do so [here](https://crowdin.com/project/stump). You can do as little or as much as you'd like at a time! If you don't see your language listed, feel free to reach out to me on [Discord](https://discord.gg/63Ybb7J3as) or open a GitHub issue.
 
 ## Financial Contributions
 

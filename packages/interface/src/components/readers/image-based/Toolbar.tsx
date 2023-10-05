@@ -84,10 +84,11 @@ export default function Toolbar({
 	return (
 		<div>
 			<motion.nav
+				initial={false}
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed left-0 top-0 z-[100] w-full bg-gray-100/95 p-4 dark:bg-gray-1000/95 dark:text-white"
+				className="fixed left-0 top-0 z-[100] w-full bg-gray-50/95 p-4 dark:bg-gray-1000/95 dark:text-white"
 			>
 				<div className="flex w-full items-center justify-between">
 					<div className="flex items-center space-x-4">
@@ -106,7 +107,9 @@ export default function Toolbar({
 					</div>
 				</div>
 			</motion.nav>
+
 			<motion.nav
+				initial={false}
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('bottom')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}

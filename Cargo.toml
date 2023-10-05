@@ -4,25 +4,24 @@ members = [
   "apps/desktop/src-tauri", 
   "apps/server",
   "core", 
-  # "core/integration-tests", 
   "crates/*", 
 ]
 
 [workspace.package]
 version = "0.0.0"
-rust-version = "1.68.0"
+rust-version = "1.72.1"
 
 # TODO: replace my fork with next official pcr release when it comes out, I just don't
 # have the time for undocumented breaking changes right now
 [workspace.dependencies]
-# prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", rev = "37ffd66291e4da8104f88251157881993112acd6", features = [
-prisma-client-rust = { git = "https://github.com/stumpapp/prisma-client-rust", rev = "4e9c79c8355dcbb098169ccbc85a9349f8c7882d", features = [
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.10", features = [
+# prisma-client-rust = { git = "https://github.com/stumpapp/prisma-client-rust", rev = "4e9c79c8355dcbb098169ccbc85a9349f8c7882d", features = [
   'sqlite-create-many',
   "migrations",
   "sqlite",
 ], default-features = false }
-# prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", rev = "37ffd66291e4da8104f88251157881993112acd6", features = [
-prisma-client-rust-cli = { git = "https://github.com/stumpapp/prisma-client-rust", rev = "4e9c79c8355dcbb098169ccbc85a9349f8c7882d", features = [
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.10", features = [
+# prisma-client-rust-cli = { git = "https://github.com/stumpapp/prisma-client-rust", rev = "4e9c79c8355dcbb098169ccbc85a9349f8c7882d", features = [
   "sqlite-create-many",
   "migrations",
   "sqlite",
@@ -43,6 +42,9 @@ urlencoding = "2.1.2"
 
 ### DEV UTILS ###
 specta = "1.0.2"
+
+### AUTH ###
+bcrypt = "0.10.1"
 
 ### Error Handling + Logging ###
 tracing = "0.1.36"

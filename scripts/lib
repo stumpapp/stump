@@ -33,3 +33,14 @@ workspaces_sed_correction() {
         sed -i '/apps\/tui/d' Cargo.toml; \
         sed -i '/crates\/prisma-cli/d' Cargo.toml
 }
+
+download_pdfium() {
+    local arch=$1
+    if [ "$arch" = "amd64" ]; then
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/chromium/6002/pdfium-linux-x86.tgz
+    elif [ "$arch" = "arm64" ]; then
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-arm64.tgz
+    fi
+    tar -xzvf pdfium.tgz -C /pdfium
+    rm pdfium.tgz
+}

@@ -5,16 +5,16 @@ use axum::{
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Redirect, Response},
 };
-use axum_sessions::SessionHandle;
 use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
 use stump_core::{db::entity::User, prisma::user};
+use tower_sessions::Session;
 use tracing::{error, trace};
 
 use crate::{
-	config::state::AppState,
+	config::{session::SESSION_USER_KEY, state::AppState},
 	utils::{decode_base64_credentials, verify_password},
 };
 
@@ -39,23 +39,22 @@ where
 		}
 
 		let state = AppState::from_ref(state);
-		let session_handle =
-			parts.extensions.get::<SessionHandle>().ok_or_else(|| {
-				(
-					StatusCode::INTERNAL_SERVER_ERROR,
-					"Failed to extract session handle",
-				)
-					.into_response()
-			})?;
-		let session = session_handle.read().await;
 
-		if let Some(user) = session.get::<User>("user") {
+		let session = Session::from_request_parts(parts, &state)
+			.await
+			.map_err(|e| {
+				error!("Failed to extract session handle: {}", e.1);
+				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+			})?;
+
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+		})?;
+		if let Some(user) = session_user {
 			trace!("Session for {} already exists", &user.username);
 			return Ok(Self);
 		}
-
-		// drop so we don't deadlock when writing to the session lol oy vey
-		drop(session);
 
 		let auth_header = parts
 			.headers
@@ -96,6 +95,7 @@ where
 			.user()
 			.find_unique(user::username::equals(decoded_credentials.username.clone()))
 			.with(user::user_preferences::fetch())
+			.with(user::age_restriction::fetch())
 			.exec()
 			.await
 			.map_err(|e| map_prisma_error(e).into_response())?;
@@ -115,13 +115,11 @@ where
 
 		if is_match {
 			trace!(
-				"Basic authentication sucessful. Creating session for user: {}",
-				&user.username
+				username = &user.username,
+				"Basic authentication sucessful. Creating session for user"
 			);
-			session_handle
-				.write()
-				.await
-				.insert("user", user.clone())
+			session
+				.insert(SESSION_USER_KEY, user.clone())
 				.map_err(|e| {
 					error!("Failed to insert user into session: {}", e);
 					(StatusCode::INTERNAL_SERVER_ERROR).into_response()
@@ -163,10 +161,16 @@ where
 			return Ok(Self);
 		}
 
-		let session_handle = parts.extensions.get::<SessionHandle>().unwrap();
-		let session = session_handle.read().await;
+		let session = parts
+			.extensions
+			.get::<Session>()
+			.expect("Failed to extract session");
 
-		if let Some(user) = session.get::<User>("user") {
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			StatusCode::INTERNAL_SERVER_ERROR
+		})?;
+		if let Some(user) = session_user {
 			if user.is_admin() {
 				return Ok(Self);
 			}
@@ -174,7 +178,6 @@ where
 			return Err(StatusCode::FORBIDDEN);
 		}
 
-		drop(session);
 		return Err(StatusCode::UNAUTHORIZED);
 	}
 }

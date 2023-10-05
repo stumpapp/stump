@@ -1,8 +1,8 @@
-import { Text } from '@stump/components'
+import { Badge, Text, ToolTip } from '@stump/components'
 import { User } from '@stump/types'
-import { ColumnDef, getCoreRowModel } from '@tanstack/react-table'
+import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
-import { useMemo } from 'react'
+import { HelpCircle } from 'lucide-react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
@@ -15,86 +15,91 @@ import UsernameRow from './UsernameRow'
 // 3. Grant access to a reading list
 // 4. etc.
 
-const debugFlag = import.meta.env.DEV
+const columnHelper = createColumnHelper<User>()
+
+const baseColumns = [
+	columnHelper.accessor('username', {
+		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
+		header: 'User',
+	}),
+	columnHelper.accessor('role', {
+		cell: (info) => (
+			<Text size="sm">
+				{info.getValue<string>()?.toLowerCase() === 'server_owner' ? 'Admin' : 'Member'}
+			</Text>
+		),
+		header: 'Role',
+	}),
+	columnHelper.accessor('created_at', {
+		cell: ({
+			row: {
+				original: { created_at },
+			},
+		}) => (
+			<Text size="sm" variant="muted">
+				{dayjs(created_at).format('LL')}
+			</Text>
+		),
+		header: 'Created at',
+	}),
+	columnHelper.accessor('last_login', {
+		cell: ({
+			row: {
+				original: { last_login },
+			},
+		}) => (
+			<Text size="sm" variant="muted">
+				{last_login ? dayjs(last_login).format('LL') : 'Never'}
+			</Text>
+		),
+		header: 'Last login',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original } }) => (
+			<Text size="sm" variant="muted">
+				{original.login_sessions_count}
+			</Text>
+		),
+		header: () => (
+			<div className="flex w-full items-center gap-2">
+				<span>Active sessions</span>
+				<ToolTip content="The number of non-expired login sessions for this user">
+					<HelpCircle className="h-3 w-3" />
+				</ToolTip>
+			</div>
+		),
+		id: 'login_sessions_count',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original } }) => (
+			<Badge size="xs" variant={original.is_locked ? 'error' : 'success'}>
+				{original.is_locked ? 'Locked' : 'Active'}
+			</Badge>
+		),
+		header: 'Status',
+		id: 'is_locked',
+	}),
+	columnHelper.display({
+		cell: ({ row: { original } }) => (
+			<div className="inline-flex items-end md:w-2">
+				<UserActionMenu user={original} />
+			</div>
+		),
+		id: 'actions',
+		size: 28,
+	}),
+]
 
 export default function UserTable() {
 	const { users, pageCount, pagination, setPagination } = useUserManagementContext()
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
-	// FIXME: sorting not working (because tied to query and needs state :weary:)
-	// TODO: https://tanstack.com/table/v8/docs/examples/react/row-selection
-	const columns = useMemo<ColumnDef<User>[]>(
-		() => [
-			{
-				accessorKey: 'username',
-				cell: (info) => {
-					const user = info.row.original
-					return <UsernameRow {...user} />
-				},
-				header: 'Username',
-			},
-			{
-				accessorKey: 'role',
-				// TODO: This will probably change once another role (or two?) is added. RBAC
-				// system is not fully thought out yet.
-				cell: (info) => {
-					return (
-						<Text size="sm">
-							{info.getValue<string>()?.toLowerCase() === 'server_owner' ? 'Admin' : 'Member'}
-						</Text>
-					)
-				},
-				header: 'Role',
-			},
-			{
-				accessorKey: 'created_at',
-				cell: ({ row }) => {
-					return (
-						<Text size="sm" variant="muted">
-							{dayjs(row.original.created_at).format('LL')}
-						</Text>
-					)
-				},
-				header: 'Created at',
-			},
-			{
-				cell: ({ row }) => {
-					const renderDate = () => {
-						if (row.original.last_login) {
-							return dayjs(row.original.last_login).format('LL')
-						} else {
-							return 'Never'
-						}
-					}
-					return (
-						<Text size="sm" variant="muted">
-							{renderDate()}
-						</Text>
-					)
-				},
-				header: 'Last Login',
-				id: 'lastLogin',
-			},
-			{
-				cell: ({ row }) => (
-					<div className="inline-flex items-end md:w-2">
-						<UserActionMenu user={row.original} />
-					</div>
-				),
-				id: 'actions',
-			},
-		],
-		[],
-	)
 
 	return (
 		<Table
 			sortable
-			columns={columns}
+			columns={baseColumns}
 			options={{
-				debugColumns: debugFlag,
-				debugHeaders: debugFlag,
-				debugTable: debugFlag,
 				getCoreRowModel: getCoreRowModel(),
 				manualPagination: true,
 				onPaginationChange: setPagination,

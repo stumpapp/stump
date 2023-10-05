@@ -1,9 +1,10 @@
-import { useContext } from 'react'
+import { createContext, useContext } from 'react'
 
-import { createFilterContext, FilterContext } from '../../components/filters/context'
+export type ISeriesContext = {
+	seriesId: string
+}
 
-type SeriesOverviewContext = {
-	seriesId?: string
-} & FilterContext
-export const SeriesOverviewContext = createFilterContext<SeriesOverviewContext>()
-export const useSeriesOverviewContext = () => useContext(SeriesOverviewContext)
+export const SeriesContext = createContext<ISeriesContext>({
+	seriesId: '',
+})
+export const useSeriesContext = () => useContext(SeriesContext)

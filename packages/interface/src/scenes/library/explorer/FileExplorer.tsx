@@ -33,14 +33,14 @@ function ExplorerFile(file: DirectoryListingFile) {
 	const { name, path, is_directory } = file
 	const [iconSrc, setIconSrc] = useState<string>()
 
-	function getIconSrc() {
+	// TODO: handle other basic file types
+	// TODO: consider handling images? Serving arbitrary images from the server is a bit of a security risk though...
+	function getFallbackIcon() {
 		const archivePattern = new RegExp(/^.*\.(cbz|zip|rar|cbr)$/gi)
 
 		if (is_directory) {
 			return '/assets/icons/folder.png'
 		} else if (archivePattern.test(path)) {
-			// TODO: no lol, I want to try and render a small preview still
-			// will have to create a new endpoint to try and grab a thumbnail by path
 			return '/assets/icons/archive.svg'
 		} else if (path.endsWith('.epub')) {
 			return '/assets/icons/epub.svg'
@@ -64,20 +64,6 @@ function ExplorerFile(file: DirectoryListingFile) {
 			}
 		}
 
-		// async function tryGetSeries() {
-		// 	try {
-		// 		const response = await getSeries({
-		// 			path,
-		// 		})
-		// 		const entity = response.data.data?.at(0)
-		// 		if (entity) {
-		// 			setIconSrc(getSereisThumbnail(entity.id))
-		// 		}
-		// 	} catch (err) {
-		// 		console.error(err)
-		// 	}
-		// }
-
 		if (!is_directory) {
 			tryGetMedia()
 		}
@@ -96,7 +82,7 @@ function ExplorerFile(file: DirectoryListingFile) {
 					{ 'aspect-[2/3] w-20 rounded-sm': iconSrc },
 				)}
 				style={{
-					backgroundImage: `url('${iconSrc || getIconSrc()}')`,
+					backgroundImage: `url('${iconSrc || getFallbackIcon()}')`,
 				}}
 			/>
 			<Text className="line-clamp-2 max-w-[5rem]" size="xs">

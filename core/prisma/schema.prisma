@@ -24,6 +24,8 @@ model User {
   created_at      DateTime  @default(now())
   // The timestamp of when the user was *soft* deleted.
   deleted_at      DateTime?
+  // A flag indicating whether or not the user is locked. A locked user will not be able to login.
+  is_locked       Boolean   @default(false)
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
@@ -33,15 +35,72 @@ model User {
   read_progresses ReadProgress[]
   reading_lists   ReadingList[]
 
-  // shared_reading_lists ReadingListAccess[]
+  age_restriction AgeRestriction?
 
   // Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44, then making it mandatory
   user_preferences_id String?          @unique
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
+  login_activity    UserLoginActivity[]
   media_annotations MediaAnnotation[]
+  sessions          Session[]
 
   @@map("users")
+}
+
+model UserLoginActivity {
+  id                        String   @id @default(uuid())
+  // The IP address of the login activity.
+  ip_address                String
+  // The user agent of the login activity.
+  user_agent                String
+  // Whether or not the login was successful.
+  authentication_successful Boolean
+  // The timestamp of the login activity.
+  timestamp                 DateTime @default(now())
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The user who logged in.
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_login_activity")
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  // The timestamp of when the session was created.
+  created_at DateTime @default(now())
+  // The timestamp of when the session expires.
+  expires_at DateTime
+  // The session data. This is a JSON blob.
+  data       Bytes
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The user who owns the session.
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  @@map("sessions")
+}
+
+model AgeRestriction {
+  // The minimum age for the user. Ex: if age is 10, then 
+  age               Int
+  // If true, the user will be restricted from accessing any media without an explicit age rating set on either
+  // the media or its series.
+  restrict_on_unset Boolean @default(false)
+
+  user_id String @unique
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("age_restrictions")
 }
 
 model Library {
@@ -70,6 +129,9 @@ model Library {
   library_options_id String         @unique
 
   tags Tag[]
+
+  job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
+  job_schedule_config_id String?
 
   @@map("libraries")
 }
@@ -154,7 +216,7 @@ model SeriesMetadata {
   // The booktype of the series, e.g. Print, OneShot, TPB or GN
   booktype   String?
   // The age rating of the associated series
-  age_rating String?
+  age_rating Int?
   // The status of the associated series, e.g. Continuing, Ended
   status     String?
 
@@ -224,15 +286,16 @@ model MediaMetadata {
   // TODO: remove this once nested create is supported, just use media_id
   id String @id @default(cuid())
 
-  title   String?
-  series  String?
-  number  Float?
-  volume  Int?
+  title      String?
+  series     String?
+  number     Float?
+  volume     Int?
   // The summary of the associated media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
-  summary String?
-  notes   String?
+  summary    String?
+  notes      String?
+  age_rating Int?
   // *** This is stored as a String, but is a String[] ***
-  genre   String?
+  genre      String?
 
   // The year the media was published. ex: "2021"
   year  Int?
@@ -509,20 +572,19 @@ model Log {
 }
 
 model UserPreferences {
-  id                     String @id @default(cuid())
+  id                     String  @id @default(cuid())
   // Whether the user wants to see the series in a library as a grid or list
-  library_layout_mode    String @default("GRID")
+  library_layout_mode    String  @default("GRID")
   // Whether the user wants to see the media in a series as a grid or list
-  series_layout_mode     String @default("GRID")
+  series_layout_mode     String  @default("GRID")
   // Whether the user wants to see the media in a collection as a grid or list
-  collection_layout_mode String @default("GRID")
+  collection_layout_mode String  @default("GRID")
   // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
-  locale                 String @default("en")
+  locale                 String  @default("en")
   // The theme the user has selected. E.g. 'LIGHT' or 'DARK'. Default is 'LIGHT'
-  app_theme              String @default("LIGHT")
-  // The theme the user has selected for the epub reader. This is different than
-  // app_theme because there will be more options available for the epub reader.
-  // epub_reader_theme      String @default("LIGHT")
+  app_theme              String  @default("LIGHT")
+  // Whether to show an indicator when a query is running in the background
+  show_query_indicator   Boolean @default(false)
 
   /////////////////////////////////////////////
   ///////////////// RELATIONS /////////////////
@@ -536,11 +598,30 @@ model UserPreferences {
   @@map("user_preferences")
 }
 
+model JobScheduleConfig {
+  id            String @id @default(cuid())
+  // The interval (in seconds) in which to run the scheduled confu
+  interval_secs Int    @default(86400)
+
+  /////////////////////////////////////////////
+  ///////////////// RELATIONS /////////////////
+  /////////////////////////////////////////////
+
+  // The libraries to exclude from scheduled scans, if any
+  excluded_libraries Library[]
+  // The associated server preferences. There will only ever be one instance of ServerPreferences in the database.
+  server_preferences ServerPreferences?
+
+  @@map("job_schedule_configs")
+}
+
 model ServerPreferences {
   id String @id @default(cuid())
-  // // Flag indicating whether or not to attempt to rename scanned series according to a ComicInfo.xml file inside the directory.
-  // // If none found, the series name will be the directory name.
-  // rename_series    Boolean @default(false)
+
+  // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
+  // The schedule configuration. If not set, no scheduled scans will be run.
+  job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
+  job_schedule_config_id String?            @unique
 
   @@map("server_preferences")
 }

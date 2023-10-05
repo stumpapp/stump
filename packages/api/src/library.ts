@@ -3,15 +3,18 @@ import type {
 	LibrariesStats,
 	Library,
 	LibraryScanMode,
+	PatchLibraryThumbnail,
 	Series,
 	UpdateLibrary,
 } from '@stump/types'
 
-import { API, mergePageParams, urlWithParams } from '.'
+import { API, mergePageParams, toUrlParams, urlWithParams } from '.'
 import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
 
-export function getLibraries(): Promise<PageableApiResult<Library[]>> {
-	return API.get('/libraries?unpaged=true')
+export function getLibraries(
+	params: Record<string, unknown> = { unpaged: true },
+): Promise<PageableApiResult<Library[]>> {
+	return API.get(urlWithParams('/libraries', toUrlParams(params)))
 }
 
 export function getLibrariesStats(): Promise<ApiResult<LibrariesStats>> {
@@ -55,12 +58,20 @@ export function deleteLibraryThumbnails(id: string) {
 	return API.delete(`/libraries/${id}/thumbnail`)
 }
 
+export function regenerateThumbnails(id: string, force?: boolean) {
+	return API.post(`/libraries/${id}/thumbnail/generate`, { force_regenerate: !!force })
+}
+
 export function createLibrary(payload: CreateLibrary): Promise<ApiResult<Library>> {
 	return API.post('/libraries', payload)
 }
 
 export function editLibrary(payload: UpdateLibrary): Promise<ApiResult<Library>> {
 	return API.put(`/libraries/${payload.id}`, payload)
+}
+
+export function patchLibraryThumbnail(id: string, params: PatchLibraryThumbnail) {
+	return API.patch(`/libraries/${id}/thumbnail`, params)
 }
 
 export const libraryApi = {
@@ -72,6 +83,8 @@ export const libraryApi = {
 	getLibrariesStats,
 	getLibraryById,
 	getLibrarySeries,
+	patchLibraryThumbnail,
+	regenerateThumbnails,
 	scanLibary,
 }
 
@@ -84,5 +97,7 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	getLibrariesStats: 'library.getLibrariesStats',
 	getLibraryById: 'library.getLibraryById',
 	getLibrarySeries: 'library.getLibrarySeries',
+	patchLibraryThumbnail: 'library.patchLibraryThumbnail',
+	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
 }

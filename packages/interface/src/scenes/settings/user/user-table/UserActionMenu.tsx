@@ -1,7 +1,10 @@
+import { userApi, userQueryKeys } from '@stump/api'
+import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { User } from '@stump/types'
-import { MoreVertical, Pencil, Trash } from 'lucide-react'
+import { Lock, MoreVertical, Pencil, Trash, Unlock } from 'lucide-react'
 import React, { useMemo } from 'react'
+import toast from 'react-hot-toast'
 
 import { useAppContext } from '../../../../context.ts'
 import { noop } from '../../../../utils/misc.ts'
@@ -17,6 +20,20 @@ export default function UserActionMenu({ user }: Props) {
 
 	const isSelf = byUser?.id === user.id
 
+	const handleSetLockStatus = async (lock: boolean) => {
+		try {
+			await userApi.setLockStatus(user.id, lock)
+			await invalidateQueries({ keys: [userQueryKeys.getUsers] })
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message)
+			} else {
+				console.error(error)
+				toast.error('An unknown error occurred')
+			}
+		}
+	}
+
 	const items = useMemo(
 		() => [
 			{
@@ -31,11 +48,22 @@ export default function UserActionMenu({ user }: Props) {
 				leftIcon: <Trash className="mr-2 h-4 w-4" />,
 				onClick: () => setDeletingUser(user),
 			},
+			{
+				disabled: isSelf || user.role === 'SERVER_OWNER',
+				label: `${user.is_locked ? 'Unlock' : 'Lock'} account`,
+				leftIcon: user.is_locked ? (
+					<Unlock className="mr-2 h-4 w-4" />
+				) : (
+					<Lock className="mr-2 h-4 w-4" />
+				),
+				onClick: () => handleSetLockStatus(!user.is_locked),
+			},
 		],
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[setDeletingUser, user, isSelf],
 	)
 
-	if (!isServerOwner) {
+	if (!isServerOwner || isSelf) {
 		return null
 	}
 

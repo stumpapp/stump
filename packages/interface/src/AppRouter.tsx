@@ -1,12 +1,13 @@
 import { useAppProps } from '@stump/client'
 import React from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 
 import { AppLayout } from './AppLayout'
 import LocaleProvider from './i18n/LocaleProvider'
 import BookRouter from './scenes/book/BookRouter'
 import LibraryRouter from './scenes/library/LibraryRouter'
 import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter'
+import SeriesRouter from './scenes/series/SeriesRouter'
 import SettingsRouter from './scenes/settings/SettingsRouter'
 
 // FIXME: this is really annoying
@@ -19,7 +20,6 @@ export type LazyComponent = Promise<{
 export const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const HomeScene = lazily(() => import('./scenes/home/HomeScene.tsx'))
-const SeriesOverviewScene = lazily(() => import('./scenes/series/SeriesOverviewScene.tsx'))
 const FourOhFour = lazily(() => import('./scenes/error/FourOhFour.tsx'))
 const ServerConnectionErrorScene = lazily(
 	() => import('./scenes/error/ServerConnectionErrorScene.tsx'),
@@ -42,18 +42,15 @@ export function AppRouter() {
 			<Routes>
 				<Route path="/" element={<AppLayout />}>
 					<Route path="" element={<HomeScene />} />
-
-					<Route path="library/*" element={<LibraryRouter />} />
-
-					<Route path="series/:id" element={<SeriesOverviewScene />} />
-					<Route path="book/*" element={<BookRouter />} />
+					<Route path="libraries/*" element={<LibraryRouter />} />
+					<Route path="series/*" element={<SeriesRouter />} />
+					<Route path="books/*" element={<BookRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 
 				<Route path="/auth" element={<LoginOrClaimScene />} />
 				<Route path="/server-connection-error" element={<ServerConnectionErrorScene />} />
-				<Route path="/404" element={<FourOhFour />} />
-				<Route path="*" element={<Navigate to="/404" />} />
+				<Route path="*" element={<FourOhFour />} />
 			</Routes>
 		</LocaleProvider>
 	)

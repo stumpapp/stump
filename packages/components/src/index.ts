@@ -7,6 +7,7 @@ export type Any = any
 
 export { Alert } from './alert'
 export { Badge, type BadgeProps } from './badge'
+export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
 export {
 	Button,
 	ButtonOrLink,
@@ -22,7 +23,7 @@ export { ContextMenu, type ContextMenuProps } from './context-menu'
 export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
 export { DropdownMenu, type DropdownMenuProps } from './dropdown'
 export { Form, type FormProps, Label, type LabelProps } from './form'
-export { useBodyLock, useBoolean, useToast } from './hooks'
+export { useBodyLock, useBoolean, usePrevious, usePreviousIsDifferent } from './hooks'
 export { AspectRatio, Avatar, Image } from './image'
 export {
 	CheckBox,
@@ -38,6 +39,7 @@ export { Link } from './link'
 export { Popover } from './popover'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { RadioGroup } from './radio'
+export { ScrollArea, ScrollBar } from './scroll-area'
 export { ComboBox, type ComboBoxProps, NativeSelect, type NativeSelectProps } from './select'
 export { Sheet, SheetPrimitive } from './sheet'
 export { Tabs } from './tabs'
@@ -50,5 +52,6 @@ export {
 	TEXT_VARIANTS,
 	type TextProps,
 } from './text'
+export { Toast } from './toast'
 export { ToolTip, type ToolTipProps } from './tooltip'
 export { cn, cx } from './utils'

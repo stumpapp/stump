@@ -70,9 +70,11 @@ export default function LibraryExplorerScene() {
 			value={{
 				canGoBack,
 				canGoForward,
+				currentPath: path,
 				files: entries,
 				goBack,
 				goForward,
+				libraryPath: library.path,
 				onSelect: handleSelect,
 			}}
 		>

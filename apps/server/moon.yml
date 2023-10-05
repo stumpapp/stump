@@ -27,9 +27,6 @@ tasks:
   build:
     command: 'cargo build --release --package stump_server'
     local: true
-    deps:
-      - 'web:build'
-      - '~:get-webapp'
 
   lint:
     command: 'cargo clippy --package stump_server -- -D warnings'

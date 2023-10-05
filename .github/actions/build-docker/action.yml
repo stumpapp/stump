@@ -81,7 +81,7 @@ runs:
         context: .
         build-args: |
           "GIT_REV=${{ env.GIT_REV }}"
-        file: scripts/release/Dockerfile
+        file: scripts/release/Dockerfile.debian
         platforms: ${{ inputs.platforms }}
         load: ${{ inputs.load }}
         push: ${{ inputs.push }}

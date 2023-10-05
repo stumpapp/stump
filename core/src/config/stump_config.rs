@@ -1,6 +1,6 @@
 use std::{env, path::Path};
 
-use optional_struct::OptionalStruct;
+use optional_struct::{optional_struct, Applyable};
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
@@ -11,9 +11,8 @@ use crate::{
 
 // TODO: before I actually use this, test to see if it works well.
 
-#[derive(Serialize, Deserialize, Debug, Clone, OptionalStruct)]
-#[optional_name = "PartialStumpConfig"]
-#[optional_derive(Deserialize)]
+#[optional_struct(PartialStumpConfig)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StumpConfig {
 	pub profile: String,
 	pub port: u16,
@@ -202,8 +201,7 @@ impl StumpConfig {
 impl From<PartialStumpConfig> for StumpConfig {
 	fn from(partial: PartialStumpConfig) -> StumpConfig {
 		let mut default = StumpConfig::default();
-		default.apply_options(partial);
-
+		partial.apply_to(&mut default);
 		default
 	}
 }

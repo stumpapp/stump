@@ -12,6 +12,7 @@ use crate::db::entity::Media;
 #[allow(clippy::large_enum_variant)]
 pub enum BatchScanOperation {
 	CreateMedia { path: PathBuf, series_id: String },
+	InsertMedia(Media),
 	UpdateMedia(Media),
 	MarkMediaMissing { path: String },
 	// Note: this will be tricky. I will need to have this as a separate operation so I don't chance

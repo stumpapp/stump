@@ -1,10 +1,8 @@
 use std::sync::Arc;
 
-mod library_dao;
 mod media_dao;
 mod series_dao;
 
-pub use library_dao::LibraryDAO;
 pub use media_dao::MediaDAO;
 pub use series_dao::*;
 

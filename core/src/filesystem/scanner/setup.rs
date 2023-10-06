@@ -3,16 +3,15 @@ use std::{collections::HashMap, path::Path};
 use globset::{GlobSet, GlobSetBuilder};
 use itertools::Itertools;
 use rayon::prelude::{ParallelBridge, ParallelIterator};
-use tokio::task::JoinHandle;
 use tracing::{debug, error};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
 	db::{
 		entity::{common::FileStatus, LibraryOptions, Media, Series},
-		LibraryDAO, SeriesDAO, DAO,
+		SeriesDAO, DAO,
 	},
-	error::{CoreError, CoreResult},
+	error::CoreResult,
 	event::CoreEvent,
 	filesystem::PathUtils,
 	prisma::{library, media, series},
@@ -28,92 +27,7 @@ pub struct LibrarySetup {
 	pub tasks: u64,
 }
 
-pub(crate) async fn setup_library(ctx: &Ctx, path: String) -> CoreResult<LibrarySetup> {
-	let start = std::time::Instant::now();
-
-	let db = ctx.get_db();
-	let library = db
-		.library()
-		.find_unique(library::path::equals(path.clone()))
-		.with(library::series::fetch(vec![]))
-		.with(library::library_options::fetch())
-		.exec()
-		.await?;
-
-	if library.is_none() {
-		return Err(CoreError::NotFound(format!("Library not found: {}", path)));
-	}
-
-	let library = library.unwrap();
-
-	if !Path::new(&path).exists() {
-		let library_dao = LibraryDAO::new(ctx.db.clone());
-		library_dao.mark_library_missing(&library).await?;
-
-		return Err(CoreError::FileNotFound(format!(
-			"Library path does not exist in fs: {}",
-			path
-		)));
-	}
-
-	let library_options: LibraryOptions = library
-		.library_options()
-		.map(LibraryOptions::from)
-		.unwrap_or_default();
-
-	let is_collection_based = library_options.is_collection_based();
-	let series = setup_library_series(ctx, &library, is_collection_based).await?;
-
-	let is_collection_based = library_options.is_collection_based();
-	let tasks: u64 = futures::future::join_all(
-		series
-			.iter()
-			.map(|data| {
-				let path = data.path.clone();
-
-				let mut series_walkdir = WalkDir::new(&path);
-
-				// When the series is the library itself, we want to set the max_depth
-				// to 1 so it doesn't walk through the entire library (effectively doubling
-				// the return result, instead of the actual number of files to process)
-				if !is_collection_based || path == library.path {
-					series_walkdir = series_walkdir.max_depth(1)
-				}
-
-				tokio::task::spawn_blocking(move || {
-					series_walkdir
-						.into_iter()
-						.filter_map(|e| e.ok())
-						.filter(|e| e.path().is_file())
-						.count() as u64
-				})
-			})
-			.collect::<Vec<JoinHandle<u64>>>(),
-	)
-	.await
-	.into_iter()
-	.filter_map(|res| res.ok())
-	.sum();
-
-	let duration = start.elapsed();
-	let seconds = duration.as_secs();
-	let setup_time = format!("{seconds}.{:03} seconds", duration.subsec_millis());
-
-	debug!(
-		task_count = tasks,
-		?setup_time,
-		"Scan setup for library completed"
-	);
-
-	Ok(LibrarySetup {
-		library,
-		library_options,
-		library_series: series,
-		tasks,
-	})
-}
-
-async fn setup_library_series(
+pub async fn setup_library_series(
 	ctx: &Ctx,
 	library: &library::Data,
 	is_collection_based: bool,

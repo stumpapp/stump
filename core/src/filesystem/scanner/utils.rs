@@ -6,11 +6,14 @@ use walkdir::DirEntry;
 
 use crate::{
 	db::{
-		entity::{LibraryOptions, Media, MediaBuilder, MediaBuilderOptions},
+		entity::{
+			FileStatus, Library, LibraryOptions, Media, MediaBuilder, MediaBuilderOptions,
+		},
 		MediaDAO, DAO,
 	},
 	error::{CoreError, CoreResult},
 	filesystem::{media::process, scanner::common::BatchScanOperation},
+	prisma::{library, media, series, PrismaClient},
 	Ctx,
 };
 
@@ -128,24 +131,8 @@ pub async fn batch_media_operations(
 			.fold(
 				(vec![], vec![], vec![]),
 				|mut acc, operation| match operation {
-					BatchScanOperation::CreateMedia { path, series_id } => {
-						let build_result = Media::build_with_options(
-							&path,
-							MediaBuilderOptions {
-								series_id,
-								library_options: library_options.clone(),
-							},
-						);
-
-						if let Ok(media) = build_result {
-							acc.0.push(media);
-						} else {
-							error!(
-								?build_result,
-								"Error occurred trying to build media entity",
-							);
-						}
-
+					BatchScanOperation::InsertMedia(generated) => {
+						acc.0.push(generated);
 						acc
 					},
 					BatchScanOperation::UpdateMedia(outdated_media) => {
@@ -176,6 +163,7 @@ pub async fn batch_media_operations(
 						acc.2.push(path);
 						acc
 					},
+					_ => unreachable!()
 				},
 			);
 
@@ -209,4 +197,58 @@ pub async fn batch_media_operations(
 
 	// FIXME: make return generic (not literally)
 	Ok(created_media)
+}
+
+pub async fn mark_library_missing(
+	db: &PrismaClient,
+	library: &library::Data,
+) -> CoreResult<Library> {
+	let series_ids = library
+		.series()
+		.unwrap_or(&vec![])
+		.iter()
+		.map(|s| s.id.clone())
+		.collect();
+
+	let (updated_library, affected_series, affected_media) = db
+		._transaction()
+		.run(|client| async move {
+			let updated_library = client
+				.library()
+				.update(
+					library::id::equals(library.id.clone()),
+					vec![library::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await?;
+
+			let affected_series = client
+				.series()
+				.update_many(
+					vec![series::library_id::equals(Some(library.id.clone()))],
+					vec![series::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await?;
+
+			client
+				.media()
+				.update_many(
+					vec![media::series_id::in_vec(series_ids)],
+					vec![media::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await
+				.map(|affected_media| (updated_library, affected_series, affected_media))
+		})
+		.await?;
+
+	tracing::trace!(
+		library_id = library.id.as_str(),
+		affected_series = affected_series,
+		affected_media = affected_media,
+		"Marked library as missing"
+	);
+
+	Ok(Library::from(updated_library))
 }

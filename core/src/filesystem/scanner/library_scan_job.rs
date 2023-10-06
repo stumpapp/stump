@@ -7,7 +7,7 @@ use crate::{
 	CoreError,
 };
 
-use super::{batch_scanner, sync_scanner};
+use super::LibraryScanner;
 
 pub const LIBRARY_SCAN_JOB_NAME: &str = "library_scan";
 
@@ -28,13 +28,10 @@ impl JobTrait for LibraryScanJob {
 	}
 
 	async fn run(&mut self, ctx: WorkerCtx) -> Result<u64, JobError> {
+		let scanner = LibraryScanner::new(self.library_path.clone(), ctx);
 		let completed_task_count = match self.scan_mode {
-			LibraryScanMode::Quick => {
-				batch_scanner::scan_library(ctx, self.library_path.clone()).await
-			},
-			LibraryScanMode::Default => {
-				sync_scanner::scan_library(ctx, self.library_path.clone()).await
-			},
+			LibraryScanMode::Default => scanner.scan().await,
+			LibraryScanMode::Quick => scanner.quick_scan().await,
 			LibraryScanMode::None => Err(CoreError::JobInitializationError(
 				String::from("Library scan mode is set to NONE"),
 			)),

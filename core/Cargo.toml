@@ -40,12 +40,12 @@ unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typest
 # unrar = { version = "0.5.1" }
 pdf = "0.8.1"
 pdfium-render = "0.8.9"
-data-encoding = "2.3.2"
+data-encoding = "2.4.0"
 ring = "0.16.20"
 
 ## ERROR HANDLING + LOGGING ###
 thiserror = { workspace = true }
-toml = "0.5.9"
+toml = "0.8.2"
 tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
 tracing-appender = "0.2.2"

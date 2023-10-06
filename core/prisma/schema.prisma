@@ -225,7 +225,7 @@ model SeriesMetadata {
   /////////////////////////////////////////////
 
   series_id String @id
-  series    Series @relation(fields: [series_id], references: [id])
+  series    Series @relation(fields: [series_id], references: [id], onDelete: Cascade)
 
   @@map("series_metadata")
 }

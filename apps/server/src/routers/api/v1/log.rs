@@ -78,20 +78,15 @@ async fn tail_log_file() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 				match res {
 					Ok(event) => {
 						println!("event: {:?}", event);
-						match event.kind {
-							EventKind::Modify(_) => {
-								let mut content = String::new();
-								file.read_to_string(&mut content).unwrap();
-								for line in content.lines().rev() {
-									println!("line: {}", line);
-									if !line.is_empty() {
-										if tx.send(line.to_owned()).is_err() {
-											break;
-										}
-									}
+						if let EventKind::Modify(_) = event.kind {
+							let mut content = String::new();
+							file.read_to_string(&mut content).unwrap();
+							for line in content.lines().rev() {
+								println!("line: {}", line);
+								if !line.is_empty() && tx.send(line.to_owned()).is_err() {
+										break;
 								}
-							},
-							_ => {},
+							}
 						}
 					},
 					Err(e) => println!("watch error: {:?}", e),

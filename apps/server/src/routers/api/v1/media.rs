@@ -5,7 +5,7 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{and, operator::or, or, Direction};
+use prisma_client_rust::{and, operator::or, or, raw, Direction, PrismaValue};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -372,10 +372,11 @@ async fn get_duplicate_media(
 		));
 	}
 
+	let page_params = pagination.0.page_params();
 	let page_bounds = page_params.get_page_bounds();
+	let client = ctx.get_db();
 
-	let duplicated_media_page = self
-		.client
+	let duplicated_media_page = client
 		._query_raw::<Media>(raw!(
 			r#"
 			SELECT * FROM media
@@ -389,8 +390,7 @@ async fn get_duplicate_media(
 		.exec()
 		.await?;
 
-	let count_result = self
-		.client
+	let count_result = client
 		._query_raw::<CountQueryReturn>(raw!(
 			r#"
 			SELECT COUNT(*) as count FROM media
@@ -408,9 +408,8 @@ async fn get_duplicate_media(
 			page_params,
 		))
 	} else {
-		Err(CoreError::InternalError(
-			"A failure occurred when trying to query for the count of duplicate media"
-				.to_string(),
+		Err(ApiError::InternalServerError(
+			"Failed to fetch duplicate media".to_string(),
 		))
 	};
 

@@ -27,7 +27,6 @@ pub enum ClientResponse {
 pub enum CoreEvent {
 	JobStarted(JobUpdate),
 	JobProgress(JobUpdate),
-	// TODO: change from string...
 	JobComplete(String),
 	JobFailed {
 		job_id: String,
@@ -43,8 +42,6 @@ pub enum CoreEvent {
 		series_id: String,
 		library_id: String,
 	},
-	// TODO: not sure if I should send the number of insertions or the insertions themselves.
-	// cloning the vector is potentially expensive.
 	CreatedManyMedia {
 		count: u64,
 		library_id: String,
@@ -53,8 +50,6 @@ pub enum CoreEvent {
 		id: String,
 		library_id: String,
 	},
-	// TODO: not sure if I should send the number of insertions or the insertions themselves.
-	// cloning the vector is potentially expensive.
 	CreatedSeriesBatch {
 		count: u64,
 		library_id: String,

@@ -51,7 +51,7 @@ impl MediaDAO {
 
 				for media in media {
 					let created_metadata = if let Some(metadata) = media.metadata {
-						let params = metadata.create_action();
+						let params = metadata.into_prisma();
 						let created_metadata =
 							client.media_metadata().create(params).exec().await?;
 						Some(created_metadata)

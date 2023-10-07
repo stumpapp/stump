@@ -56,8 +56,7 @@ export function useCoreEventHandler({
 				}, 250)
 				break
 			default:
-				console.warn('Unknown JobEvent', data)
-				console.debug(data)
+				console.warn('Unhandled JobEvent', { data, key })
 				break
 		}
 	}

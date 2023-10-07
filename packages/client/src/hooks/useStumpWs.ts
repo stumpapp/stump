@@ -37,10 +37,12 @@ export function useStumpWs({ onEvent }: Props) {
 	}
 
 	function handleOpen() {
+		console.debug('Websocket connected')
 		setConnected(true)
 	}
 
 	function handleClose() {
+		console.debug('Websocket closed')
 		setConnected(false)
 	}
 

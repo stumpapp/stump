@@ -4,10 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tokio::sync::oneshot;
 
-use crate::{
-	db::entity::{Media, Series},
-	job::{JobDetail, JobExecutorTrait, JobManagerResult, JobStatus, JobUpdate},
-};
+use crate::job::{JobDetail, JobExecutorTrait, JobManagerResult, JobStatus, JobUpdate};
 
 pub enum InternalCoreTask {
 	EnqueueJob(Box<dyn JobExecutorTrait>),
@@ -41,14 +38,27 @@ pub enum CoreEvent {
 		path: String,
 		message: String,
 	},
-	CreatedMedia(Box<Media>),
+	CreateOrUpdateMedia {
+		id: String,
+		series_id: String,
+		library_id: String,
+	},
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
-	CreatedMediaBatch(u64),
-	CreatedSeries(Series),
+	CreatedManyMedia {
+		count: u64,
+		library_id: String,
+	},
+	CreatedSeries {
+		id: String,
+		library_id: String,
+	},
 	// TODO: not sure if I should send the number of insertions or the insertions themselves.
 	// cloning the vector is potentially expensive.
-	CreatedSeriesBatch(u64),
+	CreatedSeriesBatch {
+		count: u64,
+		library_id: String,
+	},
 	GeneratedThumbnailBatch(u64),
 }
 

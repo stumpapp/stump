@@ -128,8 +128,6 @@ impl LibraryOptions {
 pub enum LibraryScanMode {
 	#[serde(rename = "DEFAULT")]
 	Default,
-	#[serde(rename = "QUICK")]
-	Quick,
 	#[serde(rename = "NONE")]
 	None,
 }
@@ -142,7 +140,6 @@ impl FromStr for LibraryScanMode {
 
 		match uppercase.as_str() {
 			"DEFAULT" => Ok(LibraryScanMode::Default),
-			"QUICK" => Ok(LibraryScanMode::Quick),
 			"NONE" => Ok(LibraryScanMode::None),
 			"" => Ok(LibraryScanMode::default()),
 			_ => Err(format!("Invalid library scan mode: {}", s)),

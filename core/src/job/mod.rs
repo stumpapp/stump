@@ -152,8 +152,7 @@ impl From<prisma::job::Data> for JobDetail {
 	}
 }
 
-// TODO: change this!
-#[derive(Clone, Serialize, Deserialize, Debug, Type)]
+#[derive(Default, Clone, Serialize, Deserialize, Debug, Type)]
 pub struct JobUpdate {
 	pub job_id: String,
 	pub current_task: Option<u64>,

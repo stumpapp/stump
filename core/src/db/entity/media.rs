@@ -1,11 +1,11 @@
-use std::{path::Path, str::FromStr};
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	error::{CoreError, CoreResult},
+	error::CoreError,
 	prisma::{media, media_annotation, read_progress},
 };
 
@@ -185,12 +185,6 @@ impl TryFrom<read_progress::Data> for Media {
 pub struct MediaBuilderOptions {
 	pub series_id: String,
 	pub library_options: LibraryOptions,
-}
-
-pub trait MediaBuilder {
-	fn build(path: &Path, series_id: &str) -> CoreResult<Media>;
-	fn build_with_options(path: &Path, options: MediaBuilderOptions)
-		-> CoreResult<Media>;
 }
 
 impl From<media::Data> for Media {

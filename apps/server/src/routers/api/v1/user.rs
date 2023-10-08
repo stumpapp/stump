@@ -1,7 +1,7 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::{get, put},
+	routing::{delete, get, put},
 	Json, Router,
 };
 use axum_extra::extract::Query;
@@ -54,6 +54,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.put(update_user_handler)
 						.delete(delete_user_by_id),
 				)
+				.route("/sessions", delete(delete_user_sessions))
 				.route("/lock", put(update_user_lock_status))
 				.route("/login-activity", get(get_user_login_activity_by_id))
 				.route(
@@ -94,14 +95,14 @@ pub(crate) fn apply_pagination<'a>(
 	path = "/api/v1/users",
 	tag = "user",
 	params(
-		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination query."),
+		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination query"),
 		("relation_query" = Option<UserQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
-		(status = 200, description = "Successfully fetched users.", body = [User]),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully fetched users", body = [User]),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 async fn get_users(
@@ -282,10 +283,10 @@ async fn update_preferences(
 	tag = "user",
 	request_body = LoginOrRegisterArgs,
 	responses(
-		(status = 200, description = "Successfully created user.", body = User),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully created user", body = User),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Creates a new user.
@@ -335,10 +336,10 @@ async fn create_user(
 	tag = "user",
 	request_body = UpdateUser,
 	responses(
-		(status = 200, description = "Successfully updated user.", body = User),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully updated user", body = User),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Updates the session user
@@ -368,10 +369,10 @@ async fn update_current_user(
 	tag = "user",
 	request_body = UpdateUserPreferences,
 	responses(
-		(status = 200, description = "Successfully updated user preferences.", body = UserPreferences),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully updated user preferences", body = UserPreferences),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Updates a user's preferences.
@@ -413,11 +414,11 @@ async fn update_current_user_preferences(
 		("id" = String, Path, description = "The user's id.", example = "1ab2c3d4")
 	),
 	responses(
-		(status = 200, description = "Successfully deleted user.", body = User),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "User not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully deleted user", body = User),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Deletes a user by ID.
@@ -463,11 +464,11 @@ async fn delete_user_by_id(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
 	),
 	responses(
-		(status = 200, description = "Successfully fetched user.", body = User),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "User not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully fetched user", body = User),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Gets a user by ID.
@@ -501,11 +502,11 @@ async fn get_user_by_id(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
 	),
 	responses(
-		(status = 200, description = "Successfully fetched user.", body = Vec<LoginActivity>),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "User not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully fetched user", body = Vec<LoginActivity>),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 async fn get_user_login_activity_by_id(
@@ -544,10 +545,10 @@ async fn get_user_login_activity_by_id(
 	),
 	request_body = UpdateUser,
 	responses(
-		(status = 200, description = "Successfully updated user.", body = User),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully updated user", body = User),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Updates a user by ID.
@@ -577,6 +578,38 @@ async fn update_user_handler(
 	Ok(Json(updated_user))
 }
 
+#[utoipa::path(
+	delete,
+	path = "/api/v1/users/:id/sessions",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	responses(
+		(status = 200, description = "Successfully deleted user sessions"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn delete_user_sessions(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<()> {
+	get_session_server_owner_user(&session)?;
+
+	let client = ctx.get_db();
+	let removed_sessions = client
+		.session()
+		.delete_many(vec![session::user_id::equals(id)])
+		.exec()
+		.await?;
+	tracing::trace!(?removed_sessions, "Removed sessions for user");
+
+	Ok(())
+}
+
 #[derive(Deserialize, ToSchema)]
 pub struct UpdateAccountLock {
 	lock: bool,
@@ -591,11 +624,11 @@ pub struct UpdateAccountLock {
 	),
 	request_body = UpdateAccountLock,
 	responses(
-		(status = 200, description = "Successfully updated user lock status.", body = User),
-		(status = 400, description = "You cannot lock your own account."),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully updated user lock status", body = User),
+		(status = 400, description = "You cannot lock your own account"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 async fn update_user_lock_status(
@@ -642,11 +675,11 @@ async fn update_user_lock_status(
 		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
 	),
 	responses(
-		(status = 200, description = "Successfully fetched user preferences.", body = UserPreferences),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "User preferences not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully fetched user preferences", body = UserPreferences),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "User preferences not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Gets the user's preferences.
@@ -689,10 +722,10 @@ async fn get_user_preferences(
 	),
 	request_body = UpdateUserPreferences,
 	responses(
-		(status = 200, description = "Successfully updated user preferences.", body = UserPreferences),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully updated user preferences", body = UserPreferences),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Updates a user's preferences.

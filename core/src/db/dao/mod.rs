@@ -1,9 +1,7 @@
 use std::sync::Arc;
 
-mod media_dao;
 mod series_dao;
 
-pub use media_dao::MediaDAO;
 pub use series_dao::*;
 
 use crate::prisma::PrismaClient;

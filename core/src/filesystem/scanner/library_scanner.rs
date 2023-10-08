@@ -9,7 +9,6 @@ use std::{
 };
 
 use rayon::prelude::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
-use tokio::task::JoinHandle;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
@@ -136,36 +135,25 @@ impl LibraryScanner {
 			.discover_series(library.id.clone(), existing_series, is_collection_based)
 			.await?;
 
-		// TODO: should I use rayon here instead?
-		let tasks = futures::future::join_all(
-			series
-				.iter()
-				.map(|data| {
-					let path = data.path.clone();
+		let tasks: u64 = series
+			.par_iter()
+			.map(|series| {
+				let mut series_walkdir = WalkDir::new(&series.path);
 
-					let mut series_walkdir = WalkDir::new(&path);
+				// When the series is the library itself, we want to set the max_depth
+				// to 1 so it doesn't walk through the entire library (effectively doubling
+				// the return result, instead of the actual number of files to process)
+				if !is_collection_based || series.path == library.path {
+					series_walkdir = series_walkdir.max_depth(1)
+				}
 
-					// When the series is the library itself, we want to set the max_depth
-					// to 1 so it doesn't walk through the entire library (effectively doubling
-					// the return result, instead of the actual number of files to process)
-					if !is_collection_based || path == library.path {
-						series_walkdir = series_walkdir.max_depth(1)
-					}
-
-					tokio::task::spawn_blocking(move || {
-						series_walkdir
-							.into_iter()
-							.filter_map(|e| e.ok())
-							.filter(|e| e.path().is_file())
-							.count() as u64
-					})
-				})
-				.collect::<Vec<JoinHandle<u64>>>(),
-		)
-		.await
-		.into_iter()
-		.filter_map(|res| res.ok())
-		.sum();
+				series_walkdir
+					.into_iter()
+					.filter_map(|e| e.ok())
+					.filter(|e| e.path().is_file())
+					.count() as u64
+			})
+			.sum();
 
 		let duration = start.elapsed();
 		let seconds = duration.as_secs();
@@ -246,10 +234,9 @@ impl LibraryScanner {
 			})
 			.collect::<Vec<DirEntry>>();
 
-		self.worker_ctx
-			.emit_job_started(0, Some(format!("Found {} new series", new_entries.len())));
-
 		if !missing_series.is_empty() {
+			self.worker_ctx.emit_job_message("Updating missing series");
+
 			ctx.db
 				.series()
 				.update_many(
@@ -261,7 +248,9 @@ impl LibraryScanner {
 		}
 
 		if !new_entries.is_empty() {
-			// trace!(new_series_count = new_entries.len(), "Inserting new series");
+			self.worker_ctx.emit_job_message("Creating new series");
+
+			// TODO: remove this DAO!!
 			let series_dao = SeriesDAO::new(ctx.db.clone());
 			let series_to_create = new_entries
 				.par_iter()
@@ -274,48 +263,28 @@ impl LibraryScanner {
 						res.ok()
 					}
 				})
-				.collect();
-			let result = series_dao.create_many(series_to_create).await;
-			match result {
-				Ok(mut created_series) => {
-					ctx.emit_event(CoreEvent::CreatedSeriesBatch {
-						count: created_series.len() as u64,
-						library_id: library_id.clone(),
-					});
-					existing_series.append(&mut created_series);
-				},
-				Err(e) => {
-					tracing::error!(error = ?e, "Failed to batch insert series");
-				},
+				.collect::<Vec<Series>>();
+
+			let chunks = series_to_create.chunks(1000);
+			tracing::debug!(chunk_count = chunks.len(), "Batch inserting new series");
+			for chunk in chunks {
+				let result = series_dao.create_many(chunk.to_vec()).await;
+				match result {
+					Ok(mut created_series) => {
+						ctx.emit_event(CoreEvent::CreatedSeriesBatch {
+							count: created_series.len() as u64,
+							library_id: library_id.clone(),
+						});
+						existing_series.append(&mut created_series);
+					},
+					Err(e) => {
+						tracing::error!(error = ?e, "Failed to batch insert series");
+					},
+				}
 			}
 		}
 
 		Ok(existing_series)
-	}
-
-	async fn finish(&self, options: LibraryOptions) {
-		self.worker_ctx
-			.emit_job_message("Performing post-scan cleanup");
-		let core_ctx = self.worker_ctx.core_ctx.clone();
-		if let Some(thumbnail_config) = options.thumbnail_config {
-			let job_config = ThumbnailJobConfig::SingleLibrary {
-				library_id: options.library_id.unwrap_or_else(|| {
-					tracing::error!("No library ID found in library options, cannot dispatch thumbnail job");
-					"".to_string()
-				}),
-				force_regenerate: false,
-			};
-
-			let dispatch_result =
-				core_ctx.dispatch_job(ThumbnailJob::new(thumbnail_config, job_config));
-			if dispatch_result.is_err() {
-				tracing::error!("Failed to dispatch thumbnail job!");
-			}
-		} else {
-			tracing::debug!("No thumbnail config found, skipping thumbnail job dispatch");
-		}
-
-		tokio::time::sleep(Duration::from_millis(200)).await;
 	}
 
 	async fn scan_series(
@@ -334,12 +303,19 @@ impl LibraryScanner {
 			glob_set,
 		} = setup_series(&ctx, &series, &self.path, &library_options).await;
 
-		// TODO: remove this!!!
-
 		let iter = walkdir
 			.into_iter()
 			.filter_map(|e| e.ok())
-			.filter(|e| e.path().is_file());
+			.filter(|e| e.path().is_file())
+			.filter(|e| {
+				let path = e.path();
+				let glob_match = glob_set.is_match(path);
+				let should_ignore = glob_match || path.should_ignore();
+				if should_ignore {
+					tracing::trace!(?path, glob_match, "Skipping ignored file");
+				}
+				!should_ignore
+			});
 
 		for entry in iter {
 			let path = entry.path();
@@ -347,16 +323,9 @@ impl LibraryScanner {
 
 			tracing::trace!(?path, "Scanning file");
 
-			// Tell client we are on the next file, this will increment the counter in the
-			// callback, as well.
 			on_progress(format!("Analyzing {:?}", path));
 
-			let glob_match = glob_set.is_match(path);
-
-			if path.should_ignore() || glob_match {
-				tracing::trace!(?path, glob_match, "Skipping ignored file");
-				continue;
-			} else if let Some(media) = media_by_path.get(&path_str) {
+			if let Some(media) = media_by_path.get(&path_str) {
 				tracing::trace!(media_path = ?path, "Existing media found");
 
 				let has_been_modified = if let Some(dt) = media.modified_at.clone() {
@@ -394,12 +363,7 @@ impl LibraryScanner {
 							},
 							Err(e) => {
 								tracing::error!(error = ?e, "Failed to create media");
-								// ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
-								// 	job_id: Some(self.worker_ctx.job_id.clone()),
-								// 	path: path.to_str().unwrap_or_default().to_string(),
-								// 	message: e.to_string(),
-								// })
-								// .await;
+								// TODO: persist error
 							},
 						}
 					} else {
@@ -427,12 +391,7 @@ impl LibraryScanner {
 						},
 						Err(e) => {
 							tracing::error!(error = ?e, "Failed to create media");
-							// ctx.handle_failure_event(CoreEvent::CreateEntityFailed {
-							// 	job_id: Some(self.worker_ctx.job_id.clone()),
-							// 	path: path.to_str().unwrap_or_default().to_string(),
-							// 	message: e.to_string(),
-							// })
-							// .await;
+							// TODO: persist error
 						},
 					}
 				} else {
@@ -463,5 +422,34 @@ impl LibraryScanner {
 				);
 			}
 		}
+
+		tracing::trace!(?series, "Finished scanning series");
+		ctx.emit_event(CoreEvent::SeriesScanComplete { id: series.id });
+	}
+
+	async fn finish(&self, options: LibraryOptions) {
+		self.worker_ctx
+			.emit_job_message("Performing post-scan cleanup");
+
+		let core_ctx = self.worker_ctx.core_ctx.clone();
+		if let Some(thumbnail_config) = options.thumbnail_config {
+			let job_config = ThumbnailJobConfig::SingleLibrary {
+				library_id: options.library_id.unwrap_or_else(|| {
+					tracing::error!("No library ID found in library options, cannot dispatch thumbnail job");
+					"".to_string()
+				}),
+				force_regenerate: false,
+			};
+
+			let dispatch_result =
+				core_ctx.dispatch_job(ThumbnailJob::new(thumbnail_config, job_config));
+			if dispatch_result.is_err() {
+				tracing::error!("Failed to dispatch thumbnail job!");
+			}
+		} else {
+			tracing::debug!("No thumbnail config found, skipping thumbnail job dispatch");
+		}
+
+		tokio::time::sleep(Duration::from_millis(200)).await;
 	}
 }

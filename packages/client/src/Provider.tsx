@@ -25,6 +25,8 @@ export function StumpClientContextProvider({ children, onRedirect }: Props) {
 	)
 }
 
+// FIXME: This is in desperate need of a refactor / throttling. I've found the UI can easily lock up when thousands
+// of tasks are completed per second. The backend is just too quick and there are too many state changes.
 export function JobContextProvider({ children }: { children: ReactElement }) {
 	const [jobs, setJobs] = useState<Record<string, JobUpdate>>({})
 

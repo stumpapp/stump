@@ -54,6 +54,9 @@ pub enum CoreEvent {
 		count: u64,
 		library_id: String,
 	},
+	SeriesScanComplete {
+		id: String,
+	},
 	GeneratedThumbnailBatch(u64),
 }
 

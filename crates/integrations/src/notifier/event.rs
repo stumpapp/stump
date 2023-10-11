@@ -6,7 +6,7 @@ pub enum NotifierEvent {
 }
 
 impl NotifierEvent {
-	pub fn to_message(self) -> String {
+	pub fn into_message(self) -> String {
 		match self {
 			NotifierEvent::ScanCompleted {
 				books_added,

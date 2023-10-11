@@ -32,7 +32,7 @@ impl Notifier for TelegramClient {
 	async fn send_message(&self, event: NotifierEvent) -> NotifierResult<()> {
 		let token = self.token.clone();
 		let chat_id = self.chat_id.clone();
-		let message = event.to_message();
+		let message = event.into_message();
 		let response = self
 		.client
 		.post(format!("https://api.telegram.org/bot{token}/sendMessage?chat_id={chat_id}&text={message}"))

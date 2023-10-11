@@ -5,6 +5,7 @@
 	"license": "MIT",
 	"scripts": {
 		"tauri": "tauri",
+		"start": "tauri dev --no-watch",
 		"vite": "vite --",
 		"dev": "tauri dev",
 		"build": "vite build && tauri build",

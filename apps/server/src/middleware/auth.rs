@@ -5,6 +5,7 @@ use axum::{
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Redirect, Response},
 };
+use base64::{engine::general_purpose::STANDARD, Engine};
 use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
@@ -82,9 +83,12 @@ where
 		}
 
 		let encoded_credentials = auth_header[6..].to_string();
-		let decoded_bytes = base64::decode(encoded_credentials).map_err(|e| {
-			(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-		})?;
+		let decoded_bytes =
+			STANDARD
+				.decode(encoded_credentials.as_bytes())
+				.map_err(|e| {
+					(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+				})?;
 		let decoded_credentials =
 			decode_base64_credentials(decoded_bytes).map_err(|e| {
 				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()

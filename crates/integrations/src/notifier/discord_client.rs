@@ -1,6 +1,9 @@
 use serde_json::json;
 
-use super::{error::NotifierResult, Notifier, NotifierEvent, FAVICON_URL, NOTIFIER_ID};
+use super::{
+	error::{NotifierError, NotifierResult},
+	Notifier, NotifierEvent, FAVICON_URL, NOTIFIER_ID,
+};
 
 pub struct DiscordClient {
 	pub webhook_url: String,
@@ -47,8 +50,15 @@ impl Notifier for DiscordClient {
 			.json(&body)
 			.send()
 			.await?;
-		println!("{:?}", response);
-		Ok(())
+		if !response.status().is_success() {
+			let errmsg = response
+				.text()
+				.await
+				.unwrap_or_else(|_| "sendMessage failed".to_string());
+			Err(NotifierError::RequestFailed(errmsg))
+		} else {
+			Ok(())
+		}
 	}
 }
 

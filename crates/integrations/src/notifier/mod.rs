@@ -15,6 +15,6 @@ pub const FAVICON_URL: &str = "https://stumpapp.dev/favicon.png";
 #[async_trait::async_trait]
 pub trait Notifier {
 	// TODO: MessageConfig struct? So we can style according to NotifierEvent?
-	fn payload_from_event(event: NotifierEvent) -> serde_json::Value;
+	fn payload_from_event(event: NotifierEvent) -> NotifierResult<serde_json::Value>;
 	async fn send_message(&self, event: NotifierEvent) -> NotifierResult<()>;
 }

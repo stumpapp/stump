@@ -17,10 +17,12 @@ impl DiscordClient {
 	}
 }
 
+//https://core.telegram.org/bots/api#message
+
 #[async_trait::async_trait]
 impl Notifier for DiscordClient {
-	fn payload_from_event(event: NotifierEvent) -> serde_json::Value {
-		match event {
+	fn payload_from_event(event: NotifierEvent) -> NotifierResult<serde_json::Value> {
+		let payload = match event {
 			NotifierEvent::ScanCompleted {
 				books_added,
 				library_name,
@@ -33,11 +35,12 @@ impl Notifier for DiscordClient {
 					"color" : 13605239,
 				}]
 			}),
-		}
+		};
+		Ok(payload)
 	}
 
 	async fn send_message(&self, event: NotifierEvent) -> NotifierResult<()> {
-		let body = Self::payload_from_event(event);
+		let body = Self::payload_from_event(event)?;
 		let response = self
 			.client
 			.post(&self.webhook_url)
@@ -58,8 +61,8 @@ mod tests {
 
 	fn get_debug_client() -> DiscordClient {
 		dotenv().ok();
-		let webhook_url =
-			std::env::var("DUMMY_WEBHOOK_URL").expect("Failed to load webhook URL");
+		let webhook_url = std::env::var("DUMMY_DISCORD_WEBHOOK_URL")
+			.expect("Failed to load webhook URL");
 		DiscordClient::new(webhook_url)
 	}
 
@@ -80,7 +83,7 @@ mod tests {
 			books_added: 5,
 			library_name: String::from("test"),
 		};
-		let response = DiscordClient::payload_from_event(event);
+		let response = DiscordClient::payload_from_event(event).unwrap();
 		assert!(response.is_object());
 		let embeds = response["embeds"].to_owned();
 		assert!(embeds.is_array());

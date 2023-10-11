@@ -80,8 +80,8 @@ mod tests {
 	async fn test_send_message() {
 		let client = get_debug_client();
 		let event = NotifierEvent::ScanCompleted {
-			books_added: 69,
-			library_name: String::from("deez"),
+			books_added: 50,
+			library_name: String::from("test_library"),
 		};
 		let response = client.send_message(event).await;
 		assert!(response.is_ok());
@@ -91,7 +91,7 @@ mod tests {
 	fn test_scan_completed() {
 		let event = NotifierEvent::ScanCompleted {
 			books_added: 5,
-			library_name: String::from("test"),
+			library_name: String::from("test_library"),
 		};
 		let response = DiscordClient::payload_from_event(event).unwrap();
 		assert!(response.is_object());
@@ -99,7 +99,7 @@ mod tests {
 		assert!(embeds.is_array());
 		assert_eq!(
 			embeds[0]["description"],
-			String::from("5 books added to test")
+			String::from("5 books added to test_library")
 		);
 	}
 }

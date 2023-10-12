@@ -37,6 +37,7 @@ target/
 *.min.js
 *.map
 *.tsbuildinfo
+.env
 docker-compose.yaml
 
 # rust

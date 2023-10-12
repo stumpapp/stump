@@ -14,7 +14,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@icons-pack/react-simple-icons": "^7.2.0",
+		"@icons-pack/react-simple-icons": "^9.1.0",
 		"clsx": "1.2.1",
 		"framer-motion": "^7.10.3",
 		"next": "^13.3.0",

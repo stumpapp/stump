@@ -10,7 +10,7 @@
 		"./assets/*": "./src/assets/*"
 	},
 	"dependencies": {
-		"@hookform/resolvers": "^3.0.0",
+		"@hookform/resolvers": "^3.3.2",
 		"@stump/api": "workspace:*",
 		"@stump/client": "workspace:*",
 		"@stump/components": "workspace:*",

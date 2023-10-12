@@ -19,12 +19,10 @@ export type TextAreaProps = {
 
 const TextArea = React.forwardRef<RawTextAreaRef, TextAreaProps>(
 	({ label, description, containerClassName, errorMessage, variant, ...props }, ref) => {
-		const isInvalid = !!errorMessage
-
 		return (
 			<div className={cn('grid items-center gap-1.5', containerClassName)}>
 				<Label htmlFor={props.id}>{label}</Label>
-				<RawTextArea variant={isInvalid ? 'error' : variant} ref={ref} {...props} />
+				<RawTextArea variant={variant} ref={ref} isInvalid={!!errorMessage} {...props} />
 
 				{errorMessage && (
 					<Text variant="danger" size="xs" className="break-all">

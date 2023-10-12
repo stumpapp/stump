@@ -159,6 +159,8 @@ pub struct UserPreferences {
 	pub collection_layout_mode: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
+	#[serde(default)]
+	pub enable_discord_presence: bool,
 }
 
 impl Default for UserPreferences {
@@ -171,6 +173,7 @@ impl Default for UserPreferences {
 			collection_layout_mode: "GRID".to_string(),
 			app_theme: "LIGHT".to_string(),
 			show_query_indicator: false,
+			enable_discord_presence: false,
 		}
 	}
 }
@@ -200,6 +203,7 @@ pub struct UpdateUserPreferences {
 	pub collection_layout_mode: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
+	pub enable_discord_presence: bool,
 }
 
 ///////////////////////////////////////////////
@@ -216,6 +220,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			collection_layout_mode: data.collection_layout_mode,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
+			enable_discord_presence: data.enable_discord_presence,
 		}
 	}
 }

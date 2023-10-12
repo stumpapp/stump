@@ -6,7 +6,7 @@ use crate::{
 	CoreError,
 };
 
-use super::LibraryScanner;
+use super::{LibraryScanner, SeriesScanner};
 
 pub const LIBRARY_SCAN_JOB_NAME: &str = "library_scan";
 pub const SERIES_SCAN_JOB_NAME: &str = "series_scan";
@@ -65,8 +65,11 @@ impl JobTrait for SeriesScanJob {
 		Some(Box::new(self.series_path.as_str()))
 	}
 
-	async fn run(&mut self, _ctx: WorkerCtx) -> Result<u64, JobError> {
-		unimplemented!("Series scan job is not implemented yet")
+	async fn run(&mut self, ctx: WorkerCtx) -> Result<u64, JobError> {
+		let scanner = SeriesScanner::new(ctx).with_path(self.series_path.clone());
+		let completed_task_count = scanner.scan().await?;
+		tracing::info!(completed_task_count, "Series scan completed");
+		Ok(completed_task_count)
 	}
 }
 

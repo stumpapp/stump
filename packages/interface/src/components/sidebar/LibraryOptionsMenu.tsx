@@ -25,7 +25,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const { scanAsync } = useScanLibrary()
 	const { isServerOwner } = useAppContext()
 
-	function handleScan(mode: LibraryScanMode) {
+	function handleScan() {
 		// extra protection, should not be possible to reach this.
 		if (!isServerOwner) {
 			throw new Error('You do not have permission to scan libraries.')
@@ -34,7 +34,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 		// The UI will receive updates from SSE in fractions of ms lol and it can get bogged down.
 		// So, add a slight delay so the close animation of the menu can finish cleanly.
 		setTimeout(async () => {
-			await scanAsync({ id: library.id, mode })
+			await scanAsync({ id: library.id, mode: 'DEFAULT' })
 			await queryClient.invalidateQueries(['getJobReports'])
 		}, 50)
 	}
@@ -61,19 +61,8 @@ export default function LibraryOptionsMenu({ library }: Props) {
 						items: [
 							{
 								label: 'Scan',
-								leftIcon: <FileScan className={iconStyle} />,
-								subItems: [
-									{
-										label: 'Default',
-										leftIcon: <ScanLine className={iconStyle} />,
-										onClick: () => handleScan('DEFAULT'),
-									},
-									{
-										label: 'Quick',
-										leftIcon: <ScanFace className={iconStyle} />,
-										onClick: () => handleScan('QUICK'),
-									},
-								],
+								leftIcon: <ScanLine className={iconStyle} />,
+								onClick: () => handleScan(),
 							},
 							{
 								href: paths.libraryFileExplorer(library.id),

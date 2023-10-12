@@ -36,7 +36,7 @@ export function ConfirmationModal({
 	onClose,
 }: ConfirmationModalProps) {
 	const handleOpenChange = (nowOpen: boolean) => {
-		if (!nowOpen) {
+		if (!nowOpen && !confirmIsLoading) {
 			onClose()
 		}
 	}
@@ -54,11 +54,11 @@ export function ConfirmationModal({
 				<Dialog.Header>
 					<Dialog.Title>{title}</Dialog.Title>
 					{description && <Dialog.Description>{description}</Dialog.Description>}
-					{closeIcon && <Dialog.Close onClick={onClose} />}
+					{closeIcon && <Dialog.Close onClick={onClose} disabled={confirmIsLoading} />}
 				</Dialog.Header>
 				{children}
 				<Dialog.Footer>
-					<Button variant={cancelVariant} onClick={onClose}>
+					<Button variant={cancelVariant} onClick={onClose} disabled={confirmIsLoading}>
 						{cancelText || 'Cancel'}
 					</Button>
 					<Button variant={confirmVariant} onClick={onConfirm} isLoading={confirmIsLoading}>

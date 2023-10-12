@@ -198,6 +198,16 @@
 			"heading": "Server Settings",
 			"subtitle": "Manage various configurable options for your Stump server instance, itself"
 		},
+		"desktop": {
+			"helmet": "Desktop Settings",
+			"heading": "Desktop Settings",
+			"subtitle": "Configure the Stump desktop application",
+			"discordPresence": {
+				"label": "Discord Presence",
+				"description": "Display your Stump activity in Discord using Discord Rich Presence",
+				"reconnect": "Reconnect to Discord"
+			}
+		},
 		"users": {
 			"helmet": "User Management",
 			"heading": "User Management",

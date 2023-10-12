@@ -19,20 +19,15 @@ use crate::{
 	event::CoreEvent,
 	filesystem::{
 		image::{ThumbnailJob, ThumbnailJobConfig},
-		media::MediaBuilder,
-		scanner::{
-			series_scanner::{setup_series, SeriesSetup},
-			utils::{
-				create_media, file_updated_since_scan, mark_library_missing,
-				mark_media_paths_missing, update_media,
-			},
-		},
+		scanner::utils::mark_library_missing,
 		PathUtils, SeriesBuilder,
 	},
 	job::{utils::persist_job_start, JobUpdate, WorkerCtx},
 	prisma::{library, series},
 	CoreError, CoreResult,
 };
+
+use super::series_scanner::SeriesScanner;
 
 pub struct LibrarySetup {
 	pub library: Library,
@@ -96,6 +91,18 @@ impl LibraryScanner {
 		Ok(counter.load(Ordering::SeqCst))
 	}
 
+	async fn scan_series(
+		&self,
+		series: Series,
+		library_options: LibraryOptions,
+		on_progress: impl FnMut(String) + Send + Sync + 'static,
+	) {
+		let scanner = SeriesScanner::new(self.worker_ctx.clone());
+		scanner
+			.scan_series(series, self.path.clone(), library_options, on_progress)
+			.await;
+	}
+
 	async fn setup(&self) -> CoreResult<LibrarySetup> {
 		self.worker_ctx
 			.emit_job_message("Running library scan setup");
@@ -138,20 +145,7 @@ impl LibraryScanner {
 		let tasks: u64 = series
 			.par_iter()
 			.map(|series| {
-				let mut series_walkdir = WalkDir::new(&series.path);
-
-				// When the series is the library itself, we want to set the max_depth
-				// to 1 so it doesn't walk through the entire library (effectively doubling
-				// the return result, instead of the actual number of files to process)
-				if !is_collection_based || series.path == library.path {
-					series_walkdir = series_walkdir.max_depth(1)
-				}
-
-				series_walkdir
-					.into_iter()
-					.filter_map(|e| e.ok())
-					.filter(|e| e.path().is_file())
-					.count() as u64
+				SeriesScanner::task_count(&series.path, &self.path, is_collection_based)
 			})
 			.sum();
 
@@ -285,146 +279,6 @@ impl LibraryScanner {
 		}
 
 		Ok(existing_series)
-	}
-
-	async fn scan_series(
-		&self,
-		series: Series,
-		library_options: LibraryOptions,
-		mut on_progress: impl FnMut(String) + Send + Sync + 'static,
-	) {
-		let ctx = self.worker_ctx.core_ctx.clone();
-
-		tracing::debug!(?series, "Scanning series");
-		let SeriesSetup {
-			mut visited_media,
-			media_by_path,
-			walkdir,
-			glob_set,
-		} = setup_series(&ctx, &series, &self.path, &library_options).await;
-
-		let iter = walkdir
-			.into_iter()
-			.filter_map(|e| e.ok())
-			.filter(|e| e.path().is_file())
-			.filter(|e| {
-				let path = e.path();
-				let glob_match = glob_set.is_match(path);
-				let should_ignore = glob_match || path.should_ignore();
-				if should_ignore {
-					tracing::trace!(?path, glob_match, "Skipping ignored file");
-				}
-				!should_ignore
-			});
-
-		for entry in iter {
-			let path = entry.path();
-			let path_str = path.to_str().unwrap_or("").to_string();
-
-			tracing::trace!(?path, "Scanning file");
-
-			on_progress(format!("Analyzing {:?}", path));
-
-			if let Some(media) = media_by_path.get(&path_str) {
-				tracing::trace!(media_path = ?path, "Existing media found");
-
-				let has_been_modified = if let Some(dt) = media.modified_at.clone() {
-					file_updated_since_scan(&entry, dt)
-						.map_err(|err| {
-							tracing::error!(
-								error = ?err,
-								?path,
-								"Failed to determine if entry has been modified since last scan"
-							)
-						})
-						.unwrap_or(false)
-				} else {
-					false
-				};
-
-				if has_been_modified {
-					tracing::debug!(?path, "File has been modified since last scan");
-
-					let build_result =
-						MediaBuilder::new(path, &series.id, library_options.clone())
-							.build();
-
-					if let Ok(generated) = build_result {
-						tracing::warn!(
-							"Stump currently has minimal support for updating media",
-						);
-						match update_media(&ctx.db, generated).await {
-							Ok(created_media) => {
-								ctx.emit_event(CoreEvent::CreateOrUpdateMedia {
-									id: created_media.id,
-									series_id: created_media.series_id,
-									library_id: series.library_id.clone(),
-								});
-							},
-							Err(e) => {
-								tracing::error!(error = ?e, "Failed to create media");
-								// TODO: persist error
-							},
-						}
-					} else {
-						tracing::error!(
-							?build_result,
-							"Failed to build media for update!",
-						);
-					}
-				}
-
-				*visited_media.entry(path_str).or_insert(true) = true;
-			} else {
-				tracing::trace!(series_id = ?series.id, new_media_path = ?path, "New media found in series");
-				let build_result =
-					MediaBuilder::new(path, &series.id, library_options.clone()).build();
-				if let Ok(generated) = build_result {
-					match create_media(&ctx.db, generated).await {
-						Ok(created_media) => {
-							visited_media.insert(path_str, true);
-							ctx.emit_event(CoreEvent::CreateOrUpdateMedia {
-								id: created_media.id,
-								series_id: created_media.series_id,
-								library_id: series.library_id.clone(),
-							});
-						},
-						Err(e) => {
-							tracing::error!(error = ?e, "Failed to create media");
-							// TODO: persist error
-						},
-					}
-				} else {
-					tracing::error!(error = ?build_result.err(), "Failed to build media");
-				}
-			}
-		}
-
-		let missing_media = visited_media
-			.into_iter()
-			.filter(|(_, visited)| !visited)
-			.map(|(path, _)| path)
-			.collect::<Vec<String>>();
-
-		if !missing_media.is_empty() {
-			tracing::warn!(
-				missing_paths = ?missing_media,
-				"Some paths were not visited during series scan"
-			);
-			let result = mark_media_paths_missing(&ctx.db, missing_media).await;
-
-			if let Err(err) = result {
-				tracing::error!(error = ?err, "Error trying to mark missing media");
-			} else {
-				tracing::debug!(
-					affected_rows = result.unwrap_or_default(),
-					"Marked missing media"
-				);
-			}
-		}
-
-		tracing::trace!(?series, "Finished scanning series");
-		ctx.emit_event(CoreEvent::SeriesScanComplete { id: series.id });
 	}
 
 	async fn finish(&self, options: LibraryOptions) {

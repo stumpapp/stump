@@ -11,7 +11,6 @@ use axum::{
 };
 use futures_util::{sink::SinkExt, stream::StreamExt};
 use stump_core::Ctx;
-use tracing::error;
 
 use crate::config::state::AppState;
 

@@ -269,6 +269,9 @@ async fn update_preferences(
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
+				user_preferences::enable_discord_presence::set(
+					input.enable_discord_presence,
+				),
 			],
 		)
 		.exec()

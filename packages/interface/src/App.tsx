@@ -66,6 +66,15 @@ function RouterContainer(props: { appProps: AppProps }) {
 		}
 	}, [appTheme])
 
+	const { setUseDiscordPresence, setDiscordPresence } = appProps
+	const discordPresenceEnabled = userPreferences?.enable_discord_presence ?? false
+	useEffect(() => {
+		setUseDiscordPresence?.(discordPresenceEnabled)
+		if (discordPresenceEnabled) {
+			setDiscordPresence?.()
+		}
+	}, [setUseDiscordPresence, setDiscordPresence, discordPresenceEnabled])
+
 	const handleRedirect = (url: string) => {
 		navigate({
 			pathname: url,

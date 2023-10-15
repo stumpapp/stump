@@ -5,6 +5,7 @@ import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from './AppLayout'
 import LocaleProvider from './i18n/LocaleProvider'
 import BookRouter from './scenes/book/BookRouter'
+import BookClubRouter from './scenes/book-club/BookClubRouter'
 import LibraryRouter from './scenes/library/LibraryRouter'
 import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter'
 import SeriesRouter from './scenes/series/SeriesRouter'
@@ -45,6 +46,7 @@ export function AppRouter() {
 					<Route path="libraries/*" element={<LibraryRouter />} />
 					<Route path="series/*" element={<SeriesRouter />} />
 					<Route path="books/*" element={<BookRouter />} />
+					<Route path="book-clubs/*" element={<BookClubRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 

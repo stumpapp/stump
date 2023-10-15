@@ -27,6 +27,9 @@ pub struct User {
 	pub last_login: Option<String>,
 	pub is_locked: bool,
 
+	#[serde(skip)]
+	pub permissions: Vec<UserPermission>,
+
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub login_sessions_count: Option<i32>,
 
@@ -110,6 +113,10 @@ impl From<prisma::user::Data> for User {
 			id: data.id,
 			username: data.username,
 			role: data.role,
+			permissions: data
+				.permissions
+				.map(|p| p.split(',').map(|p| p.into()).collect())
+				.unwrap_or_default(),
 			user_preferences,
 			avatar_url: data.avatar_url,
 			age_restriction,
@@ -146,6 +153,33 @@ impl fmt::Display for UserRole {
 		match self {
 			UserRole::ServerOwner => write!(f, "SERVER_OWNER"),
 			UserRole::Member => write!(f, "MEMBER"),
+		}
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
+pub enum UserPermission {
+	#[serde(rename = "bookclub:create")]
+	CreateBookClub,
+	#[serde(rename = "file:upload")]
+	UploadFile,
+}
+
+impl ToString for UserPermission {
+	fn to_string(&self) -> String {
+		match self {
+			UserPermission::CreateBookClub => "bookclub:create".to_string(),
+			UserPermission::UploadFile => "file:upload".to_string(),
+		}
+	}
+}
+
+impl From<&str> for UserPermission {
+	fn from(s: &str) -> UserPermission {
+		match s {
+			"bookclub:create" => UserPermission::CreateBookClub,
+			"file:upload" => UserPermission::UploadFile,
+			_ => UserPermission::UploadFile,
 		}
 	}
 }

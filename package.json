@@ -63,8 +63,5 @@
 	"packageManager": "pnpm@8.6.1",
 	"engines": {
 		"node": "18.16.0"
-	},
-	"resolutions": {
-		"esbuild": "^0.15.13"
 	}
 }

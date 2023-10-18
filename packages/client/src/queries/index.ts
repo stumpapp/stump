@@ -1,4 +1,5 @@
 export { useAuthQuery, useLoginOrRegister } from './auth'
+export { useBookClubsQuery } from './bookClub'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
 export { useJobSchedulerConfig, useJobsQuery } from './job'

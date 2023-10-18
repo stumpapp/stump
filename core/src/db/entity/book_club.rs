@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -40,7 +42,9 @@ book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_wi
 pub struct BookClub {
 	id: String,
 	name: String,
-	private: bool,
+	is_private: bool,
+
+	member_role_spec: BookClubMemberRoleSpec,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	members: Option<Vec<BookClubMember>>,
@@ -62,13 +66,53 @@ pub struct BookClubMember {
 	pub book_club: Option<BookClub>,
 }
 
-#[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema, PartialEq)]
+#[derive(
+	Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema, PartialEq, Eq, Hash,
+)]
 pub enum BookClubMemberRole {
 	#[default]
+	#[serde(rename = "MEMBER")]
 	MEMBER = 0, // default, read-only access
+	#[serde(rename = "MODERATOR")]
 	MODERATOR = 1, // can delete messages
-	ADMIN = 2,     // can add/remove members, change schedule, etc.
-	CREATOR = 3,   // can delete the book club, change name, etc.
+	#[serde(rename = "ADMIN")]
+	ADMIN = 2, // can add/remove members, change schedule, etc.
+	#[serde(rename = "CREATOR")]
+	CREATOR = 3, // can delete the book club, change name, etc.
+}
+
+// A map of [BookClubMemberRole] to a [String] representing the club-specific
+// name for a role
+#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+#[serde(transparent)]
+pub struct BookClubMemberRoleSpec(HashMap<BookClubMemberRole, String>);
+impl Default for BookClubMemberRoleSpec {
+	fn default() -> Self {
+		let mut map = HashMap::new();
+		map.insert(BookClubMemberRole::MEMBER, "Member".to_string());
+		map.insert(BookClubMemberRole::MODERATOR, "Moderator".to_string());
+		map.insert(BookClubMemberRole::ADMIN, "Admin".to_string());
+		map.insert(BookClubMemberRole::CREATOR, "Creator".to_string());
+		Self(map)
+	}
+}
+
+impl From<Vec<u8>> for BookClubMemberRoleSpec {
+	fn from(value: Vec<u8>) -> Self {
+		serde_json::from_slice(&value).unwrap_or_else(|error| {
+			tracing::error!(error = ?error, "Failed to deserialize member_role_spec");
+			Self::default()
+		})
+	}
+}
+
+impl From<BookClubMemberRoleSpec> for Vec<u8> {
+	fn from(value: BookClubMemberRoleSpec) -> Self {
+		serde_json::to_vec(&value).unwrap_or_else(|error| {
+			tracing::error!(error = ?error, "Failed to serialize member_role_spec");
+			vec![]
+		})
+	}
 }
 
 impl From<BookClubMemberRole> for i32 {
@@ -147,12 +191,18 @@ impl From<book_club::Data> for BookClub {
 			.cloned()
 			.map(BookClubSchedule::from);
 
+		let member_role_spec = data
+			.member_role_spec
+			.map(BookClubMemberRoleSpec::from)
+			.unwrap_or_default();
+
 		BookClub {
 			id: data.id,
 			name: data.name,
-			private: data.private,
+			is_private: data.is_private,
 			members,
 			schedule,
+			member_role_spec,
 		}
 	}
 }
@@ -164,12 +214,17 @@ impl From<book_club_member_user_username::Data> for BookClub {
 			.into_iter()
 			.map(BookClubMember::from)
 			.collect::<Vec<BookClubMember>>();
+		let member_role_spec = data
+			.member_role_spec
+			.map(BookClubMemberRoleSpec::from)
+			.unwrap_or_default();
 
 		BookClub {
 			id: data.id,
 			name: data.name,
-			private: data.private,
+			is_private: data.is_private,
 			members: Some(members),
+			member_role_spec,
 			..Default::default()
 		}
 	}
@@ -182,12 +237,17 @@ impl From<book_club_member_and_schedule_include::Data> for BookClub {
 			.into_iter()
 			.map(BookClubMember::from)
 			.collect::<Vec<BookClubMember>>();
+		let member_role_spec = data
+			.member_role_spec
+			.map(BookClubMemberRoleSpec::from)
+			.unwrap_or_default();
 
 		BookClub {
 			id: data.id,
 			name: data.name,
-			private: data.private,
+			is_private: data.is_private,
 			members: Some(members),
+			member_role_spec,
 			..Default::default()
 		}
 	}
@@ -202,13 +262,18 @@ impl From<book_club_with_books_include::Data> for BookClub {
 			.collect::<Vec<BookClubMember>>();
 
 		let schedule = data.schedule.map(BookClubSchedule::from);
+		let member_role_spec = data
+			.member_role_spec
+			.map(BookClubMemberRoleSpec::from)
+			.unwrap_or_default();
 
 		BookClub {
 			id: data.id,
 			name: data.name,
-			private: data.private,
+			is_private: data.is_private,
 			members: Some(members),
 			schedule,
+			member_role_spec,
 		}
 	}
 }
@@ -353,5 +418,58 @@ impl From<book_club_invitation::Data> for BookClubInvitation {
 			user,
 			book_club,
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn deserialize_member_role_spec_from_str() {
+		let spec = r#"{"MEMBER":"Member","MODERATOR":"Moderator","ADMIN":"Admin","CREATOR":"Creator"}"#;
+		let spec: BookClubMemberRoleSpec = serde_json::from_str(spec).unwrap();
+		assert_eq!(spec.0.len(), 4);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::MEMBER),
+			Some(&"Member".to_string())
+		);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::MODERATOR),
+			Some(&"Moderator".to_string())
+		);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::ADMIN),
+			Some(&"Admin".to_string())
+		);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::CREATOR),
+			Some(&"Creator".to_string())
+		);
+	}
+
+	#[test]
+	fn deserialize_member_role_spec_from_bytes() {
+		let spec_str = r#"{"MEMBER":"Crewmate","MODERATOR":"Boatswain","ADMIN":"First Mate","CREATOR":"Captain"}"#;
+		let spec_json = serde_json::from_str::<serde_json::Value>(spec_str).unwrap();
+		let spec_bytes = spec_json.to_string().into_bytes();
+		let spec = BookClubMemberRoleSpec::from(spec_bytes);
+		assert_eq!(spec.0.len(), 4);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::MEMBER),
+			Some(&"Crewmate".to_string())
+		);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::MODERATOR),
+			Some(&"Boatswain".to_string())
+		);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::ADMIN),
+			Some(&"First Mate".to_string())
+		);
+		assert_eq!(
+			spec.0.get(&BookClubMemberRole::CREATOR),
+			Some(&"Captain".to_string())
+		);
 	}
 }

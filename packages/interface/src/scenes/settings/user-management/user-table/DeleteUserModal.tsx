@@ -22,7 +22,7 @@ export default function DeleteUserModal() {
 			return
 		} else if (!!user && user.id === deletingUser.id) {
 			toast.error('You cannot delete your own account')
-		} else if (deletingUser.role === 'SERVER_OWNER') {
+		} else if (deletingUser.is_server_owner) {
 			toast.error('You cannot delete the server owner')
 		} else {
 			try {

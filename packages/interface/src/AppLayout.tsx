@@ -54,9 +54,7 @@ export function AppLayout() {
 	}
 
 	return (
-		<AppContext.Provider
-			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
-		>
+		<AppContext.Provider value={{ isServerOwner: storeUser.is_server_owner, user: storeUser }}>
 			<Suspense fallback={<RouteLoadingIndicator />}>
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">

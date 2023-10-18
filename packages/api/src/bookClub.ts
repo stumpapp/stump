@@ -1,0 +1,140 @@
+import {
+	BookClub,
+	BookClubInvitation,
+	BookClubInvitationAnswer,
+	BookClubMember,
+	BookClubSchedule,
+	CreateBookClub,
+	CreateBookClubInvitation,
+	CreateBookClubMember,
+	PatchBookClubMember,
+	UpdateBookClub,
+} from '@stump/types'
+
+import { API } from './axios'
+import { ApiResult } from './types'
+
+export async function getBookClubs(): Promise<ApiResult<BookClub[]>> {
+	return API.get('/book-clubs')
+}
+
+export async function createBookClub(payload: CreateBookClub): Promise<ApiResult<BookClub>> {
+	return API.post('/book-clubs', payload)
+}
+
+export async function getBookClubById(id: string): Promise<ApiResult<BookClub>> {
+	return API.get(`/book-clubs/${id}`)
+}
+
+export async function updateBookClub(
+	id: string,
+	payload: UpdateBookClub,
+): Promise<ApiResult<BookClub>> {
+	return API.put(`/book-clubs/${id}`, payload)
+}
+
+export async function getBookClubInvitations(
+	bookClubId: string,
+): Promise<ApiResult<BookClubInvitation>> {
+	return API.get(`/book-clubs/${bookClubId}/invitations`)
+}
+
+export async function createBookClubInvitation(
+	bookClubId: string,
+	payload: CreateBookClubInvitation,
+): Promise<ApiResult<BookClubInvitation>> {
+	return API.post(`/book-clubs/${bookClubId}/invitations`, payload)
+}
+
+export async function respondToBookClubInvitation(
+	bookClubId: string,
+	invitationId: string,
+	payload: BookClubInvitationAnswer,
+): Promise<ApiResult<BookClubInvitation>> {
+	return API.put(`/book-clubs/${bookClubId}/invitations/${invitationId}`, payload)
+}
+
+export async function getBookClubMembers(bookClubId: string): Promise<ApiResult<BookClubMember>> {
+	return API.get(`/book-clubs/${bookClubId}/members`)
+}
+
+export async function createBookClubMember(
+	bookClubId: string,
+	payload: CreateBookClubMember,
+): Promise<ApiResult<BookClubMember>> {
+	return API.post(`/book-clubs/${bookClubId}/members`, payload)
+}
+
+export async function getBookClubMember(
+	bookClubId: string,
+	memberId: string,
+): Promise<ApiResult<BookClubMember>> {
+	return API.get(`/book-clubs/${bookClubId}/members/${memberId}`)
+}
+
+export async function updateBookClubMember(
+	bookClubId: string,
+	memberId: string,
+	payload: CreateBookClubMember,
+): Promise<ApiResult<PatchBookClubMember>> {
+	return API.put(`/book-clubs/${bookClubId}/members/${memberId}`, payload)
+}
+
+export async function deleteBookClubMember(
+	bookClubId: string,
+	memberId: string,
+): Promise<ApiResult<void>> {
+	return API.delete(`/book-clubs/${bookClubId}/members/${memberId}`)
+}
+
+export async function getBookClubSchedule(
+	bookClubId: string,
+): Promise<ApiResult<BookClubSchedule>> {
+	return API.get(`/book-clubs/${bookClubId}/schedule`)
+}
+
+export async function createBookClubSchedule(
+	bookClubId: string,
+): Promise<ApiResult<BookClubSchedule>> {
+	return API.post(`/book-clubs/${bookClubId}/schedule`)
+}
+
+export async function getBookClubCurrentBook(bookClubId: string): Promise<ApiResult<void>> {
+	return API.get(`/book-clubs/${bookClubId}/schedule/current-book`)
+}
+
+export const bookClubApi = {
+	createBookClub,
+	createBookClubInvitation,
+	createBookClubMember,
+	createBookClubSchedule,
+	deleteBookClubMember,
+	getBookClubById,
+	getBookClubCurrentBook,
+	getBookClubInvitations,
+	getBookClubMember,
+	getBookClubMembers,
+	getBookClubSchedule,
+	getBookClubs,
+	respondToBookClubInvitation,
+	updateBookClub,
+	updateBookClubMember,
+}
+
+export const bookClubQueryKeys: Record<keyof typeof bookClubApi, string> = {
+	createBookClub: 'bookClub.create',
+	createBookClubInvitation: 'bookClub.createInvitation',
+	createBookClubMember: 'bookClub.createMember',
+	createBookClubSchedule: 'bookClub.createSchedule',
+	deleteBookClubMember: 'bookClub.deleteMember',
+	getBookClubById: 'bookClub.getById',
+	getBookClubCurrentBook: 'bookClub.getCurrentBook',
+	getBookClubInvitations: 'bookClub.getInvitations',
+	getBookClubMember: 'bookClub.getMember',
+	getBookClubMembers: 'bookClub.getMembers',
+	getBookClubSchedule: 'bookClub.getSchedule',
+	getBookClubs: 'bookClub.get',
+	respondToBookClubInvitation: 'bookClub.respondToInvitation',
+	updateBookClub: 'bookClub.update',
+	updateBookClubMember: 'bookClub.updateMember',
+}

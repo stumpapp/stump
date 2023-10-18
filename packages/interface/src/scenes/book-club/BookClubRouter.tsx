@@ -1,3 +1,4 @@
+import { useUserStore } from '@stump/client'
 import React from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
@@ -9,6 +10,14 @@ const PublicBookClubExplorerScene = lazily(() => import('./PublicBookClubExplore
 const BookClubHomeScene = lazily(() => import('./BookClubHomeScene.tsx'))
 
 export default function BookClubRouter() {
+	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
+
+	const userCanAccess = checkUserPermission('bookclub:read')
+
+	if (!userCanAccess) {
+		return <Navigate to=".." />
+	}
+
 	return (
 		<Routes>
 			<Route path="explore" element={<PublicBookClubExplorerScene />} />

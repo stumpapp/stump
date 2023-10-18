@@ -517,7 +517,7 @@ async fn get_user_login_activity_by_id(
 
 	let client = ctx.get_db();
 
-	if user.id != id && !user.is_server_owner() {
+	if user.id != id && !user.is_server_owner {
 		return Err(ApiError::Forbidden(String::from(
 			"You cannot access this resource",
 		)));

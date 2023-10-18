@@ -13,7 +13,7 @@ model User {
 
   username        String    @unique
   hashed_password String // Salted and hashed, NOT plain text
-  role            String    @default("MEMBER") // MEMBER or SERVER_OWNER
+  is_server_owner Boolean   @default(false)
   avatar_url      String?
   last_login      DateTime?
   created_at      DateTime  @default(now())
@@ -290,11 +290,11 @@ model Tag {
 }
 
 model BookClub {
-  id      String  @id @default(cuid())
-  name    String  @unique
-  private Boolean @default(false)
-
-  // lock_books Boolean @default(false) // If true, members cannot read books outside of the schedule
+  id               String  @id @default(cuid())
+  name             String  @unique
+  description      String?
+  is_private       Boolean @default(false)
+  member_role_spec Bytes?
 
   members     BookClubMember[]
   schedule    BookClubSchedule?
@@ -340,7 +340,7 @@ model BookClubMember {
 }
 
 model BookClubSchedule {
-  default_interval_days Int @default(30) // in days
+  default_interval_days Int? @default(30) // in days
   // auto_start_chat_board Boolean @default(false)
 
   books BookClubBook[]
@@ -358,7 +358,7 @@ model BookClubBook {
 
   start_at                 DateTime?
   end_at                   DateTime?
-  discussion_duration_days Int       @default(1) // in days
+  discussion_duration_days Int?      @default(1) // in days
 
   book_club_schedule_id String?
   book_club_schedule    BookClubSchedule? @relation(fields: [book_club_schedule_id], references: [book_club_id], onDelete: Cascade)

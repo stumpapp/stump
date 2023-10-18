@@ -49,7 +49,7 @@ export default function UserActionMenu({ user }: Props) {
 				onClick: () => setDeletingUser(user),
 			},
 			{
-				disabled: isSelf || user.role === 'SERVER_OWNER',
+				disabled: isSelf || user.is_server_owner,
 				label: `${user.is_locked ? 'Unlock' : 'Lock'} account`,
 				leftIcon: user.is_locked ? (
 					<Unlock className="mr-2 h-4 w-4" />

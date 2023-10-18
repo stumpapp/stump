@@ -1,7 +1,7 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::{get, post},
+	routing::{get, put},
 	Json, Router,
 };
 use prisma_client_rust::{
@@ -10,11 +10,12 @@ use prisma_client_rust::{
 	or, Direction,
 };
 use serde::Deserialize;
+use specta::Type;
 use stump_core::{
 	db::entity::{
 		book_club_member_and_schedule_include, book_club_with_books_include, BookClub,
 		BookClubBook, BookClubInvitation, BookClubMember, BookClubMemberRole,
-		BookClubSchedule, User, UserPermission,
+		BookClubMemberRoleSpec, BookClubSchedule, User, UserPermission,
 	},
 	prisma::{
 		book_club, book_club_book, book_club_invitation, book_club_member,
@@ -27,7 +28,7 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
-	middleware::auth::Auth,
+	middleware::auth::{Auth, BookClubGuard},
 	utils::{
 		chain_optional_iter, get_session_server_owner_user, get_session_user,
 		get_user_and_enforce_permission,
@@ -40,7 +41,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.nest(
 			"/book-clubs/:id",
 			Router::new()
-				.route("/", get(get_book_club).patch(patch_book_club))
+				.route("/", get(get_book_club).put(update_book_club))
 				.nest(
 					"/invitations",
 					Router::new()
@@ -49,7 +50,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 							get(get_book_club_invitations)
 								.post(create_book_club_invitation),
 						)
-						.route("/:id", post(respond_to_book_club_invitation)),
+						.route("/:id", put(respond_to_book_club_invitation)),
 				)
 				.nest(
 					"/members",
@@ -61,7 +62,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						)
 						.route(
 							"/:id",
-							get(get_book_club_member).patch(patch_book_club_member),
+							get(get_book_club_member)
+								.put(update_book_club_member)
+								.delete(delete_book_club_member),
 						),
 				)
 				.nest(
@@ -74,6 +77,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.route("/current-book", get(get_book_club_current_book)),
 				),
 		)
+		.layer(from_extractor_with_state::<BookClubGuard, AppState>(
+			app_state.clone(),
+		))
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
@@ -84,13 +90,13 @@ pub(crate) fn book_club_access_for_user(user: &User) -> Vec<book_club::WherePara
 	chain_optional_iter(
 		[],
 		// server owner can see all book clubs
-		[(!user.is_server_owner()).then(|| {
+		[(!user.is_server_owner).then(|| {
 			// a user can see a book club if they are a member or if it is not private
 			or![
 				book_club::members::some(vec![book_club_member::user_id::equals(
 					user.id.clone(),
 				)]),
-				book_club::private::equals(false),
+				book_club::is_private::equals(false),
 			]
 		})],
 	)
@@ -103,7 +109,7 @@ pub(crate) fn book_club_member_permission_for_user(
 ) -> Vec<book_club_member::WhereParam> {
 	chain_optional_iter(
 		[],
-		[(!user.is_server_owner()).then(|| book_club_member::role::gte(role.into()))],
+		[(!user.is_server_owner).then(|| book_club_member::role::gte(role.into()))],
 	)
 }
 
@@ -114,7 +120,7 @@ pub(crate) fn book_club_member_access_for_user(
 	chain_optional_iter(
 		[],
 		// server owner can see all members
-		[(!user.is_server_owner()).then(|| {
+		[(!user.is_server_owner).then(|| {
 			or![
 				// if the user is a member, they can see all members
 				book_club_member::book_club::is(vec![book_club::members::some(vec![
@@ -127,7 +133,7 @@ pub(crate) fn book_club_member_access_for_user(
 						book_club::members::none(vec![
 							book_club_member::user_id::equals(user.id.clone())
 						]),
-						book_club::private::equals(false)
+						book_club::is_private::equals(false)
 					])
 				],
 			]
@@ -164,10 +170,11 @@ async fn get_book_clubs(
 	Ok(Json(book_clubs.into_iter().map(BookClub::from).collect()))
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct CreateBookClub {
 	pub name: String,
 	pub private: bool,
+	pub member_role_spec: Option<BookClubMemberRoleSpec>,
 
 	pub creator_hide_progress: bool,
 	pub creator_display_name: Option<String>,
@@ -199,7 +206,15 @@ async fn create_book_club(
 		.run(|client| async move {
 			let book_club = client
 				.book_club()
-				.create(payload.name, vec![book_club::private::set(payload.private)])
+				.create(
+					payload.name,
+					vec![
+						book_club::is_private::set(payload.private),
+						book_club::member_role_spec::set(
+							payload.member_role_spec.map(Into::into),
+						),
+					],
+				)
 				.exec()
 				.await?;
 
@@ -260,14 +275,16 @@ async fn get_book_club(
 	Ok(Json(BookClub::from(book_club)))
 }
 
-#[derive(Deserialize, ToSchema)]
-pub struct PatchBookClub {
+#[derive(Deserialize, Type, ToSchema)]
+pub struct UpdateBookClub {
 	pub name: Option<String>,
-	pub private: Option<bool>,
+	pub description: Option<String>,
+	pub is_private: Option<bool>,
+	pub member_role_spec: Option<BookClubMemberRoleSpec>,
 }
 
 #[utoipa::path(
-    patch,
+    put,
     path = "/api/v1/book_clubs/:id",
     tag = "book_club",
     responses(
@@ -276,11 +293,11 @@ pub struct PatchBookClub {
         (status = 500, description = "Internal server error")
     )
 )]
-async fn patch_book_club(
+async fn update_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	session: Session,
-	Json(payload): Json<PatchBookClub>,
+	Json(payload): Json<UpdateBookClub>,
 ) -> ApiResult<Json<BookClub>> {
 	let client = ctx.get_db();
 
@@ -306,10 +323,13 @@ async fn patch_book_club(
 		.update(
 			book_club::id::equals(book_club.id),
 			chain_optional_iter(
-				[],
+				[book_club::description::set(payload.description)],
 				[
 					payload.name.map(book_club::name::set),
-					payload.private.map(book_club::private::set),
+					payload.is_private.map(book_club::is_private::set),
+					payload
+						.member_role_spec
+						.map(|spec| book_club::member_role_spec::set(Some(spec.into()))),
 				],
 			),
 		)
@@ -319,14 +339,14 @@ async fn patch_book_club(
 	Ok(Json(BookClub::from(updated_book_club)))
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct UpdateBookClubSchedule {}
 
 async fn get_book_club_invitations() -> ApiResult<Json<Vec<BookClubInvitation>>> {
-	unimplemented!()
+	Err(ApiError::NotImplemented)
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct CreateBookClubInvitation {
 	pub user_id: String,
 	pub role: Option<BookClubMemberRole>,
@@ -429,7 +449,7 @@ async fn get_book_club_members(
 	))
 }
 
-#[derive(Deserialize, ToSchema, Default)]
+#[derive(Deserialize, Type, ToSchema, Default)]
 pub struct CreateBookClubMember {
 	pub user_id: String,
 	pub display_name: Option<String>,
@@ -456,7 +476,7 @@ async fn create_book_club_member(
 	Ok(BookClubMember::from(created_member))
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct BookClubInvitationAnswer {
 	pub accept: bool,
 	pub member_details: Option<CreateBookClubMember>,
@@ -579,7 +599,7 @@ async fn get_book_club_member(
 	Ok(Json(BookClubMember::from(book_club_member)))
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct PatchBookClubMember {
 	pub display_name: Option<String>,
 	pub private_membership: Option<bool>,
@@ -595,7 +615,7 @@ pub struct PatchBookClubMember {
         (status = 500, description = "Internal server error")
     )
 )]
-async fn patch_book_club_member(
+async fn update_book_club_member(
 	State(ctx): State<AppState>,
 	Path((_id, member_id)): Path<(String, String)>,
 	session: Session,
@@ -605,7 +625,7 @@ async fn patch_book_club_member(
 
 	let viewer = get_session_user(&session)?;
 
-	if viewer.id != member_id && !viewer.is_server_owner() {
+	if viewer.id != member_id && !viewer.is_server_owner {
 		return Err(ApiError::Forbidden(
 			"Cannot patch a book club member other than yourself".to_string(),
 		));
@@ -631,7 +651,39 @@ async fn patch_book_club_member(
 	Ok(Json(BookClubMember::from(updated_member)))
 }
 
-#[derive(Deserialize, ToSchema)]
+async fn delete_book_club_member(
+	State(ctx): State<AppState>,
+	Path((id, member_id)): Path<(String, String)>,
+	session: Session,
+) -> ApiResult<Json<BookClubMember>> {
+	let client = ctx.get_db();
+
+	let viewer = get_session_user(&session)?;
+	let viewer_membership = client
+		.book_club_member()
+		.find_first(vec![
+			book_club_member::book_club_id::equals(id),
+			book_club_member::user_id::equals(viewer.id),
+			book_club_member::role::gte(BookClubMemberRole::ADMIN.into()),
+		])
+		.exec()
+		.await?;
+
+	let can_remove_member = viewer_membership.is_some() || viewer.is_server_owner;
+	if !can_remove_member {
+		return Err(ApiError::Forbidden("Insufficient privileges".to_string()));
+	}
+
+	let deleted_member = client
+		.book_club_member()
+		.delete(book_club_member::id::equals(member_id))
+		.exec()
+		.await?;
+
+	Ok(Json(BookClubMember::from(deleted_member)))
+}
+
+#[derive(Deserialize, Type, ToSchema)]
 pub struct CreateBookClubScheduleBook {
 	pub book_id: String,
 	pub order: i32,

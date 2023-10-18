@@ -28,7 +28,7 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
-	middleware::auth::{AdminGuard, Auth},
+	middleware::auth::{Auth, ServerOwnerGuard},
 	utils::chain_optional_iter,
 };
 
@@ -49,7 +49,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					get(get_scheduler_config).post(update_scheduler_config),
 				),
 		)
-		.layer(from_extractor::<AdminGuard>())
+		.layer(from_extractor::<ServerOwnerGuard>())
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 

@@ -49,7 +49,7 @@ pub fn get_session_user(session: &Session) -> ApiResult<User> {
 pub fn get_session_server_owner_user(session: &Session) -> ApiResult<User> {
 	let user = get_session_user(session)?;
 
-	if user.is_server_owner() {
+	if user.is_server_owner {
 		Ok(user)
 	} else {
 		Err(ApiError::Forbidden(
@@ -59,7 +59,7 @@ pub fn get_session_server_owner_user(session: &Session) -> ApiResult<User> {
 }
 
 pub fn user_has_permission(user: &User, permission: UserPermission) -> bool {
-	user.is_server_owner() || user.permissions.iter().any(|p| p == &permission)
+	user.is_server_owner || user.permissions.iter().any(|p| p == &permission)
 }
 
 pub fn enforce_permission(user: &User, permission: UserPermission) -> ApiResult<()> {

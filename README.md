@@ -162,7 +162,8 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 
 ### /crates
 
-- `prisma-cli`: A small rust app to run the Prisma CLI.
+- `codegen`: A small rust app that handles all of the code generation for Stump.
+- `prisma-cli`: A small wrapper rust app to run the Prisma CLI.
 
 ### /packages
 

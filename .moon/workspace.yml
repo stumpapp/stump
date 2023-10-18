@@ -7,5 +7,6 @@ vcs:
 projects:
   - 'apps/*'
   - 'core'
+  - 'crates/*'
   - '!crates/prisma-cli'
   - 'packages/*'

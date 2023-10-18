@@ -11,6 +11,7 @@ import z from 'zod'
 import { useLocaleContext } from '../../../../i18n'
 import { useUserManagementContext } from '../context'
 
+// TODO: make this a dedicated page!
 export default function CreateUserModal() {
 	const { t } = useLocaleContext()
 

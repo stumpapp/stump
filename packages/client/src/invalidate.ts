@@ -2,7 +2,7 @@ import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from 
 import { CoreEvent } from '@stump/types'
 import { QueryKey } from '@tanstack/react-query'
 
-import { queryClient } from './index'
+import { queryClient } from './client'
 
 type CoreEventTrigger = CoreEvent['key']
 type InvalidateFnArgs = {

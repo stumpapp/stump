@@ -1,7 +1,8 @@
 import { MediaMetadataOverview } from '@stump/types'
 
-import { API, toUrlParams, urlWithParams } from './index'
+import { API } from './axios'
 import { ApiResult } from './types'
+import { toUrlParams, urlWithParams } from './utils'
 
 export function getMediaMetadataOverview(
 	params?: Record<string, unknown>,

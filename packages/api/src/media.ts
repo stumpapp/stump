@@ -1,6 +1,6 @@
 import type { Media, PatchMediaThumbnail, ReadProgress } from '@stump/types'
 
-import { API } from './index'
+import { API } from './axios'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
 import { mergeCursorParams, toUrlParams, urlWithParams } from './utils'
 

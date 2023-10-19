@@ -2,7 +2,8 @@ import { cva, VariantProps } from 'class-variance-authority'
 import React, { forwardRef, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 
-import { ProgressBar, Text } from '../index'
+import { ProgressBar } from '../progress'
+import { Text } from '../text'
 import { cn, cx } from '../utils'
 
 const entityCardVariants = cva('', {

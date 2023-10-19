@@ -24,7 +24,6 @@
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
-		"@netlify/plugin-nextjs": "^4.33.0",
 		"@types/node": "^20.8.7",
 		"autoprefixer": "^10.4.16",
 		"postcss": "^8.4.31",

@@ -50,7 +50,7 @@ export function useTags({
 					({
 						label: tag.name,
 						value: tag.name,
-					} as TagOption),
+					}) as TagOption,
 			)
 
 			return { options: tagOptions, tags: data.data }

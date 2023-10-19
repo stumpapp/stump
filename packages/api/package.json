@@ -9,7 +9,7 @@
 	},
 	"license": "MIT",
 	"devDependencies": {
-		"@types/qs": "^6.9.7",
+		"@types/qs": "^6.9.9",
 		"typescript": "^5.2.2"
 	},
 	"dependencies": {

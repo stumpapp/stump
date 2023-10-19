@@ -17,11 +17,11 @@
 	},
 	"devDependencies": {
 		"@types/axios": "^0.14.0",
-		"@types/node": "^18.15.11",
-		"@types/react": "^18.0.31",
+		"@types/node": "^20.8.7",
+		"@types/react": "^18.2.29",
 		"prettier": "^2.8.7",
 		"react": "^18.2.0",
-		"tsconfig": "*",
+		"tsconfig": "^7.0.0",
 		"typescript": "^5.2.2"
 	}
 }

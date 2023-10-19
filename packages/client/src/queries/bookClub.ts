@@ -1,12 +1,15 @@
 import { bookClubApi, bookClubQueryKeys } from '@stump/api'
-import { BookClub } from '@stump/types'
+import { BookClub, GetBookClubsParams } from '@stump/types'
 
 import { QueryOptions, useQuery } from '../client'
 
-export function useBookClubsQuery(options: QueryOptions<BookClub[]> = {}) {
+type UseBookClubsQueryOptions = QueryOptions<BookClub[]> & {
+	params?: GetBookClubsParams
+}
+export function useBookClubsQuery({ params, ...options }: UseBookClubsQueryOptions = {}) {
 	const { data, ...rest } = useQuery(
 		[bookClubQueryKeys.getBookClubs],
-		() => bookClubApi.getBookClubs().then((res) => res.data),
+		() => bookClubApi.getBookClubs(params).then((res) => res.data),
 		options,
 	)
 

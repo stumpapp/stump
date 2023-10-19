@@ -7,14 +7,21 @@ import {
 	CreateBookClub,
 	CreateBookClubInvitation,
 	CreateBookClubMember,
+	GetBookClubsParams,
 	PatchBookClubMember,
 	UpdateBookClub,
 } from '@stump/types'
 
+import { toUrlParams, urlWithParams } from '.'
 import { API } from './axios'
 import { ApiResult } from './types'
 
-export async function getBookClubs(): Promise<ApiResult<BookClub[]>> {
+export async function getBookClubs(params?: GetBookClubsParams): Promise<ApiResult<BookClub[]>> {
+	if (params) {
+		const searchParams = toUrlParams(params)
+		return API.get(urlWithParams('/book-clubs', searchParams))
+	}
+
 	return API.get('/book-clubs')
 }
 

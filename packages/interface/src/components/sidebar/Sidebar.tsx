@@ -1,4 +1,4 @@
-import { refreshUseLibrary, useAppProps, useLibraries } from '@stump/client'
+import { refreshUseLibrary, useAppProps, useLibraries, useUserStore } from '@stump/client'
 import { Button, ButtonOrLink, cn, Heading, Spacer, useBoolean } from '@stump/components'
 import type { Library } from '@stump/types'
 import clsx from 'clsx'
@@ -10,6 +10,7 @@ import {
 	Library as LibraryIcon,
 	type LucideProps,
 	Settings,
+	Users,
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -22,6 +23,8 @@ import NavigationButtons from '../topbar/NavigationButtons'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
 import Logout from './Logout'
 import ThemeToggle from './ThemeToggle'
+
+// TODO: major chore, but this entire component needs a rewrite. It is awful, and one of the oldest...
 
 interface NavMenuItemProps extends Library {
 	active: boolean
@@ -173,8 +176,10 @@ type SidebarContentProps = {
 export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 	const location = useLocation()
 	const navigate = useNavigate()
+	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
 
 	const { t } = useLocaleContext()
+
 	const { libraries } = useLibraries()
 
 	// TODO: I'd like to also highlight the library when viewing an item from it.
@@ -189,14 +194,12 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 		return location.pathname.startsWith(href)
 	}
 
+	const bookClubAccess = checkUserPermission('bookclub:read')
 	const links: Array<NavItemProps> = useMemo(() => {
 		const libraryIsActive = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
 
 		return [
 			{ href: '/', icon: Home, name: t('sidebar.buttons.home') },
-			// TODO: clicking Libraries should be disabled when:
-			// 1. there are no libraries
-			// 2. user is not server owner (i.e. cannot create libraries)
 			{
 				active: location.pathname === '/libraries/create',
 				icon: LibraryIcon,
@@ -214,17 +217,23 @@ export function SidebarContent({ isMobileSheet = false }: SidebarContentProps) {
 				icon: Book,
 				name: t('sidebar.buttons.books'),
 			},
-			// {
-			// 	icon: List,
-			// 	name: 'Reading Lists',
-			// },
+			...(bookClubAccess
+				? [
+						{
+							active: location.pathname.startsWith('/book-clubs'),
+							href: '/book-clubs',
+							icon: Users,
+							name: t('sidebar.buttons.bookClubs'),
+						},
+				  ]
+				: []),
 			{
 				href: '/settings',
 				icon: Settings,
 				name: t('sidebar.buttons.settings'),
 			},
 		]
-	}, [libraries, location.pathname, t])
+	}, [libraries, location.pathname, t, bookClubAccess])
 
 	return (
 		<>

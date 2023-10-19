@@ -11,7 +11,7 @@ import { UserManagementContext } from './context.ts'
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const UserManagementScene = lazily(() => import('./UserManagementScene.tsx'))
-const CreateUserScene = lazily(() => import('./CreateUserScene.tsx'))
+const CreateUserScene = lazily(() => import('./create-user/CreateUserScene.tsx'))
 
 export default function UserManagementRouter() {
 	const [deletingUser, setDeletingUser] = useState<User | null>(null)
@@ -31,6 +31,7 @@ export default function UserManagementRouter() {
 		page_size: pagination.pageSize,
 		params: {
 			include_read_progresses: true,
+			include_restrictions: true,
 			include_session_count: true,
 		},
 	})
@@ -54,6 +55,7 @@ export default function UserManagementRouter() {
 			<Routes>
 				<Route path="" element={<UserManagementScene />} />
 				<Route path="create" element={<CreateUserScene />} />
+				{/* TODO: update user */}
 			</Routes>
 		</UserManagementContext.Provider>
 	)

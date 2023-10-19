@@ -39,6 +39,7 @@ const baseColumns = [
 			</Text>
 		),
 		header: 'Timestamp',
+		size: 100,
 	}),
 	columnHelper.accessor('ip_address', {
 		cell: ({ row: { original: activity } }) => (
@@ -47,7 +48,7 @@ const baseColumns = [
 			</Text>
 		),
 		header: 'IP address',
-		size: 75,
+		size: 100,
 	}),
 	columnHelper.accessor('user_agent', {
 		cell: ({ row: { original: activity } }) => (

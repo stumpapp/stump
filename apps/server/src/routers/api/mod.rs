@@ -18,10 +18,8 @@ mod tests {
 	};
 
 	use super::v1::{
-		auth::LoginOrRegisterArgs, book_club::*, job::UpdateSchedulerConfig,
-		library::PatchLibraryThumbnail, media::PatchMediaThumbnail,
-		metadata::MediaMetadataOverview, series::PatchSeriesThumbnail, ClaimResponse,
-		StumpVersion,
+		auth::*, book_club::*, job::*, library::*, media::*, metadata::*, series::*,
+		user::*, ClaimResponse, StumpVersion,
 	};
 
 	#[allow(dead_code)]
@@ -60,6 +58,7 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<CreateUser>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
@@ -68,6 +67,7 @@ mod tests {
 			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),
 		)?;
 
+		file.write_all(format!("{}\n\n", ts_export::<GetBookClubsParams>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateBookClub>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateBookClub>()?).as_bytes())?;
 		file.write_all(

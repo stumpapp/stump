@@ -7,15 +7,19 @@ use axum::{
 use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Utc, Direction};
 use serde::Deserialize;
+use specta::Type;
 use stump_core::{
 	db::{
 		entity::{
-			DeleteUser, LoginActivity, UpdateUser, UpdateUserPreferences, User,
-			UserPreferences,
+			AgeRestriction, DeleteUser, LoginActivity, UpdateUser, UpdateUserPreferences,
+			User, UserPermission, UserPreferences,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
+	prisma::{
+		age_restriction, session, user, user_login_activity, user_preferences,
+		PrismaClient,
+	},
 };
 use tower_sessions::Session;
 use tracing::{debug, trace};
@@ -29,8 +33,6 @@ use crate::{
 		get_hash_cost, get_session_server_owner_user, get_session_user, UserQueryRelation,
 	},
 };
-
-use super::auth::LoginOrRegisterArgs;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -121,6 +123,7 @@ async fn get_users(
 	let include_user_read_progress =
 		relation_query.include_read_progresses.unwrap_or_default();
 	let include_session_count = relation_query.include_session_count.unwrap_or_default();
+	let include_restrictions = relation_query.include_restrictions.unwrap_or_default();
 
 	let (users, count) = ctx
 		.db
@@ -134,6 +137,10 @@ async fn get_users(
 
 			if include_session_count {
 				query = query.with(user::sessions::fetch(vec![]));
+			}
+
+			if include_restrictions {
+				query = query.with(user::age_restriction::fetch());
 			}
 
 			if !is_unpaged {
@@ -276,57 +283,103 @@ async fn update_preferences(
 	Ok(UserPreferences::from(updated_preferences))
 }
 
+#[derive(Deserialize, Type, ToSchema)]
+pub struct CreateUser {
+	pub username: String,
+	pub password: String,
+	#[serde(default)]
+	pub permissions: Vec<UserPermission>,
+	pub age_restriction: Option<AgeRestriction>,
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/users",
 	tag = "user",
-	request_body = LoginOrRegisterArgs,
+	request_body = CreateUser,
 	responses(
-		(status = 200, description = "Successfully created user.", body = User),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 200, description = "Successfully created user", body = User),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Creates a new user.
 async fn create_user(
 	session: Session,
 	State(ctx): State<AppState>,
-	Json(input): Json<LoginOrRegisterArgs>,
+	Json(input): Json<CreateUser>,
 ) -> ApiResult<Json<User>> {
 	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
+
 	let hashed_password = bcrypt::hash(input.password, get_hash_cost())?;
+
+	// TODO: https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let created_user = db
-		.user()
-		.create(input.username.to_owned(), hashed_password, vec![])
-		.exec()
-		.await?;
+		._transaction()
+		.run(|client| async move {
+			let created_user = client
+				.user()
+				.create(
+					input.username.to_owned(),
+					hashed_password,
+					vec![
+						user::is_server_owner::set(false),
+						user::permissions::set(Some(
+							input
+								.permissions
+								.into_iter()
+								.map(|p| p.to_string())
+								.collect::<Vec<String>>()
+								.join(","),
+						)),
+					],
+				)
+				.exec()
+				.await?;
 
-	// FIXME: these next two queries will be removed once nested create statements are
-	// supported on the prisma client. Until then, this ugly mess is necessary.
-	// https://github.com/Brendonovich/prisma-client-rust/issues/44
-	let _user_preferences = db
-		.user_preferences()
-		.create(vec![
-			user_preferences::user::connect(user::id::equals(created_user.id.clone())),
-			user_preferences::user_id::set(Some(created_user.id.clone())),
-		])
-		.exec()
-		.await?;
+			if let Some(ar) = input.age_restriction {
+				let _age_restriction = client
+					.age_restriction()
+					.create(
+						ar.age,
+						user::id::equals(created_user.id.clone()),
+						vec![age_restriction::restrict_on_unset::set(
+							ar.restrict_on_unset,
+						)],
+					)
+					.exec()
+					.await?;
+				tracing::trace!(?_age_restriction, "Created age restriction")
+			}
 
-	// This *really* shouldn't fail, so I am using unwrap here. It also doesn't
-	// matter too much in the long run since this query will go away once above fixme
-	// is resolved.
-	let user = db
-		.user()
-		.find_unique(user::id::equals(created_user.id))
-		.with(user::user_preferences::fetch())
-		.exec()
+			let _user_preferences = client
+				.user_preferences()
+				.create(vec![
+					user_preferences::user::connect(user::id::equals(
+						created_user.id.clone(),
+					)),
+					user_preferences::user_id::set(Some(created_user.id.clone())),
+				])
+				.exec()
+				.await?;
+			tracing::trace!(?_user_preferences, "Created user preferences");
+
+			client
+				.user()
+				.find_unique(user::id::equals(created_user.id))
+				.with(user::user_preferences::fetch())
+				.with(user::age_restriction::fetch())
+				.exec()
+				.await
+		})
 		.await?
-		.unwrap();
+		.ok_or(ApiError::InternalServerError(
+			"Failed to create user".to_string(),
+		))?;
 
-	Ok(Json(user.into()))
+	Ok(Json(created_user.into()))
 }
 
 #[utoipa::path(

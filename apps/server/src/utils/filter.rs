@@ -254,6 +254,7 @@ pub struct SeriesQueryRelation {
 pub struct UserQueryRelation {
 	pub include_read_progresses: Option<bool>,
 	pub include_session_count: Option<bool>,
+	pub include_restrictions: Option<bool>,
 }
 
 // TODO: decide what others to include

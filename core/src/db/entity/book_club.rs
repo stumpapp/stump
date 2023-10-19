@@ -136,7 +136,7 @@ pub struct BookClubSchedule {
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct BookClubBook {
-	id: i32,
+	id: String,
 	order: i32,
 	#[specta(optional)]
 	start_at: Option<String>,

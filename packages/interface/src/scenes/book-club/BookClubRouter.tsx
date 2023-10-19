@@ -8,6 +8,8 @@ const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyCompo
 
 const PublicBookClubExplorerScene = lazily(() => import('./PublicBookClubExplorerScene.tsx'))
 const BookClubHomeScene = lazily(() => import('./BookClubHomeScene.tsx'))
+const UserBookClubsScene = lazily(() => import('./UserBookClubsScene.tsx'))
+const CreateBookClubScene = lazily(() => import('./create-club/CreateBookClubScene.tsx'))
 
 export default function BookClubRouter() {
 	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
@@ -20,7 +22,10 @@ export default function BookClubRouter() {
 
 	return (
 		<Routes>
+			<Route path="" element={<UserBookClubsScene />} />
 			<Route path="explore" element={<PublicBookClubExplorerScene />} />
+			{/* TODO: router guard bookclub:create */}
+			<Route path="create" element={<CreateBookClubScene />} />
 			<Route path=":id" element={<BookClubHomeScene />} />
 			{/* <Route path=":id/manage" element={<BookClubManagementScene />} /> */}
 			<Route path="*" element={<Navigate to="/404" />} />

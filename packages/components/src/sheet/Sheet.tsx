@@ -5,7 +5,7 @@ import { Button, PickSelect } from '../index'
 import { SheetContentProps, SheetPortalProps, SheetPrimitive } from './primitives'
 
 export type SheetProps = {
-	trigger: string | React.ReactNode
+	trigger?: string | React.ReactNode
 	children: React.ReactNode
 	footer?: React.ReactNode
 	title: string | React.ReactNode
@@ -64,7 +64,7 @@ export function Sheet({
 
 	return (
 		<SheetPrimitive open={open} onOpenChange={handleOpenChange}>
-			<SheetPrimitive.Trigger asChild>{renderTrigger()}</SheetPrimitive.Trigger>
+			{!!trigger && <SheetPrimitive.Trigger asChild>{renderTrigger()}</SheetPrimitive.Trigger>}
 			<SheetPrimitive.Content closeIcon={closeIcon} {...contentProps} className={contentClassName}>
 				<SheetPrimitive.Header>
 					<SheetPrimitive.Title>{title}</SheetPrimitive.Title>

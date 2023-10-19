@@ -1,10 +1,4 @@
-import type {
-	LoginActivity,
-	LoginOrRegisterArgs,
-	UpdateUser,
-	User,
-	UserPreferences,
-} from '@stump/types'
+import type { CreateUser, LoginActivity, UpdateUser, User, UserPreferences } from '@stump/types'
 
 import { API, toUrlParams } from '.'
 import { ApiResult, PageableApiResult } from './types'
@@ -41,7 +35,7 @@ export function updateUserPreferences(
 	return API.put(`/users/${userId}/preferences`, preferences)
 }
 
-export function createUser(params: LoginOrRegisterArgs): Promise<ApiResult<User>> {
+export function createUser(params: CreateUser): Promise<ApiResult<User>> {
 	return API.post(`/users`, params)
 }
 

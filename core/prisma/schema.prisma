@@ -170,11 +170,12 @@ model Media {
   series    Series?        @relation(fields: [series_id], references: [id], onDelete: Cascade)
   series_id String?
 
-  read_progresses    ReadProgress[]
-  tags               Tag[]
-  reading_list_items ReadingListItem[]
-  annotations        MediaAnnotation[]
-  reviews            Review[]
+  read_progresses       ReadProgress[]
+  tags                  Tag[]
+  reading_list_items    ReadingListItem[]
+  annotations           MediaAnnotation[]
+  reviews               Review[]
+  book_club_suggestions BookClubBookSuggestion[]
 
   @@map("media")
 }
@@ -329,11 +330,13 @@ model BookClubMember {
   role Int // 0 - member, 1 - moderator, 2 - admin, 3 - creator
 
   user_id                   String
-  user                      User                      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user                      User                         @relation(fields: [user_id], references: [id], onDelete: Cascade)
   book_club_id              String
-  book_club                 BookClub                  @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
+  book_club                 BookClub                     @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
   discussion_messages       BookClubChatMessage[]
   liked_discussion_messages BookClubChatMessageLike[]
+  book_suggestions          BookClubBookSuggestion[]
+  liked_book_suggestions    BookClubBookSuggestionLike[]
 
   @@unique([user_id, book_club_id])
   @@map("book_club_members")
@@ -352,7 +355,7 @@ model BookClubSchedule {
 }
 
 model BookClubBook {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
   order Int
 
@@ -368,12 +371,42 @@ model BookClubBook {
   @@map("book_club_books")
 }
 
+model BookClubBookSuggestion {
+  id String @id @default(cuid())
+
+  title  String?
+  author String?
+  url    String?
+  notes  String?
+
+  suggested_by_id String
+  suggested_by    BookClubMember @relation(fields: [suggested_by_id], references: [id], onDelete: Cascade)
+  book_id         String?
+  book            Media?         @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  likes BookClubBookSuggestionLike[]
+
+  @@map("book_club_book_suggestions")
+}
+
+model BookClubBookSuggestionLike {
+  timestamp DateTime @default(now())
+
+  liked_by_id   String
+  liked_by      BookClubMember         @relation(fields: [liked_by_id], references: [id], onDelete: Cascade)
+  suggestion_id String
+  suggestion    BookClubBookSuggestion @relation(fields: [suggestion_id], references: [id], onDelete: Cascade)
+
+  @@unique([liked_by_id, suggestion_id])
+  @@map("book_club_book_suggestion_likes")
+}
+
 model BookClubChatBoard {
   id String @id @default(cuid())
 
   messages BookClubChatMessage[]
 
-  book_club_book_id Int          @unique
+  book_club_book_id String       @unique
   book_club_book    BookClubBook @relation(fields: [book_club_book_id], references: [id], onDelete: Cascade)
 
   @@map("book_club_chat_boards")
@@ -539,22 +572,37 @@ model JobScheduleConfig {
 
   // The libraries to exclude from scheduled scans, if any
   excluded_libraries Library[]
-  // The associated server preferences. There will only ever be one instance of ServerPreferences in the database.
-  server_preferences ServerPreferences?
+  // The associated server preferences. There will only ever be one instance of ServerConfig in the database.
+  server_config      ServerConfig?
 
   @@map("job_schedule_configs")
 }
 
-model ServerPreferences {
+// TODO: notifier support
+// An external invitation sent to a provided email for the user to join the server
+model ServerInvitation {
   id String @id @default(cuid())
+
+  secret              String // The secret token used to verify the invitation
+  email               String?
+  granted_permissions String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
+  created_at          DateTime @default(now())
+  expires_at          DateTime
+
+  // notifier            Notifier? @relation(fields: [notifier_id], references: [id])
+
+  @@map("server_invitations")
+}
+
+model ServerConfig {
+  id String @id @default(cuid())
+
+  public_url String? // The public URL of the server, if any
 
   // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
   // The schedule configuration. If not set, no scheduled scans will be run.
   job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?            @unique
 
-  @@map("server_preferences")
+  @@map("server_config")
 }
-
-// https://github.com/prisma/prisma/issues/2219
-// CHORE: once/if above is resolved, use enums

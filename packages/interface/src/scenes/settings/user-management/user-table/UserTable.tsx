@@ -3,9 +3,11 @@ import { User } from '@stump/types'
 import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { HelpCircle } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
 import Table from '../../../../components/table/Table'
 import { useUserManagementContext } from '../context'
+import InspectUserSlideOver from './InspectUserSlideOver'
 import UserActionMenu from './UserActionMenu'
 import UsernameRow from './UsernameRow'
 
@@ -22,13 +24,10 @@ const baseColumns = [
 		cell: ({ row: { original: user } }) => <UsernameRow {...user} />,
 		header: 'User',
 	}),
-	columnHelper.accessor('role', {
-		cell: (info) => (
-			<Text size="sm">
-				{info.getValue<string>()?.toLowerCase() === 'server_owner' ? 'Admin' : 'Member'}
-			</Text>
-		),
+	columnHelper.display({
+		cell: (info) => <Text size="sm">{info.getValue<boolean>() ? 'Server Owner' : 'Member'}</Text>,
 		header: 'Role',
+		id: 'is_server_owner',
 	}),
 	columnHelper.accessor('created_at', {
 		cell: ({
@@ -79,37 +78,51 @@ const baseColumns = [
 		header: 'Status',
 		id: 'is_locked',
 	}),
-	columnHelper.display({
-		cell: ({ row: { original } }) => (
-			<div className="inline-flex items-end md:w-2">
-				<UserActionMenu user={original} />
-			</div>
-		),
-		id: 'actions',
-		size: 28,
-	}),
 ]
 
 export default function UserTable() {
+	const [inspectingUser, setInspectingUser] = useState<User | null>(null)
 	const { users, pageCount, pagination, setPagination } = useUserManagementContext()
 
 	// TODO: mobile columns less? or maybe scroll? idk what would be best UX
 
+	const columns = useMemo(
+		() => [
+			...baseColumns,
+			columnHelper.display({
+				cell: ({ row: { original } }) => (
+					<div className="inline-flex items-end md:w-2">
+						<UserActionMenu
+							user={original}
+							onSelectForInspect={() => setInspectingUser(original)}
+						/>
+					</div>
+				),
+				id: 'actions',
+				size: 28,
+			}),
+		],
+		[],
+	)
+
 	return (
-		<Table
-			sortable
-			columns={baseColumns}
-			options={{
-				getCoreRowModel: getCoreRowModel(),
-				manualPagination: true,
-				onPaginationChange: setPagination,
-				pageCount,
-				state: {
-					pagination,
-				},
-			}}
-			data={users}
-			fullWidth
-		/>
+		<>
+			<Table
+				sortable
+				columns={columns}
+				options={{
+					getCoreRowModel: getCoreRowModel(),
+					manualPagination: true,
+					onPaginationChange: setPagination,
+					pageCount,
+					state: {
+						pagination,
+					},
+				}}
+				data={users}
+				fullWidth
+			/>
+			<InspectUserSlideOver user={inspectingUser} onClose={() => setInspectingUser(null)} />
+		</>
 	)
 }

@@ -10,6 +10,7 @@ use prisma_client_rust::{
 	or, Direction,
 };
 use serde::Deserialize;
+use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
 	db::entity::{
@@ -34,6 +35,11 @@ use crate::{
 		get_user_and_enforce_permission,
 	},
 };
+
+// TODO: suggestions
+// TODO: suggestion likes
+// TODO: update schedule
+// TODO: patch schedule
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -141,6 +147,12 @@ pub(crate) fn book_club_member_access_for_user(
 	)
 }
 
+#[derive(Deserialize, Type, ToSchema)]
+pub struct GetBookClubsParams {
+	#[serde(default)]
+	all: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/book_clubs",
@@ -153,14 +165,23 @@ pub(crate) fn book_club_member_access_for_user(
 )]
 async fn get_book_clubs(
 	State(ctx): State<AppState>,
+	QsQuery(params): QsQuery<GetBookClubsParams>,
 	session: Session,
 ) -> ApiResult<Json<Vec<BookClub>>> {
 	let client = ctx.get_db();
 	let viewer = get_session_user(&session)?;
 
+	let where_params = if params.all {
+		vec![book_club::members::some(vec![
+			book_club_member::user_id::equals(viewer.id.clone()),
+		])]
+	} else {
+		book_club_access_for_user(&viewer)
+	};
+
 	let book_clubs = client
 		.book_club()
-		.find_many(book_club_access_for_user(&viewer))
+		.find_many(where_params)
 		.include(book_club_member_and_schedule_include::include(
 			book_club_member_access_for_user(&viewer),
 		))
@@ -173,9 +194,11 @@ async fn get_book_clubs(
 #[derive(Deserialize, Type, ToSchema)]
 pub struct CreateBookClub {
 	pub name: String,
-	pub private: bool,
+	#[serde(default)]
+	pub is_private: bool,
 	pub member_role_spec: Option<BookClubMemberRoleSpec>,
 
+	#[serde(default)]
 	pub creator_hide_progress: bool,
 	pub creator_display_name: Option<String>,
 }
@@ -209,7 +232,7 @@ async fn create_book_club(
 				.create(
 					payload.name,
 					vec![
-						book_club::is_private::set(payload.private),
+						book_club::is_private::set(payload.is_private),
 						book_club::member_role_spec::set(
 							payload.member_role_spec.map(Into::into),
 						),

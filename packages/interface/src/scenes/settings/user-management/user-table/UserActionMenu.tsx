@@ -2,7 +2,7 @@ import { userApi, userQueryKeys } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { User } from '@stump/types'
-import { Lock, MoreVertical, Pencil, Trash, Unlock } from 'lucide-react'
+import { Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
 import React, { useMemo } from 'react'
 import toast from 'react-hot-toast'
 
@@ -12,9 +12,10 @@ import { useUserManagementContext } from '../context.ts'
 
 type Props = {
 	user: User
+	onSelectForInspect: (user: User) => void
 }
 
-export default function UserActionMenu({ user }: Props) {
+export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 	const { isServerOwner, user: byUser } = useAppContext()
 	const { setDeletingUser } = useUserManagementContext()
 
@@ -36,6 +37,12 @@ export default function UserActionMenu({ user }: Props) {
 
 	const items = useMemo(
 		() => [
+			{
+				disabled: isSelf,
+				label: 'Inspect',
+				leftIcon: <Search className="mr-2 h-4 w-4" />,
+				onClick: () => onSelectForInspect(user),
+			},
 			{
 				disabled: true,
 				label: 'Edit',

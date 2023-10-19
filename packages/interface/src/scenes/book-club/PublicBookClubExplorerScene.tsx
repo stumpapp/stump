@@ -2,6 +2,7 @@ import { useBookClubsQuery, useUserStore } from '@stump/client'
 import React from 'react'
 
 import GenericEmptyState from '../../components/GenericEmptyState'
+import SceneContainer from '../../components/SceneContainer'
 
 export default function PublicBookClubExplorerScene() {
 	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
@@ -17,5 +18,7 @@ export default function PublicBookClubExplorerScene() {
 		return <GenericEmptyState title="No book clubs found" subtitle={message} />
 	}
 
-	return <div>I will eventually show some public book clubs that you can join</div>
+	return (
+		<SceneContainer>I will eventually show some public book clubs that you can join</SceneContainer>
+	)
 }

@@ -105,19 +105,14 @@ impl StumpCore {
 		let config_exists = self
 			.ctx
 			.db
-			.server_preferences()
+			.server_config()
 			.find_first(vec![])
 			.exec()
 			.await?
 			.is_some();
 
 		if !config_exists {
-			self.ctx
-				.db
-				.server_preferences()
-				.create(vec![])
-				.exec()
-				.await?;
+			self.ctx.db.server_config().create(vec![]).exec().await?;
 		}
 
 		Ok(())

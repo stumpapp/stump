@@ -18,7 +18,7 @@ use stump_core::{
 	job::JobDetail,
 	prisma::{
 		job::{self, OrderByParam as JobOrderByParam},
-		job_schedule_config, library, server_preferences,
+		job_schedule_config, library, server_config,
 	},
 };
 use tokio::sync::oneshot;
@@ -223,10 +223,10 @@ async fn get_scheduler_config(
 	let client = ctx.get_db();
 
 	let server_config = client
-		.server_preferences()
+		.server_config()
 		.find_first(vec![])
 		.with(
-			server_preferences::job_schedule_config::fetch()
+			server_config::job_schedule_config::fetch()
 				.with(job_schedule_config::excluded_libraries::fetch(vec![])),
 		)
 		.exec()
@@ -276,17 +276,17 @@ async fn update_scheduler_config(
 	let result: Result<Option<JobSchedulerConfig>, ApiError> = db
 		._transaction()
 		.run(|client| async move {
-			let server_preferences = client
-				.server_preferences()
+			let server_config = client
+				.server_config()
 				.find_first(vec![])
-				.with(server_preferences::job_schedule_config::fetch())
+				.with(server_config::job_schedule_config::fetch())
 				.exec()
 				.await?
 				.ok_or(ApiError::InternalServerError(String::from(
 					"Server preferences are missing!",
 				)))?;
 
-			let existing_config = server_preferences.job_schedule_config()?.cloned();
+			let existing_config = server_config.job_schedule_config()?.cloned();
 
 			if should_remove_config {
 				client
@@ -324,8 +324,8 @@ async fn update_scheduler_config(
 				let created_config = client
 					.job_schedule_config()
 					.create(chain_optional_iter(
-						[job_schedule_config::server_preferences::connect(
-							server_preferences::id::equals(server_preferences.id),
+						[job_schedule_config::server_config::connect(
+							server_config::id::equals(server_config.id),
 						)],
 						[
 							input

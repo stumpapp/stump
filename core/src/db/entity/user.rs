@@ -118,6 +118,7 @@ impl From<prisma::user::Data> for User {
 	}
 }
 
+// TODO: consider adding self:update permission, useful for child accounts
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
 pub enum UserPermission {
 	#[serde(rename = "bookclub:read")]

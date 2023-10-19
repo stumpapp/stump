@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::{job_schedule_config, server_preferences};
+use crate::prisma::{job_schedule_config, server_config};
 
 use super::Library;
 
@@ -19,8 +19,8 @@ pub struct JobSchedulerConfig {
 	excluded_libraries: Vec<Library>,
 }
 
-impl From<server_preferences::Data> for ServerConfig {
-	fn from(data: server_preferences::Data) -> Self {
+impl From<server_config::Data> for ServerConfig {
+	fn from(data: server_config::Data) -> Self {
 		let job_scheduler_config = match data.job_schedule_config() {
 			Ok(job_scheduler_config) => {
 				job_scheduler_config.cloned().map(JobSchedulerConfig::from)

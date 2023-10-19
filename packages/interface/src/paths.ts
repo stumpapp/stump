@@ -7,6 +7,9 @@ type BookReaderParams = {
 	isStreaming?: boolean
 }
 
+type SettingsPage = 'general' | 'users' | 'jobs' | 'desktop' | 'server'
+type DocTopic = 'access-control'
+
 const paths = {
 	bookManagement: (id: string) => `/books/${id}/manage`,
 	bookOverview: (id: string) => `/books/${id}`,
@@ -40,6 +43,8 @@ const paths = {
 		return `${baseUrl}/reader?${searchParams.toString()}`
 	},
 	bookSearch: () => '/books',
+	docs: (topic?: DocTopic, section?: string) =>
+		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
 	home: () => '/',
 	libraryCreate: () => '/libraries/create',
 	libraryFileExplorer: (id: string) => `/libraries/${id}/explore`,
@@ -58,7 +63,7 @@ const paths = {
 		}
 		return `/series/${id}`
 	},
-	settings: (subpath?: string) => `/settings/${subpath || ''}`,
+	settings: (subpath?: SettingsPage) => `/settings/${subpath || ''}`,
 } as const
 
 export default paths

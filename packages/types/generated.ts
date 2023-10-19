@@ -60,7 +60,7 @@ export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>
 
 export type BookClubSchedule = { default_interval_days: number | null; books?: BookClubBook[] | null }
 
-export type BookClubBook = { id: number; order: number; start_at?: string | null; end_at?: string | null; discussion_duration_days: number; chat_board?: BookClubChatBoard | null }
+export type BookClubBook = { id: string; order: number; start_at?: string | null; end_at?: string | null; discussion_duration_days: number; chat_board?: BookClubChatBoard | null }
 
 export type BookClubChatBoard = { id: string; messages: BookClubChatMessage[] | null }
 
@@ -158,17 +158,21 @@ export type StumpVersion = { semver: string; rev: string | null; compile_time: s
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 
+export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
+
 export type ClaimResponse = { is_claimed: boolean }
 
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
 
 export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_library_ids: string[] | null }
 
-export type CreateBookClub = { name: string; private: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress: boolean; creator_display_name: string | null }
+export type GetBookClubsParams = { all?: boolean }
+
+export type CreateBookClub = { name: string; is_private: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress: boolean; creator_display_name: string | null }
 
 export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null }
 
-// export type UpdateBookClubSchedule<> = null
+export type UpdateBookClubSchedule<> = null
 
 export type CreateBookClubInvitation = { user_id: string; role: BookClubMemberRole | null }
 

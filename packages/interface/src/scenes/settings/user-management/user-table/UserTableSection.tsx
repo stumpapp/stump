@@ -1,6 +1,5 @@
-import { Divider, Heading, Text } from '@stump/components'
+import { ButtonOrLink, Divider, Heading, Text } from '@stump/components'
 
-import CreateUserModal from './CreateUserModal'
 import DeleteUserModal from './DeleteUserModal'
 import UserTable from './UserTable'
 
@@ -11,7 +10,9 @@ export default function UserTableSection() {
 				<Heading size="xs">Users</Heading>
 				<div className="flex items-start gap-2">
 					<DeleteUserModal />
-					<CreateUserModal />
+					<ButtonOrLink href="create" variant="secondary">
+						Create user
+					</ButtonOrLink>
 				</div>
 			</div>
 

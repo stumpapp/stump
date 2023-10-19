@@ -26,18 +26,19 @@ export default function ApplicationVersion() {
 		>
 			<div className="flex flex-col gap-3">
 				<div className="flex items-center gap-2">
-					<img src="/assets/favicon.ico" className="h-6 w-6 object-scale-down" />
-					<Heading className="text-xs">Version Information</Heading>
+					<img src="/assets/favicon.ico" className="h-4 w-4 object-scale-down" />
+					<Heading className="text-xs">Build Information</Heading>
 				</div>
 				<div className="flex flex-col gap-1">
-					{version?.semver && (
-						<Text className="text-xs">
-							Semantic Version: <span className={TEXT_VARIANTS.muted}>{version.semver}</span>
-						</Text>
-					)}
 					{version?.rev && (
 						<Text className="text-xs">
-							Commit: <span className={TEXT_VARIANTS.muted}>{version.rev}</span>
+							Commit:{' '}
+							<Link
+								className={TEXT_VARIANTS.muted}
+								href={`https://github.com/stumpapp/stump/commit/${version.rev}`}
+							>
+								{version.rev}
+							</Link>
 						</Text>
 					)}
 					{version?.compile_time && (

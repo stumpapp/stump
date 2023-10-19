@@ -10,7 +10,7 @@ interface Props {
 }
 
 // Used to render the items in the series list and media list
-export default function ListItem({ id, title, subtitle, href, even }: Props) {
+export default function ListItem({ id, title, subtitle, href }: Props) {
 	return (
 		<Link
 			tabIndex={0}

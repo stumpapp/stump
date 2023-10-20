@@ -6,7 +6,7 @@ import { LazyComponent } from '../../AppRouter'
 
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
-const PublicBookClubExplorerScene = lazily(() => import('./PublicBookClubExplorerScene.tsx'))
+const BookClubExplorerScene = lazily(() => import('./BookClubExplorerScene.tsx'))
 const BookClubHomeScene = lazily(() => import('./BookClubHomeScene.tsx'))
 const UserBookClubsScene = lazily(() => import('./UserBookClubsScene.tsx'))
 const CreateBookClubScene = lazily(() => import('./create-club/CreateBookClubScene.tsx'))
@@ -23,7 +23,7 @@ export default function BookClubRouter() {
 	return (
 		<Routes>
 			<Route path="" element={<UserBookClubsScene />} />
-			<Route path="explore" element={<PublicBookClubExplorerScene />} />
+			<Route path="explore" element={<BookClubExplorerScene />} />
 			{/* TODO: router guard bookclub:create */}
 			<Route path="create" element={<CreateBookClubScene />} />
 			<Route path=":id" element={<BookClubHomeScene />} />

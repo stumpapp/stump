@@ -15,3 +15,13 @@ export function useBookClubsQuery({ params, ...options }: UseBookClubsQueryOptio
 
 	return { bookClubs: data, ...rest }
 }
+
+export function useBookClubQuery(id: string, options: QueryOptions<BookClub> = {}) {
+	const { data, ...rest } = useQuery(
+		[bookClubQueryKeys.getBookClubById, id],
+		() => bookClubApi.getBookClubById(id).then((res) => res.data),
+		options,
+	)
+
+	return { bookClub: data, ...rest }
+}

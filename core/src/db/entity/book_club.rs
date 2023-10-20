@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use super::User;
+use super::{Media, User};
 use crate::prisma::{
 	book_club, book_club_book, book_club_chat_board, book_club_chat_message,
 	book_club_invitation, book_club_member, book_club_schedule,
@@ -42,8 +42,9 @@ book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_wi
 pub struct BookClub {
 	id: String,
 	name: String,
+	description: Option<String>,
 	is_private: bool,
-
+	created_at: String,
 	member_role_spec: BookClubMemberRoleSpec,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -145,6 +146,8 @@ pub struct BookClubBook {
 	discussion_duration_days: i32,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
+	pub book_entity: Option<Media>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub chat_board: Option<BookClubChatBoard>,
 }
 
@@ -199,7 +202,9 @@ impl From<book_club::Data> for BookClub {
 		BookClub {
 			id: data.id,
 			name: data.name,
+			description: data.description,
 			is_private: data.is_private,
+			created_at: data.created_at.to_rfc3339(),
 			members,
 			schedule,
 			member_role_spec,
@@ -222,7 +227,9 @@ impl From<book_club_member_user_username::Data> for BookClub {
 		BookClub {
 			id: data.id,
 			name: data.name,
+			description: data.description,
 			is_private: data.is_private,
+			created_at: data.created_at.to_rfc3339(),
 			members: Some(members),
 			member_role_spec,
 			..Default::default()
@@ -245,6 +252,8 @@ impl From<book_club_member_and_schedule_include::Data> for BookClub {
 		BookClub {
 			id: data.id,
 			name: data.name,
+			description: data.description,
+			created_at: data.created_at.to_rfc3339(),
 			is_private: data.is_private,
 			members: Some(members),
 			member_role_spec,
@@ -270,7 +279,9 @@ impl From<book_club_with_books_include::Data> for BookClub {
 		BookClub {
 			id: data.id,
 			name: data.name,
+			description: data.description,
 			is_private: data.is_private,
+			created_at: data.created_at.to_rfc3339(),
 			members: Some(members),
 			schedule,
 			member_role_spec,
@@ -371,6 +382,8 @@ impl From<book_club_book::Data> for BookClubBook {
 			.cloned()
 			.map(BookClubChatBoard::from);
 
+		let book = data.book_entity().ok().flatten().cloned().map(Media::from);
+
 		BookClubBook {
 			id: data.id,
 			order: data.order,
@@ -378,6 +391,7 @@ impl From<book_club_book::Data> for BookClubBook {
 			end_at: data.end_at.map(|d| d.to_rfc3339()),
 			discussion_duration_days: data.discussion_duration_days.unwrap_or(2),
 			chat_board,
+			book_entity: book,
 		}
 	}
 }

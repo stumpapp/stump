@@ -4,7 +4,7 @@ import React from 'react'
 import GenericEmptyState from '../../components/GenericEmptyState'
 import SceneContainer from '../../components/SceneContainer'
 
-export default function PublicBookClubExplorerScene() {
+export default function BookClubExplorerScene() {
 	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
 
 	const { bookClubs, isLoading } = useBookClubsQuery()

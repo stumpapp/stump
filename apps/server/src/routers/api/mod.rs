@@ -70,9 +70,9 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<GetBookClubsParams>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateBookClub>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateBookClub>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<UpdateBookClubSchedule>()?).as_bytes(),
-		)?;
+		// file.write_all(
+		// 	format!("{}\n\n", ts_export::<UpdateBookClubSchedule>()?).as_bytes(),
+		// )?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateBookClubInvitation>()?).as_bytes(),
 		)?;

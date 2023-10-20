@@ -50,7 +50,7 @@ export type MediaAnnotation = { id: string; kind: MediaAnnotationKind; epubcfi: 
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
-export type BookClub = { id: string; name: string; is_private: boolean; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
+export type BookClub = { id: string; name: string; description: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 
 export type BookClubMember = { display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; user?: User | null; book_club?: BookClub | null }
 
@@ -60,7 +60,7 @@ export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>
 
 export type BookClubSchedule = { default_interval_days: number | null; books?: BookClubBook[] | null }
 
-export type BookClubBook = { id: string; order: number; start_at?: string | null; end_at?: string | null; discussion_duration_days: number; chat_board?: BookClubChatBoard | null }
+export type BookClubBook = { id: string; order: number; start_at?: string | null; end_at?: string | null; discussion_duration_days: number; book_entity?: Media | null; chat_board?: BookClubChatBoard | null }
 
 export type BookClubChatBoard = { id: string; messages: BookClubChatMessage[] | null }
 
@@ -168,11 +168,9 @@ export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_lib
 
 export type GetBookClubsParams = { all?: boolean }
 
-export type CreateBookClub = { name: string; is_private: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress: boolean; creator_display_name: string | null }
+export type CreateBookClub = { name: string; is_private?: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress?: boolean; creator_display_name: string | null }
 
 export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null }
-
-export type UpdateBookClubSchedule<> = null
 
 export type CreateBookClubInvitation = { user_id: string; role: BookClubMemberRole | null }
 

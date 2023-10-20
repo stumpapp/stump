@@ -14,6 +14,7 @@ const entityCardVariants = cva('', {
 			// md:{h-[22.406rem], w-[12rem]}
 			default: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
 			lg: 'w-full max-w-[16rem]',
+			sm: 'w-12 h-16',
 		},
 		variant: {},
 	},

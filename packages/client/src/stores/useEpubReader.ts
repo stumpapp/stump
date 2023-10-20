@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { type UserPreferences } from '@stump/types'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'

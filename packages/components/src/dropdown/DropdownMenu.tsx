@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { Link, XOR } from '../'
 import { Button } from '../button/Button'
-import { cn } from '../utils'
+import { Link } from '../link'
+import { cn, XOR } from '../utils'
 import { GenericMenu } from '.'
 import {
 	Dropdown,

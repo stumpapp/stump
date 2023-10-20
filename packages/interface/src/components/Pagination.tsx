@@ -1,7 +1,6 @@
 import { cx } from '@stump/components'
 import { ArrowLeft, ArrowRight, MoreHorizontal } from 'lucide-react'
 import { useMemo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useWindowSize } from 'rooks'
 
 import { usePagination } from '../hooks/usePagination'

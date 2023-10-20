@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Label } from '../form'
-import { Text } from '../index'
+import { Text } from '../text'
 import { cn } from '../utils'
 import { RawTextArea, RawTextAreaProps, RawTextAreaRef } from './raw'
 

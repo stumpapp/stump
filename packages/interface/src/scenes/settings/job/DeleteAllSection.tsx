@@ -1,6 +1,6 @@
 import { jobApi, jobQueryKeys } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
-import { Alert, Button, Text } from '@stump/components'
+import { Alert, Button } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 import React from 'react'
 import { toast } from 'react-hot-toast'

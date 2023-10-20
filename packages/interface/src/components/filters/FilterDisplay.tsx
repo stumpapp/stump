@@ -6,20 +6,23 @@ import { useFilterContext } from './context'
 const MATCH_KEYS = ['search']
 
 const flattenObject = (obj: object, prefix = ''): Record<string, unknown[]> => {
-	return Object.keys(obj).reduce((acc, key) => {
-		const value = obj[key as keyof typeof obj]
+	return Object.keys(obj).reduce(
+		(acc, key) => {
+			const value = obj[key as keyof typeof obj]
 
-		if (typeof value === 'object' && !Array.isArray(value)) {
-			const nestedPrefix = prefix ? `${prefix}.${key}` : key
-			const nestedFlattened = flattenObject(value, nestedPrefix)
-			Object.assign(acc, nestedFlattened)
-		} else {
-			const newKey = prefix ? `${prefix}.${key}` : key
-			acc[newKey] = Array.isArray(value) ? value : [value]
-		}
+			if (typeof value === 'object' && !Array.isArray(value)) {
+				const nestedPrefix = prefix ? `${prefix}.${key}` : key
+				const nestedFlattened = flattenObject(value, nestedPrefix)
+				Object.assign(acc, nestedFlattened)
+			} else {
+				const newKey = prefix ? `${prefix}.${key}` : key
+				acc[newKey] = Array.isArray(value) ? value : [value]
+			}
 
-		return acc
-	}, {} as Record<string, unknown[]>)
+			return acc
+		},
+		{} as Record<string, unknown[]>,
+	)
 }
 
 // TODO: handle overflow/excessively long filter display better!

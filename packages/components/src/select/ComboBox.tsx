@@ -1,7 +1,11 @@
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { Fragment, MutableRefObject, RefCallback, useRef, useState } from 'react'
 
-import { Button, Command, Label, Popover, Text } from '..'
+import { Button } from '../button'
+import { Command } from '../command'
+import { Label } from '../form'
+import { Popover } from '../popover'
+import { Text } from '../text'
 import { cn } from '../utils'
 
 // TODO: customize multi display value, e.g. "2 items selected"

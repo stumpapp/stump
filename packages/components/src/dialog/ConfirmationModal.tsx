@@ -1,4 +1,5 @@
-import { Button, PickSelect } from '..'
+import { Button } from '../button'
+import { PickSelect } from '../utils'
 import { Dialog } from './primitives'
 
 type ButtonVariant = PickSelect<React.ComponentProps<typeof Button>, 'variant'>

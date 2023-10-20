@@ -2,7 +2,7 @@ import type { CoreEvent } from '@stump/types'
 
 import { useJobContext } from '../context'
 import { core_event_triggers, invalidateQueries } from '../invalidate'
-import { useStumpWs } from '.'
+import { useStumpWs } from './useStumpWs'
 
 interface UseCoreEventHandlerParams {
 	onJobComplete?: (jobId: string) => void
@@ -40,23 +40,17 @@ export function useCoreEventHandler({
 			case 'JobFailed':
 				onJobFailed?.(data)
 				removeJob(data.job_id)
-				invalidateQueries({ keys: core_event_triggers[key].keys })
-
-				break
-			case 'CreatedMedia':
-			case 'CreatedMediaBatch':
-			case 'CreatedSeries':
-			case 'CreatedSeriesBatch':
-			case 'GeneratedThumbnailBatch':
-				// I set a timeout here to give the backend a little time to analyze at least
-				// one of the books in a new series before triggering a refetch. This is to
-				// prevent the series/media cards from being displayed before there is an image ready.
-				setTimeout(() => {
-					invalidateQueries({ keys: core_event_triggers[key].keys })
-				}, 250)
+				await invalidateQueries({ keys: core_event_triggers[key].keys })
 				break
 			default:
-				console.warn('Unhandled JobEvent', { data, key })
+				// eslint-disable-next-line no-case-declarations
+				const result = core_event_triggers[key]
+				if (result?.keys) {
+					await new Promise((resolve) => setTimeout(resolve, 300))
+					await invalidateQueries({ exact: false, keys: result.keys })
+				} else {
+					console.warn(`Unhandled core event: ${key}`, event)
+				}
 				break
 		}
 	}

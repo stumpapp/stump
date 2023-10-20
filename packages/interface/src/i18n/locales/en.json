@@ -255,14 +255,10 @@
 			"goBack": "Go Back"
 		},
 		"libraryOptions": {
-			"scanLibrary": {
-				"base": "Scan Library",
-				"parallel": "Parallel Scan",
-				"inOrder": "In Order Scan"
-			},
+			"scanLibrary": "Scan",
 			"fileExplorer": "File Explorer",
-			"editLibrary": "Edit Library",
-			"deleteLibrary": "Delete Library"
+			"manageLibrary": "Manage",
+			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
 			"heading": "Version Information",

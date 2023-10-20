@@ -1,18 +1,11 @@
 import { queryClient, useScanLibrary } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
-import type { Library, LibraryScanMode } from '@stump/types'
-import {
-	Edit,
-	FileScan,
-	FolderSearch2,
-	MoreVertical,
-	ScanFace,
-	ScanLine,
-	Trash,
-} from 'lucide-react'
+import type { Library } from '@stump/types'
+import { Edit, FolderSearch2, MoreVertical, ScanLine, Trash } from 'lucide-react'
 import { useState } from 'react'
 
 import { useAppContext } from '../../context'
+import { useLocaleContext } from '../../i18n'
 import paths from '../../paths'
 import DeleteLibraryConfirmation from '../library/DeleteLibraryConfirmation'
 
@@ -20,9 +13,13 @@ type Props = {
 	library: Library
 }
 
+const LOCALE_KEY = 'sidebar.libraryOptions'
+const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
+
 export default function LibraryOptionsMenu({ library }: Props) {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const { scanAsync } = useScanLibrary()
+	const { t } = useLocaleContext()
 	const { isServerOwner } = useAppContext()
 
 	function handleScan() {
@@ -60,13 +57,13 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					{
 						items: [
 							{
-								label: 'Scan',
+								label: t(getLocaleKey('scanLibrary')),
 								leftIcon: <ScanLine className={iconStyle} />,
 								onClick: () => handleScan(),
 							},
 							{
 								href: paths.libraryFileExplorer(library.id),
-								label: 'File explorer',
+								label: t(getLocaleKey('fileExplorer')),
 								leftIcon: <FolderSearch2 className={iconStyle} />,
 							},
 						],
@@ -75,11 +72,11 @@ export default function LibraryOptionsMenu({ library }: Props) {
 						items: [
 							{
 								href: paths.libraryManage(library.id),
-								label: 'Manage',
+								label: t(getLocaleKey('manageLibrary')),
 								leftIcon: <Edit className={iconStyle} />,
 							},
 							{
-								label: 'Delete',
+								label: t(getLocaleKey('deleteLibrary')),
 								leftIcon: <Trash className={iconStyle} />,
 								onClick: () => setIsDeleting(true),
 							},

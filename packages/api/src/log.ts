@@ -1,6 +1,6 @@
 import type { LogMetadata } from '@stump/types'
 
-import { API } from '.'
+import { API } from './axios'
 import { ApiResult } from './types'
 
 export function getLogFileMeta(): Promise<ApiResult<LogMetadata>> {

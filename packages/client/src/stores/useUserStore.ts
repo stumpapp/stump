@@ -21,7 +21,7 @@ interface UserStore extends StoreBase<UserStore> {
 export const useUserStore = create<UserStore>()(
 	devtools(
 		persist(
-			(set, get) => ({
+			(set) => ({
 				reset() {
 					set(() => ({}))
 				},

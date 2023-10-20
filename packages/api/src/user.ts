@@ -6,8 +6,9 @@ import type {
 	UserPreferences,
 } from '@stump/types'
 
-import { API, toUrlParams } from '.'
+import { API } from './axios'
 import { ApiResult, PageableApiResult } from './types'
+import { toUrlParams } from './utils'
 
 export function getUsers(params?: Record<string, unknown>): Promise<PageableApiResult<User[]>> {
 	if (params) {

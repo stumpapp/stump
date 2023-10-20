@@ -1,7 +1,9 @@
 import type { Media, PatchSeriesThumbnail, Series } from '@stump/types'
 
-import { API, mediaApi, mergeCursorParams, mergePageParams, toUrlParams, urlWithParams } from '.'
+import { API } from './axios'
+import { mediaApi } from './media'
 import { ApiResult, CursorQueryParams, PageableApiResult, PagedQueryParams } from './types'
+import { mergeCursorParams, mergePageParams, toUrlParams, urlWithParams } from './utils'
 
 export function getSeries(filters?: Record<string, unknown>): Promise<PageableApiResult<Series[]>> {
 	const params = toUrlParams(filters)

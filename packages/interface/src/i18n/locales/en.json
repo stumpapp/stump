@@ -60,7 +60,7 @@
 				"description": "An optional, short description of your book club"
 			},
 			"is_private": {
-				"label": "Private",
+				"label": "Private club",
 				"description": "If enabled, only users you invite will be able to join your book club"
 			},
 			"member_role_spec": {
@@ -89,7 +89,21 @@
 					"placeholder": "Creator",
 					"description": "The name of the creator role for your book club. This is you!"
 				}
-			}
+			},
+			"creator_preferences": {
+				"heading": "Your membership preferences",
+				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"creator_display_name": {
+					"label": "Display Name",
+					"placeholder": "oromei",
+					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+				},
+				"creator_hide_progress": {
+					"label": "Hide Progress",
+					"description": "If enabled, your read progress will be hidden from other members of the book club"
+				}
+			},
+			"submit": "Create Book Club"
 		}
 	},
 	"createLibraryScene": {

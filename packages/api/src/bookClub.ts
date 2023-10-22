@@ -1,5 +1,8 @@
 import {
 	BookClub,
+	BookClubBook,
+	BookClubChatBoard,
+	BookClubChatMessage,
 	BookClubInvitation,
 	BookClubInvitationAnswer,
 	BookClubMember,
@@ -106,8 +109,30 @@ export async function createBookClubSchedule(
 	return API.post(`/book-clubs/${bookClubId}/schedule`)
 }
 
-export async function getBookClubCurrentBook(bookClubId: string): Promise<ApiResult<void>> {
+export async function getBookClubCurrentBook(bookClubId: string): Promise<ApiResult<BookClubBook>> {
+	// TODO: maybe remove /schedule from the endpoint
 	return API.get(`/book-clubs/${bookClubId}/schedule/current-book`)
+}
+
+export async function getBookClubCurrentChat(
+	bookClubId: string,
+): Promise<ApiResult<BookClubChatBoard>> {
+	return API.get(`/book-clubs/${bookClubId}/chats/current`)
+}
+
+export async function getBookClubChatById(
+	bookClubId: string,
+	chatId: string,
+): Promise<ApiResult<BookClubChatBoard>> {
+	return API.get(`/book-clubs/${bookClubId}/chats/${chatId}`)
+}
+
+export async function getBookClubChatThread(
+	bookClubId: string,
+	chatId: string,
+	threadId: string,
+): Promise<ApiResult<BookClubChatMessage>> {
+	return API.get(`/book-clubs/${bookClubId}/chats/${chatId}/threads/${threadId}`)
 }
 
 export const bookClubApi = {
@@ -117,7 +142,10 @@ export const bookClubApi = {
 	createBookClubSchedule,
 	deleteBookClubMember,
 	getBookClubById,
+	getBookClubChatById,
+	getBookClubChatThread,
 	getBookClubCurrentBook,
+	getBookClubCurrentChat,
 	getBookClubInvitations,
 	getBookClubMember,
 	getBookClubMembers,
@@ -135,7 +163,10 @@ export const bookClubQueryKeys: Record<keyof typeof bookClubApi, string> = {
 	createBookClubSchedule: 'bookClub.createSchedule',
 	deleteBookClubMember: 'bookClub.deleteMember',
 	getBookClubById: 'bookClub.getById',
+	getBookClubChatById: 'bookClub.getChatById',
+	getBookClubChatThread: 'bookClub.getChatThread',
 	getBookClubCurrentBook: 'bookClub.getCurrentBook',
+	getBookClubCurrentChat: 'bookClub.getCurrentChat',
 	getBookClubInvitations: 'bookClub.getInvitations',
 	getBookClubMember: 'bookClub.getMember',
 	getBookClubMembers: 'bookClub.getMembers',

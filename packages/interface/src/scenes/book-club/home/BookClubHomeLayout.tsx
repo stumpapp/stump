@@ -12,8 +12,7 @@ export default function BookClubHomeLayout() {
 	const { id } = useParams<{ id: string }>()
 
 	const { bookClub, isLoading } = useBookClubQuery(id || '', {
-		// enabled: !!id
-		enabled: false,
+		enabled: !!id,
 	})
 
 	const user = useUserStore((store) => store.user)
@@ -32,8 +31,10 @@ export default function BookClubHomeLayout() {
 		return <Navigate to="/404" />
 	}
 
-	// if (isLoading) return null
-	// if (!bookClub) return <Navigate to="/404" />
+	if (isLoading) return null
+	if (!bookClub) {
+		return <Navigate to="/404" />
+	}
 
 	// TODO: when viewing a thread, don't render the header
 	return (
@@ -71,6 +72,7 @@ const mockBookClub: BookClub = {
 		{
 			display_name: 'Ed Teech',
 			hide_progress: false,
+			id: '1',
 			is_creator: true,
 			private_membership: false,
 			role: 'CREATOR',

@@ -1,3 +1,4 @@
+import { prefetchBookClubChat } from '@stump/client'
 import { cx, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
@@ -7,7 +8,10 @@ import { useBookClubContext } from './context'
 // TODO: when viewing a thread, only show something like "<-- Return to chat board"
 export default function BookClubNavigation() {
 	const location = useLocation()
-	const { viewerIsMember } = useBookClubContext()
+	const {
+		bookClub: { id },
+		viewerIsMember,
+	} = useBookClubContext()
 
 	const tabs = useMemo(() => {
 		const base = [
@@ -27,6 +31,7 @@ export default function BookClubNavigation() {
 			{
 				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/chat-board.*$/),
 				label: 'Chat Board',
+				onHover: () => prefetchBookClubChat(id),
 				to: 'chat-board',
 			},
 			{
@@ -40,7 +45,7 @@ export default function BookClubNavigation() {
 				to: 'settings',
 			},
 		]
-	}, [location, viewerIsMember])
+	}, [location, viewerIsMember, id])
 
 	return (
 		<div className="sticky top-0 z-10 w-full border-b border-gray-75 bg-white dark:border-gray-850 dark:bg-gray-975 md:relative md:top-[unset] md:z-[unset]">

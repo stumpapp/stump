@@ -1,3 +1,4 @@
+import { prefetchThread } from '@stump/client'
 import { Avatar, Button, cx, IconButton, Text, ToolTip } from '@stump/components'
 import { BookClubChatMessage } from '@stump/types'
 import dayjs from 'dayjs'
@@ -12,9 +13,10 @@ import { useBookClubContext } from '../../context'
 
 type Props = {
 	message: BookClubChatMessage
-	archivedChatId?: string
+	chatId: string
+	isArchived?: boolean
 }
-export default function ChatMessage({ message, archivedChatId }: Props) {
+export default function ChatMessage({ message, chatId, isArchived }: Props) {
 	const { bookClub, viewerMember } = useBookClubContext()
 
 	const displayName = message.member?.display_name ?? message.member?.user?.username ?? 'Unknown'
@@ -53,9 +55,17 @@ export default function ChatMessage({ message, archivedChatId }: Props) {
 					</IconButton>
 
 					<ToolTip content="Go to thread">
-						<Button variant="ghost" size="sm">
+						<Button
+							variant="ghost"
+							size="sm"
+							onMouseEnter={() => prefetchThread(bookClub.id, chatId, message.id)}
+						>
 							<Link
-								to={paths.bookClubChatBoardMessage(bookClub.id, message.id, archivedChatId)}
+								to={paths.bookClubChatBoardMessage(
+									bookClub.id,
+									message.id,
+									isArchived ? chatId : undefined,
+								)}
 								className="flex items-center gap-2 py-0.5"
 							>
 								<Text size="xs">{pluralize('reply', childMessages, true)}</Text>

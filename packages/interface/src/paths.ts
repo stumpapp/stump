@@ -8,11 +8,11 @@ type BookReaderParams = {
 }
 
 type SettingsPage = 'general' | 'users' | 'jobs' | 'desktop' | 'server'
-type DocTopic = 'access-control'
+type DocTopic = 'access-control' | 'book-club'
 type BookClubArea = 'overview' | 'members' | 'chat-board' | 'settings'
 
 const paths = {
-	bookClub: (id: string, area: BookClubArea) => `/book-clubs/${id}${area ? `/${area}` : ''}`,
+	bookClub: (id: string, area?: BookClubArea) => `/book-clubs/${id}${area ? `/${area}` : ''}`,
 	bookClubChatBoard: (id: string, chatBoardId?: string) => {
 		const url = paths.bookClub(id, 'chat-board')
 		if (chatBoardId?.length) {
@@ -27,6 +27,7 @@ const paths = {
 		}
 		return url
 	},
+	bookClubCreate: () => '/book-clubs/create',
 	bookClubs: () => '/book-clubs',
 	bookManagement: (id: string) => `/books/${id}/manage`,
 	bookOverview: (id: string) => `/books/${id}`,

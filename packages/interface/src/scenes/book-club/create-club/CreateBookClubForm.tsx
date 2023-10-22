@@ -1,25 +1,36 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useBookClubsQuery } from '@stump/client'
-import { Form, Input, TextArea } from '@stump/components'
-import { BookClub } from '@stump/types'
+import { useBookClubsQuery, useCreateBookClub } from '@stump/client'
+import { Button, CheckBox, Form, Input, TextArea } from '@stump/components'
+import { BookClub, BookClubMemberRoleSpec, CreateBookClub } from '@stump/types'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router'
 import z from 'zod'
 
 import { useLocaleContext } from '../../../i18n'
+import paths from '../../../paths'
+import CreatorPreferences from './CreatorPreferences'
+import RoleMappingForm from './RoleMappingForm'
 
 const memberRoleSpecSchema = z.object({
-	ADMIN: z.string(),
-	CREATOR: z.string(),
-	MEMBER: z.string(),
-	MODERATOR: z.string(),
+	ADMIN: z.string().optional(),
+	CREATOR: z.string().optional(),
+	MEMBER: z.string().optional(),
+	MODERATOR: z.string().optional(),
 })
+const defaultMemberSpec: BookClubMemberRoleSpec = {
+	ADMIN: 'Admin',
+	CREATOR: 'Creator',
+	MEMBER: 'Member',
+	MODERATOR: 'Moderator',
+}
 const buildSchema = (t: (key: string) => string, existingClubs: BookClub[]) =>
 	z.object({
 		creator_display_name: z.string().optional(),
-		creator_hide_progress: z.boolean().default(false),
+		creator_hide_progress: z.boolean().default(false).optional(),
 		description: z.string().optional(),
-		is_private: z.boolean().default(false),
+		is_private: z.boolean().default(false).optional(),
 		member_role_spec: memberRoleSpecSchema.optional(),
 		name: z
 			.string()
@@ -29,21 +40,50 @@ const buildSchema = (t: (key: string) => string, existingClubs: BookClub[]) =>
 				(value) => ({ message: `${value} is already taken` }),
 			),
 	})
-type Schema = z.infer<ReturnType<typeof buildSchema>>
+export type Schema = z.infer<ReturnType<typeof buildSchema>>
 
 const LOCAL_BASE = 'createBookClubScene.form'
-const getLocaleKey = (key: string) => `${LOCAL_BASE}.${key}`
+export const getLocaleKey = (key: string) => `${LOCAL_BASE}.${key}`
 
 export default function CreateBookClubForm() {
+	const navigate = useNavigate()
+
 	const { t } = useLocaleContext()
+
 	const { bookClubs } = useBookClubsQuery({ params: { all: true } })
+	const { createBookClub } = useCreateBookClub()
 
 	const schema = useMemo(() => buildSchema(t, bookClubs ?? []), [t, bookClubs])
 	const form = useForm<Schema>({
 		resolver: zodResolver(schema),
 	})
+	const is_private = form.watch('is_private')
 
-	const handleSubmit = async (data: Schema) => {}
+	const handleSubmit = async (data: Schema) => {
+		let member_role_spec: BookClubMemberRoleSpec | null = null
+		// if any field of the member role spec is set, we need to set the whole thing
+		// with the default values
+		const setRoles = Object.values(data.member_role_spec ?? {}).filter(Boolean)
+		if (setRoles.length) {
+			member_role_spec = {
+				...defaultMemberSpec,
+				...data.member_role_spec,
+			}
+		}
+
+		try {
+			const payload = {
+				...data,
+				member_role_spec,
+			} as CreateBookClub // null vs undefined type issue, im just lazy
+			const createdClub = await createBookClub(payload)
+			toast.success('Club created!')
+			navigate(paths.bookClub(createdClub.id))
+		} catch (error) {
+			console.error(error)
+			toast.error('Something went wrong')
+		}
+	}
 
 	return (
 		<Form id="create-club-form" form={form} onSubmit={handleSubmit} className="py-4">
@@ -70,9 +110,26 @@ export default function CreateBookClubForm() {
 					placeholder={t(getLocaleKey('description.placeholder'))}
 					autoComplete="off"
 					errorMessage={form.formState.errors.description?.message}
-					required
 					{...form.register('description')}
 				/>
+
+				<CheckBox
+					id="is_private"
+					variant="primary"
+					label={t(getLocaleKey('is_private.label'))}
+					description={t(getLocaleKey('is_private.description'))}
+					checked={is_private}
+					onClick={() => form.setValue('is_private', !is_private)}
+				/>
+			</div>
+
+			<RoleMappingForm />
+			<CreatorPreferences />
+
+			<div className="mt-4 flex w-full md:max-w-sm">
+				<Button type="submit" variant="primary" size="lg">
+					{t(getLocaleKey('submit'))}
+				</Button>
 			</div>
 		</Form>
 	)

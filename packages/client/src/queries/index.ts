@@ -1,5 +1,12 @@
 export { useAuthQuery, useLoginOrRegister } from './auth'
-export { useBookClubQuery, useBookClubsQuery } from './bookClub'
+export {
+	prefetchBookClubChat,
+	prefetchThread,
+	useBookClubQuery,
+	useBookClubsQuery,
+	useChatBoardQuery,
+	useCreateBookClub,
+} from './bookClub'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
 export { useJobSchedulerConfig, useJobsQuery } from './job'

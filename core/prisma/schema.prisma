@@ -170,13 +170,14 @@ model Media {
   series    Series?        @relation(fields: [series_id], references: [id], onDelete: Cascade)
   series_id String?
 
-  read_progresses       ReadProgress[]
-  tags                  Tag[]
-  reading_list_items    ReadingListItem[]
-  annotations           MediaAnnotation[]
-  reviews               Review[]
-  book_club_suggestions BookClubBookSuggestion[]
-  book_club_books       BookClubBook[]
+  read_progresses                ReadProgress[]
+  tags                           Tag[]
+  reading_list_items             ReadingListItem[]
+  annotations                    MediaAnnotation[]
+  reviews                        Review[]
+  book_club_suggestions          BookClubBookSuggestion[]
+  book_club_books                BookClubBook[]
+  book_club_member_favorite_book BookClubMemberFavoriteBook[]
 
   @@map("media")
 }
@@ -339,9 +340,26 @@ model BookClubMember {
   liked_discussion_messages BookClubChatMessageLike[]
   book_suggestions          BookClubBookSuggestion[]
   liked_book_suggestions    BookClubBookSuggestionLike[]
+  favorite_book             BookClubMemberFavoriteBook?
 
   @@unique([user_id, book_club_id])
   @@map("book_club_members")
+}
+
+model BookClubMemberFavoriteBook {
+  id String @id @default(cuid())
+
+  title  String?
+  author String?
+  url    String?
+  notes  String?
+
+  member_id String         @unique
+  member    BookClubMember @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  book_id   String?
+  book      Media?         @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@map("book_club_member_favorite_books")
 }
 
 model BookClubSchedule {
@@ -422,9 +440,14 @@ model BookClubChatBoard {
 }
 
 model BookClubChatMessage {
-  id        String   @id @default(cuid())
-  content   String
-  timestamp DateTime @default(now())
+  id             String   @id @default(cuid())
+  content        String
+  timestamp      DateTime @default(now())
+  is_top_message Boolean  @default(true)
+
+  parent_message_id String?
+  // TODO: cascade delete? Not sure... I don't necessarily want to delete the children if the parent is deleted. Maybe soft delete when a user 'deletes' a message? Then just hide content from deleted messages...
+  parent_message    BookClubChatMessage? @relation("ThreadMessage", fields: [parent_message_id], references: [id])
 
   chat_board    BookClubChatBoard @relation(fields: [chat_board_id], references: [id], onDelete: Cascade)
   chat_board_id String
@@ -432,7 +455,8 @@ model BookClubChatMessage {
   member    BookClubMember? @relation(fields: [member_id], references: [id], onDelete: Cascade)
   member_id String?
 
-  likes BookClubChatMessageLike[]
+  likes          BookClubChatMessageLike[]
+  child_messages BookClubChatMessage[]     @relation("ThreadMessage")
 
   @@map("book_club_chat_messages")
 }

@@ -7,7 +7,8 @@ use utoipa::ToSchema;
 use super::{Media, User};
 use crate::prisma::{
 	book_club, book_club_book, book_club_chat_board, book_club_chat_message,
-	book_club_invitation, book_club_member, book_club_schedule,
+	book_club_chat_message_like, book_club_invitation, book_club_member,
+	book_club_schedule,
 };
 
 book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_member_user_username {
@@ -27,6 +28,7 @@ book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_me
 	schedule
 });
 
+// TODO: filter future books if not admin!
 book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_with_books_include {
 	members(filters): include {
 		user: select {
@@ -55,11 +57,14 @@ pub struct BookClub {
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct BookClubMember {
+	pub id: String,
+
 	#[specta(optional)]
 	pub display_name: Option<String>,
 	pub is_creator: bool,
 	pub hide_progress: bool,
 	pub private_membership: bool,
+	pub role: BookClubMemberRole,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<User>,
@@ -80,6 +85,18 @@ pub enum BookClubMemberRole {
 	ADMIN = 2, // can add/remove members, change schedule, etc.
 	#[serde(rename = "CREATOR")]
 	CREATOR = 3, // can delete the book club, change name, etc.
+}
+
+impl From<i32> for BookClubMemberRole {
+	fn from(val: i32) -> Self {
+		match val {
+			0 => BookClubMemberRole::MEMBER,
+			1 => BookClubMemberRole::MODERATOR,
+			2 => BookClubMemberRole::ADMIN,
+			3 => BookClubMemberRole::CREATOR,
+			_ => BookClubMemberRole::MEMBER,
+		}
+	}
 }
 
 // A map of [BookClubMemberRole] to a [String] representing the club-specific
@@ -146,6 +163,13 @@ pub struct BookClubBook {
 	discussion_duration_days: i32,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
+	pub title: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub author: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub url: Option<String>,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub book_entity: Option<Media>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub chat_board: Option<BookClubChatBoard>,
@@ -162,9 +186,23 @@ pub struct BookClubChatMessage {
 	id: String,
 	content: String,
 	timestamp: String,
+	is_top_message: bool,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
+	child_messages: Option<Vec<BookClubChatMessage>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	likes: Option<Vec<BookClubChatMessageLike>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub member: Option<BookClubMember>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
+pub struct BookClubChatMessageLike {
+	id: String,
+	timestamp: String,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	liked_by: Option<BookClubMember>,
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
@@ -293,10 +331,12 @@ impl From<book_club_member::Data> for BookClubMember {
 	fn from(data: book_club_member::Data) -> BookClubMember {
 		// TODO: relations
 		BookClubMember {
+			id: data.id,
 			display_name: data.display_name,
 			is_creator: data.is_creator,
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
+			role: data.role.into(),
 			..Default::default()
 		}
 	}
@@ -305,10 +345,12 @@ impl From<book_club_member::Data> for BookClubMember {
 impl From<book_club_member_user_username::members::Data> for BookClubMember {
 	fn from(data: book_club_member_user_username::members::Data) -> BookClubMember {
 		BookClubMember {
+			id: data.id,
 			display_name: data.display_name.or(Some(data.user.username)),
 			is_creator: data.is_creator,
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
+			role: data.role.into(),
 			..Default::default()
 		}
 	}
@@ -319,10 +361,12 @@ impl From<book_club_member_and_schedule_include::members::Data> for BookClubMemb
 		data: book_club_member_and_schedule_include::members::Data,
 	) -> BookClubMember {
 		BookClubMember {
+			id: data.id,
 			display_name: data.display_name.or(Some(data.user.username)),
 			is_creator: data.is_creator,
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
+			role: data.role.into(),
 			..Default::default()
 		}
 	}
@@ -331,10 +375,12 @@ impl From<book_club_member_and_schedule_include::members::Data> for BookClubMemb
 impl From<book_club_with_books_include::members::Data> for BookClubMember {
 	fn from(data: book_club_with_books_include::members::Data) -> BookClubMember {
 		BookClubMember {
+			id: data.id,
 			display_name: data.display_name.or(Some(data.user.username)),
 			is_creator: data.is_creator,
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
+			role: data.role.into(),
 			..Default::default()
 		}
 	}
@@ -390,6 +436,9 @@ impl From<book_club_book::Data> for BookClubBook {
 			start_at: data.start_at.map(|d| d.to_rfc3339()),
 			end_at: data.end_at.map(|d| d.to_rfc3339()),
 			discussion_duration_days: data.discussion_duration_days.unwrap_or(2),
+			title: data.title,
+			author: data.author,
+			url: data.url,
 			chat_board,
 			book_entity: book,
 		}
@@ -412,13 +461,49 @@ impl From<book_club_chat_board::Data> for BookClubChatBoard {
 	}
 }
 
+impl From<book_club_chat_message_like::Data> for BookClubChatMessageLike {
+	fn from(data: book_club_chat_message_like::Data) -> BookClubChatMessageLike {
+		let liked_by = data.liked_by().ok().cloned().map(BookClubMember::from);
+
+		BookClubChatMessageLike {
+			id: data.id,
+			timestamp: data.timestamp.to_rfc3339(),
+			liked_by,
+		}
+	}
+}
+
 impl From<book_club_chat_message::Data> for BookClubChatMessage {
 	fn from(data: book_club_chat_message::Data) -> BookClubChatMessage {
+		let member = data
+			.member()
+			.ok()
+			.flatten()
+			.cloned()
+			.map(BookClubMember::from);
+
+		let child_messages = data.child_messages().ok().cloned().map(|messages| {
+			messages
+				.into_iter()
+				.map(BookClubChatMessage::from)
+				.collect::<Vec<BookClubChatMessage>>()
+		});
+
+		let likes = data.likes().ok().cloned().map(|likes| {
+			likes
+				.into_iter()
+				.map(BookClubChatMessageLike::from)
+				.collect::<Vec<BookClubChatMessageLike>>()
+		});
+
 		BookClubChatMessage {
 			id: data.id,
 			content: data.content,
 			timestamp: data.timestamp.to_rfc3339(),
-			..Default::default()
+			is_top_message: data.is_top_message,
+			child_messages,
+			member,
+			likes,
 		}
 	}
 }

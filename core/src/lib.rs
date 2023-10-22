@@ -221,6 +221,9 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<BookClubChatMessage>()?).as_bytes(),
 		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<BookClubChatMessageLike>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<BookClubInvitation>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<Tag>()?).as_bytes())?;

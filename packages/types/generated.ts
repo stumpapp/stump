@@ -52,7 +52,7 @@ export type ReadProgress = { id: string; page: number; epubcfi: string | null; p
 
 export type BookClub = { id: string; name: string; description: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 
-export type BookClubMember = { display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; user?: User | null; book_club?: BookClub | null }
+export type BookClubMember = { id: string; display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; role: BookClubMemberRole; user?: User | null; book_club?: BookClub | null }
 
 export type BookClubMemberRole = "MEMBER" | "MODERATOR" | "ADMIN" | "CREATOR"
 
@@ -60,11 +60,13 @@ export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>
 
 export type BookClubSchedule = { default_interval_days: number | null; books?: BookClubBook[] | null }
 
-export type BookClubBook = { id: string; order: number; start_at?: string | null; end_at?: string | null; discussion_duration_days: number; book_entity?: Media | null; chat_board?: BookClubChatBoard | null }
+export type BookClubBook = { id: string; order: number; start_at?: string | null; end_at?: string | null; discussion_duration_days: number; title?: string | null; author?: string | null; url?: string | null; book_entity?: Media | null; chat_board?: BookClubChatBoard | null }
 
 export type BookClubChatBoard = { id: string; messages: BookClubChatMessage[] | null }
 
-export type BookClubChatMessage = { id: string; content: string; timestamp: string; member?: BookClubMember | null }
+export type BookClubChatMessage = { id: string; content: string; timestamp: string; is_top_message: boolean; child_messages?: BookClubChatMessage[] | null; likes?: BookClubChatMessageLike[] | null; member?: BookClubMember | null }
+
+export type BookClubChatMessageLike = { id: string; timestamp: string; liked_by?: BookClubMember | null }
 
 export type BookClubInvitation = { id: string; user?: User | null; book_club?: BookClub | null }
 

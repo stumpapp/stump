@@ -1,10 +1,10 @@
 import { useBookClubsQuery, useUserStore } from '@stump/client'
 import React from 'react'
 
-import GenericEmptyState from '../../components/GenericEmptyState'
-import SceneContainer from '../../components/SceneContainer'
+import GenericEmptyState from '../../../components/GenericEmptyState'
+import SceneContainer from '../../../components/SceneContainer'
 
-export default function BookClubExplorerScene() {
+export default function BookClubExploreScene() {
 	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
 
 	const { bookClubs, isLoading } = useBookClubsQuery()

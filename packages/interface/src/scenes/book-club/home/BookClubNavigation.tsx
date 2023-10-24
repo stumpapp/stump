@@ -29,18 +29,18 @@ export default function BookClubNavigation() {
 		return [
 			...base,
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/chat-board.*$/),
+				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/chat-board(\/.*)?$/),
 				label: 'Chat Board',
 				onHover: () => prefetchBookClubChat(id),
 				to: 'chat-board',
 			},
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/members(\?.*)?$/),
+				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/members(\/.*)?$/),
 				label: 'Members',
 				to: 'members',
 			},
 			{
-				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/settings$/),
+				isActive: location.pathname.match(/\/book-clubs\/[^/]+\/settings(\/.*)?$/),
 				label: 'Settings',
 				to: 'settings',
 			},

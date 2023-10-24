@@ -16,6 +16,9 @@ const BookClubChatBoardScene = lazily(
 	() => import('./home/tabs/chat-board/BookClubChatBoardScene.tsx'),
 )
 const BookClubMembersScene = lazily(() => import('./home/tabs/members/BookClubMembersScene.tsx'))
+const BookClubSchedulerScene = lazily(
+	() => import('./home/tabs/settings/scheduler/BookClubSchedulerScene.tsx'),
+)
 
 export default function BookClubRouter() {
 	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
@@ -38,6 +41,7 @@ export default function BookClubRouter() {
 				<Route path="chat-board" element={<BookClubChatBoardScene />} />
 				<Route path="members" element={<BookClubMembersScene />} />
 				<Route path="settings" element={<BookClubSettingsScene />} />
+				<Route path="settings/scheduler" element={<BookClubSchedulerScene />} />
 			</Route>
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>

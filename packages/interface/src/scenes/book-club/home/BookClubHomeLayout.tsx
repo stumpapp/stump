@@ -40,7 +40,8 @@ export default function BookClubHomeLayout() {
 	return (
 		<BookClubContext.Provider
 			value={{
-				bookClub: mockBookClub,
+				// bookClub: mockBookClub,
+				bookClub,
 				viewerCanManage,
 				viewerIsMember,
 				viewerMember,

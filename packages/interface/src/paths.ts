@@ -9,10 +9,10 @@ type BookReaderParams = {
 
 type SettingsPage = 'general' | 'users' | 'jobs' | 'desktop' | 'server'
 type DocTopic = 'access-control' | 'book-club'
-type BookClubArea = 'overview' | 'members' | 'chat-board' | 'settings'
+type BookClubTab = 'overview' | 'members' | 'chat-board' | 'settings'
 
 const paths = {
-	bookClub: (id: string, area?: BookClubArea) => `/book-clubs/${id}${area ? `/${area}` : ''}`,
+	bookClub: (id: string, tab?: BookClubTab) => `/book-clubs/${id}${tab ? `/${tab}` : ''}`,
 	bookClubChatBoard: (id: string, chatBoardId?: string) => {
 		const url = paths.bookClub(id, 'chat-board')
 		if (chatBoardId?.length) {
@@ -28,6 +28,8 @@ const paths = {
 		return url
 	},
 	bookClubCreate: () => '/book-clubs/create',
+	bookClubScheduler: (id: string) => paths.bookClub(id, 'settings') + '/scheduler',
+	bookClubSettings: (id: string) => paths.bookClub(id, 'settings'),
 	bookClubs: () => '/book-clubs',
 	bookManagement: (id: string) => `/books/${id}/manage`,
 	bookOverview: (id: string) => `/books/${id}`,

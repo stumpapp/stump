@@ -1,8 +1,7 @@
 import { isAxiosError } from '@stump/api'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
 import { Suspense, useMemo } from 'react'
-import { useHotkeys } from 'react-hotkeys-hook'
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
 import JobOverlay from './components/jobs/JobOverlay'
@@ -15,7 +14,6 @@ import { AppContext } from './context'
 export function AppLayout() {
 	const appProps = useAppProps()
 
-	const navigate = useNavigate()
 	const location = useLocation()
 
 	const hideSidebar = useMemo(() => {
@@ -31,11 +29,6 @@ export function AppLayout() {
 	}))
 
 	// TODO: platform specific hotkeys
-	// TODO: cmd+shift+h for home
-	useHotkeys('ctrl+,, cmd+,', (e) => {
-		e.preventDefault()
-		navigate('/settings/general')
-	})
 
 	const { error } = useAuthQuery({
 		enabled: !storeUser,

@@ -24,7 +24,7 @@ impl MediaBuilder {
 	}
 
 	pub fn build(self) -> CoreResult<Media> {
-		let processed_entry = process(&self.path, self.library_options.into())?;
+		let mut processed_entry = process(&self.path, self.library_options.into())?;
 
 		tracing::trace!(?processed_entry, "Processed entry");
 
@@ -50,18 +50,18 @@ impl MediaBuilder {
 		});
 
 		let pages = processed_entry.pages;
-		if let Some(ref metadata) = processed_entry.metadata {
+		if let Some(ref mut metadata) = processed_entry.metadata {
 			let conflicting_page_counts = metadata
 				.page_count
 				.map(|count| count != pages)
 				.unwrap_or(false);
-			// TODO: should we act here? Or just log the warning?
 			if conflicting_page_counts {
 				tracing::warn!(
 					?pages,
 					?metadata.page_count,
 					"Page count in metadata does not match actual page count!"
 				);
+				metadata.page_count = Some(pages);
 			}
 		}
 

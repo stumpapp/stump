@@ -29,6 +29,7 @@ pub struct Media {
 	pub updated_at: String,
 	/// The timestamp when the media was created.
 	pub created_at: String,
+	// TODO: rename file_modified_at
 	/// The timestamp when the file was last modified on disk.
 	pub modified_at: Option<String>,
 	/// The hash of the file contents. Used to ensure only one instance of a file in the database.

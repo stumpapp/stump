@@ -1,5 +1,7 @@
 use std::path::{Path, PathBuf};
 
+use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
+
 use crate::{
 	db::entity::{LibraryOptions, Media, Series},
 	filesystem::{process, FileParts, PathUtils, SeriesJson},
@@ -36,30 +38,43 @@ impl MediaBuilder {
 		} = path.file_parts();
 		let path_str = path.to_str().unwrap_or_default().to_string();
 
-		let raw_size = path.metadata().map(|m| m.len()).unwrap_or_else(|e| {
-			tracing::error!(error = ?e, "Error occurred trying to calculate file size");
-			0
-		});
-		let converted_size: i32 = raw_size.try_into().unwrap_or_else(|e| {
-			tracing::error!(error = ?e, "Error occurred trying to convert file size to i32");
+		let (raw_size, last_modified_at) = path.metadata().map(|m| {
+			let datetime: Option<DateTime<Utc>> = m.modified().ok().map(|t| t.into());
+			let last_modified_at: Option<DateTime<FixedOffset>> =
+				datetime.map(|dt| dt.into());
+			(m.len(), last_modified_at)
+		})?;
+		let size = raw_size.try_into().unwrap_or_else(|_| {
+			tracing::error!(?raw_size, "Failed to convert file size to i32");
 			0
 		});
 
-		let pages = if let Some(metadata) = &processed_entry.metadata {
-			metadata.page_count.unwrap_or(processed_entry.pages)
-		} else {
-			processed_entry.pages
-		};
+		let pages = processed_entry.pages;
+		if let Some(ref metadata) = processed_entry.metadata {
+			let conflicting_page_counts = metadata
+				.page_count
+				.map(|count| count != pages)
+				.unwrap_or(false);
+			// TODO: should we act here? Or just log the warning?
+			if conflicting_page_counts {
+				tracing::warn!(
+					?pages,
+					?metadata.page_count,
+					"Page count in metadata does not match actual page count!"
+				);
+			}
+		}
 
 		Ok(Media {
 			name: file_name,
-			size: converted_size,
+			size,
 			extension,
-			pages,
+			pages: processed_entry.pages,
 			hash: processed_entry.hash,
 			path: path_str,
 			series_id: self.series_id,
 			metadata: processed_entry.metadata,
+			modified_at: last_modified_at.map(|dt| dt.to_rfc3339()),
 			..Default::default()
 		})
 	}

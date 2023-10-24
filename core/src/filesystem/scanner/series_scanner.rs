@@ -180,6 +180,7 @@ impl SeriesScanner {
 			if let Some(media) = media_by_path.get(&path_str) {
 				tracing::trace!(media_path = ?path, "Existing media found");
 
+				// let last_touched_at = media.created_at
 				let has_been_modified = if let Some(dt) = media.modified_at.clone() {
 					file_updated_since_scan(&entry, dt)
 						.map_err(|err| {

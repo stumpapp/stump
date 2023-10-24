@@ -63,30 +63,6 @@ pub struct Media {
 	pub tags: Option<Vec<Tag>>,
 }
 
-impl Media {
-	// NOTE: currently, this will only look at a few fields:
-	// - name
-	// - description
-	// - size
-	// - pages
-	// - modified_at
-	// - status
-	// It's also a fairly naive implementation, effectively blindly overwriting
-	// the fields of the current media with the newer media. This is fine for now,
-	// but will eventually need to change to be more intelligent.
-	pub fn resolve_changes(&self, newer: &Media) -> Media {
-		Media {
-			name: newer.name.clone(),
-			size: newer.size,
-			pages: newer.pages,
-			modified_at: newer.modified_at.clone(),
-			status: newer.status,
-			hash: newer.hash.clone().or_else(|| self.hash.clone()),
-			..self.clone()
-		}
-	}
-}
-
 impl Cursor for Media {
 	fn cursor(&self) -> String {
 		self.id.clone()

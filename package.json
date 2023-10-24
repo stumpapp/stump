@@ -27,7 +27,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",
-		"@moonrepo/cli": "^1.15.1",
+		"@moonrepo/cli": "^1.15.3",
 		"@typescript-eslint/eslint-plugin": "^6.8.0",
 		"@typescript-eslint/parser": "^6.8.0",
 		"babel-preset-moon": "^2.0.9",
@@ -62,6 +62,6 @@
 	},
 	"packageManager": "pnpm@8.6.1",
 	"engines": {
-		"node": "18.16.0"
+		"node": "20.0.0"
 	}
 }

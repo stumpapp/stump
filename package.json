@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"scripts": {
 		"prepare": "husky install",
-		"setup": "pnpm i && pnpm web build && pnpm codegen",
+		"setup": "pnpm i && pnpm web build && cargo codegen",
 		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path .gitignore .",
 		"client": "pnpm --filter @stump/client --",
 		"desktop": "pnpm --filter @stump/desktop --",

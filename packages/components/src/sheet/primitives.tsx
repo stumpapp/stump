@@ -35,8 +35,8 @@ export type SheetPortalProps = {
 	floating?: boolean
 } & SheetPrimitive.DialogPortalProps &
 	VariantProps<typeof portalVariants>
-const SheetPortal = ({ position, className, children, floating, ...props }: SheetPortalProps) => (
-	<SheetPrimitive.Portal className={cn(className)} {...props}>
+const SheetPortal = ({ position, children, floating, ...props }: SheetPortalProps) => (
+	<SheetPrimitive.Portal {...props}>
 		<div
 			className={cn(portalVariants({ position }), {
 				[FLOATING_PORTAL_VARIANTS[position || 'right']]: !!floating,
@@ -68,7 +68,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-	'fixed z-50 scale-100 gap-4 bg-white opacity-100 dark:bg-gray-900 flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300 transition ease-in-out',
+	'fixed z-50 scale-100 gap-4 bg-white opacity-100 dark:bg-gray-950 flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300 transition ease-in-out',
 	{
 		compoundVariants: [
 			{

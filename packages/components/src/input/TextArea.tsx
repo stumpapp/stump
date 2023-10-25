@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Label } from '../form'
-import { Text } from '../index'
+import { Text } from '../text'
 import { cn } from '../utils'
 import { RawTextArea, RawTextAreaProps, RawTextAreaRef } from './raw'
 
@@ -19,12 +19,10 @@ export type TextAreaProps = {
 
 const TextArea = React.forwardRef<RawTextAreaRef, TextAreaProps>(
 	({ label, description, containerClassName, errorMessage, variant, ...props }, ref) => {
-		const isInvalid = !!errorMessage
-
 		return (
 			<div className={cn('grid items-center gap-1.5', containerClassName)}>
 				<Label htmlFor={props.id}>{label}</Label>
-				<RawTextArea variant={isInvalid ? 'error' : variant} ref={ref} {...props} />
+				<RawTextArea variant={variant} ref={ref} isInvalid={!!errorMessage} {...props} />
 
 				{errorMessage && (
 					<Text variant="danger" size="xs" className="break-all">

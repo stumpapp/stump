@@ -1,4 +1,4 @@
-import { Divider, Heading, Link, Text } from '@stump/components'
+import { Link, Text } from '@stump/components'
 import { useMemo } from 'react'
 
 import { useLocaleContext } from '../../../i18n/context'

@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 
-import { cx, Text } from '../index'
+import { Text } from '../text'
+import { cx } from '../utils'
 import { AvatarPrimitive, AvatarPrimitiveRef } from './primitives'
 
 // TODO: sizes that will handle scaling of the fallback text and avatar size

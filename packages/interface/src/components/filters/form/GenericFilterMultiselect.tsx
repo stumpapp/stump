@@ -1,5 +1,3 @@
-import { ApiResult } from '@stump/api'
-import { useQuery } from '@stump/client'
 import { ComboBox } from '@stump/components'
 import React, { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'

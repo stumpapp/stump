@@ -1,18 +1,11 @@
 import { queryClient, useScanLibrary } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
-import type { Library, LibraryScanMode } from '@stump/types'
-import {
-	Edit,
-	FileScan,
-	FolderSearch2,
-	MoreVertical,
-	ScanFace,
-	ScanLine,
-	Trash,
-} from 'lucide-react'
+import type { Library } from '@stump/types'
+import { Edit, FolderSearch2, MoreVertical, ScanLine, Trash } from 'lucide-react'
 import { useState } from 'react'
 
 import { useAppContext } from '../../context'
+import { useLocaleContext } from '../../i18n'
 import paths from '../../paths'
 import DeleteLibraryConfirmation from '../library/DeleteLibraryConfirmation'
 
@@ -20,12 +13,16 @@ type Props = {
 	library: Library
 }
 
+const LOCALE_KEY = 'sidebar.libraryOptions'
+const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
+
 export default function LibraryOptionsMenu({ library }: Props) {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const { scanAsync } = useScanLibrary()
+	const { t } = useLocaleContext()
 	const { isServerOwner } = useAppContext()
 
-	function handleScan(mode: LibraryScanMode) {
+	function handleScan() {
 		// extra protection, should not be possible to reach this.
 		if (!isServerOwner) {
 			throw new Error('You do not have permission to scan libraries.')
@@ -34,7 +31,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 		// The UI will receive updates from SSE in fractions of ms lol and it can get bogged down.
 		// So, add a slight delay so the close animation of the menu can finish cleanly.
 		setTimeout(async () => {
-			await scanAsync({ id: library.id, mode })
+			await scanAsync({ id: library.id, mode: 'DEFAULT' })
 			await queryClient.invalidateQueries(['getJobReports'])
 		}, 50)
 	}
@@ -60,24 +57,13 @@ export default function LibraryOptionsMenu({ library }: Props) {
 					{
 						items: [
 							{
-								label: 'Scan',
-								leftIcon: <FileScan className={iconStyle} />,
-								subItems: [
-									{
-										label: 'Default',
-										leftIcon: <ScanLine className={iconStyle} />,
-										onClick: () => handleScan('DEFAULT'),
-									},
-									{
-										label: 'Quick',
-										leftIcon: <ScanFace className={iconStyle} />,
-										onClick: () => handleScan('QUICK'),
-									},
-								],
+								label: t(getLocaleKey('scanLibrary')),
+								leftIcon: <ScanLine className={iconStyle} />,
+								onClick: () => handleScan(),
 							},
 							{
 								href: paths.libraryFileExplorer(library.id),
-								label: 'File explorer',
+								label: t(getLocaleKey('fileExplorer')),
 								leftIcon: <FolderSearch2 className={iconStyle} />,
 							},
 						],
@@ -86,11 +72,11 @@ export default function LibraryOptionsMenu({ library }: Props) {
 						items: [
 							{
 								href: paths.libraryManage(library.id),
-								label: 'Manage',
+								label: t(getLocaleKey('manageLibrary')),
 								leftIcon: <Edit className={iconStyle} />,
 							},
 							{
-								label: 'Delete',
+								label: t(getLocaleKey('deleteLibrary')),
 								leftIcon: <Trash className={iconStyle} />,
 								onClick: () => setIsDeleting(true),
 							},

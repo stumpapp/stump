@@ -55,7 +55,7 @@ export default function BookClubNavigation() {
 						to={tab.to}
 						key={tab.to}
 						underline={false}
-						className={cx('whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium', {
+						className={cx('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
 							'border-brand-500 text-brand-600 dark:text-brand-400': tab.isActive,
 							'border-transparent text-gray-800 hover:border-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200':
 								!tab.isActive,

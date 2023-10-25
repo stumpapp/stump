@@ -9,13 +9,13 @@ export type UserPermission = "bookclub:read" | "bookclub:create" | "file:upload"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
-export type UserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean }
+export type UserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence?: boolean }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
 
 export type UpdateUser = { username: string; password: string | null; avatar_url: string | null }
 
-export type UpdateUserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean }
+export type UpdateUserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean }
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
@@ -23,7 +23,7 @@ export type Library = { id: string; name: string; description: string | null; pa
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
-export type LibraryScanMode = "DEFAULT" | "QUICK" | "NONE"
+export type LibraryScanMode = "DEFAULT" | "NONE"
 
 export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
 
@@ -88,7 +88,7 @@ export type JobDetail = { id: string; name: string; description: string | null; 
 
 export type JobSchedulerConfig = { id: string; interval_secs: number; excluded_libraries: Library[] }
 
-export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { job_id: string; message: string } } | { key: "CreateEntityFailed"; data: { job_id: string | null; path: string; message: string } } | { key: "CreatedMedia"; data: Media } | { key: "CreatedMediaBatch"; data: BigInt } | { key: "CreatedSeries"; data: Series } | { key: "CreatedSeriesBatch"; data: BigInt } | { key: "GeneratedThumbnailBatch"; data: BigInt }
+export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { job_id: string; message: string } } | { key: "CreateEntityFailed"; data: { job_id: string | null; path: string; message: string } } | { key: "CreateOrUpdateMedia"; data: { id: string; series_id: string; library_id: string } } | { key: "CreatedManyMedia"; data: { count: BigInt; library_id: string } } | { key: "CreatedSeries"; data: { id: string; library_id: string } } | { key: "CreatedSeriesBatch"; data: { count: BigInt; library_id: string } } | { key: "SeriesScanComplete"; data: { id: string } } | { key: "GeneratedThumbnailBatch"; data: BigInt }
 
 export type ReadingListItem = { display_order: number; media_id: string; reading_list_id: string; media: Media | null }
 

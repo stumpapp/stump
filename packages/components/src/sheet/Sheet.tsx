@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { Button, PickSelect } from '../index'
+import { Button } from '../button'
+import { PickSelect } from '../utils'
 import { SheetContentProps, SheetPortalProps, SheetPrimitive } from './primitives'
 
 export type SheetProps = {

@@ -32,8 +32,6 @@ export default function App() {
 		async function init() {
 			const platform = await os.platform()
 			setPlatform(getPlatform(platform))
-			setUseDiscordPresence(true)
-			setDiscordPresence()
 			setMounted(true)
 			setTimeout(hideSplashScreen, 1000)
 		}

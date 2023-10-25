@@ -2,15 +2,9 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use tracing::debug;
 use utoipa::ToSchema;
-use walkdir::DirEntry;
 
-use crate::{
-	filesystem::SeriesJson,
-	prisma::{library, series},
-	CoreError, CoreResult,
-};
+use crate::prisma::{library, series};
 
 use super::{
 	common::FileStatus,
@@ -63,34 +57,6 @@ impl Series {
 			media_count: Some(media_count),
 			..series
 		}
-	}
-
-	pub fn try_from_entry(library_id: &str, entry: &DirEntry) -> CoreResult<Series> {
-		let path = entry.path();
-
-		let file_name = path
-			.file_name()
-			.and_then(|file_name| file_name.to_str().map(String::from))
-			.ok_or(CoreError::InternalError(
-				"Could not convert series file name to string".to_string(),
-			))?;
-		let path_str =
-			path.to_str()
-				.map(String::from)
-				.ok_or(CoreError::InternalError(
-					"Could not convert series path to string".to_string(),
-				))?;
-		let metadata = SeriesJson::from_folder(path).map(|json| json.metadata).ok();
-
-		debug!(file_name, path_str, ?metadata, "Parsed series information");
-
-		Ok(Series {
-			path: path_str,
-			name: file_name,
-			library_id: library_id.to_string(),
-			metadata,
-			..Default::default()
-		})
 	}
 
 	pub fn set_media_count(&mut self, count: i64) {

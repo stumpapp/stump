@@ -2,7 +2,7 @@ import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from 
 import { CoreEvent } from '@stump/types'
 import { QueryKey } from '@tanstack/react-query'
 
-import { queryClient } from './index'
+import { queryClient } from './client'
 
 type CoreEventTrigger = CoreEvent['key']
 type InvalidateFnArgs = {
@@ -10,26 +10,30 @@ type InvalidateFnArgs = {
 } & (
 	| {
 			keys: string[]
+			exact?: false
 	  }
 	| {
 			queryKey: QueryKey
+			exact?: boolean
 	  }
 )
 
-// TODO: this is still rather verbose, but it's a start
+// FIXME: I hate this... Figure out a better way to do this
+
 export const core_event_triggers = {
 	CreateEntityFailed: {
 		keys: [jobQueryKeys.getJobs],
 	},
-	CreatedMedia: {
+	// This results in WAY too many re-queries...
+	CreateOrUpdateMedia: {
 		keys: [
-			libraryQueryKeys.getLibraryById,
-			libraryQueryKeys.getLibrariesStats,
-			seriesQueryKeys.getSeriesById,
-			mediaQueryKeys.getRecentlyAddedMedia,
+			// libraryQueryKeys.getLibraryById,
+			// libraryQueryKeys.getLibrariesStats,
+			// seriesQueryKeys.getSeriesById,
+			// mediaQueryKeys.getRecentlyAddedMedia,
 		],
 	},
-	CreatedMediaBatch: {
+	CreatedManyMedia: {
 		keys: [
 			libraryQueryKeys.getLibraryById,
 			libraryQueryKeys.getLibrariesStats,
@@ -71,6 +75,7 @@ export const core_event_triggers = {
 			seriesQueryKeys.getSeriesById,
 			seriesQueryKeys.getRecentlyAddedSeries,
 			mediaQueryKeys.getRecentlyAddedMedia,
+			mediaQueryKeys.getInProgressMedia,
 		],
 	},
 	JobFailed: {
@@ -82,14 +87,25 @@ export const core_event_triggers = {
 	JobStarted: {
 		keys: [jobQueryKeys.getJobs],
 	},
+	SeriesScanComplete: {
+		keys: [
+			libraryQueryKeys.getLibrarySeries,
+			seriesQueryKeys.getSeries,
+			libraryQueryKeys.getLibraryById,
+			libraryQueryKeys.getLibrariesStats,
+			seriesQueryKeys.getSeriesById,
+			mediaQueryKeys.getRecentlyAddedMedia,
+			seriesQueryKeys.getRecentlyAddedSeries,
+			mediaQueryKeys.getInProgressMedia,
+		],
+	},
 } satisfies Record<CoreEventTrigger, InvalidateFnArgs>
 
 export async function invalidateQueries({ exact, ...args }: InvalidateFnArgs) {
 	if ('keys' in args) {
-		const predicate = (query: { queryKey: QueryKey }, compare: string) => {
-			const key = (query.queryKey[0] as string) || ''
-			return exact ? key === compare : key.startsWith(compare)
-		}
+		const predicate = ({ queryKey }: { queryKey: QueryKey }, compare: string) =>
+			queryKey.includes(compare)
+
 		return Promise.all(
 			args.keys.map((key) =>
 				queryClient.invalidateQueries({

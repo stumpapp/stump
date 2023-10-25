@@ -198,6 +198,16 @@
 			"heading": "Configuración del servidor",
 			"subtitle": "Gestiona varias opciones configurables para su servidor Stump en si mismo"
 		},
+		"desktop": {
+			"helmet": "Desktop Settings",
+			"heading": "Desktop Settings",
+			"subtitle": "Configure the Stump desktop application",
+			"discordPresence": {
+				"label": "Discord Presence",
+				"description": "Display your Stump activity in Discord using Discord Rich Presence",
+				"reconnect": "Reconnect to Discord"
+			}
+		},
 		"users": {
 			"helmet": "Administración de usuarios",
 			"heading": "Administración de usuarios",
@@ -245,14 +255,10 @@
 			"goBack": "Ir Atrás"
 		},
 		"libraryOptions": {
-			"scanLibrary": {
-				"base": "Escanear Biblioteca",
-				"parallel": "Escanear en Paralelo",
-				"inOrder": "Escanear en Orden"
-			},
+			"scanLibrary": "Scan",
 			"fileExplorer": "Explorador de Archivos",
-			"editLibrary": "Editar Biblioteca",
-			"deleteLibrary": "Eliminar Biblioteca"
+			"manageLibrary": "Manage",
+			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
 			"heading": "Información de la Versión",

@@ -64,6 +64,8 @@ export default function ServerUrlForm() {
 			}
 
 			if (baseUrl) {
+				form.clearErrors('baseUrl')
+				setSuccessfulConnection(false)
 				validateUrl()
 			}
 		},
@@ -106,11 +108,7 @@ export default function ServerUrlForm() {
 				onChange={(e) => setUrlDebounced(e.target.value)}
 			/>
 
-			{sucessfulConnection && (
-				<Text className="text-green-400">
-					Successfully connected to {form.getValues('baseUrl')}!
-				</Text>
-			)}
+			{sucessfulConnection && <Text className="-mt-3 text-green-400">Successfully connected!</Text>}
 
 			<div className="w-full md:w-1/3">
 				<Button className="w-full" variant="primary" type="submit" isLoading={isCheckingUrl}>

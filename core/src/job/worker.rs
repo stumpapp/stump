@@ -29,6 +29,14 @@ impl WorkerCtx {
 		self.core_ctx.emit_event(CoreEvent::JobProgress(progress))
 	}
 
+	pub fn emit_job_message(&self, message: &str) {
+		self.core_ctx.emit_event(CoreEvent::JobProgress(JobUpdate {
+			job_id: self.job_id.clone(),
+			message: Some(message.to_string()),
+			..Default::default()
+		}))
+	}
+
 	pub fn emit_job_started(&self, task_count: u64, message: Option<String>) {
 		self.core_ctx
 			.emit_event(CoreEvent::JobStarted(JobUpdate::started(

@@ -5,7 +5,7 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{and, operator::or, or, Direction};
+use prisma_client_rust::{and, operator::or, or, raw, Direction, PrismaValue};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -13,7 +13,7 @@ use stump_core::{
 	db::{
 		entity::{LibraryOptions, Media, ReadProgress, User},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
-		MediaDAO, DAO,
+		CountQueryReturn,
 	},
 	filesystem::{
 		get_unknown_thumnail,
@@ -366,19 +366,54 @@ async fn get_duplicate_media(
 	State(ctx): State<AppState>,
 	_session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let media_dao = MediaDAO::new(ctx.db.clone());
-
 	if pagination.page.is_none() {
 		return Err(ApiError::BadRequest(
 			"Pagination is required for this request".to_string(),
 		));
 	}
 
-	Ok(Json(
-		media_dao
-			.get_duplicate_media(pagination.0.page_params())
-			.await?,
-	))
+	let page_params = pagination.0.page_params();
+	let page_bounds = page_params.get_page_bounds();
+	let client = ctx.get_db();
+
+	let duplicated_media_page = client
+		._query_raw::<Media>(raw!(
+			r#"
+			SELECT * FROM media
+			WHERE hash IN (
+				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1
+			)
+			LIMIT {} OFFSET {}"#,
+			PrismaValue::Int(page_bounds.take),
+			PrismaValue::Int(page_bounds.skip)
+		))
+		.exec()
+		.await?;
+
+	let count_result = client
+		._query_raw::<CountQueryReturn>(raw!(
+			r#"
+			SELECT COUNT(*) as count FROM media
+			WHERE hash IN (
+				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) s> 1
+			)"#
+		))
+		.exec()
+		.await?;
+
+	let result = if let Some(db_total) = count_result.first() {
+		Ok(Pageable::with_count(
+			duplicated_media_page,
+			db_total.count,
+			page_params,
+		))
+	} else {
+		Err(ApiError::InternalServerError(
+			"Failed to fetch duplicate media".to_string(),
+		))
+	};
+
+	Ok(Json(result?))
 }
 
 #[utoipa::path(

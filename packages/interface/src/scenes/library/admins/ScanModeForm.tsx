@@ -39,14 +39,6 @@ export default function ScanModeForm({ isCreatingLibrary }: Props) {
 				/>
 
 				<RadioGroup.CardItem
-					label="Quick scan"
-					description="A faster scan that indexes your library files in parallel"
-					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"
-					isActive={scanMode === 'QUICK'}
-					value="QUICK"
-				/>
-
-				<RadioGroup.CardItem
 					label="Skip the scan"
 					description="You can perform a scan manually at a later time"
 					innerContainerClassName="block sm:flex-col sm:items-start sm:gap-2"

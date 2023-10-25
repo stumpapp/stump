@@ -12,6 +12,7 @@ const GeneralSettingsScene = lazily(() => import('./general/GeneralSettingsScene
 const JobSettingsScene = lazily(() => import('./job/JobSettingsScene.tsx'))
 const ServerSettingsScene = lazily(() => import('./server/ServerSettingsScene.tsx'))
 const UserManagementScene = lazily(() => import('./user/UserManagementScene.tsx'))
+const DesktopSettingsScene = lazily(() => import('./desktop/DesktopSettingsScene.tsx'))
 
 export default function SettingsRouter() {
 	const appProps = useAppProps()
@@ -30,7 +31,9 @@ export default function SettingsRouter() {
 				<Route path="jobs" element={<ServerOwnerRouteWrapper />}>
 					<Route path="" element={<JobSettingsScene />} />
 				</Route>
-				{appProps?.platform !== 'browser' && <Route path="desktop" element={<>Desktop!</>} />}
+				{appProps?.platform !== 'browser' && (
+					<Route path="desktop" element={<DesktopSettingsScene />} />
+				)}
 			</Route>
 		</Routes>
 	)

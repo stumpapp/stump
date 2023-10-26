@@ -38,33 +38,6 @@ export default function BookReaderScene() {
 		}
 	}, [])
 
-	/**
-	 * An effect to allow handling key down events so that navigation can be done when
-	 * the left and right arrow keys are pressed.
-	 */
-	useEffect(() => {
-		function handleKeyDown(event: KeyboardEvent) {
-			if (!page || !media) return
-
-			const currentPage = parseInt(page, 10)
-
-			// Check arrow keys
-			if (event.key == 'ArrowLeft' && currentPage > 1) {
-				handleChangePage(currentPage - 1)
-			}
-			if (event.key == 'ArrowRight' && currentPage < media.pages) {
-				handleChangePage(currentPage + 1)
-			}
-		}
-
-		// Add event listener
-		window.addEventListener('keydown', handleKeyDown)
-		// Remove listener on unmount
-		return () => {
-			window.removeEventListener('keydown', handleKeyDown)
-		}
-	})
-
 	function handleChangePage(newPage: number) {
 		updateReadProgress(newPage)
 		navigate(paths.bookReader(id!, { isAnimated, page: newPage }))

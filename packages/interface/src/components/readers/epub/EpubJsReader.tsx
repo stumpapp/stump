@@ -1,3 +1,5 @@
+import test from 'node:test'
+
 import { API, updateEpubProgress } from '@stump/api'
 import {
 	type EpubReaderPreferences,
@@ -168,6 +170,24 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					//* Color manipulation reference: https://github.com/futurepress/epub.js/issues/1019
 					rendition_.themes.register('stump-dark', stumpDark)
 					rendition_.on('relocated', handleLocationChange)
+
+					// This callback is used to change the page when a keydown
+					// event is recieved.
+					const keydown_callback = (event: KeyboardEvent) => {
+						// Check arrow keys
+						if (event.key == 'ArrowLeft') {
+							rendition_.prev()
+						}
+						if (event.key == 'ArrowRight') {
+							rendition_.next()
+						}
+					}
+					// The rendition fires the event when the epub page is in focus
+					rendition_.on('keydown', keydown_callback)
+					// The window should fire the event when the epub page isn't in focus
+					// However turning the page doesn't work, possibly because
+					// rendition.start() hasn't been called yet?
+					window.addEventListener('keydown', keydown_callback)
 
 					applyEpubPreferences(rendition_, epubPreferences)
 					setRendition(rendition_)

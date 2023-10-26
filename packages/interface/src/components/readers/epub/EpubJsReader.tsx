@@ -1,5 +1,3 @@
-import test from 'node:test'
-
 import { API, updateEpubProgress } from '@stump/api'
 import {
 	type EpubReaderPreferences,

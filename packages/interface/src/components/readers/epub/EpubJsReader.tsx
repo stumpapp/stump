@@ -169,6 +169,21 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					rendition_.themes.register('stump-dark', stumpDark)
 					rendition_.on('relocated', handleLocationChange)
 
+					// This callback is used to change the page when a keydown event is recieved.
+					const keydown_callback = (event: KeyboardEvent) => {
+						// Check arrow keys
+						if (event.key == 'ArrowLeft') {
+							rendition_.prev()
+						}
+						if (event.key == 'ArrowRight') {
+							rendition_.next()
+						}
+					}
+					// The rendition fires keydown events when the epub page is in focus
+					rendition_.on('keydown', keydown_callback)
+					// When the epub page isn't in focus, the window fires them instead
+					window.addEventListener('keydown', keydown_callback)
+
 					applyEpubPreferences(rendition_, epubPreferences)
 					setRendition(rendition_)
 

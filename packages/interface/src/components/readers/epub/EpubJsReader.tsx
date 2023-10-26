@@ -169,8 +169,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					rendition_.themes.register('stump-dark', stumpDark)
 					rendition_.on('relocated', handleLocationChange)
 
-					// This callback is used to change the page when a keydown
-					// event is recieved.
+					// This callback is used to change the page when a keydown event is recieved.
 					const keydown_callback = (event: KeyboardEvent) => {
 						// Check arrow keys
 						if (event.key == 'ArrowLeft') {
@@ -180,11 +179,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 							rendition_.next()
 						}
 					}
-					// The rendition fires the event when the epub page is in focus
+					// The rendition fires keydown events when the epub page is in focus
 					rendition_.on('keydown', keydown_callback)
-					// The window should fire the event when the epub page isn't in focus
-					// However turning the page doesn't work, possibly because
-					// rendition.start() hasn't been called yet?
+					// When the epub page isn't in focus, the window fires them instead
 					window.addEventListener('keydown', keydown_callback)
 
 					applyEpubPreferences(rendition_, epubPreferences)

@@ -11,7 +11,7 @@ export default function FileExplorerNavigation() {
 	const isDesktop = platform !== 'browser'
 
 	return (
-		<div className="m-0 hidden items-center gap-1 md:flex">
+		<div className="m-0 flex shrink-0 items-center gap-1">
 			<IconButton
 				variant="ghost"
 				size="sm"

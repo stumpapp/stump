@@ -377,21 +377,20 @@ model BookClubSchedule {
 model BookClubBook {
   id String @id @default(cuid())
 
-  order Int
-
-  start_at                 DateTime?
-  end_at                   DateTime?
-  discussion_duration_days Int?      @default(1) // in days
+  start_at                 DateTime
+  end_at                   DateTime
+  discussion_duration_days Int?     @default(1) // in days
 
   // The below group should only be set if the book is not already in the library
   title  String?
   author String?
   url    String?
 
-  book_entity_id        String?
-  book_entity           Media?            @relation(fields: [book_entity_id], references: [id], onDelete: Cascade)
-  book_club_schedule_id String?
-  book_club_schedule    BookClubSchedule? @relation(fields: [book_club_schedule_id], references: [book_club_id], onDelete: Cascade)
+  book_entity_id String?
+  book_entity    Media?  @relation(fields: [book_entity_id], references: [id], onDelete: Cascade)
+
+  book_club_schedule_book_club_id String?
+  book_club_schedule              BookClubSchedule? @relation(fields: [book_club_schedule_book_club_id], references: [book_club_id], onDelete: Cascade)
 
   chat_board BookClubChatBoard?
 

@@ -59,6 +59,11 @@ mod tests {
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<CreateUser>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UpdateUser>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<UpdateUserPreferences>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<DeleteUser>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
@@ -83,10 +88,17 @@ mod tests {
 			format!("{}\n\n", ts_export::<CreateBookClubMember>()?).as_bytes(),
 		)?;
 		file.write_all(
-			format!("{}\n\n", ts_export::<PatchBookClubMember>()?).as_bytes(),
+			format!("{}\n\n", ts_export::<UpdateBookClubMember>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateBookClubScheduleBookOption>()?)
+				.as_bytes(),
 		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateBookClubScheduleBook>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateBookClubSchedule>()?).as_bytes(),
 		)?;
 
 		file.write_all(

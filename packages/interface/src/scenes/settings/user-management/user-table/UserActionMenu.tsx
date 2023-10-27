@@ -2,12 +2,13 @@ import { userApi, userQueryKeys } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import { User } from '@stump/types'
-import { Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
+import { Database, Lock, MoreVertical, Pencil, Search, Trash, Unlock } from 'lucide-react'
 import React, { useMemo } from 'react'
 import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router'
 
 import { useAppContext } from '../../../../context.ts'
-import { noop } from '../../../../utils/misc.ts'
+import paths from '../../../../paths.ts'
 import { useUserManagementContext } from '../context.ts'
 
 type Props = {
@@ -17,9 +18,12 @@ type Props = {
 
 export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 	const { isServerOwner, user: byUser } = useAppContext()
-	const { setDeletingUser } = useUserManagementContext()
+	const { setDeletingUser, users } = useUserManagementContext()
 
+	const navigate = useNavigate()
 	const isSelf = byUser?.id === user.id
+
+	const userSessionsCount = users.find((u) => u.id === user.id)?.login_sessions_count || 0
 
 	const handleSetLockStatus = async (lock: boolean) => {
 		try {
@@ -35,52 +39,78 @@ export default function UserActionMenu({ user, onSelectForInspect }: Props) {
 		}
 	}
 
-	const items = useMemo(
+	const handleClearUserSessions = async () => {
+		try {
+			await userApi.deleteUserSessions(user.id)
+			if (isSelf) {
+				navigate('/')
+			} else {
+				await invalidateQueries({ keys: [userQueryKeys.getUsers] })
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message)
+			} else {
+				console.error(error)
+				toast.error('An unknown error occurred')
+			}
+		}
+	}
+
+	const groups = useMemo(
 		() => [
 			{
-				disabled: isSelf,
-				label: 'Inspect',
-				leftIcon: <Search className="mr-2 h-4 w-4" />,
-				onClick: () => onSelectForInspect(user),
+				items: [
+					{
+						label: 'Inspect',
+						leftIcon: <Search className="mr-2 h-4 w-4" />,
+						onClick: () => onSelectForInspect(user),
+					},
+					{
+						disabled: userSessionsCount === 0,
+						label: 'Clear sessions',
+						leftIcon: <Database className="mr-2 h-4 w-4" />,
+						onClick: handleClearUserSessions,
+					},
+				],
 			},
 			{
-				disabled: true,
-				label: 'Edit',
-				leftIcon: <Pencil className="mr-2 h-4 w-4" />,
-				onClick: noop,
-			},
-			{
-				disabled: isSelf,
-				label: 'Delete',
-				leftIcon: <Trash className="mr-2 h-4 w-4" />,
-				onClick: () => setDeletingUser(user),
-			},
-			{
-				disabled: isSelf || user.is_server_owner,
-				label: `${user.is_locked ? 'Unlock' : 'Lock'} account`,
-				leftIcon: user.is_locked ? (
-					<Unlock className="mr-2 h-4 w-4" />
-				) : (
-					<Lock className="mr-2 h-4 w-4" />
-				),
-				onClick: () => handleSetLockStatus(!user.is_locked),
+				items: [
+					{
+						label: 'Edit',
+						leftIcon: <Pencil className="mr-2 h-4 w-4" />,
+						onClick: () => navigate(paths.updateUser(user.id)),
+					},
+					{
+						disabled: isSelf,
+						label: 'Delete',
+						leftIcon: <Trash className="mr-2 h-4 w-4" />,
+						onClick: () => setDeletingUser(user),
+					},
+					{
+						disabled: isSelf || user.is_server_owner,
+						label: `${user.is_locked ? 'Unlock' : 'Lock'} account`,
+						leftIcon: user.is_locked ? (
+							<Unlock className="mr-2 h-4 w-4" />
+						) : (
+							<Lock className="mr-2 h-4 w-4" />
+						),
+						onClick: () => handleSetLockStatus(!user.is_locked),
+					},
+				],
 			},
 		],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[setDeletingUser, user, isSelf],
+		[setDeletingUser, user, isSelf, userSessionsCount],
 	)
 
-	if (!isServerOwner || isSelf) {
+	if (!isServerOwner) {
 		return null
 	}
 
 	return (
 		<DropdownMenu
-			groups={[
-				{
-					items,
-				},
-			]}
+			groups={groups}
 			trigger={
 				<IconButton size="xs" variant="ghost">
 					<MoreVertical className="h-4 w-4" />

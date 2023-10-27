@@ -1,12 +1,12 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::{get, put},
+	routing::{get, post, put},
 	Json, Router,
 };
 use prisma_client_rust::{
 	and,
-	chrono::{DateTime, Duration, Utc},
+	chrono::{Duration, Utc},
 	or, Direction,
 };
 use serde::Deserialize;
@@ -14,13 +14,14 @@ use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
 	db::entity::{
-		book_club_member_and_schedule_include, book_club_with_books_include, BookClub,
-		BookClubBook, BookClubInvitation, BookClubMember, BookClubMemberRole,
-		BookClubMemberRoleSpec, BookClubSchedule, User, UserPermission,
+		book_club_member_and_schedule_include, book_club_with_books_include,
+		book_club_with_schedule, BookClub, BookClubBook, BookClubInvitation,
+		BookClubMember, BookClubMemberRole, BookClubMemberRoleSpec, BookClubSchedule,
+		User, UserPermission,
 	},
 	prisma::{
 		book_club, book_club_book, book_club_invitation, book_club_member,
-		book_club_schedule, user, PrismaClient,
+		book_club_schedule, media, user, PrismaClient,
 	},
 };
 use tower_sessions::Session;
@@ -32,7 +33,7 @@ use crate::{
 	middleware::auth::{Auth, BookClubGuard},
 	utils::{
 		chain_optional_iter, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission,
+		get_user_and_enforce_permission, safe_string_to_date, string_to_date,
 	},
 };
 
@@ -40,6 +41,8 @@ use crate::{
 // TODO: suggestion likes
 // TODO: update schedule
 // TODO: patch schedule
+// TODO: check members can access the books in the schedule. I don't think lack of access should necessarily
+// be an error, but it would definitely be a warning for admins/creator
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -48,6 +51,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/book-clubs/:id",
 			Router::new()
 				.route("/", get(get_book_club).put(update_book_club))
+				.route("/current-book", get(get_book_club_current_book))
 				.nest(
 					"/invitations",
 					Router::new()
@@ -80,7 +84,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 							"/",
 							get(get_book_club_schedule).post(create_book_club_schedule),
 						)
-						.route("/current-book", get(get_book_club_current_book)),
+						.route("/add", post(add_books_to_book_club_schedule)),
 				),
 		)
 		.layer(from_extractor_with_state::<BookClubGuard, AppState>(
@@ -623,17 +627,17 @@ async fn get_book_club_member(
 }
 
 #[derive(Deserialize, Type, ToSchema)]
-pub struct PatchBookClubMember {
+pub struct UpdateBookClubMember {
 	pub display_name: Option<String>,
 	pub private_membership: Option<bool>,
 }
 
 #[utoipa::path(
-    patch,
+    put,
     path = "/api/v1/book_clubs/:id/members/:member_id",
     tag = "book_club",
     responses(
-        (status = 200, description = "Successfully patched book club member", body = BookClubMember),
+        (status = 200, description = "Successfully updated book club member", body = BookClubMember),
         (status = 401, description = "Unauthorized"),
         (status = 500, description = "Internal server error")
     )
@@ -642,7 +646,7 @@ async fn update_book_club_member(
 	State(ctx): State<AppState>,
 	Path((_id, member_id)): Path<(String, String)>,
 	session: Session,
-	Json(payload): Json<PatchBookClubMember>,
+	Json(payload): Json<UpdateBookClubMember>,
 ) -> ApiResult<Json<BookClubMember>> {
 	let client = ctx.get_db();
 
@@ -659,10 +663,7 @@ async fn update_book_club_member(
 		.update(
 			book_club_member::id::equals(member_id),
 			chain_optional_iter(
-				[
-					// TODO: this is not really a patch, because it will overwrite always...
-					book_club_member::display_name::set(payload.display_name),
-				],
+				[book_club_member::display_name::set(payload.display_name)],
 				[payload
 					.private_membership
 					.map(book_club_member::private_membership::set)],
@@ -706,20 +707,62 @@ async fn delete_book_club_member(
 	Ok(Json(BookClubMember::from(deleted_member)))
 }
 
+/// An enum to represent the two options for a book in a book club schedule:
+///
+/// - A book that is stored in the database
+/// - A book that is not stored in the database
+///
+/// This provides some flexibility for book clubs to add books that perhaps are not on the server
+#[derive(Deserialize, Type, ToSchema)]
+#[serde(untagged)]
+pub enum CreateBookClubScheduleBookOption {
+	/// A book that is stored in the database
+	Stored { id: String },
+	/// A book that is not stored in the database
+	External {
+		title: String,
+		author: String,
+		url: Option<String>,
+	},
+}
+
+impl CreateBookClubScheduleBookOption {
+	/// Convert the option into a vector of Prisma set parameters
+	pub fn into_prisma(self) -> Vec<book_club_book::SetParam> {
+		match self {
+			CreateBookClubScheduleBookOption::Stored { id } => {
+				vec![
+					book_club_book::book_entity::connect(media::id::equals(id.clone())),
+					book_club_book::book_entity_id::set(Some(id)),
+				]
+			},
+			CreateBookClubScheduleBookOption::External { title, author, url } => vec![
+				book_club_book::title::set(Some(title)),
+				book_club_book::author::set(Some(author)),
+				book_club_book::url::set(url),
+			],
+		}
+	}
+}
+
 #[derive(Deserialize, Type, ToSchema)]
 pub struct CreateBookClubScheduleBook {
-	pub book_id: String,
-	pub order: i32,
+	pub book: CreateBookClubScheduleBookOption,
+	pub start_at: Option<String>,
+	pub end_at: Option<String>,
 	pub discussion_duration_days: Option<i32>,
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, Type, ToSchema)]
 pub struct CreateBookClubSchedule {
-	pub start_at: Option<DateTime<Utc>>,
 	pub default_interval_days: Option<i32>,
 	pub books: Vec<CreateBookClubScheduleBook>,
 }
 
+// TODO: validate that the books are properly ordered, e.g. start_at < end_at and order is sequential
+// An example bad request might be:
+// { order: 1, start_at: "2021-05-01", end_at: "2021-05-02" }, { order: 2, start_at: "2021-01-03", end_at: "2021-01-04" }
+// The second book should have a start_at date after the end_at date of the first book
 #[utoipa::path(
     post,
     path = "/api/v1/book_clubs/:id/schedule",
@@ -753,6 +796,9 @@ async fn create_book_club_schedule(
 		.await?
 		.ok_or(ApiError::NotFound("Book club not found".to_string()))?;
 
+	let interval_days = payload.default_interval_days.unwrap_or(30);
+	let books_to_create = payload.books;
+
 	let result = client
 		._transaction()
 		.run(|tx| async move {
@@ -767,34 +813,50 @@ async fn create_book_club_schedule(
 				.exec()
 				.await?;
 
-			let first_book_start_at = payload.start_at.unwrap_or(Utc::now());
-			let interval_days = payload.default_interval_days.unwrap_or(30);
 			let mut last_end_at = None;
-			let create_books_query = payload.books.into_iter().map(|book| {
-				let (start_at, end_at) = if let Some(previous_end_at) = last_end_at {
-					(
-						previous_end_at,
-						previous_end_at + Duration::days(interval_days as i64),
-					)
-				} else {
-					(
-						first_book_start_at,
-						first_book_start_at + Duration::days(interval_days as i64),
-					)
+
+			let create_books_query = books_to_create.into_iter().map(|book| {
+				let CreateBookClubScheduleBook {
+					book,
+					start_at: start_at_str,
+					end_at: end_at_str,
+					discussion_duration_days,
+				} = book;
+
+				let (start_at, end_at) = match (start_at_str, end_at_str) {
+					(Some(start_at), Some(end_at)) => {
+						(safe_string_to_date(start_at), safe_string_to_date(end_at))
+					},
+					(Some(start_at), None) => {
+						let start_at = safe_string_to_date(start_at);
+						(start_at, start_at + Duration::days(interval_days as i64))
+					},
+					(None, Some(end_at)) => {
+						let end_at = safe_string_to_date(end_at);
+						(end_at - Duration::days(interval_days as i64), end_at)
+					},
+					(None, None) => {
+						let start_at = if let Some(last_end_at) = last_end_at {
+							last_end_at
+						} else {
+							Utc::now()
+						};
+
+						(start_at, start_at + Duration::days(interval_days as i64))
+					},
 				};
 
 				last_end_at = Some(end_at);
 
-				tx.book_club_book().create(
-					book.order,
-					vec![
-						book_club_book::start_at::set(Some(start_at.into())),
-						book_club_book::end_at::set(Some(end_at.into())),
-						book_club_book::discussion_duration_days::set(
-							book.discussion_duration_days,
-						),
-					],
-				)
+				let set_params = vec![book_club_book::discussion_duration_days::set(
+					discussion_duration_days,
+				)]
+				.into_iter()
+				.chain(book.into_prisma())
+				.collect();
+
+				tx.book_club_book()
+					.create(start_at.into(), end_at.into(), set_params)
 			});
 
 			tx._batch(create_books_query)
@@ -837,7 +899,7 @@ async fn get_book_club_schedule(
 		.find_first(vec![book_club_schedule::book_club::is(where_params)])
 		.with(
 			book_club_schedule::books::fetch(vec![])
-				.order_by(book_club_book::order::order(Direction::Asc)),
+				.order_by(book_club_book::start_at::order(Direction::Asc)),
 		)
 		.exec()
 		.await?
@@ -846,6 +908,130 @@ async fn get_book_club_schedule(
 		))?;
 
 	Ok(Json(BookClubSchedule::from(book_club_schedule)))
+}
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct AddBooksToBookClubSchedule {
+	pub books: Vec<CreateBookClubScheduleBook>,
+}
+
+async fn add_books_to_book_club_schedule(
+	State(ctx): State<AppState>,
+	Path(id): Path<String>,
+	session: Session,
+	Json(payload): Json<AddBooksToBookClubSchedule>,
+) -> ApiResult<Json<Vec<BookClubBook>>> {
+	let client = ctx.get_db();
+
+	let viewer = get_session_user(&session)?;
+
+	let book_club = client
+		.book_club()
+		.find_first(vec![
+			book_club::id::equals(id),
+			book_club::members::some(book_club_member_permission_for_user(
+				&viewer,
+				BookClubMemberRole::ADMIN,
+			)),
+		])
+		.include(book_club_with_schedule::include())
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Book club not found".to_string()))?;
+	let schedule = book_club.schedule.ok_or(ApiError::NotFound(
+		"Book club schedule not found".to_string(),
+	))?;
+
+	let existing_books = client
+		.book_club_book()
+		.find_many(vec![
+			book_club_book::book_club_schedule_book_club_id::equals(Some(book_club.id)),
+		])
+		.order_by(book_club_book::start_at::order(Direction::Asc))
+		.exec()
+		.await?;
+
+	let books_to_add = payload.books;
+	if books_to_add.is_empty() {
+		return Err(ApiError::BadRequest(
+			"Cannot add an empty list of books".to_string(),
+		));
+	}
+
+	let last_existing_book = existing_books.last().ok_or(
+		ApiError::InternalServerError("Could not find last existing book".to_string()),
+	)?;
+	let last_existing_book_end_at_str = last_existing_book.end_at.to_rfc3339();
+	let last_existing_book_end_at =
+		string_to_date(last_existing_book_end_at_str.clone())?;
+
+	let has_collision = books_to_add.iter().any(|book| {
+		let start_at = safe_string_to_date(
+			book.start_at
+				.clone()
+				.unwrap_or(last_existing_book_end_at_str.clone()),
+		);
+		start_at < last_existing_book_end_at
+	});
+	if has_collision {
+		return Err(ApiError::BadRequest(
+			"Cannot add books that have a start date before the last book's end date"
+				.to_string(),
+		));
+	}
+
+	let interval_days = schedule.default_interval_days.unwrap_or(30);
+	let mut last_end_at = Some(last_existing_book_end_at);
+	let create_many_query = books_to_add.into_iter().map(|book| {
+		let CreateBookClubScheduleBook {
+			book,
+			start_at: start_at_str,
+			end_at: end_at_str,
+			discussion_duration_days,
+		} = book;
+
+		let (start_at, end_at) = match (start_at_str, end_at_str) {
+			(Some(start_at), Some(end_at)) => {
+				(safe_string_to_date(start_at), safe_string_to_date(end_at))
+			},
+			(Some(start_at), None) => {
+				let start_at = safe_string_to_date(start_at);
+				(start_at, start_at + Duration::days(interval_days as i64))
+			},
+			(None, Some(end_at)) => {
+				let end_at = safe_string_to_date(end_at);
+				(end_at - Duration::days(interval_days as i64), end_at)
+			},
+			(None, None) => {
+				let start_at = if let Some(last_end_at) = last_end_at {
+					last_end_at
+				} else {
+					Utc::now()
+				};
+
+				(start_at, start_at + Duration::days(interval_days as i64))
+			},
+		};
+
+		last_end_at = Some(end_at);
+
+		let set_params = vec![book_club_book::discussion_duration_days::set(
+			discussion_duration_days,
+		)]
+		.into_iter()
+		.chain(book.into_prisma())
+		.collect();
+
+		client
+			.book_club_book()
+			.create(start_at.into(), end_at.into(), set_params)
+	});
+
+	let created_books = client._batch(create_many_query).await?;
+
+	Ok(Json(
+		created_books.into_iter().map(BookClubBook::from).collect(),
+	))
 }
 
 #[utoipa::path(
@@ -879,7 +1065,7 @@ async fn get_book_club_current_book(
 			book_club_schedule::books::fetch(vec![book_club_book::end_at::gte(
 				Utc::now().into(),
 			)])
-			.order_by(book_club_book::order::order(Direction::Asc)),
+			.order_by(book_club_book::start_at::order(Direction::Asc)),
 		)
 		.exec()
 		.await?

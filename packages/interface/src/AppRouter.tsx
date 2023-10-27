@@ -27,6 +27,8 @@ const ServerConnectionErrorScene = lazily(
 )
 const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene.tsx'))
 
+const IS_DEVELOPMENT = import.meta.env.DEV
+
 export function AppRouter() {
 	const appProps = useAppProps()
 
@@ -46,7 +48,7 @@ export function AppRouter() {
 					<Route path="libraries/*" element={<LibraryRouter />} />
 					<Route path="series/*" element={<SeriesRouter />} />
 					<Route path="books/*" element={<BookRouter />} />
-					<Route path="book-clubs/*" element={<BookClubRouter />} />
+					{IS_DEVELOPMENT && <Route path="book-clubs/*" element={<BookClubRouter />} />}
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 

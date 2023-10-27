@@ -96,6 +96,15 @@ A quick summary of the steps required to get going:
    pnpm run setup
    ```
 
+   This will build the React app, generate the Prisma client, and generate the Rust-TypeScript types. To do any of these individually, you can run:
+
+   ```bash
+    # build the React app
+    moon run web:build
+    # generate the Prisma client and Rust-TypeScript types
+    moon run codegen:generate
+   ```
+
 4. Start one of the apps:
 
    I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. A few example commands are:

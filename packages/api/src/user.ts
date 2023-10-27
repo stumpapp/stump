@@ -13,6 +13,10 @@ export function getUsers(params?: Record<string, unknown>): Promise<PageableApiR
 	}
 }
 
+export function getUserById(userId: string): Promise<ApiResult<User>> {
+	return API.get(`/users/${userId}`)
+}
+
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {
 	return API.get(`/users/${userId}/preferences`)
 }
@@ -79,12 +83,18 @@ export function setLockStatus(userId: string, lock: boolean): Promise<ApiResult<
 	})
 }
 
+export function deleteUserSessions(userId: string): Promise<ApiResult<void>> {
+	return API.delete(`/users/${userId}/sessions`)
+}
+
 export const userApi = {
 	createUser,
 	deleteAllLoginActivity,
 	deleteUser,
+	deleteUserSessions,
 	getLoginActivity,
 	getLoginActivityForUser,
+	getUserById,
 	getUserPreferences,
 	getUsers,
 	setLockStatus,
@@ -98,8 +108,10 @@ export const userQueryKeys: Record<keyof typeof userApi, string> = {
 	createUser: 'user.createUser',
 	deleteAllLoginActivity: 'user.deleteAllLoginActivity',
 	deleteUser: 'user.deleteUser',
+	deleteUserSessions: 'user.deleteUserSessions',
 	getLoginActivity: 'user.getLoginActivity',
 	getLoginActivityForUser: 'user.getLoginActivityForUser',
+	getUserById: 'user.getUserById',
 	getUserPreferences: 'user.getUserPreferences',
 	getUsers: 'user.getUsers',
 	setLockStatus: 'user.setLockStatus',

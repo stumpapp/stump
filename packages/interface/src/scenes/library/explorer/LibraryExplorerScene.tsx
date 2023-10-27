@@ -12,9 +12,6 @@ import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
 import FileExplorerHeader, { HEADER_HEIGHT } from './FileExplorerHeader'
 
-// TODO: this is just a concept right now, its pretty ugly and I won't spend much more time on it
-// until more of stump is compelted. That being said, if someone wants to run with this go for it!
-// most of what would be needed on the backend is in place.
 export default function LibraryExplorerScene() {
 	const navigate = useNavigate()
 

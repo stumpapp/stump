@@ -4,9 +4,9 @@ import { useFormContext } from 'react-hook-form'
 
 import { useLocaleContext } from '../../../../i18n'
 import paths from '../../../../paths'
-import { Schema } from './CreateUserForm'
+import { Schema } from './CreateOrUpdateUserForm'
 
-const LOCAL_BASE = 'settingsScene.createUsers.accessControl'
+const LOCAL_BASE = 'settingsScene.createOrUpdateUsers.accessControl'
 const getLocaleKey = (path: string) => `${LOCAL_BASE}.${path}`
 const getAgeRestrictionKey = (path: string) => `${getLocaleKey('ageRestriction')}.${path}`
 
@@ -80,6 +80,8 @@ export default function UserRestrictionsForm() {
 						disabled={!age_restriction || age_restriction < 1}
 					/>
 				</div>
+
+				{/* TODO: TagSelect */}
 			</div>
 		</div>
 	)

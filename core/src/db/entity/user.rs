@@ -103,7 +103,13 @@ impl From<prisma::user::Data> for User {
 			is_server_owner: data.is_server_owner,
 			permissions: data
 				.permissions
-				.map(|p| p.split(',').map(|p| p.into()).collect())
+				.map(|p| {
+					p.split(',')
+						.map(|p| p.trim())
+						.filter(|p| !p.is_empty())
+						.map(|p| p.into())
+						.collect()
+				})
 				.unwrap_or_default(),
 			user_preferences,
 			avatar_url: data.avatar_url,
@@ -125,8 +131,12 @@ pub enum UserPermission {
 	AccessBookClub,
 	#[serde(rename = "bookclub:create")]
 	CreateBookClub,
+	#[serde(rename = "file:explorer")]
+	FileExplorer,
 	#[serde(rename = "file:upload")]
 	UploadFile,
+	#[serde(rename = "library:scan")]
+	ScanLibrary,
 }
 
 impl ToString for UserPermission {
@@ -134,7 +144,9 @@ impl ToString for UserPermission {
 		match self {
 			UserPermission::AccessBookClub => "bookclub:read".to_string(),
 			UserPermission::CreateBookClub => "bookclub:create".to_string(),
+			UserPermission::FileExplorer => "file:explorer".to_string(),
 			UserPermission::UploadFile => "file:upload".to_string(),
+			UserPermission::ScanLibrary => "library:scan".to_string(),
 		}
 	}
 }
@@ -144,7 +156,9 @@ impl From<&str> for UserPermission {
 		match s {
 			"bookclub:read" => UserPermission::AccessBookClub,
 			"bookclub:create" => UserPermission::CreateBookClub,
+			"file:explorer" => UserPermission::FileExplorer,
 			"file:upload" => UserPermission::UploadFile,
+			"library:scan" => UserPermission::ScanLibrary,
 			_ => panic!("Invalid user permission: {}", s),
 		}
 	}
@@ -176,34 +190,6 @@ impl Default for UserPreferences {
 			enable_discord_presence: false,
 		}
 	}
-}
-
-//////////////////////////////////////////////
-//////////////////// INPUTS //////////////////
-//////////////////////////////////////////////
-
-#[derive(Deserialize, Type, ToSchema)]
-pub struct DeleteUser {
-	pub hard_delete: Option<bool>,
-}
-
-#[derive(Deserialize, Type, ToSchema)]
-pub struct UpdateUser {
-	pub username: String,
-	pub password: Option<String>,
-	pub avatar_url: Option<String>,
-}
-
-#[derive(Debug, Clone, Deserialize, Type, ToSchema)]
-pub struct UpdateUserPreferences {
-	pub id: String,
-	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
-	pub app_theme: String,
-	pub show_query_indicator: bool,
-	pub enable_discord_presence: bool,
 }
 
 ///////////////////////////////////////////////

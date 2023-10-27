@@ -177,10 +177,6 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<UpdateUser>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<UpdateUserPreferences>()?).as_bytes(),
-		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;

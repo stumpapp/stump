@@ -11,6 +11,8 @@ use crate::prisma::{
 	book_club_schedule,
 };
 
+// TODO: figure out ordering relations...
+
 book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_member_user_username {
 	members(filters): include {
 		user: select {
@@ -39,6 +41,8 @@ book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_wi
 		books
 	}
 });
+
+book_club::include!(book_club_with_schedule { schedule });
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct BookClub {
@@ -155,11 +159,9 @@ pub struct BookClubSchedule {
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct BookClubBook {
 	id: String,
-	order: i32,
-	#[specta(optional)]
-	start_at: Option<String>,
-	#[specta(optional)]
-	end_at: Option<String>,
+
+	start_at: String,
+	end_at: String,
 	discussion_duration_days: i32,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
@@ -432,9 +434,8 @@ impl From<book_club_book::Data> for BookClubBook {
 
 		BookClubBook {
 			id: data.id,
-			order: data.order,
-			start_at: data.start_at.map(|d| d.to_rfc3339()),
-			end_at: data.end_at.map(|d| d.to_rfc3339()),
+			start_at: data.start_at.to_rfc3339(),
+			end_at: data.end_at.to_rfc3339(),
 			discussion_duration_days: data.discussion_duration_days.unwrap_or(2),
 			title: data.title,
 			author: data.author,

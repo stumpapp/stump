@@ -1,8 +1,9 @@
-import { queryClient, useScanLibrary } from '@stump/client'
+import { queryClient, useScanLibrary, useUserStore } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import type { Library } from '@stump/types'
 import { Edit, FolderSearch2, MoreVertical, ScanLine, Trash } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useLocation } from 'react-router'
 
 import { useAppContext } from '../../context'
 import { useLocaleContext } from '../../i18n'
@@ -21,10 +22,17 @@ export default function LibraryOptionsMenu({ library }: Props) {
 	const { scanAsync } = useScanLibrary()
 	const { t } = useLocaleContext()
 	const { isServerOwner } = useAppContext()
+	const checkUserPermission = useUserStore((state) => state.checkUserPermission)
+
+	const location = useLocation()
+	const isOnExplorer = location.pathname.startsWith(paths.libraryFileExplorer(library.id))
+
+	const canScan = useMemo(() => checkUserPermission('library:scan'), [checkUserPermission])
+	const canUseExplorer = useMemo(() => checkUserPermission('file:explorer'), [checkUserPermission])
 
 	function handleScan() {
 		// extra protection, should not be possible to reach this.
-		if (!isServerOwner) {
+		if (!canScan) {
 			throw new Error('You do not have permission to scan libraries.')
 		}
 
@@ -38,7 +46,8 @@ export default function LibraryOptionsMenu({ library }: Props) {
 
 	const iconStyle = 'mr-2 h-4 w-4'
 
-	if (!isServerOwner) return null
+	// TODO: other permissions!
+	if (!canScan && !canUseExplorer) return null
 
 	return (
 		<>
@@ -56,32 +65,45 @@ export default function LibraryOptionsMenu({ library }: Props) {
 				groups={[
 					{
 						items: [
-							{
-								label: t(getLocaleKey('scanLibrary')),
-								leftIcon: <ScanLine className={iconStyle} />,
-								onClick: () => handleScan(),
-							},
-							{
-								href: paths.libraryFileExplorer(library.id),
-								label: t(getLocaleKey('fileExplorer')),
-								leftIcon: <FolderSearch2 className={iconStyle} />,
-							},
+							...(canScan
+								? [
+										{
+											label: t(getLocaleKey('scanLibrary')),
+											leftIcon: <ScanLine className={iconStyle} />,
+											onClick: () => handleScan(),
+										},
+								  ]
+								: []),
+							...(canUseExplorer
+								? [
+										{
+											disabled: isOnExplorer,
+											href: paths.libraryFileExplorer(library.id),
+											label: t(getLocaleKey('fileExplorer')),
+											leftIcon: <FolderSearch2 className={iconStyle} />,
+										},
+								  ]
+								: []),
 						],
 					},
-					{
-						items: [
-							{
-								href: paths.libraryManage(library.id),
-								label: t(getLocaleKey('manageLibrary')),
-								leftIcon: <Edit className={iconStyle} />,
-							},
-							{
-								label: t(getLocaleKey('deleteLibrary')),
-								leftIcon: <Trash className={iconStyle} />,
-								onClick: () => setIsDeleting(true),
-							},
-						],
-					},
+					...(isServerOwner
+						? [
+								{
+									items: [
+										{
+											href: paths.libraryManage(library.id),
+											label: t(getLocaleKey('manageLibrary')),
+											leftIcon: <Edit className={iconStyle} />,
+										},
+										{
+											label: t(getLocaleKey('deleteLibrary')),
+											leftIcon: <Trash className={iconStyle} />,
+											onClick: () => setIsDeleting(true),
+										},
+									],
+								},
+						  ]
+						: []),
 				]}
 				align="start"
 			/>

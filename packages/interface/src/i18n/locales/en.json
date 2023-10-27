@@ -274,10 +274,13 @@
 			"heading": "User Management",
 			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
 		},
-		"createUsers": {
-			"helmet": "Create user",
-			"heading": "Create new user",
-			"subtitle": "Use the form below to create a new user on this server",
+		"createOrUpdateUsers": {
+			"createHelmet": "Create user",
+			"createHeading": "Create new user",
+			"createSubtitle": "Use the form below to create a new user on this server",
+			"updateHelmet": "Update user",
+			"updateHeading": "Update user",
+			"updateSubtitle": "Use the form below to update the details of this user",
 			"accessControl": {
 				"heading": "Access control and restrictions",
 				"subtitle": [
@@ -318,16 +321,28 @@
 				},
 				"file": {
 					"label": "File Management",
+					"explorer": {
+						"label": "File Explorer",
+						"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+					},
 					"upload": {
 						"label": "Upload files",
 						"description": "Allows the user to upload files to the server"
+					}
+				},
+				"library": {
+					"label": "Library Management",
+					"scan": {
+						"label": "Scan libraries",
+						"description": "Allows the user to initiate scans for existing libraries"
 					}
 				}
 			},
 			"validation": {
 				"ageRestrictionTooLow": "Age restriction cannot be less than 0"
 			},
-			"submitButton": "Create user"
+			"createSubmitButton": "Create user",
+			"updateSubmitButton": "Update user"
 		}
 	},
 	"jobOverlay": {

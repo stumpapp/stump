@@ -45,6 +45,25 @@ export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) 
 	}
 }
 
+type UseUserQuery = {
+	id: string
+} & QueryOptions<User>
+export function useUserQuery({ id, ...options }: UseUserQuery) {
+	const { data, ...restReturn } = useQuery(
+		[userQueryKeys.getUserById, id],
+		async () => {
+			const { data } = await userApi.getUserById(id)
+			return data
+		},
+		options,
+	)
+
+	return {
+		user: data,
+		...restReturn,
+	}
+}
+
 type UseUserPreferencesParams = {
 	enableFetchPreferences?: boolean
 } & MutationOptions<UserPreferences, AxiosError, UserPreferences>
@@ -85,7 +104,7 @@ type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUser>
 export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	updateViewer
 
-	const { mutateAsync: update, isLoading } = useMutation(
+	const { mutateAsync, isLoading, error } = useMutation(
 		[userQueryKeys.updateUser, id],
 		async (params: UpdateUser) => {
 			const response = id ? await updateUser(id, params) : await updateViewer(params)
@@ -95,8 +114,9 @@ export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	)
 
 	return {
+		error,
 		isLoading,
-		update,
+		updateAsync: mutateAsync,
 	}
 }
 

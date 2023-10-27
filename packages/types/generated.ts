@@ -5,17 +5,13 @@
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 
-export type UserPermission = "bookclub:read" | "bookclub:create" | "file:upload"
+export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:scan"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
 export type UserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence?: boolean }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
-
-export type UpdateUser = { username: string; password: string | null; avatar_url: string | null }
-
-export type UpdateUserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean }
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
@@ -60,7 +56,7 @@ export type BookClubMemberRoleSpec = Record<BookClubMemberRole, string>
 
 export type BookClubSchedule = { default_interval_days: number | null; books?: BookClubBook[] | null }
 
-export type BookClubBook = { id: string; order: number; start_at?: string | null; end_at?: string | null; discussion_duration_days: number; title?: string | null; author?: string | null; url?: string | null; book_entity?: Media | null; chat_board?: BookClubChatBoard | null }
+export type BookClubBook = { id: string; start_at: string; end_at: string; discussion_duration_days: number; title?: string | null; author?: string | null; url?: string | null; book_entity?: Media | null; chat_board?: BookClubChatBoard | null }
 
 export type BookClubChatBoard = { id: string; messages: BookClubChatMessage[] | null }
 
@@ -162,6 +158,12 @@ export type LoginOrRegisterArgs = { username: string; password: string }
 
 export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
 
+export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
+
+export type UpdateUserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean }
+
+export type DeleteUser = { hard_delete: boolean | null }
+
 export type ClaimResponse = { is_claimed: boolean }
 
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
@@ -180,9 +182,21 @@ export type BookClubInvitationAnswer = { accept: boolean; member_details: Create
 
 export type CreateBookClubMember = { user_id: string; display_name: string | null; private_membership: boolean | null }
 
-export type PatchBookClubMember = { display_name: string | null; private_membership: boolean | null }
+export type UpdateBookClubMember = { display_name: string | null; private_membership: boolean | null }
 
-export type CreateBookClubScheduleBook = { book_id: string; order: number; discussion_duration_days: number | null }
+/**
+ * An enum to represent the two options for a book in a book club schedule:
+ * 
+ * - A book that is stored in the database
+ * - A book that is not stored in the database
+ * 
+ * This provides some flexibility for book clubs to add books that perhaps are not on the server
+ */
+export type CreateBookClubScheduleBookOption = { id: string } | { title: string; author: string; url: string | null }
+
+export type CreateBookClubScheduleBook = { book: CreateBookClubScheduleBookOption; start_at: string | null; end_at: string | null; discussion_duration_days: number | null }
+
+export type CreateBookClubSchedule = { default_interval_days: number | null; books: CreateBookClubScheduleBook[] }
 
 export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null }
 

@@ -1,4 +1,5 @@
-import React from 'react'
+import { useUserStore } from '@stump/client'
+import React, { useMemo } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
 import { LazyComponent } from '../../AppRouter'
@@ -12,9 +13,16 @@ const LibraryExplorerScene = lazily(() => import('./explorer/LibraryExplorerScen
 const LibraryOverviewScene = lazily(() => import('./LibraryOverviewScene.tsx'))
 
 export default function LibraryRouter() {
+	const checkUserPermission = useUserStore((state) => state.checkUserPermission)
+
+	const canAccessExplorer = useMemo(
+		() => checkUserPermission('file:explorer'),
+		[checkUserPermission],
+	)
+
 	return (
 		<Routes>
-			<Route path=":id/explore" element={<LibraryExplorerScene />} />
+			{canAccessExplorer && <Route path=":id/explore" element={<LibraryExplorerScene />} />}
 			<Route path=":id" element={<LibraryOverviewScene />} />
 			<Route element={<LibraryAdminLayout />}>
 				<Route path="create" element={<CreateLibraryScene />} />

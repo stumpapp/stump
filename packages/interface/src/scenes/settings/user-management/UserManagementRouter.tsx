@@ -7,11 +7,12 @@ import { Navigate, Route, Routes } from 'react-router'
 import { LazyComponent } from '../../../AppRouter.tsx'
 import { useAppContext } from '../../../context.ts'
 import { UserManagementContext } from './context.ts'
+import UpdateUserScene from './create-or-update/UpdateUserScene.tsx'
 
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const UserManagementScene = lazily(() => import('./UserManagementScene.tsx'))
-const CreateUserScene = lazily(() => import('./create-user/CreateUserScene.tsx'))
+const CreateUserScene = lazily(() => import('./create-or-update/CreateUserScene.tsx'))
 
 export default function UserManagementRouter() {
 	const [deletingUser, setDeletingUser] = useState<User | null>(null)
@@ -55,6 +56,7 @@ export default function UserManagementRouter() {
 			<Routes>
 				<Route path="" element={<UserManagementScene />} />
 				<Route path="create" element={<CreateUserScene />} />
+				<Route path=":id/manage" element={<UpdateUserScene />} />
 				{/* TODO: update user */}
 			</Routes>
 		</UserManagementContext.Provider>

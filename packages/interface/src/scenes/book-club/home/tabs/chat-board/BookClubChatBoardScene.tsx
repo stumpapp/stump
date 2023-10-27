@@ -1,5 +1,5 @@
 import { useChatBoardQuery } from '@stump/client/queries/bookClub'
-import { ButtonOrLink } from '@stump/components'
+import { ButtonOrLink, Card } from '@stump/components'
 import { BookClubChatMessage, User } from '@stump/types'
 import React from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
@@ -31,7 +31,7 @@ export default function BookClubChatBoardScene() {
 			: 'The chat board has not been opened yet'
 
 		return (
-			<div className="flex flex-col px-4">
+			<Card className="flex flex-col border-dashed px-4 pb-4">
 				<GenericEmptyState title="No chat board available" subtitle={message} />
 				<div className="self-center">
 					{/* FIXME: render right thing */}
@@ -41,7 +41,7 @@ export default function BookClubChatBoardScene() {
 						</ButtonOrLink>
 					)}
 				</div>
-			</div>
+			</Card>
 		)
 	} else if (!chatBoard && archivedChatId) {
 		return <Navigate to="/404" />

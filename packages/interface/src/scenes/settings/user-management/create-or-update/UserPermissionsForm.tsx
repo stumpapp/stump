@@ -1,4 +1,3 @@
-/* eslint-disable sort-keys-fix/sort-keys-fix */
 import { CheckBox, Divider, Heading, Link, Text } from '@stump/components'
 import { UserPermission } from '@stump/types'
 import { useEffect } from 'react'
@@ -7,14 +6,20 @@ import z from 'zod'
 
 import { useLocaleContext } from '../../../../i18n'
 import paths from '../../../../paths'
-import { Schema } from './CreateUserForm'
+import { Schema } from './CreateOrUpdateUserForm'
 
-export const allPermissions = ['bookclub:read', 'bookclub:create', 'file:upload'] as const
+export const allPermissions = [
+	'bookclub:read',
+	'bookclub:create',
+	'file:explorer',
+	'file:upload',
+	'library:scan',
+] as const
 export const userPermissionSchema = z.enum(allPermissions)
 
-const prefixes = ['bookclub', 'file']
+const prefixes = ['bookclub', 'file', 'library']
 
-const LOCAL_BASE = 'settingsScene.createUsers.permissions'
+const LOCAL_BASE = 'settingsScene.createOrUpdateUsers.permissions'
 const getLocaleKey = (path: string) => `${LOCAL_BASE}.${path}`
 const splitPermission = (permission: UserPermission): [string, string] =>
 	permission.split(':') as [string, string]
@@ -63,10 +68,12 @@ export default function UserPermissionsForm() {
 	const renderSection = (permissions: UserPermission[]) => {
 		return permissions.map((permission) => {
 			const label = t(getPermissionLabel(permission))
-			const description = t(getPermissionDescription(permission))
+			const [description, disclaimer] = t(getPermissionDescription(permission))
+				.split('\n')
+				.filter(Boolean)
 
 			return (
-				<div className="leading-6" key={permission}>
+				<div className="leading-6 md:max-w-2xl" key={permission}>
 					<CheckBox
 						id={permission}
 						variant="primary"
@@ -76,7 +83,10 @@ export default function UserPermissionsForm() {
 						value={permission}
 					/>
 					<Text variant="muted" className="ml-6 text-gray-500" size="sm">
-						{description}
+						{description}{' '}
+						{disclaimer && (
+							<span className="font-medium text-gray-900 dark:text-gray-200">{disclaimer}</span>
+						)}
 					</Text>
 				</div>
 			)

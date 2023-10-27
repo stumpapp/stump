@@ -46,5 +46,6 @@ export {
 	useUpdatePreferences,
 	useUpdateUser,
 	useUserPreferences,
+	useUserQuery,
 	useUsersQuery,
 } from './user'

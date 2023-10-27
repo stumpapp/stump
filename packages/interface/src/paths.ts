@@ -84,6 +84,7 @@ const paths = {
 		return `/series/${id}`
 	},
 	settings: (subpath?: SettingsPage) => `/settings/${subpath || ''}`,
+	updateUser: (id: string) => `${paths.settings('users')}/${id}/manage`,
 } as const
 
 export default paths

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { userQueryKeys } from '@stump/api'
-import { invalidateQueries, useCreateUser } from '@stump/client'
+import { invalidateQueries, useCreateUser, useUpdateUser } from '@stump/client'
 import { Alert, Button, Divider, Form, Heading, IconButton, Input, Text } from '@stump/components'
 import { User } from '@stump/types'
 import { Eye, EyeOff, Shield } from 'lucide-react'
@@ -16,20 +16,31 @@ import { useUserManagementContext } from '../context'
 import UserPermissionsForm, { userPermissionSchema } from './UserPermissionsForm'
 import UserRestrictionsForm from './UserRestrictionsForm'
 
-const buildSchema = (t: (key: string) => string, existingUsers: User[]) =>
+const buildSchema = (t: (key: string) => string, existingUsers: User[], updatingUser?: User) =>
 	z.object({
 		age_restriction: z
 			.number()
-			.min(0, { message: t('settingsScene.createUsers.validation.ageRestrictionTooLow') })
+			.min(0, { message: t('settingsScene.createOrUpdateUsers.validation.ageRestrictionTooLow') })
 			.optional(),
 		age_restriction_on_unset: z.boolean().optional(),
-		password: z.string().min(1, { message: t('authScene.form.validation.missingPassword') }),
+		forbidden_tags: z.array(z.string()).optional(),
+		password: z
+			.string()
+			// .min(1, { message: t('authScene.form.validation.missingPassword') })
+			.optional()
+			.refine(
+				// if we are updating a user, we don't need to validate the password
+				(value) => !!updatingUser || !!value,
+				() => ({ message: t('authScene.form.validation.missingPassword') }),
+			),
 		permissions: z.array(userPermissionSchema).optional(),
 		username: z
 			.string()
 			.min(1, { message: t('authScene.form.validation.missingUsername') })
 			.refine(
-				(value) => existingUsers.every((user) => user.username !== value),
+				(value) =>
+					(!!updatingUser && value === updatingUser.username) ||
+					existingUsers.every((user) => user.username !== value),
 				(value) => ({ message: `${value} is already taken` }),
 			),
 	})
@@ -45,22 +56,34 @@ const generateRandomPassword = (length = 16) => {
 	return randomValue
 }
 
-export default function CreateUserForm() {
+type Props = {
+	user?: User
+}
+
+export default function CreateOrUpdateUserForm({ user }: Props) {
 	const navigate = useNavigate()
 	const [passwordVisible, setPasswordVisible] = useState(false)
 
 	const { t } = useLocaleContext()
 	const { users } = useUserManagementContext()
 
-	const schema = useMemo(() => buildSchema(t, users), [t, users])
+	const isCreating = !user
+	const schema = useMemo(() => buildSchema(t, users, user), [t, users, user])
 	const form = useForm<Schema>({
+		defaultValues: {
+			age_restriction: user?.age_restriction?.age,
+			age_restriction_on_unset: user?.age_restriction?.restrict_on_unset,
+			permissions: user?.permissions,
+			username: user?.username,
+		},
 		resolver: zodResolver(schema),
 	})
 	const formHasErrors = useMemo(() => {
 		return Object.keys(form.formState.errors).length > 0
 	}, [form.formState])
 
-	const { createAsync, error } = useCreateUser()
+	const { createAsync, error: createError } = useCreateUser()
+	const { updateAsync, error: updateError } = useUpdateUser(user?.id)
 
 	const handleSubmit = async ({ username, password, permissions, ...ageRestrictions }: Schema) => {
 		try {
@@ -70,28 +93,61 @@ export default function CreateUserForm() {
 						restrict_on_unset: ageRestrictions.age_restriction_on_unset ?? false,
 				  }
 				: null
-			const result = await createAsync({ age_restriction, password, permissions, username })
-			console.debug('Created user', { result })
+
+			if (isCreating && password) {
+				const result = await createAsync({
+					age_restriction,
+					password: password,
+					permissions,
+					username,
+				})
+				console.debug('Created user', { result })
+				toast.success('User created successfully')
+			} else if (user) {
+				const result = await updateAsync({
+					...user,
+					age_restriction,
+					password: password || null,
+					permissions,
+					username,
+				})
+				console.debug('Updated user', { result })
+				toast.success('User updated successfully')
+			}
+
 			await invalidateQueries({ queryKey: [userQueryKeys.getUsers] })
-			toast.success('User created successfully')
 			navigate(paths.settings('users'))
 		} catch (error) {
 			console.error(error)
 		}
 	}
 
+	const renderErrors = () => {
+		return (
+			<>
+				{createError && (
+					<Alert level="error">
+						<Alert.Content>{createError.message}</Alert.Content>
+					</Alert>
+				)}
+				{updateError && (
+					<Alert level="error">
+						<Alert.Content>{updateError.message}</Alert.Content>
+					</Alert>
+				)}
+			</>
+		)
+	}
+
 	return (
 		<Form id="create-user-form" form={form} onSubmit={handleSubmit} className="py-2">
-			{error && (
-				<Alert level="error">
-					<Alert.Content>{error.message}</Alert.Content>
-				</Alert>
-			)}
+			{renderErrors()}
 
 			<div>
 				<Heading size="xs">Account details</Heading>
 				<Text size="sm" variant="muted" className="mt-1.5">
-					Enter the details for the new user below. They can change these details at any time
+					{isCreating ? 'Enter' : 'Update'} the details for the user below. They can change these
+					details at any time
 				</Text>
 
 				<Divider variant="muted" className="mt-3.5" />
@@ -136,12 +192,20 @@ export default function CreateUserForm() {
 				</div>
 			</div>
 
-			<UserPermissionsForm />
-			<UserRestrictionsForm />
+			{!user?.is_server_owner && (
+				<>
+					<UserPermissionsForm />
+					<UserRestrictionsForm />
+				</>
+			)}
 
 			<div className="mt-6 flex w-full md:max-w-sm">
 				<Button className="w-full md:max-w-sm" variant="primary" disabled={formHasErrors}>
-					{t('settingsScene.createUsers.submitButton')}
+					{t(
+						isCreating
+							? 'settingsScene.createOrUpdateUsers.createSubmitButton'
+							: 'settingsScene.createOrUpdateUsers.updateSubmitButton',
+					)}
 				</Button>
 			</div>
 		</Form>

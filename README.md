@@ -20,7 +20,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 </p>
 
 <p align='center'>
-<img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 90%" />
+<img alt="Screenshot of Stump" src="./.github/images/demo.png" style="width: 90%" />
 </p>
 
 <!-- prettier-ignore: I hate you sometimes prettier -->

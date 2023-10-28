@@ -43,6 +43,7 @@ use crate::{
 // TODO: patch schedule
 // TODO: check members can access the books in the schedule. I don't think lack of access should necessarily
 // be an error, but it would definitely be a warning for admins/creator
+// TODO: users that are members but have the feature revoked need some reconcilation...
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()

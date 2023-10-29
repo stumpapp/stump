@@ -1,7 +1,8 @@
 import { useBookClubQuery, useUserStore } from '@stump/client'
+import { cx } from '@stump/components'
 import { BookClub, Media, User } from '@stump/types'
 import React, { Suspense, useMemo } from 'react'
-import { Navigate, Outlet, useParams } from 'react-router'
+import { Navigate, Outlet, useLocation, useParams } from 'react-router'
 
 import SceneContainer from '../../../components/SceneContainer'
 import BookClubHeader from './BookClubHeader'
@@ -15,6 +16,7 @@ export default function BookClubHomeLayout() {
 		enabled: !!id,
 	})
 
+	const location = useLocation()
 	const user = useUserStore((store) => store.user)
 
 	const viewerMember = useMemo(
@@ -24,6 +26,7 @@ export default function BookClubHomeLayout() {
 	const viewerCanManage =
 		user?.is_server_owner || viewerMember?.is_creator || viewerMember?.role === 'ADMIN'
 	const viewerIsMember = !!viewerMember || !!user?.is_server_owner
+	const isOnOverview = location.pathname.endsWith('/overview')
 
 	// Realistically this won't happen because of access control rules on the server,
 	// but doesn't hurt to have an additional check here
@@ -49,7 +52,15 @@ export default function BookClubHomeLayout() {
 		>
 			<BookClubHeader />
 			<BookClubNavigation />
-			<SceneContainer className="flex flex-col gap-4 pb-[100px] md:h-full md:overflow-hidden md:pb-0">
+			<SceneContainer
+				className={cx(
+					'flex flex-col gap-4 pb-[100px] md:h-full md:pb-0',
+					{
+						'md:overflow-hidden': isOnOverview,
+					},
+					{ 'md:h-full md:overflow-y-scroll md:pb-4': !isOnOverview },
+				)}
+			>
 				<Suspense fallback={null}>
 					<Outlet />
 				</Suspense>
@@ -101,7 +112,6 @@ const mockBookClub: BookClub = {
 				discussion_duration_days: 2,
 				end_at: '2023-11-18T00:00:00.000Z',
 				id: '3',
-				order: 3,
 				start_at: '2023-10-19T00:00:00.000Z',
 			},
 			{
@@ -113,7 +123,6 @@ const mockBookClub: BookClub = {
 				discussion_duration_days: 2,
 				end_at: '2021-01-31T00:00:00.000Z',
 				id: '2',
-				order: 2,
 				start_at: '2021-01-01T00:00:00.000Z',
 				title: 'The Kraken: Part 2',
 				url: 'https://www.gutenberg.org/files/2701/2701-h/2701-h.htm',
@@ -130,7 +139,6 @@ const mockBookClub: BookClub = {
 				discussion_duration_days: 2,
 				end_at: '2020-12-31T00:00:00.000Z',
 				id: '1',
-				order: 1,
 				start_at: '2020-12-01T00:00:00.000Z',
 			},
 		],

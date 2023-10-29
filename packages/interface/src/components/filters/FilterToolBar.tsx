@@ -7,7 +7,7 @@ import { FilterFormVariant } from './form'
 import Search from './Search'
 
 type Props = {
-	slideOverForm: FilterFormVariant
+	slideOverForm: FilterFormVariant | null
 	/**
 	 * The placeholder text to display in the search input.
 	 */
@@ -49,7 +49,9 @@ export default function FilterToolBar({
 					}}
 					isLoading={isRefetching}
 				/>
-				<FilterSlideOver prompt={filterSlideOverPrompt} formVariant={slideOverForm} />
+				{slideOverForm && (
+					<FilterSlideOver prompt={filterSlideOverPrompt} formVariant={slideOverForm} />
+				)}
 			</div>
 			<FilterDisplay />
 		</header>

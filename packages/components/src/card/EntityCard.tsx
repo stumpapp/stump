@@ -21,7 +21,7 @@ const entityCardVariants = cva('', {
 	},
 })
 
-type EntityCardProps = {
+export type EntityCardProps = {
 	title?: string | React.ReactNode
 	subtitle?: string | React.ReactNode
 	imageUrl: string

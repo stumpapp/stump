@@ -58,7 +58,7 @@ export default function BookClubHomeLayout() {
 					{
 						'md:overflow-hidden': isOnOverview,
 					},
-					{ 'md:h-full md:overflow-y-scroll md:pb-4': !isOnOverview },
+					{ 'md:h-full md:overflow-y-scroll': !isOnOverview },
 				)}
 			>
 				<Suspense fallback={null}>

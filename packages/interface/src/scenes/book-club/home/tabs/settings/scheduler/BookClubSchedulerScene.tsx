@@ -10,7 +10,7 @@ export default function BookClubSchedulerScene() {
 
 	if (!schedule) {
 		return (
-			<div>
+			<div className="pb-4">
 				<CreateOrAddToScheduleForm />
 			</div>
 		)

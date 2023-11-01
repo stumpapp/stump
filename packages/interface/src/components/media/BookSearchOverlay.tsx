@@ -49,17 +49,6 @@ export default function BookSearchOverlay({ onBookSelect, sheetProps }: Props) {
 				description={sheetProps?.prompt || 'You can use the search bar below to find a book'}
 				trigger={renderTrigger()}
 				size="xl"
-				// footer={
-				// 	<div className="flex items-center gap-4 py-2">
-				// 		<Button type="button" variant="danger" onClick={handleClearFilters}>
-				// 			Clear filters
-				// 		</Button>
-
-				// 		<Button type="submit" form="filter-form">
-				// 			Apply filters
-				// 		</Button>
-				// 	</div>
-				// }
 			>
 				<div className="overflow-scroll p-4">
 					<BookSearch page={page} setPage={setPage} onBookSelect={handleSelectBook} />

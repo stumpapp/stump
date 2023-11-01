@@ -25,9 +25,9 @@ export default function Calendar({
 					buttonVariants({ size: 'sm', variant: 'ghost' }),
 					'h-8 w-8 p-0 font-normal aria-selected:opacity-100',
 				),
-				day_disabled: 'text-gray-500 dark:text-gray-450 opacity-50',
+				day_disabled: 'text-gray-400 dark:text-gray-500 opacity-50',
 				day_hidden: 'invisible',
-				day_outside: 'text-gray-500 dark:text-gray-450 opacity-50',
+				day_outside: 'text-gray-550 dark:text-gray-250 opacity-75',
 				day_range_middle: 'aria-selected:bg-accent aria-selected:text-accent-foreground',
 				day_selected:
 					'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',

@@ -2,7 +2,7 @@ import { ScrollArea, useBoolean } from '@stump/components'
 import { Fragment } from 'react'
 
 import { DEBUG_ENV } from '../index.ts'
-import Markdown from './Markdown.tsx'
+import Markdown from './markdown/MarkdownPreview.tsx'
 
 type Props = {
 	text?: string | null

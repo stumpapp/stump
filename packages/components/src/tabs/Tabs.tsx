@@ -57,7 +57,10 @@ const TabsTrigger = React.forwardRef<
 					TABS_CONTENT_VARIANTS[variant] || TABS_CONTENT_VARIANTS.default,
 					{
 						'hover:data-[state=inactive]:bg-gray-75 dark:hover:data-[state=inactive]:bg-gray-850':
-							activeOnHover,
+							activeOnHover && !props.disabled,
+					},
+					{
+						'pointer-events-none opacity-50': props.disabled,
 					},
 					className,
 				)}

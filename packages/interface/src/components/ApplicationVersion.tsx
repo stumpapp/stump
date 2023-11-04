@@ -31,7 +31,7 @@ export default function ApplicationVersion() {
 		>
 			<span>
 				v{version.semver}
-				{!!version.rev && `- ${version.rev}`}
+				{!!version.rev && ` - ${version.rev}`}
 			</span>
 		</Link>
 	)

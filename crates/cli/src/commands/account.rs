@@ -220,9 +220,14 @@ async fn change_server_owner() -> CliResult<()> {
 		client
 			.user()
 			.update(
-				user::id::equals(user.id),
+				user::id::equals(user.id.clone()),
 				vec![user::is_server_owner::set(false)],
 			)
+			.exec()
+			.await?;
+		client
+			.session()
+			.delete_many(vec![session::user_id::equals(user.id)])
 			.exec()
 			.await?;
 	}
@@ -231,9 +236,14 @@ async fn change_server_owner() -> CliResult<()> {
 	client
 		.user()
 		.update(
-			user::id::equals(target_user.id),
+			user::id::equals(target_user.id.clone()),
 			vec![user::is_server_owner::set(true)],
 		)
+		.exec()
+		.await?;
+	client
+		.session()
+		.delete_many(vec![session::user_id::equals(target_user.id)])
 		.exec()
 		.await?;
 

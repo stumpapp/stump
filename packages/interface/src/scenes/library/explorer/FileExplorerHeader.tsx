@@ -15,7 +15,7 @@ export default function FileExplorerHeader() {
 		<header className="fixed top-[50] z-10 h-10 w-full border-y border-gray-75 bg-white px-4 dark:border-gray-900 dark:bg-gray-975 md:top-0 md:border-y-0 md:border-b">
 			<nav className="flex h-full w-full items-center gap-4">
 				<FileExplorerNavigation />
-				<Text variant="secondary" size="sm">
+				<Text variant="secondary" size="sm" className="line-clamp-1">
 					{basename}
 				</Text>
 			</nav>

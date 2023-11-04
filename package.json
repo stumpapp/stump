@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"scripts": {
 		"prepare": "husky install",
-		"setup": "pnpm i && pnpm web build && pnpm core run setup",
+		"setup": "pnpm i && pnpm web build && cargo codegen",
 		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path .gitignore .",
 		"client": "pnpm --filter @stump/client --",
 		"desktop": "pnpm --filter @stump/desktop --",
@@ -18,7 +18,7 @@
 		"dev:web": "concurrently -n server,web -c green.bold,blue.bold \"pnpm run server dev\" \"pnpm web dev\"",
 		"core": "pnpm --filter @stump/core --",
 		"prisma": "pnpm core prisma",
-		"codegen": "pnpm -r codegen",
+		"codegen": "cargo run --package codegen",
 		"build:server": "pnpm run server build",
 		"build:web": "pnpm web build && pnpm build:server",
 		"build:desktop": "pnpm desktop build",
@@ -51,7 +51,7 @@
 		"typescript": "^5.2.2"
 	},
 	"lint-staged": {
-		"!(packages/interface/src/i18n/locales/**/*)*.{js,jsx,ts,tsx,md,json}": [
+		"*.{js,jsx,ts,tsx,md,json}": [
 			"prettier --config prettier.config.js --check"
 		],
 		"*.rs": [

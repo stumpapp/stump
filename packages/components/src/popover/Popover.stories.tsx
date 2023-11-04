@@ -1,30 +1,31 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { ComponentProps } from 'react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { Button, Text } from '..'
 import { Popover } from './Popover'
 
-export default {
+const StoryMeta: Meta<typeof Popover> = {
 	component: Popover,
 	title: 'popover/Popover',
-} as ComponentMeta<typeof Popover>
+}
+type Story = StoryObj<typeof Popover>
 
-type StoryProps = Omit<ComponentProps<typeof Popover.Content>, 'children'>
-const Story = (args: StoryProps) => {
+const Demo = () => {
 	return (
 		<div className="flex h-full w-full items-center justify-center">
 			<Popover>
 				<Popover.Trigger>
 					<Button>Trigger</Button>
 				</Popover.Trigger>
-				<Popover.Content {...args}>
+				<Popover.Content>
 					<Text>Content!</Text>
 				</Popover.Content>
 			</Popover>
 		</div>
 	)
 }
-const Template: ComponentStory<typeof Popover.Content> = (args) => <Story {...args} />
 
-export const Default = Template.bind({})
-Default.args = {}
+export const Default: Story = {
+	render: () => <Demo />,
+}
+
+export default StoryMeta

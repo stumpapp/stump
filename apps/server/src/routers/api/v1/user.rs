@@ -7,15 +7,16 @@ use axum::{
 use axum_extra::extract::Query;
 use prisma_client_rust::{chrono::Utc, Direction};
 use serde::Deserialize;
+use specta::Type;
 use stump_core::{
 	db::{
-		entity::{
-			DeleteUser, LoginActivity, UpdateUser, UpdateUserPreferences, User,
-			UserPreferences,
-		},
+		entity::{AgeRestriction, LoginActivity, User, UserPermission, UserPreferences},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 	},
-	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
+	prisma::{
+		age_restriction, session, user, user_login_activity, user_preferences,
+		PrismaClient,
+	},
 };
 use tower_sessions::Session;
 use tracing::{debug, trace};
@@ -29,8 +30,6 @@ use crate::{
 		get_hash_cost, get_session_server_owner_user, get_session_user, UserQueryRelation,
 	},
 };
-
-use super::auth::LoginOrRegisterArgs;
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -122,6 +121,7 @@ async fn get_users(
 	let include_user_read_progress =
 		relation_query.include_read_progresses.unwrap_or_default();
 	let include_session_count = relation_query.include_session_count.unwrap_or_default();
+	let include_restrictions = relation_query.include_restrictions.unwrap_or_default();
 
 	let (users, count) = ctx
 		.db
@@ -135,6 +135,10 @@ async fn get_users(
 
 			if include_session_count {
 				query = query.with(user::sessions::fetch(vec![]));
+			}
+
+			if include_restrictions {
+				query = query.with(user::age_restriction::fetch());
 			}
 
 			if !is_unpaged {
@@ -224,9 +228,20 @@ async fn delete_user_login_activity(
 	Ok(Json(()))
 }
 
+#[derive(Deserialize, Type, ToSchema)]
+pub struct UpdateUser {
+	pub username: String,
+	pub password: Option<String>,
+	pub avatar_url: Option<String>,
+	#[serde(default)]
+	pub permissions: Vec<UserPermission>,
+	pub age_restriction: Option<AgeRestriction>,
+}
+
 async fn update_user(
+	by_user: &User,
 	client: &PrismaClient,
-	user_id: String,
+	for_user_id: String,
 	input: UpdateUser,
 ) -> ApiResult<User> {
 	let mut update_params = vec![
@@ -238,16 +253,66 @@ async fn update_user(
 		update_params.push(user::hashed_password::set(hashed_password));
 	}
 
-	let updated_user_data = client
-		.user()
-		.update(user::id::equals(user_id), update_params)
-		// NOTE: we have to fetch preferences because if we update session without
-		// it then it effectively removes the preferences from the session
-		.with(user::user_preferences::fetch())
-		.exec()
-		.await?;
+	let to_update_is_server_owner = by_user.is_server_owner && by_user.id == for_user_id;
+	if to_update_is_server_owner {
+		let updated_user_data = client
+			.user()
+			.update(user::id::equals(for_user_id), update_params)
+			// NOTE: we have to fetch preferences because if we update session without
+			// it then it effectively removes the preferences from the session
+			.with(user::user_preferences::fetch())
+			.exec()
+			.await?;
 
-	Ok(User::from(updated_user_data))
+		Ok(User::from(updated_user_data))
+	} else {
+		let updated_user_data = client
+			._transaction()
+			.run(|tx| async move {
+				if let Some(age_restriction) = input.age_restriction {
+					let upserted_age_restriction = tx
+						.age_restriction()
+						.upsert(
+							age_restriction::user_id::equals(for_user_id.clone()),
+							(
+								age_restriction.age,
+								user::id::equals(for_user_id.clone()),
+								vec![age_restriction::restrict_on_unset::set(
+									age_restriction.restrict_on_unset,
+								)],
+							),
+							vec![
+								age_restriction::age::set(age_restriction.age),
+								age_restriction::restrict_on_unset::set(
+									age_restriction.restrict_on_unset,
+								),
+							],
+						)
+						.exec()
+						.await?;
+					tracing::trace!(?upserted_age_restriction, "Upserted age restriction")
+				}
+
+				update_params.push(user::permissions::set(Some(
+					input
+						.permissions
+						.into_iter()
+						.map(|p| p.to_string())
+						.collect::<Vec<String>>()
+						.join(","),
+				)));
+
+				tx.user()
+					.update(user::id::equals(for_user_id), update_params)
+					// NOTE: we have to fetch preferences because if we update session without
+					// it then it effectively removes the preferences from the session
+					.with(user::user_preferences::fetch())
+					.exec()
+					.await
+			})
+			.await?;
+		Ok(User::from(updated_user_data))
+	}
 }
 
 async fn update_preferences(
@@ -280,11 +345,20 @@ async fn update_preferences(
 	Ok(UserPreferences::from(updated_preferences))
 }
 
+#[derive(Deserialize, Type, ToSchema)]
+pub struct CreateUser {
+	pub username: String,
+	pub password: String,
+	#[serde(default)]
+	pub permissions: Vec<UserPermission>,
+	pub age_restriction: Option<AgeRestriction>,
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/users",
 	tag = "user",
-	request_body = LoginOrRegisterArgs,
+	request_body = CreateUser,
 	responses(
 		(status = 200, description = "Successfully created user", body = User),
 		(status = 401, description = "Unauthorized"),
@@ -296,41 +370,86 @@ async fn update_preferences(
 async fn create_user(
 	session: Session,
 	State(ctx): State<AppState>,
-	Json(input): Json<LoginOrRegisterArgs>,
+	Json(input): Json<CreateUser>,
 ) -> ApiResult<Json<User>> {
 	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
+
 	let hashed_password = bcrypt::hash(input.password, get_hash_cost())?;
+
+	// TODO: https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let created_user = db
-		.user()
-		.create(input.username.to_owned(), hashed_password, vec![])
-		.exec()
-		.await?;
+		._transaction()
+		.run(|client| async move {
+			let permissions = input
+				.permissions
+				.into_iter()
+				.filter_map(|p| {
+					let p_str = p.to_string();
+					if p_str.is_empty() {
+						None
+					} else {
+						Some(p_str)
+					}
+				})
+				.collect::<Vec<String>>();
 
-	// FIXME: these next two queries will be removed once nested create statements are
-	// supported on the prisma client. Until then, this ugly mess is necessary.
-	// https://github.com/Brendonovich/prisma-client-rust/issues/44
-	let _user_preferences = db
-		.user_preferences()
-		.create(vec![
-			user_preferences::user::connect(user::id::equals(created_user.id.clone())),
-			user_preferences::user_id::set(Some(created_user.id.clone())),
-		])
-		.exec()
-		.await?;
+			let created_user = client
+				.user()
+				.create(
+					input.username.to_owned(),
+					hashed_password,
+					vec![
+						user::is_server_owner::set(false),
+						user::permissions::set(Some(permissions.join(","))),
+					],
+				)
+				.exec()
+				.await?;
+			tracing::trace!(?created_user, "Created user");
 
-	// This *really* shouldn't fail, so I am using unwrap here. It also doesn't
-	// matter too much in the long run since this query will go away once above fixme
-	// is resolved.
-	let user = db
-		.user()
-		.find_unique(user::id::equals(created_user.id))
-		.with(user::user_preferences::fetch())
-		.exec()
+			if let Some(ar) = input.age_restriction {
+				let _age_restriction = client
+					.age_restriction()
+					.create(
+						ar.age,
+						user::id::equals(created_user.id.clone()),
+						vec![age_restriction::restrict_on_unset::set(
+							ar.restrict_on_unset,
+						)],
+					)
+					.exec()
+					.await?;
+				tracing::trace!(?_age_restriction, "Created age restriction")
+			}
+
+			let _user_preferences = client
+				.user_preferences()
+				.create(vec![
+					user_preferences::user::connect(user::id::equals(
+						created_user.id.clone(),
+					)),
+					user_preferences::user_id::set(Some(created_user.id.clone())),
+				])
+				.exec()
+				.await?;
+			tracing::trace!(?_user_preferences, "Created user preferences");
+
+			client
+				.user()
+				.find_unique(user::id::equals(created_user.id))
+				.with(user::user_preferences::fetch())
+				.with(user::age_restriction::fetch())
+				.exec()
+				.await
+		})
 		.await?
-		.unwrap();
+		.ok_or(ApiError::InternalServerError(
+			"Failed to create user".to_string(),
+		))?;
+	tracing::trace!(final_user = ?created_user, "Final user result");
 
-	Ok(Json(user.into()))
+	Ok(Json(created_user.into()))
 }
 
 #[utoipa::path(
@@ -354,7 +473,7 @@ async fn update_current_user(
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
 
-	let updated_user = update_user(db, user.id, input).await?;
+	let updated_user = update_user(&user, db, user.id.clone(), input).await?;
 	debug!(?updated_user, "Updated user");
 
 	session
@@ -364,6 +483,18 @@ async fn update_current_user(
 		})?;
 
 	Ok(Json(updated_user))
+}
+
+#[derive(Debug, Clone, Deserialize, Type, ToSchema)]
+pub struct UpdateUserPreferences {
+	pub id: String,
+	pub locale: String,
+	pub library_layout_mode: String,
+	pub series_layout_mode: String,
+	pub collection_layout_mode: String,
+	pub app_theme: String,
+	pub show_query_indicator: bool,
+	pub enable_discord_presence: bool,
 }
 
 #[utoipa::path(
@@ -407,6 +538,11 @@ async fn update_current_user_preferences(
 		})?;
 
 	Ok(Json(updated_preferences))
+}
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct DeleteUser {
+	pub hard_delete: Option<bool>,
 }
 
 #[utoipa::path(
@@ -485,6 +621,7 @@ async fn get_user_by_id(
 	let user_by_id = db
 		.user()
 		.find_unique(user::id::equals(id.clone()))
+		.with(user::age_restriction::fetch())
 		.exec()
 		.await?;
 	debug!(id, ?user_by_id, "Result of fetching user by id");
@@ -521,7 +658,7 @@ async fn get_user_login_activity_by_id(
 
 	let client = ctx.get_db();
 
-	if user.id != id && !user.is_server_owner() {
+	if user.id != id && !user.is_server_owner {
 		return Err(ApiError::Forbidden(String::from(
 			"You cannot access this resource",
 		)));
@@ -564,19 +701,27 @@ async fn update_user_handler(
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
 
-	// TODO: determine what a server owner can update.
-	if user.id != id {
+	if user.id != id && !user.is_server_owner {
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_user = update_user(db, id, input).await?;
+	let updated_user = update_user(&user, db, id.clone(), input).await?;
 	debug!(?updated_user, "Updated user");
 
-	session
-		.insert(SESSION_USER_KEY, updated_user.clone())
-		.map_err(|e| {
-			ApiError::InternalServerError(format!("Failed to update session: {}", e))
-		})?;
+	if user.id == id {
+		session
+			.insert(SESSION_USER_KEY, updated_user.clone())
+			.map_err(|e| {
+				ApiError::InternalServerError(format!("Failed to update session: {}", e))
+			})?;
+	} else {
+		// When a server owner updates another user, we need to delete all sessions for that user
+		// because the user's permissions may have changed. This is a bit lazy but it works.
+		db.session()
+			.delete_many(vec![session::user_id::equals(id)])
+			.exec()
+			.await?;
+	}
 
 	Ok(Json(updated_user))
 }

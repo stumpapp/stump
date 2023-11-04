@@ -50,6 +50,14 @@ export default function SettingsNavigation({ user }: Props) {
 
 	const { t } = useLocaleContext()
 
+	const activeRoute = useMemo(() => {
+		return (
+			[...DEFAULT_PAGES, DESKTOP_PAGE].find((page) => location.pathname.startsWith(page.path))
+				?.path || ''
+		)
+	}, [location.pathname])
+
+	const isServerOwner = user?.is_server_owner ?? false
 	const tabs = useMemo(() => {
 		let base = DEFAULT_PAGES
 
@@ -58,13 +66,13 @@ export default function SettingsNavigation({ user }: Props) {
 			base = [...base.slice(0, 1), DESKTOP_PAGE, ...base.slice(1)]
 		}
 
-		if (user?.role !== 'SERVER_OWNER') {
+		if (!isServerOwner) {
 			// Remove all pages except general and desktop for base users
 			base = base.filter((page) => page.shortName === 'general' || page.shortName === 'desktop')
 		}
 
 		return base.map((page, i) => ({ ...page, index: i }))
-	}, [appProps?.platform, user?.role])
+	}, [appProps?.platform, isServerOwner])
 
 	if (tabs.length <= 1) {
 		// Don't render navigation if there's only one available page,
@@ -81,17 +89,12 @@ export default function SettingsNavigation({ user }: Props) {
 					label: t(tab.localeKey),
 					value: tab.path,
 				}))}
-				value={location.pathname}
+				value={activeRoute}
 				onChange={(e) => {
 					navigate(e.target.value)
 				}}
 			/>
-			<Tabs
-				value={location.pathname}
-				variant="primary"
-				activeOnHover
-				className="hidden md:inline-flex"
-			>
+			<Tabs value={activeRoute} variant="primary" activeOnHover className="hidden md:inline-flex">
 				<Tabs.List>
 					{tabs.map((tab) => (
 						<Tabs.Trigger key={tab.path} value={tab.path} asChild>

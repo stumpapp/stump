@@ -1,10 +1,4 @@
-import type {
-	LoginActivity,
-	LoginOrRegisterArgs,
-	UpdateUser,
-	User,
-	UserPreferences,
-} from '@stump/types'
+import type { CreateUser, LoginActivity, UpdateUser, User, UserPreferences } from '@stump/types'
 
 import { API } from './axios'
 import { ApiResult, PageableApiResult } from './types'
@@ -17,6 +11,10 @@ export function getUsers(params?: Record<string, unknown>): Promise<PageableApiR
 	} else {
 		return API.get('/users')
 	}
+}
+
+export function getUserById(userId: string): Promise<ApiResult<User>> {
+	return API.get(`/users/${userId}`)
 }
 
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {
@@ -42,7 +40,7 @@ export function updateUserPreferences(
 	return API.put(`/users/${userId}/preferences`, preferences)
 }
 
-export function createUser(params: LoginOrRegisterArgs): Promise<ApiResult<User>> {
+export function createUser(params: CreateUser): Promise<ApiResult<User>> {
 	return API.post(`/users`, params)
 }
 
@@ -85,12 +83,18 @@ export function setLockStatus(userId: string, lock: boolean): Promise<ApiResult<
 	})
 }
 
+export function deleteUserSessions(userId: string): Promise<ApiResult<void>> {
+	return API.delete(`/users/${userId}/sessions`)
+}
+
 export const userApi = {
 	createUser,
 	deleteAllLoginActivity,
 	deleteUser,
+	deleteUserSessions,
 	getLoginActivity,
 	getLoginActivityForUser,
+	getUserById,
 	getUserPreferences,
 	getUsers,
 	setLockStatus,
@@ -104,8 +108,10 @@ export const userQueryKeys: Record<keyof typeof userApi, string> = {
 	createUser: 'user.createUser',
 	deleteAllLoginActivity: 'user.deleteAllLoginActivity',
 	deleteUser: 'user.deleteUser',
+	deleteUserSessions: 'user.deleteUserSessions',
 	getLoginActivity: 'user.getLoginActivity',
 	getLoginActivityForUser: 'user.getLoginActivityForUser',
+	getUserById: 'user.getUserById',
 	getUserPreferences: 'user.getUserPreferences',
 	getUsers: 'user.getUsers',
 	setLockStatus: 'user.setLockStatus',

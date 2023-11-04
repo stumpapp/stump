@@ -107,7 +107,6 @@ module.exports = function (relativeFromRoot) {
 	let config = {
 		content: [
 			'../../packages/*/src/**/*.{js,ts,jsx,tsx,html}',
-			// app ? `../../apps/${app}/src/**/*.{js,ts,jsx,tsx,html}` : `./src/**/*.{js,ts,jsx,tsx,html}`,
 			path.join(basePath, './src/**/*.(js|jsx|ts|tsx)'),
 		],
 		darkMode: 'class',
@@ -115,7 +114,6 @@ module.exports = function (relativeFromRoot) {
 			require('tailwind-scrollbar-hide'),
 			require('@tailwindcss/typography'),
 			require('tailwindcss-animate'),
-			// require('@tailwindcss/line-clamp'),
 			require('tailwindcss-autofill'),
 			require('tailwindcss-text-fill'),
 			require('tailwindcss-shadow-fill'),

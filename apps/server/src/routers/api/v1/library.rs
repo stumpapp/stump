@@ -19,7 +19,7 @@ use stump_core::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
 			CreateLibrary, LibrariesStats, Library, LibraryOptions, LibraryScanMode,
-			Media, Series, UpdateLibrary,
+			Media, Series, UpdateLibrary, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -49,8 +49,9 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
-		get_session_user, http::ImageResponse, FilterableQuery, LibraryBaseFilter,
-		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
+		get_session_user, get_user_and_enforce_permission, http::ImageResponse,
+		FilterableQuery, LibraryBaseFilter, LibraryFilter, LibraryRelationFilter,
+		MediaFilter, SeriesFilter,
 	},
 };
 
@@ -63,7 +64,7 @@ use super::{
 };
 
 // TODO: age restrictions!
-// TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
+// TODO: .layer(from_extractor::<ServerOwnerGuard>()) where needed. Might need to remove some
 // of the nesting
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -757,7 +758,8 @@ async fn scan_library(
 	session: Session,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
-	let _user = get_session_server_owner_user(&session)?;
+
+	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
 
 	let library = db
 		.library()

@@ -15,12 +15,13 @@ const entityCardVariants = cva('', {
 			// md:{h-[22.406rem], w-[12rem]}
 			default: 'w-[10rem] sm:w-[10.666rem] md:w-[12rem]',
 			lg: 'w-full max-w-[16rem]',
+			sm: 'w-12 h-16',
 		},
 		variant: {},
 	},
 })
 
-type EntityCardProps = {
+export type EntityCardProps = {
 	title?: string | React.ReactNode
 	subtitle?: string | React.ReactNode
 	imageUrl: string
@@ -89,6 +90,8 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 			return null
 		}
 
+		const hasClickAction = !!href || !!props.onClick || !!props.onDoubleClick
+
 		return (
 			// @ts-expect-error: naive type oop
 			<Container {...containerProps}>
@@ -97,7 +100,7 @@ export const EntityCard = forwardRef<React.ElementRef<'div'>, EntityCardProps>(
 					className={cn(
 						'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-gray-75 bg-white shadow-sm transition-colors duration-100 dark:border-gray-850 dark:bg-gray-950',
 						entityCardVariants({ className, size, variant }),
-						{ 'hover:border-brand dark:hover:border-brand': !!href },
+						{ 'cursor-pointer hover:border-brand dark:hover:border-brand': hasClickAction },
 						className,
 					)}
 					{...props}

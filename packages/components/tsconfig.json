@@ -6,6 +6,7 @@
 		"outDir": "../../.moon/cache/types/packages/components",
 		"jsx": "preserve",
 		"esModuleInterop": true,
-		"module": "NodeNext"
+		"module": "es2022",
+		"moduleResolution": "Node"
 	}
 }

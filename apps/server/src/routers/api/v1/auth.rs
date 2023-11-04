@@ -11,7 +11,7 @@ use prisma_client_rust::{
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
-	db::entity::{User, UserRole},
+	db::entity::User,
 	prisma::{user, user_login_activity, user_preferences, PrismaClient},
 };
 use tower_sessions::{session::SessionDeletion, Session};
@@ -256,13 +256,13 @@ pub async fn register(
 
 	let has_users = db.user().find_first(vec![]).exec().await?.is_some();
 
-	let mut user_role = UserRole::default();
+	let mut is_server_owner = false;
 
 	let session_user = session.get::<User>(SESSION_USER_KEY)?;
 
 	// TODO: move nested if to if let once stable
 	if let Some(user) = session_user {
-		if !user.is_server_owner() {
+		if !user.is_server_owner {
 			return Err(ApiError::Forbidden(String::from(
 				"You do not have permission to access this resource.",
 			)));
@@ -272,7 +272,7 @@ pub async fn register(
 		return Err(ApiError::Unauthorized);
 	} else if !has_users {
 		// if no users present, the user is automatically a server owner
-		user_role = UserRole::ServerOwner;
+		is_server_owner = true;
 	}
 
 	let hashed_password = bcrypt::hash(&input.password, utils::get_hash_cost())?;
@@ -282,7 +282,7 @@ pub async fn register(
 		.create(
 			input.username.to_owned(),
 			hashed_password,
-			vec![user::role::set(user_role.into())],
+			vec![user::is_server_owner::set(is_server_owner)],
 		)
 		.exec()
 		.await?;

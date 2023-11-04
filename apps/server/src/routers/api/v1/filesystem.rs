@@ -18,14 +18,14 @@ use tracing::trace;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
-	middleware::auth::{AdminGuard, Auth},
+	middleware::auth::{Auth, ServerOwnerGuard},
 	utils::get_session_server_owner_user,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/filesystem", post(list_directory))
-		.layer(from_extractor::<AdminGuard>())
+		.layer(from_extractor::<ServerOwnerGuard>())
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 

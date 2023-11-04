@@ -20,7 +20,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 </p>
 
 <p align='center'>
-<img alt="Screenshot of Stump" src="./.github/images/demo-img.png" style="width: 90%" />
+<img alt="Screenshot of Stump" src="./.github/images/demo.png" style="width: 90%" />
 </p>
 
 <!-- prettier-ignore: I hate you sometimes prettier -->
@@ -96,6 +96,15 @@ A quick summary of the steps required to get going:
    pnpm run setup
    ```
 
+   This will build the React app, generate the Prisma client, and generate the Rust-TypeScript types. To do any of these individually, you can run:
+
+   ```bash
+    # build the React app
+    moon run web:build
+    # generate the Prisma client and Rust-TypeScript types
+    moon run codegen:generate
+   ```
+
 4. Start one of the apps:
 
    I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. A few example commands are:
@@ -150,26 +159,29 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 
 ### /apps
 
-- `desktop`: A React+Tauri application.
-- `docs`: A NextJS application for the Stump documentation site.
-- `mobile`: A React Native application.
-- `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server.
-- `web`: A React application.
+- `desktop`: A React+Tauri application
+- `docs`: A NextJS application for the Stump documentation site
+- `mobile`: A React Native application
+- `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server
+- `web`: A React application
 
 ### /core
 
-- `core`: A Rust crate containing Stump's core functionalities.
+- `core`: A Rust crate containing Stump's core functionalities
 
 ### /crates
 
-- `prisma-cli`: A small rust app to run the Prisma CLI.
+- `cli`: A CLI library used in the `server` app
+- `codegen`: A small rust app that handles all of the code generation for Stump
+- `integrations`: A rust library containing integrations with other notification services
+- `prisma-cli`: A small wrapper rust app to run the Prisma CLI
 
 ### /packages
 
-- `api`: All of the API functions used by the `client` package.
-- `client`: React-query config, hooks, and other client-side utilities.
-- `components`: Shared React components for the web and desktop applications.
-- `interface`: A React component responsible for the main UI layout for the web and desktop applications.
+- `api`: All of the API functions used by the `client` package
+- `client`: React-query config, hooks, and other client-side utilities
+- `components`: Shared React components for the web and desktop applications
+- `interface`: A React component responsible for the main UI layout for the web and desktop applications
 - `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 ## Similar Projects 👯

@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
@@ -50,6 +52,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route("/media/duplicates", get(get_duplicate_media))
 		.route("/media/keep-reading", get(get_in_progress_media))
 		.route("/media/recently-added", get(get_recently_added_media))
+		.route("/media/path/:path", get(get_media_by_path))
 		.nest(
 			"/media/:id",
 			Router::new()
@@ -584,6 +587,49 @@ async fn get_recently_added_media(
 	}
 
 	Ok(Json(Pageable::from(media)))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/path/:path",
+	tag = "media",
+	params(
+		("path" = PathBuf, Path, description = "The path of the media to get")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media", body = Media),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn get_media_by_path(
+	Path(path): Path<PathBuf>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<Media>> {
+	let client = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let path_str = path.to_string_lossy().to_string();
+
+	let book = client
+		.media()
+		.find_first(chain_optional_iter(
+			[media::path::equals(path_str)],
+			[age_restrictions],
+		))
+		.with(media::metadata::fetch())
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	Ok(Json(Media::from(book)))
 }
 
 #[derive(Deserialize)]

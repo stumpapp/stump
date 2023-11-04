@@ -10,7 +10,10 @@ use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{db::entity::User, prisma::user};
+use stump_core::{
+	db::entity::{User, UserPermission},
+	prisma::user,
+};
 use tower_sessions::Session;
 use tracing::{error, trace};
 
@@ -145,13 +148,13 @@ where
 /// use axum::{Router, middleware::from_extractor};
 ///
 /// Router::new()
-///     .layer(from_extractor::<AdminGuard>())
+///     .layer(from_extractor::<ServerOwnerGuard>())
 ///     .layer(from_extractor_with_state::<Auth, AppState>(app_state));
 /// ```
-pub struct AdminGuard;
+pub struct ServerOwnerGuard;
 
 #[async_trait]
-impl<S> FromRequestParts<S> for AdminGuard
+impl<S> FromRequestParts<S> for ServerOwnerGuard
 where
 	S: Send + Sync,
 {
@@ -175,7 +178,7 @@ where
 			StatusCode::INTERNAL_SERVER_ERROR
 		})?;
 		if let Some(user) = session_user {
-			if user.is_admin() {
+			if user.is_server_owner {
 				return Ok(Self);
 			}
 
@@ -196,6 +199,45 @@ impl IntoResponse for BasicAuth {
 			.header("WWW-Authenticate", "Basic realm=\"stump\"")
 			.body(BoxBody::default())
 			.unwrap()
+	}
+}
+
+pub struct BookClubGuard;
+
+#[async_trait]
+impl<S> FromRequestParts<S> for BookClubGuard
+where
+	S: Send + Sync,
+{
+	type Rejection = StatusCode;
+
+	async fn from_request_parts(
+		parts: &mut Parts,
+		_: &S,
+	) -> Result<Self, Self::Rejection> {
+		if parts.method == Method::OPTIONS {
+			return Ok(Self);
+		}
+
+		let session = parts
+			.extensions
+			.get::<Session>()
+			.expect("Failed to extract session");
+
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			StatusCode::INTERNAL_SERVER_ERROR
+		})?;
+
+		if let Some(user) = session_user {
+			if user.has_permission(UserPermission::AccessBookClub) {
+				return Ok(Self);
+			}
+
+			return Err(StatusCode::FORBIDDEN);
+		}
+
+		return Err(StatusCode::UNAUTHORIZED);
 	}
 }
 

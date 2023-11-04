@@ -1,5 +1,6 @@
 // TODO: fix all these pub uses
 
+pub mod book_club;
 pub(crate) mod common;
 pub mod epub;
 pub mod library;
@@ -16,6 +17,7 @@ pub mod user;
 pub use self::epub::*;
 pub use self::log::*;
 
+pub use book_club::*;
 pub use library::*;
 pub use media::*;
 pub use read_progress::*;

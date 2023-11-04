@@ -1,15 +1,15 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { CreditCard, Settings, User } from 'lucide-react'
 import { ComponentProps } from 'react'
 
 import { DropdownMenu } from './DropdownMenu'
 
-export default {
+const StoryMeta: Meta<typeof DropdownMenu> = {
 	component: DropdownMenu,
 	title: 'dropdown/DropdownMenu',
-} as ComponentMeta<typeof DropdownMenu>
+}
+type Story = StoryObj<typeof DropdownMenu>
 
-type StoryProps = Partial<ComponentProps<typeof DropdownMenu>>
 const defaultArgs: ComponentProps<typeof DropdownMenu> = {
 	groups: [
 		{
@@ -62,28 +62,26 @@ const defaultArgs: ComponentProps<typeof DropdownMenu> = {
 	],
 	label: 'DropdownMenu',
 }
-const Story = ({ align, ...args }: StoryProps) => (
+
+type DemoProps = Partial<ComponentProps<typeof DropdownMenu>>
+const Demo = ({ align, ...args }: DemoProps) => (
 	<DropdownMenu
 		label={args.label || defaultArgs.label}
 		groups={args.groups || defaultArgs.groups}
 		align={align}
 	/>
 )
-const Template: ComponentStory<typeof Story> = (args) => <Story {...args} />
 
-export const Default = Template.bind({})
-Default.args = {
-	label: 'Dropdown',
+export const Default: Story = {
+	render: () => <Demo />,
 }
 
-export const StartAligned = Template.bind({})
-StartAligned.args = {
-	align: 'start',
-	label: 'Dropdown',
+export const StartAligned: Story = {
+	render: () => <Demo align="start" />,
 }
 
-export const CenterAligned = Template.bind({})
-CenterAligned.args = {
-	align: 'center',
-	label: 'Dropdown',
+export const CenterAligned: Story = {
+	render: () => <Demo align="center" />,
 }
+
+export default StoryMeta

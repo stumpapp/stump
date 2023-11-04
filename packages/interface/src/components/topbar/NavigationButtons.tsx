@@ -1,4 +1,4 @@
-import { IconButton } from '@stump/components'
+import { IconButton, ToolTip } from '@stump/components'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -28,13 +28,17 @@ export default function NavigationButtons() {
 
 	return (
 		<div className="m-0 hidden items-center gap-1 md:flex">
-			<IconButton variant="ghost" size="sm" onClick={navigateBackward}>
-				<ChevronLeft size="0.75rem" />
-			</IconButton>
+			<ToolTip content="Navigate back" size="xs">
+				<IconButton variant="ghost" size="sm" onClick={navigateBackward}>
+					<ChevronLeft size="0.75rem" />
+				</IconButton>
+			</ToolTip>
 
-			<IconButton variant="ghost" size="sm" onClick={navigateForward}>
-				<ChevronRight size="0.75rem" />
-			</IconButton>
+			<ToolTip content="Navigate forward" size="xs">
+				<IconButton variant="ghost" size="sm" onClick={navigateForward}>
+					<ChevronRight size="0.75rem" />
+				</IconButton>
+			</ToolTip>
 		</div>
 	)
 }

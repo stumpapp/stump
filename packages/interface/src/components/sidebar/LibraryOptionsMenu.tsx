@@ -1,7 +1,7 @@
 import { queryClient, useScanLibrary, useUserStore } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
 import type { Library } from '@stump/types'
-import { Edit, FolderSearch2, MoreVertical, ScanLine, Trash } from 'lucide-react'
+import { Edit, FolderSearch2, MoreHorizontal, MoreVertical, ScanLine, Trash } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useLocation } from 'react-router'
 
@@ -58,8 +58,11 @@ export default function LibraryOptionsMenu({ library }: Props) {
 			/>
 			<DropdownMenu
 				trigger={
-					<IconButton variant="ghost" rounded="full" size="xs">
-						<MoreVertical className="h-4 w-4" />
+					<IconButton
+						variant="ghost"
+						className="p-1 text-gray-700 text-opacity-30 focus:ring-0 focus:ring-offset-0 group-hover:text-opacity-100 dark:text-gray-200 dark:text-opacity-30 dark:group-hover:text-opacity-100"
+					>
+						<MoreHorizontal className="h-4 w-4" />
 					</IconButton>
 				}
 				groups={[

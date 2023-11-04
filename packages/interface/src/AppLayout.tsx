@@ -7,7 +7,7 @@ import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
 import JobOverlay from './components/jobs/JobOverlay'
 import RouteLoadingIndicator from './components/RouteLoadingIndicator'
 import ServerStatusOverlay from './components/ServerStatusOverlay'
-import Sidebar from './components/sidebar/Sidebar'
+import SideBar from './components/sidebar/NewSideBar'
 import TopBar from './components/topbar/TopBar'
 import { AppContext } from './context'
 
@@ -52,7 +52,7 @@ export function AppLayout() {
 			<Suspense fallback={<RouteLoadingIndicator />}>
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">
-					{!hideSidebar && <Sidebar />}
+					{!hideSidebar && <SideBar />}
 					<main className="min-h-full w-full bg-white dark:bg-gray-975">
 						{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 						<Suspense fallback={<RouteLoadingIndicator />}>

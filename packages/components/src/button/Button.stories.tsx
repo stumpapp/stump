@@ -9,6 +9,13 @@ const StoryMeta: Meta<typeof Button> = {
 
 type Story = StoryObj<typeof Button>
 
+export const Default: Story = {
+	args: {
+		children: 'Button',
+		newYork: true,
+	},
+}
+
 export const XSmallGhost: Story = {
 	render: () => (
 		<Button size="xs" variant="ghost">

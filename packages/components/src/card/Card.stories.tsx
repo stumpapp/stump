@@ -1,15 +1,14 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { Library } from 'lucide-react'
-import { ComponentProps } from 'react'
 
 import { Link } from '../link'
 import { Heading } from '../text'
 import { Card } from './Card'
 
-export default {
+const StoryMeta: Meta<typeof Card> = {
 	component: Card,
 	title: 'card/Card',
-} as ComponentMeta<typeof Card>
+}
 
 const DemoChild = () => (
 	<div className="flex flex-col space-y-3 px-6 py-4 dark:text-gray-100">
@@ -30,11 +29,14 @@ const DemoChild = () => (
 	</div>
 )
 
-type StoryProps = Partial<ComponentProps<typeof Card>>
-const Template: ComponentStory<never> = (args: StoryProps) => (
-	<Card {...args}>
-		<DemoChild />
-	</Card>
-)
+type Story = StoryObj<typeof Card>
 
-export const Default = Template.bind({})
+export const Default: Story = {
+	render: () => (
+		<Card>
+			<DemoChild />
+		</Card>
+	),
+}
+
+export default StoryMeta

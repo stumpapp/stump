@@ -1,13 +1,13 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
 
 import { Button } from '../button'
 import { HoverCard } from './HoverCard'
 
-export default {
+const StoryMeta: Meta<typeof HoverCard> = {
 	component: HoverCard,
 	title: 'card/HoverCard',
-} as ComponentMeta<typeof HoverCard>
+}
 
 const Demo = () => (
 	<HoverCard
@@ -27,6 +27,9 @@ const Demo = () => (
 		</React.Fragment>
 	</HoverCard>
 )
-const Template: ComponentStory<never> = () => <Demo />
+type Story = StoryObj<typeof HoverCard>
+export const Default: Story = {
+	render: () => <Demo />,
+}
 
-export const Default = Template.bind({})
+export default StoryMeta

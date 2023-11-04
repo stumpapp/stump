@@ -1,83 +1,92 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { Button } from './Button'
 
-export default {
-	args: {
-		children: 'Button',
-	},
+const StoryMeta: Meta<typeof Button> = {
 	component: Button,
 	title: 'button/Button',
-} as ComponentMeta<typeof Button>
-
-const Template: ComponentStory<typeof Button> = (args) => <Button {...args} />
-
-// GHOST
-export const XSmallGhost = Template.bind({})
-XSmallGhost.args = {
-	size: 'xs',
-	variant: 'ghost',
 }
 
-export const SmallGhost = Template.bind({})
-SmallGhost.args = {
-	size: 'sm',
-	variant: 'ghost',
+type Story = StoryObj<typeof Button>
+
+export const XSmallGhost: Story = {
+	render: () => (
+		<Button size="xs" variant="ghost">
+			Button
+		</Button>
+	),
 }
 
-export const MediumGhost = Template.bind({})
-MediumGhost.args = {
-	size: 'md',
-	variant: 'ghost',
+export const SmallGhost: Story = {
+	render: () => (
+		<Button size="sm" variant="ghost">
+			Button
+		</Button>
+	),
 }
 
-export const LargeGhost = Template.bind({})
-LargeGhost.args = {
-	size: 'lg',
-	variant: 'ghost',
+export const MediumGhost: Story = {
+	render: () => (
+		<Button size="md" variant="ghost">
+			Button
+		</Button>
+	),
 }
 
-// PRIMARY
-export const XSmallPrimary = Template.bind({})
-XSmallPrimary.args = {
-	size: 'xs',
-	variant: 'primary',
+export const LargeGhost: Story = {
+	render: () => (
+		<Button size="lg" variant="ghost">
+			Button
+		</Button>
+	),
 }
 
-export const SmallPrimary = Template.bind({})
-SmallPrimary.args = {
-	size: 'sm',
-	variant: 'primary',
+export const XSmallPrimary: Story = {
+	render: () => (
+		<Button size="xs" variant="primary">
+			Button
+		</Button>
+	),
 }
 
-export const MediumPrimary = Template.bind({})
-MediumPrimary.args = {
-	size: 'md',
-	variant: 'primary',
+export const SmallPrimary: Story = {
+	render: () => (
+		<Button size="sm" variant="primary">
+			Button
+		</Button>
+	),
 }
 
-export const LargePrimary = Template.bind({})
-LargePrimary.args = {
-	size: 'lg',
-	variant: 'primary',
+export const MediumPrimary: Story = {
+	render: () => (
+		<Button size="md" variant="primary">
+			Button
+		</Button>
+	),
 }
 
-export const Danger = Template.bind({})
-Danger.args = {
-	variant: 'danger',
+export const LargePrimary: Story = {
+	render: () => (
+		<Button size="lg" variant="primary">
+			Button
+		</Button>
+	),
 }
 
-export const Outline = Template.bind({})
-Outline.args = {
-	variant: 'outline',
+export const Danger: Story = {
+	render: () => <Button variant="danger">Button</Button>,
 }
 
-export const Subtle = Template.bind({})
-Subtle.args = {
-	variant: 'subtle',
+export const Outline: Story = {
+	render: () => <Button variant="outline">Button</Button>,
 }
 
-export const Loading = Template.bind({})
-Loading.args = {
-	isLoading: true,
+export const Subtle: Story = {
+	render: () => <Button variant="subtle">Button</Button>,
 }
+
+export const Loading: Story = {
+	render: () => <Button isLoading>Button</Button>,
+}
+
+export default StoryMeta

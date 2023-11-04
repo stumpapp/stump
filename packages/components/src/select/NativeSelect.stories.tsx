@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { ComponentProps, useState } from 'react'
 
 import { NativeSelect } from './NativeSelect'
@@ -26,13 +26,14 @@ const frameworks = [
 	},
 ]
 
-export default {
+const StoryMeta: Meta<typeof NativeSelect> = {
 	component: NativeSelect,
 	title: 'select/NativeSelect',
-} as ComponentMeta<typeof NativeSelect>
+}
+type Story = StoryObj<typeof NativeSelect>
 
-type StoryProps = Omit<ComponentProps<typeof NativeSelect>, 'children'>
-const Story = (args: StoryProps) => {
+type DemoProps = Omit<ComponentProps<typeof NativeSelect>, 'children'>
+const Demo = (args: DemoProps) => {
 	const [value, setValue] = useState<string | string[] | undefined>(undefined)
 
 	return (
@@ -42,9 +43,9 @@ const Story = (args: StoryProps) => {
 		</div>
 	)
 }
-const Template: ComponentStory<typeof NativeSelect> = (args) => <Story {...args} />
 
-export const Default = Template.bind({})
-Default.args = {
-	options: frameworks,
+export const Default: Story = {
+	render: () => <Demo options={frameworks} />,
 }
+
+export default StoryMeta

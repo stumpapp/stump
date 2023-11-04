@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 
 import { Button } from '../button'
 import { PickSelect } from '../utils'
-import { SheetContentProps, SheetPortalProps, SheetPrimitive } from './primitives'
+import { SheetContentProps, SheetPrimitive } from './primitives'
 
 export type SheetProps = {
 	trigger?: string | React.ReactNode
@@ -15,7 +15,6 @@ export type SheetProps = {
 	position?: PickSelect<SheetContentProps, 'position'>
 	size?: PickSelect<SheetContentProps, 'size'>
 	rounded?: PickSelect<SheetContentProps, 'rounded'>
-	floating?: PickSelect<SheetPortalProps, 'floating'>
 	contentClassName?: string
 	onOpen?: () => void
 	onClose?: () => void

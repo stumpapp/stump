@@ -1,32 +1,29 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { ComponentProps, useState } from 'react'
 
 import { DatePicker } from './DatePicker'
 
-type StoryProps = Pick<ComponentProps<typeof DatePicker>, 'maxDate' | 'minDate'>
-const Story = (props: StoryProps) => {
+type DemoProps = Pick<ComponentProps<typeof DatePicker>, 'maxDate' | 'minDate'>
+const Demo = (props: DemoProps) => {
 	const [date, setDate] = useState<Date | undefined>()
 
 	return <DatePicker selected={date} onChange={setDate} {...props} />
 }
 
-export default {
-	args: {
-		children: 'DatePicker',
-	},
+const StoryMeta: Meta<typeof DatePicker> = {
 	component: DatePicker,
 	title: 'calendar/DatePicker',
-} as ComponentMeta<typeof DatePicker>
-
-const Template: ComponentStory<typeof Story> = (args) => <Story {...args} />
-
-export const Basic = Template.bind({})
-Basic.args = {}
-
-export const WithBounds = Template.bind({})
-WithBounds.args = {
-	// 10 days from now
-	maxDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-	// today
-	minDate: new Date(),
 }
+type Story = StoryObj<typeof DatePicker>
+
+export const Default: Story = {
+	render: () => <Demo />,
+}
+
+export const WithBounds: Story = {
+	render: () => (
+		<Demo maxDate={new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)} minDate={new Date()} />
+	),
+}
+
+export default StoryMeta

@@ -1,9 +1,9 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
 
 import Calendar from './Calendar'
 
-const Story = () => {
+const Demo = () => {
 	const [date, setDate] = useState<Date | undefined>(new Date())
 
 	return (
@@ -13,15 +13,14 @@ const Story = () => {
 	)
 }
 
-export default {
-	args: {
-		children: 'Calendar',
-	},
+const StoryMeta: Meta<typeof Calendar> = {
 	component: Calendar,
 	title: 'calendar/Calendar',
-} as ComponentMeta<typeof Calendar>
+}
 
-const Template: ComponentStory<typeof Story> = () => <Story />
+type Story = StoryObj<typeof Calendar>
+export const Default: Story = {
+	render: () => <Demo />,
+}
 
-export const Basic = Template.bind({})
-Basic.args = {}
+export default StoryMeta

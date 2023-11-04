@@ -158,9 +158,8 @@ export function SidebarHeader() {
 
 export function SidebarFooter() {
 	return (
-		<footer className="flex items-center justify-between px-2 py-2 sm:py-0">
+		<footer className="flex items-center justify-between">
 			<ApplicationVersion />
-
 			<div className="flex items-center gap-2">
 				<Logout />
 				<ThemeToggle />

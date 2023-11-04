@@ -19,6 +19,8 @@ export default function ApplicationVersion() {
 		}
 	}, [version])
 
+	if (!version) return null
+
 	return (
 		<Link
 			href={url}
@@ -28,7 +30,8 @@ export default function ApplicationVersion() {
 			underline={false}
 		>
 			<span>
-				v{version?.semver} - {version?.rev}
+				v{version.semver}
+				{!!version.rev && `- ${version.rev}`}
 			</span>
 		</Link>
 	)

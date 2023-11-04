@@ -1,7 +1,7 @@
 use std::{thread, time::Duration};
 
 use clap::Subcommand;
-use dialoguer::{theme::ColorfulTheme, Password};
+use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
 use stump_core::{
 	db::create_client,
 	prisma::{session, user},
@@ -38,6 +38,8 @@ pub enum Account {
 		#[clap(long)]
 		username: String,
 	},
+	/// Enter a flow to change the server owner to another account
+	ResetOwner,
 }
 
 pub async fn handle_account_command(
@@ -51,6 +53,7 @@ pub async fn handle_account_command(
 		Account::ResetPassword { username } => {
 			reset_account_password(username, config.password_hash_cost).await
 		},
+		Account::ResetOwner => change_server_owner().await,
 	}
 }
 
@@ -165,6 +168,76 @@ async fn print_accounts(locked: Option<bool>) -> CliResult<()> {
 			if user.is_locked { "locked" } else { "unlocked" }
 		);
 	}
+
+	Ok(())
+}
+
+async fn change_server_owner() -> CliResult<()> {
+	let client = create_client().await;
+
+	let all_accounts = client
+		.user()
+		.find_many(vec![user::is_locked::equals(false)])
+		.exec()
+		.await?;
+	let current_server_owner = all_accounts
+		.iter()
+		.find(|user| user.is_server_owner)
+		.cloned();
+
+	let username = Input::new()
+		.with_prompt("Enter the username of the account to assign as server owner")
+		.allow_empty(false)
+		.validate_with(|input: &String| -> Result<(), &str> {
+			let existing_user = all_accounts.iter().find(|user| user.username == *input);
+			if existing_user.is_some() {
+				Ok(())
+			} else {
+				Err("An account with that username does not exist or their account is locked")
+			}
+		})
+		.interact_text()?;
+
+	let confirmation = Confirm::new()
+		.with_prompt("Are you sure you want to continue?")
+		.interact()?;
+
+	if !confirmation {
+		println!("Exiting...");
+		return Ok(());
+	}
+
+	let target_user = all_accounts
+		.into_iter()
+		.find(|user| user.username == username)
+		.ok_or(CliError::OperationFailed(
+			"Failed to reconcile users after validation".to_string(),
+		))?;
+
+	let progress = default_progress_spinner();
+	if let Some(user) = current_server_owner {
+		progress.set_message(format!("Removing owner status from {}", user.username));
+		client
+			.user()
+			.update(
+				user::id::equals(user.id),
+				vec![user::is_server_owner::set(false)],
+			)
+			.exec()
+			.await?;
+	}
+
+	progress.set_message(format!("Setting owner status for {}", target_user.username));
+	client
+		.user()
+		.update(
+			user::id::equals(target_user.id),
+			vec![user::is_server_owner::set(true)],
+		)
+		.exec()
+		.await?;
+
+	progress.finish_with_message("Successfully changed the server owner!");
 
 	Ok(())
 }

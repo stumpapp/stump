@@ -27,7 +27,7 @@ const ServerConnectionErrorScene = lazily(
 )
 const LoginOrClaimScene = lazily(() => import('./scenes/auth/LoginOrClaimScene.tsx'))
 
-const IS_DEVELOPMENT = import.meta.env.DEV
+const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
 
 export function AppRouter() {
 	const appProps = useAppProps()

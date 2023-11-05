@@ -25,7 +25,11 @@ const baseColumns = [
 		header: 'User',
 	}),
 	columnHelper.display({
-		cell: (info) => <Text size="sm">{info.getValue<boolean>() ? 'Server Owner' : 'Member'}</Text>,
+		cell: ({
+			row: {
+				original: { is_server_owner },
+			},
+		}) => <Text size="sm">{is_server_owner ? 'Server Owner' : 'Member'}</Text>,
 		header: 'Role',
 		id: 'is_server_owner',
 	}),

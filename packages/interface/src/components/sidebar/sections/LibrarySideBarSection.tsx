@@ -1,5 +1,6 @@
 import { useLibraries } from '@stump/client'
 import { Accordion, Spacer } from '@stump/components'
+import { Library } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
@@ -28,6 +29,7 @@ export default function LibrarySideBarSection() {
 				isActive={isCurrentLibrary(library.id)}
 				className="pl-2 pr-0"
 			>
+				<Library className="mr-2 h-4 w-4" />
 				<span>{library.name}</span>
 				<Spacer />
 				<LibraryOptionsMenu library={library} />

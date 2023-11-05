@@ -146,6 +146,9 @@ module.exports = function (relativeFromRoot) {
 				screens: {
 					'3xl': '1600px',
 				},
+				fontSize: {
+					xxs: '0.65rem',
+				},
 			},
 		},
 		variants: {

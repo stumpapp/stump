@@ -378,9 +378,10 @@
 		"buttons": {
 			"home": "Home",
 			"libraries": "Libraries",
-			"books": "Explore Books",
-			"bookClubs": "Book Clubs",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
+			"createBookClub": "Create book club",
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",

@@ -26,7 +26,7 @@ export default function ApplicationVersion() {
 			href={url}
 			target="__blank"
 			rel="noopener noreferrer"
-			className={cx('flex items-center space-x-2 pl-2 text-xs', TEXT_VARIANTS.muted)}
+			className={cx('flex items-center space-x-2 pl-2 text-[0.65rem]', TEXT_VARIANTS.muted)}
 			underline={false}
 		>
 			<span>

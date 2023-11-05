@@ -1,6 +1,6 @@
 import { useAppProps } from '@stump/client'
 import { Spacer } from '@stump/components'
-import { Home } from 'lucide-react'
+import { Book, Home } from 'lucide-react'
 import React from 'react'
 
 import { useLocaleContext } from '../../i18n'
@@ -9,6 +9,8 @@ import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
 import Logout from './Logout'
 import { LibrarySideBarSection } from './sections'
+import BookClubSideBarSection from './sections/BookClubSideBarSection'
+import SettingsButton from './Settings'
 import SideBarButtonLink from './SideBarButtonLink'
 import ThemeToggle from './ThemeToggle'
 
@@ -30,12 +32,15 @@ export default function SideBar() {
 
 	const renderFooter = () => {
 		return (
-			<footer className="flex items-center justify-between">
-				<ApplicationVersion />
-				<div className="flex items-center gap-2">
-					<Logout />
-					<ThemeToggle />
+			<footer className="flex flex-col gap-1.5">
+				<div className="flex items-center justify-between">
+					<SettingsButton />
+					<div className="flex items-center gap-2">
+						<Logout />
+						<ThemeToggle />
+					</div>
 				</div>
+				<ApplicationVersion />
 			</footer>
 		)
 	}
@@ -46,25 +51,23 @@ export default function SideBar() {
 				{renderHeader()}
 
 				<div className="flex max-h-full grow flex-col gap-4 overflow-y-scroll p-1 scrollbar-hide">
-					<SideBarButtonLink
-						className="gap-x-2"
-						href={paths.libraryCreate()}
-						isActive={location.pathname === '/'}
-					>
-						<Home className="h-4 w-4" />
-						{t('sidebar.buttons.home')}
-					</SideBarButtonLink>
+					<div className="flex flex-col gap-2">
+						<SideBarButtonLink href={paths.home()} isActive={location.pathname === '/'}>
+							<Home className="mr-2 h-4 w-4" />
+							{t('sidebar.buttons.home')}
+						</SideBarButtonLink>
 
-					<SideBarButtonLink
-						className="gap-x-2"
-						href={paths.libraryCreate()}
-						isActive={location.pathname === '/'}
-					>
-						<Home className="h-4 w-4" />
-						Explore
-					</SideBarButtonLink>
+						<SideBarButtonLink
+							href={paths.bookSearch()}
+							isActive={location.pathname === paths.bookSearch()}
+						>
+							<Book className="mr-2 h-4 w-4" />
+							Explore
+						</SideBarButtonLink>
+					</div>
 
 					<LibrarySideBarSection />
+					<BookClubSideBarSection />
 				</div>
 				<Spacer />
 

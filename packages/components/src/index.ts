@@ -21,6 +21,7 @@ export { Container, Divider, Layout, Spacer, type SpacerProps } from './containe
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
 export { DropdownMenu, type DropdownMenuProps } from './dropdown'
+export { EmojiPicker } from './emoji'
 export { Form, type FormProps, Label, type LabelProps } from './form'
 export { useBodyLock, useBoolean, usePrevious, usePreviousIsDifferent } from './hooks'
 export { AspectRatio, Avatar, Image } from './image'

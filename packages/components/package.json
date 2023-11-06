@@ -12,6 +12,7 @@
 		"build-storybook": "storybook build"
 	},
 	"dependencies": {
+		"@emoji-mart/react": "^1.1.1",
 		"@headlessui/react": "^1.7.17",
 		"@radix-ui/react-accordion": "^1.1.2",
 		"@radix-ui/react-aspect-ratio": "^1.0.3",

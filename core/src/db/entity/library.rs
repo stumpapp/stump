@@ -39,6 +39,8 @@ pub struct Library {
 	pub name: String,
 	/// The description of the library. ex: "The best library ever"
 	pub description: Option<String>,
+	/// The emoji associated with the library. ex: "📚"
+	pub emoji: Option<String>,
 	/// The path to the library. ex: "/home/user/Library"
 	pub path: String,
 	/// The status of the library since last scan or access. ex: "READY" or "MISSING"
@@ -260,6 +262,7 @@ impl From<prisma::library::Data> for Library {
 			id: data.id,
 			name: data.name,
 			description: data.description,
+			emoji: data.emoji,
 			path: data.path,
 			status: data.status,
 			updated_at: data.updated_at.to_string(),
@@ -291,6 +294,7 @@ impl From<(prisma::library::Data, prisma::library_options::Data)> for Library {
 			id: library.id,
 			name: library.name,
 			description: library.description,
+			emoji: library.emoji,
 			path: library.path,
 			status: library.status,
 			updated_at: library.updated_at.to_string(),

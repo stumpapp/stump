@@ -20,8 +20,8 @@ import { useLocaleContext } from '../../i18n/context'
 import paths from '../../paths'
 import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
-import LibraryOptionsMenu from './LibraryOptionsMenu'
 import Logout from './Logout'
+import LibraryOptionsMenu from './sections/library-section/LibraryOptionsMenu'
 import ThemeToggle from './ThemeToggle'
 
 // TODO: major chore, but this entire component needs a rewrite. It is awful, and one of the oldest...

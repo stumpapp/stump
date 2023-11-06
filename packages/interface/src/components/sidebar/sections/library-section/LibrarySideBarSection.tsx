@@ -4,10 +4,10 @@ import { Library } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
-import { useLocaleContext } from '../../../i18n'
-import paths from '../../../paths'
-import LibraryOptionsMenu from '../LibraryOptionsMenu'
-import SideBarButtonLink from '../SideBarButtonLink'
+import { useLocaleContext } from '../../../../i18n'
+import paths from '../../../../paths'
+import SideBarButtonLink from '../../SideBarButtonLink'
+import LibraryOptionsMenu from './LibraryOptionsMenu'
 
 export default function LibrarySideBarSection() {
 	const location = useLocation()
@@ -29,8 +29,8 @@ export default function LibrarySideBarSection() {
 				isActive={isCurrentLibrary(library.id)}
 				className="pl-2 pr-0"
 			>
-				<Library className="mr-2 h-4 w-4" />
-				<span>{library.name}</span>
+				<Library className="mr-2 h-4 w-4 shrink-0" />
+				<span className="line-clamp-1">{library.name}</span>
 				<Spacer />
 				<LibraryOptionsMenu library={library} />
 			</SideBarButtonLink>

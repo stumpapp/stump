@@ -14,7 +14,11 @@ import SettingsButton from './Settings'
 import SideBarButtonLink from './SideBarButtonLink'
 import ThemeToggle from './ThemeToggle'
 
-export default function SideBar() {
+type Props = {
+	asChild?: boolean
+}
+
+export default function SideBar({ asChild }: Props) {
 	const { platform } = useAppProps()
 	const { t } = useLocaleContext()
 
@@ -45,9 +49,9 @@ export default function SideBar() {
 		)
 	}
 
-	return (
-		<aside className="hidden min-h-full md:inline-block">
-			<div className="relative z-10 flex h-full w-48 shrink-0 flex-col gap-4 border-r border-gray-75 px-2 py-4 dark:border-gray-900 dark:bg-gray-1000">
+	const renderContent = () => {
+		return (
+			<>
 				{renderHeader()}
 
 				<div className="flex max-h-full grow flex-col gap-4 overflow-y-scroll p-1 scrollbar-hide">
@@ -72,6 +76,18 @@ export default function SideBar() {
 				<Spacer />
 
 				{renderFooter()}
+			</>
+		)
+	}
+
+	if (asChild) {
+		return renderContent()
+	}
+
+	return (
+		<aside className="hidden min-h-full md:inline-block">
+			<div className="relative z-10 flex h-full w-48 shrink-0 flex-col gap-4 border-r border-gray-75 px-2 py-4 dark:border-gray-900 dark:bg-gray-1000">
+				{renderContent()}
 			</div>
 		</aside>
 	)

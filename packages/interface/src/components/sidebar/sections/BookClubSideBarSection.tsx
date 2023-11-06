@@ -1,5 +1,6 @@
 import { useBookClubsQuery, useUserStore } from '@stump/client'
 import { Accordion } from '@stump/components'
+import { Club } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
@@ -28,7 +29,8 @@ export default function BookClubSideBarSection() {
 				isActive={isCurrentBookClub(bookClub.id)}
 				className="pl-2 pr-0"
 			>
-				<span>{bookClub.name}</span>
+				<Club className="mr-2 h-4 w-4 shrink-0" />
+				<span className="line-clamp-1">{bookClub.name}</span>
 			</SideBarButtonLink>
 		))
 	}

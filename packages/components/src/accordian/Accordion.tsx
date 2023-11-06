@@ -30,7 +30,7 @@ const AccordionTrigger = React.forwardRef<
 			className={cn(
 				'flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all [&[data-state=open]>svg]:rotate-180',
 				{
-					'text-sm font-medium leading-none text-gray-850 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-100':
+					'text-sm font-medium leading-none text-gray-850 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-50':
 						asLabel,
 				},
 				{ 'hover:underline': !noUnderline },

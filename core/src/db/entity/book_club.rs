@@ -74,6 +74,8 @@ pub struct BookClubMember {
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user: Option<User>,
 	#[serde(skip_serializing_if = "Option::is_none")]
+	pub user_id: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub book_club: Option<BookClub>,
 }
 
@@ -358,6 +360,7 @@ impl From<book_club_member_user_username::members::Data> for BookClubMember {
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
 			role: data.role.into(),
+			user_id: Some(data.user_id),
 			..Default::default()
 		}
 	}
@@ -374,6 +377,7 @@ impl From<book_club_member_and_schedule_include::members::Data> for BookClubMemb
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
 			role: data.role.into(),
+			user_id: Some(data.user_id),
 			..Default::default()
 		}
 	}
@@ -388,6 +392,7 @@ impl From<book_club_with_books_include::members::Data> for BookClubMember {
 			hide_progress: data.hide_progress,
 			private_membership: data.private_membership,
 			role: data.role.into(),
+			user_id: Some(data.user_id),
 			..Default::default()
 		}
 	}

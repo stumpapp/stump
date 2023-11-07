@@ -1,24 +1,29 @@
-import { ButtonOrLink, cn } from '@stump/components'
+import { cn } from '@stump/components'
 import React, { ComponentProps } from 'react'
+import { Link } from 'react-router-dom'
 
 // TODO: tooltips, but currently they don't work with links...
 type Props = {
+	to: string
 	variant?: 'action' | 'default'
 	isActive?: boolean
-} & Omit<ComponentProps<typeof ButtonOrLink>, 'variant'>
+	leftContent?: React.ReactNode
+	rightContent?: React.ReactNode
+} & Omit<ComponentProps<'div'>, 'ref'>
 export default function SideBarButtonLink({
+	to,
 	variant = 'default',
 	isActive,
 	className,
+	children,
+	leftContent,
+	rightContent,
 	...props
 }: Props) {
 	return (
-		<ButtonOrLink
-			{...props}
-			variant="ghost"
-			size="md"
+		<div
 			className={cn(
-				'group h-[2.35rem] w-full justify-start px-2 text-sm focus:ring-0 focus:ring-offset-0 dark:hover:bg-gray-900/70',
+				'group inline-flex h-[2.35rem] w-full items-center justify-start rounded-md px-2 text-sm transition-all duration-150 dark:hover:bg-gray-900/70',
 				{
 					'justify-center border border-dashed border-gray-150/60 text-black text-opacity-80 hover:text-opacity-100 dark:border-gray-750/80 dark:text-gray-50 dark:text-opacity-80 dark:hover:text-opacity-100':
 						variant === 'action',
@@ -27,7 +32,18 @@ export default function SideBarButtonLink({
 				{ 'dark:bg-gray-900/70': isActive },
 				className,
 			)}
-			newYork
-		/>
+			{...props}
+		>
+			{leftContent}
+			<Link
+				to={to}
+				className={cn('line-clamp-1 flex h-full w-full items-center', {
+					'justify-center': variant === 'action',
+				})}
+			>
+				{children}
+			</Link>
+			{rightContent}
+		</div>
 	)
 }

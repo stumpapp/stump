@@ -4,13 +4,16 @@ import { Club } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
-import { useLocaleContext } from '../../../i18n'
-import paths from '../../../paths'
-import SideBarButtonLink from '../SideBarButtonLink'
+import { useAppContext } from '../../../../context'
+import { useLocaleContext } from '../../../../i18n'
+import paths from '../../../../paths'
+import SideBarButtonLink from '../../SideBarButtonLink'
+import BookClubEmoji from './BookClubEmoji'
 
 export default function BookClubSideBarSection() {
 	const location = useLocation()
 	const checkUserPermission = useUserStore((state) => state.checkUserPermission)
+	const { user, isServerOwner } = useAppContext()
 
 	const { t } = useLocaleContext()
 	const { bookClubs } = useBookClubsQuery({ params: { all: false } })
@@ -22,17 +25,33 @@ export default function BookClubSideBarSection() {
 			return null
 		}
 
-		return bookClubs.map((bookClub) => (
-			<SideBarButtonLink
-				key={bookClub.id}
-				href={paths.bookClub(bookClub.id)}
-				isActive={isCurrentBookClub(bookClub.id)}
-				className="pl-2 pr-0"
-			>
-				<Club className="mr-2 h-4 w-4 shrink-0" />
-				<span className="line-clamp-1">{bookClub.name}</span>
-			</SideBarButtonLink>
-		))
+		return bookClubs.map((bookClub) => {
+			const userId = user.id
+			const member = bookClub.members?.find((member) => member.user_id === userId)
+			const canChange = isServerOwner || member?.role === 'CREATOR' || member?.role === 'ADMIN'
+
+			const leftContent = (
+				<BookClubEmoji
+					emoji={bookClub.emoji || undefined}
+					placeholder={<Club className="h-4 w-4 shrink-0" />}
+					bookClub={bookClub}
+					disabled={!canChange}
+				/>
+			)
+
+			return (
+				<SideBarButtonLink
+					key={bookClub.id}
+					to={paths.bookClub(bookClub.id)}
+					isActive={isCurrentBookClub(bookClub.id)}
+					leftContent={canChange ? leftContent : undefined}
+					className="pl-2 pr-0"
+				>
+					{!canChange && leftContent}
+					{bookClub.name}
+				</SideBarButtonLink>
+			)
+		})
 	}
 
 	const canCreateBookClub = checkUserPermission('bookclub:create')
@@ -47,7 +66,7 @@ export default function BookClubSideBarSection() {
 					{renderBookClubs()}
 					{canCreateBookClub && (
 						<SideBarButtonLink
-							href={paths.bookClubCreate()}
+							to={paths.bookClubCreate()}
 							isActive={location.pathname === paths.bookClubCreate()}
 							variant="action"
 						>

@@ -18,6 +18,7 @@ interface UserStore extends StoreBase<UserStore> {
 	checkUserPermission: (permission: UserPermission) => boolean
 }
 
+// FIXME: [DEPRECATED] Use `createWithEqualityFn` instead of `create`
 // TODO: consider renaming to useAuth
 export const useUserStore = create<UserStore>()(
 	devtools(

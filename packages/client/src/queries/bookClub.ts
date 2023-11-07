@@ -1,7 +1,14 @@
 import { bookClubApi, bookClubQueryKeys } from '@stump/api'
-import { BookClub, BookClubChatBoard, CreateBookClub, GetBookClubsParams } from '@stump/types'
+import {
+	BookClub,
+	BookClubChatBoard,
+	CreateBookClub,
+	GetBookClubsParams,
+	UpdateBookClub,
+} from '@stump/types'
 import { AxiosError } from 'axios'
 
+import { invalidateQueries } from '..'
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 
 export const prefetchBookClubChat = async (bookClubId: string, id?: string) => {
@@ -90,6 +97,34 @@ export function useCreateBookClub(
 
 	return {
 		createBookClub,
+		...rest,
+	}
+}
+
+type UseBookClubChatMutationOptions = {
+	id: string
+} & MutationOptions<BookClub, AxiosError, UpdateBookClub>
+export function useUpdateBookClub({ id, ...options }: UseBookClubChatMutationOptions) {
+	const { mutateAsync: updateBookClub, ...rest } = useMutation(
+		[bookClubQueryKeys.updateBookClub],
+		async (variables) => {
+			const { data } = await bookClubApi.updateBookClub(id, variables)
+			return data
+		},
+		{
+			onSuccess: (bookClub, _, __) => {
+				invalidateQueries({
+					keys: [bookClubQueryKeys.getBookClubs, bookClubQueryKeys.getBookClubChatById],
+				})
+				options.onSuccess?.(bookClub, _, __)
+				return bookClub
+			},
+			...options,
+		},
+	)
+
+	return {
+		updateBookClub,
 		...rest,
 	}
 }

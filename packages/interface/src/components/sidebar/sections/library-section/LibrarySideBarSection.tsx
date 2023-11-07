@@ -1,12 +1,14 @@
 import { useLibraries } from '@stump/client'
-import { Accordion, Spacer } from '@stump/components'
+import { Accordion } from '@stump/components'
 import { Library } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
+import { useAppContext } from '../../../../context'
 import { useLocaleContext } from '../../../../i18n'
 import paths from '../../../../paths'
 import SideBarButtonLink from '../../SideBarButtonLink'
+import LibraryEmoji from './LibraryEmoji'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
 
 export default function LibrarySideBarSection() {
@@ -14,6 +16,7 @@ export default function LibrarySideBarSection() {
 
 	const { t } = useLocaleContext()
 	const { libraries } = useLibraries()
+	const { isServerOwner } = useAppContext()
 
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
 
@@ -22,19 +25,32 @@ export default function LibrarySideBarSection() {
 			return null
 		}
 
-		return libraries.map((library) => (
-			<SideBarButtonLink
-				key={library.id}
-				href={paths.libraryOverview(library.id)}
-				isActive={isCurrentLibrary(library.id)}
-				className="pl-2 pr-0"
-			>
-				<Library className="mr-2 h-4 w-4 shrink-0" />
-				<span className="line-clamp-1">{library.name}</span>
-				<Spacer />
-				<LibraryOptionsMenu library={library} />
-			</SideBarButtonLink>
-		))
+		return libraries.map((library) => {
+			// TODO: user permissions
+			const canChange = isServerOwner
+			const leftContent = (
+				<LibraryEmoji
+					emoji={library.emoji || undefined}
+					placeholder={<Library className="h-4 w-4 shrink-0" />}
+					library={library}
+					disabled={!canChange}
+				/>
+			)
+
+			return (
+				<SideBarButtonLink
+					key={library.id}
+					to={paths.libraryOverview(library.id)}
+					isActive={isCurrentLibrary(library.id)}
+					className="pl-2 pr-0"
+					leftContent={canChange ? leftContent : undefined}
+					rightContent={<LibraryOptionsMenu library={library} />}
+				>
+					{!canChange && leftContent}
+					{library.name}
+				</SideBarButtonLink>
+			)
+		})
 	}
 
 	return (
@@ -46,7 +62,7 @@ export default function LibrarySideBarSection() {
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
 					{renderLibraries()}
 					<SideBarButtonLink
-						href={paths.libraryCreate()}
+						to={paths.libraryCreate()}
 						isActive={location.pathname === paths.libraryCreate()}
 						variant="action"
 					>

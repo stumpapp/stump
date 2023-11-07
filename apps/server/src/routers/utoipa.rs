@@ -20,10 +20,7 @@ use crate::utils::{
 
 use super::api::{
 	self,
-	v1::{
-		auth::LoginOrRegisterArgs, library::ScanQueryParam, user::*, ClaimResponse,
-		StumpVersion,
-	},
+	v1::{auth::LoginOrRegisterArgs, library::*, user::*, ClaimResponse, StumpVersion},
 };
 
 // NOTE: it is very easy to indirectly cause fmt failures by not adhering to the

@@ -168,45 +168,6 @@ pub struct LibrariesStats {
 	total_bytes: u64,
 }
 
-//////////////////////////////////////////////
-//////////////////// INPUTS //////////////////
-//////////////////////////////////////////////
-
-#[derive(Deserialize, Debug, Type, ToSchema)]
-pub struct CreateLibrary {
-	/// The name of the library to create.
-	pub name: String,
-	/// The path to the library to create, i.e. where the directory is on the filesystem.
-	pub path: String,
-	/// Optional text description of the library.
-	pub description: Option<String>,
-	/// Optional tags to assign to the library.
-	pub tags: Option<Vec<Tag>>,
-	/// Optional flag to indicate if the how the library should be scanned after creation. Default is `BATCHED`.
-	pub scan_mode: Option<LibraryScanMode>,
-	/// Optional options to apply to the library. When not provided, the default options will be used.
-	pub library_options: Option<LibraryOptions>,
-}
-
-#[derive(Deserialize, Debug, Type, ToSchema)]
-pub struct UpdateLibrary {
-	pub id: String,
-	/// The updated name of the library.
-	pub name: String,
-	/// The updated path of the library.
-	pub path: String,
-	/// The updated description of the library.
-	pub description: Option<String>,
-	/// The updated tags of the library.
-	pub tags: Option<Vec<Tag>>,
-	/// The tags to remove from the library.
-	pub removed_tags: Option<Vec<Tag>>,
-	/// The updated options of the library.
-	pub library_options: LibraryOptions,
-	/// Optional flag to indicate how the library should be automatically scanned after update. Default is `BATCHED`.
-	pub scan_mode: Option<LibraryScanMode>,
-}
-
 ///////////////////////////////////////////////
 ////////////////// CONVERSIONS ////////////////
 ///////////////////////////////////////////////

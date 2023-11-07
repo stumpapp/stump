@@ -7,12 +7,10 @@ import { useLocaleContext } from '../../i18n'
 import paths from '../../paths'
 import ApplicationVersion from '../ApplicationVersion'
 import NavigationButtons from '../topbar/NavigationButtons'
-import Logout from './Logout'
-import { LibrarySideBarSection } from './sections'
-import BookClubSideBarSection from './sections/BookClubSideBarSection'
+import { BookClubSideBarSection, LibrarySideBarSection } from './sections'
 import SettingsButton from './Settings'
 import SideBarButtonLink from './SideBarButtonLink'
-import ThemeToggle from './ThemeToggle'
+import UserMenu from './UserMenu'
 
 type Props = {
 	asChild?: boolean
@@ -39,10 +37,10 @@ export default function SideBar({ asChild }: Props) {
 			<footer className="flex flex-col gap-1.5">
 				<div className="flex items-center justify-between">
 					<SettingsButton />
-					<div className="flex items-center gap-2">
+					{/* <div className="flex items-center gap-2">
 						<Logout />
 						<ThemeToggle />
-					</div>
+					</div> */}
 				</div>
 				<ApplicationVersion />
 			</footer>
@@ -55,14 +53,16 @@ export default function SideBar({ asChild }: Props) {
 				{renderHeader()}
 
 				<div className="flex max-h-full grow flex-col gap-4 overflow-y-scroll p-1 scrollbar-hide">
+					<UserMenu />
+
 					<div className="flex flex-col gap-2">
-						<SideBarButtonLink href={paths.home()} isActive={location.pathname === '/'}>
+						<SideBarButtonLink to={paths.home()} isActive={location.pathname === '/'}>
 							<Home className="mr-2 h-4 w-4" />
 							{t('sidebar.buttons.home')}
 						</SideBarButtonLink>
 
 						<SideBarButtonLink
-							href={paths.bookSearch()}
+							to={paths.bookSearch()}
 							isActive={location.pathname === paths.bookSearch()}
 						>
 							<Book className="mr-2 h-4 w-4" />

@@ -1,19 +1,20 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { ComponentProps, useEffect, useRef, useState } from 'react'
 
 import { ProgressBar } from './ProgressBar'
 
-export default {
+const StoryMeta: Meta<typeof ProgressBar> = {
 	component: ProgressBar,
 	title: 'progress/ProgressBar',
-} as ComponentMeta<typeof ProgressBar>
+}
+type Story = StoryObj<typeof ProgressBar>
 
-type StoryProps = ComponentProps<typeof ProgressBar> & {
+type DemoProps = ComponentProps<typeof ProgressBar> & {
 	animated?: boolean
 	speed?: number
 }
-const Story = (args: StoryProps) => {
-	const interval = useRef<NodeJS.Timer>()
+const Demo = (args: DemoProps) => {
+	const interval = useRef<NodeJS.Timeout>()
 	const [value, setValue] = useState(args.value || 0)
 
 	useEffect(() => {
@@ -41,15 +42,12 @@ const Story = (args: StoryProps) => {
 	)
 }
 
-const Template: ComponentStory<typeof Story> = (args) => <Story {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-	value: 10,
+export const Default: Story = {
+	render: () => <Demo value={10} />,
 }
 
-export const Animated = Template.bind({})
-Animated.args = {
-	animated: true,
-	speed: 75,
+export const Animated: Story = {
+	render: () => <Demo animated speed={75} />,
 }
+
+export default StoryMeta

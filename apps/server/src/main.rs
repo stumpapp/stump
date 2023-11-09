@@ -9,6 +9,8 @@ mod middleware;
 mod routers;
 mod utils;
 
+// I annotate this so it doesn't complain during release builds.
+#[allow(dead_code)]
 fn debug_setup() {
 	std::env::set_var(
 		"STUMP_CLIENT_DIR",

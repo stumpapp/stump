@@ -1,15 +1,15 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { Label } from './Label'
 
-export default {
+const StoryMeta: Meta<typeof Label> = {
 	component: Label,
 	title: 'form/Label',
-} as ComponentMeta<typeof Label>
-
-const Template: ComponentStory<typeof Label> = (args) => <Label {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-	children: 'My Label',
 }
+type Story = StoryObj<typeof Label>
+
+export const Default: Story = {
+	render: () => <Label>My Label</Label>,
+}
+
+export default StoryMeta

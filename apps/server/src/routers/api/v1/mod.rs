@@ -10,6 +10,7 @@ use utoipa::ToSchema;
 use crate::{config::state::AppState, errors::ApiResult};
 
 pub(crate) mod auth;
+pub(crate) mod book_club;
 pub(crate) mod epub;
 pub(crate) mod filesystem;
 pub(crate) mod job;
@@ -34,8 +35,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(log::mount(app_state.clone()))
 		.merge(series::mount(app_state.clone()))
 		.merge(tag::mount(app_state.clone()))
-		.merge(user::mount(app_state))
+		.merge(user::mount(app_state.clone()))
 		.merge(reading_list::mount())
+		.merge(book_club::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
 		.route("/version", post(version))

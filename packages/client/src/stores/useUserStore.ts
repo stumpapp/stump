@@ -1,4 +1,4 @@
-import type { User, UserPreferences } from '@stump/types'
+import type { User, UserPermission, UserPreferences } from '@stump/types'
 import { produce } from 'immer'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
@@ -15,13 +15,19 @@ interface UserStore extends StoreBase<UserStore> {
 
 	setUser: (user?: User | null) => void
 	setUserPreferences: (userPreferences: UserPreferences | null) => void
+	checkUserPermission: (permission: UserPermission) => boolean
 }
 
 // TODO: consider renaming to useAuth
 export const useUserStore = create<UserStore>()(
 	devtools(
 		persist(
-			(set) => ({
+			(set, get) => ({
+				checkUserPermission(permission: UserPermission) {
+					const user = get().user
+					if (!user) return false
+					return user.is_server_owner || user.permissions.includes(permission)
+				},
 				reset() {
 					set(() => ({}))
 				},

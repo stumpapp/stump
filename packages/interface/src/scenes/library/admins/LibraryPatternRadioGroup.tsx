@@ -49,7 +49,7 @@ export default function LibraryPatternRadioGroup() {
 				<Link href="https://stumpapp.dev/guides/libraries#library-patterns">
 					{t('Click here to learn more.')}
 				</Link>
-				{<i> You cannot change this setting later.</i>}
+				{<i> You cannot change this setting later</i>}
 			</Text>
 		</div>
 	)

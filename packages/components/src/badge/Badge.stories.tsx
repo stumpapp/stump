@@ -1,21 +1,20 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { Badge } from './Badge'
 
-export default {
+const StoryMeta: Meta<typeof Badge> = {
 	component: Badge,
 	title: 'badge/Badge',
-} as ComponentMeta<typeof Badge>
-
-const Template: ComponentStory<typeof Badge> = (args) => <Badge {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-	children: 'My Badge',
 }
 
-export const Primary = Template.bind({})
-Primary.args = {
-	children: 'My Badge',
-	variant: 'primary',
+type Story = StoryObj<typeof Badge>
+
+export const Default: Story = {
+	render: () => <Badge>My Badge</Badge>,
 }
+
+export const Primary: Story = {
+	render: () => <Badge variant="primary">My Badge</Badge>,
+}
+
+export default StoryMeta

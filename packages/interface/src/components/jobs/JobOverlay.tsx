@@ -44,15 +44,13 @@ export default function JobOverlay() {
 						<ProgressBar
 							// isIndeterminate={!jobShown.current_task || !jobShown.task_count}
 							value={(Number(jobShown.current_task) / Number(jobShown.task_count)) * 100}
-							// max={Number(jobShown.task_count)}
-							// size="xs"
 							size="sm"
 							variant="primary"
 						/>
 						{jobShown.current_task != undefined && !!jobShown.task_count && (
 							<Text size="xs" variant="muted">
 								<>
-									Task {jobShown.current_task} of {jobShown.task_count}
+									{jobShown.current_task} of {jobShown.task_count}
 								</>
 							</Text>
 						)}

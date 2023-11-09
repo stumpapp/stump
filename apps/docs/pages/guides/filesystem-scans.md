@@ -4,27 +4,9 @@ A scan is the process of indexing your filesystem to detect new media files and 
 
 You can start scans at either the library level or the series level, which are referred to as `library_scan` and `series_scan`, respectively, throughout Stump. There are no real differences between the two, except that a library scan will scan all series in the library, while a series scan will only scan the selected series.
 
-## Quick scan vs default scan
+## How does it work?
 
-In Stump, there is the concept of a quick scan and a default scan. A quick scan, as the name suggests, is a faster scan that utilizes more concurrency and parallelism to scan your filesystem. A quick scan waits until the _very_ end to insert what changes it has detected into the database, all in one batch.
-
-A default scan, on the other hand, is a slightly slower scan that utilizes less concurrency and parallelism to achieve a more consistent and stable scan. Changes are inserted into the database as soon as they are detected, which means that you can access new media files as soon as they are scanned.
-
-### Which one should I use?
-
-To preface, both options are safe and fast, they just differ in how they operate.
-
-The benefit of a quick scan is that it is generally faster than the default. However, because it does one big batch insert at the end, you have the following caveats:
-
-- You cannot access any new media files until the _entire_ scan is complete
-- If any one of the database inserts fails, for example bad metadata being present in a media file, then the entire scan effectively fails
-
-Therefore, it is recommended to use a quick scan when:
-
-- You are running consecutive scans, i.e. not the very first scan
-- Your library is not very large and the scan would complete in a reasonable amount of time
-
-Of course, if you are confident that your media files are in good shape and will not cause any issues, you are free to use whichever scan you prefer.
+When you start a scan, Stump will walk your filesystem to detect any new, updated, or otherwise changed series and media. It will then insert these changes into the database, which will make them available to you in the UI.
 
 ## Scheduling scans
 

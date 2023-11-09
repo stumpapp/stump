@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
-export default function useIsInView<T extends Element | undefined>(
+export default function useIsInView<T extends Element | null>(
 	rootMargin = '0px',
-): [React.MutableRefObject<T | undefined>, boolean] {
-	const ref = useRef<T>()
+): [React.MutableRefObject<T | null>, boolean] {
+	const ref = useRef<T>(null)
 
 	const [isIntersecting, setIntersecting] = useState(false)
 

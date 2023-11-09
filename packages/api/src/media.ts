@@ -28,6 +28,10 @@ export function getMediaById(id: string): Promise<GetMediaById> {
 	return API.get(`/media/${id}?load_series=true`)
 }
 
+export function getMediaByPath(path: string): Promise<ApiResult<Media>> {
+	return API.get(`/media/path/${encodeURIComponent(path)}`)
+}
+
 export function getRecentlyAddedMedia({
 	afterId,
 	limit,
@@ -71,6 +75,7 @@ export const mediaApi = {
 	getInProgressMedia,
 	getMedia,
 	getMediaById,
+	getMediaByPath,
 	getMediaPage,
 	getMediaThumbnail,
 	getMediaWithCursor,
@@ -84,6 +89,7 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getInProgressMedia: 'media.getInProgress',
 	getMedia: 'media.get',
 	getMediaById: 'media.getById',
+	getMediaByPath: 'media.getByPath',
 	getMediaPage: 'media.getPage',
 	getMediaThumbnail: 'media.getThumbnail',
 	getMediaWithCursor: 'media.getWithCursor',

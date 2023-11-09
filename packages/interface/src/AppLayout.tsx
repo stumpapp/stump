@@ -1,7 +1,7 @@
+import { isAxiosError } from '@stump/api'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
 import { Suspense, useMemo } from 'react'
-import { useHotkeys } from 'react-hotkeys-hook'
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
 import JobOverlay from './components/jobs/JobOverlay'
@@ -14,7 +14,6 @@ import { AppContext } from './context'
 export function AppLayout() {
 	const appProps = useAppProps()
 
-	const navigate = useNavigate()
 	const location = useLocation()
 
 	const hideSidebar = useMemo(() => {
@@ -30,23 +29,18 @@ export function AppLayout() {
 	}))
 
 	// TODO: platform specific hotkeys
-	// TODO: cmd+shift+h for home
-	useHotkeys('ctrl+,, cmd+,', (e) => {
-		e.preventDefault()
-		navigate('/settings/general')
-	})
 
 	const { error } = useAuthQuery({
 		enabled: !storeUser,
 		onSuccess: setUser,
 	})
 
-	// TODO: I should def throw error, but something about throwing error causes
-	// an async error
-	// @ts-expect-error: FIXME: type error no good >:(
-	const isNetworkError = error?.code === 'ERR_NETWORK'
+	const axiosError = isAxiosError(error) ? error : null
+	const isNetworkError = axiosError?.code === 'ERR_NETWORK'
 	if (isNetworkError) {
 		return <Navigate to="/server-connection-error" state={{ from: location }} />
+	} else if (error && !storeUser) {
+		throw error
 	}
 
 	if (!storeUser) {
@@ -54,9 +48,7 @@ export function AppLayout() {
 	}
 
 	return (
-		<AppContext.Provider
-			value={{ isServerOwner: storeUser.role === 'SERVER_OWNER', user: storeUser }}
-		>
+		<AppContext.Provider value={{ isServerOwner: storeUser.is_server_owner, user: storeUser }}>
 			<Suspense fallback={<RouteLoadingIndicator />}>
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">

@@ -15,7 +15,7 @@ export default function SettingsLayout() {
 	return (
 		<div className="flex h-full w-full flex-col gap-2">
 			<SettingsNavigation user={user} />
-			<Suspense>
+			<Suspense fallback={null}>
 				<Outlet />
 			</Suspense>
 		</div>

@@ -20,18 +20,3 @@ pub struct Cli {
 	#[command(subcommand)]
 	pub command: Option<Commands>,
 }
-
-// # start the server
-// $ ./server
-
-// # unlock an account
-// $ ./server account lock --username <username>
-
-// # freeze an account
-// $ ./server account unlock --username <username>
-
-// # list all frozen accounts
-// $ ./server account list --locked
-
-// # reset password for a user
-// $ ./server account reset-password --username <username>

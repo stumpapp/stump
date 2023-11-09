@@ -12,41 +12,7 @@ const Sheet = (props: ComponentProps<typeof SheetPrimitive.Root>) => (
 const SheetTrigger = (props: ComponentProps<typeof SheetPrimitive.Trigger>) => (
 	<SheetPrimitive.Trigger {...props} />
 )
-
-const FLOATING_PORTAL_VARIANTS = {
-	bottom: 'bottom-4 inset-x-4 z-50',
-	left: 'left-4 inset-y-4 z-50',
-	right: 'right-4 inset-y-4 z-50',
-	top: 'top-4 inset-x-4 z-50',
-}
-const portalVariants = cva('fixed inset-0 z-[105] flex', {
-	defaultVariants: { position: 'right' },
-	variants: {
-		position: {
-			bottom: 'items-end',
-			left: 'justify-start',
-			right: 'justify-end',
-			top: 'items-start',
-		},
-	},
-})
-
-export type SheetPortalProps = {
-	floating?: boolean
-} & SheetPrimitive.DialogPortalProps &
-	VariantProps<typeof portalVariants>
-const SheetPortal = ({ position, className, children, floating, ...props }: SheetPortalProps) => (
-	<SheetPrimitive.Portal className={cn(className)} {...props}>
-		<div
-			className={cn(portalVariants({ position }), {
-				[FLOATING_PORTAL_VARIANTS[position || 'right']]: !!floating,
-			})}
-		>
-			{children}
-		</div>
-	</SheetPrimitive.Portal>
-)
-SheetPortal.displayName = SheetPrimitive.Portal.displayName
+const SheetPortal = SheetPrimitive.Portal
 
 export type SheetOverlayProps = Omit<
 	React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>,
@@ -58,7 +24,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Overlay
 		className={cn(
-			'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-all duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
+			'fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
 			className,
 		)}
 		{...props}
@@ -68,7 +34,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-	'fixed z-50 scale-100 gap-4 bg-white opacity-100 dark:bg-gray-900 flex flex-col data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-300 transition ease-in-out',
+	'fixed z-50 gap-4 bg-white shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300 flex flex-col dark:bg-gray-950 ',
 	{
 		compoundVariants: [
 			{
@@ -136,14 +102,14 @@ const sheetVariants = cva(
 			position: 'right',
 			size: 'default',
 		},
-		// FIXME: animate out not working
 		variants: {
 			position: {
-				bottom: 'data-[state=open]:slide-in-from-bottom w-full',
-				left: 'data-[state=open]:slide-in-from-left h-full',
+				bottom:
+					'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom border-gray-50 dark:border-gray-800',
+				left: 'inset-y-0 left-0 h-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left border-gray-50 dark:border-gray-800',
 				right:
-					'data-[state=open]:slide-in-from-right h-full data-[state=closed]:slide-out-to-right ',
-				top: 'data-[state=open]:slide-in-from-top w-full',
+					'inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right border-gray-50 dark:border-gray-800',
+				top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top border-gray-50 dark:border-gray-800',
 			},
 			size: {
 				content: '',
@@ -157,16 +123,8 @@ const sheetVariants = cva(
 	},
 )
 
-const FLOATING_CONTENT_VARIANTS = {
-	bottom: 'max-w-[calc(100%-2rem)]',
-	left: 'max-h-[calc(100%-2rem)]',
-	right: 'max-h-[calc(100%-2rem)]',
-	top: 'max-w-[calc(100%-2rem)]',
-}
-
 export type SheetContentProps = {
 	closeIcon?: boolean
-	floating?: boolean
 	rounded?: boolean
 } & React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> &
 	VariantProps<typeof sheetVariants>
@@ -174,19 +132,12 @@ export type SheetContentProps = {
 const SheetContent = React.forwardRef<
 	React.ElementRef<typeof SheetPrimitive.Content>,
 	SheetContentProps
->(({ position, size, className, children, closeIcon, floating, rounded, ...props }, ref) => (
-	<SheetPortal position={position} floating={floating}>
+>(({ position, size, className, children, closeIcon, rounded, ...props }, ref) => (
+	<SheetPortal>
 		<SheetOverlay />
 		<SheetPrimitive.Content
 			ref={ref}
-			className={cn(
-				sheetVariants({ position, size }),
-				{
-					[FLOATING_CONTENT_VARIANTS[position || 'right']]: !!floating,
-				},
-				rounded && 'rounded-md',
-				className,
-			)}
+			className={cn(sheetVariants({ position, size }), rounded && 'rounded-md', className)}
 			{...props}
 		>
 			{children}

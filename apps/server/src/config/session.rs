@@ -45,6 +45,7 @@ pub fn get_session_layer(
 	);
 	let session_ttl = get_session_ttl();
 
+	// TODO: This configuration won't work for Tauri Windows app, it requires SameSite::None and Secure=true... Linux and macOS work fine.
 	SessionManagerLayer::new(store)
 		.with_name("stump_session")
 		.with_max_age(Duration::seconds(session_ttl))

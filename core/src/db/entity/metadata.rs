@@ -263,7 +263,7 @@ pub struct MediaMetadata {
 }
 
 impl MediaMetadata {
-	pub fn create_action(self) -> Vec<media_metadata::SetParam> {
+	pub fn into_prisma(self) -> Vec<media_metadata::SetParam> {
 		vec![
 			media_metadata::title::set(self.title),
 			media_metadata::series::set(self.series),

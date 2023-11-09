@@ -1,61 +1,43 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { Input } from './Input'
 
-export default {
+const StoryMeta: Meta<typeof Input> = {
 	component: Input,
 	title: 'input/Input',
-} as ComponentMeta<typeof Input>
+}
+type Story = StoryObj<typeof Input>
 
-const Template: ComponentStory<typeof Input> = (args) => <Input {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-	label: 'My Label',
+export const Default: Story = {
+	render: () => <Input label="default" />,
 }
 
-export const Ghost = Template.bind({})
-Ghost.args = {
-	label: 'My Label',
-	variant: 'ghost',
+export const Ghost: Story = {
+	render: () => <Input variant="ghost" label="ghost" />,
 }
 
-export const Underline = Template.bind({})
-Underline.args = {
-	label: 'My Label',
-	variant: 'underline',
+export const Underline: Story = {
+	render: () => <Input variant="underline" label="underline" />,
 }
 
-export const UnderlineInvalid = Template.bind({})
-UnderlineInvalid.args = {
-	isInvalid: true,
-	label: 'My Label',
-	variant: 'underline',
+export const UnderlineInvalid: Story = {
+	render: () => <Input isInvalid label="underline" variant="underline" />,
 }
 
-export const WithDescription = Template.bind({})
-WithDescription.args = {
-	description: 'My Description',
-	label: 'My Label',
+export const WithDescription: Story = {
+	render: () => <Input description="This is a description" label="Label" />,
 }
 
-export const Primary = Template.bind({})
-Primary.args = {
-	label: 'My Label',
-	variant: 'primary',
+export const WithDescriptionInvalid: Story = {
+	render: () => <Input description="This is a description" isInvalid label="Label" />,
 }
 
-export const PrimaryInvalid = Template.bind({})
-PrimaryInvalid.args = {
-	isInvalid: true,
-	label: 'My Label',
-	variant: 'primary',
+export const Primary: Story = {
+	render: () => <Input variant="primary" label="primary" />,
 }
 
-export const AutoComplete = Template.bind({})
-AutoComplete.args = {
-	autoComplete: 'username',
-	id: 'username',
-	label: 'My Label',
-	variant: 'primary',
+export const PrimaryInvalid: Story = {
+	render: () => <Input isInvalid variant="primary" label="primary" />,
 }
+
+export default StoryMeta

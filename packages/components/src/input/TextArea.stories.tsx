@@ -1,29 +1,19 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { TextArea } from './TextArea'
 
-export default {
-	argTypes: {},
+const StoryMeta: Meta<typeof TextArea> = {
 	component: TextArea,
-
 	title: 'input/TextArea',
-} as ComponentMeta<typeof TextArea>
+}
+type Story = StoryObj<typeof TextArea>
 
-const Template: ComponentStory<typeof TextArea> = (args) => <TextArea {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-	placeholder: 'Enter your text here...',
+export const Default: Story = {
+	render: () => <TextArea label="Label" placeholder="Enter your text here..." />,
 }
 
-export const WithLabel = Template.bind({})
-WithLabel.args = {
-	label: 'My Label',
-	placeholder: 'Enter your text here...',
+export const Primary: Story = {
+	render: () => <TextArea label="Label" variant="primary" placeholder="Hi" />,
 }
 
-export const Primary = Template.bind({})
-Primary.args = {
-	placeholder: 'Enter your text here...',
-	variant: 'primary',
-}
+export default StoryMeta

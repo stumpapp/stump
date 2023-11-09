@@ -17,6 +17,7 @@ const iconButtonVariants = cva(BUTTON_BASE_CLASSES, {
 			md: 'p-2',
 			sm: 'p-2',
 			xs: 'p-1',
+			xxs: 'p-0.5',
 		},
 		variant: BUTTON_VARIANTS,
 	},

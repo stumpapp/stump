@@ -65,9 +65,15 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	return useReactQuery(queryKey, queryFn, {
 		context: QueryClientContext,
 		onError: (err) => {
-			if (isAxiosError(err) && err.response?.status === 401) {
+			const axiosError = isAxiosError(err)
+			const isNetworkError = axiosError && err?.code === 'ERR_NETWORK'
+			const isAuthError = axiosError && err.response?.status === 401
+
+			if (isAuthError) {
 				setUser(null)
 				onRedirect?.('/auth')
+			} else if (isNetworkError) {
+				onRedirect?.('/server-connection-error')
 			}
 			onError?.(err)
 		},

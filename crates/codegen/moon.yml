@@ -1,0 +1,15 @@
+type: 'application'
+
+# workspace:
+# inheritedTasks:
+
+fileGroups:
+  app:
+    - 'src/**/*'
+
+language: 'rust'
+
+tasks:
+  generate:
+    command: 'cargo run --release --package codegen'
+    local: true

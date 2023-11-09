@@ -7,13 +7,7 @@ import {
 	userApi,
 	userQueryKeys,
 } from '@stump/api'
-import type {
-	LoginActivity,
-	LoginOrRegisterArgs,
-	UpdateUser,
-	User,
-	UserPreferences,
-} from '@stump/types'
+import type { CreateUser, LoginActivity, UpdateUser, User, UserPreferences } from '@stump/types'
 import { AxiosError } from 'axios'
 
 import {
@@ -47,6 +41,25 @@ export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) 
 	return {
 		pageData,
 		users,
+		...restReturn,
+	}
+}
+
+type UseUserQuery = {
+	id: string
+} & QueryOptions<User>
+export function useUserQuery({ id, ...options }: UseUserQuery) {
+	const { data, ...restReturn } = useQuery(
+		[userQueryKeys.getUserById, id],
+		async () => {
+			const { data } = await userApi.getUserById(id)
+			return data
+		},
+		options,
+	)
+
+	return {
+		user: data,
 		...restReturn,
 	}
 }
@@ -91,7 +104,7 @@ type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUser>
 export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	updateViewer
 
-	const { mutateAsync: update, isLoading } = useMutation(
+	const { mutateAsync, isLoading, error } = useMutation(
 		[userQueryKeys.updateUser, id],
 		async (params: UpdateUser) => {
 			const response = id ? await updateUser(id, params) : await updateViewer(params)
@@ -101,8 +114,9 @@ export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	)
 
 	return {
+		error,
 		isLoading,
-		update,
+		updateAsync: mutateAsync,
 	}
 }
 
@@ -124,7 +138,7 @@ export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 	}
 }
 
-export function useCreateUser(options?: MutationOptions<User, AxiosError, LoginOrRegisterArgs>) {
+export function useCreateUser(options?: MutationOptions<User, AxiosError, CreateUser>) {
 	const {
 		mutateAsync: createAsync,
 		mutate: create,
@@ -132,7 +146,7 @@ export function useCreateUser(options?: MutationOptions<User, AxiosError, LoginO
 		...restReturn
 	} = useMutation(
 		[userQueryKeys.createUser],
-		async (params: LoginOrRegisterArgs) => {
+		async (params: CreateUser) => {
 			const { data } = await userApi.createUser(params)
 			return data
 		},

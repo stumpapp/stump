@@ -10,9 +10,9 @@ export default function AppPreview() {
 	// ! NOTE: There is a chance that 'system' will pop up first, only then resolving to
 	// ! either 'dark' or 'light'. I don't see this as much of an issue, TBH.
 	useEffect(() => {
-		let imageUrl = 'demo-fallback--light.png'
+		let imageUrl = 'demo-light.png'
 		if (resolvedTheme !== 'dark') {
-			imageUrl = 'demo-fallback--dark.png'
+			imageUrl = 'demo-dark.png'
 		}
 
 		const image = new Image()
@@ -26,7 +26,7 @@ export default function AppPreview() {
 					initial={{ opacity: 0, scale: 0.75 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ delay: 0.5, duration: 1 }}
-					className="z-40 flex h-full w-[650px] flex-1 self-center bg-[url('/demo-fallback--light.png')] bg-contain bg-[center_top] bg-no-repeat dark:bg-[url('/demo-fallback--dark.png')] sm:w-auto"
+					className="z-40 flex h-full w-[650px] flex-1 self-center bg-[url('/demo-light.png')] bg-contain bg-[center_top] bg-no-repeat dark:bg-[url('/demo-dark.png')] sm:w-auto"
 				/>
 			</div>
 		</div>

@@ -11,7 +11,7 @@ import AvatarPicker from './AvatarPicker'
 
 export default function ProfileForm() {
 	const { t } = useLocaleContext()
-	const { update } = useUpdateUser()
+	const { updateAsync } = useUpdateUser()
 
 	const { user, setUser } = useUser()
 
@@ -55,11 +55,13 @@ export default function ProfileForm() {
 	}
 
 	const handleSubmit = async (values: Schema) => {
-		if (!hasChanges) return
+		if (!hasChanges || !user) return
 
 		try {
-			await update(
+			await updateAsync(
 				{
+					...user,
+					age_restriction: user.age_restriction || null,
 					avatar_url: values.avatarUrl || null,
 					password: values.password || null,
 					username: values.username,

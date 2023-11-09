@@ -55,8 +55,6 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 		.with_state(app_state.clone())
 		.layer(session_service)
 		.layer(cors_layer)
-		// TODO: not sure if it needs to be done in here or stump_core::config::logging,
-		// but I want to ignore traces for asset requests, e.g. /assets/chunk-SRMZVY4F.02115dd3.js lol
 		.layer(TraceLayer::new_for_http());
 
 	let addr = SocketAddr::from(([0, 0, 0, 0], port));

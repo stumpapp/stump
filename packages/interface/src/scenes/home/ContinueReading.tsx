@@ -2,8 +2,8 @@ import { useContinueReading } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { CircleSlash2 } from 'lucide-react'
 
-import HorizontalCardList from '../../components/HorizontalCardList'
-import MediaCard from '../../components/media/MediaCard'
+import HorizontalCardList from '@/components/HorizontalCardList'
+import MediaCard from '@/components/media/MediaCard'
 
 export default function ContinueReadingMedia() {
 	const { media, fetchNextPage, hasNextPage, isLoading } = useContinueReading({

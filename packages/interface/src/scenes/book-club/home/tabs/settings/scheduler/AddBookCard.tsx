@@ -4,7 +4,8 @@ import { Media } from '@stump/types'
 import React, { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import BookSearchOverlay from '../../../../../../components/media/BookSearchOverlay'
+import BookSearchOverlay from '@/components/media/BookSearchOverlay'
+
 import { defaultBook, Schema } from './CreateOrAddToScheduleForm'
 
 type Props = {

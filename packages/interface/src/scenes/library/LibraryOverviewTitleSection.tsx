@@ -3,8 +3,8 @@ import { EntityCard, Heading } from '@stump/components'
 import type { Library } from '@stump/types'
 import { useMediaMatch } from 'rooks'
 
-import ReadMore from '../../components/ReadMore'
-import TagList from '../../components/tags/TagList'
+import ReadMore from '@/components/ReadMore'
+import TagList from '@/components/tags/TagList'
 
 type Props = {
 	library: Library

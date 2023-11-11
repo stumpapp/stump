@@ -1,8 +1,8 @@
 import { seriesQueryKeys } from '@stump/api'
 import { useSeriesCursorQuery } from '@stump/client'
 
-import HorizontalCardList from '../../components/HorizontalCardList'
-import SeriesCard from '../../components/series/SeriesCard'
+import HorizontalCardList from '@/components/HorizontalCardList'
+import SeriesCard from '@/components/series/SeriesCard'
 
 export default function RecentlyAddedSeries() {
 	const { series, fetchNextPage, hasNextPage } = useSeriesCursorQuery({

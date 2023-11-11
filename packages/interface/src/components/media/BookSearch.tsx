@@ -3,7 +3,8 @@ import { usePreviousIsDifferent } from '@stump/components'
 import { Media } from '@stump/types'
 import React, { useEffect } from 'react'
 
-import useIsInView from '../../hooks/useIsInView'
+import useIsInView from '@/hooks/useIsInView'
+
 import MediaGrid from '../../scenes/series/MediaGrid'
 import { FilterToolBar, useFilterContext } from '../filters'
 import Pagination from '../Pagination'

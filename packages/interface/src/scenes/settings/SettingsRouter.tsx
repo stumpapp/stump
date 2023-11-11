@@ -2,8 +2,9 @@ import { useAppProps } from '@stump/client'
 import React from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
+import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'
+
 import { LazyComponent } from '../../AppRouter'
-import ServerOwnerRouteWrapper from '../../components/ServerOwnerRouteWrapper.tsx'
 import SettingsLayout from './SettingsLayout'
 import UserManagementRouter from './user-management/UserManagementRouter.tsx'
 

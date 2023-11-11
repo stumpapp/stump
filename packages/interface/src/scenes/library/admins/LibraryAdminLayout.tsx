@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router'
 
-import SceneContainer from '../../../components/SceneContainer'
+import SceneContainer from '@/components/SceneContainer'
+
 import { useAppContext } from '../../../context'
 
 /**

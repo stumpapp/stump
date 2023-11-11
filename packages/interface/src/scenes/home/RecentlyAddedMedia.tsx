@@ -1,7 +1,7 @@
 import { useRecentlyAddedMediaQuery } from '@stump/client'
 
-import HorizontalCardList from '../../components/HorizontalCardList'
-import MediaCard from '../../components/media/MediaCard'
+import HorizontalCardList from '@/components/HorizontalCardList'
+import MediaCard from '@/components/media/MediaCard'
 
 // TODO: better empty state
 export default function RecentlyAddedMedia() {

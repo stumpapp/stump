@@ -3,8 +3,9 @@ import { ButtonOrLink, EntityCard, Heading } from '@stump/components'
 import { Series } from '@stump/types'
 import { useMediaMatch } from 'rooks'
 
-import ReadMore from '../../components/ReadMore'
-import TagList from '../../components/tags/TagList'
+import ReadMore from '@/components/ReadMore'
+import TagList from '@/components/tags/TagList'
+
 import { useAppContext } from '../../context'
 import paths from '../../paths'
 import DownloadSeriesButton from './DownloadSeriesButton'

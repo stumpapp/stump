@@ -4,7 +4,8 @@ import type { DirectoryListingFile, Media } from '@stump/types'
 import { Book, Folder } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
-import GenericEmptyState from '../../../components/GenericEmptyState'
+import GenericEmptyState from '@/components/GenericEmptyState'
+
 import { useFileExplorerContext } from './context'
 
 type FileExplorerProps = {

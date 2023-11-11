@@ -3,8 +3,9 @@ import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@s
 import { useEffect } from 'react'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import AnimatedPagedReader from '../../components/readers/image-based/AnimatedPagedReader'
-import PagedReader from '../../components/readers/image-based/PagedReader'
+import AnimatedPagedReader from '@/components/readers/image-based/AnimatedPagedReader'
+import PagedReader from '@/components/readers/image-based/PagedReader'
+
 import paths from '../../paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
 

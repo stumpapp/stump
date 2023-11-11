@@ -9,9 +9,9 @@ import Pagination from '@/components/Pagination'
 import SceneContainer from '@/components/SceneContainer'
 import SeriesGrid from '@/components/series/SeriesGrid'
 import SeriesList from '@/components/series/SeriesList'
+import useIsInView from '@/hooks/useIsInView'
+import { usePageParam } from '@/hooks/usePageParam'
 
-import useIsInView from '../../hooks/useIsInView'
-import { usePageParam } from '../../hooks/usePageParam'
 import LibraryOverviewTitleSection from './LibraryOverviewTitleSection'
 
 function LibraryOverviewScene() {

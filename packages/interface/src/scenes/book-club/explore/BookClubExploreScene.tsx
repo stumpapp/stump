@@ -2,8 +2,9 @@ import { useBookClubsQuery, useUserStore } from '@stump/client'
 import { ButtonOrLink, cx } from '@stump/components'
 import React from 'react'
 
-import GenericEmptyState from '../../../components/GenericEmptyState'
-import SceneContainer from '../../../components/SceneContainer'
+import GenericEmptyState from '@/components/GenericEmptyState'
+import SceneContainer from '@/components/SceneContainer'
+
 import paths from '../../../paths'
 
 export default function BookClubExploreScene() {

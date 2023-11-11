@@ -7,7 +7,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { CircleSlash2 } from 'lucide-react'
 import React, { useMemo } from 'react'
 
-import { Table } from '../../../components/table'
+import { Table } from '@/components/table'
+
 import { useAppContext } from '../../../context.ts'
 import { useLocaleContext } from '../../../i18n'
 import { useJobSettingsContext } from './context'

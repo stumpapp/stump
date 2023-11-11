@@ -18,8 +18,9 @@ import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 import { z } from 'zod'
 
-import DirectoryPickerModal from '../../../components/DirectoryPickerModal'
-import TagSelect from '../../../components/TagSelect'
+import DirectoryPickerModal from '@/components/DirectoryPickerModal'
+import TagSelect from '@/components/TagSelect'
+
 import paths from '../../../paths'
 import LibraryOptionsForm from './LibraryOptionsForm'
 import ScanModeForm from './ScanModeForm'

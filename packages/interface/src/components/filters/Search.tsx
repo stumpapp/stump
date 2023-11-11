@@ -58,6 +58,7 @@ export default function Search({ initialValue, label, placeholder, onChange, isL
 			leftDecoration={<SearchIcon className="h-4 w-4 dark:text-gray-300" />}
 			rightDecoration={showLoader ? <ProgressSpinner size="sm" /> : null}
 			variant="ghost"
+			className="flex-grow"
 		/>
 	)
 }

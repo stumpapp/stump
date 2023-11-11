@@ -65,8 +65,6 @@ use super::{
 };
 
 // TODO: age restrictions!
-// TODO: .layer(from_extractor::<ServerOwnerGuard>()) where needed. Might need to remove some
-// of the nesting
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/libraries", get(get_libraries).post(create_library))

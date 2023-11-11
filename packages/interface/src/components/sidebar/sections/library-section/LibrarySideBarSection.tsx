@@ -11,7 +11,11 @@ import SideBarButtonLink from '../../SideBarButtonLink'
 import LibraryEmoji from './LibraryEmoji'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
 
-export default function LibrarySideBarSection() {
+type Props = {
+	isMobile?: boolean
+}
+
+export default function LibrarySideBarSection({ isMobile }: Props) {
 	const location = useLocation()
 
 	const { t } = useLocaleContext()
@@ -27,7 +31,7 @@ export default function LibrarySideBarSection() {
 
 		return libraries.map((library) => {
 			// TODO: user permissions
-			const canChange = isServerOwner
+			const canChange = isServerOwner && !isMobile
 			const leftContent = (
 				<LibraryEmoji
 					emoji={library.emoji || undefined}

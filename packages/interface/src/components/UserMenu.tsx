@@ -4,10 +4,10 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
-import { useAppContext } from '../../context'
-import paths from '../../paths'
-import SignOut from './SignOut'
-import ThemeSwitch from './ThemeSwitch'
+import { useAppContext } from '../context'
+import paths from '../paths'
+import SignOut from './sidebar/SignOut'
+import ThemeSwitch from './sidebar/ThemeSwitch'
 
 export default function UserMenu() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -35,7 +35,7 @@ export default function UserMenu() {
 								rounded="lg"
 								className="h-6 w-6"
 							/>
-							<Text className="ml-2 select-none" size="sm">
+							<Text className="ml-2 line-clamp-1 select-none text-ellipsis" size="sm">
 								{user.username}
 							</Text>
 						</Card>

@@ -62,7 +62,7 @@ export default function BookSearch({ page, setPage, onBookSelect, showFilters }:
 			<FilterToolBar
 				isRefetching={isRefetching}
 				searchPlaceholder="Search books by name or description."
-				slideOverForm={showFilters ? 'media' : null}
+				{...(showFilters ? { entity: 'media', orderBy: true } : {})}
 			/>
 
 			<div className="flex w-full flex-col space-y-6 pt-4">

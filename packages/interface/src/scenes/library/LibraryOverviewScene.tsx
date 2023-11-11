@@ -4,11 +4,12 @@ import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
-import { FilterProvider, FilterToolBar, useFilterContext } from '../../components/filters'
-import Pagination from '../../components/Pagination'
-import SceneContainer from '../../components/SceneContainer'
-import SeriesGrid from '../../components/series/SeriesGrid'
-import SeriesList from '../../components/series/SeriesList'
+import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
+import Pagination from '@/components/Pagination'
+import SceneContainer from '@/components/SceneContainer'
+import SeriesGrid from '@/components/series/SeriesGrid'
+import SeriesList from '@/components/series/SeriesList'
+
 import useIsInView from '../../hooks/useIsInView'
 import { usePageParam } from '../../hooks/usePageParam'
 import LibraryOverviewTitleSection from './LibraryOverviewTitleSection'
@@ -92,13 +93,13 @@ function LibraryOverviewScene() {
 
 			{showOverview && <LibraryOverviewTitleSection library={library} />}
 
-			{/* @ts-expect-error: wrong ref, still okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
 
 			<FilterToolBar
 				isRefetching={isRefetchingSeries}
 				searchPlaceholder="Search series in this library by name or description."
-				slideOverForm="series"
+				entity="series"
+				orderBy
 			/>
 
 			<div className="flex w-full flex-col space-y-6 p-4">

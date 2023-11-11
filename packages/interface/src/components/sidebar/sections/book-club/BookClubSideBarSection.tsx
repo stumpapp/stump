@@ -10,7 +10,11 @@ import paths from '../../../../paths'
 import SideBarButtonLink from '../../SideBarButtonLink'
 import BookClubEmoji from './BookClubEmoji'
 
-export default function BookClubSideBarSection() {
+type Props = {
+	isMobile?: boolean
+}
+
+export default function BookClubSideBarSection({ isMobile }: Props) {
 	const location = useLocation()
 	const checkUserPermission = useUserStore((state) => state.checkUserPermission)
 	const { user, isServerOwner } = useAppContext()
@@ -28,7 +32,8 @@ export default function BookClubSideBarSection() {
 		return bookClubs.map((bookClub) => {
 			const userId = user.id
 			const member = bookClub.members?.find((member) => member.user_id === userId)
-			const canChange = isServerOwner || member?.role === 'CREATOR' || member?.role === 'ADMIN'
+			const canChange =
+				(isServerOwner || member?.role === 'CREATOR' || member?.role === 'ADMIN') && !isMobile
 
 			const leftContent = (
 				<BookClubEmoji

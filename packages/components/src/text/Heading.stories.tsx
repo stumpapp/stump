@@ -1,15 +1,15 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { Heading } from './Heading'
 
-export default {
+const StoryMeta: Meta<typeof Heading> = {
 	component: Heading,
 	title: 'input/Heading',
-} as ComponentMeta<typeof Heading>
-
-const Template: ComponentStory<typeof Heading> = (args) => <Heading {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-	children: 'My Heading',
 }
+type Story = StoryObj<typeof Heading>
+
+export const Default: Story = {
+	render: () => <Heading>My Heading</Heading>,
+}
+
+export default StoryMeta

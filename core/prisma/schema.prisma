@@ -9,29 +9,24 @@ generator client {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  // The username of the user. E.g. "oromei"
+  id String @id @default(cuid())
+
   username        String    @unique
-  // The password of the user. This will a hash - not the actual password.
-  hashed_password String
-  // The role of the user. Defaults to "MEMBER".
-  role            String    @default("MEMBER")
-  // The URL of the user's optional avatar.
+  hashed_password String // Salted and hashed, NOT plain text
+  is_server_owner Boolean   @default(false)
   avatar_url      String?
-  // The timestamp of the user's last login.
   last_login      DateTime?
-  // The timestamp of when the user was created.
   created_at      DateTime  @default(now())
-  // The timestamp of when the user was *soft* deleted.
   deleted_at      DateTime?
+  is_locked       Boolean   @default(false) // Locked users cannot login
+  permissions     String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The media the user currently has progress on.
+  reviews         Review[]
   read_progresses ReadProgress[]
   reading_lists   ReadingList[]
+
+  book_club_memberships BookClubMember[]
+  book_club_invitations BookClubInvitation[]
 
   age_restriction AgeRestriction?
 
@@ -41,38 +36,39 @@ model User {
 
   login_activity    UserLoginActivity[]
   media_annotations MediaAnnotation[]
+  sessions          Session[]
 
   @@map("users")
 }
 
 model UserLoginActivity {
   id                        String   @id @default(uuid())
-  // The IP address of the login activity.
-  ip_address                String
-  // The user agent of the login activity.
-  user_agent                String
-  // Whether or not the login was successful.
+  ip_address                String // TODO: this is not being collected properly
+  user_agent                String // Basic user agent string
   authentication_successful Boolean
-  // The timestamp of the login activity.
   timestamp                 DateTime @default(now())
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The user who logged in.
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_login_activity")
 }
 
+model Session {
+  id         String   @id @default(uuid())
+  created_at DateTime @default(now())
+  expires_at DateTime
+  data       Bytes // User information (user and user preferences)
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+
+  @@map("sessions")
+}
+
 model AgeRestriction {
-  // The minimum age for the user. Ex: if age is 10, then 
-  age               Int
-  // If true, the user will be restricted from accessing any media without an explicit age rating set on either
-  // the media or its series.
-  restrict_on_unset Boolean @default(false)
+  age               Int // The minimum age for the user
+  restrict_on_unset Boolean @default(false) // Media without an age rating is forbidden
 
   user_id String @unique
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -82,24 +78,13 @@ model AgeRestriction {
 
 model Library {
   id          String   @id @default(uuid())
-  // The name of the library. ex: "Marvel Comics"
   name        String   @unique
-  // The description of the library. ex: "The best library ever"
   description String?
-  // The location of the library in the fs. ex: "/home/user/media/comics/marvel"
   path        String   @unique
-  // The status of the series since last scan or access
-  status      String   @default("READY")
-  // The date in which the library was last updated. This is usually after a scan. ex: "2022-04-20 04:20:69"
+  status      String   @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
   updated_at  DateTime @updatedAt
-  // The date in which the library was created. ex: "2022-04-20 04:20:69"
   created_at  DateTime @default(now())
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The series in the library
   series Series[]
 
   library_options    LibraryOptions @relation(fields: [library_options_id], references: [id])
@@ -115,25 +100,11 @@ model Library {
 
 model LibraryOptions {
   id                      String  @id @default(uuid())
-  // Flag indicating whether or not to attempt to convert rar files to zip on scans.
   convert_rar_to_zip      Boolean @default(false)
-  // Flag indicating whether or not to *hard* delete rar files that were successfully converted to zip.
-  // Hard delete **will not be recoverable**. When false, converted files will be moved to the systems native
-  // trash location, or a custom location when running in Docker (which will clear on an interval).
   hard_delete_conversions Boolean @default(false)
-  // The pattern which this library follows. Used primarily during scanning, affects how Stump
-  // will define its series. SERIES_BASED and COLLECTION_BASED are the only
-  // two valid options. Default is SERIES_BASED.
-  library_pattern         String  @default("SERIES_BASED")
-  // The thumbnail configuration for this library. This is a JSON blob in the form of:
-  // { size_factor: "...", format: "...", quality: ... }
-  thumbnail_config        Bytes?
+  library_pattern         String  @default("SERIES_BASED") // SERIES_BASED or COLLECTION_BASED
+  thumbnail_config        Bytes? // { size_factor: "...", format: "...", quality: ... }
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The ID of the library which these options belong to.
   library_id String?
   library    Library?
 
@@ -142,32 +113,20 @@ model LibraryOptions {
 
 model Series {
   id          String   @id @default(uuid())
-  // The title of the series. This is generated from a fs scan, and will be the directory name.
   name        String
-  // The description of the series. ex: "The best series ever"
   description String?
-  // The date in which the series was last updated in the FS. ex: "2020-01-01"
   updated_at  DateTime @updatedAt
-  // The date in which the series was created. ex: "2020-01-01"
   created_at  DateTime @default(now())
-  // The url of the series. ex: "/home/user/media/comics/The Amazing Spider-Man"
   path        String
-  // The status of the series since last scan or access
-  status      String   @default("READY")
+  status      String   @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
   metadata SeriesMetadata?
 
-  // The id of the library this series belongs to.
   library_id String?
-  // The library this series belongs to.
   library    Library? @relation(fields: [library_id], references: [id], onDelete: Cascade)
-  // The media files in the series.
-  media      Media[]
 
-  tags Tag[]
+  media Media[]
+  tags  Tag[]
 
   @@map("series")
 }
@@ -176,89 +135,54 @@ model Series {
 // This is primarily derived from a series.json file. Refer to:
 // https://github.com/mylar3/mylar3/wiki/series.json-schema-%28version-1.0.1%29
 model SeriesMetadata {
-  // The type of series. ex: "comicSeries"
-  meta_type  String
-  // The title of the series, renamed from 'name' to keep consistency with the rest of the models
+  meta_type  String // ex: "comicSeries"
   title      String?
-  // The associated series' description, renamed from 'description' to keep consistency with the rest of the models
   summary    String?
-  // The publisher of the associated series
   publisher  String?
-  // The name of the imprint while under the publisher
   imprint    String?
-  // The ComicVine id of the associated series
-  comicid    Int?
-  // The volume of the series in relation to other titles (this can be either numerical or the series year)
+  comicid    Int? // ComicVine id
   volume     Int?
-  // The booktype of the series, e.g. Print, OneShot, TPB or GN
-  booktype   String?
-  // The age rating of the associated series
+  booktype   String? // ex: Print, OneShot, TPB or GN
   age_rating Int?
-  // The status of the associated series, e.g. Continuing, Ended
-  status     String?
-
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
+  status     String? // ex: Continuing, Ended
 
   series_id String @id
-  series    Series @relation(fields: [series_id], references: [id])
+  series    Series @relation(fields: [series_id], references: [id], onDelete: Cascade)
 
   @@map("series_metadata")
 }
 
 model Media {
-  id          String    @id @default(uuid())
-  // The name of the media. This is derived from the associated file. ex: "The Amazing Spider-Man (2018) #69"
-  name        String
-  // The size of the media file in bytes.
-  size        Int
-  // The extension of the media file. ex: "cbz"
+  id String @id @default(uuid())
+
+  name        String // derived from filename
+  size        Int // in bytes
   extension   String
-  // The number of pages in the media. ex: "69"
   pages       Int
-  // The date in which the media entity was last updated. ex: "2022-04-20 04:20:69"
   updated_at  DateTime  @updatedAt
-  // The date in which the media entity was first created. ex: "2022-04-20 04:20:69"
   created_at  DateTime  @default(now())
-  // The date in which the file itself was last modified. This is derived directly from the 
-  // filesystem. ex: "2022-04-20 04:20:69"
   modified_at DateTime?
-  // The hash of the file contents. Used primarily to find multiple instances of a file in the database
-  // This is **not** an integrity check(sum), and is not used to verify the file contents.
-  hash        String?
-  // The full path of the media as it exists on the filesystem. 
-  // ex: "/home/user/media/comics/The Amazing Spider-Man (2018) #69.cbz"
+  hash        String? // This is **not** an integrity check(sum), and is not used to verify the file contents.
   path        String
-  // The status of the series since last scan or access
-  status      String    @default("READY")
+  status      String    @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
+  metadata  MediaMetadata?
+  series    Series?        @relation(fields: [series_id], references: [id], onDelete: Cascade)
+  series_id String?
 
-  metadata MediaMetadata?
-
-  // The series this media belongs to.
-  series             Series?           @relation(fields: [series_id], references: [id], onDelete: Cascade)
-  // The id of the series this media belongs to.
-  series_id          String?
-  // The read progresses of the media
-  read_progresses    ReadProgress[]
-  // The user assigned tags for the media. ex: ["Spider-Man", "Marvel"]
-  tags               Tag[]
-  // The associated reading list items for this media
-  reading_list_items ReadingListItem[]
-  // The associated annotations for this media
-  annotations        MediaAnnotation[]
+  read_progresses                ReadProgress[]
+  tags                           Tag[]
+  reading_list_items             ReadingListItem[]
+  annotations                    MediaAnnotation[]
+  reviews                        Review[]
+  book_club_suggestions          BookClubBookSuggestion[]
+  book_club_books                BookClubBook[]
+  book_club_member_favorite_book BookClubMemberFavoriteBook[]
 
   @@map("media")
 }
 
 // TODO: determine what is optional and what is safe to make required
-// NOTE: There will be some fields that are of String[] type but are stored as a String.
-// This is because Prisma doesn't support String[] for SQLite. These will be 
-// denoted with a comment.
 model MediaMetadata {
   // TODO: remove this once nested create is supported, just use media_id
   id String @id @default(cuid())
@@ -267,60 +191,76 @@ model MediaMetadata {
   series     String?
   number     Float?
   volume     Int?
-  // The summary of the associated media. ex: "Spidey and his superspy sister, Teresa Parker, dig to uncover THE CHAMELEON CONSPIRACY."
   summary    String?
   notes      String?
   age_rating Int?
-  // *** This is stored as a String, but is a String[] ***
-  genre      String?
-
-  // The year the media was published. ex: "2021"
-  year  Int?
-  // The month the media was published. ex: "1"
-  month Int?
-  // The day the media was published. ex: "1"
-  day   Int?
+  year       Int?
+  month      Int?
+  day        Int?
 
   // *** This entire group will store as a String, but they are all String[] ***
-  // The writer(s) of the associated media
+  genre         String?
   writers       String?
-  // The penciller(s) of the associated media
   pencillers    String?
-  // The inker(s) of the associated media
   inkers        String?
-  // The colorist(s) of the associated media
   colorists     String?
-  // The letterer(s) of the associated media
   letterers     String?
-  // The cover artist(s) of the associated media
   cover_artists String?
-  // The editor(s) of the associated media
   editors       String?
   // *** End of group ***
-  // The publisher of the associated media
-  publisher     String?
+
+  publisher String?
 
   // *** This entire group will store as a String, but they are all String[] ***
-  // Link(s) to the associated media, e.g. a comixology link
   links      String?
-  // A list of characters that appear in the associated media
   characters String?
-  // A list of teams that appear in the associated media
   teams      String?
   // *** End of group ***
 
   page_count Int?
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // TODO: don't make optional once nested create is supported
   media    Media?  @relation(fields: [media_id], references: [id], onDelete: Cascade)
-  // TODO: make unique once nested create is supported
   media_id String? @unique
 
   @@map("media_metadata")
+}
+
+model Review {
+  id String @id @default(cuid())
+
+  rating     Int
+  content    String?
+  is_private Boolean @default(false)
+
+  media_id String
+  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, media_id])
+  @@map("reviews")
+}
+
+model ReadProgress {
+  id String @id @default(uuid())
+
+  page                 Int
+  percentage_completed Float? // 0.0 - 1.0
+  epubcfi              String?
+  is_completed         Boolean   @default(false)
+  completed_at         DateTime?
+  updated_at           DateTime  @updatedAt
+
+  media_id String
+  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // literally cant stand this name lol read_progresses
+  @@unique([user_id, media_id])
+  @@map("read_progresses")
 }
 
 //* NOTE: Only EPUB files currently support annotations. I expect maybe someday
@@ -328,23 +268,13 @@ model MediaMetadata {
 //* formats like CBZ or CBR, unless there is demand for it.
 model MediaAnnotation {
   id      String  @id @default(uuid())
-  // The kind of annotation. ex: "HIGHLIGHT" or "ANNOTATION" or "BOOKMARK"
-  kind    String
-  // The epubcfi associated with the annotation. This can be a range or a single point.
+  kind    String // "HIGHLIGHT" or "ANNOTATION" or "BOOKMARK"
   epubcfi String?
-  // The text associated with the annotation. This can be a user entered note, or some 
-  // visual indicator of the annotation.
   text    String?
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The user who created the annotation
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  // The media this annotation belongs to
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
 
@@ -353,44 +283,201 @@ model MediaAnnotation {
 
 model Tag {
   id   String @id @default(cuid())
-  // The name of the tag. ex: "Action"
-  name String @unique
+  name String @unique // ex: "Action"
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // media which have this tag associated
   media     Media[]
-  // series which have this tag associated
   series    Series[]
-  // libraries which have this tag associated
   libraries Library[]
 
   @@map("tags")
 }
 
-//? - Reading lists can be made PUBLIC, PRIVATE, or SHARED.
-//? - Reading list RBAC have 4 roles: creator, collaborator, reader, excluded. Users with the role "creator" can fully read, edit, and delete. 
-//?   Users with the role "collaborator" can read or edit (add). Users with the role "reader" can only read. Users with the role "excluded" can do nothing.
-//? - Reading lists default to PRIVATE, which will have a corresponding RBAC so only users with the role "creator" 
-//?   can access the reading list. This means creating a reading list will automatically create a RBAC for the creator.
-//? - Reading lists can be made SHARED, which will behave similarly to PRIVATE, but will also create a RBAC for each user invited.
-//? - Reading lists can be made PUBLIC, which WON'T generate a RBAC. This means that anyone has read access the reading list.
+model BookClub {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  description      String?
+  is_private       Boolean  @default(false)
+  member_role_spec Bytes?
+  created_at       DateTime @default(now())
+
+  members     BookClubMember[]
+  schedule    BookClubSchedule?
+  invitations BookClubInvitation[]
+
+  @@map("book_clubs")
+}
+
+model BookClubInvitation {
+  id String @id @default(cuid())
+
+  role Int @default(0) // 0 - member, 1 - moderator, 2 - admin, 3 - creator
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  book_club_id String
+  book_club    BookClub @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, book_club_id])
+  @@map("book_club_invitations")
+}
+
+model BookClubMember {
+  id String @id @default(cuid())
+
+  display_name       String? // If omitted, will default to the user's username
+  is_creator         Boolean @default(false)
+  hide_progress      Boolean
+  private_membership Boolean @default(false)
+
+  role Int // 0 - member, 1 - moderator, 2 - admin, 3 - creator
+
+  user_id                   String
+  user                      User                         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book_club_id              String
+  book_club                 BookClub                     @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
+  discussion_messages       BookClubChatMessage[]
+  liked_discussion_messages BookClubChatMessageLike[]
+  book_suggestions          BookClubBookSuggestion[]
+  liked_book_suggestions    BookClubBookSuggestionLike[]
+  favorite_book             BookClubMemberFavoriteBook?
+
+  @@unique([user_id, book_club_id])
+  @@map("book_club_members")
+}
+
+model BookClubMemberFavoriteBook {
+  id String @id @default(cuid())
+
+  title  String?
+  author String?
+  url    String?
+  notes  String?
+
+  member_id String         @unique
+  member    BookClubMember @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  book_id   String?
+  book      Media?         @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@map("book_club_member_favorite_books")
+}
+
+model BookClubSchedule {
+  default_interval_days Int? @default(30) // in days
+  // auto_start_chat_board Boolean @default(false)
+
+  books BookClubBook[]
+
+  book_club_id String   @id
+  book_club    BookClub @relation(fields: [book_club_id], references: [id], onDelete: Cascade)
+
+  @@map("book_club_schedules")
+}
+
+model BookClubBook {
+  id String @id @default(cuid())
+
+  start_at                 DateTime
+  end_at                   DateTime
+  discussion_duration_days Int?     @default(1) // in days
+
+  // The below group should only be set if the book is not already in the library
+  title  String?
+  author String?
+  url    String?
+
+  book_entity_id String?
+  book_entity    Media?  @relation(fields: [book_entity_id], references: [id], onDelete: Cascade)
+
+  book_club_schedule_book_club_id String?
+  book_club_schedule              BookClubSchedule? @relation(fields: [book_club_schedule_book_club_id], references: [book_club_id], onDelete: Cascade)
+
+  chat_board BookClubChatBoard?
+
+  @@map("book_club_books")
+}
+
+model BookClubBookSuggestion {
+  id String @id @default(cuid())
+
+  title  String?
+  author String?
+  url    String?
+  notes  String?
+
+  suggested_by_id String
+  suggested_by    BookClubMember @relation(fields: [suggested_by_id], references: [id], onDelete: Cascade)
+  book_id         String?
+  book            Media?         @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  likes BookClubBookSuggestionLike[]
+
+  @@map("book_club_book_suggestions")
+}
+
+model BookClubBookSuggestionLike {
+  timestamp DateTime @default(now())
+
+  liked_by_id   String
+  liked_by      BookClubMember         @relation(fields: [liked_by_id], references: [id], onDelete: Cascade)
+  suggestion_id String
+  suggestion    BookClubBookSuggestion @relation(fields: [suggestion_id], references: [id], onDelete: Cascade)
+
+  @@unique([liked_by_id, suggestion_id])
+  @@map("book_club_book_suggestion_likes")
+}
+
+model BookClubChatBoard {
+  id String @id @default(cuid())
+
+  messages BookClubChatMessage[]
+
+  book_club_book_id String       @unique
+  book_club_book    BookClubBook @relation(fields: [book_club_book_id], references: [id], onDelete: Cascade)
+
+  @@map("book_club_chat_boards")
+}
+
+model BookClubChatMessage {
+  id             String   @id @default(cuid())
+  content        String
+  timestamp      DateTime @default(now())
+  is_top_message Boolean  @default(true)
+
+  parent_message_id String?
+  // TODO: cascade delete? Not sure... I don't necessarily want to delete the children if the parent is deleted. Maybe soft delete when a user 'deletes' a message? Then just hide content from deleted messages...
+  parent_message    BookClubChatMessage? @relation("ThreadMessage", fields: [parent_message_id], references: [id])
+
+  chat_board    BookClubChatBoard @relation(fields: [chat_board_id], references: [id], onDelete: Cascade)
+  chat_board_id String
+
+  member    BookClubMember? @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  member_id String?
+
+  likes          BookClubChatMessageLike[]
+  child_messages BookClubChatMessage[]     @relation("ThreadMessage")
+
+  @@map("book_club_chat_messages")
+}
+
+model BookClubChatMessageLike {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+
+  liked_by    BookClubMember @relation(fields: [liked_by_id], references: [id], onDelete: Cascade)
+  liked_by_id String
+
+  message    BookClubChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  message_id String
+
+  @@map("book_club_chat_message_likes")
+}
+
 model ReadingListRBAC {
-  // The role associated this access control rule, as a number for easy querying.
-  // 0: excluded, 1: reader, 2: collaborator, 3: creator
-  role Int
+  role Int // 0: excluded, 1: reader, 2: collaborator, 3: creator
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The ID of the user who this rule applies to
   user_id         String
-  // The ID of the reading list associated with this rule
   reading_list_id String
-  // The reading list associated with this rule
   reading_list    ReadingList? @relation(fields: [reading_list_id], references: [id])
 
   @@unique([user_id, reading_list_id])
@@ -401,10 +488,6 @@ model ReadingListItem {
   // The order in which the media should be displayed in the reading list. ex: 1
   // This will be ignored if the reading list ordering is not set to "MANUAL"
   display_order Int
-
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
 
   media_id String
   media    Media? @relation(fields: [media_id], references: [id])
@@ -430,10 +513,6 @@ model ReadingList {
   // field on the media. ex: 'name', 'created_at', 'pushlish_date', etc.
   ordering    String   @default("MANUAL")
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
   // The access control rules for this reading list
   access_control   ReadingListRBAC[]
   // The items in the reading list.
@@ -457,43 +536,7 @@ model Collection {
   // The date in which the collection was last updated. ex: "2022-04-20 04:20:69"
   updated_at  DateTime @updatedAt
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The series in the collection.
-  // series       Series[]
-
   @@map("collections")
-}
-
-model ReadProgress {
-  id   String @id @default(uuid())
-  // The page number the user is currently reading. ex: "69". This will be -1
-  // for epubs (maybe)
-  page Int
-
-  percentage_completed Float? // 0.0 - 1.0
-  epubcfi              String?
-
-  is_completed Boolean   @default(false)
-  completed_at DateTime?
-
-  updated_at DateTime @updatedAt
-
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  media_id String
-  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
-
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  // literally cant stand this name lol read_progresses
-  @@unique([user_id, media_id])
-  @@map("read_progresses")
 }
 
 model Job {
@@ -520,27 +563,17 @@ model Job {
   // The datetime stamp of when the job completed
   completed_at         DateTime?
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
   logs Log[]
 
   @@map("jobs")
 }
 
 model Log {
-  id         String   @id @default(uuid())
-  // The level of the log. i.e: "ERROR", "WARN", "INFO", "DEBUG"
-  level      String   @default("INFO")
-  // The message of the log.
-  message    String
-  // The datetime in which the log was created. ex: "2022-04-20 04:20:69"
-  created_at DateTime @default(now())
+  id String @id @default(uuid())
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
+  level      String   @default("INFO") //  "ERROR", "WARN", "INFO", "DEBUG"
+  message    String
+  created_at DateTime @default(now()) // TODO: change name to timestamp
 
   job    Job?    @relation(fields: [job_id], references: [id], onDelete: Cascade)
   job_id String?
@@ -549,27 +582,23 @@ model Log {
 }
 
 model UserPreferences {
-  id                     String  @id @default(cuid())
+  id                      String  @id @default(cuid())
   // Whether the user wants to see the series in a library as a grid or list
-  library_layout_mode    String  @default("GRID")
+  library_layout_mode     String  @default("GRID")
   // Whether the user wants to see the media in a series as a grid or list
-  series_layout_mode     String  @default("GRID")
+  series_layout_mode      String  @default("GRID")
   // Whether the user wants to see the media in a collection as a grid or list
-  collection_layout_mode String  @default("GRID")
+  collection_layout_mode  String  @default("GRID")
   // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
-  locale                 String  @default("en")
+  locale                  String  @default("en")
   // The theme the user has selected. E.g. 'LIGHT' or 'DARK'. Default is 'LIGHT'
-  app_theme              String  @default("LIGHT")
+  app_theme               String  @default("LIGHT")
   // Whether to show an indicator when a query is running in the background
-  show_query_indicator   Boolean @default(false)
+  show_query_indicator    Boolean @default(false)
+  // Whether to show the user's activity in Discord when using the Desktop App
+  enable_discord_presence Boolean @default(false)
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
-  // The user which these preferences belong to
   user    User?
-  // The user id which these preferences belong to
   user_id String? @unique
 
   @@map("user_preferences")
@@ -580,28 +609,39 @@ model JobScheduleConfig {
   // The interval (in seconds) in which to run the scheduled confu
   interval_secs Int    @default(86400)
 
-  /////////////////////////////////////////////
-  ///////////////// RELATIONS /////////////////
-  /////////////////////////////////////////////
-
   // The libraries to exclude from scheduled scans, if any
   excluded_libraries Library[]
-  // The associated server preferences. There will only ever be one instance of ServerPreferences in the database.
-  server_preferences ServerPreferences?
+  // The associated server preferences. There will only ever be one instance of ServerConfig in the database.
+  server_config      ServerConfig?
 
   @@map("job_schedule_configs")
 }
 
-model ServerPreferences {
+// TODO: notifier support
+// An external invitation sent to a provided email for the user to join the server
+model ServerInvitation {
   id String @id @default(cuid())
+
+  secret              String // The secret token used to verify the invitation
+  email               String?
+  granted_permissions String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
+  created_at          DateTime @default(now())
+  expires_at          DateTime
+
+  // notifier            Notifier? @relation(fields: [notifier_id], references: [id])
+
+  @@map("server_invitations")
+}
+
+model ServerConfig {
+  id String @id @default(cuid())
+
+  public_url String? // The public URL of the server, if any
 
   // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
   // The schedule configuration. If not set, no scheduled scans will be run.
   job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?            @unique
 
-  @@map("server_preferences")
+  @@map("server_config")
 }
-
-// https://github.com/prisma/prisma/issues/2219
-// CHORE: once/if above is resolved, use enums

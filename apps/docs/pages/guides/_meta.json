@@ -16,6 +16,7 @@
 	"readers": "Stump Readers",
 	"opds": "OPDS",
 	"rest-api": "REST API",
+	"cli": "CLI",
 	"desktop": "Desktop Guides",
 	"mobile": "Mobile Guides",
 	"setup": "Setup Examples"

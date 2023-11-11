@@ -8,9 +8,10 @@ type Props = {
 	isLoading: boolean
 	media?: Media[]
 	hasFilters?: boolean
+	onSelect?: (media: Media) => void
 }
 
-export default function MediaGrid({ media, isLoading, hasFilters }: Props) {
+export default function MediaGrid({ media, isLoading, hasFilters, onSelect }: Props) {
 	if (isLoading) {
 		return null
 	} else if (!media || !media.length) {
@@ -33,7 +34,7 @@ export default function MediaGrid({ media, isLoading, hasFilters }: Props) {
 	return (
 		<CardGrid>
 			{media.map((m) => (
-				<MediaCard key={m.id} media={m} />
+				<MediaCard key={m.id} media={m} onSelect={onSelect} />
 			))}
 		</CardGrid>
 	)

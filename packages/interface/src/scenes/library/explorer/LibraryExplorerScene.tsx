@@ -4,14 +4,14 @@ import { DirectoryListingFile } from '@stump/types'
 import { Helmet } from 'react-helmet'
 import toast from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useMediaMatch } from 'rooks'
 
 import paths from '../../../paths'
 import { LibraryExplorerContext } from './context'
 import FileExplorer from './FileExplorer'
+import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
+import FileExplorerHeader, { HEADER_HEIGHT } from './FileExplorerHeader'
 
-// TODO: this is just a concept right now, its pretty ugly and I won't spend much more time on it
-// until more of stump is compelted. That being said, if someone wants to run with this go for it!
-// most of what would be needed on the backend is in place.
 export default function LibraryExplorerScene() {
 	const navigate = useNavigate()
 
@@ -20,6 +20,7 @@ export default function LibraryExplorerScene() {
 		throw new Error('Library id is required')
 	}
 
+	const isMobile = useMediaMatch('(max-width: 768px)')
 	const { library, isLoading } = useLibraryByIdQuery(id)
 
 	// TODO: I need to store location.state somewhere so that when the user uses native navigation,
@@ -82,9 +83,17 @@ export default function LibraryExplorerScene() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
-			<div className="flex h-full w-full flex-col space-y-6 p-4">
+			<FileExplorerHeader />
+			<div
+				className="h-full w-full overflow-x-hidden overflow-y-scroll"
+				style={{
+					marginBottom: FOOTER_HEIGHT + (isMobile ? 50 : 0),
+					marginTop: HEADER_HEIGHT,
+				}}
+			>
 				<FileExplorer files={entries} />
 			</div>
+			<FileExplorerFooter />
 		</LibraryExplorerContext.Provider>
 	)
 }

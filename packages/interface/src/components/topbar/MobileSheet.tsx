@@ -16,8 +16,6 @@ export default function MobileSheet() {
 					<Menu className="h-5 w-5" />
 				</IconButton>
 			}
-			floating
-			rounded
 			open={open}
 			onOpen={() => setOpen(true)}
 			onClose={() => setOpen(false)}

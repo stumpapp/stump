@@ -3,6 +3,7 @@ prisma = "run --package prisma-cli --"
 integration-tests = "test --package integration-tests -- --test-threads 1"
 doc-tests = "cargo test --doc -- --show-output"
 build-server = "build --package stump_server --bin stump_server --release --"
+codegen = "run --package codegen --bin codegen"
 
 [target.x86_64-apple-darwin]
 rustflags = [

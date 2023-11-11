@@ -66,6 +66,7 @@ impl FileProcessor for EpubProcessor {
 		let path_buf = PathBuf::from(path);
 		let epub_file = Self::open(path)?;
 
+		tracing::trace!(?epub_file.metadata, "Processing raw EPUB metadata");
 		let pages = epub_file.get_num_pages() as i32;
 		let metadata = MediaMetadata::from(epub_file.metadata);
 

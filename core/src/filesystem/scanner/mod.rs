@@ -1,8 +1,8 @@
-mod batch_scanner;
-mod common;
-mod library_scan_job;
-mod setup;
-mod sync_scanner;
+mod library_scanner;
+mod scanner_job;
+mod series_scanner;
 mod utils;
 
-pub use library_scan_job::LibraryScanJob;
+pub use library_scanner::LibraryScanner;
+pub use scanner_job::{LibraryScanJob, SeriesScanJob};
+pub use series_scanner::SeriesScanner;

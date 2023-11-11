@@ -1,31 +1,25 @@
 # Scanning
 
-Scanning is essential for keeping your media libraries up-to-date in Stump. Scanners will index your filesystem based on the configured libraries to detect new media files and file changes/updates, which are then synced with Stump's database.
+A scan is the process of indexing your filesystem to detect new media files and file changes/updates. Scans are essential for keeping your media libraries up-to-date in Stump.
 
-You can start scans at either the library level or the series level, which are referred to as library scan and series scan respectively throughout Stump. There are no real differences between the two, except that a library scan will scan all series in the library, while a series scan will only scan the selected series.
+You can start scans at either the library level or the series level, which are referred to as `library_scan` and `series_scan`, respectively, throughout Stump. There are no real differences between the two, except that a library scan will scan all series in the library, while a series scan will only scan the selected series.
 
-## Scan Modes
+## How does it work?
 
-You can choose between two scanning modes: in-order and parallel scanning.
+When you start a scan, Stump will walk your filesystem to detect any new, updated, or otherwise changed series and media. It will then insert these changes into the database, which will make them available to you in the UI.
 
-### In-order scanning
+## Scheduling scans
 
-In-order scanning processes one series at a time and inserts its media one-by-one as soon as they are discovered. This means that you can access new media files as soon as they are scanned, even if the rest of the series has not been scanned yet.
+You can configure the scheduler to run scans at a specific interval. This is useful for keeping your media libraries up-to-date without having to manually run scans.
 
-### Parallel scanning
+To configure the scheduler, navigate to `/settings/jobs`, scroll to the `Job Scheduling` section towards the top of the page, fill out your desired interval (in seconds), and click the `Save scheduler changes` button.
 
-Parallel scanning processes multiple series at once, up to 10 series in a batch. This significantly reduces the overall scanning time, but you may not be able to access some media files until the entire batch is processed.
+For convenience, there are a few preset options you may select from the dropdown menu. These are:
 
-### Example
+- Every 6 hours (21600 seconds)
+- Every 12 hours (43200 seconds)
+- Every 24 hours (86400 seconds)
+- Once a week (604800 seconds)
+- Once a month (2592000 seconds)
 
-Let's assume you are about to add a new library to Stump. In it contains 200 series, each containing about 50 books.
-
-An in-order scan will start from the first series and insert all of its media one at a time before moving on to the next series. On the other hand, a parallel scan will divide the 200 series into two chunks of 100 series and process up to 10 series in parallel for each chunk before inserting all the media in a single batch per chunk.
-
-It is generally recommend to use parallel scanning whenever possible because it is more efficient and faster than in-order scanning.
-
-## Scheduled Scans
-
-TODO: this isn't implemented yet!
-
-By default, Stump schedules regular automated scans of your library folders. However, you can update or disable this functionality in the server configuration section. For more information, please refer to the [relevant documentation](#).
+> In the future, this section of the UI will change to include scheduling options for more than just scans. However, for now, it is only for scans.

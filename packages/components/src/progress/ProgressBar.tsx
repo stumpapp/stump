@@ -1,6 +1,6 @@
 import * as ProgressPrimitive from '@radix-ui/react-progress'
 import { cva, VariantProps } from 'class-variance-authority'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import { cn, cx } from '../utils'
 
@@ -52,6 +52,8 @@ export const ProgressBar = React.forwardRef<
 	React.ElementRef<typeof ProgressPrimitive.Root>,
 	ProgressBarProps
 >(({ className, value, variant, size, rounded, ...props }, ref) => {
+	const adjustedValue = useMemo(() => (!!value && isNaN(value) ? null : value ?? null), [value])
+
 	return (
 		<ProgressPrimitive.Root
 			ref={ref}
@@ -63,7 +65,7 @@ export const ProgressBar = React.forwardRef<
 				}),
 				className,
 			)}
-			value={value}
+			value={adjustedValue}
 			{...props}
 		>
 			<ProgressPrimitive.Indicator
@@ -71,7 +73,7 @@ export const ProgressBar = React.forwardRef<
 					'h-full w-full flex-1 transition-all',
 					PROGRESS_BAR_INDICATOR_COLOR_VARIANTS[variant || 'default'],
 				)}
-				style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+				style={{ transform: `translateX(-${100 - (adjustedValue || 0)}%)` }}
 			/>
 		</ProgressPrimitive.Root>
 	)

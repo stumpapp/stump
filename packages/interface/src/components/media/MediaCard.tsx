@@ -1,8 +1,10 @@
 import { getMediaThumbnail } from '@stump/api'
 import { prefetchMedia } from '@stump/client'
 import { EntityCard, Text } from '@stump/components'
+import { EntityCardProps } from '@stump/components/card/EntityCard'
 import { FileStatus, Media } from '@stump/types'
 import pluralize from 'pluralize'
+import { useMemo } from 'react'
 
 import paths from '../../paths'
 import { formatBytes } from '../../utils/format'
@@ -13,6 +15,7 @@ export type MediaCardProps = {
 	readingLink?: boolean
 	fullWidth?: boolean
 	variant?: 'cover' | 'default'
+	onSelect?: (media: Media) => void
 }
 
 export default function MediaCard({
@@ -20,6 +23,7 @@ export default function MediaCard({
 	readingLink,
 	fullWidth,
 	variant = 'default',
+	onSelect,
 }: MediaCardProps) {
 	const isCoverOnly = variant === 'cover'
 
@@ -101,22 +105,41 @@ export default function MediaCard({
 		return null
 	}
 
-	const href = readingLink
-		? paths.bookReader(media.id, {
-				epubcfi: media.current_epubcfi,
-				page: media.current_page || undefined,
-		  })
-		: paths.bookOverview(media.id)
+	const href = useMemo(() => {
+		if (onSelect) {
+			return undefined
+		}
 
-	const overrides = isCoverOnly
-		? {
-				className: 'flex-shrink-0 flex-auto',
-				href: undefined,
-				progress: undefined,
-				subtitle: undefined,
-				title: undefined,
-		  }
-		: {}
+		return readingLink
+			? paths.bookReader(media.id, {
+					epubcfi: media.current_epubcfi,
+					page: media.current_page || undefined,
+			  })
+			: paths.bookOverview(media.id)
+	}, [readingLink, media.id, media.current_epubcfi, media.current_page, onSelect])
+
+	const propsOverrides = useMemo(() => {
+		let overrides = (
+			isCoverOnly
+				? {
+						className: 'flex-shrink-0 flex-auto',
+						href: undefined,
+						progress: undefined,
+						subtitle: undefined,
+						title: undefined,
+				  }
+				: {}
+		) as Partial<EntityCardProps>
+
+		if (onSelect) {
+			overrides = {
+				...overrides,
+				onClick: () => onSelect(media),
+			}
+		}
+
+		return overrides
+	}, [onSelect, isCoverOnly, media])
 
 	return (
 		<EntityCard
@@ -129,7 +152,7 @@ export default function MediaCard({
 			subtitle={getSubtitle(media)}
 			onMouseEnter={handleHover}
 			size={isCoverOnly ? 'lg' : 'default'}
-			{...overrides}
+			{...propsOverrides}
 		/>
 	)
 }

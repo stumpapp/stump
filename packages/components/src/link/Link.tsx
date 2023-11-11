@@ -48,6 +48,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
 				className={cn(
 					linkVariants({ className, variant }),
 					underline && 'underline underline-offset-2',
+					underline === false && 'no-underline hover:no-underline',
 					className,
 				)}
 				{...location}

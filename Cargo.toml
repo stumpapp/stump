@@ -4,32 +4,27 @@ members = [
   "apps/desktop/src-tauri", 
   "apps/server",
   "core", 
-  # "core/integration-tests", 
-  "crates/prisma-cli", 
+  "crates/*", 
 ]
 
 [workspace.package]
 version = "0.0.0"
-rust-version = "1.68.0"
+rust-version = "1.72.1"
 
-# TODO: replace my fork with next official pcr release when it comes out, I just don't
-# have the time for undocumented breaking changes right now
 [workspace.dependencies]
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.10", features = [
-# prisma-client-rust = { git = "https://github.com/stumpapp/prisma-client-rust", rev = "4e9c79c8355dcbb098169ccbc85a9349f8c7882d", features = [
   'sqlite-create-many',
   "migrations",
   "sqlite",
 ], default-features = false }
 prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.10", features = [
-# prisma-client-rust-cli = { git = "https://github.com/stumpapp/prisma-client-rust", rev = "4e9c79c8355dcbb098169ccbc85a9349f8c7882d", features = [
   "sqlite-create-many",
   "migrations",
   "sqlite",
 ], default-features = false }
 
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.85"
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.107"
 tokio = { version = "1.21.2", features = [
   # feature for the internal channels (internal communication)
   "sync", 
@@ -38,16 +33,15 @@ tokio = { version = "1.21.2", features = [
   # needed for detecting shutdown signals (e.g. ctrl+c)
   "signal",
 ] }
-async-stream = "0.3.3"
-urlencoding = "2.1.2"
+async-stream = "0.3.5"
+urlencoding = "2.1.3"
 
 ### DEV UTILS ###
-specta = "1.0.2"
+specta = "1.0.5"
+
+### AUTH ###
+bcrypt = "0.15.0"
 
 ### Error Handling + Logging ###
-tracing = "0.1.36"
-thiserror = "1.0.37"
-
-[patch.crates-io]
-# for some reason, async-stream 0.3.4 is getting used instead of 0.3.3 but ONLY IN DOCKER?? So I have to patch it IG?? kms
-async-stream = { git = "https://github.com/tokio-rs/async-stream", rev = "e1373e4dede24f7700452e499a46561fb45ea515" }
+tracing = "0.1.37"
+thiserror = "1.0.49"

@@ -1,6 +1,6 @@
 import { jobApi, jobQueryKeys } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
-import { Alert, Button, Text } from '@stump/components'
+import { Alert, Button } from '@stump/components'
 import { AlertTriangle } from 'lucide-react'
 import React from 'react'
 import { toast } from 'react-hot-toast'
@@ -36,7 +36,7 @@ export default function DeleteAllSection() {
 
 	return (
 		<Alert level="error" rounded="sm" icon={AlertTriangle}>
-			<Alert.Content>
+			<Alert.Content className="flex flex-col gap-3 md:flex-row">
 				{t('settingsScene.jobs.historyTable.deleteAllMessage')}
 				<Button
 					title={`${t(

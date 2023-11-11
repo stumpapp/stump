@@ -4,29 +4,20 @@ import React, { useMemo } from 'react'
 import { useFileExplorerContext } from './context'
 import FileExplorerNavigation from './FileExplorerNavigation'
 
+export const HEADER_HEIGHT = 40
+
 export default function FileExplorerHeader() {
-	const { currentPath, libraryPath } = useFileExplorerContext()
+	const { currentPath } = useFileExplorerContext()
 
-	/**
-	 * The relative path is the path relative to the library root.
-	 */
-	const relativePath = useMemo(() => {
-		if (currentPath === libraryPath) {
-			return '/'
-		}
-
-		return currentPath?.replace(libraryPath, '') ?? ''
-	}, [currentPath, libraryPath])
+	const basename = useMemo(() => currentPath?.split('/').pop() ?? '', [currentPath])
 
 	return (
-		<header className="sticky top-0 z-10 h-12 w-full bg-white dark:bg-gray-975">
-			<nav className="h-full w-full">
-				<div className="flex items-center justify-between gap-2">
-					<FileExplorerNavigation />
-					<Text variant="secondary" size="sm">
-						{relativePath}
-					</Text>
-				</div>
+		<header className="fixed top-[50] z-10 h-10 w-full border-y border-gray-75 bg-white px-4 dark:border-gray-900 dark:bg-gray-975 md:top-0 md:border-y-0 md:border-b">
+			<nav className="flex h-full w-full items-center gap-4">
+				<FileExplorerNavigation />
+				<Text variant="secondary" size="sm" className="line-clamp-1">
+					{basename}
+				</Text>
 			</nav>
 		</header>
 	)

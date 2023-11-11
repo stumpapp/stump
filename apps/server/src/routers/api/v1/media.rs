@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
@@ -5,8 +7,7 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::{and, operator::or, or, Direction};
+use prisma_client_rust::{and, operator::or, or, raw, Direction, PrismaValue};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -14,7 +15,7 @@ use stump_core::{
 	db::{
 		entity::{LibraryOptions, Media, ReadProgress, User},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
-		MediaDAO, DAO,
+		CountQueryReturn,
 	},
 	filesystem::{
 		get_unknown_thumnail,
@@ -28,6 +29,7 @@ use stump_core::{
 		media_metadata, read_progress, series, series_metadata, tag, user, PrismaClient,
 	},
 };
+use tower_sessions::Session;
 use utoipa::ToSchema;
 
 use crate::{
@@ -35,7 +37,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_admin_user,
+		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
 		get_session_user,
 		http::{ImageResponse, NamedFile},
 		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter, ReadStatus,
@@ -50,6 +52,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.route("/media/duplicates", get(get_duplicate_media))
 		.route("/media/keep-reading", get(get_in_progress_media))
 		.route("/media/recently-added", get(get_recently_added_media))
+		.route("/media/path/:path", get(get_media_by_path))
 		.nest(
 			"/media/:id",
 			Router::new()
@@ -268,7 +271,7 @@ async fn get_media(
 	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -364,21 +367,56 @@ async fn get_media(
 async fn get_duplicate_media(
 	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
-	_session: ReadableSession,
+	_session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let media_dao = MediaDAO::new(ctx.db.clone());
-
 	if pagination.page.is_none() {
 		return Err(ApiError::BadRequest(
 			"Pagination is required for this request".to_string(),
 		));
 	}
 
-	Ok(Json(
-		media_dao
-			.get_duplicate_media(pagination.0.page_params())
-			.await?,
-	))
+	let page_params = pagination.0.page_params();
+	let page_bounds = page_params.get_page_bounds();
+	let client = ctx.get_db();
+
+	let duplicated_media_page = client
+		._query_raw::<Media>(raw!(
+			r#"
+			SELECT * FROM media
+			WHERE hash IN (
+				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) > 1
+			)
+			LIMIT {} OFFSET {}"#,
+			PrismaValue::Int(page_bounds.take),
+			PrismaValue::Int(page_bounds.skip)
+		))
+		.exec()
+		.await?;
+
+	let count_result = client
+		._query_raw::<CountQueryReturn>(raw!(
+			r#"
+			SELECT COUNT(*) as count FROM media
+			WHERE hash IN (
+				SELECT hash FROM media GROUP BY hash HAVING COUNT(*) s> 1
+			)"#
+		))
+		.exec()
+		.await?;
+
+	let result = if let Some(db_total) = count_result.first() {
+		Ok(Pageable::with_count(
+			duplicated_media_page,
+			db_total.count,
+			page_params,
+		))
+	} else {
+		Err(ApiError::InternalServerError(
+			"Failed to fetch duplicate media".to_string(),
+		))
+	};
+
+	Ok(Json(result?))
 }
 
 #[utoipa::path(
@@ -399,7 +437,7 @@ async fn get_duplicate_media(
 /// total number of pages available (i.e not completed).
 async fn get_in_progress_media(
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	pagination_query: Query<PaginationQuery>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let user = get_session_user(&session)?;
@@ -491,7 +529,7 @@ async fn get_in_progress_media(
 async fn get_recently_added_media(
 	filter_query: QsQuery<FilterableQuery<MediaFilter>>,
 	pagination_query: Query<PaginationQuery>,
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
@@ -551,6 +589,49 @@ async fn get_recently_added_media(
 	Ok(Json(Pageable::from(media)))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/path/:path",
+	tag = "media",
+	params(
+		("path" = PathBuf, Path, description = "The path of the media to get")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media", body = Media),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
+	)
+)]
+async fn get_media_by_path(
+	Path(path): Path<PathBuf>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<Media>> {
+	let client = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let path_str = path.to_string_lossy().to_string();
+
+	let book = client
+		.media()
+		.find_first(chain_optional_iter(
+			[media::path::equals(path_str)],
+			[age_restrictions],
+		))
+		.with(media::metadata::fetch())
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	Ok(Json(Media::from(book)))
+}
+
 #[derive(Deserialize)]
 struct LoadSeries {
 	load_series: Option<bool>,
@@ -578,7 +659,7 @@ async fn get_media_by_id(
 	Path(id): Path<String>,
 	params: Query<LoadSeries>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Media>> {
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
@@ -632,7 +713,7 @@ async fn get_media_by_id(
 async fn get_media_file(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<NamedFile> {
 	let db = ctx.get_db();
 
@@ -677,7 +758,7 @@ async fn get_media_file(
 async fn convert_media(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
 
@@ -727,7 +808,7 @@ async fn convert_media(
 async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -764,7 +845,7 @@ async fn get_media_page(
 pub(crate) async fn get_media_thumbnail_by_id(
 	id: String,
 	db: &PrismaClient,
-	session: &ReadableSession,
+	session: &Session,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let user = get_session_user(session)?;
 	let age_restrictions = user
@@ -862,7 +943,7 @@ pub(crate) fn get_media_thumbnail(
 async fn get_media_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	tracing::trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
@@ -896,10 +977,10 @@ pub struct PatchMediaThumbnail {
 async fn patch_media_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	Json(body): Json<PatchMediaThumbnail>,
 ) -> ApiResult<ImageResponse> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
 
@@ -976,7 +1057,7 @@ async fn patch_media_thumbnail(
 async fn update_media_progress(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<ReadProgress>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;

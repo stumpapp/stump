@@ -8,8 +8,9 @@ import type {
 	UpdateLibrary,
 } from '@stump/types'
 
-import { API, mergePageParams, toUrlParams, urlWithParams } from '.'
+import { API } from './axios'
 import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
+import { mergePageParams, toUrlParams, urlWithParams } from './utils'
 
 export function getLibraries(
 	params: Record<string, unknown> = { unpaged: true },

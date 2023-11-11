@@ -6,7 +6,6 @@ use axum::http::{
 };
 use local_ip_address::local_ip;
 use tower_http::cors::{AllowOrigin, CorsLayer};
-use tracing::{error, trace};
 
 use crate::config::utils::is_debug;
 
@@ -23,7 +22,7 @@ fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValu
 	origins
 		.iter()
 		.map(|origin| origin.to_string())
-		.chain(local_origins.into_iter())
+		.chain(local_origins)
 		.map(|origin| origin.parse())
 		.filter_map(|res| res.ok())
 		.collect::<Vec<HeaderValue>>()
@@ -45,7 +44,10 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 							if let Ok(val) = res {
 								Some(val)
 							} else {
-								error!("Failed to parse allowed origin: {:?}", res);
+								tracing::error!(
+									"Failed to parse allowed origin: {:?}",
+									res
+								);
 								None
 							}
 						})
@@ -58,7 +60,7 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 
 	let local_ip = local_ip()
 		.map_err(|e| {
-			error!("Failed to get local ip: {:?}", e);
+			tracing::error!("Failed to get local ip: {:?}", e);
 			e
 		})
 		.map(|ip| ip.to_string())
@@ -112,7 +114,7 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 		.allow_credentials(true);
 
 	#[cfg(debug_assertions)]
-	trace!(?cors_layer, "Cors configuration complete");
+	tracing::trace!(?cors_layer, "Cors configuration complete");
 
 	cors_layer
 }

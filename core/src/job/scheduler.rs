@@ -79,7 +79,7 @@ impl JobScheduler {
 						let library_path = library.path.clone();
 						let result = scheduler_ctx.dispatch_job(LibraryScanJob::new(
 							library_path,
-							LibraryScanMode::Batched,
+							LibraryScanMode::Default,
 						));
 						if result.is_err() {
 							tracing::error!(

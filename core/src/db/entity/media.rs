@@ -1,11 +1,11 @@
-use std::{path::Path, str::FromStr};
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
-	error::{CoreError, CoreResult},
+	error::CoreError,
 	prisma::{media, media_annotation, read_progress},
 };
 
@@ -29,6 +29,7 @@ pub struct Media {
 	pub updated_at: String,
 	/// The timestamp when the media was created.
 	pub created_at: String,
+	// TODO: rename file_modified_at
 	/// The timestamp when the file was last modified on disk.
 	pub modified_at: Option<String>,
 	/// The hash of the file contents. Used to ensure only one instance of a file in the database.
@@ -61,30 +62,6 @@ pub struct Media {
 	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tags: Option<Vec<Tag>>,
-}
-
-impl Media {
-	// NOTE: currently, this will only look at a few fields:
-	// - name
-	// - description
-	// - size
-	// - pages
-	// - modified_at
-	// - status
-	// It's also a fairly naive implementation, effectively blindly overwriting
-	// the fields of the current media with the newer media. This is fine for now,
-	// but will eventually need to change to be more intelligent.
-	pub fn resolve_changes(&self, newer: &Media) -> Media {
-		Media {
-			name: newer.name.clone(),
-			size: newer.size,
-			pages: newer.pages,
-			modified_at: newer.modified_at.clone(),
-			status: newer.status,
-			hash: newer.hash.clone().or_else(|| self.hash.clone()),
-			..self.clone()
-		}
-	}
 }
 
 impl Cursor for Media {
@@ -185,12 +162,6 @@ impl TryFrom<read_progress::Data> for Media {
 pub struct MediaBuilderOptions {
 	pub series_id: String,
 	pub library_options: LibraryOptions,
-}
-
-pub trait MediaBuilder {
-	fn build(path: &Path, series_id: &str) -> CoreResult<Media>;
-	fn build_with_options(path: &Path, options: MediaBuilderOptions)
-		-> CoreResult<Media>;
 }
 
 impl From<media::Data> for Media {

@@ -6,12 +6,12 @@ default-run = "stump_server"
 
 [dependencies]
 stump_core = { path = "../../core" }
+cli = { path = "../../crates/cli" }
 prisma-client-rust = { workspace = true }
-axum = { version = "0.6.1", features = ["ws"] }
+axum = { version = "0.6.1", features = ["ws", "headers"] }
 axum-macros = "0.3.0"
 axum-extra = { version = "0.4.2", features = [
   "spa",
-  # "cookie"
   "query"
 ] }
 tower-http = { version = "0.3.5", features = [
@@ -26,20 +26,22 @@ futures-util = "0.3.24"
 tokio = { workspace = true }
 tokio-util = "0.7.4"
 serde = { workspace = true }
-axum-sessions = "0.4.1"
+tower = "0.4.13"
+tower-sessions = "0.2.1"
 async-trait = "0.1.53"
 async-stream = { workspace = true }
-local-ip-address = { git = "https://github.com/EstebanBorai/local-ip-address.git", tag = "v0.5.1" }
+local-ip-address = "0.5.6"
 notify = "5.1.0"
 urlencoding = { workspace = true }
 serde_qs = { version = "0.12.0", features = ["axum"] }
-serde-untagged = "0.1"
+serde-untagged = "0.1.1"
+time = "0.3.29"
 
 
 ### Dev Utils ###
 rand = "0.8.5"
-utoipa = { version = "3.0.3", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "3.0.2", features = ["axum"] }
+utoipa = { version = "3.5.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "3.1.5", features = ["axum"] }
 specta = { workspace = true }
 
 ### Error Handling + Logging ###
@@ -47,18 +49,18 @@ tracing = { workspace = true }
 thiserror = { workspace = true }
 
 ### Auth ###
-bcrypt = "0.10.1"
-base64 = "0.13.0"
+bcrypt = { workspace = true }
+base64 = "0.21.4"
 
 ### Platform Specific Deps ###
 [target.aarch64-unknown-linux-musl.dependencies]
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.57", features = ["vendored"] }
 
 [target.armv7-unknown-linux-musleabihf.dependencies]
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.57", features = ["vendored"] }
 
 [target.x86_64-unknown-linux-musl.dependencies]
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.57", features = ["vendored"] }
 
 [build-dependencies]
-chrono = "0.4.19"
+chrono = "0.4.31"

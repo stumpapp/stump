@@ -1,7 +1,8 @@
 import type { JobDetail, JobSchedulerConfig, UpdateSchedulerConfig } from '@stump/types'
 
-import { API, toUrlParams } from '.'
+import { API } from './axios'
 import { ApiResult, PageableApiResult } from './types'
+import { toUrlParams } from './utils'
 
 export function getJobs(params?: Record<string, unknown>): Promise<PageableApiResult<JobDetail[]>> {
 	if (params) {

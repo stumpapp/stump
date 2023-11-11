@@ -1,26 +1,22 @@
-import { Heading } from '@stump/components'
-// import ServerUrlForm from '../components/ServerUrlForm'
+import ServerUrlForm from '../../components/ServerUrlForm'
 
 // Used primarily for setting the correct base url for the api when the app is
 // NOT running in a browser. I.e. when the app is running in Tauri.
 // TODO: locale!
-// TODO: finish this component after I gutted it to remove chakra
 export default function OnBoardingScene() {
 	return (
 		<div className="flex h-full flex-col items-center justify-center gap-4">
-			<div className="flex shrink-0 items-center justify-center gap-4 px-2">
-				<img src="/assets/favicon.png" width="120" height="120" />
-				<Heading variant="gradient" size="2xl">
-					Stump
-				</Heading>
+			<div className="text-left sm:max-w-md md:max-w-lg">
+				<h1 className="text-4xl font-semibold dark:text-gray-50">Configure your connection</h1>
+				<p className="mt-1.5 text-base text-gray-700 dark:text-gray-150">
+					To get started with the Stump desktop app, please enter the base URL of your Stump server
+					below
+				</p>
+
+				<div className="text-unset mt-3 w-full">
+					<ServerUrlForm />
+				</div>
 			</div>
-
-			{/* <Alert status="info" rounded="md">
-				<AlertIcon />
-				Welcome to Stump! To get started, please enter the base URL of your Stump server below.
-			</Alert> */}
-
-			{/* <ServerUrlForm /> */}
 		</div>
 	)
 }

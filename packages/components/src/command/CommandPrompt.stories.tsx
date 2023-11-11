@@ -1,15 +1,16 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { ScanFace, Search } from 'lucide-react'
 import { ComponentProps } from 'react'
 
 import { CommandPrompt } from './CommandPrompt'
 
-export default {
+const StoryMeta: Meta<typeof CommandPrompt> = {
 	component: CommandPrompt,
 	title: 'command/CommandPrompt',
-} as ComponentMeta<typeof CommandPrompt>
+}
+type Story = StoryObj<typeof CommandPrompt>
 
-type StoryProps = Partial<ComponentProps<typeof CommandPrompt>>
+type DemoProps = Partial<ComponentProps<typeof CommandPrompt>>
 const defaultArgs: Omit<ComponentProps<typeof CommandPrompt>, 'children'> = {
 	groups: [
 		{
@@ -48,7 +49,7 @@ const defaultArgs: Omit<ComponentProps<typeof CommandPrompt>, 'children'> = {
 		},
 	],
 }
-const Story = (args: StoryProps) => (
+const Demo = (args: DemoProps) => (
 	<>
 		<p>
 			Press {'⌘'}
@@ -57,7 +58,9 @@ const Story = (args: StoryProps) => (
 		<CommandPrompt groups={args.groups || defaultArgs.groups} {...args} />
 	</>
 )
-const Template: ComponentStory<typeof Story> = (args) => <Story {...args} />
 
-export const Default = Template.bind({})
-Default.args = {}
+export const Default: Story = {
+	render: () => <Demo />,
+}
+
+export default StoryMeta

@@ -90,6 +90,7 @@ pub struct ImageProcessorOptions {
 	// I would like to iterate after the initial release to make this more robust so that these choices
 	// are stored in the database
 	/// The page to use when generating an image. This is not applicable to all media formats.
+	#[specta(optional)]
 	pub page: Option<i32>,
 }
 

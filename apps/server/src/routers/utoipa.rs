@@ -1,4 +1,3 @@
-// use axum::middleware::from_extractor_with_state;
 use axum::middleware::from_extractor_with_state;
 use axum::Router;
 use stump_core::db::entity::*;
@@ -22,7 +21,8 @@ use crate::utils::{
 use super::api::{
 	self,
 	v1::{
-		auth::LoginOrRegisterArgs, library::ScanQueryParam, ClaimResponse, StumpVersion,
+		auth::LoginOrRegisterArgs, library::ScanQueryParam, user::*, ClaimResponse,
+		StumpVersion,
 	},
 };
 
@@ -101,6 +101,7 @@ use super::api::{
         api::v1::user::update_user_handler,
         api::v1::user::get_user_preferences,
         api::v1::user::update_user_preferences,
+        api::v1::user::update_user_lock_status
     ),
     components(
         schemas(
@@ -118,6 +119,7 @@ use super::api::{
     ),
     tags(
         (name = "util", description = "Utility API"),
+        (name = "book_club", description = "Book Club API"),
         (name = "auth", description = "Authentication API"),
         (name = "epub", description = "EPUB API"),
         (name = "filesystem", description = "Filesystem API"),

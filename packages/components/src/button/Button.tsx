@@ -42,13 +42,51 @@ export const BUTTON_SIZE_VARIANTS = {
 	xs: 'h-6 px-1',
 }
 
+export const BUTTON_NY_SIZE_VARIANTS = {
+	default: 'h-7 py-2 px-3',
+	lg: 'h-9 px-4',
+	md: 'h-8 px-3',
+	sm: 'h-7 px-2',
+	xs: 'h-5 px-1',
+}
+
 const buttonVariants = cva(BUTTON_BASE_CLASSES, {
+	compoundVariants: [
+		{
+			className: BUTTON_NY_SIZE_VARIANTS.default,
+			newYork: true,
+			size: 'default',
+		},
+		{
+			className: BUTTON_NY_SIZE_VARIANTS.lg,
+			newYork: true,
+			size: 'lg',
+		},
+		{
+			className: BUTTON_NY_SIZE_VARIANTS.md,
+			newYork: true,
+			size: 'md',
+		},
+		{
+			className: BUTTON_NY_SIZE_VARIANTS.sm,
+			newYork: true,
+			size: 'sm',
+		},
+		{
+			className: BUTTON_NY_SIZE_VARIANTS.xs,
+			newYork: true,
+			size: 'xs',
+		},
+	],
 	defaultVariants: {
 		rounded: 'default',
 		size: 'default',
 		variant: 'default',
 	},
 	variants: {
+		newYork: {
+			true: '',
+		},
 		rounded: BUTTON_ROUNDED_VARIANTS,
 		size: BUTTON_SIZE_VARIANTS,
 		variant: BUTTON_VARIANTS,
@@ -73,6 +111,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			primaryFocus = true,
 			isLoading,
 			children,
+			newYork,
 			...props
 		},
 		ref,
@@ -81,7 +120,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 			<ButtonContext.Provider value={{ variant }}>
 				<button
 					className={cn(
-						buttonVariants({ className, rounded, size, variant }),
+						buttonVariants({ className, newYork, rounded, size, variant }),
 						{
 							'active:scale-95': pressEffect,
 							'cursor-not-allowed': props.disabled,

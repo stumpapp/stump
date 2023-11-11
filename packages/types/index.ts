@@ -1,4 +1,4 @@
-import { CursorInfo, Library, Media, PageInfo, Series } from './core'
+import { CursorInfo, Library, Media, PageInfo, Series } from './generated'
 
 export enum FileStatus {
 	Unknown = 'UNKNOWN',
@@ -37,9 +37,8 @@ export type MediaOrderByExclusions = Extract<
 export type MediaOrderByOptions = Partial<Omit<Media, MediaOrderByExclusions>>
 // TODO: I HATE THIS
 export const mediaOrderByOptions: MediaOrderByOptions = {
-	checksum: undefined,
-	description: undefined,
 	extension: undefined,
+	hash: undefined,
 	name: undefined,
 	pages: undefined,
 	path: undefined,
@@ -75,5 +74,4 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 	updated_at: undefined,
 }
 
-export * from './core'
-export * from './server'
+export * from './generated'

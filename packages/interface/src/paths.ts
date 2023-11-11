@@ -7,7 +7,30 @@ type BookReaderParams = {
 	isStreaming?: boolean
 }
 
+type SettingsPage = 'general' | 'users' | 'jobs' | 'desktop' | 'server'
+type DocTopic = 'access-control' | 'book-club'
+type BookClubTab = 'overview' | 'members' | 'chat-board' | 'settings'
+
 const paths = {
+	bookClub: (id: string, tab?: BookClubTab) => `/book-clubs/${id}${tab ? `/${tab}` : ''}`,
+	bookClubChatBoard: (id: string, chatBoardId?: string) => {
+		const url = paths.bookClub(id, 'chat-board')
+		if (chatBoardId?.length) {
+			return `${url}?archived_chat_id=${chatBoardId}`
+		}
+		return url
+	},
+	bookClubChatBoardMessage: (id: string, messageId: string, chatBoardId?: string) => {
+		const url = paths.bookClubChatBoard(id, chatBoardId) + '/thread/' + messageId
+		if (chatBoardId?.length) {
+			return `${url}?archived_chat_id=${chatBoardId}`
+		}
+		return url
+	},
+	bookClubCreate: () => '/book-clubs/create',
+	bookClubScheduler: (id: string) => paths.bookClub(id, 'settings') + '/scheduler',
+	bookClubSettings: (id: string) => paths.bookClub(id, 'settings'),
+	bookClubs: () => '/book-clubs',
 	bookManagement: (id: string) => `/books/${id}/manage`,
 	bookOverview: (id: string) => `/books/${id}`,
 	bookReader: (
@@ -40,6 +63,8 @@ const paths = {
 		return `${baseUrl}/reader?${searchParams.toString()}`
 	},
 	bookSearch: () => '/books',
+	docs: (topic?: DocTopic, section?: string) =>
+		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
 	home: () => '/',
 	libraryCreate: () => '/libraries/create',
 	libraryFileExplorer: (id: string) => `/libraries/${id}/explore`,
@@ -58,7 +83,8 @@ const paths = {
 		}
 		return `/series/${id}`
 	},
-	settings: (subpath?: string) => `/settings/${subpath || ''}`,
+	settings: (subpath?: SettingsPage) => `/settings/${subpath || ''}`,
+	updateUser: (id: string) => `${paths.settings('users')}/${id}/manage`,
 } as const
 
 export default paths

@@ -66,3 +66,52 @@ export default function FilterProvider({ children }: Props) {
 		</FilterContext.Provider>
 	)
 }
+
+/**
+ * A context provider to handle filter state where everything is local state.
+ */
+export function ManualFilterProvider({ children }: Props) {
+	const [filters, setFilters] = React.useState<Record<string, unknown>>({})
+
+	/**
+	 * Replace the current filters with the provided filters
+	 */
+	const handleSetFilters = (newFilters: Record<string, unknown>) => {
+		setFilters(newFilters)
+	}
+
+	/**
+	 * Sets a single filter in the url with the provided value
+	 */
+	const handleSetFilter = (key: string, value: unknown) => {
+		setFilters((prev) => {
+			const params = { ...prev }
+			params[key] = value
+			return params
+		})
+	}
+
+	/**
+	 * Removes a filter from the url
+	 */
+	const handleRemoveFilter = (key: string) => {
+		setFilters((prev) => {
+			const params = { ...prev }
+			delete params[key]
+			return params
+		})
+	}
+
+	return (
+		<FilterContext.Provider
+			value={{
+				filters,
+				removeFilter: handleRemoveFilter,
+				setFilter: handleSetFilter,
+				setFilters: handleSetFilters,
+			}}
+		>
+			{children}
+		</FilterContext.Provider>
+	)
+}

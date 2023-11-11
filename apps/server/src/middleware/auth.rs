@@ -5,16 +5,20 @@ use axum::{
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Redirect, Response},
 };
-use axum_sessions::SessionHandle;
+use base64::{engine::general_purpose::STANDARD, Engine};
 use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{db::entity::User, prisma::user};
+use stump_core::{
+	db::entity::{User, UserPermission},
+	prisma::user,
+};
+use tower_sessions::Session;
 use tracing::{error, trace};
 
 use crate::{
-	config::state::AppState,
+	config::{session::SESSION_USER_KEY, state::AppState},
 	utils::{decode_base64_credentials, verify_password},
 };
 
@@ -39,23 +43,22 @@ where
 		}
 
 		let state = AppState::from_ref(state);
-		let session_handle =
-			parts.extensions.get::<SessionHandle>().ok_or_else(|| {
-				(
-					StatusCode::INTERNAL_SERVER_ERROR,
-					"Failed to extract session handle",
-				)
-					.into_response()
-			})?;
-		let session = session_handle.read().await;
 
-		if let Some(user) = session.get::<User>("user") {
+		let session = Session::from_request_parts(parts, &state)
+			.await
+			.map_err(|e| {
+				error!("Failed to extract session handle: {}", e.1);
+				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+			})?;
+
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+		})?;
+		if let Some(user) = session_user {
 			trace!("Session for {} already exists", &user.username);
 			return Ok(Self);
 		}
-
-		// drop so we don't deadlock when writing to the session lol oy vey
-		drop(session);
 
 		let auth_header = parts
 			.headers
@@ -83,9 +86,12 @@ where
 		}
 
 		let encoded_credentials = auth_header[6..].to_string();
-		let decoded_bytes = base64::decode(encoded_credentials).map_err(|e| {
-			(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-		})?;
+		let decoded_bytes =
+			STANDARD
+				.decode(encoded_credentials.as_bytes())
+				.map_err(|e| {
+					(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+				})?;
 		let decoded_credentials =
 			decode_base64_credentials(decoded_bytes).map_err(|e| {
 				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
@@ -119,12 +125,8 @@ where
 				username = &user.username,
 				"Basic authentication sucessful. Creating session for user"
 			);
-			// TODO: why did I use user as key here? I need to revisit the docs for this library because
-			// that doesn't seem right.
-			session_handle
-				.write()
-				.await
-				.insert("user", user.clone())
+			session
+				.insert(SESSION_USER_KEY, user.clone())
 				.map_err(|e| {
 					error!("Failed to insert user into session: {}", e);
 					(StatusCode::INTERNAL_SERVER_ERROR).into_response()
@@ -146,13 +148,13 @@ where
 /// use axum::{Router, middleware::from_extractor};
 ///
 /// Router::new()
-///     .layer(from_extractor::<AdminGuard>())
+///     .layer(from_extractor::<ServerOwnerGuard>())
 ///     .layer(from_extractor_with_state::<Auth, AppState>(app_state));
 /// ```
-pub struct AdminGuard;
+pub struct ServerOwnerGuard;
 
 #[async_trait]
-impl<S> FromRequestParts<S> for AdminGuard
+impl<S> FromRequestParts<S> for ServerOwnerGuard
 where
 	S: Send + Sync,
 {
@@ -166,18 +168,23 @@ where
 			return Ok(Self);
 		}
 
-		let session_handle = parts.extensions.get::<SessionHandle>().unwrap();
-		let session = session_handle.read().await;
+		let session = parts
+			.extensions
+			.get::<Session>()
+			.expect("Failed to extract session");
 
-		if let Some(user) = session.get::<User>("user") {
-			if user.is_admin() {
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			StatusCode::INTERNAL_SERVER_ERROR
+		})?;
+		if let Some(user) = session_user {
+			if user.is_server_owner {
 				return Ok(Self);
 			}
 
 			return Err(StatusCode::FORBIDDEN);
 		}
 
-		drop(session);
 		return Err(StatusCode::UNAUTHORIZED);
 	}
 }
@@ -192,6 +199,45 @@ impl IntoResponse for BasicAuth {
 			.header("WWW-Authenticate", "Basic realm=\"stump\"")
 			.body(BoxBody::default())
 			.unwrap()
+	}
+}
+
+pub struct BookClubGuard;
+
+#[async_trait]
+impl<S> FromRequestParts<S> for BookClubGuard
+where
+	S: Send + Sync,
+{
+	type Rejection = StatusCode;
+
+	async fn from_request_parts(
+		parts: &mut Parts,
+		_: &S,
+	) -> Result<Self, Self::Rejection> {
+		if parts.method == Method::OPTIONS {
+			return Ok(Self);
+		}
+
+		let session = parts
+			.extensions
+			.get::<Session>()
+			.expect("Failed to extract session");
+
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			StatusCode::INTERNAL_SERVER_ERROR
+		})?;
+
+		if let Some(user) = session_user {
+			if user.has_permission(UserPermission::AccessBookClub) {
+				return Ok(Self);
+			}
+
+			return Err(StatusCode::FORBIDDEN);
+		}
+
+		return Err(StatusCode::UNAUTHORIZED);
 	}
 }
 

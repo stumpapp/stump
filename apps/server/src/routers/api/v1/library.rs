@@ -5,11 +5,11 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use std::{path, str::FromStr};
+use tower_sessions::Session;
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
@@ -19,7 +19,7 @@ use stump_core::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
 			CreateLibrary, LibrariesStats, Library, LibraryOptions, LibraryScanMode,
-			Media, Series, UpdateLibrary,
+			Media, Series, UpdateLibrary, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -48,9 +48,10 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_admin_user,
-		get_session_user, http::ImageResponse, FilterableQuery, LibraryBaseFilter,
-		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
+		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
+		get_session_user, get_user_and_enforce_permission, http::ImageResponse,
+		FilterableQuery, LibraryBaseFilter, LibraryFilter, LibraryRelationFilter,
+		MediaFilter, SeriesFilter,
 	},
 };
 
@@ -63,7 +64,7 @@ use super::{
 };
 
 // TODO: age restrictions!
-// TODO: .layer(from_extractor::<AdminGuard>()) where needed. Might need to remove some
+// TODO: .layer(from_extractor::<ServerOwnerGuard>()) where needed. Might need to remove some
 // of the nesting
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -478,7 +479,7 @@ pub(crate) fn get_library_thumbnail(
 async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
@@ -557,10 +558,10 @@ pub struct PatchLibraryThumbnail {
 async fn patch_library_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> ApiResult<ImageResponse> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
 
@@ -754,10 +755,11 @@ async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	query: Query<ScanQueryParam>,
-	session: ReadableSession,
+	session: Session,
 ) -> Result<(), ApiError> {
 	let db = ctx.get_db();
-	let _user = get_session_admin_user(&session)?;
+
+	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
 
 	let library = db
 		.library()
@@ -793,11 +795,11 @@ async fn scan_library(
 )]
 /// Create a new library. Will queue a ScannerJob to scan the library, and return the library
 async fn create_library(
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	let user = get_session_admin_user(&session)?;
+	let user = get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
 	debug!(user_id = user.id, ?input, "Creating library");
@@ -917,12 +919,12 @@ async fn create_library(
 )]
 /// Update a library by id, if the current user is a SERVER_OWNER.
 async fn update_library(
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
 	if !path::Path::new(&input.path).exists() {
@@ -1030,11 +1032,11 @@ async fn update_library(
 )]
 /// Delete a library by id
 async fn delete_library(
-	session: ReadableSession,
+	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {
-	get_session_admin_user(&session)?;
+	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
 	trace!(?id, "Attempting to delete library");

@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
-use std::fmt;
 use utoipa::ToSchema;
 
 use crate::prisma;
@@ -21,18 +20,25 @@ pub struct AgeRestriction {
 pub struct User {
 	pub id: String,
 	pub username: String,
-	pub role: String,
+	pub is_server_owner: bool,
+	pub avatar_url: Option<String>,
+	pub created_at: String,
+	pub last_login: Option<String>,
+	pub is_locked: bool,
+
+	pub permissions: Vec<UserPermission>,
+
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub login_sessions_count: Option<i32>,
+
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub user_preferences: Option<UserPreferences>,
-	pub avatar_url: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub login_activity: Option<Vec<LoginActivity>>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub age_restriction: Option<AgeRestriction>,
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub read_progresses: Option<Vec<ReadProgress>>,
-	pub created_at: String,
-	pub last_login: Option<String>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub login_activity: Option<Vec<LoginActivity>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
@@ -48,19 +54,9 @@ pub struct LoginActivity {
 }
 
 impl User {
-	pub fn is_admin(&self) -> bool {
-		self.role == "SERVER_OWNER"
+	pub fn has_permission(&self, permission: UserPermission) -> bool {
+		self.is_server_owner || self.permissions.contains(&permission)
 	}
-
-	pub fn is_server_owner(&self) -> bool {
-		self.role == "SERVER_OWNER"
-	}
-
-	pub fn is_member(&self) -> bool {
-		self.role == "MEMBER"
-	}
-
-	// TODO: other utilities based off of preferences
 }
 
 impl Cursor for User {
@@ -98,11 +94,23 @@ impl From<prisma::user::Data> for User {
 			.login_activity()
 			.map(|la| la.clone().into_iter().map(LoginActivity::from).collect())
 			.ok();
+		let login_sessions_count =
+			data.sessions().map(|sessions| sessions.len() as i32).ok();
 
 		User {
 			id: data.id,
 			username: data.username,
-			role: data.role,
+			is_server_owner: data.is_server_owner,
+			permissions: data
+				.permissions
+				.map(|p| {
+					p.split(',')
+						.map(|p| p.trim())
+						.filter(|p| !p.is_empty())
+						.map(|p| p.into())
+						.collect()
+				})
+				.unwrap_or_default(),
 			user_preferences,
 			avatar_url: data.avatar_url,
 			age_restriction,
@@ -110,33 +118,48 @@ impl From<prisma::user::Data> for User {
 			created_at: data.created_at.to_rfc3339(),
 			last_login: data.last_login.map(|dt| dt.to_rfc3339()),
 			login_activity,
+			is_locked: data.is_locked,
+			login_sessions_count,
 		}
 	}
 }
 
-#[derive(Serialize, Deserialize, Type, ToSchema, Default)]
-pub enum UserRole {
-	#[serde(rename = "SERVER_OWNER")]
-	ServerOwner,
-	#[serde(rename = "MEMBER")]
-	#[default]
-	Member,
+// TODO: consider adding self:update permission, useful for child accounts
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
+pub enum UserPermission {
+	#[serde(rename = "bookclub:read")]
+	AccessBookClub,
+	#[serde(rename = "bookclub:create")]
+	CreateBookClub,
+	#[serde(rename = "file:explorer")]
+	FileExplorer,
+	#[serde(rename = "file:upload")]
+	UploadFile,
+	#[serde(rename = "library:scan")]
+	ScanLibrary,
 }
 
-impl From<UserRole> for String {
-	fn from(role: UserRole) -> String {
-		match role {
-			UserRole::ServerOwner => "SERVER_OWNER".to_string(),
-			UserRole::Member => "MEMBER".to_string(),
-		}
-	}
-}
-
-impl fmt::Display for UserRole {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl ToString for UserPermission {
+	fn to_string(&self) -> String {
 		match self {
-			UserRole::ServerOwner => write!(f, "SERVER_OWNER"),
-			UserRole::Member => write!(f, "MEMBER"),
+			UserPermission::AccessBookClub => "bookclub:read".to_string(),
+			UserPermission::CreateBookClub => "bookclub:create".to_string(),
+			UserPermission::FileExplorer => "file:explorer".to_string(),
+			UserPermission::UploadFile => "file:upload".to_string(),
+			UserPermission::ScanLibrary => "library:scan".to_string(),
+		}
+	}
+}
+
+impl From<&str> for UserPermission {
+	fn from(s: &str) -> UserPermission {
+		match s {
+			"bookclub:read" => UserPermission::AccessBookClub,
+			"bookclub:create" => UserPermission::CreateBookClub,
+			"file:explorer" => UserPermission::FileExplorer,
+			"file:upload" => UserPermission::UploadFile,
+			"library:scan" => UserPermission::ScanLibrary,
+			_ => panic!("Invalid user permission: {}", s),
 		}
 	}
 }
@@ -150,6 +173,8 @@ pub struct UserPreferences {
 	pub collection_layout_mode: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
+	#[serde(default)]
+	pub enable_discord_presence: bool,
 }
 
 impl Default for UserPreferences {
@@ -162,35 +187,9 @@ impl Default for UserPreferences {
 			collection_layout_mode: "GRID".to_string(),
 			app_theme: "LIGHT".to_string(),
 			show_query_indicator: false,
+			enable_discord_presence: false,
 		}
 	}
-}
-
-//////////////////////////////////////////////
-//////////////////// INPUTS //////////////////
-//////////////////////////////////////////////
-
-#[derive(Deserialize, Type, ToSchema)]
-pub struct DeleteUser {
-	pub hard_delete: Option<bool>,
-}
-
-#[derive(Deserialize, Type, ToSchema)]
-pub struct UpdateUser {
-	pub username: String,
-	pub password: Option<String>,
-	pub avatar_url: Option<String>,
-}
-
-#[derive(Debug, Clone, Deserialize, Type, ToSchema)]
-pub struct UpdateUserPreferences {
-	pub id: String,
-	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
-	pub app_theme: String,
-	pub show_query_indicator: bool,
 }
 
 ///////////////////////////////////////////////
@@ -207,6 +206,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			collection_layout_mode: data.collection_layout_mode,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
+			enable_discord_presence: data.enable_discord_presence,
 		}
 	}
 }

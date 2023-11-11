@@ -1,6 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { isAxiosError } from '@stump/api'
 import { queryClient, useLoginOrRegister, useUserStore } from '@stump/client'
-import { Button, cx, Form, Heading, Input, Text } from '@stump/components'
+import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
+import { ShieldAlert } from 'lucide-react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { Navigate } from 'react-router'
@@ -19,10 +21,17 @@ export default function LoginOrClaimScene() {
 	}))
 
 	const { t } = useLocaleContext()
-	const { isClaimed, isCheckingClaimed, loginUser, registerUser, isLoggingIn, isRegistering } =
-		useLoginOrRegister({
-			onSuccess: setUser,
-		})
+	const {
+		isClaimed,
+		isCheckingClaimed,
+		loginUser,
+		registerUser,
+		isLoggingIn,
+		isRegistering,
+		loginError,
+	} = useLoginOrRegister({
+		onSuccess: setUser,
+	})
 
 	const schema = z.object({
 		password: z.string().min(1, { message: t('authScene.form.validation.missingPassword') }),
@@ -101,9 +110,29 @@ export default function LoginOrClaimScene() {
 		}
 	}
 
+	const renderError = () => {
+		if (!loginError) return null
+
+		// If the response is a 403, and we are NOT claiming, it is likely because
+		// the account login is disabled (i.e. the account is locked). Additionally,
+		// authentication had to have passed, otherwise we would have gotten a 401. So,
+		// we can safely display the error message from the server.
+		if (isAxiosError(loginError) && loginError.response?.status === 403) {
+			const message = loginError.response?.data as string
+			return (
+				<Alert level="error" icon={ShieldAlert} className="sm:max-w-md md:max-w-lg">
+					<Alert.Content>{message || 'An unknown error occurred'}</Alert.Content>
+				</Alert>
+			)
+		}
+
+		return null
+	}
+
 	return (
 		<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-white p-4 dark:bg-gray-975">
 			{renderHeader()}
+			{renderError()}
 
 			<Form
 				form={form}

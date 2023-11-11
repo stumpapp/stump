@@ -18,7 +18,7 @@ export default function NoLibraries() {
 				show a select list of books and series
 			</Text>
 			{isServerOwner && (
-				<ButtonOrLink className="mt-2" href={paths.libraryCreate()}>
+				<ButtonOrLink className="mt-2" href={paths.libraryCreate()} variant="secondary">
 					Create a library
 				</ButtonOrLink>
 			)}

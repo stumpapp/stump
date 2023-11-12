@@ -4,12 +4,9 @@ on:
   pull_request:
     branches:
       - develop
-      - main
   push:
     branches:
       - develop
-
-# TODO: should I push nightly on main pushes? then on tag, an actual tagged release?
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

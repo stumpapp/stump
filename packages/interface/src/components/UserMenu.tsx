@@ -42,13 +42,13 @@ export default function UserMenu() {
 					</Popover.Trigger>
 
 					<Popover.Content
-						className="flex flex-col divide-y divide-gray-100 overflow-hidden border-opacity-50 p-0 shadow-sm dark:divide-gray-800 dark:bg-gray-950"
+						className="flex flex-col divide-y divide-gray-75 overflow-hidden border-opacity-50 p-0 shadow-sm dark:divide-gray-800 dark:bg-gray-950"
 						align="start"
 						style={{ width }}
 					>
 						<div className="flex w-full flex-col">
 							<Link
-								className="pointer-events-none flex h-[2.35rem] w-full items-center px-2 text-sm transition-colors duration-150 hover:bg-gray-75/75 dark:text-gray-400 dark:hover:bg-gray-900"
+								className="pointer-events-none flex h-[2.35rem] w-full items-center bg-gray-50/80 px-2 text-sm transition-colors duration-150 hover:bg-gray-75/75 dark:bg-gray-700/20 dark:text-gray-400 dark:hover:bg-gray-900"
 								to={paths.settings('general')}
 								onClick={() => setIsOpen(false)}
 							>

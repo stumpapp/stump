@@ -8,7 +8,7 @@ export default function ThemeSwitch() {
 
 	return (
 		<label
-			className="flex h-[2.35rem] w-full items-center justify-between px-2"
+			className="flex h-[2.35rem] w-full items-center justify-between px-2 dark:hover:bg-gray-900"
 			form="dark-mode-toggle"
 		>
 			<div className="flex items-center gap-1.5">

@@ -1,4 +1,4 @@
-import { useAppProps } from '@stump/client'
+import { useAppProps, useUserStore } from '@stump/client'
 import { Spacer } from '@stump/components'
 import { Book, Home } from 'lucide-react'
 import React from 'react'
@@ -12,6 +12,8 @@ import { BookClubSideBarSection, LibrarySideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
 
+const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
+
 type Props = {
 	asChild?: boolean
 }
@@ -20,18 +22,23 @@ export default function SideBar({ asChild }: Props) {
 	const { platform } = useAppProps()
 	const { t } = useLocaleContext()
 
+	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
+	const showBookClubs = IS_DEVELOPMENT && checkUserPermission('bookclub:read')
+
 	const isBrowser = platform === 'browser'
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	const renderHeader = () => {
-		if (isBrowser || isMobile) return null
+		if (!isBrowser && !isMobile) {
+			return (
+				<header className="flex w-full justify-between gap-1">
+					<UserMenu />
+					<NavigationButtons />
+				</header>
+			)
+		}
 
-		return (
-			<header className="flex w-full justify-between gap-1">
-				<UserMenu />
-				<NavigationButtons />
-			</header>
-		)
+		return null
 	}
 
 	const renderContent = () => {
@@ -40,7 +47,7 @@ export default function SideBar({ asChild }: Props) {
 				{renderHeader()}
 
 				<div className="flex max-h-full grow flex-col gap-4 overflow-y-scroll p-1 scrollbar-hide">
-					{!isMobile && !isBrowser && <UserMenu />}
+					{!isMobile && <UserMenu />}
 
 					<div className="flex flex-col gap-2">
 						<SideBarButtonLink to={paths.home()} isActive={location.pathname === '/'}>
@@ -58,7 +65,7 @@ export default function SideBar({ asChild }: Props) {
 					</div>
 
 					<LibrarySideBarSection isMobile={isMobile} />
-					<BookClubSideBarSection isMobile={isMobile} />
+					{showBookClubs && <BookClubSideBarSection isMobile={isMobile} />}
 				</div>
 				<Spacer />
 

@@ -23,13 +23,13 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'group inline-flex h-[2.35rem] w-full items-center justify-start rounded-md px-2 text-sm transition-all duration-150 dark:hover:bg-gray-900/70',
+				'group inline-flex h-[2.35rem] w-full items-center justify-start rounded-md px-2 text-sm transition-all duration-150 hover:bg-gray-50/95 dark:hover:bg-gray-900/40',
 				{
 					'justify-center border border-dashed border-gray-150/60 text-black text-opacity-80 hover:text-opacity-100 dark:border-gray-750/80 dark:text-gray-50 dark:text-opacity-80 dark:hover:text-opacity-100':
 						variant === 'action',
 				},
 				{ 'dark:text-gray-75': variant !== 'action' },
-				{ 'dark:bg-gray-900/70': isActive },
+				{ 'bg-gray-100/50 dark:bg-gray-900/70 dark:hover:bg-gray-900/90': isActive },
 				className,
 			)}
 			{...props}

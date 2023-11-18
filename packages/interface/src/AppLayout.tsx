@@ -3,12 +3,13 @@ import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@s
 import { Suspense, useMemo } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
-import BackgroundFetchIndicator from './components/BackgroundFetchIndicator'
-import JobOverlay from './components/jobs/JobOverlay'
-import RouteLoadingIndicator from './components/RouteLoadingIndicator'
-import ServerStatusOverlay from './components/ServerStatusOverlay'
-import SideBar from './components/sidebar/SideBar'
-import TopBar from './components/topbar/TopBar'
+import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
+import JobOverlay from '@/components/jobs/JobOverlay'
+import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
+import ServerStatusOverlay from '@/components/ServerStatusOverlay'
+import { SideBar } from '@/components/sidebar'
+import TopBar from '@/components/topbar/TopBar'
+
 import { AppContext } from './context'
 
 export function AppLayout() {

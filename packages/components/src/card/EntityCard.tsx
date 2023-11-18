@@ -137,7 +137,7 @@ export function EntityCard({
 			)
 		} else {
 			return (
-				<div className="flex h-full w-full items-center justify-center rounded-md border border-gray-75 bg-gray-50/80 dark:border-gray-950 dark:bg-gray-1000/30">
+				<div className="flex h-full w-full items-center justify-center  bg-gray-50/80 dark:bg-gray-1000/30">
 					<Book className="h-16 w-16 text-gray-750 dark:text-gray-400" />
 				</div>
 			)

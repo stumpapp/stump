@@ -1,15 +1,11 @@
 /* eslint-disable react/prop-types */
-// Card
-// CardContent
-// CardOverlay
 
 import React, { forwardRef } from 'react'
 
 import { cn } from '../utils'
 
-// TODO: div OR link
 type CardBaseProps = React.ComponentPropsWithoutRef<'div'>
-export type CardProps = /*VariantProps<typeof cardVariants> &*/ CardBaseProps
+export type CardProps = CardBaseProps
 export const Card = React.forwardRef<React.ElementRef<'div'>, CardProps>(
 	({ className, ...props }, ref) => {
 		return (

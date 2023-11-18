@@ -12,6 +12,7 @@ interface PagePopoverFormProps {
 	trigger: React.ReactElement
 }
 
+// FIXME: Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
 export default function PagePopoverForm({
 	totalPages,
 	currentPage,

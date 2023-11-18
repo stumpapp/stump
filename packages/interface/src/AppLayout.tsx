@@ -7,7 +7,7 @@ import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
 import JobOverlay from '@/components/jobs/JobOverlay'
 import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
 import ServerStatusOverlay from '@/components/ServerStatusOverlay'
-import SideBar from '@/components/sidebar/SideBar'
+import { SideBar } from '@/components/sidebar'
 import TopBar from '@/components/topbar/TopBar'
 
 import { AppContext } from './context'

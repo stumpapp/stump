@@ -28,11 +28,11 @@ export default function HorizontalCardList({
 	// memoization changes. This feels like a bug TBH.
 	const estimateSize = useCallback(() => {
 		if (!isAtLeastSmall) {
-			return 200
+			return 170
 		} else if (!isAtLeastMedium) {
-			return 213
+			return 185
 		} else {
-			return 245
+			return 205
 		}
 	}, [isAtLeastSmall, isAtLeastMedium])
 

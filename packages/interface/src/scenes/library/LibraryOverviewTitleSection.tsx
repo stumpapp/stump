@@ -18,9 +18,8 @@ export default function LibraryOverviewTitleSection({ library }: Props) {
 		<div className="flex flex-col items-center gap-4 md:mb-2 md:flex-row md:items-start">
 			<EntityCard
 				imageUrl={getLibraryThumbnail(library.id)}
-				size="lg"
-				fullWidth={false}
-				className="md:min-w-[16rem]"
+				isCover
+				className="flex-auto flex-shrink-0"
 			/>
 
 			<div className="flex h-full w-full flex-col gap-2 md:gap-4">

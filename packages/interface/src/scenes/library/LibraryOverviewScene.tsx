@@ -3,6 +3,7 @@ import { usePreviousIsDifferent } from '@stump/components'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
+import { useMediaMatch } from 'rooks'
 
 import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
 import Pagination from '@/components/Pagination'
@@ -15,6 +16,8 @@ import { usePageParam } from '@/hooks/usePageParam'
 import LibraryOverviewTitleSection from './LibraryOverviewTitleSection'
 
 function LibraryOverviewScene() {
+	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
+
 	const { id } = useParams()
 	const { page, setPage } = usePageParam()
 
@@ -35,6 +38,7 @@ function LibraryOverviewScene() {
 		pageData,
 	} = usePagedSeriesQuery({
 		page,
+		page_size: is3XLScreenOrBigger ? 40 : 20,
 		params: {
 			...filters,
 			count_media: true,

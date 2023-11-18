@@ -29,7 +29,10 @@ export default function SideBarButtonLink({
 						variant === 'action',
 				},
 				{ 'dark:text-gray-75': variant !== 'action' },
-				{ 'bg-gray-100/50 dark:bg-gray-900/70 dark:hover:bg-gray-900/90': isActive },
+				{
+					'bg-gray-100/50 hover:bg-gray-100/40 dark:bg-gray-900/70 dark:hover:bg-gray-900/90':
+						isActive,
+				},
 				className,
 			)}
 			{...props}
@@ -37,7 +40,7 @@ export default function SideBarButtonLink({
 			{leftContent}
 			<Link
 				to={to}
-				className={cn('line-clamp-1 flex h-full w-full items-center', {
+				className={cn('line-clamp-1 flex h-full w-full flex-1 items-center break-words p-0', {
 					'justify-center': variant === 'action',
 				})}
 			>

@@ -10,8 +10,9 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 import z from 'zod'
 
-import { useLocaleContext } from '../../../../i18n'
-import paths from '../../../../paths'
+import { useLocaleContext } from '@/i18n'
+import paths from '@/paths'
+
 import { useUserManagementContext } from '../context'
 import UserPermissionsForm, { userPermissionSchema } from './UserPermissionsForm'
 import UserRestrictionsForm from './UserRestrictionsForm'
@@ -47,6 +48,7 @@ const buildSchema = (t: (key: string) => string, existingUsers: User[], updating
 export type Schema = z.infer<ReturnType<typeof buildSchema>>
 
 const generateRandomPassword = (length = 16) => {
+	// FIXME: this should probably be moved to the server and be a secret lol very insecure
 	const charset =
 		'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~}{[]:;?'
 	let randomValue = ''

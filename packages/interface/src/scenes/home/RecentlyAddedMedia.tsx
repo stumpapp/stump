@@ -1,10 +1,13 @@
 import { useRecentlyAddedMediaQuery } from '@stump/client'
+import { Heading, Text } from '@stump/components'
+import { CircleSlash2 } from 'lucide-react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import MediaCard from '@/components/media/MediaCard'
+import { useLocaleContext } from '@/i18n'
 
-// TODO: better empty state
 export default function RecentlyAddedMedia() {
+	const { t } = useLocaleContext()
 	const { data, media, isLoading, fetchNextPage, hasNextPage } = useRecentlyAddedMediaQuery({
 		limit: 20,
 	})
@@ -17,10 +20,21 @@ export default function RecentlyAddedMedia() {
 
 	return (
 		<HorizontalCardList
-			title="Recently Added Books"
+			title={t('homeScene.recentlyAddedBooks.title')}
 			cards={cards}
 			fetchNext={fetchNextPage}
 			hasMore={hasNextPage}
+			emptyMessage={() =>
+				isLoading ? null : (
+					<div className="flex min-h-[150px] flex-col items-start justify-center gap-2">
+						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
+						<Heading size="sm">{t('homeScene.recentlyAddedBooks.emptyState.heading')}</Heading>
+						<Text size="sm" variant="muted">
+							{t('homeScene.recentlyAddedBooks.emptyState.message')}
+						</Text>
+					</div>
+				)
+			}
 		/>
 	)
 }

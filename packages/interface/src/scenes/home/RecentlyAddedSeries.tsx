@@ -1,11 +1,15 @@
 import { seriesQueryKeys } from '@stump/api'
 import { useSeriesCursorQuery } from '@stump/client'
+import { Heading, Text } from '@stump/components'
+import { CircleSlash2 } from 'lucide-react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
+import { useLocaleContext } from '@/i18n'
 
 export default function RecentlyAddedSeries() {
-	const { series, fetchNextPage, hasNextPage } = useSeriesCursorQuery({
+	const { t } = useLocaleContext()
+	const { series, fetchNextPage, hasNextPage, isLoading } = useSeriesCursorQuery({
 		limit: 20,
 		params: {
 			count_media: true,
@@ -21,10 +25,21 @@ export default function RecentlyAddedSeries() {
 
 	return (
 		<HorizontalCardList
-			title="Recently Added Series"
+			title={t('homeScene.recentlyAddedSeries.title')}
 			cards={cards}
 			fetchNext={fetchNextPage}
 			hasMore={hasNextPage}
+			emptyMessage={() =>
+				isLoading ? null : (
+					<div className="flex min-h-[150px] flex-col items-start justify-center gap-2">
+						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
+						<Heading size="sm">{t('homeScene.recentlyAddedSeries.emptyState.heading')}</Heading>
+						<Text size="sm" variant="muted">
+							{t('homeScene.recentlyAddedSeries.emptyState.message')}
+						</Text>
+					</div>
+				)
+			}
 		/>
 	)
 }

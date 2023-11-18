@@ -122,3 +122,7 @@ Whether or not to enable Swagger UI. To learn more about what Swagger UI is, vis
 | Type    | Default Value |
 | ------- | ------------- |
 | Boolean | `true`        |
+
+#### ENABLE_WAL
+
+Whether or not to enable Write-Ahead Logging (WAL) for the Stump database. This is not enabled by default. WAL is a feature of SQLite that allows for better concurrency and performance. You can read more about WAL [here](https://www.sqlite.org/wal.html).

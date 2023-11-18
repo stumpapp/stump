@@ -80,7 +80,7 @@ export default function SideBar({ asChild }: Props) {
 
 	return (
 		<aside className="hidden min-h-full md:inline-block">
-			<div className="relative z-10 flex h-full w-48 shrink-0 flex-col gap-4 border-r border-gray-75 px-2 py-4 dark:border-gray-900 dark:bg-gray-1000">
+			<div className="relative z-10 flex h-full w-52 shrink-0 flex-col gap-4 border-r border-gray-75 px-2 py-4 dark:border-gray-900 dark:bg-gray-1000">
 				{renderContent()}
 			</div>
 		</aside>

@@ -36,13 +36,13 @@ pub fn get_session_layer(
 	let store = PrismaSessionStore::new(client);
 
 	let cleanup_interval = get_session_expiry_cleanup_interval();
-	tokio::task::spawn(
-		store
-			.clone()
-			.continuously_delete_expired(tokio::time::Duration::from_secs(
-				cleanup_interval,
-			)),
-	);
+	if cleanup_interval > 0 {
+		tokio::task::spawn(store.clone().continuously_delete_expired(
+			tokio::time::Duration::from_secs(cleanup_interval),
+		));
+	} else {
+		tracing::debug!("SESSION_EXPIRY_CLEANUP_INTERVAL is set to 0, session expiry cleanup is disabled.");
+	}
 	let session_ttl = get_session_ttl();
 
 	// TODO: This configuration won't work for Tauri Windows app, it requires SameSite::None and Secure=true... Linux and macOS work fine.

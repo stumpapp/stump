@@ -228,15 +228,22 @@ pub(crate) fn apply_media_age_restriction(
 		]
 	} else {
 		or![
+			// If there is no media metadata at all, or it exists with no age rating, then we
+			// should try to defer to the series age rating
 			and![
-				// If the media has no age rating, and restrict on unset is disabled, it can be allowed
-				// so long as the series has no age rating OR it is under
-				media::metadata::is(vec![media_metadata::age_rating::equals(None)]),
+				or![
+					media::metadata::is_null(),
+					media::metadata::is(vec![media_metadata::age_rating::equals(None)])
+				],
 				media::series::is(vec![or![
+					// If the series has no metadata, then we can allow the media
+					series::metadata::is_null(),
+					// Or if the series has an age rating and it is under the user age restriction
 					series::metadata::is(vec![
 						series_metadata::age_rating::not(None),
 						series_metadata::age_rating::lte(min_age),
 					]),
+					// Or if the series has no age rating, then we can allow the media
 					series::metadata::is(vec![series_metadata::age_rating::equals(None)])
 				]])
 			],

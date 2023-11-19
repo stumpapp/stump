@@ -4,11 +4,11 @@ use time::Duration;
 
 use tower_sessions::{cookie::SameSite, SessionManagerLayer};
 
-use super::prisma_session_store::PrismaSessionStore;
+use super::store::PrismaSessionStore;
 
-pub(crate) const SESSION_USER_KEY: &str = "user";
+pub const SESSION_USER_KEY: &str = "user";
 
-pub(crate) fn get_session_ttl() -> i64 {
+pub fn get_session_ttl() -> i64 {
 	env::var("SESSION_TTL")
 		.map(|s| {
 			s.parse::<i64>().unwrap_or_else(|e| {
@@ -19,7 +19,7 @@ pub(crate) fn get_session_ttl() -> i64 {
 		.unwrap_or(3600 * 24 * 3)
 }
 
-pub(crate) fn get_session_expiry_cleanup_interval() -> u64 {
+pub fn get_session_expiry_cleanup_interval() -> u64 {
 	env::var("SESSION_EXPIRY_CLEANUP_INTERVAL")
 		.map(|s| {
 			s.parse::<u64>().unwrap_or_else(|e| {

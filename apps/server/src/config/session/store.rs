@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use prisma_client_rust::{
-	chrono::{DateTime, Duration, FixedOffset, Utc},
-	QueryError,
-};
+use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use stump_core::{
 	db::entity::User,
 	prisma::{session, user, PrismaClient},
@@ -11,7 +8,21 @@ use stump_core::{
 use time::OffsetDateTime;
 use tower_sessions::{session::SessionId, Session, SessionRecord, SessionStore};
 
-use super::session::{get_session_ttl, SESSION_USER_KEY};
+use super::{get_session_ttl, SESSION_USER_KEY};
+
+#[derive(Debug, thiserror::Error)]
+pub enum SessionError {
+	#[error("Session not found")]
+	NotFound,
+	#[error("An error occurred while converting a timestamp to an OffsetDateTime: {0}")]
+	DateTimeError(#[from] time::error::ComponentRange),
+	#[error("{0}")]
+	QueryError(#[from] prisma_client_rust::queries::QueryError),
+	#[error("An error occurred while serializing or deserializing session data: {0}")]
+	SerdeError(#[from] serde_json::Error),
+}
+
+pub type SessionResult<T> = Result<T, SessionError>;
 
 #[derive(Clone)]
 pub struct PrismaSessionStore {
@@ -23,7 +34,7 @@ impl PrismaSessionStore {
 		Self { client }
 	}
 
-	async fn delete_expired(&self) -> Result<(), QueryError> {
+	async fn delete_expired(&self) -> SessionResult<()> {
 		tracing::trace!("Deleting expired sessions");
 
 		let affected_rows = self
@@ -49,13 +60,9 @@ impl PrismaSessionStore {
 	}
 }
 
-// FIXME: There are a LOT of expectations here. Looking at the source code for other implementations,
-// e.g. sqlx sqlite store, this was also the case. If possible, though, I'd like to more safely
-// handle these cases.
-
 #[async_trait::async_trait]
 impl SessionStore for PrismaSessionStore {
-	type Error = QueryError;
+	type Error = SessionError;
 
 	async fn save(&self, session_record: &SessionRecord) -> Result<(), Self::Error> {
 		let expires_at: DateTime<FixedOffset> =
@@ -64,12 +71,10 @@ impl SessionStore for PrismaSessionStore {
 			.data()
 			.get(SESSION_USER_KEY)
 			.cloned()
-			.expect("Failed to get user from session");
-		let user = serde_json::from_value::<User>(session_user.clone())
-			.expect("Failed to deserialize user");
+			.ok_or(SessionError::NotFound)?;
+		let user = serde_json::from_value::<User>(session_user.clone())?;
 		let session_id = session_record.id().to_string();
-		let session_data = serde_json::to_vec(&session_record.data())
-			.expect("Failed to serialize session data");
+		let session_data = serde_json::to_vec(&session_record.data())?;
 
 		tracing::trace!(session_id, ?user, "Saving session");
 
@@ -114,13 +119,11 @@ impl SessionStore for PrismaSessionStore {
 		if let Some(result) = record {
 			tracing::trace!("Found session");
 			let timestamp = result.expires_at.timestamp();
-			let expiration_time = OffsetDateTime::from_unix_timestamp(timestamp)
-				.expect("Failed to convert timestamp to OffsetDateTime");
+			let expiration_time = OffsetDateTime::from_unix_timestamp(timestamp)?;
 			let session_record = SessionRecord::new(
 				session_id.to_owned(),
 				Some(expiration_time),
-				serde_json::from_slice(&result.data)
-					.expect("Failed to deserialize session data"),
+				serde_json::from_slice(&result.data)?,
 			);
 			Ok(Some(session_record.into()))
 		} else {

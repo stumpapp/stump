@@ -85,8 +85,10 @@ impl JobManager {
 
 	/// Cancels a job by ID. If the job is not running but in the queue, it will be removed.
 	pub async fn cancel_job(self: Arc<Self>, job_id: String) -> JobManagerResult<()> {
+		tracing::trace!(job_id, "Attempting to cancel job");
 		let mut workers = self.workers.write().await;
 		if workers.get(&job_id).is_some() {
+			tracing::trace!(job_id, "Sending shutdown signal to worker");
 			self.shutdown_tx
 				.send(JobManagerShutdownSignal::Worker(job_id.clone()))?;
 

@@ -14,7 +14,7 @@
 		"isolatedModules": true,
 		"jsx": "preserve",
 		"types": ["node"],
-		"outDir": "../../.moon/cache/types/apps/docs"
+		"outDir": "../.moon/cache/types/docs"
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules"]

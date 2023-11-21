@@ -6,4 +6,4 @@
 *.sql linguist-detectable=false
 
 # I don't want docs website to be included in language stats
-apps/docs/** linguist-vendored
+docs/** linguist-vendored

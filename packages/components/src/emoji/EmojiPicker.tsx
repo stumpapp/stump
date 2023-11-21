@@ -2,11 +2,12 @@ import Picker from '@emoji-mart/react'
 import React, { useEffect, useState } from 'react'
 
 import { IconButton } from '../button'
+import { Dropdown } from '../dropdown'
 import { Popover } from '../popover'
 import { cn } from '../utils'
 
 // TODO: this should probably be moved to the interface package so I can
-// use react-query for better caching
+// use react-query for better caching AND language support
 
 type Emoji = {
 	id: string
@@ -19,7 +20,7 @@ type Props = {
 	disabled?: boolean
 	placeholder?: string | React.ReactNode
 	triggerProps?: React.ComponentProps<typeof IconButton>
-	onEmojiSelect: (emoji: Emoji) => void
+	onEmojiSelect: (emoji?: Emoji) => void
 	onLoadError?: (error: Error) => void
 } & Pick<React.ComponentProps<typeof Popover.Content>, 'align'>
 export default function EmojiPicker({
@@ -77,13 +78,35 @@ export default function EmojiPicker({
 	}
 
 	return (
-		<Popover open={isOpen} onOpenChange={setIsOpen}>
-			<Popover.Trigger asChild disabled={disabled}>
-				{renderTrigger()}
-			</Popover.Trigger>
-			<Popover.Content className="!border-none !bg-transparent p-0 !shadow-none" {...contentProps}>
-				<Picker data={data} onEmojiSelect={handleEmojiSelect} />
-			</Popover.Content>
-		</Popover>
+		<div>
+			{!isOpen && (
+				<Dropdown>
+					<Dropdown.Trigger asChild disabled={disabled}>
+						{renderTrigger()}
+					</Dropdown.Trigger>
+					<Dropdown.Content align="start">
+						<Dropdown.Label className="text-xs">Emoji options</Dropdown.Label>
+						<Dropdown.Item disabled={disabled} onClick={() => setIsOpen(true)}>
+							Change
+						</Dropdown.Item>
+						<Dropdown.Item disabled={disabled || !value}>Remove</Dropdown.Item>
+					</Dropdown.Content>
+				</Dropdown>
+			)}
+
+			{isOpen && (
+				<Popover open={isOpen} onOpenChange={setIsOpen}>
+					<Popover.Trigger asChild disabled={disabled}>
+						{renderTrigger()}
+					</Popover.Trigger>
+					<Popover.Content
+						className="!border-none !bg-transparent p-0 !shadow-none"
+						{...contentProps}
+					>
+						<Picker data={data} onEmojiSelect={handleEmojiSelect} />
+					</Popover.Content>
+				</Popover>
+			)}
+		</div>
 	)
 }

@@ -150,9 +150,27 @@
 		}
 	},
 	"homeScene": {
-		"continueReading": "Verder lezen",
-		"recentlyAddedSeries": "Recently Added Series",
-		"recentlyAddedBooks": "Recently Added Books"
+		"continueReading": {
+			"title": "Continue Reading",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you're currently reading will show up here"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Recently Added Series",
+			"emptyState": {
+				"heading": "No series to display",
+				"message": "Any series you add to your libraries will show up here"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Recently Added Books",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you add to your libraries will show up here"
+			}
+		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
@@ -378,9 +396,10 @@
 		"buttons": {
 			"home": "Home",
 			"libraries": "Libraries",
-			"books": "Explore Books",
-			"bookClubs": "Book Clubs",
-			"createLibrary": "Create Library",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Create library",
+			"createBookClub": "Create book club",
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",

@@ -1,12 +1,13 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::{get, post},
+	routing::{get, post, put},
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{raw, Direction};
-use serde::Deserialize;
+use axum_macros::debug_handler;
+use prisma_client_rust::{not, or, raw, Direction};
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
 use std::{path, str::FromStr};
@@ -19,8 +20,8 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			LibrariesStats, Library, LibraryOptions, LibraryScanMode, Media, Series, Tag,
-			UserPermission,
+			FileStatus, LibrariesStats, Library, LibraryOptions, LibraryScanMode, Media,
+			Series, Tag, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -79,6 +80,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.delete(delete_library),
 				)
 				.route("/scan", get(scan_library))
+				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
 				.nest(
@@ -779,6 +781,94 @@ async fn scan_library(
 	Ok(())
 }
 
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+pub struct CleanLibraryResponse {
+	deleted_media_count: i32,
+	deleted_series_count: i32,
+	is_empty: bool,
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/libraries/:id/clean",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully cleaned library"),
+		(status = 400, description = "Bad request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+#[debug_handler]
+async fn clean_library(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<CleanLibraryResponse>> {
+	get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
+
+	let client = ctx.get_db();
+
+	let _it_exists = client
+		.library()
+		.find_unique(library::id::equals(id.clone()))
+		.exec()
+		.await?;
+
+	let deleted_media_count = client
+		.media()
+		.delete_many(vec![
+			media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
+			not![media::status::equals(FileStatus::Ready.to_string())],
+		])
+		.exec()
+		.await?
+		.try_into()?;
+
+	tracing::debug!(deleted_media_count, "Deleted media");
+
+	let deleted_series_count = client
+		.series()
+		.delete_many(vec![
+			series::library_id::equals(Some(id.clone())),
+			or![
+				series::status::equals(FileStatus::Ready.to_string()),
+				not![series::media::some(vec![media::status::equals(
+					FileStatus::Ready.to_string()
+				)])],
+			],
+		])
+		.exec()
+		.await?
+		.try_into()?;
+
+	tracing::debug!(deleted_series_count, "Deleted series");
+
+	let is_empty = client
+		.library()
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			or![
+				library::series::none(vec![]),
+				library::series::every(vec![series::media::none(vec![])])
+			],
+		])
+		.exec()
+		.await?
+		.is_none();
+
+	Ok(Json(CleanLibraryResponse {
+		deleted_media_count,
+		deleted_series_count,
+		is_empty,
+	}))
+}
+
 #[derive(Deserialize, Debug, Type, ToSchema)]
 pub struct CreateLibrary {
 	/// The name of the library to create.
@@ -962,7 +1052,8 @@ async fn update_library(
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	get_session_server_owner_user(&session)?;
+	get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
+
 	let db = ctx.get_db();
 
 	if !path::Path::new(&input.path).exists() {

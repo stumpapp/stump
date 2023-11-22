@@ -89,7 +89,9 @@ export default function EmojiPicker({
 						<Dropdown.Item disabled={disabled} onClick={() => setIsOpen(true)}>
 							Change
 						</Dropdown.Item>
-						<Dropdown.Item disabled={disabled || !value}>Remove</Dropdown.Item>
+						<Dropdown.Item disabled={disabled || !value} onClick={() => onEmojiSelect(undefined)}>
+							Remove
+						</Dropdown.Item>
 					</Dropdown.Content>
 				</Dropdown>
 			)}

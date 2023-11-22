@@ -309,6 +309,7 @@ pub struct UpdateBookClub {
 	pub description: Option<String>,
 	pub is_private: Option<bool>,
 	pub member_role_spec: Option<BookClubMemberRoleSpec>,
+	pub emoji: Option<String>,
 }
 
 #[utoipa::path(
@@ -351,7 +352,10 @@ async fn update_book_club(
 		.update(
 			book_club::id::equals(book_club.id),
 			chain_optional_iter(
-				[book_club::description::set(payload.description)],
+				[
+					book_club::description::set(payload.description),
+					book_club::emoji::set(payload.emoji),
+				],
 				[
 					payload.name.map(book_club::name::set),
 					payload.is_private.map(book_club::is_private::set),

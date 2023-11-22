@@ -7,7 +7,8 @@ import pluralize from 'pluralize'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import Markdown from '../../../../../components/markdown/MarkdownPreview'
+import Markdown from '@/components/markdown/MarkdownPreview'
+
 import paths from '../../../../../paths'
 import { useBookClubContext } from '../../context'
 

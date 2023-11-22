@@ -59,6 +59,7 @@ impl TryInto<media::OrderByParam> for QueryOrder {
 			"path" => media::path::order(dir),
 			"pages" => media::pages::order(dir),
 			"series_id" => media::series_id::order(dir),
+			"created_at" => media::created_at::order(dir),
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order media by {:?}",
@@ -80,7 +81,7 @@ impl TryInto<library::OrderByParam> for QueryOrder {
 			"path" => library::path::order(dir),
 			"status" => library::status::order(dir),
 			"updated_at" => library::updated_at::order(dir),
-			// "created_at" => library::created_at::order(dir),
+			"created_at" => library::created_at::order(dir),
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order library by {:?}",

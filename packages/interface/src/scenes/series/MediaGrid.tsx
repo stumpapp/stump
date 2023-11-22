@@ -1,8 +1,8 @@
 import { CardGrid } from '@stump/components'
 import type { Media } from '@stump/types'
 
-import GenericEmptyState from '../../components/GenericEmptyState'
-import MediaCard from '../../components/media/MediaCard'
+import GenericEmptyState from '@/components/GenericEmptyState'
+import MediaCard from '@/components/media/MediaCard'
 
 type Props = {
 	isLoading: boolean

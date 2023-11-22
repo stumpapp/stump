@@ -8,6 +8,7 @@ use axum_extra::extract::Query;
 use prisma_client_rust::{raw, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
+use specta::Type;
 use std::{path, str::FromStr};
 use tower_sessions::Session;
 use tracing::{debug, error, trace};
@@ -18,8 +19,8 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			CreateLibrary, LibrariesStats, Library, LibraryOptions, LibraryScanMode,
-			Media, Series, UpdateLibrary, UserPermission,
+			LibrariesStats, Library, LibraryOptions, LibraryScanMode, Media, Series, Tag,
+			UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -64,8 +65,6 @@ use super::{
 };
 
 // TODO: age restrictions!
-// TODO: .layer(from_extractor::<ServerOwnerGuard>()) where needed. Might need to remove some
-// of the nesting
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/libraries", get(get_libraries).post(create_library))
@@ -780,6 +779,22 @@ async fn scan_library(
 	Ok(())
 }
 
+#[derive(Deserialize, Debug, Type, ToSchema)]
+pub struct CreateLibrary {
+	/// The name of the library to create.
+	pub name: String,
+	/// The path to the library to create, i.e. where the directory is on the filesystem.
+	pub path: String,
+	/// Optional text description of the library.
+	pub description: Option<String>,
+	/// Optional tags to assign to the library.
+	pub tags: Option<Vec<Tag>>,
+	/// Optional flag to indicate if the how the library should be scanned after creation. Default is `BATCHED`.
+	pub scan_mode: Option<LibraryScanMode>,
+	/// Optional options to apply to the library. When not provided, the default options will be used.
+	pub library_options: Option<LibraryOptions>,
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/libraries",
@@ -900,6 +915,29 @@ async fn create_library(
 	Ok(Json(library))
 }
 
+#[derive(Deserialize, Debug, Type, ToSchema)]
+pub struct UpdateLibrary {
+	pub id: String,
+	/// The updated name of the library.
+	pub name: String,
+	/// The updated path of the library.
+	pub path: String,
+	/// The updated description of the library.
+	pub description: Option<String>,
+	/// The updated emoji for the library.
+	pub emoji: Option<String>,
+	/// The updated tags of the library.
+	pub tags: Option<Vec<Tag>>,
+	/// The tags to remove from the library.
+	#[serde(default)]
+	pub removed_tags: Option<Vec<Tag>>,
+	/// The updated options of the library.
+	pub library_options: LibraryOptions,
+	/// Optional flag to indicate how the library should be automatically scanned after update. Default is `BATCHED`.
+	#[serde(default)]
+	pub scan_mode: Option<LibraryScanMode>,
+}
+
 #[utoipa::path(
 	put,
 	path = "/api/v1/libraries/:id",
@@ -996,9 +1034,10 @@ async fn update_library(
 		.update(
 			library::id::equals(id),
 			vec![
-				library::name::set(input.name.to_owned()),
-				library::path::set(input.path.to_owned()),
-				library::description::set(input.description.to_owned()),
+				library::name::set(input.name),
+				library::path::set(input.path),
+				library::description::set(input.description),
+				library::emoji::set(input.emoji),
 			],
 		)
 		.with(library::tags::fetch(vec![]))

@@ -36,6 +36,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [/apps](#apps)
   - [/core](#core)
   - [/crates](#crates)
+  - [/docs](#docs)
   - [/packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
 - [Acknowledgements 🙏](#acknowledgements-)
@@ -160,14 +161,13 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 ### /apps
 
 - `desktop`: A React+Tauri application
-- `docs`: A NextJS application for the Stump documentation site
 - `mobile`: A React Native application
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server
 - `web`: A React application
 
 ### /core
 
-- `core`: A Rust crate containing Stump's core functionalities
+A Rust crate containing Stump's core functionalities
 
 ### /crates
 
@@ -175,6 +175,10 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 - `codegen`: A small rust app that handles all of the code generation for Stump
 - `integrations`: A rust library containing integrations with other notification services
 - `prisma-cli`: A small wrapper rust app to run the Prisma CLI
+
+### /docs
+
+A NextJS application for the Stump documentation site
 
 ### /packages
 

@@ -5,7 +5,8 @@ import { PaginationState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
-import SceneContainer from '../../../components/SceneContainer'
+import SceneContainer from '@/components/SceneContainer'
+
 import { useAppContext } from '../../../context.ts'
 import { useLocaleContext } from '../../../i18n'
 import { JobSettingsContext } from './context'

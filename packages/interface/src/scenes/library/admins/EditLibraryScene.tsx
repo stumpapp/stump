@@ -22,16 +22,19 @@ export default function ManageLibraryScene() {
 
 	return (
 		<>
-			<Heading size="lg">{t('manageLibraryScene.heading')}</Heading>
-			<Text size="sm" variant="muted">
-				{t('manageLibraryScene.subtitle')}{' '}
-				<Link href="https://stumpapp.dev/guides/libraries">
-					{t('manageLibraryScene.subtitleLink')}.
-				</Link>
-			</Text>
+			<div>
+				<Heading size="lg">{t('manageLibraryScene.heading')}</Heading>
+				<Text size="sm" variant="muted">
+					{t('manageLibraryScene.subtitle')}{' '}
+					<Link href="https://stumpapp.dev/guides/libraries">
+						{t('manageLibraryScene.subtitleLink')}.
+					</Link>
+				</Text>
 
-			<Divider variant="muted" className="my-3.5" />
-			<div className="flex flex-col gap-12 pt-2">
+				<Divider variant="muted" className="mt-3.5" />
+			</div>
+
+			<div className="flex flex-col gap-12">
 				{libraries && (
 					<>
 						<QuickActions library={library} />

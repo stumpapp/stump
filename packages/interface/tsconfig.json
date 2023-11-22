@@ -16,7 +16,13 @@
 			"@stump/components": ["../components/src/index.ts"],
 			"@stump/components/*": ["../components/src/*"],
 			"@stump/types": ["../types/index.ts"],
-			"@stump/types/*": ["../types/*"]
+			"@stump/types/*": ["../types/*"],
+			"@/components/*": ["./src/components/*"],
+			"@/hooks/*": ["./src/hooks/*"],
+			"@/i18n": ["./src/i18n/index.ts"],
+			"@/i18n/*": ["./src/i18n/*"],
+			"@/utils/*": ["./src/utils/*"],
+			"@/paths": ["./src/paths.ts"]
 		},
 		"resolveJsonModule": true
 	},

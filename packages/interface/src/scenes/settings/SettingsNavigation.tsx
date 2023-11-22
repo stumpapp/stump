@@ -4,7 +4,8 @@ import { User } from '@stump/types'
 import { useContext, useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import SceneContainer from '../../components/SceneContainer'
+import SceneContainer from '@/components/SceneContainer'
+
 import { useLocaleContext } from '../../i18n/context'
 
 const DEFAULT_PAGES = [

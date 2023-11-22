@@ -1,6 +1,7 @@
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
-import EpubJsReader from '../../components/readers/epub/EpubJsReader'
+import EpubJsReader from '@/components/readers/epub/EpubJsReader'
+
 import paths from '../../paths'
 
 //! NOTE: Only the epub.js reader is supported for now :sob:

@@ -36,7 +36,7 @@ export default function Logout() {
 			onConfirm={handleLogout}
 			trigger={
 				<ToolTip content="Sign Out">
-					<IconButton variant="ghost" size="sm" onClick={on}>
+					<IconButton variant="ghost" className="p-1.5" onClick={on}>
 						<LogOut className="h-4 w-4 -scale-x-[1] transform" />
 					</IconButton>
 				</ToolTip>

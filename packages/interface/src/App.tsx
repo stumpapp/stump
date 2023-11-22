@@ -17,9 +17,10 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Helmet } from 'react-helmet'
 import { BrowserRouter, createSearchParams, useLocation, useNavigate } from 'react-router-dom'
 
+import { ErrorFallback } from '@/components/ErrorFallback'
+import Notifications from '@/components/Notifications'
+
 import { AppRouter } from './AppRouter'
-import { ErrorFallback } from './components/ErrorFallback'
-import Notifications from './components/Notifications'
 import { API_VERSION } from './index'
 
 const IS_DEVELOPMENT = import.meta.env.MODE === 'development'

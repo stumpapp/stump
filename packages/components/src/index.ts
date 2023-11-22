@@ -2,6 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Any = any
 
+export { Accordion } from './accordian'
 export { Alert } from './alert'
 export { Badge, type BadgeProps } from './badge'
 export { Breadcrumbs, type BreadcrumbsProps } from './breadcrumbs'
@@ -19,7 +20,8 @@ export { Command, type CommandProps } from './command'
 export { Container, Divider, Layout, Spacer, type SpacerProps } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
-export { DropdownMenu, type DropdownMenuProps } from './dropdown'
+export { Dropdown, DropdownMenu, type DropdownMenuProps } from './dropdown'
+export { EmojiPicker } from './emoji'
 export { Form, type FormProps, Label, type LabelProps } from './form'
 export { useBodyLock, useBoolean, usePrevious, usePreviousIsDifferent } from './hooks'
 export { AspectRatio, Avatar, Image } from './image'

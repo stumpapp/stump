@@ -2,19 +2,23 @@ import { useLayoutMode, usePagedMediaQuery, useSeriesByIdQuery } from '@stump/cl
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
+import { useMediaMatch } from 'rooks'
 
-import { FilterProvider, FilterToolBar, useFilterContext } from '../../components/filters'
-import MediaList from '../../components/media/MediaList'
-import Pagination from '../../components/Pagination'
-import SceneContainer from '../../components/SceneContainer'
-import useIsInView from '../../hooks/useIsInView'
-import { usePageParam } from '../../hooks/usePageParam'
+import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
+import MediaList from '@/components/media/MediaList'
+import Pagination from '@/components/Pagination'
+import SceneContainer from '@/components/SceneContainer'
+import useIsInView from '@/hooks/useIsInView'
+import { usePageParam } from '@/hooks/usePageParam'
+
 import { SeriesContext, useSeriesContext } from './context'
 import MediaGrid from './MediaGrid'
 import SeriesOverviewTitleSection from './SeriesOverviewTitleSection'
 
 // TODO: fix pagination
 function SeriesOverviewScene() {
+	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
+
 	const [containerRef, isInView] = useIsInView()
 
 	const { page, setPage } = usePageParam()
@@ -30,6 +34,7 @@ function SeriesOverviewScene() {
 		pageData,
 	} = usePagedMediaQuery({
 		page,
+		page_size: is3XLScreenOrBigger ? 40 : 20,
 		params: {
 			...filters,
 			series: {
@@ -79,7 +84,8 @@ function SeriesOverviewScene() {
 			<FilterToolBar
 				isRefetching={isRefetchingMedia}
 				searchPlaceholder="Search media in series by name or description."
-				slideOverForm="media"
+				entity="media"
+				orderBy
 			/>
 
 			<div className="flex w-full flex-col space-y-6 pt-4">

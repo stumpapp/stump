@@ -1,0 +1,41 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Executable
+
+<Callout emoji="☢️">
+	Any present tense information in this section is not accurate. Once a release is made, the
+	following information will apply shortly thereafter.
+</Callout>
+
+Pre-built binaries will be generally available on [GitHub](https://github.com/stumpapp/stump/releases), once a release schedule starts. Supported platforms will include: Linux, macOS, and Windows.
+
+## Linux
+
+Coming Soon!
+
+## macOS
+
+Coming Soon!
+
+## Windows
+
+Coming Soon!
+
+Example Windows service file provided by [@KrautByte](https://github.com/KrautByte):
+
+```
+[Unit]
+Description=Stump Book Server
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=stump
+WorkingDirectory=/opt/stump
+ExecStart=pnpm start core
+
+[Install]
+WantedBy=multi-user.target
+```

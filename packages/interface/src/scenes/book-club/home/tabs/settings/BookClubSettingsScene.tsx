@@ -2,7 +2,8 @@ import { ButtonOrLink, Card } from '@stump/components'
 import dayjs from 'dayjs'
 import React from 'react'
 
-import GenericEmptyState from '../../../../../components/GenericEmptyState'
+import GenericEmptyState from '@/components/GenericEmptyState'
+
 import paths from '../../../../../paths'
 import { useBookClubContext } from '../../context'
 import MemberSpecDisplay from './MemberSpecDisplay'

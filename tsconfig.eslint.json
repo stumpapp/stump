@@ -4,6 +4,7 @@
 		"apps/**/*",
 		"core",
 		"crates/**/*",
+		"docs",
 		"packages/**/*",
 		"**/.eslintrc.js",
 		"**/*.config.js",

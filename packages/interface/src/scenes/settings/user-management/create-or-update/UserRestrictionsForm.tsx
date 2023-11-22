@@ -10,7 +10,6 @@ const LOCAL_BASE = 'settingsScene.createOrUpdateUsers.accessControl'
 const getLocaleKey = (path: string) => `${LOCAL_BASE}.${path}`
 const getAgeRestrictionKey = (path: string) => `${getLocaleKey('ageRestriction')}.${path}`
 
-// TODO: refactor to resuse in updating a user...
 export default function UserRestrictionsForm() {
 	const { t } = useLocaleContext()
 
@@ -23,7 +22,7 @@ export default function UserRestrictionsForm() {
 
 	useEffect(
 		() => {
-			if (age_restriction == undefined || isNaN(age_restriction)) {
+			if (age_restriction == undefined) {
 				form.setValue('age_restriction_on_unset', undefined)
 				form.clearErrors('age_restriction')
 			}
@@ -32,6 +31,19 @@ export default function UserRestrictionsForm() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[age_restriction],
 	)
+
+	const handleAgeRestrictionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target
+
+		if (value === '' || value == undefined) {
+			form.setValue('age_restriction', undefined)
+		} else {
+			const parsed = parseInt(value)
+			if (!isNaN(parsed)) {
+				form.setValue('age_restriction', parsed)
+			}
+		}
+	}
 
 	const renderDescription = () => {
 		const description = t(getLocaleKey('subtitle.0'))
@@ -64,11 +76,9 @@ export default function UserRestrictionsForm() {
 						label={t(getAgeRestrictionKey('label'))}
 						description={t(getAgeRestrictionKey('description'))}
 						descriptionPosition="top"
-						{...form.register('age_restriction', {
-							required: false,
-							valueAsNumber: true,
-						})}
+						defaultValue={age_restriction}
 						errorMessage={form.formState.errors.age_restriction?.message}
+						onChange={handleAgeRestrictionChange}
 					/>
 
 					<CheckBox

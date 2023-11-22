@@ -46,7 +46,7 @@
 		"nextInSeries": "Suivant dans la série"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
+		"heading": "Créer un nouveau Club de Lecture",
 		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
 		"form": {
 			"name": {
@@ -150,9 +150,27 @@
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continuer la lecture",
-		"recentlyAddedSeries": "Séries récemment ajoutées",
-		"recentlyAddedBooks": "Livres récemment ajoutés"
+		"continueReading": {
+			"title": "Continue Reading",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you're currently reading will show up here"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Recently Added Series",
+			"emptyState": {
+				"heading": "No series to display",
+				"message": "Any series you add to your libraries will show up here"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Recently Added Books",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you add to your libraries will show up here"
+			}
+		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
@@ -378,9 +396,10 @@
 		"buttons": {
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
-			"books": "Explorer les livres",
-			"bookClubs": "Book Clubs",
-			"createLibrary": "Créer une bibliothèque",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Create library",
+			"createBookClub": "Create book club",
 			"settings": "Paramètres",
 			"themeToggle": "Changer de thème",
 			"goForward": "Aller en avant",

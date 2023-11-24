@@ -821,7 +821,8 @@ async fn clean_library(
 				.library()
 				.find_unique(library::id::equals(id.clone()))
 				.exec()
-				.await?;
+				.await?
+				.ok_or(ApiError::NotFound("Library not found".to_string()))?;
 
 			let delete_media_params = vec![
 				media::series::is(vec![series::library_id::equals(Some(id.clone()))]),

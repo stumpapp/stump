@@ -54,9 +54,14 @@ where
 			tracing::error!(error = ?e, "Failed to get user from session");
 			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 		})?;
+
 		if let Some(user) = session_user {
-			tracing::trace!("Session for {} already exists", &user.username);
-			return Ok(Self);
+			if !user.is_locked {
+				tracing::trace!(user = user.username, "Session found!");
+				return Ok(Self);
+			}
+		} else {
+			tracing::trace!("No session found, checking for auth header");
 		}
 
 		let auth_header = parts
@@ -69,17 +74,18 @@ where
 		let has_auth_header = auth_header.is_some();
 		tracing::trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
 
-		if !has_auth_header {
+		let Some(auth_header) = auth_header else {
 			if is_opds {
+				// Prompt for basic auth on OPDS routes
 				return Err(BasicAuth.into_response());
 			} else if is_swagger {
+				// Sign in via React app and then redirect to server-side swagger-ui
 				return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
 			}
 
 			return Err((StatusCode::UNAUTHORIZED).into_response());
-		}
+		};
 
-		let auth_header = auth_header.unwrap();
 		if !auth_header.starts_with("Basic ") || auth_header.len() <= 6 {
 			tracing::error!(?auth_header, "Invalid auth header!");
 			return Err((StatusCode::UNAUTHORIZED).into_response());
@@ -119,7 +125,13 @@ where
 			verify_password(&user.hashed_password, &decoded_credentials.password)
 				.map_err(|e| e.into_response())?;
 
-		if is_match {
+		if is_match && user.is_locked {
+			tracing::error!(
+				username = &user.username,
+				"User is locked, denying authentication"
+			);
+			return Err((StatusCode::UNAUTHORIZED, "Your account is locked. Please contact an administrator to unlock your account.").into_response());
+		} else if is_match {
 			tracing::trace!(
 				username = &user.username,
 				"Basic authentication sucessful. Creating session for user"
@@ -196,7 +208,10 @@ impl IntoResponse for BasicAuth {
 			.header("Authorization", "Basic")
 			.header("WWW-Authenticate", "Basic realm=\"stump\"")
 			.body(BoxBody::default())
-			.unwrap()
+			.unwrap_or_else(|e| {
+				tracing::error!(error = ?e, "Failed to build response");
+				StatusCode::INTERNAL_SERVER_ERROR.into_response()
+			})
 	}
 }
 

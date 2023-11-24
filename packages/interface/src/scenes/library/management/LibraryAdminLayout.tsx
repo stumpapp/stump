@@ -1,8 +1,8 @@
-import { Navigate, Outlet } from 'react-router'
+import { useEffect, useMemo } from 'react'
+import { Outlet, useNavigate } from 'react-router'
 
 import SceneContainer from '@/components/SceneContainer'
-
-import { useAppContext } from '../../../context'
+import { useAppContext } from '@/context'
 
 /**
  *  Component that renders the layout for the library admin pages. This includes:
@@ -11,10 +11,18 @@ import { useAppContext } from '../../../context'
  * - Updating an existing library
  */
 export default function LibraryAdminLayout() {
-	const { isServerOwner } = useAppContext()
+	const { checkPermission } = useAppContext()
 
-	if (!isServerOwner) {
-		return <Navigate to=".." replace />
+	const navigate = useNavigate()
+	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
+	useEffect(() => {
+		if (!canManage) {
+			navigate('..')
+		}
+	}, [canManage, navigate])
+
+	if (!canManage) {
+		return null
 	}
 
 	return (

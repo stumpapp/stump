@@ -5,7 +5,6 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_macros::debug_handler;
 use prisma_client_rust::{not, or, raw, Direction};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -781,7 +780,7 @@ async fn scan_library(
 	Ok(())
 }
 
-#[derive(Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
 pub struct CleanLibraryResponse {
 	deleted_media_count: i32,
 	deleted_series_count: i32,
@@ -804,7 +803,6 @@ pub struct CleanLibraryResponse {
 		(status = 500, description = "Internal server error")
 	)
 )]
-#[debug_handler]
 async fn clean_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -812,61 +810,113 @@ async fn clean_library(
 ) -> ApiResult<Json<CleanLibraryResponse>> {
 	get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
 
-	let client = ctx.get_db();
+	let db = ctx.get_db();
 
-	let _it_exists = client
-		.library()
-		.find_unique(library::id::equals(id.clone()))
-		.exec()
-		.await?;
+	let result: ApiResult<(CleanLibraryResponse, Vec<String>)> = db
+		._transaction()
+		.run(|client| async move {
+			// This isn't really necessary, but it is more for RESTful patterns (i.e. error
+			// if the library doesn't exist)
+			let _it_exists = client
+				.library()
+				.find_unique(library::id::equals(id.clone()))
+				.exec()
+				.await?;
 
-	let deleted_media_count = client
-		.media()
-		.delete_many(vec![
-			media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
-			not![media::status::equals(FileStatus::Ready.to_string())],
-		])
-		.exec()
-		.await?
-		.try_into()?;
+			let delete_media_params = vec![
+				media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
+				// Delete media that are not ready
+				media::status::not(FileStatus::Ready.to_string()),
+			];
 
-	tracing::debug!(deleted_media_count, "Deleted media");
+			let media_to_delete = client
+				.media()
+				.find_many(delete_media_params.clone())
+				.exec()
+				.await?;
 
-	let deleted_series_count = client
-		.series()
-		.delete_many(vec![
-			series::library_id::equals(Some(id.clone())),
-			or![
-				series::status::equals(FileStatus::Ready.to_string()),
-				not![series::media::some(vec![media::status::equals(
-					FileStatus::Ready.to_string()
-				)])],
-			],
-		])
-		.exec()
-		.await?
-		.try_into()?;
+			let media_to_delete_count = media_to_delete.len();
+			let media_to_delete_ids = media_to_delete
+				.into_iter()
+				.map(|m| m.id)
+				.collect::<Vec<_>>();
 
-	tracing::debug!(deleted_series_count, "Deleted series");
+			let deleted_media_count = client
+				.media()
+				.delete_many(delete_media_params)
+				.exec()
+				.await?
+				.try_into()?;
 
-	let is_empty = client
-		.library()
-		.find_first(vec![
-			library::id::equals(id.clone()),
-			or![
-				library::series::none(vec![]),
-				library::series::every(vec![series::media::none(vec![])])
-			],
-		])
-		.exec()
-		.await?
-		.is_none();
+			tracing::debug!(deleted_media_count, "Deleted media");
 
-	Ok(Json(CleanLibraryResponse {
-		deleted_media_count,
-		deleted_series_count,
-		is_empty,
-	}))
+			if media_to_delete_count != deleted_media_count as usize {
+				tracing::warn!(
+					fetched_media_count = media_to_delete_count,
+					deleted_media_count,
+					"Deleted media count does not match fetched media count"
+				);
+			}
+
+			let deleted_series_count = client
+				.series()
+				.delete_many(vec![
+					series::library_id::equals(Some(id.clone())),
+					or![
+						// Delete series that are missing
+						series::status::not(FileStatus::Ready.to_string()),
+						// Delete series that have no non-missing media. Since we deleted all the media
+						// above, this is effectively the same as deleting all series with no media
+						not![series::media::some(vec![media::status::equals(
+							FileStatus::Ready.to_string()
+						)])],
+					],
+				])
+				.exec()
+				.await?
+				.try_into()?;
+
+			tracing::debug!(deleted_series_count, "Deleted series");
+
+			let is_empty = client
+				.library()
+				.find_first(vec![
+					library::id::equals(id.clone()),
+					or![
+						// There are no series
+						library::series::none(vec![]),
+						// All series have no media
+						library::series::every(vec![series::media::none(vec![])])
+					],
+				])
+				.exec()
+				.await?
+				.is_some();
+
+			Ok((
+				CleanLibraryResponse {
+					deleted_media_count,
+					deleted_series_count,
+					is_empty,
+				},
+				media_to_delete_ids,
+			))
+		})
+		.await;
+	let (response, media_to_delete_ids) = result?;
+
+	if !media_to_delete_ids.is_empty() {
+		image::remove_thumbnails(&media_to_delete_ids).map_or_else(
+			|error| {
+				tracing::error!(?error, "Failed to remove thumbnails for library media");
+			},
+			|_| {
+				tracing::debug!("Removed thumbnails for deleted media");
+			},
+		);
+	}
+
+	Ok(Json(response))
 }
 
 #[derive(Deserialize, Debug, Type, ToSchema)]

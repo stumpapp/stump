@@ -6,6 +6,7 @@ import React from 'react'
 
 import { useAppContext } from '../../../context'
 import paths from '../../../paths'
+import CleanLibrary from './CleanLibrary'
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
 import RegenerateThumbnails from './RegenerateThumbnails'
@@ -46,6 +47,7 @@ export default function QuickActions({ library }: Props) {
 							<DeleteLibraryThumbnails libraryId={library.id} />
 						</>
 					)}
+					<CleanLibrary libraryId={library.id} />
 					<ButtonOrLink href={paths.libraryFileExplorer(library.id)} size="md" variant="outline">
 						Open file explorer
 					</ButtonOrLink>

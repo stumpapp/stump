@@ -127,7 +127,7 @@ impl From<prisma::user::Data> for User {
 // TODO: consider adding self:update permission, useful for child accounts
 /// Permissions that can be granted to a user. Some permissions are implied by others,
 /// and will be automatically granted if the "parent" permission is granted.
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
 pub enum UserPermission {
 	/// Grant access to the book club feature
 	#[serde(rename = "bookclub:read")]
@@ -141,6 +141,9 @@ pub enum UserPermission {
 	/// Grant access to upload files to the library (manage library)
 	#[serde(rename = "file:upload")]
 	UploadFile,
+	/// Grant access to create a library
+	#[serde(rename = "library:create")]
+	CreateLibrary,
 	/// Grant access to edit basic details about the library
 	#[serde(rename = "library:edit")]
 	EditLibrary,
@@ -162,6 +165,7 @@ impl ToString for UserPermission {
 			UserPermission::CreateBookClub => "bookclub:create".to_string(),
 			UserPermission::FileExplorer => "file:explorer".to_string(),
 			UserPermission::UploadFile => "file:upload".to_string(),
+			UserPermission::CreateLibrary => "library:create".to_string(),
 			UserPermission::EditLibrary => "library:edit".to_string(),
 			UserPermission::ScanLibrary => "library:scan".to_string(),
 			UserPermission::ManageLibrary => "library:manage".to_string(),
@@ -177,6 +181,7 @@ impl From<&str> for UserPermission {
 			"bookclub:create" => UserPermission::CreateBookClub,
 			"file:explorer" => UserPermission::FileExplorer,
 			"file:upload" => UserPermission::UploadFile,
+			"library:create" => UserPermission::CreateLibrary,
 			"library:edit" => UserPermission::EditLibrary,
 			"library:scan" => UserPermission::ScanLibrary,
 			"library:manage" => UserPermission::ManageLibrary,

@@ -20,7 +20,7 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 
 	const { t } = useLocaleContext()
 	const { libraries } = useLibraries()
-	const { isServerOwner } = useAppContext()
+	const { checkPermission } = useAppContext()
 
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
 
@@ -30,8 +30,7 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 		}
 
 		return libraries.map((library) => {
-			// TODO: user permissions
-			const canChange = isServerOwner && !isMobile
+			const canChange = checkPermission('library:manage') && !isMobile
 			const leftContent = (
 				<LibraryEmoji
 					emoji={library.emoji || undefined}

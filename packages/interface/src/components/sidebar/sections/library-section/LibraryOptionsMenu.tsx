@@ -1,4 +1,4 @@
-import { queryClient, useScanLibrary, useUserStore } from '@stump/client'
+import { queryClient, useScanLibrary } from '@stump/client'
 import { DropdownMenu } from '@stump/components'
 import type { Library } from '@stump/types'
 import { Edit, FolderSearch2, MoreHorizontal, ScanLine, Trash } from 'lucide-react'
@@ -18,23 +18,22 @@ type Props = {
 const LOCALE_KEY = 'sidebar.libraryOptions'
 const getLocaleKey = (path: string) => `${LOCALE_KEY}.${path}`
 
-// TODO: just split this into two components: one for desktop and one for inline
-// dropdown menu.. this is gross otherwise.
 export default function LibraryOptionsMenu({ library }: Props) {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const { scanAsync } = useScanLibrary()
 
 	const { t } = useLocaleContext()
-	const { isServerOwner } = useAppContext()
+	const { checkPermission } = useAppContext()
 
 	const isMobile = useMediaMatch('(max-width: 768px)')
-	const checkUserPermission = useUserStore((state) => state.checkUserPermission)
 
 	const location = useLocation()
 	const isOnExplorer = location.pathname.startsWith(paths.libraryFileExplorer(library.id))
 
-	const canScan = useMemo(() => checkUserPermission('library:scan'), [checkUserPermission])
-	const canUseExplorer = useMemo(() => checkUserPermission('file:explorer'), [checkUserPermission])
+	const canScan = useMemo(() => checkPermission('library:scan'), [checkPermission])
+	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
+	const canDelete = useMemo(() => checkPermission('library:delete'), [checkPermission])
+	const canUseExplorer = useMemo(() => checkPermission('file:explorer'), [checkPermission])
 
 	const handleScan = useCallback(() => {
 		// extra protection, should not be possible to reach this.
@@ -95,7 +94,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 								: []),
 						],
 					},
-					...(isServerOwner
+					...(canManage
 						? [
 								{
 									items: [
@@ -104,14 +103,18 @@ export default function LibraryOptionsMenu({ library }: Props) {
 											label: t(getLocaleKey('manageLibrary')),
 											leftIcon: <Edit className={iconStyle} />,
 										},
-										{
-											label: t(getLocaleKey('deleteLibrary')),
-											leftIcon: <Trash className={iconStyle} />,
-											onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-												e.stopPropagation()
-												setIsDeleting(true)
-											},
-										},
+										...(canDelete
+											? [
+													{
+														label: t(getLocaleKey('deleteLibrary')),
+														leftIcon: <Trash className={iconStyle} />,
+														onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+															e.stopPropagation()
+															setIsDeleting(true)
+														},
+													},
+											  ]
+											: []),
 									],
 								},
 						  ]

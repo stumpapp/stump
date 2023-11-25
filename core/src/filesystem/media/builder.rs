@@ -23,6 +23,14 @@ impl MediaBuilder {
 		}
 	}
 
+	pub fn rebuild(self, media: &Media) -> CoreResult<Media> {
+		let generated = self.build()?;
+		Ok(Media {
+			id: media.id.clone(),
+			..generated
+		})
+	}
+
 	pub fn build(self) -> CoreResult<Media> {
 		let mut processed_entry = process(&self.path, self.library_options.into())?;
 

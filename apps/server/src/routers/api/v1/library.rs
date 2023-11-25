@@ -252,21 +252,16 @@ async fn get_libraries_stats(
 		(status = 500, description = "Internal server error")
 	)
 )]
-/// Get a library by id, if the current user has access to it. Library `series`, `media`
-/// and `tags` relations are loaded on this route.
+/// Get a library by ID
 async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
-	// FIXME: this query is a pain to add series->media relation counts.
-	// This should be much better in https://github.com/Brendonovich/prisma-client-rust/issues/24
-	// but for now I kinda have to load all the media...
 	let library = db
 		.library()
 		.find_unique(library::id::equals(id.clone()))
-		.with(library::series::fetch(vec![]))
 		.with(library::library_options::fetch())
 		.with(library::tags::fetch(vec![]))
 		.exec()
@@ -292,15 +287,13 @@ async fn get_library_by_id(
 		(status = 500, description = "Internal server error")
 	)
 )]
-// FIXME: this is absolutely atrocious...
-// This should be much better once https://github.com/Brendonovich/prisma-client-rust/issues/24 is added
-// but for now I will have this disgustingly gross and ugly work around...
 /// Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
 	filter_query: Query<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery {
 		ordering, filters, ..
@@ -310,16 +303,25 @@ async fn get_library_series(
 
 	let db = ctx.get_db();
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
 	let where_conditions = apply_series_filters(filters)
 		.into_iter()
-		.chain(vec![series::library_id::equals(Some(id.clone()))])
+		.chain(chain_optional_iter(
+			[series::library_id::equals(Some(id.clone()))],
+			[age_restrictions],
+		))
 		.collect::<Vec<series::WhereParam>>();
+
 	let mut query = db
 		.series()
-		// TODO: add media relation count....
 		.find_many(where_conditions.clone())
 		.order_by(order_by_param);
 
@@ -337,7 +339,7 @@ async fn get_library_series(
 					query = query.take(limit)
 				}
 			},
-			_ => unreachable!(),
+			_ => unreachable!("Pagination should be either page or cursor"),
 		}
 	}
 
@@ -348,9 +350,10 @@ async fn get_library_series(
 	let series = series
 		.iter()
 		.map(|s| {
-			let media_count = match media_counts.get(&s.id) {
-				Some(count) => count.to_owned(),
-				_ => 0,
+			let media_count = if let Some(count) = media_counts.get(&s.id) {
+				count.to_owned()
+			} else {
+				0
 			};
 
 			(s.to_owned(), media_count).into()
@@ -361,11 +364,7 @@ async fn get_library_series(
 		return Ok(Json(series.into()));
 	}
 
-	let series_count = db
-		.series()
-		.count(vec![series::library_id::equals(Some(id.clone()))])
-		.exec()
-		.await?;
+	let series_count = db.series().count(where_conditions).exec().await?;
 
 	Ok(Json((series, series_count, pagination).into()))
 }

@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use pdf::primitive::Dictionary;
+use pdf::{
+	object::InfoDict,
+	primitive::{Dictionary, PdfString},
+};
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize};
 use specta::Type;
@@ -439,6 +442,38 @@ impl From<Dictionary> for MediaMetadata {
 			.map(|(k, v)| (k.to_lowercase(), vec![v]))
 			.collect::<HashMap<String, Vec<String>>>();
 		Self::from(map)
+	}
+}
+
+fn pdf_string_to_string(pdf_string: PdfString) -> Option<String> {
+	pdf_string.to_string().map_or_else(
+		|error| {
+			tracing::error!(error = ?error, "Failed to convert PdfString to String");
+			None
+		},
+		|str| Some(str.trim().to_owned()),
+	)
+}
+
+impl From<InfoDict> for MediaMetadata {
+	fn from(dict: InfoDict) -> Self {
+		MediaMetadata {
+			title: dict.title.map(pdf_string_to_string).flatten(),
+			genre: dict
+				.subject
+				.map(pdf_string_to_string)
+				.flatten()
+				.map(|v| vec![v]),
+			year: dict.creation_date.as_ref().map(|date| date.year as i32),
+			month: dict.creation_date.as_ref().map(|date| date.month as i32),
+			day: dict.creation_date.as_ref().map(|date| date.day as i32),
+			writers: dict
+				.author
+				.map(pdf_string_to_string)
+				.flatten()
+				.map(|v| vec![v]),
+			..Default::default()
+		}
 	}
 }
 

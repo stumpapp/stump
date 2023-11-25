@@ -458,20 +458,12 @@ fn pdf_string_to_string(pdf_string: PdfString) -> Option<String> {
 impl From<InfoDict> for MediaMetadata {
 	fn from(dict: InfoDict) -> Self {
 		MediaMetadata {
-			title: dict.title.map(pdf_string_to_string).flatten(),
-			genre: dict
-				.subject
-				.map(pdf_string_to_string)
-				.flatten()
-				.map(|v| vec![v]),
+			title: dict.title.and_then(pdf_string_to_string),
+			genre: dict.subject.and_then(pdf_string_to_string).map(|v| vec![v]),
 			year: dict.creation_date.as_ref().map(|date| date.year as i32),
 			month: dict.creation_date.as_ref().map(|date| date.month as i32),
 			day: dict.creation_date.as_ref().map(|date| date.day as i32),
-			writers: dict
-				.author
-				.map(pdf_string_to_string)
-				.flatten()
-				.map(|v| vec![v]),
+			writers: dict.author.and_then(pdf_string_to_string).map(|v| vec![v]),
 			..Default::default()
 		}
 	}

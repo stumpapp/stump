@@ -1,4 +1,4 @@
-import { useBookClubsQuery, useUserStore } from '@stump/client'
+import { useBookClubsQuery } from '@stump/client'
 import { Accordion } from '@stump/components'
 import { Club } from 'lucide-react'
 import React from 'react'
@@ -16,8 +16,7 @@ type Props = {
 
 export default function BookClubSideBarSection({ isMobile }: Props) {
 	const location = useLocation()
-	const checkUserPermission = useUserStore((state) => state.checkUserPermission)
-	const { user, isServerOwner } = useAppContext()
+	const { user, isServerOwner, checkPermission } = useAppContext()
 
 	const { t } = useLocaleContext()
 	const { bookClubs } = useBookClubsQuery({ params: { all: false } })
@@ -59,7 +58,7 @@ export default function BookClubSideBarSection({ isMobile }: Props) {
 		})
 	}
 
-	const canCreateBookClub = checkUserPermission('bookclub:create')
+	const canCreateBookClub = checkPermission('bookclub:create')
 
 	return (
 		<Accordion type="single" collapsible className="w-full">

@@ -1,7 +1,8 @@
 import { isAxiosError } from '@stump/api'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import { Suspense, useMemo } from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { UserPermission } from '@stump/types'
+import { Suspense, useCallback, useMemo } from 'react'
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import BackgroundFetchIndicator from '@/components/BackgroundFetchIndicator'
 import JobOverlay from '@/components/jobs/JobOverlay'
@@ -10,12 +11,13 @@ import ServerStatusOverlay from '@/components/ServerStatusOverlay'
 import { SideBar } from '@/components/sidebar'
 import TopBar from '@/components/topbar/TopBar'
 
-import { AppContext } from './context'
+import { AppContext, PermissionEnforcerOptions } from './context'
 
 export function AppLayout() {
 	const appProps = useAppProps()
 
 	const location = useLocation()
+	const navigate = useNavigate()
 
 	const hideSidebar = useMemo(() => {
 		// hide sidebar when reading a book
@@ -24,10 +26,25 @@ export function AppLayout() {
 
 	useCoreEventHandler()
 
-	const { storeUser, setUser } = useUserStore((state) => ({
+	const { storeUser, setUser, checkUserPermission } = useUserStore((state) => ({
+		checkUserPermission: state.checkUserPermission,
 		setUser: state.setUser,
 		storeUser: state.user,
 	}))
+
+	const enforcePermission = useCallback(
+		(
+			permission: UserPermission,
+			{ onFailure }: PermissionEnforcerOptions = {
+				onFailure: () => navigate('..'),
+			},
+		) => {
+			if (!checkUserPermission(permission)) {
+				onFailure()
+			}
+		},
+		[checkUserPermission, navigate],
+	)
 
 	// TODO: platform specific hotkeys
 
@@ -49,7 +66,14 @@ export function AppLayout() {
 	}
 
 	return (
-		<AppContext.Provider value={{ isServerOwner: storeUser.is_server_owner, user: storeUser }}>
+		<AppContext.Provider
+			value={{
+				checkPermission: checkUserPermission,
+				enforcePermission,
+				isServerOwner: storeUser.is_server_owner,
+				user: storeUser,
+			}}
+		>
 			<Suspense fallback={<RouteLoadingIndicator />}>
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">

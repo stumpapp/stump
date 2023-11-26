@@ -5,7 +5,11 @@
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 
-export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:scan"
+/**
+ * Permissions that can be granted to a user. Some permissions are implied by others,
+ * and will be automatically granted if the "parent" permission is granted.
+ */
+export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
@@ -165,6 +169,8 @@ export type ClaimResponse = { is_claimed: boolean }
 export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
 
 export type UpdateLibrary = { id: string; name: string; path: string; description: string | null; emoji: string | null; tags: Tag[] | null; removed_tags?: Tag[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
+
+export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
 
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
 

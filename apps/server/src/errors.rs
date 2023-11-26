@@ -15,7 +15,7 @@ use tokio::sync::mpsc;
 use tower_sessions::session::SessionError;
 use utoipa::ToSchema;
 
-use std::net;
+use std::{net, num::TryFromIntError};
 use thiserror::Error;
 
 pub type ServerResult<T> = Result<T, ServerError>;
@@ -120,6 +120,12 @@ impl ApiError {
 		ApiError::Forbidden(String::from(
 			"You do not have permission to access this resource.",
 		))
+	}
+}
+
+impl From<TryFromIntError> for ApiError {
+	fn from(e: TryFromIntError) -> Self {
+		ApiError::InternalServerError(e.to_string())
 	}
 }
 

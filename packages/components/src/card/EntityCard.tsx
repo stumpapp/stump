@@ -38,7 +38,7 @@ type Props = {
 	/**
 	 * Whether the card should be full width or not. Defaults to `true`. If `false`, the card will be sized explicitly.
 	 */
-	fullWidth?: boolean
+	fullWidth?: boolean | ((imageLoadFailed: boolean) => boolean)
 	/**
 	 * Whether the card is a cover variant. If `true`, the card will be sized explicitly to the cover size.
 	 */
@@ -76,6 +76,8 @@ export function EntityCard({
 	} as React.ComponentPropsWithoutRef<'div'> & React.ComponentPropsWithoutRef<typeof Link>
 
 	const hasClickAction = !!href || !!containerProps.onClick || !!containerProps.onDoubleClick
+
+	const isFullWidth = typeof fullWidth === 'function' ? fullWidth(isImageFailed) : fullWidth
 
 	/**
 	 * Renders the title of the card. If the title is a string, it will be truncated to 2 lines
@@ -137,7 +139,7 @@ export function EntityCard({
 			)
 		} else {
 			return (
-				<div className="flex h-full w-full items-center justify-center  bg-gray-50/80 dark:bg-gray-1000/30">
+				<div className="flex h-full w-full items-center justify-center bg-gray-50/80 dark:bg-gray-1000/30">
 					<Book className="h-16 w-16 text-gray-750 dark:text-gray-400" />
 				</div>
 			)
@@ -152,14 +154,14 @@ export function EntityCard({
 				{ 'cursor-pointer hover:border-brand dark:hover:border-brand': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{
-					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !fullWidth,
+					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
 				},
 				className,
 			)}
 		>
 			<div
 				className={cn('aspect-[2/3] h-full w-full p-0', {
-					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !fullWidth,
+					'w-[10rem] sm:w-[10.666rem] md:w-[12rem]': !isFullWidth,
 				})}
 			>
 				{renderImage()}

@@ -68,6 +68,7 @@ fn enforce_permission(user: &User, permission: UserPermission) -> ApiResult<()> 
 	if user_has_permission(user, permission) {
 		Ok(())
 	} else {
+		tracing::error!(?user, ?permission, "User does not have permission");
 		Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))

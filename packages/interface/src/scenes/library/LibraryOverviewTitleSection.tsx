@@ -20,6 +20,7 @@ export default function LibraryOverviewTitleSection({ library }: Props) {
 				imageUrl={getLibraryThumbnail(library.id)}
 				isCover
 				className="flex-auto flex-shrink-0"
+				fullWidth={(imageFailed) => !imageFailed}
 			/>
 
 			<div className="flex h-full w-full flex-col gap-2 md:gap-4">

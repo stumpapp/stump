@@ -51,6 +51,7 @@ use super::api::{
         api::v1::library::delete_library_thumbnails,
         api::v1::library::generate_library_thumbnails,
         api::v1::library::scan_library,
+        api::v1::library::clean_library,
         api::v1::library::create_library,
         api::v1::library::update_library,
         api::v1::library::delete_library,
@@ -111,7 +112,7 @@ use super::api::{
             Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
-            CreateTags
+            CreateTags, CleanLibraryResponse
         )
     ),
     tags(

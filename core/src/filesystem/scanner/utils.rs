@@ -213,6 +213,7 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 						media::pages::set(media.pages),
 						media::hash::set(media.hash.clone()),
 						media::path::set(media.path.clone()),
+						media::status::set(media.status.to_string()),
 					],
 				)
 				.with(media::metadata::fetch())

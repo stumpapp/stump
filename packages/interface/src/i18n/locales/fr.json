@@ -350,9 +350,25 @@
 				},
 				"library": {
 					"label": "Library Management",
+					"create": {
+						"label": "Create libraries",
+						"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+					},
 					"scan": {
 						"label": "Scan libraries",
 						"description": "Allows the user to initiate scans for existing libraries"
+					},
+					"edit": {
+						"label": "Edit libraries",
+						"description": "Allows the user to edit basic details for existing libraries"
+					},
+					"manage": {
+						"label": "Manage libraries",
+						"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+					},
+					"delete": {
+						"label": "Delete libraries",
+						"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
 					}
 				}
 			},

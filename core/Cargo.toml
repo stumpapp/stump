@@ -12,6 +12,7 @@ specta = { workspace = true }
 rayon = "1.8.0"
 futures = "0.3.28"
 async-trait = "0.1.73"
+async-channel = "2.1.0"
 
 ### MISC UTILS ###
 urlencoding = { workspace = true }

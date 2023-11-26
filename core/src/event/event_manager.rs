@@ -11,6 +11,8 @@ pub struct EventManager {
 	job_manager: Arc<JobManager>,
 }
 
+// TODO: delete this
+
 // TODO: I think event manager can manage it's own Ctx here, and instead of housing all
 // of the logic in the `new` function there can be something like `handle_event`.
 impl EventManager {

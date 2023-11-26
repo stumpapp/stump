@@ -13,6 +13,7 @@ pub mod db;
 pub mod event;
 pub mod filesystem;
 pub mod job;
+mod job_;
 pub mod opds;
 
 mod context;

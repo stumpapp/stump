@@ -48,7 +48,7 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 
 	let session_service = ServiceBuilder::new()
 		.layer(HandleErrorLayer::new(handle_session_service_error))
-		.layer(session::get_session_layer(app_state.db.clone()));
+		.layer(session::get_session_layer(app_state.clone()));
 
 	let app = Router::new()
 		.merge(routers::mount(app_state.clone()))

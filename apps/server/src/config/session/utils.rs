@@ -5,7 +5,7 @@ use axum::{
 };
 use hyper::StatusCode;
 use std::{env, sync::Arc};
-use stump_core::prisma::PrismaClient;
+use stump_core::Ctx;
 use time::Duration;
 
 use tower_sessions::{cookie::SameSite, SessionManagerLayer};
@@ -16,40 +16,50 @@ pub const SESSION_USER_KEY: &str = "user";
 pub const SESSION_NAME: &str = "stump_session";
 pub const SESSION_PATH: &str = "/";
 
+pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
+pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
+
 pub fn get_session_ttl() -> i64 {
 	env::var("SESSION_TTL")
 		.map(|s| {
-			s.parse::<i64>().unwrap_or_else(|e| {
-				tracing::error!(error = ?e, "Failed to parse provided SESSION_TTL");
-				3600 * 24 * 3
+			s.parse::<i64>().unwrap_or_else(|error| {
+				tracing::error!(?error, "Failed to parse provided SESSION_TTL");
+				DEFAULT_SESSION_TTL
 			})
 		})
-		.unwrap_or(3600 * 24 * 3)
+		.unwrap_or(DEFAULT_SESSION_TTL)
 }
 
 pub fn get_session_expiry_cleanup_interval() -> u64 {
 	env::var("SESSION_EXPIRY_CLEANUP_INTERVAL")
 		.map(|s| {
-			s.parse::<u64>().unwrap_or_else(|e| {
-				tracing::error!(error = ?e, "Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL");
-				60
+			s.parse::<u64>().unwrap_or_else(|error| {
+				tracing::error!(
+					?error,
+					"Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL"
+				);
+				DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 			})
 		})
-		.unwrap_or(60)
+		.unwrap_or(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)
 }
 
-pub fn get_session_layer(
-	client: Arc<PrismaClient>,
-) -> SessionManagerLayer<PrismaSessionStore> {
+pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<PrismaSessionStore> {
+	let client = ctx.db.clone();
 	let store = PrismaSessionStore::new(client);
 
 	let cleanup_interval = get_session_expiry_cleanup_interval();
 	if cleanup_interval > 0 {
+		tracing::trace!(
+			cleanup_interval = cleanup_interval,
+			"Spawning session expiry cleanup task"
+		);
 		tokio::task::spawn(store.clone().continuously_delete_expired(
 			tokio::time::Duration::from_secs(cleanup_interval),
+			ctx,
 		));
 	} else {
-		tracing::debug!("SESSION_EXPIRY_CLEANUP_INTERVAL is set to 0, session expiry cleanup is disabled.");
+		tracing::debug!("SESSION_EXPIRY_CLEANUP_INTERVAL is set to 0. Session expiry cleanup is disabled");
 	}
 	let session_ttl = get_session_ttl();
 

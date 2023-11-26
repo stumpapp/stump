@@ -4,11 +4,13 @@ use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use stump_core::{
 	db::entity::User,
 	prisma::{session, user, PrismaClient},
+	Ctx,
 };
 use time::OffsetDateTime;
+use tokio::time::MissedTickBehavior;
 use tower_sessions::{session::SessionId, Session, SessionRecord, SessionStore};
 
-use super::{get_session_ttl, SESSION_USER_KEY};
+use super::{get_session_ttl, SessionCleanupJob, SESSION_USER_KEY};
 
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
@@ -22,8 +24,6 @@ pub enum SessionError {
 	SerdeError(#[from] serde_json::Error),
 }
 
-pub type SessionResult<T> = Result<T, SessionError>;
-
 #[derive(Clone)]
 pub struct PrismaSessionStore {
 	client: Arc<PrismaClient>,
@@ -34,28 +34,21 @@ impl PrismaSessionStore {
 		Self { client }
 	}
 
-	async fn delete_expired(&self) -> SessionResult<()> {
-		tracing::trace!("Deleting expired sessions");
-
-		let affected_rows = self
-			.client
-			.session()
-			.delete_many(vec![session::expires_at::lt(Utc::now().into())])
-			.exec()
-			.await?;
-
-		tracing::trace!(affected_rows = ?affected_rows, "Deleted expired sessions");
-
-		Ok(())
-	}
-
-	pub async fn continuously_delete_expired(self, period: tokio::time::Duration) {
+	pub async fn continuously_delete_expired(
+		self,
+		period: tokio::time::Duration,
+		ctx: Arc<Ctx>,
+	) {
 		let mut interval = tokio::time::interval(period);
+		interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
 		loop {
-			if let Err(error) = self.delete_expired().await {
-				tracing::error!(error = ?error, "Failed to delete expired sessions");
+			interval.tick().await; // The first tick completes immediately
+			if let Err(error) = ctx.dispatch_job(SessionCleanupJob::new()) {
+				tracing::error!(error = ?error, "Failed to dispatch session cleanup job");
+			} else {
+				tracing::trace!("Dispatched session cleanup job");
 			}
-			interval.tick().await;
+			tracing::trace!("Waiting for next session cleanup interval...");
 		}
 	}
 }

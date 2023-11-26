@@ -90,8 +90,18 @@ impl JobManager {
 		if workers.get(&job_id).is_some() {
 			tracing::trace!(job_id, "Sending shutdown signal to worker");
 			self.shutdown_tx
-				.send(JobManagerShutdownSignal::Worker(job_id.clone()))?;
-
+				.send(JobManagerShutdownSignal::Worker(job_id.clone()))
+				.map_or_else(
+					|error| {
+						tracing::error!(
+							?error,
+							"Failed to send shutdown signal to worker!"
+						);
+					},
+					|_| {
+						tracing::trace!(job_id, "Shutdown signal sent to worker");
+					},
+				);
 			workers.remove(&job_id);
 			drop(workers);
 			return Ok(());

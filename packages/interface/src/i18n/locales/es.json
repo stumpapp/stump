@@ -46,64 +46,64 @@
 		"nextInSeries": "Siguiente en la serie"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Crear nuevo club de libros",
+		"subtitle": "Puedes crear un club privado de libros para unos pocos o hacerlo público para que cualquiera en el servidor se una",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Nombre",
+				"placeholder": "Mi club de libros",
+				"description": "El nombre de tu club de libros"
 			},
 			"description": {
-				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"label": "Descripción",
+				"placeholder": "Un club de aficionados 'Nuestra bandera significa la muerte'. Leemos ficción pirata.",
+				"description": "Una breve descripción opcional de tu club de libros"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Club privado",
+				"description": "Si está habilitado, solo los usuarios que invites podrán unirse a tu club de libros"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Mapeo de roles personalizado",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
-					"documentation"
+					"Puedes crear nombres personalizados para los roles en tu club de libros. Por ejemplo, podría renombrar el rol de “Miembro” a “Marinero”, o “Creador” a “Capitán”. Si no desea utilizar nombres personalizados, puede dejar estos campos en blanco y los nombres por defecto se utilizarán en su lugar. Para más información sobre los roles, consulte el",
+					"documentación"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Miembro",
+					"placeholder": "Miembro",
+					"description": "El nombre del rol predeterminado para tu club de libros"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "Moderador",
+					"placeholder": "Moderador",
+					"description": "El nombre del rol de moderador para tu club de libros"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Administrador",
+					"placeholder": "Administrador",
+					"description": "El nombre del rol de administrador de tu club de libros"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Creador",
+					"placeholder": "Creador",
+					"description": "El nombre del rol de creador para tu club de libros. ¡Este eres tú!"
 				}
 			},
 			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"heading": "Tus preferencias de membresía",
+				"subtitle": "Algunas preferencias para su membresía en el club de libros. Pueden cambiarse en cualquier momento desde la página de configuración del club de libros",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Nombre para mostrar",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Un nombre opcional para mostrar tu membresía en el club del libro. Si se establece, esto tiene precedencia sobre tu nombre de usuario"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Ocultar progreso",
+					"description": "Si está activado, el progreso de lectura se ocultará a otros miembros del club del libro"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Crear Club de Libros"
 		}
 	},
 	"createLibraryScene": {
@@ -151,23 +151,23 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Continuar leyendo",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "No hay libros para mostrar",
+				"message": "Cualquier libro que estés leyendo se mostrará aquí"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Series añadidas recientemente",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "No hay series para mostrar",
+				"message": "Cualquier serie que añadas a tus bibliotecas aparecerá aquí"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Libros añadidos recientemente",
 			"emptyState": {
-				"heading": "No books to display",
+				"heading": "No hay libros para mostrar",
 				"message": "Any books you add to your libraries will show up here"
 			}
 		}

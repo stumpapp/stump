@@ -542,45 +542,34 @@ model Collection {
 }
 
 model Job {
-  id                   String    @id
+  id          String  @id
   // The name of the job, e.g. Library Scan
-  name                 String
+  name        String
   // The extra description
-  description          String?
-  // The status of the job (i.e. QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED).
-  status               String    @default("QUEUED")
+  description String?
+  // The status of the job (i.e. QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED, PAUSED).
+  status      String  @default("QUEUED")
   // The state of the job. This is primarily stored in order to support pausing/resuming
   // jobs, as it will hold the state of the job at the time it was paused.
-  state                Bytes?
-  // A JSON blob of optional, extra metadata
-  extra_metadata       Bytes?
-  // The total number of tasks
-  task_count           Int       @default(1)
-  // The total number of tasks completed (i.e. without error/failure)
-  completed_task_count Int       @default(0)
-  // The time (in milliseconds) to complete the job
-  ms_elapsed           BigInt    @default(0)
-  // The datetime stamp of when the job was created
-  created_at           DateTime  @default(now())
-  // The datetime stamp of when the job completed
-  completed_at         DateTime?
+  save_state  Bytes?
+  // The output result of the job TODO: this can replace the top-level task-specific fields
+  output      Bytes?
 
-  logs Log[]
+  // The total number of tasks
+  task_count           Int    @default(1)
+  // The total number of tasks completed (i.e. without error/failure)
+  completed_task_count Int    @default(0)
+  // The time (in milliseconds) to complete the job
+  ms_elapsed           BigInt @default(0)
+
+  // The datetime of when the job was created
+  created_at DateTime  @default(now())
+  // The datetime of when the job started
+  started_at DateTime?
+  // The datetime of when the job exited
+  exited_at  DateTime?
 
   @@map("jobs")
-}
-
-model Log {
-  id String @id @default(uuid())
-
-  level      String   @default("INFO") //  "ERROR", "WARN", "INFO", "DEBUG"
-  message    String
-  created_at DateTime @default(now()) // TODO: change name to timestamp
-
-  job    Job?    @relation(fields: [job_id], references: [id], onDelete: Cascade)
-  job_id String?
-
-  @@map("logs")
 }
 
 model UserPreferences {

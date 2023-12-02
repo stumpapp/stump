@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{or, Direction};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::get_config_dir,
@@ -68,6 +68,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/thumbnail",
 					get(get_series_thumbnail_handler).patch(patch_series_thumbnail),
+				)
+				.route(
+					"/complete",
+					get(get_series_is_complete).put(put_series_is_complete),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -784,4 +788,67 @@ async fn get_next_in_series(
 			id
 		)))
 	}
+}
+
+#[derive(Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct SeriesIsComplete {
+	is_complete: bool,
+	completed_at: Option<String>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id/complete",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to check"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series completion status.", body = SeriesIsComplete),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_series_is_complete(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<SeriesIsComplete>> {
+	let client = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let media_count = client
+		.media()
+		.count(vec![media::series_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
+
+	let rp = client
+		.read_progress()
+		.find_many(vec![
+			read_progress::user_id::equals(user_id),
+			read_progress::media::is(vec![media::series_id::equals(Some(id))]),
+			read_progress::is_completed::equals(true),
+		])
+		.order_by(read_progress::completed_at::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	let is_complete = rp.len() == media_count as usize;
+	let completed_at = is_complete
+		.then(|| {
+			rp.get(0)
+				.and_then(|rp| rp.completed_at.map(|ca| ca.to_rfc3339()))
+		})
+		.flatten();
+
+	Ok(Json(SeriesIsComplete {
+		is_complete,
+		completed_at,
+	}))
+}
+
+// TODO: implement
+async fn put_series_is_complete() -> ApiResult<Json<SeriesIsComplete>> {
+	Err(ApiError::NotImplemented)
 }

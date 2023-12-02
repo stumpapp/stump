@@ -68,6 +68,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.5.6
         version: 0.5.6(prettier@3.0.3)
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.5
       trash-cli:
         specifier: ^5.0.0
         version: 5.0.0
@@ -15141,6 +15144,14 @@ packages:
     hasBin: true
     dependencies:
       glob: 7.2.3
+    dev: true
+
+  /rimraf@5.0.5:
+    resolution: {integrity: sha512-CqDakW+hMe/Bz202FPEymy68P+G50RfMQK+Qo5YUqc9SPipvbGjCGKd0RSKEelbsfQuw3g5NZDSrlZZAJurH1A==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      glob: 10.3.10
     dev: true
 
   /robust-predicates@3.0.2:

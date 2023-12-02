@@ -8,3 +8,6 @@ tasks:
   storybook:
     command: 'start-storybook -p 6006'
     local: true
+
+  nuke:
+    command: 'rimraf -rf node_modules'

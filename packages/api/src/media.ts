@@ -81,7 +81,7 @@ export function putMediaCompletion(
 	id: string,
 	payload: PutMediaCompletionStatus,
 ): Promise<ApiResult<MediaIsComplete>> {
-	return API.put(`/media/${id}/complete`, payload)
+	return API.put(`/media/${id}/progress/complete`, payload)
 }
 
 export const mediaApi = {

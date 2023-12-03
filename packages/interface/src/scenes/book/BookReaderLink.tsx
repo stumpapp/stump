@@ -8,6 +8,7 @@ import { EBOOK_EXTENSION } from '../../utils/patterns'
 type Props = {
 	book?: Media
 }
+
 export default function BookReaderLink({ book }: Props) {
 	const currentPage = book?.current_page ?? -1
 
@@ -21,13 +22,7 @@ export default function BookReaderLink({ book }: Props) {
 	const isReadAgain = useMemo(() => {
 		if (!book) return false
 
-		const { is_completed, current_page, pages, current_epubcfi, extension } = book
-
-		const isEpub = extension.match(EBOOK_EXTENSION)
-		const epubCompleted = isEpub && !current_epubcfi && is_completed
-		const otherCompleted = !isEpub && current_page === pages && is_completed
-
-		return epubCompleted || otherCompleted
+		return isReadAgainPrompt(book)
 	}, [book])
 
 	const epubcfi = book?.current_epubcfi
@@ -73,4 +68,14 @@ export default function BookReaderLink({ book }: Props) {
 			</ButtonOrLink>
 		</div>
 	)
+}
+
+export const isReadAgainPrompt = (book: Media) => {
+	const { is_completed, current_page, pages, current_epubcfi, extension } = book
+
+	const isEpub = extension.match(EBOOK_EXTENSION)
+	const epubCompleted = isEpub && !current_epubcfi && is_completed
+	const otherCompleted = !isEpub && current_page === pages && is_completed
+
+	return epubCompleted || otherCompleted
 }

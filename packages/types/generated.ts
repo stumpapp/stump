@@ -172,7 +172,7 @@ export type UpdateLibrary = { id: string; name: string; path: string; descriptio
 
 export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
 
-export type PutMediaCompletionStatus = { is_complete: boolean }
+export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | null }
 
 export type MediaIsComplete = { is_completed: boolean; completed_at: string | null }
 

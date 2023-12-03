@@ -1234,6 +1234,8 @@ async fn get_is_media_completed(
 #[derive(Deserialize, ToSchema, specta::Type)]
 pub struct PutMediaCompletionStatus {
 	is_complete: bool,
+	#[specta(optional)]
+	page: Option<i32>,
 }
 
 #[utoipa::path(
@@ -1270,9 +1272,9 @@ async fn put_media_complete_status(
 
 			let is_completed = payload.is_complete;
 			let (pages, completed_at) = if is_completed {
-				(Some(media.pages), Some(Utc::now().into()))
+				(payload.page.or(Some(media.pages)), Some(Utc::now().into()))
 			} else {
-				(None, None)
+				(payload.page, None)
 			};
 
 			let updated_or_created_rp = tx

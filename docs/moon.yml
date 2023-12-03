@@ -37,3 +37,6 @@ tasks:
     options:
       shell: true
       runFromWorkspaceRoot: false
+
+  nuke:
+    command: 'rimraf -rf node_modules'

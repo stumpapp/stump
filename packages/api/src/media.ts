@@ -1,4 +1,10 @@
-import type { Media, PatchMediaThumbnail, ReadProgress } from '@stump/types'
+import type {
+	Media,
+	MediaIsComplete,
+	PatchMediaThumbnail,
+	PutMediaCompletionStatus,
+	ReadProgress,
+} from '@stump/types'
 
 import { API } from './axios'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
@@ -71,6 +77,13 @@ export function patchMediaThumbnail(id: string, params: PatchMediaThumbnail) {
 	return API.patch(`/media/${id}/thumbnail`, params)
 }
 
+export function putMediaCompletion(
+	id: string,
+	payload: PutMediaCompletionStatus,
+): Promise<ApiResult<MediaIsComplete>> {
+	return API.put(`/media/${id}/complete`, payload)
+}
+
 export const mediaApi = {
 	getInProgressMedia,
 	getMedia,
@@ -82,6 +95,7 @@ export const mediaApi = {
 	getPaginatedMedia,
 	getRecentlyAddedMedia,
 	patchMediaThumbnail,
+	putMediaCompletion,
 	updateMediaProgress,
 }
 
@@ -96,5 +110,6 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getPaginatedMedia: 'media.getPaginated',
 	getRecentlyAddedMedia: 'media.getRecentlyAdded',
 	patchMediaThumbnail: 'media.patchThumbnail',
+	putMediaCompletion: 'media.putCompletion',
 	updateMediaProgress: 'media.updateProgress',
 }

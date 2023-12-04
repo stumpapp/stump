@@ -1277,17 +1277,20 @@ async fn put_media_complete_status(
 				(payload.page, None)
 			};
 
+			let extension = media.extension.to_lowercase();
+			let fallback_page = if extension.contains("epub") { -1 } else { 1 };
+
 			let updated_or_created_rp = tx
 				.read_progress()
 				.upsert(
 					read_progress::user_id_media_id(user_id.clone(), id.clone()),
 					(
-						pages.unwrap_or(0),
+						pages.unwrap_or(fallback_page),
 						media::id::equals(id.clone()),
 						user::id::equals(user_id.clone()),
 						vec![
 							read_progress::is_completed::set(is_completed),
-							read_progress::completed_at::set(completed_at.clone()),
+							read_progress::completed_at::set(completed_at),
 						],
 					),
 					chain_optional_iter(

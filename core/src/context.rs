@@ -6,6 +6,7 @@ use tokio::sync::{
 };
 
 use crate::{
+	config::StumpConfig,
 	db::{self, entity::Log},
 	event::{CoreEvent, InternalCoreTask},
 	job::JobExecutorTrait,
@@ -20,6 +21,7 @@ type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 /// to all the different parts of the application, and is used to access the database
 /// and manage the event channels.
 pub struct Ctx {
+	pub config: StumpConfig,
 	pub db: Arc<prisma::PrismaClient>,
 	pub internal_sender: Arc<InternalSender>,
 	pub response_channel: Arc<ClientChannel>,
@@ -47,9 +49,10 @@ impl Ctx {
 	///    let ctx = Ctx::new(sender).await;
 	/// }
 	/// ```
-	pub async fn new(internal_sender: InternalSender) -> Ctx {
+	pub async fn new(config: StumpConfig, internal_sender: InternalSender) -> Ctx {
 		Ctx {
-			db: Arc::new(db::create_client().await),
+			config: config.clone(),
+			db: Arc::new(db::create_client(&config).await),
 			internal_sender: Arc::new(internal_sender),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
@@ -61,6 +64,7 @@ impl Ctx {
 	/// **This should not be used in production.**
 	pub async fn mock() -> Ctx {
 		Ctx {
+			config: StumpConfig::debug(),
 			db: Arc::new(db::create_test_client().await),
 			internal_sender: Arc::new(unbounded_channel::<InternalCoreTask>().0),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
@@ -99,6 +103,7 @@ impl Ctx {
 	/// Returns a copy of the ctx
 	pub fn get_ctx(&self) -> Ctx {
 		Ctx {
+			config: self.config.clone(),
 			db: self.db.clone(),
 			internal_sender: self.internal_sender.clone(),
 			response_channel: self.response_channel.clone(),

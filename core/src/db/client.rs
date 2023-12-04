@@ -2,21 +2,19 @@ use prisma_client_rust::raw;
 use std::path::Path;
 use tracing::trace;
 
-use crate::{config::get_config_dir, prisma};
+use crate::{config::StumpConfig, prisma};
 
 /// Creates the PrismaClient. Will call `create_data_dir` as well
-pub async fn create_client() -> prisma::PrismaClient {
-	let config_dir = get_config_dir()
+pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
+	let config_dir = config
+		.get_config_dir()
 		.to_str()
 		.expect("Error parsing config directory")
 		.to_string();
 
-	let profile = std::env::var("STUMP_PROFILE").unwrap_or_else(|_| "debug".to_string());
-	let db_override = std::env::var("STUMP_DB_PATH").ok();
-
-	let client = if let Some(path) = db_override {
+	let client = if let Some(path) = config.db_path.clone() {
 		create_client_with_url(&format!("file:{}/stump.db", &path)).await
-	} else if profile == "release" {
+	} else if config.profile == "release" {
 		trace!(
 			"Creating Prisma client with url: file:{}/stump.db",
 			&config_dir

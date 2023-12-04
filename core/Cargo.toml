@@ -20,7 +20,6 @@ xml-rs = "0.8.19" # used for creating XML docs
 serde-xml-rs = "0.6.0" # used for serializing/deserializing xml
 serde_json = { workspace = true }
 itertools = "0.11.0"
-optional_struct = "0.3.1"
 utoipa = { version = "3.5.0" }
 uuid = "1.4.1"
 regex = "1.9.6"

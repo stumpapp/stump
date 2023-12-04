@@ -396,6 +396,7 @@ pub(crate) fn get_series_thumbnail(
 	series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
+	thumbnails_dir: PathBuf,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let thumbnails = get_config_dir().join("thumbnails");
 	let series_id = series.id.clone();
@@ -409,7 +410,7 @@ pub(crate) fn get_series_thumbnail(
 			tracing::trace!(?path, series_id, "Found generated series thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&series_id) {
+	} else if let Some(path) = get_unknown_thumnail(&series_id, thumbnails_dir) {
 		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
@@ -418,7 +419,7 @@ pub(crate) fn get_series_thumbnail(
 		));
 	}
 
-	get_media_thumbnail(first_book, image_format)
+	get_media_thumbnail(first_book, image_format, thumbnails_dir)
 }
 
 // TODO: ImageResponse type for body
@@ -490,7 +491,10 @@ async fn get_series_thumbnail_handler(
 		.thumbnail_config
 		.map(|config| config.format);
 
-	get_series_thumbnail(&series, first_book, image_format).map(ImageResponse::from)
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
+
+	get_series_thumbnail(&series, first_book, image_format, thumbnails_dir)
+		.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]
@@ -528,6 +532,7 @@ async fn patch_series_thumbnail(
 	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let target_page = body
 		.is_zero_based
@@ -578,7 +583,8 @@ async fn patch_series_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	let path_buf =
+		generate_thumbnail(&id, &media.path, thumbnail_options, thumbnails_dir)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,

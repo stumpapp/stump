@@ -3791,34 +3791,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "optional_struct"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e60da57c6a9d057c07f1a90ca7abed9d104fca0d0db1a7d7e3304e4567d977fd"
-dependencies = [
- "optional_struct_internal",
- "optional_struct_macro_impl",
-]
-
-[[package]]
-name = "optional_struct_internal"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64e389cec0df3c934737dadc7b927a8e05b8c8ef792cd1af06a524bd129e9f4d"
-
-[[package]]
-name = "optional_struct_macro_impl"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "286db11c92049709d5fbbe89eecaa2febc0efe6c18d94d9ebf942e592ac80f9f"
-dependencies = [
- "optional_struct_internal",
- "proc-macro2",
- "quote",
- "syn 1.0.107",
-]
-
-[[package]]
 name = "ordered-float"
 version = "2.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5852,7 +5824,6 @@ dependencies = [
  "image",
  "infer",
  "itertools 0.11.0",
- "optional_struct",
  "pdf",
  "pdfium-render",
  "prisma-client-rust",

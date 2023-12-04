@@ -11,7 +11,6 @@ use specta::Type;
 use tracing::{info, trace};
 
 use crate::{
-	config::get_thumbnails_dir,
 	event::CoreEvent,
 	filesystem::{
 		image::thumbnail::{
@@ -108,7 +107,7 @@ impl JobTrait for ThumbnailJob {
 				library_id,
 				force_regenerate,
 			} => {
-				let thumbnail_dir = get_thumbnails_dir();
+				let thumbnail_dir = core_ctx.config.get_thumbnails_dir();
 				let library_media = core_ctx
 					.db
 					.media()
@@ -136,6 +135,7 @@ impl JobTrait for ThumbnailJob {
 							.filter(|m| readdir_hash_set.contains(&m.id))
 							.map(|m| m.id.to_owned())
 							.collect::<Vec<String>>(),
+						thumbnail_dir,
 					)?;
 					// Generate thumbnails for all media in the library
 					let tasks = library_media.len() as u64;
@@ -164,6 +164,7 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						library_media,
 						self.options.to_owned(),
+						thumbnail_dir,
 						on_progress,
 					)?;
 
@@ -198,6 +199,7 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						media_without_thumbnails,
 						self.options.to_owned(),
+						thumbnail_dir,
 						on_progress,
 					)?;
 					Ok(generated_thumbnail_paths)
@@ -207,7 +209,7 @@ impl JobTrait for ThumbnailJob {
 				series_id,
 				force_regenerate,
 			} => {
-				let thumbnail_dir = get_thumbnails_dir();
+				let thumbnail_dir = core_ctx.config.get_thumbnails_dir();
 
 				let series_media = core_ctx
 					.db
@@ -234,6 +236,7 @@ impl JobTrait for ThumbnailJob {
 							.filter(|m| readdir_hash_set.contains(&m.id))
 							.map(|m| m.id.to_owned())
 							.collect::<Vec<String>>(),
+						thumbnail_dir,
 					)?;
 
 					let tasks = series_media.len() as u64;
@@ -262,6 +265,7 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						series_media,
 						self.options.to_owned(),
+						thumbnail_dir,
 						on_progress,
 					)?;
 					Ok(generated_thumbnail_paths)
@@ -295,12 +299,15 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						media_without_thumbnails,
 						self.options.to_owned(),
+						thumbnail_dir,
 						on_progress,
 					)?;
 					Ok(generated_thumbnail_paths)
 				}
 			},
 			ThumbnailJobConfig::MediaGroup(media_group_ids) => {
+				let thumbnail_dir = core_ctx.config.get_thumbnails_dir();
+
 				let tasks = media_group_ids.len() as u64;
 				let on_progress = move |msg| {
 					let previous = counter_ref.fetch_add(5, Ordering::SeqCst);
@@ -331,6 +338,7 @@ impl JobTrait for ThumbnailJob {
 				let generated_thumbnail_paths = generate_thumbnails_for_media(
 					media,
 					self.options.to_owned(),
+					thumbnail_dir,
 					on_progress,
 				)?;
 				Ok(generated_thumbnail_paths)

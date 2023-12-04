@@ -1,68 +1,28 @@
-use std::path::{Path, PathBuf};
-
-pub mod env;
 pub mod logging;
 mod stump_config;
 
-pub use stump_config::*;
+use std::env;
 
-/// Gets the home directory of the system running Stump
-fn home() -> PathBuf {
-	dirs::home_dir().expect("Could not determine your home directory")
+pub use stump_config::StumpConfig;
+
+pub fn get_default_config_dir() -> String {
+	let home = dirs::home_dir().expect("Could not determine user home directory");
+	let config_dir = home.join(".stump");
+
+	config_dir.to_string_lossy().into_owned()
 }
 
-fn check_configuration_dir(path: &Path) {
-	if !path.exists() {
-		std::fs::create_dir_all(path).unwrap_or_else(|e| {
-			panic!(
-				"Failed to create Stump configuration directory at {:?}: {:?}",
-				path,
-				e.to_string()
-			)
-		});
-	}
-
-	if !path.is_dir() {
-		panic!(
-			"Invalid Stump configuration, the item located at {:?} must be a directory.",
-			path
-		);
-	}
-}
-
-/// Gets the Stump config directory. If the directory does not exist, it will be created. If
-/// the path is not a directory (only possible if overridden using STUMP_CONFIG_DIR) it will
-/// panic.
-pub fn get_config_dir() -> PathBuf {
-	let config_dir = std::env::var("STUMP_CONFIG_DIR")
-		.map(|val| {
-			if val.is_empty() {
-				home().join(".stump")
+pub fn bootstrap_config_dir() -> String {
+	match env::var("STUMP_CONFIG_DIR") {
+		Ok(config_dir) => {
+			if config_dir.is_empty() {
+				get_default_config_dir()
 			} else {
-				PathBuf::from(val)
+				config_dir
 			}
-		})
-		.unwrap_or_else(|_| home().join(".stump"));
-
-	check_configuration_dir(&config_dir);
-
-	config_dir
-}
-
-pub fn get_cache_dir() -> PathBuf {
-	let cache_dir = get_config_dir().join("cache");
-
-	check_configuration_dir(&cache_dir);
-
-	cache_dir
-}
-
-pub fn get_thumbnails_dir() -> PathBuf {
-	let thumbnails_dir = get_config_dir().join("thumbnails");
-
-	check_configuration_dir(&thumbnails_dir);
-
-	thumbnails_dir
+		},
+		Err(_) => get_default_config_dir(),
+	}
 }
 
 pub fn stump_in_docker() -> bool {
@@ -87,8 +47,4 @@ pub fn stump_in_docker() -> bool {
 				.any(|line| line.contains("docker") || line.contains("containerd"))
 		})
 		.unwrap_or(false)
-}
-
-pub fn get_pdfium_path() -> Option<PathBuf> {
-	std::env::var("PDFIUM_PATH").ok().map(PathBuf::from)
 }

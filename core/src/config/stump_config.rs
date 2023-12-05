@@ -5,20 +5,50 @@ use tracing::debug;
 
 use crate::error::{CoreError, CoreResult};
 
+/// Represents the configuration of a Stump application. This file is generated at startup
+/// using a TOML file, enviroment variables, or both and is input when creating a `StumpCore`
+/// instance.
+///
+/// Example:
+/// ```
+/// /// Get config dir from environment variables.
+/// let config_dir = config::bootstrap_config_dir();
+///
+/// // Create a StumpConfig using the config file and environment variables.
+/// let config = StumpConfig::new(config_dir)
+/// 	// Load Stump.toml file (if any)
+/// 	.with_config_file().unwrap()
+/// 	// Overlay environment variables
+/// 	.with_environment().unwrap();
+///
+/// // Ensure that config directory exists and write Stump.toml.
+/// config.write_config_dir().unwrap();
+///	// Create an instance of the stump core.
+/// let core = StumpCore::new(config).await;
+/// ```
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StumpConfig {
+	/// The "release" | "debug" profile with which the application is running.
 	pub profile: String,
+	/// The port from which to serve the application (default: 10801).
 	pub port: u16,
+	/// The verbosity with which to log errors (default: 0).
 	pub verbosity: u64,
+	/// An optional custom path for the database.
 	pub db_path: Option<String>,
+	/// The client directory.
 	pub client_dir: String,
+	/// The configuration root for the Stump application, cotains thumbnails, cache, and logs.
 	pub config_dir: String,
+	/// A list of origins for CORS.
 	pub allowed_origins: Vec<String>,
+	/// Path to the PDFium binary for PDF support.
 	pub pdfium_path: Option<String>,
 }
 
 impl StumpConfig {
-	/// Create a new `StumpConfig`.
+	/// Create a new `StumpConfig` isntance with a given `config_dir`
+	/// configuration root and default values.
 	pub fn new(config_dir: String) -> Self {
 		Self {
 			profile: String::from("debug"),
@@ -32,6 +62,9 @@ impl StumpConfig {
 		}
 	}
 
+	/// Create a debug version of `StumpConfig` with `config_dir`
+	/// automatically set using `get_default_config_dir()` and `client_dir` set
+	/// to `env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist"`.
 	pub fn debug() -> Self {
 		Self {
 			profile: String::from("debug"),
@@ -45,6 +78,9 @@ impl StumpConfig {
 		}
 	}
 
+	/// Looks for Stump.toml at `self.config_dir`, loading its contents and replacing
+	/// stored configuration variables with those contents. If Stump.toml doesn't exist,
+	/// the stored variables remain unchanged and the function returns `Ok`.
 	pub fn with_config_file(mut self) -> CoreResult<Self> {
 		let stump_toml = self.get_config_dir().join("Stump.toml");
 
@@ -62,6 +98,8 @@ impl StumpConfig {
 		Ok(self)
 	}
 
+	/// Loads configuration variables from the environment, replacing stored
+	/// values with the environment values.
 	pub fn with_environment(mut self) -> CoreResult<Self> {
 		let mut env_configs = PartialStumpConfig::empty();
 
@@ -107,6 +145,13 @@ impl StumpConfig {
 		Ok(self)
 	}
 
+	/// Ensures that the configuration directory exists and saves the `StumpConfig`'s current values
+	/// to Stump.toml in the configuration directory.
+	///
+	/// This function first checks if `config_dir` exists and creates it if it does not, then does the
+	/// same for the thumbnails and cache directories. Finally, a Stump.toml file containing the current
+	/// configuration values is written. Returns `Ok` on success and `Err` if paths are misconfigured or
+	/// file IO errors are encountered.
 	pub fn write_config_dir(&self) -> CoreResult<()> {
 		// Check that config directory is configured correctly
 		let config_dir = self.get_config_dir();
@@ -152,18 +197,22 @@ impl StumpConfig {
 		Ok(())
 	}
 
+	/// Returns a `PathBuf` to the Stump configuration directory.
 	pub fn get_config_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir)
 	}
 
+	/// Returns a `PathBuf` to the Stump cache directory.
 	pub fn get_cache_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("cache")
 	}
 
+	/// Returns a `PathBuf` to the Stump thumbnails directory.
 	pub fn get_thumbnails_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("thumbnails")
 	}
 
+	/// Returns a `PathBuf` to the Stump log file.
 	pub fn get_log_file(&self) -> PathBuf {
 		self.get_config_dir().join("Stump.log")
 	}
@@ -194,6 +243,7 @@ impl PartialStumpConfig {
 			pdfium_path: None,
 		}
 	}
+
 	pub fn apply_to_config(self, config: &mut StumpConfig) {
 		// Port
 		if let Some(port) = self.port {

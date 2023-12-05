@@ -5,6 +5,8 @@ use std::env;
 
 pub use stump_config::StumpConfig;
 
+/// Gets the default config directory located at `~/.stump` where `~` is the
+/// user's home directory.
 pub fn get_default_config_dir() -> String {
 	let home = dirs::home_dir().expect("Could not determine user home directory");
 	let config_dir = home.join(".stump");
@@ -12,6 +14,8 @@ pub fn get_default_config_dir() -> String {
 	config_dir.to_string_lossy().into_owned()
 }
 
+/// Returns the value of the `STUMP_CONFIG_DIR` environment variable if it is set,
+/// and `~/.stump` otherwise.
 pub fn bootstrap_config_dir() -> String {
 	match env::var("STUMP_CONFIG_DIR") {
 		Ok(config_dir) => {
@@ -25,6 +29,10 @@ pub fn bootstrap_config_dir() -> String {
 	}
 }
 
+/// Checks if Stump is running in docker by checking each of:
+///   1. The `STUMP_IN_DOCKER` environment variable.
+///   2. The existence of `/run/.containerenv` and `/.dockerenv`.
+///   3. The presence of "docker" or "containerd" processes.
 pub fn stump_in_docker() -> bool {
 	let env_set = std::env::var("STUMP_IN_DOCKER").is_ok();
 	if env_set {

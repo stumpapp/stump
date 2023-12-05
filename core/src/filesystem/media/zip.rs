@@ -20,7 +20,7 @@ use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
 pub struct ZipProcessor;
 
 impl FileProcessor for ZipProcessor {
-	fn get_sample_size(&self, path: &str) -> Result<u64, FileError> {
+	fn get_sample_size(path: &str) -> Result<u64, FileError> {
 		let zip_file = File::open(path)?;
 		let mut archive = zip::ZipArchive::new(zip_file)?;
 
@@ -40,8 +40,8 @@ impl FileProcessor for ZipProcessor {
 		Ok(sample_size)
 	}
 
-	fn hash(&self, path: &str) -> Option<String> {
-		let sample_result = self.get_sample_size(path);
+	fn hash(path: &str) -> Option<String> {
+		let sample_result = Self::get_sample_size(path);
 
 		if let Ok(sample) = sample_result {
 			match hash::generate(path, sample) {
@@ -57,14 +57,10 @@ impl FileProcessor for ZipProcessor {
 		}
 	}
 
-	fn process(
-		&self,
-		path: &str,
-		_: FileProcessorOptions,
-	) -> Result<ProcessedFile, FileError> {
+	fn process(path: &str, _: FileProcessorOptions) -> Result<ProcessedFile, FileError> {
 		debug!(path, "Processing zip");
 
-		let hash = self.hash(path);
+		let hash = ZipProcessor::hash(path);
 		let zip_file = File::open(path)?;
 		let mut archive = zip::ZipArchive::new(zip_file)?;
 
@@ -95,11 +91,7 @@ impl FileProcessor for ZipProcessor {
 		})
 	}
 
-	fn get_page(
-		&self,
-		path: &str,
-		page: i32,
-	) -> Result<(ContentType, Vec<u8>), FileError> {
+	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
 		let zip_file = File::open(path)?;
 
 		let mut archive = zip::ZipArchive::new(&zip_file)?;
@@ -137,7 +129,6 @@ impl FileProcessor for ZipProcessor {
 	}
 
 	fn get_page_content_types(
-		&self,
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
@@ -174,12 +165,6 @@ impl FileProcessor for ZipProcessor {
 		}
 
 		Ok(content_types)
-	}
-}
-
-impl ZipProcessor {
-	pub fn new() -> Self {
-		Self {}
 	}
 }
 

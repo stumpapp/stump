@@ -7,26 +7,27 @@ use std::{
 use tracing::{debug, error, trace, warn};
 use unrar::Archive;
 
-use crate::filesystem::{
-	archive::create_zip_archive,
-	content_type::ContentType,
-	error::FileError,
-	hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
-	image::ImageFormat,
-	media::common::metadata_from_buf,
-	zip::ZipProcessor,
-	FileParts, PathUtils,
+use crate::{
+	config,
+	filesystem::{
+		archive::create_zip_archive,
+		content_type::ContentType,
+		error::FileError,
+		hash::{self, HASH_SAMPLE_COUNT, HASH_SAMPLE_SIZE},
+		image::ImageFormat,
+		media::common::metadata_from_buf,
+		zip::ZipProcessor,
+		FileParts, PathUtils,
+	},
 };
 
 use super::{process::FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for RAR files.
-pub struct RarProcessor {
-	cache_dir: PathBuf,
-}
+pub struct RarProcessor;
 
 impl FileProcessor for RarProcessor {
-	fn get_sample_size(&self, path: &str) -> Result<u64, FileError> {
+	fn get_sample_size(path: &str) -> Result<u64, FileError> {
 		let file = File::open(path)?;
 
 		let file_size = file.metadata()?.len();
@@ -46,8 +47,8 @@ impl FileProcessor for RarProcessor {
 		}
 	}
 
-	fn hash(&self, path: &str) -> Option<String> {
-		let sample_result = self.get_sample_size(path).ok();
+	fn hash(path: &str) -> Option<String> {
+		let sample_result = RarProcessor::get_sample_size(path).ok();
 
 		if let Some(sample) = sample_result {
 			match hash::generate(path, sample) {
@@ -64,25 +65,23 @@ impl FileProcessor for RarProcessor {
 	}
 
 	fn process(
-		&self,
 		path: &str,
 		options: FileProcessorOptions,
 	) -> Result<ProcessedFile, FileError> {
 		if options.convert_rar_to_zip {
 			let zip_path_buf =
-				self.to_zip(path, options.delete_conversion_source, None)?;
+				RarProcessor::to_zip(path, options.delete_conversion_source, None)?;
 			let zip_path = zip_path_buf.to_str().ok_or_else(|| {
 				FileError::UnknownError(
 					"Converted RAR file failed to be discovered".to_string(),
 				)
 			})?;
-			let zip_processor = ZipProcessor::new();
-			return zip_processor.process(zip_path, options);
+			return ZipProcessor::process(zip_path, options);
 		}
 
 		debug!(path, "Processing RAR");
 
-		let hash: Option<String> = self.hash(path);
+		let hash: Option<String> = RarProcessor::hash(path);
 
 		let mut archive = Archive::new(&path).open_for_processing()?;
 		let mut pages = 0;
@@ -117,11 +116,7 @@ impl FileProcessor for RarProcessor {
 		})
 	}
 
-	fn get_page(
-		&self,
-		file: &str,
-		page: i32,
-	) -> Result<(ContentType, Vec<u8>), FileError> {
+	fn get_page(file: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
 		let archive = Archive::new(file).open_for_listing()?;
 
 		let mut valid_entries = archive
@@ -167,7 +162,6 @@ impl FileProcessor for RarProcessor {
 	}
 
 	fn get_page_content_types(
-		&self,
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
@@ -227,7 +221,6 @@ impl FileProcessor for RarProcessor {
 
 impl FileConverter for RarProcessor {
 	fn to_zip(
-		&self,
 		path: &str,
 		delete_source: bool,
 		_: Option<ImageFormat>,
@@ -243,7 +236,8 @@ impl FileConverter for RarProcessor {
 			file_name,
 		} = path_buf.as_path().file_parts();
 
-		let unpacked_path = self.cache_dir.join(file_stem);
+		let cache_dir = config::get_cache_dir();
+		let unpacked_path = cache_dir.join(file_stem);
 
 		trace!(?unpacked_path, "Extracting RAR to cache");
 
@@ -270,16 +264,10 @@ impl FileConverter for RarProcessor {
 		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
 		if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
 			error!(
-				error = ?err, ?self.cache_dir, ?unpacked_path, "Failed to delete unpacked RAR contents in cache",
+				error = ?err, ?cache_dir, ?unpacked_path, "Failed to delete unpacked RAR contents in cache",
 			);
 		}
 
 		Ok(zip_path)
-	}
-}
-
-impl RarProcessor {
-	pub fn new(cache_dir: PathBuf) -> Self {
-		Self { cache_dir }
 	}
 }

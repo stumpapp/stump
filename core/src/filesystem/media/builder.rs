@@ -3,7 +3,6 @@ use std::path::{Path, PathBuf};
 use prisma_client_rust::chrono::{DateTime, FixedOffset, Utc};
 
 use crate::{
-	config::StumpConfig,
 	db::entity::{LibraryOptions, Media, Series},
 	filesystem::{process, FileParts, PathUtils, SeriesJson},
 	CoreError, CoreResult,
@@ -13,21 +12,14 @@ pub struct MediaBuilder {
 	path: PathBuf,
 	series_id: String,
 	library_options: LibraryOptions,
-	config: StumpConfig,
 }
 
 impl MediaBuilder {
-	pub fn new(
-		path: &Path,
-		series_id: &str,
-		library_options: LibraryOptions,
-		config: StumpConfig,
-	) -> Self {
+	pub fn new(path: &Path, series_id: &str, library_options: LibraryOptions) -> Self {
 		Self {
 			path: path.to_path_buf(),
 			series_id: series_id.to_string(),
 			library_options,
-			config,
 		}
 	}
 
@@ -40,8 +32,7 @@ impl MediaBuilder {
 	}
 
 	pub fn build(self) -> CoreResult<Media> {
-		let mut processed_entry =
-			process(&self.path, self.library_options.into(), self.config)?;
+		let mut processed_entry = process(&self.path, self.library_options.into())?;
 
 		tracing::trace!(?processed_entry, "Processed entry");
 

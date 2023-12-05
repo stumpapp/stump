@@ -9,7 +9,6 @@ use pdf::file::FileOptions;
 use pdfium_render::{prelude::Pdfium, render_config::PdfRenderConfig};
 
 use crate::{
-	config,
 	db::entity::metadata::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive, error::FileError, hash, image::ImageFormat,
@@ -20,14 +19,17 @@ use crate::{
 use super::{process::FileConverter, FileProcessor, FileProcessorOptions, ProcessedFile};
 
 /// A file processor for PDF files.
-pub struct PdfProcessor;
+pub struct PdfProcessor {
+	pdfium_path: Option<String>,
+	cache_dir: PathBuf,
+}
 
 impl FileProcessor for PdfProcessor {
 	// It is REALLY annoying to work with PDFs, and there is no good way to consume
 	// each page as a vector of bytes efficiently. Since PDFs don't really have metadata,
 	// I wouldn't expect the file to change much after a scan. So, for now, this will
 	// just make the sample size approximately 1/10th of the file size.
-	fn get_sample_size(path: &str) -> Result<u64, FileError> {
+	fn get_sample_size(&self, path: &str) -> Result<u64, FileError> {
 		let file = std::fs::File::open(path)?;
 		let metadata = file.metadata()?;
 		let size = metadata.len();
@@ -42,8 +44,8 @@ impl FileProcessor for PdfProcessor {
 		Ok(size / 10)
 	}
 
-	fn hash(path: &str) -> Option<String> {
-		let sample_result = PdfProcessor::get_sample_size(path);
+	fn hash(&self, path: &str) -> Option<String> {
+		let sample_result = self.get_sample_size(path);
 
 		if let Ok(sample) = sample_result {
 			match hash::generate(path, sample) {
@@ -58,7 +60,11 @@ impl FileProcessor for PdfProcessor {
 		}
 	}
 
-	fn process(path: &str, _: FileProcessorOptions) -> Result<ProcessedFile, FileError> {
+	fn process(
+		&self,
+		path: &str,
+		_: FileProcessorOptions,
+	) -> Result<ProcessedFile, FileError> {
 		let file = FileOptions::cached().open(path)?;
 
 		let pages = file.pages().count() as i32;
@@ -66,15 +72,19 @@ impl FileProcessor for PdfProcessor {
 
 		Ok(ProcessedFile {
 			path: PathBuf::from(path),
-			hash: PdfProcessor::hash(path),
+			hash: self.hash(path),
 			metadata,
 			pages,
 		})
 	}
 
 	// TODO: The decision to use PNG should be a configuration option
-	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
-		let pdfium = PdfProcessor::renderer()?;
+	fn get_page(
+		&self,
+		path: &str,
+		page: i32,
+	) -> Result<(ContentType, Vec<u8>), FileError> {
+		let pdfium = self.renderer()?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let document_page =
@@ -111,6 +121,7 @@ impl FileProcessor for PdfProcessor {
 	}
 
 	fn get_page_content_types(
+		&self,
 		_: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
@@ -124,11 +135,16 @@ impl FileProcessor for PdfProcessor {
 }
 
 impl PdfProcessor {
-	/// Initializes a PDFium renderer. If a path to the PDFium library is not provided
-	pub fn renderer() -> Result<Pdfium, FileError> {
-		let pdfium_path = config::get_pdfium_path();
+	pub fn new(pdfium_path: Option<String>, cache_dir: PathBuf) -> Self {
+		Self {
+			pdfium_path,
+			cache_dir,
+		}
+	}
 
-		if let Some(path) = pdfium_path {
+	/// Initializes a PDFium renderer. If a path to the PDFium library is not provided
+	pub fn renderer(&self) -> Result<Pdfium, FileError> {
+		if let Some(path) = self.pdfium_path {
 			let bindings = Pdfium::bind_to_library(&path)
 			.or_else(|e| {
 				tracing::error!(provided_path = ?path, ?e, "Failed to bind to PDFium library at provided path");
@@ -148,11 +164,12 @@ impl PdfProcessor {
 
 impl FileConverter for PdfProcessor {
 	fn to_zip(
+		&self,
 		path: &str,
 		delete_source: bool,
 		format: Option<ImageFormat>,
 	) -> Result<PathBuf, FileError> {
-		let pdfium = PdfProcessor::renderer()?;
+		let pdfium = self.renderer()?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let iter = document.pages().iter();
@@ -202,8 +219,7 @@ impl FileConverter for PdfProcessor {
 			extension,
 		} = path_buf.as_path().file_parts();
 
-		let cache_dir = config::get_cache_dir();
-		let unpacked_path = cache_dir.join(&file_stem);
+		let unpacked_path = self.cache_dir.join(&file_stem);
 
 		// create folder for the zip
 		std::fs::create_dir_all(&unpacked_path)?;
@@ -237,7 +253,7 @@ impl FileConverter for PdfProcessor {
 		// TODO: maybe check that this path isn't in a pre-defined list of important paths?
 		if let Err(err) = std::fs::remove_dir_all(&unpacked_path) {
 			tracing::error!(
-				error = ?err, ?cache_dir, ?unpacked_path, "Failed to delete unpacked contents in cache",
+				error = ?err, ?self.cache_dir, ?unpacked_path, "Failed to delete unpacked contents in cache",
 			);
 		}
 

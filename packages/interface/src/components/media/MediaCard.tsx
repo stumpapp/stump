@@ -1,7 +1,6 @@
 import { getMediaThumbnail } from '@stump/api'
 import { prefetchMedia } from '@stump/client'
 import { EntityCard, Text } from '@stump/components'
-import { EntityCardProps } from '@stump/components/card/EntityCard'
 import { FileStatus, Media } from '@stump/types'
 import pluralize from 'pluralize'
 import { useMemo } from 'react'
@@ -17,6 +16,8 @@ export type MediaCardProps = {
 	variant?: 'cover' | 'default'
 	onSelect?: (media: Media) => void
 }
+
+type EntityCardProps = React.ComponentPropsWithoutRef<typeof EntityCard>
 
 export default function MediaCard({
 	media,
@@ -151,7 +152,7 @@ export default function MediaCard({
 			progress={getProgress()}
 			subtitle={getSubtitle(media)}
 			onMouseEnter={handleHover}
-			size={isCoverOnly ? 'lg' : 'default'}
+			isCover={isCoverOnly}
 			{...propsOverrides}
 		/>
 	)

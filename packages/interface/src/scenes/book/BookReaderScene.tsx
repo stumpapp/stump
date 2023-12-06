@@ -3,8 +3,9 @@ import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@s
 import { useEffect } from 'react'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import AnimatedPagedReader from '../../components/readers/image-based/AnimatedPagedReader'
-import PagedReader from '../../components/readers/image-based/PagedReader'
+import AnimatedPagedReader from '@/components/readers/image-based/AnimatedPagedReader'
+import PagedReader from '@/components/readers/image-based/PagedReader'
+
 import paths from '../../paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
 
@@ -38,8 +39,20 @@ export default function BookReaderScene() {
 		}
 	}, [])
 
+	/**
+	 * An effect to update the read progress whenever the page changes in the URL
+	 */
+	useEffect(() => {
+		const parsedPage = parseInt(page || '', 10)
+		if (!parsedPage || isNaN(parsedPage) || !media) return
+
+		const maxPage = media.pages
+		if (parsedPage <= 0 || parsedPage > maxPage) return
+
+		updateReadProgress(parsedPage)
+	}, [page, updateReadProgress, media])
+
 	function handleChangePage(newPage: number) {
-		updateReadProgress(newPage)
 		navigate(paths.bookReader(id!, { isAnimated, page: newPage }))
 	}
 

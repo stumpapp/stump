@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { Navigate, useLocation } from 'react-router'
 
-import ServerUrlForm from '../../components/ServerUrlForm'
+import ServerUrlForm from '@/components/ServerUrlForm'
+
 import { useLocaleContext } from '../../i18n/index'
 
 export default function ServerConnectionErrorScene() {

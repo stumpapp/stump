@@ -6,7 +6,10 @@ use axum::{
 };
 use std::path::Path;
 use stump_core::{
-	db::query::pagination::{PageQuery, Pageable},
+	db::{
+		entity::UserPermission,
+		query::pagination::{PageQuery, Pageable},
+	},
 	filesystem::{
 		DirectoryListing, DirectoryListingFile, DirectoryListingInput, FileParts,
 		PathUtils,
@@ -19,7 +22,7 @@ use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
 	middleware::auth::{Auth, ServerOwnerGuard},
-	utils::get_session_server_owner_user,
+	utils::enforce_session_permission,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -52,7 +55,7 @@ pub async fn list_directory(
 	pagination: Query<PageQuery>,
 	input: Json<Option<DirectoryListingInput>>,
 ) -> ApiResult<Json<Pageable<DirectoryListing>>> {
-	let _ = get_session_server_owner_user(&session)?;
+	enforce_session_permission(&session, UserPermission::FileExplorer)?;
 	let input = input.0.unwrap_or_default();
 
 	let start_path = input.path.unwrap_or_else(|| {

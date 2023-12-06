@@ -15,7 +15,7 @@ export const BUTTON_VARIANTS = {
 	default:
 		'dark:bg-gray-900 dark:text-white dark:hover:bg-gray-700 bg-gray-50 hover:bg-gray-75 text-gray-900 focus:ring-brand-400',
 	ghost:
-		'bg-transparent hover:bg-gray-75 dark:hover:bg-gray-800 dark:text-gray-100 dark:hover:text-gray-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
+		'bg-transparent hover:bg-gray-75/60 dark:hover:bg-gray-800 dark:text-gray-100 dark:hover:text-gray-100 data-[state=open]:bg-transparent dark:data-[state=open]:bg-transparent',
 	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
 	outline:
 		'bg-transparent border border-gray-200 hover:bg-gray-75 dark:border-gray-700 dark:text-gray-100',

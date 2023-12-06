@@ -3,11 +3,21 @@ import React from 'react'
 import { useFilterContext } from './context'
 import FilterDisplay from './FilterDisplay'
 import FilterSlideOver from './FilterSlideOver'
-import { FilterFormVariant } from './form'
+import { FilterableEntity } from './form'
+import OrderBy from './OrderBy'
 import Search from './Search'
 
 type Props = {
-	slideOverForm: FilterFormVariant | null
+	/**
+	 * The entity to use for the filter slide over. If not provided, the filter
+	 * slide over will not be rendered.
+	 */
+	entity?: FilterableEntity
+	/**
+	 * Whether or not to render the order by component. If not provided, the order
+	 * by component will not be rendered.
+	 */
+	orderBy?: boolean
 	/**
 	 * The placeholder text to display in the search input.
 	 */
@@ -28,15 +38,20 @@ type Props = {
  * A component that renders a set of filter-related components within a header.
  */
 export default function FilterToolBar({
+	entity,
+	orderBy,
 	searchPlaceholder,
 	filterSlideOverPrompt,
 	isRefetching,
-	slideOverForm,
 }: Props) {
 	const { filters, setFilter, removeFilter } = useFilterContext()
+
+	const renderFilter = !!entity
+	const renderOrderBy = !!orderBy && !!entity
+
 	return (
-		<header className="flex flex-col gap-2">
-			<div className="flex items-center justify-between gap-2">
+		<header className="flex max-w-full flex-col gap-2">
+			<div className="flex flex-col items-center gap-2 md:flex-row">
 				<Search
 					initialValue={filters?.search as string}
 					placeholder={searchPlaceholder}
@@ -49,9 +64,10 @@ export default function FilterToolBar({
 					}}
 					isLoading={isRefetching}
 				/>
-				{slideOverForm && (
-					<FilterSlideOver prompt={filterSlideOverPrompt} formVariant={slideOverForm} />
-				)}
+				<div className="flex w-full shrink-0 gap-2 md:w-auto">
+					{renderOrderBy && <OrderBy entity={entity} />}
+					{renderFilter && <FilterSlideOver prompt={filterSlideOverPrompt} formVariant={entity} />}
+				</div>
 			</div>
 			<FilterDisplay />
 		</header>

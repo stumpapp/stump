@@ -1,4 +1,5 @@
 packages:
   - 'core'
   - 'apps/*'
+  - 'docs'
   - 'packages/*'

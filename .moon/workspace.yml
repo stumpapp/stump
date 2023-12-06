@@ -9,4 +9,5 @@ projects:
   - 'core'
   - 'crates/*'
   - '!crates/prisma-cli'
+  - 'docs'
   - 'packages/*'

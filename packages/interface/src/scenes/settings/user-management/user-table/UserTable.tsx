@@ -5,7 +5,8 @@ import dayjs from 'dayjs'
 import { HelpCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import Table from '../../../../components/table/Table'
+import Table from '@/components/table/Table'
+
 import { useUserManagementContext } from '../context'
 import InspectUserSlideOver from './InspectUserSlideOver'
 import UserActionMenu from './UserActionMenu'
@@ -25,7 +26,11 @@ const baseColumns = [
 		header: 'User',
 	}),
 	columnHelper.display({
-		cell: (info) => <Text size="sm">{info.getValue<boolean>() ? 'Server Owner' : 'Member'}</Text>,
+		cell: ({
+			row: {
+				original: { is_server_owner },
+			},
+		}) => <Text size="sm">{is_server_owner ? 'Server Owner' : 'Member'}</Text>,
 		header: 'Role',
 		id: 'is_server_owner',
 	}),

@@ -12,7 +12,7 @@ export default function ThemeToggle() {
 		<div>
 			<AnimatePresence mode="wait" initial={false}>
 				<ToolTip content="Toggle theme">
-					<IconButton variant="ghost" size="sm" onClick={toggleTheme}>
+					<IconButton variant="ghost" className="p-1.5" onClick={toggleTheme}>
 						<motion.span
 							key={isDark ? 'moon' : 'sun'}
 							initial={{ opacity: 0, y: -30 }}

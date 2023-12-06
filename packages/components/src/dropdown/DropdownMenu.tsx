@@ -24,7 +24,7 @@ export type DropdownItem = {
 	label: string
 	leftIcon?: React.ReactNode
 	shortCut?: React.ReactNode
-	onClick?: () => void
+	onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 	href?: string
 	subItems?: DropdownItem[]
 	hidden?: boolean

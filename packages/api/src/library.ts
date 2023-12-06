@@ -1,4 +1,5 @@
 import type {
+	CleanLibraryResponse,
 	CreateLibrary,
 	LibrariesStats,
 	Library,
@@ -48,6 +49,10 @@ export function scanLibary(params: {
 	return API.get(`/libraries/${params.id}/scan?scan_mode=${params.mode ?? 'BATCHED'}`)
 }
 
+export function cleanLibrary(id: string): Promise<ApiResult<CleanLibraryResponse>> {
+	return API.put(`/libraries/${id}/clean`)
+}
+
 // TODO: type this
 export function deleteLibrary(id: string) {
 	return API.delete(`/libraries/${id}`)
@@ -76,6 +81,7 @@ export function patchLibraryThumbnail(id: string, params: PatchLibraryThumbnail)
 }
 
 export const libraryApi = {
+	cleanLibrary,
 	createLibrary,
 	deleteLibrary,
 	deleteLibraryThumbnails,
@@ -90,6 +96,7 @@ export const libraryApi = {
 }
 
 export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
+	cleanLibrary: 'library.cleanLibrary',
 	createLibrary: 'library.createLibrary',
 	deleteLibrary: 'library.deleteLibrary',
 	deleteLibraryThumbnails: 'library.deleteLibraryThumbnails',

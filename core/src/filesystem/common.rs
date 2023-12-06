@@ -91,7 +91,9 @@ impl PathUtils for Path {
 			.extension()
 			.and_then(|os_str| os_str.try_to_string())
 			.unwrap_or_else(|| {
-				tracing::warn!(path = ?self, "Failed to get file extension");
+				if !self.is_dir() {
+					tracing::warn!(path = ?self, "Failed to get file extension");
+				}
 				String::default()
 			});
 

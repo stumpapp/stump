@@ -269,6 +269,12 @@ async fn update_user(
 		let updated_user_data = client
 			._transaction()
 			.run(|tx| async move {
+				let existing_age_restriction = tx
+					.age_restriction()
+					.find_unique(age_restriction::user_id::equals(for_user_id.clone()))
+					.exec()
+					.await?;
+
 				if let Some(age_restriction) = input.age_restriction {
 					let upserted_age_restriction = tx
 						.age_restriction()
@@ -291,6 +297,12 @@ async fn update_user(
 						.exec()
 						.await?;
 					tracing::trace!(?upserted_age_restriction, "Upserted age restriction")
+				} else if existing_age_restriction.is_some() {
+					tx.age_restriction()
+						.delete(age_restriction::user_id::equals(for_user_id.clone()))
+						.exec()
+						.await?;
+					tracing::trace!("Deleted age restriction")
 				}
 
 				update_params.push(user::permissions::set(Some(
@@ -304,9 +316,8 @@ async fn update_user(
 
 				tx.user()
 					.update(user::id::equals(for_user_id), update_params)
-					// NOTE: we have to fetch preferences because if we update session without
-					// it then it effectively removes the preferences from the session
 					.with(user::user_preferences::fetch())
+					.with(user::age_restriction::fetch())
 					.exec()
 					.await
 			})

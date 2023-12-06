@@ -62,18 +62,6 @@
 				"decorations": true,
 				"transparent": false,
 				"center": true
-			},
-			{
-				"fullscreen": false,
-				"height": 700,
-				"resizable": true,
-				"title": "Stump",
-				"width": 1200,
-				"decorations": true,
-				"transparent": false,
-				"center": true,
-				"url": "splash-screen.html",
-				"label": "splashscreen"
 			}
 		]
 	}

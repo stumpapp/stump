@@ -1,8 +1,8 @@
-import { useUserStore } from '@stump/client'
-import React from 'react'
-import { Navigate, Route, Routes } from 'react-router'
+import React, { useEffect } from 'react'
+import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
 import { LazyComponent } from '../../AppRouter'
+import { useAppContext } from '../../context.ts'
 import BookClubHomeLayout from './home/BookClubHomeLayout.tsx'
 
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
@@ -21,12 +21,18 @@ const BookClubSchedulerScene = lazily(
 )
 
 export default function BookClubRouter() {
-	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
+	const { checkPermission } = useAppContext()
 
-	const userCanAccess = checkUserPermission('bookclub:read')
+	const navigate = useNavigate()
+	const canAccess = checkPermission('bookclub:read')
+	useEffect(() => {
+		if (!canAccess) {
+			navigate('..')
+		}
+	}, [canAccess, navigate])
 
-	if (!userCanAccess) {
-		return <Navigate to=".." />
+	if (!canAccess) {
+		return null
 	}
 
 	return (

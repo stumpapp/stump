@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
 import { useFilterContext } from './context'
-import { FilterFormVariant, MediaFilterForm, SeriesFilterForm } from './form'
+import { FilterableEntity, MediaFilterForm, SeriesFilterForm } from './form'
 
 type Props = {
 	/**
@@ -15,7 +15,7 @@ type Props = {
 	/**
 	 * The form variant to render in the slide over. I.e. media or series or library
 	 */
-	formVariant: FilterFormVariant
+	formVariant: FilterableEntity
 }
 
 /**

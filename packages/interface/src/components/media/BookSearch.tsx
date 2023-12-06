@@ -3,13 +3,15 @@ import { usePreviousIsDifferent } from '@stump/components'
 import { Media } from '@stump/types'
 import React, { useEffect } from 'react'
 
-import useIsInView from '../../hooks/useIsInView'
+import useIsInView from '@/hooks/useIsInView'
+
 import MediaGrid from '../../scenes/series/MediaGrid'
 import { FilterToolBar, useFilterContext } from '../filters'
 import Pagination from '../Pagination'
 
 type Props = {
 	page: number
+	page_size?: number
 	setPage: (page: number) => void
 	onBookSelect?: (book: Media) => void
 	showFilters?: boolean
@@ -19,7 +21,7 @@ type Props = {
  *  A component that renders a paginated grid of books with a search bar and (optionally)
  *  a filter slide over. Must be used within a `FilterProvider`.
  */
-export default function BookSearch({ page, setPage, onBookSelect, showFilters }: Props) {
+export default function BookSearch({ page, page_size, setPage, onBookSelect, showFilters }: Props) {
 	const { filters } = useFilterContext()
 	const {
 		isLoading,
@@ -28,6 +30,7 @@ export default function BookSearch({ page, setPage, onBookSelect, showFilters }:
 		pageData: { current_page, total_pages } = {},
 	} = usePagedMediaQuery({
 		page,
+		page_size,
 		params: filters,
 	})
 
@@ -62,7 +65,7 @@ export default function BookSearch({ page, setPage, onBookSelect, showFilters }:
 			<FilterToolBar
 				isRefetching={isRefetching}
 				searchPlaceholder="Search books by name or description."
-				slideOverForm={showFilters ? 'media' : null}
+				{...(showFilters ? { entity: 'media', orderBy: true } : {})}
 			/>
 
 			<div className="flex w-full flex-col space-y-6 pt-4">

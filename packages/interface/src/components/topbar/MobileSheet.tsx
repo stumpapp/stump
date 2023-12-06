@@ -1,16 +1,24 @@
 import { IconButton, Sheet } from '@stump/components'
 import { Menu } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useMediaMatch } from 'rooks'
 
-import { SidebarContent, SidebarFooter, SidebarHeader } from '../sidebar/Sidebar'
+import { SideBar, SideBarFooter } from '../sidebar'
+import UserMenu from '../UserMenu'
 
 export default function MobileSheet() {
 	const [open, setOpen] = useState(false)
 
+	const isMobile = useMediaMatch('(max-width: 768px)')
+
+	useEffect(() => {
+		if (!isMobile) setOpen(false)
+	}, [isMobile])
+
 	return (
 		<Sheet
 			size="xl"
-			title={<SidebarHeader />}
+			title={<UserMenu />}
 			trigger={
 				<IconButton variant="ghost" onClick={() => setOpen(true)}>
 					<Menu className="h-5 w-5" />
@@ -19,10 +27,16 @@ export default function MobileSheet() {
 			open={open}
 			onOpen={() => setOpen(true)}
 			onClose={() => setOpen(false)}
-			footer={<SidebarFooter />}
+			footer={
+				<div className="w-full pb-2">
+					<SideBarFooter />
+				</div>
+			}
+			closeIcon={false}
+			position="left"
 		>
-			<div className="flex-1 px-6">
-				<SidebarContent isMobileSheet />
+			<div className="flex-1 overflow-y-scroll px-6">
+				<SideBar asChild />
 			</div>
 		</Sheet>
 	)

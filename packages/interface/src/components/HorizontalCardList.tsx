@@ -116,7 +116,10 @@ export default function HorizontalCardList({
 		}
 
 		return (
-			<div ref={parentRef} className="h-[24rem] overflow-x-auto overflow-y-hidden scrollbar-hide">
+			<div
+				ref={parentRef}
+				className="h-[23rem] overflow-x-auto overflow-y-hidden scrollbar-hide sm:h-[25rem] lg:h-[28rem]"
+			>
 				<div
 					className="relative inline-flex h-full"
 					style={{

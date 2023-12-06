@@ -15,7 +15,6 @@ use stump_core::{
 	prisma::user,
 };
 use tower_sessions::Session;
-use tracing::{error, trace};
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
@@ -47,7 +46,7 @@ where
 		let session = Session::from_request_parts(parts, &state)
 			.await
 			.map_err(|e| {
-				error!("Failed to extract session handle: {}", e.1);
+				tracing::error!("Failed to extract session handle: {}", e.1);
 				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 			})?;
 
@@ -55,9 +54,14 @@ where
 			tracing::error!(error = ?e, "Failed to get user from session");
 			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 		})?;
+
 		if let Some(user) = session_user {
-			trace!("Session for {} already exists", &user.username);
-			return Ok(Self);
+			if !user.is_locked {
+				tracing::trace!(user = user.username, "Session found!");
+				return Ok(Self);
+			}
+		} else {
+			tracing::trace!("No session found, checking for auth header");
 		}
 
 		let auth_header = parts
@@ -68,20 +72,22 @@ where
 		let is_opds = parts.uri.path().starts_with("/opds");
 		let is_swagger = parts.uri.path().starts_with("/swagger-ui");
 		let has_auth_header = auth_header.is_some();
-		trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
+		tracing::trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
 
-		if !has_auth_header {
+		let Some(auth_header) = auth_header else {
 			if is_opds {
+				// Prompt for basic auth on OPDS routes
 				return Err(BasicAuth.into_response());
 			} else if is_swagger {
+				// Sign in via React app and then redirect to server-side swagger-ui
 				return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
 			}
 
 			return Err((StatusCode::UNAUTHORIZED).into_response());
-		}
+		};
 
-		let auth_header = auth_header.unwrap();
 		if !auth_header.starts_with("Basic ") || auth_header.len() <= 6 {
+			tracing::error!(?auth_header, "Invalid auth header!");
 			return Err((StatusCode::UNAUTHORIZED).into_response());
 		}
 
@@ -97,7 +103,7 @@ where
 				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
 			})?;
 
-		let user = state
+		let fetched_user = state
 			.db
 			.user()
 			.find_unique(user::username::equals(decoded_credentials.username.clone()))
@@ -107,30 +113,34 @@ where
 			.await
 			.map_err(|e| map_prisma_error(e).into_response())?;
 
-		if user.is_none() {
-			error!(
+		let Some(user) = fetched_user else {
+			tracing::error!(
 				"No user found for username: {}",
 				&decoded_credentials.username
 			);
 			return Err((StatusCode::UNAUTHORIZED).into_response());
-		}
+		};
 
-		let user = user.unwrap();
 		let is_match =
 			verify_password(&user.hashed_password, &decoded_credentials.password)
 				.map_err(|e| e.into_response())?;
 
-		if is_match {
-			trace!(
+		if is_match && user.is_locked {
+			tracing::error!(
+				username = &user.username,
+				"User is locked, denying authentication"
+			);
+			return Err((StatusCode::UNAUTHORIZED, "Your account is locked. Please contact an administrator to unlock your account.").into_response());
+		} else if is_match {
+			tracing::trace!(
 				username = &user.username,
 				"Basic authentication sucessful. Creating session for user"
 			);
-			session
-				.insert(SESSION_USER_KEY, user.clone())
-				.map_err(|e| {
-					error!("Failed to insert user into session: {}", e);
-					(StatusCode::INTERNAL_SERVER_ERROR).into_response()
-				})?;
+			let user = User::from(user);
+			session.insert(SESSION_USER_KEY, user).map_err(|e| {
+				tracing::error!("Failed to insert user into session: {}", e);
+				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+			})?;
 
 			return Ok(Self);
 		}
@@ -198,7 +208,10 @@ impl IntoResponse for BasicAuth {
 			.header("Authorization", "Basic")
 			.header("WWW-Authenticate", "Basic realm=\"stump\"")
 			.body(BoxBody::default())
-			.unwrap()
+			.unwrap_or_else(|e| {
+				tracing::error!(error = ?e, "Failed to build response");
+				StatusCode::INTERNAL_SERVER_ERROR.into_response()
+			})
 	}
 }
 

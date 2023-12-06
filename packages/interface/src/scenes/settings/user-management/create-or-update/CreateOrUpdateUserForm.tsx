@@ -10,8 +10,9 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 import z from 'zod'
 
-import { useLocaleContext } from '../../../../i18n'
-import paths from '../../../../paths'
+import { useLocaleContext } from '@/i18n'
+import paths from '@/paths'
+
 import { useUserManagementContext } from '../context'
 import UserPermissionsForm, { userPermissionSchema } from './UserPermissionsForm'
 import UserRestrictionsForm from './UserRestrictionsForm'
@@ -20,8 +21,10 @@ const buildSchema = (t: (key: string) => string, existingUsers: User[], updating
 	z.object({
 		age_restriction: z
 			.number()
-			.min(0, { message: t('settingsScene.createOrUpdateUsers.validation.ageRestrictionTooLow') })
-			.optional(),
+			.optional()
+			.refine((value) => value == undefined || value >= 0, {
+				message: t('settingsScene.createOrUpdateUsers.validation.ageRestrictionTooLow'),
+			}),
 		age_restriction_on_unset: z.boolean().optional(),
 		forbidden_tags: z.array(z.string()).optional(),
 		password: z
@@ -47,6 +50,7 @@ const buildSchema = (t: (key: string) => string, existingUsers: User[], updating
 export type Schema = z.infer<ReturnType<typeof buildSchema>>
 
 const generateRandomPassword = (length = 16) => {
+	// FIXME: this should probably be moved to the server and be a secret lol very insecure
 	const charset =
 		'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~}{[]:;?'
 	let randomValue = ''
@@ -103,6 +107,8 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				})
 				console.debug('Created user', { result })
 				toast.success('User created successfully')
+				await invalidateQueries({ keys: [userQueryKeys.getUsers, userQueryKeys.getUserById] })
+				form.reset()
 			} else if (user) {
 				const result = await updateAsync({
 					...user,
@@ -113,9 +119,15 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				})
 				console.debug('Updated user', { result })
 				toast.success('User updated successfully')
+				await invalidateQueries({ keys: [userQueryKeys.getUsers, userQueryKeys.getUserById] })
+				form.reset({
+					age_restriction: result.age_restriction?.age,
+					age_restriction_on_unset: result.age_restriction?.restrict_on_unset,
+					permissions: result.permissions,
+					username: result.username,
+				})
 			}
 
-			await invalidateQueries({ queryKey: [userQueryKeys.getUsers] })
 			navigate(paths.settings('users'))
 		} catch (error) {
 			console.error(error)

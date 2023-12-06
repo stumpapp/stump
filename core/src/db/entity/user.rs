@@ -125,18 +125,37 @@ impl From<prisma::user::Data> for User {
 }
 
 // TODO: consider adding self:update permission, useful for child accounts
-#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
+/// Permissions that can be granted to a user. Some permissions are implied by others,
+/// and will be automatically granted if the "parent" permission is granted.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, ToSchema, Eq, PartialEq)]
 pub enum UserPermission {
+	/// Grant access to the book club feature
 	#[serde(rename = "bookclub:read")]
 	AccessBookClub,
+	/// Grant access to create a book club (access book club)
 	#[serde(rename = "bookclub:create")]
 	CreateBookClub,
+	/// Grant access to access the file explorer
 	#[serde(rename = "file:explorer")]
 	FileExplorer,
+	/// Grant access to upload files to the library (manage library)
 	#[serde(rename = "file:upload")]
 	UploadFile,
+	/// Grant access to create a library
+	#[serde(rename = "library:create")]
+	CreateLibrary,
+	/// Grant access to edit basic details about the library
+	#[serde(rename = "library:edit")]
+	EditLibrary,
+	/// Grant access to scan the library for new files
 	#[serde(rename = "library:scan")]
 	ScanLibrary,
+	/// Grant access to manage the library (scan,edit,manage relations)
+	#[serde(rename = "library:manage")]
+	ManageLibrary,
+	/// Grant access to delete the library (manage library)
+	#[serde(rename = "library:delete")]
+	DeleteLibrary,
 }
 
 impl ToString for UserPermission {
@@ -146,7 +165,11 @@ impl ToString for UserPermission {
 			UserPermission::CreateBookClub => "bookclub:create".to_string(),
 			UserPermission::FileExplorer => "file:explorer".to_string(),
 			UserPermission::UploadFile => "file:upload".to_string(),
+			UserPermission::CreateLibrary => "library:create".to_string(),
+			UserPermission::EditLibrary => "library:edit".to_string(),
 			UserPermission::ScanLibrary => "library:scan".to_string(),
+			UserPermission::ManageLibrary => "library:manage".to_string(),
+			UserPermission::DeleteLibrary => "library:delete".to_string(),
 		}
 	}
 }
@@ -158,7 +181,11 @@ impl From<&str> for UserPermission {
 			"bookclub:create" => UserPermission::CreateBookClub,
 			"file:explorer" => UserPermission::FileExplorer,
 			"file:upload" => UserPermission::UploadFile,
+			"library:create" => UserPermission::CreateLibrary,
+			"library:edit" => UserPermission::EditLibrary,
 			"library:scan" => UserPermission::ScanLibrary,
+			"library:manage" => UserPermission::ManageLibrary,
+			"library:delete" => UserPermission::DeleteLibrary,
 			_ => panic!("Invalid user permission: {}", s),
 		}
 	}

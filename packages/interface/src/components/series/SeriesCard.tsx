@@ -72,13 +72,13 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 		<EntityCard
 			key={series.id}
 			title={series.name}
-			fullWidth={fullWidth}
 			href={paths.seriesOverview(series.id)}
 			imageUrl={getSeriesThumbnail(series.id)}
 			progress={getProgress()}
 			subtitle={getSubtitle(series)}
 			onMouseEnter={handleHover}
-			size={isCoverOnly ? 'lg' : 'default'}
+			fullWidth={fullWidth}
+			isCover={isCoverOnly}
 			{...overrides}
 		/>
 	)

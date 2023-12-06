@@ -1,14 +1,16 @@
-import { useBookClubsQuery, useUserStore } from '@stump/client'
+import { useBookClubsQuery } from '@stump/client'
 import { ButtonOrLink, cx } from '@stump/components'
 import React from 'react'
 
-import GenericEmptyState from '../../../components/GenericEmptyState'
-import SceneContainer from '../../../components/SceneContainer'
-import paths from '../../../paths'
+import GenericEmptyState from '@/components/GenericEmptyState'
+import SceneContainer from '@/components/SceneContainer'
+import { useAppContext } from '@/context'
+import paths from '@/paths'
 
 export default function BookClubExploreScene() {
-	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
-	const canCreate = checkUserPermission('bookclub:create')
+	const { checkPermission } = useAppContext()
+
+	const canCreate = checkPermission('bookclub:create')
 
 	const { bookClubs, isLoading } = useBookClubsQuery()
 

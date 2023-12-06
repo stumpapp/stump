@@ -26,7 +26,7 @@ export default function LocalePreferences() {
 	return (
 		<div className="pb-2">
 			<SettingsSubSection heading={t('settingsScene.general.locale.heading')} subtitle={subTitle}>
-				<div className="flex max-w-2xl flex-col gap-3 divide-y divide-gray-75 pt-6 dark:divide-gray-900">
+				<div className="flex max-w-2xl flex-col gap-3 divide-y divide-gray-75 pt-2 dark:divide-gray-900">
 					<LocaleSelector />
 				</div>
 			</SettingsSubSection>

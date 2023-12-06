@@ -6,6 +6,7 @@ export {
 	useBookClubsQuery,
 	useChatBoardQuery,
 	useCreateBookClub,
+	useUpdateBookClub,
 } from './bookClub'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'

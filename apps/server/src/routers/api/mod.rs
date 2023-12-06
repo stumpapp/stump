@@ -73,8 +73,13 @@ mod tests {
 		)?;
 
 		file.write_all(
+			format!("{}\n\n", ts_export::<PutMediaCompletionStatus>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaIsComplete>()?).as_bytes())?;
+		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesIsComplete>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),
 		)?;

@@ -172,7 +172,13 @@ export type UpdateLibrary = { id: string; name: string; path: string; descriptio
 
 export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
 
+export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | null }
+
+export type MediaIsComplete = { is_completed: boolean; completed_at: string | null }
+
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
+
+export type SeriesIsComplete = { is_complete: boolean; completed_at: string | null }
 
 export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_library_ids: string[] | null }
 

@@ -72,6 +72,9 @@ export default function SeriesThumbnailSelector({ series }: Props) {
 				imageUrl={
 					selectedBook && page ? getMediaPage(selectedBook.id, page) : getSeriesThumbnail(series.id)
 				}
+				isCover
+				className="flex-auto flex-shrink-0"
+				fullWidth={(imageFailed) => !imageFailed}
 			/>
 
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>

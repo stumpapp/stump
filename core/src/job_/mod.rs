@@ -4,6 +4,7 @@ use globset::GlobSet;
 use serde::{de, Deserialize, Serialize};
 
 mod error;
+mod executor;
 mod manager;
 mod worker;
 
@@ -97,7 +98,7 @@ pub trait StatefulJob: Send + Sync + Sized {
 	#[must_use("Self::init must be called before Self::run")]
 	async fn run(
 		&self,
-		data: Self::State,
+		data: &mut Self::State,
 		tasks: WorkingState<Self::Task>,
 	) -> Result<JobOutput<Self::State, Self::Output, Self::Error>, JobError>;
 }
@@ -218,7 +219,7 @@ impl StatefulJob for LibraryScanJob {
 
 	async fn run(
 		&self,
-		data: Self::State,
+		data: &mut Self::State,
 		tasks: WorkingState<Self::Task>,
 	) -> Result<JobOutput<Self::State, Self::Output, Self::Error>, JobError> {
 		let WorkingState { mut tasks, .. } = tasks;

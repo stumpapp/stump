@@ -6,7 +6,7 @@ use std::{
 use futures::future::join_all;
 use tokio::sync::{mpsc, oneshot, RwLock};
 
-use super::{JobManagerError, Worker};
+use super::{JobManagerError, StatefulJob, Worker, WorkerEvent};
 use crate::Ctx;
 
 /// Events that can be sent to the job manager. If any of these events require a response,
@@ -91,8 +91,6 @@ impl JobManager {
 	}
 }
 
-// type AsyncChannel<T> = (async_channel::Sender<T>, async_channel::Receiver<T>);
-
 /// A helper struct that holds the job queue and a list of workers for the job manager
 struct Jobs {
 	/// Queue of jobs waiting to be run in a worker thread
@@ -102,6 +100,7 @@ struct Jobs {
 	workers: RwLock<HashMap<String, Arc<Worker>>>,
 	/// A channel to send shutdown signals to the parent job manager
 	job_manager_tx: mpsc::UnboundedSender<JobManagerEvent>,
+	// worker_tx: mpsc::UnboundedSender<WorkerEvent>,
 }
 
 impl Jobs {
@@ -121,7 +120,7 @@ impl Jobs {
 
 	/// Add a job to the queue. If there are no running jobs (i.e. no workers),
 	/// then a worker will be created and immediately spawned
-	async fn enqueue(self: Arc<Self>, job: String) {
+	async fn enqueue(self: Arc<Self>, job: Box<dyn StatefulJob>) {
 		// Persist the job to the database? Maybe... Perhaps only after it's been
 		// started?
 
@@ -129,6 +128,7 @@ impl Jobs {
 
 		if workers.is_empty() {
 			// Create the worker
+			// let worker = Worker::new("FIXME".to_string(), job, self.clone()).await?;
 			// Spawn the worker
 			// Insert the worker into the workers map
 		} else {

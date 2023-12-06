@@ -4,13 +4,15 @@ use tokio::sync::oneshot;
 
 use crate::{job::JobError, prisma::PrismaClient};
 
+use super::StatefulJob;
+
 pub enum WorkerEvent {
 	Progress, // TODO: data
 	Complete,
 }
 
-/// Commands that the worker can send/receive internally. Currently only used for cancellation,
-/// but could be used for other things in the future (e.g. pausing/resuming)
+/// Commands that the worker can send/receive internally. Every command will kill
+/// the Future that effectively runs the job. Currently, the only command is `Cancel`.
 #[derive(Debug)]
 pub enum WorkerCommand {
 	Cancel(oneshot::Sender<()>),
@@ -40,12 +42,14 @@ impl WorkerCtx {
 }
 
 pub struct Worker {
+	job: Box<dyn StatefulJob>,
 	command_sender: async_channel::Sender<WorkerCommand>,
 }
 
 impl Worker {
 	pub async fn new(
 		job_id: String,
+		job: Box<dyn StatefulJob>,
 		db: Arc<PrismaClient>,
 		event_sender: async_channel::Sender<WorkerEvent>,
 	) -> Result<Self, JobError> {
@@ -59,9 +63,10 @@ impl Worker {
 			command_receiver: command_receiver,
 		};
 
-		tokio::spawn(Self::work(worker_ctx));
-
-		Ok(Self { command_sender })
+		Ok(Self {
+			job,
+			command_sender,
+		})
 	}
 
 	/// Cancels the job running in the worker
@@ -93,22 +98,18 @@ impl Worker {
 
 	async fn work(worker_ctx: WorkerCtx) {
 		let commands_rx = worker_ctx.command_receiver.clone();
+		let shutdown_fut = commands_rx.recv();
+		tokio::pin!(shutdown_fut);
 
-		// TODO: do I need this?
-		// let commands_fut = commands_rx.recv();
-		// tokio::pin!(commands_fut);
-
-		let mut running = true;
-		while running {
-			tokio::select! {
-				command = commands_rx.recv() => {
-					// TODO: do something
-					println!("Received command: {:?}", command);
-				},
-				_ = tokio::time::sleep(std::time::Duration::from_secs(20)) => {
-					println!("Timeout reached!");
-				},
-			}
+		// TODO: commands (if ever extended to more than cancel) should be handled in a loop
+		tokio::select! {
+			command = shutdown_fut => {
+				// TODO: do something
+				println!("Received command: {:?}", command);
+			},
+			_ = tokio::time::sleep(std::time::Duration::from_secs(20)) => {
+				println!("Timeout reached!");
+			},
 		}
 	}
 }

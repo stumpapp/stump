@@ -24,7 +24,7 @@ export default function BookCompletionToggleButton({ book }: Props) {
 
 	const handleClick = async () => {
 		const willBeComplete = !isCompleted
-		const page = isEpub ? undefined : willBeComplete ? book.pages : 1
+		const page = isEpub ? undefined : willBeComplete ? book.pages : 0
 		try {
 			await mutateAsync({
 				is_complete: willBeComplete,

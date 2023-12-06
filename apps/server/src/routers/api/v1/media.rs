@@ -1278,7 +1278,7 @@ async fn put_media_complete_status(
 			};
 
 			let extension = media.extension.to_lowercase();
-			let fallback_page = if extension.contains("epub") { -1 } else { 1 };
+			let fallback_page = if extension.contains("epub") { -1 } else { 0 };
 
 			let updated_or_created_rp = tx
 				.read_progress()

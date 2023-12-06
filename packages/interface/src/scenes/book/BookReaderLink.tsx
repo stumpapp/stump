@@ -29,7 +29,7 @@ export default function BookReaderLink({ book }: Props) {
 	const title = useMemo(() => {
 		if (isReadAgain) {
 			return 'Read again'
-		} else if (currentPage > -1 || !!epubcfi) {
+		} else if (currentPage > 0 || !!epubcfi) {
 			return 'Continue reading'
 		} else {
 			return 'Start reading'
@@ -53,7 +53,7 @@ export default function BookReaderLink({ book }: Props) {
 				isEpub: true,
 			})
 		} else {
-			return paths.bookReader(id, { page: isReadAgain ? undefined : current_page || 1 })
+			return paths.bookReader(id, { page: isReadAgain ? 1 : current_page || 1 })
 		}
 	}, [book, isReadAgain])
 

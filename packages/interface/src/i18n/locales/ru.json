@@ -151,21 +151,21 @@
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Продолжить чтение",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you're currently reading will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Новые серии",
 			"emptyState": {
 				"heading": "No series to display",
 				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Новые книги",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you add to your libraries will show up here"

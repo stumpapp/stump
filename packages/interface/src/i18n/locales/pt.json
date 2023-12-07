@@ -150,9 +150,27 @@
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continuar Lendo",
-		"recentlyAddedSeries": "Séries adicionadas recentemente",
-		"recentlyAddedBooks": "Livros adicionados recentemente"
+		"continueReading": {
+			"title": "Continuar Lendo",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you're currently reading will show up here"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Séries adicionadas recentemente",
+			"emptyState": {
+				"heading": "No series to display",
+				"message": "Any series you add to your libraries will show up here"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Livros adicionados recentemente",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you add to your libraries will show up here"
+			}
+		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
@@ -332,9 +350,25 @@
 				},
 				"library": {
 					"label": "Library Management",
+					"create": {
+						"label": "Create libraries",
+						"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+					},
 					"scan": {
 						"label": "Scan libraries",
 						"description": "Allows the user to initiate scans for existing libraries"
+					},
+					"edit": {
+						"label": "Edit libraries",
+						"description": "Allows the user to edit basic details for existing libraries"
+					},
+					"manage": {
+						"label": "Manage libraries",
+						"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+					},
+					"delete": {
+						"label": "Delete libraries",
+						"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
 					}
 				}
 			},
@@ -378,9 +412,10 @@
 		"buttons": {
 			"home": "Início",
 			"libraries": "Bibliotecas",
-			"books": "Explore Books",
-			"bookClubs": "Book Clubs",
-			"createLibrary": "Criar Biblioteca",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Create library",
+			"createBookClub": "Create book club",
 			"settings": "Configurações",
 			"themeToggle": "Alternar tema",
 			"goForward": "Ir adiante",

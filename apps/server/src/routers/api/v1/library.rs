@@ -15,7 +15,7 @@ use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
@@ -434,20 +434,24 @@ pub(crate) fn get_library_thumbnail(
 	first_series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
-	thumbnails_dir: PathBuf,
+	config: StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let library_id = library.id.clone();
 
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
 
-		let path = thumbnails_dir.join(format!("{}.{}", library_id, extension));
+		let path = config
+			.get_thumbnails_dir()
+			.join(format!("{}.{}", library_id, extension));
 
 		if path.exists() {
 			tracing::trace!(?path, library_id, "Found generated library thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&library_id, thumbnails_dir) {
+	} else if let Some(path) =
+		get_unknown_thumnail(&library_id, config.get_thumbnails_dir())
+	{
 		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
@@ -456,7 +460,7 @@ pub(crate) fn get_library_thumbnail(
 		));
 	}
 
-	get_series_thumbnail(first_series, first_book, image_format, thumbnails_dir)
+	get_series_thumbnail(first_series, first_book, image_format, config)
 }
 
 // TODO: ImageResponse for utoipa
@@ -481,7 +485,6 @@ async fn get_library_thumbnail_handler(
 	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
-	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let user = get_session_user(&session)?;
 	let age_restriction = user.age_restriction;
@@ -530,7 +533,7 @@ async fn get_library_thumbnail_handler(
 		&first_series,
 		first_book,
 		image_format,
-		thumbnails_dir,
+		ctx.config.clone(),
 	)
 	.map(ImageResponse::from)
 }
@@ -570,7 +573,6 @@ async fn patch_library_thumbnail(
 	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
-	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let target_page = body
 		.is_zero_based
@@ -622,7 +624,7 @@ async fn patch_library_thumbnail(
 
 	let format = thumbnail_options.format.clone();
 	let path_buf =
-		generate_thumbnail(&id, &media.path, thumbnail_options, thumbnails_dir)?;
+		generate_thumbnail(&id, &media.path, thumbnail_options, ctx.config.clone())?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,

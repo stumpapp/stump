@@ -5,7 +5,7 @@ use std::time::Duration;
 use clap::Subcommand;
 use indicatif::{ProgressBar, ProgressStyle};
 
-use crate::{error::CliResult, CliConfig};
+use crate::{error::CliResult, BundledConfigs};
 
 use self::account::Account;
 
@@ -15,7 +15,7 @@ pub enum Commands {
 	Account(Account),
 }
 
-pub async fn handle_command(command: Commands, config: CliConfig) -> CliResult<()> {
+pub async fn handle_command(command: Commands, config: BundledConfigs) -> CliResult<()> {
 	match command {
 		Commands::Account(account) => {
 			account::handle_account_command(account, config).await

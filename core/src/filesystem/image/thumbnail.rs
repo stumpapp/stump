@@ -4,6 +4,7 @@ use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use tracing::{debug, error, trace};
 
 use crate::{
+	config::StumpConfig,
 	db::entity::Media,
 	filesystem::{media, FileError},
 	prisma::media as prisma_media,
@@ -18,12 +19,13 @@ pub fn generate_thumbnail(
 	id: &str,
 	media_path: &str,
 	options: ImageProcessorOptions,
-	thumbnails_dir: PathBuf,
+	config: StumpConfig,
 ) -> Result<PathBuf, FileError> {
-	let (_, buf) = media::get_page(media_path, options.page.unwrap_or(1))?;
+	let (_, buf) =
+		media::get_page(media_path, options.page.unwrap_or(1), config.clone())?;
 	let ext = options.format.extension();
 
-	let thumbnail_path = thumbnails_dir.join(format!("{}.{}", &id, ext));
+	let thumbnail_path = config.get_thumbnails_dir().join(format!("{}.{}", &id, ext));
 	if !thumbnail_path.exists() {
 		// TODO: this will be more complicated once more specialized processors are added...
 		let image_buffer = if options.format == ImageFormat::Webp {
@@ -45,7 +47,7 @@ pub fn generate_thumbnail(
 pub fn generate_thumbnails(
 	media: &[Media],
 	options: ImageProcessorOptions,
-	thumbnails_dir: PathBuf,
+	config: StumpConfig,
 ) -> Result<Vec<PathBuf>, FileError> {
 	trace!("Enter generate_thumbnails");
 
@@ -62,7 +64,7 @@ pub fn generate_thumbnails(
 					m.id.as_str(),
 					m.path.as_str(),
 					options.clone(),
-					thumbnails_dir,
+					config.clone(),
 				)
 			})
 			.filter_map(|res| {
@@ -88,7 +90,7 @@ pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
 pub fn generate_thumbnails_for_media(
 	media: Vec<prisma_media::Data>,
 	options: ImageProcessorOptions,
-	thumbnails_dir: PathBuf,
+	config: StumpConfig,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Result<Vec<PathBuf>, FileError> {
 	trace!(media_count = media.len(), "Enter generate_thumbnails");
@@ -112,7 +114,7 @@ pub fn generate_thumbnails_for_media(
 					m.id.as_str(),
 					m.path.as_str(),
 					options.clone(),
-					thumbnails_dir,
+					config.clone(),
 				)
 			})
 			.filter_map(|res| {

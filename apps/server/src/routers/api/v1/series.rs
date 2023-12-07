@@ -9,7 +9,7 @@ use prisma_client_rust::{or, Direction};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
 		entity::{LibraryOptions, Media, Series},
 		query::{
@@ -396,15 +396,14 @@ pub(crate) fn get_series_thumbnail(
 	series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
-	thumbnails_dir: PathBuf,
+	config: StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
-	let thumbnails = get_config_dir().join("thumbnails");
+	let thumbnails_dir = config.get_thumbnails_dir();
 	let series_id = series.id.clone();
 
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
-
-		let path = thumbnails.join(format!("{}.{}", series_id, extension));
+		let path = thumbnails_dir.join(format!("{}.{}", series_id, extension));
 
 		if path.exists() {
 			tracing::trace!(?path, series_id, "Found generated series thumbnail");
@@ -419,7 +418,7 @@ pub(crate) fn get_series_thumbnail(
 		));
 	}
 
-	get_media_thumbnail(first_book, image_format, thumbnails_dir)
+	get_media_thumbnail(first_book, image_format, config)
 }
 
 // TODO: ImageResponse type for body
@@ -491,9 +490,7 @@ async fn get_series_thumbnail_handler(
 		.thumbnail_config
 		.map(|config| config.format);
 
-	let thumbnails_dir = ctx.config.get_thumbnails_dir();
-
-	get_series_thumbnail(&series, first_book, image_format, thumbnails_dir)
+	get_series_thumbnail(&series, first_book, image_format, ctx.config.clone())
 		.map(ImageResponse::from)
 }
 
@@ -532,7 +529,6 @@ async fn patch_series_thumbnail(
 	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
-	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let target_page = body
 		.is_zero_based
@@ -584,7 +580,7 @@ async fn patch_series_thumbnail(
 
 	let format = thumbnail_options.format.clone();
 	let path_buf =
-		generate_thumbnail(&id, &media.path, thumbnail_options, thumbnails_dir)?;
+		generate_thumbnail(&id, &media.path, thumbnail_options, ctx.config.clone())?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,

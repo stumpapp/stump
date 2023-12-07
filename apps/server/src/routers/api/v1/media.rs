@@ -11,7 +11,7 @@ use prisma_client_rust::{and, operator::or, or, raw, Direction, PrismaValue};
 use serde::Deserialize;
 use serde_qs::axum::QsQuery;
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
 		entity::{LibraryOptions, Media, ReadProgress, User},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
@@ -845,7 +845,7 @@ async fn get_media_page(
 			page, id
 		)))
 	} else {
-		Ok(get_page(&media.path, page)?.into())
+		Ok(get_page(&media.path, page, ctx.config.clone())?.into())
 	}
 }
 
@@ -853,7 +853,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	id: String,
 	db: &PrismaClient,
 	session: &Session,
-	thumbnail_dir: PathBuf,
+	config: StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let user = get_session_user(session)?;
 	let age_restrictions = user
@@ -898,9 +898,9 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		(Some(book), Some(options)) => get_media_thumbnail(
 			&book,
 			options.thumbnail_config.map(|config| config.format),
-			thumbnail_dir,
+			config,
 		),
-		(Some(book), None) => get_media_thumbnail(&book, None, thumbnail_dirs),
+		(Some(book), None) => get_media_thumbnail(&book, None, config),
 		_ => Err(ApiError::NotFound(String::from("Media not found"))),
 	}
 }
@@ -908,16 +908,21 @@ pub(crate) async fn get_media_thumbnail_by_id(
 pub(crate) fn get_media_thumbnail(
 	media: &media::Data,
 	target_format: Option<ImageFormat>,
-	thumbnail_dir: PathBuf,
+	config: StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	if let Some(format) = target_format {
 		let extension = format.extension();
-		let thumbnail_path = thumbnail_dir.join(format!("{}.{}", media.id, extension));
+		let thumbnail_path = config
+			.get_thumbnails_dir()
+			.join(format!("{}.{}", media.id, extension));
+
 		if thumbnail_path.exists() {
 			tracing::trace!(path = ?thumbnail_path, media_id = ?media.id, "Found generated media thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(thumbnail_path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&media.id, thumbnail_dir) {
+	} else if let Some(path) =
+		get_unknown_thumnail(&media.id, config.get_thumbnails_dir())
+	{
 		// If there exists a file that starts with the media id in the thumbnails dir,
 		// then return it. This might happen if a user manually regenerates thumbnails
 		// via the API without updating the thumbnail config...
@@ -929,7 +934,7 @@ pub(crate) fn get_media_thumbnail(
 		));
 	}
 
-	Ok(get_page(media.path.as_str(), 1)?)
+	Ok(get_page(media.path.as_str(), 1, config)?)
 }
 
 // TODO: ImageResponse as body type
@@ -956,8 +961,7 @@ async fn get_media_thumbnail_handler(
 ) -> ApiResult<ImageResponse> {
 	tracing::trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
-	let thumbnail_dir = ctx.config.get_thumbnails_dir();
-	get_media_thumbnail_by_id(id, db, &session, thumbnail_dir)
+	get_media_thumbnail_by_id(id, db, &session, ctx.config.clone())
 		.await
 		.map(ImageResponse::from)
 }
@@ -993,7 +997,6 @@ async fn patch_media_thumbnail(
 	get_session_server_owner_user(&session)?;
 
 	let client = ctx.get_db();
-	let thumbnail_dirs = ctx.config.get_thumbnails_dir();
 
 	let target_page = body
 		.is_zero_based
@@ -1042,7 +1045,7 @@ async fn patch_media_thumbnail(
 
 	let format = thumbnail_options.format.clone();
 	let path_buf =
-		generate_thumbnail(&id, &media.path, thumbnail_options, thumbnail_dirs)?;
+		generate_thumbnail(&id, &media.path, thumbnail_options, ctx.config.clone())?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,

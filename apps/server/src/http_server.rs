@@ -11,15 +11,15 @@ use crate::{
 	config::{
 		cors,
 		session::{self, handle_session_service_error},
-		StumpConfig,
 	},
 	errors::{ServerError, ServerResult},
 	routers,
 	utils::shutdown_signal_with_cleanup,
 };
+use stump_core::config::StumpConfig;
 
 pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
-	let core = StumpCore::new(config).await;
+	let core = StumpCore::new(config.clone()).await;
 	if let Err(err) = core.run_migrations().await {
 		tracing::error!("Failed to run migrations: {:?}", err);
 		return Err(ServerError::ServerStartError(err.to_string()));
@@ -43,7 +43,7 @@ pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
-	let cors_layer = cors::get_cors_layer(port);
+	let cors_layer = cors::get_cors_layer(config.port);
 
 	tracing::info!("{}", core.get_shadow_text());
 

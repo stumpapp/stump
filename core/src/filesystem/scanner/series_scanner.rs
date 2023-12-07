@@ -204,9 +204,13 @@ impl SeriesScanner {
 						"File has been modified since last scan"
 					);
 
-					let build_result =
-						MediaBuilder::new(path, &series.id, library_options.clone())
-							.rebuild(media);
+					let build_result = MediaBuilder::new(
+						path,
+						&series.id,
+						library_options.clone(),
+						ctx.config.clone(),
+					)
+					.rebuild(media);
 
 					if let Ok(generated) = build_result {
 						tracing::warn!(
@@ -237,8 +241,13 @@ impl SeriesScanner {
 				*visited_media.entry(path_str).or_insert(true) = true;
 			} else {
 				tracing::trace!(series_id = ?series.id, new_media_path = ?path, "New media found in series");
-				let build_result =
-					MediaBuilder::new(path, &series.id, library_options.clone()).build();
+				let build_result = MediaBuilder::new(
+					path,
+					&series.id,
+					library_options.clone(),
+					ctx.config.clone(),
+				)
+				.build();
 				if let Ok(generated) = build_result {
 					match create_media(&ctx.db, generated).await {
 						Ok(created_media) => {

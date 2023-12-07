@@ -8,7 +8,7 @@ use tracing::{debug, error, trace, warn};
 use unrar::Archive;
 
 use crate::{
-	config,
+	config::StumpConfig,
 	filesystem::{
 		archive::create_zip_archive,
 		content_type::ContentType,
@@ -67,16 +67,21 @@ impl FileProcessor for RarProcessor {
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
+		config: StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		if options.convert_rar_to_zip {
-			let zip_path_buf =
-				RarProcessor::to_zip(path, options.delete_conversion_source, None)?;
+			let zip_path_buf = RarProcessor::to_zip(
+				path,
+				options.delete_conversion_source,
+				None,
+				config.clone(),
+			)?;
 			let zip_path = zip_path_buf.to_str().ok_or_else(|| {
 				FileError::UnknownError(
 					"Converted RAR file failed to be discovered".to_string(),
 				)
 			})?;
-			return ZipProcessor::process(zip_path, options);
+			return ZipProcessor::process(zip_path, options, config);
 		}
 
 		debug!(path, "Processing RAR");
@@ -116,7 +121,11 @@ impl FileProcessor for RarProcessor {
 		})
 	}
 
-	fn get_page(file: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
+	fn get_page(
+		file: &str,
+		page: i32,
+		_: StumpConfig,
+	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let archive = Archive::new(file).open_for_listing()?;
 
 		let mut valid_entries = archive
@@ -224,6 +233,7 @@ impl FileConverter for RarProcessor {
 		path: &str,
 		delete_source: bool,
 		_: Option<ImageFormat>,
+		config: StumpConfig,
 	) -> Result<PathBuf, FileError> {
 		debug!(path, "Converting RAR to ZIP");
 
@@ -236,7 +246,7 @@ impl FileConverter for RarProcessor {
 			file_name,
 		} = path_buf.as_path().file_parts();
 
-		let cache_dir = config::get_cache_dir();
+		let cache_dir = config.get_cache_dir();
 		let unpacked_path = cache_dir.join(file_stem);
 
 		trace!(?unpacked_path, "Extracting RAR to cache");

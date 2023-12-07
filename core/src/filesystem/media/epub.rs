@@ -4,6 +4,7 @@ const ACCEPTED_EPUB_COVER_MIMES: [&str; 2] = ["image/jpeg", "image/png"];
 const DEFAULT_EPUB_COVER_ID: &str = "cover";
 
 use crate::{
+	config::StumpConfig,
 	db::entity::metadata::MediaMetadata,
 	filesystem::{content_type::ContentType, error::FileError, hash},
 };
@@ -60,7 +61,11 @@ impl FileProcessor for EpubProcessor {
 		}
 	}
 
-	fn process(path: &str, _: FileProcessorOptions) -> Result<ProcessedFile, FileError> {
+	fn process(
+		path: &str,
+		_: FileProcessorOptions,
+		_: StumpConfig,
+	) -> Result<ProcessedFile, FileError> {
 		debug!(?path, "processing epub");
 
 		let path_buf = PathBuf::from(path);
@@ -78,7 +83,11 @@ impl FileProcessor for EpubProcessor {
 		})
 	}
 
-	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
+	fn get_page(
+		path: &str,
+		page: i32,
+		_: StumpConfig,
+	) -> Result<(ContentType, Vec<u8>), FileError> {
 		if page == 1 {
 			// Assume this is the cover page
 			EpubProcessor::get_cover(path)

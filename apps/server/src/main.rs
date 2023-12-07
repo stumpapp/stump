@@ -1,6 +1,8 @@
-use cli::{handle_command, Cli, Parser};
+use cli::{handle_command, BundledConfigs, Cli, Parser};
 use errors::EntryError;
-use stump_core::{config, config::logging::init_tracing, StumpCore};
+use stump_core::{
+	config::bootstrap_config_dir, config::logging::init_tracing, StumpCore,
+};
 
 mod config;
 mod errors;
@@ -25,7 +27,7 @@ async fn main() -> Result<(), EntryError> {
 	debug_setup();
 
 	// Get STUMP_CONFIG_DIR to bootstrap startup
-	let config_dir = config::bootstrap_config_dir();
+	let config_dir = bootstrap_config_dir();
 
 	let config = StumpCore::init_config(config_dir)
 		.map_err(|e| EntryError::InvalidConfig(e.to_string()))?;
@@ -33,16 +35,23 @@ async fn main() -> Result<(), EntryError> {
 	let cli = Cli::parse();
 
 	if let Some(command) = cli.command {
-		Ok(handle_command(command, cli.config).await?)
+		Ok(handle_command(
+			command,
+			BundledConfigs {
+				cli_config: cli.config,
+				stump_config: config.clone(),
+			},
+		)
+		.await?)
 	} else {
 		// Note: init_tracing after loading the environment so the correct verbosity
 		// level is used for logging.
 		init_tracing(&config);
 
-		if config.verbosity.unwrap_or(1) >= 3 {
+		if config.verbosity >= 3 {
 			tracing::trace!(?config, "App config");
 		}
 
-		Ok(http_server::run_http_server(config.port).await?)
+		Ok(http_server::run_http_server(config).await?)
 	}
 }

@@ -22,7 +22,11 @@ create_dummy_rust_file() {
 # it's a bit of a hack, but it works lol
 prisma_sed_correction() {
     set -ex; \
-        sed -i 's|\/.*\/core\/prisma\/schema.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
+        # Match windows paths
+        sed -i 's|[A-Z]:\\\\.*\\\\core\\\\prisma\\\\schema\.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
+        sed -i 's|[A-Z]:\\\\.*\\\\core\\\\prisma\\\\migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs; \
+        # Match Unix paths
+        sed -i 's|\/.*\/core\/prisma\/schema\.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
         sed -i 's|\/.*\/core\/prisma\/migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs
 }
 

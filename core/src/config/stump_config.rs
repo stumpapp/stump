@@ -26,7 +26,7 @@ use crate::error::{CoreError, CoreResult};
 ///	// Create an instance of the stump core.
 /// let core = StumpCore::new(config).await;
 /// ```
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct StumpConfig {
 	/// The "release" | "debug" profile with which the application is running.
 	pub profile: String,
@@ -47,8 +47,8 @@ pub struct StumpConfig {
 }
 
 impl StumpConfig {
-	/// Create a new `StumpConfig` isntance with a given `config_dir`
-	/// configuration root and default values.
+	/// Create a new `StumpConfig` instance with a given `config_dir` as
+	/// the configuration root and default values for other variables.
 	pub fn new(config_dir: String) -> Self {
 		Self {
 			profile: String::from("debug"),
@@ -218,7 +218,7 @@ impl StumpConfig {
 	}
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct PartialStumpConfig {
 	pub profile: Option<String>,
 	pub port: Option<u16>,
@@ -245,23 +245,18 @@ impl PartialStumpConfig {
 	}
 
 	pub fn apply_to_config(self, config: &mut StumpConfig) {
-		// Port
 		if let Some(port) = self.port {
 			config.port = port;
 		}
-		// Verbosity
 		if let Some(verbosity) = self.verbosity {
 			config.verbosity = verbosity;
 		}
-		// DB Path
 		if let Some(db_path) = self.db_path {
 			config.db_path = Some(db_path);
 		}
-		// Client Directory
 		if let Some(client_dir) = self.client_dir {
 			config.client_dir = client_dir;
 		}
-		// Config Directory
 		if let Some(config_dir) = self.config_dir {
 			config.config_dir = config_dir;
 		}
@@ -287,5 +282,169 @@ impl PartialStumpConfig {
 		if let Some(pdfium_path) = self.pdfium_path {
 			config.pdfium_path = Some(pdfium_path);
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use std::fs;
+
+	use tempfile;
+
+	use super::*;
+
+	#[test]
+	fn test_apply_partial_to_debug() {
+		let mut config = StumpConfig::debug();
+
+		let partial_config = PartialStumpConfig {
+			profile: Some("release".to_string()),
+			port: Some(1337),
+			verbosity: Some(3),
+			db_path: Some("not_a_real_path".to_string()),
+			client_dir: Some("not_a_real_dir".to_string()),
+			config_dir: Some("also_not_a_real_dir".to_string()),
+			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
+			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
+		};
+
+		// Apply the partial configuration
+		partial_config.apply_to_config(&mut config);
+
+		// Check that values are as expected
+		assert_eq!(
+			config,
+			StumpConfig {
+				profile: "release".to_string(),
+				port: 1337,
+				verbosity: 3,
+				db_path: Some("not_a_real_path".to_string()),
+				client_dir: "not_a_real_dir".to_string(),
+				config_dir: "also_not_a_real_dir".to_string(),
+				allowed_origins: vec!["origin1".to_string(), "origin2".to_string()],
+				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
+			}
+		);
+	}
+
+	#[test]
+	fn test_getting_config_from_environment() {
+		// Set environment variables
+		env::set_var("STUMP_PROFILE", "release");
+		env::set_var("STUMP_PORT", "1337");
+		env::set_var("STUMP_VERBOSITY", "3");
+		env::set_var("STUMP_DB_PATH", "not_a_real_path");
+		env::set_var("STUMP_CLIENT_DIR", "not_a_real_dir");
+		env::set_var("STUMP_CONFIG_DIR", "also_not_a_real_dir");
+
+		// Create a new StumpConfig and load values from the environment.
+		let config = StumpConfig::new("not_a_dir".to_string())
+			.with_environment()
+			.unwrap();
+
+		// Confirm values are as expected
+		assert_eq!(
+			config,
+			StumpConfig {
+				profile: "release".to_string(),
+				port: 1337,
+				verbosity: 3,
+				db_path: Some("not_a_real_path".to_string()),
+				client_dir: "not_a_real_dir".to_string(),
+				config_dir: "also_not_a_real_dir".to_string(),
+				allowed_origins: vec![],
+				pdfium_path: None,
+			}
+		);
+	}
+
+	#[test]
+	fn test_getting_config_from_toml() {
+		// Create temporary directory and place a copy of our mock Stump.toml in it
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+		let temp_config_file_path = tempdir.path().join("Stump.toml");
+		fs::write(temp_config_file_path, get_mock_config_file())
+			.expect("Failed to write temporary Stump.toml");
+
+		// Now we can create a StumpConfig rooted at the temporary directory and load the values
+		let config_dir = tempdir.path().to_string_lossy().to_string();
+		let config = StumpConfig::new(config_dir).with_config_file().unwrap();
+
+		// Check that values are as expected
+		assert_eq!(
+			config,
+			StumpConfig {
+				profile: "release".to_string(),
+				port: 1337,
+				verbosity: 3,
+				db_path: Some("not_a_real_path".to_string()),
+				client_dir: "not_a_real_dir".to_string(),
+				config_dir: "also_not_a_real_dir".to_string(),
+				allowed_origins: vec!["origin1".to_string(), "origin2".to_string()],
+				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
+			}
+		);
+
+		// Ensure that the temporary directory is deleted
+		tempdir
+			.close()
+			.expect("Failed to delete temporary directory");
+	}
+
+	#[test]
+	fn test_writing_to_config_dir() {
+		let tempdir = tempfile::tempdir().expect("Failed to create temporary directory");
+
+		// Now we can create a StumpConfig rooted at the temporary directory
+		let config_dir = tempdir.path().to_string_lossy().to_string();
+		let mut config = StumpConfig::new(config_dir.clone());
+
+		// Apply a partial config to set the values
+		let partial_config = PartialStumpConfig {
+			profile: Some("release".to_string()),
+			port: Some(1337),
+			verbosity: Some(3),
+			db_path: Some("not_a_real_path".to_string()),
+			client_dir: Some("not_a_real_dir".to_string()),
+			config_dir: None,
+			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
+			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
+		};
+		partial_config.apply_to_config(&mut config);
+
+		// Write to the config directory
+		config.write_config_dir().unwrap();
+		// Load the toml that should have been created
+		let new_toml_path = tempdir.path().join("Stump.toml");
+		let new_toml_content = std::fs::read_to_string(new_toml_path).unwrap();
+		let new_toml_vals =
+			toml::from_str::<PartialStumpConfig>(&new_toml_content).unwrap();
+
+		// And check its values against what we expect
+		assert_eq!(
+			new_toml_vals,
+			PartialStumpConfig {
+				profile: Some("release".to_string()),
+				port: Some(1337),
+				verbosity: Some(3),
+				db_path: Some("not_a_real_path".to_string()),
+				client_dir: Some("not_a_real_dir".to_string()),
+				config_dir: Some(config_dir),
+				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
+				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
+			}
+		);
+
+		// Ensure that the temporary directory is deleted
+		tempdir
+			.close()
+			.expect("Failed to delete temporary directory");
+	}
+
+	fn get_mock_config_file() -> String {
+		let mock_config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+			.join("integration-tests/data/mock-stump.toml");
+
+		fs::read_to_string(mock_config_path).expect("Failed to fetch mock config file")
 	}
 }

@@ -30,23 +30,27 @@ use tokio::sync::mpsc::unbounded_channel;
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
 
-/// The [`StumpCore`] struct is the main entry point for any server-side Stump
-/// applications. It is responsible for managing incoming tasks ([`InternalCoreTask`]),
-/// outgoing events ([`CoreEvent`](event::CoreEvent)), and providing access to the database
-/// via the core's [`Ctx`].
+/// The [StumpCore] struct is the main entry point for any server-side Stump
+/// applications. It is responsible for managing incoming tasks ([InternalCoreTask]),
+/// outgoing events ([CoreEvent](event::CoreEvent)), and providing access to the database
+/// via the core's [Ctx].
 ///
-/// [`StumpCore`] also provides a few initilization functions, such as `init_environment`. This
-/// is provided to standardize various configurations for consumers of the library.
+/// [StumpCore] expects the consuming application to determine its configuration prior to startup.
+/// [config::bootstrap_config_dir] enables consumers to fetch the configuration directory automatically,
+/// and [StumpCore::init_config](#method.init_config) will load any Stump.toml in the config directory
+/// or environment variables to return a [StumpConfig] struct.
 ///
 /// ## Example:
 /// ```rust
 /// use stump_core::StumpCore;
+/// use stump_core::config;
 ///
 /// #[tokio::main]
 /// async fn main() {
-///    assert!(StumpCore::init_environment().is_ok());
+///    let config_dir = config::bootstrap_config_dir();
+///    let config = StumpCore::init_config(config_dir);
 ///
-///    let core = StumpCore::new().await;
+///    let core = StumpCore::new(config).await;
 /// }
 /// ```
 pub struct StumpCore {

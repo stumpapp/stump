@@ -27,7 +27,7 @@ const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 const DEFAULT_ENABLE_WAL: bool = false;
 
 /// Represents the configuration of a Stump application. This file is generated at startup
-/// using a TOML file, enviroment variables, or both and is input when creating a `StumpCore`
+/// using a TOML file, environment variables, or both and is input when creating a `StumpCore`
 /// instance.
 ///
 /// Example:

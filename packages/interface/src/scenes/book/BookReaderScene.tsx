@@ -39,8 +39,20 @@ export default function BookReaderScene() {
 		}
 	}, [])
 
+	/**
+	 * An effect to update the read progress whenever the page changes in the URL
+	 */
+	useEffect(() => {
+		const parsedPage = parseInt(page || '', 10)
+		if (!parsedPage || isNaN(parsedPage) || !media) return
+
+		const maxPage = media.pages
+		if (parsedPage <= 0 || parsedPage > maxPage) return
+
+		updateReadProgress(parsedPage)
+	}, [page, updateReadProgress, media])
+
 	function handleChangePage(newPage: number) {
-		updateReadProgress(newPage)
 		navigate(paths.bookReader(id!, { isAnimated, page: newPage }))
 	}
 

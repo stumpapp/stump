@@ -15,7 +15,10 @@ import {
 export const prefetchSeries = async (id: string) => {
 	await queryClient.prefetchQuery(
 		[seriesQueryKeys.getSeriesById, id],
-		() => seriesApi.getSeriesById(id),
+		async () => {
+			const { data } = await seriesApi.getSeriesById(id)
+			return data
+		},
 		{
 			staleTime: 10 * 1000,
 		},

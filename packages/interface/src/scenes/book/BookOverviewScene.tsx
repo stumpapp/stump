@@ -15,6 +15,7 @@ import TagList from '@/components/tags/TagList'
 import { useAppContext } from '../../context'
 import paths from '../../paths'
 import { PDF_EXTENSION } from '../../utils/patterns'
+import BookCompletionToggleButton from './BookCompletionToggleButton'
 import BookFileInformation from './BookFileInformation'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
 import BookReaderLink from './BookReaderLink'
@@ -97,6 +98,7 @@ export default function BookOverviewScene() {
 
 							<div className="flex w-full flex-col gap-2 md:flex-row">
 								<BookReaderLink book={media} />
+								<BookCompletionToggleButton book={media} />
 								{media.extension?.match(PDF_EXTENSION) && (
 									<ButtonOrLink
 										variant="outline"

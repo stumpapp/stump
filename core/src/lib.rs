@@ -42,15 +42,14 @@ pub use error::{CoreError, CoreResult};
 ///
 /// ## Example:
 /// ```rust
-/// use stump_core::StumpCore;
-/// use stump_core::config;
+/// use stump_core::{config, StumpCore};
 ///
 /// #[tokio::main]
 /// async fn main() {
-///    let config_dir = config::bootstrap_config_dir();
-///    let config = StumpCore::init_config(config_dir);
+/// 	let config_dir = config::bootstrap_config_dir();
+/// 	let config = StumpCore::init_config(config_dir).unwrap();
 ///
-///    let core = StumpCore::new(config).await;
+/// 	let core = StumpCore::new(config).await;
 /// }
 /// ```
 pub struct StumpCore {

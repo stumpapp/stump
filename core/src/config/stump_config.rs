@@ -11,20 +11,25 @@ use crate::error::{CoreError, CoreResult};
 ///
 /// Example:
 /// ```
-/// /// Get config dir from environment variables.
-/// let config_dir = config::bootstrap_config_dir();
+/// use stump_core::{config::{self, StumpConfig}, StumpCore};
 ///
-/// // Create a StumpConfig using the config file and environment variables.
-/// let config = StumpConfig::new(config_dir)
-/// 	// Load Stump.toml file (if any)
-/// 	.with_config_file().unwrap()
-/// 	// Overlay environment variables
-/// 	.with_environment().unwrap();
+/// #[tokio::main]
+/// async fn main() {
+/// 	/// Get config dir from environment variables.
+/// 	let config_dir = config::bootstrap_config_dir();
 ///
-/// // Ensure that config directory exists and write Stump.toml.
-/// config.write_config_dir().unwrap();
-///	// Create an instance of the stump core.
-/// let core = StumpCore::new(config).await;
+/// 	// Create a StumpConfig using the config file and environment variables.
+/// 	let config = StumpConfig::new(config_dir)
+/// 		// Load Stump.toml file (if any)
+/// 		.with_config_file().unwrap()
+/// 		// Overlay environment variables
+/// 		.with_environment().unwrap();
+///
+/// 	// Ensure that config directory exists and write Stump.toml.
+/// 	config.write_config_dir().unwrap();
+/// 	// Create an instance of the stump core.
+/// 	let core = StumpCore::new(config).await;
+/// }
 /// ```
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct StumpConfig {

@@ -40,13 +40,14 @@ impl Ctx {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::config::Ctx;
+	/// use stump_core::{Ctx, config::StumpConfig};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	///
 	/// #[tokio::main]
 	/// async fn main() {
 	///    let (sender, _) = unbounded_channel();
-	///    let ctx = Ctx::new(sender).await;
+	///    let config = StumpConfig::debug();
+	///    let ctx = Ctx::new(config, sender).await;
 	/// }
 	/// ```
 	pub async fn new(config: StumpConfig, internal_sender: InternalSender) -> Ctx {
@@ -76,15 +77,16 @@ impl Ctx {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::config::Ctx;
+	/// use stump_core::{Ctx, config::StumpConfig};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	/// use std::sync::Arc;
 	///
 	/// #[tokio::main]
 	/// async fn main() {
 	///     let (sender, _) = unbounded_channel();
+	///     let config = StumpConfig::debug();
 	///
-	///     let ctx = Ctx::new(sender).await;
+	///     let ctx = Ctx::new(config, sender).await;
 	///     let arced_ctx = ctx.arced();
 	///     let ctx_clone = arced_ctx.clone();
 	///
@@ -120,16 +122,17 @@ impl Ctx {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::{config::Ctx, event::CoreEvent};
+	/// use stump_core::{Ctx, config::StumpConfig, event::CoreEvent};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	///
 	/// #[tokio::main]
 	/// async fn main() {
 	///    let (sender, _) = unbounded_channel();
-	///    let ctx = Ctx::new(sender).await;
+	///    let config = StumpConfig::debug();
+	///    let ctx = Ctx::new(config, sender).await;
 	///
 	///    let event = CoreEvent::JobFailed {
-	///        runner_id: "Gandalf quote".to_string(),
+	///        job_id: "Gandalf quote".to_string(),
 	///        message: "When in doubt, follow your nose".to_string(),
 	///    };
 	///
@@ -139,8 +142,8 @@ impl Ctx {
 	///        let received_event = receiver.recv().await;
 	///        assert_eq!(received_event.is_ok(), true);
 	///        match received_event.unwrap() {
-	///            CoreEvent::JobFailed { runner_id, message } => {
-	///                assert_eq!(runner_id, "Gandalf quote");
+	///            CoreEvent::JobFailed { job_id, message } => {
+	///                assert_eq!(job_id, "Gandalf quote");
 	///                assert_eq!(message, "When in doubt, follow your nose");
 	///            }
 	///            _ => unreachable!("Wrong event type received"),

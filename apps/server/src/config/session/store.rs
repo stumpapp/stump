@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
-use prisma_client_rust::chrono::{FixedOffset, TimeZone, Utc};
+use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use stump_core::{
+	config::defaults::DEFAULT_SESSION_TTL,
 	db::entity::User,
 	prisma::{session, user, PrismaClient},
 	Ctx,
@@ -58,18 +59,9 @@ impl SessionStore for PrismaSessionStore {
 	type Error = SessionError;
 
 	async fn save(&self, session_record: &SessionRecord) -> Result<(), Self::Error> {
-		let offset_time = session_record.expiration_time().unwrap();
-		let expires_at = FixedOffset::west_opt(offset_time.offset().whole_seconds())
-			.unwrap()
-			.with_ymd_and_hms(
-				offset_time.year(),
-				offset_time.month() as u32,
-				offset_time.day() as u32,
-				offset_time.hour() as u32,
-				offset_time.minute() as u32,
-				offset_time.second() as u32,
-			)
-			.unwrap();
+		// TODO fix this so that it actually uses the config value instead of the default
+		let expires_at: DateTime<FixedOffset> =
+			(Utc::now() + Duration::seconds(DEFAULT_SESSION_TTL)).into();
 
 		let session_user = session_record
 			.data()

@@ -6,6 +6,13 @@ use std::env;
 pub use stump_config::StumpConfig;
 use stump_config::{CONFIG_DIR_KEY, IN_DOCKER_KEY};
 
+pub mod defaults {
+	pub use super::stump_config::{
+		DEFAULT_ENABLE_WAL, DEFAULT_HASH_COST, DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+		DEFAULT_SESSION_TTL,
+	};
+}
+
 /// Gets the default config directory located at `~/.stump` where `~` is the
 /// user's home directory.
 pub fn get_default_config_dir() -> String {

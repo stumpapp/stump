@@ -21,10 +21,10 @@ const SESSION_TTL_KEY: &str = "SESSION_TTL";
 const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
 const ENABLE_WAL_KEY: &str = "ENABLE_WAL";
 
-const DEFAULT_HASH_COST: u32 = 12;
-const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
-const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-const DEFAULT_ENABLE_WAL: bool = false;
+pub const DEFAULT_HASH_COST: u32 = 12;
+pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
+pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
+pub const DEFAULT_ENABLE_WAL: bool = false;
 
 /// Represents the configuration of a Stump application. This file is generated at startup
 /// using a TOML file, environment variables, or both and is input when creating a `StumpCore`

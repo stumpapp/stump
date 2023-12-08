@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
+use prisma_client_rust::chrono::{FixedOffset, TimeZone, Utc};
 use stump_core::{
 	db::entity::User,
 	prisma::{session, user, PrismaClient},
@@ -10,7 +10,7 @@ use time::OffsetDateTime;
 use tokio::time::MissedTickBehavior;
 use tower_sessions::{session::SessionId, Session, SessionRecord, SessionStore};
 
-use super::{get_session_ttl, SessionCleanupJob, SESSION_USER_KEY};
+use super::{SessionCleanupJob, SESSION_USER_KEY};
 
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
@@ -58,8 +58,19 @@ impl SessionStore for PrismaSessionStore {
 	type Error = SessionError;
 
 	async fn save(&self, session_record: &SessionRecord) -> Result<(), Self::Error> {
-		let expires_at: DateTime<FixedOffset> =
-			(Utc::now() + Duration::seconds(get_session_ttl())).into();
+		let offset_time = session_record.expiration_time().unwrap();
+		let expires_at = FixedOffset::west_opt(offset_time.offset().whole_seconds())
+			.unwrap()
+			.with_ymd_and_hms(
+				offset_time.year(),
+				offset_time.month() as u32,
+				offset_time.day() as u32,
+				offset_time.hour() as u32,
+				offset_time.minute() as u32,
+				offset_time.second() as u32,
+			)
+			.unwrap();
+
 		let session_user = session_record
 			.data()
 			.get(SESSION_USER_KEY)

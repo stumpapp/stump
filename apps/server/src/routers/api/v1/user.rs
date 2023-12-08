@@ -9,6 +9,7 @@ use prisma_client_rust::{chrono::Utc, Direction};
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
+	config::StumpConfig,
 	db::{
 		entity::{AgeRestriction, LoginActivity, User, UserPermission, UserPreferences},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
@@ -26,9 +27,7 @@ use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{ApiError, ApiResult},
 	middleware::auth::Auth,
-	utils::{
-		get_hash_cost, get_session_server_owner_user, get_session_user, UserQueryRelation,
-	},
+	utils::{get_session_server_owner_user, get_session_user, UserQueryRelation},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -243,13 +242,14 @@ async fn update_user(
 	client: &PrismaClient,
 	for_user_id: String,
 	input: UpdateUser,
+	config: &StumpConfig,
 ) -> ApiResult<User> {
 	let mut update_params = vec![
 		user::username::set(input.username),
 		user::avatar_url::set(input.avatar_url),
 	];
 	if let Some(password) = input.password {
-		let hashed_password = bcrypt::hash(password, get_hash_cost())?;
+		let hashed_password = bcrypt::hash(password, config.hash_cost)?;
 		update_params.push(user::hashed_password::set(hashed_password));
 	}
 
@@ -386,7 +386,7 @@ async fn create_user(
 	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
-	let hashed_password = bcrypt::hash(input.password, get_hash_cost())?;
+	let hashed_password = bcrypt::hash(input.password, ctx.config.hash_cost)?;
 
 	// TODO: https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let created_user = db
@@ -484,7 +484,8 @@ async fn update_current_user(
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
 
-	let updated_user = update_user(&user, db, user.id.clone(), input).await?;
+	let updated_user =
+		update_user(&user, db, user.id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
 	session
@@ -716,7 +717,7 @@ async fn update_user_handler(
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_user = update_user(&user, db, id.clone(), input).await?;
+	let updated_user = update_user(&user, db, id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
 	if user.id == id {

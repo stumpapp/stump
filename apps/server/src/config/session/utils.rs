@@ -4,7 +4,7 @@ use axum::{
 	BoxError,
 };
 use hyper::StatusCode;
-use std::{env, sync::Arc};
+use std::sync::Arc;
 use stump_core::Ctx;
 use time::Duration;
 
@@ -16,39 +16,11 @@ pub const SESSION_USER_KEY: &str = "user";
 pub const SESSION_NAME: &str = "stump_session";
 pub const SESSION_PATH: &str = "/";
 
-pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
-pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-
-pub fn get_session_ttl() -> i64 {
-	env::var("SESSION_TTL")
-		.map(|s| {
-			s.parse::<i64>().unwrap_or_else(|error| {
-				tracing::error!(?error, "Failed to parse provided SESSION_TTL");
-				DEFAULT_SESSION_TTL
-			})
-		})
-		.unwrap_or(DEFAULT_SESSION_TTL)
-}
-
-pub fn get_session_expiry_cleanup_interval() -> u64 {
-	env::var("SESSION_EXPIRY_CLEANUP_INTERVAL")
-		.map(|s| {
-			s.parse::<u64>().unwrap_or_else(|error| {
-				tracing::error!(
-					?error,
-					"Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL"
-				);
-				DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
-			})
-		})
-		.unwrap_or(DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL)
-}
-
 pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<PrismaSessionStore> {
 	let client = ctx.db.clone();
 	let store = PrismaSessionStore::new(client);
 
-	let cleanup_interval = get_session_expiry_cleanup_interval();
+	let cleanup_interval = ctx.config.session_expiry_cleanup_interval;
 	if cleanup_interval > 0 {
 		tracing::trace!(
 			cleanup_interval = cleanup_interval,
@@ -56,17 +28,16 @@ pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<PrismaSessionStor
 		);
 		tokio::task::spawn(store.clone().continuously_delete_expired(
 			tokio::time::Duration::from_secs(cleanup_interval),
-			ctx,
+			ctx.clone(),
 		));
 	} else {
 		tracing::debug!("SESSION_EXPIRY_CLEANUP_INTERVAL is set to 0. Session expiry cleanup is disabled");
 	}
-	let session_ttl = get_session_ttl();
 
 	// TODO: This configuration won't work for Tauri Windows app, it requires SameSite::None and Secure=true... Linux and macOS work fine.
 	SessionManagerLayer::new(store)
 		.with_name(SESSION_NAME)
-		.with_max_age(Duration::seconds(session_ttl))
+		.with_max_age(Duration::seconds(ctx.config.session_ttl))
 		.with_path(SESSION_PATH.to_string())
 		.with_same_site(SameSite::Lax)
 		.with_secure(false)

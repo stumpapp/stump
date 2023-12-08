@@ -34,15 +34,7 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		.await
 	};
 
-	let enable_wal = std::env::var("ENABLE_WAL")
-		.unwrap_or_else(|_| "false".to_string())
-		.parse()
-		.unwrap_or_else(|error| {
-			tracing::error!(?error, "Failed to parse ENABLE_WAL");
-			false
-		});
-
-	if enable_wal {
+	if config.enable_wal {
 		let _affected_rows = client
 			._execute_raw(raw!("PRAGMA journal_mode=WAL;"))
 			.exec()

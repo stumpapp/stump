@@ -4,6 +4,7 @@ mod stump_config;
 use std::env;
 
 pub use stump_config::StumpConfig;
+use stump_config::{CONFIG_DIR_KEY, IN_DOCKER_KEY};
 
 /// Gets the default config directory located at `~/.stump` where `~` is the
 /// user's home directory.
@@ -17,7 +18,7 @@ pub fn get_default_config_dir() -> String {
 /// Returns the value of the `STUMP_CONFIG_DIR` environment variable if it is set,
 /// and `~/.stump` otherwise.
 pub fn bootstrap_config_dir() -> String {
-	match env::var("STUMP_CONFIG_DIR") {
+	match env::var(CONFIG_DIR_KEY) {
 		Ok(config_dir) => {
 			if config_dir.is_empty() {
 				get_default_config_dir()
@@ -34,7 +35,7 @@ pub fn bootstrap_config_dir() -> String {
 ///   2. The existence of `/run/.containerenv` and `/.dockerenv`.
 ///   3. The presence of "docker" or "containerd" processes.
 pub fn stump_in_docker() -> bool {
-	let env_set = std::env::var("STUMP_IN_DOCKER").is_ok();
+	let env_set = std::env::var(IN_DOCKER_KEY).is_ok();
 	if env_set {
 		return true;
 	}

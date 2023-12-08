@@ -60,7 +60,7 @@ impl StumpConfig {
 			port: 10801,
 			verbosity: 0,
 			db_path: None,
-			client_dir: String::from("client"),
+			client_dir: String::from("./dist"),
 			config_dir,
 			allowed_origins: vec![],
 			pdfium_path: None,
@@ -200,6 +200,11 @@ impl StumpConfig {
 		)?;
 
 		Ok(())
+	}
+
+	/// Returns True if the configuration profile is "debug" and False otherwise.
+	pub fn is_debug(&self) -> bool {
+		self.profile.as_str() == "debug"
 	}
 
 	/// Returns a `PathBuf` to the Stump configuration directory.

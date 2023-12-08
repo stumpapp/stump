@@ -5,9 +5,8 @@ use axum::http::{
 	HeaderValue, Method,
 };
 use local_ip_address::local_ip;
+use stump_core::config::StumpConfig;
 use tower_http::cors::{AllowOrigin, CorsLayer};
-
-use crate::config::utils::is_debug;
 
 const DEFAULT_ALLOWED_ORIGINS: &[&str] =
 	&["tauri://localhost", "https://tauri.localhost"];
@@ -28,8 +27,8 @@ fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValu
 		.collect::<Vec<HeaderValue>>()
 }
 
-pub fn get_cors_layer(port: u16) -> CorsLayer {
-	let is_debug = is_debug();
+pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
+	let is_debug = config.is_debug();
 
 	let allowed_origins = match env::var("STUMP_ALLOWED_ORIGINS") {
 		Ok(val) => {
@@ -69,6 +68,7 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 	// Format the local IP with both http and https, and the port. If is_debug is true,
 	// then also add port 3000.
 	let local_orgins = if !local_ip.is_empty() {
+		let port = config.port;
 		let mut base = vec![
 			format!("http://{local_ip}:{port}"),
 			format!("https://{local_ip}:{port}"),

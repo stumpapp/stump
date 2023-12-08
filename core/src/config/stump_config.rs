@@ -1,5 +1,6 @@
 use std::{env, path::PathBuf};
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
@@ -141,6 +142,17 @@ impl StumpConfig {
 		if let Ok(config_dir) = env::var("STUMP_CONFIG_DIR") {
 			env_configs.config_dir = Some(config_dir);
 		}
+
+		if let Ok(allowed_origins) = env::var("STUMP_ALLOWED_ORIGINS") {
+			if !allowed_origins.is_empty() {
+				env_configs.allowed_origins = Some(
+					allowed_origins
+						.split(',')
+						.map(|val| val.trim().to_string())
+						.collect_vec(),
+				)
+			}
+		};
 
 		if let Ok(pdfium_path) = env::var("PDFIUM_PATH") {
 			env_configs.pdfium_path = Some(pdfium_path);
@@ -306,6 +318,7 @@ mod tests {
 	#[test]
 	fn test_apply_partial_to_debug() {
 		let mut config = StumpConfig::debug();
+		config.allowed_origins = vec!["origin1".to_string(), "origin2".to_string()];
 
 		let partial_config = PartialStumpConfig {
 			profile: Some("release".to_string()),
@@ -314,7 +327,11 @@ mod tests {
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			config_dir: Some("also_not_a_real_dir".to_string()),
-			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
+			allowed_origins: Some(vec![
+				"origin1".to_string(),
+				"origin3".to_string(),
+				"origin2".to_string(),
+			]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 		};
 
@@ -331,7 +348,11 @@ mod tests {
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
-				allowed_origins: vec!["origin1".to_string(), "origin2".to_string()],
+				allowed_origins: vec![
+					"origin1".to_string(),
+					"origin2".to_string(),
+					"origin3".to_string()
+				],
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 			}
 		);

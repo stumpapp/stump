@@ -208,7 +208,7 @@ impl SeriesScanner {
 						path,
 						&series.id,
 						library_options.clone(),
-						ctx.config.clone(),
+						&ctx.config,
 					)
 					.rebuild(media);
 
@@ -245,7 +245,7 @@ impl SeriesScanner {
 					path,
 					&series.id,
 					library_options.clone(),
-					ctx.config.clone(),
+					&ctx.config,
 				)
 				.build();
 				if let Ok(generated) = build_result {

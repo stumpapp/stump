@@ -396,7 +396,7 @@ pub(crate) fn get_series_thumbnail(
 	series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let thumbnails_dir = config.get_thumbnails_dir();
 	let series_id = series.id.clone();
@@ -490,7 +490,7 @@ async fn get_series_thumbnail_handler(
 		.thumbnail_config
 		.map(|config| config.format);
 
-	get_series_thumbnail(&series, first_book, image_format, ctx.config.clone())
+	get_series_thumbnail(&series, first_book, image_format, &ctx.config)
 		.map(ImageResponse::from)
 }
 
@@ -579,8 +579,7 @@ async fn patch_series_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf =
-		generate_thumbnail(&id, &media.path, thumbnail_options, ctx.config.clone())?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,

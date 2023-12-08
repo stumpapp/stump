@@ -67,14 +67,14 @@ impl FileProcessor for RarProcessor {
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
-		config: StumpConfig,
+		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		if options.convert_rar_to_zip {
 			let zip_path_buf = RarProcessor::to_zip(
 				path,
 				options.delete_conversion_source,
 				None,
-				config.clone(),
+				config,
 			)?;
 			let zip_path = zip_path_buf.to_str().ok_or_else(|| {
 				FileError::UnknownError(
@@ -124,7 +124,7 @@ impl FileProcessor for RarProcessor {
 	fn get_page(
 		file: &str,
 		page: i32,
-		_: StumpConfig,
+		_: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let archive = Archive::new(file).open_for_listing()?;
 
@@ -233,7 +233,7 @@ impl FileConverter for RarProcessor {
 		path: &str,
 		delete_source: bool,
 		_: Option<ImageFormat>,
-		config: StumpConfig,
+		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
 		debug!(path, "Converting RAR to ZIP");
 

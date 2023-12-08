@@ -61,7 +61,7 @@ impl FileProcessor for PdfProcessor {
 	fn process(
 		path: &str,
 		_: FileProcessorOptions,
-		_: StumpConfig,
+		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		let file = FileOptions::cached().open(path)?;
 
@@ -80,9 +80,9 @@ impl FileProcessor for PdfProcessor {
 	fn get_page(
 		path: &str,
 		page: i32,
-		config: StumpConfig,
+		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		let pdfium = PdfProcessor::renderer(config.pdfium_path)?;
+		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let document_page =
@@ -133,7 +133,7 @@ impl FileProcessor for PdfProcessor {
 
 impl PdfProcessor {
 	/// Initializes a PDFium renderer. If a path to the PDFium library is not provided
-	pub fn renderer(pdfium_path: Option<String>) -> Result<Pdfium, FileError> {
+	pub fn renderer(pdfium_path: &Option<String>) -> Result<Pdfium, FileError> {
 		if let Some(path) = pdfium_path {
 			let bindings = Pdfium::bind_to_library(&path)
 			.or_else(|e| {
@@ -157,9 +157,9 @@ impl FileConverter for PdfProcessor {
 		path: &str,
 		delete_source: bool,
 		format: Option<ImageFormat>,
-		config: StumpConfig,
+		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
-		let pdfium = PdfProcessor::renderer(config.pdfium_path.clone())?;
+		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let iter = document.pages().iter();

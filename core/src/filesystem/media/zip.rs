@@ -63,7 +63,7 @@ impl FileProcessor for ZipProcessor {
 	fn process(
 		path: &str,
 		_: FileProcessorOptions,
-		_: StumpConfig,
+		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		debug!(path, "Processing zip");
 
@@ -101,7 +101,7 @@ impl FileProcessor for ZipProcessor {
 	fn get_page(
 		path: &str,
 		page: i32,
-		_: StumpConfig,
+		_: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let zip_file = File::open(path)?;
 

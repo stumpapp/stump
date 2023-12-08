@@ -21,7 +21,7 @@ type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 /// to all the different parts of the application, and is used to access the database
 /// and manage the event channels.
 pub struct Ctx {
-	pub config: StumpConfig,
+	pub config: Arc<StumpConfig>,
 	pub db: Arc<prisma::PrismaClient>,
 	pub internal_sender: Arc<InternalSender>,
 	pub response_channel: Arc<ClientChannel>,
@@ -52,7 +52,7 @@ impl Ctx {
 	/// ```
 	pub async fn new(config: StumpConfig, internal_sender: InternalSender) -> Ctx {
 		Ctx {
-			config: config.clone(),
+			config: Arc::new(config.clone()),
 			db: Arc::new(db::create_client(&config).await),
 			internal_sender: Arc::new(internal_sender),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
@@ -65,7 +65,7 @@ impl Ctx {
 	/// **This should not be used in production.**
 	pub async fn mock() -> Ctx {
 		Ctx {
-			config: StumpConfig::debug(),
+			config: Arc::new(StumpConfig::debug()),
 			db: Arc::new(db::create_test_client().await),
 			internal_sender: Arc::new(unbounded_channel::<InternalCoreTask>().0),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),

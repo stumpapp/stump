@@ -561,8 +561,7 @@ async fn get_book_thumbnail(
 		.await?
 		.ok_or(ApiError::NotFound(String::from("Book not found")))?;
 
-	let (content_type, image_buffer) =
-		get_page(book.path.as_str(), 1, ctx.config.clone())?;
+	let (content_type, image_buffer) = get_page(book.path.as_str(), 1, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 
@@ -629,7 +628,7 @@ async fn get_book_page(
 
 	let (book, _) = result?;
 	let (content_type, image_buffer) =
-		get_page(book.path.as_str(), correct_page, ctx.config.clone())?;
+		get_page(book.path.as_str(), correct_page, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 

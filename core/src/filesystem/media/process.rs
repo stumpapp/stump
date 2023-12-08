@@ -62,14 +62,14 @@ pub trait FileProcessor {
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
-		config: StumpConfig,
+		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError>;
 
 	/// Get the bytes of a page of the file.
 	fn get_page(
 		path: &str,
 		page: i32,
-		config: StumpConfig,
+		config: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError>;
 
 	/// Get the content types of a list of pages of the file. This should determine content
@@ -86,7 +86,7 @@ pub trait FileConverter {
 		path: &str,
 		delete_source: bool,
 		image_format: Option<ImageFormat>,
-		config: StumpConfig,
+		config: &StumpConfig,
 	) -> Result<PathBuf, FileError>;
 }
 
@@ -123,7 +123,7 @@ pub struct ProcessedFile {
 pub fn process(
 	path: &Path,
 	options: FileProcessorOptions,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> Result<ProcessedFile, FileError> {
 	debug!(?path, ?options, "Processing entry");
 	let mime = ContentType::from_path(path).mime_type();
@@ -131,12 +131,10 @@ pub fn process(
 	let path_str = path.to_str().unwrap_or_default();
 
 	match mime.as_str() {
-		"application/zip" => ZipProcessor::process(path_str, options, config),
-		"application/vnd.comicbook+zip" => {
+		"application/zip" | "application/vnd.comicbook+zip" => {
 			ZipProcessor::process(path_str, options, config)
 		},
-		"application/vnd.rar" => RarProcessor::process(path_str, options, config),
-		"application/vnd.comicbook-rar" => {
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
 			RarProcessor::process(path_str, options, config)
 		},
 		"application/epub+zip" => EpubProcessor::process(path_str, options, config),
@@ -148,15 +146,17 @@ pub fn process(
 pub fn get_page(
 	path: &str,
 	page: i32,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> Result<(ContentType, Vec<u8>), FileError> {
 	let mime = ContentType::from_file(path).mime_type();
 
 	match mime.as_str() {
-		"application/zip" => ZipProcessor::get_page(path, page, config),
-		"application/vnd.comicbook+zip" => ZipProcessor::get_page(path, page, config),
-		"application/vnd.rar" => RarProcessor::get_page(path, page, config),
-		"application/vnd.comicbook-rar" => RarProcessor::get_page(path, page, config),
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::get_page(path, page, config)
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::get_page(path, page, config)
+		},
 		"application/epub+zip" => EpubProcessor::get_page(path, page, config),
 		"application/pdf" => PdfProcessor::get_page(path, page, config),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
@@ -170,12 +170,10 @@ pub fn get_content_types_for_pages(
 	let mime = ContentType::from_file(path).mime_type();
 
 	match mime.as_str() {
-		"application/zip" => ZipProcessor::get_page_content_types(path, pages),
-		"application/vnd.comicbook+zip" => {
+		"application/zip" | "application/vnd.comicbook+zip" => {
 			ZipProcessor::get_page_content_types(path, pages)
 		},
-		"application/vnd.rar" => RarProcessor::get_page_content_types(path, pages),
-		"application/vnd.comicbook-rar" => {
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
 			RarProcessor::get_page_content_types(path, pages)
 		},
 		"application/epub+zip" => EpubProcessor::get_page_content_types(path, pages),

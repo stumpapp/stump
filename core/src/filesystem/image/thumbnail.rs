@@ -19,10 +19,9 @@ pub fn generate_thumbnail(
 	id: &str,
 	media_path: &str,
 	options: ImageProcessorOptions,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> Result<PathBuf, FileError> {
-	let (_, buf) =
-		media::get_page(media_path, options.page.unwrap_or(1), config.clone())?;
+	let (_, buf) = media::get_page(media_path, options.page.unwrap_or(1), config)?;
 	let ext = options.format.extension();
 
 	let thumbnail_path = config.get_thumbnails_dir().join(format!("{}.{}", &id, ext));
@@ -47,7 +46,7 @@ pub fn generate_thumbnail(
 pub fn generate_thumbnails(
 	media: &[Media],
 	options: ImageProcessorOptions,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> Result<Vec<PathBuf>, FileError> {
 	trace!("Enter generate_thumbnails");
 
@@ -64,7 +63,7 @@ pub fn generate_thumbnails(
 					m.id.as_str(),
 					m.path.as_str(),
 					options.clone(),
-					config.clone(),
+					config,
 				)
 			})
 			.filter_map(|res| {
@@ -90,7 +89,7 @@ pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
 pub fn generate_thumbnails_for_media(
 	media: Vec<prisma_media::Data>,
 	options: ImageProcessorOptions,
-	config: StumpConfig,
+	config: &StumpConfig,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Result<Vec<PathBuf>, FileError> {
 	trace!(media_count = media.len(), "Enter generate_thumbnails");
@@ -114,7 +113,7 @@ pub fn generate_thumbnails_for_media(
 					m.id.as_str(),
 					m.path.as_str(),
 					options.clone(),
-					config.clone(),
+					config,
 				)
 			})
 			.filter_map(|res| {

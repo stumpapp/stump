@@ -434,7 +434,7 @@ pub(crate) fn get_library_thumbnail(
 	first_series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let library_id = library.id.clone();
 
@@ -533,7 +533,7 @@ async fn get_library_thumbnail_handler(
 		&first_series,
 		first_book,
 		image_format,
-		ctx.config.clone(),
+		&ctx.config,
 	)
 	.map(ImageResponse::from)
 }
@@ -623,8 +623,7 @@ async fn patch_library_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf =
-		generate_thumbnail(&id, &media.path, thumbnail_options, ctx.config.clone())?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,

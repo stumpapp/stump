@@ -164,7 +164,7 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						library_media,
 						self.options.to_owned(),
-						core_ctx.config.clone(),
+						&core_ctx.config,
 						on_progress,
 					)?;
 
@@ -199,7 +199,7 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						media_without_thumbnails,
 						self.options.to_owned(),
-						core_ctx.config.clone(),
+						&core_ctx.config,
 						on_progress,
 					)?;
 					Ok(generated_thumbnail_paths)
@@ -265,7 +265,7 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						series_media,
 						self.options.to_owned(),
-						core_ctx.config.clone(),
+						&core_ctx.config,
 						on_progress,
 					)?;
 					Ok(generated_thumbnail_paths)
@@ -299,7 +299,7 @@ impl JobTrait for ThumbnailJob {
 					let generated_thumbnail_paths = generate_thumbnails_for_media(
 						media_without_thumbnails,
 						self.options.to_owned(),
-						core_ctx.config.clone(),
+						&core_ctx.config,
 						on_progress,
 					)?;
 					Ok(generated_thumbnail_paths)
@@ -336,7 +336,7 @@ impl JobTrait for ThumbnailJob {
 				let generated_thumbnail_paths = generate_thumbnails_for_media(
 					media,
 					self.options.to_owned(),
-					core_ctx.config.clone(),
+					&core_ctx.config,
 					on_progress,
 				)?;
 				Ok(generated_thumbnail_paths)

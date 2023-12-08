@@ -64,7 +64,7 @@ impl FileProcessor for EpubProcessor {
 	fn process(
 		path: &str,
 		_: FileProcessorOptions,
-		_: StumpConfig,
+		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
 		debug!(?path, "processing epub");
 
@@ -86,7 +86,7 @@ impl FileProcessor for EpubProcessor {
 	fn get_page(
 		path: &str,
 		page: i32,
-		_: StumpConfig,
+		_: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		if page == 1 {
 			// Assume this is the cover page

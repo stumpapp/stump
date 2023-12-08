@@ -845,7 +845,7 @@ async fn get_media_page(
 			page, id
 		)))
 	} else {
-		Ok(get_page(&media.path, page, ctx.config.clone())?.into())
+		Ok(get_page(&media.path, page, &ctx.config)?.into())
 	}
 }
 
@@ -853,7 +853,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	id: String,
 	db: &PrismaClient,
 	session: &Session,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let user = get_session_user(session)?;
 	let age_restrictions = user
@@ -908,7 +908,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 pub(crate) fn get_media_thumbnail(
 	media: &media::Data,
 	target_format: Option<ImageFormat>,
-	config: StumpConfig,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	if let Some(format) = target_format {
 		let extension = format.extension();
@@ -961,7 +961,7 @@ async fn get_media_thumbnail_handler(
 ) -> ApiResult<ImageResponse> {
 	tracing::trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
-	get_media_thumbnail_by_id(id, db, &session, ctx.config.clone())
+	get_media_thumbnail_by_id(id, db, &session, &ctx.config)
 		.await
 		.map(ImageResponse::from)
 }
@@ -1044,8 +1044,7 @@ async fn patch_media_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf =
-		generate_thumbnail(&id, &media.path, thumbnail_options, ctx.config.clone())?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,

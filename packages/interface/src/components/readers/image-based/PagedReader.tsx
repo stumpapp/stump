@@ -3,7 +3,7 @@ import { queryClient } from '@stump/client'
 import { useBoolean } from '@stump/components'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
-import React, { useEffect } from 'react'
+import React, { memo, useEffect } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 import Toolbar from './Toolbar'
@@ -26,16 +26,14 @@ export type PagedReaderProps = {
  * Note: This component lacks animations between pages. The `AnimatedPagedReader` component
  * will have animations between pages, but is currently a WIP
  */
-export default function PagedReader({
-	currentPage,
-	media,
-	onPageChange,
-	getPageUrl,
-}: PagedReaderProps) {
-	const currPageRef = React.useRef(currentPage)
+function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
+	const currentPageRef = React.useRef(currentPage)
 
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
+	// TODO: This effect, on very first load, is hit twice. A parent context is causing this.
+	// This is not a huge issue, since the second hit is a no-op (the pages are already preloaded)
+	// but it is something to look into.
 	const pageCount = media.pages
 	/**
 	 * This effect is responsible for preloading the next 2 pages relative to the current page. This is done to
@@ -47,9 +45,10 @@ export default function PagedReader({
 
 			const start = currentPage >= 1 ? currentPage - 1 : 0
 
-			pageArray.slice(start, 3).forEach((_, i) => {
+			pageArray.slice(start, start + 3).forEach((_, i) => {
+				const virtualPage = currentPage + i + 1
 				const preloadedImg = new Image()
-				preloadedImg.src = getPageUrl(currentPage + (i + 1))
+				preloadedImg.src = getPageUrl(virtualPage)
 			})
 		},
 
@@ -62,7 +61,7 @@ export default function PagedReader({
 	 * added primarily because of the useHotKeys hook below.
 	 */
 	useEffect(() => {
-		currPageRef.current = currentPage
+		currentPageRef.current = currentPage
 	}, [currentPage])
 
 	/**
@@ -102,10 +101,10 @@ export default function PagedReader({
 		const targetKey = handler.keys?.at(0)
 		switch (targetKey) {
 			case 'right':
-				handlePageChange(currPageRef.current + 1)
+				handlePageChange(currentPageRef.current + 1)
 				break
 			case 'left':
-				handlePageChange(currPageRef.current - 1)
+				handlePageChange(currentPageRef.current - 1)
 				break
 			case 'space':
 				toggleToolbar()
@@ -169,3 +168,5 @@ function SideBarControl({ onClick, position }: SideBarControlProps) {
 		/>
 	)
 }
+
+export default memo(PagedReader)

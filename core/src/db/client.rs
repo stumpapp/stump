@@ -4,6 +4,11 @@ use tracing::trace;
 
 use crate::{config::get_config_dir, prisma};
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+struct JournalModeQueryResult {
+	journal_mode: String,
+}
+
 /// Creates the PrismaClient. Will call `create_data_dir` as well
 pub async fn create_client() -> prisma::PrismaClient {
 	let config_dir = get_config_dir()
@@ -36,23 +41,29 @@ pub async fn create_client() -> prisma::PrismaClient {
 		.await
 	};
 
+	let enable_wal_var = std::env::var("ENABLE_WAL").ok();
 	let enable_wal = std::env::var("ENABLE_WAL")
-		.unwrap_or_else(|_| "false".to_string())
+		.unwrap_or_else(|_| "true".to_string())
 		.parse()
 		.unwrap_or_else(|error| {
-			tracing::error!(?error, "Failed to parse ENABLE_WAL");
-			false
+			tracing::error!(?error, enable_wal_var, "Failed to parse ENABLE_WAL");
+			true
+		});
+	let journal_value = if enable_wal { "WAL" } else { "DELETE" };
+
+	let result = client
+		._query_raw::<JournalModeQueryResult>(raw!(&format!(
+			"PRAGMA journal_mode={journal_value};"
+		)))
+		.exec()
+		.await
+		.unwrap_or_else(|error| {
+			tracing::error!(?error, "Failed to set journal mode");
+			vec![]
 		});
 
-	if enable_wal {
-		let _affected_rows = client
-			._execute_raw(raw!("PRAGMA journal_mode=WAL;"))
-			.exec()
-			.await
-			.unwrap_or_else(|error| {
-				tracing::error!(?error, "Failed to enable WAL mode");
-				0
-			});
+	if let Some(journal_mode) = result.first() {
+		tracing::debug!(?journal_mode, "Journal mode set");
 	}
 
 	client

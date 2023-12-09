@@ -4,6 +4,11 @@ use tracing::trace;
 
 use crate::{config::StumpConfig, prisma};
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+struct JournalModeQueryResult {
+	journal_mode: String,
+}
+
 /// Creates the PrismaClient. Will call `create_data_dir` as well
 pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 	let config_dir = config

@@ -1,4 +1,5 @@
 mod account;
+mod system;
 
 use std::time::Duration;
 
@@ -7,12 +8,14 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::{error::CliResult, CliConfig};
 
-use self::account::Account;
+use self::{account::Account, system::System};
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
 	#[command(subcommand)]
 	Account(Account),
+	#[command(subcommand)]
+	System(System),
 }
 
 pub async fn handle_command(command: Commands, config: CliConfig) -> CliResult<()> {
@@ -20,6 +23,7 @@ pub async fn handle_command(command: Commands, config: CliConfig) -> CliResult<(
 		Commands::Account(account) => {
 			account::handle_account_command(account, config).await
 		},
+		Commands::System(system) => system::handle_system_command(system).await,
 	}
 }
 

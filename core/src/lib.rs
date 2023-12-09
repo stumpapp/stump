@@ -23,12 +23,17 @@ pub mod prisma;
 
 use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
+use db::{DBPragma, JournalMode};
 use event::{event_manager::EventManager, InternalCoreTask};
 use job::JobScheduler;
+use prisma::server_config;
 use tokio::sync::mpsc::unbounded_channel;
 
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
+
+/// A type alias strictly for explicitness in the return type of `init_journal_mode`.
+type JournalModeChanged = bool;
 
 /// The [`StumpCore`] struct is the main entry point for any server-side Stump
 /// applications. It is responsible for managing incoming tasks ([`InternalCoreTask`]),
@@ -96,11 +101,13 @@ impl StumpCore {
 		STUMP_SHADOW_TEXT
 	}
 
-	/// Runs the database migrations. This will be updated with PCR 0.6.2
+	/// Runs the database migrations
 	pub async fn run_migrations(&self) -> Result<(), CoreError> {
 		db::migration::run_migrations(&self.ctx.db).await
 	}
 
+	/// Initializes the server configuration record. This will only create a new record if one
+	/// does not already exist.
 	pub async fn init_server_config(&self) -> Result<(), CoreError> {
 		let config_exists = self
 			.ctx
@@ -116,6 +123,55 @@ impl StumpCore {
 		}
 
 		Ok(())
+	}
+
+	/// Initializes the journal mode for the database. This will only set the journal mode to WAL
+	/// provided a few conditions are met:
+	///
+	/// 1. The initial WAL setup has not already been completed on first run
+	/// 2. The journal mode is not already set to WAL
+	pub async fn init_journal_mode(&self) -> Result<JournalModeChanged, CoreError> {
+		let client = self.ctx.get_db();
+
+		let wal_mode_setup_completed = client
+			.server_config()
+			.find_first(vec![server_config::initial_wal_setup_complete::equals(
+				true,
+			)])
+			.exec()
+			.await?
+			.is_some();
+
+		if wal_mode_setup_completed {
+			tracing::trace!("Initial WAL setup has already been completed, skipping");
+			Ok(false)
+		} else {
+			let journal_mode = client.get_journal_mode().await?;
+
+			if journal_mode != JournalMode::WAL {
+				tracing::trace!("Journal mode is not set to WAL!");
+				let updated_journal_mode =
+					client.set_journal_mode(JournalMode::WAL).await?;
+				tracing::debug!(
+					"Initial journal mode has been set to {:?}",
+					updated_journal_mode
+				)
+			} else {
+				tracing::trace!("Journal mode is already set to WAL, skipping");
+			}
+
+			let _affected_rows = client
+				.server_config()
+				.update_many(
+					vec![],
+					vec![server_config::initial_wal_setup_complete::set(true)],
+				)
+				.exec()
+				.await?;
+			tracing::trace!(_affected_rows, "Updated initial WAL setup complete flag");
+
+			Ok(journal_mode != JournalMode::WAL)
+		}
 	}
 
 	pub async fn init_scheduler(&self) -> Result<Arc<JobScheduler>, CoreError> {

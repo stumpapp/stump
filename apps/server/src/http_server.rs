@@ -19,6 +19,7 @@ use crate::{
 
 pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 	let core = StumpCore::new().await;
+
 	if let Err(err) = core.run_migrations().await {
 		tracing::error!("Failed to run migrations: {:?}", err);
 		return Err(ServerError::ServerStartError(err.to_string()));
@@ -26,6 +27,10 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 
 	// Initialize the server configuration. If it already exists, nothing will happen.
 	core.init_server_config()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
+	core.init_journal_mode()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 

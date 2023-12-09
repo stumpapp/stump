@@ -46,10 +46,10 @@ pub use error::{CoreError, CoreResult};
 ///
 /// #[tokio::main]
 /// async fn main() {
-/// 	let config_dir = config::bootstrap_config_dir();
-/// 	let config = StumpCore::init_config(config_dir).unwrap();
+///   let config_dir = config::bootstrap_config_dir();
+///   let config = StumpCore::init_config(config_dir).unwrap();
 ///
-/// 	let core = StumpCore::new(config).await;
+///   let core = StumpCore::new(config).await;
 /// }
 /// ```
 pub struct StumpCore {

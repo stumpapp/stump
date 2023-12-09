@@ -275,7 +275,7 @@ pub async fn register(
 		is_server_owner = true;
 	}
 
-	let hashed_password = bcrypt::hash(&input.password, ctx.config.hash_cost)?;
+	let hashed_password = bcrypt::hash(&input.password, ctx.config.password_hash_cost)?;
 
 	let created_user = db
 		.user()

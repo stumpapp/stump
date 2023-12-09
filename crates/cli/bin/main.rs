@@ -1,4 +1,4 @@
-use cli::{handle_command, BundledConfigs, Cli, Parser};
+use cli::{handle_command, Cli, Parser};
 use stump_core::{config, StumpCore};
 
 /// This is just an example of how to use this crate. It is going to be used in the
@@ -11,13 +11,8 @@ async fn main() {
 	let stump_config = StumpCore::init_config(config_dir)
 		.expect("Failed to initialize stump configuration");
 
-	let bundled_config = BundledConfigs {
-		cli_config: app.config,
-		stump_config,
-	};
-
 	if let Some(command) = app.command {
-		handle_command(command, bundled_config)
+		handle_command(command, &app.config.merge_stump_config(stump_config))
 			.await
 			.expect("Failed to handle command");
 	} else {

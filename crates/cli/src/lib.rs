@@ -3,7 +3,7 @@ mod config;
 mod error;
 
 pub use commands::{handle_command, Commands};
-pub use config::{BundledConfigs, CliConfig};
+pub use config::CliConfig;
 pub use error::CliError;
 
 pub use clap::Parser;

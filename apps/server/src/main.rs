@@ -1,4 +1,4 @@
-use cli::{handle_command, BundledConfigs, Cli, Parser};
+use cli::{handle_command, Cli, Parser};
 use errors::EntryError;
 use stump_core::{
 	config::bootstrap_config_dir, config::logging::init_tracing, StumpCore,
@@ -35,14 +35,7 @@ async fn main() -> Result<(), EntryError> {
 	let cli = Cli::parse();
 
 	if let Some(command) = cli.command {
-		Ok(handle_command(
-			command,
-			BundledConfigs {
-				cli_config: cli.config,
-				stump_config: config.clone(),
-			},
-		)
-		.await?)
+		Ok(handle_command(command, &cli.config.merge_stump_config(config)).await?)
 	} else {
 		// Note: init_tracing after loading the environment so the correct verbosity
 		// level is used for logging.

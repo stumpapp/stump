@@ -3,11 +3,12 @@ use std::{thread, time::Duration};
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
 use stump_core::{
+	config::StumpConfig,
 	db::create_client,
 	prisma::{session, user},
 };
 
-use crate::{commands::chain_optional_iter, error::CliResult, BundledConfigs, CliError};
+use crate::{commands::chain_optional_iter, error::CliResult, CliError};
 
 use super::default_progress_spinner;
 
@@ -44,7 +45,7 @@ pub enum Account {
 
 pub async fn handle_account_command(
 	command: Account,
-	config: BundledConfigs,
+	config: &StumpConfig,
 ) -> CliResult<()> {
 	match command {
 		Account::Lock { username } => {
@@ -55,8 +56,7 @@ pub async fn handle_account_command(
 		},
 		Account::List { locked } => print_accounts(locked, config).await,
 		Account::ResetPassword { username } => {
-			reset_account_password(username, config.cli_config.password_hash_cost, config)
-				.await
+			reset_account_password(username, config.password_hash_cost, config).await
 		},
 		Account::ResetOwner => change_server_owner(config).await,
 	}
@@ -65,7 +65,7 @@ pub async fn handle_account_command(
 async fn set_account_lock_status(
 	username: String,
 	lock: bool,
-	config: BundledConfigs,
+	config: &StumpConfig,
 ) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message(if lock {
@@ -74,7 +74,7 @@ async fn set_account_lock_status(
 		"Unlocking account..."
 	});
 
-	let client = create_client(&config.stump_config).await;
+	let client = create_client(config).await;
 
 	let affected_rows = client
 		.user()
@@ -116,9 +116,9 @@ async fn set_account_lock_status(
 async fn reset_account_password(
 	username: String,
 	hash_cost: u32,
-	config: BundledConfigs,
+	config: &StumpConfig,
 ) -> CliResult<()> {
-	let client = create_client(&config.stump_config).await;
+	let client = create_client(config).await;
 
 	let theme = &ColorfulTheme::default();
 	let builder = Password::with_theme(theme)
@@ -157,11 +157,11 @@ async fn reset_account_password(
 
 // TODO: print pretty table
 // TODO: handle empty state
-async fn print_accounts(locked: Option<bool>, config: BundledConfigs) -> CliResult<()> {
+async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message("Fetching accounts...");
 
-	let client = create_client(&config.stump_config).await;
+	let client = create_client(config).await;
 
 	let users = client
 		.user()
@@ -185,8 +185,8 @@ async fn print_accounts(locked: Option<bool>, config: BundledConfigs) -> CliResu
 	Ok(())
 }
 
-async fn change_server_owner(config: BundledConfigs) -> CliResult<()> {
-	let client = create_client(&config.stump_config).await;
+async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
+	let client = create_client(config).await;
 
 	let all_accounts = client
 		.user()

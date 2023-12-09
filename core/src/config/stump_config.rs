@@ -25,7 +25,7 @@ pub mod env_keys {
 use env_keys::*;
 
 pub mod defaults {
-	pub const DEFAULT_HASH_COST: u32 = 12;
+	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
 	pub const DEFAULT_ENABLE_WAL: bool = true;
@@ -42,20 +42,20 @@ use defaults::*;
 ///
 /// #[tokio::main]
 /// async fn main() {
-/// 	/// Get config dir from environment variables.
-/// 	let config_dir = config::bootstrap_config_dir();
+///   /// Get config dir from environment variables.
+///   let config_dir = config::bootstrap_config_dir();
 ///
-/// 	// Create a StumpConfig using the config file and environment variables.
-/// 	let config = StumpConfig::new(config_dir)
-/// 		// Load Stump.toml file (if any)
-/// 		.with_config_file().unwrap()
-/// 		// Overlay environment variables
-/// 		.with_environment().unwrap();
+///   // Create a StumpConfig using the config file and environment variables.
+///   let config = StumpConfig::new(config_dir)
+///     // Load Stump.toml file (if any)
+///     .with_config_file().unwrap()
+///     // Overlay environment variables
+///     .with_environment().unwrap();
 ///
-/// 	// Ensure that config directory exists and write Stump.toml.
-/// 	config.write_config_dir().unwrap();
-/// 	// Create an instance of the stump core.
-/// 	let core = StumpCore::new(config).await;
+///   // Ensure that config directory exists and write Stump.toml.
+///   config.write_config_dir().unwrap();
+///   // Create an instance of the stump core.
+///   let core = StumpCore::new(config).await;
 /// }
 /// ```
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -79,7 +79,7 @@ pub struct StumpConfig {
 	/// Indicates if the Swagger UI should be disabled.
 	pub disable_swagger: bool,
 	/// Password hash cost
-	pub hash_cost: u32,
+	pub password_hash_cost: u32,
 	/// The time in seconds that a login session will be valid for.
 	pub session_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
@@ -102,7 +102,7 @@ impl StumpConfig {
 			allowed_origins: vec![],
 			pdfium_path: None,
 			disable_swagger: false,
-			hash_cost: DEFAULT_HASH_COST,
+			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 			enable_wal: DEFAULT_ENABLE_WAL,
@@ -123,7 +123,7 @@ impl StumpConfig {
 			allowed_origins: vec![],
 			pdfium_path: None,
 			disable_swagger: false,
-			hash_cost: DEFAULT_HASH_COST,
+			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 			enable_wal: DEFAULT_ENABLE_WAL,
@@ -206,7 +206,7 @@ impl StumpConfig {
 
 		if let Ok(hash_cost) = env::var(HASH_COST_KEY) {
 			if let Ok(val) = hash_cost.parse() {
-				env_configs.hash_cost = Some(val);
+				env_configs.password_hash_cost = Some(val);
 			}
 		}
 
@@ -254,12 +254,13 @@ impl StumpConfig {
 	pub fn write_config_dir(&self) -> CoreResult<()> {
 		// Check that config directory is configured correctly
 		let config_dir = self.get_config_dir();
-		if !config_dir.is_dir() {
+		if config_dir.is_file() {
 			return Err(CoreError::InitializationError(format!(
-				"Error writing config directory: {:?} is not a directory",
+				"Error writing config directory: {:?} is a file",
 				config_dir
 			)));
 		}
+
 		// And create directory if it is missing.
 		if !config_dir.exists() {
 			match std::fs::create_dir_all(config_dir.clone()) {
@@ -333,7 +334,7 @@ pub struct PartialStumpConfig {
 	pub allowed_origins: Option<Vec<String>>,
 	pub pdfium_path: Option<String>,
 	pub disable_swagger: Option<bool>,
-	pub hash_cost: Option<u32>,
+	pub password_hash_cost: Option<u32>,
 	pub session_ttl: Option<i64>,
 	pub expired_session_cleanup_interval: Option<u64>,
 	pub enable_wal: Option<bool>,
@@ -351,7 +352,7 @@ impl PartialStumpConfig {
 			allowed_origins: None,
 			pdfium_path: None,
 			disable_swagger: None,
-			hash_cost: None,
+			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
 			enable_wal: None,
@@ -400,9 +401,9 @@ impl PartialStumpConfig {
 		if let Some(disable_swagger) = self.disable_swagger {
 			config.disable_swagger = disable_swagger;
 		}
-		// Hash Cost - Merge if not None
-		if let Some(hash_cost) = self.hash_cost {
-			config.hash_cost = hash_cost;
+		// Password Hash Cost - Merge if not None
+		if let Some(hash_cost) = self.password_hash_cost {
+			config.password_hash_cost = hash_cost;
 		}
 		// Session TTL - Merge if not None
 		if let Some(session_ttl) = self.session_ttl {
@@ -446,7 +447,7 @@ mod tests {
 			]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 			disable_swagger: Some(true),
-			hash_cost: Some(24),
+			password_hash_cost: Some(24),
 			session_ttl: Some(3600 * 24),
 			expired_session_cleanup_interval: Some(60 * 60 * 8),
 			enable_wal: Some(true),
@@ -472,7 +473,7 @@ mod tests {
 				],
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				disable_swagger: true,
-				hash_cost: 24,
+				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
 				enable_wal: true,
@@ -513,7 +514,7 @@ mod tests {
 				allowed_origins: vec![],
 				pdfium_path: None,
 				disable_swagger: true,
-				hash_cost: 24,
+				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
 				enable_wal: true,
@@ -546,7 +547,7 @@ mod tests {
 				allowed_origins: vec!["origin1".to_string(), "origin2".to_string()],
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				disable_swagger: false,
-				hash_cost: DEFAULT_HASH_COST,
+				password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 				session_ttl: DEFAULT_SESSION_TTL,
 				expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 				enable_wal: DEFAULT_ENABLE_WAL,
@@ -578,7 +579,7 @@ mod tests {
 			allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 			pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 			disable_swagger: Some(false),
-			hash_cost: None,
+			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
 			enable_wal: None,
@@ -607,7 +608,7 @@ mod tests {
 				allowed_origins: Some(vec!["origin1".to_string(), "origin2".to_string()]),
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				disable_swagger: Some(false),
-				hash_cost: Some(DEFAULT_HASH_COST),
+				password_hash_cost: Some(DEFAULT_PASSWORD_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL

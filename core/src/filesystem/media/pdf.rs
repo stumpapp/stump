@@ -135,7 +135,7 @@ impl PdfProcessor {
 	/// Initializes a PDFium renderer. If a path to the PDFium library is not provided
 	pub fn renderer(pdfium_path: &Option<String>) -> Result<Pdfium, FileError> {
 		if let Some(path) = pdfium_path {
-			let bindings = Pdfium::bind_to_library(&path)
+			let bindings = Pdfium::bind_to_library(path)
 			.or_else(|e| {
 				tracing::error!(provided_path = ?path, ?e, "Failed to bind to PDFium library at provided path");
 				Pdfium::bind_to_system_library()
@@ -210,7 +210,7 @@ impl FileConverter for PdfProcessor {
 		} = path_buf.as_path().file_parts();
 
 		let cache_dir = config.get_cache_dir();
-		let unpacked_path = cache_dir.join(&file_stem);
+		let unpacked_path = cache_dir.join(file_stem);
 
 		// create folder for the zip
 		std::fs::create_dir_all(&unpacked_path)?;

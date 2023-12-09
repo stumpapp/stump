@@ -249,7 +249,7 @@ async fn update_user(
 		user::avatar_url::set(input.avatar_url),
 	];
 	if let Some(password) = input.password {
-		let hashed_password = bcrypt::hash(password, config.hash_cost)?;
+		let hashed_password = bcrypt::hash(password, config.password_hash_cost)?;
 		update_params.push(user::hashed_password::set(hashed_password));
 	}
 
@@ -386,7 +386,7 @@ async fn create_user(
 	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
-	let hashed_password = bcrypt::hash(input.password, ctx.config.hash_cost)?;
+	let hashed_password = bcrypt::hash(input.password, ctx.config.password_hash_cost)?;
 
 	// TODO: https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let created_user = db

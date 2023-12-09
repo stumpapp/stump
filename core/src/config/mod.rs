@@ -16,17 +16,36 @@ pub fn get_default_config_dir() -> String {
 }
 
 /// Returns the value of the `STUMP_CONFIG_DIR` environment variable if it is set,
-/// and `~/.stump` otherwise.
+/// logs an error and returns and `~/.stump` otherwise.
 pub fn bootstrap_config_dir() -> String {
 	match env::var(CONFIG_DIR_KEY) {
+		// Environment variable set
 		Ok(config_dir) => {
 			if config_dir.is_empty() {
-				get_default_config_dir()
+				let default_dir = get_default_config_dir();
+				tracing::error!(
+					"{} set to an empty value - falling back to {}",
+					CONFIG_DIR_KEY,
+					default_dir
+				);
+
+				default_dir
 			} else {
 				config_dir
 			}
 		},
-		Err(_) => get_default_config_dir(),
+		// Environment variable not set
+		Err(e) => {
+			let default_dir = get_default_config_dir();
+			tracing::error!(
+				"Error {} retrieving {} - falling back to {}",
+				e,
+				CONFIG_DIR_KEY,
+				default_dir
+			);
+
+			default_dir
+		},
 	}
 }
 

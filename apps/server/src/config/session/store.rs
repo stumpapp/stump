@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use stump_core::{
-	config::defaults::DEFAULT_SESSION_TTL,
+	config::StumpConfig,
 	db::entity::User,
 	prisma::{session, user, PrismaClient},
 	Ctx,
@@ -28,11 +28,12 @@ pub enum SessionError {
 #[derive(Clone)]
 pub struct PrismaSessionStore {
 	client: Arc<PrismaClient>,
+	config: Arc<StumpConfig>,
 }
 
 impl PrismaSessionStore {
-	pub fn new(client: Arc<PrismaClient>) -> Self {
-		Self { client }
+	pub fn new(client: Arc<PrismaClient>, config: Arc<StumpConfig>) -> Self {
+		Self { client, config }
 	}
 
 	pub async fn continuously_delete_expired(
@@ -59,9 +60,8 @@ impl SessionStore for PrismaSessionStore {
 	type Error = SessionError;
 
 	async fn save(&self, session_record: &SessionRecord) -> Result<(), Self::Error> {
-		// TODO fix this so that it actually uses the config value instead of the default
 		let expires_at: DateTime<FixedOffset> =
-			(Utc::now() + Duration::seconds(DEFAULT_SESSION_TTL)).into();
+			(Utc::now() + Duration::seconds(self.config.session_ttl)).into();
 
 		let session_user = session_record
 			.data()

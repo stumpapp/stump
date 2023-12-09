@@ -6,25 +6,31 @@ use tracing::debug;
 
 use crate::error::{CoreError, CoreResult};
 
-pub const CONFIG_DIR_KEY: &str = "STUMP_CONFIG_DIR";
-pub const IN_DOCKER_KEY: &str = "STUMP_IN_DOCKER";
-const PROFILE_KEY: &str = "STUMP_PROFILE";
-const PORT_KEY: &str = "STUMP_PORT";
-const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
-const DB_PATH_KEY: &str = "STUMP_DB_PATH";
-const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
-const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
-const PDFIUM_KEY: &str = "PDFIUM_PATH";
-const DISABLE_SWAGGER_KEY: &str = "DISABLE_SWAGGER_UI";
-const HASH_COST_KEY: &str = "HASH_COST";
-const SESSION_TTL_KEY: &str = "SESSION_TTL";
-const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-const ENABLE_WAL_KEY: &str = "ENABLE_WAL";
+pub mod env_keys {
+	pub const CONFIG_DIR_KEY: &str = "STUMP_CONFIG_DIR";
+	pub const IN_DOCKER_KEY: &str = "STUMP_IN_DOCKER";
+	pub const PROFILE_KEY: &str = "STUMP_PROFILE";
+	pub const PORT_KEY: &str = "STUMP_PORT";
+	pub const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
+	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
+	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
+	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
+	pub const PDFIUM_KEY: &str = "PDFIUM_PATH";
+	pub const DISABLE_SWAGGER_KEY: &str = "DISABLE_SWAGGER_UI";
+	pub const HASH_COST_KEY: &str = "HASH_COST";
+	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
+	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
+	pub const ENABLE_WAL_KEY: &str = "ENABLE_WAL";
+}
+use env_keys::*;
 
-pub const DEFAULT_HASH_COST: u32 = 12;
-pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
-pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-pub const DEFAULT_ENABLE_WAL: bool = false;
+pub mod defaults {
+	pub const DEFAULT_HASH_COST: u32 = 12;
+	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
+	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
+	pub const DEFAULT_ENABLE_WAL: bool = false;
+}
+use defaults::*;
 
 /// Represents the configuration of a Stump application. This file is generated at startup
 /// using a TOML file, environment variables, or both and is input when creating a `StumpCore`
@@ -74,10 +80,10 @@ pub struct StumpConfig {
 	pub disable_swagger: bool,
 	/// Password hash cost
 	pub hash_cost: u32,
-	/// TODO What is this?
+	/// The time in seconds that a login session will be valid for.
 	pub session_ttl: i64,
-	/// TODO What is this?
-	pub session_expiry_cleanup_interval: u64,
+	/// The interval at which automatic deleted session cleanup is performed.
+	pub expired_session_cleanup_interval: u64,
 	/// Indicates whether the prisma client will support write-ahead logging.
 	pub enable_wal: bool,
 }
@@ -98,7 +104,7 @@ impl StumpConfig {
 			disable_swagger: false,
 			hash_cost: DEFAULT_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
-			session_expiry_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 			enable_wal: DEFAULT_ENABLE_WAL,
 		}
 	}
@@ -119,7 +125,7 @@ impl StumpConfig {
 			disable_swagger: false,
 			hash_cost: DEFAULT_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
-			session_expiry_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 			enable_wal: DEFAULT_ENABLE_WAL,
 		}
 	}
@@ -219,7 +225,7 @@ impl StumpConfig {
 
 		if let Ok(session_expiry_interval) = env::var(SESSION_EXPIRY_INTERVAL_KEY) {
 			match session_expiry_interval.parse() {
-				Ok(val) => env_configs.session_expiry_cleanup_interval = Some(val),
+				Ok(val) => env_configs.expired_session_cleanup_interval = Some(val),
 				Err(e) => tracing::error!(
 					?e,
 					"Failed to parse provided SESSION_EXPIRY_CLEANUP_INTERVAL"
@@ -329,7 +335,7 @@ pub struct PartialStumpConfig {
 	pub disable_swagger: Option<bool>,
 	pub hash_cost: Option<u32>,
 	pub session_ttl: Option<i64>,
-	pub session_expiry_cleanup_interval: Option<u64>,
+	pub expired_session_cleanup_interval: Option<u64>,
 	pub enable_wal: Option<bool>,
 }
 
@@ -347,7 +353,7 @@ impl PartialStumpConfig {
 			disable_swagger: None,
 			hash_cost: None,
 			session_ttl: None,
-			session_expiry_cleanup_interval: None,
+			expired_session_cleanup_interval: None,
 			enable_wal: None,
 		}
 	}
@@ -403,8 +409,8 @@ impl PartialStumpConfig {
 			config.session_ttl = session_ttl;
 		}
 		// Session Expiry Cleanup Interval - Merge if not None
-		if let Some(cleanup_interval) = self.session_expiry_cleanup_interval {
-			config.session_expiry_cleanup_interval = cleanup_interval;
+		if let Some(cleanup_interval) = self.expired_session_cleanup_interval {
+			config.expired_session_cleanup_interval = cleanup_interval;
 		}
 		// Enable WAL - Merge if not None
 		if let Some(enable_wal) = self.enable_wal {
@@ -442,7 +448,7 @@ mod tests {
 			disable_swagger: Some(true),
 			hash_cost: Some(24),
 			session_ttl: Some(3600 * 24),
-			session_expiry_cleanup_interval: Some(60 * 60 * 8),
+			expired_session_cleanup_interval: Some(60 * 60 * 8),
 			enable_wal: Some(true),
 		};
 
@@ -468,7 +474,7 @@ mod tests {
 				disable_swagger: true,
 				hash_cost: 24,
 				session_ttl: 3600 * 24,
-				session_expiry_cleanup_interval: 60 * 60 * 8,
+				expired_session_cleanup_interval: 60 * 60 * 8,
 				enable_wal: true,
 			}
 		);
@@ -509,7 +515,7 @@ mod tests {
 				disable_swagger: true,
 				hash_cost: 24,
 				session_ttl: 3600 * 24,
-				session_expiry_cleanup_interval: 60 * 60 * 8,
+				expired_session_cleanup_interval: 60 * 60 * 8,
 				enable_wal: true,
 			}
 		);
@@ -542,7 +548,7 @@ mod tests {
 				disable_swagger: false,
 				hash_cost: DEFAULT_HASH_COST,
 				session_ttl: DEFAULT_SESSION_TTL,
-				session_expiry_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
+				expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
 				enable_wal: DEFAULT_ENABLE_WAL,
 			}
 		);
@@ -574,7 +580,7 @@ mod tests {
 			disable_swagger: Some(false),
 			hash_cost: None,
 			session_ttl: None,
-			session_expiry_cleanup_interval: None,
+			expired_session_cleanup_interval: None,
 			enable_wal: None,
 		};
 		partial_config.apply_to_config(&mut config);
@@ -603,7 +609,7 @@ mod tests {
 				disable_swagger: Some(false),
 				hash_cost: Some(DEFAULT_HASH_COST),
 				session_ttl: Some(DEFAULT_SESSION_TTL),
-				session_expiry_cleanup_interval: Some(
+				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
 				enable_wal: Some(DEFAULT_ENABLE_WAL)

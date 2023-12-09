@@ -18,9 +18,9 @@ pub const SESSION_PATH: &str = "/";
 
 pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<PrismaSessionStore> {
 	let client = ctx.db.clone();
-	let store = PrismaSessionStore::new(client);
+	let store = PrismaSessionStore::new(client, ctx.config.clone());
 
-	let cleanup_interval = ctx.config.session_expiry_cleanup_interval;
+	let cleanup_interval = ctx.config.expired_session_cleanup_interval;
 	if cleanup_interval > 0 {
 		tracing::trace!(
 			cleanup_interval = cleanup_interval,
@@ -31,7 +31,7 @@ pub fn get_session_layer(ctx: Arc<Ctx>) -> SessionManagerLayer<PrismaSessionStor
 			ctx.clone(),
 		));
 	} else {
-		tracing::debug!("SESSION_EXPIRY_CLEANUP_INTERVAL is set to 0. Session expiry cleanup is disabled");
+		tracing::debug!("expired_session_cleanup_interval is set to 0. Session expiry cleanup is disabled");
 	}
 
 	// TODO: This configuration won't work for Tauri Windows app, it requires SameSite::None and Secure=true... Linux and macOS work fine.

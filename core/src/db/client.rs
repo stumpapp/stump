@@ -1,4 +1,3 @@
-use prisma_client_rust::raw;
 use std::path::Path;
 use tracing::trace;
 
@@ -38,17 +37,6 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		))
 		.await
 	};
-
-	if config.enable_wal {
-		let _affected_rows = client
-			._execute_raw(raw!("PRAGMA journal_mode=WAL;"))
-			.exec()
-			.await
-			.unwrap_or_else(|error| {
-				tracing::error!(?error, "Failed to enable WAL mode");
-				0
-			});
-	}
 
 	client
 }

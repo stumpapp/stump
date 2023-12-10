@@ -8,6 +8,8 @@ import { useHotkeys } from 'react-hotkeys-hook'
 
 import Toolbar from './Toolbar'
 
+const DEFAULT_PRELOAD_COUNT = 4
+
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
 	currentPage: number
@@ -45,10 +47,14 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 
 			const start = currentPage >= 1 ? currentPage - 1 : 0
 
-			pageArray.slice(start, start + 3).forEach((_, i) => {
+			pageArray.slice(start, start + DEFAULT_PRELOAD_COUNT).forEach((_, i) => {
 				const virtualPage = currentPage + i + 1
 				const preloadedImg = new Image()
+				// TODO: It doesn't seem that this is actually preloading the image? More investigation is needed...
 				preloadedImg.src = getPageUrl(virtualPage)
+				preloadedImg.onload = () => {
+					console.debug(`Preloaded page ${virtualPage}`)
+				}
 			})
 		},
 

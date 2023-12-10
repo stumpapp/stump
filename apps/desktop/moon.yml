@@ -20,6 +20,9 @@ tasks:
     command: 'pnpm tauri dev --no-watch'
     local: true
 
+  start-bundled:
+    command: 'pnpm tauri dev  --no-watch -- --features bundled-server'
+
   lint:
     command: 'cargo clippy --package stump_desktop -- -D warnings'
     options:

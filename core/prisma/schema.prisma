@@ -640,6 +640,8 @@ model ServerConfig {
 
   public_url String? // The public URL of the server, if any
 
+  initial_wal_setup_complete Boolean @default(false) // Whether the initial WAL setup has been completed
+
   // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
   // The schedule configuration. If not set, no scheduled scans will be run.
   job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])

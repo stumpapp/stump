@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 use crate::{
+	config::StumpConfig,
 	db::entity::{
 		metadata::{MediaMetadata, SeriesMetadata},
 		LibraryOptions,
@@ -50,18 +51,27 @@ impl From<&LibraryOptions> for FileProcessorOptions {
 pub trait FileProcessor {
 	/// Get the sample size for a file. This is used for generating a hash of the file.
 	fn get_sample_size(path: &str) -> Result<u64, FileError>;
+
 	/// Generate a hash of the file. In most cases, the hash is generated from select pages
 	/// of the file, rather than the entire file. This is to prevent the hash from changing
 	/// when the metadata of the file changes.
 	fn hash(path: &str) -> Option<String>;
+
 	/// Process a file. Should gather the basic metadata and information required for
 	/// processing the file.
 	fn process(
 		path: &str,
 		options: FileProcessorOptions,
+		config: &StumpConfig,
 	) -> Result<ProcessedFile, FileError>;
+
 	/// Get the bytes of a page of the file.
-	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError>;
+	fn get_page(
+		path: &str,
+		page: i32,
+		config: &StumpConfig,
+	) -> Result<(ContentType, Vec<u8>), FileError>;
+
 	/// Get the content types of a list of pages of the file. This should determine content
 	/// types by actually testing the bytes for each page.
 	fn get_page_content_types(
@@ -76,6 +86,7 @@ pub trait FileConverter {
 		path: &str,
 		delete_source: bool,
 		image_format: Option<ImageFormat>,
+		config: &StumpConfig,
 	) -> Result<PathBuf, FileError>;
 }
 
@@ -112,6 +123,7 @@ pub struct ProcessedFile {
 pub fn process(
 	path: &Path,
 	options: FileProcessorOptions,
+	config: &StumpConfig,
 ) -> Result<ProcessedFile, FileError> {
 	debug!(?path, ?options, "Processing entry");
 	let mime = ContentType::from_path(path).mime_type();
@@ -119,26 +131,34 @@ pub fn process(
 	let path_str = path.to_str().unwrap_or_default();
 
 	match mime.as_str() {
-		"application/zip" => ZipProcessor::process(path_str, options),
-		"application/vnd.comicbook+zip" => ZipProcessor::process(path_str, options),
-		"application/vnd.rar" => RarProcessor::process(path_str, options),
-		"application/vnd.comicbook-rar" => RarProcessor::process(path_str, options),
-		"application/epub+zip" => EpubProcessor::process(path_str, options),
-		"application/pdf" => PdfProcessor::process(path_str, options),
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::process(path_str, options, config)
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::process(path_str, options, config)
+		},
+		"application/epub+zip" => EpubProcessor::process(path_str, options, config),
+		"application/pdf" => PdfProcessor::process(path_str, options, config),
 		_ => Err(FileError::UnsupportedFileType(path.display().to_string())),
 	}
 }
 
-pub fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
+pub fn get_page(
+	path: &str,
+	page: i32,
+	config: &StumpConfig,
+) -> Result<(ContentType, Vec<u8>), FileError> {
 	let mime = ContentType::from_file(path).mime_type();
 
 	match mime.as_str() {
-		"application/zip" => ZipProcessor::get_page(path, page),
-		"application/vnd.comicbook+zip" => ZipProcessor::get_page(path, page),
-		"application/vnd.rar" => RarProcessor::get_page(path, page),
-		"application/vnd.comicbook-rar" => RarProcessor::get_page(path, page),
-		"application/epub+zip" => EpubProcessor::get_page(path, page),
-		"application/pdf" => PdfProcessor::get_page(path, page),
+		"application/zip" | "application/vnd.comicbook+zip" => {
+			ZipProcessor::get_page(path, page, config)
+		},
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
+			RarProcessor::get_page(path, page, config)
+		},
+		"application/epub+zip" => EpubProcessor::get_page(path, page, config),
+		"application/pdf" => PdfProcessor::get_page(path, page, config),
 		_ => Err(FileError::UnsupportedFileType(path.to_string())),
 	}
 }
@@ -150,12 +170,10 @@ pub fn get_content_types_for_pages(
 	let mime = ContentType::from_file(path).mime_type();
 
 	match mime.as_str() {
-		"application/zip" => ZipProcessor::get_page_content_types(path, pages),
-		"application/vnd.comicbook+zip" => {
+		"application/zip" | "application/vnd.comicbook+zip" => {
 			ZipProcessor::get_page_content_types(path, pages)
 		},
-		"application/vnd.rar" => RarProcessor::get_page_content_types(path, pages),
-		"application/vnd.comicbook-rar" => {
+		"application/vnd.rar" | "application/vnd.comicbook-rar" => {
 			RarProcessor::get_page_content_types(path, pages)
 		},
 		"application/epub+zip" => EpubProcessor::get_page_content_types(path, pages),

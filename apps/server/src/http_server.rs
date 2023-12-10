@@ -20,6 +20,7 @@ use stump_core::config::StumpConfig;
 
 pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let core = StumpCore::new(config.clone()).await;
+
 	if let Err(err) = core.run_migrations().await {
 		tracing::error!("Failed to run migrations: {:?}", err);
 		return Err(ServerError::ServerStartError(err.to_string()));
@@ -27,6 +28,10 @@ pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 	// Initialize the server configuration. If it already exists, nothing will happen.
 	core.init_server_config()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
+	core.init_journal_mode()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 

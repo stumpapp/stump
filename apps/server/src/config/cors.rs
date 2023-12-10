@@ -55,7 +55,7 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 
 		if is_debug {
 			base.append(&mut vec![
-				format!("http://{local_ip}:3000",),
+				format!("http://{local_ip}:3000"),
 				format!("https://{local_ip}:3000"),
 			]);
 		}
@@ -67,17 +67,20 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 
 	let mut cors_layer = CorsLayer::new();
 
-	if !allowed_origins.is_empty() {
-		// TODO: consider adding some config to allow for this list to be appended to defaults, rather than
-		// completely overriding them.
-		cors_layer = cors_layer.allow_origin(AllowOrigin::list(allowed_origins));
-	} else if is_debug {
-		let debug_origins = merge_origins(DEBUG_ALLOWED_ORIGINS, local_orgins);
-		cors_layer = cors_layer.allow_origin(debug_origins);
+	let defaults = if is_debug {
+		DEBUG_ALLOWED_ORIGINS
 	} else {
-		let release_origins = merge_origins(DEFAULT_ALLOWED_ORIGINS, local_orgins);
-		cors_layer = cors_layer.allow_origin(release_origins);
-	}
+		DEFAULT_ALLOWED_ORIGINS
+	};
+	let default_allowlist = merge_origins(defaults, local_orgins);
+
+	// TODO: add new config option for fully overriding the default allowlist versus appending to it
+	cors_layer = cors_layer.allow_origin(AllowOrigin::list(
+		default_allowlist
+			.into_iter()
+			.chain(allowed_origins)
+			.collect::<Vec<HeaderValue>>(),
+	));
 
 	cors_layer = cors_layer
 		.allow_methods([

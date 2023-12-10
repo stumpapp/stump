@@ -1,4 +1,3 @@
-use prisma_client_rust::raw;
 use std::path::Path;
 use tracing::trace;
 
@@ -17,7 +16,7 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		.expect("Error parsing config directory")
 		.to_string();
 
-	let client = if let Some(path) = config.db_path.clone() {
+	if let Some(path) = config.db_path.clone() {
 		create_client_with_url(&format!("file:{}/stump.db", &path)).await
 	} else if config.profile == "release" {
 		trace!(
@@ -37,20 +36,7 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 			&env!("CARGO_MANIFEST_DIR")
 		))
 		.await
-	};
-
-	if config.enable_wal {
-		let _affected_rows = client
-			._execute_raw(raw!("PRAGMA journal_mode=WAL;"))
-			.exec()
-			.await
-			.unwrap_or_else(|error| {
-				tracing::error!(?error, "Failed to enable WAL mode");
-				0
-			});
 	}
-
-	client
 }
 
 pub async fn create_client_with_url(url: &str) -> prisma::PrismaClient {

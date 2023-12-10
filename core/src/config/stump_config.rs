@@ -20,7 +20,6 @@ pub mod env_keys {
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const ENABLE_WAL_KEY: &str = "ENABLE_WAL";
 }
 use env_keys::*;
 
@@ -28,7 +27,6 @@ pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
-	pub const DEFAULT_ENABLE_WAL: bool = true;
 }
 use defaults::*;
 
@@ -84,8 +82,6 @@ pub struct StumpConfig {
 	pub session_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
 	pub expired_session_cleanup_interval: u64,
-	/// Indicates whether the prisma client will support write-ahead logging.
-	pub enable_wal: bool,
 }
 
 impl StumpConfig {
@@ -105,7 +101,6 @@ impl StumpConfig {
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-			enable_wal: DEFAULT_ENABLE_WAL,
 		}
 	}
 
@@ -126,7 +121,6 @@ impl StumpConfig {
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-			enable_wal: DEFAULT_ENABLE_WAL,
 		}
 	}
 
@@ -233,13 +227,6 @@ impl StumpConfig {
 			}
 		}
 
-		if let Ok(enable_wal) = env::var(ENABLE_WAL_KEY) {
-			match enable_wal.parse() {
-				Ok(val) => env_configs.enable_wal = Some(val),
-				Err(e) => tracing::error!(?e, "Failed to parse ENABLE_WAL"),
-			}
-		}
-
 		env_configs.apply_to_config(&mut self);
 		Ok(self)
 	}
@@ -337,7 +324,6 @@ pub struct PartialStumpConfig {
 	pub password_hash_cost: Option<u32>,
 	pub session_ttl: Option<i64>,
 	pub expired_session_cleanup_interval: Option<u64>,
-	pub enable_wal: Option<bool>,
 }
 
 impl PartialStumpConfig {
@@ -355,7 +341,6 @@ impl PartialStumpConfig {
 			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
-			enable_wal: None,
 		}
 	}
 
@@ -413,10 +398,6 @@ impl PartialStumpConfig {
 		if let Some(cleanup_interval) = self.expired_session_cleanup_interval {
 			config.expired_session_cleanup_interval = cleanup_interval;
 		}
-		// Enable WAL - Merge if not None
-		if let Some(enable_wal) = self.enable_wal {
-			config.enable_wal = enable_wal;
-		}
 	}
 }
 
@@ -450,7 +431,6 @@ mod tests {
 			password_hash_cost: Some(24),
 			session_ttl: Some(3600 * 24),
 			expired_session_cleanup_interval: Some(60 * 60 * 8),
-			enable_wal: Some(true),
 		};
 
 		// Apply the partial configuration
@@ -476,7 +456,6 @@ mod tests {
 				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
-				enable_wal: true,
 			}
 		);
 	}
@@ -494,7 +473,6 @@ mod tests {
 		env::set_var(HASH_COST_KEY, "24");
 		env::set_var(SESSION_TTL_KEY, (3600 * 24).to_string());
 		env::set_var(SESSION_EXPIRY_INTERVAL_KEY, (60 * 60 * 8).to_string());
-		env::set_var(ENABLE_WAL_KEY, "true".to_string());
 
 		// Create a new StumpConfig and load values from the environment.
 		let config = StumpConfig::new("not_a_dir".to_string())
@@ -517,7 +495,6 @@ mod tests {
 				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
-				enable_wal: true,
 			}
 		);
 	}
@@ -550,7 +527,6 @@ mod tests {
 				password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 				session_ttl: DEFAULT_SESSION_TTL,
 				expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-				enable_wal: DEFAULT_ENABLE_WAL,
 			}
 		);
 
@@ -582,7 +558,6 @@ mod tests {
 			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
-			enable_wal: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -613,7 +588,6 @@ mod tests {
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
-				enable_wal: Some(DEFAULT_ENABLE_WAL)
 			}
 		);
 

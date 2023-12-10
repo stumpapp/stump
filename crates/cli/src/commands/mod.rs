@@ -24,7 +24,7 @@ pub async fn handle_command(command: Commands, config: &StumpConfig) -> CliResul
 		Commands::Account(account) => {
 			account::handle_account_command(account, config).await
 		},
-		Commands::System(system) => system::handle_system_command(system).await,
+		Commands::System(system) => system::handle_system_command(system, config).await,
 	}
 }
 

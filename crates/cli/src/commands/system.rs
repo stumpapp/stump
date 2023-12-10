@@ -1,6 +1,9 @@
 use clap::Subcommand;
 use dialoguer::Confirm;
-use stump_core::db::{create_client, DBPragma, JournalMode};
+use stump_core::{
+	config::StumpConfig,
+	db::{create_client, DBPragma, JournalMode},
+};
 
 use super::default_progress_spinner;
 use crate::{error::CliResult, CliError};
@@ -16,13 +19,16 @@ pub enum System {
 	},
 }
 
-pub async fn handle_system_command(command: System) -> CliResult<()> {
+pub async fn handle_system_command(
+	command: System,
+	config: &StumpConfig,
+) -> CliResult<()> {
 	match command {
-		System::SetJournalMode { mode } => set_journal_mode(mode).await,
+		System::SetJournalMode { mode } => set_journal_mode(mode, config).await,
 	}
 }
 
-async fn set_journal_mode(mode: JournalMode) -> CliResult<()> {
+async fn set_journal_mode(mode: JournalMode, config: &StumpConfig) -> CliResult<()> {
 	let confirmation = Confirm::new()
     .with_prompt("Changing the journal mode can lead to unexpected behavior. Are you sure you want to continue?")
     .interact()?;
@@ -35,7 +41,7 @@ async fn set_journal_mode(mode: JournalMode) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message("Connecting to database...");
 
-	let client = create_client().await;
+	let client = create_client(config).await;
 
 	progress.set_message("Fetching current journal mode...");
 	let current_journal_mode = client.get_journal_mode().await?;

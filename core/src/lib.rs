@@ -21,8 +21,8 @@ pub mod error;
 #[allow(warnings, unused)]
 pub mod prisma;
 
-use config::env::StumpEnvironment;
 use config::logging::STUMP_SHADOW_TEXT;
+use config::StumpConfig;
 use db::{DBPragma, JournalMode};
 use event::{event_manager::EventManager, InternalCoreTask};
 use job::JobScheduler;
@@ -35,23 +35,26 @@ pub use error::{CoreError, CoreResult};
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;
 
-/// The [`StumpCore`] struct is the main entry point for any server-side Stump
-/// applications. It is responsible for managing incoming tasks ([`InternalCoreTask`]),
-/// outgoing events ([`CoreEvent`](event::CoreEvent)), and providing access to the database
-/// via the core's [`Ctx`].
+/// The [StumpCore] struct is the main entry point for any server-side Stump
+/// applications. It is responsible for managing incoming tasks ([InternalCoreTask]),
+/// outgoing events ([CoreEvent](event::CoreEvent)), and providing access to the database
+/// via the core's [Ctx].
 ///
-/// [`StumpCore`] also provides a few initilization functions, such as `init_environment`. This
-/// is provided to standardize various configurations for consumers of the library.
+/// [StumpCore] expects the consuming application to determine its configuration prior to startup.
+/// [config::bootstrap_config_dir] enables consumers to fetch the configuration directory automatically,
+/// and [StumpCore::init_config](#method.init_config) will load any Stump.toml in the config directory
+/// or environment variables to return a [StumpConfig] struct.
 ///
 /// ## Example:
 /// ```rust
-/// use stump_core::StumpCore;
+/// use stump_core::{config, StumpCore};
 ///
 /// #[tokio::main]
 /// async fn main() {
-///    assert!(StumpCore::init_environment().is_ok());
+///   let config_dir = config::bootstrap_config_dir();
+///   let config = StumpCore::init_config(config_dir).unwrap();
 ///
-///    let core = StumpCore::new().await;
+///   let core = StumpCore::new(config).await;
 /// }
 /// ```
 pub struct StumpCore {
@@ -61,10 +64,10 @@ pub struct StumpCore {
 
 impl StumpCore {
 	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`Arc`].
-	pub async fn new() -> StumpCore {
+	pub async fn new(config: StumpConfig) -> StumpCore {
 		let internal_channel = unbounded_channel::<InternalCoreTask>();
 
-		let core_ctx = Ctx::new(internal_channel.0).await;
+		let core_ctx = Ctx::new(config, internal_channel.0).await;
 		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
 
 		StumpCore {
@@ -73,10 +76,28 @@ impl StumpCore {
 		}
 	}
 
-	/// Loads environment variables from the `Stump.toml` configuration file, if
-	/// it exists, using the [`StumpEnv`] struct.
-	pub fn init_environment() -> CoreResult<StumpEnvironment> {
-		StumpEnvironment::load()
+	/// A three-step configuration initialization function.
+	///
+	/// 1. Loads configuration variables from Stump.toml, located at the input
+	/// config_dir, if such a file exists.
+	///
+	/// 2. Overrides variables with those set in the environment.
+	///
+	/// 3. Creates the configuration directory (if it does not exist) and writes
+	/// to Stump.toml.
+	///
+	/// Returns the configuration variables in a `StumpConfig` struct.
+	pub fn init_config(config_dir: String) -> CoreResult<StumpConfig> {
+		let config = StumpConfig::new(config_dir)
+			// Load config file (if any)
+			.with_config_file()?
+			// Overlay environment variables
+			.with_environment()?;
+
+		// Write ensure that config directory exists and write Stump.toml
+		config.write_config_dir()?;
+
+		Ok(config)
 	}
 
 	/// Returns [`StumpCore`] wrapped in an [`Arc`]. Will take ownership of self. Created

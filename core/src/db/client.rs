@@ -2,7 +2,7 @@ use prisma_client_rust::raw;
 use std::path::Path;
 use tracing::trace;
 
-use crate::{config::get_config_dir, prisma};
+use crate::{config::StumpConfig, prisma};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub(crate) struct JournalModeQueryResult {
@@ -10,19 +10,16 @@ pub(crate) struct JournalModeQueryResult {
 }
 
 /// Creates the PrismaClient. Will call `create_data_dir` as well
-pub async fn create_client() -> prisma::PrismaClient {
-	let config_dir = get_config_dir()
+pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
+	let config_dir = config
+		.get_config_dir()
 		.to_str()
 		.expect("Error parsing config directory")
 		.to_string();
 
-	let profile = std::env::var("STUMP_PROFILE").unwrap_or_else(|_| "debug".to_string());
-	let db_override = std::env::var("STUMP_DB_PATH").ok();
-
-	let client = if let Some(path) = db_override {
-		trace!("Creating Prisma client with url: file:{}", &path);
-		create_client_with_url(&format!("file:{}", &path)).await
-	} else if profile == "release" {
+	let client = if let Some(path) = config.db_path.clone() {
+		create_client_with_url(&format!("file:{}/stump.db", &path)).await
+	} else if config.profile == "release" {
 		trace!(
 			"Creating Prisma client with url: file:{}/stump.db",
 			&config_dir
@@ -42,35 +39,15 @@ pub async fn create_client() -> prisma::PrismaClient {
 		.await
 	};
 
-	let enable_wal_var = std::env::var("ENABLE_WAL")
-		.ok()
-		.and_then(|v| v.parse::<bool>().ok());
-
-	if let Some(enable_wal) = enable_wal_var {
-		let journal_value = if enable_wal { "WAL" } else { "DELETE" };
-
-		if enable_wal {
-			tracing::warn!(
-				"WAL is highly unstable at the moment. DO NOT SET MORE THAN ONCE! Be sure to remove the environment variable after usage"
-			);
-		}
-
-		let result = client
-			._query_raw::<JournalModeQueryResult>(raw!(&format!(
-				"PRAGMA journal_mode={journal_value};"
-			)))
+	if config.enable_wal {
+		let _affected_rows = client
+			._execute_raw(raw!("PRAGMA journal_mode=WAL;"))
 			.exec()
 			.await
 			.unwrap_or_else(|error| {
-				tracing::error!(?error, "Failed to set journal mode");
-				vec![]
+				tracing::error!(?error, "Failed to enable WAL mode");
+				0
 			});
-
-		if let Some(journal_mode) = result.first() {
-			tracing::debug!(?journal_mode, "Journal mode set");
-		} else {
-			tracing::error!("No journal mode set!");
-		}
 	}
 
 	client

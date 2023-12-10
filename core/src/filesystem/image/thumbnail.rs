@@ -4,7 +4,7 @@ use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use tracing::{debug, error, trace};
 
 use crate::{
-	config::get_thumbnails_dir,
+	config::StumpConfig,
 	db::entity::Media,
 	filesystem::{media, FileError},
 	prisma::media as prisma_media,
@@ -19,11 +19,12 @@ pub fn generate_thumbnail(
 	id: &str,
 	media_path: &str,
 	options: ImageProcessorOptions,
+	config: &StumpConfig,
 ) -> Result<PathBuf, FileError> {
-	let (_, buf) = media::get_page(media_path, options.page.unwrap_or(1))?;
+	let (_, buf) = media::get_page(media_path, options.page.unwrap_or(1), config)?;
 	let ext = options.format.extension();
 
-	let thumbnail_path = get_thumbnails_dir().join(format!("{}.{}", &id, ext));
+	let thumbnail_path = config.get_thumbnails_dir().join(format!("{}.{}", &id, ext));
 	if !thumbnail_path.exists() {
 		// TODO: this will be more complicated once more specialized processors are added...
 		let image_buffer = if options.format == ImageFormat::Webp {
@@ -45,6 +46,7 @@ pub fn generate_thumbnail(
 pub fn generate_thumbnails(
 	media: &[Media],
 	options: ImageProcessorOptions,
+	config: &StumpConfig,
 ) -> Result<Vec<PathBuf>, FileError> {
 	trace!("Enter generate_thumbnails");
 
@@ -56,7 +58,14 @@ pub fn generate_thumbnails(
 		trace!(chunk = idx + 1, "Processing chunk for thumbnail generation");
 		let results = chunk
 			.into_par_iter()
-			.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str(), options.clone()))
+			.map(|m| {
+				generate_thumbnail(
+					m.id.as_str(),
+					m.path.as_str(),
+					options.clone(),
+					config,
+				)
+			})
 			.filter_map(|res| {
 				if res.is_err() {
 					error!(error = ?res.err(), "Error generating thumbnail!");
@@ -80,6 +89,7 @@ pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
 pub fn generate_thumbnails_for_media(
 	media: Vec<prisma_media::Data>,
 	options: ImageProcessorOptions,
+	config: &StumpConfig,
 	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
 ) -> Result<Vec<PathBuf>, FileError> {
 	trace!(media_count = media.len(), "Enter generate_thumbnails");
@@ -98,7 +108,14 @@ pub fn generate_thumbnails_for_media(
 		);
 		let results = chunk
 			.into_par_iter()
-			.map(|m| generate_thumbnail(m.id.as_str(), m.path.as_str(), options.clone()))
+			.map(|m| {
+				generate_thumbnail(
+					m.id.as_str(),
+					m.path.as_str(),
+					options.clone(),
+					config,
+				)
+			})
 			.filter_map(|res| {
 				if res.is_err() {
 					error!(error = ?res.err(), "Error generating thumbnail!");
@@ -117,8 +134,10 @@ pub fn generate_thumbnails_for_media(
 	Ok(generated_paths)
 }
 
-pub fn remove_thumbnails(id_list: &[String]) -> Result<(), FileError> {
-	let thumbnails_dir = get_thumbnails_dir();
+pub fn remove_thumbnails(
+	id_list: &[String],
+	thumbnails_dir: PathBuf,
+) -> Result<(), FileError> {
 	let found_thumbnails = thumbnails_dir
 		.read_dir()
 		.ok()
@@ -153,9 +172,8 @@ pub fn remove_thumbnails(id_list: &[String]) -> Result<(), FileError> {
 pub fn remove_thumbnails_of_type(
 	ids: &[String],
 	extension: &str,
+	thumbnails_dir: PathBuf,
 ) -> Result<(), FileError> {
-	let thumbnails_dir = get_thumbnails_dir();
-
 	for (idx, chunk) in ids.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
 		trace!(chunk = idx + 1, "Processing chunk for thumbnail removal");
 		let results = chunk

@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use stump_core::{
+	config::StumpConfig,
 	db::entity::User,
 	prisma::{session, user, PrismaClient},
 	Ctx,
@@ -10,7 +11,7 @@ use time::OffsetDateTime;
 use tokio::time::MissedTickBehavior;
 use tower_sessions::{session::SessionId, Session, SessionRecord, SessionStore};
 
-use super::{get_session_ttl, SessionCleanupJob, SESSION_USER_KEY};
+use super::{SessionCleanupJob, SESSION_USER_KEY};
 
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
@@ -27,11 +28,12 @@ pub enum SessionError {
 #[derive(Clone)]
 pub struct PrismaSessionStore {
 	client: Arc<PrismaClient>,
+	config: Arc<StumpConfig>,
 }
 
 impl PrismaSessionStore {
-	pub fn new(client: Arc<PrismaClient>) -> Self {
-		Self { client }
+	pub fn new(client: Arc<PrismaClient>, config: Arc<StumpConfig>) -> Self {
+		Self { client, config }
 	}
 
 	pub async fn continuously_delete_expired(
@@ -59,7 +61,8 @@ impl SessionStore for PrismaSessionStore {
 
 	async fn save(&self, session_record: &SessionRecord) -> Result<(), Self::Error> {
 		let expires_at: DateTime<FixedOffset> =
-			(Utc::now() + Duration::seconds(get_session_ttl())).into();
+			(Utc::now() + Duration::seconds(self.config.session_ttl)).into();
+
 		let session_user = session_record
 			.data()
 			.get(SESSION_USER_KEY)

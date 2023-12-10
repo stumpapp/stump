@@ -15,7 +15,7 @@ use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
@@ -434,20 +434,24 @@ pub(crate) fn get_library_thumbnail(
 	first_series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
-	let thumbnails = get_config_dir().join("thumbnails");
 	let library_id = library.id.clone();
 
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
 
-		let path = thumbnails.join(format!("{}.{}", library_id, extension));
+		let path = config
+			.get_thumbnails_dir()
+			.join(format!("{}.{}", library_id, extension));
 
 		if path.exists() {
 			tracing::trace!(?path, library_id, "Found generated library thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&library_id) {
+	} else if let Some(path) =
+		get_unknown_thumnail(&library_id, config.get_thumbnails_dir())
+	{
 		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
@@ -456,7 +460,7 @@ pub(crate) fn get_library_thumbnail(
 		));
 	}
 
-	get_series_thumbnail(first_series, first_book, image_format)
+	get_series_thumbnail(first_series, first_book, image_format, config)
 }
 
 // TODO: ImageResponse for utoipa
@@ -524,8 +528,14 @@ async fn get_library_thumbnail_handler(
 		"Library has no media to get thumbnail from".to_string(),
 	))?;
 
-	get_library_thumbnail(library, &first_series, first_book, image_format)
-		.map(ImageResponse::from)
+	get_library_thumbnail(
+		library,
+		&first_series,
+		first_book,
+		image_format,
+		&ctx.config,
+	)
+	.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]
@@ -613,7 +623,7 @@ async fn patch_library_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,
@@ -641,6 +651,7 @@ async fn delete_library_thumbnails(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<()>> {
 	let db = ctx.get_db();
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let result = db
 		.library()
@@ -665,9 +676,9 @@ async fn delete_library_thumbnails(
 		.collect::<Vec<String>>();
 
 	if let Some(ext) = extension {
-		remove_thumbnails_of_type(&media_ids, ext)?;
+		remove_thumbnails_of_type(&media_ids, ext, thumbnails_dir)?;
 	} else {
-		remove_thumbnails(&media_ids)?;
+		remove_thumbnails(&media_ids, thumbnails_dir)?;
 	}
 
 	Ok(Json(()))
@@ -810,6 +821,7 @@ async fn clean_library(
 	get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
 
 	let db = ctx.get_db();
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let result: ApiResult<(CleanLibraryResponse, Vec<String>)> = db
 		._transaction()
@@ -906,7 +918,7 @@ async fn clean_library(
 	let (response, media_to_delete_ids) = result?;
 
 	if !media_to_delete_ids.is_empty() {
-		image::remove_thumbnails(&media_to_delete_ids).map_or_else(
+		image::remove_thumbnails(&media_to_delete_ids, thumbnails_dir).map_or_else(
 			|error| {
 				tracing::error!(?error, "Failed to remove thumbnails for library media");
 			},
@@ -1218,6 +1230,7 @@ async fn delete_library(
 ) -> ApiResult<Json<String>> {
 	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	trace!(?id, "Attempting to delete library");
 
@@ -1242,7 +1255,7 @@ async fn delete_library(
 			media_ids.len()
 		);
 
-		if let Err(err) = image::remove_thumbnails(&media_ids) {
+		if let Err(err) = image::remove_thumbnails(&media_ids, thumbnails_dir) {
 			error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
 			debug!("Removed thumbnails for library media (if present)");

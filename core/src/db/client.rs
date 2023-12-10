@@ -16,7 +16,7 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		.expect("Error parsing config directory")
 		.to_string();
 
-	let client = if let Some(path) = config.db_path.clone() {
+	if let Some(path) = config.db_path.clone() {
 		create_client_with_url(&format!("file:{}/stump.db", &path)).await
 	} else if config.profile == "release" {
 		trace!(
@@ -36,9 +36,7 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 			&env!("CARGO_MANIFEST_DIR")
 		))
 		.await
-	};
-
-	client
+	}
 }
 
 pub async fn create_client_with_url(url: &str) -> prisma::PrismaClient {

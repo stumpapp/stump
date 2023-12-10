@@ -1,13 +1,10 @@
-use std::env;
-
 use axum::http::{
 	header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
 	HeaderValue, Method,
 };
 use local_ip_address::local_ip;
+use stump_core::config::StumpConfig;
 use tower_http::cors::{AllowOrigin, CorsLayer};
-
-use crate::config::utils::is_debug;
 
 const DEFAULT_ALLOWED_ORIGINS: &[&str] =
 	&["tauri://localhost", "https://tauri.localhost"];
@@ -28,35 +25,16 @@ fn merge_origins(origins: &[&str], local_origins: Vec<String>) -> Vec<HeaderValu
 		.collect::<Vec<HeaderValue>>()
 }
 
-pub fn get_cors_layer(port: u16) -> CorsLayer {
-	let is_debug = is_debug();
+pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
+	let is_debug = config.is_debug();
 
-	let allowed_origins = match env::var("STUMP_ALLOWED_ORIGINS") {
-		Ok(val) => {
-			if val.is_empty() {
-				None
-			} else {
-				Some(
-					val.split(',')
-						.map(|val| val.trim().to_string().parse::<HeaderValue>())
-						// Note: doing this the more verbose way so I can log errors...
-						.filter_map(|res| {
-							if let Ok(val) = res {
-								Some(val)
-							} else {
-								tracing::error!(
-									"Failed to parse allowed origin: {:?}",
-									res
-								);
-								None
-							}
-						})
-						.collect::<Vec<HeaderValue>>(),
-				)
-			}
-		},
-		Err(_) => None,
-	};
+	let mut allowed_origins = Vec::new();
+	for origin in config.allowed_origins {
+		match origin.parse::<HeaderValue>() {
+			Ok(val) => allowed_origins.push(val),
+			Err(_) => tracing::error!("Failed to parse allowed origin: {:?}", origin),
+		}
+	}
 
 	let local_ip = local_ip()
 		.map_err(|e| {
@@ -69,6 +47,7 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 	// Format the local IP with both http and https, and the port. If is_debug is true,
 	// then also add port 3000.
 	let local_orgins = if !local_ip.is_empty() {
+		let port = config.port;
 		let mut base = vec![
 			format!("http://{local_ip}:{port}"),
 			format!("https://{local_ip}:{port}"),
@@ -88,10 +67,10 @@ pub fn get_cors_layer(port: u16) -> CorsLayer {
 
 	let mut cors_layer = CorsLayer::new();
 
-	if let Some(origins_list) = allowed_origins {
+	if !allowed_origins.is_empty() {
 		// TODO: consider adding some config to allow for this list to be appended to defaults, rather than
 		// completely overriding them.
-		cors_layer = cors_layer.allow_origin(AllowOrigin::list(origins_list));
+		cors_layer = cors_layer.allow_origin(AllowOrigin::list(allowed_origins));
 	} else if is_debug {
 		let debug_origins = merge_origins(DEBUG_ALLOWED_ORIGINS, local_orgins);
 		cors_layer = cors_layer.allow_origin(debug_origins);

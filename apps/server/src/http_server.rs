@@ -16,9 +16,10 @@ use crate::{
 	routers,
 	utils::shutdown_signal_with_cleanup,
 };
+use stump_core::config::StumpConfig;
 
-pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
-	let core = StumpCore::new().await;
+pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
+	let core = StumpCore::new(config.clone()).await;
 	if let Err(err) = core.run_migrations().await {
 		tracing::error!("Failed to run migrations: {:?}", err);
 		return Err(ServerError::ServerStartError(err.to_string()));
@@ -42,7 +43,7 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
-	let cors_layer = cors::get_cors_layer(port);
+	let cors_layer = cors::get_cors_layer(config.clone());
 
 	tracing::info!("{}", core.get_shadow_text());
 
@@ -57,7 +58,7 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 		.layer(cors_layer)
 		.layer(TraceLayer::new_for_http());
 
-	let addr = SocketAddr::from(([0, 0, 0, 0], port));
+	let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
 	tracing::info!("⚡️ Stump HTTP server starting on http://{}", addr);
 
 	// TODO: might need to refactor to use https://docs.rs/async-shutdown/latest/async_shutdown/

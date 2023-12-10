@@ -6,6 +6,7 @@ use tokio::sync::{
 };
 
 use crate::{
+	config::StumpConfig,
 	db::{self, entity::Log},
 	event::{CoreEvent, InternalCoreTask},
 	job::JobExecutorTrait,
@@ -20,6 +21,7 @@ type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 /// to all the different parts of the application, and is used to access the database
 /// and manage the event channels.
 pub struct Ctx {
+	pub config: Arc<StumpConfig>,
 	pub db: Arc<prisma::PrismaClient>,
 	pub internal_sender: Arc<InternalSender>,
 	pub response_channel: Arc<ClientChannel>,
@@ -38,18 +40,20 @@ impl Ctx {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::config::Ctx;
+	/// use stump_core::{Ctx, config::StumpConfig};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	///
 	/// #[tokio::main]
 	/// async fn main() {
 	///    let (sender, _) = unbounded_channel();
-	///    let ctx = Ctx::new(sender).await;
+	///    let config = StumpConfig::debug();
+	///    let ctx = Ctx::new(config, sender).await;
 	/// }
 	/// ```
-	pub async fn new(internal_sender: InternalSender) -> Ctx {
+	pub async fn new(config: StumpConfig, internal_sender: InternalSender) -> Ctx {
 		Ctx {
-			db: Arc::new(db::create_client().await),
+			config: Arc::new(config.clone()),
+			db: Arc::new(db::create_client(&config).await),
 			internal_sender: Arc::new(internal_sender),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
@@ -61,6 +65,7 @@ impl Ctx {
 	/// **This should not be used in production.**
 	pub async fn mock() -> Ctx {
 		Ctx {
+			config: Arc::new(StumpConfig::debug()),
 			db: Arc::new(db::create_test_client().await),
 			internal_sender: Arc::new(unbounded_channel::<InternalCoreTask>().0),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
@@ -72,15 +77,16 @@ impl Ctx {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::config::Ctx;
+	/// use stump_core::{Ctx, config::StumpConfig};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	/// use std::sync::Arc;
 	///
 	/// #[tokio::main]
 	/// async fn main() {
 	///     let (sender, _) = unbounded_channel();
+	///     let config = StumpConfig::debug();
 	///
-	///     let ctx = Ctx::new(sender).await;
+	///     let ctx = Ctx::new(config, sender).await;
 	///     let arced_ctx = ctx.arced();
 	///     let ctx_clone = arced_ctx.clone();
 	///
@@ -99,6 +105,7 @@ impl Ctx {
 	/// Returns a copy of the ctx
 	pub fn get_ctx(&self) -> Ctx {
 		Ctx {
+			config: self.config.clone(),
 			db: self.db.clone(),
 			internal_sender: self.internal_sender.clone(),
 			response_channel: self.response_channel.clone(),
@@ -115,16 +122,17 @@ impl Ctx {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::{config::Ctx, event::CoreEvent};
+	/// use stump_core::{Ctx, config::StumpConfig, event::CoreEvent};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	///
 	/// #[tokio::main]
 	/// async fn main() {
 	///    let (sender, _) = unbounded_channel();
-	///    let ctx = Ctx::new(sender).await;
+	///    let config = StumpConfig::debug();
+	///    let ctx = Ctx::new(config, sender).await;
 	///
 	///    let event = CoreEvent::JobFailed {
-	///        runner_id: "Gandalf quote".to_string(),
+	///        job_id: "Gandalf quote".to_string(),
 	///        message: "When in doubt, follow your nose".to_string(),
 	///    };
 	///
@@ -134,8 +142,8 @@ impl Ctx {
 	///        let received_event = receiver.recv().await;
 	///        assert_eq!(received_event.is_ok(), true);
 	///        match received_event.unwrap() {
-	///            CoreEvent::JobFailed { runner_id, message } => {
-	///                assert_eq!(runner_id, "Gandalf quote");
+	///            CoreEvent::JobFailed { job_id, message } => {
+	///                assert_eq!(job_id, "Gandalf quote");
 	///                assert_eq!(message, "When in doubt, follow your nose");
 	///            }
 	///            _ => unreachable!("Wrong event type received"),

@@ -15,4 +15,4 @@ serde = { workspace = true }
 prisma-client-rust = { workspace = true }
 tokio = { workspace = true }
 stump_core = { path = ".." }
-tempfile = "3.3.0"
+tempfile = { workspace = true }

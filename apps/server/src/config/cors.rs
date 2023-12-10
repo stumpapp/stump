@@ -78,7 +78,7 @@ pub fn get_cors_layer(config: StumpConfig) -> CorsLayer {
 	cors_layer = cors_layer.allow_origin(AllowOrigin::list(
 		default_allowlist
 			.into_iter()
-			.chain(allowed_origins.into_iter())
+			.chain(allowed_origins)
 			.collect::<Vec<HeaderValue>>(),
 	));
 

@@ -281,7 +281,7 @@ impl JobManager {
 		let jobs = db
 			.job()
 			.find_many(vec![])
-			.order_by(job::exited_at::order(Direction::Desc))
+			.order_by(job::completed_at::order(Direction::Desc))
 			.exec()
 			.await?
 			.into_iter()
@@ -301,7 +301,7 @@ impl JobManager {
 				vec![job::status::equals(JobStatus::Running.to_string())],
 				vec![
 					job::status::set(JobStatus::Cancelled.to_string()),
-					job::exited_at::set(None),
+					job::completed_at::set(None),
 				],
 			)
 			.exec()

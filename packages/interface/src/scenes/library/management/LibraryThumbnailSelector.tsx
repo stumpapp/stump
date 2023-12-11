@@ -112,6 +112,9 @@ export default function LibraryThumbnailSelector({ library }: Props) {
 						? getMediaPage(selectedBook.id, page)
 						: getLibraryThumbnail(library.id)
 				}
+				isCover
+				fullWidth={false}
+				className="flex-auto flex-shrink-0"
 			/>
 
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>

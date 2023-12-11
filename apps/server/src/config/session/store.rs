@@ -2,13 +2,16 @@ use std::sync::Arc;
 
 use prisma_client_rust::chrono::{DateTime, Duration, FixedOffset, Utc};
 use stump_core::{
+	config::StumpConfig,
 	db::entity::User,
 	prisma::{session, user, PrismaClient},
+	Ctx,
 };
 use time::OffsetDateTime;
+use tokio::time::MissedTickBehavior;
 use tower_sessions::{session::SessionId, Session, SessionRecord, SessionStore};
 
-use super::{get_session_ttl, SESSION_USER_KEY};
+use super::{SessionCleanupJob, SESSION_USER_KEY};
 
 #[derive(Debug, thiserror::Error)]
 pub enum SessionError {
@@ -22,40 +25,32 @@ pub enum SessionError {
 	SerdeError(#[from] serde_json::Error),
 }
 
-pub type SessionResult<T> = Result<T, SessionError>;
-
 #[derive(Clone)]
 pub struct PrismaSessionStore {
 	client: Arc<PrismaClient>,
+	config: Arc<StumpConfig>,
 }
 
 impl PrismaSessionStore {
-	pub fn new(client: Arc<PrismaClient>) -> Self {
-		Self { client }
+	pub fn new(client: Arc<PrismaClient>, config: Arc<StumpConfig>) -> Self {
+		Self { client, config }
 	}
 
-	async fn delete_expired(&self) -> SessionResult<()> {
-		tracing::trace!("Deleting expired sessions");
-
-		let affected_rows = self
-			.client
-			.session()
-			.delete_many(vec![session::expires_at::lt(Utc::now().into())])
-			.exec()
-			.await?;
-
-		tracing::trace!(affected_rows = ?affected_rows, "Deleted expired sessions");
-
-		Ok(())
-	}
-
-	pub async fn continuously_delete_expired(self, period: tokio::time::Duration) {
+	pub async fn continuously_delete_expired(
+		self,
+		period: tokio::time::Duration,
+		ctx: Arc<Ctx>,
+	) {
 		let mut interval = tokio::time::interval(period);
+		interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
 		loop {
-			if let Err(error) = self.delete_expired().await {
-				tracing::error!(error = ?error, "Failed to delete expired sessions");
+			interval.tick().await; // The first tick completes immediately
+			if let Err(error) = ctx.dispatch_job(SessionCleanupJob::new()) {
+				tracing::error!(error = ?error, "Failed to dispatch session cleanup job");
+			} else {
+				tracing::trace!("Dispatched session cleanup job");
 			}
-			interval.tick().await;
+			tracing::trace!("Waiting for next session cleanup interval...");
 		}
 	}
 }
@@ -66,7 +61,8 @@ impl SessionStore for PrismaSessionStore {
 
 	async fn save(&self, session_record: &SessionRecord) -> Result<(), Self::Error> {
 		let expires_at: DateTime<FixedOffset> =
-			(Utc::now() + Duration::seconds(get_session_ttl())).into();
+			(Utc::now() + Duration::seconds(self.config.session_ttl)).into();
+
 		let session_user = session_record
 			.data()
 			.get(SESSION_USER_KEY)

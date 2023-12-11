@@ -46,7 +46,12 @@ export default function BookThumbnailSelector({ book }: Props) {
 
 	return (
 		<div className="relative">
-			<EntityCard imageUrl={page ? getMediaPage(book.id, page) : getMediaThumbnail(book.id)} />
+			<EntityCard
+				imageUrl={page ? getMediaPage(book.id, page) : getMediaThumbnail(book.id)}
+				isCover
+				className="flex-auto flex-shrink-0"
+				fullWidth={(imageFailed) => !imageFailed}
+			/>
 
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 				<Dialog.Trigger asChild>

@@ -1,9 +1,10 @@
-import { useAppProps, useUserStore } from '@stump/client'
+import { useAppProps } from '@stump/client'
 import { Spacer } from '@stump/components'
 import { Book, Home } from 'lucide-react'
 import React from 'react'
 import { useMediaMatch } from 'rooks'
 
+import { useAppContext } from '../../context'
 import { useLocaleContext } from '../../i18n'
 import paths from '../../paths'
 import NavigationButtons from '../topbar/NavigationButtons'
@@ -22,8 +23,8 @@ export default function SideBar({ asChild }: Props) {
 	const { platform } = useAppProps()
 	const { t } = useLocaleContext()
 
-	const checkUserPermission = useUserStore((store) => store.checkUserPermission)
-	const showBookClubs = IS_DEVELOPMENT && checkUserPermission('bookclub:read')
+	const { checkPermission } = useAppContext()
+	const showBookClubs = IS_DEVELOPMENT && checkPermission('bookclub:read')
 
 	const isBrowser = platform === 'browser'
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -75,7 +76,7 @@ export default function SideBar({ asChild }: Props) {
 	}
 
 	if (asChild) {
-		return renderContent()
+		return <div className="min-h-full">{renderContent()}</div>
 	}
 
 	return (

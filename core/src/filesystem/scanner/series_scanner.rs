@@ -13,7 +13,7 @@ use itertools::Itertools;
 use walkdir::WalkDir;
 
 use crate::{
-	db::entity::{Library, LibraryOptions, Media, Series},
+	db::entity::{FileStatus, Library, LibraryOptions, Media, Series},
 	event::CoreEvent,
 	filesystem::{
 		scanner::utils::{
@@ -194,12 +194,23 @@ impl SeriesScanner {
 					false
 				};
 
-				if has_been_modified {
-					tracing::debug!(?path, "File has been modified since last scan");
+				let is_changed_readiness_state = media.status != FileStatus::Ready;
 
-					let build_result =
-						MediaBuilder::new(path, &series.id, library_options.clone())
-							.build();
+				if has_been_modified || is_changed_readiness_state {
+					tracing::debug!(
+						?path,
+						has_been_modified,
+						is_changed_readiness_state,
+						"File has been modified since last scan"
+					);
+
+					let build_result = MediaBuilder::new(
+						path,
+						&series.id,
+						library_options.clone(),
+						&ctx.config,
+					)
+					.rebuild(media);
 
 					if let Ok(generated) = build_result {
 						tracing::warn!(
@@ -214,7 +225,7 @@ impl SeriesScanner {
 								});
 							},
 							Err(e) => {
-								tracing::error!(error = ?e, "Failed to create media");
+								tracing::error!(error = ?e, "Failed to update media");
 								// TODO: persist error
 							},
 						}
@@ -230,8 +241,13 @@ impl SeriesScanner {
 				*visited_media.entry(path_str).or_insert(true) = true;
 			} else {
 				tracing::trace!(series_id = ?series.id, new_media_path = ?path, "New media found in series");
-				let build_result =
-					MediaBuilder::new(path, &series.id, library_options.clone()).build();
+				let build_result = MediaBuilder::new(
+					path,
+					&series.id,
+					library_options.clone(),
+					&ctx.config,
+				)
+				.build();
 				if let Ok(generated) = build_result {
 					match create_media(&ctx.db, generated).await {
 						Ok(created_media) => {

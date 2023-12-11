@@ -68,10 +68,18 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CleanLibraryResponse>()?).as_bytes(),
+		)?;
 
+		file.write_all(
+			format!("{}\n\n", ts_export::<PutMediaCompletionStatus>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaIsComplete>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesIsComplete>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),
 		)?;

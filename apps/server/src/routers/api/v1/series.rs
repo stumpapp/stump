@@ -6,10 +6,10 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{or, Direction};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
 		entity::{LibraryOptions, Media, Series},
 		query::{
@@ -68,6 +68,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/thumbnail",
 					get(get_series_thumbnail_handler).patch(patch_series_thumbnail),
+				)
+				.route(
+					"/complete",
+					get(get_series_is_complete).put(put_series_is_complete),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -396,20 +400,20 @@ pub(crate) fn get_series_thumbnail(
 	series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
-	let thumbnails = get_config_dir().join("thumbnails");
+	let thumbnails_dir = config.get_thumbnails_dir();
 	let series_id = series.id.clone();
 
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
-
-		let path = thumbnails.join(format!("{}.{}", series_id, extension));
+		let path = thumbnails_dir.join(format!("{}.{}", series_id, extension));
 
 		if path.exists() {
 			tracing::trace!(?path, series_id, "Found generated series thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&series_id) {
+	} else if let Some(path) = get_unknown_thumnail(&series_id, thumbnails_dir) {
 		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
@@ -418,7 +422,7 @@ pub(crate) fn get_series_thumbnail(
 		));
 	}
 
-	get_media_thumbnail(first_book, image_format)
+	get_media_thumbnail(first_book, image_format, config)
 }
 
 // TODO: ImageResponse type for body
@@ -490,7 +494,8 @@ async fn get_series_thumbnail_handler(
 		.thumbnail_config
 		.map(|config| config.format);
 
-	get_series_thumbnail(&series, first_book, image_format).map(ImageResponse::from)
+	get_series_thumbnail(&series, first_book, image_format, &ctx.config)
+		.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]
@@ -578,7 +583,7 @@ async fn patch_series_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,
@@ -784,4 +789,67 @@ async fn get_next_in_series(
 			id
 		)))
 	}
+}
+
+#[derive(Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct SeriesIsComplete {
+	is_complete: bool,
+	completed_at: Option<String>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id/complete",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to check"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series completion status.", body = SeriesIsComplete),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_series_is_complete(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<SeriesIsComplete>> {
+	let client = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let media_count = client
+		.media()
+		.count(vec![media::series_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
+
+	let rp = client
+		.read_progress()
+		.find_many(vec![
+			read_progress::user_id::equals(user_id),
+			read_progress::media::is(vec![media::series_id::equals(Some(id))]),
+			read_progress::is_completed::equals(true),
+		])
+		.order_by(read_progress::completed_at::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	let is_complete = rp.len() == media_count as usize;
+	let completed_at = is_complete
+		.then(|| {
+			rp.get(0)
+				.and_then(|rp| rp.completed_at.map(|ca| ca.to_rfc3339()))
+		})
+		.flatten();
+
+	Ok(Json(SeriesIsComplete {
+		is_complete,
+		completed_at,
+	}))
+}
+
+// TODO: implement
+async fn put_series_is_complete() -> ApiResult<Json<SeriesIsComplete>> {
+	Err(ApiError::NotImplemented)
 }

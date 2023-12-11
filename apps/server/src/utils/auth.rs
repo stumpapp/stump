@@ -12,13 +12,6 @@ pub struct DecodedCredentials {
 	pub password: String,
 }
 
-pub fn get_hash_cost() -> u32 {
-	std::env::var("HASH_COST")
-		.unwrap_or_else(|_e| "12".to_string())
-		.parse()
-		.unwrap_or(12)
-}
-
 pub fn verify_password(hash: &str, password: &str) -> Result<bool, AuthError> {
 	Ok(bcrypt::verify(password, hash)?)
 }
@@ -68,6 +61,7 @@ fn enforce_permission(user: &User, permission: UserPermission) -> ApiResult<()> 
 	if user_has_permission(user, permission) {
 		Ok(())
 	} else {
+		tracing::error!(?user, ?permission, "User does not have permission");
 		Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))

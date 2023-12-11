@@ -20,11 +20,11 @@ export type PagedReaderProps = {
 }
 
 /**
- * A component that renders a reader for image-based media. Images are displayed one at a time,
+ * A reader component for image-based media. Images are displayed one at a time,
  * however preloading is done to reduce wait times for consecutive pages.
  *
  * Note: This component lacks animations between pages. The `AnimatedPagedReader` component
- * has animations, as the name suggests lol.
+ * will have animations between pages, but is currently a WIP
  */
 export default function PagedReader({
 	currentPage,
@@ -36,13 +36,14 @@ export default function PagedReader({
 
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
+	const pageCount = media.pages
 	/**
 	 * This effect is responsible for preloading the next 2 pages relative to the current page. This is done to
 	 * try and prevent wait times for the next page to load.
 	 */
 	useEffect(
 		() => {
-			const pageArray = Array.from({ length: media.pages })
+			const pageArray = Array.from({ length: pageCount })
 
 			const start = currentPage >= 1 ? currentPage - 1 : 0
 
@@ -53,7 +54,7 @@ export default function PagedReader({
 		},
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentPage, media.pages],
+		[currentPage, pageCount],
 	)
 
 	/**
@@ -82,10 +83,10 @@ export default function PagedReader({
 	 * A simple function that does a little bit of validation before calling the onPageChange callback.
 	 * This is done to prevent the user from going to a page that doesn't exist.
 	 *
-	 * @param newPage The new page to navigate to
+	 * @param newPage The new page to navigate to (1-indexed)
 	 */
 	function handlePageChange(newPage: number) {
-		if (newPage < media.pages && newPage > 0) {
+		if (newPage <= media.pages && newPage > 0) {
 			onPageChange(newPage)
 		}
 	}
@@ -126,7 +127,8 @@ export default function PagedReader({
 				visible={toolbarVisible}
 				onPageChange={handlePageChange}
 			/>
-			<SideBarControl position="left" onClick={() => onPageChange(currentPage - 1)} />
+			<SideBarControl position="left" onClick={() => handlePageChange(currentPage - 1)} />
+			{/* TODO: better error handling for the loaded image */}
 			<img
 				className="z-30 max-h-full w-full select-none md:w-auto"
 				src={getPageUrl(currentPage)}
@@ -136,7 +138,7 @@ export default function PagedReader({
 				}}
 				onClick={toggleToolbar}
 			/>
-			<SideBarControl position="right" onClick={() => onPageChange(currentPage + 1)} />
+			<SideBarControl position="right" onClick={() => handlePageChange(currentPage + 1)} />
 		</div>
 	)
 }

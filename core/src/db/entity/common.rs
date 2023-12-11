@@ -16,7 +16,7 @@ pub enum LayoutMode {
 	List,
 }
 
-#[derive(Debug, Deserialize, Serialize, Type, ToSchema, Clone, Copy)]
+#[derive(Debug, Deserialize, Serialize, Type, ToSchema, Clone, Copy, PartialEq, Eq)]
 pub enum FileStatus {
 	#[serde(rename = "UNKNOWN")]
 	Unknown,

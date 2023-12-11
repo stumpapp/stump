@@ -21,13 +21,14 @@ impl EventManager {
 	///
 	/// ## Example
 	/// ```rust
-	/// use stump_core::{event::event_manager::EventManager, config::Ctx};
+	/// use stump_core::{event::event_manager::EventManager, Ctx, config::StumpConfig};
 	/// use tokio::sync::mpsc::unbounded_channel;
 	///
 	/// #[tokio::main]
 	/// async fn main() {
 	///    let (sender, reciever) = unbounded_channel();
-	///    let ctx = Ctx::new(sender).await;
+	///    let config = StumpConfig::debug();
+	///    let ctx = Ctx::new(config, sender).await;
 	///    let event_manager = EventManager::new(ctx, reciever);
 	/// }
 	/// ```

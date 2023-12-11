@@ -13,9 +13,25 @@ export const allPermissions = [
 	'bookclub:create',
 	'file:explorer',
 	'file:upload',
+	'library:create',
+	'library:edit',
 	'library:scan',
+	'library:manage',
+	'library:delete',
 ] as const
 export const userPermissionSchema = z.enum(allPermissions)
+
+const associatedPermissions: Record<UserPermission, UserPermission[]> = {
+	'bookclub:create': ['bookclub:read'],
+	'bookclub:read': [],
+	'file:explorer': [],
+	'file:upload': [],
+	'library:create': ['library:edit'],
+	'library:delete': ['library:edit', 'library:scan', 'library:manage'],
+	'library:edit': [],
+	'library:manage': ['library:edit', 'library:scan'],
+	'library:scan': [],
+}
 
 const prefixes = ['bookclub', 'file', 'library']
 
@@ -33,7 +49,6 @@ const getPermissionDescription = (permission: UserPermission) => {
 }
 const getPrefixLabel = (prefix: string) => getLocaleKey(`${prefix}.label`)
 
-// TODO: refactor to resuse in updating a user...
 export default function UserPermissionsForm() {
 	const { t } = useLocaleContext()
 	const form = useFormContext<Schema>()
@@ -42,11 +57,12 @@ export default function UserPermissionsForm() {
 
 	useEffect(
 		() => {
-			const hasBookClubCreate = selectedPermissions.includes('bookclub:create')
-			const hasBookClubRead = selectedPermissions.includes('bookclub:read')
-			if (hasBookClubCreate && !hasBookClubRead) {
-				form.setValue('permissions', [...selectedPermissions, 'bookclub:read'])
-			}
+			const selectionsWithAssociations = selectedPermissions.reduce<UserPermission[]>(
+				(acc, permission) => [...acc, permission, ...associatedPermissions[permission]],
+				[],
+			)
+			const uniqueSelections = [...new Set(selectionsWithAssociations)]
+			form.setValue('permissions', uniqueSelections)
 		},
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps

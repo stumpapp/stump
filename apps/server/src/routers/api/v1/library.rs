@@ -1,12 +1,12 @@
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::{get, post},
+	routing::{get, post, put},
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{raw, Direction};
-use serde::Deserialize;
+use prisma_client_rust::{not, or, raw, Direction};
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
 use std::{path, str::FromStr};
@@ -15,12 +15,12 @@ use tracing::{debug, error, trace};
 use utoipa::ToSchema;
 
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			LibrariesStats, Library, LibraryOptions, LibraryScanMode, Media, Series, Tag,
-			UserPermission,
+			FileStatus, LibrariesStats, Library, LibraryOptions, LibraryScanMode, Media,
+			Series, Tag, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -79,6 +79,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.delete(delete_library),
 				)
 				.route("/scan", get(scan_library))
+				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
 				.route("/media", get(get_library_media))
 				.nest(
@@ -251,21 +252,16 @@ async fn get_libraries_stats(
 		(status = 500, description = "Internal server error")
 	)
 )]
-/// Get a library by id, if the current user has access to it. Library `series`, `media`
-/// and `tags` relations are loaded on this route.
+/// Get a library by ID
 async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Library>> {
 	let db = ctx.get_db();
 
-	// FIXME: this query is a pain to add series->media relation counts.
-	// This should be much better in https://github.com/Brendonovich/prisma-client-rust/issues/24
-	// but for now I kinda have to load all the media...
 	let library = db
 		.library()
 		.find_unique(library::id::equals(id.clone()))
-		.with(library::series::fetch(vec![]))
 		.with(library::library_options::fetch())
 		.with(library::tags::fetch(vec![]))
 		.exec()
@@ -291,15 +287,13 @@ async fn get_library_by_id(
 		(status = 500, description = "Internal server error")
 	)
 )]
-// FIXME: this is absolutely atrocious...
-// This should be much better once https://github.com/Brendonovich/prisma-client-rust/issues/24 is added
-// but for now I will have this disgustingly gross and ugly work around...
 /// Returns the series in a given library. Will *not* load the media relation.
 async fn get_library_series(
 	filter_query: Query<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery {
 		ordering, filters, ..
@@ -309,16 +303,25 @@ async fn get_library_series(
 
 	let db = ctx.get_db();
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: SeriesOrderByParam = ordering.try_into()?;
 
 	let where_conditions = apply_series_filters(filters)
 		.into_iter()
-		.chain(vec![series::library_id::equals(Some(id.clone()))])
+		.chain(chain_optional_iter(
+			[series::library_id::equals(Some(id.clone()))],
+			[age_restrictions],
+		))
 		.collect::<Vec<series::WhereParam>>();
+
 	let mut query = db
 		.series()
-		// TODO: add media relation count....
 		.find_many(where_conditions.clone())
 		.order_by(order_by_param);
 
@@ -336,7 +339,7 @@ async fn get_library_series(
 					query = query.take(limit)
 				}
 			},
-			_ => unreachable!(),
+			_ => unreachable!("Pagination should be either page or cursor"),
 		}
 	}
 
@@ -347,9 +350,10 @@ async fn get_library_series(
 	let series = series
 		.iter()
 		.map(|s| {
-			let media_count = match media_counts.get(&s.id) {
-				Some(count) => count.to_owned(),
-				_ => 0,
+			let media_count = if let Some(count) = media_counts.get(&s.id) {
+				count.to_owned()
+			} else {
+				0
 			};
 
 			(s.to_owned(), media_count).into()
@@ -360,11 +364,7 @@ async fn get_library_series(
 		return Ok(Json(series.into()));
 	}
 
-	let series_count = db
-		.series()
-		.count(vec![series::library_id::equals(Some(id.clone()))])
-		.exec()
-		.await?;
+	let series_count = db.series().count(where_conditions).exec().await?;
 
 	Ok(Json((series, series_count, pagination).into()))
 }
@@ -434,20 +434,24 @@ pub(crate) fn get_library_thumbnail(
 	first_series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
-	let thumbnails = get_config_dir().join("thumbnails");
 	let library_id = library.id.clone();
 
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
 
-		let path = thumbnails.join(format!("{}.{}", library_id, extension));
+		let path = config
+			.get_thumbnails_dir()
+			.join(format!("{}.{}", library_id, extension));
 
 		if path.exists() {
 			tracing::trace!(?path, library_id, "Found generated library thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&library_id) {
+	} else if let Some(path) =
+		get_unknown_thumnail(&library_id, config.get_thumbnails_dir())
+	{
 		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
@@ -456,7 +460,7 @@ pub(crate) fn get_library_thumbnail(
 		));
 	}
 
-	get_series_thumbnail(first_series, first_book, image_format)
+	get_series_thumbnail(first_series, first_book, image_format, config)
 }
 
 // TODO: ImageResponse for utoipa
@@ -524,8 +528,14 @@ async fn get_library_thumbnail_handler(
 		"Library has no media to get thumbnail from".to_string(),
 	))?;
 
-	get_library_thumbnail(library, &first_series, first_book, image_format)
-		.map(ImageResponse::from)
+	get_library_thumbnail(
+		library,
+		&first_series,
+		first_book,
+		image_format,
+		&ctx.config,
+	)
+	.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]
@@ -613,7 +623,7 @@ async fn patch_library_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,
@@ -641,6 +651,7 @@ async fn delete_library_thumbnails(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<()>> {
 	let db = ctx.get_db();
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let result = db
 		.library()
@@ -665,9 +676,9 @@ async fn delete_library_thumbnails(
 		.collect::<Vec<String>>();
 
 	if let Some(ext) = extension {
-		remove_thumbnails_of_type(&media_ids, ext)?;
+		remove_thumbnails_of_type(&media_ids, ext, thumbnails_dir)?;
 	} else {
-		remove_thumbnails(&media_ids)?;
+		remove_thumbnails(&media_ids, thumbnails_dir)?;
 	}
 
 	Ok(Json(()))
@@ -777,6 +788,147 @@ async fn scan_library(
 	ctx.dispatch_job(LibraryScanJob::new(library.path, scan_mode))?;
 
 	Ok(())
+}
+
+#[derive(Debug, Deserialize, Serialize, ToSchema, Type)]
+pub struct CleanLibraryResponse {
+	deleted_media_count: i32,
+	deleted_series_count: i32,
+	is_empty: bool,
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/libraries/:id/clean",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully cleaned library"),
+		(status = 400, description = "Bad request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn clean_library(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<CleanLibraryResponse>> {
+	get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
+
+	let db = ctx.get_db();
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
+
+	let result: ApiResult<(CleanLibraryResponse, Vec<String>)> = db
+		._transaction()
+		.run(|client| async move {
+			// This isn't really necessary, but it is more for RESTful patterns (i.e. error
+			// if the library doesn't exist)
+			let _it_exists = client
+				.library()
+				.find_unique(library::id::equals(id.clone()))
+				.exec()
+				.await?
+				.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+
+			let delete_media_params = vec![
+				media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
+				// Delete media that are not ready
+				media::status::not(FileStatus::Ready.to_string()),
+			];
+
+			let media_to_delete = client
+				.media()
+				.find_many(delete_media_params.clone())
+				.exec()
+				.await?;
+
+			let media_to_delete_count = media_to_delete.len();
+			let media_to_delete_ids = media_to_delete
+				.into_iter()
+				.map(|m| m.id)
+				.collect::<Vec<_>>();
+
+			let deleted_media_count = client
+				.media()
+				.delete_many(delete_media_params)
+				.exec()
+				.await?
+				.try_into()?;
+
+			tracing::debug!(deleted_media_count, "Deleted media");
+
+			if media_to_delete_count != deleted_media_count as usize {
+				tracing::warn!(
+					fetched_media_count = media_to_delete_count,
+					deleted_media_count,
+					"Deleted media count does not match fetched media count"
+				);
+			}
+
+			let deleted_series_count = client
+				.series()
+				.delete_many(vec![
+					series::library_id::equals(Some(id.clone())),
+					or![
+						// Delete series that are missing
+						series::status::not(FileStatus::Ready.to_string()),
+						// Delete series that have no non-missing media. Since we deleted all the media
+						// above, this is effectively the same as deleting all series with no media
+						not![series::media::some(vec![media::status::equals(
+							FileStatus::Ready.to_string()
+						)])],
+					],
+				])
+				.exec()
+				.await?
+				.try_into()?;
+
+			tracing::debug!(deleted_series_count, "Deleted series");
+
+			let is_empty = client
+				.library()
+				.find_first(vec![
+					library::id::equals(id.clone()),
+					or![
+						// There are no series
+						library::series::none(vec![]),
+						// All series have no media
+						library::series::every(vec![series::media::none(vec![])])
+					],
+				])
+				.exec()
+				.await?
+				.is_some();
+
+			Ok((
+				CleanLibraryResponse {
+					deleted_media_count,
+					deleted_series_count,
+					is_empty,
+				},
+				media_to_delete_ids,
+			))
+		})
+		.await;
+	let (response, media_to_delete_ids) = result?;
+
+	if !media_to_delete_ids.is_empty() {
+		image::remove_thumbnails(&media_to_delete_ids, thumbnails_dir).map_or_else(
+			|error| {
+				tracing::error!(?error, "Failed to remove thumbnails for library media");
+			},
+			|_| {
+				tracing::debug!("Removed thumbnails for deleted media");
+			},
+		);
+	}
+
+	Ok(Json(response))
 }
 
 #[derive(Deserialize, Debug, Type, ToSchema)]
@@ -962,7 +1114,8 @@ async fn update_library(
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	get_session_server_owner_user(&session)?;
+	get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
+
 	let db = ctx.get_db();
 
 	if !path::Path::new(&input.path).exists() {
@@ -1077,6 +1230,7 @@ async fn delete_library(
 ) -> ApiResult<Json<String>> {
 	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
+	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	trace!(?id, "Attempting to delete library");
 
@@ -1101,7 +1255,7 @@ async fn delete_library(
 			media_ids.len()
 		);
 
-		if let Err(err) = image::remove_thumbnails(&media_ids) {
+		if let Err(err) = image::remove_thumbnails(&media_ids, thumbnails_dir) {
 			error!("Failed to remove thumbnails for library media: {:?}", err);
 		} else {
 			debug!("Removed thumbnails for library media (if present)");

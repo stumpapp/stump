@@ -147,7 +147,7 @@ impl From<prisma::job::Data> for JobDetail {
 			completed_task_count: Some(data.completed_task_count),
 			ms_elapsed: Some(data.ms_elapsed as u64),
 			created_at: Some(data.created_at.to_rfc3339()),
-			completed_at: data.exited_at.map(|dt| dt.to_rfc3339()),
+			completed_at: data.completed_at.map(|dt| dt.to_rfc3339()),
 		}
 	}
 }

@@ -445,7 +445,7 @@ mod tests {
 			password_hash_cost: Some(24),
 			session_ttl: Some(3600 * 24),
 			expired_session_cleanup_interval: Some(60 * 60 * 8),
-			worker_count: 16,
+			worker_count: Some(16),
 		};
 
 		// Apply the partial configuration

@@ -2,10 +2,8 @@ use std::{collections::VecDeque, sync::Arc};
 
 use tokio::sync::{mpsc, oneshot};
 
-use super::error::JobManagerError;
+use super::{error::JobManagerError, StatefulJob};
 use crate::Ctx;
-
-trait StatefulJob {}
 
 /// Commands that can be sent to the job manager. If any of these commands require
 /// a response, e.g., to provide an HTTP status code, a oneshot channel should be provided.

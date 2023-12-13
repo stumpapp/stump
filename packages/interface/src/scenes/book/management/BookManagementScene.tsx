@@ -4,7 +4,8 @@ import { Construction } from 'lucide-react'
 import React from 'react'
 import { Navigate, useParams } from 'react-router'
 
-import SceneContainer from '../../../components/SceneContainer'
+import SceneContainer from '@/components/SceneContainer'
+
 import paths from '../../../paths'
 import BookLibrarySeriesLinks from '../BookLibrarySeriesLinks'
 import BookThumbnailSelector from './BookThumbnailSelector'

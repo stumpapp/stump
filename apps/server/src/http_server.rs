@@ -1,21 +1,26 @@
 use std::net::SocketAddr;
 
 use axum::{error_handling::HandleErrorLayer, extract::connect_info::Connected, Router};
-use hyper::{server::conn::AddrStream, StatusCode};
+use hyper::server::conn::AddrStream;
 use stump_core::{event::InternalCoreTask, StumpCore};
 use tokio::sync::oneshot;
-use tower::{BoxError, ServiceBuilder};
+use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
 
 use crate::{
-	config::{cors, session},
+	config::{
+		cors,
+		session::{self, handle_session_service_error},
+	},
 	errors::{ServerError, ServerResult},
 	routers,
 	utils::shutdown_signal_with_cleanup,
 };
+use stump_core::config::StumpConfig;
 
-pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
-	let core = StumpCore::new().await;
+pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
+	let core = StumpCore::new(config.clone()).await;
+
 	if let Err(err) = core.run_migrations().await {
 		tracing::error!("Failed to run migrations: {:?}", err);
 		return Err(ServerError::ServerStartError(err.to_string()));
@@ -23,6 +28,10 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 
 	// Initialize the server configuration. If it already exists, nothing will happen.
 	core.init_server_config()
+		.await
+		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
+
+	core.init_journal_mode()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
@@ -39,16 +48,13 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 
 	let server_ctx = core.get_context();
 	let app_state = server_ctx.arced();
-	let cors_layer = cors::get_cors_layer(port);
+	let cors_layer = cors::get_cors_layer(config.clone());
 
 	tracing::info!("{}", core.get_shadow_text());
 
 	let session_service = ServiceBuilder::new()
-		.layer(HandleErrorLayer::new(|err: BoxError| async move {
-			tracing::error!("Failed to handle session: {:?}", err);
-			StatusCode::BAD_REQUEST
-		}))
-		.layer(session::get_session_layer(app_state.db.clone()));
+		.layer(HandleErrorLayer::new(handle_session_service_error))
+		.layer(session::get_session_layer(app_state.clone()));
 
 	let app = Router::new()
 		.merge(routers::mount(app_state.clone()))
@@ -57,7 +63,7 @@ pub(crate) async fn run_http_server(port: u16) -> ServerResult<()> {
 		.layer(cors_layer)
 		.layer(TraceLayer::new_for_http());
 
-	let addr = SocketAddr::from(([0, 0, 0, 0], port));
+	let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
 	tracing::info!("⚡️ Stump HTTP server starting on http://{}", addr);
 
 	// TODO: might need to refactor to use https://docs.rs/async-shutdown/latest/async_shutdown/

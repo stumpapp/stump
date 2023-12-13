@@ -20,7 +20,6 @@ xml-rs = "0.8.19" # used for creating XML docs
 serde-xml-rs = "0.6.0" # used for serializing/deserializing xml
 serde_json = { workspace = true }
 itertools = "0.11.0"
-optional_struct = "0.3.1"
 utoipa = { version = "3.5.0" }
 uuid = "1.4.1"
 regex = "1.9.6"
@@ -38,7 +37,8 @@ zip = "0.5.13"
 epub = "1.2.4"
 unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typestate" }
 # unrar = { version = "0.5.1" }
-pdf = "0.8.1"
+# pdf = "0.8.1"
+pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release
 pdfium-render = "0.8.9"
 data-encoding = "2.4.0"
 ring = "0.16.20"
@@ -49,3 +49,6 @@ toml = "0.8.2"
 tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.15", features = ["env-filter"] }
 tracing-appender = "0.2.2"
+
+[dev-dependencies]
+tempfile = { workspace = true }

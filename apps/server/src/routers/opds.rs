@@ -6,7 +6,7 @@ use axum::{
 };
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
-	db::{query::pagination::PageQuery, PrismaCountTrait},
+	db::query::pagination::PageQuery,
 	filesystem::{
 		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
 		media::get_page,
@@ -32,8 +32,9 @@ use crate::{
 	},
 };
 
-use super::api::v1::media::{
-	apply_in_progress_filter_for_user, apply_media_age_restriction,
+use super::api::v1::{
+	media::{apply_in_progress_filter_for_user, apply_media_age_restriction},
+	series::apply_series_age_restriction,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -276,17 +277,24 @@ async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-// TODO: age restrictions
 async fn get_library_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let library_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
+
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
 	debug!(skip, take, page, library_id, "opds get_library_by_id");
 
 	let tx_result = db
@@ -295,14 +303,23 @@ async fn get_library_by_id(
 			let library = client
 				.library()
 				.find_unique(library::id::equals(id.clone()))
-				.with(library::series::fetch(vec![]).skip(skip).take(take))
+				.with(
+					library::series::fetch(chain_optional_iter(
+						[],
+						[age_restrictions.clone()],
+					))
+					.skip(skip)
+					.take(take),
+				)
 				.exec()
 				.await?;
 
-			// FIXME: PCR doesn't support relation counts yet!
 			client
 				.series()
-				.count(vec![series::library_id::equals(Some(id.clone()))])
+				.count(chain_optional_iter(
+					[series::library_id::equals(Some(id.clone()))],
+					[age_restrictions],
+				))
 				.exec()
 				.await
 				.map(|count| (library, Some(count)))
@@ -335,24 +352,30 @@ async fn get_library_by_id(
 	}
 }
 
-// TODO: age restrictions
 /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 /// pagination is zero-indexed.
 async fn get_series(
-	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let (series, count) = db
 		._transaction()
 		.run(|client| async move {
 			let series = client
 				.series()
-				.find_many(vec![])
+				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
 				.skip(skip)
 				.take(take)
 				.exec()
@@ -360,7 +383,7 @@ async fn get_series(
 
 			client
 				.series()
-				.count(vec![])
+				.count(chain_optional_iter([], [age_restrictions]))
 				.exec()
 				.await
 				.map(|count| (series, count))
@@ -378,22 +401,28 @@ async fn get_series(
 	.build()?))
 }
 
-// TODO: age restrictions
 async fn get_latest_series(
-	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let (series, count) = db
 		._transaction()
 		.run(|client| async move {
 			let series = client
 				.series()
-				.find_many(vec![])
+				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
 				.order_by(series::updated_at::order(Direction::Desc))
 				.skip(skip)
 				.take(take)
@@ -402,7 +431,7 @@ async fn get_latest_series(
 
 			client
 				.series()
-				.count(vec![])
+				.count(chain_optional_iter([], [age_restrictions]))
 				.exec()
 				.await
 				.map(|count| (series, count))
@@ -420,24 +449,32 @@ async fn get_latest_series(
 	.build()?))
 }
 
-// TODO: age restrictions
 async fn get_series_by_id(
 	Path(id): Path<String>,
-	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let series_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let tx_result = db
 		._transaction()
 		.run(|client| async move {
 			let series = db
 				.series()
-				.find_unique(series::id::equals(id.clone()))
+				.find_first(chain_optional_iter(
+					[series::id::equals(id.clone())],
+					[age_restrictions.clone()],
+				))
 				.with(
 					series::media::fetch(vec![])
 						.skip(skip)
@@ -447,15 +484,16 @@ async fn get_series_by_id(
 				.exec()
 				.await?;
 
-			// FIXME: PCR doesn't support relation counts yet!
-			// let series_media_count = client
-			// 	.media()
-			// 	.count(vec![media::series_id::equals(Some(id.clone()))])
-			// 	.exec()
-			// 	.await
-			// .map(|count| (series, Some(count)))
 			client
-				.media_in_series_count(id)
+				.media()
+				.count(vec![
+					media::series_id::equals(Some(id.clone())),
+					media::series::is(chain_optional_iter(
+						[series::id::equals(id.clone())],
+						[age_restrictions],
+					)),
+				])
+				.exec()
 				.await
 				.map(|count| (series, Some(count)))
 		})
@@ -523,7 +561,7 @@ async fn get_book_thumbnail(
 		.await?
 		.ok_or(ApiError::NotFound(String::from("Book not found")))?;
 
-	let (content_type, image_buffer) = get_page(book.path.as_str(), 1)?;
+	let (content_type, image_buffer) = get_page(book.path.as_str(), 1, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 
@@ -589,7 +627,8 @@ async fn get_book_page(
 		.await;
 
 	let (book, _) = result?;
-	let (content_type, image_buffer) = get_page(book.path.as_str(), correct_page)?;
+	let (content_type, image_buffer) =
+		get_page(book.path.as_str(), correct_page, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
 }
 

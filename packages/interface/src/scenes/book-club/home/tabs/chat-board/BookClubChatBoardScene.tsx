@@ -4,7 +4,8 @@ import { BookClubChatMessage, User } from '@stump/types'
 import React from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
-import GenericEmptyState from '../../../../../components/GenericEmptyState'
+import GenericEmptyState from '@/components/GenericEmptyState'
+
 import paths from '../../../../../paths'
 import { useBookClubContext } from '../../context'
 import ChatMessage from './ChatMessage'

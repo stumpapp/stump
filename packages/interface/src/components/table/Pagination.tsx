@@ -3,7 +3,8 @@ import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react'
 import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
 
-import { usePagination } from '../../hooks/usePagination'
+import { usePagination } from '@/hooks/usePagination'
+
 import PagePopoverForm from '../PagePopoverForm'
 import { PaginationProps } from '../Pagination'
 

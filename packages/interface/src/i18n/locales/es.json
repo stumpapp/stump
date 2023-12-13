@@ -45,6 +45,67 @@
 		},
 		"nextInSeries": "Siguiente en la serie"
 	},
+	"createBookClubScene": {
+		"heading": "Crear nuevo club de libros",
+		"subtitle": "Puedes crear un club privado de libros para unos pocos o hacerlo público para que cualquiera en el servidor se una",
+		"form": {
+			"name": {
+				"label": "Nombre",
+				"placeholder": "Mi club de libros",
+				"description": "El nombre de tu club de libros"
+			},
+			"description": {
+				"label": "Descripción",
+				"placeholder": "Un club de aficionados 'Nuestra bandera significa la muerte'. Leemos ficción pirata.",
+				"description": "Una breve descripción opcional de tu club de libros"
+			},
+			"is_private": {
+				"label": "Club privado",
+				"description": "Si está habilitado, solo los usuarios que invites podrán unirse a tu club de libros"
+			},
+			"member_role_spec": {
+				"heading": "Mapeo de roles personalizado",
+				"subtitle": [
+					"Puedes crear nombres personalizados para los roles en tu club de libros. Por ejemplo, podría renombrar el rol de “Miembro” a “Marinero”, o “Creador” a “Capitán”. Si no desea utilizar nombres personalizados, puede dejar estos campos en blanco y los nombres por defecto se utilizarán en su lugar. Para más información sobre los roles, consulte el",
+					"documentación"
+				],
+				"member": {
+					"label": "Miembro",
+					"placeholder": "Miembro",
+					"description": "El nombre del rol predeterminado para tu club de libros"
+				},
+				"moderator": {
+					"label": "Moderador",
+					"placeholder": "Moderador",
+					"description": "El nombre del rol de moderador para tu club de libros"
+				},
+				"admin": {
+					"label": "Administrador",
+					"placeholder": "Administrador",
+					"description": "El nombre del rol de administrador de tu club de libros"
+				},
+				"creator": {
+					"label": "Creador",
+					"placeholder": "Creador",
+					"description": "El nombre del rol de creador para tu club de libros. ¡Este eres tú!"
+				}
+			},
+			"creator_preferences": {
+				"heading": "Tus preferencias de membresía",
+				"subtitle": "Algunas preferencias para su membresía en el club de libros. Pueden cambiarse en cualquier momento desde la página de configuración del club de libros",
+				"creator_display_name": {
+					"label": "Nombre para mostrar",
+					"placeholder": "oromei",
+					"description": "Un nombre opcional para mostrar tu membresía en el club del libro. Si se establece, esto tiene precedencia sobre tu nombre de usuario"
+				},
+				"creator_hide_progress": {
+					"label": "Ocultar progreso",
+					"description": "Si está activado, el progreso de lectura se ocultará a otros miembros del club del libro"
+				}
+			},
+			"submit": "Crear Club de Libros"
+		}
+	},
 	"createLibraryScene": {
 		"heading": "Crear nueva biblioteca",
 		"subtitle": "Las bibliotecas se usan para agrupar tus libros. Si necesitas refrescar tu memoria sobre las bibliotecas y cómo funcionan, consulta la",
@@ -89,9 +150,27 @@
 		}
 	},
 	"homeScene": {
-		"continueReading": "Continuar leyendo",
-		"recentlyAddedSeries": "Series añadidas recientemente",
-		"recentlyAddedBooks": "Libros añadidos recientemente"
+		"continueReading": {
+			"title": "Continuar leyendo",
+			"emptyState": {
+				"heading": "No hay libros para mostrar",
+				"message": "Cualquier libro que estés leyendo se mostrará aquí"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Series añadidas recientemente",
+			"emptyState": {
+				"heading": "No hay series para mostrar",
+				"message": "Cualquier serie que añadas a tus bibliotecas aparecerá aquí"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Libros añadidos recientemente",
+			"emptyState": {
+				"heading": "No hay libros para mostrar",
+				"message": "Cualquier libro que añadas a tus bibliotecas aparecerá aquí"
+			}
+		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
@@ -198,10 +277,106 @@
 			"heading": "Configuración del servidor",
 			"subtitle": "Gestiona varias opciones configurables para su servidor Stump en si mismo"
 		},
+		"desktop": {
+			"helmet": "Configuración del escritorio",
+			"heading": "Configuración de escritorio",
+			"subtitle": "Configurar el escritorio Stump",
+			"discordPresence": {
+				"label": "Rich Presence de Discord",
+				"description": "Muestra tu actividad de Stump en Discord usando Discord Rich Presence",
+				"reconnect": "Volver a conectar a Discord"
+			}
+		},
 		"users": {
 			"helmet": "Administración de usuarios",
 			"heading": "Administración de usuarios",
 			"subtitle": "Gestionar los usuarios en este servidor, incluyendo la creación de nuevos usuarios y cambiar sus permisos"
+		},
+		"createOrUpdateUsers": {
+			"createHelmet": "Crear usuario",
+			"createHeading": "Crear nuevo usuario",
+			"createSubtitle": "Utilice el siguiente formulario para crear un nuevo usuario en este servidor",
+			"updateHelmet": "Actualizar usuario",
+			"updateHeading": "Actualizar usuario",
+			"updateSubtitle": "Utilice el siguiente formulario para actualizar los detalles de este usuario",
+			"accessControl": {
+				"heading": "Control de acceso y restricciones",
+				"subtitle": [
+					"Si desea restringir el acceso a cierto contenido basado en etiquetas o clasificaciones de edad, puede hacerlo aquí. Cualquier valor sin ajustar significa que la restricción no será aplicada. Para más información sobre el control de acceso, vea el",
+					"documentación"
+				],
+				"ageRestriction": {
+					"label": "Restricción de edad",
+					"description": "Restringe al usuario el acceso al contenido por encima del umbral de edad establecido",
+					"placeholder": "13",
+					"enforceUnset": {
+						"label": "Forzar en no establecer",
+						"description": "Si está habilitado, se restringirá a los usuarios el acceso a contenido sin valoración de edad disponible"
+					}
+				},
+				"tagRestriction": {
+					"label": "Restricciones de etiqueta",
+					"description": "Restringe al usuario acceder al contenido con las etiquetas seleccionadas",
+					"placeholder": "Adulto, Gore"
+				}
+			},
+			"permissions": {
+				"heading": "Permisos concedidos",
+				"subtitle": [
+					"Seleccione los permisos que desea conceder a este usuario. Para más información sobre lo que hace cada permiso, vea el",
+					"documentación"
+				],
+				"bookclub": {
+					"label": "Clubes de libros",
+					"read": {
+						"label": "Acceder a las funciones del club del libro",
+						"description": "Permite al usuario acceder a las funciones del club de libros, incluyendo ver y unirse a los clubes de libros"
+					},
+					"create": {
+						"label": "Crear clubes de libros",
+						"description": "Permite al usuario crear nuevos clubes de libros"
+					}
+				},
+				"file": {
+					"label": "Gestión de Archivos",
+					"explorer": {
+						"label": "Explorador de Archivos",
+						"description": "Permite al usuario acceder al Explorador de Archivos de la Biblioteca.\nNo se admite restricción de contenido cuando se concede esta función"
+					},
+					"upload": {
+						"label": "Subir ficheros",
+						"description": "Permite al usuario subir ficheros al servidor"
+					}
+				},
+				"library": {
+					"label": "Gestión de la biblioteca",
+					"create": {
+						"label": "Crear bibliotecas",
+						"description": "Permite al usuario crear nuevas bibliotecas.\nIncluye permisos para editar y escanear"
+					},
+					"scan": {
+						"label": "Escanear bibliotecas",
+						"description": "Permite al usuario iniciar escaneos para las bibliotecas existentes"
+					},
+					"edit": {
+						"label": "Editar bibliotecas",
+						"description": "Permite al usuario editar los detalles básicos de las bibliotecas existentes"
+					},
+					"manage": {
+						"label": "Gestionar bibliotecas",
+						"description": "Permite al usuario gestionar la configuración avanzada de las bibliotecas existentes.\nIncluye permisos para editar y escanear"
+					},
+					"delete": {
+						"label": "Eliminar bibliotecas",
+						"description": "Permite al usuario eliminar las bibliotecas existentes.\nIncluye permisos para editar, administrar y escanear"
+					}
+				}
+			},
+			"validation": {
+				"ageRestrictionTooLow": "La restricción de la edad no puede ser menor que 0"
+			},
+			"createSubmitButton": "Crear usuario",
+			"updateSubmitButton": "Actualizar usuario"
 		}
 	},
 	"jobOverlay": {
@@ -237,22 +412,20 @@
 		"buttons": {
 			"home": "Inicio",
 			"libraries": "Bibliotecas",
-			"books": "Explorar libros",
-			"createLibrary": "Crear Biblioteca",
+			"books": "Explorar",
+			"bookClubs": "Clubes de libros",
+			"createLibrary": "Crear biblioteca",
+			"createBookClub": "Crear club de libros",
 			"settings": "Ajustes",
 			"themeToggle": "Alternar Tema",
 			"goForward": "Ir Adelante",
 			"goBack": "Ir Atrás"
 		},
 		"libraryOptions": {
-			"scanLibrary": {
-				"base": "Escanear Biblioteca",
-				"parallel": "Escanear en Paralelo",
-				"inOrder": "Escanear en Orden"
-			},
+			"scanLibrary": "Escanear",
 			"fileExplorer": "Explorador de Archivos",
-			"editLibrary": "Editar Biblioteca",
-			"deleteLibrary": "Eliminar Biblioteca"
+			"manageLibrary": "Administrar",
+			"deleteLibrary": "Eliminar"
 		},
 		"versionInformation": {
 			"heading": "Información de la Versión",

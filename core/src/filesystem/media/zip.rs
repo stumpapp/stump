@@ -7,11 +7,14 @@ use std::{
 use tracing::{debug, error, trace};
 use zip::read::ZipFile;
 
-use crate::filesystem::{
-	content_type::ContentType,
-	error::FileError,
-	hash,
-	media::common::{metadata_from_buf, sort_file_names},
+use crate::{
+	config::StumpConfig,
+	filesystem::{
+		content_type::ContentType,
+		error::FileError,
+		hash,
+		media::common::{metadata_from_buf, sort_file_names},
+	},
 };
 
 use super::{FileProcessor, FileProcessorOptions, ProcessedFile};
@@ -57,7 +60,11 @@ impl FileProcessor for ZipProcessor {
 		}
 	}
 
-	fn process(path: &str, _: FileProcessorOptions) -> Result<ProcessedFile, FileError> {
+	fn process(
+		path: &str,
+		_: FileProcessorOptions,
+		_: &StumpConfig,
+	) -> Result<ProcessedFile, FileError> {
 		debug!(path, "Processing zip");
 
 		let hash = ZipProcessor::hash(path);
@@ -91,7 +98,11 @@ impl FileProcessor for ZipProcessor {
 		})
 	}
 
-	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
+	fn get_page(
+		path: &str,
+		page: i32,
+		_: &StumpConfig,
+	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let zip_file = File::open(path)?;
 
 		let mut archive = zip::ZipArchive::new(&zip_file)?;

@@ -84,6 +84,7 @@ model Library {
   status      String   @default("READY") // UNKNOWN, READY, UNSUPPORTED, ERROR, MISSING
   updated_at  DateTime @updatedAt
   created_at  DateTime @default(now())
+  emoji       String?
 
   series Series[]
 
@@ -296,6 +297,7 @@ model BookClub {
   id               String   @id @default(cuid())
   name             String   @unique
   description      String?
+  emoji            String?
   is_private       Boolean  @default(false)
   member_role_spec Bytes?
   created_at       DateTime @default(now())
@@ -637,6 +639,8 @@ model ServerConfig {
   id String @id @default(cuid())
 
   public_url String? // The public URL of the server, if any
+
+  initial_wal_setup_complete Boolean @default(false) // Whether the initial WAL setup has been completed
 
   // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
   // The schedule configuration. If not set, no scheduled scans will be run.

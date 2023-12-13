@@ -68,6 +68,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.5.6
         version: 0.5.6(prettier@3.0.3)
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.5
       trash-cli:
         specifier: ^5.0.0
         version: 5.0.0
@@ -139,49 +142,6 @@ importers:
         specifier: ^1.3.1
         version: 1.3.1(typescript@5.2.2)(vite@4.5.0)
 
-  apps/docs:
-    dependencies:
-      '@icons-pack/react-simple-icons':
-        specifier: ^9.1.0
-        version: 9.1.0(react@18.2.0)
-      clsx:
-        specifier: 2.0.0
-        version: 2.0.0
-      framer-motion:
-        specifier: ^10.16.4
-        version: 10.16.4(react-dom@18.2.0)(react@18.2.0)
-      next:
-        specifier: ^13.5.6
-        version: 13.5.6(@babel/core@7.23.2)(react-dom@18.2.0)(react@18.2.0)
-      nextra:
-        specifier: ^2.13.2
-        version: 2.13.2(next@13.5.6)(react-dom@18.2.0)(react@18.2.0)
-      nextra-theme-docs:
-        specifier: ^2.13.2
-        version: 2.13.2(next@13.5.6)(nextra@2.13.2)(react-dom@18.2.0)(react@18.2.0)
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^20.8.7
-        version: 20.8.7
-      autoprefixer:
-        specifier: ^10.4.16
-        version: 10.4.16(postcss@8.4.31)
-      postcss:
-        specifier: ^8.4.31
-        version: 8.4.31
-      tailwindcss:
-        specifier: ^3.3.3
-        version: 3.3.3
-      typescript:
-        specifier: ^5.2.2
-        version: 5.2.2
-
   apps/mobile: {}
 
   apps/server: {}
@@ -245,6 +205,49 @@ importers:
         version: 1.3.1(typescript@5.2.2)(vite@4.5.0)
 
   core: {}
+
+  docs:
+    dependencies:
+      '@icons-pack/react-simple-icons':
+        specifier: ^9.1.0
+        version: 9.1.0(react@18.2.0)
+      clsx:
+        specifier: 2.0.0
+        version: 2.0.0
+      framer-motion:
+        specifier: ^10.16.4
+        version: 10.16.4(react-dom@18.2.0)(react@18.2.0)
+      next:
+        specifier: ^13.5.6
+        version: 13.5.6(@babel/core@7.23.2)(react-dom@18.2.0)(react@18.2.0)
+      nextra:
+        specifier: ^2.13.2
+        version: 2.13.2(next@13.5.6)(react-dom@18.2.0)(react@18.2.0)
+      nextra-theme-docs:
+        specifier: ^2.13.2
+        version: 2.13.2(next@13.5.6)(nextra@2.13.2)(react-dom@18.2.0)(react@18.2.0)
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.8.7
+        version: 20.8.7
+      autoprefixer:
+        specifier: ^10.4.16
+        version: 10.4.16(postcss@8.4.31)
+      postcss:
+        specifier: ^8.4.31
+        version: 8.4.31
+      tailwindcss:
+        specifier: ^3.3.3
+        version: 3.3.3
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
 
   packages/api:
     dependencies:
@@ -310,9 +313,15 @@ importers:
 
   packages/components:
     dependencies:
+      '@emoji-mart/react':
+        specifier: ^1.1.1
+        version: 1.1.1(emoji-mart@5.5.2)(react@18.2.0)
       '@headlessui/react':
         specifier: ^1.7.17
         version: 1.7.17(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-accordion':
+        specifier: ^1.1.2
+        version: 1.1.2(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-aspect-ratio':
         specifier: ^1.0.3
         version: 1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0)
@@ -2171,6 +2180,16 @@ packages:
     engines: {node: '>=10.0.0'}
     dev: true
 
+  /@emoji-mart/react@1.1.1(emoji-mart@5.5.2)(react@18.2.0):
+    resolution: {integrity: sha512-NMlFNeWgv1//uPsvLxvGQoIerPuVdXwK/EUek8OOkJ6wVOWPUizRBJU0hDqWZCOROVpfBgCemaC3m6jDOXi03g==}
+    peerDependencies:
+      emoji-mart: ^5.2
+      react: ^16.8 || ^17 || ^18
+    dependencies:
+      emoji-mart: 5.5.2
+      react: 18.2.0
+    dev: false
+
   /@emotion/is-prop-valid@0.8.8:
     resolution: {integrity: sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA==}
     requiresBuild: true
@@ -3030,6 +3049,35 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.2
 
+  /@radix-ui/react-accordion@1.1.2(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-fDG7jcoNKVjSK6yfmuAs0EnPDro0WMXIhMtXdTBWqEioVW206ku+4Lw07e+13lUkFkpoEQ2PdeMIAGpdqEAmDg==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.2
+      '@radix-ui/primitive': 1.0.1
+      '@radix-ui/react-collapsible': 1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-collection': 1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-context': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-direction': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-id': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@types/react': 18.2.29
+      '@types/react-dom': 18.2.14
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
   /@radix-ui/react-arrow@1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-wSP+pHsB/jQRaL6voubsQ/ZlrGBHHrOjmBnr19hxYgtS0WvAFwZhK2WP/YY5yF9uKECCEEDGxuLxq1NBK51wFA==}
     peerDependencies:
@@ -3117,6 +3165,34 @@ packages:
       '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.29)(react@18.2.0)
       '@radix-ui/react-use-previous': 1.0.1(@types/react@18.2.29)(react@18.2.0)
       '@radix-ui/react-use-size': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@types/react': 18.2.29
+      '@types/react-dom': 18.2.14
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@radix-ui/react-collapsible@1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-UBmVDkmR6IvDsloHVN+3rtx4Mi5TFvylYXpluuv0f37dtaz3H99bp8No0LGXRigVpl3UAT4l9j6bIchh42S/Gg==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.23.2
+      '@radix-ui/primitive': 1.0.1
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-context': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-id': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-presence': 1.0.1(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-primitive': 1.0.3(@types/react-dom@18.2.14)(@types/react@18.2.29)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-use-controllable-state': 1.0.1(@types/react@18.2.29)(react@18.2.0)
+      '@radix-ui/react-use-layout-effect': 1.0.1(@types/react@18.2.29)(react@18.2.0)
       '@types/react': 18.2.29
       '@types/react-dom': 18.2.14
       react: 18.2.0
@@ -8758,6 +8834,10 @@ packages:
 
   /elkjs@0.8.2:
     resolution: {integrity: sha512-L6uRgvZTH+4OF5NE/MBbzQx/WYpru1xCBE9respNj6qznEewGUIfhzmm7horWWxbNO2M0WckQypGctR8lH79xQ==}
+    dev: false
+
+  /emoji-mart@5.5.2:
+    resolution: {integrity: sha512-Sqc/nso4cjxhOwWJsp9xkVm8OF5c+mJLZJFoFfzRuKO+yWiN7K8c96xmtughYb0d/fZ8UC6cLIQ/p4BR6Pv3/A==}
     dev: false
 
   /emoji-regex@8.0.0:
@@ -15064,6 +15144,14 @@ packages:
     hasBin: true
     dependencies:
       glob: 7.2.3
+    dev: true
+
+  /rimraf@5.0.5:
+    resolution: {integrity: sha512-CqDakW+hMe/Bz202FPEymy68P+G50RfMQK+Qo5YUqc9SPipvbGjCGKd0RSKEelbsfQuw3g5NZDSrlZZAJurH1A==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dependencies:
+      glob: 10.3.10
     dev: true
 
   /robust-predicates@3.0.2:

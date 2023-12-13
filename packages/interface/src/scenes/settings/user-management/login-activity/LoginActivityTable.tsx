@@ -10,7 +10,8 @@ import {
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
 
-import { Table } from '../../../../components/table'
+import { Table } from '@/components/table'
+
 import UsernameRow from '../user-table/UsernameRow'
 
 const columnHelper = createColumnHelper<LoginActivity>()

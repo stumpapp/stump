@@ -2,7 +2,8 @@ import { Breadcrumbs, Divider, Heading, Text } from '@stump/components'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
-import SceneContainer from '../../../components/SceneContainer'
+import SceneContainer from '@/components/SceneContainer'
+
 import CreateBookClubForm from './CreateBookClubForm'
 
 export default function CreateBookClubScene() {

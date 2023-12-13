@@ -2,10 +2,12 @@ import { useContinueReading } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { CircleSlash2 } from 'lucide-react'
 
-import HorizontalCardList from '../../components/HorizontalCardList'
-import MediaCard from '../../components/media/MediaCard'
+import HorizontalCardList from '@/components/HorizontalCardList'
+import MediaCard from '@/components/media/MediaCard'
+import { useLocaleContext } from '@/i18n'
 
 export default function ContinueReadingMedia() {
+	const { t } = useLocaleContext()
 	const { media, fetchNextPage, hasNextPage, isLoading } = useContinueReading({
 		limit: 20,
 	})
@@ -14,17 +16,17 @@ export default function ContinueReadingMedia() {
 
 	return (
 		<HorizontalCardList
-			title="Continue Reading"
+			title={t('homeScene.continueReading.title')}
 			cards={cards}
 			fetchNext={fetchNextPage}
 			hasMore={hasNextPage}
 			emptyMessage={() =>
 				isLoading ? null : (
-					<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
+					<div className="flex min-h-[150px] flex-col items-start justify-center gap-2">
 						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
-						<Heading size="sm">You don&apos;t have anything in progress</Heading>
+						<Heading size="sm">{t('homeScene.continueReading.emptyState.heading')}</Heading>
 						<Text size="sm" variant="muted">
-							Any books you&apos;re currently reading will show up here
+							{t('homeScene.continueReading.emptyState.message')}
 						</Text>
 					</div>
 				)

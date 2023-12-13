@@ -5,7 +5,11 @@
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 
-export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:scan"
+/**
+ * Permissions that can be granted to a user. Some permissions are implied by others,
+ * and will be automatically granted if the "parent" permission is granted.
+ */
+export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
@@ -15,17 +19,13 @@ export type LoginActivity = { id: string; ip_address: string; user_agent: string
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
-export type Library = { id: string; name: string; description: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryOptions }
+export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryOptions }
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
 export type LibraryScanMode = "DEFAULT" | "NONE"
 
 export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
-
-export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
-
-export type UpdateLibrary = { id: string; name: string; path: string; description: string | null; tags: Tag[] | null; removed_tags: Tag[] | null; library_options: LibraryOptions; scan_mode: LibraryScanMode | null }
 
 export type LibrariesStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt }
 
@@ -46,9 +46,9 @@ export type MediaAnnotation = { id: string; kind: MediaAnnotationKind; epubcfi: 
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
-export type BookClub = { id: string; name: string; description: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
+export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 
-export type BookClubMember = { id: string; display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; role: BookClubMemberRole; user?: User | null; book_club?: BookClub | null }
+export type BookClubMember = { id: string; display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; role: BookClubMemberRole; user?: User | null; user_id?: string | null; book_club?: BookClub | null }
 
 export type BookClubMemberRole = "MEMBER" | "MODERATOR" | "ADMIN" | "CREATOR"
 
@@ -166,7 +166,19 @@ export type DeleteUser = { hard_delete: boolean | null }
 
 export type ClaimResponse = { is_claimed: boolean }
 
+export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
+
+export type UpdateLibrary = { id: string; name: string; path: string; description: string | null; emoji: string | null; tags: Tag[] | null; removed_tags?: Tag[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
+
+export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
+
+export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | null }
+
+export type MediaIsComplete = { is_completed: boolean; completed_at: string | null }
+
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
+
+export type SeriesIsComplete = { is_complete: boolean; completed_at: string | null }
 
 export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_library_ids: string[] | null }
 
@@ -174,7 +186,7 @@ export type GetBookClubsParams = { all?: boolean }
 
 export type CreateBookClub = { name: string; is_private?: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress?: boolean; creator_display_name: string | null }
 
-export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null }
+export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null; emoji: string | null }
 
 export type CreateBookClubInvitation = { user_id: string; role: BookClubMemberRole | null }
 

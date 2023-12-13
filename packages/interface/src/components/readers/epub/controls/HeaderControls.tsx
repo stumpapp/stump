@@ -12,7 +12,7 @@ export default function HeaderControls() {
 	const { readerMeta } = useEpubReaderContext()
 
 	return (
-		<ControlsContainer>
+		<ControlsContainer position="top">
 			<div className="flex items-center">
 				<ToolTip content="Book Overview" size="sm">
 					<Link to={paths.bookOverview(readerMeta.bookEntity?.id || '')}>

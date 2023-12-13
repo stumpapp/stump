@@ -7,16 +7,14 @@ import EpubNavigationControls from './controls/EpubNavigationControls'
 type Props = {
 	children: React.ReactNode
 	readerMeta: EpubReaderMeta
-	controls: Omit<
-		EpubReaderControls,
-		'visible' | 'setVisible' | 'onMouseEnterControls' | 'onMouseLeaveControls'
-	>
+	controls: Pick<EpubReaderControls, 'onLinkClick' | 'onPaginateBackward' | 'onPaginateForward'>
 }
 
 /**
  * A container component that provides the basic functionality for epub readers.
  */
 export default function EpubReaderContainer({ children, readerMeta, controls }: Props) {
+	const [fullscreen, setFullscreen] = useState(false)
 	const [controlsVisible, setControlsVisible] = useState(false)
 	const [mouseIsInZone, setMouseIsInZone] = useState(false)
 
@@ -50,8 +48,10 @@ export default function EpubReaderContainer({ children, readerMeta, controls }: 
 			value={{
 				controls: {
 					...controls,
+					fullscreen,
 					onMouseEnterControls,
 					onMouseLeaveControls,
+					setFullscreen,
 					setVisible: setControlsVisible,
 					visible: controlsVisible,
 				},

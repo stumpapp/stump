@@ -39,7 +39,6 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [/docs](#docs)
   - [/packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
-- [Acknowledgements 🙏](#acknowledgements-)
 </details>
 
 > **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. I will likely flatten the migrations immediately prior to the `0.1.0` release, which will break existing Stump databases. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
@@ -198,8 +197,3 @@ There are a number of other projects that are similar to Stump, it certainly isn
 - [Komga](https://github.com/gotson/komga)
 - [Librum](https://github.com/Librum-Reader/Librum)
 - [oqurum](https://github.com/oqurum) (✨*Rust*✨)
-
-## Acknowledgements 🙏
-
-- [Komga](https://github.com/gotson/komga) is a huge inspiration for Stump, an amazing comics/manga media server written in Kotlin.
-- [Brendonovich](https://github.com/Brendonovich) for building [prisma client rust](https://github.com/Brendonovich/prisma-client-rust), which allows me to use Prisma with Rust. Stump originally used SeaORM, but the DX simply can't compare to Prisma.

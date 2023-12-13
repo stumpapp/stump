@@ -7,26 +7,24 @@ type Props = {
 	position: 'top' | 'bottom'
 }
 export default function ControlsContainer({ position, children }: Props) {
-	const { visible, onMouseEnterControls, onMouseLeaveControls } = useEpubReaderControls()
+	const { visible, fullscreen, onMouseEnterControls, onMouseLeaveControls } =
+		useEpubReaderControls()
 
 	return (
 		<div
-			className={cx(
-				'fixed z-[100] h-10 w-full',
-				{
-					'bottom-0': position === 'bottom',
-				},
-				{
-					'top-0': position === 'top',
-				},
-			)}
+			className={cx('z-[100] h-10 w-full', {
+				'fixed bottom-0 left-0': position === 'bottom' && fullscreen,
+				'fixed left-0 top-0': position === 'top' && fullscreen,
+			})}
 			onMouseEnter={onMouseEnterControls}
 			onMouseLeave={onMouseLeaveControls}
+			aria-hidden="true"
 		>
 			<div
 				className={cx(
 					'flex items-center gap-1 bg-white p-2 shadow-sm transition-opacity duration-150 dark:bg-gray-950 md:bg-transparent',
-					visible ? 'opacity-100' : 'opacity-0',
+					{ 'opacity-100': !fullscreen || visible },
+					{ 'opacity-0': !visible && fullscreen },
 				)}
 			>
 				{children}

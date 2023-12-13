@@ -3,8 +3,10 @@ import { queryClient } from '@stump/client'
 import { useBoolean } from '@stump/components'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
-import React, { memo, useEffect } from 'react'
+import React, { memo, useEffect, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+
+import { usePreloadPage } from '@/hooks/usePreloadPage'
 
 import Toolbar from './Toolbar'
 
@@ -33,34 +35,19 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
-	// TODO: This effect, on very first load, is hit twice. A parent context is causing this.
-	// This is not a huge issue, since the second hit is a no-op (the pages are already preloaded)
-	// but it is something to look into.
-	const pageCount = media.pages
-	/**
-	 * This effect is responsible for preloading the next 2 pages relative to the current page. This is done to
-	 * try and prevent wait times for the next page to load.
-	 */
-	useEffect(
-		() => {
-			const pageArray = Array.from({ length: pageCount })
-
-			const start = currentPage >= 1 ? currentPage - 1 : 0
-
-			pageArray.slice(start, start + DEFAULT_PRELOAD_COUNT).forEach((_, i) => {
-				const virtualPage = currentPage + i + 1
-				const preloadedImg = new Image()
-				// TODO: It doesn't seem that this is actually preloading the image? More investigation is needed...
-				preloadedImg.src = getPageUrl(virtualPage)
-				preloadedImg.onload = () => {
-					console.debug(`Preloaded page ${virtualPage}`)
-				}
-			})
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentPage, pageCount],
+	const pagesToPreload = useMemo(
+		() => [...Array(DEFAULT_PRELOAD_COUNT).keys()].map((i) => currentPage + i + 1),
+		[currentPage],
 	)
+
+	/**
+	 * Preload pages that are not currently visible. This is done to try and
+	 * prevent wait times for the next page to load.
+	 */
+	usePreloadPage({
+		pages: pagesToPreload,
+		urlBuilder: getPageUrl,
+	})
 
 	/**
 	 * This effect is responsible for updating the current page ref when the current page changes. This was

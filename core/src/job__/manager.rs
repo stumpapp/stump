@@ -3,10 +3,11 @@ use std::{collections::VecDeque, sync::Arc};
 use tokio::sync::{mpsc, oneshot};
 
 use super::{error::JobManagerError, worker::WorkerManager, StatefulJob};
-use crate::Ctx;
+use crate::{config::StumpConfig, prisma::PrismaClient};
 
 /// Commands that can be sent via a [JobManager]. If any of these commands require a
 /// response (e.g., to provide an HTTP status code) a oneshot channel should be provided.
+#[derive(Debug)]
 pub enum JobManagerCommand {
 	/// Add a job to the queue to be run.
 	EnqueueJob(Box<dyn StatefulJob>),
@@ -19,16 +20,17 @@ pub enum JobManagerCommand {
 type JobManagerResult<T> = Result<T, JobManagerError>;
 
 /// A struct that manages the execution and queueing of jobs and their workers.
+#[derive(Debug)]
 pub struct JobManager {
-	/// A transmitter to communicate with the [JobManagerThreadController].
+	/// A transmitter to communicate with the [JobManagerAgent].
 	controller_tx: mpsc::UnboundedSender<JobManagerCommand>,
 }
 
 impl JobManager {
 	/// Create a [JobManager] and launch a handler thread to be managed by it.
-	pub fn create(core_ctx: Arc<Ctx>) -> Self {
+	pub fn create(db: Arc<PrismaClient>, config: Arc<StumpConfig>) -> Self {
 		// Launch controller thread
-		let controller_tx = JobManagerThreadController::start_thread(core_ctx);
+		let controller_tx = JobManagerAgent::start_thread(db, config);
 
 		Self { controller_tx }
 	}
@@ -43,12 +45,12 @@ impl JobManager {
 		todo!();
 	}
 
-	/// Signal to the [JobManagerThreadController] to shut down.
+	/// Signal to the [JobManagerAgent] to shut down.
 	fn shutdown(&mut self, tx: oneshot::Sender<()>) {
 		todo!();
 	}
 
-	/// A helper function for transmitting commands to the [JobManagerThreadController]
+	/// A helper function for transmitting commands to the [JobManagerAgent]
 	fn send_command(&mut self, cmd: JobManagerCommand) -> JobManagerResult<()> {
 		match self.controller_tx.send(cmd) {
 			Ok(_) => Ok(()),
@@ -59,9 +61,12 @@ impl JobManager {
 
 /// A controller for the thread managing worker state. It is responsible for recieving  signals
 /// from the [JobManager], queueing jobs, and recieving updates from workers.
-struct JobManagerThreadController {
-	/// A pointer to the core context
-	core_ctx: Arc<Ctx>,
+#[derive(Debug)]
+struct JobManagerAgent {
+	/// A pointer to the prisma database client.
+	db: Arc<PrismaClient>,
+	/// A pointer to the Stump server configuration set at startup.
+	config: Arc<StumpConfig>,
 	/// Jobs waiting to be assigned a worker thread
 	jobs: VecDeque<Box<dyn StatefulJob>>,
 	/// Each worker managed by the controller has a corresponding [WorkerManger] for signaling.
@@ -74,16 +79,20 @@ struct JobManagerThreadController {
 	is_running: bool,
 }
 
-impl JobManagerThreadController {
-	/// Create a new [JobManagerThreadController] with available workers
-	/// as defined by the [StumpConfig] in the [Ctx] provided.
-	pub fn start_thread(core_ctx: Arc<Ctx>) -> mpsc::UnboundedSender<JobManagerCommand> {
+impl JobManagerAgent {
+	/// Create a new [JobManagerAgent] with available workers as defined by the
+	/// [StumpConfig] provided.
+	pub fn start_thread(
+		db: Arc<PrismaClient>,
+		config: Arc<StumpConfig>,
+	) -> mpsc::UnboundedSender<JobManagerCommand> {
 		let (base_tx, base_rx) = mpsc::unbounded_channel();
 
 		let controller = Self {
-			core_ctx: core_ctx.clone(),
+			db,
+			config: config.clone(),
 			jobs: VecDeque::new(),
-			workers: Vec::with_capacity(core_ctx.config.worker_count),
+			workers: Vec::with_capacity(config.worker_count),
 
 			base_rx,
 
@@ -105,8 +114,9 @@ impl JobManagerThreadController {
 		self.is_running = true;
 
 		// Spawn workers
-		for _ in 0..self.core_ctx.config.worker_count {
-			self.workers.push(WorkerManager::create(&self.core_ctx))
+		for _ in 0..self.config.worker_count {
+			self.workers
+				.push(WorkerManager::create(self.db.clone(), self.config.clone()))
 		}
 
 		// This loop ends when shutdown occurs

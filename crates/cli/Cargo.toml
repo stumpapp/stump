@@ -8,7 +8,7 @@ name = "cli-bin"
 path = "bin/main.rs"
 
 [dependencies]
-clap = { version = "4.4.6", features = ["derive"] }
+clap = { version = "4.4.11", features = ["derive"] }
 stump_core = { path = "../../core" }
 
 tokio = { workspace = true }

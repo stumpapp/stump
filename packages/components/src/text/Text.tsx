@@ -7,6 +7,8 @@ import { cn } from '../utils'
 export const TEXT_VARIANTS = {
 	danger: 'text-red-600 dark:text-red-400',
 	default: 'text-gray-900 dark:text-gray-100',
+	label:
+		'font-medium leading-none text-gray-750 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-250',
 	muted: 'text-gray-500 dark:text-gray-450',
 	primary: 'text-brand',
 	secondary: 'text-gray-700 dark:text-gray-300',

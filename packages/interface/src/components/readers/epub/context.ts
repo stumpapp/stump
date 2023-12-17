@@ -30,6 +30,8 @@ export type EpubReaderMeta = {
 
 export type EpubReaderControls = {
 	visible: boolean
+	fullscreen: boolean
+	setFullscreen: (fullscreen: boolean) => void
 	setVisible: (visible: boolean) => void
 	onMouseEnterControls: () => void
 	onMouseLeaveControls: () => void
@@ -45,11 +47,13 @@ export type EpubReaderContextProps = {
 
 export const EpubReaderContext = createContext<EpubReaderContextProps>({
 	controls: {
+		fullscreen: false,
 		onLinkClick: noop,
 		onMouseEnterControls: noop,
 		onMouseLeaveControls: noop,
 		onPaginateBackward: noop,
 		onPaginateForward: noop,
+		setFullscreen: noop,
 		setVisible: noop,
 		visible: false,
 	},

@@ -6,7 +6,7 @@ import { ArrowLeft } from 'phosphor-react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
-import { ThemeToggle } from '@/components/sidebar'
+import ThemeToggle from '@/components/ThemeToggle'
 import paths from '@/paths'
 
 interface ToolbarProps {

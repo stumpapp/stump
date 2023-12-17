@@ -10,10 +10,12 @@ import { UpdateEpubProgress } from '@stump/types'
 import { Book, Rendition } from 'epubjs'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
+import AutoSizer from 'react-virtualized-auto-sizer'
 
-// import { useSwipeable } from 'react-swipeable'
 import EpubReaderContainer from './EpubReaderContainer'
 import { stumpDark } from './themes'
+
+// NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 
 /** The props for the EpubJsReader component */
 type EpubJsReaderProps = {
@@ -79,7 +81,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		let name: string | undefined
 
 		const currentHref = currentLocation?.start.href
-		const position = book?.navigation?.toc?.findIndex((toc) => toc.href === currentHref)
+		const position = book?.navigation?.toc?.findIndex(
+			(toc) => toc.href === currentHref || (!!currentHref && toc.href.startsWith(currentHref)),
+		)
 
 		if (position !== undefined && position !== -1) {
 			name = book?.navigation.toc[position]?.label.trim()
@@ -118,8 +122,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * otherwise not be able to authenticate with the server.
 	 */
 	useEffect(() => {
-		if (!ref.current) return
-
 		if (!book) {
 			setBook(
 				new Book(`${API.getUri()}/media/${id}/file`, {
@@ -140,8 +142,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const applyEpubPreferences = (rendition: Rendition, preferences: EpubReaderPreferences) => {
 		if (isDark) {
 			rendition.themes.select('stump-dark')
+		} else {
+			rendition.themes.select('stump-light')
 		}
-
+		rendition.direction(preferences.readingDirection)
 		rendition.themes.fontSize(`${preferences.fontSize}px`)
 	}
 
@@ -153,7 +157,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(
 		() => {
 			if (!book) return
-			if (!ref.current) return
 
 			book.ready.then(() => {
 				if (book.spine) {
@@ -202,6 +205,43 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book],
 	)
 
+	// TODO: this needs to have fullscreen as an effect dependency
+	/**
+	 * This effect is responsible for resizing the epubjs rendition instance whenever the
+	 * div it attaches to is resized.
+	 *
+	 * Resizing here typically happens, outside user-initiated
+	 * events like window resizing, when the fullscreen state changes.
+	 */
+	useEffect(() => {
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const { width, height } = entry.contentRect
+
+				const { width: currentWidth, height: currentHeight } = ref.current
+					? ref.current.getBoundingClientRect()
+					: {
+							height: 0,
+							width: 0,
+					  }
+
+				if (currentWidth === width && currentHeight === height) {
+					continue
+				}
+
+				rendition?.resize(width, height)
+			}
+		})
+
+		if (ref.current) {
+			resizeObserver.observe(ref.current)
+		}
+
+		return () => {
+			resizeObserver.disconnect()
+		}
+	}, [rendition])
+
 	/**
 	 * This effect is responsible for updating the epub theme options whenever the epub
 	 * preferences change. It will only run when the epub preferences change and the
@@ -215,7 +255,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		},
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[rendition, epubPreferences],
+		[rendition, epubPreferences, isDark],
 	)
 
 	/**
@@ -269,7 +309,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				return
 			}
 
-			const failureMessage = 'Failed to navigate, please check the integrity of the epub file.'
+			const failureMessage = 'Failed to navigate, please check the integrity of the epub file'
 			const adjusted = href.split('#')[0]
 
 			let spineItem = book.spine.get(adjusted)
@@ -420,7 +460,13 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				onPaginateForward,
 			}}
 		>
-			<div className="h-full w-full" ref={ref} />
+			<div className="h-full w-full">
+				<AutoSizer>
+					{({ height, width }) => {
+						return <div ref={ref} style={{ height, width }} />
+					}}
+				</AutoSizer>
+			</div>
 		</EpubReaderContainer>
 	)
 }

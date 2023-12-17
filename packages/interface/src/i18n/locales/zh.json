@@ -94,49 +94,49 @@
 				"heading": "您的会员选项",
 				"subtitle": "对于您在读书俱乐部中的会员资格的一些偏好。这些偏好可以随时从读书俱乐部设置页面更改",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "显示名称",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "您在读书俱乐部的会员可选显示名称。如果设置，它优先于您的用户名"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "隐藏进度",
+					"description": "如果启用，您的阅读进度将被隐藏在读书俱乐部的其他成员"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "创建读书俱乐部"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "新建书库",
+		"subtitle": "书库被用来将你的书籍分组。如果你想要刷新库和它们如何工作，请查看",
+		"subtitleLink": "相关文档",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "名称",
+				"libraryPath": "路径",
+				"libraryPathDescription": "在您的服务器上存在的书库路径",
+				"libraryDescription": "描述",
+				"libraryTags": "标签"
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "新建书库"
 			}
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "管理书库",
+		"subtitle": "更新书库的详细信息或配置，更改控制访问规则，或扫描文件。 如果你想要刷新书库和它们如何工作，请查看",
+		"subtitleLink": "相关文档",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "名称",
+				"libraryPath": "路径",
+				"libraryPathDescription": "在您的服务器上存在的书库路径",
+				"libraryDescription": "描述",
+				"libraryTags": "标签"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "保存更改"
 			}
 		}
 	},
@@ -252,139 +252,139 @@
 			"heading": "任务和配置",
 			"subtitle": "查看和管理此服务器上可用的后台任务，包括库扫描和计划",
 			"schedulingHeading": "任务计划",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
-			"historyHeading": "Job History",
-			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"schedulingSubtitle": "管理此服务器上后台任务的时间安排。此配置的更改将在服务器重启后生效",
+			"historyHeading": "任务历史",
+			"historySubtitle": "管理运行任务并查看已完成任务的历史",
 			"historyTable": {
 				"columns": {
-					"name": "Type",
-					"description": "Description",
-					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
-					"tasks": "Tasks"
+					"name": "类型",
+					"description": "描述",
+					"status": "状态",
+					"createdAt": "开始于",
+					"elapsed": "已用时",
+					"tasks": "任务"
 				},
-				"emptyHeading": "There are no jobs to display",
-				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-				"deleteAllConfirmButton": "Clear history",
-				"deleteAllConfirmButtonTitle": "Clear all job history",
-				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+				"emptyHeading": "没有要显示的任务",
+				"emptySubtitle": "如果你没有任务，你就不可能有任务",
+				"deleteAllMessage": "任务历史和统计可以随时从数据库中删除。此操作不能撤消。",
+				"deleteAllConfirmButton": "清除历史记录",
+				"deleteAllConfirmButtonTitle": "清除所有任务历史",
+				"deleteAllConfirmButtonTitleNoJobs": "没有要清除的任务"
 			}
 		},
 		"server": {
-			"helmet": "Server Settings",
-			"heading": "Server Settings",
-			"subtitle": "Manage various configurable options for your Stump server instance, itself"
+			"helmet": "服务器设置",
+			"heading": "服务器设置",
+			"subtitle": "管理您Stump 服务器实例各种可配置选项"
 		},
 		"desktop": {
-			"helmet": "Desktop Settings",
-			"heading": "Desktop Settings",
-			"subtitle": "Configure the Stump desktop application",
+			"helmet": "桌面设置",
+			"heading": "桌面设置",
+			"subtitle": "配置Stump 桌面应用程序",
 			"discordPresence": {
 				"label": "Discord Presence",
-				"description": "Display your Stump activity in Discord using Discord Rich Presence",
-				"reconnect": "Reconnect to Discord"
+				"description": "使用 Discord Rich Presence 在 Discord 显示您的Stump 活动",
+				"reconnect": "重新连接到Discord"
 			}
 		},
 		"users": {
-			"helmet": "User Management",
-			"heading": "User Management",
-			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
+			"helmet": "用户管理",
+			"heading": "用户管理",
+			"subtitle": "管理此服务器上的用户，包括创建新用户和更改他们的权限"
 		},
 		"createOrUpdateUsers": {
-			"createHelmet": "Create user",
-			"createHeading": "Create new user",
-			"createSubtitle": "Use the form below to create a new user on this server",
-			"updateHelmet": "Update user",
-			"updateHeading": "Update user",
-			"updateSubtitle": "Use the form below to update the details of this user",
+			"createHelmet": "创建用户",
+			"createHeading": "创建新用户",
+			"createSubtitle": "使用以下的表单在此服务器上创建一个新用户",
+			"updateHelmet": "更新用户",
+			"updateHeading": "更新用户",
+			"updateSubtitle": "使用下面的表单来更新此用户的详细信息",
 			"accessControl": {
-				"heading": "Access control and restrictions",
+				"heading": "访问控制和限制",
 				"subtitle": [
-					"If you want to restrict access to certain content based on tags or age rating, you can do so here. Any unset values means that the restriction will not be enforced. For more information about access control, see the",
-					"documentation"
+					"如果您想根据标签或年龄评级限制访问某些内容，您可以在这里这样做。 任何未设定的值意味着限制将不会被强制执行。要了解更多关于访问控制的信息，请参阅。",
+					"文档"
 				],
 				"ageRestriction": {
-					"label": "Age restriction",
-					"description": "Restricts the user from accessing content above the set age rating threshold",
+					"label": "年龄限制",
+					"description": "限制用户访问内容超过设定的年龄等级阈值",
 					"placeholder": "13",
 					"enforceUnset": {
-						"label": "Enforce on unset",
-						"description": "If enabled, users will be restricted from accessing content with no age rating available"
+						"label": "强制取消设置",
+						"description": "如果启用，用户将被限制访问内容，但没有可用的年龄评分"
 					}
 				},
 				"tagRestriction": {
-					"label": "Tag restrictions",
-					"description": "Restricts the user from accessing content with the selected tags",
-					"placeholder": "Adult, Gore"
+					"label": "标签限制",
+					"description": "限制用户访问选中标签的内容",
+					"placeholder": "成人, 血腥"
 				}
 			},
 			"permissions": {
-				"heading": "Granted permissions",
+				"heading": "授予权限",
 				"subtitle": [
-					"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-					"documentation"
+					"选择您想要授予此用户的权限。欲了解更多关于每个权限的信息，请查看",
+					"文档"
 				],
 				"bookclub": {
-					"label": "Book Clubs",
+					"label": "读书俱乐部",
 					"read": {
-						"label": "Access book club features",
-						"description": "Allows the user to access book club features, including viewing and joining book clubs"
+						"label": "访问读书俱乐部功能",
+						"description": "允许用户访问读书俱乐部功能，包括查看和加入读书俱乐部"
 					},
 					"create": {
-						"label": "Create book clubs",
-						"description": "Allows the user to create new book clubs"
+						"label": "创建读书俱乐部",
+						"description": "允许用户创建新读书俱乐部"
 					}
 				},
 				"file": {
-					"label": "File Management",
+					"label": "文件管理",
 					"explorer": {
-						"label": "File Explorer",
-						"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+						"label": "文件资源管理器",
+						"description": "允许用户访问书库文件探索。\n当该功能被授予时，内容限制不被支持"
 					},
 					"upload": {
-						"label": "Upload files",
-						"description": "Allows the user to upload files to the server"
+						"label": "上传文件",
+						"description": "允许用户上传文件到服务器"
 					}
 				},
 				"library": {
-					"label": "Library Management",
+					"label": "书库管理",
 					"create": {
-						"label": "Create libraries",
-						"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+						"label": "新建书库",
+						"description": "允许用户创建新的书库。\n包括编辑和扫描权限"
 					},
 					"scan": {
-						"label": "Scan libraries",
-						"description": "Allows the user to initiate scans for existing libraries"
+						"label": "扫描书库",
+						"description": "允许用户对现有书库启动扫描"
 					},
 					"edit": {
-						"label": "Edit libraries",
-						"description": "Allows the user to edit basic details for existing libraries"
+						"label": "编辑书库",
+						"description": "允许用户对现有书库启动扫描"
 					},
 					"manage": {
-						"label": "Manage libraries",
-						"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+						"label": "管理书库",
+						"description": "允许用户创建新的书库。\n包括编辑和扫描权限"
 					},
 					"delete": {
-						"label": "Delete libraries",
-						"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+						"label": "新建书库",
+						"description": "允许用户创建新的书库。\n包括编辑和扫描权限"
 					}
 				}
 			},
 			"validation": {
-				"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+				"ageRestrictionTooLow": "年龄限制不能小于0"
 			},
-			"createSubmitButton": "Create user",
-			"updateSubmitButton": "Update user"
+			"createSubmitButton": "创建用户",
+			"updateSubmitButton": "更新用户"
 		}
 	},
 	"jobOverlay": {
 		"backupHeading": "正在执行的任务"
 	},
 	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
+		"seriesCount": "总系列",
+		"bookCount": "书籍总数",
 		"diskUsage": "磁盘使用量"
 	},
 	"pagination": {
@@ -412,59 +412,59 @@
 		"buttons": {
 			"home": "首页",
 			"libraries": "书库",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"createBookClub": "Create book club",
-			"settings": "Settings",
-			"themeToggle": "Toggle Theme",
-			"goForward": "Go Forward",
-			"goBack": "Go Back"
+			"books": "探索",
+			"bookClubs": "读书俱乐部",
+			"createLibrary": "新建书库",
+			"createBookClub": "创建读书俱乐部",
+			"settings": "设置",
+			"themeToggle": "切换主题",
+			"goForward": "前进",
+			"goBack": "返回"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
-			"fileExplorer": "File Explorer",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
+			"scanLibrary": "扫描",
+			"fileExplorer": "文件管理器",
+			"manageLibrary": "管理",
+			"deleteLibrary": "删除"
 		},
 		"versionInformation": {
-			"heading": "Version Information",
-			"semVer": "Semantic Version",
-			"commitHash": "Commit Hash",
-			"buildDate": "Build Date"
+			"heading": "版本信息",
+			"semVer": "语义化版本",
+			"commitHash": "提交哈希",
+			"buildDate": "构建日期"
 		}
 	},
 	"search": {
-		"placeholder": "Search"
+		"placeholder": "搜索"
 	},
 	"serverSOS": {
-		"heading": "Server Unavailable",
+		"heading": "服务器不可用",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "出现网络错误，表示您的 Stump 服务器目前不可用。请确保它正在运行并且可以在此设备上访问。\n如果您的服务器 URL 已经更改，您可以使用下面的表单更新它"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "网络错误，您的 Stump 服务器目前不可用。请确保它正在运行并且可以从此设备访问"
 		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
+		"reconnected": "重新连接到服务器！正在重定向...",
+		"reconnectionFailed": "发生未知错误。"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "服务器未连接",
 		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
+			"请检查您的网络连接",
+			"点击此处",
+			"更改您的服务器 URL"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "暂无数据",
 		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
+			"next": "正在查找",
+			"previous": "向后检索"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
+		"placholder": "选择或创建标签",
+		"placeholderNoTags": "没有可用的标签"
 	}
 }

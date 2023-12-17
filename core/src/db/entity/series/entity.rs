@@ -4,15 +4,15 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::{library, series};
-
-use super::{
-	common::FileStatus,
-	library::Library,
-	media::Media,
-	metadata::{SeriesMetadata, SeriesMetadataCreateAction},
-	tag::Tag,
-	Cursor,
+use crate::{
+	db::{
+		entity::{
+			common::Cursor, Library, Media, SeriesMetadata, SeriesMetadataCreateAction,
+			Tag,
+		},
+		FileStatus,
+	},
+	prisma::{library, series},
 };
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]

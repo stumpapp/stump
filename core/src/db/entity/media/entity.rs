@@ -5,14 +5,15 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
+	db::{
+		entity::{common::Cursor, LibraryOptions, MediaMetadata, Series, Tag},
+		FileStatus,
+	},
 	error::CoreError,
 	prisma::{media, media_annotation, read_progress},
 };
 
-use super::{
-	common::FileStatus, metadata::MediaMetadata, read_progress::ReadProgress,
-	series::Series, tag::Tag, Cursor, LibraryOptions,
-};
+use super::ReadProgress;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
 pub struct Media {
@@ -71,51 +72,24 @@ impl Cursor for Media {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
-pub enum MediaAnnotationKind {
-	#[serde(rename = "HIGHLIGHT")]
-	Highlight,
-	#[serde(rename = "NOTE")]
-	Note,
-	#[serde(rename = "BOOKMARK")]
-	#[default]
-	Bookmark,
-}
-
-impl FromStr for MediaAnnotationKind {
-	type Err = CoreError;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s {
-			"HIGHLIGHT" => Ok(MediaAnnotationKind::Highlight),
-			"NOTE" => Ok(MediaAnnotationKind::Note),
-			"BOOKMARK" => Ok(MediaAnnotationKind::Bookmark),
-			_ => Err(CoreError::InternalError(format!(
-				"Invalid media annotation kind: {}",
-				s
-			))),
-		}
-	}
-}
-
-impl From<String> for MediaAnnotationKind {
-	fn from(s: String) -> MediaAnnotationKind {
-		MediaAnnotationKind::from_str(s.as_str()).unwrap_or_default()
-	}
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
 pub struct MediaAnnotation {
-	pub id: String,
-	// The kind of annotation
-	pub kind: MediaAnnotationKind,
-	// The epubcfi associated with the annotation. This can be a range or a single point.
-	pub epubcfi: Option<String>,
-	// The text associated with the annotation. This can be a user entered note, or some
-	// visual indicator of the annotation.
-	pub text: Option<String>,
+	id: String,
+	// The text that was highlighted, if any
+	highlighted_text: Option<String>,
+	/// The page number of the annotation. This is a 1-based index for image-based media
+	page: Option<i32>,
+	/// The x coordinate of the annotation on the page. This is a percentage of the page width
+	page_coordinates_x: Option<f32>,
+	/// The y coordinate of the annotation on the page. This is a percentage of the page height
+	page_coordinates_y: Option<f32>,
+	/// The epubcfi associated with the annotation. This can be a range or a single point,
+	/// where a range can be inferred as highlighted text
+	epubcfi: Option<String>,
+	/// The user notes for the annotation. ex: "This is a note"
+	notes: Option<String>,
 	// The media this annotation belongs to
-	pub media_id: String,
-	pub media: Option<Media>,
+	media_id: String,
+	media: Option<Media>,
 }
 
 impl From<media_annotation::Data> for MediaAnnotation {
@@ -127,9 +101,12 @@ impl From<media_annotation::Data> for MediaAnnotation {
 
 		MediaAnnotation {
 			id: data.id,
-			kind: MediaAnnotationKind::from(data.kind),
+			highlighted_text: data.highlighted_text,
 			epubcfi: data.epubcfi,
-			text: data.text,
+			page: data.page,
+			page_coordinates_x: data.page_coordinates_x,
+			page_coordinates_y: data.page_coordinates_y,
+			notes: data.notes,
 			media_id: data.media_id,
 			media,
 		}

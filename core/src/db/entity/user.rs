@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
-use super::{Cursor, ReadProgress};
+use super::{common::Cursor, ReadProgress};
 
 ///////////////////////////////////////////////
 //////////////////// MODELS ///////////////////

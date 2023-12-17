@@ -3,10 +3,14 @@ import { queryClient } from '@stump/client'
 import { useBoolean } from '@stump/components'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
-import React, { useEffect } from 'react'
+import React, { memo, useEffect, useMemo } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
+import { usePreloadPage } from '@/hooks/usePreloadPage'
+
 import Toolbar from './Toolbar'
+
+const DEFAULT_PRELOAD_COUNT = 4
 
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
@@ -26,43 +30,31 @@ export type PagedReaderProps = {
  * Note: This component lacks animations between pages. The `AnimatedPagedReader` component
  * will have animations between pages, but is currently a WIP
  */
-export default function PagedReader({
-	currentPage,
-	media,
-	onPageChange,
-	getPageUrl,
-}: PagedReaderProps) {
-	const currPageRef = React.useRef(currentPage)
+function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
+	const currentPageRef = React.useRef(currentPage)
 
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
 
-	const pageCount = media.pages
-	/**
-	 * This effect is responsible for preloading the next 2 pages relative to the current page. This is done to
-	 * try and prevent wait times for the next page to load.
-	 */
-	useEffect(
-		() => {
-			const pageArray = Array.from({ length: pageCount })
-
-			const start = currentPage >= 1 ? currentPage - 1 : 0
-
-			pageArray.slice(start, 3).forEach((_, i) => {
-				const preloadedImg = new Image()
-				preloadedImg.src = getPageUrl(currentPage + (i + 1))
-			})
-		},
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[currentPage, pageCount],
+	const pagesToPreload = useMemo(
+		() => [...Array(DEFAULT_PRELOAD_COUNT).keys()].map((i) => currentPage + i + 1),
+		[currentPage],
 	)
+
+	/**
+	 * Preload pages that are not currently visible. This is done to try and
+	 * prevent wait times for the next page to load.
+	 */
+	usePreloadPage({
+		pages: pagesToPreload,
+		urlBuilder: getPageUrl,
+	})
 
 	/**
 	 * This effect is responsible for updating the current page ref when the current page changes. This was
 	 * added primarily because of the useHotKeys hook below.
 	 */
 	useEffect(() => {
-		currPageRef.current = currentPage
+		currentPageRef.current = currentPage
 	}, [currentPage])
 
 	/**
@@ -102,10 +94,10 @@ export default function PagedReader({
 		const targetKey = handler.keys?.at(0)
 		switch (targetKey) {
 			case 'right':
-				handlePageChange(currPageRef.current + 1)
+				handlePageChange(currentPageRef.current + 1)
 				break
 			case 'left':
-				handlePageChange(currPageRef.current - 1)
+				handlePageChange(currentPageRef.current - 1)
 				break
 			case 'space':
 				toggleToolbar()
@@ -169,3 +161,5 @@ function SideBarControl({ onClick, position }: SideBarControlProps) {
 		/>
 	)
 }
+
+export default memo(PagedReader)

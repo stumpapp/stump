@@ -6,6 +6,7 @@ import paths from '../../../../paths'
 import { useEpubReaderContext } from '../context'
 import ControlButton from './ControlButton'
 import ControlsContainer from './ControlsContainer'
+import FullScreenToggle from './FullScreenToggle'
 import ThemeControls from './ThemeControls'
 
 export default function HeaderControls() {
@@ -37,6 +38,8 @@ export default function HeaderControls() {
 
 			<div className="flex items-center gap-x-2">
 				<ThemeControls />
+
+				<FullScreenToggle />
 
 				<ControlButton disabled>
 					<Bookmark className="h-4 w-4" />

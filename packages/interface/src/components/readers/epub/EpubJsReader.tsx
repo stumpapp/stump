@@ -12,9 +12,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
-// import { useSwipeable } from 'react-swipeable'
 import EpubReaderContainer from './EpubReaderContainer'
 import { stumpDark } from './themes'
+
+// NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 
 /** The props for the EpubJsReader component */
 type EpubJsReaderProps = {
@@ -141,8 +142,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const applyEpubPreferences = (rendition: Rendition, preferences: EpubReaderPreferences) => {
 		if (isDark) {
 			rendition.themes.select('stump-dark')
+		} else {
+			rendition.themes.select('stump-light')
 		}
-
+		rendition.direction(preferences.readingDirection)
 		rendition.themes.fontSize(`${preferences.fontSize}px`)
 	}
 

@@ -42,7 +42,6 @@ export default function EpubReaderContainer({ children, readerMeta, controls }: 
 		return undefined
 	}, [mouseIsInZone])
 
-	// FIXME: I don't like how the controls obstruct the view if I am being honest. redesign!
 	return (
 		<EpubReaderContext.Provider
 			value={{

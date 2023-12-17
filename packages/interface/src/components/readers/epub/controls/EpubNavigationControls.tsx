@@ -24,7 +24,8 @@ export default function EpubNavigationControls({ children }: Props) {
 	})
 
 	return (
-		<div className="relative flex h-full w-full items-center gap-1">
+		// <div className="relative flex h-full w-full flex-1 items-center gap-1">
+		<div className="relative flex h-full w-full flex-1 items-center gap-1">
 			<div
 				className="fixed left-2 z-[100] hidden h-1/2 w-12 items-center md:flex"
 				onMouseEnter={onMouseEnterControls}

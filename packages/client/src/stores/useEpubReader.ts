@@ -11,7 +11,7 @@ export type EpubReaderPreferences = {
 	theme: string
 	fontSize: number
 	setFontSize: (fontSize: number) => void
-	// flow: EpubReaderFlow
+	setTheme: (theme: string) => void
 }
 
 export type EpubReaderStore = {
@@ -33,6 +33,7 @@ const defaultTheme = tryParseUserTheme()
 const defaultPreferences: EpubReaderPreferences = {
 	fontSize: 13,
 	setFontSize: () => {},
+	setTheme: () => {},
 	theme: `stump-${defaultTheme}`,
 }
 

@@ -12,9 +12,10 @@ export default function ControlsContainer({ position, children }: Props) {
 
 	return (
 		<div
-			className={cx('z-[100] h-10 w-full', {
-				'fixed bottom-0 left-0': position === 'bottom' && fullscreen,
-				'fixed left-0 top-0': position === 'top' && fullscreen,
+			className={cx('h-10 w-full shrink-0', {
+				'bottom-0 left-0': position === 'bottom' && fullscreen,
+				'fixed z-[100]': fullscreen,
+				'left-0 top-0': position === 'top' && fullscreen,
 			})}
 			onMouseEnter={onMouseEnterControls}
 			onMouseLeave={onMouseLeaveControls}
@@ -22,7 +23,7 @@ export default function ControlsContainer({ position, children }: Props) {
 		>
 			<div
 				className={cx(
-					'flex items-center gap-1 bg-white p-2 shadow-sm transition-opacity duration-150 dark:bg-gray-950 md:bg-transparent',
+					'flex h-full items-center gap-1 bg-white p-2 shadow-sm transition-opacity duration-150 dark:bg-gray-1000 md:bg-transparent',
 					{ 'opacity-100': !fullscreen || visible },
 					{ 'opacity-0': !visible && fullscreen },
 				)}

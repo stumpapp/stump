@@ -1,9 +1,9 @@
 import { Text } from '@stump/components'
 
-import pluralizeStat from '../../../../utils/pluralize'
 import { useEpubReaderContext } from '../context'
 import ControlsContainer from './ControlsContainer'
 
+// TODO: I LOVE Yomu's footer controls! I want to make something like that!
 /**
  * A component that shows at the bottom of the epub reader that shows, at least
  * currently, mostly the number of pages left in the current chapter
@@ -11,24 +11,25 @@ import ControlsContainer from './ControlsContainer'
 export default function FooterControls() {
 	const { bookMeta } = useEpubReaderContext().readerMeta
 
-	const firstPage = bookMeta?.chapter.currentPage?.[0]
-	const totalPages = bookMeta?.chapter.totalPages
+	const visiblePages = (bookMeta?.chapter.currentPage ?? []).filter(Boolean)
+	const pagesVisible = visiblePages.length
+
+	const chapterPageCount = bookMeta?.chapter.totalPages || 1
+	const chapterName = bookMeta?.chapter.name || ''
 
 	// If we don't have the first page or total pages, we can't show the controls for now
-	if (firstPage === undefined || totalPages === undefined) {
+	if (!pagesVisible) {
 		return null
 	}
 
-	/**
-	 * The pages left in the current chapter. The pages are not zero-indexed, but
-	 * we need to count the current page as well, so we subtract 1 from the first
-	 */
-	const pagesLeftInChapter = totalPages - (firstPage - 1)
+	const currentPage = visiblePages[0] || 1
+	const virtualPage = Math.ceil(currentPage / pagesVisible)
+	const virtualPageCount = Math.ceil(chapterPageCount / pagesVisible)
 
 	return (
 		<ControlsContainer position="bottom">
 			<Text size="sm" variant="muted">
-				{pluralizeStat('page', pagesLeftInChapter)} left in chapter
+				{chapterName} ({virtualPage}/{virtualPageCount})
 			</Text>
 		</ControlsContainer>
 	)

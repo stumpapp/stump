@@ -1,66 +1,46 @@
-import { IconButton, Spacer, Text, ToolTip } from '@stump/components'
-import { Album, ArrowLeft, Bookmark, TextSelection } from 'lucide-react'
+import { Spacer, Text } from '@stump/components'
+import { ArrowLeft, Bookmark, List } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import paths from '../../../../paths'
 import { useEpubReaderContext } from '../context'
+import ControlButton from './ControlButton'
 import ControlsContainer from './ControlsContainer'
-import FontSelection from './FontSelection'
-import TocDrawer from './TocDrawer'
+import ThemeControls from './ThemeControls'
 
 export default function HeaderControls() {
 	const { readerMeta } = useEpubReaderContext()
 
+	const bookName = readerMeta.bookEntity?.name || ''
+
 	return (
 		<ControlsContainer position="top">
-			<div className="flex items-center">
-				<ToolTip content="Book Overview" size="sm">
-					<Link to={paths.bookOverview(readerMeta.bookEntity?.id || '')}>
-						<IconButton variant="ghost" size="xs">
-							<ArrowLeft className="h-5 w-5" />
-						</IconButton>
-					</Link>
-				</ToolTip>
+			<div className="flex items-center gap-x-2">
+				<Link to={paths.bookOverview(readerMeta.bookEntity?.id || '')} title="Book Overview">
+					<ControlButton>
+						<ArrowLeft className="h-4 w-4" />
+					</ControlButton>
+				</Link>
 
-				{/* FIXME: replace this with button group once I make one :cringe: */}
-				<div className="ml-4 flex items-center overflow-hidden rounded-md dark:bg-gray-800">
-					<TocDrawer />
-
-					<ToolTip content="Bookmarks" size="sm">
-						<IconButton variant="ghost" size="xs" rounded="none" pressEffect={false} disabled>
-							<Album className="h-5 w-5" />
-						</IconButton>
-					</ToolTip>
-
-					<ToolTip content="Annotations" size="sm">
-						<IconButton variant="ghost" size="xs" rounded="none" pressEffect={false} disabled>
-							<TextSelection className="h-5 w-5" />
-						</IconButton>
-					</ToolTip>
-				</div>
+				<ControlButton>
+					<List className="h-4 w-4" />
+				</ControlButton>
 			</div>
 
 			<Spacer />
 
-			<div className="flex flex-col text-center">
-				<Text size="sm" className="line-clamp-1">
-					{readerMeta.bookEntity?.name}
-				</Text>
-				{readerMeta.bookMeta?.chapter && (
-					<Text size="sm" className="line-clamp-1">
-						{readerMeta.bookMeta?.chapter.name}
-					</Text>
-				)}
-			</div>
+			<Text size="sm" className="line-clamp-1">
+				{bookName}
+			</Text>
 
 			<Spacer />
 
-			<div className="flex items-center">
-				<IconButton variant="ghost" size="xs" disabled>
-					<Bookmark className="h-5 w-5" />
-				</IconButton>
+			<div className="flex items-center gap-x-2">
+				<ThemeControls />
 
-				<FontSelection />
+				<ControlButton disabled>
+					<Bookmark className="h-4 w-4" />
+				</ControlButton>
 			</div>
 		</ControlsContainer>
 	)

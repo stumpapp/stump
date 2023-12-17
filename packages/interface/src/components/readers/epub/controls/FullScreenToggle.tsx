@@ -8,7 +8,10 @@ export default function FullScreenToggle() {
 	const { fullscreen, setFullscreen } = useEpubReaderControls()
 
 	return (
-		<ControlButton>
+		<ControlButton
+			title={fullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+			aria-about="When fullscreen is enabled, the top and bottom control menus are hidden unless your mouse is hovering over them"
+		>
 			<Fullscreen className="h-4 w-4" onClick={() => setFullscreen(!fullscreen)} />
 		</ControlButton>
 	)

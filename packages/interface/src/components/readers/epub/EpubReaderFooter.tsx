@@ -1,14 +1,14 @@
 import { Text } from '@stump/components'
 
-import { useEpubReaderContext } from '../context'
-import ControlsContainer from './ControlsContainer'
+import { useEpubReaderContext } from './context'
+import { ControlsContainer } from './controls'
 
 // TODO: I LOVE Yomu's footer controls! I want to make something like that!
 /**
  * A component that shows at the bottom of the epub reader that shows, at least
  * currently, mostly the number of pages left in the current chapter
  */
-export default function FooterControls() {
+export default function EpubReaderFooter() {
 	const { bookMeta } = useEpubReaderContext().readerMeta
 
 	const visiblePages = (bookMeta?.chapter.currentPage ?? []).filter(Boolean)

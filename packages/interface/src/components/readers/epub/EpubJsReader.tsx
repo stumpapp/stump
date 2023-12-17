@@ -205,6 +205,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book],
 	)
 
+	// TODO: this needs to have fullscreen as an effect dependency
 	/**
 	 * This effect is responsible for resizing the epubjs rendition instance whenever the
 	 * div it attaches to is resized.
@@ -308,7 +309,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				return
 			}
 
-			const failureMessage = 'Failed to navigate, please check the integrity of the epub file.'
+			const failureMessage = 'Failed to navigate, please check the integrity of the epub file'
 			const adjusted = href.split('#')[0]
 
 			let spineItem = book.spine.get(adjusted)

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 
 import { EpubReaderContext, EpubReaderControls, EpubReaderMeta } from './context'
-import { FooterControls, HeaderControls } from './controls'
-import EpubNavigationControls from './controls/EpubNavigationControls'
+import { EpubNavigationControls } from './controls'
+import EpubReaderFooter from './EpubReaderFooter'
+import EpubReaderHeader from './EpubReaderHeader'
 
 type Props = {
 	children: React.ReactNode
@@ -21,6 +22,8 @@ export default function EpubReaderContainer({ children, readerMeta, controls }: 
 	const onMouseEnterControls = () => setMouseIsInZone(true)
 	const onMouseLeaveControls = () => setMouseIsInZone(false)
 
+	// TODO: Just make these preferences, e.g. `showHeader` and `showFooter`. When set to false, then we can do something like this effect
+	// and the header/footer can manage their own visibility state
 	/**
 	 * This effect is responsible for hiding the controls when the user is not interacting with the reader.
 	 * It is 'debounced' to prevent the controls closing when the user exits but re-enters before
@@ -57,9 +60,9 @@ export default function EpubReaderContainer({ children, readerMeta, controls }: 
 				readerMeta,
 			}}
 		>
-			<HeaderControls />
+			<EpubReaderHeader />
 			<EpubNavigationControls>{children}</EpubNavigationControls>
-			<FooterControls />
+			<EpubReaderFooter />
 		</EpubReaderContext.Provider>
 	)
 }

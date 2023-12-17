@@ -10,6 +10,9 @@ import ControlButton from './ControlButton'
 type Props = {
 	children: React.ReactNode
 }
+
+// TODO: allow config to hide the icons, this will allow for a less intrusive reading experience IMO without
+// sacrificing accessibility for those who want the icon always visible
 export default function EpubNavigationControls({ children }: Props) {
 	const { visible, onPaginateBackward, onPaginateForward, setVisible } = useEpubReaderControls()
 

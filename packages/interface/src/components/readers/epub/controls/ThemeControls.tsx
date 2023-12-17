@@ -11,7 +11,7 @@ export default function ThemeControls() {
 	return (
 		<Popover>
 			<Popover.Trigger asChild>
-				<ControlButton>
+				<ControlButton title="Theme and options">
 					<Paintbrush className="h-4 w-4" />
 				</ControlButton>
 			</Popover.Trigger>

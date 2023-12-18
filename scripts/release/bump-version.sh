@@ -10,6 +10,8 @@ _TARGETS=${TARGETS:=$@}
 # SCRIPTS_DIR="${BASH_SOURCE%/*}/.."
 # source "${SCRIPTS_DIR}/lib"
 
+# TODO: implement some sort of release system! This is all scratch work
+
 
 # if no targets, exit
 if [ -z "$_TARGETS" ]; then
@@ -17,14 +19,11 @@ if [ -z "$_TARGETS" ]; then
   exit 1
 fi
 
-# TODO: bump based on targets
+# TODO: bump based on targets!!
 
-# if mobile, we bump the version in apps/mobile
-# if desktop, we bump the version in apps/desktop
-# if core, we bump the version in core
+# cargo workspaces version $BUMP --no-git-commit
 
 # https://docs.gitmoji-changelog.dev/#/?id=%f0%9f%93%9a-how-it-works
 if [ $_GENERATE_CHANGELOG == 1 ]; then
   pnpx gitmoji-changelog
 fi
-# cargo workspaces version $BUMP --no-git-commit

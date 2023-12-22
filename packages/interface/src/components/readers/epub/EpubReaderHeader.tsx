@@ -1,10 +1,16 @@
 import { Spacer, Text } from '@stump/components'
-import { ArrowLeft, Bookmark } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import paths from '../../../paths'
 import { useEpubReaderContext } from './context'
-import { ControlButton, ControlsContainer, FullScreenToggle, ThemeControls } from './controls'
+import {
+	BookmarkToggle,
+	ControlButton,
+	ControlsContainer,
+	FullScreenToggle,
+	ThemeControls,
+} from './controls'
 import { LocationManager } from './locations'
 
 export default function EpubReaderHeader() {
@@ -36,12 +42,8 @@ export default function EpubReaderHeader() {
 
 			<div className="flex items-center gap-x-2">
 				<ThemeControls />
-
 				<FullScreenToggle />
-
-				<ControlButton disabled>
-					<Bookmark className="h-4 w-4" />
-				</ControlButton>
+				<BookmarkToggle />
 			</div>
 		</ControlsContainer>
 	)

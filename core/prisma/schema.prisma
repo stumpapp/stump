@@ -269,7 +269,9 @@ model ReadProgress {
 model Bookmark {
   id String @id @default(uuid())
 
-  epubcfi String
+  preview_content String?
+  epubcfi         String?
+  page            Int?
 
   media_id String
   media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
@@ -277,7 +279,7 @@ model Bookmark {
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([user_id, media_id])
+  @@unique([user_id, media_id, epubcfi, page])
   @@map("bookmarks")
 }
 

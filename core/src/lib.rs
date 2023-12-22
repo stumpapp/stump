@@ -262,6 +262,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
 

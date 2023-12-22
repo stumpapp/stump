@@ -31,18 +31,22 @@ export type LibrariesStats = { series_count: BigInt; book_count: BigInt; total_b
 
 export type SeriesMetadata = { _type: string; title: string | null; summary: string | null; publisher: string | null; imprint: string | null; comicid: number | null; volume: number | null; booktype: string | null; age_rating: number | null; status: string | null }
 
-export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; metadata: SeriesMetadata | null; media_count?: BigInt | null; unread_media_count?: BigInt | null; tags: Tag[] | null }
+export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; metadata: SeriesMetadata | null; media_count?: BigInt | null; unread_media_count?: BigInt | null; tags?: Tag[] | null }
 
 /**
  * Struct representing the metadata for a processed file.
  */
 export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
 
-export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null }
+export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
-export type MediaAnnotationKind = "HIGHLIGHT" | "NOTE" | "BOOKMARK"
+/**
+ * A model representing a bookmark in the database. Bookmarks are used to save specific locations
+ * in a media file, such as an epub, without any additional metadata like notes, tags, etc.
+ */
+export type Bookmark = { id: string; preview_content: string | null; epubcfi: string | null; page: number | null; book_id: string; book?: Media | null; user_id?: string | null; user?: User | null }
 
-export type MediaAnnotation = { id: string; kind: MediaAnnotationKind; epubcfi: string | null; text: string | null; media_id: string; media: Media | null }
+export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
@@ -177,6 +181,10 @@ export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | n
 export type MediaIsComplete = { is_completed: boolean; completed_at: string | null }
 
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
+
+export type CreateOrUpdateBookmark = { epubcfi: string; preview_content: string | null }
+
+export type DeleteBookmark = { epubcfi: string }
 
 export type SeriesIsComplete = { is_complete: boolean; completed_at: string | null }
 

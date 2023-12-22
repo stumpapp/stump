@@ -1,7 +1,9 @@
 import { Platform } from '@stump/client'
 import StumpInterface from '@stump/interface'
 import { invoke, os } from '@tauri-apps/api'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+const VITE_STUMP_SERVER_IS_BUNDLED = import.meta.env.VITE_STUMP_SERVER_IS_BUNDLED === 'true'
 
 export default function App() {
 	function getPlatform(platform: string): Platform {
@@ -39,6 +41,19 @@ export default function App() {
 		init()
 	}, [])
 
+	const baseUrl = useMemo(() => {
+		if (!VITE_STUMP_SERVER_IS_BUNDLED) {
+			return undefined
+		}
+
+		// TODO: The port is configurable...
+		if (platform === 'windows') {
+			return 'https://tauri.localhost:10801'
+		} else {
+			return 'http://localhost:10801'
+		}
+	}, [platform])
+
 	// I want to wait until platform is properly set before rendering the interface
 	if (!mounted) {
 		return null
@@ -49,6 +64,7 @@ export default function App() {
 			platform={platform}
 			setUseDiscordPresence={setUseDiscordPresence}
 			setDiscordPresence={setDiscordPresence}
+			baseUrl={baseUrl}
 		/>
 	)
 }

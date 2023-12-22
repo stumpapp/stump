@@ -2,6 +2,7 @@ use std::{thread, time::Duration};
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
+
 use stump_core::{
 	config::StumpConfig,
 	db::create_client,
@@ -155,14 +156,12 @@ async fn reset_account_password(
 	}
 }
 
-// TODO: print pretty table
-// TODO: handle empty state
 async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message("Fetching accounts...");
 
+	// Fetch users from prisma database
 	let client = create_client(config).await;
-
 	let users = client
 		.user()
 		.find_many(chain_optional_iter(
@@ -172,14 +171,24 @@ async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult
 		.exec()
 		.await?;
 
-	progress.finish_with_message("Accounts fetched successfully!");
+	// Print results from database
+	if users.is_empty() {
+		progress.finish_with_message("No accounts found.");
+	} else {
+		progress.finish_with_message("Accounts fetched successfully!");
 
-	for user in users {
-		println!(
-			"{}: {}",
-			user.username,
-			if user.is_locked { "locked" } else { "unlocked" }
-		);
+		// Create table using prettytable-rs
+		let mut table = prettytable::Table::new();
+		table.add_row(prettytable::row!["Account", "Status"]);
+
+		for user in users {
+			table.add_row(prettytable::row![
+				user.username,
+				if user.is_locked { "locked" } else { "unlocked" }
+			]);
+		}
+
+		table.printstd();
 	}
 
 	Ok(())

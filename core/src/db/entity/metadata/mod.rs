@@ -1,6 +1,8 @@
 mod common;
 mod media_metadata;
+pub(crate) mod prisma_macros;
 mod series_metadata;
 
+pub use common::age_rating_deserializer;
 pub use media_metadata::*;
 pub use series_metadata::*;

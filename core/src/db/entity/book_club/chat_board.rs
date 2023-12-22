@@ -1,4 +1,12 @@
 use serde::{Deserialize, Serialize};
+use specta::Type;
+use utoipa::ToSchema;
+
+use crate::prisma::{
+	book_club_chat_board, book_club_chat_message, book_club_chat_message_like,
+};
+
+use super::BookClubMember;
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct BookClubChatBoard {

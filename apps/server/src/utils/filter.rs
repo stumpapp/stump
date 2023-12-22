@@ -3,9 +3,7 @@ use std::{marker::PhantomData, str::FromStr};
 use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_untagged::UntaggedEnumVisitor;
 use std::fmt;
-use stump_core::db::{
-	entity::metadata::age_rating_deserializer, query::ordering::QueryOrder,
-};
+use stump_core::db::{entity::age_rating_deserializer, query::ordering::QueryOrder};
 use utoipa::ToSchema;
 
 use crate::errors::ApiError;

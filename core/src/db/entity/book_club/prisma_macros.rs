@@ -1,4 +1,4 @@
-use crate::prisma::{book_club, book_club_member, book_club_schedule};
+use crate::prisma::{book_club, book_club_member};
 
 book_club::include!((filters: Vec<book_club_member::WhereParam>) => book_club_member_user_username {
 	members(filters): include {

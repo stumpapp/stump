@@ -10,7 +10,7 @@ use pdfium_render::{prelude::Pdfium, render_config::PdfRenderConfig};
 
 use crate::{
 	config::StumpConfig,
-	db::entity::metadata::MediaMetadata,
+	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive, error::FileError, hash, image::ImageFormat,
 		ContentType, FileParts, PathUtils,

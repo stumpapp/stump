@@ -6,8 +6,11 @@ use utoipa::ToSchema;
 use crate::db::entity::User;
 
 use super::{
-	book_club_member_and_schedule_include, book_club_member_user_username,
-	book_club_with_books_include, BookClub,
+	prisma_macros::{
+		book_club_member_and_schedule_include, book_club_member_user_username,
+		book_club_with_books_include,
+	},
+	BookClub,
 };
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]

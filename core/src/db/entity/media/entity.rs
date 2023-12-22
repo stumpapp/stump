@@ -79,9 +79,9 @@ pub struct MediaAnnotation {
 	/// The page number of the annotation. This is a 1-based index for image-based media
 	page: Option<i32>,
 	/// The x coordinate of the annotation on the page. This is a percentage of the page width
-	page_coordinates_x: Option<f32>,
+	page_coordinates_x: Option<f64>,
 	/// The y coordinate of the annotation on the page. This is a percentage of the page height
-	page_coordinates_y: Option<f32>,
+	page_coordinates_y: Option<f64>,
 	/// The epubcfi associated with the annotation. This can be a range or a single point,
 	/// where a range can be inferred as highlighted text
 	epubcfi: Option<String>,
@@ -89,6 +89,8 @@ pub struct MediaAnnotation {
 	notes: Option<String>,
 	// The media this annotation belongs to
 	media_id: String,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[specta(optional)]
 	media: Option<Media>,
 }
 

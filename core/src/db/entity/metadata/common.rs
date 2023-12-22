@@ -1,24 +1,7 @@
-//////////////////////////////////////////////
-//////////////// PRISMA MACROS ///////////////
-//////////////////////////////////////////////
-
 use regex::Regex;
-use serde::Deserializer;
+use serde::{Deserialize, Deserializer};
 
-use crate::prisma::media_metadata;
-
-media_metadata::select!(metadata_available_genre_select { genre });
-media_metadata::select!(metadata_available_writers_select { writers });
-media_metadata::select!(metadata_available_pencillers_select { pencillers });
-media_metadata::select!(metadata_available_inkers_select { inkers });
-media_metadata::select!(metadata_available_colorists_select { colorists });
-media_metadata::select!(metadata_available_letterers_select { letterers });
-media_metadata::select!(metadata_available_editors_select { editors });
-media_metadata::select!(metadata_available_publisher_select { publisher });
-media_metadata::select!(metadata_available_characters_select { characters });
-media_metadata::select!(metadata_available_teams_select { teams });
-
-pub(crate) fn string_list_deserializer<'de, D>(
+pub fn string_list_deserializer<'de, D>(
 	deserializer: D,
 ) -> Result<Option<Vec<String>>, D::Error>
 where
@@ -36,9 +19,7 @@ where
 // https://anansi-project.github.io/docs/comicinfo/schemas/v2.1
 /// Deserializes a string into an age rating. This isn't the fanciest deserializer,
 /// but it's fine.
-pub(crate) fn age_rating_deserializer<'de, D>(
-	deserializer: D,
-) -> Result<Option<i32>, D::Error>
+pub fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
 where
 	D: Deserializer<'de>,
 {
@@ -121,6 +102,6 @@ where
 	Ok(age)
 }
 
-pub(crate) fn comma_separated_list_to_vec(vec: String) -> Vec<String> {
+pub fn comma_separated_list_to_vec(vec: String) -> Vec<String> {
 	vec.split(',').map(|v| v.trim().to_owned()).collect()
 }

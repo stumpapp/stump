@@ -6039,8 +6039,10 @@ dependencies = [
  "discord-rich-presence",
  "serde",
  "serde_json",
+ "stump_server",
  "tauri",
  "tauri-build",
+ "tracing",
 ]
 
 [[package]]

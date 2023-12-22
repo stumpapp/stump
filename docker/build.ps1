@@ -8,7 +8,7 @@ $GIT_REV = git rev-parse --short HEAD
 
 # Build the Docker image
 docker buildx build `
-    -f ./scripts/release/Dockerfile.debian `
+    -f ./docker/Dockerfile `
     --load `
     --progress=$FORMAT `
     --platform=$PLATFORMS `

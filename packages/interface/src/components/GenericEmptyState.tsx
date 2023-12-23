@@ -4,7 +4,7 @@ import React from 'react'
 
 type Props = {
 	title: string
-	subtitle: string
+	subtitle?: string
 	containerClassName?: string
 	contentClassName?: string
 }
@@ -24,9 +24,11 @@ export default function GenericEmptyState({
 			<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
 			<div className={cn('text-center', contentClassName)}>
 				<Heading size="sm">{title}</Heading>
-				<Text size="sm" variant="muted">
-					{subtitle}
-				</Text>
+				{subtitle && (
+					<Text size="sm" variant="muted">
+						{subtitle}
+					</Text>
+				)}
 			</div>
 		</div>
 	)

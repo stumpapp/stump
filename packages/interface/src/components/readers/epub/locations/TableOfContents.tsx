@@ -10,8 +10,6 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 	const { readerMeta, controls } = useEpubReaderContext()
 	const { toc } = readerMeta.bookMeta || {}
 
-	// const currentChapterName =
-
 	const handleSelect = useCallback(
 		(href: string) => {
 			controls.onLinkClick(href)

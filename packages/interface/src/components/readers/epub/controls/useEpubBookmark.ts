@@ -5,6 +5,9 @@ import { useCallback, useMemo } from 'react'
 
 import { useEpubReaderContext } from '../context'
 
+/**
+ * A hook for creating and deleting bookmarks within an epub reader
+ */
 export function useEpubBookmark() {
 	const {
 		readerMeta: {
@@ -84,6 +87,10 @@ export function useEpubBookmark() {
 		},
 	)
 
+	/**
+	 * Create a payload for creating or deleting a bookmark based on the current
+	 * chapter's cfi range
+	 */
 	const deletePayload = useCallback(() => {
 		if (currentBookmark?.epubcfi) {
 			return {
@@ -96,7 +103,7 @@ export function useEpubBookmark() {
 
 	/**
 	 * Delete a bookmark for a specific epubcfi. If no epubcfi payload is provided,
-	 * the current chapter's cfi range will be used.
+	 * the current chapter's cfi range will be used
 	 */
 	const deleteBookmark = useCallback(
 		(payload = deletePayload()) => {

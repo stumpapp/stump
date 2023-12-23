@@ -3,6 +3,7 @@ import { List } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 
 import ControlButton from '../controls/ControlButton'
+import Bookmarks from './Bookmarks'
 import TableOfContents from './TableOfContents'
 
 type LocationTab = 'contents' | 'annotations' | 'bookmarks'
@@ -27,6 +28,10 @@ export default function LocationManager() {
 	const renderTabContent = () => {
 		if (activeTab === 'contents') {
 			return <TableOfContents onLocationChanged={handleLocationChanged} />
+		} else if (activeTab === 'annotations') {
+			return null
+		} else if (activeTab === 'bookmarks') {
+			return <Bookmarks onLocationChanged={handleLocationChanged} />
 		}
 
 		return null
@@ -47,6 +52,10 @@ export default function LocationManager() {
 								<Text className="cursor-pointer truncate">Contents</Text>
 							</Tabs.Trigger>
 
+							<Tabs.Trigger value="bookmarks" asChild onClick={() => handleTabChange('bookmarks')}>
+								<Text className="cursor-pointer truncate">Bookmarks</Text>
+							</Tabs.Trigger>
+
 							<Tabs.Trigger
 								value="annotations"
 								asChild
@@ -54,15 +63,6 @@ export default function LocationManager() {
 								disabled
 							>
 								<Text className="cursor-pointer truncate">Annotations</Text>
-							</Tabs.Trigger>
-
-							<Tabs.Trigger
-								value="bookmarks"
-								asChild
-								onClick={() => handleTabChange('bookmarks')}
-								disabled
-							>
-								<Text className="cursor-pointer truncate">Bookmarks</Text>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Tabs>

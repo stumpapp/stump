@@ -1,5 +1,4 @@
-import { useJobContext } from '@stump/client'
-import { useJobsQuery } from '@stump/client/queries/job'
+import { useJobContext, useJobsQuery } from '@stump/client'
 import { Divider, Heading, Text } from '@stump/components'
 import { PaginationState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
@@ -8,11 +7,11 @@ import { Helmet } from 'react-helmet'
 import SceneContainer from '@/components/SceneContainer'
 
 import { useAppContext } from '../../../context.ts'
-import { useLocaleContext } from '../../../i18n'
-import { JobSettingsContext } from './context'
+import { useLocaleContext } from '../../../i18n/index.ts'
+import { JobSettingsContext } from './context.ts'
 import DeleteAllSection from './DeleteAllSection.tsx'
-import JobScheduler from './JobScheduler'
-import JobTable from './JobTable'
+import JobScheduler from './JobScheduler.tsx'
+import JobTable from './JobTable.tsx'
 
 export default function JobSettingsScene() {
 	const { isServerOwner } = useAppContext()

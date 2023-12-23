@@ -10,10 +10,10 @@ import React, { useMemo } from 'react'
 import { Table } from '@/components/table'
 
 import { useAppContext } from '../../../context.ts'
-import { useLocaleContext } from '../../../i18n'
-import { useJobSettingsContext } from './context'
-import JobActionMenu from './JobActionMenu'
-import RunningJobElapsedTime from './RunningJobElapsedTime'
+import { useLocaleContext } from '../../../i18n/index.ts'
+import { useJobSettingsContext } from './context.ts'
+import JobActionMenu from './JobActionMenu.tsx'
+import RunningJobElapsedTime from './RunningJobElapsedTime.tsx'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)

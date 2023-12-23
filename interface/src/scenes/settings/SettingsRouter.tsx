@@ -4,8 +4,8 @@ import { Navigate, Route, Routes } from 'react-router'
 
 import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'
 
-import { LazyComponent } from '../../AppRouter'
-import SettingsLayout from './SettingsLayout'
+import { LazyComponent } from '../../AppRouter.tsx'
+import SettingsLayout from './SettingsLayout.tsx'
 import UserManagementRouter from './user-management/UserManagementRouter.tsx'
 
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)

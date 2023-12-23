@@ -2,14 +2,14 @@ import { useAppProps } from '@stump/client'
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 
-import { AppLayout } from './AppLayout'
-import LocaleProvider from './i18n/LocaleProvider'
-import BookRouter from './scenes/book/BookRouter'
-import BookClubRouter from './scenes/book-club/BookClubRouter'
-import LibraryRouter from './scenes/library/LibraryRouter'
-import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter'
-import SeriesRouter from './scenes/series/SeriesRouter'
-import SettingsRouter from './scenes/settings/SettingsRouter'
+import { AppLayout } from './AppLayout.tsx'
+import LocaleProvider from './i18n/LocaleProvider.tsx'
+import BookRouter from './scenes/book/BookRouter.tsx'
+import BookClubRouter from './scenes/book-club/BookClubRouter.tsx'
+import LibraryRouter from './scenes/library/LibraryRouter.tsx'
+import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter.tsx'
+import SeriesRouter from './scenes/series/SeriesRouter.tsx'
+import SettingsRouter from './scenes/settings/SettingsRouter.tsx'
 
 // FIXME: this is really annoying
 export type LazyComponent = Promise<{

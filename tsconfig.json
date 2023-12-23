@@ -24,7 +24,7 @@
 			"path": "packages/components"
 		},
 		{
-			"path": "packages/interface"
+			"path": "interface"
 		},
 		{
 			"path": "packages/types"

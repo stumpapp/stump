@@ -6,7 +6,7 @@ import React from 'react'
 import { toast } from 'react-hot-toast'
 
 import { useAppContext } from '../../../context.ts'
-import { useLocaleContext } from '../../../i18n'
+import { useLocaleContext } from '../../../i18n/index.ts'
 import { useJobSettingsContext } from './context.ts'
 
 export default function DeleteAllSection() {

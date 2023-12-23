@@ -1,4 +1,4 @@
-import { useChatBoardQuery } from '@stump/client/queries/bookClub'
+import { useChatBoardQuery } from '@stump/client'
 import { ButtonOrLink, Card } from '@stump/components'
 import { BookClubChatMessage, User } from '@stump/types'
 import React from 'react'

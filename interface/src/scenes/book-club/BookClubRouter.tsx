@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router'
 
-import { LazyComponent } from '../../AppRouter'
+import { LazyComponent } from '../../AppRouter.tsx'
 import { useAppContext } from '../../context.ts'
 import BookClubHomeLayout from './home/BookClubHomeLayout.tsx'
 

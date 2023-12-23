@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router'
 
 import { useAppContext } from '@/context'
 
-import { LazyComponent } from '../../AppRouter'
+import { LazyComponent } from '../../AppRouter.tsx'
 import LibraryAdminLayout from './management/LibraryAdminLayout.tsx'
 
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)

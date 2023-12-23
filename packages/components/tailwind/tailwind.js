@@ -2,6 +2,8 @@
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const defaultTheme = require('tailwindcss/defaultTheme')
 
 const brand = {
 	100: '#EFDDD1',
@@ -124,6 +126,9 @@ module.exports = function (relativeFromRoot) {
 				animation: {
 					'accordion-down': 'accordion-down 0.2s ease-out',
 					'accordion-up': 'accordion-up 0.2s ease-out',
+				},
+				fontFamily: {
+					sans: ['Inter var', ...defaultTheme.fontFamily.sans],
 				},
 				colors: {
 					brand,

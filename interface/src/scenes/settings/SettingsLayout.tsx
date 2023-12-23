@@ -3,7 +3,8 @@ import { Divider, Heading, Text } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 
-import SettingsNavigation from './SettingsNavigation'
+// import SettingsNavigation from './SettingsNavigation'
+import SettingsSideBar from './SettingsSideBar'
 
 export default function SettingsLayout() {
 	const user = useUserStore((store) => store.user)
@@ -13,11 +14,13 @@ export default function SettingsLayout() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col gap-2">
-			<SettingsNavigation user={user} />
-			<Suspense fallback={null}>
-				<Outlet />
-			</Suspense>
+		<div className="flex h-full w-full flex-col md:flex-row">
+			<SettingsSideBar user={user} />
+			<div className="overflow-y-auto">
+				<Suspense fallback={null}>
+					<Outlet />
+				</Suspense>
+			</div>
 		</div>
 	)
 }

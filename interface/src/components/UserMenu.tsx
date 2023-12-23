@@ -24,8 +24,8 @@ export default function UserMenu() {
 					<Popover.Trigger asChild>
 						<Card
 							className={cx(
-								'flex h-[2.35rem] w-full cursor-pointer items-center border-opacity-50 px-1 transition-all duration-150 hover:border-opacity-100 dark:border-opacity-40 dark:hover:border-opacity-80',
-								{ 'border-opacity-100 dark:border-opacity-80': isOpen },
+								'border-edge-200 flex h-[2.35rem] w-full cursor-pointer items-center border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
+								{ 'border-opacity-100': isOpen },
 							)}
 						>
 							<Avatar
@@ -42,7 +42,7 @@ export default function UserMenu() {
 					</Popover.Trigger>
 
 					<Popover.Content
-						className="flex flex-col divide-y divide-gray-75 overflow-hidden border-opacity-50 p-0 shadow-sm dark:divide-gray-800 dark:bg-gray-950"
+						className="divide-edge flex flex-col divide-y overflow-hidden border-opacity-50 p-0 shadow-sm dark:divide-gray-800 dark:bg-gray-950"
 						align="start"
 						style={{ width }}
 					>

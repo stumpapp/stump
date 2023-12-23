@@ -85,6 +85,7 @@
 		"storybook-tailwind-dark-mode": "^1.0.22",
 		"style-loader": "^3.3.3",
 		"tailwind-scrollbar-hide": "^1.1.7",
+		"tw-colors": "^3.3.1",
 		"typescript": "^5.2.2",
 		"webpack": "5.89.0"
 	}

@@ -60,11 +60,9 @@ function RouterContainer(props: { appProps: AppProps }) {
 
 	const appTheme = (userPreferences?.app_theme ?? 'light').toLowerCase()
 	useEffect(() => {
-		if (appTheme === 'light') {
-			document.querySelector('html')?.classList.remove('dark')
-		} else {
-			document.querySelector('html')?.classList.add('dark')
-		}
+		const html = document.querySelector('html')
+		html?.classList.remove(...(html?.classList ?? []))
+		html?.classList.add(appTheme)
 	}, [appTheme])
 
 	const { setUseDiscordPresence, setDiscordPresence } = appProps

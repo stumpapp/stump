@@ -10,7 +10,7 @@ export default function SettingsSideBar({ user }: Props) {
 	console.debug(user)
 
 	return (
-		<div className="relative flex h-full w-48 shrink-0 flex-col gap-4 border-r border-gray-75 bg-white px-2 py-4 dark:border-gray-900 dark:bg-gray-975">
+		<div className="border-edge bg-background relative flex h-full w-48 shrink-0 flex-col gap-4 border-r px-2 py-4">
 			<div>
 				<Label className="mb-2">Application</Label>
 

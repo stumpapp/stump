@@ -4,6 +4,8 @@
 const path = require('path')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultTheme = require('tailwindcss/defaultTheme')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { createThemes } = require('tw-colors')
 
 const brand = {
 	100: '#EFDDD1',
@@ -19,7 +21,7 @@ const brand = {
 	DEFAULT: '#C48259',
 }
 
-const newGray = {
+const gray = {
 	DEFAULT: '#7D828A',
 	50: '#F6F6F7',
 	75: '#E9EAEB',
@@ -47,51 +49,37 @@ const newGray = {
 	// 1000: '#010102',
 }
 
-const slate = {
-	50: '#f8fafc',
-	75: '#F4F7FA',
-	100: '#f1f5f9',
-	150: '#E9EEF4',
-	200: '#e2e8f0',
-	250: '#D5DEE8',
-	300: '#cbd5e1',
-	350: '#B2BECE',
-	400: '#94a3b8',
-	450: '#7E8EA4',
-	500: '#64748b',
-	550: '#57667C',
-	600: '#475569',
-	650: '#3E4C60',
-	700: '#334155',
-	750: '#293649',
-	800: '#1e293b',
-	850: '#172133',
-	900: '#0f172a',
-	1000: '#070c1f',
-}
+// let woodsmoke = {
+// 	DEFAULT: '#161719',
+// 	50: '#41444A',
+// 	100: '#3F4147',
+// 	200: '#3A3C42',
+// 	300: '#35373C',
+// 	400: '#303237',
+// 	500: '#2B2D31',
+// 	600: '#27282C',
+// 	700: '#222327',
+// 	800: '#1D1E21',
+// 	900: '#18191C',
+// 	950: '#161719',
+// }
 
-const zinc = {
-	50: '#fafafa',
-	75: '#F6F6F6',
-	100: '#f4f4f5',
-	150: '#EBEBED',
-	200: '#e4e4e7',
-	250: '#DDDDE0',
-	300: '#d4d4d8',
-	350: '#BDBDC3',
-	400: '#a1a1aa',
-	450: '#8B8B94',
-	500: '#71717a',
-	550: '#63636A',
-	600: '#52525b',
-	650: '#47474F',
-	700: '#3f3f46',
-	750: '#35353C',
-	800: '#27272a',
-	850: '#1F1F22',
-	900: '#18181b',
-	1000: '#0D0D0F',
-}
+// const woodsmokeHued = {
+// 	DEFAULT: '#161719',
+// 	50: '#43414A',
+// 	100: '#413F47',
+// 	200: '#3B3A42',
+// 	300: '#36353C',
+// 	400: '#303037',
+// 	500: '#2B2C31',
+// 	600: '#27272C',
+// 	700: '#222327',
+// 	800: '#1D1E21',
+// 	900: '#18191C',
+// 	950: '#161719',
+// }
+
+// 'pampas': {  DEFAULT: '#FBFAF9',  50: '#FFFFFF',  100: '#FFFFFF',  200: '#FBFAF9',  300: '#EDE8E4',  400: '#DED6CE',  500: '#D0C4B9',  600: '#C2B3A3',  700: '#B4A18E',  800: '#A58F78',  900: '#967D64',  950: '#8B745D'},
 
 /**
  *
@@ -112,14 +100,69 @@ module.exports = function (relativeFromRoot) {
 			'../../packages/*/src/**/*.{js,ts,jsx,tsx,html}',
 			path.join(basePath, './src/**/*.(js|jsx|ts|tsx)'),
 		],
-		darkMode: 'class',
 		plugins: [
 			require('tailwind-scrollbar-hide'),
 			require('@tailwindcss/typography'),
 			require('tailwindcss-animate'),
 			require('tailwindcss-autofill'),
-			require('tailwindcss-text-fill'),
-			require('tailwindcss-shadow-fill'),
+			// require('tailwindcss-text-fill'),
+			// require('tailwindcss-shadow-fill'),
+			createThemes({
+				light: {
+					brand,
+					sidebar: {
+						// The background for the sidebar
+						DEFAULT: '#F3F0ED',
+						200: '#EDE8E4',
+						300: '#E0D6CF',
+					},
+					background: {
+						DEFAULT: '#FFFFFF',
+						100: '#FFFFFF',
+						200: '#FBFAF9',
+						300: '#EDE8E4',
+						400: '#E0D6CF',
+						500: '#D3C4BA',
+					},
+					contrast: {
+						DEFAULT: '#000000',
+						100: '#000000',
+						200: '#161719',
+					},
+					muted: {
+						DEFAULT: '#7D828A',
+						100: '#7D828A',
+						200: '#93979D',
+					},
+					edge: {
+						DEFAULT: '#EDE8E4',
+						200: '#E0D6CF',
+					},
+				},
+				dark: {
+					brand,
+					sidebar: {
+						DEFAULT: '#151517',
+					},
+					background: {
+						DEFAULT: '#161719',
+						100: '#161719',
+						200: '#161718',
+						300: '#1B1C1D',
+						400: '#1F2123',
+						500: '#242628',
+					},
+					contrast: {
+						DEFAULT: '#FFFFFF',
+						100: '#FFFFFF',
+						200: '#FBFAF9',
+					},
+					edge: {
+						DEFAULT: '#1B1C1D',
+						200: '#161718',
+					},
+				},
+			}),
 		],
 		theme: {
 			extend: {
@@ -132,9 +175,7 @@ module.exports = function (relativeFromRoot) {
 				},
 				colors: {
 					brand,
-					gray: newGray,
-					slate,
-					zinc,
+					gray,
 				},
 				keyframes: {
 					'accordion-down': {

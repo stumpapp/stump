@@ -16,7 +16,7 @@ export default function SettingsLayout() {
 	return (
 		<div className="flex h-full w-full flex-col md:flex-row">
 			<SettingsSideBar user={user} />
-			<div className="overflow-y-auto">
+			<div className="w-full flex-1 overflow-y-auto">
 				<Suspense fallback={null}>
 					<Outlet />
 				</Suspense>

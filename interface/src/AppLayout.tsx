@@ -78,7 +78,7 @@ export function AppLayout() {
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">
 					{!hideSidebar && <SideBar />}
-					<main className="min-h-full w-full bg-white dark:bg-gray-975">
+					<main className="bg-background min-h-full w-full">
 						{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />

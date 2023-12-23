@@ -144,7 +144,7 @@ impl From<media::Data> for Media {
 
 		let bookmarks = data.bookmarks().ok().map(|bookmarks| {
 			bookmarks
-				.into_iter()
+				.iter()
 				.map(|data| Bookmark::from(data.to_owned()))
 				.collect::<Vec<Bookmark>>()
 		});

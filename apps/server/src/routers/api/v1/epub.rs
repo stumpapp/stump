@@ -167,7 +167,7 @@ async fn get_bookmarks(
 	Ok(Json(
 		bookmarks
 			.into_iter()
-			.map(|bookmark| Bookmark::from(bookmark))
+			.map(Bookmark::from)
 			.collect::<Vec<Bookmark>>(),
 	))
 }

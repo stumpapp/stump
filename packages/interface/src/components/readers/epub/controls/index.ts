@@ -1,3 +1,4 @@
+export { default as BookmarkToggle } from './BookmarkToggle'
 export { default as ControlButton } from './ControlButton'
 export { default as ControlsContainer } from './ControlsContainer'
 export { default as EpubNavigationControls } from './EpubNavigationControls'

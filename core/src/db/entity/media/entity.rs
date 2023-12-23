@@ -5,14 +5,15 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{
+	db::{
+		entity::{common::Cursor, LibraryOptions, MediaMetadata, Series, Tag},
+		FileStatus,
+	},
 	error::CoreError,
-	prisma::{media, media_annotation, read_progress},
+	prisma::{media, read_progress},
 };
 
-use super::{
-	common::FileStatus, metadata::MediaMetadata, read_progress::ReadProgress,
-	series::Series, tag::Tag, Cursor, LibraryOptions,
-};
+use super::{Bookmark, ReadProgress};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
 pub struct Media {
@@ -62,77 +63,14 @@ pub struct Media {
 	/// The user assigned tags for the media. ex: ["comic", "spiderman"]. Will be `None` only if the relation is not loaded.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub tags: Option<Vec<Tag>>,
+	/// Bookmarks for the media. Will be `None` only if the relation is not loaded.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub bookmarks: Option<Vec<Bookmark>>,
 }
 
 impl Cursor for Media {
 	fn cursor(&self) -> String {
 		self.id.clone()
-	}
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
-pub enum MediaAnnotationKind {
-	#[serde(rename = "HIGHLIGHT")]
-	Highlight,
-	#[serde(rename = "NOTE")]
-	Note,
-	#[serde(rename = "BOOKMARK")]
-	#[default]
-	Bookmark,
-}
-
-impl FromStr for MediaAnnotationKind {
-	type Err = CoreError;
-
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		match s {
-			"HIGHLIGHT" => Ok(MediaAnnotationKind::Highlight),
-			"NOTE" => Ok(MediaAnnotationKind::Note),
-			"BOOKMARK" => Ok(MediaAnnotationKind::Bookmark),
-			_ => Err(CoreError::InternalError(format!(
-				"Invalid media annotation kind: {}",
-				s
-			))),
-		}
-	}
-}
-
-impl From<String> for MediaAnnotationKind {
-	fn from(s: String) -> MediaAnnotationKind {
-		MediaAnnotationKind::from_str(s.as_str()).unwrap_or_default()
-	}
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, Type, Default, ToSchema)]
-pub struct MediaAnnotation {
-	pub id: String,
-	// The kind of annotation
-	pub kind: MediaAnnotationKind,
-	// The epubcfi associated with the annotation. This can be a range or a single point.
-	pub epubcfi: Option<String>,
-	// The text associated with the annotation. This can be a user entered note, or some
-	// visual indicator of the annotation.
-	pub text: Option<String>,
-	// The media this annotation belongs to
-	pub media_id: String,
-	pub media: Option<Media>,
-}
-
-impl From<media_annotation::Data> for MediaAnnotation {
-	fn from(data: media_annotation::Data) -> Self {
-		let media = match data.media() {
-			Ok(media) => Some(Media::from(media.to_owned())),
-			Err(_) => None,
-		};
-
-		MediaAnnotation {
-			id: data.id,
-			kind: MediaAnnotationKind::from(data.kind),
-			epubcfi: data.epubcfi,
-			text: data.text,
-			media_id: data.media_id,
-			media,
-		}
 	}
 }
 
@@ -204,6 +142,13 @@ impl From<media::Data> for Media {
 			Err(_e) => None,
 		};
 
+		let bookmarks = data.bookmarks().ok().map(|bookmarks| {
+			bookmarks
+				.iter()
+				.map(|data| Bookmark::from(data.to_owned()))
+				.collect::<Vec<Bookmark>>()
+		});
+
 		Media {
 			id: data.id,
 			name: data.name,
@@ -224,6 +169,7 @@ impl From<media::Data> for Media {
 			current_epubcfi: epubcfi,
 			is_completed,
 			tags,
+			bookmarks,
 		}
 	}
 }

@@ -9,7 +9,7 @@ use crate::{
 	prisma::{self, library},
 };
 
-use super::{series::Series, tag::Tag, Cursor};
+use super::{common::Cursor, series::Series, tag::Tag};
 
 //////////////////////////////////////////////
 //////////////// PRISMA MACROS ///////////////

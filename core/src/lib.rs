@@ -211,11 +211,7 @@ mod tests {
 
 	use crate::{
 		db::{
-			entity::{
-				book_club::*, epub::*, library::*, log::*, media::*, metadata::*,
-				read_progress::*, reading_list::*, series::*, server_config::*, tag::*,
-				user::*, FileStatus, LayoutMode,
-			},
+			entity::*,
 			query::{ordering::*, pagination::*},
 		},
 		event::*,
@@ -266,9 +262,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Series>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaMetadata>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Media>()?).as_bytes())?;
-		file.write_all(
-			format!("{}\n\n", ts_export::<MediaAnnotationKind>()?).as_bytes(),
-		)?;
+		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
 

@@ -52,7 +52,7 @@ export default function EpubNavigationControls({ children }: Props) {
 				</ControlButton>
 			</div>
 			<div
-				className="fixed inset-0 z-[99] md:hidden"
+				className="fixed bottom-10 left-0 right-0 top-10 z-[99] md:hidden"
 				{...swipeHandlers}
 				onClick={() => setVisible(false)}
 			/>

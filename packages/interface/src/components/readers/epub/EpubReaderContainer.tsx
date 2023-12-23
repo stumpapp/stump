@@ -8,7 +8,10 @@ import EpubReaderHeader from './EpubReaderHeader'
 type Props = {
 	children: React.ReactNode
 	readerMeta: EpubReaderMeta
-	controls: Pick<EpubReaderControls, 'onLinkClick' | 'onPaginateBackward' | 'onPaginateForward'>
+	controls: Pick<
+		EpubReaderControls,
+		'onLinkClick' | 'onPaginateBackward' | 'onPaginateForward' | 'getCfiPreviewText'
+	>
 }
 
 /**

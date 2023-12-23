@@ -4,132 +4,15 @@ use pdf::{
 	object::InfoDict,
 	primitive::{Dictionary, PdfString},
 };
-use regex::Regex;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::{media_metadata, series_metadata};
+use crate::prisma::media_metadata;
 
-//////////////////////////////////////////////
-//////////////// PRISMA MACROS ///////////////
-//////////////////////////////////////////////
-
-media_metadata::select!(metadata_available_genre_select { genre });
-media_metadata::select!(metadata_available_writers_select { writers });
-media_metadata::select!(metadata_available_pencillers_select { pencillers });
-media_metadata::select!(metadata_available_inkers_select { inkers });
-media_metadata::select!(metadata_available_colorists_select { colorists });
-media_metadata::select!(metadata_available_letterers_select { letterers });
-media_metadata::select!(metadata_available_editors_select { editors });
-media_metadata::select!(metadata_available_publisher_select { publisher });
-media_metadata::select!(metadata_available_characters_select { characters });
-media_metadata::select!(metadata_available_teams_select { teams });
-
-///////////////////////////////////////////////
-//////////////////// MODELS ///////////////////
-///////////////////////////////////////////////
-
-fn string_list_deserializer<'de, D>(
-	deserializer: D,
-) -> Result<Option<Vec<String>>, D::Error>
-where
-	D: Deserializer<'de>,
-{
-	let str_sequence = String::deserialize(deserializer)?;
-	Ok(Some(
-		str_sequence
-			.split(',')
-			.map(|item| item.trim().to_owned())
-			.collect(),
-	))
-}
-
-// https://anansi-project.github.io/docs/comicinfo/schemas/v2.1
-/// Deserializes a string into an age rating. This isn't the fanciest deserializer,
-/// but it's fine.
-pub fn age_rating_deserializer<'de, D>(deserializer: D) -> Result<Option<i32>, D::Error>
-where
-	D: Deserializer<'de>,
-{
-	// if exists and is empty, return None
-	let str_sequence = Option::<String>::deserialize(deserializer)?
-		.filter(|s| !s.is_empty())
-		.map(|s| s.trim().to_owned());
-
-	if str_sequence.is_none() {
-		return Ok(None);
-	}
-
-	let str_sequence = str_sequence.unwrap();
-
-	// check for the first case G/PG/PG-13/R
-	let age = match str_sequence.to_lowercase().as_str() {
-		"g" | "pg" => Some(0),
-		"pg-13" => Some(13),
-		"r" => Some(17),
-		_ => None,
-	};
-
-	if age.is_some() {
-		return Ok(age);
-	}
-
-	// check for the second case All Ages/Teen/Teen+/Mature
-	let age = match str_sequence.to_lowercase().as_str() {
-		"all ages" => Some(0),
-		"everyone" => Some(0),
-		"early childhood" => Some(8), // TODO: this is a guess
-		"everyone 10+" => Some(10),
-		"teen" => Some(13),
-		"teen+" => Some(16),
-		"ma15+" => Some(15),
-		"mature 17+" => Some(17),
-		"m" => Some(18),
-		"mature" => Some(18),
-		"adults only 18+" => Some(18),
-		"r18+" => Some(18),
-		"x18+" => Some(18),
-		_ => None,
-	};
-
-	if age.is_some() {
-		return Ok(age);
-	}
-
-	// check for the third case \d and up
-	if let Ok(re) = Regex::new(r"(\d+) and up") {
-		let age = re
-			.captures(&str_sequence)
-			.and_then(|c| c.get(1))
-			.and_then(|m| m.as_str().parse().ok());
-
-		if age.is_some() {
-			return Ok(age);
-		}
-	} else {
-		tracing::error!("Failed to create regex for age rating deserializer");
-	}
-
-	// check for the fourth case \d+
-	if let Ok(re) = Regex::new(r"(\d+)") {
-		let age = re
-			.captures(&str_sequence)
-			.and_then(|c| c.get(1))
-			.and_then(|m| m.as_str().parse().ok());
-
-		if age.is_some() {
-			return Ok(age);
-		}
-	} else {
-		tracing::error!("Failed to create regex for age rating deserializer");
-	}
-
-	// check final case of just a number
-	let age = str_sequence.parse().ok();
-
-	Ok(age)
-}
+use super::common::{
+	age_rating_deserializer, comma_separated_list_to_vec, string_list_deserializer,
+};
 
 // TODO: author field?
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
@@ -295,61 +178,6 @@ impl MediaMetadata {
 	}
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
-pub struct SeriesMetadata {
-	/// The type of series. ex: "comicSeries"
-	#[serde(alias = "type")]
-	pub _type: String,
-	/// The title of the series, renamed from 'name' to keep consistency with the rest of the models
-	pub title: Option<String>,
-	/// The associated series' description, renamed from 'description' to keep consistency with the rest of the models
-	pub summary: Option<String>,
-	/// The publisher of the associated series
-	pub publisher: Option<String>,
-	/// The name of the imprint while under the publisher
-	pub imprint: Option<String>,
-	/// The ComicVine id of the associated series
-	pub comicid: Option<i32>,
-	/// The volume of the series in relation to other titles (this can be either numerical or the series year)
-	pub volume: Option<i32>,
-	/// The booktype of the series, e.g. Print, OneShot, TPB or GN
-	pub booktype: Option<String>,
-	/// The age rating of the associated series
-	#[serde(deserialize_with = "age_rating_deserializer")]
-	pub age_rating: Option<i32>,
-	/// The status of the associated series, e.g. Continuing, Ended
-	pub status: Option<String>,
-}
-
-pub type SeriesMetadataCreateAction = (String, Vec<series_metadata::SetParam>);
-
-impl SeriesMetadata {
-	pub fn create_action(self) -> (String, Vec<series_metadata::SetParam>) {
-		(
-			self._type,
-			vec![
-				series_metadata::title::set(self.title),
-				series_metadata::summary::set(self.summary),
-				series_metadata::publisher::set(self.publisher),
-				series_metadata::imprint::set(self.imprint),
-				series_metadata::comicid::set(self.comicid),
-				series_metadata::volume::set(self.volume),
-				series_metadata::booktype::set(self.booktype),
-				series_metadata::age_rating::set(self.age_rating),
-				series_metadata::status::set(self.status),
-			],
-		)
-	}
-}
-
-///////////////////////////////////////////////
-////////////////// CONVERSIONS ////////////////
-///////////////////////////////////////////////
-
-fn comma_separated_list_to_vec(vec: String) -> Vec<String> {
-	vec.split(',').map(|v| v.trim().to_owned()).collect()
-}
-
 impl From<media_metadata::Data> for MediaMetadata {
 	fn from(metadata: media_metadata::Data) -> Self {
 		MediaMetadata {
@@ -465,23 +293,6 @@ impl From<InfoDict> for MediaMetadata {
 			day: dict.creation_date.as_ref().map(|date| date.day as i32),
 			writers: dict.author.and_then(pdf_string_to_string).map(|v| vec![v]),
 			..Default::default()
-		}
-	}
-}
-
-impl From<series_metadata::Data> for SeriesMetadata {
-	fn from(metadata: series_metadata::Data) -> Self {
-		SeriesMetadata {
-			_type: metadata.meta_type,
-			title: metadata.title,
-			summary: metadata.summary,
-			publisher: metadata.publisher,
-			imprint: metadata.imprint,
-			comicid: metadata.comicid,
-			volume: metadata.volume,
-			booktype: metadata.booktype,
-			age_rating: metadata.age_rating,
-			status: metadata.status,
 		}
 	}
 }

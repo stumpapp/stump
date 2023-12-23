@@ -5,7 +5,7 @@ const DEFAULT_EPUB_COVER_ID: &str = "cover";
 
 use crate::{
 	config::StumpConfig,
-	db::entity::metadata::MediaMetadata,
+	db::entity::MediaMetadata,
 	filesystem::{content_type::ContentType, error::FileError, hash},
 };
 use epub::doc::EpubDoc;

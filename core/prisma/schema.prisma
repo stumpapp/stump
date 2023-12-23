@@ -35,6 +35,7 @@ model User {
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
   login_activity    UserLoginActivity[]
+  bookmarks         Bookmark[]
   media_annotations MediaAnnotation[]
   sessions          Session[]
 
@@ -179,6 +180,7 @@ model Media {
   book_club_suggestions          BookClubBookSuggestion[]
   book_club_books                BookClubBook[]
   book_club_member_favorite_book BookClubMemberFavoriteBook[]
+  bookmarks                      Bookmark[]
 
   @@map("media")
 }
@@ -264,14 +266,31 @@ model ReadProgress {
   @@map("read_progresses")
 }
 
-//* NOTE: Only EPUB files currently support annotations. I expect maybe someday
-//* PDFs might, as well. I don't intend on adding support for annotations to archive
-//* formats like CBZ or CBR, unless there is demand for it.
+model Bookmark {
+  id String @id @default(uuid())
+
+  preview_content String?
+  epubcfi         String?
+  page            Int?
+
+  media_id String
+  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, media_id, epubcfi, page])
+  @@map("bookmarks")
+}
+
 model MediaAnnotation {
-  id      String  @id @default(uuid())
-  kind    String // "HIGHLIGHT" or "ANNOTATION" or "BOOKMARK"
-  epubcfi String?
-  text    String?
+  id                 String  @id @default(uuid())
+  highlighted_text   String?
+  epubcfi            String?
+  page               Int?
+  page_coordinates_x Float? // relative to where the annotation was made on the page
+  page_coordinates_y Float? // relative to where the annotation was made on the page
+  notes              String?
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)

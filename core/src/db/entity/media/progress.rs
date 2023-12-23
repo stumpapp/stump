@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::prisma;
 
-use super::{media::Media, user::User};
+use crate::db::entity::{Media, User};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema, Default)]
 pub struct ReadProgress {

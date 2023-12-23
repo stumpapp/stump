@@ -4,7 +4,7 @@ use tracing::trace;
 use utoipa::ToSchema;
 
 use crate::{
-	db::entity::{Cursor, Library, Media, Series},
+	db::entity::{common::Cursor, Library, Media, Series},
 	filesystem::DirectoryListing,
 };
 

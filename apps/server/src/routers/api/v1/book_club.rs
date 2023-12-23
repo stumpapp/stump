@@ -14,10 +14,12 @@ use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
 	db::entity::{
-		book_club_member_and_schedule_include, book_club_with_books_include,
-		book_club_with_schedule, BookClub, BookClubBook, BookClubInvitation,
-		BookClubMember, BookClubMemberRole, BookClubMemberRoleSpec, BookClubSchedule,
-		User, UserPermission,
+		macros::{
+			book_club_member_and_schedule_include, book_club_with_books_include,
+			book_club_with_schedule,
+		},
+		BookClub, BookClubBook, BookClubInvitation, BookClubMember, BookClubMemberRole,
+		BookClubMemberRoleSpec, BookClubSchedule, User, UserPermission,
 	},
 	prisma::{
 		book_club, book_club_book, book_club_invitation, book_club_member,

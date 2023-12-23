@@ -1,2 +1,2 @@
 // Note: this isn't used, but needed for intellisense. >:(
-module.exports = require('../components/tailwind/tailwind.js')('interface')
+module.exports = require('../packages/components/tailwind/tailwind.js')('interface')

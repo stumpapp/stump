@@ -107,6 +107,7 @@ module.exports = function (relativeFromRoot) {
 	let config = {
 		content: [
 			'../../interface/src/**/*.{js,ts,jsx,tsx,html}',
+			'../../packages/*/src/**/*.{js,ts,jsx,tsx,html}',
 			path.join(basePath, './src/**/*.(js|jsx|ts|tsx)'),
 		],
 		darkMode: 'class',

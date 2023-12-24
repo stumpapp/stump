@@ -1,8 +1,9 @@
 import { useUserStore } from '@stump/client'
-import { Divider, Heading, Text } from '@stump/components'
+import { Heading, Text } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 
+import SettingsHeader from './SettingsHeader'
 // import SettingsNavigation from './SettingsNavigation'
 import SettingsSideBar from './SettingsSideBar'
 
@@ -16,7 +17,8 @@ export default function SettingsLayout() {
 	return (
 		<div className="flex h-full w-full flex-col md:flex-row">
 			<SettingsSideBar />
-			<div className="w-full flex-1 overflow-y-auto">
+			<div className="w-full max-w-4xl flex-1 flex-col overflow-y-auto">
+				<SettingsHeader />
 				<Suspense fallback={null}>
 					<Outlet />
 				</Suspense>
@@ -32,7 +34,6 @@ type SettingsContentProps = {
 export function SettingsContent({ children }: SettingsContentProps) {
 	return (
 		<>
-			<Divider variant="muted" className="my-3.5" />
 			<div className="mt-6 flex flex-col gap-12">{children}</div>
 		</>
 	)
@@ -82,7 +83,6 @@ export function SettingsSubSection({ heading, subtitle, children }: SettingsSubS
 		<>
 			<Heading size="xs">{heading}</Heading>
 			{renderSubtitle()}
-			<Divider variant="muted" className="my-3.5" />
 			{children}
 		</>
 	)

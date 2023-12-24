@@ -7,7 +7,14 @@ type BookReaderParams = {
 	isStreaming?: boolean
 }
 
-type SettingsPage = 'general' | 'users' | 'jobs' | 'desktop' | 'server'
+type SettingsPage =
+	| 'app/general'
+	| 'app/appearance'
+	| 'app/desktop'
+	| 'server/general'
+	| 'server/users'
+	| 'server/access'
+	| 'server/notifications'
 type DocTopic = 'access-control' | 'book-club'
 type BookClubTab = 'overview' | 'members' | 'chat-board' | 'settings'
 
@@ -84,7 +91,7 @@ const paths = {
 		return `/series/${id}`
 	},
 	settings: (subpath?: SettingsPage) => `/settings/${subpath || ''}`,
-	updateUser: (id: string) => `${paths.settings('users')}/${id}/manage`,
+	updateUser: (id: string) => `${paths.settings('server/users')}/${id}/manage`,
 } as const
 
 export default paths

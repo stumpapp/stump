@@ -10,7 +10,7 @@ export type AvatarProps = {
 	fallback?: React.ReactNode
 	fallbackWrapperClassName?: string
 	fallbackColor?: 'brand' | 'gray'
-	rounded: 'none' | 'sm' | 'md' | 'lg' | 'full'
+	rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
 } & React.ComponentPropsWithoutRef<typeof AvatarPrimitive>
 export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 	(

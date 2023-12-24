@@ -7,7 +7,6 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import { useAppContext } from '../context'
 import paths from '../paths'
 import SignOut from './sidebar/SignOut'
-import ThemeSwitch from './sidebar/ThemeSwitch'
 
 export default function UserMenu() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -49,7 +48,7 @@ export default function UserMenu() {
 						<div className="flex w-full flex-col">
 							<Link
 								className="bg-sidebar-300 text-muted pointer-events-none flex h-[2.35rem] w-full items-center  px-2 text-sm transition-colors duration-150"
-								to={paths.settings('general')}
+								to={paths.settings('server/notifications')}
 								onClick={() => setIsOpen(false)}
 							>
 								<Bell className="mr-1.5 h-4 w-4 " />
@@ -58,16 +57,12 @@ export default function UserMenu() {
 
 							<Link
 								className="text-contrast-200 flex h-[2.35rem] w-full items-center px-2 text-sm transition-colors duration-150"
-								to={paths.settings('general')}
+								to={paths.settings('app/general')}
 								onClick={() => setIsOpen(false)}
 							>
 								<Settings className="mr-1.5 h-4 w-4" />
 								Settings
 							</Link>
-						</div>
-
-						<div className="w-full">
-							<ThemeSwitch />
 						</div>
 
 						<div className="w-full">

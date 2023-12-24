@@ -16,20 +16,17 @@ export function useTheme({ onError }: UseThemeParams = {}) {
 	}))
 	const { update } = useUpdatePreferences()
 
-	const isDark = (userPreferences?.app_theme || 'light').toLowerCase() === 'dark'
-
-	async function toggleTheme() {
+	const changeTheme = (theme: string) => {
 		if (userPreferences) {
-			const newTheme = isDark ? 'light' : 'dark'
 			setUserPreferences({
 				...userPreferences,
-				app_theme: newTheme,
+				app_theme: theme,
 			})
 
 			try {
-				await update({
+				update({
 					...userPreferences,
-					app_theme: newTheme,
+					app_theme: theme,
 				})
 			} catch (err) {
 				console.error(err)
@@ -38,5 +35,5 @@ export function useTheme({ onError }: UseThemeParams = {}) {
 		}
 	}
 
-	return { isDark, theme: userPreferences?.app_theme || 'light', toggleTheme }
+	return { changeTheme, theme: userPreferences?.app_theme || 'light' }
 }

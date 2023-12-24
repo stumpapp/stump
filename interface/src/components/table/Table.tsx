@@ -165,7 +165,7 @@ export default function Table<T, V>({
 					</tbody>
 				</table>
 			</div>
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between px-3">
 				<div className="flex items-center gap-4">
 					<Text
 						variant="muted"

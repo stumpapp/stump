@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
-		entity::server_config::JobSchedulerConfig,
+		entity::JobSchedulerConfig,
 		query::{
 			ordering::QueryOrder,
 			pagination::{Pageable, Pagination, PaginationQuery},

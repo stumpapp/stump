@@ -11,6 +11,7 @@ _FORCE_INSTALL_PNPM=${INSTALL_PNPM:=0}
 dev_setup() {
   set -ex; \
     cargo install cargo-watch; \
+    cargo install cargo-workspaces; \
     pnpm run setup; \
     set +x
 }

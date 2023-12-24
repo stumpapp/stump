@@ -18,8 +18,8 @@ mod tests {
 	};
 
 	use super::v1::{
-		auth::*, book_club::*, job::*, library::*, media::*, metadata::*, series::*,
-		user::*, ClaimResponse, StumpVersion,
+		auth::*, book_club::*, epub::*, job::*, library::*, media::*, metadata::*,
+		series::*, user::*, ClaimResponse, StumpVersion,
 	};
 
 	#[allow(dead_code)]
@@ -79,6 +79,10 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
 		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateBookmark>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<DeleteBookmark>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesIsComplete>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),

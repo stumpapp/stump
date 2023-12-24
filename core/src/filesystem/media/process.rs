@@ -10,10 +10,7 @@ use tracing::debug;
 
 use crate::{
 	config::StumpConfig,
-	db::entity::{
-		metadata::{MediaMetadata, SeriesMetadata},
-		LibraryOptions,
-	},
+	db::entity::{LibraryOptions, MediaMetadata, SeriesMetadata},
 	filesystem::{
 		content_type::ContentType, epub::EpubProcessor, error::FileError,
 		image::ImageFormat, pdf::PdfProcessor,

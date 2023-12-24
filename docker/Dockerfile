@@ -39,10 +39,10 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev;
 
 COPY . .
-RUN ./scripts/release/build-utils.sh -w;
+RUN ./scripts/release/utils.sh -w;
 
 RUN set -ex; \
-    ./scripts/release/build-utils.sh -p; \
+    ./scripts/release/utils.sh -p; \
     cargo build --package stump_server --bin stump_server --release; \
     cp ./target/release/stump_server ./stump_server
 
@@ -84,7 +84,7 @@ COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium
 COPY --from=frontend /app/build /app/client
 
-COPY scripts/release/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so

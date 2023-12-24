@@ -4,15 +4,15 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::prisma::{library, series};
-
-use super::{
-	common::FileStatus,
-	library::Library,
-	media::Media,
-	metadata::{SeriesMetadata, SeriesMetadataCreateAction},
-	tag::Tag,
-	Cursor,
+use crate::{
+	db::{
+		entity::{
+			common::Cursor, Library, Media, SeriesMetadata, SeriesMetadataCreateAction,
+			Tag,
+		},
+		FileStatus,
+	},
+	prisma::{library, series},
 };
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
@@ -38,13 +38,17 @@ pub struct Series {
 	pub media: Option<Vec<Media>>,
 	/// The metadata for this series. Will be `None` if the relation is not loaded or if the series has no metadata.
 	pub metadata: Option<SeriesMetadata>,
-	#[serde(skip_serializing_if = "Option::is_none")]
 	/// The number of media in this series. Optional for safety, but should be loaded if possible.
-	pub media_count: Option<i64>,
 	#[serde(skip_serializing_if = "Option::is_none")]
+	#[specta(optional)]
+	pub media_count: Option<i64>,
 	/// The number of media in this series which have not been read. Only loaded on some queries.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[specta(optional)]
 	pub unread_media_count: Option<i64>,
 	/// The user assigned tags for the series. ex: ["comic", "family"]. Will be `None` only if the relation is not loaded.
+	#[serde(skip_serializing_if = "Option::is_none")]
+	#[specta(optional)]
 	pub tags: Option<Vec<Tag>>,
 }
 

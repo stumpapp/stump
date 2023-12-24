@@ -1,19 +1,22 @@
-import { API, updateEpubProgress } from '@stump/api'
+import { API, epubApi, epubQueryKeys, updateEpubProgress } from '@stump/api'
 import {
 	type EpubReaderPreferences,
 	queryClient,
 	useEpubLazy,
 	useEpubReader,
+	useQuery,
 	useTheme,
 } from '@stump/client'
-import { UpdateEpubProgress } from '@stump/types'
+import { Bookmark, UpdateEpubProgress } from '@stump/types'
 import { Book, Rendition } from 'epubjs'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
+import AutoSizer from 'react-virtualized-auto-sizer'
 
-// import { useSwipeable } from 'react-swipeable'
 import EpubReaderContainer from './EpubReaderContainer'
 import { stumpDark } from './themes'
+
+// NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 
 /** The props for the EpubJsReader component */
 type EpubJsReaderProps = {
@@ -73,13 +76,41 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		epubPreferences: state.preferences,
 	}))
 
+	const { data: bookmarks } = useQuery([epubQueryKeys.getBookmarks, id], async () => {
+		try {
+			const { data } = await epubApi.getBookmarks(id)
+			return data
+		} catch (error) {
+			console.error('Failed to fetch bookmarks', error)
+			return []
+		}
+	})
+	const existingBookmarks = useMemo(
+		() =>
+			(bookmarks ?? []).reduce(
+				(acc, bookmark) => {
+					if (!bookmark.epubcfi) {
+						return acc
+					} else {
+						acc[bookmark.epubcfi] = bookmark
+						return acc
+					}
+				},
+				{} as Record<string, Bookmark>,
+			),
+
+		[bookmarks],
+	)
+
 	//* Note: some books have entries in the spine for each href, some don't. It seems
 	//* mostly just a matter of if the epub is good.
 	const { chapter, chapterName } = useMemo(() => {
 		let name: string | undefined
 
 		const currentHref = currentLocation?.start.href
-		const position = book?.navigation?.toc?.findIndex((toc) => toc.href === currentHref)
+		const position = book?.navigation?.toc?.findIndex(
+			(toc) => toc.href === currentHref || (!!currentHref && toc.href.startsWith(currentHref)),
+		)
 
 		if (position !== undefined && position !== -1) {
 			name = book?.navigation.toc[position]?.label.trim()
@@ -118,8 +149,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * otherwise not be able to authenticate with the server.
 	 */
 	useEffect(() => {
-		if (!ref.current) return
-
 		if (!book) {
 			setBook(
 				new Book(`${API.getUri()}/media/${id}/file`, {
@@ -140,8 +169,10 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	const applyEpubPreferences = (rendition: Rendition, preferences: EpubReaderPreferences) => {
 		if (isDark) {
 			rendition.themes.select('stump-dark')
+		} else {
+			rendition.themes.select('stump-light')
 		}
-
+		rendition.direction(preferences.readingDirection)
 		rendition.themes.fontSize(`${preferences.fontSize}px`)
 	}
 
@@ -153,7 +184,6 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	useEffect(
 		() => {
 			if (!book) return
-			if (!ref.current) return
 
 			book.ready.then(() => {
 				if (book.spine) {
@@ -202,6 +232,43 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book],
 	)
 
+	// TODO: this needs to have fullscreen as an effect dependency
+	/**
+	 * This effect is responsible for resizing the epubjs rendition instance whenever the
+	 * div it attaches to is resized.
+	 *
+	 * Resizing here typically happens, outside user-initiated
+	 * events like window resizing, when the fullscreen state changes.
+	 */
+	useEffect(() => {
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				const { width, height } = entry.contentRect
+
+				const { width: currentWidth, height: currentHeight } = ref.current
+					? ref.current.getBoundingClientRect()
+					: {
+							height: 0,
+							width: 0,
+					  }
+
+				if (currentWidth === width && currentHeight === height) {
+					continue
+				}
+
+				rendition?.resize(width, height)
+			}
+		})
+
+		if (ref.current) {
+			resizeObserver.observe(ref.current)
+		}
+
+		return () => {
+			resizeObserver.disconnect()
+		}
+	}, [rendition])
+
 	/**
 	 * This effect is responsible for updating the epub theme options whenever the epub
 	 * preferences change. It will only run when the epub preferences change and the
@@ -215,7 +282,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		},
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[rendition, epubPreferences],
+		[rendition, epubPreferences, isDark],
 	)
 
 	/**
@@ -269,7 +336,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				return
 			}
 
-			const failureMessage = 'Failed to navigate, please check the integrity of the epub file.'
+			const failureMessage = 'Failed to navigate, please check the integrity of the epub file'
 			const adjusted = href.split('#')[0]
 
 			let spineItem = book.spine.get(adjusted)
@@ -392,6 +459,66 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[currentLocation, spineSize],
 	)
 
+	/**
+	 * A callback for attempting to extract preview text from a given cfi. This is used for bookmarks,
+	 * to provide a preview of the bookmarked start location
+	 */
+	const getCfiPreviewText = useCallback(
+		async (cfi: string) => {
+			if (!book) return null
+
+			const range = await book.getRange(cfi)
+			if (!range) return null
+
+			return range.commonAncestorContainer?.textContent ?? null
+		},
+		[book],
+	)
+
+	// TODO: figure this out! Basically, I would (ideally) like to be able to determine if a bookmark
+	// 'exists' within another. This can happen when you move between viewport sizes..
+	// const cfiWithinAnother = useCallback(
+	// 	async (cfi: string, otherCfi: string) => {
+	// 		if (!book) return false
+
+	// 		const range = await book.getRange(cfi)
+	// 		const otherRange = await book.getRange(otherCfi)
+
+	// 		if (!range || !otherRange) return false
+
+	// 		console.log({ otherRange, range })
+
+	// 		const firstStartNode = range.startContainer
+	// 		const firstEndNode = range.endContainer
+
+	// 		range.commonAncestorContainer
+
+	// 		// const firstIsInOther = range.isPointInRange(otherRange.startContainer, otherRange.startOffset)
+	// 		// const otherIsInFirst = otherRange.isPointInRange(range.startContainer, range.startOffset)
+
+	// 		// return firstIsInOther || otherIsInFirst
+
+	// 		book.locations.generate(10000)
+
+	// 		const first = new EpubCFI(cfi)
+	// 		const second = new EpubCFI(otherCfi)
+
+	// 		console.log({ compare: first.compare(cfi, otherCfi) })
+	// 		console.log({ first, second })
+
+	// 		const location1 = book.locations.locationFromCfi(cfi)
+	// 		const location2 = book.locations.locationFromCfi(otherCfi)
+
+	// 		console.log({ location1, location2 })
+	// 	},
+	// 	[book, rendition],
+	// )
+
+	// cfiWithinAnother(
+	// 	'epubcfi(/6/12!/4[3Q280-a9efbf2f573d4345819e3829f80e5dbc]/2[prologue]/2/2/2/4/2[calibre_pb_0]/1:0)',
+	// 	'epubcfi(/6/12!/4[3Q280-a9efbf2f573d4345819e3829f80e5dbc]/2[prologue]/4[prologue-text]/8/1:56)',
+	// ).then((res) => console.log('cfiWithinAnother', res))
+
 	if (isLoading || !epub) {
 		return null
 	}
@@ -401,7 +528,9 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			readerMeta={{
 				bookEntity: epub.media_entity,
 				bookMeta: {
+					bookmarks: existingBookmarks,
 					chapter: {
+						cfiRange: [currentLocation?.start.cfi, currentLocation?.end.cfi],
 						currentPage: [
 							currentLocation?.start.displayed.page,
 							currentLocation?.end.displayed.page,
@@ -415,12 +544,19 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				progress: epub.media_entity.read_progresses?.[0]?.percentage_completed || null,
 			}}
 			controls={{
+				getCfiPreviewText,
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,
 			}}
 		>
-			<div className="h-full w-full" ref={ref} />
+			<div className="h-full w-full">
+				<AutoSizer>
+					{({ height, width }) => {
+						return <div ref={ref} style={{ height, width }} />
+					}}
+				</AutoSizer>
+			</div>
 		</EpubReaderContainer>
 	)
 }

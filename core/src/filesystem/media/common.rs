@@ -1,6 +1,6 @@
 use tracing::error;
 
-use crate::db::entity::metadata::MediaMetadata;
+use crate::db::entity::MediaMetadata;
 
 pub fn is_accepted_cover_name(name: &str) -> bool {
 	let cover_file_names = ["cover", "thumbnail", "folder"];

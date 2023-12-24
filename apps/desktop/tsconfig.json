@@ -3,6 +3,8 @@
 	"compilerOptions": {
 		"types": ["vite/client"],
 		"jsx": "preserve",
+		"module": "es2022",
+		"moduleResolution": "Node",
 		"outDir": "../../.moon/cache/types/apps/desktop",
 		"paths": {
 			"@stump/client": ["../../packages/client/src/index.ts"],

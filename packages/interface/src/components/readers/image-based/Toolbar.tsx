@@ -3,11 +3,11 @@ import { cx, Heading } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'phosphor-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
-import paths from '../../../paths'
-import ThemeToggle from '../../sidebar/ThemeToggle'
+import ThemeToggle from '@/components/ThemeToggle'
+import paths from '@/paths'
 
 interface ToolbarProps {
 	title: string
@@ -31,13 +31,15 @@ export default function Toolbar({
 
 	const parentRef = useRef<HTMLDivElement>(null)
 	const rangeRef = useRef([0, 0])
+
 	const columnVirtualizer = useVirtualizer({
 		count: pages,
 		enableSmoothScroll: true,
 		estimateSize: () => 85,
 		getScrollElement: () => parentRef.current,
 		horizontal: true,
-		overscan: 3,
+		initialOffset: useMemo(() => 85 * currentPage, [currentPage]),
+		overscan: 1,
 		rangeExtractor: useCallback((range: Range) => {
 			rangeRef.current = [range.startIndex, range.endIndex]
 			return defaultRangeExtractor(range)

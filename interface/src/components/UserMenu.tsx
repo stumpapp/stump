@@ -42,26 +42,26 @@ export default function UserMenu() {
 					</Popover.Trigger>
 
 					<Popover.Content
-						className="divide-edge flex flex-col divide-y overflow-hidden border-opacity-50 p-0 shadow-sm dark:divide-gray-800 dark:bg-gray-950"
+						className="divide-edge-200 bg-sidebar-200 border-edge-200 flex flex-col divide-y overflow-hidden p-0 shadow-sm"
 						align="start"
 						style={{ width }}
 					>
 						<div className="flex w-full flex-col">
 							<Link
-								className="pointer-events-none flex h-[2.35rem] w-full items-center bg-gray-50/80 px-2 text-sm transition-colors duration-150 hover:bg-gray-75/75 dark:bg-gray-700/20 dark:text-gray-400 dark:hover:bg-gray-900"
+								className="bg-sidebar-300 text-muted pointer-events-none flex h-[2.35rem] w-full items-center  px-2 text-sm transition-colors duration-150"
 								to={paths.settings('general')}
 								onClick={() => setIsOpen(false)}
 							>
-								<Bell className="mr-1.5 h-4 w-4 dark:text-gray-400" />
+								<Bell className="mr-1.5 h-4 w-4 " />
 								Notifications
 							</Link>
 
 							<Link
-								className="flex h-[2.35rem] w-full items-center px-2 text-sm transition-colors duration-150 hover:bg-gray-75/75 dark:text-gray-100 dark:hover:bg-gray-900"
+								className="text-contrast-200 flex h-[2.35rem] w-full items-center px-2 text-sm transition-colors duration-150"
 								to={paths.settings('general')}
 								onClick={() => setIsOpen(false)}
 							>
-								<Settings className="mr-1.5 h-4 w-4 dark:text-gray-150" />
+								<Settings className="mr-1.5 h-4 w-4" />
 								Settings
 							</Link>
 						</div>

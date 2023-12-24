@@ -107,6 +107,7 @@ module.exports = function (relativeFromRoot) {
 			require('tailwindcss-autofill'),
 			// require('tailwindcss-text-fill'),
 			// require('tailwindcss-shadow-fill'),
+			// TODO: move these themes to separate files and create types to enforce structures
 			createThemes({
 				light: {
 					brand,
@@ -143,23 +144,30 @@ module.exports = function (relativeFromRoot) {
 					brand,
 					sidebar: {
 						DEFAULT: '#151517',
+						200: '#161718',
+						300: '#1F2123',
 					},
 					background: {
 						DEFAULT: '#161719',
 						100: '#161719',
-						200: '#161718',
-						300: '#1B1C1D',
-						400: '#1F2123',
-						500: '#242628',
+						200: '#1B1C1D',
+						300: '#1F2123',
+						400: '#242628',
+						500: '#292C30',
 					},
 					contrast: {
 						DEFAULT: '#FFFFFF',
 						100: '#FFFFFF',
 						200: '#FBFAF9',
 					},
+					muted: {
+						DEFAULT: '#898D94',
+						100: '#898D94',
+						200: '#71757D',
+					},
 					edge: {
-						DEFAULT: '#1B1C1D',
-						200: '#161718',
+						DEFAULT: '#1F2123',
+						200: '#242628',
 					},
 				},
 			}),

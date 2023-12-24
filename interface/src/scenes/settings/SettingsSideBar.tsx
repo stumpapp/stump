@@ -1,47 +1,75 @@
-import { Heading, Label } from '@stump/components'
-import { User } from '@stump/types'
-import { Link } from 'react-router-dom'
+import { Label } from '@stump/components'
+import { Bell, Brush, Cog, ShieldCheck, Users } from 'lucide-react'
+import { useLocation } from 'react-router'
 
-type Props = {
-	user?: User | null
-}
+import SettingsSideBarLink from './SettingsSideBarLink'
 
-export default function SettingsSideBar({ user }: Props) {
-	console.debug(user)
+export default function SettingsSideBar() {
+	const location = useLocation()
 
 	return (
-		<div className="border-edge bg-background relative flex h-full w-48 shrink-0 flex-col gap-4 border-r px-2 py-4">
-			<div>
-				<Label className="mb-2">Application</Label>
+		<div className="border-edge bg-background text-contrast-200 relative flex h-full w-48 shrink-0 flex-col gap-4 border-r px-2 py-4">
+			{groups.map((group) => (
+				<div key={group.label}>
+					<Label>{group.label}</Label>
 
-				<ul>
-					<Link to="/settings/app/general">
-						<li className="rounded-md px-2 py-1 dark:hover:bg-gray-950">General</li>
-					</Link>
-					<Link to="/settings/app/appearance">
-						<li className="rounded-md px-2 py-1 dark:hover:bg-gray-950">Appearance</li>
-					</Link>
-				</ul>
-			</div>
-
-			<div>
-				<Label className="mb-2">Server</Label>
-
-				<ul>
-					<Link to="/settings/server/general">
-						<li className="rounded-md px-2 py-1 dark:hover:bg-gray-950">General</li>
-					</Link>
-					<Link to="/settings/server/users">
-						<li className="rounded-md px-2 py-1 dark:hover:bg-gray-950">Users</li>
-					</Link>
-					<Link to="/settings/server/access">
-						<li className="rounded-md px-2 py-1 dark:hover:bg-gray-950">Access</li>
-					</Link>
-					<Link to="/settings/server/notifications">
-						<li className="rounded-md px-2 py-1 dark:hover:bg-gray-950">Notifications</li>
-					</Link>
-				</ul>
-			</div>
+					<ul className="pt-2 text-sm">
+						{group.items.map((item) => (
+							<SettingsSideBarLink
+								key={item.to}
+								to={item.to}
+								isActive={location.pathname.startsWith(item.to)}
+								icon={item.icon}
+							>
+								{item.label}
+							</SettingsSideBarLink>
+						))}
+					</ul>
+				</div>
+			))}
 		</div>
 	)
 }
+
+const groups = [
+	{
+		items: [
+			{
+				icon: Cog,
+				label: 'General',
+				to: '/settings/app/general',
+			},
+			{
+				icon: Brush,
+				label: 'Appearance',
+				to: '/settings/app/appearance',
+			},
+		],
+		label: 'Application',
+	},
+	{
+		items: [
+			{
+				icon: Cog,
+				label: 'General',
+				to: '/settings/server/general',
+			},
+			{
+				icon: Users,
+				label: 'Users',
+				to: '/settings/server/users',
+			},
+			{
+				icon: ShieldCheck,
+				label: 'Access',
+				to: '/settings/server/access',
+			},
+			{
+				icon: Bell,
+				label: 'Notifications',
+				to: '/settings/server/notifications',
+			},
+		],
+		label: 'Server',
+	},
+]

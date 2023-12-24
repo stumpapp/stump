@@ -25,7 +25,7 @@ const headingVariants = cva(HEADING_BASE_CLASSES, {
 			xxs: 'text-sm',
 		},
 		variant: {
-			default: 'dark:text-gray-100',
+			default: 'text-contrast',
 			gradient: 'bg-gradient-to-r from-brand-600 to-brand-500 bg-clip-text text-transparent',
 		},
 	},

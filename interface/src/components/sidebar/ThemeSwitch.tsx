@@ -14,16 +14,16 @@ export default function ThemeSwitch({ showIcon = true, activeOnHover = true, cla
 	return (
 		<label
 			className={cn(
-				'flex h-[2.35rem] w-full items-center justify-between px-2',
+				'text-contrast-200 flex h-[2.35rem] w-full items-center justify-between px-2',
 				{
-					'dark:hover:bg-gray-900': activeOnHover,
+					'hover:bg-sidebar-300': activeOnHover,
 				},
 				className,
 			)}
 			form="dark-mode-toggle"
 		>
 			<div className="flex items-center gap-1.5">
-				{showIcon && <Moon className="h-4 w-4 dark:text-gray-150" />}
+				{showIcon && <Moon className="h-4 w-4" />}
 				<Text className="select-none" size="sm" variant="label">
 					Dark mode
 				</Text>

@@ -16,10 +16,18 @@ enum WorkerCommand {
 
 #[derive(Debug)]
 enum WorkerUpdate {
+	/// Sent when a job has started, includes the [Uuid] for the job.
 	JobStarted(Uuid),
+	/// Sent when a job has executed its `do_work` function, includes the progress
+	/// as an [f64] between 0 and 1.
 	JobProgress(f64),
+	/// Sent wehn a job has been completed.
 	JobCompleted,
+	/// Sent if a job is unable to start. Includes the job which was expected to start
+	/// so that it can be requeued.
 	JobStartError(Box<dyn StatefulJob>),
+	/// Sent when the worker has shut down.
+	Shutdown,
 }
 
 #[derive(Debug)]
@@ -35,6 +43,8 @@ enum WorkerState {
 pub struct WorkerManager {
 	/// Indicates the state of the associated worker thread.
 	state: WorkerState,
+	/// Indicates the job [Uuid] pf the worker if it has a job.
+	job_id: Option<Uuid>,
 
 	/// The channel by which commands are sent to the worker thread
 	worker_tx: mpsc::UnboundedSender<WorkerCommand>,
@@ -52,6 +62,8 @@ impl WorkerManager {
 		// Return Self to manage the thread.
 		Self {
 			state: WorkerState::Idle,
+			job_id: None,
+
 			worker_tx,
 			worker_rx,
 		}
@@ -61,12 +73,19 @@ impl WorkerManager {
 	pub fn do_update(&mut self) {
 		while let Ok(update) = self.worker_rx.try_recv() {
 			match update {
-				WorkerUpdate::JobStarted(_) => self.state = WorkerState::Working(0.0),
+				WorkerUpdate::JobStarted(id) => {
+					self.job_id = Some(id);
+					self.state = WorkerState::Working(0.0);
+				},
 				WorkerUpdate::JobProgress(prog) => {
 					self.state = WorkerState::Working(prog)
 				},
-				WorkerUpdate::JobCompleted => self.state = WorkerState::Idle,
+				WorkerUpdate::JobCompleted => {
+					self.job_id = None;
+					self.state = WorkerState::Idle;
+				},
 				WorkerUpdate::JobStartError(_) => panic!("Uhoh JobStartError"),
+				WorkerUpdate::Shutdown => todo!(),
 			}
 		}
 	}
@@ -148,7 +167,7 @@ impl WorkerAgent {
 	}
 
 	/// The main thread loop which runs until a shutdown signal is recieved
-	fn main_loop(mut self) {
+	async fn main_loop(mut self) {
 		// Guard to prevent initiating the main loop twice
 		if self.is_running {
 			tracing::error!("Attempted to start job controller thread twice");
@@ -164,7 +183,7 @@ impl WorkerAgent {
 					WorkerCommand::CancelJob => todo!(),
 					WorkerCommand::PauseJob => todo!(),
 					WorkerCommand::Shutdown => {
-						self.do_shutdown();
+						self.do_shutdown().await;
 						break 'main;
 					},
 				}
@@ -177,15 +196,35 @@ impl WorkerAgent {
 				tracing::error!(
 					"Worker controller reciever disconnected before shutdown"
 				);
-				self.do_shutdown();
+				self.do_shutdown().await;
 				break 'main;
 			}
+
+			// Handle the job (if there is one)
+			if let Some(job) = &mut self.current_job {
+				// If the job isn't finished yet, work on it
+				if !job.is_finished() {
+					job.do_work(&self.worker_ctx).await;
+				}
+				// If it has finished, send an update indicating this
+				// TODO: Verify that this is going to work
+				else {
+					self.send_update(WorkerUpdate::JobCompleted);
+				}
+			}
+			// If there isn't a job, then park the thread and wait for a job.
+			else {
+				todo!()
+			}
 		}
+
+		// Send shutdown message as we exit the loop
+		self.send_update(WorkerUpdate::Shutdown);
 	}
 
-	/// Called when a [WorkerCommand::StartJob] command is recieved. Causes the
-	/// command to be stored in the [WorkerAgent], generates a [Uuid] for the job,
-	/// and transmits a [WorkerUpdate::JobStarted] message containing the id.
+	/// Called when a [WorkerCommand::StartJob] is recieved. Causes the command to be
+	/// stored in the [WorkerAgent], generates a [Uuid] for the job, and transmits a
+	/// [WorkerUpdate::JobStarted] message containing the id.
 	///
 	/// If called when a job is already running, the job is sent back to the sender
 	/// with a [WorkerUpdate::JobStartError] message.
@@ -203,8 +242,12 @@ impl WorkerAgent {
 		}
 	}
 
-	fn do_shutdown(&mut self) {
-		todo!()
+	/// Shut the worker thread down by saving the state of the current job, if any.
+	async fn do_shutdown(&mut self) {
+		// If any jobs are running we need to save their state before exiting
+		if let Some(job) = &self.current_job {
+			job.save_state(&self.worker_ctx).await;
+		}
 	}
 
 	/// A helper function for transmitting updates to the [WorkerManager].

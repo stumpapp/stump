@@ -17,7 +17,7 @@ export const dark = {
 		DEFAULT: '#FFFFFF',
 	},
 	edge: {
-		200: '#242628',
+		200: '#292C30',
 		DEFAULT: '#1F2123',
 	},
 	muted: {

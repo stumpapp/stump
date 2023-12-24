@@ -5,6 +5,9 @@ import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
 
 import { SettingsContent } from '../../SettingsLayout'
+import DisplayAppearanceSettings from './DisplayAppearanceSettings'
+import DoubleSidebarToggle from './DoubleSidebarToggle'
+import PreferColorToggle from './PreferColorToggle'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
 import ThemeSelect from './ThemeSelect'
 
@@ -18,8 +21,14 @@ export default function AppearanceSettingsScene() {
 			</Helmet>
 
 			<SettingsContent>
+				<DisplayAppearanceSettings />
 				<ThemeSelect />
-				<QueryIndicatorToggle />
+
+				<div className="flex flex-col gap-y-8">
+					<PreferColorToggle />
+					<QueryIndicatorToggle />
+					<DoubleSidebarToggle />
+				</div>
 			</SettingsContent>
 		</SceneContainer>
 	)

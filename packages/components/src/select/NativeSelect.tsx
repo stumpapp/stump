@@ -25,12 +25,19 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 			<select
 				ref={ref}
 				className={cn(
-					'flex w-full items-center justify-between rounded-md border border-gray-300 bg-transparent px-3 pl-3 pr-10 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-50 dark:focus:ring-brand-400 dark:focus:ring-offset-gray-900',
+					[
+						'enabled:hover:bg-background-200 bg-transparent focus:bg-transparent',
+						'border-edge-200 border',
+						'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2',
+						'text-contrast-200 placeholder:text-muted text-sm',
+						'disabled:cursor-not-allowed disabled:opacity-50',
+					],
+					'flex w-full items-center justify-between rounded-md bg-transparent px-3 pl-3 pr-10 transition-all duration-150',
 					{
 						[SELECT_SIZES[size ?? 'default']]: size,
 					},
 					{
-						'text-gray-500 dark:text-gray-400': !!emptyOption && props.value === emptyOption.value,
+						'text-muted': !!emptyOption && props.value === emptyOption.value,
 					},
 					className,
 				)}
@@ -42,7 +49,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 					</option>
 				)}
 				{options.map((option) => (
-					<option key={option.value} value={option.value}>
+					<option key={option.value} value={option.value} disabled={option.disabled}>
 						{option.label}
 					</option>
 				))}

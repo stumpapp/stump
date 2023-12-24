@@ -1,7 +1,9 @@
 import { AlarmClock, Bell, Brush, Cog, PcCase, ShieldCheck, Users } from 'lucide-react'
 
+// TODO: permission guards
 export const routeGroups = [
 	{
+		defaultRoute: '/settings/app/general',
 		items: [
 			{
 				icon: Cog,
@@ -25,6 +27,7 @@ export const routeGroups = [
 		label: 'Application',
 	},
 	{
+		defaultRoute: '/settings/server/general',
 		items: [
 			{
 				icon: Cog,

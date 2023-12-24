@@ -603,21 +603,23 @@ model Log {
 }
 
 model UserPreferences {
-  id                      String  @id @default(cuid())
-  // Whether the user wants to see the series in a library as a grid or list
-  library_layout_mode     String  @default("GRID")
-  // Whether the user wants to see the media in a series as a grid or list
-  series_layout_mode      String  @default("GRID")
-  // Whether the user wants to see the media in a collection as a grid or list
-  collection_layout_mode  String  @default("GRID")
-  // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
-  locale                  String  @default("en")
-  // The theme the user has selected. E.g. 'LIGHT' or 'DARK'. Default is 'LIGHT'
-  app_theme               String  @default("LIGHT")
-  // Whether to show an indicator when a query is running in the background
+  id String @id @default(cuid())
+
+  library_layout_mode    String @default("GRID")
+  series_layout_mode     String @default("GRID")
+  collection_layout_mode String @default("GRID")
+
+  // TODO: replace the 3 above with the below:
+  preferred_layout_mode String @default("GRID")
+  locale                String @default("en")
+  app_theme             String @default("LIGHT")
+
   show_query_indicator    Boolean @default(false)
-  // Whether to show the user's activity in Discord when using the Desktop App
   enable_discord_presence Boolean @default(false)
+  enable_compact_display  Boolean @default(false)
+
+  enable_double_sidebar Boolean @default(true)
+  prefer_accent_color   Boolean @default(true)
 
   user    User?
   user_id String? @unique

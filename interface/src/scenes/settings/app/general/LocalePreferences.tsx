@@ -1,8 +1,7 @@
-import { Link, Text } from '@stump/components'
+import { Heading, Link, Text } from '@stump/components'
 import { useMemo } from 'react'
 
 import { useLocaleContext } from '../../../../i18n/context'
-import { SettingsSubSection } from '../../SettingsLayout'
 import LocaleSelector from './LocaleSelector'
 
 export default function LocalePreferences() {
@@ -24,12 +23,13 @@ export default function LocalePreferences() {
 	}, [t])
 
 	return (
-		<div className="pb-2">
-			<SettingsSubSection heading={t('settingsScene.general.locale.heading')} subtitle={subTitle}>
-				<div className="flex max-w-2xl flex-col gap-3 divide-y divide-gray-75 pt-2 dark:divide-gray-900">
-					<LocaleSelector />
-				</div>
-			</SettingsSubSection>
+		<div className="flex flex-col gap-y-4">
+			<div>
+				<Heading size="sm">{t('settingsScene.general.locale.heading')}</Heading>
+				{subTitle}
+			</div>
+
+			<LocaleSelector />
 		</div>
 	)
 }

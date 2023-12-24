@@ -1,12 +1,17 @@
-import { Heading, Text } from '@stump/components'
+import { cx, Heading, Text } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useLocaleContext } from '@/i18n'
 
 import { routeGroups } from './routes'
+import SettingsNavigation from './SettingsNavigation'
 
-export default function SettingsHeader() {
+type Props = {
+	renderNavigation?: boolean
+}
+
+export default function SettingsHeader({ renderNavigation }: Props) {
 	const { t } = useLocaleContext()
 	const location = useLocation()
 
@@ -36,15 +41,18 @@ export default function SettingsHeader() {
 	const translatedDescription = t(`settingsScene.${activeRouteKey}.description`)
 
 	return (
-		<header className="px-4 pt-4">
-			<Heading size="lg" className="font-bold">
-				{translatedHeader}
-			</Heading>
-			{translatedDescription && translatedDescription !== descriptionKey && (
-				<Text variant="muted" className="mt-1.5" size="sm">
-					{translatedDescription}
-				</Text>
-			)}
+		<header className={cx('px-4 pt-4', { 'flex flex-col gap-y-8': renderNavigation })}>
+			{renderNavigation && <SettingsNavigation />}
+			<div>
+				<Heading size="lg" className="font-bold">
+					{translatedHeader}
+				</Heading>
+				{translatedDescription && translatedDescription !== descriptionKey && (
+					<Text variant="muted" className="mt-1.5" size="sm">
+						{translatedDescription}
+					</Text>
+				)}
+			</div>
 		</header>
 	)
 }

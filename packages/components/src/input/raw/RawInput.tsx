@@ -3,8 +3,14 @@ import React from 'react'
 
 import { cn } from '../../utils'
 
-export const RAW_INPUT_BASE_CLASSES =
-	'flex w-full border border-gray-300 border-opacity-70 bg-transparent autofill:shadow-fill-gray-50/50 dark:autofill:shadow-fill-gray-950 outline-none dark:autofill:text-fill-gray-100 text-sm transition-all duration-150 placeholder:text-gray-400 enabled:hover:border-opacity-100 enabled:hover:bg-gray-50/50 focus:bg-transparent focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:border-opacity-70 dark:text-gray-50 dark:enabled:hover:border-opacity-100  dark:enabled:hover:bg-gray-900/50 dark:focus:bg-transparent dark:focus:ring-offset-gray-900'
+export const RAW_INPUT_BASE_CLASSES = [
+	'flex w-full items-center justify-between transition-all duration-150 ',
+	'enabled:hover:bg-background-200 bg-transparent focus:bg-transparent',
+	'border-edge-200 border outline-none',
+	'focus:ring-offset-background focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2',
+	'text-contrast-200 placeholder:text-muted text-sm',
+	'disabled:cursor-not-allowed disabled:opacity-50',
+]
 export const RAW_INPUT_SIZE_VARIANTS = {
 	default: 'h-10 py-2 px-3',
 }

@@ -1,7 +1,7 @@
 import { useUserStore } from '@stump/client'
-import { Heading, Text } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
+import { useMediaMatch } from 'rooks'
 
 import SettingsHeader from './SettingsHeader'
 // import SettingsNavigation from './SettingsNavigation'
@@ -9,16 +9,19 @@ import SettingsSideBar from './SettingsSideBar'
 
 export default function SettingsLayout() {
 	const user = useUserStore((store) => store.user)
+	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	if (!user) {
 		return <Navigate to={`/login?redirect=${encodeURIComponent(window.location.pathname)}`} />
 	}
 
+	const displaySideBar = /*userPreferences.enable_double_sidebar && */ !isMobile
+
 	return (
 		<div className="flex h-full w-full flex-col md:flex-row">
-			<SettingsSideBar />
+			{displaySideBar && <SettingsSideBar />}
 			<div className="w-full max-w-4xl flex-1 flex-col overflow-y-auto">
-				<SettingsHeader />
+				<SettingsHeader renderNavigation={!displaySideBar} />
 				<Suspense fallback={null}>
 					<Outlet />
 				</Suspense>
@@ -32,58 +35,5 @@ type SettingsContentProps = {
 }
 
 export function SettingsContent({ children }: SettingsContentProps) {
-	return (
-		<>
-			<div className="mt-6 flex flex-col gap-12">{children}</div>
-		</>
-	)
-}
-
-type SettingsHeadingProps = {
-	heading: string
-	subtitle: string | React.ReactNode
-}
-
-export function SettingsHeading({ heading, subtitle }: SettingsHeadingProps) {
-	const renderSubtitle = () => {
-		if (typeof subtitle === 'string') {
-			return (
-				<Text size="sm" variant="muted" className="mt-1">
-					{subtitle}
-				</Text>
-			)
-		}
-
-		return subtitle
-	}
-
-	return (
-		<>
-			<Heading>{heading}</Heading>
-			{renderSubtitle()}
-		</>
-	)
-}
-type SettingsSubSectionProps = SettingsContentProps & SettingsHeadingProps
-
-export function SettingsSubSection({ heading, subtitle, children }: SettingsSubSectionProps) {
-	const renderSubtitle = () => {
-		if (typeof subtitle === 'string') {
-			return (
-				<Text size="sm" variant="muted" className="mt-1.5">
-					{subtitle}
-				</Text>
-			)
-		}
-
-		return subtitle
-	}
-
-	return (
-		<>
-			<Heading size="xs">{heading}</Heading>
-			{renderSubtitle()}
-			{children}
-		</>
-	)
+	return <div className="mt-6 flex flex-col gap-8 md:gap-12">{children}</div>
 }

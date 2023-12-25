@@ -1,4 +1,11 @@
-import type { CreateUser, LoginActivity, UpdateUser, User, UserPreferences } from '@stump/types'
+import type {
+	CreateUser,
+	LoginActivity,
+	UpdateUser,
+	UpdateUserPreferences,
+	User,
+	UserPreferences,
+} from '@stump/types'
 
 import { API } from './axios'
 import { ApiResult, PageableApiResult } from './types'
@@ -25,7 +32,7 @@ export function getUserPreferences(userId: string): Promise<ApiResult<UserPrefer
  * Update the current user's preferences
  */
 export function updatePreferences(
-	preferences: UserPreferences,
+	preferences: UpdateUserPreferences,
 ): Promise<ApiResult<UserPreferences>> {
 	return API.put(`/users/me/preferences`, preferences)
 }

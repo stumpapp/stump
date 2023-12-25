@@ -1,10 +1,20 @@
-import { cx, Label } from '@stump/components'
+import { usePreferences } from '@stump/client'
+import { cx, Label, Text } from '@stump/components'
 import { Check } from 'lucide-react'
-import React, { useState } from 'react'
 
-// TODO: support this! lol
 export default function DisplayAppearanceSettings() {
-	const [isDefaultDisplay, setIsDefaultDisplay] = useState(true)
+	const {
+		preferences: { enable_compact_display },
+		update,
+	} = usePreferences()
+
+	const handleChange = async (enable_compact: boolean) => {
+		try {
+			await update({ enable_compact_display: enable_compact })
+		} catch (error) {
+			console.error(error)
+		}
+	}
 
 	return (
 		<div>
@@ -12,15 +22,18 @@ export default function DisplayAppearanceSettings() {
 			<div className="flex items-center gap-x-4 pt-1.5">
 				<AppearanceOption
 					label="Default"
-					isSelected={isDefaultDisplay}
-					onSelect={() => setIsDefaultDisplay(true)}
+					isSelected={!enable_compact_display}
+					onSelect={() => handleChange(false)}
 				/>
 				<AppearanceOption
 					label="Compact"
-					isSelected={!isDefaultDisplay}
-					onSelect={() => setIsDefaultDisplay(false)}
+					isSelected={enable_compact_display}
+					onSelect={() => handleChange(true)}
 				/>
 			</div>
+			<Text size="xs" variant="muted" className="pt-1.5">
+				* Compact display mode is not implemented yet
+			</Text>
 		</div>
 	)
 }

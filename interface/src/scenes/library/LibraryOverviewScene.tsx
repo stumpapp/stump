@@ -27,7 +27,7 @@ function LibraryOverviewScene() {
 		throw new Error('Library id is required')
 	}
 
-	const { layoutMode } = useLayoutMode('LIBRARY')
+	const { layoutMode } = useLayoutMode()
 	const { isLoading, library } = useLibraryByIdQuery(id)
 
 	const { filters } = useFilterContext()

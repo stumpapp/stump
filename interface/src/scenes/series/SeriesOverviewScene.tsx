@@ -24,7 +24,7 @@ function SeriesOverviewScene() {
 	const { page, setPage } = usePageParam()
 	const { seriesId } = useSeriesContext()
 
-	const { layoutMode } = useLayoutMode('SERIES')
+	const { layoutMode } = useLayoutMode()
 	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(seriesId)
 	const { filters } = useFilterContext()
 	const {

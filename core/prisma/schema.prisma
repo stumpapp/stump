@@ -605,11 +605,6 @@ model Log {
 model UserPreferences {
   id String @id @default(cuid())
 
-  library_layout_mode    String @default("GRID")
-  series_layout_mode     String @default("GRID")
-  collection_layout_mode String @default("GRID")
-
-  // TODO: replace the 3 above with the below:
   preferred_layout_mode String @default("GRID")
   locale                String @default("en")
   app_theme             String @default("LIGHT")

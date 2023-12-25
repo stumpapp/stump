@@ -89,6 +89,7 @@ export default function SettingsNavigation({ user }: Props) {
 					onChange={(e) => {
 						navigate(e.target.value)
 					}}
+					className="md:max-w-xs"
 				/>
 			</div>
 		</div>

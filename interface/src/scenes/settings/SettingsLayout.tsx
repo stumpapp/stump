@@ -8,14 +8,17 @@ import SettingsHeader from './SettingsHeader'
 import SettingsSideBar from './SettingsSideBar'
 
 export default function SettingsLayout() {
-	const user = useUserStore((store) => store.user)
+	const { user, userPreferences } = useUserStore((store) => ({
+		user: store.user,
+		userPreferences: store.userPreferences,
+	}))
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
 	if (!user) {
 		return <Navigate to={`/login?redirect=${encodeURIComponent(window.location.pathname)}`} />
 	}
 
-	const displaySideBar = /*userPreferences.enable_double_sidebar && */ !isMobile
+	const displaySideBar = !!userPreferences?.enable_double_sidebar && !isMobile
 
 	return (
 		<div className="flex h-full w-full flex-col md:flex-row">

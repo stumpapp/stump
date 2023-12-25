@@ -1,4 +1,4 @@
-import { CardGrid } from '@stump/components'
+import { Card, CardGrid } from '@stump/components'
 import type { Media } from '@stump/types'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
@@ -16,18 +16,20 @@ export default function MediaGrid({ media, isLoading, hasFilters, onSelect }: Pr
 		return null
 	} else if (!media || !media.length) {
 		return (
-			<GenericEmptyState
-				title={
-					hasFilters
-						? 'No books match your search'
-						: "It doesn't look like there are any books here"
-				}
-				subtitle={
-					hasFilters
-						? 'Try removing some filters to see more books'
-						: 'Do you have any books in your library?'
-				}
-			/>
+			<Card className="bg-background-200">
+				<GenericEmptyState
+					title={
+						hasFilters
+							? 'No books match your search'
+							: "It doesn't look like there are any books here"
+					}
+					subtitle={
+						hasFilters
+							? 'Try removing some filters to see more books'
+							: 'Do you have any books in your library?'
+					}
+				/>
+			</Card>
 		)
 	}
 

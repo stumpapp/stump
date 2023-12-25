@@ -195,13 +195,13 @@ impl From<&str> for UserPermission {
 pub struct UserPreferences {
 	pub id: String,
 	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
-	#[serde(default)]
+	pub preferred_layout_mode: String,
 	pub enable_discord_presence: bool,
+	pub enable_compact_display: bool,
+	pub enable_double_sidebar: bool,
+	pub prefer_accent_color: bool,
 }
 
 impl Default for UserPreferences {
@@ -209,12 +209,13 @@ impl Default for UserPreferences {
 		Self {
 			id: "DEFAULT".to_string(),
 			locale: "en".to_string(),
-			library_layout_mode: "GRID".to_string(),
-			series_layout_mode: "GRID".to_string(),
-			collection_layout_mode: "GRID".to_string(),
+			preferred_layout_mode: "GRID".to_string(),
 			app_theme: "LIGHT".to_string(),
 			show_query_indicator: false,
 			enable_discord_presence: false,
+			enable_compact_display: false,
+			enable_double_sidebar: true,
+			prefer_accent_color: true,
 		}
 	}
 }
@@ -228,12 +229,13 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 		UserPreferences {
 			id: data.id,
 			locale: data.locale,
-			library_layout_mode: data.library_layout_mode,
-			series_layout_mode: data.series_layout_mode,
-			collection_layout_mode: data.collection_layout_mode,
+			preferred_layout_mode: data.preferred_layout_mode,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
 			enable_discord_presence: data.enable_discord_presence,
+			enable_compact_display: data.enable_compact_display,
+			enable_double_sidebar: data.enable_double_sidebar,
+			prefer_accent_color: data.prefer_accent_color,
 		}
 	}
 }

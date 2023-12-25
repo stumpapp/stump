@@ -1,17 +1,28 @@
-import React from 'react'
+import { usePreferences } from '@stump/client'
+import React, { useCallback } from 'react'
 
 import PreferenceToggle from './PreferenceToggle'
 
 export default function DoubleSidebarToggle() {
-	const handleChange = () => {}
+	const {
+		preferences: { enable_double_sidebar },
+		update,
+	} = usePreferences()
+
+	const handleToggle = useCallback(async () => {
+		try {
+			await update({ enable_double_sidebar: !enable_double_sidebar })
+		} catch (error) {
+			console.error(error)
+		}
+	}, [enable_double_sidebar, update])
 
 	return (
 		<PreferenceToggle
 			label="Double sidebar"
-			description="Enables the double sidebar in the settings pages. If you have a small screen, you may want to disable this."
-			isChecked={true}
-			onToggle={handleChange}
-			isDisabled
+			description="Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
+			isChecked={enable_double_sidebar}
+			onToggle={handleToggle}
 			formId="enable_double_sidebar"
 		/>
 	)

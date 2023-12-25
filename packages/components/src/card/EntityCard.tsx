@@ -139,8 +139,8 @@ export function EntityCard({
 			)
 		} else {
 			return (
-				<div className="flex h-full w-full items-center justify-center bg-gray-50/80 dark:bg-gray-1000/30">
-					<Book className="h-16 w-16 text-gray-750 dark:text-gray-400" />
+				<div className="flex h-full w-full items-center justify-center bg-sidebar">
+					<Book className="h-16 w-16 text-muted" />
 				</div>
 			)
 		}
@@ -150,7 +150,7 @@ export function EntityCard({
 		<Container
 			{...containerProps}
 			className={cn(
-				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-gray-75 bg-white shadow-sm transition-colors duration-100 dark:border-gray-850 dark:bg-gray-950',
+				'relative flex flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge bg-background/80 shadow-sm transition-colors duration-100',
 				{ 'cursor-pointer hover:border-brand dark:hover:border-brand': hasClickAction },
 				{ 'max-w-[16rem]': isCover },
 				{

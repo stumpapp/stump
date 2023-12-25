@@ -2,8 +2,7 @@ import { useUpdatePreferences, useUserStore } from '@stump/client'
 import { ComboBox } from '@stump/components'
 import { shallow } from 'zustand/shallow'
 
-import { isLocale, localeNames } from '../../../../i18n'
-import { useLocaleContext } from '../../../../i18n/context'
+import { isLocale, localeNames, useLocaleContext } from '@/i18n'
 
 const options = Object.entries(localeNames).map(([value, label]) => ({
 	label,
@@ -32,7 +31,7 @@ export default function LocaleSelector() {
 
 	return (
 		<ComboBox
-			label={t('settingsScene.general.locale.localeSelector.label')}
+			label={t('settingsScene.app/general.sections.locale.localeSelector.label')}
 			value={locale}
 			options={options}
 			filterable

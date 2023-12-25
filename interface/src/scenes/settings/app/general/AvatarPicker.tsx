@@ -11,7 +11,7 @@ import {
 import { Edit } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { useLocaleContext } from '../../../../i18n'
+import { useLocaleContext } from '@/i18n'
 
 type Props = {
 	imageUrl?: string | null
@@ -47,39 +47,41 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 				<Dialog.Content size="md">
 					<Dialog.Header>
 						<Dialog.Title>
-							{t('settingsScene.general.profileForm.avatarPicker.heading')}
+							{t('settingsScene.app/general.sections.account.avatarPicker.heading')}
 						</Dialog.Title>
 						<Dialog.Description>
-							{t('settingsScene.general.profileForm.avatarPicker.subtitle')}
+							{t('settingsScene.app/general.sections.account.avatarPicker.subtitle')}
 						</Dialog.Description>
 						<Dialog.Close onClick={off} />
 					</Dialog.Header>
 					<Text variant="muted" size="xs">
-						{t('settingsScene.general.profileForm.avatarPicker.preview')}
+						{t('settingsScene.app/general.sections.account.avatarPicker.preview')}
 					</Text>
 					<div className="flex flex-col items-center gap-4 p-2 md:flex-row md:justify-between">
 						<Input
 							variant="primary"
-							label={t('settingsScene.general.profileForm.avatarPicker.labels.imageUrl')}
+							label={t('settingsScene.app/general.sections.account.avatarPicker.labels.imageUrl')}
 							value={newUrl}
 							onChange={(e) => setNewUrl(e.target.value)}
 						/>
-						<Avatar src={newUrl} className="h-20 w-20 md:h-28 md:w-28" />
+						<Avatar src={newUrl} className="h-20 w-20 md:h-28 md:w-28" fallbackColor="brand" />
 					</div>
 
 					<Dialog.Footer>
 						<Button onClick={off}>
-							{t('settingsScene.general.profileForm.avatarPicker.buttons.cancel')}
+							{t('settingsScene.app/general.sections.account.avatarPicker.buttons.cancel')}
 						</Button>
 						<Button variant="primary" onClick={handleConfirm}>
-							{t('settingsScene.general.profileForm.avatarPicker.buttons.confirm')}
+							{t('settingsScene.app/general.sections.account.avatarPicker.buttons.confirm')}
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>
 			</Dialog>
 
 			<div className="flex flex-col gap-2.5 self-center">
-				<Label>{t('settingsScene.general.profileForm.avatarPicker.labels.customAvatar')}</Label>
+				<Label>
+					{t('settingsScene.app/general.sections.account.avatarPicker.labels.customAvatar')}
+				</Label>
 				<span className="relative">
 					<Avatar
 						className="h-40 w-40 !text-2xl"
@@ -99,7 +101,7 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 									className="border border-gray-75 px-2 py-1.5 dark:border-gray-850"
 								>
 									<Edit className="mr-2 h-3 w-3" />
-									{t('settingsScene.general.profileForm.avatarPicker.buttons.edit')}
+									{t('settingsScene.app/general.sections.account.avatarPicker.buttons.edit')}
 								</Button>
 							}
 							groups={[
@@ -107,14 +109,14 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 									items: [
 										{
 											label: t(
-												'settingsScene.general.profileForm.avatarPicker.buttons.changeImage',
+												'settingsScene.app/general.sections.account.avatarPicker.buttons.changeImage',
 											),
 											onClick: on,
 										},
 										{
 											disabled: !imageUrl && !newUrl,
 											label: t(
-												'settingsScene.general.profileForm.avatarPicker.buttons.removeImage',
+												'settingsScene.app/general.sections.account.avatarPicker.buttons.removeImage',
 											),
 											onClick: () => onImageChange(),
 										},

@@ -21,7 +21,7 @@ export default function GenericEmptyState({
 				containerClassName,
 			)}
 		>
-			<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
+			<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
 			<div className={cn('text-center', contentClassName)}>
 				<Heading size="sm">{title}</Heading>
 				{subtitle && (

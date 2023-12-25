@@ -613,8 +613,9 @@ model UserPreferences {
   enable_discord_presence Boolean @default(false)
   enable_compact_display  Boolean @default(false)
 
-  enable_double_sidebar Boolean @default(true)
-  prefer_accent_color   Boolean @default(true)
+  enable_double_sidebar          Boolean @default(true)
+  enable_replace_primary_sidebar Boolean @default(false)
+  prefer_accent_color            Boolean @default(true)
 
   user    User?
   user_id String? @unique

@@ -23,7 +23,7 @@ export default function UserMenu() {
 					<Popover.Trigger asChild>
 						<Card
 							className={cx(
-								'border-edge-200 flex h-[2.35rem] w-full cursor-pointer items-center border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
+								'flex h-[2.35rem] w-full cursor-pointer items-center border-edge-200 border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
 								{ 'border-opacity-100': isOpen },
 							)}
 						>
@@ -41,13 +41,13 @@ export default function UserMenu() {
 					</Popover.Trigger>
 
 					<Popover.Content
-						className="divide-edge-200 bg-sidebar-200 border-edge-200 flex flex-col divide-y overflow-hidden p-0 shadow-sm"
+						className="flex flex-col divide-y divide-edge overflow-hidden p-0 shadow-sm"
 						align="start"
 						style={{ width }}
 					>
 						<div className="flex w-full flex-col">
 							<Link
-								className="bg-sidebar-300 text-muted pointer-events-none flex h-[2.35rem] w-full items-center  px-2 text-sm transition-colors duration-150"
+								className="pointer-events-none flex h-[2.35rem] w-full items-center bg-background-200 px-2  text-sm text-muted transition-colors duration-150"
 								to={paths.settings('server/notifications')}
 								onClick={() => setIsOpen(false)}
 							>
@@ -56,7 +56,7 @@ export default function UserMenu() {
 							</Link>
 
 							<Link
-								className="text-contrast-200 flex h-[2.35rem] w-full items-center px-2 text-sm transition-colors duration-150"
+								className="flex h-[2.35rem] w-full items-center px-2 text-sm text-contrast-200 transition-colors duration-150 hover:bg-background-200"
 								to={paths.settings('app/general')}
 								onClick={() => setIsOpen(false)}
 							>

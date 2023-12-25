@@ -23,7 +23,7 @@ export default function SettingsLayout() {
 	return (
 		<div className="flex h-full w-full flex-col md:flex-row">
 			{displaySideBar && <SettingsSideBar />}
-			<div className="w-full max-w-4xl flex-1 flex-col overflow-y-auto">
+			<div className="w-full flex-1 flex-col overflow-y-auto">
 				<SettingsHeader renderNavigation={!displaySideBar} />
 				<Suspense fallback={null}>
 					<Outlet />
@@ -38,5 +38,5 @@ type SettingsContentProps = {
 }
 
 export function SettingsContent({ children }: SettingsContentProps) {
-	return <div className="mt-6 flex flex-col gap-8 md:gap-12">{children}</div>
+	return <div className="mt-6 flex max-w-4xl flex-col gap-8 md:gap-12">{children}</div>
 }

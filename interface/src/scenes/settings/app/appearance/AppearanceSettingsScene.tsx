@@ -9,6 +9,7 @@ import DisplayAppearanceSettings from './DisplayAppearanceSettings'
 import DoubleSidebarToggle from './DoubleSidebarToggle'
 import PreferColorToggle from './PreferColorToggle'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
+import ReplacePrimarySidebarToggle from './ReplacePrimarySidebarToggle'
 import ThemeSelect from './ThemeSelect'
 
 export default function AppearanceSettingsScene() {
@@ -28,6 +29,7 @@ export default function AppearanceSettingsScene() {
 					<PreferColorToggle />
 					<QueryIndicatorToggle />
 					<DoubleSidebarToggle />
+					<ReplacePrimarySidebarToggle />
 				</div>
 			</SettingsContent>
 		</SceneContainer>

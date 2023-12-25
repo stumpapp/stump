@@ -205,7 +205,53 @@
 		"app/general": {
 			"helmet": "General client settings",
 			"title": "General settings",
-			"description": "Settings related to your account or the client itself"
+			"description": "Settings related to your account or app preferences",
+			"sections": {
+				"account": {
+					"validation": {
+						"invalidUrl": "Please enter a valid URL",
+						"missingUsername": "Username is required"
+					},
+					"labels": {
+						"username": "Username",
+						"password": "Password",
+						"activeChangesPrompt": "You have unsaved changes"
+					},
+					"errors": {
+						"updateFailed": "A server error occurred while updating your profile. Please try again."
+					},
+					"avatarPicker": {
+						"heading": "Set your Avatar Image",
+						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
+						"preview": "A preview will appear here once you have entered a URL.",
+						"labels": {
+							"imageUrl": "Image URL",
+							"customAvatar": "Custom Avatar"
+						},
+						"buttons": {
+							"confirm": "Confirm Image",
+							"cancel": "Cancel",
+							"edit": "Edit",
+							"changeImage": "Change Image",
+							"removeImage": "Remove Image"
+						}
+					},
+					"buttons": {
+						"confirm": "Save Changes"
+					}
+				},
+				"locale": {
+					"localeSelector": {
+						"label": "Language"
+					},
+					"heading": "Language and locale",
+					"subtitle": [
+						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+						"Stump's translations",
+						"if you're able to!"
+					]
+				}
+			}
 		},
 		"app/appearance": {
 			"helmet": "Appearance",
@@ -256,7 +302,23 @@
 				},
 				"history": {
 					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance"
+					"description": "A record of jobs that have been run on your Stump server instance",
+					"table": {
+						"columns": {
+							"name": "Type",
+							"description": "Description",
+							"status": "Status",
+							"createdAt": "Started At",
+							"elapsed": "Elapsed",
+							"tasks": "Tasks"
+						},
+						"emptyHeading": "There are no jobs to display",
+						"emptySubtitle": "You can't have a job if you don't have a job",
+						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
+						"deleteAllConfirmButton": "Clear history",
+						"deleteAllConfirmButtonTitle": "Clear all job history",
+						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+					}
 				}
 			}
 		},
@@ -354,112 +416,6 @@
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
 			}
-		},
-		"general": {
-			"helmet": "General Settings",
-			"heading": "General Settings",
-			"subtitle": "Use the forms below to manage your preferences and account settings.",
-			"profileForm": {
-				"validation": {
-					"invalidUrl": "Please enter a valid URL",
-					"missingUsername": "Username is required"
-				},
-				"labels": {
-					"username": "Username",
-					"password": "Password",
-					"activeChangesPrompt": "You have unsaved changes"
-				},
-				"errors": {
-					"updateFailed": "A server error occurred while updating your profile. Please try again."
-				},
-				"avatarPicker": {
-					"heading": "Set your Avatar Image",
-					"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-					"preview": "A preview will appear here once you have entered a URL.",
-					"labels": {
-						"imageUrl": "Image URL",
-						"customAvatar": "Custom Avatar"
-					},
-					"buttons": {
-						"confirm": "Confirm Image",
-						"cancel": "Cancel",
-						"edit": "Edit",
-						"changeImage": "Change Image",
-						"removeImage": "Remove Image"
-					}
-				},
-				"buttons": {
-					"confirm": "Save Changes"
-				}
-			},
-			"theme": {
-				"heading": "Application Theme",
-				"subtitle": "Stump supports both light and dark themes, which can be set below.",
-				"dark": {
-					"label": "Dark Theme",
-					"description": "Use a dark theme for Stump, which is the correct theme."
-				},
-				"light": {
-					"label": "Light Theme",
-					"description": "Use a light theme for Stump, which is the incorrect theme."
-				}
-			},
-			"locale": {
-				"localeSelector": {
-					"label": "Language"
-				},
-				"heading": "Language and locale",
-				"subtitle": [
-					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-					"Stump's translations",
-					"if you're able to!"
-				]
-			}
-		},
-		"jobs": {
-			"helmet": "Jobs and Configuration",
-			"heading": "Jobs and Configuration",
-			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
-			"schedulingHeading": "Job Scheduling",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
-			"historyHeading": "Job History",
-			"historySubtitle": "Manage running jobs and view the history of completed jobs",
-			"historyTable": {
-				"columns": {
-					"name": "Type",
-					"description": "Description",
-					"status": "Status",
-					"createdAt": "Started At",
-					"elapsed": "Elapsed",
-					"tasks": "Tasks"
-				},
-				"emptyHeading": "There are no jobs to display",
-				"emptySubtitle": "You can't have a job if you don't have a job",
-				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-				"deleteAllConfirmButton": "Clear history",
-				"deleteAllConfirmButtonTitle": "Clear all job history",
-				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
-			}
-		},
-		"server": {
-			"helmet": "Server Settings",
-			"heading": "Server Settings",
-			"subtitle": "Manage various configurable options for your Stump server instance, itself"
-		},
-		"desktop": {
-			"helmet": "Desktop Settings",
-			"heading": "Desktop Settings",
-			"subtitle": "Configure the Stump desktop application",
-			"discordPresence": {
-				"label": "Discord Presence",
-				"description": "Display your Stump activity in Discord using Discord Rich Presence",
-				"reconnect": "Reconnect to Discord"
-			}
-		},
-		"users": {
-			"helmet": "User Management",
-			"heading": "User Management",
-			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
 		}
 	},
 	"jobOverlay": {

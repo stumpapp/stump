@@ -1,4 +1,4 @@
-import { cx } from '@stump/components'
+import { cn, cx } from '@stump/components'
 import { ArrowLeft, ArrowRight, MoreHorizontal } from 'lucide-react'
 import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
@@ -32,9 +32,9 @@ function PaginationArrow({ kind, isDisabled, onClick }: PaginationArrowProps) {
 			>
 				<div
 					className={cx(
-						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-gray-300 dark:hover:border-gray-600 md:text-sm',
-						!isDisabled && 'dark:text-gray-300 dark:hover:text-gray-100',
-						isDisabled && 'pointer-events-none cursor-not-allowed text-gray-300 dark:text-gray-500',
+						'inline-flex items-center border-t-2 border-transparent pt-4 text-xs font-medium hover:border-edge-200 md:text-sm',
+						!isDisabled && 'text-contrast-300',
+						isDisabled && 'pointer-events-none cursor-not-allowed text-muted',
 						{ 'pl-0 pr-1': kind === 'previous' },
 						{ 'pl-1 pr-0': kind === 'next' },
 					)}
@@ -45,7 +45,7 @@ function PaginationArrow({ kind, isDisabled, onClick }: PaginationArrowProps) {
 							'h-4 w-4 md:h-5 md:w-5',
 							kind === 'previous' ? 'mr-3' : 'ml-3',
 							// TODO: dark different color?? idk, doesn't look THAT bad
-							isDisabled ? 'text-gray-300 dark:text-gray-500' : 'text-gray-600',
+							isDisabled ? 'text-muted-200' : 'text-contrast-300',
 						)}
 						aria-hidden="true"
 					/>
@@ -66,14 +66,13 @@ function PaginationLink({ value, onClick, isActive }: PaginationLinkProps) {
 	return (
 		<span
 			onClick={onClick}
-			className={cx(
-				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-gray-550 dark:text-gray-300 md:text-sm',
+			className={cn(
+				'inline-flex cursor-pointer items-center border-t-2 px-4 pt-4 text-xs font-medium text-muted md:text-sm',
 				{
-					'border-brand text-brand hover:border-brand-600 dark:hover:border-brand-400': isActive,
+					'border-brand text-brand hover:border-brand-600': isActive,
 				},
 				{
-					'border-transparent text-gray-300 hover:border-gray-300 dark:text-gray-600 dark:hover:border-gray-600':
-						!isActive,
+					'border-transparent text-muted hover:border-edge-200': !isActive,
 				},
 			)}
 		>
@@ -120,7 +119,7 @@ export default function Pagination({
 	return (
 		<nav className="w-full">
 			<div
-				className={cx('w-full border-t border-gray-200 dark:border-gray-700', {
+				className={cx('w-full border-t border-edge-200', {
 					'mt-7': position === 'bottom',
 				})}
 			>

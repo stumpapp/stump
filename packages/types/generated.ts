@@ -13,7 +13,7 @@ export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explore
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
-export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; preferred_layout_mode: string; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; prefer_accent_color: boolean }
+export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; preferred_layout_mode: string; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; prefer_accent_color: boolean }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
 
@@ -164,7 +164,7 @@ export type CreateUser = { username: string; password: string; permissions?: Use
 
 export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
 
-export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; prefer_accent_color: boolean }
+export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; prefer_accent_color: boolean }
 
 export type DeleteUser = { hard_delete: boolean | null }
 

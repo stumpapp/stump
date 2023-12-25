@@ -1,5 +1,5 @@
 import { useDirectoryListing } from '@stump/client'
-import { Button, CheckBox, Dialog, Input, Text, useBoolean } from '@stump/components'
+import { Button, CheckBox, cx, Dialog, Input, Text, useBoolean } from '@stump/components'
 import { ArrowLeft, Folder } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
@@ -94,21 +94,20 @@ export default function DirectoryPickerModal({
 						/>
 					</div>
 
-					<div className="flex h-[20rem] flex-col space-y-1 overflow-y-scroll px-1 pt-1 scrollbar-hide">
+					<div className="flex h-[20rem] flex-col divide-y divide-edge/75 overflow-y-scroll px-1 pt-1 scrollbar-hide">
 						{directoryList.map((directory, i) => (
-							<Button
-								className="justify-start px-1 py-2"
+							<button
 								key={directory.path}
-								variant={i % 2 === 0 ? 'ghost' : 'subtle'}
+								className={cx('justify-start px-2 py-1.5 text-left hover:bg-background-200', {
+									'bg-background-200/40': i % 2 === 0,
+								})}
 								onClick={() => setPath(directory.path)}
 							>
-								<div className="flex items-center gap-4">
-									<Folder size="1.25rem" />{' '}
-									<Text className="line-clamp-1" size="sm">
-										{directory.name}
-									</Text>
-								</div>
-							</Button>
+								<Text className="line-clamp-1 inline-flex items-center gap-x-2">
+									<Folder size="1.25rem" />
+									<span>{directory.name}</span>
+								</Text>
+							</button>
 						))}
 					</div>
 				</div>

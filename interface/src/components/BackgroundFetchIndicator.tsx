@@ -21,10 +21,7 @@ export default function BackgroundFetchIndicator() {
 
 	return (
 		<div className="fixed bottom-4 right-6 z-50">
-			<svg
-				className="h-6 w-6 animate-spin stroke-gray-1000 dark:stroke-white"
-				viewBox="0 0 256 256"
-			>
+			<svg className="h-6 w-6 animate-spin stroke-contrast" viewBox="0 0 256 256">
 				<line
 					x1="128"
 					y1="32"

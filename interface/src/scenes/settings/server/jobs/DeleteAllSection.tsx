@@ -38,10 +38,10 @@ export default function DeleteAllSection() {
 	return (
 		<Alert level="error" rounded="sm" icon={AlertTriangle}>
 			<Alert.Content className="flex flex-col gap-3 md:flex-row">
-				{t('settingsScene.jobs.historyTable.deleteAllMessage')}
+				{t('settingsScene.server/jobs.sections.history.table.deleteAllMessage')}
 				<Button
 					title={`${t(
-						`settingsScene.jobs.historyTable.${
+						`settingsScene.server/jobs.sections.history.table.${
 							!jobs.length ? 'deleteAllConfirmButtonTitleNoJobs' : 'deleteAllConfirmButtonTitle'
 						}`,
 					)}`}
@@ -50,7 +50,7 @@ export default function DeleteAllSection() {
 					disabled={!isServerOwner || !jobs.length}
 					className="flex-shrink-0"
 				>
-					{t('settingsScene.jobs.historyTable.deleteAllConfirmButton')}
+					{t('settingsScene.server/jobs.sections.history.table.deleteAllConfirmButton')}
 				</Button>
 			</Alert.Content>
 		</Alert>

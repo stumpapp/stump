@@ -191,16 +191,31 @@ impl From<&str> for UserPermission {
 	}
 }
 
+fn default_layout_mode() -> String {
+	"GRID".to_string()
+}
+
+fn default_true() -> bool {
+	true
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct UserPreferences {
 	pub id: String,
 	pub locale: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
+	#[serde(default = "default_layout_mode")]
 	pub preferred_layout_mode: String,
+	#[serde(default)]
 	pub enable_discord_presence: bool,
+	#[serde(default)]
 	pub enable_compact_display: bool,
+	#[serde(default = "default_true")]
 	pub enable_double_sidebar: bool,
+	#[serde(default)]
+	pub enable_replace_primary_sidebar: bool,
+	#[serde(default = "default_true")]
 	pub prefer_accent_color: bool,
 }
 
@@ -215,6 +230,7 @@ impl Default for UserPreferences {
 			enable_discord_presence: false,
 			enable_compact_display: false,
 			enable_double_sidebar: true,
+			enable_replace_primary_sidebar: false,
 			prefer_accent_color: true,
 		}
 	}
@@ -235,6 +251,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			enable_discord_presence: data.enable_discord_presence,
 			enable_compact_display: data.enable_compact_display,
 			enable_double_sidebar: data.enable_double_sidebar,
+			enable_replace_primary_sidebar: data.enable_replace_primary_sidebar,
 			prefer_accent_color: data.prefer_accent_color,
 		}
 	}

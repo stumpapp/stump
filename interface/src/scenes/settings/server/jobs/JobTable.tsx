@@ -19,7 +19,7 @@ dayjs.extend(duration)
 dayjs.extend(relativeTime)
 
 const DEBUG = import.meta.env.DEV
-const LOCALE_BASE = 'settingsScene.jobs.historyTable'
+const LOCALE_BASE = 'settingsScene.server/jobs.sections.history.table'
 
 const columnHelper = createColumnHelper<JobDetail>()
 

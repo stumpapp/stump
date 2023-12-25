@@ -1,6 +1,6 @@
 import { isAxiosError } from '@stump/api'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import { UserPermission } from '@stump/types'
+import { UserPermission, UserPreferences } from '@stump/types'
 import { Suspense, useCallback, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -19,18 +19,31 @@ export function AppLayout() {
 	const location = useLocation()
 	const navigate = useNavigate()
 
-	const hideSidebar = useMemo(() => {
-		// hide sidebar when reading a book
-		return location.pathname.match(/\/book(s?)\/.+\/(.*-?reader)/)
-	}, [location])
-
-	useCoreEventHandler()
-
 	const { storeUser, setUser, checkUserPermission } = useUserStore((state) => ({
 		checkUserPermission: state.checkUserPermission,
 		setUser: state.setUser,
 		storeUser: state.user,
 	}))
+
+	const softHideSidebar = useMemo(() => {
+		const userPreferences = storeUser?.user_preferences ?? ({} as UserPreferences)
+		const { enable_double_sidebar, enable_replace_primary_sidebar } = userPreferences
+
+		// hide sidebar when double sidebar is enabled and replace primary sidebar is enabled and on a route where
+		// a secondary sidebar is displayed (right now, just settings/*)
+		if (enable_double_sidebar && enable_replace_primary_sidebar) {
+			return (location.pathname.match(/\/settings\/.+/) ?? []).length > 0
+		} else {
+			return false
+		}
+	}, [location, storeUser])
+
+	const hideSidebar = useMemo(
+		() => (location.pathname.match(/\/book(s?)\/.+\/(.*-?reader)/) ?? []).length > 0,
+		[location],
+	)
+
+	useCoreEventHandler()
 
 	const enforcePermission = useCallback(
 		(
@@ -77,8 +90,8 @@ export function AppLayout() {
 			<Suspense fallback={<RouteLoadingIndicator />}>
 				{!hideSidebar && <TopBar />}
 				<div className="flex h-full w-full">
-					{!hideSidebar && <SideBar />}
-					<main className="bg-background min-h-full w-full">
+					{!hideSidebar && <SideBar hidden={softHideSidebar} />}
+					<main className="min-h-full w-full bg-background">
 						{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 						<Suspense fallback={<RouteLoadingIndicator />}>
 							<Outlet />

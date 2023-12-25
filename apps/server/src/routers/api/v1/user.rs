@@ -349,6 +349,9 @@ async fn update_preferences(
 					input.enable_compact_display,
 				),
 				user_preferences::enable_double_sidebar::set(input.enable_double_sidebar),
+				user_preferences::enable_replace_primary_sidebar::set(
+					input.enable_replace_primary_sidebar,
+				),
 				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
 			],
 		)
@@ -509,6 +512,7 @@ pub struct UpdateUserPreferences {
 	pub enable_discord_presence: bool,
 	pub enable_compact_display: bool,
 	pub enable_double_sidebar: bool,
+	pub enable_replace_primary_sidebar: bool,
 	pub prefer_accent_color: bool,
 }
 

@@ -63,7 +63,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 			/>
 			<DropdownMenu
 				trigger={
-					<button className="p-1 text-gray-700 text-opacity-30 outline-none hover:text-opacity-100 focus:ring-0 focus:ring-offset-0 data-[state=open]:text-opacity-100 dark:text-gray-200 dark:text-opacity-30 dark:hover:text-opacity-100 dark:data-[state=open]:text-opacity-100">
+					<button className="p-1 text-contrast-200 text-opacity-50 outline-none hover:text-opacity-100 focus:ring-0 focus:ring-offset-0 data-[state=open]:text-opacity-100">
 						<MoreHorizontal className="h-4 w-4 shrink-0" />
 					</button>
 				}

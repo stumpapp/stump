@@ -22,7 +22,7 @@ export default function PreferenceToggle({
 			<div className="flex flex-grow flex-col gap-2 text-left">
 				<Label
 					htmlFor={formId}
-					className={cx({ 'text-muted cursor-not-allowed select-none': isDisabled })}
+					className={cx({ 'cursor-not-allowed select-none text-muted': isDisabled })}
 				>
 					{label}
 				</Label>
@@ -30,7 +30,7 @@ export default function PreferenceToggle({
 					size="sm"
 					variant="muted"
 					className={cx('max-w-[80%]', {
-						'text-muted-200 cursor-not-allowed select-none': isDisabled,
+						'cursor-not-allowed select-none text-muted-200': isDisabled,
 					})}
 				>
 					{description}
@@ -45,6 +45,7 @@ export default function PreferenceToggle({
 				onClick={onToggle}
 				primaryRing
 				disabled={isDisabled}
+				variant="primary"
 			/>
 		</div>
 	)

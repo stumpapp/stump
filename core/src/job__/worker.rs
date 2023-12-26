@@ -109,9 +109,9 @@ impl WorkerManager {
 #[derive(Debug)]
 pub struct WorkerContext {
 	/// A pointer to the prisma database client.
-	db: Arc<PrismaClient>,
+	pub db: Arc<PrismaClient>,
 	/// A pointer to the server's startup configuration.
-	config: Arc<StumpConfig>,
+	pub config: Arc<StumpConfig>,
 }
 
 /// Oversees the worker thread, recieving commands and starting and stopping

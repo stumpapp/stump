@@ -1,3 +1,4 @@
+mod _scanner_job;
 mod library_scanner;
 mod scanner_job;
 mod series_scanner;

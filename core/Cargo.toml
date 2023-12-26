@@ -11,7 +11,7 @@ specta = { workspace = true }
 
 ### Async Utils ###
 rayon = "1.8.0"
-futures = "0.3.29"
+futures = { workspace = true }
 async-trait = { workspace = true }
 
 ### Filesystem Utils ###

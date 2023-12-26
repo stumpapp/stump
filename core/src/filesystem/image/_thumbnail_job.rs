@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use crate::{
 	filesystem::image::{ImageProcessorOptions, _thumbnail::ThumbnailManager},
 	job__::{worker::WorkerContext, StatefulJob},
-	prisma::{media, series},
+	prisma::{media as prisma_media, series},
 };
 
 #[derive(Debug, Clone)]
@@ -21,7 +21,7 @@ pub enum ThumbnailJobParams {
 
 pub struct ThumbnailJobState {
 	manager: ThumbnailManager,
-	media_data: Vec<media::Data>,
+	media_data: Vec<prisma_media::Data>,
 	force_regenerate: bool,
 
 	current_index: usize,
@@ -78,7 +78,7 @@ impl StatefulJob for ThumbnailJob {
 			media_data = media_data
 				.into_iter()
 				.filter(|media| !manager.has_thumbnail(&media.id))
-				.collect::<Vec<media::Data>>();
+				.collect::<Vec<prisma_media::Data>>();
 		}
 
 		// Set job state so that it can be mutated in do_work
@@ -163,12 +163,12 @@ impl ThumbnailJob {
 pub async fn get_library_media(
 	library_id: String,
 	ctx: &WorkerContext,
-) -> Vec<media::Data> {
+) -> Vec<prisma_media::Data> {
 	ctx.db
 		.media()
-		.find_many(vec![media::series::is(vec![series::library_id::equals(
-			Some(library_id),
-		)])])
+		.find_many(vec![prisma_media::series::is(vec![
+			series::library_id::equals(Some(library_id)),
+		])])
 		.exec()
 		.await
 		.expect("There was a library load error")
@@ -179,10 +179,10 @@ pub async fn get_library_media(
 pub async fn get_series_media(
 	series_id: String,
 	ctx: &WorkerContext,
-) -> Vec<media::Data> {
+) -> Vec<prisma_media::Data> {
 	ctx.db
 		.media()
-		.find_many(vec![media::series_id::equals(Some(series_id))])
+		.find_many(vec![prisma_media::series_id::equals(Some(series_id))])
 		.exec()
 		.await
 		.expect("There was a library load error")
@@ -193,10 +193,10 @@ pub async fn get_series_media(
 pub async fn get_media_group_media(
 	media_group_ids: Vec<String>,
 	ctx: &WorkerContext,
-) -> Vec<media::Data> {
+) -> Vec<prisma_media::Data> {
 	ctx.db
 		.media()
-		.find_many(vec![media::id::in_vec(media_group_ids)])
+		.find_many(vec![prisma_media::id::in_vec(media_group_ids)])
 		.exec()
 		.await
 		.expect("There was a library load error")

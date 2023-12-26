@@ -9,7 +9,7 @@ use crate::{
 		},
 		media, FileError,
 	},
-	prisma::{media as prisma_media, series},
+	prisma::media as prisma_media,
 };
 
 pub struct ThumbnailManager {

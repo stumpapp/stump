@@ -22,7 +22,7 @@ tower-http = { version = "0.4.4", features = [
 ] }
 hyper = "0.14.27"
 serde_json = { workspace = true }
-futures-util = "0.3.29"
+futures-util = { workspace = true }
 tokio = { workspace = true }
 tokio-util = "0.7.10"
 serde = { workspace = true }

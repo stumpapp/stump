@@ -36,17 +36,17 @@ impl JobManager {
 	}
 
 	/// Add a job to the end of the queue.
-	fn enqueue_job(&mut self, job: Box<dyn StatefulJob>) -> JobManagerResult<()> {
+	pub fn enqueue_job(&mut self, job: Box<dyn StatefulJob>) -> JobManagerResult<()> {
 		self.send_command(JobManagerCommand::EnqueueJob(job))
 	}
 
 	/// Cancel a job by its id.
-	fn cancel_job(&mut self, job_id: String) -> JobManagerResult<()> {
+	pub fn cancel_job(&mut self, job_id: String) -> JobManagerResult<()> {
 		todo!();
 	}
 
 	/// Signal to the [JobManagerAgent] to shut down.
-	fn shutdown(&mut self, tx: oneshot::Sender<()>) {
+	pub fn shutdown(&mut self, tx: oneshot::Sender<()>) {
 		todo!();
 	}
 

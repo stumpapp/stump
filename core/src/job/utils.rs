@@ -11,7 +11,7 @@ pub async fn persist_new_job(
 	name: String,
 	description: Option<String>,
 ) -> CoreResult<job::Data> {
-	let db = core_ctx.get_db();
+	let db = &core_ctx.db;
 	let job = db
 		.job()
 		.create(id, name, vec![job::description::set(description)])
@@ -26,7 +26,7 @@ pub async fn persist_job_start(
 	job_id: String,
 	task_count: u64,
 ) -> CoreResult<()> {
-	let db = core_ctx.get_db();
+	let db = &core_ctx.db;
 	let _ = db
 		.job()
 		.update(
@@ -52,7 +52,7 @@ pub async fn persist_job_end(
 	ms_elapsed: u64,
 	completed_task_count: Option<u64>,
 ) -> CoreResult<()> {
-	let db = core_ctx.get_db();
+	let db = &core_ctx.db;
 	let mut params = vec![
 		// FIXME: potentially unsafe cast u64 -> i64
 		job::ms_elapsed::set(
@@ -84,7 +84,7 @@ pub async fn update_job_status(
 	job_id: String,
 	status: JobStatus,
 ) -> CoreResult<()> {
-	let db = core_ctx.get_db();
+	let db = &core_ctx.db;
 	let _ = db
 		.job()
 		.update(

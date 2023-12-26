@@ -184,7 +184,7 @@ async fn get_user_login_activity(
 ) -> ApiResult<Json<Vec<LoginActivity>>> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let user_activity = client
 		.user_login_activity()
@@ -216,7 +216,7 @@ async fn delete_user_login_activity(
 ) -> ApiResult<Json<()>> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	client
 		.user_login_activity()
@@ -384,7 +384,7 @@ async fn create_user(
 	Json(input): Json<CreateUser>,
 ) -> ApiResult<Json<User>> {
 	get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let hashed_password = bcrypt::hash(input.password, ctx.config.password_hash_cost)?;
 
@@ -481,7 +481,7 @@ async fn update_current_user(
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUser>,
 ) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	let updated_user =
@@ -527,7 +527,7 @@ async fn update_current_user_preferences(
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUserPreferences>,
 ) -> ApiResult<Json<UserPreferences>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
@@ -579,7 +579,7 @@ async fn delete_user_by_id(
 	session: Session,
 	Json(input): Json<DeleteUser>,
 ) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_server_owner_user(&session)?;
 
 	if user.id == id {
@@ -629,7 +629,7 @@ async fn get_user_by_id(
 	session: Session,
 ) -> ApiResult<Json<User>> {
 	get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user_by_id = db
 		.user()
 		.find_unique(user::id::equals(id.clone()))
@@ -668,7 +668,7 @@ async fn get_user_login_activity_by_id(
 ) -> ApiResult<Json<Vec<LoginActivity>>> {
 	let user = get_session_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	if user.id != id && !user.is_server_owner {
 		return Err(ApiError::Forbidden(String::from(
@@ -710,7 +710,7 @@ async fn update_user_handler(
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUser>,
 ) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	if user.id != id && !user.is_server_owner {
@@ -759,7 +759,7 @@ async fn delete_user_sessions(
 ) -> ApiResult<()> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let removed_sessions = client
 		.session()
 		.delete_many(vec![session::user_id::equals(id)])
@@ -804,7 +804,7 @@ async fn update_user_lock_status(
 		));
 	}
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let updated_user = db
 		.user()
 		.update(
@@ -848,7 +848,7 @@ async fn get_user_preferences(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<UserPreferences>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	if id != user.id {
@@ -896,7 +896,7 @@ async fn update_user_preferences(
 	Json(input): Json<UpdateUserPreferences>,
 ) -> ApiResult<Json<UserPreferences>> {
 	trace!(?id, ?input, "Updating user preferences");
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();

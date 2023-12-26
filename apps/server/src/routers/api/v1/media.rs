@@ -295,7 +295,7 @@ async fn get_media(
 
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_media");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id.clone();
 
@@ -394,7 +394,7 @@ async fn get_duplicate_media(
 
 	let page_params = pagination.0.page_params();
 	let page_bounds = page_params.get_page_bounds();
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let duplicated_media_page = client
 		._query_raw::<Media>(raw!(
@@ -554,7 +554,7 @@ async fn get_recently_added_media(
 
 	tracing::trace!(?filters, ?pagination, "get_recently_added_media");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id.clone();
 
@@ -626,7 +626,7 @@ async fn get_media_by_path(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Media>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
@@ -678,7 +678,7 @@ async fn get_media_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Media>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
 	let age_restrictions = user
@@ -732,7 +732,7 @@ async fn get_media_file(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<NamedFile> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
@@ -777,7 +777,7 @@ async fn convert_media(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> Result<(), ApiError> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
@@ -827,7 +827,7 @@ async fn get_media_page(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -970,7 +970,7 @@ async fn get_media_thumbnail_handler(
 	session: Session,
 ) -> ApiResult<ImageResponse> {
 	tracing::trace!(?id, "get_media_thumbnail");
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	get_media_thumbnail_by_id(id, db, &session, &ctx.config)
 		.await
 		.map(ImageResponse::from)
@@ -1006,7 +1006,7 @@ async fn patch_media_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let target_page = body
 		.is_zero_based
@@ -1083,7 +1083,7 @@ async fn update_media_progress(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<ReadProgress>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let read_progress = db
@@ -1147,7 +1147,7 @@ async fn get_media_progress(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Option<ReadProgress>>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let result = db
@@ -1180,7 +1180,7 @@ async fn delete_media_progress(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<MediaIsComplete>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let deleted_rp = client
@@ -1218,7 +1218,7 @@ async fn get_is_media_completed(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<MediaIsComplete>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let result = client
@@ -1264,7 +1264,7 @@ async fn put_media_complete_status(
 	session: Session,
 	Json(payload): Json<PutMediaCompletionStatus>,
 ) -> ApiResult<Json<MediaIsComplete>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let result: Result<read_progress::Data, ApiError> = client

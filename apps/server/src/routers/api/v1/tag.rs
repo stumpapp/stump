@@ -32,7 +32,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// Get all tags for all items in the database. Tags are returned in a flat list,
 /// not grouped by the items which they belong to.
 async fn get_tags(State(ctx): State<AppState>) -> ApiResult<Json<Vec<Tag>>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	Ok(Json(
 		db.tag()
@@ -61,7 +61,7 @@ async fn create_tags(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateTags>,
 ) -> ApiResult<Json<Vec<Tag>>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let already_existing_tags = db
 		.tag()

@@ -57,7 +57,7 @@ pub struct ClaimResponse {
 	)
 )]
 async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	Ok(Json(ClaimResponse {
 		is_claimed: db.user().find_first(vec![]).exec().await?.is_some(),

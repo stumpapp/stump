@@ -217,7 +217,7 @@ async fn get_libraries(
 async fn get_libraries_stats(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<LibrariesStats>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	// TODO: maybe add more, like missingBooks, idk
 	let stats = db
@@ -257,7 +257,7 @@ async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Library>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let library = db
 		.library()
@@ -301,7 +301,7 @@ async fn get_library_series(
 	let pagination = pagination_query.0.get();
 	tracing::debug!(?filters, ?ordering, ?pagination, "get_library_series");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
@@ -484,7 +484,7 @@ async fn get_library_thumbnail_handler(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restriction = user.age_restriction;
@@ -572,7 +572,7 @@ async fn patch_library_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let target_page = body
 		.is_zero_based
@@ -650,7 +650,7 @@ async fn delete_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<()>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let result = db
@@ -767,7 +767,7 @@ async fn scan_library(
 	query: Query<ScanQueryParam>,
 	session: Session,
 ) -> Result<(), ApiError> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
 
@@ -820,7 +820,7 @@ async fn clean_library(
 ) -> ApiResult<Json<CleanLibraryResponse>> {
 	get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let result: ApiResult<(CleanLibraryResponse, Vec<String>)> = db
@@ -967,7 +967,7 @@ async fn create_library(
 	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
 	let user = get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	debug!(user_id = user.id, ?input, "Creating library");
 
@@ -1116,7 +1116,7 @@ async fn update_library(
 ) -> ApiResult<Json<Library>> {
 	get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	if !path::Path::new(&input.path).exists() {
 		return Err(ApiError::BadRequest(format!(
@@ -1229,7 +1229,7 @@ async fn delete_library(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {
 	get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	trace!(?id, "Attempting to delete library");

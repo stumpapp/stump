@@ -248,7 +248,7 @@ impl JobManager {
 		let queued_job_count = queued_job_ids.len();
 		tracing::debug!(queued_job_count, "Clearing job queue");
 
-		let client = self.core_ctx.get_db();
+		let client = &self.core_ctx.db;
 		let result = client
 			.job()
 			.update_many(
@@ -276,7 +276,7 @@ impl JobManager {
 
 	// TODO: remove this...
 	pub async fn report(self: Arc<Self>) -> JobManagerResult<Vec<JobDetail>> {
-		let db = self.core_ctx.get_db();
+		let db = &self.core_ctx.db;
 
 		let jobs = db
 			.job()

@@ -327,7 +327,7 @@ impl JobTrait for ThumbnailJob {
 					media_group_ids_count = media_group_ids.len(),
 					"Generating thumbnails for media group"
 				);
-				let client = ctx.core_ctx.get_db();
+				let client = &ctx.core_ctx.db;
 				let media = client
 					.media()
 					.find_many(vec![media::id::in_vec(media_group_ids.to_owned())])

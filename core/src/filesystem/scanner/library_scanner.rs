@@ -110,7 +110,7 @@ impl LibraryScanner {
 		let start = Instant::now();
 
 		let ctx = self.worker_ctx.core_ctx.clone();
-		let db = ctx.get_db();
+		let db = &ctx.db;
 
 		let library = db
 			.library()

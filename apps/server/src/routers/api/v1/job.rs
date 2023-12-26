@@ -76,7 +76,7 @@ async fn get_jobs(
 
 	trace!(?pagination, ?order, "get_jobs");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: JobOrderByParam = order.try_into()?;
 
@@ -220,7 +220,7 @@ async fn cancel_job_by_id(
 async fn get_scheduler_config(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<JobSchedulerConfig>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let server_config = client
 		.server_config()
@@ -266,7 +266,7 @@ async fn update_scheduler_config(
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateSchedulerConfig>,
 ) -> ApiResult<Json<Option<JobSchedulerConfig>>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let should_remove_config =
 		input.excluded_library_ids.is_none() && input.interval_secs.is_none();

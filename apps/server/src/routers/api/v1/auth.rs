@@ -252,7 +252,7 @@ pub async fn register(
 	State(ctx): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let has_users = db.user().find_first(vec![]).exec().await?.is_some();
 

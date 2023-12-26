@@ -194,7 +194,7 @@ async fn get_series(
 
 	trace!(?filters, ?ordering, ?pagination, "get_series");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
 	let age_restrictions = user
@@ -309,7 +309,7 @@ async fn get_series_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Series>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -446,7 +446,7 @@ async fn get_series_thumbnail_handler(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restriction = user.age_restriction;
@@ -532,7 +532,7 @@ async fn patch_series_thumbnail(
 ) -> ApiResult<ImageResponse> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let target_page = body
 		.is_zero_based
@@ -616,7 +616,7 @@ async fn get_series_media(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -733,7 +733,7 @@ async fn get_next_in_series(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Option<Media>>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let result = db
@@ -815,7 +815,7 @@ async fn get_series_is_complete(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<SeriesIsComplete>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let media_count = client

@@ -175,7 +175,7 @@ async fn get_book_clubs(
 	QsQuery(params): QsQuery<GetBookClubsParams>,
 	session: Session,
 ) -> ApiResult<Json<Vec<BookClub>>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let viewer = get_session_user(&session)?;
 
 	let where_params = if params.all {
@@ -225,7 +225,7 @@ async fn create_book_club(
 	session: Session,
 	Json(payload): Json<CreateBookClub>,
 ) -> ApiResult<Json<BookClub>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let viewer =
 		get_user_and_enforce_permission(&session, UserPermission::CreateBookClub)?;
@@ -284,7 +284,7 @@ async fn get_book_club(
 	Path(id): Path<String>,
 	session: Session,
 ) -> ApiResult<Json<BookClub>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let viewer = get_session_user(&session)?;
 
 	let where_params = book_club_access_for_user(&viewer)
@@ -330,7 +330,7 @@ async fn update_book_club(
 	session: Session,
 	Json(payload): Json<UpdateBookClub>,
 ) -> ApiResult<Json<BookClub>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -392,7 +392,7 @@ async fn create_book_club_invitation(
 	session: Session,
 	Json(payload): Json<CreateBookClubInvitation>,
 ) -> ApiResult<Json<BookClubInvitation>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let viewer = get_session_user(&session)?;
 
 	// I don't check for access control before the query because I am enforcing it when
@@ -458,7 +458,7 @@ async fn get_book_club_members(
 	Path(id): Path<String>,
 	session: Session,
 ) -> ApiResult<Json<Vec<BookClubMember>>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -532,7 +532,7 @@ async fn respond_to_book_club_invitation(
 	session: Session,
 	Json(payload): Json<BookClubInvitationAnswer>,
 ) -> ApiResult<Json<Option<BookClubMember>>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -591,7 +591,7 @@ async fn create_book_club_member_handler(
 	Json(payload): Json<CreateBookClubMember>,
 ) -> ApiResult<Json<BookClubMember>> {
 	get_session_server_owner_user(&session)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let created_member = create_book_club_member(payload, id, client).await?;
 	Ok(Json(created_member))
 }
@@ -611,7 +611,7 @@ async fn get_book_club_member(
 	Path((id, member_id)): Path<(String, String)>,
 	session: Session,
 ) -> ApiResult<Json<BookClubMember>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -655,7 +655,7 @@ async fn update_book_club_member(
 	session: Session,
 	Json(payload): Json<UpdateBookClubMember>,
 ) -> ApiResult<Json<BookClubMember>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -687,7 +687,7 @@ async fn delete_book_club_member(
 	Path((id, member_id)): Path<(String, String)>,
 	session: Session,
 ) -> ApiResult<Json<BookClubMember>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 	let viewer_membership = client
@@ -786,7 +786,7 @@ async fn create_book_club_schedule(
 	session: Session,
 	Json(payload): Json<CreateBookClubSchedule>,
 ) -> ApiResult<Json<BookClubSchedule>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -890,7 +890,7 @@ async fn get_book_club_schedule(
 	Path(id): Path<String>,
 	session: Session,
 ) -> ApiResult<Json<BookClubSchedule>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -928,7 +928,7 @@ async fn add_books_to_book_club_schedule(
 	session: Session,
 	Json(payload): Json<AddBooksToBookClubSchedule>,
 ) -> ApiResult<Json<Vec<BookClubBook>>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -1056,7 +1056,7 @@ async fn get_book_club_current_book(
 	Path(id): Path<String>,
 	session: Session,
 ) -> ApiResult<Json<BookClubBook>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 

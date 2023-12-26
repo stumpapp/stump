@@ -83,7 +83,7 @@ async fn update_epub_progress(
 	session: Session,
 	Json(input): Json<UpdateEpubProgress>,
 ) -> ApiResult<Json<ReadProgress>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let input_is_complete = input.is_complete.unwrap_or(input.percentage >= 1.0);
@@ -151,7 +151,7 @@ async fn get_bookmarks(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Vec<Bookmark>>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
 
@@ -187,7 +187,7 @@ async fn create_or_update_bookmark(
 	session: Session,
 	Json(input): Json<CreateOrUpdateBookmark>,
 ) -> ApiResult<Json<Bookmark>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
 
@@ -233,7 +233,7 @@ async fn delete_bookmark(
 	session: Session,
 	Json(input): Json<DeleteBookmark>,
 ) -> ApiResult<Json<Bookmark>> {
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
 

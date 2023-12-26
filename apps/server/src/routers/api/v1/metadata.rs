@@ -216,7 +216,7 @@ async fn get_metadata_overview(
 
 	trace!(?filters, "get_metadata_overview");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let result = db
 		._transaction()
@@ -289,7 +289,7 @@ async fn get_genres_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_genres(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_genres(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -330,7 +330,7 @@ async fn get_writers_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_writers(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_writers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -371,7 +371,7 @@ async fn get_pencillers_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_pencllers(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_pencllers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -412,7 +412,7 @@ async fn get_inkers_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_inkers(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_inkers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -453,7 +453,7 @@ async fn get_colorists_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_colorists(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_colorists(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -494,7 +494,7 @@ async fn get_letterers_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_letterers(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_letterers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -535,7 +535,7 @@ async fn get_editors_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_editors(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_editors(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -576,7 +576,7 @@ async fn get_publishers_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_publishers(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_publishers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -617,7 +617,7 @@ async fn get_characters_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_characters(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_characters(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }
 
@@ -658,6 +658,6 @@ async fn get_teams_handler(
 ) -> ApiResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
-		get_teams(ctx.get_db(), &apply_media_metadata_filters(filters)).await?,
+		get_teams(&ctx.db, &apply_media_metadata_filters(filters)).await?,
 	))
 }

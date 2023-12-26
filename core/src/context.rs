@@ -10,6 +10,7 @@ use crate::{
 	db::{self, entity::Log},
 	event::{CoreEvent, InternalCoreTask},
 	job::JobExecutorTrait,
+	job__::JobManager,
 	prisma,
 };
 
@@ -20,17 +21,13 @@ type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 /// Struct that holds the main context for a Stump application. This is passed around
 /// to all the different parts of the application, and is used to access the database
 /// and manage the event channels.
+#[derive(Clone)]
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
 	pub db: Arc<prisma::PrismaClient>,
+	pub jobs: Arc<JobManager>,
 	pub internal_sender: Arc<InternalSender>,
 	pub response_channel: Arc<ClientChannel>,
-}
-
-impl Clone for Ctx {
-	fn clone(&self) -> Ctx {
-		self.get_ctx()
-	}
 }
 
 impl Ctx {
@@ -51,9 +48,16 @@ impl Ctx {
 	/// }
 	/// ```
 	pub async fn new(config: StumpConfig, internal_sender: InternalSender) -> Ctx {
+		let config = Arc::new(config.clone());
+		let db = Arc::new(db::create_client(&config).await);
+
+		// Create job manager
+		let job_manager = Arc::new(JobManager::create(db.clone(), config.clone()));
+
 		Ctx {
-			config: Arc::new(config.clone()),
-			db: Arc::new(db::create_client(&config).await),
+			config,
+			db,
+			jobs: job_manager,
 			internal_sender: Arc::new(internal_sender),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
@@ -64,9 +68,16 @@ impl Ctx {
 	///
 	/// **This should not be used in production.**
 	pub async fn mock() -> Ctx {
+		let config = Arc::new(StumpConfig::debug());
+		let db = Arc::new(db::create_test_client().await);
+
+		// Create job manager
+		let job_manager = Arc::new(JobManager::create(db.clone(), config.clone()));
+
 		Ctx {
-			config: Arc::new(StumpConfig::debug()),
-			db: Arc::new(db::create_test_client().await),
+			config,
+			db,
+			jobs: job_manager,
 			internal_sender: Arc::new(unbounded_channel::<InternalCoreTask>().0),
 			response_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
@@ -94,22 +105,7 @@ impl Ctx {
 	/// }
 	/// ```
 	pub fn arced(&self) -> Arc<Ctx> {
-		Arc::new(self.get_ctx())
-	}
-
-	/// Get reference to prisma client
-	pub fn get_db(&self) -> &prisma::PrismaClient {
-		&self.db
-	}
-
-	/// Returns a copy of the ctx
-	pub fn get_ctx(&self) -> Ctx {
-		Ctx {
-			config: self.config.clone(),
-			db: self.db.clone(),
-			internal_sender: self.internal_sender.clone(),
-			response_channel: self.response_channel.clone(),
-		}
+		Arc::new(self.clone())
 	}
 
 	/// Returns the reciever for the CoreEvent channel. See [`emit_event`]

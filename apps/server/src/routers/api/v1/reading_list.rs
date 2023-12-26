@@ -189,7 +189,7 @@ async fn create_reading_list(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
 ) -> ApiResult<Json<ReadingList>> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let created_reading_list = db
@@ -255,7 +255,7 @@ async fn get_reading_list_by_id(
 	session: Session,
 ) -> ApiResult<Json<ReadingList>> {
 	let user_id = get_session_user(&session)?.id;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let rbac_condition = reading_list_rbac_for_user(user_id, 1);
 
@@ -302,7 +302,7 @@ async fn update_reading_list(
 	Json(input): Json<CreateReadingList>,
 ) -> ApiResult<Json<ReadingList>> {
 	let user = get_session_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	trace!(?input, "update_reading_list");
 
@@ -368,7 +368,7 @@ async fn delete_reading_list_by_id(
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<ReadingList>> {
 	let user = get_session_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let reading_list = db
 		.reading_list()

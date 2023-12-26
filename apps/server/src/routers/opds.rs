@@ -187,7 +187,7 @@ async fn catalog() -> ApiResult<Xml> {
 }
 
 async fn keep_reading(State(ctx): State<AppState>, session: Session) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user_id = get_session_user(&session)?.id;
 	let read_progress_conditions = vec![apply_in_progress_filter_for_user(user_id)];
@@ -251,7 +251,7 @@ async fn keep_reading(State(ctx): State<AppState>, session: Session) -> ApiResul
 
 // TODO: age restrictions
 async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
 	let entries = libraries.into_iter().map(OpdsEntry::from).collect();
@@ -283,7 +283,7 @@ async fn get_library_by_id(
 	pagination: Query<PageQuery>,
 	session: Session,
 ) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let library_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
@@ -359,7 +359,7 @@ async fn get_series(
 	pagination: Query<PageQuery>,
 	session: Session,
 ) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
@@ -406,7 +406,7 @@ async fn get_latest_series(
 	pagination: Query<PageQuery>,
 	session: Session,
 ) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
@@ -455,7 +455,7 @@ async fn get_series_by_id(
 	pagination: Query<PageQuery>,
 	session: Session,
 ) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let series_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
@@ -544,7 +544,7 @@ async fn get_book_thumbnail(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
 		.age_restriction
@@ -572,7 +572,7 @@ async fn get_book_page(
 	pagination: Query<PageQuery>,
 	session: Session,
 ) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -638,7 +638,7 @@ async fn download_book(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<NamedFile> {
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
 		.age_restriction

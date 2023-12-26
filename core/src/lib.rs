@@ -69,7 +69,7 @@ impl StumpCore {
 		let internal_channel = unbounded_channel::<InternalCoreTask>();
 
 		let core_ctx = Ctx::new(config, internal_channel.0).await;
-		let event_manager = EventManager::new(core_ctx.get_ctx(), internal_channel.1);
+		let event_manager = EventManager::new(core_ctx.clone(), internal_channel.1);
 
 		StumpCore {
 			ctx: core_ctx,
@@ -110,7 +110,7 @@ impl StumpCore {
 	/// Returns a new instance of [`Ctx`]. This is the main context struct for the core,
 	/// prividing access to the database and internal channels.
 	pub fn get_context(&self) -> Ctx {
-		self.ctx.get_ctx()
+		self.ctx.clone()
 	}
 
 	pub fn get_job_manager(&self) -> Arc<job::JobManager> {
@@ -153,7 +153,7 @@ impl StumpCore {
 	/// 1. The initial WAL setup has not already been completed on first run
 	/// 2. The journal mode is not already set to WAL
 	pub async fn init_journal_mode(&self) -> Result<JournalModeChanged, CoreError> {
-		let client = self.ctx.get_db();
+		let client = self.ctx.db.clone();
 
 		let wal_mode_setup_completed = client
 			.server_config()

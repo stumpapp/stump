@@ -11,6 +11,7 @@ import ServerStatusOverlay from '@/components/ServerStatusOverlay'
 import { SideBar } from '@/components/sidebar'
 import TopBar from '@/components/topbar/TopBar'
 
+import { TopNavigation } from './components/topNavigation'
 import { AppContext, PermissionEnforcerOptions } from './context'
 
 export function AppLayout() {
@@ -25,6 +26,11 @@ export function AppLayout() {
 		storeUser: state.user,
 	}))
 
+	const preferTopBar = useMemo(() => {
+		const userPreferences = storeUser?.user_preferences ?? ({} as UserPreferences)
+		return userPreferences?.primary_navigation_mode === 'TOPBAR'
+	}, [storeUser])
+
 	const softHideSidebar = useMemo(() => {
 		const userPreferences = storeUser?.user_preferences ?? ({} as UserPreferences)
 		const { enable_double_sidebar, enable_replace_primary_sidebar } = userPreferences
@@ -38,10 +44,13 @@ export function AppLayout() {
 		}
 	}, [location, storeUser])
 
-	const hideSidebar = useMemo(
+	const hideNavigation = useMemo(
 		() => (location.pathname.match(/\/book(s?)\/.+\/(.*-?reader)/) ?? []).length > 0,
 		[location],
 	)
+
+	const hideSidebar = hideNavigation || preferTopBar
+	const hideTopBar = hideNavigation || !preferTopBar
 
 	useCoreEventHandler()
 
@@ -88,7 +97,8 @@ export function AppLayout() {
 			}}
 		>
 			<Suspense fallback={<RouteLoadingIndicator />}>
-				{!hideSidebar && <TopBar />}
+				{!hideNavigation && <TopBar />}
+				{!hideTopBar && <TopNavigation />}
 				<div className="flex h-full w-full">
 					{!hideSidebar && <SideBar hidden={softHideSidebar} />}
 					<main className="min-h-full w-full bg-background">

@@ -191,6 +191,10 @@ impl From<&str> for UserPermission {
 	}
 }
 
+fn default_navigation_mode() -> String {
+	"SIDEBAR".to_string()
+}
+
 fn default_layout_mode() -> String {
 	"GRID".to_string()
 }
@@ -207,6 +211,8 @@ pub struct UserPreferences {
 	pub show_query_indicator: bool,
 	#[serde(default = "default_layout_mode")]
 	pub preferred_layout_mode: String,
+	#[serde(default = "default_navigation_mode")]
+	pub primary_navigation_mode: String,
 	#[serde(default)]
 	pub enable_discord_presence: bool,
 	#[serde(default)]
@@ -225,6 +231,7 @@ impl Default for UserPreferences {
 			id: "DEFAULT".to_string(),
 			locale: "en".to_string(),
 			preferred_layout_mode: "GRID".to_string(),
+			primary_navigation_mode: "SIDEBAR".to_string(),
 			app_theme: "LIGHT".to_string(),
 			show_query_indicator: false,
 			enable_discord_presence: false,
@@ -246,6 +253,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			id: data.id,
 			locale: data.locale,
 			preferred_layout_mode: data.preferred_layout_mode,
+			primary_navigation_mode: data.primary_navigation_mode,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
 			enable_discord_presence: data.enable_discord_presence,

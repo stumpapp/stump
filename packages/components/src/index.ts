@@ -36,6 +36,7 @@ export {
 	type TextAreaProps,
 } from './input'
 export { Link } from './link'
+export { NavigationMenu, navigationMenuTriggerStyle } from './navigation'
 export { Popover } from './popover'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { RadioGroup } from './radio'

@@ -8,6 +8,7 @@ import { SettingsContent } from '../../SettingsLayout'
 import DisplayAppearanceSettings from './DisplayAppearanceSettings'
 import DoubleSidebarToggle from './DoubleSidebarToggle'
 import PreferColorToggle from './PreferColorToggle'
+import PrimaryNavigationPreference from './PrimaryNavigationPreference'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
 import ReplacePrimarySidebarToggle from './ReplacePrimarySidebarToggle'
 import ThemeSelect from './ThemeSelect'
@@ -22,14 +23,19 @@ export default function AppearanceSettingsScene() {
 			</Helmet>
 
 			<SettingsContent>
-				<DisplayAppearanceSettings />
 				<ThemeSelect />
+				<PrimaryNavigationPreference />
+
+				<div className="flex flex-col gap-y-8">
+					<DoubleSidebarToggle />
+					<ReplacePrimarySidebarToggle />
+				</div>
+
+				<DisplayAppearanceSettings />
 
 				<div className="flex flex-col gap-y-8">
 					<PreferColorToggle />
 					<QueryIndicatorToggle />
-					<DoubleSidebarToggle />
-					<ReplacePrimarySidebarToggle />
 				</div>
 			</SettingsContent>
 		</SceneContainer>

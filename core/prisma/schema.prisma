@@ -609,6 +609,7 @@ model UserPreferences {
   locale                String @default("en")
   app_theme             String @default("LIGHT")
 
+  primary_navigation_mode String  @default("SIDEBAR")
   show_query_indicator    Boolean @default(false)
   enable_discord_presence Boolean @default(false)
   enable_compact_display  Boolean @default(false)

@@ -17,9 +17,12 @@ export default function DisplayAppearanceSettings() {
 	}
 
 	return (
-		<div>
-			<Label>Display</Label>
-			<div className="flex items-center gap-x-4 pt-1.5">
+		<div className="flex flex-col gap-y-1.5">
+			<Label>Display spacing</Label>
+			<Text size="sm" variant="muted">
+				Adjusts the overall spacing between elements throughout the app
+			</Text>
+			<div className="flex items-center gap-x-4">
 				<AppearanceOption
 					label="Default"
 					isSelected={!enable_compact_display}
@@ -27,11 +30,11 @@ export default function DisplayAppearanceSettings() {
 				/>
 				<AppearanceOption
 					label="Compact"
-					isSelected={enable_compact_display}
+					isSelected={!!enable_compact_display}
 					onSelect={() => handleChange(true)}
 				/>
 			</div>
-			<Text size="xs" variant="muted" className="pt-1.5">
+			<Text size="xs" variant="muted">
 				* Compact display mode is not implemented yet
 			</Text>
 		</div>
@@ -50,7 +53,7 @@ function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps
 		<div className="w-1/2 text-center md:w-1/3">
 			<div
 				className={cx(
-					'bg-background-300 hover:bg-background-300 border-edge hover:border-edge-200 relative flex h-32 w-full flex-col rounded-md border p-2 transition-all duration-200',
+					'relative flex h-32 w-full flex-col rounded-md border border-edge bg-background-300 p-2 transition-all duration-200 hover:border-edge-200 hover:bg-background-300',
 					isDefaultDisplay ? 'gap-y-4' : 'gap-y-2',
 					{
 						'border-edge-200': isSelected,
@@ -60,20 +63,20 @@ function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps
 			>
 				<div
 					className={cx(
-						'bg-background-400 w-full rounded-md',
+						'w-full rounded-md bg-background-400',
 						isDefaultDisplay ? 'h-1/4' : 'h-1/5',
 					)}
 				/>
 
 				<div
-					className={cx('bg-background-400 w-2/3 rounded-md', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
+					className={cx('w-2/3 rounded-md bg-background-400', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
 				<div
-					className={cx('bg-background-400 w-5/6 rounded-md', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
+					className={cx('w-5/6 rounded-md bg-background-400', isDefaultDisplay ? 'h-1/4' : 'h-1/5')}
 				/>
 
-				{!isDefaultDisplay && <div className="bg-background-400 h-1/5 w-full rounded-md" />}
+				{!isDefaultDisplay && <div className="h-1/5 w-full rounded-md bg-background-400" />}
 
 				{isSelected && (
 					<div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand">

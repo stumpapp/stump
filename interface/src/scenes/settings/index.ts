@@ -1,0 +1,1 @@
+export { routeGroups } from './routes'

@@ -2,14 +2,20 @@ use std::{error::Error, path::PathBuf, process::Command};
 
 /// A simple program that executes various `cargo` commands to generate code
 fn main() -> Result<(), Box<dyn Error>> {
-	// cargo prisma generate
-	let command = Command::new("cargo")
-		.args(["prisma", "generate"])
-		.current_dir(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../core"))
-		.spawn()?
-		.wait()?;
-	assert!(command.success());
-	println!("Prisma client has been generated successfully!");
+	let args: Vec<String> = std::env::args().collect();
+	let skip_prisma = args.get(1).map(|s| s == "--skip-prisma").unwrap_or(false);
+	if skip_prisma {
+		println!("Skipping prisma generation...");
+	} else {
+		// cargo prisma generate
+		let command = Command::new("cargo")
+			.args(["prisma", "generate"])
+			.current_dir(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../core"))
+			.spawn()?
+			.wait()?;
+		assert!(command.success());
+		println!("Prisma client has been generated successfully!");
+	}
 
 	let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 		.join("../../packages/types")

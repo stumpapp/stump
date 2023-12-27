@@ -2,7 +2,7 @@ import { Popover } from '@stump/components'
 import { Paintbrush } from 'lucide-react'
 import React from 'react'
 
-import { ThemeSwitch } from '../../../sidebar'
+import { ThemeSwitch } from '../../../navigation/sidebar'
 import ControlButton from './ControlButton'
 import FontSizeControl from './FontSizeControl'
 import ReadingDirection from './ReadingDirection'

@@ -16,7 +16,7 @@ export default function LibrariesStats() {
 	if (!libraryStats || !libraryUsage) return null
 
 	return (
-		<div className="flex items-center gap-4 divide-x divide-gray-100/60 dark:divide-gray-800/80">
+		<div className="flex items-center gap-4 divide-x divide-edge">
 			<Statistic className="pr-10">
 				<Statistic.Label>Total Series</Statistic.Label>
 				<Statistic.CountUpNumber value={Number(libraryStats.series_count)} />

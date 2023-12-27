@@ -8,15 +8,11 @@ body {
 
 #root,
 html {
-	@apply h-full overflow-hidden dark:bg-gray-950;
+	@apply flex h-full flex-col overflow-hidden bg-background;
 }
 
 body {
-	@apply dark:bg-gray-950;
-}
-
-main {
-	@apply flex h-full w-full flex-col overflow-y-auto overflow-x-hidden !important;
+	@apply bg-background;
 }
 
 form {

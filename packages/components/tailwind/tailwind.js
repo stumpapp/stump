@@ -1,25 +1,15 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable sort-keys-fix/sort-keys-fix */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultTheme = require('tailwindcss/defaultTheme')
+const { createThemes } = require('tw-colors')
+const {
+	themes: { bronze, dark, light },
+	sharedColors,
+} = require('../themes')
 
-const brand = {
-	100: '#EFDDD1',
-	200: '#E4C6B3',
-	300: '#D9AF95',
-	400: '#CF9977',
-	50: '#F4E8E0',
-	500: '#C48259',
-	600: '#A9663C',
-	700: '#7F4D2D',
-	800: '#56341F',
-	900: '#2D1B10',
-	DEFAULT: '#C48259',
-}
-
-const newGray = {
+const gray = {
 	DEFAULT: '#7D828A',
 	50: '#F6F6F7',
 	75: '#E9EAEB',
@@ -47,52 +37,6 @@ const newGray = {
 	// 1000: '#010102',
 }
 
-const slate = {
-	50: '#f8fafc',
-	75: '#F4F7FA',
-	100: '#f1f5f9',
-	150: '#E9EEF4',
-	200: '#e2e8f0',
-	250: '#D5DEE8',
-	300: '#cbd5e1',
-	350: '#B2BECE',
-	400: '#94a3b8',
-	450: '#7E8EA4',
-	500: '#64748b',
-	550: '#57667C',
-	600: '#475569',
-	650: '#3E4C60',
-	700: '#334155',
-	750: '#293649',
-	800: '#1e293b',
-	850: '#172133',
-	900: '#0f172a',
-	1000: '#070c1f',
-}
-
-const zinc = {
-	50: '#fafafa',
-	75: '#F6F6F6',
-	100: '#f4f4f5',
-	150: '#EBEBED',
-	200: '#e4e4e7',
-	250: '#DDDDE0',
-	300: '#d4d4d8',
-	350: '#BDBDC3',
-	400: '#a1a1aa',
-	450: '#8B8B94',
-	500: '#71717a',
-	550: '#63636A',
-	600: '#52525b',
-	650: '#47474F',
-	700: '#3f3f46',
-	750: '#35353C',
-	800: '#27272a',
-	850: '#1F1F22',
-	900: '#18181b',
-	1000: '#0D0D0F',
-}
-
 /**
  *
  * @param {string | undefined} relativeFromRoot - relative path from root of project
@@ -112,14 +56,20 @@ module.exports = function (relativeFromRoot) {
 			'../../packages/*/src/**/*.{js,ts,jsx,tsx,html}',
 			path.join(basePath, './src/**/*.(js|jsx|ts|tsx)'),
 		],
-		darkMode: 'class',
 		plugins: [
 			require('tailwind-scrollbar-hide'),
 			require('@tailwindcss/typography'),
 			require('tailwindcss-animate'),
 			require('tailwindcss-autofill'),
-			require('tailwindcss-text-fill'),
-			require('tailwindcss-shadow-fill'),
+			// FIXME: these two plugins break when combined with the theme plugin. They are simple enough
+			// to manually implement, so I'm disabling them for now.
+			// require('tailwindcss-text-fill'),
+			// require('tailwindcss-shadow-fill'),
+			createThemes({
+				dark,
+				light,
+				bronze,
+			}),
 		],
 		theme: {
 			extend: {
@@ -131,10 +81,8 @@ module.exports = function (relativeFromRoot) {
 					sans: ['Inter var', ...defaultTheme.fontFamily.sans],
 				},
 				colors: {
-					brand,
-					gray: newGray,
-					slate,
-					zinc,
+					brand: sharedColors.brand,
+					gray,
 				},
 				keyframes: {
 					'accordion-down': {
@@ -147,7 +95,7 @@ module.exports = function (relativeFromRoot) {
 					},
 				},
 				ringColor: {
-					DEFAULT: brand['500'],
+					DEFAULT: sharedColors.brand['500'],
 				},
 				screens: {
 					'3xl': '1600px',

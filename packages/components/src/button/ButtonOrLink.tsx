@@ -42,8 +42,7 @@ export function ButtonOrLink({
 							buttonVariants({ className, newYork, rounded, size, variant }),
 							'focus:ring-brand-400 dark:focus:ring-brand-400',
 							{
-								'cursor-not-allowed bg-gray-75 opacity-50 dark:bg-gray-850 dark:hover:bg-gray-850':
-									props.disabled,
+								'cursor-not-allowed bg-background opacity-50': props.disabled,
 							},
 							className,
 					  )

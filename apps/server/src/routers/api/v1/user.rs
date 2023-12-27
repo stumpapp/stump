@@ -337,17 +337,25 @@ async fn update_preferences(
 			user_preferences::id::equals(preferences_id),
 			vec![
 				user_preferences::locale::set(input.locale.to_owned()),
-				user_preferences::library_layout_mode::set(
-					input.library_layout_mode.to_owned(),
-				),
-				user_preferences::series_layout_mode::set(
-					input.series_layout_mode.to_owned(),
+				user_preferences::preferred_layout_mode::set(
+					input.preferred_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::primary_navigation_mode::set(
+					input.primary_navigation_mode.to_owned(),
+				),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
 				user_preferences::enable_discord_presence::set(
 					input.enable_discord_presence,
 				),
+				user_preferences::enable_compact_display::set(
+					input.enable_compact_display,
+				),
+				user_preferences::enable_double_sidebar::set(input.enable_double_sidebar),
+				user_preferences::enable_replace_primary_sidebar::set(
+					input.enable_replace_primary_sidebar,
+				),
+				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
 			],
 		)
 		.exec()
@@ -501,12 +509,15 @@ async fn update_current_user(
 pub struct UpdateUserPreferences {
 	pub id: String,
 	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
+	pub preferred_layout_mode: String,
+	pub primary_navigation_mode: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
 	pub enable_discord_presence: bool,
+	pub enable_compact_display: bool,
+	pub enable_double_sidebar: bool,
+	pub enable_replace_primary_sidebar: bool,
+	pub prefer_accent_color: bool,
 }
 
 #[utoipa::path(

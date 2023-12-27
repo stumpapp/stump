@@ -17,7 +17,7 @@ export default function ListItem({ id, title, subtitle, href }: Props) {
 			title={title}
 			key={id}
 			to={href}
-			className="dark:hover-bg-gray-800 flex h-[40px] w-full rounded-lg p-2 hover:bg-gray-100"
+			className="flex h-[40px] w-full rounded-lg p-2 hover:bg-background-200"
 		>
 			<Heading
 				size="sm"

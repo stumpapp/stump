@@ -1,6 +1,11 @@
-import { useLayoutMode, useLibraryByIdQuery, usePagedSeriesQuery } from '@stump/client'
+import {
+	useLayoutMode,
+	useLibraryByIdQuery,
+	usePagedSeriesQuery,
+	useVisitLibrary,
+} from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -27,7 +32,11 @@ function LibraryOverviewScene() {
 		throw new Error('Library id is required')
 	}
 
-	const { layoutMode } = useLayoutMode('LIBRARY')
+	const { layoutMode } = useLayoutMode()
+
+	const alreadyVisited = useRef(false)
+	const { visitLibrary } = useVisitLibrary()
+
 	const { isLoading, library } = useLibraryByIdQuery(id)
 
 	const { filters } = useFilterContext()
@@ -75,6 +84,17 @@ function LibraryOverviewScene() {
 		[pageData?.current_page, isOnFirstPage],
 	)
 
+	useEffect(
+		() => {
+			if (library?.id && !alreadyVisited.current) {
+				alreadyVisited.current = true
+				visitLibrary(library.id)
+			}
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[library?.id],
+	)
+
 	if (isLoading) {
 		return null
 	} else if (!library) {
@@ -106,7 +126,7 @@ function LibraryOverviewScene() {
 				orderBy
 			/>
 
-			<div className="flex w-full flex-col space-y-6 p-4">
+			<div className="flex w-full flex-col space-y-6 pt-4">
 				{hasStuff && (
 					<Pagination
 						pages={total_pages}

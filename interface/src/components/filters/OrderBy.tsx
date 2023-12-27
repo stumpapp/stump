@@ -33,10 +33,10 @@ export default function OrderBy({ entity }: Props) {
 				<Button
 					variant="ghost"
 					className={cx('shrink-0', {
-						'!bg-gray-75/60 dark:!bg-gray-800': isOpen,
+						'!bg-background-300': isOpen,
 					})}
 				>
-					<SortAsc className="mr-1.5 h-4 w-4 dark:text-gray-400" />
+					<SortAsc className="mr-1.5 h-4 w-4 text-contrast-300" />
 					Order By
 				</Button>
 			</Popover.Trigger>

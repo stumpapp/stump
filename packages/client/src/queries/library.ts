@@ -182,3 +182,28 @@ export function useDeleteLibraryMutation(
 
 	return { deleteLibrary, deleteLibraryAsync, ...rest }
 }
+
+export function useVisitLibrary(options: MutationOptions<Library, AxiosError, string> = {}) {
+	const {
+		mutate: visitLibrary,
+		mutateAsync: visitLibraryAsync,
+		...rest
+	} = useMutation(
+		[libraryQueryKeys.visitLibrary],
+		async (id) => {
+			const { data } = await libraryApi.visitLibrary(id)
+			return data
+		},
+		{
+			...options,
+			onSuccess: async (library, _, __) => {
+				await invalidateQueries({
+					keys: [libraryQueryKeys.getLastVisitedLibrary],
+				})
+				options.onSuccess?.(library, _, __)
+			},
+		},
+	)
+
+	return { visitLibrary, visitLibraryAsync, ...rest }
+}

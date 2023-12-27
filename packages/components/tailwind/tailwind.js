@@ -61,6 +61,8 @@ module.exports = function (relativeFromRoot) {
 			require('@tailwindcss/typography'),
 			require('tailwindcss-animate'),
 			require('tailwindcss-autofill'),
+			// FIXME: these two plugins break when combined with the theme plugin. They are simple enough
+			// to manually implement, so I'm disabling them for now.
 			// require('tailwindcss-text-fill'),
 			// require('tailwindcss-shadow-fill'),
 			createThemes({

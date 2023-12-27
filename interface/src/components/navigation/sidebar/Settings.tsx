@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react'
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
-import paths from '../../paths'
+import paths from '../../../paths'
 
 export default function SettingsButton() {
 	const navigate = useNavigate()

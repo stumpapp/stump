@@ -5,7 +5,7 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{not, or, raw, Direction};
+use prisma_client_rust::{chrono::Utc, not, or, raw, Direction};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
@@ -36,11 +36,12 @@ use stump_core::{
 		ContentType, FileParts, PathUtils,
 	},
 	prisma::{
+		last_library_visit,
 		library::{self, WhereParam},
 		library_options, media,
 		media::OrderByParam as MediaOrderByParam,
 		series::{self, OrderByParam as SeriesOrderByParam},
-		tag,
+		tag, user,
 	},
 };
 
@@ -69,6 +70,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
 		.route("/libraries", get(get_libraries).post(create_library))
 		.route("/libraries/stats", get(get_libraries_stats))
+		.nest(
+			"/libraries/last-visited",
+			Router::new()
+				.route("/", get(get_last_visited_library))
+				.route("/:id", put(update_last_visited_library)),
+		)
 		.nest(
 			"/libraries/:id",
 			Router::new()
@@ -201,6 +208,60 @@ async fn get_libraries(
 	let count = ctx.db.library().count(where_conditions).exec().await?;
 
 	Ok(Json((libraries, count, pagination).into()))
+}
+
+async fn get_last_visited_library(
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<Option<Library>>> {
+	let client = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+
+	let last_visited_library = client
+		.last_library_visit()
+		.find_first(vec![last_library_visit::user_id::equals(user.id)])
+		.with(last_library_visit::library::fetch())
+		.exec()
+		.await?;
+
+	let library = last_visited_library
+		.map(|llv| llv.library().cloned())
+		.transpose()?;
+
+	Ok(Json(library.map(Library::from)))
+}
+
+async fn update_last_visited_library(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<Library>> {
+	let client = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+
+	let last_library_visit = client
+		.last_library_visit()
+		.upsert(
+			last_library_visit::user_id_library_id(user.id.clone(), id.clone()),
+			(
+				user::id::equals(user.id.clone()),
+				library::id::equals(id.clone()),
+				vec![last_library_visit::timestamp::set(Utc::now().into())],
+			),
+			vec![last_library_visit::timestamp::set(Utc::now().into())],
+		)
+		.with(last_library_visit::library::fetch())
+		.exec()
+		.await?;
+
+	let library = last_library_visit
+		.library()
+		.ok()
+		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+
+	Ok(Json(Library::from(library.to_owned())))
 }
 
 #[utoipa::path(

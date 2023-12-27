@@ -50,7 +50,7 @@ function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps
 	const isSidebar = label === 'Sidebar'
 
 	return (
-		<div className="w-1/2 text-center md:w-1/3">
+		<div className="w-1/2 text-center md:w-1/3 lg:w-1/4">
 			<div
 				className={cx(
 					'relative flex h-32 w-full overflow-hidden rounded-md border border-edge bg-background-300 transition-all duration-200 hover:border-edge-200 hover:bg-background-300',

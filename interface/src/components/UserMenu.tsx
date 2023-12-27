@@ -6,24 +6,29 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { useAppContext } from '../context'
 import paths from '../paths'
-import SignOut from './sidebar/SignOut'
+import SignOut from './navigation/sidebar/SignOut'
 
-export default function UserMenu() {
+type Props = {
+	variant?: 'sidebar' | 'topbar'
+}
+
+export default function UserMenu({ variant = 'sidebar' }: Props) {
 	const [isOpen, setIsOpen] = useState(false)
 
 	const { user } = useAppContext()
 
 	const avatarUrl = user.avatar_url || undefined
 	const fallback = user.username.slice(0, 2).toUpperCase()
+	const isSidebar = variant === 'sidebar'
 
 	return (
-		<AutoSizer style={{ height: '2.35rem', width: '100%' }}>
+		<AutoSizer style={{ height: '2.35rem', width: isSidebar ? '100%' : '2.35rem' }}>
 			{({ width }) => (
 				<Popover onOpenChange={setIsOpen} open={isOpen}>
 					<Popover.Trigger asChild>
 						<Card
 							className={cx(
-								'flex h-[2.35rem] w-full cursor-pointer items-center border-edge-200 border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
+								'flex h-[2.35rem] w-full cursor-pointer items-center justify-center border-edge-200 border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
 								{ 'border-opacity-100': isOpen },
 							)}
 						>
@@ -34,16 +39,18 @@ export default function UserMenu() {
 								rounded="lg"
 								className="h-6 w-6"
 							/>
-							<Text className="ml-2 line-clamp-1 select-none text-ellipsis" size="sm">
-								{user.username}
-							</Text>
+							{isSidebar && (
+								<Text className="ml-2 line-clamp-1 select-none text-ellipsis" size="sm">
+									{user.username}
+								</Text>
+							)}
 						</Card>
 					</Popover.Trigger>
 
 					<Popover.Content
 						className="flex flex-col divide-y divide-edge overflow-hidden p-0 shadow-sm"
-						align="start"
-						style={{ width }}
+						align={isSidebar ? 'start' : 'end'}
+						style={{ width: isSidebar ? width : 'auto' }}
 					>
 						<div className="flex w-full flex-col">
 							<Link

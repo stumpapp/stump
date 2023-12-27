@@ -1,8 +1,8 @@
 import { usePreferences } from '@stump/client'
-import { cx, Label, Text } from '@stump/components'
+import { cn, cx, Label, Text } from '@stump/components'
 import { Check } from 'lucide-react'
 
-export default function DisplayAppearanceSettings() {
+export default function DisplaySpacingPreference() {
 	const {
 		preferences: { enable_compact_display },
 		update,
@@ -27,11 +27,13 @@ export default function DisplayAppearanceSettings() {
 					label="Default"
 					isSelected={!enable_compact_display}
 					onSelect={() => handleChange(false)}
+					isDisabled
 				/>
 				<AppearanceOption
 					label="Compact"
 					isSelected={!!enable_compact_display}
 					onSelect={() => handleChange(true)}
+					isDisabled
 				/>
 			</div>
 			<Text size="xs" variant="muted">
@@ -44,22 +46,26 @@ export default function DisplayAppearanceSettings() {
 type AppearanceOptionProps = {
 	label: string
 	isSelected: boolean
+	isDisabled?: boolean
 	onSelect: () => void
 }
-function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps) {
+function AppearanceOption({ label, isSelected, isDisabled, onSelect }: AppearanceOptionProps) {
 	const isDefaultDisplay = label === 'Default'
 
 	return (
-		<div className="w-1/2 text-center md:w-1/3">
+		<div className="w-1/2 text-center md:w-1/3 lg:w-1/4">
 			<div
-				className={cx(
+				className={cn(
 					'relative flex h-32 w-full flex-col rounded-md border border-edge bg-background-300 p-2 transition-all duration-200 hover:border-edge-200 hover:bg-background-300',
 					isDefaultDisplay ? 'gap-y-4' : 'gap-y-2',
 					{
 						'border-edge-200': isSelected,
 					},
+					{
+						'cursor-not-allowed opacity-50': isDisabled,
+					},
 				)}
-				onClick={onSelect}
+				onClick={isDisabled ? undefined : onSelect}
 			>
 				<div
 					className={cx(
@@ -85,7 +91,7 @@ function AppearanceOption({ label, isSelected, onSelect }: AppearanceOptionProps
 				)}
 			</div>
 
-			<Label>{label}</Label>
+			<Label className={cn({ 'opacity-50': isDisabled })}>{label}</Label>
 		</div>
 	)
 }

@@ -19,7 +19,7 @@ export default function DoubleSidebarToggle() {
 
 	return (
 		<PreferenceToggle
-			label="Double sidebar"
+			label="Settings sidebar"
 			description="Enables the sidebar navigation for the settings pages. If you frequently use a smaller screen, you may want to disable this."
 			isChecked={enable_double_sidebar}
 			onToggle={handleToggle}

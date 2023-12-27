@@ -3,8 +3,8 @@ import { Menu } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useMediaMatch } from 'rooks'
 
+import UserMenu from '../../UserMenu'
 import { SideBar, SideBarFooter } from '../sidebar'
-import UserMenu from '../UserMenu'
 
 export default function MobileSheet() {
 	const [open, setOpen] = useState(false)

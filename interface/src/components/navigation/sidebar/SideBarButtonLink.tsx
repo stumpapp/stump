@@ -23,9 +23,9 @@ export default function SideBarButtonLink({
 	return (
 		<div
 			className={cn(
-				'hover:bg-sidebar-300 group inline-flex h-[2.35rem] w-full items-center justify-start rounded-md px-2 text-sm transition-all duration-150',
+				'group inline-flex h-[2.35rem] w-full items-center justify-start rounded-md px-2 text-sm transition-all duration-150 hover:bg-sidebar-300',
 				{
-					'hover:bg-sidebar-200 border-sidebar-300 text-contrast-200 justify-center border border-dashed bg-opacity-50 text-opacity-80 hover:text-opacity-100':
+					'justify-center border border-dashed border-sidebar-300 bg-opacity-50 text-contrast-200 text-opacity-80 hover:bg-sidebar-200 hover:text-opacity-100':
 						variant === 'action',
 				},
 				{ 'text-contrast': variant !== 'action' },

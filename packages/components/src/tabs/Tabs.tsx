@@ -7,7 +7,7 @@ import { TabsContext, TabsVariant } from './context'
 
 const TABS_CONTENT_VARIANTS: Record<TabsVariant, string> = {
 	default: 'text-contrast-300 data-[state=active]:bg-background data-[state=active]:text-contrast',
-	primary: 'text-contrast-300 data-[state=active]:bg-brand-200 data-[state=active]:text-brand-800',
+	primary: 'text-contrast-300 data-[state=active]:bg-brand-300 data-[state=active]:text-brand-800',
 }
 
 export type TabsProps = {

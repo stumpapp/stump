@@ -9,7 +9,7 @@ export default function NoLibraries() {
 
 	return (
 		<div className="flex flex-1 items-center justify-center">
-			<Card className="bg-background-200 flex flex-col items-center justify-center gap-2 p-4 text-center">
+			<Card className="flex flex-col items-center justify-center gap-2 bg-background-200 p-4 text-center">
 				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
 				<Heading size="sm">
 					{isServerOwner ? "You don't have" : 'There are no'} libraries configured

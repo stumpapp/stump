@@ -5,7 +5,7 @@ import PreferenceToggle from './PreferenceToggle'
 
 export default function ReplacePrimarySidebarToggle() {
 	const {
-		preferences: { enable_replace_primary_sidebar, enable_double_sidebar },
+		preferences: { enable_replace_primary_sidebar, enable_double_sidebar, primary_navigation_mode },
 		update,
 	} = usePreferences()
 
@@ -22,7 +22,7 @@ export default function ReplacePrimarySidebarToggle() {
 			label="Replace primary sidebar"
 			description="Any instance of a secondary sidebar will replace the primary sidebar instead of being displayed next to it"
 			isChecked={enable_replace_primary_sidebar}
-			isDisabled={!enable_double_sidebar}
+			isDisabled={!enable_double_sidebar || primary_navigation_mode !== 'SIDEBAR'}
 			onToggle={handleToggle}
 			formId="enable_replace_primary_sidebar"
 		/>

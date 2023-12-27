@@ -6,10 +6,10 @@ import { useCallback, useMemo, useState } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
-import { useAppContext } from '../../../../context'
-import { useLocaleContext } from '../../../../i18n'
-import paths from '../../../../paths'
-import DeleteLibraryConfirmation from '../../../library/DeleteLibraryConfirmation'
+import { useAppContext } from '../../../../../context'
+import { useLocaleContext } from '../../../../../i18n'
+import paths from '../../../../../paths'
+import DeleteLibraryConfirmation from '../../../../library/DeleteLibraryConfirmation'
 
 type Props = {
 	library: Library

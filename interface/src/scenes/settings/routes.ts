@@ -1,6 +1,7 @@
 import { AlarmClock, Bell, Brush, Cog, PcCase, ShieldCheck, Users } from 'lucide-react'
 
 // TODO: permission guards
+// TODO: prefetch options
 export const routeGroups = [
 	{
 		defaultRoute: '/settings/app/general',

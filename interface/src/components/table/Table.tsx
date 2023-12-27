@@ -113,7 +113,7 @@ export default function Table<T, V>({
 		<>
 			<div className="divide block max-w-full overflow-y-hidden overflow-x-scroll p-3 scrollbar-hide">
 				<table className={clsx('divide-y', { 'w-full': props.fullWidth })}>
-					<thead className="border-b border-gray-75 text-left dark:border-gray-800">
+					<thead className="border-b border-edge text-left">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<tr key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
@@ -143,7 +143,7 @@ export default function Table<T, V>({
 							</tr>
 						))}
 					</thead>
-					<tbody className="divide-y divide-gray-75 dark:divide-gray-800">
+					<tbody className="divide-y divide-edge">
 						{tableRows.map((row) => {
 							return (
 								<tr key={row.id}>

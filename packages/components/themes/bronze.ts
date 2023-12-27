@@ -1,4 +1,4 @@
-import { brand } from './shared'
+import { amber, brand, red } from './shared'
 
 export const bronze = {
 	background: {
@@ -8,6 +8,8 @@ export const bronze = {
 		400: '#E0D6CF',
 		500: '#D3C4BA',
 		DEFAULT: '#FFFFFF',
+		danger: red[50],
+		warning: amber[50],
 	},
 	brand,
 	contrast: {
@@ -16,7 +18,7 @@ export const bronze = {
 		DEFAULT: '#000000',
 	},
 	edge: {
-		200: '#E0D6CF',
+		200: '#E7E0DA',
 		DEFAULT: '#EDE8E4',
 	},
 	muted: {
@@ -30,5 +32,3 @@ export const bronze = {
 		DEFAULT: '#F3F0ED',
 	},
 }
-
-// 'pampas': {  DEFAULT: '#FBFAF9',  50: '#FFFFFF',  100: '#FFFFFF',  200: '#FBFAF9',  300: '#EDE8E4',  400: '#DED6CE',  500: '#D0C4B9',  600: '#C2B3A3',  700: '#B4A18E',  800: '#A58F78',  900: '#967D64',  950: '#8B745D'},

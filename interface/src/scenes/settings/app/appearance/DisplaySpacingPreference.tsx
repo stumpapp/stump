@@ -9,6 +9,8 @@ export default function DisplaySpacingPreference() {
 	} = usePreferences()
 
 	const handleChange = async (enable_compact: boolean) => {
+		if (enable_compact === enable_compact_display) return
+
 		try {
 			await update({ enable_compact_display: enable_compact })
 		} catch (error) {
@@ -27,7 +29,6 @@ export default function DisplaySpacingPreference() {
 					label="Default"
 					isSelected={!enable_compact_display}
 					onSelect={() => handleChange(false)}
-					isDisabled
 				/>
 				<AppearanceOption
 					label="Compact"
@@ -36,7 +37,7 @@ export default function DisplaySpacingPreference() {
 					isDisabled
 				/>
 			</div>
-			<Text size="xs" variant="muted">
+			<Text size="xs" variant="muted" className="italic">
 				* Compact display mode is not implemented yet
 			</Text>
 		</div>

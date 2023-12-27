@@ -5,7 +5,7 @@ import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
 
 import { SettingsContent } from '../../SettingsLayout'
-import DisplayAppearanceSettings from './DisplayAppearanceSettings'
+import DisplaySpacingPreference from './DisplaySpacingPreference'
 import DoubleSidebarToggle from './DoubleSidebarToggle'
 import PreferColorToggle from './PreferColorToggle'
 import PrimaryNavigationPreference from './PrimaryNavigationPreference'
@@ -31,7 +31,7 @@ export default function AppearanceSettingsScene() {
 					<ReplacePrimarySidebarToggle />
 				</div>
 
-				<DisplayAppearanceSettings />
+				<DisplaySpacingPreference />
 
 				<div className="flex flex-col gap-y-8">
 					<PreferColorToggle />

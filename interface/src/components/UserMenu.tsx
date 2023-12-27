@@ -28,8 +28,9 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 					<Popover.Trigger asChild>
 						<Card
 							className={cx(
-								'flex h-[2.35rem] w-full cursor-pointer items-center justify-center border-edge-200 border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
+								'flex h-[2.35rem] w-full cursor-pointer items-center border-edge-200 border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
 								{ 'border-opacity-100': isOpen },
+								{ 'justify-center': !isSidebar },
 							)}
 						>
 							<Avatar

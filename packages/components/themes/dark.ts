@@ -8,6 +8,8 @@ export const dark = {
 		400: '#242628',
 		500: '#292C30',
 		DEFAULT: '#161719',
+		danger: '#491B1C',
+		warning: '#412E19',
 	},
 	brand,
 	contrast: {

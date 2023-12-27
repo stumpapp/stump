@@ -1,4 +1,4 @@
-import { brand } from './shared'
+import { brand, red, yellow } from './shared'
 
 export const light = {
 	background: {
@@ -8,6 +8,8 @@ export const light = {
 		400: '#D3D5D7',
 		500: '#BEC0C4',
 		DEFAULT: '#FFFFFF',
+		danger: red[50],
+		warning: yellow[50],
 	},
 	brand,
 	contrast: {

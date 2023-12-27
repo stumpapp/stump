@@ -1,7 +1,7 @@
 import { useLibraries } from '@stump/client'
 import { Accordion } from '@stump/components'
 import { Library } from 'lucide-react'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '../../../../../context'
@@ -23,6 +23,8 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 	const { checkPermission } = useAppContext()
 
 	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
+
+	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
 
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
@@ -64,13 +66,15 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 				</Accordion.Trigger>
 				<Accordion.Content containerClassName="flex flex-col gap-y-1.5">
 					{renderLibraries()}
-					<SideBarButtonLink
-						to={paths.libraryCreate()}
-						isActive={location.pathname === paths.libraryCreate()}
-						variant="action"
-					>
-						{t('sidebar.buttons.createLibrary')}
-					</SideBarButtonLink>
+					{canCreateLibrary && (
+						<SideBarButtonLink
+							to={paths.libraryCreate()}
+							isActive={location.pathname === paths.libraryCreate()}
+							variant="action"
+						>
+							{t('sidebar.buttons.createLibrary')}
+						</SideBarButtonLink>
+					)}
 				</Accordion.Content>
 			</Accordion.Item>
 		</Accordion>

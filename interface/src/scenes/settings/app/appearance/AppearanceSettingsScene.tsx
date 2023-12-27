@@ -1,10 +1,10 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
+import { ContentContainer } from '@/components/container'
 import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
 
-import { SettingsContent } from '../../SettingsLayout'
 import DisplaySpacingPreference from './DisplaySpacingPreference'
 import DoubleSidebarToggle from './DoubleSidebarToggle'
 import PreferColorToggle from './PreferColorToggle'
@@ -22,7 +22,7 @@ export default function AppearanceSettingsScene() {
 				<title>Stump | {t('settingsScene.app/appearance.helmet')}</title>
 			</Helmet>
 
-			<SettingsContent>
+			<ContentContainer>
 				<ThemeSelect />
 				<PrimaryNavigationPreference />
 
@@ -37,7 +37,7 @@ export default function AppearanceSettingsScene() {
 					<PreferColorToggle />
 					<QueryIndicatorToggle />
 				</div>
-			</SettingsContent>
+			</ContentContainer>
 		</SceneContainer>
 	)
 }

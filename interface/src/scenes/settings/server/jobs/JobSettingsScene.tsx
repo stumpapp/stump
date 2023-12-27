@@ -4,11 +4,11 @@ import { PaginationState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
+import ContentContainer from '@/components/container/ContentContainer.tsx'
 import SceneContainer from '@/components/SceneContainer'
 import { useAppContext } from '@/context'
 import { useLocaleContext } from '@/i18n'
 
-import { SettingsContent } from '../../SettingsLayout.tsx'
 import { JobSettingsContext } from './context.ts'
 import DeleteAllSection from './DeleteAllSection.tsx'
 import JobScheduler from './JobScheduler.tsx'
@@ -76,7 +76,7 @@ export default function JobSettingsScene() {
 					through the table on mobile would prolly suck
 				*/}
 
-				<SettingsContent>
+				<ContentContainer>
 					<div className="flex flex-col gap-4">
 						<div>
 							<Heading size="sm">
@@ -101,7 +101,7 @@ export default function JobSettingsScene() {
 						<JobTable />
 						<DeleteAllSection />
 					</div>
-				</SettingsContent>
+				</ContentContainer>
 			</SceneContainer>
 		</JobSettingsContext.Provider>
 	)

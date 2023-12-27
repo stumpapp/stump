@@ -1,10 +1,10 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
+import { ContentContainer } from '@/components/container'
 import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
 
-import { SettingsContent } from '../../../SettingsLayout'
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 
 export default function CreateUserScene() {
@@ -16,9 +16,9 @@ export default function CreateUserScene() {
 				<title>Stump | {t('settingsScene.server/users.createUser.helmet')}</title>
 			</Helmet>
 
-			<SettingsContent>
+			<ContentContainer>
 				<CreateOrUpdateUserForm />
-			</SettingsContent>
+			</ContentContainer>
 		</SceneContainer>
 	)
 }

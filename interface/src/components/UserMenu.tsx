@@ -1,4 +1,4 @@
-import { Avatar, Card, cx, Popover, Text } from '@stump/components'
+import { Avatar, Card, cn, Popover, Text } from '@stump/components'
 import { Bell, Settings } from 'lucide-react'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -27,10 +27,11 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 				<Popover onOpenChange={setIsOpen} open={isOpen}>
 					<Popover.Trigger asChild>
 						<Card
-							className={cx(
-								'flex h-[2.35rem] w-full cursor-pointer items-center border-edge-200 border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
-								{ 'border-opacity-100': isOpen },
-								{ 'justify-center': !isSidebar },
+							className={cn(
+								'flex h-[2.35rem] w-full cursor-pointer items-center border-transparent border-opacity-80 px-1 transition-all duration-150 hover:border-opacity-100',
+								{ 'border-edge-200 border-opacity-100': isOpen },
+								{ 'border-edge-200': isSidebar },
+								{ 'justify-center rounded-full hover:border-edge-200': !isSidebar },
 							)}
 						>
 							<Avatar

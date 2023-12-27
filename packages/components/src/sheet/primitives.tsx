@@ -143,7 +143,7 @@ const SheetContent = React.forwardRef<
 			{children}
 			{closeIcon && (
 				<SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-background disabled:pointer-events-none data-[state=open]:bg-background">
-					<X className="h-4 w-4" />
+					<X className="h-4 w-4 text-contrast-300" />
 					<span className="sr-only">Close</span>
 				</SheetPrimitive.Close>
 			)}

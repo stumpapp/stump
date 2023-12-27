@@ -1,5 +1,5 @@
 import { useAppProps, usePreferences } from '@stump/client'
-import { cn, Label, NavigationMenu, navigationMenuTriggerStyle } from '@stump/components'
+import { cn, Label, NavigationMenu } from '@stump/components'
 import { Cog } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
@@ -19,15 +19,24 @@ export default function SettingsNavigationItem() {
 	const { platform } = useAppProps()
 
 	const location = useLocation()
-	const isInSettingsSomewhere = location.pathname.startsWith(paths.settings())
+	const isInSettingsSomewhere = location.pathname.startsWith('/settings')
+
+	const classes = cn(
+		'rounded-full border border-transparent border-opacity-80 bg-sidebar text-contrast-300 hover:border-edge-200 hover:border-opacity-100 hover:bg-background-200/50 data-[state=open]:border-edge-200 data-[state=open]:border-opacity-100 data-[state=open]:bg-background-200/50',
+		{
+			'border-edge-200 border-opacity-100 bg-background-200/50': isInSettingsSomewhere,
+		},
+		{
+			'h-[2.35rem] w-[2.35rem] p-0 px-0 py-0': enable_double_sidebar,
+		},
+	)
 
 	// If the user has the settings sidebar enabled, they likely don't need a complex
 	// sub-navigation item for settings
 	if (enable_double_sidebar) {
 		return (
-			<TopBarNavLink to={paths.settings()} isActive={isInSettingsSomewhere}>
-				<Cog className="mr-2 h-4 w-4" />
-				Settings
+			<TopBarNavLink to={paths.settings()} isActive={isInSettingsSomewhere} className={classes}>
+				<Cog className="h-4 w-4" />
 			</TopBarNavLink>
 		)
 	}
@@ -71,15 +80,8 @@ export default function SettingsNavigationItem() {
 
 	return (
 		<NavigationMenu.Item>
-			<NavigationMenu.Trigger
-				className={navigationMenuTriggerStyle({
-					className: cn('bg-sidebar text-contrast-300 hover:bg-sidebar-300', {
-						'bg-sidebar-300': isInSettingsSomewhere,
-					}),
-				})}
-			>
-				<Cog className="mr-2 h-4 w-4" />
-				Settings
+			<NavigationMenu.Trigger className={classes} showChevron={false}>
+				<Cog className="h-4 w-4" />
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content className="left-auto right-0">
 				<div className="grid grid-cols-2 justify-between gap-x-2 p-4 md:w-[400px]">

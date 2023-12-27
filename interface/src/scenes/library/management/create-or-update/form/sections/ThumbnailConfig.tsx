@@ -1,17 +1,8 @@
-import {
-	cx,
-	Divider,
-	Heading,
-	Input,
-	Label,
-	NativeSelect,
-	RadioGroup,
-	Text,
-} from '@stump/components'
+import { cx, Heading, Input, Label, NativeSelect, RadioGroup, Text } from '@stump/components'
 import { ImageResizeMode, ImageResizeOptions } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
 
-import { Schema } from './CreateOrEditLibraryForm'
+import { Schema } from '../CreateOrUpdateLibraryForm'
 
 const formatOptions = [
 	{ label: 'WebP', value: 'Webp' },
@@ -42,18 +33,13 @@ export default function ThumbnailConfigForm() {
 	const resizeOptionsError = form.formState.errors.thumbnail_config?.resize_options?.message
 
 	return (
-		<div className="py-2">
-			<Heading size="xs">Thumbnail Generation</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5">
-				Control how thumbnails are generated for your library, if at all. These options can be
-				changed at any time, but{' '}
-				<span className="font-medium text-gray-700 dark:text-gray-300">
-					will not affect existing
-				</span>{' '}
-				thumbnails
-			</Text>
-
-			<Divider variant="muted" className="my-3.5" />
+		<div className="flex flex-grow flex-col gap-6">
+			<div>
+				<Heading size="xs">Thumbnail configuration</Heading>
+				<Text size="sm" variant="muted">
+					Optional configurations for generating thumbnails for library content
+				</Text>
+			</div>
 
 			<div className="flex max-w-2xl flex-col gap-4">
 				<RadioGroup

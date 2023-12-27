@@ -1,4 +1,4 @@
-import { usePreferences, useUserStore } from '@stump/client'
+import { useUserStore } from '@stump/client'
 import { cx } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
@@ -40,26 +40,6 @@ export default function SettingsLayout() {
 					<Outlet />
 				</Suspense>
 			</div>
-		</div>
-	)
-}
-
-type SettingsContentProps = {
-	children: React.ReactNode
-}
-
-export function SettingsContent({ children }: SettingsContentProps) {
-	const {
-		preferences: { primary_navigation_mode },
-	} = usePreferences()
-
-	return (
-		<div
-			className={cx('mt-6 flex flex-col gap-8 md:gap-12', {
-				'max-w-4xl': primary_navigation_mode === 'SIDEBAR',
-			})}
-		>
-			{children}
 		</div>
 	)
 }

@@ -90,7 +90,7 @@ const paths = {
 		}
 		return `/series/${id}`
 	},
-	settings: (subpath?: SettingsPage) => `/settings/${subpath || ''}`,
+	settings: (subpath: SettingsPage = 'app/general') => `/settings/${subpath || ''}`,
 	updateUser: (id: string) => `${paths.settings('server/users')}/${id}/manage`,
 } as const
 

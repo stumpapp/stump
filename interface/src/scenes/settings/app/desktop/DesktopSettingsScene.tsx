@@ -1,10 +1,10 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
+import { ContentContainer } from '@/components/container'
 import SceneContainer from '@/components/SceneContainer'
+import { useLocaleContext } from '@/i18n'
 
-import { useLocaleContext } from '../../../../i18n'
-import { SettingsContent } from '../../SettingsLayout'
 import DiscordPresenceSwitch from './DiscordPresenceSwitch'
 
 export default function DesktopSettingsScene() {
@@ -16,9 +16,9 @@ export default function DesktopSettingsScene() {
 				<title>Stump | {t('settingsScene.app/desktop.helmet')}</title>
 			</Helmet>
 
-			<SettingsContent>
+			<ContentContainer>
 				<DiscordPresenceSwitch />
-			</SettingsContent>
+			</ContentContainer>
 		</SceneContainer>
 	)
 }

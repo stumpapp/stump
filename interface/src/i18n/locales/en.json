@@ -205,7 +205,7 @@
 		"app/general": {
 			"helmet": "General client settings",
 			"title": "General settings",
-			"description": "Settings related to your account or app preferences",
+			"description": "Settings related to your account or general preferences",
 			"sections": {
 				"account": {
 					"validation": {

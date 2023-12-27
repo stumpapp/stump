@@ -1,30 +1,24 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCreateLibraryMutation, useEditLibraryMutation, useTags } from '@stump/client'
-import {
-	Button,
-	Divider,
-	Form,
-	Heading,
-	IconButton,
-	Input,
-	Text,
-	TextArea,
-} from '@stump/components'
+import { Button, Form } from '@stump/components'
 import type { Library, LibraryOptions, LibraryPattern, LibraryScanMode } from '@stump/types'
-import { Folder } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 import { z } from 'zod'
 
+import { ContentContainer } from '@/components/container'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal'
-import TagSelect from '@/components/TagSelect'
+import paths from '@/paths'
 
-import paths from '../../../paths'
-import LibraryOptionsForm from './LibraryOptionsForm'
-import ScanModeForm from './ScanModeForm'
-import ThumbnailConfigForm from './ThumbnailConfigForm'
+import {
+	BasicLibraryInformation,
+	FileConversionOptions,
+	LibraryPattern as LibraryPatternSection,
+	ScanMode,
+	ThumbnailConfig,
+} from './sections'
 
 function isLibraryScanMode(input: string): input is LibraryScanMode {
 	return input === 'DEFAULT' || input === 'QUICK' || input === 'NONE' || !input
@@ -126,7 +120,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 
 	const isCreatingLibrary = !library
 
-	const { tags, createTagsAsync, isLoading: isLoadingTags } = useTags()
+	const { tags } = useTags()
 
 	const [showDirectoryPicker, setShowDirectoryPicker] = useState(false)
 
@@ -167,14 +161,14 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		},
 	})
 
-	const handleCreateTag = async (tag: string) => {
-		try {
-			await createTagsAsync([tag])
-		} catch (err) {
-			console.error(err)
-			// TODO: toast error
-		}
-	}
+	// const handleCreateTag = async (tag: string) => {
+	// 	try {
+	// 		await createTagsAsync([tag])
+	// 	} catch (err) {
+	// 		console.error(err)
+	// 		// TODO: toast error
+	// 	}
+	// }
 
 	const handleCreateLibrary = async (values: Schema) => {
 		const { name, path, description, tags: formTags, scan_mode, ...options } = values
@@ -283,10 +277,6 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 		}
 	}
 
-	const errors = useMemo(() => {
-		return form.formState.errors
-	}, [form.formState.errors])
-
 	const [formPath] = form.watch(['path'])
 
 	return (
@@ -302,73 +292,23 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 				}}
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
-				<div>
-					<Heading size="xs">Library Details</Heading>
-					<Text size="sm" variant="muted" className="mt-1.5">
-						Basic information and settings for your library
-					</Text>
+				<ContentContainer>
+					<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
 
-					<Divider variant="muted" className="my-3.5" />
-				</div>
-				<div className="flex flex-grow flex-col gap-6">
-					<Input
-						variant="primary"
-						label="Library Name"
-						placeholder="My Library"
-						containerClassName="max-w-full md:max-w-sm"
-						required
-						errorMessage={errors.name?.message}
-						data-1p-ignore
-						{...form.register('name')}
-					/>
-					<Input
-						variant="primary"
-						label="Library path"
-						placeholder="/path/to/library"
-						containerClassName="max-w-full md:max-w-sm"
-						rightDecoration={
-							<IconButton
-								size="xs"
-								variant="ghost"
-								type="button"
-								onClick={() => setShowDirectoryPicker(true)}
-							>
-								<Folder className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-							</IconButton>
-						}
-						required
-						errorMessage={errors.path?.message}
-						{...form.register('path')}
-					/>
+					{isCreatingLibrary && <LibraryPatternSection />}
 
-					<TagSelect
-						isLoading={isLoadingTags}
-						options={tags.map((tag) => ({ label: tag.name, value: tag.name }))}
-						defaultValue={library?.tags?.map((tag) => ({ label: tag.name, value: tag.name }))}
-						onCreateTag={handleCreateTag}
-					/>
+					<FileConversionOptions />
 
-					<TextArea
-						className="flex"
-						variant="primary"
-						label="Description"
-						placeholder="A short description of your library (optional)"
-						containerClassName="max-w-full md:max-w-sm"
-						{...form.register('description')}
-					/>
-				</div>
+					<ThumbnailConfig />
 
-				<LibraryOptionsForm isCreatingLibrary={isCreatingLibrary} />
+					<ScanMode isCreatingLibrary={isCreatingLibrary} />
 
-				<ThumbnailConfigForm />
-
-				<ScanModeForm isCreatingLibrary={isCreatingLibrary} />
-
-				<div className="mt-6 flex w-full md:max-w-sm">
-					<Button className="w-full md:max-w-sm" variant="primary">
-						{isCreatingLibrary ? 'Create library' : 'Save changes'}
-					</Button>
-				</div>
+					<div className="mt-6 flex w-full md:max-w-sm">
+						<Button className="w-full md:max-w-sm" variant="primary">
+							{isCreatingLibrary ? 'Create library' : 'Save changes'}
+						</Button>
+					</div>
+				</ContentContainer>
 			</Form>
 		</>
 	)

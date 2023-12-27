@@ -53,7 +53,7 @@ export default function UsersStats() {
 	)
 
 	return (
-		<div className="flex items-center gap-4 divide-x divide-gray-100/60 overflow-x-scroll pb-8 scrollbar-hide dark:divide-gray-800/80">
+		<div className="flex items-center gap-4 divide-x divide-edge-200 overflow-x-scroll pb-8 scrollbar-hide">
 			<Statistic className="shrink-0 pr-5 md:pr-10">
 				<Statistic.Label>Users</Statistic.Label>
 				<Statistic.CountUpNumber value={users.length} />

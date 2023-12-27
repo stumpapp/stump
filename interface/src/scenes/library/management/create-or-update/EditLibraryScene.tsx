@@ -2,9 +2,9 @@ import { useLibraries, useLibraryByIdQuery } from '@stump/client'
 import { Divider, Heading, Link, Text } from '@stump/components'
 import { useParams } from 'react-router'
 
-import { useLocaleContext } from '../../../i18n/context'
-import CreateOrEditLibraryForm from './CreateOrEditLibraryForm'
-import QuickActions from './QuickActions'
+import { useLocaleContext } from '../../../../i18n/context'
+import QuickActions from '../QuickActions'
+import { CreateOrUpdateLibraryForm } from './form'
 
 export default function ManageLibraryScene() {
 	const { id } = useParams()
@@ -38,7 +38,7 @@ export default function ManageLibraryScene() {
 				{libraries && (
 					<>
 						<QuickActions library={library} />
-						<CreateOrEditLibraryForm existingLibraries={libraries} library={library} />
+						<CreateOrUpdateLibraryForm existingLibraries={libraries} library={library} />
 					</>
 				)}
 			</div>

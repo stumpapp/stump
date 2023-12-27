@@ -3,10 +3,10 @@ import React from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
+import { ContentContainer } from '@/components/container'
 import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
 
-import { SettingsContent } from '../../../SettingsLayout'
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 
 export default function UpdateUserScene() {
@@ -25,7 +25,7 @@ export default function UpdateUserScene() {
 				<title>Stump | {t('settingsScene.server/users.updateUser.helmet')}</title>
 			</Helmet>
 
-			<SettingsContent>{user && <CreateOrUpdateUserForm user={user} />}</SettingsContent>
+			<ContentContainer>{user && <CreateOrUpdateUserForm user={user} />}</ContentContainer>
 		</SceneContainer>
 	)
 }

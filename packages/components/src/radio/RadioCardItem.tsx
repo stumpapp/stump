@@ -1,6 +1,6 @@
 import { Label } from '../form'
 import { Text } from '../text'
-import { cn, cx } from '../utils'
+import { cn } from '../utils'
 import { RadioGroup } from './primitives'
 
 type RadioCardProps = {
@@ -10,6 +10,7 @@ type RadioCardProps = {
 	value: string
 	isActive: boolean
 	children?: React.ReactNode
+	className?: string
 	innerContainerClassName?: string
 	radioContainerClassName?: string
 }
@@ -24,20 +25,22 @@ export function RadioCardItem({
 	value,
 	isActive,
 	children,
+	className,
 	innerContainerClassName,
 	radioContainerClassName,
 }: RadioCardProps) {
 	return (
 		<div
-			className={cx(
-				'relative rounded-lg border px-6 py-4 shadow-sm focus:outline-none',
+			className={cn(
+				'relative rounded-lg border bg-background-200 px-6 py-4 shadow-sm transition-colors duration-150 hover:bg-background-300/70 focus:outline-none',
 				{
-					'border-brand-400 ring-2 ring-brand-400': isActive,
+					'border-brand-400 bg-background-300 ring-2 ring-brand-400 hover:bg-background-300':
+						isActive,
 				},
 				{
-					'border-gray-150 border-opacity-70 hover:border-opacity-100 dark:border-gray-800 dark:border-opacity-70 dark:hover:border-opacity-100':
-						!isActive,
+					'border-edge-200 border-opacity-70 hover:border-opacity-100': !isActive,
 				},
+				className,
 			)}
 		>
 			<div
@@ -48,7 +51,7 @@ export function RadioCardItem({
 				)}
 			>
 				<div className={cn('flex flex-shrink-0 items-center space-x-2', radioContainerClassName)}>
-					<RadioGroup.Item value={value} id={value} />
+					<RadioGroup.Item value={value} id={value} className="border-edge-200" />
 					<Label htmlFor={value}>{label}</Label>
 				</div>
 				{description && (

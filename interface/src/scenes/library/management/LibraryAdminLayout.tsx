@@ -1,3 +1,5 @@
+import { usePreferences } from '@stump/client'
+import { cx } from 'class-variance-authority'
 import { useEffect, useMemo } from 'react'
 import { Outlet, useNavigate } from 'react-router'
 
@@ -12,6 +14,9 @@ import { useAppContext } from '@/context'
  */
 export default function LibraryAdminLayout() {
 	const { checkPermission } = useAppContext()
+	const {
+		preferences: { primary_navigation_mode },
+	} = usePreferences()
 
 	const navigate = useNavigate()
 	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
@@ -27,7 +32,11 @@ export default function LibraryAdminLayout() {
 
 	return (
 		<div className="flex h-full w-full items-start justify-start">
-			<SceneContainer className="flex min-h-full w-full flex-grow flex-col space-y-6">
+			<SceneContainer
+				className={cx('flex min-h-full w-full flex-grow flex-col space-y-6', {
+					'max-w-4xl': primary_navigation_mode === 'SIDEBAR',
+				})}
+			>
 				<Outlet />
 			</SceneContainer>
 		</div>

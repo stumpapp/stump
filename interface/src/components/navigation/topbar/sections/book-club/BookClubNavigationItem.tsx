@@ -1,14 +1,10 @@
-import { NavigationMenu, navigationMenuTriggerStyle } from '@stump/components'
+import { NavigationMenu } from '@stump/components'
 import React from 'react'
 
 export default function BookClubNavigationItem() {
 	return (
 		<NavigationMenu.Item>
-			<NavigationMenu.Trigger
-				className={navigationMenuTriggerStyle({
-					className: 'bg-sidebar text-contrast-300 hover:bg-sidebar-300',
-				})}
-			>
+			<NavigationMenu.Trigger className="bg-sidebar text-contrast-300 hover:bg-sidebar-300">
 				Book clubs
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>

@@ -1,9 +1,9 @@
 import { Helmet } from 'react-helmet'
 
+import { ContentContainer } from '@/components/container'
 import SceneContainer from '@/components/SceneContainer'
 
 import { useLocaleContext } from '../../../../i18n'
-import { SettingsContent } from '../../SettingsLayout'
 import LocalePreferences from './LocalePreferences'
 import ProfileForm from './ProfileForm'
 
@@ -16,10 +16,10 @@ export default function GeneralSettingsScene() {
 				<title>Stump | {t('settingsScene.app/general.helmet')}</title>
 			</Helmet>
 
-			<SettingsContent>
+			<ContentContainer>
 				<ProfileForm />
 				<LocalePreferences />
-			</SettingsContent>
+			</ContentContainer>
 		</SceneContainer>
 	)
 }

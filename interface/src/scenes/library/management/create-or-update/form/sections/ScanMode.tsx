@@ -1,8 +1,8 @@
-import { Divider, Heading, RadioGroup, Text } from '@stump/components'
+import { Heading, RadioGroup, Text } from '@stump/components'
 import { LibraryScanMode } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
 
-import { Schema } from './CreateOrEditLibraryForm'
+import { Schema } from '../CreateOrUpdateLibraryForm'
 
 type Props = {
 	isCreatingLibrary: boolean
@@ -17,17 +17,14 @@ export default function ScanModeForm({ isCreatingLibrary }: Props) {
 	}
 
 	return (
-		<div className="py-2">
-			<Heading size="xs">Scan Mode</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5 max-w-4xl">
-				Choose how you want to scan your library{' '}
-				{isCreatingLibrary
-					? 'once it is registered in the database'
-					: 'once your edits are persisted'}
-				. This is optional, and can be done later
-			</Text>
-
-			<Divider variant="muted" className="my-3.5" />
+		<div className="flex flex-grow flex-col gap-6">
+			<div>
+				<Heading size="xs">Scan mode</Heading>
+				<Text size="sm" variant="muted">
+					Choose how you want to scan your library{' '}
+					{isCreatingLibrary ? 'after it is created' : 'once your updates are stored'}
+				</Text>
+			</div>
 
 			<RadioGroup value={scanMode} onValueChange={handleChange} className="max-w-2xl gap-4">
 				<RadioGroup.CardItem

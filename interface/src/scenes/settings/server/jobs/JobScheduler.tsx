@@ -115,7 +115,7 @@ export default function JobScheduler() {
 			</Alert>
 
 			<Form form={form} onSubmit={handleSubmit}>
-				<div className="flex w-full flex-col gap-2 md:flex-row md:items-end lg:w-1/2">
+				<div className="flex w-full flex-col gap-2 md:flex-row md:items-end lg:w-2/3">
 					<Input
 						variant="primary"
 						type="number"
@@ -140,7 +140,7 @@ export default function JobScheduler() {
 					</div>
 				</div>
 
-				<div className="flex w-full flex-col gap-4 md:flex-row md:items-end md:justify-between lg:w-1/2">
+				<div className="flex w-full flex-col gap-4 md:flex-row md:items-end md:justify-between lg:w-2/3">
 					<ComboBox
 						label="Excluded libraries"
 						description="Libraries that will be excluded from the scheduled scans"
@@ -154,17 +154,17 @@ export default function JobScheduler() {
 						onChange={(value) => (value ? form.setValue('excluded_library_ids', value) : null)}
 						size={isSmallViewport ? 'full' : 'default'}
 					/>
-
-					<Button
-						type="submit"
-						variant="primary"
-						size="md"
-						disabled={form.formState.isSubmitting}
-						className="flex-shrink-0"
-					>
-						Save scheduler changes
-					</Button>
 				</div>
+
+				<Button
+					type="submit"
+					variant="primary"
+					size="md"
+					disabled={form.formState.isSubmitting}
+					className="flex-shrink-0 md:w-32"
+				>
+					Save changes
+				</Button>
 			</Form>
 		</div>
 	)

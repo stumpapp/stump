@@ -1,9 +1,9 @@
 import { Helmet } from 'react-helmet'
 
+import { ContentContainer } from '@/components/container'
 import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
 
-import { SettingsContent } from '../../SettingsLayout'
 import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'
 import UserManagementStats from './UsersStats'
@@ -20,11 +20,11 @@ export default function UsersScene() {
 				<title>Stump | {t('settingsScene.users.helmet')}</title>
 			</Helmet>
 
-			<SettingsContent>
+			<ContentContainer>
 				<UserManagementStats />
 				<UserTableSection />
 				<LoginActivitySection />
-			</SettingsContent>
+			</ContentContainer>
 		</SceneContainer>
 	)
 }

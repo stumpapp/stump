@@ -1,11 +1,10 @@
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
+import { ContentContainer } from '@/components/container'
 import LibrariesStats from '@/components/library/LibrariesStats'
 import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
-
-import { SettingsContent } from '../../SettingsLayout'
 
 export default function GeneralServerSettingsScene() {
 	const { t } = useLocaleContext()
@@ -16,11 +15,11 @@ export default function GeneralServerSettingsScene() {
 				<title>Stump | {t('settingsScene.server/general.helmet')}</title>
 			</Helmet>
 
-			<SettingsContent>
+			<ContentContainer>
 				<div className="flex flex-col gap-4">
 					<LibrariesStats />
 				</div>
-			</SettingsContent>
+			</ContentContainer>
 		</SceneContainer>
 	)
 }

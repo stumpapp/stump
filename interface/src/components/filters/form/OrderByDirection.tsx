@@ -19,7 +19,7 @@ export default function OrderByDirection({ value, onChange }: Props) {
 			disabled={!ordering.order_by}
 		>
 			<SortAsc
-				className={cx('mr-1.5 h-4 w-4 transition-all dark:text-gray-400', {
+				className={cx('mr-1.5 h-4 w-4 text-muted transition-all', {
 					'rotate-180': value === 'desc',
 				})}
 			/>

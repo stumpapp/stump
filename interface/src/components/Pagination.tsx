@@ -152,7 +152,7 @@ export default function Pagination({
 									onPageChange={handleEllipsisNavigate}
 									trigger={
 										<div className="-mt-1">
-											<button className="flex items-center border-t-2 border-transparent px-4 pt-4 text-xs font-medium text-gray-300 hover:border-gray-300 focus:outline-none dark:text-gray-600 dark:hover:border-gray-600 md:text-sm">
+											<button className="flex items-center border-t-2 border-transparent px-4 pt-4 text-xs font-medium text-muted hover:border-edge-200 focus:outline-none md:text-sm">
 												<MoreHorizontal className="h-4 w-4" />
 											</button>
 										</div>

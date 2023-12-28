@@ -9,14 +9,14 @@ export default function NoLibraries() {
 
 	return (
 		<div className="flex flex-1 items-center justify-center">
-			<Card className="flex flex-col items-center justify-center gap-2 bg-background-200 p-4 text-center">
-				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
+			<Card className="flex flex-col items-center justify-center gap-2 border-edge-200 bg-background-200 p-4 text-center">
+				<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
 				<Heading size="sm">
 					{isServerOwner ? "You don't have" : 'There are no'} libraries configured
 				</Heading>
 				<Text size="sm" variant="muted">
 					Once {isServerOwner ? 'you create a library' : 'a library has been created'}, this page
-					will show a select list of books and series
+					will be more useful
 				</Text>
 				{isServerOwner && (
 					<ButtonOrLink className="mt-2" href={paths.libraryCreate()} variant="secondary">

@@ -99,11 +99,9 @@ export default function UserPermissionsForm() {
 						onClick={() => handlePermissionClick(permission)}
 						value={permission}
 					/>
-					<Text variant="muted" className="ml-6 text-gray-500" size="sm">
+					<Text variant="muted" className="ml-6" size="sm">
 						{description}{' '}
-						{disclaimer && (
-							<span className="font-medium text-gray-900 dark:text-gray-200">{disclaimer}</span>
-						)}
+						{disclaimer && <span className="font-medium text-contrast-300">{disclaimer}</span>}
 					</Text>
 				</div>
 			)

@@ -162,7 +162,7 @@ export default function JobTable() {
 				// TODO(aaron): loader
 				emptyRenderer={() => (
 					<div className="flex min-h-[150px] flex-col items-center justify-center gap-2">
-						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 dark:text-gray-400" />
+						<CircleSlash2 className="h-10 w-10 pb-2 pt-1 text-muted" />
 						<Heading size="sm">{t(`${LOCALE_BASE}.emptyHeading`)}</Heading>
 						<Text size="sm" variant="muted">
 							{t(`${LOCALE_BASE}.emptySubtitle`)}

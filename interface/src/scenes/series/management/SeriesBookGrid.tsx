@@ -116,7 +116,7 @@ export default function SeriesBookGrid({ seriesId, onSelectBook }: Props) {
 												}}
 											>
 												<div
-													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-gray-75 bg-white shadow-sm transition-colors duration-100 hover:border-brand dark:border-gray-850 dark:bg-gray-950 dark:hover:border-brand sm:w-[7.666rem] md:w-[9rem]"
+													className="relative flex w-[7rem] flex-1 flex-col space-y-1 overflow-hidden rounded-md border-[1.5px] border-edge-200 bg-background shadow-sm transition-colors duration-100 hover:border-brand sm:w-[7.666rem] md:w-[9rem]"
 													onClick={() => onSelectBook(book!)}
 												>
 													<div

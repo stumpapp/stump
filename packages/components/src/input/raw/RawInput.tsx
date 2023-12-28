@@ -23,6 +23,9 @@ export const RAW_INPUT_VARIANT = {
 		'border-x-0 border-t-0 border-b-[1.5px] border-gray-300 border-opacity-70 dark:border-gray-700 dark:border-opacity-70 focus:ring-0 focus:ring-offset-0 outline-none focus:border-b-brand',
 }
 export const RAW_INPUT_VARIANTS = {
+	contrast: {
+		true: 'enabled:hover:bg-background bg-background/40 focus:bg-background',
+	},
 	isInvalid: {
 		true: 'focus:ring-red-400 dark:focus:ring-red-400 border border-red-300 border-opacity-70 dark:border-red-400 dark:border-opacity-70',
 	},
@@ -59,10 +62,10 @@ export type RawInputProps = VariantProps<typeof inputVariants> &
 	React.InputHTMLAttributes<HTMLInputElement>
 
 export const RawInput = React.forwardRef<HTMLInputElement, RawInputProps>(
-	({ className, variant, size, rounded, isInvalid, ...props }, ref) => {
+	({ className, variant, size, rounded, isInvalid, contrast, ...props }, ref) => {
 		return (
 			<input
-				className={cn(inputVariants({ className, isInvalid, rounded, size, variant }))}
+				className={cn(inputVariants({ className, contrast, isInvalid, rounded, size, variant }))}
 				ref={ref}
 				{...props}
 			/>

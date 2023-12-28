@@ -63,7 +63,7 @@ type EpubLocationState = {
  * epub reader as an additional option.
  */
 export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
-	const { isDark } = useTheme()
+	const { theme } = useTheme()
 
 	const ref = useRef<HTMLDivElement>(null)
 
@@ -167,7 +167,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 * @param preferences The epub reader preferences
 	 */
 	const applyEpubPreferences = (rendition: Rendition, preferences: EpubReaderPreferences) => {
-		if (isDark) {
+		if (theme === 'dark') {
 			rendition.themes.select('stump-dark')
 		} else {
 			rendition.themes.select('stump-light')
@@ -282,7 +282,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		},
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[rendition, epubPreferences, isDark],
+		[rendition, epubPreferences, theme],
 	)
 
 	/**

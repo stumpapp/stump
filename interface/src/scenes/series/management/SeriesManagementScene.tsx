@@ -1,12 +1,12 @@
 import { useSeriesByIdQuery } from '@stump/client'
-import { Alert, Breadcrumbs, Divider, Heading, Text } from '@stump/components'
+import { Alert, Breadcrumbs, Heading, Text } from '@stump/components'
 import { Construction } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { Navigate, useParams } from 'react-router'
 
 import SceneContainer from '@/components/SceneContainer'
+import paths from '@/paths'
 
-import paths from '../../../paths'
 import SeriesThumbnailSelector from './SeriesThumbnailSelector'
 
 export default function SeriesManagementScene() {
@@ -37,10 +37,6 @@ export default function SeriesManagementScene() {
 				label: series.metadata?.title || series.name,
 				to: paths.seriesOverview(series.id),
 			},
-			{
-				label: 'Manage',
-				noShrink: true,
-			},
 		]
 	}, [series])
 
@@ -50,27 +46,23 @@ export default function SeriesManagementScene() {
 		return <Navigate to={paths.notFound()} />
 	}
 
-	const title = series.metadata?.title || series.name
-
 	return (
 		<SceneContainer>
-			<div className="flex flex-col items-center text-center md:items-start md:text-left">
-				<Heading size="sm">{title}</Heading>
+			<div className="flex flex-col items-start gap-y-6 text-left">
+				<div className="flex flex-col gap-y-1.5">
+					<Breadcrumbs segments={breadcrumbs} trailingSlash />
+					<Heading size="lg" className="font-bold">
+						Manage
+					</Heading>
 
-				<Breadcrumbs segments={breadcrumbs} />
+					<Text size="sm" variant="muted">
+						Make changes to this series
+					</Text>
+				</div>
 
-				<Text size="sm" variant="muted" className="mt-2">
-					Use this page to make various changes to this series as it exists in the database, such as
-					changing the thumbnail or updating metadata
-				</Text>
-			</div>
-
-			<Divider variant="muted" className="my-3.5" />
-			<div className="flex flex-col gap-6 pt-2">
 				<Alert level="warning" rounded="sm" icon={Construction}>
 					<Alert.Content>
-						Series management is currently under construction. There are not many features exposed
-						here yet.
+						Series management is currently under development and has very limited functionality
 					</Alert.Content>
 				</Alert>
 

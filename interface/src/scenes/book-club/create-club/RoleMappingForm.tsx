@@ -1,4 +1,4 @@
-import { Divider, Heading, Input, Link, Text } from '@stump/components'
+import { Card, Heading, Input, Link, Text } from '@stump/components'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -14,18 +14,18 @@ export default function RoleMappingForm() {
 	const form = useFormContext<Schema>()
 
 	return (
-		<div className="py-2">
-			<Heading size="xs">{t('createBookClubScene.form.member_role_spec.heading')}</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5">
-				{t('createBookClubScene.form.member_role_spec.subtitle.0')}{' '}
-				<Link href={paths.docs('book-club')}>
-					{t('createBookClubScene.form.member_role_spec.subtitle.1')}
-				</Link>
-			</Text>
+		<div className="flex flex-col gap-y-6">
+			<div className="flex flex-col gap-y-1.5">
+				<Heading size="xs">{t('createBookClubScene.form.member_role_spec.heading')}</Heading>
+				<Text size="sm" variant="muted">
+					{t('createBookClubScene.form.member_role_spec.subtitle.0')}{' '}
+					<Link href={paths.docs('book-club')}>
+						{t('createBookClubScene.form.member_role_spec.subtitle.1')}
+					</Link>
+				</Text>
+			</div>
 
-			<Divider variant="muted" className="my-3.5" />
-
-			<div className="grid grid-cols-1 gap-4 pt-2 md:max-w-3xl md:grid-cols-2">
+			<Card className="grid grid-cols-1 gap-6 bg-background-200 p-4 md:max-w-3xl md:grid-cols-2">
 				<Input
 					variant="primary"
 					fullWidth
@@ -35,6 +35,7 @@ export default function RoleMappingForm() {
 					placeholder={t(getMemberKey('member.placeholder'))}
 					autoComplete="off"
 					errorMessage={form.formState.errors.member_role_spec?.MEMBER?.message}
+					contrast
 					{...form.register('member_role_spec.MEMBER')}
 				/>
 
@@ -47,6 +48,7 @@ export default function RoleMappingForm() {
 					placeholder={t(getMemberKey('moderator.placeholder'))}
 					autoComplete="off"
 					errorMessage={form.formState.errors.member_role_spec?.MODERATOR?.message}
+					contrast
 					{...form.register('member_role_spec.MODERATOR')}
 				/>
 
@@ -59,6 +61,7 @@ export default function RoleMappingForm() {
 					placeholder={t(getMemberKey('admin.placeholder'))}
 					autoComplete="off"
 					errorMessage={form.formState.errors.member_role_spec?.ADMIN?.message}
+					contrast
 					{...form.register('member_role_spec.ADMIN')}
 				/>
 
@@ -71,9 +74,10 @@ export default function RoleMappingForm() {
 					placeholder={t(getMemberKey('creator.placeholder'))}
 					autoComplete="off"
 					errorMessage={form.formState.errors.member_role_spec?.CREATOR?.message}
+					contrast
 					{...form.register('member_role_spec.CREATOR')}
 				/>
-			</div>
+			</Card>
 		</div>
 	)
 }

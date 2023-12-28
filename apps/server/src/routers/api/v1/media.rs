@@ -650,8 +650,11 @@ async fn get_media_by_path(
 }
 
 #[derive(Deserialize)]
-struct LoadSeries {
+struct BookRelations {
+	#[serde(default)]
 	load_series: Option<bool>,
+	#[serde(default)]
+	load_library: Option<bool>,
 }
 
 #[utoipa::path(
@@ -674,7 +677,7 @@ struct LoadSeries {
 /// the series relation for the media.
 async fn get_media_by_id(
 	Path(id): Path<String>,
-	params: Query<LoadSeries>,
+	params: Query<BookRelations>,
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Media>> {
@@ -699,7 +702,13 @@ async fn get_media_by_id(
 
 	if params.load_series.unwrap_or_default() {
 		tracing::trace!(media_id = id, "Loading series relation for media");
-		query = query.with(media::series::fetch());
+		query = query.with(if params.load_library.unwrap_or_default() {
+			media::series::fetch()
+				.with(series::metadata::fetch())
+				.with(series::library::fetch())
+		} else {
+			media::series::fetch().with(series::metadata::fetch())
+		});
 	}
 
 	let media = query

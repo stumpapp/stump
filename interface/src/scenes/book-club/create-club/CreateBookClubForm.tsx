@@ -8,6 +8,8 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 import z from 'zod'
 
+import { ContentContainer } from '@/components/container'
+
 import { useLocaleContext } from '../../../i18n'
 import paths from '../../../paths'
 import CreatorPreferences from './CreatorPreferences'
@@ -86,51 +88,53 @@ export default function CreateBookClubForm() {
 	}
 
 	return (
-		<Form id="create-club-form" form={form} onSubmit={handleSubmit} className="py-4">
-			<div className="flex flex-col gap-4 pb-4 pt-1 md:max-w-md">
-				<Input
-					variant="primary"
-					fullWidth
-					label={t(getLocaleKey('name.label'))}
-					description={t(getLocaleKey('name.description'))}
-					descriptionPosition="top"
-					placeholder={t(getLocaleKey('name.placeholder'))}
-					autoComplete="off"
-					errorMessage={form.formState.errors.name?.message}
-					required
-					{...form.register('name')}
-				/>
+		<Form id="create-club-form" form={form} onSubmit={handleSubmit}>
+			<ContentContainer>
+				<div className="flex flex-col gap-6 md:max-w-md">
+					<Input
+						variant="primary"
+						fullWidth
+						label={t(getLocaleKey('name.label'))}
+						description={t(getLocaleKey('name.description'))}
+						descriptionPosition="top"
+						placeholder={t(getLocaleKey('name.placeholder'))}
+						autoComplete="off"
+						errorMessage={form.formState.errors.name?.message}
+						required
+						{...form.register('name')}
+					/>
 
-				<TextArea
-					variant="primary"
-					label={t(getLocaleKey('description.label'))}
-					description={t(getLocaleKey('description.description'))}
-					// TODO: impl this for text area
-					// descriptionPosition="top"
-					placeholder={t(getLocaleKey('description.placeholder'))}
-					autoComplete="off"
-					errorMessage={form.formState.errors.description?.message}
-					{...form.register('description')}
-				/>
+					<TextArea
+						variant="primary"
+						label={t(getLocaleKey('description.label'))}
+						description={t(getLocaleKey('description.description'))}
+						// TODO: impl this for text area
+						// descriptionPosition="top"
+						placeholder={t(getLocaleKey('description.placeholder'))}
+						autoComplete="off"
+						errorMessage={form.formState.errors.description?.message}
+						{...form.register('description')}
+					/>
 
-				<CheckBox
-					id="is_private"
-					variant="primary"
-					label={t(getLocaleKey('is_private.label'))}
-					description={t(getLocaleKey('is_private.description'))}
-					checked={is_private}
-					onClick={() => form.setValue('is_private', !is_private)}
-				/>
-			</div>
+					<CheckBox
+						id="is_private"
+						variant="primary"
+						label={t(getLocaleKey('is_private.label'))}
+						description={t(getLocaleKey('is_private.description'))}
+						checked={is_private}
+						onClick={() => form.setValue('is_private', !is_private)}
+					/>
+				</div>
 
-			<RoleMappingForm />
-			<CreatorPreferences />
+				<RoleMappingForm />
+				<CreatorPreferences />
 
-			<div className="mt-4 flex w-full md:max-w-sm">
-				<Button type="submit" variant="primary" size="lg">
-					{t(getLocaleKey('submit'))}
-				</Button>
-			</div>
+				<div className="flex w-full md:max-w-sm">
+					<Button type="submit" variant="primary" size="lg">
+						{t(getLocaleKey('submit'))}
+					</Button>
+				</div>
+			</ContentContainer>
 		</Form>
 	)
 }

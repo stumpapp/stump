@@ -44,7 +44,7 @@ export default function LocationManager() {
 					<List className="h-4 w-4" onClick={() => setIsOpen(true)} />
 				</ControlButton>
 			</Dialog.Trigger>
-			<Dialog.Content size="md" className="h-[400px] dark:bg-gray-1000">
+			<Dialog.Content size="md">
 				<Dialog.Header>
 					<Tabs value={activeTab} variant="primary" activeOnHover>
 						<Tabs.List className="border-none">
@@ -69,8 +69,7 @@ export default function LocationManager() {
 
 					<Dialog.Close onClick={handleClose} />
 				</Dialog.Header>
-
-				<div className="h-full overflow-y-scroll scrollbar-hide">{renderTabContent()}</div>
+				<div className="h-[300px] overflow-y-scroll scrollbar-hide">{renderTabContent()}</div>
 			</Dialog.Content>
 		</Dialog>
 	)

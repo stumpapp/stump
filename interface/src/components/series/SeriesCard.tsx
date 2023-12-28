@@ -43,7 +43,7 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 		const isMissing = series.status === FileStatus.Missing
 		if (isMissing) {
 			return (
-				<Text size="xs" className="uppercase text-amber-500 dark:text-amber-400">
+				<Text size="xs" className="uppercase text-amber-500">
 					Series Missing
 				</Text>
 			)

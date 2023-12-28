@@ -50,9 +50,9 @@ function ExplorerFile(file: DirectoryListingFile) {
 	 */
 	const getFallbackIcon = (isSupportedBook: boolean) => {
 		if (isSupportedBook) {
-			return <Book className="h-16 w-16 text-gray-750 dark:text-gray-400" />
+			return <Book className="h-16 w-16 text-muted" />
 		} else if (is_directory) {
-			return <Folder className="h-16 w-16 fill-blue-400 text-blue-400 dark:text-blue-400" />
+			return <Folder className="h-16 w-16 fill-blue-400 text-blue-400" />
 		} else {
 			return null
 		}
@@ -96,8 +96,7 @@ function ExplorerFile(file: DirectoryListingFile) {
 		return (
 			<div
 				className={cx('flex h-full w-full items-center justify-center rounded-md', {
-					'border border-gray-75 bg-gray-50/80 dark:border-gray-950 dark:bg-gray-1000/30':
-						isSupportedBook,
+					'border border-edge bg-background/80': isSupportedBook,
 				})}
 			>
 				{getFallbackIcon(isSupportedBook)}
@@ -112,7 +111,7 @@ function ExplorerFile(file: DirectoryListingFile) {
 				onDoubleClick={() => onSelect(file)}
 			>
 				<div className="flex items-start justify-between">
-					<div className="w-24 overflow-hidden rounded-md group-hover:bg-gray-75/75 group-focus:bg-gray-100/75 dark:group-hover:bg-gray-900/75 dark:group-focus:bg-gray-850/75">
+					<div className="w-24 overflow-hidden rounded-md group-hover:bg-background-300/80 group-focus:bg-background-300">
 						<AspectRatio ratio={imageSrc ? 2 / 3 : 1} className={cx('m-1', !!imageSrc)}>
 							{renderFile()}
 						</AspectRatio>
@@ -120,7 +119,7 @@ function ExplorerFile(file: DirectoryListingFile) {
 				</div>
 
 				<Text
-					className="line-clamp-1 max-w-full rounded-md p-1 group-hover:bg-gray-75/75 group-focus:bg-gray-100/75 dark:group-hover:bg-gray-900/75 dark:group-focus:bg-gray-850/75"
+					className="line-clamp-1 max-w-full rounded-md p-1 group-hover:bg-background-300/80 group-focus:bg-background-300"
 					size="xs"
 				>
 					{name}

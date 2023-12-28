@@ -120,6 +120,8 @@ export function AppLayout() {
 						<div
 							className={cx(
 								'relative flex w-full flex-col',
+								// FIXME: The width restriction will need to be lower down the tree to allow
+								// for certain layouts that utilize a full width layout (e.g. book clubs)
 								preferTopBar ? 'mx-auto max-w-7xl flex-1' : 'h-full',
 							)}
 						>

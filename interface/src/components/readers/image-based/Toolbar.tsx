@@ -89,7 +89,7 @@ export default function Toolbar({
 				animate={visible ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed left-0 top-0 z-[100] w-full bg-gray-50/95 p-4 dark:bg-gray-1000/95 dark:text-white"
+				className="fixed left-0 top-0 z-[100] w-full bg-sidebar/95 p-4 text-contrast"
 			>
 				<div className="flex w-full items-center justify-between">
 					<div className="flex items-center space-x-4">

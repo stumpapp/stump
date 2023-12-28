@@ -59,7 +59,7 @@ export default function BookThumbnailSelector({ book }: Props) {
 						<Button
 							variant="subtle-dark"
 							size="xs"
-							className="border border-gray-75 px-2 py-1.5 dark:border-gray-850"
+							className="border border-edge px-2 py-1.5"
 							onClick={() => setIsOpen(true)}
 						>
 							<Edit className="mr-2 h-3 w-3" />

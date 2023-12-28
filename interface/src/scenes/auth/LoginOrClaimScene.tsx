@@ -99,12 +99,8 @@ export default function LoginOrClaimScene() {
 		} else {
 			return (
 				<div className="text-left sm:max-w-md md:max-w-lg">
-					<h1 className="text-4xl font-semibold dark:text-gray-50">
-						{t('authScene.claimHeading')}
-					</h1>
-					<p className="mt-1.5 text-base text-gray-700 dark:text-gray-150">
-						{t('authScene.claimText')}
-					</p>
+					<h1 className="text-4xl font-semibold text-contrast">{t('authScene.claimHeading')}</h1>
+					<p className="mt-1.5 text-base text-contrast-300">{t('authScene.claimText')}</p>
 				</div>
 			)
 		}
@@ -130,7 +126,7 @@ export default function LoginOrClaimScene() {
 	}
 
 	return (
-		<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-white p-4 dark:bg-gray-975">
+		<div className="flex h-full w-full flex-col items-center justify-center gap-8 bg-background p-4">
 			{renderHeader()}
 			{renderError()}
 

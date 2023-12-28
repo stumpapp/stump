@@ -38,7 +38,7 @@ export default function MarkdownEditor({ initialState = 'writing', initialConten
 			return (
 				<textarea
 					ref={editorRef}
-					className="w-full bg-transparent px-1 py-2 focus:outline-none dark:text-gray-200"
+					className="w-full bg-transparent px-1 py-2 text-contrast-300 focus:outline-none"
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					rows={4}

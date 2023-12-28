@@ -77,8 +77,8 @@ export default function ServerConnectionErrorScene() {
 			className="mx-auto flex h-full w-full max-w-sm flex-col items-center justify-center gap-6 sm:max-w-md md:max-w-xl"
 		>
 			<div className="text-left">
-				<h1 className="text-4xl font-semibold dark:text-gray-50">{t('serverSOS.heading')}</h1>
-				<p className="mt-1.5 text-base text-gray-700 dark:text-gray-150">{t(localeKey)}</p>
+				<h1 className="font-sans text-4xl font-semibold text-contrast">{t('serverSOS.heading')}</h1>
+				<p className="mt-1.5 text-base text-contrast-300">{t(localeKey)}</p>
 			</div>
 
 			{showForm && (

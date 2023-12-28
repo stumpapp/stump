@@ -66,7 +66,7 @@
 			"member_role_spec": {
 				"heading": "Custom role mapping",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
 					"documentation"
 				],
 				"member": {
@@ -91,8 +91,8 @@
 				}
 			},
 			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"heading": "Membership",
+				"subtitle": "Preferences for your own membership in the book club",
 				"creator_display_name": {
 					"label": "Display Name",
 					"placeholder": "oromei",

@@ -20,13 +20,13 @@ export default function TableOfContents({ onLocationChanged }: Props) {
 
 	return (
 		<div
-			className="flex max-h-full flex-col divide-y overflow-y-auto px-2 pt-4 scrollbar-hide dark:divide-gray-850/60"
+			className="flex max-h-full flex-col divide-y divide-edge overflow-y-auto px-2 pt-4 scrollbar-hide"
 			aria-label="Table of Contents"
 		>
 			{toc?.map((item) => (
 				<button
 					key={item.label}
-					className="justify-start px-1 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-850/40"
+					className="justify-start px-1 py-1.5 text-left hover:bg-background-200"
 					onClick={() => handleSelect(item.content)}
 				>
 					<Text className="line-clamp-1">{item.label}</Text>

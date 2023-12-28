@@ -20,9 +20,9 @@ export default function FileExplorerFooter() {
 	}, [currentPath, libraryPath])
 
 	return (
-		<footer className="fixed bottom-0 z-10 h-10 w-full border-t border-gray-75 bg-white px-4 dark:border-gray-900 dark:bg-gray-975">
+		<footer className="fixed bottom-0 z-10 h-10 w-full border-t border-edge bg-background px-4">
 			<div className="flex h-full w-full items-center gap-4">
-				<span className="rounded-md border border-dotted px-2 py-0.5 dark:border-gray-800">
+				<span className="rounded-md border border-dotted border-edge-200 px-2 py-0.5">
 					<Text variant="muted" size="sm">
 						{relativePath}
 					</Text>

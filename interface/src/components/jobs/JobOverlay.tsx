@@ -34,7 +34,7 @@ export default function JobOverlay() {
 		<AnimatePresence>
 			{jobShown && (
 				<motion.div
-					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md bg-white p-2 shadow dark:bg-gray-800"
+					className="fixed bottom-[1rem] right-[1rem] flex w-64 flex-col items-center justify-center rounded-md border border-edge-200 bg-background-300 p-2 shadow"
 					initial={{ opacity: 0, scale: 0.9, y: 100 }}
 					animate={{ opacity: 1, scale: 1, y: 0 }}
 					exit={{ opacity: 0, scale: 0.9, y: 100 }}

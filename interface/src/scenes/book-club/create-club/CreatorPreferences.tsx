@@ -1,4 +1,4 @@
-import { CheckBox, Divider, Heading, Input, Text } from '@stump/components'
+import { CheckBox, Heading, Input, Text } from '@stump/components'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -14,13 +14,13 @@ export default function CreatorPreferences() {
 	const creator_hide_progress = form.watch('creator_hide_progress')
 
 	return (
-		<div className="py-2">
-			<Heading size="xs">{t(getKey('heading'))}</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5">
-				{t(getKey('subtitle'))}
-			</Text>
-
-			<Divider variant="muted" className="my-3.5" />
+		<div className="flex flex-col gap-y-6">
+			<div className="flex flex-col gap-y-1.5">
+				<Heading size="xs">{t(getKey('heading'))}</Heading>
+				<Text size="sm" variant="muted">
+					{t(getKey('subtitle'))}
+				</Text>
+			</div>
 
 			<div className="flex flex-col gap-4 pt-2 md:max-w-lg">
 				<Input

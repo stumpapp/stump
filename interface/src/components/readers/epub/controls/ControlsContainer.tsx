@@ -23,7 +23,7 @@ export default function ControlsContainer({ position, children }: Props) {
 		>
 			<div
 				className={cx(
-					'flex h-full items-center gap-1 bg-white p-2 transition-opacity duration-150 dark:bg-gray-1000 md:bg-transparent',
+					'flex h-full items-center gap-1 bg-background p-2 transition-opacity duration-150 md:bg-transparent',
 					{ 'opacity-100': !fullscreen || visible },
 					{ 'opacity-0': !visible && fullscreen },
 				)}

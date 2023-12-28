@@ -42,7 +42,7 @@ export default function OrderBy({ entity }: Props) {
 			</Popover.Trigger>
 
 			<Popover.Content
-				className="flex flex-col gap-3 overflow-hidden border-opacity-50 shadow-sm dark:bg-gray-950"
+				className="flex flex-col gap-3 overflow-hidden border-opacity-50 bg-background shadow-sm"
 				align={isMobile ? 'start' : 'end'}
 			>
 				<OrderBySelect entity={entity} value={ordering.order_by} onChange={handleChangeOrderBy} />

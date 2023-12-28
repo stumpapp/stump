@@ -10,6 +10,7 @@ import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
 import z from 'zod'
 
+import { ContentContainer } from '@/components/container'
 import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
@@ -152,81 +153,78 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 	}
 
 	return (
-		<Form
-			id="create-user-form"
-			form={form}
-			onSubmit={handleSubmit}
-			fieldsetClassName="flex flex-col gap-y-12"
-		>
-			{renderErrors()}
+		<Form id="create-user-form" form={form} onSubmit={handleSubmit}>
+			<ContentContainer>
+				{renderErrors()}
 
-			<div className="flex flex-col gap-4">
-				<div>
-					<Heading size="sm">Account details</Heading>
-					<Text size="sm" variant="muted" className="mt-1">
-						They can change these values at any time
-					</Text>
-				</div>
+				<div className="flex flex-col gap-6">
+					<div>
+						<Heading size="sm">Account details</Heading>
+						<Text size="sm" variant="muted" className="mt-1.5">
+							They can change these values at any time
+						</Text>
+					</div>
 
-				<div className="flex flex-col gap-4 pb-4 pt-1 md:max-w-md">
-					<Input
-						variant="primary"
-						fullWidth
-						label="Username"
-						placeholder="Username"
-						autoComplete="off"
-						errorMessage={form.formState.errors.username?.message}
-						{...form.register('username')}
-					/>
-					<Input
-						variant="primary"
-						fullWidth
-						label="Password"
-						placeholder="Password"
-						errorMessage={form.formState.errors.password?.message}
-						type={passwordVisible ? 'text' : 'password'}
-						autoComplete="off"
-						rightDecoration={
-							<IconButton
+					<div className="flex flex-col gap-4 pb-4 pt-1 md:max-w-md">
+						<Input
+							variant="primary"
+							fullWidth
+							label="Username"
+							placeholder="Username"
+							autoComplete="off"
+							errorMessage={form.formState.errors.username?.message}
+							{...form.register('username')}
+						/>
+						<Input
+							variant="primary"
+							fullWidth
+							label="Password"
+							placeholder="Password"
+							errorMessage={form.formState.errors.password?.message}
+							type={passwordVisible ? 'text' : 'password'}
+							autoComplete="off"
+							rightDecoration={
+								<IconButton
+									type="button"
+									variant="ghost"
+									size="xs"
+									onClick={() => setPasswordVisible(!passwordVisible)}
+									className="text-muted"
+								>
+									{passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+								</IconButton>
+							}
+							{...form.register('password')}
+						/>
+
+						<div className="flex items-center gap-1">
+							<Button
 								type="button"
-								variant="ghost"
-								size="xs"
-								onClick={() => setPasswordVisible(!passwordVisible)}
-								className="text-gray-600 dark:text-gray-500"
+								onClick={() => form.setValue('password', generateRandomPassword())}
 							>
-								{passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-							</IconButton>
-						}
-						{...form.register('password')}
-					/>
-
-					<div className="flex items-center gap-1">
-						<Button
-							type="button"
-							onClick={() => form.setValue('password', generateRandomPassword())}
-						>
-							<Shield className="mr-1.5 h-4 w-4" /> Generate Random Password
-						</Button>
+								<Shield className="mr-1.5 h-4 w-4" /> Generate Random Password
+							</Button>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			{!user?.is_server_owner && (
-				<>
-					<UserPermissionsForm />
-					<UserRestrictionsForm />
-				</>
-			)}
+				{!user?.is_server_owner && (
+					<>
+						<UserPermissionsForm />
+						<UserRestrictionsForm />
+					</>
+				)}
 
-			<div className="mt-6 flex w-full md:max-w-sm">
-				<Button className="w-full md:max-w-sm" variant="primary" disabled={formHasErrors}>
-					{t(
-						isCreating
-							? 'settingsScene.createOrUpdateUsers.createSubmitButton'
-							: 'settingsScene.createOrUpdateUsers.updateSubmitButton',
-					)}
-				</Button>
-			</div>
+				<div className="mt-6 flex w-full md:max-w-sm">
+					<Button className="w-full md:max-w-sm" variant="primary" disabled={formHasErrors}>
+						{t(
+							isCreating
+								? 'settingsScene.server/users.createOrUpdateForm.createSubmitButton'
+								: 'settingsScene.server/users.createOrUpdateForm.updateSubmitButton',
+						)}
+					</Button>
+				</div>
+			</ContentContainer>
 		</Form>
 	)
 }

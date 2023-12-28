@@ -3,6 +3,7 @@ import { Pageable } from '@stump/types'
 import {
 	MutationFunction,
 	MutationKey,
+	QueriesOptions as UseQueriesOptions,
 	QueryClient,
 	QueryFilters,
 	QueryFunction,
@@ -12,6 +13,7 @@ import {
 	useIsFetching as useReactIsFetching,
 	useMutation as useReactMutation,
 	UseMutationOptions,
+	useQueries as useReactQueries,
 	useQuery as useReactQuery,
 	UseQueryOptions,
 } from '@tanstack/react-query'
@@ -79,6 +81,16 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 		},
 		...restOptions,
 	})
+}
+
+// BAD!
+export type QueriesOptions<
+	T extends unknown[],
+	Result extends unknown[] = [],
+	Depth extends ReadonlyArray<number> = [],
+> = UseQueriesOptions<T, Result, Depth>
+export function useQueries<T extends unknown[]>({ queries }: { queries: QueriesOptions<T> }) {
+	return useReactQueries({ context: QueryClientContext, queries })
 }
 
 type PageQueryParams = {

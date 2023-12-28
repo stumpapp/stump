@@ -14,7 +14,7 @@ export default function MarkdownPreview({ children, className }: Props) {
 	return (
 		<ReactMarkdown
 			remarkPlugins={[remarkDirective, remarkDirectiveRehype]}
-			className={cn('dark:text-gray-100', className)}
+			className={cn('text-contrast-200', className)}
 			components={{
 				h1: ({ ref: _, ...props }) => (
 					<>
@@ -53,10 +53,10 @@ const Spoiler = ({ children }: PropsWithChildren) => {
 		<span
 			className={cx(
 				{
-					'cursor-pointer bg-gray-800 text-gray text-opacity-0 dark:bg-gray-800': isSpoiler,
+					'cursor-pointer bg-gray-800 text-gray text-opacity-0': isSpoiler,
 				},
 				{
-					'bg-gray-100 bg-opacity-10 dark:bg-gray-900': !isSpoiler,
+					'bg-background bg-opacity-10': !isSpoiler,
 				},
 			)}
 			onClick={() => setIsSpoiler(!isSpoiler)}

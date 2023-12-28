@@ -95,11 +95,7 @@ export default function AvatarPicker({ imageUrl, fallback, onImageChange }: Prop
 							align="start"
 							contentWrapperClassName="w-18"
 							trigger={
-								<Button
-									variant="subtle-dark"
-									size="xs"
-									className="border border-gray-75 px-2 py-1.5 dark:border-gray-850"
-								>
+								<Button variant="subtle-dark" size="xs" className="border border-edge px-2 py-1.5">
 									<Edit className="mr-2 h-3 w-3" />
 									{t('settingsScene.app/general.sections.account.avatarPicker.buttons.edit')}
 								</Button>

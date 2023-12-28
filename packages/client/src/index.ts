@@ -14,6 +14,7 @@ export {
 	useIsFetching,
 	useMutation,
 	usePageQuery,
+	useQueries,
 	useQuery,
 } from './client'
 export * from './context'

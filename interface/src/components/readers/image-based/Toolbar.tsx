@@ -6,7 +6,6 @@ import { ArrowLeft } from 'phosphor-react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
-import ThemeToggle from '@/components/ThemeToggle'
 import paths from '@/paths'
 
 interface ToolbarProps {
@@ -104,9 +103,9 @@ export default function Toolbar({
 
 						<Heading size="sm">{title}</Heading>
 					</div>
-					<div className="flex items-center">
+					{/* <div className="flex items-center">
 						<ThemeToggle />
-					</div>
+					</div> */}
 				</div>
 			</motion.nav>
 

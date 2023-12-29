@@ -1,9 +1,11 @@
 import { useAppProps, usePreferences } from '@stump/client'
 import { cn, Label, NavigationMenu } from '@stump/components'
+import { UserPermission } from '@stump/types'
 import { Cog } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 
+import { useAppContext } from '@/context'
 import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
@@ -17,6 +19,7 @@ export default function SettingsNavigationItem() {
 		preferences: { enable_double_sidebar },
 	} = usePreferences()
 	const { platform } = useAppProps()
+	const { checkPermission } = useAppContext()
 
 	const location = useLocation()
 	const isInSettingsSomewhere = location.pathname.startsWith('/settings')
@@ -42,40 +45,51 @@ export default function SettingsNavigationItem() {
 	}
 
 	const renderRouteGroups = () => {
-		return routeGroups.map((group) => {
-			const groupLabel = t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)
+		return routeGroups
+			.map((group) => {
+				const groupLabel = t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)
 
-			const withGroup = (key: string) => `settingsScene.sidebar.${group.label.toLowerCase()}.${key}`
+				const withGroup = (key: string) =>
+					`settingsScene.sidebar.${group.label.toLowerCase()}.${key}`
 
-			return (
-				<div key={groupLabel}>
-					<Label>{groupLabel}</Label>
+				const filteredItems = group.items.filter(
+					({ permission }) => !permission || checkPermission(permission as UserPermission),
+				)
 
-					<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
-						{group.items.map(({ to, icon, label, disabled }) => {
-							const isDisabled = disabled || (platform === 'browser' && to.includes('desktop'))
+				if (filteredItems.length === 0) {
+					return null
+				}
 
-							const Icon = icon
+				return (
+					<div key={groupLabel}>
+						<Label>{groupLabel}</Label>
 
-							return (
-								<div key={to} className="w-full">
-									<TopBarLinkListItem
-										to={to}
-										isActive={location.pathname.startsWith(to)}
-										isDisabled={isDisabled}
-									>
-										<Icon className="mr-2 h-4 w-4 shrink-0" />
-										<span className="ml-1 line-clamp-1 font-medium">
-											{t(withGroup(label.toLowerCase()))}
-										</span>
-									</TopBarLinkListItem>
-								</div>
-							)
-						})}
-					</ul>
-				</div>
-			)
-		})
+						<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
+							{filteredItems.map(({ to, icon, label, disabled }) => {
+								const isDisabled = disabled || (platform === 'browser' && to.includes('desktop'))
+
+								const Icon = icon
+
+								return (
+									<div key={to} className="w-full">
+										<TopBarLinkListItem
+											to={to}
+											isActive={location.pathname.startsWith(to)}
+											isDisabled={isDisabled}
+										>
+											<Icon className="mr-2 h-4 w-4 shrink-0" />
+											<span className="ml-1 line-clamp-1 font-medium">
+												{t(withGroup(label.toLowerCase()))}
+											</span>
+										</TopBarLinkListItem>
+									</div>
+								)
+							})}
+						</ul>
+					</div>
+				)
+			})
+			.filter(Boolean)
 	}
 
 	return (

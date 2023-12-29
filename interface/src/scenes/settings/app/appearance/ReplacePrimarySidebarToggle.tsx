@@ -25,6 +25,13 @@ export default function ReplacePrimarySidebarToggle() {
 			isDisabled={!enable_double_sidebar || primary_navigation_mode !== 'SIDEBAR'}
 			onToggle={handleToggle}
 			formId="enable_replace_primary_sidebar"
+			title={
+				!enable_double_sidebar
+					? 'This setting requires the double sidebar to be changed'
+					: primary_navigation_mode !== 'SIDEBAR'
+					? 'This setting is not currently supported when the primary navigation is set to top bar'
+					: undefined
+			}
 		/>
 	)
 }

@@ -5,7 +5,10 @@ import { LogOut } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 
-export default function Logout() {
+type Props = {
+	trigger?: (setOpen: (state: boolean) => void) => JSX.Element
+}
+export default function Logout({ trigger }: Props) {
 	const [isOpen, { on, off }] = useBoolean()
 
 	const setUser = useUserStore((store) => store.setUser)
@@ -36,9 +39,17 @@ export default function Logout() {
 			onConfirm={handleLogout}
 			trigger={
 				<ToolTip content="Sign Out">
-					<IconButton variant="ghost" className="p-1.5" onClick={on}>
-						<LogOut className="h-4 w-4 -scale-x-[1] transform" />
-					</IconButton>
+					{trigger ? (
+						trigger(on)
+					) : (
+						<IconButton
+							className="hover:text-contrast-500 text-contrast-300"
+							onClick={on}
+							aria-label="Sign Out"
+						>
+							<LogOut />
+						</IconButton>
+					)}
 				</ToolTip>
 			}
 		/>

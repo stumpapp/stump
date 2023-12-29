@@ -156,6 +156,12 @@ pub enum UserPermission {
 	/// Grant access to delete the library (manage library)
 	#[serde(rename = "library:delete")]
 	DeleteLibrary,
+	/// Grant access to manage users (create,edit,delete)
+	#[serde(rename = "user:manage")]
+	ManageUsers,
+	/// Grant access to manage the server. This is effectively a step below server owner
+	#[serde(rename = "server:manage")]
+	ManageServer,
 }
 
 impl ToString for UserPermission {
@@ -170,6 +176,8 @@ impl ToString for UserPermission {
 			UserPermission::ScanLibrary => "library:scan".to_string(),
 			UserPermission::ManageLibrary => "library:manage".to_string(),
 			UserPermission::DeleteLibrary => "library:delete".to_string(),
+			UserPermission::ManageUsers => "user:manage".to_string(),
+			UserPermission::ManageServer => "server:manage".to_string(),
 		}
 	}
 }
@@ -186,6 +194,8 @@ impl From<&str> for UserPermission {
 			"library:scan" => UserPermission::ScanLibrary,
 			"library:manage" => UserPermission::ManageLibrary,
 			"library:delete" => UserPermission::DeleteLibrary,
+			"user:manage" => UserPermission::ManageUsers,
+			"server:manage" => UserPermission::ManageServer,
 			_ => panic!("Invalid user permission: {}", s),
 		}
 	}
@@ -203,6 +213,10 @@ fn default_true() -> bool {
 	true
 }
 
+fn default_layout_max_width_px() -> Option<i32> {
+	Some(1280)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct UserPreferences {
 	pub id: String,
@@ -213,6 +227,8 @@ pub struct UserPreferences {
 	pub preferred_layout_mode: String,
 	#[serde(default = "default_navigation_mode")]
 	pub primary_navigation_mode: String,
+	#[serde(default = "default_layout_max_width_px")]
+	pub layout_max_width_px: Option<i32>,
 	#[serde(default)]
 	pub enable_discord_presence: bool,
 	#[serde(default)]
@@ -232,6 +248,7 @@ impl Default for UserPreferences {
 			locale: "en".to_string(),
 			preferred_layout_mode: "GRID".to_string(),
 			primary_navigation_mode: "SIDEBAR".to_string(),
+			layout_max_width_px: Some(1280),
 			app_theme: "LIGHT".to_string(),
 			show_query_indicator: false,
 			enable_discord_presence: false,
@@ -254,6 +271,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			locale: data.locale,
 			preferred_layout_mode: data.preferred_layout_mode,
 			primary_navigation_mode: data.primary_navigation_mode,
+			layout_max_width_px: data.layout_max_width_px,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
 			enable_discord_presence: data.enable_discord_presence,

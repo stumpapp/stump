@@ -344,6 +344,7 @@ async fn update_preferences(
 				user_preferences::primary_navigation_mode::set(
 					input.primary_navigation_mode.to_owned(),
 				),
+				user_preferences::layout_max_width_px::set(input.layout_max_width_px),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
 				user_preferences::enable_discord_presence::set(
 					input.enable_discord_presence,
@@ -511,6 +512,7 @@ pub struct UpdateUserPreferences {
 	pub locale: String,
 	pub preferred_layout_mode: String,
 	pub primary_navigation_mode: String,
+	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
 	pub enable_discord_presence: bool,

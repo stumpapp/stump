@@ -1,8 +1,29 @@
-import { AlarmClock, Bell, Brush, Cog, PcCase, ShieldCheck, Users } from 'lucide-react'
+import { AlarmClock, Bell, Brush, Cog, LucideIcon, PcCase, ShieldCheck, Users } from 'lucide-react'
+
+type SubItem = {
+	localeKey: string
+	matcher: (path: string) => boolean
+}
+
+type Route = {
+	icon: LucideIcon
+	label: string
+	localeKey: string
+	permission?: string
+	to: string
+	subItems?: SubItem[]
+	disabled?: boolean
+}
+
+type RouteGroup = {
+	defaultRoute: string
+	items: Route[]
+	label: string
+}
 
 // TODO: permission guards
 // TODO: prefetch options
-export const routeGroups = [
+export const routeGroups: RouteGroup[] = [
 	{
 		defaultRoute: '/settings/app/general',
 		items: [
@@ -34,18 +55,21 @@ export const routeGroups = [
 				icon: Cog,
 				label: 'General',
 				localeKey: 'server/general',
+				permission: 'server:manage',
 				to: '/settings/server/general',
 			},
 			{
 				icon: AlarmClock,
 				label: 'Jobs',
 				localeKey: 'server/jobs',
+				permission: 'server:manage',
 				to: '/settings/server/jobs',
 			},
 			{
 				icon: Users,
 				label: 'Users',
 				localeKey: 'server/users',
+				permission: 'user:manage',
 				subItems: [
 					{
 						localeKey: 'server/users.createUser',
@@ -55,7 +79,7 @@ export const routeGroups = [
 						localeKey: 'server/users.updateUser',
 						matcher: (path: string) => {
 							const match = path.match(/\/settings\/server\/users\/[a-zA-Z0-9]+\/manage/)
-							return match && match.length > 0
+							return !!match && match.length > 0
 						},
 					},
 				],
@@ -66,6 +90,7 @@ export const routeGroups = [
 				icon: ShieldCheck,
 				label: 'Access',
 				localeKey: 'server/access',
+				permission: 'server:manage',
 				to: '/settings/server/access',
 			},
 			{
@@ -73,6 +98,7 @@ export const routeGroups = [
 				icon: Bell,
 				label: 'Notifications',
 				localeKey: 'server/notifications',
+				permission: 'server:manage',
 				to: '/settings/server/notifications',
 			},
 		],

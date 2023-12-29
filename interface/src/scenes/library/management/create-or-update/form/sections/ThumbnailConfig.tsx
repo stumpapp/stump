@@ -65,6 +65,7 @@ export default function ThumbnailConfigForm() {
 							disabled={resize_options?.mode !== 'Sized'}
 						>
 							<Input
+								contrast
 								variant="primary"
 								label="Width"
 								placeholder="200"
@@ -79,6 +80,7 @@ export default function ThumbnailConfigForm() {
 									: {})}
 							/>
 							<Input
+								contrast
 								variant="primary"
 								label="Height"
 								placeholder="350"
@@ -100,6 +102,7 @@ export default function ThumbnailConfigForm() {
 							disabled={resize_options?.mode !== 'Scaled'}
 						>
 							<Input
+								contrast
 								variant="primary"
 								label="Width Scale"
 								placeholder="0.65"
@@ -114,6 +117,7 @@ export default function ThumbnailConfigForm() {
 									: {})}
 							/>
 							<Input
+								contrast
 								variant="primary"
 								label="Height Scale"
 								placeholder="0.65"
@@ -139,18 +143,25 @@ export default function ThumbnailConfigForm() {
 
 				<div className="flex flex-col gap-6 py-6">
 					<div className="flex flex-col gap-2">
-						<Label>Image Format</Label>
+						<Label className={cx({ 'cursor-not-allowed text-opacity-50': !resize_options })}>
+							Image Format
+						</Label>
 						<NativeSelect
 							options={formatOptions}
 							disabled={!resize_options}
 							{...form.register('thumbnail_config.format')}
 						/>
-						<Text size="xs" variant="muted">
+						<Text
+							size="xs"
+							variant="muted"
+							className={cx({ 'cursor-not-allowed text-opacity-50': !resize_options })}
+						>
 							The format of the generated thumbnail
 						</Text>
 					</div>
 
 					<Input
+						contrast
 						variant="primary"
 						label="Image Quality"
 						disabled={!resize_options}
@@ -165,37 +176,3 @@ export default function ThumbnailConfigForm() {
 		</div>
 	)
 }
-
-// type SwitchRowProps = {
-// 	label: string
-// 	description: string
-// 	checked: boolean
-// 	onClick: () => void
-// 	children?: React.ReactNode
-// }
-
-// const SwitchRow = ({ label, description, checked, onClick, children }: SwitchRowProps) => {
-// 	const Container = children ? 'div' : Fragment
-// 	const containerProps = children ? { className: 'py-6' } : {}
-// 	return (
-// 		<Container {...containerProps}>
-// 			<div
-// 				className={cx('flex items-center justify-between md:items-start', {
-// 					'pb-4': !!children,
-// 					'py-6': !children,
-// 				})}
-// 			>
-// 				<RawSwitch className="text-gray-900" checked={checked} onClick={onClick} primaryRing />
-
-// 				<div className="flex flex-grow flex-col gap-2 text-right">
-// 					<Label>{label}</Label>
-// 					<Text size="xs" variant="muted">
-// 						{description}
-// 					</Text>
-// 				</div>
-// 			</div>
-
-// 			{children}
-// 		</Container>
-// 	)
-// }

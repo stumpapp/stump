@@ -34,7 +34,7 @@ export function RadioCardItem({
 			className={cn(
 				'relative rounded-lg border bg-background-200 px-6 py-4 shadow-sm transition-colors duration-150 hover:bg-background-300/70 focus:outline-none',
 				{
-					'border-brand-400 bg-background-300 ring-2 ring-brand-400 hover:bg-background-300':
+					'border-brand-400 bg-background-300/75 ring-2 ring-brand-400 hover:bg-background-300':
 						isActive,
 				},
 				{

@@ -1,15 +1,16 @@
+import { usePreferences } from '@stump/client'
 import { NavigationMenu } from '@stump/components'
 import { Book, Home } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
-import UserMenu from '@/components/UserMenu'
 import { useAppContext } from '@/context'
 import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import { LibraryNavigationItem, SettingsNavigationItem } from './sections'
 import { BookClubNavigationItem } from './sections/book-club'
+import UserMenu from './sections/UserMenu'
 import TopBarNavLink from './TopBarNavLink'
 
 const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
@@ -21,12 +22,20 @@ export default function TopNavigation() {
 
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
+	const {
+		preferences: { layout_max_width_px },
+	} = usePreferences()
 
 	const showBookClubs = IS_DEVELOPMENT && checkPermission('bookclub:read')
 
 	return (
 		<div className="h-12 w-full border-b border-edge bg-sidebar">
-			<div className="mx-auto flex h-12 max-w-7xl items-center justify-between">
+			<div
+				className="mx-auto flex h-12 items-center justify-between"
+				style={{
+					maxWidth: layout_max_width_px ? `${layout_max_width_px}px` : undefined,
+				}}
+			>
 				<NavigationMenu className="z-[100] h-full">
 					<NavigationMenu.List className="w-full">
 						<TopBarNavLink to={paths.home()} isActive={location.pathname === paths.home()}>
@@ -51,9 +60,9 @@ export default function TopNavigation() {
 					<NavigationMenu className="z-[100] h-full">
 						<NavigationMenu.List className="w-full">
 							<SettingsNavigationItem />
+							<UserMenu />
 						</NavigationMenu.List>
 					</NavigationMenu>
-					<UserMenu variant="topbar" />
 				</div>
 			</div>
 		</div>

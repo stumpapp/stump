@@ -8,6 +8,7 @@ type Props = {
 	isChecked?: boolean
 	onToggle: () => void
 	isDisabled?: boolean
+	title?: string
 }
 export default function PreferenceToggle({
 	formId,
@@ -16,9 +17,10 @@ export default function PreferenceToggle({
 	isChecked,
 	onToggle,
 	isDisabled,
+	title,
 }: Props) {
 	return (
-		<div className="flex items-center justify-between">
+		<div className="flex items-center justify-between" title={title}>
 			<div className="flex flex-grow flex-col gap-2 text-left">
 				<Label
 					htmlFor={formId}

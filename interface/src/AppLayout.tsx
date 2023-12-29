@@ -36,6 +36,33 @@ export function AppLayout() {
 	}, [storeUser])
 
 	/**
+	 * If the user has a max width constraint, we apply it to the layout
+	 */
+	const layoutMaxWidthPx = useMemo(() => {
+		const { layout_max_width_px } = storeUser?.user_preferences ?? ({} as UserPreferences)
+
+		if (preferTopBar) {
+			return layout_max_width_px
+		} else {
+			return undefined
+		}
+	}, [storeUser, preferTopBar])
+	// const layoutMaxWidthPx = useMemo(() => {
+	// 	const { enable_double_sidebar, enable_replace_primary_sidebar, layout_max_width_px } =
+	// 		storeUser?.user_preferences ?? ({} as UserPreferences)
+
+	// 	if (preferTopBar) {
+	// 		return layout_max_width_px
+	// 	}
+
+	// 	if (enable_double_sidebar && enable_replace_primary_sidebar) {
+	// 		return (layout_max_width_px || 192) - 192
+	// 	} else {
+	// 		return (layout_max_width_px || 192 + 208) - (192 + 208)
+	// 	}
+	// }, [storeUser, preferTopBar])
+
+	/**
 	 * Soft hiding the sidebar allows a nice animation when toggling the sidebar
 	 * stacking preference
 	 */
@@ -122,8 +149,11 @@ export function AppLayout() {
 								'relative flex w-full flex-col',
 								// FIXME: The width restriction will need to be lower down the tree to allow
 								// for certain layouts that utilize a full width layout (e.g. book clubs)
-								preferTopBar ? 'mx-auto max-w-7xl flex-1' : 'h-full',
+								preferTopBar ? 'mx-auto flex-1' : 'h-full',
 							)}
+							style={{
+								maxWidth: layoutMaxWidthPx || undefined,
+							}}
 						>
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 							<Suspense fallback={<RouteLoadingIndicator />}>

@@ -624,6 +624,7 @@ model UserPreferences {
   app_theme             String @default("LIGHT")
 
   primary_navigation_mode String  @default("SIDEBAR")
+  layout_max_width_px     Int?    @default(1280)
   show_query_indicator    Boolean @default(false)
   enable_discord_presence Boolean @default(false)
   enable_compact_display  Boolean @default(false)

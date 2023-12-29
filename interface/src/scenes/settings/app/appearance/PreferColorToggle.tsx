@@ -14,6 +14,7 @@ export default function PreferColorToggle() {
 			onToggle={handleChange}
 			isDisabled
 			formId="prefer_accent_color"
+			title="This setting is not currently supported"
 		/>
 	)
 }

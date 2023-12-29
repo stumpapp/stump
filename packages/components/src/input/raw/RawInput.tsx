@@ -24,7 +24,7 @@ export const RAW_INPUT_VARIANT = {
 }
 export const RAW_INPUT_VARIANTS = {
 	contrast: {
-		true: 'enabled:hover:bg-background bg-background/40 focus:bg-background',
+		true: 'enabled:hover:bg-background-200 bg-background/40 focus:bg-background/80',
 	},
 	isInvalid: {
 		true: 'focus:ring-red-400 dark:focus:ring-red-400 border border-red-300 border-opacity-70 dark:border-red-400 dark:border-opacity-70',

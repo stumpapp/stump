@@ -7,6 +7,7 @@ import { useLocaleContext } from '@/i18n'
 
 import DisplaySpacingPreference from './DisplaySpacingPreference'
 import DoubleSidebarToggle from './DoubleSidebarToggle'
+import MaxWidthPreference from './MaxWidthPreference'
 import PreferColorToggle from './PreferColorToggle'
 import PrimaryNavigationPreference from './PrimaryNavigationPreference'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
@@ -29,6 +30,8 @@ export default function AppearanceSettingsScene() {
 				<div className="flex flex-col gap-y-8">
 					<DoubleSidebarToggle />
 					<ReplacePrimarySidebarToggle />
+
+					<MaxWidthPreference />
 				</div>
 
 				<DisplaySpacingPreference />

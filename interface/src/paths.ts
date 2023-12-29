@@ -83,6 +83,7 @@ const paths = {
 		return `/libraries/${id}`
 	},
 	notFound: () => '/404',
+	notifications: () => '/notifications',
 	seriesManagement: (id: string) => `/series/${id}/manage`,
 	seriesOverview: (id: string, page?: number) => {
 		if (page !== undefined) {

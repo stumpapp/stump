@@ -57,7 +57,7 @@ export default function UserMenu({ variant = 'sidebar' }: Props) {
 						<div className="flex w-full flex-col">
 							<Link
 								className="pointer-events-none flex h-[2.35rem] w-full items-center bg-background-200 px-2  text-sm text-muted transition-colors duration-150"
-								to={paths.settings('server/notifications')}
+								to={paths.notifications()}
 								onClick={() => setIsOpen(false)}
 							>
 								<Bell className="mr-1.5 h-4 w-4 " />

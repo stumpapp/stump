@@ -44,12 +44,16 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 				{...props}
 			>
 				{emptyOption && (
-					<option value={emptyOption.value} disabled selected>
+					<option value={emptyOption.value} disabled selected key="native-select-empty-option">
 						{emptyOption.label}
 					</option>
 				)}
 				{options.map((option) => (
-					<option key={option.value} value={option.value} disabled={option.disabled}>
+					<option
+						key={option.value || 'null-option'}
+						value={option.value}
+						disabled={option.disabled}
+					>
 						{option.label}
 					</option>
 				))}

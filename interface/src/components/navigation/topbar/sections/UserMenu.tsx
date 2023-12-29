@@ -65,7 +65,7 @@ export default function UserMenu() {
 
 					<TopBarLinkListItem
 						className="rounded-none py-3"
-						to={paths.notifications()}
+						to={paths.settings('app/appearance')}
 						isActive={location.pathname.startsWith(paths.settings('app/appearance'))}
 					>
 						<Bell className="mr-2 h-4 w-4 shrink-0" />

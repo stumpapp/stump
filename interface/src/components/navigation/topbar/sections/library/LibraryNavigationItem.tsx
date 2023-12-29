@@ -72,7 +72,7 @@ export default function LibraryNavigationItem() {
 				Libraries
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
-				<div className="flex gap-3 p-4 md:w-[400px] lg:w-[500px]">
+				<div className="flex min-h-[150px] gap-3 p-4 md:w-[400px] lg:w-[500px]">
 					<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
 
 					<div className="flex w-2/3 shrink-0 flex-col gap-y-2">

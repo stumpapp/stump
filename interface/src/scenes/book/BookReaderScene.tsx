@@ -5,8 +5,8 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-
 
 import AnimatedPagedReader from '@/components/readers/image-based/AnimatedPagedReader'
 import PagedReader from '@/components/readers/image-based/PagedReader'
+import paths from '@/paths'
 
-import paths from '../../paths'
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
 
 export default function BookReaderScene() {
@@ -35,7 +35,7 @@ export default function BookReaderScene() {
 	 */
 	useEffect(() => {
 		return () => {
-			invalidateQueries({ keys: [mediaQueryKeys.getInProgressMedia] })
+			invalidateQueries({ exact: false, keys: [mediaQueryKeys.getInProgressMedia] })
 		}
 	}, [])
 

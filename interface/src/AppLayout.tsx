@@ -1,6 +1,6 @@
 import { isAxiosError } from '@stump/api'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import { cx } from '@stump/components'
+import { cn, cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { Suspense, useCallback, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -145,14 +145,15 @@ export function AppLayout() {
 					{!hideSidebar && <SideBar hidden={softHideSidebar} />}
 					<main className="min-h-full w-full overflow-y-auto overflow-x-hidden bg-background">
 						<div
-							className={cx(
+							className={cn(
 								'relative flex w-full flex-col',
 								// FIXME: The width restriction will need to be lower down the tree to allow
 								// for certain layouts that utilize a full width layout (e.g. book clubs)
-								preferTopBar ? 'mx-auto flex-1' : 'h-full',
+								{ 'mx-auto flex-1': !hideAllNavigation && preferTopBar },
+								{ 'h-full': hideAllNavigation || !preferTopBar },
 							)}
 							style={{
-								maxWidth: layoutMaxWidthPx || undefined,
+								maxWidth: !hideAllNavigation ? layoutMaxWidthPx || undefined : undefined,
 							}}
 						>
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}

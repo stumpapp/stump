@@ -1,4 +1,4 @@
-import { API, epubApi, epubQueryKeys, updateEpubProgress } from '@stump/api'
+import { API, epubApi, epubQueryKeys, mediaQueryKeys, updateEpubProgress } from '@stump/api'
 import {
 	type EpubReaderPreferences,
 	queryClient,
@@ -292,7 +292,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	 */
 	useEffect(() => {
 		return () => {
-			queryClient.invalidateQueries(['getInProgressMedia'])
+			queryClient.invalidateQueries([mediaQueryKeys.getInProgressMedia], { exact: false })
 		}
 	}, [])
 

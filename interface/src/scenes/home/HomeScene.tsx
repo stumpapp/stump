@@ -1,7 +1,7 @@
 import { useLibraries } from '@stump/client'
 import { Helmet } from 'react-helmet'
 
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 
 import ContinueReadingMedia from './ContinueReading'
 import NoLibraries from './NoLibraries'

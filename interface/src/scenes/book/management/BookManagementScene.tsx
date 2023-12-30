@@ -4,7 +4,7 @@ import { Construction } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { Navigate, useParams } from 'react-router'
 
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 import paths from '@/paths'
 
 import BookThumbnailSelector from './BookThumbnailSelector'

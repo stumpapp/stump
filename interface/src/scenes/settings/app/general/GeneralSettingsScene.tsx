@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 
 import { useLocaleContext } from '../../../../i18n'
 import LocalePreferences from './LocalePreferences'

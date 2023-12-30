@@ -6,7 +6,7 @@ import pluralize from 'pluralize'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 
 import paths from '../../paths'
 

@@ -37,7 +37,7 @@ export default function TopNavigation() {
 				}}
 			>
 				<NavigationMenu className="z-[100] h-full">
-					<NavigationMenu.List className="w-full">
+					<NavigationMenu.List className="w-full pl-4">
 						<TopBarNavLink to={paths.home()} isActive={location.pathname === paths.home()}>
 							<Home className="mr-2 h-4 w-4" />
 							{t('sidebar.buttons.home')}
@@ -57,7 +57,7 @@ export default function TopNavigation() {
 				</NavigationMenu>
 
 				<div className="flex h-full items-center gap-x-2">
-					<NavigationMenu className="z-[100] h-full">
+					<NavigationMenu className="z-[100] h-full pr-4" viewPortProps={{ align: 'right' }}>
 						<NavigationMenu.List className="w-full">
 							<SettingsNavigationItem />
 							<UserMenu />

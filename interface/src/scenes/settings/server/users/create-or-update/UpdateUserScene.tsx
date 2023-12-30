@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 
 import { ContentContainer } from '@/components/container'
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 import { useLocaleContext } from '@/i18n'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'

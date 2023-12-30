@@ -4,7 +4,7 @@ import { BookClub, Media, User } from '@stump/types'
 import React, { Suspense, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router'
 
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 
 import BookClubHeader from './BookClubHeader'
 import BookClubNavigation from './BookClubNavigation'

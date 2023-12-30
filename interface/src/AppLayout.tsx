@@ -1,6 +1,6 @@
 import { isAxiosError } from '@stump/api'
 import { useAppProps, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
-import { cn, cx } from '@stump/components'
+import { cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { Suspense, useCallback, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -34,33 +34,6 @@ export function AppLayout() {
 		const userPreferences = storeUser?.user_preferences ?? ({} as UserPreferences)
 		return userPreferences?.primary_navigation_mode === 'TOPBAR'
 	}, [storeUser])
-
-	/**
-	 * If the user has a max width constraint, we apply it to the layout
-	 */
-	const layoutMaxWidthPx = useMemo(() => {
-		const { layout_max_width_px } = storeUser?.user_preferences ?? ({} as UserPreferences)
-
-		if (preferTopBar) {
-			return layout_max_width_px
-		} else {
-			return undefined
-		}
-	}, [storeUser, preferTopBar])
-	// const layoutMaxWidthPx = useMemo(() => {
-	// 	const { enable_double_sidebar, enable_replace_primary_sidebar, layout_max_width_px } =
-	// 		storeUser?.user_preferences ?? ({} as UserPreferences)
-
-	// 	if (preferTopBar) {
-	// 		return layout_max_width_px
-	// 	}
-
-	// 	if (enable_double_sidebar && enable_replace_primary_sidebar) {
-	// 		return (layout_max_width_px || 192) - 192
-	// 	} else {
-	// 		return (layout_max_width_px || 192 + 208) - (192 + 208)
-	// 	}
-	// }, [storeUser, preferTopBar])
 
 	/**
 	 * Soft hiding the sidebar allows a nice animation when toggling the sidebar
@@ -144,18 +117,7 @@ export function AppLayout() {
 				<div className={cx('flex h-full flex-1', { 'pb-12': preferTopBar && !hideTopBar })}>
 					{!hideSidebar && <SideBar hidden={softHideSidebar} />}
 					<main className="min-h-full w-full overflow-y-auto overflow-x-hidden bg-background">
-						<div
-							className={cn(
-								'relative flex w-full flex-col',
-								// FIXME: The width restriction will need to be lower down the tree to allow
-								// for certain layouts that utilize a full width layout (e.g. book clubs)
-								{ 'mx-auto flex-1': !hideAllNavigation && preferTopBar },
-								{ 'h-full': hideAllNavigation || !preferTopBar },
-							)}
-							style={{
-								maxWidth: !hideAllNavigation ? layoutMaxWidthPx || undefined : undefined,
-							}}
-						>
+						<div className="relative flex h-full w-full flex-col">
 							{!!storeUser.user_preferences?.show_query_indicator && <BackgroundFetchIndicator />}
 							<Suspense fallback={<RouteLoadingIndicator />}>
 								<Outlet />

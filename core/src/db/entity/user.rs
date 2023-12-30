@@ -236,6 +236,8 @@ pub struct UserPreferences {
 	#[serde(default = "default_true")]
 	pub enable_double_sidebar: bool,
 	#[serde(default)]
+	pub enable_hide_scrollbar: bool,
+	#[serde(default)]
 	pub enable_replace_primary_sidebar: bool,
 	#[serde(default = "default_true")]
 	pub prefer_accent_color: bool,
@@ -255,6 +257,7 @@ impl Default for UserPreferences {
 			enable_compact_display: false,
 			enable_double_sidebar: true,
 			enable_replace_primary_sidebar: false,
+			enable_hide_scrollbar: false,
 			prefer_accent_color: true,
 		}
 	}
@@ -278,6 +281,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			enable_compact_display: data.enable_compact_display,
 			enable_double_sidebar: data.enable_double_sidebar,
 			enable_replace_primary_sidebar: data.enable_replace_primary_sidebar,
+			enable_hide_scrollbar: data.enable_hide_scrollbar,
 			prefer_accent_color: data.prefer_accent_color,
 		}
 	}

@@ -4,10 +4,10 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
+import { SceneContainer } from '@/components/container'
 import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
 import MediaList from '@/components/media/MediaList'
 import Pagination from '@/components/Pagination'
-import SceneContainer from '@/components/SceneContainer'
 import useIsInView from '@/hooks/useIsInView'
 import { usePageParam } from '@/hooks/usePageParam'
 
@@ -88,7 +88,7 @@ function SeriesOverviewScene() {
 				orderBy
 			/>
 
-			<div className="flex w-full flex-col space-y-6 pt-4">
+			<div className="flex w-full flex-col gap-y-6 pt-4">
 				{hasStuff && (
 					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
 				)}

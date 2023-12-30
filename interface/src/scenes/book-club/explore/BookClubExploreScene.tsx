@@ -2,8 +2,8 @@ import { useBookClubsQuery } from '@stump/client'
 import { ButtonOrLink, cx } from '@stump/components'
 import React from 'react'
 
+import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'
-import SceneContainer from '@/components/SceneContainer'
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 

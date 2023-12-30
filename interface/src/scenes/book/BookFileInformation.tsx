@@ -34,7 +34,7 @@ export default function BookFileInformation({ media }: Props) {
 	const formatPath = (path: string) => path.replace(libraryPath, '')
 
 	return (
-		<div className="flex flex-col space-y-1.5 pb-3 pt-2 text-sm">
+		<div className="flex flex-col space-y-1 pb-3 pt-2 text-sm">
 			<Heading size="xs">File Information</Heading>
 			<div className="flex space-x-4">
 				<Text size="sm" variant="muted">

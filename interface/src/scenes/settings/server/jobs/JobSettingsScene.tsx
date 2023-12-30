@@ -4,8 +4,8 @@ import { PaginationState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
+import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
-import SceneContainer from '@/components/SceneContainer'
 import { useAppContext } from '@/context'
 import { useLocaleContext } from '@/i18n'
 

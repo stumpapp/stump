@@ -1,8 +1,8 @@
 import { Heading, Text } from '@stump/components'
 import { Helmet } from 'react-helmet'
 
+import { SceneContainer } from '@/components/container'
 import LibrariesStats from '@/components/library/LibrariesStats'
-import SceneContainer from '@/components/SceneContainer'
 
 import { useLocaleContext } from '../../../i18n'
 

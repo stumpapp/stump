@@ -2,8 +2,8 @@ import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
+import { SceneContainer } from '@/components/container'
 import LibrariesStats from '@/components/library/LibrariesStats'
-import SceneContainer from '@/components/SceneContainer'
 import { useLocaleContext } from '@/i18n'
 
 export default function GeneralServerSettingsScene() {

@@ -8,7 +8,7 @@ import * as React from 'react'
 import { cn } from '../utils'
 
 type NavigationMenuProps = {
-	viewPortProps?: Pick<NavigationMenuViewportProps, 'containerClassName' | 'className'>
+	viewPortProps?: Pick<NavigationMenuViewportProps, 'containerClassName' | 'className' | 'align'>
 } & React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
 
 const NavigationMenu = React.forwardRef<
@@ -90,13 +90,19 @@ const NavigationMenuLink = NavigationMenuPrimitive.Link
 
 type NavigationMenuViewportProps = {
 	containerClassName?: string
+	align?: 'left' | 'right'
 } & React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
 const NavigationMenuViewport = React.forwardRef<
 	React.ElementRef<typeof NavigationMenuPrimitive.Viewport>,
 	NavigationMenuViewportProps
->(({ className, containerClassName, ...props }, ref) => (
+>(({ className, containerClassName, align = 'left', ...props }, ref) => (
 	<div
-		className={cn('absolute top-full flex justify-center', 'left-auto right-0', containerClassName)}
+		className={cn(
+			'absolute top-full flex justify-center',
+			{ 'left-auto right-0': align === 'right' },
+			{ 'left-0 right-auto': align === 'left' },
+			containerClassName,
+		)}
 	>
 		<NavigationMenuPrimitive.Viewport
 			className={cn(

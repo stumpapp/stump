@@ -356,6 +356,7 @@ async fn update_preferences(
 				user_preferences::enable_replace_primary_sidebar::set(
 					input.enable_replace_primary_sidebar,
 				),
+				user_preferences::enable_hide_scrollbar::set(input.enable_hide_scrollbar),
 				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
 			],
 		)
@@ -519,6 +520,7 @@ pub struct UpdateUserPreferences {
 	pub enable_compact_display: bool,
 	pub enable_double_sidebar: bool,
 	pub enable_replace_primary_sidebar: bool,
+	pub enable_hide_scrollbar: bool,
 	pub prefer_accent_color: bool,
 }
 

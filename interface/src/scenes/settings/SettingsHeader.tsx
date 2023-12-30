@@ -2,6 +2,7 @@ import { cx, Heading, Text } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
+import { useSceneContainer } from '@/components/container'
 import { useLocaleContext } from '@/i18n'
 
 import { routeGroups } from './routes'
@@ -13,6 +14,7 @@ type Props = {
 
 export default function SettingsHeader({ renderNavigation }: Props) {
 	const { t } = useLocaleContext()
+	const { maxWidth } = useSceneContainer()
 	const location = useLocation()
 
 	const activeRouteGroup = useMemo(
@@ -41,7 +43,14 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 	const translatedDescription = t(`settingsScene.${activeRouteKey}.description`)
 
 	return (
-		<header className={cx('px-4 pt-4', { 'flex flex-col gap-y-8': renderNavigation })}>
+		<header
+			className={cx(
+				'px-4 pt-4',
+				{ 'flex flex-col gap-y-8': renderNavigation },
+				{ 'mx-auto': !!maxWidth },
+			)}
+			style={{ maxWidth }}
+		>
 			{renderNavigation && <SettingsNavigation />}
 			<div>
 				<Heading size="lg" className="font-bold">

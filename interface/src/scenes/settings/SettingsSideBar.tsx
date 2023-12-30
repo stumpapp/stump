@@ -24,7 +24,9 @@ export default function SettingsSideBar() {
 		<div
 			className={cn(
 				'relative flex h-full w-48 shrink-0 flex-col border-edge bg-background px-2 py-4 text-contrast-200',
-				primary_navigation_mode === 'TOPBAR' ? 'fixed top-12 z-50 h-screen border-x' : 'border-r',
+				primary_navigation_mode === 'TOPBAR'
+					? 'fixed top-12 z-50 h-screen border-x'
+					: 'fixed top-0 z-50 h-screen border-r',
 			)}
 		>
 			<div className="flex h-full flex-grow flex-col gap-4">

@@ -10,9 +10,9 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
+import { SceneContainer } from '@/components/container'
 import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
 import Pagination from '@/components/Pagination'
-import SceneContainer from '@/components/SceneContainer'
 import SeriesGrid from '@/components/series/SeriesGrid'
 import SeriesList from '@/components/series/SeriesList'
 import useIsInView from '@/hooks/useIsInView'
@@ -126,7 +126,7 @@ function LibraryOverviewScene() {
 				orderBy
 			/>
 
-			<div className="flex w-full flex-col space-y-6 pt-4">
+			<div className="flex w-full flex-col gap-y-6 pt-4">
 				{hasStuff && (
 					<Pagination
 						pages={total_pages}

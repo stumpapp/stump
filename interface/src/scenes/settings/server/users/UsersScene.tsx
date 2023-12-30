@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 import { useLocaleContext } from '@/i18n'
 
 import LoginActivitySection from './login-activity/LoginActivitySection'
@@ -17,7 +17,7 @@ export default function UsersScene() {
 	return (
 		<SceneContainer>
 			<Helmet>
-				<title>Stump | {t('settingsScene.users.helmet')}</title>
+				<title>Stump | {t('settingsScene.server/users.helmet')}</title>
 			</Helmet>
 
 			<ContentContainer>

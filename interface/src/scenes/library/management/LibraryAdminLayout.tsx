@@ -3,7 +3,7 @@ import { cx } from 'class-variance-authority'
 import { useEffect, useMemo } from 'react'
 import { Outlet, useNavigate } from 'react-router'
 
-import SceneContainer from '@/components/SceneContainer'
+import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
 
 /**

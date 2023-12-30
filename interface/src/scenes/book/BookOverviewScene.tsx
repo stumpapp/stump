@@ -6,10 +6,10 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
+import { SceneContainer } from '@/components/container'
 import LinkBadge from '@/components/LinkBadge'
 import MediaCard from '@/components/media/MediaCard'
 import ReadMore from '@/components/ReadMore'
-import SceneContainer from '@/components/SceneContainer'
 import TagList from '@/components/tags/TagList'
 
 import { useAppContext } from '../../context'

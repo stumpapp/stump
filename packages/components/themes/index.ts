@@ -4,8 +4,6 @@ import { light } from './light'
 import { local } from './local'
 import { brand } from './shared'
 
-// TODO: type def to enforce uniformity in theme palette defs
-
 export const sharedColors = {
 	brand,
 }
@@ -18,3 +16,4 @@ export const themes = {
 }
 
 export type Theme = keyof typeof themes
+export { type ThemeDefintion } from './shared'

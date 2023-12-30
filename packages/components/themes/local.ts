@@ -1,4 +1,6 @@
-export const local = {
+import { ThemeDefintion } from './shared'
+
+export const local: ThemeDefintion = {
 	background: {
 		100: 'var(--twc-background-100)',
 		200: 'var(--twc-background-200)',
@@ -6,6 +8,8 @@ export const local = {
 		400: 'var(--twc-background-400)',
 		500: 'var(--twc-background-500)',
 		DEFAULT: 'var(--twc-background)',
+		danger: 'var(--twc-danger)',
+		warning: 'var(--twc-warning)',
 	},
 	brand: {
 		100: 'var(--twc-brand-100)',

@@ -1,6 +1,6 @@
-import { amber, brand, red } from './shared'
+import { amber, brand, red, ThemeDefintion } from './shared'
 
-export const bronze = {
+export const bronze: ThemeDefintion = {
 	background: {
 		100: '#FFFFFF',
 		200: '#FBFAF9',
@@ -15,6 +15,7 @@ export const bronze = {
 	contrast: {
 		100: '#000000',
 		200: '#161719',
+		300: '#1F2123',
 		DEFAULT: '#000000',
 	},
 	edge: {

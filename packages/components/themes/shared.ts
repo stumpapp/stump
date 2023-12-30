@@ -1,4 +1,58 @@
-export const brand = {
+/**
+ * A type for enforcing the structure of a color
+ */
+export type FullColor = {
+	100: string
+	200: string
+	300: string
+	400: string
+	50: string
+	500: string
+	600: string
+	700: string
+	800: string
+	900: string
+	DEFAULT: string
+}
+
+/**
+ * A type for enforcing the structure of a valid theme
+ */
+export type ThemeDefintion = {
+	background: {
+		100: string
+		200: string
+		300: string
+		400: string
+		500: string
+		DEFAULT: string
+		danger: string
+		warning: string
+	}
+	brand: FullColor
+	contrast: {
+		100: string
+		200: string
+		300: string
+		DEFAULT: string
+	}
+	edge: {
+		200: string
+		DEFAULT: string
+	}
+	muted: {
+		100: string
+		200: string
+		DEFAULT: string
+	}
+	sidebar: {
+		200: string
+		300: string
+		DEFAULT: string
+	}
+}
+
+export const brand: FullColor = {
 	100: '#EFDDD1',
 	200: '#E4C6B3',
 	300: '#D9AF95',
@@ -12,7 +66,7 @@ export const brand = {
 	DEFAULT: '#C48259',
 }
 
-export const red = {
+export const red: FullColor = {
 	100: '#FCDADA',
 	200: '#F9B5B5',
 	300: '#F58F8F',
@@ -23,11 +77,10 @@ export const red = {
 	700: '#B30F0F',
 	800: '#800B0B',
 	900: '#4C0707',
-	950: '#320404',
 	DEFAULT: '#EF4444',
 }
 
-export const yellow = {
+export const yellow: FullColor = {
 	100: '#FDEFB5',
 	200: '#FDE68D',
 	300: '#FCDD65',
@@ -38,11 +91,10 @@ export const yellow = {
 	700: '#9B7D03',
 	800: '#655102',
 	900: '#2E2501',
-	950: '#120F00',
 	DEFAULT: '#FACC15',
 }
 
-export const amber = {
+export const amber: FullColor = {
 	100: '#FBDCA8',
 	200: '#FACD81',
 	300: '#F8BD59',
@@ -53,6 +105,5 @@ export const amber = {
 	700: '#8A5906',
 	800: '#543603',
 	900: '#1E1401',
-	950: '#030200',
 	DEFAULT: '#F59E0B',
 }

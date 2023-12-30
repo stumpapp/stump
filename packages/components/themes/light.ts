@@ -1,6 +1,6 @@
-import { brand, red, yellow } from './shared'
+import { brand, red, ThemeDefintion, yellow } from './shared'
 
-export const light = {
+export const light: ThemeDefintion = {
 	background: {
 		100: '#FFFFFF',
 		200: '#F6F6F7',

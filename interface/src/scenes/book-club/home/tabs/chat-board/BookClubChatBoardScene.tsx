@@ -5,8 +5,8 @@ import React from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
 import GenericEmptyState from '@/components/GenericEmptyState'
+import paths from '@/paths'
 
-import paths from '../../../../../paths'
 import { useBookClubContext } from '../../context'
 import ChatMessage from './ChatMessage'
 
@@ -49,7 +49,7 @@ export default function BookClubChatBoardScene() {
 	}
 
 	return (
-		<div className="md:h-full md:overflow-y-scroll">
+		<div className="md:h-full">
 			{mockMessages.map((message) => (
 				<ChatMessage key={message.id} message={message} chatId={chatId} />
 			))}

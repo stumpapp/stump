@@ -1,6 +1,8 @@
 import { useLibraries, useLibraryByIdQuery } from '@stump/client'
-import { Divider, Heading, Link, Text } from '@stump/components'
+import { Heading, Link, Text } from '@stump/components'
 import { useParams } from 'react-router'
+
+import { Container, ContentContainer } from '@/components/container'
 
 import { useLocaleContext } from '../../../../i18n/context'
 import QuickActions from '../QuickActions'
@@ -21,7 +23,7 @@ export default function ManageLibraryScene() {
 	}
 
 	return (
-		<>
+		<Container disableHorizontalPadding>
 			<div>
 				<Heading size="lg">{t('manageLibraryScene.heading')}</Heading>
 				<Text size="sm" variant="muted">
@@ -30,18 +32,16 @@ export default function ManageLibraryScene() {
 						{t('manageLibraryScene.subtitleLink')}.
 					</Link>
 				</Text>
-
-				<Divider variant="muted" className="mt-3.5" />
 			</div>
 
-			<div className="flex flex-col gap-12">
+			<ContentContainer>
 				{libraries && (
 					<>
 						<QuickActions library={library} />
 						<CreateOrUpdateLibraryForm existingLibraries={libraries} library={library} />
 					</>
 				)}
-			</div>
-		</>
+			</ContentContainer>
+		</Container>
 	)
 }

@@ -1,7 +1,8 @@
 import { useLibraries } from '@stump/client'
 import { Heading, Link, Text } from '@stump/components'
 
-import { useLocaleContext } from '../../../../i18n'
+import { useLocaleContext } from '@/i18n'
+
 import { CreateOrUpdateLibraryForm } from './form'
 
 export default function CreateLibraryScene() {

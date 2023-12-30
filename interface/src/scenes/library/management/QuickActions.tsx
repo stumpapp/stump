@@ -1,11 +1,12 @@
 import { libraryApi, libraryQueryKeys } from '@stump/api'
 import { useMutation } from '@stump/client'
-import { ButtonOrLink, Divider, Heading, Text } from '@stump/components'
+import { ButtonOrLink, Heading, Text } from '@stump/components'
 import { Library } from '@stump/types'
 import React from 'react'
 
-import { useAppContext } from '../../../context'
-import paths from '../../../paths'
+import { useAppContext } from '@/context'
+import paths from '@/paths'
+
 import CleanLibrary from './CleanLibrary'
 import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
@@ -31,13 +32,14 @@ export default function QuickActions({ library }: Props) {
 	}
 
 	return (
-		<div>
-			<Heading size="xs">Quick Actions</Heading>
-			<Text size="sm" variant="muted" className="mt-1.5">
-				Some quick actions you can take on this library
-			</Text>
+		<div className="flex flex-col gap-y-6">
+			<div className="flex flex-col gap-y-1.5">
+				<Heading size="xs">Quick Actions</Heading>
+				<Text size="sm" variant="muted">
+					Some quick actions you can take on this library
+				</Text>
+			</div>
 
-			<Divider variant="muted" className="my-3.5" />
 			<div className="flex items-start gap-4">
 				<LibraryThumbnailSelector library={library} />
 				<div className="flex flex-wrap items-center gap-2">

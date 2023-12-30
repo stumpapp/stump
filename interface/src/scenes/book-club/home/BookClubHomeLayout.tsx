@@ -1,4 +1,4 @@
-import { useBookClubQuery, useUserStore } from '@stump/client'
+import { useBookClubQuery, usePreferences, useUserStore } from '@stump/client'
 import { cx } from '@stump/components'
 import { BookClub, Media, User } from '@stump/types'
 import React, { Suspense, useMemo } from 'react'
@@ -19,6 +19,9 @@ export default function BookClubHomeLayout() {
 
 	const location = useLocation()
 	const user = useUserStore((store) => store.user)
+	const {
+		preferences: { enable_hide_scrollbar },
+	} = usePreferences()
 
 	const viewerMember = useMemo(
 		() => mockBookClub.members?.find((member) => !!member.user?.id && member.user.id === user?.id),
@@ -59,7 +62,8 @@ export default function BookClubHomeLayout() {
 					{
 						'md:overflow-hidden': isOnOverview,
 					},
-					{ 'md:h-full md:overflow-y-scroll': !isOnOverview },
+					{ 'md:h-full md:overflow-y-auto': !isOnOverview },
+					{ 'md:hide-scrollbar': !!enable_hide_scrollbar },
 				)}
 			>
 				<Suspense fallback={null}>
@@ -73,6 +77,7 @@ export default function BookClubHomeLayout() {
 const mockBookClub: BookClub = {
 	created_at: '2020-12-01T00:00:00.000Z',
 	description: 'A book club for fans of the OFMD series. All you can read pirate fiction!',
+	emoji: null,
 	id: '1',
 	is_private: false,
 	member_role_spec: {

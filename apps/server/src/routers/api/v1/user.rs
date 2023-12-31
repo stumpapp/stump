@@ -235,6 +235,8 @@ pub struct UpdateUser {
 	#[serde(default)]
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestriction>,
+	#[serde(default)]
+	pub max_sessions_allowed: Option<i32>,
 }
 
 async fn update_user(
@@ -244,9 +246,24 @@ async fn update_user(
 	input: UpdateUser,
 	config: &StumpConfig,
 ) -> ApiResult<User> {
+	// NOTE: there are other mechanisms in place to effectively disable logging in,
+	// so I am making this a bad request. In the future, perhaps this can change.
+	match input.max_sessions_allowed {
+		Some(max_sessions_allowed) if max_sessions_allowed == 0 => {
+			return Err(ApiError::BadRequest(
+				"max_sessions_allowed must be greater than 0 when set".to_string(),
+			))
+		},
+		Some(max_sessions_allowed) => {
+			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set")
+		},
+		_ => {},
+	}
+
 	let mut update_params = vec![
 		user::username::set(input.username),
 		user::avatar_url::set(input.avatar_url),
+		user::max_sessions_allowed::set(input.max_sessions_allowed),
 	];
 	if let Some(password) = input.password {
 		let hashed_password = bcrypt::hash(password, config.password_hash_cost)?;
@@ -373,6 +390,8 @@ pub struct CreateUser {
 	#[serde(default)]
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestriction>,
+	#[serde(default)]
+	pub max_sessions_allowed: Option<i32>,
 }
 
 #[utoipa::path(
@@ -423,6 +442,7 @@ async fn create_user(
 					vec![
 						user::is_server_owner::set(false),
 						user::permissions::set(Some(permissions.join(","))),
+						user::max_sessions_allowed::set(input.max_sessions_allowed),
 					],
 				)
 				.exec()

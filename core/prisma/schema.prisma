@@ -11,16 +11,16 @@ generator client {
 model User {
   id String @id @default(cuid())
 
-  username           String    @unique
-  hashed_password    String // Salted and hashed, NOT plain text
-  is_server_owner    Boolean   @default(false)
-  avatar_url         String?
-  last_login         DateTime?
-  created_at         DateTime  @default(now())
-  deleted_at         DateTime?
-  is_locked          Boolean   @default(false) // Locked users cannot login
-  max_sessions_count Int? // null = unlimited
-  permissions        String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
+  username             String    @unique
+  hashed_password      String // Salted and hashed, NOT plain text
+  is_server_owner      Boolean   @default(false)
+  avatar_url           String?
+  last_login           DateTime?
+  created_at           DateTime  @default(now())
+  deleted_at           DateTime?
+  is_locked            Boolean   @default(false) // Locked users cannot login
+  max_sessions_allowed Int? // null = unlimited
+  permissions          String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
 
   reviews         Review[]
   read_progresses ReadProgress[]

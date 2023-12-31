@@ -19,6 +19,8 @@ export const allPermissions = [
 	'library:scan',
 	'library:manage',
 	'library:delete',
+	'user:manage',
+	'server:manage',
 ] as const
 export const userPermissionSchema = z.enum(allPermissions)
 
@@ -32,6 +34,8 @@ const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'library:edit': [],
 	'library:manage': ['library:edit', 'library:scan'],
 	'library:scan': [],
+	'server:manage': ['file:explorer', 'user:manage'],
+	'user:manage': [],
 }
 
 const prefixes = ['bookclub', 'file', 'library']

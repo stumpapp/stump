@@ -207,7 +207,7 @@ async fn login(
 				.to_owned();
 			let existing_login_sessions_count = existing_sessions.len() as i32;
 
-			match (db_user.max_sessions_count, existing_login_sessions_count) {
+			match (db_user.max_sessions_allowed, existing_login_sessions_count) {
 				(Some(max_login_sessions), count) if count >= max_login_sessions => {
 					let oldest_session_id = existing_sessions.iter().min_by_key(|session| session.expires_at).map(|session| session.id.clone());
 					handle_remove_earliest_session(&state.db, db_user.id.clone(), oldest_session_id).await?;

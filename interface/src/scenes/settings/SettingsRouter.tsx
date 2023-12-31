@@ -7,6 +7,9 @@ import { AppSettingsRouter } from './app'
 import { ServerSettingsRouter } from './server'
 import SettingsLayout from './SettingsLayout.tsx'
 
+/**
+ * The main router for the settings scene(s). Mostly just a collection of nested routers
+ */
 export default function SettingsRouter() {
 	return (
 		<Routes>
@@ -16,19 +19,6 @@ export default function SettingsRouter() {
 				<Route path="server/*" element={<ServerOwnerRouteWrapper />}>
 					<Route path="*" element={<ServerSettingsRouter />} />
 				</Route>
-
-				{/* <Route path="" element={<Navigate to="/settings/general" replace />} />
-				<Route path="general" element={<GeneralSettingsScene />} />
-				<Route path="users/*" element={<ServerOwnerRouteWrapper />}>
-					<Route path="*" element={<UserManagementRouter />} />
-				</Route>
-				<Route path="server" element={<ServerOwnerRouteWrapper />}>
-					<Route path="" element={<ServerSettingsScene />} />
-				</Route>
-				<Route path="jobs" element={<ServerOwnerRouteWrapper />}>
-					<Route path="" element={<JobSettingsScene />} />
-				</Route>
-				 */}
 			</Route>
 		</Routes>
 	)

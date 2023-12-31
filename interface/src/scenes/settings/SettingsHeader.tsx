@@ -12,11 +12,18 @@ type Props = {
 	renderNavigation?: boolean
 }
 
+/**
+ * A header for the settings scene, which pulls a header and optional description from
+ * the locale files based on the current route
+ */
 export default function SettingsHeader({ renderNavigation }: Props) {
 	const { t } = useLocaleContext()
 	const { maxWidth } = useSceneContainer()
 	const location = useLocation()
 
+	/**
+	 * The active route based on the current location
+	 */
 	const activeRouteGroup = useMemo(
 		() =>
 			routeGroups
@@ -25,6 +32,11 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 		[location.pathname],
 	)
 
+	/**
+	 * The active route's locale key, which is used to pull the title and description. If
+	 * the active route has sub-items, we'll have to check the provided matchers to see
+	 * if/which sub-item is active
+	 */
 	const activeRouteKey = useMemo(() => {
 		if (!activeRouteGroup) {
 			return null

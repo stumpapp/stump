@@ -11,5 +11,5 @@ target
 
 # ignore contents in excess directories, some are kept only so cargo 
 # doesn't yell at me
-apps/docs
+docs
 apps/mobile

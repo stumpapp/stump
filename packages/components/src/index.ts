@@ -17,7 +17,7 @@ export {
 export { Calendar, DatePicker } from './calendar'
 export { Card, CardGrid, type CardProps, EntityCard, HoverCard, type HoverCardProps } from './card'
 export { Command, type CommandProps } from './command'
-export { Container, Divider, Layout, Spacer, type SpacerProps } from './container'
+export { Divider, Layout, Spacer, type SpacerProps } from './container'
 export { ContextMenu, type ContextMenuProps } from './context-menu'
 export { ConfirmationModal, type ConfirmationModalProps, Dialog } from './dialog'
 export { Dropdown, DropdownMenu, type DropdownMenuProps } from './dropdown'
@@ -36,6 +36,7 @@ export {
 	type TextAreaProps,
 } from './input'
 export { Link } from './link'
+export { NavigationMenu, navigationMenuTriggerStyle } from './navigation'
 export { Popover } from './popover'
 export { FullScreenLoader, ProgressBar, type ProgressBarProps, ProgressSpinner } from './progress'
 export { RadioGroup } from './radio'

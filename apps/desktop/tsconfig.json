@@ -9,8 +9,8 @@
 		"paths": {
 			"@stump/client": ["../../packages/client/src/index.ts"],
 			"@stump/client/*": ["../../packages/client/src/*"],
-			"@stump/interface": ["../../packages/interface/src/index.ts"],
-			"@stump/interface/*": ["../../packages/interface/src/*"]
+			"@stump/interface": ["../../interface/src/index.ts"],
+			"@stump/interface/*": ["../../interface/src/*"]
 		}
 	},
 	"include": ["src"],
@@ -19,7 +19,7 @@
 			"path": "../../packages/client"
 		},
 		{
-			"path": "../../packages/interface"
+			"path": "../../interface"
 		}
 	]
 }

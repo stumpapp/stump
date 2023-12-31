@@ -4,8 +4,15 @@ import React from 'react'
 
 import { cn } from '../../utils'
 
-export const SWITCH_BASE_CLASSES =
-	'inline-flex shrink-0 cursor-pointer items-center rounded-full border border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900 data-[state=unchecked]:bg-gray-200'
+// TODO: figure out the contrast colors for default colors...
+
+export const SWITCH_BASE_CLASSES = [
+	'inline-flex shrink-0 cursor-pointer items-center rounded-full transition-colors',
+	'border border-transparent',
+	'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-background-400 focus:ring-offset-background',
+	'disabled:cursor-not-allowed disabled:opacity-50',
+	'data-[state=unchecked]:bg-background-500',
+]
 
 export const SWITCH_SIZE_VARIANTS = {
 	default: 'h-[24px] w-[44px]',
@@ -13,10 +20,8 @@ export const SWITCH_SIZE_VARIANTS = {
 	xs: 'h-[16px] w-[28px]',
 }
 export const SWITCH_VARIANTS = {
-	default:
-		'focus:ring-gray-400 dark:focus:ring-gray-400 data-[state=checked]:bg-gray-900 dark:data-[state=unchecked]:bg-gray-700 dark:data-[state=checked]:bg-gray-400',
-	primary:
-		'focus:ring-brand-400 dark:focus:ring-brand-400 data-[state=checked]:bg-brand-400 dark:data-[state=unchecked]:bg-gray-800 dark:data-[state=checked]:bg-brand-400 dark:border-gray-750',
+	default: 'focus:ring-background-400 data-[state=checked]:bg-background-400',
+	primary: 'focus:ring-brand-400 data-[state=checked]:bg-brand-400',
 }
 export const switchVariants = cva(SWITCH_BASE_CLASSES, {
 	defaultVariants: {
@@ -30,13 +35,9 @@ export const switchVariants = cva(SWITCH_BASE_CLASSES, {
 })
 
 export type RawSwitchRef = React.ElementRef<typeof SwitchPrimitives.Root>
-// TODO: figure out icon(s)
-// type SwitchIcon = (props: React.ComponentPropsWithoutRef<'svg'>) => JSX.Element
 export type RawSwitchProps = VariantProps<typeof switchVariants> &
 	React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & {
 		primaryRing?: boolean
-		// CheckedIcon?: SwitchIcon
-		// UnCheckedIcon?: SwitchIcon
 	}
 
 export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
@@ -44,7 +45,7 @@ export const RawSwitch = React.forwardRef<RawSwitchRef, RawSwitchProps>(
 		return (
 			<SwitchPrimitives.Root
 				className={cn(switchVariants({ className, size, variant }), {
-					'focus:ring-brand-400 dark:focus:ring-brand-400': primaryRing,
+					'focus:ring-brand-400': primaryRing,
 				})}
 				{...props}
 				ref={ref}

@@ -15,11 +15,11 @@ export const ALERT_ICONS = {
 
 // TODO: adjust colors
 export const ALERT_VARIANTS: Record<keyof typeof ALERT_ICONS, string> = {
-	error: 'bg-red-50 text-red-700 dark:bg-red-700/30 dark:text-red-400',
-	grayscale: 'bg-gray-50 text-gray-700',
+	error: 'bg-background-danger text-contrast-300',
+	grayscale: 'bg-background-200 text-contrast',
 	info: 'bg-blue-50 text-blue-700',
 	success: 'bg-green-50 text-green-700',
-	warning: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-700/30 dark:text-yellow-600',
+	warning: 'bg-background-warning text-contrast-300',
 }
 
 const alertVariants = cva('p-4', {

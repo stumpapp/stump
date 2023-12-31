@@ -7,7 +7,14 @@ import {
 	userApi,
 	userQueryKeys,
 } from '@stump/api'
-import type { CreateUser, LoginActivity, UpdateUser, User, UserPreferences } from '@stump/types'
+import type {
+	CreateUser,
+	LoginActivity,
+	UpdateUser,
+	UpdateUserPreferences,
+	User,
+	UserPreferences,
+} from '@stump/types'
 import { AxiosError } from 'axios'
 
 import {
@@ -125,7 +132,7 @@ type UseUpdatePreferencesParams = MutationOptions<UserPreferences, AxiosError, U
 export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 	const { mutateAsync: update, isLoading } = useMutation(
 		[userQueryKeys.updateUserPreferences],
-		async (preferences: UserPreferences) => {
+		async (preferences: UpdateUserPreferences) => {
 			const response = await updatePreferences(preferences)
 			return response.data
 		},

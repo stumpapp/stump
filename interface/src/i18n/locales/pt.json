@@ -4,46 +4,46 @@
 		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
 		"form": {
 			"validation": {
-				"missingUsername": "Username is required",
-				"missingPassword": "Password is required"
+				"missingUsername": "O nome de usuário é necessário",
+				"missingPassword": "A senha é necessária"
 			},
 			"labels": {
-				"username": "Username",
-				"password": "Password"
+				"username": "Nome de usuário",
+				"password": "Senha"
 			},
 			"buttons": {
-				"createAccount": "Create Account",
+				"createAccount": "Criar Conta",
 				"login": "Log in"
 			}
 		},
 		"toasts": {
-			"loggingIn": "Logging in...",
+			"loggingIn": "Entrando...",
 			"loggedIn": "Welcome back!",
 			"loggedInFirstTime": "Welcome!",
-			"registering": "Registering...",
-			"registered": "Registered!",
-			"loginFailed": "Login failed. Please try again",
-			"registrationFailed": "Registration failed. Please try again"
+			"registering": "Registrando...",
+			"registered": "Registrado!",
+			"loginFailed": "Falha no login. Tente novamente",
+			"registrationFailed": "Falha ao registrar. Por favor, tente novamente"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Configuração da Biblioteca",
+			"subtitleCreating": "Uma prévia da sua nova biblioteca será exibida abaixo",
+			"subtitleEditing": "Uma prévia das edições da sua biblioteca será exibida abaixo"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "File Information",
+			"heading": "Informações do Arquivo",
 			"labels": {
-				"fileSize": "File Size",
-				"fileType": "File Type",
-				"fileLocation": "File Location",
+				"fileSize": "Tamanho do arquivo",
+				"fileType": "Tipo de arquivo",
+				"fileLocation": "Localização do Arquivo",
 				"fileChecksum": "Checksum"
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Seguinte na série"
 	},
 	"createBookClubScene": {
 		"heading": "Create a new book club",
@@ -66,7 +66,7 @@
 			"member_role_spec": {
 				"heading": "Custom role mapping",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
+					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
 					"documentation"
 				],
 				"member": {
@@ -91,8 +91,8 @@
 				}
 			},
 			"creator_preferences": {
-				"heading": "Membership",
-				"subtitle": "Preferences for your own membership in the book club",
+				"heading": "Your membership preferences",
+				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
 				"creator_display_name": {
 					"label": "Display Name",
 					"placeholder": "oromei",
@@ -107,65 +107,65 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Criar nova biblioteca",
+		"subtitle": "As bibliotecas são usadas para agrupar seus livros. Se você quer uma atualização sobre as bibliotecas e como elas funcionam, confira",
+		"subtitleLink": "documentação relevante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Nome",
+				"libraryPath": "Caminho",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
+				"libraryDescription": "Descrição",
+				"libraryTags": "Etiquetas"
 			},
 			"buttons": {
-				"confirm": "Create Library"
+				"confirm": "Criar Biblioteca"
 			}
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"heading": "Gerenciar Biblioteca",
+		"subtitle": "Atualize os detalhes ou a configuração da sua biblioteca, altere as regras de acesso de controle ou arquivos de verificação. Se você está querendo uma atualização das bibliotecas e como elas funcionam, confira a",
+		"subtitleLink": "documentação relevante",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryName": "Nome",
+				"libraryPath": "Caminho",
+				"libraryPathDescription": "O caminho para a biblioteca como ela existe em seu servidor",
+				"libraryDescription": "Descrição",
+				"libraryTags": "Marcadores"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "Salvar Alterações"
 			}
 		}
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "An error occurred:",
+		"message": "Ocorreu um erro:",
 		"buttons": {
-			"report": "Report Bug",
-			"copy": "Copy Error Details",
-			"goHome": "Go Home"
+			"report": "Reportar Bug",
+			"copy": "Copiar os detalhes do erro",
+			"goHome": "Ir ao Início"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "Continue Reading",
+			"title": "Continuar Lendo",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you're currently reading will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "Recently Added Series",
+			"title": "Séries adicionadas recentemente",
 			"emptyState": {
 				"heading": "No series to display",
 				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "Recently Added Books",
+			"title": "Livros adicionados recentemente",
 			"emptyState": {
 				"heading": "No books to display",
 				"message": "Any books you add to your libraries will show up here"
@@ -174,16 +174,16 @@
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "Continue Reading",
-			"downloadSeries": "Download Series"
+			"continueReading": "Continuar Lendo",
+			"downloadSeries": "Baixar Séries"
 		}
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
+			"general": "Geral",
+			"server": "Servidor",
+			"jobs": "Ações e configurações",
+			"users": "Gerenciamento de usuários",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
@@ -419,91 +419,91 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Job in Progress"
+		"backupHeading": "Trabalho em Progresso"
 	},
 	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
+		"seriesCount": "Total de Séries",
+		"bookCount": "Número Total de Livros",
+		"diskUsage": "Uso de disco"
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Next",
-			"previous": "Previous"
+			"next": "Próxima",
+			"previous": "Anterior"
 		},
 		"popover": {
-			"heading": "Go to page",
+			"heading": "Ir para a página",
 			"buttons": {
-				"confirm": "Go",
-				"cancel": "Cancel"
+				"confirm": "Ir",
+				"cancel": "Cancelar"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
+		"title": "Terminar Sessão",
+		"message": "Você tem certeza que deseja sair?",
 		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
+			"cancel": "Cancelar",
+			"signOut": "Terminar Sessão"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Home",
-			"libraries": "Libraries",
+			"home": "Início",
+			"libraries": "Bibliotecas",
 			"books": "Explore",
 			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
 			"createBookClub": "Create book club",
-			"settings": "Settings",
-			"themeToggle": "Toggle Theme",
-			"goForward": "Go Forward",
-			"goBack": "Go Back"
+			"settings": "Configurações",
+			"themeToggle": "Alternar tema",
+			"goForward": "Ir adiante",
+			"goBack": "Retornar"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
-			"fileExplorer": "File Explorer",
+			"fileExplorer": "Explorador de Arquivos",
 			"manageLibrary": "Manage",
 			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
-			"heading": "Version Information",
-			"semVer": "Semantic Version",
-			"commitHash": "Commit Hash",
-			"buildDate": "Build Date"
+			"heading": "Informações da versão",
+			"semVer": "Versionamento Semântico",
+			"commitHash": "Hash do Commit",
+			"buildDate": "Data da Compilação"
 		}
 	},
 	"search": {
-		"placeholder": "Search"
+		"placeholder": "Pesquisar"
 	},
 	"serverSOS": {
-		"heading": "Server Unavailable",
+		"heading": "Servidor indisponível",
 		"desktop": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo.\nSe a URL do seu servidor mudou, você pode atualizá-la usando o formulário abaixo"
 		},
 		"web": {
-			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+			"message": "Ocorreu um erro de rede que sugere que seu servidor Stump está indisponível no momento. Por favor, verifique se ele está sendo executado e acessível a partir deste dispositivo"
 		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
+		"reconnected": "Reconectado ao servidor! Redirecionando...",
+		"reconnectionFailed": "Algo deu errado!"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "Servidor não está conectado",
 		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
+			"Por favor, verifique sua conexão com a internet",
+			"Clique aqui",
+			"para mudar a URL de seu servidor"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "Nenhum item para exibir",
 		"buttons": {
-			"next": "Seek Ahead",
-			"previous": "Seek Backwards"
+			"next": "Buscar à frente",
+			"previous": "Procurar Anterior"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
-		"placeholderNoTags": "No tags available"
+		"placholder": "Selecionar ou criar etiqueta",
+		"placeholderNoTags": "Não há tags disponíveis"
 	}
 }

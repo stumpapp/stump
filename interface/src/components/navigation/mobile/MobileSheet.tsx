@@ -35,7 +35,7 @@ export default function MobileSheet() {
 			closeIcon={false}
 			position="left"
 		>
-			<div className="flex-1 overflow-y-scroll px-6">
+			<div className="flex-1 overflow-y-auto px-6">
 				<SideBar asChild />
 			</div>
 		</Sheet>

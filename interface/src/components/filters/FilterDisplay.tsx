@@ -55,7 +55,7 @@ export default function FilterDisplay() {
 
 	return (
 		<Card className="hidden p-4 md:inline-block">
-			<div className="flex max-h-60 flex-wrap items-center gap-4 overflow-y-scroll scrollbar-hide">
+			<div className="flex max-h-60 flex-wrap items-center gap-4 overflow-y-auto scrollbar-hide">
 				{Object.entries(filterMapping).map(([key, values]) => {
 					return (
 						<div key={key} className="flex items-center gap-1">

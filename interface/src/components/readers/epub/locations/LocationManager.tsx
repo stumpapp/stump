@@ -69,7 +69,7 @@ export default function LocationManager() {
 
 					<Dialog.Close onClick={handleClose} />
 				</Dialog.Header>
-				<div className="h-[300px] overflow-y-scroll scrollbar-hide">{renderTabContent()}</div>
+				<div className="h-[300px] overflow-y-auto scrollbar-hide">{renderTabContent()}</div>
 			</Dialog.Content>
 		</Dialog>
 	)

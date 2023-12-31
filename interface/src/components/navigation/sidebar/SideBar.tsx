@@ -49,7 +49,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 			<>
 				{renderHeader()}
 
-				<div className="flex max-h-full grow flex-col gap-4 overflow-y-scroll p-1 scrollbar-hide">
+				<div className="flex max-h-full grow flex-col gap-4 overflow-y-auto p-1 scrollbar-hide">
 					{!isMobile && <UserMenu />}
 
 					<div className="flex flex-col gap-2">

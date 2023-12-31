@@ -65,7 +65,7 @@ export default function SeriesFilterForm() {
 
 	return (
 		<Form
-			className="flex max-h-full grow flex-col overflow-x-visible overflow-y-scroll px-6 py-2 scrollbar-hide"
+			className="flex max-h-full grow flex-col overflow-y-auto overflow-x-visible px-6 py-2 scrollbar-hide"
 			id="filter-form"
 			form={form}
 			onSubmit={handleSubmit}

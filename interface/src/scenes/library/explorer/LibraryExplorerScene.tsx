@@ -85,7 +85,7 @@ export default function LibraryExplorerScene() {
 
 			<FileExplorerHeader />
 			<div
-				className="h-full w-full overflow-x-hidden overflow-y-scroll"
+				className="h-full w-full overflow-y-auto overflow-x-hidden"
 				style={{
 					marginBottom: FOOTER_HEIGHT + (isMobile ? 50 : 0),
 					marginTop: HEADER_HEIGHT,

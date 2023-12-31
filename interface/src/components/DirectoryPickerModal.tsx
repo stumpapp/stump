@@ -94,7 +94,7 @@ export default function DirectoryPickerModal({
 						/>
 					</div>
 
-					<div className="flex h-[20rem] flex-col divide-y divide-edge/75 overflow-y-scroll px-1 pt-1 scrollbar-hide">
+					<div className="flex h-[20rem] flex-col divide-y divide-edge/75 overflow-y-auto px-1 pt-1 scrollbar-hide">
 						{directoryList.map((directory, i) => (
 							<button
 								key={directory.path}

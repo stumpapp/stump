@@ -1,5 +1,5 @@
-import { prefetchBookClubChat } from '@stump/client'
-import { cx, Link } from '@stump/components'
+import { prefetchBookClubChat, usePreferences } from '@stump/client'
+import { cn, cx, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
@@ -8,6 +8,9 @@ import { useBookClubContext } from './context'
 // TODO: when viewing a thread, only show something like "<-- Return to chat board"
 export default function BookClubNavigation() {
 	const location = useLocation()
+	const {
+		preferences: { primary_navigation_mode, layout_max_width_px },
+	} = usePreferences()
 	const {
 		bookClub: { id },
 		viewerIsMember,
@@ -47,9 +50,19 @@ export default function BookClubNavigation() {
 		]
 	}, [location, viewerIsMember, id])
 
+	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+
 	return (
 		<div className="sticky top-0 z-10 w-full border-b border-gray-75 bg-white dark:border-gray-850 dark:bg-gray-975 md:relative md:top-[unset] md:z-[unset]">
-			<nav className="-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden">
+			<nav
+				className={cn(
+					'-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',
+					{
+						'mx-auto': preferTopBar && !!layout_max_width_px,
+					},
+				)}
+				style={{ maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined }}
+			>
 				{tabs.map((tab) => (
 					<Link
 						to={tab.to}

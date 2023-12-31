@@ -1,4 +1,5 @@
-import { Avatar, Card, Heading, Text } from '@stump/components'
+import { usePreferences } from '@stump/client'
+import { Avatar, Card, cn, Heading, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
 import React from 'react'
@@ -6,6 +7,9 @@ import React from 'react'
 import { useBookClubContext } from './context'
 
 export default function BookClubHeader() {
+	const {
+		preferences: { primary_navigation_mode, layout_max_width_px },
+	} = usePreferences()
 	const { bookClub } = useBookClubContext()
 
 	const creator = bookClub.members?.find((member) => member.is_creator)
@@ -31,8 +35,20 @@ export default function BookClubHeader() {
 		)
 	}
 
+	const preferTopBar = primary_navigation_mode === 'TOPBAR'
+
 	return (
-		<header className="flex flex-col gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0">
+		<header
+			className={cn(
+				'flex w-full flex-col gap-4 p-4 md:flex-row md:items-start md:justify-between md:gap-0',
+				{
+					'mx-auto': preferTopBar && !!layout_max_width_px,
+				},
+			)}
+			style={{
+				maxWidth: preferTopBar ? layout_max_width_px || undefined : undefined,
+			}}
+		>
 			<div className="md:max-w-xl">
 				<Heading>{bookClub.name}</Heading>
 				{/* TODO: read more text for long descriptions... */}

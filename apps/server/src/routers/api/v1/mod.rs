@@ -79,7 +79,7 @@ async fn ping() -> ApiResult<String> {
 #[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct StumpVersion {
 	pub semver: String,
-	pub rev: Option<String>,
+	pub rev: String,
 	pub compile_time: String,
 }
 
@@ -94,7 +94,7 @@ pub struct StumpVersion {
 async fn version() -> ApiResult<Json<StumpVersion>> {
 	Ok(Json(StumpVersion {
 		semver: env!("CARGO_PKG_VERSION").to_string(),
-		rev: std::env::var("GIT_REV").ok(),
+		rev: env!("GIT_REV").to_string(),
 		compile_time: env!("STATIC_BUILD_DATE").to_string(),
 	}))
 }

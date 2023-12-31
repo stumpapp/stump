@@ -3,8 +3,7 @@ import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import LibrariesStats from '@/components/library/LibrariesStats'
-
-import { useLocaleContext } from '../../../i18n'
+import { useLocaleContext } from '@/i18n'
 
 export default function ServerSettingsScene() {
 	const { t } = useLocaleContext()

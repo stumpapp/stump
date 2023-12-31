@@ -38,6 +38,8 @@ export default function SettingsLayout() {
 
 	return (
 		<div
+			// The overfloy on the parent is intentional, as it allows the native scrollbar to be fully
+			// to the right, instead of on the potentially restricted width of the child container
 			className={cn('flex h-full w-full flex-col overflow-y-auto md:flex-row', {
 				'scrollbar-hide': enable_hide_scrollbar,
 			})}

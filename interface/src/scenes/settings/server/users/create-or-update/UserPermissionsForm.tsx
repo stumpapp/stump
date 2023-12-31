@@ -34,11 +34,11 @@ const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'library:edit': [],
 	'library:manage': ['library:edit', 'library:scan'],
 	'library:scan': [],
-	'server:manage': ['file:explorer', 'user:manage'],
+	'server:manage': ['file:explorer', 'user:manage', 'library:edit', 'library:scan'],
 	'user:manage': [],
 }
 
-const prefixes = ['bookclub', 'file', 'library']
+const prefixes = ['bookclub', 'file', 'library', 'user', 'server'] as const
 
 const LOCAL_BASE = 'settingsScene.server/users.createOrUpdateForm.permissions'
 const getLocaleKey = (path: string) => `${LOCAL_BASE}.${path}`

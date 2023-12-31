@@ -184,14 +184,21 @@ async fn login(
 					.await?;
 
 				if should_lock_account {
-					client
+					let _locked_user = client
 						.user()
 						.update(
-							user::id::equals(user_id),
+							user::id::equals(user_id.clone()),
 							vec![user::is_locked::set(true)],
 						)
 						.exec()
 						.await?;
+
+					let removed_sessions_count = client
+						.session()
+						.delete_many(vec![session::user_id::equals(user_id.clone())])
+						.exec()
+						.await?;
+					tracing::debug!(?removed_sessions_count, ?user_id, "Locked user account and removed all associated sessions")
 				}
 
 				return Err(ApiError::Unauthorized);

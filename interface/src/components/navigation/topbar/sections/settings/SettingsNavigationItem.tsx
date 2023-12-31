@@ -1,15 +1,13 @@
 import { useAppProps, usePreferences } from '@stump/client'
 import { cn, Label, NavigationMenu } from '@stump/components'
-import { UserPermission } from '@stump/types'
 import { Cog } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { useAppContext } from '@/context'
 import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
-import { routeGroups } from '../../../../../scenes/settings'
+import { useSettingsRoutes } from '../../../../../scenes/settings'
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 import TopBarNavLink from '../../TopBarNavLink'
 
@@ -19,7 +17,8 @@ export default function SettingsNavigationItem() {
 		preferences: { enable_double_sidebar },
 	} = usePreferences()
 	const { platform } = useAppProps()
-	const { checkPermission } = useAppContext()
+
+	const { groups } = useSettingsRoutes()
 
 	const location = useLocation()
 	const isInSettingsSomewhere = location.pathname.startsWith('/settings')
@@ -45,51 +44,40 @@ export default function SettingsNavigationItem() {
 	}
 
 	const renderRouteGroups = () => {
-		return routeGroups
-			.map((group) => {
-				const groupLabel = t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)
+		return groups.map(({ label, items }) => {
+			const groupLabel = t(`settingsScene.sidebar.${label.toLowerCase()}.label`)
 
-				const withGroup = (key: string) =>
-					`settingsScene.sidebar.${group.label.toLowerCase()}.${key}`
+			const withGroup = (key: string) => `settingsScene.sidebar.${label.toLowerCase()}.${key}`
 
-				const filteredItems = group.items.filter(
-					({ permission }) => !permission || checkPermission(permission as UserPermission),
-				)
+			return (
+				<div key={groupLabel}>
+					<Label>{groupLabel}</Label>
 
-				if (filteredItems.length === 0) {
-					return null
-				}
+					<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
+						{items.map(({ to, icon, label, disabled }) => {
+							const isDisabled = disabled || (platform === 'browser' && to.includes('desktop'))
 
-				return (
-					<div key={groupLabel}>
-						<Label>{groupLabel}</Label>
+							const Icon = icon
 
-						<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
-							{filteredItems.map(({ to, icon, label, disabled }) => {
-								const isDisabled = disabled || (platform === 'browser' && to.includes('desktop'))
-
-								const Icon = icon
-
-								return (
-									<div key={to} className="w-full">
-										<TopBarLinkListItem
-											to={to}
-											isActive={location.pathname.startsWith(to)}
-											isDisabled={isDisabled}
-										>
-											<Icon className="mr-2 h-4 w-4 shrink-0" />
-											<span className="ml-1 line-clamp-1 font-medium">
-												{t(withGroup(label.toLowerCase()))}
-											</span>
-										</TopBarLinkListItem>
-									</div>
-								)
-							})}
-						</ul>
-					</div>
-				)
-			})
-			.filter(Boolean)
+							return (
+								<div key={to} className="w-full">
+									<TopBarLinkListItem
+										to={to}
+										isActive={location.pathname.startsWith(to)}
+										isDisabled={isDisabled}
+									>
+										<Icon className="mr-2 h-4 w-4 shrink-0" />
+										<span className="ml-1 line-clamp-1 font-medium">
+											{t(withGroup(label.toLowerCase()))}
+										</span>
+									</TopBarLinkListItem>
+								</div>
+							)
+						})}
+					</ul>
+				</div>
+			)
+		})
 	}
 
 	return (
@@ -98,7 +86,15 @@ export default function SettingsNavigationItem() {
 				<Cog className="h-4 w-4" />
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content className="left-auto right-0">
-				<div className="grid grid-cols-2 justify-between gap-x-2 p-4 md:w-[400px]">
+				<div
+					className={cn(
+						'grid justify-between gap-x-2 p-4 md:w-[400px]',
+						{
+							'grid-cols-1 md:w-[200px]': groups.length === 1,
+						},
+						{ 'grid-cols-2': groups.length === 2 },
+					)}
+				>
 					{renderRouteGroups()}
 				</div>
 			</NavigationMenu.Content>

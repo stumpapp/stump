@@ -21,7 +21,6 @@ type RouteGroup = {
 	label: string
 }
 
-// TODO: permission guards
 // TODO: prefetch options
 export const routeGroups: RouteGroup[] = [
 	{

@@ -408,6 +408,20 @@
 							"label": "Delete libraries",
 							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
 						}
+					},
+					"server": {
+						"label": "Server Management",
+						"manage": {
+							"label": "Manage server",
+							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+						}
+					},
+					"user": {
+						"label": "User Management",
+						"manage": {
+							"label": "Manage users",
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+						}
 					}
 				},
 				"validation": {
@@ -454,7 +468,9 @@
 			"books": "Explore",
 			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
+			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
+			"noBookClubs": "No book clubs",
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",

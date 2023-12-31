@@ -249,7 +249,7 @@ async fn update_user(
 	// NOTE: there are other mechanisms in place to effectively disable logging in,
 	// so I am making this a bad request. In the future, perhaps this can change.
 	match input.max_sessions_allowed {
-		Some(max_sessions_allowed) if max_sessions_allowed == 0 => {
+		Some(max_sessions_allowed) if max_sessions_allowed <= 0 => {
 			return Err(ApiError::BadRequest(
 				"max_sessions_allowed must be greater than 0 when set".to_string(),
 			))

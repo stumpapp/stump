@@ -1,11 +1,15 @@
+use std::str::FromStr;
+
 use prisma_client_rust::{not, or};
 use serde::{Deserialize, Serialize};
-use stump_core::prisma::{library, media, series, series_metadata};
+use specta::Type;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+use crate::prisma::{library, media, media_metadata, series, series_metadata};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 /// A filter for a single value, e.g. `name = "test"`
-enum Filter<T> {
+pub enum Filter<T> {
 	/// A simple equals filter, e.g. `name = "test"`
 	Equals(T),
 	/// A simple not filter, e.g. `name != "test"`
@@ -65,21 +69,68 @@ impl<T> Filter<T> {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
 /// A list of filters that are being combined with a logical operator, e.g. `and` or `or`
-enum FilterGroup<T> {
+pub enum FilterGroup<T> {
 	And { and: Vec<T> },
 	Or { or: Vec<T> },
 	Not { not: Vec<T> },
 }
 
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
+pub enum FilterJoin {
+	#[default]
+	#[serde(rename = "AND")]
+	And,
+	#[serde(rename = "OR")]
+	Or,
+}
+
+impl FromStr for FilterJoin {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s.to_lowercase().as_str() {
+			"and" => Ok(Self::And),
+			"or" => Ok(Self::Or),
+			_ => Err(format!("Invalid filter joiner: {}", s)),
+		}
+	}
+}
+
+impl ToString for FilterJoin {
+	fn to_string(&self) -> String {
+		match self {
+			FilterJoin::And => "AND".to_string(),
+			FilterJoin::Or => "OR".to_string(),
+		}
+	}
+}
+
+impl From<&str> for FilterJoin {
+	fn from(s: &str) -> Self {
+		match s.to_lowercase().as_str() {
+			"and" => Self::And,
+			"or" => Self::Or,
+			_ => Self::And,
+		}
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+pub struct SmartFilter<T> {
+	pub groups: Vec<FilterGroup<T>>,
+	#[serde(default)]
+	pub joiner: FilterJoin,
+}
+
 // TODO: figure out if perhaps macros can come in with the save here. Continuing down this path
 // will be INCREDIBLY verbose..
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
-enum LibrarySmartFilter {
+pub enum LibrarySmartFilter {
 	Name { name: Filter<String> },
 	Path { path: Filter<String> },
 }
@@ -101,9 +152,9 @@ impl LibrarySmartFilter {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
-enum SeriesSmartFilter {
+pub enum SeriesSmartFilter {
 	Name { name: Filter<String> },
 
 	Library { library: LibrarySmartFilter },
@@ -135,11 +186,86 @@ impl SeriesSmartFilter {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
-enum MediaSmartFilter {
+pub enum MediaMetadataSmartFilter {
+	Publisher { publisher: Filter<String> },
+	Genre { genre: Filter<String> },
+	Character { character: Filter<String> },
+	Colorist { colorist: Filter<String> },
+	Writer { writer: Filter<String> },
+	Penciller { penciller: Filter<String> },
+	Letterer { letterer: Filter<String> },
+	Inker { inker: Filter<String> },
+	Editor { editor: Filter<String> },
+	// FIXME: Current implementationm makes it awkward to support numeric filters
+	// AgeRating { age_rating: Filter<i32> },
+	// Year { year: Filter<i32> },
+}
+
+impl MediaMetadataSmartFilter {
+	pub fn into_prisma(self) -> media_metadata::WhereParam {
+		match self {
+			MediaMetadataSmartFilter::Publisher { publisher } => publisher
+				.into_optional_prisma(
+					media_metadata::publisher::equals,
+					media_metadata::publisher::contains,
+					media_metadata::publisher::in_vec,
+				),
+			MediaMetadataSmartFilter::Genre { genre } => genre.into_optional_prisma(
+				media_metadata::genre::equals,
+				media_metadata::genre::contains,
+				media_metadata::genre::in_vec,
+			),
+			MediaMetadataSmartFilter::Character { character } => character
+				.into_optional_prisma(
+					media_metadata::characters::equals,
+					media_metadata::characters::contains,
+					media_metadata::characters::in_vec,
+				),
+			MediaMetadataSmartFilter::Colorist { colorist } => colorist
+				.into_optional_prisma(
+					media_metadata::colorists::equals,
+					media_metadata::colorists::contains,
+					media_metadata::colorists::in_vec,
+				),
+			MediaMetadataSmartFilter::Writer { writer } => writer.into_optional_prisma(
+				media_metadata::writers::equals,
+				media_metadata::writers::contains,
+				media_metadata::writers::in_vec,
+			),
+			MediaMetadataSmartFilter::Penciller { penciller } => penciller
+				.into_optional_prisma(
+					media_metadata::pencillers::equals,
+					media_metadata::pencillers::contains,
+					media_metadata::pencillers::in_vec,
+				),
+			MediaMetadataSmartFilter::Letterer { letterer } => letterer
+				.into_optional_prisma(
+					media_metadata::letterers::equals,
+					media_metadata::letterers::contains,
+					media_metadata::letterers::in_vec,
+				),
+			MediaMetadataSmartFilter::Inker { inker } => inker.into_optional_prisma(
+				media_metadata::inkers::equals,
+				media_metadata::inkers::contains,
+				media_metadata::inkers::in_vec,
+			),
+			MediaMetadataSmartFilter::Editor { editor } => editor.into_optional_prisma(
+				media_metadata::editors::equals,
+				media_metadata::editors::contains,
+				media_metadata::editors::in_vec,
+			),
+		}
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[serde(untagged)]
+pub enum MediaSmartFilter {
 	Name { name: Filter<String> },
 
+	Metadata { metadata: MediaMetadataSmartFilter },
 	Series { series: SeriesSmartFilter },
 }
 
@@ -152,6 +278,9 @@ impl MediaSmartFilter {
 				media::name::contains,
 				media::name::in_vec,
 			),
+			MediaSmartFilter::Metadata { metadata } => {
+				media::metadata::is(vec![metadata.into_prisma()])
+			},
 			MediaSmartFilter::Series { series } => {
 				media::series::is(vec![series.into_prisma()])
 			},
@@ -162,9 +291,9 @@ impl MediaSmartFilter {
 #[cfg(test)]
 mod tests {
 	use prisma_client_rust::chrono::Utc;
-	use stump_core::prisma::PrismaClient;
 
 	use super::*;
+	use crate::prisma::PrismaClient;
 
 	#[test]
 	fn it_serializes_correctly() {

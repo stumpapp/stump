@@ -2,6 +2,7 @@ mod client;
 mod common;
 pub(crate) mod dao;
 pub mod entity;
+pub mod filter;
 pub mod migration;
 pub mod query;
 

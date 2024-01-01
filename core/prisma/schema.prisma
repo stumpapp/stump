@@ -567,8 +567,10 @@ model ReadingList {
 model SmartList {
   id String @id @default(cuid())
 
-  name    String
-  filters Bytes
+  name        String
+  description String?
+  filters     Bytes
+  joiner      String  @default("AND") // AND or OR
 
   creator_id String
   creator    User   @relation(fields: [creator_id], references: [id], onDelete: Cascade)

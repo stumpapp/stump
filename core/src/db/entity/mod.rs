@@ -8,6 +8,7 @@ mod metadata;
 mod reading_list;
 mod series;
 mod server_config;
+mod smart_list;
 mod tag;
 mod user;
 
@@ -21,6 +22,7 @@ pub use metadata::*;
 pub use reading_list::*;
 pub use series::*;
 pub use server_config::*;
+pub use smart_list::*;
 pub use tag::*;
 pub use user::*;
 

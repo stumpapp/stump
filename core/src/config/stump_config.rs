@@ -158,16 +158,22 @@ impl StumpConfig {
 		}
 
 		if let Ok(port) = env::var(PORT_KEY) {
-			let port_u16 = port
-				.parse::<u16>()
-				.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+			let port_u16 = port.parse::<u16>().map_err(|e| {
+				tracing::error!(error = ?e, port, "Failed to parse provided STUMP_PORT");
+				CoreError::InitializationError(e.to_string())
+			})?;
 			env_configs.port = Some(port_u16);
 		}
 
 		if let Ok(verbosity) = env::var(VERBOSITY_KEY) {
-			let verbosity_u64 = verbosity
-				.parse::<u64>()
-				.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+			let verbosity_u64 = verbosity.parse::<u64>().map_err(|e| {
+				tracing::error!(
+					error = ?e,
+					verbosity,
+					"Failed to parse provided STUMP_VERBOSITY"
+				);
+				CoreError::InitializationError(e.to_string())
+			})?;
 			env_configs.verbosity = Some(verbosity_u64);
 		}
 

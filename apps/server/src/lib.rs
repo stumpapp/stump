@@ -1,5 +1,6 @@
 mod config;
 mod errors;
+mod filter;
 mod http_server;
 mod middleware;
 mod routers;

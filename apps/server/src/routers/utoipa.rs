@@ -12,11 +12,11 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::ApiError;
-use crate::middleware::auth::Auth;
-use crate::utils::{
+use crate::filter::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesQueryRelation,
 };
+use crate::middleware::auth::Auth;
 
 use super::api::{
 	self,

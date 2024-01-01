@@ -26,8 +26,9 @@ use utoipa::ToSchema;
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{ApiError, ApiResult},
+	filter::UserQueryRelation,
 	middleware::auth::Auth,
-	utils::{get_session_server_owner_user, get_session_user, UserQueryRelation},
+	utils::{get_session_server_owner_user, get_session_user},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {

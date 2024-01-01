@@ -1,12 +1,13 @@
 import { useLibraries } from '@stump/client'
-import { Accordion } from '@stump/components'
+import { Accordion, Text } from '@stump/components'
 import { Library } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
-import { useAppContext } from '../../../../../context'
-import { useLocaleContext } from '../../../../../i18n'
-import paths from '../../../../../paths'
+import { useAppContext } from '@/context'
+import { useLocaleContext } from '@/i18n'
+import paths from '@/paths'
+
 import SideBarButtonLink from '../../SideBarButtonLink'
 import LibraryEmoji from './LibraryEmoji'
 import LibraryOptionsMenu from './LibraryOptionsMenu'
@@ -28,7 +29,11 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 
 	const renderLibraries = () => {
 		if (!libraries || !libraries.length) {
-			return null
+			return (
+				<Text className="select-none px-1 py-2" variant="muted">
+					{t('sidebar.buttons.noLibraries')}
+				</Text>
+			)
 		}
 
 		return libraries.map((library) => {

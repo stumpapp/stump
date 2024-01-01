@@ -53,3 +53,6 @@ alphanumeric-sort = "1.5.3"
 
 [dev-dependencies]
 tempfile = { workspace = true }
+
+[build-dependencies]
+chrono = "0.4.31"

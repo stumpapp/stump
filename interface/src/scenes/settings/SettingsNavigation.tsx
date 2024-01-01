@@ -1,40 +1,26 @@
 import { useAppProps } from '@stump/client'
 import { Label, NativeSelect, Tabs } from '@stump/components'
-import { User } from '@stump/types'
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useLocaleContext } from '@/i18n'
 
-import { routeGroups } from './routes'
-
-type Props = {
-	user?: User | null
-}
+import { useSettingsRoutes } from './useSettingsRoutes'
 
 // TODO: update doc strings
 
-export default function SettingsNavigation({ user }: Props) {
+export default function SettingsNavigation() {
 	const navigate = useNavigate()
 	const location = useLocation()
 
 	const { t } = useLocaleContext()
 	const { platform } = useAppProps()
 
-	const visibleGroups = useMemo(
-		() =>
-			!user?.is_server_owner
-				? routeGroups
-				: routeGroups.filter((group) => group.label.toLowerCase() !== 'server'),
-		[user],
-	)
+	const { groups } = useSettingsRoutes()
 
 	const activeRouteGroup = useMemo(
-		() =>
-			visibleGroups.find((group) =>
-				group.items.some((page) => location.pathname.startsWith(page.to)),
-			),
-		[location.pathname, visibleGroups],
+		() => groups.find((group) => group.items.some((page) => location.pathname.startsWith(page.to))),
+		[location.pathname, groups],
 	)
 
 	const activeSubRoute = useMemo(
@@ -63,14 +49,14 @@ export default function SettingsNavigation({ user }: Props) {
 		return allOptions
 	}, [t, activeRouteGroup, platform])
 
-	const renderTabs = visibleGroups.length > 1
+	const renderTabs = groups.length > 1
 
 	return (
 		<div className="flex flex-col gap-y-4">
 			{renderTabs && (
 				<Tabs value={activeRouteGroup?.label} variant="primary" activeOnHover>
 					<Tabs.List>
-						{visibleGroups.map((group) => (
+						{groups.map((group) => (
 							<Tabs.Trigger key={group.label} value={group.label} asChild>
 								<Link className="truncate" to={group.defaultRoute}>
 									{t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)}

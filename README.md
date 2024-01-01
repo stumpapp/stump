@@ -37,6 +37,7 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [/core](#core)
   - [/crates](#crates)
   - [/docs](#docs)
+  - [/interface](#interface)
   - [/packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
 </details>
@@ -179,12 +180,15 @@ A Rust crate containing Stump's core functionalities
 
 A NextJS application for the Stump documentation site
 
+### /interface
+
+A React component that is essentially the "main" UI for Stump. It is used in both the `web` and `desktop` apps
+
 ### /packages
 
 - `api`: All of the API functions used by the `client` package
 - `client`: React-query config, hooks, and other client-side utilities
 - `components`: Shared React components for the web and desktop applications
-- `interface`: A React component responsible for the main UI layout for the web and desktop applications
 - `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 ## Similar Projects 👯

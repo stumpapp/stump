@@ -1,5 +1,5 @@
 import { useBookClubsQuery } from '@stump/client'
-import { Accordion } from '@stump/components'
+import { Accordion, Text } from '@stump/components'
 import { Club } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
@@ -25,7 +25,11 @@ export default function BookClubSideBarSection({ isMobile }: Props) {
 
 	const renderBookClubs = () => {
 		if (!bookClubs || !bookClubs.length) {
-			return null
+			return (
+				<Text className="select-none px-1 py-2" variant="muted">
+					{t('sidebar.buttons.noBookClubs')}
+				</Text>
+			)
 		}
 
 		return bookClubs.map((bookClub) => {

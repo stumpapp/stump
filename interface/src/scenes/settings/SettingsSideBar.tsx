@@ -6,8 +6,8 @@ import { useLocation, useNavigate } from 'react-router'
 import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
-import { routeGroups } from './routes'
 import SettingsSideBarLink from './SettingsSideBarLink'
+import { useSettingsRoutes } from './useSettingsRoutes'
 
 export default function SettingsSideBar() {
 	const location = useLocation()
@@ -15,10 +15,11 @@ export default function SettingsSideBar() {
 
 	const { t } = useLocaleContext()
 	const { platform } = useAppProps()
-
 	const {
 		preferences: { enable_replace_primary_sidebar, primary_navigation_mode },
 	} = usePreferences()
+
+	const { groups } = useSettingsRoutes()
 
 	return (
 		<div
@@ -30,35 +31,37 @@ export default function SettingsSideBar() {
 			)}
 		>
 			<div className="flex h-full flex-grow flex-col gap-4">
-				{routeGroups.map((group) => {
-					const groupLabel = t(`settingsScene.sidebar.${group.label.toLowerCase()}.label`)
+				{groups
+					.map(({ label, items }) => {
+						const groupLabel = t(`settingsScene.sidebar.${label.toLowerCase()}.label`)
 
-					const withGroup = (key: string) =>
-						`settingsScene.sidebar.${group.label.toLowerCase()}.${key}`
+						const withGroup = (key: string) => `settingsScene.sidebar.${label.toLowerCase()}.${key}`
 
-					return (
-						<div key={groupLabel}>
-							<Label>{groupLabel}</Label>
+						return (
+							<div key={groupLabel}>
+								<Label>{groupLabel}</Label>
 
-							<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
-								{group.items.map(({ to, icon, label, disabled }) => {
-									const isDisabled = disabled || (platform === 'browser' && to.includes('desktop'))
-									return (
-										<SettingsSideBarLink
-											key={to}
-											to={to}
-											isActive={location.pathname.startsWith(to)}
-											isDisabled={isDisabled}
-											icon={icon}
-										>
-											{t(withGroup(label.toLowerCase()))}
-										</SettingsSideBarLink>
-									)
-								})}
-							</ul>
-						</div>
-					)
-				})}
+								<ul className="flex flex-col gap-y-0.5 pt-2 text-sm">
+									{items.map(({ to, icon, label, disabled }) => {
+										const isDisabled =
+											disabled || (platform === 'browser' && to.includes('desktop'))
+										return (
+											<SettingsSideBarLink
+												key={to}
+												to={to}
+												isActive={location.pathname.startsWith(to)}
+												isDisabled={isDisabled}
+												icon={icon}
+											>
+												{t(withGroup(label.toLowerCase()))}
+											</SettingsSideBarLink>
+										)
+									})}
+								</ul>
+							</div>
+						)
+					})
+					.filter(Boolean)}
 				<div className="flex-1" />
 
 				{enable_replace_primary_sidebar && (

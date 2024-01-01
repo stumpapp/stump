@@ -1,5 +1,5 @@
 import { useLibraries } from '@stump/client'
-import { cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
+import { cn, cx, Label, NavigationMenu, ScrollArea, Text } from '@stump/components'
 import { CircleSlash2, Library, LibrarySquare } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -22,7 +22,7 @@ export default function LibraryNavigationItem() {
 	const renderLibraries = () => {
 		if (!libraries?.length) {
 			return (
-				<div className="flex w-full flex-1 items-center justify-center">
+				<div className="flex w-full flex-1 items-center justify-start px-2">
 					<div className="flex flex-col items-start gap-y-2">
 						<CircleSlash2 className="h-7 w-7 text-muted" />
 						<div className="text-left">
@@ -72,11 +72,19 @@ export default function LibraryNavigationItem() {
 				Libraries
 			</NavigationMenu.Trigger>
 			<NavigationMenu.Content>
-				<div className="flex min-h-[150px] gap-3 p-4 md:w-[400px] lg:w-[500px]">
+				<div
+					className={cn('flex min-h-[150px] gap-3 p-4 md:w-[400px] lg:w-[500px]', {
+						'md:w-[300px] lg:w-[350px]': !libraries?.length,
+					})}
+				>
 					<LastVisitedLibrary container={(children) => <div className="w-1/3">{children}</div>} />
 
-					<div className="flex w-2/3 shrink-0 flex-col gap-y-2">
-						<div className={cx('flex w-full flex-1', { 'flex-col': !libraries?.length })}>
+					<div
+						className={cn('flex w-2/3 shrink-0 flex-col gap-y-2', {
+							'w-full': !libraries?.length,
+						})}
+					>
+						<div className={cx('flex w-full flex-1', { 'flex-col gap-y-2': !libraries?.length })}>
 							{renderLibraries()}
 
 							{canCreateLibrary && (

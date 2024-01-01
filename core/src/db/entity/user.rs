@@ -27,6 +27,8 @@ pub struct User {
 	pub is_locked: bool,
 
 	pub permissions: Vec<UserPermission>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub max_sessions_allowed: Option<i32>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub login_sessions_count: Option<i32>,
@@ -111,6 +113,7 @@ impl From<prisma::user::Data> for User {
 						.collect()
 				})
 				.unwrap_or_default(),
+			max_sessions_allowed: data.max_sessions_allowed,
 			user_preferences,
 			avatar_url: data.avatar_url,
 			age_restriction,

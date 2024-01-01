@@ -43,6 +43,14 @@ else
 
 fi
 
+# If a TZ is set, symlink /etc/localtime to it
+if [[ -n "$TZ" ]]; then
+    echo "Setting timezone to $TZ"
+    rm -f /etc/localtime # Remove existing symlink if present (shouldn't be)
+    ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime
+    echo "$TZ" > /etc/timezone
+fi
+
 # Change current working directory
 cd /app
 

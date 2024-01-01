@@ -156,7 +156,7 @@ export type Pagination = null | PageQuery | CursorQuery
 
 // SERVER TYPE GENERATION
 
-export type StumpVersion = { semver: string; rev: string | null; compile_time: string }
+export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 

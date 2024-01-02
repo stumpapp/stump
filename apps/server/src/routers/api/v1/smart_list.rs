@@ -142,13 +142,13 @@ async fn get_smart_list_items(
 		.into_iter()
 		.map(|filter_group| match filter_group {
 			FilterGroup::Or { or } => prisma_client_rust::operator::or(
-				or.into_iter().map(|f| f.into_prisma()).collect(),
+				or.into_iter().map(|f| f.into_params()).collect(),
 			),
 			FilterGroup::And { and } => prisma_client_rust::operator::and(
-				and.into_iter().map(|f| f.into_prisma()).collect(),
+				and.into_iter().map(|f| f.into_params()).collect(),
 			),
 			FilterGroup::Not { not } => prisma_client_rust::operator::not(
-				not.into_iter().map(|f| f.into_prisma()).collect(),
+				not.into_iter().map(|f| f.into_params()).collect(),
 			),
 		})
 		.collect();

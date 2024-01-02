@@ -9,7 +9,7 @@ export type User = { id: string; username: string; is_server_owner: boolean; ava
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:manage" | "server:manage"
+export type UserPermission = "bookclub:read" | "bookclub:create" | "smartlist:read" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:manage" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
@@ -49,6 +49,34 @@ export type Bookmark = { id: string; preview_content: string | null; epubcfi: st
 export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
+
+/**
+ * A filter for a single value, e.g. `name = "test"`
+ */
+export type Filter<T> = T | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
+
+export type NumericFilter<T> = { gt: T } | { gte: T } | { lt: T } | { lte: T } | NumericRange<T>
+
+export type NumericRange<T> = { from: T; to: T; inclusive?: boolean }
+
+/**
+ * A list of filters that are being combined with a logical operator, e.g. `and` or `or`
+ */
+export type FilterGroup<T> = { and: T[] } | { or: T[] } | { not: T[] }
+
+export type FilterJoin = "AND" | "OR"
+
+export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin }
+
+export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
+
+export type MediaSmartFilter = { name: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
+
+export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { character: Filter<string> } | { colorist: Filter<string> } | { writer: Filter<string> } | { penciller: Filter<string> } | { letterer: Filter<string> } | { inker: Filter<string> } | { editor: Filter<string> } | { age_rating: Filter<number> }
+
+export type SeriesSmartFilter = { name: Filter<string> } | { library: LibrarySmartFilter }
+
+export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
 
 export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 

@@ -212,6 +212,7 @@ mod tests {
 	use crate::{
 		db::{
 			entity::*,
+			filter::*,
 			query::{ordering::*, pagination::*},
 		},
 		event::*,
@@ -265,6 +266,20 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<Bookmark>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaAnnotation>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ReadProgress>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<Filter<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<NumericFilter<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<NumericRange<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<FilterGroup<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<FilterJoin>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<BookClub>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookClubMember>()?).as_bytes())?;

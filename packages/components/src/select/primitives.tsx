@@ -16,7 +16,7 @@ const SelectPrimitiveTrigger = React.forwardRef<
 	<SelectRadix.Trigger
 		ref={ref}
 		className={cn(
-			'flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-50 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900',
+			'flex h-10 w-full items-center justify-between rounded-md border border-edge bg-transparent px-3 py-2 text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-background-400 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
 			className,
 		)}
 		{...props}
@@ -35,7 +35,7 @@ const SelectPrimitiveContent = React.forwardRef<
 		<SelectRadix.Content
 			ref={ref}
 			className={cn(
-				'relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-100 bg-white text-gray-700 shadow-md animate-in fade-in-80 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400',
+				'relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-edge bg-background text-contrast-200 shadow-md animate-in fade-in-80',
 				className,
 			)}
 			{...props}
@@ -52,10 +52,7 @@ const SelectPrimitiveLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SelectRadix.Label
 		ref={ref}
-		className={cn(
-			'py-1.5 pl-8 pr-2 text-sm font-semibold text-gray-900 dark:text-gray-300',
-			className,
-		)}
+		className={cn('py-1.5 pl-8 pr-2 text-sm font-semibold text-contrast', className)}
 		{...props}
 	/>
 ))
@@ -68,7 +65,7 @@ const SelectPrimitiveItem = React.forwardRef<
 	<SelectRadix.Item
 		ref={ref}
 		className={cn(
-			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-gray-700',
+			'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm font-medium outline-none focus:bg-background-300 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 			className,
 		)}
 		{...props}
@@ -90,7 +87,7 @@ const SelectPrimitiveSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SelectRadix.Separator
 		ref={ref}
-		className={cn('-mx-1 my-1 h-px bg-gray-100 dark:bg-gray-700', className)}
+		className={cn('-mx-1 my-1 h-px bg-edge', className)}
 		{...props}
 	/>
 ))

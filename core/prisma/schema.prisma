@@ -11,15 +11,16 @@ generator client {
 model User {
   id String @id @default(cuid())
 
-  username        String    @unique
-  hashed_password String // Salted and hashed, NOT plain text
-  is_server_owner Boolean   @default(false)
-  avatar_url      String?
-  last_login      DateTime?
-  created_at      DateTime  @default(now())
-  deleted_at      DateTime?
-  is_locked       Boolean   @default(false) // Locked users cannot login
-  permissions     String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
+  username             String    @unique
+  hashed_password      String // Salted and hashed, NOT plain text
+  is_server_owner      Boolean   @default(false)
+  avatar_url           String?
+  last_login           DateTime?
+  created_at           DateTime  @default(now())
+  deleted_at           DateTime?
+  is_locked            Boolean   @default(false) // Locked users cannot login
+  max_sessions_allowed Int? // null = unlimited
+  permissions          String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
 
   reviews         Review[]
   read_progresses ReadProgress[]
@@ -35,8 +36,10 @@ model User {
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
   login_activity    UserLoginActivity[]
+  bookmarks         Bookmark[]
   media_annotations MediaAnnotation[]
   sessions          Session[]
+  library_visits    LastLibraryVisit[]
 
   @@map("users")
 }
@@ -95,6 +98,7 @@ model Library {
 
   job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?
+  user_visits            LastLibraryVisit[]
 
   @@map("libraries")
 }
@@ -110,6 +114,18 @@ model LibraryOptions {
   library    Library?
 
   @@map("library_options")
+}
+
+model LastLibraryVisit {
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  library_id String
+  library    Library @relation(fields: [library_id], references: [id], onDelete: Cascade)
+
+  timestamp DateTime @default(now())
+
+  @@unique([user_id, library_id])
 }
 
 model Series {
@@ -179,6 +195,7 @@ model Media {
   book_club_suggestions          BookClubBookSuggestion[]
   book_club_books                BookClubBook[]
   book_club_member_favorite_book BookClubMemberFavoriteBook[]
+  bookmarks                      Bookmark[]
 
   @@map("media")
 }
@@ -264,14 +281,31 @@ model ReadProgress {
   @@map("read_progresses")
 }
 
-//* NOTE: Only EPUB files currently support annotations. I expect maybe someday
-//* PDFs might, as well. I don't intend on adding support for annotations to archive
-//* formats like CBZ or CBR, unless there is demand for it.
+model Bookmark {
+  id String @id @default(uuid())
+
+  preview_content String?
+  epubcfi         String?
+  page            Int?
+
+  media_id String
+  media    Media  @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, media_id, epubcfi, page])
+  @@map("bookmarks")
+}
+
 model MediaAnnotation {
-  id      String  @id @default(uuid())
-  kind    String // "HIGHLIGHT" or "ANNOTATION" or "BOOKMARK"
-  epubcfi String?
-  text    String?
+  id                 String  @id @default(uuid())
+  highlighted_text   String?
+  epubcfi            String?
+  page               Int?
+  page_coordinates_x Float? // relative to where the annotation was made on the page
+  page_coordinates_y Float? // relative to where the annotation was made on the page
+  notes              String?
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -584,21 +618,22 @@ model Log {
 }
 
 model UserPreferences {
-  id                      String  @id @default(cuid())
-  // Whether the user wants to see the series in a library as a grid or list
-  library_layout_mode     String  @default("GRID")
-  // Whether the user wants to see the media in a series as a grid or list
-  series_layout_mode      String  @default("GRID")
-  // Whether the user wants to see the media in a collection as a grid or list
-  collection_layout_mode  String  @default("GRID")
-  // The locale the user has selected. E.g. 'en' or 'fr'. Default is 'en'
-  locale                  String  @default("en")
-  // The theme the user has selected. E.g. 'LIGHT' or 'DARK'. Default is 'LIGHT'
-  app_theme               String  @default("LIGHT")
-  // Whether to show an indicator when a query is running in the background
+  id String @id @default(cuid())
+
+  preferred_layout_mode String @default("GRID")
+  locale                String @default("en")
+  app_theme             String @default("LIGHT")
+
+  primary_navigation_mode String  @default("SIDEBAR")
+  layout_max_width_px     Int?    @default(1280)
   show_query_indicator    Boolean @default(false)
-  // Whether to show the user's activity in Discord when using the Desktop App
   enable_discord_presence Boolean @default(false)
+  enable_compact_display  Boolean @default(false)
+
+  enable_double_sidebar          Boolean @default(true)
+  enable_replace_primary_sidebar Boolean @default(false)
+  enable_hide_scrollbar          Boolean @default(false)
+  prefer_accent_color            Boolean @default(true)
 
   user    User?
   user_id String? @unique

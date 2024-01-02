@@ -7,7 +7,7 @@ use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::db::entity::metadata::MediaMetadata;
+use crate::db::entity::MediaMetadata;
 use crate::error::CoreResult;
 use crate::filesystem::media::get_content_types_for_pages;
 use crate::filesystem::{ContentType, FileParts, PathUtils};

@@ -80,12 +80,21 @@ export function patchLibraryThumbnail(id: string, params: PatchLibraryThumbnail)
 	return API.patch(`/libraries/${id}/thumbnail`, params)
 }
 
+export function visitLibrary(id: string) {
+	return API.put(`/libraries/last-visited/${id}`)
+}
+
+export function getLastVisitedLibrary(): Promise<ApiResult<Library>> {
+	return API.get('/libraries/last-visited')
+}
+
 export const libraryApi = {
 	cleanLibrary,
 	createLibrary,
 	deleteLibrary,
 	deleteLibraryThumbnails,
 	editLibrary,
+	getLastVisitedLibrary,
 	getLibraries,
 	getLibrariesStats,
 	getLibraryById,
@@ -93,6 +102,7 @@ export const libraryApi = {
 	patchLibraryThumbnail,
 	regenerateThumbnails,
 	scanLibary,
+	visitLibrary,
 }
 
 export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
@@ -101,6 +111,7 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	deleteLibrary: 'library.deleteLibrary',
 	deleteLibraryThumbnails: 'library.deleteLibraryThumbnails',
 	editLibrary: 'library.editLibrary',
+	getLastVisitedLibrary: 'library.getLastVisitedLibrary',
 	getLibraries: 'library.getLibraries',
 	getLibrariesStats: 'library.getLibrariesStats',
 	getLibraryById: 'library.getLibraryById',
@@ -108,4 +119,5 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	patchLibraryThumbnail: 'library.patchLibraryThumbnail',
 	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
+	visitLibrary: 'library.visitLibrary',
 }

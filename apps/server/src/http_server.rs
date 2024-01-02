@@ -2,7 +2,11 @@ use std::net::SocketAddr;
 
 use axum::{error_handling::HandleErrorLayer, extract::connect_info::Connected, Router};
 use hyper::server::conn::AddrStream;
-use stump_core::{event::InternalCoreTask, StumpCore};
+use stump_core::{
+	config::{bootstrap_config_dir, logging::init_tracing},
+	event::InternalCoreTask,
+	StumpCore,
+};
 use tokio::sync::oneshot;
 use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
@@ -12,13 +16,13 @@ use crate::{
 		cors,
 		session::{self, handle_session_service_error},
 	},
-	errors::{ServerError, ServerResult},
+	errors::{EntryError, ServerError, ServerResult},
 	routers,
 	utils::shutdown_signal_with_cleanup,
 };
 use stump_core::config::StumpConfig;
 
-pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
+pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 	let core = StumpCore::new(config.clone()).await;
 
 	if let Err(err) = core.run_migrations().await {
@@ -90,6 +94,25 @@ pub(crate) async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.expect("Failed to start Stump HTTP server!");
 
 	Ok(())
+}
+
+#[allow(dead_code)]
+pub async fn bootstrap_http_server_config() -> Result<StumpConfig, EntryError> {
+	// Get STUMP_CONFIG_DIR to bootstrap startup
+	let config_dir = bootstrap_config_dir();
+
+	let config = StumpCore::init_config(config_dir)
+		.map_err(|e| EntryError::InvalidConfig(e.to_string()))?;
+
+	// Note: init_tracing after loading the environment so the correct verbosity
+	// level is used for logging.
+	init_tracing(&config);
+
+	if config.verbosity >= 3 {
+		tracing::trace!(?config, "App config");
+	}
+
+	Ok(config)
 }
 
 #[derive(Clone, Debug)]

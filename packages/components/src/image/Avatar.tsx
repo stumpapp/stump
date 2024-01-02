@@ -10,7 +10,7 @@ export type AvatarProps = {
 	fallback?: React.ReactNode
 	fallbackWrapperClassName?: string
 	fallbackColor?: 'brand' | 'gray'
-	rounded: 'none' | 'sm' | 'md' | 'lg' | 'full'
+	rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
 } & React.ComponentPropsWithoutRef<typeof AvatarPrimitive>
 export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 	(
@@ -69,10 +69,10 @@ export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 					asChild
 					className={cn(
 						{
-							'bg-brand-400 dark:bg-brand': fallbackColor === 'brand',
+							'bg-brand-400': fallbackColor === 'brand',
 						},
 						{
-							'bg-gray-75 dark:bg-gray-800': fallbackColor === 'gray',
+							'bg-background-200': fallbackColor === 'gray',
 						},
 						roundedClassName,
 						fallbackWrapperClassName,

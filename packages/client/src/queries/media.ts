@@ -32,16 +32,23 @@ type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 	TData
 >
 
-export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = {}) {
+type UseMediaByIdQueryOptions = MediaQueryParams<Media> & {
+	params?: Record<string, unknown>
+}
+
+export function useMediaByIdQuery(
+	id: string,
+	{ params, ...options }: UseMediaByIdQueryOptions = {},
+) {
 	const { data, ...ret } = useQuery(
-		[mediaQueryKeys.getMediaById, id],
+		[mediaQueryKeys.getMediaById, id, params],
 		async () => {
-			const { data } = await mediaApi.getMediaById(id)
+			const { data } = await mediaApi.getMediaById(id, params)
 			return data
 		},
 		{
 			keepPreviousData: false,
-			...params,
+			...options,
 		},
 	)
 

@@ -9,7 +9,7 @@ use crate::{
 	prisma::{reading_list, reading_list_item},
 };
 
-use super::Cursor;
+use super::common::Cursor;
 
 ///////////////////////////////////////////////
 //////////////////// MODELS ///////////////////

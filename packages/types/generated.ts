@@ -252,3 +252,9 @@ export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_bas
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
+export type CreateSmartList = { name: string; description: string | null; filter: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin }
+
+export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
+
+export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
+

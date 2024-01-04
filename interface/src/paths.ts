@@ -92,6 +92,9 @@ const paths = {
 		return `/series/${id}`
 	},
 	settings: (subpath: SettingsPage = 'app/general') => `/settings/${subpath || ''}`,
+	smartList: (id: string) => `/smart-lists/${id}`,
+	smartListCreate: () => '/smart-lists/create',
+	smartLists: () => '/smart-lists',
 	updateUser: (id: string) => `${paths.settings('server/users')}/${id}/manage`,
 } as const
 

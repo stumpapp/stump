@@ -26,6 +26,7 @@ export {
 	seriesQueryKeys,
 } from './series'
 export { checkIsClaimed, getStumpVersion, ping, serverQueryKeys } from './server'
+export { getSmartListById, getSmartLists, smartListApi, smartListQueryKeys } from './smartList'
 export * from './tag'
 export * from './types'
 export * from './user'

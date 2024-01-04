@@ -13,6 +13,7 @@ export const RAW_INPUT_BASE_CLASSES = [
 ]
 export const RAW_INPUT_SIZE_VARIANTS = {
 	default: 'h-10 py-2 px-3',
+	sm: 'h-8 p-2',
 }
 export const RAW_INPUT_VARIANT = {
 	default: 'focus:ring-background-400 dark:focus:ring-background-400',
@@ -59,7 +60,7 @@ export const inputVariants = cva(RAW_INPUT_BASE_CLASSES, {
 	variants: RAW_INPUT_VARIANTS,
 })
 export type RawInputProps = VariantProps<typeof inputVariants> &
-	React.InputHTMLAttributes<HTMLInputElement>
+	Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>
 
 export const RawInput = React.forwardRef<HTMLInputElement, RawInputProps>(
 	({ className, variant, size, rounded, isInvalid, contrast, ...props }, ref) => {

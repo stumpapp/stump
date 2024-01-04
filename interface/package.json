@@ -47,6 +47,7 @@
 		"remark-directive": "^3.0.0",
 		"remark-directive-rehype": "^0.4.2",
 		"rooks": "^7.14.1",
+		"ts-pattern": "^5.0.6",
 		"use-count-up": "^3.0.1",
 		"zod": "^3.22.4",
 		"zustand": "^4.4.3"

@@ -40,6 +40,12 @@ export {
 	useUpNextInSeries,
 } from './series'
 export { useStumpVersion } from './server'
+export {
+	prefetchSmartList,
+	useSmartListMetaQuery,
+	useSmartListQuery,
+	useSmartListsQuery,
+} from './smartList'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {
 	useCreateUser,

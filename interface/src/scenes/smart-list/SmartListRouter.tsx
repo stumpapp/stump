@@ -8,8 +8,10 @@ import { LazyComponent } from '../../AppRouter.tsx'
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const UserSmartListsScene = lazily(() => import('./UserSmartListsScene.tsx'))
+const UserSmartListScene = lazily(() => import('./UserSmartListScene.tsx'))
+const CreateSmartListScene = lazily(() => import('./create-or-update/CreateSmartListScene.tsx'))
 
-export default function BookClubRouter() {
+export default function SmartListRouter() {
 	const { checkPermission } = useAppContext()
 
 	const navigate = useNavigate()
@@ -27,6 +29,8 @@ export default function BookClubRouter() {
 	return (
 		<Routes>
 			<Route path="" element={<UserSmartListsScene />} />
+			<Route path=":id" element={<UserSmartListScene />} />
+			<Route path="create" element={<CreateSmartListScene />} />
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>
 	)

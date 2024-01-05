@@ -1,4 +1,4 @@
-import { GetSmartListsParams, Media, SmartList, SmartListMeta } from '@stump/types'
+import { GetSmartListsParams, SmartList, SmartListItems, SmartListMeta } from '@stump/types'
 
 import { API } from './axios'
 import { ApiResult } from './types'
@@ -25,7 +25,7 @@ export async function getSmartListMeta(id: string): Promise<ApiResult<SmartListM
 	return API.get(`/smart-lists/${id}/meta`)
 }
 
-export async function getSmartListItems(id: string): Promise<ApiResult<Media[]>> {
+export async function getSmartListItems(id: string): Promise<ApiResult<SmartListItems>> {
 	return API.get(`/smart-lists/${id}/items`)
 }
 

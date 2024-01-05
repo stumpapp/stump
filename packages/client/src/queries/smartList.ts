@@ -1,5 +1,5 @@
 import { smartListApi, smartListQueryKeys } from '@stump/api'
-import { GetSmartListsParams, Media, SmartList, SmartListMeta } from '@stump/types'
+import { GetSmartListsParams, SmartList, SmartListItems, SmartListMeta } from '@stump/types'
 
 import { queryClient, QueryOptions, useQuery } from '../client'
 
@@ -60,9 +60,9 @@ export function useSmartListMetaQuery({ id, ...options }: UseSmartListMetaQueryO
 	return { meta: data, ...rest }
 }
 
-// TODO: grouping params
+// TODO: grouping override params
 // TODO: additional filter params (change the request to POST when those are provided)
-type UseSmartListItemsQuery = QueryOptions<Media[]> & {
+type UseSmartListItemsQuery = QueryOptions<SmartListItems> & {
 	id: string
 }
 export function useSmartListItemsQuery({ id, ...options }: UseSmartListItemsQuery) {

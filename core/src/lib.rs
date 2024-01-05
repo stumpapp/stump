@@ -272,6 +272,13 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<NumericRange<()>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<FilterGroup<()>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<FilterJoin>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SmartListItemGrouping>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SmartListItemGroup<()>>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SmartListItems>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartList>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartFilter<()>>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<MediaSmartFilter>()?).as_bytes())?;

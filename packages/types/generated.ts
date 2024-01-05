@@ -66,7 +66,13 @@ export type FilterGroup<T> = { and: T[] } | { or: T[] } | { not: T[] }
 
 export type FilterJoin = "AND" | "OR"
 
-export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin }
+export type SmartListItemGrouping = "BY_BOOKS" | "BY_SERIES" | "BY_LIBRARY"
+
+export type SmartListItemGroup<E> = { entity: E; books: Media[] }
+
+export type SmartListItems = { type: "Books"; items: Media[] } | { type: "Series"; items: SmartListItemGroup<Series>[] } | { type: "Library"; items: SmartListItemGroup<Library>[] }
+
+export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin; default_grouping?: SmartListItemGrouping }
 
 export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 
@@ -252,7 +258,7 @@ export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_bas
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
-export type CreateSmartList = { name: string; description: string | null; filter: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin }
+export type CreateSmartList = { name: string; description: string | null; filter: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
 
 export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
 

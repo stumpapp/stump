@@ -15,8 +15,11 @@ use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
 	db::{
-		entity::{macros::media_only_series_id, Media, SmartList, UserPermission},
-		filter::{FilterGroup, FilterJoin, MediaSmartFilter, SmartFilter},
+		entity::{
+			macros::media_only_series_id, SmartList, SmartListItemGrouping,
+			SmartListItems, UserPermission,
+		},
+		filter::{FilterJoin, MediaSmartFilter, SmartFilter},
 	},
 	prisma::{library, series, smart_list, user},
 };
@@ -80,7 +83,7 @@ async fn get_smart_lists(
 
 	let smart_lists = raw_lists
 		.into_iter()
-		.map(|smart_list| SmartList::try_from(smart_list))
+		.map(SmartList::try_from)
 		.collect::<Result<Vec<_>, _>>()?;
 
 	Ok(Json(smart_lists))
@@ -92,7 +95,9 @@ pub struct CreateSmartList {
 	pub description: Option<String>,
 	pub filter: SmartFilter<MediaSmartFilter>,
 	#[serde(default)]
-	pub joiner: FilterJoin,
+	pub joiner: Option<FilterJoin>,
+	#[serde(default)]
+	pub default_grouping: Option<SmartListItemGrouping>,
 }
 
 async fn create_smart_list(
@@ -103,6 +108,8 @@ async fn create_smart_list(
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
+
+	tracing::debug!(?input, "Creating smart list");
 
 	let serialized_filter = serde_json::to_vec(&input.filter).map_err(|e| {
 		tracing::error!(?e, "Failed to serialize smart list filters");
@@ -115,10 +122,17 @@ async fn create_smart_list(
 			input.name,
 			serialized_filter,
 			user::id::equals(user.id),
-			vec![
-				smart_list::description::set(input.description),
-				smart_list::joiner::set(input.joiner.to_string()),
-			],
+			chain_optional_iter(
+				[smart_list::description::set(input.description)],
+				[
+					input
+						.joiner
+						.map(|joiner| smart_list::joiner::set(joiner.to_string())),
+					input.default_grouping.map(|grouping| {
+						smart_list::default_grouping::set(grouping.to_string())
+					}),
+				],
+			),
 		)
 		.exec()
 		.await?;
@@ -192,53 +206,36 @@ async fn get_smart_list_items(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Vec<Media>>> {
+) -> ApiResult<Json<SmartListItems>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 
 	let client = ctx.get_db();
 
-	let smart_list = client
+	let smart_list: SmartList = client
 		.smart_list()
 		.find_first(vec![
 			smart_list::id::equals(id.clone()),
-			smart_list::creator_id::equals(user.id),
+			smart_list::creator_id::equals(user.id.clone()),
 		])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?
+		.try_into()?;
 
-	let smart_filter: SmartFilter<MediaSmartFilter> =
-		serde_json::from_slice(&smart_list.filters).map_err(|e| {
-			tracing::error!(?e, "Failed to deserialize smart list filters");
-			ApiError::InternalServerError(e.to_string())
-		})?;
+	let (tx, client) = client._transaction().begin().await?;
 
-	let where_params = smart_filter
-		.groups
-		.into_iter()
-		.map(|filter_group| match filter_group {
-			FilterGroup::Or { or } => prisma_client_rust::operator::or(
-				or.into_iter().map(|f| f.into_params()).collect(),
-			),
-			FilterGroup::And { and } => prisma_client_rust::operator::and(
-				and.into_iter().map(|f| f.into_params()).collect(),
-			),
-			FilterGroup::Not { not } => prisma_client_rust::operator::not(
-				not.into_iter().map(|f| f.into_params()).collect(),
-			),
-		})
-		.collect();
-
-	let joiner = FilterJoin::from(smart_list.joiner.as_str());
-	let params = match joiner {
-		FilterJoin::And => where_params,
-		FilterJoin::Or => vec![prisma_client_rust::operator::or(where_params)],
-	};
-
-	let items = client.media().find_many(params).exec().await?;
-
-	Ok(Json(items.into_iter().map(Media::from).collect()))
+	match smart_list.build(&client, &user).await {
+		Ok(items) => {
+			tx.commit(client).await?;
+			Ok(Json(items))
+		},
+		Err(e) => {
+			tx.rollback(client).await?;
+			tracing::error!(error = ?e, "Failed to execute smart list query");
+			Err(e.into())
+		},
+	}
 }
 
 #[derive(Serialize, Deserialize, Debug, Type, ToSchema)]
@@ -257,7 +254,7 @@ async fn get_smart_list_meta(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let smart_list = client
+	let smart_list: SmartList = client
 		.smart_list()
 		.find_first(vec![
 			smart_list::id::equals(id.clone()),
@@ -265,36 +262,10 @@ async fn get_smart_list_meta(
 		])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?
+		.try_into()?;
 
-	let smart_filter: SmartFilter<MediaSmartFilter> =
-		serde_json::from_slice(&smart_list.filters).map_err(|e| {
-			tracing::error!(?e, "Failed to deserialize smart list filters");
-			ApiError::InternalServerError(e.to_string())
-		})?;
-
-	// TODO: consolidate this with get_smart_list_items OR implement some kind of into
-	let where_params = smart_filter
-		.groups
-		.into_iter()
-		.map(|filter_group| match filter_group {
-			FilterGroup::Or { or } => prisma_client_rust::operator::or(
-				or.into_iter().map(|f| f.into_params()).collect(),
-			),
-			FilterGroup::And { and } => prisma_client_rust::operator::and(
-				and.into_iter().map(|f| f.into_params()).collect(),
-			),
-			FilterGroup::Not { not } => prisma_client_rust::operator::not(
-				not.into_iter().map(|f| f.into_params()).collect(),
-			),
-		})
-		.collect();
-
-	let joiner = FilterJoin::from(smart_list.joiner.as_str());
-	let params = match joiner {
-		FilterJoin::And => where_params,
-		FilterJoin::Or => vec![prisma_client_rust::operator::or(where_params)],
-	};
+	let params = smart_list.into_params();
 
 	// TODO: would it just be more efficient to do three queries in this transaction?
 	let meta = client

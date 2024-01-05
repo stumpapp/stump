@@ -46,7 +46,7 @@ export default function UserSmartListScene() {
 			return null
 		}
 
-		return <pre className="text-contrast-200">{JSON.stringify({ items }, null, 2)}</pre>
+		return <pre className="text-xs text-contrast-200">{JSON.stringify({ items }, null, 2)}</pre>
 	}
 
 	return (

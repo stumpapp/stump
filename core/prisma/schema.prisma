@@ -567,15 +567,17 @@ model ReadingList {
 model SmartList {
   id String @id @default(cuid())
 
-  name        String
-  description String?
-  filters     Bytes
-  joiner      String  @default("AND") // AND or OR
+  name             String
+  description      String?
+  filters          Bytes
+  joiner           String  @default("AND") // AND or OR
+  default_grouping String  @default("BY_BOOKS") // BY_BOOKS, BY_SERIES, BY_LIBRARY
 
   creator_id String
   creator    User   @relation(fields: [creator_id], references: [id], onDelete: Cascade)
 
   @@unique([creator_id, name])
+  @@map("smart_lists")
 }
 
 model Collection {

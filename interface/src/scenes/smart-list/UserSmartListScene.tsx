@@ -1,14 +1,18 @@
 import { useSmartListItemsQuery } from '@stump/client'
+import { cn } from '@stump/components'
 import React from 'react'
 
 import { SceneContainer } from '@/components/container'
 
 import { useSmartListContext } from './context'
 import GroupedSmartListItemList from './GroupedSmartListItemList'
+import GroupedSmartListItemTable from './GroupedSmartListItemTable'
+import SmartListBookTable from './SmartListBookTable'
 
 export default function UserSmartListScene() {
 	const {
 		list: { id },
+		layout,
 	} = useSmartListContext()
 
 	const { items, isLoading } = useSmartListItemsQuery({ id })
@@ -27,11 +31,21 @@ export default function UserSmartListScene() {
 		const isGrouped = items.type !== 'Books'
 
 		if (isGrouped) {
-			return <GroupedSmartListItemList items={items.items} />
+			return layout === 'table' ? (
+				<GroupedSmartListItemTable items={items.items} />
+			) : (
+				<GroupedSmartListItemList items={items.items} />
+			)
 		}
 
-		return <pre className="text-xs text-contrast-200">{JSON.stringify({ items }, null, 2)}</pre>
+		return layout === 'table' ? (
+			<SmartListBookTable books={items.items} />
+		) : (
+			<pre className="text-xs text-contrast-200">{JSON.stringify({ items }, null, 2)}</pre>
+		)
 	}
 
-	return <SceneContainer>{renderContent()}</SceneContainer>
+	return (
+		<SceneContainer className={cn({ 'p-0': layout === 'table' })}>{renderContent()}</SceneContainer>
+	)
 }

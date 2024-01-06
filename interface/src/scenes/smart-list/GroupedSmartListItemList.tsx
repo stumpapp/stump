@@ -1,4 +1,5 @@
-import { Accordion, Text } from '@stump/components'
+import { usePreferences } from '@stump/client'
+import { Accordion, cn, Text } from '@stump/components'
 import { Library, Series, SmartListItemGroup } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import pluralize from 'pluralize'
@@ -23,6 +24,10 @@ type Props = {
 	items: SmartListItemGroup<Series>[] | SmartListItemGroup<Library>[]
 }
 export default function GroupedSmartListItemList({ items }: Props) {
+	const {
+		preferences: { enable_hide_scrollbar },
+	} = usePreferences()
+
 	const [accordionState, setAccordionState] = useState<AccordionState>(() =>
 		items
 			.map((item, index) => ({
@@ -97,7 +102,9 @@ export default function GroupedSmartListItemList({ items }: Props) {
 				{({ height, width }) => (
 					<div
 						ref={scrollRef}
-						className="overflow-y-auto overflow-x-hidden"
+						className={cn('overflow-y-auto overflow-x-hidden', {
+							'scrollbar-hide': enable_hide_scrollbar,
+						})}
 						style={{
 							height,
 							width,
@@ -118,6 +125,9 @@ export default function GroupedSmartListItemList({ items }: Props) {
 									}
 
 									const { entity, books } = group
+
+									const positionFromTop = start + size
+									const remainingSpace = height - positionFromTop
 
 									return (
 										<Accordion.Item
@@ -140,7 +150,10 @@ export default function GroupedSmartListItemList({ items }: Props) {
 													</Text>
 												</div>
 											</Accordion.Trigger>
-											<GroupedSmartListItemListGroupContent books={books} />
+											<GroupedSmartListItemListGroupContent
+												books={books}
+												maxHeight={remainingSpace}
+											/>
 										</Accordion.Item>
 									)
 								})}

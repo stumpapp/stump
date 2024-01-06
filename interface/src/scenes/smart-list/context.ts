@@ -3,6 +3,8 @@ import { createContext, useContext } from 'react'
 
 export type ISmartListContext = {
 	list: SmartList
+	layout: 'table' | 'list'
+	setLayout: (layout: 'table' | 'list') => void
 }
 
 export const SmartListContext = createContext<ISmartListContext | null>(null)

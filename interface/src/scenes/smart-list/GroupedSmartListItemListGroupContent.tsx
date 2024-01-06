@@ -1,5 +1,6 @@
 import { getMediaThumbnail } from '@stump/api'
-import { Accordion, Text } from '@stump/components'
+import { usePreferences } from '@stump/client'
+import { Accordion, cn, Text } from '@stump/components'
 import { Media } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React from 'react'
@@ -11,9 +12,9 @@ export const ACCORDION_CONTENT_ITEM_HEIGHT = 64
 
 type Props = {
 	books: Media[]
+	maxHeight?: number
 }
-// FIXME: the group triggers are virtualizing, but the content (this) is not!
-// what a fucking name lol
+
 export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 	const scrollRef = React.useRef<HTMLDivElement>(null)
 
@@ -24,9 +25,20 @@ export default function GroupedSmartListItemListGroupContent({ books }: Props) {
 		overscan: 5,
 	})
 
+	const {
+		preferences: { enable_hide_scrollbar },
+	} = usePreferences()
+
 	return (
 		<Accordion.Content>
-			<div ref={scrollRef} className="h-full w-full overflow-y-auto">
+			<div
+				ref={scrollRef}
+				className={cn('h-full w-full overflow-y-auto', { 'scrollbar-hide': enable_hide_scrollbar })}
+				// FIXME: this will virtualize the inner content, but the parent size is not being calculated correctly
+				// style={{
+				// 	height: maxHeight,
+				// }}
+			>
 				<div
 					style={{
 						height: `${rowVirtualizer.getTotalSize()}px`,

@@ -1,58 +1,37 @@
-import { smartListApi, smartListQueryKeys } from '@stump/api'
-import { useQueries } from '@stump/client'
+import { useSmartListItemsQuery } from '@stump/client'
 import React from 'react'
-import { useParams } from 'react-router'
+
+import { SceneContainer } from '@/components/container'
+
+import { useSmartListContext } from './context'
+import GroupedSmartListItemList from './GroupedSmartListItemList'
 
 export default function UserSmartListScene() {
-	const { id } = useParams<{ id: string }>()
+	const {
+		list: { id },
+	} = useSmartListContext()
 
-	if (!id) {
-		throw new Error('This scene requires an ID in the URL')
-	}
+	const { items, isLoading } = useSmartListItemsQuery({ id })
 
-	const [listResult, itemsResult] = useQueries({
-		queries: [
-			{
-				queryFn: async () => {
-					const { data } = await smartListApi.getSmartListById(id)
-					return data
-				},
-				queryKey: [smartListQueryKeys.getSmartListById, id],
-			},
-			{
-				queryFn: async () => {
-					const { data } = await smartListApi.getSmartListItems(id)
-					return data
-				},
-				queryKey: [smartListQueryKeys.getSmartListItems, id],
-			},
-		],
-	})
-
-	if (!listResult || !itemsResult) {
+	if (isLoading) {
 		return null
 	}
 
-	const { data: list, isLoading: isLoadingList } = listResult
-	const { data: items, isLoading: isLoadingItems } = itemsResult
-
-	const shouldThrow = !isLoadingList && !list
+	const shouldThrow = !items
 	if (shouldThrow) {
+		// TODO: redirect for these?
 		throw new Error('The requested smart list does not exist!')
 	}
 
-	const renderItems = () => {
-		if (isLoadingItems) {
-			return null
+	const renderContent = () => {
+		const isGrouped = items.type !== 'Books'
+
+		if (isGrouped) {
+			return <GroupedSmartListItemList items={items.items} />
 		}
 
 		return <pre className="text-xs text-contrast-200">{JSON.stringify({ items }, null, 2)}</pre>
 	}
 
-	return (
-		<div>
-			TODO: smart list things
-			{renderItems()}
-		</div>
-	)
+	return <SceneContainer>{renderContent()}</SceneContainer>
 }

@@ -42,6 +42,7 @@ export {
 export { useStumpVersion } from './server'
 export {
 	prefetchSmartList,
+	useSmartListItemsQuery,
 	useSmartListMetaQuery,
 	useSmartListQuery,
 	useSmartListsQuery,

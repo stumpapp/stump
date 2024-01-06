@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useNavigate } from 'react-router'
 import { useAppContext } from '@/context'
 
 import { LazyComponent } from '../../AppRouter.tsx'
+import UserSmartListLayout from './UserSmartListLayout.tsx'
 
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
@@ -29,7 +30,9 @@ export default function SmartListRouter() {
 	return (
 		<Routes>
 			<Route path="" element={<UserSmartListsScene />} />
-			<Route path=":id" element={<UserSmartListScene />} />
+			<Route path=":id" element={<UserSmartListLayout />}>
+				<Route path="" element={<UserSmartListScene />} />
+			</Route>
 			<Route path="create" element={<CreateSmartListScene />} />
 			<Route path="*" element={<Navigate to="/404" />} />
 		</Routes>

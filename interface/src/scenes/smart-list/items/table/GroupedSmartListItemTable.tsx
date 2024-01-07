@@ -6,6 +6,7 @@ import {
 	flexRender,
 	getCoreRowModel,
 	getExpandedRowModel,
+	getFilteredRowModel,
 	getSortedRowModel,
 	SortDirection,
 	SortingState,
@@ -16,6 +17,8 @@ import React, { useMemo, useState } from 'react'
 
 import { SortIcon } from '@/components/table'
 
+import { useSafeWorkingView } from '../../context'
+import { bookFuzzySearch } from './mediaColumns'
 import SmartListBookTable from './SmartListBookTable'
 import TableHeaderActions from './TableHeaderActions'
 
@@ -48,10 +51,11 @@ const buildColumns = (isGroupedBySeries: boolean) => [
 							'rotate-180': isExpanded,
 						})}
 					/>
-					<Text>{name}</Text>
+					<Text className="line-clamp-1 text-left text-sm md:text-base">{name}</Text>
 				</button>
 			)
 		},
+		enableGlobalFilter: true,
 		enableSorting: true,
 		header: ({ table: { getToggleAllRowsExpandedHandler, getIsAllRowsExpanded } }) => {
 			const isAllRowsExpanded = getIsAllRowsExpanded()
@@ -90,6 +94,7 @@ const buildColumns = (isGroupedBySeries: boolean) => [
 				{books.length}
 			</Text>
 		),
+		enableGlobalFilter: true,
 		enableSorting: true,
 		header: () => (
 			<Text size="sm" className="text-left" variant="muted">
@@ -106,6 +111,11 @@ type Props = {
 
 // TODO: virtualization
 export default function GroupedSmartListItemTable({ items }: Props) {
+	const {
+		workingView: { search },
+	} = useSafeWorkingView()
+
+	// TODO: sorting state from view
 	const [sortState, setSortState] = useState<SortingState>([])
 	const [expanded, setExpanded] = useState<ExpandedState>({})
 
@@ -118,12 +128,35 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 		data: items,
 		getCoreRowModel: getCoreRowModel(),
 		getExpandedRowModel: getExpandedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
 		getRowCanExpand: () => true,
 		getSortedRowModel: getSortedRowModel(),
+		// TODO: this needs a bit of work I think, I think maybe separating the searches??
+		globalFilterFn: (
+			{
+				original: {
+					books,
+					entity: { name },
+				},
+			},
+			_columnId,
+			search,
+		) => {
+			// TODO: we should only search selected columns
+			const matchedBooks = books.filter((book) => bookFuzzySearch(book, search))
+			if (matchedBooks.length) {
+				return true
+			} else if (name.toLowerCase().includes(search.toLowerCase())) {
+				return true
+			} else {
+				return false
+			}
+		},
 		onExpandedChange: setExpanded,
 		onSortingChange: setSortState,
 		state: {
 			expanded,
+			globalFilter: search,
 			sorting: sortState,
 		},
 	})
@@ -131,9 +164,9 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 	const { rows } = table.getRowModel()
 
 	return (
-		<>
+		<div className="relative w-full">
 			<TableHeaderActions />
-			<table>
+			<table className="w-full">
 				<thead>
 					{table.getFlatHeaders().map((header) => (
 						<th key={header.id} className="h-10 first:pl-4 last:pr-4">
@@ -174,6 +207,6 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 					))}
 				</tbody>
 			</table>
-		</>
+		</div>
 	)
 }

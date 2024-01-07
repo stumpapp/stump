@@ -287,6 +287,13 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SmartListView>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SmartListTableSortingState>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SmartListTableColumnSelection>()?).as_bytes(),
+		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<BookClub>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<BookClubMember>()?).as_bytes())?;

@@ -19,6 +19,7 @@ import paths from '@/paths'
 
 import SmartListCard from './SmartListCard'
 
+// TODO: move filter to URL params
 export default function UserSmartListsScene() {
 	/**
 	 * The local value state for the search input
@@ -95,7 +96,7 @@ export default function UserSmartListsScene() {
 				</Text>
 			</header>
 
-			<SceneContainer className="relative h-full overflow-hidden pt-0">
+			<SceneContainer className="relative h-full overflow-hidden">
 				<div className="min-h-10 sticky top-0 z-10 bg-background py-2 backdrop-blur-sm">
 					<div className="flex w-full flex-row items-center justify-between gap-x-2 pr-3 md:w-2/3 lg:max-w-xl">
 						<Input
@@ -104,17 +105,17 @@ export default function UserSmartListsScene() {
 							leftDecoration={<Search className="h-4 w-4 text-muted" />}
 							rightDecoration={isRefetching ? <ProgressSpinner size="sm" /> : null}
 							className="h-9"
+							fullWidth
 							value={value}
 							onChange={(e) => setValue(e.target.value)}
 						/>
 
 						<ButtonOrLink
 							href={paths.smartListCreate()}
-							variant="secondary"
-							size="sm"
-							className="shrink-0"
+							variant="ghost"
+							className="h-full shrink-0"
 						>
-							New list
+							Create list
 						</ButtonOrLink>
 					</div>
 				</div>

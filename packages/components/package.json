@@ -55,7 +55,8 @@
 		"tailwindcss-autofill": "^1.0.2",
 		"tailwindcss-shadow-fill": "^1.0.1",
 		"tailwindcss-text-fill": "^0.2.0",
-		"use-count-up": "^3.0.1"
+		"use-count-up": "^3.0.1",
+		"vaul": "^0.8.0"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",

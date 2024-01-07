@@ -35,7 +35,7 @@ export default function UserSmartListNavigation() {
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	return (
-		<div className="sticky top-0 z-10 w-full border-b border-edge-200 bg-background md:relative md:top-[unset] md:z-[unset]">
+		<div className="relative z-10 w-full border-b border-edge-200 bg-background">
 			<nav
 				className={cn(
 					'-mb-px flex gap-x-4 overflow-x-scroll px-3 transition-colors duration-150 scrollbar-hide md:overflow-x-hidden',

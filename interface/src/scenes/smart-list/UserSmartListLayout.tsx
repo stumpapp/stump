@@ -1,19 +1,48 @@
 import { useSmartListWithMetaQuery } from '@stump/client'
-import React, { Suspense, useEffect } from 'react'
+import { SmartListView } from '@stump/types'
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router'
 
-import { SmartListContext } from './context'
+import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
 
 export default function UserSmartListLayout() {
 	const { id } = useParams<{ id: string }>()
 
+	// TODO: I don't think I need both TBH, esp with how many more features I can add to the table...
 	const [layout, setLayout] = React.useState<'table' | 'list'>(() => getDefaultLayout())
+	const [selectedView, setSelectedView] = useState<SmartListView>()
+	const [workingView, setWorkingView] = useState<WorkingView>()
 
 	useEffect(() => {
 		localStorage.setItem(LAYOUT_PREFERENCE_KEY, layout)
 	}, [layout])
+
+	/**
+	 * An effect to update the working view whenever the selected view changes
+	 */
+	useEffect(() => {
+		if (selectedView) {
+			setWorkingView(selectedView)
+		}
+	}, [selectedView])
+
+	/**
+	 * Whether or not the working view is different from the selected view. If there is
+	 * no selected view, then this will always be false
+	 */
+	const workingViewIsDifferent = useMemo(() => {
+		if (!selectedView || !workingView) {
+			return false
+		}
+
+		return (
+			selectedView.columns !== workingView.columns ||
+			selectedView.search !== workingView.search ||
+			selectedView.sorting !== workingView.sorting
+		)
+	}, [selectedView, workingView])
 
 	if (!id) {
 		throw new Error('This scene requires an ID in the URL')
@@ -24,6 +53,61 @@ export default function UserSmartListLayout() {
 		meta,
 		listQuery: { isLoading: isLoadingList },
 	} = useSmartListWithMetaQuery({ id })
+
+	/**
+	 * A function to update the local working view state without storing it in the DB
+	 */
+	const updateWorkingView = useCallback((updates: Partial<WorkingView>) => {
+		setWorkingView((workingView) => {
+			const tentative = {
+				...(workingView ?? defaultWorkingView),
+				...updates,
+			}
+
+			const isDefault = Object.keys(tentative).every((key) => {
+				const tentativeValue = tentative[key as keyof WorkingView]
+				const defaultValue = defaultWorkingView[key as keyof WorkingView]
+
+				return (!tentativeValue && !defaultValue) || tentativeValue === defaultValue
+			})
+
+			return isDefault ? undefined : tentative
+		})
+	}, [])
+
+	/**
+	 * A function to store the current working view as a new, stored view in the DB
+	 */
+	const saveWorkingView = useCallback(
+		(name: string) => {
+			if (!workingView || !list?.id) {
+				return
+			}
+
+			// TODO: API call!
+			setSelectedView({
+				list_id: list.id,
+				name,
+				...workingView,
+			})
+		},
+		[workingView, list?.id],
+	)
+
+	/**
+	 * A function to update the currently selected stored view with the current working view changes
+	 */
+	const updateSelectedStoredView = useCallback(() => {
+		if (!selectedView) {
+			return
+		}
+
+		// TODO: API call!
+		setSelectedView({
+			...selectedView,
+			...workingView,
+		})
+	}, [selectedView, workingView])
 
 	if (isLoadingList) {
 		return null
@@ -40,7 +124,14 @@ export default function UserSmartListLayout() {
 				layout,
 				list,
 				meta,
+				saveWorkingView,
+				selectStoredView: setSelectedView,
+				selectedView,
 				setLayout,
+				updateSelectedStoredView,
+				updateWorkingView,
+				workingView,
+				workingViewIsDifferent,
 			}}
 		>
 			<UserSmartListHeader />

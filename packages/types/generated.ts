@@ -72,7 +72,7 @@ export type SmartListItemGroup<E> = { entity: E; books: Media[] }
 
 export type SmartListItems = { type: "Books"; items: Media[] } | { type: "Series"; items: SmartListItemGroup<Series>[] } | { type: "Library"; items: SmartListItemGroup<Library>[] }
 
-export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin; default_grouping?: SmartListItemGrouping }
+export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin; default_grouping?: SmartListItemGrouping; saved_views?: SmartListView[] | null }
 
 export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 
@@ -83,6 +83,12 @@ export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: 
 export type SeriesSmartFilter = { name: Filter<string> } | { library: LibrarySmartFilter }
 
 export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
+
+export type SmartListView = ({ columns: SmartListTableColumnSelection[]; sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
+
+export type SmartListTableSortingState = { desc: boolean; id: string }
+
+export type SmartListTableColumnSelection = { id: string; position: number }
 
 export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 

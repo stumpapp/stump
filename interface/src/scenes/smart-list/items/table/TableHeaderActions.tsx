@@ -1,19 +1,37 @@
-import React, { useState } from 'react'
+import React, { useCallback } from 'react'
 
 import { Search } from '@/components/filters'
 
+import { useSafeWorkingView } from '../../context'
 import FilterBottomDrawer from './FilterBottomDrawer'
-import PersistedViewSelector from './PersistedViewSelector'
+import SavedViewSelector from './SavedViewSelector'
+import TableColumnsBottomDrawer from './TableColumnsBottomDrawer'
+import ViewManagerDropdown from './ViewManagerDropdown'
 
 export default function TableHeaderActions() {
-	const [filter, setFilter] = useState<string>()
+	const {
+		workingView: { search },
+		updateWorkingView,
+	} = useSafeWorkingView()
 
-	// TODO: when sticks adjust height/padding?
+	const setFilter = useCallback(
+		(value?: string) => updateWorkingView({ search: value || undefined }),
+		[updateWorkingView],
+	)
+
+	const defaultValue = search || undefined
+
 	return (
 		<header className="sticky top-0 flex h-12 w-full items-center gap-x-2 bg-background px-4">
-			<PersistedViewSelector />
+			<SavedViewSelector />
 			<FilterBottomDrawer />
-			<Search onChange={setFilter} placeholder="Quick filter" />
+			<TableColumnsBottomDrawer />
+			<Search
+				initialValue={defaultValue}
+				onChange={(value) => setFilter(value)}
+				placeholder="Quick filter"
+			/>
+			<ViewManagerDropdown />
 		</header>
 	)
 }

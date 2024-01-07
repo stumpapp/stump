@@ -15,7 +15,7 @@ use crate::{
 
 use super::{
 	prisma_macros::media_grouped_by_library, SmartListItemGroup, SmartListItemGrouping,
-	SmartListItems,
+	SmartListItems, SmartListView,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
@@ -28,6 +28,8 @@ pub struct SmartList {
 	pub joiner: FilterJoin,
 	#[serde(default)]
 	pub default_grouping: SmartListItemGrouping,
+	#[serde(default)]
+	pub saved_views: Option<Vec<SmartListView>>,
 }
 
 impl SmartList {
@@ -182,6 +184,18 @@ impl TryFrom<smart_list::Data> for SmartList {
 	type Error = CoreError;
 
 	fn try_from(value: smart_list::Data) -> Result<Self, Self::Error> {
+		let saved_views = if let Ok(stored) = value.saved_views() {
+			Some(
+				stored
+					.to_owned()
+					.into_iter()
+					.map(SmartListView::try_from)
+					.collect::<Result<Vec<SmartListView>, CoreError>>()?,
+			)
+		} else {
+			None
+		};
+
 		Ok(Self {
 			id: value.id,
 			name: value.name,
@@ -199,6 +213,7 @@ impl TryFrom<smart_list::Data> for SmartList {
 					tracing::error!(?e, "Failed to convert smart list default grouping");
 					SmartListItemGrouping::ByBooks
 				}),
+			saved_views,
 		})
 	}
 }

@@ -576,8 +576,22 @@ model SmartList {
   creator_id String
   creator    User   @relation(fields: [creator_id], references: [id], onDelete: Cascade)
 
+  saved_views SmartListView[]
+
   @@unique([creator_id, name])
   @@map("smart_lists")
+}
+
+model SmartListView {
+  name String
+
+  list_id String
+  list    SmartList @relation(fields: [list_id], references: [id], onDelete: Cascade)
+
+  data Bytes
+
+  @@unique([list_id, name])
+  @@map("smart_list_views")
 }
 
 model Collection {

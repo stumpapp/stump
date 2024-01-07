@@ -1,130 +1,24 @@
-import { getMediaThumbnail } from '@stump/api'
 import { usePreferences } from '@stump/client'
-import { cn, Link, Text } from '@stump/components'
+import { cn } from '@stump/components'
 import { Media } from '@stump/types'
 import {
-	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
+	getFilteredRowModel,
 	getSortedRowModel,
 	SortDirection,
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { SortIcon } from '@/components/table'
-import paths from '@/paths'
+
+import { useSafeWorkingView, useSmartListContext } from '../../context'
+import { buildColumns, defaultColumns } from './mediaColumns'
 
 // TODO: Allow customizing and persisting views on smart lists. This would allow custom columns, sorting, and filtering.
-
-const columnHelper = createColumnHelper<Media>()
-
-const baseColumns = [
-	columnHelper.display({
-		cell: ({
-			row: {
-				original: { id },
-			},
-		}) => (
-			<img
-				className="aspect-[2/3] h-14 w-auto rounded-sm object-cover"
-				src={getMediaThumbnail(id)}
-			/>
-		),
-		header: () => (
-			<Text size="sm" variant="muted">
-				Cover
-			</Text>
-		),
-		id: 'cover',
-		// height is 56px, so with a 2/3 aspect ratio, the width is 37.3333333333px
-		size: 60,
-	}),
-	columnHelper.accessor(({ name, metadata }) => metadata?.title || name, {
-		cell: ({
-			getValue,
-			row: {
-				original: { id },
-			},
-		}) => (
-			<Link
-				to={paths.bookOverview(id)}
-				className="line-clamp-2 text-sm text-opacity-100 hover:text-opacity-90"
-			>
-				{getValue()}
-			</Link>
-		),
-		enableSorting: true,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Name
-			</Text>
-		),
-		id: 'name',
-		minSize: 285,
-	}),
-	columnHelper.accessor('pages', {
-		cell: ({ getValue }) => (
-			<Text size="sm" variant="muted">
-				{getValue()}
-			</Text>
-		),
-		enableSorting: true,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Pages
-			</Text>
-		),
-		id: 'pages',
-	}),
-	columnHelper.accessor(
-		({ metadata }) => {
-			const { year, month, day } = metadata || {}
-
-			// TODO: validation
-			if (!!year && !!month && !!day) {
-				return dayjs(`${year}-${month}-${day}`).format('YYYY-MM-DD')
-			} else if (!!year && !!month) {
-				return dayjs(`${year}-${month}`).format('YYYY-MM')
-			} else if (year) {
-				return dayjs(`${year}`).format('YYYY')
-			}
-
-			return ''
-		},
-		{
-			cell: ({ getValue }) => (
-				<Text size="sm" variant="muted">
-					{getValue()}
-				</Text>
-			),
-			enableSorting: true,
-			header: () => (
-				<Text size="sm" variant="muted">
-					Published
-				</Text>
-			),
-			id: 'published',
-		},
-	),
-	columnHelper.accessor(({ created_at }) => dayjs(created_at).format('M/D/YYYY, HH:mm:ss'), {
-		cell: ({ getValue }) => (
-			<Text size="sm" variant="muted">
-				{getValue()}
-			</Text>
-		),
-		enableSorting: true,
-		header: () => (
-			<Text size="sm" variant="muted">
-				Added
-			</Text>
-		),
-		id: 'added',
-	}),
-]
 
 type Props = {
 	books: Media[]
@@ -135,17 +29,53 @@ export default function SmartListBookTable({ books }: Props) {
 	const {
 		preferences: { enable_hide_scrollbar },
 	} = usePreferences()
+	const { workingView, updateWorkingView } = useSmartListContext()
+	const {
+		workingView: { search, enable_multi_sort },
+	} = useSafeWorkingView()
 
-	const [sortState, setSortState] = useState<SortingState>([])
+	/**
+	 * The columns selected in the working view
+	 */
+	const columns = useMemo(
+		() => (workingView?.columns?.length ? buildColumns(workingView.columns) : defaultColumns),
+		[workingView],
+	)
+
+	/**
+	 * The current sorting state as it is stored in the working view
+	 */
+	const sorting = useMemo(() => workingView?.sorting ?? [], [workingView])
+	/**
+	 * A callback to update the sorting state of the table. This updates the current working view
+	 */
+	const setSorting = useCallback(
+		(updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
+			if (typeof updaterOrValue === 'function') {
+				const updated = updaterOrValue(sorting)
+				updateWorkingView({
+					sorting: updated.length ? updated : undefined,
+				})
+			} else {
+				updateWorkingView({
+					sorting: updaterOrValue.length ? updaterOrValue : undefined,
+				})
+			}
+		},
+		[updateWorkingView, sorting],
+	)
 
 	const table = useReactTable({
-		columns: baseColumns,
+		columns,
 		data: books,
+		enableMultiSort: enable_multi_sort ?? false,
 		getCoreRowModel: getCoreRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
-		onSortingChange: setSortState,
+		onSortingChange: setSorting,
 		state: {
-			sorting: sortState,
+			globalFilter: search,
+			sorting,
 		},
 	})
 

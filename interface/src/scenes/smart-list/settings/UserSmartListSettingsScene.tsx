@@ -1,4 +1,4 @@
-import { Accordion, Heading, Input, Label, Text, TextArea } from '@stump/components'
+import { Accordion, Button, Heading, Input, Label, Text, TextArea } from '@stump/components'
 import React from 'react'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
@@ -30,6 +30,12 @@ export default function UserSmartListSettingsScene() {
 						className="md:w-3/5"
 						value={description || ''}
 					/>
+
+					<div>
+						<Button variant="primary" disabled>
+							Save changes
+						</Button>
+					</div>
 				</div>
 
 				<div className="flex flex-col gap-y-6">

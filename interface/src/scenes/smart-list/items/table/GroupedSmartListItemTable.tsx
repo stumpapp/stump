@@ -168,22 +168,24 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 			<TableHeaderActions />
 			<table className="w-full">
 				<thead>
-					{table.getFlatHeaders().map((header) => (
-						<th key={header.id} className="h-10 first:pl-4 last:pr-4">
-							<div
-								className={cn('flex items-center gap-x-2', {
-									'cursor-pointer select-none': header.column.getCanSort(),
-								})}
-								onClick={header.column.getToggleSortingHandler()}
-								// style={{
-								// 	width: header.getSize(),
-								// }}
-							>
-								{flexRender(header.column.columnDef.header, header.getContext())}
-								<SortIcon direction={(header.column.getIsSorted() as SortDirection) ?? null} />
-							</div>
-						</th>
-					))}
+					<tr>
+						{table.getFlatHeaders().map((header) => (
+							<th key={header.id} className="h-10 first:pl-4 last:pr-4">
+								<div
+									className={cn('flex items-center gap-x-2', {
+										'cursor-pointer select-none': header.column.getCanSort(),
+									})}
+									onClick={header.column.getToggleSortingHandler()}
+									// style={{
+									// 	width: header.getSize(),
+									// }}
+								>
+									{flexRender(header.column.columnDef.header, header.getContext())}
+									<SortIcon direction={(header.column.getIsSorted() as SortDirection) ?? null} />
+								</div>
+							</th>
+						))}
+					</tr>
 				</thead>
 
 				<tbody className="divide divide-y divide-edge">
@@ -199,7 +201,7 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 							{row.getIsExpanded() && (
 								<tr key={row.id + 'expanded'}>
 									<td colSpan={columns.length}>
-										<SmartListBookTable books={row.original.books} />
+										<SmartListBookTable books={row.original.books} isIsolatedTable={false} />
 									</td>
 								</tr>
 							)}

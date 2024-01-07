@@ -10,22 +10,24 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { useCallback, useMemo } from 'react'
+import React, { PropsWithChildren, useCallback, useMemo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { SortIcon } from '@/components/table'
 
 import { useSafeWorkingView, useSmartListContext } from '../../context'
 import { buildColumns, defaultColumns } from './mediaColumns'
+import TableHeaderActions from './TableHeaderActions'
 
 // TODO: Allow customizing and persisting views on smart lists. This would allow custom columns, sorting, and filtering.
 
 type Props = {
 	books: Media[]
+	isIsolatedTable?: boolean
 }
 
 // TODO: virtualization
-export default function SmartListBookTable({ books }: Props) {
+export default function SmartListBookTable({ books, isIsolatedTable = true }: Props) {
 	const {
 		preferences: { enable_hide_scrollbar },
 	} = usePreferences()
@@ -81,70 +83,83 @@ export default function SmartListBookTable({ books }: Props) {
 
 	const { rows } = table.getRowModel()
 
+	const Container = isIsolatedTable
+		? ({ children }: PropsWithChildren) => (
+				<div className="relative w-full">
+					<TableHeaderActions />
+					{children}
+				</div>
+		  )
+		: React.Fragment
+
 	return (
-		<AutoSizer disableHeight>
-			{({ width }) => (
-				<div
-					className={cn('h-full min-w-full overflow-x-auto', {
-						'scrollbar-hide': enable_hide_scrollbar,
-					})}
-					style={{
-						width,
-					}}
-				>
-					<table
-						className="min-w-full"
+		<Container>
+			<AutoSizer disableHeight>
+				{({ width }) => (
+					<div
+						className={cn('h-full min-w-full overflow-x-auto', {
+							'scrollbar-hide': enable_hide_scrollbar,
+						})}
 						style={{
-							width: table.getCenterTotalSize(),
+							width,
 						}}
 					>
-						<thead>
-							{table.getFlatHeaders().map((header) => {
-								const isSortable = header.column.getCanSort()
-								// TODO: make sticky work sticky -left-8
-								return (
-									<th key={header.id} className="h-10 first:pl-4 last:pr-4">
-										<div
-											className={cn('flex items-center', {
-												'cursor-pointer select-none gap-x-2': isSortable,
-											})}
-											onClick={header.column.getToggleSortingHandler()}
-											style={{
-												width: header.getSize(),
-											}}
-										>
-											{flexRender(header.column.columnDef.header, header.getContext())}
-											{isSortable && (
-												<SortIcon
-													direction={(header.column.getIsSorted() as SortDirection) ?? null}
-												/>
-											)}
-										</div>
-									</th>
-								)
-							})}
-						</thead>
-
-						<tbody>
-							{rows.map((row) => (
-								<tr key={row.id} className="odd:bg-background-200">
-									{row.getVisibleCells().map((cell) => (
-										<td
-											className="first:pl-4 last:pr-4"
-											key={cell.id}
-											style={{
-												width: cell.column.getSize(),
-											}}
-										>
-											{flexRender(cell.column.columnDef.cell, cell.getContext())}
-										</td>
-									))}
+						<table
+							className="min-w-full"
+							style={{
+								width: table.getCenterTotalSize(),
+							}}
+						>
+							<thead>
+								<tr>
+									{table.getFlatHeaders().map((header) => {
+										const isSortable = header.column.getCanSort()
+										// TODO: make sticky work sticky -left-8
+										return (
+											<th key={header.id} className="h-10 first:pl-4 last:pr-4">
+												<div
+													className={cn('flex items-center', {
+														'cursor-pointer select-none gap-x-2': isSortable,
+													})}
+													onClick={header.column.getToggleSortingHandler()}
+													style={{
+														width: header.getSize(),
+													}}
+												>
+													{flexRender(header.column.columnDef.header, header.getContext())}
+													{isSortable && (
+														<SortIcon
+															direction={(header.column.getIsSorted() as SortDirection) ?? null}
+														/>
+													)}
+												</div>
+											</th>
+										)
+									})}
 								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			)}
-		</AutoSizer>
+							</thead>
+
+							<tbody>
+								{rows.map((row) => (
+									<tr key={row.id} className="odd:bg-background-200">
+										{row.getVisibleCells().map((cell) => (
+											<td
+												className="first:pl-4 last:pr-4"
+												key={cell.id}
+												style={{
+													width: cell.column.getSize(),
+												}}
+											>
+												{flexRender(cell.column.columnDef.cell, cell.getContext())}
+											</td>
+										))}
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				)}
+			</AutoSizer>
+		</Container>
 	)
 }

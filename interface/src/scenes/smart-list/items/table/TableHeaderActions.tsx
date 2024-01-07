@@ -22,7 +22,7 @@ export default function TableHeaderActions() {
 	const defaultValue = search || undefined
 
 	return (
-		<header className="sticky top-0 flex h-12 w-full items-center gap-x-2 bg-background px-4">
+		<header className="sticky top-0 z-10 flex h-12 w-full items-center gap-x-2 bg-background px-4">
 			<SavedViewSelector />
 			<FilterBottomDrawer />
 			<TableColumnsBottomDrawer />

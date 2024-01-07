@@ -6,6 +6,7 @@ import { useSmartListContext } from '../../context'
 export default function SavedViewSelector() {
 	const {
 		workingView,
+		selectedView,
 		list: { saved_views },
 	} = useSmartListContext()
 
@@ -23,6 +24,7 @@ export default function SavedViewSelector() {
 			options={options}
 			emptyOption={{ label: workingView ? 'Custom view' : 'Default view', value: '' }}
 			disabled={isDisabled}
+			value={selectedView?.name}
 		/>
 	)
 }

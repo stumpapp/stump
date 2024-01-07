@@ -1,8 +1,10 @@
-import { useSmartListQuery } from '@stump/client'
-import React, { useEffect } from 'react'
+import { useSmartListWithMetaQuery } from '@stump/client'
+import React, { Suspense, useEffect } from 'react'
 import { Outlet, useParams } from 'react-router'
 
 import { SmartListContext } from './context'
+import UserSmartListHeader from './UserSmartListHeader'
+import UserSmartListNavigation from './UserSmartListNavigation'
 
 export default function UserSmartListLayout() {
 	const { id } = useParams<{ id: string }>()
@@ -17,9 +19,13 @@ export default function UserSmartListLayout() {
 		throw new Error('This scene requires an ID in the URL')
 	}
 
-	const { list, isLoading } = useSmartListQuery({ id })
+	const {
+		list,
+		meta,
+		listQuery: { isLoading: isLoadingList },
+	} = useSmartListWithMetaQuery({ id })
 
-	if (isLoading) {
+	if (isLoadingList) {
 		return null
 	}
 
@@ -33,10 +39,15 @@ export default function UserSmartListLayout() {
 			value={{
 				layout,
 				list,
+				meta,
 				setLayout,
 			}}
 		>
-			<Outlet />
+			<UserSmartListHeader />
+			<UserSmartListNavigation />
+			<Suspense fallback={null}>
+				<Outlet />
+			</Suspense>
 		</SmartListContext.Provider>
 	)
 }

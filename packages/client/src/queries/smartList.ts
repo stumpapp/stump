@@ -1,7 +1,9 @@
 import { smartListApi, smartListQueryKeys } from '@stump/api'
 import { GetSmartListsParams, SmartList, SmartListItems, SmartListMeta } from '@stump/types'
+import { useQueries, UseQueryResult } from '@tanstack/react-query'
 
 import { queryClient, QueryOptions, useQuery } from '../client'
+import { QueryClientContext } from '../context'
 
 type UseBookClubsQueryOptions = QueryOptions<SmartList[]> & {
 	params?: GetSmartListsParams
@@ -60,6 +62,12 @@ export function useSmartListMetaQuery({ id, ...options }: UseSmartListMetaQueryO
 	return { meta: data, ...rest }
 }
 
+export const prefetchSmartListItems = (id: string) =>
+	queryClient.prefetchQuery([smartListQueryKeys.getSmartListItems, id], async () => {
+		const { data } = await smartListApi.getSmartListItems(id)
+		return data
+	})
+
 // TODO: grouping override params
 // TODO: additional filter params (change the request to POST when those are provided)
 type UseSmartListItemsQuery = QueryOptions<SmartListItems> & {
@@ -76,4 +84,39 @@ export function useSmartListItemsQuery({ id, ...options }: UseSmartListItemsQuer
 	)
 
 	return { items: data, ...rest }
+}
+
+type UseSmartListItemsWithMetaQuery = {
+	id: string
+}
+export function useSmartListWithMetaQuery({ id }: UseSmartListItemsWithMetaQuery) {
+	const [listResult, metaResult] = useQueries({
+		context: QueryClientContext,
+		queries: [
+			{
+				queryFn: async () => {
+					const { data } = await smartListApi.getSmartListById(id)
+					return data
+				},
+				queryKey: [smartListQueryKeys.getSmartListById, id],
+			},
+			{
+				queryFn: async () => {
+					const { data } = await smartListApi.getSmartListMeta(id)
+					return data
+				},
+				queryKey: [smartListQueryKeys.getSmartListMeta, id],
+			},
+		],
+	})
+
+	const { data: list, ...listQuery } = listResult ?? ({} as UseQueryResult<SmartList>)
+	const { data: meta, ...metaQuery } = metaResult ?? ({} as UseQueryResult<SmartListMeta>)
+
+	return {
+		list,
+		listQuery,
+		meta,
+		metaQuery,
+	}
 }

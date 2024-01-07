@@ -42,10 +42,12 @@ export {
 export { useStumpVersion } from './server'
 export {
 	prefetchSmartList,
+	prefetchSmartListItems,
 	useSmartListItemsQuery,
 	useSmartListMetaQuery,
 	useSmartListQuery,
 	useSmartListsQuery,
+	useSmartListWithMetaQuery,
 } from './smartList'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {

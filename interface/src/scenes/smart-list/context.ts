@@ -1,8 +1,9 @@
-import { SmartList } from '@stump/types'
+import { SmartList, SmartListMeta } from '@stump/types'
 import { createContext, useContext } from 'react'
 
 export type ISmartListContext = {
 	list: SmartList
+	meta?: SmartListMeta
 	layout: 'table' | 'list'
 	setLayout: (layout: 'table' | 'list') => void
 }

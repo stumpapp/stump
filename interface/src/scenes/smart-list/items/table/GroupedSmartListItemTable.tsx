@@ -12,16 +12,17 @@ import {
 	useReactTable,
 } from '@tanstack/react-table'
 import { ChevronDown } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { SortIcon } from '@/components/table'
 
 import SmartListBookTable from './SmartListBookTable'
+import TableHeaderActions from './TableHeaderActions'
 
 type TableRow = SmartListItemGroup<Series> | SmartListItemGroup<Library>
 const columnHelper = createColumnHelper<TableRow>()
 
-const baseColumns = [
+const buildColumns = (isGroupedBySeries: boolean) => [
 	columnHelper.accessor('entity.name', {
 		cell: ({
 			row: {
@@ -72,7 +73,9 @@ const baseColumns = [
 							})}
 						/>
 					</button>
-					<Text className="text-sm">Name</Text>
+					<Text className="text-sm" variant="muted">
+						{isGroupedBySeries ? 'Series' : 'Library'}
+					</Text>
 				</div>
 			)
 		},
@@ -88,7 +91,11 @@ const baseColumns = [
 			</Text>
 		),
 		enableSorting: true,
-		header: () => <Text className="text-left text-sm">Books</Text>,
+		header: () => (
+			<Text size="sm" className="text-left" variant="muted">
+				Books
+			</Text>
+		),
 		id: 'books',
 	}),
 ]
@@ -102,8 +109,12 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 	const [sortState, setSortState] = useState<SortingState>([])
 	const [expanded, setExpanded] = useState<ExpandedState>({})
 
+	const isGroupedBySeries = 'library_id' in (items[0]?.entity ?? {})
+
+	const columns = useMemo(() => buildColumns(isGroupedBySeries), [isGroupedBySeries])
+
 	const table = useReactTable({
-		columns: baseColumns,
+		columns,
 		data: items,
 		getCoreRowModel: getCoreRowModel(),
 		getExpandedRowModel: getExpandedRowModel(),
@@ -120,44 +131,49 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 	const { rows } = table.getRowModel()
 
 	return (
-		<table>
-			<thead>
-				{table.getFlatHeaders().map((header) => (
-					<th key={header.id} className="h-10">
-						<div
-							className={cn('flex items-center gap-x-2', {
-								'cursor-pointer select-none': header.column.getCanSort(),
-							})}
-							onClick={header.column.getToggleSortingHandler()}
-							// style={{
-							// 	width: header.getSize(),
-							// }}
-						>
-							{flexRender(header.column.columnDef.header, header.getContext())}
-							<SortIcon direction={(header.column.getIsSorted() as SortDirection) ?? null} />
-						</div>
-					</th>
-				))}
-			</thead>
+		<>
+			<TableHeaderActions />
+			<table>
+				<thead>
+					{table.getFlatHeaders().map((header) => (
+						<th key={header.id} className="h-10 first:pl-4 last:pr-4">
+							<div
+								className={cn('flex items-center gap-x-2', {
+									'cursor-pointer select-none': header.column.getCanSort(),
+								})}
+								onClick={header.column.getToggleSortingHandler()}
+								// style={{
+								// 	width: header.getSize(),
+								// }}
+							>
+								{flexRender(header.column.columnDef.header, header.getContext())}
+								<SortIcon direction={(header.column.getIsSorted() as SortDirection) ?? null} />
+							</div>
+						</th>
+					))}
+				</thead>
 
-			<tbody className="divide divide-y divide-edge">
-				{rows.map((row) => (
-					<React.Fragment key={row.id}>
-						<tr key={row.id} className="h-10">
-							{row.getVisibleCells().map((cell) => (
-								<td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-							))}
-						</tr>
-						{row.getIsExpanded() && (
-							<tr key={row.id + 'expanded'}>
-								<td colSpan={baseColumns.length}>
-									<SmartListBookTable books={row.original.books} />
-								</td>
+				<tbody className="divide divide-y divide-edge">
+					{rows.map((row) => (
+						<React.Fragment key={row.id}>
+							<tr key={row.id} className="h-10">
+								{row.getVisibleCells().map((cell) => (
+									<td className="first:pl-4 last:pr-4" key={cell.id}>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</td>
+								))}
 							</tr>
-						)}
-					</React.Fragment>
-				))}
-			</tbody>
-		</table>
+							{row.getIsExpanded() && (
+								<tr key={row.id + 'expanded'}>
+									<td colSpan={columns.length}>
+										<SmartListBookTable books={row.original.books} />
+									</td>
+								</tr>
+							)}
+						</React.Fragment>
+					))}
+				</tbody>
+			</table>
+		</>
 	)
 }

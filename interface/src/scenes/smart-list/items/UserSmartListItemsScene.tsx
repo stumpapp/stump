@@ -4,12 +4,11 @@ import React from 'react'
 
 import { SceneContainer } from '@/components/container'
 
-import { useSmartListContext } from './context'
-import GroupedSmartListItemList from './GroupedSmartListItemList'
-import GroupedSmartListItemTable from './GroupedSmartListItemTable'
-import SmartListBookTable from './SmartListBookTable'
+import { useSmartListContext } from '../context'
+import { GroupedSmartListItemList } from './list'
+import { GroupedSmartListItemTable, SmartListBookTable } from './table'
 
-export default function UserSmartListScene() {
+export default function UserSmartListItemsScene() {
 	const {
 		list: { id },
 		layout,
@@ -46,6 +45,8 @@ export default function UserSmartListScene() {
 	}
 
 	return (
-		<SceneContainer className={cn({ 'p-0': layout === 'table' })}>{renderContent()}</SceneContainer>
+		<SceneContainer className={cn({ 'p-0 py-4': layout === 'table' })}>
+			{renderContent()}
+		</SceneContainer>
 	)
 }

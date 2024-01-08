@@ -564,6 +564,17 @@ model ReadingList {
   @@map("reading_lists")
 }
 
+model SmartListAccessRule {
+  role Int // 1: reader (read), 2: collaborator (read, edit), 3: co-creator (read, edit, delete)
+
+  user_id       String
+  smart_list_id String
+  smart_list    SmartList? @relation(fields: [smart_list_id], references: [id])
+
+  @@unique([user_id, smart_list_id])
+  @@map("smart_list_access_rules")
+}
+
 model SmartList {
   id String @id @default(cuid())
 
@@ -572,11 +583,13 @@ model SmartList {
   filters          Bytes
   joiner           String  @default("AND") // AND or OR
   default_grouping String  @default("BY_BOOKS") // BY_BOOKS, BY_SERIES, BY_LIBRARY
+  visibility       String  @default("PRIVATE") // PRIVATE, SHARED, PUBLIC
 
   creator_id String
   creator    User   @relation(fields: [creator_id], references: [id], onDelete: Cascade)
 
-  saved_views SmartListView[]
+  saved_views  SmartListView[]
+  access_rules SmartListAccessRule[]
 
   @@unique([creator_id, name])
   @@map("smart_lists")

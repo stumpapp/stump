@@ -9,7 +9,7 @@ use axum::{
 	routing::get,
 	Json, Router,
 };
-use prisma_client_rust::or;
+use prisma_client_rust::{and, or};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
@@ -17,11 +17,13 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::media_only_series_id, SmartList, SmartListItemGrouping,
-			SmartListItems, SmartListView, SmartListViewConfig, UserPermission,
+			SmartListItems, SmartListView, SmartListViewConfig, User, UserPermission,
 		},
 		filter::{FilterJoin, MediaSmartFilter, SmartFilter},
 	},
-	prisma::{library, series, smart_list, smart_list_view, user},
+	prisma::{
+		library, series, smart_list, smart_list_access_rule, smart_list_view, user,
+	},
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
@@ -38,6 +40,8 @@ pub(crate) fn mount() -> Router<AppState> {
 				)
 				.route("/items", get(get_smart_list_items))
 				.route("/meta", get(get_smart_list_meta))
+				// TODO: nest a router for updating access
+				.route("/access-rules", get(get_smart_list_access_rules))
 				.nest(
 					"/views",
 					Router::new()
@@ -56,6 +60,48 @@ pub(crate) fn mount() -> Router<AppState> {
 						),
 				),
 		)
+}
+
+/// Generates a single where param that asserts the user has access to a smart list
+pub(crate) fn smart_list_access_for_user(
+	user: &User,
+	minimum_role: i32,
+) -> smart_list::WhereParam {
+	let user_id = user.id.clone();
+	// A common condition that asserts there is an entry for the user that has a role
+	// greater than or equal to the minimum role:
+	// 1 for reader, 2 for collaborator, 3 for co-creator
+	let base_rule = smart_list::access_rules::some(vec![
+		smart_list_access_rule::user_id::equals(user_id.clone()),
+		smart_list_access_rule::role::gte(minimum_role),
+	]);
+
+	or![
+		// creator always has access
+		smart_list::creator_id::equals(user_id.clone()),
+		// condition where visibility is PUBLIC:
+		and![
+			// TODO: make enum
+			smart_list::visibility::equals("PUBLIC".to_string()),
+			// This asserts the reader rule is present OR there is no rule for the user
+			or![
+				base_rule.clone(),
+				smart_list::access_rules::none(vec![
+					smart_list_access_rule::user_id::equals(user_id.clone())
+				])
+			]
+		],
+		// condition where visibility is SHARED:
+		and![
+			smart_list::visibility::equals("SHARED".to_string()),
+			base_rule
+		],
+		// condition where visibility is PRIVATE:
+		and![
+			smart_list::visibility::equals("PRIVATE".to_string()),
+			smart_list::creator_id::equals(user_id)
+		]
+	]
 }
 
 #[derive(Deserialize, Debug, Type, ToSchema)]
@@ -84,9 +130,8 @@ async fn get_smart_lists(
 
 	let where_params = chain_optional_iter(
 		[],
-		// TODO: support shared smart lists
 		[
-			(!query_all).then(|| smart_list::creator_id::equals(user.id)),
+			(!query_all).then(|| smart_list_access_for_user(&user, 1)),
 			params.search.map(|search| {
 				or![
 					smart_list::name::contains(search.clone()),
@@ -168,13 +213,10 @@ async fn get_smart_list_by_id(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 1);
 	let smart_list = client
 		.smart_list()
-		.find_first(vec![
-			smart_list::id::equals(id),
-			// TODO: support shared smart lists
-			smart_list::creator_id::equals(user.id),
-		])
+		.find_first(vec![smart_list::id::equals(id), access_condition])
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
@@ -191,9 +233,11 @@ async fn delete_smart_list_by_id(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 3);
+
 	let smart_list = client
 		.smart_list()
-		.find_unique(smart_list::id::equals(id.clone()))
+		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
@@ -229,12 +273,10 @@ async fn get_smart_list_items(
 
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 1);
 	let smart_list: SmartList = client
 		.smart_list()
-		.find_first(vec![
-			smart_list::id::equals(id.clone()),
-			smart_list::creator_id::equals(user.id.clone()),
-		])
+		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?
@@ -271,12 +313,10 @@ async fn get_smart_list_meta(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 1);
 	let smart_list: SmartList = client
 		.smart_list()
-		.find_first(vec![
-			smart_list::id::equals(id.clone()),
-			smart_list::creator_id::equals(user.id),
-		])
+		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?
@@ -320,6 +360,11 @@ async fn get_smart_list_meta(
 	Ok(Json(meta))
 }
 
+// TODO: make me
+async fn get_smart_list_access_rules() {
+	unimplemented!()
+}
+
 async fn get_smart_list_views(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -329,14 +374,12 @@ async fn get_smart_list_views(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 1);
 	let saved_smart_list_views = client
 		.smart_list_view()
 		.find_many(vec![
 			smart_list_view::list_id::equals(id.clone()),
-			smart_list_view::list::is(vec![
-				// TODO: support shared smart lists
-				smart_list::creator_id::equals(user.id),
-			]),
+			smart_list_view::list::is(vec![access_condition]),
 		])
 		.exec()
 		.await?;
@@ -358,15 +401,13 @@ async fn get_smart_list_view(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 1);
 	let smart_list = client
 		.smart_list_view()
 		.find_first(vec![
 			smart_list_view::list_id::equals(id),
 			smart_list_view::name::equals(name),
-			smart_list_view::list::is(vec![
-				// TODO: support shared smart lists
-				smart_list::creator_id::equals(user.id),
-			]),
+			smart_list_view::list::is(vec![access_condition]),
 		])
 		.exec()
 		.await?
@@ -392,13 +433,14 @@ async fn create_smart_list_view(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	// NOTE: views are currently completely detatched from a user, rather they are tied
+	// only to the smart list. This makes _this_ aspect a bit awkward. For now, to not over
+	// complicate sharing and permissions, I will leave this as-is. But this can be a future
+	// improvement down the road.
+	let access_condition = smart_list_access_for_user(&user, 2);
 	let smart_list = client
 		.smart_list()
-		.find_first(vec![
-			smart_list::id::equals(id.clone()),
-			// TODO: support shared smart lists
-			smart_list::creator_id::equals(user.id),
-		])
+		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
@@ -439,13 +481,10 @@ async fn update_smart_list_view(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 2);
 	let smart_list = client
 		.smart_list()
-		.find_first(vec![
-			smart_list::id::equals(id.clone()),
-			// TODO: support shared smart lists
-			smart_list::creator_id::equals(user.id),
-		])
+		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
@@ -479,13 +518,10 @@ async fn delete_smart_list_view(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
+	let access_condition = smart_list_access_for_user(&user, 2);
 	let smart_list = client
 		.smart_list()
-		.find_first(vec![
-			smart_list::id::equals(id.clone()),
-			// TODO: support shared smart lists (check for delete perms)
-			smart_list::creator_id::equals(user.id),
-		])
+		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;

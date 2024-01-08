@@ -17,11 +17,11 @@ use stump_core::{
 	db::{
 		entity::{
 			macros::media_only_series_id, SmartList, SmartListItemGrouping,
-			SmartListItems, UserPermission,
+			SmartListItems, SmartListView, SmartListViewConfig, UserPermission,
 		},
 		filter::{FilterJoin, MediaSmartFilter, SmartFilter},
 	},
-	prisma::{library, series, smart_list, user},
+	prisma::{library, series, smart_list, smart_list_view, user},
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
@@ -37,7 +37,24 @@ pub(crate) fn mount() -> Router<AppState> {
 					get(get_smart_list_by_id).delete(delete_smart_list_by_id),
 				)
 				.route("/items", get(get_smart_list_items))
-				.route("/meta", get(get_smart_list_meta)),
+				.route("/meta", get(get_smart_list_meta))
+				.nest(
+					"/views",
+					Router::new()
+						.route(
+							"/",
+							get(get_smart_list_views).post(create_smart_list_view),
+						)
+						.nest(
+							"/:name",
+							Router::new().route(
+								"/",
+								get(get_smart_list_view)
+									.put(update_smart_list_view)
+									.delete(delete_smart_list_view),
+							),
+						),
+				),
 		)
 }
 
@@ -301,4 +318,183 @@ async fn get_smart_list_meta(
 		.await?;
 
 	Ok(Json(meta))
+}
+
+async fn get_smart_list_views(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<Vec<SmartListView>>> {
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let client = ctx.get_db();
+
+	let saved_smart_list_views = client
+		.smart_list_view()
+		.find_many(vec![
+			smart_list_view::list_id::equals(id.clone()),
+			smart_list_view::list::is(vec![
+				// TODO: support shared smart lists
+				smart_list::creator_id::equals(user.id),
+			]),
+		])
+		.exec()
+		.await?;
+
+	let smart_list_views = saved_smart_list_views
+		.into_iter()
+		.map(SmartListView::try_from)
+		.collect::<Result<Vec<_>, _>>()?;
+
+	Ok(Json(smart_list_views))
+}
+
+async fn get_smart_list_view(
+	Path((id, name)): Path<(String, String)>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<SmartListView>> {
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let client = ctx.get_db();
+
+	let smart_list = client
+		.smart_list_view()
+		.find_first(vec![
+			smart_list_view::list_id::equals(id),
+			smart_list_view::name::equals(name),
+			smart_list_view::list::is(vec![
+				// TODO: support shared smart lists
+				smart_list::creator_id::equals(user.id),
+			]),
+		])
+		.exec()
+		.await?
+		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+
+	Ok(Json(SmartListView::try_from(smart_list)?))
+}
+
+#[derive(Deserialize, Debug, Type, ToSchema)]
+pub struct CreateSmartListView {
+	pub name: String,
+	#[serde(flatten)]
+	pub config: SmartListViewConfig,
+}
+
+async fn create_smart_list_view(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(input): Json<CreateSmartListView>,
+) -> ApiResult<Json<SmartListView>> {
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let client = ctx.get_db();
+
+	let smart_list = client
+		.smart_list()
+		.find_first(vec![
+			smart_list::id::equals(id.clone()),
+			// TODO: support shared smart lists
+			smart_list::creator_id::equals(user.id),
+		])
+		.exec()
+		.await?
+		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+
+	let serialized_config = serde_json::to_vec(&input.config).map_err(|e| {
+		tracing::error!(?e, "Failed to serialize smart list view config");
+		ApiError::InternalServerError(e.to_string())
+	})?;
+
+	let smart_list_view = client
+		.smart_list_view()
+		.create(
+			input.name,
+			smart_list::id::equals(smart_list.id),
+			serialized_config,
+			vec![],
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(SmartListView::try_from(smart_list_view)?))
+}
+
+#[derive(Deserialize, Debug, Type, ToSchema)]
+pub struct UpdateSmartListView {
+	pub name: String,
+	#[serde(flatten)]
+	pub config: SmartListViewConfig,
+}
+
+async fn update_smart_list_view(
+	Path((id, name)): Path<(String, String)>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(input): Json<UpdateSmartListView>,
+) -> ApiResult<Json<SmartListView>> {
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let client = ctx.get_db();
+
+	let smart_list = client
+		.smart_list()
+		.find_first(vec![
+			smart_list::id::equals(id.clone()),
+			// TODO: support shared smart lists
+			smart_list::creator_id::equals(user.id),
+		])
+		.exec()
+		.await?
+		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+
+	let serialized_config = serde_json::to_vec(&input.config).map_err(|e| {
+		tracing::error!(?e, "Failed to serialize smart list view config");
+		ApiError::InternalServerError(e.to_string())
+	})?;
+
+	let updated_smart_list_view = client
+		.smart_list_view()
+		.update(
+			smart_list_view::list_id_name(smart_list.id, name),
+			vec![
+				smart_list_view::name::set(input.name),
+				smart_list_view::data::set(serialized_config),
+			],
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(SmartListView::try_from(updated_smart_list_view)?))
+}
+
+async fn delete_smart_list_view(
+	Path((id, name)): Path<(String, String)>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<SmartListView>> {
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let client = ctx.get_db();
+
+	let smart_list = client
+		.smart_list()
+		.find_first(vec![
+			smart_list::id::equals(id.clone()),
+			// TODO: support shared smart lists (check for delete perms)
+			smart_list::creator_id::equals(user.id),
+		])
+		.exec()
+		.await?
+		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+
+	let deleted_smart_list_view = client
+		.smart_list_view()
+		.delete(smart_list_view::list_id_name(smart_list.id, name))
+		.exec()
+		.await?;
+
+	Ok(Json(SmartListView::try_from(deleted_smart_list_view)?))
 }

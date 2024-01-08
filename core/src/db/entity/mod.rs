@@ -26,7 +26,9 @@ pub use smart_list::*;
 pub use tag::*;
 pub use user::*;
 
-pub use common::{Cursor, FileStatus, LayoutMode};
+pub use common::{
+	Cursor, FileStatus, LayoutMode, ResourceAccessRole, ResourceVisibility,
+};
 
 pub mod macros {
 	pub use super::book_club::prisma_macros::*;

@@ -16,8 +16,9 @@ use specta::Type;
 use stump_core::{
 	db::{
 		entity::{
-			macros::media_only_series_id, SmartList, SmartListItemGrouping,
-			SmartListItems, SmartListView, SmartListViewConfig, User, UserPermission,
+			macros::media_only_series_id, ResourceAccessRole, ResourceVisibility,
+			SmartList, SmartListItemGrouping, SmartListItems, SmartListView,
+			SmartListViewConfig, User, UserPermission,
 		},
 		filter::{FilterJoin, MediaSmartFilter, SmartFilter},
 	},
@@ -82,7 +83,7 @@ pub(crate) fn smart_list_access_for_user(
 		// condition where visibility is PUBLIC:
 		and![
 			// TODO: make enum
-			smart_list::visibility::equals("PUBLIC".to_string()),
+			smart_list::visibility::equals(ResourceVisibility::Public.to_string()),
 			// This asserts the reader rule is present OR there is no rule for the user
 			or![
 				base_rule.clone(),
@@ -93,12 +94,12 @@ pub(crate) fn smart_list_access_for_user(
 		],
 		// condition where visibility is SHARED:
 		and![
-			smart_list::visibility::equals("SHARED".to_string()),
+			smart_list::visibility::equals(ResourceVisibility::Shared.to_string()),
 			base_rule
 		],
 		// condition where visibility is PRIVATE:
 		and![
-			smart_list::visibility::equals("PRIVATE".to_string()),
+			smart_list::visibility::equals(ResourceVisibility::Private.to_string()),
 			smart_list::creator_id::equals(user_id)
 		]
 	]
@@ -131,7 +132,9 @@ async fn get_smart_lists(
 	let where_params = chain_optional_iter(
 		[],
 		[
-			(!query_all).then(|| smart_list_access_for_user(&user, 1)),
+			(!query_all).then(|| {
+				smart_list_access_for_user(&user, ResourceAccessRole::Reader.value())
+			}),
 			params.search.map(|search| {
 				or![
 					smart_list::name::contains(search.clone()),
@@ -213,7 +216,8 @@ async fn get_smart_list_by_id(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 1);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Reader.value());
 	let smart_list = client
 		.smart_list()
 		.find_first(vec![smart_list::id::equals(id), access_condition])
@@ -233,7 +237,8 @@ async fn delete_smart_list_by_id(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 3);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::CoCreator.value());
 
 	let smart_list = client
 		.smart_list()
@@ -273,7 +278,8 @@ async fn get_smart_list_items(
 
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 1);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Reader.value());
 	let smart_list: SmartList = client
 		.smart_list()
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
@@ -313,7 +319,8 @@ async fn get_smart_list_meta(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 1);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Reader.value());
 	let smart_list: SmartList = client
 		.smart_list()
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
@@ -374,7 +381,8 @@ async fn get_smart_list_views(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 1);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Reader.value());
 	let saved_smart_list_views = client
 		.smart_list_view()
 		.find_many(vec![
@@ -401,7 +409,8 @@ async fn get_smart_list_view(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 1);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Reader.value());
 	let smart_list = client
 		.smart_list_view()
 		.find_first(vec![
@@ -437,7 +446,8 @@ async fn create_smart_list_view(
 	// only to the smart list. This makes _this_ aspect a bit awkward. For now, to not over
 	// complicate sharing and permissions, I will leave this as-is. But this can be a future
 	// improvement down the road.
-	let access_condition = smart_list_access_for_user(&user, 2);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Writer.value());
 	let smart_list = client
 		.smart_list()
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
@@ -481,7 +491,8 @@ async fn update_smart_list_view(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 2);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Writer.value());
 	let smart_list = client
 		.smart_list()
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
@@ -518,7 +529,8 @@ async fn delete_smart_list_view(
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 	let client = ctx.get_db();
 
-	let access_condition = smart_list_access_for_user(&user, 2);
+	let access_condition =
+		smart_list_access_for_user(&user, ResourceAccessRole::Writer.value());
 	let smart_list = client
 		.smart_list()
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])

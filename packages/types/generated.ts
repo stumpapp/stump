@@ -84,7 +84,7 @@ export type SeriesSmartFilter = { name: Filter<string> } | { library: LibrarySma
 
 export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
 
-export type SmartListView = ({ columns: SmartListTableColumnSelection[]; sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
+export type SmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
 
 export type SmartListTableSortingState = { desc: boolean; id: string }
 

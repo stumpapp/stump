@@ -1,7 +1,6 @@
-import { cn, Text } from '@stump/components'
+import { cn } from '@stump/components'
 import { Library, Series, SmartListItemGroup } from '@stump/types'
 import {
-	createColumnHelper,
 	ExpandedState,
 	flexRender,
 	getCoreRowModel,
@@ -12,98 +11,15 @@ import {
 	SortingState,
 	useReactTable,
 } from '@tanstack/react-table'
-import { ChevronDown } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import { SortIcon } from '@/components/table'
 
-import { useSafeWorkingView } from '../../context'
+import { useSafeWorkingView, useSmartListContext } from '../../context'
+import { buildColumns, buildDefaultColumns } from './groupColumns'
 import { bookFuzzySearch } from './mediaColumns'
 import SmartListBookTable from './SmartListBookTable'
 import TableHeaderActions from './TableHeaderActions'
-
-type TableRow = SmartListItemGroup<Series> | SmartListItemGroup<Library>
-const columnHelper = createColumnHelper<TableRow>()
-
-const buildColumns = (isGroupedBySeries: boolean) => [
-	columnHelper.accessor('entity.name', {
-		cell: ({
-			row: {
-				original: {
-					entity: { name },
-				},
-				getToggleExpandedHandler,
-				getIsExpanded,
-				getCanExpand,
-			},
-		}) => {
-			const isExpanded = getIsExpanded()
-
-			return (
-				<button
-					title={isExpanded ? 'Collapse' : 'Expand'}
-					className="flex items-center gap-x-1"
-					onClick={getToggleExpandedHandler()}
-					disabled={!getCanExpand()}
-				>
-					<ChevronDown
-						className={cn('h-4 w-4 text-muted transition-transform duration-200', {
-							'rotate-180': isExpanded,
-						})}
-					/>
-					<Text className="line-clamp-1 text-left text-sm md:text-base">{name}</Text>
-				</button>
-			)
-		},
-		enableGlobalFilter: true,
-		enableSorting: true,
-		header: ({ table: { getToggleAllRowsExpandedHandler, getIsAllRowsExpanded } }) => {
-			const isAllRowsExpanded = getIsAllRowsExpanded()
-
-			return (
-				<div className="flex items-center gap-x-1">
-					<button
-						onClick={(e) => {
-							// Don't update the sorting state when clicking the expand all button
-							e.stopPropagation()
-							const handler = getToggleAllRowsExpandedHandler()
-							handler(e)
-						}}
-						title={isAllRowsExpanded ? 'Collapse all' : 'Expand all'}
-					>
-						<ChevronDown
-							className={cn('h-4 w-4 text-muted transition-transform duration-200', {
-								'rotate-180': isAllRowsExpanded,
-							})}
-						/>
-					</button>
-					<Text className="text-sm" variant="muted">
-						{isGroupedBySeries ? 'Series' : 'Library'}
-					</Text>
-				</div>
-			)
-		},
-	}),
-	columnHelper.accessor(({ books }) => books.length, {
-		cell: ({
-			row: {
-				original: { books },
-			},
-		}) => (
-			<Text size="sm" variant="muted">
-				{books.length}
-			</Text>
-		),
-		enableGlobalFilter: true,
-		enableSorting: true,
-		header: () => (
-			<Text size="sm" className="text-left" variant="muted">
-				Books
-			</Text>
-		),
-		id: 'books',
-	}),
-]
 
 type Props = {
 	items: SmartListItemGroup<Series>[] | SmartListItemGroup<Library>[]
@@ -111,17 +27,48 @@ type Props = {
 
 // TODO: virtualization
 export default function GroupedSmartListItemTable({ items }: Props) {
+	const { workingView, updateWorkingView } = useSmartListContext()
 	const {
 		workingView: { search },
 	} = useSafeWorkingView()
 
-	// TODO: sorting state from view
-	const [sortState, setSortState] = useState<SortingState>([])
 	const [expanded, setExpanded] = useState<ExpandedState>({})
 
 	const isGroupedBySeries = 'library_id' in (items[0]?.entity ?? {})
 
-	const columns = useMemo(() => buildColumns(isGroupedBySeries), [isGroupedBySeries])
+	/**
+	 * The columns selected in the working view
+	 */
+	const columns = useMemo(
+		() =>
+			workingView?.group_columns?.length
+				? buildColumns(isGroupedBySeries, workingView.group_columns)
+				: buildDefaultColumns(isGroupedBySeries),
+		[workingView, isGroupedBySeries],
+	)
+
+	/**
+	 * The current sorting state as it is stored in the working view
+	 */
+	const sorting = useMemo(() => workingView?.group_sorting ?? [], [workingView])
+	/**
+	 * A callback to update the sorting state of the table. This updates the current working view
+	 */
+	const setSorting = useCallback(
+		(updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
+			if (typeof updaterOrValue === 'function') {
+				const updated = updaterOrValue(sorting)
+				updateWorkingView({
+					group_sorting: updated.length ? updated : undefined,
+				})
+			} else {
+				updateWorkingView({
+					group_sorting: updaterOrValue.length ? updaterOrValue : undefined,
+				})
+			}
+		},
+		[updateWorkingView, sorting],
+	)
 
 	const table = useReactTable({
 		columns,
@@ -131,7 +78,7 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 		getFilteredRowModel: getFilteredRowModel(),
 		getRowCanExpand: () => true,
 		getSortedRowModel: getSortedRowModel(),
-		// TODO: this needs a bit of work I think, I think maybe separating the searches??
+		// TODO: this needs a bit of work I think...
 		globalFilterFn: (
 			{
 				original: {
@@ -153,11 +100,11 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 			}
 		},
 		onExpandedChange: setExpanded,
-		onSortingChange: setSortState,
+		onSortingChange: setSorting,
 		state: {
 			expanded,
 			globalFilter: search,
-			sorting: sortState,
+			sorting,
 		},
 	})
 

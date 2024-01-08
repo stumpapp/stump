@@ -38,9 +38,11 @@ export default function UserSmartListLayout() {
 		}
 
 		return (
-			selectedView.columns !== workingView.columns ||
+			selectedView.book_columns !== workingView.book_columns ||
 			selectedView.search !== workingView.search ||
-			selectedView.sorting !== workingView.sorting
+			selectedView.book_sorting !== workingView.book_sorting ||
+			selectedView.group_columns !== workingView.group_columns ||
+			selectedView.group_sorting !== workingView.group_sorting
 		)
 	}, [selectedView, workingView])
 

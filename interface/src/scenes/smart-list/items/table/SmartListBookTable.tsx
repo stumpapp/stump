@@ -40,14 +40,15 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 	 * The columns selected in the working view
 	 */
 	const columns = useMemo(
-		() => (workingView?.columns?.length ? buildColumns(workingView.columns) : defaultColumns),
+		() =>
+			workingView?.book_columns?.length ? buildColumns(workingView.book_columns) : defaultColumns,
 		[workingView],
 	)
 
 	/**
 	 * The current sorting state as it is stored in the working view
 	 */
-	const sorting = useMemo(() => workingView?.sorting ?? [], [workingView])
+	const sorting = useMemo(() => workingView?.book_sorting ?? [], [workingView])
 	/**
 	 * A callback to update the sorting state of the table. This updates the current working view
 	 */
@@ -56,11 +57,11 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 			if (typeof updaterOrValue === 'function') {
 				const updated = updaterOrValue(sorting)
 				updateWorkingView({
-					sorting: updated.length ? updated : undefined,
+					book_sorting: updated.length ? updated : undefined,
 				})
 			} else {
 				updateWorkingView({
-					sorting: updaterOrValue.length ? updaterOrValue : undefined,
+					book_sorting: updaterOrValue.length ? updaterOrValue : undefined,
 				})
 			}
 		},
@@ -70,6 +71,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 	const table = useReactTable({
 		columns,
 		data: books,
+		// FIXME: multi-sort not working when set
 		enableMultiSort: enable_multi_sort ?? false,
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),

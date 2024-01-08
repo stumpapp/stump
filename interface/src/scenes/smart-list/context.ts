@@ -1,12 +1,28 @@
-import { SmartList, SmartListMeta, SmartListView } from '@stump/types'
+import { SmartList, SmartListItemGrouping, SmartListMeta, SmartListView } from '@stump/types'
 import { createContext, useContext } from 'react'
 
+import { buildColumns as buildGroupColumns } from './items/table/groupColumns'
 import { defaultColumns } from './items/table/mediaColumns'
 
 export type WorkingView = Omit<SmartListView, 'name' | 'list_id'>
 export const defaultWorkingView: WorkingView = {
-	columns: defaultColumns.map(({ id }, position) => ({ id: id || '', position })),
-	sorting: null,
+	book_columns: defaultColumns.map(({ id }, position) => ({ id: id || '', position })),
+	book_sorting: null,
+	group_columns: [],
+	group_sorting: null,
+}
+const buildDefaultWorkingView = (grouping?: SmartListItemGrouping): WorkingView => {
+	if (!grouping || grouping === 'BY_BOOKS') {
+		return defaultWorkingView
+	} else {
+		return {
+			...defaultWorkingView,
+			group_columns: buildGroupColumns(grouping === 'BY_SERIES', []).map(({ id }, position) => ({
+				id: id || '',
+				position,
+			})),
+		}
+	}
 }
 
 export type ISmartListContext = {
@@ -39,15 +55,20 @@ export const useSmartListContext = () => {
 }
 
 export const useSafeWorkingView = () => {
-	const { workingViewIsDifferent, workingView, saveWorkingView, updateWorkingView } =
-		useSmartListContext()
+	const {
+		workingViewIsDifferent,
+		workingView,
+		saveWorkingView,
+		updateWorkingView,
+		list: { default_grouping },
+	} = useSmartListContext()
 
 	const workingViewIsDefined = !!workingView
 
 	return {
 		saveWorkingView,
 		updateWorkingView,
-		workingView: workingView || defaultWorkingView,
+		workingView: workingView || buildDefaultWorkingView(default_grouping),
 		workingViewIsDefined,
 		workingViewIsDifferent,
 	}

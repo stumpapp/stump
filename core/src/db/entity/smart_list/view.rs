@@ -18,11 +18,16 @@ pub struct SmartListView {
 #[derive(Default, Clone, Debug, Deserialize, Serialize, Type, ToSchema)]
 
 pub struct SmartListViewConfig {
-	/// The columns present in the table
-	columns: Vec<SmartListTableColumnSelection>,
-	/// The sorting state of the table view
-	#[serde(rename = "sorting")]
-	sorting_state: Option<Vec<SmartListTableSortingState>>,
+	/// The columns present in the book table(s)
+	book_columns: Vec<SmartListTableColumnSelection>,
+	/// The columns present in the grouping entity table
+	group_columns: Vec<SmartListTableColumnSelection>,
+	/// The sorting state of the book table(s)
+	#[serde(rename = "book_sorting")]
+	book_sorting_state: Option<Vec<SmartListTableSortingState>>,
+	/// The sorting state of the grouping entity table view
+	#[serde(rename = "group_sorting")]
+	group_sorting_state: Option<Vec<SmartListTableSortingState>>,
 	/// Whether the table view allows multi-sorting
 	#[serde(default)]
 	#[specta(optional)]

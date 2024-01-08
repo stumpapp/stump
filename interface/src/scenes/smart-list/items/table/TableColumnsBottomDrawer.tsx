@@ -10,27 +10,51 @@ import {
 } from '@stump/components'
 import { TableProperties } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
 
-import { useSafeWorkingView } from '../../context'
-import { columnOptionMap } from './mediaColumns'
+import { useSafeWorkingView, useSmartListContext } from '../../context'
+import { getColumnOptionMap as getGroupColumnOptionMap } from './groupColumns'
+import { columnOptionMap as mediaColumnOptionMap } from './mediaColumns'
 
 export default function TableColumnsBottomDrawer() {
 	const {
-		workingView: { columns: selectedColumns, enable_multi_sort },
+		list: { default_grouping },
+	} = useSmartListContext()
+	const {
+		workingView: {
+			book_columns: selectedBookColumns,
+			group_columns: selectedGroupColumns,
+			enable_multi_sort,
+		},
 		updateWorkingView,
 	} = useSafeWorkingView()
 
+	const isGrouped = !default_grouping || default_grouping !== 'BY_BOOKS'
+
 	/**
-	 * The local state to track the selected columns. This will be used to update the
-	 * context working view once the user clicks save
+	 * The local state to track the selected columns for the book table(s). This will be used to
+	 * update the context working view once the user clicks save
 	 */
-	const [selectState, setSelectState] = useState<Record<string, boolean>>(() => {
+	const [bookColumnState, setBookColumnState] = useState<Record<string, boolean>>(() => {
 		const state: Record<string, boolean> = {}
-		selectedColumns.forEach(({ id }) => {
+		selectedBookColumns.forEach(({ id }) => {
 			state[id] = true
 		})
 		return state
 	})
+
+	/**
+	 * The local state to track the selected columns of the parent table (if any)
+	 */
+	const [groupByEntityColumnState, setGroupByEntityColumnState] = useState<Record<string, boolean>>(
+		() => {
+			const state: Record<string, boolean> = {}
+			selectedGroupColumns.forEach(({ id }) => {
+				state[id] = true
+			})
+			return state
+		},
+	)
 
 	/**
 	 * The local state to track whether multi-sort is enabled
@@ -40,46 +64,67 @@ export default function TableColumnsBottomDrawer() {
 	/**
 	 * The options available to the user to select from
 	 */
-	const columnOptions = useMemo(
+	const bookColumnOptions = useMemo(
 		() =>
-			Object.entries(columnOptionMap).map(([key, label]) => ({
-				isSelected: selectState[key] ?? false,
+			Object.entries(mediaColumnOptionMap).map(([key, label]) => ({
+				isSelected: bookColumnState[key] ?? false,
 				label,
 				value: key,
 			})),
-		[selectState],
+		[bookColumnState],
 	)
 
+	const isGroupedBySeries = default_grouping === 'BY_SERIES'
+	const groupColumnOptions = useMemo(() => {
+		if (isGrouped) {
+			const all = getGroupColumnOptionMap(isGroupedBySeries)
+			return Object.entries(all).map(([key, label]) => ({
+				isSelected: groupByEntityColumnState[key] ?? false,
+				label,
+				value: key,
+			}))
+		}
+
+		return []
+	}, [isGrouped, isGroupedBySeries, groupByEntityColumnState])
+
 	/**
-	 * A callback to update the local state when a column is selected or deselected
+	 * A callback to update the local state when a book column is selected or deselected
 	 * @param id The ID of the column to update
 	 */
-	const handleChangeColumnState = (id: string) => {
-		setSelectState((state) => ({ ...state, [id]: !state[id] }))
+	const handleChangeBookColumnState = (id: string) => {
+		setBookColumnState((state) => ({ ...state, [id]: !state[id] }))
+	}
+
+	/**
+	 * A callback to update the local state when a group column is selected or deselected
+	 * @param id
+	 */
+	const handleChangeGroupColumnState = (id: string) => {
+		setGroupByEntityColumnState((state) => ({ ...state, [id]: !state[id] }))
 	}
 
 	/**
 	 * A callback to update the working view with the current local state
 	 */
 	const handleSave = () => {
-		const columns = Object.entries(selectState)
+		const bookColumns = Object.entries(bookColumnState)
 			.filter(([, isSelected]) => isSelected)
 			.map(([id], idx) => ({ id, position: idx }))
 
+		const groupColumns = Object.entries(groupByEntityColumnState)
+			.filter(([, isSelected]) => isSelected)
+			.map(([id], idx) => ({ id, position: idx }))
+
+		if (!bookColumns.length || !groupColumns.length) {
+			toast.error('You must select at least one column')
+			return
+		}
+
 		const enable_multi_sort = multiSort || undefined
 
-		updateWorkingView({ columns, enable_multi_sort })
+		updateWorkingView({ book_columns: bookColumns, enable_multi_sort, group_columns: groupColumns })
 	}
-
-	// const handleReset = useCallback(() => {
-	// 	setSelectState(() => {
-	// 		const newState: Record<string, boolean> = {}
-	// 		selectedColumns.forEach(({ id }) => {
-	// 			newState[id] = true
-	// 		})
-	// 		return newState
-	// 	})
-	// }, [selectedColumns])
 
 	return (
 		<Drawer>
@@ -97,18 +142,40 @@ export default function TableColumnsBottomDrawer() {
 						<Drawer.Description>Choose which columns to display or hide</Drawer.Description>
 					</Drawer.Header>
 					<div className="flex flex-col gap-y-6 p-4 pb-0">
+						{isGrouped && (
+							<div>
+								<Label>Group columns</Label>
+								<Text size="sm" variant="muted">
+									This only affects the parent table by which books are grouped
+								</Text>
+								<div className="mt-3 grid grid-cols-5 gap-x-2 gap-y-4">
+									{groupColumnOptions.map(({ label, value, isSelected }) => (
+										<CheckBox
+											id={value}
+											checked={isSelected}
+											key={value}
+											label={label}
+											onClick={() => handleChangeGroupColumnState(value)}
+											variant="primary"
+										/>
+									))}
+								</div>
+							</div>
+						)}
+
 						<div>
 							<Label>Book columns</Label>
 							<Text size="sm" variant="muted">
 								This only affects the nested book table(s)
 							</Text>
 							<div className="mt-3 grid grid-cols-5 gap-x-2 gap-y-4">
-								{columnOptions.map(({ label, value, isSelected }) => (
+								{bookColumnOptions.map(({ label, value, isSelected }) => (
 									<CheckBox
+										id={value}
 										checked={isSelected}
 										key={value}
 										label={label}
-										onClick={() => handleChangeColumnState(value)}
+										onClick={() => handleChangeBookColumnState(value)}
 										variant="primary"
 									/>
 								))}

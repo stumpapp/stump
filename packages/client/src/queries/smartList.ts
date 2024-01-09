@@ -1,8 +1,15 @@
 import { smartListApi, smartListQueryKeys } from '@stump/api'
-import { GetSmartListsParams, SmartList, SmartListItems, SmartListMeta } from '@stump/types'
+import {
+	CreateSmartList,
+	GetSmartListsParams,
+	SmartList,
+	SmartListItems,
+	SmartListMeta,
+} from '@stump/types'
 import { useQueries, UseQueryResult } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 
-import { queryClient, QueryOptions, useQuery } from '../client'
+import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { QueryClientContext } from '../context'
 
 type UseBookClubsQueryOptions = QueryOptions<SmartList[]> & {
@@ -118,5 +125,27 @@ export function useSmartListWithMetaQuery({ id }: UseSmartListItemsWithMetaQuery
 		listQuery,
 		meta,
 		metaQuery,
+	}
+}
+
+// TODO: different types!
+type UseUpdateSmartListMutationOptions = {
+	id: string
+} & MutationOptions<SmartList, AxiosError, CreateSmartList>
+export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartListMutationOptions) {
+	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
+		[smartListQueryKeys.updateSmartList, id],
+		async (updates: CreateSmartList) => {
+			const { data } = await smartListApi.updateSmartList(id, updates)
+			return data
+		},
+		options,
+	)
+
+	return {
+		isMutating: isLoading,
+		update: mutate,
+		updateAsync: mutateAsync,
+		...restReturn,
 	}
 }

@@ -1,4 +1,10 @@
-import { GetSmartListsParams, SmartList, SmartListItems, SmartListMeta } from '@stump/types'
+import {
+	CreateSmartList,
+	GetSmartListsParams,
+	SmartList,
+	SmartListItems,
+	SmartListMeta,
+} from '@stump/types'
 
 import { API } from './axios'
 import { ApiResult } from './types'
@@ -29,9 +35,13 @@ export async function getSmartListItems(id: string): Promise<ApiResult<SmartList
 	return API.get(`/smart-lists/${id}/items`)
 }
 
-// export async function updateSmartList(id: string, payload: SmartList): Promise<ApiResult<SmartList>> {
-//   return API.put(`/smart-lists/${id}`, payload)
-// }
+// TODO: different types!
+export async function updateSmartList(
+	id: string,
+	payload: CreateSmartList,
+): Promise<ApiResult<SmartList>> {
+	return API.put(`/smart-lists/${id}`, payload)
+}
 
 export async function deleteSmartList(id: string): Promise<ApiResult<SmartList>> {
 	return API.delete(`/smart-lists/${id}`)
@@ -44,6 +54,7 @@ export const smartListApi = {
 	getSmartListItems,
 	getSmartListMeta,
 	getSmartLists,
+	updateSmartList,
 }
 
 export const smartListQueryKeys: Record<keyof typeof smartListApi, string> = {
@@ -53,4 +64,5 @@ export const smartListQueryKeys: Record<keyof typeof smartListApi, string> = {
 	getSmartListItems: 'smartlist.getItems',
 	getSmartListMeta: 'smartlist.getMeta',
 	getSmartLists: 'smartlist.get',
+	updateSmartList: 'smartlist.update',
 }

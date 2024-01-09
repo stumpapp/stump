@@ -48,6 +48,7 @@ export {
 	useSmartListQuery,
 	useSmartListsQuery,
 	useSmartListWithMetaQuery,
+	useUpdateSmartListMutation,
 } from './smartList'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {

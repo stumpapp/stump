@@ -1,5 +1,5 @@
-import { useSmartListWithMetaQuery } from '@stump/client'
-import { SmartListView } from '@stump/types'
+import { useSmartListWithMetaQuery, useUpdateSmartListMutation } from '@stump/client'
+import { SmartList, SmartListView } from '@stump/types'
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router'
 
@@ -55,6 +55,16 @@ export default function UserSmartListLayout() {
 		meta,
 		listQuery: { isLoading: isLoadingList },
 	} = useSmartListWithMetaQuery({ id })
+	const { updateAsync } = useUpdateSmartListMutation({ id })
+
+	const patchSmartList = useCallback(
+		async (updates: Partial<SmartList>) => {
+			if (list) {
+				await updateAsync({ ...list, ...updates })
+			}
+		},
+		[list, updateAsync],
+	)
 
 	/**
 	 * A function to update the local working view state without storing it in the DB
@@ -126,6 +136,7 @@ export default function UserSmartListLayout() {
 				layout,
 				list,
 				meta,
+				patchSmartList,
 				saveWorkingView,
 				selectStoredView: setSelectedView,
 				selectedView,

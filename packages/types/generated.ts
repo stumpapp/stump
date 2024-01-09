@@ -3,6 +3,10 @@
 
 // CORE TYPE GENERATION
 
+export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
+
+export type AccessRole = "Reader" | "Writer" | "CoCreator"
+
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 
 /**
@@ -72,7 +76,7 @@ export type SmartListItemGroup<E> = { entity: E; books: Media[] }
 
 export type SmartListItems = { type: "Books"; items: Media[] } | { type: "Series"; items: SmartListItemGroup<Series>[] } | { type: "Library"; items: SmartListItemGroup<Library>[] }
 
-export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin; default_grouping?: SmartListItemGrouping; saved_views?: SmartListView[] | null }
+export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; visibility: EntityVisibility; joiner: FilterJoin; default_grouping: SmartListItemGrouping; saved_views: SmartListView[] | null }
 
 export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 
@@ -264,7 +268,7 @@ export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_bas
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
-export type CreateSmartList = { name: string; description: string | null; filter: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
+export type CreateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
 
 export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
 

@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::{
-		entity::{Library, Media, Series, User},
+		entity::{EntityVisibility, Library, Media, Series, User},
 		filter::{FilterGroup, FilterJoin, MediaSmartFilter, SmartFilter},
 	},
 	prisma::{library, media, read_progress, series, smart_list, PrismaClient},
@@ -24,11 +24,9 @@ pub struct SmartList {
 	pub name: String,
 	pub description: Option<String>,
 	pub filters: SmartFilter<MediaSmartFilter>,
-	#[serde(default)]
+	pub visibility: EntityVisibility,
 	pub joiner: FilterJoin,
-	#[serde(default)]
 	pub default_grouping: SmartListItemGrouping,
-	#[serde(default)]
 	pub saved_views: Option<Vec<SmartListView>>,
 }
 
@@ -213,6 +211,10 @@ impl TryFrom<smart_list::Data> for SmartList {
 					tracing::error!(?e, "Failed to convert smart list default grouping");
 					SmartListItemGrouping::ByBooks
 				}),
+			visibility: EntityVisibility::from_str(&value.visibility).map_err(|e| {
+				tracing::error!(?e, "Failed to deserialize smart list visibility");
+				CoreError::InternalError(e.to_string())
+			})?,
 			saved_views,
 		})
 	}

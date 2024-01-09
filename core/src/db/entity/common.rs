@@ -66,7 +66,7 @@ impl FromStr for FileStatus {
 #[derive(
 	Debug, Default, Deserialize, Serialize, Type, ToSchema, Clone, Copy, PartialEq, Eq,
 )]
-pub enum ResourceVisibility {
+pub enum EntityVisibility {
 	#[serde(rename = "PUBLIC")]
 	Public,
 	#[serde(rename = "SHARED")]
@@ -76,30 +76,43 @@ pub enum ResourceVisibility {
 	Private,
 }
 
-impl fmt::Display for ResourceVisibility {
+impl fmt::Display for EntityVisibility {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		match self {
-			ResourceVisibility::Public => write!(f, "PUBLIC"),
-			ResourceVisibility::Shared => write!(f, "SHARED"),
-			ResourceVisibility::Private => write!(f, "PRIVATE"),
+			EntityVisibility::Public => write!(f, "PUBLIC"),
+			EntityVisibility::Shared => write!(f, "SHARED"),
+			EntityVisibility::Private => write!(f, "PRIVATE"),
+		}
+	}
+}
+
+impl FromStr for EntityVisibility {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"PUBLIC" => Ok(EntityVisibility::Public),
+			"SHARED" => Ok(EntityVisibility::Shared),
+			"PRIVATE" => Ok(EntityVisibility::Private),
+			_ => Err(format!("Invalid visibility: {}", s)),
 		}
 	}
 }
 
 #[derive(Debug, Default, Deserialize, Serialize, Type, ToSchema, Clone, Copy)]
-pub enum ResourceAccessRole {
+pub enum AccessRole {
 	#[default]
 	Reader = 1,
 	Writer = 2,
 	CoCreator = 3,
 }
 
-impl ResourceAccessRole {
+impl AccessRole {
 	pub fn value(&self) -> i32 {
 		match self {
-			ResourceAccessRole::Reader => 1,
-			ResourceAccessRole::Writer => 2,
-			ResourceAccessRole::CoCreator => 3,
+			AccessRole::Reader => 1,
+			AccessRole::Writer => 2,
+			AccessRole::CoCreator => 3,
 		}
 	}
 }

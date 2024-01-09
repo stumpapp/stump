@@ -38,6 +38,8 @@ export type ISmartListContext = {
 	selectStoredView: (view: SmartListView) => void
 	updateSelectedStoredView: (view: SmartListView) => void
 
+	patchSmartList: (updates: Partial<SmartList>) => Promise<void>
+
 	layout: 'table' | 'list'
 	setLayout: (layout: 'table' | 'list') => void
 }

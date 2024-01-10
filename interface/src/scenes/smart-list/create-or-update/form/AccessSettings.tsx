@@ -3,7 +3,7 @@ import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { match } from 'ts-pattern'
 
-import { Schema } from './CreateSmartListForm'
+import { Schema } from './schema'
 
 type SubSchema = Pick<Schema, 'visibility'>
 

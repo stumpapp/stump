@@ -2,7 +2,7 @@ import { Heading, Input, Text, TextArea } from '@stump/components'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { Schema } from './CreateSmartListForm'
+import { Schema } from './schema'
 
 type SubSchema = Pick<Schema, 'name' | 'description'>
 

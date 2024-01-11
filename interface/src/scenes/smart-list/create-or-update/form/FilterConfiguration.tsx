@@ -15,28 +15,30 @@ import { useFieldArray, useFormContext } from 'react-hook-form'
 
 import { defaultMediaFilter, Schema, toAPIFilters } from './schema'
 
-type SubSchema = Pick<Schema, 'filters'>
-
 export default function FilterConfiguration() {
-	const form = useFormContext<SubSchema>()
-	const { append, remove } = useFieldArray<SubSchema>({
+	const form = useFormContext<Schema>()
+	const { append, remove } = useFieldArray<Schema>({
 		name: 'filters.groups',
 	})
 
-	const [groups, joiner] = form.watch(['filters.groups', 'filters.joiner'])
+	// FIXME: This watch does not work >:(
+	// const [groups, joiner] = form.watch(['filters.groups', 'filters.joiner'])
 
 	const apiFilters = useMemo(
 		() =>
 			toAPIFilters({
-				groups: groups ?? [],
-				joiner,
+				groups: form.getValues('filters.groups') ?? [],
+				joiner: form.getValues('filters.joiner') ?? 'AND',
 			}),
-		[groups, joiner],
+		[form],
 	)
 	const formattedFilters = useMemo(() => JSON.stringify(apiFilters, null, 2), [apiFilters])
 
 	const handleAddGroup = () => append({ filters: [], joiner: 'and' })
 	const handleRemoveGroup = (index: number) => remove(index)
+
+	const groupCount = form.getValues('filters.groups').length
+	const joiner = form.getValues('filters.joiner')
 
 	return (
 		<div className="flex flex-col gap-y-6">
@@ -82,11 +84,11 @@ export default function FilterConfiguration() {
 			<div>
 				<Label>Groups</Label>
 				<div className="mt-4 flex flex-col gap-y-6">
-					{groups.map((_, index) => (
+					{form.getValues('filters.groups').map((_, index) => (
 						<FilterGroup
 							key={index}
-							index={index}
-							onRemove={groups.length > 1 ? () => handleRemoveGroup(index) : undefined}
+							groupIndex={index}
+							onRemove={groupCount > 1 ? () => handleRemoveGroup(index) : undefined}
 						/>
 					))}
 
@@ -102,20 +104,20 @@ export default function FilterConfiguration() {
 }
 
 type FilterGroupProps = {
-	index: number
+	groupIndex: number
 	onRemove?: () => void
 }
-function FilterGroup({ index, onRemove }: FilterGroupProps) {
-	const form = useFormContext<SubSchema>()
+function FilterGroup({ groupIndex, onRemove }: FilterGroupProps) {
+	const form = useFormContext<Schema>()
 
-	const { filters, joiner } = form.watch(`filters.groups.${index}`)
+	const { filters, joiner } = form.watch(`filters.groups.${groupIndex}`)
 
-	const { append } = useFieldArray<SubSchema>({
-		name: `filters.groups.${index}.filters` as const,
+	const { append } = useFieldArray<Schema>({
+		name: `filters.groups.${groupIndex}.filters` as const,
 	})
 
 	return (
-		<Card key={index} className="relative flex flex-col gap-y-4 p-4">
+		<Card key={groupIndex} className="relative flex flex-col gap-y-4 p-4">
 			<div className="flex flex-col gap-y-1.5">
 				<Label>Join method</Label>
 				<NativeSelect
@@ -124,7 +126,8 @@ function FilterGroup({ index, onRemove }: FilterGroupProps) {
 						{ label: 'Any', value: 'or' },
 						{ label: 'None', value: 'not' },
 					]}
-					{...form.register(`filters.groups.${index}.joiner`)}
+					className="md:w-36"
+					{...form.register(`filters.groups.${groupIndex}.joiner`)}
 				/>
 				<Text variant="muted" size="xs">
 					{joiner === 'and'
@@ -136,14 +139,13 @@ function FilterGroup({ index, onRemove }: FilterGroupProps) {
 			</div>
 
 			<div className="flex flex-col gap-y-4">
-				{filters.map((filter, index) => (
-					// <Filter
-					// 	key={index}
-					// 	index={index}
-					// 	onRemove={filters.length > 1 ? () => remove(index) : undefined}
-					// />
-
-					<div key={index}>{JSON.stringify(filter)}</div>
+				{filters.map((_, index) => (
+					<Filter
+						key={index}
+						groupIndex={groupIndex}
+						filterIndex={index}
+						// onRemove={filters.length > 1 ? () => {} : undefined}
+					/>
 				))}
 			</div>
 
@@ -168,4 +170,17 @@ function FilterGroup({ index, onRemove }: FilterGroupProps) {
 			)}
 		</Card>
 	)
+}
+
+type FilterProps = {
+	groupIndex: number
+	filterIndex: number
+	onRemove?: () => void
+}
+function Filter({ groupIndex, filterIndex }: FilterProps) {
+	const form = useFormContext<Schema>()
+
+	const filter = form.watch(`filters.groups.${groupIndex}.filters.${filterIndex}`)
+
+	return <div>{JSON.stringify(filter)}</div>
 }

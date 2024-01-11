@@ -288,6 +288,9 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataSmartFilter>()?).as_bytes(),
 		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SeriesMetadataSmartFilter>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesSmartFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibrarySmartFilter>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartListView>()?).as_bytes())?;

@@ -61,7 +61,7 @@
 		"@types/react-helmet": "^6.1.8",
 		"@types/react-router-dom": "^5.3.3",
 		"@vitejs/plugin-react": "^4.1.0",
-		"typescript": "^5.2.2",
+		"typescript": "^5.3.3",
 		"vite": "^4.5.0"
 	},
 	"peerDependencies": {

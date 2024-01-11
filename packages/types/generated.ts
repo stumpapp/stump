@@ -80,11 +80,13 @@ export type SmartList = { id: string; name: string; description: string | null; 
 
 export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 
-export type MediaSmartFilter = { name: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
+export type MediaSmartFilter = { name: Filter<string> } | { extension: Filter<string> } | { path: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
 
-export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { character: Filter<string> } | { colorist: Filter<string> } | { writer: Filter<string> } | { penciller: Filter<string> } | { letterer: Filter<string> } | { inker: Filter<string> } | { editor: Filter<string> } | { age_rating: Filter<number> }
+export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { character: Filter<string> } | { colorist: Filter<string> } | { writer: Filter<string> } | { penciller: Filter<string> } | { letterer: Filter<string> } | { inker: Filter<string> } | { editor: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
 
-export type SeriesSmartFilter = { name: Filter<string> } | { library: LibrarySmartFilter }
+export type SeriesMetadataSmartFilter = { meta_type: Filter<string> } | { publisher: Filter<string> } | { status: Filter<string> } | { age_rating: Filter<number> } | { volume: Filter<number> }
+
+export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string> } | { metadata: SeriesMetadataSmartFilter } | { library: LibrarySmartFilter }
 
 export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
 

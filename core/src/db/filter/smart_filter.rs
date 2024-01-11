@@ -256,9 +256,60 @@ impl LibrarySmartFilter {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
 #[serde(untagged)]
+pub enum SeriesMetadataSmartFilter {
+	MetaType { meta_type: Filter<String> },
+	Publisher { publisher: Filter<String> },
+	Status { status: Filter<String> },
+	AgeRating { age_rating: Filter<i32> },
+	Volume { volume: Filter<i32> },
+}
+
+impl SeriesMetadataSmartFilter {
+	pub fn into_params(self) -> series_metadata::WhereParam {
+		match self {
+			SeriesMetadataSmartFilter::MetaType { meta_type } => meta_type.into_params(
+				series_metadata::meta_type::equals,
+				series_metadata::meta_type::contains,
+				series_metadata::meta_type::in_vec,
+			),
+			SeriesMetadataSmartFilter::Publisher { publisher } => publisher
+				.into_optional_params(
+					series_metadata::publisher::equals,
+					series_metadata::publisher::contains,
+					series_metadata::publisher::in_vec,
+				),
+			SeriesMetadataSmartFilter::Status { status } => status.into_optional_params(
+				series_metadata::status::equals,
+				series_metadata::status::contains,
+				series_metadata::status::in_vec,
+			),
+			SeriesMetadataSmartFilter::AgeRating { age_rating } => age_rating
+				.into_optional_numeric_params(
+					series_metadata::age_rating::equals,
+					series_metadata::age_rating::gt,
+					series_metadata::age_rating::gte,
+					series_metadata::age_rating::lt,
+					series_metadata::age_rating::lte,
+				),
+			SeriesMetadataSmartFilter::Volume { volume } => volume
+				.into_optional_numeric_params(
+					series_metadata::volume::equals,
+					series_metadata::volume::gt,
+					series_metadata::volume::gte,
+					series_metadata::volume::lt,
+					series_metadata::volume::lte,
+				),
+		}
+	}
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[serde(untagged)]
 pub enum SeriesSmartFilter {
 	Name { name: Filter<String> },
+	Path { path: Filter<String> },
 
+	Metadata { metadata: SeriesMetadataSmartFilter },
 	Library { library: LibrarySmartFilter },
 }
 
@@ -281,6 +332,14 @@ impl SeriesSmartFilter {
 					series::metadata::is(vec![metadata_param])
 				]
 			},
+			SeriesSmartFilter::Path { path } => path.into_params(
+				series::path::equals,
+				series::path::contains,
+				series::path::in_vec,
+			),
+			SeriesSmartFilter::Metadata { metadata } => {
+				series::metadata::is(vec![metadata.into_params()])
+			},
 			SeriesSmartFilter::Library { library } => {
 				series::library::is(vec![library.into_params()])
 			},
@@ -302,7 +361,9 @@ pub enum MediaMetadataSmartFilter {
 	Editor { editor: Filter<String> },
 	// FIXME: Current implementationm makes it awkward to support numeric filters
 	AgeRating { age_rating: Filter<i32> },
-	// Year { year: Filter<i32> },
+	Year { year: Filter<i32> },
+	Month { month: Filter<i32> },
+	Day { day: Filter<i32> },
 }
 
 impl MediaMetadataSmartFilter {
@@ -366,6 +427,28 @@ impl MediaMetadataSmartFilter {
 					media_metadata::age_rating::lt,
 					media_metadata::age_rating::lte,
 				),
+			MediaMetadataSmartFilter::Year { year } => year.into_optional_numeric_params(
+				media_metadata::year::equals,
+				media_metadata::year::gt,
+				media_metadata::year::gte,
+				media_metadata::year::lt,
+				media_metadata::year::lte,
+			),
+			MediaMetadataSmartFilter::Month { month } => month
+				.into_optional_numeric_params(
+					media_metadata::month::equals,
+					media_metadata::month::gt,
+					media_metadata::month::gte,
+					media_metadata::month::lt,
+					media_metadata::month::lte,
+				),
+			MediaMetadataSmartFilter::Day { day } => day.into_optional_numeric_params(
+				media_metadata::day::equals,
+				media_metadata::day::gt,
+				media_metadata::day::gte,
+				media_metadata::day::lt,
+				media_metadata::day::lte,
+			),
 		}
 	}
 }
@@ -374,7 +457,8 @@ impl MediaMetadataSmartFilter {
 #[serde(untagged)]
 pub enum MediaSmartFilter {
 	Name { name: Filter<String> },
-
+	Extension { extension: Filter<String> },
+	Path { path: Filter<String> },
 	Metadata { metadata: MediaMetadataSmartFilter },
 	Series { series: SeriesSmartFilter },
 }
@@ -386,6 +470,16 @@ impl MediaSmartFilter {
 				media::name::equals,
 				media::name::contains,
 				media::name::in_vec,
+			),
+			MediaSmartFilter::Extension { extension } => extension.into_params(
+				media::extension::equals,
+				media::extension::contains,
+				media::extension::in_vec,
+			),
+			MediaSmartFilter::Path { path } => path.into_params(
+				media::path::equals,
+				media::path::contains,
+				media::path::in_vec,
 			),
 			MediaSmartFilter::Metadata { metadata } => {
 				media::metadata::is(vec![metadata.into_params()])

@@ -4,6 +4,8 @@ import { MediaSmartFilter, SmartFilter } from '@stump/types'
 import { match, P } from 'ts-pattern'
 import { z } from 'zod'
 
+// TODO: support friendly names for filter groups
+
 // export type NumericRange<T> = { from: T; to: T; inclusive?: boolean }
 export const numericFilterSchema = z.union([
 	z.object({
@@ -117,6 +119,7 @@ export const mediaFilter = z.union([
 		series: seriesFilter,
 	}),
 ])
+export type MediaFilterSchema = z.infer<typeof mediaFilter>
 
 export const defaultMediaFilter = mediaFilter.parse({
 	name: '',
@@ -127,6 +130,7 @@ export const filterGroup = z.object({
 	filters: z.array(mediaFilter),
 	joiner: z.union([z.literal('and'), z.literal('or'), z.literal('not')]),
 })
+export type FilterGroupSchema = z.infer<typeof filterGroup>
 
 // export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 export const filters = z.object({

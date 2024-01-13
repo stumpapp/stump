@@ -115,6 +115,16 @@ pub struct GetSmartListsParams {
 	search: Option<String>,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/smart-lists",
+    tag = "smart_list",
+    responses(
+        (status = 200, description = "Successfully fetched smart lists", body = Vec<SmartList>),
+        (status = 401, description = "Unauthorized"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 async fn get_smart_lists(
 	State(ctx): State<AppState>,
 	session: Session,
@@ -166,6 +176,17 @@ pub struct CreateOrUpdateSmartList {
 	pub default_grouping: Option<SmartListItemGrouping>,
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/smart-lists",
+	tag = "smart_list",
+	request_body = CreateOrUpdateSmartList,
+	responses(
+		(status = 200, description = "Successfully created smart list", body = SmartList),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn create_smart_list(
 	State(ctx): State<AppState>,
 	session: Session,
@@ -208,6 +229,17 @@ async fn create_smart_list(
 	Ok(Json(SmartList::try_from(smart_list)?))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/smart-lists/:id",
+	tag = "smart_list",
+	responses(
+		(status = 200, description = "Successfully fetched smart list", body = SmartList),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -228,6 +260,18 @@ async fn get_smart_list_by_id(
 	Ok(Json(SmartList::try_from(smart_list)?))
 }
 
+#[utoipa::path(
+	put,
+	path = "/api/v1/smart-lists/:id",
+	tag = "smart_list",
+	request_body = CreateOrUpdateSmartList,
+	responses(
+		(status = 200, description = "Successfully updated smart list", body = SmartList),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn update_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -277,6 +321,17 @@ async fn update_smart_list_by_id(
 	Ok(Json(SmartList::try_from(updated_smart_list)?))
 }
 
+#[utoipa::path(
+	delete,
+	path = "/api/v1/smart-lists/:id",
+	tag = "smart_list",
+	responses(
+		(status = 200, description = "Successfully deleted smart list", body = SmartList),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn delete_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -317,6 +372,17 @@ async fn delete_smart_list_by_id(
 	Ok(Json(SmartList::try_from(smart_list)?))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/smart-lists/:id/items",
+	tag = "smart_list",
+	responses(
+		(status = 200, description = "Successfully fetched smart list items", body = SmartListItems),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_smart_list_items(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -358,6 +424,17 @@ pub struct SmartListMeta {
 	matched_libraries: i64,
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/smart-lists/:id/meta",
+	tag = "smart_list",
+	responses(
+		(status = 200, description = "Successfully fetched smart list meta", body = SmartListMeta),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_smart_list_meta(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -419,6 +496,17 @@ async fn get_smart_list_access_rules() {
 	unimplemented!()
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/smart-lists/:id/views",
+	tag = "smart_list",
+	responses(
+		(status = 200, description = "Successfully fetched smart list views", body = Vec<SmartListView>),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_smart_list_views(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -446,6 +534,17 @@ async fn get_smart_list_views(
 	Ok(Json(smart_list_views))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/smart-lists/:id/views/:name",
+	tag = "smart_list",
+	responses(
+		(status = 200, description = "Successfully fetched smart list view", body = SmartListView),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list view not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
@@ -477,6 +576,18 @@ pub struct CreateSmartListView {
 	pub config: SmartListViewConfig,
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/smart-lists/:id/views",
+	tag = "smart_list",
+	request_body = CreateSmartListView,
+	responses(
+		(status = 200, description = "Successfully created smart list view", body = SmartListView),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn create_smart_list_view(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
@@ -525,6 +636,18 @@ pub struct UpdateSmartListView {
 	pub config: SmartListViewConfig,
 }
 
+#[utoipa::path(
+	put,
+	path = "/api/v1/smart-lists/:id/views/:name",
+	tag = "smart_list",
+	request_body = UpdateSmartListView,
+	responses(
+		(status = 200, description = "Successfully updated smart list view", body = SmartListView),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list view not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn update_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
@@ -563,6 +686,17 @@ async fn update_smart_list_view(
 	Ok(Json(SmartListView::try_from(updated_smart_list_view)?))
 }
 
+#[utoipa::path(
+	delete,
+	path = "/api/v1/smart-lists/:id/views/:name",
+	tag = "smart_list",
+	responses(
+		(status = 200, description = "Successfully deleted smart list view", body = SmartListView),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Smart list view not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn delete_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,

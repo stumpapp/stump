@@ -3,6 +3,7 @@ use std::str::FromStr;
 use prisma_client_rust::{and, not, or};
 use serde::{Deserialize, Serialize};
 use specta::Type;
+use utoipa::ToSchema;
 
 use crate::prisma::{library, media, media_metadata, series, series_metadata};
 
@@ -166,7 +167,7 @@ impl Filter<i32> {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
 /// A list of filters that are being combined with a logical operator, e.g. `and` or `or`
 pub enum FilterGroup<T> {
@@ -175,7 +176,7 @@ pub enum FilterGroup<T> {
 	Not { not: Vec<T> },
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub enum FilterJoin {
 	#[default]
 	#[serde(rename = "AND")]
@@ -220,7 +221,8 @@ impl From<&str> for FilterJoin {
 // 	pub order_by:
 // }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
+#[aliases(SmartFilterSchema = SmartFilter<MediaSmartFilter>)]
 pub struct SmartFilter<T> {
 	pub groups: Vec<FilterGroup<T>>,
 	#[serde(default)]
@@ -230,7 +232,7 @@ pub struct SmartFilter<T> {
 // TODO: figure out if perhaps macros can come in with the save here. Continuing down this path
 // will be INCREDIBLY verbose..
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
 pub enum LibrarySmartFilter {
 	Name { name: Filter<String> },
@@ -254,7 +256,7 @@ impl LibrarySmartFilter {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
 pub enum SeriesMetadataSmartFilter {
 	MetaType { meta_type: Filter<String> },
@@ -303,7 +305,7 @@ impl SeriesMetadataSmartFilter {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
 pub enum SeriesSmartFilter {
 	Name { name: Filter<String> },
@@ -347,7 +349,7 @@ impl SeriesSmartFilter {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
 pub enum MediaMetadataSmartFilter {
 	Publisher { publisher: Filter<String> },
@@ -455,7 +457,7 @@ impl MediaMetadataSmartFilter {
 	}
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Type, ToSchema)]
 #[serde(untagged)]
 pub enum MediaSmartFilter {
 	Name { name: Filter<String> },

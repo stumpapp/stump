@@ -5,12 +5,11 @@ import { useAppContext } from '@/context'
 
 import { LazyComponent } from '../../AppRouter.tsx'
 import UserSmartListLayout from './UserSmartListLayout.tsx'
+import UserSmartListRouter from './UserSmartListRouter.tsx'
 
 const lazily = (loader: () => unknown) => React.lazy(() => loader() as LazyComponent)
 
 const UserSmartListsScene = lazily(() => import('./UserSmartListsScene.tsx'))
-const UserSmartListSettingsScene = lazily(() => import('./settings/UserSmartListSettingsScene.tsx'))
-const UserSmartListItemsScene = lazily(() => import('./items/UserSmartListItemsScene.tsx'))
 const CreateSmartListScene = lazily(() => import('./create-or-update/CreateSmartListScene.tsx'))
 
 export default function SmartListRouter() {
@@ -31,10 +30,8 @@ export default function SmartListRouter() {
 	return (
 		<Routes>
 			<Route path="" element={<UserSmartListsScene />} />
-			<Route path=":id" element={<UserSmartListLayout />}>
-				<Route path="" element={<Navigate to="items" replace />} />
-				<Route path="items" element={<UserSmartListItemsScene />} />
-				<Route path="settings" element={<UserSmartListSettingsScene />} />
+			<Route path=":id/*" element={<UserSmartListLayout />}>
+				<Route path="*" element={<UserSmartListRouter />} />
 			</Route>
 			<Route path="create" element={<CreateSmartListScene />} />
 			<Route path="*" element={<Navigate to="/404" replace />} />

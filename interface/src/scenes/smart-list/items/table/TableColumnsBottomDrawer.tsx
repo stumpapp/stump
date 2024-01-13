@@ -17,6 +17,7 @@ import { getColumnOptionMap as getGroupColumnOptionMap } from './groupColumns'
 import { columnOptionMap as mediaColumnOptionMap } from './mediaColumns'
 
 export default function TableColumnsBottomDrawer() {
+	const [isOpen, setIsOpen] = useState(false)
 	const {
 		list: { default_grouping },
 	} = useSmartListContext()
@@ -124,12 +125,19 @@ export default function TableColumnsBottomDrawer() {
 		const enable_multi_sort = multiSort || undefined
 
 		updateWorkingView({ book_columns: bookColumns, enable_multi_sort, group_columns: groupColumns })
+		setIsOpen(false)
+	}
+
+	const handleOpenChanged = (nowOpen: boolean) => {
+		if (!nowOpen) {
+			setIsOpen(false)
+		}
 	}
 
 	return (
-		<Drawer>
+		<Drawer open={isOpen} onOpenChange={handleOpenChanged}>
 			<ToolTip content="Adjust columns">
-				<Drawer.Trigger asChild>
+				<Drawer.Trigger asChild onClick={() => setIsOpen(true)}>
 					<IconButton variant="ghost">
 						<TableProperties className="h-4 w-4 text-muted" />
 					</IconButton>

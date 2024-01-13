@@ -1,4 +1,10 @@
-import { SmartList, SmartListItemGrouping, SmartListMeta, SmartListView } from '@stump/types'
+import {
+	AccessRole,
+	SmartList,
+	SmartListItemGrouping,
+	SmartListMeta,
+	SmartListView,
+} from '@stump/types'
 import { createContext, useContext } from 'react'
 
 import { buildColumns as buildGroupColumns } from './items/table/groupColumns'
@@ -42,6 +48,8 @@ export type ISmartListContext = {
 
 	layout: 'table' | 'list'
 	setLayout: (layout: 'table' | 'list') => void
+
+	viewerRole: AccessRole
 }
 
 export const SmartListContext = createContext<ISmartListContext | null>(null)

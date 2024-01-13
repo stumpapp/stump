@@ -1,7 +1,9 @@
 import { useSmartListWithMetaQuery, useUpdateSmartListMutation } from '@stump/client'
-import { SmartList, SmartListView } from '@stump/types'
+import { AccessRole, SmartList, SmartListView } from '@stump/types'
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router'
+
+import { useAppContext } from '@/context'
 
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import UserSmartListHeader from './UserSmartListHeader'
@@ -56,6 +58,26 @@ export default function UserSmartListLayout() {
 		listQuery: { isLoading: isLoadingList },
 	} = useSmartListWithMetaQuery({ id })
 	const { updateAsync } = useUpdateSmartListMutation({ id })
+	const { user } = useAppContext()
+
+	/**
+	 * Whether or not the current user is the creator of the smart list
+	 */
+	const isCreator = useMemo(
+		() => !!list?.creator_id && list?.creator_id === user.id,
+		[user.id, list?.creator_id],
+	)
+
+	/**
+	 * The access role of the current user for this smart list. This is used to determine
+	 * what actions the user can take on the list
+	 *
+	 * TODO: Support actual roles from the backend, i.e. Writer, CoCreator, Creator, Reader
+	 */
+	const viewerRole = useMemo<AccessRole>(
+		() => (isCreator || user.is_server_owner ? 'CoCreator' : 'Reader'),
+		[isCreator, user.is_server_owner],
+	)
 
 	const patchSmartList = useCallback(
 		async (updates: Partial<SmartList>) => {
@@ -143,6 +165,7 @@ export default function UserSmartListLayout() {
 				setLayout,
 				updateSelectedStoredView,
 				updateWorkingView,
+				viewerRole,
 				workingView,
 				workingViewIsDifferent,
 			}}

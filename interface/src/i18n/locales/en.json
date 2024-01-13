@@ -474,7 +474,10 @@
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",
-			"goBack": "Go Back"
+			"goBack": "Go Back",
+			"smartlists": "Smart lists",
+			"noSmartlists": "No smart lists",
+			"createSmartlist": "Create smart list"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",

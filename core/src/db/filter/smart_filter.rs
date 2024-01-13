@@ -352,13 +352,13 @@ impl SeriesSmartFilter {
 pub enum MediaMetadataSmartFilter {
 	Publisher { publisher: Filter<String> },
 	Genre { genre: Filter<String> },
-	Character { character: Filter<String> },
-	Colorist { colorist: Filter<String> },
-	Writer { writer: Filter<String> },
-	Penciller { penciller: Filter<String> },
-	Letterer { letterer: Filter<String> },
-	Inker { inker: Filter<String> },
-	Editor { editor: Filter<String> },
+	Characters { characters: Filter<String> },
+	Colorists { colorists: Filter<String> },
+	Writers { writers: Filter<String> },
+	Pencillers { pencillers: Filter<String> },
+	Letterers { letterers: Filter<String> },
+	Inkers { inkers: Filter<String> },
+	Editors { editors: Filter<String> },
 	// FIXME: Current implementationm makes it awkward to support numeric filters
 	AgeRating { age_rating: Filter<i32> },
 	Year { year: Filter<i32> },
@@ -380,45 +380,47 @@ impl MediaMetadataSmartFilter {
 				media_metadata::genre::contains,
 				media_metadata::genre::in_vec,
 			),
-			MediaMetadataSmartFilter::Character { character } => character
+			MediaMetadataSmartFilter::Characters { characters } => characters
 				.into_optional_params(
 					media_metadata::characters::equals,
 					media_metadata::characters::contains,
 					media_metadata::characters::in_vec,
 				),
-			MediaMetadataSmartFilter::Colorist { colorist } => colorist
+			MediaMetadataSmartFilter::Colorists { colorists } => colorists
 				.into_optional_params(
 					media_metadata::colorists::equals,
 					media_metadata::colorists::contains,
 					media_metadata::colorists::in_vec,
 				),
-			MediaMetadataSmartFilter::Writer { writer } => writer.into_optional_params(
-				media_metadata::writers::equals,
-				media_metadata::writers::contains,
-				media_metadata::writers::in_vec,
-			),
-			MediaMetadataSmartFilter::Penciller { penciller } => penciller
+			MediaMetadataSmartFilter::Writers { writers } => writers
+				.into_optional_params(
+					media_metadata::writers::equals,
+					media_metadata::writers::contains,
+					media_metadata::writers::in_vec,
+				),
+			MediaMetadataSmartFilter::Pencillers { pencillers } => pencillers
 				.into_optional_params(
 					media_metadata::pencillers::equals,
 					media_metadata::pencillers::contains,
 					media_metadata::pencillers::in_vec,
 				),
-			MediaMetadataSmartFilter::Letterer { letterer } => letterer
+			MediaMetadataSmartFilter::Letterers { letterers } => letterers
 				.into_optional_params(
 					media_metadata::letterers::equals,
 					media_metadata::letterers::contains,
 					media_metadata::letterers::in_vec,
 				),
-			MediaMetadataSmartFilter::Inker { inker } => inker.into_optional_params(
+			MediaMetadataSmartFilter::Inkers { inkers } => inkers.into_optional_params(
 				media_metadata::inkers::equals,
 				media_metadata::inkers::contains,
 				media_metadata::inkers::in_vec,
 			),
-			MediaMetadataSmartFilter::Editor { editor } => editor.into_optional_params(
-				media_metadata::editors::equals,
-				media_metadata::editors::contains,
-				media_metadata::editors::in_vec,
-			),
+			MediaMetadataSmartFilter::Editors { editors } => editors
+				.into_optional_params(
+					media_metadata::editors::equals,
+					media_metadata::editors::contains,
+					media_metadata::editors::in_vec,
+				),
 			MediaMetadataSmartFilter::AgeRating { age_rating } => age_rating
 				.into_optional_numeric_params(
 					media_metadata::age_rating::equals,

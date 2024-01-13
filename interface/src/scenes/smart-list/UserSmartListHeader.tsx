@@ -1,6 +1,8 @@
 import { usePreferences } from '@stump/client'
-import { cn, Heading, Text } from '@stump/components'
+import { cn, Heading, Link, Text } from '@stump/components'
 import React from 'react'
+
+import paths from '@/paths'
 
 import { useSmartListContext } from './context'
 import { parseListMeta } from './utils'
@@ -43,6 +45,13 @@ export default function UserSmartListHeader() {
 			}}
 		>
 			<div>
+				<Link
+					to={paths.smartLists()}
+					variant="muted"
+					className="text-sm no-underline hover:underline"
+				>
+					Lists /
+				</Link>
 				<Heading size="lg" bold>
 					{name}
 				</Heading>

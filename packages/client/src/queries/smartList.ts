@@ -1,6 +1,6 @@
 import { smartListApi, smartListQueryKeys } from '@stump/api'
 import {
-	CreateSmartList,
+	CreateOrUpdateSmartList,
 	GetSmartListsParams,
 	SmartList,
 	SmartListItems,
@@ -131,11 +131,11 @@ export function useSmartListWithMetaQuery({ id }: UseSmartListItemsWithMetaQuery
 // TODO: different types!
 type UseUpdateSmartListMutationOptions = {
 	id: string
-} & MutationOptions<SmartList, AxiosError, CreateSmartList>
+} & MutationOptions<SmartList, AxiosError, CreateOrUpdateSmartList>
 export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartListMutationOptions) {
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
 		[smartListQueryKeys.updateSmartList, id],
-		async (updates: CreateSmartList) => {
+		async (updates: CreateOrUpdateSmartList) => {
 			const { data } = await smartListApi.updateSmartList(id, updates)
 			return data
 		},
@@ -146,6 +146,23 @@ export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartLis
 		isMutating: isLoading,
 		update: mutate,
 		updateAsync: mutateAsync,
+		...restReturn,
+	}
+}
+
+export function useDeleteSmartListMutation() {
+	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
+		[smartListQueryKeys.deleteSmartList],
+		async (id: string) => {
+			const { data } = await smartListApi.deleteSmartList(id)
+			return data
+		},
+	)
+
+	return {
+		delete: mutate,
+		deleteAsync: mutateAsync,
+		isDeleting: isLoading,
 		...restReturn,
 	}
 }

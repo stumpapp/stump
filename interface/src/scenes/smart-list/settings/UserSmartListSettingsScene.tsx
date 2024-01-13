@@ -7,6 +7,7 @@ import { ContentContainer, SceneContainer } from '@/components/container'
 import { useSmartListContext } from '../context'
 import { Schema } from '../create-or-update/form/schema'
 import AccessSettings from './AccessSettings'
+import DangerSection from './DangerSection'
 import FilterConfiguration from './FilterConfiguration'
 
 type BasicDetailsForm = Pick<Schema, 'name' | 'description'>
@@ -66,6 +67,7 @@ export default function UserSmartListSettingsScene() {
 
 				<FilterConfiguration />
 				<AccessSettings />
+				<DangerSection />
 			</ContentContainer>
 		</SceneContainer>
 	)

@@ -123,9 +123,6 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 										'cursor-pointer select-none': header.column.getCanSort(),
 									})}
 									onClick={header.column.getToggleSortingHandler()}
-									// style={{
-									// 	width: header.getSize(),
-									// }}
 								>
 									{flexRender(header.column.columnDef.header, header.getContext())}
 									<SortIcon direction={(header.column.getIsSorted() as SortDirection) ?? null} />
@@ -135,10 +132,16 @@ export default function GroupedSmartListItemTable({ items }: Props) {
 					</tr>
 				</thead>
 
-				<tbody className="divide divide-y divide-edge">
+				<tbody className="divide relative divide-y divide-edge">
 					{rows.map((row) => (
 						<React.Fragment key={row.id}>
-							<tr key={row.id} className="h-10">
+							<tr
+								key={row.id}
+								className={cn('h-10', {
+									// FIXME: this doesn't look quite right...
+									// 'sticky top-10 z-10 bg-background': row.getIsExpanded(),
+								})}
+							>
 								{row.getVisibleCells().map((cell) => (
 									<td className="first:pl-4 last:pr-4" key={cell.id}>
 										{flexRender(cell.column.columnDef.cell, cell.getContext())}

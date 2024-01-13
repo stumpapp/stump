@@ -28,6 +28,8 @@ pub struct SmartList {
 	pub joiner: FilterJoin,
 	pub default_grouping: SmartListItemGrouping,
 	pub saved_views: Option<Vec<SmartListView>>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub creator_id: Option<String>,
 }
 
 impl SmartList {
@@ -185,8 +187,8 @@ impl TryFrom<smart_list::Data> for SmartList {
 		let saved_views = if let Ok(stored) = value.saved_views() {
 			Some(
 				stored
-					.to_owned()
-					.into_iter()
+					.iter()
+					.cloned()
 					.map(SmartListView::try_from)
 					.collect::<Result<Vec<SmartListView>, CoreError>>()?,
 			)
@@ -216,6 +218,7 @@ impl TryFrom<smart_list::Data> for SmartList {
 				CoreError::InternalError(e.to_string())
 			})?,
 			saved_views,
+			creator_id: Some(value.creator_id),
 		})
 	}
 }

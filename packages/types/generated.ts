@@ -76,13 +76,13 @@ export type SmartListItemGroup<E> = { entity: E; books: Media[] }
 
 export type SmartListItems = { type: "Books"; items: Media[] } | { type: "Series"; items: SmartListItemGroup<Series>[] } | { type: "Library"; items: SmartListItemGroup<Library>[] }
 
-export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; visibility: EntityVisibility; joiner: FilterJoin; default_grouping: SmartListItemGrouping; saved_views: SmartListView[] | null }
+export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; visibility: EntityVisibility; joiner: FilterJoin; default_grouping: SmartListItemGrouping; saved_views: SmartListView[] | null; creator_id?: string | null }
 
 export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
 
 export type MediaSmartFilter = { name: Filter<string> } | { extension: Filter<string> } | { path: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
 
-export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { character: Filter<string> } | { colorist: Filter<string> } | { writer: Filter<string> } | { penciller: Filter<string> } | { letterer: Filter<string> } | { inker: Filter<string> } | { editor: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
+export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
 
 export type SeriesMetadataSmartFilter = { meta_type: Filter<string> } | { publisher: Filter<string> } | { status: Filter<string> } | { age_rating: Filter<number> } | { volume: Filter<number> }
 

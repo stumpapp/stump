@@ -1,4 +1,3 @@
-import { getMediaThumbnail } from '@stump/api'
 import { Link, Text } from '@stump/components'
 import { Media, SmartListTableColumnSelection } from '@stump/types'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
@@ -6,16 +5,17 @@ import dayjs from 'dayjs'
 
 import paths from '@/paths'
 
+import BookLinksCell from './BookLinksCell'
+import CoverImageCell from './CoverImageCell'
+
 const columnHelper = createColumnHelper<Media>()
 
 const coverColumn = columnHelper.display({
 	cell: ({
 		row: {
-			original: { id },
+			original: { id, name, metadata },
 		},
-	}) => (
-		<img className="aspect-[2/3] h-14 w-auto rounded-sm object-cover" src={getMediaThumbnail(id)} />
-	),
+	}) => <CoverImageCell id={id} title={metadata?.title || name} />,
 	enableGlobalFilter: true,
 	header: () => (
 		<Text size="sm" variant="muted">
@@ -281,12 +281,29 @@ const artistsColumn = columnHelper.accessor(({ metadata }) => metadata?.cover_ar
 	id: 'artists',
 })
 
-const linksColumn = columnHelper.accessor(({ metadata }) => metadata?.links?.join(', '), {
+const charactersColumn = columnHelper.accessor(({ metadata }) => metadata?.characters?.join(', '), {
 	cell: ({ getValue }) => (
 		<Text size="sm" variant="muted">
 			{getValue()}
 		</Text>
 	),
+
+	enableGlobalFilter: true,
+	enableSorting: true,
+	header: () => (
+		<Text size="sm" variant="muted">
+			Characters
+		</Text>
+	),
+	id: 'characters',
+})
+
+const linksColumn = columnHelper.accessor(({ metadata }) => metadata?.links?.join(', '), {
+	cell: ({
+		row: {
+			original: { metadata },
+		},
+	}) => <BookLinksCell links={metadata?.links || []} />,
 
 	enableGlobalFilter: true,
 	enableSorting: true,
@@ -307,6 +324,7 @@ export const columnMap = {
 	added: addedColumn,
 	age_rating: ageRatingColumn,
 	artists: artistsColumn,
+	characters: charactersColumn,
 	colorists: coloristsColumn,
 	cover: coverColumn,
 	genres: genresColumn,
@@ -327,6 +345,7 @@ export const columnOptionMap: Record<keyof typeof columnMap, string> = {
 	added: 'Added',
 	age_rating: 'Age Rating',
 	artists: 'Artists',
+	characters: 'Characters',
 	colorists: 'Colorists',
 	cover: 'Cover',
 	genres: 'Genres',

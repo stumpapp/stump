@@ -113,7 +113,8 @@ export default function UserSmartListsScene() {
 						<ButtonOrLink
 							href={paths.smartListCreate()}
 							variant="ghost"
-							className="h-full shrink-0"
+							className="pointer-events-none h-full shrink-0"
+							disabled
 						>
 							Create list
 						</ButtonOrLink>

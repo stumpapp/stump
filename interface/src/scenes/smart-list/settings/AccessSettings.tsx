@@ -32,8 +32,11 @@ export default function AccessSettings() {
 				</Text>
 			</div>
 
-			<div className="flex max-w-xs flex-col gap-y-1.5">
-				<Label>Visibility</Label>
+			<div
+				className="flex max-w-xs cursor-not-allowed flex-col gap-y-1.5"
+				title="This feature is not implemented yet!"
+			>
+				<Label className="text-opacity-50">Visibility</Label>
 				<NativeSelect
 					options={[
 						{ label: 'Public', value: 'PUBLIC' },
@@ -42,16 +45,12 @@ export default function AccessSettings() {
 					]}
 					value={visibility}
 					onChange={(e) => handleVisibilityChange(e.target.value as EntityVisibility)}
+					disabled
 				/>
-				<Text variant="muted" size="sm">
+				<Text variant="muted" size="sm" className="text-opacity-50">
 					{renderVisibilityHelp()}
 				</Text>
 			</div>
-
-			{/* <div>
-				<Label>Granted users</Label>
-				<div>TODO: form here?</div>
-			</div> */}
 		</div>
 	)
 }

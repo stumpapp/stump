@@ -1,5 +1,5 @@
-import { Accordion, Button, Drawer, IconButton, Text, ToolTip } from '@stump/components'
-import { Filter } from 'lucide-react'
+import { Accordion, Alert, Button, Drawer, IconButton, Text, ToolTip } from '@stump/components'
+import { Construction, Filter } from 'lucide-react'
 import React from 'react'
 
 import { useSmartListContext } from '../../context'
@@ -44,12 +44,18 @@ export default function FilterBottomDrawer() {
 							</Accordion.Item>
 						</Accordion>
 
-						<div>TODO: filter form</div>
+						<Alert level="warning" icon={Construction} rounded="sm">
+							<Alert.Content>
+								<span>This functionality is not yet implemented</span>
+							</Alert.Content>
+						</Alert>
 					</div>
-					<Drawer.Footer>
-						<Button>Submit</Button>
+					<Drawer.Footer className="w-full flex-row">
+						<Button className="w-full">Save</Button>
 						<Drawer.Close asChild>
-							<Button variant="outline">Cancel</Button>
+							<Button variant="outline" className="w-full">
+								Cancel
+							</Button>
 						</Drawer.Close>
 					</Drawer.Footer>
 				</div>

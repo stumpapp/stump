@@ -270,7 +270,7 @@ export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_bas
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
-export type CreateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
+export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
 
 export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
 

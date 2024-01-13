@@ -1,4 +1,5 @@
-import { Accordion, Heading, Text } from '@stump/components'
+import { Accordion, Alert, Heading, Text } from '@stump/components'
+import { Construction } from 'lucide-react'
 import React from 'react'
 
 import { useSmartListContext } from '../context'
@@ -27,6 +28,15 @@ export default function FilterConfiguration() {
 					</Accordion.Content>
 				</Accordion.Item>
 			</Accordion>
+
+			<Alert level="warning" icon={Construction} rounded="sm" alignIcon="start">
+				<Alert.Content>
+					<span>
+						Editing the configured filters is not yet implemented. To update your filters, please
+						use the Stump API directly
+					</span>
+				</Alert.Content>
+			</Alert>
 		</div>
 	)
 }

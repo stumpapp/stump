@@ -37,7 +37,9 @@ pub(crate) fn mount() -> Router<AppState> {
 			Router::new()
 				.route(
 					"/",
-					get(get_smart_list_by_id).delete(delete_smart_list_by_id),
+					get(get_smart_list_by_id)
+						.put(update_smart_list_by_id)
+						.delete(delete_smart_list_by_id),
 				)
 				.route("/items", get(get_smart_list_items))
 				.route("/meta", get(get_smart_list_meta))
@@ -154,7 +156,7 @@ async fn get_smart_lists(
 }
 
 #[derive(Deserialize, Debug, Type, ToSchema)]
-pub struct CreateSmartList {
+pub struct CreateOrUpdateSmartList {
 	pub name: String,
 	pub description: Option<String>,
 	pub filters: SmartFilter<MediaSmartFilter>,
@@ -167,7 +169,7 @@ pub struct CreateSmartList {
 async fn create_smart_list(
 	State(ctx): State<AppState>,
 	session: Session,
-	Json(input): Json<CreateSmartList>,
+	Json(input): Json<CreateOrUpdateSmartList>,
 ) -> ApiResult<Json<SmartList>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
@@ -224,6 +226,55 @@ async fn get_smart_list_by_id(
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
 
 	Ok(Json(SmartList::try_from(smart_list)?))
+}
+
+async fn update_smart_list_by_id(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(input): Json<CreateOrUpdateSmartList>,
+) -> ApiResult<Json<SmartList>> {
+	let user =
+		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
+	let client = ctx.get_db();
+
+	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
+	let smart_list = client
+		.smart_list()
+		.find_first(vec![smart_list::id::equals(id), access_condition])
+		.exec()
+		.await?
+		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+
+	let serialized_filters = serde_json::to_vec(&input.filters).map_err(|e| {
+		tracing::error!(?e, "Failed to serialize smart list filters");
+		ApiError::InternalServerError(e.to_string())
+	})?;
+
+	let updated_smart_list = client
+		.smart_list()
+		.update(
+			smart_list::id::equals(smart_list.id),
+			chain_optional_iter(
+				[
+					smart_list::name::set(input.name),
+					smart_list::description::set(input.description),
+					smart_list::filters::set(serialized_filters),
+				],
+				[
+					input
+						.joiner
+						.map(|joiner| smart_list::joiner::set(joiner.to_string())),
+					input.default_grouping.map(|grouping| {
+						smart_list::default_grouping::set(grouping.to_string())
+					}),
+				],
+			),
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(SmartList::try_from(updated_smart_list)?))
 }
 
 async fn delete_smart_list_by_id(

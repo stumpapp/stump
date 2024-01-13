@@ -127,7 +127,9 @@ mod tests {
 			format!("{}\n\n", ts_export::<PatchLibraryThumbnail>()?).as_bytes(),
 		)?;
 
-		file.write_all(format!("{}\n\n", ts_export::<CreateSmartList>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateSmartList>()?).as_bytes(),
+		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<GetSmartListsParams>()?).as_bytes(),
 		)?;

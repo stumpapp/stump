@@ -3,7 +3,7 @@
 
 // CORE TYPE GENERATION
 
-export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
+export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 
 /**
  * Permissions that can be granted to a user. Some permissions are implied by others,
@@ -156,13 +156,13 @@ export type Pagination = null | PageQuery | CursorQuery
 
 // SERVER TYPE GENERATION
 
-export type StumpVersion = { semver: string; rev: string | null; compile_time: string }
+export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 
-export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
+export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
-export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
+export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
 export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean }
 

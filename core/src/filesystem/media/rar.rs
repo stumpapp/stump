@@ -92,8 +92,7 @@ impl FileProcessor for RarProcessor {
 		let mut pages = 0;
 		let mut metadata_buf = None;
 
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		while let Ok(Some(header)) = archive.read_header() {
 			let entry = header.entry();
 			if entry.filename.as_os_str() == "ComicInfo.xml" {
 				let (data, rest) = header.read()?;
@@ -153,8 +152,7 @@ impl FileProcessor for RarProcessor {
 
 		let mut bytes = None;
 		let mut archive = Archive::new(file).open_for_processing()?;
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		while let Ok(Some(header)) = archive.read_header() {
 			let is_target =
 				header.entry().filename.as_os_str() == target_entry.filename.as_os_str();
 			if is_target {
@@ -197,8 +195,7 @@ impl FileProcessor for RarProcessor {
 
 		let mut content_types = HashMap::new();
 		let mut archive = Archive::new(path).open_for_processing()?;
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		while let Ok(Some(header)) = archive.read_header() {
 			archive = if let Some(tuple) =
 				entries.get_key_value(&PathBuf::from(header.entry().filename.as_os_str()))
 			{
@@ -252,8 +249,7 @@ impl FileConverter for RarProcessor {
 		trace!(?unpacked_path, "Extracting RAR to cache");
 
 		let mut archive = Archive::new(path).open_for_processing()?;
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		while let Ok(Some(header)) = archive.read_header() {
 			archive = if header.entry().is_file() {
 				header.extract_to(&unpacked_path)?
 			} else {

@@ -1,6 +1,7 @@
 import { smartListApi, smartListQueryKeys } from '@stump/api'
 import {
 	CreateOrUpdateSmartList,
+	CreateOrUpdateSmartListView,
 	GetSmartListsParams,
 	SmartList,
 	SmartListItems,
@@ -164,5 +165,33 @@ export function useDeleteSmartListMutation() {
 		deleteAsync: mutateAsync,
 		isDeleting: isLoading,
 		...restReturn,
+	}
+}
+
+type UseSmartListViesManagerParams = {
+	listId: string
+}
+export function useSmartListViewsManager({ listId }: UseSmartListViesManagerParams) {
+	const { mutateAsync: createView, isLoading: isCreating } = useMutation(
+		[smartListQueryKeys.createSmartListView, listId],
+		async (params: CreateOrUpdateSmartListView) => {
+			const { data } = await smartListApi.createSmartListView(listId, params)
+			return data
+		},
+	)
+
+	const { mutateAsync: updateView, isLoading: isUpdating } = useMutation(
+		[smartListQueryKeys.updateSmartListView, listId],
+		async ({ originalName, ...params }: CreateOrUpdateSmartListView & { originalName: string }) => {
+			const { data } = await smartListApi.updateSmartListView(listId, originalName, params)
+			return data
+		},
+	)
+
+	return {
+		createView,
+		isCreating,
+		updateView,
+		isUpdating,
 	}
 }

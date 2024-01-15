@@ -1,9 +1,11 @@
 import {
-	CreateSmartList,
+	CreateOrUpdateSmartList,
 	GetSmartListsParams,
 	SmartList,
 	SmartListItems,
 	SmartListMeta,
+	CreateOrUpdateSmartListView,
+	SmartListView,
 } from '@stump/types'
 
 import { API } from './axios'
@@ -38,13 +40,28 @@ export async function getSmartListItems(id: string): Promise<ApiResult<SmartList
 // TODO: different types!
 export async function updateSmartList(
 	id: string,
-	payload: CreateSmartList,
+	payload: CreateOrUpdateSmartList,
 ): Promise<ApiResult<SmartList>> {
 	return API.put(`/smart-lists/${id}`, payload)
 }
 
 export async function deleteSmartList(id: string): Promise<ApiResult<SmartList>> {
 	return API.delete(`/smart-lists/${id}`)
+}
+
+export async function createSmartListView(
+	listId: string,
+	params: CreateOrUpdateSmartListView,
+): Promise<ApiResult<SmartListView>> {
+	return API.post(`/smart-lists/${listId}/views`, params)
+}
+
+export async function updateSmartListView(
+	listId: string,
+	name: string,
+	params: CreateOrUpdateSmartListView,
+): Promise<ApiResult<SmartListView>> {
+	return API.put(`/smart-lists/${listId}/views/${name}`, params)
 }
 
 export const smartListApi = {
@@ -55,6 +72,8 @@ export const smartListApi = {
 	getSmartListMeta,
 	getSmartLists,
 	updateSmartList,
+	createSmartListView,
+	updateSmartListView,
 }
 
 export const smartListQueryKeys: Record<keyof typeof smartListApi, string> = {
@@ -65,4 +84,6 @@ export const smartListQueryKeys: Record<keyof typeof smartListApi, string> = {
 	getSmartListMeta: 'smartlist.getMeta',
 	getSmartLists: 'smartlist.get',
 	updateSmartList: 'smartlist.update',
+	createSmartListView: 'smartlist.createView',
+	updateSmartListView: 'smartlist.updateView',
 }

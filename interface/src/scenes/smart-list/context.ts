@@ -38,11 +38,11 @@ export type ISmartListContext = {
 	workingView?: WorkingView
 	workingViewIsDifferent: boolean
 	updateWorkingView: (updates: Partial<WorkingView>) => void
-	saveWorkingView: (name: string) => void
+	saveWorkingView: (name: string) => Promise<void>
 
 	selectedView?: SmartListView
 	selectStoredView: (view: SmartListView) => void
-	updateSelectedStoredView: (view: SmartListView) => void
+	saveSelectedStoredView: (newName?: string) => Promise<void>
 
 	patchSmartList: (updates: Partial<SmartList>) => Promise<void>
 

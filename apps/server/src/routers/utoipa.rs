@@ -137,8 +137,8 @@ use super::api::{
             FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus,
-            SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList, CreateSmartListView,
-            UpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
+            SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList,
+            CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
             SmartListViewConfig, SmartListTableColumnSelection, SmartListTableSortingState,
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
             LibrarySmartFilter

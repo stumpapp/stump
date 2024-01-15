@@ -570,7 +570,7 @@ async fn get_smart_list_view(
 }
 
 #[derive(Deserialize, Debug, Type, ToSchema)]
-pub struct CreateSmartListView {
+pub struct CreateOrUpdateSmartListView {
 	pub name: String,
 	#[serde(flatten)]
 	pub config: SmartListViewConfig,
@@ -592,7 +592,7 @@ async fn create_smart_list_view(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-	Json(input): Json<CreateSmartListView>,
+	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> ApiResult<Json<SmartListView>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
@@ -629,18 +629,11 @@ async fn create_smart_list_view(
 	Ok(Json(SmartListView::try_from(smart_list_view)?))
 }
 
-#[derive(Deserialize, Debug, Type, ToSchema)]
-pub struct UpdateSmartListView {
-	pub name: String,
-	#[serde(flatten)]
-	pub config: SmartListViewConfig,
-}
-
 #[utoipa::path(
 	put,
 	path = "/api/v1/smart-lists/:id/views/:name",
 	tag = "smart_list",
-	request_body = UpdateSmartListView,
+	request_body = CreateOrUpdateSmartListView,
 	responses(
 		(status = 200, description = "Successfully updated smart list view", body = SmartListView),
 		(status = 401, description = "Unauthorized"),
@@ -652,7 +645,7 @@ async fn update_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
 	session: Session,
-	Json(input): Json<UpdateSmartListView>,
+	Json(input): Json<CreateOrUpdateSmartListView>,
 ) -> ApiResult<Json<SmartListView>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;

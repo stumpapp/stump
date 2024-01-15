@@ -1,4 +1,8 @@
-import { useSmartListWithMetaQuery, useUpdateSmartListMutation } from '@stump/client'
+import {
+	useSmartListViewsManager,
+	useSmartListWithMetaQuery,
+	useUpdateSmartListMutation,
+} from '@stump/client'
 import { AccessRole, SmartList, SmartListView } from '@stump/types'
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router'
@@ -8,6 +12,7 @@ import { useAppContext } from '@/context'
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
+import toast from 'react-hot-toast'
 
 export default function UserSmartListLayout() {
 	const { id } = useParams<{ id: string }>()
@@ -58,6 +63,7 @@ export default function UserSmartListLayout() {
 		listQuery: { isLoading: isLoadingList },
 	} = useSmartListWithMetaQuery({ id })
 	const { updateAsync } = useUpdateSmartListMutation({ id })
+	const { createView, updateView } = useSmartListViewsManager({ listId: id })
 	const { user } = useAppContext()
 
 	/**
@@ -113,17 +119,25 @@ export default function UserSmartListLayout() {
 	 * A function to store the current working view as a new, stored view in the DB
 	 */
 	const saveWorkingView = useCallback(
-		(name: string) => {
+		async (name: string) => {
 			if (!workingView || !list?.id) {
 				return
 			}
 
-			// TODO: API call!
-			setSelectedView({
-				list_id: list.id,
-				name,
-				...workingView,
-			})
+			try {
+				const createdView = await createView({
+					name,
+					...workingView,
+				})
+				setSelectedView(createdView)
+			} catch (error) {
+				console.error(error)
+				if (error instanceof Error) {
+					toast.error(`Failed to create view${error.message ? `: ${error.message}` : ''}`)
+				} else {
+					toast.error(`Failed to create view`)
+				}
+			}
 		},
 		[workingView, list?.id],
 	)
@@ -131,17 +145,31 @@ export default function UserSmartListLayout() {
 	/**
 	 * A function to update the currently selected stored view with the current working view changes
 	 */
-	const updateSelectedStoredView = useCallback(() => {
-		if (!selectedView) {
-			return
-		}
+	const saveSelectedStoredView = useCallback(
+		async (newName?: string) => {
+			if (!selectedView || !workingView) {
+				return
+			}
 
-		// TODO: API call!
-		setSelectedView({
-			...selectedView,
-			...workingView,
-		})
-	}, [selectedView, workingView])
+			try {
+				const updatedView = await updateView({
+					originalName: selectedView.name,
+					...selectedView,
+					...workingView,
+					...(!!newName ? { name: newName } : {}),
+				})
+				setSelectedView(updatedView)
+			} catch (error) {
+				console.error(error)
+				if (error instanceof Error) {
+					toast.error(`Failed to update view${error.message ? `: ${error.message}` : ''}`)
+				} else {
+					toast.error(`Failed to update view`)
+				}
+			}
+		},
+		[selectedView, workingView],
+	)
 
 	if (isLoadingList) {
 		return null
@@ -163,7 +191,7 @@ export default function UserSmartListLayout() {
 				selectStoredView: setSelectedView,
 				selectedView,
 				setLayout,
-				updateSelectedStoredView,
+				saveSelectedStoredView,
 				updateWorkingView,
 				viewerRole,
 				workingView,

@@ -276,3 +276,5 @@ export type GetSmartListsParams = { all?: boolean | null; search?: string | null
 
 export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
 
+export type CreateOrUpdateSmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
+

@@ -229,6 +229,13 @@ async fn create_smart_list(
 	Ok(Json(SmartList::try_from(smart_list)?))
 }
 
+#[derive(Deserialize, Debug, Type, ToSchema)]
+pub struct SmartListRelationOptions {
+	#[serde(default)]
+	#[specta(optional)]
+	pub load_views: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/smart-lists/:id",
@@ -242,6 +249,7 @@ async fn create_smart_list(
 )]
 async fn get_smart_list_by_id(
 	Path(id): Path<String>,
+	QsQuery(options): QsQuery<SmartListRelationOptions>,
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<SmartList>> {
@@ -250,9 +258,15 @@ async fn get_smart_list_by_id(
 	let client = ctx.get_db();
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
-	let smart_list = client
+	let mut query = client
 		.smart_list()
-		.find_first(vec![smart_list::id::equals(id), access_condition])
+		.find_first(vec![smart_list::id::equals(id.clone()), access_condition]);
+
+	if options.load_views {
+		query = query.with(smart_list::saved_views::fetch(vec![]))
+	}
+
+	let smart_list = query
 		.exec()
 		.await?
 		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;

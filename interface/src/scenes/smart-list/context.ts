@@ -41,7 +41,7 @@ export type ISmartListContext = {
 	saveWorkingView: (name: string) => Promise<void>
 
 	selectedView?: SmartListView
-	selectStoredView: (view: SmartListView) => void
+	selectStoredView: (view?: SmartListView) => void
 	saveSelectedStoredView: (newName?: string) => Promise<void>
 
 	patchSmartList: (updates: Partial<SmartList>) => Promise<void>

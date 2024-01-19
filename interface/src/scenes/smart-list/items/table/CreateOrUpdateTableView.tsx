@@ -21,7 +21,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 
 	const form = useForm({
 		defaultValues: {
-			name: selectedView?.name || '',
+			name: isCreating ? '' : selectedView?.name || '',
 		},
 		resolver: zodResolver(
 			buildSchema(saved_views?.map((view) => view.name) || [], selectedView?.name),
@@ -34,6 +34,10 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 		}
 	}
 
+	/**
+	 * A submit handler to either save the working view as a new, stored view, or to
+	 * update the currently selected stored view with the working view changes
+	 */
 	const handleSubmit = useCallback(
 		async ({ name }: z.infer<ReturnType<typeof buildSchema>>) => {
 			try {
@@ -42,6 +46,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 				} else {
 					await saveSelectedStoredView(name)
 				}
+				onClose()
 			} catch (error) {
 				console.error(error)
 				if (error instanceof Error) {
@@ -55,7 +60,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 				}
 			}
 		},
-		[isCreating, name, saveWorkingView],
+		[isCreating, saveWorkingView],
 	)
 
 	return (

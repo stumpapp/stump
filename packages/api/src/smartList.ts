@@ -6,6 +6,7 @@ import {
 	SmartListMeta,
 	CreateOrUpdateSmartListView,
 	SmartListView,
+	SmartListRelationOptions,
 } from '@stump/types'
 
 import { API } from './axios'
@@ -25,8 +26,16 @@ export async function createSmartList(payload: SmartList): Promise<ApiResult<Sma
 	return API.post('/smart-lists', payload)
 }
 
-export async function getSmartListById(id: string): Promise<ApiResult<SmartList>> {
-	return API.get(`/smart-lists/${id}`)
+export async function getSmartListById(
+	id: string,
+	params?: SmartListRelationOptions,
+): Promise<ApiResult<SmartList>> {
+	if (params) {
+		const searchParams = toUrlParams(params)
+		return API.get(urlWithParams(`/smart-lists/${id}`, searchParams))
+	} else {
+		return API.get(`/smart-lists/${id}`)
+	}
 }
 
 export async function getSmartListMeta(id: string): Promise<ApiResult<SmartListMeta>> {

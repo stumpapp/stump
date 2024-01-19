@@ -133,6 +133,9 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<GetSmartListsParams>()?).as_bytes(),
 		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SmartListRelationOptions>()?).as_bytes(),
+		)?;
 		file.write_all(format!("{}\n\n", ts_export::<SmartListMeta>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),

@@ -31,6 +31,7 @@ export default function UserSmartListLayout() {
 	 */
 	useEffect(() => {
 		if (selectedView) {
+			console.log('selected view changed', selectedView)
 			setWorkingView(selectedView)
 		}
 	}, [selectedView])
@@ -61,7 +62,12 @@ export default function UserSmartListLayout() {
 		list,
 		meta,
 		listQuery: { isLoading: isLoadingList },
-	} = useSmartListWithMetaQuery({ id })
+	} = useSmartListWithMetaQuery({
+		id,
+		params: {
+			load_views: true,
+		},
+	})
 	const { updateAsync } = useUpdateSmartListMutation({ id })
 	const { createView, updateView } = useSmartListViewsManager({ listId: id })
 	const { user } = useAppContext()

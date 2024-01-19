@@ -6,12 +6,14 @@ import {
 	SmartList,
 	SmartListItems,
 	SmartListMeta,
+	SmartListRelationOptions,
 } from '@stump/types'
 import { useQueries, UseQueryResult } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { QueryClientContext } from '../context'
+import { useCallback } from 'react'
 
 type UseBookClubsQueryOptions = QueryOptions<SmartList[]> & {
 	params?: GetSmartListsParams
@@ -96,17 +98,18 @@ export function useSmartListItemsQuery({ id, ...options }: UseSmartListItemsQuer
 
 type UseSmartListItemsWithMetaQuery = {
 	id: string
+	params?: SmartListRelationOptions
 }
-export function useSmartListWithMetaQuery({ id }: UseSmartListItemsWithMetaQuery) {
+export function useSmartListWithMetaQuery({ id, params }: UseSmartListItemsWithMetaQuery) {
 	const [listResult, metaResult] = useQueries({
 		context: QueryClientContext,
 		queries: [
 			{
 				queryFn: async () => {
-					const { data } = await smartListApi.getSmartListById(id)
+					const { data } = await smartListApi.getSmartListById(id, params)
 					return data
 				},
-				queryKey: [smartListQueryKeys.getSmartListById, id],
+				queryKey: [smartListQueryKeys.getSmartListById, id, params],
 			},
 			{
 				queryFn: async () => {
@@ -172,11 +175,22 @@ type UseSmartListViesManagerParams = {
 	listId: string
 }
 export function useSmartListViewsManager({ listId }: UseSmartListViesManagerParams) {
+	const handleInvalidate = useCallback(
+		() =>
+			queryClient.invalidateQueries([smartListQueryKeys.getSmartListById, listId], {
+				exact: false,
+			}),
+		[listId],
+	)
+
 	const { mutateAsync: createView, isLoading: isCreating } = useMutation(
 		[smartListQueryKeys.createSmartListView, listId],
 		async (params: CreateOrUpdateSmartListView) => {
 			const { data } = await smartListApi.createSmartListView(listId, params)
 			return data
+		},
+		{
+			onSuccess: handleInvalidate,
 		},
 	)
 
@@ -185,6 +199,9 @@ export function useSmartListViewsManager({ listId }: UseSmartListViesManagerPara
 		async ({ originalName, ...params }: CreateOrUpdateSmartListView & { originalName: string }) => {
 			const { data } = await smartListApi.updateSmartListView(listId, originalName, params)
 			return data
+		},
+		{
+			onSuccess: handleInvalidate,
 		},
 	)
 

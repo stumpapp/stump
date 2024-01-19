@@ -9,7 +9,7 @@ import {
 	ToolTip,
 } from '@stump/components'
 import { TableProperties } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 import { useSafeWorkingView, useSmartListContext } from '../../context'
@@ -127,6 +127,29 @@ export default function TableColumnsBottomDrawer() {
 		updateWorkingView({ book_columns: bookColumns, enable_multi_sort, group_columns: groupColumns })
 		setIsOpen(false)
 	}
+
+	/**
+	 * An effect to update the local states whenever the working view changes
+	 */
+	useEffect(() => {
+		setBookColumnState(() => {
+			const newState: Record<string, boolean> = {}
+			selectedBookColumns.forEach(({ id }) => {
+				newState[id] = true
+			})
+			return newState
+		})
+
+		setGroupByEntityColumnState(() => {
+			const newState: Record<string, boolean> = {}
+			selectedGroupColumns.forEach(({ id }) => {
+				newState[id] = true
+			})
+			return newState
+		})
+
+		setMultiSort(enable_multi_sort ?? false)
+	}, [selectedBookColumns, selectedGroupColumns, enable_multi_sort])
 
 	const handleOpenChanged = (nowOpen: boolean) => {
 		if (!nowOpen) {

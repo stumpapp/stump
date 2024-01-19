@@ -118,7 +118,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 										const isSortable = header.column.getCanSort()
 										// TODO: make sticky work sticky -left-8
 										return (
-											<th key={header.id} className="h-10 first:pl-4 last:pr-4">
+											<th key={header.id} className="h-10 pl-1.5 pr-1.5 first:pl-4 last:pr-4">
 												<div
 													className={cn('flex items-center', {
 														'cursor-pointer select-none gap-x-2': isSortable,
@@ -146,7 +146,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 									<tr key={row.id} className="odd:bg-background-200">
 										{row.getVisibleCells().map((cell) => (
 											<td
-												className="first:pl-4 last:pr-4"
+												className="pl-1.5 pr-1.5 first:pl-4 last:pr-4"
 												key={cell.id}
 												style={{
 													width: cell.column.getSize(),

@@ -422,6 +422,13 @@
 							"label": "Manage users",
 							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
+					},
+					"smartlist": {
+						"label": "Smart Lists",
+						"read": {
+							"label": "Access smart list feature",
+							"description": "Allows the user to access smart lists features"
+						}
 					}
 				},
 				"validation": {

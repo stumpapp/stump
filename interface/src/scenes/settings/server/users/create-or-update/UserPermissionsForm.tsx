@@ -36,8 +36,8 @@ const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'library:manage': ['library:edit', 'library:scan'],
 	'library:scan': [],
 	'server:manage': ['file:explorer', 'user:manage', 'library:edit', 'library:scan'],
-	'user:manage': [],
 	'smartlist:read': [],
+	'user:manage': [],
 }
 
 const prefixes = ['bookclub', 'file', 'library', 'user', 'server', 'smartlist'] as const

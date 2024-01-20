@@ -1,12 +1,12 @@
 import {
 	CreateOrUpdateSmartList,
+	CreateOrUpdateSmartListView,
 	GetSmartListsParams,
 	SmartList,
 	SmartListItems,
 	SmartListMeta,
-	CreateOrUpdateSmartListView,
-	SmartListView,
 	SmartListRelationOptions,
+	SmartListView,
 } from '@stump/types'
 
 import { API } from './axios'
@@ -75,24 +75,24 @@ export async function updateSmartListView(
 
 export const smartListApi = {
 	createSmartList,
+	createSmartListView,
 	deleteSmartList,
 	getSmartListById,
 	getSmartListItems,
 	getSmartListMeta,
 	getSmartLists,
 	updateSmartList,
-	createSmartListView,
 	updateSmartListView,
 }
 
 export const smartListQueryKeys: Record<keyof typeof smartListApi, string> = {
 	createSmartList: 'smartlist.create',
+	createSmartListView: 'smartlist.createView',
 	deleteSmartList: 'smartlist.delete',
 	getSmartListById: 'smartlist.getById',
 	getSmartListItems: 'smartlist.getItems',
 	getSmartListMeta: 'smartlist.getMeta',
 	getSmartLists: 'smartlist.get',
 	updateSmartList: 'smartlist.update',
-	createSmartListView: 'smartlist.createView',
 	updateSmartListView: 'smartlist.updateView',
 }

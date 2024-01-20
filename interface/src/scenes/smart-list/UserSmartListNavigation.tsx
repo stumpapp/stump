@@ -55,6 +55,7 @@ export default function UserSmartListNavigation() {
 							'border-transparent text-gray-800 hover:border-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200':
 								!tab.isActive,
 						})}
+						onMouseEnter={tab.onHover}
 					>
 						{tab.label}
 					</Link>

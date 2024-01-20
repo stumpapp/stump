@@ -33,7 +33,7 @@ export default function SavedViewSelector() {
 			options.length
 				? undefined
 				: { label: workingView ? 'Custom view' : 'Default view', value: '' },
-		[options],
+		[options, workingView],
 	)
 
 	/**

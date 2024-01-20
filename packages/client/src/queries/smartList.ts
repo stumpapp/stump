@@ -10,10 +10,10 @@ import {
 } from '@stump/types'
 import { useQueries, UseQueryResult } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
+import { useCallback } from 'react'
 
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
 import { QueryClientContext } from '../context'
-import { useCallback } from 'react'
 
 type UseBookClubsQueryOptions = QueryOptions<SmartList[]> & {
 	params?: GetSmartListsParams
@@ -154,12 +154,25 @@ export function useUpdateSmartListMutation({ id, ...options }: UseUpdateSmartLis
 	}
 }
 
-export function useDeleteSmartListMutation() {
+type UseDeleteSmartListMutationOptions = MutationOptions<SmartList, AxiosError, string>
+export function useDeleteSmartListMutation({
+	onSuccess,
+	...options
+}: UseDeleteSmartListMutationOptions = {}) {
 	const { mutate, mutateAsync, isLoading, ...restReturn } = useMutation(
 		[smartListQueryKeys.deleteSmartList],
 		async (id: string) => {
 			const { data } = await smartListApi.deleteSmartList(id)
 			return data
+		},
+		{
+			onSuccess: async (...args) => {
+				await queryClient.invalidateQueries([smartListQueryKeys.getSmartLists], {
+					exact: false,
+				})
+				onSuccess?.(...args)
+			},
+			...options,
 		},
 	)
 
@@ -208,7 +221,7 @@ export function useSmartListViewsManager({ listId }: UseSmartListViesManagerPara
 	return {
 		createView,
 		isCreating,
-		updateView,
 		isUpdating,
+		updateView,
 	}
 }

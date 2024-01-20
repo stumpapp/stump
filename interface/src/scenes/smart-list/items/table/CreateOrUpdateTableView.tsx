@@ -1,10 +1,11 @@
-import React, { useCallback } from 'react'
-import { useSmartListContext } from '../../context'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Dialog, Form, Input } from '@stump/components'
+import React, { useCallback, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+
+import { useSmartListContext } from '../../context'
 
 type Props = {
 	isCreating: boolean
@@ -27,6 +28,15 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 			buildSchema(saved_views?.map((view) => view.name) || [], selectedView?.name),
 		),
 	})
+
+	/**
+	 * An effect to reset the form when the selected view changes
+	 */
+	useEffect(() => {
+		form.reset({
+			name: isCreating ? '' : selectedView?.name || '',
+		})
+	}, [isCreating, selectedView, form])
 
 	const handleOpenChange = (nowOpen: boolean) => {
 		if (!nowOpen) {
@@ -60,7 +70,7 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 				}
 			}
 		},
-		[isCreating, saveWorkingView],
+		[isCreating, saveWorkingView, saveSelectedStoredView, onClose],
 	)
 
 	return (
@@ -79,7 +89,11 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 				<Form id="create-or-update-view" form={form} onSubmit={handleSubmit}>
 					<Input
 						label="Name"
-						description="A friendly name to uniquely identify this view"
+						description={
+							isCreating
+								? 'A friendly name to uniquely identify this view'
+								: 'The updated name for this view, if desired'
+						}
 						placeholder="Name"
 						required
 						autoFocus

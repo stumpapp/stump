@@ -3,6 +3,9 @@ import { useDeleteSmartListMutation } from '@stump/client'
 import { ConfirmationModal } from '@stump/components'
 import React from 'react'
 import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router'
+
+import paths from '@/paths'
 
 import { useSmartListContext } from '../context'
 
@@ -11,8 +14,14 @@ type Props = {
 	onClose: () => void
 }
 export default function DeleteSmartListConfirmation({ isOpen, onClose }: Props) {
+	const navigate = useNavigate()
+
 	const { list, viewerRole } = useSmartListContext()
-	const { deleteAsync, isDeleting } = useDeleteSmartListMutation()
+	const { deleteAsync, isDeleting } = useDeleteSmartListMutation({
+		onSuccess: () => {
+			navigate(paths.smartLists())
+		},
+	})
 
 	async function handleDelete() {
 		if (viewerRole === 'CoCreator') {

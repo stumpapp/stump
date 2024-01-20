@@ -8,7 +8,7 @@ import CreateOrUpdateTableView from './CreateOrUpdateTableView'
 export default function ViewManagerDropdown() {
 	const [managerState, setManagerState] = useState<'create' | 'update' | 'none'>('none')
 
-	const { workingView, selectedView, workingViewIsDifferent } = useSmartListContext()
+	const { workingView, selectedView } = useSmartListContext()
 
 	return (
 		<>
@@ -27,10 +27,7 @@ export default function ViewManagerDropdown() {
 					</Button>
 				</Dropdown.Trigger>
 				<Dropdown.Content align="end">
-					<Dropdown.Item
-						disabled={!selectedView || !workingViewIsDifferent}
-						onClick={() => setManagerState('update')}
-					>
+					<Dropdown.Item disabled={!selectedView} onClick={() => setManagerState('update')}>
 						Update selected
 					</Dropdown.Item>
 					<Dropdown.Item disabled={!workingView} onClick={() => setManagerState('create')}>

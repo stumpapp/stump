@@ -36,7 +36,6 @@ export type ISmartListContext = {
 	meta?: SmartListMeta
 
 	workingView?: WorkingView
-	workingViewIsDifferent: boolean
 	updateWorkingView: (updates: Partial<WorkingView>) => void
 	saveWorkingView: (name: string) => Promise<void>
 
@@ -66,7 +65,6 @@ export const useSmartListContext = () => {
 
 export const useSafeWorkingView = () => {
 	const {
-		workingViewIsDifferent,
 		workingView,
 		saveWorkingView,
 		updateWorkingView,
@@ -80,6 +78,5 @@ export const useSafeWorkingView = () => {
 		updateWorkingView,
 		workingView: workingView || buildDefaultWorkingView(default_grouping),
 		workingViewIsDefined,
-		workingViewIsDifferent,
 	}
 }

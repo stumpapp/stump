@@ -5,6 +5,7 @@ import {
 } from '@stump/client'
 import { AccessRole, SmartList, SmartListView } from '@stump/types'
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
 import { Outlet, useParams } from 'react-router'
 
 import { useAppContext } from '@/context'
@@ -12,7 +13,6 @@ import { useAppContext } from '@/context'
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
-import toast from 'react-hot-toast'
 
 export default function UserSmartListLayout() {
 	const { id } = useParams<{ id: string }>()
@@ -30,29 +30,8 @@ export default function UserSmartListLayout() {
 	 * An effect to update the working view whenever the selected view changes
 	 */
 	useEffect(() => {
-		if (selectedView) {
-			console.log('selected view changed', selectedView)
-			setWorkingView(selectedView)
-		}
+		setWorkingView(selectedView)
 	}, [selectedView])
-
-	/**
-	 * Whether or not the working view is different from the selected view. If there is
-	 * no selected view, then this will always be false
-	 */
-	const workingViewIsDifferent = useMemo(() => {
-		if (!selectedView || !workingView) {
-			return false
-		}
-
-		return (
-			selectedView.book_columns !== workingView.book_columns ||
-			selectedView.search !== workingView.search ||
-			selectedView.book_sorting !== workingView.book_sorting ||
-			selectedView.group_columns !== workingView.group_columns ||
-			selectedView.group_sorting !== workingView.group_sorting
-		)
-	}, [selectedView, workingView])
 
 	if (!id) {
 		throw new Error('This scene requires an ID in the URL')
@@ -145,7 +124,7 @@ export default function UserSmartListLayout() {
 				}
 			}
 		},
-		[workingView, list?.id],
+		[workingView, list?.id, createView],
 	)
 
 	/**
@@ -162,7 +141,7 @@ export default function UserSmartListLayout() {
 					originalName: selectedView.name,
 					...selectedView,
 					...workingView,
-					...(!!newName ? { name: newName } : {}),
+					...(newName ? { name: newName } : {}),
 				})
 				setSelectedView(updatedView)
 			} catch (error) {
@@ -174,7 +153,7 @@ export default function UserSmartListLayout() {
 				}
 			}
 		},
-		[selectedView, workingView],
+		[selectedView, workingView, updateView],
 	)
 
 	if (isLoadingList) {
@@ -193,15 +172,14 @@ export default function UserSmartListLayout() {
 				list,
 				meta,
 				patchSmartList,
+				saveSelectedStoredView,
 				saveWorkingView,
 				selectStoredView: setSelectedView,
 				selectedView,
 				setLayout,
-				saveSelectedStoredView,
 				updateWorkingView,
 				viewerRole,
 				workingView,
-				workingViewIsDifferent,
 			}}
 		>
 			<UserSmartListHeader />

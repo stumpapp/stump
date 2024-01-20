@@ -35,12 +35,13 @@ model User {
   user_preferences_id String?          @unique
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
-  login_activity    UserLoginActivity[]
-  bookmarks         Bookmark[]
-  media_annotations MediaAnnotation[]
-  sessions          Session[]
-  library_visits    LastLibraryVisit[]
-  smart_lists       SmartList[]
+  login_activity          UserLoginActivity[]
+  bookmarks               Bookmark[]
+  media_annotations       MediaAnnotation[]
+  sessions                Session[]
+  library_visits          LastLibraryVisit[]
+  smart_lists             SmartList[]
+  smart_list_access_rules SmartListAccessRule[]
 
   @@map("users")
 }
@@ -568,8 +569,9 @@ model SmartListAccessRule {
   role Int // 1: reader (read), 2: collaborator (read, edit), 3: co-creator (read, edit, delete)
 
   user_id       String
+  user          User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   smart_list_id String
-  smart_list    SmartList? @relation(fields: [smart_list_id], references: [id])
+  smart_list    SmartList? @relation(fields: [smart_list_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, smart_list_id])
   @@map("smart_list_access_rules")

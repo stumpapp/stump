@@ -84,7 +84,6 @@ pub(crate) fn smart_list_access_for_user(
 		smart_list::creator_id::equals(user_id.clone()),
 		// condition where visibility is PUBLIC:
 		and![
-			// TODO: make enum
 			smart_list::visibility::equals(EntityVisibility::Public.to_string()),
 			// This asserts the reader rule is present OR there is no rule for the user
 			or![

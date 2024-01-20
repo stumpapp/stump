@@ -50,7 +50,7 @@ export function AppRouter() {
 					<Route path="series/*" element={<SeriesRouter />} />
 					<Route path="books/*" element={<BookRouter />} />
 					{IS_DEVELOPMENT && <Route path="book-clubs/*" element={<BookClubRouter />} />}
-					{IS_DEVELOPMENT && <Route path="/smart-lists/*" element={<SmartListRouter />} />}
+					<Route path="/smart-lists/*" element={<SmartListRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 

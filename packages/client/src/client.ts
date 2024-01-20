@@ -83,7 +83,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	})
 }
 
-// BAD!
+// BAD TYPES!!
 export type QueriesOptions<
 	T extends unknown[],
 	Result extends unknown[] = [],

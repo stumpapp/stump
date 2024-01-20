@@ -38,12 +38,12 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
-	middleware::auth::Auth,
-	utils::{
-		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
-		get_session_user, http::ImageResponse, FilterableQuery, SeriesBaseFilter,
+	filter::{
+		chain_optional_iter, decode_path_filter, FilterableQuery, SeriesBaseFilter,
 		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
 	},
+	middleware::auth::Auth,
+	utils::{get_session_server_owner_user, get_session_user, http::ImageResponse},
 };
 
 use super::{

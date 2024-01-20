@@ -19,8 +19,6 @@ import { useSafeWorkingView, useSmartListContext } from '../../context'
 import { buildColumns, defaultColumns } from './mediaColumns'
 import TableHeaderActions from './TableHeaderActions'
 
-// TODO: Allow customizing and persisting views on smart lists. This would allow custom columns, sorting, and filtering.
-
 type Props = {
 	books: Media[]
 	isIsolatedTable?: boolean

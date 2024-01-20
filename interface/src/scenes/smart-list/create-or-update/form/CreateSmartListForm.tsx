@@ -20,12 +20,12 @@ export default function CreateSmartListForm() {
 				groups: [
 					{
 						filters: [
-							{
-								name: 'test-1',
-							},
-							{
-								name: 'test-2',
-							},
+							// {
+							// 	name: 'test-1',
+							// },
+							// {
+							// 	name: 'test-2',
+							// },
 						],
 						joiner: 'and',
 					},

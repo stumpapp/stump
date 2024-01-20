@@ -10,6 +10,7 @@ import CreateOrUpdateTableView from './CreateOrUpdateTableView'
 const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewManager'
 const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
+// TODO: support deleting views
 export default function ViewManagerDropdown() {
 	const [managerState, setManagerState] = useState<'create' | 'update' | 'none'>('none')
 
@@ -25,7 +26,7 @@ export default function ViewManagerDropdown() {
 						className="h-10 shrink-0 divide-opacity-30 bg-background-200/50 px-0 py-0 hover:bg-background-200/80 data-[state=open]:bg-background-200"
 					>
 						<div className="inline-flex h-full items-center divide-x divide-edge">
-							<span className="flex h-full items-center px-3 py-2">Save</span>
+							<span className="flex h-full items-center px-3 py-2">{t('common.save')}</span>
 							<span className="flex h-full items-center  px-1 py-2">
 								<ChevronDown className="h-4 w-4" />
 							</span>

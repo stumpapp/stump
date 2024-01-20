@@ -5,7 +5,12 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
 
+import { useLocaleContext } from '@/i18n'
+
 import { useSmartListContext } from '../../context'
+
+const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewManager.modal'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 type Props = {
 	isCreating: boolean
@@ -13,6 +18,7 @@ type Props = {
 	onClose: () => void
 }
 export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }: Props) {
+	const { t } = useLocaleContext()
 	const {
 		list: { saved_views },
 		selectedView,
@@ -37,6 +43,15 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 			name: isCreating ? '' : selectedView?.name || '',
 		})
 	}, [isCreating, selectedView, form])
+
+	/**
+	 * A callback to translate a form control
+	 */
+	const translateControl = useCallback(
+		(key: string) =>
+			isCreating ? t(withLocaleKey(`createForm.${key}`)) : t(withLocaleKey(`updateForm.${key}`)),
+		[t, isCreating],
+	)
 
 	const handleOpenChange = (nowOpen: boolean) => {
 		if (!nowOpen) {
@@ -77,24 +92,22 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 			<Dialog.Content size="sm">
 				<Dialog.Header>
-					<Dialog.Title>{isCreating ? 'Create' : 'Update'} view</Dialog.Title>
+					<Dialog.Title>
+						{isCreating ? t(withLocaleKey('heading.create')) : t(withLocaleKey('heading.update'))}
+					</Dialog.Title>
 					<Dialog.Description>
 						{isCreating
-							? 'Create a new view for this list'
-							: `Update the view "${selectedView?.name}"`}
+							? t(withLocaleKey('description.create'))
+							: `${t(withLocaleKey('description.update'))}} "${selectedView?.name}"`}
 					</Dialog.Description>
 					<Dialog.Close onClick={onClose} />
 				</Dialog.Header>
 
 				<Form id="create-or-update-view" form={form} onSubmit={handleSubmit}>
 					<Input
-						label="Name"
-						description={
-							isCreating
-								? 'A friendly name to uniquely identify this view'
-								: 'The updated name for this view, if desired'
-						}
-						placeholder="Name"
+						label={translateControl('name.label')}
+						description={translateControl('name.description')}
+						placeholder={translateControl('name.placeholder')}
 						required
 						autoFocus
 						errorMessage={form.formState.errors.name?.message}
@@ -105,7 +118,9 @@ export default function CreateOrUpdateTableView({ isCreating, isOpen, onClose }:
 
 				<Dialog.Footer>
 					<Button onClick={onClose}>Cancel</Button>
-					<Button form="create-or-update-view">{isCreating ? 'Create' : 'Save changes'}</Button>
+					<Button form="create-or-update-view">
+						{isCreating ? t('common.create') : t('common.saveChanges')}
+					</Button>
 				</Dialog.Footer>
 			</Dialog.Content>
 		</Dialog>

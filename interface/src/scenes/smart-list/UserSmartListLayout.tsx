@@ -9,13 +9,18 @@ import toast from 'react-hot-toast'
 import { Outlet, useParams } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { useLocaleContext } from '@/i18n'
 
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import UserSmartListHeader from './UserSmartListHeader'
 import UserSmartListNavigation from './UserSmartListNavigation'
 
+const LOCALE_BASE_KEY = 'userSmartListScene.layout'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
+
 export default function UserSmartListLayout() {
 	const { id } = useParams<{ id: string }>()
+	const { t } = useLocaleContext()
 
 	// TODO: I don't think I need both TBH, esp with how many more features I can add to the table...
 	const [layout, setLayout] = React.useState<'table' | 'list'>(() => getDefaultLayout())
@@ -34,7 +39,7 @@ export default function UserSmartListLayout() {
 	}, [selectedView])
 
 	if (!id) {
-		throw new Error('This scene requires an ID in the URL')
+		throw new Error(t(withLocaleKey('missingIdError')))
 	}
 
 	const {
@@ -117,14 +122,15 @@ export default function UserSmartListLayout() {
 				setSelectedView(createdView)
 			} catch (error) {
 				console.error(error)
+				const prefix = t(withLocaleKey('viewCreateError'))
 				if (error instanceof Error) {
-					toast.error(`Failed to create view${error.message ? `: ${error.message}` : ''}`)
+					toast.error(`${prefix}${error.message ? `: ${error.message}` : ''}`)
 				} else {
-					toast.error(`Failed to create view`)
+					toast.error(`${prefix}`)
 				}
 			}
 		},
-		[workingView, list?.id, createView],
+		[workingView, list?.id, createView, t],
 	)
 
 	/**
@@ -146,14 +152,15 @@ export default function UserSmartListLayout() {
 				setSelectedView(updatedView)
 			} catch (error) {
 				console.error(error)
+				const prefix = t(withLocaleKey('viewSaveError'))
 				if (error instanceof Error) {
-					toast.error(`Failed to update view${error.message ? `: ${error.message}` : ''}`)
+					toast.error(`${prefix}${error.message ? `: ${error.message}` : ''}`)
 				} else {
-					toast.error(`Failed to update view`)
+					toast.error(`${prefix}`)
 				}
 			}
 		},
-		[selectedView, workingView, updateView],
+		[selectedView, workingView, updateView, t],
 	)
 
 	if (isLoadingList) {
@@ -162,7 +169,7 @@ export default function UserSmartListLayout() {
 
 	// TODO: redirect for these?
 	if (!list) {
-		throw new Error('The requested smart list does not exist!')
+		throw new Error(t(withLocaleKey('smartListNotFound')))
 	}
 
 	return (

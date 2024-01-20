@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 
 import { Search } from '@/components/filters'
+import { useLocaleContext } from '@/i18n'
 
 import { useSafeWorkingView } from '../../context'
 import FilterBottomDrawer from './FilterBottomDrawer'
@@ -9,6 +10,7 @@ import TableColumnsBottomDrawer from './TableColumnsBottomDrawer'
 import ViewManagerDropdown from './ViewManagerDropdown'
 
 export default function TableHeaderActions() {
+	const { t } = useLocaleContext()
 	const {
 		workingView: { search },
 		updateWorkingView,
@@ -29,7 +31,7 @@ export default function TableHeaderActions() {
 			<Search
 				initialValue={defaultValue}
 				onChange={(value) => setFilter(value)}
-				placeholder="Quick filter"
+				placeholder={t('userSmartListScene.itemsScene.actionHeader.search.placeholder')}
 			/>
 			<ViewManagerDropdown />
 		</header>

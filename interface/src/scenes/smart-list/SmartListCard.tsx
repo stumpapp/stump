@@ -6,9 +6,12 @@ import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { match, P } from 'ts-pattern'
 
+import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 const DEFAULT_META_CACHE_TIME = 900000 // 15 minutes
+const LOCALE_BASE_KEY = 'userSmartListsScene.list.card'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 type Props = {
 	list: SmartList
@@ -22,6 +25,7 @@ export default function SmartListCard({
 		description,
 	},
 }: Props) {
+	const { t } = useLocaleContext()
 	const { meta } = useSmartListMetaQuery({
 		/**
 		 * I allow a longer cache time because the query on the backend is a bit more expensive than others.
@@ -48,10 +52,11 @@ export default function SmartListCard({
 		const matchedSeries = Number(matched_series)
 		const matchedLibraries = Number(matched_libraries)
 
+		// TODO: I don't think pluralize supports multiple languages...
 		const figures = [
-			{ label: 'book', value: matchedBooks },
-			{ label: 'series', value: matchedSeries },
-			{ label: 'library', value: matchedLibraries },
+			{ label: t(withLocaleKey('meta.figures.books')), value: matchedBooks },
+			{ label: t(withLocaleKey('meta.figures.series')), value: matchedSeries },
+			{ label: t(withLocaleKey('meta.figures.library')), value: matchedLibraries },
 		].filter(({ value }) => !isNaN(value))
 
 		if (figures.length === 0) {
@@ -64,7 +69,7 @@ export default function SmartListCard({
 
 		return (
 			<Text variant="muted" size="sm">
-				Matches: {figureString}
+				{t(withLocaleKey('meta.matches'))}: {figureString}
 			</Text>
 		)
 	}

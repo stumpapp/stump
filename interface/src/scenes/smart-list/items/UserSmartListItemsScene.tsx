@@ -3,12 +3,14 @@ import { cn } from '@stump/components'
 import React from 'react'
 
 import { SceneContainer } from '@/components/container'
+import { useLocaleContext } from '@/i18n'
 
 import { useSmartListContext } from '../context'
 import { GroupedSmartListItemList } from './list'
 import { GroupedSmartListItemTable, SmartListBookTable } from './table'
 
 export default function UserSmartListItemsScene() {
+	const { t } = useLocaleContext()
 	const {
 		list: { id },
 		layout,
@@ -23,7 +25,7 @@ export default function UserSmartListItemsScene() {
 	const shouldThrow = !items
 	if (shouldThrow) {
 		// TODO: redirect for these?
-		throw new Error('The requested smart list does not exist!')
+		throw new Error(t('userSmartListScene.itemsScene.smartListNotFound'))
 	}
 
 	const renderContent = () => {

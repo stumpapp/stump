@@ -2,10 +2,15 @@ import { Accordion, Alert, Button, Drawer, IconButton, Text, ToolTip } from '@st
 import { Construction, Filter } from 'lucide-react'
 import React from 'react'
 
+import { useLocaleContext } from '@/i18n'
+
 import { useSmartListContext } from '../../context'
 
-// TODO: bottom drawer
+const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.filterDrawer'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
+
 export default function FilterBottomDrawer() {
+	const { t } = useLocaleContext()
 	const {
 		list: { filters },
 	} = useSmartListContext()
@@ -22,8 +27,8 @@ export default function FilterBottomDrawer() {
 			<Drawer.Content>
 				<div className="mx-auto w-full max-w-2xl">
 					<Drawer.Header>
-						<Drawer.Title>Smart list filters</Drawer.Title>
-						<Drawer.Description>Change the filters for this viewing session</Drawer.Description>
+						<Drawer.Title>{t(withLocaleKey('heading'))}</Drawer.Title>
+						<Drawer.Description>{t(withLocaleKey('description'))}</Drawer.Description>
 					</Drawer.Header>
 				</div>
 
@@ -33,11 +38,11 @@ export default function FilterBottomDrawer() {
 							<Accordion type="single" collapsible>
 								<Accordion.Item value="raw_filters" className="border-none">
 									<Accordion.Trigger noUnderline asLabel>
-										Raw filter data
+										{t(withLocaleKey('rawData.heading'))}
 									</Accordion.Trigger>
 									<Accordion.Content className="-mt-2">
 										<Text size="sm" variant="muted">
-											This is how Stump will process the filters
+											{t(withLocaleKey('rawData.description'))}
 										</Text>
 										<div className="mt-1.5 rounded-sm bg-background-200 p-4">
 											<pre className="text-xs text-contrast-200">
@@ -59,10 +64,10 @@ export default function FilterBottomDrawer() {
 
 				<div className="mx-auto w-full max-w-2xl">
 					<Drawer.Footer className="w-full flex-row">
-						<Button className="w-full">Save</Button>
+						<Button className="w-full">{t(withLocaleKey('buttons.save'))}</Button>
 						<Drawer.Close asChild>
 							<Button variant="outline" className="w-full">
-								Cancel
+								{t(withLocaleKey('buttons.cancel'))}
 							</Button>
 						</Drawer.Close>
 					</Drawer.Footer>

@@ -2,12 +2,17 @@ import { usePreferences } from '@stump/client'
 import { cn, Heading, Link, Text } from '@stump/components'
 import React from 'react'
 
+import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import { useSmartListContext } from './context'
 import { parseListMeta } from './utils'
 
+const LOCALE_BASE_KEY = 'userSmartListScene.header'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
+
 export default function UserSmartListHeader() {
+	const { t } = useLocaleContext()
 	const {
 		preferences: { primary_navigation_mode, layout_max_width_px },
 	} = usePreferences()
@@ -50,7 +55,7 @@ export default function UserSmartListHeader() {
 					variant="muted"
 					className="text-sm no-underline hover:underline"
 				>
-					Lists /
+					{t(withLocaleKey('backLink'))} /
 				</Link>
 				<Heading size="lg" bold>
 					{name}

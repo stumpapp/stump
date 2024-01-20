@@ -1,15 +1,26 @@
 import { NativeSelect } from '@stump/components'
 import React, { useCallback, useMemo } from 'react'
 
+import { useLocaleContext } from '@/i18n'
+
 import { useSmartListContext } from '../../context'
 
+const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewSelector'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
+
 export default function SavedViewSelector() {
+	const { t } = useLocaleContext()
 	const {
 		workingView,
 		selectedView,
 		selectStoredView,
 		list: { saved_views },
 	} = useSmartListContext()
+
+	const translateKey = useCallback((key: string) => t(withLocaleKey(key)), [t])
+
+	const defaultViewLabel = useMemo(() => translateKey('defaultView'), [translateKey])
+	const customViewLabel = useMemo(() => translateKey('customView'), [translateKey])
 
 	/**
 	 * The options available to the user to select from, pulled from the saved views on
@@ -18,11 +29,11 @@ export default function SavedViewSelector() {
 	const options = useMemo(() => {
 		const baseOptions = (saved_views ?? []).map(({ name }) => ({ label: name, value: name }))
 		if (baseOptions.length) {
-			return [{ label: 'Default view', value: '' }, ...baseOptions]
+			return [{ label: defaultViewLabel, value: '' }, ...baseOptions]
 		} else {
 			return baseOptions
 		}
-	}, [saved_views])
+	}, [saved_views, defaultViewLabel])
 
 	/**
 	 * The empty option to display when there are no saved views. This will be undefined if there are
@@ -32,8 +43,8 @@ export default function SavedViewSelector() {
 		() =>
 			options.length
 				? undefined
-				: { label: workingView ? 'Custom view' : 'Default view', value: '' },
-		[options, workingView],
+				: { label: workingView ? customViewLabel : defaultViewLabel, value: '' },
+		[options, workingView, customViewLabel, defaultViewLabel],
 	)
 
 	/**
@@ -58,7 +69,7 @@ export default function SavedViewSelector() {
 
 	return (
 		<NativeSelect
-			title={isDisabled ? 'No saved views' : 'Select a saved view'}
+			title={isDisabled ? translateKey('noViewsSaved') : translateKey('selectView')}
 			className="w-[185px]"
 			options={options}
 			emptyOption={emptyOption}

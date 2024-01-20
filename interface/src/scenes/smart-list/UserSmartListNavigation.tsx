@@ -3,10 +3,16 @@ import { cn, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
+import { useLocaleContext } from '@/i18n'
+
 import { useSmartListContext } from './context'
+
+const LOCALE_BASE_KEY = 'userSmartListScene.navigation'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function UserSmartListNavigation() {
 	const location = useLocation()
+	const { t } = useLocaleContext()
 	const {
 		preferences: { primary_navigation_mode, layout_max_width_px },
 	} = usePreferences()
@@ -19,17 +25,17 @@ export default function UserSmartListNavigation() {
 			{
 				// smart-lists/ID OR smart-lists/ID/items
 				isActive: location.pathname.match(/\/smart-lists\/[^/]+(\/items)?$/),
-				label: 'Items',
+				label: t(withLocaleKey('items')),
 				onHover: () => prefetchSmartListItems(id),
 				to: 'items',
 			},
 			{
 				isActive: location.pathname.match(/\/smart-lists\/[^/]+\/settings(\/.*)?$/),
-				label: 'Settings',
+				label: t(withLocaleKey('settings')),
 				to: 'settings',
 			},
 		],
-		[location, id],
+		[location, id, t],
 	)
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
@@ -51,9 +57,8 @@ export default function UserSmartListNavigation() {
 						key={tab.to}
 						underline={false}
 						className={cn('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
-							'border-brand-500 text-brand-600 dark:text-brand-400': tab.isActive,
-							'border-transparent text-gray-800 hover:border-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200':
-								!tab.isActive,
+							'border-brand-500 text-brand-600': tab.isActive,
+							'border-transparent text-muted': !tab.isActive,
 						})}
 						onMouseEnter={tab.onHover}
 					>

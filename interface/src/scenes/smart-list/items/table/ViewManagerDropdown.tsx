@@ -2,12 +2,18 @@ import { Button, Dropdown } from '@stump/components'
 import { ChevronDown } from 'lucide-react'
 import React, { useState } from 'react'
 
+import { useLocaleContext } from '@/i18n'
+
 import { useSmartListContext } from '../../context'
 import CreateOrUpdateTableView from './CreateOrUpdateTableView'
+
+const LOCALE_BASE_KEY = 'userSmartListScene.itemsScene.actionHeader.viewManager'
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
 
 export default function ViewManagerDropdown() {
 	const [managerState, setManagerState] = useState<'create' | 'update' | 'none'>('none')
 
+	const { t } = useLocaleContext()
 	const { workingView, selectedView } = useSmartListContext()
 
 	return (
@@ -28,10 +34,10 @@ export default function ViewManagerDropdown() {
 				</Dropdown.Trigger>
 				<Dropdown.Content align="end">
 					<Dropdown.Item disabled={!selectedView} onClick={() => setManagerState('update')}>
-						Update selected
+						{t(withLocaleKey('updateSelected'))}
 					</Dropdown.Item>
 					<Dropdown.Item disabled={!workingView} onClick={() => setManagerState('create')}>
-						Create new view
+						{t(withLocaleKey('create'))}
 					</Dropdown.Item>
 				</Dropdown.Content>
 			</Dropdown>

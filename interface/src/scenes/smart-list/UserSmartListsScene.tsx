@@ -15,12 +15,18 @@ import { useDebouncedValue } from 'rooks'
 
 import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'
+import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import SmartListCard from './SmartListCard'
 
 // TODO: move filter to URL params
+
+const LOCALE_BASE_KEY = `userSmartListsScene`
+const withLocaleKey = (key: string) => `${LOCALE_BASE_KEY}.${key}`
+
 export default function UserSmartListsScene() {
+	const { t } = useLocaleContext()
 	/**
 	 * The local value state for the search input
 	 */
@@ -61,8 +67,12 @@ export default function UserSmartListsScene() {
 				<GenericEmptyState
 					containerClassName="justify-start items-start pt-0 pl-1"
 					contentClassName="text-left"
-					title={search ? 'No smart lists match your search' : 'You have no smart lists'}
-					subtitle={search ? 'Try changing your search' : 'Create a smart list to get started'}
+					title={t(withLocaleKey('list.emptyState.heading'))}
+					subtitle={
+						search
+							? t(withLocaleKey('list.emptyState.noMatchesMessage'))
+							: t(withLocaleKey('list.emptyState.noListsMessage'))
+					}
 				/>
 			)
 		}
@@ -100,7 +110,7 @@ export default function UserSmartListsScene() {
 				<div className="min-h-10 sticky top-0 z-10 bg-background py-2 backdrop-blur-sm">
 					<div className="flex w-full flex-row items-center justify-between gap-x-2 pr-3 md:w-2/3 lg:max-w-xl">
 						<Input
-							placeholder="Filter smart lists"
+							placeholder={t(withLocaleKey('searchPlaceholder'))}
 							variant="primary"
 							leftDecoration={<Search className="h-4 w-4 text-muted" />}
 							rightDecoration={isRefetching ? <ProgressSpinner size="sm" /> : null}
@@ -116,7 +126,7 @@ export default function UserSmartListsScene() {
 							className="pointer-events-none h-full shrink-0"
 							disabled
 						>
-							Create list
+							{t(withLocaleKey('buttons.createSmartList'))}
 						</ButtonOrLink>
 					</div>
 				</div>

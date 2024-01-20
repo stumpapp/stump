@@ -9,11 +9,13 @@ export interface EpubTheme {
 export const stumpDark: EpubTheme = {
 	a: { color: '#4299E1' },
 	blockquote: { color: 'rgb(168 172 176) !important' },
-	body: { background: '#161719 !important' },
+	body: { background: '#161719 !important', color: '#E8EDF4' },
 	h1: { color: '#E8EDF4' },
 	h2: { color: '#E8EDF4' },
 	h3: { color: '#E8EDF4' },
 	h4: { color: '#E8EDF4' },
 	h5: { color: '#E8EDF4' },
 	p: { color: '#E8EDF4 !important', 'font-size': 'unset' },
+	span: { color: '#E8EDF4' },
+	ul: { color: '#E8EDF4' },
 }

@@ -178,6 +178,100 @@
 			"downloadSeries": "Download Series"
 		}
 	},
+	"userSmartListsScene": {
+		"heading": "Smart lists",
+		"subtitle": "Your favorite searches and filters saved for easy access",
+		"searchPlaceholder": "Filter smart lists",
+		"buttons": {
+			"createSmartList": "Create smart list"
+		},
+		"list": {
+			"emptyState": {
+				"heading": "No smart lists to display",
+				"noListsMessage": "Create a smart list to get started",
+				"noMatchesMessage": "Try changing your search query"
+			},
+			"card": {
+				"meta": {
+					"figures": {
+						"books": "book",
+						"series": "series",
+						"library": "library"
+					},
+					"matches": "Matches"
+				}
+			}
+		}
+	},
+	"userSmartListScene": {
+		"navigation": {
+			"items": "Items",
+			"settings": "Settings"
+		},
+		"layout": {
+			"missingIdError": "This scene requires an ID in the URL",
+			"smartListNotFound": "Smart list not found",
+			"viewCreateError": "Failed to create view",
+			"viewSaveError": "Failed to save view"
+		},
+		"header": {
+			"backLink": "Lists"
+		},
+		"itemsScene": {
+			"smartListNotFound": "Smart list not found",
+			"actionHeader": {
+				"viewSelector": {
+					"customView": "Custom view",
+					"defaultView": "Default view",
+					"noViewsSaved": "No views saved",
+					"selectView": "Select a saved view"
+				},
+				"filterDrawer": {
+					"heading": "Smart list filters",
+					"description": "Change the filters for this viewing session",
+					"rawData": {
+						"heading": "Raw filter data",
+						"description": "This is how Stump will process the filters"
+					},
+					"buttons": {
+						"save": "Save",
+						"cancel": "Cancel"
+					}
+				},
+				"search": {
+					"placeholder": "Quick filter"
+				},
+				"viewManager": {
+					"updateSelected": "Update selected",
+					"create": "Create new view",
+					"modal": {
+						"heading": {
+							"create": "Create view",
+							"update": "Update view"
+						},
+						"description": {
+							"create": "Create a new view for this smart list",
+							"update": "Update the view"
+						},
+						"createForm": {
+							"name": {
+								"label": "Name",
+								"placeholder": "My view",
+								"description": "A friendly name to uniquely identify this view"
+							}
+						},
+						"updateForm": {
+							"name": {
+								"label": "Name",
+								"placeholder": "My view",
+								"description": "The updated name for this view, if desired"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
 	"settingsScene": {
 		"navigation": {
 			"general": "General",
@@ -422,6 +516,13 @@
 							"label": "Manage users",
 							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
+					},
+					"smartlist": {
+						"label": "Smart Lists",
+						"read": {
+							"label": "Access smart list feature",
+							"description": "Allows the user to access smart lists features"
+						}
 					}
 				},
 				"validation": {
@@ -474,7 +575,10 @@
 			"settings": "Settings",
 			"themeToggle": "Toggle Theme",
 			"goForward": "Go Forward",
-			"goBack": "Go Back"
+			"goBack": "Go Back",
+			"smartlists": "Smart lists",
+			"noSmartlists": "No smart lists",
+			"createSmartlist": "Create smart list"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
@@ -521,5 +625,12 @@
 	"tagSelect": {
 		"placholder": "Select or create tag",
 		"placeholderNoTags": "No tags available"
+	},
+	"common": {
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"save": "Save",
+		"saveChanges": "Save changes",
+		"create": "Create"
 	}
 }

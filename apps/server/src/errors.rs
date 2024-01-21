@@ -1,4 +1,5 @@
 use axum::{
+	extract::multipart::MultipartError,
 	http::StatusCode,
 	response::{IntoResponse, Response},
 };
@@ -113,6 +114,12 @@ pub enum ApiError {
 	#[error("{0}")]
 	#[schema(value_type = String)]
 	PrismaError(#[from] QueryError),
+}
+
+impl From<MultipartError> for ApiError {
+	fn from(error: MultipartError) -> Self {
+		ApiError::InternalServerError(error.to_string())
+	}
 }
 
 impl ApiError {

@@ -1,5 +1,5 @@
 use axum::{
-	extract::{Path, State},
+	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
 	routing::{get, post, put},
 	Json, Router,
@@ -28,8 +28,9 @@ use stump_core::{
 	filesystem::{
 		get_unknown_thumnail,
 		image::{
-			self, generate_thumbnail, remove_thumbnails, remove_thumbnails_of_type,
-			ImageFormat, ImageProcessorOptions, ThumbnailJob, ThumbnailJobConfig,
+			self, generate_thumbnail, place_thumbnail, remove_thumbnails,
+			remove_thumbnails_of_type, ImageFormat, ImageProcessorOptions, ThumbnailJob,
+			ThumbnailJobConfig,
 		},
 		read_entire_file,
 		scanner::LibraryScanJob,
@@ -54,8 +55,8 @@ use crate::{
 	},
 	middleware::auth::Auth,
 	utils::{
-		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
-		http::ImageResponse,
+		enforce_session_permissions, get_session_server_owner_user, get_session_user,
+		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
 	},
 };
 
@@ -98,6 +99,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 							"/",
 							get(get_library_thumbnail_handler)
 								.patch(patch_library_thumbnail)
+								.put(replace_library_thumbnail)
+								.layer(DefaultBodyLimit::max(20 * 1024 * 1024)) // 20MB
 								.delete(delete_library_thumbnails),
 						)
 						.route("/generate", post(generate_library_thumbnails)),
@@ -689,6 +692,37 @@ async fn patch_library_thumbnail(
 	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
+}
+
+async fn replace_library_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	mut upload: Multipart,
+) -> ApiResult<ImageResponse> {
+	enforce_session_permissions(
+		&session,
+		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
+	)?;
+	let client = ctx.get_db();
+
+	let library = client
+		.library()
+		.find_unique(library::id::equals(id))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Library not found")))?;
+
+	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let ext = content_type.extension();
+	let library_id = library.id;
+
+	let path_buf = place_thumbnail(&library_id, ext, &bytes, &ctx.config)?;
+
+	Ok(ImageResponse::from((
+		content_type,
 		read_entire_file(path_buf)?,
 	)))
 }

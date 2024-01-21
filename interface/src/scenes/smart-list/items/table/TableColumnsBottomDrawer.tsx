@@ -129,7 +129,7 @@ export default function TableColumnsBottomDrawer() {
 	}
 
 	/**
-	 * An effect to update the local states whenever the working view changes
+	 * An effect to update the local book column state whenever the working view changes
 	 */
 	useEffect(() => {
 		setBookColumnState(() => {
@@ -139,7 +139,12 @@ export default function TableColumnsBottomDrawer() {
 			})
 			return newState
 		})
+	}, [selectedBookColumns])
 
+	/**
+	 * An effect to update the local group column state whenever the working view changes
+	 */
+	useEffect(() => {
 		setGroupByEntityColumnState(() => {
 			const newState: Record<string, boolean> = {}
 			selectedGroupColumns.forEach(({ id }) => {
@@ -147,9 +152,14 @@ export default function TableColumnsBottomDrawer() {
 			})
 			return newState
 		})
+	}, [selectedGroupColumns])
 
+	/**
+	 * An effect to update the local multi-sort state whenever the working view changes
+	 */
+	useEffect(() => {
 		setMultiSort(enable_multi_sort ?? false)
-	}, [selectedBookColumns, selectedGroupColumns, enable_multi_sort])
+	}, [enable_multi_sort])
 
 	const handleOpenChanged = (nowOpen: boolean) => {
 		if (!nowOpen) {

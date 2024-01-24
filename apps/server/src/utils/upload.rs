@@ -15,7 +15,9 @@ pub async fn validate_image_upload(
 	})?;
 
 	let raw_content_type = field.content_type().map(ContentType::from);
+
 	let bytes = field.bytes().await?;
+	let file_size = bytes.len();
 
 	if bytes.is_empty() || bytes.len() < 5 {
 		return Err(ApiError::BadRequest("Uploaded file is empty".to_string()));
@@ -48,6 +50,8 @@ pub async fn validate_image_upload(
 			ApiError::BadRequest("Uploaded file is not an image".to_string())
 		}),
 	}?;
+
+	tracing::trace!(?content_type, file_size, "Validated image upload");
 
 	Ok((content_type, bytes.to_vec()))
 }

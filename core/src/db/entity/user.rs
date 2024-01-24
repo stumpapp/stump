@@ -144,7 +144,7 @@ pub enum UserPermission {
 	/// Grant access to access the file explorer
 	#[serde(rename = "file:explorer")]
 	FileExplorer,
-	/// Grant access to upload files to the library (manage library)
+	/// Grant access to upload files to a library (manage library)
 	#[serde(rename = "file:upload")]
 	UploadFile,
 	/// Grant access to create a library
@@ -162,6 +162,9 @@ pub enum UserPermission {
 	/// Grant access to delete the library (manage library)
 	#[serde(rename = "library:delete")]
 	DeleteLibrary,
+	/// Grant access to upload an avatar image for their account
+	#[serde(rename = "user:upload_avatar")]
+	UploadAvatar,
 	/// Grant access to manage users (create,edit,delete)
 	#[serde(rename = "user:manage")]
 	ManageUsers,
@@ -183,6 +186,7 @@ impl ToString for UserPermission {
 			UserPermission::ScanLibrary => "library:scan".to_string(),
 			UserPermission::ManageLibrary => "library:manage".to_string(),
 			UserPermission::DeleteLibrary => "library:delete".to_string(),
+			UserPermission::UploadAvatar => "user:upload_avatar".to_string(),
 			UserPermission::ManageUsers => "user:manage".to_string(),
 			UserPermission::ManageServer => "server:manage".to_string(),
 		}
@@ -202,6 +206,7 @@ impl From<&str> for UserPermission {
 			"library:scan" => UserPermission::ScanLibrary,
 			"library:manage" => UserPermission::ManageLibrary,
 			"library:delete" => UserPermission::DeleteLibrary,
+			"user:upload_avatar" => UserPermission::UploadAvatar,
 			"user:manage" => UserPermission::ManageUsers,
 			"server:manage" => UserPermission::ManageServer,
 			_ => panic!("Invalid user permission: {}", s),

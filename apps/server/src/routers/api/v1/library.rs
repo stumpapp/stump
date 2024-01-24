@@ -99,7 +99,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 							"/",
 							get(get_library_thumbnail_handler)
 								.patch(patch_library_thumbnail)
-								.put(replace_library_thumbnail)
+								.post(replace_library_thumbnail)
+								// TODO: configurable max file size
 								.layer(DefaultBodyLimit::max(20 * 1024 * 1024)) // 20MB
 								.delete(delete_library_thumbnails),
 						)
@@ -515,9 +516,9 @@ pub(crate) fn get_library_thumbnail(
 			tracing::trace!(?path, library_id, "Found generated library thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) =
-		get_unknown_thumnail(&library_id, config.get_thumbnails_dir())
-	{
+	}
+
+	if let Some(path) = get_unknown_thumnail(&library_id, config.get_thumbnails_dir()) {
 		tracing::debug!(path = ?path, library_id, "Found library thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
@@ -708,6 +709,8 @@ async fn replace_library_thumbnail(
 	)?;
 	let client = ctx.get_db();
 
+	tracing::trace!(?id, ?upload, "Replacing library thumbnail");
+
 	let library = client
 		.library()
 		.find_unique(library::id::equals(id))
@@ -716,8 +719,19 @@ async fn replace_library_thumbnail(
 		.ok_or(ApiError::NotFound(String::from("Library not found")))?;
 
 	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+
 	let ext = content_type.extension();
 	let library_id = library.id;
+
+	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+	// user testing I'd like to see if this becomes a problem. We'll see!
+	remove_thumbnails(&[library_id.clone()], ctx.config.get_thumbnails_dir())
+		.unwrap_or_else(|e| {
+			tracing::error!(
+				?e,
+				"Failed to remove existing library thumbnail before replacing!"
+			);
+		});
 
 	let path_buf = place_thumbnail(&library_id, ext, &bytes, &ctx.config)?;
 

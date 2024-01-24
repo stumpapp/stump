@@ -21,7 +21,8 @@ use stump_core::{
 	filesystem::{
 		get_unknown_thumnail,
 		image::{
-			generate_thumbnail, place_thumbnail, ImageFormat, ImageProcessorOptions,
+			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
+			ImageProcessorOptions,
 		},
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
@@ -635,6 +636,16 @@ async fn replace_series_thumbnail(
 	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
 	let ext = content_type.extension();
 	let series_id = series.id;
+
+	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+	// user testing I'd like to see if this becomes a problem. We'll see!
+	remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir())
+		.unwrap_or_else(|e| {
+			tracing::error!(
+				?e,
+				"Failed to remove existing series thumbnail before replacing!"
+			);
+		});
 
 	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config)?;
 

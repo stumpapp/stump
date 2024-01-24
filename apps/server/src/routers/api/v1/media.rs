@@ -22,7 +22,8 @@ use stump_core::{
 	filesystem::{
 		get_unknown_thumnail,
 		image::{
-			generate_thumbnail, place_thumbnail, ImageFormat, ImageProcessorOptions,
+			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
+			ImageProcessorOptions,
 		},
 		media::get_page,
 		read_entire_file, ContentType, FileParts, PathUtils,
@@ -1115,6 +1116,16 @@ async fn replace_media_thumbnail(
 	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
 	let ext = content_type.extension();
 	let book_id = media.id;
+
+	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+	// user testing I'd like to see if this becomes a problem. We'll see!
+	remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir())
+		.unwrap_or_else(|e| {
+			tracing::error!(
+				?e,
+				"Failed to remove existing media thumbnail before replacing!"
+			);
+		});
 
 	let path_buf = place_thumbnail(&book_id, ext, &bytes, &ctx.config)?;
 

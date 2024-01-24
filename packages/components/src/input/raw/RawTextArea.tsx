@@ -25,10 +25,10 @@ export type RawTextAreaProps = VariantProps<typeof textAreaVariants> &
 	React.TextareaHTMLAttributes<HTMLTextAreaElement>
 
 const RawTextArea = React.forwardRef<RawTextAreaRef, RawTextAreaProps>(
-	({ className, variant, size, ...props }, ref) => {
+	({ className, variant, size, isInvalid, ...props }, ref) => {
 		return (
 			<textarea
-				className={cn(textAreaVariants({ className, size, variant }))}
+				className={cn(textAreaVariants({ className, isInvalid, size, variant }))}
 				ref={ref}
 				{...props}
 			/>

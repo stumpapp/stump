@@ -6085,6 +6085,7 @@ dependencies = [
  "openssl",
  "prisma-client-rust",
  "rand 0.8.5",
+ "reqwest",
  "serde",
  "serde-untagged",
  "serde_json",

@@ -36,6 +36,20 @@ pub fn get_unknown_thumnail(id: &str, mut thumbnails_dir: PathBuf) -> Option<Pat
 	None
 }
 
+pub fn get_unknown_image(mut base_path: PathBuf) -> Option<PathBuf> {
+	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
+		base_path.set_extension(extension);
+
+		if base_path.exists() {
+			return Some(base_path);
+		}
+
+		base_path.set_extension("");
+	}
+
+	None
+}
+
 pub trait IsImage {
 	fn is_image(&self) -> bool;
 }

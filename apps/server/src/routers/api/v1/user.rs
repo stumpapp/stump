@@ -1,5 +1,7 @@
+use std::{fs::File, io::Write};
+
 use axum::{
-	extract::{Path, State},
+	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
 	routing::{delete, get, put},
 	Json, Router,
@@ -13,6 +15,9 @@ use stump_core::{
 	db::{
 		entity::{AgeRestriction, LoginActivity, User, UserPermission, UserPreferences},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
+	},
+	filesystem::{
+		get_unknown_image, read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
 		age_restriction, session, user, user_login_activity, user_preferences,
@@ -28,7 +33,10 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	filter::UserQueryRelation,
 	middleware::auth::Auth,
-	utils::{get_session_server_owner_user, get_session_user},
+	utils::{
+		enforce_session_permission, get_session_server_owner_user, get_session_user,
+		http::ImageResponse, validate_image_upload,
+	},
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -59,6 +67,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/preferences",
 					get(get_user_preferences).put(update_user_preferences),
+				)
+				.route(
+					"/avatar",
+					get(get_user_avatar)
+						.post(upload_user_avatar)
+						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -957,4 +971,121 @@ async fn update_user_preferences(
 		})?;
 
 	Ok(Json(updated_preferences))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/:id/avatar",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched user avatar"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "User avatar not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_user_avatar(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+) -> ApiResult<ImageResponse> {
+	let client = ctx.get_db();
+
+	let user = client
+		.user()
+		.find_unique(user::id::equals(id))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("User not found".to_string()))?;
+
+	match user.avatar_url {
+		Some(url) if url.starts_with("/api/v1/") => {
+			let avatars_dir = ctx.config.get_avatars_dir();
+			let base_path = avatars_dir.join(user.username.as_str());
+			if let Some(local_file) = get_unknown_image(base_path) {
+				let FileParts { extension, .. } = local_file.file_parts();
+				let content_type = ContentType::from_extension(extension.as_str());
+				let bytes = read_entire_file(local_file)?;
+				Ok(ImageResponse::new(content_type, bytes))
+			} else {
+				Err(ApiError::NotFound("User avatar not found".to_string()))
+			}
+		},
+		Some(url) => {
+			let bytes = reqwest::get(&url).await?.bytes().await?;
+			let mut magic_bytes = [0; 5];
+			magic_bytes.copy_from_slice(&bytes[0..5]);
+			let content_type = ContentType::from_bytes(&magic_bytes);
+			Ok(ImageResponse::new(content_type, bytes.to_vec()))
+		},
+		None => Err(ApiError::NotFound("User avatar not found".to_string())),
+	}
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/users/:id/avatar",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	responses(
+		(status = 200, description = "Successfully uploaded user avatar", body = User),
+		(status = 400, description = "Invalid request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "User not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn upload_user_avatar(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	mut upload: Multipart,
+) -> ApiResult<ImageResponse> {
+	enforce_session_permission(&session, UserPermission::UploadFile)?;
+	let client = ctx.get_db();
+
+	tracing::trace!(?id, ?upload, "Replacing user avatar");
+
+	let user = client
+		.user()
+		.find_unique(user::id::equals(id.clone()))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("User not found".to_string()))?;
+
+	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+
+	let ext = content_type.extension();
+	let username = user.username.clone();
+
+	let base_path = ctx.config.get_avatars_dir().join(username.as_str());
+	let existing_avatar = get_unknown_image(base_path.clone());
+	if let Some(existing_avatar) = existing_avatar {
+		std::fs::remove_file(existing_avatar)?;
+	}
+
+	let file_name = format!("{username}.{ext}");
+	let file_path = ctx.config.get_avatars_dir().join(file_name.as_str());
+	let mut file = File::create(file_path.clone())?;
+	file.write_all(&bytes)?;
+
+	let updated_user = client
+		.user()
+		.update(
+			user::id::equals(id.clone()),
+			vec![user::avatar_url::set(Some(format!(
+				"/api/v1/users/{}/avatar",
+				id
+			)))],
+		)
+		.exec()
+		.await?;
+
+	tracing::trace!(?updated_user, "Updated user");
+
+	Ok(ImageResponse::new(content_type, bytes))
 }

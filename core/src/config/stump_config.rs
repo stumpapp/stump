@@ -274,11 +274,15 @@ impl StumpConfig {
 		// Create cache and thumbnail directories if they are missing
 		let cache_dir = self.get_cache_dir();
 		let thumbs_dir = self.get_thumbnails_dir();
+		let avatars_dir = self.get_avatars_dir();
 		if !cache_dir.exists() {
 			std::fs::create_dir(cache_dir).unwrap();
 		}
 		if !thumbs_dir.exists() {
 			std::fs::create_dir(thumbs_dir).unwrap();
+		}
+		if !avatars_dir.exists() {
+			std::fs::create_dir(avatars_dir).unwrap();
 		}
 
 		// Save configuration to Stump.toml
@@ -313,6 +317,11 @@ impl StumpConfig {
 	/// Returns a `PathBuf` to the Stump thumbnails directory.
 	pub fn get_thumbnails_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("thumbnails")
+	}
+
+	/// Returns a `PathBuf` to the Stump avatars directory
+	pub fn get_avatars_dir(&self) -> PathBuf {
+		PathBuf::from(&self.config_dir).join("avatars")
 	}
 
 	/// Returns a `PathBuf` to the Stump log file.

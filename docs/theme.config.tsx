@@ -7,7 +7,7 @@ import NavBar, { ExtraContent } from './components/NavBar'
 import StumpLogo from './components/StumpLogo'
 
 export const STUMP_REPO = 'https://github.com/stumpapp/stump'
-const DOCS_PAGES_HREF = `${STUMP_REPO}/tree/main/apps/docs/pages`
+const DOCS_PAGES_HREF = `${STUMP_REPO}/tree/main/docs/pages`
 
 export default {
 	chat: {

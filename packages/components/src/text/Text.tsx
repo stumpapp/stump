@@ -6,10 +6,10 @@ import { cn } from '../utils'
 // TODO: common combination shortcuts, e.g. description, subtitle, etc.
 export const TEXT_VARIANTS = {
 	danger: 'text-red-600 dark:text-red-400',
-	default: 'text-gray-900 dark:text-gray-100',
+	default: 'text-contrast',
 	label:
-		'font-medium leading-none text-gray-750 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-250',
-	muted: 'text-gray-500 dark:text-gray-450',
+		'font-medium leading-none text-contrast-200 peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+	muted: 'text-muted',
 	primary: 'text-brand',
 	secondary: 'text-gray-700 dark:text-gray-300',
 }

@@ -67,6 +67,42 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			return null
 		}
 
+		const renderDescription = () => {
+			if (description) {
+				return (
+					<Text
+						variant="muted"
+						size="sm"
+						{...(descriptionProps || {})}
+						className={cn(
+							{
+								'cursor-not-allowed text-opacity-50': props.disabled,
+							},
+							descriptionProps?.className,
+						)}
+					>
+						{description}
+					</Text>
+				)
+			}
+
+			return null
+		}
+
+		const renderBottom = () => {
+			if (errorMessage) {
+				return (
+					<Text variant="danger" size="xs" className="break-all">
+						{errorMessage}
+					</Text>
+				)
+			} else if (bottomDescription) {
+				return renderDescription()
+			} else {
+				return null
+			}
+		}
+
 		const topDescription = description && descriptionPosition === 'top'
 		const bottomDescription = description && descriptionPosition === 'bottom'
 
@@ -79,17 +115,22 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				)}
 			>
 				{label && (
-					<Label htmlFor={props.id} {...(labelProps || {})}>
+					<Label
+						htmlFor={props.id}
+						{...(labelProps || {})}
+						className={cn(
+							{
+								'cursor-not-allowed text-opacity-50': props.disabled,
+							},
+							labelProps?.className,
+						)}
+					>
 						{label}
 						{props.required && <span className="text-red-400"> *</span>}
 					</Label>
 				)}
 
-				{topDescription && (
-					<Text variant="muted" size="sm" {...(descriptionProps || {})}>
-						{description}
-					</Text>
-				)}
+				{topDescription && renderDescription()}
 
 				<div className="relative w-full">
 					{renderLeftDecoration()}
@@ -107,17 +148,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					{renderRightDecoration()}
 				</div>
 
-				{errorMessage && (
-					<Text variant="danger" size="xs" className="break-all">
-						{errorMessage}
-					</Text>
-				)}
-
-				{bottomDescription && (
-					<Text variant="muted" size="sm" {...(descriptionProps || {})}>
-						{description}
-					</Text>
-				)}
+				{renderBottom()}
 			</div>
 		)
 	},

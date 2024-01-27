@@ -235,6 +235,8 @@ pub struct UpdateUser {
 	#[serde(default)]
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestriction>,
+	#[serde(default)]
+	pub max_sessions_allowed: Option<i32>,
 }
 
 async fn update_user(
@@ -244,9 +246,24 @@ async fn update_user(
 	input: UpdateUser,
 	config: &StumpConfig,
 ) -> ApiResult<User> {
+	// NOTE: there are other mechanisms in place to effectively disable logging in,
+	// so I am making this a bad request. In the future, perhaps this can change.
+	match input.max_sessions_allowed {
+		Some(max_sessions_allowed) if max_sessions_allowed <= 0 => {
+			return Err(ApiError::BadRequest(
+				"max_sessions_allowed must be greater than 0 when set".to_string(),
+			))
+		},
+		Some(max_sessions_allowed) => {
+			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set")
+		},
+		_ => {},
+	}
+
 	let mut update_params = vec![
 		user::username::set(input.username),
 		user::avatar_url::set(input.avatar_url),
+		user::max_sessions_allowed::set(input.max_sessions_allowed),
 	];
 	if let Some(password) = input.password {
 		let hashed_password = bcrypt::hash(password, config.password_hash_cost)?;
@@ -337,17 +354,27 @@ async fn update_preferences(
 			user_preferences::id::equals(preferences_id),
 			vec![
 				user_preferences::locale::set(input.locale.to_owned()),
-				user_preferences::library_layout_mode::set(
-					input.library_layout_mode.to_owned(),
-				),
-				user_preferences::series_layout_mode::set(
-					input.series_layout_mode.to_owned(),
+				user_preferences::preferred_layout_mode::set(
+					input.preferred_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::primary_navigation_mode::set(
+					input.primary_navigation_mode.to_owned(),
+				),
+				user_preferences::layout_max_width_px::set(input.layout_max_width_px),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
 				user_preferences::enable_discord_presence::set(
 					input.enable_discord_presence,
 				),
+				user_preferences::enable_compact_display::set(
+					input.enable_compact_display,
+				),
+				user_preferences::enable_double_sidebar::set(input.enable_double_sidebar),
+				user_preferences::enable_replace_primary_sidebar::set(
+					input.enable_replace_primary_sidebar,
+				),
+				user_preferences::enable_hide_scrollbar::set(input.enable_hide_scrollbar),
+				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
 			],
 		)
 		.exec()
@@ -363,6 +390,8 @@ pub struct CreateUser {
 	#[serde(default)]
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestriction>,
+	#[serde(default)]
+	pub max_sessions_allowed: Option<i32>,
 }
 
 #[utoipa::path(
@@ -413,6 +442,7 @@ async fn create_user(
 					vec![
 						user::is_server_owner::set(false),
 						user::permissions::set(Some(permissions.join(","))),
+						user::max_sessions_allowed::set(input.max_sessions_allowed),
 					],
 				)
 				.exec()
@@ -501,12 +531,17 @@ async fn update_current_user(
 pub struct UpdateUserPreferences {
 	pub id: String,
 	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
+	pub preferred_layout_mode: String,
+	pub primary_navigation_mode: String,
+	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
 	pub enable_discord_presence: bool,
+	pub enable_compact_display: bool,
+	pub enable_double_sidebar: bool,
+	pub enable_replace_primary_sidebar: bool,
+	pub enable_hide_scrollbar: bool,
+	pub prefer_accent_color: bool,
 }
 
 #[utoipa::path(

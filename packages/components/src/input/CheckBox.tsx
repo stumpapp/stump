@@ -2,6 +2,7 @@ import React from 'react'
 
 import { Label } from '../form'
 import { Text } from '../text'
+import { cx } from '../utils'
 import { RawCheckBox, RawCheckBoxProps, type RawCheckBoxRef } from './raw'
 
 export type CheckBoxProps = {
@@ -21,9 +22,20 @@ export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 
 			return (
 				<div className="grid gap-1.5 leading-none">
-					{label && <Label htmlFor={props.id}>{label}</Label>}
+					{label && (
+						<Label
+							htmlFor={props.id}
+							className={cx({ 'cursor-not-allowed text-opacity-50': props.disabled })}
+						>
+							{label}
+						</Label>
+					)}
 					{description && (
-						<Text size="sm" variant="muted">
+						<Text
+							size="sm"
+							variant="muted"
+							className={cx({ 'cursor-not-allowed text-opacity-50': props.disabled })}
+						>
 							{description}
 						</Text>
 					)}

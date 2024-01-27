@@ -144,7 +144,10 @@ impl StumpConfig {
 
 		let toml_content_str = std::fs::read_to_string(stump_toml)?;
 		let toml_configs = toml::from_str::<PartialStumpConfig>(&toml_content_str)
-			.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+			.map_err(|e| {
+				tracing::error!(error = ?e, "Failed to parse Stump.toml");
+				CoreError::InitializationError(e.to_string())
+			})?;
 
 		toml_configs.apply_to_config(&mut self);
 		Ok(self)
@@ -164,16 +167,22 @@ impl StumpConfig {
 		}
 
 		if let Ok(port) = env::var(PORT_KEY) {
-			let port_u16 = port
-				.parse::<u16>()
-				.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+			let port_u16 = port.parse::<u16>().map_err(|e| {
+				tracing::error!(error = ?e, port, "Failed to parse provided STUMP_PORT");
+				CoreError::InitializationError(e.to_string())
+			})?;
 			env_configs.port = Some(port_u16);
 		}
 
 		if let Ok(verbosity) = env::var(VERBOSITY_KEY) {
-			let verbosity_u64 = verbosity
-				.parse::<u64>()
-				.map_err(|e| CoreError::InitializationError(e.to_string()))?;
+			let verbosity_u64 = verbosity.parse::<u64>().map_err(|e| {
+				tracing::error!(
+					error = ?e,
+					verbosity,
+					"Failed to parse provided STUMP_VERBOSITY"
+				);
+				CoreError::InitializationError(e.to_string())
+			})?;
 			env_configs.verbosity = Some(verbosity_u64);
 		}
 
@@ -290,8 +299,10 @@ impl StumpConfig {
 
 		std::fs::write(
 			stump_toml.as_path(),
-			toml::to_string(&self)
-				.map_err(|e| CoreError::InitializationError(e.to_string()))?,
+			toml::to_string(&self).map_err(|e| {
+				tracing::error!(error = ?e, "Failed to serialize StumpConfig to toml");
+				CoreError::InitializationError(e.to_string())
+			})?,
 		)?;
 
 		Ok(())

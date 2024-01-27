@@ -69,7 +69,7 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 					running = false;
 
 					let duration = start.elapsed().as_millis() as u64;
-					let persist_result = match job_result {
+					let _persist_result = match job_result {
 						Ok(completed_count) => {
 							persist_job_end(
 								&ctx.core_ctx,
@@ -92,7 +92,6 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 							.await
 						},
 					};
-					println!("Persist result: {:?}", persist_result);
 				}
 				// TODO: I think this might be wrong for pausing, in that even if the signal is
 				// meant to pause, it will kill the future above? Unless I pin it maybe?

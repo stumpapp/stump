@@ -21,6 +21,7 @@ export {
 	useLibraryQuery,
 	useLibraryStats,
 	useScanLibrary,
+	useVisitLibrary,
 } from './library'
 export {
 	prefetchMedia,

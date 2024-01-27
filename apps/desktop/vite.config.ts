@@ -24,7 +24,7 @@ export default defineConfig({
 		pkgJson: { name, version },
 	},
 	plugins: [react(), tsconfigPaths()],
-	publicDir: '../../../packages/interface/public',
+	publicDir: '../../../interface/public',
 	root: 'src',
 	server: {
 		port: 3000,

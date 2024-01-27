@@ -27,6 +27,8 @@ pub struct User {
 	pub is_locked: bool,
 
 	pub permissions: Vec<UserPermission>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub max_sessions_allowed: Option<i32>,
 
 	#[serde(skip_serializing_if = "Option::is_none")]
 	pub login_sessions_count: Option<i32>,
@@ -111,6 +113,7 @@ impl From<prisma::user::Data> for User {
 						.collect()
 				})
 				.unwrap_or_default(),
+			max_sessions_allowed: data.max_sessions_allowed,
 			user_preferences,
 			avatar_url: data.avatar_url,
 			age_restriction,
@@ -156,6 +159,12 @@ pub enum UserPermission {
 	/// Grant access to delete the library (manage library)
 	#[serde(rename = "library:delete")]
 	DeleteLibrary,
+	/// Grant access to manage users (create,edit,delete)
+	#[serde(rename = "user:manage")]
+	ManageUsers,
+	/// Grant access to manage the server. This is effectively a step below server owner
+	#[serde(rename = "server:manage")]
+	ManageServer,
 }
 
 impl ToString for UserPermission {
@@ -170,6 +179,8 @@ impl ToString for UserPermission {
 			UserPermission::ScanLibrary => "library:scan".to_string(),
 			UserPermission::ManageLibrary => "library:manage".to_string(),
 			UserPermission::DeleteLibrary => "library:delete".to_string(),
+			UserPermission::ManageUsers => "user:manage".to_string(),
+			UserPermission::ManageServer => "server:manage".to_string(),
 		}
 	}
 }
@@ -186,22 +197,53 @@ impl From<&str> for UserPermission {
 			"library:scan" => UserPermission::ScanLibrary,
 			"library:manage" => UserPermission::ManageLibrary,
 			"library:delete" => UserPermission::DeleteLibrary,
+			"user:manage" => UserPermission::ManageUsers,
+			"server:manage" => UserPermission::ManageServer,
 			_ => panic!("Invalid user permission: {}", s),
 		}
 	}
+}
+
+fn default_navigation_mode() -> String {
+	"SIDEBAR".to_string()
+}
+
+fn default_layout_mode() -> String {
+	"GRID".to_string()
+}
+
+fn default_true() -> bool {
+	true
+}
+
+fn default_layout_max_width_px() -> Option<i32> {
+	Some(1280)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 pub struct UserPreferences {
 	pub id: String,
 	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
+	#[serde(default = "default_layout_mode")]
+	pub preferred_layout_mode: String,
+	#[serde(default = "default_navigation_mode")]
+	pub primary_navigation_mode: String,
+	#[serde(default = "default_layout_max_width_px")]
+	pub layout_max_width_px: Option<i32>,
 	#[serde(default)]
 	pub enable_discord_presence: bool,
+	#[serde(default)]
+	pub enable_compact_display: bool,
+	#[serde(default = "default_true")]
+	pub enable_double_sidebar: bool,
+	#[serde(default)]
+	pub enable_hide_scrollbar: bool,
+	#[serde(default)]
+	pub enable_replace_primary_sidebar: bool,
+	#[serde(default = "default_true")]
+	pub prefer_accent_color: bool,
 }
 
 impl Default for UserPreferences {
@@ -209,12 +251,17 @@ impl Default for UserPreferences {
 		Self {
 			id: "DEFAULT".to_string(),
 			locale: "en".to_string(),
-			library_layout_mode: "GRID".to_string(),
-			series_layout_mode: "GRID".to_string(),
-			collection_layout_mode: "GRID".to_string(),
+			preferred_layout_mode: "GRID".to_string(),
+			primary_navigation_mode: "SIDEBAR".to_string(),
+			layout_max_width_px: Some(1280),
 			app_theme: "LIGHT".to_string(),
 			show_query_indicator: false,
 			enable_discord_presence: false,
+			enable_compact_display: false,
+			enable_double_sidebar: true,
+			enable_replace_primary_sidebar: false,
+			enable_hide_scrollbar: false,
+			prefer_accent_color: true,
 		}
 	}
 }
@@ -228,12 +275,17 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 		UserPreferences {
 			id: data.id,
 			locale: data.locale,
-			library_layout_mode: data.library_layout_mode,
-			series_layout_mode: data.series_layout_mode,
-			collection_layout_mode: data.collection_layout_mode,
+			preferred_layout_mode: data.preferred_layout_mode,
+			primary_navigation_mode: data.primary_navigation_mode,
+			layout_max_width_px: data.layout_max_width_px,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
 			enable_discord_presence: data.enable_discord_presence,
+			enable_compact_display: data.enable_compact_display,
+			enable_double_sidebar: data.enable_double_sidebar,
+			enable_replace_primary_sidebar: data.enable_replace_primary_sidebar,
+			enable_hide_scrollbar: data.enable_hide_scrollbar,
+			prefer_accent_color: data.prefer_accent_color,
 		}
 	}
 }

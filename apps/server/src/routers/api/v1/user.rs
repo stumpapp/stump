@@ -35,7 +35,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		enforce_session_permission, get_session_server_owner_user, get_session_user,
-		http::ImageResponse, validate_image_upload,
+		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
 	},
 };
 
@@ -1045,8 +1045,12 @@ async fn upload_user_avatar(
 	session: Session,
 	mut upload: Multipart,
 ) -> ApiResult<ImageResponse> {
-	enforce_session_permission(&session, UserPermission::UploadFile)?;
+	let by_user = get_user_and_enforce_permission(&session, UserPermission::UploadFile)?;
 	let client = ctx.get_db();
+
+	if by_user.id != id && !by_user.is_server_owner {
+		return Err(ApiError::forbidden_discreet());
+	}
 
 	tracing::trace!(?id, ?upload, "Replacing user avatar");
 

@@ -71,7 +71,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 					"/thumbnail",
 					get(get_media_thumbnail_handler)
 						.patch(patch_media_thumbnail)
-						.put(replace_media_thumbnail)
+						.post(replace_media_thumbnail)
+						// TODO: configurable max file size
 						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
 				)
 				.route("/page/:page", get(get_media_page))
@@ -1080,7 +1081,7 @@ async fn patch_media_thumbnail(
 }
 
 #[utoipa::path(
-	put,
+	post,
 	path = "/api/v1/media/:id/thumbnail",
 	tag = "media",
 	params(

@@ -34,8 +34,8 @@ use crate::{
 	filter::UserQueryRelation,
 	middleware::auth::Auth,
 	utils::{
-		enforce_session_permission, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
+		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
+		http::ImageResponse, validate_image_upload,
 	},
 };
 

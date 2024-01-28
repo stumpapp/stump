@@ -15,6 +15,20 @@ use super::{
 	ImageProcessorOptions,
 };
 
+pub fn place_thumbnail(
+	id: &str,
+	ext: &str,
+	bytes: &[u8],
+	config: &StumpConfig,
+) -> Result<PathBuf, FileError> {
+	let thumbnail_path = config.get_thumbnails_dir().join(format!("{}.{}", id, ext));
+
+	let mut image_file = File::create(&thumbnail_path)?;
+	image_file.write_all(bytes)?;
+
+	Ok(thumbnail_path)
+}
+
 pub fn generate_thumbnail(
 	id: &str,
 	media_path: &str,

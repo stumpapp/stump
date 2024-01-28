@@ -585,7 +585,7 @@ model Job {
   status               String    @default("QUEUED")
   // The state of the job. This is primarily stored in order to support pausing/resuming
   // jobs, as it will hold the state of the job at the time it was paused.
-  state                Bytes?
+  save_state           Bytes?
   // A JSON blob of optional, extra metadata
   extra_metadata       Bytes?
   // The total number of tasks

@@ -161,7 +161,7 @@ impl WorkerAgent {
 			current_job: None,
 		};
 
-		tokio::spawn(async move { controller.main_loop() });
+		// tokio::spawn(async move { controller.main_loop() });
 
 		(from_manager_tx, to_manager_rx)
 	}

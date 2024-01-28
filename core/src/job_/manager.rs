@@ -6,14 +6,14 @@ use std::{
 use futures::future::join_all;
 use tokio::sync::{mpsc, oneshot, RwLock};
 
-use super::{JobManagerError, StatefulJob, Worker, WorkerEvent};
+use super::{JobExecutor, JobManagerError, Worker};
 use crate::Ctx;
 
 /// Events that can be sent to the job manager. If any of these events require a response,
 /// e.g. to provide an HTTP status code, a oneshot channel should be provided.
 pub enum JobManagerEvent {
 	/// Add a job to the queue to be run
-	EnqueueJob(String),
+	EnqueueJob(Box<dyn JobExecutor>),
 	/// A job has been completed and should be removed from the queue
 	CompleteJob(String),
 	/// Cancel a job by its ID
@@ -45,8 +45,8 @@ impl JobManager {
 		let (internal_receiver, internal_sender) = event_channel;
 		Self {
 			internal_receiver,
-			core_ctx: ctx,
-			jobs: Jobs::new(internal_sender).arced(),
+			core_ctx: ctx.clone(),
+			jobs: Jobs::new(internal_sender, ctx).arced(),
 		}
 	}
 
@@ -94,22 +94,26 @@ impl JobManager {
 /// A helper struct that holds the job queue and a list of workers for the job manager
 struct Jobs {
 	/// Queue of jobs waiting to be run in a worker thread
-	// queue: VecDeque<Box<dyn JobExecutorTrait>>,
-	queue: RwLock<VecDeque<String>>,
+	queue: RwLock<VecDeque<Box<dyn JobExecutor>>>,
 	/// Worker threads with a running job
 	workers: RwLock<HashMap<String, Arc<Worker>>>,
 	/// A channel to send shutdown signals to the parent job manager
 	job_manager_tx: mpsc::UnboundedSender<JobManagerEvent>,
 	// worker_tx: mpsc::UnboundedSender<WorkerEvent>,
+	core_ctx: Arc<Ctx>,
 }
 
 impl Jobs {
 	/// Creates a new Jobs instance
-	pub fn new(job_manager_tx: mpsc::UnboundedSender<JobManagerEvent>) -> Self {
+	pub fn new(
+		job_manager_tx: mpsc::UnboundedSender<JobManagerEvent>,
+		core_ctx: Arc<Ctx>,
+	) -> Self {
 		Self {
 			queue: RwLock::new(VecDeque::new()),
 			workers: RwLock::new(HashMap::new()),
 			job_manager_tx,
+			core_ctx,
 		}
 	}
 
@@ -120,7 +124,7 @@ impl Jobs {
 
 	/// Add a job to the queue. If there are no running jobs (i.e. no workers),
 	/// then a worker will be created and immediately spawned
-	async fn enqueue(self: Arc<Self>, job: Box<dyn StatefulJob>) {
+	async fn enqueue(self: Arc<Self>, job: Box<dyn JobExecutor>) {
 		// Persist the job to the database? Maybe... Perhaps only after it's been
 		// started?
 
@@ -128,7 +132,9 @@ impl Jobs {
 
 		if workers.is_empty() {
 			// Create the worker
-			// let worker = Worker::new("FIXME".to_string(), job, self.clone()).await?;
+			// let worker =
+			// 	Worker::new(job, self.core_ctx.db.clone(), self.worker_tx.clone())
+			// 		.await?;
 			// Spawn the worker
 			// Insert the worker into the workers map
 		} else {

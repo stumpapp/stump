@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use tokio::sync::oneshot;
+use tokio::{spawn, sync::oneshot};
 
 use crate::{job::JobError, prisma::PrismaClient};
 
-use super::StatefulJob;
+use super::JobExecutor;
 
 pub enum WorkerEvent {
 	Progress, // TODO: data
@@ -18,7 +18,7 @@ pub enum WorkerCommand {
 	Cancel(oneshot::Sender<()>),
 }
 
-// TODO: prisma client
+#[derive(Clone)]
 pub struct WorkerCtx {
 	pub db: Arc<PrismaClient>,
 	pub job_id: String,
@@ -42,31 +42,33 @@ impl WorkerCtx {
 }
 
 pub struct Worker {
-	job: Box<dyn StatefulJob>,
+	job: Box<dyn JobExecutor>,
 	command_sender: async_channel::Sender<WorkerCommand>,
 }
 
 impl Worker {
 	pub async fn new(
-		job_id: String,
-		job: Box<dyn StatefulJob>,
+		job: Box<dyn JobExecutor>,
 		db: Arc<PrismaClient>,
 		event_sender: async_channel::Sender<WorkerEvent>,
-	) -> Result<Self, JobError> {
+	) -> Result<(Self, WorkerCtx), JobError> {
 		let (command_sender, command_receiver) =
 			async_channel::unbounded::<WorkerCommand>();
 
 		let worker_ctx = WorkerCtx {
-			job_id,
+			job_id: job.id().to_string(),
 			db,
 			event_sender,
 			command_receiver: command_receiver,
 		};
 
-		Ok(Self {
-			job,
-			command_sender,
-		})
+		Ok((
+			Self {
+				job,
+				command_sender,
+			},
+			worker_ctx,
+		))
 	}
 
 	/// Cancels the job running in the worker
@@ -100,6 +102,15 @@ impl Worker {
 		let commands_rx = worker_ctx.command_receiver.clone();
 		let shutdown_fut = commands_rx.recv();
 		tokio::pin!(shutdown_fut);
+
+		// let mut run_task = {
+		// 	let ctx = worker_ctx.clone();
+		// 	spawn(async move {
+		// 		let job_result = job.run(ctx).await;
+
+		// 		(job, job_result)
+		// 	})
+		// };
 
 		// TODO: commands (if ever extended to more than cancel) should be handled in a loop
 		tokio::select! {

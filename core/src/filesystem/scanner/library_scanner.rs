@@ -187,7 +187,7 @@ impl LibraryScanner {
 			.map(|data| (data.path.as_str(), false))
 			.collect::<HashMap<&str, bool>>();
 
-		let missing_series = existing_series
+		let missing_from_fs = existing_series
 			.iter()
 			.filter(|s| {
 				let path = Path::new(&s.path);
@@ -195,6 +195,31 @@ impl LibraryScanner {
 			})
 			.map(|s| s.id.clone())
 			.collect::<Vec<String>>();
+
+		let marked_as_missing_but_found = existing_series
+			.iter()
+			.filter(|s| s.status == FileStatus::Missing && Path::new(&s.path).exists())
+			.map(|s| s.id.clone())
+			.collect::<Vec<String>>();
+
+		if !marked_as_missing_but_found.is_empty() {
+			self.worker_ctx
+				.emit_job_message("Found series previously marked as missing");
+
+			let affected_count = ctx
+				.db
+				.series()
+				.update_many(
+					vec![series::id::in_vec(marked_as_missing_but_found)],
+					vec![series::status::set(FileStatus::Ready.to_string())],
+				)
+				.exec()
+				.await?;
+			tracing::debug!(
+				?affected_count,
+				"Updated series previously marked as missing"
+			);
+		}
 
 		let mut walkdir = WalkDir::new(library_path.as_str());
 
@@ -228,13 +253,13 @@ impl LibraryScanner {
 			})
 			.collect::<Vec<DirEntry>>();
 
-		if !missing_series.is_empty() {
+		if !missing_from_fs.is_empty() {
 			self.worker_ctx.emit_job_message("Updating missing series");
 
 			ctx.db
 				.series()
 				.update_many(
-					vec![series::id::in_vec(missing_series)],
+					vec![series::id::in_vec(missing_from_fs)],
 					vec![series::status::set(FileStatus::Missing.to_string())],
 				)
 				.exec()

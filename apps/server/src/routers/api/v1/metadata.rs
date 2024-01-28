@@ -26,12 +26,12 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::ApiResult,
-	middleware::auth::Auth,
-	utils::{
+	filter::{
 		chain_optional_iter, FilterableQuery, MediaMetadataBaseFilter,
 		MediaMetadataFilter, MediaMetadataRelationFilter, SeriesMedataFilter,
 		ValueOrRange,
 	},
+	middleware::auth::Auth,
 };
 
 use super::media::apply_media_filters;

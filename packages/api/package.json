@@ -10,7 +10,7 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/qs": "^6.9.9",
-		"typescript": "^5.2.2"
+		"typescript": "^5.3.3"
 	},
 	"dependencies": {
 		"@stump/types": "workspace:*",

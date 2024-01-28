@@ -25,9 +25,10 @@ use tracing::{debug, trace, warn};
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::chain_optional_iter,
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, get_session_user,
+		get_session_user,
 		http::{ImageResponse, NamedFile, Xml},
 	},
 };

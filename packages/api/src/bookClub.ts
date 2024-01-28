@@ -11,8 +11,8 @@ import {
 	CreateBookClubInvitation,
 	CreateBookClubMember,
 	GetBookClubsParams,
-	PatchBookClubMember,
 	UpdateBookClub,
+	UpdateBookClubMember,
 } from '@stump/types'
 
 import { toUrlParams, urlWithParams } from '.'
@@ -86,7 +86,7 @@ export async function updateBookClubMember(
 	bookClubId: string,
 	memberId: string,
 	payload: CreateBookClubMember,
-): Promise<ApiResult<PatchBookClubMember>> {
+): Promise<ApiResult<UpdateBookClubMember>> {
 	return API.put(`/book-clubs/${bookClubId}/members/${memberId}`, payload)
 }
 

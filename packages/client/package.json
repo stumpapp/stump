@@ -21,6 +21,6 @@
 		"prettier": "^3.0.3",
 		"react": "^18.2.0",
 		"tsconfig": "^7.0.0",
-		"typescript": "^5.2.2"
+		"typescript": "^5.3.3"
 	}
 }

@@ -64,6 +64,9 @@ pub trait DynJob: Send + Sync + Sized + 'static {
 	/// If pausing/resuming is implemented, this will be serialized and stored in the DB.
 	type Data: Serialize + de::DeserializeOwned + WritableData + Default + Send + Sync;
 	type Task: Serialize + de::DeserializeOwned + Send + Sync;
+	// TODO: Eventually allow for custom errors, I could see doing something like Log as the error
+	// being useful to then just dump the errors to the DB...
+	// type TaskError = String;
 
 	/// A function that should be called in Self::init to initialize the job state with
 	/// existing data from the DB (if any). Used to support pausing/resuming jobs.

@@ -1,4 +1,8 @@
-use std::{collections::HashMap, path::PathBuf, sync::Arc};
+use std::{
+	collections::HashMap,
+	path::{Path, PathBuf},
+	sync::Arc,
+};
 
 use globset::GlobSet;
 use itertools::{Either, Itertools};
@@ -168,12 +172,12 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 
 #[derive(Default)]
 pub struct WalkedSeries {
-	seen_files: u64,
-	ignored_files: u64,
-	media_to_create: Vec<PathBuf>,
-	media_to_update: Vec<PathBuf>,
-	missing_media: Vec<PathBuf>,
-	series_is_missing: bool,
+	pub seen_files: u64,
+	pub ignored_files: u64,
+	pub media_to_create: Vec<PathBuf>,
+	pub media_to_update: Vec<PathBuf>,
+	pub missing_media: Vec<PathBuf>,
+	pub series_is_missing: bool,
 }
 
 impl WalkedSeries {
@@ -185,9 +189,12 @@ impl WalkedSeries {
 	}
 }
 
-pub async fn walk_series(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedSeries> {
-	if !PathBuf::from(path).exists() {
-		tracing::error!("Failed to walk: {} is missing or inaccessible", path);
+pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries> {
+	if !path.exists() {
+		tracing::error!(
+			"Failed to walk: {} is missing or inaccessible",
+			path.display()
+		);
 		return Ok(WalkedSeries::missing());
 	}
 
@@ -195,7 +202,7 @@ pub async fn walk_series(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedSeries>
 		db, ignore_rules, ..
 	} = ctx;
 
-	tracing::debug!("Walking series at {}", path);
+	tracing::debug!("Walking series at {}", path.display());
 
 	let walk_start = std::time::Instant::now();
 	let walker = WalkDir::new(path);
@@ -229,7 +236,7 @@ pub async fn walk_series(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedSeries>
 	let existing_media = db
 		.media()
 		.find_many(vec![media::series::is(vec![series::path::equals(
-			path.to_string(),
+			path.to_string_lossy().to_string(),
 		)])])
 		.exec()
 		.await?;

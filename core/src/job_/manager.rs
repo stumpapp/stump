@@ -6,7 +6,7 @@ use std::{
 use futures::future::join_all;
 use tokio::sync::{mpsc, oneshot, RwLock};
 
-use super::{JobExecutor, JobManagerError, Worker};
+use super::{error::JobManagerError, JobExecutor, Worker};
 use crate::Ctx;
 
 /// Events that can be sent to the job manager. If any of these events require a response,

@@ -1,41 +1,473 @@
-use async_trait::async_trait;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use std::{collections::VecDeque, path::PathBuf};
+
+use serde::{Deserialize, Serialize};
 
 use crate::{
-	db::entity::LibraryScanMode,
-	job__::{worker::WorkerContext, StatefulJob},
+	db::{
+		entity::{LibraryOptions, Media, Series},
+		FileStatus, SeriesDAO, DAO,
+	},
+	filesystem::{scanner::utils::create_media, MediaBuilder, SeriesBuilder},
+	job_::{
+		error::JobError, DynJob, JobTaskOutput, WorkerCtx, WorkingState, WritableData,
+	},
+	prisma::{library, library_options, media, series, PrismaClient},
 };
 
-pub struct LibraryScanJob {
-	pub library_path: String,
-	pub scan_mode: LibraryScanMode,
+use super::{
+	utils::generate_rule_set, walk_library, walk_series, WalkedLibrary, WalkedSeries,
+	WalkerCtx,
+};
+
+// TODO: there has to be some sort of nesting of task counts here in order to properly report on the UI.
+// For example, I might be on the 3rd task of 5, and within the 3rd task (series scan) I have:
+// - 400 files total to index on init
+// - 20 new media to create
+// - 1 missing media
+// I think, logically, the progression on the UI would be something like:
+// - Handling task (3/5) - x/400 files indexed
+// - Handling task (3/5) - x/20 new media created
+// - Handling task (3/5) - x/1 missing media handled
+// Or some iteration of that kind of thing. Otherwise, the progression will be SUPER unclear to the user
+// with just 3/5, 4/5, 5/5, etc. I think this is a good idea, but I'm not sure how to implement it (yet).
+
+#[derive(Serialize, Deserialize)]
+enum LibraryScanTask {
+	Init(InitTaskInput),
+	WalkSeries(PathBuf),
 }
 
-#[async_trait]
-impl StatefulJob for LibraryScanJob {
-	fn name(&self) -> &'static str {
-		"Scan Library"
-	}
+#[derive(Serialize, Deserialize)]
+struct InitTaskInput {
+	series_to_create: Vec<PathBuf>,
+	missing_series: Vec<PathBuf>,
+}
 
-	async fn load_state(&mut self, ctx: &WorkerContext) {
-		todo!()
-	}
+struct LibraryScanJob {
+	id: String,
+	path: String,
+}
 
-	async fn save_state(&self, ctx: &WorkerContext) {
-		todo!()
-	}
+#[derive(Serialize, Deserialize, Default)]
+struct LibraryScanData {
+	/// The number of files to scan relative to the library root
+	total_files: u64,
 
-	async fn do_work(&mut self, ctx: &WorkerContext) {}
+	created_media: u64,
+	updated_media: u64,
 
-	fn get_progress(&self) -> f64 {
-		todo!()
+	created_series: u64,
+	updated_series: u64,
+}
+
+impl WritableData for LibraryScanData {
+	fn store(&mut self, updated: Self) {
+		self.total_files += updated.total_files;
+		self.created_media += updated.created_media;
+		self.updated_media += updated.updated_media;
+		self.created_series += updated.created_series;
+		self.updated_series += updated.updated_series;
 	}
 }
 
-impl LibraryScanJob {
-	pub fn new(library_path: String, scan_mode: LibraryScanMode) -> Self {
-		Self {
-			library_path,
-			scan_mode,
+#[derive(Serialize, Deserialize)]
+struct LibraryScanJobOutput {}
+
+#[async_trait::async_trait]
+impl DynJob for LibraryScanJob {
+	const NAME: &'static str = "library_scan";
+
+	type Data = LibraryScanData;
+	type Task = LibraryScanTask;
+
+	async fn init(
+		&self,
+		ctx: &WorkerCtx,
+	) -> Result<WorkingState<Self::Data, Self::Task>, JobError> {
+		if let Some(restore_point) = self.attempt_restore(ctx).await? {
+			// TODO: consider more logging here
+			tracing::debug!("Restoring library scan job from save state");
+			return Ok(restore_point);
+		}
+
+		let library_options = ctx
+			.db
+			.library_options()
+			.find_first(vec![library_options::library::is(vec![
+				library::id::equals(self.id.clone()),
+				library::path::equals(self.path.clone()),
+			])])
+			.exec()
+			.await?
+			.map(LibraryOptions::from)
+			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
+		let is_collection_based = library_options.is_collection_based();
+		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+
+		let WalkedLibrary {
+			series_to_create,
+			series_to_visit,
+			missing_series,
+			library_is_missing,
+			..
+		} = walk_library(
+			&self.path,
+			WalkerCtx {
+				db: ctx.db.clone(),
+				ignore_rules,
+				max_depth: is_collection_based.then(|| 1),
+			},
+		)
+		.await?;
+
+		if library_is_missing {
+			// TODO: mark library as missing in DB
+			return Err(JobError::InitFailed(
+				"Library could not be found on disk".to_string(),
+			));
+		}
+
+		let init_task_input = InitTaskInput {
+			series_to_create: series_to_create.clone(),
+			missing_series: missing_series,
+		};
+
+		let series_to_visit = series_to_visit
+			.into_iter()
+			.map(LibraryScanTask::WalkSeries)
+			.chain(
+				series_to_create
+					.into_iter()
+					.map(LibraryScanTask::WalkSeries),
+			)
+			.collect::<Vec<LibraryScanTask>>();
+
+		let tasks = VecDeque::from(
+			[LibraryScanTask::Init(init_task_input)]
+				.into_iter()
+				.chain(series_to_visit)
+				.collect::<Vec<LibraryScanTask>>(),
+		);
+
+		Ok(WorkingState {
+			data: Some(LibraryScanData::default()),
+			tasks,
+			current_task_index: 0,
+			errors: vec![],
+		})
+	}
+
+	async fn execute_task(
+		&self,
+		ctx: &WorkerCtx,
+		task: Self::Task,
+	) -> Result<JobTaskOutput<Self>, JobError> {
+		let mut data = Self::Data::default();
+		let mut errors = vec![];
+
+		match task {
+			LibraryScanTask::Init(input) => {
+				tracing::info!("Executing the init task for library scan");
+				let InitTaskInput {
+					series_to_create,
+					missing_series,
+				} = input;
+
+				if !missing_series.is_empty() {
+					let missing_series_str = missing_series
+						.iter()
+						.map(|e| e.to_string_lossy().to_string())
+						.collect::<Vec<String>>();
+					let _affected_rows = ctx
+						.db
+						.series()
+						.update_many(
+							vec![series::path::in_vec(missing_series_str)],
+							vec![series::status::set(FileStatus::Missing.to_string())],
+						)
+						.exec()
+						.await
+						.map_or_else(
+							|error| {
+								tracing::error!(error = ?error, "Failed to update missing series");
+								errors.push(format!(
+									"Failed to update missing series: {:?}",
+									error.to_string()
+								));
+								0
+							},
+							|count| {
+								data.updated_series = count as u64;
+								tracing::debug!(count, "Updated missing series");
+								count
+							},
+						);
+				}
+
+				if !series_to_create.is_empty() {
+					// TODO: remove this DAO!!
+					let series_dao = SeriesDAO::new(ctx.db.clone());
+
+					let built_series = series_to_create
+						.par_iter()
+						.map(|e| SeriesBuilder::new(e.as_path(), &self.id).build())
+						.filter_map(|res| {
+							if let Err(e) = res {
+								tracing::error!(error = ?e, "Failed to create series from entry");
+								None
+							} else {
+								res.ok()
+							}
+						})
+						.collect::<Vec<Series>>();
+
+					let chunks = built_series.chunks(1000);
+					tracing::debug!(
+						chunk_count = chunks.len(),
+						"Batch inserting new series"
+					);
+					for chunk in chunks {
+						let result = series_dao.create_many(chunk.to_vec()).await;
+						match result {
+							Ok(created_series) => {
+								// TODO: emit event
+								data.created_series += created_series.len() as u64;
+							},
+							Err(e) => {
+								tracing::error!(error = ?e, "Failed to batch insert series");
+								errors.push(format!(
+									"Failed to batch insert series: {:?}",
+									e.to_string()
+								));
+							},
+						}
+					}
+				}
+			},
+			LibraryScanTask::WalkSeries(path_buf) => {
+				tracing::info!("Executing the walk series task for library scan");
+
+				let ignore_rules = generate_rule_set(&[
+					path_buf.clone(),
+					PathBuf::from(self.path.clone()),
+				]);
+
+				let walk_result = walk_series(
+					path_buf.as_path(),
+					WalkerCtx {
+						db: ctx.db.clone(),
+						ignore_rules,
+						max_depth: None,
+					},
+				)
+				.await;
+
+				if let Err(core_error) = walk_result {
+					tracing::error!(error = ?core_error, "Critical error during attempt to walk series!");
+					// NOTE: I don't error here in order to collect and report on the error later on.
+					// This can perhaps be refactored later on so that the parent (Job struct) properly
+					// handles this instead, however for now this is fine.
+					return Ok(JobTaskOutput {
+						new_data: data,
+						errors: vec![core_error.to_string()],
+					});
+				}
+
+				let WalkedSeries {
+					series_is_missing,
+					media_to_create,
+					media_to_update,
+					missing_media,
+					..
+				} = walk_result?;
+
+				if series_is_missing {
+					return handle_missing_series(
+						&ctx.db,
+						path_buf.to_str().unwrap(),
+						data,
+						errors,
+					)
+					.await;
+				}
+
+				let series = ctx
+					.db
+					.series()
+					.find_first(vec![series::path::equals(
+						path_buf.to_str().unwrap().to_string(),
+					)])
+					.exec()
+					.await?
+					.ok_or(JobError::TaskFailed("Series not found".to_string()))?;
+
+				handle_create_series_media(
+					media_to_create,
+					SeriesCtx {
+						id: series.id,
+						path: series.path,
+						library_id: self.id.clone(),
+						library_path: self.path.clone(),
+					},
+					&ctx,
+					&mut data,
+					&mut errors,
+				)
+				.await?;
+			},
+		}
+
+		Ok(JobTaskOutput {
+			new_data: data,
+			errors,
+		})
+	}
+}
+
+async fn handle_missing_series(
+	client: &PrismaClient,
+	path: &str,
+	mut data: LibraryScanData,
+	mut errors: Vec<String>,
+) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
+	let affected_rows = client
+		.series()
+		.update_many(
+			vec![series::path::equals(path.to_string())],
+			vec![series::status::set(FileStatus::Missing.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to update missing series");
+				errors.push(format!(
+					"Failed to update missing series: {:?}",
+					error.to_string()
+				));
+				0
+			},
+			|count| {
+				data.updated_series += count as u64;
+				tracing::debug!(count, "Updated missing series");
+				count
+			},
+		);
+
+	if affected_rows > 1 {
+		tracing::warn!(
+			affected_rows,
+			"Updated more than one series with path: {}",
+			path
+		);
+	}
+
+	let _affected_media = client
+		.media()
+		.update_many(
+			vec![media::series::is(vec![series::path::equals(
+				path.to_string(),
+			)])],
+			vec![media::status::set(FileStatus::Missing.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to update missing media");
+				errors.push(format!(
+					"Failed to update missing media: {:?}",
+					error.to_string()
+				));
+				0
+			},
+			|count| {
+				data.updated_media += count as u64;
+				tracing::debug!(count, "Updated missing media");
+				count
+			},
+		);
+
+	Ok(JobTaskOutput {
+		new_data: data,
+		errors,
+	})
+}
+
+struct SeriesCtx {
+	id: String,
+	path: String,
+	library_id: String,
+	library_path: String,
+}
+
+async fn handle_create_series_media(
+	paths: Vec<PathBuf>,
+	series_ctx: SeriesCtx,
+	ctx: &WorkerCtx,
+	// TODO: mut or just take ownership and return the changes?
+	data: &mut LibraryScanData,
+	// TODO: mut or just take ownership and return the changes?
+	errors: &mut Vec<String>,
+) -> Result<(), JobError> {
+	if paths.is_empty() {
+		tracing::debug!("No media to create for series");
+		return Ok(());
+	}
+
+	let SeriesCtx { id, path, .. } = series_ctx;
+	tracing::debug!(?path, "Creating media for series");
+
+	// TODO: support config for chunk size, systems with more memory can take advantage of larger chunks
+	// while systems with less memory can take advantage of smaller chunks (if desired)
+	let path_chunks = paths.chunks(300);
+	for (idx, chunk) in path_chunks.enumerate() {
+		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
+		let mut built_media = chunk
+			.par_iter()
+			.map(|path_buf| {
+				MediaBuilder::new(
+					path_buf,
+					&id,
+					// FIXME: need the options!
+					LibraryOptions::default(),
+					&ctx.config,
+				)
+				.build()
+			})
+			.collect::<VecDeque<Result<Media, _>>>();
+
+		while let Some(build_result) = built_media.pop_front() {
+			match build_result {
+				Ok(generated) => {
+					// TODO: convert to a transaction!
+					match create_media(&ctx.db, generated).await {
+						Ok(_created_media) => {
+							// TODO: emit event
+							data.created_media += 1;
+						},
+						Err(e) => {
+							tracing::error!(error = ?e, ?path, "Failed to create media");
+							errors.push(format!(
+								"Failed to create media: {:?}",
+								e.to_string()
+							));
+						},
+					}
+				},
+				Err(e) => {
+					tracing::error!(error = ?e, ?path, "Failed to build media");
+					errors.push(format!("Failed to build media: {:?}", e.to_string()));
+				},
+			}
 		}
 	}
+
+	Ok(())
 }
+
+// #[cfg(test)]
+// mod tests {
+// 	fn setup_test() {}
+// }

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tokio::{spawn, sync::oneshot};
 
-use crate::{job::JobError, prisma::PrismaClient};
+use crate::{config::StumpConfig, job::JobError, prisma::PrismaClient};
 
 use super::JobExecutor;
 
@@ -20,8 +20,9 @@ pub enum WorkerCommand {
 
 #[derive(Clone)]
 pub struct WorkerCtx {
-	pub db: Arc<PrismaClient>,
 	pub job_id: String,
+	pub db: Arc<PrismaClient>,
+	pub config: Arc<StumpConfig>,
 	event_sender: async_channel::Sender<WorkerEvent>,
 	command_receiver: async_channel::Receiver<WorkerCommand>,
 }
@@ -50,6 +51,7 @@ impl Worker {
 	pub async fn new(
 		job: Box<dyn JobExecutor>,
 		db: Arc<PrismaClient>,
+		config: Arc<StumpConfig>,
 		event_sender: async_channel::Sender<WorkerEvent>,
 	) -> Result<(Self, WorkerCtx), JobError> {
 		let (command_sender, command_receiver) =
@@ -58,6 +60,7 @@ impl Worker {
 		let worker_ctx = WorkerCtx {
 			job_id: job.id().to_string(),
 			db,
+			config,
 			event_sender,
 			command_receiver: command_receiver,
 		};

@@ -8,6 +8,8 @@ pub enum JobError {
 	StateDeserializeFailed(String),
 	#[error("Job was cancelled")]
 	Cancelled,
+	#[error("A task experienced a critical error while executing: {0}")]
+	TaskFailed(String),
 	#[error("A query error occurred: {0}")]
 	QueryError(#[from] prisma_client_rust::QueryError),
 	#[error("An unknown error occurred: {0}")]

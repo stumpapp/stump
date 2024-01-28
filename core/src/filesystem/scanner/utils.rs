@@ -4,7 +4,8 @@ use std::{
 	path::PathBuf,
 };
 
-use globset::{Glob, GlobSetBuilder};
+use globset::{Glob, GlobSet, GlobSetBuilder};
+use itertools::Itertools;
 use prisma_client_rust::{
 	chrono::{DateTime, Utc},
 	QueryError,
@@ -74,6 +75,45 @@ pub(crate) fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathB
 			);
 		}
 	}
+}
+
+pub(crate) fn generate_rule_set(paths: &[PathBuf]) -> GlobSet {
+	let mut builder = GlobSetBuilder::new();
+
+	let adjusted_paths = paths
+		.into_iter()
+		// We have to remove duplicates here otherwise the glob will double some patterns.
+		// An example would be when the library has media in root. Not the end of the world.
+		.unique()
+		.filter(|p| p.exists())
+		.collect::<Vec<_>>();
+
+	for path in adjusted_paths {
+		let open_result = File::open(path);
+		if let Ok(file) = open_result {
+			// read the lines of the file, and add each line as a glob pattern in the builder
+			for line in BufReader::new(file).lines() {
+				if let Err(e) = line {
+					tracing::error!(
+						error = ?e,
+						"Error occurred trying to read line from glob file",
+					);
+					continue;
+				}
+
+				// TODO: remove unwraps!
+				builder.add(Glob::new(&line.unwrap()).unwrap());
+			}
+		} else {
+			tracing::error!(
+				error = ?open_result.err(),
+				?path,
+				"Failed to open file",
+			);
+		}
+	}
+
+	builder.build().unwrap_or_default()
 }
 
 pub async fn mark_library_missing(

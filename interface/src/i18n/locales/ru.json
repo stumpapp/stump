@@ -626,11 +626,24 @@
 		"placholder": "Выберите или создайте тег",
 		"placeholderNoTags": "Нет доступных тегов"
 	},
+	"thumbnailDropdown": {
+		"label": "Edit thumbnail",
+		"options": {
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
+		},
+		"uploadImage": {
+			"emptyState": "A preview of your image will appear here",
+			"prompt": "Drop image here or click to select",
+			"remove": "Remove image"
+		}
+	},
 	"common": {
 		"cancel": "Cancel",
 		"confirm": "Confirm",
 		"save": "Save",
 		"saveChanges": "Save changes",
-		"create": "Create"
+		"create": "Create",
+		"edit": "Edit"
 	}
 }

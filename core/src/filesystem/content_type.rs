@@ -247,27 +247,6 @@ impl ContentType {
 	pub fn is_epub(&self) -> bool {
 		self == &ContentType::EPUB_ZIP
 	}
-
-	/// Returns the file extension of the content type. If the content type is unknown, then an
-	/// empty string is returned.
-	pub fn extension(&self) -> &str {
-		match self {
-			ContentType::XHTML => "xhtml",
-			ContentType::XML => "xml",
-			ContentType::HTML => "html",
-			ContentType::PDF => "pdf",
-			ContentType::EPUB_ZIP => "epub",
-			ContentType::ZIP => "zip",
-			ContentType::COMIC_ZIP => "cbz",
-			ContentType::RAR => "rar",
-			ContentType::COMIC_RAR => "cbr",
-			ContentType::PNG => "png",
-			ContentType::JPEG => "jpg",
-			ContentType::WEBP => "webp",
-			ContentType::GIF => "gif",
-			ContentType::UNKNOWN => "",
-		}
-	}
 }
 
 impl From<&str> for ContentType {

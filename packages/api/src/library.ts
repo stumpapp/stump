@@ -80,16 +80,6 @@ export function patchLibraryThumbnail(id: string, params: PatchLibraryThumbnail)
 	return API.patch(`/libraries/${id}/thumbnail`, params)
 }
 
-export function uploadLibraryThumbnail(id: string, file: File) {
-	const formData = new FormData()
-	formData.append('file', file)
-	return API.post(`/libraries/${id}/thumbnail`, formData, {
-		headers: {
-			'Content-Type': 'multipart/form-data',
-		},
-	})
-}
-
 export function visitLibrary(id: string) {
 	return API.put(`/libraries/last-visited/${id}`)
 }
@@ -112,7 +102,6 @@ export const libraryApi = {
 	patchLibraryThumbnail,
 	regenerateThumbnails,
 	scanLibary,
-	uploadLibraryThumbnail,
 	visitLibrary,
 }
 
@@ -130,6 +119,5 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	patchLibraryThumbnail: 'library.patchLibraryThumbnail',
 	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
-	uploadLibraryThumbnail: 'library.uploadLibraryThumbnail',
 	visitLibrary: 'library.visitLibrary',
 }

@@ -144,7 +144,7 @@ pub enum UserPermission {
 	/// Grant access to access the file explorer
 	#[serde(rename = "file:explorer")]
 	FileExplorer,
-	/// Grant access to upload files to a library
+	/// Grant access to upload files to the library (manage library)
 	#[serde(rename = "file:upload")]
 	UploadFile,
 	/// Grant access to create a library

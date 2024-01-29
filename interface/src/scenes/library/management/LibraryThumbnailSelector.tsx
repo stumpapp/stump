@@ -1,10 +1,9 @@
 import { getLibraryThumbnail, getMediaPage, libraryApi } from '@stump/api'
 import { Button, Dialog, EntityCard } from '@stump/components'
 import { Library, Media, Series } from '@stump/types'
+import { Edit } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-
-import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 
 import BookPageGrid from '../../book/management/BookPageGrid'
 import SeriesBookGrid from '../../series/management/SeriesBookGrid'
@@ -31,16 +30,6 @@ export default function LibraryThumbnailSelector({ library }: Props) {
 			setPage(undefined)
 		}
 		setIsOpen(false)
-	}
-
-	const handleUploadImage = async (file: File) => {
-		try {
-			await libraryApi.uploadLibraryThumbnail(library.id, file)
-			setIsOpen(false)
-		} catch (error) {
-			console.error(error)
-			toast.error('Failed to upload image')
-		}
 	}
 
 	const handleConfirm = async () => {
@@ -128,14 +117,20 @@ export default function LibraryThumbnailSelector({ library }: Props) {
 				className="flex-auto flex-shrink-0"
 			/>
 
-			<span className="absolute bottom-2 left-2 block">
-				<EditThumbnailDropdown
-					onChooseSelector={() => setIsOpen(true)}
-					onUploadImage={handleUploadImage}
-				/>
-			</span>
-
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
+				<Dialog.Trigger asChild>
+					<span className="absolute bottom-2 left-2 block">
+						<Button
+							variant="subtle-dark"
+							size="xs"
+							className="border border-edge px-2 py-1.5"
+							onClick={() => setIsOpen(true)}
+						>
+							<Edit className="mr-2 h-3 w-3" />
+							Edit thumbnail
+						</Button>
+					</span>
+				</Dialog.Trigger>
 				<Dialog.Content size="xl">
 					<Dialog.Header>
 						<Dialog.Title>Select a thumbnail</Dialog.Title>

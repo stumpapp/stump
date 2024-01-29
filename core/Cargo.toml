@@ -56,3 +56,6 @@ tempfile = { workspace = true }
 
 [build-dependencies]
 chrono = "0.4.31"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2.152"

@@ -9,8 +9,6 @@ use walkdir::WalkDir;
 
 use super::{media::is_accepted_cover_name, ContentType, FileError};
 
-pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 5] = ["jpg", "png", "jpeg", "webp", "gif"];
-
 pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
 	let mut file = File::open(path)?;
 
@@ -23,7 +21,8 @@ pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
 /// A function that returns the path of a thumbnail image, if it exists.
 /// This should be used when the thumbnail extension is not known.
 pub fn get_unknown_thumnail(id: &str, mut thumbnails_dir: PathBuf) -> Option<PathBuf> {
-	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
+	let accepted_extensions = ["jpg", "png", "jpeg", "webp"];
+	for extension in accepted_extensions.iter() {
 		thumbnails_dir.push(format!("{}.{}", id, extension));
 
 		if thumbnails_dir.exists() {
@@ -31,20 +30,6 @@ pub fn get_unknown_thumnail(id: &str, mut thumbnails_dir: PathBuf) -> Option<Pat
 		}
 
 		thumbnails_dir.pop();
-	}
-
-	None
-}
-
-pub fn get_unknown_image(mut base_path: PathBuf) -> Option<PathBuf> {
-	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
-		base_path.set_extension(extension);
-
-		if base_path.exists() {
-			return Some(base_path);
-		}
-
-		base_path.set_extension("");
 	}
 
 	None

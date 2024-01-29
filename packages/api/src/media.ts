@@ -82,16 +82,6 @@ export function patchMediaThumbnail(id: string, params: PatchMediaThumbnail) {
 	return API.patch(`/media/${id}/thumbnail`, params)
 }
 
-export function uploadMediaThumbnail(id: string, file: File) {
-	const formData = new FormData()
-	formData.append('file', file)
-	return API.post(`/media/${id}/thumbnail`, formData, {
-		headers: {
-			'Content-Type': 'multipart/form-data',
-		},
-	})
-}
-
 export function putMediaCompletion(
 	id: string,
 	payload: PutMediaCompletionStatus,
@@ -112,7 +102,6 @@ export const mediaApi = {
 	patchMediaThumbnail,
 	putMediaCompletion,
 	updateMediaProgress,
-	uploadMediaThumbnail,
 }
 
 export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
@@ -128,5 +117,4 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	patchMediaThumbnail: 'media.patchThumbnail',
 	putMediaCompletion: 'media.putCompletion',
 	updateMediaProgress: 'media.updateProgress',
-	uploadMediaThumbnail: 'media.uploadThumbnail',
 }

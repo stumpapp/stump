@@ -1,5 +1,5 @@
 use axum::{
-	extract::{DefaultBodyLimit, Multipart, Path, State},
+	extract::{Path, State},
 	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
@@ -11,7 +11,7 @@ use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, Series, UserPermission},
+		entity::{LibraryOptions, Media, Series},
 		query::{
 			ordering::QueryOrder,
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
@@ -20,10 +20,7 @@ use stump_core::{
 	},
 	filesystem::{
 		get_unknown_thumnail,
-		image::{
-			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
-			ImageProcessorOptions,
-		},
+		image::{generate_thumbnail, ImageFormat, ImageProcessorOptions},
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
@@ -46,10 +43,7 @@ use crate::{
 		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
 	},
 	middleware::auth::Auth,
-	utils::{
-		enforce_session_permissions, get_session_server_owner_user, get_session_user,
-		http::ImageResponse, validate_image_upload,
-	},
+	utils::{get_session_server_owner_user, get_session_user, http::ImageResponse},
 };
 
 use super::{
@@ -73,11 +67,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/media/next", get(get_next_in_series))
 				.route(
 					"/thumbnail",
-					get(get_series_thumbnail_handler)
-						.patch(patch_series_thumbnail)
-						.post(replace_series_thumbnail)
-						// TODO: configurable max file size
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+					get(get_series_thumbnail_handler).patch(patch_series_thumbnail),
 				)
 				.route(
 					"/complete",
@@ -596,62 +586,6 @@ async fn patch_series_thumbnail(
 	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
-		read_entire_file(path_buf)?,
-	)))
-}
-
-#[utoipa::path(
-	post,
-	path = "/api/v1/series/:id/thumbnail",
-	tag = "series",
-	params(
-		("id" = String, Path, description = "The ID of the series")
-	),
-	responses(
-		(status = 200, description = "Successfully updated series thumbnail"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Series not found"),
-		(status = 500, description = "Internal server error"),
-	)
-)]
-async fn replace_series_thumbnail(
-	Path(id): Path<String>,
-	State(ctx): State<AppState>,
-	session: Session,
-	mut upload: Multipart,
-) -> ApiResult<ImageResponse> {
-	enforce_session_permissions(
-		&session,
-		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
-	let client = ctx.get_db();
-
-	let series = client
-		.series()
-		.find_unique(series::id::equals(id))
-		.exec()
-		.await?
-		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
-
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
-	let ext = content_type.extension();
-	let series_id = series.id;
-
-	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
-	// user testing I'd like to see if this becomes a problem. We'll see!
-	remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir())
-		.unwrap_or_else(|e| {
-			tracing::error!(
-				?e,
-				"Failed to remove existing series thumbnail before replacing!"
-			);
-		});
-
-	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config)?;
-
-	Ok(ImageResponse::from((
-		content_type,
 		read_entire_file(path_buf)?,
 	)))
 }

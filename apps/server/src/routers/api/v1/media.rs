@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use axum::{
-	extract::{DefaultBodyLimit, Multipart, Path, State},
+	extract::{Path, State},
 	middleware::from_extractor_with_state,
 	routing::{get, put},
 	Json, Router,
@@ -15,16 +15,13 @@ use serde_qs::axum::QsQuery;
 use stump_core::{
 	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, ReadProgress, User, UserPermission},
+		entity::{LibraryOptions, Media, ReadProgress, User},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		CountQueryReturn,
 	},
 	filesystem::{
 		get_unknown_thumnail,
-		image::{
-			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
-			ImageProcessorOptions,
-		},
+		image::{generate_thumbnail, ImageFormat, ImageProcessorOptions},
 		media::get_page,
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
@@ -46,9 +43,8 @@ use crate::{
 	},
 	middleware::auth::Auth,
 	utils::{
-		enforce_session_permissions, get_session_server_owner_user, get_session_user,
+		get_session_server_owner_user, get_session_user,
 		http::{ImageResponse, NamedFile},
-		validate_image_upload,
 	},
 };
 
@@ -69,11 +65,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/convert", get(convert_media))
 				.route(
 					"/thumbnail",
-					get(get_media_thumbnail_handler)
-						.patch(patch_media_thumbnail)
-						.post(replace_media_thumbnail)
-						// TODO: configurable max file size
-						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+					get(get_media_thumbnail_handler).patch(patch_media_thumbnail),
 				)
 				.route("/page/:page", get(get_media_page))
 				.route(
@@ -286,9 +278,9 @@ pub(crate) fn apply_media_age_restriction(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media", body = PageableMedia),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Get all media accessible to the requester. This is a paginated request, and
@@ -381,9 +373,9 @@ async fn get_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched duplicate media", body = PageableMedia),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Get all media with identical checksums. This heavily implies duplicate files,
@@ -455,9 +447,9 @@ async fn get_duplicate_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched in progress media", body = PageableMedia),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Get all media which the requester has progress for that is less than the
@@ -546,9 +538,9 @@ async fn get_in_progress_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched recently added media", body = PageableMedia),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Get all media which was added to the library in descending order of when it
@@ -625,10 +617,10 @@ async fn get_recently_added_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media", body = Media),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 async fn get_media_by_path(
@@ -677,10 +669,10 @@ struct BookRelations {
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media", body = Media),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Get a media by its ID. If provided, the `load_series` query param will load
@@ -739,10 +731,10 @@ async fn get_media_by_id(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media file"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Download the file associated with the media.
@@ -783,10 +775,10 @@ async fn get_media_file(
 	),
 	responses(
 		(status = 200, description = "Successfully converted media"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 // TODO: remove this, implement it? maybe?
@@ -834,10 +826,10 @@ async fn convert_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Get a page of a media
@@ -972,14 +964,14 @@ pub(crate) fn get_media_thumbnail(
 	path = "/api/v1/media/:id/thumbnail",
 	tag = "media",
 	params(
-		("id" = String, Path, description = "The ID of the media")
+		("id" = String, Path, description = "The ID of the media to get")
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media thumbnail"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Get the thumbnail image of a media
@@ -1007,14 +999,14 @@ pub struct PatchMediaThumbnail {
     path = "/api/v1/media/:id/thumbnail",
     tag = "media",
     params(
-        ("id" = String, Path, description = "The ID of the media")
+        ("id" = String, Path, description = "The ID of the media to get")
     ),
     responses(
         (status = 200, description = "Successfully updated media thumbnail"),
-        (status = 401, description = "Unauthorized"),
-        (status = 403, description = "Forbidden"),
-        (status = 404, description = "Media not found"),
-        (status = 500, description = "Internal server error"),
+        (status = 401, description = "Unauthorized."),
+        (status = 403, description = "Forbidden."),
+        (status = 404, description = "Media not found."),
+        (status = 500, description = "Internal server error."),
     )
 )]
 async fn patch_media_thumbnail(
@@ -1081,62 +1073,6 @@ async fn patch_media_thumbnail(
 }
 
 #[utoipa::path(
-	post,
-	path = "/api/v1/media/:id/thumbnail",
-	tag = "media",
-	params(
-		("id" = String, Path, description = "The ID of the media")
-	),
-	responses(
-		(status = 200, description = "Successfully replaced media thumbnail"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
-	)
-)]
-async fn replace_media_thumbnail(
-	Path(id): Path<String>,
-	State(ctx): State<AppState>,
-	session: Session,
-	mut upload: Multipart,
-) -> ApiResult<ImageResponse> {
-	enforce_session_permissions(
-		&session,
-		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
-	)?;
-	let client = ctx.get_db();
-
-	let media = client
-		.media()
-		.find_unique(media::id::equals(id.clone()))
-		.exec()
-		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
-
-	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
-	let ext = content_type.extension();
-	let book_id = media.id;
-
-	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
-	// user testing I'd like to see if this becomes a problem. We'll see!
-	remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir())
-		.unwrap_or_else(|e| {
-			tracing::error!(
-				?e,
-				"Failed to remove existing media thumbnail before replacing!"
-			);
-		});
-
-	let path_buf = place_thumbnail(&book_id, ext, &bytes, &ctx.config)?;
-
-	Ok(ImageResponse::from((
-		content_type,
-		read_entire_file(path_buf)?,
-	)))
-}
-
-#[utoipa::path(
 	put,
 	path = "/api/v1/media/:id/progress/:page",
 	tag = "media",
@@ -1146,10 +1082,10 @@ async fn replace_media_thumbnail(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media read progress"),
-		(status = 401, description = "Unauthorized"),
-		(status = 403, description = "Forbidden"),
-		(status = 404, description = "Media not found"),
-		(status = 500, description = "Internal server error"),
+		(status = 401, description = "Unauthorized."),
+		(status = 403, description = "Forbidden."),
+		(status = 404, description = "Media not found."),
+		(status = 500, description = "Internal server error."),
 	)
 )]
 /// Update the read progress of a media. If the progress doesn't exist, it will be created.

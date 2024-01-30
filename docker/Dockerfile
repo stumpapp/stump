@@ -76,6 +76,8 @@ RUN set -ex; \
 
 FROM debian:buster-slim
 
+RUN apt-get update && apt-get install -y locales-all
+
 WORKDIR /
 
 RUN mkdir -p config && mkdir -p data && mkdir -p app

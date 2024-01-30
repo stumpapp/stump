@@ -97,7 +97,7 @@ pub trait DynJob: Send + Sync + Sized + 'static {
 	/// A function that is called before Self::run to initialize the job and gather the
 	/// required tasks
 	async fn init(
-		&self,
+		&mut self,
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Data, Self::Task>, JobError>;
 
@@ -203,13 +203,13 @@ impl<J: DynJob> JobExecutor for Job<J> {
 					returned_ctx,
 				} = job_task_handler::<J>(ctx, task_handle, commands_rx.clone()).await?;
 				let JobTaskOutput {
-					new_data,
+					data: task_data,
 					errors: task_errors,
 				} = output;
 
 				// Update our working data and any errors with the new data/errors from the
 				// completed task. Then increment the task index
-				working_data.store(new_data);
+				working_data.store(task_data);
 				errors.extend(task_errors);
 				current_task_index += 1;
 

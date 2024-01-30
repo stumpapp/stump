@@ -47,6 +47,7 @@ struct InitTaskInput {
 struct LibraryScanJob {
 	id: String,
 	path: String,
+	options: Option<LibraryOptions>,
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -82,7 +83,7 @@ impl DynJob for LibraryScanJob {
 	type Task = LibraryScanTask;
 
 	async fn init(
-		&self,
+		&mut self,
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Data, Self::Task>, JobError> {
 		if let Some(restore_point) = self.attempt_restore(ctx).await? {
@@ -104,6 +105,8 @@ impl DynJob for LibraryScanJob {
 			.ok_or(JobError::InitFailed("Library not found".to_string()))?;
 		let is_collection_based = library_options.is_collection_based();
 		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+
+		self.options = Some(library_options);
 
 		let WalkedLibrary {
 			series_to_create,
@@ -269,7 +272,7 @@ impl DynJob for LibraryScanJob {
 					// This can perhaps be refactored later on so that the parent (Job struct) properly
 					// handles this instead, however for now this is fine.
 					return Ok(JobTaskOutput {
-						new_data: data,
+						data,
 						errors: vec![core_error.to_string()],
 					});
 				}
@@ -277,7 +280,7 @@ impl DynJob for LibraryScanJob {
 				let WalkedSeries {
 					series_is_missing,
 					media_to_create,
-					media_to_update,
+					// media_to_update,
 					missing_media,
 					..
 				} = walk_result?;
@@ -302,26 +305,35 @@ impl DynJob for LibraryScanJob {
 					.await?
 					.ok_or(JobError::TaskFailed("Series not found".to_string()))?;
 
-				handle_create_series_media(
+				let JobTaskOutput {
+					data: new_data,
+					errors: new_errors,
+				} = hande_missing_media(&ctx.db, &series.id, missing_media, data, errors)
+					.await?;
+				data = new_data;
+				errors = new_errors;
+
+				let JobTaskOutput {
+					data: new_data,
+					errors: new_errors,
+				} = handle_create_series_media(
 					media_to_create,
 					SeriesCtx {
 						id: series.id,
 						path: series.path,
-						library_id: self.id.clone(),
-						library_path: self.path.clone(),
+						library_options: self.options.clone().unwrap_or_default(),
 					},
 					&ctx,
-					&mut data,
-					&mut errors,
+					data,
+					errors,
 				)
 				.await?;
+				data = new_data;
+				errors = new_errors;
 			},
 		}
 
-		Ok(JobTaskOutput {
-			new_data: data,
-			errors,
-		})
+		Ok(JobTaskOutput { data, errors })
 	}
 }
 
@@ -389,34 +401,79 @@ async fn handle_missing_series(
 			},
 		);
 
-	Ok(JobTaskOutput {
-		new_data: data,
-		errors,
-	})
+	Ok(JobTaskOutput { data, errors })
+}
+
+async fn hande_missing_media(
+	client: &PrismaClient,
+	series_id: &str,
+	media_paths: Vec<PathBuf>,
+	mut data: LibraryScanData,
+	mut errors: Vec<String>,
+) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
+	if media_paths.is_empty() {
+		tracing::debug!("No missing media to handle");
+		return Ok(JobTaskOutput { data, errors });
+	}
+
+	let _affected_rows = client
+		.media()
+		.update_many(
+			vec![
+				media::series::is(vec![series::id::equals(series_id.to_string())]),
+				media::path::in_vec(
+					media_paths
+						.iter()
+						.map(|e| e.to_string_lossy().to_string())
+						.collect::<Vec<String>>(),
+				),
+			],
+			vec![media::status::set(FileStatus::Missing.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to update missing media");
+				errors.push(format!(
+					"Failed to update missing media: {:?}",
+					error.to_string()
+				));
+				0
+			},
+			|count| {
+				data.updated_media += count as u64;
+				tracing::debug!(count, "Updated missing media");
+				count
+			},
+		);
+
+	Ok(JobTaskOutput { data, errors })
 }
 
 struct SeriesCtx {
 	id: String,
 	path: String,
-	library_id: String,
-	library_path: String,
+	library_options: LibraryOptions,
 }
 
 async fn handle_create_series_media(
 	paths: Vec<PathBuf>,
 	series_ctx: SeriesCtx,
 	ctx: &WorkerCtx,
-	// TODO: mut or just take ownership and return the changes?
-	data: &mut LibraryScanData,
-	// TODO: mut or just take ownership and return the changes?
-	errors: &mut Vec<String>,
-) -> Result<(), JobError> {
+	mut data: LibraryScanData,
+	mut errors: Vec<String>,
+) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
 	if paths.is_empty() {
 		tracing::debug!("No media to create for series");
-		return Ok(());
+		return Ok(JobTaskOutput { data, errors });
 	}
 
-	let SeriesCtx { id, path, .. } = series_ctx;
+	let SeriesCtx {
+		id,
+		path,
+		library_options,
+	} = series_ctx;
 	tracing::debug!(?path, "Creating media for series");
 
 	// TODO: support config for chunk size, systems with more memory can take advantage of larger chunks
@@ -427,14 +484,8 @@ async fn handle_create_series_media(
 		let mut built_media = chunk
 			.par_iter()
 			.map(|path_buf| {
-				MediaBuilder::new(
-					path_buf,
-					&id,
-					// FIXME: need the options!
-					LibraryOptions::default(),
-					&ctx.config,
-				)
-				.build()
+				MediaBuilder::new(path_buf, &id, library_options.clone(), &ctx.config)
+					.build()
 			})
 			.collect::<VecDeque<Result<Media, _>>>();
 
@@ -464,7 +515,7 @@ async fn handle_create_series_media(
 		}
 	}
 
-	Ok(())
+	Ok(JobTaskOutput { data, errors })
 }
 
 // #[cfg(test)]

@@ -77,6 +77,7 @@ pub(crate) fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathB
 	}
 }
 
+// TODO: should probably return result as to not scan files which the user would like to ignore
 pub(crate) fn generate_rule_set(paths: &[PathBuf]) -> GlobSet {
 	let mut builder = GlobSetBuilder::new();
 

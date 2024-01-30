@@ -8,7 +8,7 @@ use tokio::task::{JoinError, JoinHandle};
 use super::{DynJob, JobError, WorkerCommand, WorkerCtx};
 
 pub struct JobTaskOutput<J: DynJob> {
-	pub new_data: J::Data,
+	pub data: J::Data,
 	pub errors: Vec<String>,
 }
 
@@ -46,10 +46,10 @@ pub(crate) async fn job_task_handler<J: DynJob>(
 				)));
 			},
 			StreamEvent::TaskCompleted(Ok(result)) => {
-				let JobTaskOutput { new_data, errors } = result?;
+				let JobTaskOutput { data, errors } = result?;
 
 				return Ok(JobTaskHandlerOutput {
-					output: JobTaskOutput { new_data, errors },
+					output: JobTaskOutput { data, errors },
 					returned_ctx: worker_ctx,
 				});
 			},

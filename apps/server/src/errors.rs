@@ -1,4 +1,5 @@
 use axum::{
+	extract::multipart::MultipartError,
 	http::StatusCode,
 	response::{IntoResponse, Response},
 };
@@ -83,6 +84,9 @@ impl IntoResponse for AuthError {
 	}
 }
 
+// TODO: ApiError -> APIError
+// TODO: Serialization is really poor, need to fix that
+
 #[allow(unused)]
 #[derive(Debug, Error, ToSchema)]
 pub enum ApiError {
@@ -113,6 +117,18 @@ pub enum ApiError {
 	#[error("{0}")]
 	#[schema(value_type = String)]
 	PrismaError(#[from] QueryError),
+}
+
+impl From<MultipartError> for ApiError {
+	fn from(error: MultipartError) -> Self {
+		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<reqwest::Error> for ApiError {
+	fn from(error: reqwest::Error) -> Self {
+		ApiError::InternalServerError(error.to_string())
+	}
 }
 
 impl ApiError {

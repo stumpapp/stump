@@ -78,6 +78,31 @@ pub fn enforce_session_permission(
 	enforce_permission(&user, permission)
 }
 
+pub fn enforce_session_permissions(
+	session: &Session,
+	permissions: &[UserPermission],
+) -> ApiResult<User> {
+	let user = get_session_user(session)?;
+
+	if user.is_server_owner {
+		return Ok(user);
+	}
+
+	let missing_permissions = permissions
+		.iter()
+		.filter(|&permission| !user_has_permission(&user, *permission))
+		.collect::<Vec<_>>();
+
+	if !missing_permissions.is_empty() {
+		tracing::error!(?user, ?missing_permissions, "User does not have permission");
+		Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".to_string(),
+		))
+	} else {
+		Ok(user)
+	}
+}
+
 /// Enforce that the user in the session has the given permission. If the user does not have the
 /// permission, an `ApiError::Forbidden` is returned. The user is returned if they have the
 /// permission.

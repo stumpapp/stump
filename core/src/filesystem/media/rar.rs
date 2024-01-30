@@ -33,6 +33,8 @@ impl RarProcessor {
 		{
 			let locale =
 				std::env::var("LIBC_LOCALE").unwrap_or_else(|_| "en_US.utf8".to_string());
+			tracing::debug!(?locale, "Setting locale for unrar");
+
 			let locale =
 				std::ffi::CString::new(locale).expect("Failed to convert locale!");
 			unsafe { libc::setlocale(libc::LC_ALL, locale.as_ptr()) };

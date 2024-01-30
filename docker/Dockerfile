@@ -76,7 +76,7 @@ RUN set -ex; \
 
 FROM debian:buster-slim
 
-RUN apt-get update && apt-get install -y locales-all
+RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /
 

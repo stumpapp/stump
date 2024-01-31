@@ -1,0 +1,470 @@
+{
+	"authScene": {
+		"claimHeading": "Инициализируйте сервер",
+		"claimText": "Этот сервер Stump не инициализирован. Используйте форму ниже, чтобы создать свою учетную запись. После создания вы получите полный доступ ко всем функциям сервера.",
+		"form": {
+			"validation": {
+				"missingUsername": "Вы не ввели имя пользователя",
+				"missingPassword": "Пароль не может быть пустым"
+			},
+			"labels": {
+				"username": "Логин",
+				"password": "Пароль"
+			},
+			"buttons": {
+				"createAccount": "Создать Аккаунт",
+				"login": "Войти"
+			}
+		},
+		"toasts": {
+			"loggingIn": "Вход...",
+			"loggedIn": "С возвращением!",
+			"loggedInFirstTime": "Добро пожаловать!",
+			"registering": "Регистрация...",
+			"registered": "Зарегистрировано!",
+			"loginFailed": "Не удалось войти. Пожалуйста, попробуйте снова",
+			"registrationFailed": "Ошибка регистрации. Пожалуйста, попробуйте еще раз"
+		}
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "Настройки библиотеки",
+			"subtitleCreating": "Предпросмотр вашей новой библиотеки будет показан ниже",
+			"subtitleEditing": "Предварительный просмотр правок вашей библиотеки будет показан ниже"
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "Информация о файле",
+			"labels": {
+				"fileSize": "Размер файла",
+				"fileType": "Тип файла",
+				"fileLocation": "Расположение файла",
+				"fileChecksum": "Контрольная сумма"
+			}
+		},
+		"nextInSeries": "Следующая в Серии"
+	},
+	"createBookClubScene": {
+		"heading": "Create a new book club",
+		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"form": {
+			"name": {
+				"label": "Name",
+				"placeholder": "My book club",
+				"description": "The name of your book club"
+			},
+			"description": {
+				"label": "Description",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
+				"description": "An optional, short description of your book club"
+			},
+			"is_private": {
+				"label": "Private club",
+				"description": "If enabled, only users you invite will be able to join your book club"
+			},
+			"member_role_spec": {
+				"heading": "Custom role mapping",
+				"subtitle": [
+					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"documentation"
+				],
+				"member": {
+					"label": "Member",
+					"placeholder": "Member",
+					"description": "The name of the default role for your book club"
+				},
+				"moderator": {
+					"label": "Moderator",
+					"placeholder": "Moderator",
+					"description": "The name of the moderator role for your book club"
+				},
+				"admin": {
+					"label": "Admin",
+					"placeholder": "Admin",
+					"description": "The name of the admin role for your book club"
+				},
+				"creator": {
+					"label": "Creator",
+					"placeholder": "Creator",
+					"description": "The name of the creator role for your book club. This is you!"
+				}
+			},
+			"creator_preferences": {
+				"heading": "Your membership preferences",
+				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"creator_display_name": {
+					"label": "Display Name",
+					"placeholder": "oromei",
+					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+				},
+				"creator_hide_progress": {
+					"label": "Hide Progress",
+					"description": "If enabled, your read progress will be hidden from other members of the book club"
+				}
+			},
+			"submit": "Create Book Club"
+		}
+	},
+	"createLibraryScene": {
+		"heading": "Создать библиотеку",
+		"subtitle": "Библиотеки используются для группировки книг вместе. Если вы хотите обновить библиотеки и узнать как они работают, проверьте",
+		"subtitleLink": "соответствующую документацию",
+		"form": {
+			"labels": {
+				"libraryName": "Имя",
+				"libraryPath": "Путь",
+				"libraryPathDescription": "Путь к папке библиотеки на вашем сервере",
+				"libraryDescription": "Описание",
+				"libraryTags": "Теги"
+			},
+			"buttons": {
+				"confirm": "Создать библиотеку"
+			}
+		}
+	},
+	"manageLibraryScene": {
+		"heading": "Управление Библиотекой",
+		"subtitle": "Обновите настройки вашей библиотеки, измените правила доступа или сканируйте файлы. Если вы хотите обновить библиотеки и узнать как они работают, проверьте",
+		"subtitleLink": "соответствующую документацию",
+		"form": {
+			"labels": {
+				"libraryName": "Имя",
+				"libraryPath": "Путь",
+				"libraryPathDescription": "Путь к папке библиотеки на вашем сервере",
+				"libraryDescription": "Описание",
+				"libraryTags": "Теги"
+			},
+			"buttons": {
+				"confirm": "Сохранить изменения"
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "Уупс, что-то пошло не так",
+		"message": "Произошла ошибка:",
+		"buttons": {
+			"report": "Сообщить об ошибке",
+			"copy": "Скопировать информацию об ошибке",
+			"goHome": "На главную"
+		}
+	},
+	"homeScene": {
+		"continueReading": {
+			"title": "Продолжить чтение",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you're currently reading will show up here"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Новые серии",
+			"emptyState": {
+				"heading": "No series to display",
+				"message": "Any series you add to your libraries will show up here"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Новые книги",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you add to your libraries will show up here"
+			}
+		}
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "Продолжить чтение",
+			"downloadSeries": "Скачать серии"
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"general": "Общие",
+			"server": "Сервер",
+			"jobs": "Задачи и настройки",
+			"users": "Управление пользователями",
+			"desktop": "Компьютер"
+		},
+		"general": {
+			"helmet": "Общие настройки",
+			"heading": "Общие настройки",
+			"subtitle": "Используйте формы ниже, чтобы управлять настройками аккаунта.",
+			"profileForm": {
+				"validation": {
+					"invalidUrl": "Пожалуйста, введите правильный URL",
+					"missingUsername": "Требуется имя пользователя"
+				},
+				"labels": {
+					"username": "Логин",
+					"password": "Пароль",
+					"activeChangesPrompt": "Есть несохраненные изменения"
+				},
+				"errors": {
+					"updateFailed": "Произошла ошибка сервера при обновлении вашего профиля. Пожалуйста, попробуйте еще раз."
+				},
+				"avatarPicker": {
+					"heading": "Установить изображение аватара",
+					"subtitle": "Stump поддерживает внешние пользовательские аватары, которые можно установить с помощью URL к изображению. Загрузка изображений не поддерживается, чтобы уменьшить количество данных, хранящихся на сервере.",
+					"preview": "Предварительный просмотр появится здесь после ввода URL.",
+					"labels": {
+						"imageUrl": "URL изображения",
+						"customAvatar": "Пользовательский аватар"
+					},
+					"buttons": {
+						"confirm": "Подтвердить изображение",
+						"cancel": "Отмена",
+						"edit": "Редактировать",
+						"changeImage": "Изменить изображение",
+						"removeImage": "Удалить изображение"
+					}
+				},
+				"buttons": {
+					"confirm": "Сохранить изменения"
+				}
+			},
+			"theme": {
+				"heading": "Тема приложения",
+				"subtitle": "Stump поддерживает как светлые, так и темные темы, которые можно задать ниже.",
+				"dark": {
+					"label": "Тёмная тема",
+					"description": "Используйте тёмную тему для Stump."
+				},
+				"light": {
+					"label": "Светлая тема",
+					"description": "Используйте светлую тему для Stump."
+				}
+			},
+			"locale": {
+				"localeSelector": {
+					"label": "Язык"
+				},
+				"heading": "Настройки языка и локали",
+				"subtitle": [
+					"Stump поддерживает несколько языков, установите предпочитаемый. Пожалуйста, подумайте о помощи в улучшении качества",
+					"Переводы Stump",
+					"если вы можете!"
+				]
+			}
+		},
+		"jobs": {
+			"helmet": "Задачи и настройки",
+			"heading": "Задачи и настройки",
+			"subtitle": "Просмотр и управление фоновой заданиями на этом сервере, включая сканирование библиотек и планирование",
+			"schedulingHeading": "Планировщик заданий",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
+			"historyHeading": "История заданий",
+			"historySubtitle": "Управление запущенными задачами и просмотр завершенных",
+			"historyTable": {
+				"columns": {
+					"name": "Тип",
+					"description": "Описание",
+					"status": "Статус",
+					"createdAt": "Запущено",
+					"elapsed": "Прошло времени",
+					"tasks": "Задачи"
+				},
+				"emptyHeading": "Нет заданий",
+				"emptySubtitle": "У вас не может быт задач, если у вас нет задач",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
+				"deleteAllConfirmButton": "Очистить историю",
+				"deleteAllConfirmButtonTitle": "Очистить историю задач",
+				"deleteAllConfirmButtonTitleNoJobs": "Нет задач для очистки"
+			}
+		},
+		"server": {
+			"helmet": "Настройки Сервера",
+			"heading": "Настройки Сервера",
+			"subtitle": "Управление параметрами сервера"
+		},
+		"desktop": {
+			"helmet": "Desktop Settings",
+			"heading": "Desktop Settings",
+			"subtitle": "Configure the Stump desktop application",
+			"discordPresence": {
+				"label": "Discord Presence",
+				"description": "Display your Stump activity in Discord using Discord Rich Presence",
+				"reconnect": "Reconnect to Discord"
+			}
+		},
+		"users": {
+			"helmet": "Управление пользователями",
+			"heading": "Управление пользователями",
+			"subtitle": "Управление пользователями, включая создание и изменение их прав доступа"
+		},
+		"createOrUpdateUsers": {
+			"createHelmet": "Create user",
+			"createHeading": "Create new user",
+			"createSubtitle": "Use the form below to create a new user on this server",
+			"updateHelmet": "Update user",
+			"updateHeading": "Update user",
+			"updateSubtitle": "Use the form below to update the details of this user",
+			"accessControl": {
+				"heading": "Access control and restrictions",
+				"subtitle": [
+					"If you want to restrict access to certain content based on tags or age rating, you can do so here. Any unset values means that the restriction will not be enforced. For more information about access control, see the",
+					"documentation"
+				],
+				"ageRestriction": {
+					"label": "Age restriction",
+					"description": "Restricts the user from accessing content above the set age rating threshold",
+					"placeholder": "13",
+					"enforceUnset": {
+						"label": "Enforce on unset",
+						"description": "If enabled, users will be restricted from accessing content with no age rating available"
+					}
+				},
+				"tagRestriction": {
+					"label": "Tag restrictions",
+					"description": "Restricts the user from accessing content with the selected tags",
+					"placeholder": "Adult, Gore"
+				}
+			},
+			"permissions": {
+				"heading": "Granted permissions",
+				"subtitle": [
+					"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
+					"documentation"
+				],
+				"bookclub": {
+					"label": "Book Clubs",
+					"read": {
+						"label": "Access book club features",
+						"description": "Allows the user to access book club features, including viewing and joining book clubs"
+					},
+					"create": {
+						"label": "Create book clubs",
+						"description": "Allows the user to create new book clubs"
+					}
+				},
+				"file": {
+					"label": "File Management",
+					"explorer": {
+						"label": "File Explorer",
+						"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+					},
+					"upload": {
+						"label": "Upload files",
+						"description": "Allows the user to upload files to the server"
+					}
+				},
+				"library": {
+					"label": "Library Management",
+					"create": {
+						"label": "Create libraries",
+						"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+					},
+					"scan": {
+						"label": "Scan libraries",
+						"description": "Allows the user to initiate scans for existing libraries"
+					},
+					"edit": {
+						"label": "Edit libraries",
+						"description": "Allows the user to edit basic details for existing libraries"
+					},
+					"manage": {
+						"label": "Manage libraries",
+						"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+					},
+					"delete": {
+						"label": "Delete libraries",
+						"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+					}
+				}
+			},
+			"validation": {
+				"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+			},
+			"createSubmitButton": "Create user",
+			"updateSubmitButton": "Update user"
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "Идёт выполнение задачи"
+	},
+	"libraryStats": {
+		"seriesCount": "Всего серий",
+		"bookCount": "Всего книг",
+		"diskUsage": "Использование диска"
+	},
+	"pagination": {
+		"buttons": {
+			"next": "Далее",
+			"previous": "Назад"
+		},
+		"popover": {
+			"heading": "Перейти",
+			"buttons": {
+				"confirm": "Перейти",
+				"cancel": "Отмена"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "Выйти",
+		"message": "Вы действительно хотите выйти?",
+		"buttons": {
+			"cancel": "Отмена",
+			"signOut": "Выйти"
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "Главная",
+			"libraries": "Библиотеки",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Create library",
+			"createBookClub": "Create book club",
+			"settings": "Настройки",
+			"themeToggle": "Изменить тему",
+			"goForward": "Вперёд",
+			"goBack": "Назад"
+		},
+		"libraryOptions": {
+			"scanLibrary": "Scan",
+			"fileExplorer": "Файловый менеджер",
+			"manageLibrary": "Manage",
+			"deleteLibrary": "Delete"
+		},
+		"versionInformation": {
+			"heading": "Версия",
+			"semVer": "Семантическая версия",
+			"commitHash": "Хэш коммита",
+			"buildDate": "Дата сборки"
+		}
+	},
+	"search": {
+		"placeholder": "Поиск"
+	},
+	"serverSOS": {
+		"heading": "Сервер недоступен",
+		"desktop": {
+			"message": "Произошла сетевая ошибка, предполагающая что ваш сервер в настоящее время недоступен. Пожалуйста, убедитесь, что он запущен и доступен с этого устройства.\nЕсли ваш URL сервера изменился, вы можете обновить его, используя форму ниже"
+		},
+		"web": {
+			"message": "Произошла сетевая ошибка, предполагающая что ваш сервер в настоящее время недоступен. Пожалуйста, убедитесь, что он запущен и доступен с этого устройства"
+		},
+		"reconnected": "Переподключено к серверу! Перенаправление...",
+		"reconnectionFailed": "Что-то пошло не так!"
+	},
+	"serverStatusOverlay": {
+		"heading": "Сервер не подключен",
+		"message": [
+			"Пожалуйста, проверьте ваше интернет-соединение",
+			"Нажмите сюда",
+			"чтобы изменить URL сервера"
+		]
+	},
+	"slidingList": {
+		"empty": "Нет элементов для отображения",
+		"buttons": {
+			"next": "Перемотка вперед",
+			"previous": "Перемотка назад"
+		}
+	},
+	"tagSelect": {
+		"placholder": "Выберите или создайте тег",
+		"placeholderNoTags": "Нет доступных тегов"
+	}
+}

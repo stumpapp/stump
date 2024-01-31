@@ -16,7 +16,10 @@ import { queryClient, useQuery } from '../client'
 export const prefetchMedia = async (id: string) => {
 	await queryClient.prefetchQuery(
 		[mediaQueryKeys.getMediaById, id],
-		() => mediaApi.getMediaById(id),
+		async () => {
+			const { data } = await mediaApi.getMediaById(id)
+			return data
+		},
 		{
 			staleTime: 10 * 1000,
 		},
@@ -29,13 +32,23 @@ type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 	TData
 >
 
-export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = {}) {
+type UseMediaByIdQueryOptions = MediaQueryParams<Media> & {
+	params?: Record<string, unknown>
+}
+
+export function useMediaByIdQuery(
+	id: string,
+	{ params, ...options }: UseMediaByIdQueryOptions = {},
+) {
 	const { data, ...ret } = useQuery(
-		[mediaQueryKeys.getMediaById, id],
-		() => mediaApi.getMediaById(id).then(({ data }) => data),
+		[mediaQueryKeys.getMediaById, id, params],
+		async () => {
+			const { data } = await mediaApi.getMediaById(id, params)
+			return data
+		},
 		{
 			keepPreviousData: false,
-			...params,
+			...options,
 		},
 	)
 

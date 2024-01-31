@@ -7,9 +7,9 @@ use std::{
 use tracing::error;
 use walkdir::WalkDir;
 
-use crate::config::get_thumbnails_dir;
-
 use super::{media::is_accepted_cover_name, ContentType, FileError};
+
+pub const ACCEPTED_IMAGE_EXTENSIONS: [&str; 5] = ["jpg", "png", "jpeg", "webp", "gif"];
 
 pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
 	let mut file = File::open(path)?;
@@ -22,18 +22,29 @@ pub fn read_entire_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, FileError> {
 
 /// A function that returns the path of a thumbnail image, if it exists.
 /// This should be used when the thumbnail extension is not known.
-pub fn get_unknown_thumnail(id: &str) -> Option<PathBuf> {
-	let mut path = get_thumbnails_dir();
+pub fn get_unknown_thumnail(id: &str, mut thumbnails_dir: PathBuf) -> Option<PathBuf> {
+	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
+		thumbnails_dir.push(format!("{}.{}", id, extension));
 
-	let accepted_extensions = ["jpg", "png", "jpeg", "webp"];
-	for extension in accepted_extensions.iter() {
-		path.push(format!("{}.{}", id, extension));
-
-		if path.exists() {
-			return Some(path);
+		if thumbnails_dir.exists() {
+			return Some(thumbnails_dir);
 		}
 
-		path.pop();
+		thumbnails_dir.pop();
+	}
+
+	None
+}
+
+pub fn get_unknown_image(mut base_path: PathBuf) -> Option<PathBuf> {
+	for extension in ACCEPTED_IMAGE_EXTENSIONS.iter() {
+		base_path.set_extension(extension);
+
+		if base_path.exists() {
+			return Some(base_path);
+		}
+
+		base_path.set_extension("");
 	}
 
 	None
@@ -91,7 +102,9 @@ impl PathUtils for Path {
 			.extension()
 			.and_then(|os_str| os_str.try_to_string())
 			.unwrap_or_else(|| {
-				tracing::warn!(path = ?self, "Failed to get file extension");
+				if !self.is_dir() {
+					tracing::warn!(path = ?self, "Failed to get file extension");
+				}
 				String::default()
 			});
 

@@ -12,8 +12,9 @@ const linkVariants = cva(
 		},
 		variants: {
 			variant: {
-				brand: 'text-primary-600 dark:text-blue-400',
-				default: 'text-gray-900 dark:text-gray-100',
+				brand: 'text-brand',
+				default: 'text-contrast',
+				muted: 'text-muted',
 			},
 		},
 	},

@@ -11,4 +11,4 @@ build
 .next
 
 # locale files
-packages/interface/src/i18n/locales/*.json
+interface/src/i18n/locales/*.json

@@ -3,19 +3,27 @@
 
 // CORE TYPE GENERATION
 
-export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
+export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
 
-export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:scan"
+export type AccessRole = "Reader" | "Writer" | "CoCreator"
+
+export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
+
+/**
+ * Permissions that can be granted to a user. Some permissions are implied by others,
+ * and will be automatically granted if the "parent" permission is granted.
+ */
+export type UserPermission = "bookclub:read" | "bookclub:create" | "smartlist:read" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:manage" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
-export type UserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence?: boolean }
+export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
-export type Library = { id: string; name: string; description: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryOptions }
+export type Library = { id: string; name: string; description: string | null; emoji: string | null; path: string; status: string; updated_at: string; series: Series[] | null; tags: Tag[] | null; library_options: LibraryOptions }
 
 export type LibraryPattern = "SERIES_BASED" | "COLLECTION_BASED"
 
@@ -23,32 +31,74 @@ export type LibraryScanMode = "DEFAULT" | "NONE"
 
 export type LibraryOptions = { id: string | null; convert_rar_to_zip: boolean; hard_delete_conversions: boolean; library_pattern: LibraryPattern; thumbnail_config: ImageProcessorOptions | null; library_id: string | null }
 
-export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
-
-export type UpdateLibrary = { id: string; name: string; path: string; description: string | null; tags: Tag[] | null; removed_tags: Tag[] | null; library_options: LibraryOptions; scan_mode: LibraryScanMode | null }
-
 export type LibrariesStats = { series_count: BigInt; book_count: BigInt; total_bytes: BigInt }
 
 export type SeriesMetadata = { _type: string; title: string | null; summary: string | null; publisher: string | null; imprint: string | null; comicid: number | null; volume: number | null; booktype: string | null; age_rating: number | null; status: string | null }
 
-export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; metadata: SeriesMetadata | null; media_count?: BigInt | null; unread_media_count?: BigInt | null; tags: Tag[] | null }
+export type Series = { id: string; name: string; path: string; description: string | null; status: FileStatus; updated_at: string; created_at: string; library_id: string; library: Library | null; media: Media[] | null; metadata: SeriesMetadata | null; media_count?: BigInt | null; unread_media_count?: BigInt | null; tags?: Tag[] | null }
 
 /**
  * Struct representing the metadata for a processed file.
  */
 export type MediaMetadata = { title: string | null; series: string | null; number: number | null; volume: number | null; summary: string | null; notes: string | null; age_rating?: number | null; genre?: string[] | null; year: number | null; month: number | null; day: number | null; writers?: string[] | null; pencillers?: string[] | null; inkers?: string[] | null; colorists?: string[] | null; letterers?: string[] | null; cover_artists?: string[] | null; editors?: string[] | null; publisher: string | null; links?: string[] | null; characters?: string[] | null; teams?: string[] | null; page_count: number | null }
 
-export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null }
+export type Media = { id: string; name: string; size: number; extension: string; pages: number; updated_at: string; created_at: string; modified_at: string | null; hash: string | null; path: string; status: FileStatus; series_id: string; metadata: MediaMetadata | null; series?: Series | null; read_progresses?: ReadProgress[] | null; current_page?: number | null; current_epubcfi?: string | null; is_completed?: boolean | null; tags?: Tag[] | null; bookmarks?: Bookmark[] | null }
 
-export type MediaAnnotationKind = "HIGHLIGHT" | "NOTE" | "BOOKMARK"
+/**
+ * A model representing a bookmark in the database. Bookmarks are used to save specific locations
+ * in a media file, such as an epub, without any additional metadata like notes, tags, etc.
+ */
+export type Bookmark = { id: string; preview_content: string | null; epubcfi: string | null; page: number | null; book_id: string; book?: Media | null; user_id?: string | null; user?: User | null }
 
-export type MediaAnnotation = { id: string; kind: MediaAnnotationKind; epubcfi: string | null; text: string | null; media_id: string; media: Media | null }
+export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
 
-export type BookClub = { id: string; name: string; description: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
+/**
+ * A filter for a single value, e.g. `name = "test"`
+ */
+export type Filter<T> = T | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
 
-export type BookClubMember = { id: string; display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; role: BookClubMemberRole; user?: User | null; book_club?: BookClub | null }
+export type NumericFilter<T> = { gt: T } | { gte: T } | { lt: T } | { lte: T } | NumericRange<T>
+
+export type NumericRange<T> = { from: T; to: T; inclusive?: boolean }
+
+/**
+ * A list of filters that are being combined with a logical operator, e.g. `and` or `or`
+ */
+export type FilterGroup<T> = { and: T[] } | { or: T[] } | { not: T[] }
+
+export type FilterJoin = "AND" | "OR"
+
+export type SmartListItemGrouping = "BY_BOOKS" | "BY_SERIES" | "BY_LIBRARY"
+
+export type SmartListItemGroup<E> = { entity: E; books: Media[] }
+
+export type SmartListItems = { type: "Books"; items: Media[] } | { type: "Series"; items: SmartListItemGroup<Series>[] } | { type: "Library"; items: SmartListItemGroup<Library>[] }
+
+export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; visibility: EntityVisibility; joiner: FilterJoin; default_grouping: SmartListItemGrouping; saved_views: SmartListView[] | null; creator_id?: string | null }
+
+export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
+
+export type MediaSmartFilter = { name: Filter<string> } | { extension: Filter<string> } | { path: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
+
+export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
+
+export type SeriesMetadataSmartFilter = { meta_type: Filter<string> } | { publisher: Filter<string> } | { status: Filter<string> } | { age_rating: Filter<number> } | { volume: Filter<number> }
+
+export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string> } | { metadata: SeriesMetadataSmartFilter } | { library: LibrarySmartFilter }
+
+export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
+
+export type SmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
+
+export type SmartListTableSortingState = { desc: boolean; id: string }
+
+export type SmartListTableColumnSelection = { id: string; position: number }
+
+export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
+
+export type BookClubMember = { id: string; display_name?: string | null; is_creator: boolean; hide_progress: boolean; private_membership: boolean; role: BookClubMemberRole; user?: User | null; user_id?: string | null; book_club?: BookClub | null }
 
 export type BookClubMemberRole = "MEMBER" | "MODERATOR" | "ADMIN" | "CREATOR"
 
@@ -152,21 +202,37 @@ export type Pagination = null | PageQuery | CursorQuery
 
 // SERVER TYPE GENERATION
 
-export type StumpVersion = { semver: string; rev: string | null; compile_time: string }
+export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 
-export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
+export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
-export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null }
+export type UpdateUser = { username: string; password: string | null; avatar_url: string | null; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }
 
-export type UpdateUserPreferences = { id: string; locale: string; library_layout_mode: string; series_layout_mode: string; collection_layout_mode: string; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean }
+export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; show_query_indicator: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean }
 
 export type DeleteUser = { hard_delete: boolean | null }
 
 export type ClaimResponse = { is_claimed: boolean }
 
+export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
+
+export type UpdateLibrary = { id: string; name: string; path: string; description: string | null; emoji: string | null; tags: Tag[] | null; removed_tags?: Tag[] | null; library_options: LibraryOptions; scan_mode?: LibraryScanMode | null }
+
+export type CleanLibraryResponse = { deleted_media_count: number; deleted_series_count: number; is_empty: boolean }
+
+export type PutMediaCompletionStatus = { is_complete: boolean; page?: number | null }
+
+export type MediaIsComplete = { is_completed: boolean; completed_at: string | null }
+
 export type MediaMetadataOverview = { genres: string[]; writers: string[]; pencillers: string[]; inkers: string[]; colorists: string[]; letterers: string[]; editors: string[]; publishers: string[]; characters: string[]; teams: string[] }
+
+export type CreateOrUpdateBookmark = { epubcfi: string; preview_content: string | null }
+
+export type DeleteBookmark = { epubcfi: string }
+
+export type SeriesIsComplete = { is_complete: boolean; completed_at: string | null }
 
 export type UpdateSchedulerConfig = { interval_secs: number | null; excluded_library_ids: string[] | null }
 
@@ -174,7 +240,7 @@ export type GetBookClubsParams = { all?: boolean }
 
 export type CreateBookClub = { name: string; is_private?: boolean; member_role_spec: BookClubMemberRoleSpec | null; creator_hide_progress?: boolean; creator_display_name: string | null }
 
-export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null }
+export type UpdateBookClub = { name: string | null; description: string | null; is_private: boolean | null; member_role_spec: BookClubMemberRoleSpec | null; emoji: string | null }
 
 export type CreateBookClubInvitation = { user_id: string; role: BookClubMemberRole | null }
 
@@ -203,4 +269,14 @@ export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null
 export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
+
+export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
+
+export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
+
+export type SmartListRelationOptions = { load_views?: boolean }
+
+export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
+
+export type CreateOrUpdateSmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 

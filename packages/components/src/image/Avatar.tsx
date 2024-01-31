@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 
 import { Text } from '../text'
-import { cx } from '../utils'
+import { cn } from '../utils'
 import { AvatarPrimitive, AvatarPrimitiveRef } from './primitives'
 
 // TODO: sizes that will handle scaling of the fallback text and avatar size
@@ -10,9 +10,21 @@ export type AvatarProps = {
 	fallback?: React.ReactNode
 	fallbackWrapperClassName?: string
 	fallbackColor?: 'brand' | 'gray'
+	rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full'
 } & React.ComponentPropsWithoutRef<typeof AvatarPrimitive>
 export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
-	({ src, fallback, fallbackColor, fallbackWrapperClassName, ...props }, ref) => {
+	(
+		{
+			src,
+			fallback,
+			fallbackColor,
+			fallbackWrapperClassName,
+			rounded = 'full',
+			className,
+			...props
+		},
+		ref,
+	) => {
 		const renderFallback = () => {
 			if (typeof fallback === 'string') {
 				let resolvedStr: string = fallback
@@ -31,18 +43,38 @@ export const Avatar = forwardRef<AvatarPrimitiveRef, AvatarProps>(
 			}
 			return fallback
 		}
+
+		const roundedClassName = cn(
+			{
+				'rounded-none': rounded === 'none',
+			},
+			{
+				'rounded-sm': rounded === 'sm',
+			},
+			{
+				'rounded-md': rounded === 'md',
+			},
+			{
+				'rounded-lg': rounded === 'lg',
+			},
+			{
+				'rounded-full': rounded === 'full',
+			},
+		)
+
 		return (
-			<AvatarPrimitive {...props} ref={ref}>
-				<AvatarPrimitive.Image src={src} />
+			<AvatarPrimitive className={cn(roundedClassName, className)} {...props} ref={ref}>
+				<AvatarPrimitive.Image src={src} className={roundedClassName} />
 				<AvatarPrimitive.Fallback
 					asChild
-					className={cx(
+					className={cn(
 						{
-							'bg-brand-400 dark:bg-brand': fallbackColor === 'brand',
+							'bg-brand-400': fallbackColor === 'brand',
 						},
 						{
-							'bg-gray-75 dark:bg-gray-800': fallbackColor === 'gray',
+							'bg-background-200': fallbackColor === 'gray',
 						},
+						roundedClassName,
 						fallbackWrapperClassName,
 					)}
 				>

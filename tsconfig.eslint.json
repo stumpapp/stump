@@ -4,7 +4,9 @@
 		"apps/**/*",
 		"core",
 		"crates/**/*",
+		"docs",
 		"packages/**/*",
+		"interface",
 		"**/.eslintrc.js",
 		"**/*.config.js",
 		"prettier.config.js"

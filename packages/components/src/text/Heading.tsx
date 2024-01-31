@@ -6,7 +6,7 @@ import { cn } from '../utils'
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 type As = `h${HeadingLevel}`
 
-export const HEADING_BASE_CLASSES = 'font-semibold'
+export const HEADING_BASE_CLASSES = 'font-sans font-semibold'
 
 const headingVariants = cva(HEADING_BASE_CLASSES, {
 	defaultVariants: {
@@ -25,7 +25,7 @@ const headingVariants = cva(HEADING_BASE_CLASSES, {
 			xxs: 'text-sm',
 		},
 		variant: {
-			default: 'dark:text-gray-100',
+			default: 'text-contrast',
 			gradient: 'bg-gradient-to-r from-brand-600 to-brand-500 bg-clip-text text-transparent',
 		},
 	},
@@ -36,15 +36,20 @@ type BaseProps = VariantProps<typeof headingVariants> & React.ComponentPropsWith
 export type HeadingProps = {
 	as?: As
 	className?: string
+	bold?: boolean
 } & BaseProps
 
 export const Heading = React.forwardRef<React.ElementRef<As>, HeadingProps>(
-	({ className, as, size, variant, ...props }, ref) => {
+	({ className, as, size, variant, bold, ...props }, ref) => {
 		const Component = as ?? 'h1'
 		return (
 			<Component
 				ref={ref}
-				className={cn(headingVariants({ className, size, variant }), className)}
+				className={cn(
+					headingVariants({ className, size, variant }),
+					{ 'font-bold': bold },
+					className,
+				)}
 				{...props}
 			/>
 		)

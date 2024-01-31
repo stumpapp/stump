@@ -36,9 +36,10 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [/apps](#apps)
   - [/core](#core)
   - [/crates](#crates)
+  - [/docs](#docs)
+  - [/interface](#interface)
   - [/packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
-- [Acknowledgements 🙏](#acknowledgements-)
 </details>
 
 > **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. I will likely flatten the migrations immediately prior to the `0.1.0` release, which will break existing Stump databases. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
@@ -160,14 +161,13 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 ### /apps
 
 - `desktop`: A React+Tauri application
-- `docs`: A NextJS application for the Stump documentation site
 - `mobile`: A React Native application
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server
 - `web`: A React application
 
 ### /core
 
-- `core`: A Rust crate containing Stump's core functionalities
+A Rust crate containing Stump's core functionalities
 
 ### /crates
 
@@ -176,12 +176,19 @@ Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/work
 - `integrations`: A rust library containing integrations with other notification services
 - `prisma-cli`: A small wrapper rust app to run the Prisma CLI
 
+### /docs
+
+A NextJS application for the Stump documentation site
+
+### /interface
+
+A React component that is essentially the "main" UI for Stump. It is used in both the `web` and `desktop` apps
+
 ### /packages
 
 - `api`: All of the API functions used by the `client` package
 - `client`: React-query config, hooks, and other client-side utilities
 - `components`: Shared React components for the web and desktop applications
-- `interface`: A React component responsible for the main UI layout for the web and desktop applications
 - `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 ## Similar Projects 👯
@@ -194,8 +201,3 @@ There are a number of other projects that are similar to Stump, it certainly isn
 - [Komga](https://github.com/gotson/komga)
 - [Librum](https://github.com/Librum-Reader/Librum)
 - [oqurum](https://github.com/oqurum) (✨*Rust*✨)
-
-## Acknowledgements 🙏
-
-- [Komga](https://github.com/gotson/komga) is a huge inspiration for Stump, an amazing comics/manga media server written in Kotlin.
-- [Brendonovich](https://github.com/Brendonovich) for building [prisma client rust](https://github.com/Brendonovich/prisma-client-rust), which allows me to use Prisma with Rust. Stump originally used SeaORM, but the DX simply can't compare to Prisma.

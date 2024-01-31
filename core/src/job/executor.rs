@@ -1,7 +1,6 @@
 use super::{
 	utils::persist_job_end, JobDetail, JobError, JobStatus, JobTrait, WorkerCtx,
 };
-use tracing::{error, trace};
 use uuid::Uuid;
 
 #[async_trait::async_trait]
@@ -70,7 +69,7 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 					running = false;
 
 					let duration = start.elapsed().as_millis() as u64;
-					let persist_result = match job_result {
+					let _persist_result = match job_result {
 						Ok(completed_count) => {
 							persist_job_end(
 								&ctx.core_ctx,
@@ -82,7 +81,7 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 							.await
 						},
 						Err(err) => {
-							error!(?err, "Job failed!");
+							tracing::error!(?err, "Job failed!");
 							persist_job_end(
 								&ctx.core_ctx,
 								ctx.job_id.clone(),
@@ -93,14 +92,15 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 							.await
 						},
 					};
-					println!("Persist result: {:?}", persist_result);
 				}
 				// TODO: I think this might be wrong for pausing, in that even if the signal is
 				// meant to pause, it will kill the future above? Unless I pin it maybe?
 				shutdown_result = &mut shutdown_rx_fut => {
+					tracing::trace!("Received shutdown signal!");
+					running = false;
 					let duration = start.elapsed().as_millis() as u64;
 					if let Ok(signal) = shutdown_result {
-						tracing::debug!(?signal, "Received shutdown signal");
+						tracing::debug!(?signal, "Signal is OK");
 						// TODO: this is where we would save state once jobs are stateful some day
 						// match signal_type {
 						// 	JobManagerShutdownSignal::Worker(id) if &id == ctx.job_id()  => {
@@ -123,12 +123,12 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 						.await;
 
 						if let Err(err) = persist_result {
-							error!(?err, "Failed to persist job end");
+							tracing::error!(?err, "Failed to persist job end");
 						}
 
 						return Err(JobError::Cancelled);
 					} else if let Err(err) = shutdown_result {
-						error!(?err, "Failed to receive shutdown signal");
+						tracing::error!(?err, "Failed to receive shutdown signal");
 
 						let persist_result = persist_job_end(
 							&ctx.core_ctx,
@@ -140,7 +140,7 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 						.await;
 
 						if let Err(err) = persist_result {
-							error!(?err, "Failed to persist job end");
+							tracing::error!(?err, "Failed to persist job end");
 						}
 
 						return Err(JobError::Unknown(err.to_string()));
@@ -158,7 +158,7 @@ impl<InnerJob: JobTrait> JobExecutorTrait for Job<InnerJob> {
 		job_result: Result<(), JobError>,
 		ctx: WorkerCtx,
 	) -> Result<(), JobError> {
-		trace!(?job_result, "Job finished!");
+		tracing::trace!(?job_result, "Job finished!");
 		// let resolved_state = if let Err(e) = result {
 		// 	match e {
 		// 		JobError::Paused(state) => state,

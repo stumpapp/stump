@@ -2,12 +2,14 @@ use std::{thread, time::Duration};
 
 use clap::Subcommand;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, Password};
+
 use stump_core::{
+	config::StumpConfig,
 	db::create_client,
 	prisma::{session, user},
 };
 
-use crate::{commands::chain_optional_iter, error::CliResult, CliConfig, CliError};
+use crate::{commands::chain_optional_iter, error::CliResult, CliError};
 
 use super::default_progress_spinner;
 
@@ -44,20 +46,28 @@ pub enum Account {
 
 pub async fn handle_account_command(
 	command: Account,
-	config: CliConfig,
+	config: &StumpConfig,
 ) -> CliResult<()> {
 	match command {
-		Account::Lock { username } => set_account_lock_status(username, true).await,
-		Account::Unlock { username } => set_account_lock_status(username, false).await,
-		Account::List { locked } => print_accounts(locked).await,
-		Account::ResetPassword { username } => {
-			reset_account_password(username, config.password_hash_cost).await
+		Account::Lock { username } => {
+			set_account_lock_status(username, true, config).await
 		},
-		Account::ResetOwner => change_server_owner().await,
+		Account::Unlock { username } => {
+			set_account_lock_status(username, false, config).await
+		},
+		Account::List { locked } => print_accounts(locked, config).await,
+		Account::ResetPassword { username } => {
+			reset_account_password(username, config.password_hash_cost, config).await
+		},
+		Account::ResetOwner => change_server_owner(config).await,
 	}
 }
 
-async fn set_account_lock_status(username: String, lock: bool) -> CliResult<()> {
+async fn set_account_lock_status(
+	username: String,
+	lock: bool,
+	config: &StumpConfig,
+) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message(if lock {
 		"Locking account..."
@@ -65,7 +75,7 @@ async fn set_account_lock_status(username: String, lock: bool) -> CliResult<()> 
 		"Unlocking account..."
 	});
 
-	let client = create_client().await;
+	let client = create_client(config).await;
 
 	let affected_rows = client
 		.user()
@@ -104,8 +114,12 @@ async fn set_account_lock_status(username: String, lock: bool) -> CliResult<()> 
 	}
 }
 
-async fn reset_account_password(username: String, hash_cost: u32) -> CliResult<()> {
-	let client = create_client().await;
+async fn reset_account_password(
+	username: String,
+	hash_cost: u32,
+	config: &StumpConfig,
+) -> CliResult<()> {
+	let client = create_client(config).await;
 
 	let theme = &ColorfulTheme::default();
 	let builder = Password::with_theme(theme)
@@ -142,14 +156,12 @@ async fn reset_account_password(username: String, hash_cost: u32) -> CliResult<(
 	}
 }
 
-// TODO: print pretty table
-// TODO: handle empty state
-async fn print_accounts(locked: Option<bool>) -> CliResult<()> {
+async fn print_accounts(locked: Option<bool>, config: &StumpConfig) -> CliResult<()> {
 	let progress = default_progress_spinner();
 	progress.set_message("Fetching accounts...");
 
-	let client = create_client().await;
-
+	// Fetch users from prisma database
+	let client = create_client(config).await;
 	let users = client
 		.user()
 		.find_many(chain_optional_iter(
@@ -159,21 +171,31 @@ async fn print_accounts(locked: Option<bool>) -> CliResult<()> {
 		.exec()
 		.await?;
 
-	progress.finish_with_message("Accounts fetched successfully!");
+	// Print results from database
+	if users.is_empty() {
+		progress.finish_with_message("No accounts found.");
+	} else {
+		progress.finish_with_message("Accounts fetched successfully!");
 
-	for user in users {
-		println!(
-			"{}: {}",
-			user.username,
-			if user.is_locked { "locked" } else { "unlocked" }
-		);
+		// Create table using prettytable-rs
+		let mut table = prettytable::Table::new();
+		table.add_row(prettytable::row!["Account", "Status"]);
+
+		for user in users {
+			table.add_row(prettytable::row![
+				user.username,
+				if user.is_locked { "locked" } else { "unlocked" }
+			]);
+		}
+
+		table.printstd();
 	}
 
 	Ok(())
 }
 
-async fn change_server_owner() -> CliResult<()> {
-	let client = create_client().await;
+async fn change_server_owner(config: &StumpConfig) -> CliResult<()> {
+	let client = create_client(config).await;
 
 	let all_accounts = client
 		.user()

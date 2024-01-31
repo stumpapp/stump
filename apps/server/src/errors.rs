@@ -1,4 +1,5 @@
 use axum::{
+	extract::multipart::MultipartError,
 	http::StatusCode,
 	response::{IntoResponse, Response},
 };
@@ -15,7 +16,7 @@ use tokio::sync::mpsc;
 use tower_sessions::session::SessionError;
 use utoipa::ToSchema;
 
-use std::net;
+use std::{net, num::TryFromIntError};
 use thiserror::Error;
 
 pub type ServerResult<T> = Result<T, ServerError>;
@@ -83,6 +84,9 @@ impl IntoResponse for AuthError {
 	}
 }
 
+// TODO: ApiError -> APIError
+// TODO: Serialization is really poor, need to fix that
+
 #[allow(unused)]
 #[derive(Debug, Error, ToSchema)]
 pub enum ApiError {
@@ -115,11 +119,29 @@ pub enum ApiError {
 	PrismaError(#[from] QueryError),
 }
 
+impl From<MultipartError> for ApiError {
+	fn from(error: MultipartError) -> Self {
+		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<reqwest::Error> for ApiError {
+	fn from(error: reqwest::Error) -> Self {
+		ApiError::InternalServerError(error.to_string())
+	}
+}
+
 impl ApiError {
 	pub fn forbidden_discreet() -> ApiError {
 		ApiError::Forbidden(String::from(
 			"You do not have permission to access this resource.",
 		))
+	}
+}
+
+impl From<TryFromIntError> for ApiError {
+	fn from(e: TryFromIntError) -> Self {
+		ApiError::InternalServerError(e.to_string())
 	}
 }
 

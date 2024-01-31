@@ -157,9 +157,9 @@ export function ComboBox({
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							'h-[unset] justify-between truncate hover:bg-gray-50/50 data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-brand-400 data-[state=open]:ring-offset-2 dark:hover:bg-gray-900/50 dark:data-[state=open]:bg-transparent dark:data-[state=open]:ring-offset-gray-900',
+							'h-[unset] justify-between truncate border-edge-200 text-contrast-200 outline-none hover:bg-background-200 data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-brand-400 data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background',
 							{ [SIZE_VARIANTS[size || 'default']]: !!size },
-							{ 'text-gray-400 dark:text-gray-300': !hasSelectedSomething },
+							{ 'text-muted': !hasSelectedSomething },
 							triggerClassName,
 						)}
 					>

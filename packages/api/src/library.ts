@@ -1,4 +1,5 @@
 import type {
+	CleanLibraryResponse,
 	CreateLibrary,
 	LibrariesStats,
 	Library,
@@ -48,6 +49,10 @@ export function scanLibary(params: {
 	return API.get(`/libraries/${params.id}/scan?scan_mode=${params.mode ?? 'BATCHED'}`)
 }
 
+export function cleanLibrary(id: string): Promise<ApiResult<CleanLibraryResponse>> {
+	return API.put(`/libraries/${id}/clean`)
+}
+
 // TODO: type this
 export function deleteLibrary(id: string) {
 	return API.delete(`/libraries/${id}`)
@@ -75,11 +80,31 @@ export function patchLibraryThumbnail(id: string, params: PatchLibraryThumbnail)
 	return API.patch(`/libraries/${id}/thumbnail`, params)
 }
 
+export function uploadLibraryThumbnail(id: string, file: File) {
+	const formData = new FormData()
+	formData.append('file', file)
+	return API.post(`/libraries/${id}/thumbnail`, formData, {
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	})
+}
+
+export function visitLibrary(id: string) {
+	return API.put(`/libraries/last-visited/${id}`)
+}
+
+export function getLastVisitedLibrary(): Promise<ApiResult<Library>> {
+	return API.get('/libraries/last-visited')
+}
+
 export const libraryApi = {
+	cleanLibrary,
 	createLibrary,
 	deleteLibrary,
 	deleteLibraryThumbnails,
 	editLibrary,
+	getLastVisitedLibrary,
 	getLibraries,
 	getLibrariesStats,
 	getLibraryById,
@@ -87,13 +112,17 @@ export const libraryApi = {
 	patchLibraryThumbnail,
 	regenerateThumbnails,
 	scanLibary,
+	uploadLibraryThumbnail,
+	visitLibrary,
 }
 
 export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
+	cleanLibrary: 'library.cleanLibrary',
 	createLibrary: 'library.createLibrary',
 	deleteLibrary: 'library.deleteLibrary',
 	deleteLibraryThumbnails: 'library.deleteLibraryThumbnails',
 	editLibrary: 'library.editLibrary',
+	getLastVisitedLibrary: 'library.getLastVisitedLibrary',
 	getLibraries: 'library.getLibraries',
 	getLibrariesStats: 'library.getLibrariesStats',
 	getLibraryById: 'library.getLibraryById',
@@ -101,4 +130,6 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	patchLibraryThumbnail: 'library.patchLibraryThumbnail',
 	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
+	uploadLibraryThumbnail: 'library.uploadLibraryThumbnail',
+	visitLibrary: 'library.visitLibrary',
 }

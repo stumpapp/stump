@@ -12,13 +12,6 @@ pub struct DecodedCredentials {
 	pub password: String,
 }
 
-pub fn get_hash_cost() -> u32 {
-	std::env::var("HASH_COST")
-		.unwrap_or_else(|_e| "12".to_string())
-		.parse()
-		.unwrap_or(12)
-}
-
 pub fn verify_password(hash: &str, password: &str) -> Result<bool, AuthError> {
 	Ok(bcrypt::verify(password, hash)?)
 }
@@ -58,20 +51,61 @@ pub fn get_session_server_owner_user(session: &Session) -> ApiResult<User> {
 	}
 }
 
-pub fn user_has_permission(user: &User, permission: UserPermission) -> bool {
+fn user_has_permission(user: &User, permission: UserPermission) -> bool {
 	user.is_server_owner || user.permissions.iter().any(|p| p == &permission)
 }
 
-pub fn enforce_permission(user: &User, permission: UserPermission) -> ApiResult<()> {
+/// Enforce that the user has the given permission. If the user does not have the permission, an
+/// `ApiError::Forbidden` is returned.
+fn enforce_permission(user: &User, permission: UserPermission) -> ApiResult<()> {
 	if user_has_permission(user, permission) {
 		Ok(())
 	} else {
+		tracing::error!(?user, ?permission, "User does not have permission");
 		Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))
 	}
 }
 
+/// Enforce that the user in the session has the given permission. If the user does not have the
+/// permission, an `ApiError::Forbidden` is returned.
+pub fn enforce_session_permission(
+	session: &Session,
+	permission: UserPermission,
+) -> ApiResult<()> {
+	let user = get_session_user(session)?;
+	enforce_permission(&user, permission)
+}
+
+pub fn enforce_session_permissions(
+	session: &Session,
+	permissions: &[UserPermission],
+) -> ApiResult<User> {
+	let user = get_session_user(session)?;
+
+	if user.is_server_owner {
+		return Ok(user);
+	}
+
+	let missing_permissions = permissions
+		.iter()
+		.filter(|&permission| !user_has_permission(&user, *permission))
+		.collect::<Vec<_>>();
+
+	if !missing_permissions.is_empty() {
+		tracing::error!(?user, ?missing_permissions, "User does not have permission");
+		Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".to_string(),
+		))
+	} else {
+		Ok(user)
+	}
+}
+
+/// Enforce that the user in the session has the given permission. If the user does not have the
+/// permission, an `ApiError::Forbidden` is returned. The user is returned if they have the
+/// permission.
 pub fn get_user_and_enforce_permission(
 	session: &Session,
 	permission: UserPermission,

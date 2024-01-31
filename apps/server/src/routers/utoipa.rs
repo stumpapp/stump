@@ -1,6 +1,8 @@
 use axum::middleware::from_extractor_with_state;
 use axum::Router;
 use stump_core::db::entity::*;
+// TODO: investigate how to get this working for swagger...
+use stump_core::db::filter::{SmartFilterSchema as SmartFilter, *};
 use stump_core::db::query::{ordering::*, pagination::*};
 use stump_core::filesystem::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
@@ -12,19 +14,21 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::ApiError;
-use crate::middleware::auth::Auth;
-use crate::utils::{
+use crate::filter::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesQueryRelation,
 };
+use crate::middleware::auth::Auth;
 
 use super::api::{
 	self,
 	v1::{
-		auth::LoginOrRegisterArgs, library::ScanQueryParam, user::*, ClaimResponse,
-		StumpVersion,
+		auth::LoginOrRegisterArgs, library::*, media::*, series::*, smart_list::*,
+		user::*, ClaimResponse, StumpVersion,
 	},
 };
+
+// TODO: investigate https://github.com/ProbablyClem/utoipauto
 
 // NOTE: it is very easy to indirectly cause fmt failures by not adhering to the
 // rustfmt rules, since cargo fmt will not format the code in the macro.
@@ -54,6 +58,7 @@ use super::api::{
         api::v1::library::delete_library_thumbnails,
         api::v1::library::generate_library_thumbnails,
         api::v1::library::scan_library,
+        api::v1::library::clean_library,
         api::v1::library::create_library,
         api::v1::library::update_library,
         api::v1::library::delete_library,
@@ -67,6 +72,10 @@ use super::api::{
         api::v1::media::get_media_page,
         api::v1::media::get_media_thumbnail_handler,
         api::v1::media::update_media_progress,
+        api::v1::media::get_media_progress,
+        api::v1::media::delete_media_progress,
+        api::v1::media::get_is_media_completed,
+        api::v1::media::put_media_complete_status,
         api::v1::metadata::get_metadata_overview,
         api::v1::metadata::get_genres_handler,
         api::v1::metadata::get_writers_handler,
@@ -88,6 +97,19 @@ use super::api::{
         api::v1::series::get_recently_added_series_handler,
         api::v1::series::get_series_thumbnail_handler,
         api::v1::series::get_series_media,
+        api::v1::series::get_series_is_complete,
+        api::v1::smart_list::get_smart_lists,
+        api::v1::smart_list::create_smart_list,
+        api::v1::smart_list::get_smart_list_by_id,
+        api::v1::smart_list::update_smart_list_by_id,
+        api::v1::smart_list::delete_smart_list_by_id,
+        api::v1::smart_list::get_smart_list_items,
+        api::v1::smart_list::get_smart_list_meta,
+        api::v1::smart_list::get_smart_list_views,
+        api::v1::smart_list::get_smart_list_view,
+        api::v1::smart_list::create_smart_list_view,
+        api::v1::smart_list::update_smart_list_view,
+        api::v1::smart_list::delete_smart_list_view,
         api::v1::tag::get_tags,
         api::v1::tag::create_tags,
         api::v1::series::get_next_in_series,
@@ -114,7 +136,12 @@ use super::api::{
             Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
-            CreateTags
+            CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus,
+            SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList,
+            CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
+            SmartListViewConfig, SmartListTableColumnSelection, SmartListTableSortingState,
+            MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
+            LibrarySmartFilter
         )
     ),
     tags(

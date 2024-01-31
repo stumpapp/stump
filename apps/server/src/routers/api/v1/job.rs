@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
-		entity::server_config::JobSchedulerConfig,
+		entity::JobSchedulerConfig,
 		query::{
 			ordering::QueryOrder,
 			pagination::{Pageable, Pagination, PaginationQuery},
@@ -28,8 +28,8 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::chain_optional_iter,
 	middleware::auth::{Auth, ServerOwnerGuard},
-	utils::chain_optional_iter,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {

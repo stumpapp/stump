@@ -23,7 +23,8 @@
 		"build:web": "pnpm web build && pnpm build:server",
 		"build:desktop": "pnpm desktop build",
 		"moon": "moon --color --log trace",
-		"prettify": "prettier --config prettier.config.js --ignore-path .prettierignore --write ."
+		"prettify": "prettier --config prettier.config.js --ignore-path .prettierignore --write .",
+		"nuke": "cargo clean && cargo codegen && moon run :nuke && pnpm i"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",
@@ -46,9 +47,10 @@
 		"prettier": "^3.0.3",
 		"prettier-eslint": "^16.1.1",
 		"prettier-plugin-tailwindcss": "^0.5.6",
+		"rimraf": "^5.0.5",
 		"trash-cli": "^5.0.0",
 		"tsconfig-moon": "^1.3.0",
-		"typescript": "^5.2.2"
+		"typescript": "^5.3.3"
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx,md,json}": [

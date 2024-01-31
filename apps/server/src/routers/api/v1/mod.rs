@@ -20,6 +20,7 @@ pub(crate) mod media;
 pub(crate) mod metadata;
 pub(crate) mod reading_list;
 pub(crate) mod series;
+pub(crate) mod smart_list;
 pub(crate) mod tag;
 pub(crate) mod user;
 
@@ -37,6 +38,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(tag::mount(app_state.clone()))
 		.merge(user::mount(app_state.clone()))
 		.merge(reading_list::mount())
+		.merge(smart_list::mount())
 		.merge(book_club::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
@@ -79,7 +81,7 @@ async fn ping() -> ApiResult<String> {
 #[derive(Serialize, Deserialize, Type, ToSchema)]
 pub struct StumpVersion {
 	pub semver: String,
-	pub rev: Option<String>,
+	pub rev: String,
 	pub compile_time: String,
 }
 
@@ -94,7 +96,7 @@ pub struct StumpVersion {
 async fn version() -> ApiResult<Json<StumpVersion>> {
 	Ok(Json(StumpVersion {
 		semver: env!("CARGO_PKG_VERSION").to_string(),
-		rev: std::env::var("GIT_REV").ok(),
+		rev: env!("GIT_REV").to_string(),
 		compile_time: env!("STATIC_BUILD_DATE").to_string(),
 	}))
 }

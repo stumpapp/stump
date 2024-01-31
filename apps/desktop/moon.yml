@@ -20,6 +20,9 @@ tasks:
     command: 'pnpm tauri dev --no-watch'
     local: true
 
+  start-bundled:
+    command: 'pnpm tauri dev  --no-watch -- --features bundled-server'
+
   lint:
     command: 'cargo clippy --package stump_desktop -- -D warnings'
     options:
@@ -34,13 +37,6 @@ tasks:
       mergeDeps: 'replace'
       mergeInputs: 'replace'
 
-  # # TODO: need to have more targets.
-  # build:
-  #   # tauri build --target universal-apple-darwin
-  #   command: 'pnpm tauri build'
-  #   local: true
-  #   deps:
-  #     - '~:build-webapp'
-
-  # build-webapp:
-  #   command: 'pnpm vite build'
+  nuke:
+    command: 'pnpm exec rimraf -rf node_modules'
+    local: true

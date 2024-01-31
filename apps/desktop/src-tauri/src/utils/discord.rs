@@ -1,4 +1,4 @@
-const STUMP_ICON: &str = "https://raw.githubusercontent.com/aaronleopold/stump/develop/apps/docs/public/favicon.png";
+const STUMP_ICON: &str = "https://raw.githubusercontent.com/aaronleopold/stump/develop/docs/public/favicon.png";
 
 use discord_rich_presence::{
 	activity::{self, Assets},

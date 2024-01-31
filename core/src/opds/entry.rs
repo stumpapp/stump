@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::vec;
 
 use prisma_client_rust::chrono::DateTime;
@@ -6,10 +7,10 @@ use prisma_client_rust::chrono::{self, FixedOffset};
 use urlencoding::encode;
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::db::entity::metadata::MediaMetadata;
+use crate::db::entity::MediaMetadata;
 use crate::error::CoreResult;
 use crate::filesystem::media::get_content_types_for_pages;
-use crate::filesystem::ContentType;
+use crate::filesystem::{ContentType, FileParts, PathUtils};
 use crate::{
 	opds::link::OpdsStreamLink,
 	prisma::{library, media, series},
@@ -157,7 +158,9 @@ impl From<media::Data> for OpdsEntry {
 		tracing::trace!(book = ?value, "Converting book to OPDS entry");
 
 		let base_url = format!("/opds/v1.2/books/{}", value.id);
-		let file_name = format!("{}.{}", value.name, value.extension);
+
+		let path_buf = PathBuf::from(value.path.as_str());
+		let FileParts { file_name, .. } = path_buf.file_parts();
 		let file_name_encoded = encode(&file_name);
 
 		let progress_info = value

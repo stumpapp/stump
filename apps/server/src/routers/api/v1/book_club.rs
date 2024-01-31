@@ -14,10 +14,12 @@ use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
 	db::entity::{
-		book_club_member_and_schedule_include, book_club_with_books_include,
-		book_club_with_schedule, BookClub, BookClubBook, BookClubInvitation,
-		BookClubMember, BookClubMemberRole, BookClubMemberRoleSpec, BookClubSchedule,
-		User, UserPermission,
+		macros::{
+			book_club_member_and_schedule_include, book_club_with_books_include,
+			book_club_with_schedule,
+		},
+		BookClub, BookClubBook, BookClubInvitation, BookClubMember, BookClubMemberRole,
+		BookClubMemberRoleSpec, BookClubSchedule, User, UserPermission,
 	},
 	prisma::{
 		book_club, book_club_book, book_club_invitation, book_club_member,
@@ -30,10 +32,11 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::chain_optional_iter,
 	middleware::auth::{Auth, BookClubGuard},
 	utils::{
-		chain_optional_iter, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission, safe_string_to_date, string_to_date,
+		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
+		safe_string_to_date, string_to_date,
 	},
 };
 
@@ -309,6 +312,7 @@ pub struct UpdateBookClub {
 	pub description: Option<String>,
 	pub is_private: Option<bool>,
 	pub member_role_spec: Option<BookClubMemberRoleSpec>,
+	pub emoji: Option<String>,
 }
 
 #[utoipa::path(
@@ -351,7 +355,10 @@ async fn update_book_club(
 		.update(
 			book_club::id::equals(book_club.id),
 			chain_optional_iter(
-				[book_club::description::set(payload.description)],
+				[
+					book_club::description::set(payload.description),
+					book_club::emoji::set(payload.emoji),
+				],
 				[
 					payload.name.map(book_club::name::set),
 					payload.is_private.map(book_club::is_private::set),

@@ -8,13 +8,13 @@ name = "cli-bin"
 path = "bin/main.rs"
 
 [dependencies]
-clap = { version = "4.4.6", features = ["derive", "env"] }
 stump_core = { path = "../../core" }
-
 tokio = { workspace = true }
-thiserror = { workspace = true }
 prisma-client-rust = { workspace = true }
+bcrypt = { workspace = true }
+thiserror = { workspace = true }
+clap = { version = "4.4.11", features = ["derive"] }
+
 dialoguer = "0.11.0"
 indicatif = "0.17.7"
-
-bcrypt = { workspace = true }
+prettytable-rs = "0.10.0"

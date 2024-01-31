@@ -1,17 +1,17 @@
 use axum::{
-	extract::{Path, State},
+	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{or, Direction};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, Series},
+		entity::{LibraryOptions, Media, Series, UserPermission},
 		query::{
 			ordering::QueryOrder,
 			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
@@ -20,7 +20,10 @@ use stump_core::{
 	},
 	filesystem::{
 		get_unknown_thumnail,
-		image::{generate_thumbnail, ImageFormat, ImageProcessorOptions},
+		image::{
+			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
+			ImageProcessorOptions,
+		},
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
@@ -38,11 +41,14 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::{
+		chain_optional_iter, decode_path_filter, FilterableQuery, SeriesBaseFilter,
+		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
+	},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
-		get_session_user, http::ImageResponse, FilterableQuery, SeriesBaseFilter,
-		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
+		enforce_session_permissions, get_session_server_owner_user, get_session_user,
+		http::ImageResponse, validate_image_upload,
 	},
 };
 
@@ -67,7 +73,15 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/media/next", get(get_next_in_series))
 				.route(
 					"/thumbnail",
-					get(get_series_thumbnail_handler).patch(patch_series_thumbnail),
+					get(get_series_thumbnail_handler)
+						.patch(patch_series_thumbnail)
+						.post(replace_series_thumbnail)
+						// TODO: configurable max file size
+						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+				)
+				.route(
+					"/complete",
+					get(get_series_is_complete).put(put_series_is_complete),
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -396,20 +410,20 @@ pub(crate) fn get_series_thumbnail(
 	series: &series::Data,
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
-	let thumbnails = get_config_dir().join("thumbnails");
+	let thumbnails_dir = config.get_thumbnails_dir();
 	let series_id = series.id.clone();
 
 	if let Some(format) = image_format.clone() {
 		let extension = format.extension();
-
-		let path = thumbnails.join(format!("{}.{}", series_id, extension));
+		let path = thumbnails_dir.join(format!("{}.{}", series_id, extension));
 
 		if path.exists() {
 			tracing::trace!(?path, series_id, "Found generated series thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&series_id) {
+	} else if let Some(path) = get_unknown_thumnail(&series_id, thumbnails_dir) {
 		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
 		let FileParts { extension, .. } = path.file_parts();
 		return Ok((
@@ -418,7 +432,7 @@ pub(crate) fn get_series_thumbnail(
 		));
 	}
 
-	get_media_thumbnail(first_book, image_format)
+	get_media_thumbnail(first_book, image_format, config)
 }
 
 // TODO: ImageResponse type for body
@@ -490,7 +504,8 @@ async fn get_series_thumbnail_handler(
 		.thumbnail_config
 		.map(|config| config.format);
 
-	get_series_thumbnail(&series, first_book, image_format).map(ImageResponse::from)
+	get_series_thumbnail(&series, first_book, image_format, &ctx.config)
+		.map(ImageResponse::from)
 }
 
 #[derive(Deserialize, ToSchema, specta::Type)]
@@ -578,9 +593,65 @@ async fn patch_series_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/series/:id/thumbnail",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series")
+	),
+	responses(
+		(status = 200, description = "Successfully updated series thumbnail"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Series not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn replace_series_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	mut upload: Multipart,
+) -> ApiResult<ImageResponse> {
+	enforce_session_permissions(
+		&session,
+		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
+	)?;
+	let client = ctx.get_db();
+
+	let series = client
+		.series()
+		.find_unique(series::id::equals(id))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
+
+	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let ext = content_type.extension();
+	let series_id = series.id;
+
+	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+	// user testing I'd like to see if this becomes a problem. We'll see!
+	remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir())
+		.unwrap_or_else(|e| {
+			tracing::error!(
+				?e,
+				"Failed to remove existing series thumbnail before replacing!"
+			);
+		});
+
+	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config)?;
+
+	Ok(ImageResponse::from((
+		content_type,
 		read_entire_file(path_buf)?,
 	)))
 }
@@ -784,4 +855,67 @@ async fn get_next_in_series(
 			id
 		)))
 	}
+}
+
+#[derive(Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct SeriesIsComplete {
+	is_complete: bool,
+	completed_at: Option<String>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id/complete",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to check"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series completion status.", body = SeriesIsComplete),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_series_is_complete(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<SeriesIsComplete>> {
+	let client = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let media_count = client
+		.media()
+		.count(vec![media::series_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
+
+	let rp = client
+		.read_progress()
+		.find_many(vec![
+			read_progress::user_id::equals(user_id),
+			read_progress::media::is(vec![media::series_id::equals(Some(id))]),
+			read_progress::is_completed::equals(true),
+		])
+		.order_by(read_progress::completed_at::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	let is_complete = rp.len() == media_count as usize;
+	let completed_at = is_complete
+		.then(|| {
+			rp.get(0)
+				.and_then(|rp| rp.completed_at.map(|ca| ca.to_rfc3339()))
+		})
+		.flatten();
+
+	Ok(Json(SeriesIsComplete {
+		is_complete,
+		completed_at,
+	}))
+}
+
+// TODO: implement
+async fn put_series_is_complete() -> ApiResult<Json<SeriesIsComplete>> {
+	Err(ApiError::NotImplemented)
 }

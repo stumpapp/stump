@@ -5,9 +5,6 @@ import { devtools, persist } from 'zustand/middleware'
 
 import { StoreBase } from '.'
 
-// TODO: just move this all into context at this point...
-
-// TODO: isServerOwner computed value
 // https://github.com/cmlarsen/zustand-middleware-computed-state
 interface UserStore extends StoreBase<UserStore> {
 	user?: User | null
@@ -18,6 +15,7 @@ interface UserStore extends StoreBase<UserStore> {
 	checkUserPermission: (permission: UserPermission) => boolean
 }
 
+// FIXME: [DEPRECATED] Use `createWithEqualityFn` instead of `create`
 // TODO: consider renaming to useAuth
 export const useUserStore = create<UserStore>()(
 	devtools(

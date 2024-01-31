@@ -64,6 +64,11 @@ export function useLoginOrRegister({ onSuccess, onError }: UseLoginOrRegisterOpt
 	const { isLoading: isRegistering, mutateAsync: registerUser } = useMutation(
 		[authQueryKeys.register],
 		authApi.register,
+		{
+			onSuccess: async () => {
+				await queryClient.invalidateQueries([serverQueryKeys.checkIsClaimed])
+			},
+		},
 	)
 
 	return {

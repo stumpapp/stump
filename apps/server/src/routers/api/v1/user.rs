@@ -1,5 +1,7 @@
+use std::{fs::File, io::Write};
+
 use axum::{
-	extract::{Path, State},
+	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
 	routing::{delete, get, put},
 	Json, Router,
@@ -9,9 +11,13 @@ use prisma_client_rust::{chrono::Utc, Direction};
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
+	config::StumpConfig,
 	db::{
 		entity::{AgeRestriction, LoginActivity, User, UserPermission, UserPreferences},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
+	},
+	filesystem::{
+		get_unknown_image, read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
 		age_restriction, session, user, user_login_activity, user_preferences,
@@ -25,9 +31,11 @@ use utoipa::ToSchema;
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{ApiError, ApiResult},
+	filter::UserQueryRelation,
 	middleware::auth::Auth,
 	utils::{
-		get_hash_cost, get_session_server_owner_user, get_session_user, UserQueryRelation,
+		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
+		http::ImageResponse, validate_image_upload,
 	},
 };
 
@@ -59,6 +67,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route(
 					"/preferences",
 					get(get_user_preferences).put(update_user_preferences),
+				)
+				.route(
+					"/avatar",
+					get(get_user_avatar)
+						.post(upload_user_avatar)
+						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
 				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
@@ -236,6 +250,8 @@ pub struct UpdateUser {
 	#[serde(default)]
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestriction>,
+	#[serde(default)]
+	pub max_sessions_allowed: Option<i32>,
 }
 
 async fn update_user(
@@ -243,13 +259,29 @@ async fn update_user(
 	client: &PrismaClient,
 	for_user_id: String,
 	input: UpdateUser,
+	config: &StumpConfig,
 ) -> ApiResult<User> {
+	// NOTE: there are other mechanisms in place to effectively disable logging in,
+	// so I am making this a bad request. In the future, perhaps this can change.
+	match input.max_sessions_allowed {
+		Some(max_sessions_allowed) if max_sessions_allowed <= 0 => {
+			return Err(ApiError::BadRequest(
+				"max_sessions_allowed must be greater than 0 when set".to_string(),
+			))
+		},
+		Some(max_sessions_allowed) => {
+			tracing::trace!(?max_sessions_allowed, "The max sessions allowed is set")
+		},
+		_ => {},
+	}
+
 	let mut update_params = vec![
 		user::username::set(input.username),
 		user::avatar_url::set(input.avatar_url),
+		user::max_sessions_allowed::set(input.max_sessions_allowed),
 	];
 	if let Some(password) = input.password {
-		let hashed_password = bcrypt::hash(password, get_hash_cost())?;
+		let hashed_password = bcrypt::hash(password, config.password_hash_cost)?;
 		update_params.push(user::hashed_password::set(hashed_password));
 	}
 
@@ -269,6 +301,12 @@ async fn update_user(
 		let updated_user_data = client
 			._transaction()
 			.run(|tx| async move {
+				let existing_age_restriction = tx
+					.age_restriction()
+					.find_unique(age_restriction::user_id::equals(for_user_id.clone()))
+					.exec()
+					.await?;
+
 				if let Some(age_restriction) = input.age_restriction {
 					let upserted_age_restriction = tx
 						.age_restriction()
@@ -291,6 +329,12 @@ async fn update_user(
 						.exec()
 						.await?;
 					tracing::trace!(?upserted_age_restriction, "Upserted age restriction")
+				} else if existing_age_restriction.is_some() {
+					tx.age_restriction()
+						.delete(age_restriction::user_id::equals(for_user_id.clone()))
+						.exec()
+						.await?;
+					tracing::trace!("Deleted age restriction")
 				}
 
 				update_params.push(user::permissions::set(Some(
@@ -304,9 +348,8 @@ async fn update_user(
 
 				tx.user()
 					.update(user::id::equals(for_user_id), update_params)
-					// NOTE: we have to fetch preferences because if we update session without
-					// it then it effectively removes the preferences from the session
 					.with(user::user_preferences::fetch())
+					.with(user::age_restriction::fetch())
 					.exec()
 					.await
 			})
@@ -326,17 +369,27 @@ async fn update_preferences(
 			user_preferences::id::equals(preferences_id),
 			vec![
 				user_preferences::locale::set(input.locale.to_owned()),
-				user_preferences::library_layout_mode::set(
-					input.library_layout_mode.to_owned(),
-				),
-				user_preferences::series_layout_mode::set(
-					input.series_layout_mode.to_owned(),
+				user_preferences::preferred_layout_mode::set(
+					input.preferred_layout_mode.to_owned(),
 				),
 				user_preferences::app_theme::set(input.app_theme.to_owned()),
+				user_preferences::primary_navigation_mode::set(
+					input.primary_navigation_mode.to_owned(),
+				),
+				user_preferences::layout_max_width_px::set(input.layout_max_width_px),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
 				user_preferences::enable_discord_presence::set(
 					input.enable_discord_presence,
 				),
+				user_preferences::enable_compact_display::set(
+					input.enable_compact_display,
+				),
+				user_preferences::enable_double_sidebar::set(input.enable_double_sidebar),
+				user_preferences::enable_replace_primary_sidebar::set(
+					input.enable_replace_primary_sidebar,
+				),
+				user_preferences::enable_hide_scrollbar::set(input.enable_hide_scrollbar),
+				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
 			],
 		)
 		.exec()
@@ -352,6 +405,8 @@ pub struct CreateUser {
 	#[serde(default)]
 	pub permissions: Vec<UserPermission>,
 	pub age_restriction: Option<AgeRestriction>,
+	#[serde(default)]
+	pub max_sessions_allowed: Option<i32>,
 }
 
 #[utoipa::path(
@@ -375,7 +430,7 @@ async fn create_user(
 	get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
-	let hashed_password = bcrypt::hash(input.password, get_hash_cost())?;
+	let hashed_password = bcrypt::hash(input.password, ctx.config.password_hash_cost)?;
 
 	// TODO: https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let created_user = db
@@ -402,6 +457,7 @@ async fn create_user(
 					vec![
 						user::is_server_owner::set(false),
 						user::permissions::set(Some(permissions.join(","))),
+						user::max_sessions_allowed::set(input.max_sessions_allowed),
 					],
 				)
 				.exec()
@@ -473,7 +529,8 @@ async fn update_current_user(
 	let db = ctx.get_db();
 	let user = get_session_user(&session)?;
 
-	let updated_user = update_user(&user, db, user.id.clone(), input).await?;
+	let updated_user =
+		update_user(&user, db, user.id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
 	session
@@ -489,12 +546,17 @@ async fn update_current_user(
 pub struct UpdateUserPreferences {
 	pub id: String,
 	pub locale: String,
-	pub library_layout_mode: String,
-	pub series_layout_mode: String,
-	pub collection_layout_mode: String,
+	pub preferred_layout_mode: String,
+	pub primary_navigation_mode: String,
+	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
 	pub enable_discord_presence: bool,
+	pub enable_compact_display: bool,
+	pub enable_double_sidebar: bool,
+	pub enable_replace_primary_sidebar: bool,
+	pub enable_hide_scrollbar: bool,
+	pub prefer_accent_color: bool,
 }
 
 #[utoipa::path(
@@ -705,7 +767,7 @@ async fn update_user_handler(
 		return Err(ApiError::forbidden_discreet());
 	}
 
-	let updated_user = update_user(&user, db, id.clone(), input).await?;
+	let updated_user = update_user(&user, db, id.clone(), input, &ctx.config).await?;
 	debug!(?updated_user, "Updated user");
 
 	if user.id == id {
@@ -909,4 +971,125 @@ async fn update_user_preferences(
 		})?;
 
 	Ok(Json(updated_preferences))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/users/:id/avatar",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched user avatar"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "User avatar not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_user_avatar(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+) -> ApiResult<ImageResponse> {
+	let client = ctx.get_db();
+
+	let user = client
+		.user()
+		.find_unique(user::id::equals(id))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("User not found".to_string()))?;
+
+	match user.avatar_url {
+		Some(url) if url.starts_with("/api/v1/") => {
+			let avatars_dir = ctx.config.get_avatars_dir();
+			let base_path = avatars_dir.join(user.username.as_str());
+			if let Some(local_file) = get_unknown_image(base_path) {
+				let FileParts { extension, .. } = local_file.file_parts();
+				let content_type = ContentType::from_extension(extension.as_str());
+				let bytes = read_entire_file(local_file)?;
+				Ok(ImageResponse::new(content_type, bytes))
+			} else {
+				Err(ApiError::NotFound("User avatar not found".to_string()))
+			}
+		},
+		Some(url) => {
+			let bytes = reqwest::get(&url).await?.bytes().await?;
+			let mut magic_bytes = [0; 5];
+			magic_bytes.copy_from_slice(&bytes[0..5]);
+			let content_type = ContentType::from_bytes(&magic_bytes);
+			Ok(ImageResponse::new(content_type, bytes.to_vec()))
+		},
+		None => Err(ApiError::NotFound("User avatar not found".to_string())),
+	}
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/users/:id/avatar",
+	tag = "user",
+	params(
+		("id" = String, Path, description = "The user's ID.", example = "1ab2c3d4")
+	),
+	responses(
+		(status = 200, description = "Successfully uploaded user avatar", body = User),
+		(status = 400, description = "Invalid request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "User not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn upload_user_avatar(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	mut upload: Multipart,
+) -> ApiResult<ImageResponse> {
+	let by_user = get_user_and_enforce_permission(&session, UserPermission::UploadFile)?;
+	let client = ctx.get_db();
+
+	if by_user.id != id && !by_user.is_server_owner {
+		return Err(ApiError::forbidden_discreet());
+	}
+
+	tracing::trace!(?id, ?upload, "Replacing user avatar");
+
+	let user = client
+		.user()
+		.find_unique(user::id::equals(id.clone()))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("User not found".to_string()))?;
+
+	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+
+	let ext = content_type.extension();
+	let username = user.username.clone();
+
+	let base_path = ctx.config.get_avatars_dir().join(username.as_str());
+	let existing_avatar = get_unknown_image(base_path.clone());
+	if let Some(existing_avatar) = existing_avatar {
+		std::fs::remove_file(existing_avatar)?;
+	}
+
+	let file_name = format!("{username}.{ext}");
+	let file_path = ctx.config.get_avatars_dir().join(file_name.as_str());
+	let mut file = File::create(file_path.clone())?;
+	file.write_all(&bytes)?;
+
+	let updated_user = client
+		.user()
+		.update(
+			user::id::equals(id.clone()),
+			vec![user::avatar_url::set(Some(format!(
+				"/api/v1/users/{}/avatar",
+				id
+			)))],
+		)
+		.exec()
+		.await?;
+
+	tracing::trace!(?updated_user, "Updated user");
+
+	Ok(ImageResponse::new(content_type, bytes))
 }

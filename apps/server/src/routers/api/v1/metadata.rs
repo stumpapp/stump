@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
 use stump_core::{
-	db::entity::metadata::{
+	db::entity::macros::{
 		metadata_available_characters_select, metadata_available_colorists_select,
 		metadata_available_editors_select, metadata_available_genre_select,
 		metadata_available_inkers_select, metadata_available_letterers_select,
@@ -26,12 +26,12 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::ApiResult,
-	middleware::auth::Auth,
-	utils::{
+	filter::{
 		chain_optional_iter, FilterableQuery, MediaMetadataBaseFilter,
 		MediaMetadataFilter, MediaMetadataRelationFilter, SeriesMedataFilter,
 		ValueOrRange,
 	},
+	middleware::auth::Auth,
 };
 
 use super::media::apply_media_filters;

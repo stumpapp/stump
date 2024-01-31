@@ -1,4 +1,10 @@
-import type { Media, PatchMediaThumbnail, ReadProgress } from '@stump/types'
+import type {
+	Media,
+	MediaIsComplete,
+	PatchMediaThumbnail,
+	PutMediaCompletionStatus,
+	ReadProgress,
+} from '@stump/types'
 
 import { API } from './axios'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
@@ -24,8 +30,13 @@ export function getPaginatedMedia(page: number): Promise<PageableApiResult<Media
 	return API.get(`/media?page=${page}`)
 }
 
-export function getMediaById(id: string): Promise<GetMediaById> {
-	return API.get(`/media/${id}?load_series=true`)
+export function getMediaById(id: string, params?: Record<string, unknown>): Promise<GetMediaById> {
+	// return API.get(`/media/${id}?load_series=true`)
+	if (params) {
+		return API.get(`/media/${id}?${toUrlParams(params)}`)
+	} else {
+		return API.get(`/media/${id}?load_series=true`)
+	}
 }
 
 export function getMediaByPath(path: string): Promise<ApiResult<Media>> {
@@ -71,6 +82,23 @@ export function patchMediaThumbnail(id: string, params: PatchMediaThumbnail) {
 	return API.patch(`/media/${id}/thumbnail`, params)
 }
 
+export function uploadMediaThumbnail(id: string, file: File) {
+	const formData = new FormData()
+	formData.append('file', file)
+	return API.post(`/media/${id}/thumbnail`, formData, {
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	})
+}
+
+export function putMediaCompletion(
+	id: string,
+	payload: PutMediaCompletionStatus,
+): Promise<ApiResult<MediaIsComplete>> {
+	return API.put(`/media/${id}/progress/complete`, payload)
+}
+
 export const mediaApi = {
 	getInProgressMedia,
 	getMedia,
@@ -82,7 +110,9 @@ export const mediaApi = {
 	getPaginatedMedia,
 	getRecentlyAddedMedia,
 	patchMediaThumbnail,
+	putMediaCompletion,
 	updateMediaProgress,
+	uploadMediaThumbnail,
 }
 
 export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
@@ -96,5 +126,7 @@ export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getPaginatedMedia: 'media.getPaginated',
 	getRecentlyAddedMedia: 'media.getRecentlyAdded',
 	patchMediaThumbnail: 'media.patchThumbnail',
+	putMediaCompletion: 'media.putCompletion',
 	updateMediaProgress: 'media.updateProgress',
+	uploadMediaThumbnail: 'media.uploadThumbnail',
 }

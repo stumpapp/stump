@@ -1,25 +1,30 @@
 use std::path::PathBuf;
 
 use axum::{
-	extract::{Path, State},
+	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
 	routing::{get, put},
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{and, operator::or, or, raw, Direction, PrismaValue};
-use serde::Deserialize;
+use prisma_client_rust::{
+	and, chrono::Utc, operator::or, or, raw, Direction, PrismaValue,
+};
+use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
-	config::get_config_dir,
+	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, ReadProgress, User},
+		entity::{LibraryOptions, Media, ReadProgress, User, UserPermission},
 		query::pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
 		CountQueryReturn,
 	},
 	filesystem::{
 		get_unknown_thumnail,
-		image::{generate_thumbnail, ImageFormat, ImageProcessorOptions},
+		image::{
+			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
+			ImageProcessorOptions,
+		},
 		media::get_page,
 		read_entire_file, ContentType, FileParts, PathUtils,
 	},
@@ -35,12 +40,15 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::{
+		chain_optional_iter, decode_path_filter, FilterableQuery, MediaBaseFilter,
+		MediaFilter, MediaRelationFilter, ReadStatus,
+	},
 	middleware::auth::Auth,
 	utils::{
-		chain_optional_iter, decode_path_filter, get_session_server_owner_user,
-		get_session_user,
+		enforce_session_permissions, get_session_server_owner_user, get_session_user,
 		http::{ImageResponse, NamedFile},
-		FilterableQuery, MediaBaseFilter, MediaFilter, MediaRelationFilter, ReadStatus,
+		validate_image_upload,
 	},
 };
 
@@ -61,10 +69,22 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/convert", get(convert_media))
 				.route(
 					"/thumbnail",
-					get(get_media_thumbnail_handler).patch(patch_media_thumbnail),
+					get(get_media_thumbnail_handler)
+						.patch(patch_media_thumbnail)
+						.post(replace_media_thumbnail)
+						// TODO: configurable max file size
+						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
 				)
 				.route("/page/:page", get(get_media_page))
-				.route("/progress/:page", put(update_media_progress)),
+				.route(
+					"/progress",
+					get(get_media_progress).delete(delete_media_progress),
+				)
+				.route("/progress/:page", put(update_media_progress))
+				.route(
+					"/progress/complete",
+					get(get_is_media_completed).put(put_media_complete_status),
+				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
@@ -228,15 +248,22 @@ pub(crate) fn apply_media_age_restriction(
 		]
 	} else {
 		or![
+			// If there is no media metadata at all, or it exists with no age rating, then we
+			// should try to defer to the series age rating
 			and![
-				// If the media has no age rating, and restrict on unset is disabled, it can be allowed
-				// so long as the series has no age rating OR it is under
-				media::metadata::is(vec![media_metadata::age_rating::equals(None)]),
+				or![
+					media::metadata::is_null(),
+					media::metadata::is(vec![media_metadata::age_rating::equals(None)])
+				],
 				media::series::is(vec![or![
+					// If the series has no metadata, then we can allow the media
+					series::metadata::is_null(),
+					// Or if the series has an age rating and it is under the user age restriction
 					series::metadata::is(vec![
 						series_metadata::age_rating::not(None),
 						series_metadata::age_rating::lte(min_age),
 					]),
+					// Or if the series has no age rating, then we can allow the media
 					series::metadata::is(vec![series_metadata::age_rating::equals(None)])
 				]])
 			],
@@ -259,9 +286,9 @@ pub(crate) fn apply_media_age_restriction(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media", body = PageableMedia),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Get all media accessible to the requester. This is a paginated request, and
@@ -354,9 +381,9 @@ async fn get_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched duplicate media", body = PageableMedia),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Get all media with identical checksums. This heavily implies duplicate files,
@@ -428,9 +455,9 @@ async fn get_duplicate_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched in progress media", body = PageableMedia),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Get all media which the requester has progress for that is less than the
@@ -519,9 +546,9 @@ async fn get_in_progress_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched recently added media", body = PageableMedia),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Get all media which was added to the library in descending order of when it
@@ -598,10 +625,10 @@ async fn get_recently_added_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media", body = Media),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "Media not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 async fn get_media_by_path(
@@ -633,8 +660,11 @@ async fn get_media_by_path(
 }
 
 #[derive(Deserialize)]
-struct LoadSeries {
+struct BookRelations {
+	#[serde(default)]
 	load_series: Option<bool>,
+	#[serde(default)]
+	load_library: Option<bool>,
 }
 
 #[utoipa::path(
@@ -647,17 +677,17 @@ struct LoadSeries {
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media", body = Media),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "Media not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Get a media by its ID. If provided, the `load_series` query param will load
 /// the series relation for the media.
 async fn get_media_by_id(
 	Path(id): Path<String>,
-	params: Query<LoadSeries>,
+	params: Query<BookRelations>,
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Media>> {
@@ -682,7 +712,13 @@ async fn get_media_by_id(
 
 	if params.load_series.unwrap_or_default() {
 		tracing::trace!(media_id = id, "Loading series relation for media");
-		query = query.with(media::series::fetch());
+		query = query.with(if params.load_library.unwrap_or_default() {
+			media::series::fetch()
+				.with(series::metadata::fetch())
+				.with(series::library::fetch())
+		} else {
+			media::series::fetch().with(series::metadata::fetch())
+		});
 	}
 
 	let media = query
@@ -703,10 +739,10 @@ async fn get_media_by_id(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media file"),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "Media not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Download the file associated with the media.
@@ -747,10 +783,10 @@ async fn get_media_file(
 	),
 	responses(
 		(status = 200, description = "Successfully converted media"),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "Media not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 // TODO: remove this, implement it? maybe?
@@ -798,10 +834,10 @@ async fn convert_media(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media"),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "Media not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Get a page of a media
@@ -838,7 +874,7 @@ async fn get_media_page(
 			page, id
 		)))
 	} else {
-		Ok(get_page(&media.path, page)?.into())
+		Ok(get_page(&media.path, page, &ctx.config)?.into())
 	}
 }
 
@@ -846,6 +882,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	id: String,
 	db: &PrismaClient,
 	session: &Session,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
 	let user = get_session_user(session)?;
 	let age_restrictions = user
@@ -890,8 +927,9 @@ pub(crate) async fn get_media_thumbnail_by_id(
 		(Some(book), Some(options)) => get_media_thumbnail(
 			&book,
 			options.thumbnail_config.map(|config| config.format),
+			config,
 		),
-		(Some(book), None) => get_media_thumbnail(&book, None),
+		(Some(book), None) => get_media_thumbnail(&book, None, config),
 		_ => Err(ApiError::NotFound(String::from("Media not found"))),
 	}
 }
@@ -899,16 +937,21 @@ pub(crate) async fn get_media_thumbnail_by_id(
 pub(crate) fn get_media_thumbnail(
 	media: &media::Data,
 	target_format: Option<ImageFormat>,
+	config: &StumpConfig,
 ) -> ApiResult<(ContentType, Vec<u8>)> {
-	let thumbnail_dir = get_config_dir().join("thumbnails");
 	if let Some(format) = target_format {
 		let extension = format.extension();
-		let thumbnail_path = thumbnail_dir.join(format!("{}.{}", media.id, extension));
+		let thumbnail_path = config
+			.get_thumbnails_dir()
+			.join(format!("{}.{}", media.id, extension));
+
 		if thumbnail_path.exists() {
 			tracing::trace!(path = ?thumbnail_path, media_id = ?media.id, "Found generated media thumbnail");
 			return Ok((ContentType::from(format), read_entire_file(thumbnail_path)?));
 		}
-	} else if let Some(path) = get_unknown_thumnail(&media.id) {
+	} else if let Some(path) =
+		get_unknown_thumnail(&media.id, config.get_thumbnails_dir())
+	{
 		// If there exists a file that starts with the media id in the thumbnails dir,
 		// then return it. This might happen if a user manually regenerates thumbnails
 		// via the API without updating the thumbnail config...
@@ -920,7 +963,7 @@ pub(crate) fn get_media_thumbnail(
 		));
 	}
 
-	Ok(get_page(media.path.as_str(), 1)?)
+	Ok(get_page(media.path.as_str(), 1, config)?)
 }
 
 // TODO: ImageResponse as body type
@@ -929,14 +972,14 @@ pub(crate) fn get_media_thumbnail(
 	path = "/api/v1/media/:id/thumbnail",
 	tag = "media",
 	params(
-		("id" = String, Path, description = "The ID of the media to get")
+		("id" = String, Path, description = "The ID of the media")
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media thumbnail"),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "Media not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Get the thumbnail image of a media
@@ -947,7 +990,7 @@ async fn get_media_thumbnail_handler(
 ) -> ApiResult<ImageResponse> {
 	tracing::trace!(?id, "get_media_thumbnail");
 	let db = ctx.get_db();
-	get_media_thumbnail_by_id(id, db, &session)
+	get_media_thumbnail_by_id(id, db, &session, &ctx.config)
 		.await
 		.map(ImageResponse::from)
 }
@@ -964,14 +1007,14 @@ pub struct PatchMediaThumbnail {
     path = "/api/v1/media/:id/thumbnail",
     tag = "media",
     params(
-        ("id" = String, Path, description = "The ID of the media to get")
+        ("id" = String, Path, description = "The ID of the media")
     ),
     responses(
         (status = 200, description = "Successfully updated media thumbnail"),
-        (status = 401, description = "Unauthorized."),
-        (status = 403, description = "Forbidden."),
-        (status = 404, description = "Media not found."),
-        (status = 500, description = "Internal server error."),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Media not found"),
+        (status = 500, description = "Internal server error"),
     )
 )]
 async fn patch_media_thumbnail(
@@ -1030,7 +1073,7 @@ async fn patch_media_thumbnail(
 		.with_page(target_page);
 
 	let format = thumbnail_options.format.clone();
-	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options)?;
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
 	Ok(ImageResponse::from((
 		ContentType::from(format),
 		read_entire_file(path_buf)?,
@@ -1038,8 +1081,64 @@ async fn patch_media_thumbnail(
 }
 
 #[utoipa::path(
+	post,
+	path = "/api/v1/media/:id/thumbnail",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media")
+	),
+	responses(
+		(status = 200, description = "Successfully replaced media thumbnail"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn replace_media_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	mut upload: Multipart,
+) -> ApiResult<ImageResponse> {
+	enforce_session_permissions(
+		&session,
+		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
+	)?;
+	let client = ctx.get_db();
+
+	let media = client
+		.media()
+		.find_unique(media::id::equals(id.clone()))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let ext = content_type.extension();
+	let book_id = media.id;
+
+	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+	// user testing I'd like to see if this becomes a problem. We'll see!
+	remove_thumbnails(&[book_id.clone()], ctx.config.get_thumbnails_dir())
+		.unwrap_or_else(|e| {
+			tracing::error!(
+				?e,
+				"Failed to remove existing media thumbnail before replacing!"
+			);
+		});
+
+	let path_buf = place_thumbnail(&book_id, ext, &bytes, &ctx.config)?;
+
+	Ok(ImageResponse::from((
+		content_type,
+		read_entire_file(path_buf)?,
+	)))
+}
+
+#[utoipa::path(
 	put,
-	path = "/api/v1/media/:id/read-progress",
+	path = "/api/v1/media/:id/progress/:page",
 	tag = "media",
 	params(
 		("id" = String, Path, description = "The ID of the media to get"),
@@ -1047,10 +1146,10 @@ async fn patch_media_thumbnail(
 	),
 	responses(
 		(status = 200, description = "Successfully fetched media read progress"),
-		(status = 401, description = "Unauthorized."),
-		(status = 403, description = "Forbidden."),
-		(status = 404, description = "Media not found."),
-		(status = 500, description = "Internal server error."),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Media not found"),
+		(status = 500, description = "Internal server error"),
 	)
 )]
 /// Update the read progress of a media. If the progress doesn't exist, it will be created.
@@ -1081,9 +1180,6 @@ async fn update_media_progress(
 				.exec()
 				.await?;
 
-			// NOTE: EPUB feature tracking!
-			// This pattern only works for page-based media... So will have to be
-			// considered/revisited once that feature gets prioritized
 			let is_completed = read_progress
 				.media
 				.as_ref()
@@ -1106,4 +1202,196 @@ async fn update_media_progress(
 		.await?;
 
 	Ok(Json(ReadProgress::from(read_progress)))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/progress",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media read progress"),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_media_progress(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<Option<ReadProgress>>> {
+	let db = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let result = db
+		.read_progress()
+		.find_first(vec![
+			read_progress::user_id::equals(user_id.clone()),
+			read_progress::media_id::equals(id.clone()),
+		])
+		.exec()
+		.await?;
+
+	Ok(Json(result.map(ReadProgress::from)))
+}
+
+#[utoipa::path(
+	delete,
+	path = "/api/v1/media/:id/progress",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media delete the progress for")
+	),
+	responses(
+		(status = 200, description = "Successfully updated media read progress completion status"),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn delete_media_progress(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<MediaIsComplete>> {
+	let client = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let deleted_rp = client
+		.read_progress()
+		.delete(read_progress::user_id_media_id(user_id, id))
+		.exec()
+		.await?;
+
+	tracing::trace!(?deleted_rp, "Deleted read progress");
+
+	Ok(Json(MediaIsComplete::default()))
+}
+
+#[derive(Default, Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct MediaIsComplete {
+	is_completed: bool,
+	completed_at: Option<String>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/media/:id/progress/complete",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to get")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched media read progress completion status"),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_is_media_completed(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<MediaIsComplete>> {
+	let client = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let result = client
+		.read_progress()
+		.find_first(vec![
+			read_progress::user_id::equals(user_id.clone()),
+			read_progress::media_id::equals(id.clone()),
+		])
+		.exec()
+		.await?
+		.map(|rp| MediaIsComplete {
+			is_completed: rp.is_completed,
+			completed_at: rp.completed_at.map(|ca| ca.to_rfc3339()),
+		})
+		.unwrap_or_default();
+
+	Ok(Json(result))
+}
+
+#[derive(Deserialize, ToSchema, specta::Type)]
+pub struct PutMediaCompletionStatus {
+	is_complete: bool,
+	#[specta(optional)]
+	page: Option<i32>,
+}
+
+#[utoipa::path(
+	put,
+	path = "/api/v1/media/:id/progress/complete",
+	tag = "media",
+	params(
+		("id" = String, Path, description = "The ID of the media to mark as completed")
+	),
+	responses(
+		(status = 200, description = "Successfully updated media read progress completion status"),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn put_media_complete_status(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(payload): Json<PutMediaCompletionStatus>,
+) -> ApiResult<Json<MediaIsComplete>> {
+	let client = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let result: Result<read_progress::Data, ApiError> = client
+		._transaction()
+		.run(|tx| async move {
+			let media = tx
+				.media()
+				.find_unique(media::id::equals(id.clone()))
+				.exec()
+				.await?
+				.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+			let is_completed = payload.is_complete;
+			let (pages, completed_at) = if is_completed {
+				(payload.page.or(Some(media.pages)), Some(Utc::now().into()))
+			} else {
+				(payload.page, None)
+			};
+
+			let extension = media.extension.to_lowercase();
+			let fallback_page = if extension.contains("epub") { -1 } else { 0 };
+
+			let updated_or_created_rp = tx
+				.read_progress()
+				.upsert(
+					read_progress::user_id_media_id(user_id.clone(), id.clone()),
+					(
+						pages.unwrap_or(fallback_page),
+						media::id::equals(id.clone()),
+						user::id::equals(user_id.clone()),
+						vec![
+							read_progress::is_completed::set(is_completed),
+							read_progress::completed_at::set(completed_at),
+						],
+					),
+					chain_optional_iter(
+						[
+							read_progress::is_completed::set(is_completed),
+							read_progress::completed_at::set(completed_at),
+						],
+						[pages.map(read_progress::page::set)],
+					),
+				)
+				.exec()
+				.await?;
+			Ok(updated_or_created_rp)
+		})
+		.await;
+	let updated_or_created_rp = result?;
+
+	Ok(Json(MediaIsComplete {
+		is_completed: updated_or_created_rp.is_completed,
+		completed_at: updated_or_created_rp.completed_at.map(|ca| ca.to_rfc3339()),
+	}))
 }

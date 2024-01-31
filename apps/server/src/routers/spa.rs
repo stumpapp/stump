@@ -2,13 +2,12 @@ use std::path::Path;
 
 use axum_extra::routing::SpaRouter;
 
-use crate::config::{state::AppState, utils::get_client_dir};
+use crate::config::state::AppState;
 
 // FIXME: I am not picking up the favicon.ico file in docker, but can't seem
 // to replicate it locally...
-pub(crate) fn mount() -> SpaRouter<AppState> {
-	let dist = get_client_dir();
-	let dist_path = Path::new(&dist);
+pub(crate) fn mount(app_state: AppState) -> SpaRouter<AppState> {
+	let dist_path = Path::new(&app_state.config.client_dir);
 
 	SpaRouter::new("/assets", dist_path.join("assets")).index_file("../index.html")
 }

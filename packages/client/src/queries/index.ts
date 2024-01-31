@@ -6,6 +6,7 @@ export {
 	useBookClubsQuery,
 	useChatBoardQuery,
 	useCreateBookClub,
+	useUpdateBookClub,
 } from './bookClub'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
@@ -20,6 +21,7 @@ export {
 	useLibraryQuery,
 	useLibraryStats,
 	useScanLibrary,
+	useVisitLibrary,
 } from './library'
 export {
 	prefetchMedia,
@@ -38,6 +40,18 @@ export {
 	useUpNextInSeries,
 } from './series'
 export { useStumpVersion } from './server'
+export {
+	prefetchSmartList,
+	prefetchSmartListItems,
+	useDeleteSmartListMutation,
+	useSmartListItemsQuery,
+	useSmartListMetaQuery,
+	useSmartListQuery,
+	useSmartListsQuery,
+	useSmartListViewsManager,
+	useSmartListWithMetaQuery,
+	useUpdateSmartListMutation,
+} from './smartList'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
 export {
 	useCreateUser,

@@ -1,0 +1,470 @@
+{
+	"authScene": {
+		"claimHeading": "初始化您的服务器",
+		"claimText": "Stump服务器尚未被初始化。请使用以下表单创建您的帐户。创建后，您将能够完全访问所有服务器功能。",
+		"form": {
+			"validation": {
+				"missingUsername": "用户名为必填项",
+				"missingPassword": "密码为必填项"
+			},
+			"labels": {
+				"username": "用户名",
+				"password": "密码"
+			},
+			"buttons": {
+				"createAccount": "创建帐户",
+				"login": "登录"
+			}
+		},
+		"toasts": {
+			"loggingIn": "登录中……",
+			"loggedIn": "欢迎回来！",
+			"loggedInFirstTime": "欢迎!",
+			"registering": "注册中...",
+			"registered": "已注册！",
+			"loginFailed": "登录失败，请重新登录",
+			"registrationFailed": "注册失败，请重试。"
+		}
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "图书馆设置",
+			"subtitleCreating": "您的新图书馆的预览将在下面显示",
+			"subtitleEditing": "您的图书库编辑的预览将在下方显示"
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "文件信息",
+			"labels": {
+				"fileSize": "文件大小",
+				"fileType": "文件类型",
+				"fileLocation": "文件位置",
+				"fileChecksum": "校验和"
+			}
+		},
+		"nextInSeries": "系列中的下一个"
+	},
+	"createBookClubScene": {
+		"heading": "创建一个新的读书俱乐部",
+		"subtitle": "您可以创建一个私人书俱乐部，或者创建一个公开的服务可以让任何人都可以加入",
+		"form": {
+			"name": {
+				"label": "名称",
+				"placeholder": "我的读书俱乐部",
+				"description": "您的读书俱乐部名称"
+			},
+			"description": {
+				"label": "描述",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
+				"description": "您的读书俱乐部的简短描述(可选)"
+			},
+			"is_private": {
+				"label": "私人俱乐部",
+				"description": "如果启用，只有您邀请的用户才能够加入您的读书俱乐部"
+			},
+			"member_role_spec": {
+				"heading": "自定义角色映射",
+				"subtitle": [
+					"您可以为您的读书俱乐部中的角色创建自定义名称。 例如，您可以将“成员”角色重命名为“Crewmate”，或将“Creator”重命名为“Captain”。 如果您不想使用自定义名称，您可以将这些字段留空，将使用默认名称。 关于角色的更多信息，请参阅：",
+					"文档"
+				],
+				"member": {
+					"label": "会员",
+					"placeholder": "会员",
+					"description": "您的读书俱乐部默认角色的名称"
+				},
+				"moderator": {
+					"label": "版主",
+					"placeholder": "版主",
+					"description": "您的读书俱乐部的版主名称"
+				},
+				"admin": {
+					"label": "管理员",
+					"placeholder": "管理员",
+					"description": "您的读书俱乐部的管理员角色名称"
+				},
+				"creator": {
+					"label": "创建者",
+					"placeholder": "创建者",
+					"description": "您的读书俱乐部创建者角色的名称。这是您！"
+				}
+			},
+			"creator_preferences": {
+				"heading": "您的会员选项",
+				"subtitle": "对于您在读书俱乐部中的会员资格的一些偏好。这些偏好可以随时从读书俱乐部设置页面更改",
+				"creator_display_name": {
+					"label": "显示名称",
+					"placeholder": "oromei",
+					"description": "您在读书俱乐部的会员可选显示名称。如果设置，它优先于您的用户名"
+				},
+				"creator_hide_progress": {
+					"label": "隐藏进度",
+					"description": "如果启用，您的阅读进度将被隐藏在读书俱乐部的其他成员"
+				}
+			},
+			"submit": "创建读书俱乐部"
+		}
+	},
+	"createLibraryScene": {
+		"heading": "新建书库",
+		"subtitle": "书库被用来将你的书籍分组。如果你想要刷新库和它们如何工作，请查看",
+		"subtitleLink": "相关文档",
+		"form": {
+			"labels": {
+				"libraryName": "名称",
+				"libraryPath": "路径",
+				"libraryPathDescription": "在您的服务器上存在的书库路径",
+				"libraryDescription": "描述",
+				"libraryTags": "标签"
+			},
+			"buttons": {
+				"confirm": "新建书库"
+			}
+		}
+	},
+	"manageLibraryScene": {
+		"heading": "管理书库",
+		"subtitle": "更新书库的详细信息或配置，更改控制访问规则，或扫描文件。 如果你想要刷新书库和它们如何工作，请查看",
+		"subtitleLink": "相关文档",
+		"form": {
+			"labels": {
+				"libraryName": "名称",
+				"libraryPath": "路径",
+				"libraryPathDescription": "在您的服务器上存在的书库路径",
+				"libraryDescription": "描述",
+				"libraryTags": "标签"
+			},
+			"buttons": {
+				"confirm": "保存更改"
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "lol, oops",
+		"message": "发生错误：",
+		"buttons": {
+			"report": "反馈Bug",
+			"copy": "复制错误详细信息",
+			"goHome": "返回首页"
+		}
+	},
+	"homeScene": {
+		"continueReading": {
+			"title": "继续阅读",
+			"emptyState": {
+				"heading": "没有书可以显示",
+				"message": "您正在阅读的任何书都会显示在这里"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "最近添加的系列",
+			"emptyState": {
+				"heading": "没有要显示的系列",
+				"message": "您添加到书库中的任何系列都会在此处显示"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "最近添加的图书",
+			"emptyState": {
+				"heading": "没有书可以显示",
+				"message": "您添加到书库中的任何系列都会在此处显示"
+			}
+		}
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "继续阅读",
+			"downloadSeries": "下载系列文件"
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"general": "通用",
+			"server": "服务器",
+			"jobs": "任务和配置",
+			"users": "用户管理",
+			"desktop": "桌面版"
+		},
+		"general": {
+			"helmet": "通用设置",
+			"heading": "通用设置",
+			"subtitle": "使用下面的表单来管理您的偏好设置和账户设置。",
+			"profileForm": {
+				"validation": {
+					"invalidUrl": "请输入有效的 URL 地址",
+					"missingUsername": "用户名为必填项"
+				},
+				"labels": {
+					"username": "用户名",
+					"password": "密码",
+					"activeChangesPrompt": "您有未保存的更改"
+				},
+				"errors": {
+					"updateFailed": "更新您的个人资料时发生服务器错误。请重试。"
+				},
+				"avatarPicker": {
+					"heading": "设置您的头像",
+					"subtitle": "Stump 支持自定义头像，这些头像可以通过提供图片的 URL 来设置。 为减少服务器上存储的数据数量，不支持图像上传。",
+					"preview": "当您输入了一个URL，预览将会显示在这里。",
+					"labels": {
+						"imageUrl": "图片链接",
+						"customAvatar": "自定义头像"
+					},
+					"buttons": {
+						"confirm": "确认图片",
+						"cancel": "取消",
+						"edit": "编辑",
+						"changeImage": "更改图片",
+						"removeImage": "删除图片"
+					}
+				},
+				"buttons": {
+					"confirm": "保存更改"
+				}
+			},
+			"theme": {
+				"heading": "应用主题",
+				"subtitle": "Stump支持亮色主题和黑色主题，这些主题可以设置在下面。",
+				"dark": {
+					"label": "暗色主题",
+					"description": "推荐使用Stump的黑色主题。"
+				},
+				"light": {
+					"label": "浅色主题",
+					"description": "不推荐使用Stump的亮色主题。"
+				}
+			},
+			"locale": {
+				"localeSelector": {
+					"label": "语言"
+				},
+				"heading": "语言和本地化设置",
+				"subtitle": [
+					"Stump 支持多种语言和本地化语言，请在下方设置您的偏好。请考虑帮助提高语言质量。",
+					"Stump 翻译",
+					"如果你能做到！"
+				]
+			}
+		},
+		"jobs": {
+			"helmet": "任务和配置",
+			"heading": "任务和配置",
+			"subtitle": "查看和管理此服务器上可用的后台任务，包括库扫描和计划",
+			"schedulingHeading": "任务计划",
+			"schedulingSubtitle": "管理此服务器上后台任务的时间安排。此配置的更改将在服务器重启后生效",
+			"historyHeading": "任务历史",
+			"historySubtitle": "管理运行任务并查看已完成任务的历史",
+			"historyTable": {
+				"columns": {
+					"name": "类型",
+					"description": "描述",
+					"status": "状态",
+					"createdAt": "开始于",
+					"elapsed": "已用时",
+					"tasks": "任务"
+				},
+				"emptyHeading": "没有要显示的任务",
+				"emptySubtitle": "如果你没有任务，你就不可能有任务",
+				"deleteAllMessage": "任务历史和统计可以随时从数据库中删除。此操作不能撤消。",
+				"deleteAllConfirmButton": "清除历史记录",
+				"deleteAllConfirmButtonTitle": "清除所有任务历史",
+				"deleteAllConfirmButtonTitleNoJobs": "没有要清除的任务"
+			}
+		},
+		"server": {
+			"helmet": "服务器设置",
+			"heading": "服务器设置",
+			"subtitle": "管理您Stump 服务器实例各种可配置选项"
+		},
+		"desktop": {
+			"helmet": "桌面设置",
+			"heading": "桌面设置",
+			"subtitle": "配置Stump 桌面应用程序",
+			"discordPresence": {
+				"label": "Discord Presence",
+				"description": "使用 Discord Rich Presence 在 Discord 显示您的Stump 活动",
+				"reconnect": "重新连接到Discord"
+			}
+		},
+		"users": {
+			"helmet": "用户管理",
+			"heading": "用户管理",
+			"subtitle": "管理此服务器上的用户，包括创建新用户和更改他们的权限"
+		},
+		"createOrUpdateUsers": {
+			"createHelmet": "创建用户",
+			"createHeading": "创建新用户",
+			"createSubtitle": "使用以下的表单在此服务器上创建一个新用户",
+			"updateHelmet": "更新用户",
+			"updateHeading": "更新用户",
+			"updateSubtitle": "使用下面的表单来更新此用户的详细信息",
+			"accessControl": {
+				"heading": "访问控制和限制",
+				"subtitle": [
+					"如果您想根据标签或年龄评级限制访问某些内容，您可以在这里这样做。 任何未设定的值意味着限制将不会被强制执行。要了解更多关于访问控制的信息，请参阅。",
+					"文档"
+				],
+				"ageRestriction": {
+					"label": "年龄限制",
+					"description": "限制用户访问内容超过设定的年龄等级阈值",
+					"placeholder": "13",
+					"enforceUnset": {
+						"label": "强制取消设置",
+						"description": "如果启用，用户将被限制访问内容，但没有可用的年龄评分"
+					}
+				},
+				"tagRestriction": {
+					"label": "标签限制",
+					"description": "限制用户访问选中标签的内容",
+					"placeholder": "成人, 血腥"
+				}
+			},
+			"permissions": {
+				"heading": "授予权限",
+				"subtitle": [
+					"选择您想要授予此用户的权限。欲了解更多关于每个权限的信息，请查看",
+					"文档"
+				],
+				"bookclub": {
+					"label": "读书俱乐部",
+					"read": {
+						"label": "访问读书俱乐部功能",
+						"description": "允许用户访问读书俱乐部功能，包括查看和加入读书俱乐部"
+					},
+					"create": {
+						"label": "创建读书俱乐部",
+						"description": "允许用户创建新读书俱乐部"
+					}
+				},
+				"file": {
+					"label": "文件管理",
+					"explorer": {
+						"label": "文件资源管理器",
+						"description": "允许用户访问书库文件探索。\n当该功能被授予时，内容限制不被支持"
+					},
+					"upload": {
+						"label": "上传文件",
+						"description": "允许用户上传文件到服务器"
+					}
+				},
+				"library": {
+					"label": "书库管理",
+					"create": {
+						"label": "新建书库",
+						"description": "允许用户创建新的书库。\n包括编辑和扫描权限"
+					},
+					"scan": {
+						"label": "扫描书库",
+						"description": "允许用户对现有书库启动扫描"
+					},
+					"edit": {
+						"label": "编辑书库",
+						"description": "允许用户对现有书库启动扫描"
+					},
+					"manage": {
+						"label": "管理书库",
+						"description": "允许用户创建新的书库。\n包括编辑和扫描权限"
+					},
+					"delete": {
+						"label": "新建书库",
+						"description": "允许用户创建新的书库。\n包括编辑和扫描权限"
+					}
+				}
+			},
+			"validation": {
+				"ageRestrictionTooLow": "年龄限制不能小于0"
+			},
+			"createSubmitButton": "创建用户",
+			"updateSubmitButton": "更新用户"
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "正在执行的任务"
+	},
+	"libraryStats": {
+		"seriesCount": "总系列",
+		"bookCount": "书籍总数",
+		"diskUsage": "磁盘使用量"
+	},
+	"pagination": {
+		"buttons": {
+			"next": "下一页",
+			"previous": "上一页"
+		},
+		"popover": {
+			"heading": "跳转到",
+			"buttons": {
+				"confirm": "跳转",
+				"cancel": "取消"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "退出登录",
+		"message": "您确定要退出登陆吗？",
+		"buttons": {
+			"cancel": "取消",
+			"signOut": "退出登录"
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "首页",
+			"libraries": "书库",
+			"books": "探索",
+			"bookClubs": "读书俱乐部",
+			"createLibrary": "新建书库",
+			"createBookClub": "创建读书俱乐部",
+			"settings": "设置",
+			"themeToggle": "切换主题",
+			"goForward": "前进",
+			"goBack": "返回"
+		},
+		"libraryOptions": {
+			"scanLibrary": "扫描",
+			"fileExplorer": "文件管理器",
+			"manageLibrary": "管理",
+			"deleteLibrary": "删除"
+		},
+		"versionInformation": {
+			"heading": "版本信息",
+			"semVer": "语义化版本",
+			"commitHash": "提交哈希",
+			"buildDate": "构建日期"
+		}
+	},
+	"search": {
+		"placeholder": "搜索"
+	},
+	"serverSOS": {
+		"heading": "服务器不可用",
+		"desktop": {
+			"message": "出现网络错误，表示您的 Stump 服务器目前不可用。请确保它正在运行并且可以在此设备上访问。\n如果您的服务器 URL 已经更改，您可以使用下面的表单更新它"
+		},
+		"web": {
+			"message": "网络错误，您的 Stump 服务器目前不可用。请确保它正在运行并且可以从此设备访问"
+		},
+		"reconnected": "重新连接到服务器！正在重定向...",
+		"reconnectionFailed": "发生未知错误。"
+	},
+	"serverStatusOverlay": {
+		"heading": "服务器未连接",
+		"message": [
+			"请检查您的网络连接",
+			"点击此处",
+			"更改您的服务器 URL"
+		]
+	},
+	"slidingList": {
+		"empty": "暂无数据",
+		"buttons": {
+			"next": "正在查找",
+			"previous": "向后检索"
+		}
+	},
+	"tagSelect": {
+		"placholder": "选择或创建标签",
+		"placeholderNoTags": "没有可用的标签"
+	}
+}

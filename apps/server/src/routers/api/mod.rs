@@ -18,8 +18,8 @@ mod tests {
 	};
 
 	use super::v1::{
-		auth::*, book_club::*, job::*, library::*, media::*, metadata::*, series::*,
-		user::*, ClaimResponse, StumpVersion,
+		auth::*, book_club::*, epub::*, job::*, library::*, media::*, metadata::*,
+		series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
 	};
 
 	#[allow(dead_code)]
@@ -65,9 +65,25 @@ mod tests {
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<DeleteUser>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CleanLibraryResponse>()?).as_bytes(),
+		)?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<PutMediaCompletionStatus>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<MediaIsComplete>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<MediaMetadataOverview>()?).as_bytes(),
 		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateBookmark>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<DeleteBookmark>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesIsComplete>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<UpdateSchedulerConfig>()?).as_bytes(),
 		)?;
@@ -109,6 +125,20 @@ mod tests {
 		)?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<PatchLibraryThumbnail>()?).as_bytes(),
+		)?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateSmartList>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<GetSmartListsParams>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<SmartListRelationOptions>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<SmartListMeta>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateSmartListView>()?).as_bytes(),
 		)?;
 
 		Ok(())

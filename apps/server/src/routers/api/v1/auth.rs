@@ -12,7 +12,7 @@ use serde::Deserialize;
 use specta::Type;
 use stump_core::{
 	db::entity::User,
-	prisma::{user, user_login_activity, user_preferences, PrismaClient},
+	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
 };
 use tower_sessions::{session::SessionDeletion, Session};
 use tracing::error;
@@ -22,7 +22,7 @@ use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{ApiError, ApiResult},
 	http_server::StumpRequestInfo,
-	utils::{self, verify_password},
+	utils::verify_password,
 };
 
 pub(crate) fn mount() -> Router<AppState> {
@@ -82,6 +82,29 @@ async fn handle_login_attempt(
 	Ok(login_activity)
 }
 
+async fn handle_remove_earliest_session(
+	client: &PrismaClient,
+	for_user_id: String,
+	session_id: Option<String>,
+) -> ApiResult<i32> {
+	if let Some(oldest_session_id) = session_id {
+		let _deleted_session = client
+			.session()
+			.delete(session::id::equals(oldest_session_id))
+			.exec()
+			.await?;
+		Ok(1)
+	} else {
+		tracing::warn!("No existing session ID was provided for enforcing the maximum number of sessions. Deleting all sessions for user instead.");
+		let deleted_sessions_count = client
+			.session()
+			.delete_many(vec![session::user_id::equals(for_user_id)])
+			.exec()
+			.await?;
+		Ok(deleted_sessions_count as i32)
+	}
+}
+
 #[utoipa::path(
 	post,
 	path = "/api/v1/auth/login",
@@ -129,6 +152,9 @@ async fn login(
 			.order_by(user_login_activity::timestamp::order(Direction::Desc))
 			.take(10),
 		)
+		.with(user::sessions::fetch(vec![session::expires_at::gt(
+			Utc::now().into(),
+		)]))
 		.exec()
 		.await?;
 
@@ -158,17 +184,42 @@ async fn login(
 					.await?;
 
 				if should_lock_account {
-					client
+					let _locked_user = client
 						.user()
 						.update(
-							user::id::equals(user_id),
+							user::id::equals(user_id.clone()),
 							vec![user::is_locked::set(true)],
 						)
 						.exec()
 						.await?;
+
+					let removed_sessions_count = client
+						.session()
+						.delete_many(vec![session::user_id::equals(user_id.clone())])
+						.exec()
+						.await?;
+					tracing::debug!(?removed_sessions_count, ?user_id, "Locked user account and removed all associated sessions")
 				}
 
 				return Err(ApiError::Unauthorized);
+			}
+
+			let existing_sessions = db_user
+				.sessions()
+				.cloned()
+				.unwrap_or_else(|error| {
+					tracing::error!(?error, "Failed to load user's existing session(s)");
+					Vec::default()
+				})
+				.to_owned();
+			let existing_login_sessions_count = existing_sessions.len() as i32;
+
+			match (db_user.max_sessions_allowed, existing_login_sessions_count) {
+				(Some(max_login_sessions), count) if count >= max_login_sessions => {
+					let oldest_session_id = existing_sessions.iter().min_by_key(|session| session.expires_at).map(|session| session.id.clone());
+					handle_remove_earliest_session(&state.db, db_user.id.clone(), oldest_session_id).await?;
+				},
+				_ => (),
 			}
 
 			let updated_user = state
@@ -275,7 +326,7 @@ pub async fn register(
 		is_server_owner = true;
 	}
 
-	let hashed_password = bcrypt::hash(&input.password, utils::get_hash_cost())?;
+	let hashed_password = bcrypt::hash(&input.password, ctx.config.password_hash_cost)?;
 
 	let created_user = db
 		.user()

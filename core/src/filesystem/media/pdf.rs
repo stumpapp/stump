@@ -9,8 +9,8 @@ use pdf::file::FileOptions;
 use pdfium_render::{prelude::Pdfium, render_config::PdfRenderConfig};
 
 use crate::{
-	config,
-	db::entity::metadata::MediaMetadata,
+	config::StumpConfig,
+	db::entity::MediaMetadata,
 	filesystem::{
 		archive::create_zip_archive, error::FileError, hash, image::ImageFormat,
 		ContentType, FileParts, PathUtils,
@@ -58,7 +58,11 @@ impl FileProcessor for PdfProcessor {
 		}
 	}
 
-	fn process(path: &str, _: FileProcessorOptions) -> Result<ProcessedFile, FileError> {
+	fn process(
+		path: &str,
+		_: FileProcessorOptions,
+		_: &StumpConfig,
+	) -> Result<ProcessedFile, FileError> {
 		let file = FileOptions::cached().open(path)?;
 
 		let pages = file.pages().count() as i32;
@@ -73,8 +77,12 @@ impl FileProcessor for PdfProcessor {
 	}
 
 	// TODO: The decision to use PNG should be a configuration option
-	fn get_page(path: &str, page: i32) -> Result<(ContentType, Vec<u8>), FileError> {
-		let pdfium = PdfProcessor::renderer()?;
+	fn get_page(
+		path: &str,
+		page: i32,
+		config: &StumpConfig,
+	) -> Result<(ContentType, Vec<u8>), FileError> {
+		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let document_page =
@@ -125,11 +133,9 @@ impl FileProcessor for PdfProcessor {
 
 impl PdfProcessor {
 	/// Initializes a PDFium renderer. If a path to the PDFium library is not provided
-	pub fn renderer() -> Result<Pdfium, FileError> {
-		let pdfium_path = config::get_pdfium_path();
-
+	pub fn renderer(pdfium_path: &Option<String>) -> Result<Pdfium, FileError> {
 		if let Some(path) = pdfium_path {
-			let bindings = Pdfium::bind_to_library(&path)
+			let bindings = Pdfium::bind_to_library(path)
 			.or_else(|e| {
 				tracing::error!(provided_path = ?path, ?e, "Failed to bind to PDFium library at provided path");
 				Pdfium::bind_to_system_library()
@@ -151,8 +157,9 @@ impl FileConverter for PdfProcessor {
 		path: &str,
 		delete_source: bool,
 		format: Option<ImageFormat>,
+		config: &StumpConfig,
 	) -> Result<PathBuf, FileError> {
-		let pdfium = PdfProcessor::renderer()?;
+		let pdfium = PdfProcessor::renderer(&config.pdfium_path)?;
 
 		let document = pdfium.load_pdf_from_file(path, None)?;
 		let iter = document.pages().iter();
@@ -202,8 +209,8 @@ impl FileConverter for PdfProcessor {
 			extension,
 		} = path_buf.as_path().file_parts();
 
-		let cache_dir = config::get_cache_dir();
-		let unpacked_path = cache_dir.join(&file_stem);
+		let cache_dir = config.get_cache_dir();
+		let unpacked_path = cache_dir.join(file_stem);
 
 		// create folder for the zip
 		std::fs::create_dir_all(&unpacked_path)?;

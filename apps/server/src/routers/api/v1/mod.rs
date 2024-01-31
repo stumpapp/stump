@@ -18,6 +18,7 @@ pub(crate) mod library;
 pub(crate) mod log;
 pub(crate) mod media;
 pub(crate) mod metadata;
+pub(crate) mod notifier;
 pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod smart_list;

@@ -1,16 +1,19 @@
 use crate::prisma::notifier;
 use serde::{Deserialize, Serialize};
+use specta::Type;
 use std::str::FromStr;
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize)]
-struct Notifier {
+#[derive(Serialize, Deserialize, ToSchema, Type)]
+pub struct Notifier {
 	id: i32,
 	#[serde(rename = "type")]
 	_type: NotifierType,
 	config: NotifierConfig,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, ToSchema, Type)]
+#[serde(untagged)]
 pub enum NotifierConfig {
 	Discord {
 		webhook_url: String,
@@ -21,7 +24,14 @@ pub enum NotifierConfig {
 	},
 }
 
-#[derive(Serialize, Deserialize)]
+impl NotifierConfig {
+	pub fn into_bytes(self) -> Vec<u8> {
+		// FIXME: don't panic! Add error handling
+		serde_json::to_vec(&self).expect("Failed to convert to bytes!")
+	}
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Type)]
 pub enum NotifierType {
 	Discord,
 	Telegram,

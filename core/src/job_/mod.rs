@@ -186,7 +186,7 @@ impl<J: DynJob> JobExecutor for Job<J> {
 			mut errors,
 		} = self.state.take().expect("Job state was already taken!");
 
-		let working_data = if let Some(state) = data {
+		let mut working_data = if let Some(state) = data {
 			Some(state)
 		} else if let Some(restore_point) = stateful_job.attempt_restore(&ctx).await? {
 			// Replace the state with the restored state
@@ -205,57 +205,57 @@ impl<J: DynJob> JobExecutor for Job<J> {
 
 			// Return the data from the init result
 			init_result.data.or_else(|| Some(Default::default()))
-		};
+		}
+		.ok_or_else(|| {
+			JobError::InitFailed(
+				"No data could be created for job. This is a bug!".to_string(),
+			)
+		})?;
+		dbg!(&working_data);
 
 		// Setup our references since the loop would otherwise take ownership
 		let stateful_job = Arc::new(stateful_job);
 		let mut ctx = Arc::new(ctx);
 
-		let data = if let Some(mut working_data) = working_data {
-			tracing::debug!(task_count = tasks.len(), "Starting tasks");
+		tracing::debug!(task_count = tasks.len(), "Starting tasks");
+		dbg!(&tasks.len());
 
-			while !tasks.is_empty() {
-				let next_task = tasks.pop_front().expect("tasks is not empty??");
+		while !tasks.is_empty() {
+			let next_task = tasks.pop_front().expect("tasks is not empty??");
 
-				let task_handle = {
-					let ctx = Arc::clone(&ctx);
-					let stateful_job = Arc::clone(&stateful_job);
+			let task_handle = {
+				let ctx = Arc::clone(&ctx);
+				let stateful_job = Arc::clone(&stateful_job);
 
-					spawn(async move { stateful_job.execute_task(&ctx, next_task).await })
-				};
+				spawn(async move { stateful_job.execute_task(&ctx, next_task).await })
+			};
 
-				let JobTaskHandlerOutput {
-					output,
-					returned_ctx,
-				} = job_task_handler::<J>(ctx, task_handle, commands_rx.clone()).await?;
-				let JobTaskOutput {
-					data: task_data,
-					errors: task_errors,
-				} = output;
+			let JobTaskHandlerOutput {
+				output,
+				returned_ctx,
+			} = job_task_handler::<J>(ctx, task_handle, commands_rx.clone()).await?;
+			let JobTaskOutput {
+				data: task_data,
+				errors: task_errors,
+			} = output;
 
-				// Update our working data and any errors with the new data/errors from the
-				// completed task. Then increment the task index
-				working_data.store(task_data);
-				errors.extend(task_errors);
-				current_task_index += 1;
+			// Update our working data and any errors with the new data/errors from the
+			// completed task. Then increment the task index
+			working_data.store(task_data);
+			errors.extend(task_errors);
+			current_task_index += 1;
 
-				// Reassign the ctx to the returned values
-				ctx = returned_ctx;
-			}
+			// Reassign the ctx to the returned values
+			ctx = returned_ctx;
+		}
 
-			tracing::debug!(
-				?current_task_index,
-				task_count = tasks.len(),
-				"Task loop completed?"
-			);
+		tracing::debug!(
+			?current_task_index,
+			task_count = tasks.len(),
+			"Task loop completed?"
+		);
 
-			dbg!(&working_data);
-
-			Some(working_data)
-		} else {
-			tracing::warn!("No working data found for job! This is likely a bug");
-			None
-		};
+		dbg!(&working_data);
 
 		let errors_count = errors.len();
 		tracing::debug!(?errors_count, "All tasks completed");

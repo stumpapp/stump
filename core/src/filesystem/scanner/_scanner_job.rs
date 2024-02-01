@@ -33,25 +33,25 @@ use super::{
 // with just 3/5, 4/5, 5/5, etc. I think this is a good idea, but I'm not sure how to implement it (yet).
 
 #[derive(Serialize, Deserialize)]
-enum LibraryScanTask {
+pub enum LibraryScanTask {
 	Init(InitTaskInput),
 	WalkSeries(PathBuf),
 }
 
 #[derive(Serialize, Deserialize)]
-struct InitTaskInput {
+pub struct InitTaskInput {
 	series_to_create: Vec<PathBuf>,
 	missing_series: Vec<PathBuf>,
 }
 
-struct LibraryScanJob {
-	id: String,
-	path: String,
-	options: Option<LibraryOptions>,
+pub struct LibraryScanJob {
+	pub id: String,
+	pub path: String,
+	pub options: Option<LibraryOptions>,
 }
 
 #[derive(Serialize, Deserialize, Default, Debug)]
-struct LibraryScanData {
+pub struct LibraryScanData {
 	/// The number of files to scan relative to the library root
 	total_files: u64,
 
@@ -179,6 +179,7 @@ impl DynJob for LibraryScanJob {
 		match task {
 			LibraryScanTask::Init(input) => {
 				tracing::info!("Executing the init task for library scan");
+				dbg!("INIT");
 				let InitTaskInput {
 					series_to_create,
 					missing_series,
@@ -257,6 +258,7 @@ impl DynJob for LibraryScanJob {
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
 				tracing::info!("Executing the walk series task for library scan");
+				dbg!("WALK SERIES");
 
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),

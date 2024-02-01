@@ -2,6 +2,7 @@
 // I am not entirely sure why this issue cropped up all of the sudden, but
 // this seems to resolve it in a musl environment.
 #![recursion_limit = "256"]
+#![warn(clippy::dbg_macro)]
 
 use std::sync::Arc;
 

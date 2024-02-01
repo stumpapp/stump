@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, sync::Arc};
+use std::{collections::VecDeque, fmt::Debug, sync::Arc};
 
 use serde::{de, Deserialize, Serialize};
 
@@ -62,7 +62,13 @@ pub trait DynJob: Send + Sync + Sized + 'static {
 
 	/// Internal state used by the job. This is updated during execution but not persisted.
 	/// If pausing/resuming is implemented, this will be serialized and stored in the DB.
-	type Data: Serialize + de::DeserializeOwned + WritableData + Default + Send + Sync;
+	type Data: Serialize
+		+ de::DeserializeOwned
+		+ WritableData
+		+ Default
+		+ Debug
+		+ Send
+		+ Sync;
 	type Task: Serialize + de::DeserializeOwned + Send + Sync;
 	// TODO: Eventually allow for custom errors, I could see doing something like Log as the error
 	// being useful to then just dump the errors to the DB...
@@ -80,17 +86,29 @@ pub trait DynJob: Send + Sync + Sized + 'static {
 			.job()
 			.find_unique(job::id::equals(ctx.job_id.clone()))
 			.exec()
-			.await?
-			.ok_or(JobError::InitFailed("Job not found in DB".to_string()))?;
+			.await?;
 
-		if let Some(save_state) = stored_job.save_state {
-			// If the job has a save state and it is invalid, we should fail
-			// as to not attempt potentially undefined behaviors
-			let state = serde_json::from_slice(&save_state)
-				.map_err(|error| JobError::StateDeserializeFailed(error.to_string()))?;
-			Ok(Some(state))
-		} else {
-			Ok(None)
+		match stored_job {
+			Some(job) => {
+				if let Some(save_state) = job.save_state {
+					// If the job has a save state and it is invalid, we should fail
+					// as to not attempt potentially undefined behaviors
+					let state = serde_json::from_slice(&save_state).map_err(|error| {
+						JobError::StateDeserializeFailed(error.to_string())
+					})?;
+					Ok(Some(state))
+				} else {
+					Ok(None)
+				}
+			},
+			None => {
+				// We don't need this job to exist in the DB for tests
+				if cfg!(test) {
+					Ok(None)
+				} else {
+					Err(JobError::InitFailed("Job not found in DB".to_string()))
+				}
+			},
 		}
 	}
 
@@ -161,13 +179,12 @@ impl<J: DynJob> JobExecutor for Job<J> {
 		tracing::info!(?job_id, ?job_name, "Starting job");
 
 		let JobState {
-			stateful_job,
+			mut stateful_job,
 			data,
 			mut tasks,
 			mut current_task_index,
 			mut errors,
 		} = self.state.take().expect("Job state was already taken!");
-		let mut is_running = true;
 
 		let working_data = if let Some(state) = data {
 			Some(state)
@@ -178,9 +195,16 @@ impl<J: DynJob> JobExecutor for Job<J> {
 			errors = restore_point.errors;
 
 			// Return the data from the restore point
-			restore_point.data
+			restore_point.data.or_else(|| Some(Default::default()))
 		} else {
-			Some(Default::default())
+			tracing::debug!("No restore point found, initializing job");
+			let init_result = stateful_job.init(&ctx).await?;
+			tasks = init_result.tasks;
+			current_task_index = init_result.current_task_index;
+			errors = init_result.errors;
+
+			// Return the data from the init result
+			init_result.data.or_else(|| Some(Default::default()))
 		};
 
 		// Setup our references since the loop would otherwise take ownership
@@ -188,7 +212,9 @@ impl<J: DynJob> JobExecutor for Job<J> {
 		let mut ctx = Arc::new(ctx);
 
 		let data = if let Some(mut working_data) = working_data {
-			while is_running && !tasks.is_empty() {
+			tracing::debug!(task_count = tasks.len(), "Starting tasks");
+
+			while !tasks.is_empty() {
 				let next_task = tasks.pop_front().expect("tasks is not empty??");
 
 				let task_handle = {
@@ -216,6 +242,14 @@ impl<J: DynJob> JobExecutor for Job<J> {
 				// Reassign the ctx to the returned values
 				ctx = returned_ctx;
 			}
+
+			tracing::debug!(
+				?current_task_index,
+				task_count = tasks.len(),
+				"Task loop completed?"
+			);
+
+			dbg!(&working_data);
 
 			Some(working_data)
 		} else {

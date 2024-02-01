@@ -50,7 +50,7 @@ struct LibraryScanJob {
 	options: Option<LibraryOptions>,
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 struct LibraryScanData {
 	/// The number of files to scan relative to the library root
 	total_files: u64,
@@ -123,6 +123,13 @@ impl DynJob for LibraryScanJob {
 			},
 		)
 		.await?;
+		tracing::debug!(
+			series_to_create = series_to_create.len(),
+			series_to_visit = series_to_visit.len(),
+			missing_series = missing_series.len(),
+			library_is_missing,
+			"Walked library"
+		);
 
 		if library_is_missing {
 			// TODO: mark library as missing in DB
@@ -484,12 +491,20 @@ async fn handle_create_series_media(
 		let mut built_media = chunk
 			.par_iter()
 			.map(|path_buf| {
-				MediaBuilder::new(path_buf, &id, library_options.clone(), &ctx.config)
-					.build()
+				(
+					path_buf.to_owned(),
+					MediaBuilder::new(
+						path_buf,
+						&id,
+						library_options.clone(),
+						&ctx.config,
+					)
+					.build(),
+				)
 			})
-			.collect::<VecDeque<Result<Media, _>>>();
+			.collect::<VecDeque<(PathBuf, Result<Media, _>)>>();
 
-		while let Some(build_result) = built_media.pop_front() {
+		while let Some((media_path, build_result)) = built_media.pop_front() {
 			match build_result {
 				Ok(generated) => {
 					// TODO: convert to a transaction!
@@ -499,7 +514,7 @@ async fn handle_create_series_media(
 							data.created_media += 1;
 						},
 						Err(e) => {
-							tracing::error!(error = ?e, ?path, "Failed to create media");
+							tracing::error!(error = ?e, ?media_path, "Failed to create media");
 							errors.push(format!(
 								"Failed to create media: {:?}",
 								e.to_string()
@@ -508,17 +523,247 @@ async fn handle_create_series_media(
 					}
 				},
 				Err(e) => {
-					tracing::error!(error = ?e, ?path, "Failed to build media");
+					tracing::error!(error = ?e, ?media_path, "Failed to build media");
 					errors.push(format!("Failed to build media: {:?}", e.to_string()));
 				},
 			}
 		}
 	}
 
+	dbg!(&data.created_media);
+
 	Ok(JobTaskOutput { data, errors })
 }
 
-// #[cfg(test)]
-// mod tests {
-// 	fn setup_test() {}
-// }
+#[cfg(test)]
+mod tests {
+	use std::sync::Arc;
+
+	use tempfile::{Builder as TempDirBuilder, TempDir};
+	use uuid::Uuid;
+
+	use super::*;
+	use crate::{
+		config::StumpConfig,
+		db::{create_client_with_url, entity::Library},
+		job_::{Job, JobExecutor},
+		prisma::{library, library_options},
+	};
+
+	struct TestCtx {
+		job: Job<LibraryScanJob>,
+		worker_ctx: WorkerCtx,
+		library: Library,
+		tempdirs: Vec<TempDir>,
+	}
+
+	async fn create_test_library(
+		series_count: usize,
+		books_per_series: usize,
+	) -> Result<(PrismaClient, Library, Vec<TempDir>), Box<dyn std::error::Error>> {
+		let client = create_client_with_url(&format!(
+			"file:{}/prisma/dev.db",
+			env!("CARGO_MANIFEST_DIR")
+		))
+		.await;
+
+		let library_temp_dir = TempDirBuilder::new().prefix("ROOT").tempdir()?;
+		let library_temp_dir_path = library_temp_dir.path().to_str().unwrap().to_string();
+
+		tracing::info!("Creating bench library...");
+
+		let library_options = client.library_options().create(vec![]).exec().await?;
+
+		let library = client
+			.library()
+			.create(
+				"Bench".to_string(),
+				library_temp_dir_path.clone(),
+				library_options::id::equals(library_options.id.clone()),
+				vec![],
+			)
+			.exec()
+			.await?;
+
+		let library_options = client
+			.library_options()
+			.update(
+				library_options::id::equals(library_options.id),
+				vec![
+					library_options::library::connect(library::id::equals(
+						library.id.clone(),
+					)),
+					library_options::library_id::set(Some(library.id.clone())),
+				],
+			)
+			.exec()
+			.await?;
+
+		tracing::info!("Library created in DB! Creating FS structure...");
+
+		let data_dir = PathBuf::from(format!(
+			"{}/integration-tests/data",
+			env!("CARGO_MANIFEST_DIR")
+		));
+
+		let zip_path = data_dir.join("book.zip");
+		let epub_path = data_dir.join("book.epub");
+		let rar_path = data_dir.join("book.rar");
+
+		let mut temp_dirs = vec![library_temp_dir];
+		for series_idx in 0..series_count {
+			tracing::debug!("Creating series {}", series_idx + 1);
+			let series_temp_dir = TempDirBuilder::new()
+				.prefix(&format!("series_{}", series_idx))
+				.tempdir_in(&library_temp_dir_path)?;
+
+			for book_idx in 0..books_per_series {
+				tracing::debug!("Creating book {}", book_idx + 1);
+				let book_path = match book_idx % 3 {
+					0 => zip_path.as_path(),
+					1 => epub_path.as_path(),
+					_ => rar_path.as_path(),
+				};
+				let book_file_name_with_ext = format!(
+					"{}_{}",
+					book_idx,
+					book_path.file_name().unwrap().to_str().unwrap(),
+				);
+				let book_temp_file_expected_path =
+					series_temp_dir.path().join(book_file_name_with_ext);
+
+				std::fs::copy(book_path, &book_temp_file_expected_path)?;
+			}
+
+			temp_dirs.push(series_temp_dir);
+		}
+
+		tracing::info!("Library created!");
+
+		let library = Library {
+			library_options: LibraryOptions::from(library_options),
+			..Library::from(library)
+		};
+
+		Ok((client, library, temp_dirs))
+	}
+
+	async fn setup_test(
+		series_count: usize,
+		books_per_series: usize,
+	) -> Result<TestCtx, Box<dyn std::error::Error>> {
+		tracing_subscriber::fmt()
+			.with_max_level(tracing::Level::TRACE)
+			.with_env_filter("stump_core=trace")
+			.init();
+
+		let (client, library, tempdirs) =
+			create_test_library(series_count, books_per_series).await?;
+		let job = Job::new(LibraryScanJob {
+			id: library.id.clone(),
+			path: library.path.clone(),
+			options: Some(library.library_options.clone()),
+		});
+		let config_dir =
+			format!("{}/integration-tests/config", env!("CARGO_MANIFEST_DIR"));
+		let config = StumpConfig::new(config_dir);
+		let worker_ctx = WorkerCtx {
+			db: Arc::new(client),
+			config: Arc::new(config),
+			job_id: Uuid::new_v4().to_string(),
+			event_sender: async_channel::unbounded().0,
+			command_receiver: async_channel::unbounded().1,
+		};
+		Ok(TestCtx {
+			job: *job,
+			worker_ctx,
+			library,
+			tempdirs,
+		})
+	}
+
+	async fn safe_validate_counts(
+		client: &PrismaClient,
+		series_count: usize,
+		books_per_series: usize,
+	) {
+		let actual_series_count = client
+			.series()
+			.count(vec![])
+			.exec()
+			.await
+			.expect("Failed to count series");
+
+		if actual_series_count != series_count as i64 {
+			println!(
+				"Series count mismatch (actual vs expected): {} != {}",
+				actual_series_count, series_count
+			);
+		}
+
+		let actual_media_count = client
+			.media()
+			.count(vec![])
+			.exec()
+			.await
+			.expect("Failed to count media");
+
+		if actual_media_count != (series_count * books_per_series) as i64 {
+			println!(
+				"Media count mismatch (actual vs expected): {} != {}",
+				actual_media_count,
+				series_count * books_per_series
+			);
+		}
+	}
+
+	async fn clean_up(client: &PrismaClient, library: Library, tempdirs: Vec<TempDir>) {
+		let deleted_library = client
+			.library()
+			.delete(library::id::equals(library.id))
+			.exec()
+			.await
+			.expect("Failed to delete library");
+
+		tracing::debug!(?deleted_library, "Deleted library");
+
+		for tempdir in tempdirs {
+			let _ = tempdir.close();
+		}
+	}
+
+	#[tokio::test]
+	async fn bench_library_scan() {
+		let series_count = 1000;
+		let books_per_series = 100;
+
+		let TestCtx {
+			mut job,
+			worker_ctx,
+			library,
+			tempdirs,
+		} = setup_test(series_count, books_per_series)
+			.await
+			.expect("Failed to setup test job");
+
+		let client = worker_ctx.db.clone();
+		let commands_rx = worker_ctx.command_receiver.clone();
+
+		println!("Setup complete! Running bench after 5 seconds...");
+		for i in 0..5 {
+			tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+			println!("{}...", 5 - i);
+		}
+
+		let start = tokio::time::Instant::now();
+		let result = job.run(worker_ctx, commands_rx).await;
+		let elapsed = start.elapsed();
+
+		tracing::info!("Elapsed: {:?}", elapsed);
+		tracing::debug!("Result: {:?}", result);
+
+		safe_validate_counts(&client, series_count, books_per_series).await;
+		tracing::info!("Cleaning up...");
+		clean_up(&client, library, tempdirs).await;
+	}
+}

@@ -59,6 +59,7 @@ pub(crate) fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathB
 			for line in BufReader::new(file).lines() {
 				if let Err(e) = line {
 					tracing::error!(
+						?path,
 						error = ?e,
 						"Error occurred trying to read line from glob file",
 					);
@@ -89,13 +90,17 @@ pub(crate) fn generate_rule_set(paths: &[PathBuf]) -> GlobSet {
 		.filter(|p| p.exists())
 		.collect::<Vec<_>>();
 
+	tracing::trace!(?adjusted_paths, "Adjusted paths");
+
 	for path in adjusted_paths {
-		let open_result = File::open(path);
+		let ignore_file = path.join(".stumpignore");
+		let open_result = File::open(&ignore_file);
 		if let Ok(file) = open_result {
 			// read the lines of the file, and add each line as a glob pattern in the builder
 			for line in BufReader::new(file).lines() {
 				if let Err(e) = line {
 					tracing::error!(
+						?ignore_file,
 						error = ?e,
 						"Error occurred trying to read line from glob file",
 					);
@@ -106,10 +111,10 @@ pub(crate) fn generate_rule_set(paths: &[PathBuf]) -> GlobSet {
 				builder.add(Glob::new(&line.unwrap()).unwrap());
 			}
 		} else {
-			tracing::error!(
+			tracing::warn!(
 				error = ?open_result.err(),
-				?path,
-				"Failed to open file",
+				?ignore_file,
+				"Failed to open file (does it exist?)",
 			);
 		}
 	}

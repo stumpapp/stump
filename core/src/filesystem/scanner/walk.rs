@@ -25,8 +25,8 @@ pub struct WalkerCtx {
 
 #[derive(Default)]
 pub struct WalkedLibrary {
-	pub seen_files: u64,
-	pub ignored_files: u64,
+	pub seen_directories: u64,
+	pub ignored_directories: u64,
 	pub series_to_create: Vec<PathBuf>,
 	pub series_to_visit: Vec<PathBuf>,
 	pub missing_series: Vec<PathBuf>,
@@ -93,11 +93,11 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 			}
 		});
 
-	let ignored_files = ignored_entries.len() as u64;
-	let seen_files = valid_entries.len() as u64 + ignored_files;
+	let ignored_directories = ignored_entries.len() as u64;
+	let seen_directories = valid_entries.len() as u64 + ignored_directories;
 
 	tracing::debug!(
-		seen_files,
+		seen_directories,
 		ignored_entries = ignored_entries.len(),
 		"Walk finished in {}ms",
 		walk_start.elapsed().as_millis()
@@ -107,43 +107,48 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 	let (series_to_create, missing_series, series_to_visit) = {
 		let existing_records = db
 			.series()
-			.find_many(vec![series::path::in_vec(
-				valid_entries
-					.iter()
-					.map(|e| e.path().to_string_lossy().to_string())
-					.collect(),
-			)])
+			.find_many(vec![series::path::starts_with(path.to_string())])
 			.exec()
 			.await?;
+		if existing_records.is_empty() {
+			tracing::debug!(
+				"No existing series found in the database, all series are new"
+			);
+			let series_to_create = valid_entries
+				.into_iter()
+				.map(|e| e.path().to_owned())
+				.collect::<Vec<PathBuf>>();
+			(series_to_create, vec![], vec![])
+		} else {
+			let existing_series_map = existing_records
+				.into_iter()
+				.map(|s| (s.path.clone(), s.to_owned()))
+				.collect::<HashMap<String, _>>();
 
-		let existing_series_map = existing_records
-			.into_iter()
-			.map(|s| (s.path.clone(), s.to_owned()))
-			.collect::<HashMap<String, _>>();
+			let missing_series = existing_series_map
+				.iter()
+				.filter(|(path, _)| !PathBuf::from(path).exists())
+				.map(|(path, _)| PathBuf::from(path))
+				.collect::<Vec<PathBuf>>();
 
-		let missing_series = existing_series_map
-			.iter()
-			.filter(|(path, _)| !PathBuf::from(path).exists())
-			.map(|(path, _)| PathBuf::from(path))
-			.collect::<Vec<PathBuf>>();
+			let (series_to_create, series_to_visit) = valid_entries
+				.iter()
+				.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
+				.map(|e| e.path().to_owned())
+				.into_iter()
+				.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
+					let already_exists =
+						existing_series_map.contains_key(path.to_string_lossy().as_ref());
 
-		let (series_to_create, series_to_visit) = valid_entries
-			.iter()
-			.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
-			.map(|e| e.path().to_owned())
-			.into_iter()
-			.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
-				let already_exists =
-					existing_series_map.contains_key(path.to_string_lossy().as_ref());
+					if already_exists {
+						Either::Right(path)
+					} else {
+						Either::Left(path)
+					}
+				});
 
-				if !already_exists {
-					Either::Right(path)
-				} else {
-					Either::Left(path)
-				}
-			});
-
-		(series_to_create, missing_series, series_to_visit)
+			(series_to_create, missing_series, series_to_visit)
+		}
 	};
 
 	let to_create = series_to_create.len();
@@ -155,14 +160,14 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 		"Found {is_missing} series to mark as missing"
 	);
 
-	tracing::trace!(
+	tracing::debug!(
 		"Finished computation steps in {}ms",
 		computation_start.elapsed().as_millis()
 	);
 
 	Ok(WalkedLibrary {
-		seen_files,
-		ignored_files,
+		seen_directories,
+		ignored_directories,
 		series_to_create,
 		series_to_visit,
 		missing_series,
@@ -208,8 +213,9 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	let walker = WalkDir::new(path);
 	let (valid_entries, ignored_entries) = walker
 		.into_iter()
-		.filter_entry(|e| e.path().is_file())
+		// .filter_entry(|e| e.path().is_file()) // Note: This doesn't seem to work?
 		.filter_map(|e| e.ok())
+		.filter_map(|e| e.path().is_file().then(|| e))
 		.par_bridge()
 		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
 			let entry_path = entry.path();
@@ -224,7 +230,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 
 	let ignored_files = ignored_entries.len() as u64;
 	let seen_files = valid_entries.len() as u64 + ignored_files;
-	tracing::trace!(
+	tracing::debug!(
 		seen_files,
 		ignored_entries = ignored_entries.len(),
 		"Walk finished in {}ms",
@@ -266,7 +272,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 							.map_err(|err| {
 								tracing::error!(
 									error = ?err,
-									?path,
+									path = ?entry_path,
 									"Failed to determine if entry has been modified since last scan"
 								)
 							})

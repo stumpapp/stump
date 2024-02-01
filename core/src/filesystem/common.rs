@@ -187,21 +187,25 @@ impl PathUtils for Path {
 			return false;
 		}
 
-		let items = std::fs::read_dir(self);
-		if items.is_err() {
-			error!(
-				error = ?items.unwrap_err(),
-				path = ?self,
-				"IOError: failed to read directory"
-			);
-			return false;
-		}
+		let read_result = std::fs::read_dir(self);
 
-		items
-			.unwrap()
-			.filter_map(|item| item.ok())
-			.filter(|item| item.path() != self)
-			.any(|f| !f.path().should_ignore())
+		match read_result {
+			Ok(items) => {
+				dbg!(self, &items);
+				items
+					.filter_map(|item| item.ok())
+					.filter(|item| item.path() != self)
+					.any(|f| !f.path().should_ignore())
+			},
+			Err(e) => {
+				error!(
+					error = ?e,
+					path = ?self,
+					"IOError: failed to read directory"
+				);
+				false
+			},
+		}
 	}
 
 	/// Returns true if the directory has any media files in it. This is a deep

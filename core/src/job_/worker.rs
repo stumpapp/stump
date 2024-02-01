@@ -23,8 +23,8 @@ pub struct WorkerCtx {
 	pub job_id: String,
 	pub db: Arc<PrismaClient>,
 	pub config: Arc<StumpConfig>,
-	event_sender: async_channel::Sender<WorkerEvent>,
-	command_receiver: async_channel::Receiver<WorkerCommand>,
+	pub event_sender: async_channel::Sender<WorkerEvent>,
+	pub command_receiver: async_channel::Receiver<WorkerCommand>,
 }
 
 impl WorkerCtx {

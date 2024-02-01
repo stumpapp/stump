@@ -46,6 +46,7 @@ pub(crate) async fn job_task_handler<J: DynJob>(
 				)));
 			},
 			StreamEvent::TaskCompleted(Ok(result)) => {
+				tracing::debug!("Task output received");
 				let JobTaskOutput { data, errors } = result?;
 
 				return Ok(JobTaskHandlerOutput {

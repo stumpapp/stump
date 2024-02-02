@@ -37,19 +37,19 @@ impl Display for BenchmarkSize {
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 1] = [
+	static SIZES: [BenchmarkSize; 3] = [
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
 		},
-		// BenchmarkSize {
-		// 	series_count: 100,
-		// 	media_per_series: 10,
-		// },
-		// BenchmarkSize {
-		// 	series_count: 100,
-		// 	media_per_series: 100,
-		// },
+		BenchmarkSize {
+			series_count: 100,
+			media_per_series: 10,
+		},
+		BenchmarkSize {
+			series_count: 100,
+			media_per_series: 100,
+		},
 		// BenchmarkSize {
 		// 	series_count: 100,
 		// 	media_per_series: 1000,
@@ -71,6 +71,7 @@ fn full_scan(c: &mut Criterion) {
 
 				let client = test_ctx.worker_ctx.db.clone();
 
+				println!("Starting benchmark for {}", size);
 				let start = Instant::now();
 				scan_new_library(test_ctx).await;
 				let elapsed = start.elapsed();
@@ -145,8 +146,6 @@ async fn create_test_library(
 
 	let data_dir = PathBuf::from(format!("{}/benches/data", env!("CARGO_MANIFEST_DIR")));
 
-	dbg!(&data_dir);
-
 	let zip_path = data_dir.join("book.zip");
 	let epub_path = data_dir.join("book.epub");
 	let rar_path = data_dir.join("book.rar");
@@ -198,13 +197,20 @@ async fn setup_test(
 		path: library.path.clone(),
 		options: Some(library.library_options.clone()),
 	});
+
+	let job_id = Uuid::new_v4().to_string();
+	let _db_job = client
+		.job()
+		.create(job_id.clone(), job.name().to_string(), vec![])
+		.exec()
+		.await?;
+
 	let config_dir = format!("{}/benches/config", env!("CARGO_MANIFEST_DIR"));
-	dbg!(&config_dir);
 	let config = StumpConfig::new(config_dir);
 	let worker_ctx = WorkerCtx {
 		db: Arc::new(client),
 		config: Arc::new(config),
-		job_id: Uuid::new_v4().to_string(),
+		job_id,
 		event_sender: async_channel::unbounded().0,
 		command_receiver: async_channel::unbounded().1,
 	};
@@ -282,5 +288,6 @@ async fn scan_new_library(test_ctx: TestCtx) {
 
 	let commands_rx = worker_ctx.command_receiver.clone();
 
-	let _ = job.run(worker_ctx, commands_rx).await;
+	let result = job.run(worker_ctx, commands_rx).await;
+	tracing::debug!("Job result: {:?}", result);
 }

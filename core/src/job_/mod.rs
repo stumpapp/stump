@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, fmt::Debug, sync::Arc};
+use std::{collections::VecDeque, env, fmt::Debug, sync::Arc};
 
 use serde::{de, Deserialize, Serialize};
 
@@ -211,14 +211,12 @@ impl<J: DynJob> JobExecutor for Job<J> {
 				"No data could be created for job. This is a bug!".to_string(),
 			)
 		})?;
-		dbg!(&working_data);
 
 		// Setup our references since the loop would otherwise take ownership
 		let stateful_job = Arc::new(stateful_job);
 		let mut ctx = Arc::new(ctx);
 
 		tracing::debug!(task_count = tasks.len(), "Starting tasks");
-		dbg!(&tasks.len());
 
 		while !tasks.is_empty() {
 			let next_task = tasks.pop_front().expect("tasks is not empty??");

@@ -45,7 +45,6 @@ impl WalkedLibrary {
 pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrary> {
 	let library_is_missing = !PathBuf::from(path).exists();
 	if library_is_missing {
-		dbg!("Library is missing");
 		tracing::error!("Failed to walk: {} is missing or inaccessible", path);
 		return Ok(WalkedLibrary::missing());
 	}
@@ -103,7 +102,6 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 		"Walk finished in {}ms",
 		walk_start.elapsed().as_millis()
 	);
-	dbg!(&valid_entries, &ignored_entries);
 
 	let computation_start = std::time::Instant::now();
 	let (series_to_create, missing_series, series_to_visit) = {

@@ -92,6 +92,7 @@ impl DynJob for LibraryScanJob {
 			return Ok(restore_point);
 		}
 
+		let mut data = Self::Data::default();
 		let library_options = ctx
 			.db
 			.library_options()
@@ -113,7 +114,8 @@ impl DynJob for LibraryScanJob {
 			series_to_visit,
 			missing_series,
 			library_is_missing,
-			..
+			ignored_directories,
+			seen_directories,
 		} = walk_library(
 			&self.path,
 			WalkerCtx {
@@ -130,6 +132,7 @@ impl DynJob for LibraryScanJob {
 			library_is_missing,
 			"Walked library"
 		);
+		data.total_files = seen_directories + ignored_directories;
 
 		if library_is_missing {
 			// TODO: mark library as missing in DB
@@ -161,7 +164,7 @@ impl DynJob for LibraryScanJob {
 		);
 
 		Ok(WorkingState {
-			data: Some(LibraryScanData::default()),
+			data: Some(data),
 			tasks,
 			current_task_index: 0,
 			errors: vec![],
@@ -179,7 +182,6 @@ impl DynJob for LibraryScanJob {
 		match task {
 			LibraryScanTask::Init(input) => {
 				tracing::info!("Executing the init task for library scan");
-				dbg!("INIT");
 				let InitTaskInput {
 					series_to_create,
 					missing_series,
@@ -258,7 +260,6 @@ impl DynJob for LibraryScanJob {
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
 				tracing::info!("Executing the walk series task for library scan");
-				dbg!("WALK SERIES");
 
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),
@@ -291,8 +292,11 @@ impl DynJob for LibraryScanJob {
 					media_to_create,
 					// media_to_update,
 					missing_media,
+					seen_files,
+					ignored_files,
 					..
 				} = walk_result?;
+				data.total_files += seen_files + ignored_files;
 
 				if series_is_missing {
 					return handle_missing_series(
@@ -532,8 +536,6 @@ async fn handle_create_series_media(
 		}
 	}
 
-	dbg!(&data.created_media);
-
 	Ok(JobTaskOutput { data, errors })
 }
 
@@ -736,8 +738,10 @@ mod tests {
 
 	#[tokio::test]
 	async fn bench_library_scan() {
-		let series_count = 1000;
-		let books_per_series = 100;
+		// let series_count = 1000;
+		// let books_per_series = 100;
+		let series_count = 10;
+		let books_per_series = 10;
 
 		let TestCtx {
 			mut job,

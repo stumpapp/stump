@@ -190,13 +190,10 @@ impl PathUtils for Path {
 		let read_result = std::fs::read_dir(self);
 
 		match read_result {
-			Ok(items) => {
-				dbg!(self, &items);
-				items
-					.filter_map(|item| item.ok())
-					.filter(|item| item.path() != self)
-					.any(|f| !f.path().should_ignore())
-			},
+			Ok(items) => items
+				.filter_map(|item| item.ok())
+				.filter(|item| item.path() != self)
+				.any(|f| !f.path().should_ignore()),
 			Err(e) => {
 				error!(
 					error = ?e,

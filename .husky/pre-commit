@@ -2,5 +2,3 @@
 . "$(dirname "$0")/_/husky.sh"
 
 npx lint-staged
-# https://moonrepo.dev/docs/faq#how-to-stop-moon-formatting-json-and-yaml-files
-# moon run :lint && pnpm prettify

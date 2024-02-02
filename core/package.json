@@ -5,10 +5,11 @@
 	"keywords": [],
 	"license": "MIT",
 	"scripts": {
+		"lint": "cargo clippy --package stump_core -- -D warnings",
 		"prisma": "cargo prisma",
-		"studio": "npx prisma studio",
+		"studio": "pnpm dlx prisma studio",
 		"build": "cargo build --release",
-		"fmt": "cargo fmt --all  --manifest-path=./Cargo.toml --",
+		"format": "cargo fmt --package stump_core",
 		"integration-tests": "cargo integration-tests"
 	}
 }

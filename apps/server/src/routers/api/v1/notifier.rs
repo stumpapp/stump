@@ -1,75 +1,108 @@
 use axum::{
 	extract::{Path, State},
+	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
 use serde::Deserialize;
 use specta::Type;
-use stump_core::db::entity::{notifier, Notifier, NotifierConfig, NotifierType};
+use stump_core::{
+	db::entity::{Notifier, NotifierConfig, NotifierType},
+	prisma::notifier,
+};
 use tower_sessions::Session;
 use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
-	utils::{chain_optional_iter, get_session_server_owner_user},
+	filter::chain_optional_iter,
+	middleware::auth::Auth,
+	utils::get_session_server_owner_user,
 };
 
-// "/" -> GET is get all, POST is create
-// "/:id" -> GET is get, PUT is update, PATCH is patch, DELETE is delete
-pub(crate) fn mount() -> Router<AppState> {
-	Router::new().nest(
-		"/notifiers",
-		Router::new()
-			.route("/", get(get_notifiers).post(create_notifier)) // <-- ONE CHANGE HERE
-			.nest(
-				"/:id",
-				Router::new().route(
-					"/",
-					get(get_notifier_by_id)
-						.put(update_notifier)
-						.patch(patch_notifier)
-						.delete(delete_notifier),
+pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
+	Router::new()
+		.nest(
+			"/notifiers",
+			Router::new()
+				.route("/", get(get_notifiers).post(create_notifier))
+				.nest(
+					"/:id",
+					Router::new().route(
+						"/",
+						get(get_notifier_by_id)
+							.put(update_notifier)
+							.patch(patch_notifier)
+							.delete(delete_notifier),
+					),
 				),
-			),
-	)
+		)
+		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+#[utoipa::path(
+	get,
+	path = "/api/v1/notifiers",
+	tag = "notifier",
+	responses(
+		(status = 200, description = "Successfully retrieved notifiers", body = Vec<Notifier>),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Bad request"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_notifiers(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Vec<Notifier>>> {
-	let client = ctx.get_db();
 	get_session_server_owner_user(&session)?;
+	let client = ctx.get_db();
 
-	let notifiers = client.notifier().find_many(vec![]).exec().await?;
+	let notifiers = client
+		.notifier()
+		.find_many(vec![])
+		.exec()
+		.await?
+		.into_iter()
+		.map(Notifier::try_from)
+		.collect::<Vec<Result<Notifier, _>>>();
+	let notifiers = notifiers.into_iter().collect::<Result<Vec<_>, _>>()?;
 
-	Ok(Json(notifiers.into_iter().map(Notifier::from).collect()))
+	Ok(Json(notifiers))
 }
 
-// take ID as param
+#[utoipa::path(
+	get,
+	path = "/api/v1/notifiers/:id",
+	tag = "notifier",
+	params(
+		("id" = i32, Path, description = "The notifier ID")
+	),
+	responses(
+		(status = 200, description = "Successfully retrieved notifier", body = Notifier),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Notifier not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn get_notifier_by_id(
 	State(ctx): State<AppState>,
-	Path(id): Path<String>,
+	Path(id): Path<i32>,
 	session: Session,
 ) -> ApiResult<Json<Notifier>> {
+	get_session_server_owner_user(&session)?;
 	let client = ctx.get_db();
-
-	let i32id = id.parse::<i32>().unwrap();
-
-	let where_params = vec![stump_core::prisma::notifier::id::equals(i32id)];
 
 	let notifier = client
 		.notifier()
-		.find_first(where_params)
+		.find_first(vec![notifier::id::equals(id)])
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Notifier not found".to_string()));
+		.ok_or(ApiError::NotFound("Notifier not found".to_string()))?;
 
-	Ok(Json(Notifier::from(notifier.unwrap())))
+	Ok(Json(Notifier::try_from(notifier)?))
 }
-
-// take create/update struct
 
 #[derive(Deserialize, ToSchema, Type)]
 pub struct CreateOrUpdateNotifier {
@@ -78,6 +111,19 @@ pub struct CreateOrUpdateNotifier {
 	config: NotifierConfig,
 }
 
+#[utoipa::path(
+	post,
+	path = "/api/v1/notifiers",
+	tag = "notifier",
+	request_body = CreateOrUpdateNotifier,
+	responses(
+		(status = 200, description = "Successfully created notifier"),
+		(status = 400, description = "Bad request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error")
+	)
+)]
 async fn create_notifier(
 	State(ctx): State<AppState>,
 	session: Session,
@@ -91,28 +137,54 @@ async fn create_notifier(
 		.notifier()
 		.create(
 			payload._type.to_string(),
-			payload.config.into_bytes(),
+			payload.config.into_bytes()?,
 			vec![],
 		)
 		.exec()
 		.await?;
 
-	Ok(Json(Notifier::from(notifier)))
+	Ok(Json(Notifier::try_from(notifier)?))
 }
 
-// take ID as param
-// take create/update struct
-// full replace/update
-async fn update_notifier() {
-	// setup:
-	// - add id to handler (the fn) in path using Path extractor
-	// - add State to handler (the fn) use State extractor
-	// - add session to handler (the fn)
-	// - add CreateOrUpdateNotifier to handler (the fn) using Json extractor
+#[utoipa::path(
+	put,
+	path = "/api/v1/notifiers/:id",
+	tag = "notifier",
+	request_body = UpdateNotifier,
+	params(
+		("id" = i32, Path, description = "The id of the notifier to update")
+	),
+	responses(
+		(status = 200, description = "Successfully updated notifier"),
+		(status = 400, description = "Bad request"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn update_notifier(
+	State(ctx): State<AppState>,
+	Path(id): Path<i32>,
+	session: Session,
+	Json(payload): Json<CreateOrUpdateNotifier>,
+) -> ApiResult<Json<Notifier>> {
+	get_session_server_owner_user(&session)?;
 
-	// step 1: enforce server admin session
-	// step 2: get client from context (state)
-	// step 3: write the update query: https://prisma.brendonovich.dev/writing-data/update
+	let client = ctx.get_db();
+	let notifier = client
+		.notifier()
+		.update(
+			notifier::id::equals(id),
+			vec![
+				notifier::r#type::set(payload._type.to_string()),
+				notifier::config::set(payload.config.into_bytes()?),
+			],
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(Notifier::try_from(notifier)?))
 }
 
 #[derive(Deserialize, ToSchema, Type)]
@@ -122,35 +194,84 @@ pub struct PatchNotifier {
 	config: Option<NotifierConfig>,
 }
 
-// take ID as param
-// take patch struct
-// only update what is not None
+#[utoipa::path(
+    patch,
+    path = "/api/v1/notifiers/:id/",
+    tag = "notifier",
+    params(
+        ("id" = i32, Path, description = "The ID of the notifier")
+    ),
+    responses(
+        (status = 200, description = "Successfully updated notifier"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Notifier not found"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
 async fn patch_notifier(
 	State(ctx): State<AppState>,
-	Path(id): Path<String>,
+	Path(id): Path<i32>,
 	session: Session,
-	Json(payload): Json<CreateOrUpdateNotifier>,
+	Json(payload): Json<PatchNotifier>,
 ) -> ApiResult<Json<Notifier>> {
+	get_session_server_owner_user(&session)?;
+
 	let client = ctx.get_db();
 
-	let i32id = id.parse::<i32>().unwrap();
+	let config = payload
+		.config
+		.map(|config| config.into_bytes())
+		.transpose()?;
 
-	let updated_notifier = client
+	let patched_notifier = client
 		.notifier()
 		.update(
-			stump_core::prisma::notifier::id::equals(i32id),
+			notifier::id::equals(id),
 			chain_optional_iter(
-				stump_core::prisma::notifier::r#type::set(payload._type.to_string()),
-				optional,
+				[],
+				[
+					payload
+						._type
+						.map(|_type| notifier::r#type::set(_type.to_string())),
+					config.map(|bytes| notifier::config::set(bytes)),
+				],
 			),
 		)
 		.exec()
 		.await?;
-	// chain_optional_iter([], [
-	// 	payload._type.and_then()
-	// ])
-	Ok(Json(Notifier::from(updated_notifier)))
+
+	Ok(Json(Notifier::try_from(patched_notifier)?))
 }
 
-// take ID
-async fn delete_notifier() {}
+#[utoipa::path(
+	delete,
+	path = "/api/v1/notifiers/:id/",
+	tag = "notifier",
+	params(
+		("id" = i32, Path, description = "The notifier ID"),
+	),
+	responses(
+		(status = 200, description = "Successfully deleted notifier"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Notifier not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn delete_notifier(
+	State(ctx): State<AppState>,
+	Path(id): Path<i32>,
+	session: Session,
+) -> ApiResult<Json<Notifier>> {
+	get_session_server_owner_user(&session)?;
+
+	let client = ctx.get_db();
+
+	let deleted_notifier = client
+		.notifier()
+		.delete(notifier::id::equals(id))
+		.exec()
+		.await?;
+
+	Ok(Json(Notifier::try_from(deleted_notifier)?))
+}

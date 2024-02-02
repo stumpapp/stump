@@ -21,7 +21,6 @@ pub use library::*;
 pub use media::*;
 pub use metadata::*;
 pub use notifier::*;
-pub use read_progress::*;
 pub use reading_list::*;
 pub use series::*;
 pub use server_config::*;

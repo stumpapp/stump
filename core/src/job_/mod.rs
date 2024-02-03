@@ -1,5 +1,6 @@
-use std::{collections::VecDeque, env, fmt::Debug, sync::Arc};
+use std::{collections::VecDeque, fmt::Debug, sync::Arc};
 
+use prisma_client_rust::chrono::{DateTime, Utc};
 use serde::{de, Deserialize, Serialize};
 
 pub mod error;
@@ -18,14 +19,6 @@ use uuid::Uuid;
 
 use crate::prisma::job;
 
-/// An enum that defines the actor that initiated a job (e.g. a user, another job, or the system)
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum JobInitActor {
-	User(String),
-	Job(String),
-	System,
-}
-
 /// A trait that defines the state of a job. State is frequently updated during execution.
 pub trait WritableData: Serialize + de::DeserializeOwned {
 	fn store(&mut self, updated: Self) {
@@ -41,11 +34,26 @@ impl WritableData for () {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct JobRunError {
+	pub msg: String,
+	pub timestamp: DateTime<Utc>,
+}
+
+impl JobRunError {
+	pub fn new(msg: String) -> Self {
+		Self {
+			msg,
+			timestamp: Utc::now(),
+		}
+	}
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct WorkingState<D, T> {
 	pub data: Option<D>,
 	pub tasks: VecDeque<T>,
 	pub current_task_index: usize,
-	pub errors: Vec<String>,
+	pub errors: Vec<JobRunError>,
 }
 
 pub struct JobState<Job: DynJob> {
@@ -53,7 +61,7 @@ pub struct JobState<Job: DynJob> {
 	data: Option<Job::Data>,
 	tasks: VecDeque<Job::Task>,
 	current_task_index: usize,
-	errors: Vec<String>,
+	errors: Vec<JobRunError>,
 }
 
 #[async_trait::async_trait]
@@ -70,9 +78,6 @@ pub trait DynJob: Send + Sync + Sized + 'static {
 		+ Send
 		+ Sync;
 	type Task: Serialize + de::DeserializeOwned + Send + Sync;
-	// TODO: Eventually allow for custom errors, I could see doing something like Log as the error
-	// being useful to then just dump the errors to the DB...
-	// type TaskError = String;
 
 	/// A function that should be called in Self::init to initialize the job state with
 	/// existing data from the DB (if any). Used to support pausing/resuming jobs.
@@ -148,6 +153,11 @@ impl<SJ: DynJob> Job<SJ> {
 	}
 }
 
+#[derive(Debug)]
+pub struct JobExecutorOutput {
+	data: Option<serde_json::Value>,
+	errors: Vec<JobRunError>,
+}
 #[async_trait::async_trait]
 pub trait JobExecutor: Send + Sync {
 	fn id(&self) -> Uuid;
@@ -156,7 +166,7 @@ pub trait JobExecutor: Send + Sync {
 		&mut self,
 		ctx: WorkerCtx,
 		commands_rx: async_channel::Receiver<WorkerCommand>,
-	) -> Result<(), JobError>;
+	) -> Result<JobExecutorOutput, JobError>;
 }
 
 #[async_trait::async_trait]
@@ -173,7 +183,7 @@ impl<J: DynJob> JobExecutor for Job<J> {
 		&mut self,
 		ctx: WorkerCtx,
 		commands_rx: async_channel::Receiver<WorkerCommand>,
-	) -> Result<(), JobError> {
+	) -> Result<JobExecutorOutput, JobError> {
 		let job_id = self.id();
 		let job_name = self.name();
 		tracing::info!(?job_id, ?job_name, "Starting job");
@@ -208,7 +218,7 @@ impl<J: DynJob> JobExecutor for Job<J> {
 		}
 		.ok_or_else(|| {
 			JobError::InitFailed(
-				"No data could be created for job. This is a bug!".to_string(),
+				"No data was created for job. This is a bug!?".to_string(),
 			)
 		})?;
 
@@ -235,6 +245,7 @@ impl<J: DynJob> JobExecutor for Job<J> {
 			let JobTaskOutput {
 				data: task_data,
 				errors: task_errors,
+				subtasks,
 			} = output;
 
 			// Update our working data and any errors with the new data/errors from the
@@ -245,6 +256,13 @@ impl<J: DynJob> JobExecutor for Job<J> {
 
 			// Reassign the ctx to the returned values
 			ctx = returned_ctx;
+
+			// If there are subtasks, we need to insert them into the tasks queue at the
+			// front, so they are executed next
+			let remaining_tasks = tasks.split_off(0);
+			let mut new_tasks = VecDeque::from(subtasks);
+			new_tasks.extend(remaining_tasks);
+			tasks = new_tasks;
 		}
 
 		tracing::debug!(
@@ -253,11 +271,20 @@ impl<J: DynJob> JobExecutor for Job<J> {
 			"Task loop completed?"
 		);
 
-		dbg!(&working_data);
-
 		let errors_count = errors.len();
 		tracing::debug!(?errors_count, "All tasks completed");
 
-		Ok(())
+		let out_data = serde_json::to_value(&working_data).map_or_else(
+			|error| {
+				tracing::error!(?error, job_data = ?working_data, "Failed to serialize job data!");
+				None
+			},
+			|value| Some(value),
+		);
+
+		Ok(JobExecutorOutput {
+			data: out_data,
+			errors,
+		})
 	}
 }

@@ -37,7 +37,7 @@ impl Display for BenchmarkSize {
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 3] = [
+	static SIZES: [BenchmarkSize; 4] = [
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
@@ -50,10 +50,10 @@ fn full_scan(c: &mut Criterion) {
 			series_count: 100,
 			media_per_series: 100,
 		},
-		// BenchmarkSize {
-		// 	series_count: 100,
-		// 	media_per_series: 1000,
-		// },
+		BenchmarkSize {
+			series_count: 100,
+			media_per_series: 1000,
+		},
 	];
 
 	let mut group = c.benchmark_group("full_scan");
@@ -114,18 +114,27 @@ async fn create_test_library(
 	))
 	.await;
 
+	let deleted_libraries = client
+		.library()
+		.delete_many(vec![])
+		.exec()
+		.await
+		.expect("Failed to delete libraries before bench");
+	tracing::debug!(?deleted_libraries, "Deleted libraries");
+
 	let library_temp_dir = TempDirBuilder::new().prefix("ROOT").tempdir()?;
 	let library_temp_dir_path = library_temp_dir.path().to_str().unwrap().to_string();
 
 	let library_options = client.library_options().create(vec![]).exec().await?;
 
+	let id = Uuid::new_v4().to_string();
 	let library = client
 		.library()
 		.create(
-			"Bench".to_string(),
+			id.clone(),
 			library_temp_dir_path.clone(),
 			library_options::id::equals(library_options.id.clone()),
-			vec![],
+			vec![library::id::set(id.clone())],
 		)
 		.exec()
 		.await?;
@@ -289,5 +298,5 @@ async fn scan_new_library(test_ctx: TestCtx) {
 	let commands_rx = worker_ctx.command_receiver.clone();
 
 	let result = job.run(worker_ctx, commands_rx).await;
-	tracing::debug!("Job result: {:?}", result);
+	println!("Job result: {:?}", result);
 }

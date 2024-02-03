@@ -17,6 +17,7 @@ pub mod job;
 pub mod job_;
 mod job__;
 pub mod opds;
+mod utils;
 
 mod context;
 pub mod error;

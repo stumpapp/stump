@@ -4,7 +4,7 @@ use tokio::{spawn, sync::oneshot};
 
 use crate::{config::StumpConfig, job::JobError, prisma::PrismaClient};
 
-use super::JobExecutor;
+use super::{JobExecutor, JobManagerAgent};
 
 pub enum WorkerEvent {
 	Progress, // TODO: data
@@ -43,13 +43,14 @@ impl WorkerCtx {
 }
 
 pub struct Worker {
-	job: Box<dyn JobExecutor>,
+	// TODO: state? E.g. running, paused, etc.
 	command_sender: async_channel::Sender<WorkerCommand>,
 }
 
 impl Worker {
-	pub async fn new(
-		job: Box<dyn JobExecutor>,
+	/// Create a new worker instance and its context
+	async fn new(
+		job_id: &str,
 		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		event_sender: async_channel::Sender<WorkerEvent>,
@@ -58,20 +59,35 @@ impl Worker {
 			async_channel::unbounded::<WorkerCommand>();
 
 		let worker_ctx = WorkerCtx {
-			job_id: job.id().to_string(),
+			job_id: job_id.to_string(),
 			db,
 			config,
 			event_sender,
 			command_receiver: command_receiver,
 		};
 
-		Ok((
-			Self {
-				job,
-				command_sender,
-			},
-			worker_ctx,
-		))
+		Ok((Self { command_sender }, worker_ctx))
+	}
+
+	pub async fn create_and_spawn(
+		job: Box<dyn JobExecutor>,
+		agent: Arc<JobManagerAgent>,
+		db: Arc<PrismaClient>,
+		config: Arc<StumpConfig>,
+		event_sender: async_channel::Sender<WorkerEvent>,
+	) -> Result<Arc<Self>, JobError> {
+		let job_id = job.id().to_string();
+		let (worker, worker_ctx) =
+			Worker::new(job_id.as_str(), db, config, event_sender).await?;
+		let worker = worker.arced();
+
+		spawn(Self::work(worker_ctx, job, agent));
+
+		Ok(worker)
+	}
+
+	fn arced(self) -> Arc<Self> {
+		Arc::new(self)
 	}
 
 	/// Cancels the job running in the worker
@@ -101,29 +117,21 @@ impl Worker {
 		}
 	}
 
-	async fn work(worker_ctx: WorkerCtx) {
-		let commands_rx = worker_ctx.command_receiver.clone();
-		let shutdown_fut = commands_rx.recv();
-		tokio::pin!(shutdown_fut);
+	async fn work(
+		worker_ctx: WorkerCtx,
+		mut job: Box<dyn JobExecutor>,
+		agent: Arc<JobManagerAgent>,
+	) {
+		let (commands_tx, commands_rx) = async_channel::unbounded::<WorkerCommand>();
 
-		// let mut run_task = {
-		// 	let ctx = worker_ctx.clone();
-		// 	spawn(async move {
-		// 		let job_result = job.run(ctx).await;
+		let job_id = job.id().to_string();
+		let mut handle = spawn(async move {
+			let result = job.run(worker_ctx, commands_rx).await;
+			(job, result)
+		});
 
-		// 		(job, job_result)
-		// 	})
-		// };
+		// TODO: stream events and handle them
 
-		// TODO: commands (if ever extended to more than cancel) should be handled in a loop
-		tokio::select! {
-			command = shutdown_fut => {
-				// TODO: do something
-				println!("Received command: {:?}", command);
-			},
-			_ = tokio::time::sleep(std::time::Duration::from_secs(20)) => {
-				println!("Timeout reached!");
-			},
-		}
+		agent.complete(job_id).await;
 	}
 }

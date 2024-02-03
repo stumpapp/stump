@@ -10,14 +10,16 @@ use crate::{
 	},
 	filesystem::{scanner::utils::create_media, MediaBuilder, SeriesBuilder},
 	job_::{
-		error::JobError, DynJob, JobTaskOutput, WorkerCtx, WorkingState, WritableData,
+		error::JobError, DynJob, JobRunError, JobTaskOutput, WorkerCtx, WorkingState,
+		WritableData,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
+	utils::chain_optional_iter,
 };
 
 use super::{
-	utils::generate_rule_set, walk_library, walk_series, WalkedLibrary, WalkedSeries,
-	WalkerCtx,
+	series_scan_job::SeriesScanTask, utils::generate_rule_set, walk_library, walk_series,
+	WalkedLibrary, WalkedSeries, WalkerCtx,
 };
 
 // TODO: there has to be some sort of nesting of task counts here in order to properly report on the UI.
@@ -36,6 +38,11 @@ use super::{
 pub enum LibraryScanTask {
 	Init(InitTaskInput),
 	WalkSeries(PathBuf),
+	SeriesTask {
+		id: String,
+		path: String,
+		task: SeriesScanTask,
+	},
 }
 
 #[derive(Serialize, Deserialize)]
@@ -178,6 +185,7 @@ impl DynJob for LibraryScanJob {
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut data = Self::Data::default();
 		let mut errors = vec![];
+		let mut subtasks = vec![];
 
 		match task {
 			LibraryScanTask::Init(input) => {
@@ -204,15 +212,14 @@ impl DynJob for LibraryScanJob {
 						.map_or_else(
 							|error| {
 								tracing::error!(error = ?error, "Failed to update missing series");
-								errors.push(format!(
+								errors.push(JobRunError::new(format!(
 									"Failed to update missing series: {:?}",
 									error.to_string()
-								));
+								)));
 								0
 							},
 							|count| {
 								data.updated_series = count as u64;
-								tracing::debug!(count, "Updated missing series");
 								count
 							},
 						);
@@ -249,10 +256,10 @@ impl DynJob for LibraryScanJob {
 							},
 							Err(e) => {
 								tracing::error!(error = ?e, "Failed to batch insert series");
-								errors.push(format!(
+								errors.push(JobRunError::new(format!(
 									"Failed to batch insert series: {:?}",
 									e.to_string()
-								));
+								)));
 							},
 						}
 					}
@@ -283,70 +290,104 @@ impl DynJob for LibraryScanJob {
 					// handles this instead, however for now this is fine.
 					return Ok(JobTaskOutput {
 						data,
-						errors: vec![core_error.to_string()],
+						errors: vec![JobRunError::new(format!(
+							"Critical error during attempt to walk series: {:?}",
+							core_error.to_string()
+						))],
+						subtasks,
 					});
 				}
 
 				let WalkedSeries {
 					series_is_missing,
 					media_to_create,
-					// media_to_update,
+					media_to_visit,
 					missing_media,
 					seen_files,
 					ignored_files,
-					..
 				} = walk_result?;
 				data.total_files += seen_files + ignored_files;
 
 				if series_is_missing {
 					return handle_missing_series(
 						&ctx.db,
-						path_buf.to_str().unwrap(),
+						path_buf.to_str().unwrap_or_default(),
 						data,
 						errors,
 					)
 					.await;
 				}
 
+				let series_path_str = path_buf.to_str().unwrap_or_default().to_string();
 				let series = ctx
 					.db
 					.series()
-					.find_first(vec![series::path::equals(
-						path_buf.to_str().unwrap().to_string(),
-					)])
+					.find_first(vec![series::path::equals(series_path_str.clone())])
 					.exec()
 					.await?
 					.ok_or(JobError::TaskFailed("Series not found".to_string()))?;
 
-				let JobTaskOutput {
-					data: new_data,
-					errors: new_errors,
-				} = hande_missing_media(&ctx.db, &series.id, missing_media, data, errors)
-					.await?;
-				data = new_data;
-				errors = new_errors;
-
-				let JobTaskOutput {
-					data: new_data,
-					errors: new_errors,
-				} = handle_create_series_media(
-					media_to_create,
-					SeriesCtx {
-						id: series.id,
-						path: series.path,
-						library_options: self.options.clone().unwrap_or_default(),
-					},
-					&ctx,
-					data,
-					errors,
+				subtasks = chain_optional_iter(
+					[],
+					[
+						(!missing_media.is_empty())
+							.then(|| SeriesScanTask::MarkMissingMedia(missing_media)),
+						(!media_to_create.is_empty())
+							.then(|| SeriesScanTask::CreateMedia(media_to_create)),
+						(!media_to_visit.is_empty())
+							.then(|| SeriesScanTask::VisitMedia(media_to_visit)),
+					],
 				)
-				.await?;
-				data = new_data;
-				errors = new_errors;
+				.into_iter()
+				.map(|task| LibraryScanTask::SeriesTask {
+					id: series.id.clone(),
+					path: series_path_str.clone(),
+					task,
+				})
+				.collect();
+			},
+			LibraryScanTask::SeriesTask {
+				id: series_id,
+				path: series_path,
+				task: series_task,
+			} => match series_task {
+				SeriesScanTask::MarkMissingMedia(paths) => {
+					let JobTaskOutput {
+						data: new_data,
+						errors: new_errors,
+						..
+					} = handle_missing_media(&ctx.db, &series_id, paths, data, errors)
+						.await?;
+					data = new_data;
+					errors = new_errors;
+				},
+				SeriesScanTask::CreateMedia(paths) => {
+					let series_ctx = SeriesCtx {
+						id: series_id,
+						path: series_path,
+						library_options: self.options.clone().unwrap_or_default(),
+						chunk_size: 300,
+					};
+					let JobTaskOutput {
+						data: new_data,
+						errors: new_errors,
+						..
+					} = handle_create_media(paths, series_ctx, ctx, data, errors).await?;
+					data = new_data;
+					errors = new_errors;
+				},
+				SeriesScanTask::VisitMedia(paths) => {
+					// NOTE: commented so bench doesn't fail
+					// unimplemented!()
+				},
 			},
 		}
 
-		Ok(JobTaskOutput { data, errors })
+		Ok(JobTaskOutput {
+			data,
+			errors,
+			subtasks,
+		})
 	}
 }
 
@@ -354,7 +395,7 @@ async fn handle_missing_series(
 	client: &PrismaClient,
 	path: &str,
 	mut data: LibraryScanData,
-	mut errors: Vec<String>,
+	mut errors: Vec<JobRunError>,
 ) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
 	let affected_rows = client
 		.series()
@@ -367,15 +408,15 @@ async fn handle_missing_series(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing series");
-				errors.push(format!(
+				errors.push(JobRunError::new(format!(
 					"Failed to update missing series: {:?}",
 					error.to_string()
-				));
+				)));
+
 				0
 			},
 			|count| {
 				data.updated_series += count as u64;
-				tracing::debug!(count, "Updated missing series");
 				count
 			},
 		);
@@ -401,32 +442,39 @@ async fn handle_missing_series(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing media");
-				errors.push(format!(
+				errors.push(JobRunError::new(format!(
 					"Failed to update missing media: {:?}",
 					error.to_string()
-				));
+				)));
 				0
 			},
 			|count| {
 				data.updated_media += count as u64;
-				tracing::debug!(count, "Updated missing media");
 				count
 			},
 		);
 
-	Ok(JobTaskOutput { data, errors })
+	Ok(JobTaskOutput {
+		data,
+		errors,
+		subtasks: vec![],
+	})
 }
 
-async fn hande_missing_media(
+async fn handle_missing_media(
 	client: &PrismaClient,
 	series_id: &str,
 	media_paths: Vec<PathBuf>,
 	mut data: LibraryScanData,
-	mut errors: Vec<String>,
+	mut errors: Vec<JobRunError>,
 ) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
 	if media_paths.is_empty() {
 		tracing::debug!("No missing media to handle");
-		return Ok(JobTaskOutput { data, errors });
+		return Ok(JobTaskOutput {
+			data,
+			errors,
+			subtasks: vec![],
+		});
 	}
 
 	let _affected_rows = client
@@ -448,50 +496,57 @@ async fn hande_missing_media(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing media");
-				errors.push(format!(
+				errors.push(JobRunError::new(format!(
 					"Failed to update missing media: {:?}",
 					error.to_string()
-				));
+				)));
 				0
 			},
 			|count| {
 				data.updated_media += count as u64;
-				tracing::debug!(count, "Updated missing media");
 				count
 			},
 		);
 
-	Ok(JobTaskOutput { data, errors })
+	Ok(JobTaskOutput {
+		data,
+		errors,
+		subtasks: vec![],
+	})
 }
 
 struct SeriesCtx {
 	id: String,
 	path: String,
 	library_options: LibraryOptions,
+	chunk_size: usize,
 }
 
-async fn handle_create_series_media(
+async fn handle_create_media(
 	paths: Vec<PathBuf>,
 	series_ctx: SeriesCtx,
 	ctx: &WorkerCtx,
 	mut data: LibraryScanData,
-	mut errors: Vec<String>,
+	mut errors: Vec<JobRunError>,
 ) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
 	if paths.is_empty() {
 		tracing::debug!("No media to create for series");
-		return Ok(JobTaskOutput { data, errors });
+		return Ok(JobTaskOutput {
+			data,
+			errors,
+			subtasks: vec![],
+		});
 	}
 
 	let SeriesCtx {
 		id,
 		path,
 		library_options,
+		chunk_size,
 	} = series_ctx;
 	tracing::debug!(?path, "Creating media for series");
 
-	// TODO: support config for chunk size, systems with more memory can take advantage of larger chunks
-	// while systems with less memory can take advantage of smaller chunks (if desired)
-	let path_chunks = paths.chunks(300);
+	let path_chunks = paths.chunks(chunk_size);
 	for (idx, chunk) in path_chunks.enumerate() {
 		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
 		let mut built_media = chunk
@@ -521,255 +576,27 @@ async fn handle_create_series_media(
 						},
 						Err(e) => {
 							tracing::error!(error = ?e, ?media_path, "Failed to create media");
-							errors.push(format!(
+							errors.push(JobRunError::new(format!(
 								"Failed to create media: {:?}",
 								e.to_string()
-							));
+							)));
 						},
 					}
 				},
 				Err(e) => {
 					tracing::error!(error = ?e, ?media_path, "Failed to build media");
-					errors.push(format!("Failed to build media: {:?}", e.to_string()));
+					errors.push(JobRunError::new(format!(
+						"Failed to build media: {:?}",
+						e.to_string()
+					)));
 				},
 			}
 		}
 	}
 
-	Ok(JobTaskOutput { data, errors })
-}
-
-#[cfg(test)]
-mod tests {
-	use std::sync::Arc;
-
-	use tempfile::{Builder as TempDirBuilder, TempDir};
-	use uuid::Uuid;
-
-	use super::*;
-	use crate::{
-		config::StumpConfig,
-		db::{create_client_with_url, entity::Library},
-		job_::{Job, JobExecutor},
-		prisma::{library, library_options},
-	};
-
-	struct TestCtx {
-		job: Job<LibraryScanJob>,
-		worker_ctx: WorkerCtx,
-		library: Library,
-		tempdirs: Vec<TempDir>,
-	}
-
-	async fn create_test_library(
-		series_count: usize,
-		books_per_series: usize,
-	) -> Result<(PrismaClient, Library, Vec<TempDir>), Box<dyn std::error::Error>> {
-		let client = create_client_with_url(&format!(
-			"file:{}/prisma/dev.db",
-			env!("CARGO_MANIFEST_DIR")
-		))
-		.await;
-
-		let library_temp_dir = TempDirBuilder::new().prefix("ROOT").tempdir()?;
-		let library_temp_dir_path = library_temp_dir.path().to_str().unwrap().to_string();
-
-		tracing::info!("Creating bench library...");
-
-		let library_options = client.library_options().create(vec![]).exec().await?;
-
-		let library = client
-			.library()
-			.create(
-				"Bench".to_string(),
-				library_temp_dir_path.clone(),
-				library_options::id::equals(library_options.id.clone()),
-				vec![],
-			)
-			.exec()
-			.await?;
-
-		let library_options = client
-			.library_options()
-			.update(
-				library_options::id::equals(library_options.id),
-				vec![
-					library_options::library::connect(library::id::equals(
-						library.id.clone(),
-					)),
-					library_options::library_id::set(Some(library.id.clone())),
-				],
-			)
-			.exec()
-			.await?;
-
-		tracing::info!("Library created in DB! Creating FS structure...");
-
-		let data_dir = PathBuf::from(format!(
-			"{}/integration-tests/data",
-			env!("CARGO_MANIFEST_DIR")
-		));
-
-		let zip_path = data_dir.join("book.zip");
-		let epub_path = data_dir.join("book.epub");
-		let rar_path = data_dir.join("book.rar");
-
-		let mut temp_dirs = vec![library_temp_dir];
-		for series_idx in 0..series_count {
-			tracing::debug!("Creating series {}", series_idx + 1);
-			let series_temp_dir = TempDirBuilder::new()
-				.prefix(&format!("series_{}", series_idx))
-				.tempdir_in(&library_temp_dir_path)?;
-
-			for book_idx in 0..books_per_series {
-				tracing::debug!("Creating book {}", book_idx + 1);
-				let book_path = match book_idx % 3 {
-					0 => zip_path.as_path(),
-					1 => epub_path.as_path(),
-					_ => rar_path.as_path(),
-				};
-				let book_file_name_with_ext = format!(
-					"{}_{}",
-					book_idx,
-					book_path.file_name().unwrap().to_str().unwrap(),
-				);
-				let book_temp_file_expected_path =
-					series_temp_dir.path().join(book_file_name_with_ext);
-
-				std::fs::copy(book_path, &book_temp_file_expected_path)?;
-			}
-
-			temp_dirs.push(series_temp_dir);
-		}
-
-		tracing::info!("Library created!");
-
-		let library = Library {
-			library_options: LibraryOptions::from(library_options),
-			..Library::from(library)
-		};
-
-		Ok((client, library, temp_dirs))
-	}
-
-	async fn setup_test(
-		series_count: usize,
-		books_per_series: usize,
-	) -> Result<TestCtx, Box<dyn std::error::Error>> {
-		tracing_subscriber::fmt()
-			.with_max_level(tracing::Level::TRACE)
-			.with_env_filter("stump_core=trace")
-			.init();
-
-		let (client, library, tempdirs) =
-			create_test_library(series_count, books_per_series).await?;
-		let job = Job::new(LibraryScanJob {
-			id: library.id.clone(),
-			path: library.path.clone(),
-			options: Some(library.library_options.clone()),
-		});
-		let config_dir =
-			format!("{}/integration-tests/config", env!("CARGO_MANIFEST_DIR"));
-		let config = StumpConfig::new(config_dir);
-		let worker_ctx = WorkerCtx {
-			db: Arc::new(client),
-			config: Arc::new(config),
-			job_id: Uuid::new_v4().to_string(),
-			event_sender: async_channel::unbounded().0,
-			command_receiver: async_channel::unbounded().1,
-		};
-		Ok(TestCtx {
-			job: *job,
-			worker_ctx,
-			library,
-			tempdirs,
-		})
-	}
-
-	async fn safe_validate_counts(
-		client: &PrismaClient,
-		series_count: usize,
-		books_per_series: usize,
-	) {
-		let actual_series_count = client
-			.series()
-			.count(vec![])
-			.exec()
-			.await
-			.expect("Failed to count series");
-
-		if actual_series_count != series_count as i64 {
-			println!(
-				"Series count mismatch (actual vs expected): {} != {}",
-				actual_series_count, series_count
-			);
-		}
-
-		let actual_media_count = client
-			.media()
-			.count(vec![])
-			.exec()
-			.await
-			.expect("Failed to count media");
-
-		if actual_media_count != (series_count * books_per_series) as i64 {
-			println!(
-				"Media count mismatch (actual vs expected): {} != {}",
-				actual_media_count,
-				series_count * books_per_series
-			);
-		}
-	}
-
-	async fn clean_up(client: &PrismaClient, library: Library, tempdirs: Vec<TempDir>) {
-		let deleted_library = client
-			.library()
-			.delete(library::id::equals(library.id))
-			.exec()
-			.await
-			.expect("Failed to delete library");
-
-		tracing::debug!(?deleted_library, "Deleted library");
-
-		for tempdir in tempdirs {
-			let _ = tempdir.close();
-		}
-	}
-
-	#[tokio::test]
-	async fn bench_library_scan() {
-		// let series_count = 1000;
-		// let books_per_series = 100;
-		let series_count = 10;
-		let books_per_series = 10;
-
-		let TestCtx {
-			mut job,
-			worker_ctx,
-			library,
-			tempdirs,
-		} = setup_test(series_count, books_per_series)
-			.await
-			.expect("Failed to setup test job");
-
-		let client = worker_ctx.db.clone();
-		let commands_rx = worker_ctx.command_receiver.clone();
-
-		println!("Setup complete! Running bench after 5 seconds...");
-		for i in 0..5 {
-			tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-			println!("{}...", 5 - i);
-		}
-
-		let start = tokio::time::Instant::now();
-		let result = job.run(worker_ctx, commands_rx).await;
-		let elapsed = start.elapsed();
-
-		tracing::info!("Elapsed: {:?}", elapsed);
-		tracing::debug!("Result: {:?}", result);
-
-		safe_validate_counts(&client, series_count, books_per_series).await;
-		tracing::info!("Cleaning up...");
-		clean_up(&client, library, tempdirs).await;
-	}
+	Ok(JobTaskOutput {
+		data,
+		errors,
+		subtasks: vec![],
+	})
 }

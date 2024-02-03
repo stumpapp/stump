@@ -180,7 +180,7 @@ pub struct WalkedSeries {
 	pub seen_files: u64,
 	pub ignored_files: u64,
 	pub media_to_create: Vec<PathBuf>,
-	pub media_to_update: Vec<PathBuf>,
+	pub media_to_visit: Vec<PathBuf>,
 	pub missing_media: Vec<PathBuf>,
 	pub series_is_missing: bool,
 }
@@ -259,7 +259,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 		.map(|m| (m.path.clone(), Media::from(m)))
 		.collect::<HashMap<String, _>>();
 
-	let (media_to_create, media_to_update) =
+	let (media_to_create, media_to_visit) =
 		valid_entries
 			.iter()
 			.fold((vec![], vec![]), |mut acc, entry| {
@@ -304,8 +304,8 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	let to_create = media_to_create.len();
 	tracing::trace!(?media_to_create, "Found {to_create} media to create");
 
-	let to_update = media_to_update.len();
-	tracing::trace!(?media_to_update, "Found {to_update} media to update");
+	let to_visit = media_to_visit.len();
+	tracing::trace!(?media_to_visit, "Found {to_visit} media to visit");
 
 	let is_missing = missing_media.len();
 	tracing::trace!(
@@ -322,7 +322,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 		seen_files,
 		ignored_files,
 		media_to_create,
-		media_to_update,
+		media_to_visit,
 		missing_media,
 		series_is_missing: false,
 	})

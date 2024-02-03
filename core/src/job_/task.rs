@@ -3,13 +3,16 @@ use std::{pin::pin, sync::Arc};
 use async_channel::Receiver;
 use futures::{stream, StreamExt};
 use futures_concurrency::stream::Merge;
+use serde::Serialize;
 use tokio::task::{JoinError, JoinHandle};
 
-use super::{DynJob, JobError, WorkerCommand, WorkerCtx};
+use super::{DynJob, JobError, JobRunError, WorkerCommand, WorkerCtx};
 
+#[derive(Serialize, Debug)]
 pub struct JobTaskOutput<J: DynJob> {
 	pub data: J::Data,
-	pub errors: Vec<String>,
+	pub subtasks: Vec<J::Task>,
+	pub errors: Vec<JobRunError>,
 }
 
 pub struct JobTaskHandlerOutput<J: DynJob> {
@@ -47,10 +50,18 @@ pub(crate) async fn job_task_handler<J: DynJob>(
 			},
 			StreamEvent::TaskCompleted(Ok(result)) => {
 				tracing::debug!("Task output received");
-				let JobTaskOutput { data, errors } = result?;
+				let JobTaskOutput {
+					data,
+					errors,
+					subtasks,
+				} = result?;
 
 				return Ok(JobTaskHandlerOutput {
-					output: JobTaskOutput { data, errors },
+					output: JobTaskOutput {
+						data,
+						errors,
+						subtasks,
+					},
 					returned_ctx: worker_ctx,
 				});
 			},

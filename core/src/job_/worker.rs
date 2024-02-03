@@ -1,10 +1,21 @@
 use std::sync::Arc;
 
-use tokio::{spawn, sync::oneshot};
+use futures::{stream, StreamExt};
+use futures_concurrency::stream::Merge;
+use std::pin::pin;
+use tokio::{
+	sync::oneshot,
+	task::{spawn, JoinError},
+};
 
-use crate::{config::StumpConfig, job::JobError, prisma::PrismaClient};
+use crate::{
+	config::StumpConfig,
+	job::JobStatus,
+	job_::{ExecutorOutput, JobError},
+	prisma::{job, PrismaClient},
+};
 
-use super::{JobExecutor, JobManagerAgent};
+use super::{Executor, JobManagerAgent};
 
 pub enum WorkerEvent {
 	Progress, // TODO: data
@@ -18,6 +29,8 @@ pub enum WorkerCommand {
 	Cancel(oneshot::Sender<()>),
 }
 
+/// The context that is passed to the worker when it is created. This context is used
+/// throughout the lifetime of a worker and its job.
 #[derive(Clone)]
 pub struct WorkerCtx {
 	pub job_id: String,
@@ -29,6 +42,7 @@ pub struct WorkerCtx {
 
 impl WorkerCtx {
 	// TODO: update params
+	/// Emit a progress event to any clients listening to the server
 	pub fn progress(&self) {
 		if self.event_sender.is_closed() {
 			tracing::error!("Worker event sender is closed! Cannot send progress event");
@@ -44,6 +58,8 @@ impl WorkerCtx {
 
 pub struct Worker {
 	// TODO: state? E.g. running, paused, etc.
+	/// The sender through which the worker can send commands to itself. The corresponding
+	/// receiver is stored in the worker context.
 	command_sender: async_channel::Sender<WorkerCommand>,
 }
 
@@ -69,8 +85,13 @@ impl Worker {
 		Ok((Self { command_sender }, worker_ctx))
 	}
 
+	/// Create a new [Worker] instance and immediately spawn it. This is the main entry point
+	/// for creating a _running_ worker.
+	///
+	/// Note that workers are _only_ supported to be in a running state. A worker should
+	/// not be created if it is not intended to be running.
 	pub async fn create_and_spawn(
-		job: Box<dyn JobExecutor>,
+		job: Box<dyn Executor>,
 		agent: Arc<JobManagerAgent>,
 		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
@@ -86,6 +107,7 @@ impl Worker {
 		Ok(worker)
 	}
 
+	/// A convenience method to wrap the worker in an Arc
 	fn arced(self) -> Arc<Self> {
 		Arc::new(self)
 	}
@@ -117,21 +139,108 @@ impl Worker {
 		}
 	}
 
+	/// The main worker loop. This is where the job is run and the worker listens for
+	/// commands to cancel the job.
+	///
+	/// Note more commands can be added in the future, e.g. pause/resume.
 	async fn work(
 		worker_ctx: WorkerCtx,
-		mut job: Box<dyn JobExecutor>,
+		mut job: Box<dyn Executor>,
 		agent: Arc<JobManagerAgent>,
 	) {
-		let (commands_tx, commands_rx) = async_channel::unbounded::<WorkerCommand>();
-
 		let job_id = job.id().to_string();
-		let mut handle = spawn(async move {
-			let result = job.run(worker_ctx, commands_rx).await;
+		let finalizer_ctx = worker_ctx.clone();
+		let commands_rx = worker_ctx.command_receiver.clone();
+
+		enum StreamEvent {
+			NewCommand(WorkerCommand),
+			JobCompleted(
+				Result<(Box<dyn Executor>, Result<ExecutorOutput, JobError>), JoinError>,
+			),
+		}
+
+		let mut job_handle = spawn(async move {
+			let result = job.run(worker_ctx).await;
 			(job, result)
 		});
+		let job_stream = stream::once(&mut job_handle).map(StreamEvent::JobCompleted);
+		let command_stream = commands_rx.clone().map(StreamEvent::NewCommand);
 
-		// TODO: stream events and handle them
+		let mut stream = pin!((job_stream, command_stream).merge());
 
+		while let Some(event) = stream.next().await {
+			match event {
+				StreamEvent::JobCompleted(Err(error)) => {
+					tracing::error!(?error, "Error while joining job worker thread");
+					// TODO: handle error better
+					return;
+				},
+				StreamEvent::JobCompleted(Ok((returned_job, result))) => {
+					match result {
+						Ok(output) => {
+							tracing::info!(?output, "Job completed successfully!");
+							let _ =
+								returned_job.persist_state(finalizer_ctx, output).await;
+						},
+						Err(error) => {
+							tracing::error!(?error, "Job failed with critical error");
+							let _ = returned_job
+								.persist_failure(finalizer_ctx, JobStatus::Failed)
+								.await;
+						},
+					}
+					return agent.complete(job_id).await;
+				},
+				StreamEvent::NewCommand(cmd) => match cmd {
+					WorkerCommand::Cancel(return_sender) => {
+						let client = finalizer_ctx.db;
+						let _ = handle_do_cancel(job_id.clone(), &client).await;
+						job_handle.abort();
+						if job_handle.await.is_ok() {
+							tracing::warn!(
+								"Job worker thread ended successfully after a cancel?"
+							);
+						};
+						return_sender.send(()).map_or_else(
+							|error| {
+								tracing::error!(
+									?error,
+									"Failed to send cancel confirmation"
+								);
+							},
+							|_| {
+								tracing::trace!("Cancel confirmation sent");
+							},
+						);
+						return agent.complete(job_id).await;
+					},
+				},
+			}
+		}
+
+		tracing::warn!("Job worker stream ended unexpectedly");
 		agent.complete(job_id).await;
 	}
+}
+
+async fn handle_do_cancel(job_id: String, client: &PrismaClient) -> Result<(), JobError> {
+	let cancelled_job = client
+		.job()
+		.update(
+			job::id::equals(job_id),
+			vec![job::status::set(JobStatus::Cancelled.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(?error, "Failed to update job status to cancelled");
+				None
+			},
+			|job| Some(job),
+		);
+
+	tracing::trace!(?cancelled_job, "Job cancelled?");
+
+	Ok(())
 }

@@ -5,7 +5,9 @@ pub enum JobError {
 	#[error("Job failed while initializing: {0}")]
 	InitFailed(String),
 	#[error("Save state failed to be deserialized: {0}")]
-	StateDeserializeFailed(String),
+	StateLoadFailed(String),
+	#[error("Save state failed to be serialized: {0}")]
+	StateSaveFailed(String),
 	#[error("Job was cancelled")]
 	Cancelled,
 	#[error("A task experienced a critical error while executing: {0}")]

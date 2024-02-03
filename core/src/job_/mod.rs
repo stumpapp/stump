@@ -17,18 +17,38 @@ pub use manager::*;
 use tokio::spawn;
 use uuid::Uuid;
 
-use crate::prisma::job;
+use crate::{
+	db::entity::LogLevel,
+	job::JobStatus,
+	prisma::{job, log},
+};
 
-/// A trait that defines the state of a job. State is frequently updated during execution.
-pub trait WritableData: Serialize + de::DeserializeOwned {
-	fn store(&mut self, updated: Self) {
+/// A trait that defines the state of a job. State is frequently updated during execution,
+/// and is used to track the progress of a job, so this trait defines a default [WritableData::update]
+/// implementation to update the state with new data.
+///
+/// The state is also serialized and stored in the DB, so it must implement [Serialize] and [de::DeserializeOwned].
+pub trait WritableData: Serialize + de::DeserializeOwned + Debug {
+	/// Update the state with new data. By default, the implementation is a full replacement
+	fn update(&mut self, updated: Self) {
 		*self = updated;
+	}
+
+	/// Serialize the state to JSON. If serialization fails, the error is logged and None is returned.
+	fn into_json(self) -> Option<serde_json::Value> {
+		serde_json::to_value(&self).map_or_else(
+			|error| {
+				tracing::error!(?error, job_data = ?self, "Failed to serialize job data!");
+				None
+			},
+			|value| Some(value),
+		)
 	}
 }
 
 /// () is effectively a no-op state, which is useful for jobs that don't need to track state.
 impl WritableData for () {
-	fn store(&mut self, _: Self) {
+	fn update(&mut self, _: Self) {
 		// Do nothing
 	}
 }
@@ -39,12 +59,27 @@ pub struct JobRunError {
 	pub timestamp: DateTime<Utc>,
 }
 
+// TODO: persisted warnings? If so, just change to JobRunLog with a LogLevel
+
 impl JobRunError {
 	pub fn new(msg: String) -> Self {
 		Self {
 			msg,
 			timestamp: Utc::now(),
 		}
+	}
+
+	/// Constructs a Prisma create payload for the error
+	pub fn into_prisma(self, job_id: String) -> (String, Vec<log::SetParam>) {
+		(
+			self.msg,
+			vec![
+				log::level::set(LogLevel::Error.to_string()),
+				log::timestamp::set(self.timestamp.into()),
+				log::job::connect(job::id::equals(job_id.clone())),
+				log::job_id::set(Some(job_id)),
+			],
+		)
 	}
 }
 
@@ -56,16 +91,19 @@ pub struct WorkingState<D, T> {
 	pub errors: Vec<JobRunError>,
 }
 
-pub struct JobState<Job: DynJob> {
-	stateful_job: Job,
-	data: Option<Job::Data>,
-	tasks: VecDeque<Job::Task>,
+pub struct JobState<J: JobExt> {
+	job: J,
+	data: Option<J::Data>,
+	tasks: VecDeque<J::Task>,
 	current_task_index: usize,
 	errors: Vec<JobRunError>,
 }
 
+/// A trait that defines the behavior and data types of a job. Jobs are responsible for
+/// intialization and individual task execution. Jobs are managed by an [Executor], which
+/// is responsible for the main run loop of a job.
 #[async_trait::async_trait]
-pub trait DynJob: Send + Sync + Sized + 'static {
+pub trait JobExt: Send + Sync + Sized + 'static {
 	const NAME: &'static str;
 
 	/// Internal state used by the job. This is updated during execution but not persisted.
@@ -98,9 +136,8 @@ pub trait DynJob: Send + Sync + Sized + 'static {
 				if let Some(save_state) = job.save_state {
 					// If the job has a save state and it is invalid, we should fail
 					// as to not attempt potentially undefined behaviors
-					let state = serde_json::from_slice(&save_state).map_err(|error| {
-						JobError::StateDeserializeFailed(error.to_string())
-					})?;
+					let state = serde_json::from_slice(&save_state)
+						.map_err(|error| JobError::StateLoadFailed(error.to_string()))?;
 					Ok(Some(state))
 				} else {
 					Ok(None)
@@ -133,17 +170,17 @@ pub trait DynJob: Send + Sync + Sized + 'static {
 	) -> Result<JobTaskOutput<Self>, JobError>;
 }
 
-pub struct Job<SJ: DynJob> {
+pub struct Job<J: JobExt> {
 	id: Uuid,
-	state: Option<JobState<SJ>>,
+	state: Option<JobState<J>>,
 }
 
-impl<SJ: DynJob> Job<SJ> {
-	pub fn new(stateful_job: SJ) -> Box<Self> {
+impl<J: JobExt> Job<J> {
+	pub fn new(job: J) -> Box<Self> {
 		Box::new(Self {
 			id: Uuid::new_v4(),
 			state: Some(JobState {
-				stateful_job,
+				job,
 				data: None,
 				tasks: VecDeque::new(),
 				current_task_index: 0,
@@ -154,23 +191,112 @@ impl<SJ: DynJob> Job<SJ> {
 }
 
 #[derive(Debug)]
-pub struct JobExecutorOutput {
-	data: Option<serde_json::Value>,
-	errors: Vec<JobRunError>,
+pub struct ExecutorOutput {
+	pub data: Option<serde_json::Value>,
+	pub errors: Vec<JobRunError>,
 }
+
+/// A trait that defines the behavior of a job executor. Executors are responsible for the main
+/// run loop of a job, including task execution and state management. Executors are managed
+/// by the [JobManagerAgent].
 #[async_trait::async_trait]
-pub trait JobExecutor: Send + Sync {
+pub trait Executor: Send + Sync {
+	/// The ID of the internal job
 	fn id(&self) -> Uuid;
+	/// The name of the internal job
 	fn name(&self) -> &'static str;
-	async fn run(
-		&mut self,
+	/// A function to persist the state of the job to the DB. This is called after the job
+	/// has completed (when [Executor::run] returns an Ok).
+	async fn persist_state(
+		&self,
 		ctx: WorkerCtx,
-		commands_rx: async_channel::Receiver<WorkerCommand>,
-	) -> Result<JobExecutorOutput, JobError>;
+		output: ExecutorOutput,
+	) -> Result<(), JobError> {
+		let db = ctx.db.clone();
+		let job_id = self.id();
+
+		let expected_errors = output.errors.len();
+		if expected_errors > 0 {
+			let persisted_errors = db
+				.log()
+				.create_many(
+					output
+						.errors
+						.into_iter()
+						.map(|error| error.into_prisma(job_id.to_string()))
+						.collect(),
+				)
+				.exec()
+				.await
+				.map_or_else(
+					|error| {
+						tracing::error!(?error, "Failed to persist job errors");
+						0
+					},
+					|count| count as usize,
+				);
+
+			if persisted_errors != expected_errors {
+				tracing::warn!(
+					?persisted_errors,
+					?expected_errors,
+					"Failed to persist all job errors!"
+				);
+			}
+		}
+
+		let save_state = serde_json::to_vec(&output.data)
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+
+		let _persisted_job_with_state = db
+			.job()
+			.update(
+				job::id::equals(job_id.to_string()),
+				vec![
+					job::save_state::set(Some(save_state)),
+					job::status::set(JobStatus::Completed.to_string()),
+				],
+			)
+			.exec()
+			.await
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+
+		Ok(())
+	}
+	/// A function to persist the failure of the job to the DB. This is called when the job
+	/// has failed with a critical error (when [Executor::run] returns an Err).
+	async fn persist_failure(
+		&self,
+		ctx: WorkerCtx,
+		status: JobStatus,
+	) -> Result<(), JobError> {
+		let db = ctx.db.clone();
+		let job_id = self.id();
+
+		if status.is_success() || status.is_pending() {
+			return Err(JobError::StateSaveFailed(
+				"Attempted to persist failure with non-failure status".to_string(),
+			));
+		}
+
+		let _persisted_job = db
+			.job()
+			.update(
+				job::id::equals(job_id.to_string()),
+				vec![job::status::set(status.to_string())],
+			)
+			.exec()
+			.await
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+
+		Ok(())
+	}
+	/// The main run loop of the job. This is where tasks are executed and state is managed.
+	async fn run(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError>;
 }
 
 #[async_trait::async_trait]
-impl<J: DynJob> JobExecutor for Job<J> {
+impl<J: JobExt> Executor for Job<J> {
 	fn id(&self) -> Uuid {
 		self.id
 	}
@@ -179,17 +305,14 @@ impl<J: DynJob> JobExecutor for Job<J> {
 		J::NAME
 	}
 
-	async fn run(
-		&mut self,
-		ctx: WorkerCtx,
-		commands_rx: async_channel::Receiver<WorkerCommand>,
-	) -> Result<JobExecutorOutput, JobError> {
+	async fn run(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError> {
 		let job_id = self.id();
 		let job_name = self.name();
+		let commands_rx = ctx.command_receiver.clone();
 		tracing::info!(?job_id, ?job_name, "Starting job");
 
 		let JobState {
-			mut stateful_job,
+			mut job,
 			data,
 			mut tasks,
 			mut current_task_index,
@@ -198,7 +321,7 @@ impl<J: DynJob> JobExecutor for Job<J> {
 
 		let mut working_data = if let Some(state) = data {
 			Some(state)
-		} else if let Some(restore_point) = stateful_job.attempt_restore(&ctx).await? {
+		} else if let Some(restore_point) = job.attempt_restore(&ctx).await? {
 			// Replace the state with the restored state
 			tasks = restore_point.tasks;
 			current_task_index = restore_point.current_task_index;
@@ -208,7 +331,7 @@ impl<J: DynJob> JobExecutor for Job<J> {
 			restore_point.data.or_else(|| Some(Default::default()))
 		} else {
 			tracing::debug!("No restore point found, initializing job");
-			let init_result = stateful_job.init(&ctx).await?;
+			let init_result = job.init(&ctx).await?;
 			tasks = init_result.tasks;
 			current_task_index = init_result.current_task_index;
 			errors = init_result.errors;
@@ -223,25 +346,41 @@ impl<J: DynJob> JobExecutor for Job<J> {
 		})?;
 
 		// Setup our references since the loop would otherwise take ownership
-		let stateful_job = Arc::new(stateful_job);
+		let job = Arc::new(job);
 		let mut ctx = Arc::new(ctx);
 
 		tracing::debug!(task_count = tasks.len(), "Starting tasks");
 
 		while !tasks.is_empty() {
-			let next_task = tasks.pop_front().expect("tasks is not empty??");
+			let next_task = tasks.pop_front().ok_or_else(|| {
+				JobError::TaskFailed(
+					"No tasks unexpectedly remain! This is a bug?".to_string(),
+				)
+			})?;
 
 			let task_handle = {
 				let ctx = Arc::clone(&ctx);
-				let stateful_job = Arc::clone(&stateful_job);
-
-				spawn(async move { stateful_job.execute_task(&ctx, next_task).await })
+				let job = Arc::clone(&job);
+				spawn(async move { job.execute_task(&ctx, next_task).await })
 			};
 
 			let JobTaskHandlerOutput {
 				output,
 				returned_ctx,
-			} = job_task_handler::<J>(ctx, task_handle, commands_rx.clone()).await?;
+			} = match job_task_handler::<J>(ctx, task_handle, commands_rx.clone()).await {
+				Ok(r) => r,
+				Err(e) => {
+					tracing::error!(?e, "Task handler failed");
+					errors.push(JobRunError::new(format!(
+						"Critical task error: {:?}",
+						e.to_string()
+					)));
+					return Ok(ExecutorOutput {
+						data: working_data.into_json(),
+						errors,
+					});
+				},
+			};
 			let JobTaskOutput {
 				data: task_data,
 				errors: task_errors,
@@ -250,7 +389,7 @@ impl<J: DynJob> JobExecutor for Job<J> {
 
 			// Update our working data and any errors with the new data/errors from the
 			// completed task. Then increment the task index
-			working_data.store(task_data);
+			working_data.update(task_data);
 			errors.extend(task_errors);
 			current_task_index += 1;
 
@@ -274,16 +413,8 @@ impl<J: DynJob> JobExecutor for Job<J> {
 		let errors_count = errors.len();
 		tracing::debug!(?errors_count, "All tasks completed");
 
-		let out_data = serde_json::to_value(&working_data).map_or_else(
-			|error| {
-				tracing::error!(?error, job_data = ?working_data, "Failed to serialize job data!");
-				None
-			},
-			|value| Some(value),
-		);
-
-		Ok(JobExecutorOutput {
-			data: out_data,
+		Ok(ExecutorOutput {
+			data: working_data.into_json(),
 			errors,
 		})
 	}

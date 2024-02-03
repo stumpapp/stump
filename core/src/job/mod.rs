@@ -65,6 +65,29 @@ pub enum JobStatus {
 	Queued,
 }
 
+impl JobStatus {
+	pub fn is_resolved(&self) -> bool {
+		match self {
+			JobStatus::Completed | JobStatus::Cancelled | JobStatus::Failed => true,
+			_ => false,
+		}
+	}
+
+	pub fn is_success(&self) -> bool {
+		match self {
+			JobStatus::Completed => true,
+			_ => false,
+		}
+	}
+
+	pub fn is_pending(&self) -> bool {
+		match self {
+			JobStatus::Running | JobStatus::Queued => true,
+			_ => false,
+		}
+	}
+}
+
 impl std::fmt::Display for JobStatus {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {

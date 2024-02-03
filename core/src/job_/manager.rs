@@ -6,14 +6,14 @@ use std::{
 use futures::future::join_all;
 use tokio::sync::{mpsc, oneshot, RwLock};
 
-use super::{error::JobManagerError, JobExecutor, Worker, WorkerEvent};
+use super::{error::JobManagerError, Executor, Worker, WorkerEvent};
 use crate::{config::StumpConfig, Ctx};
 
 /// Events that can be sent to the job manager. If any of these events require a response,
 /// e.g. to provide an HTTP status code, a oneshot channel should be provided.
 pub enum JobManagerEvent {
 	/// Add a job to the queue to be run
-	EnqueueJob(Box<dyn JobExecutor>),
+	EnqueueJob(Box<dyn Executor>),
 	/// A job has been completed and should be removed from the queue
 	CompleteJob(String),
 	/// Cancel a job by its ID
@@ -92,7 +92,7 @@ impl JobManager {
 /// A helper struct that holds the job queue and a list of workers for the job manager
 pub struct JobManagerAgent {
 	/// Queue of jobs waiting to be run in a worker thread
-	queue: RwLock<VecDeque<Box<dyn JobExecutor>>>,
+	queue: RwLock<VecDeque<Box<dyn Executor>>>,
 	/// Worker threads with a running job
 	workers: RwLock<HashMap<String, Arc<Worker>>>,
 	/// A channel to send shutdown signals to the parent job manager
@@ -127,7 +127,7 @@ impl JobManagerAgent {
 	// TODO: result return
 	/// Add a job to the queue. If there are no running jobs (i.e. no workers),
 	/// then a worker will be created and immediately spawned
-	async fn enqueue(self: Arc<Self>, job: Box<dyn JobExecutor>) {
+	async fn enqueue(self: Arc<Self>, job: Box<dyn Executor>) {
 		// TODO: Persist the job to the database somewhere
 
 		let mut workers = self.workers.write().await;

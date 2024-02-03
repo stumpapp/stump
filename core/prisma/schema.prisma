@@ -653,9 +653,9 @@ model Job {
 model Log {
   id String @id @default(uuid())
 
-  level      String   @default("INFO") //  "ERROR", "WARN", "INFO", "DEBUG"
-  message    String
-  created_at DateTime @default(now()) // TODO: change name to timestamp
+  level     String   @default("INFO") //  "ERROR", "WARN", "INFO", "DEBUG"
+  message   String
+  timestamp DateTime @default(now())
 
   job    Job?    @relation(fields: [job_id], references: [id], onDelete: Cascade)
   job_id String?

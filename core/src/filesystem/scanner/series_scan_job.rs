@@ -10,7 +10,7 @@ use crate::{
 	},
 	filesystem::{scanner::utils::create_media, MediaBuilder},
 	job_::{
-		error::JobError, DynJob, JobRunError, JobTaskOutput, WorkerCtx, WorkingState,
+		error::JobError, JobExt, JobRunError, JobTaskOutput, WorkerCtx, WorkingState,
 		WritableData,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
@@ -53,7 +53,7 @@ pub struct SeriesScanData {
 }
 
 impl WritableData for SeriesScanData {
-	fn store(&mut self, updated: Self) {
+	fn update(&mut self, updated: Self) {
 		self.total_files += updated.total_files;
 		self.created_media += updated.created_media;
 		self.updated_media += updated.updated_media;
@@ -61,7 +61,7 @@ impl WritableData for SeriesScanData {
 }
 
 #[async_trait::async_trait]
-impl DynJob for SeriesScanJob {
+impl JobExt for SeriesScanJob {
 	const NAME: &'static str = "series_scan";
 
 	type Data = SeriesScanData;

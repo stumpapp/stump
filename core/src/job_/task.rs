@@ -6,16 +6,16 @@ use futures_concurrency::stream::Merge;
 use serde::Serialize;
 use tokio::task::{JoinError, JoinHandle};
 
-use super::{DynJob, JobError, JobRunError, WorkerCommand, WorkerCtx};
+use super::{JobError, JobExt, JobRunError, WorkerCommand, WorkerCtx};
 
 #[derive(Serialize, Debug)]
-pub struct JobTaskOutput<J: DynJob> {
+pub struct JobTaskOutput<J: JobExt> {
 	pub data: J::Data,
 	pub subtasks: Vec<J::Task>,
 	pub errors: Vec<JobRunError>,
 }
 
-pub struct JobTaskHandlerOutput<J: DynJob> {
+pub struct JobTaskHandlerOutput<J: JobExt> {
 	pub output: JobTaskOutput<J>,
 	pub returned_ctx: Arc<WorkerCtx>,
 }
@@ -23,12 +23,12 @@ pub struct JobTaskHandlerOutput<J: DynJob> {
 pub type JobTaskResult<J> = Result<JobTaskOutput<J>, JobError>;
 pub type JobTaskHandlerResult<J> = Result<JobTaskHandlerOutput<J>, JobError>;
 
-enum StreamEvent<J: DynJob> {
+enum StreamEvent<J: JobExt> {
 	NewCommand(WorkerCommand),
 	TaskCompleted(Result<JobTaskResult<J>, JoinError>),
 }
 
-pub(crate) async fn job_task_handler<J: DynJob>(
+pub(crate) async fn job_task_handler<J: JobExt>(
 	worker_ctx: Arc<WorkerCtx>,
 	mut task_handle: JoinHandle<JobTaskResult<J>>,
 	commands_rx: Receiver<WorkerCommand>,

@@ -13,7 +13,7 @@ use stump_core::{
 		entity::{Library, LibraryOptions},
 	},
 	filesystem::scanner::_LibraryScanJob,
-	job_::{Job, JobExecutor, WorkerCtx},
+	job_::{Executor, Job, WorkerCtx},
 	prisma::{library, library_options, PrismaClient},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
@@ -295,8 +295,6 @@ async fn scan_new_library(test_ctx: TestCtx) {
 		worker_ctx,
 	} = test_ctx;
 
-	let commands_rx = worker_ctx.command_receiver.clone();
-
-	let result = job.run(worker_ctx, commands_rx).await;
+	let result = job.run(worker_ctx).await;
 	println!("Job result: {:?}", result);
 }

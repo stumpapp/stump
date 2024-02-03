@@ -50,11 +50,6 @@ apps/server/client/*
 *.sqlite*
 *prisma.rs*
 
-# Moon
-.moon/cache
-.moon/dts
-.moon/docker
-
 # nix
 .envrc
 .direnv

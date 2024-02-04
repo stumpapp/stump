@@ -3,7 +3,6 @@ use std::sync::Arc;
 use crate::{
 	db::entity::LibraryScanMode,
 	filesystem::scanner::LibraryScanJob,
-	job::Job,
 	prisma::{job_schedule_config, library},
 	CoreResult, Ctx,
 };
@@ -67,7 +66,6 @@ impl JobScheduler {
 						.find_many(vec![library::id::not_in_vec(
 							excluded_library_ids.clone(),
 						)])
-						.include(library::library_options::fetch())
 						.exec()
 						.await
 						.unwrap_or_else(|e| {
@@ -79,13 +77,10 @@ impl JobScheduler {
 						// TODO: support default scan mode on libraries
 						// let scan_mode = library.default_scan_mode.clone();
 						let library_path = library.path.clone();
-						let options = library.library_options().unwrap_or_default();
-						let result =
-							scheduler_ctx.enqueue_job(Job::new(LibraryScanJob {
-								id: library.id.clone(),
-								path: library_path,
-								options,
-							}));
+						let result = scheduler_ctx.dispatch_job(LibraryScanJob::new(
+							library_path,
+							LibraryScanMode::Default,
+						));
 						if result.is_err() {
 							tracing::error!(
 								?library,

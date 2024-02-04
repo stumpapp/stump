@@ -2,21 +2,18 @@ use std::sync::Arc;
 
 use tokio::sync::{
 	broadcast::{channel, Receiver, Sender},
-	mpsc::{error::SendError, unbounded_channel, UnboundedSender},
+	mpsc::error::SendError,
 };
 
 use crate::{
 	config::StumpConfig,
 	db::{self, entity::Log},
-	event::{CoreEvent, InternalCoreTask},
-	job::JobExecutorTrait,
-	job__::JobManager,
+	event::CoreEvent,
+	job::{Executor, JobManager, JobManagerEvent},
 	prisma,
 };
 
-type InternalSender = UnboundedSender<InternalCoreTask>;
-
-type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
+type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 
 /// Struct that holds the main context for a Stump application. This is passed around
 /// to all the different parts of the application, and is used to access the database
@@ -25,9 +22,8 @@ type ClientChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
 	pub db: Arc<prisma::PrismaClient>,
-	pub jobs: Arc<JobManager>,
-	pub internal_sender: Arc<InternalSender>,
-	pub response_channel: Arc<ClientChannel>,
+	pub job_manager: Arc<JobManager>,
+	pub event_channel: Arc<EventChannel>,
 }
 
 impl Ctx {
@@ -42,24 +38,21 @@ impl Ctx {
 	///
 	/// #[tokio::main]
 	/// async fn main() {
-	///    let (sender, _) = unbounded_channel();
 	///    let config = StumpConfig::debug();
-	///    let ctx = Ctx::new(config, sender).await;
+	///    let ctx = Ctx::new(config).await;
 	/// }
 	/// ```
-	pub async fn new(config: StumpConfig, internal_sender: InternalSender) -> Ctx {
+	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
 		let db = Arc::new(db::create_client(&config).await);
 
-		// Create job manager
-		let job_manager = Arc::new(JobManager::create(db.clone(), config.clone()));
+		let job_manager = Arc::new(JobManager::new(db.clone(), config.clone()));
 
 		Ctx {
 			config,
 			db,
-			jobs: job_manager,
-			internal_sender: Arc::new(internal_sender),
-			response_channel: Arc::new(channel::<CoreEvent>(1024)),
+			job_manager,
+			event_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
 	}
 
@@ -77,9 +70,8 @@ impl Ctx {
 		Ctx {
 			config,
 			db,
-			jobs: job_manager,
-			internal_sender: Arc::new(unbounded_channel::<InternalCoreTask>().0),
-			response_channel: Arc::new(channel::<CoreEvent>(1024)),
+			job_manager,
+			event_channel: Arc::new(channel::<CoreEvent>(1024)),
 		}
 	}
 
@@ -111,7 +103,11 @@ impl Ctx {
 	/// Returns the reciever for the CoreEvent channel. See [`emit_event`]
 	/// for more information and an example usage.
 	pub fn get_client_receiver(&self) -> Receiver<CoreEvent> {
-		self.response_channel.0.subscribe()
+		self.event_channel.0.subscribe()
+	}
+
+	pub fn get_event_tx(&self) -> Sender<CoreEvent> {
+		self.event_channel.0.clone()
 	}
 
 	/// Emits a [CoreEvent] to the client event channel.
@@ -150,7 +146,7 @@ impl Ctx {
 	/// }
 	/// ```
 	pub fn emit_event(&self, event: CoreEvent) {
-		let _ = self.response_channel.0.send(event);
+		let _ = self.event_channel.0.send(event);
 	}
 
 	/// Emits a client event and persists a log based on the failure.
@@ -176,19 +172,12 @@ impl Ctx {
 			.await;
 	}
 
-	/// Sends in internal task
-	pub fn dispatch_task(
+	/// Sends an EnqueueJob event to the job manager.
+	pub fn enqueue_job(
 		&self,
-		task: InternalCoreTask,
-	) -> Result<(), SendError<InternalCoreTask>> {
-		self.internal_sender.send(task)
-	}
-
-	/// Sends an EnqueueJob task to the event manager.
-	pub fn dispatch_job(
-		&self,
-		job: Box<dyn JobExecutorTrait>,
-	) -> Result<(), SendError<InternalCoreTask>> {
-		self.dispatch_task(InternalCoreTask::EnqueueJob(job))
+		job: Box<dyn Executor>,
+	) -> Result<(), SendError<JobManagerEvent>> {
+		self.job_manager
+			.push_event(JobManagerEvent::EnqueueJob(job))
 	}
 }

@@ -13,7 +13,7 @@ use stump_core::{
 		entity::{Library, LibraryOptions},
 	},
 	filesystem::scanner::_LibraryScanJob,
-	job_::{Executor, Job, WorkerCtx},
+	job::{Executor, Job, WorkerCtx},
 	prisma::{library, library_options, PrismaClient},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};

@@ -11,10 +11,9 @@ use std::sync::Arc;
 
 pub mod config;
 pub mod db;
-pub mod event;
+mod event;
 pub mod filesystem;
 pub mod job;
-pub mod job_;
 mod job__;
 pub mod opds;
 mod utils;
@@ -28,10 +27,8 @@ pub mod prisma;
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
 use db::{DBPragma, JournalMode};
-use event::{event_manager::EventManager, InternalCoreTask};
 use job::JobScheduler;
 use prisma::server_config;
-use tokio::sync::mpsc::unbounded_channel;
 
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
@@ -63,21 +60,13 @@ type JournalModeChanged = bool;
 /// ```
 pub struct StumpCore {
 	ctx: Ctx,
-	event_manager: Arc<EventManager>,
 }
 
 impl StumpCore {
 	/// Creates a new instance of [`StumpCore`] and returns it wrapped in an [`Arc`].
 	pub async fn new(config: StumpConfig) -> StumpCore {
-		let internal_channel = unbounded_channel::<InternalCoreTask>();
-
-		let core_ctx = Ctx::new(config, internal_channel.0).await;
-		let event_manager = EventManager::new(core_ctx.clone(), internal_channel.1);
-
-		StumpCore {
-			ctx: core_ctx,
-			event_manager,
-		}
+		let core_ctx = Ctx::new(config).await;
+		StumpCore { ctx: core_ctx }
 	}
 
 	/// A three-step configuration initialization function.
@@ -117,7 +106,7 @@ impl StumpCore {
 	}
 
 	pub fn get_job_manager(&self) -> Arc<job::JobManager> {
-		self.event_manager.get_job_manager()
+		self.ctx.job_manager.clone()
 	}
 
 	/// Returns the shadow text for the core. This is just the fun ascii art that
@@ -219,7 +208,6 @@ mod tests {
 			filter::*,
 			query::{ordering::*, pagination::*},
 		},
-		event::*,
 		filesystem::{image::*, *},
 		job::*,
 	};
@@ -338,11 +326,7 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<EpubContent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<JobStatus>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<JobDetail>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobSchedulerConfig>()?).as_bytes())?;
-
-		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<ReadingListItem>()?).as_bytes())?;
 		file.write_all(

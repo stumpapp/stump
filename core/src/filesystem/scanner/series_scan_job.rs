@@ -9,9 +9,9 @@ use crate::{
 		FileStatus,
 	},
 	filesystem::{scanner::utils::create_media, MediaBuilder},
-	job_::{
-		error::JobError, JobExt, JobRunError, JobTaskOutput, WorkerCtx, WorkingState,
-		WritableData,
+	job::{
+		error::JobError, JobDataExt, JobExt, JobRunError, JobTaskOutput, WorkerCtx,
+		WorkingState,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
@@ -52,7 +52,7 @@ pub struct SeriesScanData {
 	updated_media: u64,
 }
 
-impl WritableData for SeriesScanData {
+impl JobDataExt for SeriesScanData {
 	fn update(&mut self, updated: Self) {
 		self.total_files += updated.total_files;
 		self.created_media += updated.created_media;

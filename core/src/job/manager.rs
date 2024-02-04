@@ -4,9 +4,12 @@ use std::{
 };
 
 use futures::future::join_all;
-use tokio::sync::{mpsc, oneshot, RwLock};
+use tokio::sync::{
+	mpsc::{self, error::SendError},
+	oneshot, RwLock,
+};
 
-use super::{error::JobManagerError, Executor, Worker, WorkerEvent};
+use super::{error::JobManagerError, Executor, Worker};
 use crate::{config::StumpConfig, Ctx};
 
 /// Events that can be sent to the job manager. If any of these events require a response,
@@ -28,30 +31,26 @@ type JobManagerResult<T> = Result<T, JobManagerError>;
 pub struct JobManager {
 	agent: Arc<JobManagerAgent>,
 	/// A channel to receive job manager events
-	internal_receiver: mpsc::UnboundedReceiver<JobManagerEvent>,
+	event_rx: mpsc::UnboundedReceiver<JobManagerEvent>,
+	/// A channel to send job manager events
+	event_tx: mpsc::UnboundedSender<JobManagerEvent>,
 }
 
 impl JobManager {
 	/// Creates a new job manager instance
-	pub fn new(
-		event_channel: (
-			mpsc::UnboundedReceiver<JobManagerEvent>,
-			mpsc::UnboundedSender<JobManagerEvent>,
-		),
-		ctx: Arc<Ctx>,
-		config: Arc<StumpConfig>,
-	) -> Self {
-		let (internal_receiver, internal_sender) = event_channel;
+	pub fn new(ctx: Arc<Ctx>, config: Arc<StumpConfig>) -> Self {
+		let (event_rx, event_tx) = mpsc::unbounded_channel();
 		Self {
-			internal_receiver,
-			agent: JobManagerAgent::new(internal_sender, ctx, config).arced(),
+			event_rx,
+			event_tx: event_tx.clone(),
+			agent: JobManagerAgent::new(event_tx, ctx, config).arced(),
 		}
 	}
 
 	/// Starts the watcher loop for the job manager
 	pub fn start(mut self) {
 		tokio::spawn(async move {
-			while let Some(event) = self.internal_receiver.recv().await {
+			while let Some(event) = self.event_rx.recv().await {
 				match event {
 					JobManagerEvent::EnqueueJob(job) => {
 						self.agent.clone().enqueue(job).await;
@@ -86,6 +85,13 @@ impl JobManager {
 				}
 			}
 		});
+	}
+
+	pub fn push_event(
+		&self,
+		event: JobManagerEvent,
+	) -> Result<(), SendError<JobManagerEvent>> {
+		self.event_tx.send(event)
 	}
 }
 
@@ -140,8 +146,7 @@ impl JobManagerAgent {
 				self.clone(),
 				self.core_ctx.db.clone(),
 				self.config.clone(),
-				// FIXME: Don't do this, should come from core_ctx?
-				async_channel::unbounded().0,
+				self.core_ctx.get_event_tx(),
 			)
 			.await
 			.map_or_else(

@@ -4,7 +4,7 @@
 		"claimText": "Este servidor Stump no está inicializado. Usa el formulario de abajo para crear tu cuenta. Una vez creada, tendrás acceso completo a todas las funciones del servidor.",
 		"form": {
 			"validation": {
-				"missingUsername": "Se requiere el nombre de usuario",
+				"missingUsername": "Se requiere un nombre de usuario",
 				"missingPassword": "Se requiere la contraseña"
 			},
 			"labels": {
@@ -179,92 +179,92 @@
 		}
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "Listas inteligentes",
+		"subtitle": "Tus búsquedas y filtros favoritos guardados para un fácil acceso",
+		"searchPlaceholder": "Filtrar listas inteligentes",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Crear lista inteligente"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "No hay listas inteligentes para mostrar",
+				"noListsMessage": "Crear una lista inteligente para empezar",
+				"noMatchesMessage": "Intente cambiando los términos de búsqueda"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "libro",
+						"series": "serie",
+						"library": "biblioteca"
 					},
-					"matches": "Matches"
+					"matches": "Coincidencias"
 				}
 			}
 		}
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "Ítems",
+			"settings": "Ajustes"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "Esta escena requiere un ID en la URL",
+			"smartListNotFound": "Lista inteligente no encontrada",
+			"viewCreateError": "No se pudo crear la vista",
+			"viewSaveError": "No se pudo guardar la vista"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Listas"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "Lista inteligente no encontrada",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Vista personalizada",
+					"defaultView": "Vista por defecto",
+					"noViewsSaved": "No hay vistas guardadas",
+					"selectView": "Seleccione una vista guardada"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Filtros de lista inteligente",
+					"description": "Cambiar los filtros para esta sesión de visualización",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Datos de filtro sin procesar",
+						"description": "Así es como Stump procesará los filtros"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Guardar",
+						"cancel": "Cancelar"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Filtro Rápido"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "Actualización seleccionada",
+					"create": "Crear nueva vista",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Crear vista",
+							"update": "Actualizar vista"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Crear una nueva vista para esta lista inteligente",
+							"update": "Actualizar vista"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "Nombre",
+								"placeholder": "Mi vista",
+								"description": "Un nombre único para esta vista"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "Nombre",
+								"placeholder": "Mi vista",
+								"description": "El nombre actualizado para esta vista, si se desea"
 							}
 						}
 					}
@@ -283,15 +283,15 @@
 		"sidebar": {
 			"application": {
 				"general": "General",
-				"appearance": "Appearance",
-				"desktop": "Desktop",
-				"label": "Application"
+				"appearance": "Apariencia",
+				"desktop": "Ordenador",
+				"label": "Aplicación"
 			},
 			"server": {
 				"general": "General",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
+				"users": "Usuarios",
+				"jobs": "Tareas",
+				"access": "Acceso",
 				"notifications": "Notifications",
 				"label": "Server"
 			}
@@ -299,161 +299,161 @@
 		"app/general": {
 			"helmet": "General client settings",
 			"title": "General settings",
-			"description": "Settings related to your account or general preferences",
+			"description": "Configuración relacionada con su cuenta o preferencias generales",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Por favor ingresa una URL válida",
+						"missingUsername": "Se requiere un nombre de usuario"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "Nombre de usuario",
+						"password": "Contraseña",
+						"activeChangesPrompt": "Tienes cambios sin guardar"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Ocurrió un error del servidor al actualizar tu perfil. Por favor intenta de nuevo."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "Establecer tu Imagen de Avatar",
+						"subtitle": "Stump admite avatares personalizados, que se pueden establecer proporcionando una URL a una imagen. Las subidas de imágenes no son compatibles para reducir la cantidad de datos almacenados en el servidor.",
+						"preview": "Una vista previa aparecerá aquí una vez que hayas ingresado una URL.",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "URL de la Imagen",
+							"customAvatar": "Avatar Personalizado"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Confirmar Imagen",
+							"cancel": "Cancelar",
+							"edit": "Editar",
+							"changeImage": "Cambiar Imagen",
+							"removeImage": "Eliminar Imagen"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Guardar cambios"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Idioma"
 					},
-					"heading": "Language and locale",
+					"heading": "Idioma y localización",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump soporta varios idiomas, establezca sus preferencias a continuación. Por favor, considera ayudar a mejorar la calidad de",
+						"Traducciones de Stump",
+						"si puedes!"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "Apariencia",
+			"title": "Apariencia",
+			"description": "Personaliza la apariencia de la aplicación",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
-					"description": "By default, Stump has a light and dark theme",
+					"label": "Tema",
+					"description": "Por defecto, Stump tiene temas claro y oscuro",
 					"customTheme": [
-						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"Si estás interesado en crear tu propio tema personalizado, revisa la",
+						"documentación"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light"
+						"light": "Claro",
+						"dark": "Oscuro",
+						"bronze": "Claro Bronce"
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Ajustes de escritorio",
+			"title": "Ajustes de escritorio",
+			"description": "Ajustes relacionados con la aplicación de escritorio Stump",
 			"sections": {
 				"discordPresence": {
-					"label": "Discord Presence",
-					"description": "Display your Stump activity in Discord using Discord Rich Presence",
-					"reconnect": "Reconnect to Discord"
+					"label": "Presencia de Discord",
+					"description": "Muestra tu actividad de Stump en Discord usando Discord Rich Presence",
+					"reconnect": "Reconectar Discord"
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"helmet": "Ajustes generales del servidor",
+			"title": "Ajustes generales",
+			"description": "Ajustes generales relacionados con tu instancia de servidor Stump",
 			"sections": {}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
+			"helmet": "Tareas",
+			"title": "Tareas",
+			"description": "Tareas de fondo que se ejecutan en su instancia de Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "Programación",
+					"description": "Algunas tareas pueden ser programadas. Los cambios a esta configuración surtirán efecto después de reiniciar el servidor"
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
+					"title": "Historial",
+					"description": "Un registro de trabajos que se han ejecutado en su instancia de servidor Stump",
 					"table": {
 						"columns": {
-							"name": "Type",
-							"description": "Description",
-							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"name": "Tipo",
+							"description": "Descripción",
+							"status": "Estado",
+							"createdAt": "Iniciado en",
+							"elapsed": "Transcurrido",
+							"tasks": "Tareas"
 						},
-						"emptyHeading": "There are no jobs to display",
+						"emptyHeading": "No hay tareas para mostrar",
 						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"deleteAllMessage": "El historial de tareas y las estadísticas pueden ser eliminadas de la base de datos en cualquier momento. Esta acción no se puede deshacer",
+						"deleteAllConfirmButton": "Limpiar historial",
+						"deleteAllConfirmButtonTitle": "Eliminar todo el historial de tareas",
+						"deleteAllConfirmButtonTitleNoJobs": "No hay tareas para eliminar"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Gestión de usuarios",
+			"title": "Usuarios",
+			"description": "Administrar los usuarios en este servidor",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "Crear usuario",
+				"title": "Crear usuario",
+				"description": "Crear un nuevo usuario en este servidor"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Actualizar usuario",
+				"title": "Actualizar usuario",
+				"description": "Actualizar los detalles de este usuario"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Control de acceso y restricciones",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"Configure cualquier restricción que desee aplicar a este usuario. Para obtener más información sobre el control de acceso, consulte",
+						"documentación"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Restricción de edad",
+						"description": "Restringe al usuario el acceso al contenido por encima del umbral de edad establecido",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Forzar en no establecido",
+							"description": "Si está habilitado, se restringirá a los usuarios el acceso a contenido sin valoración de edad disponible"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Restricciones por etiqueta",
+						"description": "Restringe al usuario acceder al contenido con las etiquetas seleccionadas",
+						"placeholder": "Adulto, Gore"
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "Permisos",
 					"subtitle": [
 						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
 						"documentation"

@@ -1,4 +1,4 @@
-use std::{pin::pin, sync::Arc};
+use std::{pin::pin, sync::Arc, time::Instant};
 
 use async_channel::Receiver;
 use futures::{stream, StreamExt};
@@ -6,13 +6,13 @@ use futures_concurrency::stream::Merge;
 use serde::Serialize;
 use tokio::task::{JoinError, JoinHandle};
 
-use super::{JobError, JobExt, JobRunError, WorkerCommand, WorkerCtx};
+use super::{JobError, JobExt, JobRunLog, WorkerCommand, WorkerCtx};
 
 #[derive(Serialize, Debug)]
 pub struct JobTaskOutput<J: JobExt> {
 	pub data: J::Data,
 	pub subtasks: Vec<J::Task>,
-	pub errors: Vec<JobRunError>,
+	pub errors: Vec<JobRunLog>,
 }
 
 pub struct JobTaskHandlerOutput<J: JobExt> {
@@ -38,18 +38,25 @@ pub(crate) async fn job_task_handler<J: JobExt>(
 
 	let mut stream = pin!((task_stream, command_stream).merge());
 
+	let start = Instant::now();
 	// TODO: support pause/resume
 	while let Some(event) = stream.next().await {
 		match event {
 			StreamEvent::TaskCompleted(Err(error)) => {
-				tracing::error!(?error, "Error while executing task");
+				let elapsed_ms = start.elapsed().as_millis();
+				tracing::error!(?error, ?elapsed_ms, "Error while executing task");
 				return Err(JobError::Unknown(format!(
 					"Error while executing task: {:?}",
 					error.to_string()
 				)));
 			},
 			StreamEvent::TaskCompleted(Ok(result)) => {
-				tracing::debug!("Task output received");
+				let elapsed_ms = start.elapsed().as_millis();
+				tracing::debug!(
+					did_err = result.is_err(),
+					?elapsed_ms,
+					"Task output received"
+				);
 				let JobTaskOutput {
 					data,
 					errors,
@@ -65,18 +72,25 @@ pub(crate) async fn job_task_handler<J: JobExt>(
 					returned_ctx: worker_ctx,
 				});
 			},
-			StreamEvent::NewCommand(cmd) => match cmd {
-				WorkerCommand::Cancel(return_sender) => {
-					task_handle.abort();
-					let _ = task_handle.await;
-					return_sender.send(()).map_or_else(
-						|error| {
-							tracing::error!(?error, "Failed to send cancel confirmation");
-						},
-						|_| tracing::trace!("Cancel confirmation sent"),
-					);
-					return Err(JobError::Cancelled);
-				},
+			StreamEvent::NewCommand(cmd) => {
+				tracing::debug!(?cmd, "Received command");
+				match cmd {
+					WorkerCommand::Cancel(return_sender) => {
+						tracing::info!("Cancel signal received! Aborting task");
+						task_handle.abort();
+						let _ = task_handle.await;
+						return_sender.send(()).map_or_else(
+							|error| {
+								tracing::error!(
+									?error,
+									"Failed to send cancel confirmation"
+								);
+							},
+							|_| tracing::trace!("Cancel confirmation sent"),
+						);
+						return Err(JobError::Cancelled);
+					},
+				}
 			},
 		}
 	}

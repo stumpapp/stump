@@ -1,20 +1,28 @@
 use std::{
 	collections::{HashMap, VecDeque},
 	sync::Arc,
+	time::Duration,
 };
 
 use futures::future::join_all;
 use tokio::sync::{
+	broadcast,
 	mpsc::{self, error::SendError},
 	oneshot, RwLock,
 };
 
-use super::{error::JobManagerError, Executor, Worker};
-use crate::{config::StumpConfig, Ctx};
+use super::{error::JobManagerError, handle_do_cancel, Executor, Worker};
+use crate::{
+	config::StumpConfig,
+	event::CoreEvent,
+	job::JobStatus,
+	prisma::{job, PrismaClient},
+	Ctx,
+};
 
 /// Events that can be sent to the job manager. If any of these events require a response,
 /// e.g. to provide an HTTP status code, a oneshot channel should be provided.
-pub enum JobManagerEvent {
+pub enum JobManagerCommand {
 	/// Add a job to the queue to be run
 	EnqueueJob(Box<dyn Executor>),
 	/// A job has been completed and should be removed from the queue
@@ -31,34 +39,42 @@ type JobManagerResult<T> = Result<T, JobManagerError>;
 pub struct JobManager {
 	agent: Arc<JobManagerAgent>,
 	/// A channel to receive job manager events
-	event_rx: mpsc::UnboundedReceiver<JobManagerEvent>,
+	commands_rx: mpsc::UnboundedReceiver<JobManagerCommand>,
 	/// A channel to send job manager events
-	event_tx: mpsc::UnboundedSender<JobManagerEvent>,
+	commands_tx: mpsc::UnboundedSender<JobManagerCommand>,
 }
 
 impl JobManager {
 	/// Creates a new job manager instance
-	pub fn new(ctx: Arc<Ctx>, config: Arc<StumpConfig>) -> Self {
-		let (event_rx, event_tx) = mpsc::unbounded_channel();
+	pub fn new(
+		client: Arc<PrismaClient>,
+		config: Arc<StumpConfig>,
+		core_event_tx: broadcast::Sender<CoreEvent>,
+	) -> Self {
+		let (commands_tx, commands_rx) = mpsc::unbounded_channel();
 		Self {
-			event_rx,
-			event_tx: event_tx.clone(),
-			agent: JobManagerAgent::new(event_tx, ctx, config).arced(),
+			commands_rx,
+			commands_tx: commands_tx.clone(),
+			agent: JobManagerAgent::new(client, config, commands_tx, core_event_tx)
+				.arced(),
 		}
 	}
 
 	/// Starts the watcher loop for the job manager
 	pub fn start(mut self) {
 		tokio::spawn(async move {
-			while let Some(event) = self.event_rx.recv().await {
+			while let Some(event) = self.commands_rx.recv().await {
 				match event {
-					JobManagerEvent::EnqueueJob(job) => {
-						self.agent.clone().enqueue(job).await;
+					JobManagerCommand::EnqueueJob(job) => {
+						self.agent.clone().enqueue(job).await.map_or_else(
+							|error| tracing::error!(?error, "Failed to enqueue job!"),
+							|_| tracing::info!("Successfully enqueued job"),
+						);
 					},
-					JobManagerEvent::CompleteJob(job_id) => {
+					JobManagerCommand::CompleteJob(job_id) => {
 						self.agent.clone().complete(job_id).await;
 					},
-					JobManagerEvent::CancelJob(job_id, tx) => {
+					JobManagerCommand::CancelJob(job_id, tx) => {
 						let result = self.agent.clone().cancel(job_id).await;
 						tx.send(result).map_or_else(
 							|error| {
@@ -70,7 +86,7 @@ impl JobManager {
 							|_| tracing::trace!("Cancel confirmation sent"),
 						);
 					},
-					JobManagerEvent::Shutdown(return_sender) => {
+					JobManagerCommand::Shutdown(return_sender) => {
 						self.agent.clone().shutdown().await;
 						return_sender.send(()).map_or_else(
 							|error| {
@@ -89,9 +105,9 @@ impl JobManager {
 
 	pub fn push_event(
 		&self,
-		event: JobManagerEvent,
-	) -> Result<(), SendError<JobManagerEvent>> {
-		self.event_tx.send(event)
+		event: JobManagerCommand,
+	) -> Result<(), SendError<JobManagerCommand>> {
+		self.commands_tx.send(event)
 	}
 }
 
@@ -102,9 +118,11 @@ pub struct JobManagerAgent {
 	/// Worker threads with a running job
 	workers: RwLock<HashMap<String, Arc<Worker>>>,
 	/// A channel to send shutdown signals to the parent job manager
-	job_manager_tx: mpsc::UnboundedSender<JobManagerEvent>,
-	/// A pointer to the core context
-	core_ctx: Arc<Ctx>,
+	job_manager_tx: mpsc::UnboundedSender<JobManagerCommand>,
+	/// A channel to emit core events
+	core_event_tx: broadcast::Sender<CoreEvent>,
+	/// A pointer to the PrismaClient
+	client: Arc<PrismaClient>,
 	/// A pointer to the core config
 	config: Arc<StumpConfig>,
 }
@@ -112,15 +130,17 @@ pub struct JobManagerAgent {
 impl JobManagerAgent {
 	/// Creates a new Jobs instance
 	pub fn new(
-		job_manager_tx: mpsc::UnboundedSender<JobManagerEvent>,
-		core_ctx: Arc<Ctx>,
+		client: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
+		job_manager_tx: mpsc::UnboundedSender<JobManagerCommand>,
+		core_event_tx: broadcast::Sender<CoreEvent>,
 	) -> Self {
 		Self {
 			queue: RwLock::new(VecDeque::new()),
 			workers: RwLock::new(HashMap::new()),
 			job_manager_tx,
-			core_ctx,
+			core_event_tx,
+			client,
 			config,
 		}
 	}
@@ -130,47 +150,57 @@ impl JobManagerAgent {
 		Arc::new(self)
 	}
 
-	// TODO: result return
+	fn get_event_tx(&self) -> broadcast::Sender<CoreEvent> {
+		self.core_event_tx.clone()
+	}
+
 	/// Add a job to the queue. If there are no running jobs (i.e. no workers),
 	/// then a worker will be created and immediately spawned
-	async fn enqueue(self: Arc<Self>, job: Box<dyn Executor>) {
-		// TODO: Persist the job to the database somewhere
+	async fn enqueue(self: Arc<Self>, job: Box<dyn Executor>) -> JobManagerResult<()> {
+		let created_job = self
+			.client
+			.job()
+			.create(
+				job.id().to_string(),
+				job.name().to_string(),
+				vec![
+					job::description::set(job.description()),
+					job::status::set(JobStatus::Queued.to_string()),
+				],
+			)
+			.exec()
+			.await
+			.map_err(|err| JobManagerError::JobPersistFailed(err.to_string()))?;
+		tracing::trace!(?created_job, "Persisted job to database");
 
 		let mut workers = self.workers.write().await;
-
 		// If there are no running workers, just start the job
 		if workers.is_empty() {
 			let job_id = job.id().to_string();
-			Worker::create_and_spawn(
+			let worker = Worker::create_and_spawn(
 				job,
 				self.clone(),
-				self.core_ctx.db.clone(),
+				self.client.clone(),
 				self.config.clone(),
-				self.core_ctx.get_event_tx(),
+				self.get_event_tx(),
 			)
-			.await
-			.map_or_else(
-				|error| {
-					tracing::error!(?error, "Failed to create worker for job");
-				},
-				|worker| {
-					workers.insert(job_id, worker);
-					tracing::trace!("Worker created and added to workers map");
-				},
-			);
+			.await?;
+			workers.insert(job_id, worker);
+			tracing::trace!("Worker created and added to workers map");
 		} else {
 			// Enqueue the job
 			self.queue.write().await.push_back(job);
 		}
 
 		drop(workers);
+		Ok(())
 	}
 
 	/// Attempts to enqueue the next job in the queue (if one exists)
 	async fn auto_enqueue(self: Arc<Self>) {
 		if let Some(next) = self.queue.write().await.pop_front() {
 			self.job_manager_tx
-				.send(JobManagerEvent::EnqueueJob(next))
+				.send(JobManagerCommand::EnqueueJob(next))
 				.map_or_else(
 					|error| {
 						tracing::error!(?error, "Failed to send event to job manager")
@@ -183,13 +213,17 @@ impl JobManagerAgent {
 	}
 
 	/// Remove a worker by its associated job ID. This should only be called when a job
-	/// is complete. If the job is queued, nothing will happen.
+	/// is complete, regardless of its finalized status. If the job is already queued,
+	/// nothing will happen.
 	///
 	/// Will attempt to dispatch the next job in the queue if one exists
 	pub async fn complete(self: Arc<Self>, job_id: String) {
 		self.workers.write().await.remove(&job_id).map_or_else(
 			|| {
-				tracing::error!("Failed to remove job from workers map");
+				tracing::error!(
+					?job_id,
+					"Failed to remove job from workers map! Did it exist?"
+				);
 			},
 			|_| tracing::trace!("Removed worker for job from workers map"),
 		);
@@ -208,6 +242,8 @@ impl JobManagerAgent {
 			drop(workers);
 			self.auto_enqueue().await;
 		} else if let Some(index) = self.get_queued_job_index(&job_id).await {
+			handle_do_cancel(job_id.clone(), &self.client, Duration::from_secs(0))
+				.await?;
 			self.queue.write().await.remove(index).map_or_else(
 				|| {
 					tracing::warn!(index, job_id, "Unexpected result: failed to remove job with existing index precondition");
@@ -230,14 +266,10 @@ impl JobManagerAgent {
 
 	/// Returns the index of a job in the pending queue by ID.
 	async fn get_queued_job_index(&self, job_id: &str) -> Option<usize> {
-		// let job_queue = self.job_queue.read().await;
-		// job_queue.iter().position(|job| {
-		// 	let job_detail = job
-		// 		.detail()
-		// 		.as_ref()
-		// 		.map(|job_detail| job_detail.id == job_id);
-		// 	job_detail.unwrap_or(false)
-		// })
-		None
+		self.queue
+			.read()
+			.await
+			.iter()
+			.position(|job| job.id().to_string() == job_id)
 	}
 }

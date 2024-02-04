@@ -1,15 +1,17 @@
-use std::{collections::VecDeque, fmt::Debug, sync::Arc};
+use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
 use prisma_client_rust::chrono::{DateTime, Utc};
 use serde::{de, Deserialize, Serialize};
 
 pub mod error;
 mod manager;
+mod progress;
 mod scheduler;
 mod task;
 mod worker;
 
 use error::JobError;
+pub use progress::*;
 pub use scheduler::JobScheduler;
 use specta::Type;
 pub use task::JobTaskOutput;
@@ -26,7 +28,9 @@ use crate::{
 	prisma::{job, log},
 };
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize, Type, ToSchema)]
+#[derive(
+	Clone, Debug, Default, Serialize, Deserialize, PartialEq, Eq, Type, ToSchema,
+)]
 pub enum JobStatus {
 	#[serde(rename = "RUNNING")]
 	Running,
@@ -52,7 +56,7 @@ impl JobStatus {
 	}
 
 	pub fn is_success(&self) -> bool {
-		self == JobStatus::Completed
+		matches!(self, JobStatus::Completed)
 	}
 
 	pub fn is_pending(&self) -> bool {
@@ -90,21 +94,6 @@ impl From<&str> for JobStatus {
 	}
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct JobUpdate {
-	id: String,
-	#[serde(flatten)]
-	payload: JobProgress,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct JobProgress {
-	status: Option<JobStatus>,
-	message: Option<String>,
-	queue_position: Option<i32>,
-	queue_size: Option<i32>,
-}
-
 /// A trait that defines the state of a job. State is frequently updated during execution,
 /// and is used to track the progress of a job, so this trait defines a default [JobDataExt::update]
 /// implementation to update the state with new data.
@@ -135,18 +124,38 @@ impl JobDataExt for () {
 	}
 }
 
+/// A log that will be persisted from a job's execution
 #[derive(Debug, Deserialize, Serialize)]
-pub struct JobRunError {
+pub struct JobRunLog {
 	pub msg: String,
+	pub level: LogLevel,
 	pub timestamp: DateTime<Utc>,
 }
 
-// TODO: persisted warnings? If so, just change to JobRunLog with a LogLevel
-
-impl JobRunError {
-	pub fn new(msg: String) -> Self {
+impl JobRunLog {
+	/// Construct a [JobRunLog] with the given msg and level
+	pub fn new(msg: String, level: LogLevel) -> Self {
 		Self {
 			msg,
+			level,
+			timestamp: Utc::now(),
+		}
+	}
+
+	/// Construct a [JobRunLog] with the given msg and [LogLevel::Error]
+	pub fn error(msg: String) -> Self {
+		Self {
+			msg,
+			level: LogLevel::Error,
+			timestamp: Utc::now(),
+		}
+	}
+
+	/// Construct a [JobRunLog] with the given msg and [LogLevel::Warn]
+	pub fn warn(msg: String) -> Self {
+		Self {
+			msg,
+			level: LogLevel::Warn,
 			timestamp: Utc::now(),
 		}
 	}
@@ -156,7 +165,7 @@ impl JobRunError {
 		(
 			self.msg,
 			vec![
-				log::level::set(LogLevel::Error.to_string()),
+				log::level::set(self.level.to_string()),
 				log::timestamp::set(self.timestamp.into()),
 				log::job::connect(job::id::equals(job_id.clone())),
 				log::job_id::set(Some(job_id)),
@@ -170,7 +179,7 @@ pub struct WorkingState<D, T> {
 	pub data: Option<D>,
 	pub tasks: VecDeque<T>,
 	pub current_task_index: usize,
-	pub errors: Vec<JobRunError>,
+	pub errors: Vec<JobRunLog>,
 }
 
 pub struct JobState<J: JobExt> {
@@ -178,7 +187,7 @@ pub struct JobState<J: JobExt> {
 	data: Option<J::Data>,
 	tasks: VecDeque<J::Task>,
 	current_task_index: usize,
-	errors: Vec<JobRunError>,
+	errors: Vec<JobRunLog>,
 }
 
 /// A trait that defines the behavior and data types of a job. Jobs are responsible for
@@ -198,6 +207,8 @@ pub trait JobExt: Send + Sync + Sized + 'static {
 		+ Send
 		+ Sync;
 	type Task: Serialize + de::DeserializeOwned + Send + Sync;
+
+	fn description(&self) -> Option<String>;
 
 	/// A function that should be called in Self::init to initialize the job state with
 	/// existing data from the DB (if any). Used to support pausing/resuming jobs.
@@ -275,7 +286,7 @@ impl<J: JobExt> Job<J> {
 #[derive(Debug)]
 pub struct ExecutorOutput {
 	pub data: Option<serde_json::Value>,
-	pub errors: Vec<JobRunError>,
+	pub errors: Vec<JobRunLog>,
 }
 
 /// A trait that defines the behavior of a job executor. Executors are responsible for the main
@@ -287,12 +298,15 @@ pub trait Executor: Send + Sync {
 	fn id(&self) -> Uuid;
 	/// The name of the internal job
 	fn name(&self) -> &'static str;
+	/// The optional description for the internal job
+	fn description(&self) -> Option<String>;
 	/// A function to persist the state of the job to the DB. This is called after the job
 	/// has completed (when [Executor::run] returns an Ok).
 	async fn persist_state(
 		&self,
 		ctx: WorkerCtx,
 		output: ExecutorOutput,
+		elapsed: Duration,
 	) -> Result<(), JobError> {
 		let db = ctx.db.clone();
 		let job_id = self.id();
@@ -337,6 +351,12 @@ pub trait Executor: Send + Sync {
 				vec![
 					job::save_state::set(Some(save_state)),
 					job::status::set(JobStatus::Completed.to_string()),
+					job::ms_elapsed::set(
+						elapsed.as_millis().try_into().unwrap_or_else(|e| {
+							tracing::error!(error = ?e, "Wow! Overflowed i64 during attempt to convert job duration to milliseconds");
+							i64::MAX
+						}),
+					),
 				],
 			)
 			.exec()
@@ -351,6 +371,7 @@ pub trait Executor: Send + Sync {
 		&self,
 		ctx: WorkerCtx,
 		status: JobStatus,
+		elapsed: Duration,
 	) -> Result<(), JobError> {
 		let db = ctx.db.clone();
 		let job_id = self.id();
@@ -365,7 +386,15 @@ pub trait Executor: Send + Sync {
 			.job()
 			.update(
 				job::id::equals(job_id.to_string()),
-				vec![job::status::set(status.to_string())],
+				vec![
+					job::status::set(status.to_string()),
+					job::ms_elapsed::set(
+						elapsed.as_millis().try_into().unwrap_or_else(|e| {
+							tracing::error!(error = ?e, "Wow! Overflowed i64 during attempt to convert job duration to milliseconds");
+							i64::MAX
+						}),
+					),
+				],
 			)
 			.exec()
 			.await
@@ -387,7 +416,16 @@ impl<J: JobExt> Executor for Job<J> {
 		J::NAME
 	}
 
+	fn description(&self) -> Option<String> {
+		self.state.as_ref().map(|s| s.job.description()).flatten()
+	}
+
 	async fn run(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError> {
+		ctx.progress(JobProgress::status_msg(
+			JobStatus::Running,
+			"Initializing job",
+		));
+
 		let job_id = self.id();
 		let job_name = self.name();
 		let commands_rx = ctx.command_receiver.clone();
@@ -401,13 +439,19 @@ impl<J: JobExt> Executor for Job<J> {
 			mut errors,
 		} = self.state.take().expect("Job state was already taken!");
 
-		let mut working_data = if let Some(state) = data {
-			Some(state)
+		let mut working_data = if let Some(initial_data) = data {
+			tracing::debug!(?initial_data, "Job started with initial state");
+			Some(initial_data)
 		} else if let Some(restore_point) = job.attempt_restore(&ctx).await? {
 			// Replace the state with the restored state
 			tasks = restore_point.tasks;
 			current_task_index = restore_point.current_task_index;
 			errors = restore_point.errors;
+
+			ctx.progress(JobProgress::restored(
+				current_task_index as i32,
+				tasks.len() as i32,
+			));
 
 			// Return the data from the restore point
 			restore_point.data.or_else(|| Some(Default::default()))
@@ -417,6 +461,11 @@ impl<J: JobExt> Executor for Job<J> {
 			tasks = init_result.tasks;
 			current_task_index = init_result.current_task_index;
 			errors = init_result.errors;
+
+			ctx.progress(JobProgress::init_done(
+				current_task_index as i32,
+				tasks.len() as i32,
+			));
 
 			// Return the data from the init result
 			init_result.data.or_else(|| Some(Default::default()))
@@ -434,6 +483,12 @@ impl<J: JobExt> Executor for Job<J> {
 		tracing::debug!(task_count = tasks.len(), "Starting tasks");
 
 		while !tasks.is_empty() {
+			ctx.progress(JobProgress::task_position_msg(
+				"Starting task",
+				current_task_index as i32,
+				tasks.len() as i32,
+			));
+
 			let next_task = tasks.pop_front().ok_or_else(|| {
 				JobError::TaskFailed(
 					"No tasks unexpectedly remain! This is a bug?".to_string(),
@@ -453,7 +508,7 @@ impl<J: JobExt> Executor for Job<J> {
 				Ok(r) => r,
 				Err(e) => {
 					tracing::error!(?e, "Task handler failed");
-					errors.push(JobRunError::new(format!(
+					errors.push(JobRunLog::error(format!(
 						"Critical task error: {:?}",
 						e.to_string()
 					)));
@@ -480,10 +535,19 @@ impl<J: JobExt> Executor for Job<J> {
 
 			// If there are subtasks, we need to insert them into the tasks queue at the
 			// front, so they are executed next
-			let remaining_tasks = tasks.split_off(0);
-			let mut new_tasks = VecDeque::from(subtasks);
-			new_tasks.extend(remaining_tasks);
-			tasks = new_tasks;
+			if !subtasks.is_empty() {
+				ctx.progress(JobProgress::msg(
+					format!(
+						"{} subtask(s) discovered. Reordering the task queue",
+						subtasks.len()
+					)
+					.as_str(),
+				));
+				let remaining_tasks = tasks.split_off(0);
+				let mut new_tasks = VecDeque::from(subtasks);
+				new_tasks.extend(remaining_tasks);
+				tasks = new_tasks;
+			}
 		}
 
 		tracing::debug!(

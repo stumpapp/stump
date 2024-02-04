@@ -9,7 +9,7 @@ use crate::{
 	config::StumpConfig,
 	db::{self, entity::Log},
 	event::CoreEvent,
-	job::{Executor, JobManager, JobManagerEvent},
+	job::{Executor, JobManager, JobManagerCommand},
 	prisma,
 };
 
@@ -45,14 +45,19 @@ impl Ctx {
 	pub async fn new(config: StumpConfig) -> Ctx {
 		let config = Arc::new(config.clone());
 		let db = Arc::new(db::create_client(&config).await);
+		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		let job_manager = Arc::new(JobManager::new(db.clone(), config.clone()));
+		let job_manager = Arc::new(JobManager::new(
+			db.clone(),
+			config.clone(),
+			event_channel.0.clone(),
+		));
 
 		Ctx {
 			config,
 			db,
 			job_manager,
-			event_channel: Arc::new(channel::<CoreEvent>(1024)),
+			event_channel,
 		}
 	}
 
@@ -63,15 +68,20 @@ impl Ctx {
 	pub async fn mock() -> Ctx {
 		let config = Arc::new(StumpConfig::debug());
 		let db = Arc::new(db::create_test_client().await);
+		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
 		// Create job manager
-		let job_manager = Arc::new(JobManager::create(db.clone(), config.clone()));
+		let job_manager = Arc::new(JobManager::new(
+			db.clone(),
+			config.clone(),
+			event_channel.0.clone(),
+		));
 
 		Ctx {
 			config,
 			db,
 			job_manager,
-			event_channel: Arc::new(channel::<CoreEvent>(1024)),
+			event_channel,
 		}
 	}
 
@@ -176,8 +186,8 @@ impl Ctx {
 	pub fn enqueue_job(
 		&self,
 		job: Box<dyn Executor>,
-	) -> Result<(), SendError<JobManagerEvent>> {
+	) -> Result<(), SendError<JobManagerCommand>> {
 		self.job_manager
-			.push_event(JobManagerEvent::EnqueueJob(job))
+			.push_event(JobManagerCommand::EnqueueJob(job))
 	}
 }

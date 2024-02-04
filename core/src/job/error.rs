@@ -29,8 +29,6 @@ impl From<CoreError> for JobError {
 
 #[derive(Debug, thiserror::Error)]
 pub enum JobManagerError {
-	// #[error("An communication error occurred {0}")]
-	// IPCError(#[from] broadcast::error::SendError<JobManagerShutdownSignal>),
 	#[error("Worker not found {0}")]
 	WorkerNotFound(String),
 	#[error("Worker is in invalid state {0}")]
@@ -41,8 +39,19 @@ pub enum JobManagerError {
 	JobNotFound(String),
 	#[error("Job missing ID")]
 	JobMissingId,
+	#[error("Job failed to be persisted: {0}")]
+	JobPersistFailed(String),
 	#[error("A query error occurred {0}")]
 	QueryError(#[from] prisma_client_rust::QueryError),
 	#[error("An unknown error occurred {0}")]
 	Unknown(String),
+}
+
+impl From<JobError> for JobManagerError {
+	fn from(job_error: JobError) -> Self {
+		match job_error {
+			JobError::QueryError(e) => JobManagerError::QueryError(e),
+			_ => JobManagerError::Unknown(job_error.to_string()),
+		}
+	}
 }

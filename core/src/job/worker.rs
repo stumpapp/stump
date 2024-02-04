@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use std::{
+	sync::Arc,
+	time::{Duration, Instant},
+};
 
 use futures::{stream, StreamExt};
 use futures_concurrency::stream::Merge;
@@ -38,14 +41,13 @@ pub struct WorkerCtx {
 impl WorkerCtx {
 	/// Emit a progress event to any clients listening to the server
 	pub fn progress(&self, payload: JobProgress) {
-		self.event_sender
-			.send(CoreEvent::JobUpdate(JobUpdate {
-				id: self.job_id.clone(),
-				payload,
-			}))
-			.unwrap_or_else(|error| {
-				tracing::error!(?error, "Failed to send progress event");
-			});
+		let send_result = self.event_sender.send(CoreEvent::JobUpdate(JobUpdate {
+			id: self.job_id.clone(),
+			payload,
+		}));
+		if let Err(send_error) = send_result {
+			tracing::error!(?send_error, "Failed to send progress event");
+		}
 	}
 }
 
@@ -153,6 +155,7 @@ impl Worker {
 			),
 		}
 
+		let start = Instant::now();
 		let mut job_handle = spawn(async move {
 			let result = job.run(worker_ctx).await;
 			(job, result)
@@ -170,16 +173,22 @@ impl Worker {
 					return;
 				},
 				StreamEvent::JobCompleted(Ok((returned_job, result))) => {
+					let elapsed = start.elapsed();
 					match result {
 						Ok(output) => {
 							tracing::info!(?output, "Job completed successfully!");
-							let _ =
-								returned_job.persist_state(finalizer_ctx, output).await;
+							let _ = returned_job
+								.persist_state(finalizer_ctx, output, elapsed)
+								.await;
 						},
 						Err(error) => {
 							tracing::error!(?error, "Job failed with critical error");
 							let _ = returned_job
-								.persist_failure(finalizer_ctx, JobStatus::Failed)
+								.persist_failure(
+									finalizer_ctx,
+									JobStatus::Failed,
+									elapsed,
+								)
 								.await;
 						},
 					}
@@ -187,14 +196,15 @@ impl Worker {
 				},
 				StreamEvent::NewCommand(cmd) => match cmd {
 					WorkerCommand::Cancel(return_sender) => {
+						let elapsed = start.elapsed();
 						let client = finalizer_ctx.db;
-						let _ = handle_do_cancel(job_id.clone(), &client).await;
 						job_handle.abort();
 						if job_handle.await.is_ok() {
 							tracing::warn!(
 								"Job worker thread ended successfully after a cancel?"
 							);
 						};
+						let _ = handle_do_cancel(job_id.clone(), &client, elapsed).await;
 						return_sender.send(()).map_or_else(
 							|error| {
 								tracing::error!(
@@ -217,12 +227,25 @@ impl Worker {
 	}
 }
 
-async fn handle_do_cancel(job_id: String, client: &PrismaClient) -> Result<(), JobError> {
+/// Cancel a job by its ID
+pub(crate) async fn handle_do_cancel(
+	job_id: String,
+	client: &PrismaClient,
+	elapsed: Duration,
+) -> Result<(), JobError> {
 	let cancelled_job = client
 		.job()
 		.update(
 			job::id::equals(job_id),
-			vec![job::status::set(JobStatus::Cancelled.to_string())],
+			vec![
+				job::status::set(JobStatus::Cancelled.to_string()),
+				job::ms_elapsed::set(
+					elapsed.as_millis().try_into().unwrap_or_else(|e| {
+						tracing::error!(error = ?e, "Wow! Overflowed i64 during attempt to convert job duration to milliseconds");
+						i64::MAX
+					}),
+				),
+			],
 		)
 		.exec()
 		.await

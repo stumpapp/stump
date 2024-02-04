@@ -10,7 +10,7 @@ use crate::{
 	},
 	filesystem::{scanner::utils::create_media, MediaBuilder},
 	job::{
-		error::JobError, JobDataExt, JobExt, JobRunError, JobTaskOutput, WorkerCtx,
+		error::JobError, JobDataExt, JobExt, JobRunLog, JobTaskOutput, WorkerCtx,
 		WorkingState,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
@@ -66,6 +66,10 @@ impl JobExt for SeriesScanJob {
 
 	type Data = SeriesScanData;
 	type Task = SeriesScanTask;
+
+	fn description(&self) -> Option<String> {
+		Some(self.path.clone())
+	}
 
 	async fn init(
 		&mut self,
@@ -256,7 +260,7 @@ async fn handle_missing_media(
 	series_id: &str,
 	media_paths: Vec<PathBuf>,
 	mut data: SeriesScanData,
-	mut errors: Vec<JobRunError>,
+	mut errors: Vec<JobRunLog>,
 ) -> Result<JobTaskOutput<SeriesScanJob>, JobError> {
 	if media_paths.is_empty() {
 		tracing::debug!("No missing media to handle");
@@ -286,7 +290,7 @@ async fn handle_missing_media(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing media");
-				errors.push(JobRunError::new(format!(
+				errors.push(JobRunLog::error(format!(
 					"Failed to update missing media: {:?}",
 					error.to_string()
 				)));
@@ -317,7 +321,7 @@ async fn handle_create_series_media(
 	series_ctx: SeriesCtx,
 	ctx: &WorkerCtx,
 	mut data: SeriesScanData,
-	mut errors: Vec<JobRunError>,
+	mut errors: Vec<JobRunLog>,
 ) -> Result<JobTaskOutput<SeriesScanJob>, JobError> {
 	if paths.is_empty() {
 		tracing::debug!("No media to create for series");
@@ -366,7 +370,7 @@ async fn handle_create_series_media(
 						},
 						Err(e) => {
 							tracing::error!(error = ?e, ?media_path, "Failed to create media");
-							errors.push(JobRunError::new(format!(
+							errors.push(JobRunLog::error(format!(
 								"Failed to create media: {:?}",
 								e.to_string()
 							)));
@@ -375,7 +379,7 @@ async fn handle_create_series_media(
 				},
 				Err(e) => {
 					tracing::error!(error = ?e, ?media_path, "Failed to build media");
-					errors.push(JobRunError::new(format!(
+					errors.push(JobRunLog::error(format!(
 						"Failed to build media: {:?}",
 						e.to_string()
 					)));

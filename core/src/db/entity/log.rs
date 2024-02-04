@@ -15,7 +15,7 @@ pub struct LogMetadata {
 	pub modified: String,
 }
 
-#[derive(Clone, Default, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Type, ToSchema)]
 pub enum LogLevel {
 	#[serde(rename = "ERROR")]
 	Error,
@@ -51,22 +51,22 @@ pub struct Log {
 impl From<CoreEvent> for Log {
 	fn from(event: CoreEvent) -> Self {
 		match event {
-			CoreEvent::JobFailed { job_id, message } => Self {
-				level: LogLevel::Error,
-				message,
-				job_id: Some(job_id),
-				..Default::default()
-			},
-			CoreEvent::CreateEntityFailed {
-				job_id,
-				path,
-				message,
-			} => Self {
-				level: LogLevel::Error,
-				message: format!("{}: {}", path, message),
-				job_id,
-				..Default::default()
-			},
+			// CoreEvent::JobFailed { job_id, message } => Self {
+			// 	level: LogLevel::Error,
+			// 	message,
+			// 	job_id: Some(job_id),
+			// 	..Default::default()
+			// },
+			// CoreEvent::CreateEntityFailed {
+			// 	job_id,
+			// 	path,
+			// 	message,
+			// } => Self {
+			// 	level: LogLevel::Error,
+			// 	message: format!("{}: {}", path, message),
+			// 	job_id,
+			// 	..Default::default()
+			// },
 			_ => unimplemented!(),
 		}
 	}

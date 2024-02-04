@@ -12,12 +12,12 @@ use stump_core::{
 		create_client_with_url,
 		entity::{Library, LibraryOptions},
 	},
-	filesystem::scanner::_LibraryScanJob,
+	filesystem::scanner::LibraryScanJob,
 	job::{Executor, Job, WorkerCtx},
 	prisma::{library, library_options, PrismaClient},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
-use tokio::runtime::Builder;
+use tokio::{runtime::Builder, sync::broadcast};
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -94,7 +94,7 @@ fn full_scan(c: &mut Criterion) {
 criterion_group!(benches, full_scan);
 
 struct TestCtx {
-	job: Job<_LibraryScanJob>,
+	job: Job<LibraryScanJob>,
 	worker_ctx: WorkerCtx,
 }
 
@@ -201,7 +201,7 @@ async fn setup_test(
 ) -> Result<Setup, Box<dyn std::error::Error>> {
 	let (client, library, tempdirs) =
 		create_test_library(series_count, books_per_series).await?;
-	let job = Job::new(_LibraryScanJob {
+	let job = Job::new(LibraryScanJob {
 		id: library.id.clone(),
 		path: library.path.clone(),
 		options: Some(library.library_options.clone()),
@@ -220,7 +220,7 @@ async fn setup_test(
 		db: Arc::new(client),
 		config: Arc::new(config),
 		job_id,
-		event_sender: async_channel::unbounded().0,
+		event_sender: broadcast::channel(1024).0,
 		command_receiver: async_channel::unbounded().1,
 	};
 	Ok(Setup {

@@ -24,18 +24,6 @@ use super::{
 	WalkedLibrary, WalkedSeries, WalkerCtx,
 };
 
-// TODO: there has to be some sort of nesting of task counts here in order to properly report on the UI.
-// For example, I might be on the 3rd task of 5, and within the 3rd task (series scan) I have:
-// - 400 files total to index on init
-// - 20 new media to create
-// - 1 missing media
-// I think, logically, the progression on the UI would be something like:
-// - Handling task (3/5) - x/400 files indexed
-// - Handling task (3/5) - x/20 new media created
-// - Handling task (3/5) - x/1 missing media handled
-// Or some iteration of that kind of thing. Otherwise, the progression will be SUPER unclear to the user
-// with just 3/5, 4/5, 5/5, etc. I think this is a good idea, but I'm not sure how to implement it (yet).
-
 #[derive(Serialize, Deserialize)]
 pub enum LibraryScanTask {
 	Init(InitTaskInput),
@@ -80,9 +68,6 @@ impl JobDataExt for LibraryScanData {
 		self.updated_series += updated.updated_series;
 	}
 }
-
-#[derive(Serialize, Deserialize)]
-struct LibraryScanJobOutput {}
 
 #[async_trait::async_trait]
 impl JobExt for LibraryScanJob {

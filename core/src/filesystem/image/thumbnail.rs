@@ -100,6 +100,7 @@ pub fn generate_thumbnails(
 
 pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
 
+// TODO: on progress callback might not be needed anymore
 pub fn generate_thumbnails_for_media(
 	media: Vec<prisma_media::Data>,
 	options: ImageProcessorOptions,
@@ -148,6 +149,7 @@ pub fn generate_thumbnails_for_media(
 	Ok(generated_paths)
 }
 
+// TODO: return deleted count
 pub fn remove_thumbnails(
 	id_list: &[String],
 	thumbnails_dir: PathBuf,

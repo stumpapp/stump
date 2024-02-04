@@ -60,6 +60,10 @@ criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 [build-dependencies]
 chrono = "0.4.31"
 
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2.152"
+
 [[bench]]
 name    = "bench_main"
 harness = false
+

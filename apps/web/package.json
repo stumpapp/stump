@@ -4,8 +4,10 @@
 	"description": "",
 	"license": "MIT",
 	"scripts": {
-		"dev": "vite",
-		"build": "vite build"
+		"dev": "vite --host",
+		"start": "vite preview",
+		"build": "vite build",
+		"nuke": "rimraf -rf node_modules"
 	},
 	"dependencies": {
 		"@stump/client": "workspace:*",

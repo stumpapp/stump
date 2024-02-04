@@ -7,9 +7,6 @@ This package is the component library used throughout the Stump web and desktop 
 When developing components within this package, it is really useful to have the Storybook running. To do so, run the following command:
 
 ```bash
-# Using moon from the project root directory
-moon run components:storybook
-
 # Using PNPM from the package root directory
 pnpm run storybook
 ```

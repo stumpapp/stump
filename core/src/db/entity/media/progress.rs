@@ -43,7 +43,7 @@ impl From<prisma::read_progress::Data> for ReadProgress {
 			page: data.page,
 			epubcfi: data.epubcfi,
 			is_completed: data.is_completed,
-			completed_at: data.completed_at.map(|t| t.to_string()),
+			completed_at: data.completed_at.map(|t| t.to_rfc3339()),
 			percentage_completed: data.percentage_completed,
 			media_id: data.media_id,
 			media,

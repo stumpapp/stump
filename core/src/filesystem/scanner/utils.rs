@@ -13,9 +13,9 @@ use prisma_client_rust::{
 use walkdir::DirEntry;
 
 use crate::{
-	db::entity::{FileStatus, Library, Media},
+	db::entity::Media,
 	error::{CoreError, CoreResult},
-	prisma::{library, media, media_metadata, series, PrismaClient},
+	prisma::{media, media_metadata, series, PrismaClient},
 };
 
 pub(crate) fn file_updated_since_scan(
@@ -51,39 +51,12 @@ pub(crate) fn file_updated_since_scan(
 	}
 }
 
-pub(crate) fn populate_glob_builder(builder: &mut GlobSetBuilder, paths: &[PathBuf]) {
-	for path in paths {
-		let open_result = File::open(path);
-		if let Ok(file) = open_result {
-			// read the lines of the file, and add each line as a glob pattern in the builder
-			for line in BufReader::new(file).lines() {
-				if let Err(e) = line {
-					tracing::error!(
-						?path,
-						error = ?e,
-						"Error occurred trying to read line from glob file",
-					);
-					continue;
-				}
-
-				builder.add(Glob::new(&line.unwrap()).unwrap());
-			}
-		} else {
-			tracing::error!(
-				error = ?open_result.err(),
-				?path,
-				"Failed to open file",
-			);
-		}
-	}
-}
-
 // TODO: should probably return result as to not scan files which the user would like to ignore
 pub(crate) fn generate_rule_set(paths: &[PathBuf]) -> GlobSet {
 	let mut builder = GlobSetBuilder::new();
 
 	let adjusted_paths = paths
-		.into_iter()
+		.iter()
 		// We have to remove duplicates here otherwise the glob will double some patterns.
 		// An example would be when the library has media in root. Not the end of the world.
 		.unique()
@@ -120,60 +93,6 @@ pub(crate) fn generate_rule_set(paths: &[PathBuf]) -> GlobSet {
 	}
 
 	builder.build().unwrap_or_default()
-}
-
-pub async fn mark_library_missing(
-	db: &PrismaClient,
-	library: &library::Data,
-) -> CoreResult<Library> {
-	let series_ids = library
-		.series()
-		.unwrap_or(&vec![])
-		.iter()
-		.map(|s| s.id.clone())
-		.collect();
-
-	let (updated_library, affected_series, affected_media) = db
-		._transaction()
-		.run(|client| async move {
-			let updated_library = client
-				.library()
-				.update(
-					library::id::equals(library.id.clone()),
-					vec![library::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await?;
-
-			let affected_series = client
-				.series()
-				.update_many(
-					vec![series::library_id::equals(Some(library.id.clone()))],
-					vec![series::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await?;
-
-			client
-				.media()
-				.update_many(
-					vec![media::series_id::in_vec(series_ids)],
-					vec![media::status::set(FileStatus::Missing.to_string())],
-				)
-				.exec()
-				.await
-				.map(|affected_media| (updated_library, affected_series, affected_media))
-		})
-		.await?;
-
-	tracing::trace!(
-		library_id = library.id.as_str(),
-		affected_series = affected_series,
-		affected_media = affected_media,
-		"Marked library as missing"
-	);
-
-	Ok(Library::from(updated_library))
 }
 
 pub(crate) async fn create_media(
@@ -272,20 +191,4 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 		.await;
 
 	Ok(result?)
-}
-
-pub(crate) async fn mark_media_paths_missing(
-	client: &PrismaClient,
-	paths: Vec<String>,
-) -> CoreResult<i64> {
-	let rows_affected = client
-		.media()
-		.update_many(
-			vec![media::path::in_vec(paths)],
-			vec![media::status::set(FileStatus::Missing.to_string())],
-		)
-		.exec()
-		.await?;
-
-	Ok(rows_affected)
 }

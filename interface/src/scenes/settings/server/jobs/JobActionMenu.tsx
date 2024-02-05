@@ -1,15 +1,25 @@
+import paths from '@/paths'
 import { jobApi, jobQueryKeys } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
-import { JobDetail } from '@stump/types'
-import { Ban, MoreVertical, Trash2 } from 'lucide-react'
+import { CoreJobOutput, PersistedJob } from '@stump/types'
+import { Ban, Database, FileClock, MoreVertical, Trash2 } from 'lucide-react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
+import { useNavigate } from 'react-router'
 
 type Props = {
-	job: JobDetail
+	job: PersistedJob
+	onInspectData: (data: CoreJobOutput | null) => void
 }
-export default function JobActionMenu({ job }: Props) {
+export default function JobActionMenu({ job, onInspectData }: Props) {
+	const navigate = useNavigate()
+
+	const isCancelable =
+		job.status === 'RUNNING' || job.status === 'QUEUED' || job.status === 'PAUSED'
+	const isDeletable =
+		job.status === 'COMPLETED' || job.status === 'FAILED' || job.status === 'CANCELLED'
+
 	/**
 	 * A generic error handler for the other utility functions in this component.
 	 */
@@ -26,7 +36,7 @@ export default function JobActionMenu({ job }: Props) {
 	 * Cancels the running job.
 	 */
 	const handleCancel = useCallback(async () => {
-		if (job.status !== 'RUNNING' && job.status !== 'QUEUED') {
+		if (!isCancelable) {
 			// This shouldn't happen, but just in case we will refresh the jobs
 			// and just return.
 			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
@@ -46,8 +56,8 @@ export default function JobActionMenu({ job }: Props) {
 	 * Deletes the record of the job from the database.
 	 */
 	const handleDelete = useCallback(async () => {
-		// We don't allow deletion for in-flight/queued jobs
-		if (job.status === 'RUNNING' || job.status === 'QUEUED') {
+		// We don't allow DELETE for in-flight/queued jobs
+		if (!isDeletable) {
 			return
 		}
 
@@ -60,9 +70,12 @@ export default function JobActionMenu({ job }: Props) {
 		}
 	}, [job.id, job.status])
 
+	const jobId = job.id
+	const jobData = job.output_data
+	const associatedLogs = useMemo(() => job.logs ?? [], [job.logs])
 	const items = useMemo(
 		() => [
-			...(job.status === 'RUNNING'
+			...(isCancelable
 				? [
 						{
 							label: 'Cancel',
@@ -71,7 +84,26 @@ export default function JobActionMenu({ job }: Props) {
 						},
 				  ]
 				: []),
-			...(job.status !== 'RUNNING' && job.status !== 'QUEUED'
+			...(jobData
+				? [
+						{
+							label: 'View data',
+							leftIcon: <Database className="mr-2 h-4 w-4" />,
+							onClick: () => onInspectData(jobData),
+						},
+				  ]
+				: []),
+			...(associatedLogs.length > 0
+				? [
+						{
+							label: 'View logs',
+							leftIcon: <FileClock className="mr-2 h-4 w-4" />,
+							onClick: () => navigate(paths.serverLogs(jobId)),
+						},
+				  ]
+				: []),
+
+			...(isDeletable
 				? [
 						{
 							label: 'Delete',
@@ -81,7 +113,16 @@ export default function JobActionMenu({ job }: Props) {
 				  ]
 				: []),
 		],
-		[job.status, handleCancel, handleDelete],
+		[
+			isCancelable,
+			isDeletable,
+			associatedLogs,
+			jobId,
+			navigate,
+			onInspectData,
+			handleCancel,
+			handleDelete,
+		],
 	)
 
 	return (

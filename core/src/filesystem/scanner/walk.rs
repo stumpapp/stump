@@ -77,16 +77,18 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 			let entry_path_str = entry_path.as_os_str().to_string_lossy().to_string();
 			let check_deep = is_collection_based && entry_path_str != path;
 
-			if ignore_rules.is_match(entry.path()) {
-				Either::Right(entry)
-			} else if check_deep && entry_path.dir_has_media_deep() {
-				// If we're doing a top level scan, we need to check that the path
-				// has media deeply nested. Exception for when the path is the library path,
-				// then we only need to check if it has media in it directly
-				Either::Left(entry)
-			} else if !check_deep && entry_path.dir_has_media() {
-				// If we're doing a bottom up scan, we need to check that the path has
-				// media directly in it.
+			let should_ignore = ignore_rules.is_match(entry.path());
+			// If we're doing a top level scan, we need to check that the path
+			// has media deeply nested. Exception for when the path is the library path,
+			// then we only need to check if it has media in it directly
+			//
+			// If we're doing a bottom up scan, we need to check that the path has
+			// media directly in it.
+			let is_valid = !should_ignore
+				&& (check_deep && entry_path.dir_has_media_deep()
+					|| (!check_deep && entry_path.dir_has_media()));
+
+			if is_valid {
 				Either::Left(entry)
 			} else {
 				Either::Right(entry)
@@ -135,7 +137,6 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 				.iter()
 				.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
 				.map(|e| e.path().to_owned())
-				.into_iter()
 				.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
 					let already_exists =
 						existing_series_map.contains_key(path.to_string_lossy().as_ref());
@@ -215,7 +216,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 		.into_iter()
 		// .filter_entry(|e| e.path().is_file()) // Note: This doesn't seem to work?
 		.filter_map(|e| e.ok())
-		.filter_map(|e| e.path().is_file().then(|| e))
+		.filter_map(|e| e.path().is_file().then_some(e))
 		.par_bridge()
 		.partition_map::<Vec<DirEntry>, Vec<DirEntry>, _, _, _>(|entry| {
 			let entry_path = entry.path();
@@ -268,7 +269,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 
 				if let Some(media) = existing_media_map.get(entry_path_str.as_str()) {
 					let has_been_modified = if let Some(dt) = media.modified_at.clone() {
-						file_updated_since_scan(&entry, dt)
+						file_updated_since_scan(entry, dt)
 							.map_err(|err| {
 								tracing::error!(
 									error = ?err,

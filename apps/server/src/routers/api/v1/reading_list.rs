@@ -1,6 +1,6 @@
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	utils::get_session_user,
 };
 use axum::{
@@ -120,7 +120,7 @@ async fn get_reading_list(
 	State(ctx): State<AppState>,
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
-) -> ApiResult<Json<Pageable<Vec<ReadingList>>>> {
+) -> APIResult<Json<Pageable<Vec<ReadingList>>>> {
 	let user = get_session_user(&session)?;
 	let user_id = user.id.clone();
 
@@ -188,7 +188,7 @@ async fn create_reading_list(
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
-) -> ApiResult<Json<ReadingList>> {
+) -> APIResult<Json<ReadingList>> {
 	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
@@ -253,7 +253,7 @@ async fn get_reading_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<ReadingList>> {
+) -> APIResult<Json<ReadingList>> {
 	let user_id = get_session_user(&session)?.id;
 	let db = &ctx.db;
 
@@ -269,7 +269,7 @@ async fn get_reading_list_by_id(
 		.await?;
 
 	if reading_list.is_none() {
-		return Err(ApiError::NotFound(format!(
+		return Err(APIError::NotFound(format!(
 			"Reading list with ID {} not found",
 			id
 		)));
@@ -300,7 +300,7 @@ async fn update_reading_list(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
-) -> ApiResult<Json<ReadingList>> {
+) -> APIResult<Json<ReadingList>> {
 	let user = get_session_user(&session)?;
 	let db = &ctx.db;
 
@@ -313,7 +313,7 @@ async fn update_reading_list(
 		.await?;
 
 	if reading_list.is_none() {
-		return Err(ApiError::NotFound(format!(
+		return Err(APIError::NotFound(format!(
 			"Reading List with id {} not found",
 			id
 		)));
@@ -322,12 +322,12 @@ async fn update_reading_list(
 	let reading_list = reading_list.unwrap();
 	if reading_list.creating_user_id != user.id {
 		// TODO: log bad access attempt to DB
-		return Err(ApiError::Forbidden(String::from(
+		return Err(APIError::Forbidden(String::from(
 			"You do not have permission to access this resource.",
 		)));
 	}
 
-	Err(ApiError::NotImplemented)
+	Err(APIError::NotImplemented)
 
 	// let created_reading_list = db
 	// 	.reading_list()
@@ -366,7 +366,7 @@ async fn delete_reading_list_by_id(
 	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<ReadingList>> {
+) -> APIResult<Json<ReadingList>> {
 	let user = get_session_user(&session)?;
 	let db = &ctx.db;
 
@@ -377,7 +377,7 @@ async fn delete_reading_list_by_id(
 		.await?;
 
 	if reading_list.is_none() {
-		return Err(ApiError::NotFound(format!(
+		return Err(APIError::NotFound(format!(
 			"Reading List with id {} not found",
 			id
 		)));
@@ -386,7 +386,7 @@ async fn delete_reading_list_by_id(
 	let reading_list = reading_list.unwrap();
 	if reading_list.creating_user_id != user.id {
 		// TODO: log bad access attempt to DB
-		return Err(ApiError::forbidden_discreet());
+		return Err(APIError::forbidden_discreet());
 	}
 
 	trace!("Attempting to delete reading list with ID {}", &id);

@@ -1,11 +1,11 @@
 import { Badge, Card, Heading, Text } from '@stump/components'
-import { JobDetail, JobStatus } from '@stump/types'
+import { CoreJobOutput, JobStatus, PersistedJob } from '@stump/types'
 import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { CircleSlash2 } from 'lucide-react'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
 import { useAppContext } from '@/context'
@@ -13,6 +13,7 @@ import { useLocaleContext } from '@/i18n'
 
 import { useJobSettingsContext } from './context.ts'
 import JobActionMenu from './JobActionMenu.tsx'
+import JobDataInspector from './JobDataInspector.tsx'
 import RunningJobElapsedTime from './RunningJobElapsedTime.tsx'
 
 dayjs.extend(duration)
@@ -21,12 +22,14 @@ dayjs.extend(relativeTime)
 const DEBUG = import.meta.env.DEV
 const LOCALE_BASE = 'settingsScene.server/jobs.sections.history.table'
 
-const columnHelper = createColumnHelper<JobDetail>()
+const columnHelper = createColumnHelper<PersistedJob>()
 
 export default function JobTable() {
 	const { isServerOwner } = useAppContext()
 	const { t } = useLocaleContext()
 	const { jobs, pagination, setPagination, pageCount } = useJobSettingsContext()
+
+	const [inspectingData, setInspectingData] = useState<CoreJobOutput | null>()
 
 	const columns = useMemo(
 		() => [
@@ -53,14 +56,6 @@ export default function JobTable() {
 					</Text>
 				),
 				header: t(`${LOCALE_BASE}.columns.description`),
-			}),
-			columnHelper.accessor((job) => `${job.completed_task_count}/${job.task_count}`, {
-				cell: ({ row }) => (
-					<Text size="sm" variant="muted" className="line-clamp-1">
-						{row.original.completed_task_count}/{row.original.task_count}
-					</Text>
-				),
-				header: t(`${LOCALE_BASE}.columns.tasks`),
 			}),
 			columnHelper.accessor('created_at', {
 				cell: ({ row: { original: job } }) => {
@@ -131,7 +126,10 @@ export default function JobTable() {
 				id: 'ms_elapsed',
 			}),
 			columnHelper.display({
-				cell: ({ row }) => (isServerOwner ? <JobActionMenu job={row.original} /> : null),
+				cell: ({ row }) =>
+					isServerOwner ? (
+						<JobActionMenu job={row.original} onInspectData={setInspectingData} />
+					) : null,
 				id: 'actions',
 				size: 28,
 			}),
@@ -149,7 +147,6 @@ export default function JobTable() {
 					debugHeaders: DEBUG,
 					debugTable: DEBUG,
 					enableSorting: false,
-					getCoreRowModel: getCoreRowModel(),
 					manualPagination: true,
 					onPaginationChange: setPagination,
 					pageCount,
@@ -171,6 +168,8 @@ export default function JobTable() {
 				)}
 				isZeroBasedPagination
 			/>
+
+			<JobDataInspector data={inspectingData} onClose={() => setInspectingData(null)} />
 		</Card>
 	)
 }

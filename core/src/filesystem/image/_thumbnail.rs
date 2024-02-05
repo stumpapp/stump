@@ -12,6 +12,8 @@ use crate::{
 	prisma::media as prisma_media,
 };
 
+// TODO: use this! :)
+
 pub struct ThumbnailManager {
 	config: Arc<StumpConfig>,
 	thumbnail_contents: HashMap<String, PathBuf>,

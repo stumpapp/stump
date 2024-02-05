@@ -8,14 +8,13 @@ use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
 	db::{
-		entity::JobSchedulerConfig,
+		entity::{JobSchedulerConfig, PersistedJob},
 		query::{
 			ordering::QueryOrder,
 			pagination::{Pageable, Pagination, PaginationQuery},
 		},
 	},
-	event::InternalCoreTask,
-	job::JobDetail,
+	job::JobManagerCommand,
 	prisma::{
 		job::{self, OrderByParam as JobOrderByParam},
 		job_schedule_config, library, server_config,
@@ -27,7 +26,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	middleware::auth::{Auth, ServerOwnerGuard},
 };
@@ -59,7 +58,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	path = "/api/v1/jobs",
 	tag = "job",
 	responses(
-		(status = 200, description = "Successfully retrieved job reports", body = [JobDetail]),
+		(status = 200, description = "Successfully retrieved job reports", body = [PersistedJob]),
 		(status = 401, description = "No user is logged in (unauthorized)."),
 		(status = 403, description = "User does not have permission to access this resource."),
 		(status = 500, description = "Internal server error."),
@@ -70,7 +69,7 @@ async fn get_jobs(
 	order: QsQuery<QueryOrder>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Pageable<Vec<JobDetail>>>> {
+) -> APIResult<Json<Pageable<Vec<PersistedJob>>>> {
 	let pagination = pagination_query.0.get();
 	let order = order.0;
 
@@ -109,7 +108,7 @@ async fn get_jobs(
 				.exec()
 				.await?
 				.into_iter()
-				.map(JobDetail::from)
+				.map(PersistedJob::from)
 				.collect::<Vec<_>>();
 
 			if is_unpaged {
@@ -144,7 +143,7 @@ async fn get_jobs(
 	)
 )]
 /// Delete all jobs from the database.
-async fn delete_jobs(State(ctx): State<AppState>) -> ApiResult<()> {
+async fn delete_jobs(State(ctx): State<AppState>) -> APIResult<()> {
 	let result = ctx.db.job().delete_many(vec![]).exec().await?;
 	debug!("Deleted {} job reports", result);
 	Ok(())
@@ -165,10 +164,10 @@ async fn delete_jobs(State(ctx): State<AppState>) -> ApiResult<()> {
 async fn delete_job_by_id(
 	State(ctx): State<AppState>,
 	Path(job_id): Path<String>,
-) -> ApiResult<()> {
+) -> APIResult<()> {
 	let _ = ctx.db.job().delete(job::id::equals(job_id)).exec().await?;
 	// TODO(aaron): debug why this breaks Axum...
-	// Ok(JobDetail::from(result))
+	// Ok(PersistedJob::from(result))
 	Ok(())
 }
 
@@ -190,19 +189,19 @@ async fn delete_job_by_id(
 async fn cancel_job_by_id(
 	State(ctx): State<AppState>,
 	Path(job_id): Path<String>,
-) -> ApiResult<()> {
+) -> APIResult<()> {
 	let (task_tx, task_rx) = oneshot::channel();
 
-	ctx.dispatch_task(InternalCoreTask::CancelJob {
-		job_id,
-		return_sender: task_tx,
-	})
-	.map_err(|e| {
-		ApiError::InternalServerError(format!("Failed to submit internal task: {}", e))
-	})?;
+	ctx.send_job_manager_command(JobManagerCommand::CancelJob(job_id, task_tx))
+		.map_err(|e| {
+			APIError::InternalServerError(format!(
+				"Failed to send command to job manager: {}",
+				e
+			))
+		})?;
 
 	Ok(task_rx.await.map_err(|e| {
-		ApiError::InternalServerError(format!("Failed to cancel job: {}", e))
+		APIError::InternalServerError(format!("Failed to get cancel confirmation: {}", e))
 	})??)
 }
 
@@ -219,7 +218,7 @@ async fn cancel_job_by_id(
 )]
 async fn get_scheduler_config(
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<JobSchedulerConfig>> {
+) -> APIResult<Json<JobSchedulerConfig>> {
 	let client = &ctx.db;
 
 	let server_config = client
@@ -231,14 +230,14 @@ async fn get_scheduler_config(
 		)
 		.exec()
 		.await?
-		.ok_or(ApiError::InternalServerError(
+		.ok_or(APIError::InternalServerError(
 			"Server preferences have not been initialized".to_string(),
 		))?;
 
 	let config = server_config
 		.job_schedule_config()?
 		.map(|c| c.to_owned())
-		.ok_or(ApiError::NotFound(
+		.ok_or(APIError::NotFound(
 			"Job scheduler config has not been initialized".to_string(),
 		))?;
 
@@ -265,7 +264,7 @@ pub struct UpdateSchedulerConfig {
 async fn update_scheduler_config(
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateSchedulerConfig>,
-) -> ApiResult<Json<Option<JobSchedulerConfig>>> {
+) -> APIResult<Json<Option<JobSchedulerConfig>>> {
 	let db = &ctx.db;
 
 	let should_remove_config =
@@ -273,7 +272,7 @@ async fn update_scheduler_config(
 
 	tracing::trace!(should_remove_config, ?input, "update_scheduler_config");
 
-	let result: Result<Option<JobSchedulerConfig>, ApiError> = db
+	let result: Result<Option<JobSchedulerConfig>, APIError> = db
 		._transaction()
 		.run(|client| async move {
 			let server_config = client
@@ -282,7 +281,7 @@ async fn update_scheduler_config(
 				.with(server_config::job_schedule_config::fetch())
 				.exec()
 				.await?
-				.ok_or(ApiError::InternalServerError(String::from(
+				.ok_or(APIError::InternalServerError(String::from(
 					"Server preferences are missing!",
 				)))?;
 

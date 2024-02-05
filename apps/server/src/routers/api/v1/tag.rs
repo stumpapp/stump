@@ -9,7 +9,7 @@ use tracing::error;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	middleware::auth::Auth,
 };
 
@@ -31,7 +31,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 )]
 /// Get all tags for all items in the database. Tags are returned in a flat list,
 /// not grouped by the items which they belong to.
-async fn get_tags(State(ctx): State<AppState>) -> ApiResult<Json<Vec<Tag>>> {
+async fn get_tags(State(ctx): State<AppState>) -> APIResult<Json<Vec<Tag>>> {
 	let db = &ctx.db;
 
 	Ok(Json(
@@ -60,7 +60,7 @@ async fn get_tags(State(ctx): State<AppState>) -> ApiResult<Json<Vec<Tag>>> {
 async fn create_tags(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateTags>,
-) -> ApiResult<Json<Vec<Tag>>> {
+) -> APIResult<Json<Vec<Tag>>> {
 	let db = &ctx.db;
 
 	let already_existing_tags = db
@@ -78,7 +78,7 @@ async fn create_tags(
 			.collect::<Vec<String>>()
 			.join(", ");
 
-		return Err(ApiError::BadRequest(format!(
+		return Err(APIError::BadRequest(format!(
 			"Attempted to create tags which already exist: {}",
 			existing_names
 		)));

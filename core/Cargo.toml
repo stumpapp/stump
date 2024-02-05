@@ -12,7 +12,6 @@ specta = { workspace = true }
 ### Async Utils ###
 rayon = "1.8.0"
 futures = { workspace = true }
-futures-concurrency = "7.4.3"
 async-trait = { workspace = true }
 async-channel = "2.1.0"
 

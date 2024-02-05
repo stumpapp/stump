@@ -1,9 +1,9 @@
 import type { ClaimResponse, StumpVersion } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult } from './types'
+import { APIResult } from './types'
 
-export function getStumpVersion(): Promise<ApiResult<StumpVersion>> {
+export function getStumpVersion(): Promise<APIResult<StumpVersion>> {
 	return API.post('/version')
 }
 
@@ -11,7 +11,7 @@ export function ping() {
 	return API.get('/ping')
 }
 
-export async function checkIsClaimed(): Promise<ApiResult<ClaimResponse>> {
+export async function checkIsClaimed(): Promise<APIResult<ClaimResponse>> {
 	return API.get('/claim')
 }
 

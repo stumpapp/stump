@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-	db::entity::{LibraryOptions, LibraryScanMode},
+	db::entity::LibraryOptions,
 	filesystem::scanner::LibraryScanJob,
 	job::Job,
 	prisma::{job_schedule_config, library},

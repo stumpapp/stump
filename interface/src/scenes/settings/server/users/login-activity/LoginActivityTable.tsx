@@ -95,7 +95,6 @@ export default function LoginActivityTable() {
 						minSize: 100,
 						size: 150,
 					},
-					getCoreRowModel: getCoreRowModel(),
 					getPaginationRowModel: getPaginationRowModel(),
 					onPaginationChange: setPagination,
 					state: {

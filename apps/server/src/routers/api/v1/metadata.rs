@@ -25,7 +25,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
-	errors::ApiResult,
+	errors::APIResult,
 	filter::{
 		chain_optional_iter, FilterableQuery, MediaMetadataBaseFilter,
 		MediaMetadataFilter, MediaMetadataRelationFilter, SeriesMedataFilter,
@@ -211,7 +211,7 @@ pub struct MediaMetadataOverview {
 async fn get_metadata_overview(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<MediaMetadataOverview>> {
+) -> APIResult<Json<MediaMetadataOverview>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 
 	trace!(?filters, "get_metadata_overview");
@@ -255,7 +255,7 @@ async fn get_metadata_overview(
 async fn get_genres(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -286,7 +286,7 @@ async fn get_genres(
 async fn get_genres_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_genres(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -296,7 +296,7 @@ async fn get_genres_handler(
 async fn get_writers(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -327,7 +327,7 @@ async fn get_writers(
 async fn get_writers_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_writers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -337,7 +337,7 @@ async fn get_writers_handler(
 async fn get_pencllers(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -368,7 +368,7 @@ async fn get_pencllers(
 async fn get_pencillers_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_pencllers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -378,7 +378,7 @@ async fn get_pencillers_handler(
 async fn get_inkers(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -409,7 +409,7 @@ async fn get_inkers(
 async fn get_inkers_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_inkers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -419,7 +419,7 @@ async fn get_inkers_handler(
 async fn get_colorists(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -450,7 +450,7 @@ async fn get_colorists(
 async fn get_colorists_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_colorists(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -460,7 +460,7 @@ async fn get_colorists_handler(
 async fn get_letterers(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -491,7 +491,7 @@ async fn get_letterers(
 async fn get_letterers_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_letterers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -501,7 +501,7 @@ async fn get_letterers_handler(
 async fn get_editors(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -532,7 +532,7 @@ async fn get_editors(
 async fn get_editors_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_editors(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -542,7 +542,7 @@ async fn get_editors_handler(
 async fn get_publishers(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -573,7 +573,7 @@ async fn get_publishers(
 async fn get_publishers_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_publishers(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -583,7 +583,7 @@ async fn get_publishers_handler(
 async fn get_characters(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -614,7 +614,7 @@ async fn get_characters(
 async fn get_characters_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_characters(&ctx.db, &apply_media_metadata_filters(filters)).await?,
@@ -624,7 +624,7 @@ async fn get_characters_handler(
 async fn get_teams(
 	client: &PrismaClient,
 	where_conditions: &[media_metadata::WhereParam],
-) -> ApiResult<Vec<String>> {
+) -> APIResult<Vec<String>> {
 	let result = client
 		.media_metadata()
 		.find_many(where_conditions.to_vec())
@@ -655,7 +655,7 @@ async fn get_teams(
 async fn get_teams_handler(
 	filter_query: QsQuery<FilterableQuery<MediaMetadataFilter>>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Vec<String>>> {
+) -> APIResult<Json<Vec<String>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	Ok(Json(
 		get_teams(&ctx.db, &apply_media_metadata_filters(filters)).await?,

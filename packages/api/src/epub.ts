@@ -8,19 +8,19 @@ import type {
 } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult } from './types'
+import { APIResult } from './types'
 
 export function getEpubBaseUrl(id: string): string {
 	return `${API.getUri()}/epub/${id}`
 }
 
-export function getEpubById(id: string): Promise<ApiResult<Epub>> {
+export function getEpubById(id: string): Promise<APIResult<Epub>> {
 	return API.get(`/epub/${id}`)
 }
 
 export function updateEpubProgress(
 	payload: UpdateEpubProgress & { id: string },
-): Promise<ApiResult<ReadProgress>> {
+): Promise<APIResult<ReadProgress>> {
 	return API.put(`/epub/${payload.id}/progress`, payload)
 }
 
@@ -30,22 +30,22 @@ export function getEpubResource(payload: {
 	id: string
 	root?: string
 	resourceId: string
-}): Promise<ApiResult<unknown>> {
+}): Promise<APIResult<unknown>> {
 	return API.get(`/epub/${payload.id}/${payload.root ?? 'META-INF'}/${payload.resourceId}`)
 }
 
-export function getBookmarks(id: string): Promise<ApiResult<Bookmark[]>> {
+export function getBookmarks(id: string): Promise<APIResult<Bookmark[]>> {
 	return API.get(`/epub/${id}/bookmarks`)
 }
 
 export function createBookmark(
 	id: string,
 	payload: CreateOrUpdateBookmark,
-): Promise<ApiResult<Bookmark>> {
+): Promise<APIResult<Bookmark>> {
 	return API.post(`/epub/${id}/bookmarks`, payload)
 }
 
-export function deleteBookmark(id: string, payload: DeleteBookmark): Promise<ApiResult<Bookmark>> {
+export function deleteBookmark(id: string, payload: DeleteBookmark): Promise<APIResult<Bookmark>> {
 	return API.delete(`/epub/${id}/bookmarks`, { data: payload })
 }
 

@@ -3,6 +3,7 @@ import {
 	ColumnDef,
 	ColumnFiltersState,
 	flexRender,
+	getCoreRowModel,
 	getFilteredRowModel,
 	getSortedRowModel,
 	SortDirection,
@@ -21,7 +22,7 @@ import TableFilterSelect from './TableFilterSelect'
 export interface TableProps<T = unknown, V = unknown> {
 	data: T[]
 	columns: ColumnDef<T, V>[]
-	options: Omit<TableOptions<T>, 'data' | 'columns'>
+	options: Omit<TableOptions<T>, 'data' | 'columns' | 'getCoreRowModel'>
 	fullWidth?: boolean
 	searchable?: boolean
 	sortable?: boolean
@@ -49,19 +50,20 @@ export default function Table<T, V>({
 	const [globalFilter, setGlobalFilter] = useState('')
 
 	const table = useReactTable({
+		onSortingChange: setSorting,
 		...options,
 		columns,
 		data,
+		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		onColumnFiltersChange: setColumnFilters,
 		onGlobalFilterChange: setGlobalFilter,
-		onSortingChange: setSorting,
 		state: {
+			sorting,
 			...options.state,
 			columnFilters,
 			globalFilter,
-			sorting,
 		},
 	})
 

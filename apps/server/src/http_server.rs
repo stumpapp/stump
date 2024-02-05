@@ -4,7 +4,7 @@ use axum::{error_handling::HandleErrorLayer, extract::connect_info::Connected, R
 use hyper::server::conn::AddrStream;
 use stump_core::{
 	config::{bootstrap_config_dir, logging::init_tracing},
-	event::InternalCoreTask,
+	job::JobManagerCommand,
 	StumpCore,
 };
 use tokio::sync::oneshot;
@@ -36,12 +36,6 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
 	core.init_journal_mode()
-		.await
-		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
-
-	// Initialize the job manager
-	core.get_job_manager()
-		.init()
 		.await
 		.map_err(|e| ServerError::ServerStartError(e.to_string()))?;
 
@@ -78,9 +72,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 		let _ = core
 			.get_context()
-			.dispatch_task(InternalCoreTask::Shutdown {
-				return_sender: shutdown_tx,
-			});
+			.send_job_manager_command(JobManagerCommand::Shutdown(shutdown_tx));
 
 		shutdown_rx
 			.await

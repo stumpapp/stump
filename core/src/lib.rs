@@ -6,15 +6,13 @@
 
 use std::sync::Arc;
 
-// TODO: for these crates, some should NOT hoist entire crate, I need to restrict it
-// to only what is necessary... UGH.
+// TODO: cleanup hoisted crates to only what is needed
 
 pub mod config;
 pub mod db;
 mod event;
 pub mod filesystem;
 pub mod job;
-mod job__;
 pub mod opds;
 mod utils;
 
@@ -32,6 +30,7 @@ use prisma::server_config;
 
 pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
+pub use event::CoreEvent;
 
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;
@@ -208,7 +207,7 @@ mod tests {
 			filter::*,
 			query::{ordering::*, pagination::*},
 		},
-		filesystem::{image::*, *},
+		filesystem::{image::*, scanner::*, *},
 		job::*,
 	};
 
@@ -240,6 +239,31 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AccessRole>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
+		// file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
+		// TODO: Fix this... Must move all job defs to the core...
+		file.write_all(
+			format!(
+				"export type CoreJobOutput = LibraryScanData | SeriesScanData | ThumbnailGenerationData | unknown\n\n"
+			)
+			.as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryScanData>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesScanData>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ThumbnailGenerationJobVariant>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ThumbnailGenerationJobParams>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<ThumbnailGenerationData>()?).as_bytes(),
+		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPermission>()?).as_bytes())?;
@@ -349,10 +373,6 @@ mod tests {
 		file.write_all(
 			format!("{}\n\n", ts_export::<DirectoryListingInput>()?).as_bytes(),
 		)?;
-
-		file.write_all(format!("{}\n\n", ts_export::<Log>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogMetadata>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LogLevel>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<Direction>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<PageParams>()?).as_bytes())?;

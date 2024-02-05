@@ -3,7 +3,7 @@ use tower_sessions::Session;
 
 use crate::{
 	config::session::SESSION_USER_KEY,
-	errors::{ApiError, ApiResult, AuthError},
+	errors::{APIError, APIResult, AuthError},
 };
 
 #[derive(Debug)]
@@ -31,21 +31,21 @@ pub fn decode_base64_credentials(
 	Ok(DecodedCredentials { username, password })
 }
 
-pub fn get_session_user(session: &Session) -> ApiResult<User> {
+pub fn get_session_user(session: &Session) -> APIResult<User> {
 	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
 		Ok(user)
 	} else {
-		Err(ApiError::Unauthorized)
+		Err(APIError::Unauthorized)
 	}
 }
 
-pub fn get_session_server_owner_user(session: &Session) -> ApiResult<User> {
+pub fn get_session_server_owner_user(session: &Session) -> APIResult<User> {
 	let user = get_session_user(session)?;
 
 	if user.is_server_owner {
 		Ok(user)
 	} else {
-		Err(ApiError::Forbidden(
+		Err(APIError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))
 	}
@@ -56,24 +56,24 @@ fn user_has_permission(user: &User, permission: UserPermission) -> bool {
 }
 
 /// Enforce that the user has the given permission. If the user does not have the permission, an
-/// `ApiError::Forbidden` is returned.
-fn enforce_permission(user: &User, permission: UserPermission) -> ApiResult<()> {
+/// `APIError::Forbidden` is returned.
+fn enforce_permission(user: &User, permission: UserPermission) -> APIResult<()> {
 	if user_has_permission(user, permission) {
 		Ok(())
 	} else {
 		tracing::error!(?user, ?permission, "User does not have permission");
-		Err(ApiError::Forbidden(
+		Err(APIError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))
 	}
 }
 
 /// Enforce that the user in the session has the given permission. If the user does not have the
-/// permission, an `ApiError::Forbidden` is returned.
+/// permission, an `APIError::Forbidden` is returned.
 pub fn enforce_session_permission(
 	session: &Session,
 	permission: UserPermission,
-) -> ApiResult<()> {
+) -> APIResult<()> {
 	let user = get_session_user(session)?;
 	enforce_permission(&user, permission)
 }
@@ -81,7 +81,7 @@ pub fn enforce_session_permission(
 pub fn enforce_session_permissions(
 	session: &Session,
 	permissions: &[UserPermission],
-) -> ApiResult<User> {
+) -> APIResult<User> {
 	let user = get_session_user(session)?;
 
 	if user.is_server_owner {
@@ -95,7 +95,7 @@ pub fn enforce_session_permissions(
 
 	if !missing_permissions.is_empty() {
 		tracing::error!(?user, ?missing_permissions, "User does not have permission");
-		Err(ApiError::Forbidden(
+		Err(APIError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))
 	} else {
@@ -104,12 +104,12 @@ pub fn enforce_session_permissions(
 }
 
 /// Enforce that the user in the session has the given permission. If the user does not have the
-/// permission, an `ApiError::Forbidden` is returned. The user is returned if they have the
+/// permission, an `APIError::Forbidden` is returned. The user is returned if they have the
 /// permission.
 pub fn get_user_and_enforce_permission(
 	session: &Session,
 	permission: UserPermission,
-) -> ApiResult<User> {
+) -> APIResult<User> {
 	let user = get_session_user(session)?;
 	enforce_permission(&user, permission)?;
 	Ok(user)

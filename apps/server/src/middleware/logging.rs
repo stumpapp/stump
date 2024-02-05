@@ -5,13 +5,13 @@ use axum::{
 	response::IntoResponse,
 };
 
-use crate::errors::ApiResult;
+use crate::errors::APIResult;
 
 #[allow(dead_code)]
 pub(crate) async fn logging_middleware(
 	req: Request<Body>,
 	next: Next<Body>,
-) -> ApiResult<impl IntoResponse> {
+) -> APIResult<impl IntoResponse> {
 	// TODO: Refactor to not rely on global state when re-enabling logging middleware
 	// if get_log_verbosity() < 3 {
 	// 	return Ok(next.run(req).await);

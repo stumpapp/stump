@@ -6,20 +6,25 @@ use axum::{
 	Json, Router,
 };
 use futures_util::Stream;
-use notify::{EventKind, RecursiveMode, Watcher};
+use linemux::MuxedLines;
 use prisma_client_rust::chrono::{DateTime, Utc};
-use std::{
-	convert::Infallible,
-	fs::File,
-	io::{Read, Seek, SeekFrom},
+use serde_qs::axum::QsQuery;
+use std::fs::File;
+use stump_core::{
+	db::{
+		entity::{Log, LogMetadata},
+		query::{
+			ordering::QueryOrder,
+			pagination::{Pageable, Pagination, PaginationQuery},
+		},
+	},
+	prisma::log::{self, OrderByParam as LogOrderByParam},
 };
-use stump_core::db::entity::LogMetadata;
-use tokio::sync::broadcast;
 use tower_sessions::Session;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	middleware::auth::Auth,
 	routers::sse::stream_shutdown_guard,
 	utils::get_session_server_owner_user,
@@ -27,19 +32,17 @@ use crate::{
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
-		.route("/logs", get(get_logs).delete(clear_logs))
-		.route("/logs/info", get(get_logfile_info))
+		.route("/logs", get(get_logs))
 		.nest(
 			"/logs/file",
-			Router::new().route("/tail", get(tail_log_file)),
+			Router::new()
+				.route("/", get(delete_log_file))
+				.route("/info", get(get_logfile_info))
+				.route("/tail", get(tail_log_file)),
 		)
 		// FIXME: admin middleware
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
-
-// TODO: there is a database entity Log. If that stays, I should differenciate between
-// the stump.log file operations and the database operations better in this file. For now,
-// I'm just going to leave it as is.
 
 #[utoipa::path(
 	get,
@@ -50,61 +53,87 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	)
 )]
 /// Get all logs from the database.
-async fn get_logs() -> ApiResult<()> {
-	// TODO: implement
-	Err(ApiError::NotImplemented)
-}
-
-// FIXME: so this is a cool POC, but it seems to only work with manual file edits. When the
-// file appender for the log config writes to the file, notify is not picking it up. I'm not
-// sure if this is a result of the recommended_watcher defaults, or perhaps something about how
-// the file appender works. I'm going to leave this here for now, as its a cool to have.
-async fn tail_log_file(
+async fn get_logs(
 	State(ctx): State<AppState>,
-) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-	let stream = async_stream::stream! {
-		let log_file_path = ctx.config.get_log_file();
-		let mut file = File::open(log_file_path.as_path()).expect("Failed to open log file");
-		let file_length = file
-			.seek(SeekFrom::End(0))
-			.expect("Failed to seek to end of log file");
-		file.seek(SeekFrom::Start(file_length))
-			.expect("Failed to seek to end of log file");
+	order: QsQuery<QueryOrder>,
+	pagination: QsQuery<PaginationQuery>,
+) -> APIResult<Json<Pageable<Vec<Log>>>> {
+	let pagination = pagination.0.get();
+	let order = order.0;
+	tracing::trace!(?pagination, ?order, "get_logs");
 
-		println!("file path: {}", log_file_path.as_path().display());
-		println!("file_length: {}", file_length);
+	let db = &ctx.db;
+	let is_unpaged = pagination.is_unpaged();
+	let order_by_param: LogOrderByParam = order.try_into()?;
 
-		let (tx, mut rx) = broadcast::channel::<String>(100);
+	let pagination_cloned = pagination.clone();
 
-		let mut watcher =
-			notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
-				match res {
-					Ok(event) => {
-						println!("event: {:?}", event);
-						if let EventKind::Modify(_) = event.kind {
-							let mut content = String::new();
-							file.read_to_string(&mut content).unwrap();
-							for line in content.lines().rev() {
-								println!("line: {}", line);
-								if !line.is_empty() && tx.send(line.to_owned()).is_err() {
-										break;
-								}
-							}
+	let (logs, count) = db
+		._transaction()
+		.run(|client| async move {
+			let mut query = client.log().find_many(vec![]).order_by(order_by_param);
+
+			if !is_unpaged {
+				match pagination_cloned {
+					Pagination::Page(page_query) => {
+						let (skip, take) = page_query.get_skip_take();
+						query = query.skip(skip).take(take);
+					},
+					Pagination::Cursor(cursor_query) => {
+						// TODO: handle this better
+						if let Some(Ok(cursor)) = cursor_query.cursor.map(|c| c.parse()) {
+							query = query.cursor(log::id::equals(cursor)).skip(1);
+						}
+						if let Some(limit) = cursor_query.limit {
+							query = query.take(limit)
 						}
 					},
-					Err(e) => println!("watch error: {:?}", e),
+					_ => unreachable!(),
 				}
-			})
-			.expect("watcher failed");
+			}
 
-		watcher
-		.watch(log_file_path.as_path(), RecursiveMode::NonRecursive)
-		.expect("watch failed");
+			let logs = query
+				.exec()
+				.await?
+				.into_iter()
+				.map(Log::from)
+				.collect::<Vec<_>>();
+
+			if is_unpaged {
+				return Ok((logs, None));
+			}
+
+			client
+				.log()
+				.count(vec![])
+				.exec()
+				.await
+				.map(|count| (logs, Some(count)))
+		})
+		.await?;
+
+	if let Some(count) = count {
+		return Ok(Json(Pageable::from((logs, count, pagination))));
+	}
+
+	Ok(Json(Pageable::from(logs)))
+}
+
+async fn tail_log_file(
+	State(ctx): State<AppState>,
+) -> Sse<impl Stream<Item = Result<Event, APIError>>> {
+	let stream = async_stream::stream! {
+		let log_file_path = ctx.config.get_log_file();
+		let mut lines = MuxedLines::new()?;
+		lines.add_file(log_file_path.as_path()).await?;
 
 		loop {
-			if let Ok(msg) = rx.recv().await {
-				println!("msg: {}", msg);
-				yield Ok(Event::default().json_data(msg).expect("Failed to create event"));
+			if let Ok(Some(line)) = lines.next_line().await {
+				yield Ok(
+					Event::default()
+						.json_data(line.line())
+						.map_err(|e| APIError::InternalServerError(e.to_string()))?
+				);
 			} else {
 				continue;
 			}
@@ -132,7 +161,7 @@ async fn tail_log_file(
 async fn get_logfile_info(
 	session: Session,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<LogMetadata>> {
+) -> APIResult<Json<LogMetadata>> {
 	get_session_server_owner_user(&session)?;
 	let log_file_path = ctx.config.get_log_file();
 
@@ -165,7 +194,7 @@ async fn get_logfile_info(
 // a resource. This is not semantically correct, but I want it to be clear that
 // this route *WILL* delete all of the file contents.
 // #[delete("/logs")]
-async fn clear_logs(session: Session, State(ctx): State<AppState>) -> ApiResult<()> {
+async fn delete_log_file(session: Session, State(ctx): State<AppState>) -> APIResult<()> {
 	get_session_server_owner_user(&session)?;
 	let log_file_path = ctx.config.get_log_file();
 

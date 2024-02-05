@@ -33,6 +33,7 @@ export default function TablePagination({
 
 	const { pageRange } = usePagination({ currentPage, numbersToShow, totalPages: pages })
 
+	// FIXME: Things get smushed together when there are too many pages
 	return (
 		<div className="flex items-center gap-1">
 			<IconButton disabled={currentPage <= 1} onClick={() => onChangePage(currentPage - 1)}>

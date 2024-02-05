@@ -94,6 +94,12 @@ impl From<&str> for JobStatus {
 	}
 }
 
+impl From<String> for JobStatus {
+	fn from(s: String) -> Self {
+		JobStatus::from(s.as_str())
+	}
+}
+
 /// A trait that defines the state of a job. State is frequently updated during execution,
 /// and is used to track the progress of a job, so this trait defines a default [JobDataExt::update]
 /// implementation to update the state with new data.
@@ -112,7 +118,7 @@ pub trait JobDataExt: Serialize + de::DeserializeOwned + Debug {
 				tracing::error!(?error, job_data = ?self, "Failed to serialize job data!");
 				None
 			},
-			|value| Some(value),
+			Some,
 		)
 	}
 }
@@ -152,9 +158,9 @@ impl JobRunLog {
 	}
 
 	/// Construct a [JobRunLog] with the given msg and [LogLevel::Warn]
-	pub fn warn(msg: String) -> Self {
+	pub fn warn(msg: &str) -> Self {
 		Self {
-			msg,
+			msg: msg.to_string(),
 			level: LogLevel::Warn,
 			timestamp: Utc::now(),
 		}
@@ -179,7 +185,7 @@ pub struct WorkingState<D, T> {
 	pub data: Option<D>,
 	pub tasks: VecDeque<T>,
 	pub current_task_index: usize,
-	pub errors: Vec<JobRunLog>,
+	pub logs: Vec<JobRunLog>,
 }
 
 pub struct JobState<J: JobExt> {
@@ -187,7 +193,7 @@ pub struct JobState<J: JobExt> {
 	data: Option<J::Data>,
 	tasks: VecDeque<J::Task>,
 	current_task_index: usize,
-	errors: Vec<JobRunLog>,
+	logs: Vec<JobRunLog>,
 }
 
 /// A trait that defines the behavior and data types of a job. Jobs are responsible for
@@ -254,6 +260,13 @@ pub trait JobExt: Send + Sync + Sized + 'static {
 		ctx: &WorkerCtx,
 	) -> Result<WorkingState<Self::Data, Self::Task>, JobError>;
 
+	/// An optional function to perform any cleanup or finalization after the job has
+	/// finished its run loop. This is called after the job has completed (when [Executor::run]
+	/// returns an Ok).
+	async fn cleanup(&self, _: &WorkerCtx, _: &Self::Data) -> Result<(), JobError> {
+		Ok(())
+	}
+
 	/// A function to execute a specific task. This will be called repeatedly until all
 	/// tasks are completed.
 	async fn execute_task(
@@ -277,7 +290,7 @@ impl<J: JobExt> Job<J> {
 				data: None,
 				tasks: VecDeque::new(),
 				current_task_index: 0,
-				errors: vec![],
+				logs: vec![],
 			}),
 		})
 	}
@@ -286,7 +299,7 @@ impl<J: JobExt> Job<J> {
 #[derive(Debug)]
 pub struct ExecutorOutput {
 	pub data: Option<serde_json::Value>,
-	pub errors: Vec<JobRunLog>,
+	pub logs: Vec<JobRunLog>,
 }
 
 /// A trait that defines the behavior of a job executor. Executors are responsible for the main
@@ -300,8 +313,8 @@ pub trait Executor: Send + Sync {
 	fn name(&self) -> &'static str;
 	/// The optional description for the internal job
 	fn description(&self) -> Option<String>;
-	/// A function to persist the state of the job to the DB. This is called after the job
-	/// has completed (when [Executor::run] returns an Ok).
+	/// A function to persist the state of the job to the DB. This is called immediately before the job
+	/// would otherwise complete (at the end of [Executor::run]).
 	async fn persist_state(
 		&self,
 		ctx: WorkerCtx,
@@ -311,13 +324,13 @@ pub trait Executor: Send + Sync {
 		let db = ctx.db.clone();
 		let job_id = self.id();
 
-		let expected_errors = output.errors.len();
-		if expected_errors > 0 {
-			let persisted_errors = db
+		let expected_logs = output.logs.len();
+		if expected_logs > 0 {
+			let persisted_logs = db
 				.log()
 				.create_many(
 					output
-						.errors
+						.logs
 						.into_iter()
 						.map(|error| error.into_prisma(job_id.to_string()))
 						.collect(),
@@ -326,30 +339,31 @@ pub trait Executor: Send + Sync {
 				.await
 				.map_or_else(
 					|error| {
-						tracing::error!(?error, "Failed to persist job errors");
+						tracing::error!(?error, "Failed to persist job logs");
 						0
 					},
 					|count| count as usize,
 				);
 
-			if persisted_errors != expected_errors {
+			if persisted_logs != expected_logs {
 				tracing::warn!(
-					?persisted_errors,
-					?expected_errors,
-					"Failed to persist all job errors!"
+					?persisted_logs,
+					?expected_logs,
+					"Failed to persist all job logs!"
 				);
 			}
 		}
 
-		let save_state = serde_json::to_vec(&output.data)
+		let output_data = serde_json::to_vec(&output.data)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
-		let _persisted_job_with_state = db
+		let persisted_job_with_data = db
 			.job()
 			.update(
 				job::id::equals(job_id.to_string()),
 				vec![
-					job::save_state::set(Some(save_state)),
+					job::save_state::set(None),
+					job::output_data::set(Some(output_data)),
 					job::status::set(JobStatus::Completed.to_string()),
 					job::ms_elapsed::set(
 						elapsed.as_millis().try_into().unwrap_or_else(|e| {
@@ -362,6 +376,7 @@ pub trait Executor: Send + Sync {
 			.exec()
 			.await
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+		tracing::trace!(?persisted_job_with_data, "Persisted completed job to DB");
 
 		Ok(())
 	}
@@ -417,18 +432,18 @@ impl<J: JobExt> Executor for Job<J> {
 	}
 
 	fn description(&self) -> Option<String> {
-		self.state.as_ref().map(|s| s.job.description()).flatten()
+		self.state.as_ref().and_then(|s| s.job.description())
 	}
 
 	async fn run(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError> {
-		ctx.progress(JobProgress::status_msg(
+		ctx.report_progress(JobProgress::status_msg(
 			JobStatus::Running,
 			"Initializing job",
 		));
 
 		let job_id = self.id();
 		let job_name = self.name();
-		let commands_rx = ctx.command_receiver.clone();
+		let commands_rx = ctx.commands_rx.clone();
 		tracing::info!(?job_id, ?job_name, "Starting job");
 
 		let JobState {
@@ -436,7 +451,7 @@ impl<J: JobExt> Executor for Job<J> {
 			data,
 			mut tasks,
 			mut current_task_index,
-			mut errors,
+			mut logs,
 		} = self.state.take().expect("Job state was already taken!");
 
 		let mut working_data = if let Some(initial_data) = data {
@@ -446,9 +461,9 @@ impl<J: JobExt> Executor for Job<J> {
 			// Replace the state with the restored state
 			tasks = restore_point.tasks;
 			current_task_index = restore_point.current_task_index;
-			errors = restore_point.errors;
+			logs = restore_point.logs;
 
-			ctx.progress(JobProgress::restored(
+			ctx.report_progress(JobProgress::restored(
 				current_task_index as i32,
 				tasks.len() as i32,
 			));
@@ -460,9 +475,9 @@ impl<J: JobExt> Executor for Job<J> {
 			let init_result = job.init(&ctx).await?;
 			tasks = init_result.tasks;
 			current_task_index = init_result.current_task_index;
-			errors = init_result.errors;
+			logs = init_result.logs;
 
-			ctx.progress(JobProgress::init_done(
+			ctx.report_progress(JobProgress::init_done(
 				current_task_index as i32,
 				tasks.len() as i32,
 			));
@@ -483,7 +498,7 @@ impl<J: JobExt> Executor for Job<J> {
 		tracing::debug!(task_count = tasks.len(), "Starting tasks");
 
 		while !tasks.is_empty() {
-			ctx.progress(JobProgress::task_position_msg(
+			ctx.report_progress(JobProgress::task_position_msg(
 				"Starting task",
 				current_task_index as i32,
 				tasks.len() as i32,
@@ -508,26 +523,26 @@ impl<J: JobExt> Executor for Job<J> {
 				Ok(r) => r,
 				Err(e) => {
 					tracing::error!(?e, "Task handler failed");
-					errors.push(JobRunLog::error(format!(
+					logs.push(JobRunLog::error(format!(
 						"Critical task error: {:?}",
 						e.to_string()
 					)));
 					return Ok(ExecutorOutput {
 						data: working_data.into_json(),
-						errors,
+						logs,
 					});
 				},
 			};
 			let JobTaskOutput {
 				data: task_data,
-				errors: task_errors,
+				logs: task_logs,
 				subtasks,
 			} = output;
 
-			// Update our working data and any errors with the new data/errors from the
+			// Update our working data and any logs with the new data/logs from the
 			// completed task. Then increment the task index
 			working_data.update(task_data);
-			errors.extend(task_errors);
+			logs.extend(task_logs);
 			current_task_index += 1;
 
 			// Reassign the ctx to the returned values
@@ -536,7 +551,7 @@ impl<J: JobExt> Executor for Job<J> {
 			// If there are subtasks, we need to insert them into the tasks queue at the
 			// front, so they are executed next
 			if !subtasks.is_empty() {
-				ctx.progress(JobProgress::msg(
+				ctx.report_progress(JobProgress::msg(
 					format!(
 						"{} subtask(s) discovered. Reordering the task queue",
 						subtasks.len()
@@ -556,12 +571,18 @@ impl<J: JobExt> Executor for Job<J> {
 			"Task loop completed?"
 		);
 
-		let errors_count = errors.len();
-		tracing::debug!(?errors_count, "All tasks completed");
+		let logs_count = logs.len();
+		tracing::debug!(?logs_count, "All tasks completed");
+		if let Err(err) = job.cleanup(&ctx, &working_data).await {
+			logs.push(JobRunLog::error(format!(
+				"Cleanup failed: {:?}",
+				err.to_string()
+			)));
+		}
 
 		Ok(ExecutorOutput {
 			data: working_data.into_json(),
-			errors,
+			logs,
 		})
 	}
 }

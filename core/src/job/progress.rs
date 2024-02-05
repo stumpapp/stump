@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use super::JobStatus;
+use super::{JobStatus, WorkerSend, WorkerSendExt};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct JobUpdate {
@@ -96,5 +96,11 @@ impl JobProgress {
 			message: Some(msg.to_string()),
 			..Self::subtask_position(index, size)
 		}
+	}
+}
+
+impl WorkerSendExt for JobProgress {
+	fn into_send(self) -> WorkerSend {
+		WorkerSend::Progress(self)
 	}
 }

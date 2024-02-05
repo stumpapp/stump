@@ -1,19 +1,25 @@
 use rayon::iter::{
 	Either, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
-use std::{collections::VecDeque, path::PathBuf};
+use std::{collections::VecDeque, path::PathBuf, sync::Arc};
 
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::{
+	config::StumpConfig,
 	db::{
 		entity::{LibraryOptions, Media, Series},
 		FileStatus, SeriesDAO, DAO,
 	},
-	filesystem::{scanner::utils::create_media, MediaBuilder, SeriesBuilder},
+	filesystem::{
+		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
+		scanner::utils::{create_media, update_media},
+		MediaBuilder, SeriesBuilder,
+	},
 	job::{
-		error::JobError, JobDataExt, JobExt, JobProgress, JobRunLog, JobTaskOutput,
-		WorkerCtx, WorkingState,
+		error::JobError, Job, JobDataExt, JobExt, JobManagerCommand, JobProgress,
+		JobRunLog, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
@@ -24,6 +30,7 @@ use super::{
 	WalkedLibrary, WalkedSeries, WalkerCtx,
 };
 
+/// The taks variants that are used to scan a library
 #[derive(Serialize, Deserialize)]
 pub enum LibraryScanTask {
 	Init(InitTaskInput),
@@ -35,27 +42,42 @@ pub enum LibraryScanTask {
 	},
 }
 
+/// The input data for the init task of a library scan job
 #[derive(Serialize, Deserialize)]
 pub struct InitTaskInput {
 	series_to_create: Vec<PathBuf>,
 	missing_series: Vec<PathBuf>,
 }
 
+/// A job that scans a library and updates the database with the results
 pub struct LibraryScanJob {
 	pub id: String,
 	pub path: String,
 	pub options: Option<LibraryOptions>,
 }
 
-#[derive(Serialize, Deserialize, Default, Debug)]
+impl LibraryScanJob {
+	pub fn new(id: String, path: String) -> Box<Job<LibraryScanJob>> {
+		Job::new(Self {
+			id,
+			path,
+			options: None,
+		})
+	}
+}
+
+/// The data that is collected and updated during the execution of a library scan job
+#[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
 pub struct LibraryScanData {
-	/// The number of files to scan relative to the library root
+	/// The number of files visited during the scan
 	total_files: u64,
-
+	/// The number of media entities created
 	created_media: u64,
+	/// The number of media entities updated
 	updated_media: u64,
-
+	/// The number of series entities created
 	created_series: u64,
+	/// The number of series entities updated
 	updated_series: u64,
 }
 
@@ -106,7 +128,7 @@ impl JobExt for LibraryScanJob {
 
 		self.options = Some(library_options);
 
-		ctx.progress(JobProgress::msg("Performing task discovery"));
+		ctx.report_progress(JobProgress::msg("Performing task discovery"));
 		let WalkedLibrary {
 			series_to_create,
 			series_to_visit,
@@ -119,7 +141,7 @@ impl JobExt for LibraryScanJob {
 			WalkerCtx {
 				db: ctx.db.clone(),
 				ignore_rules,
-				max_depth: is_collection_based.then(|| 1),
+				max_depth: is_collection_based.then_some(1),
 			},
 		)
 		.await?;
@@ -133,18 +155,18 @@ impl JobExt for LibraryScanJob {
 		data.total_files = seen_directories + ignored_directories;
 
 		if library_is_missing {
-			ctx.progress(JobProgress::msg("Failed to find library on disk"));
-			// TODO: mark library as missing in DB
+			ctx.report_progress(JobProgress::msg("Failed to find library on disk"));
+			handle_missing_library(&ctx.db, self.id.as_str()).await?;
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
 			));
 		}
 
-		ctx.progress(JobProgress::msg("Indexing complete! Building tasks"));
+		ctx.report_progress(JobProgress::msg("Indexing complete! Building tasks"));
 
 		let init_task_input = InitTaskInput {
 			series_to_create: series_to_create.clone(),
-			missing_series: missing_series,
+			missing_series,
 		};
 
 		let series_to_visit = series_to_visit
@@ -168,8 +190,39 @@ impl JobExt for LibraryScanJob {
 			data: Some(data),
 			tasks,
 			current_task_index: 0,
-			errors: vec![],
+			logs: vec![],
 		})
+	}
+
+	async fn cleanup(&self, ctx: &WorkerCtx, data: &Self::Data) -> Result<(), JobError> {
+		let did_create = data.created_series > 0 || data.created_media > 0;
+		let did_update = data.updated_series > 0 || data.updated_media > 0;
+		let image_options = self
+			.options
+			.as_ref()
+			.and_then(|o| o.thumbnail_config.clone());
+
+		match image_options {
+			Some(options) if did_create | did_update => {
+				tracing::debug!("Enqueuing thumbnail generation job");
+				ctx.send_batch(vec![
+					JobProgress::msg("Enqueuing thumbnail generation job").into_send(),
+					JobManagerCommand::EnqueueJob(Job::new(ThumbnailGenerationJob {
+						options,
+						params: ThumbnailGenerationJobParams::single_library(
+							self.id.clone(),
+							false,
+						),
+					}))
+					.into_send(),
+				]);
+			},
+			_ => {
+				tracing::debug!("No cleanup required for library scan job");
+			},
+		}
+
+		Ok(())
 	}
 
 	async fn execute_task(
@@ -178,7 +231,7 @@ impl JobExt for LibraryScanJob {
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
 		let mut data = Self::Data::default();
-		let mut errors = vec![];
+		let mut logs = vec![];
 		let mut subtasks = vec![];
 
 		match task {
@@ -191,15 +244,15 @@ impl JobExt for LibraryScanJob {
 
 				// Task count: build each series + 1 for insertion step, +1 for update tx on missing series
 				let total_subtask_count = (series_to_create.len() + 1)
-					+ (missing_series.len() > 0).then(|| 1).unwrap_or(0);
+					+ if !missing_series.is_empty() { 1 } else { 0 };
 				let mut current_subtask_index = 0;
-				ctx.progress(JobProgress::subtask_position(
+				ctx.report_progress(JobProgress::subtask_position(
 					current_subtask_index,
 					total_subtask_count as i32,
 				));
 
 				if !missing_series.is_empty() {
-					ctx.progress(JobProgress::msg("Handling missing series"));
+					ctx.report_progress(JobProgress::msg("Handling missing series"));
 					let missing_series_str = missing_series
 						.iter()
 						.map(|e| e.to_string_lossy().to_string())
@@ -216,7 +269,7 @@ impl JobExt for LibraryScanJob {
 						.map_or_else(
 							|error| {
 								tracing::error!(error = ?error, "Failed to update missing series");
-								errors.push(JobRunLog::error(format!(
+								logs.push(JobRunLog::error(format!(
 									"Failed to update missing series: {:?}",
 									error.to_string()
 								)));
@@ -227,7 +280,7 @@ impl JobExt for LibraryScanJob {
 								count
 							},
 						);
-					ctx.progress(JobProgress::subtask_position(
+					ctx.report_progress(JobProgress::subtask_position(
 						(affected_rows > 0)
 							.then(|| {
 								current_subtask_index += 1;
@@ -239,7 +292,7 @@ impl JobExt for LibraryScanJob {
 				}
 
 				if !series_to_create.is_empty() {
-					ctx.progress(JobProgress::msg("Creating new series"));
+					ctx.report_progress(JobProgress::msg("Creating new series"));
 					// TODO: remove this DAO!!
 					let series_dao = SeriesDAO::new(ctx.db.clone());
 
@@ -247,7 +300,7 @@ impl JobExt for LibraryScanJob {
 						.par_iter()
 						.enumerate()
 						.map(|(idx, path_buf)| {
-							ctx.progress(JobProgress::subtask_position_msg(
+							ctx.report_progress(JobProgress::subtask_position_msg(
 								format!("Building series {}", path_buf.display())
 									.as_str(),
 								current_subtask_index + (idx as i32),
@@ -269,7 +322,7 @@ impl JobExt for LibraryScanJob {
 					let chunk_count = chunks.len();
 					tracing::debug!(chunk_count, "Batch inserting new series");
 					for (idx, chunk) in chunks.enumerate() {
-						ctx.progress(JobProgress::msg(
+						ctx.report_progress(JobProgress::msg(
 							format!(
 								"Processing series insertion chunk {} of {}",
 								idx + 1,
@@ -285,7 +338,7 @@ impl JobExt for LibraryScanJob {
 							},
 							Err(e) => {
 								tracing::error!(error = ?e, "Failed to batch insert series");
-								errors.push(JobRunLog::error(format!(
+								logs.push(JobRunLog::error(format!(
 									"Failed to batch insert series: {:?}",
 									e.to_string()
 								)));
@@ -294,7 +347,7 @@ impl JobExt for LibraryScanJob {
 					}
 
 					current_subtask_index += 1;
-					ctx.progress(JobProgress::subtask_position_msg(
+					ctx.report_progress(JobProgress::subtask_position_msg(
 						"Processed all chunks",
 						current_subtask_index,
 						total_subtask_count as i32,
@@ -326,7 +379,7 @@ impl JobExt for LibraryScanJob {
 					// handles this instead, however for now this is fine.
 					return Ok(JobTaskOutput {
 						data,
-						errors: vec![JobRunLog::error(format!(
+						logs: vec![JobRunLog::error(format!(
 							"Critical error during attempt to walk series: {:?}",
 							core_error.to_string()
 						))],
@@ -349,7 +402,7 @@ impl JobExt for LibraryScanJob {
 						&ctx.db,
 						path_buf.to_str().unwrap_or_default(),
 						data,
-						errors,
+						logs,
 					)
 					.await;
 				}
@@ -367,11 +420,11 @@ impl JobExt for LibraryScanJob {
 					[],
 					[
 						(!missing_media.is_empty())
-							.then(|| SeriesScanTask::MarkMissingMedia(missing_media)),
+							.then_some(SeriesScanTask::MarkMissingMedia(missing_media)),
 						(!media_to_create.is_empty())
-							.then(|| SeriesScanTask::CreateMedia(media_to_create)),
+							.then_some(SeriesScanTask::CreateMedia(media_to_create)),
 						(!media_to_visit.is_empty())
-							.then(|| SeriesScanTask::VisitMedia(media_to_visit)),
+							.then_some(SeriesScanTask::VisitMedia(media_to_visit)),
 					],
 				)
 				.into_iter()
@@ -390,12 +443,11 @@ impl JobExt for LibraryScanJob {
 				SeriesScanTask::MarkMissingMedia(paths) => {
 					let JobTaskOutput {
 						data: new_data,
-						errors: new_errors,
+						logs: new_logs,
 						..
-					} = handle_missing_media(&ctx.db, &series_id, paths, data, errors)
-						.await?;
+					} = handle_missing_media(&ctx.db, &series_id, paths, data, logs).await?;
 					data = new_data;
-					errors = new_errors;
+					logs = new_logs;
 				},
 				SeriesScanTask::CreateMedia(paths) => {
 					let series_ctx = SeriesCtx {
@@ -406,32 +458,97 @@ impl JobExt for LibraryScanJob {
 					};
 					let JobTaskOutput {
 						data: new_data,
-						errors: new_errors,
+						logs: new_logs,
 						..
-					} = handle_create_media(paths, series_ctx, ctx, data, errors).await?;
+					} = handle_create_media(paths, series_ctx, ctx, data, logs).await?;
 					data = new_data;
-					errors = new_errors;
+					logs = new_logs;
 				},
 				SeriesScanTask::VisitMedia(paths) => {
-					// NOTE: commented so bench doesn't fail
-					// unimplemented!()
+					let media_ctx = MediaCtx {
+						series_id,
+						library_options: self.options.clone().unwrap_or_default(),
+						chunk_size: 300,
+						config: ctx.config.clone(),
+					};
+					let JobTaskOutput {
+						data: new_data,
+						logs: new_logs,
+						..
+					} = handle_visit_media(&ctx.db, media_ctx, paths, data, logs).await?;
+					data = new_data;
+					logs = new_logs;
 				},
 			},
 		}
 
 		Ok(JobTaskOutput {
 			data,
-			errors,
+			logs,
 			subtasks,
 		})
 	}
+}
+
+pub async fn handle_missing_library(
+	db: &PrismaClient,
+	library_id: &str,
+) -> Result<(), JobError> {
+	let (updated_library, affected_series, affected_media) = db
+		._transaction()
+		.run(|client| async move {
+			let updated_library = client
+				.library()
+				.update(
+					library::id::equals(library_id.to_string()),
+					vec![library::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await?;
+
+			let affected_series = client
+				.series()
+				.update_many(
+					vec![series::library_id::equals(Some(library_id.to_string()))],
+					vec![series::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await?;
+
+			client
+				.media()
+				.update_many(
+					vec![media::series::is(vec![series::library_id::equals(Some(
+						library_id.to_string(),
+					))])],
+					vec![media::status::set(FileStatus::Missing.to_string())],
+				)
+				.exec()
+				.await
+				.map(|affected_media| (updated_library, affected_series, affected_media))
+		})
+		.await
+		.map_err(|e| {
+			JobError::InitFailed(format!(
+				"A critical error occurred while handling missing library: {}",
+				e
+			))
+		})?;
+	tracing::trace!(
+		?updated_library,
+		affected_series,
+		affected_media,
+		"Marked library as missing"
+	);
+
+	Ok(())
 }
 
 async fn handle_missing_series(
 	client: &PrismaClient,
 	path: &str,
 	mut data: LibraryScanData,
-	mut errors: Vec<JobRunLog>,
+	mut logs: Vec<JobRunLog>,
 ) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
 	let affected_rows = client
 		.series()
@@ -444,7 +561,7 @@ async fn handle_missing_series(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing series");
-				errors.push(JobRunLog::error(format!(
+				logs.push(JobRunLog::error(format!(
 					"Failed to update missing series: {:?}",
 					error.to_string()
 				)));
@@ -478,7 +595,7 @@ async fn handle_missing_series(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing media");
-				errors.push(JobRunLog::error(format!(
+				logs.push(JobRunLog::error(format!(
 					"Failed to update missing media: {:?}",
 					error.to_string()
 				)));
@@ -492,9 +609,23 @@ async fn handle_missing_series(
 
 	Ok(JobTaskOutput {
 		data,
-		errors,
+		logs,
 		subtasks: vec![],
 	})
+}
+
+struct SeriesCtx {
+	id: String,
+	path: String,
+	library_options: LibraryOptions,
+	chunk_size: usize,
+}
+
+struct MediaCtx {
+	series_id: String,
+	library_options: LibraryOptions,
+	chunk_size: usize,
+	config: Arc<StumpConfig>,
 }
 
 async fn handle_missing_media(
@@ -502,13 +633,13 @@ async fn handle_missing_media(
 	series_id: &str,
 	media_paths: Vec<PathBuf>,
 	mut data: LibraryScanData,
-	mut errors: Vec<JobRunLog>,
+	mut logs: Vec<JobRunLog>,
 ) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
 	if media_paths.is_empty() {
 		tracing::debug!("No missing media to handle");
 		return Ok(JobTaskOutput {
 			data,
-			errors,
+			logs,
 			subtasks: vec![],
 		});
 	}
@@ -532,7 +663,7 @@ async fn handle_missing_media(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing media");
-				errors.push(JobRunLog::error(format!(
+				logs.push(JobRunLog::error(format!(
 					"Failed to update missing media: {:?}",
 					error.to_string()
 				)));
@@ -546,16 +677,108 @@ async fn handle_missing_media(
 
 	Ok(JobTaskOutput {
 		data,
-		errors,
+		logs,
 		subtasks: vec![],
 	})
 }
 
-struct SeriesCtx {
-	id: String,
-	path: String,
-	library_options: LibraryOptions,
-	chunk_size: usize,
+async fn handle_visit_media(
+	client: &PrismaClient,
+	ctx: MediaCtx,
+	media_paths: Vec<PathBuf>,
+	mut data: LibraryScanData,
+	mut logs: Vec<JobRunLog>,
+) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
+	// 1. query for existing media based on paths
+	// 2. chunk the media into groups of 300
+	// 3. for each chunk, rebuild media
+	// 4. for each rebuilt media, update the media in the db
+
+	let MediaCtx {
+		series_id,
+		library_options,
+		chunk_size,
+		config,
+	} = ctx;
+
+	// TODO: might be better to batch this in a transaction, in case there are a lot of media to update
+	let media = client
+		.media()
+		.find_many(vec![
+			media::path::in_vec(
+				media_paths
+					.iter()
+					.map(|e| e.to_string_lossy().to_string())
+					.collect::<Vec<String>>(),
+			),
+			media::series_id::equals(Some(series_id.clone())),
+		])
+		.exec()
+		.await?
+		.into_iter()
+		.map(Media::from)
+		.collect::<Vec<Media>>();
+
+	if media.len() != media_paths.len() {
+		logs.push(JobRunLog::warn(
+			"Not all media paths were found in the database",
+		));
+	}
+
+	let chunks = media.chunks(chunk_size);
+
+	for (idx, chunk) in chunks.enumerate() {
+		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
+		let mut built_media = chunk
+			.par_iter()
+			.map(|m| {
+				MediaBuilder::new(
+					PathBuf::from(m.path.as_str()).as_path(),
+					&series_id,
+					library_options.clone(),
+					&config,
+				)
+				.rebuild(m)
+			})
+			.collect::<VecDeque<Result<Media, _>>>();
+
+		while let Some(build_result) = built_media.pop_front() {
+			match build_result {
+				Ok(generated) => {
+					tracing::warn!(
+						"Stump currently has minimal support for updating media",
+					);
+					match update_media(client, generated).await {
+						Ok(updated_media) => {
+							tracing::trace!(?updated_media, "Updated media");
+							// TODO: emit event
+							data.updated_media += 1;
+						},
+						Err(e) => {
+							tracing::error!(error = ?e, "Failed to update media");
+							logs.push(JobRunLog::error(format!(
+								"Failed to update media: {:?}",
+								e.to_string()
+							)));
+						},
+					}
+				},
+				Err(e) => {
+					tracing::error!(error = ?e, "Failed to build media");
+					logs.push(JobRunLog::error(format!(
+						"Failed to build media: {:?}",
+						e.to_string()
+					)));
+				},
+			}
+		}
+	}
+
+	Ok(JobTaskOutput {
+		data,
+		logs,
+		subtasks: vec![],
+	})
 }
 
 async fn handle_create_media(
@@ -563,13 +786,13 @@ async fn handle_create_media(
 	series_ctx: SeriesCtx,
 	ctx: &WorkerCtx,
 	mut data: LibraryScanData,
-	mut errors: Vec<JobRunLog>,
+	mut logs: Vec<JobRunLog>,
 ) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
 	if paths.is_empty() {
 		tracing::debug!("No media to create for series");
 		return Ok(JobTaskOutput {
 			data,
-			errors,
+			logs,
 			subtasks: vec![],
 		});
 	}
@@ -612,7 +835,7 @@ async fn handle_create_media(
 						},
 						Err(e) => {
 							tracing::error!(error = ?e, ?media_path, "Failed to create media");
-							errors.push(JobRunLog::error(format!(
+							logs.push(JobRunLog::error(format!(
 								"Failed to create media: {:?}",
 								e.to_string()
 							)));
@@ -621,7 +844,7 @@ async fn handle_create_media(
 				},
 				Err(e) => {
 					tracing::error!(error = ?e, ?media_path, "Failed to build media");
-					errors.push(JobRunLog::error(format!(
+					logs.push(JobRunLog::error(format!(
 						"Failed to build media: {:?}",
 						e.to_string()
 					)));
@@ -632,7 +855,7 @@ async fn handle_create_media(
 
 	Ok(JobTaskOutput {
 		data,
-		errors,
+		logs,
 		subtasks: vec![],
 	})
 }

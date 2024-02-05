@@ -17,7 +17,10 @@ use stump_core::{
 	prisma::{library, library_options, PrismaClient},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
-use tokio::{runtime::Builder, sync::broadcast};
+use tokio::{
+	runtime::Builder,
+	sync::{broadcast, mpsc},
+};
 use uuid::Uuid;
 
 #[derive(Debug)]
@@ -37,7 +40,7 @@ impl Display for BenchmarkSize {
 }
 
 fn full_scan(c: &mut Criterion) {
-	static SIZES: [BenchmarkSize; 4] = [
+	static SIZES: [BenchmarkSize; 3] = [
 		BenchmarkSize {
 			series_count: 10,
 			media_per_series: 10,
@@ -50,10 +53,11 @@ fn full_scan(c: &mut Criterion) {
 			series_count: 100,
 			media_per_series: 100,
 		},
-		BenchmarkSize {
-			series_count: 100,
-			media_per_series: 1000,
-		},
+		// Note: This benchmark is a time hog, so I have commented it out for now
+		// BenchmarkSize {
+		// 	series_count: 100,
+		// 	media_per_series: 1000,
+		// },
 	];
 
 	let mut group = c.benchmark_group("full_scan");
@@ -220,8 +224,9 @@ async fn setup_test(
 		db: Arc::new(client),
 		config: Arc::new(config),
 		job_id,
-		event_sender: broadcast::channel(1024).0,
-		command_receiver: async_channel::unbounded().1,
+		job_manager_tx: mpsc::unbounded_channel().0,
+		core_event_tx: broadcast::channel(1024).0,
+		commands_rx: async_channel::unbounded().1,
 	};
 	Ok(Setup {
 		test_ctx: TestCtx {
@@ -264,7 +269,7 @@ async fn safe_validate_counts(
 
 	if actual_media_count != (series_count * books_per_series) as i64 {
 		println!(
-			"Media count mismatch (actual vs expected): {} != {}",
+			"Media count mismatch (actual vs expected): {} != {}. You probably introduced a bug :)",
 			actual_media_count,
 			series_count * books_per_series
 		);

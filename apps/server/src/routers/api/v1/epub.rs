@@ -19,7 +19,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	middleware::auth::Auth,
 	utils::{get_session_user, http::BufferResponse},
 };
@@ -48,7 +48,7 @@ async fn get_epub_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Epub>> {
+) -> APIResult<Json<Epub>> {
 	let user_id = get_session_user(&session)?.id;
 
 	let result = ctx
@@ -67,7 +67,7 @@ async fn get_epub_by_id(
 	if let Some(book) = result {
 		Ok(Json(Epub::try_from(book)?))
 	} else {
-		Err(ApiError::NotFound(format!(
+		Err(APIError::NotFound(format!(
 			"Media with id {} not found",
 			id
 		)))
@@ -82,7 +82,7 @@ async fn update_epub_progress(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<UpdateEpubProgress>,
-) -> ApiResult<Json<ReadProgress>> {
+) -> APIResult<Json<ReadProgress>> {
 	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
@@ -150,7 +150,7 @@ async fn get_bookmarks(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Vec<Bookmark>>> {
+) -> APIResult<Json<Vec<Bookmark>>> {
 	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
@@ -186,7 +186,7 @@ async fn create_or_update_bookmark(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<CreateOrUpdateBookmark>,
-) -> ApiResult<Json<Bookmark>> {
+) -> APIResult<Json<Bookmark>> {
 	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
@@ -232,7 +232,7 @@ async fn delete_bookmark(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<DeleteBookmark>,
-) -> ApiResult<Json<Bookmark>> {
+) -> APIResult<Json<Bookmark>> {
 	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
@@ -259,7 +259,7 @@ async fn delete_bookmark(
 async fn get_epub_chapter(
 	Path((id, chapter)): Path<(String, usize)>,
 	State(ctx): State<AppState>,
-) -> ApiResult<BufferResponse> {
+) -> APIResult<BufferResponse> {
 	let result = ctx
 		.db
 		.media()
@@ -270,7 +270,7 @@ async fn get_epub_chapter(
 	if let Some(book) = result {
 		Ok(EpubProcessor::get_chapter(book.path.as_str(), chapter)?.into())
 	} else {
-		Err(ApiError::NotFound(format!(
+		Err(APIError::NotFound(format!(
 			"Media with id {} not found",
 			id
 		)))
@@ -285,7 +285,7 @@ async fn get_epub_chapter(
 async fn get_epub_meta(
 	Path((id, root, resource)): Path<(String, String, PathBuf)>,
 	State(ctx): State<AppState>,
-) -> ApiResult<BufferResponse> {
+) -> APIResult<BufferResponse> {
 	let result = ctx
 		.db
 		.media()
@@ -312,7 +312,7 @@ async fn get_epub_meta(
 
 		Ok(BufferResponse::new(content_type, buffer))
 	} else {
-		Err(ApiError::NotFound(format!(
+		Err(APIError::NotFound(format!(
 			"Media with id {} not found",
 			id
 		)))

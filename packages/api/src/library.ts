@@ -10,20 +10,20 @@ import type {
 } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult, PageableApiResult, PagedQueryParams } from './types'
+import { APIResult, PageableAPIResult, PagedQueryParams } from './types'
 import { mergePageParams, toUrlParams, urlWithParams } from './utils'
 
 export function getLibraries(
 	params: Record<string, unknown> = { unpaged: true },
-): Promise<PageableApiResult<Library[]>> {
+): Promise<PageableAPIResult<Library[]>> {
 	return API.get(urlWithParams('/libraries', toUrlParams(params)))
 }
 
-export function getLibrariesStats(): Promise<ApiResult<LibrariesStats>> {
+export function getLibrariesStats(): Promise<APIResult<LibrariesStats>> {
 	return API.get('/libraries/stats')
 }
 
-export function getLibraryById(id: string): Promise<ApiResult<Library>> {
+export function getLibraryById(id: string): Promise<APIResult<Library>> {
 	return API.get(`/libraries/${id}`)
 }
 
@@ -34,7 +34,7 @@ export function getLibraryThumbnail(id: string): string {
 export function getLibrarySeries(
 	id: string,
 	{ page, page_size, params }: PagedQueryParams,
-): Promise<PageableApiResult<Series[]>> {
+): Promise<PageableAPIResult<Series[]>> {
 	const searchParams = mergePageParams({ page, page_size, params })
 	return API.get(urlWithParams(`/libraries/${id}/series`, searchParams))
 }
@@ -45,11 +45,11 @@ export function getLibrarySeries(
 export function scanLibary(params: {
 	id: string
 	mode?: LibraryScanMode
-}): Promise<ApiResult<unknown>> {
+}): Promise<APIResult<unknown>> {
 	return API.get(`/libraries/${params.id}/scan?scan_mode=${params.mode ?? 'BATCHED'}`)
 }
 
-export function cleanLibrary(id: string): Promise<ApiResult<CleanLibraryResponse>> {
+export function cleanLibrary(id: string): Promise<APIResult<CleanLibraryResponse>> {
 	return API.put(`/libraries/${id}/clean`)
 }
 
@@ -68,11 +68,11 @@ export function regenerateThumbnails(id: string, force?: boolean) {
 	return API.post(`/libraries/${id}/thumbnail/generate`, { force_regenerate: !!force })
 }
 
-export function createLibrary(payload: CreateLibrary): Promise<ApiResult<Library>> {
+export function createLibrary(payload: CreateLibrary): Promise<APIResult<Library>> {
 	return API.post('/libraries', payload)
 }
 
-export function editLibrary(payload: UpdateLibrary): Promise<ApiResult<Library>> {
+export function editLibrary(payload: UpdateLibrary): Promise<APIResult<Library>> {
 	return API.put(`/libraries/${payload.id}`, payload)
 }
 
@@ -94,7 +94,7 @@ export function visitLibrary(id: string) {
 	return API.put(`/libraries/last-visited/${id}`)
 }
 
-export function getLastVisitedLibrary(): Promise<ApiResult<Library>> {
+export function getLastVisitedLibrary(): Promise<APIResult<Library>> {
 	return API.get('/libraries/last-visited')
 }
 

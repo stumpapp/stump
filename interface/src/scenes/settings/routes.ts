@@ -1,4 +1,14 @@
-import { AlarmClock, Bell, Brush, Cog, LucideIcon, PcCase, ShieldCheck, Users } from 'lucide-react'
+import {
+	AlarmClock,
+	Bell,
+	Brush,
+	Cog,
+	LucideIcon,
+	PcCase,
+	ScrollText,
+	ShieldCheck,
+	Users,
+} from 'lucide-react'
 
 type SubItem = {
 	localeKey: string
@@ -56,6 +66,13 @@ export const routeGroups: RouteGroup[] = [
 				localeKey: 'server/general',
 				permission: 'server:manage',
 				to: '/settings/server/general',
+			},
+			{
+				icon: ScrollText,
+				label: 'Logs',
+				localeKey: 'server/logs',
+				permission: 'server:manage',
+				to: '/settings/server/logs',
 			},
 			{
 				icon: AlarmClock,

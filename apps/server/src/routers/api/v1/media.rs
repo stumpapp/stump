@@ -39,7 +39,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::{
 		chain_optional_iter, decode_path_filter, FilterableQuery, MediaBaseFilter,
 		MediaFilter, MediaRelationFilter, ReadStatus,
@@ -299,7 +299,7 @@ async fn get_media(
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
@@ -395,9 +395,9 @@ async fn get_duplicate_media(
 	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
 	_session: Session,
-) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	if pagination.page.is_none() {
-		return Err(ApiError::BadRequest(
+		return Err(APIError::BadRequest(
 			"Pagination is required for this request".to_string(),
 		));
 	}
@@ -438,7 +438,7 @@ async fn get_duplicate_media(
 			page_params,
 		))
 	} else {
-		Err(ApiError::InternalServerError(
+		Err(APIError::InternalServerError(
 			"Failed to fetch duplicate media".to_string(),
 		))
 	};
@@ -466,7 +466,7 @@ async fn get_in_progress_media(
 	State(ctx): State<AppState>,
 	session: Session,
 	pagination_query: Query<PaginationQuery>,
-) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
 	let age_restrictions = user
@@ -558,7 +558,7 @@ async fn get_recently_added_media(
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let FilterableQuery { filters, .. } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
@@ -635,7 +635,7 @@ async fn get_media_by_path(
 	Path(path): Path<PathBuf>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Media>> {
+) -> APIResult<Json<Media>> {
 	let client = &ctx.db;
 
 	let user = get_session_user(&session)?;
@@ -654,7 +654,7 @@ async fn get_media_by_path(
 		.with(media::metadata::fetch())
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	Ok(Json(Media::from(book)))
 }
@@ -690,7 +690,7 @@ async fn get_media_by_id(
 	params: Query<BookRelations>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Media>> {
+) -> APIResult<Json<Media>> {
 	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -724,7 +724,7 @@ async fn get_media_by_id(
 	let media = query
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	Ok(Json(Media::from(media)))
 }
@@ -750,7 +750,7 @@ async fn get_media_file(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<NamedFile> {
+) -> APIResult<NamedFile> {
 	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
@@ -767,7 +767,7 @@ async fn get_media_file(
 		))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	tracing::trace!(?media, "Downloading media file");
 
@@ -795,7 +795,7 @@ async fn convert_media(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> Result<(), ApiError> {
+) -> Result<(), APIError> {
 	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
@@ -812,15 +812,15 @@ async fn convert_media(
 		))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	if media.extension != "cbr" || media.extension != "rar" {
-		return Err(ApiError::BadRequest(String::from(
+		return Err(APIError::BadRequest(String::from(
 			"Stump only supports RAR to ZIP conversions at this time",
 		)));
 	}
 
-	Err(ApiError::NotImplemented)
+	Err(APIError::NotImplemented)
 }
 
 // TODO: ImageResponse as body type
@@ -845,7 +845,7 @@ async fn get_media_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
@@ -866,10 +866,10 @@ async fn get_media_page(
 		]))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	if page > media.pages {
-		Err(ApiError::BadRequest(format!(
+		Err(APIError::BadRequest(format!(
 			"Page {} is out of bounds for media {}",
 			page, id
 		)))
@@ -883,7 +883,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 	db: &PrismaClient,
 	session: &Session,
 	config: &StumpConfig,
-) -> ApiResult<(ContentType, Vec<u8>)> {
+) -> APIResult<(ContentType, Vec<u8>)> {
 	let user = get_session_user(session)?;
 	let age_restrictions = user
 		.age_restriction
@@ -930,7 +930,7 @@ pub(crate) async fn get_media_thumbnail_by_id(
 			config,
 		),
 		(Some(book), None) => get_media_thumbnail(&book, None, config),
-		_ => Err(ApiError::NotFound(String::from("Media not found"))),
+		_ => Err(APIError::NotFound(String::from("Media not found"))),
 	}
 }
 
@@ -938,7 +938,7 @@ pub(crate) fn get_media_thumbnail(
 	media: &media::Data,
 	target_format: Option<ImageFormat>,
 	config: &StumpConfig,
-) -> ApiResult<(ContentType, Vec<u8>)> {
+) -> APIResult<(ContentType, Vec<u8>)> {
 	if let Some(format) = target_format {
 		let extension = format.extension();
 		let thumbnail_path = config
@@ -987,7 +987,7 @@ async fn get_media_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	tracing::trace!(?id, "get_media_thumbnail");
 	let db = &ctx.db;
 	get_media_thumbnail_by_id(id, db, &session, &ctx.config)
@@ -1022,7 +1022,7 @@ async fn patch_media_thumbnail(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(body): Json<PatchMediaThumbnail>,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	get_session_server_owner_user(&session)?;
 
 	let client = &ctx.db;
@@ -1047,17 +1047,17 @@ async fn patch_media_thumbnail(
 		)
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	if media.extension == "epub" {
-		return Err(ApiError::NotSupported);
+		return Err(APIError::NotSupported);
 	}
 
 	let library = media
 		.series()?
-		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
-		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
 	let thumbnail_options = library
 		.library_options()?
 		.thumbnail_config
@@ -1100,19 +1100,19 @@ async fn replace_media_thumbnail(
 	State(ctx): State<AppState>,
 	session: Session,
 	mut upload: Multipart,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	enforce_session_permissions(
 		&session,
 		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
 	)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let media = client
 		.media()
 		.find_unique(media::id::equals(id.clone()))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
 	let ext = content_type.extension();
@@ -1157,7 +1157,7 @@ async fn update_media_progress(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<ReadProgress>> {
+) -> APIResult<Json<ReadProgress>> {
 	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
@@ -1221,7 +1221,7 @@ async fn get_media_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Option<ReadProgress>>> {
+) -> APIResult<Json<Option<ReadProgress>>> {
 	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
@@ -1254,7 +1254,7 @@ async fn delete_media_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<MediaIsComplete>> {
+) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
@@ -1292,7 +1292,7 @@ async fn get_is_media_completed(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<MediaIsComplete>> {
+) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
@@ -1338,11 +1338,11 @@ async fn put_media_complete_status(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(payload): Json<PutMediaCompletionStatus>,
-) -> ApiResult<Json<MediaIsComplete>> {
+) -> APIResult<Json<MediaIsComplete>> {
 	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
-	let result: Result<read_progress::Data, ApiError> = client
+	let result: Result<read_progress::Data, APIError> = client
 		._transaction()
 		.run(|tx| async move {
 			let media = tx
@@ -1350,7 +1350,7 @@ async fn put_media_complete_status(
 				.find_unique(media::id::equals(id.clone()))
 				.exec()
 				.await?
-				.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+				.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 			let is_completed = payload.is_complete;
 			let (pages, completed_at) = if is_completed {

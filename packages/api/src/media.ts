@@ -7,12 +7,12 @@ import type {
 } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
+import { APIResult, CursorQueryParams, PageableAPIResult } from './types'
 import { mergeCursorParams, toUrlParams, urlWithParams } from './utils'
 
-type GetMediaById = ApiResult<Media>
+type GetMediaById = APIResult<Media>
 
-export function getMedia(filters?: Record<string, unknown>): Promise<PageableApiResult<Media[]>> {
+export function getMedia(filters?: Record<string, unknown>): Promise<PageableAPIResult<Media[]>> {
 	const params = toUrlParams(filters)
 	return API.get(urlWithParams('/media', params))
 }
@@ -21,12 +21,12 @@ export function getMediaWithCursor({
 	afterId,
 	limit,
 	params,
-}: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
+}: CursorQueryParams): Promise<PageableAPIResult<Media[]>> {
 	const searchParams = mergeCursorParams({ afterId, limit, params })
 	return API.get(urlWithParams('/media', searchParams))
 }
 
-export function getPaginatedMedia(page: number): Promise<PageableApiResult<Media[]>> {
+export function getPaginatedMedia(page: number): Promise<PageableAPIResult<Media[]>> {
 	return API.get(`/media?page=${page}`)
 }
 
@@ -39,7 +39,7 @@ export function getMediaById(id: string, params?: Record<string, unknown>): Prom
 	}
 }
 
-export function getMediaByPath(path: string): Promise<ApiResult<Media>> {
+export function getMediaByPath(path: string): Promise<APIResult<Media>> {
 	return API.get(`/media/path/${encodeURIComponent(path)}`)
 }
 
@@ -47,7 +47,7 @@ export function getRecentlyAddedMedia({
 	afterId,
 	limit,
 	params,
-}: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
+}: CursorQueryParams): Promise<PageableAPIResult<Media[]>> {
 	const searchParams = mergeCursorParams({ afterId, limit, params })
 	return API.get(urlWithParams('/media/recently-added', searchParams))
 }
@@ -56,7 +56,7 @@ export function getInProgressMedia({
 	afterId,
 	limit,
 	params,
-}: CursorQueryParams): Promise<PageableApiResult<Media[]>> {
+}: CursorQueryParams): Promise<PageableAPIResult<Media[]>> {
 	const searchParams = mergeCursorParams({ afterId, limit, params })
 	return API.get(urlWithParams('/media/keep-reading', searchParams))
 }
@@ -74,7 +74,7 @@ export function getMediaPage(id: string, page: number): string {
 	return `${API.getUri()}/media/${id}/page/${page}`
 }
 
-export function updateMediaProgress(id: string, page: number): Promise<ApiResult<ReadProgress>> {
+export function updateMediaProgress(id: string, page: number): Promise<APIResult<ReadProgress>> {
 	return API.put(`/media/${id}/progress/${page}`)
 }
 
@@ -95,7 +95,7 @@ export function uploadMediaThumbnail(id: string, file: File) {
 export function putMediaCompletion(
 	id: string,
 	payload: PutMediaCompletionStatus,
-): Promise<ApiResult<MediaIsComplete>> {
+): Promise<APIResult<MediaIsComplete>> {
 	return API.put(`/media/${id}/progress/complete`, payload)
 }
 

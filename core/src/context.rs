@@ -47,11 +47,8 @@ impl Ctx {
 		let db = Arc::new(db::create_client(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		let job_manager = Arc::new(JobManager::new(
-			db.clone(),
-			config.clone(),
-			event_channel.0.clone(),
-		));
+		let job_manager =
+			JobManager::new(db.clone(), config.clone(), event_channel.0.clone());
 
 		Ctx {
 			config,
@@ -71,11 +68,8 @@ impl Ctx {
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
 		// Create job manager
-		let job_manager = Arc::new(JobManager::new(
-			db.clone(),
-			config.clone(),
-			event_channel.0.clone(),
-		));
+		let job_manager =
+			JobManager::new(db.clone(), config.clone(), event_channel.0.clone());
 
 		Ctx {
 			config,
@@ -189,5 +183,20 @@ impl Ctx {
 	) -> Result<(), SendError<JobManagerCommand>> {
 		self.job_manager
 			.push_event(JobManagerCommand::EnqueueJob(job))
+	}
+
+	pub fn send_job_manager_command(
+		&self,
+		command: JobManagerCommand,
+	) -> Result<(), SendError<JobManagerCommand>> {
+		self.job_manager.push_event(command)
+	}
+
+	pub fn send_core_event(&self, event: CoreEvent) {
+		if let Err(error) = self.event_channel.0.send(event) {
+			tracing::error!(error = ?error, "Failed to send core event");
+		} else {
+			tracing::trace!("Sent core event");
+		}
 	}
 }

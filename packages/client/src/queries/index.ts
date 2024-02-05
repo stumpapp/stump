@@ -23,6 +23,7 @@ export {
 	useScanLibrary,
 	useVisitLibrary,
 } from './library'
+export { useLogsQuery } from './log'
 export {
 	prefetchMedia,
 	useContinueReading,

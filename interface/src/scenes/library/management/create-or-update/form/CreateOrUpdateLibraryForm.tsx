@@ -180,7 +180,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 
 		if (tagsToCreate && tagsToCreate.length > 0) {
 			// TODO: Re-add this logic...
-			// const res: ApiResult<Tag[]> = await tryCreateTags(tagsToCreate)
+			// const res: APIResult<Tag[]> = await tryCreateTags(tagsToCreate)
 			// if (res.status > 201) {
 			// 	toast.error('Something went wrong when creating the tags.')
 			// 	return

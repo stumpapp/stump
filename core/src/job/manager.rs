@@ -11,13 +11,14 @@ use tokio::sync::{
 	oneshot, RwLock,
 };
 
-use super::{error::JobManagerError, handle_do_cancel, Executor, Worker};
+use super::{
+	error::JobManagerError, handle_do_cancel, Executor, Worker, WorkerSend, WorkerSendExt,
+};
 use crate::{
 	config::StumpConfig,
 	event::CoreEvent,
 	job::JobStatus,
 	prisma::{job, PrismaClient},
-	Ctx,
 };
 
 /// Events that can be sent to the job manager. If any of these events require a response,
@@ -33,39 +34,51 @@ pub enum JobManagerCommand {
 	Shutdown(oneshot::Sender<()>),
 }
 
+impl WorkerSendExt for JobManagerCommand {
+	fn into_send(self) -> WorkerSend {
+		WorkerSend::ManagerCommand(self)
+	}
+}
+
 type JobManagerResult<T> = Result<T, JobManagerError>;
 
 /// A struct that manages the execution and queueing of jobs and their workers
 pub struct JobManager {
 	agent: Arc<JobManagerAgent>,
-	/// A channel to receive job manager events
-	commands_rx: mpsc::UnboundedReceiver<JobManagerCommand>,
 	/// A channel to send job manager events
 	commands_tx: mpsc::UnboundedSender<JobManagerCommand>,
 }
 
 impl JobManager {
-	/// Creates a new job manager instance
+	/// Creates a new job manager instance and starts the watcher loop in a new thread
 	pub fn new(
 		client: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
-	) -> Self {
+	) -> Arc<Self> {
 		let (commands_tx, commands_rx) = mpsc::unbounded_channel();
-		Self {
-			commands_rx,
+		let this = Arc::new(Self {
 			commands_tx: commands_tx.clone(),
 			agent: JobManagerAgent::new(client, config, commands_tx, core_event_tx)
 				.arced(),
-		}
+		});
+
+		let this_cpy = this.clone();
+		this_cpy.start(commands_rx);
+
+		this
 	}
 
 	/// Starts the watcher loop for the job manager
-	pub fn start(mut self) {
+	pub fn start(
+		self: Arc<Self>,
+		mut commands_rx: mpsc::UnboundedReceiver<JobManagerCommand>,
+	) {
 		tokio::spawn(async move {
-			while let Some(event) = self.commands_rx.recv().await {
+			while let Some(event) = commands_rx.recv().await {
 				match event {
 					JobManagerCommand::EnqueueJob(job) => {
+						tracing::trace!("Received enqueue job event");
 						self.agent.clone().enqueue(job).await.map_or_else(
 							|error| tracing::error!(?error, "Failed to enqueue job!"),
 							|_| tracing::info!("Successfully enqueued job"),
@@ -183,6 +196,7 @@ impl JobManagerAgent {
 				self.client.clone(),
 				self.config.clone(),
 				self.get_event_tx(),
+				self.job_manager_tx.clone(),
 			)
 			.await?;
 			workers.insert(job_id, worker);

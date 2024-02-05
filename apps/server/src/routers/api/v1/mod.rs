@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{config::state::AppState, errors::ApiResult};
+use crate::{config::state::AppState, errors::APIResult};
 
 pub(crate) mod auth;
 pub(crate) mod book_club;
@@ -58,7 +58,7 @@ pub struct ClaimResponse {
 		(status = 200, description = "Claim status successfully determined", body = ClaimResponse)
 	)
 )]
-async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
+async fn claim(State(ctx): State<AppState>) -> APIResult<Json<ClaimResponse>> {
 	let db = &ctx.db;
 
 	Ok(Json(ClaimResponse {
@@ -74,7 +74,7 @@ async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
 		(status = 200, description = "Always responds with 'pong'", body = String)
 	)
 )]
-async fn ping() -> ApiResult<String> {
+async fn ping() -> APIResult<String> {
 	Ok("pong".to_string())
 }
 
@@ -93,7 +93,7 @@ pub struct StumpVersion {
 		(status = 200, description = "Version information for the Stump server instance", body = StumpVersion)
 	)
 )]
-async fn version() -> ApiResult<Json<StumpVersion>> {
+async fn version() -> APIResult<Json<StumpVersion>> {
 	Ok(Json(StumpVersion {
 		semver: env!("CARGO_PKG_VERSION").to_string(),
 		rev: env!("GIT_REV").to_string(),

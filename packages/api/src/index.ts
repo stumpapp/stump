@@ -1,4 +1,3 @@
-// TODO: remove these export *
 export { authApi, authQueryKeys } from './auth'
 export { API, apiIsInitialized, checkUrl, initializeApi, isUrl } from './axios'
 export { bookClubApi, bookClubQueryKeys } from './bookClub'
@@ -6,7 +5,7 @@ export { epubApi, epubQueryKeys, getEpubResource, updateEpubProgress } from './e
 export { filesystemApi, filesystemQueryKeys } from './filesystem'
 export * from './job'
 export { getLibraryThumbnail, libraryApi, libraryQueryKeys } from './library'
-export * from './log'
+export { logApi, logQueryKeys } from './log'
 export {
 	getMediaDownloadUrl,
 	getMediaPage,
@@ -27,6 +26,7 @@ export {
 } from './series'
 export { checkIsClaimed, getStumpVersion, ping, serverQueryKeys } from './server'
 export { getSmartListById, getSmartLists, smartListApi, smartListQueryKeys } from './smartList'
+// TODO: remove these export *
 export * from './tag'
 export * from './types'
 export * from './user'

@@ -1,5 +1,5 @@
-mod _thumbnail;
-mod _thumbnail_job;
+// mod _thumbnail;
+// mod _thumbnail_job;
 mod generic;
 mod process;
 mod thumbnail;
@@ -16,4 +16,7 @@ pub use thumbnail::{
 	generate_thumbnail, generate_thumbnails, place_thumbnail, remove_thumbnails,
 	remove_thumbnails_of_type,
 };
-// pub use thumbnail_job::{ThumbnailJob, ThumbnailJobConfig, THUMBNAIL_JOB_NAME};
+pub use thumbnail_job::{
+	ThumbnailGenerationData, ThumbnailGenerationJob, ThumbnailGenerationJobParams,
+	ThumbnailGenerationJobVariant,
+};

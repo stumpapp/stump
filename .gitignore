@@ -3,6 +3,7 @@
 
 # Logs
 logs/
+!interface/**/logs/
 *.log
 
 # Cache

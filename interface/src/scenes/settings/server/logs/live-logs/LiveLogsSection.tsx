@@ -17,10 +17,11 @@ export default function LiveLogsSection() {
 				</Text>
 			</div>
 
-			<LiveLogsFeed />
 			<Alert level="warning" rounded="sm" icon={Construction}>
-				<Alert.Content>{t('common.unimplemented')}</Alert.Content>
+				<Alert.Content>{t('common.limitedFunctionality')}</Alert.Content>
 			</Alert>
+
+			<LiveLogsFeed />
 		</div>
 	)
 }

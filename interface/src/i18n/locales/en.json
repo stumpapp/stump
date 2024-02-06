@@ -671,6 +671,7 @@
 		"saveChanges": "Save changes",
 		"create": "Create",
 		"edit": "Edit",
-		"unimplemented": "This functionality is not yet implemented! Check back later"
+		"unimplemented": "This functionality is not yet implemented! Check back later",
+		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
 	}
 }

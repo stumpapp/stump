@@ -1,3 +1,4 @@
+import { API } from '@stump/api'
 import React, { useEffect, useRef, useState } from 'react'
 
 const MAX_BUFFER_SIZE = 1000
@@ -17,14 +18,21 @@ export default function LiveLogsFeed() {
 	const [logsBuffer, setLogsBuffer] = useState<string[]>([])
 
 	const scrollRef = useRef<HTMLDivElement>(null)
+	const logContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		if (!source) {
-			const newSource = new EventSource('/api/logs/live')
+			const URI = API?.getUri()
+
+			const newSource = new EventSource(`${URI}/logs/file/tail`, {
+				withCredentials: true,
+			})
 			newSource.onmessage = (event) => {
-				const newLog = event.data
+				const newLog = event.data as string
+				// remove the " at the first and last character of the string
+				const formattedLog = newLog.slice(1, newLog.length - 1)
 				setLogsBuffer((prevLogs) => {
-					const newLogs = [...prevLogs, newLog]
+					const newLogs = [...prevLogs, formattedLog]
 					if (newLogs.length > MAX_BUFFER_SIZE) {
 						return newLogs.slice(newLogs.length - MAX_BUFFER_SIZE)
 					}
@@ -48,15 +56,24 @@ export default function LiveLogsFeed() {
 
 	// whenever a new log is added to the buffer, we want to scroll to the bottom of the logs
 	useEffect(() => {
-		scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+		logContainerRef.current?.scrollTo({
+			behavior: 'smooth',
+			top: logContainerRef.current.scrollHeight,
+		})
 	}, [logsBuffer])
 
+	// TODO: Syntax highlighting for logs
 	return (
-		<div style={{ fontFamily: 'monospace', maxHeight: '100%', overflowY: 'auto', padding: '1rem' }}>
-			{logsBuffer.map((log, index) => (
-				<div key={index}>{log}</div>
-			))}
-			<div ref={scrollRef} />
+		<div className="h-72 bg-background-200 p-4">
+			<div
+				ref={logContainerRef}
+				className="flex max-h-full flex-col gap-y-1.5 overflow-y-auto font-mono text-sm text-contrast-200"
+			>
+				{logsBuffer.map((log, index) => (
+					<span key={index}>{log}</span>
+				))}
+				<div ref={scrollRef} />
+			</div>
 		</div>
 	)
 }

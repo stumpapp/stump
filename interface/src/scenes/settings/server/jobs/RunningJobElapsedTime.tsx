@@ -1,11 +1,11 @@
 import { Text } from '@stump/components'
-import { JobDetail } from '@stump/types'
+import { PersistedJob } from '@stump/types'
 import dayjs from 'dayjs'
 import { Duration } from 'dayjs/plugin/duration'
 import React, { useEffect, useMemo, useState } from 'react'
 
 type Props = {
-	job: JobDetail
+	job: PersistedJob
 	formatDuration: (duration: Duration) => string
 }
 

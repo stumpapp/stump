@@ -1,11 +1,11 @@
-import { JobDetail } from '@stump/types'
+import { PersistedJob } from '@stump/types'
 import { PaginationState } from '@tanstack/react-table'
 import { createContext, useContext } from 'react'
 
 import { noop } from '@/utils/misc'
 
 export type IJobSettingsContext = {
-	jobs: JobDetail[]
+	jobs: PersistedJob[]
 	isRefetchingJobs: boolean
 	pageCount: number
 	pagination: PaginationState

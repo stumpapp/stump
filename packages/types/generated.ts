@@ -3,6 +3,11 @@
 
 // CORE TYPE GENERATION
 
+/**
+ * An event that is emitted by the core and consumed by a client
+ */
+export type CoreEvent = ({ __typename: "JobUpdate" } & JobUpdate)
+
 export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
 
 export type AccessRole = "Reader" | "Writer" | "CoCreator"
@@ -22,10 +27,16 @@ export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
 
-/**
- * An enum which represents the possible outputs of a job in the Stump core
- */
 export type CoreJobOutput = LibraryScanData | SeriesScanData | ThumbnailGenerationData | unknown
+
+export type JobUpdate = ({ status: JobStatus | null; message: string | null; current_task_index: number | null; task_queue_size: number | null; current_subtask_index: number | null; subtask_queue_size: number | null }) & { id: string }
+
+/**
+ * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
+ * where the client will ignore any fields that are not present. This is done so all internal ops
+ * can be done without needing to know the full state of the job.
+ */
+export type JobProgress = { status: JobStatus | null; message: string | null; current_task_index: number | null; task_queue_size: number | null; current_subtask_index: number | null; subtask_queue_size: number | null }
 
 /**
  * The data that is collected and updated during the execution of a library scan job

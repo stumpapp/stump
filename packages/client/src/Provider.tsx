@@ -32,12 +32,12 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 
 	function addJob(newJob: JobUpdate) {
 		setJobs((jobs) => {
-			const target = jobs[newJob.job_id]
+			const target = jobs[newJob.id]
 
 			if (target) {
 				return {
 					...jobs,
-					[newJob.job_id]: {
+					[newJob.id]: {
 						...target,
 						...newJob,
 					},
@@ -45,7 +45,7 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 			} else {
 				return {
 					...jobs,
-					[newJob.job_id]: newJob,
+					[newJob.id]: newJob,
 				}
 			}
 		})
@@ -55,12 +55,12 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 
 	function updateJob(jobUpdate: JobUpdate) {
 		setJobs((jobs) => {
-			const target = jobs[jobUpdate.job_id]
+			const target = jobs[jobUpdate.id]
 
 			if (target) {
 				return {
 					...jobs,
-					[jobUpdate.job_id]: {
+					[jobUpdate.id]: {
 						...target,
 						...jobUpdate,
 					},
@@ -68,7 +68,7 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 			} else {
 				return {
 					...jobs,
-					[jobUpdate.job_id]: jobUpdate,
+					[jobUpdate.id]: jobUpdate,
 				}
 			}
 		})

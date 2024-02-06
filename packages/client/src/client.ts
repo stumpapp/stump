@@ -59,7 +59,7 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	queryFn: QueryFunction<TQueryFnData, QueryKey>,
 	options?: QueryOptions<TQueryFnData, TError, TData>,
 ) {
-	const { onRedirect } = useClientContext() || {}
+	const { onRedirect } = useClientContext()
 	const { setUser } = useUserStore((store) => ({
 		setUser: store.setUser,
 	}))
@@ -149,7 +149,7 @@ export function useInfiniteQuery<TQueryFnData = unknown, TError = unknown, TData
 	queryFn: QueryFunction<TQueryFnData, QueryKey>,
 	options?: InfiniteQueryOptions<TQueryFnData, TError, TData>,
 ) {
-	const { onRedirect } = useClientContext() || {}
+	const { onRedirect } = useClientContext()
 	const { setUser } = useUserStore((store) => ({
 		setUser: store.setUser,
 	}))
@@ -261,7 +261,7 @@ export function useMutation<
 	mutationFn?: MutationFunction<TData, TVariables>,
 	options?: MutationOptions<TData, TError, TVariables, TContext>,
 ) {
-	const { onRedirect } = useClientContext() || {}
+	const { onRedirect } = useClientContext()
 	const { setUser } = useUserStore((store) => ({
 		setUser: store.setUser,
 	}))

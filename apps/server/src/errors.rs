@@ -285,7 +285,7 @@ impl IntoResponse for APIErrorResponse {
 			.body(base_response.into_body())
 			.unwrap_or_else(|error| {
 				tracing::error!(?error, "Failed to build response");
-				(StatusCode::INSUFFICIENT_STORAGE, error.to_string()).into_response()
+				(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
 			})
 	}
 }

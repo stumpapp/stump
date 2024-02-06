@@ -35,5 +35,17 @@ export const useAppProps = () => {
 	if (!context) throw new Error('AppPropsContext not found')
 	return context
 }
-export const useJobContext = () => useContext(JobContext)
-export const useClientContext = () => useContext(StumpClientContext)
+export const useJobContext = () => {
+	const context = useContext(JobContext)
+	if (!context) {
+		throw new Error('JobContext not found')
+	}
+	return context
+}
+export const useClientContext = () => {
+	const context = useContext(StumpClientContext)
+	if (!context) {
+		throw new Error('StumpClientContext not found')
+	}
+	return context
+}

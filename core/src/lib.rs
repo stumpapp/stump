@@ -209,6 +209,7 @@ mod tests {
 		},
 		filesystem::{image::*, scanner::*, *},
 		job::*,
+		CoreEvent,
 	};
 
 	#[allow(dead_code)]
@@ -237,6 +238,8 @@ mod tests {
 
 		file.write_all(b"// CORE TYPE GENERATION\n\n")?;
 
+		file.write_all(format!("{}\n\n", ts_export::<CoreEvent>()?).as_bytes())?;
+
 		file.write_all(format!("{}\n\n", ts_export::<EntityVisibility>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<AccessRole>()?).as_bytes())?;
 
@@ -253,6 +256,8 @@ mod tests {
 			)
 			.as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<JobProgress>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LibraryScanData>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<SeriesScanData>()?).as_bytes())?;
 		file.write_all(

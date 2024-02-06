@@ -69,7 +69,7 @@ impl JobExt for SessionCleanupJob {
 		Ok(WorkingState {
 			data: Some(data),
 			tasks: VecDeque::default(),
-			current_task_index: 0,
+			completed_tasks: 0,
 			logs,
 		})
 	}

@@ -14,7 +14,7 @@ use stump_core::{
 			pagination::{Pageable, Pagination, PaginationQuery},
 		},
 	},
-	job::JobManagerCommand,
+	job::JobControllerCommand,
 	prisma::{
 		job::{self, OrderByParam as JobOrderByParam},
 		job_schedule_config, library, server_config,
@@ -192,7 +192,7 @@ async fn cancel_job_by_id(
 ) -> APIResult<()> {
 	let (task_tx, task_rx) = oneshot::channel();
 
-	ctx.send_job_manager_command(JobManagerCommand::CancelJob(job_id, task_tx))
+	ctx.send_job_controller_command(JobControllerCommand::CancelJob(job_id, task_tx))
 		.map_err(|e| {
 			APIError::InternalServerError(format!(
 				"Failed to send command to job manager: {}",

@@ -18,11 +18,12 @@ use crate::{
 		MediaBuilder, SeriesBuilder,
 	},
 	job::{
-		error::JobError, Job, JobDataExt, JobExt, JobManagerCommand, JobProgress,
+		error::JobError, Job, JobControllerCommand, JobDataExt, JobExt, JobProgress,
 		JobRunLog, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
+	CoreEvent,
 };
 
 use super::{
@@ -155,8 +156,11 @@ impl JobExt for LibraryScanJob {
 		data.total_files = seen_directories + ignored_directories;
 
 		if library_is_missing {
-			ctx.report_progress(JobProgress::msg("Failed to find library on disk"));
 			handle_missing_library(&ctx.db, self.id.as_str()).await?;
+			ctx.send_batch(vec![
+				JobProgress::msg("Failed to find library on disk").into_send(),
+				CoreEvent::DiscoveredMissingLibrary(self.id.clone()).into_send(),
+			]);
 			return Err(JobError::InitFailed(
 				"Library could not be found on disk".to_string(),
 			));
@@ -189,7 +193,7 @@ impl JobExt for LibraryScanJob {
 		Ok(WorkingState {
 			data: Some(data),
 			tasks,
-			current_task_index: 0,
+			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
@@ -207,7 +211,7 @@ impl JobExt for LibraryScanJob {
 				tracing::debug!("Enqueuing thumbnail generation job");
 				ctx.send_batch(vec![
 					JobProgress::msg("Enqueuing thumbnail generation job").into_send(),
-					JobManagerCommand::EnqueueJob(Job::new(ThumbnailGenerationJob {
+					JobControllerCommand::EnqueueJob(Job::new(ThumbnailGenerationJob {
 						options,
 						params: ThumbnailGenerationJobParams::single_library(
 							self.id.clone(),
@@ -237,6 +241,7 @@ impl JobExt for LibraryScanJob {
 		match task {
 			LibraryScanTask::Init(input) => {
 				tracing::info!("Executing the init task for library scan");
+				ctx.report_progress(JobProgress::msg("Handling library scan init"));
 				let InitTaskInput {
 					series_to_create,
 					missing_series,
@@ -261,7 +266,7 @@ impl JobExt for LibraryScanJob {
 						.db
 						.series()
 						.update_many(
-							vec![series::path::in_vec(missing_series_str)],
+							vec![series::path::in_vec(missing_series_str.clone())],
 							vec![series::status::set(FileStatus::Missing.to_string())],
 						)
 						.exec()
@@ -280,6 +285,7 @@ impl JobExt for LibraryScanJob {
 								count
 							},
 						);
+
 					ctx.report_progress(JobProgress::subtask_position(
 						(affected_rows > 0)
 							.then(|| {
@@ -296,7 +302,7 @@ impl JobExt for LibraryScanJob {
 					// TODO: remove this DAO!!
 					let series_dao = SeriesDAO::new(ctx.db.clone());
 
-					let (built_series, failures): (Vec<_>, Vec<_>) = series_to_create
+					let (built_series, failure_logs): (Vec<_>, Vec<_>) = series_to_create
 						.par_iter()
 						.enumerate()
 						.map(|(idx, path_buf)| {
@@ -306,16 +312,23 @@ impl JobExt for LibraryScanJob {
 								current_subtask_index + (idx as i32),
 								total_subtask_count as i32,
 							));
-							SeriesBuilder::new(path_buf.as_path(), &self.id).build()
+							(
+								path_buf,
+								SeriesBuilder::new(path_buf.as_path(), &self.id).build(),
+							)
 						})
-						.partition_map::<_, _, _, Series, String>(
-							|result| match result {
+						.partition_map::<_, _, _, Series, JobRunLog>(
+							|(path_buf, result)| match result {
 								Ok(s) => Either::Left(s),
-								Err(e) => Either::Right(e.to_string()),
+								Err(e) => Either::Right(
+									JobRunLog::error(e.to_string())
+										.with_ctx(path_buf.to_string_lossy().to_string()),
+								),
 							},
 						);
-
-					current_subtask_index += (built_series.len() + failures.len()) as i32;
+					current_subtask_index +=
+						(built_series.len() + failure_logs.len()) as i32;
+					logs.extend(failure_logs);
 
 					// TODO: make this configurable
 					let chunks = built_series.chunks(400);
@@ -333,8 +346,11 @@ impl JobExt for LibraryScanJob {
 						let result = series_dao.create_many(chunk.to_vec()).await;
 						match result {
 							Ok(created_series) => {
-								// TODO: emit event
 								data.created_series += created_series.len() as u64;
+								ctx.send_core_event(CoreEvent::CreatedManySeries {
+									count: created_series.len() as u64,
+									library_id: self.id.clone(),
+								});
 							},
 							Err(e) => {
 								tracing::error!(error = ?e, "Failed to batch insert series");
@@ -352,10 +368,17 @@ impl JobExt for LibraryScanJob {
 						current_subtask_index,
 						total_subtask_count as i32,
 					));
+				} else {
+					tracing::debug!("No series to create");
 				}
+
+				ctx.report_progress(JobProgress::msg("Init task complete!"));
 			},
 			LibraryScanTask::WalkSeries(path_buf) => {
 				tracing::info!("Executing the walk series task for library scan");
+				ctx.report_progress(JobProgress::msg(
+					format!("Scanning series at {}", path_buf.display()).as_str(),
+				));
 
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),
@@ -398,6 +421,7 @@ impl JobExt for LibraryScanJob {
 				data.total_files += seen_files + ignored_files;
 
 				if series_is_missing {
+					// TODO: emit event
 					return handle_missing_series(
 						&ctx.db,
 						path_buf.to_str().unwrap_or_default(),
@@ -434,6 +458,8 @@ impl JobExt for LibraryScanJob {
 					task,
 				})
 				.collect();
+
+				ctx.report_progress(JobProgress::msg("Series walk complete!"));
 			},
 			LibraryScanTask::SeriesTask {
 				id: series_id,
@@ -441,17 +467,29 @@ impl JobExt for LibraryScanJob {
 				task: series_task,
 			} => match series_task {
 				SeriesScanTask::MarkMissingMedia(paths) => {
+					ctx.report_progress(JobProgress::msg("Handling missing media"));
 					let JobTaskOutput {
 						data: new_data,
 						logs: new_logs,
 						..
 					} = handle_missing_media(&ctx.db, &series_id, paths, data, logs).await?;
+					ctx.send_batch(vec![
+						JobProgress::msg("Handled missing media").into_send(),
+						CoreEvent::CreatedOrUpdatedManyMedia {
+							count: new_data.updated_media,
+							series_id,
+						}
+						.into_send(),
+					]);
 					data = new_data;
 					logs = new_logs;
 				},
 				SeriesScanTask::CreateMedia(paths) => {
+					ctx.report_progress(JobProgress::msg(
+						format!("Creating {} media entities", paths.len()).as_str(),
+					));
 					let series_ctx = SeriesCtx {
-						id: series_id,
+						id: series_id.clone(),
 						path: series_path,
 						library_options: self.options.clone().unwrap_or_default(),
 						chunk_size: 300,
@@ -461,12 +499,24 @@ impl JobExt for LibraryScanJob {
 						logs: new_logs,
 						..
 					} = handle_create_media(paths, series_ctx, ctx, data, logs).await?;
+					ctx.send_batch(vec![
+						JobProgress::msg("Created new media").into_send(),
+						CoreEvent::CreatedOrUpdatedManyMedia {
+							count: new_data.updated_media,
+							series_id,
+						}
+						.into_send(),
+					]);
 					data = new_data;
 					logs = new_logs;
 				},
 				SeriesScanTask::VisitMedia(paths) => {
+					ctx.report_progress(JobProgress::msg(
+						format!("Visiting {} media entities on disk", paths.len())
+							.as_str(),
+					));
 					let media_ctx = MediaCtx {
-						series_id,
+						series_id: series_id.clone(),
 						library_options: self.options.clone().unwrap_or_default(),
 						chunk_size: 300,
 						config: ctx.config.clone(),
@@ -476,6 +526,14 @@ impl JobExt for LibraryScanJob {
 						logs: new_logs,
 						..
 					} = handle_visit_media(&ctx.db, media_ctx, paths, data, logs).await?;
+					ctx.send_batch(vec![
+						JobProgress::msg("Visited all media").into_send(),
+						CoreEvent::CreatedOrUpdatedManyMedia {
+							count: new_data.updated_media,
+							series_id,
+						}
+						.into_send(),
+					]);
 					data = new_data;
 					logs = new_logs;
 				},
@@ -825,29 +883,42 @@ async fn handle_create_media(
 			.collect::<VecDeque<(PathBuf, Result<Media, _>)>>();
 
 		while let Some((media_path, build_result)) = built_media.pop_front() {
-			match build_result {
-				Ok(generated) => {
-					// TODO: convert to a transaction!
-					match create_media(&ctx.db, generated).await {
-						Ok(_created_media) => {
-							// TODO: emit event
-							data.created_media += 1;
-						},
-						Err(e) => {
-							tracing::error!(error = ?e, ?media_path, "Failed to create media");
-							logs.push(JobRunLog::error(format!(
-								"Failed to create media: {:?}",
-								e.to_string()
-							)));
-						},
-					}
+			let Ok(generated) = build_result else {
+				tracing::error!(?media_path, "Failed to build media");
+				logs.push(
+					JobRunLog::error(format!(
+						"Failed to build media: {:?}",
+						build_result.unwrap_err().to_string()
+					))
+					.with_ctx(media_path.to_string_lossy().to_string()),
+				);
+				continue;
+			};
+
+			match create_media(&ctx.db, generated).await {
+				Ok(created_media) => {
+					data.created_media += 1;
+					ctx.send_batch(vec![
+						JobProgress::msg(
+							format!("Inserted {}", media_path.display()).as_str(),
+						)
+						.into_send(),
+						CoreEvent::CreatedMedia {
+							id: created_media.id,
+							series_id: id.clone(),
+						}
+						.into_send(),
+					]);
 				},
 				Err(e) => {
-					tracing::error!(error = ?e, ?media_path, "Failed to build media");
-					logs.push(JobRunLog::error(format!(
-						"Failed to build media: {:?}",
-						e.to_string()
-					)));
+					tracing::error!(error = ?e, ?media_path, "Failed to create media");
+					logs.push(
+						JobRunLog::error(format!(
+							"Failed to create media: {:?}",
+							e.to_string()
+						))
+						.with_ctx(media_path.to_string_lossy().to_string()),
+					);
 				},
 			}
 		}

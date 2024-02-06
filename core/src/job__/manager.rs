@@ -8,7 +8,7 @@ use crate::{config::StumpConfig, prisma::PrismaClient};
 /// Commands that can be sent via a [JobManager]. If any of these commands require a
 /// response (e.g., to provide an HTTP status code) a oneshot channel should be provided.
 #[derive(Debug)]
-pub enum JobManagerCommand {
+pub enum JobControllerCommand {
 	/// Add a job to the queue to be run.
 	EnqueueJob(Box<dyn StatefulJob>),
 	/// Cancel a job by its ID.
@@ -23,7 +23,7 @@ type JobManagerResult<T> = Result<T, JobManagerError>;
 #[derive(Debug)]
 pub struct JobManager {
 	/// A transmitter to communicate with the [JobManagerAgent].
-	controller_tx: mpsc::UnboundedSender<JobManagerCommand>,
+	controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 }
 
 impl JobManager {
@@ -37,7 +37,7 @@ impl JobManager {
 
 	/// Add a job to the end of the queue.
 	pub fn enqueue_job(&mut self, job: Box<dyn StatefulJob>) -> JobManagerResult<()> {
-		self.send_command(JobManagerCommand::EnqueueJob(job))
+		self.send_command(JobControllerCommand::EnqueueJob(job))
 	}
 
 	/// Cancel a job by its id.
@@ -51,7 +51,7 @@ impl JobManager {
 	}
 
 	/// A helper function for transmitting commands to the [JobManagerAgent]
-	fn send_command(&mut self, cmd: JobManagerCommand) -> JobManagerResult<()> {
+	fn send_command(&mut self, cmd: JobControllerCommand) -> JobManagerResult<()> {
 		match self.controller_tx.send(cmd) {
 			Ok(_) => Ok(()),
 			Err(e) => Err(JobManagerError::CommandSendError(e)),
@@ -73,7 +73,7 @@ struct JobManagerAgent {
 	workers: Vec<WorkerManager>,
 
 	/// Recieves messages from the [JobManager] controlling this thread.
-	base_rx: mpsc::UnboundedReceiver<JobManagerCommand>,
+	base_rx: mpsc::UnboundedReceiver<JobControllerCommand>,
 
 	/// Tracks if the main loop has been started
 	is_running: bool,
@@ -85,7 +85,7 @@ impl JobManagerAgent {
 	pub fn start_thread(
 		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
-	) -> mpsc::UnboundedSender<JobManagerCommand> {
+	) -> mpsc::UnboundedSender<JobControllerCommand> {
 		let (base_tx, base_rx) = mpsc::unbounded_channel();
 
 		let controller = Self {
@@ -124,9 +124,9 @@ impl JobManagerAgent {
 			// Recive any available messages from the base
 			while let Ok(cmd) = self.base_rx.try_recv() {
 				match cmd {
-					JobManagerCommand::EnqueueJob(job) => self.jobs.push_back(job),
-					JobManagerCommand::CancelJob(_, _) => todo!(),
-					JobManagerCommand::Shutdown(_) => {
+					JobControllerCommand::EnqueueJob(job) => self.jobs.push_back(job),
+					JobControllerCommand::CancelJob(_, _) => todo!(),
+					JobControllerCommand::Shutdown(_) => {
 						self.do_shutdown();
 						break 'main;
 					},

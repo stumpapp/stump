@@ -19,7 +19,7 @@ export {
 } from './client'
 export * from './context'
 export * from './hooks'
-export { core_event_triggers, invalidateQueries } from './invalidate'
+export { invalidateQueries } from './invalidate'
 export { JobContextProvider, StumpClientContextProvider } from './Provider'
 export * from './queries'
 export * from './stores'

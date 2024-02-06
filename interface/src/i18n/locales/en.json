@@ -385,7 +385,21 @@
 			"helmet": "General server settings",
 			"title": "General settings",
 			"description": "General settings related to your Stump server instance",
-			"sections": {}
+			"sections": {
+				"serverInfo": {
+					"title": "Server information",
+					"description": "Basic details about your Stump server instance",
+					"build": {
+						"label": "Build",
+						"description": "Details about the version and build",
+						"version": {
+							"semver": "Version",
+							"commitHash": "Exact commit",
+							"date": "Build date"
+						}
+					}
+				}
+			}
 		},
 		"server/logs": {
 			"helmet": "Logs",

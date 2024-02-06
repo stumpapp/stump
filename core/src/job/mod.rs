@@ -3,6 +3,7 @@ use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 use prisma_client_rust::chrono::{DateTime, Utc};
 use serde::{de, Deserialize, Serialize};
 
+mod controller;
 pub mod error;
 mod manager;
 mod progress;
@@ -19,6 +20,7 @@ use task::{job_task_handler, JobTaskHandlerOutput};
 use utoipa::ToSchema;
 pub use worker::*;
 
+pub use controller::*;
 pub use manager::*;
 use tokio::spawn;
 use uuid::Uuid;
@@ -134,6 +136,7 @@ impl JobDataExt for () {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct JobRunLog {
 	pub msg: String,
+	pub context: Option<String>,
 	pub level: LogLevel,
 	pub timestamp: DateTime<Utc>,
 }
@@ -143,6 +146,7 @@ impl JobRunLog {
 	pub fn new(msg: String, level: LogLevel) -> Self {
 		Self {
 			msg,
+			context: None,
 			level,
 			timestamp: Utc::now(),
 		}
@@ -152,6 +156,7 @@ impl JobRunLog {
 	pub fn error(msg: String) -> Self {
 		Self {
 			msg,
+			context: None,
 			level: LogLevel::Error,
 			timestamp: Utc::now(),
 		}
@@ -161,8 +166,16 @@ impl JobRunLog {
 	pub fn warn(msg: &str) -> Self {
 		Self {
 			msg: msg.to_string(),
+			context: None,
 			level: LogLevel::Warn,
 			timestamp: Utc::now(),
+		}
+	}
+
+	pub fn with_ctx(self, ctx: String) -> Self {
+		Self {
+			context: Some(ctx),
+			..self
 		}
 	}
 
@@ -171,6 +184,7 @@ impl JobRunLog {
 		(
 			self.msg,
 			vec![
+				log::context::set(self.context),
 				log::level::set(self.level.to_string()),
 				log::timestamp::set(self.timestamp.into()),
 				log::job::connect(job::id::equals(job_id.clone())),
@@ -184,7 +198,7 @@ impl JobRunLog {
 pub struct WorkingState<D, T> {
 	pub data: Option<D>,
 	pub tasks: VecDeque<T>,
-	pub current_task_index: usize,
+	pub completed_tasks: usize,
 	pub logs: Vec<JobRunLog>,
 }
 
@@ -192,7 +206,7 @@ pub struct JobState<J: JobExt> {
 	job: J,
 	data: Option<J::Data>,
 	tasks: VecDeque<J::Task>,
-	current_task_index: usize,
+	completed_tasks: usize,
 	logs: Vec<JobRunLog>,
 }
 
@@ -289,7 +303,7 @@ impl<J: JobExt> Job<J> {
 				job,
 				data: None,
 				tasks: VecDeque::new(),
-				current_task_index: 0,
+				completed_tasks: 0,
 				logs: vec![],
 			}),
 		})
@@ -450,7 +464,7 @@ impl<J: JobExt> Executor for Job<J> {
 			mut job,
 			data,
 			mut tasks,
-			mut current_task_index,
+			mut completed_tasks,
 			mut logs,
 		} = self.state.take().expect("Job state was already taken!");
 
@@ -460,11 +474,11 @@ impl<J: JobExt> Executor for Job<J> {
 		} else if let Some(restore_point) = job.attempt_restore(&ctx).await? {
 			// Replace the state with the restored state
 			tasks = restore_point.tasks;
-			current_task_index = restore_point.current_task_index;
+			completed_tasks = restore_point.completed_tasks;
 			logs = restore_point.logs;
 
 			ctx.report_progress(JobProgress::restored(
-				current_task_index as i32,
+				completed_tasks as i32,
 				tasks.len() as i32,
 			));
 
@@ -474,11 +488,11 @@ impl<J: JobExt> Executor for Job<J> {
 			tracing::debug!("No restore point found, initializing job");
 			let init_result = job.init(&ctx).await?;
 			tasks = init_result.tasks;
-			current_task_index = init_result.current_task_index;
+			completed_tasks = init_result.completed_tasks;
 			logs = init_result.logs;
 
 			ctx.report_progress(JobProgress::init_done(
-				current_task_index as i32,
+				completed_tasks as i32,
 				tasks.len() as i32,
 			));
 
@@ -500,7 +514,7 @@ impl<J: JobExt> Executor for Job<J> {
 		while !tasks.is_empty() {
 			ctx.report_progress(JobProgress::task_position_msg(
 				"Starting task",
-				current_task_index as i32,
+				completed_tasks as i32,
 				tasks.len() as i32,
 			));
 
@@ -543,7 +557,7 @@ impl<J: JobExt> Executor for Job<J> {
 			// completed task. Then increment the task index
 			working_data.update(task_data);
 			logs.extend(task_logs);
-			current_task_index += 1;
+			completed_tasks += 1;
 
 			// Reassign the ctx to the returned values
 			ctx = returned_ctx;
@@ -551,25 +565,33 @@ impl<J: JobExt> Executor for Job<J> {
 			// If there are subtasks, we need to insert them into the tasks queue at the
 			// front, so they are executed next
 			if !subtasks.is_empty() {
-				ctx.report_progress(JobProgress::msg(
-					format!(
-						"{} subtask(s) discovered. Reordering the task queue",
-						subtasks.len()
-					)
-					.as_str(),
-				));
+				let subtask_count = subtasks.len();
 				let remaining_tasks = tasks.split_off(0);
 				let mut new_tasks = VecDeque::from(subtasks);
 				new_tasks.extend(remaining_tasks);
 				tasks = new_tasks;
+				ctx.report_progress(JobProgress::task_position_msg(
+					format!(
+						"{} subtask(s) discovered. Reordering the task queue",
+						subtask_count
+					)
+					.as_str(),
+					completed_tasks as i32,
+					tasks.len() as i32,
+				));
 			}
 		}
 
 		tracing::debug!(
-			?current_task_index,
-			task_count = tasks.len(),
-			"Task loop completed?"
+			?completed_tasks,
+			final_task_count = tasks.len(), // Should be 0!
+			"Task loop completed? Should be 0 tasks remaining 0.o"
 		);
+
+		ctx.report_progress(JobProgress::task_position(
+			completed_tasks as i32,
+			tasks.len() as i32,
+		));
 
 		let logs_count = logs.len();
 		tracing::debug!(?logs_count, "All tasks completed");

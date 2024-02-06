@@ -2,7 +2,7 @@ mod error;
 mod manager;
 pub(crate) mod worker;
 
-pub use manager::{JobManager, JobManagerCommand};
+pub use manager::{JobControllerCommand, JobManager};
 
 use worker::WorkerContext;
 

@@ -25,7 +25,7 @@ pub mod prisma;
 use config::logging::STUMP_SHADOW_TEXT;
 use config::StumpConfig;
 use db::{DBPragma, JournalMode};
-use job::JobScheduler;
+use job::{JobController, JobScheduler};
 use prisma::server_config;
 
 pub use context::Ctx;
@@ -104,8 +104,8 @@ impl StumpCore {
 		self.ctx.clone()
 	}
 
-	pub fn get_job_manager(&self) -> Arc<job::JobManager> {
-		self.ctx.job_manager.clone()
+	pub fn get_job_controller(&self) -> Arc<JobController> {
+		self.ctx.job_controller.clone()
 	}
 
 	/// Returns the shadow text for the core. This is just the fun ascii art that

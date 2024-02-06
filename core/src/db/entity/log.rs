@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{event::CoreEvent, prisma::log};
+use crate::prisma::log;
 
 use super::Cursor;
 
@@ -62,6 +62,8 @@ pub struct Log {
 	pub level: LogLevel,
 	/// The message of the log entry
 	pub message: String,
+	/// Optional context for the log entry
+	pub context: Option<String>,
 	/// The timestamp of the log entry
 	pub timestamp: String,
 	/// The job ID associated with the log entry, if any
@@ -75,6 +77,7 @@ impl From<log::Data> for Log {
 			id: log.id,
 			level: log.level.into(),
 			message: log.message,
+			context: log.context,
 			timestamp: log.timestamp.to_rfc3339(),
 			job_id: log.job_id,
 		}
@@ -84,11 +87,5 @@ impl From<log::Data> for Log {
 impl Cursor for Log {
 	fn cursor(&self) -> String {
 		self.id.to_string()
-	}
-}
-
-impl From<CoreEvent> for Log {
-	fn from(_event: CoreEvent) -> Self {
-		unimplemented!()
 	}
 }

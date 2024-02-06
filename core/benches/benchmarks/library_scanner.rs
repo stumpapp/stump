@@ -224,7 +224,7 @@ async fn setup_test(
 		db: Arc::new(client),
 		config: Arc::new(config),
 		job_id,
-		job_manager_tx: mpsc::unbounded_channel().0,
+		job_controller_tx: mpsc::unbounded_channel().0,
 		core_event_tx: broadcast::channel(1024).0,
 		commands_rx: async_channel::unbounded().1,
 	};

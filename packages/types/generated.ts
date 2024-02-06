@@ -6,7 +6,7 @@
 /**
  * An event that is emitted by the core and consumed by a client
  */
-export type CoreEvent = ({ __typename: "JobUpdate" } & JobUpdate)
+export type CoreEvent = ({ __typename: "JobUpdate" } & JobUpdate) | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: BigInt; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: BigInt; series_id: string }
 
 export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
 
@@ -15,7 +15,7 @@ export type AccessRole = "Reader" | "Writer" | "CoCreator"
 /**
  * A model representing a persisted log entry. These are different than traces/system logs.
  */
-export type Log = { id: number; level: LogLevel; message: string; timestamp: string; job_id?: string | null }
+export type Log = { id: number; level: LogLevel; message: string; context: string | null; timestamp: string; job_id?: string | null }
 
 /**
  * Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
@@ -29,14 +29,14 @@ export type PersistedJob = { id: string; name: string; description: string | nul
 
 export type CoreJobOutput = LibraryScanData | SeriesScanData | ThumbnailGenerationData | unknown
 
-export type JobUpdate = ({ status: JobStatus | null; message: string | null; current_task_index: number | null; task_queue_size: number | null; current_subtask_index: number | null; subtask_queue_size: number | null }) & { id: string }
+export type JobUpdate = ({ status: JobStatus | null; message: string | null; completed_tasks: number | null; remaining_tasks: number | null; completed_subtasks: number | null; remaining_subtasks: number | null }) & { id: string }
 
 /**
  * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
  * where the client will ignore any fields that are not present. This is done so all internal ops
  * can be done without needing to know the full state of the job.
  */
-export type JobProgress = { status: JobStatus | null; message: string | null; current_task_index: number | null; task_queue_size: number | null; current_subtask_index: number | null; subtask_queue_size: number | null }
+export type JobProgress = { status: JobStatus | null; message: string | null; completed_tasks: number | null; remaining_tasks: number | null; completed_subtasks: number | null; remaining_subtasks: number | null }
 
 /**
  * The data that is collected and updated during the execution of a library scan job

@@ -4,7 +4,7 @@ use axum::{error_handling::HandleErrorLayer, extract::connect_info::Connected, R
 use hyper::server::conn::AddrStream;
 use stump_core::{
 	config::{bootstrap_config_dir, logging::init_tracing},
-	job::JobManagerCommand,
+	job::JobControllerCommand,
 	StumpCore,
 };
 use tokio::sync::oneshot;
@@ -72,7 +72,7 @@ pub async fn run_http_server(config: StumpConfig) -> ServerResult<()> {
 
 		let _ = core
 			.get_context()
-			.send_job_manager_command(JobManagerCommand::Shutdown(shutdown_tx));
+			.send_job_controller_command(JobControllerCommand::Shutdown(shutdown_tx));
 
 		shutdown_rx
 			.await

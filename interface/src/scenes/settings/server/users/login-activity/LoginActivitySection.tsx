@@ -8,9 +8,10 @@ export default function LoginActivitySection() {
 	return (
 		<div className="flex flex-col gap-y-4">
 			<div>
-				<Heading size="xs">Authentication history</Heading>
-				<Text size="sm" variant="muted">
-					All login attempts are stored and can be cleared at any time
+				<Heading size="sm">Authentication history</Heading>
+				<Text size="sm" variant="muted" className="mt-1">
+					All login attempts are logged and stored for security purposes. You can clear the logs at
+					any time
 				</Text>
 			</div>
 

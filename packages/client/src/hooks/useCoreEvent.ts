@@ -1,67 +1,61 @@
-import type { CoreEvent, JobUpdate } from '@stump/types'
+import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from '@stump/api'
+import type { CoreEvent } from '@stump/types'
 
-import { useJobContext } from '../context'
-import { core_event_triggers, invalidateQueries } from '../invalidate'
+import { invalidateQueries } from '../invalidate'
+import { useJobStore } from '../stores/job'
 import { useStumpWs } from './useStumpWs'
 
-interface UseCoreEventHandlerParams {
-	onJobComplete?: (jobId: string) => void
-	onJobFailed?: (err: { job_id: string; message: string }) => void
-}
+export function useCoreEventHandler() {
+	const { upsertJob, removeJob } = useJobStore((state) => ({
+		removeJob: state.removeJob,
+		upsertJob: state.upsertJob,
+	}))
 
-// TODO: I hate this pattern here and it would be a lovely time to refactor it!!!
-
-export function useCoreEventHandler({
-	onJobComplete,
-	onJobFailed,
-}: UseCoreEventHandlerParams = {}) {
-	const { updateJob, removeJob } = useJobContext()
+	const handleInvalidate = async (keys: string[]) => {
+		try {
+			await invalidateQueries({ keys })
+		} catch (e) {
+			console.error('Failed to invalidate queries', e)
+		}
+	}
 
 	async function handleCoreEvent(event: CoreEvent) {
 		const { __typename } = event
 
 		switch (__typename) {
 			case 'JobUpdate':
-				if (event.status !== 'RUNNING') {
-					// onJobComplete?.(event.id)
+				if (!!event.status && event.status !== 'RUNNING') {
+					await new Promise((resolve) => setTimeout(resolve, 1000))
 					removeJob(event.id)
+					await handleInvalidate([
+						libraryQueryKeys.getLibraryById,
+						libraryQueryKeys.getLibrariesStats,
+						jobQueryKeys.getJobs,
+						seriesQueryKeys.getSeriesById,
+						seriesQueryKeys.getRecentlyAddedSeries,
+						mediaQueryKeys.getRecentlyAddedMedia,
+						mediaQueryKeys.getInProgressMedia,
+					])
 				} else {
-					updateJob(event)
+					upsertJob(event)
 				}
 				break
+			case 'DiscoveredMissingLibrary':
+				await handleInvalidate(['library', 'series', 'media'])
+				break
+			case 'CreatedManySeries':
+				await handleInvalidate(['library', 'series', 'media'])
+				break
+			case 'CreatedOrUpdatedManyMedia':
+				await handleInvalidate([
+					'series',
+					'media',
+					libraryQueryKeys.getLibrariesStats,
+					libraryQueryKeys.getLibraryById,
+				])
+				break
 		}
-
-		// switch (__typename) {
-		// 	case 'JobStarted':
-		// 		addJob(data)
-		// 		break
-		// 	case 'JobProgress':
-		// 		updateJob(data)
-		// 		break
-		// 	case 'JobComplete':
-		// 		removeJob(data)
-		// 		await new Promise((resolve) => setTimeout(resolve, 300))
-		// 		await invalidateQueries({ keys: core_event_triggers[key].keys })
-		// 		onJobComplete?.(data)
-		// 		break
-		// 	case 'JobFailed':
-		// 		onJobFailed?.(data)
-		// 		removeJob(data.job_id)
-		// 		await invalidateQueries({ keys: core_event_triggers[key].keys })
-		// 		break
-		// 	default:
-		// 		// eslint-disable-next-line no-case-declarations
-		// 		const result = core_event_triggers[key]
-		// 		if (result?.keys) {
-		// 			await new Promise((resolve) => setTimeout(resolve, 300))
-		// 			await invalidateQueries({ exact: false, keys: result.keys })
-		// 		} else {
-		// 			console.warn(`Unhandled core event: ${key}`, event)
-		// 		}
-		// 		break
-		// }
 	}
 
-	// useStumpSse({ onEvent: handleCoreEvent })
 	useStumpWs({ onEvent: handleCoreEvent })
 }

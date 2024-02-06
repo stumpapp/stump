@@ -7,9 +7,9 @@ use tokio::sync::{
 
 use crate::{
 	config::StumpConfig,
-	db::{self, entity::Log},
+	db,
 	event::CoreEvent,
-	job::{Executor, JobManager, JobManagerCommand},
+	job::{Executor, JobController, JobControllerCommand},
 	prisma,
 };
 
@@ -22,7 +22,7 @@ type EventChannel = (Sender<CoreEvent>, Receiver<CoreEvent>);
 pub struct Ctx {
 	pub config: Arc<StumpConfig>,
 	pub db: Arc<prisma::PrismaClient>,
-	pub job_manager: Arc<JobManager>,
+	pub job_controller: Arc<JobController>,
 	pub event_channel: Arc<EventChannel>,
 }
 
@@ -47,13 +47,13 @@ impl Ctx {
 		let db = Arc::new(db::create_client(&config).await);
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
-		let job_manager =
-			JobManager::new(db.clone(), config.clone(), event_channel.0.clone());
+		let job_controller =
+			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
 
 		Ctx {
 			config,
 			db,
-			job_manager,
+			job_controller,
 			event_channel,
 		}
 	}
@@ -68,13 +68,13 @@ impl Ctx {
 		let event_channel = Arc::new(channel::<CoreEvent>(1024));
 
 		// Create job manager
-		let job_manager =
-			JobManager::new(db.clone(), config.clone(), event_channel.0.clone());
+		let job_controller =
+			JobController::new(db.clone(), config.clone(), event_channel.0.clone());
 
 		Ctx {
 			config,
 			db,
-			job_manager,
+			job_controller,
 			event_channel,
 		}
 	}
@@ -153,45 +153,23 @@ impl Ctx {
 		let _ = self.event_channel.0.send(event);
 	}
 
-	/// Emits a client event and persists a log based on the failure.
-	pub async fn handle_failure_event(&self, event: CoreEvent) {
-		use prisma::log;
-
-		self.emit_event(event.clone());
-
-		let log = Log::from(event);
-
-		// FIXME: error handling here...
-		let _ = self
-			.db
-			.log()
-			.create(
-				log.message,
-				vec![
-					log::job_id::set(log.job_id),
-					log::level::set(log.level.to_string()),
-				],
-			)
-			.exec()
-			.await;
+	/// Sends a [JobControllerCommand] to the job controller
+	pub fn send_job_controller_command(
+		&self,
+		command: JobControllerCommand,
+	) -> Result<(), SendError<JobControllerCommand>> {
+		self.job_controller.push_command(command)
 	}
 
 	/// Sends an EnqueueJob event to the job manager.
 	pub fn enqueue_job(
 		&self,
 		job: Box<dyn Executor>,
-	) -> Result<(), SendError<JobManagerCommand>> {
-		self.job_manager
-			.push_event(JobManagerCommand::EnqueueJob(job))
+	) -> Result<(), SendError<JobControllerCommand>> {
+		self.send_job_controller_command(JobControllerCommand::EnqueueJob(job))
 	}
 
-	pub fn send_job_manager_command(
-		&self,
-		command: JobManagerCommand,
-	) -> Result<(), SendError<JobManagerCommand>> {
-		self.job_manager.push_event(command)
-	}
-
+	/// Send a [CoreEvent] through the event channel to any clients listening
 	pub fn send_core_event(&self, event: CoreEvent) {
 		if let Err(error) = self.event_channel.0.send(event) {
 			tracing::error!(error = ?error, "Failed to send core event");

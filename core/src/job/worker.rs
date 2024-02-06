@@ -15,13 +15,24 @@ use crate::{
 	prisma::{job, PrismaClient},
 };
 
-use super::{Executor, JobManagerAgent, JobManagerCommand, JobProgress, JobUpdate};
+use super::{Executor, JobControllerCommand, JobManager, JobProgress, JobUpdate};
+
+// pub enum WorkerState {
+// 	Running,
+// 	Paused,
+// }
+
+// pub enum WorkerEvent {
+// 	StateChange(WorkerState),
+// 	CoreEvent(CoreEvent),
+// }
 
 /// An enum representing the various types of messages that a worker can send, excluding
 /// internal commands.
 pub enum WorkerSend {
-	ManagerCommand(JobManagerCommand),
+	ManagerCommand(JobControllerCommand),
 	Progress(JobProgress),
+	Event(CoreEvent),
 }
 
 /// A trait for extending the `WorkerSend` enum with a method to convert it into a `WorkerSend`
@@ -51,7 +62,7 @@ pub struct WorkerCtx {
 	/// A receiver for the worker commands
 	pub commands_rx: async_channel::Receiver<WorkerCommand>,
 	/// A sender for the worker to send commands to the job manager
-	pub job_manager_tx: mpsc::UnboundedSender<JobManagerCommand>,
+	pub job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 }
 
 impl WorkerCtx {
@@ -67,13 +78,24 @@ impl WorkerCtx {
 	}
 
 	/// Send a command to the [super::JobManager]
-	pub fn send_manager_command(&self, command: JobManagerCommand) {
-		self.job_manager_tx.send(command).map_or_else(
+	pub fn send_manager_command(&self, command: JobControllerCommand) {
+		self.job_controller_tx.send(command).map_or_else(
 			|error| {
 				tracing::error!(?error, "Failed to send command to job manager");
 			},
 			|_| {
 				tracing::trace!("Command sent to job manager");
+			},
+		);
+	}
+
+	pub fn send_core_event(&self, event: CoreEvent) {
+		self.core_event_tx.send(event).map_or_else(
+			|error| {
+				tracing::error!(?error, "Failed to send event");
+			},
+			|_| {
+				tracing::trace!("Event sent");
 			},
 		);
 	}
@@ -90,6 +112,9 @@ impl WorkerCtx {
 				},
 				WorkerSend::Progress(progress) => {
 					self.report_progress(progress.clone());
+				},
+				WorkerSend::Event(ev) => {
+					self.send_core_event(ev);
 				},
 			}
 		}
@@ -112,7 +137,7 @@ impl Worker {
 		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
-		job_manager_tx: mpsc::UnboundedSender<JobManagerCommand>,
+		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 	) -> Result<(Self, WorkerCtx), JobError> {
 		let (commands_tx, commands_rx) = async_channel::unbounded::<WorkerCommand>();
 
@@ -122,7 +147,7 @@ impl Worker {
 			config,
 			core_event_tx,
 			commands_rx,
-			job_manager_tx,
+			job_controller_tx,
 		};
 
 		Ok((Self { commands_tx }, worker_ctx))
@@ -135,16 +160,21 @@ impl Worker {
 	/// not be created if it is not intended to be running.
 	pub async fn create_and_spawn(
 		job: Box<dyn Executor>,
-		agent: Arc<JobManagerAgent>,
+		agent: Arc<JobManager>,
 		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
-		job_manager_tx: mpsc::UnboundedSender<JobManagerCommand>,
+		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 	) -> Result<Arc<Self>, JobError> {
 		let job_id = job.id().to_string();
-		let (worker, worker_ctx) =
-			Worker::new(job_id.as_str(), db, config, core_event_tx, job_manager_tx)
-				.await?;
+		let (worker, worker_ctx) = Worker::new(
+			job_id.as_str(),
+			db,
+			config,
+			core_event_tx,
+			job_controller_tx,
+		)
+		.await?;
 		let worker = worker.arced();
 
 		handle_job_start(&worker_ctx.db, job_id.clone()).await?;
@@ -192,19 +222,19 @@ impl Worker {
 	async fn work(
 		worker_ctx: WorkerCtx,
 		mut job: Box<dyn Executor>,
-		agent: Arc<JobManagerAgent>,
+		manager: Arc<JobManager>,
 	) {
 		let job_id = job.id().to_string();
 		let finalizer_ctx = worker_ctx.clone();
-		let commands_rx = worker_ctx.commands_rx.clone();
+		// let commands_rx = worker_ctx.commands_rx.clone();
 
-		let commands_rx_fut = commands_rx.recv();
+		// let commands_rx_fut = commands_rx.recv();
 		let job_handle = spawn(async move {
 			let result = job.run(worker_ctx).await;
 			(job, result)
 		});
 
-		tokio::pin!(commands_rx_fut);
+		// tokio::pin!(commands_rx_fut);
 		tokio::pin!(job_handle);
 
 		let start = Instant::now();
@@ -222,12 +252,19 @@ impl Worker {
 							match result {
 								Ok(output) => {
 									tracing::info!("Job completed successfully!");
+									finalizer_ctx.report_progress(JobProgress::finished());
 									let _ = returned_job
-										.persist_state(finalizer_ctx, output, elapsed)
-										.await;
+											.persist_state(finalizer_ctx, output, elapsed)
+											.await;
+
 								},
 								Err(error) => {
 									tracing::error!(?error, "Job failed with critical error");
+									finalizer_ctx.report_progress(JobProgress::status_msg(
+										JobStatus::Failed,
+										&format!("Job failed: {}", error),
+									));
+
 									let _ = returned_job
 										.persist_failure(
 											finalizer_ctx,
@@ -235,43 +272,70 @@ impl Worker {
 											elapsed,
 										)
 										.await;
+
+									if let JobError::Cancelled(return_tx) = error {
+										return_tx.send(()).map_or_else(
+											|error| {
+												tracing::error!(
+													?error,
+													"Failed to send cancel confirmation"
+												);
+											},
+											|_| {
+												tracing::trace!("Cancel confirmation sent");
+											},
+										);
+									}
 								},
 							}
 						},
 						Err(join_error) => {
 							tracing::error!(?join_error, ?elapsed, "Error while joining job worker thread");
+							finalizer_ctx.report_progress(JobProgress::status_msg(
+								JobStatus::Failed,
+								&format!("Job failed: {}", join_error),
+							));
 							let _ = handle_do_cancel(job_id.clone(), &finalizer_ctx.db, elapsed).await;
 						}
 					}
-					return agent.complete(job_id).await;
+					return manager.complete(job_id).await;
 				},
-				Ok(cmd) = &mut commands_rx_fut => {
-					tracing::debug!(?cmd, "Received command");
-					match cmd {
-						WorkerCommand::Cancel(return_sender) => {
-							let elapsed = start.elapsed();
-							job_handle.abort();
-							if job_handle.await.is_ok() {
-								tracing::warn!(
-									"Job worker thread ended successfully after a cancel?"
-								);
-							};
-							let _ = handle_do_cancel(job_id.clone(), &finalizer_ctx.db, elapsed).await;
-							return_sender.send(()).map_or_else(
-								|error| {
-									tracing::error!(
-										?error,
-										"Failed to send cancel confirmation"
-									);
-								},
-								|_| {
-									tracing::trace!("Cancel confirmation sent");
-								},
-							);
-							return agent.complete(job_id).await;
-						},
-					}
-				},
+
+				// TODO: Track the worker state and handle core events instead of commands,
+				// Each task should listen for commands and handle them accordingly...
+				// If a task would be started, it should understand the state and wait if paused
+
+				// Ok(cmd) = &mut commands_rx_fut => {
+				// 	tracing::debug!(?cmd, "Received command");
+				// 	match cmd {
+				// 		WorkerCommand::Cancel(return_sender) => {
+				// 			let elapsed = start.elapsed();
+				// 			job_handle.abort();
+				// 			if job_handle.await.is_ok() {
+				// 				tracing::warn!(
+				// 					"Job worker thread ended successfully after a cancel?"
+				// 				);
+				// 			};
+				// 			finalizer_ctx.report_progress(JobProgress::status_msg(
+				// 				JobStatus::Cancelled,
+				// 				"Job cancelled",
+				// 			));
+				// 			let _ = handle_do_cancel(job_id.clone(), &finalizer_ctx.db, elapsed).await;
+				// 			return_sender.send(()).map_or_else(
+				// 				|error| {
+				// 					tracing::error!(
+				// 						?error,
+				// 						"Failed to send cancel confirmation"
+				// 					);
+				// 				},
+				// 				|_| {
+				// 					tracing::trace!("Cancel confirmation sent");
+				// 				},
+				// 			);
+				// 			return manager.complete(job_id).await;
+				// 		},
+				// 	}
+				// },
 			}
 		}
 	}

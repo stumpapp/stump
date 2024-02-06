@@ -6,6 +6,8 @@ import { SceneContainer } from '@/components/container'
 import LibrariesStats from '@/components/library/LibrariesStats'
 import { useLocaleContext } from '@/i18n'
 
+import ServerInfoSection from './ServerInfoSection'
+
 export default function GeneralServerSettingsScene() {
 	const { t } = useLocaleContext()
 
@@ -16,9 +18,8 @@ export default function GeneralServerSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<div className="flex flex-col gap-4">
-					<LibrariesStats />
-				</div>
+				<LibrariesStats />
+				<ServerInfoSection />
 			</ContentContainer>
 		</SceneContainer>
 	)

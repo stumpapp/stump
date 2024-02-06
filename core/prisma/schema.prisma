@@ -652,6 +652,7 @@ model Log {
 
   level     String   @default("INFO") //  "ERROR", "WARN", "INFO", "DEBUG"
   message   String
+  context   String?
   timestamp DateTime @default(now())
 
   job    Job?    @relation(fields: [job_id], references: [id], onDelete: Cascade)

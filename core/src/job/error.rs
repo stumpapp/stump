@@ -1,3 +1,5 @@
+use tokio::sync::oneshot;
+
 use crate::CoreError;
 
 #[derive(Debug, thiserror::Error)]
@@ -9,7 +11,7 @@ pub enum JobError {
 	#[error("Save state failed to be serialized: {0}")]
 	StateSaveFailed(String),
 	#[error("Job was cancelled")]
-	Cancelled,
+	Cancelled(oneshot::Sender<()>),
 	#[error("A task experienced a critical error while executing: {0}")]
 	TaskFailed(String),
 	#[error("A query error occurred: {0}")]

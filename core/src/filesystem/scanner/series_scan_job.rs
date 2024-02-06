@@ -15,7 +15,7 @@ use crate::{
 		MediaBuilder,
 	},
 	job::{
-		error::JobError, Job, JobDataExt, JobExt, JobManagerCommand, JobProgress,
+		error::JobError, Job, JobControllerCommand, JobDataExt, JobExt, JobProgress,
 		JobRunLog, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
@@ -154,7 +154,7 @@ impl JobExt for SeriesScanJob {
 		Ok(WorkingState {
 			data: Some(data),
 			tasks,
-			current_task_index: 0,
+			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
@@ -172,7 +172,7 @@ impl JobExt for SeriesScanJob {
 				tracing::debug!("Enqueuing thumbnail generation job");
 				ctx.send_batch(vec![
 					JobProgress::msg("Enqueuing thumbnail generation job").into_send(),
-					JobManagerCommand::EnqueueJob(Job::new(ThumbnailGenerationJob {
+					JobControllerCommand::EnqueueJob(Job::new(ThumbnailGenerationJob {
 						options,
 						params: ThumbnailGenerationJobParams::single_series(
 							self.id.clone(),
@@ -180,7 +180,7 @@ impl JobExt for SeriesScanJob {
 						),
 					}))
 					.into_send(),
-				])
+				]);
 			},
 			_ => {
 				tracing::debug!("No cleanup required for series scan job");

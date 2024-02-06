@@ -1,12 +1,7 @@
 import { useLoginActivityQuery } from '@stump/client'
 import { Badge, Card, Text } from '@stump/components'
 import { LoginActivity } from '@stump/types'
-import {
-	createColumnHelper,
-	getCoreRowModel,
-	getPaginationRowModel,
-	PaginationState,
-} from '@tanstack/react-table'
+import { createColumnHelper, getPaginationRowModel, PaginationState } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
 

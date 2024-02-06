@@ -3,8 +3,7 @@ import { devtools, persist } from 'zustand/middleware'
 
 import { StoreBase } from '.'
 
-// TODO: remove this!! Just use app props context
-
+// TODO: fix this store to use the new `createWithEqualityFn` method and optimize
 interface StumpStore extends StoreBase<StumpStore> {
 	baseUrl?: string
 	connected: boolean

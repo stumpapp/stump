@@ -75,16 +75,7 @@ pub(crate) async fn job_task_handler<J: JobExt>(
 						tracing::info!("Cancel signal received! Aborting task");
 						task_handle.abort();
 						let _ = task_handle.await;
-						return_sender.send(()).map_or_else(
-							|error| {
-								tracing::error!(
-									?error,
-									"Failed to send cancel confirmation"
-								);
-							},
-							|_| tracing::trace!("Cancel confirmation sent"),
-						);
-						return Err(JobError::Cancelled);
+						return Err(JobError::Cancelled(return_sender));
 					},
 				}
 			},

@@ -155,7 +155,7 @@ impl JobExt for ThumbnailGenerationJob {
 		Ok(WorkingState {
 			data: Some(Self::Data::default()),
 			tasks,
-			current_task_index: 0,
+			completed_tasks: 0,
 			logs: vec![],
 		})
 	}

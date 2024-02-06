@@ -1,4 +1,4 @@
-import { useJobContext, useJobsQuery } from '@stump/client'
+import { useJobsQuery, useJobStore } from '@stump/client'
 import { Heading, Text } from '@stump/components'
 import { PaginationState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
@@ -23,7 +23,7 @@ export default function JobSettingsScene() {
 
 	const { t } = useLocaleContext()
 
-	const { activeJobs } = useJobContext() ?? {}
+	const storeJobs = useJobStore((state) => state.jobs)
 
 	const {
 		jobs: dbJobs,
@@ -44,17 +44,15 @@ export default function JobSettingsScene() {
 		// active jobs has the task progress information, so we need to merge that
 		// with the jobs from the database.
 		return (dbJobs ?? []).map((job) => {
-			const activeJob = activeJobs?.[job.id]
+			const activeJob = storeJobs?.[job.id]
 			if (!activeJob) return job
 
 			return {
 				...job,
-				completed_task_count: Number(activeJob.current_task),
 				status: activeJob.status ?? job.status,
-				task_count: Number(activeJob.task_count),
 			}
 		})
-	}, [dbJobs, activeJobs])
+	}, [dbJobs, storeJobs])
 
 	return (
 		<JobSettingsContext.Provider

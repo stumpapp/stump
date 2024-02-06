@@ -22,15 +22,15 @@ pub struct JobProgress {
 	pub message: Option<String>,
 
 	/// The current task being worked on
-	pub current_task_index: Option<i32>,
+	pub completed_tasks: Option<i32>,
 	/// The number of tasks for the job. This number can change as
 	/// subtasks get added/converted to tasks
-	pub task_queue_size: Option<i32>,
+	pub remaining_tasks: Option<i32>,
 
 	/// The current subtask being worked on
-	pub current_subtask_index: Option<i32>,
+	pub completed_subtasks: Option<i32>,
 	/// The number of subtasks that exist in the current task
-	pub subtask_queue_size: Option<i32>,
+	pub remaining_subtasks: Option<i32>,
 }
 
 impl JobProgress {
@@ -59,11 +59,16 @@ impl JobProgress {
 		}
 	}
 
+	/// Constructs a new JobProgress with the status set to `JobStatus::Completed` and the message set to "Job finished"
+	pub fn finished() -> Self {
+		Self::status_msg(JobStatus::Completed, "Job finished")
+	}
+
 	/// Constructs a new JobProgress with the given queue position and size
 	pub fn task_position(index: i32, size: i32) -> Self {
 		Self {
-			current_task_index: Some(index),
-			task_queue_size: Some(size),
+			completed_tasks: Some(index),
+			remaining_tasks: Some(size),
 			..Default::default()
 		}
 	}
@@ -85,8 +90,8 @@ impl JobProgress {
 
 	pub fn subtask_position(index: i32, size: i32) -> Self {
 		Self {
-			current_subtask_index: Some(index),
-			subtask_queue_size: Some(size),
+			completed_subtasks: Some(index),
+			remaining_subtasks: Some(size),
 			..Default::default()
 		}
 	}

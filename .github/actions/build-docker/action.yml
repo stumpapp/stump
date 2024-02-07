@@ -80,6 +80,7 @@ runs:
         push: ${{ inputs.push }}
         tags: ${{ env.TAGS }}
 
+    # TODO: detatch this from the action, make it separate as to notify on entire workflow success
     - name: Discord notification
       if: ${{ success() && inputs.push == 'true' }}
       env:

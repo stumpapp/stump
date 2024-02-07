@@ -1,0 +1,95 @@
+name: 'Release CI'
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  build-docker:
+    name: Build docker image
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build and push docker image
+        uses: ./.github/actions/build-docker
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+          tags: ${{ github.ref }}
+          load: false
+          push: true
+          platforms: 'linux/arm64/v8,linux/amd64'
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
+
+  build-web-app:
+    name: Build web app
+    runs-on: [self-hosted]
+    if: false # TODO: Enable this once 0.1.0 is ready
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build the app
+        uses: ./.github/actions/build-web
+
+      - name: Upload the build
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: webapp
+          upload-path: apps/web/dist
+
+  build-server:
+    strategy:
+      fail-fast: true
+      matrix:
+        platform: [macos, windows]
+    name: Build server app
+    needs: build-web
+    runs-on: ${{ matrix.platform }}
+    if: false # TODO: Enable this once 0.1.0 is ready
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build the server
+        uses: ./.github/actions/build-server
+        with:
+          platform: ${{ matrix.platform }}
+
+      - name: Upload the server binary
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: stump_server-${{ matrix.platform }}
+          upload-path: target/release/stump_server
+
+  # TODO: Investigate if I can just merge this with the above
+  build-linux-server:
+    name: Build server app (self-hosted runner)
+    needs: build-web
+    runs-on: [self-hosted]
+    if: false # TODO: Enable this once 0.1.0 is ready
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build the server
+        uses: ./.github/actions/build-server
+        with:
+          platform: 'linux'
+
+      - name: Upload the server binary
+        uses: ./.github/actions/upload-artifact
+        with:
+          upload-name: stump_server-linux
+          upload-path: target/release/stump_server

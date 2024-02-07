@@ -11,8 +11,8 @@ use crate::{
 		PathUtils,
 	},
 	job::{
-		error::JobError, Job, JobDataExt, JobExt, JobRunLog, JobTaskOutput, WorkerCtx,
-		WorkingState,
+		error::JobError, Job, JobDataExt, JobExecuteLog, JobExt, JobTaskOutput,
+		WorkerCtx, WorkingState,
 	},
 	prisma::{media, series},
 };
@@ -202,7 +202,7 @@ impl JobExt for ThumbnailGenerationJob {
 					remove_thumbnails(&media_ids_to_remove, thumbnail_dir).map_or_else(
 						|error| {
 							tracing::error!(error = ?error, "Failed to remove thumbnails");
-							logs.push(JobRunLog::error(format!(
+							logs.push(JobExecuteLog::error(format!(
 								"Failed to remove thumbnails: {:?}",
 								error.to_string()
 							)));
@@ -232,7 +232,7 @@ impl JobExt for ThumbnailGenerationJob {
 				.map_or_else(
 					|error| {
 						tracing::error!(error = ?error, "Failed to update missing series");
-						logs.push(JobRunLog::error(format!(
+						logs.push(JobExecuteLog::error(format!(
 							"Failed to generate thumbnail batch: {:?}",
 							error.to_string()
 						)));

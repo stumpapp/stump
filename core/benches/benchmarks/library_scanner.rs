@@ -301,6 +301,6 @@ async fn scan_new_library(test_ctx: TestCtx) {
 		worker_ctx,
 	} = test_ctx;
 
-	let result = job.run(worker_ctx).await;
+	let result = job.execute(worker_ctx).await;
 	println!("Job result: {:?}", result);
 }

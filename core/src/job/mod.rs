@@ -134,15 +134,15 @@ impl JobDataExt for () {
 
 /// A log that will be persisted from a job's execution
 #[derive(Debug, Deserialize, Serialize)]
-pub struct JobRunLog {
+pub struct JobExecuteLog {
 	pub msg: String,
 	pub context: Option<String>,
 	pub level: LogLevel,
 	pub timestamp: DateTime<Utc>,
 }
 
-impl JobRunLog {
-	/// Construct a [JobRunLog] with the given msg and level
+impl JobExecuteLog {
+	/// Construct a [JobExecuteLog] with the given msg and level
 	pub fn new(msg: String, level: LogLevel) -> Self {
 		Self {
 			msg,
@@ -152,7 +152,7 @@ impl JobRunLog {
 		}
 	}
 
-	/// Construct a [JobRunLog] with the given msg and [LogLevel::Error]
+	/// Construct a [JobExecuteLog] with the given msg and [LogLevel::Error]
 	pub fn error(msg: String) -> Self {
 		Self {
 			msg,
@@ -162,7 +162,7 @@ impl JobRunLog {
 		}
 	}
 
-	/// Construct a [JobRunLog] with the given msg and [LogLevel::Warn]
+	/// Construct a [JobExecuteLog] with the given msg and [LogLevel::Warn]
 	pub fn warn(msg: &str) -> Self {
 		Self {
 			msg: msg.to_string(),
@@ -199,7 +199,7 @@ pub struct WorkingState<D, T> {
 	pub data: Option<D>,
 	pub tasks: VecDeque<T>,
 	pub completed_tasks: usize,
-	pub logs: Vec<JobRunLog>,
+	pub logs: Vec<JobExecuteLog>,
 }
 
 pub struct JobState<J: JobExt> {
@@ -207,7 +207,7 @@ pub struct JobState<J: JobExt> {
 	data: Option<J::Data>,
 	tasks: VecDeque<J::Task>,
 	completed_tasks: usize,
-	logs: Vec<JobRunLog>,
+	logs: Vec<JobExecuteLog>,
 }
 
 /// A trait that defines the behavior and data types of a job. Jobs are responsible for
@@ -313,7 +313,7 @@ impl<J: JobExt> Job<J> {
 #[derive(Debug)]
 pub struct ExecutorOutput {
 	pub data: Option<serde_json::Value>,
-	pub logs: Vec<JobRunLog>,
+	pub logs: Vec<JobExecuteLog>,
 }
 
 /// A trait that defines the behavior of a job executor. Executors are responsible for the main
@@ -432,7 +432,7 @@ pub trait Executor: Send + Sync {
 		Ok(())
 	}
 	/// The main run loop of the job. This is where tasks are executed and state is managed.
-	async fn run(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError>;
+	async fn execute(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError>;
 }
 
 #[async_trait::async_trait]
@@ -449,7 +449,7 @@ impl<J: JobExt> Executor for Job<J> {
 		self.state.as_ref().and_then(|s| s.job.description())
 	}
 
-	async fn run(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError> {
+	async fn execute(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError> {
 		ctx.report_progress(JobProgress::status_msg(
 			JobStatus::Running,
 			"Initializing job",
@@ -556,7 +556,7 @@ impl<J: JobExt> Executor for Job<J> {
 				Ok(r) => r,
 				Err(e) => {
 					tracing::error!(?e, "Task handler failed");
-					logs.push(JobRunLog::error(format!(
+					logs.push(JobExecuteLog::error(format!(
 						"Critical task error: {:?}",
 						e.to_string()
 					)));
@@ -615,7 +615,7 @@ impl<J: JobExt> Executor for Job<J> {
 		let logs_count = logs.len();
 		tracing::debug!(?logs_count, "All tasks completed");
 		if let Err(err) = job.cleanup(&ctx, &working_data).await {
-			logs.push(JobRunLog::error(format!(
+			logs.push(JobExecuteLog::error(format!(
 				"Cleanup failed: {:?}",
 				err.to_string()
 			)));

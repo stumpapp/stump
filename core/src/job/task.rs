@@ -4,13 +4,13 @@ use async_channel::Receiver;
 use serde::Serialize;
 use tokio::task::JoinHandle;
 
-use super::{JobError, JobExt, JobRunLog, WorkerCommand, WorkerCtx};
+use super::{JobError, JobExecuteLog, JobExt, WorkerCommand, WorkerCtx};
 
 #[derive(Serialize, Debug)]
 pub struct JobTaskOutput<J: JobExt> {
 	pub data: J::Data,
 	pub subtasks: Vec<J::Task>,
-	pub logs: Vec<JobRunLog>,
+	pub logs: Vec<JobExecuteLog>,
 }
 
 pub struct JobTaskHandlerOutput<J: JobExt> {

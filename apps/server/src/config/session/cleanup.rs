@@ -4,8 +4,8 @@ use prisma_client_rust::chrono::Utc;
 use serde::{Deserialize, Serialize};
 use stump_core::{
 	job::{
-		error::JobError, Job, JobDataExt, JobExt, JobRunLog, JobTaskOutput, WorkerCtx,
-		WorkingState,
+		error::JobError, Job, JobDataExt, JobExecuteLog, JobExt, JobTaskOutput,
+		WorkerCtx, WorkingState,
 	},
 	prisma::session,
 };
@@ -55,7 +55,7 @@ impl JobExt for SessionCleanupJob {
 			.await
 			.map_or_else(
 				|e| {
-					logs.push(JobRunLog::error(format!(
+					logs.push(JobExecuteLog::error(format!(
 						"Failed to delete expired sessions: {:?}",
 						e.to_string()
 					)));

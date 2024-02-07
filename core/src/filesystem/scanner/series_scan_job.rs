@@ -15,8 +15,8 @@ use crate::{
 		MediaBuilder,
 	},
 	job::{
-		error::JobError, Job, JobControllerCommand, JobDataExt, JobExt, JobProgress,
-		JobRunLog, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState,
+		error::JobError, Job, JobControllerCommand, JobDataExt, JobExecuteLog, JobExt,
+		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
@@ -295,7 +295,7 @@ async fn handle_missing_media(
 	series_id: &str,
 	media_paths: Vec<PathBuf>,
 	mut data: SeriesScanData,
-	mut logs: Vec<JobRunLog>,
+	mut logs: Vec<JobExecuteLog>,
 ) -> Result<JobTaskOutput<SeriesScanJob>, JobError> {
 	if media_paths.is_empty() {
 		tracing::debug!("No missing media to handle");
@@ -325,7 +325,7 @@ async fn handle_missing_media(
 		.map_or_else(
 			|error| {
 				tracing::error!(error = ?error, "Failed to update missing media");
-				logs.push(JobRunLog::error(format!(
+				logs.push(JobExecuteLog::error(format!(
 					"Failed to update missing media: {:?}",
 					error.to_string()
 				)));
@@ -356,7 +356,7 @@ async fn handle_create_series_media(
 	series_ctx: SeriesCtx,
 	ctx: &WorkerCtx,
 	mut data: SeriesScanData,
-	mut logs: Vec<JobRunLog>,
+	mut logs: Vec<JobExecuteLog>,
 ) -> Result<JobTaskOutput<SeriesScanJob>, JobError> {
 	if paths.is_empty() {
 		tracing::debug!("No media to create for series");
@@ -405,7 +405,7 @@ async fn handle_create_series_media(
 						},
 						Err(e) => {
 							tracing::error!(error = ?e, ?media_path, "Failed to create media");
-							logs.push(JobRunLog::error(format!(
+							logs.push(JobExecuteLog::error(format!(
 								"Failed to create media: {:?}",
 								e.to_string()
 							)));
@@ -414,7 +414,7 @@ async fn handle_create_series_media(
 				},
 				Err(e) => {
 					tracing::error!(error = ?e, ?media_path, "Failed to build media");
-					logs.push(JobRunLog::error(format!(
+					logs.push(JobExecuteLog::error(format!(
 						"Failed to build media: {:?}",
 						e.to_string()
 					)));

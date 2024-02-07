@@ -416,7 +416,7 @@
 							"timestamp": "Timestamp"
 						},
 						"emptyHeading": "No logs to display",
-						"emptySubtitle": "There are no logs to display at this time"
+						"emptySubtitle": "Your server is either very healthy or very unhealthy"
 					}
 				},
 				"liveLogs": {

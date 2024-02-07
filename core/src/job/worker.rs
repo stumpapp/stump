@@ -340,7 +340,7 @@ impl Worker {
 		let mut state = WorkerState::Running;
 		let state_rx_fut = state_rx.recv();
 		let job_handle = spawn(async move {
-			let result = job.run(worker_ctx).await;
+			let result = job.execute(worker_ctx).await;
 			(job, result)
 		});
 

@@ -171,6 +171,28 @@ impl JobManager {
 		Ok(())
 	}
 
+	/// Pause a job by ID. This operation does not check the queue
+	pub async fn pause(self: Arc<Self>, job_id: String) -> JobManagerResult<()> {
+		let worker = self.get_worker(&job_id).await?;
+		worker.pause().await;
+		Ok(())
+	}
+
+	/// Resume a job by ID. This operation does not check the queue
+	pub async fn resume(self: Arc<Self>, job_id: String) -> JobManagerResult<()> {
+		let worker = self.get_worker(&job_id).await?;
+		worker.resume().await;
+		Ok(())
+	}
+
+	/// Get a worker by ID, if it exists
+	async fn get_worker(self: Arc<Self>, id: &str) -> JobManagerResult<Arc<Worker>> {
+		self.workers.read().await.get(id).map_or_else(
+			|| Err(JobManagerError::JobNotFound(id.to_string())),
+			|worker| Ok(worker.clone()),
+		)
+	}
+
 	pub async fn shutdown(self: Arc<Self>) {
 		let workers = self.workers.read().await;
 		join_all(workers.values().map(|worker| worker.cancel())).await;

@@ -27,10 +27,8 @@ pub(crate) async fn job_task_handler<J: JobExt>(
 	commands_rx: Receiver<WorkerCommand>,
 ) -> JobTaskHandlerResult<J> {
 	let commands_rx_fut = commands_rx.recv();
-
 	tokio::pin!(task_handle);
 	tokio::pin!(commands_rx_fut);
-	// TODO: timeout safety. timeout_fut?
 
 	let start = Instant::now();
 	loop {
@@ -77,6 +75,12 @@ pub(crate) async fn job_task_handler<J: JobExt>(
 						let _ = task_handle.await;
 						return Err(JobError::Cancelled(return_sender));
 					},
+					WorkerCommand::Pause => {
+						worker_ctx.pause().await;
+					}
+					WorkerCommand::Resume => {
+						worker_ctx.resume().await;
+					}
 				}
 			},
 		}

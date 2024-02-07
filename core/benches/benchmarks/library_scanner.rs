@@ -227,6 +227,7 @@ async fn setup_test(
 		job_controller_tx: mpsc::unbounded_channel().0,
 		core_event_tx: broadcast::channel(1024).0,
 		commands_rx: async_channel::unbounded().1,
+		state_tx: async_channel::unbounded().0,
 	};
 	Ok(Setup {
 		test_ctx: TestCtx {

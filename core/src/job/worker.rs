@@ -17,18 +17,8 @@ use crate::{
 
 use super::{Executor, JobControllerCommand, JobManager, JobProgress, JobUpdate};
 
-// pub enum WorkerState {
-// 	Running,
-// 	Paused,
-// }
-
-// pub enum WorkerEvent {
-// 	StateChange(WorkerState),
-// 	CoreEvent(CoreEvent),
-// }
-
-/// An enum representing the various types of messages that a worker can send, excluding
-/// internal commands.
+/// An enum representing the various types of _external_ messages that a worker can send, excluding
+/// internal commands and state events.
 pub enum WorkerSend {
 	ManagerCommand(JobControllerCommand),
 	Progress(JobProgress),
@@ -40,11 +30,28 @@ pub trait WorkerSendExt {
 	fn into_send(self) -> WorkerSend;
 }
 
+// TODO: Add Finalizing state to inform clients that a job is not able to be paused
+/// The state of the worker, either running or paused.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WorkerState {
+	Running,
+	Paused,
+}
+
+/// An enum representing the types of state-related events that the worker can send/receive. This
+/// is primarily used to support pausing and resuming jobs.
+pub enum StateEvent {
+	StateChange(WorkerState),
+	StateRequested(oneshot::Sender<WorkerState>),
+}
+
 /// Commands that the worker can send/receive internally. Every command will kill
 /// the Future that effectively runs the job. Currently, the only command is `Cancel`.
 #[derive(Debug)]
 pub enum WorkerCommand {
 	Cancel(oneshot::Sender<()>),
+	Pause,
+	Resume,
 }
 
 /// The context that is passed to the worker when it is created. This context is used
@@ -63,6 +70,9 @@ pub struct WorkerCtx {
 	pub commands_rx: async_channel::Receiver<WorkerCommand>,
 	/// A sender for the worker to send commands to the job manager
 	pub job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
+	/// A sender for the [WorkerCtx] to send state events to the loop which
+	/// is managing the corresponding worker
+	pub state_tx: async_channel::Sender<StateEvent>,
 }
 
 impl WorkerCtx {
@@ -119,12 +129,81 @@ impl WorkerCtx {
 			}
 		}
 	}
+
+	/// Send a state request to the worker loop and await the response
+	///
+	/// Note that in the case of a failure to send the state request, the method will
+	/// return `WorkerState::Running` as a guess. This isn't overly ideal, but I will
+	/// revisit this in the future.
+	pub async fn get_state(&self) -> WorkerState {
+		// Try 3 times to send the state request with an acknowledgement
+		for _ in 0..3 {
+			let (tx, rx) = oneshot::channel();
+
+			let send_succeeded = self
+				.state_tx
+				.send(StateEvent::StateRequested(tx))
+				.await
+				.is_ok();
+
+			if send_succeeded {
+				return rx.await.unwrap_or(WorkerState::Running);
+			}
+		}
+
+		tracing::warn!(
+			"Failed to send state request 3 times. Returning running state as a guess..."
+		);
+
+		WorkerState::Running
+	}
+
+	/// Send a pause request to the worker loop
+	///
+	/// Note that this method will attempt to send the pause request 3 times before
+	/// giving up.
+	pub async fn pause(&self) {
+		// Try 3 times to send the state request with an acknowledgement
+		for _ in 0..3 {
+			let send_succeeded = self
+				.state_tx
+				.send(StateEvent::StateChange(WorkerState::Paused))
+				.await
+				.is_ok();
+
+			if send_succeeded {
+				return;
+			}
+		}
+
+		tracing::warn!("Failed to send pause request 3 times. Giving up...");
+	}
+
+	/// Send a resume request to the worker loop
+	///
+	/// Note that this method will attempt to send the resume request 3 times before
+	/// giving up.
+	pub async fn resume(&self) {
+		// Try 3 times to send the state request with an acknowledgement
+		for _ in 0..3 {
+			let send_succeeded = self
+				.state_tx
+				.send(StateEvent::StateChange(WorkerState::Running))
+				.await
+				.is_ok();
+
+			if send_succeeded {
+				return;
+			}
+		}
+
+		tracing::warn!("Failed to send resume request 3 times. Giving up...");
+	}
 }
 
 /// An instance of a running job, represented by a worker. The worker is responsible for
 /// kicking off the job and managing its lifecycle.
 pub struct Worker {
-	// TODO: state? E.g. running, paused, etc.
 	/// The sender through which the worker can send commands to itself. The corresponding
 	/// receiver is stored in the worker context.
 	commands_tx: async_channel::Sender<WorkerCommand>,
@@ -138,8 +217,9 @@ impl Worker {
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
-	) -> Result<(Self, WorkerCtx), JobError> {
+	) -> Result<(Self, WorkerCtx, async_channel::Receiver<StateEvent>), JobError> {
 		let (commands_tx, commands_rx) = async_channel::unbounded::<WorkerCommand>();
+		let (state_tx, state_rx) = async_channel::unbounded::<StateEvent>();
 
 		let worker_ctx = WorkerCtx {
 			job_id: job_id.to_string(),
@@ -148,9 +228,10 @@ impl Worker {
 			core_event_tx,
 			commands_rx,
 			job_controller_tx,
+			state_tx,
 		};
 
-		Ok((Self { commands_tx }, worker_ctx))
+		Ok((Self { commands_tx }, worker_ctx, state_rx))
 	}
 
 	/// Create a new [Worker] instance and immediately spawn it. This is the main entry point
@@ -167,7 +248,7 @@ impl Worker {
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 	) -> Result<Arc<Self>, JobError> {
 		let job_id = job.id().to_string();
-		let (worker, worker_ctx) = Worker::new(
+		let (worker, worker_ctx, state_rx) = Worker::new(
 			job_id.as_str(),
 			db,
 			config,
@@ -178,7 +259,7 @@ impl Worker {
 		let worker = worker.arced();
 
 		handle_job_start(&worker_ctx.db, job_id.clone()).await?;
-		spawn(Self::work(worker_ctx, job, agent));
+		spawn(Self::work(worker_ctx, state_rx, job, agent));
 
 		Ok(worker)
 	}
@@ -186,6 +267,34 @@ impl Worker {
 	/// A convenience method to wrap the worker in an Arc
 	fn arced(self) -> Arc<Self> {
 		Arc::new(self)
+	}
+
+	pub async fn pause(&self) {
+		self.commands_tx
+			.send(WorkerCommand::Pause)
+			.await
+			.map_or_else(
+				|error| {
+					tracing::error!(?error, "Error while sending pause command");
+				},
+				|_| {
+					tracing::trace!("Pause command sent");
+				},
+			);
+	}
+
+	pub async fn resume(&self) {
+		self.commands_tx
+			.send(WorkerCommand::Resume)
+			.await
+			.map_or_else(
+				|error| {
+					tracing::error!(?error, "Error while sending resume command");
+				},
+				|_| {
+					tracing::trace!("Resume command sent");
+				},
+			);
 	}
 
 	/// Cancels the job running in the worker
@@ -221,20 +330,21 @@ impl Worker {
 	/// Note more commands can be added in the future, e.g. pause/resume.
 	async fn work(
 		worker_ctx: WorkerCtx,
+		state_rx: async_channel::Receiver<StateEvent>,
 		mut job: Box<dyn Executor>,
 		manager: Arc<JobManager>,
 	) {
 		let job_id = job.id().to_string();
 		let finalizer_ctx = worker_ctx.clone();
-		// let commands_rx = worker_ctx.commands_rx.clone();
 
-		// let commands_rx_fut = commands_rx.recv();
+		let mut state = WorkerState::Running;
+		let state_rx_fut = state_rx.recv();
 		let job_handle = spawn(async move {
 			let result = job.run(worker_ctx).await;
 			(job, result)
 		});
 
-		// tokio::pin!(commands_rx_fut);
+		tokio::pin!(state_rx_fut);
 		tokio::pin!(job_handle);
 
 		let start = Instant::now();
@@ -295,47 +405,32 @@ impl Worker {
 								JobStatus::Failed,
 								&format!("Job failed: {}", join_error),
 							));
+							// FIXME: not a cancel...
 							let _ = handle_do_cancel(job_id.clone(), &finalizer_ctx.db, elapsed).await;
 						}
 					}
 					return manager.complete(job_id).await;
 				},
 
-				// TODO: Track the worker state and handle core events instead of commands,
-				// Each task should listen for commands and handle them accordingly...
-				// If a task would be started, it should understand the state and wait if paused
-
-				// Ok(cmd) = &mut commands_rx_fut => {
-				// 	tracing::debug!(?cmd, "Received command");
-				// 	match cmd {
-				// 		WorkerCommand::Cancel(return_sender) => {
-				// 			let elapsed = start.elapsed();
-				// 			job_handle.abort();
-				// 			if job_handle.await.is_ok() {
-				// 				tracing::warn!(
-				// 					"Job worker thread ended successfully after a cancel?"
-				// 				);
-				// 			};
-				// 			finalizer_ctx.report_progress(JobProgress::status_msg(
-				// 				JobStatus::Cancelled,
-				// 				"Job cancelled",
-				// 			));
-				// 			let _ = handle_do_cancel(job_id.clone(), &finalizer_ctx.db, elapsed).await;
-				// 			return_sender.send(()).map_or_else(
-				// 				|error| {
-				// 					tracing::error!(
-				// 						?error,
-				// 						"Failed to send cancel confirmation"
-				// 					);
-				// 				},
-				// 				|_| {
-				// 					tracing::trace!("Cancel confirmation sent");
-				// 				},
-				// 			);
-				// 			return manager.complete(job_id).await;
-				// 		},
-				// 	}
-				// },
+				Ok(state_event) = &mut state_rx_fut => {
+					match state_event {
+						StateEvent::StateChange(new_state) => {
+							tracing::debug!(?state, ?new_state, "State change event received");
+							state = new_state;
+						},
+						StateEvent::StateRequested(sender) => {
+							tracing::trace!("State requested");
+							sender.send(state).map_or_else(
+								|error| {
+									tracing::error!(?error, "Failed to send state!");
+								},
+								|state| {
+									tracing::trace!(?state, "State sent");
+								},
+							);
+						},
+					}
+				},
 			}
 		}
 	}

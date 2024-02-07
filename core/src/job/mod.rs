@@ -466,7 +466,9 @@ impl<J: JobExt> Executor for Job<J> {
 			mut tasks,
 			mut completed_tasks,
 			mut logs,
-		} = self.state.take().expect("Job state was already taken!");
+		} = self.state.take().ok_or_else(|| {
+			JobError::InitFailed("Job state was unexpectedly None".to_string())
+		})?;
 
 		let mut working_data = if let Some(initial_data) = data {
 			tracing::debug!(?initial_data, "Job started with initial state");
@@ -512,6 +514,23 @@ impl<J: JobExt> Executor for Job<J> {
 		tracing::debug!(task_count = tasks.len(), "Starting tasks");
 
 		while !tasks.is_empty() {
+			// The state can dynamically change during the run loop, and should be re-checked
+			// at the start of each iteration. If the state is Paused, the loop should wait for
+			// Running with a reasonable timeout before continuing.
+			let mut worker_state = ctx.get_state().await;
+			if worker_state == WorkerState::Paused {
+				ctx.report_progress(JobProgress::msg("Paused acknowledged"));
+				while worker_state == WorkerState::Paused {
+					tracing::debug!("Job is paused. Waiting for resume...");
+					// Wait for a reasonable amount of time before checking again
+					worker_state = ctx.get_state().await;
+					if worker_state == WorkerState::Running {
+						ctx.report_progress(JobProgress::msg("Resume acknowledged"));
+					}
+					tokio::time::sleep(Duration::from_secs(5)).await;
+				}
+			}
+
 			ctx.report_progress(JobProgress::task_position_msg(
 				"Starting task",
 				completed_tasks as i32,

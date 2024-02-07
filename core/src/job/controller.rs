@@ -9,6 +9,13 @@ use tokio::sync::{
 use super::{Executor, JobManager, JobManagerResult, WorkerSend, WorkerSendExt};
 use crate::{config::StumpConfig, event::CoreEvent, prisma::PrismaClient};
 
+/// Input for commands that require an acknowledgement when they are completed
+/// (e.g. cancel, pause, resume)
+pub struct AcknowledgeableCommand {
+	pub id: String,
+	pub ack: oneshot::Sender<JobManagerResult<()>>,
+}
+
 /// Events that can be sent to the job controller. If any of these events require a response,
 /// e.g. to provide an HTTP status code, a oneshot channel should be provided.
 pub enum JobControllerCommand {
@@ -17,7 +24,11 @@ pub enum JobControllerCommand {
 	/// A job has been completed and should be removed from the queue
 	CompleteJob(String),
 	/// Cancel a job by its ID
-	CancelJob(String, oneshot::Sender<JobManagerResult<()>>),
+	CancelJob(AcknowledgeableCommand),
+	/// Pause a job by its ID
+	PauseJob(String), // TODO: AcknowledgeableCommand
+	/// Resume a job by its ID
+	ResumeJob(String), // TODO: AcknowledgeableCommand
 	/// Shutdown the job controller. This will cancel all running jobs and clear the queue
 	Shutdown(oneshot::Sender<()>),
 }
@@ -70,12 +81,15 @@ impl JobController {
 							|_| tracing::info!("Successfully enqueued job"),
 						);
 					},
-					JobControllerCommand::CompleteJob(job_id) => {
-						self.manager.clone().complete(job_id).await;
+					JobControllerCommand::CompleteJob(id) => {
+						self.manager.clone().complete(id).await;
 					},
-					JobControllerCommand::CancelJob(job_id, tx) => {
-						let result = self.manager.clone().cancel(job_id).await;
-						tx.send(result).map_or_else(
+					JobControllerCommand::CancelJob(AcknowledgeableCommand {
+						id,
+						ack,
+					}) => {
+						let result = self.manager.clone().cancel(id).await;
+						ack.send(result).map_or_else(
 							|error| {
 								tracing::error!(
 									?error,
@@ -83,6 +97,18 @@ impl JobController {
 								);
 							},
 							|_| tracing::trace!("Cancel confirmation sent"),
+						);
+					},
+					JobControllerCommand::PauseJob(id) => {
+						self.manager.clone().pause(id).await.map_or_else(
+							|error| tracing::error!(?error, "Failed to pause job!"),
+							|_| tracing::info!("Successfully issued pause request"),
+						);
+					},
+					JobControllerCommand::ResumeJob(id) => {
+						self.manager.clone().resume(id).await.map_or_else(
+							|error| tracing::error!(?error, "Failed to resume job!"),
+							|_| tracing::info!("Successfully issued resume request"),
 						);
 					},
 					JobControllerCommand::Shutdown(return_sender) => {

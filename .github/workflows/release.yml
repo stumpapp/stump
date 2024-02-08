@@ -23,10 +23,9 @@ jobs:
     name: Parse semver version from tag
     runs-on: [self-hosted]
     steps:
-      # FIXME: I realize this is for tags and won't work...
-      - name: Get the tag
+      - name: Extract version from branch name
         id: tag
-        uses: ildug/get-tag-action@v1
+        run: echo "version=$(echo ${{ github.event.pull_request.head.ref }} | sed -e 's/release\/v//')" >> $GITHUB_ENV
 
       - name: Print the tag
         run: echo "The output version is ${{ steps.tag.outputs.version }}"

@@ -67,12 +67,5 @@
 	},
 	"peerDependencies": {
 		"react-router-dom": "^6.8.1"
-	},
-	"pnpm": {
-		"peerDependencyRules": {
-			"ignoreMissing": [
-				"@babel/core"
-			]
-		}
 	}
 }

@@ -8,6 +8,7 @@ mod metadata;
 mod reading_list;
 mod series;
 mod server_config;
+mod smart_list;
 mod tag;
 mod user;
 
@@ -21,12 +22,14 @@ pub use metadata::*;
 pub use reading_list::*;
 pub use series::*;
 pub use server_config::*;
+pub use smart_list::*;
 pub use tag::*;
 pub use user::*;
 
-pub use common::{Cursor, FileStatus, LayoutMode};
+pub use common::{AccessRole, Cursor, EntityVisibility, FileStatus, LayoutMode};
 
 pub mod macros {
 	pub use super::book_club::prisma_macros::*;
 	pub use super::metadata::prisma_macros::*;
+	pub use super::smart_list::prisma_macros::*;
 }

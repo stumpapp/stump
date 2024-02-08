@@ -8,7 +8,10 @@
 		"build": "next build",
 		"export": "next export",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"deploy-preview": "vercel",
+		"deploy": "vercel --prod",
+		"nuke": "rimraf -rf node_modules"
 	},
 	"keywords": [],
 	"author": "",
@@ -28,6 +31,6 @@
 		"autoprefixer": "^10.4.16",
 		"postcss": "^8.4.31",
 		"tailwindcss": "^3.3.3",
-		"typescript": "^5.2.2"
+		"typescript": "^5.3.3"
 	}
 }

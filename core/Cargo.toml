@@ -25,8 +25,8 @@ image = "0.24.7"
 webp = "0.2.6"
 zip = "0.6.6"
 epub = "1.2.4"
-unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typestate" }
-# unrar = { version = "0.5.1" }
+# unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typestate" }
+unrar = { version = "0.5.2" }
 # pdf = "0.8.1"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release
 pdfium-render = "0.8.16"
@@ -56,3 +56,6 @@ tempfile = { workspace = true }
 
 [build-dependencies]
 chrono = "0.4.31"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2.152"

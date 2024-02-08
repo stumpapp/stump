@@ -138,10 +138,13 @@ pub enum UserPermission {
 	/// Grant access to create a book club (access book club)
 	#[serde(rename = "bookclub:create")]
 	CreateBookClub,
+	/// Grant access to access the smart list feature. This includes the ability to create and edit smart lists
+	#[serde(rename = "smartlist:read")]
+	AccessSmartList,
 	/// Grant access to access the file explorer
 	#[serde(rename = "file:explorer")]
 	FileExplorer,
-	/// Grant access to upload files to the library (manage library)
+	/// Grant access to upload files to a library
 	#[serde(rename = "file:upload")]
 	UploadFile,
 	/// Grant access to create a library
@@ -172,6 +175,7 @@ impl ToString for UserPermission {
 		match self {
 			UserPermission::AccessBookClub => "bookclub:read".to_string(),
 			UserPermission::CreateBookClub => "bookclub:create".to_string(),
+			UserPermission::AccessSmartList => "smartlist:read".to_string(),
 			UserPermission::FileExplorer => "file:explorer".to_string(),
 			UserPermission::UploadFile => "file:upload".to_string(),
 			UserPermission::CreateLibrary => "library:create".to_string(),
@@ -190,6 +194,7 @@ impl From<&str> for UserPermission {
 		match s {
 			"bookclub:read" => UserPermission::AccessBookClub,
 			"bookclub:create" => UserPermission::CreateBookClub,
+			"smartlist:read" => UserPermission::AccessSmartList,
 			"file:explorer" => UserPermission::FileExplorer,
 			"file:upload" => UserPermission::UploadFile,
 			"library:create" => UserPermission::CreateLibrary,

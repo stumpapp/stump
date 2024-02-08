@@ -71,6 +71,16 @@ export function patchSeriesThumbnail(id: string, params: PatchSeriesThumbnail) {
 	return API.patch(`/series/${id}/thumbnail`, params)
 }
 
+export function uploadSeriesThumbnail(id: string, file: File) {
+	const formData = new FormData()
+	formData.append('file', file)
+	return API.post(`/series/${id}/thumbnail`, formData, {
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	})
+}
+
 export const seriesApi = {
 	getNextInSeries,
 	getNextMediaInSeries,
@@ -81,6 +91,7 @@ export const seriesApi = {
 	getSeriesThumbnail,
 	getSeriesWithCursor,
 	patchSeriesThumbnail,
+	uploadSeriesThumbnail,
 }
 
 export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
@@ -93,4 +104,5 @@ export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
 	getSeriesThumbnail: 'series.getSeriesThumbnail',
 	getSeriesWithCursor: 'series.getSeriesWithCursor',
 	patchSeriesThumbnail: 'series.patchSeriesThumbnail',
+	uploadSeriesThumbnail: 'series.uploadSeriesThumbnail',
 }

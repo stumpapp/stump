@@ -32,10 +32,11 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::chain_optional_iter,
 	middleware::auth::{Auth, BookClubGuard},
 	utils::{
-		chain_optional_iter, get_session_server_owner_user, get_session_user,
-		get_user_and_enforce_permission, safe_string_to_date, string_to_date,
+		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
+		safe_string_to_date, string_to_date,
 	},
 };
 

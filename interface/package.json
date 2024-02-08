@@ -32,6 +32,7 @@
 		"pluralize": "^8.0.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"react-dropzone": "^14.2.3",
 		"react-error-boundary": "^4.0.11",
 		"react-helmet": "^6.1.0",
 		"react-hook-form": "^7.47.0",
@@ -47,6 +48,7 @@
 		"remark-directive": "^3.0.0",
 		"remark-directive-rehype": "^0.4.2",
 		"rooks": "^7.14.1",
+		"ts-pattern": "^5.0.6",
 		"use-count-up": "^3.0.1",
 		"zod": "^3.22.4",
 		"zustand": "^4.4.3"
@@ -60,7 +62,7 @@
 		"@types/react-helmet": "^6.1.8",
 		"@types/react-router-dom": "^5.3.3",
 		"@vitejs/plugin-react": "^4.1.0",
-		"typescript": "^5.2.2",
+		"typescript": "^5.3.3",
 		"vite": "^4.5.0"
 	},
 	"peerDependencies": {

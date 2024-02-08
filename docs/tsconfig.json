@@ -13,8 +13,7 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"jsx": "preserve",
-		"types": ["node"],
-		"outDir": "../.moon/cache/types/docs"
+		"types": ["node"]
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules"]

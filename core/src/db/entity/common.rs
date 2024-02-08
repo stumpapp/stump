@@ -62,3 +62,57 @@ impl FromStr for FileStatus {
 		}
 	}
 }
+
+#[derive(
+	Debug, Default, Deserialize, Serialize, Type, ToSchema, Clone, Copy, PartialEq, Eq,
+)]
+pub enum EntityVisibility {
+	#[serde(rename = "PUBLIC")]
+	Public,
+	#[serde(rename = "SHARED")]
+	Shared,
+	#[serde(rename = "PRIVATE")]
+	#[default]
+	Private,
+}
+
+impl fmt::Display for EntityVisibility {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		match self {
+			EntityVisibility::Public => write!(f, "PUBLIC"),
+			EntityVisibility::Shared => write!(f, "SHARED"),
+			EntityVisibility::Private => write!(f, "PRIVATE"),
+		}
+	}
+}
+
+impl FromStr for EntityVisibility {
+	type Err = String;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"PUBLIC" => Ok(EntityVisibility::Public),
+			"SHARED" => Ok(EntityVisibility::Shared),
+			"PRIVATE" => Ok(EntityVisibility::Private),
+			_ => Err(format!("Invalid visibility: {}", s)),
+		}
+	}
+}
+
+#[derive(Debug, Default, Deserialize, Serialize, Type, ToSchema, Clone, Copy)]
+pub enum AccessRole {
+	#[default]
+	Reader = 1,
+	Writer = 2,
+	CoCreator = 3,
+}
+
+impl AccessRole {
+	pub fn value(&self) -> i32 {
+		match self {
+			AccessRole::Reader => 1,
+			AccessRole::Writer => 2,
+			AccessRole::CoCreator => 3,
+		}
+	}
+}

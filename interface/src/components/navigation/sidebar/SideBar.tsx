@@ -10,7 +10,7 @@ import { useLocaleContext } from '../../../i18n'
 import paths from '../../../paths'
 import UserMenu from '../../UserMenu'
 import NavigationButtons from '../mobile/NavigationButtons'
-import { BookClubSideBarSection, LibrarySideBarSection } from './sections'
+import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
 
@@ -27,6 +27,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 
 	const { checkPermission } = useAppContext()
 	const showBookClubs = IS_DEVELOPMENT && checkPermission('bookclub:read')
+	const showSmartLists = checkPermission('smartlist:read')
 
 	const isBrowser = platform === 'browser'
 	const isMobile = useMediaMatch('(max-width: 768px)')
@@ -68,6 +69,7 @@ export default function SideBar({ asChild, hidden }: Props) {
 					</div>
 
 					<LibrarySideBarSection isMobile={isMobile} />
+					{showSmartLists && <SmartListSideBarSection />}
 					{showBookClubs && <BookClubSideBarSection isMobile={isMobile} />}
 				</div>
 				<Spacer />

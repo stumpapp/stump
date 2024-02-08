@@ -3,13 +3,17 @@
 
 // CORE TYPE GENERATION
 
+export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
+
+export type AccessRole = "Reader" | "Writer" | "CoCreator"
+
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 
 /**
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "bookclub:read" | "bookclub:create" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:manage" | "server:manage"
+export type UserPermission = "bookclub:read" | "bookclub:create" | "smartlist:read" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:manage" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
@@ -49,6 +53,48 @@ export type Bookmark = { id: string; preview_content: string | null; epubcfi: st
 export type MediaAnnotation = { id: string; highlighted_text: string | null; page: number | null; page_coordinates_x: number | null; page_coordinates_y: number | null; epubcfi: string | null; notes: string | null; media_id: string; media?: Media | null }
 
 export type ReadProgress = { id: string; page: number; epubcfi: string | null; percentage_completed: number | null; is_completed: boolean; completed_at: string | null; media_id: string; media: Media | null; user_id: string; user: User | null }
+
+/**
+ * A filter for a single value, e.g. `name = "test"`
+ */
+export type Filter<T> = T | { not: T } | { contains: T } | { excludes: T } | { any: T[] } | { none: T[] } | NumericFilter<T>
+
+export type NumericFilter<T> = { gt: T } | { gte: T } | { lt: T } | { lte: T } | NumericRange<T>
+
+export type NumericRange<T> = { from: T; to: T; inclusive?: boolean }
+
+/**
+ * A list of filters that are being combined with a logical operator, e.g. `and` or `or`
+ */
+export type FilterGroup<T> = { and: T[] } | { or: T[] } | { not: T[] }
+
+export type FilterJoin = "AND" | "OR"
+
+export type SmartListItemGrouping = "BY_BOOKS" | "BY_SERIES" | "BY_LIBRARY"
+
+export type SmartListItemGroup<E> = { entity: E; books: Media[] }
+
+export type SmartListItems = { type: "Books"; items: Media[] } | { type: "Series"; items: SmartListItemGroup<Series>[] } | { type: "Library"; items: SmartListItemGroup<Library>[] }
+
+export type SmartList = { id: string; name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; visibility: EntityVisibility; joiner: FilterJoin; default_grouping: SmartListItemGrouping; saved_views: SmartListView[] | null; creator_id?: string | null }
+
+export type SmartFilter<T> = { groups: FilterGroup<T>[]; joiner?: FilterJoin }
+
+export type MediaSmartFilter = { name: Filter<string> } | { extension: Filter<string> } | { path: Filter<string> } | { metadata: MediaMetadataSmartFilter } | { series: SeriesSmartFilter }
+
+export type MediaMetadataSmartFilter = { publisher: Filter<string> } | { genre: Filter<string> } | { characters: Filter<string> } | { colorists: Filter<string> } | { writers: Filter<string> } | { pencillers: Filter<string> } | { letterers: Filter<string> } | { inkers: Filter<string> } | { editors: Filter<string> } | { age_rating: Filter<number> } | { year: Filter<number> } | { month: Filter<number> } | { day: Filter<number> }
+
+export type SeriesMetadataSmartFilter = { meta_type: Filter<string> } | { publisher: Filter<string> } | { status: Filter<string> } | { age_rating: Filter<number> } | { volume: Filter<number> }
+
+export type SeriesSmartFilter = { name: Filter<string> } | { path: Filter<string> } | { metadata: SeriesMetadataSmartFilter } | { library: LibrarySmartFilter }
+
+export type LibrarySmartFilter = { name: Filter<string> } | { path: Filter<string> }
+
+export type SmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string; list_id: string }
+
+export type SmartListTableSortingState = { desc: boolean; id: string }
+
+export type SmartListTableColumnSelection = { id: string; position: number }
 
 export type BookClub = { id: string; name: string; description: string | null; emoji: string | null; is_private: boolean; created_at: string; member_role_spec: BookClubMemberRoleSpec; members?: BookClubMember[] | null; schedule?: BookClubSchedule | null }
 
@@ -156,7 +202,7 @@ export type Pagination = null | PageQuery | CursorQuery
 
 // SERVER TYPE GENERATION
 
-export type StumpVersion = { semver: string; rev: string | null; compile_time: string }
+export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type LoginOrRegisterArgs = { username: string; password: string }
 
@@ -223,4 +269,14 @@ export type PatchMediaThumbnail = { page: number; is_zero_based?: boolean | null
 export type PatchSeriesThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
 
 export type PatchLibraryThumbnail = { media_id: string; page: number; is_zero_based?: boolean | null }
+
+export type CreateOrUpdateSmartList = { name: string; description: string | null; filters: SmartFilter<MediaSmartFilter>; joiner?: FilterJoin | null; default_grouping?: SmartListItemGrouping | null }
+
+export type GetSmartListsParams = { all?: boolean | null; search?: string | null }
+
+export type SmartListRelationOptions = { load_views?: boolean }
+
+export type SmartListMeta = { matched_books: BigInt; matched_series: BigInt; matched_libraries: BigInt }
+
+export type CreateOrUpdateSmartListView = ({ book_columns: SmartListTableColumnSelection[]; group_columns: SmartListTableColumnSelection[]; book_sorting: SmartListTableSortingState[] | null; group_sorting: SmartListTableSortingState[] | null; enable_multi_sort?: boolean | null; search?: string | null }) & { name: string }
 

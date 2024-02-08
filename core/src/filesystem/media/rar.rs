@@ -5,7 +5,7 @@ use std::{
 	path::{Path, PathBuf},
 };
 use tracing::{debug, error, trace, warn};
-use unrar::Archive;
+use unrar::{Archive, CursorBeforeHeader, List, OpenArchive, Process, UnrarResult};
 
 use crate::{
 	config::StumpConfig,
@@ -25,6 +25,36 @@ use super::{process::FileConverter, FileProcessor, FileProcessorOptions, Process
 
 /// A file processor for RAR files.
 pub struct RarProcessor;
+
+impl RarProcessor {
+	fn init() {
+		// See https://github.com/muja/unrar.rs/issues/44
+		#[cfg(target_os = "linux")]
+		{
+			let locale =
+				std::env::var("LIBC_LOCALE").unwrap_or_else(|_| "en_US.utf8".to_string());
+			tracing::debug!(?locale, "Setting locale for unrar");
+
+			let locale =
+				std::ffi::CString::new(locale).expect("Failed to convert locale!");
+			unsafe { libc::setlocale(libc::LC_ALL, locale.as_ptr()) };
+		}
+	}
+
+	fn open_for_processing(
+		path: &str,
+	) -> UnrarResult<OpenArchive<Process, CursorBeforeHeader>> {
+		Self::init();
+		Archive::new(path).open_for_processing()
+	}
+
+	fn open_for_listing(
+		path: &str,
+	) -> UnrarResult<OpenArchive<List, CursorBeforeHeader>> {
+		Self::init();
+		Archive::new(path).open_for_listing()
+	}
+}
 
 impl FileProcessor for RarProcessor {
 	fn get_sample_size(path: &str) -> Result<u64, FileError> {
@@ -88,12 +118,11 @@ impl FileProcessor for RarProcessor {
 
 		let hash: Option<String> = RarProcessor::hash(path);
 
-		let mut archive = Archive::new(&path).open_for_processing()?;
+		let mut archive = RarProcessor::open_for_processing(path)?;
 		let mut pages = 0;
 		let mut metadata_buf = None;
 
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		while let Ok(Some(header)) = archive.read_header() {
 			let entry = header.entry();
 			if entry.filename.as_os_str() == "ComicInfo.xml" {
 				let (data, rest) = header.read()?;
@@ -126,7 +155,7 @@ impl FileProcessor for RarProcessor {
 		page: i32,
 		_: &StumpConfig,
 	) -> Result<(ContentType, Vec<u8>), FileError> {
-		let archive = Archive::new(file).open_for_listing()?;
+		let archive = RarProcessor::open_for_listing(file)?;
 
 		let mut valid_entries = archive
 			.into_iter()
@@ -152,9 +181,8 @@ impl FileProcessor for RarProcessor {
 			.ok_or(FileError::RarReadError)?;
 
 		let mut bytes = None;
-		let mut archive = Archive::new(file).open_for_processing()?;
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		let mut archive = RarProcessor::open_for_processing(file)?;
+		while let Ok(Some(header)) = archive.read_header() {
 			let is_target =
 				header.entry().filename.as_os_str() == target_entry.filename.as_os_str();
 			if is_target {
@@ -166,15 +194,25 @@ impl FileProcessor for RarProcessor {
 			}
 		}
 
-		// TODO: don't hard code content type!
-		Ok((ContentType::JPEG, bytes.ok_or(FileError::NoImageError)?))
+		let content_type = if let Some(bytes) = &bytes {
+			if bytes.len() < 5 {
+				return Err(FileError::NoImageError);
+			}
+			let mut magic_header = [0; 5];
+			magic_header.copy_from_slice(&bytes[0..5]);
+			ContentType::from_bytes(&magic_header)
+		} else {
+			ContentType::UNKNOWN
+		};
+
+		Ok((content_type, bytes.ok_or(FileError::NoImageError)?))
 	}
 
 	fn get_page_content_types(
 		path: &str,
 		pages: Vec<i32>,
 	) -> Result<HashMap<i32, ContentType>, FileError> {
-		let archive = Archive::new(path).open_for_listing()?;
+		let archive = RarProcessor::open_for_listing(path)?;
 
 		let entries = archive
 			.into_iter()
@@ -196,9 +234,8 @@ impl FileProcessor for RarProcessor {
 			.collect::<HashMap<_, _>>();
 
 		let mut content_types = HashMap::new();
-		let mut archive = Archive::new(path).open_for_processing()?;
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		let mut archive = RarProcessor::open_for_processing(path)?;
+		while let Ok(Some(header)) = archive.read_header() {
 			archive = if let Some(tuple) =
 				entries.get_key_value(&PathBuf::from(header.entry().filename.as_os_str()))
 			{
@@ -251,9 +288,8 @@ impl FileConverter for RarProcessor {
 
 		trace!(?unpacked_path, "Extracting RAR to cache");
 
-		let mut archive = Archive::new(path).open_for_processing()?;
-		while let Some(header) = archive.read_header() {
-			let header = header?;
+		let mut archive = RarProcessor::open_for_processing(path)?;
+		while let Ok(Some(header)) = archive.read_header() {
 			archive = if header.entry().is_file() {
 				header.extract_to(&unpacked_path)?
 			} else {

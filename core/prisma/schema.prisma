@@ -35,11 +35,13 @@ model User {
   user_preferences_id String?          @unique
   user_preferences    UserPreferences? @relation(fields: [user_preferences_id], references: [id], onDelete: Cascade)
 
-  login_activity    UserLoginActivity[]
-  bookmarks         Bookmark[]
-  media_annotations MediaAnnotation[]
-  sessions          Session[]
-  library_visits    LastLibraryVisit[]
+  login_activity          UserLoginActivity[]
+  bookmarks               Bookmark[]
+  media_annotations       MediaAnnotation[]
+  sessions                Session[]
+  library_visits          LastLibraryVisit[]
+  smart_lists             SmartList[]
+  smart_list_access_rules SmartListAccessRule[]
 
   @@map("users")
 }
@@ -561,6 +563,50 @@ model ReadingList {
   // A user can only have one reading list with the same name
   @@unique([creating_user_id, name])
   @@map("reading_lists")
+}
+
+model SmartListAccessRule {
+  role Int // 1: reader (read), 2: collaborator (read, edit), 3: co-creator (read, edit, delete)
+
+  user_id       String
+  user          User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  smart_list_id String
+  smart_list    SmartList? @relation(fields: [smart_list_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, smart_list_id])
+  @@map("smart_list_access_rules")
+}
+
+model SmartList {
+  id String @id @default(cuid())
+
+  name             String
+  description      String?
+  filters          Bytes
+  joiner           String  @default("AND") // AND or OR
+  default_grouping String  @default("BY_BOOKS") // BY_BOOKS, BY_SERIES, BY_LIBRARY
+  visibility       String  @default("PRIVATE") // PRIVATE, SHARED, PUBLIC
+
+  creator_id String
+  creator    User   @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  saved_views  SmartListView[]
+  access_rules SmartListAccessRule[]
+
+  @@unique([creator_id, name])
+  @@map("smart_lists")
+}
+
+model SmartListView {
+  name String
+
+  list_id String
+  list    SmartList @relation(fields: [list_id], references: [id], onDelete: Cascade)
+
+  data Bytes
+
+  @@unique([list_id, name])
+  @@map("smart_list_views")
 }
 
 model Collection {

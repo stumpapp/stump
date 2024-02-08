@@ -14,6 +14,7 @@ pub mod event;
 pub mod filesystem;
 pub mod job;
 pub mod opds;
+mod utils;
 
 mod context;
 pub mod error;

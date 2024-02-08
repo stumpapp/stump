@@ -29,7 +29,8 @@ model User {
   book_club_memberships BookClubMember[]
   book_club_invitations BookClubInvitation[]
 
-  age_restriction AgeRestriction?
+  age_restriction            AgeRestriction?
+  libraries_hidden_from_user Library[]
 
   // Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44, then making it mandatory
   user_preferences_id String?          @unique
@@ -96,7 +97,8 @@ model Library {
   library_options    LibraryOptions @relation(fields: [library_options_id], references: [id])
   library_options_id String         @unique
 
-  tags Tag[]
+  tags              Tag[]
+  hidden_from_users User[]
 
   job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?

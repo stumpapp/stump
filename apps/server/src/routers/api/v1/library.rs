@@ -20,7 +20,7 @@ use stump_core::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
 			FileStatus, LibrariesStats, Library, LibraryOptions, LibraryScanMode, Media,
-			Series, Tag, UserPermission,
+			Series, Tag, User, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
 		PrismaCountTrait,
@@ -39,8 +39,8 @@ use stump_core::{
 	prisma::{
 		last_library_visit,
 		library::{self, WhereParam},
-		library_options, media,
-		media::OrderByParam as MediaOrderByParam,
+		library_options,
+		media::{self, OrderByParam as MediaOrderByParam},
 		series::{self, OrderByParam as SeriesOrderByParam},
 		tag, user,
 	},
@@ -137,10 +137,19 @@ pub(crate) fn apply_library_relation_filters(
 	)
 }
 
-pub(crate) fn apply_library_filters(filters: LibraryFilter) -> Vec<WhereParam> {
+pub(crate) fn library_not_hidden_from_user_filter(user: &User) -> WhereParam {
+	library::hidden_from_users::none(vec![user::id::equals(user.id.clone())])
+}
+
+pub(crate) fn apply_library_filters_for_user(
+	filters: LibraryFilter,
+	user: &User,
+) -> Vec<WhereParam> {
+	let not_hidden_filter = library_not_hidden_from_user_filter(user);
 	apply_library_base_filters(filters.base_filter)
 		.into_iter()
 		.chain(apply_library_relation_filters(filters.relation_filter))
+		.chain([not_hidden_filter])
 		.collect()
 }
 
@@ -164,14 +173,16 @@ async fn get_libraries(
 	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Library>>>> {
+	let user = get_session_user(&session)?;
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
 	tracing::trace!(?filters, ?ordering, ?pagination, "get_libraries");
 
 	let is_unpaged = pagination.is_unpaged();
-	let where_conditions = apply_library_filters(filters);
+	let where_conditions = apply_library_filters_for_user(filters, &user);
 	let order_by = ordering.try_into()?;
 
 	let mut query = ctx
@@ -262,6 +273,7 @@ async fn update_last_visited_library(
 		.exec()
 		.await?;
 
+	// TODO: fetch first in order to enforce access
 	let library = last_library_visit
 		.library()
 		.ok()
@@ -323,12 +335,19 @@ async fn get_libraries_stats(
 async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<Json<Library>> {
+	let user = get_session_user(&session)?;
 	let db = ctx.get_db();
 
 	let library = db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
+		.find_first(
+			[library::id::equals(id.clone())]
+				.into_iter()
+				.chain([library_not_hidden_from_user_filter(&user)])
+				.collect(),
+		)
 		.with(library::library_options::fetch())
 		.with(library::tags::fetch(vec![]))
 		.exec()
@@ -382,7 +401,10 @@ async fn get_library_series(
 	let where_conditions = apply_series_filters(filters)
 		.into_iter()
 		.chain(chain_optional_iter(
-			[series::library_id::equals(Some(id.clone()))],
+			[
+				series::library_id::equals(Some(id.clone())),
+				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+			],
 			[age_restrictions],
 		))
 		.collect::<Vec<series::WhereParam>>();
@@ -441,7 +463,9 @@ async fn get_library_media(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+	let user = get_session_user(&session)?;
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 	let pagination_cloned = pagination.clone();
@@ -449,12 +473,13 @@ async fn get_library_media(
 	let is_unpaged = pagination.is_unpaged();
 	let order_by_param: MediaOrderByParam = ordering.try_into()?;
 
-	let mut media_conditions = apply_media_filters(filters);
-	media_conditions.push(media::series::is(vec![series::library_id::equals(Some(
-		id.clone(),
-	))]));
-
-	let media_conditions_cloned = media_conditions.clone();
+	let media_conditions = apply_media_filters(filters)
+		.into_iter()
+		.chain([media::series::is(vec![
+			series::library_id::equals(Some(id.clone())),
+			series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+		])])
+		.collect::<Vec<media::WhereParam>>();
 
 	let (media, count) = ctx
 		.db
@@ -462,7 +487,7 @@ async fn get_library_media(
 		.run(|client| async move {
 			let mut query = client
 				.media()
-				.find_many(media_conditions_cloned.clone())
+				.find_many(media_conditions.clone())
 				.order_by(order_by_param);
 
 			if !is_unpaged {
@@ -482,7 +507,7 @@ async fn get_library_media(
 
 			client
 				.media()
-				.count(media_conditions_cloned)
+				.count(media_conditions)
 				.exec()
 				.await
 				.map(|count| (media, Some(count)))
@@ -554,15 +579,17 @@ async fn get_library_thumbnail_handler(
 	let db = ctx.get_db();
 
 	let user = get_session_user(&session)?;
-	let age_restriction = user.age_restriction;
+	let age_restriction = user.age_restriction.as_ref();
 
 	let first_series = db
 		.series()
 		// Find the first series in the library which satisfies the age restriction
 		.find_first(chain_optional_iter(
-			[series::library_id::equals(Some(id.clone()))],
+			[
+				series::library_id::equals(Some(id.clone())),
+				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+			],
 			[age_restriction
-				.as_ref()
 				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
 		))
 		.with(
@@ -637,7 +664,7 @@ async fn patch_library_thumbnail(
 	session: Session,
 	Json(body): Json<PatchLibraryThumbnail>,
 ) -> ApiResult<ImageResponse> {
-	get_session_server_owner_user(&session)?;
+	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 
 	let client = ctx.get_db();
 
@@ -655,7 +682,10 @@ async fn patch_library_thumbnail(
 	let media = client
 		.media()
 		.find_first(vec![
-			media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
+			media::series::is(vec![
+				series::library_id::equals(Some(id.clone())),
+				series::library::is(vec![library_not_hidden_from_user_filter(&user)]),
+			]),
 			media::id::equals(body.media_id),
 		])
 		.with(
@@ -664,7 +694,9 @@ async fn patch_library_thumbnail(
 		)
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(ApiError::NotFound(String::from(
+			"Library not found or doesn't contain requested book",
+		)))?;
 
 	if media.extension == "epub" {
 		return Err(ApiError::NotSupported);
@@ -703,7 +735,7 @@ async fn replace_library_thumbnail(
 	session: Session,
 	mut upload: Multipart,
 ) -> ApiResult<ImageResponse> {
-	enforce_session_permissions(
+	let user = enforce_session_permissions(
 		&session,
 		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
 	)?;
@@ -713,7 +745,10 @@ async fn replace_library_thumbnail(
 
 	let library = client
 		.library()
-		.find_unique(library::id::equals(id))
+		.find_first(vec![
+			library::id::equals(id),
+			library_not_hidden_from_user_filter(&user),
+		])
 		.exec()
 		.await?
 		.ok_or(ApiError::NotFound(String::from("Library not found")))?;
@@ -760,13 +795,18 @@ async fn replace_library_thumbnail(
 async fn delete_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<Json<()>> {
+	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 	let db = ctx.get_db();
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let result = db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(&user),
+		])
 		.include(library_thumbnails_deletion_include::include())
 		.exec()
 		.await?
@@ -820,12 +860,17 @@ pub struct GenerateLibraryThumbnails {
 async fn generate_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 	Json(input): Json<GenerateLibraryThumbnails>,
 ) -> ApiResult<Json<()>> {
+	let user = enforce_session_permissions(&session, &[UserPermission::ManageLibrary])?;
 	let library = ctx
 		.db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(&user),
+		])
 		.with(library::library_options::fetch())
 		.exec()
 		.await?
@@ -878,13 +923,15 @@ async fn scan_library(
 	query: Query<ScanQueryParam>,
 	session: Session,
 ) -> Result<(), ApiError> {
+	let user = get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
 	let db = ctx.get_db();
-
-	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
 
 	let library = db
 		.library()
-		.find_unique(library::id::equals(id.clone()))
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(&user),
+		])
 		.exec()
 		.await?
 		.ok_or(ApiError::NotFound(format!(
@@ -929,7 +976,7 @@ async fn clean_library(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<CleanLibraryResponse>> {
-	get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
+	let user = get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
 
 	let db = ctx.get_db();
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
@@ -941,7 +988,10 @@ async fn clean_library(
 			// if the library doesn't exist)
 			let _it_exists = client
 				.library()
-				.find_unique(library::id::equals(id.clone()))
+				.find_first(vec![
+					library::id::equals(id.clone()),
+					library_not_hidden_from_user_filter(&user),
+				])
 				.exec()
 				.await?
 				.ok_or(ApiError::NotFound("Library not found".to_string()))?;
@@ -1077,6 +1127,7 @@ async fn create_library(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
 ) -> ApiResult<Json<Library>> {
+	// TODO: Roles
 	let user = get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 
@@ -1225,8 +1276,7 @@ async fn update_library(
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
 ) -> ApiResult<Json<Library>> {
-	get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
-
+	let user = get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
 	let db = ctx.get_db();
 
 	if !path::Path::new(&input.path).exists() {
@@ -1235,6 +1285,16 @@ async fn update_library(
 			input.path
 		)));
 	}
+
+	let _can_access = db
+		.library()
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(&user),
+		])
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
 
 	let library_options = input.library_options.to_owned();
 
@@ -1339,20 +1399,34 @@ async fn delete_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<String>> {
-	get_session_server_owner_user(&session)?;
+	// TODO: Roles
+	let user = get_session_server_owner_user(&session)?;
 	let db = ctx.get_db();
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	trace!(?id, "Attempting to delete library");
 
-	let deleted = db
+	// TODO: This is not ideal, but `delete_many` only returns affected rows, so
+	// I can't do the exact same ops. I want to revisit this though, this API is one
+	// of the older ones and could use a refactor
+	let _can_access = db
+		.library()
+		.find_first(vec![
+			library::id::equals(id.clone()),
+			library_not_hidden_from_user_filter(&user),
+		])
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+
+	let deleted_library = db
 		.library()
 		.delete(library::id::equals(id.clone()))
 		.include(library_series_ids_media_ids_include::include())
 		.exec()
 		.await?;
 
-	let media_ids = deleted
+	let media_ids = deleted_library
 		.series
 		.into_iter()
 		.flat_map(|series| series.media)
@@ -1373,5 +1447,6 @@ async fn delete_library(
 		}
 	}
 
-	Ok(Json(deleted.id))
+	// TODO: convert to library from library_series_ids_media_ids_include::Data
+	Ok(Json(deleted_library.id))
 }

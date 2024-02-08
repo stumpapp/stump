@@ -11,8 +11,8 @@ use crate::{
 		PathUtils,
 	},
 	job::{
-		error::JobError, Job, JobDataExt, JobExecuteLog, JobExt, JobTaskOutput,
-		WorkerCtx, WorkingState,
+		error::JobError, JobExecuteLog, JobExt, JobOutputExt, JobTaskOutput, WorkerCtx,
+		WorkingState, WrappedJob,
 	},
 	prisma::{media, series},
 };
@@ -23,7 +23,7 @@ use super::ImageProcessorOptions;
 type Id = String;
 type MediaIds = Vec<Id>;
 
-#[derive(Debug, Serialize, Deserialize, Type)]
+#[derive(Clone, Debug, Serialize, Deserialize, Type)]
 #[serde(tag = "type")]
 pub enum ThumbnailGenerationJobVariant {
 	SingleLibrary(Id),
@@ -31,7 +31,7 @@ pub enum ThumbnailGenerationJobVariant {
 	MediaGroup(MediaIds),
 }
 
-#[derive(Debug, Serialize, Deserialize, Type)]
+#[derive(Clone, Debug, Serialize, Deserialize, Type)]
 pub struct ThumbnailGenerationJobParams {
 	variant: ThumbnailGenerationJobVariant,
 	force_regenerate: bool,
@@ -66,21 +66,21 @@ pub enum ThumbnailGenerationTask {
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
-pub struct ThumbnailGenerationData {
+pub struct ThumbnailGenerationOutput {
 	/// The total number of files that were visited during the thumbnail generation
 	visited_files: u64,
 	/// The number of thumbnails that were generated
 	generated_thumbnails: u64,
 }
 
-impl JobDataExt for ThumbnailGenerationData {
+impl JobOutputExt for ThumbnailGenerationOutput {
 	fn update(&mut self, updated: Self) {
 		self.visited_files += updated.visited_files;
 		self.generated_thumbnails += updated.generated_thumbnails;
 	}
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ThumbnailGenerationJob {
 	pub options: ImageProcessorOptions,
 	pub params: ThumbnailGenerationJobParams,
@@ -90,8 +90,8 @@ impl ThumbnailGenerationJob {
 	pub fn new(
 		options: ImageProcessorOptions,
 		params: ThumbnailGenerationJobParams,
-	) -> Box<Job<Self>> {
-		Job::new(Self { options, params })
+	) -> Box<WrappedJob<Self>> {
+		WrappedJob::new(Self { options, params })
 	}
 }
 
@@ -99,7 +99,7 @@ impl ThumbnailGenerationJob {
 impl JobExt for ThumbnailGenerationJob {
 	const NAME: &'static str = "thumbnail_generation";
 
-	type Data = ThumbnailGenerationData;
+	type Output = ThumbnailGenerationOutput;
 	type Task = ThumbnailGenerationTask;
 
 	// TODO: description based on params
@@ -110,7 +110,7 @@ impl JobExt for ThumbnailGenerationJob {
 	async fn init(
 		&mut self,
 		ctx: &WorkerCtx,
-	) -> Result<WorkingState<Self::Data, Self::Task>, JobError> {
+	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
 		let tasks = match &self.params.variant {
 			ThumbnailGenerationJobVariant::SingleLibrary(id) => {
 				let library_media = ctx
@@ -153,7 +153,7 @@ impl JobExt for ThumbnailGenerationJob {
 		};
 
 		Ok(WorkingState {
-			data: Some(Self::Data::default()),
+			output: Some(Self::Output::default()),
 			tasks,
 			completed_tasks: 0,
 			logs: vec![],
@@ -168,7 +168,7 @@ impl JobExt for ThumbnailGenerationJob {
 		let core_config = ctx.config.clone();
 		let thumbnail_dir = core_config.get_thumbnails_dir();
 
-		let mut data = Self::Data::default();
+		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
 		match task {
@@ -209,7 +209,7 @@ impl JobExt for ThumbnailGenerationJob {
 						},
 						|_| {
 							// TODO: removed count
-							data.visited_files += expected_removed;
+							output.visited_files += expected_removed;
 						},
 					);
 				}
@@ -239,15 +239,15 @@ impl JobExt for ThumbnailGenerationJob {
 					},
 					|paths| {
 						let count = paths.len() as u64;
-						data.visited_files += count;
-						data.generated_thumbnails += count;
+						output.visited_files += count;
+						output.generated_thumbnails += count;
 					},
 				);
 			},
 		}
 
 		Ok(JobTaskOutput {
-			data,
+			output,
 			logs,
 			subtasks: vec![],
 		})

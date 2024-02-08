@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
 	db::entity::LibraryOptions,
 	filesystem::scanner::LibraryScanJob,
-	job::Job,
+	job::WrappedJob,
 	prisma::{job_schedule_config, library},
 	CoreResult, Ctx,
 };
@@ -81,7 +81,7 @@ impl JobScheduler {
 						let library_path = library.path.clone();
 						let options = library.library_options().ok().take();
 						let result =
-							scheduler_ctx.enqueue_job(Job::new(LibraryScanJob {
+							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
 								id: library.id.clone(),
 								path: library_path,
 								options: options.map(LibraryOptions::from),

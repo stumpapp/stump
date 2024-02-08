@@ -1,3 +1,15 @@
+// This job module would not be possible without other awesome projects in the Rust ecosystem! They
+// taught me a lot, and I don't think I could have done this without them. Taking bits and pieces from
+// each of them, I was able to create a job system that is both flexible and powerful:
+// - https://github.com/spacedriveapp/spacedrive --> The most impressive and inflential one IMO
+// - https://git.asonix.dog/asonix/background-jobs
+// - https://github.com/ZeroAssumptions/aide-de-camp
+// 		- Also their writeup on the fundamentals of their design: https://dev.to/zeroassumptions/build-a-job-queue-with-rust-using-aide-de-camp-part-1-4g5m
+// - https://github.com/lorepozo/workerpool
+// - https://github.com/geofmureithi/apalis
+// - https://github.com/SabrinaJewson/work-queue.rs
+// - https://github.com/Nukesor/pueue
+
 use std::{collections::VecDeque, fmt::Debug, sync::Arc, time::Duration};
 
 use prisma_client_rust::chrono::{DateTime, Utc};
@@ -102,12 +114,11 @@ impl From<String> for JobStatus {
 	}
 }
 
-/// A trait that defines the state of a job. State is frequently updated during execution,
-/// and is used to track the progress of a job, so this trait defines a default [JobDataExt::update]
-/// implementation to update the state with new data.
+/// A trait to extend the output type for a job with a common interface. Job output starts
+/// in an 'empty' state (Default) and is frequently updated during execution.
 ///
 /// The state is also serialized and stored in the DB, so it must implement [Serialize] and [de::DeserializeOwned].
-pub trait JobDataExt: Serialize + de::DeserializeOwned + Debug {
+pub trait JobOutputExt: Serialize + de::DeserializeOwned + Debug {
 	/// Update the state with new data. By default, the implementation is a full replacement
 	fn update(&mut self, updated: Self) {
 		*self = updated;
@@ -125,15 +136,8 @@ pub trait JobDataExt: Serialize + de::DeserializeOwned + Debug {
 	}
 }
 
-/// () is effectively a no-op state, which is useful for jobs that don't need to track state.
-impl JobDataExt for () {
-	fn update(&mut self, _: Self) {
-		// Do nothing
-	}
-}
-
 /// A log that will be persisted from a job's execution
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct JobExecuteLog {
 	pub msg: String,
 	pub context: Option<String>,
@@ -188,54 +192,67 @@ impl JobExecuteLog {
 				log::level::set(self.level.to_string()),
 				log::timestamp::set(self.timestamp.into()),
 				log::job::connect(job::id::equals(job_id.clone())),
-				log::job_id::set(Some(job_id)),
+				// log::job_id::set(Some(job_id)),
 			],
 		)
 	}
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct WorkingState<D, T> {
-	pub data: Option<D>,
+/// The working state of a job. This is frequently updated during execution, and is used to track
+/// progress internally. The entire state is only persisted when a job is paused, otherwise only
+/// the data and logs are persisted.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct WorkingState<O, T> {
+	pub output: Option<O>,
 	pub tasks: VecDeque<T>,
 	pub completed_tasks: usize,
 	pub logs: Vec<JobExecuteLog>,
 }
 
-pub struct JobState<J: JobExt> {
-	job: J,
-	data: Option<J::Data>,
-	tasks: VecDeque<J::Task>,
-	completed_tasks: usize,
-	logs: Vec<JobExecuteLog>,
+impl<O, T> Default for WorkingState<O, T> {
+	fn default() -> Self {
+		Self {
+			output: None,
+			tasks: VecDeque::new(),
+			completed_tasks: 0,
+			logs: vec![],
+		}
+	}
 }
 
 /// A trait that defines the behavior and data types of a job. Jobs are responsible for
 /// intialization and individual task execution. Jobs are managed by an [Executor], which
 /// is responsible for the main run loop of a job.
 #[async_trait::async_trait]
-pub trait JobExt: Send + Sync + Sized + 'static {
+pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 	const NAME: &'static str;
 
-	/// Internal state used by the job. This is updated during execution but not persisted.
-	/// If pausing/resuming is implemented, this will be serialized and stored in the DB.
-	type Data: Serialize
+	/// The output type for the job. This is the data that will be persisted to the DB when the
+	/// job completes. All jobs should have a user-friendly representation of their output.
+	type Output: Serialize
 		+ de::DeserializeOwned
-		+ JobDataExt
+		+ JobOutputExt
 		+ Default
 		+ Debug
 		+ Send
 		+ Sync;
+	/// The type representing a single task for the job. These are executed in a loop until
+	/// all tasks are completed. If a job should be small enough to not require tasks,
+	/// this type should be set to ().
 	type Task: Serialize + de::DeserializeOwned + Send + Sync;
 
+	/// The description of the job, if any
 	fn description(&self) -> Option<String>;
 
-	/// A function that should be called in Self::init to initialize the job state with
+	/// A function that will be called in Self::init to initialize the job state with
 	/// existing data from the DB (if any). Used to support pausing/resuming jobs.
+	///
+	/// Note that when defining a new job, you should not need to invoke this function directly. The
+	/// [Executor] will handle this for you during the beginning of the job's execution.
 	async fn attempt_restore(
 		&self,
 		ctx: &WorkerCtx,
-	) -> Result<Option<WorkingState<Self::Data, Self::Task>>, JobError> {
+	) -> Result<Option<WorkingState<Self::Output, Self::Task>>, JobError> {
 		let db = ctx.db.clone();
 
 		let stored_job = db
@@ -267,18 +284,70 @@ pub trait JobExt: Send + Sync + Sized + 'static {
 		}
 	}
 
-	/// A function that is called before Self::run to initialize the job and gather the
+	/// A function to persist the current working state of the job to the DB. This is called
+	/// when the job is paused in the event that a shutdown occurs before it can be resumed.
+	///
+	/// Note that when defining a new job, you should not need to invoke this function directly. The
+	/// [Executor] will handle this for you whenever the job is paused.
+	async fn persist_restore_point(
+		&self,
+		ctx: &WorkerCtx,
+		output: &Self::Output,
+		tasks: &VecDeque<Self::Task>,
+		completed_tasks: usize,
+		logs: &Vec<JobExecuteLog>,
+	) -> Result<(), JobError> {
+		let db = ctx.db.clone();
+		let job_id = ctx.job_id.clone();
+
+		let json_output = serde_json::to_value(output)
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+		let json_tasks = serde_json::to_value(tasks)
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+		let json_logs = serde_json::to_value(logs)
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+		let working_state = serde_json::json!({
+			"output": json_output,
+			"tasks": json_tasks,
+			"completed_tasks": completed_tasks,
+			"logs": json_logs,
+		});
+
+		let save_state = serde_json::to_vec(&working_state)
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+
+		let persisted_job = db
+			.job()
+			.update(
+				job::id::equals(job_id),
+				vec![job::save_state::set(Some(save_state))],
+			)
+			.exec()
+			.await
+			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
+		tracing::trace!(?persisted_job, "Persisted job save state to DB");
+
+		Ok(())
+	}
+
+	/// A function that is called before Self::execute to initialize the job and gather the
 	/// required tasks
 	async fn init(
 		&mut self,
 		ctx: &WorkerCtx,
-	) -> Result<WorkingState<Self::Data, Self::Task>, JobError>;
+	) -> Result<WorkingState<Self::Output, Self::Task>, JobError>;
 
 	/// An optional function to perform any cleanup or finalization after the job has
-	/// finished its run loop. This is called after the job has completed (when [Executor::run]
+	/// finished its run loop. This is called after the job has completed (when [Executor::execute]
 	/// returns an Ok).
-	async fn cleanup(&self, _: &WorkerCtx, _: &Self::Data) -> Result<(), JobError> {
+	async fn cleanup(&self, _: &WorkerCtx, _: &Self::Output) -> Result<(), JobError> {
 		Ok(())
+	}
+
+	/// An optional function to determine if a task should be requeued. This is called after
+	/// a job fully completes in a non-successful state, but not after critical task errors.
+	fn should_requeue(&self, _: usize) -> bool {
+		false
 	}
 
 	/// A function to execute a specific task. This will be called repeatedly until all
@@ -290,29 +359,46 @@ pub trait JobExt: Send + Sync + Sized + 'static {
 	) -> Result<JobTaskOutput<Self>, JobError>;
 }
 
-pub struct Job<J: JobExt> {
+/// A wrapper struct that will act as the main [Executor] for jobs defined throughout
+/// Stump.
+pub struct WrappedJob<J: JobExt> {
+	/// The ID of the job, which is created _first_ via this wrapper and will get persisted to the DB
+	/// afterwords
 	id: Uuid,
-	state: Option<JobState<J>>,
+	/// The internal job that will be executed. This is an Option to allow for the job to be
+	/// taken out of the wrapper and put back in after a requeue
+	inner_job: Option<J>,
+	/// The inital state of the job, used to build its working state. This is an Option to allow for
+	/// the state to be taken out of the wrapper without a clone. At the end of the job, the state
+	/// will be reinitialized to its default state.
+	initial_state: Option<WorkingState<J::Output, J::Task>>,
+	/// The number of attempts the job has made thus far. This is used to determine if the job
+	/// should be requeued. Requeue logic is defined externally in the job's implementation.
+	attempts: usize,
 }
 
-impl<J: JobExt> Job<J> {
+impl<J: JobExt> WrappedJob<J> {
+	/// Create a new [WrappedJob] with the given job, wrapping itself in a Box
 	pub fn new(job: J) -> Box<Self> {
 		Box::new(Self {
 			id: Uuid::new_v4(),
-			state: Some(JobState {
-				job,
-				data: None,
+			inner_job: Some(job),
+			initial_state: Some(WorkingState {
+				output: None,
 				tasks: VecDeque::new(),
 				completed_tasks: 0,
 				logs: vec![],
 			}),
+			attempts: 0,
 		})
 	}
 }
 
+/// The output of a job's execution. To avoid the need for a generic type, the output data is serialized
+/// _prior_ to being returned from the [Executor::execute] function.
 #[derive(Debug)]
 pub struct ExecutorOutput {
-	pub data: Option<serde_json::Value>,
+	pub output: Option<serde_json::Value>,
 	pub logs: Vec<JobExecuteLog>,
 }
 
@@ -327,9 +413,12 @@ pub trait Executor: Send + Sync {
 	fn name(&self) -> &'static str;
 	/// The optional description for the internal job
 	fn description(&self) -> Option<String>;
-	/// A function to persist the state of the job to the DB. This is called immediately before the job
-	/// would otherwise complete (at the end of [Executor::run]).
-	async fn persist_state(
+	/// A function to determine if a job should be requeued. This is called after
+	/// a job fully completes in a non-successful state, but not after critical task errors.
+	fn should_requeue(&self) -> bool;
+	/// A function to persist the data of the job to the DB. This is called immediately before the job
+	/// would otherwise complete (at the end of [Executor::execute]).
+	async fn persist_output(
 		&self,
 		ctx: WorkerCtx,
 		output: ExecutorOutput,
@@ -340,24 +429,18 @@ pub trait Executor: Send + Sync {
 
 		let expected_logs = output.logs.len();
 		if expected_logs > 0 {
-			let persisted_logs = db
-				.log()
-				.create_many(
-					output
-						.logs
-						.into_iter()
-						.map(|error| error.into_prisma(job_id.to_string()))
-						.collect(),
-				)
-				.exec()
-				.await
-				.map_or_else(
-					|error| {
-						tracing::error!(?error, "Failed to persist job logs");
-						0
-					},
-					|count| count as usize,
-				);
+			let creates = output
+				.logs
+				.into_iter()
+				.map(|log| log.into_prisma(job_id.to_string()))
+				.map(|(msg, params)| db.log().create(msg, params));
+			let persisted_logs = db._batch(creates).await.map_or_else(
+				|error| {
+					tracing::error!(?error, "Failed to persist job logs!");
+					0
+				},
+				|logs| logs.len(),
+			);
 
 			if persisted_logs != expected_logs {
 				tracing::warn!(
@@ -368,7 +451,7 @@ pub trait Executor: Send + Sync {
 			}
 		}
 
-		let output_data = serde_json::to_vec(&output.data)
+		let output_data = serde_json::to_vec(&output.output)
 			.map_err(|error| JobError::StateSaveFailed(error.to_string()))?;
 
 		let persisted_job_with_data = db
@@ -395,7 +478,7 @@ pub trait Executor: Send + Sync {
 		Ok(())
 	}
 	/// A function to persist the failure of the job to the DB. This is called when the job
-	/// has failed with a critical error (when [Executor::run] returns an Err).
+	/// has failed with a critical error (when [Executor::execute] returns an Err).
 	async fn persist_failure(
 		&self,
 		ctx: WorkerCtx,
@@ -436,7 +519,7 @@ pub trait Executor: Send + Sync {
 }
 
 #[async_trait::async_trait]
-impl<J: JobExt> Executor for Job<J> {
+impl<J: JobExt> Executor for WrappedJob<J> {
 	fn id(&self) -> Uuid {
 		self.id
 	}
@@ -446,7 +529,13 @@ impl<J: JobExt> Executor for Job<J> {
 	}
 
 	fn description(&self) -> Option<String> {
-		self.state.as_ref().and_then(|s| s.job.description())
+		self.inner_job.as_ref().and_then(|job| job.description())
+	}
+
+	fn should_requeue(&self) -> bool {
+		self.inner_job
+			.as_ref()
+			.map_or(false, |job| job.should_requeue(self.attempts))
 	}
 
 	async fn execute(&mut self, ctx: WorkerCtx) -> Result<ExecutorOutput, JobError> {
@@ -455,25 +544,32 @@ impl<J: JobExt> Executor for Job<J> {
 			"Initializing job",
 		));
 
+		self.attempts += 1;
 		let job_id = self.id();
 		let job_name = self.name();
 		let commands_rx = ctx.commands_rx.clone();
 		tracing::info!(?job_id, ?job_name, "Starting job");
 
-		let JobState {
-			mut job,
-			data,
+		let mut inner_job = self.inner_job.take().ok_or_else(|| {
+			JobError::InitFailed("Job was unexpectedly None".to_string())
+		})?;
+		let WorkingState {
+			output,
 			mut tasks,
 			mut completed_tasks,
 			mut logs,
-		} = self.state.take().ok_or_else(|| {
-			JobError::InitFailed("Job state was unexpectedly None".to_string())
-		})?;
+		} = self.initial_state.take().unwrap_or_else(|| {
+			tracing::warn!(
+				current_attempt = self.attempts,
+				"Initial state was not defined for job. This is a bug!"
+			);
+			WorkingState::default()
+		});
 
-		let mut working_data = if let Some(initial_data) = data {
+		let mut working_output = if let Some(initial_data) = output {
 			tracing::debug!(?initial_data, "Job started with initial state");
 			Some(initial_data)
-		} else if let Some(restore_point) = job.attempt_restore(&ctx).await? {
+		} else if let Some(restore_point) = inner_job.attempt_restore(&ctx).await? {
 			// Replace the state with the restored state
 			tasks = restore_point.tasks;
 			completed_tasks = restore_point.completed_tasks;
@@ -485,10 +581,10 @@ impl<J: JobExt> Executor for Job<J> {
 			));
 
 			// Return the data from the restore point
-			restore_point.data.or_else(|| Some(Default::default()))
+			restore_point.output.or_else(|| Some(Default::default()))
 		} else {
 			tracing::debug!("No restore point found, initializing job");
-			let init_result = job.init(&ctx).await?;
+			let init_result = inner_job.init(&ctx).await?;
 			tasks = init_result.tasks;
 			completed_tasks = init_result.completed_tasks;
 			logs = init_result.logs;
@@ -499,7 +595,7 @@ impl<J: JobExt> Executor for Job<J> {
 			));
 
 			// Return the data from the init result
-			init_result.data.or_else(|| Some(Default::default()))
+			init_result.output.or_else(|| Some(Default::default()))
 		}
 		.ok_or_else(|| {
 			JobError::InitFailed(
@@ -508,7 +604,7 @@ impl<J: JobExt> Executor for Job<J> {
 		})?;
 
 		// Setup our references since the loop would otherwise take ownership
-		let job = Arc::new(job);
+		let job = Arc::new(inner_job.clone());
 		let mut ctx = Arc::new(ctx);
 
 		tracing::debug!(task_count = tasks.len(), "Starting tasks");
@@ -517,17 +613,27 @@ impl<J: JobExt> Executor for Job<J> {
 			// The state can dynamically change during the run loop, and should be re-checked
 			// at the start of each iteration. If the state is Paused, the loop should wait for
 			// Running with a reasonable timeout before continuing.
-			let mut worker_state = ctx.get_state().await;
-			if worker_state == WorkerState::Paused {
+			let mut worker_status = ctx.get_status().await;
+			if worker_status == WorkerStatus::Paused {
 				ctx.report_progress(JobProgress::msg("Paused acknowledged"));
-				while worker_state == WorkerState::Paused {
+				let save_result = job
+					.persist_restore_point(
+						&ctx,
+						&working_output,
+						&tasks,
+						completed_tasks,
+						&logs,
+					)
+					.await;
+				tracing::debug!(?save_result, "Persisted restore point?");
+				while worker_status == WorkerStatus::Paused {
 					tracing::debug!("Job is paused. Waiting for resume...");
-					// Wait for a reasonable amount of time before checking again
-					worker_state = ctx.get_state().await;
-					if worker_state == WorkerState::Running {
+					if worker_status == WorkerStatus::Running {
 						ctx.report_progress(JobProgress::msg("Resume acknowledged"));
 					}
+					// Wait for a reasonable amount of time before checking again
 					tokio::time::sleep(Duration::from_secs(5)).await;
+					worker_status = ctx.get_status().await;
 				}
 			}
 
@@ -538,8 +644,9 @@ impl<J: JobExt> Executor for Job<J> {
 			));
 
 			let next_task = tasks.pop_front().ok_or_else(|| {
+				tracing::error!(completed_tasks, "No tasks remain after explicit check!");
 				JobError::TaskFailed(
-					"No tasks unexpectedly remain! This is a bug?".to_string(),
+					"No tasks unexpectedly remain! This doesn't make sense!".to_string(),
 				)
 			})?;
 
@@ -557,24 +664,24 @@ impl<J: JobExt> Executor for Job<J> {
 				Err(e) => {
 					tracing::error!(?e, "Task handler failed");
 					logs.push(JobExecuteLog::error(format!(
-						"Critical task error: {:?}",
-						e.to_string()
+						"Critical task error: {}",
+						e
 					)));
 					return Ok(ExecutorOutput {
-						data: working_data.into_json(),
+						output: working_output.into_json(),
 						logs,
 					});
 				},
 			};
 			let JobTaskOutput {
-				data: task_data,
+				output: task_output,
 				logs: task_logs,
 				subtasks,
 			} = output;
 
 			// Update our working data and any logs with the new data/logs from the
 			// completed task. Then increment the task index
-			working_data.update(task_data);
+			working_output.update(task_output);
 			logs.extend(task_logs);
 			completed_tasks += 1;
 
@@ -582,7 +689,10 @@ impl<J: JobExt> Executor for Job<J> {
 			ctx = returned_ctx;
 
 			// If there are subtasks, we need to insert them into the tasks queue at the
-			// front, so they are executed next
+			// front, so they are executed next. I think this can be polarizing, since on the
+			// UI it would be surprising to see the task count go up after a task is completed lol
+			// However, this is the most performant way aside from queueing the subtasks at the end
+			// as separate jobs, which could balloon the queue with a lot of small jobs.
 			if !subtasks.is_empty() {
 				let subtask_count = subtasks.len();
 				let remaining_tasks = tasks.split_off(0);
@@ -614,15 +724,21 @@ impl<J: JobExt> Executor for Job<J> {
 
 		let logs_count = logs.len();
 		tracing::debug!(?logs_count, "All tasks completed");
-		if let Err(err) = job.cleanup(&ctx, &working_data).await {
+		if let Err(err) = job.cleanup(&ctx, &working_output).await {
 			logs.push(JobExecuteLog::error(format!(
 				"Cleanup failed: {:?}",
 				err.to_string()
 			)));
 		}
 
+		// Replace the state with defaults. This is to ensure there is a reset in the
+		// event of a requeue
+		self.initial_state = Some(WorkingState::default());
+		// Put the inner job back into the WrappedJob
+		self.inner_job = Some(inner_job);
+
 		Ok(ExecutorOutput {
-			data: working_data.into_json(),
+			output: working_output.into_json(),
 			logs,
 		})
 	}

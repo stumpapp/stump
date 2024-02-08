@@ -252,14 +252,14 @@ mod tests {
 		// TODO: Fix this... Must move all job defs to the core...
 		file.write_all(
 			format!(
-				"export type CoreJobOutput = LibraryScanData | SeriesScanData | ThumbnailGenerationData | unknown\n\n"
+				"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown\n\n"
 			)
 			.as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<JobProgress>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<LibraryScanData>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<SeriesScanData>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryScanOutput>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<SeriesScanOutput>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<ThumbnailGenerationJobVariant>()?).as_bytes(),
 		)?;
@@ -267,7 +267,7 @@ mod tests {
 			format!("{}\n\n", ts_export::<ThumbnailGenerationJobParams>()?).as_bytes(),
 		)?;
 		file.write_all(
-			format!("{}\n\n", ts_export::<ThumbnailGenerationData>()?).as_bytes(),
+			format!("{}\n\n", ts_export::<ThumbnailGenerationOutput>()?).as_bytes(),
 		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<User>()?).as_bytes())?;

@@ -37,7 +37,6 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [Core](#core)
   - [Crates](#crates)
   - [Docs](#docs)
-  - [Interface](#interface)
   - [Packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
 </details>
@@ -159,6 +158,8 @@ Stand-alone applications that can be run independently, at `/apps` in the root o
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server
 - `web`: A React application, the primary UI for both the built-in web app the server serves and the desktop app
 
+The only exception to this is the `docs` app, which is a NextJS application and is located at `/docs` in the root of the project.
+
 ### Core
 
 A Rust crate containing Stump's core functionalities, at `/core` in the root of the project
@@ -176,10 +177,6 @@ Various Rust crates, at `/crates` in the root of the project:
 
 A NextJS application for the Stump documentation site at `/docs` in the root of the project
 
-### Interface
-
-A React component that is essentially the "main" UI for Stump, at `/interface` in the root of the project. It is used in both the `web` and `desktop` apps
-
 ### Packages
 
 Various TypeScript packages, at `/packages` in the root of the project:
@@ -187,6 +184,7 @@ Various TypeScript packages, at `/packages` in the root of the project:
 - `api`: All of the API functions used by the `client` package
 - `client`: React-query config, hooks, and other client-side utilities
 - `components`: Shared React components for the web and desktop applications
+- `browser`: A React component that is essentially the "main" UI for Stump on browser-based platforms. It is isolated in order to be re-used in the two browser-based apps: `web` and `desktop`
 - `types`: Shared TypeScript types for interfacing with Stump's core and API
 
 </details>

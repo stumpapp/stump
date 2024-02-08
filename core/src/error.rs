@@ -33,7 +33,7 @@ pub enum CoreError {
 	Utf8ConversionError(#[from] std::string::FromUtf8Error),
 	#[error("Failed to initialize job: {0}")]
 	JobInitializationError(String),
-	#[error("Something went wrong: {0}")]
+	#[error("{0}")]
 	InternalError(String),
 	#[error("This feature is not yet implemented: {0}")]
 	UnImplemented(String),

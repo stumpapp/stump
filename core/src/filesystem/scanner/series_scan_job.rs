@@ -15,8 +15,8 @@ use crate::{
 		MediaBuilder,
 	},
 	job::{
-		error::JobError, Job, JobControllerCommand, JobDataExt, JobExecuteLog, JobExt,
-		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState,
+		error::JobError, JobControllerCommand, JobExecuteLog, JobExt, JobOutputExt,
+		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
@@ -32,6 +32,7 @@ pub enum SeriesScanTask {
 	VisitMedia(Vec<PathBuf>),
 }
 
+#[derive(Clone)]
 pub struct SeriesScanJob {
 	pub id: String,
 	pub path: String,
@@ -39,8 +40,8 @@ pub struct SeriesScanJob {
 }
 
 impl SeriesScanJob {
-	pub fn new(id: String, path: String) -> Box<Job<SeriesScanJob>> {
-		Job::new(Self {
+	pub fn new(id: String, path: String) -> Box<WrappedJob<SeriesScanJob>> {
+		WrappedJob::new(Self {
 			id,
 			path,
 			options: None,
@@ -49,14 +50,14 @@ impl SeriesScanJob {
 }
 
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
-pub struct SeriesScanData {
+pub struct SeriesScanOutput {
 	/// The number of files to scan relative to the series root
 	total_files: u64,
 	created_media: u64,
 	updated_media: u64,
 }
 
-impl JobDataExt for SeriesScanData {
+impl JobOutputExt for SeriesScanOutput {
 	fn update(&mut self, updated: Self) {
 		self.total_files += updated.total_files;
 		self.created_media += updated.created_media;
@@ -68,7 +69,7 @@ impl JobDataExt for SeriesScanData {
 impl JobExt for SeriesScanJob {
 	const NAME: &'static str = "series_scan";
 
-	type Data = SeriesScanData;
+	type Output = SeriesScanOutput;
 	type Task = SeriesScanTask;
 
 	fn description(&self) -> Option<String> {
@@ -78,14 +79,8 @@ impl JobExt for SeriesScanJob {
 	async fn init(
 		&mut self,
 		ctx: &WorkerCtx,
-	) -> Result<WorkingState<Self::Data, Self::Task>, JobError> {
-		if let Some(restore_point) = self.attempt_restore(ctx).await? {
-			// TODO: consider more logging here
-			tracing::debug!("Restoring series scan job from save state");
-			return Ok(restore_point);
-		}
-
-		let mut data = Self::Data::default();
+	) -> Result<WorkingState<Self::Output, Self::Task>, JobError> {
+		let mut output = Self::Output::default();
 		let library_options = ctx
 			.db
 			.library_options()
@@ -134,7 +129,7 @@ impl JobExt for SeriesScanJob {
 			media_to_visit = media_to_visit.len(),
 			"Walked series"
 		);
-		data.total_files = seen_files + ignored_files;
+		output.total_files = seen_files + ignored_files;
 
 		let tasks = VecDeque::from(chain_optional_iter(
 			[],
@@ -152,16 +147,20 @@ impl JobExt for SeriesScanJob {
 		));
 
 		Ok(WorkingState {
-			data: Some(data),
+			output: Some(output),
 			tasks,
 			completed_tasks: 0,
 			logs: vec![],
 		})
 	}
 
-	async fn cleanup(&self, ctx: &WorkerCtx, data: &Self::Data) -> Result<(), JobError> {
-		let did_create = data.created_media > 0;
-		let did_update = data.updated_media > 0;
+	async fn cleanup(
+		&self,
+		ctx: &WorkerCtx,
+		output: &Self::Output,
+	) -> Result<(), JobError> {
+		let did_create = output.created_media > 0;
+		let did_update = output.updated_media > 0;
 		let image_options = self
 			.options
 			.as_ref()
@@ -172,13 +171,15 @@ impl JobExt for SeriesScanJob {
 				tracing::debug!("Enqueuing thumbnail generation job");
 				ctx.send_batch(vec![
 					JobProgress::msg("Enqueuing thumbnail generation job").into_send(),
-					JobControllerCommand::EnqueueJob(Job::new(ThumbnailGenerationJob {
-						options,
-						params: ThumbnailGenerationJobParams::single_series(
-							self.id.clone(),
-							false,
-						),
-					}))
+					JobControllerCommand::EnqueueJob(WrappedJob::new(
+						ThumbnailGenerationJob {
+							options,
+							params: ThumbnailGenerationJobParams::single_series(
+								self.id.clone(),
+								false,
+							),
+						},
+					))
 					.into_send(),
 				]);
 			},
@@ -195,17 +196,17 @@ impl JobExt for SeriesScanJob {
 		ctx: &WorkerCtx,
 		task: Self::Task,
 	) -> Result<JobTaskOutput<Self>, JobError> {
-		let mut data = Self::Data::default();
+		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
 		match task {
 			SeriesScanTask::MarkMissingMedia(paths) => {
 				let JobTaskOutput {
-					data: new_data,
+					output: new_output,
 					logs: new_logs,
 					..
-				} = handle_missing_media(&ctx.db, &self.id, paths, data, logs).await?;
-				data = new_data;
+				} = handle_missing_media(&ctx.db, &self.id, paths, output, logs).await?;
+				output = new_output;
 				logs = new_logs;
 			},
 			SeriesScanTask::CreateMedia(paths) => {
@@ -216,22 +217,22 @@ impl JobExt for SeriesScanJob {
 					chunk_size: 10,
 				};
 				let JobTaskOutput {
-					data: new_data,
+					output: new_output,
 					logs: new_logs,
 					..
-				} = handle_create_series_media(paths, series_ctx, ctx, data, logs).await?;
-				data = new_data;
+				} = handle_create_series_media(paths, series_ctx, ctx, output, logs).await?;
+				output = new_output;
 				logs = new_logs;
 			},
 			SeriesScanTask::VisitMedia(_paths) => {
 				unimplemented!()
-				// let result = handle_visit_media(&ctx.db, paths, data, logs).await;
+				// let result = handle_visit_media(&ctx.db, paths, output, logs).await;
 				// return result;
 			},
 		}
 
 		Ok(JobTaskOutput {
-			data,
+			output,
 			logs,
 			subtasks: vec![],
 		})
@@ -294,13 +295,13 @@ async fn handle_missing_media(
 	client: &PrismaClient,
 	series_id: &str,
 	media_paths: Vec<PathBuf>,
-	mut data: SeriesScanData,
+	mut output: SeriesScanOutput,
 	mut logs: Vec<JobExecuteLog>,
 ) -> Result<JobTaskOutput<SeriesScanJob>, JobError> {
 	if media_paths.is_empty() {
 		tracing::debug!("No missing media to handle");
 		return Ok(JobTaskOutput {
-			data,
+			output,
 			logs,
 			subtasks: vec![],
 		});
@@ -332,13 +333,13 @@ async fn handle_missing_media(
 				0
 			},
 			|count| {
-				data.updated_media += count as u64;
+				output.updated_media += count as u64;
 				count
 			},
 		);
 
 	Ok(JobTaskOutput {
-		data,
+		output,
 		logs,
 		subtasks: vec![],
 	})
@@ -355,13 +356,13 @@ async fn handle_create_series_media(
 	paths: Vec<PathBuf>,
 	series_ctx: SeriesCtx,
 	ctx: &WorkerCtx,
-	mut data: SeriesScanData,
+	mut output: SeriesScanOutput,
 	mut logs: Vec<JobExecuteLog>,
 ) -> Result<JobTaskOutput<SeriesScanJob>, JobError> {
 	if paths.is_empty() {
 		tracing::debug!("No media to create for series");
 		return Ok(JobTaskOutput {
-			data,
+			output,
 			logs,
 			subtasks: vec![],
 		});
@@ -401,7 +402,7 @@ async fn handle_create_series_media(
 					match create_media(&ctx.db, generated).await {
 						Ok(_created_media) => {
 							// TODO: emit event
-							data.created_media += 1;
+							output.created_media += 1;
 						},
 						Err(e) => {
 							tracing::error!(error = ?e, ?media_path, "Failed to create media");
@@ -424,7 +425,7 @@ async fn handle_create_series_media(
 	}
 
 	Ok(JobTaskOutput {
-		data,
+		output,
 		logs,
 		subtasks: vec![],
 	})

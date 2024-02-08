@@ -58,6 +58,7 @@ impl JobManager {
 		Arc::new(self)
 	}
 
+	/// Get a reference to the event broadcaster
 	fn get_event_tx(&self) -> broadcast::Sender<CoreEvent> {
 		self.core_event_tx.clone()
 	}
@@ -193,6 +194,8 @@ impl JobManager {
 		)
 	}
 
+	/// Shutdown all workers and the job manager. This will be called when the application
+	/// is shutting down
 	pub async fn shutdown(self: Arc<Self>) {
 		let workers = self.workers.read().await;
 		join_all(workers.values().map(|worker| worker.cancel())).await;

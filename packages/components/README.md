@@ -1,6 +1,6 @@
 # Components
 
-This package is the component library used throughout the Stump web and desktop interface(s). A vast majority of the foundational components come from [shadcn/ui](https://ui.shadcn.com/docs), a wonderful free and open source collection of React components build with [radix-ui](https://radix-ui.com/) and [TailwindCSS](https://tailwindcss.com/). Huge thanks to [shadcn](https://github.com/shadcn) for their work!
+This package is the component library used throughout the Stump web and desktop apps. A vast majority of the foundational components come from [shadcn/ui](https://ui.shadcn.com/docs), a wonderful free and open source collection of React components build with [radix-ui](https://radix-ui.com/) and [TailwindCSS](https://tailwindcss.com/). Huge thanks to [shadcn](https://github.com/shadcn) for their work!
 
 ## Usage
 

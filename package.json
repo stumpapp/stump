@@ -10,7 +10,7 @@
 		"lint": "eslint --ext .ts,.tsx,.cts,.mts,.js,.jsx,.cjs,.mjs --fix --report-unused-disable-directives --no-error-on-unmatched-pattern --exit-on-fatal-error --ignore-path .gitignore .",
 		"client": "pnpm --filter @stump/client --",
 		"desktop": "pnpm --filter @stump/desktop --",
-		"interface": "pnpm --filter @stump/interface --",
+		"browser": "pnpm --filter @stump/browser --",
 		"web": "pnpm --filter @stump/web --",
 		"docs": "pnpm --filter @stump/docs --",
 		"server": "pnpm --filter @stump/server --",

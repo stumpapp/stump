@@ -4,8 +4,8 @@ use utoipa::ToSchema;
 
 use crate::{
 	filesystem::{
-		image::ThumbnailGenerationData,
-		scanner::{LibraryScanData, SeriesScanData},
+		image::ThumbnailGenerationOutput,
+		scanner::{LibraryScanOutput, SeriesScanOutput},
 	},
 	job::JobStatus,
 	prisma::job,
@@ -22,9 +22,9 @@ pub type ExternalJobOutput = serde_json::Value;
 #[derive(Clone, Serialize, Deserialize, Type, ToSchema)]
 #[serde(untagged)]
 pub enum CoreJobOutput {
-	LibraryScan(LibraryScanData),
-	SeriesScan(SeriesScanData),
-	ThumbnailGeneration(ThumbnailGenerationData),
+	LibraryScan(LibraryScanOutput),
+	SeriesScan(SeriesScanOutput),
+	ThumbnailGeneration(ThumbnailGenerationOutput),
 	External(ExternalJobOutput),
 }
 

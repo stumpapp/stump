@@ -2,7 +2,10 @@ use std::str::FromStr;
 
 use serde::{de, Deserialize, Serialize};
 use serde_untagged::UntaggedEnumVisitor;
-use stump_core::db::{entity::age_rating_deserializer, query::ordering::QueryOrder};
+use stump_core::db::{
+	entity::{age_rating_deserializer, LogLevel},
+	query::ordering::QueryOrder,
+};
 use utoipa::ToSchema;
 
 use crate::errors::APIError;
@@ -313,6 +316,14 @@ pub struct MediaFilter {
 	pub base_filter: MediaBaseFilter,
 	#[serde(flatten)]
 	pub relation_filter: MediaRelationFilter,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct LogFilter {
+	pub level: Option<LogLevel>,
+	pub job_id: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub timestamp: Option<ValueOrRange<String>>,
 }
 
 #[cfg(test)]

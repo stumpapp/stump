@@ -2,7 +2,7 @@ import { API } from '@stump/api'
 import type { CoreEvent } from '@stump/types'
 import { useEffect, useMemo } from 'react'
 
-import { useStumpStore } from '../stores'
+import { useAppStore } from '../stores/app'
 
 interface SseOptions {
 	onOpen?: (event: Event) => void
@@ -72,7 +72,7 @@ interface Props {
 export function useStumpSse({ onEvent }: Props) {
 	const URI = API?.getUri()
 
-	const setConnected = useStumpStore(({ setConnected }) => setConnected)
+	const setConnected = useAppStore((store) => store.setIsConnectedWithServer)
 
 	const eventSourceUrl = useMemo(() => {
 		let url = URI

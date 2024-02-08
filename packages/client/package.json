@@ -14,7 +14,7 @@
 		"deep-equal": "^2.2.3",
 		"immer": "^10.0.3",
 		"react-use-websocket": "^4.5.0",
-		"zustand": "^4.4.3"
+		"zustand": "^4.5.0"
 	},
 	"devDependencies": {
 		"@types/deep-equal": "^1.0.4",

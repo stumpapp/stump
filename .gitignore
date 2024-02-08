@@ -3,7 +3,7 @@
 
 # Logs
 logs/
-!interface/**/logs/
+!packages/browser/**/logs/
 *.log
 
 # Cache

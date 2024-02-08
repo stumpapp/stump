@@ -18,13 +18,14 @@ use stump_core::{
 			pagination::{Pageable, Pagination, PaginationQuery},
 		},
 	},
-	prisma::log::{self, OrderByParam as LogOrderByParam},
+	prisma::log::{self, OrderByParam as LogOrderByParam, WhereParam},
 };
 use tower_sessions::Session;
 
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
+	filter::{chain_optional_iter, LogFilter},
 	middleware::auth::Auth,
 	routers::sse::stream_shutdown_guard,
 	utils::get_session_server_owner_user,
@@ -44,6 +45,20 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+pub(crate) fn apply_log_filters(filters: LogFilter) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			filters
+				.level
+				.map(|level| log::level::equals(level.to_string())),
+			filters
+				.job_id
+				.map(|job_id| log::job_id::equals(Some(job_id))),
+		],
+	)
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/logs",
@@ -55,6 +70,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 /// Get all logs from the database.
 async fn get_logs(
 	State(ctx): State<AppState>,
+	filters: QsQuery<LogFilter>,
 	order: QsQuery<QueryOrder>,
 	pagination: QsQuery<PaginationQuery>,
 ) -> APIResult<Json<Pageable<Vec<Log>>>> {
@@ -67,11 +83,15 @@ async fn get_logs(
 	let order_by_param: LogOrderByParam = order.try_into()?;
 
 	let pagination_cloned = pagination.clone();
+	let where_params = apply_log_filters(filters.0);
 
 	let (logs, count) = db
 		._transaction()
 		.run(|client| async move {
-			let mut query = client.log().find_many(vec![]).order_by(order_by_param);
+			let mut query = client
+				.log()
+				.find_many(where_params.clone())
+				.order_by(order_by_param);
 
 			if !is_unpaged {
 				match pagination_cloned {
@@ -105,7 +125,7 @@ async fn get_logs(
 
 			client
 				.log()
-				.count(vec![])
+				.count(where_params)
 				.exec()
 				.await
 				.map(|count| (logs, Some(count)))

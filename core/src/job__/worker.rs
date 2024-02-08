@@ -31,7 +31,7 @@ enum WorkerUpdate {
 }
 
 #[derive(Debug)]
-enum WorkerState {
+enum WorkerStatus {
 	Idle,
 	Loaded,
 	Working(f64),
@@ -42,7 +42,7 @@ enum WorkerState {
 #[derive(Debug)]
 pub struct WorkerManager {
 	/// Indicates the state of the associated worker thread.
-	state: WorkerState,
+	state: WorkerStatus,
 	/// Indicates the job [Uuid] pf the worker if it has a job.
 	job_id: Option<Uuid>,
 
@@ -61,7 +61,7 @@ impl WorkerManager {
 
 		// Return Self to manage the thread.
 		Self {
-			state: WorkerState::Idle,
+			state: WorkerStatus::Idle,
 			job_id: None,
 
 			worker_tx,
@@ -75,14 +75,14 @@ impl WorkerManager {
 			match update {
 				WorkerUpdate::JobStarted(id) => {
 					self.job_id = Some(id);
-					self.state = WorkerState::Working(0.0);
+					self.state = WorkerStatus::Working(0.0);
 				},
 				WorkerUpdate::JobProgress(prog) => {
-					self.state = WorkerState::Working(prog)
+					self.state = WorkerStatus::Working(prog)
 				},
 				WorkerUpdate::JobCompleted => {
 					self.job_id = None;
-					self.state = WorkerState::Idle;
+					self.state = WorkerStatus::Idle;
 				},
 				WorkerUpdate::JobStartError(_) => panic!("Uhoh JobStartError"),
 				WorkerUpdate::Shutdown => todo!(),
@@ -93,7 +93,7 @@ impl WorkerManager {
 	/// Returns `true` if the associated worker thread is ready for a new job.
 	pub fn is_idle(&self) -> bool {
 		match self.state {
-			WorkerState::Idle => true,
+			WorkerStatus::Idle => true,
 			_ => false,
 		}
 	}
@@ -101,7 +101,7 @@ impl WorkerManager {
 	pub fn start_job(&mut self, job: Box<dyn StatefulJob>) {
 		// TODO handle errors
 		self.worker_tx.send(WorkerCommand::StartJob(job)).unwrap();
-		self.state = WorkerState::Loaded;
+		self.state = WorkerStatus::Loaded;
 	}
 }
 

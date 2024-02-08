@@ -6,6 +6,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
+use specta::Type;
 use stump_core::{
 	db::{
 		entity::{JobSchedulerConfig, PersistedJob},
@@ -21,7 +22,6 @@ use stump_core::{
 	},
 };
 use tokio::sync::oneshot;
-use tracing::{debug, trace};
 use utoipa::ToSchema;
 
 use crate::{
@@ -52,6 +52,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
+#[derive(Deserialize, Serialize, ToSchema, Type)]
+pub struct GetJobsParams {
+	#[serde(default)]
+	pub load_logs: bool,
+}
+
 // TODO: support filtering
 #[utoipa::path(
 	get,
@@ -68,12 +74,14 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn get_jobs(
 	order: QsQuery<QueryOrder>,
 	pagination_query: Query<PaginationQuery>,
+	relation_query: Query<GetJobsParams>,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<Pageable<Vec<PersistedJob>>>> {
 	let pagination = pagination_query.0.get();
 	let order = order.0;
+	let load_logs = relation_query.load_logs;
 
-	trace!(?pagination, ?order, "get_jobs");
+	tracing::trace!(load_logs, ?pagination, ?order, "get_jobs");
 
 	let db = &ctx.db;
 	let is_unpaged = pagination.is_unpaged();
@@ -85,6 +93,10 @@ async fn get_jobs(
 		._transaction()
 		.run(|client| async move {
 			let mut query = client.job().find_many(vec![]).order_by(order_by_param);
+
+			if load_logs {
+				query = query.with(job::logs::fetch(vec![]));
+			}
 
 			if !is_unpaged {
 				match pagination_cloned {
@@ -145,7 +157,7 @@ async fn get_jobs(
 /// Delete all jobs from the database.
 async fn delete_jobs(State(ctx): State<AppState>) -> APIResult<()> {
 	let result = ctx.db.job().delete_many(vec![]).exec().await?;
-	debug!("Deleted {} job reports", result);
+	tracing::debug!("Deleted {} job reports", result);
 	Ok(())
 }
 

@@ -66,7 +66,8 @@ impl JobController {
 		this
 	}
 
-	/// Starts the watcher loop for the job manager
+	/// Starts the watcher loop for the [JobController]. This function will listen for incoming
+	/// commands and execute them.
 	pub fn watch(
 		self: Arc<Self>,
 		mut commands_rx: mpsc::UnboundedReceiver<JobControllerCommand>,

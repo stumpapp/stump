@@ -5,7 +5,7 @@ use std::{
 
 use tokio::{
 	sync::{broadcast, mpsc, oneshot},
-	task::spawn,
+	task,
 };
 
 use crate::{
@@ -31,18 +31,20 @@ pub trait WorkerSendExt {
 }
 
 // TODO: Add Finalizing state to inform clients that a job is not able to be paused
-/// The state of the worker, either running or paused.
+/// The status of the worker, either running or paused.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum WorkerState {
+pub enum WorkerStatus {
 	Running,
 	Paused,
+	// Finalizing
 }
 
-/// An enum representing the types of state-related events that the worker can send/receive. This
+/// An enum representing the types of status-related events that the worker can send/receive. This
 /// is primarily used to support pausing and resuming jobs.
-pub enum StateEvent {
-	StateChange(WorkerState),
-	StateRequested(oneshot::Sender<WorkerState>),
+#[derive(Debug)]
+pub enum WorkerStatusEvent {
+	StatusChange(WorkerStatus),
+	StatusRequested(oneshot::Sender<WorkerStatus>),
 }
 
 /// Commands that the worker can send/receive internally. Every command will kill
@@ -70,9 +72,9 @@ pub struct WorkerCtx {
 	pub commands_rx: async_channel::Receiver<WorkerCommand>,
 	/// A sender for the worker to send commands to the job manager
 	pub job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
-	/// A sender for the [WorkerCtx] to send state events to the loop which
+	/// A sender for the [WorkerCtx] to send status events to the loop which
 	/// is managing the corresponding worker
-	pub state_tx: async_channel::Sender<StateEvent>,
+	pub status_tx: async_channel::Sender<WorkerStatusEvent>,
 }
 
 impl WorkerCtx {
@@ -130,32 +132,32 @@ impl WorkerCtx {
 		}
 	}
 
-	/// Send a state request to the worker loop and await the response
+	/// Send a status request to the worker loop and await the response
 	///
-	/// Note that in the case of a failure to send the state request, the method will
-	/// return `WorkerState::Running` as a guess. This isn't overly ideal, but I will
+	/// Note that in the case of a failure to send the status request, the method will
+	/// return `WorkerStatus::Running` as a guess. This isn't overly ideal, but I will
 	/// revisit this in the future.
-	pub async fn get_state(&self) -> WorkerState {
-		// Try 3 times to send the state request with an acknowledgement
+	pub async fn get_status(&self) -> WorkerStatus {
+		// Try 3 times to send the status request with an acknowledgement
 		for _ in 0..3 {
 			let (tx, rx) = oneshot::channel();
 
 			let send_succeeded = self
-				.state_tx
-				.send(StateEvent::StateRequested(tx))
+				.status_tx
+				.send(WorkerStatusEvent::StatusRequested(tx))
 				.await
 				.is_ok();
 
 			if send_succeeded {
-				return rx.await.unwrap_or(WorkerState::Running);
+				return rx.await.unwrap_or(WorkerStatus::Running);
 			}
 		}
 
 		tracing::warn!(
-			"Failed to send state request 3 times. Returning running state as a guess..."
+			"Failed to send status request 3 times. Returning running status as a guess..."
 		);
 
-		WorkerState::Running
+		WorkerStatus::Running
 	}
 
 	/// Send a pause request to the worker loop
@@ -166,8 +168,8 @@ impl WorkerCtx {
 		// Try 3 times to send the state request with an acknowledgement
 		for _ in 0..3 {
 			let send_succeeded = self
-				.state_tx
-				.send(StateEvent::StateChange(WorkerState::Paused))
+				.status_tx
+				.send(WorkerStatusEvent::StatusChange(WorkerStatus::Paused))
 				.await
 				.is_ok();
 
@@ -184,11 +186,11 @@ impl WorkerCtx {
 	/// Note that this method will attempt to send the resume request 3 times before
 	/// giving up.
 	pub async fn resume(&self) {
-		// Try 3 times to send the state request with an acknowledgement
+		// Try 3 times to send the status request with an acknowledgement
 		for _ in 0..3 {
 			let send_succeeded = self
-				.state_tx
-				.send(StateEvent::StateChange(WorkerState::Running))
+				.status_tx
+				.send(WorkerStatusEvent::StatusChange(WorkerStatus::Running))
 				.await
 				.is_ok();
 
@@ -217,9 +219,9 @@ impl Worker {
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
-	) -> Result<(Self, WorkerCtx, async_channel::Receiver<StateEvent>), JobError> {
+	) -> Result<(Self, WorkerCtx, async_channel::Receiver<WorkerStatusEvent>), JobError> {
 		let (commands_tx, commands_rx) = async_channel::unbounded::<WorkerCommand>();
-		let (state_tx, state_rx) = async_channel::unbounded::<StateEvent>();
+		let (status_tx, status_rx) = async_channel::unbounded::<WorkerStatusEvent>();
 
 		let worker_ctx = WorkerCtx {
 			job_id: job_id.to_string(),
@@ -228,10 +230,10 @@ impl Worker {
 			core_event_tx,
 			commands_rx,
 			job_controller_tx,
-			state_tx,
+			status_tx,
 		};
 
-		Ok((Self { commands_tx }, worker_ctx, state_rx))
+		Ok((Self { commands_tx }, worker_ctx, status_rx))
 	}
 
 	/// Create a new [Worker] instance and immediately spawn it. This is the main entry point
@@ -241,14 +243,14 @@ impl Worker {
 	/// not be created if it is not intended to be running.
 	pub async fn create_and_spawn(
 		job: Box<dyn Executor>,
-		agent: Arc<JobManager>,
+		manager: Arc<JobManager>,
 		db: Arc<PrismaClient>,
 		config: Arc<StumpConfig>,
 		core_event_tx: broadcast::Sender<CoreEvent>,
 		job_controller_tx: mpsc::UnboundedSender<JobControllerCommand>,
 	) -> Result<Arc<Self>, JobError> {
 		let job_id = job.id().to_string();
-		let (worker, worker_ctx, state_rx) = Worker::new(
+		let (worker, worker_ctx, status_rx) = Worker::new(
 			job_id.as_str(),
 			db,
 			config,
@@ -259,7 +261,13 @@ impl Worker {
 		let worker = worker.arced();
 
 		handle_job_start(&worker_ctx.db, job_id.clone()).await?;
-		spawn(Self::work(worker_ctx, state_rx, job, agent));
+		let worker_manager = WorkerManager {
+			status: WorkerStatus::Running,
+			worker_ctx: worker_ctx.clone(),
+			status_rx,
+			manager: manager.clone(),
+		};
+		task::spawn(worker_manager.main_loop(job));
 
 		Ok(worker)
 	}
@@ -269,6 +277,7 @@ impl Worker {
 		Arc::new(self)
 	}
 
+	/// Send a pause command to the worker manager
 	pub async fn pause(&self) {
 		self.commands_tx
 			.send(WorkerCommand::Pause)
@@ -283,6 +292,7 @@ impl Worker {
 			);
 	}
 
+	/// Send a resume command to the worker manager
 	pub async fn resume(&self) {
 		self.commands_tx
 			.send(WorkerCommand::Resume)
@@ -323,37 +333,52 @@ impl Worker {
 			tracing::error!("Failed to send cancel signal to worker");
 		}
 	}
+}
 
+/// A helper struct to manage the worker's status and lifecycle. This struct is responsible for
+/// kicking off the [Executor] and watching for status changes and commands.
+struct WorkerManager {
+	/// The current status of the worker which is being managed/monitored
+	status: WorkerStatus,
+	/// The context that was provided to the worker when it was created
+	worker_ctx: WorkerCtx,
+	/// A receiver for status events, which are used to pause/resume the worker
+	status_rx: async_channel::Receiver<WorkerStatusEvent>,
+	/// A pointer to the job manager, which is used to complete the job once it's done
+	manager: Arc<JobManager>,
+}
+
+impl WorkerManager {
 	/// The main worker loop. This is where the job is run and the worker listens for
 	/// commands to cancel the job.
 	///
 	/// Note more commands can be added in the future, e.g. pause/resume.
-	async fn work(
-		worker_ctx: WorkerCtx,
-		state_rx: async_channel::Receiver<StateEvent>,
-		mut job: Box<dyn Executor>,
-		manager: Arc<JobManager>,
-	) {
-		let job_id = job.id().to_string();
-		let finalizer_ctx = worker_ctx.clone();
+	async fn main_loop(mut self, mut executor: Box<dyn Executor>) {
+		let job_id = executor.id().to_string();
+		let loop_ctx = self.worker_ctx.clone();
+		let finalizer_ctx = loop_ctx.clone();
 
-		let mut state = WorkerState::Running;
-		let state_rx_fut = state_rx.recv();
-		let job_handle = spawn(async move {
-			let result = job.execute(worker_ctx).await;
-			(job, result)
+		self.status = WorkerStatus::Running;
+		let status_rx_fut = self.status_rx.recv();
+
+		// Note: we cannot use an Arc here because the executor.execute method
+		// requires a mutable reference to the executor. So instead we just return
+		// the executor and the result of the execution once it's done.
+		let executor_handle = task::spawn(async move {
+			let result = executor.execute(loop_ctx).await;
+			(executor, result)
 		});
 
-		tokio::pin!(state_rx_fut);
-		tokio::pin!(job_handle);
+		tokio::pin!(status_rx_fut);
+		tokio::pin!(executor_handle);
 
 		let start = Instant::now();
 		loop {
 			tokio::select! {
-				job_result = &mut job_handle => {
+				executor_result = &mut executor_handle => {
 					let elapsed = start.elapsed();
-					match job_result {
-						Ok((returned_job, result)) => {
+					match executor_result {
+						Ok((returned_executor, result)) => {
 							tracing::debug!(
 								did_err = result.is_err(),
 								?elapsed,
@@ -363,8 +388,8 @@ impl Worker {
 								Ok(output) => {
 									tracing::info!("Job completed successfully!");
 									finalizer_ctx.report_progress(JobProgress::finished());
-									let _ = returned_job
-											.persist_state(finalizer_ctx, output, elapsed)
+									let _ = returned_executor
+											.persist_output(finalizer_ctx, output, elapsed)
 											.await;
 
 								},
@@ -375,7 +400,7 @@ impl Worker {
 										&format!("Job failed: {}", error),
 									));
 
-									let _ = returned_job
+									let _ = returned_executor
 										.persist_failure(
 											finalizer_ctx,
 											JobStatus::Failed,
@@ -395,6 +420,8 @@ impl Worker {
 												tracing::trace!("Cancel confirmation sent");
 											},
 										);
+									} else if returned_executor.should_requeue() {
+
 									}
 								},
 							}
@@ -405,30 +432,33 @@ impl Worker {
 								JobStatus::Failed,
 								&format!("Job failed: {}", join_error),
 							));
-							// FIXME: not a cancel...
-							let _ = handle_do_cancel(job_id.clone(), &finalizer_ctx.db, elapsed).await;
+							let _ = handle_failure_status(job_id.clone(), JobStatus::Failed, &finalizer_ctx.db, elapsed).await;
 						}
 					}
-					return manager.complete(job_id).await;
+					return self.manager.complete(job_id).await;
 				},
 
-				Ok(state_event) = &mut state_rx_fut => {
-					match state_event {
-						StateEvent::StateChange(new_state) => {
-							tracing::debug!(?state, ?new_state, "State change event received");
-							state = new_state;
+				Ok(status_event) = &mut status_rx_fut => {
+					match status_event {
+						WorkerStatusEvent::StatusChange(new_status) if new_status != self.status => {
+							// TODO: should we track idle times?
+							tracing::debug!(status = ?self.status, ?new_status, "Status change event received");
+							self.status = new_status;
 						},
-						StateEvent::StateRequested(sender) => {
-							tracing::trace!("State requested");
-							sender.send(state).map_or_else(
+						WorkerStatusEvent::StatusRequested(sender) => {
+							tracing::trace!("Status requested");
+							sender.send(self.status).map_or_else(
 								|error| {
-									tracing::error!(?error, "Failed to send state!");
+									tracing::error!(?error, "Failed to send status!");
 								},
-								|state| {
-									tracing::trace!(?state, "State sent");
+								|status| {
+									tracing::trace!(?status, "status sent");
 								},
 							);
 						},
+						_=> {
+							tracing::warn!(?status_event, "Ignoring status event. Most likely a status change to the same status");
+						}
 					}
 				},
 			}
@@ -436,18 +466,18 @@ impl Worker {
 	}
 }
 
-/// Cancel a job by its ID
-pub(crate) async fn handle_do_cancel(
+pub(crate) async fn handle_failure_status(
 	job_id: String,
+	status: JobStatus,
 	client: &PrismaClient,
 	elapsed: Duration,
 ) -> Result<(), JobError> {
-	let cancelled_job = client
+	let updated_job = client
 		.job()
 		.update(
 			job::id::equals(job_id),
 			vec![
-				job::status::set(JobStatus::Cancelled.to_string()),
+				job::status::set(status.to_string()),
 				job::ms_elapsed::set(
 					elapsed.as_millis().try_into().unwrap_or_else(|e| {
 						tracing::error!(error = ?e, "Wow! Overflowed i64 during attempt to convert job duration to milliseconds");
@@ -460,15 +490,24 @@ pub(crate) async fn handle_do_cancel(
 		.await
 		.map_or_else(
 			|error| {
-				tracing::error!(?error, "Failed to update job status to cancelled");
+				tracing::error!(?error, ?status, "Failed to update job status");
 				None
 			},
 			Some,
 		);
 
-	tracing::trace!(?cancelled_job, "Job cancelled?");
+	tracing::trace!(?updated_job, "Upated job?");
 
 	Ok(())
+}
+
+/// Cancel a job by its ID
+pub(crate) async fn handle_do_cancel(
+	job_id: String,
+	client: &PrismaClient,
+	elapsed: Duration,
+) -> Result<(), JobError> {
+	handle_failure_status(job_id, JobStatus::Cancelled, client, elapsed).await
 }
 
 /// Update the job status to `Running` in the database

@@ -17,6 +17,6 @@ pub use thumbnail::{
 	remove_thumbnails_of_type,
 };
 pub use thumbnail_job::{
-	ThumbnailGenerationData, ThumbnailGenerationJob, ThumbnailGenerationJobParams,
-	ThumbnailGenerationJobVariant,
+	ThumbnailGenerationJob, ThumbnailGenerationJobParams, ThumbnailGenerationJobVariant,
+	ThumbnailGenerationOutput,
 };

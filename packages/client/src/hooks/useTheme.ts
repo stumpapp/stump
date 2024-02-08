@@ -1,8 +1,7 @@
 import { usePreferences } from './usePreferences'
 
-/** A hook to get the current theme and toggle it. Please note that this hook
- *  **will not** handle the class toggling required by tailwind. That logic
- *  is handled by the `interface` package.
+/**
+ * A hook to get the current theme and toggle it with an API call
  **/
 export function useTheme() {
 	const {

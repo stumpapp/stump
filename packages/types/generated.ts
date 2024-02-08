@@ -27,7 +27,7 @@ export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
 
-export type CoreJobOutput = LibraryScanData | SeriesScanData | ThumbnailGenerationData | unknown
+export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown
 
 export type JobUpdate = ({ status: JobStatus | null; message: string | null; completed_tasks: number | null; remaining_tasks: number | null; completed_subtasks: number | null; remaining_subtasks: number | null }) & { id: string }
 
@@ -41,15 +41,15 @@ export type JobProgress = { status: JobStatus | null; message: string | null; co
 /**
  * The data that is collected and updated during the execution of a library scan job
  */
-export type LibraryScanData = { total_files: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
+export type LibraryScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
 
-export type SeriesScanData = { total_files: BigInt; created_media: BigInt; updated_media: BigInt }
+export type SeriesScanOutput = { total_files: BigInt; created_media: BigInt; updated_media: BigInt }
 
 export type ThumbnailGenerationJobVariant = ({ type: "SingleLibrary" } & string) | ({ type: "SingleSeries" } & string) | ({ type: "MediaGroup" } & string[])
 
 export type ThumbnailGenerationJobParams = { variant: ThumbnailGenerationJobVariant; force_regenerate: boolean }
 
-export type ThumbnailGenerationData = { visited_files: BigInt; generated_thumbnails: BigInt }
+export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt }
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 

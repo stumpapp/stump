@@ -8,7 +8,7 @@ use super::{JobError, JobExecuteLog, JobExt, WorkerCommand, WorkerCtx};
 
 #[derive(Serialize, Debug)]
 pub struct JobTaskOutput<J: JobExt> {
-	pub data: J::Data,
+	pub output: J::Output,
 	pub subtasks: Vec<J::Task>,
 	pub logs: Vec<JobExecuteLog>,
 }
@@ -43,14 +43,14 @@ pub(crate) async fn job_task_handler<J: JobExt>(
 							"Task output received"
 						);
 						let JobTaskOutput {
-							data,
+							output,
 							logs,
 							subtasks,
 						} = result?;
 
 						return Ok(JobTaskHandlerOutput {
 							output: JobTaskOutput {
-								data,
+								output,
 								logs,
 								subtasks,
 							},

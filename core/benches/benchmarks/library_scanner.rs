@@ -13,7 +13,7 @@ use stump_core::{
 		entity::{Library, LibraryOptions},
 	},
 	filesystem::scanner::LibraryScanJob,
-	job::{Executor, Job, WorkerCtx},
+	job::{Executor, WorkerCtx, WrappedJob},
 	prisma::{library, library_options, PrismaClient},
 };
 use tempfile::{Builder as TempDirBuilder, TempDir};
@@ -98,7 +98,7 @@ fn full_scan(c: &mut Criterion) {
 criterion_group!(benches, full_scan);
 
 struct TestCtx {
-	job: Job<LibraryScanJob>,
+	job: WrappedJob<LibraryScanJob>,
 	worker_ctx: WorkerCtx,
 }
 
@@ -205,7 +205,7 @@ async fn setup_test(
 ) -> Result<Setup, Box<dyn std::error::Error>> {
 	let (client, library, tempdirs) =
 		create_test_library(series_count, books_per_series).await?;
-	let job = Job::new(LibraryScanJob {
+	let job = WrappedJob::new(LibraryScanJob {
 		id: library.id.clone(),
 		path: library.path.clone(),
 		options: Some(library.library_options.clone()),
@@ -227,7 +227,7 @@ async fn setup_test(
 		job_controller_tx: mpsc::unbounded_channel().0,
 		core_event_tx: broadcast::channel(1024).0,
 		commands_rx: async_channel::unbounded().1,
-		state_tx: async_channel::unbounded().0,
+		status_tx: async_channel::unbounded().0,
 	};
 	Ok(Setup {
 		test_ctx: TestCtx {

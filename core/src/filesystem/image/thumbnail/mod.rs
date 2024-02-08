@@ -3,6 +3,10 @@ use std::{fs::File, io::Write, path::PathBuf};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use tracing::{debug, error, trace};
 
+// TODO: I know this is super related to image processing, however I am debating whether it is
+// extensive enough to warrant its own module. I think it is, but I am not 100% sure. I would just
+// move thumbnail folder up one to the root of `filesystem` instead of `filesystem/image`
+
 use crate::{
 	config::StumpConfig,
 	db::entity::Media,

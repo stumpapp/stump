@@ -1,5 +1,3 @@
-// mod _thumbnail;
-// mod _thumbnail_job;
 mod generic;
 mod process;
 mod thumbnail;

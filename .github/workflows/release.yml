@@ -23,6 +23,7 @@ jobs:
     name: Parse semver version from tag
     runs-on: [self-hosted]
     steps:
+      # FIXME: I realize this is for tags and won't work...
       - name: Get the tag
         id: tag
         uses: ildug/get-tag-action@v1

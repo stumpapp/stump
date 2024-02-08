@@ -1,9 +1,13 @@
 name: 'Release CI'
 
+# This workflow triggers when a PR is merged into `main`, but jobs have conditions to only run when:
+# - A PR is closed, merged into `main`, from a branch that matches the pattern `release/v*.*.*`
+
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
+    types: [opened, closed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,9 +18,38 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
-  build-docker:
+  parse-semver:
+    if: contains(github.event.pull_request.head.ref, 'release/v')
+    name: Parse semver version from tag
+    runs-on: [self-hosted]
+    steps:
+      - name: Get the tag
+        id: tag
+        uses: ildug/get-tag-action@v1
+
+      - name: Print the tag
+        run: echo "The output version is ${{ steps.tag.outputs.version }}"
+
+      - name: Configure docker tags
+        run: |
+          echo "DOCKER_TAGS=latest,${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
+          echo "Docker tags are latest, nightly, and ${{ steps.tag.outputs.version }}"
+
+  push-or-load:
+    if: contains(github.event.pull_request.head.ref, 'release/v')
+    name: Configure docker load/push
+    runs-on: [self-hosted]
+    steps:
+      - name: Configure environment
+        run: |
+          echo "load=${{ github.event.pull_request.merged == false }}" >> $GITHUB_OUTPUT
+          echo "push=${{ github.event.pull_request.merged == true }}" >> $GITHUB_OUTPUT
+
+  build-stable-docker:
+    if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Build docker image
     runs-on: [self-hosted]
+    needs: [parse-semver, push-or-load]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -26,70 +59,70 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-          tags: ${{ github.ref }}
-          load: false
-          push: true
+          tags: ${{ env.DOCKER_TAGS }}
+          load: ${{ steps.push-or-load.outputs.load }}
+          push: ${{ steps.push-or-load.outputs.push }}
           platforms: 'linux/arm64/v8,linux/amd64'
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
-  build-web-app:
-    name: Build web app
-    runs-on: [self-hosted]
-    if: false # TODO: Enable this once 0.1.0 is ready
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  # build-web-app:
+  #   name: Build web app
+  #   runs-on: [self-hosted]
+  #   if: false # TODO: Enable this once 0.1.0 is ready
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - name: Build the app
-        uses: ./.github/actions/build-web
+  #     - name: Build the app
+  #       uses: ./.github/actions/build-web
 
-      - name: Upload the build
-        uses: ./.github/actions/upload-artifact
-        with:
-          upload-name: webapp
-          upload-path: apps/web/dist
+  #     - name: Upload the build
+  #       uses: ./.github/actions/upload-artifact
+  #       with:
+  #         upload-name: webapp
+  #         upload-path: apps/web/dist
 
-  build-server:
-    strategy:
-      fail-fast: true
-      matrix:
-        platform: [macos, windows]
-    name: Build server app
-    needs: build-web
-    runs-on: ${{ matrix.platform }}
-    if: false # TODO: Enable this once 0.1.0 is ready
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  # build-server:
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       platform: [macos, windows]
+  #   name: Build server app
+  #   needs: build-web
+  #   runs-on: ${{ matrix.platform }}
+  #   if: false # TODO: Enable this once 0.1.0 is ready
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - name: Build the server
-        uses: ./.github/actions/build-server
-        with:
-          platform: ${{ matrix.platform }}
+  #     - name: Build the server
+  #       uses: ./.github/actions/build-server
+  #       with:
+  #         platform: ${{ matrix.platform }}
 
-      - name: Upload the server binary
-        uses: ./.github/actions/upload-artifact
-        with:
-          upload-name: stump_server-${{ matrix.platform }}
-          upload-path: target/release/stump_server
+  #     - name: Upload the server binary
+  #       uses: ./.github/actions/upload-artifact
+  #       with:
+  #         upload-name: stump_server-${{ matrix.platform }}
+  #         upload-path: target/release/stump_server
 
-  # TODO: Investigate if I can just merge this with the above
-  build-linux-server:
-    name: Build server app (self-hosted runner)
-    needs: build-web
-    runs-on: [self-hosted]
-    if: false # TODO: Enable this once 0.1.0 is ready
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  # # TODO: Investigate if I can just merge this with the above
+  # build-linux-server:
+  #   name: Build server app (self-hosted runner)
+  #   needs: build-web
+  #   runs-on: [self-hosted]
+  #   if: false # TODO: Enable this once 0.1.0 is ready
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - name: Build the server
-        uses: ./.github/actions/build-server
-        with:
-          platform: 'linux'
+  #     - name: Build the server
+  #       uses: ./.github/actions/build-server
+  #       with:
+  #         platform: 'linux'
 
-      - name: Upload the server binary
-        uses: ./.github/actions/upload-artifact
-        with:
-          upload-name: stump_server-linux
-          upload-path: target/release/stump_server
+  #     - name: Upload the server binary
+  #       uses: ./.github/actions/upload-artifact
+  #       with:
+  #         upload-name: stump_server-linux
+  #         upload-path: target/release/stump_server

@@ -32,7 +32,7 @@ jobs:
 
       - name: Configure docker tags
         run: |
-          echo "DOCKER_TAGS=latest,${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
+          echo "DOCKER_TAGS=latest,nightly,${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
           echo "Docker tags are latest, nightly, and ${{ steps.tag.outputs.version }}"
 
   push-or-load:

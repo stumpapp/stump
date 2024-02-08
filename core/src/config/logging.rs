@@ -1,36 +1,21 @@
-use std::path::PathBuf;
-
 use tracing_subscriber::{
 	filter::LevelFilter, prelude::__tracing_subscriber_SubscriberExt,
 	util::SubscriberInitExt, EnvFilter,
 };
 
-use super::get_config_dir;
+use super::StumpConfig;
 
 pub const STUMP_SHADOW_TEXT: &str = include_str!("stump_shadow_text.txt");
-
-pub fn get_log_file() -> PathBuf {
-	get_config_dir().join("Stump.log")
-}
-
-pub fn get_log_verbosity() -> u64 {
-	match std::env::var("STUMP_VERBOSITY") {
-		Ok(s) => s.parse::<u64>().unwrap_or(1),
-		Err(_) => 1,
-	}
-}
 
 // TODO: allow for overriding of format
 /// Initializes the logging system, which uses the [tracing] crate. Logs are written to
 /// both the console and a file in the config directory. The file is called `Stump.log`
 /// by default.
-pub fn init_tracing() {
-	let config_dir = get_config_dir();
-
+pub fn init_tracing(config: &StumpConfig) {
+	let config_dir = config.get_config_dir();
 	let file_appender = tracing_appender::rolling::never(config_dir, "Stump.log");
 
-	let verbosity = get_log_verbosity();
-	let max_level = match verbosity {
+	let max_level = match config.verbosity {
 		0 => LevelFilter::OFF,
 		1 => LevelFilter::INFO,
 		2 => LevelFilter::DEBUG,
@@ -79,5 +64,5 @@ pub fn init_tracing() {
 		)
 		.init();
 
-	tracing::debug!("Tracing initialized with verbosity {}", verbosity);
+	tracing::debug!(config.verbosity, "Tracing initialized");
 }

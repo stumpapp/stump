@@ -17,6 +17,7 @@ export interface TagOption {
 	value: string
 }
 
+// TODO: fix type error :grimacing:
 export function useTags({
 	onQuerySuccess,
 	onQueryError,
@@ -49,7 +50,7 @@ export function useTags({
 					({
 						label: tag.name,
 						value: tag.name,
-					} as TagOption),
+					}) as TagOption,
 			)
 
 			return { options: tagOptions, tags: data.data }

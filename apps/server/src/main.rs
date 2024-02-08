@@ -1,81 +1,50 @@
-use std::net::SocketAddr;
-
-use axum::Router;
-use errors::{ServerError, ServerResult};
-use stump_core::{config::logging::init_tracing, StumpCore};
-use tower_http::trace::TraceLayer;
-use tracing::{error, info, trace};
+use cli::{handle_command, Cli, Parser};
+use errors::EntryError;
+use stump_core::{
+	config::bootstrap_config_dir, config::logging::init_tracing, StumpCore,
+};
 
 mod config;
 mod errors;
+mod filter;
+mod http_server;
 mod middleware;
 mod routers;
 mod utils;
 
-use config::{cors, session};
-
+#[cfg(debug_assertions)]
 fn debug_setup() {
 	std::env::set_var(
 		"STUMP_CLIENT_DIR",
-		env!("CARGO_MANIFEST_DIR").to_string() + "/dist",
+		env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist",
 	);
 	std::env::set_var("STUMP_PROFILE", "debug");
 }
 
-// FIXME: ever since bumping rust, I get false postive errors on this line:
-// no method `expect` on type `<Graceful<AddrIncoming, IntoMakeService<Router<(), Body>>, impl Future<Output = ()>, Exec> as IntoFuture>::Output`
-// https://docs.rs/tokio/latest/tokio/attr.main.html#using-the-multi-thread-runtime
-// TODO: Do I need to annotate with flavor?? I don't ~think~ so, but I'm not sure.
 #[tokio::main(flavor = "multi_thread")]
-async fn main() -> ServerResult<()> {
+async fn main() -> Result<(), EntryError> {
 	#[cfg(debug_assertions)]
 	debug_setup();
 
-	let stump_environment = StumpCore::init_environment();
-	if let Err(err) = stump_environment {
-		error!("Failed to load environment variables: {:?}", err);
-		return Err(ServerError::ServerStartError(err.to_string()));
+	// Get STUMP_CONFIG_DIR to bootstrap startup
+	let config_dir = bootstrap_config_dir();
+
+	let config = StumpCore::init_config(config_dir)
+		.map_err(|e| EntryError::InvalidConfig(e.to_string()))?;
+
+	let cli = Cli::parse();
+
+	if let Some(command) = cli.command {
+		Ok(handle_command(command, &cli.config.merge_stump_config(config)).await?)
+	} else {
+		// Note: init_tracing after loading the environment so the correct verbosity
+		// level is used for logging.
+		init_tracing(&config);
+
+		if config.verbosity >= 3 {
+			tracing::trace!(?config, "App config");
+		}
+
+		Ok(http_server::run_http_server(config).await?)
 	}
-	let stump_environment = stump_environment.unwrap();
-	let port = stump_environment.port.unwrap_or(10801);
-
-	// Note: init_tracing after loading the environment so the correct verbosity
-	// level is used for logging.
-	init_tracing();
-
-	if stump_environment.verbosity.unwrap_or(1) >= 3 {
-		trace!("Environment configuration: {:?}", stump_environment);
-	}
-
-	let core = StumpCore::new().await;
-	if let Err(err) = core.run_migrations().await {
-		error!("Failed to run migrations: {:?}", err);
-		return Err(ServerError::ServerStartError(err.to_string()));
-	}
-
-	let server_ctx = core.get_context();
-	let app_state = server_ctx.arced();
-	let cors_layer = cors::get_cors_layer(port);
-
-	info!("{}", core.get_shadow_text());
-
-	let app = Router::new()
-		.merge(routers::mount(app_state.clone()))
-		.with_state(app_state.clone())
-		.layer(session::get_session_layer())
-		.layer(cors_layer)
-		// TODO: not sure if it needs to be done in here or stump_core::config::logging,
-		// but I want to ignore traces for asset requests, e.g. /assets/chunk-SRMZVY4F.02115dd3.js lol
-		.layer(TraceLayer::new_for_http());
-
-	let addr = SocketAddr::from(([0, 0, 0, 0], port));
-	info!("⚡️ Stump HTTP server starting on http://{}", addr);
-
-	axum::Server::bind(&addr)
-		.serve(app.into_make_service())
-		.with_graceful_shutdown(utils::shutdown_signal())
-		.await
-		.expect("Failed to start Stump HTTP server!");
-
-	Ok(())
 }

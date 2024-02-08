@@ -1,7 +1,11 @@
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { Fragment, MutableRefObject, RefCallback, useRef, useState } from 'react'
 
-import { Button, Command, Label, Popover, Text } from '..'
+import { Button } from '../button'
+import { Command } from '../command'
+import { Label } from '../form'
+import { Popover } from '../popover'
+import { Text } from '../text'
 import { cn } from '../utils'
 
 // TODO: customize multi display value, e.g. "2 items selected"
@@ -32,11 +36,12 @@ const SIZE_VARIANTS = {
 export type ComboBoxProps = {
 	label?: string
 	description?: string
+	descriptionPosition?: 'top' | 'bottom'
 	options: ComboBoxOption[]
 	size?: keyof typeof SIZE_VARIANTS | null
 	/** Classes applied to the trigger button for the combobox */
 	triggerClassName?: string
-	triggerRef?: React.LegacyRef<HTMLDivElement> | undefined
+	triggerRef?: React.RefObject<HTMLButtonElement>
 	wrapperClassName?: string
 	wrapperStyle?: React.CSSProperties
 	placeholder?: string
@@ -45,16 +50,35 @@ export type ComboBoxProps = {
 	filterEmptyMessage?: string
 } & (SingleSelectComboBoxProps | MultiSelectComboBoxProps)
 
+type MutableRefList<T> = Array<RefCallback<T> | MutableRefObject<T> | undefined | null>
+
+function setRef<T>(val: T, ...refs: MutableRefList<T>): void {
+	refs.forEach((ref) => {
+		if (typeof ref === 'function') {
+			ref(val)
+		} else if (ref != null) {
+			ref.current = val
+		}
+	})
+}
+
+function mergeRefs<T>(...refs: MutableRefList<T>): RefCallback<T> {
+	return (val: T) => {
+		setRef(val, ...refs)
+	}
+}
+
 export function ComboBox({
 	label,
 	description,
+	descriptionPosition = 'bottom',
 	isMultiSelect,
 	options,
 	value,
 	onChange,
 	size = 'default',
 	triggerClassName,
-	triggerRef,
+	triggerRef: triggerRefProps,
 	wrapperClassName,
 	wrapperStyle,
 	placeholder = 'Select...',
@@ -62,6 +86,7 @@ export function ComboBox({
 	filterPlaceholder = 'Filter...',
 	filterEmptyMessage = 'No results found',
 }: ComboBoxProps) {
+	const triggerRef = useRef<HTMLButtonElement | null>(null)
 	const [open, setOpen] = useState(false)
 
 	const handleChange = (selected: string) => {
@@ -104,21 +129,37 @@ export function ComboBox({
 		...((label || description) && { className: 'flex flex-col gap-2' }),
 	}
 
+	const contentStyle = {
+		...(size === 'full'
+			? {
+					width: triggerRef?.current?.offsetWidth,
+			  }
+			: {}),
+		...(wrapperStyle || {}),
+	}
+
+	const topDescription = description && descriptionPosition === 'top'
+	const bottomDescription = description && descriptionPosition === 'bottom'
+
 	return (
 		<Container {...containerProps}>
 			{label && <Label>{label}</Label>}
+			{topDescription && (
+				<Text size="sm" variant="muted">
+					{description}
+				</Text>
+			)}
 			<Popover open={open} onOpenChange={setOpen}>
 				<Popover.Trigger asChild>
 					<Button
-						// @ts-expect-error: wrong type for ref, but it's fineeee
-						ref={triggerRef}
+						ref={mergeRefs(triggerRef, triggerRefProps)}
 						variant="outline"
 						role="combobox"
 						aria-expanded={open}
 						className={cn(
-							'h-[unset] justify-between truncate hover:bg-gray-50/50 data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-brand-400 data-[state=open]:ring-offset-2 dark:hover:bg-gray-900/50 dark:data-[state=open]:bg-transparent dark:data-[state=open]:ring-offset-gray-900',
+							'h-[unset] justify-between truncate border-edge-200 text-contrast-200 outline-none hover:bg-background-200 data-[state=open]:bg-transparent data-[state=open]:ring-2 data-[state=open]:ring-brand-400 data-[state=open]:ring-offset-2 data-[state=open]:ring-offset-background',
 							{ [SIZE_VARIANTS[size || 'default']]: !!size },
-							{ 'text-gray-400 dark:text-gray-300': !hasSelectedSomething },
+							{ 'text-muted': !hasSelectedSomething },
 							triggerClassName,
 						)}
 					>
@@ -126,13 +167,14 @@ export function ComboBox({
 						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 					</Button>
 				</Popover.Trigger>
+				{/* FIXME: this does NOT scroll right... */}
 				<Popover.Content
 					className={cn(
 						{ [SIZE_VARIANTS[size || 'default']]: !!size },
-						'mt-1 p-0',
+						'z-[1000] mt-1 max-h-96 overflow-y-auto p-0',
 						wrapperClassName,
 					)}
-					style={wrapperStyle}
+					style={contentStyle}
 				>
 					<Command>
 						{filterable && (
@@ -163,7 +205,7 @@ export function ComboBox({
 					</Command>
 				</Popover.Content>
 			</Popover>
-			{description && (
+			{bottomDescription && (
 				<Text size="sm" variant="muted">
 					{description}
 				</Text>

@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
 import { ComponentProps, useState } from 'react'
 
 import { ComboBox } from './ComboBox'
@@ -26,13 +26,14 @@ const frameworks = [
 	},
 ]
 
-export default {
+const StoryMeta: Meta<typeof ComboBox> = {
 	component: ComboBox,
 	title: 'select/ComboBox',
-} as ComponentMeta<typeof ComboBox>
+}
+type Story = StoryObj<typeof ComboBox>
 
-type StoryProps = Omit<ComponentProps<typeof ComboBox>, 'children'>
-const Story = (args: StoryProps) => {
+type DemoProps = Omit<ComponentProps<typeof ComboBox>, 'children'>
+const Demo = (args: DemoProps) => {
 	const [value, setValue] = useState<string | string[] | undefined>(undefined)
 
 	return (
@@ -42,24 +43,17 @@ const Story = (args: StoryProps) => {
 		</div>
 	)
 }
-const Template: ComponentStory<typeof ComboBox> = (args) => <Story {...args} />
 
-export const Default = Template.bind({})
-Default.args = {
-	isMultiSelect: false,
-	options: frameworks,
+export const Default: Story = {
+	render: () => <Demo options={frameworks} />,
 }
 
-export const Filterable = Template.bind({})
-Filterable.args = {
-	filterable: true,
-	isMultiSelect: false,
-	options: frameworks,
+export const Filterable: Story = {
+	render: () => <Demo filterable options={frameworks} />,
 }
 
-export const MultiSelect = Template.bind({})
-MultiSelect.args = {
-	filterable: true,
-	isMultiSelect: true,
-	options: frameworks,
+export const MultiSelect: Story = {
+	render: () => <Demo filterable isMultiSelect options={frameworks} />,
 }
+
+export default StoryMeta

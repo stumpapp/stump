@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { Button, PickSelect } from '../index'
-import { SheetContentProps, SheetPortalProps, SheetPrimitive } from './primitives'
+import { Button } from '../button'
+import { PickSelect } from '../utils'
+import { SheetContentProps, SheetPrimitive } from './primitives'
 
 export type SheetProps = {
-	trigger: string | React.ReactNode
+	trigger?: string | React.ReactNode
 	children: React.ReactNode
 	footer?: React.ReactNode
 	title: string | React.ReactNode
@@ -14,7 +15,6 @@ export type SheetProps = {
 	position?: PickSelect<SheetContentProps, 'position'>
 	size?: PickSelect<SheetContentProps, 'size'>
 	rounded?: PickSelect<SheetContentProps, 'rounded'>
-	floating?: PickSelect<SheetPortalProps, 'floating'>
 	contentClassName?: string
 	onOpen?: () => void
 	onClose?: () => void
@@ -64,7 +64,7 @@ export function Sheet({
 
 	return (
 		<SheetPrimitive open={open} onOpenChange={handleOpenChange}>
-			<SheetPrimitive.Trigger asChild>{renderTrigger()}</SheetPrimitive.Trigger>
+			{!!trigger && <SheetPrimitive.Trigger asChild>{renderTrigger()}</SheetPrimitive.Trigger>}
 			<SheetPrimitive.Content closeIcon={closeIcon} {...contentProps} className={contentClassName}>
 				<SheetPrimitive.Header>
 					<SheetPrimitive.Title>{title}</SheetPrimitive.Title>

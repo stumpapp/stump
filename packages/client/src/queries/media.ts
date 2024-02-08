@@ -5,16 +5,21 @@ import { AxiosError } from 'axios'
 import {
 	type CursorQueryOptions,
 	MutationOptions,
+	PageQueryOptions,
 	type QueryOptions,
 	useCursorQuery,
 	useMutation,
+	usePageQuery,
 } from '../client'
 import { queryClient, useQuery } from '../client'
 
 export const prefetchMedia = async (id: string) => {
 	await queryClient.prefetchQuery(
 		[mediaQueryKeys.getMediaById, id],
-		() => mediaApi.getMediaById(id),
+		async () => {
+			const { data } = await mediaApi.getMediaById(id)
+			return data
+		},
 		{
 			staleTime: 10 * 1000,
 		},
@@ -27,17 +32,50 @@ type MediaQueryParams<TQueryFnData, TData = TQueryFnData> = QueryOptions<
 	TData
 >
 
-export function useMediaByIdQuery(id: string, params: MediaQueryParams<Media> = {}) {
+type UseMediaByIdQueryOptions = MediaQueryParams<Media> & {
+	params?: Record<string, unknown>
+}
+
+export function useMediaByIdQuery(
+	id: string,
+	{ params, ...options }: UseMediaByIdQueryOptions = {},
+) {
 	const { data, ...ret } = useQuery(
-		[mediaQueryKeys.getMediaById, id],
-		() => mediaApi.getMediaById(id).then(({ data }) => data),
+		[mediaQueryKeys.getMediaById, id, params],
+		async () => {
+			const { data } = await mediaApi.getMediaById(id, params)
+			return data
+		},
 		{
 			keepPreviousData: false,
-			...params,
+			...options,
 		},
 	)
 
 	return { media: data, ...ret }
+}
+
+export function usePagedMediaQuery(options: PageQueryOptions<Media> = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[mediaQueryKeys.getMedia, options],
+		async ({ page, page_size, params }) => {
+			const { data } = await mediaApi.getMedia({ page, page_size, ...(params ?? {}) })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
+	)
+
+	const media = data?.data
+	const pageData = data?._page
+
+	return {
+		media,
+		pageData,
+		...restReturn,
+	}
 }
 
 export function useMediaCursorQuery(options: CursorQueryOptions<Media>) {
@@ -110,7 +148,7 @@ export function useContinueReading(options: CursorQueryOptions<Media>) {
 		options,
 	)
 
-	const media = data ? data.pages.flatMap((page) => page.data) : []
+	const media = data?.pages.flatMap((page) => page.data) || []
 
 	return {
 		data,

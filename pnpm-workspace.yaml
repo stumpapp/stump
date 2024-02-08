@@ -1,4 +1,6 @@
 packages:
   - 'core'
   - 'apps/*'
+  - 'docs'
+  - 'interface'
   - 'packages/*'

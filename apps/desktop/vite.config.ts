@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-plugin-tsconfig-paths'
 
@@ -12,12 +13,18 @@ export default defineConfig({
 		assetsDir: './assets',
 		manifest: true,
 		outDir: '../dist',
+		rollupOptions: {
+			input: {
+				main: resolve(__dirname, 'src', 'index.html'),
+				splash: resolve(__dirname, 'src', 'splash-screen.html'),
+			},
+		},
 	},
 	define: {
 		pkgJson: { name, version },
 	},
 	plugins: [react(), tsconfigPaths()],
-	publicDir: '../../../packages/interface/public',
+	publicDir: '../../../interface/public',
 	root: 'src',
 	server: {
 		port: 3000,

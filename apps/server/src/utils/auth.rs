@@ -1,13 +1,15 @@
-use axum_sessions::extractors::{ReadableSession, WritableSession};
-use stump_core::{db::models::User, prelude::DecodedCredentials};
+use stump_core::db::entity::{User, UserPermission};
+use tower_sessions::Session;
 
-use crate::errors::{ApiError, ApiResult, AuthError};
+use crate::{
+	config::session::SESSION_USER_KEY,
+	errors::{ApiError, ApiResult, AuthError},
+};
 
-pub fn get_hash_cost() -> u32 {
-	std::env::var("HASH_COST")
-		.unwrap_or_else(|_e| "12".to_string())
-		.parse()
-		.unwrap_or(12)
+#[derive(Debug)]
+pub struct DecodedCredentials {
+	pub username: String,
+	pub password: String,
 }
 
 pub fn verify_password(hash: &str, password: &str) -> Result<bool, AuthError> {
@@ -29,42 +31,86 @@ pub fn decode_base64_credentials(
 	Ok(DecodedCredentials { username, password })
 }
 
-pub fn get_session_user(session: &ReadableSession) -> ApiResult<User> {
-	if let Some(user) = session.get::<User>("user") {
+pub fn get_session_user(session: &Session) -> ApiResult<User> {
+	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
 		Ok(user)
 	} else {
 		Err(ApiError::Unauthorized)
 	}
 }
 
-pub fn get_writable_session_user(session: &WritableSession) -> ApiResult<User> {
-	if let Some(user) = session.get::<User>("user") {
-		Ok(user)
-	} else {
-		Err(ApiError::Unauthorized)
-	}
-}
-
-// pub fn get_writable_session_admin_user(session: &WritableSession) -> ApiResult<User> {
-// 	let user = get_writable_session_user(session)?;
-
-// 	if user.is_admin() {
-// 		Ok(user)
-// 	} else {
-// 		Err(ApiError::Forbidden(
-// 			"You do not have permission to access this resource.".to_string(),
-// 		))
-// 	}
-// }
-
-pub fn get_session_admin_user(session: &ReadableSession) -> ApiResult<User> {
+pub fn get_session_server_owner_user(session: &Session) -> ApiResult<User> {
 	let user = get_session_user(session)?;
 
-	if user.is_admin() {
+	if user.is_server_owner {
 		Ok(user)
 	} else {
 		Err(ApiError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))
 	}
+}
+
+fn user_has_permission(user: &User, permission: UserPermission) -> bool {
+	user.is_server_owner || user.permissions.iter().any(|p| p == &permission)
+}
+
+/// Enforce that the user has the given permission. If the user does not have the permission, an
+/// `ApiError::Forbidden` is returned.
+fn enforce_permission(user: &User, permission: UserPermission) -> ApiResult<()> {
+	if user_has_permission(user, permission) {
+		Ok(())
+	} else {
+		tracing::error!(?user, ?permission, "User does not have permission");
+		Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".to_string(),
+		))
+	}
+}
+
+/// Enforce that the user in the session has the given permission. If the user does not have the
+/// permission, an `ApiError::Forbidden` is returned.
+pub fn enforce_session_permission(
+	session: &Session,
+	permission: UserPermission,
+) -> ApiResult<()> {
+	let user = get_session_user(session)?;
+	enforce_permission(&user, permission)
+}
+
+pub fn enforce_session_permissions(
+	session: &Session,
+	permissions: &[UserPermission],
+) -> ApiResult<User> {
+	let user = get_session_user(session)?;
+
+	if user.is_server_owner {
+		return Ok(user);
+	}
+
+	let missing_permissions = permissions
+		.iter()
+		.filter(|&permission| !user_has_permission(&user, *permission))
+		.collect::<Vec<_>>();
+
+	if !missing_permissions.is_empty() {
+		tracing::error!(?user, ?missing_permissions, "User does not have permission");
+		Err(ApiError::Forbidden(
+			"You do not have permission to access this resource.".to_string(),
+		))
+	} else {
+		Ok(user)
+	}
+}
+
+/// Enforce that the user in the session has the given permission. If the user does not have the
+/// permission, an `ApiError::Forbidden` is returned. The user is returned if they have the
+/// permission.
+pub fn get_user_and_enforce_permission(
+	session: &Session,
+	permission: UserPermission,
+) -> ApiResult<User> {
+	let user = get_session_user(session)?;
+	enforce_permission(&user, permission)?;
+	Ok(user)
 }

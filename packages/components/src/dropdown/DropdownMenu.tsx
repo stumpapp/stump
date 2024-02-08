@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { Link, XOR } from '../'
 import { Button } from '../button/Button'
-import { cn } from '../utils'
+import { Link } from '../link'
+import { cn, XOR } from '../utils'
 import { GenericMenu } from '.'
 import {
 	Dropdown,
@@ -24,9 +24,11 @@ export type DropdownItem = {
 	label: string
 	leftIcon?: React.ReactNode
 	shortCut?: React.ReactNode
-	onClick?: () => void
+	onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
 	href?: string
 	subItems?: DropdownItem[]
+	hidden?: boolean
+	disabled?: boolean
 }
 export type DropdownItemGroup = {
 	title?: string
@@ -62,41 +64,43 @@ export function DropdownMenu({
 	...props
 }: DropdownMenuProps) {
 	const renderItems = (items: DropdownItem[]) => {
-		return items.map((item) => {
-			const key = `dropdown-item-${item.label}`
+		return items
+			.filter((item) => !item.hidden)
+			.map((item) => {
+				const key = `dropdown-item-${item.label}`
 
-			if (item.subItems) {
+				if (item.subItems) {
+					return (
+						<DropdownSub key={key}>
+							<DropdownSubTrigger disabled={item.disabled}>
+								{item.leftIcon}
+								<span>{item.label}</span>
+								{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
+							</DropdownSubTrigger>
+							<DropdownPortal>
+								<DropdownSubContent className={cn('w-44', subContentWrapperClassName)}>
+									{renderItems(item.subItems)}
+								</DropdownSubContent>
+							</DropdownPortal>
+						</DropdownSub>
+					)
+				}
+
+				const Container = item.href ? Link : React.Fragment
+				const containerProps = item.href
+					? { className: 'hover:no-underline', to: item.href, underline: false }
+					: {}
+
 				return (
-					<DropdownSub key={key}>
-						<DropdownSubTrigger>
+					<Container {...containerProps} key={key}>
+						<DropdownItem onClick={item.onClick} disabled={item.disabled}>
 							{item.leftIcon}
 							<span>{item.label}</span>
 							{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
-						</DropdownSubTrigger>
-						<DropdownPortal>
-							<DropdownSubContent className={cn('w-44', subContentWrapperClassName)}>
-								{renderItems(item.subItems)}
-							</DropdownSubContent>
-						</DropdownPortal>
-					</DropdownSub>
+						</DropdownItem>
+					</Container>
 				)
-			}
-
-			const Container = item.href ? Link : React.Fragment
-			const containerProps = item.href
-				? { className: 'hover:no-underline', to: item.href, underline: false }
-				: {}
-
-			return (
-				<Container {...containerProps} key={key}>
-					<DropdownItem onClick={item.onClick}>
-						{item.leftIcon}
-						<span>{item.label}</span>
-						{item.shortCut && <DropdownShortcut>{item.shortCut}</DropdownShortcut>}
-					</DropdownItem>
-				</Container>
-			)
-		})
+			})
 	}
 
 	const renderTrigger = () => {

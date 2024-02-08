@@ -1,23 +1,36 @@
 use axum::{
+	extract::multipart::MultipartError,
 	http::StatusCode,
 	response::{IntoResponse, Response},
 };
+use cli::CliError;
 use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
 use stump_core::{
-	event::InternalCoreTask,
-	prelude::{CoreError, ProcessFileError},
+	error::CoreError, event::InternalCoreTask, filesystem::FileError,
+	job::JobManagerError,
 };
 use tokio::sync::mpsc;
+use tower_sessions::session::SessionError;
 use utoipa::ToSchema;
 
-use std::net;
+use std::{net, num::TryFromIntError};
 use thiserror::Error;
 
 pub type ServerResult<T> = Result<T, ServerError>;
 pub type ApiResult<T> = Result<T, ApiError>;
+
+#[derive(Debug, Error)]
+pub enum EntryError {
+	#[error("{0}")]
+	InvalidConfig(String),
+	#[error("{0}")]
+	CliError(#[from] CliError),
+	#[error("{0}")]
+	ServerError(#[from] ServerError),
+}
 
 #[derive(Debug, Error)]
 pub enum ServerError {
@@ -71,6 +84,9 @@ impl IntoResponse for AuthError {
 	}
 }
 
+// TODO: ApiError -> APIError
+// TODO: Serialization is really poor, need to fix that
+
 #[allow(unused)]
 #[derive(Debug, Error, ToSchema)]
 pub enum ApiError {
@@ -86,6 +102,8 @@ pub enum ApiError {
 	Forbidden(String),
 	#[error("This functionality has not been implemented yet")]
 	NotImplemented,
+	#[error("This functionality is not supported")]
+	NotSupported,
 	#[error("{0}")]
 	ServiceUnavailable(String),
 	#[error("{0}")]
@@ -95,8 +113,22 @@ pub enum ApiError {
 	#[error("{0}")]
 	Redirect(String),
 	#[error("{0}")]
+	SessionFetchError(#[from] SessionError),
+	#[error("{0}")]
 	#[schema(value_type = String)]
 	PrismaError(#[from] QueryError),
+}
+
+impl From<MultipartError> for ApiError {
+	fn from(error: MultipartError) -> Self {
+		ApiError::InternalServerError(error.to_string())
+	}
+}
+
+impl From<reqwest::Error> for ApiError {
+	fn from(error: reqwest::Error) -> Self {
+		ApiError::InternalServerError(error.to_string())
+	}
 }
 
 impl ApiError {
@@ -104,6 +136,12 @@ impl ApiError {
 		ApiError::Forbidden(String::from(
 			"You do not have permission to access this resource.",
 		))
+	}
+}
+
+impl From<TryFromIntError> for ApiError {
+	fn from(e: TryFromIntError) -> Self {
+		ApiError::InternalServerError(e.to_string())
 	}
 }
 
@@ -123,6 +161,12 @@ impl From<CoreError> for ApiError {
 			},
 			_ => ApiError::InternalServerError(err.to_string()),
 		}
+	}
+}
+
+impl From<JobManagerError> for ApiError {
+	fn from(error: JobManagerError) -> Self {
+		ApiError::InternalServerError(error.to_string())
 	}
 }
 
@@ -162,8 +206,8 @@ impl From<prisma_client_rust::RelationNotFetchedError> for ApiError {
 	}
 }
 
-impl From<ProcessFileError> for ApiError {
-	fn from(error: ProcessFileError) -> ApiError {
+impl From<FileError> for ApiError {
+	fn from(error: FileError) -> ApiError {
 		ApiError::InternalServerError(error.to_string())
 	}
 }

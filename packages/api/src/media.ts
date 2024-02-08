@@ -1,13 +1,19 @@
-import type { Media, ReadProgress } from '@stump/types'
+import type {
+	Media,
+	MediaIsComplete,
+	PatchMediaThumbnail,
+	PutMediaCompletionStatus,
+	ReadProgress,
+} from '@stump/types'
 
 import { API } from './axios'
 import { ApiResult, CursorQueryParams, PageableApiResult } from './types'
-import { mergeCursorParams, urlWithParams } from './utils'
+import { mergeCursorParams, toUrlParams, urlWithParams } from './utils'
 
 type GetMediaById = ApiResult<Media>
 
-export function getMedia(filters?: Record<string, string>): Promise<PageableApiResult<Media[]>> {
-	const params = new URLSearchParams(filters)
+export function getMedia(filters?: Record<string, unknown>): Promise<PageableApiResult<Media[]>> {
+	const params = toUrlParams(filters)
 	return API.get(urlWithParams('/media', params))
 }
 
@@ -24,8 +30,17 @@ export function getPaginatedMedia(page: number): Promise<PageableApiResult<Media
 	return API.get(`/media?page=${page}`)
 }
 
-export function getMediaById(id: string): Promise<GetMediaById> {
-	return API.get(`/media/${id}?load_series=true`)
+export function getMediaById(id: string, params?: Record<string, unknown>): Promise<GetMediaById> {
+	// return API.get(`/media/${id}?load_series=true`)
+	if (params) {
+		return API.get(`/media/${id}?${toUrlParams(params)}`)
+	} else {
+		return API.get(`/media/${id}?load_series=true`)
+	}
+}
+
+export function getMediaByPath(path: string): Promise<ApiResult<Media>> {
+	return API.get(`/media/path/${encodeURIComponent(path)}`)
 }
 
 export function getRecentlyAddedMedia({
@@ -63,26 +78,55 @@ export function updateMediaProgress(id: string, page: number): Promise<ApiResult
 	return API.put(`/media/${id}/progress/${page}`)
 }
 
+export function patchMediaThumbnail(id: string, params: PatchMediaThumbnail) {
+	return API.patch(`/media/${id}/thumbnail`, params)
+}
+
+export function uploadMediaThumbnail(id: string, file: File) {
+	const formData = new FormData()
+	formData.append('file', file)
+	return API.post(`/media/${id}/thumbnail`, formData, {
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	})
+}
+
+export function putMediaCompletion(
+	id: string,
+	payload: PutMediaCompletionStatus,
+): Promise<ApiResult<MediaIsComplete>> {
+	return API.put(`/media/${id}/progress/complete`, payload)
+}
+
 export const mediaApi = {
 	getInProgressMedia,
 	getMedia,
 	getMediaById,
+	getMediaByPath,
 	getMediaPage,
 	getMediaThumbnail,
 	getMediaWithCursor,
 	getPaginatedMedia,
 	getRecentlyAddedMedia,
+	patchMediaThumbnail,
+	putMediaCompletion,
 	updateMediaProgress,
+	uploadMediaThumbnail,
 }
 
 export const mediaQueryKeys: Record<keyof typeof mediaApi, string> = {
 	getInProgressMedia: 'media.getInProgress',
 	getMedia: 'media.get',
 	getMediaById: 'media.getById',
+	getMediaByPath: 'media.getByPath',
 	getMediaPage: 'media.getPage',
 	getMediaThumbnail: 'media.getThumbnail',
 	getMediaWithCursor: 'media.getWithCursor',
 	getPaginatedMedia: 'media.getPaginated',
 	getRecentlyAddedMedia: 'media.getRecentlyAdded',
+	patchMediaThumbnail: 'media.patchThumbnail',
+	putMediaCompletion: 'media.putCompletion',
 	updateMediaProgress: 'media.updateProgress',
+	uploadMediaThumbnail: 'media.uploadThumbnail',
 }

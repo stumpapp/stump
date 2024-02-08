@@ -18,7 +18,7 @@ export function useStumpWs({ onEvent }: Props) {
 		// remove http(s):// from url, and replace with ws(s)://
 		url = url.replace(/^http(s?):\/\//, 'ws$1://')
 		// remove /api(/) from end of url
-		url = url.replace(/\/api\/?$/, '')
+		url = url.replace(/\/api(\/v\d)?$/, '')
 
 		return `${url}/ws`
 	}, [URI])
@@ -37,10 +37,12 @@ export function useStumpWs({ onEvent }: Props) {
 	}
 
 	function handleOpen() {
+		console.debug('Websocket connected')
 		setConnected(true)
 	}
 
 	function handleClose() {
+		console.debug('Websocket closed')
 		setConnected(false)
 	}
 

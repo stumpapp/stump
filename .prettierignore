@@ -1,5 +1,5 @@
 # Files
-core.ts
+generated.ts
 *-lock.*
 
 # Directories
@@ -7,5 +7,7 @@ node_modules
 target
 dist
 build
-.moon/cache
 .next
+
+# locale files
+interface/src/i18n/locales/*.json

@@ -1,6 +1,6 @@
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::prelude::CoreResult;
+use crate::error::CoreResult;
 
 pub trait OpdsEnumStr {
 	fn as_str(&self) -> &'static str;

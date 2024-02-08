@@ -1,19 +1,28 @@
 use axum::{
-	extract::State,
+	extract::{ConnectInfo, State},
+	headers::UserAgent,
 	routing::{get, post},
-	Json, Router,
+	Json, Router, TypedHeader,
 };
-use axum_sessions::extractors::{ReadableSession, WritableSession};
+use prisma_client_rust::{
+	chrono::{DateTime, Duration, FixedOffset, Utc},
+	Direction,
+};
+use serde::Deserialize;
+use specta::Type;
 use stump_core::{
-	db::models::User,
-	prelude::{LoginOrRegisterArgs, UserRole},
-	prisma::{user, user_preferences},
+	db::entity::User,
+	prisma::{session, user, user_login_activity, user_preferences, PrismaClient},
 };
+use tower_sessions::{session::SessionDeletion, Session};
+use tracing::error;
+use utoipa::ToSchema;
 
 use crate::{
-	config::state::AppState,
+	config::{session::SESSION_USER_KEY, state::AppState},
 	errors::{ApiError, ApiResult},
-	utils::{self, verify_password},
+	http_server::StumpRequestInfo,
+	utils::verify_password,
 };
 
 pub(crate) fn mount() -> Router<AppState> {
@@ -27,6 +36,12 @@ pub(crate) fn mount() -> Router<AppState> {
 	)
 }
 
+#[derive(Deserialize, Type, ToSchema)]
+pub struct LoginOrRegisterArgs {
+	pub username: String,
+	pub password: String,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/auth/me",
@@ -38,11 +53,55 @@ pub(crate) fn mount() -> Router<AppState> {
 )]
 /// Returns the currently logged in user from the session. If no user is logged in, returns an
 /// unauthorized error.
-async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
-	if let Some(user) = session.get::<User>("user") {
+async fn viewer(session: Session) -> ApiResult<Json<User>> {
+	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
 		Ok(Json(user))
 	} else {
 		Err(ApiError::Unauthorized)
+	}
+}
+
+async fn handle_login_attempt(
+	client: &PrismaClient,
+	for_user: user::Data,
+	user_agent: UserAgent,
+	request_info: StumpRequestInfo,
+	success: bool,
+) -> ApiResult<user_login_activity::Data> {
+	let login_activity = client
+		.user_login_activity()
+		.create(
+			request_info.ip_addr.to_string(),
+			user_agent.to_string(),
+			success,
+			user::id::equals(for_user.id),
+			vec![],
+		)
+		.exec()
+		.await?;
+	Ok(login_activity)
+}
+
+async fn handle_remove_earliest_session(
+	client: &PrismaClient,
+	for_user_id: String,
+	session_id: Option<String>,
+) -> ApiResult<i32> {
+	if let Some(oldest_session_id) = session_id {
+		let _deleted_session = client
+			.session()
+			.delete(session::id::equals(oldest_session_id))
+			.exec()
+			.await?;
+		Ok(1)
+	} else {
+		tracing::warn!("No existing session ID was provided for enforcing the maximum number of sessions. Deleting all sessions for user instead.");
+		let deleted_sessions_count = client
+			.session()
+			.delete_many(vec![session::user_id::equals(for_user_id)])
+			.exec()
+			.await?;
+		Ok(deleted_sessions_count as i32)
 	}
 }
 
@@ -60,39 +119,150 @@ async fn viewer(session: ReadableSession) -> ApiResult<Json<User>> {
 /// Authenticates the user and returns the user object. If the user is already logged in, returns the
 /// user object from the session.
 async fn login(
-	mut session: WritableSession,
+	TypedHeader(user_agent): TypedHeader<UserAgent>,
+	ConnectInfo(request_info): ConnectInfo<StumpRequestInfo>,
+	session: Session,
 	State(state): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
-	if let Some(user) = session.get::<User>("user") {
+	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
 		if input.username == user.username {
 			return Ok(Json(user));
 		}
 	}
 
-	let fetched_user = state
-		.db
+	let client = state.db.clone();
+	let today: DateTime<FixedOffset> = Utc::now().into();
+	// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+	let twenty_four_hours_ago = today - Duration::hours(24);
+
+	let fetch_result = client
 		.user()
-		.find_unique(user::username::equals(input.username.to_owned()))
+		.find_first(vec![
+			user::username::equals(input.username.to_owned()),
+			user::deleted_at::equals(None),
+		])
 		.with(user::user_preferences::fetch())
+		.with(user::age_restriction::fetch())
+		.with(
+			user::login_activity::fetch(vec![
+				user_login_activity::timestamp::gte(twenty_four_hours_ago),
+				user_login_activity::timestamp::lte(today),
+			])
+			.order_by(user_login_activity::timestamp::order(Direction::Desc))
+			.take(10),
+		)
+		.with(user::sessions::fetch(vec![session::expires_at::gt(
+			Utc::now().into(),
+		)]))
 		.exec()
 		.await?;
 
-	if let Some(db_user) = fetched_user {
-		let matches = verify_password(&db_user.hashed_password, &input.password)?;
-		if !matches {
-			return Err(ApiError::Unauthorized);
-		}
+	match fetch_result {
+		Some(db_user)
+			if db_user.is_locked
+				&& verify_password(&db_user.hashed_password, &input.password)? =>
+		{
+			Err(ApiError::Forbidden(
+				"Account is locked. Please contact an administrator to unlock your account."
+					.to_string(),
+			))
+		},
+		Some(db_user) if !db_user.is_locked => {
+			let user_id = db_user.id.clone();
+			let matches = verify_password(&db_user.hashed_password, &input.password)?;
+			if !matches {
+				// TODO: make this configurable via environment variable so knowledgable attackers can't bypass this
+				let should_lock_account = db_user
+					.login_activity
+					.as_ref()
+					// If there are 9 or more failed login attempts _in a row_, within a 24 hour period, lock the account
+					.map(|activity| !activity.iter().any(|activity| activity.authentication_successful) && activity.len() >= 9)
+					.unwrap_or(false);
 
-		let user: User = db_user.into();
-		session
-			.insert("user", user.clone())
-			.expect("Failed to write user to session");
+				handle_login_attempt(&client, db_user, user_agent, request_info, false)
+					.await?;
 
-		return Ok(Json(user));
+				if should_lock_account {
+					let _locked_user = client
+						.user()
+						.update(
+							user::id::equals(user_id.clone()),
+							vec![user::is_locked::set(true)],
+						)
+						.exec()
+						.await?;
+
+					let removed_sessions_count = client
+						.session()
+						.delete_many(vec![session::user_id::equals(user_id.clone())])
+						.exec()
+						.await?;
+					tracing::debug!(?removed_sessions_count, ?user_id, "Locked user account and removed all associated sessions")
+				}
+
+				return Err(ApiError::Unauthorized);
+			}
+
+			let existing_sessions = db_user
+				.sessions()
+				.cloned()
+				.unwrap_or_else(|error| {
+					tracing::error!(?error, "Failed to load user's existing session(s)");
+					Vec::default()
+				})
+				.to_owned();
+			let existing_login_sessions_count = existing_sessions.len() as i32;
+
+			match (db_user.max_sessions_allowed, existing_login_sessions_count) {
+				(Some(max_login_sessions), count) if count >= max_login_sessions => {
+					let oldest_session_id = existing_sessions.iter().min_by_key(|session| session.expires_at).map(|session| session.id.clone());
+					handle_remove_earliest_session(&state.db, db_user.id.clone(), oldest_session_id).await?;
+				},
+				_ => (),
+			}
+
+			let updated_user = state
+				.db
+				.user()
+				.update(
+					user::id::equals(db_user.id.clone()),
+					vec![user::last_login::set(Some(Utc::now().into()))],
+				)
+				.with(user::user_preferences::fetch())
+				.with(user::age_restriction::fetch())
+				.exec()
+				.await
+				.unwrap_or_else(|err| {
+					error!(error = ?err, "Failed to update user last login!");
+					user::Data {
+						last_login: Some(Utc::now().into()),
+						..db_user
+					}
+				});
+
+			let login_track_result = handle_login_attempt(
+				&state.db,
+				updated_user.clone(),
+				user_agent,
+				request_info,
+				true,
+			)
+			.await;
+			// I don't want to kill the login here, so not bubbling up the error
+			if let Err(err) = login_track_result {
+				error!(error = ?err, "Failed to track login attempt!");
+			}
+
+			let user = User::from(updated_user);
+			session
+				.insert(SESSION_USER_KEY, user.clone())
+				.expect("Failed to write user to session");
+
+			Ok(Json(user))
+		},
+		_ => Err(ApiError::Unauthorized),
 	}
-
-	Err(ApiError::Unauthorized)
 }
 
 #[utoipa::path(
@@ -105,9 +275,9 @@ async fn login(
 	)
 )]
 /// Destroys the session and logs the user out.
-async fn logout(mut session: WritableSession) -> ApiResult<()> {
-	session.destroy();
-	if !session.is_destroyed() {
+async fn logout(session: Session) -> ApiResult<()> {
+	session.delete();
+	if !matches!(session.deleted(), Some(SessionDeletion::Deleted)) {
 		return Err(ApiError::InternalServerError(
 			"Failed to destroy session".to_string(),
 		));
@@ -129,7 +299,7 @@ async fn logout(mut session: WritableSession) -> ApiResult<()> {
 /// Attempts to register a new user. If no users exist in the database, the user is registered as a server owner.
 /// Otherwise, the registration is rejected by all users except the server owner.
 pub async fn register(
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
 ) -> ApiResult<Json<User>> {
@@ -137,13 +307,13 @@ pub async fn register(
 
 	let has_users = db.user().find_first(vec![]).exec().await?.is_some();
 
-	let mut user_role = UserRole::default();
+	let mut is_server_owner = false;
 
-	let session_user = session.get::<User>("user");
+	let session_user = session.get::<User>(SESSION_USER_KEY)?;
 
 	// TODO: move nested if to if let once stable
 	if let Some(user) = session_user {
-		if !user.is_admin() {
+		if !user.is_server_owner {
 			return Err(ApiError::Forbidden(String::from(
 				"You do not have permission to access this resource.",
 			)));
@@ -153,17 +323,17 @@ pub async fn register(
 		return Err(ApiError::Unauthorized);
 	} else if !has_users {
 		// if no users present, the user is automatically a server owner
-		user_role = UserRole::ServerOwner;
+		is_server_owner = true;
 	}
 
-	let hashed_password = bcrypt::hash(&input.password, utils::get_hash_cost())?;
+	let hashed_password = bcrypt::hash(&input.password, ctx.config.password_hash_cost)?;
 
 	let created_user = db
 		.user()
 		.create(
 			input.username.to_owned(),
 			hashed_password,
-			vec![user::role::set(user_role.into())],
+			vec![user::is_server_owner::set(is_server_owner)],
 		)
 		.exec()
 		.await?;
@@ -185,6 +355,7 @@ pub async fn register(
 		.user()
 		.find_unique(user::id::equals(created_user.id))
 		.with(user::user_preferences::fetch())
+		.with(user::age_restriction::fetch())
 		.exec()
 		.await?
 		.expect("Failed to fetch user after registration.");

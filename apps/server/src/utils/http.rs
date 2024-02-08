@@ -7,7 +7,7 @@ use std::{
 	io,
 	path::{Path, PathBuf},
 };
-use stump_core::prelude::ContentType;
+use stump_core::filesystem::ContentType;
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
 use tracing::error;

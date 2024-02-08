@@ -1,8 +1,9 @@
-import { CursorQueryParams, PagedQueryParams, toUrlParams } from '@stump/api'
+import { CursorQueryParams, PagedQueryParams } from '@stump/api'
 import { Pageable } from '@stump/types'
 import {
 	MutationFunction,
 	MutationKey,
+	QueriesOptions as UseQueriesOptions,
 	QueryClient,
 	QueryFilters,
 	QueryFunction,
@@ -12,6 +13,7 @@ import {
 	useIsFetching as useReactIsFetching,
 	useMutation as useReactMutation,
 	UseMutationOptions,
+	useQueries as useReactQueries,
 	useQuery as useReactQuery,
 	UseQueryOptions,
 } from '@tanstack/react-query'
@@ -65,14 +67,30 @@ export function useQuery<TQueryFnData = unknown, TError = unknown, TData = TQuer
 	return useReactQuery(queryKey, queryFn, {
 		context: QueryClientContext,
 		onError: (err) => {
-			if (isAxiosError(err) && err.response?.status === 401) {
+			const axiosError = isAxiosError(err)
+			const isNetworkError = axiosError && err?.code === 'ERR_NETWORK'
+			const isAuthError = axiosError && err.response?.status === 401
+
+			if (isAuthError) {
 				setUser(null)
 				onRedirect?.('/auth')
+			} else if (isNetworkError) {
+				onRedirect?.('/server-connection-error')
 			}
 			onError?.(err)
 		},
 		...restOptions,
 	})
+}
+
+// BAD TYPES!!
+export type QueriesOptions<
+	T extends unknown[],
+	Result extends unknown[] = [],
+	Depth extends ReadonlyArray<number> = [],
+> = UseQueriesOptions<T, Result, Depth>
+export function useQueries<T extends unknown[]>({ queries }: { queries: QueriesOptions<T> }) {
+	return useReactQueries({ context: QueryClientContext, queries })
 }
 
 type PageQueryParams = {
@@ -82,7 +100,7 @@ type PageQueryParams = {
 	page_size?: number
 	/** Filters to apply to the query. The name can be a bit misleading,
 	 *  since ordering and other things can be applied as well. */
-	params?: Record<string, string>
+	params?: Record<string, unknown>
 }
 export type PageQueryFunction<E> = (
 	params: PagedQueryParams,
@@ -111,7 +129,7 @@ export function usePageQuery<Entity = unknown, Error = AxiosError>(
 ) {
 	return useQuery(
 		[...queryKey, page, page_size, params],
-		async () => queryFn({ page, page_size, params: new URLSearchParams(params) }),
+		async () => queryFn({ page, page_size, params }),
 		{
 			...options,
 		},
@@ -163,7 +181,9 @@ export type CursorQueryOptions<
 	UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryFnData, QueryKey>,
 	'queryKey' | 'queryFn' | 'context' | 'getNextPageParam' | 'getPreviousPageParam'
 > &
-	CursorQueryCursorOptions
+	CursorQueryCursorOptions & {
+		queryKey?: QueryKey
+	}
 
 export type UseCursorQueryFunction<E> = (
 	params: CursorQueryParams,
@@ -175,17 +195,20 @@ type CursorQueryContext = {
 export function useCursorQuery<Entity = unknown, TError = AxiosError>(
 	queryKey: QueryKey,
 	queryFn: UseCursorQueryFunction<Entity>,
-	options?: CursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+	options?: Omit<
+		CursorQueryOptions<Entity, Pageable<Array<Entity>>, TError, Pageable<Array<Entity>>>,
+		'queryKey'
+	>,
 ) {
 	const { initialCursor, limit, params, ...restOptions } = options || {}
 
 	const { data, ...rest } = useInfiniteQuery(
-		[...queryKey, initialCursor, limit, params],
+		[initialCursor, limit, params, ...queryKey],
 		async ({ pageParam }: CursorQueryContext) => {
 			return queryFn({
 				afterId: pageParam || initialCursor,
 				limit: limit || 20,
-				params: toUrlParams(params),
+				params,
 			})
 		},
 		{

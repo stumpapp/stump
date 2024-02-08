@@ -4,24 +4,28 @@ use axum::{
 	routing::get,
 	Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{chrono, Direction};
 use stump_core::{
-	db::utils::PrismaCountTrait,
-	fs::{epub, image, media_file},
+	db::query::pagination::PageQuery,
+	filesystem::{
+		image::{GenericImageProcessor, ImageProcessor, ImageProcessorOptions},
+		media::get_page,
+		ContentType,
+	},
 	opds::{
 		entry::OpdsEntry,
 		feed::OpdsFeed,
 		link::{OpdsLink, OpdsLinkRel, OpdsLinkType},
 	},
-	prelude::{ContentType, PageQuery},
-	prisma::{library, media, series},
+	prisma::{library, media, read_progress, series, user},
 };
-use tracing::{trace, warn};
+use tower_sessions::Session;
+use tracing::{debug, trace, warn};
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::chain_optional_iter,
 	middleware::auth::Auth,
 	utils::{
 		get_session_user,
@@ -29,7 +33,10 @@ use crate::{
 	},
 };
 
-use super::api::v1::media::apply_in_progress_filter_for_user;
+use super::api::v1::{
+	media::{apply_in_progress_filter_for_user, apply_media_age_restriction},
+	series::apply_series_age_restriction,
+};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -64,12 +71,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 
 fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
 	let skip = page * page_size;
-	let take = skip + page_size;
-
-	(skip, take)
+	(skip, page_size)
 }
 
-// TODO auth middleware....
 async fn catalog() -> ApiResult<Xml> {
 	let entries = vec![
 		OpdsEntry::new(
@@ -183,10 +187,7 @@ async fn catalog() -> ApiResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn keep_reading(
-	State(ctx): State<AppState>,
-	session: ReadableSession,
-) -> ApiResult<Xml> {
+async fn keep_reading(State(ctx): State<AppState>, session: Session) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let user_id = get_session_user(&session)?.id;
@@ -249,6 +250,7 @@ async fn keep_reading(
 	Ok(Xml(feed.build()?))
 }
 
+// TODO: age restrictions
 async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -280,6 +282,7 @@ async fn get_library_by_id(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
@@ -287,32 +290,57 @@ async fn get_library_by_id(
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
+	debug!(skip, take, page, library_id, "opds get_library_by_id");
+
 	let tx_result = db
 		._transaction()
 		.run(|client| async move {
 			let library = client
 				.library()
 				.find_unique(library::id::equals(id.clone()))
-				.with(library::series::fetch(vec![]).skip(skip).take(take))
+				.with(
+					library::series::fetch(chain_optional_iter(
+						[],
+						[age_restrictions.clone()],
+					))
+					.skip(skip)
+					.take(take),
+				)
 				.exec()
 				.await?;
 
-			// FIXME: PCR doesn't support relation counts yet!
 			client
 				.series()
-				.count(vec![series::library_id::equals(Some(id.clone()))])
+				.count(chain_optional_iter(
+					[series::library_id::equals(Some(id.clone()))],
+					[age_restrictions],
+				))
 				.exec()
 				.await
 				.map(|count| (library, Some(count)))
 		})
 		.await?;
+	trace!(result = ?tx_result, "opds get_library_by_id transaction");
 
 	if let (Some(library), Some(library_series_count)) = tx_result {
+		let library_series = library.series().unwrap_or(&Vec::new()).to_owned();
+		debug!(
+			page,
+			series_in_page = library_series.len(),
+			library_series_count,
+			"Fetched library with series"
+		);
 		Ok(Xml(OpdsFeed::paginated(
 			library.id.as_str(),
 			library.name.as_str(),
 			format!("libraries/{}", &library.id).as_str(),
-			library.series().unwrap_or(&Vec::new()).to_owned(),
+			library_series,
 			page.into(),
 			library_series_count,
 		)
@@ -328,20 +356,27 @@ async fn get_library_by_id(
 /// A handler for GET /opds/v1.2/series, accepts a `page` URL param. Note: OPDS
 /// pagination is zero-indexed.
 async fn get_series(
-	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let (series, count) = db
 		._transaction()
 		.run(|client| async move {
 			let series = client
 				.series()
-				.find_many(vec![])
+				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
 				.skip(skip)
 				.take(take)
 				.exec()
@@ -349,7 +384,7 @@ async fn get_series(
 
 			client
 				.series()
-				.count(vec![])
+				.count(chain_optional_iter([], [age_restrictions]))
 				.exec()
 				.await
 				.map(|count| (series, count))
@@ -368,20 +403,27 @@ async fn get_series(
 }
 
 async fn get_latest_series(
-	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
 
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
 	let (series, count) = db
 		._transaction()
 		.run(|client| async move {
 			let series = client
 				.series()
-				.find_many(vec![])
+				.find_many(chain_optional_iter([], [age_restrictions.clone()]))
 				.order_by(series::updated_at::order(Direction::Desc))
 				.skip(skip)
 				.take(take)
@@ -390,7 +432,7 @@ async fn get_latest_series(
 
 			client
 				.series()
-				.count(vec![])
+				.count(chain_optional_iter([], [age_restrictions]))
 				.exec()
 				.await
 				.map(|count| (series, count))
@@ -410,21 +452,30 @@ async fn get_latest_series(
 
 async fn get_series_by_id(
 	Path(id): Path<String>,
-	pagination: Query<PageQuery>,
 	State(ctx): State<AppState>,
+	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<Xml> {
 	let db = ctx.get_db();
 
 	let series_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let tx_result = db
 		._transaction()
 		.run(|client| async move {
 			let series = db
 				.series()
-				.find_unique(series::id::equals(id.clone()))
+				.find_first(chain_optional_iter(
+					[series::id::equals(id.clone())],
+					[age_restrictions.clone()],
+				))
 				.with(
 					series::media::fetch(vec![])
 						.skip(skip)
@@ -434,15 +485,16 @@ async fn get_series_by_id(
 				.exec()
 				.await?;
 
-			// FIXME: PCR doesn't support relation counts yet!
-			// let series_media_count = client
-			// 	.media()
-			// 	.count(vec![media::series_id::equals(Some(id.clone()))])
-			// 	.exec()
-			// 	.await
-			// .map(|count| (series, Some(count)))
 			client
-				.media_in_series_count(id)
+				.media()
+				.count(vec![
+					media::series_id::equals(Some(id.clone())),
+					media::series::is(chain_optional_iter(
+						[series::id::equals(id.clone())],
+						[age_restrictions],
+					)),
+				])
+				.exec()
 				.await
 				.map(|count| (series, Some(count)))
 		})
@@ -478,7 +530,11 @@ fn handle_opds_image_response(
 			?content_type,
 			"Unsupported image for OPDS detected, converting to JPEG"
 		);
-		let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+		// let jpeg_buffer = image::jpeg_from_bytes(&image_buffer)?;
+		let jpeg_buffer = GenericImageProcessor::generate(
+			&image_buffer,
+			ImageProcessorOptions::jpeg(),
+		)?;
 		Ok(ImageResponse::new(ContentType::JPEG, jpeg_buffer))
 	}
 }
@@ -487,24 +543,27 @@ fn handle_opds_image_response(
 async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 
-	let result = db
+	let book = db
 		.media()
-		.find_unique(media::id::equals(id.clone()))
+		.find_first(chain_optional_iter(
+			[media::id::equals(id.clone())],
+			[age_restrictions],
+		))
 		.exec()
-		.await?;
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Book not found")))?;
 
-	if let Some(book) = result {
-		let (content_type, image_buffer) = media_file::get_page(book.path.as_str(), 1)?;
-		handle_opds_image_response(content_type, image_buffer)
-	} else {
-		Err(ApiError::NotFound(format!(
-			"Media with id {} not found",
-			id
-		)))
-	}
+	let (content_type, image_buffer) = get_page(book.path.as_str(), 1, &ctx.config)?;
+	handle_opds_image_response(content_type, image_buffer)
 }
 
 /// A handler for GET /opds/v1.2/books/{id}/page/{page}, returns the page
@@ -512,55 +571,92 @@ async fn get_book_page(
 	Path((id, page)): Path<(String, i32)>,
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 
 	// OPDS defaults to zero-indexed pages, I don't even think it allows the
 	// zero_based query param to be set.
 	let zero_based = pagination.zero_based.unwrap_or(true);
-	let result = db
-		.media()
-		.find_unique(media::id::equals(id.clone()))
-		.exec()
-		.await?;
-
 	let mut correct_page = page;
 	if zero_based {
 		correct_page = page + 1;
 	}
 
-	if let Some(book) = result {
-		let (content_type, image_buffer) =
-			if book.path.ends_with(".epub") && correct_page == 1 {
-				epub::get_cover(&book.path)?
-			} else {
-				media_file::get_page(book.path.as_str(), correct_page)?
-			};
+	let result: Result<(media::Data, read_progress::Data), ApiError> = db
+		._transaction()
+		.run(|client| async move {
+			let book = db
+				.media()
+				.find_first(chain_optional_iter(
+					[media::id::equals(id.clone())],
+					[age_restrictions],
+				))
+				.exec()
+				.await?
+				.ok_or(ApiError::NotFound(String::from("Book not found")))?;
 
-		handle_opds_image_response(content_type, image_buffer)
-	} else {
-		Err(ApiError::NotFound(format!("Book {} not found", &id)))
-	}
+			let is_completed = book.pages == correct_page;
+
+			let read_progress = client
+				.read_progress()
+				.upsert(
+					read_progress::user_id_media_id(user_id.clone(), id.clone()),
+					(
+						correct_page,
+						media::id::equals(id.clone()),
+						user::id::equals(user_id.clone()),
+						vec![read_progress::is_completed::set(is_completed)],
+					),
+					vec![
+						read_progress::page::set(correct_page),
+						read_progress::is_completed::set(is_completed),
+					],
+				)
+				.exec()
+				.await?;
+
+			Ok((book, read_progress))
+		})
+		.await;
+
+	let (book, _) = result?;
+	let (content_type, image_buffer) =
+		get_page(book.path.as_str(), correct_page, &ctx.config)?;
+	handle_opds_image_response(content_type, image_buffer)
 }
 
 /// A handler for GET /opds/v1.2/books/{id}/file/{filename}, returns the book
 async fn download_book(
 	Path((id, filename)): Path<(String, String)>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<NamedFile> {
 	let db = ctx.get_db();
+	let user = get_session_user(&session)?;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 
 	trace!(?id, ?filename, "download_book");
 
 	let book = db
 		.media()
-		.find_unique(media::id::equals(id.clone()))
+		.find_first(chain_optional_iter(
+			[media::id::equals(id.clone())],
+			[age_restrictions],
+		))
 		.exec()
-		.await?;
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Book not found")))?;
 
-	if let Some(book) = book {
-		Ok(NamedFile::open(book.path.clone()).await?)
-	} else {
-		Err(ApiError::NotFound(format!("Book with id {} not found", id)))
-	}
+	Ok(NamedFile::open(book.path.clone()).await?)
 }

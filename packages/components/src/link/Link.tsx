@@ -4,17 +4,21 @@ import { Link as RouterLink } from 'react-router-dom'
 
 import { cn } from '../utils'
 
-const linkVariants = cva('font-medium hover:underline', {
-	defaultVariants: {
-		variant: 'default',
-	},
-	variants: {
-		variant: {
-			brand: 'text-primary-600 dark:text-blue-400',
-			default: 'text-gray-900 dark:text-gray-100',
+const linkVariants = cva(
+	'font-medium hover:underline outline-none focus-visible:outline focus-visible:outline-brand',
+	{
+		defaultVariants: {
+			variant: 'default',
+		},
+		variants: {
+			variant: {
+				brand: 'text-brand',
+				default: 'text-contrast',
+				muted: 'text-muted',
+			},
 		},
 	},
-})
+)
 
 type BaseProps = React.ComponentPropsWithoutRef<'a'> &
 	Omit<React.ComponentPropsWithoutRef<typeof RouterLink>, 'to'> &
@@ -45,6 +49,7 @@ export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
 				className={cn(
 					linkVariants({ className, variant }),
 					underline && 'underline underline-offset-2',
+					underline === false && 'no-underline hover:no-underline',
 					className,
 				)}
 				{...location}

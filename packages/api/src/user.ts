@@ -1,10 +1,27 @@
-import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
+import type {
+	CreateUser,
+	LoginActivity,
+	UpdateUser,
+	UpdateUserPreferences,
+	User,
+	UserPreferences,
+} from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult } from './types'
+import { ApiResult, PageableApiResult } from './types'
+import { toUrlParams } from './utils'
 
-export function getUsers(): Promise<ApiResult<User[]>> {
-	return API.get('/users')
+export function getUsers(params?: Record<string, unknown>): Promise<PageableApiResult<User[]>> {
+	if (params) {
+		const searchParams = toUrlParams(params)
+		return API.get(`/users?${searchParams.toString()}`)
+	} else {
+		return API.get('/users')
+	}
+}
+
+export function getUserById(userId: string): Promise<ApiResult<User>> {
+	return API.get(`/users/${userId}`)
 }
 
 export function getUserPreferences(userId: string): Promise<ApiResult<UserPreferences>> {
@@ -15,7 +32,7 @@ export function getUserPreferences(userId: string): Promise<ApiResult<UserPrefer
  * Update the current user's preferences
  */
 export function updatePreferences(
-	preferences: UserPreferences,
+	preferences: UpdateUserPreferences,
 ): Promise<ApiResult<UserPreferences>> {
 	return API.put(`/users/me/preferences`, preferences)
 }
@@ -30,17 +47,64 @@ export function updateUserPreferences(
 	return API.put(`/users/${userId}/preferences`, preferences)
 }
 
-export function updateUser(userId: string, params: UpdateUserArgs): Promise<ApiResult<User>> {
+export function createUser(params: CreateUser): Promise<ApiResult<User>> {
+	return API.post(`/users`, params)
+}
+
+export function updateUser(userId: string, params: UpdateUser): Promise<ApiResult<User>> {
 	return API.put(`/users/${userId}`, params)
 }
 
-export function updateViewer(params: UpdateUserArgs): Promise<ApiResult<User>> {
+export function updateViewer(params: UpdateUser): Promise<ApiResult<User>> {
 	return API.put(`/users/me`, params)
 }
 
-const userApi = {
+type DeleteUser = {
+	userId: string
+	hardDelete?: boolean
+}
+
+export function deleteUser({ userId, hardDelete }: DeleteUser): Promise<ApiResult<User>> {
+	return API.delete(`/users/${userId}`, {
+		data: {
+			hard_delete: hardDelete,
+		},
+	})
+}
+
+export function getLoginActivityForUser(userId: string): Promise<ApiResult<LoginActivity[]>> {
+	return API.get(`/users/${userId}/login-activity`)
+}
+
+export function getLoginActivity(): Promise<ApiResult<LoginActivity[]>> {
+	return API.get(`/users/login-activity`)
+}
+
+export function deleteAllLoginActivity(): Promise<ApiResult<void>> {
+	return API.delete(`/users/login-activity`)
+}
+
+export function setLockStatus(userId: string, lock: boolean): Promise<ApiResult<User>> {
+	return API.put(`/users/${userId}/lock`, {
+		lock,
+	})
+}
+
+export function deleteUserSessions(userId: string): Promise<ApiResult<void>> {
+	return API.delete(`/users/${userId}/sessions`)
+}
+
+export const userApi = {
+	createUser,
+	deleteAllLoginActivity,
+	deleteUser,
+	deleteUserSessions,
+	getLoginActivity,
+	getLoginActivityForUser,
+	getUserById,
 	getUserPreferences,
 	getUsers,
+	setLockStatus,
 	updatePreferences,
 	updateUser,
 	updateUserPreferences,
@@ -48,8 +112,16 @@ const userApi = {
 }
 
 export const userQueryKeys: Record<keyof typeof userApi, string> = {
+	createUser: 'user.createUser',
+	deleteAllLoginActivity: 'user.deleteAllLoginActivity',
+	deleteUser: 'user.deleteUser',
+	deleteUserSessions: 'user.deleteUserSessions',
+	getLoginActivity: 'user.getLoginActivity',
+	getLoginActivityForUser: 'user.getLoginActivityForUser',
+	getUserById: 'user.getUserById',
 	getUserPreferences: 'user.getUserPreferences',
 	getUsers: 'user.getUsers',
+	setLockStatus: 'user.setLockStatus',
 	updatePreferences: 'user.updatePreferences',
 	updateUser: 'user.updateUser',
 	updateUserPreferences: 'user.updateUserPreferences',

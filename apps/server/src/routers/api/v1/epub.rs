@@ -6,13 +6,16 @@ use axum::{
 	routing::{get, put},
 	Json, Router,
 };
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::chrono::Utc;
+use serde::Deserialize;
+use specta::Type;
 use stump_core::{
-	db::models::{Epub, ReadProgress, UpdateEpubProgress},
-	fs::epub,
-	prisma::{media, media_annotation, read_progress, user},
+	db::entity::{Bookmark, Epub, ReadProgress, UpdateEpubProgress},
+	filesystem::media::EpubProcessor,
+	prisma::{bookmark, media, media_annotation, read_progress, user},
 };
+use tower_sessions::Session;
+use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
@@ -28,6 +31,12 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			Router::new()
 				.route("/", get(get_epub_by_id))
 				.route("/progress", put(update_epub_progress))
+				.route(
+					"/bookmarks",
+					get(get_bookmarks)
+						.post(create_or_update_bookmark)
+						.delete(delete_bookmark),
+				)
 				.route("/chapter/:chapter", get(get_epub_chapter))
 				.route("/:root/:resource", get(get_epub_meta)),
 		)
@@ -38,7 +47,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 async fn get_epub_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Epub>> {
 	let user_id = get_session_user(&session)?.id;
 
@@ -71,7 +80,7 @@ async fn get_epub_by_id(
 async fn update_epub_progress(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 	Json(input): Json<UpdateEpubProgress>,
 ) -> ApiResult<Json<ReadProgress>> {
 	let db = ctx.get_db();
@@ -137,6 +146,111 @@ async fn update_epub_progress(
 	Ok(Json(ReadProgress::from(progress)))
 }
 
+async fn get_bookmarks(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<Vec<Bookmark>>> {
+	let client = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+
+	let bookmarks = client
+		.bookmark()
+		.find_many(vec![
+			bookmark::user_id::equals(user.id),
+			bookmark::media_id::equals(id),
+		])
+		.exec()
+		.await?;
+
+	Ok(Json(
+		bookmarks
+			.into_iter()
+			.map(Bookmark::from)
+			.collect::<Vec<Bookmark>>(),
+	))
+}
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct CreateOrUpdateBookmark {
+	/// The position of the bookmark in the epub, represented by an epubcfi
+	epubcfi: String,
+	/// Optional text content at the start of the epubcfi range. This is used to display a preview
+	/// of the bookmark in the UI
+	preview_content: Option<String>,
+}
+
+async fn create_or_update_bookmark(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(input): Json<CreateOrUpdateBookmark>,
+) -> ApiResult<Json<Bookmark>> {
+	let client = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+
+	let bookmark = client
+		.bookmark()
+		.upsert(
+			bookmark::user_id_media_id_epubcfi_page(
+				user.id.clone(),
+				id.clone(),
+				input.epubcfi.clone(),
+				-1,
+			),
+			(
+				media::id::equals(id),
+				user::id::equals(user.id),
+				vec![
+					bookmark::epubcfi::set(Some(input.epubcfi.clone())),
+					bookmark::preview_content::set(input.preview_content.clone()),
+					bookmark::page::set(Some(-1)),
+				],
+			),
+			vec![
+				bookmark::epubcfi::set(Some(input.epubcfi)),
+				bookmark::preview_content::set(input.preview_content),
+				bookmark::page::set(Some(-1)),
+			],
+		)
+		.exec()
+		.await?;
+
+	Ok(Json(Bookmark::from(bookmark)))
+}
+
+#[derive(Deserialize, Type, ToSchema)]
+pub struct DeleteBookmark {
+	/// The position of the bookmark in the epub, represented by an epubcfi
+	epubcfi: String,
+}
+
+async fn delete_bookmark(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(input): Json<DeleteBookmark>,
+) -> ApiResult<Json<Bookmark>> {
+	let client = ctx.get_db();
+
+	let user = get_session_user(&session)?;
+
+	let bookmark = client
+		.bookmark()
+		.delete(bookmark::user_id_media_id_epubcfi_page(
+			user.id,
+			id,
+			input.epubcfi,
+			-1,
+		))
+		.exec()
+		.await?;
+
+	Ok(Json(Bookmark::from(bookmark)))
+}
+
 /// Get a resource from an epub file. META-INF is a reserved `root` query parameter, which will
 /// grab a resource by resource ID (e.g. `META-INF/container.xml`, where `container.xml` is the
 /// resource ID). Otherwise, the `resource` query parameter represents the path to the requested
@@ -154,7 +268,7 @@ async fn get_epub_chapter(
 		.await?;
 
 	if let Some(book) = result {
-		Ok(epub::get_epub_chapter(book.path.as_str(), chapter)?.into())
+		Ok(EpubProcessor::get_chapter(book.path.as_str(), chapter)?.into())
 	} else {
 		Err(ApiError::NotFound(format!(
 			"Media with id {} not found",
@@ -182,14 +296,14 @@ async fn get_epub_meta(
 	if let Some(book) = result {
 		let (content_type, buffer) = if root == "META-INF" {
 			// reserved for accessing resources via resource id
-			epub::get_epub_resource_by_id(
+			EpubProcessor::get_resource_by_id(
 				book.path.as_str(),
 				resource.to_str().unwrap_or_default(),
 			)?
 		} else {
 			// NOTE: when a resource is loaded from a path, it is likely something inside the contents of an epub page,
 			// such as a css file or an image file.
-			epub::get_epub_resource_from_path(
+			EpubProcessor::get_resource_by_path(
 				book.path.as_str(),
 				root.as_str(),
 				resource,

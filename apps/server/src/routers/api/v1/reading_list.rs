@@ -9,13 +9,15 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_sessions::extractors::ReadableSession;
 use prisma_client_rust::{and, or};
 use stump_core::{
-	db::models::ReadingList,
-	prelude::{CreateReadingList, Pageable, Pagination, PaginationQuery},
+	db::{
+		entity::{CreateReadingList, ReadingList},
+		query::pagination::{Pageable, Pagination, PaginationQuery},
+	},
 	prisma::{reading_list, reading_list_rbac, user},
 };
+use tower_sessions::Session;
 use tracing::trace;
 
 pub(crate) fn mount() -> Router<AppState> {
@@ -117,7 +119,7 @@ pub(crate) fn apply_pagination<'a>(
 async fn get_reading_list(
 	State(ctx): State<AppState>,
 	pagination_query: Query<PaginationQuery>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<ReadingList>>>> {
 	let user = get_session_user(&session)?;
 	let user_id = user.id.clone();
@@ -183,7 +185,7 @@ async fn get_reading_list(
 	)
 )]
 async fn create_reading_list(
-	session: ReadableSession,
+	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
 ) -> ApiResult<Json<ReadingList>> {
@@ -250,7 +252,7 @@ async fn create_reading_list(
 async fn get_reading_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<ReadingList>> {
 	let user_id = get_session_user(&session)?.id;
 	let db = ctx.get_db();
@@ -294,7 +296,7 @@ async fn get_reading_list_by_id(
 	)
 )]
 async fn update_reading_list(
-	session: ReadableSession,
+	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateReadingList>,
@@ -361,7 +363,7 @@ async fn update_reading_list(
 	)
 )]
 async fn delete_reading_list_by_id(
-	session: ReadableSession,
+	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<ReadingList>> {

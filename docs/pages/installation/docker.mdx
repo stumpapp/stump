@@ -1,0 +1,115 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Docker
+
+<Callout type="info" emoji="ℹ">
+	Stump currently only has a [nightly build](https://hub.docker.com/r/aaronleopold/stump) available
+	for Docker. **This image is for testing, lacking in both features and reliability**. There are
+	some, including myself, who are reportedly using this as their primary media server, however do
+	not expect a fully featured, bug-free experience if you spin up a container.
+</Callout>
+
+## Usage
+
+You have two options for spinning up a container based on your preference. I prefer using compose, however I have listed instructions for both Docker CLI and Docker Compose below.
+
+Please ensure to adjust `PUID` and `PGID` to the user your config and data directories belong to.
+You can print those by executing: `echo -e "PUID=$(id -u)\nPGID=$(id -g)"`
+
+### Using docker run
+
+You can create a container by running:
+
+```bash
+# replace my paths (left of colon) with your own
+docker create \
+  --name=stump \
+  -e "PUID=1000" \
+  -e "PGID=1000" \
+  -p 10801:10801 \
+  --volume "/Users/aaronleopold/.stump:/config" \
+  --volume "/Users/aaronleopold/Documents/Stump:/data" \
+  --restart unless-stopped \
+  aaronleopold/stump:nightly
+```
+
+If you prefer bind mounts, you can swap out the two `--volume` lines with:
+
+```bash
+--mount type=volume,source=/Users/aaronleopold/.stump,target=/config \
+--mount type=volume,source=/Users/aaronleopold/Documents/Stump,target=/data \
+```
+
+Then you can start the container:
+
+```bash
+docker start stump
+```
+
+#### Properties and configuration
+
+| Parameter                       |                                Functionality                                |
+| ------------------------------- | :-------------------------------------------------------------------------: |
+| `--name=stump`                  |           Sets the name of the container this command will create           |
+| `-e "PUID=1000" -e "PGID=1000"` |    Sets the user and group used within the container (leave this as is)     |
+| `-p 10801:10801`                | Maps the port on your machine (left) to the port the container uses (right) |
+
+### Using docker compose
+
+<Callout emoji="☢️">
+	This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for
+	you, you might be on V1, which uses `docker-compose`. Please review [Docker's
+	documentation](https://docs.docker.com/compose/install/) for more information and/or
+	platform-specific installation.
+</Callout>
+
+Below is an example of a Docker Compose file you can use to bootstrap your Stump server:
+
+```yaml
+version: '3.3'
+services:
+  stump:
+    image: aaronleopold/stump:nightly
+    container_name: stump
+    # Replace my paths (prior to the colons) with your own
+    volumes:
+      - /Users/aaronleopold/.stump:/config
+      - /Users/aaronleopold/Documents/Stump:/data
+    ports:
+      - 10801:10801
+    environment:
+      - PUID=1000
+      - PGID=1000
+      # This `environment` field is optional, remove if you don't need it.
+      # I am using it as an example here, but it's actually a default value.
+      - STUMP_CONFIG_DIR=/config
+    restart: unless-stopped
+```
+
+## Monitoring
+
+To monitor the logs of the container, you can use the following command:
+
+```bash
+docker logs -f stump
+```
+
+## Updating your container
+
+As with starting Stump, updating your container is slightly different depending on how you chose to run it.
+
+### Update using docker CLI
+
+1. Update the image: `docker pull aaronleopold/stump:nightly`
+2. Stop the running container: `docker stop stump`
+3. Delete the container: `docker rm stump`
+4. Recreate your container (see [using-docker-run](#using-docker-run))
+5. Start the new container: `docker start stump`
+
+To remove the old dangling images you have installed: `docker image prune`
+
+### Update using docker compose
+
+1. Stop the running container: `docker compose down`
+2. Update the image: `docker compose pull` or `docker compose pull aaronleopold/stump:nightly`
+3. Start the container again: `docker-compose up`

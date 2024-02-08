@@ -1,36 +1,30 @@
-import type { User, UserPreferences } from '@stump/types'
+import type { User, UserPermission, UserPreferences } from '@stump/types'
 import { produce } from 'immer'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
 import { StoreBase } from '.'
 
-type UserStore = {
+// https://github.com/cmlarsen/zustand-middleware-computed-state
+interface UserStore extends StoreBase<UserStore> {
 	user?: User | null
 	userPreferences?: UserPreferences | null
 	setUser: (user?: User | null) => void
 	setUserPreferences: (userPreferences: UserPreferences | null) => void
-} & StoreBase<UserStore>
+	checkUserPermission: (permission: UserPermission) => boolean
+}
 
-// FIXME: So this definitely was an oversight when I initially considered using Zustand for both
-// react and react-native. Effectively, I need the storage backend to be dynamic, i.e. localStorage
-// for react and AsyncStorage for react-native. This is possible by doing something like:
-// export const useUserStore = (storageBackend) => create<UserStore>()(persist(..., { storage: createJSONStorage(() => storageBackend) })
-// but would then make usage awkard: const {user} = useUserStore(localStorage)(store => ...)
-// alternatively, what I could do is update the client/src/stores to more of a `create store` pattern. So this file would instead
-// export:
-// export const createUserStore = (storageBackend) => create<UserStore>()(persist(..., { storage: createJSONStorage(() => storageBackend) })
-// and then the interface package would need `interface/src/stores/user.ts`:
-// export const useUserStore = createUserStore(localStorage)
-// and the mobile package would do:
-// export const useUserStore = createUserStore(AsyncStorage)
-// OR, just move this all to React context and manually sync with the appropriate storage backend for the
-// values that need persisting (really only the preferences)...
-// https://github.com/pmndrs/zustand/blob/main/docs/integrations/persisting-store-data.md#options
+// FIXME: [DEPRECATED] Use `createWithEqualityFn` instead of `create`
+// TODO: consider renaming to useAuth
 export const useUserStore = create<UserStore>()(
 	devtools(
 		persist(
 			(set, get) => ({
+				checkUserPermission(permission: UserPermission) {
+					const user = get().user
+					if (!user) return false
+					return user.is_server_owner || user.permissions.includes(permission)
+				},
 				reset() {
 					set(() => ({}))
 				},
@@ -41,20 +35,25 @@ export const useUserStore = create<UserStore>()(
 					set((state) =>
 						produce(state, (draft) => {
 							draft.user = user
+							if (user?.user_preferences) {
+								// NOTE: I am not killing the user preferences when a user logs out. This ensures
+								// certain things like locality, theme, etc. will be lost. Nothing sensitive is
+								// stored in user preferences, so I think this is fine.
+								draft.userPreferences = user.user_preferences
+							}
 						}),
 					)
-
-					// NOTE: I am not killing the user preferences when a user logs out. This might
-					// be 'controversial' but I think it's net postive. Otherwise, certain things
-					// like locality, theme, etc. will be lost.
-					if (user?.user_preferences) {
-						get().setUserPreferences(user.user_preferences)
-					}
 				},
 				setUserPreferences(userPreferences: UserPreferences | null) {
 					set((state) =>
 						produce(state, (draft) => {
 							draft.userPreferences = userPreferences
+							if (state.user) {
+								draft.user = {
+									...state.user,
+									user_preferences: userPreferences,
+								}
+							}
 						}),
 					)
 				},

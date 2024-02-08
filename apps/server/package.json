@@ -3,8 +3,12 @@
 	"private": true,
 	"version": "0.0.0",
 	"scripts": {
-		"build": "pnpm get-client && cargo build --release && pnpm move-client",
-		"get-client": "trash \"dist/*\" \"!dist/.placeholder\" && cpy \"../web/dist/**/*\" ./dist/",
-		"move-client": "trash ../../target/release/dist && cp -r ./dist ../../target/release/dist"
+		"lint": "cargo clippy --package stump_server -- -D warnings",
+		"format": "cargo fmt --package stump_server",
+		"start": "cargo run --release --package stump_server",
+		"dev": "cargo-watch -x run",
+		"build": "cargo build --release --package stump_server",
+		"delete-webapp": "trash \"dist/*\" \"!dist/.placeholder\"",
+		"get-webapp": "cp -r ../web/dist ./dist"
 	}
 }

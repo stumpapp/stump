@@ -22,7 +22,11 @@ create_dummy_rust_file() {
 # it's a bit of a hack, but it works lol
 prisma_sed_correction() {
     set -ex; \
-        sed -i 's|\/.*\/core\/prisma\/schema.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
+        # Match windows paths
+        sed -i 's|[A-Z]:\\\\.*\\\\core\\\\prisma\\\\schema\.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
+        sed -i 's|[A-Z]:\\\\.*\\\\core\\\\prisma\\\\migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs; \
+        # Match Unix paths
+        sed -i 's|\/.*\/core\/prisma\/schema\.prisma|\/app\/core\/prisma\/schema.prisma|g' core/src/prisma.rs; \
         sed -i 's|\/.*\/core\/prisma\/migrations|\/app\/core\/prisma\/migrations|g' core/src/prisma.rs
 }
 
@@ -31,5 +35,16 @@ workspaces_sed_correction() {
         sed -i '/core\/integration-tests/d' Cargo.toml; \
         sed -i '/apps\/desktop\/src-tauri/d' Cargo.toml; \
         sed -i '/apps\/tui/d' Cargo.toml; \
-        sed -i '/packages\/prisma-cli/d' Cargo.toml
+        sed -i '/crates\/prisma-cli/d' Cargo.toml
+}
+
+download_pdfium() {
+    local arch=$1
+    if [ "$arch" = "amd64" ]; then
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/chromium/6002/pdfium-linux-x86.tgz
+    elif [ "$arch" = "arm64" ]; then
+        curl -sLo pdfium.tgz https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/6002/pdfium-linux-arm64.tgz
+    fi
+    tar -xzvf pdfium.tgz -C /pdfium
+    rm pdfium.tgz
 }

@@ -1,3 +1,4 @@
+// TODO: Update this config... https://typescript-eslint.io/blog/announcing-typescript-eslint-v6/
 module.exports = {
 	env: {
 		browser: true,

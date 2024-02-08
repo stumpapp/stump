@@ -4,12 +4,16 @@
 	"description": "",
 	"license": "MIT",
 	"scripts": {
+		"lint": "cargo clippy --package stump_desktop -- -D warnings",
+		"format": "cargo fmt --package stump_desktop",
 		"tauri": "tauri",
+		"start": "tauri dev --no-watch",
+		"start-bundled": "pnpm tauri dev  --no-watch -- --features bundled-server",
 		"vite": "vite --",
 		"dev": "tauri dev",
-		"build": "pnpm build:web && tauri build",
-		"build:mac": "pnpm build:web && tauri build --target universal-apple-darwin",
-		"build:web": "vite build"
+		"build": "vite build && tauri build",
+		"build:mac": "vite build && tauri build --target universal-apple-darwin",
+		"nuke": "pnpm exec rimraf -rf node_modules"
 	},
 	"dependencies": {
 		"@stump/client": "workspace:*",
@@ -20,18 +24,18 @@
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
-		"@tailwindcss/typography": "^0.5.9",
+		"@tailwindcss/typography": "^0.5.10",
 		"@tauri-apps/cli": "^1.2.3",
-		"@types/react": "^18.0.31",
-		"@types/react-dom": "^18.0.11",
-		"@vitejs/plugin-react": "^2.0.0",
-		"autoprefixer": "^10.4.14",
-		"postcss": "^8.4.21",
+		"@types/react": "^18.2.29",
+		"@types/react-dom": "^18.2.14",
+		"@vitejs/plugin-react": "^4.1.0",
+		"autoprefixer": "^10.4.16",
+		"postcss": "^8.4.31",
 		"tailwind": "^4.0.0",
 		"tailwind-scrollbar-hide": "^1.1.7",
-		"tailwindcss": "^3.3.0",
-		"typescript": "^5.0.2",
-		"vite": "^3.2.5",
-		"vite-plugin-tsconfig-paths": "^1.1.0"
+		"tailwindcss": "^3.3.3",
+		"typescript": "^5.3.3",
+		"vite": "^4.5.0",
+		"vite-plugin-tsconfig-paths": "^1.3.1"
 	}
 }

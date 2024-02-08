@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 
-import { ButtonProps, PickSelect } from '../index'
+import { PickSelect } from '../utils'
+import { ButtonProps } from './Button'
 
 export type ButtonContextProps = {
 	variant: PickSelect<ButtonProps, 'variant'>

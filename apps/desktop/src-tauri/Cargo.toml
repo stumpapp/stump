@@ -10,12 +10,20 @@ edition = "2021"
 tauri-build = { version = "1.2.1", features = [] }
 
 [dependencies]
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2.4", features = ["api-all", "devtools"] }
+stump_server = { path = "../../server", optional = true }
+
+# https://github.com/tauri-apps/tauri/issues/5070 -> Once I upgrade Tauri, the workspace inheritance bug will be fixed
+# serde_json = { workspace = true }
+# serde = { workspace = true }
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.107"
+
+tauri = { version = "1.2.5", features = ["api-all", "devtools"] }
 
 ### MISC ###
 discord-rich-presence = "0.2.3"
+tracing = { version = "0.1.37", optional = true}
+
 
 [features]
 # by default Tauri runs in production mode
@@ -24,3 +32,6 @@ default = [ "custom-protocol" ]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
 custom-protocol = [ "tauri/custom-protocol" ]
+# This feature will bundle the Stump server with the desktop app, allowing the user to use the desktop app
+# as their dedicated server instance.
+bundled-server = [ "dep:stump_server", "dep:tracing" ] 

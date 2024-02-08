@@ -1,6 +1,6 @@
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::prelude::{ContentType, CoreResult};
+use crate::{error::CoreResult, filesystem::ContentType};
 
 use super::util::OpdsEnumStr;
 
@@ -154,11 +154,11 @@ impl OpdsStreamLink {
 			.attr("pse:count", &self.count);
 
 		if let Some(last_read) = &self.last_read {
-			link = link.attr("wstxns1:lastRead", last_read);
+			link = link.attr("pse:lastRead", last_read);
 		}
 
 		if let Some(last_read_date) = &self.last_read_date {
-			link = link.attr("wstxns1:lastReadDate", last_read_date);
+			link = link.attr("pse:lastReadDate", last_read_date);
 		}
 
 		writer.write(link)?;

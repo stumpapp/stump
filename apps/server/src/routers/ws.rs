@@ -9,10 +9,8 @@ use axum::{
 	routing::get,
 	Router,
 };
-// use axum_typed_websockets::{Message, WebSocket, WebSocketUpgrade};
 use futures_util::{sink::SinkExt, stream::StreamExt};
-use stump_core::prelude::Ctx;
-use tracing::error;
+use stump_core::Ctx;
 
 use crate::config::state::AppState;
 
@@ -35,15 +33,10 @@ async fn handle_socket(socket: WebSocket, ctx: Arc<Ctx>) {
 
 	let mut rx = ctx.get_client_receiver();
 
-	// if let Ok(msg) = rx.recv().await {}
 	while let Ok(core_event) = rx.recv().await {
 		if let Ok(payload) = serde_json::to_string(&core_event) {
-			sender
-				.send(Message::Text(payload))
-				.await
-				// FIXME: This `or_else` is hitting for EVERY message, even though I see
-				// the messages coming in on the client side.
-				.unwrap_or_else(|e| error!("Failed to send message: {}", e));
+			// TODO: Pipe errors give me a twitchy eye
+			let _ = sender.send(Message::Text(payload)).await;
 		}
 	}
 }

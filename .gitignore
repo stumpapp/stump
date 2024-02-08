@@ -37,6 +37,7 @@ target/
 *.min.js
 *.map
 *.tsbuildinfo
+.env
 docker-compose.yaml
 
 # rust
@@ -48,11 +49,6 @@ apps/server/client/*
 *.db*
 *.sqlite*
 *prisma.rs*
-
-# Moon
-.moon/cache
-.moon/dts
-.moon/docker
 
 # nix
 .envrc

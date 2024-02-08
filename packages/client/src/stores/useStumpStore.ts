@@ -12,6 +12,7 @@ interface StumpStore extends StoreBase<StumpStore> {
 	setConnected(connected: boolean): void
 }
 
+// FIXME: [DEPRECATED] Use `createWithEqualityFn` instead of `create`
 export const useStumpStore = create<StumpStore>()(
 	devtools(
 		// TODO: I am unsure the base url is something to be persisted. The only scenario

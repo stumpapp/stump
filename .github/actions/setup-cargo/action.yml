@@ -6,7 +6,7 @@ runs:
   steps:
     - name: Configure environment
       run: |
-        if [[ ${{ runner.name }} == 'manjaro-az' || ${{ runner.os }} == 'Windows' ]]; then
+        if [[ ${{ runner.name }} == 'oromei-ubuntu' || ${{ runner.os }} == 'Windows' ]]; then
           echo "RUN_SETUP=false" >> $GITHUB_ENV
         else
           echo "RUN_SETUP=true" >> $GITHUB_ENV
@@ -21,7 +21,7 @@ runs:
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: stable
+        toolchain: 1.72.1
         profile: minimal
         override: true
         components: rustfmt, clippy

@@ -1,25 +1,25 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
-import { ComponentProps } from 'react'
+import { Meta, StoryObj } from '@storybook/react'
 
 import { Text } from '..'
 import { ToolTip } from './ToolTip'
 
-export default {
+const StoryMeta: Meta<typeof ToolTip> = {
 	component: ToolTip,
 	title: 'tooltip/ToolTip',
-} as ComponentMeta<typeof ToolTip>
+}
 
-type StoryProps = Omit<ComponentProps<typeof ToolTip>, 'children'>
-const Story = (args: StoryProps) => {
+const Demo = () => {
 	return (
 		<div className="flex h-full w-full items-center justify-center">
-			<ToolTip {...args} content={args.content || <Text>Content!</Text>}>
+			<ToolTip content={<Text>Content!</Text>}>
 				<Text>Trigger</Text>
 			</ToolTip>
 		</div>
 	)
 }
-const Template: ComponentStory<typeof Story> = (args) => <Story {...args} />
 
-export const Default = Template.bind({})
-Default.args = {}
+export const Default: StoryObj<typeof ToolTip> = {
+	render: () => <Demo />,
+}
+
+export default StoryMeta

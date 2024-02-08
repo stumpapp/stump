@@ -12,41 +12,7 @@ const Sheet = (props: ComponentProps<typeof SheetPrimitive.Root>) => (
 const SheetTrigger = (props: ComponentProps<typeof SheetPrimitive.Trigger>) => (
 	<SheetPrimitive.Trigger {...props} />
 )
-
-const FLOATING_PORTAL_VARIANTS = {
-	bottom: 'bottom-4 inset-x-4 z-50',
-	left: 'left-4 inset-y-4 z-50',
-	right: 'right-4 inset-y-4 z-50',
-	top: 'top-4 inset-x-4 z-50',
-}
-const portalVariants = cva('fixed inset-0 z-[105] flex', {
-	defaultVariants: { position: 'right' },
-	variants: {
-		position: {
-			bottom: 'items-end',
-			left: 'justify-start',
-			right: 'justify-end',
-			top: 'items-start',
-		},
-	},
-})
-
-export type SheetPortalProps = {
-	floating?: boolean
-} & SheetPrimitive.DialogPortalProps &
-	VariantProps<typeof portalVariants>
-const SheetPortal = ({ position, className, children, floating, ...props }: SheetPortalProps) => (
-	<SheetPrimitive.Portal className={cn(className)} {...props}>
-		<div
-			className={cn(portalVariants({ position }), {
-				[FLOATING_PORTAL_VARIANTS[position || 'right']]: !!floating,
-			})}
-		>
-			{children}
-		</div>
-	</SheetPrimitive.Portal>
-)
-SheetPortal.displayName = SheetPrimitive.Portal.displayName
+const SheetPortal = SheetPrimitive.Portal
 
 export type SheetOverlayProps = Omit<
 	React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>,
@@ -58,7 +24,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Overlay
 		className={cn(
-			'fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-all duration-100 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
+			'fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
 			className,
 		)}
 		{...props}
@@ -67,101 +33,98 @@ const SheetOverlay = React.forwardRef<
 ))
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
-const sheetVariants = cva('fixed z-50 scale-100 gap-4 bg-white p-6 opacity-100 dark:bg-gray-900', {
-	compoundVariants: [
-		{
-			class: 'max-h-screen',
-			position: ['top', 'bottom'],
-			size: 'content',
-		},
-		{
-			class: 'h-1/3',
-			position: ['top', 'bottom'],
+const sheetVariants = cva(
+	'fixed z-50 gap-4 bg-background shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300 flex flex-col',
+	{
+		compoundVariants: [
+			{
+				class: 'max-h-screen',
+				position: ['top', 'bottom'],
+				size: 'content',
+			},
+			{
+				class: 'h-1/3',
+				position: ['top', 'bottom'],
+				size: 'default',
+			},
+			{
+				class: 'h-1/4',
+				position: ['top', 'bottom'],
+				size: 'sm',
+			},
+			{
+				class: 'h-1/2',
+				position: ['top', 'bottom'],
+				size: 'lg',
+			},
+			{
+				class: 'h-5/6',
+				position: ['top', 'bottom'],
+				size: 'xl',
+			},
+			{
+				class: 'h-screen',
+				position: ['top', 'bottom'],
+				size: 'full',
+			},
+			{
+				class: 'max-w-screen',
+				position: ['right', 'left'],
+				size: 'content',
+			},
+			{
+				class: 'w-1/3',
+				position: ['right', 'left'],
+				size: 'default',
+			},
+			{
+				class: 'w-1/4',
+				position: ['right', 'left'],
+				size: 'sm',
+			},
+			{
+				class: 'w-1/2',
+				position: ['right', 'left'],
+				size: 'lg',
+			},
+			{
+				class: 'w-5/6',
+				position: ['right', 'left'],
+				size: 'xl',
+			},
+			{
+				class: 'w-screen',
+				position: ['right', 'left'],
+				size: 'full',
+			},
+		],
+		defaultVariants: {
+			position: 'right',
 			size: 'default',
 		},
-		{
-			class: 'h-1/4',
-			position: ['top', 'bottom'],
-			size: 'sm',
-		},
-		{
-			class: 'h-1/2',
-			position: ['top', 'bottom'],
-			size: 'lg',
-		},
-		{
-			class: 'h-5/6',
-			position: ['top', 'bottom'],
-			size: 'xl',
-		},
-		{
-			class: 'h-screen',
-			position: ['top', 'bottom'],
-			size: 'full',
-		},
-		{
-			class: 'max-w-screen',
-			position: ['right', 'left'],
-			size: 'content',
-		},
-		{
-			class: 'w-1/3',
-			position: ['right', 'left'],
-			size: 'default',
-		},
-		{
-			class: 'w-1/4',
-			position: ['right', 'left'],
-			size: 'sm',
-		},
-		{
-			class: 'w-1/2',
-			position: ['right', 'left'],
-			size: 'lg',
-		},
-		{
-			class: 'w-5/6',
-			position: ['right', 'left'],
-			size: 'xl',
-		},
-		{
-			class: 'w-screen',
-			position: ['right', 'left'],
-			size: 'full',
-		},
-	],
-	defaultVariants: {
-		position: 'right',
-		size: 'default',
-	},
-	variants: {
-		position: {
-			bottom: 'animate-in slide-in-from-bottom w-full duration-300',
-			left: 'animate-in slide-in-from-left h-full duration-300',
-			right: 'animate-in slide-in-from-right h-full duration-300',
-			top: 'animate-in slide-in-from-top w-full duration-300',
-		},
-		size: {
-			content: '',
-			default: '',
-			full: '',
-			lg: '',
-			sm: '',
-			xl: '',
+		variants: {
+			position: {
+				bottom:
+					'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom border-edge-200/80',
+				left: 'inset-y-0 left-0 h-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left border-edge-200/80',
+				right:
+					'inset-y-0 right-0 h-full border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right border-edge-200/80',
+				top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top border-edge-200/80',
+			},
+			size: {
+				content: '',
+				default: '',
+				full: '',
+				lg: '',
+				sm: '',
+				xl: '',
+			},
 		},
 	},
-})
-
-const FLOATING_CONTENT_VARIANTS = {
-	bottom: 'max-w-[calc(100%-2rem)]',
-	left: 'max-h-[calc(100%-2rem)]',
-	right: 'max-h-[calc(100%-2rem)]',
-	top: 'max-w-[calc(100%-2rem)]',
-}
+)
 
 export type SheetContentProps = {
 	closeIcon?: boolean
-	floating?: boolean
 	rounded?: boolean
 } & React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> &
 	VariantProps<typeof sheetVariants>
@@ -169,25 +132,18 @@ export type SheetContentProps = {
 const SheetContent = React.forwardRef<
 	React.ElementRef<typeof SheetPrimitive.Content>,
 	SheetContentProps
->(({ position, size, className, children, closeIcon, floating, rounded, ...props }, ref) => (
-	<SheetPortal position={position} floating={floating}>
+>(({ position, size, className, children, closeIcon, rounded, ...props }, ref) => (
+	<SheetPortal>
 		<SheetOverlay />
 		<SheetPrimitive.Content
 			ref={ref}
-			className={cn(
-				sheetVariants({ position, size }),
-				{
-					[FLOATING_CONTENT_VARIANTS[position || 'right']]: !!floating,
-				},
-				rounded && 'rounded-md',
-				className,
-			)}
+			className={cn(sheetVariants({ position, size }), rounded && 'rounded-md', className)}
 			{...props}
 		>
 			{children}
 			{closeIcon && (
-				<SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 dark:text-gray-100 dark:focus:ring-gray-400 dark:focus:ring-offset-gray-900 dark:data-[state=open]:bg-gray-800">
-					<X className="h-4 w-4" />
+				<SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-background disabled:pointer-events-none data-[state=open]:bg-background">
+					<X className="h-4 w-4 text-contrast-300" />
 					<span className="sr-only">Close</span>
 				</SheetPrimitive.Close>
 			)}
@@ -197,13 +153,16 @@ const SheetContent = React.forwardRef<
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-	<div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
+	<div
+		className={cn('flex flex-col space-y-2 pb-2 pt-4 text-center sm:text-left', className)}
+		{...props}
+	/>
 )
 SheetHeader.displayName = 'SheetHeader'
 
 const SheetFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
 	<div
-		className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
+		className={cn('flex flex-col-reverse px-6 sm:flex-row sm:justify-end sm:space-x-2', className)}
 		{...props}
 	/>
 )
@@ -215,7 +174,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Title
 		ref={ref}
-		className={cn('text-lg font-semibold text-gray-900', 'dark:text-gray-50', className)}
+		className={cn('text-lg font-semibold text-gray-900', 'px-6 dark:text-gray-50', className)}
 		{...props}
 	/>
 ))
@@ -227,7 +186,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SheetPrimitive.Description
 		ref={ref}
-		className={cn('text-sm text-gray-500', 'dark:text-gray-400', className)}
+		className={cn('px-6 text-sm text-gray-500', 'dark:text-gray-400', className)}
 		{...props}
 	/>
 ))

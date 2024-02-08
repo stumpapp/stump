@@ -1,6 +1,6 @@
 {
+	"extends": "expo/tsconfig.base",
 	"compilerOptions": {
-		"outDir": "../../.moon/cache/types/apps/mobile",
 		"skipLibCheck": true,
 		"paths": {
 			"@stump/api": ["../../packages/api/src/index.ts"],
@@ -11,5 +11,5 @@
 			"@stump/types/*": ["../../packages/types/*"]
 		}
 	},
-	"extends": "expo/tsconfig.base"
+	"module": "NodeNext"
 }

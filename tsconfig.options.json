@@ -1,5 +1,4 @@
 {
-	"extends": "tsconfig-moon/tsconfig.json",
 	"compilerOptions": {
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
 		"strict": true,
@@ -22,7 +21,7 @@
 			"@stump/client": ["./packages/client"],
 			"@stump/api": ["./packages/api"],
 			"@stump/types": ["./packages/types"],
-			"@stump/interface": ["./packages/interface"]
+			"@stump/interface": ["./interface"]
 		}
 	}
 }

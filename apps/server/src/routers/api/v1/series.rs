@@ -1,41 +1,62 @@
 use axum::{
-	extract::{Path, State},
+	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
 	routing::get,
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use axum_sessions::extractors::ReadableSession;
-use prisma_client_rust::Direction;
+use prisma_client_rust::{or, Direction};
+use serde::{Deserialize, Serialize};
+use serde_qs::axum::QsQuery;
 use stump_core::{
+	config::StumpConfig,
 	db::{
-		models::{Media, Series},
-		utils::PrismaCountTrait,
-		Dao, SeriesDao, SeriesDaoImpl,
+		entity::{LibraryOptions, Media, Series, UserPermission},
+		query::{
+			ordering::QueryOrder,
+			pagination::{PageQuery, Pageable, Pagination, PaginationQuery},
+		},
+		PrismaCountTrait, SeriesDAO, DAO,
 	},
-	fs::{image, media_file},
-	prelude::{
-		ContentType, PageQuery, Pageable, Pagination, PaginationQuery, QueryOrder,
+	filesystem::{
+		get_unknown_thumnail,
+		image::{
+			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
+			ImageProcessorOptions,
+		},
+		read_entire_file, ContentType, FileParts, PathUtils,
 	},
 	prisma::{
+		library,
 		media::{self, OrderByParam as MediaOrderByParam},
-		read_progress,
+		media_metadata, read_progress,
 		series::{self, OrderByParam, WhereParam},
+		series_metadata,
 	},
 };
+use tower_sessions::Session;
 use tracing::{error, trace};
+use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
 	errors::{ApiError, ApiResult},
+	filter::{
+		chain_optional_iter, decode_path_filter, FilterableQuery, SeriesBaseFilter,
+		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
+	},
 	middleware::auth::Auth,
 	utils::{
-		get_session_user, http::ImageResponse, FilterableQuery, SeriesFilter,
-		SeriesRelation,
+		enforce_session_permissions, get_session_server_owner_user, get_session_user,
+		http::ImageResponse, validate_image_upload,
 	},
 };
 
-use super::library::apply_library_filters;
+use super::{
+	library::apply_library_base_filters,
+	media::{apply_media_age_restriction, apply_media_base_filters, get_media_thumbnail},
+	metadata::apply_series_metadata_filters,
+};
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 	Router::new()
@@ -50,27 +71,109 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_series_by_id))
 				.route("/media", get(get_series_media))
 				.route("/media/next", get(get_next_in_series))
-				.route("/thumbnail", get(get_series_thumbnail)),
+				.route(
+					"/thumbnail",
+					get(get_series_thumbnail_handler)
+						.patch(patch_series_thumbnail)
+						.post(replace_series_thumbnail)
+						// TODO: configurable max file size
+						.layer(DefaultBodyLimit::max(20 * 1024 * 1024)), // 20MB
+				)
+				.route(
+					"/complete",
+					get(get_series_is_complete).put(put_series_is_complete),
+				),
 		)
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
-pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
-	let mut _where: Vec<WhereParam> = vec![];
-
-	if !filters.id.is_empty() {
-		_where.push(series::id::in_vec(filters.id))
-	}
-	if !filters.name.is_empty() {
-		_where.push(series::name::in_vec(filters.name));
-	}
-
-	if let Some(library_filters) = filters.library {
-		_where.push(series::library::is(apply_library_filters(library_filters)));
-	}
-
-	_where
+pub(crate) fn apply_series_base_filters(filters: SeriesBaseFilter) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			(!filters.id.is_empty()).then(|| series::id::in_vec(filters.id)),
+			(!filters.name.is_empty()).then(|| series::name::in_vec(filters.name)),
+			(!filters.path.is_empty()).then(|| {
+				let decoded_paths = decode_path_filter(filters.path);
+				series::path::in_vec(decoded_paths)
+			}),
+			filters.search.map(|s| {
+				or![
+					series::name::contains(s.clone()),
+					series::description::contains(s.clone()),
+					series::metadata::is(vec![or![
+						series_metadata::title::contains(s.clone()),
+						series_metadata::summary::contains(s),
+					]])
+				]
+			}),
+			filters
+				.metadata
+				.map(apply_series_metadata_filters)
+				.map(series::metadata::is),
+		],
+	)
 }
+
+pub(crate) fn apply_series_relation_filters(
+	filters: SeriesRelationFilter,
+) -> Vec<WhereParam> {
+	chain_optional_iter(
+		[],
+		[
+			filters
+				.library
+				.map(apply_library_base_filters)
+				.map(series::library::is),
+			filters
+				.media
+				.map(apply_media_base_filters)
+				.map(series::media::some),
+		],
+	)
+}
+
+pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
+	apply_series_base_filters(filters.base_filter)
+		.into_iter()
+		.chain(apply_series_relation_filters(filters.relation_filter))
+		.collect()
+}
+
+// TODO: this is wrong
+pub(crate) fn apply_series_age_restriction(
+	min_age: i32,
+	restrict_on_unset: bool,
+) -> WhereParam {
+	let direct_restriction = series::metadata::is(if restrict_on_unset {
+		vec![
+			series_metadata::age_rating::not(None),
+			series_metadata::age_rating::lte(min_age),
+		]
+	} else {
+		vec![or![
+			series_metadata::age_rating::equals(None),
+			series_metadata::age_rating::lte(min_age)
+		]]
+	});
+
+	let media_restriction =
+		series::media::some(vec![media::metadata::is(if restrict_on_unset {
+			vec![
+				media_metadata::age_rating::not(None),
+				media_metadata::age_rating::lte(min_age),
+			]
+		} else {
+			vec![or![
+				media_metadata::age_rating::equals(None),
+				media_metadata::age_rating::lte(min_age)
+			]]
+		})]);
+
+	or![direct_restriction, media_restriction]
+}
+
+// TODO: use age restrictions!
 
 #[utoipa::path(
 	get,
@@ -79,7 +182,7 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 	params(
 		("filter_query" = Option<FilterableSeriesQuery>, Query, description = "The filter options"),
 		("pagination_query" = Option<PaginationQuery>, Query, description = "The pagination options"),
-		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+		("relation_query" = Option<SeriesQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched series.", body = PageableSeries),
@@ -89,11 +192,11 @@ pub(crate) fn apply_series_filters(filters: SeriesFilter) -> Vec<WhereParam> {
 )]
 /// Get all series accessible by user.
 async fn get_series(
-	filter_query: Query<FilterableQuery<SeriesFilter>>,
+	filter_query: QsQuery<FilterableQuery<SeriesFilter>>,
 	pagination_query: Query<PaginationQuery>,
-	relation_query: Query<SeriesRelation>,
+	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
@@ -102,7 +205,12 @@ async fn get_series(
 	trace!(?filters, ?ordering, ?pagination, "get_series");
 
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by: OrderByParam = ordering.try_into()?;
@@ -110,7 +218,10 @@ async fn get_series(
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);
 
-	let where_conditions = apply_series_filters(filters);
+	let where_conditions = apply_series_filters(filters)
+		.into_iter()
+		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+		.collect::<Vec<WhereParam>>();
 
 	// series, total series count
 	let (series, series_count) = db
@@ -191,7 +302,7 @@ async fn get_series(
 	tag = "series",
 	params(
 		("id" = String, Path, description = "The ID of the series to fetch"),
-		("relation_query" = Option<SeriesRelation>, Query, description = "The relations to include"),
+		("relation_query" = Option<SeriesQueryRelation>, Query, description = "The relations to include"),
 	),
 	responses(
 		(status = 200, description = "Successfully fetched series.", body = Series),
@@ -203,16 +314,26 @@ async fn get_series(
 /// Get a series by ID. Optional query param `load_media` that will load the media
 /// relation (i.e. the media entities will be loaded and sent with the response)
 async fn get_series_by_id(
-	query: Query<SeriesRelation>,
+	query: Query<SeriesQueryRelation>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Series>> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let load_media = query.load_media.unwrap_or(false);
-	let mut query = db.series().find_unique(series::id::equals(id.clone()));
+	let load_library = query.load_library.unwrap_or(false);
+	let mut query = db.series().find_first(chain_optional_iter(
+		[series::id::equals(id.clone())],
+		[age_restrictions],
+	));
 
 	if load_media {
 		query = query.with(
@@ -224,14 +345,14 @@ async fn get_series_by_id(
 		);
 	}
 
-	let series = query.exec().await?;
-
-	if series.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} not found",
-			id
-		)));
+	if load_library {
+		query = query.with(series::library::fetch());
 	}
+
+	let series = query
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
 
 	if !load_media {
 		// FIXME: PCR doesn't support relation counts yet!
@@ -242,16 +363,13 @@ async fn get_series_by_id(
 		// 	.await?;
 		let series_media_count = db.media_in_series_count(id).await?;
 
-		return Ok(Json((series.unwrap(), series_media_count).into()));
+		return Ok(Json((series, series_media_count).into()));
 	}
 
-	Ok(Json(series.unwrap().into()))
+	Ok(Json(series.into()))
 }
 
-// async fn get_recently_added_series() {
-// 	unimplemented!()
-// }
-
+// FIXME: This hand written SQL needs to factor in age restrictions!
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/recently-added",
@@ -269,7 +387,7 @@ async fn get_series_by_id(
 async fn get_recently_added_series_handler(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Pageable<Vec<Series>>>> {
 	if pagination.page.is_none() {
 		return Err(ApiError::BadRequest(
@@ -279,15 +397,42 @@ async fn get_recently_added_series_handler(
 
 	let viewer_id = get_session_user(&session)?.id;
 	let page_params = pagination.0.page_params();
-	let series_dao = SeriesDaoImpl::new(ctx.db.clone());
+	let series_dao = SeriesDAO::new(ctx.db.clone());
 
-	// TODO: don't use DAO just create separate function `get_recently_added_series` and make
-	// this one `get_recently_added_series_handler`.
 	let recently_added_series = series_dao
-		.get_recently_added_series_page(&viewer_id, page_params)
+		.get_recently_added_series(&viewer_id, page_params)
 		.await?;
 
 	Ok(Json(recently_added_series))
+}
+
+pub(crate) fn get_series_thumbnail(
+	series: &series::Data,
+	first_book: &media::Data,
+	image_format: Option<ImageFormat>,
+	config: &StumpConfig,
+) -> ApiResult<(ContentType, Vec<u8>)> {
+	let thumbnails_dir = config.get_thumbnails_dir();
+	let series_id = series.id.clone();
+
+	if let Some(format) = image_format.clone() {
+		let extension = format.extension();
+		let path = thumbnails_dir.join(format!("{}.{}", series_id, extension));
+
+		if path.exists() {
+			tracing::trace!(?path, series_id, "Found generated series thumbnail");
+			return Ok((ContentType::from(format), read_entire_file(path)?));
+		}
+	} else if let Some(path) = get_unknown_thumnail(&series_id, thumbnails_dir) {
+		tracing::debug!(path = ?path, series_id, "Found series thumbnail that does not align with config");
+		let FileParts { extension, .. } = path.file_parts();
+		return Ok((
+			ContentType::from_extension(extension.as_str()),
+			read_entire_file(path)?,
+		));
+	}
+
+	get_media_thumbnail(first_book, image_format, config)
 }
 
 // TODO: ImageResponse type for body
@@ -306,35 +451,213 @@ async fn get_recently_added_series_handler(
 	)
 )]
 /// Returns the thumbnail image for a series
-async fn get_series_thumbnail(
+async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
+	session: Session,
 ) -> ApiResult<ImageResponse> {
 	let db = ctx.get_db();
 
-	let media = db
-		.media()
-		.find_first(vec![media::series_id::equals(Some(id.clone()))])
-		.order_by(media::name::order(Direction::Asc))
+	let user = get_session_user(&session)?;
+	let age_restriction = user.age_restriction;
+
+	let series = db
+		.series()
+		// Find the first series in the library which satisfies the age restriction
+		.find_first(chain_optional_iter(
+			[series::id::equals(id.clone())],
+			[age_restriction
+				.as_ref()
+				.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset))],
+		))
+		.with(
+			// Then load the first media in that series which satisfies the age restriction
+			series::media::fetch(chain_optional_iter(
+				[],
+				[age_restriction
+					.as_ref()
+					.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset))],
+			))
+			.take(1)
+			.order_by(media::name::order(Direction::Asc)),
+		)
+		.with(series::library::fetch().with(library::library_options::fetch()))
+		.order_by(series::name::order(Direction::Asc))
 		.exec()
-		.await?;
+		.await?
+		.ok_or(ApiError::NotFound("Series not found".to_string()))?;
 
-	if media.is_none() {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} not found",
-			id
-		)));
-	}
+	let library = series
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
 
-	let media = media.unwrap();
-	if let Some(webp_path) = image::get_thumbnail_path(&media.id) {
-		trace!("Found webp thumbnail for series {}", &id);
-		return Ok((ContentType::WEBP, image::get_bytes(webp_path)?).into());
-	}
+	let first_book = series
+		.media()?
+		.first()
+		.ok_or(ApiError::NotFound(String::from(
+			"Series does not have any media",
+		)))?;
 
-	Ok(media_file::get_page(media.path.as_str(), 1)?.into())
+	let image_format = library
+		.library_options()
+		.map(LibraryOptions::from)?
+		.thumbnail_config
+		.map(|config| config.format);
+
+	get_series_thumbnail(&series, first_book, image_format, &ctx.config)
+		.map(ImageResponse::from)
 }
 
+#[derive(Deserialize, ToSchema, specta::Type)]
+pub struct PatchSeriesThumbnail {
+	/// The ID of the media inside the series to fetch
+	media_id: String,
+	/// The page of the media to use for the thumbnail
+	page: i32,
+	#[specta(optional)]
+	/// A flag indicating whether the page is zero based
+	is_zero_based: Option<bool>,
+}
+
+#[utoipa::path(
+    patch,
+    path = "/api/v1/series/:id/thumbnail",
+    tag = "series",
+    params(
+        ("id" = String, Path, description = "The ID of the series")
+    ),
+    responses(
+        (status = 200, description = "Successfully updated series thumbnail"),
+        (status = 401, description = "Unauthorized"),
+        (status = 403, description = "Forbidden"),
+        (status = 404, description = "Series not found"),
+        (status = 500, description = "Internal server error"),
+    )
+)]
+async fn patch_series_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(body): Json<PatchSeriesThumbnail>,
+) -> ApiResult<ImageResponse> {
+	get_session_server_owner_user(&session)?;
+
+	let client = ctx.get_db();
+
+	let target_page = body
+		.is_zero_based
+		.map(|is_zero_based| {
+			if is_zero_based {
+				body.page + 1
+			} else {
+				body.page
+			}
+		})
+		.unwrap_or(body.page);
+
+	let media = client
+		.media()
+		.find_first(vec![
+			media::series_id::equals(Some(id.clone())),
+			media::id::equals(body.media_id),
+		])
+		.with(
+			media::series::fetch()
+				.with(series::library::fetch().with(library::library_options::fetch())),
+		)
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+
+	if media.extension == "epub" {
+		return Err(ApiError::NotSupported);
+	}
+
+	let library = media
+		.series()?
+		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.library()?
+		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+	let thumbnail_options = library
+		.library_options()?
+		.thumbnail_config
+		.to_owned()
+		.map(ImageProcessorOptions::try_from)
+		.transpose()?
+		.unwrap_or_else(|| {
+			tracing::warn!(
+				"Failed to parse existing thumbnail config! Using a default config"
+			);
+			ImageProcessorOptions::default()
+		})
+		.with_page(target_page);
+
+	let format = thumbnail_options.format.clone();
+	let path_buf = generate_thumbnail(&id, &media.path, thumbnail_options, &ctx.config)?;
+	Ok(ImageResponse::from((
+		ContentType::from(format),
+		read_entire_file(path_buf)?,
+	)))
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/series/:id/thumbnail",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series")
+	),
+	responses(
+		(status = 200, description = "Successfully updated series thumbnail"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Series not found"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn replace_series_thumbnail(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	mut upload: Multipart,
+) -> ApiResult<ImageResponse> {
+	enforce_session_permissions(
+		&session,
+		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
+	)?;
+	let client = ctx.get_db();
+
+	let series = client
+		.series()
+		.find_unique(series::id::equals(id))
+		.exec()
+		.await?
+		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
+
+	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
+	let ext = content_type.extension();
+	let series_id = series.id;
+
+	// Note: I chose to *safely* attempt the removal as to not block the upload, however after some
+	// user testing I'd like to see if this becomes a problem. We'll see!
+	remove_thumbnails(&[series_id.clone()], ctx.config.get_thumbnails_dir())
+		.unwrap_or_else(|e| {
+			tracing::error!(
+				?e,
+				"Failed to remove existing series thumbnail before replacing!"
+			);
+		});
+
+	let path_buf = place_thumbnail(&series_id, ext, &bytes, &ctx.config)?;
+
+	Ok(ImageResponse::from((
+		content_type,
+		read_entire_file(path_buf)?,
+	)))
+}
+
+// FIXME: age restrictions mess up the counts since PCR doesn't support relation counts yet!
+// TODO: media filtering...
 #[utoipa::path(
 	get,
 	path = "/api/v1/series/:id/media",
@@ -355,12 +678,20 @@ async fn get_series_thumbnail(
 async fn get_series_media(
 	pagination_query: Query<PaginationQuery>,
 	ordering: Query<QueryOrder>,
-	session: ReadableSession,
+	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 ) -> ApiResult<Json<Pageable<Vec<Media>>>> {
 	let db = ctx.get_db();
-	let user_id = get_session_user(&session)?.id;
+
+	let user = get_session_user(&session)?;
+	let user_id = user.id;
+	let age_restrictions = user.age_restriction.as_ref().map(|ar| {
+		(
+			apply_series_age_restriction(ar.age, ar.restrict_on_unset),
+			apply_media_age_restriction(ar.age, ar.restrict_on_unset),
+		)
+	});
 
 	let pagination = pagination_query.0.get();
 	let pagination_cloned = pagination.clone();
@@ -370,26 +701,24 @@ async fn get_series_media(
 
 	let order_by_param: MediaOrderByParam = ordering.0.try_into()?;
 
-	let series_exists = db
-		.series()
-		.find_first(vec![series::id::equals(id.clone())])
+	db.series()
+		.find_first(chain_optional_iter(
+			[series::id::equals(id.clone())],
+			[age_restrictions.as_ref().map(|(sr, _)| sr.clone())],
+		))
 		.exec()
 		.await?
-		.is_some();
-
-	if !series_exists {
-		return Err(ApiError::NotFound(format!(
-			"Series with id {} not found",
-			id
-		)));
-	}
+		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
 
 	let (media, count) = db
 		._transaction()
 		.run(|client| async move {
 			let mut query = client
 				.media()
-				.find_many(vec![media::series_id::equals(Some(id.clone()))])
+				.find_many(chain_optional_iter(
+					[media::series_id::equals(Some(id.clone()))],
+					[age_restrictions.as_ref().map(|(_, mr)| mr.clone())],
+				))
 				.with(media::read_progresses::fetch(vec![
 					read_progress::user_id::equals(user_id),
 				]))
@@ -468,7 +797,7 @@ async fn get_series_media(
 async fn get_next_in_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	session: ReadableSession,
+	session: Session,
 ) -> ApiResult<Json<Option<Media>>> {
 	let db = ctx.get_db();
 	let user_id = get_session_user(&session)?.id;
@@ -526,4 +855,67 @@ async fn get_next_in_series(
 			id
 		)))
 	}
+}
+
+#[derive(Deserialize, Serialize, ToSchema, specta::Type)]
+pub struct SeriesIsComplete {
+	is_complete: bool,
+	completed_at: Option<String>,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/series/:id/complete",
+	tag = "series",
+	params(
+		("id" = String, Path, description = "The ID of the series to check"),
+	),
+	responses(
+		(status = 200, description = "Successfully fetched series completion status.", body = SeriesIsComplete),
+		(status = 401, description = "Unauthorized"),
+		(status = 500, description = "Internal server error"),
+	)
+)]
+async fn get_series_is_complete(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> ApiResult<Json<SeriesIsComplete>> {
+	let client = ctx.get_db();
+	let user_id = get_session_user(&session)?.id;
+
+	let media_count = client
+		.media()
+		.count(vec![media::series_id::equals(Some(id.clone()))])
+		.exec()
+		.await?;
+
+	let rp = client
+		.read_progress()
+		.find_many(vec![
+			read_progress::user_id::equals(user_id),
+			read_progress::media::is(vec![media::series_id::equals(Some(id))]),
+			read_progress::is_completed::equals(true),
+		])
+		.order_by(read_progress::completed_at::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	let is_complete = rp.len() == media_count as usize;
+	let completed_at = is_complete
+		.then(|| {
+			rp.get(0)
+				.and_then(|rp| rp.completed_at.map(|ca| ca.to_rfc3339()))
+		})
+		.flatten();
+
+	Ok(Json(SeriesIsComplete {
+		is_complete,
+		completed_at,
+	}))
+}
+
+// TODO: implement
+async fn put_series_is_complete() -> ApiResult<Json<SeriesIsComplete>> {
+	Err(ApiError::NotImplemented)
 }

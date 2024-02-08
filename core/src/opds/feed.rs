@@ -1,6 +1,6 @@
 use crate::{
+	error::CoreError,
 	opds::link::OpdsLink,
-	prelude::errors::CoreError,
 	prisma::{library, series},
 };
 use prisma_client_rust::chrono;

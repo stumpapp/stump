@@ -1,12 +1,20 @@
-import type { Media, Series } from '@stump/types'
+import type { Media, PatchSeriesThumbnail, Series } from '@stump/types'
 
 import { API } from './axios'
 import { mediaApi } from './media'
 import { ApiResult, CursorQueryParams, PageableApiResult, PagedQueryParams } from './types'
-import { mergeCursorParams, mergePageParams, urlWithParams } from './utils'
+import { mergeCursorParams, mergePageParams, toUrlParams, urlWithParams } from './utils'
 
-export function getSeriesById(id: string): Promise<ApiResult<Series>> {
-	return API.get(`/series/${id}`)
+export function getSeries(filters?: Record<string, unknown>): Promise<PageableApiResult<Series[]>> {
+	const params = toUrlParams(filters)
+	return API.get(urlWithParams('/series', params))
+}
+
+export function getSeriesById(
+	id: string,
+	params?: Record<string, unknown>,
+): Promise<ApiResult<Series>> {
+	return API.get(urlWithParams(`/series/${id}`, toUrlParams(params)))
 }
 
 export function getSeriesWithCursor(
@@ -59,22 +67,42 @@ export function getSeriesThumbnail(id: string): string {
 	return `${API.getUri()}/series/${id}/thumbnail`
 }
 
+export function patchSeriesThumbnail(id: string, params: PatchSeriesThumbnail) {
+	return API.patch(`/series/${id}/thumbnail`, params)
+}
+
+export function uploadSeriesThumbnail(id: string, file: File) {
+	const formData = new FormData()
+	formData.append('file', file)
+	return API.post(`/series/${id}/thumbnail`, formData, {
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+	})
+}
+
 export const seriesApi = {
 	getNextInSeries,
 	getNextMediaInSeries,
 	getRecentlyAddedSeries,
+	getSeries,
 	getSeriesById,
 	getSeriesMedia,
 	getSeriesThumbnail,
 	getSeriesWithCursor,
+	patchSeriesThumbnail,
+	uploadSeriesThumbnail,
 }
 
 export const seriesQueryKeys: Record<keyof typeof seriesApi, string> = {
 	getNextInSeries: 'series.getNextInSeries',
 	getNextMediaInSeries: 'series.getNextMediaInSeries',
 	getRecentlyAddedSeries: 'series.getRecentlyAddedSeries',
+	getSeries: 'series.getSeries',
 	getSeriesById: 'series.getSeriesById',
 	getSeriesMedia: 'series.getSeriesMedia',
 	getSeriesThumbnail: 'series.getSeriesThumbnail',
 	getSeriesWithCursor: 'series.getSeriesWithCursor',
+	patchSeriesThumbnail: 'series.patchSeriesThumbnail',
+	uploadSeriesThumbnail: 'series.uploadSeriesThumbnail',
 }

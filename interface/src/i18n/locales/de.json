@@ -1,0 +1,470 @@
+{
+	"authScene": {
+		"claimHeading": "Initialize your server",
+		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"form": {
+			"validation": {
+				"missingUsername": "Der Benutzername ist erforderlich",
+				"missingPassword": "Ein Passwort wird benötigt"
+			},
+			"labels": {
+				"username": "Benutzername",
+				"password": "Passwort"
+			},
+			"buttons": {
+				"createAccount": "Konto erstellen",
+				"login": "Log in"
+			}
+		},
+		"toasts": {
+			"loggingIn": "Anmeldung läuft...",
+			"loggedIn": "Welcome back!",
+			"loggedInFirstTime": "Welcome!",
+			"registering": "Registrierung läuft...",
+			"registered": "Registriert!",
+			"loginFailed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+			"registrationFailed": "Registration failed. Please try again"
+		}
+	},
+	"adminLibrarySidebar": {
+		"libraryConfiguration": {
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
+		}
+	},
+	"bookOverviewScene": {
+		"fileInformation": {
+			"heading": "Datei-Informationen",
+			"labels": {
+				"fileSize": "Dateigröße",
+				"fileType": "Datei Typ",
+				"fileLocation": "Dateipfad",
+				"fileChecksum": "Prüfsumme"
+			}
+		},
+		"nextInSeries": "Next in Series"
+	},
+	"createBookClubScene": {
+		"heading": "Create a new book club",
+		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"form": {
+			"name": {
+				"label": "Name",
+				"placeholder": "My book club",
+				"description": "The name of your book club"
+			},
+			"description": {
+				"label": "Description",
+				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
+				"description": "An optional, short description of your book club"
+			},
+			"is_private": {
+				"label": "Private club",
+				"description": "If enabled, only users you invite will be able to join your book club"
+			},
+			"member_role_spec": {
+				"heading": "Custom role mapping",
+				"subtitle": [
+					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"documentation"
+				],
+				"member": {
+					"label": "Member",
+					"placeholder": "Member",
+					"description": "The name of the default role for your book club"
+				},
+				"moderator": {
+					"label": "Moderator",
+					"placeholder": "Moderator",
+					"description": "The name of the moderator role for your book club"
+				},
+				"admin": {
+					"label": "Admin",
+					"placeholder": "Admin",
+					"description": "The name of the admin role for your book club"
+				},
+				"creator": {
+					"label": "Creator",
+					"placeholder": "Creator",
+					"description": "The name of the creator role for your book club. This is you!"
+				}
+			},
+			"creator_preferences": {
+				"heading": "Your membership preferences",
+				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"creator_display_name": {
+					"label": "Display Name",
+					"placeholder": "oromei",
+					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+				},
+				"creator_hide_progress": {
+					"label": "Hide Progress",
+					"description": "If enabled, your read progress will be hidden from other members of the book club"
+				}
+			},
+			"submit": "Create Book Club"
+		}
+	},
+	"createLibraryScene": {
+		"heading": "Neue Bibliothek erstellen",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
+		"form": {
+			"labels": {
+				"libraryName": "Name",
+				"libraryPath": "Pfad",
+				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryDescription": "Beschreibung",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Bibliothek erstellen"
+			}
+		}
+	},
+	"manageLibraryScene": {
+		"heading": "Manage Library",
+		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
+		"form": {
+			"labels": {
+				"libraryName": "Name",
+				"libraryPath": "Pfad",
+				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryDescription": "Beschreibung",
+				"libraryTags": "Tags"
+			},
+			"buttons": {
+				"confirm": "Änderungen speichern"
+			}
+		}
+	},
+	"errorScene": {
+		"heading": "lol, oops",
+		"message": "Ein Fehler ist aufgetreten:",
+		"buttons": {
+			"report": "Fehler melden",
+			"copy": "Fehler-Details kopieren",
+			"goHome": "Go Home"
+		}
+	},
+	"homeScene": {
+		"continueReading": {
+			"title": "Weiterlesen",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you're currently reading will show up here"
+			}
+		},
+		"recentlyAddedSeries": {
+			"title": "Kürzlich hinzugefügte Serie",
+			"emptyState": {
+				"heading": "No series to display",
+				"message": "Any series you add to your libraries will show up here"
+			}
+		},
+		"recentlyAddedBooks": {
+			"title": "Kürzlich hinzugefügte Bücher",
+			"emptyState": {
+				"heading": "No books to display",
+				"message": "Any books you add to your libraries will show up here"
+			}
+		}
+	},
+	"seriesOverviewScene": {
+		"buttons": {
+			"continueReading": "Weiterlesen",
+			"downloadSeries": "Download Series"
+		}
+	},
+	"settingsScene": {
+		"navigation": {
+			"general": "General",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management",
+			"desktop": "Desktop"
+		},
+		"general": {
+			"helmet": "General Settings",
+			"heading": "General Settings",
+			"subtitle": "Use the forms below to manage your preferences and account settings.",
+			"profileForm": {
+				"validation": {
+					"invalidUrl": "Please enter a valid URL",
+					"missingUsername": "Username is required"
+				},
+				"labels": {
+					"username": "Username",
+					"password": "Password",
+					"activeChangesPrompt": "You have unsaved changes"
+				},
+				"errors": {
+					"updateFailed": "A server error occurred while updating your profile. Please try again."
+				},
+				"avatarPicker": {
+					"heading": "Set your Avatar Image",
+					"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
+					"preview": "A preview will appear here once you have entered a URL.",
+					"labels": {
+						"imageUrl": "Image URL",
+						"customAvatar": "Custom Avatar"
+					},
+					"buttons": {
+						"confirm": "Confirm Image",
+						"cancel": "Cancel",
+						"edit": "Edit",
+						"changeImage": "Change Image",
+						"removeImage": "Remove Image"
+					}
+				},
+				"buttons": {
+					"confirm": "Save Changes"
+				}
+			},
+			"theme": {
+				"heading": "Application Theme",
+				"subtitle": "Stump supports both light and dark themes, which can be set below.",
+				"dark": {
+					"label": "Dark Theme",
+					"description": "Use a dark theme for Stump, which is the correct theme."
+				},
+				"light": {
+					"label": "Light Theme",
+					"description": "Use a light theme for Stump, which is the incorrect theme."
+				}
+			},
+			"locale": {
+				"localeSelector": {
+					"label": "Language"
+				},
+				"heading": "Language and Locale Settings",
+				"subtitle": [
+					"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+					"Stump's translations",
+					"Wenn Sie in der Lage sind!"
+				]
+			}
+		},
+		"jobs": {
+			"helmet": "Jobs and Configuration",
+			"heading": "Jobs and Configuration",
+			"subtitle": "View and manage the background jobs available on this server, including library scans and scheduling",
+			"schedulingHeading": "Job Scheduling",
+			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
+			"historyHeading": "Job History",
+			"historySubtitle": "Manage running jobs and view the history of completed jobs",
+			"historyTable": {
+				"columns": {
+					"name": "Typ",
+					"description": "Beschreibung",
+					"status": "Status",
+					"createdAt": "Gestartet um",
+					"elapsed": "Verstrichen",
+					"tasks": "Aufgaben"
+				},
+				"emptyHeading": "There are no jobs to display",
+				"emptySubtitle": "You can't have a job if you don't have a job",
+				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
+				"deleteAllConfirmButton": "Verlauf löschen",
+				"deleteAllConfirmButtonTitle": "Clear all job history",
+				"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+			}
+		},
+		"server": {
+			"helmet": "Server-Einstellungen",
+			"heading": "Server-Einstellungen",
+			"subtitle": "Manage various configurable options for your Stump server instance, itself"
+		},
+		"desktop": {
+			"helmet": "Desktop Settings",
+			"heading": "Desktop Settings",
+			"subtitle": "Configure the Stump desktop application",
+			"discordPresence": {
+				"label": "Discord Presence",
+				"description": "Display your Stump activity in Discord using Discord Rich Presence",
+				"reconnect": "Reconnect to Discord"
+			}
+		},
+		"users": {
+			"helmet": "Benutzerverwaltung",
+			"heading": "Benutzerverwaltung",
+			"subtitle": "Manage the users on this server, including creating new users and changing their permissions"
+		},
+		"createOrUpdateUsers": {
+			"createHelmet": "Create user",
+			"createHeading": "Create new user",
+			"createSubtitle": "Use the form below to create a new user on this server",
+			"updateHelmet": "Update user",
+			"updateHeading": "Update user",
+			"updateSubtitle": "Use the form below to update the details of this user",
+			"accessControl": {
+				"heading": "Access control and restrictions",
+				"subtitle": [
+					"If you want to restrict access to certain content based on tags or age rating, you can do so here. Any unset values means that the restriction will not be enforced. For more information about access control, see the",
+					"documentation"
+				],
+				"ageRestriction": {
+					"label": "Age restriction",
+					"description": "Restricts the user from accessing content above the set age rating threshold",
+					"placeholder": "13",
+					"enforceUnset": {
+						"label": "Enforce on unset",
+						"description": "If enabled, users will be restricted from accessing content with no age rating available"
+					}
+				},
+				"tagRestriction": {
+					"label": "Tag restrictions",
+					"description": "Restricts the user from accessing content with the selected tags",
+					"placeholder": "Adult, Gore"
+				}
+			},
+			"permissions": {
+				"heading": "Granted permissions",
+				"subtitle": [
+					"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
+					"documentation"
+				],
+				"bookclub": {
+					"label": "Book Clubs",
+					"read": {
+						"label": "Access book club features",
+						"description": "Allows the user to access book club features, including viewing and joining book clubs"
+					},
+					"create": {
+						"label": "Create book clubs",
+						"description": "Allows the user to create new book clubs"
+					}
+				},
+				"file": {
+					"label": "File Management",
+					"explorer": {
+						"label": "File Explorer",
+						"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+					},
+					"upload": {
+						"label": "Upload files",
+						"description": "Allows the user to upload files to the server"
+					}
+				},
+				"library": {
+					"label": "Library Management",
+					"create": {
+						"label": "Create libraries",
+						"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+					},
+					"scan": {
+						"label": "Scan libraries",
+						"description": "Allows the user to initiate scans for existing libraries"
+					},
+					"edit": {
+						"label": "Edit libraries",
+						"description": "Allows the user to edit basic details for existing libraries"
+					},
+					"manage": {
+						"label": "Manage libraries",
+						"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+					},
+					"delete": {
+						"label": "Delete libraries",
+						"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+					}
+				}
+			},
+			"validation": {
+				"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+			},
+			"createSubmitButton": "Create user",
+			"updateSubmitButton": "Update user"
+		}
+	},
+	"jobOverlay": {
+		"backupHeading": "Job in Progress"
+	},
+	"libraryStats": {
+		"seriesCount": "Total Series",
+		"bookCount": "Bücher Gesamt",
+		"diskUsage": "Speichernutzung"
+	},
+	"pagination": {
+		"buttons": {
+			"next": "Weiter",
+			"previous": "Zurück"
+		},
+		"popover": {
+			"heading": "Gehe zur Seite",
+			"buttons": {
+				"confirm": "Los",
+				"cancel": "Abbrechen"
+			}
+		}
+	},
+	"signOutModal": {
+		"title": "Abmelden",
+		"message": "Sind Sie sicher, dass Sie sich abmelden wollen?",
+		"buttons": {
+			"cancel": "Abbrechen",
+			"signOut": "Abmelden"
+		}
+	},
+	"sidebar": {
+		"buttons": {
+			"home": "Startseite",
+			"libraries": "Bibliotheken",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Bibliothek erstellen",
+			"createBookClub": "Create book club",
+			"settings": "Einstellungen",
+			"themeToggle": "Design wechseln",
+			"goForward": "Weiter",
+			"goBack": "Zurück"
+		},
+		"libraryOptions": {
+			"scanLibrary": "Scan",
+			"fileExplorer": "Dateimanager",
+			"manageLibrary": "Manage",
+			"deleteLibrary": "Delete"
+		},
+		"versionInformation": {
+			"heading": "Versionsinformationen",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Erstellungsdatum"
+		}
+	},
+	"search": {
+		"placeholder": "Suche"
+	},
+	"serverSOS": {
+		"heading": "Server nicht erreichbar",
+		"desktop": {
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
+		},
+		"web": {
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
+		},
+		"reconnected": "Mit Server neu verbunden! Weiterleiten...",
+		"reconnectionFailed": "Etwas ist schief gelaufen!"
+	},
+	"serverStatusOverlay": {
+		"heading": "Server ist nicht verbunden",
+		"message": [
+			"Überprüfen Sie bitte Ihre Internetverbindung",
+			"Hier klicken",
+			"to change your server URL"
+		]
+	},
+	"slidingList": {
+		"empty": "Keine Elemente zum Anzeigen",
+		"buttons": {
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
+		}
+	},
+	"tagSelect": {
+		"placholder": "Tag auswählen oder erstellen",
+		"placeholderNoTags": "Keine Tags vorhanden"
+	}
+}

@@ -1,6 +1,6 @@
 use xml::{writer::XmlEvent, EventWriter};
 
-use crate::prelude::CoreResult;
+use crate::error::CoreResult;
 
 use super::{
 	link::OpdsLinkType,
@@ -15,10 +15,7 @@ impl OpdsOpenSearch {
 		let raw = Vec::new();
 		let mut writer = EventWriter::new(raw);
 
-		writer.write(
-			XmlEvent::start_element("OpenSearchDescription")
-				.attr("xmlns:wstxns1", "http://a9.com/-/spec/opensearch/1.1/"),
-		)?;
+		writer.write(XmlEvent::start_element("OpenSearchDescription"))?;
 
 		util::write_xml_element("ShortName", "Search", &mut writer)?;
 		util::write_xml_element("Description", "Search by keyword", &mut writer)?;

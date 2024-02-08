@@ -1,4 +1,4 @@
-import { CursorInfo, Library, Media, PageInfo, Series } from './core'
+import { CursorInfo, Library, Media, PageInfo, Series } from './generated'
 
 export enum FileStatus {
 	Unknown = 'UNKNOWN',
@@ -7,6 +7,18 @@ export enum FileStatus {
 	Error = 'ERROR',
 	Missing = 'MISSING',
 }
+
+export type ApiError =
+	| { code: 'BadRequest'; details: string }
+	| { code: 'NotFound'; details: string }
+	| { code: 'InternalServerError'; details: string }
+	| { code: 'Unauthorized'; details: string }
+	| { code: 'Forbidden'; details: string }
+	| { code: 'NotImplemented'; details: string }
+	| { code: 'ServiceUnavailable'; details: string }
+	| { code: 'BadGateway'; details: string }
+	| { code: 'Unknown'; details: string }
+	| { code: 'Redirect'; details: string }
 
 export interface Pageable<T> {
 	// The target data being returned.
@@ -25,9 +37,8 @@ export type MediaOrderByExclusions = Extract<
 export type MediaOrderByOptions = Partial<Omit<Media, MediaOrderByExclusions>>
 // TODO: I HATE THIS
 export const mediaOrderByOptions: MediaOrderByOptions = {
-	checksum: undefined,
-	description: undefined,
 	extension: undefined,
+	hash: undefined,
 	name: undefined,
 	pages: undefined,
 	path: undefined,
@@ -63,5 +74,4 @@ export const libraryOrderByOptions: LibraryOrderByOptions = {
 	updated_at: undefined,
 }
 
-export * from './core'
-export * from './server'
+export * from './generated'

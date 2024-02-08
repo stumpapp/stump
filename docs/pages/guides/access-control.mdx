@@ -1,0 +1,69 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Access Control
+
+<Callout emoji="🚧">
+	This functionality is not yet fully implemented. Some information presented here may be subject to
+	change, but the general idea should remain the same.
+</Callout>
+
+Stump has a built-in access control systems that allows you to manage who has access to what. This is done through a combination of methods, including:
+
+- RBAC (Role-based access control)
+- Age restrictions
+- Tag-based restrictions
+
+## RBAC
+
+> This is not available yet
+
+## Age restrictions
+
+Age restrictions are set on a per-user basis, and are used to determine whether or not a user can access a book. For more information on user management, see the [User Management](/guides/user-management) page.
+
+### How age restrictions are represented
+
+The way age restrictions can be represented vary, but Stump aims to support as many as possible and convert it to a common format used internally. Stump treats the age restriction as a minimum age, meaning that if a user has an age restriction set to `13` and a book is rated to `17`, the user will not be able to access the book.
+
+The following source formats are supported:
+
+- `G / PG / PG-13 / R / X` - The MPAA rating system, maps to the following:
+  - `G` - `0`
+  - `PG` - `0` (TBD maybe change to `7`?)
+  - `PG-13` - `13`
+  - `R` - `17`
+  - `X` - `18`
+- `All ages / Teen / Mature / Explicit` - More of common phrases, maps to the following:
+  - `All ages` - `0`
+  - `Teen` - `13`
+  - `Mature` - `17`
+  - `Explicit` - `18`
+- `{number} and up` - A number followed by `and up`, maps to the number itself. E.g. `13 and up` maps to `13`.
+- `{number}+` - A number followed by a `+`, maps to the number itself. E.g. `13+` maps to `13`.
+- `{number}-{number}` - A range of numbers, maps to the first number in the range. E.g. `13-17` maps to `13`.
+- `{number}` - Just a number, maps to the number itself. E.g. `13` maps to `13`.
+
+### Where does Stump get the age restrictions from?
+
+The age restriction is located directly within the metadata for a book itself, or on a book's series' metadata. Stump will attempt to parse this value from the metadata and store it internally as a number.
+
+### How does Stump determine whether or not a book is age-allowed?
+
+If a book or a book's series has an age restriction set, Stump will use that age restriction to determine whether or not a user can access it. The comparison done internally is `less than or equal to X number`, meaning that if a user has an age restriction set to `13` and a book is rated to `17`, the user will not be able to access the book. If a user has an age restriction set to `17` and a book is rated to `13`, the user will be able to access the book. In other words, **the age restriction set on the user must be greater than or equal to the age restriction number set on the book or series in order to have access**.
+
+If a book doesn't have an age restriction set, but a user with an age restriction attempts to access it, Stump will use the following logic to determine whether or not the book is allowed:
+
+- If the book is part of a series, and that series has an age restriction set, that age restriction will be used
+- If neither the book nor the series has an age restriction set, the book will be considered allowed **unless** a user has an age restriction configuration with the `restrict_on_unset` option set to `true`. See the [User Management](/guides/user-management) page for more information on user configuration.
+
+Stump doesn't currently support editing metadata directly, but it is planned for the future! For now, if you need to set age restrictions on your books, you'll need to use a third-party tool to edit the metadata, then re-scan your library.
+
+### Other considerations
+
+- Stump doesn't currently support dynamic thumbnails for libraries containing age-restricted books or series. This means that if it happens to be the case that the first book in the first series of a library is age-restricted, the thumbnail for the library **will still be displayed** so long as a user has access to the library. This is planned to be fixed in the future by one of two ways:
+  1. Settings will be made available to override the thumbnail for a library or series
+  2. Server owners will be able to associate libraries and series with tags and then set restrictions on a user that would prevent access to specific tags. See the [Tag-based restrictions](#tag-based-restrictions) section for more information.
+
+## Tag-based restrictions
+
+> This is not available yet

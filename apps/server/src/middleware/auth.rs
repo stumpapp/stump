@@ -5,16 +5,19 @@ use axum::{
 	http::{header, request::Parts, Method, StatusCode},
 	response::{IntoResponse, Redirect, Response},
 };
-use axum_sessions::SessionHandle;
+use base64::{engine::general_purpose::STANDARD, Engine};
 use prisma_client_rust::{
 	prisma_errors::query_engine::{RecordNotFound, UniqueKeyViolation},
 	QueryError,
 };
-use stump_core::{db::models::User, prisma::user};
-use tracing::{error, trace};
+use stump_core::{
+	db::entity::{User, UserPermission},
+	prisma::user,
+};
+use tower_sessions::Session;
 
 use crate::{
-	config::state::AppState,
+	config::{session::SESSION_USER_KEY, state::AppState},
 	utils::{decode_base64_credentials, verify_password},
 };
 
@@ -39,23 +42,27 @@ where
 		}
 
 		let state = AppState::from_ref(state);
-		let session_handle =
-			parts.extensions.get::<SessionHandle>().ok_or_else(|| {
-				(
-					StatusCode::INTERNAL_SERVER_ERROR,
-					"Failed to extract session handle",
-				)
-					.into_response()
+
+		let session = Session::from_request_parts(parts, &state)
+			.await
+			.map_err(|e| {
+				tracing::error!("Failed to extract session handle: {}", e.1);
+				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
 			})?;
-		let session = session_handle.read().await;
 
-		if let Some(user) = session.get::<User>("user") {
-			trace!("Session for {} already exists", &user.username);
-			return Ok(Self);
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+		})?;
+
+		if let Some(user) = session_user {
+			if !user.is_locked {
+				tracing::trace!(user = user.username, "Session found!");
+				return Ok(Self);
+			}
+		} else {
+			tracing::trace!("No session found, checking for auth header");
 		}
-
-		// drop so we don't deadlock when writing to the session lol oy vey
-		drop(session);
 
 		let auth_header = parts
 			.headers
@@ -65,67 +72,75 @@ where
 		let is_opds = parts.uri.path().starts_with("/opds");
 		let is_swagger = parts.uri.path().starts_with("/swagger-ui");
 		let has_auth_header = auth_header.is_some();
-		trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
+		tracing::trace!(is_opds, has_auth_header, uri = ?parts.uri, "Checking auth header");
 
-		if !has_auth_header {
+		let Some(auth_header) = auth_header else {
 			if is_opds {
+				// Prompt for basic auth on OPDS routes
 				return Err(BasicAuth.into_response());
 			} else if is_swagger {
+				// Sign in via React app and then redirect to server-side swagger-ui
 				return Err(Redirect::to("/auth?redirect=%2Fswagger-ui/").into_response());
 			}
 
 			return Err((StatusCode::UNAUTHORIZED).into_response());
-		}
+		};
 
-		let auth_header = auth_header.unwrap();
 		if !auth_header.starts_with("Basic ") || auth_header.len() <= 6 {
+			tracing::error!(?auth_header, "Invalid auth header!");
 			return Err((StatusCode::UNAUTHORIZED).into_response());
 		}
 
 		let encoded_credentials = auth_header[6..].to_string();
-		let decoded_bytes = base64::decode(encoded_credentials).map_err(|e| {
-			(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-		})?;
+		let decoded_bytes =
+			STANDARD
+				.decode(encoded_credentials.as_bytes())
+				.map_err(|e| {
+					(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+				})?;
 		let decoded_credentials =
 			decode_base64_credentials(decoded_bytes).map_err(|e| {
 				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
 			})?;
 
-		let user = state
+		let fetched_user = state
 			.db
 			.user()
 			.find_unique(user::username::equals(decoded_credentials.username.clone()))
 			.with(user::user_preferences::fetch())
+			.with(user::age_restriction::fetch())
 			.exec()
 			.await
 			.map_err(|e| map_prisma_error(e).into_response())?;
 
-		if user.is_none() {
-			error!(
+		let Some(user) = fetched_user else {
+			tracing::error!(
 				"No user found for username: {}",
 				&decoded_credentials.username
 			);
 			return Err((StatusCode::UNAUTHORIZED).into_response());
-		}
+		};
 
-		let user = user.unwrap();
 		let is_match =
 			verify_password(&user.hashed_password, &decoded_credentials.password)
 				.map_err(|e| e.into_response())?;
 
-		if is_match {
-			trace!(
-				"Basic authentication sucessful. Creating session for user: {}",
-				&user.username
+		if is_match && user.is_locked {
+			tracing::error!(
+				username = &user.username,
+				"User is locked, denying authentication"
 			);
-			session_handle
-				.write()
-				.await
-				.insert("user", user.clone())
-				.map_err(|e| {
-					error!("Failed to insert user into session: {}", e);
-					(StatusCode::INTERNAL_SERVER_ERROR).into_response()
-				})?;
+			return Err((StatusCode::UNAUTHORIZED, "Your account is locked. Please contact an administrator to unlock your account.").into_response());
+		} else if is_match {
+			tracing::trace!(
+				username = &user.username,
+				"Basic authentication sucessful. Creating session for user"
+			);
+			let user = User::from(user);
+			session.insert(SESSION_USER_KEY, user).map_err(|e| {
+				tracing::error!("Failed to insert user into session: {}", e);
+				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+			})?;
 
 			return Ok(Self);
 		}
@@ -143,13 +158,13 @@ where
 /// use axum::{Router, middleware::from_extractor};
 ///
 /// Router::new()
-///     .layer(from_extractor::<AdminGuard>())
+///     .layer(from_extractor::<ServerOwnerGuard>())
 ///     .layer(from_extractor_with_state::<Auth, AppState>(app_state));
 /// ```
-pub struct AdminGuard;
+pub struct ServerOwnerGuard;
 
 #[async_trait]
-impl<S> FromRequestParts<S> for AdminGuard
+impl<S> FromRequestParts<S> for ServerOwnerGuard
 where
 	S: Send + Sync,
 {
@@ -163,18 +178,23 @@ where
 			return Ok(Self);
 		}
 
-		let session_handle = parts.extensions.get::<SessionHandle>().unwrap();
-		let session = session_handle.read().await;
+		let session = parts
+			.extensions
+			.get::<Session>()
+			.expect("Failed to extract session");
 
-		if let Some(user) = session.get::<User>("user") {
-			if user.is_admin() {
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			StatusCode::INTERNAL_SERVER_ERROR
+		})?;
+		if let Some(user) = session_user {
+			if user.is_server_owner {
 				return Ok(Self);
 			}
 
 			return Err(StatusCode::FORBIDDEN);
 		}
 
-		drop(session);
 		return Err(StatusCode::UNAUTHORIZED);
 	}
 }
@@ -188,7 +208,49 @@ impl IntoResponse for BasicAuth {
 			.header("Authorization", "Basic")
 			.header("WWW-Authenticate", "Basic realm=\"stump\"")
 			.body(BoxBody::default())
-			.unwrap()
+			.unwrap_or_else(|e| {
+				tracing::error!(error = ?e, "Failed to build response");
+				StatusCode::INTERNAL_SERVER_ERROR.into_response()
+			})
+	}
+}
+
+pub struct BookClubGuard;
+
+#[async_trait]
+impl<S> FromRequestParts<S> for BookClubGuard
+where
+	S: Send + Sync,
+{
+	type Rejection = StatusCode;
+
+	async fn from_request_parts(
+		parts: &mut Parts,
+		_: &S,
+	) -> Result<Self, Self::Rejection> {
+		if parts.method == Method::OPTIONS {
+			return Ok(Self);
+		}
+
+		let session = parts
+			.extensions
+			.get::<Session>()
+			.expect("Failed to extract session");
+
+		let session_user = session.get::<User>(SESSION_USER_KEY).map_err(|e| {
+			tracing::error!(error = ?e, "Failed to get user from session");
+			StatusCode::INTERNAL_SERVER_ERROR
+		})?;
+
+		if let Some(user) = session_user {
+			if user.has_permission(UserPermission::AccessBookClub) {
+				return Ok(Self);
+			}
+
+			return Err(StatusCode::FORBIDDEN);
+		}
+
+		return Err(StatusCode::UNAUTHORIZED);
 	}
 }
 

@@ -6,13 +6,13 @@
 			"path": "apps/desktop"
 		},
 		{
-			"path": "apps/docs"
-		},
-		{
 			"path": "apps/mobile"
 		},
 		{
 			"path": "apps/web"
+		},
+		{
+			"path": "docs"
 		},
 		{
 			"path": "packages/api"
@@ -24,10 +24,13 @@
 			"path": "packages/components"
 		},
 		{
-			"path": "packages/interface"
+			"path": "interface"
 		},
 		{
 			"path": "packages/types"
 		}
-	]
+	],
+	"compilerOptions": {
+		"module": "NodeNext"
+	}
 }

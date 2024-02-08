@@ -1,35 +1,65 @@
 export { useAuthQuery, useLoginOrRegister } from './auth'
+export {
+	prefetchBookClubChat,
+	prefetchThread,
+	useBookClubQuery,
+	useBookClubsQuery,
+	useChatBoardQuery,
+	useCreateBookClub,
+	useUpdateBookClub,
+} from './bookClub'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
-export { useJobReport } from './job'
+export { useJobSchedulerConfig, useJobsQuery } from './job'
 export {
 	refreshUseLibrary,
 	useCreateLibraryMutation,
 	useDeleteLibraryMutation,
 	useEditLibraryMutation,
 	useLibraries,
-	type UseLibrariesReturn,
 	useLibraryByIdQuery,
-	useLibrarySeriesQuery,
+	useLibraryQuery,
 	useLibraryStats,
 	useScanLibrary,
+	useVisitLibrary,
 } from './library'
 export {
 	prefetchMedia,
 	useContinueReading,
 	useMediaByIdQuery,
 	useMediaCursorQuery,
+	usePagedMediaQuery,
 	useRecentlyAddedMediaQuery,
 	useUpdateMediaProgress,
 } from './media'
 export {
 	prefetchSeries,
-	useRecentlyAddedSeries,
+	usePagedSeriesQuery,
 	useSeriesByIdQuery,
 	useSeriesCursorQuery,
-	useSeriesMediaQuery,
 	useUpNextInSeries,
 } from './series'
 export { useStumpVersion } from './server'
+export {
+	prefetchSmartList,
+	prefetchSmartListItems,
+	useDeleteSmartListMutation,
+	useSmartListItemsQuery,
+	useSmartListMetaQuery,
+	useSmartListQuery,
+	useSmartListsQuery,
+	useSmartListViewsManager,
+	useSmartListWithMetaQuery,
+	useUpdateSmartListMutation,
+} from './smartList'
 export { type TagOption, useTags, type UseTagsConfig } from './tag'
-export { useUpdatePreferences, useUpdateUser, useUserPreferences, useUsersQuery } from './user'
+export {
+	useCreateUser,
+	useDeleteUser,
+	useLoginActivityQuery,
+	useUpdatePreferences,
+	useUpdateUser,
+	useUserPreferences,
+	useUserQuery,
+	useUsersQuery,
+} from './user'

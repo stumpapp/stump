@@ -1,43 +1,21 @@
-import { useUpdatePreferences } from '../queries/user'
-import { useUserStore } from '../stores/useUserStore'
-
-export type UseThemeParams = {
-	onError?: (err: unknown) => void
-}
+import { usePreferences } from './usePreferences'
 
 /** A hook to get the current theme and toggle it. Please note that this hook
  *  **will not** handle the class toggling required by tailwind. That logic
  *  is handled by the `interface` package.
  **/
-export function useTheme({ onError }: UseThemeParams = {}) {
-	const { userPreferences, setUserPreferences } = useUserStore((state) => ({
-		setUserPreferences: state.setUserPreferences,
-		user: state.user,
-		userPreferences: state.userPreferences,
-	}))
-	const { update } = useUpdatePreferences()
+export function useTheme() {
+	const {
+		preferences: { app_theme },
+		update,
+	} = usePreferences()
 
-	const isDark = (userPreferences?.app_theme || 'light').toLowerCase() === 'dark'
+	const changeTheme = (theme: string) =>
+		update({
+			app_theme: theme,
+		})
 
-	async function toggleTheme() {
-		if (userPreferences) {
-			const newTheme = isDark ? 'light' : 'dark'
-			setUserPreferences({
-				...userPreferences,
-				app_theme: newTheme,
-			})
+	const isDarkVariant = (app_theme || 'light').includes('dark')
 
-			try {
-				await update({
-					...userPreferences,
-					app_theme: newTheme,
-				})
-			} catch (err) {
-				console.error(err)
-				onError?.(err)
-			}
-		}
-	}
-
-	return { isDark, theme: userPreferences?.app_theme || 'light', toggleTheme }
+	return { changeTheme, isDarkVariant, theme: app_theme || 'light' }
 }

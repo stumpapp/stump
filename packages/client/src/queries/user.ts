@@ -1,25 +1,74 @@
 import {
 	getUserPreferences,
-	getUsers,
 	updatePreferences,
 	updateUser,
 	updateUserPreferences as updateUserPreferencesFn,
 	updateViewer,
+	userApi,
+	userQueryKeys,
 } from '@stump/api'
-import type { UpdateUserArgs, User, UserPreferences } from '@stump/types'
+import type {
+	CreateUser,
+	LoginActivity,
+	UpdateUser,
+	UpdateUserPreferences,
+	User,
+	UserPreferences,
+} from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { MutationOptions, QueryOptions, useMutation, useQuery } from '../client'
+import {
+	MutationOptions,
+	PageQueryOptions,
+	QueryOptions,
+	useMutation,
+	usePageQuery,
+	useQuery,
+} from '../client'
 
-type UseUsersQueryParams = QueryOptions<User[], AxiosError, User[]>
-export function useUsersQuery(params: UseUsersQueryParams = {}) {
-	const { data: users, ...ret } = useQuery(
-		['getUsers'],
-		() => getUsers().then((res) => res.data),
-		params,
+type UseUsersQueryParams = PageQueryOptions<User> & {
+	params?: Record<string, unknown>
+}
+export function useUsersQuery({ params, ...options }: UseUsersQueryParams = {}) {
+	const { data, ...restReturn } = usePageQuery(
+		[userQueryKeys.getUsers, params],
+		async ({ page = 1, page_size }) => {
+			const { data } = await userApi.getUsers({ page, page_size, ...params })
+			return data
+		},
+		{
+			keepPreviousData: true,
+			...options,
+		},
 	)
 
-	return { users, ...ret }
+	const users = data?.data
+	const pageData = data?._page
+
+	return {
+		pageData,
+		users,
+		...restReturn,
+	}
+}
+
+type UseUserQuery = {
+	id: string
+} & QueryOptions<User>
+export function useUserQuery({ id, ...options }: UseUserQuery) {
+	const { data, ...restReturn } = useQuery(
+		[userQueryKeys.getUserById, id],
+		async () => {
+			const { data } = await userApi.getUserById(id)
+			return data
+		},
+		options,
+	)
+
+	return {
+		user: data,
+		...restReturn,
+	}
 }
 
 type UseUserPreferencesParams = {
@@ -35,12 +84,16 @@ export function useUserPreferences(
 		isLoading,
 		isFetching,
 		isRefetching,
-	} = useQuery(['getUserPreferences', id], () => getUserPreferences(id!).then((res) => res.data), {
-		enabled: enableFetchPreferences && !!id,
-	})
+	} = useQuery(
+		[userQueryKeys.getUserPreferences, id],
+		() => getUserPreferences(id!).then((res) => res.data),
+		{
+			enabled: enableFetchPreferences && !!id,
+		},
+	)
 
 	const { mutateAsync: updateUserPreferences, isLoading: isUpdating } = useMutation(
-		['updateUserPreferences', id],
+		[userQueryKeys.updateUserPreferences, id],
 		(preferences: UserPreferences) =>
 			updateUserPreferencesFn(id!, preferences).then((res) => res.data),
 		mutationOptions,
@@ -54,14 +107,33 @@ export function useUserPreferences(
 	}
 }
 
-type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUserArgs>
+type UseUpdateUserParams = MutationOptions<User, AxiosError, UpdateUser>
 export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	updateViewer
 
-	const { mutateAsync: update, isLoading } = useMutation(
-		['updateUser', id],
-		async (params: UpdateUserArgs) => {
+	const { mutateAsync, isLoading, error } = useMutation(
+		[userQueryKeys.updateUser, id],
+		async (params: UpdateUser) => {
 			const response = id ? await updateUser(id, params) : await updateViewer(params)
+			return response.data
+		},
+		params,
+	)
+
+	return {
+		error,
+		isLoading,
+		updateAsync: mutateAsync,
+	}
+}
+
+type UseUpdatePreferencesParams = MutationOptions<UserPreferences, AxiosError, UserPreferences>
+
+export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
+	const { mutateAsync: update, isLoading } = useMutation(
+		[userQueryKeys.updateUserPreferences],
+		async (preferences: UpdateUserPreferences) => {
+			const response = await updatePreferences(preferences)
 			return response.data
 		},
 		params,
@@ -73,20 +145,68 @@ export function useUpdateUser(id?: string, params: UseUpdateUserParams = {}) {
 	}
 }
 
-type UseUpdatePreferencesParams = MutationOptions<UserPreferences, AxiosError, UserPreferences>
-
-export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
-	const { mutateAsync: update, isLoading } = useMutation(
-		['updateUserPreferences'],
-		async (preferences: UserPreferences) => {
-			const response = await updatePreferences(preferences)
-			return response.data
+export function useCreateUser(options?: MutationOptions<User, AxiosError, CreateUser>) {
+	const {
+		mutateAsync: createAsync,
+		mutate: create,
+		isLoading,
+		...restReturn
+	} = useMutation(
+		[userQueryKeys.createUser],
+		async (params: CreateUser) => {
+			const { data } = await userApi.createUser(params)
+			return data
 		},
-		params,
+		options,
 	)
 
 	return {
+		create,
+		createAsync,
 		isLoading,
-		update,
+		...restReturn,
+	}
+}
+
+export type UseDeleteUserOptions = {
+	userId: string
+	hardDelete?: boolean
+} & MutationOptions<User, AxiosError>
+export function useDeleteUser(options: UseDeleteUserOptions) {
+	const { hardDelete, userId, ...mutationOptions } = options
+	const { mutateAsync: deleteAsync, ...restReturn } = useMutation(
+		[userQueryKeys.deleteUser, userId, hardDelete],
+		async () => {
+			const { data } = await userApi.deleteUser({ hardDelete, userId })
+			return data
+		},
+		mutationOptions,
+	)
+
+	return {
+		deleteAsync,
+		...restReturn,
+	}
+}
+
+type UseLoginActivityQueryOptions = {
+	userId?: string
+} & QueryOptions<LoginActivity[]>
+export function useLoginActivityQuery({ userId, ...options }: UseLoginActivityQueryOptions) {
+	const { data: loginActivity, ...restReturn } = useQuery(
+		// This is a bit pedantic and not strictly necessary, but w/e
+		[userId ? userQueryKeys.getLoginActivityForUser : userQueryKeys.getLoginActivity, userId],
+		async () => {
+			const response = userId
+				? await userApi.getLoginActivityForUser(userId)
+				: await userApi.getLoginActivity()
+			return response.data
+		},
+		options,
+	)
+
+	return {
+		loginActivity,
+		...restReturn,
 	}
 }

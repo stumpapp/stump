@@ -1,20 +1,35 @@
-import { ComponentMeta, ComponentStory } from '@storybook/react'
+import { Meta, StoryObj } from '@storybook/react'
+import { useState } from 'react'
 
 import { ConfirmationModal } from './ConfirmationModal'
 
-export default {
+const StoryMeta: Meta<typeof ConfirmationModal> = {
 	component: ConfirmationModal,
 	title: 'dialog/ConfirmationModal',
-} as ComponentMeta<typeof ConfirmationModal>
-
-const Template: ComponentStory<typeof ConfirmationModal> = (args) => <ConfirmationModal {...args} />
-
-export const Default = Template.bind({})
-Default.args = {
-	children: 'Are you sure you want to do that thing?',
-	closeIcon: true,
-	confirmText: 'Yuh huh',
-	description: 'This action cannot be undone, tho',
-	title: 'Are you sure?',
-	trigger: 'Open',
 }
+type Story = StoryObj<typeof ConfirmationModal>
+
+const Demo = () => {
+	const [isOpen, setIsOpen] = useState(false)
+
+	return (
+		<ConfirmationModal
+			closeIcon={true}
+			confirmText="Yuh huh"
+			description="This action cannot be undone, tho"
+			isOpen={isOpen}
+			title="Are you sure?"
+			trigger={<button onClick={() => setIsOpen(true)}>Open Modal</button>}
+			onConfirm={() => setIsOpen(false)}
+			onClose={() => setIsOpen(false)}
+		>
+			Are you sure you want to do that thing?
+		</ConfirmationModal>
+	)
+}
+
+export const Default: Story = {
+	render: () => <Demo />,
+}
+
+export default StoryMeta

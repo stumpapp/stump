@@ -1,13 +1,15 @@
+import { jobQueryKeys } from '@stump/api'
 import { JobUpdate } from '@stump/types'
 import { ReactElement, useState } from 'react'
 
 import { queryClient, QueryClientProvider } from './client'
 import {
-	ActiveJobContext,
+	JobContext,
 	QueryClientContext,
 	StumpClientContext,
 	StumpClientContextProps,
 } from './context'
+import { invalidateQueries } from './invalidate'
 
 type Props = {
 	children: React.ReactNode
@@ -23,42 +25,53 @@ export function StumpClientContextProvider({ children, onRedirect }: Props) {
 	)
 }
 
+// FIXME: This is in desperate need of a refactor / throttling. I've found the UI can easily lock up when thousands
+// of tasks are completed per second. The backend is just too quick and there are too many state changes.
 export function JobContextProvider({ children }: { children: ReactElement }) {
 	const [jobs, setJobs] = useState<Record<string, JobUpdate>>({})
 
 	function addJob(newJob: JobUpdate) {
-		const job = jobs[newJob.runner_id]
+		setJobs((jobs) => {
+			const target = jobs[newJob.job_id]
 
-		if (job) {
-			updateJob(newJob)
-		} else {
-			setJobs((jobs) => ({
-				...jobs,
-				[newJob.runner_id]: newJob,
-			}))
-		}
+			if (target) {
+				return {
+					...jobs,
+					[newJob.job_id]: {
+						...target,
+						...newJob,
+					},
+				}
+			} else {
+				return {
+					...jobs,
+					[newJob.job_id]: newJob,
+				}
+			}
+		})
+
+		invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 	}
 
 	function updateJob(jobUpdate: JobUpdate) {
-		const job = jobs[jobUpdate.runner_id]
+		setJobs((jobs) => {
+			const target = jobs[jobUpdate.job_id]
 
-		if (!job || !Object.keys(jobs).length) {
-			addJob(jobUpdate)
-			return
-		}
-
-		const { current_task, message, task_count } = jobUpdate
-		const updatedJob = {
-			...job,
-			current_task,
-			message,
-			task_count,
-		}
-
-		setJobs((jobs) => ({
-			...jobs,
-			[jobUpdate.runner_id]: updatedJob,
-		}))
+			if (target) {
+				return {
+					...jobs,
+					[jobUpdate.job_id]: {
+						...target,
+						...jobUpdate,
+					},
+				}
+			} else {
+				return {
+					...jobs,
+					[jobUpdate.job_id]: jobUpdate,
+				}
+			}
+		})
 	}
 
 	function removeJob(jobId: string) {
@@ -70,7 +83,7 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 	}
 
 	return (
-		<ActiveJobContext.Provider
+		<JobContext.Provider
 			value={{
 				activeJobs: jobs,
 				addJob,
@@ -79,6 +92,6 @@ export function JobContextProvider({ children }: { children: ReactElement }) {
 			}}
 		>
 			{children}
-		</ActiveJobContext.Provider>
+		</JobContext.Provider>
 	)
 }

@@ -6,4 +6,3 @@ node_modules/
 **/prisma-cli/**
 **/dist/**
 **/target/**
-.moon/

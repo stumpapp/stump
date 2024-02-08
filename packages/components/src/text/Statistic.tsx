@@ -41,6 +41,17 @@ const StatisticNumber = forwardRef<HTMLElement, StatisticNumberProps>(
 )
 StatisticNumber.displayName = 'StatisticNumber'
 
+const StatisticStringValue = forwardRef<HTMLElement, StatisticNumberProps>(
+	({ className, variant, size = 'lg', ...props }, ref) => (
+		<dd
+			ref={ref}
+			className={cn('font-semibold', textVariants({ className, size, variant }), className)}
+			{...props}
+		/>
+	),
+)
+StatisticStringValue.displayName = 'StatisticStringValue'
+
 type StatisticCountUpNumberProps = Omit<StatisticNumberProps, 'children'> & {
 	value: number
 	duration?: number
@@ -77,6 +88,7 @@ type StatisticSubComponents = {
 	Label: typeof StatisticLabel
 	Number: typeof StatisticNumber
 	CountUpNumber: typeof StatisticCountUpNumber
+	StringValue: typeof StatisticStringValue
 }
 
 const Statistic = StatisticRoot as typeof StatisticRoot & StatisticSubComponents
@@ -84,6 +96,7 @@ const Statistic = StatisticRoot as typeof StatisticRoot & StatisticSubComponents
 Statistic.Label = StatisticLabel
 Statistic.Number = StatisticNumber
 Statistic.CountUpNumber = StatisticCountUpNumber
+Statistic.StringValue = StatisticStringValue
 
 export {
 	Statistic,

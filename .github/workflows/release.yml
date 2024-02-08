@@ -20,7 +20,7 @@ env:
 jobs:
   parse-semver:
     if: contains(github.event.pull_request.head.ref, 'release/v')
-    name: Parse semver version from tag
+    name: Parse semver version
     runs-on: [self-hosted]
     steps:
       - name: Extract version from branch name

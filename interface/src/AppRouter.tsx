@@ -10,6 +10,7 @@ import LibraryRouter from './scenes/library/LibraryRouter.tsx'
 import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter.tsx'
 import SeriesRouter from './scenes/series/SeriesRouter.tsx'
 import SettingsRouter from './scenes/settings/SettingsRouter.tsx'
+import { SmartListRouter } from './scenes/smart-list'
 
 // FIXME: this is really annoying
 export type LazyComponent = Promise<{
@@ -49,6 +50,7 @@ export function AppRouter() {
 					<Route path="series/*" element={<SeriesRouter />} />
 					<Route path="books/*" element={<BookRouter />} />
 					{IS_DEVELOPMENT && <Route path="book-clubs/*" element={<BookClubRouter />} />}
+					<Route path="/smart-lists/*" element={<SmartListRouter />} />
 					<Route path="settings/*" element={<SettingsRouter />} />
 				</Route>
 

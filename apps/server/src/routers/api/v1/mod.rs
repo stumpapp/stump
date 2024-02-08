@@ -20,6 +20,7 @@ pub(crate) mod media;
 pub(crate) mod metadata;
 pub(crate) mod reading_list;
 pub(crate) mod series;
+pub(crate) mod smart_list;
 pub(crate) mod tag;
 pub(crate) mod user;
 
@@ -37,6 +38,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(tag::mount(app_state.clone()))
 		.merge(user::mount(app_state.clone()))
 		.merge(reading_list::mount())
+		.merge(smart_list::mount())
 		.merge(book_club::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))

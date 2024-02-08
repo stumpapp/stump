@@ -1,6 +1,8 @@
 use axum::middleware::from_extractor_with_state;
 use axum::Router;
 use stump_core::db::entity::*;
+// TODO: investigate how to get this working for swagger...
+use stump_core::db::filter::{SmartFilterSchema as SmartFilter, *};
 use stump_core::db::query::{ordering::*, pagination::*};
 use stump_core::filesystem::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
@@ -12,17 +14,17 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
 use crate::errors::ApiError;
-use crate::middleware::auth::Auth;
-use crate::utils::{
+use crate::filter::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesQueryRelation,
 };
+use crate::middleware::auth::Auth;
 
 use super::api::{
 	self,
 	v1::{
-		auth::LoginOrRegisterArgs, library::*, media::*, series::*, user::*,
-		ClaimResponse, StumpVersion,
+		auth::LoginOrRegisterArgs, library::*, media::*, series::*, smart_list::*,
+		user::*, ClaimResponse, StumpVersion,
 	},
 };
 
@@ -96,6 +98,18 @@ use super::api::{
         api::v1::series::get_series_thumbnail_handler,
         api::v1::series::get_series_media,
         api::v1::series::get_series_is_complete,
+        api::v1::smart_list::get_smart_lists,
+        api::v1::smart_list::create_smart_list,
+        api::v1::smart_list::get_smart_list_by_id,
+        api::v1::smart_list::update_smart_list_by_id,
+        api::v1::smart_list::delete_smart_list_by_id,
+        api::v1::smart_list::get_smart_list_items,
+        api::v1::smart_list::get_smart_list_meta,
+        api::v1::smart_list::get_smart_list_views,
+        api::v1::smart_list::get_smart_list_view,
+        api::v1::smart_list::create_smart_list_view,
+        api::v1::smart_list::update_smart_list_view,
+        api::v1::smart_list::delete_smart_list_view,
         api::v1::tag::get_tags,
         api::v1::tag::create_tags,
         api::v1::series::get_next_in_series,
@@ -122,7 +136,12 @@ use super::api::{
             Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
             FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
-            CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus
+            CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus,
+            SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList,
+            CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
+            SmartListViewConfig, SmartListTableColumnSelection, SmartListTableSortingState,
+            MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
+            LibrarySmartFilter
         )
     ),
     tags(

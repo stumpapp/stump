@@ -7,7 +7,6 @@ node_modules
 target
 dist
 build
-.moon/cache
 .next
 
 # locale files

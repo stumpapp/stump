@@ -33,29 +33,18 @@ This will install the project dependencies, build the frontend bundle (required 
 
 ### Running Stump
 
-I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. You'll want to read a bit about how it works, but below are two useful examples executing moon tasks concurrently:
-
-```bash
-# webapp + server
-moon run server:dev web:dev
-# desktop app + server
-moon run server:start desktop:desktop-dev
-```
-
-Notice the general format is `moon run <app>:<command>`. You can supply multiple `<app>:<command>` pairs to run multiple tasks concurrently.
-
-This isn't a requirement though! You can also run the apps directly with `pnpm`:
+I use [pnpm workspaces](https://pnpm.io/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html):
 
 ```bash
 # run the webapp + server
 pnpm dev:web
 # run the desktop app + server
-pnpm dev:desktop
+pnpm start:desktop
 # run the docs website
 pnpm docs dev
 ```
 
-Or just `cargo` for the server:
+Or `cargo` for the server:
 
 ```bash
 cargo run --package stump_server --bin stump_server
@@ -80,14 +69,6 @@ In general, some good places to start might be:
 
 ### Code Style, Formatting, and Linting
 
-<Callout emoji="🚧">
-	moonrepo will format `yaml` and `json` files in a way that deviates from the repo configurations
-	outlined below. This is something that [currently cannot be
-	changed](https://moonrepo.dev/docs/faq#how-to-stop-moon-formatting-json-and-yaml-files). Because
-	of this, it is very likely the pre-commit hook will fail, so often times you will have to run
-	`pnpm prettify` to fix the format issues caused by moonrepo.
-</Callout>
-
 Stump is developed using primarily [Rust](https://www.rust-lang.org/) and [TypeScript](https://www.typescriptlang.org/).
 
 For Rust, I use [rustfmt](https://github.com/rust-lang/rustfmt) for formatting, and [clippy](https://github.com/rust-lang/clippy) for linting. For TypeScript, I use [Prettier](https://prettier.io/) for formatting, and [ESLint](https://eslint.org/) for linting. While I definitely recommend using these tools as you develop, there is a pre-commit hook that will lint and format your code before committing.
@@ -99,7 +80,7 @@ I also want to point out that this repository uses 4 tab spaces for indentation.
 Stump has a custom component library used throughout the `interface` package (the web UI and desktop app). This library can be found at `packages/components`, and was developed with Storybook in mind. For getting started building out designs and components in Stump, I highly recommend going through the stories available in the Storybook UI:
 
 ```bash
-moon run components:storybook
+pnpm storybook
 ```
 
 This will give you a good idea of what components are available and how they can be used.

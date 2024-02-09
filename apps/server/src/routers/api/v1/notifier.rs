@@ -7,7 +7,7 @@ use axum::{
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
-	db::entity::{Notifier, NotifierConfig, NotifierType},
+	db::entity::{Notifier, NotifierConfig, NotifierType, UserPermission},
 	prisma::notifier,
 };
 use tower_sessions::Session;
@@ -18,7 +18,7 @@ use crate::{
 	errors::{ApiError, ApiResult},
 	filter::chain_optional_iter,
 	middleware::auth::Auth,
-	utils::get_session_server_owner_user,
+	utils::enforce_session_permissions,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -56,7 +56,7 @@ async fn get_notifiers(
 	State(ctx): State<AppState>,
 	session: Session,
 ) -> ApiResult<Json<Vec<Notifier>>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
 	let client = ctx.get_db();
 
 	let notifiers = client
@@ -91,7 +91,7 @@ async fn get_notifier_by_id(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> ApiResult<Json<Notifier>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ReadNotifier])?;
 	let client = ctx.get_db();
 
 	let notifier = client
@@ -129,7 +129,7 @@ async fn create_notifier(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> ApiResult<Json<Notifier>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::CreateNotifier])?;
 
 	let client = ctx.get_db();
 
@@ -169,7 +169,7 @@ async fn update_notifier(
 	session: Session,
 	Json(payload): Json<CreateOrUpdateNotifier>,
 ) -> ApiResult<Json<Notifier>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
 
 	let client = ctx.get_db();
 	let notifier = client
@@ -215,7 +215,7 @@ async fn patch_notifier(
 	session: Session,
 	Json(payload): Json<PatchNotifier>,
 ) -> ApiResult<Json<Notifier>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
 
 	let client = ctx.get_db();
 
@@ -263,7 +263,7 @@ async fn delete_notifier(
 	Path(id): Path<i32>,
 	session: Session,
 ) -> ApiResult<Json<Notifier>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::DeleteNotifier])?;
 
 	let client = ctx.get_db();
 

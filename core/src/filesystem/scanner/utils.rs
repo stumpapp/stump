@@ -1,4 +1,5 @@
 use std::{
+	collections::VecDeque,
 	fs::File,
 	io::{BufRead, BufReader},
 	path::PathBuf,
@@ -10,12 +11,19 @@ use prisma_client_rust::{
 	chrono::{DateTime, Utc},
 	QueryError,
 };
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use walkdir::DirEntry;
 
 use crate::{
-	db::entity::Media,
+	db::{
+		entity::{LibraryOptions, Media},
+		FileStatus,
+	},
 	error::{CoreError, CoreResult},
+	filesystem::MediaBuilder,
+	job::{error::JobError, JobExecuteLog, JobProgress, WorkerCtx, WorkerSendExt},
 	prisma::{media, media_metadata, series, PrismaClient},
+	CoreEvent,
 };
 
 pub(crate) fn file_updated_since_scan(
@@ -191,4 +199,238 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 		.await;
 
 	Ok(result?)
+}
+
+#[derive(Default)]
+pub(crate) struct MediaOperationOutput {
+	pub created_media: u64,
+	pub updated_media: u64,
+	pub logs: Vec<JobExecuteLog>,
+}
+
+pub(crate) async fn handle_missing_media(
+	ctx: &WorkerCtx,
+	series_id: &str,
+	paths: Vec<PathBuf>,
+) -> MediaOperationOutput {
+	let mut output = MediaOperationOutput::default();
+
+	if paths.is_empty() {
+		tracing::debug!("No missing media to handle");
+		return output;
+	}
+
+	let _affected_rows = ctx
+		.db
+		.media()
+		.update_many(
+			vec![
+				media::series::is(vec![series::id::equals(series_id.to_string())]),
+				media::path::in_vec(
+					paths
+						.iter()
+						.map(|e| e.to_string_lossy().to_string())
+						.collect::<Vec<String>>(),
+				),
+			],
+			vec![media::status::set(FileStatus::Missing.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to update missing media");
+				output.logs.push(JobExecuteLog::error(format!(
+					"Failed to update missing media: {:?}",
+					error.to_string()
+				)));
+				0
+			},
+			|count| {
+				output.updated_media += count as u64;
+				count
+			},
+		);
+
+	output
+}
+
+pub(crate) struct MediaBuildOperationCtx {
+	pub series_id: String,
+	pub library_options: LibraryOptions,
+	pub chunk_size: usize,
+}
+
+pub(crate) async fn handle_create_media(
+	build_ctx: MediaBuildOperationCtx,
+	worker_ctx: &WorkerCtx,
+	paths: Vec<PathBuf>,
+) -> Result<MediaOperationOutput, JobError> {
+	if paths.is_empty() {
+		tracing::debug!("No media to create");
+		return Ok(MediaOperationOutput::default());
+	}
+
+	let mut output = MediaOperationOutput::default();
+	let MediaBuildOperationCtx {
+		series_id,
+		library_options,
+		chunk_size,
+	} = build_ctx;
+
+	let path_chunks = paths.chunks(chunk_size);
+	for (idx, chunk) in path_chunks.enumerate() {
+		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
+		let mut built_media = chunk
+			.par_iter()
+			.map(|path_buf| {
+				(
+					path_buf.to_owned(),
+					MediaBuilder::new(
+						path_buf,
+						&series_id,
+						library_options.clone(),
+						&worker_ctx.config,
+					)
+					.build(),
+				)
+			})
+			.collect::<VecDeque<(PathBuf, Result<Media, _>)>>();
+
+		while let Some((media_path, build_result)) = built_media.pop_front() {
+			let Ok(generated) = build_result else {
+				tracing::error!(?media_path, "Failed to build media");
+				output.logs.push(
+					JobExecuteLog::error(format!(
+						"Failed to build media: {:?}",
+						build_result.unwrap_err().to_string()
+					))
+					.with_ctx(media_path.to_string_lossy().to_string()),
+				);
+				continue;
+			};
+
+			match create_media(&worker_ctx.db, generated).await {
+				Ok(created_media) => {
+					output.created_media += 1;
+					worker_ctx.send_batch(vec![
+						JobProgress::msg(
+							format!("Inserted {}", media_path.display()).as_str(),
+						)
+						.into_send(),
+						CoreEvent::CreatedMedia {
+							id: created_media.id,
+							series_id: series_id.clone(),
+						}
+						.into_send(),
+					]);
+				},
+				Err(e) => {
+					tracing::error!(error = ?e, ?media_path, "Failed to create media");
+					output.logs.push(
+						JobExecuteLog::error(format!(
+							"Failed to create media: {:?}",
+							e.to_string()
+						))
+						.with_ctx(media_path.to_string_lossy().to_string()),
+					);
+				},
+			}
+		}
+	}
+
+	Ok(output)
+}
+
+pub(crate) async fn handle_visit_media(
+	build_ctx: MediaBuildOperationCtx,
+	worker_ctx: &WorkerCtx,
+	paths: Vec<PathBuf>,
+) -> Result<MediaOperationOutput, JobError> {
+	if paths.is_empty() {
+		tracing::debug!("No media to visit");
+		return Ok(MediaOperationOutput::default());
+	}
+
+	let mut output = MediaOperationOutput::default();
+	let MediaBuildOperationCtx {
+		series_id,
+		library_options,
+		chunk_size,
+	} = build_ctx;
+	let client = &worker_ctx.db;
+
+	let media = client
+		.media()
+		.find_many(vec![
+			media::path::in_vec(
+				paths
+					.iter()
+					.map(|e| e.to_string_lossy().to_string())
+					.collect::<Vec<String>>(),
+			),
+			media::series_id::equals(Some(series_id.clone())),
+		])
+		.exec()
+		.await?
+		.into_iter()
+		.map(Media::from)
+		.collect::<Vec<Media>>();
+
+	if media.len() != paths.len() {
+		output.logs.push(JobExecuteLog::warn(
+			"Not all media paths were found in the database",
+		));
+	}
+
+	let chunks = media.chunks(chunk_size);
+
+	for (idx, chunk) in chunks.enumerate() {
+		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
+		let mut built_media = chunk
+			.par_iter()
+			.map(|m| {
+				MediaBuilder::new(
+					PathBuf::from(m.path.as_str()).as_path(),
+					&series_id,
+					library_options.clone(),
+					&worker_ctx.config,
+				)
+				.rebuild(m)
+			})
+			.collect::<VecDeque<Result<Media, _>>>();
+
+		while let Some(build_result) = built_media.pop_front() {
+			match build_result {
+				Ok(generated) => {
+					tracing::warn!(
+						"Stump currently has minimal support for updating media",
+					);
+					match update_media(client, generated).await {
+						Ok(updated_media) => {
+							tracing::trace!(?updated_media, "Updated media");
+							// TODO: emit event
+							output.updated_media += 1;
+						},
+						Err(e) => {
+							tracing::error!(error = ?e, "Failed to update media");
+							output.logs.push(JobExecuteLog::error(format!(
+								"Failed to update media: {:?}",
+								e.to_string()
+							)));
+						},
+					}
+				},
+				Err(e) => {
+					tracing::error!(error = ?e, "Failed to build media");
+					output.logs.push(JobExecuteLog::error(format!(
+						"Failed to build media: {:?}",
+						e.to_string()
+					)));
+				},
+			}
+		}
+	}
+
+	Ok(output)
 }

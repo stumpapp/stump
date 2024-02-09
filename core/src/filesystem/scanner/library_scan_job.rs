@@ -1,21 +1,19 @@
 use rayon::iter::{
 	Either, IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
-use std::{collections::VecDeque, path::PathBuf, sync::Arc};
+use std::{collections::VecDeque, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
-	config::StumpConfig,
 	db::{
-		entity::{LibraryOptions, Media, Series},
+		entity::{LibraryOptions, Series},
 		FileStatus, SeriesDAO, DAO,
 	},
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
-		scanner::utils::{create_media, update_media},
-		MediaBuilder, SeriesBuilder,
+		SeriesBuilder,
 	},
 	job::{
 		error::JobError, JobControllerCommand, JobExecuteLog, JobExt, JobOutputExt,
@@ -27,8 +25,12 @@ use crate::{
 };
 
 use super::{
-	series_scan_job::SeriesScanTask, utils::generate_rule_set, walk_library, walk_series,
-	WalkedLibrary, WalkedSeries, WalkerCtx,
+	series_scan_job::SeriesScanTask,
+	utils::{
+		generate_rule_set, handle_create_media, handle_missing_media, handle_visit_media,
+		MediaBuildOperationCtx, MediaOperationOutput,
+	},
+	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
 
 /// The taks variants that are used to scan a library
@@ -478,80 +480,85 @@ impl JobExt for LibraryScanJob {
 			},
 			LibraryScanTask::SeriesTask {
 				id: series_id,
-				path: series_path,
+				path: _series_path,
 				task: series_task,
 			} => match series_task {
 				SeriesScanTask::MarkMissingMedia(paths) => {
 					ctx.report_progress(JobProgress::msg("Handling missing media"));
-					let JobTaskOutput {
-						output: new_output,
+					let MediaOperationOutput {
+						updated_media,
 						logs: new_logs,
 						..
-					} = handle_missing_media(&ctx.db, &series_id, paths, output, logs)
-						.await?;
+					} = handle_missing_media(ctx, &series_id, paths).await;
 					ctx.send_batch(vec![
 						JobProgress::msg("Handled missing media").into_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
-							count: new_output.updated_media,
+							count: updated_media,
 							series_id,
 						}
 						.into_send(),
 					]);
-					output = new_output;
-					logs = new_logs;
+					output.updated_media += updated_media;
+					logs.extend(new_logs);
 				},
 				SeriesScanTask::CreateMedia(paths) => {
 					ctx.report_progress(JobProgress::msg(
 						format!("Creating {} media entities", paths.len()).as_str(),
 					));
-					let series_ctx = SeriesCtx {
-						id: series_id.clone(),
-						path: series_path,
-						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size: 300,
-					};
-					let JobTaskOutput {
-						output: new_output,
+					let MediaOperationOutput {
+						created_media,
 						logs: new_logs,
 						..
-					} = handle_create_media(paths, series_ctx, ctx, output, logs).await?;
+					} = handle_create_media(
+						MediaBuildOperationCtx {
+							series_id: series_id.clone(),
+							library_options: self.options.clone().unwrap_or_default(),
+							chunk_size: 300,
+						},
+						ctx,
+						paths,
+					)
+					.await?;
 					ctx.send_batch(vec![
 						JobProgress::msg("Created new media").into_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
-							count: new_output.updated_media,
+							count: created_media,
 							series_id,
 						}
 						.into_send(),
 					]);
-					output = new_output;
-					logs = new_logs;
+					output.created_media += created_media;
+					logs.extend(new_logs);
 				},
 				SeriesScanTask::VisitMedia(paths) => {
 					ctx.report_progress(JobProgress::msg(
 						format!("Visiting {} media entities on disk", paths.len())
 							.as_str(),
 					));
-					let media_ctx = MediaCtx {
-						series_id: series_id.clone(),
-						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size: 300,
-						config: ctx.config.clone(),
-					};
-					let JobTaskOutput {
-						output: new_output,
+					let MediaOperationOutput {
+						updated_media,
 						logs: new_logs,
 						..
-					} = handle_visit_media(&ctx.db, media_ctx, paths, output, logs).await?;
+					} = handle_visit_media(
+						MediaBuildOperationCtx {
+							series_id: series_id.clone(),
+							library_options: self.options.clone().unwrap_or_default(),
+							chunk_size: 300,
+						},
+						ctx,
+						paths,
+					)
+					.await?;
 					ctx.send_batch(vec![
 						JobProgress::msg("Visited all media").into_send(),
 						CoreEvent::CreatedOrUpdatedManyMedia {
-							count: new_output.updated_media,
+							count: updated_media,
 							series_id,
 						}
 						.into_send(),
 					]);
-					output = new_output;
-					logs = new_logs;
+					output.updated_media += updated_media;
+					logs.extend(new_logs);
 				},
 			},
 		}
@@ -563,8 +570,6 @@ impl JobExt for LibraryScanJob {
 		})
 	}
 }
-
-// TODO: A lot of these functions can be generalized and moved to utils, shared with series_scan_job
 
 pub async fn handle_missing_library(
 	db: &PrismaClient,
@@ -682,265 +687,6 @@ async fn handle_missing_series(
 				count
 			},
 		);
-
-	Ok(JobTaskOutput {
-		output,
-		logs,
-		subtasks: vec![],
-	})
-}
-
-struct SeriesCtx {
-	id: String,
-	path: String,
-	library_options: LibraryOptions,
-	chunk_size: usize,
-}
-
-struct MediaCtx {
-	series_id: String,
-	library_options: LibraryOptions,
-	chunk_size: usize,
-	config: Arc<StumpConfig>,
-}
-
-async fn handle_missing_media(
-	client: &PrismaClient,
-	series_id: &str,
-	media_paths: Vec<PathBuf>,
-	mut output: LibraryScanOutput,
-	mut logs: Vec<JobExecuteLog>,
-) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
-	if media_paths.is_empty() {
-		tracing::debug!("No missing media to handle");
-		return Ok(JobTaskOutput {
-			output,
-			logs,
-			subtasks: vec![],
-		});
-	}
-
-	let _affected_rows = client
-		.media()
-		.update_many(
-			vec![
-				media::series::is(vec![series::id::equals(series_id.to_string())]),
-				media::path::in_vec(
-					media_paths
-						.iter()
-						.map(|e| e.to_string_lossy().to_string())
-						.collect::<Vec<String>>(),
-				),
-			],
-			vec![media::status::set(FileStatus::Missing.to_string())],
-		)
-		.exec()
-		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to update missing media");
-				logs.push(JobExecuteLog::error(format!(
-					"Failed to update missing media: {:?}",
-					error.to_string()
-				)));
-				0
-			},
-			|count| {
-				output.updated_media += count as u64;
-				count
-			},
-		);
-
-	Ok(JobTaskOutput {
-		output,
-		logs,
-		subtasks: vec![],
-	})
-}
-
-async fn handle_visit_media(
-	client: &PrismaClient,
-	ctx: MediaCtx,
-	media_paths: Vec<PathBuf>,
-	mut output: LibraryScanOutput,
-	mut logs: Vec<JobExecuteLog>,
-) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
-	// 1. query for existing media based on paths
-	// 2. chunk the media into groups of 300
-	// 3. for each chunk, rebuild media
-	// 4. for each rebuilt media, update the media in the db
-
-	let MediaCtx {
-		series_id,
-		library_options,
-		chunk_size,
-		config,
-	} = ctx;
-
-	// TODO: might be better to batch this in a transaction, in case there are a lot of media to update
-	let media = client
-		.media()
-		.find_many(vec![
-			media::path::in_vec(
-				media_paths
-					.iter()
-					.map(|e| e.to_string_lossy().to_string())
-					.collect::<Vec<String>>(),
-			),
-			media::series_id::equals(Some(series_id.clone())),
-		])
-		.exec()
-		.await?
-		.into_iter()
-		.map(Media::from)
-		.collect::<Vec<Media>>();
-
-	if media.len() != media_paths.len() {
-		logs.push(JobExecuteLog::warn(
-			"Not all media paths were found in the database",
-		));
-	}
-
-	let chunks = media.chunks(chunk_size);
-
-	for (idx, chunk) in chunks.enumerate() {
-		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
-		let mut built_media = chunk
-			.par_iter()
-			.map(|m| {
-				MediaBuilder::new(
-					PathBuf::from(m.path.as_str()).as_path(),
-					&series_id,
-					library_options.clone(),
-					&config,
-				)
-				.rebuild(m)
-			})
-			.collect::<VecDeque<Result<Media, _>>>();
-
-		while let Some(build_result) = built_media.pop_front() {
-			match build_result {
-				Ok(generated) => {
-					tracing::warn!(
-						"Stump currently has minimal support for updating media",
-					);
-					match update_media(client, generated).await {
-						Ok(updated_media) => {
-							tracing::trace!(?updated_media, "Updated media");
-							// TODO: emit event
-							output.updated_media += 1;
-						},
-						Err(e) => {
-							tracing::error!(error = ?e, "Failed to update media");
-							logs.push(JobExecuteLog::error(format!(
-								"Failed to update media: {:?}",
-								e.to_string()
-							)));
-						},
-					}
-				},
-				Err(e) => {
-					tracing::error!(error = ?e, "Failed to build media");
-					logs.push(JobExecuteLog::error(format!(
-						"Failed to build media: {:?}",
-						e.to_string()
-					)));
-				},
-			}
-		}
-	}
-
-	Ok(JobTaskOutput {
-		output,
-		logs,
-		subtasks: vec![],
-	})
-}
-
-async fn handle_create_media(
-	paths: Vec<PathBuf>,
-	series_ctx: SeriesCtx,
-	ctx: &WorkerCtx,
-	mut output: LibraryScanOutput,
-	mut logs: Vec<JobExecuteLog>,
-) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
-	if paths.is_empty() {
-		tracing::debug!("No media to create for series");
-		return Ok(JobTaskOutput {
-			output,
-			logs,
-			subtasks: vec![],
-		});
-	}
-
-	let SeriesCtx {
-		id,
-		path,
-		library_options,
-		chunk_size,
-	} = series_ctx;
-	tracing::debug!(?path, "Creating media for series");
-
-	let path_chunks = paths.chunks(chunk_size);
-	for (idx, chunk) in path_chunks.enumerate() {
-		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
-		let mut built_media = chunk
-			.par_iter()
-			.map(|path_buf| {
-				(
-					path_buf.to_owned(),
-					MediaBuilder::new(
-						path_buf,
-						&id,
-						library_options.clone(),
-						&ctx.config,
-					)
-					.build(),
-				)
-			})
-			.collect::<VecDeque<(PathBuf, Result<Media, _>)>>();
-
-		while let Some((media_path, build_result)) = built_media.pop_front() {
-			let Ok(generated) = build_result else {
-				tracing::error!(?media_path, "Failed to build media");
-				logs.push(
-					JobExecuteLog::error(format!(
-						"Failed to build media: {:?}",
-						build_result.unwrap_err().to_string()
-					))
-					.with_ctx(media_path.to_string_lossy().to_string()),
-				);
-				continue;
-			};
-
-			match create_media(&ctx.db, generated).await {
-				Ok(created_media) => {
-					output.created_media += 1;
-					ctx.send_batch(vec![
-						JobProgress::msg(
-							format!("Inserted {}", media_path.display()).as_str(),
-						)
-						.into_send(),
-						CoreEvent::CreatedMedia {
-							id: created_media.id,
-							series_id: id.clone(),
-						}
-						.into_send(),
-					]);
-				},
-				Err(e) => {
-					tracing::error!(error = ?e, ?media_path, "Failed to create media");
-					logs.push(
-						JobExecuteLog::error(format!(
-							"Failed to create media: {:?}",
-							e.to_string()
-						))
-						.with_ctx(media_path.to_string_lossy().to_string()),
-					);
-				},
-			}
-		}
-	}
 
 	Ok(JobTaskOutput {
 		output,

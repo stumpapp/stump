@@ -404,21 +404,6 @@ impl JobExt for LibraryScanJob {
 				)
 				.await;
 
-				if let Err(core_error) = walk_result {
-					tracing::error!(error = ?core_error, "Critical error during attempt to walk series!");
-					// NOTE: I don't error here in order to collect and report on the error later on.
-					// This can perhaps be refactored later on so that the parent (Job struct) properly
-					// handles this instead, however for now this is fine.
-					return Ok(JobTaskOutput {
-						output,
-						logs: vec![JobExecuteLog::error(format!(
-							"Critical error during attempt to walk series: {:?}",
-							core_error.to_string()
-						))],
-						subtasks,
-					});
-				}
-
 				let WalkedSeries {
 					series_is_missing,
 					media_to_create,
@@ -426,12 +411,32 @@ impl JobExt for LibraryScanJob {
 					missing_media,
 					seen_files,
 					ignored_files,
-				} = walk_result?;
+				} = match walk_result {
+					Ok(walked_series) => walked_series,
+					Err(core_error) => {
+						tracing::error!(error = ?core_error, "Critical error during attempt to walk series!");
+						// NOTE: I don't error here in order to collect and report on the error later on.
+						// This can perhaps be refactored later on so that the parent (Job struct) properly
+						// handles this instead, however for now this is fine.
+						return Ok(JobTaskOutput {
+							output,
+							logs: vec![JobExecuteLog::error(format!(
+								"Critical error during attempt to walk series: {:?}",
+								core_error.to_string()
+							))],
+							subtasks,
+						});
+					},
+				};
 				output.total_files += seen_files + ignored_files;
 				output.ignored_files += ignored_files;
 
 				if series_is_missing {
-					// TODO: emit event
+					ctx.report_progress(JobProgress::msg("Series not found on disk!"));
+					logs.push(
+						JobExecuteLog::warn("Series could not be found on disk")
+							.with_ctx(path_buf.to_string_lossy().to_string()),
+					);
 					return handle_missing_series(
 						&ctx.db,
 						path_buf.to_str().unwrap_or_default(),
@@ -558,6 +563,8 @@ impl JobExt for LibraryScanJob {
 		})
 	}
 }
+
+// TODO: A lot of these functions can be generalized and moved to utils, shared with series_scan_job
 
 pub async fn handle_missing_library(
 	db: &PrismaClient,

@@ -1,17 +1,18 @@
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use std::{collections::VecDeque, path::PathBuf};
+use std::{collections::VecDeque, path::PathBuf, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
+	config::StumpConfig,
 	db::{
 		entity::{LibraryOptions, Media},
 		FileStatus,
 	},
 	filesystem::{
 		image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
-		scanner::utils::create_media,
+		scanner::utils::{create_media, update_media},
 		MediaBuilder,
 	},
 	job::{
@@ -20,6 +21,7 @@ use crate::{
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
+	CoreEvent,
 };
 
 use super::{utils::generate_rule_set, walk_series, WalkedSeries, WalkerCtx};
@@ -224,10 +226,31 @@ impl JobExt for SeriesScanJob {
 				output = new_output;
 				logs = new_logs;
 			},
-			SeriesScanTask::VisitMedia(_paths) => {
-				unimplemented!()
-				// let result = handle_visit_media(&ctx.db, paths, output, logs).await;
-				// return result;
+			SeriesScanTask::VisitMedia(paths) => {
+				ctx.report_progress(JobProgress::msg(
+					format!("Visiting {} media entities on disk", paths.len()).as_str(),
+				));
+				let media_ctx = MediaCtx {
+					series_id: self.id.clone(),
+					library_options: self.options.clone().unwrap_or_default(),
+					chunk_size: 300,
+					config: ctx.config.clone(),
+				};
+				let JobTaskOutput {
+					output: new_output,
+					logs: new_logs,
+					..
+				} = handle_visit_media(&ctx.db, media_ctx, paths, output, logs).await?;
+				ctx.send_batch(vec![
+					JobProgress::msg("Visited all media").into_send(),
+					CoreEvent::CreatedOrUpdatedManyMedia {
+						count: new_output.updated_media,
+						series_id: self.id.clone(),
+					}
+					.into_send(),
+				]);
+				output = new_output;
+				logs = new_logs;
 			},
 		}
 
@@ -415,6 +438,107 @@ async fn handle_create_series_media(
 				},
 				Err(e) => {
 					tracing::error!(error = ?e, ?media_path, "Failed to build media");
+					logs.push(JobExecuteLog::error(format!(
+						"Failed to build media: {:?}",
+						e.to_string()
+					)));
+				},
+			}
+		}
+	}
+
+	Ok(JobTaskOutput {
+		output,
+		logs,
+		subtasks: vec![],
+	})
+}
+
+struct MediaCtx {
+	series_id: String,
+	library_options: LibraryOptions,
+	chunk_size: usize,
+	config: Arc<StumpConfig>,
+}
+
+async fn handle_visit_media(
+	client: &PrismaClient,
+	ctx: MediaCtx,
+	media_paths: Vec<PathBuf>,
+	mut output: SeriesScanOutput,
+	mut logs: Vec<JobExecuteLog>,
+) -> Result<JobTaskOutput<SeriesScanJob>, JobError> {
+	let MediaCtx {
+		series_id,
+		library_options,
+		chunk_size,
+		config,
+	} = ctx;
+
+	// TODO: might be better to batch this in a transaction, in case there are a lot of media to update
+	let media = client
+		.media()
+		.find_many(vec![
+			media::path::in_vec(
+				media_paths
+					.iter()
+					.map(|e| e.to_string_lossy().to_string())
+					.collect::<Vec<String>>(),
+			),
+			media::series_id::equals(Some(series_id.clone())),
+		])
+		.exec()
+		.await?
+		.into_iter()
+		.map(Media::from)
+		.collect::<Vec<Media>>();
+
+	if media.len() != media_paths.len() {
+		logs.push(JobExecuteLog::warn(
+			"Not all media paths were found in the database",
+		));
+	}
+
+	let chunks = media.chunks(chunk_size);
+
+	for (idx, chunk) in chunks.enumerate() {
+		tracing::trace!(chunk_idx = idx, chunk_len = chunk.len(), "Processing chunk");
+		let mut built_media = chunk
+			.par_iter()
+			.map(|m| {
+				MediaBuilder::new(
+					PathBuf::from(m.path.as_str()).as_path(),
+					&series_id,
+					library_options.clone(),
+					&config,
+				)
+				.rebuild(m)
+			})
+			.collect::<VecDeque<Result<Media, _>>>();
+
+		while let Some(build_result) = built_media.pop_front() {
+			match build_result {
+				Ok(generated) => {
+					tracing::warn!(
+						"Stump currently has minimal support for updating media",
+					);
+					match update_media(client, generated).await {
+						Ok(updated_media) => {
+							tracing::trace!(?updated_media, "Updated media");
+							// TODO: emit event
+							output.updated_media += 1;
+						},
+						Err(e) => {
+							tracing::error!(error = ?e, "Failed to update media");
+							logs.push(JobExecuteLog::error(format!(
+								"Failed to update media: {:?}",
+								e.to_string()
+							)));
+						},
+					}
+				},
+				Err(e) => {
+					tracing::error!(error = ?e, "Failed to build media");
 					logs.push(JobExecuteLog::error(format!(
 						"Failed to build media: {:?}",
 						e.to_string()

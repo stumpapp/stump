@@ -1,0 +1,8 @@
+{
+	"expo": {
+		"scheme": "stump",
+		"name": "stump",
+		"slug": "stump",
+		"plugins": ["expo-router"]
+	}
+}

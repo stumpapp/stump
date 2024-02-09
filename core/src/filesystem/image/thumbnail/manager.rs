@@ -12,8 +12,6 @@ use crate::{
 	prisma::media as prisma_media,
 };
 
-// TODO: use this! :)
-
 pub struct ThumbnailManager {
 	config: Arc<StumpConfig>,
 	thumbnail_contents: HashMap<String, PathBuf>,
@@ -26,19 +24,14 @@ impl ThumbnailManager {
 
 		// Take inventory of the thumbnail_dir's contents
 		let read_dir = config.get_thumbnails_dir().read_dir()?;
-		for item in read_dir.into_iter() {
-			match item {
-				// Move on if we can't read something
-				Err(_) => continue,
-				// Otherwise let's log it
-				Ok(item) => {
-					let path = item.path();
-					// Test if the path has a filename, if it does, add it to the hashmap
-					if let Some(file_name) = item.path().file_name() {
-						let file_name = file_name.to_string_lossy().to_string();
-						thumbnail_contents.insert(file_name, path);
-					}
-				},
+		for item in read_dir.into_iter().filter_map(Result::ok) {
+			let path = item.path();
+			// Test if the path has a filename, if it does, add it to the hashmap
+			if let Some(file_name) = item.path().file_name() {
+				let file_name = file_name.to_string_lossy().to_string();
+				thumbnail_contents.insert(file_name, path);
+			} else {
+				tracing::warn!(?path, "Thumbnail file has no filename?");
 			}
 		}
 
@@ -46,6 +39,10 @@ impl ThumbnailManager {
 			config,
 			thumbnail_contents,
 		})
+	}
+
+	pub fn has_thumbnail<S: AsRef<str>>(&self, media_id: S) -> bool {
+		self.thumbnail_contents.contains_key(media_id.as_ref())
 	}
 
 	pub fn generate_thumbnail(
@@ -87,16 +84,18 @@ impl ThumbnailManager {
 		Ok(())
 	}
 
-	pub fn remove_thumbnail(&mut self, media_id: &String) -> Result<(), FileError> {
+	pub fn remove_thumbnail<S: AsRef<str>>(
+		&mut self,
+		media_id: S,
+	) -> Result<(), FileError> {
+		let media_id = media_id.as_ref();
 		if let Some(path) = self.thumbnail_contents.get(media_id) {
 			std::fs::remove_file(path)?;
 			self.thumbnail_contents.remove(media_id);
+		} else {
+			tracing::warn!(?media_id, "Thumbnail not found in manager");
 		}
 
 		Ok(())
-	}
-
-	pub fn has_thumbnail(&self, media_id: &String) -> bool {
-		self.thumbnail_contents.contains_key(media_id)
 	}
 }

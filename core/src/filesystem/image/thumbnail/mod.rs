@@ -7,11 +7,19 @@ use tracing::{debug, error, trace};
 // extensive enough to warrant its own module. I think it is, but I am not 100% sure. I would just
 // move thumbnail folder up one to the root of `filesystem` instead of `filesystem/image`
 
+mod generation_job;
+mod manager;
+
+pub use generation_job::{
+	ThumbnailGenerationJob, ThumbnailGenerationJobParams, ThumbnailGenerationJobVariant,
+	ThumbnailGenerationOutput,
+};
+pub use manager::ThumbnailManager;
+
 use crate::{
 	config::StumpConfig,
 	db::entity::Media,
 	filesystem::{media, FileError},
-	prisma::media as prisma_media,
 };
 
 use super::{
@@ -103,55 +111,6 @@ pub fn generate_thumbnails(
 }
 
 pub const THUMBNAIL_CHUNK_SIZE: usize = 5;
-
-// TODO: on progress callback might not be needed anymore
-pub fn generate_thumbnails_for_media(
-	media: Vec<prisma_media::Data>,
-	options: ImageProcessorOptions,
-	config: &StumpConfig,
-	mut on_progress: impl FnMut(String) + Send + Sync + 'static,
-) -> Result<Vec<PathBuf>, FileError> {
-	trace!(media_count = media.len(), "Enter generate_thumbnails");
-
-	let mut generated_paths = Vec::with_capacity(media.len());
-
-	for (idx, chunk) in media.chunks(THUMBNAIL_CHUNK_SIZE).enumerate() {
-		trace!(chunk = idx + 1, "Processing chunk for thumbnail generation");
-		on_progress(
-			format!(
-				"Processing group {} of {} for thumbnail generation",
-				idx + 1,
-				media.len() / THUMBNAIL_CHUNK_SIZE
-			)
-			.to_string(),
-		);
-		let results = chunk
-			.into_par_iter()
-			.map(|m| {
-				generate_thumbnail(
-					m.id.as_str(),
-					m.path.as_str(),
-					options.clone(),
-					config,
-				)
-			})
-			.filter_map(|res| {
-				if res.is_err() {
-					error!(error = ?res.err(), "Error generating thumbnail!");
-					None
-				} else {
-					res.ok()
-				}
-			})
-			.collect::<Vec<PathBuf>>();
-
-		debug!(num_generated = results.len(), "Generated thumbnail batch");
-
-		generated_paths.extend(results);
-	}
-
-	Ok(generated_paths)
-}
 
 // TODO: return deleted count
 pub fn remove_thumbnails(

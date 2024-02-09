@@ -1,24 +1,13 @@
-import { Callout } from 'nextra-theme-docs'
-
-# Users and user accounts
-
-<Callout emoji="🚧">
-	All functionality outlined here is currently only available to server owners. There is a
-	role-based access control system in the works, which will allow server owners to grant access to
-	pieces of this functionality to other users. A lot of this information will change when that is
-	released.
-</Callout>
+# Users and User Accounts
 
 Stump has two user account types:
 
 - **Server Owner**: The owner of the server. This user has full control over the server, and can add and remove users.
-- **Server Member**: A user that is granted access to the server. This user has majority read-only access to the server.
+- **Server Member**: A user that is granted access to the server. This user has majority read-only access to the server, with opt-out options
 
 An 'unclaimed' Stump server, or a server that has no user with the `server owner` role, will prompt for an initialization step, and will automatically assign the first registered user the **Server Owner** role.
 
-All of the user management functionality is available in the `Users` section of the settings page, which only the **Server Owner** has access to, available at `/settings/users` in your browser. The following sections will cover the various user management features.
-
-## User management
+## Managing Users
 
 ### Creating a user
 

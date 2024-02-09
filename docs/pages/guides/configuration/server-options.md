@@ -1,4 +1,4 @@
-# Configuring Stump
+# Server Options
 
 > Stump will use default options if you don't manually configure them. When following this guide, keep in mind you only need to provide values for things you wish to override.
 

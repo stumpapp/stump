@@ -1,6 +1,6 @@
 import { Callout } from 'nextra-theme-docs'
 
-# Book Club
+# Book Club Overview
 
 <Callout emoji="🚧">
 	This feature is not yet available. You can track the progress on this feature in [this
@@ -24,14 +24,16 @@ You don't even technically need any books on the server to start a book club, ei
 
 Book clubs in Stump are effectively just a group of users that all have access to special pages and functionalities that are only available to members of a given book club. There can be multiple book clubs in a single Stump instance, and users can be members of multiple book clubs.
 
-### RBAC and book clubs
+### RBAC and Book Clubs
 
-There are two relevant permissions that affect access to the book club feature as a whole:
+There are two relevant user permissions that affect access to the book club feature as a whole:
 
     1. Any managed account with the `bookclub:read` permission may access the book club feature. This means that they can view and join book clubs
     2. Any managed account with the `bookclub:create` permission may create book clubs (and therefore inherently has the `bookclub:read` permission)
 
-The server owner can assign these permissions to other users in the user management settings page.
+The server owner can assign these permissions to other users in the user management settings page. For more information about that process, see the [user permissions](/guides/access-control/permissions) guide.
+
+#### Book Club Roles
 
 Within a book club, there are 4 roles:
 
@@ -42,7 +44,7 @@ Within a book club, there are 4 roles:
 
 The server owner retains all of the permissions as a creator of any book club that exists on the server.
 
-#### Custom roles
+##### Custom roles
 
 Book clubs can create custom names for each of the four available roles. This was added to better support book clubs that want some themed and/or immersive names for their roles. For example, a book club that reads primarily D&D books might want to rename the roles to `Dungeon Master`, `Adventurer`, `Explorer`, and `Novice`. Internally, nothing changes, but the names are displayed in the UI accordingly.
 

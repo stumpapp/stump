@@ -92,7 +92,7 @@ fn user_has_all_permissions(user: &User, permissions: &[UserPermission]) -> bool
 
 	let missing_permissions = permissions
 		.iter()
-		.filter(|&permission| !user_has_permission(&user, *permission))
+		.filter(|&permission| !user_has_permission(user, *permission))
 		.collect::<Vec<_>>();
 	if !missing_permissions.is_empty() {
 		tracing::error!(?user, ?missing_permissions, "User does not have permission");

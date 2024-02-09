@@ -234,7 +234,7 @@ async fn patch_notifier(
 					payload
 						._type
 						.map(|_type| notifier::r#type::set(_type.to_string())),
-					config.map(|bytes| notifier::config::set(bytes)),
+					config.map(notifier::config::set),
 				],
 			),
 		)

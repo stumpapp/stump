@@ -33,12 +33,12 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
 - [Developer Guide 💻](#developer-guide-)
   - [Where to start?](#where-to-start)
 - [Project Structure 📦](#project-structure-)
-  - [/apps](#apps)
-  - [/core](#core)
-  - [/crates](#crates)
-  - [/docs](#docs)
-  - [/interface](#interface)
-  - [/packages](#packages)
+  - [Apps](#apps)
+  - [Core](#core)
+  - [Crates](#crates)
+  - [Docs](#docs)
+  - [Interface](#interface)
+  - [Packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
 </details>
 
@@ -101,36 +101,25 @@ A quick summary of the steps required to get going:
 
    ```bash
     # build the React app
-    moon run web:build
+    pnpm web build
     # generate the Prisma client and Rust-TypeScript types
-    moon run codegen:generate
+    cargo codegen # or cargo prisma generate --schema=./core/prisma/schema.prisma for just the Prisma client
    ```
 
 4. Start one of the apps:
 
-   I use [moonrepo](https://moonrepo.dev/) for Stump's repository management. A few example commands are:
-
-   ```bash
-   # run the webapp + server
-   moon run server:dev web:dev
-   # run the desktop app + server
-   moon run server:start desktop:dev
-   # run the docs website
-   moon run docs:dev
-   ```
-
-   This isn't a requirement though! You can also run the apps directly with `pnpm`:
+   A few example commands are:
 
    ```bash
    # run the webapp + server
    pnpm dev:web
    # run the desktop app + server
-   pnpm dev:desktop
+   pnpm start:desktop
    # run the docs website
    pnpm docs dev
    ```
 
-   Or just `cargo` for the server:
+   Or just `cargo` for the server (and other Rust apps):
 
    ```bash
    cargo run --package stump_server --bin stump_server
@@ -156,40 +145,51 @@ In general, the following areas are good places to start:
 
 ## Project Structure 📦
 
-Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/workspaces) and [moonrepo](https://moonrepo.dev/):
+<details>
+  <summary><b>Click to expand</b></summary>
+  
+Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html). The project is split into a number of different packages and crates, each with their own purpose:
 
-### /apps
+### Apps
 
-- `desktop`: A React+Tauri application
-- `mobile`: A React Native application
+Stand-alone applications that can be run independently, at `/apps` in the root of the project:
+
+- `desktop`: A React + Tauri desktop application
+- `mobile`: A React Native application ([#125](https://github.com/stumpapp/stump/issues/125))
 - `server`: An [Axum](https://github.com/tokio-rs/axum) HTTP server
-- `web`: A React application
+- `web`: A React application, the primary UI for both the built-in web app the server serves and the desktop app
 
-### /core
+### Core
 
-A Rust crate containing Stump's core functionalities
+A Rust crate containing Stump's core functionalities, at `/core` in the root of the project
 
-### /crates
+### Crates
+
+Various Rust crates, at `/crates` in the root of the project:
 
 - `cli`: A CLI library used in the `server` app
 - `codegen`: A small rust app that handles all of the code generation for Stump
 - `integrations`: A rust library containing integrations with other notification services
 - `prisma-cli`: A small wrapper rust app to run the Prisma CLI
 
-### /docs
+### Docs
 
-A NextJS application for the Stump documentation site
+A NextJS application for the Stump documentation site at `/docs` in the root of the project
 
-### /interface
+### Interface
 
-A React component that is essentially the "main" UI for Stump. It is used in both the `web` and `desktop` apps
+A React component that is essentially the "main" UI for Stump, at `/interface` in the root of the project. It is used in both the `web` and `desktop` apps
 
-### /packages
+### Packages
+
+Various TypeScript packages, at `/packages` in the root of the project:
 
 - `api`: All of the API functions used by the `client` package
 - `client`: React-query config, hooks, and other client-side utilities
 - `components`: Shared React components for the web and desktop applications
 - `types`: Shared TypeScript types for interfacing with Stump's core and API
+
+</details>
 
 ## Similar Projects 👯
 

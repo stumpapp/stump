@@ -8,7 +8,10 @@
 		"build": "next build",
 		"export": "next export",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"deploy-preview": "vercel",
+		"deploy": "vercel --prod",
+		"nuke": "rimraf -rf node_modules"
 	},
 	"keywords": [],
 	"author": "",

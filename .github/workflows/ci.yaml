@@ -6,7 +6,6 @@ on:
     branches:
       - main
 
-# TODO: figure out how to use moon here.
 jobs:
   check-rust:
     name: Rust checks
@@ -42,6 +41,3 @@ jobs:
 
       - name: Run TypeScript lints
         run: pnpm lint
-
-      # - name: typecheck
-      #   run: pnpm moon run :typecheck

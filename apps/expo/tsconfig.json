@@ -1,15 +1,16 @@
 {
-  "extends": "expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ]
+	"extends": "expo/tsconfig.base",
+	"compilerOptions": {
+		"skipLibCheck": true,
+		"jsx": "preserve",
+		"paths": {
+			"@stump/api": ["../../packages/api/src/index.ts"],
+			"@stump/api/*": ["../../packages/api/src/*"],
+			"@stump/client": ["../../packages/client/src/index.ts"],
+			"@stump/client/*": ["../../packages/client/src/*"],
+			"@stump/types": ["../../packages/types/index.ts"],
+			"@stump/types/*": ["../../packages/types/*"]
+		}
+	},
+	"module": "NodeNext"
 }

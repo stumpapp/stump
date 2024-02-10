@@ -19,8 +19,10 @@
 		"@types/node": "^20.8.7",
 		"@types/react": "^18.2.29",
 		"prettier": "^3.0.3",
-		"react": "^18.2.0",
 		"tsconfig": "^7.0.0",
 		"typescript": "^5.3.3"
+	},
+	"peerDependencies": {
+		"react": "^18.2.0"
 	}
 }

@@ -135,58 +135,6 @@ importers:
 
   apps/expo:
     dependencies:
-      expo:
-        specifier: ~50.0.6
-        version: 50.0.6(@babel/core@7.23.2)(@react-native/babel-preset@0.73.21)
-      expo-constants:
-        specifier: ~15.4.5
-        version: 15.4.5(expo@50.0.6)
-      expo-linking:
-        specifier: ~6.2.2
-        version: 6.2.2(expo@50.0.6)
-      expo-router:
-        specifier: ~3.4.7
-        version: 3.4.7(expo-constants@15.4.5)(expo-linking@6.2.2)(expo-modules-autolinking@1.10.3)(expo-status-bar@1.11.1)(expo@50.0.6)(react-dom@18.2.0)(react-native-reanimated@3.6.2)(react-native-safe-area-context@4.8.2)(react-native-screens@3.29.0)(react-native@0.73.4)(react@18.2.0)
-      expo-status-bar:
-        specifier: ~1.11.1
-        version: 1.11.1
-      nativewind:
-        specifier: ^2.0.11
-        version: 2.0.11(react@18.2.0)(tailwindcss@3.3.2)
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
-      react-native:
-        specifier: 0.73.4
-        version: 0.73.4(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
-      react-native-reanimated:
-        specifier: ~3.6.2
-        version: 3.6.2(@babel/core@7.23.2)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.22.5)(@babel/plugin-transform-shorthand-properties@7.22.5)(@babel/plugin-transform-template-literals@7.22.5)(react-native@0.73.4)(react@18.2.0)
-      react-native-safe-area-context:
-        specifier: 4.8.2
-        version: 4.8.2(react-native@0.73.4)(react@18.2.0)
-      react-native-screens:
-        specifier: ~3.29.0
-        version: 3.29.0(react-native@0.73.4)(react@18.2.0)
-      react-native-url-polyfill:
-        specifier: ^1.3.0
-        version: 1.3.0(react-native@0.73.4)
-    devDependencies:
-      '@babel/core':
-        specifier: ^7.20.0
-        version: 7.23.2
-      '@types/react':
-        specifier: ~18.2.45
-        version: 18.2.55
-      tailwindcss:
-        specifier: 3.3.2
-        version: 3.3.2
-      typescript:
-        specifier: ^5.1.3
-        version: 5.3.3
-
-  apps/mobile:
-    dependencies:
       '@stump/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -202,9 +150,6 @@ importers:
       expo-linking:
         specifier: ~6.2.2
         version: 6.2.2(expo@50.0.6)
-      expo-router:
-        specifier: ^3.4.7
-        version: 3.4.7(expo-constants@15.4.5)(expo-linking@6.2.2)(expo-modules-autolinking@1.10.3)(expo-status-bar@1.11.1)(expo@50.0.6)(react-dom@18.2.0)(react-native-reanimated@3.6.2)(react-native-safe-area-context@4.8.2)(react-native-screens@3.29.0)(react-native@0.73.4)(react@18.2.0)
       expo-splash-screen:
         specifier: ~0.26.4
         version: 0.26.4(expo-modules-autolinking@1.10.3)(expo@50.0.6)
@@ -261,7 +206,7 @@ importers:
         specifier: 3.3.2
         version: 3.3.2
 
-  apps/mobile_:
+  apps/expo_:
     dependencies:
       '@expo/vector-icons':
         specifier: ^14.0.0
@@ -339,6 +284,82 @@ importers:
       typescript:
         specifier: ^5.1.3
         version: 5.3.3
+
+  apps/mobile:
+    dependencies:
+      '@stump/api':
+        specifier: workspace:*
+        version: link:../../packages/api
+      '@tanstack/react-query':
+        specifier: ^4.28.0
+        version: 4.28.0(react-dom@18.2.0)(react-native@0.73.4)(react@18.2.0)
+      expo:
+        specifier: ^50.0.6
+        version: 50.0.6(@babel/core@7.23.2)(@react-native/babel-preset@0.73.21)
+      expo-constants:
+        specifier: ~15.4.5
+        version: 15.4.5(expo@50.0.6)
+      expo-linking:
+        specifier: ~6.2.2
+        version: 6.2.2(expo@50.0.6)
+      expo-router:
+        specifier: ^3.4.7
+        version: 3.4.7(expo-constants@15.4.5)(expo-linking@6.2.2)(expo-modules-autolinking@1.10.3)(expo-status-bar@1.11.1)(expo@50.0.6)(react-dom@18.2.0)(react-native-reanimated@3.6.2)(react-native-safe-area-context@4.8.2)(react-native-screens@3.29.0)(react-native@0.73.4)(react@18.2.0)
+      expo-splash-screen:
+        specifier: ~0.26.4
+        version: 0.26.4(expo-modules-autolinking@1.10.3)(expo@50.0.6)
+      expo-status-bar:
+        specifier: ~1.11.1
+        version: 1.11.1
+      nativewind:
+        specifier: ^2.0.11
+        version: 2.0.11(react@18.2.0)(tailwindcss@3.3.2)
+      phosphor-react-native:
+        specifier: ^1.1.2
+        version: 1.1.2(react-native-svg@14.1.0)(react-native@0.73.4)(react@18.2.0)
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      react-native:
+        specifier: 0.73.4
+        version: 0.73.4(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
+      react-native-gesture-handler:
+        specifier: ~2.14.1
+        version: 2.14.1(react-native@0.73.4)(react@18.2.0)
+      react-native-reanimated:
+        specifier: ~3.6.2
+        version: 3.6.2(@babel/core@7.23.2)(@babel/plugin-proposal-nullish-coalescing-operator@7.18.6)(@babel/plugin-proposal-optional-chaining@7.21.0)(@babel/plugin-transform-arrow-functions@7.22.5)(@babel/plugin-transform-shorthand-properties@7.22.5)(@babel/plugin-transform-template-literals@7.22.5)(react-native@0.73.4)(react@18.2.0)
+      react-native-safe-area-context:
+        specifier: 4.8.2
+        version: 4.8.2(react-native@0.73.4)(react@18.2.0)
+      react-native-screens:
+        specifier: ~3.29.0
+        version: 3.29.0(react-native@0.73.4)(react@18.2.0)
+      react-native-svg:
+        specifier: 14.1.0
+        version: 14.1.0(react-native@0.73.4)(react@18.2.0)
+      react-native-web:
+        specifier: ~0.19.10
+        version: 0.19.10(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.19.3
+        version: 7.23.2
+      '@babel/plugin-proposal-export-namespace-from':
+        specifier: ^7.18.9
+        version: 7.18.9(@babel/core@7.23.2)
+      babel-preset-expo:
+        specifier: ^10.0.1
+        version: 10.0.1(@babel/core@7.23.2)
+      react-native-url-polyfill:
+        specifier: ^1.3.0
+        version: 1.3.0(react-native@0.73.4)
+      tailwindcss:
+        specifier: 3.3.2
+        version: 3.3.2
 
   apps/server: {}
 
@@ -641,6 +662,9 @@ importers:
       immer:
         specifier: ^10.0.3
         version: 10.0.3
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
       react-use-websocket:
         specifier: ^4.5.0
         version: 4.5.0(react-dom@18.2.0)(react@18.2.0)
@@ -657,9 +681,6 @@ importers:
       prettier:
         specifier: ^3.0.3
         version: 3.0.3
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
       tsconfig:
         specifier: ^7.0.0
         version: 7.0.0
@@ -1257,7 +1278,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.23.2
-      '@babel/helper-create-class-features-plugin': 7.22.15(@babel/core@7.23.2)
+      '@babel/helper-create-class-features-plugin': 7.23.10(@babel/core@7.23.2)
       '@babel/helper-plugin-utils': 7.22.5
 
   /@babel/plugin-proposal-decorators@7.23.9(@babel/core@7.23.2):
@@ -2878,7 +2899,7 @@ packages:
       fs-extra: 9.0.0
       getenv: 1.0.0
       jimp-compact: 0.16.1
-      node-fetch: 2.6.11
+      node-fetch: 2.7.0
       parse-png: 2.1.0
       resolve-from: 5.0.0
       semver: 7.3.2
@@ -5362,7 +5383,7 @@ packages:
       chalk: 4.1.2
       find-up: 5.0.0
       mime: 2.6.0
-      node-fetch: 2.6.11
+      node-fetch: 2.7.0
       open: 6.4.0
       ora: 5.4.1
       semver: 7.5.4
@@ -5596,7 +5617,7 @@ packages:
     dependencies:
       '@react-navigation/routers': 6.1.9
       escape-string-regexp: 4.0.0
-      nanoid: 3.3.6
+      nanoid: 3.3.7
       query-string: 7.1.3
       react: 18.2.0
       react-is: 16.13.1
@@ -16588,6 +16609,7 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: true
 
   /node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -17245,7 +17267,7 @@ packages:
       react-native: '*'
       react-native-svg: '*'
     dependencies:
-      caniuse-lite: 1.0.30001550
+      caniuse-lite: 1.0.30001585
       react: 18.2.0
       react-native: 0.73.4(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
       react-native-svg: 14.1.0(react-native@0.73.4)(react@18.2.0)
@@ -17908,7 +17930,7 @@ packages:
       progress: 2.0.3
       proxy-from-env: 1.1.0
       rimraf: 2.7.1
-      ws: 6.2.0
+      ws: 6.2.2
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -18351,6 +18373,7 @@ packages:
     dependencies:
       react-native: 0.73.4(@babel/core@7.23.2)(@babel/preset-env@7.23.2)(react@18.2.0)
       whatwg-url-without-unicode: 8.0.0-3
+    dev: true
 
   /react-native-web@0.19.10(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-IQoHiTQq8egBCVVwmTrYcFLgEFyb4LMZYEktHn4k22JMk9+QTCEz5WTfvr+jdNoeqj/7rtE81xgowKbfGO74qg==}

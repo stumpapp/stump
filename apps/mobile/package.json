@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"@stump/api": "workspace:*",
-		"@tanstack/react-query": "^4.20.4",
+		"@tanstack/react-query": "^4.28.0",
 		"expo": "^50.0.6",
 		"expo-constants": "~15.4.5",
 		"expo-linking": "~6.2.2",

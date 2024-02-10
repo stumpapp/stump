@@ -1,4 +1,4 @@
-import { CheckBox, Label, Text } from '@stump/components'
+import { CheckBox, Heading, Text } from '@stump/components'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
@@ -26,7 +26,7 @@ export default function FileConversionOptions() {
 	return (
 		<div className="flex flex-col gap-y-6">
 			<div className="flex flex-col gap-y-1.5">
-				<Label>File conversion</Label>
+				<Heading size="sm">Converting options</Heading>
 				<Text size="sm" variant="muted">
 					Stump is capable of converting certain file formats to more compatible ones
 				</Text>

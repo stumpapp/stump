@@ -1,5 +1,5 @@
 import { Button, DropdownMenu } from '@stump/components'
-import { Edit } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 
 import { useAppContext } from '@/context'
@@ -35,9 +35,9 @@ export default function EditThumbnailDropdown({ label, onChooseSelector, onUploa
 				align="start"
 				contentWrapperClassName="w-18"
 				trigger={
-					<Button variant="subtle-dark" size="xs" className="border border-edge px-2 py-1.5">
-						<Edit className="mr-2 h-3 w-3" />
+					<Button size="md" className="border border-edge" variant="outline">
 						{label || t(withLocaleKey('label'))}
+						<ChevronDown className="ml-2 h-4 w-4" />
 					</Button>
 				}
 				groups={[

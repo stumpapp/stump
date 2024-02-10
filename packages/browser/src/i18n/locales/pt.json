@@ -123,7 +123,7 @@
 			}
 		}
 	},
-	"manageLibraryScene": {
+	"librarySettingsScene": {
 		"heading": "Gerenciar Biblioteca",
 		"subtitle": "Atualize os detalhes ou a configuração da sua biblioteca, altere as regras de acesso de controle ou arquivos de verificação. Se você está querendo uma atualização das bibliotecas e como elas funcionam, confira a",
 		"subtitleLink": "documentação relevante",

@@ -123,7 +123,7 @@ export default function Pagination({
 					'mt-7': position === 'bottom',
 				})}
 			>
-				<div className="-mt-px flex w-full items-start justify-between gap-2">
+				<div className="-mt-px flex w-full items-start justify-between gap-2 px-4">
 					<PaginationArrow
 						kind="previous"
 						onClick={() => onChangePage(currentPage - 1)}

@@ -50,7 +50,7 @@ export default function FilterToolBar({
 	const renderOrderBy = !!orderBy && !!entity
 
 	return (
-		<header className="flex max-w-full flex-col gap-2">
+		<header className="flex max-w-full flex-col gap-2 px-4">
 			<div className="flex flex-col items-center gap-2 md:flex-row">
 				<Search
 					initialValue={filters?.search as string}

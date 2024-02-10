@@ -1,6 +1,6 @@
-import { getLibraryThumbnail, getMediaPage, libraryApi } from '@stump/api'
-import { Button, Dialog, EntityCard } from '@stump/components'
-import { Library, Media, Series } from '@stump/types'
+import { libraryApi } from '@stump/api'
+import { Button, Dialog, Label, Text } from '@stump/components'
+import { Media, Series } from '@stump/types'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -8,17 +8,17 @@ import EditThumbnailDropdown from '@/components/thumbnail/EditThumbnailDropdown'
 
 import BookPageGrid from '../../book/management/BookPageGrid'
 import SeriesBookGrid from '../../series/management/SeriesBookGrid'
+import { useLibraryContext } from '../context'
 import LibrarySeriesGrid from './LibrarySeriesGrid'
 
-type Props = {
-	library: Library
-}
-export default function LibraryThumbnailSelector({ library }: Props) {
+export default function LibraryThumbnailSelector() {
 	const [selectedSeries, setSelectedSeries] = useState<Series>()
 	const [selectedBook, setSelectedBook] = useState<Media>()
 	const [page, setPage] = useState<number>()
 
 	const [isOpen, setIsOpen] = useState(false)
+
+	const { library } = useLibraryContext()
 
 	const handleOpenChange = (nowOpen: boolean) => {
 		if (!nowOpen) {
@@ -116,24 +116,20 @@ export default function LibraryThumbnailSelector({ library }: Props) {
 	}
 
 	return (
-		<div className="relative">
-			<EntityCard
-				imageUrl={
-					selectedSeries && selectedBook && page
-						? getMediaPage(selectedBook.id, page)
-						: getLibraryThumbnail(library.id)
-				}
-				isCover
-				fullWidth={false}
-				className="flex-auto flex-shrink-0"
-			/>
+		<div className="flex flex-col gap-4">
+			<div>
+				<Label>Select thumbnail</Label>
+				<Text size="sm" variant="muted">
+					Choose a different thumbnail for this library, either from a book or upload a custom one
+				</Text>
+			</div>
 
-			<span className="absolute bottom-2 left-2 block">
+			<div>
 				<EditThumbnailDropdown
 					onChooseSelector={() => setIsOpen(true)}
 					onUploadImage={handleUploadImage}
 				/>
-			</span>
+			</div>
 
 			<Dialog open={isOpen} onOpenChange={handleOpenChange}>
 				<Dialog.Content size="xl">

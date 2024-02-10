@@ -10,7 +10,6 @@ import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
-import { SceneContainer } from '@/components/container'
 import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
 import Pagination from '@/components/Pagination'
 import SeriesGrid from '@/components/series/SeriesGrid'
@@ -18,9 +17,7 @@ import SeriesList from '@/components/series/SeriesList'
 import useIsInView from '@/hooks/useIsInView'
 import { usePageParam } from '@/hooks/usePageParam'
 
-import LibraryOverviewTitleSection from './LibraryOverviewTitleSection'
-
-function LibraryOverviewScene() {
+function LibrarySeriesScene() {
 	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
 
 	const { id } = useParams()
@@ -69,8 +66,6 @@ function LibraryOverviewScene() {
 	const isOnFirstPage = current_page === 1
 	const hasFilters = Object.keys(filters || {}).length > 0
 	const hasStuff = total_pages !== undefined && current_page !== undefined
-	// we show on the first page, but if there are filters and no stuff we show it
-	const showOverview = isOnFirstPage || (hasFilters && !hasStuff)
 
 	// TODO: detect if going from page > 1 to page = 1 and scroll to top
 	useEffect(
@@ -110,12 +105,10 @@ function LibraryOverviewScene() {
 	}
 
 	return (
-		<SceneContainer>
+		<>
 			<Helmet>
 				<title>Stump | {library.name}</title>
 			</Helmet>
-
-			{showOverview && <LibraryOverviewTitleSection library={library} />}
 
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
 
@@ -126,7 +119,7 @@ function LibraryOverviewScene() {
 				orderBy
 			/>
 
-			<div className="flex w-full flex-col gap-y-6 pt-4">
+			<div className="flex w-full flex-col gap-y-6">
 				{hasStuff && (
 					<Pagination
 						pages={total_pages}
@@ -134,7 +127,7 @@ function LibraryOverviewScene() {
 						onChangePage={(page) => setPage(page)}
 					/>
 				)}
-				{renderContent()}
+				<div className="px-4">{renderContent()}</div>
 				{hasStuff && (
 					<Pagination
 						position="bottom"
@@ -144,14 +137,14 @@ function LibraryOverviewScene() {
 					/>
 				)}
 			</div>
-		</SceneContainer>
+		</>
 	)
 }
 
-export default function LibraryOverviewSceneWrapper() {
+export default function LibrarySeriesSceneWrapper() {
 	return (
 		<FilterProvider>
-			<LibraryOverviewScene />
+			<LibrarySeriesScene />
 		</FilterProvider>
 	)
 }

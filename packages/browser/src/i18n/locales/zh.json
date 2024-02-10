@@ -123,7 +123,7 @@
 			}
 		}
 	},
-	"manageLibraryScene": {
+	"librarySettingsScene": {
 		"heading": "管理书库",
 		"subtitle": "更新书库的详细信息或配置，更改控制访问规则，或扫描文件。 如果你想要刷新书库和它们如何工作，请查看",
 		"subtitleLink": "相关文档",

@@ -9,7 +9,11 @@ export {
 	useUpdateBookClub,
 } from './bookClub'
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
-export { type DirectoryListingQueryParams, useDirectoryListing } from './filesystem'
+export {
+	type DirectoryListingQueryParams,
+	prefetchLibraryFiles,
+	useDirectoryListing,
+} from './filesystem'
 export { useJobSchedulerConfig, useJobsQuery } from './job'
 export {
 	refreshUseLibrary,
@@ -34,6 +38,7 @@ export {
 	useUpdateMediaProgress,
 } from './media'
 export {
+	prefetchLibrarySeries,
 	prefetchSeries,
 	usePagedSeriesQuery,
 	useSeriesByIdQuery,

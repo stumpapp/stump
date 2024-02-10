@@ -292,7 +292,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 				}}
 			/>
 			<Form form={form} onSubmit={handleSubmit}>
-				<ContentContainer>
+				<ContentContainer className="mt-0">
 					<BasicLibraryInformation onSetShowDirectoryPicker={setShowDirectoryPicker} />
 
 					{isCreatingLibrary && <LibraryPatternSection />}

@@ -18,7 +18,7 @@ export default function BasicLibraryInformation({ onSetShowDirectoryPicker }: Pr
 	return (
 		<div className="flex flex-grow flex-col gap-6">
 			<div>
-				<Heading size="xs">Basic information</Heading>
+				<Heading size="sm">Basic information</Heading>
 				<Text size="sm" variant="muted">
 					This information will be used to identify your library and find its content
 				</Text>

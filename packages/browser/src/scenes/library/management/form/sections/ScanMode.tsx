@@ -19,7 +19,7 @@ export default function ScanModeForm({ isCreatingLibrary }: Props) {
 	return (
 		<div className="flex flex-grow flex-col gap-6">
 			<div>
-				<Heading size="xs">Scan mode</Heading>
+				<Heading size="sm">Scan mode</Heading>
 				<Text size="sm" variant="muted">
 					Choose how you want to scan your library{' '}
 					{isCreatingLibrary ? 'after it is created' : 'once your updates are stored'}

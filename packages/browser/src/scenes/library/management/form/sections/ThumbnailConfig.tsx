@@ -35,9 +35,9 @@ export default function ThumbnailConfigForm() {
 	return (
 		<div className="flex flex-grow flex-col gap-6">
 			<div>
-				<Heading size="xs">Thumbnail configuration</Heading>
+				<Heading size="sm">Thumbnail generation</Heading>
 				<Text size="sm" variant="muted">
-					Optional configurations for generating thumbnails for library content
+					Optionally generate thumbnails for library content to improve image loading times
 				</Text>
 			</div>
 

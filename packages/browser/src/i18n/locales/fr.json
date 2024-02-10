@@ -123,7 +123,7 @@
 			}
 		}
 	},
-	"manageLibraryScene": {
+	"librarySettingsScene": {
 		"heading": "Gérer la Bibliothèque",
 		"subtitle": "Mettez à jour les détails ou la configuration de votre bibliothèque, modifiez les règles d'accès ou scannez des fichiers. Si vous voulez une mise à jour sur les bibliothèques et comment elles fonctionnent, consultez la",
 		"subtitleLink": "documentation correspondante",

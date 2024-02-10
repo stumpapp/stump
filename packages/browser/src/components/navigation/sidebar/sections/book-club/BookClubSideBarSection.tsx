@@ -21,7 +21,7 @@ export default function BookClubSideBarSection({ isMobile }: Props) {
 	const { t } = useLocaleContext()
 	const { bookClubs } = useBookClubsQuery({ params: { all: false } })
 
-	const isCurrentBookClub = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
+	const isCurrentBookClub = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
 	const renderBookClubs = () => {
 		if (!bookClubs || !bookClubs.length) {

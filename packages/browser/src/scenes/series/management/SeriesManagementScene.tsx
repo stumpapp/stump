@@ -29,7 +29,7 @@ export default function SeriesManagementScene() {
 				? [
 						{
 							label: series.library.name,
-							to: paths.libraryOverview(series.library.id),
+							to: paths.librarySeries(series.library.id),
 						},
 				  ]
 				: []),

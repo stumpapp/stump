@@ -23,7 +23,7 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 	const { libraries } = useLibraries()
 	const { checkPermission } = useAppContext()
 
-	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.libraryOverview(id))
+	const isCurrentLibrary = (id: string) => location.pathname.startsWith(paths.librarySeries(id))
 
 	const canCreateLibrary = useMemo(() => checkPermission('library:create'), [checkPermission])
 
@@ -50,7 +50,7 @@ export default function LibrarySideBarSection({ isMobile }: Props) {
 			return (
 				<SideBarButtonLink
 					key={library.id}
-					to={paths.libraryOverview(library.id)}
+					to={paths.librarySeries(library.id)}
 					isActive={isCurrentLibrary(library.id)}
 					className="pl-2 pr-0"
 					leftContent={canChange ? leftContent : undefined}

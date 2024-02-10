@@ -623,7 +623,7 @@
 		"libraryOptions": {
 			"scanLibrary": "Scan",
 			"fileExplorer": "File Explorer",
-			"manageLibrary": "Manage",
+			"manageLibrary": "Settings",
 			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {

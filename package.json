@@ -23,7 +23,7 @@
 		"build:web": "pnpm web build && pnpm build:server",
 		"build:desktop": "pnpm desktop build",
 		"prettify": "prettier --config prettier.config.js --ignore-path .prettierignore --write .",
-		"nuke": "cargo clean && cargo codegen && pnpm -r nuke && pnpm i"
+		"nuke": "pnpm -r nuke && pnpm i"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.2",

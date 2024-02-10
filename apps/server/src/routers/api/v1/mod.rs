@@ -18,6 +18,7 @@ pub(crate) mod library;
 pub(crate) mod log;
 pub(crate) mod media;
 pub(crate) mod metadata;
+pub(crate) mod notifier;
 pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod smart_list;
@@ -31,6 +32,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(library::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
 		.merge(metadata::mount(app_state.clone()))
+		.merge(notifier::mount(app_state.clone()))
 		.merge(filesystem::mount(app_state.clone()))
 		.merge(job::mount(app_state.clone()))
 		.merge(log::mount(app_state.clone()))

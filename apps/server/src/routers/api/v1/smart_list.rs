@@ -1,6 +1,6 @@
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	utils::get_user_and_enforce_permission,
 };
@@ -130,14 +130,14 @@ async fn get_smart_lists(
 	State(ctx): State<AppState>,
 	session: Session,
 	QsQuery(params): QsQuery<GetSmartListsParams>,
-) -> ApiResult<Json<Vec<SmartList>>> {
+) -> APIResult<Json<Vec<SmartList>>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let query_all = params.all.unwrap_or(false);
 	if query_all && !user.is_server_owner {
-		return Err(ApiError::Forbidden(
+		return Err(APIError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		));
 	}
@@ -192,16 +192,16 @@ async fn create_smart_list(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartList>,
-) -> ApiResult<Json<SmartList>> {
+) -> APIResult<Json<SmartList>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	tracing::debug!(?input, "Creating smart list");
 
 	let serialized_filters = serde_json::to_vec(&input.filters).map_err(|e| {
 		tracing::error!(?e, "Failed to serialize smart list filters");
-		ApiError::InternalServerError(e.to_string())
+		APIError::InternalServerError(e.to_string())
 	})?;
 
 	let smart_list = client
@@ -253,10 +253,10 @@ async fn get_smart_list_by_id(
 	QsQuery(options): QsQuery<SmartListRelationOptions>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<SmartList>> {
+) -> APIResult<Json<SmartList>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
 	let mut query = client
@@ -270,7 +270,7 @@ async fn get_smart_list_by_id(
 	let smart_list = query
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?;
 
 	Ok(Json(SmartList::try_from(smart_list)?))
 }
@@ -292,10 +292,10 @@ async fn update_smart_list_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartList>,
-) -> ApiResult<Json<SmartList>> {
+) -> APIResult<Json<SmartList>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
 	let smart_list = client
@@ -303,11 +303,11 @@ async fn update_smart_list_by_id(
 		.find_first(vec![smart_list::id::equals(id), access_condition])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?;
 
 	let serialized_filters = serde_json::to_vec(&input.filters).map_err(|e| {
 		tracing::error!(?e, "Failed to serialize smart list filters");
-		ApiError::InternalServerError(e.to_string())
+		APIError::InternalServerError(e.to_string())
 	})?;
 
 	let updated_smart_list = client
@@ -351,10 +351,10 @@ async fn delete_smart_list_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<SmartList>> {
+) -> APIResult<Json<SmartList>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition =
 		smart_list_access_for_user(&user, AccessRole::CoCreator.value());
@@ -364,7 +364,7 @@ async fn delete_smart_list_by_id(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?;
 
 	let deleted_count = client
 		.smart_list()
@@ -376,7 +376,7 @@ async fn delete_smart_list_by_id(
 		.await?;
 
 	if deleted_count == 0 {
-		return Err(ApiError::NotFound("Smart list not found".to_string()));
+		return Err(APIError::NotFound("Smart list not found".to_string()));
 	} else if deleted_count > 1 {
 		tracing::warn!(
 			?deleted_count,
@@ -402,11 +402,11 @@ async fn get_smart_list_items(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<SmartListItems>> {
+) -> APIResult<Json<SmartListItems>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
 	let smart_list: SmartList = client
@@ -414,7 +414,7 @@ async fn get_smart_list_items(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?
 		.try_into()?;
 
 	let (tx, client) = client._transaction().begin().await?;
@@ -454,10 +454,10 @@ async fn get_smart_list_meta(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<SmartListMeta>> {
+) -> APIResult<Json<SmartListMeta>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
 	let smart_list: SmartList = client
@@ -465,7 +465,7 @@ async fn get_smart_list_meta(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?
 		.try_into()?;
 
 	let params = smart_list.into_params();
@@ -539,10 +539,10 @@ async fn get_smart_list_views(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Vec<SmartListView>>> {
+) -> APIResult<Json<Vec<SmartListView>>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
 	let saved_smart_list_views = client
@@ -577,10 +577,10 @@ async fn get_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<SmartListView>> {
+) -> APIResult<Json<SmartListView>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Reader.value());
 	let smart_list = client
@@ -592,7 +592,7 @@ async fn get_smart_list_view(
 		])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?;
 
 	Ok(Json(SmartListView::try_from(smart_list)?))
 }
@@ -621,10 +621,10 @@ async fn create_smart_list_view(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartListView>,
-) -> ApiResult<Json<SmartListView>> {
+) -> APIResult<Json<SmartListView>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	// NOTE: views are currently completely detatched from a user, rather they are tied
 	// only to the smart list. This makes _this_ aspect a bit awkward. For now, to not over
@@ -636,11 +636,11 @@ async fn create_smart_list_view(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?;
 
 	let serialized_config = serde_json::to_vec(&input.config).map_err(|e| {
 		tracing::error!(?e, "Failed to serialize smart list view config");
-		ApiError::InternalServerError(e.to_string())
+		APIError::InternalServerError(e.to_string())
 	})?;
 
 	let smart_list_view = client
@@ -674,10 +674,10 @@ async fn update_smart_list_view(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<CreateOrUpdateSmartListView>,
-) -> ApiResult<Json<SmartListView>> {
+) -> APIResult<Json<SmartListView>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
 	let smart_list = client
@@ -685,11 +685,11 @@ async fn update_smart_list_view(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?;
 
 	let serialized_config = serde_json::to_vec(&input.config).map_err(|e| {
 		tracing::error!(?e, "Failed to serialize smart list view config");
-		ApiError::InternalServerError(e.to_string())
+		APIError::InternalServerError(e.to_string())
 	})?;
 
 	let updated_smart_list_view = client
@@ -722,10 +722,10 @@ async fn delete_smart_list_view(
 	Path((id, name)): Path<(String, String)>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<SmartListView>> {
+) -> APIResult<Json<SmartListView>> {
 	let user =
 		get_user_and_enforce_permission(&session, UserPermission::AccessSmartList)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let access_condition = smart_list_access_for_user(&user, AccessRole::Writer.value());
 	let smart_list = client
@@ -733,7 +733,7 @@ async fn delete_smart_list_view(
 		.find_first(vec![smart_list::id::equals(id.clone()), access_condition])
 		.exec()
 		.await?
-		.ok_or_else(|| ApiError::NotFound("Smart list not found".to_string()))?;
+		.ok_or_else(|| APIError::NotFound("Smart list not found".to_string()))?;
 
 	let deleted_smart_list_view = client
 		.smart_list_view()

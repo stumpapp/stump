@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::event::CoreEvent;
+use crate::prisma::log;
+
+use super::Cursor;
 
 /// Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
 /// ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
@@ -15,7 +17,7 @@ pub struct LogMetadata {
 	pub modified: String,
 }
 
-#[derive(Clone, Default, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Type, ToSchema)]
 pub enum LogLevel {
 	#[serde(rename = "ERROR")]
 	Error,
@@ -26,6 +28,18 @@ pub enum LogLevel {
 	Info,
 	#[serde(rename = "DEBUG")]
 	Debug,
+}
+
+impl From<String> for LogLevel {
+	fn from(s: String) -> Self {
+		match s.to_lowercase().as_str() {
+			"error" => Self::Error,
+			"warn" => Self::Warn,
+			"info" => Self::Info,
+			"debug" => Self::Debug,
+			_ => Self::Info,
+		}
+	}
 }
 
 impl std::fmt::Display for LogLevel {
@@ -39,35 +53,39 @@ impl std::fmt::Display for LogLevel {
 	}
 }
 
+/// A model representing a persisted log entry. These are different than traces/system logs.
 #[derive(Clone, Serialize, Deserialize, Default, Type, ToSchema)]
 pub struct Log {
-	pub id: String,
+	/// The unique identifier of the log entry
+	pub id: i32,
+	/// The log level of the message
 	pub level: LogLevel,
+	/// The message of the log entry
 	pub message: String,
-	pub created_at: String,
+	/// Optional context for the log entry
+	pub context: Option<String>,
+	/// The timestamp of the log entry
+	pub timestamp: String,
+	/// The job ID associated with the log entry, if any
+	#[serde(skip_serializing_if = "Option::is_none")]
 	pub job_id: Option<String>,
 }
 
-impl From<CoreEvent> for Log {
-	fn from(event: CoreEvent) -> Self {
-		match event {
-			CoreEvent::JobFailed { job_id, message } => Self {
-				level: LogLevel::Error,
-				message,
-				job_id: Some(job_id),
-				..Default::default()
-			},
-			CoreEvent::CreateEntityFailed {
-				job_id,
-				path,
-				message,
-			} => Self {
-				level: LogLevel::Error,
-				message: format!("{}: {}", path, message),
-				job_id,
-				..Default::default()
-			},
-			_ => unimplemented!(),
+impl From<log::Data> for Log {
+	fn from(log: log::Data) -> Self {
+		Self {
+			id: log.id,
+			level: log.level.into(),
+			message: log.message,
+			context: log.context,
+			timestamp: log.timestamp.to_rfc3339(),
+			job_id: log.job_id,
 		}
+	}
+}
+
+impl Cursor for Log {
+	fn cursor(&self) -> String {
+		self.id.to_string()
 	}
 }

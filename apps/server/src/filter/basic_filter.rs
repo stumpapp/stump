@@ -2,10 +2,13 @@ use std::str::FromStr;
 
 use serde::{de, Deserialize, Serialize};
 use serde_untagged::UntaggedEnumVisitor;
-use stump_core::db::{entity::age_rating_deserializer, query::ordering::QueryOrder};
+use stump_core::db::{
+	entity::{age_rating_deserializer, LogLevel},
+	query::ordering::QueryOrder,
+};
 use utoipa::ToSchema;
 
-use crate::errors::ApiError;
+use crate::errors::APIError;
 
 use super::common::{
 	chain_optional_iter, from_optional_str, read_status_or_seq_read_status,
@@ -268,14 +271,14 @@ pub enum ReadStatus {
 }
 
 impl FromStr for ReadStatus {
-	type Err = ApiError;
+	type Err = APIError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s.to_lowercase().as_str() {
 			"unread" => Ok(ReadStatus::Unread),
 			"reading" => Ok(ReadStatus::Reading),
 			"completed" => Ok(ReadStatus::Completed),
-			_ => Err(ApiError::BadRequest(format!("invalid read status: {}", s))),
+			_ => Err(APIError::BadRequest(format!("invalid read status: {}", s))),
 		}
 	}
 }
@@ -313,6 +316,14 @@ pub struct MediaFilter {
 	pub base_filter: MediaBaseFilter,
 	#[serde(flatten)]
 	pub relation_filter: MediaRelationFilter,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, ToSchema)]
+pub struct LogFilter {
+	pub level: Option<LogLevel>,
+	pub job_id: Option<String>,
+	#[serde(skip_serializing_if = "Option::is_none")]
+	pub timestamp: Option<ValueOrRange<String>>,
 }
 
 #[cfg(test)]

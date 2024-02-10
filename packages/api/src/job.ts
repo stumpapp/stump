@@ -1,10 +1,12 @@
-import type { JobDetail, JobSchedulerConfig, UpdateSchedulerConfig } from '@stump/types'
+import type { JobSchedulerConfig, PersistedJob, UpdateSchedulerConfig } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult, PageableApiResult } from './types'
+import { APIResult, PageableAPIResult } from './types'
 import { toUrlParams } from './utils'
 
-export function getJobs(params?: Record<string, unknown>): Promise<PageableApiResult<JobDetail[]>> {
+export function getJobs(
+	params?: Record<string, unknown>,
+): Promise<PageableAPIResult<PersistedJob[]>> {
 	if (params) {
 		const searchParams = toUrlParams(params)
 		return API.get(`/jobs?${searchParams.toString()}`)
@@ -13,25 +15,25 @@ export function getJobs(params?: Record<string, unknown>): Promise<PageableApiRe
 	}
 }
 
-export function cancelJob(id: string): Promise<ApiResult<void>> {
+export function cancelJob(id: string): Promise<APIResult<void>> {
 	return API.delete(`/jobs/${id}/cancel`)
 }
 
-export function deleteJob(id: string): Promise<ApiResult<void>> {
+export function deleteJob(id: string): Promise<APIResult<void>> {
 	return API.delete(`/jobs/${id}`)
 }
 
-export function deleteAllJobs(): Promise<ApiResult<void>> {
+export function deleteAllJobs(): Promise<APIResult<void>> {
 	return API.delete('/jobs')
 }
 
-export function getJobSchedulerConfig(): Promise<ApiResult<JobSchedulerConfig>> {
+export function getJobSchedulerConfig(): Promise<APIResult<JobSchedulerConfig>> {
 	return API.get('/jobs/scheduler-config')
 }
 
 export function updateJobSchedulerConfig(
 	config: UpdateSchedulerConfig,
-): Promise<ApiResult<JobSchedulerConfig>> {
+): Promise<APIResult<JobSchedulerConfig>> {
 	return API.post('/jobs/scheduler-config', config)
 }
 

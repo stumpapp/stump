@@ -1,4 +1,4 @@
-import { ApiResult, createTags, getAllTags } from '@stump/api'
+import { APIResult, createTags, getAllTags } from '@stump/api'
 import type { Tag } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useMemo } from 'react'
@@ -6,9 +6,9 @@ import { useMemo } from 'react'
 import { queryClient, useMutation, useQuery } from '../client'
 
 export interface UseTagsConfig {
-	onQuerySuccess?: (res: ApiResult<Tag[]>) => void
+	onQuerySuccess?: (res: APIResult<Tag[]>) => void
 	onQueryError?: (err: AxiosError) => void
-	onCreateSuccess?: (res: ApiResult<Tag[]>) => void
+	onCreateSuccess?: (res: APIResult<Tag[]>) => void
 	onCreateError?: (err: AxiosError) => void
 }
 

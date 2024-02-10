@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{config::state::AppState, errors::ApiResult};
+use crate::{config::state::AppState, errors::APIResult};
 
 pub(crate) mod auth;
 pub(crate) mod book_club;
@@ -18,6 +18,7 @@ pub(crate) mod library;
 pub(crate) mod log;
 pub(crate) mod media;
 pub(crate) mod metadata;
+pub(crate) mod notifier;
 pub(crate) mod reading_list;
 pub(crate) mod series;
 pub(crate) mod smart_list;
@@ -31,6 +32,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(library::mount(app_state.clone()))
 		.merge(media::mount(app_state.clone()))
 		.merge(metadata::mount(app_state.clone()))
+		.merge(notifier::mount(app_state.clone()))
 		.merge(filesystem::mount(app_state.clone()))
 		.merge(job::mount(app_state.clone()))
 		.merge(log::mount(app_state.clone()))
@@ -58,8 +60,8 @@ pub struct ClaimResponse {
 		(status = 200, description = "Claim status successfully determined", body = ClaimResponse)
 	)
 )]
-async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
-	let db = ctx.get_db();
+async fn claim(State(ctx): State<AppState>) -> APIResult<Json<ClaimResponse>> {
+	let db = &ctx.db;
 
 	Ok(Json(ClaimResponse {
 		is_claimed: db.user().find_first(vec![]).exec().await?.is_some(),
@@ -74,7 +76,7 @@ async fn claim(State(ctx): State<AppState>) -> ApiResult<Json<ClaimResponse>> {
 		(status = 200, description = "Always responds with 'pong'", body = String)
 	)
 )]
-async fn ping() -> ApiResult<String> {
+async fn ping() -> APIResult<String> {
 	Ok("pong".to_string())
 }
 
@@ -93,7 +95,7 @@ pub struct StumpVersion {
 		(status = 200, description = "Version information for the Stump server instance", body = StumpVersion)
 	)
 )]
-async fn version() -> ApiResult<Json<StumpVersion>> {
+async fn version() -> APIResult<Json<StumpVersion>> {
 	Ok(Json(StumpVersion {
 		semver: env!("CARGO_PKG_VERSION").to_string(),
 		rev: env!("GIT_REV").to_string(),

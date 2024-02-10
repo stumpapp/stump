@@ -10,10 +10,10 @@ import {
 } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult } from './types'
+import { APIResult } from './types'
 import { toUrlParams, urlWithParams } from './utils'
 
-export async function getSmartLists(params?: GetSmartListsParams): Promise<ApiResult<SmartList[]>> {
+export async function getSmartLists(params?: GetSmartListsParams): Promise<APIResult<SmartList[]>> {
 	if (params) {
 		const searchParams = toUrlParams(params)
 		return API.get(urlWithParams('/smart-lists', searchParams))
@@ -22,14 +22,14 @@ export async function getSmartLists(params?: GetSmartListsParams): Promise<ApiRe
 	return API.get('/smart-lists')
 }
 
-export async function createSmartList(payload: SmartList): Promise<ApiResult<SmartList>> {
+export async function createSmartList(payload: SmartList): Promise<APIResult<SmartList>> {
 	return API.post('/smart-lists', payload)
 }
 
 export async function getSmartListById(
 	id: string,
 	params?: SmartListRelationOptions,
-): Promise<ApiResult<SmartList>> {
+): Promise<APIResult<SmartList>> {
 	if (params) {
 		const searchParams = toUrlParams(params)
 		return API.get(urlWithParams(`/smart-lists/${id}`, searchParams))
@@ -38,11 +38,11 @@ export async function getSmartListById(
 	}
 }
 
-export async function getSmartListMeta(id: string): Promise<ApiResult<SmartListMeta>> {
+export async function getSmartListMeta(id: string): Promise<APIResult<SmartListMeta>> {
 	return API.get(`/smart-lists/${id}/meta`)
 }
 
-export async function getSmartListItems(id: string): Promise<ApiResult<SmartListItems>> {
+export async function getSmartListItems(id: string): Promise<APIResult<SmartListItems>> {
 	return API.get(`/smart-lists/${id}/items`)
 }
 
@@ -50,18 +50,18 @@ export async function getSmartListItems(id: string): Promise<ApiResult<SmartList
 export async function updateSmartList(
 	id: string,
 	payload: CreateOrUpdateSmartList,
-): Promise<ApiResult<SmartList>> {
+): Promise<APIResult<SmartList>> {
 	return API.put(`/smart-lists/${id}`, payload)
 }
 
-export async function deleteSmartList(id: string): Promise<ApiResult<SmartList>> {
+export async function deleteSmartList(id: string): Promise<APIResult<SmartList>> {
 	return API.delete(`/smart-lists/${id}`)
 }
 
 export async function createSmartListView(
 	listId: string,
 	params: CreateOrUpdateSmartListView,
-): Promise<ApiResult<SmartListView>> {
+): Promise<APIResult<SmartListView>> {
 	return API.post(`/smart-lists/${listId}/views`, params)
 }
 
@@ -69,7 +69,7 @@ export async function updateSmartListView(
 	listId: string,
 	name: string,
 	params: CreateOrUpdateSmartListView,
-): Promise<ApiResult<SmartListView>> {
+): Promise<APIResult<SmartListView>> {
 	return API.put(`/smart-lists/${listId}/views/${name}`, params)
 }
 

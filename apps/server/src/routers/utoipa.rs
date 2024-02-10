@@ -7,13 +7,13 @@ use stump_core::db::query::{ordering::*, pagination::*};
 use stump_core::filesystem::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
 };
-use stump_core::job::{JobDetail, JobStatus};
+use stump_core::job::JobStatus;
 
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
-use crate::errors::ApiError;
+use crate::errors::APIError;
 use crate::filter::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesQueryRelation,
@@ -23,8 +23,8 @@ use crate::middleware::auth::Auth;
 use super::api::{
 	self,
 	v1::{
-		auth::LoginOrRegisterArgs, library::*, media::*, series::*, smart_list::*,
-		user::*, ClaimResponse, StumpVersion,
+		auth::LoginOrRegisterArgs, library::*, media::*, notifier::*, series::*,
+		smart_list::*, user::*, ClaimResponse, StumpVersion,
 	},
 };
 
@@ -87,6 +87,12 @@ use super::api::{
         api::v1::metadata::get_publishers_handler,
         api::v1::metadata::get_characters_handler,
         api::v1::metadata::get_teams_handler,
+        api::v1::notifier::get_notifiers,
+        api::v1::notifier::get_notifier_by_id,
+        api::v1::notifier::create_notifier,
+        api::v1::notifier::update_notifier,
+        api::v1::notifier::patch_notifier,
+        api::v1::notifier::delete_notifier,
         api::v1::reading_list::get_reading_list,
         api::v1::reading_list::create_reading_list,
         api::v1::reading_list::get_reading_list_by_id,
@@ -133,15 +139,15 @@ use super::api::{
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
             PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
-            Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
-            FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
+            Direction, CreateLibrary, UpdateLibrary, APIError, MediaFilter, SeriesFilter,
+            FilterableMediaQuery, FilterableSeriesQuery, LibrariesStats,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus,
             SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList,
             CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
             SmartListViewConfig, SmartListTableColumnSelection, SmartListTableSortingState,
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
-            LibrarySmartFilter
+            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier
         )
     ),
     tags(

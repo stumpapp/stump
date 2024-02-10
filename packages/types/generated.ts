@@ -3,9 +3,56 @@
 
 // CORE TYPE GENERATION
 
+/**
+ * An event that is emitted by the core and consumed by a client
+ */
+export type CoreEvent = ({ __typename: "JobStarted" } & string) | ({ __typename: "JobUpdate" } & JobUpdate) | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: BigInt; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: BigInt; series_id: string }
+
 export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
 
 export type AccessRole = "Reader" | "Writer" | "CoCreator"
+
+/**
+ * A model representing a persisted log entry. These are different than traces/system logs.
+ */
+export type Log = { id: number; level: LogLevel; message: string; context: string | null; timestamp: string; job_id?: string | null }
+
+/**
+ * Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
+ * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
+ */
+export type LogMetadata = { path: string; size: BigInt; modified: string }
+
+export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
+
+export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
+
+export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown
+
+/**
+ * An update event that is emitted by a job
+ */
+export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }) & { id: string }
+
+/**
+ * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
+ * where the client will ignore any fields that are not present. This is done so all internal ops
+ * can be done without needing to know the full state of the job.
+ */
+export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }
+
+/**
+ * The data that is collected and updated during the execution of a library scan job
+ */
+export type LibraryScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
+
+export type SeriesScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt }
+
+export type ThumbnailGenerationJobVariant = ({ type: "SingleLibrary" } & string) | ({ type: "SingleSeries" } & string) | ({ type: "MediaGroup" } & string[])
+
+export type ThumbnailGenerationJobParams = { variant: ThumbnailGenerationJobVariant; force_regenerate: boolean }
+
+export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 
@@ -126,15 +173,9 @@ export type UpdateEpubProgress = { epubcfi: string; percentage: number; is_compl
 
 export type EpubContent = { label: string; content: string; play_order: number }
 
-export type JobStatus = "RUNNING" | "COMPLETED" | "CANCELLED" | "FAILED" | "QUEUED"
-
-export type JobUpdate = { job_id: string; current_task: BigInt | null; task_count: BigInt; message: string | null; status: JobStatus | null }
-
-export type JobDetail = { id: string; name: string; description: string | null; status: JobStatus; task_count: number | null; completed_task_count: number | null; ms_elapsed: BigInt | null; created_at: string | null; completed_at: string | null }
+export type JobStatus = "RUNNING" | "PAUSED" | "COMPLETED" | "CANCELLED" | "FAILED" | "QUEUED"
 
 export type JobSchedulerConfig = { id: string; interval_secs: number; excluded_libraries: Library[] }
-
-export type CoreEvent = { key: "JobStarted"; data: JobUpdate } | { key: "JobProgress"; data: JobUpdate } | { key: "JobComplete"; data: string } | { key: "JobFailed"; data: { job_id: string; message: string } } | { key: "CreateEntityFailed"; data: { job_id: string | null; path: string; message: string } } | { key: "CreateOrUpdateMedia"; data: { id: string; series_id: string; library_id: string } } | { key: "CreatedManyMedia"; data: { count: BigInt; library_id: string } } | { key: "CreatedSeries"; data: { id: string; library_id: string } } | { key: "CreatedSeriesBatch"; data: { count: BigInt; library_id: string } } | { key: "SeriesScanComplete"; data: { id: string } } | { key: "GeneratedThumbnailBatch"; data: BigInt }
 
 export type ReadingListItem = { display_order: number; media_id: string; reading_list_id: string; media: Media | null }
 
@@ -170,16 +211,6 @@ export type DirectoryListing = { parent: string | null; files: DirectoryListingF
 export type DirectoryListingFile = { is_directory: boolean; name: string; path: string }
 
 export type DirectoryListingInput = { path: string | null }
-
-export type Log = { id: string; level: LogLevel; message: string; created_at: string; job_id: string | null }
-
-/**
- * Information about the Stump log file, located at STUMP_CONFIG_DIR/Stump.log, or
- * ~/.stump/Stump.log by default. Information such as the file size, last modified date, etc.
- */
-export type LogMetadata = { path: string; size: BigInt; modified: string }
-
-export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type Direction = "asc" | "desc"
 

@@ -6,7 +6,7 @@ import { Dropdown } from '../dropdown'
 import { Popover } from '../popover'
 import { cn } from '../utils'
 
-// TODO: this should probably be moved to the interface package so I can
+// TODO: this should probably be moved to the browser package so I can
 // use react-query for better caching AND language support
 
 type Emoji = {

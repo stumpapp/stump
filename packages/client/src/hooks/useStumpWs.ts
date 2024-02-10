@@ -3,7 +3,7 @@ import type { CoreEvent } from '@stump/types'
 import { useMemo } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 
-import { useStumpStore } from '../stores'
+import { useAppStore } from '../stores/app'
 
 interface Props {
 	onEvent(event: CoreEvent): void
@@ -11,7 +11,7 @@ interface Props {
 
 export function useStumpWs({ onEvent }: Props) {
 	const URI = API?.getUri()
-	const { setConnected } = useStumpStore(({ setConnected }) => ({ setConnected }))
+	const setConnected = useAppStore((store) => store.setIsConnectedWithServer)
 
 	const socketUrl = useMemo(() => {
 		let url = URI

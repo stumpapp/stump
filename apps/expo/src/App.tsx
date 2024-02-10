@@ -1,4 +1,4 @@
-// import { NavigationContainer } from '@react-navigation/native'
+import { useAuthQuery } from '@stump/client'
 import { StatusBar } from 'expo-status-bar'
 import { Text, View } from 'react-native'
 
@@ -9,9 +9,14 @@ import { Text, View } from 'react-native'
 // - Authenticated
 
 export default function App() {
+
+  const {error} = useAuthQuery({})
+
+  console.log(error)
+
 	return (
 		<View className="flex-1 items-center justify-center">
-			<Text>Open up App.tsx to start working on your app!</Text>
+			<Text>I guess pnpm has to go!!</Text>
 			<StatusBar style="auto" />
 		</View>
 	)

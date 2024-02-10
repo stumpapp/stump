@@ -7,8 +7,8 @@
 		".": "./src/index.ts"
 	},
 	"dependencies": {
-		"@stump/api": "workspace:*",
-		"@stump/types": "workspace:*",
+		"@stump/api": "*",
+		"@stump/types": "*",
 		"@tanstack/react-query": "^4.28.0",
 		"axios": "^1.5.1",
 		"immer": "^10.0.3",

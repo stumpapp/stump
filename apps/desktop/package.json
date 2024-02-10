@@ -16,8 +16,8 @@
 		"nuke": "pnpm exec rimraf -rf node_modules"
 	},
 	"dependencies": {
-		"@stump/client": "workspace:*",
-		"@stump/interface": "workspace:*",
+		"@stump/client": "*",
+		"@stump/interface": "*",
 		"@tanstack/react-query": "^4.28.0",
 		"@tauri-apps/api": "^1.2.0",
 		"react": "^18.2.0",

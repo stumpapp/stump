@@ -4,9 +4,8 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 
 import App from './App'
+import { initializeApi } from '@stump/api'
 
-// FIXME: As soon as I import from '@stump/client', I get invalid hook call errors... I assume it is
-// just monorepo headaches, but it is super irritating.
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
@@ -24,6 +23,8 @@ export function AppEntry() {
 	useEffect(() => {
 		if (loaded) {
 			SplashScreen.hideAsync()
+			// TODO: This needs to move to lower in the tree
+			initializeApi('http://localhost:10801', 'v1')
 		}
 	}, [loaded])
 

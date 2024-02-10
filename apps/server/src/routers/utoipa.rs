@@ -23,8 +23,8 @@ use crate::middleware::auth::Auth;
 use super::api::{
 	self,
 	v1::{
-		auth::LoginOrRegisterArgs, library::*, media::*, series::*, smart_list::*,
-		user::*, ClaimResponse, StumpVersion,
+		auth::LoginOrRegisterArgs, library::*, media::*, notifier::*, series::*,
+		smart_list::*, user::*, ClaimResponse, StumpVersion,
 	},
 };
 
@@ -87,6 +87,12 @@ use super::api::{
         api::v1::metadata::get_publishers_handler,
         api::v1::metadata::get_characters_handler,
         api::v1::metadata::get_teams_handler,
+        api::v1::notifier::get_notifiers,
+        api::v1::notifier::get_notifier_by_id,
+        api::v1::notifier::create_notifier,
+        api::v1::notifier::update_notifier,
+        api::v1::notifier::patch_notifier,
+        api::v1::notifier::delete_notifier,
         api::v1::reading_list::get_reading_list,
         api::v1::reading_list::create_reading_list,
         api::v1::reading_list::get_reading_list_by_id,
@@ -141,7 +147,7 @@ use super::api::{
             CreateOrUpdateSmartListView, SmartListItemGrouping, SmartFilter, FilterJoin, EntityVisibility,
             SmartListViewConfig, SmartListTableColumnSelection, SmartListTableSortingState,
             MediaSmartFilter, MediaMetadataSmartFilter, SeriesSmartFilter, SeriesMetadataSmartFilter,
-            LibrarySmartFilter
+            LibrarySmartFilter, Notifier, CreateOrUpdateNotifier, PatchNotifier
         )
     ),
     tags(

@@ -698,6 +698,15 @@ model JobScheduleConfig {
   @@map("job_schedule_configs")
 }
 
+model Notifier {
+  id Int @id @default(autoincrement())
+
+  type   String //DISCORD | TELEGRAM
+  config Bytes //too many variants to support concrete type
+
+  @@map("notifiers")
+}
+
 // TODO: notifier support
 // An external invitation sent to a provided email for the user to join the server
 model ServerInvitation {

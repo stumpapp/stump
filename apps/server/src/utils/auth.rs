@@ -112,7 +112,7 @@ pub fn enforce_session_permissions(
 	if can_proceed {
 		Ok(user)
 	} else {
-		Err(ApiError::Forbidden(
+		Err(APIError::Forbidden(
 			"You do not have permission to access this resource.".to_string(),
 		))
 	}

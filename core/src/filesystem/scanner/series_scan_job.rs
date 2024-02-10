@@ -48,6 +48,8 @@ impl SeriesScanJob {
 	}
 }
 
+// TODO: emit progress events. This job isn't exposed in the UI yet, so it's not a big deal for now
+
 #[derive(Clone, Serialize, Deserialize, Default, Debug, Type)]
 pub struct SeriesScanOutput {
 	/// The number of files to scan relative to the series root
@@ -204,6 +206,8 @@ impl JobExt for SeriesScanJob {
 		let mut output = Self::Output::default();
 		let mut logs = vec![];
 
+		let chunk_size = ctx.config.scanner_chunk_size;
+
 		match task {
 			SeriesScanTask::MarkMissingMedia(paths) => {
 				ctx.report_progress(JobProgress::msg("Handling missing media"));
@@ -235,7 +239,7 @@ impl JobExt for SeriesScanJob {
 					MediaBuildOperationCtx {
 						series_id: self.id.clone(),
 						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size: 300,
+						chunk_size,
 					},
 					ctx,
 					paths,
@@ -264,7 +268,7 @@ impl JobExt for SeriesScanJob {
 					MediaBuildOperationCtx {
 						series_id: self.id.clone(),
 						library_options: self.options.clone().unwrap_or_default(),
-						chunk_size: 300,
+						chunk_size,
 					},
 					ctx,
 					paths,

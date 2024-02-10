@@ -1,8 +1,8 @@
 // This job module would not be possible without other awesome projects in the Rust ecosystem! They
 // taught me a lot, and I don't think I could have done this without them. Taking bits and pieces from
 // each of them, I was able to create a job system that is both flexible and powerful:
-// - https://github.com/spacedriveapp/spacedrive --> The most impressive and inflential one IMO
-// - https://git.asonix.dog/asonix/background-jobs
+// - https://github.com/spacedriveapp/spacedrive --> The most impressive and inflential one, the concept of jobs having typed tasks executed one-by-one in a loop, in addition to the handling logic for pause/resume, came from here
+// - https://git.asonix.dog/asonix/background-jobs --> Trait design (v similar to above) and how they handle retries
 // - https://github.com/ZeroAssumptions/aide-de-camp
 // 		- Also their writeup on the fundamentals of their design: https://dev.to/zeroassumptions/build-a-job-queue-with-rust-using-aide-de-camp-part-1-4g5m
 // - https://github.com/lorepozo/workerpool
@@ -34,7 +34,6 @@ pub use worker::*;
 
 pub use controller::*;
 pub use manager::*;
-use tokio::spawn;
 use uuid::Uuid;
 
 use crate::{
@@ -62,6 +61,8 @@ pub enum JobStatus {
 }
 
 impl JobStatus {
+	/// A helper function to determine if a job status is resolved. A job is considered
+	/// resolved if it is in a final state (Completed, Cancelled, or Failed).
 	pub fn is_resolved(&self) -> bool {
 		matches!(
 			self,
@@ -69,10 +70,14 @@ impl JobStatus {
 		)
 	}
 
+	/// A helper function to determine if a job status is successful. A job is considered
+	/// successful if it is in a Completed state.
 	pub fn is_success(&self) -> bool {
 		matches!(self, JobStatus::Completed)
 	}
 
+	/// A helper function to determine if a job status is pending. A job is considered pending
+	/// if it is in a Running, Paused, or Queued state.
 	pub fn is_pending(&self) -> bool {
 		matches!(
 			self,
@@ -112,6 +117,16 @@ impl From<String> for JobStatus {
 	fn from(s: String) -> Self {
 		JobStatus::from(s.as_str())
 	}
+}
+
+/// The retry policy for a job. This is used to determine if a job should be requeued after
+/// a non-critical failure.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum JobRetryPolicy {
+	/// Always retry the job when it fails
+	Infinite,
+	/// Only retry the job a fixed number of times before giving up
+	Count(usize),
 }
 
 /// A trait to extend the output type for a job with a common interface. Job output starts
@@ -176,6 +191,7 @@ impl JobExecuteLog {
 		}
 	}
 
+	/// Construct a new [JobExecuteLog] with the given context string
 	pub fn with_ctx(self, ctx: String) -> Self {
 		Self {
 			context: Some(ctx),
@@ -192,7 +208,6 @@ impl JobExecuteLog {
 				log::level::set(self.level.to_string()),
 				log::timestamp::set(self.timestamp.into()),
 				log::job::connect(job::id::equals(job_id.clone())),
-				// log::job_id::set(Some(job_id)),
 			],
 		)
 	}
@@ -226,6 +241,7 @@ impl<O, T> Default for WorkingState<O, T> {
 #[async_trait::async_trait]
 pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 	const NAME: &'static str;
+	const MAX_RETRIES: JobRetryPolicy = JobRetryPolicy::Count(0);
 
 	/// The output type for the job. This is the data that will be persisted to the DB when the
 	/// job completes. All jobs should have a user-friendly representation of their output.
@@ -236,19 +252,22 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		+ Debug
 		+ Send
 		+ Sync;
-	/// The type representing a single task for the job. These are executed in a loop until
-	/// all tasks are completed. If a job should be small enough to not require tasks,
-	/// this type should be set to ().
+	/// The type representing a single task for the job. As the name implies, each task will
+	/// be executed in its own asynchronous task in a loop until all tasks are completed.
+	///
+	/// If a job should be small enough to not require tasks, this type should be set to (). In
+	/// this scenario, the job should execute all of its logic in the [JobExt::init] function.
 	type Task: Serialize + de::DeserializeOwned + Send + Sync;
 
 	/// The description of the job, if any
 	fn description(&self) -> Option<String>;
 
-	/// A function that will be called in Self::init to initialize the job state with
+	/// A function that will be called in [Executor::execute] to initialize the job state with
 	/// existing data from the DB (if any). Used to support pausing/resuming jobs.
 	///
 	/// Note that when defining a new job, you should not need to invoke this function directly. The
 	/// [Executor] will handle this for you during the beginning of the job's execution.
+	#[tracing::instrument(level = "debug", skip(self, ctx))]
 	async fn attempt_restore(
 		&self,
 		ctx: &WorkerCtx,
@@ -289,6 +308,7 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 	///
 	/// Note that when defining a new job, you should not need to invoke this function directly. The
 	/// [Executor] will handle this for you whenever the job is paused.
+	#[tracing::instrument(level = "debug", err, skip(self, ctx, tasks, logs))]
 	async fn persist_restore_point(
 		&self,
 		ctx: &WorkerCtx,
@@ -344,10 +364,19 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 		Ok(())
 	}
 
+	// TODO: notify_output(&self, output: &Self::Output) -> Result<(), JobError> { Ok(()) }
+
 	/// An optional function to determine if a task should be requeued. This is called after
 	/// a job fully completes in a non-successful state, but not after critical task errors.
-	fn should_requeue(&self, _: usize) -> bool {
-		false
+	/// The default implementation is to requeue per the job's retry policy. This can be
+	/// overridden to provide custom requeue logic.
+	///
+	/// Note that the exception to the above is that it **won't** be called after a manual cancellation
+	fn should_requeue(&self, attempts: usize) -> bool {
+		match Self::MAX_RETRIES {
+			JobRetryPolicy::Infinite => true,
+			JobRetryPolicy::Count(count) => attempts < count,
+		}
 	}
 
 	/// A function to execute a specific task. This will be called repeatedly until all
@@ -404,7 +433,7 @@ pub struct ExecutorOutput {
 
 /// A trait that defines the behavior of a job executor. Executors are responsible for the main
 /// run loop of a job, including task execution and state management. Executors are managed
-/// by the [JobManagerAgent].
+/// by the [JobManager].
 #[async_trait::async_trait]
 pub trait Executor: Send + Sync {
 	/// The ID of the internal job
@@ -415,6 +444,8 @@ pub trait Executor: Send + Sync {
 	fn description(&self) -> Option<String>;
 	/// A function to determine if a job should be requeued. This is called after
 	/// a job fully completes in a non-successful state, but not after critical task errors.
+	///
+	/// Note that the exception to the above is that it **won't** be called after a manual cancellation
 	fn should_requeue(&self) -> bool;
 	/// A function to persist the data of the job to the DB. This is called immediately before the job
 	/// would otherwise complete (at the end of [Executor::execute]).
@@ -464,7 +495,7 @@ pub trait Executor: Send + Sync {
 					job::status::set(JobStatus::Completed.to_string()),
 					job::ms_elapsed::set(
 						elapsed.as_millis().try_into().unwrap_or_else(|e| {
-							tracing::error!(error = ?e, "Wow! Overflowed i64 during attempt to convert job duration to milliseconds");
+							tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
 							i64::MAX
 						}),
 					),
@@ -489,6 +520,10 @@ pub trait Executor: Send + Sync {
 		let job_id = self.id();
 
 		if status.is_success() || status.is_pending() {
+			tracing::error!(
+				?status,
+				"Attempted to persist failure with non-failure status!? This is a bug!"
+			);
 			return Err(JobError::StateSaveFailed(
 				"Attempted to persist failure with non-failure status".to_string(),
 			));
@@ -502,7 +537,7 @@ pub trait Executor: Send + Sync {
 					job::status::set(status.to_string()),
 					job::ms_elapsed::set(
 						elapsed.as_millis().try_into().unwrap_or_else(|e| {
-							tracing::error!(error = ?e, "Wow! Overflowed i64 during attempt to convert job duration to milliseconds");
+							tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
 							i64::MAX
 						}),
 					),
@@ -653,7 +688,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 			let task_handle = {
 				let ctx = Arc::clone(&ctx);
 				let job = Arc::clone(&job);
-				spawn(async move { job.execute_task(&ctx, next_task).await })
+				tokio::spawn(async move { job.execute_task(&ctx, next_task).await })
 			};
 
 			let JobTaskHandlerOutput {
@@ -711,7 +746,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 			}
 		}
 
-		tracing::debug!(
+		tracing::trace!(
 			?completed_tasks,
 			final_task_count = tasks.len(), // Should be 0!
 			"Task loop completed? Should be 0 tasks remaining 0.o"

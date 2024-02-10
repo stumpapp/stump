@@ -12,6 +12,7 @@ pub mod env_keys {
 	pub const PROFILE_KEY: &str = "STUMP_PROFILE";
 	pub const PORT_KEY: &str = "STUMP_PORT";
 	pub const VERBOSITY_KEY: &str = "STUMP_VERBOSITY";
+	pub const PRETTY_LOGS_KEY: &str = "STUMP_PRETTY_LOGS";
 	pub const DB_PATH_KEY: &str = "STUMP_DB_PATH";
 	pub const CLIENT_KEY: &str = "STUMP_CLIENT_DIR";
 	pub const ORIGINS_KEY: &str = "STUMP_ALLOWED_ORIGINS";
@@ -20,7 +21,7 @@ pub mod env_keys {
 	pub const HASH_COST_KEY: &str = "HASH_COST";
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
-	pub const WORKER_COUNT_KEY: &str = "STUMP_WORKER_COUNT";
+	pub const SCANNER_CHUNK_SIZE_KEY: &str = "STUMP_SCANNER_CHUNK_SIZE";
 }
 use env_keys::*;
 
@@ -28,6 +29,7 @@ pub mod defaults {
 	pub const DEFAULT_PASSWORD_HASH_COST: u32 = 12;
 	pub const DEFAULT_SESSION_TTL: i64 = 3600 * 24 * 3; // 3 days
 	pub const DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL: u64 = 60 * 60 * 24; // 24 hours
+	pub const DEFAULT_SCANNER_CHUNK_SIZE: usize = 100;
 }
 use defaults::*;
 
@@ -65,6 +67,8 @@ pub struct StumpConfig {
 	pub port: u16,
 	/// The verbosity with which to log errors (default: 0).
 	pub verbosity: u64,
+	/// Whether or not to pretty print logs.
+	pub pretty_logs: bool,
 	/// An optional custom path for the database.
 	pub db_path: Option<String>,
 	/// The client directory.
@@ -83,9 +87,10 @@ pub struct StumpConfig {
 	pub session_ttl: i64,
 	/// The interval at which automatic deleted session cleanup is performed.
 	pub expired_session_cleanup_interval: u64,
-	/// The number of worker threads for handling jobs (0 automatically
-	/// sets worker count = num CPUs).
-	pub worker_count: usize,
+	/// The size of chunks to use throughout scanning the filesystem. This is used to
+	/// limit the number of files that are processed at once. Realistically, you are bound
+	/// by I/O constraints, but perhaps you can squeeze out some performance by tweaking this.
+	pub scanner_chunk_size: usize,
 }
 
 impl StumpConfig {
@@ -96,6 +101,7 @@ impl StumpConfig {
 			profile: String::from("debug"),
 			port: 10801,
 			verbosity: 0,
+			pretty_logs: true,
 			db_path: None,
 			client_dir: String::from("./dist"),
 			config_dir,
@@ -105,7 +111,7 @@ impl StumpConfig {
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-			worker_count: 0,
+			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 		}
 	}
 
@@ -117,6 +123,7 @@ impl StumpConfig {
 			profile: String::from("debug"),
 			port: 10801,
 			verbosity: 0,
+			pretty_logs: true,
 			db_path: None,
 			client_dir: env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist",
 			config_dir: super::get_default_config_dir(),
@@ -126,7 +133,7 @@ impl StumpConfig {
 			password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 			session_ttl: DEFAULT_SESSION_TTL,
 			expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-			worker_count: 0,
+			scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 		}
 	}
 
@@ -186,6 +193,18 @@ impl StumpConfig {
 			env_configs.verbosity = Some(verbosity_u64);
 		}
 
+		if let Ok(pretty_logs) = env::var(PRETTY_LOGS_KEY) {
+			let pretty_logs_bool = pretty_logs.parse::<bool>().map_err(|e| {
+				tracing::error!(
+					error = ?e,
+					pretty_logs,
+					"Failed to parse provided STUMP_PRETTY_LOGS"
+				);
+				CoreError::InitializationError(e.to_string())
+			})?;
+			self.pretty_logs = pretty_logs_bool;
+		}
+
 		if let Ok(db_path) = env::var(DB_PATH_KEY) {
 			env_configs.db_path = Some(db_path);
 		}
@@ -242,10 +261,12 @@ impl StumpConfig {
 			}
 		}
 
-		if let Ok(worker_count) = env::var(WORKER_COUNT_KEY) {
-			match worker_count.parse() {
-				Ok(val) => env_configs.worker_count = Some(val),
-				Err(e) => tracing::error!(?e, "Failed to parse STUMP_WORKER_COUNT"),
+		if let Ok(scanner_chunk_size) = env::var(SCANNER_CHUNK_SIZE_KEY) {
+			match scanner_chunk_size.parse() {
+				Ok(val) => self.scanner_chunk_size = val,
+				Err(e) => {
+					tracing::error!(?e, "Failed to parse provided SCANNER_CHUNK_SIZE")
+				},
 			}
 		}
 
@@ -348,6 +369,7 @@ pub struct PartialStumpConfig {
 	pub profile: Option<String>,
 	pub port: Option<u16>,
 	pub verbosity: Option<u64>,
+	pub pretty_logs: Option<bool>,
 	pub db_path: Option<String>,
 	pub client_dir: Option<String>,
 	pub config_dir: Option<String>,
@@ -357,7 +379,7 @@ pub struct PartialStumpConfig {
 	pub password_hash_cost: Option<u32>,
 	pub session_ttl: Option<i64>,
 	pub expired_session_cleanup_interval: Option<u64>,
-	pub worker_count: Option<usize>,
+	pub scanner_chunk_size: Option<usize>,
 }
 
 impl PartialStumpConfig {
@@ -366,6 +388,7 @@ impl PartialStumpConfig {
 			profile: None,
 			port: None,
 			verbosity: None,
+			pretty_logs: None,
 			db_path: None,
 			client_dir: None,
 			config_dir: None,
@@ -375,7 +398,7 @@ impl PartialStumpConfig {
 			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
-			worker_count: None,
+			scanner_chunk_size: None,
 		}
 	}
 
@@ -385,6 +408,9 @@ impl PartialStumpConfig {
 		}
 		if let Some(verbosity) = self.verbosity {
 			config.verbosity = verbosity;
+		}
+		if let Some(pretty_logs) = self.pretty_logs {
+			config.pretty_logs = pretty_logs;
 		}
 		if let Some(db_path) = self.db_path {
 			config.db_path = Some(db_path);
@@ -406,9 +432,6 @@ impl PartialStumpConfig {
 		}
 		if let Some(cleanup_interval) = self.expired_session_cleanup_interval {
 			config.expired_session_cleanup_interval = cleanup_interval;
-		}
-		if let Some(worker_count) = self.worker_count {
-			config.worker_count = worker_count;
 		}
 
 		// Profile - validate profile selection
@@ -432,6 +455,10 @@ impl PartialStumpConfig {
 		if let Some(pdfium_path) = self.pdfium_path {
 			config.pdfium_path = Some(pdfium_path);
 		}
+
+		if let Some(scanner_chunk_size) = self.scanner_chunk_size {
+			config.scanner_chunk_size = scanner_chunk_size;
+		}
 	}
 }
 
@@ -452,6 +479,7 @@ mod tests {
 			profile: Some("release".to_string()),
 			port: Some(1337),
 			verbosity: Some(3),
+			pretty_logs: Some(true),
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			config_dir: Some("also_not_a_real_dir".to_string()),
@@ -465,7 +493,7 @@ mod tests {
 			password_hash_cost: Some(24),
 			session_ttl: Some(3600 * 24),
 			expired_session_cleanup_interval: Some(60 * 60 * 8),
-			worker_count: Some(16),
+			scanner_chunk_size: Some(300),
 		};
 
 		// Apply the partial configuration
@@ -478,6 +506,7 @@ mod tests {
 				profile: "release".to_string(),
 				port: 1337,
 				verbosity: 3,
+				pretty_logs: true,
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
@@ -491,7 +520,7 @@ mod tests {
 				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
-				worker_count: 16,
+				scanner_chunk_size: 300,
 			}
 		);
 	}
@@ -509,7 +538,6 @@ mod tests {
 		env::set_var(HASH_COST_KEY, "24");
 		env::set_var(SESSION_TTL_KEY, (3600 * 24).to_string());
 		env::set_var(SESSION_EXPIRY_INTERVAL_KEY, (60 * 60 * 8).to_string());
-		env::set_var(WORKER_COUNT_KEY, "16");
 
 		// Create a new StumpConfig and load values from the environment.
 		let config = StumpConfig::new("not_a_dir".to_string())
@@ -523,6 +551,7 @@ mod tests {
 				profile: "release".to_string(),
 				port: 1337,
 				verbosity: 3,
+				pretty_logs: true,
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
@@ -532,7 +561,7 @@ mod tests {
 				password_hash_cost: 24,
 				session_ttl: 3600 * 24,
 				expired_session_cleanup_interval: 60 * 60 * 8,
-				worker_count: 16,
+				scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 			}
 		);
 	}
@@ -556,6 +585,7 @@ mod tests {
 				profile: "release".to_string(),
 				port: 1337,
 				verbosity: 3,
+				pretty_logs: true,
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
@@ -565,7 +595,7 @@ mod tests {
 				password_hash_cost: DEFAULT_PASSWORD_HASH_COST,
 				session_ttl: DEFAULT_SESSION_TTL,
 				expired_session_cleanup_interval: DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL,
-				worker_count: 0,
+				scanner_chunk_size: DEFAULT_SCANNER_CHUNK_SIZE,
 			}
 		);
 
@@ -588,6 +618,7 @@ mod tests {
 			profile: Some("release".to_string()),
 			port: Some(1337),
 			verbosity: Some(3),
+			pretty_logs: Some(true),
 			db_path: Some("not_a_real_path".to_string()),
 			client_dir: Some("not_a_real_dir".to_string()),
 			config_dir: None,
@@ -597,7 +628,7 @@ mod tests {
 			password_hash_cost: None,
 			session_ttl: None,
 			expired_session_cleanup_interval: None,
-			worker_count: Some(16),
+			scanner_chunk_size: None,
 		};
 		partial_config.apply_to_config(&mut config);
 
@@ -617,6 +648,7 @@ mod tests {
 				profile: Some("release".to_string()),
 				port: Some(1337),
 				verbosity: Some(3),
+				pretty_logs: Some(true),
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: Some("not_a_real_dir".to_string()),
 				config_dir: Some(config_dir),
@@ -628,7 +660,7 @@ mod tests {
 				expired_session_cleanup_interval: Some(
 					DEFAULT_SESSION_EXPIRY_CLEANUP_INTERVAL
 				),
-				worker_count: Some(16),
+				scanner_chunk_size: Some(DEFAULT_SCANNER_CHUNK_SIZE),
 			}
 		);
 

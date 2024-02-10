@@ -17,13 +17,13 @@ type InvalidateFnArgs = {
 
 export async function invalidateQueries({ exact, ...args }: InvalidateFnArgs) {
 	if ('keys' in args) {
-		const predicate = ({ queryKey }: { queryKey: QueryKey }, compare: string) =>
-			queryKey.includes(compare)
+		const predicate = (queryKey: QueryKey, compare: string) =>
+			queryKey.some((piece) => typeof piece === 'string' && piece.includes(compare))
 
 		return Promise.all(
 			args.keys.map((key) =>
 				queryClient.invalidateQueries({
-					predicate: (query) => predicate(query, key),
+					predicate: (query) => predicate(query.queryKey, key),
 				}),
 			),
 		)

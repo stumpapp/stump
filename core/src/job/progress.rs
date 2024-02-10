@@ -4,6 +4,7 @@ use utoipa::ToSchema;
 
 use super::{JobStatus, WorkerSend, WorkerSendExt};
 
+/// An update event that is emitted by a job
 #[derive(Debug, Clone, Deserialize, Serialize, Type, ToSchema)]
 pub struct JobUpdate {
 	pub id: String,
@@ -17,19 +18,25 @@ pub struct JobUpdate {
 #[derive(Debug, Clone, Default, Deserialize, Serialize, Type, ToSchema)]
 pub struct JobProgress {
 	/// The status of the job
+	#[specta(optional)]
 	pub status: Option<JobStatus>,
 	/// The message to display
+	#[specta(optional)]
 	pub message: Option<String>,
 
 	/// The current task being worked on
+	#[specta(optional)]
 	pub completed_tasks: Option<i32>,
 	/// The number of tasks for the job. This number can change as
 	/// subtasks get added/converted to tasks
+	#[specta(optional)]
 	pub remaining_tasks: Option<i32>,
 
 	/// The current subtask being worked on
+	#[specta(optional)]
 	pub completed_subtasks: Option<i32>,
 	/// The number of subtasks that exist in the current task
+	#[specta(optional)]
 	pub remaining_subtasks: Option<i32>,
 }
 

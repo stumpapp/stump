@@ -150,14 +150,14 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 	const { createLibraryAsync } = useCreateLibraryMutation({
 		onSuccess: () => {
 			form.reset()
-			setTimeout(() => navigate(paths.home()), 750)
+			navigate(paths.home())
 		},
 	})
 
 	const { editLibraryAsync } = useEditLibraryMutation({
 		onSuccess: () => {
 			form.reset()
-			setTimeout(() => navigate(paths.home()), 750)
+			navigate(paths.home())
 		},
 	})
 

@@ -78,6 +78,16 @@ pub struct WorkerCtx {
 }
 
 impl WorkerCtx {
+	/// Emit a [CoreEvent] to any clients listening to the server that a job has started
+	pub fn report_started(&self) {
+		let send_result = self
+			.core_event_tx
+			.send(CoreEvent::JobStarted(self.job_id.clone()));
+		if let Err(send_error) = send_result {
+			tracing::error!(?send_error, "Failed to send started event");
+		}
+	}
+
 	/// Emit a [CoreEvent] to any clients listening to the server
 	pub fn report_progress(&self, payload: JobProgress) {
 		let send_result = self.core_event_tx.send(CoreEvent::JobUpdate(JobUpdate {
@@ -351,8 +361,6 @@ struct WorkerManager {
 impl WorkerManager {
 	/// The main worker loop. This is where the job is run and the worker listens for
 	/// commands to cancel the job.
-	///
-	/// Note more commands can be added in the future, e.g. pause/resume.
 	async fn main_loop(mut self, mut executor: Box<dyn Executor>) {
 		let job_id = executor.id().to_string();
 		let loop_ctx = self.worker_ctx.clone();
@@ -427,6 +435,7 @@ impl WorkerManager {
 							}
 						},
 						Err(join_error) => {
+							// TODO: should log the error to DB? Or force people to find context via log file?
 							tracing::error!(?join_error, ?elapsed, "Error while joining job worker thread");
 							finalizer_ctx.report_progress(JobProgress::status_msg(
 								JobStatus::Failed,
@@ -466,6 +475,7 @@ impl WorkerManager {
 	}
 }
 
+/// Update the job status to the provided status in the database
 pub(crate) async fn handle_failure_status(
 	job_id: String,
 	status: JobStatus,
@@ -480,7 +490,7 @@ pub(crate) async fn handle_failure_status(
 				job::status::set(status.to_string()),
 				job::ms_elapsed::set(
 					elapsed.as_millis().try_into().unwrap_or_else(|e| {
-						tracing::error!(error = ?e, "Wow! Overflowed i64 during attempt to convert job duration to milliseconds");
+						tracing::error!(error = ?e, "Wow! You defied logic and overflowed an i64 during the attempt to convert job duration to milliseconds. It must have been a long 292_471_208 years!");
 						i64::MAX
 					}),
 				),

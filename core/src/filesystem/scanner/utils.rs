@@ -202,6 +202,79 @@ pub(crate) async fn update_media(db: &PrismaClient, media: Media) -> CoreResult<
 }
 
 #[derive(Default)]
+pub(crate) struct MissingSeriesOutput {
+	pub updated_series: u64,
+	pub updated_media: u64,
+	pub logs: Vec<JobExecuteLog>,
+}
+
+pub(crate) async fn handle_missing_series(
+	client: &PrismaClient,
+	path: &str,
+) -> Result<MissingSeriesOutput, JobError> {
+	let mut output = MissingSeriesOutput::default();
+
+	let affected_rows = client
+		.series()
+		.update_many(
+			vec![series::path::equals(path.to_string())],
+			vec![series::status::set(FileStatus::Missing.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to update missing series");
+				output.logs.push(JobExecuteLog::error(format!(
+					"Failed to update missing series: {:?}",
+					error.to_string()
+				)));
+
+				0
+			},
+			|count| {
+				output.updated_series += count as u64;
+				count
+			},
+		);
+
+	if affected_rows > 1 {
+		tracing::warn!(
+			affected_rows,
+			"Updated more than one series with path: {}",
+			path
+		);
+	}
+
+	let _affected_media = client
+		.media()
+		.update_many(
+			vec![media::series::is(vec![series::path::equals(
+				path.to_string(),
+			)])],
+			vec![media::status::set(FileStatus::Missing.to_string())],
+		)
+		.exec()
+		.await
+		.map_or_else(
+			|error| {
+				tracing::error!(error = ?error, "Failed to update missing media");
+				output.logs.push(JobExecuteLog::error(format!(
+					"Failed to update missing media: {:?}",
+					error.to_string()
+				)));
+				0
+			},
+			|count| {
+				output.updated_media += count as u64;
+				count
+			},
+		);
+
+	Ok(output)
+}
+
+#[derive(Default)]
 pub(crate) struct MediaOperationOutput {
 	pub created_media: u64,
 	pub updated_media: u64,

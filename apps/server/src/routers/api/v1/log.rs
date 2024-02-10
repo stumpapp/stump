@@ -12,7 +12,7 @@ use serde_qs::axum::QsQuery;
 use std::fs::File;
 use stump_core::{
 	db::{
-		entity::{Log, LogMetadata},
+		entity::{Log, LogMetadata, UserPermission},
 		query::{
 			ordering::QueryOrder,
 			pagination::{Pageable, Pagination, PaginationQuery},
@@ -28,7 +28,7 @@ use crate::{
 	filter::{chain_optional_iter, LogFilter},
 	middleware::auth::Auth,
 	routers::sse::stream_shutdown_guard,
-	utils::get_session_server_owner_user,
+	utils::enforce_session_permissions,
 };
 
 pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
@@ -41,7 +41,6 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/info", get(get_logfile_info))
 				.route("/tail", get(tail_log_file)),
 		)
-		// FIXME: admin middleware
 		.layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }
 
@@ -73,7 +72,10 @@ async fn get_logs(
 	filters: QsQuery<LogFilter>,
 	order: QsQuery<QueryOrder>,
 	pagination: QsQuery<PaginationQuery>,
+	session: Session,
 ) -> APIResult<Json<Pageable<Vec<Log>>>> {
+	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+
 	let pagination = pagination.0.get();
 	let order = order.0;
 	tracing::trace!(?pagination, ?order, "get_logs");
@@ -141,7 +143,10 @@ async fn get_logs(
 
 async fn tail_log_file(
 	State(ctx): State<AppState>,
-) -> Sse<impl Stream<Item = Result<Event, APIError>>> {
+	session: Session,
+) -> APIResult<Sse<impl Stream<Item = Result<Event, APIError>>>> {
+	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+
 	let stream = async_stream::stream! {
 		let log_file_path = ctx.config.get_log_file();
 		let mut lines = MuxedLines::new()?;
@@ -162,7 +167,7 @@ async fn tail_log_file(
 
 	let guarded_stream = stream_shutdown_guard(stream);
 
-	Sse::new(guarded_stream)
+	Ok(Sse::new(guarded_stream))
 }
 
 #[utoipa::path(
@@ -182,7 +187,8 @@ async fn get_logfile_info(
 	session: Session,
 	State(ctx): State<AppState>,
 ) -> APIResult<Json<LogMetadata>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+
 	let log_file_path = ctx.config.get_log_file();
 
 	let file = File::open(log_file_path.as_path())?;
@@ -215,7 +221,8 @@ async fn get_logfile_info(
 // this route *WILL* delete all of the file contents.
 // #[delete("/logs")]
 async fn delete_log_file(session: Session, State(ctx): State<AppState>) -> APIResult<()> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ManageServer])?;
+
 	let log_file_path = ctx.config.get_log_file();
 
 	File::create(log_file_path.as_path())?;

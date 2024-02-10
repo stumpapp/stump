@@ -31,7 +31,6 @@ export function getPaginatedMedia(page: number): Promise<PageableAPIResult<Media
 }
 
 export function getMediaById(id: string, params?: Record<string, unknown>): Promise<GetMediaById> {
-	// return API.get(`/media/${id}?load_series=true`)
 	if (params) {
 		return API.get(`/media/${id}?${toUrlParams(params)}`)
 	} else {

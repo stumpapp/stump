@@ -27,8 +27,9 @@ use crate::{
 use super::{
 	series_scan_job::SeriesScanTask,
 	utils::{
-		generate_rule_set, handle_create_media, handle_missing_media, handle_visit_media,
-		MediaBuildOperationCtx, MediaOperationOutput,
+		generate_rule_set, handle_create_media, handle_missing_media,
+		handle_missing_series, handle_visit_media, MediaBuildOperationCtx,
+		MediaOperationOutput, MissingSeriesOutput,
 	},
 	walk_library, walk_series, WalkedLibrary, WalkedSeries, WalkerCtx,
 };
@@ -249,6 +250,8 @@ impl JobExt for LibraryScanJob {
 		let mut logs = vec![];
 		let mut subtasks = vec![];
 
+		let chunk_size = ctx.config.scanner_chunk_size;
+
 		match task {
 			LibraryScanTask::Init(input) => {
 				tracing::info!("Executing the init task for library scan");
@@ -439,13 +442,23 @@ impl JobExt for LibraryScanJob {
 						JobExecuteLog::warn("Series could not be found on disk")
 							.with_ctx(path_buf.to_string_lossy().to_string()),
 					);
-					return handle_missing_series(
+					let MissingSeriesOutput {
+						updated_series,
+						updated_media,
+						logs: new_logs,
+					} = handle_missing_series(
 						&ctx.db,
 						path_buf.to_str().unwrap_or_default(),
+					)
+					.await?;
+					output.updated_series += updated_series;
+					output.updated_media += updated_media;
+					logs.extend(new_logs);
+					return Ok(JobTaskOutput {
 						output,
 						logs,
-					)
-					.await;
+						subtasks,
+					});
 				}
 
 				let series_path_str = path_buf.to_str().unwrap_or_default().to_string();
@@ -513,7 +526,7 @@ impl JobExt for LibraryScanJob {
 						MediaBuildOperationCtx {
 							series_id: series_id.clone(),
 							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size: 300,
+							chunk_size,
 						},
 						ctx,
 						paths,
@@ -543,7 +556,7 @@ impl JobExt for LibraryScanJob {
 						MediaBuildOperationCtx {
 							series_id: series_id.clone(),
 							library_options: self.options.clone().unwrap_or_default(),
-							chunk_size: 300,
+							chunk_size,
 						},
 						ctx,
 						paths,
@@ -623,74 +636,4 @@ pub async fn handle_missing_library(
 	);
 
 	Ok(())
-}
-
-async fn handle_missing_series(
-	client: &PrismaClient,
-	path: &str,
-	mut output: LibraryScanOutput,
-	mut logs: Vec<JobExecuteLog>,
-) -> Result<JobTaskOutput<LibraryScanJob>, JobError> {
-	let affected_rows = client
-		.series()
-		.update_many(
-			vec![series::path::equals(path.to_string())],
-			vec![series::status::set(FileStatus::Missing.to_string())],
-		)
-		.exec()
-		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to update missing series");
-				logs.push(JobExecuteLog::error(format!(
-					"Failed to update missing series: {:?}",
-					error.to_string()
-				)));
-
-				0
-			},
-			|count| {
-				output.updated_series += count as u64;
-				count
-			},
-		);
-
-	if affected_rows > 1 {
-		tracing::warn!(
-			affected_rows,
-			"Updated more than one series with path: {}",
-			path
-		);
-	}
-
-	let _affected_media = client
-		.media()
-		.update_many(
-			vec![media::series::is(vec![series::path::equals(
-				path.to_string(),
-			)])],
-			vec![media::status::set(FileStatus::Missing.to_string())],
-		)
-		.exec()
-		.await
-		.map_or_else(
-			|error| {
-				tracing::error!(error = ?error, "Failed to update missing media");
-				logs.push(JobExecuteLog::error(format!(
-					"Failed to update missing media: {:?}",
-					error.to_string()
-				)));
-				0
-			},
-			|count| {
-				output.updated_media += count as u64;
-				count
-			},
-		);
-
-	Ok(JobTaskOutput {
-		output,
-		logs,
-		subtasks: vec![],
-	})
 }

@@ -1,4 +1,4 @@
-import { jobQueryKeys, libraryQueryKeys, mediaQueryKeys, seriesQueryKeys } from '@stump/api'
+import { jobQueryKeys, libraryQueryKeys } from '@stump/api'
 import type { CoreEvent } from '@stump/types'
 
 import { invalidateQueries } from '../invalidate'
@@ -6,7 +6,8 @@ import { useJobStore } from '../stores/job'
 import { useStumpWs } from './useStumpWs'
 
 export function useCoreEventHandler() {
-	const { upsertJob, removeJob } = useJobStore((state) => ({
+	const { addJob, upsertJob, removeJob } = useJobStore((state) => ({
+		addJob: state.addJob,
 		removeJob: state.removeJob,
 		upsertJob: state.upsertJob,
 	}))
@@ -23,19 +24,15 @@ export function useCoreEventHandler() {
 		const { __typename } = event
 
 		switch (__typename) {
+			case 'JobStarted':
+				await handleInvalidate([jobQueryKeys.getJobs])
+				addJob(event)
+				break
 			case 'JobUpdate':
 				if (!!event.status && event.status !== 'RUNNING') {
 					await new Promise((resolve) => setTimeout(resolve, 1000))
 					removeJob(event.id)
-					await handleInvalidate([
-						libraryQueryKeys.getLibraryById,
-						libraryQueryKeys.getLibrariesStats,
-						jobQueryKeys.getJobs,
-						seriesQueryKeys.getSeriesById,
-						seriesQueryKeys.getRecentlyAddedSeries,
-						mediaQueryKeys.getRecentlyAddedMedia,
-						mediaQueryKeys.getInProgressMedia,
-					])
+					await handleInvalidate([jobQueryKeys.getJobs, 'library', 'series', 'media'])
 				} else {
 					upsertJob(event)
 				}

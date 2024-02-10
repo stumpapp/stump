@@ -6,7 +6,7 @@
 /**
  * An event that is emitted by the core and consumed by a client
  */
-export type CoreEvent = ({ __typename: "JobUpdate" } & JobUpdate) | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: BigInt; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: BigInt; series_id: string }
+export type CoreEvent = ({ __typename: "JobStarted" } & string) | ({ __typename: "JobUpdate" } & JobUpdate) | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: BigInt; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: BigInt; series_id: string }
 
 export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
 
@@ -29,27 +29,30 @@ export type PersistedJob = { id: string; name: string; description: string | nul
 
 export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown
 
-export type JobUpdate = ({ status: JobStatus | null; message: string | null; completed_tasks: number | null; remaining_tasks: number | null; completed_subtasks: number | null; remaining_subtasks: number | null }) & { id: string }
+/**
+ * An update event that is emitted by a job
+ */
+export type JobUpdate = ({ status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }) & { id: string }
 
 /**
  * A struct that represents a progress event that is emitted by a job. This behaves like a patch,
  * where the client will ignore any fields that are not present. This is done so all internal ops
  * can be done without needing to know the full state of the job.
  */
-export type JobProgress = { status: JobStatus | null; message: string | null; completed_tasks: number | null; remaining_tasks: number | null; completed_subtasks: number | null; remaining_subtasks: number | null }
+export type JobProgress = { status?: JobStatus | null; message?: string | null; completed_tasks?: number | null; remaining_tasks?: number | null; completed_subtasks?: number | null; remaining_subtasks?: number | null }
 
 /**
  * The data that is collected and updated during the execution of a library scan job
  */
 export type LibraryScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
 
-export type SeriesScanOutput = { total_files: BigInt; created_media: BigInt; updated_media: BigInt }
+export type SeriesScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt }
 
 export type ThumbnailGenerationJobVariant = ({ type: "SingleLibrary" } & string) | ({ type: "SingleSeries" } & string) | ({ type: "MediaGroup" } & string[])
 
 export type ThumbnailGenerationJobParams = { variant: ThumbnailGenerationJobVariant; force_regenerate: boolean }
 
-export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt }
+export type ThumbnailGenerationOutput = { visited_files: BigInt; generated_thumbnails: BigInt; removed_thumbnails: BigInt }
 
 export type User = { id: string; username: string; is_server_owner: boolean; avatar_url: string | null; created_at: string; last_login: string | null; is_locked: boolean; permissions: UserPermission[]; max_sessions_allowed?: number | null; login_sessions_count?: number | null; user_preferences?: UserPreferences | null; login_activity?: LoginActivity[] | null; age_restriction?: AgeRestriction | null; read_progresses?: ReadProgress[] | null }
 

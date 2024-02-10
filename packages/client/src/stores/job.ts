@@ -6,6 +6,7 @@ import { createWithEqualityFn } from 'zustand/traditional'
 type JobID = string
 type JobStore = {
 	jobs: Record<JobID, JobUpdate>
+	addJob: (id: JobID) => void
 	upsertJob: (job: JobUpdate) => void
 	removeJob: (jobId: JobID) => void
 }
@@ -15,6 +16,12 @@ type JobStore = {
  */
 export const useJobStore = createWithEqualityFn<JobStore>(
 	(set) => ({
+		addJob: (id) =>
+			set((state) =>
+				produce(state, (draft) => {
+					draft.jobs[id] = { id }
+				}),
+			),
 		jobs: {} as Record<JobID, JobUpdate>,
 		removeJob: (id) =>
 			set((state) =>

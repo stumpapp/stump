@@ -7,6 +7,7 @@ use crate::job::{JobUpdate, WorkerSend, WorkerSendExt};
 #[derive(Clone, Serialize, Deserialize, Debug, Type)]
 #[serde(tag = "__typename")]
 pub enum CoreEvent {
+	JobStarted(String),
 	JobUpdate(JobUpdate),
 	DiscoveredMissingLibrary(String),
 	CreatedMedia { id: String, series_id: String },

@@ -4,6 +4,12 @@
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
 	"license": "MIT",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"core",
+		"packages/*"
+	],
 	"scripts": {
 		"prepare": "husky install",
 		"setup": "pnpm i && pnpm web build && cargo codegen",
@@ -58,11 +64,10 @@
 			"cargo fmt --check --manifest-path=apps/desktop/src-tauri/Cargo.toml --"
 		]
 	},
-	"packageManager": "pnpm@8.6.1",
 	"engines": {
 		"node": "20.0.0"
 	},
-	"pnpm": {
+	"yarn": {
 		"peerDependencyRules": {
 			"ignoreMissing": [
 				"@babel/core"

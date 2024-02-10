@@ -25,7 +25,7 @@
 
         packages = with pkgs; [
           # node
-          nodePackages.pnpm
+          nodePackages.yarn
           nodejs
 
           # rust

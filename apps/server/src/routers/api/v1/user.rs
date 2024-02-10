@@ -30,7 +30,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::UserQueryRelation,
 	middleware::auth::Auth,
 	utils::{
@@ -123,7 +123,7 @@ async fn get_users(
 	relation_query: Query<UserQueryRelation>,
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
-) -> ApiResult<Json<Pageable<Vec<User>>>> {
+) -> APIResult<Json<Pageable<Vec<User>>>> {
 	get_session_server_owner_user(&session)?;
 
 	let pagination = pagination_query.0.get();
@@ -196,10 +196,10 @@ async fn get_users(
 async fn get_user_login_activity(
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Vec<LoginActivity>>> {
+) -> APIResult<Json<Vec<LoginActivity>>> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let user_activity = client
 		.user_login_activity()
@@ -228,10 +228,10 @@ async fn get_user_login_activity(
 async fn delete_user_login_activity(
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<()>> {
+) -> APIResult<Json<()>> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	client
 		.user_login_activity()
@@ -260,12 +260,12 @@ async fn update_user(
 	for_user_id: String,
 	input: UpdateUser,
 	config: &StumpConfig,
-) -> ApiResult<User> {
+) -> APIResult<User> {
 	// NOTE: there are other mechanisms in place to effectively disable logging in,
 	// so I am making this a bad request. In the future, perhaps this can change.
 	match input.max_sessions_allowed {
 		Some(max_sessions_allowed) if max_sessions_allowed <= 0 => {
-			return Err(ApiError::BadRequest(
+			return Err(APIError::BadRequest(
 				"max_sessions_allowed must be greater than 0 when set".to_string(),
 			))
 		},
@@ -362,7 +362,7 @@ async fn update_preferences(
 	client: &PrismaClient,
 	preferences_id: String,
 	input: UpdateUserPreferences,
-) -> ApiResult<UserPreferences> {
+) -> APIResult<UserPreferences> {
 	let updated_preferences = client
 		.user_preferences()
 		.update(
@@ -426,9 +426,9 @@ async fn create_user(
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateUser>,
-) -> ApiResult<Json<User>> {
+) -> APIResult<Json<User>> {
 	get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let hashed_password = bcrypt::hash(input.password, ctx.config.password_hash_cost)?;
 
@@ -500,7 +500,7 @@ async fn create_user(
 				.await
 		})
 		.await?
-		.ok_or(ApiError::InternalServerError(
+		.ok_or(APIError::InternalServerError(
 			"Failed to create user".to_string(),
 		))?;
 	tracing::trace!(final_user = ?created_user, "Final user result");
@@ -525,8 +525,8 @@ async fn update_current_user(
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUser>,
-) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<User>> {
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	let updated_user =
@@ -536,7 +536,7 @@ async fn update_current_user(
 	session
 		.insert(SESSION_USER_KEY, updated_user.clone())
 		.map_err(|e| {
-			ApiError::InternalServerError(format!("Failed to update session: {}", e))
+			APIError::InternalServerError(format!("Failed to update session: {}", e))
 		})?;
 
 	Ok(Json(updated_user))
@@ -576,8 +576,8 @@ async fn update_current_user_preferences(
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<UpdateUserPreferences>,
-) -> ApiResult<Json<UserPreferences>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<UserPreferences>> {
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
@@ -596,7 +596,7 @@ async fn update_current_user_preferences(
 			},
 		)
 		.map_err(|e| {
-			ApiError::InternalServerError(format!("Failed to update session: {}", e))
+			APIError::InternalServerError(format!("Failed to update session: {}", e))
 		})?;
 
 	Ok(Json(updated_preferences))
@@ -628,12 +628,12 @@ async fn delete_user_by_id(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<DeleteUser>,
-) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<User>> {
+	let db = &ctx.db;
 	let user = get_session_server_owner_user(&session)?;
 
 	if user.id == id {
-		return Err(ApiError::BadRequest(
+		return Err(APIError::BadRequest(
 			"You cannot delete your own account.".into(),
 		));
 	}
@@ -677,9 +677,9 @@ async fn get_user_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<User>> {
+) -> APIResult<Json<User>> {
 	get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user_by_id = db
 		.user()
 		.find_unique(user::id::equals(id.clone()))
@@ -689,7 +689,7 @@ async fn get_user_by_id(
 	debug!(id, ?user_by_id, "Result of fetching user by id");
 
 	if user_by_id.is_none() {
-		return Err(ApiError::NotFound(format!("User with id {} not found", id)));
+		return Err(APIError::NotFound(format!("User with id {} not found", id)));
 	}
 
 	Ok(Json(User::from(user_by_id.unwrap())))
@@ -715,13 +715,13 @@ async fn get_user_login_activity_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Vec<LoginActivity>>> {
+) -> APIResult<Json<Vec<LoginActivity>>> {
 	let user = get_session_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	if user.id != id && !user.is_server_owner {
-		return Err(ApiError::Forbidden(String::from(
+		return Err(APIError::Forbidden(String::from(
 			"You cannot access this resource",
 		)));
 	}
@@ -759,12 +759,12 @@ async fn update_user_handler(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUser>,
-) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<User>> {
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	if user.id != id && !user.is_server_owner {
-		return Err(ApiError::forbidden_discreet());
+		return Err(APIError::forbidden_discreet());
 	}
 
 	let updated_user = update_user(&user, db, id.clone(), input, &ctx.config).await?;
@@ -774,7 +774,7 @@ async fn update_user_handler(
 		session
 			.insert(SESSION_USER_KEY, updated_user.clone())
 			.map_err(|e| {
-				ApiError::InternalServerError(format!("Failed to update session: {}", e))
+				APIError::InternalServerError(format!("Failed to update session: {}", e))
 			})?;
 	} else {
 		// When a server owner updates another user, we need to delete all sessions for that user
@@ -806,10 +806,10 @@ async fn delete_user_sessions(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<()> {
+) -> APIResult<()> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let removed_sessions = client
 		.session()
 		.delete_many(vec![session::user_id::equals(id)])
@@ -846,15 +846,15 @@ async fn update_user_lock_status(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(input): Json<UpdateAccountLock>,
-) -> ApiResult<Json<User>> {
+) -> APIResult<Json<User>> {
 	let user = get_session_server_owner_user(&session)?;
 	if user.id == id {
-		return Err(ApiError::BadRequest(
+		return Err(APIError::BadRequest(
 			"You cannot lock your own account.".into(),
 		));
 	}
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let updated_user = db
 		.user()
 		.update(
@@ -897,12 +897,12 @@ async fn get_user_preferences(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<UserPreferences>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<UserPreferences>> {
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	if id != user.id {
-		return Err(ApiError::forbidden_discreet());
+		return Err(APIError::forbidden_discreet());
 	}
 
 	let user_preferences = db
@@ -913,7 +913,7 @@ async fn get_user_preferences(
 	debug!(id, ?user_preferences, "Fetched user preferences");
 
 	if user_preferences.is_none() {
-		return Err(ApiError::NotFound(format!(
+		return Err(APIError::NotFound(format!(
 			"User preferences with id {} not found",
 			id
 		)));
@@ -944,15 +944,15 @@ async fn update_user_preferences(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateUserPreferences>,
-) -> ApiResult<Json<UserPreferences>> {
+) -> APIResult<Json<UserPreferences>> {
 	trace!(?id, ?input, "Updating user preferences");
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_preferences = user.user_preferences.clone().unwrap_or_default();
 
 	if user_preferences.id != input.id {
-		return Err(ApiError::forbidden_discreet());
+		return Err(APIError::forbidden_discreet());
 	}
 
 	let updated_preferences = update_preferences(db, user_preferences.id, input).await?;
@@ -967,7 +967,7 @@ async fn update_user_preferences(
 			},
 		)
 		.map_err(|e| {
-			ApiError::InternalServerError(format!("Failed to update session: {}", e))
+			APIError::InternalServerError(format!("Failed to update session: {}", e))
 		})?;
 
 	Ok(Json(updated_preferences))
@@ -990,15 +990,15 @@ async fn update_user_preferences(
 async fn get_user_avatar(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-) -> ApiResult<ImageResponse> {
-	let client = ctx.get_db();
+) -> APIResult<ImageResponse> {
+	let client = &ctx.db;
 
 	let user = client
 		.user()
 		.find_unique(user::id::equals(id))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("User not found".to_string()))?;
+		.ok_or(APIError::NotFound("User not found".to_string()))?;
 
 	match user.avatar_url {
 		Some(url) if url.starts_with("/api/v1/") => {
@@ -1010,7 +1010,7 @@ async fn get_user_avatar(
 				let bytes = read_entire_file(local_file)?;
 				Ok(ImageResponse::new(content_type, bytes))
 			} else {
-				Err(ApiError::NotFound("User avatar not found".to_string()))
+				Err(APIError::NotFound("User avatar not found".to_string()))
 			}
 		},
 		Some(url) => {
@@ -1020,7 +1020,7 @@ async fn get_user_avatar(
 			let content_type = ContentType::from_bytes(&magic_bytes);
 			Ok(ImageResponse::new(content_type, bytes.to_vec()))
 		},
-		None => Err(ApiError::NotFound("User avatar not found".to_string())),
+		None => Err(APIError::NotFound("User avatar not found".to_string())),
 	}
 }
 
@@ -1044,12 +1044,12 @@ async fn upload_user_avatar(
 	State(ctx): State<AppState>,
 	session: Session,
 	mut upload: Multipart,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	let by_user = get_user_and_enforce_permission(&session, UserPermission::UploadFile)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	if by_user.id != id && !by_user.is_server_owner {
-		return Err(ApiError::forbidden_discreet());
+		return Err(APIError::forbidden_discreet());
 	}
 
 	tracing::trace!(?id, ?upload, "Replacing user avatar");
@@ -1059,7 +1059,7 @@ async fn upload_user_avatar(
 		.find_unique(user::id::equals(id.clone()))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("User not found".to_string()))?;
+		.ok_or(APIError::NotFound("User not found".to_string()))?;
 
 	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
 

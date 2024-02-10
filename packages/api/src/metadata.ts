@@ -1,52 +1,52 @@
 import { MediaMetadataOverview } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult } from './types'
+import { APIResult } from './types'
 import { toUrlParams, urlWithParams } from './utils'
 
 export function getMediaMetadataOverview(
 	params?: Record<string, unknown>,
-): Promise<ApiResult<MediaMetadataOverview>> {
+): Promise<APIResult<MediaMetadataOverview>> {
 	return API.get(urlWithParams('/metadata/media', toUrlParams(params)))
 }
 
-export function getGenres(): Promise<ApiResult<string[]>> {
+export function getGenres(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/genres')
 }
 
-export function getWriters(): Promise<ApiResult<string[]>> {
+export function getWriters(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/writers')
 }
 
-export function getPencillers(): Promise<ApiResult<string[]>> {
+export function getPencillers(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/pencillers')
 }
 
-export function getInkers(): Promise<ApiResult<string[]>> {
+export function getInkers(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/inkers')
 }
 
-export function getColorists(): Promise<ApiResult<string[]>> {
+export function getColorists(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/colorists')
 }
 
-export function getLetterers(): Promise<ApiResult<string[]>> {
+export function getLetterers(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/letterers')
 }
 
-export function getEditors(): Promise<ApiResult<string[]>> {
+export function getEditors(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/editors')
 }
 
-export function getPublishers(): Promise<ApiResult<string[]>> {
+export function getPublishers(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/publishers')
 }
 
-export function getCharacters(): Promise<ApiResult<string[]>> {
+export function getCharacters(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/characters')
 }
 
-export function getTeams(): Promise<ApiResult<string[]>> {
+export function getTeams(): Promise<APIResult<string[]>> {
 	return API.get('/metadata/media/teams')
 }
 

@@ -307,8 +307,7 @@ impl EpubProcessor {
 		// replace all src attributes with `{epubBaseURl}/{root}/{src}`
 		// replace all href attributes with `{epubBaseURl}/{root}/{href}`
 		// base_url/root/
-		let resolved_base = PathBuf::from(base_url).join(root);
-		dbg!(resolved_base);
+		let _resolved_base = PathBuf::from(base_url).join(root);
 
 		// 1. convert to string
 		// 2. match all elements with src or href attributes

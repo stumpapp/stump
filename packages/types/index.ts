@@ -8,7 +8,7 @@ export enum FileStatus {
 	Missing = 'MISSING',
 }
 
-export type ApiError =
+export type APIError =
 	| { code: 'BadRequest'; details: string }
 	| { code: 'NotFound'; details: string }
 	| { code: 'InternalServerError'; details: string }

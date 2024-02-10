@@ -5,8 +5,6 @@ use tracing::{trace, warn};
 
 use super::image::ImageFormat;
 
-// TODO: move this into fs crate
-
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
 #[allow(non_camel_case_types)]
@@ -25,6 +23,7 @@ pub enum ContentType {
 	JPEG,
 	WEBP,
 	GIF,
+	TXT,
 	#[default]
 	UNKNOWN,
 }
@@ -80,6 +79,7 @@ impl ContentType {
 			"jpeg" => ContentType::JPEG,
 			"webp" => ContentType::WEBP,
 			"gif" => ContentType::GIF,
+			"txt" => ContentType::TXT,
 			_ => temporary_content_workarounds(extension),
 		}
 	}
@@ -265,6 +265,7 @@ impl ContentType {
 			ContentType::JPEG => "jpg",
 			ContentType::WEBP => "webp",
 			ContentType::GIF => "gif",
+			ContentType::TXT => "txt",
 			ContentType::UNKNOWN => "",
 		}
 	}
@@ -311,6 +312,7 @@ impl std::fmt::Display for ContentType {
 			ContentType::JPEG => write!(f, "image/jpeg"),
 			ContentType::WEBP => write!(f, "image/webp"),
 			ContentType::GIF => write!(f, "image/gif"),
+			ContentType::TXT => write!(f, "text/plain"),
 			ContentType::UNKNOWN => write!(f, "unknown"),
 		}
 	}

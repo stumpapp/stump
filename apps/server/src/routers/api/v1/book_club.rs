@@ -31,7 +31,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	middleware::auth::{Auth, BookClubGuard},
 	utils::{
@@ -175,8 +175,8 @@ async fn get_book_clubs(
 	State(ctx): State<AppState>,
 	QsQuery(params): QsQuery<GetBookClubsParams>,
 	session: Session,
-) -> ApiResult<Json<Vec<BookClub>>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<Vec<BookClub>>> {
+	let client = &ctx.db;
 	let viewer = get_session_user(&session)?;
 
 	let where_params = if params.all {
@@ -225,8 +225,8 @@ async fn create_book_club(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(payload): Json<CreateBookClub>,
-) -> ApiResult<Json<BookClub>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<BookClub>> {
+	let db = &ctx.db;
 
 	let viewer =
 		get_user_and_enforce_permission(&session, UserPermission::CreateBookClub)?;
@@ -284,8 +284,8 @@ async fn get_book_club(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	session: Session,
-) -> ApiResult<Json<BookClub>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClub>> {
+	let client = &ctx.db;
 	let viewer = get_session_user(&session)?;
 
 	let where_params = book_club_access_for_user(&viewer)
@@ -301,7 +301,7 @@ async fn get_book_club(
 		))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Book club not found".to_string()))?;
+		.ok_or(APIError::NotFound("Book club not found".to_string()))?;
 
 	Ok(Json(BookClub::from(book_club)))
 }
@@ -330,8 +330,8 @@ async fn update_book_club(
 	Path(id): Path<String>,
 	session: Session,
 	Json(payload): Json<UpdateBookClub>,
-) -> ApiResult<Json<BookClub>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClub>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -348,7 +348,7 @@ async fn update_book_club(
 		])
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Book club not found".to_string()))?;
+		.ok_or(APIError::NotFound("Book club not found".to_string()))?;
 
 	let updated_book_club = client
 		.book_club()
@@ -377,8 +377,8 @@ async fn update_book_club(
 #[derive(Deserialize, Type, ToSchema)]
 pub struct UpdateBookClubSchedule {}
 
-async fn get_book_club_invitations() -> ApiResult<Json<Vec<BookClubInvitation>>> {
-	Err(ApiError::NotImplemented)
+async fn get_book_club_invitations() -> APIResult<Json<Vec<BookClubInvitation>>> {
+	Err(APIError::NotImplemented)
 }
 
 #[derive(Deserialize, Type, ToSchema)]
@@ -392,8 +392,8 @@ async fn create_book_club_invitation(
 	Path(id): Path<String>,
 	session: Session,
 	Json(payload): Json<CreateBookClubInvitation>,
-) -> ApiResult<Json<BookClubInvitation>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClubInvitation>> {
+	let client = &ctx.db;
 	let viewer = get_session_user(&session)?;
 
 	// I don't check for access control before the query because I am enforcing it when
@@ -410,7 +410,7 @@ async fn create_book_club_invitation(
 		])
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Book club not found".to_string()))?;
+		.ok_or(APIError::NotFound("Book club not found".to_string()))?;
 
 	let invalid_role = payload
 		.role
@@ -419,9 +419,9 @@ async fn create_book_club_invitation(
 		.unwrap_or(false);
 
 	if invalid_role {
-		return Err(ApiError::BadRequest("Cannot invite a creator".to_string()));
+		return Err(APIError::BadRequest("Cannot invite a creator".to_string()));
 	} else if payload.user_id == viewer.id {
-		return Err(ApiError::BadRequest(
+		return Err(APIError::BadRequest(
 			"Cannot invite yourself a book club you are already a member of".to_string(),
 		));
 	}
@@ -458,8 +458,8 @@ async fn get_book_club_members(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	session: Session,
-) -> ApiResult<Json<Vec<BookClubMember>>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<Vec<BookClubMember>>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -495,7 +495,7 @@ async fn create_book_club_member(
 	input: CreateBookClubMember,
 	book_club_id: String,
 	client: &PrismaClient,
-) -> ApiResult<BookClubMember> {
+) -> APIResult<BookClubMember> {
 	let created_member = client
 		.book_club_member()
 		.create(
@@ -532,8 +532,8 @@ async fn respond_to_book_club_invitation(
 	Path((id, invitation_id)): Path<(String, String)>,
 	session: Session,
 	Json(payload): Json<BookClubInvitationAnswer>,
-) -> ApiResult<Json<Option<BookClubMember>>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<Option<BookClubMember>>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -546,7 +546,7 @@ async fn respond_to_book_club_invitation(
 		])
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Invitation not found".to_string()))?;
+		.ok_or(APIError::NotFound("Invitation not found".to_string()))?;
 
 	if payload.accept {
 		let input = payload.member_details.unwrap_or(CreateBookClubMember {
@@ -590,9 +590,9 @@ async fn create_book_club_member_handler(
 	Path(id): Path<String>,
 	session: Session,
 	Json(payload): Json<CreateBookClubMember>,
-) -> ApiResult<Json<BookClubMember>> {
+) -> APIResult<Json<BookClubMember>> {
 	get_session_server_owner_user(&session)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 	let created_member = create_book_club_member(payload, id, client).await?;
 	Ok(Json(created_member))
 }
@@ -611,8 +611,8 @@ async fn get_book_club_member(
 	State(ctx): State<AppState>,
 	Path((id, member_id)): Path<(String, String)>,
 	session: Session,
-) -> ApiResult<Json<BookClubMember>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClubMember>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -629,7 +629,7 @@ async fn get_book_club_member(
 		.find_first(where_params)
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Book club member not found".to_string()))?;
+		.ok_or(APIError::NotFound("Book club member not found".to_string()))?;
 
 	Ok(Json(BookClubMember::from(book_club_member)))
 }
@@ -655,13 +655,13 @@ async fn update_book_club_member(
 	Path((_id, member_id)): Path<(String, String)>,
 	session: Session,
 	Json(payload): Json<UpdateBookClubMember>,
-) -> ApiResult<Json<BookClubMember>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClubMember>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
 	if viewer.id != member_id && !viewer.is_server_owner {
-		return Err(ApiError::Forbidden(
+		return Err(APIError::Forbidden(
 			"Cannot patch a book club member other than yourself".to_string(),
 		));
 	}
@@ -687,8 +687,8 @@ async fn delete_book_club_member(
 	State(ctx): State<AppState>,
 	Path((id, member_id)): Path<(String, String)>,
 	session: Session,
-) -> ApiResult<Json<BookClubMember>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClubMember>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 	let viewer_membership = client
@@ -703,7 +703,7 @@ async fn delete_book_club_member(
 
 	let can_remove_member = viewer_membership.is_some() || viewer.is_server_owner;
 	if !can_remove_member {
-		return Err(ApiError::Forbidden("Insufficient privileges".to_string()));
+		return Err(APIError::Forbidden("Insufficient privileges".to_string()));
 	}
 
 	let deleted_member = client
@@ -786,8 +786,8 @@ async fn create_book_club_schedule(
 	Path(id): Path<String>,
 	session: Session,
 	Json(payload): Json<CreateBookClubSchedule>,
-) -> ApiResult<Json<BookClubSchedule>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClubSchedule>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -802,7 +802,7 @@ async fn create_book_club_schedule(
 		])
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Book club not found".to_string()))?;
+		.ok_or(APIError::NotFound("Book club not found".to_string()))?;
 
 	let interval_days = payload.default_interval_days.unwrap_or(30);
 	let books_to_create = payload.books;
@@ -890,8 +890,8 @@ async fn get_book_club_schedule(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	session: Session,
-) -> ApiResult<Json<BookClubSchedule>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClubSchedule>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -911,7 +911,7 @@ async fn get_book_club_schedule(
 		)
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(
+		.ok_or(APIError::NotFound(
 			"Book club schedule not found".to_string(),
 		))?;
 
@@ -928,8 +928,8 @@ async fn add_books_to_book_club_schedule(
 	Path(id): Path<String>,
 	session: Session,
 	Json(payload): Json<AddBooksToBookClubSchedule>,
-) -> ApiResult<Json<Vec<BookClubBook>>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<Vec<BookClubBook>>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -945,8 +945,8 @@ async fn add_books_to_book_club_schedule(
 		.include(book_club_with_schedule::include())
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Book club not found".to_string()))?;
-	let schedule = book_club.schedule.ok_or(ApiError::NotFound(
+		.ok_or(APIError::NotFound("Book club not found".to_string()))?;
+	let schedule = book_club.schedule.ok_or(APIError::NotFound(
 		"Book club schedule not found".to_string(),
 	))?;
 
@@ -961,13 +961,13 @@ async fn add_books_to_book_club_schedule(
 
 	let books_to_add = payload.books;
 	if books_to_add.is_empty() {
-		return Err(ApiError::BadRequest(
+		return Err(APIError::BadRequest(
 			"Cannot add an empty list of books".to_string(),
 		));
 	}
 
 	let last_existing_book = existing_books.last().ok_or(
-		ApiError::InternalServerError("Could not find last existing book".to_string()),
+		APIError::InternalServerError("Could not find last existing book".to_string()),
 	)?;
 	let last_existing_book_end_at_str = last_existing_book.end_at.to_rfc3339();
 	let last_existing_book_end_at =
@@ -982,7 +982,7 @@ async fn add_books_to_book_club_schedule(
 		start_at < last_existing_book_end_at
 	});
 	if has_collision {
-		return Err(ApiError::BadRequest(
+		return Err(APIError::BadRequest(
 			"Cannot add books that have a start date before the last book's end date"
 				.to_string(),
 		));
@@ -1056,8 +1056,8 @@ async fn get_book_club_current_book(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	session: Session,
-) -> ApiResult<Json<BookClubBook>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<BookClubBook>> {
+	let client = &ctx.db;
 
 	let viewer = get_session_user(&session)?;
 
@@ -1077,18 +1077,18 @@ async fn get_book_club_current_book(
 		)
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(
+		.ok_or(APIError::NotFound(
 			"Book club schedule not found".to_string(),
 		))?;
 
 	let current_book = book_club_schedule
 		.books
-		.ok_or(ApiError::NotFound(
+		.ok_or(APIError::NotFound(
 			"Book club schedule has no books".to_string(),
 		))?
 		.first()
 		.cloned()
-		.ok_or(ApiError::NotFound(
+		.ok_or(APIError::NotFound(
 			"Book club schedule has no books".to_string(),
 		))?;
 

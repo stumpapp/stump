@@ -1,0 +1,34 @@
+name: 'Stump Experimental CI'
+
+on:
+  push:
+    branches:
+      - experimental
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  nightly-docker-build:
+    name: Build docker image
+    runs-on: [self-hosted]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup and build docker image
+        uses: ./.github/actions/build-docker
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+          tags: 'experimental'
+          load: false
+          push: true
+          platforms: 'linux/arm64/v8,linux/amd64'
+          # platforms: 'linux/arm64/v8,linux/arm/v7,linux/amd64'
+          discord-webhook: ''

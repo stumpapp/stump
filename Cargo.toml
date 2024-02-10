@@ -15,6 +15,8 @@ rust-version = "1.72.1"
 async-trait = "0.1.74"
 async-stream = "0.3.5"
 bcrypt = "0.15.0"
+futures = "0.3.30"
+futures-util = "0.3.30"
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust.git", tag = "0.6.11", features = [
   "sqlite-create-many",
   "migrations",

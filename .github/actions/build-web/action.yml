@@ -12,6 +12,10 @@ runs:
         node-version: '20'
         cache: 'yarn'
 
+    - name: Install yarn
+      shell: bash
+      run: npm install -g yarn
+
     - name: Install dependencies
       shell: bash
       run: yarn install

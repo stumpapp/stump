@@ -2,7 +2,7 @@
 # Frontend Build Stage
 # ------------------------------------------------------------------------------
 
-FROM node:16-alpine3.14 as frontend
+FROM node:20.0.0-alpine3.16 as frontend
 ARG TARGETARCH
 
 WORKDIR /app

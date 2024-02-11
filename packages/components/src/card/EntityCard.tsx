@@ -68,10 +68,10 @@ export function EntityCard({
 		...(href
 			? {
 					to: href,
-			  }
+				}
 			: {
 					as: 'div',
-			  }),
+				}),
 		...props,
 	} as React.ComponentPropsWithoutRef<'div'> & React.ComponentPropsWithoutRef<typeof Link>
 

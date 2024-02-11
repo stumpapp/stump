@@ -80,7 +80,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 												handleScan()
 											},
 										},
-								  ]
+									]
 								: []),
 							...(canUseExplorer
 								? [
@@ -90,7 +90,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 											label: t(getLocaleKey('fileExplorer')),
 											leftIcon: <FolderSearch2 className={iconStyle} />,
 										},
-								  ]
+									]
 								: []),
 						],
 					},
@@ -113,11 +113,11 @@ export default function LibraryOptionsMenu({ library }: Props) {
 															setIsDeleting(true)
 														},
 													},
-											  ]
+												]
 											: []),
 									],
 								},
-						  ]
+							]
 						: []),
 				]}
 				align={isMobile ? 'end' : 'start'}

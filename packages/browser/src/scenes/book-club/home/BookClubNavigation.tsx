@@ -53,7 +53,7 @@ export default function BookClubNavigation() {
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
 	return (
-		<div className="sticky top-0 z-10 w-full border-b border-gray-75 bg-white dark:border-gray-850 dark:bg-gray-975 md:relative md:top-[unset] md:z-[unset]">
+		<div className="sticky top-0 z-10 w-full border-b border-gray-75 bg-white md:relative md:top-[unset] md:z-[unset] dark:border-gray-850 dark:bg-gray-975">
 			<nav
 				className={cn(
 					'-mb-px flex gap-x-6 overflow-x-scroll px-3 scrollbar-hide md:overflow-x-hidden',

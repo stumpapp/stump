@@ -53,7 +53,7 @@ export default function EditThumbnailDropdown({ label, onChooseSelector, onUploa
 											label: t(withLocaleKey('options.uploadImage')),
 											onClick: () => setShowUploadModal(true),
 										},
-								  ]
+									]
 								: []),
 						],
 					},

@@ -82,7 +82,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 							leftIcon: <Ban className="mr-2 h-4 w-4" />,
 							onClick: handleCancel,
 						},
-				  ]
+					]
 				: []),
 			...(jobData
 				? [
@@ -91,7 +91,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 							leftIcon: <Database className="mr-2 h-4 w-4" />,
 							onClick: () => onInspectData(jobData),
 						},
-				  ]
+					]
 				: []),
 			...(associatedLogs.length > 0
 				? [
@@ -100,7 +100,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 							leftIcon: <FileClock className="mr-2 h-4 w-4" />,
 							onClick: () => navigate(paths.serverLogs(jobId)),
 						},
-				  ]
+					]
 				: []),
 
 			...(isDeletable
@@ -110,7 +110,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 							leftIcon: <Trash2 className="mr-2 h-4 w-4" />,
 							onClick: handleDelete,
 						},
-				  ]
+					]
 				: []),
 		],
 		[

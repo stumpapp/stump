@@ -65,7 +65,7 @@ export default function SeriesCard({ series, fullWidth, variant = 'default' }: S
 				progress: undefined,
 				subtitle: undefined,
 				title: undefined,
-		  }
+			}
 		: {}
 
 	return (

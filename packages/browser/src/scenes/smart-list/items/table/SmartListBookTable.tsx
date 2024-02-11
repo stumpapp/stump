@@ -89,7 +89,7 @@ export default function SmartListBookTable({ books, isIsolatedTable = true }: Pr
 					<TableHeaderActions />
 					{children}
 				</div>
-		  )
+			)
 		: React.Fragment
 
 	return (

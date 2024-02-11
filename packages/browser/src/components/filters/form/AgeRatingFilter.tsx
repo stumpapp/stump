@@ -72,7 +72,7 @@ export default function AgeRatingFilter({ variant = 'media' }: Props) {
 							{...(selection !== null
 								? {
 										errorMessage: form.formState.errors.metadata?.age_rating?.message as string,
-								  }
+									}
 								: {})}
 						/>
 					</fieldset>

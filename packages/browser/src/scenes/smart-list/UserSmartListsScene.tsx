@@ -107,7 +107,7 @@ export default function UserSmartListsScene() {
 			</header>
 
 			<SceneContainer className="relative h-full overflow-hidden">
-				<div className="min-h-10 sticky top-0 z-10 bg-background py-2 backdrop-blur-sm">
+				<div className="sticky top-0 z-10 min-h-10 bg-background py-2 backdrop-blur-sm">
 					<div className="flex w-full flex-row items-center justify-between gap-x-2 pr-3 md:w-2/3 lg:max-w-xl">
 						<Input
 							placeholder={t(withLocaleKey('searchPlaceholder'))}

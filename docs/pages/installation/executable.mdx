@@ -34,7 +34,7 @@ Restart=always
 RestartSec=1
 User=stump
 WorkingDirectory=/opt/stump
-ExecStart=pnpm start core
+ExecStart=cargo run -p stump_server --release
 
 [Install]
 WantedBy=multi-user.target

@@ -9,7 +9,7 @@ runs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '20.0.0'
 
     - name: Install yarn
       shell: bash
@@ -17,7 +17,7 @@ runs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '20.0.0'
         cache: 'yarn'
 
 

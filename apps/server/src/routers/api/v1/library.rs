@@ -9,7 +9,7 @@ use prisma_client_rust::{chrono::Utc, not, or, raw, Direction};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
-use std::{path, str::FromStr};
+use std::path;
 use tower_sessions::Session;
 use tracing::{debug, error, trace};
 use utoipa::ToSchema;
@@ -29,8 +29,8 @@ use stump_core::{
 		get_unknown_thumnail,
 		image::{
 			self, generate_thumbnail, place_thumbnail, remove_thumbnails,
-			remove_thumbnails_of_type, ImageFormat, ImageProcessorOptions, ThumbnailJob,
-			ThumbnailJobConfig,
+			remove_thumbnails_of_type, ImageFormat, ImageProcessorOptions,
+			ThumbnailGenerationJob, ThumbnailGenerationJobParams,
 		},
 		read_entire_file,
 		scanner::LibraryScanJob,
@@ -48,7 +48,7 @@ use stump_core::{
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::{
 		chain_optional_iter, decode_path_filter, FilterableQuery, LibraryBaseFilter,
 		LibraryFilter, LibraryRelationFilter, MediaFilter, SeriesFilter,
@@ -164,7 +164,7 @@ async fn get_libraries(
 	filter_query: QsQuery<FilterableQuery<LibraryFilter>>,
 	pagination_query: Query<PaginationQuery>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Pageable<Vec<Library>>>> {
+) -> APIResult<Json<Pageable<Vec<Library>>>> {
 	let FilterableQuery { filters, ordering } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 
@@ -219,9 +219,8 @@ async fn get_libraries(
 async fn get_last_visited_library(
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Option<Library>>> {
-	let client = ctx.get_db();
-
+) -> APIResult<Json<Option<Library>>> {
+	let client = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	let last_visited_library = client
@@ -242,9 +241,8 @@ async fn update_last_visited_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Library>> {
-	let client = ctx.get_db();
-
+) -> APIResult<Json<Library>> {
+	let client = &ctx.db;
 	let user = get_session_user(&session)?;
 
 	let last_library_visit = client
@@ -265,7 +263,7 @@ async fn update_last_visited_library(
 	let library = last_library_visit
 		.library()
 		.ok()
-		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
 	Ok(Json(Library::from(library.to_owned())))
 }
@@ -283,8 +281,8 @@ async fn update_last_visited_library(
 /// Get stats for all libraries
 async fn get_libraries_stats(
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<LibrariesStats>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<LibrariesStats>> {
+	let db = &ctx.db;
 
 	// TODO: maybe add more, like missingBooks, idk
 	let stats = db
@@ -297,7 +295,7 @@ async fn get_libraries_stats(
 		.next();
 
 	if stats.is_none() {
-		return Err(ApiError::InternalServerError(
+		return Err(APIError::InternalServerError(
 			"Failed to compute stats for libraries".to_string(),
 		));
 	}
@@ -323,8 +321,8 @@ async fn get_libraries_stats(
 async fn get_library_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Library>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<Library>> {
+	let db = &ctx.db;
 
 	let library = db
 		.library()
@@ -333,7 +331,7 @@ async fn get_library_by_id(
 		.with(library::tags::fetch(vec![]))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
 	Ok(Json(library.into()))
 }
@@ -361,14 +359,14 @@ async fn get_library_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery {
 		ordering, filters, ..
 	} = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 	tracing::debug!(?filters, ?ordering, ?pagination, "get_library_series");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
@@ -441,7 +439,7 @@ async fn get_library_media(
 	pagination_query: Query<PaginationQuery>,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Pageable<Vec<Media>>>> {
+) -> APIResult<Json<Pageable<Vec<Media>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 	let pagination_cloned = pagination.clone();
@@ -502,7 +500,7 @@ pub(crate) fn get_library_thumbnail(
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
-) -> ApiResult<(ContentType, Vec<u8>)> {
+) -> APIResult<(ContentType, Vec<u8>)> {
 	let library_id = library.id.clone();
 
 	if let Some(format) = image_format.clone() {
@@ -550,8 +548,8 @@ async fn get_library_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+) -> APIResult<ImageResponse> {
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restriction = user.age_restriction;
@@ -580,18 +578,18 @@ async fn get_library_thumbnail_handler(
 		.order_by(series::name::order(Direction::Asc))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Library has no series".to_string()))?;
+		.ok_or(APIError::NotFound("Library has no series".to_string()))?;
 
 	let library = first_series
 		.library()?
-		.ok_or(ApiError::Unknown(String::from("Failed to load library")))?;
+		.ok_or(APIError::Unknown(String::from("Failed to load library")))?;
 	let image_format = library
 		.library_options()
 		.map(LibraryOptions::from)?
 		.thumbnail_config
 		.map(|config| config.format);
 
-	let first_book = first_series.media()?.first().ok_or(ApiError::NotFound(
+	let first_book = first_series.media()?.first().ok_or(APIError::NotFound(
 		"Library has no media to get thumbnail from".to_string(),
 	))?;
 
@@ -636,10 +634,10 @@ async fn patch_library_thumbnail(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(body): Json<PatchLibraryThumbnail>,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let target_page = body
 		.is_zero_based
@@ -664,17 +662,17 @@ async fn patch_library_thumbnail(
 		)
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	if media.extension == "epub" {
-		return Err(ApiError::NotSupported);
+		return Err(APIError::NotSupported);
 	}
 
 	let library = media
 		.series()?
-		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
-		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
 	let thumbnail_options = library
 		.library_options()?
 		.thumbnail_config
@@ -702,12 +700,12 @@ async fn replace_library_thumbnail(
 	State(ctx): State<AppState>,
 	session: Session,
 	mut upload: Multipart,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	enforce_session_permissions(
 		&session,
 		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
 	)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	tracing::trace!(?id, ?upload, "Replacing library thumbnail");
 
@@ -716,7 +714,7 @@ async fn replace_library_thumbnail(
 		.find_unique(library::id::equals(id))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Library not found")))?;
+		.ok_or(APIError::NotFound(String::from("Library not found")))?;
 
 	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
 
@@ -760,8 +758,8 @@ async fn replace_library_thumbnail(
 async fn delete_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<()>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<()>> {
+	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	let result = db
@@ -770,7 +768,7 @@ async fn delete_library_thumbnails(
 		.include(library_thumbnails_deletion_include::include())
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
 	let thumbnail_config = result.library_options.thumbnail_config;
 	let extension = if let Some(config) = thumbnail_config {
@@ -821,7 +819,7 @@ async fn generate_library_thumbnails(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	Json(input): Json<GenerateLibraryThumbnails>,
-) -> ApiResult<Json<()>> {
+) -> APIResult<Json<()>> {
 	let library = ctx
 		.db
 		.library()
@@ -829,7 +827,7 @@ async fn generate_library_thumbnails(
 		.with(library::library_options::fetch())
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
 	let library_options = library.library_options()?.to_owned();
 	let existing_options = if let Some(config) = library_options.thumbnail_config {
 		// I hard error here so that we don't accidentally generate thumbnails in an invalid or
@@ -839,30 +837,23 @@ async fn generate_library_thumbnails(
 		None
 	};
 	let options = input.image_options.or(existing_options).unwrap_or_default();
-	let config = ThumbnailJobConfig::SingleLibrary {
-		library_id: library.id,
-		force_regenerate: input.force_regenerate,
-	};
-	tracing::trace!(?options, ?config, "Dispatching thumbnail job");
-
-	ctx.dispatch_job(ThumbnailJob::new(options, config))?;
+	let config =
+		ThumbnailGenerationJobParams::single_library(library.id, input.force_regenerate);
+	ctx.enqueue_job(ThumbnailGenerationJob::new(options, config))
+		.map_err(|e| {
+			error!(?e, "Failed to enqueue thumbnail generation job");
+			APIError::InternalServerError(
+				"Failed to enqueue thumbnail generation job".to_string(),
+			)
+		})?;
 
 	Ok(Json(()))
-}
-
-#[derive(Debug, Deserialize, ToSchema)]
-pub struct ScanQueryParam {
-	scan_mode: Option<String>,
 }
 
 #[utoipa::path(
 	post,
 	path = "/api/v1/libraries/:id/scan",
 	tag = "library",
-	params(
-		("id" = String, Path, description = "The library ID"),
-		("query" = ScanQueryParam, Query, description = "The scan options"),
-	),
 	responses(
 		(status = 200, description = "Successfully queued library scan"),
 		(status = 401, description = "Unauthorized"),
@@ -875,10 +866,9 @@ pub struct ScanQueryParam {
 async fn scan_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-	query: Query<ScanQueryParam>,
 	session: Session,
-) -> Result<(), ApiError> {
-	let db = ctx.get_db();
+) -> Result<(), APIError> {
+	let db = &ctx.db;
 
 	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
 
@@ -887,16 +877,18 @@ async fn scan_library(
 		.find_unique(library::id::equals(id.clone()))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(format!(
+		.ok_or(APIError::NotFound(format!(
 			"Library with id {} not found",
 			id
 		)))?;
 
-	let scan_mode = query.scan_mode.to_owned().unwrap_or_default();
-	let scan_mode = LibraryScanMode::from_str(&scan_mode)
-		.map_err(|e| ApiError::BadRequest(format!("Invalid scan mode: {}", e)))?;
-
-	ctx.dispatch_job(LibraryScanJob::new(library.path, scan_mode))?;
+	ctx.enqueue_job(LibraryScanJob::new(library.id, library.path))
+		.map_err(|e| {
+			error!(?e, "Failed to enqueue library scan job");
+			APIError::InternalServerError(
+				"Failed to enqueue library scan job".to_string(),
+			)
+		})?;
 
 	Ok(())
 }
@@ -928,13 +920,13 @@ async fn clean_library(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<CleanLibraryResponse>> {
+) -> APIResult<Json<CleanLibraryResponse>> {
 	get_user_and_enforce_permission(&session, UserPermission::ManageLibrary)?;
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
-	let result: ApiResult<(CleanLibraryResponse, Vec<String>)> = db
+	let result: APIResult<(CleanLibraryResponse, Vec<String>)> = db
 		._transaction()
 		.run(|client| async move {
 			// This isn't really necessary, but it is more for RESTful patterns (i.e. error
@@ -944,7 +936,7 @@ async fn clean_library(
 				.find_unique(library::id::equals(id.clone()))
 				.exec()
 				.await?
-				.ok_or(ApiError::NotFound("Library not found".to_string()))?;
+				.ok_or(APIError::NotFound("Library not found".to_string()))?;
 
 			let delete_media_params = vec![
 				media::series::is(vec![series::library_id::equals(Some(id.clone()))]),
@@ -1076,14 +1068,14 @@ async fn create_library(
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateLibrary>,
-) -> ApiResult<Json<Library>> {
+) -> APIResult<Json<Library>> {
 	let user = get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	debug!(user_id = user.id, ?input, "Creating library");
 
 	if !path::Path::new(&input.path).exists() {
-		return Err(ApiError::BadRequest(format!(
+		return Err(APIError::BadRequest(format!(
 			"The library directory does not exist: {}",
 			input.path
 		)));
@@ -1096,7 +1088,7 @@ async fn create_library(
 		.await?;
 
 	if !child_libraries.is_empty() {
-		return Err(ApiError::BadRequest(String::from(
+		return Err(APIError::BadRequest(String::from(
 			"You may not create a library that is a parent of another on the filesystem.",
 		)));
 	}
@@ -1104,7 +1096,7 @@ async fn create_library(
 	// TODO: refactor once nested create is supported
 	// https://github.com/Brendonovich/prisma-client-rust/issues/44
 	let library_options_arg = input.library_options.unwrap_or_default();
-	let transaction_result: Result<Library, ApiError> = db
+	let transaction_result: Result<Library, APIError> = db
 		._transaction()
 		.run(|client| async move {
 			let library_options = client
@@ -1173,7 +1165,18 @@ async fn create_library(
 
 	let library = transaction_result?;
 	let scan_mode = input.scan_mode.unwrap_or_default();
-	ctx.dispatch_job(LibraryScanJob::new(library.path.clone(), scan_mode))?;
+	if scan_mode != LibraryScanMode::None {
+		ctx.enqueue_job(LibraryScanJob::new(
+			library.id.clone(),
+			library.path.clone(),
+		))
+		.map_err(|e| {
+			error!(?e, "Failed to enqueue library scan job");
+			APIError::InternalServerError(
+				"Failed to enqueue library scan job".to_string(),
+			)
+		})?;
+	}
 
 	Ok(Json(library))
 }
@@ -1224,13 +1227,13 @@ async fn update_library(
 	State(ctx): State<AppState>,
 	Path(id): Path<String>,
 	Json(input): Json<UpdateLibrary>,
-) -> ApiResult<Json<Library>> {
+) -> APIResult<Json<Library>> {
 	get_user_and_enforce_permission(&session, UserPermission::EditLibrary)?;
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 
 	if !path::Path::new(&input.path).exists() {
-		return Err(ApiError::BadRequest(format!(
+		return Err(APIError::BadRequest(format!(
 			"Updated path does not exist: {}",
 			input.path
 		)));
@@ -1293,7 +1296,7 @@ async fn update_library(
 		db._batch(batches).await?;
 	}
 
-	let updated = db
+	let updated_library = db
 		.library()
 		.update(
 			library::id::equals(id),
@@ -1311,10 +1314,19 @@ async fn update_library(
 	let scan_mode = input.scan_mode.unwrap_or_default();
 
 	if scan_mode != LibraryScanMode::None {
-		ctx.dispatch_job(LibraryScanJob::new(updated.path.clone(), scan_mode))?;
+		ctx.enqueue_job(LibraryScanJob::new(
+			updated_library.id.clone(),
+			updated_library.path.clone(),
+		))
+		.map_err(|e| {
+			error!(?e, "Failed to enqueue library scan job");
+			APIError::InternalServerError(
+				"Failed to enqueue library scan job".to_string(),
+			)
+		})?;
 	}
 
-	Ok(Json(updated.into()))
+	Ok(Json(updated_library.into()))
 }
 
 #[utoipa::path(
@@ -1338,9 +1350,9 @@ async fn delete_library(
 	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<String>> {
+) -> APIResult<Json<String>> {
 	get_session_server_owner_user(&session)?;
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let thumbnails_dir = ctx.config.get_thumbnails_dir();
 
 	trace!(?id, "Attempting to delete library");

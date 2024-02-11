@@ -81,7 +81,7 @@ runs:
         tags: ${{ env.TAGS }}
 
     - name: Discord notification
-      if: ${{ success() && inputs.push == 'true' }}
+      if: ${{ success() && inputs.push == 'true' && inputs.discord-webhook != '' }}
       env:
         DISCORD_WEBHOOK: ${{ inputs.discord-webhook }}
       uses: 'Ilshidur/action-discord@0.3.2'

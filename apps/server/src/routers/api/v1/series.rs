@@ -1,7 +1,7 @@
 use axum::{
 	extract::{DefaultBodyLimit, Multipart, Path, State},
 	middleware::from_extractor_with_state,
-	routing::get,
+	routing::{get, post},
 	Json, Router,
 };
 use axum_extra::extract::Query;
@@ -24,7 +24,9 @@ use stump_core::{
 			generate_thumbnail, place_thumbnail, remove_thumbnails, ImageFormat,
 			ImageProcessorOptions,
 		},
-		read_entire_file, ContentType, FileParts, PathUtils,
+		read_entire_file,
+		scanner::SeriesScanJob,
+		ContentType, FileParts, PathUtils,
 	},
 	prisma::{
 		library,
@@ -40,7 +42,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::{
 		chain_optional_iter, decode_path_filter, FilterableQuery, SeriesBaseFilter,
 		SeriesFilter, SeriesQueryRelation, SeriesRelationFilter,
@@ -48,7 +50,7 @@ use crate::{
 	middleware::auth::Auth,
 	utils::{
 		enforce_session_permissions, get_session_server_owner_user, get_session_user,
-		http::ImageResponse, validate_image_upload,
+		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
 	},
 };
 
@@ -69,6 +71,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 			"/series/:id",
 			Router::new()
 				.route("/", get(get_series_by_id))
+				.route("/scan", post(scan_series))
 				.route("/media", get(get_series_media))
 				.route("/media/next", get(get_next_in_series))
 				.route(
@@ -197,14 +200,14 @@ async fn get_series(
 	relation_query: Query<SeriesQueryRelation>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	let FilterableQuery { ordering, filters } = filter_query.0.get();
 	let pagination = pagination_query.0.get();
 	let pagination_cloned = pagination.clone();
 
 	trace!(?filters, ?ordering, ?pagination, "get_series");
 
-	let db = ctx.get_db();
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
 	let age_restrictions = user
@@ -318,8 +321,8 @@ async fn get_series_by_id(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Series>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<Series>> {
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -352,7 +355,7 @@ async fn get_series_by_id(
 	let series = query
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
+		.ok_or(APIError::NotFound(String::from("Series not found")))?;
 
 	if !load_media {
 		// FIXME: PCR doesn't support relation counts yet!
@@ -367,6 +370,42 @@ async fn get_series_by_id(
 	}
 
 	Ok(Json(series.into()))
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/series/:id/scan",
+	tag = "series",
+	responses(
+		(status = 200, description = "Successfully queued series scan"),
+		(status = 401, description = "Unauthorized"),
+		(status = 404, description = "Series not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+/// Queue a job to scan the series by ID
+async fn scan_series(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> Result<(), APIError> {
+	let db = &ctx.db;
+	get_user_and_enforce_permission(&session, UserPermission::ScanLibrary)?;
+
+	let series = db
+		.series()
+		.find_unique(series::id::equals(id.clone()))
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Series not found".to_string()))?;
+
+	ctx.enqueue_job(SeriesScanJob::new(series.id, series.path))
+		.map_err(|e| {
+			error!(?e, "Failed to enqueue series scan job");
+			APIError::InternalServerError("Failed to enqueue series scan job".to_string())
+		})?;
+
+	Ok(())
 }
 
 // FIXME: This hand written SQL needs to factor in age restrictions!
@@ -388,9 +427,9 @@ async fn get_recently_added_series_handler(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	session: Session,
-) -> ApiResult<Json<Pageable<Vec<Series>>>> {
+) -> APIResult<Json<Pageable<Vec<Series>>>> {
 	if pagination.page.is_none() {
-		return Err(ApiError::BadRequest(
+		return Err(APIError::BadRequest(
 			"Unpaged request not supported for this endpoint".to_string(),
 		));
 	}
@@ -411,7 +450,7 @@ pub(crate) fn get_series_thumbnail(
 	first_book: &media::Data,
 	image_format: Option<ImageFormat>,
 	config: &StumpConfig,
-) -> ApiResult<(ContentType, Vec<u8>)> {
+) -> APIResult<(ContentType, Vec<u8>)> {
 	let thumbnails_dir = config.get_thumbnails_dir();
 	let series_id = series.id.clone();
 
@@ -455,8 +494,8 @@ async fn get_series_thumbnail_handler(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+) -> APIResult<ImageResponse> {
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let age_restriction = user.age_restriction;
@@ -485,16 +524,16 @@ async fn get_series_thumbnail_handler(
 		.order_by(series::name::order(Direction::Asc))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound("Series not found".to_string()))?;
+		.ok_or(APIError::NotFound("Series not found".to_string()))?;
 
 	let library = series
 		.library()?
-		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
 
 	let first_book = series
 		.media()?
 		.first()
-		.ok_or(ApiError::NotFound(String::from(
+		.ok_or(APIError::NotFound(String::from(
 			"Series does not have any media",
 		)))?;
 
@@ -539,10 +578,10 @@ async fn patch_series_thumbnail(
 	State(ctx): State<AppState>,
 	session: Session,
 	Json(body): Json<PatchSeriesThumbnail>,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	get_session_server_owner_user(&session)?;
 
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let target_page = body
 		.is_zero_based
@@ -567,17 +606,17 @@ async fn patch_series_thumbnail(
 		)
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Media not found")))?;
+		.ok_or(APIError::NotFound(String::from("Media not found")))?;
 
 	if media.extension == "epub" {
-		return Err(ApiError::NotSupported);
+		return Err(APIError::NotSupported);
 	}
 
 	let library = media
 		.series()?
-		.ok_or(ApiError::NotFound(String::from("Series relation missing")))?
+		.ok_or(APIError::NotFound(String::from("Series relation missing")))?
 		.library()?
-		.ok_or(ApiError::NotFound(String::from("Library relation missing")))?;
+		.ok_or(APIError::NotFound(String::from("Library relation missing")))?;
 	let thumbnail_options = library
 		.library_options()?
 		.thumbnail_config
@@ -620,19 +659,19 @@ async fn replace_series_thumbnail(
 	State(ctx): State<AppState>,
 	session: Session,
 	mut upload: Multipart,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	enforce_session_permissions(
 		&session,
 		&[UserPermission::UploadFile, UserPermission::ManageLibrary],
 	)?;
-	let client = ctx.get_db();
+	let client = &ctx.db;
 
 	let series = client
 		.series()
 		.find_unique(series::id::equals(id))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
+		.ok_or(APIError::NotFound(String::from("Series not found")))?;
 
 	let (content_type, bytes) = validate_image_upload(&mut upload).await?;
 	let ext = content_type.extension();
@@ -681,8 +720,8 @@ async fn get_series_media(
 	session: Session,
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
-) -> ApiResult<Json<Pageable<Vec<Media>>>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<Pageable<Vec<Media>>>> {
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -708,7 +747,7 @@ async fn get_series_media(
 		))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Series not found")))?;
+		.ok_or(APIError::NotFound(String::from("Series not found")))?;
 
 	let (media, count) = db
 		._transaction()
@@ -798,8 +837,8 @@ async fn get_next_in_series(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<Option<Media>>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<Option<Media>>> {
+	let db = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let result = db
@@ -850,7 +889,7 @@ async fn get_next_in_series(
 
 		Ok(Json(next_book.map(|data| Media::from(data.to_owned()))))
 	} else {
-		Err(ApiError::NotFound(format!(
+		Err(APIError::NotFound(format!(
 			"Series with id {} no found.",
 			id
 		)))
@@ -880,8 +919,8 @@ async fn get_series_is_complete(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<Json<SeriesIsComplete>> {
-	let client = ctx.get_db();
+) -> APIResult<Json<SeriesIsComplete>> {
+	let client = &ctx.db;
 	let user_id = get_session_user(&session)?.id;
 
 	let media_count = client
@@ -916,6 +955,6 @@ async fn get_series_is_complete(
 }
 
 // TODO: implement
-async fn put_series_is_complete() -> ApiResult<Json<SeriesIsComplete>> {
-	Err(ApiError::NotImplemented)
+async fn put_series_is_complete() -> APIResult<Json<SeriesIsComplete>> {
+	Err(APIError::NotImplemented)
 }

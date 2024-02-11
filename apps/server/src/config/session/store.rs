@@ -45,7 +45,7 @@ impl PrismaSessionStore {
 		interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
 		loop {
 			interval.tick().await; // The first tick completes immediately
-			if let Err(error) = ctx.dispatch_job(SessionCleanupJob::new()) {
+			if let Err(error) = ctx.enqueue_job(SessionCleanupJob::new()) {
 				tracing::error!(error = ?error, "Failed to dispatch session cleanup job");
 			} else {
 				tracing::trace!("Dispatched session cleanup job");

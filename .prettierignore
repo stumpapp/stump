@@ -10,4 +10,4 @@ build
 .next
 
 # locale files
-interface/src/i18n/locales/*.json
+packages/browser/src/i18n/locales/*.json

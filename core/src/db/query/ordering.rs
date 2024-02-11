@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	error::CoreError,
-	prisma::{job, library, media, series},
+	prisma::{job, library, log, media, series},
 };
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone, Type, ToSchema)]
@@ -127,8 +127,6 @@ impl TryInto<job::OrderByParam> for QueryOrder {
 			"status" => job::status::order(dir),
 			"created_at" => job::created_at::order(dir),
 			"completed_at" => job::completed_at::order(dir),
-			"task_count" => job::task_count::order(dir),
-			"ms_elapsed" => job::ms_elapsed::order(dir),
 			_ => {
 				return Err(CoreError::InvalidQuery(format!(
 					"You cannot order jobs by {:?}",
@@ -139,31 +137,23 @@ impl TryInto<job::OrderByParam> for QueryOrder {
 	}
 }
 
-// pub enum PrismaJoiner {
-// 	And,
-// 	Or,
-// 	Not,
-// }
+impl TryInto<log::OrderByParam> for QueryOrder {
+	type Error = CoreError;
 
-// impl Display for PrismaJoiner {
-// 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-// 		match self {
-// 			PrismaJoiner::And => write!(f, "and"),
-// 			PrismaJoiner::Or => write!(f, "or"),
-// 			PrismaJoiner::Not => write!(f, "not"),
-// 		}
-// 	}
-// }
+	fn try_into(self) -> Result<log::OrderByParam, Self::Error> {
+		let dir: prisma_client_rust::Direction = self.direction.into();
 
-// impl TryFrom<&str> for PrismaJoiner {
-// 	type Error = CoreError;
-
-// 	fn try_from(s: &str) -> Result<Self, Self::Error> {
-// 		match s {
-// 			"and" => Ok(PrismaJoiner::And),
-// 			"or" => Ok(PrismaJoiner::Or),
-// 			"not" => Ok(PrismaJoiner::Not),
-// 			_ => Err(CoreError::InvalidQuery("Invalid joiner".to_string())),
-// 		}
-// 	}
-// }
+		Ok(match self.order_by.to_lowercase().as_str() {
+			"timestamp" => log::timestamp::order(dir),
+			"level" => log::level::order(dir),
+			"message" => log::message::order(dir),
+			"job_id" => log::job_id::order(dir),
+			_ => {
+				return Err(CoreError::InvalidQuery(format!(
+					"You cannot order logs by {:?}",
+					self.order_by
+				)))
+			},
+		})
+	}
+}

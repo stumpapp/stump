@@ -12,7 +12,7 @@ use prisma_client_rust::{
 };
 use stump_core::{
 	db::entity::{User, UserPermission},
-	prisma::user,
+	prisma::{user, PrismaClient},
 };
 use tower_sessions::Session;
 
@@ -22,6 +22,8 @@ use crate::{
 };
 
 pub struct Auth;
+
+// TODO: Change Response to APIResultResponse
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Auth
@@ -86,67 +88,78 @@ where
 			return Err((StatusCode::UNAUTHORIZED).into_response());
 		};
 
-		if !auth_header.starts_with("Basic ") || auth_header.len() <= 6 {
-			tracing::error!(?auth_header, "Invalid auth header!");
-			return Err((StatusCode::UNAUTHORIZED).into_response());
-		}
-
-		let encoded_credentials = auth_header[6..].to_string();
-		let decoded_bytes =
-			STANDARD
-				.decode(encoded_credentials.as_bytes())
-				.map_err(|e| {
-					(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-				})?;
-		let decoded_credentials =
-			decode_base64_credentials(decoded_bytes).map_err(|e| {
-				(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-			})?;
-
-		let fetched_user = state
-			.db
-			.user()
-			.find_unique(user::username::equals(decoded_credentials.username.clone()))
-			.with(user::user_preferences::fetch())
-			.with(user::age_restriction::fetch())
-			.exec()
-			.await
-			.map_err(|e| map_prisma_error(e).into_response())?;
-
-		let Some(user) = fetched_user else {
-			tracing::error!(
-				"No user found for username: {}",
-				&decoded_credentials.username
-			);
-			return Err((StatusCode::UNAUTHORIZED).into_response());
-		};
-
-		let is_match =
-			verify_password(&user.hashed_password, &decoded_credentials.password)
-				.map_err(|e| e.into_response())?;
-
-		if is_match && user.is_locked {
-			tracing::error!(
-				username = &user.username,
-				"User is locked, denying authentication"
-			);
-			return Err((StatusCode::UNAUTHORIZED, "Your account is locked. Please contact an administrator to unlock your account.").into_response());
-		} else if is_match {
-			tracing::trace!(
-				username = &user.username,
-				"Basic authentication sucessful. Creating session for user"
-			);
-			let user = User::from(user);
-			session.insert(SESSION_USER_KEY, user).map_err(|e| {
-				tracing::error!("Failed to insert user into session: {}", e);
-				(StatusCode::INTERNAL_SERVER_ERROR).into_response()
-			})?;
-
-			return Ok(Self);
+		if auth_header.starts_with("Bearer ") && auth_header.len() > 7 {
+			let token = auth_header[7..].to_owned();
+			return handle_bearer_auth(token).await;
+		} else if auth_header.starts_with("Basic ") && auth_header.len() > 6 {
+			let encoded_credentials = auth_header[6..].to_owned();
+			return handle_basic_auth(encoded_credentials, &state.db, session).await;
 		}
 
 		return Err((StatusCode::UNAUTHORIZED).into_response());
 	}
+}
+
+// TODO: https://github.com/stumpapp/stump/issues/219
+async fn handle_bearer_auth(_: String) -> Result<Auth, Response> {
+	Err((StatusCode::NOT_IMPLEMENTED).into_response())
+}
+
+async fn handle_basic_auth(
+	encoded_credentials: String,
+	client: &PrismaClient,
+	session: Session,
+) -> Result<Auth, Response> {
+	let decoded_bytes = STANDARD
+		.decode(encoded_credentials.as_bytes())
+		.map_err(|e| {
+			(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+		})?;
+	let decoded_credentials = decode_base64_credentials(decoded_bytes).map_err(|e| {
+		(StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+	})?;
+
+	let fetched_user = client
+		.user()
+		.find_unique(user::username::equals(decoded_credentials.username.clone()))
+		.with(user::user_preferences::fetch())
+		.with(user::age_restriction::fetch())
+		.exec()
+		.await
+		.map_err(|e| map_prisma_error(e).into_response())?;
+
+	let Some(user) = fetched_user else {
+		tracing::error!(
+			"No user found for username: {}",
+			&decoded_credentials.username
+		);
+		return Err((StatusCode::UNAUTHORIZED).into_response());
+	};
+
+	let is_match = verify_password(&user.hashed_password, &decoded_credentials.password)
+		.map_err(|e| e.into_response())?;
+
+	if is_match && user.is_locked {
+		tracing::error!(
+			username = &user.username,
+			"User is locked, denying authentication"
+		);
+		return Err((StatusCode::UNAUTHORIZED, "Your account is locked. Please contact an administrator to unlock your account.").into_response());
+	} else if is_match {
+		tracing::trace!(
+			username = &user.username,
+			"Basic authentication sucessful. Creating session for user"
+		);
+		let user = User::from(user);
+		session.insert(SESSION_USER_KEY, user).map_err(|e| {
+			tracing::error!("Failed to insert user into session: {}", e);
+			(StatusCode::INTERNAL_SERVER_ERROR).into_response()
+		})?;
+
+		return Ok(Auth);
+	}
+
+	Err((StatusCode::UNAUTHORIZED).into_response())
 }
 
 /// Middleware to check the session user is an admin. **Must** be used **after** [Auth] midddleware.

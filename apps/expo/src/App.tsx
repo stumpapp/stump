@@ -9,10 +9,9 @@ import { Text, View } from 'react-native'
 // - Authenticated
 
 export default function App() {
+	const { error } = useAuthQuery({})
 
-  const {error} = useAuthQuery({})
-
-  console.log(error)
+	console.log(error)
 
 	return (
 		<View className="flex-1 items-center justify-center">

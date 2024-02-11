@@ -6,7 +6,6 @@ import { useEffect } from 'react'
 import App from './App'
 import { initializeApi } from '@stump/api'
 
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
 

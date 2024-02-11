@@ -133,7 +133,7 @@ export function ComboBox({
 		...(size === 'full'
 			? {
 					width: triggerRef?.current?.offsetWidth,
-			  }
+				}
 			: {}),
 		...(wrapperStyle || {}),
 	}

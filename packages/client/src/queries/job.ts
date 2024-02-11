@@ -1,9 +1,9 @@
 import { jobApi, jobQueryKeys } from '@stump/api'
-import type { JobDetail } from '@stump/types'
+import type { PersistedJob } from '@stump/types'
 
 import { PageQueryOptions, useMutation, usePageQuery, useQuery } from '../client'
 
-type UseJobsQueryParmas = PageQueryOptions<JobDetail> & {
+type UseJobsQueryParmas = PageQueryOptions<PersistedJob> & {
 	params?: Record<string, unknown>
 }
 // TODO(aaron): investigate why params from queryFn is not being properly populated, i.e.

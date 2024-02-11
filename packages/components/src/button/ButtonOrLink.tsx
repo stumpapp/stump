@@ -27,7 +27,7 @@ export function ButtonOrLink({
 	const location = isLink
 		? {
 				[isExternal ? 'href' : 'to']: props.href as string,
-		  }
+			}
 		: {}
 	const buttonOnlyProps = isLink
 		? {}
@@ -45,7 +45,7 @@ export function ButtonOrLink({
 								'cursor-not-allowed bg-background opacity-50': props.disabled,
 							},
 							className,
-					  )
+						)
 					: undefined
 			}
 			{...location}

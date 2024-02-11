@@ -3,6 +3,7 @@
 
 # Logs
 logs/
+!packages/browser/**/logs/
 *.log
 
 # Cache
@@ -30,7 +31,6 @@ node_modules/
 target/
 .next
 .netlify
-.pnpm-store
 .vercel
 
 # Custom

@@ -3,6 +3,7 @@
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
 		"strict": true,
 		"allowJs": true,
+		"allowSyntheticDefaultImports": true,
 		"moduleResolution": "nodenext",
 		"verbatimModuleSyntax": false,
 		"target": "es2022",
@@ -21,7 +22,7 @@
 			"@stump/client": ["./packages/client"],
 			"@stump/api": ["./packages/api"],
 			"@stump/types": ["./packages/types"],
-			"@stump/interface": ["./interface"]
+			"@stump/browser": ["./packages/browser"]
 		}
 	}
 }

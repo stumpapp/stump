@@ -20,7 +20,7 @@ use utoipa::ToSchema;
 
 use crate::{
 	config::{session::SESSION_USER_KEY, state::AppState},
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	http_server::StumpRequestInfo,
 	utils::verify_password,
 };
@@ -53,11 +53,11 @@ pub struct LoginOrRegisterArgs {
 )]
 /// Returns the currently logged in user from the session. If no user is logged in, returns an
 /// unauthorized error.
-async fn viewer(session: Session) -> ApiResult<Json<User>> {
+async fn viewer(session: Session) -> APIResult<Json<User>> {
 	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
 		Ok(Json(user))
 	} else {
-		Err(ApiError::Unauthorized)
+		Err(APIError::Unauthorized)
 	}
 }
 
@@ -67,7 +67,7 @@ async fn handle_login_attempt(
 	user_agent: UserAgent,
 	request_info: StumpRequestInfo,
 	success: bool,
-) -> ApiResult<user_login_activity::Data> {
+) -> APIResult<user_login_activity::Data> {
 	let login_activity = client
 		.user_login_activity()
 		.create(
@@ -86,7 +86,7 @@ async fn handle_remove_earliest_session(
 	client: &PrismaClient,
 	for_user_id: String,
 	session_id: Option<String>,
-) -> ApiResult<i32> {
+) -> APIResult<i32> {
 	if let Some(oldest_session_id) = session_id {
 		let _deleted_session = client
 			.session()
@@ -124,7 +124,7 @@ async fn login(
 	session: Session,
 	State(state): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
-) -> ApiResult<Json<User>> {
+) -> APIResult<Json<User>> {
 	if let Some(user) = session.get::<User>(SESSION_USER_KEY)? {
 		if input.username == user.username {
 			return Ok(Json(user));
@@ -163,7 +163,7 @@ async fn login(
 			if db_user.is_locked
 				&& verify_password(&db_user.hashed_password, &input.password)? =>
 		{
-			Err(ApiError::Forbidden(
+			Err(APIError::Forbidden(
 				"Account is locked. Please contact an administrator to unlock your account."
 					.to_string(),
 			))
@@ -201,7 +201,7 @@ async fn login(
 					tracing::debug!(?removed_sessions_count, ?user_id, "Locked user account and removed all associated sessions")
 				}
 
-				return Err(ApiError::Unauthorized);
+				return Err(APIError::Unauthorized);
 			}
 
 			let existing_sessions = db_user
@@ -261,7 +261,7 @@ async fn login(
 
 			Ok(Json(user))
 		},
-		_ => Err(ApiError::Unauthorized),
+		_ => Err(APIError::Unauthorized),
 	}
 }
 
@@ -275,10 +275,10 @@ async fn login(
 	)
 )]
 /// Destroys the session and logs the user out.
-async fn logout(session: Session) -> ApiResult<()> {
+async fn logout(session: Session) -> APIResult<()> {
 	session.delete();
 	if !matches!(session.deleted(), Some(SessionDeletion::Deleted)) {
-		return Err(ApiError::InternalServerError(
+		return Err(APIError::InternalServerError(
 			"Failed to destroy session".to_string(),
 		));
 	}
@@ -302,8 +302,8 @@ pub async fn register(
 	session: Session,
 	State(ctx): State<AppState>,
 	Json(input): Json<LoginOrRegisterArgs>,
-) -> ApiResult<Json<User>> {
-	let db = ctx.get_db();
+) -> APIResult<Json<User>> {
+	let db = &ctx.db;
 
 	let has_users = db.user().find_first(vec![]).exec().await?.is_some();
 
@@ -314,13 +314,13 @@ pub async fn register(
 	// TODO: move nested if to if let once stable
 	if let Some(user) = session_user {
 		if !user.is_server_owner {
-			return Err(ApiError::Forbidden(String::from(
+			return Err(APIError::Forbidden(String::from(
 				"You do not have permission to access this resource.",
 			)));
 		}
 	} else if session_user.is_none() && has_users {
 		// if users exist, a valid session is required to register a new user
-		return Err(ApiError::Unauthorized);
+		return Err(APIError::Unauthorized);
 	} else if !has_users {
 		// if no users present, the user is automatically a server owner
 		is_server_owner = true;

@@ -9,7 +9,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN npm install -g yarn
+# yarn is installed by default now
+# RUN npm install -g yarn 
 
 RUN yarn install
 RUN yarn web build

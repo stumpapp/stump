@@ -140,7 +140,7 @@ export default function CreateOrEditLibraryForm({ library, existingLibraries }: 
 				? {
 						enabled: true,
 						...library?.library_options.thumbnail_config,
-				  }
+					}
 				: undefined,
 		},
 		reValidateMode: 'onChange',

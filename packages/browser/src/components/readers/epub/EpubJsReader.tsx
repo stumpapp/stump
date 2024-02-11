@@ -250,7 +250,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 					: {
 							height: 0,
 							width: 0,
-					  }
+						}
 
 				if (currentWidth === width && currentHeight === height) {
 					continue

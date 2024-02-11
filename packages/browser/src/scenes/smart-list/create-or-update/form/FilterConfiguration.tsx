@@ -133,8 +133,8 @@ function FilterGroup({ groupIndex, onRemove }: FilterGroupProps) {
 					{joiner === 'and'
 						? 'All filters in this group must be true'
 						: joiner === 'or'
-						? 'Any one filter in this group can be true'
-						: 'None of the filters in this group can be true'}
+							? 'Any one filter in this group can be true'
+							: 'None of the filters in this group can be true'}
 				</Text>
 			</div>
 

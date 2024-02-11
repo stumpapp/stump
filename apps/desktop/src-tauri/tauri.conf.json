@@ -1,7 +1,7 @@
 {
 	"$schema": "../node_modules/@tauri-apps/cli/schema.json",
 	"build": {
-		"beforeDevCommand": "pnpm vite --clearScreen=false",
+		"beforeDevCommand": "yarn vite --clearScreen=false",
 		"devPath": "http://localhost:3000",
 		"distDir": "../dist"
 	},

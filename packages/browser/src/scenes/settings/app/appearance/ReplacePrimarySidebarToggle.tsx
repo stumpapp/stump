@@ -29,8 +29,8 @@ export default function ReplacePrimarySidebarToggle() {
 				!enable_double_sidebar
 					? 'This setting requires the double sidebar to be changed'
 					: primary_navigation_mode !== 'SIDEBAR'
-					? 'This setting is not currently supported when the primary navigation is set to top bar'
-					: undefined
+						? 'This setting is not currently supported when the primary navigation is set to top bar'
+						: undefined
 			}
 		/>
 	)

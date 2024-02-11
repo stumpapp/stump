@@ -23,25 +23,25 @@ If you're completely new to rust and/or web development, I put together a small 
 	[Rosetta](https://support.apple.com/en-us/>HT211861).
 </Callout>
 
-You need to install [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). Additionally, if you want to run any of the dev scripts on the rust side of things, you'll need to install [cargo-watch](https://crates.io/crates/cargo-watch). Afterwards, run the following:
+You need to install [yarn](https://yarnpkg.com), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/). Additionally, if you want to run any of the dev scripts on the rust side of things, you'll need to install [cargo-watch](https://crates.io/crates/cargo-watch). Afterwards, run the following:
 
 ```bash
-pnpm run setup
+yarn run setup
 ```
 
 This will install the project dependencies, build the frontend bundle (required for server to start), generate the prisma client, and create the sqlite database.
 
 ### Running Stump
 
-I use [pnpm workspaces](https://pnpm.io/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html):
+I use [yarn workspaces](https://yarnpkg.com/features/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html):
 
 ```bash
 # run the webapp + server
-pnpm dev:web
+yarn dev:web
 # run the desktop app + server
-pnpm start:desktop
+yarn start:desktop
 # run the docs website
-pnpm docs dev
+yarn docs dev
 ```
 
 Or `cargo` for the server:
@@ -80,7 +80,7 @@ I also want to point out that this repository uses 4 tab spaces for indentation.
 Stump has a custom component library used throughout the `browser` package (the web UI and desktop app). This library can be found at `packages/components`, and was developed with Storybook in mind. For getting started building out designs and components in Stump, I highly recommend going through the stories available in the Storybook UI:
 
 ```bash
-pnpm storybook
+yarn storybook
 ```
 
 This will give you a good idea of what components are available and how they can be used.

@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"skipLibCheck": true,
 		"jsx": "preserve",
+		"module": "esnext",
 		"paths": {
 			"@stump/api": ["../../packages/api/src/index.ts"],
 			"@stump/api/*": ["../../packages/api/src/*"],
@@ -11,6 +12,5 @@
 			"@stump/types": ["../../packages/types/index.ts"],
 			"@stump/types/*": ["../../packages/types/*"]
 		}
-	},
-	"module": "NodeNext"
+	}
 }

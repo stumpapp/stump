@@ -1,23 +1,26 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/api'
-import { useAppStore, useAuthQuery, useUserStore } from '@stump/client'
+import { StumpClientContextProvider, useAppStore, useAuthQuery, useUserStore } from '@stump/client'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { AuthenticatedNavigator } from './screens/authenticated'
 import LoginOrClaim from './screens/LoginOrClaim'
 import ServerNotAccessible from './screens/ServerNotAccessible'
 
-// TODO: Setup React Navigation: https://reactnavigation.org/docs/getting-started/
-// 3 main route groups:
-// - Cannot connect to server
-// - Unathenticated
-// - Authenticated
-
 const Stack = createNativeStackNavigator()
 
 export default function AppWrapper() {
+	return (
+		<StumpClientContextProvider>
+			<App />
+		</StumpClientContextProvider>
+	)
+}
+
+function App() {
 	const { baseUrl, setBaseUrl, setPlatform } = useAppStore((store) => ({
 		baseUrl: store.baseUrl,
 		setBaseUrl: store.setBaseUrl,
@@ -105,8 +108,10 @@ export default function AppWrapper() {
 	if (!isReady) return null
 
 	return (
-		<NavigationContainer>
-			<Stack.Navigator>{renderApp()}</Stack.Navigator>
-		</NavigationContainer>
+		<SafeAreaProvider>
+			<NavigationContainer>
+				<Stack.Navigator>{renderApp()}</Stack.Navigator>
+			</NavigationContainer>
+		</SafeAreaProvider>
 	)
 }

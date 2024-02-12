@@ -3,7 +3,7 @@ import { produce } from 'immer'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
-import { StoreBase } from '.'
+import { globalPersistStorage, StoreBase } from '.'
 
 // TODO: fix this store to use the new `createWithEqualityFn` method and optimize
 
@@ -68,6 +68,7 @@ export const useUserStore = create<UserStore>()(
 						userPreferences: store.userPreferences,
 					}
 				},
+				storage: globalPersistStorage,
 			},
 		),
 	),

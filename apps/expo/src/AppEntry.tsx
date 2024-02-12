@@ -1,12 +1,21 @@
-import { StumpClientContextProvider } from '@stump/client'
 import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 
-import App from './App'
+import { LocalStorage } from './localStorage'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
+
+// FIXME: this doesn't seem to be working still... Investigate
+// Set global persist storage to AsyncStorage
+// setGlobalPersistStorage(() => AsyncStorage)
+globalThis.localStorage = new LocalStorage()
+
+// Lazy load the app to prevent zustand from being initialized before the globalThis.localStorage is set
+const LazyApp = lazy(async () => {
+	return await import('./App')
+})
 
 export function AppEntry() {
 	const [loaded, error] = useFonts({
@@ -24,8 +33,8 @@ export function AppEntry() {
 
 	// NOTE: react navigate advises against manual redirect? so for now we don't supply onRedirect...
 	return (
-		<StumpClientContextProvider>
-			<App />
-		</StumpClientContextProvider>
+		<Suspense fallback={null}>
+			<LazyApp />
+		</Suspense>
 	)
 }

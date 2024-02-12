@@ -20,5 +20,6 @@ export {
 export * from './context'
 export * from './hooks'
 export { invalidateQueries } from './invalidate'
+export { StumpClientContextProvider } from './provider'
 export * from './queries'
 export * from './stores'

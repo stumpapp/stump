@@ -1,4 +1,10 @@
-import { StumpClientContextProvider } from '@stump/client'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import {
+	createJSONStorage,
+	StumpClientContextProvider,
+	useAppStore,
+	useUserStore,
+} from '@stump/client'
 import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
@@ -7,6 +13,15 @@ import App from './App'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
+
+// FIXME: not working :sob: things are NOT being persisted...
+
+useUserStore.persist.setOptions({
+	storage: createJSONStorage(() => AsyncStorage),
+})
+useAppStore.persist.setOptions({
+	storage: createJSONStorage(() => AsyncStorage),
+})
 
 export function AppEntry() {
 	const [loaded, error] = useFonts({

@@ -1,7 +1,5 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createContext, PropsWithChildren, useContext } from 'react'
-
-import { queryClient } from './client'
+import { QueryClient } from '@tanstack/react-query'
+import { createContext, useContext } from 'react'
 
 export const QueryClientContext = createContext<QueryClient | undefined>(undefined)
 
@@ -11,19 +9,8 @@ export type IStumpClientContext = {
 	setDiscordPresence?: (status?: string, details?: string) => void
 }
 export const StumpClientContext = createContext<IStumpClientContext | undefined>(undefined)
-export function StumpClientContextProvider({
-	children,
-	...context
-}: PropsWithChildren<IStumpClientContext>) {
-	return (
-		<StumpClientContext.Provider value={context}>
-			<QueryClientContext.Provider value={queryClient}>
-				<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-			</QueryClientContext.Provider>
-		</StumpClientContext.Provider>
-	)
-}
 
+// TODO: 'android' | 'ios' --> https://reactnative.dev/docs/platform
 /**
  * The platform that the application is running on
  */

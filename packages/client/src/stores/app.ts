@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
 import { Platform } from '../context'
+import { getDefaultStorage } from './utils'
 
 type AppStore = {
 	platform: Platform
@@ -45,6 +46,7 @@ export const useAppStore = create<AppStore>()(
 				partialize(state) {
 					return { baseUrl: state.baseUrl, platform: state.platform }
 				},
+				...getDefaultStorage(),
 			},
 		),
 	),

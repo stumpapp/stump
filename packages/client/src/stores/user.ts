@@ -1,9 +1,10 @@
 import type { User, UserPermission, UserPreferences } from '@stump/types'
 import { produce } from 'immer'
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
 import { StoreBase } from '.'
+import { getDefaultStorage } from './utils'
 
 // TODO: fix this store to use the new `createWithEqualityFn` method and optimize
 
@@ -68,9 +69,16 @@ export const useUserStore = create<UserStore>()(
 						userPreferences: store.userPreferences,
 					}
 				},
+				...getDefaultStorage(),
 			},
 		),
 	),
 )
 
 export const useUser = () => useUserStore((store) => ({ setUser: store.setUser, user: store.user }))
+
+export const setUserStorage = (storage: StateStorage) => {
+	useUserStore.persist.setOptions({
+		storage: createJSONStorage(() => storage),
+	})
+}

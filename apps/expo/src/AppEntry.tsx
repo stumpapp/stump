@@ -1,45 +1,40 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import {
-	createJSONStorage,
-	StumpClientContextProvider,
-	useAppStore,
-	useUserStore,
-} from '@stump/client'
+import { StumpClientContextProvider } from '@stump/client'
 import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 
 import App from './App'
+import { useAppStore, useUserStore } from './stores'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
-
-// FIXME: not working :sob: things are NOT being persisted...
-
-useUserStore.persist.setOptions({
-	storage: createJSONStorage(() => AsyncStorage),
-})
-useAppStore.persist.setOptions({
-	storage: createJSONStorage(() => AsyncStorage),
-})
 
 export function AppEntry() {
 	const [loaded, error] = useFonts({
 		SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
 	})
 
+	const setUser = useUserStore((store) => store.setUser)
+	const setIsConnectedWithServer = useAppStore((store) => store.setIsConnectedWithServer)
+
 	// Expo Router uses Error Boundaries to catch errors in the navigation tree.
 	useEffect(() => {
 		if (error) throw error
 	}, [error])
 
+	const handleUnauthenticatedResponse = () => setUser(null)
+	const handleConnectionWithServerChanged = (isConnected: boolean) =>
+		setIsConnectedWithServer(isConnected)
+
 	if (!loaded) {
 		return null
 	}
 
-	// NOTE: react navigate advises against manual redirect? so for now we don't supply onRedirect...
 	return (
-		<StumpClientContextProvider>
+		<StumpClientContextProvider
+			onUnauthenticatedResponse={handleUnauthenticatedResponse}
+			onConnectionWithServerChanged={handleConnectionWithServerChanged}
+		>
 			<App />
 		</StumpClientContextProvider>
 	)

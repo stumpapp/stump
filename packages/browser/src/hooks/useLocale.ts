@@ -1,7 +1,8 @@
-import '../i18n/config'
+import '@/i18n/config'
 
-import { useUserStore } from '@stump/client'
 import { useTranslation } from 'react-i18next'
+
+import { useUserStore } from '@/stores'
 
 export enum Locale {
 	English = 'en',

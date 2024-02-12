@@ -1,4 +1,4 @@
-import { useLayoutMode, usePagedMediaQuery, useSeriesByIdQuery } from '@stump/client'
+import { usePagedMediaQuery, useSeriesByIdQuery } from '@stump/client'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
@@ -9,7 +9,7 @@ import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/fi
 import MediaList from '@/components/media/MediaList'
 import Pagination from '@/components/Pagination'
 import useIsInView from '@/hooks/useIsInView'
-import { usePageParam } from '@/hooks/usePageParam'
+import { usePageParam, useLayoutMode } from '@/hooks'
 
 import { SeriesContext, useSeriesContext } from './context'
 import MediaGrid from './MediaGrid'

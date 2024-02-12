@@ -1,4 +1,4 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
 import { cn, Heading, Link, Text } from '@stump/components'
 import React from 'react'
 

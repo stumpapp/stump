@@ -94,8 +94,8 @@ const paths = {
 		}
 		return `/series/${id}`
 	},
-	settings: (subpath: SettingsPage = 'app/general') => `/settings/${subpath || ''}`,
 	serverLogs: (jobId?: string) => paths.settings('server/logs') + (jobId ? `?job_id=${jobId}` : ''),
+	settings: (subpath: SettingsPage = 'app/general') => `/settings/${subpath || ''}`,
 	smartList: (id: string) => `/smart-lists/${id}`,
 	smartListCreate: () =>
 		IS_DEV ? '/smart-lists/create' : 'https://stumpapp.dev/guides/smart-list#creating-a-smart-list',

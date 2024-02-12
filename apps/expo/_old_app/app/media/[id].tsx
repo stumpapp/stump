@@ -26,7 +26,6 @@ export default function Library() {
 const SeriesCard = ({ media }: { media: Media }) => {
 	const imageUrl = `${API.defaults.baseURL}/media/${media.id}/thumbnail`
 
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	const onPress = () => {}
 
 	return (

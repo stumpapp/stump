@@ -1,4 +1,4 @@
-import { useLayoutMode } from '@stump/client'
+import { useLayoutMode } from '@/hooks'
 import { IconButton } from '@stump/components'
 import { Rows, SquaresFour } from 'phosphor-react'
 

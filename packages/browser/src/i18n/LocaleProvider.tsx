@@ -1,6 +1,7 @@
-import { useUserStore } from '@stump/client'
 import { Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import { useUserStore } from '@/stores'
 
 import { AllowedLocale, i18n } from './config'
 import { LocaleContext } from './context'

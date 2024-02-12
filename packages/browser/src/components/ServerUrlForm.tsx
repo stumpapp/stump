@@ -1,6 +1,6 @@
+import { useAppStore } from '@/stores'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUrl, isUrl } from '@stump/api'
-import { useAppStore } from '@stump/client'
 import { Button, Form, Input, ProgressSpinner, Text, useBoolean } from '@stump/components'
 import { CloudCheck, CloudSlash } from 'phosphor-react'
 import { useEffect, useMemo, useState } from 'react'

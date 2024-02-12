@@ -1,4 +1,5 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
+
 import { Avatar, Card, cn, Heading, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'

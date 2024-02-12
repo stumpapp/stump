@@ -1,4 +1,3 @@
-import paths from '@/paths'
 import { jobApi, jobQueryKeys } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
@@ -7,6 +6,8 @@ import { Ban, Database, FileClock, MoreVertical, Trash2 } from 'lucide-react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
+
+import paths from '@/paths'
 
 type Props = {
 	job: PersistedJob

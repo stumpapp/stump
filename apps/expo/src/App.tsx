@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/api'
-import { useAppStore, useAuthQuery, useUserStore } from '@stump/client'
+import { useAuthQuery } from '@stump/client'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { AuthenticatedNavigator } from './screens/authenticated'
 import LoginOrClaim from './screens/LoginOrClaim'
 import ServerNotAccessible from './screens/ServerNotAccessible'
+import { useAppStore, useUserStore } from './stores'
 
 const Stack = createNativeStackNavigator()
 
@@ -23,15 +24,19 @@ export default function AppWrapper() {
 		setStoreUser: state.setUser,
 		storeUser: state.user,
 	}))
+	const { isConnectedToServer, setIsConnectedToServer } = useAppStore((store) => ({
+		isConnectedToServer: store.isConnectedWithServer,
+		setIsConnectedToServer: store.setIsConnectedWithServer,
+	}))
 
 	const [isReady, setIsReady] = useState(false)
-	const [isConnectedToServer, setIsConnectedToServer] = useState(false)
 
 	const { error } = useAuthQuery({
 		enabled: !storeUser && !!baseUrl && isConnectedToServer,
 		onSuccess: setStoreUser,
 	})
 
+	// TODO: This might not be needed anymore after refactoring the client, check this
 	useEffect(() => {
 		if (!error) return
 
@@ -40,7 +45,7 @@ export default function AppWrapper() {
 		if (isNetworkError) {
 			setIsConnectedToServer(false)
 		}
-	}, [error])
+	}, [error, setIsConnectedToServer])
 
 	useEffect(() => {
 		// TODO: ios vs androind?
@@ -48,9 +53,9 @@ export default function AppWrapper() {
 	}, [setPlatform])
 
 	// TODO: remove, just debugging stuff
-	useEffect(() => {
-		setBaseUrl('https://demo.stumpapp.dev')
-	}, [setBaseUrl])
+	// useEffect(() => {
+	// 	setBaseUrl('https://demo.stumpapp.dev')
+	// }, [setBaseUrl])
 
 	useEffect(() => {
 		if (isReady) {
@@ -58,7 +63,7 @@ export default function AppWrapper() {
 		}
 	}, [isReady])
 
-	console.log({ baseUrl, isConnectedToServer, isReady, storeUser })
+	// console.log({ baseUrl, isConnectedToServer, isReady, storeUser })
 
 	/**
 	 * An effect that will verify the baseUrl is accessible to the app.
@@ -87,7 +92,7 @@ export default function AppWrapper() {
 		} else {
 			setIsReady(true)
 		}
-	}, [baseUrl])
+	}, [baseUrl, setIsConnectedToServer])
 
 	const renderApp = () => {
 		if (!isConnectedToServer) {

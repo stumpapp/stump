@@ -1,8 +1,10 @@
 import { userQueryKeys } from '@stump/api'
-import { invalidateQueries, useDeleteUser, useUser } from '@stump/client'
+import { invalidateQueries, useDeleteUser } from '@stump/client'
 import { Button, CheckBox, Dialog } from '@stump/components'
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'
+
+import { useUser } from '@/stores'
 
 import { useUserManagementContext } from '../context'
 

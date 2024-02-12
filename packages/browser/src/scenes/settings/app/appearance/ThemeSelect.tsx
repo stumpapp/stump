@@ -1,8 +1,8 @@
-import { useTheme } from '@stump/client'
 import { Label, Link, NativeSelect, Text } from '@stump/components'
 import React from 'react'
 
 import { useLocaleContext } from '@/i18n'
+import { useTheme } from '@/hooks'
 
 const localeKey = 'settingsScene.app/appearance.sections.themeSelect'
 

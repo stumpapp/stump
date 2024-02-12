@@ -5,6 +5,8 @@ export const QueryClientContext = createContext<QueryClient | undefined>(undefin
 
 export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
+	onUnauthenticatedResponse?: (redirectUrl?: string) => void
+	onConnectionWithServerChanged?: (isConnected: boolean) => void
 	setUseDiscordPresence?: (connect: boolean) => void
 	setDiscordPresence?: (status?: string, details?: string) => void
 }

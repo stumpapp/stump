@@ -1,18 +1,18 @@
-import { useAppStore } from '@stump/client'
 import { Spacer } from '@stump/components'
 import { motion } from 'framer-motion'
 import { Book, Home } from 'lucide-react'
 import React from 'react'
 import { useMediaMatch } from 'rooks'
 
-import { useAppContext } from '../../../context'
-import { useLocaleContext } from '../../../i18n'
-import paths from '../../../paths'
+import { useAppContext } from '@/context'
+import { useLocaleContext } from '@/i18n'
+import paths from '@/paths'
 import UserMenu from '../../UserMenu'
 import NavigationButtons from '../mobile/NavigationButtons'
 import { BookClubSideBarSection, LibrarySideBarSection, SmartListSideBarSection } from './sections'
 import SideBarButtonLink from './SideBarButtonLink'
 import SideBarFooter from './SideBarFooter'
+import { useAppStore } from '@/stores'
 
 const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
 

@@ -1,4 +1,4 @@
-import { useAppStore } from '@stump/client'
+import { useAppStore } from '@/stores'
 import { Link, Text } from '@stump/components'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'

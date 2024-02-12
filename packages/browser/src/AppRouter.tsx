@@ -1,4 +1,3 @@
-import { useAppStore } from '@stump/client'
 import React, { lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
@@ -11,6 +10,7 @@ import OnBoardingRouter from './scenes/onboarding/OnBoardingRouter.tsx'
 import SeriesRouter from './scenes/series/SeriesRouter.tsx'
 import SettingsRouter from './scenes/settings/SettingsRouter.tsx'
 import { SmartListRouter } from './scenes/smart-list/index.ts'
+import { useAppStore } from './stores/app.ts'
 
 const HomeScene = lazy(() => import('./scenes/home/HomeScene.tsx'))
 const FourOhFour = lazy(() => import('./scenes/error/FourOhFour.tsx'))

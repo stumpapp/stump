@@ -1,4 +1,5 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
+
 import { Accordion, cn, Text } from '@stump/components'
 import { Library, Series, SmartListItemGroup } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'

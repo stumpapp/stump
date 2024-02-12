@@ -76,7 +76,7 @@ export default function ThumbnailConfigForm() {
 									? {
 											errorMessage:
 												form.formState.errors.thumbnail_config?.resize_options?.width?.message,
-									  }
+										}
 									: {})}
 							/>
 							<Input
@@ -113,7 +113,7 @@ export default function ThumbnailConfigForm() {
 									? {
 											errorMessage:
 												form.formState.errors.thumbnail_config?.resize_options?.width?.message,
-									  }
+										}
 									: {})}
 							/>
 							<Input

@@ -37,7 +37,7 @@ export default function BookManagementScene() {
 							label: series.metadata?.title || series.name,
 							to: paths.seriesOverview(series.id),
 						},
-				  ]
+					]
 				: []),
 			{
 				label: media.metadata?.title || media.name,

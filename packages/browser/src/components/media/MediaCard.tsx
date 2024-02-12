@@ -115,7 +115,7 @@ export default function MediaCard({
 			? paths.bookReader(media.id, {
 					epubcfi: media.current_epubcfi,
 					page: media.current_page || undefined,
-			  })
+				})
 			: paths.bookOverview(media.id)
 	}, [readingLink, media.id, media.current_epubcfi, media.current_page, onSelect])
 
@@ -128,7 +128,7 @@ export default function MediaCard({
 						progress: undefined,
 						subtitle: undefined,
 						title: undefined,
-				  }
+					}
 				: {}
 		) as Partial<EntityCardProps>
 

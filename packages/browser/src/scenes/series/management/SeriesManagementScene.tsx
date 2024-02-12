@@ -31,7 +31,7 @@ export default function SeriesManagementScene() {
 							label: series.library.name,
 							to: paths.librarySeries(series.library.id),
 						},
-				  ]
+					]
 				: []),
 			{
 				label: series.metadata?.title || series.name,

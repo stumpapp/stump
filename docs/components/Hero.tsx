@@ -10,7 +10,7 @@ export default function Hero() {
 					initial={{ opacity: 0, y: -40 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
-					className="text-4xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-5xl md:text-6xl"
+					className="text-4xl font-extrabold tracking-tight text-neutral-900 sm:text-5xl md:text-6xl dark:text-neutral-100"
 				>
 					<span className="block xl:inline">A lightning fast</span>{' '}
 					<span className="block xl:inline">media server.</span>
@@ -19,7 +19,7 @@ export default function Hero() {
 					initial={{ opacity: 0, y: 40 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.25, duration: 0.5 }}
-					className="text-neutral-650 mx-auto mt-3 max-w-md text-base dark:text-neutral-400 sm:text-lg md:mt-5 md:max-w-3xl md:text-xl"
+					className="text-neutral-650 mx-auto mt-3 max-w-md text-base sm:text-lg md:mt-5 md:max-w-3xl md:text-xl dark:text-neutral-400"
 				>
 					Free, open source, self-hosting for all your comic books, manga and digital book
 					collections. Supports the most popular reading formats.

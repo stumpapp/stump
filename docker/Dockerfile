@@ -2,20 +2,18 @@
 # Frontend Build Stage
 # ------------------------------------------------------------------------------
 
-FROM node:16-alpine3.14 as frontend
+FROM node:20.0.0-alpine3.16 as frontend
 ARG TARGETARCH
 
 WORKDIR /app
 
-# Note: I don't like copying ~everything~ but since I now use types exported from
-# the core, and use pnpm specific means of accessing it via the workspace, I kind
-# of need to maintain the structure of the workspace and use pnpm
 COPY . .
 
-RUN npm install -g pnpm
+# yarn is installed by default now
+# RUN npm install -g yarn 
 
-RUN pnpm i
-RUN pnpm web build
+RUN yarn install
+RUN yarn web build
 
 RUN mv ./apps/web/dist build
 

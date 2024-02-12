@@ -80,7 +80,7 @@ Contributions are very **welcome**! Please review the [CONTRIBUTING.md](https://
 
 A quick summary of the steps required to get going:
 
-1. Install [pnpm](https://pnpm.io/installation), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
+1. Install [yarn](https://yarnpkg.com/), [rust](https://www.rust-lang.org/tools/install) and [node](https://nodejs.org/en/download/).
    - If you're running Windows, you will need [Visual C++](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
    - If you're running macOS on Apple Silicon, you'll need to install [Rosetta](https://support.apple.com/en-us/HT211861)
 2. Install [cargo-watch](https://crates.io/crates/cargo-watch)
@@ -93,14 +93,14 @@ A quick summary of the steps required to get going:
    This isn't strictly necessary, and is mostly beneficial for Linux users (it installs some system dependencies). Feel free to skip this step if you'd like, and instead just run:
 
    ```bash
-   pnpm run setup
+   yarn run setup
    ```
 
    This will build the React app, generate the Prisma client, and generate the Rust-TypeScript types. To do any of these individually, you can run:
 
    ```bash
     # build the React app
-    pnpm web build
+    yarn web build
     # generate the Prisma client and Rust-TypeScript types
     cargo codegen # or cargo prisma generate --schema=./core/prisma/schema.prisma for just the Prisma client
    ```
@@ -111,11 +111,11 @@ A quick summary of the steps required to get going:
 
    ```bash
    # run the webapp + server
-   pnpm dev:web
+   yarn dev:web
    # run the desktop app + server
-   pnpm start:desktop
+   yarn start:desktop
    # run the docs website
-   pnpm docs dev
+   yarn docs dev
    ```
 
    Or just `cargo` for the server (and other Rust apps):
@@ -147,7 +147,7 @@ In general, the following areas are good places to start:
 <details>
   <summary><b>Click to expand</b></summary>
   
-Stump has a monorepo structure managed by [pnpm workspaces](https://pnpm.io/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html). The project is split into a number of different packages and crates, each with their own purpose:
+Stump has a monorepo structure managed by [yarn workspaces](https://yarnpkg.com/features/workspaces) and [cargo workspaces](https://doc.rust-lang.org/cargo/reference/workspaces.html). The project is split into a number of different packages and crates, each with their own purpose:
 
 ### Apps
 

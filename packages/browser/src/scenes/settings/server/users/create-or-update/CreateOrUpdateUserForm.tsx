@@ -93,7 +93,7 @@ export default function CreateOrUpdateUserForm({ user }: Props) {
 				? {
 						age: ageRestrictions.age_restriction,
 						restrict_on_unset: ageRestrictions.age_restriction_on_unset ?? false,
-				  }
+					}
 				: null
 
 			if (isCreating && password) {

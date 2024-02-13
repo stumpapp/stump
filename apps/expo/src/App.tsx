@@ -53,9 +53,9 @@ export default function AppWrapper() {
 	}, [setPlatform])
 
 	// TODO: remove, just debugging stuff
-	// useEffect(() => {
-	// 	setBaseUrl('https://demo.stumpapp.dev')
-	// }, [setBaseUrl])
+	useEffect(() => {
+		setBaseUrl('https://demo.stumpapp.dev')
+	}, [setBaseUrl])
 
 	useEffect(() => {
 		if (isReady) {
@@ -100,7 +100,13 @@ export default function AppWrapper() {
 		} else if (!storeUser) {
 			return <Stack.Screen name="Login" component={LoginOrClaim} />
 		} else {
-			return <AuthenticatedNavigator />
+			return (
+				<Stack.Screen
+					name="Authenticated"
+					component={AuthenticatedNavigator}
+					options={{ headerShown: false }}
+				/>
+			)
 		}
 	}
 

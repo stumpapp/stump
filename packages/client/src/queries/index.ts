@@ -39,7 +39,7 @@ export {
 	useSeriesCursorQuery,
 	useUpNextInSeries,
 } from './series'
-export { useStumpVersion } from './server'
+export { useCheckForServerUpdate, useStumpVersion } from './server'
 export {
 	prefetchSmartList,
 	prefetchSmartListItems,

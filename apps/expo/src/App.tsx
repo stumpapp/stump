@@ -4,6 +4,7 @@ import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/api'
 import { useAuthQuery } from '@stump/client'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
+import { View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { AuthenticatedNavigator } from './screens/authenticated'
@@ -54,7 +55,8 @@ export default function AppWrapper() {
 
 	// TODO: remove, just debugging stuff
 	useEffect(() => {
-		setBaseUrl('https://demo.stumpapp.dev')
+		// setBaseUrl('https://demo.stumpapp.dev')
+		setBaseUrl('http://localhost:10801')
 	}, [setBaseUrl])
 
 	useEffect(() => {
@@ -96,9 +98,15 @@ export default function AppWrapper() {
 
 	const renderApp = () => {
 		if (!isConnectedToServer) {
-			return <Stack.Screen name="Server SOS" component={ServerNotAccessible} />
+			return (
+				<Stack.Screen
+					name="Server SOS"
+					component={ServerNotAccessible}
+					options={{ headerShown: false }}
+				/>
+			)
 		} else if (!storeUser) {
-			return <Stack.Screen name="Login" component={LoginOrClaim} />
+			return <Stack.Screen name="Login" component={LoginOrClaim} options={{ headerShown: false }} />
 		} else {
 			return (
 				<Stack.Screen

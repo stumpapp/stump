@@ -1,20 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLoginOrRegister } from '@stump/client'
 import { StatusBar } from 'expo-status-bar'
+import { styled } from 'nativewind'
 import React, { useCallback } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Alert, Button, Text, TextInput, View } from 'react-native'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 import { z } from 'zod'
 
+import { Input } from '@/components'
 import { useUserStore } from '@/stores'
 
-// One thing I have NO clue about is how auth will actually wind up working for
-// the mobile app. Stump doesn't currently issue session tokens, just session cookies
-// being sent/set. I RN handles this in a secure way out the gate, perhaps we are clear.
-// However, my guess would be it doesn't?
-//
-// Adding tokens which can be pulled from the store for each request (:weary:)
-// might be required.
+const StyledView = styled(View)
 
 export default function LoginOrClaim() {
 	const setUser = useUserStore((store) => store.setUser)
@@ -63,47 +59,85 @@ export default function LoginOrClaim() {
 		[isClaimed, loginUser, registerUser],
 	)
 
+	const renderHeader = () => {
+		if (isClaimed) {
+			// just return a view with the icon.png:
+			return (
+				<View>
+					<Image className="h-32 w-32" source={require('../../assets/images/icon.png')} />
+				</View>
+			)
+		} else {
+			return (
+				<View className="items-center space-y-1">
+					<Text className="text-xl font-bold">This server is uninitialized</Text>
+					<Text className="mb-3 text-center text-sm">
+						Enter a username and password to claim it
+					</Text>
+					<Image className="h-24 w-24" source={require('../../assets/images/icon.png')} />
+				</View>
+			)
+		}
+	}
+
 	const isLoading = isCheckingClaimed || isLoggingIn || isRegistering
 
 	return (
-		<View className="flex-1 items-center justify-center">
-			<Text>I am logging in (or claiming server)</Text>
+		<StyledView className="flex-1 flex-col items-center justify-center space-y-4 px-4">
+			{renderHeader()}
 
-			<Controller
-				control={control}
-				rules={{
-					required: true,
-				}}
-				render={({ field: { onChange, onBlur, value } }) => (
-					<TextInput placeholder="Username" onBlur={onBlur} onChangeText={onChange} value={value} />
-				)}
-				name="username"
-			/>
-			{errors.username && <Text>{errors.username.message}</Text>}
+			<View className="w-full">
+				<Controller
+					control={control}
+					rules={{
+						required: true,
+					}}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<Input
+							autoCorrect={false}
+							autoCapitalize="none"
+							placeholder="Username"
+							onBlur={onBlur}
+							onChangeText={onChange}
+							value={value}
+						/>
+					)}
+					name="username"
+				/>
+				{errors.username && <Text>{errors.username.message}</Text>}
+			</View>
 
-			<Controller
-				control={control}
-				rules={{
-					required: true,
-				}}
-				render={({ field: { onChange, onBlur, value } }) => (
-					<TextInput
-						secureTextEntry
-						autoCorrect={false}
-						autoCapitalize="none"
-						placeholder="Password"
-						onBlur={onBlur}
-						onChangeText={onChange}
-						value={value}
-					/>
-				)}
-				name="password"
-			/>
-			{errors.password && <Text>{errors.password.message}</Text>}
+			<View className="w-full">
+				<Controller
+					control={control}
+					rules={{
+						required: true,
+					}}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<Input
+							secureTextEntry
+							autoCorrect={false}
+							autoCapitalize="none"
+							placeholder="Password"
+							onBlur={onBlur}
+							onChangeText={onChange}
+							value={value}
+						/>
+					)}
+					name="password"
+				/>
+				{errors.password && <Text>{errors.password.message}</Text>}
+			</View>
 
-			<Button title="Submit" onPress={handleSubmit(onSubmit)} disabled={isLoading} />
+			<TouchableOpacity
+				className="w-full rounded-md bg-orange-300 p-3"
+				onPress={handleSubmit(onSubmit)}
+				disabled={isLoading}
+			>
+				<Text className="text-center">{isClaimed ? 'Log in' : 'Create account'}</Text>
+			</TouchableOpacity>
 
 			<StatusBar style="auto" />
-		</View>
+		</StyledView>
 	)
 }

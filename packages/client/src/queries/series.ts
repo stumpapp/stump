@@ -61,6 +61,7 @@ export function usePagedSeriesQuery(options: PageQueryOptions<Series> = {}) {
 	}
 }
 
+// TODO: fix this query!
 export function useSeriesCursorQuery({ queryKey, ...options }: CursorQueryOptions<Series>) {
 	const { data, ...restReturn } = useCursorQuery(
 		queryKey ?? [seriesQueryKeys.getSeriesWithCursor],

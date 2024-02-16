@@ -7,8 +7,8 @@ use crate::{
 	db::{entity::LibraryOptions, FileStatus},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
-		error::JobError, JobControllerCommand, JobExt, JobOutputExt, JobProgress,
-		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, Executor, JobControllerCommand, JobExt, JobOutputExt,
+		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
@@ -163,9 +163,9 @@ impl JobExt for SeriesScanJob {
 
 	async fn cleanup(
 		&self,
-		ctx: &WorkerCtx,
+		_: &WorkerCtx,
 		output: &Self::Output,
-	) -> Result<(), JobError> {
+	) -> Result<Option<Box<dyn Executor>>, JobError> {
 		let did_create = output.created_media > 0;
 		let did_update = output.updated_media > 0;
 		let image_options = self
@@ -175,27 +175,20 @@ impl JobExt for SeriesScanJob {
 
 		match image_options {
 			Some(options) if did_create | did_update => {
-				tracing::debug!("Enqueuing thumbnail generation job");
-				ctx.send_batch(vec![
-					JobProgress::msg("Enqueuing thumbnail generation job").into_send(),
-					JobControllerCommand::EnqueueJob(WrappedJob::new(
-						ThumbnailGenerationJob {
-							options,
-							params: ThumbnailGenerationJobParams::single_series(
-								self.id.clone(),
-								false,
-							),
-						},
-					))
-					.into_send(),
-				]);
+				tracing::trace!("Thumbnail generation job should be enqueued");
+				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+					options,
+					params: ThumbnailGenerationJobParams::single_series(
+						self.id.clone(),
+						false,
+					),
+				})))
 			},
 			_ => {
-				tracing::debug!("No cleanup required for series scan job");
+				tracing::trace!("No cleanup required for series scan job");
+				Ok(None)
 			},
 		}
-
-		Ok(())
 	}
 
 	async fn execute_task(

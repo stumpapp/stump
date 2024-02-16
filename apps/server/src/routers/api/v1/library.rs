@@ -88,6 +88,10 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.put(update_library)
 						.delete(delete_library),
 				)
+				.route(
+					"/excluded-users",
+					get(get_library_excluded_users).post(update_library_excluded_users),
+				)
 				.route("/scan", get(scan_library))
 				.route("/clean", put(clean_library))
 				.route("/series", get(get_library_series))
@@ -897,6 +901,10 @@ async fn generate_library_thumbnails(
 
 	Ok(Json(()))
 }
+
+async fn get_library_excluded_users() {}
+
+async fn update_library_excluded_users() {}
 
 #[utoipa::path(
 	post,

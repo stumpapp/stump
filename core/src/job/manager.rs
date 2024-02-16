@@ -63,22 +63,34 @@ impl JobManager {
 		self.core_event_tx.clone()
 	}
 
+	// FIXME: there is a bug in here I haven't been able to track down,
+	// it only presents when I enable thumbnails and the scanner auto-enqueues
+	// a follow-up job
+
 	/// Add a job to the queue. If there are no running jobs (i.e. no workers),
 	/// then a worker will be created and immediately spawned
 	pub async fn enqueue(
 		self: Arc<Self>,
 		job: Box<dyn Executor>,
 	) -> JobManagerResult<()> {
+		let job_id = job.id().to_string();
+
+		if self.job_already_exists(&job_id).await {
+			tracing::warn!(?job_id, "Job already exists in queue or is running!");
+			return Err(JobManagerError::JobAlreadyExists(job_id));
+		}
+
 		let created_job = self
 			.client
 			.job()
-			.create(
-				job.id().to_string(),
-				job.name().to_string(),
-				vec![
-					job::description::set(job.description()),
-					job::status::set(JobStatus::Queued.to_string()),
-				],
+			.upsert(
+				job::id::equals(job.id().to_string()),
+				(
+					job.id().to_string(),
+					job.name().to_string(),
+					vec![job::description::set(job.description())],
+				),
+				vec![job::status::set(JobStatus::Queued.to_string())],
 			)
 			.exec()
 			.await
@@ -199,6 +211,11 @@ impl JobManager {
 	pub async fn shutdown(self: Arc<Self>) {
 		let workers = self.workers.read().await;
 		join_all(workers.values().map(|worker| worker.cancel())).await;
+	}
+
+	async fn job_already_exists(&self, job_id: &str) -> bool {
+		self.workers.read().await.contains_key(job_id)
+			|| self.get_queued_job_index(job_id).await.is_some()
 	}
 
 	/// Returns the index of a job in the pending queue by ID.

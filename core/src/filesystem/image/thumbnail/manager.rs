@@ -1,5 +1,7 @@
 use std::{collections::HashMap, fs::File, io::Write, path::PathBuf, sync::Arc};
 
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
 use crate::{
 	config::StumpConfig,
 	filesystem::{
@@ -11,6 +13,12 @@ use crate::{
 	},
 	prisma::media as prisma_media,
 };
+
+#[derive(Default)]
+pub struct ParThumbnailGenerationOutput {
+	created_thumbnails: i64,
+	errors: Vec<FileError>,
+}
 
 pub struct ThumbnailManager {
 	config: Arc<StumpConfig>,
@@ -45,11 +53,11 @@ impl ThumbnailManager {
 		self.thumbnail_contents.contains_key(media_id.as_ref())
 	}
 
-	pub fn generate_thumbnail(
-		&mut self,
+	fn do_generate_thumbnail(
+		&self,
 		media_item: &prisma_media::Data,
 		options: ImageProcessorOptions,
-	) -> Result<(), FileError> {
+	) -> Result<PathBuf, FileError> {
 		let media_id = media_item.id.clone();
 		let media_path = media_item.path.clone();
 
@@ -70,9 +78,6 @@ impl ThumbnailManager {
 
 			let mut image_file = File::create(&thumbnail_path)?;
 			image_file.write_all(&image_buffer)?;
-
-			// Write new thumbnail into hashmap
-			self.thumbnail_contents.insert(media_id, thumbnail_path);
 		} else {
 			tracing::trace!(
 				?thumbnail_path,
@@ -81,7 +86,45 @@ impl ThumbnailManager {
 			)
 		}
 
-		Ok(())
+		Ok(thumbnail_path)
+	}
+
+	pub fn generate_thumbnail(
+		&mut self,
+		media_item: &prisma_media::Data,
+		options: ImageProcessorOptions,
+	) -> Result<PathBuf, FileError> {
+		let path = self.do_generate_thumbnail(media_item, options)?;
+		self.thumbnail_contents
+			.insert(media_item.id.clone(), path.clone());
+		Ok(path)
+	}
+
+	pub fn generate_thumbnails_par(
+		&self,
+		media: &[prisma_media::Data],
+		options: ImageProcessorOptions,
+	) -> Result<ParThumbnailGenerationOutput, FileError> {
+		let mut output = ParThumbnailGenerationOutput::default();
+
+		for chunk in media.chunks(5) {
+			let results = chunk
+				.into_par_iter()
+				.map(|m| self.do_generate_thumbnail(m, options.clone()))
+				.collect::<Vec<_>>();
+
+			let result_len = results.len();
+			let errors = results
+				.into_iter()
+				.filter_map(Result::err)
+				.collect::<Vec<_>>();
+			let created_count = result_len - errors.len();
+
+			output.created_thumbnails += created_count as i64;
+			output.errors.extend(errors);
+		}
+
+		unimplemented!()
 	}
 
 	pub fn remove_thumbnail<S: AsRef<str>>(

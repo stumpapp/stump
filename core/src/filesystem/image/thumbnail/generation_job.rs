@@ -134,6 +134,19 @@ impl JobExt for ThumbnailGenerationJob {
 			ThumbnailGenerationJobVariant::MediaGroup(media_ids) => media_ids.clone(),
 		};
 
+		let manager = ThumbnailManager::new(ctx.config.clone())
+			.map_err(|e| JobError::TaskFailed(e.to_string()))?;
+
+		let media_ids = if !self.params.force_regenerate {
+			// if we aren't force regenerating, we can skip the init if all media already have thumbnails
+			media_ids
+				.into_iter()
+				.filter(|id| !manager.has_thumbnail(id.as_str()))
+				.collect::<Vec<_>>()
+		} else {
+			media_ids
+		};
+
 		let tasks = media_ids
 			.chunks(100)
 			.map(|chunk| ThumbnailGenerationTask::GenerateBatch(chunk.to_vec()))
@@ -253,6 +266,13 @@ pub fn safely_generate_batch(
 	let mut output = ThumbnailGenerationOutput::default();
 	let mut logs = vec![];
 
+	// let manager_arc = Arc::
+
+	// media
+	// 	.par_iter()
+	// 	.for_each_with(manager, |inner_manager, media| {});
+
+	// TODO: introduce a parallel version of this, it is too slow sequentially like this
 	for media_item in media {
 		manager
 			.generate_thumbnail(media_item, options.clone())

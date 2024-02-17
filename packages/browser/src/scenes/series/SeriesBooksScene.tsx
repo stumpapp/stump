@@ -1,31 +1,26 @@
-import { useLayoutMode, usePagedMediaQuery, useSeriesByIdQuery } from '@stump/client'
+import { useLayoutMode, usePagedMediaQuery } from '@stump/client'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
-import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
-import { SceneContainer } from '@/components/container'
 import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
 import MediaList from '@/components/media/MediaList'
 import Pagination from '@/components/Pagination'
 import useIsInView from '@/hooks/useIsInView'
 import { usePageParam } from '@/hooks/usePageParam'
 
-import { SeriesContext, useSeriesContext } from './context'
+import { useSeriesContext } from './context'
 import MediaGrid from './MediaGrid'
-import SeriesOverviewTitleSection from './SeriesOverviewTitleSection'
 
-// TODO: fix pagination
 function SeriesOverviewScene() {
 	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')
 
-	const [containerRef, isInView] = useIsInView()
+	const [containerRef, isInView] = useIsInView<HTMLDivElement>()
 
 	const { page, setPage } = usePageParam()
-	const { seriesId } = useSeriesContext()
+	const { series } = useSeriesContext()
 
 	const { layoutMode } = useLayoutMode()
-	const { series, isLoading: isLoadingSeries } = useSeriesByIdQuery(seriesId)
 	const { filters } = useFilterContext()
 	const {
 		isLoading: isLoadingMedia,
@@ -38,17 +33,14 @@ function SeriesOverviewScene() {
 		params: {
 			...filters,
 			series: {
-				id: seriesId,
+				id: series.id,
 			},
 		},
 	})
 
 	const { current_page, total_pages } = pageData || {}
 	const isOnFirstPage = current_page === 1
-	const hasFilters = Object.keys(filters || {}).length > 0
 	const hasStuff = total_pages !== undefined && current_page !== undefined
-	// we show on the first page, but if there are filters and no stuff we show it
-	const showOverview = isOnFirstPage || (hasFilters && !hasStuff)
 
 	// TODO: detect if going from page > 1 to page = 1 and scroll to top
 	useEffect(
@@ -64,21 +56,32 @@ function SeriesOverviewScene() {
 		[current_page, isOnFirstPage],
 	)
 
-	if (isLoadingSeries) {
-		return null
-	} else if (!series) {
-		throw new Error('Series not found')
+	const renderContent = () => {
+		if (layoutMode === 'GRID') {
+			return (
+				<MediaGrid
+					isLoading={isLoadingMedia}
+					media={media}
+					hasFilters={Object.keys(filters || {}).length > 0}
+				/>
+			)
+		} else {
+			return (
+				<MediaList
+					isLoading={isLoadingMedia}
+					media={media}
+					hasFilters={Object.keys(filters || {}).length > 0}
+				/>
+			)
+		}
 	}
 
 	return (
-		<SceneContainer>
+		<>
 			<Helmet>
 				<title>Stump | {series.name || ''}</title>
 			</Helmet>
 
-			{showOverview && <SeriesOverviewTitleSection series={series} />}
-
-			{/* @ts-expect-error: wrong ref but is okay */}
 			<section ref={containerRef} id="grid-top-indicator" className="h-1" />
 
 			<FilterToolBar
@@ -88,23 +91,11 @@ function SeriesOverviewScene() {
 				orderBy
 			/>
 
-			<div className="flex w-full flex-col gap-y-6 pt-4">
+			<div className="flex w-full flex-col gap-y-6">
 				{hasStuff && (
 					<Pagination pages={total_pages} currentPage={current_page} onChangePage={setPage} />
 				)}
-				{layoutMode === 'GRID' ? (
-					<MediaGrid
-						isLoading={isLoadingMedia}
-						media={media}
-						hasFilters={Object.keys(filters || {}).length > 0}
-					/>
-				) : (
-					<MediaList
-						isLoading={isLoadingMedia}
-						media={media}
-						hasFilters={Object.keys(filters || {}).length > 0}
-					/>
-				)}
+				<div className="px-4">{renderContent()}</div>
 				{hasStuff && (
 					<Pagination
 						position="bottom"
@@ -114,22 +105,14 @@ function SeriesOverviewScene() {
 					/>
 				)}
 			</div>
-		</SceneContainer>
+		</>
 	)
 }
 
 export default function SeriesOverviewSceneWrapper() {
-	const seriesId = useParams<{ id: string }>()?.id
-
-	if (!seriesId) {
-		throw new Error('Series ID is required for this route.')
-	}
-
 	return (
-		<SeriesContext.Provider value={{ seriesId }}>
-			<FilterProvider>
-				<SeriesOverviewScene />
-			</FilterProvider>
-		</SeriesContext.Provider>
+		<FilterProvider>
+			<SeriesOverviewScene />
+		</FilterProvider>
 	)
 }

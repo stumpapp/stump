@@ -10,6 +10,7 @@ const CreateLibraryScene = lazy(() => import('./management/CreateLibraryScene.ts
 const LibrarySettingsScene = lazy(() => import('./management/LibrarySettingsScene.tsx'))
 const LibraryExplorerScene = lazy(() => import('./explorer/LibraryExplorerScene.tsx'))
 const LibrarySeriesScene = lazy(() => import('./LibrarySeriesScene.tsx'))
+const LibraryBooksScene = lazy(() => import('./LibraryBooksScene.tsx'))
 
 export default function LibraryRouter() {
 	const { checkPermission } = useAppContext()
@@ -19,8 +20,9 @@ export default function LibraryRouter() {
 	return (
 		<Routes>
 			<Route path=":id/*" element={<LibraryLayout />}>
-				<Route path="" element={<Navigate to="series" />} />
+				<Route path="" element={<Navigate to="series" replace />} />
 				<Route path="series" element={<LibrarySeriesScene />} />
+				<Route path="books" element={<LibraryBooksScene />} />
 				{canAccessExplorer && <Route path="files" element={<LibraryExplorerScene />} />}
 				<Route element={<LibraryAdminLayout />}>
 					<Route path="settings" element={<LibrarySettingsScene />} />

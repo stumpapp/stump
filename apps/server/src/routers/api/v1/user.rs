@@ -390,6 +390,9 @@ async fn update_preferences(
 				),
 				user_preferences::enable_hide_scrollbar::set(input.enable_hide_scrollbar),
 				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
+				user_preferences::show_thumbnails_in_headers::set(
+					input.show_thumbnails_in_headers,
+				),
 			],
 		)
 		.exec()
@@ -557,6 +560,7 @@ pub struct UpdateUserPreferences {
 	pub enable_replace_primary_sidebar: bool,
 	pub enable_hide_scrollbar: bool,
 	pub prefer_accent_color: bool,
+	pub show_thumbnails_in_headers: bool,
 }
 
 #[utoipa::path(

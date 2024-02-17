@@ -1,53 +1,48 @@
-import { prefetchLibraryFiles, prefetchLibrarySeries, usePreferences } from '@stump/client'
+import { prefetchFiles, usePreferences } from '@stump/client'
 import { cn, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
 
-import { useLibraryContext } from './context'
+import { useSeriesContext } from './context'
 
-export default function LibraryNavigation() {
+export default function SeriesNavigation() {
 	const location = useLocation()
 	const {
 		preferences: { primary_navigation_mode, layout_max_width_px },
 	} = usePreferences()
 	const {
-		library: { id, path },
-	} = useLibraryContext()
+		series: { path },
+	} = useSeriesContext()
 	const { checkPermission } = useAppContext()
 
 	const canAccessFiles = checkPermission('file:explorer')
 	const tabs = useMemo(
 		() => [
 			{
-				isActive: location.pathname.match(/\/libraries\/[^/]+\/?(series)?$/),
-				label: 'Series',
-				onHover: () => prefetchLibrarySeries(id),
-				to: 'series',
-			},
-			{
-				isActive: location.pathname.match(/\/libraries\/[^/]+\/books(\/.*)?$/),
+				isActive: location.pathname.match(/\/series\/[^/]+\/books(\/.*)?$/),
 				label: 'Books',
 				to: 'books',
 			},
 			...(canAccessFiles
 				? [
 						{
-							isActive: location.pathname.match(/\/libraries\/[^/]+\/files(\/.*)?$/),
+							disabled: true,
+							isActive: location.pathname.match(/\/series\/[^/]+\/files(\/.*)?$/),
 							label: 'Files',
-							onHover: () => prefetchLibraryFiles(path),
+							onHover: () => prefetchFiles(path),
 							to: 'files',
 						},
 					]
 				: []),
 			{
-				isActive: location.pathname.match(/\/libraries\/[^/]+\/settings(\/.*)?$/),
+				isActive: location.pathname.match(/\/series\/[^/]+\/settings(\/.*)?$/),
 				label: 'Settings',
 				to: 'settings',
 			},
 		],
-		[location, id, path, canAccessFiles],
+		[location, path, canAccessFiles],
 	)
 
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
@@ -69,11 +64,17 @@ export default function LibraryNavigation() {
 						key={tab.to}
 						underline={false}
 						onMouseEnter={tab.onHover}
-						className={cn('whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium', {
-							'border-brand-500 text-brand-600 dark:text-brand-400': tab.isActive,
-							'border-transparent text-gray-800 hover:border-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200':
-								!tab.isActive,
-						})}
+						className={cn(
+							'whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium',
+							{
+								'border-brand-500 text-brand-600 dark:text-brand-400': tab.isActive,
+								'border-transparent text-gray-800 hover:border-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200':
+									!tab.isActive,
+							},
+							{
+								'pointer-events-none !text-opacity-40': tab.disabled,
+							},
+						)}
 					>
 						{tab.label}
 					</Link>

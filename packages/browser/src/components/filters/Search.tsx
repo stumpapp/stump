@@ -25,12 +25,23 @@ type Props = {
 	 * Whether or not the search input should display a loading indicator.
 	 */
 	isLoading?: boolean
+	/**
+	 *  Whether or not the search input should be disabled
+	 */
+	isDisabled?: boolean
 }
 
 /**
  * A search input that debounces the onChange function
  */
-export default function Search({ initialValue, label, placeholder, onChange, isLoading }: Props) {
+export default function Search({
+	initialValue,
+	label,
+	placeholder,
+	onChange,
+	isLoading,
+	isDisabled,
+}: Props) {
 	// we need to debounce the onChange function so we only update once the user has stopped typing
 	// this is a common pattern for search inputs
 	const [value, setValue] = useState<string | undefined>(initialValue)
@@ -50,6 +61,7 @@ export default function Search({ initialValue, label, placeholder, onChange, isL
 
 	return (
 		<Input
+			title={isDisabled ? "This functionality isn't available right now" : undefined}
 			label={label}
 			placeholder={placeholder || 'Search'}
 			fullWidth
@@ -59,6 +71,7 @@ export default function Search({ initialValue, label, placeholder, onChange, isL
 			rightDecoration={showLoader ? <ProgressSpinner size="sm" /> : null}
 			variant="ghost"
 			className="flex-grow"
+			disabled={isDisabled}
 		/>
 	)
 }

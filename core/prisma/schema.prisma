@@ -680,6 +680,7 @@ model UserPreferences {
   enable_replace_primary_sidebar Boolean @default(false)
   enable_hide_scrollbar          Boolean @default(false)
   prefer_accent_color            Boolean @default(true)
+  show_thumbnails_in_headers     Boolean @default(false)
 
   user    User?
   user_id String? @unique

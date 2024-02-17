@@ -44,6 +44,8 @@ pub struct UserPreferences {
 	pub enable_replace_primary_sidebar: bool,
 	#[serde(default = "default_true")]
 	pub prefer_accent_color: bool,
+	#[serde(default)]
+	pub show_thumbnails_in_headers: bool,
 }
 
 impl Default for UserPreferences {
@@ -62,6 +64,7 @@ impl Default for UserPreferences {
 			enable_replace_primary_sidebar: false,
 			enable_hide_scrollbar: false,
 			prefer_accent_color: true,
+			show_thumbnails_in_headers: false,
 		}
 	}
 }
@@ -86,6 +89,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			enable_replace_primary_sidebar: data.enable_replace_primary_sidebar,
 			enable_hide_scrollbar: data.enable_hide_scrollbar,
 			prefer_accent_color: data.prefer_accent_color,
+			show_thumbnails_in_headers: data.show_thumbnails_in_headers,
 		}
 	}
 }

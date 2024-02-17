@@ -32,7 +32,7 @@ export default function TagList({ tags, baseUrl }: Props) {
 	}
 
 	return (
-		<div className="flex flex-row space-x-2 pt-4">
+		<div className="flex flex-row space-x-2">
 			{(tags ?? DEBUG_TAGS)
 				.filter((tag) => !!tag.name)
 				.map((tag) => (

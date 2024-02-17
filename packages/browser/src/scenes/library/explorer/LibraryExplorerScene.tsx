@@ -14,6 +14,8 @@ import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
 import FileExplorerHeader from './FileExplorerHeader'
 
+// TODO: abstract this away from library as to use it with other entities
+
 export default function LibraryExplorerScene() {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')

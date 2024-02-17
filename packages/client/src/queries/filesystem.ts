@@ -10,6 +10,12 @@ export const prefetchLibraryFiles = (path: string) =>
 		return data
 	})
 
+export const prefetchFiles = (path: string) =>
+	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
+		const { data } = await filesystemApi.listDirectory({ page: 1, path })
+		return data
+	})
+
 export type DirectoryListingQueryParams = {
 	enabled: boolean
 	/**

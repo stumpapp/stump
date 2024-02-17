@@ -11,6 +11,7 @@ export {
 export { type EpubActions, useEpub, useEpubLazy, type UseEpubReturn } from './epub'
 export {
 	type DirectoryListingQueryParams,
+	prefetchFiles,
 	prefetchLibraryFiles,
 	useDirectoryListing,
 } from './filesystem'

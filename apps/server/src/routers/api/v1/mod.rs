@@ -3,11 +3,15 @@ use axum::{
 	routing::{get, post},
 	Json, Router,
 };
+use hyper::header::USER_AGENT;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{config::state::AppState, errors::APIResult};
+use crate::{
+	config::state::AppState,
+	errors::{APIError, APIResult},
+};
 
 pub(crate) mod auth;
 pub(crate) mod book_club;
@@ -44,7 +48,9 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 		.merge(book_club::mount(app_state))
 		.route("/claim", get(claim))
 		.route("/ping", get(ping))
+		// TODO: should /version or /check-for-updates be behind any auth reqs?
 		.route("/version", post(version))
+		.route("/check-for-update", get(check_for_updates))
 }
 
 #[derive(Serialize, Type, ToSchema)]
@@ -101,4 +107,59 @@ async fn version() -> APIResult<Json<StumpVersion>> {
 		rev: env!("GIT_REV").to_string(),
 		compile_time: env!("STATIC_BUILD_DATE").to_string(),
 	}))
+}
+
+#[derive(Serialize, Deserialize, Type, ToSchema)]
+pub struct UpdateCheck {
+	current_semver: String,
+	latest_semver: String,
+	has_update_available: bool,
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/check-for-update",
+	tag = "util",
+	responses(
+		(status = 200, description = "Check for updates", body = UpdateCheck)
+	)
+)]
+async fn check_for_updates() -> APIResult<Json<UpdateCheck>> {
+	let current_semver = env!("CARGO_PKG_VERSION").to_string();
+
+	let client = reqwest::Client::new();
+	let github_response = client
+		.get("https://api.github.com/repos/stumpapp/stump/releases/latest")
+		.header(USER_AGENT, "stumpapp/stump")
+		.send()
+		.await?;
+
+	if github_response.status().is_success() {
+		let github_json: serde_json::Value = github_response.json().await?;
+
+		let latest_semver = github_json["tag_name"].as_str().ok_or_else(|| {
+			APIError::InternalServerError(
+				"Failed to parse latest release tag name".to_string(),
+			)
+		})?;
+		let has_update_available = latest_semver != current_semver;
+
+		Ok(Json(UpdateCheck {
+			current_semver,
+			latest_semver: latest_semver.to_string(),
+			has_update_available,
+		}))
+	} else {
+		match github_response.status().as_u16() {
+			404 => Ok(Json(UpdateCheck {
+				current_semver,
+				latest_semver: "unknown".to_string(),
+				has_update_available: false,
+			})),
+			_ => Err(APIError::InternalServerError(format!(
+				"Failed to fetch latest release: {}",
+				github_response.status()
+			))),
+		}
+	}
 }

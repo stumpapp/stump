@@ -41,17 +41,19 @@ jobs:
     name: Configure docker load/push
     runs-on: [self-hosted]
     steps:
-      - name: Configure environment
+      - name: Configure environment (push)
+        if: ${{ github.event.pull_request.merged }}
         run: |
-          if [[ ${{ github.event.pull_request.merged == 'true' }} ]]; then
-            echo "DOCKER_PUSH=true" >> $GITHUB_ENV
-            echo "DOCKER_LOAD=false" >> $GITHUB_ENV
-            echo "DOCKER_PLATFORMS=linux/arm64/v8,linux/amd64" >> $GITHUB_ENV
-          else
-            echo "DOCKER_PUSH=false" >> $GITHUB_ENV
-            echo "DOCKER_LOAD=true" >> $GITHUB_ENV
-            echo "DOCKER_PLATFORMS=linux/amd64" >> $GITHUB_ENV
-          fi
+          echo "DOCKER_PUSH=true" >> $GITHUB_ENV
+          echo "DOCKER_LOAD=false" >> $GITHUB_ENV
+          echo "DOCKER_PLATFORMS=linux/arm64/v8,linux/amd64" >> $GITHUB_ENV
+
+      - name: Configure environment (load)
+        if: ${{ github.event.pull_request.merged == false }}
+        run: |
+          echo "DOCKER_PUSH=false" >> $GITHUB_ENV
+          echo "DOCKER_LOAD=true" >> $GITHUB_ENV
+          echo "DOCKER_PLATFORMS=linux/amd64" >> $GITHUB_ENV
 
       - name: Print the configuration
         run: |

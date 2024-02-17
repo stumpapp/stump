@@ -43,7 +43,7 @@ jobs:
     steps:
       - name: Configure environment
         run: |
-          if [[ ${{ github.event.pull_request.merged }} ]]; then
+          if [[ ${{ github.event.pull_request.merged == 'true' }} ]]; then
             echo "DOCKER_PUSH=true" >> $GITHUB_ENV
             echo "DOCKER_LOAD=false" >> $GITHUB_ENV
             echo "DOCKER_PLATFORMS=linux/arm64/v8,linux/amd64" >> $GITHUB_ENV

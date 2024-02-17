@@ -3,7 +3,7 @@ name: 'Stump Checks CI'
 on:
   pull_request:
     branches-ignore:
-      - 'release/v*.*.*'
+      - 'release/v*'
   push:
     branches:
       - main

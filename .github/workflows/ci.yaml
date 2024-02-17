@@ -2,14 +2,13 @@ name: 'Stump Checks CI'
 
 on:
   pull_request:
-    branches-ignore:
-      - 'release/v**'
   push:
     branches:
       - main
 
 jobs:
   check-rust:
+    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
     name: Rust checks
     runs-on: [self-hosted]
     steps:
@@ -32,6 +31,7 @@ jobs:
       #     cargo integration-tests
 
   check-typescript:
+    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
     name: TypeScript checks
     runs-on: [self-hosted]
     steps:

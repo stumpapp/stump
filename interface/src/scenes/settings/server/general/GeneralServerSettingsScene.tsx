@@ -21,7 +21,7 @@ export default function GeneralServerSettingsScene() {
 
 			<ContentContainer>
 				<div className="flex flex-col gap-12">
-					{!updateAvailable && (
+					{updateAvailable && (
 						<Alert level="warning" rounded="sm" icon="warning">
 							<Alert.Content>
 								{t('settingsScene.server/general.sections.updateAvailable.message')}

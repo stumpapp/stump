@@ -1,7 +1,7 @@
 import { type RouteProp, useRoute } from '@react-navigation/native'
 import { useMediaCursorQuery } from '@stump/client'
 import { StatusBar } from 'expo-status-bar'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { FlatList } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -25,13 +25,23 @@ export default function LibrarySeriesBookList() {
 		throw new Error('ID required for this Screen!')
 	}
 
-	const { media: books } = useMediaCursorQuery({
+	const {
+		media: books,
+		hasNextPage,
+		fetchNextPage,
+	} = useMediaCursorQuery({
 		params: {
 			series: {
 				id,
 			},
 		},
 	})
+
+	const handleFetchMore = useCallback(() => {
+		if (hasNextPage) {
+			fetchNextPage()
+		}
+	}, [hasNextPage, fetchNextPage])
 
 	return (
 		<View
@@ -47,6 +57,8 @@ export default function LibrarySeriesBookList() {
 				data={books}
 				renderItem={({ item }) => <SeriesBookLink books={item} />}
 				keyExtractor={(item) => item.id}
+				onEndReachedThreshold={0.85}
+				onEndReached={handleFetchMore}
 			/>
 			<StatusBar style="auto" />
 		</View>

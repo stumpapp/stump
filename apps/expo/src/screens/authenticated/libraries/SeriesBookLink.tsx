@@ -1,5 +1,6 @@
-import { Link } from '@react-navigation/native'
 import { Media } from '@stump/types'
+
+import { Link } from '@/components'
 
 type Props = {
 	books: Media
@@ -7,7 +8,10 @@ type Props = {
 
 export default function SeriesBookLink({ books }: Props) {
 	return (
-		<Link to={{ params: { id: books.id }, screen: 'BookStack' }} className="w-full p-3 text-left">
+		<Link
+			to={{ params: { id: books.id }, screen: 'BookStack' }}
+			className="max-w-full p-3 text-left"
+		>
 			{books.name}
 		</Link>
 	)

@@ -1,1 +1,1 @@
-export { Input, View } from './primitives'
+export { Input, Link, View } from './primitives'

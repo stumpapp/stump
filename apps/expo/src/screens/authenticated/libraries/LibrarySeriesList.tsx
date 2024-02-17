@@ -47,6 +47,7 @@ export default function LibrarySeriesList() {
 				data={series}
 				renderItem={({ item }) => <LibrarySeriesLink series={item} />}
 				keyExtractor={(item) => item.id}
+				className="w-full"
 			/>
 			<StatusBar style="auto" />
 		</View>

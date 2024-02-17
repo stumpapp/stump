@@ -12,7 +12,7 @@
 				"password": "密码"
 			},
 			"buttons": {
-				"createAccount": "创建帐户",
+				"createAccount": "创建账户",
 				"login": "登录"
 			}
 		},
@@ -22,160 +22,160 @@
 			"loggedInFirstTime": "欢迎!",
 			"registering": "注册中...",
 			"registered": "已注册！",
-			"loginFailed": "登录失败，请重新登录",
+			"loginFailed": "登录失败。请重试。",
 			"registrationFailed": "注册失败，请重试。"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "图书馆设置",
-			"subtitleCreating": "您的新图书馆的预览将在下面显示",
-			"subtitleEditing": "您的图书库编辑的预览将在下方显示"
+			"heading": "Library Configuration",
+			"subtitleCreating": "A preview of your new library will be shown below",
+			"subtitleEditing": "A preview of your library edits will be shown below"
 		}
 	},
 	"bookOverviewScene": {
 		"fileInformation": {
-			"heading": "文件信息",
+			"heading": "File Information",
 			"labels": {
-				"fileSize": "文件大小",
-				"fileType": "文件类型",
-				"fileLocation": "文件位置",
-				"fileChecksum": "校验和"
+				"fileSize": "File Size",
+				"fileType": "File Type",
+				"fileLocation": "File Location",
+				"fileChecksum": "Checksum"
 			}
 		},
-		"nextInSeries": "系列中的下一个"
+		"nextInSeries": "Next in Series"
 	},
 	"createBookClubScene": {
-		"heading": "创建一个新的读书俱乐部",
-		"subtitle": "您可以创建一个私人书俱乐部，或者创建一个公开的服务可以让任何人都可以加入",
+		"heading": "Create a new book club",
+		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
 		"form": {
 			"name": {
-				"label": "名称",
-				"placeholder": "我的读书俱乐部",
-				"description": "您的读书俱乐部名称"
+				"label": "Name",
+				"placeholder": "My book club",
+				"description": "The name of your book club"
 			},
 			"description": {
-				"label": "描述",
+				"label": "Description",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "您的读书俱乐部的简短描述(可选)"
+				"description": "An optional, short description of your book club"
 			},
 			"is_private": {
-				"label": "私人俱乐部",
-				"description": "如果启用，只有您邀请的用户才能够加入您的读书俱乐部"
+				"label": "Private club",
+				"description": "If enabled, only users you invite will be able to join your book club"
 			},
 			"member_role_spec": {
-				"heading": "自定义角色映射",
+				"heading": "Custom role mapping",
 				"subtitle": [
-					"您可以为您的读书俱乐部中的角色创建自定义名称。 例如，您可以将“成员”角色重命名为“Crewmate”，或将“Creator”重命名为“Captain”。 如果您不想使用自定义名称，您可以将这些字段留空，将使用默认名称。 关于角色的更多信息，请参阅：",
-					"文档"
+					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
+					"documentation"
 				],
 				"member": {
-					"label": "会员",
-					"placeholder": "会员",
-					"description": "您的读书俱乐部默认角色的名称"
+					"label": "Member",
+					"placeholder": "Member",
+					"description": "The name of the default role for your book club"
 				},
 				"moderator": {
-					"label": "版主",
-					"placeholder": "版主",
-					"description": "您的读书俱乐部的版主名称"
+					"label": "Moderator",
+					"placeholder": "Moderator",
+					"description": "The name of the moderator role for your book club"
 				},
 				"admin": {
-					"label": "管理员",
-					"placeholder": "管理员",
-					"description": "您的读书俱乐部的管理员角色名称"
+					"label": "Admin",
+					"placeholder": "Admin",
+					"description": "The name of the admin role for your book club"
 				},
 				"creator": {
-					"label": "创建者",
-					"placeholder": "创建者",
-					"description": "您的读书俱乐部创建者角色的名称。这是您！"
+					"label": "Creator",
+					"placeholder": "Creator",
+					"description": "The name of the creator role for your book club. This is you!"
 				}
 			},
 			"creator_preferences": {
-				"heading": "您的会员选项",
-				"subtitle": "对于您在读书俱乐部中的会员资格的一些偏好。这些偏好可以随时从读书俱乐部设置页面更改",
+				"heading": "Membership",
+				"subtitle": "Preferences for your own membership in the book club",
 				"creator_display_name": {
-					"label": "显示名称",
+					"label": "Display Name",
 					"placeholder": "oromei",
-					"description": "您在读书俱乐部的会员可选显示名称。如果设置，它优先于您的用户名"
+					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},
 				"creator_hide_progress": {
-					"label": "隐藏进度",
-					"description": "如果启用，您的阅读进度将被隐藏在读书俱乐部的其他成员"
+					"label": "Hide Progress",
+					"description": "If enabled, your read progress will be hidden from other members of the book club"
 				}
 			},
-			"submit": "创建读书俱乐部"
+			"submit": "Create Book Club"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "新建书库",
-		"subtitle": "书库被用来将你的书籍分组。如果你想要刷新库和它们如何工作，请查看",
-		"subtitleLink": "相关文档",
+		"heading": "Create New Library",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "名称",
-				"libraryPath": "路径",
-				"libraryPathDescription": "在您的服务器上存在的书库路径",
-				"libraryDescription": "描述",
-				"libraryTags": "标签"
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
 			},
 			"buttons": {
-				"confirm": "新建书库"
+				"confirm": "Create Library"
 			}
 		}
 	},
 	"manageLibraryScene": {
-		"heading": "管理书库",
-		"subtitle": "更新书库的详细信息或配置，更改控制访问规则，或扫描文件。 如果你想要刷新书库和它们如何工作，请查看",
-		"subtitleLink": "相关文档",
+		"heading": "Manage Library",
+		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
-				"libraryName": "名称",
-				"libraryPath": "路径",
-				"libraryPathDescription": "在您的服务器上存在的书库路径",
-				"libraryDescription": "描述",
-				"libraryTags": "标签"
+				"libraryName": "Name",
+				"libraryPath": "Path",
+				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryDescription": "Description",
+				"libraryTags": "Tags"
 			},
 			"buttons": {
-				"confirm": "保存更改"
+				"confirm": "Save Changes"
 			}
 		}
 	},
 	"errorScene": {
 		"heading": "lol, oops",
-		"message": "发生错误：",
+		"message": "An error occurred:",
 		"buttons": {
-			"report": "反馈Bug",
-			"copy": "复制错误详细信息",
-			"goHome": "返回首页"
+			"report": "Report Bug",
+			"copy": "Copy Error Details",
+			"goHome": "Go Home"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
-			"title": "继续阅读",
+			"title": "Continue Reading",
 			"emptyState": {
-				"heading": "没有书可以显示",
-				"message": "您正在阅读的任何书都会显示在这里"
+				"heading": "No books to display",
+				"message": "Any books you're currently reading will show up here"
 			}
 		},
 		"recentlyAddedSeries": {
-			"title": "最近添加的系列",
+			"title": "Recently Added Series",
 			"emptyState": {
-				"heading": "没有要显示的系列",
-				"message": "您添加到书库中的任何系列都会在此处显示"
+				"heading": "No series to display",
+				"message": "Any series you add to your libraries will show up here"
 			}
 		},
 		"recentlyAddedBooks": {
-			"title": "最近添加的图书",
+			"title": "Recently Added Books",
 			"emptyState": {
-				"heading": "没有书可以显示",
-				"message": "您添加到书库中的任何系列都会在此处显示"
+				"heading": "No books to display",
+				"message": "Any books you add to your libraries will show up here"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
-			"continueReading": "继续阅读",
-			"downloadSeries": "下载系列文件"
+			"continueReading": "Continue Reading",
+			"downloadSeries": "Download Series"
 		}
 	},
 	"userSmartListsScene": {
@@ -274,11 +274,11 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "通用",
-			"server": "服务器",
-			"jobs": "任务和配置",
-			"users": "用户管理",
-			"desktop": "桌面版"
+			"general": "General",
+			"server": "Server",
+			"jobs": "Jobs and Configuration",
+			"users": "User Management",
+			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"application": {
@@ -383,7 +383,11 @@
 			"helmet": "General server settings",
 			"title": "General settings",
 			"description": "General settings related to your Stump server instance",
-			"sections": {}
+			"sections": {
+				"updateAvailable": {
+					"message": "Your server is not up to date. Please update to the latest version!"
+				}
+			}
 		},
 		"server/jobs": {
 			"helmet": "Jobs",
@@ -534,97 +538,97 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "正在执行的任务"
+		"backupHeading": "Job in Progress"
 	},
 	"libraryStats": {
-		"seriesCount": "总系列",
-		"bookCount": "书籍总数",
-		"diskUsage": "磁盘使用量"
+		"seriesCount": "Total Series",
+		"bookCount": "Total Books",
+		"diskUsage": "Disk Usage"
 	},
 	"pagination": {
 		"buttons": {
-			"next": "下一页",
-			"previous": "上一页"
+			"next": "Next",
+			"previous": "Previous"
 		},
 		"popover": {
-			"heading": "跳转到",
+			"heading": "Go to page",
 			"buttons": {
-				"confirm": "跳转",
-				"cancel": "取消"
+				"confirm": "Go",
+				"cancel": "Cancel"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "退出登录",
-		"message": "您确定要退出登陆吗？",
+		"title": "Sign out",
+		"message": "Are you sure you want to sign out?",
 		"buttons": {
-			"cancel": "取消",
-			"signOut": "退出登录"
+			"cancel": "Cancel",
+			"signOut": "Sign out"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "首页",
-			"libraries": "书库",
-			"books": "探索",
-			"bookClubs": "读书俱乐部",
-			"createLibrary": "新建书库",
+			"home": "Home",
+			"libraries": "Libraries",
+			"books": "Explore",
+			"bookClubs": "Book clubs",
+			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
-			"createBookClub": "创建读书俱乐部",
+			"createBookClub": "Create book club",
 			"noBookClubs": "No book clubs",
-			"settings": "设置",
-			"themeToggle": "切换主题",
-			"goForward": "前进",
-			"goBack": "返回",
+			"settings": "Settings",
+			"themeToggle": "Toggle Theme",
+			"goForward": "Go Forward",
+			"goBack": "Go Back",
 			"smartlists": "Smart lists",
 			"noSmartlists": "No smart lists",
 			"createSmartlist": "Create smart list"
 		},
 		"libraryOptions": {
-			"scanLibrary": "扫描",
-			"fileExplorer": "文件管理器",
-			"manageLibrary": "管理",
-			"deleteLibrary": "删除"
+			"scanLibrary": "Scan",
+			"fileExplorer": "File Explorer",
+			"manageLibrary": "Manage",
+			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
-			"heading": "版本信息",
-			"semVer": "语义化版本",
-			"commitHash": "提交哈希",
-			"buildDate": "构建日期"
+			"heading": "Version Information",
+			"semVer": "Semantic Version",
+			"commitHash": "Commit Hash",
+			"buildDate": "Build Date"
 		}
 	},
 	"search": {
-		"placeholder": "搜索"
+		"placeholder": "Search"
 	},
 	"serverSOS": {
-		"heading": "服务器不可用",
+		"heading": "Server Unavailable",
 		"desktop": {
-			"message": "出现网络错误，表示您的 Stump 服务器目前不可用。请确保它正在运行并且可以在此设备上访问。\n如果您的服务器 URL 已经更改，您可以使用下面的表单更新它"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
-			"message": "网络错误，您的 Stump 服务器目前不可用。请确保它正在运行并且可以从此设备访问"
+			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "重新连接到服务器！正在重定向...",
-		"reconnectionFailed": "发生未知错误。"
+		"reconnected": "Reconnected to server! Redirecting...",
+		"reconnectionFailed": "Something went wrong!"
 	},
 	"serverStatusOverlay": {
-		"heading": "服务器未连接",
+		"heading": "Server isn't connected",
 		"message": [
-			"请检查您的网络连接",
-			"点击此处",
-			"更改您的服务器 URL"
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
 		]
 	},
 	"slidingList": {
-		"empty": "暂无数据",
+		"empty": "No items to display",
 		"buttons": {
-			"next": "正在查找",
-			"previous": "向后检索"
+			"next": "Seek Ahead",
+			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
-		"placholder": "选择或创建标签",
-		"placeholderNoTags": "没有可用的标签"
+		"placholder": "Select or create tag",
+		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",

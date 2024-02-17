@@ -19,7 +19,7 @@ mod tests {
 
 	use super::v1::{
 		auth::*, book_club::*, epub::*, job::*, library::*, media::*, metadata::*,
-		series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
+		series::*, smart_list::*, user::*, ClaimResponse, StumpVersion, UpdateCheck,
 	};
 
 	#[allow(dead_code)]
@@ -55,6 +55,7 @@ mod tests {
 		file.write_all(b"// SERVER TYPE GENERATION\n\n")?;
 
 		file.write_all(format!("{}\n\n", ts_export::<StumpVersion>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UpdateCheck>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;

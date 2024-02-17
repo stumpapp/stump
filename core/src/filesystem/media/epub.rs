@@ -9,9 +9,10 @@ use crate::{
 	filesystem::{content_type::ContentType, error::FileError, hash},
 };
 use epub::doc::EpubDoc;
-use tracing::{debug, error, trace, warn};
 
 use super::process::{FileProcessor, FileProcessorOptions, ProcessedFile};
+
+// TODO: lots of smells in this file, needs a touch up :)
 
 /// A file processor for EPUB files.
 pub struct EpubProcessor;
@@ -29,14 +30,14 @@ impl FileProcessor for EpubProcessor {
 			}
 
 			if i > 0 {
-				epub_file
-					.set_current_page(i)
-					.map_err(|e| FileError::EpubReadError(e.to_string()))?;
+				epub_file.set_current_page(i);
 			}
 
-			let chapter_buffer = epub_file
-				.get_current()
-				.map_err(|e| FileError::EpubReadError(e.to_string()))?;
+			let (chapter_buffer, _) = epub_file.get_current().ok_or_else(|| {
+				FileError::EpubReadError(
+					"Failed to get chapter from epub file".to_string(),
+				)
+			})?;
 			let chapter_size = chapter_buffer.len() as u64;
 
 			sample_size += chapter_size;
@@ -52,7 +53,7 @@ impl FileProcessor for EpubProcessor {
 			match hash::generate(path, sample) {
 				Ok(digest) => Some(digest),
 				Err(e) => {
-					debug!(error = ?e, path, "Failed to digest epub file");
+					tracing::debug!(error = ?e, path, "Failed to digest epub file");
 					None
 				},
 			}
@@ -66,7 +67,7 @@ impl FileProcessor for EpubProcessor {
 		_: FileProcessorOptions,
 		_: &StumpConfig,
 	) -> Result<ProcessedFile, FileError> {
-		debug!(?path, "processing epub");
+		tracing::debug!(?path, "processing epub");
 
 		let path_buf = PathBuf::from(path);
 		let epub_file = Self::open(path)?;
@@ -112,18 +113,19 @@ impl FileProcessor for EpubProcessor {
 				continue;
 			}
 
-			epub_file.set_current_page(chapter as usize).map_err(|e| {
-				error!("Failed to get chapter from epub file: {}", e);
-				FileError::EpubReadError(e.to_string())
-			})?;
+			if !epub_file.set_current_page(chapter as usize) {
+				tracing::error!(path, chapter, "Failed to get chapter from epub file!");
+				return Err(FileError::EpubReadError(
+					"Failed to get chapter from epub file".to_string(),
+				));
+			}
 
 			let content_type = match epub_file.get_current_mime() {
-				Ok(mime) => ContentType::from(mime.as_str()),
-				Err(e) => {
-					error!(
-						error = ?e,
+				Some(mime) => ContentType::from(mime.as_str()),
+				None => {
+					tracing::error!(
 						chapter_path = ?path,
-						"Failed to get explicit resource mime for chapter. Returning default.",
+						"Failed to get explicit resource mime for chapter. Returning XHTML",
 					);
 
 					ContentType::XHTML
@@ -152,24 +154,20 @@ impl EpubProcessor {
 	/// returned.
 	pub fn get_cover(path: &str) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = EpubDoc::new(path).map_err(|e| {
-			error!("Failed to open epub file: {}", e);
+			tracing::error!("Failed to open epub file: {}", e);
 			FileError::EpubOpenError(e.to_string())
 		})?;
 
-		let cover_id = epub_file.get_cover_id().unwrap_or_else(|_| {
-			debug!("Epub file does not contain cover metadata");
+		let cover_id = epub_file.get_cover_id().unwrap_or_else(|| {
+			tracing::debug!("Epub file does not contain cover metadata");
 			DEFAULT_EPUB_COVER_ID.to_string()
 		});
 
-		if let Ok(cover) = epub_file.get_resource(&cover_id) {
-			let mime = epub_file
-				.get_resource_mime(&cover_id)
-				.unwrap_or_else(|_| "image/png".to_string());
-
-			return Ok((ContentType::from(mime.as_str()), cover));
+		if let Some((buf, mime)) = epub_file.get_resource(&cover_id) {
+			return Ok((ContentType::from(mime.as_str()), buf));
 		}
 
-		debug!(
+		tracing::debug!(
 			"Explicit cover image could not be found, falling back to searching for best match..."
 		);
 		// FIXME: this is hack, i do NOT want to clone this entire hashmap...
@@ -182,7 +180,7 @@ impl EpubProcessor {
 					.any(|accepted_mime| accepted_mime == mime)
 			})
 			.map(|(id, (path, _))| {
-				trace!(name = ?path, "Found possible cover image");
+				tracing::trace!(name = ?path, "Found possible cover image");
 				// I want to weight the results based on how likely they are to be the cover.
 				// For example, if the cover is named "cover.jpg", it's probably the cover.
 				// TODO: this is SUPER naive, and should be improved at some point...
@@ -196,16 +194,12 @@ impl EpubProcessor {
 			.max_by_key(|(weight, _)| *weight);
 
 		if let Some((_, id)) = search_result {
-			if let Ok(c) = epub_file.get_resource(id) {
-				let mime = epub_file
-					.get_resource_mime(id)
-					.unwrap_or_else(|_| "image/png".to_string());
-
-				return Ok((ContentType::from(mime.as_str()), c));
+			if let Some((buf, mime)) = epub_file.get_resource(id) {
+				return Ok((ContentType::from(mime.as_str()), buf));
 			}
 		}
 
-		error!("Failed to find cover for epub file");
+		tracing::error!("Failed to find cover for epub file");
 		Err(FileError::EpubReadError(
 			"Failed to find cover for epub file".to_string(),
 		))
@@ -217,23 +211,24 @@ impl EpubProcessor {
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = Self::open(path)?;
 
-		epub_file.set_current_page(chapter).map_err(|e| {
-			error!("Failed to get chapter from epub file: {}", e);
-			FileError::EpubReadError(e.to_string())
-		})?;
+		if !epub_file.set_current_page(chapter) {
+			tracing::error!(path, chapter, "Failed to get chapter from epub file!");
+			return Err(FileError::EpubReadError(
+				"Failed to get chapter from epub file".to_string(),
+			));
+		}
 
 		let content = epub_file.get_current_with_epub_uris().map_err(|e| {
-			error!("Failed to get chapter from epub file: {}", e);
+			tracing::error!("Failed to get chapter from epub file: {}", e);
 			FileError::EpubReadError(e.to_string())
 		})?;
 
 		let content_type = match epub_file.get_current_mime() {
-			Ok(mime) => ContentType::from(mime.as_str()),
-			Err(e) => {
-				error!(
-					error = ?e,
+			Some(mime) => ContentType::from(mime.as_str()),
+			None => {
+				tracing::error!(
 					chapter_path = ?path,
-					"Failed to get explicit resource mime for chapter. Returning default.",
+					"Failed to get explicit resource mime for chapter. Returning XHTML",
 				);
 
 				ContentType::XHTML
@@ -249,17 +244,12 @@ impl EpubProcessor {
 	) -> Result<(ContentType, Vec<u8>), FileError> {
 		let mut epub_file = Self::open(path)?;
 
-		let contents = epub_file.get_resource(resource_id).map_err(|e| {
-			error!("Failed to get resource: {}", e);
-			FileError::EpubReadError(e.to_string())
+		let (buf, mime) = epub_file.get_resource(resource_id).ok_or_else(|| {
+			tracing::error!("Failed to get resource: {}", resource_id);
+			FileError::EpubReadError("Failed to get resource".to_string())
 		})?;
 
-		let content_type = epub_file.get_resource_mime(resource_id).map_err(|e| {
-			error!("Failed to get resource mime: {}", e);
-			FileError::EpubReadError(e.to_string())
-		})?;
-
-		Ok((ContentType::from(content_type.as_str()), contents))
+		Ok((ContentType::from(mime.as_str()), buf))
 	}
 
 	pub fn get_resource_by_path(
@@ -273,9 +263,9 @@ impl EpubProcessor {
 
 		let contents = epub_file
 			.get_resource_by_path(adjusted_path.as_path())
-			.map_err(|e| {
-				error!("Failed to get resource: {}", e);
-				FileError::EpubReadError(e.to_string())
+			.ok_or_else(|| {
+				tracing::error!(?adjusted_path, "Failed to get resource!");
+				FileError::EpubReadError("Failed to get resource".to_string())
 			})?;
 
 		// Note: If the resource does not have an entry in the `resources` map, then loading the content
@@ -283,12 +273,11 @@ impl EpubProcessor {
 		// package.opf, etc.).
 		let content_type =
 			match epub_file.get_resource_mime_by_path(adjusted_path.as_path()) {
-				Ok(mime) => ContentType::from(mime.as_str()),
-				Err(e) => {
-					warn!(
-						"Failed to get explicit definition of resource mime for {}: {}",
-						adjusted_path.as_path().to_str().unwrap(),
-						e
+				Some(mime) => ContentType::from(mime.as_str()),
+				None => {
+					tracing::warn!(
+						?adjusted_path,
+						"Failed to get explicit definition of resource mime",
 					);
 
 					ContentType::from_path(adjusted_path.as_path())
@@ -318,7 +307,7 @@ impl EpubProcessor {
 		// 6. convert back to bytes
 
 		let content_str = String::from_utf8(content).map_err(|e| {
-			error!(error = ?e, "Failed to HTML buffer content to string");
+			tracing::error!(error = ?e, "Failed to HTML buffer content to string");
 			FileError::EpubReadError(e.to_string())
 		})?;
 
@@ -341,13 +330,13 @@ pub(crate) fn normalize_resource_path(path: PathBuf, root: &str) -> PathBuf {
 
 	//  This below won't work since these paths are INSIDE the epub file >:(
 	// adjusted_path = adjusted_path.canonicalize().unwrap_or_else(|err| {
-	// 	// warn!(
+	// 	// tracing::warn!(
 	// 	// 	"Failed to safely canonicalize path {}: {}",
 	// 	// 	adjusted_path.display(),
 	// 	// 	err
 	// 	// );
 
-	// 	warn!(
+	// 	tracing::warn!(
 	// 		"Failed to safely canonicalize path {}: {}",
 	// 		adjusted_path.display(),
 	// 		err

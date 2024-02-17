@@ -1,4 +1,4 @@
-import { useLibraryStats } from '@stump/client'
+import { useTotalLibraryStats } from '@stump/client'
 import { Statistic } from '@stump/components'
 import { useMemo } from 'react'
 
@@ -6,8 +6,8 @@ import { formatBytesSeparate } from '../../utils/format'
 
 // Note: I don't ~love~ the plural here, but I want to make sure it is understood it
 // encompasses *all* libraries, not just one.
-export default function LibrariesStats() {
-	const { libraryStats } = useLibraryStats()
+export default function LibraryStats() {
+	const { libraryStats } = useTotalLibraryStats()
 
 	const libraryUsage = useMemo(() => {
 		return formatBytesSeparate(libraryStats?.total_bytes as bigint | undefined)

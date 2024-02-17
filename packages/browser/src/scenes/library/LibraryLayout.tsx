@@ -1,4 +1,4 @@
-import { useLibraryByIdQuery, usePreferences } from '@stump/client'
+import { useLibraryByIdQuery, useLibraryStats, usePreferences } from '@stump/client'
 import { cn } from '@stump/components'
 import React from 'react'
 import { Suspense, useEffect } from 'react'
@@ -19,6 +19,7 @@ export default function LibraryLayout() {
 	}
 
 	const { isLoading, library } = useLibraryByIdQuery(id)
+	const { stats } = useLibraryStats({ cacheTime: 1000 * 60 * 5, id })
 	const {
 		preferences: { enable_hide_scrollbar },
 	} = usePreferences()
@@ -32,7 +33,7 @@ export default function LibraryLayout() {
 	if (isLoading || !library) return null
 
 	return (
-		<LibraryContext.Provider value={{ library }}>
+		<LibraryContext.Provider value={{ library, stats }}>
 			<LibraryHeader />
 			<LibraryNavigation />
 

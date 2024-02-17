@@ -34,8 +34,8 @@ use crate::{
 	filter::UserQueryRelation,
 	middleware::auth::Auth,
 	utils::{
-		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
-		http::ImageResponse, validate_image_upload,
+		enforce_session_permissions, get_session_server_owner_user, get_session_user,
+		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
 	},
 };
 
@@ -124,7 +124,7 @@ async fn get_users(
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
 ) -> APIResult<Json<Pageable<Vec<User>>>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ReadUsers])?;
 
 	let pagination = pagination_query.0.get();
 	let is_unpaged = pagination.is_unpaged();

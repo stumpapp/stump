@@ -18,9 +18,8 @@ use crate::{
 		SeriesBuilder,
 	},
 	job::{
-		error::JobError, Executor, JobControllerCommand, JobExecuteLog, JobExt,
-		JobOutputExt, JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState,
-		WrappedJob,
+		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,

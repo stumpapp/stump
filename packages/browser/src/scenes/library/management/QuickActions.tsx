@@ -4,8 +4,6 @@ import { Heading, Text } from '@stump/components'
 import React from 'react'
 
 import { useLibraryContext } from '../context'
-import CleanLibrary from './CleanLibrary'
-import DeleteLibraryThumbnails from './DeleteLibraryThumbnails'
 import LibraryThumbnailSelector from './LibraryThumbnailSelector'
 import RegenerateThumbnails from './RegenerateThumbnails'
 
@@ -37,9 +35,6 @@ export default function QuickActions() {
 
 			<LibraryThumbnailSelector />
 			<RegenerateThumbnails onRegenerate={handleRegenerateThumbnails} />
-
-			<DeleteLibraryThumbnails libraryId={library.id} />
-			<CleanLibrary libraryId={library.id} />
 		</div>
 	)
 }

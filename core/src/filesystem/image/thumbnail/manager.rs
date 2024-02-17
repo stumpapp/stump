@@ -16,8 +16,8 @@ use crate::{
 
 #[derive(Default)]
 pub struct ParThumbnailGenerationOutput {
-	created_thumbnails: i64,
-	errors: Vec<FileError>,
+	pub created_thumbnails: Vec<(String, PathBuf)>,
+	pub errors: Vec<(PathBuf, FileError)>,
 }
 
 pub struct ThumbnailManager {
@@ -51,6 +51,24 @@ impl ThumbnailManager {
 
 	pub fn has_thumbnail<S: AsRef<str>>(&self, media_id: S) -> bool {
 		self.thumbnail_contents.contains_key(media_id.as_ref())
+	}
+
+	/// Inserts thumbnails into the manager's internal hashmap for future reference,
+	/// it will assume generation is not necessary.
+	pub fn track_thumbnails(
+		&mut self,
+		media_ids: &[String],
+		options: ImageProcessorOptions,
+	) {
+		let base_path = self.config.get_thumbnails_dir();
+		let ext = options.format.extension();
+
+		for id in media_ids {
+			let thumbnail_path = base_path.join(format!("{}.{}", id, ext));
+			if thumbnail_path.exists() {
+				self.thumbnail_contents.insert(id.clone(), thumbnail_path);
+			}
+		}
 	}
 
 	fn do_generate_thumbnail(
@@ -104,27 +122,37 @@ impl ThumbnailManager {
 		&self,
 		media: &[prisma_media::Data],
 		options: ImageProcessorOptions,
-	) -> Result<ParThumbnailGenerationOutput, FileError> {
+	) -> ParThumbnailGenerationOutput {
 		let mut output = ParThumbnailGenerationOutput::default();
 
 		for chunk in media.chunks(5) {
 			let results = chunk
 				.into_par_iter()
-				.map(|m| self.do_generate_thumbnail(m, options.clone()))
+				.map(|m| {
+					(
+						m.id.clone(),
+						m.path.clone(),
+						self.do_generate_thumbnail(m, options.clone()),
+					)
+				})
 				.collect::<Vec<_>>();
 
-			let result_len = results.len();
-			let errors = results
-				.into_iter()
-				.filter_map(Result::err)
-				.collect::<Vec<_>>();
-			let created_count = result_len - errors.len();
+			let (errors, generated) = results.into_iter().fold(
+				(vec![], vec![]),
+				|(mut errors, mut generated), (id, path, res)| {
+					match res {
+						Ok(generated_path) => generated.push((id, generated_path)),
+						Err(err) => errors.push((PathBuf::from(path), err)),
+					}
+					(errors, generated)
+				},
+			);
 
-			output.created_thumbnails += created_count as i64;
-			output.errors.extend(errors);
+			output.errors = errors;
+			output.created_thumbnails = generated;
 		}
 
-		unimplemented!()
+		output
 	}
 
 	pub fn remove_thumbnail<S: AsRef<str>>(

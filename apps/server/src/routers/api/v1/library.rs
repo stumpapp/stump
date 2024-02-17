@@ -1,11 +1,10 @@
 use axum::{
-	extract::{DefaultBodyLimit, Multipart, Path, State},
+	extract::{DefaultBodyLimit, Multipart, Path, Query, State},
 	middleware::from_extractor_with_state,
 	routing::{get, post, put},
 	Json, Router,
 };
-use axum_extra::extract::Query;
-use prisma_client_rust::{chrono::Utc, not, or, raw, Direction};
+use prisma_client_rust::{chrono::Utc, not, or, raw, Direction, PrismaValue};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use specta::Type;
@@ -19,7 +18,7 @@ use stump_core::{
 	db::{
 		entity::{
 			library_series_ids_media_ids_include, library_thumbnails_deletion_include,
-			FileStatus, LibrariesStats, Library, LibraryOptions, LibraryScanMode, Media,
+			FileStatus, Library, LibraryOptions, LibraryScanMode, LibraryStats, Media,
 			Series, Tag, User, UserPermission,
 		},
 		query::pagination::{Pageable, Pagination, PaginationQuery},
@@ -88,6 +87,7 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 						.put(update_library)
 						.delete(delete_library),
 				)
+				.route("/stats", get(get_library_stats))
 				.route(
 					"/excluded-users",
 					get(get_library_excluded_users).post(update_library_excluded_users),
@@ -284,12 +284,18 @@ async fn update_last_visited_library(
 	Ok(Json(Library::from(library.to_owned())))
 }
 
+#[derive(Debug, Deserialize, ToSchema, Type)]
+pub struct LibraryStatsParams {
+	#[serde(default)]
+	all_users: bool,
+}
+
 #[utoipa::path(
 	get,
 	path = "/api/v1/libraries/stats",
 	tag = "library",
 	responses(
-		(status = 200, description = "Successfully fetched stats", body = LibrariesStats),
+		(status = 200, description = "Successfully fetched stats", body = LibraryStats),
 		(status = 401, description = "Unauthorized"),
 		(status = 500, description = "Internal server error")
 	)
@@ -297,26 +303,70 @@ async fn update_last_visited_library(
 /// Get stats for all libraries
 async fn get_libraries_stats(
 	State(ctx): State<AppState>,
-) -> APIResult<Json<LibrariesStats>> {
+	Query(params): Query<LibraryStatsParams>,
+	session: Session,
+) -> APIResult<Json<LibraryStats>> {
+	let user = get_session_user(&session)?;
 	let db = &ctx.db;
 
-	// TODO: maybe add more, like missingBooks, idk
 	let stats = db
-		._query_raw::<LibrariesStats>(raw!(
-			"SELECT COUNT(*) as book_count, IFNULL(SUM(media.size),0) as total_bytes, IFNULL(series_count,0) as series_count FROM media INNER JOIN (SELECT COUNT(*) as series_count FROM series)"
+		._query_raw::<LibraryStats>(raw!(
+			r#"
+			WITH base_counts AS (
+				SELECT
+					COUNT(*) AS book_count,
+					IFNULL(SUM(media.size), 0) AS total_bytes,
+					IFNULL(series_count, 0) AS series_count
+				FROM
+					media
+					INNER JOIN (
+						SELECT
+							COUNT(*) AS series_count
+						FROM
+							series)
+			),
+			progress_counts AS (
+				SELECT
+					IFNULL(SUM(
+							CASE WHEN rp.is_completed THEN
+								1
+							ELSE
+								0
+							END),
+						0) AS completed_books,
+					IFNULL(SUM(
+							CASE WHEN rp.is_completed THEN
+								0
+							ELSE
+								1
+							END),
+						0) AS in_progress_books
+				FROM
+					media m
+					INNER JOIN read_progresses rp ON rp.media_id = m.id
+				WHERE
+					rp.is_completed AND (
+						{} IS TRUE OR rp.user_id = {}
+					)
+			)
+			SELECT
+				*
+			FROM
+				base_counts
+				INNER JOIN progress_counts;
+			"#,
+			PrismaValue::Boolean(params.all_users),
+			PrismaValue::String(user.id)
 		))
 		.exec()
 		.await?
 		.into_iter()
-		.next();
-
-	if stats.is_none() {
-		return Err(APIError::InternalServerError(
+		.next()
+		.ok_or(APIError::InternalServerError(
 			"Failed to compute stats for libraries".to_string(),
-		));
-	}
+		))?;
 
-	Ok(Json(stats.unwrap()))
+	Ok(Json(stats))
 }
 
 #[utoipa::path(
@@ -902,9 +952,137 @@ async fn generate_library_thumbnails(
 	Ok(Json(()))
 }
 
-async fn get_library_excluded_users() {}
+#[utoipa::path(
+	get,
+	path = "/api/v1/libraries/:id/excluded-users",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully fetched library excluded users", body = Vec<User>),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn get_library_excluded_users(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<Json<Vec<User>>> {
+	enforce_session_permissions(
+		&session,
+		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
+	)?;
 
-async fn update_library_excluded_users() {}
+	let db = &ctx.db;
+
+	let library = db
+		.library()
+		.find_first(vec![library::id::equals(id.clone())])
+		.with(library::hidden_from_users::fetch(vec![]))
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+	let hidden_from_users = library.hidden_from_users()?.to_owned();
+
+	Ok(Json(
+		hidden_from_users.into_iter().map(User::from).collect(),
+	))
+}
+
+#[derive(Debug, Deserialize, ToSchema, Type)]
+pub struct UpdateLibraryExcludedUsers {
+	pub user_ids: Vec<String>,
+}
+
+#[utoipa::path(
+	post,
+	path = "/api/v1/libraries/:id/excluded-users",
+	tag = "library",
+	params(
+		("id" = String, Path, description = "The library ID")
+	),
+	responses(
+		(status = 200, description = "Successfully updated library excluded users", body = Library),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 404, description = "Library not found"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn update_library_excluded_users(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(input): Json<UpdateLibraryExcludedUsers>,
+) -> APIResult<Json<Library>> {
+	enforce_session_permissions(
+		&session,
+		&[UserPermission::ReadUsers, UserPermission::ManageLibrary],
+	)?;
+
+	let db = &ctx.db;
+
+	let library = db
+		.library()
+		.find_first(vec![library::id::equals(id.clone())])
+		.with(library::hidden_from_users::fetch(vec![]))
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Library not found".to_string()))?;
+
+	let server_owner_in_list = db
+		.user()
+		.find_first(vec![
+			user::id::in_vec(input.user_ids.clone()),
+			user::is_server_owner::equals(true),
+		])
+		.exec()
+		.await?
+		.is_some();
+
+	if server_owner_in_list {
+		// Don't surface the fact that the server owner is in the list?
+		return Err(APIError::forbidden_discreet());
+	}
+
+	let hidden_from_users = library.hidden_from_users()?.to_owned();
+	let user_ids = input.user_ids;
+
+	let to_add = user_ids
+		.iter()
+		.filter(|id| !hidden_from_users.iter().any(|u| u.id.eq(*id)))
+		.cloned()
+		.collect::<Vec<String>>();
+
+	let to_remove = hidden_from_users
+		.iter()
+		.filter(|u| !user_ids.contains(&u.id))
+		.map(|u| u.id.clone())
+		.collect::<Vec<String>>();
+
+	let updated_library = db
+		.library()
+		.update(
+			library::id::equals(id.clone()),
+			vec![
+				library::hidden_from_users::disconnect(
+					to_remove.into_iter().map(user::id::equals).collect(),
+				),
+				library::hidden_from_users::connect(
+					to_add.into_iter().map(user::id::equals).collect(),
+				),
+			],
+		)
+		.with(library::hidden_from_users::fetch(vec![]))
+		.exec()
+		.await?;
+
+	Ok(Json(Library::from(updated_library)))
+}
 
 #[utoipa::path(
 	post,
@@ -1471,4 +1649,78 @@ async fn delete_library(
 
 	// TODO: convert to library from library_series_ids_media_ids_include::Data
 	Ok(Json(deleted_library.id))
+}
+
+/// Get stats for a specific library
+async fn get_library_stats(
+	Path(id): Path<String>,
+	State(ctx): State<AppState>,
+	Query(params): Query<LibraryStatsParams>,
+	session: Session,
+) -> APIResult<Json<LibraryStats>> {
+	let user = get_session_user(&session)?;
+	let db = &ctx.db;
+
+	let stats = db
+		._query_raw::<LibraryStats>(raw!(
+			r#"
+			WITH base_counts AS (
+				SELECT
+					COUNT(*) AS book_count,
+					IFNULL(SUM(media.size), 0) AS total_bytes,
+					IFNULL(series_count, 0) AS series_count
+				FROM
+					media
+					INNER JOIN (
+						SELECT
+							COUNT(*) AS series_count
+						FROM
+							series)
+					WHERE media.series_id IN (
+						SELECT id FROM series WHERE library_id = {}
+					)
+			),
+			progress_counts AS (
+				SELECT
+					IFNULL(SUM(
+							CASE WHEN rp.is_completed THEN
+								1
+							ELSE
+								0
+							END),
+						0) AS completed_books,
+					IFNULL(SUM(
+							CASE WHEN rp.is_completed THEN
+								0
+							ELSE
+								1
+							END),
+						0) AS in_progress_books
+				FROM
+					media m
+					INNER JOIN read_progresses rp ON rp.media_id = m.id
+				WHERE
+					rp.is_completed AND (
+						{} IS TRUE OR rp.user_id = {}
+					)
+			)
+			SELECT
+				*
+			FROM
+				base_counts
+				INNER JOIN progress_counts;
+			"#,
+			PrismaValue::String(id),
+			PrismaValue::Boolean(params.all_users),
+			PrismaValue::String(user.id)
+		))
+		.exec()
+		.await?
+		.into_iter()
+		.next()
+		.ok_or(APIError::InternalServerError(
+			"Failed to compute stats for libraries".to_string(),
+		))?;
+
+	Ok(Json(stats))
 }

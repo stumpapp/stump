@@ -56,6 +56,12 @@ pub enum UserPermission {
 	#[serde(rename = "library:delete")]
 	DeleteLibrary,
 	// TODO: ReadUsers, CreateUsers, ManageUsers
+	/// Grant access to read users.
+	///
+	/// Note that this is explicitly for querying users via user-specific endpoints.
+	/// This would not affect relational queries, such as members in a common book club.
+	#[serde(rename = "user:read")]
+	ReadUsers,
 	/// Grant access to manage users (create,edit,delete)
 	#[serde(rename = "user:manage")]
 	ManageUsers,
@@ -103,6 +109,7 @@ impl UserPermission {
 			UserPermission::DeleteNotifier => {
 				vec![UserPermission::ManageNotifier, UserPermission::ReadNotifier]
 			},
+			UserPermission::ManageUsers => vec![UserPermission::ReadUsers],
 			_ => vec![],
 		}
 	}
@@ -121,6 +128,7 @@ impl ToString for UserPermission {
 			UserPermission::ScanLibrary => "library:scan".to_string(),
 			UserPermission::ManageLibrary => "library:manage".to_string(),
 			UserPermission::DeleteLibrary => "library:delete".to_string(),
+			UserPermission::ReadUsers => "user:read".to_string(),
 			UserPermission::ManageUsers => "user:manage".to_string(),
 			UserPermission::ReadNotifier => "notifier:read".to_string(),
 			UserPermission::CreateNotifier => "notifier:create".to_string(),
@@ -144,6 +152,7 @@ impl From<&str> for UserPermission {
 			"library:scan" => UserPermission::ScanLibrary,
 			"library:manage" => UserPermission::ManageLibrary,
 			"library:delete" => UserPermission::DeleteLibrary,
+			"user:read" => UserPermission::ReadUsers,
 			"user:manage" => UserPermission::ManageUsers,
 			"notifier:read" => UserPermission::ReadNotifier,
 			"notifier:create" => UserPermission::CreateNotifier,

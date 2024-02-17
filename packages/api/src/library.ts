@@ -1,9 +1,9 @@
 import type {
 	CleanLibraryResponse,
 	CreateLibrary,
-	LibrariesStats,
 	Library,
 	LibraryScanMode,
+	LibraryStats,
 	PatchLibraryThumbnail,
 	Series,
 	UpdateLibrary,
@@ -19,8 +19,19 @@ export function getLibraries(
 	return API.get(urlWithParams('/libraries', toUrlParams(params)))
 }
 
-export function getLibrariesStats(): Promise<APIResult<LibrariesStats>> {
+export function getTotalLibraryStats(): Promise<APIResult<LibraryStats>> {
 	return API.get('/libraries/stats')
+}
+
+export function getLibraryStats(
+	id: string,
+	params?: Record<string, unknown>,
+): Promise<APIResult<LibraryStats>> {
+	if (params) {
+		return API.get(`/libraries/${id}/stats?${toUrlParams(params)}`)
+	} else {
+		return API.get(`/libraries/${id}/stats`)
+	}
 }
 
 export function getLibraryById(id: string): Promise<APIResult<Library>> {
@@ -98,20 +109,31 @@ export function getLastVisitedLibrary(): Promise<APIResult<Library>> {
 	return API.get('/libraries/last-visited')
 }
 
+export function getExcludedUsers(id: string) {
+	return API.get(`/libraries/${id}/excluded-users`)
+}
+
+export function updateExcludedUsers(id: string, user_ids: string[]) {
+	return API.post(`/libraries/${id}/excluded-users`, user_ids)
+}
+
 export const libraryApi = {
 	cleanLibrary,
 	createLibrary,
 	deleteLibrary,
 	deleteLibraryThumbnails,
 	editLibrary,
+	getExcludedUsers,
 	getLastVisitedLibrary,
 	getLibraries,
-	getLibrariesStats,
 	getLibraryById,
 	getLibrarySeries,
+	getLibraryStats,
+	getTotalLibraryStats,
 	patchLibraryThumbnail,
 	regenerateThumbnails,
 	scanLibary,
+	updateExcludedUsers,
 	uploadLibraryThumbnail,
 	visitLibrary,
 }
@@ -122,14 +144,17 @@ export const libraryQueryKeys: Record<keyof typeof libraryApi, string> = {
 	deleteLibrary: 'library.deleteLibrary',
 	deleteLibraryThumbnails: 'library.deleteLibraryThumbnails',
 	editLibrary: 'library.editLibrary',
+	getExcludedUsers: 'library.getExcludedUsers',
 	getLastVisitedLibrary: 'library.getLastVisitedLibrary',
 	getLibraries: 'library.getLibraries',
-	getLibrariesStats: 'library.getLibrariesStats',
 	getLibraryById: 'library.getLibraryById',
 	getLibrarySeries: 'library.getLibrarySeries',
+	getLibraryStats: 'library.getLibraryStats',
+	getTotalLibraryStats: 'library.getTotalLibraryStats',
 	patchLibraryThumbnail: 'library.patchLibraryThumbnail',
 	regenerateThumbnails: 'library.regenerateThumbnails',
 	scanLibary: 'library.scanLibary',
+	updateExcludedUsers: 'library.updateExcludedUsers',
 	uploadLibraryThumbnail: 'library.uploadLibraryThumbnail',
 	visitLibrary: 'library.visitLibrary',
 }

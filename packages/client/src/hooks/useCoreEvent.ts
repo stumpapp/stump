@@ -47,7 +47,7 @@ export function useCoreEventHandler() {
 				await handleInvalidate([
 					'series',
 					'media',
-					libraryQueryKeys.getLibrariesStats,
+					libraryQueryKeys.getLibraryStats,
 					libraryQueryKeys.getLibraryById,
 				])
 				break

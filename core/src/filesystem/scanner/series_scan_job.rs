@@ -7,8 +7,8 @@ use crate::{
 	db::{entity::LibraryOptions, FileStatus},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
-		error::JobError, Executor, JobControllerCommand, JobExt, JobOutputExt,
-		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
+		WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,

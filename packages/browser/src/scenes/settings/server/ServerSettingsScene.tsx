@@ -2,7 +2,7 @@ import { Heading, Text } from '@stump/components'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
-import LibrariesStats from '@/components/library/LibrariesStats'
+import LibraryStats from '@/components/library/LibraryStats'
 import { useLocaleContext } from '@/i18n'
 
 export default function ServerSettingsScene() {
@@ -15,7 +15,7 @@ export default function ServerSettingsScene() {
 			</Helmet>
 
 			<div className="flex flex-col gap-4 pb-8">
-				<LibrariesStats />
+				<LibraryStats />
 			</div>
 
 			<Heading>{t('settingsScene.server.heading')}</Heading>

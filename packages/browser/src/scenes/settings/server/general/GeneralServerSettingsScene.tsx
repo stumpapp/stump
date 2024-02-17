@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
-import LibrariesStats from '@/components/library/LibrariesStats'
+import LibraryStats from '@/components/library/LibraryStats'
 import { useLocaleContext } from '@/i18n'
 
 import ServerInfoSection from './ServerInfoSection'
@@ -18,7 +18,7 @@ export default function GeneralServerSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<LibrariesStats />
+				<LibraryStats />
 				<ServerInfoSection />
 			</ContentContainer>
 		</SceneContainer>

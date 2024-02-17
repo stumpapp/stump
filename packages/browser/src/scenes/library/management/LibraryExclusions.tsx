@@ -1,7 +1,39 @@
+import { useLibraryExclusionsQuery, useUsersQuery } from '@stump/client'
 import { ComboBox, Heading, Text } from '@stump/components'
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+
+import { useAppContext } from '@/context'
+
+import { useLibraryContext } from '../context'
 
 export default function LibraryExclusions() {
+	const { library } = useLibraryContext()
+	const { user } = useAppContext()
+
+	const { users: allUsers, isLoading: isLoadingUsers } = useUsersQuery()
+	const { excludedUsers, isLoading: isLoadingExclusions } = useLibraryExclusionsQuery({
+		id: library.id,
+	})
+
+	const [excludedUserIds, setExcludedUserIds] = useState<string[]>(
+		() => excludedUsers?.map((user) => user.id) || [],
+	)
+	useEffect(() => {
+		setExcludedUserIds(excludedUsers?.map((user) => user.id) || [])
+	}, [excludedUsers])
+
+	const userOptions = useMemo(
+		() =>
+			(allUsers?.map((user) => ({ label: user.username, value: user.id })) || []).filter(
+				(option) => option.value !== user.id,
+			),
+		[allUsers, user],
+	)
+
+	if (isLoadingUsers || isLoadingExclusions) {
+		return null
+	}
+
 	return (
 		<div className="flex flex-col gap-4">
 			<div>
@@ -12,7 +44,7 @@ export default function LibraryExclusions() {
 				</Text>
 			</div>
 
-			<ComboBox options={[]} />
+			<ComboBox options={userOptions} value={excludedUserIds} isMultiSelect />
 		</div>
 	)
 }

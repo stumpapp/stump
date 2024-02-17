@@ -9,7 +9,10 @@ use crate::{
 	prisma::{media, series},
 };
 
-use super::{manager::ThumbnailManager, ImageProcessorOptions};
+use super::{
+	manager::{ParThumbnailGenerationOutput, ThumbnailManager},
+	ImageProcessorOptions,
+};
 
 // Note: I am type aliasing for the sake of clarity in what the provided Strings represent
 type Id = String;
@@ -148,7 +151,7 @@ impl JobExt for ThumbnailGenerationJob {
 		};
 
 		let tasks = media_ids
-			.chunks(100)
+			.chunks(ctx.config.scanner_chunk_size)
 			.map(|chunk| ThumbnailGenerationTask::GenerateBatch(chunk.to_vec()))
 			.collect();
 
@@ -264,33 +267,30 @@ pub fn safely_generate_batch(
 	manager: &mut ThumbnailManager,
 ) -> JobTaskOutput<ThumbnailGenerationJob> {
 	let mut output = ThumbnailGenerationOutput::default();
-	let mut logs = vec![];
 
-	// let manager_arc = Arc::
+	let ParThumbnailGenerationOutput {
+		created_thumbnails,
+		errors,
+	} = manager.generate_thumbnails_par(media, options.clone());
+	let created_media_id_thumbnails = created_thumbnails
+		.into_iter()
+		.map(|(id, _)| id)
+		.collect::<Vec<String>>();
+	manager.track_thumbnails(&created_media_id_thumbnails, options);
 
-	// media
-	// 	.par_iter()
-	// 	.for_each_with(manager, |inner_manager, media| {});
+	output.visited_files = (created_media_id_thumbnails.len() + errors.len()) as u64;
+	output.generated_thumbnails = created_media_id_thumbnails.len() as u64;
 
-	// TODO: introduce a parallel version of this, it is too slow sequentially like this
-	for media_item in media {
-		manager
-			.generate_thumbnail(media_item, options.clone())
-			.map_or_else(
-				|error| {
-					tracing::error!(error = ?error, "Failed to generate thumbnail");
-					logs.push(
-						JobExecuteLog::error(format!(
-							"Failed to generate thumbnail: {:?}",
-							error.to_string()
-						))
-						.with_ctx(format!("Media ID: {}", media_item.id)),
-					);
-				},
-				|_| output.generated_thumbnails += 1,
-			);
-	}
-	output.visited_files = media.len() as u64;
+	let logs = errors
+		.into_iter()
+		.map(|(path, error)| {
+			JobExecuteLog::error(format!(
+				"Failed to generate thumbnail: {:?}",
+				error.to_string()
+			))
+			.with_ctx(format!("{:?}", path))
+		})
+		.collect();
 
 	JobTaskOutput {
 		output,

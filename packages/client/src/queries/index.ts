@@ -22,9 +22,11 @@ export {
 	useEditLibraryMutation,
 	useLibraries,
 	useLibraryByIdQuery,
+	useLibraryExclusionsQuery,
 	useLibraryQuery,
 	useLibraryStats,
 	useScanLibrary,
+	useTotalLibraryStats,
 	useVisitLibrary,
 } from './library'
 export { useLogsQuery } from './log'

@@ -1,8 +1,10 @@
-import { Library } from '@stump/types'
+import { Library, LibraryStats } from '@stump/types'
 import { createContext, useContext } from 'react'
 
+// TODO: add derived meta (book_count, series_count, etc)
 export type ILibraryContext = {
 	library: Library
+	stats?: LibraryStats
 }
 export const LibraryContext = createContext<ILibraryContext | null>(null)
 export const useLibraryContext = () => {

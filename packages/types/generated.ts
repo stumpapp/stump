@@ -235,6 +235,8 @@ export type Pagination = null | PageQuery | CursorQuery
 
 export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
+export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
+
 export type LoginOrRegisterArgs = { username: string; password: string }
 
 export type CreateUser = { username: string; password: string; permissions?: UserPermission[]; age_restriction: AgeRestriction | null; max_sessions_allowed?: number | null }

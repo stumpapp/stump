@@ -25,8 +25,7 @@ infer = "0.15.0"
 image = "0.24.7"
 webp = "0.2.6"
 zip = "0.6.6"
-epub = "1.2.4"
-# unrar = { git = "https://github.com/stumpapp/unrar.rs", branch = "feature/typestate" }
+epub = { git = "https://github.com/stumpapp/epub-rs", rev = "38e091abe96875952556ab7dec195022d0230e14" }
 unrar = { version = "0.5.2" }
 # pdf = "0.8.1"
 pdf = { git = "https://github.com/pdf-rs/pdf", rev = "3bc9e636d31b1846e51b58c7429914e640866f53" } # TODO: revert back to crates.io once fix(es) release

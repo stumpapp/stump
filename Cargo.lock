@@ -809,7 +809,7 @@ checksum = "702fc72eb24e5a1e48ce58027a675bc24edd52096d5397d4aea7c6dd9eca0bd1"
 
 [[package]]
 name = "cli"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "bcrypt",
  "clap",
@@ -1661,13 +1661,12 @@ dependencies = [
 
 [[package]]
 name = "epub"
-version = "1.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83c5ac32621967f51e8b82def1a8a86bf4f4e4ab21b6e22f3486d42121fa6581"
+version = "2.1.1"
+source = "git+https://github.com/stumpapp/epub-rs?rev=38e091abe96875952556ab7dec195022d0230e14#38e091abe96875952556ab7dec195022d0230e14"
 dependencies = [
- "anyhow",
  "percent-encoding",
  "regex",
+ "thiserror",
  "xml-rs",
  "zip",
 ]
@@ -2778,7 +2777,7 @@ dependencies = [
 
 [[package]]
 name = "integrations"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "async-trait",
  "dotenv",
@@ -4451,7 +4450,7 @@ dependencies = [
 
 [[package]]
 name = "prisma-cli"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "prisma-client-rust-cli",
 ]

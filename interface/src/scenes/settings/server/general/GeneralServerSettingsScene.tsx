@@ -1,3 +1,5 @@
+import { useCheckForServerUpdate } from '@stump/client'
+import { Alert } from '@stump/components'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
@@ -9,6 +11,8 @@ import { useLocaleContext } from '@/i18n'
 export default function GeneralServerSettingsScene() {
 	const { t } = useLocaleContext()
 
+	const { updateAvailable } = useCheckForServerUpdate()
+
 	return (
 		<SceneContainer>
 			<Helmet>
@@ -16,7 +20,15 @@ export default function GeneralServerSettingsScene() {
 			</Helmet>
 
 			<ContentContainer>
-				<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-12">
+					{updateAvailable && (
+						<Alert level="warning" rounded="sm" icon="warning">
+							<Alert.Content>
+								{t('settingsScene.server/general.sections.updateAvailable.message')}
+							</Alert.Content>
+						</Alert>
+					)}
+
 					<LibrariesStats />
 				</div>
 			</ContentContainer>

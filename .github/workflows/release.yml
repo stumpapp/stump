@@ -25,12 +25,13 @@ jobs:
     steps:
       - name: Extract version from branch name
         id: tag
-        run: echo "version=$(echo ${{ github.event.pull_request.head.ref }} | sed -e 's/release\/v//')" >> $GITHUB_ENV
+        run: echo "version=$(echo ${{ github.event.pull_request.head.ref }} | sed -e 's/release\/v//')" >> $GITHUB_OUTPUT
 
       - name: Print the tag
         run: echo "The output version is ${{ steps.tag.outputs.version }}"
 
       - name: Configure docker tags
+        id: docker-tags
         run: |
           echo "DOCKER_TAGS=latest,nightly,${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
           echo "Docker tags are latest, nightly, and ${{ steps.tag.outputs.version }}"
@@ -42,8 +43,13 @@ jobs:
     steps:
       - name: Configure environment
         run: |
-          echo "load=${{ github.event.pull_request.merged == false }}" >> $GITHUB_OUTPUT
-          echo "push=${{ github.event.pull_request.merged == true }}" >> $GITHUB_OUTPUT
+          echo "DOCKER_LOAD=${{ github.event.pull_request.merged == false }}" >> $GITHUB_ENV
+          echo "DOCKER_PUSH=${{ github.event.pull_request.merged == true }}" >> $GITHUB_ENV
+
+      - name: Print the configuration
+        run: |
+          echo "Load: ${{ env.DOCKER_LOAD }}"
+          echo "Push: ${{ env.DOCKER_PUSH }}"
 
   build-stable-docker:
     if: contains(github.event.pull_request.head.ref, 'release/v')
@@ -60,8 +66,8 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: ${{ env.DOCKER_TAGS }}
-          load: ${{ steps.push-or-load.outputs.load }}
-          push: ${{ steps.push-or-load.outputs.push }}
+          load: ${{ env.DOCKER_LOAD }}
+          push: ${{ env.DOCKER_PUSH }}
           platforms: 'linux/arm64/v8,linux/amd64'
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
 

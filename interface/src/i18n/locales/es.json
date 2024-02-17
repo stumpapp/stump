@@ -383,7 +383,11 @@
 			"helmet": "Ajustes generales del servidor",
 			"title": "Ajustes generales",
 			"description": "Ajustes generales relacionados con tu instancia de servidor Stump",
-			"sections": {}
+			"sections": {
+				"updateAvailable": {
+					"message": "Your server is not up to date. Please update to the latest version!"
+				}
+			}
 		},
 		"server/jobs": {
 			"helmet": "Tareas",

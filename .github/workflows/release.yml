@@ -66,8 +66,8 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           tags: ${{ env.DOCKER_TAGS }}
-          load: ${{ env.DOCKER_LOAD }}
-          push: ${{ env.DOCKER_PUSH }}
+          load: ${{ env.DOCKER_LOAD == 'true' }}
+          push: ${{ env.DOCKER_PUSH == 'true' }}
           platforms: 'linux/arm64/v8,linux/amd64'
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
 

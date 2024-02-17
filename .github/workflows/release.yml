@@ -22,6 +22,9 @@ jobs:
     if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Parse semver version
     runs-on: [self-hosted]
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+      tags: ${{ steps.docker-tags.outputs.tags }}
     steps:
       - name: Extract version from branch name
         id: tag
@@ -33,33 +36,36 @@ jobs:
       - name: Configure docker tags
         id: docker-tags
         run: |
-          echo "DOCKER_TAGS=latest,nightly,${{ steps.tag.outputs.version }}" >> $GITHUB_ENV
+          echo "tags=latest,nightly,${{ steps.tag.outputs.version }}" >> $GITHUB_OUTPUT
           echo "Docker tags are latest, nightly, and ${{ steps.tag.outputs.version }}"
 
   push-or-load:
     if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Configure docker load/push
     runs-on: [self-hosted]
+    outputs:
+      load: ${{ steps.configure.outputs.load }}
+      push: ${{ steps.configure.outputs.push }}
+      platforms: ${{ steps.configure.outputs.platforms }}
     steps:
-      - name: Configure environment (push)
-        if: ${{ github.event.pull_request.merged }}
+      - name: Configure environment
+        id: configure
         run: |
-          echo "DOCKER_PUSH=true" >> $GITHUB_ENV
-          echo "DOCKER_LOAD=false" >> $GITHUB_ENV
-          echo "DOCKER_PLATFORMS=linux/arm64/v8,linux/amd64" >> $GITHUB_ENV
-
-      - name: Configure environment (load)
-        if: ${{ github.event.pull_request.merged == false }}
-        run: |
-          echo "DOCKER_PUSH=false" >> $GITHUB_ENV
-          echo "DOCKER_LOAD=true" >> $GITHUB_ENV
-          echo "DOCKER_PLATFORMS=linux/amd64" >> $GITHUB_ENV
+          if [[ ${{ github.event.pull_request.merged }} == 'true' ]]; then
+            echo "push=true" >> $GITHUB_OUTPUT
+            echo "load=false" >> $GITHUB_OUTPUT
+            echo "DOCKER_PLATFORMS=linux/arm64/v8,linux/amd64" >> $GITHUB_OUTPUT
+          else
+            echo "push=false" >> $GITHUB_OUTPUT
+            echo "load=true" >> $GITHUB_OUTPUT
+            echo "platforms=linux/amd64" >> $GITHUB_OUTPUT
+          fi
 
       - name: Print the configuration
         run: |
-          echo "Platforms: ${{ env.DOCKER_PLATFORMS }}"
-          echo "Load: ${{ env.DOCKER_LOAD }}"
-          echo "Push: ${{ env.DOCKER_PUSH }}"
+          echo "Platforms: ${{ steps.configure.outputs.platforms }}"
+          echo "Load: ${{ steps.configure.outputs.load }}"
+          echo "Push: ${{ steps.configure.outputs.push }}"
 
   build-stable-docker:
     if: contains(github.event.pull_request.head.ref, 'release/v')
@@ -75,10 +81,10 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-          tags: ${{ env.DOCKER_TAGS }}
-          load: ${{ env.DOCKER_LOAD }}
-          push: ${{ env.DOCKER_PUSH }}
-          platforms: ${{ env.DOCKER_PLATFORMS }}
+          tags: ${{ needs.parse-semver.outputs.tags }}
+          load: ${{ needs.push-or-load.outputs.load }}
+          push: ${{ needs.push-or-load.outputs.push }}
+          platforms: ${{ needs.push-or-load.outputs.platforms }}
           discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}
 
   # build-web-app:

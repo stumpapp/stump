@@ -1,5 +1,5 @@
 import { usePreferences } from '@stump/client'
-import { cn, Heading } from '@stump/components'
+import { cn, Heading, Text } from '@stump/components'
 import React from 'react'
 import { useMediaMatch } from 'rooks'
 
@@ -19,7 +19,21 @@ export default function LibraryHeader() {
 	const summary = library.description
 	const preferTopBar = primary_navigation_mode === 'TOPBAR'
 
-	console.debug({ stats })
+	const renderStats = () => {
+		if (!stats) return null
+
+		const bookCount = Number(stats.book_count)
+		const completedBooks = Number(stats.completed_books)
+
+		const rawPercentageComplete = (completedBooks / bookCount) * 100
+		const percentageComplete = completedBooks > 0 ? rawPercentageComplete.toFixed(2) : 0
+
+		return (
+			<Text size="xs" variant="muted">
+				{percentageComplete}% complete ({completedBooks} of {bookCount} books)
+			</Text>
+		)
+	}
 
 	return (
 		<header
@@ -44,6 +58,7 @@ export default function LibraryHeader() {
 				<div className="flex h-full w-full flex-col gap-2 md:gap-4">
 					<div className="flex flex-col items-start">
 						<Heading size="lg">{library.name}</Heading>
+						{renderStats()}
 						<TagList tags={library.tags} />
 					</div>
 

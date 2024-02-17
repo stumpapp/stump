@@ -1,6 +1,12 @@
-import { useLibraryExclusionsQuery, useUsersQuery } from '@stump/client'
+import {
+	useLibraryExclusionsMutation,
+	useLibraryExclusionsQuery,
+	useUsersQuery,
+} from '@stump/client'
 import { ComboBox, Heading, Text } from '@stump/components'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
+import { useDebouncedValue } from 'rooks'
 
 import { useAppContext } from '@/context'
 
@@ -15,12 +21,36 @@ export default function LibraryExclusions() {
 		id: library.id,
 	})
 
-	const [excludedUserIds, setExcludedUserIds] = useState<string[]>(
-		() => excludedUsers?.map((user) => user.id) || [],
+	const { updateExcludedUsersAsync } = useLibraryExclusionsMutation({ id: library.id })
+	const update = useCallback(
+		async (ids: string[]) => {
+			try {
+				await updateExcludedUsersAsync(ids)
+				toast.success('Excluded users updated')
+			} catch (e) {
+				console.error(e)
+				toast.error('Failed to update excluded users')
+			}
+		},
+		[updateExcludedUsersAsync],
 	)
+
+	const [excludedUserIds, setExcludedUserIds] = useState<string[] | undefined>(() =>
+		excludedUsers?.map((user) => user.id),
+	)
+	const [debouncedUserIds] = useDebouncedValue(excludedUserIds, 500)
+
 	useEffect(() => {
 		setExcludedUserIds(excludedUsers?.map((user) => user.id) || [])
 	}, [excludedUsers])
+
+	const variablesLoaded = !!debouncedUserIds && !!excludedUsers
+	const shouldCall = variablesLoaded && debouncedUserIds.length !== excludedUsers.length
+	useEffect(() => {
+		if (shouldCall) {
+			update(debouncedUserIds)
+		}
+	}, [debouncedUserIds, update, shouldCall])
 
 	const userOptions = useMemo(
 		() =>
@@ -44,7 +74,14 @@ export default function LibraryExclusions() {
 				</Text>
 			</div>
 
-			<ComboBox options={userOptions} value={excludedUserIds} isMultiSelect />
+			<ComboBox
+				options={userOptions}
+				value={excludedUserIds}
+				isMultiSelect
+				onChange={(userIds) => {
+					setExcludedUserIds(userIds || [])
+				}}
+			/>
 		</div>
 	)
 }

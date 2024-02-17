@@ -114,7 +114,7 @@ export function getExcludedUsers(id: string) {
 }
 
 export function updateExcludedUsers(id: string, user_ids: string[]) {
-	return API.post(`/libraries/${id}/excluded-users`, user_ids)
+	return API.post(`/libraries/${id}/excluded-users`, { user_ids })
 }
 
 export const libraryApi = {

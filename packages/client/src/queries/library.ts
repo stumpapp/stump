@@ -245,3 +245,31 @@ export function useLibraryExclusionsQuery({
 
 	return { excludedUsers, ...rest }
 }
+
+export function useLibraryExclusionsMutation({
+	id,
+	...options
+}: MutationOptions<User[], AxiosError, string[]> & { id: string }) {
+	const {
+		mutate: updateExcludedUsers,
+		mutateAsync: updateExcludedUsersAsync,
+		...rest
+	} = useMutation(
+		[libraryQueryKeys.updateExcludedUsers],
+		async (userIds) => {
+			const { data } = await libraryApi.updateExcludedUsers(id, userIds)
+			return data
+		},
+		{
+			...options,
+			onSuccess: async (users, _, __) => {
+				await invalidateQueries({
+					keys: [libraryQueryKeys.getExcludedUsers],
+				})
+				options.onSuccess?.(users, _, __)
+			},
+		},
+	)
+
+	return { updateExcludedUsers, updateExcludedUsersAsync, ...rest }
+}

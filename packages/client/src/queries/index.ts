@@ -22,6 +22,7 @@ export {
 	useEditLibraryMutation,
 	useLibraries,
 	useLibraryByIdQuery,
+	useLibraryExclusionsMutation,
 	useLibraryExclusionsQuery,
 	useLibraryQuery,
 	useLibraryStats,

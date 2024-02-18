@@ -1,13 +1,12 @@
+import { getMediaThumbnail } from '@stump/api'
 import { useMediaCursorQuery } from '@stump/client'
 import { StatusBar } from 'expo-status-bar'
 import React, { useCallback } from 'react'
-import { FlatList } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { FlatList, Image } from 'react-native'
 
-import { Link, View } from '@/components'
+import { Link, ScreenRootView, Text, View } from '@/components'
 
 export default function Explore() {
-	const insets = useSafeAreaInsets()
 	const { media: books, hasNextPage, fetchNextPage } = useMediaCursorQuery({})
 
 	const handleFetchMore = useCallback(() => {
@@ -17,30 +16,33 @@ export default function Explore() {
 	}, [hasNextPage, fetchNextPage])
 
 	return (
-		<View
-			className="flex-1 items-center justify-center"
-			style={{
-				paddingBottom: insets.bottom,
-				paddingLeft: insets.left,
-				paddingRight: insets.right,
-				paddingTop: insets.top,
-			}}
-		>
+		<ScreenRootView>
 			<FlatList
 				data={books}
 				renderItem={({ item }) => (
-					<Link
-						to={{ params: { id: item.id }, screen: 'BookStack' }}
-						className="max-w-full p-3 text-left"
-					>
-						{item.name}
+					<Link to={{ params: { id: item.id }, screen: 'BookStack' }} className="max-w-full">
+						<View className="w-full flex-row space-x-2 p-3 text-left">
+							<View>
+								<Image
+									source={{ uri: getMediaThumbnail(item.id) }}
+									style={{ height: 50, objectFit: 'scale-down', width: 50 }}
+								/>
+							</View>
+
+							<View className="w-0 flex-1 flex-grow">
+								<Text size="sm" className="shrink-1">
+									{item.name}
+								</Text>
+							</View>
+						</View>
 					</Link>
 				)}
+				ItemSeparatorComponent={() => <View className="h-px bg-gray-50 dark:bg-gray-900" />}
 				keyExtractor={(item) => item.id}
 				onEndReachedThreshold={0.85}
 				onEndReached={handleFetchMore}
 			/>
 			<StatusBar style="auto" />
-		</View>
+		</ScreenRootView>
 	)
 }

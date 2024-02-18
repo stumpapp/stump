@@ -4,7 +4,6 @@ import { checkUrl, initializeApi, isAxiosError, isUrl } from '@stump/api'
 import { useAuthQuery } from '@stump/client'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect, useState } from 'react'
-import { View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { AuthenticatedNavigator } from './screens/authenticated'

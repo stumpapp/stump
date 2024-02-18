@@ -1,3 +1,4 @@
 export { Input } from './Input'
 export { Link } from './Link'
-export { View } from './View'
+export { Text } from './Text'
+export { ScreenRootView, View } from './View'

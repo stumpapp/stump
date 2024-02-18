@@ -1,1 +1,1 @@
-export { Input, Link, View } from './primitives'
+export { Input, Link, ScreenRootView, Text, View } from './primitives'

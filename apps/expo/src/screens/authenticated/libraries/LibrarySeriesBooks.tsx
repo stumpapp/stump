@@ -1,11 +1,9 @@
 import { type RouteProp, useRoute } from '@react-navigation/native'
 import { useMediaCursorQuery } from '@stump/client'
-import { StatusBar } from 'expo-status-bar'
 import React, { useCallback } from 'react'
 import { FlatList } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { View } from '@/components'
+import { ScreenRootView, View } from '@/components'
 
 import SeriesBookLink from './SeriesBookLink'
 
@@ -16,7 +14,6 @@ type Params = {
 }
 
 export default function LibrarySeriesBookList() {
-	const insets = useSafeAreaInsets()
 	const {
 		params: { id },
 	} = useRoute<RouteProp<Params>>()
@@ -44,23 +41,16 @@ export default function LibrarySeriesBookList() {
 	}, [hasNextPage, fetchNextPage])
 
 	return (
-		<View
-			className="flex-1 items-center justify-center"
-			style={{
-				paddingBottom: insets.bottom,
-				paddingLeft: insets.left,
-				paddingRight: insets.right,
-				paddingTop: insets.top,
-			}}
-		>
+		<ScreenRootView>
 			<FlatList
+				className="w-full"
 				data={books}
-				renderItem={({ item }) => <SeriesBookLink books={item} />}
+				renderItem={({ item }) => <SeriesBookLink book={item} />}
 				keyExtractor={(item) => item.id}
+				ItemSeparatorComponent={() => <View className="h-px bg-gray-50 dark:bg-gray-900" />}
 				onEndReachedThreshold={0.85}
 				onEndReached={handleFetchMore}
 			/>
-			<StatusBar style="auto" />
-		</View>
+		</ScreenRootView>
 	)
 }

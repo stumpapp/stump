@@ -1,11 +1,9 @@
 import { type RouteProp, useRoute } from '@react-navigation/native'
 import { useSeriesCursorQuery } from '@stump/client'
-import { StatusBar } from 'expo-status-bar'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { FlatList } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { View } from '@/components'
+import { ScreenRootView, View } from '@/components'
 
 import LibrarySeriesLink from './LibrarySeriesLink'
 
@@ -16,7 +14,6 @@ type Params = {
 }
 
 export default function LibrarySeriesList() {
-	const insets = useSafeAreaInsets()
 	const {
 		params: { id },
 	} = useRoute<RouteProp<Params>>()
@@ -25,7 +22,7 @@ export default function LibrarySeriesList() {
 		throw new Error('ID required for this Screen!')
 	}
 
-	const { series } = useSeriesCursorQuery({
+	const { series, hasNextPage, fetchNextPage } = useSeriesCursorQuery({
 		params: {
 			library: {
 				id,
@@ -33,23 +30,23 @@ export default function LibrarySeriesList() {
 		},
 	})
 
+	const handleFetchMore = useCallback(() => {
+		if (hasNextPage) {
+			fetchNextPage()
+		}
+	}, [hasNextPage, fetchNextPage])
+
 	return (
-		<View
-			className="flex-1 items-center justify-center"
-			style={{
-				paddingBottom: insets.bottom,
-				paddingLeft: insets.left,
-				paddingRight: insets.right,
-				paddingTop: insets.top,
-			}}
-		>
+		<ScreenRootView>
 			<FlatList
 				data={series}
 				renderItem={({ item }) => <LibrarySeriesLink series={item} />}
+				ItemSeparatorComponent={() => <View className="h-px bg-gray-50 dark:bg-gray-900" />}
 				keyExtractor={(item) => item.id}
 				className="w-full"
+				onEndReachedThreshold={0.85}
+				onEndReached={handleFetchMore}
 			/>
-			<StatusBar style="auto" />
-		</View>
+		</ScreenRootView>
 	)
 }

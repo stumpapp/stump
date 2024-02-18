@@ -1,15 +1,16 @@
-import { StatusBar } from 'expo-status-bar'
+import { useColorScheme } from 'nativewind'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Button } from 'react-native'
 
-import CenterTabSelector from '@/components/CenterTabSelector'
+import { ScreenRootView, Text } from '@/components'
 
 export default function Home() {
+	const { colorScheme, toggleColorScheme } = useColorScheme()
+
 	return (
-		<View className="flex-1 items-center justify-center">
-			<Text>I am home</Text>
-			<CenterTabSelector />
-			<StatusBar style="auto" />
-		</View>
+		<ScreenRootView>
+			<Text>I am home : {colorScheme}</Text>
+			<Button title="Toggle color scheme" onPress={toggleColorScheme} />
+		</ScreenRootView>
 	)
 }

@@ -1,5 +1,6 @@
-import { Link } from '@react-navigation/native'
 import { Library } from '@stump/types'
+
+import { Link } from '@/components'
 
 type Props = {
 	library: Library

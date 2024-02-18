@@ -84,17 +84,34 @@ fi
 
 CALL_TO_ACTION_LOL="Please consider helping to expand support for your system: https://github.com/stumpapp/stump/issues"
 
-# TODO: group these? so lines aren't so long...
 # https://tauri.app/v1/guides/getting-started/prerequisites/#1-system-dependencies
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   UNSUPPORTED_DISTRO="Your distro '$(lsb_release -s -d)' is not supported by this script. $CALL_TO_ACTION_LOL"
 
   if which apt-get &> /dev/null; then
     sudo apt-get -y update
-    sudo apt-get -y install pkg-config javascriptcoregtk-4.0 libssl-dev libdbus-1-dev libsoup2.4-dev libwebkit2gtk-4.0-dev curl wget libgtk-3-dev libappindicator3-dev librsvg2-dev build-essential libayatana-appindicator3-dev gobject-2.0 libcairo2-dev libatk1.0-dev libgdk-pixbuf2.0-dev
+    sudo apt-get -y install libwebkit2gtk-4.0-dev \
+      pkg-config \
+      build-essential \
+      curl \
+      wget \
+      file \
+      openssl \
+      libssl-dev \
+      libgtk-3-dev \
+      libayatana-appindicator3-dev \
+      librsvg2-dev \
+      libvips42
   elif which pacman &> /dev/null; then
     sudo pacman -Syu
-    sudo pacman -S --needed webkit2gtk base-devel curl wget openssl appmenu-gtk-module gtk3 libappindicator-gtk3 librsvg libvips
+    sudo pacman -S --needed webkit2gtk \
+      base-devel \
+      curl \
+      wget \
+      openssl \
+      appmenu-gtk-module \
+      gtk3 \
+      libappindicator-gtk3 librsvg libvips
   elif which dnf &> /dev/null; then
     sudo dnf check-update
     sudo dnf install openssl-devel webkit2gtk4.0-devel curl wget libappindicator-gtk3 librsvg2-devel

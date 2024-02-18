@@ -18,9 +18,6 @@ jobs:
       - name: Setup rust
         uses: ./.github/actions/setup-rust
 
-      - name: Setup prisma
-        uses: ./.github/actions/setup-prisma
-
       - name: Run cargo checks
         run: |
           cargo fmt --all -- --check

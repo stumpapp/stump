@@ -4,11 +4,6 @@ description: 'Install system dependencies and setup cache'
 runs:
   using: 'composite'
   steps:
-    - name: Configure environment
-      if: ${{ runner.name != 'oromei-ubuntu' && runner.os != 'Windows' }}
-      shell: bash
-      run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
-
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
@@ -17,20 +12,30 @@ runs:
         override: true
         components: rustfmt, clippy
 
-    - name: Cache cargo registry
-      uses: actions/cache@v3
-      with:
-        path: ~/.cargo/registry
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+    - name: Configure environment
+      if: ${{ runner.name != 'oromei-ubuntu' && runner.os != 'Windows' }}
+      shell: bash
+      run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
 
-    - name: Cache cargo index
-      uses: actions/cache@v3
+    - name: Cache Rust Dependencies
+      uses: Swatinem/rust-cache@v2
       with:
-        path: ~/.cargo/git
-        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+        shared-key: stump-rust-cache
 
-    - name: Cache cargo build
-      uses: actions/cache@v3
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+    # - name: Cache cargo registry
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: ~/.cargo/registry
+    #     key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+    # - name: Cache cargo index
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: ~/.cargo/git
+    #     key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+    # - name: Cache cargo build
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: target
+    #     key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}

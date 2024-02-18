@@ -9,3 +9,5 @@ build
 .expo
 
 packages/browser/src/i18n/locales/*.json
+
+CHANGELOG.md

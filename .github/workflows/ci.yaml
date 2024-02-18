@@ -8,17 +8,15 @@ on:
 
 jobs:
   check-rust:
+    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
     name: Rust checks
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup cargo
-        uses: ./.github/actions/setup-cargo
-
-      - name: Setup prisma
-        uses: ./.github/actions/setup-prisma
+      - name: Setup rust
+        uses: ./.github/actions/setup-rust
 
       - name: Run cargo checks
         run: |
@@ -30,8 +28,9 @@ jobs:
       #     cargo integration-tests
 
   check-typescript:
+    if: "!contains(github.event.pull_request.head.ref, 'release/v')"
     name: TypeScript checks
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

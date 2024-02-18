@@ -51,7 +51,7 @@ jobs:
       - name: Configure environment
         id: configure
         run: |
-          if [[ ${{ github.event.pull_request.merged }} == false ]]; then
+          if [[ ${{ github.event.pull_request.merged }} == true ]]; then
             echo "push=true" >> $GITHUB_OUTPUT
             echo "load=false" >> $GITHUB_OUTPUT
             echo "platforms=linux/arm64/v8,linux/amd64" >> $GITHUB_OUTPUT

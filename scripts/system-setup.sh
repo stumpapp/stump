@@ -100,7 +100,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       libssl-dev \
       libgtk-3-dev \
       libayatana-appindicator3-dev \
-      librsvg2-dev \ 
+      librsvg2-dev \
       libvips42
   elif which pacman &> /dev/null; then
     sudo pacman -Syu

@@ -19,9 +19,14 @@ export const allPermissions = [
 	'library:scan',
 	'library:manage',
 	'library:delete',
+	'user:read',
 	'user:manage',
 	'server:manage',
 	'smartlist:read',
+	'notifier:read',
+	'notifier:create',
+	'notifier:delete',
+	'notifier:manage',
 ] as const
 export const userPermissionSchema = z.enum(allPermissions)
 
@@ -35,9 +40,14 @@ const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'library:edit': [],
 	'library:manage': ['library:edit', 'library:scan'],
 	'library:scan': [],
+	'notifier:create': ['notifier:read'],
+	'notifier:delete': ['notifier:read'],
+	'notifier:manage': ['notifier:read', 'notifier:create', 'notifier:delete'],
+	'notifier:read': [],
 	'server:manage': ['file:explorer', 'user:manage', 'library:edit', 'library:scan'],
 	'smartlist:read': [],
-	'user:manage': [],
+	'user:manage': ['user:read'],
+	'user:read': [],
 }
 
 const prefixes = ['bookclub', 'file', 'library', 'user', 'server', 'smartlist'] as const

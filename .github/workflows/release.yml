@@ -21,7 +21,7 @@ jobs:
   parse-semver:
     if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Parse semver version
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, ubuntu-22.04]
     outputs:
       version: ${{ steps.tag.outputs.version }}
       tags: ${{ steps.docker-tags.outputs.tags }}
@@ -42,7 +42,7 @@ jobs:
   push-or-load:
     if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Configure docker load/push
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, ubuntu-22.04]
     outputs:
       load: ${{ steps.configure.outputs.load }}
       push: ${{ steps.configure.outputs.push }}
@@ -70,7 +70,7 @@ jobs:
   build-stable-docker:
     if: contains(github.event.pull_request.head.ref, 'release/v')
     name: Build docker image
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-22.04]
     needs: [parse-semver, push-or-load]
     steps:
       - name: Checkout repository

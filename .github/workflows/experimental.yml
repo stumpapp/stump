@@ -19,7 +19,7 @@ env:
 jobs:
   nightly-docker-build:
     name: Build docker image
-    runs-on: [self-hosted]
+    runs-on: [ubuntu-22.04]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

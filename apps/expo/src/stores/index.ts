@@ -1,2 +1,2 @@
 export { useAppStore } from './app'
-export { useUserStore } from './user'
+export { usePreferencesStore, useUserStore } from './user'

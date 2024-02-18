@@ -8,7 +8,16 @@ const Stack = createNativeStackNavigator()
 
 export default function LibraryStackNavigator() {
 	return (
-		<Stack.Navigator>
+		<Stack.Navigator
+		// screenOptions={{
+		// 	headerStyle: {
+		// 		backgroundColor: colorScheme === 'dark' ? gray[950] : 'white',
+		// 	},
+		// 	headerTitleStyle: {
+		// 		color: colorScheme === 'dark' ? gray[50] : gray[900],
+		// 	},
+		// }}
+		>
 			<Stack.Screen name="Libraries" component={LibrariesList} options={{ headerShown: false }} />
 			<Stack.Screen
 				name="LibrarySeries"

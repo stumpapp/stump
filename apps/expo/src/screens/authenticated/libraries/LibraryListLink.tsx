@@ -16,3 +16,5 @@ export default function LibraryListLink({ library }: Props) {
 		</Link>
 	)
 }
+
+// https://github.com/facebook/react-native/issues/32222#issuecomment-1567296877

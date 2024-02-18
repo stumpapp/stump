@@ -95,6 +95,7 @@ export default function AppWrapper() {
 		}
 	}, [baseUrl, setIsConnectedToServer])
 
+	// TODO: An offline-only stack which allows for reading of downloaded content
 	const renderApp = () => {
 		if (!isConnectedToServer) {
 			return (

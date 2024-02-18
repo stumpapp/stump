@@ -11,3 +11,5 @@ build
 
 # locale files
 interface/src/i18n/locales/*.json
+
+CHANGELOG.md

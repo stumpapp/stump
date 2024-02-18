@@ -64,4 +64,3 @@ libc = "0.2.152"
 [[bench]]
 name    = "bench_main"
 harness = false
-

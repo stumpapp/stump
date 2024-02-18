@@ -20,7 +20,6 @@ runs:
         node-version: '20.0.0'
         cache: 'yarn'
 
-
     - name: Install yarn
       shell: bash
       run: npm install -g yarn

@@ -9,5 +9,6 @@ dist
 build
 .next
 
-# locale files
 packages/browser/src/i18n/locales/*.json
+
+CHANGELOG.md

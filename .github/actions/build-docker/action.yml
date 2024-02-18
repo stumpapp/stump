@@ -37,10 +37,7 @@ runs:
       shell: bash
 
     - name: Setup rust
-      uses: ./.github/actions/setup-cargo
-
-    - name: Generate Prisma client
-      uses: ./.github/actions/setup-prisma
+      uses: ./.github/actions/setup-rust
 
     # We only need QEMU when an arm* platform is targeted
     - name: Check QEMU requirement

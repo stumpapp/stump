@@ -15,8 +15,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup cargo
-        uses: ./.github/actions/setup-cargo
+      - name: Setup rust
+        uses: ./.github/actions/setup-rust
 
       - name: Setup prisma
         uses: ./.github/actions/setup-prisma

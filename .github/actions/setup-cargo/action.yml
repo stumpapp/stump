@@ -5,16 +5,7 @@ runs:
   using: 'composite'
   steps:
     - name: Configure environment
-      run: |
-        if [[ ${{ runner.name }} == 'oromei-ubuntu' || ${{ runner.os }} == 'Windows' ]]; then
-          echo "RUN_SETUP=false" >> $GITHUB_ENV
-        else
-          echo "RUN_SETUP=true" >> $GITHUB_ENV
-        fi
-      shell: bash
-
-    - name: System setup
-      if: ${{ env.RUN_SETUP == 'true' }}
+      if: ${{ runner.name != 'oromei-ubuntu' && runner.os != 'Windows' }}
       shell: bash
       run: CHECK_NODE=0 CHECK_CARGO=0 DEV_SETUP=0 ./scripts/system-setup.sh
 

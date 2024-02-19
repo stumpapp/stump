@@ -5,7 +5,6 @@ import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
-import LibrariesStats from '@/components/library/LibrariesStats'
 import { useLocaleContext } from '@/i18n'
 
 import ServerInfoSection from './ServerInfoSection'
@@ -31,7 +30,6 @@ export default function GeneralServerSettingsScene() {
 						</Alert>
 					)}
 
-					<LibrariesStats />
 					<ServerInfoSection />
 				</div>
 			</ContentContainer>

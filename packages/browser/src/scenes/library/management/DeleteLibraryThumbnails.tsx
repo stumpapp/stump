@@ -1,5 +1,6 @@
 import { libraryApi } from '@stump/api'
-import { Button, ConfirmationModal } from '@stump/components'
+import { Alert, Button, ConfirmationModal } from '@stump/components'
+import { AlertTriangle } from 'lucide-react'
 import React, { useState } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -33,7 +34,22 @@ export default function DeleteLibraryThumbnails({ libraryId }: Props) {
 	}
 
 	return (
-		<div>
+		<>
+			<Alert level="error" rounded="sm" icon={AlertTriangle}>
+				<Alert.Content className="flex flex-col gap-3 md:flex-row">
+					Delete all generated thumbnails for this library
+					<Button
+						variant="danger"
+						onClick={() => setShowConfirmation(true)}
+						className="flex-shrink-0"
+						disabled={justDeleted || isDeleting}
+						size="md"
+					>
+						Delete thumbnails
+					</Button>
+				</Alert.Content>
+			</Alert>
+
 			<ConfirmationModal
 				title="Delete library thumbnails"
 				description="Are you sure you want to delete all thumbnails for this library? You will have to manually regenerate them."
@@ -44,17 +60,6 @@ export default function DeleteLibraryThumbnails({ libraryId }: Props) {
 				onConfirm={handleDeleteThumbnails}
 				confirmIsLoading={isDeleting}
 			/>
-
-			<Button
-				type="button"
-				variant="danger"
-				onClick={() => setShowConfirmation(true)}
-				className="flex-shrink-0"
-				size="md"
-				disabled={justDeleted || isDeleting}
-			>
-				Delete thumbnails
-			</Button>
-		</div>
+		</>
 	)
 }

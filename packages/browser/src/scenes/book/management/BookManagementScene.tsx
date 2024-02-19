@@ -29,7 +29,7 @@ export default function BookManagementScene() {
 
 		return [
 			...(series?.library
-				? [{ label: series.library.name, to: paths.libraryOverview(series.library.id) }]
+				? [{ label: series.library.name, to: paths.librarySeries(series.library.id) }]
 				: []),
 			...(series
 				? [

@@ -1,15 +1,15 @@
 import { queryClient, useScanLibrary } from '@stump/client'
 import { DropdownMenu } from '@stump/components'
 import type { Library } from '@stump/types'
-import { Edit, FolderSearch2, MoreHorizontal, ScanLine, Trash } from 'lucide-react'
+import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useLocation } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
-import { useAppContext } from '../../../../../context'
-import { useLocaleContext } from '../../../../../i18n'
-import paths from '../../../../../paths'
-import DeleteLibraryConfirmation from '../../../../library/DeleteLibraryConfirmation'
+import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirmation'
+import { useAppContext } from '@/context'
+import { useLocaleContext } from '@/i18n'
+import paths from '@/paths'
 
 type Props = {
 	library: Library
@@ -101,7 +101,7 @@ export default function LibraryOptionsMenu({ library }: Props) {
 										{
 											href: paths.libraryManage(library.id),
 											label: t(getLocaleKey('manageLibrary')),
-											leftIcon: <Edit className={iconStyle} />,
+											leftIcon: <Settings className={iconStyle} />,
 										},
 										...(canDelete
 											? [

@@ -23,11 +23,13 @@ use stump_core::{
 		filter::{FilterJoin, MediaSmartFilter, SmartFilter},
 	},
 	prisma::{
-		library, series, smart_list, smart_list_access_rule, smart_list_view, user,
+		library, media, series, smart_list, smart_list_access_rule, smart_list_view, user,
 	},
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
+
+use super::media::apply_media_age_restriction;
 
 pub(crate) fn mount() -> Router<AppState> {
 	Router::new()
@@ -467,14 +469,27 @@ async fn get_smart_list_meta(
 		.try_into()?;
 
 	let params = smart_list.into_params();
+	let age_restriction = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+	let library_not_hidden_restriction =
+		library::hidden_from_users::none(vec![user::id::equals(user.id.clone())]);
+	let params_for_user = chain_optional_iter(
+		params
+			.into_iter()
+			.chain([media::series::is(vec![series::library::is(vec![
+				library_not_hidden_restriction,
+			])])]),
+		[age_restriction],
+	);
 
-	// TODO: would it just be more efficient to do three queries in this transaction?
 	let meta = client
 		._transaction()
 		.run(|tx| async move {
 			let books = tx
 				.media()
-				.find_many(params.clone())
+				.find_many(params_for_user)
 				.select(media_only_series_id::select())
 				.exec()
 				.await?;

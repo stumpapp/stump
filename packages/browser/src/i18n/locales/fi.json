@@ -123,7 +123,7 @@
 			}
 		}
 	},
-	"manageLibraryScene": {
+	"librarySettingsScene": {
 		"heading": "Manage Library",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
 		"subtitleLink": "relevant documentation",

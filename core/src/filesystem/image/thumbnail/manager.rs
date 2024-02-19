@@ -1,5 +1,7 @@
 use std::{collections::HashMap, fs::File, io::Write, path::PathBuf, sync::Arc};
 
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
 use crate::{
 	config::StumpConfig,
 	filesystem::{
@@ -11,6 +13,12 @@ use crate::{
 	},
 	prisma::media as prisma_media,
 };
+
+#[derive(Default)]
+pub struct ParThumbnailGenerationOutput {
+	pub created_thumbnails: Vec<(String, PathBuf)>,
+	pub errors: Vec<(PathBuf, FileError)>,
+}
 
 pub struct ThumbnailManager {
 	config: Arc<StumpConfig>,
@@ -45,11 +53,29 @@ impl ThumbnailManager {
 		self.thumbnail_contents.contains_key(media_id.as_ref())
 	}
 
-	pub fn generate_thumbnail(
+	/// Inserts thumbnails into the manager's internal hashmap for future reference,
+	/// it will assume generation is not necessary.
+	pub fn track_thumbnails(
 		&mut self,
+		media_ids: &[String],
+		options: ImageProcessorOptions,
+	) {
+		let base_path = self.config.get_thumbnails_dir();
+		let ext = options.format.extension();
+
+		for id in media_ids {
+			let thumbnail_path = base_path.join(format!("{}.{}", id, ext));
+			if thumbnail_path.exists() {
+				self.thumbnail_contents.insert(id.clone(), thumbnail_path);
+			}
+		}
+	}
+
+	fn do_generate_thumbnail(
+		&self,
 		media_item: &prisma_media::Data,
 		options: ImageProcessorOptions,
-	) -> Result<(), FileError> {
+	) -> Result<PathBuf, FileError> {
 		let media_id = media_item.id.clone();
 		let media_path = media_item.path.clone();
 
@@ -70,9 +96,6 @@ impl ThumbnailManager {
 
 			let mut image_file = File::create(&thumbnail_path)?;
 			image_file.write_all(&image_buffer)?;
-
-			// Write new thumbnail into hashmap
-			self.thumbnail_contents.insert(media_id, thumbnail_path);
 		} else {
 			tracing::trace!(
 				?thumbnail_path,
@@ -81,7 +104,55 @@ impl ThumbnailManager {
 			)
 		}
 
-		Ok(())
+		Ok(thumbnail_path)
+	}
+
+	pub fn generate_thumbnail(
+		&mut self,
+		media_item: &prisma_media::Data,
+		options: ImageProcessorOptions,
+	) -> Result<PathBuf, FileError> {
+		let path = self.do_generate_thumbnail(media_item, options)?;
+		self.thumbnail_contents
+			.insert(media_item.id.clone(), path.clone());
+		Ok(path)
+	}
+
+	pub fn generate_thumbnails_par(
+		&self,
+		media: &[prisma_media::Data],
+		options: ImageProcessorOptions,
+	) -> ParThumbnailGenerationOutput {
+		let mut output = ParThumbnailGenerationOutput::default();
+
+		for chunk in media.chunks(5) {
+			let results = chunk
+				.into_par_iter()
+				.map(|m| {
+					(
+						m.id.clone(),
+						m.path.clone(),
+						self.do_generate_thumbnail(m, options.clone()),
+					)
+				})
+				.collect::<Vec<_>>();
+
+			let (errors, generated) = results.into_iter().fold(
+				(vec![], vec![]),
+				|(mut errors, mut generated), (id, path, res)| {
+					match res {
+						Ok(generated_path) => generated.push((id, generated_path)),
+						Err(err) => errors.push((PathBuf::from(path), err)),
+					}
+					(errors, generated)
+				},
+			);
+
+			output.errors = errors;
+			output.created_thumbnails = generated;
+		}
+
+		output
 	}
 
 	pub fn remove_thumbnail<S: AsRef<str>>(

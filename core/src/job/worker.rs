@@ -3,10 +3,7 @@ use std::{
 	time::{Duration, Instant},
 };
 
-use tokio::{
-	sync::{broadcast, mpsc, oneshot},
-	task,
-};
+use tokio::sync::{broadcast, mpsc, oneshot};
 
 use crate::{
 	config::StumpConfig,
@@ -277,7 +274,7 @@ impl Worker {
 			status_rx,
 			manager: manager.clone(),
 		};
-		task::spawn(worker_manager.main_loop(job));
+		tokio::spawn(worker_manager.main_loop(job));
 
 		Ok(worker)
 	}
@@ -372,7 +369,7 @@ impl WorkerManager {
 		// Note: we cannot use an Arc here because the executor.execute method
 		// requires a mutable reference to the executor. So instead we just return
 		// the executor and the result of the execution once it's done.
-		let executor_handle = task::spawn(async move {
+		let executor_handle = tokio::spawn(async move {
 			let result = executor.execute(loop_ctx).await;
 			(executor, result)
 		});
@@ -393,13 +390,17 @@ impl WorkerManager {
 								"Task output received"
 							);
 							match result {
-								Ok(output) => {
+								Ok(mut output) => {
 									tracing::info!("Job completed successfully!");
 									finalizer_ctx.report_progress(JobProgress::finished());
-									let _ = returned_executor
-											.persist_output(finalizer_ctx, output, elapsed)
+									let next_job = output.next_job.take();
+									let result = returned_executor
+											.persist_output(finalizer_ctx.clone(), output, elapsed)
 											.await;
-
+									tracing::trace!(?result, "Output persisted?");
+									if let Some(next_job) = next_job {
+										finalizer_ctx.send_manager_command(JobControllerCommand::EnqueueJob(next_job));
+									}
 								},
 								Err(error) => {
 									tracing::error!(?error, "Job failed with critical error");
@@ -408,13 +409,14 @@ impl WorkerManager {
 										&format!("Job failed: {}", error),
 									));
 
-									let _ = returned_executor
+									let result = returned_executor
 										.persist_failure(
 											finalizer_ctx,
 											JobStatus::Failed,
 											elapsed,
 										)
 										.await;
+									tracing::trace!(?result, "Failure persisted?");
 
 									if let JobError::Cancelled(return_tx) = error {
 										return_tx.send(()).map_or_else(
@@ -429,7 +431,7 @@ impl WorkerManager {
 											},
 										);
 									} else if returned_executor.should_requeue() {
-
+										// TODO: requeue the job
 									}
 								},
 							}

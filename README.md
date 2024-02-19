@@ -39,9 +39,10 @@ Stump is a free and open source comics, manga and digital book server with OPDS 
   - [Docs](#docs)
   - [Packages](#packages)
 - [Similar Projects 👯](#similar-projects-)
+- [License 📝](#license-)
 </details>
 
-> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. I will likely flatten the migrations immediately prior to the `0.1.0` release, which will break existing Stump databases. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
+> **🚧 Disclaimer 🚧**: Stump is under active development and is an ongoing **WIP**. Anyone is welcome to try it out, but **DO NOT** expect a fully featured or bug-free experience. If you'd like to contribute and help expedite Stump's first release, please review the [developer guide](#developer-guide-).
 
 ## Roadmap 🗺
 
@@ -199,3 +200,7 @@ There are a number of other projects that are similar to Stump, it certainly isn
 - [Komga](https://github.com/gotson/komga)
 - [Librum](https://github.com/Librum-Reader/Librum)
 - [oqurum](https://github.com/oqurum) (✨*Rust*✨)
+
+## License 📝
+
+Stump is licensed under the [MIT License](https://www.tldrlegal.com/license/mit-license). This applies to the entire repository except for subfolders/packages which contain their own license file(s). In such cases, the license file(s) in the subfolder/package take precedence.

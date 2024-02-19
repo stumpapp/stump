@@ -34,7 +34,6 @@ const baseColumns = [
 		),
 		enableSorting: true,
 		header: 'Time',
-		size: 75,
 		sortingFn: ({ original: a }, { original: b }) => {
 			return dayjs(a.timestamp).isBefore(b.timestamp) ? -1 : 1
 		},
@@ -58,7 +57,7 @@ const baseColumns = [
 			row: {
 				original: { message },
 			},
-		}) => <Text size="sm">{message}</Text>,
+		}) => <Text size="xs">{message}</Text>,
 		header: 'Message',
 		size: 300,
 	}),

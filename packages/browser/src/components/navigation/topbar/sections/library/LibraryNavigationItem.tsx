@@ -47,8 +47,8 @@ export default function LibraryNavigationItem() {
 						{libraries.map((library) => (
 							<div key={library.id} className="w-full">
 								<TopBarLinkListItem
-									to={paths.libraryOverview(library.id)}
-									isActive={location.pathname.startsWith(paths.libraryOverview(library.id))}
+									to={paths.librarySeries(library.id)}
+									isActive={location.pathname.startsWith(paths.librarySeries(library.id))}
 								>
 									{library.emoji ? (
 										<span className="mr-2 h-4 w-4 shrink-0">{library.emoji}</span>

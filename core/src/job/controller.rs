@@ -76,7 +76,7 @@ impl JobController {
 			while let Some(event) = commands_rx.recv().await {
 				match event {
 					JobControllerCommand::EnqueueJob(job) => {
-						tracing::trace!("Received enqueue job event");
+						tracing::trace!(job_id = ?job.id(), "Received enqueue job event");
 						self.manager.clone().enqueue(job).await.map_or_else(
 							|error| tracing::error!(?error, "Failed to enqueue job!"),
 							|_| tracing::info!("Successfully enqueued job"),

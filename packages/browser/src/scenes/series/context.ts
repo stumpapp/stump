@@ -1,10 +1,15 @@
+import { Series } from '@stump/types'
 import { createContext, useContext } from 'react'
 
 export type ISeriesContext = {
-	seriesId: string
+	series: Series
 }
 
-export const SeriesContext = createContext<ISeriesContext>({
-	seriesId: '',
-})
-export const useSeriesContext = () => useContext(SeriesContext)
+export const SeriesContext = createContext<ISeriesContext | null>(null)
+export const useSeriesContext = () => {
+	const context = useContext(SeriesContext)
+	if (!context) {
+		throw new Error('useSeriesContext must be used within a SeriesContext')
+	}
+	return context
+}

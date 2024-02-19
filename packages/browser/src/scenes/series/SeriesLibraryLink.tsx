@@ -13,7 +13,7 @@ export default function SeriesLibraryLink({ id }: Props) {
 	return (
 		<Suspense>
 			{library && (
-				<Link to={paths.libraryOverview(library?.id || '')} className="line-clamp-1">
+				<Link to={paths.librarySeries(library?.id || '')} className="line-clamp-1">
 					{library?.name}
 				</Link>
 			)}

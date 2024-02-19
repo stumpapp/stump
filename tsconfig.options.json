@@ -6,7 +6,6 @@
 		"allowSyntheticDefaultImports": true,
 		"moduleResolution": "nodenext",
 		"verbatimModuleSyntax": false,
-		"allowSyntheticDefaultImports": true,
 		"target": "es2022",
 		"composite": true,
 		"declaration": true,

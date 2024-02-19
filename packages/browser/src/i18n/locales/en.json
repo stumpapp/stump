@@ -107,8 +107,8 @@
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create New Library",
-		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
+		"heading": "Create library",
+		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",
 		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
@@ -123,9 +123,9 @@
 			}
 		}
 	},
-	"manageLibraryScene": {
-		"heading": "Manage Library",
-		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
+	"librarySettingsScene": {
+		"heading": "Settings",
+		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
 		"subtitleLink": "relevant documentation",
 		"form": {
 			"labels": {
@@ -555,16 +555,20 @@
 					},
 					"user": {
 						"label": "User Management",
+						"read": {
+							"label": "Read users",
+							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
+						},
 						"manage": {
 							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to read, create, and update"
 						}
 					},
 					"smartlist": {
 						"label": "Smart Lists",
 						"read": {
 							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"description": "Allows the user to access smart lists features. Granular permissions are not yet implemented, so this\nincludes permissions to read, create, and update their own lists"
 						}
 					}
 				},
@@ -626,7 +630,7 @@
 		"libraryOptions": {
 			"scanLibrary": "Scan",
 			"fileExplorer": "File Explorer",
-			"manageLibrary": "Manage",
+			"manageLibrary": "Settings",
 			"deleteLibrary": "Delete"
 		},
 		"versionInformation": {
@@ -670,7 +674,7 @@
 		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Select thumbnail",
 		"options": {
 			"selectFromBooks": "Select from books",
 			"uploadImage": "Upload image"

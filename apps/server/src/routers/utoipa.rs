@@ -140,7 +140,7 @@ use super::api::{
             PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
             Direction, CreateLibrary, UpdateLibrary, APIError, MediaFilter, SeriesFilter,
-            FilterableMediaQuery, FilterableSeriesQuery, LibrariesStats,
+            FilterableMediaQuery, FilterableSeriesQuery, LibraryStats,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus,
             SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList,

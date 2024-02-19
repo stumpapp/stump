@@ -1,5 +1,12 @@
 import { jobQueryKeys, libraryApi, libraryQueryKeys } from '@stump/api'
-import type { CreateLibrary, Library, UpdateLibrary } from '@stump/types'
+import type {
+	CreateLibrary,
+	Library,
+	LibraryStats,
+	LibraryStatsParams,
+	UpdateLibrary,
+	User,
+} from '@stump/types'
 import { AxiosError } from 'axios'
 
 import {
@@ -66,19 +73,34 @@ export function useLibraries(options: PageQueryOptions<Library> = {}) {
 	}
 }
 
-export function useLibraryStats() {
+export function useTotalLibraryStats() {
 	const {
 		data: libraryStats,
 		isLoading,
 		isRefetching,
 		isFetching,
-	} = useQuery(
-		[libraryQueryKeys.getLibrariesStats],
-		() => libraryApi.getLibrariesStats().then((data) => data.data),
-		{},
+	} = useQuery([libraryQueryKeys.getLibraryStats], () =>
+		libraryApi.getTotalLibraryStats().then((data) => data.data),
 	)
 
 	return { isLoading: isLoading || isRefetching || isFetching, libraryStats }
+}
+
+export function useLibraryStats({
+	id,
+	params,
+	...options
+}: QueryOptions<LibraryStats> & { id: string; params?: LibraryStatsParams }) {
+	const { data: stats, ...rest } = useQuery(
+		[libraryQueryKeys.getLibraryStats, id, params],
+		async () => {
+			const { data } = await libraryApi.getLibraryStats(id, params)
+			return data
+		},
+		options,
+	)
+
+	return { stats, ...rest }
 }
 
 // TODO: fix type error :grimacing:
@@ -113,7 +135,7 @@ export function useCreateLibraryMutation(
 				await invalidateQueries({
 					keys: [
 						libraryQueryKeys.getLibraries,
-						libraryQueryKeys.getLibrariesStats,
+						libraryQueryKeys.getLibraryStats,
 						jobQueryKeys.getJobs,
 					],
 				})
@@ -144,7 +166,7 @@ export function useEditLibraryMutation(
 				await invalidateQueries({
 					keys: [
 						libraryQueryKeys.getLibraries,
-						libraryQueryKeys.getLibrariesStats,
+						libraryQueryKeys.getLibraryStats,
 						jobQueryKeys.getJobs,
 					],
 				})
@@ -173,7 +195,7 @@ export function useDeleteLibraryMutation(
 			...options,
 			onSuccess: async (library, _, __) => {
 				await invalidateQueries({
-					keys: [libraryQueryKeys.getLibraries, libraryQueryKeys.getLibrariesStats],
+					keys: [libraryQueryKeys.getLibraries, libraryQueryKeys.getLibraryStats],
 				})
 				options.onSuccess?.(library, _, __)
 			},
@@ -206,4 +228,48 @@ export function useVisitLibrary(options: MutationOptions<Library, AxiosError, st
 	)
 
 	return { visitLibrary, visitLibraryAsync, ...rest }
+}
+
+export function useLibraryExclusionsQuery({
+	id,
+	...options
+}: QueryOptions<User[]> & { id: string }) {
+	const { data: excludedUsers, ...rest } = useQuery(
+		[libraryQueryKeys.getExcludedUsers],
+		async () => {
+			const { data } = await libraryApi.getExcludedUsers(id)
+			return data
+		},
+		options,
+	)
+
+	return { excludedUsers, ...rest }
+}
+
+export function useLibraryExclusionsMutation({
+	id,
+	...options
+}: MutationOptions<User[], AxiosError, string[]> & { id: string }) {
+	const {
+		mutate: updateExcludedUsers,
+		mutateAsync: updateExcludedUsersAsync,
+		...rest
+	} = useMutation(
+		[libraryQueryKeys.updateExcludedUsers],
+		async (userIds) => {
+			const { data } = await libraryApi.updateExcludedUsers(id, userIds)
+			return data
+		},
+		{
+			...options,
+			onSuccess: async (users, _, __) => {
+				await invalidateQueries({
+					keys: [libraryQueryKeys.getExcludedUsers],
+				})
+				options.onSuccess?.(users, _, __)
+			},
+		},
+	)
+
+	return { updateExcludedUsers, updateExcludedUsersAsync, ...rest }
 }

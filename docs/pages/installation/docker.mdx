@@ -1,67 +1,34 @@
 import { Callout } from 'nextra-theme-docs'
+import { Steps } from 'nextra/components'
+import { Tabs } from 'nextra/components'
 
 # Docker
 
 <Callout type="info" emoji="ℹ">
 	Stump currently only has a [nightly build](https://hub.docker.com/r/aaronleopold/stump) available
-	for Docker. **This image is for testing, lacking in both features and reliability**. There are
-	some, including myself, who are reportedly using this as their primary media server, however do
-	not expect a fully featured, bug-free experience if you spin up a container.
+	for Docker. A `0.0.x` release will be available soon, which will provide a bit more stability when
+	updating your container.
 </Callout>
 
-## Usage
+You have two options for spinning up a container based on your preference:
 
-You have two options for spinning up a container based on your preference. I prefer using compose, however I have listed instructions for both Docker CLI and Docker Compose below.
+1. Docker CLI
+2. Docker Compose
 
 Please ensure to adjust `PUID` and `PGID` to the user your config and data directories belong to.
-You can print those by executing: `echo -e "PUID=$(id -u)\nPGID=$(id -g)"`
-
-### Using docker run
-
-You can create a container by running:
+You can print those by executing:
 
 ```bash
-# replace my paths (left of colon) with your own
-docker create \
-  --name=stump \
-  -e "PUID=1000" \
-  -e "PGID=1000" \
-  -p 10801:10801 \
-  --volume "/Users/aaronleopold/.stump:/config" \
-  --volume "/Users/aaronleopold/Documents/Stump:/data" \
-  --restart unless-stopped \
-  aaronleopold/stump:nightly
+echo -e "PUID=$(id -u)\nPGID=$(id -g)"
 ```
 
-If you prefer bind mounts, you can swap out the two `--volume` lines with:
+<Tabs items={['Compose', 'CLI']}>
 
-```bash
---mount type=volume,source=/Users/aaronleopold/.stump,target=/config \
---mount type=volume,source=/Users/aaronleopold/Documents/Stump,target=/data \
-```
+<Tabs.Tab>
 
-Then you can start the container:
+<Steps>
 
-```bash
-docker start stump
-```
-
-#### Properties and configuration
-
-| Parameter                       |                                Functionality                                |
-| ------------------------------- | :-------------------------------------------------------------------------: |
-| `--name=stump`                  |           Sets the name of the container this command will create           |
-| `-e "PUID=1000" -e "PGID=1000"` |    Sets the user and group used within the container (leave this as is)     |
-| `-p 10801:10801`                | Maps the port on your machine (left) to the port the container uses (right) |
-
-### Using docker compose
-
-<Callout emoji="☢️">
-	This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for
-	you, you might be on V1, which uses `docker-compose`. Please review [Docker's
-	documentation](https://docs.docker.com/compose/install/) for more information and/or
-	platform-specific installation.
-</Callout>
+### Create a `docker-compose.yml` file
 
 Below is an example of a Docker Compose file you can use to bootstrap your Stump server:
 
@@ -86,6 +53,87 @@ services:
     restart: unless-stopped
 ```
 
+### Start the container
+
+```bash
+docker compose up -d
+```
+
+### Update the container
+
+When a new image is available, you can update your container using these commands:
+
+```bash
+docker compose pull stump
+docker compose up -d
+```
+
+</Steps>
+
+<Callout emoji="☢️">
+	This tutorial uses the newer `docker compose` CLI. If you find this command does not exist for
+	you, you might be on V1, which uses `docker-compose`. Please review [Docker's
+	documentation](https://docs.docker.com/compose/install/) for more information and/or
+	platform-specific installation.
+</Callout>
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+<Steps>
+
+### Create the container
+
+```bash
+# replace my paths (left of colon) with your own
+docker create \
+  --name=stump \
+  -e "PUID=1000" \
+  -e "PGID=1000" \
+  -p 10801:10801 \
+  --volume "/Users/aaronleopold/.stump:/config" \
+  --volume "/Users/aaronleopold/Documents/Stump:/data" \
+  --restart unless-stopped \
+  aaronleopold/stump:nightly
+```
+
+If you prefer bind mounts, you can swap out the two `--volume` lines with:
+
+```bash
+--mount type=volume,source=/Users/aaronleopold/.stump,target=/config \
+--mount type=volume,source=/Users/aaronleopold/Documents/Stump,target=/data \
+```
+
+### Start the container
+
+```bash
+docker start stump
+```
+
+### Update the container
+
+When a new image is available, you can update your container using these commands:
+
+```bash
+docker pull aaronleopold/stump:nightly
+docker restart stump
+```
+
+</Steps>
+
+Below is a reference for some of the paremeters used in this section:
+
+| Parameter                       |                                Functionality                                |
+| ------------------------------- | :-------------------------------------------------------------------------: |
+| `--name=stump`                  |           Sets the name of the container this command will create           |
+| `-e "PUID=1000" -e "PGID=1000"` |    Sets the user and group used within the container (leave this as is)     |
+| `-p 10801:10801`                | Maps the port on your machine (left) to the port the container uses (right) |
+
+</Tabs.Tab>
+
+</Tabs>
+
 ## Monitoring
 
 To monitor the logs of the container, you can use the following command:
@@ -93,23 +141,3 @@ To monitor the logs of the container, you can use the following command:
 ```bash
 docker logs -f stump
 ```
-
-## Updating your container
-
-As with starting Stump, updating your container is slightly different depending on how you chose to run it.
-
-### Update using docker CLI
-
-1. Update the image: `docker pull aaronleopold/stump:nightly`
-2. Stop the running container: `docker stop stump`
-3. Delete the container: `docker rm stump`
-4. Recreate your container (see [using-docker-run](#using-docker-run))
-5. Start the new container: `docker start stump`
-
-To remove the old dangling images you have installed: `docker image prune`
-
-### Update using docker compose
-
-1. Stop the running container: `docker compose down`
-2. Update the image: `docker compose pull` or `docker compose pull aaronleopold/stump:nightly`
-3. Start the container again: `docker-compose up`

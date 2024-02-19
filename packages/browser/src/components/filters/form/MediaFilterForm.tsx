@@ -38,24 +38,28 @@ const schema = z.object({
 })
 export type MediaFilterFormSchema = z.infer<typeof schema>
 
+// TODO: detatch from series context to be re-used in library context
+
 export default function MediaFilterForm() {
 	const { filters, setFilters } = useFilterContext()
-	const { seriesId } = useSeriesContext()
+	const {
+		series: { id },
+	} = useSeriesContext()
 
 	const [onlyFromSeries, setOnlyFromSeries] = useState(false)
 
 	const params = useMemo(() => {
-		if (onlyFromSeries && !!seriesId) {
+		if (onlyFromSeries && !!id) {
 			return {
 				media: {
 					series: {
-						id: seriesId,
+						id,
 					},
 				},
 			}
 		}
 		return {}
-	}, [onlyFromSeries, seriesId])
+	}, [onlyFromSeries, id])
 
 	const { data } = useQuery([metadataQueryKeys.getMediaMetadataOverview, params], () =>
 		metadataApi.getMediaMetadataOverview(params).then((res) => res.data),
@@ -94,7 +98,7 @@ export default function MediaFilterForm() {
 			form={form}
 			onSubmit={handleSubmit}
 		>
-			{!!seriesId && (
+			{!!id && (
 				<CheckBox
 					label="Only show options available from series"
 					checked={onlyFromSeries}

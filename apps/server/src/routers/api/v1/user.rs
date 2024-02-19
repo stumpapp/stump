@@ -34,8 +34,8 @@ use crate::{
 	filter::UserQueryRelation,
 	middleware::auth::Auth,
 	utils::{
-		get_session_server_owner_user, get_session_user, get_user_and_enforce_permission,
-		http::ImageResponse, validate_image_upload,
+		enforce_session_permissions, get_session_server_owner_user, get_session_user,
+		get_user_and_enforce_permission, http::ImageResponse, validate_image_upload,
 	},
 };
 
@@ -124,7 +124,7 @@ async fn get_users(
 	pagination_query: Query<PaginationQuery>,
 	session: Session,
 ) -> APIResult<Json<Pageable<Vec<User>>>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ReadUsers])?;
 
 	let pagination = pagination_query.0.get();
 	let is_unpaged = pagination.is_unpaged();
@@ -390,6 +390,9 @@ async fn update_preferences(
 				),
 				user_preferences::enable_hide_scrollbar::set(input.enable_hide_scrollbar),
 				user_preferences::prefer_accent_color::set(input.prefer_accent_color),
+				user_preferences::show_thumbnails_in_headers::set(
+					input.show_thumbnails_in_headers,
+				),
 			],
 		)
 		.exec()
@@ -557,6 +560,7 @@ pub struct UpdateUserPreferences {
 	pub enable_replace_primary_sidebar: bool,
 	pub enable_hide_scrollbar: bool,
 	pub prefer_accent_color: bool,
+	pub show_thumbnails_in_headers: bool,
 }
 
 #[utoipa::path(

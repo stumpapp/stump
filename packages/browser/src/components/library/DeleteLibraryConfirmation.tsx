@@ -18,7 +18,7 @@ export default function DeleteLibraryConfirmation({ isOpen, libraryId, onClose }
 
 	const { deleteLibraryAsync, isLoading } = useDeleteLibraryMutation({
 		onSuccess: () => {
-			const isOnLibrary = location.pathname.includes(paths.libraryOverview(libraryId))
+			const isOnLibrary = location.pathname.includes(paths.librarySeries(libraryId))
 			if (isOnLibrary) {
 				navigate(paths.home())
 			}

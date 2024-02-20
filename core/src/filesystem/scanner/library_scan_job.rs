@@ -391,6 +391,11 @@ impl JobExt for LibraryScanJob {
 					format!("Scanning series at {}", path_buf.display()).as_str(),
 				));
 
+				let max_depth = self
+					.options
+					.as_ref()
+					.and_then(|o| o.is_collection_based().then(|| 1));
+
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),
 					PathBuf::from(self.path.clone()),
@@ -401,7 +406,7 @@ impl JobExt for LibraryScanJob {
 					WalkerCtx {
 						db: ctx.db.clone(),
 						ignore_rules,
-						max_depth: None,
+						max_depth,
 					},
 				)
 				.await;

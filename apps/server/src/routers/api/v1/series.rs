@@ -5,7 +5,7 @@ use axum::{
 	Json, Router,
 };
 use axum_extra::extract::Query;
-use prisma_client_rust::{or, Direction};
+use prisma_client_rust::{and, operator, or, Direction};
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
 use stump_core::{
@@ -152,13 +152,6 @@ pub(crate) fn apply_series_library_not_hidden_for_user_filter(
 	])]
 }
 
-fn apply_series_filters_for_user(filters: SeriesFilter, user: &User) -> Vec<WhereParam> {
-	apply_series_filters(filters)
-		.into_iter()
-		.chain(apply_series_library_not_hidden_for_user_filter(user))
-		.collect()
-}
-
 // TODO: this is wrong
 pub(crate) fn apply_series_age_restriction(
 	min_age: i32,
@@ -192,7 +185,39 @@ pub(crate) fn apply_series_age_restriction(
 	or![direct_restriction, media_restriction]
 }
 
-// TODO: use age restrictions!
+// FIXME: hidden libraries introduced a bug here, need to fix!
+
+// fn apply_series_filters_for_user(filters: SeriesFilter, user: &User) -> Vec<WhereParam> {
+// 	apply_series_filters(filters)
+// 		.into_iter()
+// 		.chain(apply_series_library_not_hidden_for_user_filter(user))
+// 		.collect()
+// }
+
+pub(crate) fn apply_series_filters_for_user(
+	filters: SeriesFilter,
+	user: &User,
+) -> Vec<WhereParam> {
+	let age_restrictions = user
+		.age_restriction
+		.as_ref()
+		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
+
+	let base_filters = operator::and(
+		apply_series_filters(filters)
+			.into_iter()
+			.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+			.collect::<Vec<WhereParam>>(),
+	);
+
+	// TODO: This is not ideal, I am adding an _additional_ relation filter for
+	// the library exclusion, when I need to merge any requested filters with this one,
+	// instead. This was a regression from the exclusion feature I need to tackle
+	vec![and![
+		base_filters,
+		series::library::is(vec![library_not_hidden_from_user_filter(user)])
+	]]
+}
 
 #[utoipa::path(
 	get,
@@ -226,10 +251,6 @@ async fn get_series(
 	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let user_id = user.id.clone();
-	let age_restrictions = user
-		.age_restriction
-		.as_ref()
-		.map(|ar| apply_series_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let is_unpaged = pagination.is_unpaged();
 	let order_by: OrderByParam = ordering.try_into()?;
@@ -237,10 +258,10 @@ async fn get_series(
 	let load_media = relation_query.load_media.unwrap_or(false);
 	let count_media = relation_query.count_media.unwrap_or(false);
 
-	let where_conditions = apply_series_filters_for_user(filters, &user)
-		.into_iter()
-		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
-		.collect::<Vec<WhereParam>>();
+	let where_conditions = apply_series_filters_for_user(filters, &user);
+	// .into_iter()
+	// .chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+	// .collect::<Vec<WhereParam>>();
 
 	// series, total series count
 	let (series, series_count) = db

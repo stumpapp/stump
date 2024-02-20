@@ -145,6 +145,8 @@ pub(crate) fn library_not_hidden_from_user_filter(user: &User) -> WhereParam {
 	library::hidden_from_users::none(vec![user::id::equals(user.id.clone())])
 }
 
+// FIXME: hidden libraries introduced a bug here, need to fix!
+
 pub(crate) fn apply_library_filters_for_user(
 	filters: LibraryFilter,
 	user: &User,

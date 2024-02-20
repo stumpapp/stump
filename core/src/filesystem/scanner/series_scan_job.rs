@@ -103,6 +103,7 @@ impl JobExt for SeriesScanJob {
 				"Associated library options not found".to_string(),
 			))?;
 		let ignore_rules = generate_rule_set(&[PathBuf::from(self.path.clone())]);
+		let max_depth = library_options.is_collection_based().then_some(1);
 
 		self.options = Some(library_options);
 
@@ -118,7 +119,7 @@ impl JobExt for SeriesScanJob {
 			WalkerCtx {
 				db: ctx.db.clone(),
 				ignore_rules,
-				max_depth: None,
+				max_depth,
 			},
 		)
 		.await?;

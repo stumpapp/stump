@@ -26,6 +26,7 @@
 		"framer-motion": "^10.16.4",
 		"i18next": "^23.6.0",
 		"immer": "^10.0.3",
+		"lodash.uniqby": "^4.7.0",
 		"lucide-react": "^0.288.0",
 		"nprogress": "^0.2.0",
 		"phosphor-react": "^1.4.1",
@@ -54,6 +55,7 @@
 		"zustand": "^4.4.3"
 	},
 	"devDependencies": {
+		"@types/lodash.uniqby": "^4.7.9",
 		"@types/node": "^20.8.7",
 		"@types/nprogress": "^0.2.2",
 		"@types/pluralize": "^0.0.32",

@@ -15,6 +15,7 @@ type Props = {
 		| 'onPaginateForward'
 		| 'getCfiPreviewText'
 		| 'searchEntireBook'
+		| 'onGoToCfi'
 	>
 }
 

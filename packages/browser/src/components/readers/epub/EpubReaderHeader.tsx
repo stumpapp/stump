@@ -9,6 +9,7 @@ import {
 	ControlButton,
 	ControlsContainer,
 	FullScreenToggle,
+	SearchCommand,
 	ThemeControls,
 } from './controls'
 import { LocationManager } from './locations'
@@ -41,6 +42,7 @@ export default function EpubReaderHeader() {
 			<Spacer />
 
 			<div className="flex items-center gap-x-2">
+				<SearchCommand />
 				<ThemeControls />
 				<FullScreenToggle />
 				<BookmarkToggle />

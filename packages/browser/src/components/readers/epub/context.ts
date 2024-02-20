@@ -44,10 +44,11 @@ export type EpubReaderControls = {
 	onPaginateForward: () => void
 	onPaginateBackward: () => void
 	getCfiPreviewText: (cfi: string) => Promise<string | null>
-	searchEntireBook: (query: string) => Promise<SearchResult[]>
+	searchEntireBook: (query: string) => Promise<SearchResult[][]>
+	onGoToCfi: (cfi: string) => void
 }
 
-type SearchResult = {
+export type SearchResult = {
 	cfi: string
 	excerpt: string
 }
@@ -61,6 +62,7 @@ export const EpubReaderContext = createContext<EpubReaderContextProps>({
 	controls: {
 		fullscreen: false,
 		getCfiPreviewText: async () => null,
+		onGoToCfi: noop,
 		onLinkClick: noop,
 		onMouseEnterControls: noop,
 		onMouseLeaveControls: noop,

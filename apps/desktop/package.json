@@ -2,7 +2,7 @@
 	"name": "@stump/desktop",
 	"version": "0.0.1",
 	"description": "",
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"scripts": {
 		"lint": "cargo clippy --package stump_desktop -- -D warnings",
 		"format": "cargo fmt --package stump_desktop",

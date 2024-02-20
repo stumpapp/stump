@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"repository": "https://github.com/stumpapp/stump.git",
 	"author": "Aaron Leopold <aaronleopold1221@gmail.com>",
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"scripts": {
 		"prepare": "husky install",
 		"setup": "pnpm i && pnpm web build && cargo codegen",

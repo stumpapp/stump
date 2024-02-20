@@ -2,7 +2,7 @@
 	"name": "@stump/interface",
 	"version": "0.0.1",
 	"description": "",
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"private": true,
 	"main": "src/index.ts",
 	"exports": {

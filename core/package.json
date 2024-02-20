@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"description": "",
 	"keywords": [],
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"scripts": {
 		"lint": "cargo clippy --package stump_core -- -D warnings",
 		"prisma": "cargo prisma",

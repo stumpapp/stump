@@ -7,7 +7,7 @@
 		".": "./index.ts",
 		"./server": "./server.ts"
 	},
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"devDependencies": {
 		"typescript": "^5.3.3"
 	}

@@ -2,7 +2,7 @@
 	"name": "@stump/mobile",
 	"version": "0.0.1",
 	"description": "",
-	"license": "MIT",
+	"license": "GPL-3.0-only",
 	"scripts": {},
 	"keywords": []
 }

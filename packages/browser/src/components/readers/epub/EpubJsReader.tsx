@@ -475,6 +475,29 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book],
 	)
 
+	const searchEntireBook = useCallback(
+		async (query: string) => {
+			if (!book || !book.spine || !book.spine.each) return []
+
+			const promises: Array<Promise<SpineItemFindResult[]>> = []
+
+			book.spine.each((item?: SpineItem) => {
+				if (!item) return []
+
+				promises.push(
+					item
+						// @ts-expect-error: I literally can't stand epubjs lol
+						.load(book.load.bind(book))
+						.then(() => item.find(query))
+						.finally(() => item.unload.bind(item)),
+				)
+			})
+
+			return await Promise.all(promises).then((results) => results.flat())
+		},
+		[book],
+	)
+
 	// TODO: figure this out! Basically, I would (ideally) like to be able to determine if a bookmark
 	// 'exists' within another. This can happen when you move between viewport sizes..
 	// const cfiWithinAnother = useCallback(
@@ -548,6 +571,7 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,
+				searchEntireBook,
 			}}
 		>
 			<div className="h-full w-full">
@@ -559,4 +583,15 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			</div>
 		</EpubReaderContainer>
 	)
+}
+
+interface SpineItem {
+	load: (book: Book) => Promise<object>
+	unload: (item: SpineItem) => void
+	find: (query: string) => Promise<SpineItemFindResult[]>
+}
+
+interface SpineItemFindResult {
+	cfi: string
+	excerpt: string
 }

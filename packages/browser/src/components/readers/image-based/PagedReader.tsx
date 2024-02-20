@@ -18,7 +18,7 @@ export type PagedReaderProps = {
 	/** The media entity associated with the reader */
 	media: Media
 	/** A callback that is called in order to change the page */
-	onPageChange: (page: number) => void
+	onPageChange?: (page: number) => void
 	/** A function that returns the url for a given page */
 	getPageUrl(page: number): string
 }
@@ -79,7 +79,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	function handlePageChange(newPage: number) {
 		if (newPage <= media.pages && newPage > 0) {
-			onPageChange(newPage)
+			onPageChange?.(newPage)
 		}
 	}
 

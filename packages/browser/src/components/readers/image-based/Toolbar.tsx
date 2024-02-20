@@ -8,7 +8,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import paths from '@/paths'
 
-interface ToolbarProps {
+type ToolbarProps = {
 	title: string
 	currentPage: number
 	pages: number

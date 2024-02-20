@@ -10,7 +10,11 @@ type Props = {
 	readerMeta: EpubReaderMeta
 	controls: Pick<
 		EpubReaderControls,
-		'onLinkClick' | 'onPaginateBackward' | 'onPaginateForward' | 'getCfiPreviewText'
+		| 'onLinkClick'
+		| 'onPaginateBackward'
+		| 'onPaginateForward'
+		| 'getCfiPreviewText'
+		| 'searchEntireBook'
 	>
 }
 

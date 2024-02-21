@@ -394,7 +394,7 @@ impl JobExt for LibraryScanJob {
 				let max_depth = self
 					.options
 					.as_ref()
-					.and_then(|o| o.is_collection_based().then(|| 1));
+					.and_then(|o| o.is_collection_based().then_some(1));
 
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),

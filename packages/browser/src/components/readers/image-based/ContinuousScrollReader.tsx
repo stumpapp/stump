@@ -1,8 +1,12 @@
+import { useReaderStore } from '@stump/client'
 import { usePrevious } from '@stump/components'
 import { Media } from '@stump/types'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useSearchParams } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
+
+import Toolbar from './Toolbar'
 
 export type ContinuousReaderOrientation = 'horizontal' | 'vertical'
 type Props = {
@@ -43,6 +47,11 @@ export default function ContinuousScrollReader({
 	orientation,
 	onProgressUpdate,
 }: Props) {
+	const [search, setSearch] = useSearchParams()
+	/**
+	 * A state to control the visibility of the toolbar
+	 */
+	const [showToolBar, setShowToolBar] = useState(false)
 	/**
 	 * The currently visible range of index(es) on the page
 	 */
@@ -50,6 +59,8 @@ export default function ContinuousScrollReader({
 		endIndex: 0,
 		startIndex: 0,
 	})
+
+	const setReaderMode = useReaderStore((state) => state.setMode)
 
 	const reportedUnsupportedMode = useRef(false)
 
@@ -75,9 +86,23 @@ export default function ContinuousScrollReader({
 		}
 	}, [orientation])
 
-	// TODO: Add a toolbar...
+	const onChangeReaderMode = useCallback(() => {
+		search.append('page', (visibleRange.startIndex + 1).toString())
+		setSearch(search)
+		setReaderMode('paged')
+	}, [setReaderMode, search, setSearch, visibleRange.startIndex])
+
 	return (
 		<>
+			<Toolbar
+				title={media.name}
+				currentPage={visibleRange.startIndex + 1}
+				pages={media.pages}
+				visible={showToolBar}
+				onChangeReaderMode={onChangeReaderMode}
+				showBottomToolbar={false}
+			/>
+
 			<Virtuoso
 				style={{ height: '100%' }}
 				data={Array.from({ length: media.pages }).map((_, index) => getPageUrl(index + 1))}
@@ -86,6 +111,7 @@ export default function ContinuousScrollReader({
 						<img
 							className="max-h-screen min-h-1 min-w-1 max-w-full select-none object-scale-down md:w-auto"
 							src={url}
+							onClick={() => setShowToolBar((prev) => !prev)}
 						/>
 					</div>
 				)}

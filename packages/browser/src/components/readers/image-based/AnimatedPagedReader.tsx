@@ -145,7 +145,7 @@ export default function AnimatedPagedReader({
 			controls.start(FORWARD_START_ANIMATION),
 			nextControls.start(TO_CENTER_ANIMATION),
 		]).then(() => {
-			onPageChange?.(currPageRef.current + 1)
+			onPageChange(currPageRef.current + 1)
 		})
 	}
 
@@ -154,7 +154,7 @@ export default function AnimatedPagedReader({
 			controls.start(BACKWARD_START_ANIMATION),
 			prevControls.start(TO_CENTER_ANIMATION),
 		]).then(() => {
-			onPageChange?.(currPageRef.current - 1)
+			onPageChange(currPageRef.current - 1)
 		})
 	}
 

@@ -1,5 +1,5 @@
 import { mediaQueryKeys } from '@stump/api'
-import { queryClient } from '@stump/client'
+import { queryClient, useReaderStore } from '@stump/client'
 import { useBoolean } from '@stump/components'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
@@ -18,7 +18,7 @@ export type PagedReaderProps = {
 	/** The media entity associated with the reader */
 	media: Media
 	/** A callback that is called in order to change the page */
-	onPageChange?: (page: number) => void
+	onPageChange: (page: number) => void
 	/** A function that returns the url for a given page */
 	getPageUrl(page: number): string
 }
@@ -34,6 +34,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	const currentPageRef = React.useRef(currentPage)
 
 	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
+
+	const setReaderMode = useReaderStore((state) => state.setMode)
 
 	const pagesToPreload = useMemo(
 		() => [...Array(DEFAULT_PRELOAD_COUNT).keys()].map((i) => currentPage + i + 1),
@@ -79,7 +81,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 	 */
 	function handlePageChange(newPage: number) {
 		if (newPage <= media.pages && newPage > 0) {
-			onPageChange?.(newPage)
+			onPageChange(newPage)
 		}
 	}
 
@@ -110,6 +112,8 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 		}
 	})
 
+	const onChangeReaderMode = () => setReaderMode('continuous')
+
 	return (
 		<div className="relative flex h-full items-center justify-center">
 			<Toolbar
@@ -118,6 +122,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				pages={media.pages}
 				visible={toolbarVisible}
 				onPageChange={handlePageChange}
+				onChangeReaderMode={onChangeReaderMode}
 			/>
 			<SideBarControl position="left" onClick={() => handlePageChange(currentPage - 1)} />
 			{/* TODO: better error handling for the loaded image */}

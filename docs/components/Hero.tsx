@@ -14,8 +14,8 @@ export default function Hero() {
 					transition={{ duration: 0.5 }}
 					className="text-4xl font-extrabold tracking-tight text-neutral-900 sm:text-5xl md:text-6xl dark:text-neutral-100"
 				>
-					<span className="block ">A lightning fast and modern</span>{' '}
-					<span className="block ">media server</span>
+					<span className="block xl:inline">A lightning fast</span>{' '}
+					<span className="block xl:inline">media server</span>
 				</motion.h1>
 				<motion.p
 					initial={{ opacity: 0, y: 40 }}

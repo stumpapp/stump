@@ -18,7 +18,7 @@ import { PDF_EXTENSION } from '../../utils/patterns'
 import BookCompletionToggleButton from './BookCompletionToggleButton'
 import BookFileInformation from './BookFileInformation'
 import BookLibrarySeriesLinks from './BookLibrarySeriesLinks'
-import BookReaderLink from './BookReaderLink'
+import BookReaderDropdown from './BookReaderDropdown'
 import BooksAfterCursor from './BooksAfterCursor'
 import DownloadMediaButton from './DownloadMediaButton'
 
@@ -96,8 +96,8 @@ export default function BookOverviewScene() {
 							{isAtLeastMedium && <ReadMore text={media.metadata?.summary} />}
 							{!isAtLeastMedium && <Spacer />}
 
-							<div className="flex w-full flex-col gap-2 md:flex-row">
-								<BookReaderLink book={media} />
+							<div className="flex w-full flex-col gap-2 md:flex-row md:items-center">
+								<BookReaderDropdown book={media} />
 								<BookCompletionToggleButton book={media} />
 								{media.extension?.match(PDF_EXTENSION) && (
 									<ButtonOrLink

@@ -1,6 +1,11 @@
 import { getMediaPage, mediaQueryKeys } from '@stump/api'
-import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
-import { useEffect } from 'react'
+import {
+	invalidateQueries,
+	useMediaByIdQuery,
+	useReaderStore,
+	useUpdateMediaProgress,
+} from '@stump/client'
+import { useCallback, useEffect } from 'react'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import {
@@ -22,10 +27,11 @@ export default function BookReaderScene() {
 	}
 
 	const page = search.get('page')
-	const scroll = search.get('scroll')
 	const isIncognito = search.get('incognito') === 'true'
 	const isAnimated = search.get('animated') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
+
+	const readerMode = useReaderStore((state) => state.mode)
 
 	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
 	const { updateReadProgress } = useUpdateMediaProgress(id, {
@@ -59,9 +65,14 @@ export default function BookReaderScene() {
 		updateReadProgress(parsedPage)
 	}, [page, updateReadProgress, media, isIncognito])
 
-	function handleChangePage(newPage: number) {
-		navigate(paths.bookReader(id!, { isAnimated, page: newPage }))
-	}
+	const handleChangePage = useCallback(
+		(newPage: number) => {
+			navigate(
+				paths.bookReader(id!, { isAnimated, isIncognito: isIncognito || undefined, page: newPage }),
+			)
+		},
+		[id, isAnimated, isIncognito, navigate],
+	)
 
 	if (fetchingBook) {
 		return null
@@ -90,24 +101,25 @@ export default function BookReaderScene() {
 		)
 	}
 
-	if (media.extension.match(ARCHIVE_EXTENSION) || media.extension.match(PDF_EXTENSION)) {
-		const initialPage = page ? parseInt(page, 10) : media.current_page || undefined
+	// TODO: unify the two image-based readers so they have a shared toolbar. This will allow for MUCH
+	// more seamless switching between paged and continuous readers...
 
-		if (scroll) {
+	const initialPage = page ? parseInt(page, 10) : undefined
+
+	if (media.extension.match(ARCHIVE_EXTENSION) || media.extension.match(PDF_EXTENSION)) {
+		if (!initialPage && readerMode !== 'continuous') {
+			return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
+		} else if (!!initialPage && initialPage > media.pages) {
+			return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
+		} else if (readerMode === 'continuous') {
 			return (
 				<ContinuousScrollReader
 					media={media}
 					initialPage={initialPage}
-					// FIXME: don't be lazy aaron...
-					orientation={scroll as 'horizontal' | 'vertical'}
 					getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
 					onProgressUpdate={isIncognito ? undefined : updateReadProgress}
 				/>
 			)
-		} else if (!page || parseInt(page, 10) <= 0) {
-			return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
-		} else if (parseInt(page, 10) > media.pages) {
-			return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
 		} else {
 			const animated = !!search.get('animated')
 			const Component = animated ? AnimatedPagedReader : PagedReader
@@ -115,9 +127,9 @@ export default function BookReaderScene() {
 			return (
 				<Component
 					media={media}
-					currentPage={parseInt(page, 10) ?? 1}
+					currentPage={initialPage || 1}
 					getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
-					onPageChange={isIncognito ? undefined : handleChangePage}
+					onPageChange={handleChangePage}
 				/>
 			)
 		}

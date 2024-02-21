@@ -18,7 +18,6 @@
 		"clsx": "^2.0.0",
 		"expo": "^50.0.6",
 		"expo-constants": "~15.4.5",
-		"expo-linking": "~6.2.2",
 		"expo-splash-screen": "~0.26.4",
 		"expo-status-bar": "~1.11.1",
 		"tailwind-merge": "^1.14.0",

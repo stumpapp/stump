@@ -1,8 +1,8 @@
+import { useUpdatePreferences } from '@stump/client'
 import { UpdateUserPreferences, UserPreferences } from '@stump/types'
 import { useCallback } from 'react'
 
-import { useUpdatePreferences } from '../queries/user'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '@/stores'
 
 export function usePreferences() {
 	const { preferences, setPreferences } = useUserStore((state) => ({
@@ -17,6 +17,7 @@ export function usePreferences() {
 	const update = useCallback(
 		(input: Partial<UpdateUserPreferences>) => {
 			if (preferences) {
+				// @ts-expect-error: FIXME: fix this type error
 				return mutate({
 					...preferences,
 					...input,

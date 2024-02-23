@@ -1,5 +1,6 @@
-import { prefetchSmartListItems, usePreferences } from '@stump/client'
+import { prefetchSmartListItems } from '@stump/client'
 import { cn, Link } from '@stump/components'
+import { usePreferences } from '@/hooks'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 

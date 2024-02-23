@@ -1222,8 +1222,46 @@ async fn update_media_progress(
 	// TODO: check library access? They don't gain access to the book here, so perhaps
 	// it is acceptable to not check library access here?
 
+	// let client = &ctx.db;
+	// let read_progress = client
+	// 	.read_progress()
+	// 	.upsert(
+	// 		read_progress::user_id_media_id(user_id.clone(), id.clone()),
+	// 		(
+	// 			page,
+	// 			media::id::equals(id.clone()),
+	// 			user::id::equals(user_id.clone()),
+	// 			vec![],
+	// 		),
+	// 		vec![read_progress::page::set(page)],
+	// 	)
+	// 	.with(read_progress::media::fetch())
+	// 	.exec()
+	// 	.await?;
+
+	// let is_completed = read_progress
+	// 	.media
+	// 	.as_ref()
+	// 	.map(|media| media.pages == page)
+	// 	.unwrap_or_default();
+
+	// let read_progress = if is_completed {
+	// 	client
+	// 		.read_progress()
+	// 		.update(
+	// 			read_progress::id::equals(read_progress.id.clone()),
+	// 			vec![read_progress::is_completed::set(true)],
+	// 		)
+	// 		.exec()
+	// 		.await?
+	// } else {
+	// 	read_progress
+	// };
+
 	let read_progress = db
 		._transaction()
+		.with_max_wait(10)
+		.with_timeout(10)
 		.run(|client| async move {
 			let read_progress = client
 				.read_progress()

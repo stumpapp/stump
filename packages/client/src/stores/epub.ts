@@ -37,6 +37,8 @@ const defaultPreferences: EpubReaderPreferences = {
 	theme: `stump-${defaultTheme}`,
 }
 
+// TODO: export creator fn only
+
 // FIXME: [DEPRECATED] Use `createWithEqualityFn` instead of `create`
 export const useEpubReader = create<EpubReaderStore>()(
 	devtools(

@@ -26,7 +26,6 @@ export {
 } from './series'
 export { checkIsClaimed, getStumpVersion, ping, serverApi, serverQueryKeys } from './server'
 export { getSmartListById, getSmartLists, smartListApi, smartListQueryKeys } from './smartList'
-// TODO: remove these export *
 export * from './tag'
 export * from './types'
 export * from './user'

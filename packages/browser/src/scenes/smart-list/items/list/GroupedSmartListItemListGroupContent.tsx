@@ -1,5 +1,6 @@
 import { getMediaThumbnail } from '@stump/api'
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
+
 import { Accordion, cn, Text } from '@stump/components'
 import { Media } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'

@@ -1,8 +1,0 @@
-{
-	"extends": "../../tsconfig.options.json",
-	"include": ["**/*"],
-	"references": [],
-	"compilerOptions": {
-		"module": "NodeNext"
-	}
-}

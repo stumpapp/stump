@@ -2,7 +2,7 @@ import { API } from '@stump/api'
 import type { CoreEvent } from '@stump/types'
 import { useEffect, useMemo } from 'react'
 
-import { useAppStore } from '../stores/app'
+import { useClientContext } from '../context'
 
 interface SseOptions {
 	onOpen?: (event: Event) => void
@@ -72,7 +72,7 @@ interface Props {
 export function useStumpSse({ onEvent }: Props) {
 	const URI = API?.getUri()
 
-	const setConnected = useAppStore((store) => store.setIsConnectedWithServer)
+	const { onConnectionWithServerChanged } = useClientContext()
 
 	const eventSourceUrl = useMemo(() => {
 		let url = URI
@@ -97,11 +97,13 @@ export function useStumpSse({ onEvent }: Props) {
 
 	const { readyState } = useSse(eventSourceUrl, {
 		onClose: () => {
-			setConnected(false)
+			// setConnected(false)
+			onConnectionWithServerChanged?.(false)
 		},
 		onMessage: handleMessage,
 		onOpen: () => {
-			setConnected(true)
+			// setConnected(true)
+			onConnectionWithServerChanged?.(true)
 		},
 	})
 

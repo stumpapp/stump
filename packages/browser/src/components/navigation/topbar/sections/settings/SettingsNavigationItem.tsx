@@ -1,4 +1,3 @@
-import { useAppStore, usePreferences } from '@stump/client'
 import { cn, Label, NavigationMenu } from '@stump/components'
 import { Cog } from 'lucide-react'
 import React from 'react'
@@ -6,10 +5,12 @@ import { useLocation } from 'react-router-dom'
 
 import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
+import { usePreferences } from '@/hooks'
 
-import { useSettingsRoutes } from '../../../../../scenes/settings'
+import { useSettingsRoutes } from '@/scenes/settings'
 import TopBarLinkListItem from '../../TopBarLinkListItem'
 import TopBarNavLink from '../../TopBarNavLink'
+import { useAppStore } from '@/stores'
 
 export default function SettingsNavigationItem() {
 	const { t } = useLocaleContext()

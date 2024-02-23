@@ -1,4 +1,4 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
 import { NavigationMenu } from '@stump/components'
 import { Book, Home } from 'lucide-react'
 import React from 'react'

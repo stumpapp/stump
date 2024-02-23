@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isAxiosError } from '@stump/api'
-import { queryClient, useLoginOrRegister, useUserStore } from '@stump/client'
+import { queryClient, useLoginOrRegister } from '@stump/client'
 import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
 import { ShieldAlert } from 'lucide-react'
 import { FieldValues, useForm } from 'react-hook-form'
@@ -8,6 +8,8 @@ import { toast } from 'react-hot-toast'
 import { Navigate } from 'react-router'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
+
+import { useUserStore } from '@/stores'
 
 import { useLocaleContext } from '../../i18n/context'
 

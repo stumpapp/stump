@@ -22,7 +22,8 @@
 			"@/i18n/*": ["./src/i18n/*"],
 			"@/utils/*": ["./src/utils/*"],
 			"@/context": ["./src/context.ts"],
-			"@/paths": ["./src/paths.ts"]
+			"@/paths": ["./src/paths.ts"],
+			"@/*": ["./src/*"]
 		},
 		"resolveJsonModule": true
 	},

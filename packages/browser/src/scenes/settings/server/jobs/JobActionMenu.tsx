@@ -1,4 +1,3 @@
-import paths from '@/paths'
 import { jobApi, jobQueryKeys } from '@stump/api'
 import { invalidateQueries } from '@stump/client'
 import { DropdownMenu, IconButton } from '@stump/components'
@@ -7,6 +6,8 @@ import { Ban, Database, FileClock, MoreVertical, Trash2 } from 'lucide-react'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'react-hot-toast'
 import { useNavigate } from 'react-router'
+
+import paths from '@/paths'
 
 type Props = {
 	job: PersistedJob
@@ -50,7 +51,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		} finally {
 			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 		}
-	}, [job.id, job.status])
+	}, [job.id, isCancelable])
 
 	/**
 	 * Deletes the record of the job from the database.
@@ -68,7 +69,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		} finally {
 			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 		}
-	}, [job.id, job.status])
+	}, [job.id, isDeletable])
 
 	const jobId = job.id
 	const jobData = job.output_data
@@ -118,6 +119,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			isDeletable,
 			associatedLogs,
 			jobId,
+			jobData,
 			navigate,
 			onInspectData,
 			handleCancel,

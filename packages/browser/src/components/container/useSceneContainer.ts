@@ -1,4 +1,4 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
 
 export function useSceneContainer() {
 	const {

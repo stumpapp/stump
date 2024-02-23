@@ -1,5 +1,5 @@
 import { authApi, serverQueryKeys } from '@stump/api'
-import { invalidateQueries, useUserStore } from '@stump/client'
+import { invalidateQueries } from '@stump/client'
 import { Avatar, cn, NavigationMenu } from '@stump/components'
 import { Bell, LogOut } from 'lucide-react'
 import React from 'react'
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router'
 
 import { useAppContext } from '@/context'
 import paths from '@/paths'
+import { useUserStore } from '@/stores'
 
 import TopBarButtonItem from '../TopBarButtonItem'
 import TopBarLinkListItem from '../TopBarLinkListItem'

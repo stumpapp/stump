@@ -1,13 +1,13 @@
 import { RouteProp, useRoute } from '@react-navigation/native'
-import { getMediaPage } from '@stump/api'
+import { getMediaPage, isAxiosError } from '@stump/api'
 import { useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
 import { useColorScheme } from 'nativewind'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { FlatList, Image, useWindowDimensions } from 'react-native'
+import React, { useCallback, useMemo, useState } from 'react'
+import { FlatList, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { ScreenRootView, Text } from '@/components'
-import LandscapePageContainer from '@/components/LandscapePageContainer'
+import { ScreenRootView, Text, View } from '@/components'
+import EntityImage from '@/components/EntityImage'
 import { gray } from '@/constants/colors'
 
 type Params = {
@@ -41,21 +41,55 @@ export default function BookReader() {
 
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
 
+	// const lastPrefetchStart = useRef(0)
+
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
 	// TODO: an effect that whenever the device orienation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
 
 	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
-	const { updateReadProgress } = useUpdateMediaProgress(id)
+	const { updateReadProgressAsync } = useUpdateMediaProgress(id)
+
+	// FIXME: this was HARD erroring...
+
+	// const prefetchPages = useCallback(
+	// 	async (start: number, end: number) => {
+	// 		for (let i = start; i <= end; i++) {
+	// 			const prefetched = await prefetchImage(getMediaPage(id, i))
+	// 			console.log('Prefetched', i, prefetched)
+	// 		}
+	// 	},
+	// 	[id],
+	// )
+
+	// useEffect(() => {
+	// 	if (lastPrefetchStart.current === 0) {
+	// 		prefetchPages(1, 5)
+	// 		lastPrefetchStart.current = 5
+	// 	}
+	// }, [prefetchPages])
 
 	/**
 	 * A callback that updates the read progress of the current page. This will be
 	 * called whenever the user changes the page in the reader.
 	 */
 	const handleCurrentPageChanged = useCallback(
-		(page: number) => updateReadProgress(page),
-		[updateReadProgress],
+		async (page: number) => {
+			try {
+				await updateReadProgressAsync(page)
+				// if (page - lastPrefetchStart.current > 5) {
+				// 	await prefetchPages(page, page + 5)
+				// }
+				// lastPrefetchStart.current = page
+			} catch (e) {
+				console.error(e)
+				if (isAxiosError(e)) {
+					console.error(e.response?.data)
+				}
+			}
+		},
+		[updateReadProgressAsync],
 	)
 
 	if (fetchingBook) {
@@ -71,8 +105,8 @@ export default function BookReader() {
 				data={Array.from({ length: media.pages }, (_, i) => i)}
 				renderItem={({ item }) => (
 					<Page
+						key={`page-${item}`}
 						deviceOrientation={deviceOrientation}
-						key={item}
 						id={id}
 						index={item}
 						imageSizes={imageSizes}
@@ -94,8 +128,8 @@ export default function BookReader() {
 						handleCurrentPageChanged(fistVisibleItemIdx + 1)
 					}
 				}}
-				// initialNumToRender={5}
-				// maxToRenderPerBatch={5}
+				initialNumToRender={10}
+				maxToRenderPerBatch={10}
 			/>
 		</ScreenRootView>
 	)
@@ -124,31 +158,7 @@ const Page = React.memo(
 		maxHeight,
 		readingDirection,
 	}: PageProps) => {
-		const [base64Image, setBase64Image] = useState<string | null>(null)
-
 		const insets = useSafeAreaInsets()
-
-		// TODO: make a custom EntityImage to reuse this fetch logic since we will require
-		// it often
-		const fetchImage = useCallback(async (url: string) => {
-			try {
-				const response = await fetch(url)
-				const blob = await response.blob()
-				const reader = new FileReader()
-				reader.onloadend = () => {
-					setBase64Image(reader.result as string)
-				}
-				reader.readAsDataURL(blob)
-			} catch (e) {
-				console.error(e)
-			}
-		}, [])
-
-		useEffect(() => {
-			if (!base64Image) {
-				fetchImage(getMediaPage(id, index + 1))
-			}
-		}, [base64Image, fetchImage, id, index])
 
 		/**
 		 * A memoized value that represents the size(s) of the image dimensions for the current page.
@@ -182,39 +192,35 @@ const Page = React.memo(
 			}
 		}, [deviceOrientation, pageSize, safeMaxHeight, maxWidth])
 
-		if (!base64Image) {
-			return null
-		}
-
-		const Container = deviceOrientation === 'landscape' ? LandscapePageContainer : React.Fragment
-
 		return (
-			<Container width={maxWidth} height={safeMaxHeight} key={`page-${index}`}>
-				<Image
-					source={{ uri: base64Image }}
+			<View
+				className="flex items-center justify-center"
+				style={{
+					height: safeMaxHeight,
+					minHeight: safeMaxHeight,
+					minWidth: maxWidth,
+					width: maxWidth,
+				}}
+			>
+				<EntityImage
+					url={getMediaPage(id, index + 1)}
 					style={{
 						alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
-						flex: 1,
 						height,
 						width,
 					}}
-					onLoad={({
-						nativeEvent: {
-							source: { height, width },
-						},
-					}) => {
+					onLoad={({ source: { height, width } }) => {
 						setImageHeights((prev) => ({
 							...prev,
 							[index + 1]: {
 								height,
-
 								ratio: deviceOrientation == 'landscape' ? height / width : width / height,
 								width,
 							},
 						}))
 					}}
 				/>
-			</Container>
+			</View>
 		)
 	},
 )

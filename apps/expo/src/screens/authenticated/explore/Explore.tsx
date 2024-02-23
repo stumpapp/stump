@@ -1,11 +1,17 @@
-import { getMediaThumbnail } from '@stump/api'
+import { useNavigation } from '@react-navigation/native'
 import { useMediaCursorQuery } from '@stump/client'
 import React, { useCallback } from 'react'
-import { FlatList, Image } from 'react-native'
+import { FlatList } from 'react-native'
 
-import { Link, ScreenRootView, Text, View } from '@/components'
+import { ScreenRootView, View } from '@/components'
+import { BOOK_LIST_ITEM_HEIGHT, BookListItem } from '@/components/book'
+
+import { BookStackNavigation } from '../book/BookStackNavigator'
+
+const SEPARATOR_HEIGHT = 1
 
 export default function Explore() {
+	const { navigate } = useNavigation<BookStackNavigation>()
 	const { media: books, hasNextPage, fetchNextPage } = useMediaCursorQuery({})
 
 	const handleFetchMore = useCallback(() => {
@@ -14,54 +20,43 @@ export default function Explore() {
 		}
 	}, [hasNextPage, fetchNextPage])
 
+	const handleNavigate = useCallback(
+		(id: string) =>
+			navigate('BookStack', {
+				params: { id: id },
+				screen: 'BookOverview',
+			}),
+		[navigate],
+	)
+
+	const windowSize = books.length > 50 ? books.length / 4 : 21
+
 	return (
 		<ScreenRootView>
 			<FlatList
 				className="w-full"
 				data={books}
 				renderItem={({ item }) => (
-					// TODO: Use todo EntityImage to correct this issue
-					// <Link
-					// 	key={item.id}
-					// 	to={{
-					// 		params: { params: { id: item.id }, screen: 'BookOverview' },
-					// 		screen: 'BookStack',
-					// 	}}
-					// 	className="w-full max-w-full"
-					// >
-					// 	<View className="w-full flex-row space-x-2 p-3 text-left">
-					// 		<View>
-					// 			<Image
-					// 				source={{ uri: getMediaThumbnail(item.id) }}
-					// 				style={{ height: 50, objectFit: 'scale-down', width: 50 }}
-					// 			/>
-					// 		</View>
-
-					// 		<View className="w-0 flex-1 flex-grow">
-					// 			<Text size="sm" className="shrink-1">
-					// 				{item.name}
-					// 			</Text>
-					// 		</View>
-					// 	</View>
-					// </Link>
-
-					<Link
-						key={item.id}
-						to={{
-							params: { params: { id: item.id }, screen: 'BookOverview' },
-							screen: 'BookStack',
-						}}
-						className="max-w-full"
-					>
-						<Text size="sm" className="shrink-1">
-							{item.name}
-						</Text>
-					</Link>
+					<BookListItem book={item} key={item.id} navigate={handleNavigate} />
 				)}
-				ItemSeparatorComponent={() => <View className="h-px bg-gray-50 dark:bg-gray-900" />}
+				getItemLayout={(_, index) => ({
+					index,
+					length: BOOK_LIST_ITEM_HEIGHT,
+					offset: BOOK_LIST_ITEM_HEIGHT * index + SEPARATOR_HEIGHT,
+				})}
+				ItemSeparatorComponent={() => (
+					<View
+						className="bg-gray-50 dark:bg-gray-900"
+						style={{
+							height: SEPARATOR_HEIGHT,
+						}}
+					/>
+				)}
 				keyExtractor={(item) => item.id}
 				onEndReachedThreshold={0.85}
 				onEndReached={handleFetchMore}
+				maxToRenderPerBatch={windowSize}
+				windowSize={windowSize}
 			/>
 		</ScreenRootView>
 	)

@@ -1,3 +1,4 @@
+import { NavigationProp } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import LibrariesList from './LibrariesList'
@@ -6,18 +7,21 @@ import LibrarySeriesList from './LibrarySeriesList'
 
 const Stack = createNativeStackNavigator()
 
+export type LibraryStackScreenNames = ['Libraries', 'LibrarySeries', 'SeriesBooks']
+export type LibraryStackScreenParams = {
+	id: string
+}
+export type LibraryStackParamList = Record<
+	LibraryStackScreenNames[number],
+	LibraryStackScreenParams
+> & {
+	Libraries: never
+}
+export type LibraryStackNavigation = NavigationProp<LibraryStackParamList>
+
 export default function LibraryStackNavigator() {
 	return (
-		<Stack.Navigator
-		// screenOptions={{
-		// 	headerStyle: {
-		// 		backgroundColor: colorScheme === 'dark' ? gray[950] : 'white',
-		// 	},
-		// 	headerTitleStyle: {
-		// 		color: colorScheme === 'dark' ? gray[50] : gray[900],
-		// 	},
-		// }}
-		>
+		<Stack.Navigator>
 			<Stack.Screen name="Libraries" component={LibrariesList} options={{ headerShown: false }} />
 			<Stack.Screen
 				name="LibrarySeries"

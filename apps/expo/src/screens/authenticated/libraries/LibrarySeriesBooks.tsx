@@ -1,22 +1,32 @@
-import { type RouteProp, useRoute } from '@react-navigation/native'
+import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import { useMediaCursorQuery } from '@stump/client'
 import React, { useCallback } from 'react'
 import { FlatList } from 'react-native'
 
 import { ScreenRootView, View } from '@/components'
+import { BookListItem } from '@/components/book'
 
-import SeriesBookLink from './SeriesBookLink'
+import { BookStackNavigation } from '../book/BookStackNavigator'
+import { LibraryStackScreenParams } from './LibraryStackNavigator'
 
 type Params = {
-	params: {
-		id: string
-	}
+	params: LibraryStackScreenParams
 }
 
 export default function LibrarySeriesBookList() {
+	const { navigate } = useNavigation<BookStackNavigation>()
 	const {
 		params: { id },
 	} = useRoute<RouteProp<Params>>()
+
+	const handleNavigate = useCallback(
+		(id: string) =>
+			navigate('BookStack', {
+				params: { id: id },
+				screen: 'BookOverview',
+			}),
+		[navigate],
+	)
 
 	if (!id) {
 		throw new Error('ID required for this Screen!')
@@ -45,7 +55,9 @@ export default function LibrarySeriesBookList() {
 			<FlatList
 				className="w-full"
 				data={books}
-				renderItem={({ item }) => <SeriesBookLink book={item} />}
+				renderItem={({ item }) => (
+					<BookListItem key={item.id} book={item} navigate={handleNavigate} />
+				)}
 				keyExtractor={(item) => item.id}
 				ItemSeparatorComponent={() => <View className="h-px bg-gray-50 dark:bg-gray-900" />}
 				onEndReachedThreshold={0.85}

@@ -54,8 +54,8 @@ export default function AppWrapper() {
 
 	// TODO: remove, just debugging stuff
 	useEffect(() => {
-		// setBaseUrl('https://demo.stumpapp.dev')
-		setBaseUrl('http://localhost:10801')
+		setBaseUrl('https://demo.stumpapp.dev')
+		// setBaseUrl('http://localhost:10801')
 	}, [setBaseUrl])
 
 	useEffect(() => {

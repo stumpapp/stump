@@ -18,9 +18,9 @@
 		"clsx": "^2.0.0",
 		"expo": "^50.0.6",
 		"expo-constants": "~15.4.5",
+		"expo-image": "^1.10.6",
 		"expo-splash-screen": "~0.26.4",
 		"expo-status-bar": "~1.11.1",
-		"tailwind-merge": "^1.14.0",
 		"lucide-react-native": "^0.330.0",
 		"nativewind": "^2.0.11",
 		"phosphor-react-native": "^1.1.2",
@@ -34,6 +34,7 @@
 		"react-native-screens": "~3.29.0",
 		"react-native-svg": "14.1.0",
 		"react-native-web": "~0.19.10",
+		"tailwind-merge": "^1.14.0",
 		"zod": "^3.22.4",
 		"zustand": "^4.5.0"
 	},

@@ -1,4 +1,5 @@
 import { authApi } from '@stump/api'
+import { queryClient } from '@stump/client'
 import { useColorScheme } from 'nativewind'
 import React from 'react'
 import { Button } from 'react-native'
@@ -19,6 +20,7 @@ export default function Home() {
 			console.error(err)
 		} finally {
 			setUser(null)
+			queryClient.clear()
 		}
 	}
 

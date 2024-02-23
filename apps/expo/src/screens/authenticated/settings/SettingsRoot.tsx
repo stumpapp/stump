@@ -7,8 +7,8 @@ import SettingsListItem from './SettingsListItem'
 // FIXME: status bar not working?
 export default function SettingsRoot() {
 	return (
-		<ScreenRootView className="items-start justify-start space-y-6 px-4">
-			<View className="w-full">
+		<ScreenRootView classes="h-full flex-1 items-start justify-start space-y-6">
+			<View className="w-full px-4">
 				<Text muted size="sm">
 					App settings
 				</Text>
@@ -21,7 +21,7 @@ export default function SettingsRoot() {
 				</View>
 			</View>
 
-			<View className="w-full">
+			<View className="w-full px-4">
 				<Text muted size="sm">
 					Server settings
 				</Text>

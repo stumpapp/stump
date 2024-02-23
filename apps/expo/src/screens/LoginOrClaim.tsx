@@ -10,17 +10,10 @@ import { useUserStore } from '@/stores'
 
 export default function LoginOrClaim() {
 	const setUser = useUserStore((store) => store.setUser)
-	const {
-		isClaimed,
-		isCheckingClaimed,
-		loginUser,
-		registerUser,
-		isLoggingIn,
-		isRegistering,
-		loginError,
-	} = useLoginOrRegister({
-		onSuccess: setUser,
-	})
+	const { isClaimed, isCheckingClaimed, loginUser, registerUser, isLoggingIn, isRegistering } =
+		useLoginOrRegister({
+			onSuccess: setUser,
+		})
 
 	// TODO: generalize common form schemas between clients to the client package
 	// TODO: move i18n to isolated package to be used between clients

@@ -51,7 +51,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		} finally {
 			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 		}
-	}, [job.id, job.status])
+	}, [job.id, isCancelable])
 
 	/**
 	 * Deletes the record of the job from the database.
@@ -69,7 +69,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 		} finally {
 			await invalidateQueries({ queryKey: [jobQueryKeys.getJobs] })
 		}
-	}, [job.id, job.status])
+	}, [job.id, isDeletable])
 
 	const jobId = job.id
 	const jobData = job.output_data
@@ -119,6 +119,7 @@ export default function JobActionMenu({ job, onInspectData }: Props) {
 			isDeletable,
 			associatedLogs,
 			jobId,
+			jobData,
 			navigate,
 			onInspectData,
 			handleCancel,

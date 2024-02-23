@@ -1,7 +1,7 @@
 import { useMediaByIdQuery } from '@stump/client'
 import { Badge, ButtonOrLink, Heading, Spacer, Text } from '@stump/components'
 import dayjs from 'dayjs'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
 import { Helmet } from 'react-helmet'
 import { useParams } from 'react-router'
 import { useMediaMatch } from 'rooks'
@@ -30,7 +30,10 @@ import DownloadMediaButton from './DownloadMediaButton'
 // - links
 // - featured characters
 export default function BookOverviewScene() {
-	const { isServerOwner } = useAppContext()
+	const { checkPermission, isServerOwner } = useAppContext()
+
+	const canDownload = useMemo(() => checkPermission('file:download'), [checkPermission])
+	const canManage = useMemo(() => checkPermission('library:manage'), [checkPermission])
 
 	const isAtLeastMedium = useMediaMatch('(min-width: 768px)')
 
@@ -109,12 +112,12 @@ export default function BookOverviewScene() {
 										Read with the native PDF viewer
 									</ButtonOrLink>
 								)}
-								{isServerOwner && (
+								{canManage && (
 									<ButtonOrLink variant="subtle" href={paths.bookManagement(media.id)}>
 										Manage
 									</ButtonOrLink>
 								)}
-								<DownloadMediaButton media={media} />
+								{canDownload && <DownloadMediaButton media={media} />}
 							</div>
 
 							{!isAtLeastMedium && !!media.metadata?.summary && (

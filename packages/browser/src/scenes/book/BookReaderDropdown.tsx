@@ -100,7 +100,12 @@ export default function BookReaderDropdown({ book }: Props) {
 
 	return (
 		<div className="flex items-center">
-			<ButtonOrLink className="rounded-r-none" variant="primary" href={readUrl} title={title}>
+			<ButtonOrLink
+				className="w-full rounded-r-none"
+				variant="primary"
+				href={readUrl}
+				title={title}
+			>
 				{title}
 			</ButtonOrLink>
 			<DropdownMenu

@@ -283,7 +283,7 @@
 		},
 		"sidebar": {
 			"application": {
-				"general": "General",
+				"account": "Account",
 				"appearance": "Appearance",
 				"desktop": "Desktop",
 				"label": "Application"
@@ -298,10 +298,10 @@
 				"label": "Server"
 			}
 		},
-		"app/general": {
-			"helmet": "General client settings",
-			"title": "General settings",
-			"description": "Settings related to your account or general preferences",
+		"app/account": {
+			"helmet": "Account settings",
+			"title": "Account settings",
+			"description": "Settings related to your account",
 			"sections": {
 				"account": {
 					"validation": {

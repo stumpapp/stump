@@ -34,13 +34,13 @@ type RouteGroup = {
 // TODO: prefetch options
 export const routeGroups: RouteGroup[] = [
 	{
-		defaultRoute: '/settings/app/general',
+		defaultRoute: '/settings/app/account',
 		items: [
 			{
 				icon: Cog,
-				label: 'General',
-				localeKey: 'app/general',
-				to: '/settings/app/general',
+				label: 'Account',
+				localeKey: 'app/account',
+				to: '/settings/app/account',
 			},
 			{
 				icon: Brush,

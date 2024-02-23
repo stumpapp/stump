@@ -23,13 +23,13 @@ export default function ProfileForm() {
 			.refine(
 				(url) => !url || isUrl(url),
 				() => ({
-					message: t('settingsScene.app/general.sections.account.validation.invalidUrl'),
+					message: t('settingsScene.app/account.sections.account.validation.invalidUrl'),
 				}),
 			),
 		name: z.string().optional(),
 		password: z.string().optional(),
 		username: z.string().min(1, {
-			message: t('settingsScene.app/general.sections.account.validation.missingUsername'),
+			message: t('settingsScene.app/account.sections.account.validation.missingUsername'),
 		}),
 	})
 	type Schema = z.infer<typeof schema>
@@ -80,7 +80,7 @@ export default function ProfileForm() {
 			)
 		} catch (error) {
 			console.error(error)
-			toast.error(t('settingsScene.app/general.sections.account.errors.updateFailed'))
+			toast.error(t('settingsScene.app/account.sections.account.errors.updateFailed'))
 		}
 	}
 
@@ -92,7 +92,7 @@ export default function ProfileForm() {
 						variant="primary"
 						className="w-full"
 						containerClassName="max-w-full md:max-w-sm"
-						label={t('settingsScene.app/general.sections.account.labels.username')}
+						label={t('settingsScene.app/account.sections.account.labels.username')}
 						autoComplete="username"
 						{...form.register('username')}
 					/>
@@ -100,7 +100,7 @@ export default function ProfileForm() {
 						variant="primary"
 						className="w-full"
 						containerClassName="max-w-full md:max-w-sm"
-						label={t('settingsScene.app/general.sections.account.labels.password')}
+						label={t('settingsScene.app/account.sections.account.labels.password')}
 						type="password"
 						autoComplete="new-password"
 						{...form.register('password')}
@@ -108,12 +108,12 @@ export default function ProfileForm() {
 
 					<div className="flex w-full flex-col items-center gap-4 md:flex-row">
 						<Button variant="primary" type="submit" className="w-full md:w-[unset]">
-							{t('settingsScene.app/general.sections.account.buttons.confirm')}
+							{t('settingsScene.app/account.sections.account.buttons.confirm')}
 						</Button>
 
 						{hasChanges && (
 							<Text variant="muted" size="xs">
-								{t('settingsScene.app/general.sections.account.labels.activeChangesPrompt')}
+								{t('settingsScene.app/account.sections.account.labels.activeChangesPrompt')}
 							</Text>
 						)}
 					</div>

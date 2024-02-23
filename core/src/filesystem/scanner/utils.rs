@@ -95,7 +95,7 @@ pub(crate) fn generate_rule_set(paths: &[PathBuf]) -> GlobSet {
 			tracing::warn!(
 				error = ?open_result.err(),
 				?ignore_file,
-				"Failed to open file (does it exist?)",
+				"Failed to open .stumpignore file (does it exist?)",
 			);
 		}
 	}

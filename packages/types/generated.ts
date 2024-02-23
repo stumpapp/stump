@@ -44,7 +44,7 @@ export type JobProgress = { status?: JobStatus | null; message?: string | null; 
 /**
  * The data that is collected and updated during the execution of a library scan job
  */
-export type LibraryScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
+export type LibraryScanOutput = { total_files: BigInt; total_directories: BigInt; ignored_files: BigInt; ignored_directories: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
 
 export type SeriesScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt }
 
@@ -60,7 +60,7 @@ export type User = { id: string; username: string; is_server_owner: boolean; ava
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "bookclub:read" | "bookclub:create" | "smartlist:read" | "file:explorer" | "file:upload" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
+export type UserPermission = "bookclub:read" | "bookclub:create" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 

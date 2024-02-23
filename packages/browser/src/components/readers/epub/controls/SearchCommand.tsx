@@ -4,14 +4,18 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import Spinner from '@/components/Spinner'
 
-import { SearchResult, useEpubReaderControls } from '../context'
+import { SpineSearchResult, useEpubReaderContext } from '../context'
 import ControlButton from './ControlButton'
 
 export default function SearchCommand() {
-	const { searchEntireBook, onGoToCfi } = useEpubReaderControls()
+	const {
+		readerMeta,
+		controls: { searchEntireBook, onGoToCfi },
+	} = useEpubReaderContext()
+	const { toc } = readerMeta.bookMeta || {}
 
 	const [isSearching, setIsSearching] = useState(false)
-	const [results, setResults] = useState<SearchResult[][]>()
+	const [results, setResults] = useState<SpineSearchResult[]>()
 
 	const [query, setQuery] = useState('')
 	const [open, setOpen] = useState(false)
@@ -69,15 +73,28 @@ export default function SearchCommand() {
 		}
 	}, [query])
 
+	const getSpineTitle = useCallback(
+		(idx: number) => {
+			const adjustedIdx = idx - 1
+			let item = toc?.at(adjustedIdx)
+			if (item?.play_order !== adjustedIdx) {
+				item = toc?.find((i) => i.play_order === adjustedIdx)
+			}
+
+			return item?.label || `Spine item ${idx}`
+		},
+		[toc],
+	)
+
 	const renderResults = () => {
 		if (!results) {
 			return null
 		} else if (!results.length) {
 			return <Command.Empty>No results found.</Command.Empty>
 		} else {
-			return results.map((group, idx) => (
-				<Command.Group key={`group-${idx}`} heading={`Spine item ${idx}`}>
-					{group.map((result) => (
+			return results.map(({ spineIndex, results }, idx) => (
+				<Command.Group key={`group-${idx}`} heading={getSpineTitle(spineIndex)}>
+					{results.map((result) => (
 						<Command.Item
 							key={result.cfi}
 							onDoubleClick={() => handleGoToCfi(result.cfi)}

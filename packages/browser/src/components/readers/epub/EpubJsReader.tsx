@@ -525,7 +525,14 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 				)
 			})
 
-			return await Promise.all(promises).then((results) => results.filter((res) => res.length > 0))
+			return await Promise.all(promises).then((results) =>
+				results
+					.map((res, idx) => ({
+						results: res,
+						spineIndex: idx,
+					}))
+					.filter(({ results }) => results.length > 0),
+			)
 		},
 		[book],
 	)

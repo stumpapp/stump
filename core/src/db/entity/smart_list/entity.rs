@@ -1,5 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
+use prisma_client_rust::operator;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -37,7 +38,7 @@ pub struct SmartList {
 }
 
 impl SmartList {
-	pub fn into_params(self) -> Vec<media::WhereParam> {
+	fn into_params(self) -> media::WhereParam {
 		let where_params = self
 			.filters
 			.groups
@@ -56,9 +57,31 @@ impl SmartList {
 			.collect();
 
 		match self.joiner {
-			FilterJoin::And => where_params,
-			FilterJoin::Or => vec![prisma_client_rust::operator::or(where_params)],
+			FilterJoin::And => operator::and(where_params),
+			FilterJoin::Or => operator::or(where_params),
 		}
+	}
+
+	pub fn into_params_for_user(self, user: &User) -> Vec<media::WhereParam> {
+		let params = self.into_params();
+		let age_restriction = user
+			.age_restriction
+			.as_ref()
+			.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+		let library_not_hidden_restriction =
+			library::hidden_from_users::none(vec![user::id::equals(user.id.clone())]);
+
+		let params_for_user = operator::and(chain_optional_iter(
+			[
+				params,
+				media::series::is(vec![series::library::is(vec![
+					library_not_hidden_restriction,
+				])]),
+			],
+			[age_restriction],
+		));
+
+		vec![params_for_user]
 	}
 
 	/// MUST be called from within a transaction!
@@ -68,21 +91,7 @@ impl SmartList {
 		for_user: &User,
 	) -> CoreResult<SmartListItems> {
 		let grouping = self.default_grouping;
-		let params = self.into_params();
-		let age_restriction = for_user
-			.age_restriction
-			.as_ref()
-			.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
-		let library_not_hidden_restriction =
-			library::hidden_from_users::none(vec![user::id::equals(for_user.id.clone())]);
-		let params_for_user = chain_optional_iter(
-			params
-				.into_iter()
-				.chain([media::series::is(vec![series::library::is(vec![
-					library_not_hidden_restriction,
-				])])]),
-			[age_restriction],
-		);
+		let params_for_user = self.into_params_for_user(for_user);
 
 		match grouping {
 			SmartListItemGrouping::ByBooks => {

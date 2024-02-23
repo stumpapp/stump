@@ -40,6 +40,9 @@ pub enum UserPermission {
 	/// Grant access to upload files to a library
 	#[serde(rename = "file:upload")]
 	UploadFile,
+	/// Grant access to download files from a library
+	#[serde(rename = "file:download")]
+	DownloadFile,
 	/// Grant access to create a library
 	#[serde(rename = "library:create")]
 	CreateLibrary,
@@ -123,6 +126,7 @@ impl ToString for UserPermission {
 			UserPermission::AccessSmartList => "smartlist:read".to_string(),
 			UserPermission::FileExplorer => "file:explorer".to_string(),
 			UserPermission::UploadFile => "file:upload".to_string(),
+			UserPermission::DownloadFile => "file:download".to_string(),
 			UserPermission::CreateLibrary => "library:create".to_string(),
 			UserPermission::EditLibrary => "library:edit".to_string(),
 			UserPermission::ScanLibrary => "library:scan".to_string(),
@@ -147,6 +151,7 @@ impl From<&str> for UserPermission {
 			"smartlist:read" => UserPermission::AccessSmartList,
 			"file:explorer" => UserPermission::FileExplorer,
 			"file:upload" => UserPermission::UploadFile,
+			"file:download" => UserPermission::DownloadFile,
 			"library:create" => UserPermission::CreateLibrary,
 			"library:edit" => UserPermission::EditLibrary,
 			"library:scan" => UserPermission::ScanLibrary,

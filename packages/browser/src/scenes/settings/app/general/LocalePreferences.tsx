@@ -9,9 +9,9 @@ export default function LocalePreferences() {
 
 	const subTitle = useMemo(() => {
 		const pieces = [
-			t('settingsScene.app/general.sections.locale.subtitle.0'),
-			t('settingsScene.app/general.sections.locale.subtitle.1'),
-			t('settingsScene.app/general.sections.locale.subtitle.2'),
+			t('settingsScene.app/account.sections.locale.subtitle.0'),
+			t('settingsScene.app/account.sections.locale.subtitle.1'),
+			t('settingsScene.app/account.sections.locale.subtitle.2'),
 		]
 
 		return (
@@ -25,7 +25,7 @@ export default function LocalePreferences() {
 	return (
 		<div className="flex flex-col gap-y-4">
 			<div>
-				<Heading size="sm">{t('settingsScene.app/general.sections.locale.heading')}</Heading>
+				<Heading size="sm">{t('settingsScene.app/account.sections.locale.heading')}</Heading>
 				{subTitle}
 			</div>
 

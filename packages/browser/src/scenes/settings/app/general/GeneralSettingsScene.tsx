@@ -13,7 +13,7 @@ export default function GeneralSettingsScene() {
 	return (
 		<SceneContainer>
 			<Helmet>
-				<title>Stump | {t('settingsScene.app/general.helmet')}</title>
+				<title>Stump | {t('settingsScene.app/account.helmet')}</title>
 			</Helmet>
 
 			<ContentContainer>

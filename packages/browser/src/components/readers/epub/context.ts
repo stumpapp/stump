@@ -44,8 +44,13 @@ export type EpubReaderControls = {
 	onPaginateForward: () => void
 	onPaginateBackward: () => void
 	getCfiPreviewText: (cfi: string) => Promise<string | null>
-	searchEntireBook: (query: string) => Promise<SearchResult[][]>
+	searchEntireBook: (query: string) => Promise<SpineSearchResult[]>
 	onGoToCfi: (cfi: string) => void
+}
+
+export type SpineSearchResult = {
+	results: SearchResult[]
+	spineIndex: number
 }
 
 export type SearchResult = {

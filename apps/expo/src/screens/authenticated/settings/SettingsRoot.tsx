@@ -3,6 +3,7 @@ import React from 'react'
 import { ScreenRootView, Text, View } from '@/components'
 
 import SettingsListItem from './SettingsListItem'
+import { SettingsScreen } from './SettingsNavigator'
 
 // FIXME: status bar not working?
 export default function SettingsRoot() {
@@ -37,7 +38,12 @@ export default function SettingsRoot() {
 	)
 }
 
-const appRoutes = [
+type Route = {
+	title: string
+	to: SettingsScreen
+}
+
+const appRoutes: Route[] = [
 	{
 		title: 'Appearance',
 		to: 'AppearanceSettings',
@@ -48,13 +54,13 @@ const appRoutes = [
 	},
 ]
 
-const serverRoutes = [
-	{
-		title: 'General',
-		to: 'ServerGeneralSettings',
-	},
-	{
-		title: 'Jobs',
-		to: 'ServerJobsSettings',
-	},
+const serverRoutes: Route[] = [
+	// {
+	// 	title: 'General',
+	// 	to: 'ServerGeneralSettings',
+	// },
+	// {
+	// 	title: 'Jobs',
+	// 	to: 'ServerJobsSettings',
+	// },
 ]

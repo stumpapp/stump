@@ -47,7 +47,7 @@ export const ScreenRootView = forwardRef<typeof NativeView, ScreenRootViewProps>
 				ref={ref}
 			>
 				{children}
-				<StatusBar style={colorScheme === 'dark' ? 'light' : 'auto'} />
+				<StatusBar key={colorScheme} style={colorScheme === 'dark' ? 'light' : 'dark'} />
 			</View>
 		)
 	},

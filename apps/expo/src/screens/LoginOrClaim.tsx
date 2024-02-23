@@ -1,16 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLoginOrRegister } from '@stump/client'
-import { StatusBar } from 'expo-status-bar'
-import { styled } from 'nativewind'
 import React, { useCallback } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 import { z } from 'zod'
 
-import { Input } from '@/components'
+import { Input, ScreenRootView } from '@/components'
 import { useUserStore } from '@/stores'
-
-const StyledView = styled(View)
 
 export default function LoginOrClaim() {
 	const setUser = useUserStore((store) => store.setUser)
@@ -83,7 +79,7 @@ export default function LoginOrClaim() {
 	const isLoading = isCheckingClaimed || isLoggingIn || isRegistering
 
 	return (
-		<StyledView className="flex-1 flex-col items-center justify-center space-y-4 px-4">
+		<ScreenRootView classes="flex-1 flex-col items-center justify-center space-y-4 px-4">
 			{renderHeader()}
 
 			<View className="w-full">
@@ -136,8 +132,6 @@ export default function LoginOrClaim() {
 			>
 				<Text className="text-center">{isClaimed ? 'Log in' : 'Create account'}</Text>
 			</TouchableOpacity>
-
-			<StatusBar style="auto" />
-		</StyledView>
+		</ScreenRootView>
 	)
 }

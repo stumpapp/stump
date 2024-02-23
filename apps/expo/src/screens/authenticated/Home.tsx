@@ -1,6 +1,5 @@
 import { authApi } from '@stump/api'
 import { queryClient } from '@stump/client'
-import { useColorScheme } from 'nativewind'
 import React from 'react'
 import { Button } from 'react-native'
 
@@ -8,8 +7,6 @@ import { ScreenRootView, Text } from '@/components'
 import { useUserStore } from '@/stores'
 
 export default function Home() {
-	const { colorScheme, toggleColorScheme } = useColorScheme()
-
 	const setUser = useUserStore((state) => state.setUser)
 
 	const handleLogout = async () => {
@@ -26,8 +23,7 @@ export default function Home() {
 
 	return (
 		<ScreenRootView>
-			<Text>I am home : {colorScheme}</Text>
-			<Button title="Toggle color scheme" onPress={toggleColorScheme} />
+			<Text>I am home</Text>
 			<Button title="Logout" onPress={handleLogout} />
 		</ScreenRootView>
 	)

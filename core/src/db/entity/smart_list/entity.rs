@@ -6,10 +6,14 @@ use utoipa::ToSchema;
 
 use crate::{
 	db::{
-		entity::{EntityVisibility, Library, Media, Series, User},
+		entity::{
+			utils::apply_media_age_restriction, EntityVisibility, Library, Media, Series,
+			User,
+		},
 		filter::{FilterGroup, FilterJoin, MediaSmartFilter, SmartFilter},
 	},
-	prisma::{library, media, read_progress, series, smart_list, PrismaClient},
+	prisma::{library, media, read_progress, series, smart_list, user, PrismaClient},
+	utils::chain_optional_iter,
 	CoreError, CoreResult,
 };
 
@@ -65,12 +69,26 @@ impl SmartList {
 	) -> CoreResult<SmartListItems> {
 		let grouping = self.default_grouping;
 		let params = self.into_params();
+		let age_restriction = for_user
+			.age_restriction
+			.as_ref()
+			.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
+		let library_not_hidden_restriction =
+			library::hidden_from_users::none(vec![user::id::equals(for_user.id.clone())]);
+		let params_for_user = chain_optional_iter(
+			params
+				.into_iter()
+				.chain([media::series::is(vec![series::library::is(vec![
+					library_not_hidden_restriction,
+				])])]),
+			[age_restriction],
+		);
 
 		match grouping {
 			SmartListItemGrouping::ByBooks => {
 				let books = client
 					.media()
-					.find_many(params)
+					.find_many(params_for_user)
 					.with(media::metadata::fetch())
 					.with(media::read_progresses::fetch(vec![
 						read_progress::user_id::equals(for_user.id.clone()),
@@ -85,7 +103,7 @@ impl SmartList {
 			SmartListItemGrouping::BySeries => {
 				let books = client
 					.media()
-					.find_many(params)
+					.find_many(params_for_user)
 					.with(media::metadata::fetch())
 					.with(media::read_progresses::fetch(vec![
 						read_progress::user_id::equals(for_user.id.clone()),
@@ -132,7 +150,7 @@ impl SmartList {
 			SmartListItemGrouping::ByLibrary => {
 				let books = client
 					.media()
-					.find_many(params)
+					.find_many(params_for_user)
 					.include(media_grouped_by_library::include(vec![
 						read_progress::user_id::equals(for_user.id.clone()),
 					]))

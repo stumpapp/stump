@@ -32,6 +32,10 @@ type Props = {
 	 * displays a loading indicator in the search input if true.
 	 */
 	isRefetching?: boolean
+	/**
+	 * Whether or not the filter toolbar is disabled
+	 */
+	isDisabled?: boolean
 }
 
 /**
@@ -43,14 +47,15 @@ export default function FilterToolBar({
 	searchPlaceholder,
 	filterSlideOverPrompt,
 	isRefetching,
+	isDisabled,
 }: Props) {
 	const { filters, setFilter, removeFilter } = useFilterContext()
 
-	const renderFilter = !!entity
-	const renderOrderBy = !!orderBy && !!entity
+	const renderFilter = !!entity && !isDisabled
+	const renderOrderBy = !!orderBy && !!entity && !isDisabled
 
 	return (
-		<header className="flex max-w-full flex-col gap-2">
+		<header className="flex max-w-full flex-col gap-2 px-4">
 			<div className="flex flex-col items-center gap-2 md:flex-row">
 				<Search
 					initialValue={filters?.search as string}
@@ -63,6 +68,7 @@ export default function FilterToolBar({
 						}
 					}}
 					isLoading={isRefetching}
+					isDisabled={isDisabled}
 				/>
 				<div className="flex w-full shrink-0 gap-2 md:w-auto">
 					{renderOrderBy && <OrderBy entity={entity} />}

@@ -33,7 +33,7 @@ export default function SeriesOverviewTitleSection({ series }: Props) {
 				<div className="flex flex-col items-center text-center md:items-start md:text-left">
 					<Heading size="sm">{series.name}</Heading>
 					<SeriesLibraryLink id={series.library_id} />
-					<TagList tags={series.tags} />
+					<TagList tags={series.tags || null} />
 				</div>
 
 				<div className="flex w-full flex-col gap-2 md:flex-row">

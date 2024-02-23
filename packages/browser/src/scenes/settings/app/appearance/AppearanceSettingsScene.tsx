@@ -12,6 +12,7 @@ import PreferColorToggle from './PreferColorToggle'
 import PrimaryNavigationPreference from './PrimaryNavigationPreference'
 import QueryIndicatorToggle from './QueryIndicatorToggle'
 import ReplacePrimarySidebarToggle from './ReplacePrimarySidebarToggle'
+import ShowThumbnailsInHeader from './ShowThumbnailsInHeader'
 import ThemeSelect from './ThemeSelect'
 
 export default function AppearanceSettingsScene() {
@@ -37,6 +38,7 @@ export default function AppearanceSettingsScene() {
 				<DisplaySpacingPreference />
 
 				<div className="flex flex-col gap-y-8">
+					<ShowThumbnailsInHeader />
 					<PreferColorToggle />
 					<HideScrollbarToggle />
 					<QueryIndicatorToggle />

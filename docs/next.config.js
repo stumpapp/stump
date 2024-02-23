@@ -14,9 +14,34 @@ module.exports = {
 				source: '/installation',
 			},
 			{
-				destination: '/guides/overview',
+				destination: '/guides/getting-started',
 				permanent: true,
 				source: '/guides',
+			},
+			{
+				destination: '/guides/access-control/age-restrictions',
+				permanent: true,
+				source: '/guides/access-control',
+			},
+			{
+				destination: '/guides/basics/books',
+				permanent: true,
+				source: '/guides/basics',
+			},
+			{
+				destination: '/guides/book-clubs/overview',
+				permanent: true,
+				source: '/guides/book-clubs',
+			},
+			{
+				destination: '/guides/configuration/server-options',
+				permanent: true,
+				source: '/guides/configuration',
+			},
+			{
+				destination: '/guides/desktop/overview',
+				permanent: true,
+				source: '/guides/desktop',
 			},
 		]
 	},

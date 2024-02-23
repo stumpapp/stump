@@ -1,35 +1,34 @@
 import { mediaApi } from '@stump/api'
-import { useDirectoryListing, useLibraryByIdQuery } from '@stump/client'
+import { useDirectoryListing } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
 import { Helmet } from 'react-helmet'
 import toast from 'react-hot-toast'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useMediaMatch } from 'rooks'
 
-import paths from '../../../paths'
+import paths from '@/paths'
+
+import { useLibraryContext } from '../context'
 import { LibraryExplorerContext } from './context'
 import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
-import FileExplorerHeader, { HEADER_HEIGHT } from './FileExplorerHeader'
+import FileExplorerHeader from './FileExplorerHeader'
+
+// TODO: abstract this away from library as to use it with other entities
 
 export default function LibraryExplorerScene() {
 	const navigate = useNavigate()
-
-	const { id } = useParams()
-	if (!id) {
-		throw new Error('Library id is required')
-	}
-
 	const isMobile = useMediaMatch('(max-width: 768px)')
-	const { library, isLoading } = useLibraryByIdQuery(id)
+
+	const { library } = useLibraryContext()
 
 	// TODO: I need to store location.state somewhere so that when the user uses native navigation,
 	// their history, or at the very least where they left off, is persisted.
 	const { entries, setPath, path, goForward, goBack, canGoBack, canGoForward } =
 		useDirectoryListing({
-			enabled: !!library?.path,
-			enforcedRoot: library?.path,
-			initialPath: library?.path,
+			enabled: !!library.path,
+			enforcedRoot: library.path,
+			initialPath: library.path,
 		})
 
 	const handleSelect = async (entry: DirectoryListingFile) => {
@@ -58,14 +57,6 @@ export default function LibraryExplorerScene() {
 		}
 	}
 
-	// TODO: loading state ugly
-	if (isLoading) {
-		return null
-	} else if (!library) {
-		// TODO: render a proper not found image or something
-		throw new Error('Library not found')
-	}
-
 	return (
 		<LibraryExplorerContext.Provider
 			value={{
@@ -83,17 +74,18 @@ export default function LibraryExplorerScene() {
 				<title>Stump | {library.name}</title>
 			</Helmet>
 
-			<FileExplorerHeader />
-			<div
-				className="h-full w-full overflow-y-auto overflow-x-hidden"
-				style={{
-					marginBottom: FOOTER_HEIGHT + (isMobile ? 50 : 0),
-					marginTop: HEADER_HEIGHT,
-				}}
-			>
-				<FileExplorer files={entries} />
+			<div className="flex flex-col">
+				<FileExplorerHeader />
+				<div
+					className="flex-1"
+					style={{
+						marginBottom: FOOTER_HEIGHT + (isMobile ? 50 : 0),
+					}}
+				>
+					<FileExplorer files={entries} />
+				</div>
+				<FileExplorerFooter />
 			</div>
-			<FileExplorerFooter />
 		</LibraryExplorerContext.Provider>
 	)
 }

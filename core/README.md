@@ -1,15 +1,18 @@
-## Package Contents
+# Core 🏭
 
-An overview of this package's contents:
+The `core` crate contains Stump's core functionalities, including the database schema, models, and other shared code.
 
-- `prisma`: Separate package for Prisma and Prisma CLI, not bundled in releases.
-- `integration-tests`: Integration tests for Stump.
+## Structure 📦
 
-- `config`: Configuration items, such as cors, logging, etc.
-- `db`: Database initialization and migration logic.
-- `event`: Event manager, handles the event queue and event processing.
-- `fs`: Filesystem utilities, as well as Stump's scanners.
-- `job`: Definitions for jobs, as well as the job pool (job manager).
-- `types`: Shared types, such as enums, structs, etc.
-  - `models`: Database models.
-- `utils`: Miscellaneous utilities
+- `config`: Configuration for the any apps consuming the core, including environment variables and tracing
+- `db`: Database client, models, and utilities
+- `filesystem`: Anything related to the filesystem and handling of files
+- `job` (AGPL-3.0): Background job processing and execution
+- `opds`: OPDS feed generation and XML utilities
+
+## License 📝
+
+This crate is licensed under the [MIT License](https://www.tldrlegal.com/license/mit-license), with the exception of the `job` module, which is licensed under the [AGPL-3.0 License](<https://www.tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)>). The `job` module could not be possible without the work of, primarily, two other open source projects which had a significant influence on the design and implementation of the module. Therefore, I would consider it derivative work of those projects collectively:
+
+- [Spacedrive](https://github.com/spacedriveapp/spacedrive)
+- [background-jobs](https://git.asonix.dog/asonix/background-jobs)

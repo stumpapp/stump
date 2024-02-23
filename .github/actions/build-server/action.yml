@@ -12,19 +12,8 @@ runs:
     - name: Checkout project
       uses: actions/checkout@v3
 
-    # - name: Configure environment
-    #   run: |
-    #     if [[ ${{ inputs.platform }} == 'linux' || ${{ inputs.platform }} == 'windows' ]]; then
-    #       echo "RUN_SETUP=false" >> $GITHUB_ENV
-    #     else
-    #       echo "RUN_SETUP=true" >> $GITHUB_ENV
-    #     fi
-
     - name: Setup rust
-      uses: ./.github/actions/setup-cargo
-
-    - name: Generate Prisma client
-      uses: ./.github/actions/setup-prisma
+      uses: ./.github/actions/setup-rust
 
     - name: Copy bundled web app
       uses: actions/download-artifact@v3

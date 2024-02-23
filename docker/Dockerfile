@@ -9,13 +9,9 @@ WORKDIR /app
 
 COPY . .
 
-# yarn is installed by default now
-# RUN npm install -g yarn 
-
-RUN yarn install
-RUN yarn web build
-
-RUN mv ./apps/web/dist build
+RUN yarn install; \
+    yarn web build; \
+    mv ./apps/web/dist build
 
 # ------------------------------------------------------------------------------
 # Cargo Build Stage
@@ -37,9 +33,9 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev;
 
 COPY . .
-RUN ./scripts/release/utils.sh -w;
 
-RUN set -ex; \
+RUN ./scripts/release/utils.sh -w; \
+    set -ex; \
     ./scripts/release/utils.sh -p; \
     cargo build --package stump_server --bin stump_server --release; \
     cp ./target/release/stump_server ./stump_server
@@ -51,13 +47,9 @@ RUN set -ex; \
 FROM debian:buster-slim AS pdfium
 ARG TARGETARCH
 
-WORKDIR /
-
-RUN apt-get update && apt-get install -y \
-    curl \
-    tar;
-
-RUN set -ex; \
+RUN apt-get update && apt-get install -y curl tar; \
+    # Download and extract PDFium
+    set -ex; \
     mkdir -p pdfium; \
     if [ "$TARGETARCH" = "amd64" ]; then \
         # NOTE: This was previously -x86, need to test more on amd64-compatible systems to ensure I have the right one
@@ -74,31 +66,25 @@ RUN set -ex; \
 
 FROM debian:buster-slim
 
-RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /
-
-RUN mkdir -p config && mkdir -p data && mkdir -p app
+RUN apt-get update && apt-get install -y locales-all && rm -rf /var/lib/apt/lists/*; \
+    mkdir -p config && mkdir -p data && mkdir -p app
 
 COPY --from=builder /app/stump_server /app/stump
 COPY --from=pdfium /pdfium /opt/pdfium
 COPY --from=frontend /app/build /app/client
-
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
-RUN ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so
-    
+RUN chmod +x /entrypoint.sh; \
+    ln -s /opt/pdfium/lib/libpdfium.so /lib/libpdfium.so
+
 # Default Stump environment variables
-ENV STUMP_CONFIG_DIR=/config
-ENV STUMP_CLIENT_DIR=/app/client
-ENV STUMP_PROFILE=release
-ENV STUMP_PORT=10801
-ENV STUMP_IN_DOCKER=true
-ENV PDFIUM_PATH=/lib/libpdfium.so
-
-
-ENV API_VERSION=v1
+ENV STUMP_CONFIG_DIR=/config \
+    STUMP_CLIENT_DIR=/app/client \
+    STUMP_PROFILE=release \
+    STUMP_PORT=10801 \
+    STUMP_IN_DOCKER=true \
+    PDFIUM_PATH=/lib/libpdfium.so \
+    API_VERSION=v1
 
 WORKDIR /app
 

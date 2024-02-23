@@ -23,7 +23,7 @@ export default function LastVisitedLibrary({ container }: Props) {
 			<div className="flex flex-col gap-y-2">
 				<Label className="text-sm">Last visited</Label>
 				<EntityCard
-					href={paths.libraryOverview(library.id)}
+					href={paths.librarySeries(library.id)}
 					imageUrl={getLibraryThumbnail(library.id)}
 					isCover
 					className="flex-auto flex-shrink-0"

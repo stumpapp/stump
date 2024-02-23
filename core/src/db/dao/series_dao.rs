@@ -77,17 +77,22 @@ impl SeriesDAO {
 					LEFT OUTER JOIN media_metadata mm ON mm.media_id = series_media.id
 					LEFT OUTER JOIN read_progresses media_progress ON media_progress.media_id = series_media.id AND media_progress.user_id = {}
 					LEFT OUTER JOIN age_restrictions ar ON ar.user_id = {}
+					INNER JOIN libraries l ON l.id = series.library_id
+					INNER JOIN _LibraryToUser lu ON lu.A = l.id
 				WHERE
-					ar.age IS NULL OR (
-						(ar.restrict_on_unset = FALSE AND mm.age_rating IS NULL) OR mm.age_rating <= ar.age
-					) OR (
-						(ar.restrict_on_unset = FALSE AND sm.age_rating IS NULL) OR sm.age_rating <= ar.age
+					lu.B != {} AND (
+						ar.age IS NULL OR (
+							(ar.restrict_on_unset = FALSE AND mm.age_rating IS NULL) OR mm.age_rating <= ar.age
+						) OR (
+							(ar.restrict_on_unset = FALSE AND sm.age_rating IS NULL) OR sm.age_rating <= ar.age
+						)
 					)
 				GROUP BY 
 					series.id
 				ORDER BY
 					series.created_at DESC
 				LIMIT {} OFFSET {}"#,
+				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::String(viewer_id.to_string()),
 				PrismaValue::Int(page_bounds.take),

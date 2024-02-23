@@ -19,7 +19,7 @@ mod tests {
 
 	use super::v1::{
 		auth::*, book_club::*, epub::*, job::*, library::*, media::*, metadata::*,
-		series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
+		series::*, smart_list::*, user::*, ClaimResponse, StumpVersion, UpdateCheck,
 	};
 
 	#[allow(dead_code)]
@@ -55,6 +55,7 @@ mod tests {
 		file.write_all(b"// SERVER TYPE GENERATION\n\n")?;
 
 		file.write_all(format!("{}\n\n", ts_export::<StumpVersion>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<UpdateCheck>()?).as_bytes())?;
 		file.write_all(
 			format!("{}\n\n", ts_export::<LoginOrRegisterArgs>()?).as_bytes(),
 		)?;
@@ -69,8 +70,12 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;
 		file.write_all(
+			format!("{}\n\n", ts_export::<UpdateLibraryExcludedUsers>()?).as_bytes(),
+		)?;
+		file.write_all(
 			format!("{}\n\n", ts_export::<CleanLibraryResponse>()?).as_bytes(),
 		)?;
+		file.write_all(format!("{}\n\n", ts_export::<LibraryStatsParams>()?).as_bytes())?;
 
 		file.write_all(
 			format!("{}\n\n", ts_export::<PutMediaCompletionStatus>()?).as_bytes(),

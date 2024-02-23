@@ -360,8 +360,12 @@ pub trait JobExt: Send + Sync + Sized + Clone + 'static {
 	/// An optional function to perform any cleanup or finalization after the job has
 	/// finished its run loop. This is called after the job has completed (when [Executor::execute]
 	/// returns an Ok).
-	async fn cleanup(&self, _: &WorkerCtx, _: &Self::Output) -> Result<(), JobError> {
-		Ok(())
+	async fn cleanup(
+		&self,
+		_: &WorkerCtx,
+		_: &Self::Output,
+	) -> Result<Option<Box<dyn Executor>>, JobError> {
+		Ok(None)
 	}
 
 	// TODO: notify_output(&self, output: &Self::Output) -> Result<(), JobError> { Ok(()) }
@@ -425,10 +429,20 @@ impl<J: JobExt> WrappedJob<J> {
 
 /// The output of a job's execution. To avoid the need for a generic type, the output data is serialized
 /// _prior_ to being returned from the [Executor::execute] function.
-#[derive(Debug)]
 pub struct ExecutorOutput {
 	pub output: Option<serde_json::Value>,
 	pub logs: Vec<JobExecuteLog>,
+	pub next_job: Option<Box<dyn Executor>>,
+}
+
+impl Debug for ExecutorOutput {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		f.debug_struct("ExecutorOutput")
+			.field("output", &self.output)
+			.field("logs", &self.logs)
+			.field("next_job", &self.next_job.as_ref().map(|j| j.name()))
+			.finish()
+	}
 }
 
 /// A trait that defines the behavior of a job executor. Executors are responsible for the main
@@ -705,6 +719,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 					return Ok(ExecutorOutput {
 						output: working_output.into_json(),
 						logs,
+						next_job: None,
 					});
 				},
 			};
@@ -759,12 +774,17 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 
 		let logs_count = logs.len();
 		tracing::debug!(?logs_count, "All tasks completed");
-		if let Err(err) = job.cleanup(&ctx, &working_output).await {
-			logs.push(JobExecuteLog::error(format!(
-				"Cleanup failed: {:?}",
-				err.to_string()
-			)));
-		}
+		let next_job = match job.cleanup(&ctx, &working_output).await {
+			Ok(next_job) => next_job,
+			Err(e) => {
+				tracing::error!(?e, "Cleanup failed");
+				logs.push(JobExecuteLog::error(format!(
+					"Cleanup failed: {:?}",
+					e.to_string()
+				)));
+				None
+			},
+		};
 
 		// Replace the state with defaults. This is to ensure there is a reset in the
 		// event of a requeue
@@ -775,6 +795,7 @@ impl<J: JobExt> Executor for WrappedJob<J> {
 		Ok(ExecutorOutput {
 			output: working_output.into_json(),
 			logs,
+			next_job,
 		})
 	}
 }

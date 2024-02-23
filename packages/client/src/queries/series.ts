@@ -25,6 +25,26 @@ export const prefetchSeries = async (id: string) => {
 	)
 }
 
+export const prefetchLibrarySeries = (id: string) =>
+	queryClient.prefetchQuery(
+		[
+			seriesQueryKeys.getSeries,
+			{ page: 1, page_size: 20, params: { count_media: true, library_id: id } },
+		],
+		async () => {
+			const { data } = await seriesApi.getSeries({
+				count_media: true,
+				library_id: id,
+				page: 1,
+				page_size: 20,
+			})
+			return data
+		},
+		{
+			staleTime: 10 * 1000,
+		},
+	)
+
 type SeriesByIdOptions = {
 	params?: Record<string, unknown>
 } & QueryOptions<Series, AxiosError>

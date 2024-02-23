@@ -123,7 +123,7 @@
 			}
 		}
 	},
-	"manageLibraryScene": {
+	"librarySettingsScene": {
 		"heading": "Gérer la Bibliothèque",
 		"subtitle": "Mettez à jour les détails ou la configuration de votre bibliothèque, modifiez les règles d'accès ou scannez des fichiers. Si vous voulez une mise à jour sur les bibliothèques et comment elles fonctionnent, consultez la",
 		"subtitleLink": "documentation correspondante",
@@ -178,6 +178,100 @@
 			"downloadSeries": "Télécharger la série"
 		}
 	},
+	"userSmartListsScene": {
+		"heading": "Smart lists",
+		"subtitle": "Your favorite searches and filters saved for easy access",
+		"searchPlaceholder": "Filter smart lists",
+		"buttons": {
+			"createSmartList": "Create smart list"
+		},
+		"list": {
+			"emptyState": {
+				"heading": "No smart lists to display",
+				"noListsMessage": "Create a smart list to get started",
+				"noMatchesMessage": "Try changing your search query"
+			},
+			"card": {
+				"meta": {
+					"figures": {
+						"books": "book",
+						"series": "series",
+						"library": "library"
+					},
+					"matches": "Matches"
+				}
+			}
+		}
+	},
+	"userSmartListScene": {
+		"navigation": {
+			"items": "Items",
+			"settings": "Settings"
+		},
+		"layout": {
+			"missingIdError": "This scene requires an ID in the URL",
+			"smartListNotFound": "Smart list not found",
+			"viewCreateError": "Failed to create view",
+			"viewSaveError": "Failed to save view"
+		},
+		"header": {
+			"backLink": "Lists"
+		},
+		"itemsScene": {
+			"smartListNotFound": "Smart list not found",
+			"actionHeader": {
+				"viewSelector": {
+					"customView": "Custom view",
+					"defaultView": "Default view",
+					"noViewsSaved": "No views saved",
+					"selectView": "Select a saved view"
+				},
+				"filterDrawer": {
+					"heading": "Smart list filters",
+					"description": "Change the filters for this viewing session",
+					"rawData": {
+						"heading": "Raw filter data",
+						"description": "This is how Stump will process the filters"
+					},
+					"buttons": {
+						"save": "Save",
+						"cancel": "Cancel"
+					}
+				},
+				"search": {
+					"placeholder": "Quick filter"
+				},
+				"viewManager": {
+					"updateSelected": "Update selected",
+					"create": "Create new view",
+					"modal": {
+						"heading": {
+							"create": "Create view",
+							"update": "Update view"
+						},
+						"description": {
+							"create": "Create a new view for this smart list",
+							"update": "Update the view"
+						},
+						"createForm": {
+							"name": {
+								"label": "Name",
+								"placeholder": "My view",
+								"description": "A friendly name to uniquely identify this view"
+							}
+						},
+						"updateForm": {
+							"name": {
+								"label": "Name",
+								"placeholder": "My view",
+								"description": "The updated name for this view, if desired"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
 	"settingsScene": {
 		"navigation": {
 			"general": "Général",
@@ -186,197 +280,257 @@
 			"users": "Gestion des Utilisateurs",
 			"desktop": "Bureau"
 		},
-		"general": {
-			"helmet": "Paramètres Généraux",
-			"heading": "Paramètres Généraux",
-			"subtitle": "Utilisez les formulaires ci-dessous pour gérer vos préférences et les paramètres de votre compte.",
-			"profileForm": {
-				"validation": {
-					"invalidUrl": "Veuillez entrer une URL valide",
-					"missingUsername": "Le nom d'utilisateur est requis"
-				},
-				"labels": {
-					"username": "Nom d'utilisateur",
-					"password": "Mot de passe",
-					"activeChangesPrompt": "Vous avez des modifications non enregistrées"
-				},
-				"errors": {
-					"updateFailed": "Une erreur de serveur est survenue lors de la mise à jour de votre profil. Veuillez réessayer."
-				},
-				"avatarPicker": {
-					"heading": "Définir votre image d'avatar",
-					"subtitle": "Stump prend en charge les avatars personnalisés, qui peuvent être définis en fournissant une URL vers une image. Les téléchargements d'images ne sont pas pris en charge pour réduire la quantité de données stockées sur le serveur.",
-					"preview": "Un aperçu apparaîtra ici une fois que vous aurez entré une URL.",
+		"sidebar": {
+			"application": {
+				"general": "General",
+				"appearance": "Appearance",
+				"desktop": "Desktop",
+				"label": "Application"
+			},
+			"server": {
+				"general": "General",
+				"users": "Users",
+				"jobs": "Jobs",
+				"access": "Access",
+				"notifications": "Notifications",
+				"label": "Server"
+			}
+		},
+		"app/general": {
+			"helmet": "General client settings",
+			"title": "General settings",
+			"description": "Settings related to your account or general preferences",
+			"sections": {
+				"account": {
+					"validation": {
+						"invalidUrl": "Please enter a valid URL",
+						"missingUsername": "Username is required"
+					},
 					"labels": {
-						"imageUrl": "URL de l'image",
-						"customAvatar": "Avatar personnalisé"
+						"username": "Username",
+						"password": "Password",
+						"activeChangesPrompt": "You have unsaved changes"
+					},
+					"errors": {
+						"updateFailed": "A server error occurred while updating your profile. Please try again."
+					},
+					"avatarPicker": {
+						"heading": "Set your Avatar Image",
+						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
+						"preview": "A preview will appear here once you have entered a URL.",
+						"labels": {
+							"imageUrl": "Image URL",
+							"customAvatar": "Custom Avatar"
+						},
+						"buttons": {
+							"confirm": "Confirm Image",
+							"cancel": "Cancel",
+							"edit": "Edit",
+							"changeImage": "Change Image",
+							"removeImage": "Remove Image"
+						}
 					},
 					"buttons": {
-						"confirm": "Confirmer l'image",
-						"cancel": "Annuler",
-						"edit": "Modifier",
-						"changeImage": "Changer l'image",
-						"removeImage": "Supprimer l'image"
+						"confirm": "Save Changes"
 					}
 				},
-				"buttons": {
-					"confirm": "Enregistrer les modifications"
+				"locale": {
+					"localeSelector": {
+						"label": "Language"
+					},
+					"heading": "Language and locale",
+					"subtitle": [
+						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
+						"Stump's translations",
+						"if you're able to!"
+					]
 				}
-			},
-			"theme": {
-				"heading": "Thème de l'application",
-				"subtitle": "Stump prend en charge les thèmes clairs et foncés, qui peuvent être définis ci-dessous.",
-				"dark": {
-					"label": "Thème Foncé",
-					"description": "Utilisez un thème sombre pour Stump, qui est le thème correct."
-				},
-				"light": {
-					"label": "Thème Clair",
-					"description": "Utilisez un thème clair pour Stump, qui est le thème incorrect."
-				}
-			},
-			"locale": {
-				"localeSelector": {
-					"label": "Langue"
-				},
-				"heading": "Paramètres de Langue et Locale",
-				"subtitle": [
-					"Stump prend en charge plusieurs langues, définissez vos préférences ci-dessous. Pensez à aider à améliorer la qualité des",
-					"Traductions de Stump",
-					"si vous le pouvez !"
-				]
 			}
 		},
-		"jobs": {
-			"helmet": "Tâches et Configuration",
-			"heading": "Tâches et Configuration",
-			"subtitle": "Affichez et gérez les tâches en arrière-plan disponibles sur ce serveur, y compris les analyses de bibliothèques et la planification",
-			"schedulingHeading": "Planification des tâches",
-			"schedulingSubtitle": "Manage the scheduling of background jobs on this server. Changes to this configuration will take effect after a server restart",
-			"historyHeading": "Historique des tâches",
-			"historySubtitle": "Gérer les tâches en cours et afficher l'historique des tâches terminées",
-			"historyTable": {
-				"columns": {
-					"name": "Type",
-					"description": "Description",
-					"status": "État",
-					"createdAt": "Commencé à",
-					"elapsed": "Écoulé",
-					"tasks": "Tâches"
-				},
-				"emptyHeading": "Il n'y a aucune tâche à afficher",
-				"emptySubtitle": "Vous ne pouvez pas avoir une tâche si vous n'avez pas une tâche",
-				"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-				"deleteAllConfirmButton": "Effacer l'historique",
-				"deleteAllConfirmButtonTitle": "Effacer l'historique des tâches",
-				"deleteAllConfirmButtonTitleNoJobs": "Aucune tâche à effacer"
-			}
-		},
-		"server": {
-			"helmet": "Paramètres du Serveur",
-			"heading": "Paramètres du Serveur",
-			"subtitle": "Gérez différentes options configurables pour votre instance de serveur Stump"
-		},
-		"desktop": {
-			"helmet": "Desktop Settings",
-			"heading": "Desktop Settings",
-			"subtitle": "Configure the Stump desktop application",
-			"discordPresence": {
-				"label": "Discord Presence",
-				"description": "Display your Stump activity in Discord using Discord Rich Presence",
-				"reconnect": "Reconnect to Discord"
-			}
-		},
-		"users": {
-			"helmet": "Gestion des Utilisateurs",
-			"heading": "Gestion des Utilisateurs",
-			"subtitle": "Gérez les utilisateurs sur ce serveur, y compris la création de nouveaux utilisateurs et la modification de leurs autorisations"
-		},
-		"createOrUpdateUsers": {
-			"createHelmet": "Create user",
-			"createHeading": "Create new user",
-			"createSubtitle": "Use the form below to create a new user on this server",
-			"updateHelmet": "Update user",
-			"updateHeading": "Update user",
-			"updateSubtitle": "Use the form below to update the details of this user",
-			"accessControl": {
-				"heading": "Access control and restrictions",
-				"subtitle": [
-					"If you want to restrict access to certain content based on tags or age rating, you can do so here. Any unset values means that the restriction will not be enforced. For more information about access control, see the",
-					"documentation"
-				],
-				"ageRestriction": {
-					"label": "Age restriction",
-					"description": "Restricts the user from accessing content above the set age rating threshold",
-					"placeholder": "13",
-					"enforceUnset": {
-						"label": "Enforce on unset",
-						"description": "If enabled, users will be restricted from accessing content with no age rating available"
-					}
-				},
-				"tagRestriction": {
-					"label": "Tag restrictions",
-					"description": "Restricts the user from accessing content with the selected tags",
-					"placeholder": "Adult, Gore"
-				}
-			},
-			"permissions": {
-				"heading": "Granted permissions",
-				"subtitle": [
-					"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-					"documentation"
-				],
-				"bookclub": {
-					"label": "Book Clubs",
-					"read": {
-						"label": "Access book club features",
-						"description": "Allows the user to access book club features, including viewing and joining book clubs"
-					},
-					"create": {
-						"label": "Create book clubs",
-						"description": "Allows the user to create new book clubs"
-					}
-				},
-				"file": {
-					"label": "File Management",
-					"explorer": {
-						"label": "File Explorer",
-						"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
-					},
-					"upload": {
-						"label": "Upload files",
-						"description": "Allows the user to upload files to the server"
-					}
-				},
-				"library": {
-					"label": "Library Management",
-					"create": {
-						"label": "Create libraries",
-						"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
-					},
-					"scan": {
-						"label": "Scan libraries",
-						"description": "Allows the user to initiate scans for existing libraries"
-					},
-					"edit": {
-						"label": "Edit libraries",
-						"description": "Allows the user to edit basic details for existing libraries"
-					},
-					"manage": {
-						"label": "Manage libraries",
-						"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
-					},
-					"delete": {
-						"label": "Delete libraries",
-						"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+		"app/appearance": {
+			"helmet": "Appearance",
+			"title": "Appearance",
+			"description": "Customize the look and feel of the application",
+			"sections": {
+				"themeSelect": {
+					"label": "Theme",
+					"description": "By default, Stump has a light and dark theme",
+					"customTheme": [
+						"If you're interested in creating your own custom theme, check out the",
+						"documentation"
+					],
+					"options": {
+						"light": "Light",
+						"dark": "Dark",
+						"bronze": "Bronze light"
 					}
 				}
+			}
+		},
+		"app/desktop": {
+			"helmet": "Desktop settings",
+			"title": "Desktop settings",
+			"description": "Settings related to the Stump desktop application",
+			"sections": {
+				"discordPresence": {
+					"label": "Discord Presence",
+					"description": "Display your Stump activity in Discord using Discord Rich Presence",
+					"reconnect": "Reconnect to Discord"
+				}
+			}
+		},
+		"server/general": {
+			"helmet": "General server settings",
+			"title": "General settings",
+			"description": "General settings related to your Stump server instance",
+			"sections": {}
+		},
+		"server/jobs": {
+			"helmet": "Jobs",
+			"title": "Jobs",
+			"description": "Background jobs that run on your Stump server instance",
+			"sections": {
+				"scheduling": {
+					"title": "Scheduling",
+					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+				},
+				"history": {
+					"title": "History",
+					"description": "A record of jobs that have been run on your Stump server instance",
+					"table": {
+						"columns": {
+							"name": "Type",
+							"description": "Description",
+							"status": "Status",
+							"createdAt": "Started At",
+							"elapsed": "Elapsed",
+							"tasks": "Tasks"
+						},
+						"emptyHeading": "There are no jobs to display",
+						"emptySubtitle": "You can't have a job if you don't have a job",
+						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
+						"deleteAllConfirmButton": "Clear history",
+						"deleteAllConfirmButtonTitle": "Clear all job history",
+						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+					}
+				}
+			}
+		},
+		"server/users": {
+			"helmet": "User management",
+			"title": "Users",
+			"description": "Manage the users on this server",
+			"createUser": {
+				"helmet": "Create user",
+				"title": "Create user",
+				"description": "Create a new user on this server"
 			},
-			"validation": {
-				"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+			"updateUser": {
+				"helmet": "Update user",
+				"title": "Update user",
+				"description": "Update the details of this user"
 			},
-			"createSubmitButton": "Create user",
-			"updateSubmitButton": "Update user"
+			"createOrUpdateForm": {
+				"accessControl": {
+					"heading": "Access control and restrictions",
+					"subtitle": [
+						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
+						"documentation"
+					],
+					"ageRestriction": {
+						"label": "Age restriction",
+						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"placeholder": "13",
+						"enforceUnset": {
+							"label": "Enforce on unset",
+							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+						}
+					},
+					"tagRestriction": {
+						"label": "Tag restrictions",
+						"description": "Restricts the user from accessing content with the selected tags",
+						"placeholder": "Adult, Gore"
+					}
+				},
+				"permissions": {
+					"heading": "Permissions",
+					"subtitle": [
+						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
+						"documentation"
+					],
+					"bookclub": {
+						"label": "Book Clubs",
+						"read": {
+							"label": "Access book club features",
+							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+						},
+						"create": {
+							"label": "Create book clubs",
+							"description": "Allows the user to create new book clubs"
+						}
+					},
+					"file": {
+						"label": "File Management",
+						"explorer": {
+							"label": "File Explorer",
+							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+						},
+						"upload": {
+							"label": "Upload files",
+							"description": "Allows the user to upload files to the server"
+						}
+					},
+					"library": {
+						"label": "Library Management",
+						"create": {
+							"label": "Create libraries",
+							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+						},
+						"scan": {
+							"label": "Scan libraries",
+							"description": "Allows the user to initiate scans for existing libraries"
+						},
+						"edit": {
+							"label": "Edit libraries",
+							"description": "Allows the user to edit basic details for existing libraries"
+						},
+						"manage": {
+							"label": "Manage libraries",
+							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+						},
+						"delete": {
+							"label": "Delete libraries",
+							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+						}
+					},
+					"server": {
+						"label": "Server Management",
+						"manage": {
+							"label": "Manage server",
+							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+						}
+					},
+					"user": {
+						"label": "User Management",
+						"manage": {
+							"label": "Manage users",
+							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+						}
+					},
+					"smartlist": {
+						"label": "Smart Lists",
+						"read": {
+							"label": "Access smart list feature",
+							"description": "Allows the user to access smart lists features"
+						}
+					}
+				},
+				"validation": {
+					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+				},
+				"createSubmitButton": "Create user",
+				"updateSubmitButton": "Update user"
+			}
 		}
 	},
 	"jobOverlay": {
@@ -415,11 +569,16 @@
 			"books": "Explore",
 			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
+			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
+			"noBookClubs": "No book clubs",
 			"settings": "Paramètres",
 			"themeToggle": "Changer de thème",
 			"goForward": "Aller en avant",
-			"goBack": "Aller en arrière"
+			"goBack": "Aller en arrière",
+			"smartlists": "Smart lists",
+			"noSmartlists": "No smart lists",
+			"createSmartlist": "Create smart list"
 		},
 		"libraryOptions": {
 			"scanLibrary": "Scan",
@@ -466,5 +625,25 @@
 	"tagSelect": {
 		"placholder": "Choisissez ou créez une étiquette",
 		"placeholderNoTags": "Aucune étiquette disponible"
+	},
+	"thumbnailDropdown": {
+		"label": "Edit thumbnail",
+		"options": {
+			"selectFromBooks": "Select from books",
+			"uploadImage": "Upload image"
+		},
+		"uploadImage": {
+			"emptyState": "A preview of your image will appear here",
+			"prompt": "Drop image here or click to select",
+			"remove": "Remove image"
+		}
+	},
+	"common": {
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"save": "Save",
+		"saveChanges": "Save changes",
+		"create": "Create",
+		"edit": "Edit"
 	}
 }

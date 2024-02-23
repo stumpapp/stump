@@ -1,5 +1,4 @@
 use std::path::Path;
-use tracing::trace;
 
 use crate::{config::StumpConfig, prisma};
 
@@ -15,31 +14,20 @@ pub async fn create_client(config: &StumpConfig) -> prisma::PrismaClient {
 		.to_str()
 		.expect("Error parsing config directory")
 		.to_string();
+	// TODO: experiment with this. I experienced some issues with concurrent writes still :/
+	// let postfix = "?socket_timeout=15000&busy_timeout=15000&connection_limit=1";
 
-	// let suffix = "?connection_limit=1";
-	let suffix = "";
-
-	if let Some(path) = config.db_path.clone() {
-		create_client_with_url(&format!("file:{}/stump.db{suffix}", &path)).await
+	let sqlite_url = if let Some(path) = config.db_path.clone() {
+		format!("file:{}/stump.db", &path)
 	} else if config.profile == "release" {
-		trace!(
-			"Creating Prisma client with url: file:{}/stump.db{suffix}",
-			&config_dir
-		);
-		prisma::new_client_with_url(&format!("file:{}/stump.db{suffix}", &config_dir))
-			.await
-			.expect("Failed to create Prisma client")
+		tracing::trace!("ile:{}/stump.db", &config_dir);
+		format!("file:{}/stump.db", &config_dir)
 	} else {
-		trace!(
-			"Creating Prisma client with url: file:{}/prisma/dev.db",
-			&env!("CARGO_MANIFEST_DIR")
-		);
-		create_client_with_url(&format!(
-			"file:{}/prisma/dev.db{suffix}",
-			&env!("CARGO_MANIFEST_DIR")
-		))
-		.await
-	}
+		format!("file:{}/prisma/dev.db", &env!("CARGO_MANIFEST_DIR"))
+	};
+
+	tracing::trace!(?sqlite_url, "Creating Prisma client");
+	create_client_with_url(&sqlite_url).await
 }
 
 pub async fn create_client_with_url(url: &str) -> prisma::PrismaClient {

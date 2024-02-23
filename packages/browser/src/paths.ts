@@ -76,12 +76,18 @@ const paths = {
 	docs: (topic?: DocTopic, section?: string) =>
 		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
 	home: () => '/',
-	libraryCreate: () => '/libraries/create',
-	libraryFileExplorer: (id: string) => `/libraries/${id}/explore`,
-	libraryManage: (id: string) => `/libraries/${id}/manage`,
-	libraryOverview: (id: string, page?: number) => {
+	libraryBooks: (id: string, page?: number) => {
 		if (page !== undefined) {
-			return `/libraries/${id}?page=${page}`
+			return `/libraries/${id}/books?page=${page}`
+		}
+		return `/libraries/${id}/books`
+	},
+	libraryCreate: () => '/libraries/create',
+	libraryFileExplorer: (id: string) => `/libraries/${id}/files`,
+	libraryManage: (id: string) => `/libraries/${id}/settings`,
+	librarySeries: (id: string, page?: number) => {
+		if (page !== undefined) {
+			return `/libraries/${id}/series?page=${page}`
 		}
 		return `/libraries/${id}`
 	},

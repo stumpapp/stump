@@ -1,0 +1,23 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Series
+
+A lot of people tend to get mixed up with what a series is in Stump. This guide will hopefully help clear up any confusion. The most important takeaway is that **series are just folders** on your file system that live somewhere within the directory tree of a library.
+
+![A series is just a folder](/images/1folder1series.gif)
+
+## What Defines a Series?
+
+Because series are just folders, it is up to Stump to determine what constitutes a series. Currently, this is done by configuring the pattern for the associated library. There are two patterns:
+
+- **Collection priority library**: Takes the top most folder and collapses everything into it as a single series.
+- **Series priority Library**: Takes the bottom most folders as series, effectively being the opposite of a collection based library.
+
+For more information on these patterns, please review the [libraries](/guides/basics/libraries) section of the documentation.
+
+<Callout emoji="👀">
+	There have been loose discussions about support for [nested
+	series](https://github.com/stumpapp/stump/issues/254#issuecomment-1922102687). This would result
+	in natural traversal, more closely aligned with the underlying filesystem. If this is something
+	you are interested in, please let me know by commenting on the issue.
+</Callout>

@@ -37,6 +37,8 @@ pub enum JobManagerError {
 	WorkerInvalidState(String),
 	#[error("Worker spawn failed")]
 	WorkerSpawnFailed,
+	#[error("Job with ID already exists: {0}")]
+	JobAlreadyExists(String),
 	#[error("Job with ID not found: {0}")]
 	JobNotFound(String),
 	#[error("Job missing ID")]

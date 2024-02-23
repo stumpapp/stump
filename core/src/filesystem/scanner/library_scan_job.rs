@@ -6,6 +6,8 @@ use std::{collections::VecDeque, path::PathBuf};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+// TODO: hone the progress messages, they are a little noisy and unhelpful (e.g. 'Starting task')
+
 use crate::{
 	db::{
 		entity::{LibraryOptions, Series},
@@ -16,8 +18,8 @@ use crate::{
 		SeriesBuilder,
 	},
 	job::{
-		error::JobError, JobControllerCommand, JobExecuteLog, JobExt, JobOutputExt,
-		JobProgress, JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
+		error::JobError, Executor, JobExecuteLog, JobExt, JobOutputExt, JobProgress,
+		JobTaskOutput, WorkerCtx, WorkerSendExt, WorkingState, WrappedJob,
 	},
 	prisma::{library, library_options, media, series, PrismaClient},
 	utils::chain_optional_iter,
@@ -172,7 +174,7 @@ impl JobExt for LibraryScanJob {
 			));
 		}
 
-		ctx.report_progress(JobProgress::msg("Indexing complete! Building tasks"));
+		ctx.report_progress(JobProgress::msg("Building tasks"));
 
 		let init_task_input = InitTaskInput {
 			series_to_create: series_to_create.clone(),
@@ -196,6 +198,8 @@ impl JobExt for LibraryScanJob {
 				.collect::<Vec<LibraryScanTask>>(),
 		);
 
+		ctx.report_progress(JobProgress::msg("Init complete!"));
+
 		Ok(WorkingState {
 			output: Some(output),
 			tasks,
@@ -206,9 +210,9 @@ impl JobExt for LibraryScanJob {
 
 	async fn cleanup(
 		&self,
-		ctx: &WorkerCtx,
+		_: &WorkerCtx,
 		output: &Self::Output,
-	) -> Result<(), JobError> {
+	) -> Result<Option<Box<dyn Executor>>, JobError> {
 		let did_create = output.created_series > 0 || output.created_media > 0;
 		let did_update = output.updated_series > 0 || output.updated_media > 0;
 		let image_options = self
@@ -218,27 +222,20 @@ impl JobExt for LibraryScanJob {
 
 		match image_options {
 			Some(options) if did_create | did_update => {
-				tracing::debug!("Enqueuing thumbnail generation job");
-				ctx.send_batch(vec![
-					JobProgress::msg("Enqueuing thumbnail generation job").into_send(),
-					JobControllerCommand::EnqueueJob(WrappedJob::new(
-						ThumbnailGenerationJob {
-							options,
-							params: ThumbnailGenerationJobParams::single_library(
-								self.id.clone(),
-								false,
-							),
-						},
-					))
-					.into_send(),
-				]);
+				tracing::trace!("Thumbnail generation job should be enqueued");
+				Ok(Some(WrappedJob::new(ThumbnailGenerationJob {
+					options,
+					params: ThumbnailGenerationJobParams::single_library(
+						self.id.clone(),
+						false,
+					),
+				})))
 			},
 			_ => {
 				tracing::debug!("No cleanup required for library scan job");
+				Ok(None)
 			},
 		}
-
-		Ok(())
 	}
 
 	async fn execute_task(

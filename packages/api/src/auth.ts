@@ -13,7 +13,7 @@ export function login(input: LoginOrRegisterArgs): Promise<APIResult<User>> {
 	return API.post('/auth/login', input)
 }
 
-export function register(payload: LoginOrRegisterArgs) {
+export function register(payload: LoginOrRegisterArgs): Promise<APIResult<User>> {
 	return API.post('/auth/register', payload)
 }
 

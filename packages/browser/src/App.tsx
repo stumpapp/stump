@@ -2,12 +2,7 @@ import './styles/index.css'
 import '@stump/components/styles/overrides.css'
 
 import { initializeApi } from '@stump/api'
-import {
-	StumpClientContextProvider,
-	StumpClientProps,
-	useAppStore,
-	useUserStore,
-} from '@stump/client'
+import { StumpClientContextProvider, StumpClientProps } from '@stump/client'
 import { defaultContext } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
@@ -20,6 +15,7 @@ import Notifications from '@/components/Notifications'
 
 import { AppRouter } from './AppRouter'
 import { API_VERSION } from './index'
+import { useAppStore, useUserStore } from './stores'
 
 const IS_DEVELOPMENT = import.meta.env.MODE === 'development'
 
@@ -39,10 +35,14 @@ function RouterContainer(props: StumpClientProps) {
 
 	const [mounted, setMounted] = useState(false)
 
-	const { userPreferences } = useUserStore(({ userPreferences }) => ({ userPreferences }))
-	const { baseUrl, setBaseUrl, setPlatform } = useAppStore((store) => ({
+	const { setUser, userPreferences } = useUserStore((store) => ({
+		setUser: store.setUser,
+		userPreferences: store.userPreferences,
+	}))
+	const { baseUrl, setBaseUrl, setPlatform, setIsConnectedWithServer } = useAppStore((store) => ({
 		baseUrl: store.baseUrl,
 		setBaseUrl: store.setBaseUrl,
+		setIsConnectedWithServer: store.setIsConnectedWithServer,
 		setPlatform: store.setPlatform,
 	}))
 
@@ -90,13 +90,26 @@ function RouterContainer(props: StumpClientProps) {
 		})
 	}
 
+	const handleUnathenticatedResponse = (redirectUrl?: string) => {
+		setUser(null)
+		if (redirectUrl) {
+			handleRedirect(redirectUrl)
+		}
+	}
+
+	const handleConnectionWithServerChanged = (wasReached: boolean) => {
+		setIsConnectedWithServer(wasReached)
+		navigate('/server-connection-error')
+	}
+
 	if (!mounted) {
 		return null
 	}
 
 	return (
 		<StumpClientContextProvider
-			onRedirect={handleRedirect}
+			onUnauthenticatedResponse={handleUnathenticatedResponse}
+			onConnectionWithServerChanged={handleConnectionWithServerChanged}
 			setDiscordPresence={setDiscordPresence}
 			setUseDiscordPresence={setUseDiscordPresence}
 		>

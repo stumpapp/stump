@@ -1,5 +1,7 @@
-import { useUpdatePreferences, useUserStore } from '@stump/client'
+import { useUpdatePreferences } from '@stump/client'
 import React from 'react'
+
+import { useUserStore } from '@/stores'
 
 import PreferenceToggle from './PreferenceToggle'
 

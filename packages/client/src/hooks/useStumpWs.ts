@@ -3,15 +3,15 @@ import type { CoreEvent } from '@stump/types'
 import { useMemo } from 'react'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 
-import { useAppStore } from '../stores/app'
-
 interface Props {
 	onEvent(event: CoreEvent): void
 }
 
 export function useStumpWs({ onEvent }: Props) {
 	const URI = API?.getUri()
-	const setConnected = useAppStore((store) => store.setIsConnectedWithServer)
+
+	// TODO: different state for WS connection state...
+	// const { onConnectionWithServerChanged } = useClientContext()
 
 	const socketUrl = useMemo(() => {
 		let url = URI
@@ -38,12 +38,12 @@ export function useStumpWs({ onEvent }: Props) {
 
 	function handleOpen() {
 		console.debug('Websocket connected')
-		setConnected(true)
+		// onConnectionWithServerChanged?.(true)
 	}
 
 	function handleClose() {
 		console.debug('Websocket closed')
-		setConnected(false)
+		// onConnectionWithServerChanged?.(false)
 	}
 
 	const { readyState } = useWebSocket(socketUrl, {

@@ -1,4 +1,4 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
 import { cx } from 'class-variance-authority'
 import { useEffect, useMemo } from 'react'
 import { Outlet, useNavigate } from 'react-router'

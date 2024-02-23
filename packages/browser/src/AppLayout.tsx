@@ -1,5 +1,5 @@
 import { isAxiosError } from '@stump/api'
-import { useAppStore, useAuthQuery, useCoreEventHandler, useUserStore } from '@stump/client'
+import { useAuthQuery, useCoreEventHandler } from '@stump/client'
 import { cx } from '@stump/components'
 import { UserPermission, UserPreferences } from '@stump/types'
 import { Suspense, useCallback, useMemo } from 'react'
@@ -13,6 +13,7 @@ import RouteLoadingIndicator from '@/components/RouteLoadingIndicator'
 import ServerStatusOverlay from '@/components/ServerStatusOverlay'
 
 import { AppContext, PermissionEnforcerOptions } from './context'
+import { useAppStore, useUserStore } from './stores'
 
 export function AppLayout() {
 	const platform = useAppStore((state) => state.platform)

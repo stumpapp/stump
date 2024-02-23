@@ -1,9 +1,4 @@
-import {
-	useLayoutMode,
-	useLibraryByIdQuery,
-	usePagedSeriesQuery,
-	useVisitLibrary,
-} from '@stump/client'
+import { useLibraryByIdQuery, usePagedSeriesQuery, useVisitLibrary } from '@stump/client'
 import { usePreviousIsDifferent } from '@stump/components'
 import { useEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet'
@@ -14,8 +9,8 @@ import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/fi
 import Pagination from '@/components/Pagination'
 import SeriesGrid from '@/components/series/SeriesGrid'
 import SeriesList from '@/components/series/SeriesList'
+import { useLayoutMode, usePageParam } from '@/hooks'
 import useIsInView from '@/hooks/useIsInView'
-import { usePageParam } from '@/hooks/usePageParam'
 
 function LibrarySeriesScene() {
 	const is3XLScreenOrBigger = useMediaMatch('(min-width: 1600px)')

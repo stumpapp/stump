@@ -8,8 +8,8 @@ import {
 } from '@stump/types'
 import { AxiosError } from 'axios'
 
-import { invalidateQueries } from '..'
 import { MutationOptions, queryClient, QueryOptions, useMutation, useQuery } from '../client'
+import { invalidateQueries } from '../invalidate'
 
 export const prefetchBookClubChat = async (bookClubId: string, id?: string) => {
 	const queryKey = id

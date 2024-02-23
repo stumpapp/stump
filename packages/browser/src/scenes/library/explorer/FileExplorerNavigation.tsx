@@ -1,8 +1,8 @@
-import { useAppStore } from '@stump/client'
 import { IconButton } from '@stump/components'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { useFileExplorerContext } from './context'
+import { useAppStore } from '@/stores'
 
 export default function FileExplorerNavigation() {
 	const platform = useAppStore((store) => store.platform)

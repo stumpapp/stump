@@ -1,9 +1,11 @@
 import { authApi, serverQueryKeys } from '@stump/api'
-import { invalidateQueries, useUserStore } from '@stump/client'
+import { invalidateQueries } from '@stump/client'
 import { ConfirmationModal, Text, useBoolean } from '@stump/components'
 import { LogOut } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
+
+import { useUserStore } from '@/stores'
 
 export default function SignOut() {
 	const [isOpen, { on, off }] = useBoolean()

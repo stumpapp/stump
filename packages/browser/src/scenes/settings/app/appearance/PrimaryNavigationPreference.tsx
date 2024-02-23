@@ -1,4 +1,4 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
 import { cx, Label, Text } from '@stump/components'
 import { Check } from 'lucide-react'
 

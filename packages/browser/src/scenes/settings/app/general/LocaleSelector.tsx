@@ -1,8 +1,8 @@
-import { useUpdatePreferences, useUserStore } from '@stump/client'
+import { useUpdatePreferences } from '@stump/client'
 import { ComboBox } from '@stump/components'
-import { shallow } from 'zustand/shallow'
 
 import { isLocale, localeNames, useLocaleContext } from '@/i18n'
+import { useUserStore } from '@/stores'
 
 const options = Object.entries(localeNames).map(([value, label]) => ({
 	label,
@@ -11,14 +11,11 @@ const options = Object.entries(localeNames).map(([value, label]) => ({
 
 export default function LocaleSelector() {
 	const { t, locale } = useLocaleContext()
-	const { setUserPreferences, userPreferences } = useUserStore(
-		(store) => ({
-			setUserPreferences: store.setUserPreferences,
-			user: store.user,
-			userPreferences: store.userPreferences,
-		}),
-		shallow,
-	)
+	const { setUserPreferences, userPreferences } = useUserStore((store) => ({
+		setUserPreferences: store.setUserPreferences,
+		user: store.user,
+		userPreferences: store.userPreferences,
+	}))
 	const { update } = useUpdatePreferences({
 		onSuccess: (preferences) => setUserPreferences(preferences),
 	})

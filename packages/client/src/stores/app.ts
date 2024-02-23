@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { devtools, persist } from 'zustand/middleware'
+import { createJSONStorage, devtools, persist, StateStorage } from 'zustand/middleware'
 
 import { Platform } from '../context'
 
@@ -12,40 +12,42 @@ type AppStore = {
 	setIsConnectedWithServer: (isConnected: boolean) => void
 }
 
-export const useAppStore = create<AppStore>()(
-	devtools(
-		persist(
-			(set) => ({
-				isConnectedWithServer: false,
-				platform: 'unknown',
-				setBaseUrl(baseUrl: string) {
-					let adjustedBaseUrl = baseUrl
+export const createAppStore = (storage?: StateStorage) =>
+	create<AppStore>()(
+		devtools(
+			persist(
+				(set) => ({
+					isConnectedWithServer: false,
+					platform: 'unknown',
+					setBaseUrl(baseUrl: string) {
+						let adjustedBaseUrl = baseUrl
 
-					if (baseUrl.endsWith('/')) {
-						adjustedBaseUrl = baseUrl.slice(0, -1)
-					}
+						if (baseUrl.endsWith('/')) {
+							adjustedBaseUrl = baseUrl.slice(0, -1)
+						}
 
-					if (!baseUrl.endsWith('/api')) {
-						adjustedBaseUrl += '/api'
-					}
+						if (!baseUrl.endsWith('/api')) {
+							adjustedBaseUrl += '/api'
+						}
 
-					set({ baseUrl: adjustedBaseUrl })
+						set({ baseUrl: adjustedBaseUrl })
+					},
+					setIsConnectedWithServer(connected: boolean) {
+						set({
+							isConnectedWithServer: connected,
+						})
+					},
+					setPlatform(platform: Platform) {
+						set({ platform })
+					},
+				}),
+				{
+					name: 'stump-main-store',
+					partialize(state) {
+						return { baseUrl: state.baseUrl, platform: state.platform }
+					},
+					storage: storage ? createJSONStorage(() => storage) : undefined,
 				},
-				setIsConnectedWithServer(connected: boolean) {
-					set({
-						isConnectedWithServer: connected,
-					})
-				},
-				setPlatform(platform: Platform) {
-					set({ platform })
-				},
-			}),
-			{
-				name: 'stump-main-store',
-				partialize(state) {
-					return { baseUrl: state.baseUrl, platform: state.platform }
-				},
-			},
+			),
 		),
-	),
-)
+	)

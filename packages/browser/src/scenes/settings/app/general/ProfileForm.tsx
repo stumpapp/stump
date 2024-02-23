@@ -1,12 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isUrl } from '@stump/api'
-import { useUpdateUser, useUser } from '@stump/client'
+import { useUpdateUser } from '@stump/client'
 import { Button, Form, Input, Text } from '@stump/components'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { z } from 'zod'
 
-import { useLocaleContext } from '../../../../i18n/context'
+import { useLocaleContext } from '@/i18n/context'
+import { useUser } from '@/stores'
+
 import AvatarPicker from './AvatarPicker'
 
 export default function ProfileForm() {

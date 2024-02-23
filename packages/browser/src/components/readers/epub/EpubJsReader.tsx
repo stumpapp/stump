@@ -5,7 +5,6 @@ import {
 	useEpubLazy,
 	useEpubReader,
 	useQuery,
-	useTheme,
 } from '@stump/client'
 import { Bookmark, UpdateEpubProgress } from '@stump/types'
 import { Book, Rendition } from 'epubjs'
@@ -16,6 +15,7 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 
 import EpubReaderContainer from './EpubReaderContainer'
 import { stumpDark } from './themes'
+import { useTheme } from '@/hooks'
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 

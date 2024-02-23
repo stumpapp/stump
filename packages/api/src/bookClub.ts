@@ -15,9 +15,9 @@ import {
 	UpdateBookClubMember,
 } from '@stump/types'
 
-import { toUrlParams, urlWithParams } from '.'
 import { API } from './axios'
 import { APIResult } from './types'
+import { toUrlParams, urlWithParams } from './utils'
 
 export async function getBookClubs(params?: GetBookClubsParams): Promise<APIResult<BookClub[]>> {
 	if (params) {

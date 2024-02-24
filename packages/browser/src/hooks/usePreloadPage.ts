@@ -1,3 +1,4 @@
+import { usePrevious } from '@stump/components'
 import { useEffect, useState } from 'react'
 
 type Params = {
@@ -12,6 +13,9 @@ type Params = {
 export function usePreloadPage({ pages, urlBuilder }: Params) {
 	const [isPreloading, setIsPreloading] = useState(false)
 
+	const previousPages = usePrevious(pages)
+	const shouldPreload = previousPages?.at(0) !== pages.at(0)
+
 	/**
 	 * This effect will attempt to preload all pages by creating an image element
 	 * for each page and setting the src to the urlBuilder function.
@@ -19,7 +23,7 @@ export function usePreloadPage({ pages, urlBuilder }: Params) {
 	 * It currently does not handle errors, but it could be extended to do so.
 	 */
 	useEffect(() => {
-		if (!pages.length) return
+		if (!pages.length || !shouldPreload) return
 
 		const preloadPage = (page: number) => {
 			const image = new Image()
@@ -41,7 +45,7 @@ export function usePreloadPage({ pages, urlBuilder }: Params) {
 		}
 
 		preloadPages()
-	}, [pages, urlBuilder])
+	}, [pages, urlBuilder, shouldPreload])
 
 	return { isPreloading }
 }

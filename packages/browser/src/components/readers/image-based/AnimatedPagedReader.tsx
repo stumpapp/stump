@@ -1,11 +1,10 @@
-import { useBoolean } from '@stump/components'
+import { useReaderStore } from '@stump/client'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import { useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useWindowSize } from 'rooks'
 
 import { PagedReaderProps } from './PagedReader'
-import Toolbar from './Toolbar'
 
 const RESET_CONTROLS = {
 	x: '0%',
@@ -105,7 +104,10 @@ export default function AnimatedPagedReader({
 	const nextControls = useAnimation()
 	const prevControls = useAnimation()
 
-	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
+	const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
+		setShowToolBar: state.setShowToolBar,
+		showToolBar: state.showToolBar,
+	}))
 
 	// This is for the hotkeys
 	const currPageRef = useRef(currentPage)
@@ -186,10 +188,10 @@ export default function AnimatedPagedReader({
 				handleHotKeyPagination('prev')
 				break
 			case 'space':
-				toggleToolbar()
+				setShowToolBar(!showToolBar)
 				break
 			case 'escape':
-				hideToolbar()
+				setShowToolBar(false)
 				break
 			default:
 				break
@@ -197,15 +199,7 @@ export default function AnimatedPagedReader({
 	})
 
 	return (
-		<div className="relative flex h-full items-center justify-center">
-			<Toolbar
-				title={media.name}
-				currentPage={currentPage}
-				pages={media.pages}
-				visible={toolbarVisible}
-				onPageChange={() => alert('TODO;')}
-			/>
-
+		<>
 			{imageUrls[0] && (
 				<motion.img
 					ref={prevRef}
@@ -261,7 +255,7 @@ export default function AnimatedPagedReader({
 					}}
 				/>
 			)}
-		</div>
+		</>
 	)
 }
 

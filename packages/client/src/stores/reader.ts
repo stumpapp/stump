@@ -6,6 +6,8 @@ type ReaderMode = 'continuous' | 'paged'
 type ReaderStore = {
 	mode: ReaderMode
 	setMode: (mode: ReaderMode) => void
+	showToolBar: boolean
+	setShowToolBar: (show: boolean) => void
 }
 
 // storage?: StateStorage
@@ -16,6 +18,8 @@ export const createReaderStore = () =>
 				(set) => ({
 					mode: 'paged' as ReaderMode,
 					setMode: (mode) => set({ mode }),
+					setShowToolBar: (show) => set({ showToolBar: show }),
+					showToolBar: false as boolean, // FIXME: this is rather annoying...
 				}),
 				{
 					name: 'stump-reader-store',

@@ -1,25 +1,20 @@
-import { getMediaPage, mediaQueryKeys } from '@stump/api'
+import { mediaQueryKeys } from '@stump/api'
 import {
 	invalidateQueries,
 	useMediaByIdQuery,
 	useReaderStore,
 	useUpdateMediaProgress,
 } from '@stump/client'
-import { useCallback, useEffect } from 'react'
-import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
-import {
-	AnimatedPagedReader,
-	ContinuousScrollReader,
-	PagedReader,
-} from '@/components/readers/image-based'
+import { ImageBasedReader } from '@/components/readers/image-based'
 import paths from '@/paths'
 
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
 
 export default function BookReaderScene() {
 	const [search] = useSearchParams()
-	const navigate = useNavigate()
 
 	const { id } = useParams()
 	if (!id) {
@@ -65,15 +60,6 @@ export default function BookReaderScene() {
 		updateReadProgress(parsedPage)
 	}, [page, updateReadProgress, media, isIncognito])
 
-	const handleChangePage = useCallback(
-		(newPage: number) => {
-			navigate(
-				paths.bookReader(id!, { isAnimated, isIncognito: isIncognito || undefined, page: newPage }),
-			)
-		},
-		[id, isAnimated, isIncognito, navigate],
-	)
-
 	if (fetchingBook) {
 		return null
 	} else if (!media) {
@@ -111,25 +97,13 @@ export default function BookReaderScene() {
 			return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
 		} else if (!!initialPage && initialPage > media.pages) {
 			return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
-		} else if (readerMode === 'continuous') {
-			return (
-				<ContinuousScrollReader
-					media={media}
-					initialPage={initialPage}
-					getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
-					onProgressUpdate={isIncognito ? undefined : updateReadProgress}
-				/>
-			)
 		} else {
-			const animated = !!search.get('animated')
-			const Component = animated ? AnimatedPagedReader : PagedReader
-
 			return (
-				<Component
+				<ImageBasedReader
 					media={media}
-					currentPage={initialPage || 1}
-					getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
-					onPageChange={handleChangePage}
+					isAnimated={isAnimated}
+					isIncognito={isIncognito}
+					initialPage={initialPage}
 				/>
 			)
 		}

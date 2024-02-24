@@ -72,7 +72,7 @@ export default function LoginOrClaim() {
 	const isLoading = isCheckingClaimed || isLoggingIn || isRegistering
 
 	return (
-		<ScreenRootView classes="flex-1 flex-col items-center justify-center space-y-4 px-4">
+		<ScreenRootView classes="flex-1 flex-col items-center justify-center space-y-4" applyPadding>
 			{renderHeader()}
 
 			<View className="w-full">

@@ -12,28 +12,24 @@ export const View = StyledView
 
 type ScreenRootViewProps = StyledProps<ViewProps> & {
 	classes?: string
+	disabledBottomInset?: boolean
+	applyPadding?: boolean
 }
 export const ScreenRootView = forwardRef<typeof NativeView, ScreenRootViewProps>(
-	({ className, children, classes, ...props }, ref) => {
+	({ className, children, classes, disabledBottomInset, applyPadding, ...props }, ref) => {
 		const { colorScheme } = useColorScheme()
 		const insets = useSafeAreaInsets()
 
-		const defaultStyle = useMemo(
-			() => ({
-				paddingBottom: insets.bottom,
-				paddingLeft: insets.left,
-				paddingRight: insets.right,
+		const defaultStyle = useMemo(() => {
+			const paddingLeft = applyPadding ? 16 + insets.left : 0
+			const paddingRight = applyPadding ? 16 + insets.right : 0
+			return {
+				paddingBottom: disabledBottomInset ? undefined : insets.bottom,
+				paddingLeft,
+				paddingRight,
 				paddingTop: insets.top,
-			}),
-			[insets],
-		)
-
-		// console.log({
-		// 	className,
-		// 	classes,
-		// 	merged: cn('flex-1 items-center justify-center dark:bg-gray-950', className, classes),
-		// 	props: props,
-		// })
+			}
+		}, [insets, disabledBottomInset, applyPadding])
 
 		return (
 			<View

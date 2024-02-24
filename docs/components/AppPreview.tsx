@@ -23,8 +23,8 @@ export default function AppPreview() {
 		<div className="relative -mt-7 h-[432px] w-full sm:p-0 lg:h-[700px]">
 			<div className="relative h-full">
 				<motion.div
-					initial={{ opacity: 0, scale: 0.75 }}
-					animate={{ opacity: 1, scale: 1 }}
+					initial={{ opacity: 0, y: 40 }}
+					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.5, duration: 1 }}
 					className="z-40 flex h-full w-[650px] flex-1 self-center bg-[url('/demo-light.png')] bg-contain bg-[center_top] bg-no-repeat sm:w-auto dark:bg-[url('/demo-dark.png')]"
 				/>

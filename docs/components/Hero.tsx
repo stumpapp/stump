@@ -2,9 +2,11 @@ import { SiGithub } from '@icons-pack/react-simple-icons'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
+import DownloadLinks from './DownloadLinks'
+
 export default function Hero() {
 	return (
-		<div className="relative">
+		<div className="relative flex flex-col space-y-8">
 			<div className="text-center">
 				<motion.h1
 					initial={{ opacity: 0, y: -40 }}
@@ -13,7 +15,7 @@ export default function Hero() {
 					className="text-4xl font-extrabold tracking-tight text-neutral-900 sm:text-5xl md:text-6xl dark:text-neutral-100"
 				>
 					<span className="block xl:inline">A lightning fast</span>{' '}
-					<span className="block xl:inline">media server.</span>
+					<span className="block xl:inline">media server</span>
 				</motion.h1>
 				<motion.p
 					initial={{ opacity: 0, y: 40 }}
@@ -21,8 +23,8 @@ export default function Hero() {
 					transition={{ delay: 0.25, duration: 0.5 }}
 					className="text-neutral-650 mx-auto mt-3 max-w-md text-base sm:text-lg md:mt-5 md:max-w-3xl md:text-xl dark:text-neutral-400"
 				>
-					Free, open source, self-hosting for all your comic books, manga and digital book
-					collections. Supports the most popular reading formats.
+					Designed to be fast, beautiful, configurable, and easy to use. Curate your digital library
+					and stream your media to any device, supporting a wide range of file formats.
 				</motion.p>
 
 				<div className="mx-auto mt-5 flex max-w-md justify-center space-x-2 md:mt-8">
@@ -58,6 +60,8 @@ export default function Hero() {
 					</motion.div>
 				</div>
 			</div>
+
+			<DownloadLinks />
 		</div>
 	)
 }

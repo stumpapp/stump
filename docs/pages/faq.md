@@ -2,7 +2,7 @@
 
 ## What is Stump?
 
-Stump is an open source, self hostable, media server for your comic books, manga, and other digital books. It is designed to be _easy to use_ and _easy to deploy_.
+Stump is an open source, self hostable, media server for digital books (ebooks, comic books, manga, etc). It is designed to be _easy to use_ and _easy to deploy_.
 
 The short on how it works:
 
@@ -16,14 +16,14 @@ Stump **is not** a tool used for fetching or downloading any kind of media. It i
 
 ## Why Stump?
 
-There are some really solid, self-hostable, OPDS media servers out there. I've personally used [Komga](https://komga.org) the most. I started developing Stump becuase I thought it would be cool to learn what goes into making something like Komga myself.
+There are some really solid, self-hostable, OPDS media servers out there. I started out using [Komga](https://komga.org). I initially started developing Stump becuase I thought it would be cool to learn what goes into making something like Komga myself.
 
 In general, Stump strives for the following:
 
-- Tiny footprint (~24MB compressed Docker image, ~36.8 MB compiled executable)
+- Small footprint and low resource usage
 - Efficiency and performance, even on less powerful hardware (e.g. Raspberry Pi)
-- Intuitive and easy to use interface
-- Enable a broad usage, supporting comics, managa, and other digital book formats (e.g. PDF, EPUB, CBZ/CBR)
+- Intuitive, pretty, and easy to use interface
+- Wide format support (e.g. PDF, EPUB, CBZ/CBR)
 
 ## What's compatibility like?
 
@@ -35,7 +35,7 @@ The hardware requirements vary and should serve **only as a guide**. Generally s
 
 ## When will Stump be released?
 
-Stump is currently under development. The primary developer is working on it in their free time, mostly on the weekends. There aren't many active contributors, so it's hard to say when it will be release ready. Ideally the first release candidate will be ready by the end of 2023. Please consider contributing to the project if you're interested in expediting the development. You can find more information on ways to contribute in the [contributing](/contributing) guide.
+Stump is currently under development. The primary developer is working on it in their free time, mostly on the weekends. There aren't many active contributors, so it's hard to say when it will be release ready. Ideally the first release candidate will be ready by the end of 2024. Please consider contributing to the project if you're interested in expediting the development. You can find more information on ways to contribute in the [contributing](/contributing) guide.
 
 ## Can I try it out?
 
@@ -46,24 +46,9 @@ I am working on setting up a public demo instance. If it is available, you will 
 
 ## What is on the roadmap?
 
-The current `0.1.0` release roadmap can be found on [GitHub](https://github.com/stumpapp/stump/issues/107). That linked ticket outlines the major features planned for the first release candidate of Stump. In general, you can expect the following features for `0.1.0`:
+Take a look at the [GitHub Projects](https://github.com/orgs/stumpapp/projects) to see what is currently being worked on and what is planned for the future.
 
-- Full OPDS + OPDS Page Streaming support
-- EPUB and CBZ/CBR support
-  - PDF support planned for `0.2.0`
-- Customizable configuration (for both Docker and local hosting)
-- Scheduled and invokable filesystem indexing/scanning
-- Support for a range of metadata operations (e.g. adding/removing tags, changing metadata, etc.)
-- Configurable CBR-to-CBZ conversion
-- Integrated web UI and optional desktop application
-  - Server management through UI settings
-    - Live feed of server logs planned for `0.2.0`
-  - Built-in webreaders for media
-- Basic role-based access control (RBAC)
-  - Controlled, fine-grained access planned for `0.2.0`
-- Multi-language support
-
-If you're interested in tracking the broader development of features, you can take a look at [GitHub issues](https://github.com/stumpapp/stump/issues).
+If you're interested in tracking the broader development of individual or otherwise isolated features, you can take a look at [GitHub issues](https://github.com/stumpapp/stump/issues).
 
 ## More questions?
 

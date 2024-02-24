@@ -61,9 +61,15 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 	}
 
 	let walk_start = std::time::Instant::now();
-	tracing::debug!("Walking library at {}", path);
-
 	let is_collection_based = max_depth.is_some_and(|d| d == 1);
+	tracing::debug!(
+		?path,
+		max_depth,
+		is_collection_based,
+		?ignore_rules,
+		"Walking library",
+	);
+
 	let (valid_entries, ignored_entries) = walkdir
 		// Set min_depth to 0 so we include the library path itself,
 		// which allows us to add it as a series when there are media items in it
@@ -87,6 +93,8 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 			let is_valid = !should_ignore
 				&& (check_deep && entry_path.dir_has_media_deep()
 					|| (!check_deep && entry_path.dir_has_media()));
+
+			tracing::trace!(?is_valid, ?entry_path_str);
 
 			if is_valid {
 				Either::Left(entry)

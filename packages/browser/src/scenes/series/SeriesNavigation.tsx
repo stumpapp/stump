@@ -1,9 +1,10 @@
-import { prefetchFiles, usePreferences } from '@stump/client'
+import { prefetchFiles } from '@stump/client'
 import { cn, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
+import { usePreferences } from '@/hooks'
 
 import { useSeriesContext } from './context'
 

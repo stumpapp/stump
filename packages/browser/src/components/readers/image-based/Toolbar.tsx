@@ -1,19 +1,23 @@
 import { getMediaPage } from '@stump/api'
-import { cx, Heading } from '@stump/components'
+import { useReaderStore } from '@stump/client'
+import { cx, Heading, IconButton } from '@stump/components'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { motion } from 'framer-motion'
+import { BookOpen, Scroll } from 'lucide-react'
 import { ArrowLeft } from 'phosphor-react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import paths from '@/paths'
 
-interface ToolbarProps {
+type ToolbarProps = {
 	title: string
 	currentPage: number
 	pages: number
 	visible: boolean
-	onPageChange(page: number): void
+	onPageChange?(page: number): void
+	showBottomToolbar?: boolean
+	onChangeReaderMode?(): void
 }
 
 export default function Toolbar({
@@ -22,6 +26,8 @@ export default function Toolbar({
 	pages,
 	visible,
 	onPageChange,
+	showBottomToolbar = true,
+	onChangeReaderMode,
 }: ToolbarProps) {
 	const { id } = useParams()
 	if (!id) {
@@ -30,6 +36,8 @@ export default function Toolbar({
 
 	const parentRef = useRef<HTMLDivElement>(null)
 	const rangeRef = useRef([0, 0])
+
+	const readerMode = useReaderStore((state) => state.mode)
 
 	const columnVirtualizer = useVirtualizer({
 		count: pages,
@@ -103,59 +111,75 @@ export default function Toolbar({
 
 						<Heading size="sm">{title}</Heading>
 					</div>
-					{/* <div className="flex items-center">
-						<ThemeToggle />
-					</div> */}
-				</div>
-			</motion.nav>
-
-			<motion.nav
-				initial={false}
-				animate={visible ? 'visible' : 'hidden'}
-				variants={variants('bottom')}
-				transition={{ duration: 0.2, ease: 'easeInOut' }}
-				className="fixed bottom-0 left-0 z-[100] w-full bg-opacity-75 text-white shadow-lg"
-			>
-				<div ref={parentRef} className="h-[150px] overflow-x-auto py-4 scrollbar-hide">
-					<div
-						className="relative inline-flex h-full"
-						style={{
-							width: `${columnVirtualizer.getTotalSize()}px`,
-						}}
-					>
-						{columnVirtualizer.getVirtualItems().map((virtualItem) => {
-							const page = virtualItem.index + 1
-							const imageUrl = getMediaPage(id, page)
-
-							return (
-								<div
-									className="z-[101]"
-									key={virtualItem.key}
-									style={{
-										height: '100%',
-										left: 0,
-										position: 'absolute',
-										top: 0,
-										transform: `translateX(${virtualItem.start}px)`,
-										width: `80px`,
-									}}
-								>
-									<img
-										id={`${id}-page-${page}`}
-										key={virtualItem.key}
-										src={imageUrl}
-										className={cx(
-											currentPage === page ? '-translate-y-1 border-brand' : 'border-transparent',
-											'h-32 w-auto cursor-pointer rounded-md border-2 border-solid shadow-xl transition duration-300 hover:-translate-y-2 hover:border-brand',
-										)}
-										onClick={() => onPageChange(page)}
-									/>
-								</div>
-							)
-						})}
+					<div className="flex items-center">
+						{onChangeReaderMode && (
+							<IconButton
+								size="sm"
+								title={
+									readerMode === 'continuous' ? 'Switch to paged mode' : 'Switch to continuous mode'
+								}
+								onClick={() => onChangeReaderMode()}
+							>
+								{readerMode === 'continuous' ? (
+									<Scroll className="h-4 w-4" />
+								) : (
+									<BookOpen className="h-4 w-4" />
+								)}
+							</IconButton>
+						)}
 					</div>
 				</div>
 			</motion.nav>
+
+			{showBottomToolbar && (
+				<motion.nav
+					initial={false}
+					animate={visible ? 'visible' : 'hidden'}
+					variants={variants('bottom')}
+					transition={{ duration: 0.2, ease: 'easeInOut' }}
+					className="fixed bottom-0 left-0 z-[100] w-full bg-opacity-75 text-white shadow-lg"
+				>
+					<div ref={parentRef} className="h-[150px] overflow-x-auto py-4 scrollbar-hide">
+						<div
+							className="relative inline-flex h-full"
+							style={{
+								width: `${columnVirtualizer.getTotalSize()}px`,
+							}}
+						>
+							{columnVirtualizer.getVirtualItems().map((virtualItem) => {
+								const page = virtualItem.index + 1
+								const imageUrl = getMediaPage(id, page)
+
+								return (
+									<div
+										className="z-[101]"
+										key={virtualItem.key}
+										style={{
+											height: '100%',
+											left: 0,
+											position: 'absolute',
+											top: 0,
+											transform: `translateX(${virtualItem.start}px)`,
+											width: `80px`,
+										}}
+									>
+										<img
+											id={`${id}-page-${page}`}
+											key={virtualItem.key}
+											src={imageUrl}
+											className={cx(
+												currentPage === page ? '-translate-y-1 border-brand' : 'border-transparent',
+												'h-32 w-auto cursor-pointer rounded-md border-2 border-solid shadow-xl transition duration-300 hover:-translate-y-2 hover:border-brand',
+											)}
+											onClick={() => onPageChange?.(page)}
+										/>
+									</div>
+								)
+							})}
+						</div>
+					</div>
+				</motion.nav>
+			)}
 		</div>
 	)
 }

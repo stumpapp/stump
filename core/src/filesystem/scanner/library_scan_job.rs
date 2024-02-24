@@ -78,8 +78,12 @@ impl LibraryScanJob {
 pub struct LibraryScanOutput {
 	/// The number of files visited during the scan
 	total_files: u64,
+	/// The number of directories visited during the scan
+	total_directories: u64,
 	/// The number of files that were ignored during the scan
 	ignored_files: u64,
+	/// The number of ignored directories during the scan
+	ignored_directories: u64,
 	/// The number of media entities created
 	created_media: u64,
 	/// The number of media entities updated
@@ -93,7 +97,9 @@ pub struct LibraryScanOutput {
 impl JobOutputExt for LibraryScanOutput {
 	fn update(&mut self, updated: Self) {
 		self.total_files += updated.total_files;
+		self.total_directories += updated.total_directories;
 		self.ignored_files += updated.ignored_files;
+		self.ignored_directories += updated.ignored_directories;
 		self.created_media += updated.created_media;
 		self.updated_media += updated.updated_media;
 		self.created_series += updated.created_series;
@@ -160,8 +166,8 @@ impl JobExt for LibraryScanJob {
 			library_is_missing,
 			"Walked library"
 		);
-		output.total_files = seen_directories + ignored_directories;
-		output.ignored_files = ignored_directories;
+		output.total_directories = seen_directories + ignored_directories;
+		output.ignored_directories = ignored_directories;
 
 		if library_is_missing {
 			handle_missing_library(&ctx.db, self.id.as_str()).await?;
@@ -309,7 +315,10 @@ impl JobExt for LibraryScanJob {
 				}
 
 				if !series_to_create.is_empty() {
-					ctx.report_progress(JobProgress::msg("Creating new series"));
+					ctx.report_progress(JobProgress::msg(&format!(
+						"Building {} series entities",
+						series_to_create.len()
+					)));
 					// TODO: remove this DAO!!
 					let series_dao = SeriesDAO::new(ctx.db.clone());
 
@@ -391,6 +400,11 @@ impl JobExt for LibraryScanJob {
 					format!("Scanning series at {}", path_buf.display()).as_str(),
 				));
 
+				let max_depth = self
+					.options
+					.as_ref()
+					.and_then(|o| o.is_collection_based().then_some(1));
+
 				let ignore_rules = generate_rule_set(&[
 					path_buf.clone(),
 					PathBuf::from(self.path.clone()),
@@ -401,7 +415,7 @@ impl JobExt for LibraryScanJob {
 					WalkerCtx {
 						db: ctx.db.clone(),
 						ignore_rules,
-						max_depth: None,
+						max_depth,
 					},
 				)
 				.await;

@@ -8,6 +8,7 @@ import {
 } from '@stump/client'
 import { Bookmark, UpdateEpubProgress } from '@stump/types'
 import { Book, Rendition } from 'epubjs'
+import uniqby from 'lodash.uniqby'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
@@ -327,6 +328,28 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 	}, [rendition])
 
 	/**
+	 * A callback for when the user wants to navigate to a specific cfi. This will only run
+	 * if the rendition instance is set.
+	 *
+	 * @param cfi The cfi to navigate to
+	 */
+	const onGoToCfi = useCallback(
+		async (cfi: string) => {
+			if (!rendition) {
+				return
+			}
+
+			try {
+				await rendition.display(cfi)
+			} catch (err) {
+				console.error(err)
+				toast.error('Failed to navigate, please check the integrity of the epub file')
+			}
+		},
+		[rendition],
+	)
+
+	/**
 	 * A callback for when the user clicks on a link embedded in the epub. This will only run
 	 * if the rendition instance is set.
 	 */
@@ -475,6 +498,45 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 		[book],
 	)
 
+	/**
+	 * A callback for searching the entire book for a given query. This will only run if the book
+	 * and spine are available.
+	 *
+	 * Note: This is a relatively expensive operation, since it requires loading each spine item
+	 * and then unloading it after the search is complete. This makes sense, since this reader is
+	 * completely client-side, but should be noted
+	 */
+	const searchEntireBook = useCallback(
+		async (query: string) => {
+			if (!book || !book.spine || !book.spine.each) return []
+
+			const promises: Array<Promise<SpineItemFindResult[]>> = []
+
+			book.spine.each((item?: SpineItem) => {
+				if (!item) return []
+
+				promises.push(
+					item
+						// @ts-expect-error: I literally can't stand epubjs lol
+						.load(book.load.bind(book))
+						.then(() => item.find(query))
+						.then((res) => uniqby(res, 'excerpt'))
+						.finally(() => item.unload.bind(item)),
+				)
+			})
+
+			return await Promise.all(promises).then((results) =>
+				results
+					.map((res, idx) => ({
+						results: res,
+						spineIndex: idx,
+					}))
+					.filter(({ results }) => results.length > 0),
+			)
+		},
+		[book],
+	)
+
 	// TODO: figure this out! Basically, I would (ideally) like to be able to determine if a bookmark
 	// 'exists' within another. This can happen when you move between viewport sizes..
 	// const cfiWithinAnother = useCallback(
@@ -545,9 +607,11 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			}}
 			controls={{
 				getCfiPreviewText,
+				onGoToCfi,
 				onLinkClick,
 				onPaginateBackward,
 				onPaginateForward,
+				searchEntireBook,
 			}}
 		>
 			<div className="h-full w-full">
@@ -559,4 +623,15 @@ export default function EpubJsReader({ id, initialCfi }: EpubJsReaderProps) {
 			</div>
 		</EpubReaderContainer>
 	)
+}
+
+interface SpineItem {
+	load: (book: Book) => Promise<object>
+	unload: (item: SpineItem) => void
+	find: (query: string) => Promise<SpineItemFindResult[]>
+}
+
+interface SpineItemFindResult {
+	cfi: string
+	excerpt: string
 }

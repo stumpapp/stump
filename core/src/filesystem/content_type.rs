@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use serde::Serialize;
-use tracing::{trace, warn};
 
 use super::image::ImageFormat;
 
@@ -43,11 +42,11 @@ fn infer_mime_from_bytes(bytes: &[u8]) -> Option<String> {
 fn infer_mime(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(result) => {
-			trace!(?path, ?result, "infered mime");
+			tracing::trace!(?path, ?result, "infered mime");
 			result.map(|infer_type| infer_type.mime_type().to_string())
 		},
 		Err(e) => {
-			trace!(error = ?e, ?path, "infer failed");
+			tracing::trace!(error = ?e, ?path, "infer failed");
 			None
 		},
 	}
@@ -134,7 +133,7 @@ impl ContentType {
 			.unwrap_or_else(|| {
 				// NOTE: I am logging at warn level because inference from bytes is a little more
 				// accurate, so if it fails it may be indicative of a problem.
-				warn!(
+				tracing::warn!(
 					?bytes,
 					?extension,
 					"failed to infer content type, falling back to extension"

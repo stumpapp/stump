@@ -1,4 +1,4 @@
-import { useLayoutMode, usePagedMediaQuery } from '@stump/client'
+import { usePagedMediaQuery } from '@stump/client'
 import { useEffect } from 'react'
 import { Helmet } from 'react-helmet'
 import { useMediaMatch } from 'rooks'
@@ -6,6 +6,7 @@ import { useMediaMatch } from 'rooks'
 import { FilterProvider, FilterToolBar, useFilterContext } from '@/components/filters'
 import MediaList from '@/components/media/MediaList'
 import Pagination from '@/components/Pagination'
+import { useLayoutMode } from '@/hooks'
 import useIsInView from '@/hooks/useIsInView'
 import { usePageParam } from '@/hooks/usePageParam'
 

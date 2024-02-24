@@ -3,7 +3,7 @@ import {
 	useLibraryExclusionsQuery,
 	useUsersQuery,
 } from '@stump/client'
-import { ComboBox, Heading, Text } from '@stump/components'
+import { ComboBox, Heading, Text, usePrevious } from '@stump/components'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useDebouncedValue } from 'rooks'
@@ -11,6 +11,8 @@ import { useDebouncedValue } from 'rooks'
 import { useAppContext } from '@/context'
 
 import { useLibraryContext } from '../context'
+
+// TODO: remove auto-submit! Annoying between libraries
 
 export default function LibraryExclusions() {
 	const { library } = useLibraryContext()
@@ -44,8 +46,11 @@ export default function LibraryExclusions() {
 		setExcludedUserIds(excludedUsers?.map((user) => user.id) || [])
 	}, [excludedUsers])
 
+	const previousLibrary = usePrevious(library)
+	const isSameLibrary = previousLibrary?.id === library.id
 	const variablesLoaded = !!debouncedUserIds && !!excludedUsers
-	const shouldCall = variablesLoaded && debouncedUserIds.length !== excludedUsers.length
+	const shouldCall =
+		variablesLoaded && debouncedUserIds.length !== excludedUsers.length && isSameLibrary
 	useEffect(() => {
 		if (shouldCall) {
 			update(debouncedUserIds)

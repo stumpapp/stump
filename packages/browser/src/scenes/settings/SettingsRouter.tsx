@@ -14,11 +14,12 @@ export default function SettingsRouter() {
 	return (
 		<Routes>
 			<Route element={<SettingsLayout />}>
-				<Route path="" element={<Navigate to="app/general" replace />} />
+				<Route path="" element={<Navigate to="app/account" replace />} />
 				<Route path="app/*" element={<AppSettingsRouter />} />
 				<Route path="server/*" element={<ServerOwnerRouteWrapper />}>
 					<Route path="*" element={<ServerSettingsRouter />} />
 				</Route>
+				<Route path="*" element={<Navigate to="app/account" replace />} />
 			</Route>
 		</Routes>
 	)

@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{
-	and, chrono::Utc, operator::or, or, raw, Direction, PrismaValue,
+	and, chrono::Utc, operator, operator::or, or, raw, Direction, PrismaValue,
 };
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -177,6 +177,8 @@ pub(crate) fn apply_media_library_not_hidden_for_user_filter(
 	])])]
 }
 
+// FIXME: hidden libraries introduced a bug here, need to fix!
+
 pub(crate) fn apply_media_filters_for_user(
 	filters: MediaFilter,
 	user: &User,
@@ -188,12 +190,23 @@ pub(crate) fn apply_media_filters_for_user(
 		.map(|ar| apply_media_age_restriction(ar.age, ar.restrict_on_unset));
 
 	let read_status_filters = filters.base_filter.read_status.clone();
-	apply_media_filters(filters)
-		.into_iter()
-		.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
-		.chain(apply_media_read_status_filter(user_id, read_status_filters))
-		.chain(apply_media_library_not_hidden_for_user_filter(user))
-		.collect::<Vec<WhereParam>>()
+	let base_filters = operator::and(
+		apply_media_filters(filters)
+			.into_iter()
+			.chain(age_restrictions.map(|ar| vec![ar]).unwrap_or_default())
+			.chain(apply_media_read_status_filter(user_id, read_status_filters))
+			.collect::<Vec<WhereParam>>(),
+	);
+
+	// TODO: This is not ideal, I am adding an _additional_ relation filter for
+	// the library exclusion, when I need to merge any requested filters with this one,
+	// instead. This was a regression from the exclusion feature I need to tackle
+	vec![and![
+		base_filters,
+		media::series::is(vec![series::library::is(vec![
+			library_not_hidden_from_user_filter(user),
+		])])
+	]]
 }
 
 pub(crate) fn apply_media_pagination<'a>(

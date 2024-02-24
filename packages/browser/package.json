@@ -26,6 +26,7 @@
 		"framer-motion": "^10.16.4",
 		"i18next": "^23.6.0",
 		"immer": "^10.0.3",
+		"lodash.uniqby": "^4.7.0",
 		"lucide-react": "^0.288.0",
 		"nprogress": "^0.2.0",
 		"phosphor-react": "^1.4.1",
@@ -44,7 +45,7 @@
 		"react-router-dom": "^6.17.0",
 		"react-swipeable": "^7.0.1",
 		"react-virtualized-auto-sizer": "^1.0.20",
-		"react-window": "^1.8.9",
+		"react-virtuoso": "^4.7.0",
 		"remark-directive": "^3.0.0",
 		"remark-directive-rehype": "^0.4.2",
 		"rooks": "^7.14.1",
@@ -54,6 +55,7 @@
 		"zustand": "^4.4.3"
 	},
 	"devDependencies": {
+		"@types/lodash.uniqby": "^4.7.9",
 		"@types/node": "^20.8.7",
 		"@types/nprogress": "^0.2.2",
 		"@types/pluralize": "^0.0.32",

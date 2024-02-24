@@ -1,10 +1,18 @@
 import { getMediaPage, mediaQueryKeys } from '@stump/api'
-import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
-import { useEffect } from 'react'
+import {
+	invalidateQueries,
+	useMediaByIdQuery,
+	useReaderStore,
+	useUpdateMediaProgress,
+} from '@stump/client'
+import { useCallback, useEffect } from 'react'
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import AnimatedPagedReader from '@/components/readers/image-based/AnimatedPagedReader'
-import PagedReader from '@/components/readers/image-based/PagedReader'
+import {
+	AnimatedPagedReader,
+	ContinuousScrollReader,
+	PagedReader,
+} from '@/components/readers/image-based'
 import paths from '@/paths'
 
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
@@ -19,8 +27,11 @@ export default function BookReaderScene() {
 	}
 
 	const page = search.get('page')
+	const isIncognito = search.get('incognito') === 'true'
 	const isAnimated = search.get('animated') === 'true'
 	const isStreaming = !search.get('stream') || search.get('stream') === 'true'
+
+	const readerMode = useReaderStore((state) => state.mode)
 
 	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
 	const { updateReadProgress } = useUpdateMediaProgress(id, {
@@ -43,6 +54,8 @@ export default function BookReaderScene() {
 	 * An effect to update the read progress whenever the page changes in the URL
 	 */
 	useEffect(() => {
+		if (isIncognito) return
+
 		const parsedPage = parseInt(page || '', 10)
 		if (!parsedPage || isNaN(parsedPage) || !media) return
 
@@ -50,11 +63,16 @@ export default function BookReaderScene() {
 		if (parsedPage <= 0 || parsedPage > maxPage) return
 
 		updateReadProgress(parsedPage)
-	}, [page, updateReadProgress, media])
+	}, [page, updateReadProgress, media, isIncognito])
 
-	function handleChangePage(newPage: number) {
-		navigate(paths.bookReader(id!, { isAnimated, page: newPage }))
-	}
+	const handleChangePage = useCallback(
+		(newPage: number) => {
+			navigate(
+				paths.bookReader(id!, { isAnimated, isIncognito: isIncognito || undefined, page: newPage }),
+			)
+		},
+		[id, isAnimated, isIncognito, navigate],
+	)
 
 	if (fetchingBook) {
 		return null
@@ -81,24 +99,40 @@ export default function BookReaderScene() {
 				})}
 			/>
 		)
-	} else if (!page || parseInt(page, 10) <= 0) {
-		return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
-	} else if (parseInt(page, 10) > media.pages) {
-		return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
 	}
 
-	if (media.extension.match(ARCHIVE_EXTENSION) || media.extension.match(PDF_EXTENSION)) {
-		const animated = !!search.get('animated')
-		const Component = animated ? AnimatedPagedReader : PagedReader
+	// TODO: unify the two image-based readers so they have a shared toolbar. This will allow for MUCH
+	// more seamless switching between paged and continuous readers...
 
-		return (
-			<Component
-				media={media}
-				currentPage={parseInt(page, 10)}
-				getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
-				onPageChange={handleChangePage}
-			/>
-		)
+	const initialPage = page ? parseInt(page, 10) : undefined
+
+	if (media.extension.match(ARCHIVE_EXTENSION) || media.extension.match(PDF_EXTENSION)) {
+		if (!initialPage && readerMode !== 'continuous') {
+			return <Navigate to={paths.bookReader(id, { isAnimated, page: 1 })} />
+		} else if (!!initialPage && initialPage > media.pages) {
+			return <Navigate to={paths.bookReader(id, { isAnimated, page: media.pages })} />
+		} else if (readerMode === 'continuous') {
+			return (
+				<ContinuousScrollReader
+					media={media}
+					initialPage={initialPage}
+					getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
+					onProgressUpdate={isIncognito ? undefined : updateReadProgress}
+				/>
+			)
+		} else {
+			const animated = !!search.get('animated')
+			const Component = animated ? AnimatedPagedReader : PagedReader
+
+			return (
+				<Component
+					media={media}
+					currentPage={initialPage || 1}
+					getPageUrl={(pageNumber) => getMediaPage(id, pageNumber)}
+					onPageChange={handleChangePage}
+				/>
+			)
+		}
 	}
 
 	return <div>Not a supported book or i just can&rsquo;t do that yet! :)</div>

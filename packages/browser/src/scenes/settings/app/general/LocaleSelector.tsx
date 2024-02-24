@@ -28,7 +28,7 @@ export default function LocaleSelector() {
 
 	return (
 		<ComboBox
-			label={t('settingsScene.app/general.sections.locale.localeSelector.label')}
+			label={t('settingsScene.app/account.sections.locale.localeSelector.label')}
 			value={locale}
 			options={options}
 			filterable

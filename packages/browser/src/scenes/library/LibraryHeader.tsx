@@ -1,10 +1,10 @@
 import { getLibraryThumbnail } from '@stump/api'
-import { usePreferences } from '@stump/client'
 import { AspectRatio, cn, Heading, Text } from '@stump/components'
 import React from 'react'
 
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
+import { usePreferences } from '@/hooks'
 
 import { useLibraryContext } from './context'
 

@@ -1,5 +1,5 @@
 import { getSeriesThumbnail } from '@stump/api'
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
 import { AspectRatio, cn, Heading } from '@stump/components'
 import React from 'react'
 

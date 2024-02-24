@@ -1,10 +1,11 @@
-import { usePreferences, useSeriesByIdQuery } from '@stump/client'
+import { useSeriesByIdQuery } from '@stump/client'
 import { cn } from '@stump/components'
 import React from 'react'
 import { Suspense, useEffect } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
+import { usePreferences } from '@/hooks'
 
 import { SeriesContext } from './context'
 import SeriesHeader from './SeriesHeader'

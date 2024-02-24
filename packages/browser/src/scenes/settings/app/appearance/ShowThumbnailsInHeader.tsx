@@ -1,4 +1,4 @@
-import { usePreferences } from '@stump/client'
+import { usePreferences } from '@/hooks'
 import React, { useCallback } from 'react'
 
 import PreferenceToggle from './PreferenceToggle'

@@ -1,10 +1,10 @@
 import { getSeriesThumbnail } from '@stump/api'
-import { usePreferences } from '@/hooks'
 import { AspectRatio, cn, Heading } from '@stump/components'
 import React from 'react'
 
 import ReadMore from '@/components/ReadMore'
 import TagList from '@/components/tags/TagList'
+import { usePreferences } from '@/hooks'
 
 import { useSeriesContext } from './context'
 

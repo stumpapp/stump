@@ -21,24 +21,21 @@ export default function FilterConfiguration() {
 		name: 'filters.groups',
 	})
 
-	// FIXME: This watch does not work >:(
-	// const [groups, joiner] = form.watch(['filters.groups', 'filters.joiner'])
-
+	const [formGroups, joiner] = form.watch(['filters.groups', 'filters.joiner'])
 	const apiFilters = useMemo(
 		() =>
 			toAPIFilters({
-				groups: form.getValues('filters.groups') ?? [],
-				joiner: form.getValues('filters.joiner') ?? 'AND',
+				groups: formGroups ?? [],
+				joiner: joiner ?? 'AND',
 			}),
-		[form],
+		[formGroups, joiner],
 	)
 	const formattedFilters = useMemo(() => JSON.stringify(apiFilters, null, 2), [apiFilters])
 
 	const handleAddGroup = () => append({ filters: [], joiner: 'and' })
 	const handleRemoveGroup = (index: number) => remove(index)
 
-	const groupCount = form.getValues('filters.groups').length
-	const joiner = form.getValues('filters.joiner')
+	const groupCount = formGroups.length
 
 	return (
 		<div className="flex flex-col gap-y-6">

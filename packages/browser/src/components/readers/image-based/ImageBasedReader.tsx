@@ -43,6 +43,9 @@ export default function ImageBasedReader({
 }: Props) {
 	const navigate = useNavigate()
 
+	/**
+	 * The current page of the reader
+	 */
 	const [currentPage, setCurrentPage] = useState(initialPage || 1)
 
 	const { readerMode, preloadCounts } = useReaderStore((state) => ({
@@ -58,6 +61,9 @@ export default function ImageBasedReader({
 			console.error(err)
 		},
 	})
+	/**
+	 * A callback to update the read progress, if the reader is not in incognito mode.
+	 */
 	const handleUpdateProgress = useCallback(
 		(page: number) => {
 			if (!isIncognito) {
@@ -67,6 +73,10 @@ export default function ImageBasedReader({
 		[updateReadProgress, isIncognito],
 	)
 
+	/**
+	 * A callback to handle when the page changes. This will update the URL to reflect the new page
+	 * if the reader mode is not continuous.
+	 */
 	const handleChangePage = useCallback(
 		(newPage: number) => {
 			if (readerMode === 'continuous') {
@@ -79,6 +89,9 @@ export default function ImageBasedReader({
 		[media.id, isAnimated, isIncognito, navigate, readerMode],
 	)
 
+	/**
+	 * A callback to get the URL of a page. This is *not* 0-indexed, so the first page is 1.
+	 */
 	const getPageUrl = (pageNumber: number) => getMediaPage(media.id, pageNumber)
 
 	const lastPage = media.pages

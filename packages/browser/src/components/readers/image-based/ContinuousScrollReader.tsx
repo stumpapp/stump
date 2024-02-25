@@ -58,7 +58,11 @@ export default function ContinuousScrollReader({
 		startIndex: 0,
 	})
 
-	const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
+	const { showToolBar, setShowToolBar, preloadCounts } = useReaderStore((state) => ({
+		preloadCounts: {
+			ahead: state.preloadAheadCount,
+			behind: state.preloadBehindCount,
+		},
 		setShowToolBar: state.setShowToolBar,
 		showToolBar: state.showToolBar,
 	}))
@@ -107,7 +111,7 @@ export default function ContinuousScrollReader({
 				)}
 				rangeChanged={setVisibleRange}
 				initialTopMostItemIndex={initialPage ? initialPage - 1 : undefined}
-				overscan={{ main: 5, reverse: 3 }}
+				overscan={{ main: preloadCounts.ahead || 1, reverse: preloadCounts.behind || 1 }}
 			/>
 
 			{/* TODO: config for showing/hiding this */}

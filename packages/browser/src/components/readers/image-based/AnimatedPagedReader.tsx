@@ -200,7 +200,7 @@ export default function AnimatedPagedReader({
 	})
 
 	return (
-		<>
+		<div className="relative flex h-full w-full items-center justify-center">
 			{imageUrls[0] && (
 				<motion.img
 					ref={prevRef}
@@ -256,7 +256,7 @@ export default function AnimatedPagedReader({
 					}}
 				/>
 			)}
-		</>
+		</div>
 	)
 }
 

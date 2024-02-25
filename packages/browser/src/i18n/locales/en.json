@@ -385,7 +385,7 @@
 						},
 						"preloadBehindCount": {
 							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page. It is recommended to keep this value to at least 3"
+							"description": "The number of pages to preload behind the current page"
 						}
 					}
 				}

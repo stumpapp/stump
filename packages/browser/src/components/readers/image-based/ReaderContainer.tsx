@@ -17,12 +17,12 @@ type Props = {
 	onPageChange?(page: number): void
 }
 
-export default function ReaderContainer({
+const ReaderContainer = ({
 	media: { id, pages, name, metadata },
 	currentPage,
 	onPageChange,
 	children,
-}: PropsWithChildren<Props>) {
+}: PropsWithChildren<Props>) => {
 	const [search, setSearch] = useSearchParams()
 
 	const parentRef = useRef<HTMLDivElement>(null)
@@ -172,6 +172,8 @@ export default function ReaderContainer({
 		</React.Fragment>
 	)
 }
+
+export default React.memo(ReaderContainer)
 
 const variants = (position: 'top' | 'bottom') => ({
 	hidden: {

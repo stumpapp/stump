@@ -26,6 +26,8 @@ type Props = {
 }
 
 // TODO: virtualization
+// TODO: see if https://virtuoso.dev/grouped-numbers/ would work.
+
 export default function GroupedSmartListItemTable({ items }: Props) {
 	const { workingView, updateWorkingView } = useSmartListContext()
 	const {

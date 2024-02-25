@@ -1,9 +1,11 @@
 import { mediaQueryKeys } from '@stump/api'
-import { queryClient, useReaderStore } from '@stump/client'
+import { queryClient } from '@stump/client'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
 import React, { memo, useEffect } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+
+import { useReaderStore } from '@/stores'
 
 export type PagedReaderProps = {
 	/** The current page which the reader should render */

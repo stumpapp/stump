@@ -1,15 +1,15 @@
 import { getMediaPage } from '@stump/api'
-import { useReaderStore } from '@stump/client'
 import { cx, Heading, IconButton } from '@stump/components'
 import { Media } from '@stump/types'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { motion } from 'framer-motion'
 import { BookOpen, Scroll } from 'lucide-react'
-import { ArrowLeft } from 'phosphor-react'
+import { ArrowLeft } from 'lucide-react'
 import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import paths from '@/paths'
+import { useReaderStore } from '@/stores'
 
 type Props = {
 	media: Media

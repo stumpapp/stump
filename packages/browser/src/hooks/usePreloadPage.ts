@@ -1,5 +1,4 @@
-import { usePrevious } from '@stump/components'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type Params = {
 	pages: number[]
@@ -13,8 +12,7 @@ type Params = {
 export function usePreloadPage({ pages, urlBuilder }: Params) {
 	const [isPreloading, setIsPreloading] = useState(false)
 
-	const previousPages = usePrevious(pages)
-	const shouldPreload = previousPages?.at(0) !== pages.at(0)
+	const preloadRef = useRef<Record<number, boolean>>({})
 
 	/**
 	 * This effect will attempt to preload all pages by creating an image element
@@ -23,7 +21,14 @@ export function usePreloadPage({ pages, urlBuilder }: Params) {
 	 * It currently does not handle errors, but it could be extended to do so.
 	 */
 	useEffect(() => {
-		if (!pages.length || !shouldPreload) return
+		const filteredPages = pages.filter((page) => !preloadRef.current[page])
+		const shouldPreload = filteredPages.length > 0
+
+		if (!shouldPreload) return
+
+		filteredPages.forEach((page) => {
+			preloadRef.current[page] = true
+		})
 
 		const preloadPage = (page: number) => {
 			const image = new Image()
@@ -36,7 +41,7 @@ export function usePreloadPage({ pages, urlBuilder }: Params) {
 
 		const preloadPages = async () => {
 			setIsPreloading(true)
-			const results = await Promise.allSettled(pages.map(preloadPage))
+			const results = await Promise.allSettled(filteredPages.map(preloadPage))
 			const errors = results.filter((result) => result.status === 'rejected')
 			if (errors.length) {
 				console.error(errors)
@@ -45,7 +50,7 @@ export function usePreloadPage({ pages, urlBuilder }: Params) {
 		}
 
 		preloadPages()
-	}, [pages, urlBuilder, shouldPreload])
+	}, [pages, urlBuilder])
 
 	return { isPreloading }
 }

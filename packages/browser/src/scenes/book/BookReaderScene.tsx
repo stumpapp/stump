@@ -1,15 +1,11 @@
 import { mediaQueryKeys } from '@stump/api'
-import {
-	invalidateQueries,
-	useMediaByIdQuery,
-	useReaderStore,
-	useUpdateMediaProgress,
-} from '@stump/client'
+import { invalidateQueries, useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
 import { useEffect } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ImageBasedReader } from '@/components/readers/image-based'
 import paths from '@/paths'
+import { useReaderStore } from '@/stores'
 
 import { ARCHIVE_EXTENSION, EBOOK_EXTENSION, PDF_EXTENSION } from '../../utils/patterns'
 
@@ -86,9 +82,6 @@ export default function BookReaderScene() {
 			/>
 		)
 	}
-
-	// TODO: unify the two image-based readers so they have a shared toolbar. This will allow for MUCH
-	// more seamless switching between paged and continuous readers...
 
 	const initialPage = page ? parseInt(page, 10) : undefined
 

@@ -1,9 +1,10 @@
-import { useReaderStore } from '@stump/client'
 import { usePrevious } from '@stump/components'
 import { Media } from '@stump/types'
 import React, { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Virtuoso } from 'react-virtuoso'
+
+import { useReaderStore } from '@/stores'
 
 export type ContinuousReaderOrientation = 'horizontal' | 'vertical'
 type Props = {
@@ -93,7 +94,10 @@ export default function ContinuousScrollReader({
 				style={{ height: '100%' }}
 				data={Array.from({ length: media.pages }).map((_, index) => getPageUrl(index + 1))}
 				itemContent={(_, url) => (
-					<div className="flex max-h-screen min-h-1 min-w-1 max-w-full items-center justify-center">
+					<div
+						key={url}
+						className="flex max-h-screen min-h-1 min-w-1 max-w-full items-center justify-center"
+					>
 						<img
 							className="max-h-screen min-h-1 min-w-1 max-w-full select-none object-scale-down md:w-auto"
 							src={url}
@@ -103,7 +107,7 @@ export default function ContinuousScrollReader({
 				)}
 				rangeChanged={setVisibleRange}
 				initialTopMostItemIndex={initialPage ? initialPage - 1 : undefined}
-				overscan={5}
+				overscan={{ main: 5, reverse: 3 }}
 			/>
 
 			{/* TODO: config for showing/hiding this */}

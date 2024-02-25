@@ -23,7 +23,6 @@
 		"expo-status-bar": "~1.11.1",
 		"lucide-react-native": "^0.330.0",
 		"nativewind": "^2.0.11",
-		"phosphor-react-native": "^1.1.2",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
 		"react-hook-form": "^7.50.1",

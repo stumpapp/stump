@@ -1,8 +1,9 @@
-import { useReaderStore } from '@stump/client'
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion'
 import { useEffect, useMemo, useRef } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useWindowSize } from 'rooks'
+
+import { useReaderStore } from '@/stores'
 
 import { PagedReaderProps } from './PagedReader'
 

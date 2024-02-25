@@ -285,6 +285,7 @@
 			"application": {
 				"account": "Account",
 				"appearance": "Appearance",
+				"reader": "Reader",
 				"desktop": "Desktop",
 				"label": "Application"
 			},
@@ -365,6 +366,27 @@
 						"light": "Light",
 						"dark": "Dark",
 						"bronze": "Bronze light"
+					}
+				}
+			}
+		},
+		"app/reader": {
+			"helmet": "Reader settings",
+			"title": "Reader settings",
+			"description": "Default options for the Stump readers. These are bound to your current device only",
+			"sections": {
+				"imageBasedBooks": {
+					"label": "Image-based books",
+					"description": "Comic books, manga, and other image-based books",
+					"sections": {
+						"preloadAheadCount": {
+							"label": "Preload ahead count",
+							"description": "The number of pages to preload ahead of the current page"
+						},
+						"preloadBehindCount": {
+							"label": "Preload behind count",
+							"description": "The number of pages to preload behind the current page. It is recommended to keep this value to at least 3"
+						}
 					}
 				}
 			}

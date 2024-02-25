@@ -1,6 +1,7 @@
 import {
 	AlarmClock,
 	Bell,
+	Book,
 	Brush,
 	Cog,
 	LucideIcon,
@@ -47,6 +48,12 @@ export const routeGroups: RouteGroup[] = [
 				label: 'Appearance',
 				localeKey: 'app/appearance',
 				to: '/settings/app/appearance',
+			},
+			{
+				icon: Book,
+				label: 'Reader',
+				localeKey: 'app/reader',
+				to: '/settings/app/reader',
 			},
 			{
 				icon: PcCase,

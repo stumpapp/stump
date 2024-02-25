@@ -1,5 +1,5 @@
 import { IconButton } from '@stump/components'
-import { Rows, SquaresFour } from 'phosphor-react'
+import { Grid2X2, Rows } from 'lucide-react'
 
 import { useLayoutMode } from '@/hooks'
 
@@ -14,14 +14,14 @@ export default function LayoutModeButtons() {
 				onClick={() => setLayoutMode('GRID')}
 				variant={viewAsGrid ? 'subtle-dark' : 'subtle'}
 			>
-				<SquaresFour className="text-lg" weight="regular" />
+				<Grid2X2 className="text-lg" />
 			</IconButton>
 
 			<IconButton
 				onClick={() => setLayoutMode('LIST')}
 				variant={viewAsGrid ? 'subtle' : 'subtle-dark'}
 			>
-				<Rows className="text-lg" weight="regular" />
+				<Rows className="text-lg" />
 			</IconButton>
 		</div>
 	)

@@ -32,6 +32,10 @@ export default function EntityImage({ url, ...props }: Props) {
 		return null
 	}
 
+	// TODO: support pinch and zoom
+	// https://github.com/likashefqet/react-native-image-zoom
+	// https://github.com/fakeheal/react-native-pan-pinch-view
+	// https://gist.github.com/Glazzes/357201f74fbfaddb3e933f4c258c4878
 	return (
 		<Image source={{ uri: isAndroid ? base64Image : url }} {...props} cachePolicy="memory-disk" />
 	)

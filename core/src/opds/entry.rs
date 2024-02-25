@@ -216,6 +216,12 @@ impl From<media::Data> for OpdsEntry {
 			OpdsLinkType::ImageJpeg
 		});
 
+		let entry_file_acquisition_link_type =
+			OpdsLinkType::from_extension(&value.extension).unwrap_or_else(|| {
+				tracing::error!(?value.extension, "Failed to convert file extension to OPDS link type");
+				OpdsLinkType::Zip
+			});
+
 		let links = vec![
 			OpdsLink::new(
 				thumbnail_opds_link_type,
@@ -228,7 +234,7 @@ impl From<media::Data> for OpdsEntry {
 				format!("{}/pages/1", base_url),
 			),
 			OpdsLink::new(
-				OpdsLinkType::Zip,
+				entry_file_acquisition_link_type,
 				OpdsLinkRel::Acquisition,
 				format!("{}/file/{}", base_url, file_name_encoded),
 			),

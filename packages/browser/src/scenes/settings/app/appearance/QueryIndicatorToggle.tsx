@@ -3,7 +3,7 @@ import React from 'react'
 
 import { useUserStore } from '@/stores'
 
-import PreferenceToggle from './PreferenceToggle'
+import PreferenceToggle from '../../PreferenceToggle'
 
 export default function QueryIndicatorToggle() {
 	const { preferences, setPreferences } = useUserStore((state) => ({

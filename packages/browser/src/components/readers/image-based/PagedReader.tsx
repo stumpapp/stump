@@ -1,16 +1,11 @@
 import { mediaQueryKeys } from '@stump/api'
-import { queryClient, useReaderStore } from '@stump/client'
-import { useBoolean } from '@stump/components'
+import { queryClient } from '@stump/client'
 import type { Media } from '@stump/types'
 import clsx from 'clsx'
-import React, { memo, useEffect, useMemo } from 'react'
+import React, { memo, useEffect } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
-import { usePreloadPage } from '@/hooks/usePreloadPage'
-
-import Toolbar from './Toolbar'
-
-const DEFAULT_PRELOAD_COUNT = 4
+import { useReaderStore } from '@/stores'
 
 export type PagedReaderProps = {
 	/** The current page which the reader should render */
@@ -33,23 +28,10 @@ export type PagedReaderProps = {
 function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedReaderProps) {
 	const currentPageRef = React.useRef(currentPage)
 
-	const [toolbarVisible, { toggle: toggleToolbar, off: hideToolbar }] = useBoolean(false)
-
-	const setReaderMode = useReaderStore((state) => state.setMode)
-
-	const pagesToPreload = useMemo(
-		() => [...Array(DEFAULT_PRELOAD_COUNT).keys()].map((i) => currentPage + i + 1),
-		[currentPage],
-	)
-
-	/**
-	 * Preload pages that are not currently visible. This is done to try and
-	 * prevent wait times for the next page to load.
-	 */
-	usePreloadPage({
-		pages: pagesToPreload,
-		urlBuilder: getPageUrl,
-	})
+	const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
+		setShowToolBar: state.setShowToolBar,
+		showToolBar: state.showToolBar,
+	}))
 
 	/**
 	 * This effect is responsible for updating the current page ref when the current page changes. This was
@@ -102,28 +84,18 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 				handlePageChange(currentPageRef.current - 1)
 				break
 			case 'space':
-				toggleToolbar()
+				setShowToolBar(!showToolBar)
 				break
 			case 'escape':
-				hideToolbar()
+				setShowToolBar(false)
 				break
 			default:
 				break
 		}
 	})
 
-	const onChangeReaderMode = () => setReaderMode('continuous')
-
 	return (
-		<div className="relative flex h-full items-center justify-center">
-			<Toolbar
-				title={media.name}
-				currentPage={currentPage}
-				pages={media.pages}
-				visible={toolbarVisible}
-				onPageChange={handlePageChange}
-				onChangeReaderMode={onChangeReaderMode}
-			/>
+		<div className="relative flex h-full w-full items-center justify-center">
 			<SideBarControl position="left" onClick={() => handlePageChange(currentPage - 1)} />
 			{/* TODO: better error handling for the loaded image */}
 			<img
@@ -133,7 +105,7 @@ function PagedReader({ currentPage, media, onPageChange, getPageUrl }: PagedRead
 					// @ts-expect-error: is oke
 					err.target.src = '/favicon.png'
 				}}
-				onClick={toggleToolbar}
+				onClick={() => setShowToolBar(!showToolBar)}
 			/>
 			<SideBarControl position="right" onClick={() => handlePageChange(currentPage + 1)} />
 		</div>
@@ -157,7 +129,7 @@ function SideBarControl({ onClick, position }: SideBarControlProps) {
 		<div
 			className={clsx(
 				'z-50 h-full border border-transparent transition-all duration-300',
-				'absolute w-[10%] active:border-edge-200 active:bg-background-200  active:bg-opacity-50',
+				'fixed w-[10%] active:border-edge-200 active:bg-background-200  active:bg-opacity-50',
 				'sm:relative sm:flex sm:w-full sm:flex-shrink',
 				{ 'right-0': position === 'right' },
 				{ 'left-0': position === 'left' },

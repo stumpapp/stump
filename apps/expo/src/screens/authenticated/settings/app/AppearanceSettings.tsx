@@ -5,8 +5,10 @@ import TabNameToggle from './TabNameToggle'
 
 export default function AppearanceSettings() {
 	return (
-		<ScreenRootView>
-			<Text>Appearance settings</Text>
+		<ScreenRootView classes="justify-start">
+			<Text size="md" className="self-start px-4 text-left font-semibold">
+				Appearance settings
+			</Text>
 
 			<TabNameToggle />
 			<ColorSchemeToggle />

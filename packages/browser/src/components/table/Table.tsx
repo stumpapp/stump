@@ -12,7 +12,7 @@ import {
 	useReactTable,
 } from '@tanstack/react-table'
 import clsx from 'clsx'
-import { SortAscending, SortDescending } from 'phosphor-react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 
 import TablePagination from './Pagination'
@@ -227,7 +227,5 @@ function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
 		return null
 	}
 
-	return (
-		<span className="ml-1.5">{direction === 'asc' ? <SortAscending /> : <SortDescending />}</span>
-	)
+	return <span className="ml-1.5">{direction === 'asc' ? <ArrowUp /> : <ArrowDown />}</span>
 }

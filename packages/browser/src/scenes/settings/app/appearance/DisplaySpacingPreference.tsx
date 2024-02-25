@@ -1,6 +1,7 @@
-import { usePreferences } from '@/hooks'
 import { cn, cx, Label, Text } from '@stump/components'
 import { Check } from 'lucide-react'
+
+import { usePreferences } from '@/hooks'
 
 export default function DisplaySpacingPreference() {
 	const {

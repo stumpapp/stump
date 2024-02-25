@@ -1,7 +1,8 @@
-import { usePreferences } from '@/hooks'
 import React, { useCallback } from 'react'
 
-import PreferenceToggle from './PreferenceToggle'
+import { usePreferences } from '@/hooks'
+
+import PreferenceToggle from '../../PreferenceToggle'
 
 export default function ReplacePrimarySidebarToggle() {
 	const {

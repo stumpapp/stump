@@ -1,6 +1,6 @@
 import React from 'react'
 
-import PreferenceToggle from './PreferenceToggle'
+import PreferenceToggle from '../../PreferenceToggle'
 
 // TODO: Implement this
 export default function PreferColorToggle() {

@@ -1,12 +1,13 @@
-import { useAppStore } from '@/stores'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { checkUrl, isUrl } from '@stump/api'
 import { Button, Form, Input, ProgressSpinner, Text, useBoolean } from '@stump/components'
-import { CloudCheck, CloudSlash } from 'phosphor-react'
+import { Cloud, CloudOff } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDebounce } from 'rooks'
 import { z } from 'zod'
+
+import { useAppStore } from '@/stores'
 
 // TODO: retest this component. I blindly refactored it when migrating off chakra...
 export default function ServerUrlForm() {
@@ -87,9 +88,9 @@ export default function ServerUrlForm() {
 		if (isCheckingUrl) {
 			return <ProgressSpinner size="sm" />
 		} else if (Object.keys(form.formState.errors).length > 0) {
-			return <CloudSlash size="1.25rem" color="#F56565" />
+			return <CloudOff size="1.25rem" color="#F56565" />
 		} else if (sucessfulConnection) {
-			return <CloudCheck size="1.25rem" color="#48BB78" />
+			return <Cloud size="1.25rem" color="#48BB78" />
 		}
 
 		return null

@@ -1,12 +1,10 @@
-import { useReaderStore } from '@stump/client'
 import { usePrevious } from '@stump/components'
 import { Media } from '@stump/types'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useSearchParams } from 'react-router-dom'
 import { Virtuoso } from 'react-virtuoso'
 
-import Toolbar from './Toolbar'
+import { useReaderStore } from '@/stores'
 
 export type ContinuousReaderOrientation = 'horizontal' | 'vertical'
 type Props = {
@@ -32,6 +30,10 @@ type Props = {
 	 * A callback to report the progress of the current page. If undefined, no progress will be reported.
 	 */
 	onProgressUpdate?(page: number): void
+	/**
+	 * A callback to report when the page has changed. If undefined, no callback will be called.
+	 */
+	onPageChanged?(page: number): void
 }
 
 /**
@@ -46,12 +48,8 @@ export default function ContinuousScrollReader({
 	getPageUrl,
 	orientation,
 	onProgressUpdate,
+	onPageChanged,
 }: Props) {
-	const [search, setSearch] = useSearchParams()
-	/**
-	 * A state to control the visibility of the toolbar
-	 */
-	const [showToolBar, setShowToolBar] = useState(false)
 	/**
 	 * The currently visible range of index(es) on the page
 	 */
@@ -60,23 +58,31 @@ export default function ContinuousScrollReader({
 		startIndex: 0,
 	})
 
-	const setReaderMode = useReaderStore((state) => state.setMode)
+	const { showToolBar, setShowToolBar, preloadCounts } = useReaderStore((state) => ({
+		preloadCounts: {
+			ahead: state.preloadAheadCount,
+			behind: state.preloadBehindCount,
+		},
+		setShowToolBar: state.setShowToolBar,
+		showToolBar: state.showToolBar,
+	}))
 
 	const reportedUnsupportedMode = useRef(false)
 
 	const { startIndex: currentIndex } = visibleRange
 	const previousIndex = usePrevious(currentIndex)
-	const shouldReportProgress = previousIndex != undefined && previousIndex !== currentIndex
+	const pageDidChange = previousIndex != undefined && previousIndex !== currentIndex
 	/**
 	 * An effect to report the progress of the current page. It will only report the progress
 	 * if the page has changed since the _last_ render.
 	 */
 	useEffect(() => {
 		const page = currentIndex + 1
-		if (shouldReportProgress) {
+		if (pageDidChange) {
 			onProgressUpdate?.(page)
+			onPageChanged?.(page)
 		}
-	}, [currentIndex, onProgressUpdate, shouldReportProgress])
+	}, [currentIndex, onProgressUpdate, onPageChanged, pageDidChange])
 
 	// TODO: support this and remove effect
 	useEffect(() => {
@@ -86,44 +92,32 @@ export default function ContinuousScrollReader({
 		}
 	}, [orientation])
 
-	const onChangeReaderMode = useCallback(() => {
-		search.append('page', (visibleRange.startIndex + 1).toString())
-		setSearch(search)
-		setReaderMode('paged')
-	}, [setReaderMode, search, setSearch, visibleRange.startIndex])
-
 	return (
-		<>
-			<Toolbar
-				title={media.name}
-				currentPage={visibleRange.startIndex + 1}
-				pages={media.pages}
-				visible={showToolBar}
-				onChangeReaderMode={onChangeReaderMode}
-				showBottomToolbar={false}
-			/>
-
+		<React.Fragment>
 			<Virtuoso
 				style={{ height: '100%' }}
 				data={Array.from({ length: media.pages }).map((_, index) => getPageUrl(index + 1))}
 				itemContent={(_, url) => (
-					<div className="flex max-h-screen min-h-1 min-w-1 max-w-full items-center justify-center">
+					<div
+						key={url}
+						className="flex max-h-screen min-h-1 min-w-1 max-w-full items-center justify-center"
+					>
 						<img
 							className="max-h-screen min-h-1 min-w-1 max-w-full select-none object-scale-down md:w-auto"
 							src={url}
-							onClick={() => setShowToolBar((prev) => !prev)}
+							onClick={() => setShowToolBar(!showToolBar)}
 						/>
 					</div>
 				)}
 				rangeChanged={setVisibleRange}
 				initialTopMostItemIndex={initialPage ? initialPage - 1 : undefined}
-				overscan={5}
+				overscan={{ main: preloadCounts.ahead || 1, reverse: preloadCounts.behind || 1 }}
 			/>
 
 			{/* TODO: config for showing/hiding this */}
 			<div className="fixed bottom-2 left-2 z-50 rounded-lg bg-black bg-opacity-75 px-2 py-1 text-white">
 				{visibleRange.startIndex + 1}
 			</div>
-		</>
+		</React.Fragment>
 	)
 }

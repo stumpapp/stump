@@ -34,4 +34,4 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           platforms: 'linux/amd64'
           # platforms: 'linux/arm64/v8,linux/arm/v7,linux/amd64'
-          discord-webhook: ''
+          discord-webhook: ${{ secrets.DISCORD_WEBHOOK }}

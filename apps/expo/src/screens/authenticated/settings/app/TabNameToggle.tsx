@@ -11,19 +11,16 @@ export default function TabNameToggle() {
 	}))
 
 	return (
-		<React.Fragment>
-			<View className="w-full flex-row items-center justify-between px-4">
+		<View className="p-4">
+			<View className="w-full flex-row items-center justify-between">
 				<Text>Show tab names</Text>
-				<Switch
-					onValueChange={() => {
-						setShowTabNames(!showTabNames)
-					}}
-					value={showTabNames}
-				/>
+				<Switch onValueChange={() => setShowTabNames(!showTabNames)} value={showTabNames} />
 			</View>
-			<View className="-mt-3 flex w-[90%] items-start px-4">
-				<Text muted>Toggles names underneath tab icons</Text>
+			<View className="flex w-full text-left">
+				<Text muted size="sm">
+					Toggles names underneath tab icons
+				</Text>
 			</View>
-		</React.Fragment>
+		</View>
 	)
 }

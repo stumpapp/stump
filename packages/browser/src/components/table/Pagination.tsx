@@ -1,5 +1,5 @@
 import { Button, cn, IconButton } from '@stump/components'
-import { ArrowLeft, ArrowRight, DotsThree } from 'phosphor-react'
+import { ArrowLeft, ArrowRight, MoreHorizontal } from 'lucide-react'
 import { useMemo } from 'react'
 import { useWindowSize } from 'rooks'
 
@@ -61,7 +61,7 @@ export default function TablePagination({
 						onPageChange={onChangePage}
 						trigger={
 							<Button>
-								<DotsThree />
+								<MoreHorizontal />
 							</Button>
 						}
 					/>

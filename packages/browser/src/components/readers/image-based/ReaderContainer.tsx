@@ -1,43 +1,38 @@
 import { getMediaPage } from '@stump/api'
-import { useReaderStore } from '@stump/client'
 import { cx, Heading, IconButton } from '@stump/components'
+import { Media } from '@stump/types'
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual'
 import { motion } from 'framer-motion'
 import { BookOpen, Scroll } from 'lucide-react'
-import { ArrowLeft } from 'phosphor-react'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 
 import paths from '@/paths'
+import { useReaderStore } from '@/stores'
 
-type ToolbarProps = {
-	title: string
+type Props = {
+	media: Media
 	currentPage: number
-	pages: number
-	visible: boolean
 	onPageChange?(page: number): void
-	showBottomToolbar?: boolean
-	onChangeReaderMode?(): void
 }
 
-export default function Toolbar({
-	title,
+const ReaderContainer = ({
+	media: { id, pages, name, metadata },
 	currentPage,
-	pages,
-	visible,
 	onPageChange,
-	showBottomToolbar = true,
-	onChangeReaderMode,
-}: ToolbarProps) {
-	const { id } = useParams()
-	if (!id) {
-		throw new Error('This reader must be rendered within a book route with an ID.')
-	}
+	children,
+}: PropsWithChildren<Props>) => {
+	const [search, setSearch] = useSearchParams()
 
 	const parentRef = useRef<HTMLDivElement>(null)
 	const rangeRef = useRef([0, 0])
 
-	const readerMode = useReaderStore((state) => state.mode)
+	const { readerMode, setReaderMode, showToolBar } = useReaderStore((state) => ({
+		readerMode: state.mode,
+		setReaderMode: state.setMode,
+		showToolBar: state.showToolBar,
+	}))
 
 	const columnVirtualizer = useVirtualizer({
 		count: pages,
@@ -55,7 +50,7 @@ export default function Toolbar({
 
 	const totalSize = columnVirtualizer.getTotalSize()
 	useEffect(() => {
-		if (visible) {
+		if (showToolBar) {
 			const offset = (totalSize / pages) * currentPage
 
 			const targetID = `${id}-page-${currentPage}`
@@ -69,32 +64,26 @@ export default function Toolbar({
 				parentRef.current?.scrollTo({ behavior: 'smooth', left: offset })
 			}
 		}
-	}, [visible, currentPage, id, pages, totalSize])
+	}, [showToolBar, currentPage, id, pages, totalSize])
 
-	const variants = (position: 'top' | 'bottom') => ({
-		hidden: {
-			opacity: 0,
-			transition: {
-				duration: 0.2,
-				ease: 'easeInOut',
-			},
-			y: position === 'top' ? '-100%' : '100%',
-		},
-		visible: {
-			opacity: 1,
-			transition: {
-				duration: 0.2,
-				ease: 'easeInOut',
-			},
-			y: 0,
-		},
-	})
+	const handleChangeReaderMode = useCallback(() => {
+		if (readerMode === 'continuous') {
+			search.set('page', currentPage.toString())
+			setSearch(search)
+			setReaderMode('paged')
+		} else {
+			setReaderMode('continuous')
+		}
+	}, [readerMode, setReaderMode, currentPage, search, setSearch])
+
+	const showBottomToolbar = readerMode !== 'continuous'
+	const title = metadata?.title || name
 
 	return (
-		<div>
+		<React.Fragment>
 			<motion.nav
 				initial={false}
-				animate={visible ? 'visible' : 'hidden'}
+				animate={showToolBar ? 'visible' : 'hidden'}
 				variants={variants('top')}
 				transition={{ duration: 0.2, ease: 'easeInOut' }}
 				className="fixed left-0 top-0 z-[100] w-full bg-sidebar/95 p-4 text-contrast"
@@ -112,29 +101,29 @@ export default function Toolbar({
 						<Heading size="sm">{title}</Heading>
 					</div>
 					<div className="flex items-center">
-						{onChangeReaderMode && (
-							<IconButton
-								size="sm"
-								title={
-									readerMode === 'continuous' ? 'Switch to paged mode' : 'Switch to continuous mode'
-								}
-								onClick={() => onChangeReaderMode()}
-							>
-								{readerMode === 'continuous' ? (
-									<Scroll className="h-4 w-4" />
-								) : (
-									<BookOpen className="h-4 w-4" />
-								)}
-							</IconButton>
-						)}
+						<IconButton
+							size="sm"
+							title={
+								readerMode === 'continuous' ? 'Switch to paged mode' : 'Switch to continuous mode'
+							}
+							onClick={handleChangeReaderMode}
+						>
+							{readerMode === 'continuous' ? (
+								<Scroll className="h-4 w-4" />
+							) : (
+								<BookOpen className="h-4 w-4" />
+							)}
+						</IconButton>
 					</div>
 				</div>
 			</motion.nav>
 
+			{children}
+
 			{showBottomToolbar && (
 				<motion.nav
 					initial={false}
-					animate={visible ? 'visible' : 'hidden'}
+					animate={showToolBar ? 'visible' : 'hidden'}
 					variants={variants('bottom')}
 					transition={{ duration: 0.2, ease: 'easeInOut' }}
 					className="fixed bottom-0 left-0 z-[100] w-full bg-opacity-75 text-white shadow-lg"
@@ -180,6 +169,27 @@ export default function Toolbar({
 					</div>
 				</motion.nav>
 			)}
-		</div>
+		</React.Fragment>
 	)
 }
+
+export default React.memo(ReaderContainer)
+
+const variants = (position: 'top' | 'bottom') => ({
+	hidden: {
+		opacity: 0,
+		transition: {
+			duration: 0.2,
+			ease: 'easeInOut',
+		},
+		y: position === 'top' ? '-100%' : '100%',
+	},
+	visible: {
+		opacity: 1,
+		transition: {
+			duration: 0.2,
+			ease: 'easeInOut',
+		},
+		y: 0,
+	},
+})

@@ -8,7 +8,10 @@ use axum::{
 };
 use axum_extra::extract::Query;
 use prisma_client_rust::{
-	and, chrono::Utc, operator, operator::or, or, raw, Direction, PrismaValue,
+	and,
+	chrono::{Duration, Utc},
+	operator::{self, or},
+	or, raw, Direction, PrismaValue,
 };
 use serde::{Deserialize, Serialize};
 use serde_qs::axum::QsQuery;
@@ -1271,10 +1274,11 @@ async fn update_media_progress(
 	// 	read_progress
 	// };
 
+	let timeout = Duration::seconds(10).num_milliseconds() as u64;
 	let read_progress = db
 		._transaction()
-		.with_max_wait(10)
-		.with_timeout(10)
+		.with_max_wait(timeout)
+		.with_timeout(timeout)
 		.run(|client| async move {
 			let read_progress = client
 				.read_progress()

@@ -8,7 +8,7 @@ import LibraryAdminLayout from './management/LibraryAdminLayout.tsx'
 
 const CreateLibraryScene = lazy(() => import('./management/CreateLibraryScene.tsx'))
 const LibrarySettingsScene = lazy(() => import('./management/LibrarySettingsScene.tsx'))
-const LibraryExplorerScene = lazy(() => import('./explorer/LibraryExplorerScene.tsx'))
+const LibraryExplorerScene = lazy(() => import('./LibraryExplorerScene.tsx'))
 const LibrarySeriesScene = lazy(() => import('./LibrarySeriesScene.tsx'))
 const LibraryBooksScene = lazy(() => import('./LibraryBooksScene.tsx'))
 

@@ -1,7 +1,7 @@
 import { cn } from '@stump/components'
-import React, { forwardRef } from 'react'
+import React from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { GridListProps, VirtuosoGrid } from 'react-virtuoso'
+import { VirtuosoGrid } from 'react-virtuoso'
 
 import { useFileExplorerContext } from '../context'
 import FileGridItem from './FileGridItem'
@@ -26,7 +26,8 @@ export default function FileGrid() {
 						style={{ height, width }}
 						totalCount={files.length}
 						className="scrollbar-hide"
-						listClassName={cn('flex flex-1 flex-wrap gap-2 place-content-center')}
+						listClassName={cn('flex flex-1 flex-wrap gap-2 px-4')}
+						itemClassName="py-1.5"
 						itemContent={renderItem}
 					/>
 				)}
@@ -34,12 +35,3 @@ export default function FileGrid() {
 		</div>
 	)
 }
-
-const GridListWrapper = forwardRef<HTMLDivElement, GridListProps>(
-	({ children, style, ...props }, ref) => (
-		<div ref={ref} {...props} style={{ display: 'flex', flexWrap: 'wrap', ...style }}>
-			{children}
-		</div>
-	),
-)
-GridListWrapper.displayName = 'GridListWrapper'

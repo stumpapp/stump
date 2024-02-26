@@ -6,52 +6,66 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
-import React, { useMemo } from 'react'
+import React from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { useFileExplorerContext } from '../context'
 import FileThumbnail from '../FileThumbnail'
 
 const columnHelper = createColumnHelper<DirectoryListingFile>()
+const baseColumns = [
+	columnHelper.display({
+		cell: ({
+			row: {
+				original: { path, is_directory },
+			},
+		}) => <FileThumbnail path={path} isDirectory={is_directory} />,
+		header: () => (
+			<Text size="sm" variant="muted">
+				Cover
+			</Text>
+		),
+		id: 'thumbnail',
+		size: 10,
+	}),
+	columnHelper.accessor('name', {
+		cell: ({ getValue }) => (
+			<Text size="sm" variant="muted">
+				{getValue()}
+			</Text>
+		),
+		header: () => (
+			<Text size="sm" variant="muted">
+				Name
+			</Text>
+		),
+	}),
+	columnHelper.display({
+		cell: () => null,
+		id: 'spacer',
+	}),
+]
 
 export default function FileTable() {
 	const { files } = useFileExplorerContext()
 
-	const columns = useMemo(
-		() => [
-			columnHelper.display({
-				cell: ({
-					row: {
-						original: { path },
-					},
-				}) => <FileThumbnail path={path} />,
-				header: () => (
-					<Text size="sm" variant="muted">
-						Cover
-					</Text>
-				),
-				id: 'thumbnail',
-			}),
-		],
-		[],
-	)
-
 	const table = useReactTable({
-		columns,
+		columns: baseColumns,
 		data: files,
 		getCoreRowModel: getCoreRowModel(),
 	})
 
 	const { rows } = table.getRowModel()
 	return (
-		<div className="relative w-full">
-			<AutoSizer disableHeight>
-				{({ width }) => (
+		<div className="relative mb-5 h-full w-full flex-1 flex-grow">
+			<AutoSizer>
+				{({ height, width }) => (
 					<div
 						className={cn('h-full min-w-full overflow-x-auto', {
 							'scrollbar-hide': true,
 						})}
 						style={{
+							height,
 							width,
 						}}
 					>
@@ -94,7 +108,7 @@ export default function FileTable() {
 									<tr key={row.id} className="odd:bg-background-200">
 										{row.getVisibleCells().map((cell) => (
 											<td
-												className="pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+												className="py-1 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
 												key={cell.id}
 												style={{
 													width: cell.column.getSize(),

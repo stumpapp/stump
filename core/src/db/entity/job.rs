@@ -19,7 +19,7 @@ use super::{Cursor, Log};
 pub type ExternalJobOutput = serde_json::Value;
 
 /// An enum which represents the possible outputs of a job in the Stump core
-#[derive(Clone, Serialize, Deserialize, Type, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, Type, ToSchema)]
 #[serde(untagged)]
 pub enum CoreJobOutput {
 	LibraryScan(LibraryScanOutput),

@@ -29,6 +29,7 @@ export default function FileGrid() {
 						listClassName={cn('flex flex-1 flex-wrap gap-2 px-4')}
 						itemClassName="py-1.5"
 						itemContent={renderItem}
+						overscan={{ main: 15, reverse: 10 }}
 					/>
 				)}
 			</AutoSizer>

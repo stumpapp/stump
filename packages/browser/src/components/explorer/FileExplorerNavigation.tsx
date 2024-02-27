@@ -16,7 +16,7 @@ export default function FileExplorerNavigation() {
 		<div className="m-0 flex shrink-0 items-center gap-1">
 			<IconButton
 				variant="ghost"
-				size="sm"
+				size="xs"
 				onClick={goBack}
 				disabled={!canGoBack}
 				pressEffect={isDesktop}
@@ -26,7 +26,7 @@ export default function FileExplorerNavigation() {
 
 			<IconButton
 				variant="ghost"
-				size="sm"
+				size="xs"
 				onClick={goForward}
 				disabled={!canGoForward}
 				pressEffect={isDesktop}

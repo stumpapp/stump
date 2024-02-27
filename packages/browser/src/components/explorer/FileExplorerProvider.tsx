@@ -1,4 +1,3 @@
-import { mediaApi } from '@stump/api'
 import { useDirectoryListing } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
 import React, { useState } from 'react'
@@ -12,6 +11,7 @@ import { ExplorerContext, ExplorerLayout } from './context'
 import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
 import FileExplorerHeader from './FileExplorerHeader'
+import { getBook } from './FileThumbnail'
 
 type Props = {
 	rootPath: string
@@ -37,11 +37,7 @@ export default function FileExplorerProvider({ rootPath }: Props) {
 			setPath(entry.path)
 		} else {
 			try {
-				const response = await mediaApi.getMedia({
-					path: entry.path,
-				})
-				const entity = response.data.data?.at(0)
-
+				const entity = await getBook(entry.path)
 				if (entity) {
 					navigate(paths.bookOverview(entity.id), {
 						state: {
@@ -66,7 +62,7 @@ export default function FileExplorerProvider({ rootPath }: Props) {
 	return (
 		<ExplorerContext.Provider
 			value={{
-				canGoBack,
+				canGoBack: canGoBack && path !== rootPath,
 				canGoForward,
 				currentPath: path,
 				files: entries,

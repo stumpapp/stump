@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::{
-	db::{entity::LibraryOptions, FileStatus},
+	db::{
+		entity::{CoreJobOutput, LibraryOptions},
+		FileStatus,
+	},
 	filesystem::image::{ThumbnailGenerationJob, ThumbnailGenerationJobParams},
 	job::{
 		error::JobError, Executor, JobExt, JobOutputExt, JobProgress, JobTaskOutput,
@@ -56,6 +59,9 @@ pub struct SeriesScanOutput {
 	total_files: u64,
 	/// The number of files that were ignored during the scan
 	ignored_files: u64,
+	/// The number of files that were deemed to be skipped during the scan, e.g. it
+	/// exists in the database but has not been modified since the last scan
+	skipped_files: u64,
 	/// The number of media entities that were created
 	created_media: u64,
 	/// The number of media entities that were updated
@@ -66,6 +72,7 @@ impl JobOutputExt for SeriesScanOutput {
 	fn update(&mut self, updated: Self) {
 		self.total_files += updated.total_files;
 		self.ignored_files += updated.ignored_files;
+		self.skipped_files += updated.skipped_files;
 		self.created_media += updated.created_media;
 		self.updated_media += updated.updated_media;
 	}
@@ -114,6 +121,7 @@ impl JobExt for SeriesScanJob {
 			missing_media,
 			seen_files,
 			ignored_files,
+			skipped_files,
 		} = walk_series(
 			PathBuf::from(self.path.clone()).as_path(),
 			WalkerCtx {
@@ -138,6 +146,7 @@ impl JobExt for SeriesScanJob {
 		);
 		output.total_files = seen_files + ignored_files;
 		output.ignored_files = ignored_files;
+		output.skipped_files = skipped_files;
 
 		let tasks = VecDeque::from(chain_optional_iter(
 			[],
@@ -164,9 +173,13 @@ impl JobExt for SeriesScanJob {
 
 	async fn cleanup(
 		&self,
-		_: &WorkerCtx,
+		ctx: &WorkerCtx,
 		output: &Self::Output,
 	) -> Result<Option<Box<dyn Executor>>, JobError> {
+		ctx.send_core_event(CoreEvent::JobOutput {
+			id: ctx.job_id.clone(),
+			output: CoreJobOutput::SeriesScan(output.clone()),
+		});
 		let did_create = output.created_media > 0;
 		let did_update = output.updated_media > 0;
 		let image_options = self

@@ -6,8 +6,9 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from '@tanstack/react-table'
-import React from 'react'
+import React, { useMemo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
+import { useWindowSize } from 'rooks'
 
 import { useFileExplorerContext } from '../context'
 import FileThumbnail from '../FileThumbnail'
@@ -28,30 +29,43 @@ const baseColumns = [
 		id: 'thumbnail',
 		size: 10,
 	}),
-	columnHelper.accessor('name', {
-		cell: ({ getValue }) => (
-			<Text size="sm" variant="muted">
-				{getValue()}
-			</Text>
-		),
-		header: () => (
-			<Text size="sm" variant="muted">
-				Name
-			</Text>
-		),
-	}),
-	columnHelper.display({
-		cell: () => null,
-		id: 'spacer',
-	}),
 ]
 
 export default function FileTable() {
-	const { files } = useFileExplorerContext()
+	const { files, onSelect } = useFileExplorerContext()
+	const { innerWidth } = useWindowSize()
+
+	const columns = useMemo(
+		() => [
+			...baseColumns.slice(0, 1),
+			columnHelper.accessor('name', {
+				cell: ({ row: { original: file }, getValue }) => (
+					<Text
+						size="sm"
+						variant="muted"
+						className="cursor-pointer hover:underline"
+						onClick={() => onSelect(file)}
+					>
+						{getValue()}
+					</Text>
+				),
+				header: () => (
+					<Text size="sm" variant="muted">
+						Name
+					</Text>
+				),
+				size: innerWidth ? innerWidth * 0.2 : 250,
+			}),
+		],
+		[onSelect, innerWidth],
+	)
 
 	const table = useReactTable({
-		columns: baseColumns,
+		columns,
 		data: files,
+		defaultColumn: {
+			size: 40,
+		},
 		getCoreRowModel: getCoreRowModel(),
 	})
 
@@ -70,7 +84,7 @@ export default function FileTable() {
 						}}
 					>
 						<table
-							className="min-w-full"
+							className="min-w-full table-fixed"
 							style={{
 								width: table.getCenterTotalSize(),
 							}}
@@ -80,7 +94,13 @@ export default function FileTable() {
 									{table.getFlatHeaders().map((header) => {
 										const isSortable = header.column.getCanSort()
 										return (
-											<th key={header.id} className="h-10 pl-1.5 pr-1.5 first:pl-4 last:pr-4">
+											<th
+												key={header.id}
+												className="h-10 pl-1.5 pr-1.5 first:pl-4 last:pr-4"
+												style={{
+													width: header.getSize(),
+												}}
+											>
 												<div
 													className={cn('flex items-center', {
 														'cursor-pointer select-none gap-x-2': isSortable,
@@ -91,11 +111,6 @@ export default function FileTable() {
 													}}
 												>
 													{flexRender(header.column.columnDef.header, header.getContext())}
-													{/* {isSortable && (
-														<SortIcon
-															direction={(header.column.getIsSorted() as SortDirection) ?? null}
-														/>
-													)} */}
 												</div>
 											</th>
 										)
@@ -127,17 +142,3 @@ export default function FileTable() {
 		</div>
 	)
 }
-
-// const getBook = async (path: string) => {
-// 	try {
-// 		const response = await queryClient.fetchQuery([mediaQueryKeys.getMedia, { path }], () =>
-// 			mediaApi.getMedia({
-// 				path,
-// 			}),
-// 		)
-// 		return response.data.data?.at(0) ?? null
-// 	} catch (error) {
-// 		console.error(error)
-// 		return null
-// 	}
-// }

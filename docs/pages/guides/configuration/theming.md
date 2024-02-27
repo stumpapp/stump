@@ -33,7 +33,7 @@ export const themes = {
 }
 ```
 
-Then we should add it to the main [`ThemeSelect` component](https://github.com/stumpapp/stump/blob/al/develop/interface/src/scenes/settings/app/appearance/ThemeSelect.tsx) so that it can be selected:
+Then we should add it to the main [`ThemeSelect` component](https://github.com/stumpapp/stump/tree/develop/packages/browser/src/scenes/settings/app/appearance/ThemeSelect.tsx) so that it can be selected:
 
 ```tsx
 // scenes/settings/app/appearance/ThemeSelect.tsx
@@ -49,7 +49,7 @@ Then we should add it to the main [`ThemeSelect` component](https://github.com/s
 />
 ```
 
-Note that the `label` is a translation key, so we should add it to the [`locales/en.json` file](https://github.com/stumpapp/stump/blob/develop/packages/interface/src/i18n/locales/en.json), as well.
+Note that the `label` is a translation key, so we should add it to the [`locales/en.json` file](https://github.com/stumpapp/stump/tree/develop/packages/browser/src/i18n/locales/en.json), as well.
 
 ## Future theming features
 

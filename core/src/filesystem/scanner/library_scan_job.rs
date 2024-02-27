@@ -10,7 +10,7 @@ use specta::Type;
 
 use crate::{
 	db::{
-		entity::{LibraryOptions, Series},
+		entity::{CoreJobOutput, LibraryOptions, Series},
 		FileStatus, SeriesDAO, DAO,
 	},
 	filesystem::{
@@ -82,6 +82,9 @@ pub struct LibraryScanOutput {
 	total_directories: u64,
 	/// The number of files that were ignored during the scan
 	ignored_files: u64,
+	/// The number of files that were deemed to be skipped during the scan, e.g. it
+	/// exists in the database but has not been modified since the last scan
+	skipped_files: u64,
 	/// The number of ignored directories during the scan
 	ignored_directories: u64,
 	/// The number of media entities created
@@ -99,6 +102,7 @@ impl JobOutputExt for LibraryScanOutput {
 		self.total_files += updated.total_files;
 		self.total_directories += updated.total_directories;
 		self.ignored_files += updated.ignored_files;
+		self.skipped_files += updated.skipped_files;
 		self.ignored_directories += updated.ignored_directories;
 		self.created_media += updated.created_media;
 		self.updated_media += updated.updated_media;
@@ -216,9 +220,14 @@ impl JobExt for LibraryScanJob {
 
 	async fn cleanup(
 		&self,
-		_: &WorkerCtx,
+		ctx: &WorkerCtx,
 		output: &Self::Output,
 	) -> Result<Option<Box<dyn Executor>>, JobError> {
+		ctx.send_core_event(CoreEvent::JobOutput {
+			id: ctx.job_id.clone(),
+			output: CoreJobOutput::LibraryScan(output.clone()),
+		});
+
 		let did_create = output.created_series > 0 || output.created_media > 0;
 		let did_update = output.updated_series > 0 || output.updated_media > 0;
 		let image_options = self
@@ -427,6 +436,7 @@ impl JobExt for LibraryScanJob {
 					missing_media,
 					seen_files,
 					ignored_files,
+					skipped_files,
 				} = match walk_result {
 					Ok(walked_series) => walked_series,
 					Err(core_error) => {
@@ -446,6 +456,7 @@ impl JobExt for LibraryScanJob {
 				};
 				output.total_files += seen_files + ignored_files;
 				output.ignored_files += ignored_files;
+				output.skipped_files += skipped_files;
 
 				if series_is_missing {
 					ctx.report_progress(JobProgress::msg("Series not found on disk!"));
@@ -499,8 +510,6 @@ impl JobExt for LibraryScanJob {
 					task,
 				})
 				.collect();
-
-				ctx.report_progress(JobProgress::msg("Series walk complete!"));
 			},
 			LibraryScanTask::SeriesTask {
 				id: series_id,

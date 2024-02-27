@@ -1,6 +1,6 @@
 # Stump Mobile Application
 
-This is the mobile application for the Stump. It is built with [Expo](https://expo.io/), and is currently in the very early stages of development.
+This is the mobile application for the Stump. It is built with [Expo](https://expo.io/) and is currently in the very early stages of development.
 
 ## Getting Started 🚀
 
@@ -10,9 +10,18 @@ This is the mobile application for the Stump. It is built with [Expo](https://ex
 2. Follow the [developer guide](https://github.com/aaronleopold/stump#developer-guide-) at the root of the Stump monorepo
 3. Start the mobile app and the server:
 
-```bash
-moon run server:start mobile:dev # or server:dev if you want to run the server in dev mode
-```
+   To start the server and mobile app concurrently, you can use the following command:
+
+   ```bash
+   yarn dev:expo
+   ```
+
+   If you want to start the server and mobile app separately, you can use the following commands in two separate terminals:
+
+   ```bash
+   cargo run --package stump_server
+   yarn workspace @stump/expo start --clear
+   ```
 
 And that's it!
 
@@ -29,24 +38,9 @@ Be sure to review the [CONTRIBUTING.md](https://github.com/aaronleopold/stump/tr
 
 ## Roadmap 🗺️
 
-With the `v0.1.0` release of the Stump server (very) slowly approaching, the mobile app has the following items targeted for an _initial POC_:
-
-- [ ] Various initial expo-related project configuration:
-  - [ ] Appropriate routing setup (e.g. tabs and stack navigators)
-- [x] Configure and connect to a Stump server instance
-- [x] Login or claim an unclaimed server instance
-- [ ] A home screen that shows the server at a glance:
-  - [x] Various server statistics
-  - [ ] In progress media
-  - [ ] Newly added series and books
-- [ ] A library screen that shows a paginated list of series within a library
-- [ ] A series screen that shows a pagination list of media within a series
-- [ ] A very basic book overview screen
-- [ ] Support barebones readers for:
-  - [ ] Epub
-  - [ ] CBZ/CBR
-- [ ] Dark theme support
+You can find the high-level roadmap for the Stump mobile app in the [documentation](https://www.stumpapp.dev/guides/mobile/app#planned-features). For a more granular view of what is coming, you can also take a look at the [project board](https://github.com/orgs/stumpapp/projects/8).
 
 ## Acknowledgements 🙏
 
-- Thanks to [@dancamdev](https://github.com/dancamdev) for bootstrapping this Expo project 🙌
+- Thanks to [@dancamdev](https://github.com/dancamdev) for bootstrapping this Expo project template 🙌
+- Thanks to [@LRotenberger](https://github.com/LRotenberger) for building out the initial POC for the mobile app 🚀

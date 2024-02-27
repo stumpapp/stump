@@ -22,6 +22,9 @@ FROM rust:1.72.1-slim-buster AS builder
 ARG GIT_REV
 ENV GIT_REV=${GIT_REV}
 
+ARG TAGS
+ENV TAGS=${TAGS}
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \

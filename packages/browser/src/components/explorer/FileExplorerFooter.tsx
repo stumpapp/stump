@@ -6,18 +6,18 @@ import { useFileExplorerContext } from './context'
 export const FOOTER_HEIGHT = 40
 
 export default function FileExplorerFooter() {
-	const { currentPath, libraryPath } = useFileExplorerContext()
+	const { currentPath, rootPath } = useFileExplorerContext()
 
 	/**
 	 * The relative path is the path relative to the library root.
 	 */
 	const relativePath = useMemo(() => {
-		if (currentPath === libraryPath) {
+		if (currentPath === rootPath) {
 			return '/'
 		}
 
-		return currentPath?.replace(libraryPath, '') ?? ''
-	}, [currentPath, libraryPath])
+		return currentPath?.replace(rootPath, '') ?? ''
+	}, [currentPath, rootPath])
 
 	return (
 		<footer className="fixed bottom-0 z-10 h-10 w-full border-t border-edge bg-background px-4">

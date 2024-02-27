@@ -1,34 +1,35 @@
-import { mediaApi } from '@stump/api'
 import { useDirectoryListing } from '@stump/client'
 import { DirectoryListingFile } from '@stump/types'
-import { Helmet } from 'react-helmet'
+import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useMediaMatch } from 'rooks'
 
 import paths from '@/paths'
 
-import { useLibraryContext } from '../context'
-import { LibraryExplorerContext } from './context'
+import { ExplorerContext, ExplorerLayout } from './context'
 import FileExplorer from './FileExplorer'
 import FileExplorerFooter, { FOOTER_HEIGHT } from './FileExplorerFooter'
 import FileExplorerHeader from './FileExplorerHeader'
+import { getBook } from './FileThumbnail'
 
-// TODO: abstract this away from library as to use it with other entities
+type Props = {
+	rootPath: string
+}
 
-export default function LibraryExplorerScene() {
+export default function FileExplorerProvider({ rootPath }: Props) {
 	const navigate = useNavigate()
 	const isMobile = useMediaMatch('(max-width: 768px)')
 
-	const { library } = useLibraryContext()
+	const [layout, setLayout] = useState<ExplorerLayout>(() => getDefaultLayout())
 
 	// TODO: I need to store location.state somewhere so that when the user uses native navigation,
 	// their history, or at the very least where they left off, is persisted.
 	const { entries, setPath, path, goForward, goBack, canGoBack, canGoForward } =
 		useDirectoryListing({
-			enabled: !!library.path,
-			enforcedRoot: library.path,
-			initialPath: library.path,
+			enabled: !!rootPath,
+			enforcedRoot: rootPath,
+			initialPath: rootPath,
 		})
 
 	const handleSelect = async (entry: DirectoryListingFile) => {
@@ -36,11 +37,7 @@ export default function LibraryExplorerScene() {
 			setPath(entry.path)
 		} else {
 			try {
-				const response = await mediaApi.getMedia({
-					path: entry.path,
-				})
-				const entity = response.data.data?.at(0)
-
+				const entity = await getBook(entry.path)
 				if (entity) {
 					navigate(paths.bookOverview(entity.id), {
 						state: {
@@ -57,24 +54,27 @@ export default function LibraryExplorerScene() {
 		}
 	}
 
+	const changeLayout = (newLayout: 'grid' | 'table') => {
+		setDefaultLayout(newLayout)
+		setLayout(newLayout)
+	}
+
 	return (
-		<LibraryExplorerContext.Provider
+		<ExplorerContext.Provider
 			value={{
-				canGoBack,
+				canGoBack: canGoBack && path !== rootPath,
 				canGoForward,
 				currentPath: path,
 				files: entries,
 				goBack,
 				goForward,
-				libraryPath: library.path,
+				layout,
 				onSelect: handleSelect,
+				rootPath,
+				setLayout: changeLayout,
 			}}
 		>
-			<Helmet>
-				<title>Stump | {library.name}</title>
-			</Helmet>
-
-			<div className="flex flex-col">
+			<div className="flex h-full flex-1 flex-col">
 				<FileExplorerHeader />
 				<div
 					className="flex-1"
@@ -82,10 +82,22 @@ export default function LibraryExplorerScene() {
 						marginBottom: FOOTER_HEIGHT + (isMobile ? 50 : 0),
 					}}
 				>
-					<FileExplorer files={entries} />
+					<FileExplorer />
 				</div>
 				<FileExplorerFooter />
 			</div>
-		</LibraryExplorerContext.Provider>
+		</ExplorerContext.Provider>
 	)
+}
+
+const LOCAL_STORAGE_LAYOUT_KEY = 'stump-explorer-layout'
+const getDefaultLayout = () => {
+	const storedLayout = localStorage.getItem(LOCAL_STORAGE_LAYOUT_KEY)
+	if (storedLayout === 'grid' || storedLayout === 'table') {
+		return storedLayout
+	}
+	return 'grid'
+}
+const setDefaultLayout = (layout: ExplorerLayout) => {
+	localStorage.setItem(LOCAL_STORAGE_LAYOUT_KEY, layout)
 }

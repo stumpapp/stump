@@ -1,11 +1,15 @@
 import { DirectoryListingFile } from '@stump/types'
 import { createContext, useContext } from 'react'
 
-import { noop } from '../../../utils/misc'
+import { noop } from '../../utils/misc'
 
-export type LibraryExplorerContextProps = {
+export type ExplorerLayout = 'grid' | 'table'
+
+export type IExplorerContext = {
+	layout: ExplorerLayout
+	setLayout: (layout: ExplorerLayout) => void
 	currentPath: string | null
-	libraryPath: string
+	rootPath: string
 	files: DirectoryListingFile[]
 	onSelect: (item: DirectoryListingFile) => void
 	canGoBack: boolean
@@ -14,14 +18,16 @@ export type LibraryExplorerContextProps = {
 	goBack: () => void
 }
 
-export const LibraryExplorerContext = createContext<LibraryExplorerContextProps>({
+export const ExplorerContext = createContext<IExplorerContext>({
 	canGoBack: false,
 	canGoForward: false,
 	currentPath: null,
 	files: [],
 	goBack: noop,
 	goForward: noop,
-	libraryPath: '',
+	layout: 'grid',
 	onSelect: noop,
+	rootPath: '',
+	setLayout: noop,
 })
-export const useFileExplorerContext = () => useContext(LibraryExplorerContext)
+export const useFileExplorerContext = () => useContext(ExplorerContext)

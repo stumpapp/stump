@@ -1,8 +1,8 @@
 import { Label, Link, NativeSelect, Text } from '@stump/components'
 import React from 'react'
 
-import { useLocaleContext } from '@/i18n'
 import { useTheme } from '@/hooks'
+import { useLocaleContext } from '@/i18n'
 
 const localeKey = 'settingsScene.app/appearance.sections.themeSelect'
 
@@ -26,7 +26,9 @@ export default function ThemeSelect() {
 			/>
 			<Text variant="muted" size="xs">
 				{t(`${localeKey}.description`)}. {t(`${localeKey}.customTheme.0`)}{' '}
-				<Link href="https://stumpapp.dev/guides/theming">{t(`${localeKey}.customTheme.1`)}</Link>
+				<Link href="https://stumpapp.dev/guides/configuration/theming">
+					{t(`${localeKey}.customTheme.1`)}
+				</Link>
 			</Text>
 		</div>
 	)

@@ -5,12 +5,14 @@ use std::{
 };
 
 use globset::GlobSet;
-use itertools::{Either, Itertools};
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
+use itertools::Either;
+use rayon::iter::{
+	IntoParallelIterator, IntoParallelRefIterator, ParallelBridge, ParallelIterator,
+};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::{
-	db::entity::Media,
+	db::entity::macros::media_path_modified_at_select,
 	filesystem::{scanner::utils::file_updated_since_scan, PathUtils},
 	prisma::{media, series, PrismaClient},
 	CoreResult,
@@ -23,13 +25,21 @@ pub struct WalkerCtx {
 	pub max_depth: Option<usize>,
 }
 
+/// The output of walking a library
 #[derive(Default)]
 pub struct WalkedLibrary {
+	/// The total number of directories seen during the walk
 	pub seen_directories: u64,
+	/// The number of directories that were ignored via ignore rules or common ignore patterns
 	pub ignored_directories: u64,
+	/// The paths for series that need to be created
 	pub series_to_create: Vec<PathBuf>,
+	/// The paths for series that need to be visited. This differs from [WalkedSeries::media_to_visit] because
+	/// All series will always be visited in order to determine what media need to be reconciled in the series walk
 	pub series_to_visit: Vec<PathBuf>,
+	/// The paths for series that are missing from the filesystem
 	pub missing_series: Vec<PathBuf>,
+	/// Whether the library is missing from the filesystem
 	pub library_is_missing: bool,
 }
 
@@ -118,6 +128,7 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 		let existing_records = db
 			.series()
 			.find_many(vec![series::path::starts_with(path.to_string())])
+			.select(series::select!({ path }))
 			.exec()
 			.await?;
 		if existing_records.is_empty() {
@@ -142,7 +153,7 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 				.collect::<Vec<PathBuf>>();
 
 			let (series_to_create, series_to_visit) = valid_entries
-				.iter()
+				.par_iter()
 				.filter(|e| !missing_series.contains(&e.path().to_path_buf()))
 				.map(|e| e.path().to_owned())
 				.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|path| {
@@ -184,13 +195,24 @@ pub async fn walk_library(path: &str, ctx: WalkerCtx) -> CoreResult<WalkedLibrar
 	})
 }
 
+/// The output of walking a series
 #[derive(Default)]
 pub struct WalkedSeries {
+	/// The total number of files seen during the walk
 	pub seen_files: u64,
+	/// The number of files that were either ignored via ignore rules or common ignore patterns
+	/// such as `.DS_Store`
 	pub ignored_files: u64,
+	/// The number of files which exist in the database but have not been updated since the last scan
+	pub skipped_files: u64,
+	/// The paths for media that need to be created
 	pub media_to_create: Vec<PathBuf>,
+	/// The paths for media that need to be visited, i.e. the timestamp on disk has changed and
+	/// Stump will reconcile the media with the database
 	pub media_to_visit: Vec<PathBuf>,
+	/// The paths for media that are missing from the filesystem
 	pub missing_media: Vec<PathBuf>,
+	/// Whether the series is missing from the filesystem
 	pub series_is_missing: bool,
 }
 
@@ -222,7 +244,6 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	let walker = WalkDir::new(path);
 	let (valid_entries, ignored_entries) = walker
 		.into_iter()
-		// .filter_entry(|e| e.path().is_file()) // Note: This doesn't seem to work?
 		.filter_map(|e| e.ok())
 		.filter_map(|e| e.path().is_file().then_some(e))
 		.par_bridge()
@@ -237,8 +258,9 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 			}
 		});
 
+	let valid_entries_len = valid_entries.len() as u64;
 	let ignored_files = ignored_entries.len() as u64;
-	let seen_files = valid_entries.len() as u64 + ignored_files;
+	let seen_files = valid_entries_len + ignored_files;
 	tracing::debug!(
 		seen_files,
 		ignored_entries = ignored_entries.len(),
@@ -253,6 +275,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 		.find_many(vec![media::series::is(vec![series::path::equals(
 			path.to_string_lossy().to_string(),
 		)])])
+		.select(media_path_modified_at_select::select())
 		.exec()
 		.await?;
 	tracing::trace!(
@@ -265,44 +288,53 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 
 	let existing_media_map = existing_media
 		.into_iter()
-		.map(|m| (m.path.clone(), Media::from(m)))
+		.map(|m| (m.path.clone(), m.to_owned()))
 		.collect::<HashMap<String, _>>();
 
-	let (media_to_create, media_to_visit) =
-		valid_entries
-			.iter()
-			.fold((vec![], vec![]), |mut acc, entry| {
-				let entry_path = entry.path();
-				let entry_path_str = entry_path.to_string_lossy().to_string();
+	let (media_to_create, media_to_visit) = valid_entries
+		.par_iter()
+		// filter out entries that neither need to be created nor visited
+		.filter(|entry| {
+			let entry_path = entry.path();
+			let entry_path_str = entry_path.to_string_lossy().to_string();
 
-				if let Some(media) = existing_media_map.get(entry_path_str.as_str()) {
-					let has_been_modified = if let Some(dt) = media.modified_at.clone() {
-						file_updated_since_scan(entry, dt)
-							.map_err(|err| {
-								tracing::error!(
-									error = ?err,
-									path = ?entry_path,
-									"Failed to determine if entry has been modified since last scan"
-								)
-							})
-							.unwrap_or(false)
-					} else {
-						false
-					};
+			// TODO: support force re-scans
+			// If the media exists, we need to check if it has been modified. If it isn't
+			// modified, there is no point in visiting it
+			if let Some(media) = existing_media_map.get(entry_path_str.as_str()) {
+				let modified_at = media.modified_at.map(|dt| dt.to_rfc3339());
 
-					// If the media has been modified, we need to update it
-					if has_been_modified {
-						acc.1.push(entry_path.to_path_buf());
-					}
-
-				// Else we don't need to do anything
+				if let Some(dt) = modified_at {
+					file_updated_since_scan(entry, dt)
+						.map_err(|err| {
+							tracing::error!(
+								error = ?err,
+								path = ?entry_path,
+								"Failed to determine if entry has been modified since last scan"
+							)
+						})
+						.unwrap_or(false)
 				} else {
-					// If the media doesn't exist, we need to create it
-					acc.0.push(entry_path.to_path_buf());
+					false
 				}
+			} else {
+				// If the media doesn't exist, we need to create it
+				true
+			}
+		})
+		.partition_map::<Vec<PathBuf>, Vec<PathBuf>, _, _, _>(|entry| {
+			let entry_path = entry.path();
+			let entry_path_str = entry_path.to_string_lossy().to_string();
 
-				acc
-			});
+			// At this point, anything that's left in the iterator is either new or has been modified
+			// so the either check is simple
+
+			if existing_media_map.contains_key(entry_path_str.as_str()) {
+				Either::Right(entry_path.to_path_buf())
+			} else {
+				Either::Left(entry_path.to_path_buf())
+			}
+		});
 
 	let missing_media = existing_media_map
 		.into_par_iter()
@@ -315,6 +347,8 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 
 	let to_visit = media_to_visit.len();
 	tracing::trace!(?media_to_visit, "Found {to_visit} media to visit");
+
+	let skipped_files = valid_entries_len - (to_create - to_visit) as u64;
 
 	let is_missing = missing_media.len();
 	tracing::trace!(
@@ -330,6 +364,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 	Ok(WalkedSeries {
 		seen_files,
 		ignored_files,
+		skipped_files,
 		media_to_create,
 		media_to_visit,
 		missing_media,

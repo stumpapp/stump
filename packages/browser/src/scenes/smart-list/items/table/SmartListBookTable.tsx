@@ -1,5 +1,3 @@
-import { usePreferences } from '@/hooks'
-
 import { cn } from '@stump/components'
 import { Media } from '@stump/types'
 import {
@@ -15,6 +13,7 @@ import React, { PropsWithChildren, useCallback, useMemo } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 import { SortIcon } from '@/components/table'
+import { usePreferences } from '@/hooks'
 
 import { useSafeWorkingView, useSmartListContext } from '../../context'
 import { buildColumns, defaultColumns } from './mediaColumns'

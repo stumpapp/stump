@@ -6,7 +6,7 @@
 /**
  * An event that is emitted by the core and consumed by a client
  */
-export type CoreEvent = ({ __typename: "JobStarted" } & string) | ({ __typename: "JobUpdate" } & JobUpdate) | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: BigInt; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: BigInt; series_id: string }
+export type CoreEvent = ({ __typename: "JobStarted" } & string) | ({ __typename: "JobUpdate" } & JobUpdate) | { __typename: "JobOutput"; id: string; output: CoreJobOutput } | ({ __typename: "DiscoveredMissingLibrary" } & string) | { __typename: "CreatedMedia"; id: string; series_id: string } | { __typename: "CreatedManySeries"; count: BigInt; library_id: string } | { __typename: "CreatedOrUpdatedManyMedia"; count: BigInt; series_id: string }
 
 export type EntityVisibility = "PUBLIC" | "SHARED" | "PRIVATE"
 
@@ -27,7 +27,7 @@ export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
 
-export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown
+export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput
 
 /**
  * An update event that is emitted by a job
@@ -44,9 +44,9 @@ export type JobProgress = { status?: JobStatus | null; message?: string | null; 
 /**
  * The data that is collected and updated during the execution of a library scan job
  */
-export type LibraryScanOutput = { total_files: BigInt; total_directories: BigInt; ignored_files: BigInt; ignored_directories: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
+export type LibraryScanOutput = { total_files: BigInt; total_directories: BigInt; ignored_files: BigInt; skipped_files: BigInt; ignored_directories: BigInt; created_media: BigInt; updated_media: BigInt; created_series: BigInt; updated_series: BigInt }
 
-export type SeriesScanOutput = { total_files: BigInt; ignored_files: BigInt; created_media: BigInt; updated_media: BigInt }
+export type SeriesScanOutput = { total_files: BigInt; ignored_files: BigInt; skipped_files: BigInt; created_media: BigInt; updated_media: BigInt }
 
 export type ThumbnailGenerationJobVariant = ({ type: "SingleLibrary" } & string) | ({ type: "SingleSeries" } & string) | ({ type: "MediaGroup" } & string[])
 

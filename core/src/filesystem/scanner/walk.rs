@@ -303,7 +303,8 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 			// modified, there is no point in visiting it
 			if let Some(media) = existing_media_map.get(entry_path_str.as_str()) {
 				let modified_at = media.modified_at.map(|dt| dt.to_rfc3339());
-				let has_been_modified = if let Some(dt) = modified_at {
+
+				if let Some(dt) = modified_at {
 					file_updated_since_scan(entry, dt)
 						.map_err(|err| {
 							tracing::error!(
@@ -315,9 +316,7 @@ pub async fn walk_series(path: &Path, ctx: WalkerCtx) -> CoreResult<WalkedSeries
 						.unwrap_or(false)
 				} else {
 					false
-				};
-
-				has_been_modified
+				}
 			} else {
 				// If the media doesn't exist, we need to create it
 				true

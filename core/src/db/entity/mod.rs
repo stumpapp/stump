@@ -1,5 +1,6 @@
 mod book_club;
 pub(crate) mod common;
+mod emailer;
 mod epub;
 mod job;
 mod library;
@@ -18,6 +19,7 @@ pub use self::epub::*;
 pub use self::log::*;
 
 pub use book_club::*;
+pub use emailer::*;
 pub use job::*;
 pub use library::*;
 pub use media::*;

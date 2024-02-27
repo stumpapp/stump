@@ -690,7 +690,7 @@ model UserPreferences {
 
 model JobScheduleConfig {
   id            String @id @default(cuid())
-  // The interval (in seconds) in which to run the scheduled confu
+  // The interval (in seconds) in which to run the scheduled configuration
   interval_secs Int    @default(86400)
 
   // The libraries to exclude from scheduled scans, if any
@@ -704,13 +704,29 @@ model JobScheduleConfig {
 model Notifier {
   id Int @id @default(autoincrement())
 
-  type   String //DISCORD | TELEGRAM
-  config Bytes //too many variants to support concrete type
+  type   String // DISCORD | TELEGRAM
+  config Bytes // There will be too many variants to support concrete type(s)
 
   @@map("notifiers")
 }
 
-// TODO: notifier support
+model Emailer {
+  id Int @id @default(autoincrement())
+
+  name String @unique
+
+  sender_email        String
+  sender_display_name String
+  encrypted_password  String
+  smtp_host           String
+  smtp_port           Int
+  smtp_secure         Boolean
+
+  max_attachment_size_bytes Int? // null = unlimited
+
+  @@map("emailers")
+}
+
 // An external invitation sent to a provided email for the user to join the server
 model ServerInvitation {
   id String @id @default(cuid())
@@ -720,8 +736,6 @@ model ServerInvitation {
   granted_permissions String? // comma separated list, e.g. "book_club:create, file:upload, file:download"
   created_at          DateTime @default(now())
   expires_at          DateTime
-
-  // notifier            Notifier? @relation(fields: [notifier_id], references: [id])
 
   @@map("server_invitations")
 }

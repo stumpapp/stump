@@ -47,21 +47,21 @@
 	},
 	"createBookClubScene": {
 		"heading": "Créer un nouveau Club de Lecture",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"subtitle": "Vous pouvez créer un club de lecture privé en sélectionnant des membres, ou le rendre public pour tous sur le serveur",
 		"form": {
 			"name": {
-				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"label": "Nom",
+				"placeholder": "Mon club de lecture",
+				"description": "Le nom de votre club de lecture"
 			},
 			"description": {
 				"label": "Description",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"placeholder": "Un club de fans sur \"Notre Drapeau signifie la Mort\". Nous lisons des fictions sur la piraterie au gré de nos envies",
+				"description": "Une courte description facultative de votre club de lecture"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Club privé",
+				"description": "Si activée, seuls les utilisateurs que vous invitez pourront rejoindre votre club de lecture"
 			},
 			"member_role_spec": {
 				"heading": "Custom role mapping",

@@ -43,7 +43,7 @@
 				"fileChecksum": "Somme de contrôle"
 			}
 		},
-		"nextInSeries": "Suivant dans la série"
+		"nextInSeries": "À suivre dans la série"
 	},
 	"createBookClubScene": {
 		"heading": "Créer un nouveau Club de Lecture",
@@ -66,7 +66,7 @@
 			"member_role_spec": {
 				"heading": "Mappage des rôles personnalisé",
 				"subtitle": [
-					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
+					"Vous pouvez créer des noms personnalisés pour les rôles de votre club de lecture. Par exemple, vous pouvez renommer le rôle \"Membre\" en \"Équipier\", ou \"Créateur\" en \"Capitaine\". Si vous ne souhaitez pas utiliser de noms personnalisés, vous pouvez laisser ces champs vides et les noms par défaut seront utilisés à la place. Pour plus d'informations sur les rôles, reportez-vous à la",
 					"documentation"
 				],
 				"member": {
@@ -91,8 +91,8 @@
 				}
 			},
 			"creator_preferences": {
-				"heading": "Your membership preferences",
-				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
+				"heading": "Adhésion",
+				"subtitle": "Vos préférences d'adhésion au club de lecture",
 				"creator_display_name": {
 					"label": "Nom affiché",
 					"placeholder": "oromei",
@@ -125,7 +125,7 @@
 	},
 	"manageLibraryScene": {
 		"heading": "Gérer la Bibliothèque",
-		"subtitle": "Mettez à jour les détails ou la configuration de votre bibliothèque, modifiez les règles d'accès ou scannez des fichiers. Si vous voulez une mise à jour sur les bibliothèques et comment elles fonctionnent, consultez la",
+		"subtitle": "Mettez à jour les détails ou la configuration de votre bibliothèque, modifiez les règles d'accès ou scannez des fichiers. Si vous souhaitez rafraîchir vos connaissances sur les bibliothèques et leur fonctionnement, consultez la",
 		"subtitleLink": "documentation correspondante",
 		"form": {
 			"labels": {
@@ -447,71 +447,71 @@
 						"placeholder": "13",
 						"enforceUnset": {
 							"label": "Appliquer en cas d'absence de paramétrage",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"description": "Si activée, les utilisateurs ne pourront pas accéder aux contenus pour lesquels aucune classification par âge n'est disponible"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Restrictions d'étiquettes",
+						"description": "Empêche l'utilisateur d'accéder au contenu contenant les étiquettes sélectionnées",
+						"placeholder": "Adulte, Gore"
 					}
 				},
 				"permissions": {
 					"heading": "Permissions",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
+						"Sélectionnez les autorisations que vous souhaitez accorder à cet utilisateur. Pour plus d'informations sur la fonction de chaque autorisation, consultez la",
 						"documentation"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Clubs de lecture",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Accéder aux fonctionnalités des clubs de lecture",
+							"description": "Permet à l'utilisateur d'accéder aux fonctionnalités des clubs de lecture, incluant la visualisation et l'inscription à des clubs de lecture"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Créer des Clubs de Lecture",
+							"description": "Permet à l'utilisateur de créer de nouveaux clubs de lectures"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "Gestion des fichiers",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "Explorateur de Fichiers",
+							"description": "Permet à l'utilisateur d'accéder à l'explorateur de fichiers des bibliothèques.\nLa restriction de contenu n'est pas prise en charge lorsque cette fonctionnalité est accordée"
 						},
 						"upload": {
-							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"label": "Envoyer des fichiers",
+							"description": "Permet à l'utilisateur d'envoyer des fichiers sur le serveur"
 						}
 					},
 					"library": {
-						"label": "Library Management",
+						"label": "Gestion des bibliothèques",
 						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"label": "Créer des bibliothèques",
+							"description": "Permet à l'utilisateur de créer de nouvelles bibliothèques.\nInclut les permissions d'édition et de scan"
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "Scanner les bibliothèques",
+							"description": "Permet à l'utilisateur de lancer des scans pour les bibliothèques existantes"
 						},
 						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
+							"label": "Modifier les bibliothèques",
+							"description": "Permet à l'utilisateur de modifier les détails de base des bibliothèques existantes"
 						},
 						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"label": "Gérer les bibliothèques",
+							"description": "Permet à l'utilisateur de gérer les paramètres avancés des bibliothèques existantes.\nInclut les permissions d'édition et de scan"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "Supprimer les bibliothèques",
+							"description": "Permet à l'utilisateur de supprimer des bibliothèques existantes.\nInclut les permissions d'édition, de gestion et de scan"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "Gestion du serveur",
 						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+							"label": "Gérer le serveur",
+							"description": "Permet à l'utilisateur de gérer le serveur.\nComprend *beaucoup* d'autres autorisations"
 						}
 					},
 					"user": {
@@ -608,7 +608,7 @@
 		"web": {
 			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
 		},
-		"reconnected": "Reconnecté au serveur! Redirection...",
+		"reconnected": "Reconnecté au serveur ! Redirection...",
 		"reconnectionFailed": "Quelque chose s'est mal passé!"
 	},
 	"serverStatusOverlay": {

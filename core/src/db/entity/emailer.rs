@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 use crate::{
 	prisma::emailer,
 	utils::{decrypt_string, encrypt_string},
-	CoreError, CoreResult,
+	CoreResult, Ctx,
 };
 
 /// The config for an SMTP emailer
@@ -28,8 +28,8 @@ pub struct EmailerConfig {
 
 impl EmailerConfig {
 	/// Convert the config into a client config, which is used for the actual sending of emails
-	pub fn into_client_config(self) -> CoreResult<EmailerClientConfig> {
-		let password = decrypt_string(&self.encrypted_password)?;
+	pub async fn into_client_config(self, ctx: &Ctx) -> CoreResult<EmailerClientConfig> {
+		let password = decrypt_string(&self.encrypted_password, ctx).await?;
 		Ok(EmailerClientConfig {
 			sender_email: self.sender_email,
 			sender_display_name: self.sender_display_name,
@@ -39,13 +39,12 @@ impl EmailerConfig {
 			enable_ssl: self.enable_ssl,
 		})
 	}
-}
 
-impl TryFrom<EmailerClientConfig> for EmailerConfig {
-	type Error = CoreError;
-
-	fn try_from(config: EmailerClientConfig) -> Result<Self, Self::Error> {
-		let encrypted_password = encrypt_string(&config.password)?;
+	pub async fn from_client_config(
+		config: EmailerClientConfig,
+		ctx: &Ctx,
+	) -> CoreResult<Self> {
+		let encrypted_password = encrypt_string(&config.password, ctx).await?;
 		Ok(EmailerConfig {
 			sender_email: config.sender_email,
 			sender_display_name: config.sender_display_name,

@@ -99,6 +99,8 @@ impl EmailerClient {
 			self.config.password.clone(),
 		);
 
+		// https://github.com/lettre/lettre/issues/359
+
 		let transport = SmtpTransport::relay(self.config.host.as_relay())?
 			.port(self.config.port)
 			// .secure(self.config.enable_ssl) // TODO: figure this out

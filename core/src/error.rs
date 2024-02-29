@@ -13,6 +13,10 @@ pub enum CoreError {
 	ConfigDirDoesNotExist(String),
 	#[error("Encryption key must be set")]
 	EncryptionKeyNotSet,
+	#[error("Failed to encrypt: {0}")]
+	EncryptionFailed(String),
+	#[error("Failed to decrypt: {0}")]
+	DecryptionFailed(String),
 	#[error("Failed to initialize Stump core: {0}")]
 	InitializationError(String),
 	#[error("Query error: {0}")]

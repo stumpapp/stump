@@ -34,6 +34,8 @@ pub use event::CoreEvent;
 
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;
+/// A type alias strictly for explicitness in the return type of `init_encryption`.
+type EncryptionKeySet = bool;
 
 /// The [StumpCore] struct is the main entry point for any server-side Stump
 /// applications. It is responsible for managing incoming tasks ([InternalCoreTask]),
@@ -136,6 +138,40 @@ impl StumpCore {
 		}
 
 		Ok(())
+	}
+
+	// TODO: This is insecure for obvious reasons, and should be removed in the future. This is
+	// a step better than storing the key in a file, but still not great.
+	/// Initializes the encryption key for the database. This will only set the encryption key
+	/// if one does not already exist.
+	pub async fn init_encryption(&self) -> Result<EncryptionKeySet, CoreError> {
+		let client = self.ctx.db.clone();
+
+		let encryption_key_set = client
+			.server_config()
+			.find_first(vec![server_config::encryption_key::equals(None)])
+			.exec()
+			.await?
+			.is_some();
+
+		if encryption_key_set {
+			Ok(false)
+		} else {
+			let encryption_key = utils::create_encryption_key()?;
+			let affected_rows = client
+				.server_config()
+				.update_many(
+					vec![],
+					vec![server_config::encryption_key::set(Some(encryption_key))],
+				)
+				.exec()
+				.await?;
+			tracing::trace!(affected_rows, "Updated encryption key");
+			if affected_rows > 1 {
+				tracing::warn!("More than one encryption key was updated? This is definitely not expected");
+			}
+			Ok(affected_rows > 0)
+		}
 	}
 
 	/// Initializes the journal mode for the database. This will only set the journal mode to WAL

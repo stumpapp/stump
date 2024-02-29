@@ -1,6 +1,6 @@
 use simple_crypt::{decrypt, encrypt};
 
-use crate::{config::StumpConfig, CoreError, CoreResult};
+use crate::{CoreError, CoreResult, Ctx};
 
 pub fn chain_optional_iter<T>(
 	required: impl IntoIterator<Item = T>,
@@ -14,30 +14,24 @@ pub fn chain_optional_iter<T>(
 		.collect()
 }
 
-// TODO: consider unique errors for encryption/decryption
+pub fn create_encryption_key() -> CoreResult<String> {
+	let random_bytes = rand::random::<[u8; 32]>();
 
-pub fn encrypt_string(str: &str) -> CoreResult<String> {
-	let encryption_key = StumpConfig::get_encryption_key();
-	let encrypted_bytes = encrypt(
-		str.as_bytes(),
-		encryption_key
-			.ok_or(CoreError::EncryptionKeyNotSet)?
-			.as_bytes(),
-	)
-	.map_err(|e| CoreError::InternalError(e.to_string()))?;
-	String::from_utf8(encrypted_bytes)
-		.map_err(|e| CoreError::InternalError(e.to_string()))
+	Ok(data_encoding::BASE64.encode(&random_bytes))
 }
 
-pub fn decrypt_string(encrypted_str: &str) -> CoreResult<String> {
-	let encryption_key = StumpConfig::get_encryption_key();
-	let decrypted_bytes = decrypt(
-		encrypted_str.as_bytes(),
-		encryption_key
-			.ok_or(CoreError::EncryptionKeyNotSet)?
-			.as_bytes(),
-	)
-	.map_err(|e| CoreError::InternalError(e.to_string()))?;
+pub async fn encrypt_string(str: &str, ctx: &Ctx) -> CoreResult<String> {
+	let encryption_key = ctx.get_encryption_key().await?;
+	let encrypted_bytes = encrypt(str.as_bytes(), encryption_key.as_bytes())
+		.map_err(|e| CoreError::EncryptionFailed(e.to_string()))?;
+	String::from_utf8(encrypted_bytes)
+		.map_err(|e| CoreError::EncryptionFailed(e.to_string()))
+}
+
+pub async fn decrypt_string(encrypted_str: &str, ctx: &Ctx) -> CoreResult<String> {
+	let encryption_key = ctx.get_encryption_key().await?;
+	let decrypted_bytes = decrypt(encrypted_str.as_bytes(), encryption_key.as_bytes())
+		.map_err(|e| CoreError::DecryptionFailed(e.to_string()))?;
 	String::from_utf8(decrypted_bytes)
-		.map_err(|e| CoreError::InternalError(e.to_string()))
+		.map_err(|e| CoreError::DecryptionFailed(e.to_string()))
 }

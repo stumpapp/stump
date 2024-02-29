@@ -1,4 +1,4 @@
-use crate::{prisma::notifier, utils::encrypt_string, CoreError, CoreResult};
+use crate::{prisma::notifier, utils::encrypt_string, CoreError, CoreResult, Ctx};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::str::FromStr;
@@ -61,11 +61,11 @@ pub enum NotifierConfigInput {
 }
 
 impl NotifierConfigInput {
-	pub fn into_config(self) -> CoreResult<NotifierConfig> {
+	pub async fn into_config(self, ctx: &Ctx) -> CoreResult<NotifierConfig> {
 		match self {
 			NotifierConfigInput::Discord(config) => Ok(NotifierConfig::Discord(config)),
 			NotifierConfigInput::Telegram(config) => {
-				let encrypted_token = encrypt_string(&config.token)?;
+				let encrypted_token = encrypt_string(&config.token, ctx).await?;
 				Ok(NotifierConfig::Telegram(TelegramConfig {
 					encrypted_token,
 					chat_id: config.chat_id,

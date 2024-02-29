@@ -22,7 +22,6 @@ pub mod env_keys {
 	pub const SESSION_TTL_KEY: &str = "SESSION_TTL";
 	pub const SESSION_EXPIRY_INTERVAL_KEY: &str = "SESSION_EXPIRY_CLEANUP_INTERVAL";
 	pub const SCANNER_CHUNK_SIZE_KEY: &str = "STUMP_SCANNER_CHUNK_SIZE";
-	pub const ENCRYPTION_KEY: &str = "STUMP_ENCRYPTION_KEY";
 }
 use env_keys::*;
 
@@ -362,13 +361,6 @@ impl StumpConfig {
 	/// Returns a `PathBuf` to the Stump log file.
 	pub fn get_log_file(&self) -> PathBuf {
 		self.get_config_dir().join("Stump.log")
-	}
-
-	/// Get the encryption key from the environment, if it exists. The key is not
-	/// stored in the actual `StumpConfig` because it is sensitive and should not
-	/// be written to disk.
-	pub fn get_encryption_key() -> Option<String> {
-		env::var(ENCRYPTION_KEY).ok()
 	}
 }
 

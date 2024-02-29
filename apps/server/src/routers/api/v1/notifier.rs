@@ -132,7 +132,7 @@ async fn create_notifier(
 	enforce_session_permissions(&session, &[UserPermission::CreateNotifier])?;
 
 	let client = &ctx.db;
-	let config = payload.config.into_config()?.into_bytes()?;
+	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
 	let notifier = client
 		.notifier()
 		.create(payload._type.to_string(), config, vec![])
@@ -168,7 +168,7 @@ async fn update_notifier(
 	enforce_session_permissions(&session, &[UserPermission::ManageNotifier])?;
 
 	let client = &ctx.db;
-	let config = payload.config.into_config()?.into_bytes()?;
+	let config = payload.config.into_config(&ctx).await?.into_bytes()?;
 	let notifier = client
 		.notifier()
 		.update(
@@ -216,12 +216,11 @@ async fn patch_notifier(
 
 	let client = &ctx.db;
 
-	let config = payload
-		.config
-		.map(|input| input.into_config())
-		.transpose()?
-		.map(|config| config.into_bytes())
-		.transpose()?;
+	let config = if let Some(config) = payload.config {
+		Some(config.into_config(&ctx).await?.into_bytes()?)
+	} else {
+		None
+	};
 
 	let patched_notifier = client
 		.notifier()

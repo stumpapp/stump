@@ -746,6 +746,10 @@ model ServerConfig {
   public_url String? // The public URL of the server, if any
 
   initial_wal_setup_complete Boolean @default(false) // Whether the initial WAL setup has been completed
+  // TODO: For obvious reasons, this is severely insecure lol i.e. don't store an encryption key in the database...
+  // However, I don't have a better solution at the moment. This, at best, provides a small barrier to entry I guess 
+  // for bad actors. I am not overly knowledgeable in cryptography, so I'm not sure what the best solution is here.
+  encryption_key             String? // The encryption key used to encrypt sensitive data
 
   // TODO: make this an array, so we can support multiple job types and not assume it will only ever be scheduled scan
   // The schedule configuration. If not set, no scheduled scans will be run.

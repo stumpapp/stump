@@ -710,17 +710,28 @@ model Notifier {
   @@map("notifiers")
 }
 
+model RegisteredEmailDevice {
+  id Int @id @default(autoincrement())
+
+  name      String
+  email     String
+  forbidden Boolean @default(false)
+
+  @@map("registered_email_devices")
+}
+
 model Emailer {
   id Int @id @default(autoincrement())
 
-  name String @unique
+  name       String  @unique
+  is_primary Boolean @default(false)
 
   sender_email        String
   sender_display_name String
   encrypted_password  String
   smtp_host           String
   smtp_port           Int
-  smtp_secure         Boolean
+  // smtp_secure         Boolean
 
   max_attachment_size_bytes Int? // null = unlimited
 

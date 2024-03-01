@@ -5,6 +5,7 @@ import {
 	Brush,
 	Cog,
 	LucideIcon,
+	Mail,
 	PcCase,
 	ScrollText,
 	ShieldCheck,
@@ -115,6 +116,13 @@ export const routeGroups: RouteGroup[] = [
 				localeKey: 'server/access',
 				permission: 'server:manage',
 				to: '/settings/server/access',
+			},
+			{
+				icon: Mail,
+				label: 'Email',
+				localeKey: 'server/email',
+				permission: 'server:manage',
+				to: '/settings/server/email',
 			},
 			{
 				disabled: true,

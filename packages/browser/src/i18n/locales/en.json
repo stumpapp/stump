@@ -295,6 +295,7 @@
 				"users": "Users",
 				"jobs": "Jobs",
 				"access": "Access",
+				"email": "Email",
 				"notifications": "Notifications",
 				"label": "Server"
 			}
@@ -599,6 +600,14 @@
 				},
 				"createSubmitButton": "Create user",
 				"updateSubmitButton": "Update user"
+			}
+		},
+		"server/email": {
+			"helmet": "Email settings",
+			"title": "Email",
+			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
+			"sections": {
+				"singleInstanceDisclaimer": "For simplicity, Stump only supports a single SMTP configuration. If you need to send emails from multiple addresses, please create a feature request"
 			}
 		}
 	},

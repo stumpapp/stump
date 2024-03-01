@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use lettre::{
 	address::AddressError,
 	message::{header::ContentType, Attachment, MultiPart},
@@ -49,17 +51,21 @@ pub struct EmailerClientConfig {
 	pub host: EmailerSMTPHost,
 	/// The SMTP port to use
 	pub port: u16,
-	/// Whether to use SSL
-	pub enable_ssl: bool,
+	/// The maximum size of an attachment in bytes
+	pub max_attachment_size_bytes: Option<i32>,
 }
 
 pub struct EmailerClient {
 	config: EmailerClientConfig,
+	template_dir: PathBuf,
 }
 
 impl EmailerClient {
-	pub fn new(config: EmailerClientConfig) -> Self {
-		Self { config }
+	pub fn new(config: EmailerClientConfig, template_dir: PathBuf) -> Self {
+		Self {
+			config,
+			template_dir,
+		}
 	}
 
 	pub async fn send_attachment(
@@ -79,6 +85,8 @@ impl EmailerClient {
 			.parse()
 			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
 
+		// TODO: render_template
+
 		let attachment = Attachment::new(name.to_string()).body(content, content_type);
 		let email = Message::builder()
 			.from(from)
@@ -88,8 +96,8 @@ impl EmailerClient {
 				MultiPart::mixed()
 					// .singlepart(
 					// 	SinglePart::builder()
-					// 		.header(header::ContentType::TEXT_PLAIN)
-					// 		.body(String::from(message)),
+					// 		.header(header::ContentType::TEXT_HTML)
+					// 		.body(String::from(html)),
 					// )
 					.singlepart(attachment),
 			)?;
@@ -103,7 +111,6 @@ impl EmailerClient {
 
 		let transport = SmtpTransport::relay(self.config.host.as_relay())?
 			.port(self.config.port)
-			// .secure(self.config.enable_ssl) // TODO: figure this out
 			.credentials(creds)
 			.build();
 

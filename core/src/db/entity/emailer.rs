@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 use crate::{
 	prisma::emailer,
 	utils::{decrypt_string, encrypt_string},
-	CoreResult, Ctx,
+	CoreError, CoreResult, Ctx,
 };
 
 /// The config for an SMTP emailer
@@ -17,13 +17,14 @@ pub struct EmailerConfig {
 	/// The display name to use for the sender
 	pub sender_display_name: String,
 	/// The encrypted password to use for the SMTP server
+	#[serde(skip_serializing)]
 	pub encrypted_password: String,
 	/// The SMTP host to use
 	pub smtp_host: EmailerSMTPHost,
 	/// The SMTP port to use
 	pub smtp_port: u16,
-	/// Whether to use SSL
-	pub enable_ssl: bool,
+	/// The maximum size of an attachment in bytes
+	pub max_attachment_size_bytes: Option<i32>,
 }
 
 impl EmailerConfig {
@@ -36,7 +37,7 @@ impl EmailerConfig {
 			password,
 			host: self.smtp_host,
 			port: self.smtp_port,
-			enable_ssl: self.enable_ssl,
+			max_attachment_size_bytes: self.max_attachment_size_bytes,
 		})
 	}
 
@@ -51,10 +52,12 @@ impl EmailerConfig {
 			encrypted_password,
 			smtp_host: config.host,
 			smtp_port: config.port,
-			enable_ssl: config.enable_ssl,
+			max_attachment_size_bytes: config.max_attachment_size_bytes,
 		})
 	}
 }
+
+pub type EmailerConfigInput = EmailerClientConfig;
 
 /// An SMTP emailer entity, which stores SMTP configuration data to be used for sending emails.
 ///
@@ -63,23 +66,30 @@ impl EmailerConfig {
 #[derive(Serialize, Deserialize, ToSchema, Type)]
 pub struct SMTPEmailer {
 	pub id: i32,
+	/// The friendly name for the emailer, used primarily to identify it in the UI
 	pub name: String,
+	/// Whether the emailer is the primary emailer for the system
+	pub is_primary: bool,
+	/// The configuration for the emailer
 	pub config: EmailerConfig,
 }
 
-impl From<emailer::Data> for SMTPEmailer {
-	fn from(data: emailer::Data) -> Self {
-		SMTPEmailer {
+impl TryFrom<emailer::Data> for SMTPEmailer {
+	type Error = CoreError;
+
+	fn try_from(data: emailer::Data) -> Result<Self, Self::Error> {
+		Ok(SMTPEmailer {
 			id: data.id,
 			name: data.name,
+			is_primary: data.is_primary,
 			config: EmailerConfig {
 				sender_email: data.sender_email,
 				sender_display_name: data.sender_display_name,
 				encrypted_password: data.encrypted_password,
 				smtp_host: EmailerSMTPHost::from(data.smtp_host),
 				smtp_port: data.smtp_port as u16,
-				enable_ssl: data.smtp_secure,
+				max_attachment_size_bytes: data.max_attachment_size_bytes,
 			},
-		}
+		})
 	}
 }

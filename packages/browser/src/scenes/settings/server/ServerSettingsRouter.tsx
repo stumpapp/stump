@@ -1,7 +1,8 @@
 import React, { lazy } from 'react'
 import { Route, Routes } from 'react-router'
 
-import { UsersRouter } from './users/index.ts'
+import { EmailSettingsRouter } from './email'
+import { UsersRouter } from './users'
 
 const GeneralServerSettingsScene = lazy(() => import('./general/GeneralServerSettingsScene.tsx'))
 const ServerLogsScene = lazy(() => import('./logs/ServerLogsScene.tsx'))
@@ -14,6 +15,7 @@ export default function ServerSettingsRouter() {
 			<Route path="logs" element={<ServerLogsScene />} />
 			<Route path="jobs" element={<JobSettingsScene />} />
 			<Route path="users/*" element={<UsersRouter />} />
+			<Route path="email/*" element={<EmailSettingsRouter />} />
 		</Routes>
 	)
 }

@@ -9,6 +9,7 @@ rust-version.workspace = true
 handlebars = "5.1.0"
 lettre = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 specta = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }

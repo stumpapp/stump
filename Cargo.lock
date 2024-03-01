@@ -1801,6 +1801,7 @@ dependencies = [
  "handlebars",
  "lettre",
  "serde",
+ "serde_json",
  "specta",
  "thiserror",
  "tracing",

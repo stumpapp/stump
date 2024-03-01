@@ -10,4 +10,8 @@ pub enum EmailError {
 	EmailBuildFailed(#[from] lettre::error::Error),
 	#[error("Failed to send email: {0}")]
 	SendFailed(#[from] smtp::Error),
+	#[error("Failed to register template: {0}")]
+	TemplateRegistrationFailed(#[from] handlebars::TemplateError),
+	#[error("Failed to render template: {0}")]
+	TemplateRenderFailed(#[from] handlebars::RenderError),
 }

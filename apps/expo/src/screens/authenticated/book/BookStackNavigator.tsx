@@ -2,7 +2,7 @@ import { NavigationProp } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import BookOverview from './BookOverview'
-import { BookReader } from './reader'
+import BookReaderScreen from './BookReaderScreen'
 
 const Stack = createNativeStackNavigator()
 
@@ -26,7 +26,11 @@ export default function BookStackNavigator() {
 	return (
 		<Stack.Navigator>
 			<Stack.Screen name="BookOverview" component={BookOverview} options={{ headerShown: false }} />
-			<Stack.Screen name="BookReader" component={BookReader} options={{ headerShown: false }} />
+			<Stack.Screen
+				name="BookReader"
+				component={BookReaderScreen}
+				options={{ headerShown: false }}
+			/>
 		</Stack.Navigator>
 	)
 }

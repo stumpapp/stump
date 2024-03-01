@@ -32,7 +32,7 @@ export default function Explore() {
 	const windowSize = books.length > 50 ? books.length / 4 : 21
 
 	return (
-		<ScreenRootView>
+		<ScreenRootView disabledBottomInset>
 			<FlatList
 				className="w-full"
 				data={books}

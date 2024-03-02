@@ -1,5 +1,5 @@
 import React from 'react'
 
-export default function NamedDevices() {
+export default function EmailerListItem() {
 	return <div></div>
 }

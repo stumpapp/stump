@@ -15,6 +15,10 @@ import {
 type SubItem = {
 	localeKey: string
 	matcher: (path: string) => boolean
+	backlink?: {
+		localeKey: string
+		to: string
+	}
 }
 
 type Route = {
@@ -96,10 +100,18 @@ export const routeGroups: RouteGroup[] = [
 				permission: 'user:manage',
 				subItems: [
 					{
+						backlink: {
+							localeKey: 'server/users.title',
+							to: '/settings/server/users',
+						},
 						localeKey: 'server/users.createUser',
 						matcher: (path: string) => path.startsWith('/settings/server/users/create'),
 					},
 					{
+						backlink: {
+							localeKey: 'server/users.title',
+							to: '/settings/server/users',
+						},
 						localeKey: 'server/users.updateUser',
 						matcher: (path: string) => {
 							const match = path.match(/\/settings\/server\/users\/[a-zA-Z0-9]+\/manage/)
@@ -122,6 +134,16 @@ export const routeGroups: RouteGroup[] = [
 				label: 'Email',
 				localeKey: 'server/email',
 				permission: 'server:manage',
+				subItems: [
+					{
+						backlink: {
+							localeKey: 'server/email.title',
+							to: '/settings/server/email',
+						},
+						localeKey: 'server/email.createEmailer',
+						matcher: (path: string) => path.startsWith('/settings/server/email/new'),
+					},
+				],
 				to: '/settings/server/email',
 			},
 			{

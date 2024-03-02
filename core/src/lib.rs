@@ -232,6 +232,7 @@ impl StumpCore {
 mod tests {
 	use std::{fs::File, io::Write, path::PathBuf};
 
+	use email::EmailerSMTPHost;
 	use specta::{
 		ts::{export, BigIntExportBehavior, ExportConfiguration, TsExportError},
 		NamedType,
@@ -285,9 +286,9 @@ mod tests {
 
 		file.write_all(format!("{}\n\n", ts_export::<PersistedJob>()?).as_bytes())?;
 		// file.write_all(format!("{}\n\n", ts_export::<CoreJobOutput>()?).as_bytes())?;
-		// TODO: Fix this... Must move all job defs to the core...
+		// TODO: Fix this... Must move all job defs to the core... Otherwise, the `unknown` type swallows the others in the union
 		file.write_all(
-			"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown\n\n".to_string()
+			"export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput\n\n".to_string()
 			.as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<JobUpdate>()?).as_bytes())?;
@@ -309,6 +310,12 @@ mod tests {
 		file.write_all(format!("{}\n\n", ts_export::<AgeRestriction>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UserPreferences>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<LoginActivity>()?).as_bytes())?;
+
+		file.write_all(format!("{}\n\n", ts_export::<SMTPEmailer>()?).as_bytes())?;
+		file.write_all(format!("{}\n\n", ts_export::<EmailerSMTPHost>()?).as_bytes())?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<RegisteredEmailDevice>()?).as_bytes(),
+		)?;
 
 		file.write_all(format!("{}\n\n", ts_export::<FileStatus>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<Library>()?).as_bytes())?;

@@ -18,8 +18,9 @@ mod tests {
 	};
 
 	use super::v1::{
-		auth::*, book_club::*, epub::*, job::*, library::*, media::*, metadata::*,
-		series::*, smart_list::*, user::*, ClaimResponse, StumpVersion, UpdateCheck,
+		auth::*, book_club::*, emailer::*, epub::*, job::*, library::*, media::*,
+		metadata::*, series::*, smart_list::*, user::*, ClaimResponse, StumpVersion,
+		UpdateCheck,
 	};
 
 	#[allow(dead_code)]
@@ -54,6 +55,7 @@ mod tests {
 
 		file.write_all(b"// SERVER TYPE GENERATION\n\n")?;
 
+		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<StumpVersion>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateCheck>()?).as_bytes())?;
 		file.write_all(
@@ -65,7 +67,14 @@ mod tests {
 			format!("{}\n\n", ts_export::<UpdateUserPreferences>()?).as_bytes(),
 		)?;
 		file.write_all(format!("{}\n\n", ts_export::<DeleteUser>()?).as_bytes())?;
-		file.write_all(format!("{}\n\n", ts_export::<ClaimResponse>()?).as_bytes())?;
+
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateEmailer>()?).as_bytes(),
+		)?;
+		file.write_all(
+			format!("{}\n\n", ts_export::<CreateOrUpdateEmailDevice>()?).as_bytes(),
+		)?;
+		file.write_all(format!("{}\n\n", ts_export::<PatchEmailDevice>()?).as_bytes())?;
 
 		file.write_all(format!("{}\n\n", ts_export::<CreateLibrary>()?).as_bytes())?;
 		file.write_all(format!("{}\n\n", ts_export::<UpdateLibrary>()?).as_bytes())?;

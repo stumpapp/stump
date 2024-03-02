@@ -607,7 +607,27 @@
 			"title": "Email",
 			"description": "Settings related to the configuring an SMTP emailer for your Stump server instance",
 			"sections": {
-				"singleInstanceDisclaimer": "For simplicity, Stump only supports a single SMTP configuration. If you need to send emails from multiple addresses, please create a feature request"
+				"emailers": {
+					"title": "SMTP emailers",
+					"description": "The clients you have configured for sending emails from your Stump server instance",
+					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
+					"list": {
+						"emptyHeading": "No SMTP emailers configured"
+					}
+				},
+				"devices": {
+					"title": "Email devices",
+					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"table": {
+						"emptyHeading": "No devices registered",
+						"emptySubtitle": "Create a new device alias for future use"
+					}
+				}
+			},
+			"createEmailer": {
+				"helmet": "Create emailer",
+				"title": "Create emailer",
+				"description": "Create a new SMTP emailer for your Stump server instance"
 			}
 		}
 	},

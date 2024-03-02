@@ -16,6 +16,8 @@ type SettingsPage =
 	| 'server/logs'
 	| 'server/users'
 	| 'server/access'
+	| 'server/email'
+	| 'server/email/new'
 	| 'server/notifications'
 type DocTopic = 'access-control' | 'book-club'
 type BookClubTab = 'overview' | 'members' | 'chat-board' | 'settings'
@@ -80,6 +82,7 @@ const paths = {
 	bookSearch: () => '/books',
 	docs: (topic?: DocTopic, section?: string) =>
 		`https://www.stumpapp.dev/guides/${topic || ''}${section ? `#${section}` : ''}`,
+	createEmailer: () => paths.settings('server/email/new'),
 	home: () => '/',
 	libraryBooks: (id: string, page?: number) => {
 		if (page !== undefined) {

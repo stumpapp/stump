@@ -227,5 +227,13 @@ function SortIcon({ direction }: { direction: 'asc' | 'desc' | null }) {
 		return null
 	}
 
-	return <span className="ml-1.5">{direction === 'asc' ? <ArrowUp /> : <ArrowDown />}</span>
+	return (
+		<span className="ml-1.5">
+			{direction === 'asc' ? (
+				<ArrowUp className="h-3 w-3 text-muted" />
+			) : (
+				<ArrowDown className="h-3 w-3 text-muted" />
+			)}
+		</span>
+	)
 }

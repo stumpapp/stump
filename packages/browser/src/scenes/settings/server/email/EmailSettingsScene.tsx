@@ -1,9 +1,11 @@
-import { Alert } from '@stump/components'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
 import { useLocaleContext } from '@/i18n'
+
+import { DevicesSection } from './devices'
+import { EmailersSection } from './emailers'
 
 export default function EmailSettingsScene() {
 	const { t } = useLocaleContext()
@@ -16,13 +18,8 @@ export default function EmailSettingsScene() {
 
 			<ContentContainer>
 				<div className="flex flex-col gap-12">
-					<Alert level="warning" rounded="sm" icon="warning">
-						<Alert.Content>
-							{t('settingsScene.server/email.sections.singleInstanceDisclaimer')}
-						</Alert.Content>
-					</Alert>
-
-					{/* <ServerInfoSection /> */}
+					<EmailersSection />
+					<DevicesSection />
 				</div>
 			</ContentContainer>
 		</SceneContainer>

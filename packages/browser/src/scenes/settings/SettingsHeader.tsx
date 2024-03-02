@@ -1,4 +1,4 @@
-import { cx, Heading, Text } from '@stump/components'
+import { cx, Heading, Link, Text } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
@@ -49,6 +49,18 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 		return matchedSubItemKey || activeRouteGroup?.localeKey
 	}, [activeRouteGroup, location.pathname])
 
+	const backlink = useMemo(() => {
+		const matchedSubItem = activeRouteGroup?.subItems?.find((subItem) =>
+			subItem.matcher(location.pathname),
+		)
+
+		if (matchedSubItem?.backlink) {
+			return matchedSubItem.backlink
+		} else {
+			return null
+		}
+	}, [activeRouteGroup?.subItems, location.pathname])
+
 	const translatedHeader = t(`settingsScene.${activeRouteKey}.title`)
 
 	const descriptionKey = `settingsScene.${activeRouteKey}.description`
@@ -64,7 +76,15 @@ export default function SettingsHeader({ renderNavigation }: Props) {
 			style={{ maxWidth }}
 		>
 			{renderNavigation && <SettingsNavigation />}
-			<div>
+			<div className="text-muted">
+				{backlink && (
+					<span className="flex items-center gap-x-1 text-xs text-muted">
+						<Link to={backlink.to} className="text-muted no-underline hover:underline">
+							{t(`settingsScene.${backlink.localeKey}`) ?? 'Back'}
+						</Link>
+						{' /'}
+					</span>
+				)}
 				<Heading size="lg" className="font-bold">
 					{translatedHeader}
 				</Heading>

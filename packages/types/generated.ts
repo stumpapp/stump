@@ -27,7 +27,7 @@ export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
 
-export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown
+export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput
 
 /**
  * An update event that is emitted by a job
@@ -60,13 +60,24 @@ export type User = { id: string; username: string; is_server_owner: boolean; ava
  * Permissions that can be granted to a user. Some permissions are implied by others,
  * and will be automatically granted if the "parent" permission is granted.
  */
-export type UserPermission = "bookclub:read" | "bookclub:create" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
+export type UserPermission = "bookclub:read" | "bookclub:create" | "emailer:read" | "emailer:create" | "emailer:manage" | "email:send" | "email:arbitrary_send" | "smartlist:read" | "file:explorer" | "file:upload" | "file:download" | "library:create" | "library:edit" | "library:scan" | "library:manage" | "library:delete" | "user:read" | "user:manage" | "notifier:read" | "notifier:create" | "notifier:manage" | "notifier:delete" | "server:manage"
 
 export type AgeRestriction = { age: number; restrict_on_unset: boolean }
 
 export type UserPreferences = { id: string; locale: string; app_theme: string; show_query_indicator: boolean; preferred_layout_mode?: string; primary_navigation_mode?: string; layout_max_width_px?: number | null; enable_discord_presence?: boolean; enable_compact_display?: boolean; enable_double_sidebar?: boolean; enable_hide_scrollbar?: boolean; enable_replace_primary_sidebar?: boolean; prefer_accent_color?: boolean; show_thumbnails_in_headers?: boolean }
 
 export type LoginActivity = { id: string; ip_address: string; user_agent: string; authentication_successful: boolean; timestamp: string; user?: User | null }
+
+/**
+ * An SMTP emailer entity, which stores SMTP configuration data to be used for sending emails.
+ * 
+ * will be configurable. This will be expanded in the future.
+ */
+export type SMTPEmailer = { id: number; name: string; is_primary: boolean; config: EmailerConfig }
+
+export type EmailerSMTPHost = "Gmail" | "Outlook" | { Custom: string }
+
+export type RegisteredEmailDevice = { id: number; name: string; email: string; forbidden: boolean }
 
 export type FileStatus = "UNKNOWN" | "READY" | "UNSUPPORTED" | "ERROR" | "MISSING"
 
@@ -233,6 +244,8 @@ export type Pagination = null | PageQuery | CursorQuery
 
 // SERVER TYPE GENERATION
 
+export type ClaimResponse = { is_claimed: boolean }
+
 export type StumpVersion = { semver: string; rev: string; compile_time: string }
 
 export type UpdateCheck = { current_semver: string; latest_semver: string; has_update_available: boolean }
@@ -247,7 +260,20 @@ export type UpdateUserPreferences = { id: string; locale: string; preferred_layo
 
 export type DeleteUser = { hard_delete: boolean | null }
 
-export type ClaimResponse = { is_claimed: boolean }
+/**
+ * Input object for creating or updating an emailer
+ */
+export type CreateOrUpdateEmailer = { name: string; is_primary: boolean; config: EmailerClientConfig }
+
+/**
+ * Input object for creating or updating an email device
+ */
+export type CreateOrUpdateEmailDevice = { name: string; email: string; forbidden: boolean }
+
+/**
+ * Patch an existing email device by its ID
+ */
+export type PatchEmailDevice = { name: string | null; email: string | null; forbidden: boolean | null }
 
 export type CreateLibrary = { name: string; path: string; description: string | null; tags: Tag[] | null; scan_mode: LibraryScanMode | null; library_options: LibraryOptions | null }
 

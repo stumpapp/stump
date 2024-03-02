@@ -713,12 +713,14 @@ model Notifier {
 model RegisteredEmailDevice {
   id Int @id @default(autoincrement())
 
-  name      String
+  name      String  @unique
   email     String
   forbidden Boolean @default(false)
 
   @@map("registered_email_devices")
 }
+
+// TODO: support send history?
 
 model Emailer {
   id Int @id @default(autoincrement())

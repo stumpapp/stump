@@ -1,6 +1,5 @@
-import { emailerApi, emailerQueryKeys } from '@stump/api'
-import { useQuery } from '@stump/client'
-import { ButtonOrLink, Card, Heading, Text } from '@stump/components'
+import { useEmailersQuery } from '@stump/client'
+import { ButtonOrLink, Card, Heading } from '@stump/components'
 import { CircleSlash2 } from 'lucide-react'
 import React from 'react'
 
@@ -11,16 +10,9 @@ import paths from '@/paths'
 export default function EmailersList() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
-	const { data: emailers } = useQuery(
-		[emailerQueryKeys.getEmailers],
-		async () => {
-			const { data } = await emailerApi.getEmailers()
-			return data
-		},
-		{
-			suspense: true,
-		},
-	)
+	const { emailers } = useEmailersQuery({
+		suspense: true,
+	})
 
 	const canCreate = checkPermission('emailer:create')
 

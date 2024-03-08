@@ -624,6 +624,12 @@
 					}
 				}
 			},
+			"createOrUpdateForm": {
+				"name": {
+					"label": "Name",
+					"description": "A friendly name to uniquely identify this emailer"
+				}
+			},
 			"createEmailer": {
 				"helmet": "Create emailer",
 				"title": "Create emailer",

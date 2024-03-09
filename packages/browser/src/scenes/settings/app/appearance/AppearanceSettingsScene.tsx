@@ -7,6 +7,7 @@ import { useLocaleContext } from '@/i18n'
 import DisplaySpacingPreference from './DisplaySpacingPreference'
 import DoubleSidebarToggle from './DoubleSidebarToggle'
 import HideScrollbarToggle from './HideScrollbarToggle'
+import LiveRefetchToggle from './LiveRefetchToggle'
 import MaxWidthPreference from './MaxWidthPreference'
 import PreferColorToggle from './PreferColorToggle'
 import PrimaryNavigationPreference from './PrimaryNavigationPreference'
@@ -42,6 +43,7 @@ export default function AppearanceSettingsScene() {
 					<PreferColorToggle />
 					<HideScrollbarToggle />
 					<QueryIndicatorToggle />
+					<LiveRefetchToggle />
 				</div>
 			</ContentContainer>
 		</Container>

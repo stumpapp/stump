@@ -13,9 +13,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
+import { useTheme } from '@/hooks'
+
 import EpubReaderContainer from './EpubReaderContainer'
 import { stumpDark } from './themes'
-import { useTheme } from '@/hooks'
 
 // NOTE: http://epubjs.org/documentation/0.3/ for epubjs documentation overview
 

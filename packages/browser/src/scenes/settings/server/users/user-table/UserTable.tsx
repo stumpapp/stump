@@ -1,6 +1,6 @@
 import { Badge, Card, Text, ToolTip } from '@stump/components'
 import { User } from '@stump/types'
-import { createColumnHelper, getCoreRowModel } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
 import { HelpCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -116,7 +116,6 @@ export default function UserTable() {
 				sortable
 				columns={columns}
 				options={{
-					getCoreRowModel: getCoreRowModel(),
 					manualPagination: true,
 					onPaginationChange: setPagination,
 					pageCount,

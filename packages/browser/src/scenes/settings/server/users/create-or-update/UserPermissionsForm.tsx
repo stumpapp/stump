@@ -14,6 +14,7 @@ export const allPermissions = [
 	'bookclub:create',
 	'file:explorer',
 	'file:upload',
+	'file:download',
 	'library:create',
 	'library:edit',
 	'library:scan',
@@ -33,6 +34,7 @@ export const userPermissionSchema = z.enum(allPermissions)
 const associatedPermissions: Record<UserPermission, UserPermission[]> = {
 	'bookclub:create': ['bookclub:read'],
 	'bookclub:read': [],
+	'file:download': [],
 	'file:explorer': [],
 	'file:upload': [],
 	'library:create': ['library:edit'],

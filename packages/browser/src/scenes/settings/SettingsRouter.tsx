@@ -1,8 +1,6 @@
 import React from 'react'
 import { Navigate, Route, Routes } from 'react-router'
 
-import ServerOwnerRouteWrapper from '@/components/ServerOwnerRouteWrapper.tsx'
-
 import { AppSettingsRouter } from './app/index.ts'
 import { ServerSettingsRouter } from './server/index.ts'
 import SettingsLayout from './SettingsLayout.tsx'
@@ -16,9 +14,7 @@ export default function SettingsRouter() {
 			<Route element={<SettingsLayout />}>
 				<Route path="" element={<Navigate to="app/account" replace />} />
 				<Route path="app/*" element={<AppSettingsRouter />} />
-				<Route path="server/*" element={<ServerOwnerRouteWrapper />}>
-					<Route path="*" element={<ServerSettingsRouter />} />
-				</Route>
+				<Route path="server/*" element={<ServerSettingsRouter />} />
 				<Route path="*" element={<Navigate to="app/account" replace />} />
 			</Route>
 		</Routes>

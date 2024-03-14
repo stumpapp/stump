@@ -73,7 +73,7 @@ pub fn parse_age_restriction(str_sequence: &str) -> Option<i32> {
 	// check for the third case \d and up
 	if let Ok(re) = Regex::new(r"(\d+) and up") {
 		let age = re
-			.captures(&str_sequence)
+			.captures(str_sequence)
 			.and_then(|c| c.get(1))
 			.and_then(|m| m.as_str().parse().ok());
 
@@ -87,7 +87,7 @@ pub fn parse_age_restriction(str_sequence: &str) -> Option<i32> {
 	// check for the fourth case \d+
 	if let Ok(re) = Regex::new(r"(\d+)") {
 		let age = re
-			.captures(&str_sequence)
+			.captures(str_sequence)
 			.and_then(|c| c.get(1))
 			.and_then(|m| m.as_str().parse().ok());
 
@@ -101,7 +101,7 @@ pub fn parse_age_restriction(str_sequence: &str) -> Option<i32> {
 	// check for the fifth case \d-\d, only the first number is used
 	if let Ok(re) = Regex::new(r"(\d+)-(\d+)") {
 		let age = re
-			.captures(&str_sequence)
+			.captures(str_sequence)
 			.and_then(|c| c.get(1))
 			.and_then(|m| m.as_str().parse().ok());
 

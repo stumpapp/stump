@@ -1,10 +1,10 @@
-import { usePreferences } from '@/hooks'
 import { cn, cx } from '@stump/components'
 import { Suspense } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useMediaMatch } from 'rooks'
 
 import { Container } from '@/components/container'
+import { usePreferences } from '@/hooks'
 import { useUserStore } from '@/stores'
 
 import SettingsHeader from './SettingsHeader'

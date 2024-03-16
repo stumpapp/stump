@@ -378,6 +378,7 @@ async fn update_preferences(
 				),
 				user_preferences::layout_max_width_px::set(input.layout_max_width_px),
 				user_preferences::show_query_indicator::set(input.show_query_indicator),
+				user_preferences::enable_live_refetch::set(input.enable_live_refetch),
 				user_preferences::enable_discord_presence::set(
 					input.enable_discord_presence,
 				),
@@ -430,7 +431,8 @@ async fn create_user(
 	State(ctx): State<AppState>,
 	Json(input): Json<CreateUser>,
 ) -> APIResult<Json<User>> {
-	get_session_server_owner_user(&session)?;
+	enforce_session_permissions(&session, &[UserPermission::ManageUsers])?;
+
 	let db = &ctx.db;
 
 	let hashed_password = bcrypt::hash(input.password, ctx.config.password_hash_cost)?;
@@ -554,6 +556,7 @@ pub struct UpdateUserPreferences {
 	pub layout_max_width_px: Option<i32>,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
+	pub enable_live_refetch: bool,
 	pub enable_discord_presence: bool,
 	pub enable_compact_display: bool,
 	pub enable_double_sidebar: bool,

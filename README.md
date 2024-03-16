@@ -51,7 +51,7 @@ The following items are the major targets for Stump's first release:
 - 📃 Full OPDS + OPDS Page Streaming support
 - 📕 EPUB, PDF, and CBZ/CBR support
 - 📚 Organize libraries with collections and reading lists
-- 🔐 Role-based access-control with managed user accounts
+- 🔐 Granular access-control with managed user accounts
 - 🚀 Easy setup and deployment using Docker or bare metal
 - 👀 Fully responsive, built-in UI with a dark mode
 - 🏃 Low resource utilization with excellent performance

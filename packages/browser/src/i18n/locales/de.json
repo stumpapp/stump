@@ -56,65 +56,65 @@
 			},
 			"description": {
 				"label": "Beschreibung",
-				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"placeholder": "Ein \"Our Flag Means Death\"-Fanclub. Wir lesen Piratenromane nach Herzenslust",
+				"description": "Eine optionale, kurze Beschreibung deines Buchclubs"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "Privater Club",
+				"description": "Wenn aktiviert, können nur von dir eingeladene Nutzer deinem Buchclub beitreten"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "Benutzerdefinierte Rollenzuordnung",
 				"subtitle": [
 					"You can create custom names for the roles in your book club. For example, you could rename the 'Member' role to 'Crewmate', or 'Creator' to 'Captain'. If you don't want to use custom names, you can leave these fields blank and the default names will be used instead. For more information about roles, refer to the",
-					"documentation"
+					"Dokumentation"
 				],
 				"member": {
-					"label": "Member",
-					"placeholder": "Member",
-					"description": "The name of the default role for your book club"
+					"label": "Mitglied",
+					"placeholder": "Mitglied",
+					"description": "Der Name der Standardrolle für deinen Buchclub"
 				},
 				"moderator": {
 					"label": "Moderator",
 					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"description": "Der Name der Moderatorenrolle für deinen Buchclub"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
-					"description": "The name of the admin role for your book club"
+					"label": "Administrator",
+					"placeholder": "Administrator",
+					"description": "Der Name der Administratorenrolle für deinen Buchclub"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "Ersteller",
+					"placeholder": "Ersteller",
+					"description": "Der Name der Erstellerrolle für deinen Buchclub!"
 				}
 			},
 			"creator_preferences": {
 				"heading": "Your membership preferences",
 				"subtitle": "Some preferences for your membership in the book club. These can be changed at any time from the book club settings page",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "Anzeigename",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "Ein optionaler Anzeigename für deine Mitgliedschaft im Buchclub. Falls gesetzt, hat dies Vorrang vor deinem Benutzernamen"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "Fortschritt verbergen",
+					"description": "Falls aktiviert, wird dein Lesefortschritt vor anderen Mitgliedern des Buchclubs verborgen"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "Buchclub erstellen"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Neue Bibliothek erstellen",
+		"heading": "Bibliothek erstellen",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "relevante Dokumentation",
 		"form": {
 			"labels": {
 				"libraryName": "Name",
 				"libraryPath": "Pfad",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "Der Pfad zur Bibliothek, wie er auf deinem Server existiert",
 				"libraryDescription": "Beschreibung",
 				"libraryTags": "Tags"
 			},
@@ -124,14 +124,14 @@
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Manage Library",
+		"heading": "Einstellungen",
 		"subtitle": "Update the details or configuration of your library, change control access rules, or scan files. If you're wanting a refresh on libraries and how they work, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "relevante Dokumentation",
 		"form": {
 			"labels": {
 				"libraryName": "Name",
 				"libraryPath": "Pfad",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "Der Pfad zur Bibliothek, wie er auf deinem Server existiert",
 				"libraryDescription": "Beschreibung",
 				"libraryTags": "Tags"
 			},
@@ -146,67 +146,67 @@
 		"buttons": {
 			"report": "Fehler melden",
 			"copy": "Fehler-Details kopieren",
-			"goHome": "Go Home"
+			"goHome": "Zur Startseite"
 		}
 	},
 	"homeScene": {
 		"continueReading": {
 			"title": "Weiterlesen",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "Keine Bücher zum Anzeigen",
+				"message": "Alle Bücher, die du gerade liest, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedSeries": {
 			"title": "Kürzlich hinzugefügte Serie",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Keine Serie zum Anzeigen",
+				"message": "Alle Serien, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
 			}
 		},
 		"recentlyAddedBooks": {
 			"title": "Kürzlich hinzugefügte Bücher",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you add to your libraries will show up here"
+				"heading": "Keine Bücher zum Anzeigen",
+				"message": "Alle Bücher, die du zu deinen Bibliotheken hinzufügst, werden hier angezeigt"
 			}
 		}
 	},
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "Weiterlesen",
-			"downloadSeries": "Download Series"
+			"downloadSeries": "Serie herunterladen"
 		}
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "Intelligente Listen",
+		"subtitle": "Deine bevorzugten Suchen und Filter gespeichert für einfachen Zugriff",
+		"searchPlaceholder": "Intelligente Listen filtern",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Intelligente Liste erstellen"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "Keine intelligenten Listen zum Anzeigen",
+				"noListsMessage": "Erstelle eine intelligente Liste, um loszulegen",
+				"noMatchesMessage": "Versuche, deine Suchanfrage zu ändern"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "Buch",
+						"series": "Serie",
+						"library": "Bibliothek"
 					},
-					"matches": "Matches"
+					"matches": "Treffer"
 				}
 			}
 		}
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "Einträge",
+			"settings": "Einstellungen"
 		},
 		"layout": {
 			"missingIdError": "This scene requires an ID in the URL",
@@ -215,56 +215,56 @@
 			"viewSaveError": "Failed to save view"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Listen"
 		},
 		"itemsScene": {
 			"smartListNotFound": "Smart list not found",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Benutzerdefinierte Ansicht",
+					"defaultView": "Standardansicht",
+					"noViewsSaved": "Keine Ansichten gespeichert",
+					"selectView": "Gespeicherte Ansicht auswählen"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Intelligente Listenfilter",
+					"description": "Filter für diese Sitzung ändern",
 					"rawData": {
 						"heading": "Raw filter data",
 						"description": "This is how Stump will process the filters"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Speichern",
+						"cancel": "Abbrechen"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Schnellfilter"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "Auswahl aktualisieren",
+					"create": "Neue Ansicht erstellen",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Ansicht erstellen",
+							"update": "Ansicht aktualisieren "
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Neue Ansicht für diese intelligente Liste erstellen",
+							"update": "Ansicht aktualisieren "
 						},
 						"createForm": {
 							"name": {
 								"label": "Name",
-								"placeholder": "My view",
+								"placeholder": "Meine Ansicht",
 								"description": "A friendly name to uniquely identify this view"
 							}
 						},
 						"updateForm": {
 							"name": {
 								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"placeholder": "Meine Ansicht",
+								"description": "Der aktualisierte Name für diese Ansicht, falls gewünscht"
 							}
 						}
 					}
@@ -274,17 +274,17 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
+			"general": "Allgemein",
 			"logs": "Logs",
 			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
+			"jobs": "Jobs und Einstellungen",
+			"users": "Benutzerverwaltung",
 			"desktop": "Desktop"
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
+				"account": "Konto",
+				"appearance": "Darstellung",
 				"reader": "Reader",
 				"desktop": "Desktop",
 				"label": "Application"
@@ -294,20 +294,20 @@
 				"logs": "Logs",
 				"users": "Users",
 				"jobs": "Jobs",
-				"access": "Access",
-				"notifications": "Notifications",
+				"access": "Zugriff",
+				"notifications": "Benachrichtigungen",
 				"label": "Server"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "Kontoeinstellungen",
+			"title": "Kontoeinstellungen",
+			"description": "Einstellungen zu deinem Konto",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Bitte gebe eine gültige URL an",
+						"missingUsername": "Benutzername ist erforderlich"
 					},
 					"labels": {
 						"username": "Username",
@@ -351,8 +351,8 @@
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
+			"helmet": "Darstellung",
+			"title": "Darstellung",
 			"description": "Customize the look and feel of the application",
 			"sections": {
 				"themeSelect": {
@@ -363,7 +363,7 @@
 						"documentation"
 					],
 					"options": {
-						"light": "Light",
+						"light": "Hell",
 						"dark": "Dark",
 						"bronze": "Bronze light"
 					}
@@ -416,11 +416,11 @@
 					"description": "Basic details about your Stump server instance",
 					"build": {
 						"label": "Build",
-						"description": "Details about the version and build",
+						"description": "Details über Version und Build",
 						"version": {
 							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"commitHash": "Exakter Commit",
+							"date": "Build-Datum"
 						}
 					}
 				}
@@ -429,7 +429,7 @@
 		"server/logs": {
 			"helmet": "Logs",
 			"title": "Logs",
-			"description": "The logs generated by your Stump server instance",
+			"description": "Die Logs generiert von deiner Stump-Server-Instanz",
 			"sections": {
 				"persistedLogs": {
 					"title": "Persisted logs",
@@ -524,7 +524,7 @@
 						"documentation"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Buchklubs",
 						"read": {
 							"label": "Access book club features",
 							"description": "Allows the user to access book club features, including viewing and joining book clubs"
@@ -537,8 +537,8 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "Dateiexplorer",
+							"description": "Ermöglicht dem Benutzer den Zugang zu den verschiedenen Dateiexplorern.\nDie Inhaltsbeschränkung kann nicht garantiert werden, wenn diese Funktion gewährt wird"
 						},
 						"download": {
 							"label": "Download files",
@@ -587,14 +587,14 @@
 						},
 						"manage": {
 							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"description": "Ermöglicht es dem Benutzer, andere Benutzer auf dem Server zu verwalten.\nUmfasst die Berechtigung zum Lesen, Erstellen und Aktualisieren"
 						}
 					},
 					"smartlist": {
 						"label": "Smart Lists",
 						"read": {
 							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"description": "Ermöglicht dem Benutzer den Zugriff auf Features der intelligenten Listen. Granulare Berechtigungen sind noch nicht implementiert, daher umfasst dies die Berechtigung zum Lesen, Erstellen und Aktualisieren der eigenen Listen"
 						}
 					}
 				},
@@ -629,7 +629,7 @@
 	},
 	"signOutModal": {
 		"title": "Abmelden",
-		"message": "Sind Sie sicher, dass Sie sich abmelden wollen?",
+		"message": "Bist du sicher, dass du dich abmelden wilslt?",
 		"buttons": {
 			"cancel": "Abbrechen",
 			"signOut": "Abmelden"
@@ -654,14 +654,14 @@
 			"createSmartlist": "Create smart list"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
+			"scanLibrary": "Scannen",
 			"fileExplorer": "Dateimanager",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
+			"manageLibrary": "Einstellungen",
+			"deleteLibrary": "Löschen"
 		},
 		"versionInformation": {
 			"heading": "Versionsinformationen",
-			"semVer": "Semantic Version",
+			"semVer": "Semantische Version",
 			"commitHash": "Commit Hash",
 			"buildDate": "Erstellungsdatum"
 		}
@@ -683,7 +683,7 @@
 	"serverStatusOverlay": {
 		"heading": "Server ist nicht verbunden",
 		"message": [
-			"Überprüfen Sie bitte Ihre Internetverbindung",
+			"Überprüfe bitte deine Internetverbindung",
 			"Hier klicken",
 			"to change your server URL"
 		]
@@ -700,24 +700,24 @@
 		"placeholderNoTags": "Keine Tags vorhanden"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Vorschaubild auswählen",
 		"options": {
 			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"uploadImage": "Bild hochladen"
 		},
 		"uploadImage": {
 			"emptyState": "A preview of your image will appear here",
 			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"remove": "Bild entfernen"
 		}
 	},
 	"common": {
-		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"saveChanges": "Save changes",
-		"create": "Create",
-		"edit": "Edit",
+		"cancel": "Abbrechen",
+		"confirm": "Bestätigen",
+		"save": "Speichern",
+		"saveChanges": "Änderungen speichern",
+		"create": "Erstellen",
+		"edit": "Bearbeiten",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
 	}

@@ -1,11 +1,9 @@
-# OS
 .DS_Store
 
-# Logs
 logs/
+!packages/browser/**/logs/
 *.log
 
-# Cache
 .eslintcache
 .idea
 .npm
@@ -14,7 +12,6 @@ logs/
 !.vscode/extensions.json
 !.vscode/*.todo
 
-# Directories
 build/
 coverage/
 cjs/
@@ -30,17 +27,14 @@ node_modules/
 target/
 .next
 .netlify
-.pnpm-store
 .vercel
 
-# Custom
 *.min.js
 *.map
 *.tsbuildinfo
 .env
 docker-compose.yaml
 
-# rust
 core/integration-tests/.*
 core/integration-tests/*libraries*
 static

@@ -7,7 +7,7 @@
 	"scripts": {
 		"lint": "cargo clippy --package stump_core -- -D warnings",
 		"prisma": "cargo prisma",
-		"studio": "pnpm dlx prisma studio",
+		"studio": "yarn dlx prisma studio",
 		"build": "cargo build --release",
 		"format": "cargo fmt --package stump_core",
 		"integration-tests": "cargo integration-tests"

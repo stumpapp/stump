@@ -4,15 +4,21 @@ use pdf::{
 	object::InfoDict,
 	primitive::{Dictionary, PdfString},
 };
+use prisma_client_rust::chrono::{Datelike, NaiveDate};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
 use crate::prisma::media_metadata;
 
-use super::common::{
-	age_rating_deserializer, comma_separated_list_to_vec, string_list_deserializer,
+use super::{
+	common::{
+		age_rating_deserializer, comma_separated_list_to_vec, string_list_deserializer,
+	},
+	parse_age_restriction,
 };
+
+const NAIVE_DATE_FORMATS: [&str; 2] = ["%Y-%m-%d", "%m-%d-%Y"];
 
 // TODO: author field?
 // NOTE: alias is used primarily to support ComicInfo.xml files, as that metadata
@@ -237,7 +243,6 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"day" => {
 					metadata.day = value.into_iter().next().and_then(|n| n.parse().ok())
 				},
-				"writers" => metadata.writers = Some(value),
 				"pencillers" => metadata.pencillers = Some(value),
 				"inkers" => metadata.inkers = Some(value),
 				"colorists" => metadata.colorists = Some(value),
@@ -251,6 +256,54 @@ impl From<HashMap<String, Vec<String>>> for MediaMetadata {
 				"pagecount" => {
 					metadata.page_count =
 						value.into_iter().next().and_then(|n| n.parse().ok())
+				},
+				"date" => {
+					// Note: we don't know the format of the date. It could be a year, a full date, etc.
+					// We need to _try_ to parse each part of the date, and if it fails, we just ignore it.
+					// This is a bit of a hack, but it's the best we can do without knowing the format.
+					let raw_date = value.into_iter().next().unwrap_or_default();
+
+					for format in NAIVE_DATE_FORMATS.iter() {
+						if let Ok(date) = NaiveDate::parse_from_str(&raw_date, format) {
+							metadata.year = Some(date.year());
+							metadata.month = Some(date.month() as i32);
+							metadata.day = Some(date.day() as i32);
+							break;
+						}
+					}
+
+					if metadata.year.is_none() {
+						if let Ok(year) = raw_date.parse() {
+							metadata.year = Some(year);
+						}
+					}
+				},
+				// TODO: separate out writer vs author?
+				"creator" | "author" | "writers" => match metadata.writers {
+					Some(ref mut writers) => {
+						writers.extend(value);
+						// remove dupliates
+						writers.sort();
+						writers.dedup();
+					},
+					None => metadata.writers = Some(value),
+				},
+				"typicalagerange" | "contentrating" => {
+					let parsed = value
+						.into_iter()
+						.next()
+						.as_deref()
+						.and_then(parse_age_restriction);
+
+					match (metadata.age_rating, parsed) {
+						// if metadata.age_rating has been set, we need to take the min of the two
+						(Some(existing), Some(new)) => {
+							metadata.age_rating = Some(existing.min(new))
+						},
+						// if metadata.age_rating has not been set, we can just take the new value
+						(_, Some(new)) => metadata.age_rating = Some(new),
+						_ => (),
+					}
 				},
 				_ => (),
 			}
@@ -294,5 +347,62 @@ impl From<InfoDict> for MediaMetadata {
 			writers: dict.author.and_then(pdf_string_to_string).map(|v| vec![v]),
 			..Default::default()
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_pdf_string_to_string() {
+		let pdf_string = PdfString::from("Hello, world!");
+		assert_eq!(
+			pdf_string_to_string(pdf_string),
+			Some("Hello, world!".to_string())
+		);
+	}
+
+	#[test]
+	fn test_from_hashmap() {
+		let mut map = HashMap::new();
+
+		map.insert("Title".to_string(), vec![String::from("The Way of Kings")]);
+		map.insert(
+			"creator".to_string(),
+			vec![String::from("Brandon Sanderson")],
+		);
+		map.insert("date".to_string(), vec![String::from("08-31-2010")]);
+		map.insert("Genre".to_string(), vec![String::from("Fantasy")]);
+		map.insert(
+			"Summary".to_string(),
+			vec![String::from("A book, you know?")],
+		);
+
+		let metadata = MediaMetadata::from(map);
+
+		assert_eq!(metadata.title, Some("The Way of Kings".to_string()));
+		assert_eq!(
+			metadata.writers,
+			Some(vec!["Brandon Sanderson".to_string()])
+		);
+		assert_eq!(metadata.year, Some(2010));
+		assert_eq!(metadata.month, Some(8));
+		assert_eq!(metadata.day, Some(31));
+		assert_eq!(metadata.genre, Some(vec!["Fantasy".to_string()]));
+		assert_eq!(metadata.summary, Some("A book, you know?".to_string()));
+	}
+
+	#[test]
+	fn test_resolve_multiple_age_ratings() {
+		let mut map = HashMap::new();
+
+		map.insert("Title".to_string(), vec![String::from("The Way of Kings")]);
+		map.insert("typicalAgeRange".to_string(), vec![String::from("14-17")]);
+		map.insert("ContentRating".to_string(), vec![String::from("13+")]);
+
+		let metadata = MediaMetadata::from(map);
+
+		assert_eq!(metadata.age_rating, Some(13));
 	}
 }

@@ -7,3 +7,8 @@
 
 # I don't want docs website to be included in language stats
 docs/** linguist-vendored
+
+# Ignore all snapshots and test files
+**/__snapshots__/** linguist-vendored
+**/*.test.ts linguist-vendored
+**/*.test.tsx linguist-vendored

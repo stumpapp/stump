@@ -35,8 +35,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup PNPM and TypeScript
-        uses: ./.github/actions/setup-pnpm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.0.0'
+
+      - name: Install yarn
+        shell: bash
+        run: npm install -g yarn
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.0.0'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
 
       - name: Run TypeScript lints
-        run: pnpm lint
+        run: yarn lint

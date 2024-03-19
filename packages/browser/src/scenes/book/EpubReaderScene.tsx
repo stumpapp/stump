@@ -1,0 +1,48 @@
+import { useMediaByIdQuery } from '@stump/client'
+import { useEffect, useState } from 'react'
+import { Navigate, useParams, useSearchParams } from 'react-router-dom'
+
+import EpubJsReader from '@/components/readers/epub/EpubJsReader'
+
+import paths from '../../paths'
+
+//! NOTE: Only the epub.js reader is supported for now :sob:
+export default function EpubReaderScene() {
+	const [search, setSearch] = useSearchParams()
+
+	const [initialCfi] = useState(() => decodeURIComponent(search.get('cfi') || ''))
+	const [startOver] = useState(() => search.get('startOver') === 'true')
+
+	const lazyReader = search.get('stream') && search.get('stream') !== 'true'
+	const isIncognito = search.get('incognito') === 'true'
+
+	/**
+	 * An effect to remove the CFI from the URL, it will be stored in local state
+	 * so it doesn't need to pollute the URL
+	 */
+	useEffect(() => {
+		if (initialCfi || startOver) {
+			search.delete('cfi')
+			search.delete('startOver')
+			setSearch(search)
+		}
+	}, [initialCfi, startOver, search, setSearch])
+
+	const { id } = useParams()
+	if (!id) {
+		throw new Error('Media id is required')
+	}
+
+	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
+
+	if (fetchingBook || !media) {
+		return null
+	} else if (lazyReader) {
+		const resolvedCfi = (initialCfi || media?.current_epubcfi) ?? null
+		return <EpubJsReader id={id} initialCfi={isIncognito ? null : resolvedCfi} />
+	} else {
+		search.set('stream', 'true')
+		setSearch(search)
+		return <Navigate to={paths.bookReader(id, { isEpub: true })} />
+	}
+}

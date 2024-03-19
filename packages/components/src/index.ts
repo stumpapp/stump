@@ -11,6 +11,7 @@ export {
 	ButtonOrLink,
 	type ButtonOrLinkProps,
 	type ButtonProps,
+	buttonVariants,
 	IconButton,
 	type IconButtonProps,
 } from './button'

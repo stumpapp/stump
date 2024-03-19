@@ -1,7 +1,7 @@
 {
 	"authScene": {
-		"claimHeading": "Initialize your server",
-		"claimText": "This Stump server is not intialized. Use the form below to create your account. Once created, you will have full access to all server features.",
+		"claimHeading": "Initialisiere deinen Server",
+		"claimText": "Dieser Stump-Server ist nicht initialisiert. Benutze das untenstehende Formular, um dein Konto zu erstellen. Sobald es erstellt ist, hast du vollen Zugriff auf alle Serverfunktionen.",
 		"form": {
 			"validation": {
 				"missingUsername": "Der Benutzername ist erforderlich",
@@ -13,24 +13,24 @@
 			},
 			"buttons": {
 				"createAccount": "Konto erstellen",
-				"login": "Log in"
+				"login": "Anmelden"
 			}
 		},
 		"toasts": {
 			"loggingIn": "Anmeldung läuft...",
-			"loggedIn": "Welcome back!",
-			"loggedInFirstTime": "Welcome!",
+			"loggedIn": "Willkommen zurück!",
+			"loggedInFirstTime": "Willkommen!",
 			"registering": "Registrierung läuft...",
 			"registered": "Registriert!",
 			"loginFailed": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
-			"registrationFailed": "Registration failed. Please try again"
+			"registrationFailed": "Registrierung fehlgeschlagen. Bitte erneut versuchen"
 		}
 	},
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
-			"heading": "Library Configuration",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"heading": "Bibliothekskonfiguration",
+			"subtitleCreating": "Eine Vorschau deiner neuen Bibliothek wird unten angezeigt",
+			"subtitleEditing": "Eine Vorschau deiner Bibliothek wird unten angezeigt"
 		}
 	},
 	"bookOverviewScene": {
@@ -43,19 +43,19 @@
 				"fileChecksum": "Prüfsumme"
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "Weiter in der Serie"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "Neuen Buchclub erstellen",
+		"subtitle": "Du kannst einen privaten Buchclub einrichten oder für jeden auf dem Server öffentlich machen",
 		"form": {
 			"name": {
 				"label": "Name",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"placeholder": "Mein Buchclub",
+				"description": "Der Name deines Buchklubs"
 			},
 			"description": {
-				"label": "Description",
+				"label": "Beschreibung",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
 				"description": "An optional, short description of your book club"
 			},

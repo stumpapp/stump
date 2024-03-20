@@ -682,7 +682,11 @@
 	},
 	"serverStatusOverlay": {
 		"heading": "Server isn't connected",
-		"message": ["Please check your internet connection", "Click here", "to change your server URL"]
+		"message": [
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
+		]
 	},
 	"slidingList": {
 		"empty": "No items to display",

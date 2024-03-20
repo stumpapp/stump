@@ -1,12 +1,12 @@
 import { useJobsQuery, useJobStore } from '@stump/client'
 import { Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { PaginationState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
-import { useLocaleContext } from '@/i18n'
 
 import { JobSettingsContext } from './context.ts'
 import DeleteAllSection from './DeleteAllSection.tsx'

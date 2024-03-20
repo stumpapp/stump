@@ -1,8 +1,8 @@
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
-import { useLocaleContext } from '@/i18n'
 
 import CreateOrUpdateUserForm from './CreateOrUpdateUserForm'
 

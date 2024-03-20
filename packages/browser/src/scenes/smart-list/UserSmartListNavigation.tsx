@@ -1,10 +1,10 @@
 import { prefetchSmartListItems } from '@stump/client'
 import { cn, Link } from '@stump/components'
-import { usePreferences } from '@/hooks'
+import { useLocaleContext } from '@stump/i18n'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
-import { useLocaleContext } from '@/i18n'
+import { usePreferences } from '@/hooks'
 
 import { useSmartListContext } from './context'
 

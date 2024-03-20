@@ -14,6 +14,7 @@
 		"@stump/api": "*",
 		"@stump/client": "*",
 		"@stump/components": "*",
+		"@stump/i18n": "*",
 		"@stump/types": "*",
 		"@tanstack/react-query": "^4.28.0",
 		"@tanstack/react-query-devtools": "^4.28.0",

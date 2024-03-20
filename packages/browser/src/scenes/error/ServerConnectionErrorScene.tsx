@@ -1,12 +1,11 @@
 import { queryClient } from '@stump/client'
+import { useLocaleContext } from '@stump/i18n'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { Navigate, useLocation } from 'react-router'
 
 import ServerUrlForm from '@/components/ServerUrlForm'
 import { useAppStore } from '@/stores'
-
-import { useLocaleContext } from '../../i18n/index'
 
 export default function ServerConnectionErrorScene() {
 	const location = useLocation()

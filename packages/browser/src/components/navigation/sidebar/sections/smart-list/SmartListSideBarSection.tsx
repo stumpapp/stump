@@ -1,8 +1,8 @@
 import { useSmartListsQuery } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
 
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import SideBarButtonLink from '../../SideBarButtonLink'

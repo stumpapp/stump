@@ -1,9 +1,9 @@
-import { usePreferences } from '@/hooks'
-
 import { Avatar, Card, cn, Heading, Text } from '@stump/components'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
 import React from 'react'
+
+import { usePreferences } from '@/hooks'
 
 import { useBookClubContext } from './context'
 

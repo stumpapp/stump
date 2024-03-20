@@ -6,7 +6,7 @@
 			"path": "apps/desktop"
 		},
 		{
-			"path": "apps/mobile"
+			"path": "apps/expo"
 		},
 		{
 			"path": "apps/web"
@@ -25,6 +25,9 @@
 		},
 		{
 			"path": "packages/browser"
+		},
+		{
+			"path": "packages/i18n"
 		},
 		{
 			"path": "packages/types"

@@ -1,4 +1,5 @@
 import { Badge, Card, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { CoreJobOutput, JobStatus, PersistedJob } from '@stump/types'
 import { createColumnHelper } from '@tanstack/react-table'
 import dayjs from 'dayjs'
@@ -9,7 +10,6 @@ import React, { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
 import { useAppContext } from '@/context'
-import { useLocaleContext } from '@/i18n'
 
 import { useJobSettingsContext } from './context.ts'
 import JobActionMenu from './JobActionMenu.tsx'

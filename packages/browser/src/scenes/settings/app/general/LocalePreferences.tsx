@@ -1,7 +1,7 @@
 import { Heading, Link, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 
-import { useLocaleContext } from '../../../../i18n/context'
 import LocaleSelector from './LocaleSelector'
 
 export default function LocalePreferences() {

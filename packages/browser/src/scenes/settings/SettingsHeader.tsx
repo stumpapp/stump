@@ -1,9 +1,9 @@
 import { cx, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useSceneContainer } from '@/components/container'
-import { useLocaleContext } from '@/i18n'
 
 import { routeGroups } from './routes'
 import SettingsNavigation from './SettingsNavigation'

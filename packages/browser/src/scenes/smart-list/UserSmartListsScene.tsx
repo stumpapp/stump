@@ -8,6 +8,7 @@ import {
 	Text,
 	usePreviousIsDifferent,
 } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Search } from 'lucide-react'
 import pluralize from 'pluralize'
 import React, { useEffect, useState } from 'react'
@@ -15,7 +16,6 @@ import { useDebouncedValue } from 'rooks'
 
 import { SceneContainer } from '@/components/container'
 import GenericEmptyState from '@/components/GenericEmptyState'
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import SmartListCard from './SmartListCard'

@@ -1,10 +1,10 @@
 import { useContinueReading } from '@stump/client'
 import { Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import MediaCard from '@/components/media/MediaCard'
-import { useLocaleContext } from '@/i18n'
 
 export default function ContinueReadingMedia() {
 	const { t } = useLocaleContext()

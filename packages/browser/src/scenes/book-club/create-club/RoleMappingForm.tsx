@@ -1,8 +1,8 @@
 import { Card, Heading, Input, Link, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { useLocaleContext } from '../../../i18n'
 import paths from '../../../paths'
 import { getLocaleKey, Schema } from './CreateBookClubForm'
 

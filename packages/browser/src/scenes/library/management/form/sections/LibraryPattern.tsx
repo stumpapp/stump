@@ -1,8 +1,7 @@
 import { Label, Link, RadioGroup, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { LibraryPattern } from '@stump/types'
 import { useFormContext } from 'react-hook-form'
-
-import { useLocaleContext } from '@/i18n'
 
 // TODO: disable this if the library is being updated, I don't support changing patterns (yet?)
 export default function LibraryPatternRadioGroup() {

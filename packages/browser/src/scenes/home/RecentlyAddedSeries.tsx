@@ -1,11 +1,11 @@
 import { seriesQueryKeys } from '@stump/api'
 import { useSeriesCursorQuery } from '@stump/client'
 import { Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 
 import HorizontalCardList from '@/components/HorizontalCardList'
 import SeriesCard from '@/components/series/SeriesCard'
-import { useLocaleContext } from '@/i18n'
 
 export default function RecentlyAddedSeries() {
 	const { t } = useLocaleContext()

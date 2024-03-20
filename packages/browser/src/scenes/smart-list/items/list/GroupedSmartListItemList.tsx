@@ -1,11 +1,11 @@
-import { usePreferences } from '@/hooks'
-
 import { Accordion, cn, Text } from '@stump/components'
 import { Library, Series, SmartListItemGroup } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import pluralize from 'pluralize'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
+
+import { usePreferences } from '@/hooks'
 
 import GroupedSmartListItemListGroupContent, {
 	ACCORDION_CONTENT_ITEM_HEIGHT,

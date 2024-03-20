@@ -1,11 +1,11 @@
-import { usePreferences } from '@/hooks'
 import { NavigationMenu } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Book, Home } from 'lucide-react'
 import React from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
-import { useLocaleContext } from '@/i18n'
+import { usePreferences } from '@/hooks'
 import paths from '@/paths'
 
 import { LibraryNavigationItem, SettingsNavigationItem } from './sections'

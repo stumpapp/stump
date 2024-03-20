@@ -1,12 +1,11 @@
 import { getMediaThumbnail } from '@stump/api'
-import { usePreferences } from '@/hooks'
-
 import { Accordion, cn, Text } from '@stump/components'
 import { Media } from '@stump/types'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
+import { usePreferences } from '@/hooks'
 import paths from '@/paths'
 
 export const ACCORDION_CONTENT_ITEM_HEIGHT = 64

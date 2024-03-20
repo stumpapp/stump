@@ -1,5 +1,6 @@
 import { queryClient, useScanLibrary } from '@stump/client'
 import { DropdownMenu } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import type { Library } from '@stump/types'
 import { FolderSearch2, MoreHorizontal, ScanLine, Settings, Trash } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
@@ -8,7 +9,6 @@ import { useMediaMatch } from 'rooks'
 
 import DeleteLibraryConfirmation from '@/components/library/DeleteLibraryConfirmation'
 import { useAppContext } from '@/context'
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 type Props = {

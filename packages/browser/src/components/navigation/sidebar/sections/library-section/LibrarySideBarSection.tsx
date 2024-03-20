@@ -1,11 +1,11 @@
 import { useLibraries } from '@stump/client'
 import { Accordion, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Library } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
 
 import { useAppContext } from '@/context'
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import SideBarButtonLink from '../../SideBarButtonLink'

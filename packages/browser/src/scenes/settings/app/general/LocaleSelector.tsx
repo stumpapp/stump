@@ -1,7 +1,7 @@
 import { useUpdatePreferences } from '@stump/client'
 import { ComboBox } from '@stump/components'
+import { isLocale, localeNames, useLocaleContext } from '@stump/i18n'
 
-import { isLocale, localeNames, useLocaleContext } from '@/i18n'
 import { useUserStore } from '@/stores'
 
 const options = Object.entries(localeNames).map(([value, label]) => ({
@@ -22,6 +22,7 @@ export default function LocaleSelector() {
 
 	const handleChange = async (selected?: string) => {
 		if (selected && userPreferences && isLocale(selected || '')) {
+			// @ts-expect-error: TODO: fix this
 			await update({ ...userPreferences, locale: selected })
 		}
 	}

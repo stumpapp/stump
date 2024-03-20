@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Dialog, Form, Input } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { z } from 'zod'
-
-import { useLocaleContext } from '@/i18n'
 
 import { useSmartListContext } from '../../context'
 

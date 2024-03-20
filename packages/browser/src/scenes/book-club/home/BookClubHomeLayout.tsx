@@ -1,11 +1,11 @@
 import { useBookClubQuery } from '@stump/client'
-import { usePreferences } from '@/hooks'
 import { cx } from '@stump/components'
 import { BookClub, Media, User } from '@stump/types'
 import React, { Suspense, useMemo } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
+import { usePreferences } from '@/hooks'
 import { useUserStore } from '@/stores'
 
 import BookClubHeader from './BookClubHeader'

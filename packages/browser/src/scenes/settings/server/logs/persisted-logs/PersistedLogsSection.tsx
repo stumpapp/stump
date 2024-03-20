@@ -1,7 +1,6 @@
 import { Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
-
-import { useLocaleContext } from '@/i18n'
 
 import PersistedLogsTable from './PersistedLogsTable'
 

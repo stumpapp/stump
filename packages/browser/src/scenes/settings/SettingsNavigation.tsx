@@ -1,11 +1,11 @@
 import { Label, NativeSelect, Tabs } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { useLocaleContext } from '@/i18n'
+import { useAppStore } from '@/stores'
 
 import { useSettingsRoutes } from './useSettingsRoutes'
-import { useAppStore } from '@/stores'
 
 // TODO: update doc strings
 

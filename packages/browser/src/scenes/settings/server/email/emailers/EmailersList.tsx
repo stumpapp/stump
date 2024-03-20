@@ -1,10 +1,10 @@
 import { useEmailersQuery } from '@stump/client'
 import { ButtonOrLink, Card, Heading } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { CircleSlash2 } from 'lucide-react'
 import React from 'react'
 
 import { useAppContext } from '@/context'
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 export default function EmailersList() {

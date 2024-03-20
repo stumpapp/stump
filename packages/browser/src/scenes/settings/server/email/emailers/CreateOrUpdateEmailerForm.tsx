@@ -1,11 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, Input } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { SMTPEmailer } from '@stump/types'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-
-import { useLocaleContext } from '@/i18n'
 
 type Props = {
 	emailer?: SMTPEmailer

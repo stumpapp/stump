@@ -1,7 +1,6 @@
 import { Alert, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React, { Suspense } from 'react'
-
-import { useLocaleContext } from '@/i18n'
 
 import EmailersList from './EmailersList'
 

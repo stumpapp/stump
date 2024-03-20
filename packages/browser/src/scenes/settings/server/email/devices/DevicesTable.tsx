@@ -1,13 +1,13 @@
 import { emailerApi, emailerQueryKeys } from '@stump/api'
 import { useQuery } from '@stump/client'
 import { Badge, Card, Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/types'
 import { createColumnHelper } from '@tanstack/react-table'
 import { CircleSlash2 } from 'lucide-react'
 import React, { useState } from 'react'
 
 import { Table } from '@/components/table'
-import { useLocaleContext } from '@/i18n'
 
 import CreateOrUpdateDeviceModal from './CreateOrUpdateDeviceModal'
 

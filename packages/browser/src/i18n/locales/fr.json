@@ -209,62 +209,62 @@
 			"settings": "Paramètres"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "Cette scène nécessite un ID dans l'URL",
+			"smartListNotFound": "La liste intelligente est introuvable",
+			"viewCreateError": "Échec lors de la création de l'affichage",
+			"viewSaveError": "Échec lors de la sauvegarde de l'affichage"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Listes"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "La liste intelligente est introuvable",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Affichage personnalisé",
+					"defaultView": "Affichage par défaut",
+					"noViewsSaved": "Aucun affichage enregistré",
+					"selectView": "Sélectionnez un affichage enregistré"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Filtres de liste intelligente",
+					"description": "Changer les filtres pour cette session affichée",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Données du filtre brut",
+						"description": "Voici comment Stump traitera les filtres"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Sauvegarder",
+						"cancel": "Annuler"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Filtre rapide"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "Mettre à jour la sélection",
+					"create": "Créer un nouvel affichage",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Créer un affichage",
+							"update": "Actualiser l'affichage"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Créer un nouvel affichage pour cette liste intelligente",
+							"update": "Actualiser l'affichage"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "Nom",
+								"placeholder": "Mon affichage",
+								"description": "Un nom sympa pour identifier de manière unique cet affichage"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "Nom",
+								"placeholder": "Mon affichage",
+								"description": "Le nom actualisé pour cet affichage, si désiré"
 							}
 						}
 					}
@@ -275,7 +275,7 @@
 	"settingsScene": {
 		"navigation": {
 			"general": "Général",
-			"logs": "Logs",
+			"logs": "Journaux",
 			"server": "Serveur",
 			"jobs": "Tâches et Configuration",
 			"users": "Gestion des Utilisateurs",
@@ -283,36 +283,36 @@
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
-				"reader": "Reader",
-				"desktop": "Desktop",
+				"account": "Compte",
+				"appearance": "Apparence",
+				"reader": "Lecteur",
+				"desktop": "Bureau",
 				"label": "Application"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
+				"general": "Général",
+				"logs": "Journaux",
+				"users": "Utilisateurs",
+				"jobs": "Tâches",
+				"access": "Accéder",
 				"notifications": "Notifications",
-				"label": "Server"
+				"label": "Serveur"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"helmet": "Paramètres du compte",
+			"title": "Paramètres du compte",
+			"description": "Paramètres liés à votre compte",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Veuillez saisir une URL valide",
+						"missingUsername": "Nom d’utilisateur requis"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "Nom d'utilisateur",
+						"password": "Mot de passe",
+						"activeChangesPrompt": "Vous avez des modifications non enregistrées"
 					},
 					"errors": {
 						"updateFailed": "Une erreur de serveur est survenue lors de la mise à jour de votre profil. Veuillez réessayer."
@@ -377,232 +377,232 @@
 			"sections": {
 				"imageBasedBooks": {
 					"label": "Livres illustrés",
-					"description": "Comic books, manga, and other image-based books",
+					"description": "Bandes dessinées, mangas, et autres livres illustrés",
 					"sections": {
 						"preloadAheadCount": {
-							"label": "Preload ahead count",
-							"description": "The number of pages to preload ahead of the current page"
+							"label": "Nombre de préchargements avant la page actuelle",
+							"description": "Le nombre de pages à précharger avant la page actuelle"
 						},
 						"preloadBehindCount": {
-							"label": "Preload behind count",
-							"description": "The number of pages to preload behind the current page"
+							"label": "Nombre de préchargements après la page actuelle",
+							"description": "Le nombre de pages à précharger après la page actuelle"
 						}
 					}
 				}
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Paramètres du bureau",
+			"title": "Paramètres du bureau",
+			"description": "Paramètres liés à l'application de bureau Stump",
 			"sections": {
 				"discordPresence": {
-					"label": "Discord Presence",
-					"description": "Display your Stump activity in Discord using Discord Rich Presence",
-					"reconnect": "Reconnect to Discord"
+					"label": "Présence Discord",
+					"description": "Affiche votre activité Stump sur Discord en utilisant la Présence Riche de Discord",
+					"reconnect": "Se reconnecter à Discord"
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"helmet": "Paramètres généraux du serveur",
+			"title": "Paramètres généraux",
+			"description": "Paramètres généraux liés à l'instance de votre serveur Stump",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Votre serveur n'est pas à jour. Veuillez le mettre à jour vers la dernière version !"
 				},
 				"serverInfo": {
-					"title": "Server information",
-					"description": "Basic details about your Stump server instance",
+					"title": "Informations du serveur",
+					"description": "Détails de base sur l'instance de votre serveur Stump",
 					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
+						"label": "Version",
+						"description": "Détails à propos de la version",
 						"version": {
 							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"commitHash": "Commit exact",
+							"date": "Date de compilation"
 						}
 					}
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "Logs",
-			"title": "Logs",
-			"description": "The logs generated by your Stump server instance",
+			"helmet": "Journaux",
+			"title": "Journaux",
+			"description": "Les journaux générés par votre instance de serveur Stump",
 			"sections": {
 				"persistedLogs": {
-					"title": "Persisted logs",
-					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
+					"title": "Journaux persistants",
+					"description": "Ces journaux ont été enregistrés manuellement dans la base de données et sont généralement associés à un travail ou à un événement spécifique",
 					"table": {
 						"columns": {
-							"level": "Level",
+							"level": "Niveau",
 							"message": "Message",
-							"timestamp": "Timestamp"
+							"timestamp": "Horodatage"
 						},
-						"emptyHeading": "No logs to display",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptyHeading": "Aucun journal à afficher",
+						"emptySubtitle": "Votre serveur est soit très sain, soit en très mauvais état"
 					}
 				},
 				"liveLogs": {
-					"title": "Live logs feed",
-					"description": "Streamed directly from your Stump server instance in real-time"
+					"title": "Flux des journaux en direct",
+					"description": "Diffusion directe depuis votre instance de serveur Stump en temps réel"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
+			"helmet": "Tâches",
+			"title": "Tâches",
+			"description": "Tâches en arrière-plan qui s'exécutent sur l'instance de votre serveur Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "Planification",
+					"description": "Certaines tâches peuvent être configurées pour être exécutées à un moment défini. Les modifications de cette configuration prendront effet après le redémarrage du serveur"
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
+					"title": "Historique",
+					"description": "Un enregistrement des tâches qui ont été exécutées sur l'instance de votre serveur Stump",
 					"table": {
 						"columns": {
 							"name": "Type",
 							"description": "Description",
-							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"status": "État",
+							"createdAt": "Commencée à",
+							"elapsed": "Temps écoulé",
+							"tasks": "Tâches"
 						},
-						"emptyHeading": "There are no jobs to display",
-						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"emptyHeading": "Il n'y a aucune tâche à afficher",
+						"emptySubtitle": "Vous ne pouvez pas avoir une tâche si vous n'avez pas une tâche définie",
+						"deleteAllMessage": "L'historique des tâches et les statistiques peuvent être supprimés de la base de données à tout moment. Cette action ne peut pas être annulée",
+						"deleteAllConfirmButton": "Effacer l'historique",
+						"deleteAllConfirmButtonTitle": "Effacer l'historique des tâches",
+						"deleteAllConfirmButtonTitleNoJobs": "Aucune tâche à effacer"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Gestion des utilisateurs",
+			"title": "Utilisateurs",
+			"description": "Gérer les utilisateurs sur ce serveur",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "Créer un utilisateur",
+				"title": "Créer un utilisateur",
+				"description": "Créer un nouvel utilisateur sur ce serveur"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Modifier l'utilisateur",
+				"title": "Modifier l'utilisateur",
+				"description": "Mettre à jour les détails de cet utilisateur"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Contrôle d'accès et restrictions",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
+						"Configurez toutes les restrictions que vous souhaitez appliquer à cet utilisateur. Pour plus d'informations sur le contrôle d'accès, consultez la",
 						"documentation"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Restriction d'âge",
+						"description": "Empêche l'utilisateur d'accéder au contenu au-delà du seuil d'âge défini",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Appliquer en cas d'absence de paramétrage",
+							"description": "Si activée, les utilisateurs ne pourront pas accéder aux contenus pour lesquels aucune classification par âge n'est disponible"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Restrictions d'étiquettes",
+						"description": "Empêche l'utilisateur d'accéder au contenu contenant les étiquettes sélectionnées",
+						"placeholder": "Adulte, Gore"
 					}
 				},
 				"permissions": {
 					"heading": "Permissions",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
+						"Sélectionnez les autorisations que vous souhaitez accorder à cet utilisateur. Pour plus d'informations sur la fonction de chaque autorisation, consultez la",
 						"documentation"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Clubs de lecture",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Accéder aux fonctionnalités des clubs de lecture",
+							"description": "Permet à l'utilisateur d'accéder aux fonctionnalités des clubs de lecture, incluant la visualisation et l'inscription à des clubs de lecture"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Créer des Clubs de Lecture",
+							"description": "Permet à l'utilisateur de créer de nouveaux clubs de lectures"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "Gestion des fichiers",
 						"explorer": {
 							"label": "File Explorer",
 							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Télécharger les fichiers",
+							"description": "Permet à l'utilisateur de télécharger des fichiers à partir du serveur"
 						},
 						"upload": {
-							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"label": "Envoyer des fichiers",
+							"description": "Permet à l'utilisateur d'envoyer des fichiers sur le serveur"
 						}
 					},
 					"library": {
-						"label": "Library Management",
+						"label": "Gestion des bibliothèques",
 						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"label": "Créer des bibliothèques",
+							"description": "Permet à l'utilisateur de créer de nouvelles bibliothèques.\nInclut les permissions d'édition et de scan"
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "Scanner les bibliothèques",
+							"description": "Permet à l'utilisateur de lancer des scans pour les bibliothèques existantes"
 						},
 						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
+							"label": "Modifier les bibliothèques",
+							"description": "Permet à l'utilisateur de modifier les détails de base des bibliothèques existantes"
 						},
 						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"label": "Gérer les bibliothèques",
+							"description": "Permet à l'utilisateur de gérer les paramètres avancés des bibliothèques existantes.\nInclut les permissions d'édition et de scan"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "Supprimer les bibliothèques",
+							"description": "Permet à l'utilisateur de supprimer des bibliothèques existantes.\nInclut les permissions d'édition, de gestion et de scan"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "Gestion du serveur",
 						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+							"label": "Gérer le serveur",
+							"description": "Permet à l'utilisateur de gérer le serveur.\nComprend *beaucoup* d'autres autorisations"
 						}
 					},
 					"user": {
-						"label": "User Management",
+						"label": "Gestion des Utilisateurs",
 						"read": {
-							"label": "Read users",
-							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
+							"label": "Lire des utilisateurs",
+							"description": "Permet à l'utilisateur de rechercher d'autres utilisateurs sur le serveur. Cette fonction est nécessaire pour certaines fonctionnalités, par exemple pour réduire l'accès à une bibliothèque pour des utilisateurs"
 						},
 						"manage": {
-							"label": "Manage users",
+							"label": "Gérer les utilisateurs",
 							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
+						"label": "Listes intelligentes",
 						"read": {
-							"label": "Access smart list feature",
+							"label": "Accéder à la fonctionnalité Liste Intelligente",
 							"description": "Allows the user to access smart lists features"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+					"ageRestrictionTooLow": "La restriction d'âge ne peut pas être inférieure à 0"
 				},
-				"createSubmitButton": "Create user",
-				"updateSubmitButton": "Update user"
+				"createSubmitButton": "Créer un utilisateur",
+				"updateSubmitButton": "Modifier l'utilisateur"
 			}
 		}
 	},
@@ -639,25 +639,25 @@
 		"buttons": {
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
+			"books": "Explorer",
+			"bookClubs": "Clubs de lecture",
+			"createLibrary": "Créer une bibliothèque",
+			"noLibraries": "Aucune bibliothèque",
+			"createBookClub": "Créer un Club de Lecture",
+			"noBookClubs": "Aucun club de lecture",
 			"settings": "Paramètres",
 			"themeToggle": "Changer de thème",
 			"goForward": "Aller en avant",
 			"goBack": "Aller en arrière",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list"
+			"smartlists": "Listes intelligentes",
+			"noSmartlists": "Aucune liste intelligente",
+			"createSmartlist": "Créer une liste intelligente"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
+			"scanLibrary": "Scanner",
 			"fileExplorer": "Explorateur de fichiers",
 			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
+			"deleteLibrary": "Supprimer"
 		},
 		"versionInformation": {
 			"heading": "Informations de version",
@@ -702,23 +702,23 @@
 	"thumbnailDropdown": {
 		"label": "Edit thumbnail",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Sélectionner à partir des livres",
+			"uploadImage": "Importer une image"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"emptyState": "Un aperçu de votre image apparaîtra ici",
+			"prompt": "Déposez l'image ici ou cliquez pour sélectionner",
+			"remove": "Supprimer l’image"
 		}
 	},
 	"common": {
-		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"saveChanges": "Save changes",
-		"create": "Create",
-		"edit": "Edit",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
+		"cancel": "Annuler",
+		"confirm": "Confirmer",
+		"save": "Sauvegarder",
+		"saveChanges": "Enregistrer les modifications",
+		"create": "Créer",
+		"edit": "Éditer",
+		"unimplemented": "Cette fonctionnalité n'est pas encore implémentée ! Revenez plus tard",
+		"limitedFunctionality": "Ceci n'est pas encore totalement implémenté et manque de certaines fonctionnalités. Revenez plus tard"
 	}
 }

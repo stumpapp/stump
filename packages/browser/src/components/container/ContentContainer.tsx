@@ -1,5 +1,6 @@
-import { usePreferences } from '@/hooks'
 import { cn } from '@stump/components'
+
+import { usePreferences } from '@/hooks'
 
 type Props = {
 	children: React.ReactNode

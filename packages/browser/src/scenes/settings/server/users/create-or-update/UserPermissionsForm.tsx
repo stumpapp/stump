@@ -1,10 +1,10 @@
 import { CheckBox, Heading, Label, Link, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { UserPermission } from '@stump/types'
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 import z from 'zod'
 
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 import { Schema } from './CreateOrUpdateUserForm'

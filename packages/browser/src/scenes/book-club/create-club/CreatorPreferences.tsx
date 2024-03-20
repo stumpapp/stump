@@ -1,8 +1,8 @@
 import { CheckBox, Heading, Input, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
-import { useLocaleContext } from '../../../i18n'
 import { getLocaleKey, Schema } from './CreateBookClubForm'
 
 const getKey = (key: string) => getLocaleKey(`creator_preferences.${key}`)

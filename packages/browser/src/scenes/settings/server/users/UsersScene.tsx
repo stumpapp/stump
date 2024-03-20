@@ -1,8 +1,8 @@
+import { useLocaleContext } from '@stump/i18n'
 import { Helmet } from 'react-helmet'
 
 import { ContentContainer } from '@/components/container'
 import { SceneContainer } from '@/components/container'
-import { useLocaleContext } from '@/i18n'
 
 import LoginActivitySection from './login-activity/LoginActivitySection'
 import UserTableSection from './user-table/UserTableSection'

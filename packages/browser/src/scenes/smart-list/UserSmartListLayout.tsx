@@ -3,13 +3,13 @@ import {
 	useSmartListWithMetaQuery,
 	useUpdateSmartListMutation,
 } from '@stump/client'
+import { useLocaleContext } from '@stump/i18n'
 import { AccessRole, SmartList, SmartListView } from '@stump/types'
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Outlet, useParams } from 'react-router'
 
 import { useAppContext } from '@/context'
-import { useLocaleContext } from '@/i18n'
 
 import { defaultWorkingView, SmartListContext, WorkingView } from './context'
 import UserSmartListHeader from './UserSmartListHeader'

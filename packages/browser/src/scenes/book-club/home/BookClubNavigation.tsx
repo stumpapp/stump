@@ -1,8 +1,9 @@
 import { prefetchBookClubChat } from '@stump/client'
-import { usePreferences } from '@/hooks'
 import { cn, cx, Link } from '@stump/components'
 import React, { useMemo } from 'react'
 import { useLocation } from 'react-router'
+
+import { usePreferences } from '@/hooks'
 
 import { useBookClubContext } from './context'
 

@@ -8,10 +8,9 @@ import {
 	Text,
 	useBoolean,
 } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Edit } from 'lucide-react'
 import { useEffect, useState } from 'react'
-
-import { useLocaleContext } from '@/i18n'
 
 type Props = {
 	imageUrl?: string | null

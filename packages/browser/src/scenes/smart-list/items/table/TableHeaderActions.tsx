@@ -1,7 +1,7 @@
+import { useLocaleContext } from '@stump/i18n'
 import React, { useCallback } from 'react'
 
 import { Search } from '@/components/filters'
-import { useLocaleContext } from '@/i18n'
 
 import { useSafeWorkingView } from '../../context'
 import FilterBottomDrawer from './FilterBottomDrawer'

@@ -1,8 +1,8 @@
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { Container, ContentContainer } from '@/components/container'
-import { useLocaleContext } from '@/i18n'
 
 import DisplaySpacingPreference from './DisplaySpacingPreference'
 import DoubleSidebarToggle from './DoubleSidebarToggle'

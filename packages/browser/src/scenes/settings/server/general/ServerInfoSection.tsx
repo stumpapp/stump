@@ -1,9 +1,8 @@
 import { useStumpVersion } from '@stump/client'
 import { cn, Heading, Label, Link, Text, TEXT_VARIANTS } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
-
-import { useLocaleContext } from '@/i18n'
 
 export default function ServerInfoSection() {
 	const version = useStumpVersion()

@@ -1,0 +1,17 @@
+{
+	"name": "@stump/i18n",
+	"version": "0.0.1",
+	"description": "",
+	"main": "src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "^5.3.3"
+	},
+	"dependencies": {
+		"@stump/types": "*",
+		"react": "^18.2.0"
+	}
+}

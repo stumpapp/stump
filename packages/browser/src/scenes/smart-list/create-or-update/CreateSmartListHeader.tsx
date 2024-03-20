@@ -1,7 +1,7 @@
-import { usePreferences } from '@/hooks'
-
 import { cn, Heading, Text } from '@stump/components'
 import React from 'react'
+
+import { usePreferences } from '@/hooks'
 
 export default function CreateSmartListHeader() {
 	const {

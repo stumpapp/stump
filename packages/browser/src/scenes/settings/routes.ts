@@ -1,3 +1,4 @@
+import { UserPermission } from '@stump/types'
 import {
 	AlarmClock,
 	Bell,
@@ -25,7 +26,7 @@ type Route = {
 	icon: LucideIcon
 	label: string
 	localeKey: string
-	permission?: string
+	permission?: UserPermission
 	to: string
 	subItems?: SubItem[]
 	disabled?: boolean
@@ -133,7 +134,7 @@ export const routeGroups: RouteGroup[] = [
 				icon: Mail,
 				label: 'Email',
 				localeKey: 'server/email',
-				permission: 'server:manage',
+				permission: 'emailer:manage',
 				subItems: [
 					{
 						backlink: {

@@ -9,7 +9,11 @@ import { useStumpWs } from './useStumpWs'
 // TODO: If above works well, test how the client/scanner bench changes if sending the data
 // e.g. if we created 300 books, send them... I imagine this will bog things down a little...
 
-export function useCoreEventHandler() {
+type Params = {
+	liveRefetch?: boolean
+}
+
+export function useCoreEventHandler({ liveRefetch }: Params = {}) {
 	const { addJob, upsertJob, removeJob } = useJobStore((state) => ({
 		addJob: state.addJob,
 		removeJob: state.removeJob,
@@ -48,15 +52,19 @@ export function useCoreEventHandler() {
 				await handleInvalidate(['library', 'series', 'media'])
 				break
 			case 'CreatedManySeries':
-				// await handleInvalidate(['library', 'series', 'media'])
+				if (liveRefetch) {
+					await handleInvalidate([libraryQueryKeys.getLibraryStats, 'series', 'media'])
+				}
 				break
 			case 'CreatedOrUpdatedManyMedia':
-				// await handleInvalidate([
-				// 	'series',
-				// 	'media',
-				// 	libraryQueryKeys.getLibraryStats,
-				// 	libraryQueryKeys.getLibraryById,
-				// ])
+				if (liveRefetch) {
+					await handleInvalidate([
+						'series',
+						'media',
+						libraryQueryKeys.getLibraryStats,
+						libraryQueryKeys.getLibraryById,
+					])
+				}
 				break
 			default:
 				console.warn('Unhandled core event', event)

@@ -538,8 +538,12 @@
 					"file": {
 						"label": "File Management",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
+							"label": "File explorer",
+							"description": "Allows the user to access the various file explorers.\nContent restriction cannot be guaranteed when this feature is granted"
+						},
+						"download": {
+							"label": "Download files",
+							"description": "Allows the user to download files from the server"
 						},
 						"upload": {
 							"label": "Upload files",

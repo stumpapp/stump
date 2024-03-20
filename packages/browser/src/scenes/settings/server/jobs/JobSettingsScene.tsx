@@ -6,7 +6,6 @@ import { Helmet } from 'react-helmet'
 
 import { SceneContainer } from '@/components/container'
 import ContentContainer from '@/components/container/ContentContainer.tsx'
-import { useAppContext } from '@/context'
 import { useLocaleContext } from '@/i18n'
 
 import { JobSettingsContext } from './context.ts'
@@ -15,7 +14,6 @@ import JobScheduler from './JobScheduler.tsx'
 import JobTable from './JobTable.tsx'
 
 export default function JobSettingsScene() {
-	const { isServerOwner } = useAppContext()
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
 		pageSize: 10,
@@ -30,7 +28,6 @@ export default function JobSettingsScene() {
 		isRefetching,
 		pageData,
 	} = useJobsQuery({
-		enabled: isServerOwner,
 		page: pagination.pageIndex,
 		page_size: pagination.pageSize,
 		params: {

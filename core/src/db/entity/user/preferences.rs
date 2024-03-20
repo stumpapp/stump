@@ -26,6 +26,8 @@ pub struct UserPreferences {
 	pub locale: String,
 	pub app_theme: String,
 	pub show_query_indicator: bool,
+	#[serde(default)]
+	pub enable_live_refetch: bool,
 	#[serde(default = "default_layout_mode")]
 	pub preferred_layout_mode: String,
 	#[serde(default = "default_navigation_mode")]
@@ -58,6 +60,7 @@ impl Default for UserPreferences {
 			layout_max_width_px: Some(1280),
 			app_theme: "LIGHT".to_string(),
 			show_query_indicator: false,
+			enable_live_refetch: false,
 			enable_discord_presence: false,
 			enable_compact_display: false,
 			enable_double_sidebar: true,
@@ -83,6 +86,7 @@ impl From<prisma::user_preferences::Data> for UserPreferences {
 			layout_max_width_px: data.layout_max_width_px,
 			app_theme: data.app_theme,
 			show_query_indicator: data.show_query_indicator,
+			enable_live_refetch: data.enable_live_refetch,
 			enable_discord_presence: data.enable_discord_presence,
 			enable_compact_display: data.enable_compact_display,
 			enable_double_sidebar: data.enable_double_sidebar,

@@ -2,9 +2,7 @@ import { useUsersQuery } from '@stump/client'
 import { User } from '@stump/types'
 import { PaginationState } from '@tanstack/react-table'
 import React, { lazy, useState } from 'react'
-import { Navigate, Route, Routes } from 'react-router'
-
-import { useAppContext } from '@/context'
+import { Route, Routes } from 'react-router'
 
 import { UserManagementContext } from './context.ts'
 import UpdateUserScene from './create-or-update/UpdateUserScene.tsx'
@@ -19,13 +17,11 @@ export default function UsersRouter() {
 		pageSize: 10,
 	})
 
-	const { isServerOwner } = useAppContext()
 	const {
 		users,
 		pageData,
 		isRefetching: isRefetchingUsers,
 	} = useUsersQuery({
-		enabled: isServerOwner,
 		page: pagination.pageIndex,
 		page_size: pagination.pageSize,
 		params: {
@@ -34,10 +30,6 @@ export default function UsersRouter() {
 			include_session_count: true,
 		},
 	})
-
-	if (!isServerOwner) {
-		return <Navigate to="/404" />
-	}
 
 	return (
 		<UserManagementContext.Provider

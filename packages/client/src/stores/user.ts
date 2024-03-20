@@ -69,3 +69,8 @@ export const createUserStore = (storage?: StateStorage) =>
 			),
 		),
 	)
+
+export const defaultPreferences = {
+	enable_live_refetch: false,
+	show_query_indicator: false,
+} as UserPreferences

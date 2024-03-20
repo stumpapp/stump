@@ -1,20 +1,17 @@
-import { RouteProp, useRoute } from '@react-navigation/native'
 import { getMediaPage, isAxiosError } from '@stump/api'
-import { useMediaByIdQuery, useUpdateMediaProgress } from '@stump/client'
+import { useUpdateMediaProgress } from '@stump/client'
+import { Media } from '@stump/types'
 import { useColorScheme } from 'nativewind'
 import React, { useCallback, useMemo, useState } from 'react'
-import { FlatList, useWindowDimensions } from 'react-native'
+import { FlatList, TouchableWithoutFeedback, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { ScreenRootView, Text, View } from '@/components'
+import { View } from '@/components'
 import EntityImage from '@/components/EntityImage'
 import { gray } from '@/constants/colors'
+import { useReaderStore } from '@/stores'
 
-type Params = {
-	params: {
-		id: string
-	}
-}
+import ReaderContainer from './ReaderContainer'
 
 type ImageDimension = {
 	height: number
@@ -27,29 +24,39 @@ type ImageDimension = {
 
 // TODO: Account for device orientation AND reading direction
 
-/**
- * A sort of weigh station that renders the corresponding reader for a given media, e.g.
- * EPUBReader, ImageBasedReader, etc.
- */
-export default function BookReader() {
-	const {
-		params: { id },
-	} = useRoute<RouteProp<Params>>()
+type Props = {
+	/**
+	 * The media which is being read
+	 */
+	book: Media
+	/**
+	 * The initial page to start the reader on
+	 */
+	initialPage: number
+	/**
+	 * Whether the reader should be in incognito mode
+	 */
+	incognito?: boolean
+}
 
+/**
+ * A reader for books that are image-based, where each page should be displayed as an image
+ */
+export default function ImageBasedReader({ book, initialPage, incognito }: Props) {
 	const { height, width } = useWindowDimensions()
 	const { colorScheme } = useColorScheme()
 
 	const [imageSizes, setImageHeights] = useState<Record<number, ImageDimension>>({})
 
 	// const lastPrefetchStart = useRef(0)
+	const readerMode = useReaderStore((state) => state.mode)
 
 	const deviceOrientation = width > height ? 'landscape' : 'portrait'
 
 	// TODO: an effect that whenever the device orienation changes to something different than before,
 	// recalculate the ratios of the images? Maybe. Who knows, you will though
 
-	const { isLoading: fetchingBook, media } = useMediaByIdQuery(id)
-	const { updateReadProgressAsync } = useUpdateMediaProgress(id)
+	const { updateReadProgressAsync } = useUpdateMediaProgress(book.id)
 
 	// FIXME: this was HARD erroring...
 
@@ -73,41 +80,39 @@ export default function BookReader() {
 	/**
 	 * A callback that updates the read progress of the current page. This will be
 	 * called whenever the user changes the page in the reader.
+	 *
+	 * If the reader is in incognito mode, this will do nothing.
 	 */
 	const handleCurrentPageChanged = useCallback(
 		async (page: number) => {
-			try {
-				await updateReadProgressAsync(page)
-				// if (page - lastPrefetchStart.current > 5) {
-				// 	await prefetchPages(page, page + 5)
-				// }
-				// lastPrefetchStart.current = page
-			} catch (e) {
-				console.error(e)
-				if (isAxiosError(e)) {
-					console.error(e.response?.data)
+			if (!incognito) {
+				try {
+					await updateReadProgressAsync(page)
+					// if (page - lastPrefetchStart.current > 5) {
+					// 	await prefetchPages(page, page + 5)
+					// }
+					// lastPrefetchStart.current = page
+				} catch (e) {
+					console.error(e)
+					if (isAxiosError(e)) {
+						console.error(e.response?.data)
+					}
 				}
 			}
 		},
-		[updateReadProgressAsync],
+		[updateReadProgressAsync, incognito],
 	)
 
-	if (fetchingBook) {
-		return <Text>Loading...</Text>
-	} else if (!media) {
-		return <Text>Book not found</Text>
-	}
-
 	return (
-		<ScreenRootView>
+		<ReaderContainer>
 			<FlatList
 				style={{ backgroundColor: colorScheme === 'dark' ? gray[950] : undefined }}
-				data={Array.from({ length: media.pages }, (_, i) => i)}
+				data={Array.from({ length: book.pages }, (_, i) => i)}
 				renderItem={({ item }) => (
 					<Page
 						key={`page-${item}`}
 						deviceOrientation={deviceOrientation}
-						id={id}
+						id={book.id}
 						index={item}
 						imageSizes={imageSizes}
 						setImageHeights={setImageHeights}
@@ -118,8 +123,8 @@ export default function BookReader() {
 					/>
 				)}
 				keyExtractor={(item) => item.toString()}
-				horizontal
-				pagingEnabled
+				horizontal={readerMode === 'paged'}
+				pagingEnabled={readerMode === 'paged'}
 				onViewableItemsChanged={({ viewableItems }) => {
 					const fistVisibleItemIdx = viewableItems
 						.filter(({ isViewable }) => isViewable)
@@ -130,8 +135,9 @@ export default function BookReader() {
 				}}
 				initialNumToRender={10}
 				maxToRenderPerBatch={10}
+				initialScrollIndex={initialPage - 1}
 			/>
-		</ScreenRootView>
+		</ReaderContainer>
 	)
 }
 
@@ -159,6 +165,15 @@ const Page = React.memo(
 		readingDirection,
 	}: PageProps) => {
 		const insets = useSafeAreaInsets()
+
+		const { showToolBar, setShowToolBar } = useReaderStore((state) => ({
+			setShowToolBar: state.setShowToolBar,
+			showToolBar: state.showToolBar,
+		}))
+
+		const handlePress = useCallback(() => {
+			setShowToolBar(!showToolBar)
+		}, [showToolBar, setShowToolBar])
 
 		/**
 		 * A memoized value that represents the size(s) of the image dimensions for the current page.
@@ -193,34 +208,36 @@ const Page = React.memo(
 		}, [deviceOrientation, pageSize, safeMaxHeight, maxWidth])
 
 		return (
-			<View
-				className="flex items-center justify-center"
-				style={{
-					height: safeMaxHeight,
-					minHeight: safeMaxHeight,
-					minWidth: maxWidth,
-					width: maxWidth,
-				}}
-			>
-				<EntityImage
-					url={getMediaPage(id, index + 1)}
+			<TouchableWithoutFeedback onPress={handlePress}>
+				<View
+					className="flex items-center justify-center"
 					style={{
-						alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
-						height,
-						width,
+						height: safeMaxHeight,
+						minHeight: safeMaxHeight,
+						minWidth: maxWidth,
+						width: maxWidth,
 					}}
-					onLoad={({ source: { height, width } }) => {
-						setImageHeights((prev) => ({
-							...prev,
-							[index + 1]: {
-								height,
-								ratio: deviceOrientation == 'landscape' ? height / width : width / height,
-								width,
-							},
-						}))
-					}}
-				/>
-			</View>
+				>
+					<EntityImage
+						url={getMediaPage(id, index + 1)}
+						style={{
+							alignSelf: readingDirection === 'horizontal' ? 'center' : undefined,
+							height,
+							width,
+						}}
+						onLoad={({ source: { height, width } }) => {
+							setImageHeights((prev) => ({
+								...prev,
+								[index + 1]: {
+									height,
+									ratio: deviceOrientation == 'landscape' ? height / width : width / height,
+									width,
+								},
+							}))
+						}}
+					/>
+				</View>
+			</TouchableWithoutFeedback>
 		)
 	},
 )

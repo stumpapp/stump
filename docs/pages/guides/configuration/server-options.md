@@ -50,21 +50,15 @@ The time-to-live for session cookies. This is the amount of time that a session 
 
 #### STUMP_ALLOWED_ORIGINS
 
-The allowed origins for the Stump API. If you're trying to access the API from a different domain, you'll need to add it to this list. By default, origins corresponding to the Tauri desktop application are allowed, and the host machine's IP address with the configured port is allowed for both HTTP and HTTPS.
+A **comma-delineated** list of allowed origins for the Stump API. If you're trying to access the API from a different domain, you'll need to add it to this list. By default, origins corresponding to the Tauri desktop application are allowed, and the host machine's IP address with the configured port is allowed for both HTTP and HTTPS.
 
-| Type     | Default Value                                                                                |
-| -------- | -------------------------------------------------------------------------------------------- |
-| String[] | `["tauri://localhost", "https://tauri.localhost", "http(s):{machine_ip}:{configured_port}"]` |
+| Type   | Default Value                                                                              |
+| ------ | ------------------------------------------------------------------------------------------ |
+| String | `"tauri://localhost","https://tauri.localhost","http(s)://{machine_ip}:{configured_port}"` |
 
-This corresponds to the `allowed_origins` configuration option in the `Stump.toml` file.
+This corresponds to the `allowed_origins` configuration option in the `Stump.toml` file, but will be stored as a valid array in the configuration file.
 
-#### STUMP_IN_DOCKER
-
-Whether or not Stump is running in a Docker container.
-
-| Type    | Default Value |
-| ------- | ------------- |
-| Boolean | `false`       |
+**Be sure to replace `{machine_ip}` and `{configured_port}` with the appropriate values for your environment.**
 
 #### STUMP_CONFIG_DIR
 

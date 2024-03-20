@@ -1,6 +1,6 @@
 {
 	"name": "@stump/api",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "",
 	"main": "src/index.ts",
 	"exports": {
@@ -13,7 +13,7 @@
 		"typescript": "^5.3.3"
 	},
 	"dependencies": {
-		"@stump/types": "workspace:*",
+		"@stump/types": "*",
 		"axios": "^1.5.1",
 		"qs": "^6.11.2"
 	}

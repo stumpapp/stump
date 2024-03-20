@@ -24,7 +24,7 @@ export const BUTTON_VARIANTS = {
 	link: 'bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-gray-900 dark:text-gray-100 hover:bg-transparent dark:hover:bg-transparent',
 	outline: 'bg-transparent border border-edge-200 hover:bg-background-200 text-contrast',
 	primary:
-		'bg-brand-500 text-white hover:bg-brand-600 dark:hover:bg-brand-600 focus:ring-brand-400',
+		'bg-brand-500 text-white hover:bg-brand-600 dark:hover:bg-brand-600 focus:ring-brand-400 data-[state=open]:bg-brand-600',
 	secondary: 'bg-contrast text-background hover:bg-contrast-300 data-[state=open]:bg-contrast-300',
 	subtle: 'bg-background-300 hover:bg-background-400 text-contrast-300',
 	'subtle-dark':

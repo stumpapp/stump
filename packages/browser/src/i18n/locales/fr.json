@@ -153,22 +153,22 @@
 		"continueReading": {
 			"title": "Continuer la lecture",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you're currently reading will show up here"
+				"heading": "Aucun livre à afficher",
+				"message": "Tous les livres que vous lisez actuellement apparaîtront ici"
 			}
 		},
 		"recentlyAddedSeries": {
 			"title": "Séries récemment ajoutées",
 			"emptyState": {
-				"heading": "No series to display",
-				"message": "Any series you add to your libraries will show up here"
+				"heading": "Aucune série à afficher",
+				"message": "Toutes les séries que vous ajoutez à vos bibliothèques apparaîtront ici"
 			}
 		},
 		"recentlyAddedBooks": {
 			"title": "Livres récemment ajoutés",
 			"emptyState": {
-				"heading": "No books to display",
-				"message": "Any books you add to your libraries will show up here"
+				"heading": "Aucun livre à afficher",
+				"message": "Tous les livres que vous ajoutez à vos bibliothèques apparaîtront ici"
 			}
 		}
 	},
@@ -179,92 +179,92 @@
 		}
 	},
 	"userSmartListsScene": {
-		"heading": "Smart lists",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"heading": "Listes intelligentes",
+		"subtitle": "Vos recherches et filtres favoris sauvegardés pour un accès facile",
+		"searchPlaceholder": "Filtrer les listes intelligentes",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "Créer une liste intelligente"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "Aucune liste intelligente à afficher",
+				"noListsMessage": "Créez une liste intelligente pour commencer",
+				"noMatchesMessage": "Essayez de modifier votre recherche"
 			},
 			"card": {
 				"meta": {
 					"figures": {
-						"books": "book",
-						"series": "series",
-						"library": "library"
+						"books": "livre",
+						"series": "séries",
+						"library": "bibliothèque"
 					},
-					"matches": "Matches"
+					"matches": "Correspondances"
 				}
 			}
 		}
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
-			"settings": "Settings"
+			"items": "Éléments",
+			"settings": "Paramètres"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
-			"viewSaveError": "Failed to save view"
+			"missingIdError": "Cette scène nécessite un ID dans l'URL",
+			"smartListNotFound": "La liste intelligente est introuvable",
+			"viewCreateError": "Échec lors de la création de l'affichage",
+			"viewSaveError": "Échec lors de la sauvegarde de l'affichage"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "Listes"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "La liste intelligente est introuvable",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "Affichage personnalisé",
+					"defaultView": "Affichage par défaut",
+					"noViewsSaved": "Aucun affichage enregistré",
+					"selectView": "Sélectionnez un affichage enregistré"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "Filtres de liste intelligente",
+					"description": "Changer les filtres pour cette session affichée",
 					"rawData": {
-						"heading": "Raw filter data",
-						"description": "This is how Stump will process the filters"
+						"heading": "Données du filtre brut",
+						"description": "Voici comment Stump traitera les filtres"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "Sauvegarder",
+						"cancel": "Annuler"
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "Filtre rapide"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "Mettre à jour la sélection",
+					"create": "Créer un nouvel affichage",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "Créer un affichage",
+							"update": "Actualiser l'affichage"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "Créer un nouvel affichage pour cette liste intelligente",
+							"update": "Actualiser l'affichage"
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "A friendly name to uniquely identify this view"
+								"label": "Nom",
+								"placeholder": "Mon affichage",
+								"description": "Un nom sympa pour identifier de manière unique cet affichage"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"label": "Nom",
+								"placeholder": "Mon affichage",
+								"description": "Le nom actualisé pour cet affichage, si désiré"
 							}
 						}
 					}
@@ -284,9 +284,8 @@
 		"sidebar": {
 			"application": {
 				"account": "Account",
-				"appearance": "Appearance",
-				"reader": "Reader",
-				"desktop": "Desktop",
+				"appearance": "Apparence",
+				"desktop": "Bureau",
 				"label": "Application"
 			},
 			"server": {
@@ -306,66 +305,66 @@
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "Veuillez saisir une URL valide",
+						"missingUsername": "Nom d’utilisateur requis"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "Nom d'utilisateur",
+						"password": "Mot de passe",
+						"activeChangesPrompt": "Vous avez des modifications non enregistrées"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "Une erreur de serveur est survenue lors de la mise à jour de votre profil. Veuillez réessayer."
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "Définir votre image d'avatar",
+						"subtitle": "Stump prend en charge les avatars personnalisés, qui peuvent être définis en fournissant une URL vers une image. Les téléchargements d'images ne sont pas pris en charge pour réduire la quantité de données stockées sur le serveur.",
+						"preview": "Un aperçu apparaîtra ici une fois que vous aurez entré une URL.",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "URL de l'image",
+							"customAvatar": "Personnaliser l’avatar"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
-							"removeImage": "Remove Image"
+							"confirm": "Confirmer l'image",
+							"cancel": "Annuler",
+							"edit": "Éditer",
+							"changeImage": "Changer l'image",
+							"removeImage": "Supprimer l'image"
 						}
 					},
 					"buttons": {
-						"confirm": "Save Changes"
+						"confirm": "Enregistrer les modifications"
 					}
 				},
 				"locale": {
 					"localeSelector": {
-						"label": "Language"
+						"label": "Langue"
 					},
-					"heading": "Language and locale",
+					"heading": "Langue",
 					"subtitle": [
-						"Stump supports multiple languages and locales, set your preferences below. Please consider helping improve the quality of",
-						"Stump's translations",
-						"if you're able to!"
+						"Stump prend en charge plusieurs langues, définissez vos préférences ci-dessous. Pensez à aider à améliorer la qualité des",
+						"traductions de Stump",
+						"si vous le pouvez !"
 					]
 				}
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "Apparence",
+			"title": "Apparence",
+			"description": "Personnaliser l'apparence de l'application",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
-					"description": "By default, Stump has a light and dark theme",
+					"label": "Thème",
+					"description": "Par défaut, Stump possède un thème clair et sombre",
 					"customTheme": [
-						"If you're interested in creating your own custom theme, check out the",
+						"Si vous êtes intéressé par la création de votre propre thème personnalisé, consultez la",
 						"documentation"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
-						"bronze": "Bronze light"
+						"light": "Clair",
+						"dark": "Sombre",
+						"bronze": "Bronze léger"
 					}
 				}
 			}
@@ -392,24 +391,24 @@
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
-			"description": "Settings related to the Stump desktop application",
+			"helmet": "Paramètres du bureau",
+			"title": "Paramètres du bureau",
+			"description": "Paramètres liés à l'application de bureau Stump",
 			"sections": {
 				"discordPresence": {
-					"label": "Discord Presence",
-					"description": "Display your Stump activity in Discord using Discord Rich Presence",
-					"reconnect": "Reconnect to Discord"
+					"label": "Présence Discord",
+					"description": "Affiche votre activité Stump sur Discord en utilisant la Présence Riche de Discord",
+					"reconnect": "Se reconnecter à Discord"
 				}
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
-			"description": "General settings related to your Stump server instance",
+			"helmet": "Paramètres généraux du serveur",
+			"title": "Paramètres généraux",
+			"description": "Paramètres généraux liés à l'instance de votre serveur Stump",
 			"sections": {
 				"updateAvailable": {
-					"message": "Your server is not up to date. Please update to the latest version!"
+					"message": "Votre serveur n'est pas à jour. Veuillez le mettre à jour vers la dernière version !"
 				},
 				"serverInfo": {
 					"title": "Server information",
@@ -451,158 +450,150 @@
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
-			"description": "Background jobs that run on your Stump server instance",
+			"helmet": "Tâches",
+			"title": "Tâches",
+			"description": "Tâches en arrière-plan qui s'exécutent sur l'instance de votre serveur Stump",
 			"sections": {
 				"scheduling": {
-					"title": "Scheduling",
-					"description": "Some jobs can be configured to run on a schedule. Changes to this configuration will take effect after a server restart"
+					"title": "Planification",
+					"description": "Certaines tâches peuvent être configurées pour être exécutées à un moment défini. Les modifications de cette configuration prendront effet après le redémarrage du serveur"
 				},
 				"history": {
-					"title": "History",
-					"description": "A record of jobs that have been run on your Stump server instance",
+					"title": "Historique",
+					"description": "Un enregistrement des tâches qui ont été exécutées sur l'instance de votre serveur Stump",
 					"table": {
 						"columns": {
 							"name": "Type",
 							"description": "Description",
-							"status": "Status",
-							"createdAt": "Started At",
-							"elapsed": "Elapsed",
-							"tasks": "Tasks"
+							"status": "État",
+							"createdAt": "Commencée à",
+							"elapsed": "Temps écoulé",
+							"tasks": "Tâches"
 						},
-						"emptyHeading": "There are no jobs to display",
-						"emptySubtitle": "You can't have a job if you don't have a job",
-						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"emptyHeading": "Il n'y a aucune tâche à afficher",
+						"emptySubtitle": "Vous ne pouvez pas avoir une tâche si vous n'avez pas une tâche définie",
+						"deleteAllMessage": "L'historique des tâches et les statistiques peuvent être supprimés de la base de données à tout moment. Cette action ne peut pas être annulée",
+						"deleteAllConfirmButton": "Effacer l'historique",
+						"deleteAllConfirmButtonTitle": "Effacer l'historique des tâches",
+						"deleteAllConfirmButtonTitleNoJobs": "Aucune tâche à effacer"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "Gestion des utilisateurs",
+			"title": "Utilisateurs",
+			"description": "Gérer les utilisateurs sur ce serveur",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "Créer un utilisateur",
+				"title": "Créer un utilisateur",
+				"description": "Créer un nouvel utilisateur sur ce serveur"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "Modifier l'utilisateur",
+				"title": "Modifier l'utilisateur",
+				"description": "Mettre à jour les détails de cet utilisateur"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "Contrôle d'accès et restrictions",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
+						"Configurez toutes les restrictions que vous souhaitez appliquer à cet utilisateur. Pour plus d'informations sur le contrôle d'accès, consultez la",
 						"documentation"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "Restriction d'âge",
+						"description": "Empêche l'utilisateur d'accéder au contenu au-delà du seuil d'âge défini",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "Appliquer en cas d'absence de paramétrage",
+							"description": "Si activée, les utilisateurs ne pourront pas accéder aux contenus pour lesquels aucune classification par âge n'est disponible"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "Restrictions d'étiquettes",
+						"description": "Empêche l'utilisateur d'accéder au contenu contenant les étiquettes sélectionnées",
+						"placeholder": "Adulte, Gore"
 					}
 				},
 				"permissions": {
 					"heading": "Permissions",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
+						"Sélectionnez les autorisations que vous souhaitez accorder à cet utilisateur. Pour plus d'informations sur la fonction de chaque autorisation, consultez la",
 						"documentation"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "Clubs de lecture",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "Accéder aux fonctionnalités des clubs de lecture",
+							"description": "Permet à l'utilisateur d'accéder aux fonctionnalités des clubs de lecture, incluant la visualisation et l'inscription à des clubs de lecture"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "Créer des Clubs de Lecture",
+							"description": "Permet à l'utilisateur de créer de nouveaux clubs de lectures"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "Gestion des fichiers",
 						"explorer": {
-							"label": "File Explorer",
-							"description": "Allows the user to access the Library File Explorer.\nContent restriction is not supported when this feature is granted"
-						},
-						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "Explorateur de Fichiers",
+							"description": "Permet à l'utilisateur d'accéder à l'explorateur de fichiers des bibliothèques.\nLa restriction de contenu n'est pas prise en charge lorsque cette fonctionnalité est accordée"
 						},
 						"upload": {
-							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"label": "Envoyer des fichiers",
+							"description": "Permet à l'utilisateur d'envoyer des fichiers sur le serveur"
 						}
 					},
 					"library": {
-						"label": "Library Management",
+						"label": "Gestion des bibliothèques",
 						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"label": "Créer des bibliothèques",
+							"description": "Permet à l'utilisateur de créer de nouvelles bibliothèques.\nInclut les permissions d'édition et de scan"
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "Scanner les bibliothèques",
+							"description": "Permet à l'utilisateur de lancer des scans pour les bibliothèques existantes"
 						},
 						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
+							"label": "Modifier les bibliothèques",
+							"description": "Permet à l'utilisateur de modifier les détails de base des bibliothèques existantes"
 						},
 						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"label": "Gérer les bibliothèques",
+							"description": "Permet à l'utilisateur de gérer les paramètres avancés des bibliothèques existantes.\nInclut les permissions d'édition et de scan"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "Supprimer les bibliothèques",
+							"description": "Permet à l'utilisateur de supprimer des bibliothèques existantes.\nInclut les permissions d'édition, de gestion et de scan"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "Gestion du serveur",
 						"manage": {
-							"label": "Manage server",
-							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"
+							"label": "Gérer le serveur",
+							"description": "Permet à l'utilisateur de gérer le serveur.\nComprend *beaucoup* d'autres autorisations"
 						}
 					},
 					"user": {
-						"label": "User Management",
-						"read": {
-							"label": "Read users",
-							"description": "Allows the user to query other users on the server. This is required for some other features, e.g. excluding users from accessing a library"
-						},
+						"label": "Gestion des Utilisateurs",
 						"manage": {
-							"label": "Manage users",
-							"description": "Allows the user to manage other users on the server.\nIncludes permissions to create and update"
+							"label": "Gérer les utilisateurs",
+							"description": "Permet à l'utilisateur de gérer d'autres utilisateurs sur le serveur.\nInclut les permissions pour créer et mettre à jour"
 						}
 					},
 					"smartlist": {
-						"label": "Smart Lists",
+						"label": "Listes intelligentes",
 						"read": {
-							"label": "Access smart list feature",
-							"description": "Allows the user to access smart lists features"
+							"label": "Accéder à la fonctionnalité Liste Intelligente",
+							"description": "Permet à l'utilisateur d'accéder aux fonctionnalités des listes intelligentes"
 						}
 					}
 				},
 				"validation": {
-					"ageRestrictionTooLow": "Age restriction cannot be less than 0"
+					"ageRestrictionTooLow": "La restriction d'âge ne peut pas être inférieure à 0"
 				},
-				"createSubmitButton": "Create user",
-				"updateSubmitButton": "Update user"
+				"createSubmitButton": "Créer un utilisateur",
+				"updateSubmitButton": "Modifier l'utilisateur"
 			}
 		}
 	},
@@ -639,25 +630,25 @@
 		"buttons": {
 			"home": "Accueil",
 			"libraries": "Bibliothèques",
-			"books": "Explore",
-			"bookClubs": "Book clubs",
-			"createLibrary": "Create library",
-			"noLibraries": "No libraries",
-			"createBookClub": "Create book club",
-			"noBookClubs": "No book clubs",
+			"books": "Explorer",
+			"bookClubs": "Club de lecture",
+			"createLibrary": "Créer une bibliothèque",
+			"noLibraries": "Aucune bibliothèque",
+			"createBookClub": "Créer un Club de Lecture",
+			"noBookClubs": "Aucun club de lecture",
 			"settings": "Paramètres",
 			"themeToggle": "Changer de thème",
 			"goForward": "Aller en avant",
 			"goBack": "Aller en arrière",
-			"smartlists": "Smart lists",
-			"noSmartlists": "No smart lists",
-			"createSmartlist": "Create smart list"
+			"smartlists": "Listes intelligentes",
+			"noSmartlists": "Aucune liste intelligente",
+			"createSmartlist": "Créer une liste intelligente"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
+			"scanLibrary": "Scanner",
 			"fileExplorer": "Explorateur de fichiers",
-			"manageLibrary": "Manage",
-			"deleteLibrary": "Delete"
+			"manageLibrary": "Gérer",
+			"deleteLibrary": "Supprimer"
 		},
 		"versionInformation": {
 			"heading": "Informations de version",
@@ -677,7 +668,7 @@
 		"web": {
 			"message": "Une erreur de réseau s'est produite indiquant que votre serveur Stump est actuellement indisponible. Veuillez vous assurer qu'il est en cours d'exécution et accessible depuis cet appareil"
 		},
-		"reconnected": "Reconnecté au serveur! Redirection...",
+		"reconnected": "Reconnecté au serveur ! Redirection...",
 		"reconnectionFailed": "Quelque chose s'est mal passé!"
 	},
 	"serverStatusOverlay": {
@@ -700,25 +691,23 @@
 		"placeholderNoTags": "Aucune étiquette disponible"
 	},
 	"thumbnailDropdown": {
-		"label": "Edit thumbnail",
+		"label": "Éditer l'image de couverture",
 		"options": {
-			"selectFromBooks": "Select from books",
-			"uploadImage": "Upload image"
+			"selectFromBooks": "Sélectionner à partir des livres",
+			"uploadImage": "Importer une image"
 		},
 		"uploadImage": {
-			"emptyState": "A preview of your image will appear here",
-			"prompt": "Drop image here or click to select",
-			"remove": "Remove image"
+			"emptyState": "Un aperçu de votre image apparaîtra ici",
+			"prompt": "Déposez l'image ici ou cliquez pour sélectionner",
+			"remove": "Supprimer l’image"
 		}
 	},
 	"common": {
-		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"saveChanges": "Save changes",
-		"create": "Create",
-		"edit": "Edit",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
+		"cancel": "Annuler",
+		"confirm": "Confirmer",
+		"save": "Sauvegarder",
+		"saveChanges": "Enregistrer les modifications",
+		"create": "Créer",
+		"edit": "Éditer"
 	}
 }

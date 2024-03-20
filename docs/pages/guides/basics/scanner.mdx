@@ -1,0 +1,108 @@
+import { Steps, Callout } from 'nextra/components'
+
+# Scanner
+
+A scan is the process of indexing your filesystem to detect new media files and file changes/updates. Scans are essential for keeping your media libraries up-to-date in Stump. The _scanner_ is a queable process which will perform these scans for you.
+
+Scans can be isolated to either the library level or the series level. There are no real differences between the two, except that a library scan will scan all series in the library, while a series scan will only scan the selected series.
+
+## How does it work?
+
+When you start a scan, Stump will walk your filesystem to detect any new, updated, or otherwise changed series and media. It will then insert these changes into the database, which will make them available to you in the UI.
+
+A high-level overview of the scan process is as follows:
+
+<Steps>
+
+### Preliminary checks
+
+Does the library exist on disk? If not, the scan will fail and adjust the library status accordingly.
+
+### Build the main task queue
+
+Stump will recursively traverse the filesystem (from the library root) to detect:
+
+1. New and **valid** series
+2. Missing series
+
+Both are handled immediately and in chunks. Any series which are not missing, including those which were created in the last sub-step, will be added to the main task queue as a `WalkSeries` task.
+
+### Walk series
+
+This task doesn't do much itself aside from discovery operations. Stump will recursively traverse the filesystem (from the series root) to detect:
+
+1. New and **valid** media
+2. Updated media (based on last modified time on disk)
+3. Missing media
+
+These discoveries are then queued separately to be handled in an isolated manner - they are added to the **front** of the main task queue.
+
+<Callout emoji="🙋">
+	This growing queue might seem like a problem, but it is actually a feature. In order to keep the
+	scan process as efficient as possible, Stump will not compute _all_ required tasks at the start.
+	As libraries grow in size, this can be a significant performance improvement.
+</Callout>
+
+### Handle media tasks
+
+Stump will handle the media tasks in the queue, which includes:
+
+1. Adding new media to the database
+2. Updating media in the database
+3. Mark missing media in the database
+
+All of which are done in chunks, to both provide speedup and to avoid resource exhaustion. The chunk size is **planned** to be configurable in the future.
+
+#### New media
+
+Stump will take a chunk of paths and process/build their DB representations **in parallel**.
+
+Once all paths in the chunk have been processed, they are inserted into the database **one by one**. This decision was made to avoid situations where one bad file would kill the entire batch of inserts. However, it is trivial to change this behavior in the future if needed.
+
+#### Updated media
+
+The process for updated media is exactly the same, except that stump diffs the newly built media representation with what already exists. The result of this diff is then used to update the database.
+
+#### Missing media
+
+Stump issues a single `UPDATE` query for the entire set of missing media. This is generally safe since there is just one text column to update.
+
+### Cleanup
+
+Stump will perform some cleanup operations, such as:
+
+1. Inserting any runtime logs (errors, warnings, etc) into the database
+2. Updating the library's last scan time **TODO**: This is not yet implemented
+
+</Steps>
+
+## Scheduling scans
+
+You can configure the scheduler to run scans at a specific interval. This is useful for keeping your media libraries up-to-date without having to manually run scans.
+
+To configure the scheduler, navigate to `/settings/jobs`, scroll to the `Job Scheduling` section towards the top of the page, fill out your desired interval (in seconds), and click the `Save scheduler changes` button.
+
+For convenience, there are a few preset options you may select from the dropdown menu. These are:
+
+- Every 6 hours (21600 seconds)
+- Every 12 hours (43200 seconds)
+- Every 24 hours (86400 seconds)
+- Once a week (604800 seconds)
+- Once a month (2592000 seconds)
+
+> In the future, this section of the UI will change to include scheduling options for more than just scans. However, for now, it is only for scans.
+
+## Ignore Files
+
+Stump has minimal support for a custom `.stumpignore` file, which allows you to ignore certain files and directories from being scanned. This is useful for files which are organized with your media, but you don't want to be included in the library.
+
+Some examples you can achieve with this:
+
+```bash
+# Ignore all files in the "extras" directory
+extras/
+# Ignore all files in the "extras" directory, except for "extras/include-me.cbz"
+!extras/include-me.cbz
+```
+
+Please note, that in the above example, if you exclude an entire directory and explicitly include a file in that directory, a series will still potentially be created for that directory depending on which [library pattern](/guides/libraries#library-patterns) you have configured. If it does get created, `include-me.cbz` will be the only file in the series.

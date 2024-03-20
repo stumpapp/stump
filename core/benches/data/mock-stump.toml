@@ -1,0 +1,8 @@
+profile = "release"
+port = 1337
+verbosity = 3
+db_path = "not_a_real_path"
+client_dir = "not_a_real_dir"
+config_dir = "also_not_a_real_dir"
+allowed_origins = ["origin1", "origin2"]
+pdfium_path = "not_a_path_to_pdfium"

@@ -1,13 +1,13 @@
 import type { Tag } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult } from './types'
+import { APIResult } from './types'
 
-export function getAllTags(): Promise<ApiResult<Tag[]>> {
+export function getAllTags(): Promise<APIResult<Tag[]>> {
 	return API.get('/tags')
 }
 
-export function createTags(tags: string[]): Promise<ApiResult<Tag[]>> {
+export function createTags(tags: string[]): Promise<APIResult<Tag[]>> {
 	return API.post('/tags', { tags })
 }
 

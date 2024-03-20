@@ -20,7 +20,7 @@ use tracing::trace;
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	middleware::auth::{Auth, ServerOwnerGuard},
 	utils::enforce_session_permission,
 };
@@ -54,7 +54,7 @@ pub async fn list_directory(
 	session: Session,
 	pagination: Query<PageQuery>,
 	input: Json<Option<DirectoryListingInput>>,
-) -> ApiResult<Json<Pageable<DirectoryListing>>> {
+) -> APIResult<Json<Pageable<DirectoryListing>>> {
 	enforce_session_permission(&session, UserPermission::FileExplorer)?;
 	let input = input.0.unwrap_or_default();
 
@@ -67,12 +67,12 @@ pub async fn list_directory(
 	let start_path = Path::new(&start_path);
 
 	if !start_path.exists() {
-		return Err(ApiError::NotFound(format!(
+		return Err(APIError::NotFound(format!(
 			"Directory does not exist: {}",
 			start_path.display()
 		)));
 	} else if !start_path.is_absolute() {
-		return Err(ApiError::BadRequest(format!(
+		return Err(APIError::BadRequest(format!(
 			"Path must be absolute: {}",
 			start_path.display()
 		)));

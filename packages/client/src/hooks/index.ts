@@ -1,6 +1,3 @@
 export { useCoreEventHandler } from './useCoreEvent'
-export { useLayoutMode } from './useLayoutMode'
-export { usePreferences } from './usePreferences'
 export { useStumpSse } from './useStumpSse'
 export { useStumpWs } from './useStumpWs'
-export { useTheme } from './useTheme'

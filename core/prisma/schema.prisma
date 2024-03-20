@@ -29,7 +29,8 @@ model User {
   book_club_memberships BookClubMember[]
   book_club_invitations BookClubInvitation[]
 
-  age_restriction AgeRestriction?
+  age_restriction            AgeRestriction?
+  libraries_hidden_from_user Library[]
 
   // Waiting on https://github.com/Brendonovich/prisma-client-rust/issues/44, then making it mandatory
   user_preferences_id String?          @unique
@@ -96,7 +97,8 @@ model Library {
   library_options    LibraryOptions @relation(fields: [library_options_id], references: [id])
   library_options_id String         @unique
 
-  tags Tag[]
+  tags              Tag[]
+  hidden_from_users User[]
 
   job_schedule_config    JobScheduleConfig? @relation(fields: [job_schedule_config_id], references: [id])
   job_schedule_config_id String?
@@ -128,6 +130,7 @@ model LastLibraryVisit {
   timestamp DateTime @default(now())
 
   @@unique([user_id, library_id])
+  @@map("last_library_visits")
 }
 
 model Series {
@@ -622,28 +625,24 @@ model Collection {
 }
 
 model Job {
-  id                   String    @id
+  id           String    @id
   // The name of the job, e.g. Library Scan
-  name                 String
+  name         String
   // The extra description
-  description          String?
+  description  String?
   // The status of the job (i.e. QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED).
-  status               String    @default("QUEUED")
+  status       String    @default("QUEUED")
   // The state of the job. This is primarily stored in order to support pausing/resuming
   // jobs, as it will hold the state of the job at the time it was paused.
-  state                Bytes?
-  // A JSON blob of optional, extra metadata
-  extra_metadata       Bytes?
-  // The total number of tasks
-  task_count           Int       @default(1)
-  // The total number of tasks completed (i.e. without error/failure)
-  completed_task_count Int       @default(0)
+  save_state   Bytes?
+  // The finalized output data of the job
+  output_data  Bytes?
   // The time (in milliseconds) to complete the job
-  ms_elapsed           BigInt    @default(0)
+  ms_elapsed   BigInt    @default(0)
   // The datetime stamp of when the job was created
-  created_at           DateTime  @default(now())
+  created_at   DateTime  @default(now())
   // The datetime stamp of when the job completed
-  completed_at         DateTime?
+  completed_at DateTime?
 
   logs Log[]
 
@@ -651,11 +650,12 @@ model Job {
 }
 
 model Log {
-  id String @id @default(uuid())
+  id Int @id @default(autoincrement())
 
-  level      String   @default("INFO") //  "ERROR", "WARN", "INFO", "DEBUG"
-  message    String
-  created_at DateTime @default(now()) // TODO: change name to timestamp
+  level     String   @default("INFO") //  "ERROR", "WARN", "INFO", "DEBUG"
+  message   String
+  context   String?
+  timestamp DateTime @default(now())
 
   job    Job?    @relation(fields: [job_id], references: [id], onDelete: Cascade)
   job_id String?
@@ -673,6 +673,7 @@ model UserPreferences {
   primary_navigation_mode String  @default("SIDEBAR")
   layout_max_width_px     Int?    @default(1280)
   show_query_indicator    Boolean @default(false)
+  enable_live_refetch     Boolean @default(false)
   enable_discord_presence Boolean @default(false)
   enable_compact_display  Boolean @default(false)
 
@@ -680,6 +681,7 @@ model UserPreferences {
   enable_replace_primary_sidebar Boolean @default(false)
   enable_hide_scrollbar          Boolean @default(false)
   prefer_accent_color            Boolean @default(true)
+  show_thumbnails_in_headers     Boolean @default(false)
 
   user    User?
   user_id String? @unique

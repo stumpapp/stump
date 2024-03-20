@@ -1,6 +1,6 @@
 [package]
 name = "stump_desktop"
-version = "0.0.0"
+version = "0.0.1"
 description = ""
 authors = ["Aaron Leopold <aaronleopold1221@gmail.com>"]
 license = "MIT"

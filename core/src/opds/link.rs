@@ -17,6 +17,20 @@ pub enum OpdsLinkType {
 	Search,      // "application/opensearchdescription+xml"
 }
 
+impl OpdsLinkType {
+	pub fn from_extension(extension: &str) -> Option<Self> {
+		match extension {
+			"jpeg" | "jpg" => Some(OpdsLinkType::ImageJpeg),
+			"png" => Some(OpdsLinkType::ImagePng),
+			"gif" => Some(OpdsLinkType::ImageGif),
+			"epub" => Some(OpdsLinkType::Epub),
+			// TODO: RARs as ZIP??? Obviously for content type it's different, but does OPDS concern itself with that?
+			"zip" | "cbz" | "rar" | "cbr" => Some(OpdsLinkType::Zip),
+			_ => None,
+		}
+	}
+}
+
 impl TryFrom<ContentType> for OpdsLinkType {
 	type Error = String;
 

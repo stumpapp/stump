@@ -1,11 +1,16 @@
 use std::sync::Arc;
 
 use crate::{
-	db::entity::LibraryScanMode,
+	db::entity::LibraryOptions,
 	filesystem::scanner::LibraryScanJob,
+	job::WrappedJob,
 	prisma::{job_schedule_config, library},
 	CoreResult, Ctx,
 };
+
+// TODO: refactor this!
+// 1. Schedule multiple job types (complex config)
+// 2. Last run timestamp, so on boot we don't immediately trigger the scheduled tasks
 
 pub struct JobScheduler {
 	pub scheduler_handle: Option<tokio::task::JoinHandle<()>>,
@@ -66,6 +71,7 @@ impl JobScheduler {
 						.find_many(vec![library::id::not_in_vec(
 							excluded_library_ids.clone(),
 						)])
+						.with(library::library_options::fetch())
 						.exec()
 						.await
 						.unwrap_or_else(|e| {
@@ -77,10 +83,13 @@ impl JobScheduler {
 						// TODO: support default scan mode on libraries
 						// let scan_mode = library.default_scan_mode.clone();
 						let library_path = library.path.clone();
-						let result = scheduler_ctx.dispatch_job(LibraryScanJob::new(
-							library_path,
-							LibraryScanMode::Default,
-						));
+						let options = library.library_options().ok().take();
+						let result =
+							scheduler_ctx.enqueue_job(WrappedJob::new(LibraryScanJob {
+								id: library.id.clone(),
+								path: library_path,
+								options: options.map(LibraryOptions::from),
+							}));
 						if result.is_err() {
 							tracing::error!(
 								?library,

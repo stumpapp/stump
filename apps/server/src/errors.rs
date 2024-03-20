@@ -2,6 +2,7 @@ use axum::{
 	extract::multipart::MultipartError,
 	http::StatusCode,
 	response::{IntoResponse, Response},
+	Json,
 };
 use cli::CliError;
 use prisma_client_rust::{
@@ -9,8 +10,7 @@ use prisma_client_rust::{
 	QueryError,
 };
 use stump_core::{
-	error::CoreError, event::InternalCoreTask, filesystem::FileError,
-	job::JobManagerError,
+	error::CoreError, filesystem::FileError, job::error::JobManagerError, CoreEvent,
 };
 use tokio::sync::mpsc;
 use tower_sessions::session::SessionError;
@@ -19,9 +19,16 @@ use utoipa::ToSchema;
 use std::{net, num::TryFromIntError};
 use thiserror::Error;
 
+/// A type alias for the result of a server operation
 pub type ServerResult<T> = Result<T, ServerError>;
-pub type ApiResult<T> = Result<T, ApiError>;
+/// A type alias for the result of an API operation, e.g. the response of an axum handler
+pub type APIResult<T> = Result<T, APIError>;
 
+/// The top-level error type for the Stump server binary. The entry is a CLI app which either
+/// performs a given command _or_ starts the server.
+///
+/// Note: If there is an invalid configuration, neither of these can happen, so there is a
+/// separate error variant for that.
 #[derive(Debug, Error)]
 pub enum EntryError {
 	#[error("{0}")]
@@ -32,6 +39,8 @@ pub enum EntryError {
 	ServerError(#[from] ServerError),
 }
 
+/// A generic error type to encapsulate general server errors, which may include API errors, but
+/// also includes other errors such as a failure to boot or bind to a port.
 #[derive(Debug, Error)]
 pub enum ServerError {
 	// TODO: meh
@@ -40,9 +49,11 @@ pub enum ServerError {
 	#[error("Stump failed to parse the provided address: {0}")]
 	InvalidAddress(#[from] net::AddrParseError),
 	#[error("{0}")]
-	ApiError(#[from] ApiError),
+	APIError(#[from] APIError),
 }
 
+/// Authentication errors, emitted during the authentication process and in instances where a user
+/// is not authorized to access a resource/action.
 #[derive(Error, Debug)]
 pub enum AuthError {
 	#[error("Error during the authentication process")]
@@ -84,12 +95,11 @@ impl IntoResponse for AuthError {
 	}
 }
 
-// TODO: ApiError -> APIError
-// TODO: Serialization is really poor, need to fix that
-
+/// The error representation for API errors. This is a simple enum which will be converted into a
+/// JSON response containing the status code and the error message.
 #[allow(unused)]
 #[derive(Debug, Error, ToSchema)]
-pub enum ApiError {
+pub enum APIError {
 	#[error("{0}")]
 	BadRequest(String),
 	#[error("{0}")]
@@ -119,130 +129,169 @@ pub enum ApiError {
 	PrismaError(#[from] QueryError),
 }
 
-impl From<MultipartError> for ApiError {
+impl APIError {
+	/// A helper function to get the status code for an APIError
+	pub fn status_code(&self) -> StatusCode {
+		match self {
+			APIError::BadRequest(_) => StatusCode::BAD_REQUEST,
+			APIError::NotFound(_) => StatusCode::NOT_FOUND,
+			APIError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+			APIError::Unauthorized => StatusCode::UNAUTHORIZED,
+			APIError::Forbidden(_) => StatusCode::FORBIDDEN,
+			APIError::NotImplemented => StatusCode::NOT_IMPLEMENTED,
+			APIError::ServiceUnavailable(_) => StatusCode::SERVICE_UNAVAILABLE,
+			APIError::BadGateway(_) => StatusCode::BAD_GATEWAY,
+			APIError::PrismaError(e) => {
+				if e.is_prisma_error::<RecordNotFound>() {
+					StatusCode::NOT_FOUND
+				} else if e.is_prisma_error::<UniqueKeyViolation>() {
+					StatusCode::UNPROCESSABLE_ENTITY
+				} else {
+					StatusCode::INTERNAL_SERVER_ERROR
+				}
+			},
+			APIError::Redirect(_) => StatusCode::TEMPORARY_REDIRECT,
+			_ => StatusCode::INTERNAL_SERVER_ERROR,
+		}
+	}
+}
+
+impl From<MultipartError> for APIError {
 	fn from(error: MultipartError) -> Self {
-		ApiError::InternalServerError(error.to_string())
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
-impl From<reqwest::Error> for ApiError {
+impl From<reqwest::Error> for APIError {
 	fn from(error: reqwest::Error) -> Self {
-		ApiError::InternalServerError(error.to_string())
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
-impl ApiError {
-	pub fn forbidden_discreet() -> ApiError {
-		ApiError::Forbidden(String::from(
+impl APIError {
+	pub fn forbidden_discreet() -> APIError {
+		APIError::Forbidden(String::from(
 			"You do not have permission to access this resource.",
 		))
 	}
 }
 
-impl From<TryFromIntError> for ApiError {
+impl From<TryFromIntError> for APIError {
 	fn from(e: TryFromIntError) -> Self {
-		ApiError::InternalServerError(e.to_string())
+		APIError::InternalServerError(e.to_string())
 	}
 }
 
-impl From<CoreError> for ApiError {
+impl From<CoreError> for APIError {
 	fn from(err: CoreError) -> Self {
 		match err {
-			CoreError::InternalError(err) => ApiError::InternalServerError(err),
-			CoreError::IoError(err) => ApiError::InternalServerError(err.to_string()),
-			CoreError::MigrationError(err) => ApiError::InternalServerError(err),
-			CoreError::QueryError(err) => ApiError::InternalServerError(err.to_string()),
-			CoreError::Unknown(err) => ApiError::InternalServerError(err),
+			CoreError::InternalError(err) => APIError::InternalServerError(err),
+			CoreError::IoError(err) => APIError::InternalServerError(err.to_string()),
+			CoreError::MigrationError(err) => APIError::InternalServerError(err),
+			CoreError::QueryError(err) => APIError::InternalServerError(err.to_string()),
+			CoreError::Unknown(err) => APIError::InternalServerError(err),
 			CoreError::Utf8ConversionError(err) => {
-				ApiError::InternalServerError(err.to_string())
+				APIError::InternalServerError(err.to_string())
 			},
 			CoreError::XmlWriteError(err) => {
-				ApiError::InternalServerError(err.to_string())
+				APIError::InternalServerError(err.to_string())
 			},
-			_ => ApiError::InternalServerError(err.to_string()),
+			_ => APIError::InternalServerError(err.to_string()),
 		}
 	}
 }
 
-impl From<JobManagerError> for ApiError {
+impl From<JobManagerError> for APIError {
 	fn from(error: JobManagerError) -> Self {
-		ApiError::InternalServerError(error.to_string())
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
-impl From<AuthError> for ApiError {
-	fn from(error: AuthError) -> ApiError {
+impl From<AuthError> for APIError {
+	fn from(error: AuthError) -> APIError {
 		match error {
 			AuthError::BcryptError(_) => {
-				ApiError::InternalServerError("Internal server error".to_string())
+				APIError::InternalServerError("Internal server error".to_string())
 			},
 			AuthError::BadCredentials => {
-				ApiError::BadRequest("Missing or malformed credentials".to_string())
+				APIError::BadRequest("Missing or malformed credentials".to_string())
 			},
-			AuthError::BadRequest => ApiError::BadRequest(
+			AuthError::BadRequest => APIError::BadRequest(
 				"The Authorization header could no be parsed".to_string(),
 			),
-			AuthError::Unauthorized => ApiError::Unauthorized,
-			AuthError::Forbidden => ApiError::Forbidden("Forbidden".to_string()),
+			AuthError::Unauthorized => APIError::Unauthorized,
+			AuthError::Forbidden => APIError::Forbidden("Forbidden".to_string()),
 		}
 	}
 }
 
-impl From<bcrypt::BcryptError> for ApiError {
-	fn from(error: bcrypt::BcryptError) -> ApiError {
-		ApiError::InternalServerError(error.to_string())
+impl From<bcrypt::BcryptError> for APIError {
+	fn from(error: bcrypt::BcryptError) -> APIError {
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
-impl From<mpsc::error::SendError<InternalCoreTask>> for ApiError {
-	fn from(err: mpsc::error::SendError<InternalCoreTask>) -> Self {
-		ApiError::InternalServerError(err.to_string())
+impl From<mpsc::error::SendError<CoreEvent>> for APIError {
+	fn from(err: mpsc::error::SendError<CoreEvent>) -> Self {
+		APIError::InternalServerError(err.to_string())
 	}
 }
 
-impl From<prisma_client_rust::RelationNotFetchedError> for ApiError {
+impl From<prisma_client_rust::RelationNotFetchedError> for APIError {
 	fn from(e: prisma_client_rust::RelationNotFetchedError) -> Self {
-		ApiError::InternalServerError(e.to_string())
+		APIError::InternalServerError(e.to_string())
 	}
 }
 
-impl From<FileError> for ApiError {
-	fn from(error: FileError) -> ApiError {
-		ApiError::InternalServerError(error.to_string())
+impl From<FileError> for APIError {
+	fn from(error: FileError) -> APIError {
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
-impl From<std::io::Error> for ApiError {
-	fn from(error: std::io::Error) -> ApiError {
-		ApiError::InternalServerError(error.to_string())
+impl From<std::io::Error> for APIError {
+	fn from(error: std::io::Error) -> APIError {
+		APIError::InternalServerError(error.to_string())
 	}
 }
 
-impl IntoResponse for ApiError {
-	fn into_response(self) -> Response {
-		match self {
-			ApiError::BadRequest(err) => (StatusCode::BAD_REQUEST, err),
-			ApiError::NotFound(err) => (StatusCode::NOT_FOUND, err),
-			ApiError::InternalServerError(err) => {
-				(StatusCode::INTERNAL_SERVER_ERROR, err)
-			},
-			ApiError::Unauthorized => (StatusCode::UNAUTHORIZED, self.to_string()),
-			ApiError::Forbidden(err) => (StatusCode::FORBIDDEN, err),
-			ApiError::NotImplemented => (StatusCode::NOT_IMPLEMENTED, self.to_string()),
-			ApiError::ServiceUnavailable(err) => (StatusCode::SERVICE_UNAVAILABLE, err),
-			ApiError::BadGateway(err) => (StatusCode::BAD_GATEWAY, err),
-			ApiError::PrismaError(e) => {
-				if e.is_prisma_error::<RecordNotFound>() {
-					(StatusCode::NOT_FOUND, e.to_string())
-				} else if e.is_prisma_error::<UniqueKeyViolation>() {
-					(StatusCode::UNPROCESSABLE_ENTITY, e.to_string())
-				} else {
-					(StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
-				}
-			},
-			ApiError::Redirect(err) => (StatusCode::TEMPORARY_REDIRECT, err),
-			_ => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+/// The response body for API errors. This is just a basic JSON response with a status code and a message.
+/// Any axum handlers which return a Result with an Error of APIError will be converted into this response.
+pub struct APIErrorResponse {
+	status: StatusCode,
+	message: String,
+}
+
+impl From<APIError> for APIErrorResponse {
+	fn from(error: APIError) -> Self {
+		APIErrorResponse {
+			status: error.status_code(),
+			message: error.to_string(),
 		}
-		.into_response()
+	}
+}
+
+impl IntoResponse for APIErrorResponse {
+	fn into_response(self) -> Response {
+		let body = serde_json::json!({
+			"status": self.status.as_u16(),
+			"message": self.message,
+		});
+
+		let base_response = Json(body).into_response();
+		Response::builder()
+			.status(self.status)
+			.header("Content-Type", "application/json")
+			.body(base_response.into_body())
+			.unwrap_or_else(|error| {
+				tracing::error!(?error, "Failed to build response");
+				(StatusCode::INTERNAL_SERVER_ERROR, error.to_string()).into_response()
+			})
+	}
+}
+
+impl IntoResponse for APIError {
+	fn into_response(self) -> Response {
+		APIErrorResponse::from(self).into_response()
 	}
 }

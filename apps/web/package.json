@@ -1,6 +1,6 @@
 {
 	"name": "@stump/web",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "",
 	"license": "MIT",
 	"scripts": {
@@ -10,8 +10,8 @@
 		"nuke": "rimraf -rf node_modules"
 	},
 	"dependencies": {
-		"@stump/client": "workspace:*",
-		"@stump/interface": "workspace:*",
+		"@stump/client": "*",
+		"@stump/browser": "*",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-router": "^6.17.0",

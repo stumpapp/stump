@@ -1,4 +1,4 @@
-import StumpInterface from '@stump/interface'
+import { StumpWebClient } from '@stump/browser'
 
 const getDebugUrl = () => {
 	const { hostname } = window.location
@@ -8,5 +8,5 @@ const getDebugUrl = () => {
 export const baseUrl = import.meta.env.PROD ? window.location.href : getDebugUrl()
 
 export default function App() {
-	return <StumpInterface platform={'browser'} baseUrl={baseUrl} />
+	return <StumpWebClient platform={'browser'} baseUrl={baseUrl} />
 }

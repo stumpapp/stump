@@ -24,7 +24,7 @@ use tracing::{debug, trace, warn};
 
 use crate::{
 	config::state::AppState,
-	errors::{ApiError, ApiResult},
+	errors::{APIError, APIResult},
 	filter::chain_optional_iter,
 	middleware::auth::Auth,
 	utils::{
@@ -74,7 +74,7 @@ fn pagination_bounds(page: i64, page_size: i64) -> (i64, i64) {
 	(skip, page_size)
 }
 
-async fn catalog() -> ApiResult<Xml> {
+async fn catalog() -> APIResult<Xml> {
 	let entries = vec![
 		OpdsEntry::new(
 			"keepReading".to_string(),
@@ -187,8 +187,8 @@ async fn catalog() -> ApiResult<Xml> {
 	Ok(Xml(feed.build()?))
 }
 
-async fn keep_reading(State(ctx): State<AppState>, session: Session) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+async fn keep_reading(State(ctx): State<AppState>, session: Session) -> APIResult<Xml> {
+	let db = &ctx.db;
 
 	let user_id = get_session_user(&session)?.id;
 	let read_progress_conditions = vec![apply_in_progress_filter_for_user(user_id)];
@@ -251,8 +251,8 @@ async fn keep_reading(State(ctx): State<AppState>, session: Session) -> ApiResul
 }
 
 // TODO: age restrictions
-async fn get_libraries(State(ctx): State<AppState>) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+async fn get_libraries(State(ctx): State<AppState>) -> APIResult<Xml> {
+	let db = &ctx.db;
 
 	let libraries = db.library().find_many(vec![]).exec().await?;
 	let entries = libraries.into_iter().map(OpdsEntry::from).collect();
@@ -283,8 +283,8 @@ async fn get_library_by_id(
 	Path(id): Path<String>,
 	pagination: Query<PageQuery>,
 	session: Session,
-) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+) -> APIResult<Xml> {
+	let db = &ctx.db;
 
 	let library_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
@@ -346,7 +346,7 @@ async fn get_library_by_id(
 		)
 		.build()?))
 	} else {
-		Err(ApiError::NotFound(format!(
+		Err(APIError::NotFound(format!(
 			"Library {} not found",
 			library_id
 		)))
@@ -359,8 +359,8 @@ async fn get_series(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	session: Session,
-) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+) -> APIResult<Xml> {
+	let db = &ctx.db;
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
@@ -406,8 +406,8 @@ async fn get_latest_series(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	session: Session,
-) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+) -> APIResult<Xml> {
+	let db = &ctx.db;
 
 	let page = pagination.page.unwrap_or(0);
 	let (skip, take) = pagination_bounds(page.into(), 20);
@@ -455,8 +455,8 @@ async fn get_series_by_id(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	session: Session,
-) -> ApiResult<Xml> {
-	let db = ctx.get_db();
+) -> APIResult<Xml> {
+	let db = &ctx.db;
 
 	let series_id = id.clone();
 	let page = pagination.page.unwrap_or(0);
@@ -511,7 +511,7 @@ async fn get_series_by_id(
 		)
 		.build()?))
 	} else {
-		Err(ApiError::NotFound(format!(
+		Err(APIError::NotFound(format!(
 			"Series {} not found",
 			series_id
 		)))
@@ -521,7 +521,7 @@ async fn get_series_by_id(
 fn handle_opds_image_response(
 	content_type: ContentType,
 	image_buffer: Vec<u8>,
-) -> ApiResult<ImageResponse> {
+) -> APIResult<ImageResponse> {
 	if content_type.is_opds_legacy_image() {
 		trace!("OPDS legacy image detected, returning as-is");
 		Ok(ImageResponse::new(content_type, image_buffer))
@@ -544,8 +544,8 @@ async fn get_book_thumbnail(
 	Path(id): Path<String>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+) -> APIResult<ImageResponse> {
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
 		.age_restriction
@@ -560,7 +560,7 @@ async fn get_book_thumbnail(
 		))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Book not found")))?;
+		.ok_or(APIError::NotFound(String::from("Book not found")))?;
 
 	let (content_type, image_buffer) = get_page(book.path.as_str(), 1, &ctx.config)?;
 	handle_opds_image_response(content_type, image_buffer)
@@ -572,8 +572,8 @@ async fn get_book_page(
 	State(ctx): State<AppState>,
 	pagination: Query<PageQuery>,
 	session: Session,
-) -> ApiResult<ImageResponse> {
-	let db = ctx.get_db();
+) -> APIResult<ImageResponse> {
+	let db = &ctx.db;
 
 	let user = get_session_user(&session)?;
 	let user_id = user.id;
@@ -590,7 +590,7 @@ async fn get_book_page(
 		correct_page = page + 1;
 	}
 
-	let result: Result<(media::Data, read_progress::Data), ApiError> = db
+	let result: Result<(media::Data, read_progress::Data), APIError> = db
 		._transaction()
 		.run(|client| async move {
 			let book = db
@@ -601,7 +601,7 @@ async fn get_book_page(
 				))
 				.exec()
 				.await?
-				.ok_or(ApiError::NotFound(String::from("Book not found")))?;
+				.ok_or(APIError::NotFound(String::from("Book not found")))?;
 
 			let is_completed = book.pages == correct_page;
 
@@ -638,8 +638,8 @@ async fn download_book(
 	Path((id, filename)): Path<(String, String)>,
 	State(ctx): State<AppState>,
 	session: Session,
-) -> ApiResult<NamedFile> {
-	let db = ctx.get_db();
+) -> APIResult<NamedFile> {
+	let db = &ctx.db;
 	let user = get_session_user(&session)?;
 	let age_restrictions = user
 		.age_restriction
@@ -656,7 +656,7 @@ async fn download_book(
 		))
 		.exec()
 		.await?
-		.ok_or(ApiError::NotFound(String::from("Book not found")))?;
+		.ok_or(APIError::NotFound(String::from("Book not found")))?;
 
 	Ok(NamedFile::open(book.path.clone()).await?)
 }

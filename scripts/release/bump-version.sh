@@ -36,5 +36,5 @@ fi
 
 # https://docs.gitmoji-changelog.dev/#/?id=%f0%9f%93%9a-how-it-works
 if [ $_GENERATE_CHANGELOG == 1 ]; then
-  pnpx gitmoji-changelog
+  pnpx gitmoji-changelog --output ./.github/CHANGELOG.md
 fi

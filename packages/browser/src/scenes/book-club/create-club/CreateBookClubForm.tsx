@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useBookClubsQuery, useCreateBookClub } from '@stump/client'
 import { Button, CheckBox, Form, Input, TextArea } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { BookClub, BookClubMemberRoleSpec, CreateBookClub } from '@stump/types'
 import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
@@ -10,7 +11,6 @@ import z from 'zod'
 
 import { ContentContainer } from '@/components/container'
 
-import { useLocaleContext } from '../../../i18n'
 import paths from '../../../paths'
 import CreatorPreferences from './CreatorPreferences'
 import RoleMappingForm from './RoleMappingForm'

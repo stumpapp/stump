@@ -3,7 +3,7 @@ import { CoreJobOutput } from '@stump/types'
 import React from 'react'
 
 type Props = {
-	data: CoreJobOutput
+	data?: CoreJobOutput | null
 	onClose: () => void
 }
 export default function JobDataInspector({ data, onClose }: Props) {

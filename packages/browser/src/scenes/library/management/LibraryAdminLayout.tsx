@@ -1,10 +1,10 @@
-import { usePreferences } from '@/hooks'
 import { cx } from 'class-variance-authority'
 import { useEffect, useMemo } from 'react'
 import { Outlet, useNavigate } from 'react-router'
 
 import { SceneContainer } from '@/components/container'
 import { useAppContext } from '@/context'
+import { usePreferences } from '@/hooks'
 
 /**
  *  Component that renders the layout for the library admin pages. This includes:

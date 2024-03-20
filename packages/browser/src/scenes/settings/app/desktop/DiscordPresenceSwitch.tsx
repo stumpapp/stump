@@ -1,10 +1,10 @@
 import { useClientContext, useUpdatePreferences } from '@stump/client'
 import { IconButton, Label, RawSwitch, Text, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { RefreshCcw } from 'lucide-react'
 import React from 'react'
 import toast from 'react-hot-toast'
 
-import { useLocaleContext } from '@/i18n'
 import { useUserStore } from '@/stores'
 
 export default function DiscordPresenceSwitch() {

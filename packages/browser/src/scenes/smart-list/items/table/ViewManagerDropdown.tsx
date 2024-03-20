@@ -1,8 +1,7 @@
 import { Button, Dropdown } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ChevronDown } from 'lucide-react'
 import React, { useState } from 'react'
-
-import { useLocaleContext } from '@/i18n'
 
 import { useSmartListContext } from '../../context'
 import CreateOrUpdateTableView from './CreateOrUpdateTableView'

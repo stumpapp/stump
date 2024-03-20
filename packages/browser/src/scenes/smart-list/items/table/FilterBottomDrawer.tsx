@@ -1,8 +1,7 @@
 import { Accordion, Alert, Button, Drawer, IconButton, Text, ToolTip } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Construction, Filter } from 'lucide-react'
 import React from 'react'
-
-import { useLocaleContext } from '@/i18n'
 
 import { useSmartListContext } from '../../context'
 

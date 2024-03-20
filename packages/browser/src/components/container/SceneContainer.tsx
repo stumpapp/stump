@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
-import { usePreferences } from '@/hooks'
 import { cn } from '@stump/components'
 import React, { forwardRef, useMemo } from 'react'
+
+import { usePreferences } from '@/hooks'
 
 type SceneContainerProps = {
 	unsetConstraints?: boolean

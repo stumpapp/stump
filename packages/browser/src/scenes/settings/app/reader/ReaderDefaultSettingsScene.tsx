@@ -1,9 +1,9 @@
 import { Heading, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 import { Helmet } from 'react-helmet'
 
 import { Container, ContentContainer } from '@/components/container'
-import { useLocaleContext } from '@/i18n'
 
 import PreloadPagesSection from './PreloadPagesSection'
 

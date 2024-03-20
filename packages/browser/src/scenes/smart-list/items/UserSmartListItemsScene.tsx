@@ -1,9 +1,9 @@
 import { useSmartListItemsQuery } from '@stump/client'
 import { cn } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import React from 'react'
 
 import { SceneContainer } from '@/components/container'
-import { useLocaleContext } from '@/i18n'
 
 import { useSmartListContext } from '../context'
 import { GroupedSmartListItemList } from './list'

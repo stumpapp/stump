@@ -1,12 +1,12 @@
 import { prefetchSmartListItems, useSmartListMetaQuery } from '@stump/client'
 import { Card, Spacer, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { SmartList } from '@stump/types'
 import pluralize from 'pluralize'
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { match, P } from 'ts-pattern'
 
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 
 const DEFAULT_META_CACHE_TIME = 900000 // 15 minutes

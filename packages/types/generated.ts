@@ -27,7 +27,7 @@ export type LogLevel = "ERROR" | "WARN" | "INFO" | "DEBUG"
 
 export type PersistedJob = { id: string; name: string; description: string | null; status: JobStatus; output_data: CoreJobOutput | null; ms_elapsed: BigInt; created_at: string; completed_at: string | null; logs?: Log[] | null }
 
-export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput | unknown
+export type CoreJobOutput = LibraryScanOutput | SeriesScanOutput | ThumbnailGenerationOutput
 
 /**
  * An update event that is emitted by a job

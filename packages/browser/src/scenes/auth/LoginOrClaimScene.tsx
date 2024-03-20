@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { isAxiosError } from '@stump/api'
 import { queryClient, useLoginOrRegister } from '@stump/client'
 import { Alert, Button, cx, Form, Heading, Input } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { ShieldAlert } from 'lucide-react'
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
@@ -10,8 +11,6 @@ import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 
 import { useUserStore } from '@/stores'
-
-import { useLocaleContext } from '../../i18n/context'
 
 export default function LoginOrClaimScene() {
 	const [params] = useSearchParams()

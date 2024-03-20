@@ -1,9 +1,9 @@
 import { cn, IconButton, Label } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { Home } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 
 import { usePreferences } from '@/hooks'
-import { useLocaleContext } from '@/i18n'
 import paths from '@/paths'
 import { useAppStore } from '@/stores'
 

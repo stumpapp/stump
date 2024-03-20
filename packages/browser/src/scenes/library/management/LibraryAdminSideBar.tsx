@@ -1,7 +1,7 @@
 import { Heading, Label, Text } from '@stump/components'
+import { useLocaleContext } from '@stump/i18n'
 import { useLocation } from 'react-router'
 
-import { useLocaleContext } from '../../../i18n'
 import { useLibraryAdminContext } from './context'
 
 /**

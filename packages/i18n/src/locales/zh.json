@@ -682,7 +682,11 @@
 	},
 	"serverStatusOverlay": {
 		"heading": "服务器未连接",
-		"message": ["请检查您的网络连接", "点击此处", "更改您的服务器 URL"]
+		"message": [
+			"请检查您的网络连接",
+			"点击此处",
+			"更改您的服务器 URL"
+		]
 	},
 	"slidingList": {
 		"empty": "暂无数据",

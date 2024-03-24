@@ -632,6 +632,42 @@
 				"name": {
 					"label": "Name",
 					"description": "A friendly name to uniquely identify this emailer"
+				},
+				"smtpSettings": {
+					"heading": "SMTP settings",
+					"description": "The SMTP-specific settings for this emailer"
+				},
+				"smtpHost": {
+					"label": "SMTP host",
+					"description": "The hostname of the SMTP server"
+				},
+				"smtpPort": {
+					"label": "SMTP port",
+					"description": "The port of the SMTP server"
+				},
+				"senderSettings": {
+					"heading": "Sender settings",
+					"description": "The settings for the sender of the email"
+				},
+				"senderDisplayName": {
+					"label": "Sender display name",
+					"description": "The name that will be displayed to recipients"
+				},
+				"senderEmail": {
+					"label": "Sender email address",
+					"description": "The email address that will be displayed to recipients"
+				},
+				"additionalSettings": {
+					"heading": "Additional settings",
+					"description": "Additional settings for the emailer"
+				},
+				"maxAttachmentSize": {
+					"label": "Max attachment size",
+					"description": "The maximum size, in bytes, that an attachment can be"
+				},
+				"submit": {
+					"create": "Create emailer",
+					"update": "Update emailer"
 				}
 			},
 			"createEmailer": {

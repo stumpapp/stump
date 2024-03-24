@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Form, Input } from '@stump/components'
+import { Button, Form, Heading, Input, Text } from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SMTPEmailer } from '@stump/types'
 import React, { useMemo } from 'react'
@@ -39,13 +39,89 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 	})
 
 	return (
-		<Form form={form} onSubmit={onSubmit}>
+		<Form form={form} onSubmit={onSubmit} fieldsetClassName="space-y-8">
 			<Input
 				label={t(`${LOCALE_BASE}.name.label`)}
 				description={t(`${LOCALE_BASE}.name.description`)}
 				variant="primary"
 				{...form.register('name')}
 			/>
+
+			<div className="flex flex-col space-y-4">
+				<div>
+					<Heading size="sm" className="font-semibold">
+						{t(`${LOCALE_BASE}.smtpSettings.heading`)}
+					</Heading>
+
+					<Text variant="muted" size="sm">
+						{t(`${LOCALE_BASE}.smtpSettings.description`)}
+					</Text>
+				</div>
+
+				<Input
+					label={t(`${LOCALE_BASE}.smtpHost.label`)}
+					description={t(`${LOCALE_BASE}.smtpHost.description`)}
+					variant="primary"
+					{...form.register('smtp_host')}
+				/>
+
+				<Input
+					label={t(`${LOCALE_BASE}.smtpPort.label`)}
+					description={t(`${LOCALE_BASE}.smtpPort.description`)}
+					variant="primary"
+					{...form.register('smtp_port')}
+				/>
+			</div>
+
+			<div className="flex flex-col space-y-4">
+				<div>
+					<Heading size="sm" className="font-semibold">
+						{t(`${LOCALE_BASE}.senderSettings.heading`)}
+					</Heading>
+
+					<Text variant="muted" size="sm">
+						{t(`${LOCALE_BASE}.senderSettings.description`)}
+					</Text>
+				</div>
+				<Input
+					label={t(`${LOCALE_BASE}.senderDisplayName.label`)}
+					description={t(`${LOCALE_BASE}.senderDisplayName.description`)}
+					variant="primary"
+					{...form.register('sender_display_name')}
+				/>
+
+				<Input
+					label={t(`${LOCALE_BASE}.senderEmail.label`)}
+					description={t(`${LOCALE_BASE}.senderEmail.description`)}
+					variant="primary"
+					{...form.register('sender_email')}
+				/>
+			</div>
+
+			<div className="flex flex-col space-y-4">
+				<div>
+					<Heading size="sm" className="font-semibold">
+						{t(`${LOCALE_BASE}.additionalSettings.heading`)}
+					</Heading>
+
+					<Text variant="muted" size="sm">
+						{t(`${LOCALE_BASE}.additionalSettings.description`)}
+					</Text>
+				</div>
+
+				<Input
+					label={t(`${LOCALE_BASE}.maxAttachmentSize.label`)}
+					description={t(`${LOCALE_BASE}.maxAttachmentSize.description`)}
+					variant="primary"
+					{...form.register('max_attachment_size_bytes')}
+				/>
+			</div>
+
+			<div>
+				<Button type="submit" variant="primary">
+					{t(`${LOCALE_BASE}.submit.${emailer ? 'update' : 'create'}`)}
+				</Button>
+			</div>
 		</Form>
 	)
 }

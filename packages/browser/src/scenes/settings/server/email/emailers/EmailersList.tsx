@@ -7,6 +7,8 @@ import React from 'react'
 import { useAppContext } from '@/context'
 import paths from '@/paths'
 
+import EmailerListItem from './EmailerListItem'
+
 export default function EmailersList() {
 	const { t } = useLocaleContext()
 	const { checkPermission } = useAppContext()
@@ -32,7 +34,13 @@ export default function EmailersList() {
 		)
 	}
 
-	return <div></div>
+	return (
+		<div className="flex flex-col space-y-6">
+			{emailers.map((emailer) => (
+				<EmailerListItem key={emailer.id} emailer={emailer} />
+			))}
+		</div>
+	)
 }
 
 const LOCALE_BASE = 'settingsScene.server/email.sections.emailers.list'

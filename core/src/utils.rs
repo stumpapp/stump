@@ -24,13 +24,15 @@ pub async fn encrypt_string(str: &str, ctx: &Ctx) -> CoreResult<String> {
 	let encryption_key = ctx.get_encryption_key().await?;
 	let encrypted_bytes = encrypt(str.as_bytes(), encryption_key.as_bytes())
 		.map_err(|e| CoreError::EncryptionFailed(e.to_string()))?;
-	String::from_utf8(encrypted_bytes)
-		.map_err(|e| CoreError::EncryptionFailed(e.to_string()))
+	Ok(data_encoding::BASE64.encode(&encrypted_bytes))
 }
 
 pub async fn decrypt_string(encrypted_str: &str, ctx: &Ctx) -> CoreResult<String> {
 	let encryption_key = ctx.get_encryption_key().await?;
-	let decrypted_bytes = decrypt(encrypted_str.as_bytes(), encryption_key.as_bytes())
+	let encrypted_bytes = data_encoding::BASE64
+		.decode(encrypted_str.as_bytes())
+		.map_err(|e| CoreError::DecryptionFailed(e.to_string()))?;
+	let decrypted_bytes = decrypt(&encrypted_bytes, encryption_key.as_bytes())
 		.map_err(|e| CoreError::DecryptionFailed(e.to_string()))?;
 	String::from_utf8(decrypted_bytes)
 		.map_err(|e| CoreError::DecryptionFailed(e.to_string()))

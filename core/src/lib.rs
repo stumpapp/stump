@@ -140,8 +140,8 @@ impl StumpCore {
 		Ok(())
 	}
 
-	// TODO: This is insecure for obvious reasons, and should be removed in the future. This is
-	// a step better than storing the key in a file, but still not great.
+	// TODO: This is insecure for obvious reasons, and should be removed in the future. This was added
+	// to reduce friction of setting up the server for folks who might not understand encryption keys.
 	/// Initializes the encryption key for the database. This will only set the encryption key
 	/// if one does not already exist.
 	pub async fn init_encryption(&self) -> Result<EncryptionKeySet, CoreError> {
@@ -149,7 +149,7 @@ impl StumpCore {
 
 		let encryption_key_set = client
 			.server_config()
-			.find_first(vec![server_config::encryption_key::equals(None)])
+			.find_first(vec![server_config::encryption_key::not(None)])
 			.exec()
 			.await?
 			.is_some();

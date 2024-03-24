@@ -15,6 +15,8 @@ import React, { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { commonHosts, getCommonHost } from './utils'
+
 type Props = {
 	emailer?: SMTPEmailer
 	existingNames: string[]
@@ -53,10 +55,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 	const errors = useMemo(() => form.formState.errors, [form.formState.errors])
 
 	const currentHost = form.watch('smtp_host')
-	const presetValue = useMemo(
-		() => (!!currentHost && currentHost in presets ? currentHost : undefined),
-		[currentHost],
-	)
+	const presetValue = useMemo(() => getCommonHost(currentHost)?.name.toLowerCase(), [currentHost])
 
 	const numericChangeHandler =
 		(key: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +72,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 		}
 	const numericRegister = (key: keyof FormValues) => {
 		return {
-			...form.register(key, { valueAsNumber: true }),
+			...form.register(key),
 			onChange: numericChangeHandler(key),
 		}
 	}
@@ -111,10 +110,12 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 						value={presetValue}
 						onChange={(e) => {
 							const value = e.target.value
-							if (value && value in presets) {
-								const preset = presets[value as keyof typeof presets]
-								form.setValue('smtp_host', preset.smtp_host)
-								form.setValue('smtp_port', preset.smtp_port)
+							if (value && value in commonHosts) {
+								const preset = commonHosts[value]
+								if (preset) {
+									form.setValue('smtp_host', preset.smtp_host)
+									form.setValue('smtp_port', preset.smtp_port)
+								}
 							}
 						}}
 					/>
@@ -238,14 +239,3 @@ const createSchema = (existingNames: string[], _t: (key: string) => string, isCr
 		username: z.string(),
 	})
 export type FormValues = z.infer<ReturnType<typeof createSchema>>
-
-const presets = {
-	google: {
-		smtp_host: 'smtp.gmail.com',
-		smtp_port: 587,
-	},
-	outlook: {
-		smtp_host: 'smtp.office365.com',
-		smtp_port: 587,
-	},
-}

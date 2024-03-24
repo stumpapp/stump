@@ -1,5 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Form, Heading, Input, Text } from '@stump/components'
+import {
+	Button,
+	Form,
+	Heading,
+	Input,
+	Label,
+	NativeSelect,
+	PasswordInput,
+	Text,
+} from '@stump/components'
 import { useLocaleContext } from '@stump/i18n'
 import { SMTPEmailer } from '@stump/types'
 import React, { useMemo } from 'react'
@@ -12,8 +21,10 @@ type Props = {
 	onSubmit: (values: FormValues) => void
 }
 
+// TODO: Some of the descriptions are LONG. Use tooltips where necessary, instead of inline descriptions.
 export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSubmit }: Props) {
 	const { t } = useLocaleContext()
+
 	const schema = useMemo(
 		() =>
 			createSchema(
@@ -33,10 +44,39 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					sender_email: emailer.config.sender_email,
 					smtp_host: emailer.config.smtp_host,
 					smtp_port: emailer.config.smtp_port,
+					username: emailer.config.username,
 				}
 			: undefined,
 		resolver: zodResolver(schema),
 	})
+
+	const errors = useMemo(() => form.formState.errors, [form.formState.errors])
+
+	const currentHost = form.watch('smtp_host')
+	const presetValue = useMemo(
+		() => (!!currentHost && currentHost in presets ? currentHost : undefined),
+		[currentHost],
+	)
+
+	const numericChangeHandler =
+		(key: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
+			const { value } = e.target
+
+			if (value === '' || value == undefined) {
+				form.setValue(key, undefined)
+			} else {
+				const parsed = parseInt(value)
+				if (!isNaN(parsed)) {
+					form.setValue(key, parsed)
+				}
+			}
+		}
+	const numericRegister = (key: keyof FormValues) => {
+		return {
+			...form.register(key, { valueAsNumber: true }),
+			onChange: numericChangeHandler(key),
+		}
+	}
 
 	return (
 		<Form form={form} onSubmit={onSubmit} fieldsetClassName="space-y-8">
@@ -45,6 +85,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 				description={t(`${LOCALE_BASE}.name.description`)}
 				variant="primary"
 				{...form.register('name')}
+				errorMessage={errors.name?.message}
 			/>
 
 			<div className="flex flex-col space-y-4">
@@ -58,18 +99,60 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					</Text>
 				</div>
 
+				{/* FIXME: A little buggy */}
+				<div className="flex flex-col space-y-1 md:max-w-sm">
+					<Label>{t(`${LOCALE_BASE}.smtpProvider.label`)}</Label>
+					<NativeSelect
+						emptyOption={{ label: 'Custom', value: undefined }}
+						options={[
+							{ label: 'Google', value: 'google' },
+							{ label: 'Outlook', value: 'outlook' },
+						]}
+						value={presetValue}
+						onChange={(e) => {
+							const value = e.target.value
+							if (value && value in presets) {
+								const preset = presets[value as keyof typeof presets]
+								form.setValue('smtp_host', preset.smtp_host)
+								form.setValue('smtp_port', preset.smtp_port)
+							}
+						}}
+					/>
+					<Text variant="muted" size="sm">
+						{t(`${LOCALE_BASE}.smtpProvider.description`)}
+					</Text>
+				</div>
+
 				<Input
 					label={t(`${LOCALE_BASE}.smtpHost.label`)}
 					description={t(`${LOCALE_BASE}.smtpHost.description`)}
 					variant="primary"
 					{...form.register('smtp_host')}
+					errorMessage={errors.smtp_host?.message}
 				/>
 
 				<Input
 					label={t(`${LOCALE_BASE}.smtpPort.label`)}
 					description={t(`${LOCALE_BASE}.smtpPort.description`)}
 					variant="primary"
-					{...form.register('smtp_port')}
+					{...numericRegister('smtp_port')}
+					errorMessage={errors.smtp_port?.message}
+				/>
+
+				<Input
+					label={t(`${LOCALE_BASE}.username.label`)}
+					description={t(`${LOCALE_BASE}.username.description`)}
+					variant="primary"
+					{...form.register('username')}
+					errorMessage={errors.username?.message}
+				/>
+
+				<PasswordInput
+					label={t(`${LOCALE_BASE}.password.label`)}
+					description={t(`${LOCALE_BASE}.password.description`)}
+					variant="primary"
+					{...form.register('password')}
+					errorMessage={errors.password?.message}
 				/>
 			</div>
 
@@ -88,6 +171,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					description={t(`${LOCALE_BASE}.senderDisplayName.description`)}
 					variant="primary"
 					{...form.register('sender_display_name')}
+					errorMessage={errors.sender_display_name?.message}
 				/>
 
 				<Input
@@ -95,6 +179,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					description={t(`${LOCALE_BASE}.senderEmail.description`)}
 					variant="primary"
 					{...form.register('sender_email')}
+					errorMessage={errors.sender_email?.message}
 				/>
 			</div>
 
@@ -113,7 +198,8 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 					label={t(`${LOCALE_BASE}.maxAttachmentSize.label`)}
 					description={t(`${LOCALE_BASE}.maxAttachmentSize.description`)}
 					variant="primary"
-					{...form.register('max_attachment_size_bytes')}
+					{...numericRegister('max_attachment_size_bytes')}
+					errorMessage={errors.max_attachment_size_bytes?.message}
 				/>
 			</div>
 
@@ -149,5 +235,17 @@ const createSchema = (existingNames: string[], _t: (key: string) => string, isCr
 		sender_email: z.string().email(),
 		smtp_host: z.string(),
 		smtp_port: z.number(),
+		username: z.string(),
 	})
 export type FormValues = z.infer<ReturnType<typeof createSchema>>
+
+const presets = {
+	google: {
+		smtp_host: 'smtp.gmail.com',
+		smtp_port: 587,
+	},
+	outlook: {
+		smtp_host: 'smtp.office365.com',
+		smtp_port: 587,
+	},
+}

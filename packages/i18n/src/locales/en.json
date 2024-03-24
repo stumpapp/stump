@@ -424,6 +424,10 @@
 							"date": "Build date"
 						}
 					}
+				},
+				"serverPublicUrl": {
+					"label": "Public URL",
+					"description": "The URL that your server is accessible from outside your network, if applicable. This will enable invite links and other features"
 				}
 			}
 		},
@@ -637,6 +641,10 @@
 					"heading": "SMTP settings",
 					"description": "The SMTP-specific settings for this emailer"
 				},
+				"smtpProvider": {
+					"label": "SMTP provider",
+					"description": "The provider of the SMTP server. This is used to prefill some common settings, but doesn't capture all providers"
+				},
 				"smtpHost": {
 					"label": "SMTP host",
 					"description": "The hostname of the SMTP server"
@@ -644,6 +652,14 @@
 				"smtpPort": {
 					"label": "SMTP port",
 					"description": "The port of the SMTP server"
+				},
+				"username": {
+					"label": "Username",
+					"description": "The username for authenticating with the SMTP server. This is typically the email address"
+				},
+				"password": {
+					"label": "Password",
+					"description": "The password for authenticating with the SMTP server. If you're using Gmail, you may need to generate an app-specific password"
 				},
 				"senderSettings": {
 					"heading": "Sender settings",
@@ -753,7 +769,11 @@
 	},
 	"serverStatusOverlay": {
 		"heading": "Server isn't connected",
-		"message": ["Please check your internet connection", "Click here", "to change your server URL"]
+		"message": [
+			"Please check your internet connection",
+			"Click here",
+			"to change your server URL"
+		]
 	},
 	"slidingList": {
 		"empty": "No items to display",

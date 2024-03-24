@@ -1,4 +1,5 @@
-import { useEmailersQuery } from '@stump/client'
+import { emailerApi } from '@stump/api'
+import { useEmailersQuery, useMutation } from '@stump/client'
 import React from 'react'
 
 import { ContentContainer, SceneContainer } from '@/components/container'
@@ -10,8 +11,23 @@ export default function CreateEmailerScene() {
 		suspense: true,
 	})
 
-	const onSubmit = (values: FormValues) => {
-		console.debug(values)
+	const { mutateAsync: createEmailer } = useMutation(['createEmailer'], emailerApi.createEmailer)
+
+	const onSubmit = async ({ name, is_primary, ...config }: FormValues) => {
+		try {
+			await createEmailer({
+				config: {
+					...config,
+					host: config.smtp_host,
+					port: config.smtp_port,
+				},
+				is_primary,
+				name,
+			})
+		} catch (error) {
+			console.error(error)
+			// TODO:toast
+		}
 	}
 
 	return (

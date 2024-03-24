@@ -14,7 +14,9 @@ use crate::{EmailError, EmailResult};
 
 #[derive(Serialize, Deserialize, ToSchema, Type)]
 pub enum EmailerSMTPHost {
+	#[serde(rename = "smtp.gmail.com")]
 	Gmail,
+	#[serde(rename = "smtp.office365.com")]
 	Outlook,
 	Custom(String),
 }

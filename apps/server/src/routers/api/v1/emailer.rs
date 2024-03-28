@@ -4,14 +4,15 @@ use axum::{
 	routing::get,
 	Json, Router,
 };
+use prisma_client_rust::Direction;
 use serde::Deserialize;
 use specta::Type;
 use stump_core::{
 	db::entity::{
-		EmailerConfig, EmailerConfigInput, RegisteredEmailDevice, SMTPEmailer,
-		UserPermission,
+		EmailerConfig, EmailerConfigInput, EmailerSendRecord, RegisteredEmailDevice,
+		SMTPEmailer, UserPermission,
 	},
-	prisma::{emailer, registered_email_device},
+	prisma::{emailer, emailer_send_record, registered_email_device},
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
@@ -32,13 +33,18 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 				.route("/", get(get_emailers).post(create_emailer))
 				.nest(
 					"/:id",
-					Router::new().route(
-						"/",
-						get(get_emailer_by_id)
-							.put(update_emailer)
-							// .patch(patch_emailer)
-							.delete(delete_emailer),
-					),
+					Router::new()
+						.route(
+							"/",
+							get(get_emailer_by_id)
+								.put(update_emailer)
+								// .patch(patch_emailer)
+								.delete(delete_emailer),
+						)
+						.nest(
+							"/send-history",
+							Router::new().route("/", get(get_emailer_send_history)),
+						),
 				),
 		)
 		.nest(
@@ -165,8 +171,9 @@ async fn create_emailer(
 			payload.name,
 			config.sender_email,
 			config.sender_display_name,
+			config.username,
 			config.encrypted_password,
-			config.smtp_host.as_relay().to_string(),
+			config.smtp_host.to_string(),
 			config.smtp_port.into(),
 			vec![
 				emailer::is_primary::set(payload.is_primary),
@@ -214,8 +221,9 @@ async fn update_emailer(
 				emailer::name::set(payload.name),
 				emailer::sender_email::set(config.sender_email),
 				emailer::sender_display_name::set(config.sender_display_name),
+				emailer::username::set(config.username),
 				emailer::encrypted_password::set(config.encrypted_password),
-				emailer::smtp_host::set(config.smtp_host.as_relay().to_string()),
+				emailer::smtp_host::set(config.smtp_host.to_string()),
 				emailer::smtp_port::set(config.smtp_port.into()),
 				emailer::max_attachment_size_bytes::set(config.max_attachment_size_bytes),
 			],
@@ -289,6 +297,47 @@ async fn delete_emailer(
 		.await?;
 
 	Ok(Json(SMTPEmailer::try_from(deleted_emailer)?))
+}
+
+#[utoipa::path(
+	get,
+	path = "/api/v1/emailers/:id/send-history",
+	tag = "emailer",
+	params(
+		("id" = i32, Path, description = "The ID of the emailer")
+	),
+	responses(
+		(status = 200, description = "Successfully retrieved emailer send history"),
+		(status = 401, description = "Unauthorized"),
+		(status = 403, description = "Forbidden"),
+		(status = 500, description = "Internal server error")
+	)
+)]
+async fn get_emailer_send_history(
+	Path(emailer_id): Path<i32>,
+	State(ctx): State<AppState>,
+	session: Session,
+) -> APIResult<Json<Vec<EmailerSendRecord>>> {
+	tracing::trace!(?emailer_id, "get_emailer_send_history");
+	enforce_session_permissions(&session, &[UserPermission::EmailerRead])?;
+
+	let client = &ctx.db;
+
+	let history = client
+		.emailer_send_record()
+		.find_many(vec![emailer_send_record::emailer_id::equals(emailer_id)])
+		.order_by(emailer_send_record::sent_at::order(Direction::Desc))
+		.exec()
+		.await?;
+
+	Ok(Json(
+		history
+			.into_iter()
+			.map(EmailerSendRecord::try_from)
+			.collect::<Vec<Result<EmailerSendRecord, _>>>()
+			.into_iter()
+			.collect::<Result<Vec<_>, _>>()?,
+	))
 }
 
 /// Get all email devices on the server

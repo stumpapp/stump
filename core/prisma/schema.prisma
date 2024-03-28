@@ -43,6 +43,7 @@ model User {
   library_visits          LastLibraryVisit[]
   smart_lists             SmartList[]
   smart_list_access_rules SmartListAccessRule[]
+  email_usage_history     EmailerSendRecord[]
 
   @@map("users")
 }
@@ -721,7 +722,21 @@ model RegisteredEmailDevice {
   @@map("registered_email_devices")
 }
 
-// TODO: support send history?
+model EmailerSendRecord {
+  id Int @id @default(autoincrement())
+
+  emailer_id Int
+  emailer    Emailer @relation(fields: [emailer_id], references: [id], onDelete: Cascade)
+
+  recipient_email String
+  attachment_meta Bytes? // { name: "...", size: ... }
+  sent_at         DateTime @default(now())
+
+  sent_by_user_id String?
+  sent_by         User?   @relation(fields: [sent_by_user_id], references: [id], onDelete: Cascade)
+
+  @@map("emailer_send_records")
+}
 
 model Emailer {
   id Int @id @default(autoincrement())
@@ -729,14 +744,18 @@ model Emailer {
   name       String  @unique
   is_primary Boolean @default(false)
 
-  sender_email        String
-  sender_display_name String
-  encrypted_password  String
-  smtp_host           String
-  smtp_port           Int
+  sender_email              String
+  sender_display_name       String
+  username                  String
+  encrypted_password        String
+  smtp_host                 String
+  smtp_port                 Int
   // smtp_secure         Boolean
-
   max_attachment_size_bytes Int? // null = unlimited
+
+  last_used_at DateTime?
+
+  send_history EmailerSendRecord[]
 
   @@map("emailers")
 }

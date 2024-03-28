@@ -620,7 +620,22 @@
 					"description": "The clients you have configured for sending emails from your Stump server instance",
 					"singleInstanceDisclaimer": "While Stump supports multiple SMTP configurations in the backend, only one can be configured on the UI. This will be improved in the future",
 					"list": {
-						"emptyHeading": "No SMTP emailers configured"
+						"emptyHeading": "No SMTP emailers configured",
+						"primaryEmailer": "Primary emailer",
+						"sendHistory": {
+							"heading": "Send history",
+							"description": "A record of emails sent from this emailer",
+							"table": {
+								"columns": {
+									"to": "To",
+									"subject": "Subject",
+									"status": "Status",
+									"createdAt": "Sent at"
+								}
+							},
+							"emptyHeading": "No history",
+							"emptySubtitle": "The history of this emailer is empty. It has either not been used or the history has been cleared"
+						}
 					}
 				},
 				"devices": {

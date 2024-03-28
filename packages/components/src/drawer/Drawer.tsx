@@ -43,13 +43,16 @@ const DrawerContent = React.forwardRef<
 		<DrawerPrimitive.Content
 			ref={ref}
 			className={cn(
-				'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-edge-200 bg-background',
+				'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-edge-200 bg-background outline-none',
 				className,
 			)}
 			{...props}
 		>
 			{showTopIndicator && (
-				<div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted/40 transition-colors duration-200 hover:bg-muted/50" />
+				<button
+					type="button"
+					className="mx-auto mt-4 h-2 w-[100px] scale-[99%] rounded-full bg-muted/40 outline-none transition-all duration-200 hover:scale-100 hover:bg-muted/50 active:scale-[99%]"
+				/>
 			)}
 			{children}
 		</DrawerPrimitive.Content>

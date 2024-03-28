@@ -11,46 +11,18 @@ use specta::Type;
 use utoipa::ToSchema;
 
 use crate::{EmailError, EmailResult};
-
-#[derive(Serialize, Deserialize, ToSchema, Type)]
-pub enum EmailerSMTPHost {
-	#[serde(rename = "smtp.gmail.com")]
-	Gmail,
-	#[serde(rename = "smtp.office365.com")]
-	Outlook,
-	Custom(String),
-}
-
-impl EmailerSMTPHost {
-	pub fn as_relay(&self) -> &str {
-		match self {
-			EmailerSMTPHost::Gmail => "smtp.gmail.com",
-			EmailerSMTPHost::Outlook => "smtp.office365.com",
-			EmailerSMTPHost::Custom(relay) => relay.as_str(),
-		}
-	}
-}
-
-impl From<String> for EmailerSMTPHost {
-	fn from(relay: String) -> Self {
-		match relay.as_str() {
-			"smtp.gmail.com" => EmailerSMTPHost::Gmail,
-			"smtp.office365.com" => EmailerSMTPHost::Outlook,
-			_ => EmailerSMTPHost::Custom(relay),
-		}
-	}
-}
-
 #[derive(Serialize, Deserialize, ToSchema, Type)]
 pub struct EmailerClientConfig {
 	/// The email address to send from
 	pub sender_email: String,
 	/// The display name to use for the sender
 	pub sender_display_name: String,
+	/// The username to use for the SMTP server, typically the same as the sender email
+	pub username: String,
 	/// The plaintext password to use for the SMTP server, which will be encrypted before being stored
 	pub password: String,
 	/// The SMTP host to use
-	pub host: EmailerSMTPHost,
+	pub host: String,
 	/// The SMTP port to use
 	pub port: u16,
 	/// The maximum size of an attachment in bytes
@@ -104,14 +76,12 @@ impl EmailerClient {
 					.singlepart(attachment),
 			)?;
 
-		let creds = Credentials::new(
-			self.config.sender_email.clone(),
-			self.config.password.clone(),
-		);
+		let creds =
+			Credentials::new(self.config.username.clone(), self.config.password.clone());
 
 		// https://github.com/lettre/lettre/issues/359
 
-		let transport = SmtpTransport::relay(self.config.host.as_relay())?
+		let transport = SmtpTransport::relay(&self.config.host)?
 			.port(self.config.port)
 			.credentials(creds)
 			.build();

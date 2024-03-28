@@ -40,7 +40,7 @@ export default function CreateOrUpdateEmailerForm({ emailer, existingNames, onSu
 		defaultValues: emailer
 			? {
 					is_primary: emailer.is_primary,
-					max_attachment_size_bytes: emailer.config.max_attachment_size_bytes,
+					max_attachment_size_bytes: emailer.config.max_attachment_size_bytes ?? undefined,
 					name: emailer.name,
 					sender_display_name: emailer.config.sender_display_name,
 					sender_email: emailer.config.sender_email,

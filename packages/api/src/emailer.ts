@@ -1,6 +1,7 @@
 import {
 	CreateOrUpdateEmailDevice,
 	CreateOrUpdateEmailer,
+	EmailerSendRecord,
 	PatchEmailDevice,
 	RegisteredEmailDevice,
 	SMTPEmailer,
@@ -13,7 +14,7 @@ function getEmailers(): Promise<APIResult<SMTPEmailer[]>> {
 	return API.get('/emailers')
 }
 
-function getEmailerById(id: string): Promise<APIResult<SMTPEmailer>> {
+function getEmailerById(id: number): Promise<APIResult<SMTPEmailer>> {
 	return API.get(`/emailers/${id}`)
 }
 
@@ -28,7 +29,7 @@ function updateEmailer(
 	return API.put(`/emailers/${id}`, payload)
 }
 
-function deleteEmailer(id: string): Promise<APIResult<SMTPEmailer>> {
+function deleteEmailer(id: number): Promise<APIResult<SMTPEmailer>> {
 	return API.delete(`/emailers/${id}`)
 }
 
@@ -36,8 +37,12 @@ function getEmailDevices(): Promise<APIResult<RegisteredEmailDevice[]>> {
 	return API.get('/email-devices')
 }
 
-function getEmailDeviceById(id: string): Promise<APIResult<RegisteredEmailDevice>> {
+function getEmailDeviceById(id: number): Promise<APIResult<RegisteredEmailDevice>> {
 	return API.get(`/email-devices/${id}`)
+}
+
+function getEmailerSendHistory(emailerId: number): Promise<APIResult<EmailerSendRecord[]>> {
+	return API.get(`/emailers/${emailerId}/send-history`)
 }
 
 function createEmailDevice(
@@ -47,20 +52,20 @@ function createEmailDevice(
 }
 
 function updateEmailDevice(
-	id: string,
+	id: number,
 	payload: CreateOrUpdateEmailDevice,
 ): Promise<APIResult<RegisteredEmailDevice>> {
 	return API.put(`/email-devices/${id}`, payload)
 }
 
 function patchEmailDevice(
-	id: string,
+	id: number,
 	payload: PatchEmailDevice,
 ): Promise<APIResult<RegisteredEmailDevice>> {
 	return API.patch(`/email-devices/${id}`, payload)
 }
 
-function deleteEmailDevice(id: string): Promise<APIResult<RegisteredEmailDevice>> {
+function deleteEmailDevice(id: number): Promise<APIResult<RegisteredEmailDevice>> {
 	return API.delete(`/email-devices/${id}`)
 }
 
@@ -72,6 +77,7 @@ export const emailerApi = {
 	getEmailDeviceById,
 	getEmailDevices,
 	getEmailerById,
+	getEmailerSendHistory,
 	getEmailers,
 	patchEmailDevice,
 	updateEmailDevice,
@@ -86,6 +92,7 @@ export const emailerQueryKeys: Record<keyof typeof emailerApi, string> = {
 	getEmailDeviceById: 'emailDevice.getById',
 	getEmailDevices: 'emailDevices.get',
 	getEmailerById: 'emailer.getById',
+	getEmailerSendHistory: 'emailer.sendHistory',
 	getEmailers: 'emailer.get',
 	patchEmailDevice: 'emailDevice.patch',
 	updateEmailDevice: 'emailDevice.update',

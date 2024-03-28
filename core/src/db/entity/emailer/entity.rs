@@ -1,4 +1,4 @@
-use email::{EmailerClientConfig, EmailerSMTPHost};
+use email::EmailerClientConfig;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -16,11 +16,13 @@ pub struct EmailerConfig {
 	pub sender_email: String,
 	/// The display name to use for the sender
 	pub sender_display_name: String,
+	/// The username to use for the SMTP server, typically the same as the sender email
+	pub username: String,
 	/// The encrypted password to use for the SMTP server
 	#[serde(skip_serializing)]
 	pub encrypted_password: String,
 	/// The SMTP host to use
-	pub smtp_host: EmailerSMTPHost,
+	pub smtp_host: String,
 	/// The SMTP port to use
 	pub smtp_port: u16,
 	/// The maximum size of an attachment in bytes
@@ -34,6 +36,7 @@ impl EmailerConfig {
 		Ok(EmailerClientConfig {
 			sender_email: self.sender_email,
 			sender_display_name: self.sender_display_name,
+			username: self.username,
 			password,
 			host: self.smtp_host,
 			port: self.smtp_port,
@@ -49,6 +52,7 @@ impl EmailerConfig {
 		Ok(EmailerConfig {
 			sender_email: config.sender_email,
 			sender_display_name: config.sender_display_name,
+			username: config.username,
 			encrypted_password,
 			smtp_host: config.host,
 			smtp_port: config.port,
@@ -72,6 +76,8 @@ pub struct SMTPEmailer {
 	pub is_primary: bool,
 	/// The configuration for the emailer
 	pub config: EmailerConfig,
+	/// The last time the emailer was used
+	pub last_used_at: Option<String>,
 }
 
 impl TryFrom<emailer::Data> for SMTPEmailer {
@@ -85,11 +91,13 @@ impl TryFrom<emailer::Data> for SMTPEmailer {
 			config: EmailerConfig {
 				sender_email: data.sender_email,
 				sender_display_name: data.sender_display_name,
+				username: data.username,
 				encrypted_password: data.encrypted_password,
-				smtp_host: EmailerSMTPHost::from(data.smtp_host),
+				smtp_host: data.smtp_host,
 				smtp_port: data.smtp_port as u16,
 				max_attachment_size_bytes: data.max_attachment_size_bytes,
 			},
+			last_used_at: data.last_used_at.map(|t| t.to_rfc3339()),
 		})
 	}
 }

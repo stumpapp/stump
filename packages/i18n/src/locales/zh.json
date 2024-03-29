@@ -43,28 +43,28 @@
 				"fileChecksum": "校验码"
 			}
 		},
-		"nextInSeries": "Next in Series"
+		"nextInSeries": "系列中的下一个"
 	},
 	"createBookClubScene": {
-		"heading": "Create a new book club",
-		"subtitle": "You can create a private book club a select few, or make it public for anyone on the server to join",
+		"heading": "创建一个新的读书俱乐部",
+		"subtitle": "您可以创建一个私人读书俱乐部，或者创建一个公开的任何人都可以加入的读书俱乐部",
 		"form": {
 			"name": {
 				"label": "名称",
-				"placeholder": "My book club",
-				"description": "The name of your book club"
+				"placeholder": "我的读书俱乐部",
+				"description": "您的读书俱乐部名称"
 			},
 			"description": {
 				"label": "描述",
 				"placeholder": "An 'Our Flag Means Death' fan club. We read pirate fiction to our hearts content",
-				"description": "An optional, short description of your book club"
+				"description": "您的读书俱乐部的简短描述（可选）"
 			},
 			"is_private": {
-				"label": "Private club",
-				"description": "If enabled, only users you invite will be able to join your book club"
+				"label": "私人俱乐部",
+				"description": "如果启用，只有您邀请的用户才能够加入您的读书俱乐部"
 			},
 			"member_role_spec": {
-				"heading": "Custom role mapping",
+				"heading": "自定义角色映射",
 				"subtitle": [
 					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
 					"文档"
@@ -80,8 +80,8 @@
 					"description": "The name of the moderator role for your book club"
 				},
 				"admin": {
-					"label": "Admin",
-					"placeholder": "Admin",
+					"label": "管理员",
+					"placeholder": "管理员",
 					"description": "The name of the admin role for your book club"
 				},
 				"creator": {
@@ -141,7 +141,7 @@
 		}
 	},
 	"errorScene": {
-		"heading": "lol, oops",
+		"heading": "我去，出错了",
 		"message": "发生错误：",
 		"buttons": {
 			"report": "反馈Bug",
@@ -198,7 +198,7 @@
 						"series": "系列",
 						"library": "库"
 					},
-					"matches": "Matches"
+					"matches": "匹配项"
 				}
 			}
 		}
@@ -212,7 +212,7 @@
 			"missingIdError": "此场景需要 URL 中的 ID",
 			"smartListNotFound": "未找到智能列表",
 			"viewCreateError": "创建视图失败",
-			"viewSaveError": "Failed to save view"
+			"viewSaveError": "保存视图失败"
 		},
 		"header": {
 			"backLink": "列表"
@@ -239,24 +239,24 @@
 					}
 				},
 				"search": {
-					"placeholder": "Quick filter"
+					"placeholder": "快速筛选"
 				},
 				"viewManager": {
-					"updateSelected": "Update selected",
-					"create": "Create new view",
+					"updateSelected": "更新被选中的项目",
+					"create": "创建新视图",
 					"modal": {
 						"heading": {
-							"create": "Create view",
-							"update": "Update view"
+							"create": "创建视图",
+							"update": "更新视图"
 						},
 						"description": {
-							"create": "Create a new view for this smart list",
-							"update": "Update the view"
+							"create": "为此智能列表创建新视图",
+							"update": "更新视图"
 						},
 						"createForm": {
 							"name": {
 								"label": "名称",
-								"placeholder": "My view",
+								"placeholder": "我的视图",
 								"description": "A friendly name to uniquely identify this view"
 							}
 						},

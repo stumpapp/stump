@@ -7,7 +7,7 @@ use axum::{
 	Json, Router,
 };
 use prisma_client_rust::Direction;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use specta::Type;
 use stump_core::{
 	db::entity::{
@@ -16,7 +16,6 @@ use stump_core::{
 	},
 	filesystem::{read_entire_file, ContentType, FileParts, PathUtils},
 	prisma::{emailer, emailer_send_record, registered_email_device, user, PrismaClient},
-	Ctx,
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
@@ -346,62 +345,69 @@ async fn get_emailer_send_history(
 	))
 }
 
-// async fn send_attachment_emails_tx(
-// 	by_user:&User,
-// 	ctx: &Ctx,
-// 	client: &PrismaClient,
-// 	emailer: SMTPEmailer,
-// 	books: Vec<Media>,
-// 	recipients: Vec<String>,
-// 	max_attachment_size_bytes: Option<i32>,
-// ) -> APIResult<Vec<EmailerSendRecord>> {
-// 	let emailer_id = emailer.id;
-// 	let emailer_client = emailer.into_client(ctx).await?;
-
-// 	let mut records = Vec::new();
-
-// 	for book in books {
-// 		let content = read_entire_file(book.path)?;
-// 		let content_type = ContentType::from_bytes_with_fallback(&content[..5], &book.extension);
-
-// 		for recipient in &recipients {
-// 			let send_result = emailer_client
-// 				.send_attachment(
-// 					"Attachment from Stump",
-// 					recipient,
-// 					&book.name,
-// 					content.clone(),
-// 					content_type.mime_type().parse().map_err(|_| {
-// 						APIError::InternalServerError("Failed to parse content type".to_string())
-// 					})?,
-// 				)
-// 				.await;
-// 			let record = client
-// 				.emailer_send_record()
-// 				.create(
-// 					emailer::id::equals(emailer_id),
-// 					recipient,
-// 					vec![]
-// 				)
-// 				.exec()
-// 				.await?;
-// 			records.push(EmailerSendRecord::try_from(record)?);
-// 		}
-
-// 	unimplemented!()
-// }
-
 #[derive(Deserialize, ToSchema, Type)]
-pub struct SendAttachmentEmail {
+pub struct SendAttachmentEmailsPayload {
 	media_ids: Vec<String>,
 	send_to: Vec<EmailerSendTo>,
+}
+
+#[derive(Serialize, ToSchema, Type)]
+pub struct SendAttachmentEmailResponse {
+	sent_emails_count: i32,
+	errors: Vec<String>,
+}
+
+async fn get_and_validate_recipients(
+	user: &User,
+	client: &PrismaClient,
+	send_to: &[EmailerSendTo],
+) -> APIResult<Vec<String>> {
+	let mut recipients = Vec::new();
+	for to in send_to {
+		let recipient = match to {
+			EmailerSendTo::Device { device_id } => {
+				let device = client
+					.registered_email_device()
+					.find_first(vec![registered_email_device::id::equals(*device_id)])
+					.exec()
+					.await?
+					.ok_or(APIError::NotFound("Device not found".to_string()))?;
+				device.email
+			},
+			EmailerSendTo::Anonymous { email } => email.clone(),
+		};
+		recipients.push(recipient);
+	}
+
+	let forbidden_devices = client
+		.registered_email_device()
+		.find_many(vec![registered_email_device::forbidden::equals(true)])
+		.exec()
+		.await?;
+	let forbidden_recipients = recipients
+		.iter()
+		.filter(|r| forbidden_devices.iter().any(|d| d.email == **r))
+		.cloned()
+		.collect::<Vec<_>>();
+	let has_forbidden_recipients = !forbidden_recipients.is_empty();
+
+	if has_forbidden_recipients {
+		tracing::error!(
+			?user,
+			?forbidden_recipients,
+			"User attempted to send an email to unauthorized recipient(s)!"
+		);
+		return Err(APIError::forbidden_discreet());
+	}
+
+	Ok(recipients)
 }
 
 async fn send_attachment_email(
 	State(ctx): State<AppState>,
 	session: Session,
-	Json(payload): Json<SendAttachmentEmail>,
-) -> APIResult<Json<i32>> {
+	Json(payload): Json<SendAttachmentEmailsPayload>,
+) -> APIResult<Json<SendAttachmentEmailResponse>> {
 	let by_user = enforce_session_permissions(
 		&session,
 		&chain_optional_iter(
@@ -446,26 +452,23 @@ async fn send_attachment_email(
 		));
 	}
 
-	let mut recipients = Vec::new();
-	for to in &payload.send_to {
-		let recipient = match to {
-			EmailerSendTo::Device { device_id } => {
-				let device = client
-					.registered_email_device()
-					.find_first(vec![registered_email_device::id::equals(*device_id)])
-					.exec()
-					.await?
-					.ok_or(APIError::NotFound("Device not found".to_string()))?;
-				device.email
+	let (tx, tx_client) = client._transaction().begin().await?;
+	let recipients =
+		match get_and_validate_recipients(&by_user, &tx_client, &payload.send_to).await {
+			Ok(r) => {
+				tx.commit(tx_client).await?;
+				r
 			},
-			EmailerSendTo::Anonymous { email } => email.clone(),
+			Err(e) => {
+				tx.rollback(tx_client).await?;
+				return Err(e);
+			},
 		};
-		recipients.push(recipient);
-	}
 
 	let emailer_client = emailer.into_client(&ctx).await?;
 	let mut record_creates =
 		Vec::<(i32, String, Vec<emailer_send_record::SetParam>)>::new();
+	let mut errors = Vec::new();
 
 	// TODO: I am not sure if reading devices (e.g. Kobo/Kindle) accept multiple attachments
 	// in a single email. I'm implementing this on this assumption it cannot, however testing
@@ -545,19 +548,36 @@ async fn send_attachment_email(
 				},
 				Err(e) => {
 					tracing::error!(?e, "Failed to send email");
+					errors.push(format!(
+						"Failed to send {} to {}: {}",
+						file_name, recipient, e
+					));
 					continue;
 				},
 			}
 		}
 	}
 
+	let sent_emails_count = record_creates.len();
 	let affected_rows = client
 		.emailer_send_record()
 		.create_many(record_creates)
 		.exec()
 		.await?;
 
-	Ok(Json(affected_rows as i32))
+	if affected_rows != sent_emails_count as i64 {
+		tracing::warn!(
+			created_records = ?affected_rows,
+			expected = ?sent_emails_count,
+			"Failed to create all emailer send records",
+		);
+		errors.push("Failed to create all emailer send records".to_string());
+	}
+
+	Ok(Json(SendAttachmentEmailResponse {
+		sent_emails_count: sent_emails_count as i32,
+		errors,
+	}))
 }
 
 /// Get all email devices on the server

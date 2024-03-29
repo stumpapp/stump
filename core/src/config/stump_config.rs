@@ -353,6 +353,11 @@ impl StumpConfig {
 		PathBuf::from(&self.config_dir).join("thumbnails")
 	}
 
+	/// Returns a `PathBuf` to the Stump templates directory.
+	pub fn get_templates_dir(&self) -> PathBuf {
+		PathBuf::from(&self.config_dir).join("templates")
+	}
+
 	/// Returns a `PathBuf` to the Stump avatars directory
 	pub fn get_avatars_dir(&self) -> PathBuf {
 		PathBuf::from(&self.config_dir).join("avatars")

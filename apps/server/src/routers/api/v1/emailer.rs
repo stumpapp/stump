@@ -1,7 +1,9 @@
+use std::path::PathBuf;
+
 use axum::{
 	extract::{Path, State},
 	middleware::from_extractor_with_state,
-	routing::get,
+	routing::{get, post},
 	Json, Router,
 };
 use prisma_client_rust::Direction;
@@ -9,10 +11,12 @@ use serde::Deserialize;
 use specta::Type;
 use stump_core::{
 	db::entity::{
-		EmailerConfig, EmailerConfigInput, EmailerSendRecord, RegisteredEmailDevice,
-		SMTPEmailer, UserPermission,
+		AttachmentMeta, EmailerConfig, EmailerConfigInput, EmailerSendRecord,
+		EmailerSendTo, Media, RegisteredEmailDevice, SMTPEmailer, User, UserPermission,
 	},
-	prisma::{emailer, emailer_send_record, registered_email_device},
+	filesystem::{read_entire_file, ContentType, FileParts, PathUtils},
+	prisma::{emailer, emailer_send_record, registered_email_device, user, PrismaClient},
+	Ctx,
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
@@ -20,8 +24,9 @@ use utoipa::ToSchema;
 use crate::{
 	config::state::AppState,
 	errors::{APIError, APIResult},
-	filter::chain_optional_iter,
+	filter::{chain_optional_iter, MediaFilter},
 	middleware::auth::Auth,
+	routers::api::v1::media::apply_media_filters_for_user,
 	utils::enforce_session_permissions,
 };
 
@@ -45,7 +50,8 @@ pub(crate) fn mount(app_state: AppState) -> Router<AppState> {
 							"/send-history",
 							Router::new().route("/", get(get_emailer_send_history)),
 						),
-				),
+				)
+				.route("/send-attachment", post(send_attachment_email)),
 		)
 		.nest(
 			"/email-devices",
@@ -338,6 +344,220 @@ async fn get_emailer_send_history(
 			.into_iter()
 			.collect::<Result<Vec<_>, _>>()?,
 	))
+}
+
+// async fn send_attachment_emails_tx(
+// 	by_user:&User,
+// 	ctx: &Ctx,
+// 	client: &PrismaClient,
+// 	emailer: SMTPEmailer,
+// 	books: Vec<Media>,
+// 	recipients: Vec<String>,
+// 	max_attachment_size_bytes: Option<i32>,
+// ) -> APIResult<Vec<EmailerSendRecord>> {
+// 	let emailer_id = emailer.id;
+// 	let emailer_client = emailer.into_client(ctx).await?;
+
+// 	let mut records = Vec::new();
+
+// 	for book in books {
+// 		let content = read_entire_file(book.path)?;
+// 		let content_type = ContentType::from_bytes_with_fallback(&content[..5], &book.extension);
+
+// 		for recipient in &recipients {
+// 			let send_result = emailer_client
+// 				.send_attachment(
+// 					"Attachment from Stump",
+// 					recipient,
+// 					&book.name,
+// 					content.clone(),
+// 					content_type.mime_type().parse().map_err(|_| {
+// 						APIError::InternalServerError("Failed to parse content type".to_string())
+// 					})?,
+// 				)
+// 				.await;
+// 			let record = client
+// 				.emailer_send_record()
+// 				.create(
+// 					emailer::id::equals(emailer_id),
+// 					recipient,
+// 					vec![]
+// 				)
+// 				.exec()
+// 				.await?;
+// 			records.push(EmailerSendRecord::try_from(record)?);
+// 		}
+
+// 	unimplemented!()
+// }
+
+#[derive(Deserialize, ToSchema, Type)]
+pub struct SendAttachmentEmail {
+	media_ids: Vec<String>,
+	send_to: Vec<EmailerSendTo>,
+}
+
+async fn send_attachment_email(
+	State(ctx): State<AppState>,
+	session: Session,
+	Json(payload): Json<SendAttachmentEmail>,
+) -> APIResult<Json<i32>> {
+	let by_user = enforce_session_permissions(
+		&session,
+		&chain_optional_iter(
+			[UserPermission::EmailSend],
+			[payload
+				.send_to
+				.iter()
+				.any(|to| matches!(to, EmailerSendTo::Anonymous { .. }))
+				.then(|| UserPermission::EmailArbitrarySend)],
+		),
+	)?;
+
+	let client = &ctx.db;
+
+	let emailer = client
+		.emailer()
+		.find_first(vec![emailer::is_primary::equals(true)])
+		.exec()
+		.await?
+		.ok_or(APIError::NotFound("Primary emailer not found".to_string()))?;
+	let emailer = SMTPEmailer::try_from(emailer)?;
+	let emailer_id = emailer.id;
+	let max_attachment_size_bytes = emailer.config.max_attachment_size_bytes;
+
+	let expected_books_len = payload.media_ids.len();
+	let books = client
+		.media()
+		.find_many(apply_media_filters_for_user(
+			MediaFilter::ids(payload.media_ids),
+			&by_user,
+		))
+		.exec()
+		.await?
+		.into_iter()
+		.map(Media::from)
+		.collect::<Vec<_>>();
+
+	if books.len() != expected_books_len {
+		tracing::error!(?books, ?expected_books_len, "Some media IDs were not found");
+		return Err(APIError::BadRequest(
+			"Some media IDs were not found".to_string(),
+		));
+	}
+
+	let mut recipients = Vec::new();
+	for to in &payload.send_to {
+		let recipient = match to {
+			EmailerSendTo::Device { device_id } => {
+				let device = client
+					.registered_email_device()
+					.find_first(vec![registered_email_device::id::equals(*device_id)])
+					.exec()
+					.await?
+					.ok_or(APIError::NotFound("Device not found".to_string()))?;
+				device.email
+			},
+			EmailerSendTo::Anonymous { email } => email.clone(),
+		};
+		recipients.push(recipient);
+	}
+
+	let emailer_client = emailer.into_client(&ctx).await?;
+	let mut record_creates =
+		Vec::<(i32, String, Vec<emailer_send_record::SetParam>)>::new();
+
+	// TODO: I am not sure if reading devices (e.g. Kobo/Kindle) accept multiple attachments
+	// in a single email. I'm implementing this on this assumption it cannot, however testing
+	// and/or clarification is needed.
+	//
+	// If I CAN send multiple attachments, this will be SIGNIFICANTLY less complex in the logic
+	// below.
+
+	for book in books {
+		let FileParts {
+			file_name,
+			extension,
+			..
+		} = PathBuf::from(&book.path).file_parts();
+		let content = read_entire_file(book.path)?;
+
+		// TODO: should error?
+		match (content.len(), max_attachment_size_bytes) {
+			(_, Some(max_size)) if content.len() as i32 > max_size => {
+				tracing::warn!("Attachment too large: {} > {}", content.len(), max_size);
+				continue;
+			},
+			(_, _) if content.len() < 5 => {
+				tracing::warn!("Attachment too small: {} < 5", content.len());
+				continue;
+			},
+			_ => {},
+		}
+
+		let content_type =
+			ContentType::from_bytes_with_fallback(&content[..5], &extension);
+
+		for recipient in recipients.iter() {
+			let send_result = emailer_client
+				.send_attachment(
+					"Attachment from Stump",
+					&recipient,
+					&file_name,
+					content.clone(),
+					content_type.mime_type().parse().map_err(|_| {
+						APIError::InternalServerError(
+							"Failed to parse content type".to_string(),
+						)
+					})?,
+				)
+				.await;
+
+			match send_result {
+				Ok(_) => {
+					record_creates.push((
+						emailer_id,
+						recipient.clone(),
+						vec![
+							emailer_send_record::sent_by::connect(user::id::equals(
+								by_user.id.clone(),
+							)),
+							emailer_send_record::attachment_meta::set(
+								AttachmentMeta::new(
+									file_name.clone(),
+									Some(book.id.clone()),
+									content.len() as i32,
+								)
+								.into_data()
+								.map_or_else(
+									|e| {
+										tracing::error!(
+											?e,
+											"Failed to serialize attachment meta"
+										);
+										None
+									},
+									Some,
+								),
+							),
+						],
+					));
+				},
+				Err(e) => {
+					tracing::error!(?e, "Failed to send email");
+					continue;
+				},
+			}
+		}
+	}
+
+	let affected_rows = client
+		.emailer_send_record()
+		.create_many(record_creates)
+		.exec()
+		.await?;
+
+	Ok(Json(affected_rows as i32))
 }
 
 /// Get all email devices on the server

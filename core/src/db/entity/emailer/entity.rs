@@ -1,4 +1,4 @@
-use email::EmailerClientConfig;
+use email::{EmailerClient, EmailerClientConfig};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -78,6 +78,21 @@ pub struct SMTPEmailer {
 	pub config: EmailerConfig,
 	/// The last time the emailer was used
 	pub last_used_at: Option<String>,
+}
+
+impl SMTPEmailer {
+	pub async fn into_client(self, ctx: &Ctx) -> CoreResult<EmailerClient> {
+		let config = self.config.into_client_config(ctx).await?;
+		let template_dir = ctx.config.get_templates_dir();
+		Ok(EmailerClient::new(config, template_dir))
+	}
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Type)]
+#[serde(untagged)]
+pub enum EmailerSendTo {
+	Device { device_id: i32 },
+	Anonymous { email: String },
 }
 
 impl TryFrom<emailer::Data> for SMTPEmailer {

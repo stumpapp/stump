@@ -3,8 +3,20 @@ use std::path::PathBuf;
 use crate::EmailResult;
 use handlebars::Handlebars;
 
+pub enum Template {
+	Attachment,
+}
+
+impl AsRef<str> for Template {
+	fn as_ref(&self) -> &str {
+		match self {
+			Self::Attachment => "attachment",
+		}
+	}
+}
+
 pub fn render_template(
-	name: &str,
+	template: Template,
 	data: &serde_json::Value,
 	templates_dir: PathBuf,
 ) -> EmailResult<String> {
@@ -12,7 +24,8 @@ pub fn render_template(
 	handlebars.register_template_file("base", templates_dir.join("base.hbs"))?;
 	handlebars
 		.register_template_file("attachment", templates_dir.join("attachment.hbs"))?;
-	Ok(handlebars.render_template(name, data)?)
+
+	Ok(handlebars.render_template(template.as_ref(), data)?)
 }
 
 // TODO: tests

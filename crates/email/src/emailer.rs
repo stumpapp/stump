@@ -2,15 +2,19 @@ use std::path::PathBuf;
 
 use lettre::{
 	address::AddressError,
-	message::{header::ContentType, Attachment, MultiPart},
+	message::{
+		header::{self, ContentType},
+		Attachment, MultiPart, SinglePart,
+	},
 	transport::smtp::authentication::Credentials,
 	Message, SmtpTransport, Transport,
 };
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use specta::Type;
 use utoipa::ToSchema;
 
-use crate::{EmailError, EmailResult};
+use crate::{render_template, EmailError, EmailResult, EmailTemplate};
 #[derive(Serialize, Deserialize, ToSchema, Type)]
 pub struct EmailerClientConfig {
 	/// The email address to send from
@@ -55,11 +59,16 @@ impl EmailerClient {
 			.sender_email
 			.parse()
 			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
+
 		let to = recipient
 			.parse()
 			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
 
-		// TODO: render_template
+		let html = render_template(
+			EmailTemplate::Attachment,
+			&json!({}),
+			self.template_dir.clone(),
+		)?;
 
 		let attachment = Attachment::new(name.to_string()).body(content, content_type);
 		let email = Message::builder()
@@ -68,11 +77,11 @@ impl EmailerClient {
 			.subject(subject)
 			.multipart(
 				MultiPart::mixed()
-					// .singlepart(
-					// 	SinglePart::builder()
-					// 		.header(header::ContentType::TEXT_HTML)
-					// 		.body(String::from(html)),
-					// )
+					.singlepart(
+						SinglePart::builder()
+							.header(header::ContentType::TEXT_HTML)
+							.body(String::from(html)),
+					)
 					.singlepart(attachment),
 			)?;
 

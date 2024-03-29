@@ -1,4 +1,4 @@
-use crate::{db::entity::User, CoreError};
+use crate::{db::entity::User, CoreError, CoreResult};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
@@ -14,6 +14,21 @@ pub struct AttachmentMeta {
 	pub media_id: Option<String>,
 	/// The size of the attachment in bytes
 	pub size: i32,
+}
+
+impl AttachmentMeta {
+	/// Create a new attachment meta
+	pub fn new(filename: String, media_id: Option<String>, size: i32) -> Self {
+		Self {
+			filename,
+			media_id,
+			size,
+		}
+	}
+
+	pub fn into_data(&self) -> CoreResult<Vec<u8>> {
+		serde_json::to_vec(self).map_err(CoreError::from)
+	}
 }
 
 /// A record of an email that was sent, used to keep track of emails that

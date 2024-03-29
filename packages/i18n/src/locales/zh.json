@@ -116,7 +116,7 @@
 				"libraryPath": "Path",
 				"libraryPathDescription": "The path to the library as it exists on your server",
 				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryTags": "标签"
 			},
 			"buttons": {
 				"confirm": "Create Library"
@@ -124,19 +124,19 @@
 		}
 	},
 	"librarySettingsScene": {
-		"heading": "Settings",
+		"heading": "设置",
 		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
-		"subtitleLink": "relevant documentation",
+		"subtitleLink": "相关文档",
 		"form": {
 			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
+				"libraryName": "名称",
+				"libraryPath": "路径",
 				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "Tags"
+				"libraryDescription": "描述",
+				"libraryTags": "标签"
 			},
 			"buttons": {
-				"confirm": "Save Changes"
+				"confirm": "保存更改"
 			}
 		}
 	},
@@ -215,7 +215,7 @@
 			"viewSaveError": "Failed to save view"
 		},
 		"header": {
-			"backLink": "Lists"
+			"backLink": "列表"
 		},
 		"itemsScene": {
 			"smartListNotFound": "Smart list not found",
@@ -234,8 +234,8 @@
 						"description": "This is how Stump will process the filters"
 					},
 					"buttons": {
-						"save": "Save",
-						"cancel": "Cancel"
+						"save": "保存",
+						"cancel": "取消"
 					}
 				},
 				"search": {
@@ -255,14 +255,14 @@
 						},
 						"createForm": {
 							"name": {
-								"label": "Name",
+								"label": "名称",
 								"placeholder": "My view",
 								"description": "A friendly name to uniquely identify this view"
 							}
 						},
 						"updateForm": {
 							"name": {
-								"label": "Name",
+								"label": "名称",
 								"placeholder": "My view",
 								"description": "The updated name for this view, if desired"
 							}
@@ -274,33 +274,33 @@
 	},
 	"settingsScene": {
 		"navigation": {
-			"general": "General",
-			"logs": "Logs",
-			"server": "Server",
-			"jobs": "Jobs and Configuration",
-			"users": "User Management",
-			"desktop": "Desktop"
+			"general": "通用",
+			"logs": "日志",
+			"server": "服务器",
+			"jobs": "任务和配置",
+			"users": "用户管理",
+			"desktop": "桌面"
 		},
 		"sidebar": {
 			"application": {
-				"account": "Account",
-				"appearance": "Appearance",
-				"reader": "Reader",
-				"desktop": "Desktop",
-				"label": "Application"
+				"account": "帐户",
+				"appearance": "外观",
+				"reader": "阅读器",
+				"desktop": "桌面",
+				"label": "应用"
 			},
 			"server": {
-				"general": "General",
-				"logs": "Logs",
-				"users": "Users",
-				"jobs": "Jobs",
-				"access": "Access",
-				"notifications": "Notifications",
-				"label": "Server"
+				"general": "通用",
+				"logs": "日志",
+				"users": "用户",
+				"jobs": "任务",
+				"access": "访问权限",
+				"notifications": "通知",
+				"label": "服务器"
 			}
 		},
 		"app/account": {
-			"helmet": "Account settings",
+			"helmet": "账户设置",
 			"title": "Account settings",
 			"description": "Settings related to your account",
 			"sections": {
@@ -351,20 +351,20 @@
 			}
 		},
 		"app/appearance": {
-			"helmet": "Appearance",
-			"title": "Appearance",
-			"description": "Customize the look and feel of the application",
+			"helmet": "外观",
+			"title": "外观",
+			"description": "自定义应用程序的外观和感觉效果",
 			"sections": {
 				"themeSelect": {
-					"label": "Theme",
+					"label": "主题",
 					"description": "By default, Stump has a light and dark theme",
 					"customTheme": [
 						"If you're interested in creating your own custom theme, check out the",
-						"documentation"
+						"文档"
 					],
 					"options": {
-						"light": "Light",
-						"dark": "Dark",
+						"light": "亮色",
+						"dark": "深色",
 						"bronze": "Bronze light"
 					}
 				}
@@ -392,8 +392,8 @@
 			}
 		},
 		"app/desktop": {
-			"helmet": "Desktop settings",
-			"title": "Desktop settings",
+			"helmet": "桌面设置",
+			"title": "桌面设置",
 			"description": "Settings related to the Stump desktop application",
 			"sections": {
 				"discordPresence": {
@@ -404,31 +404,31 @@
 			}
 		},
 		"server/general": {
-			"helmet": "General server settings",
-			"title": "General settings",
+			"helmet": "常规服务器设定",
+			"title": "常规设置",
 			"description": "General settings related to your Stump server instance",
 			"sections": {
 				"updateAvailable": {
 					"message": "Your server is not up to date. Please update to the latest version!"
 				},
 				"serverInfo": {
-					"title": "Server information",
+					"title": "服务器信息",
 					"description": "Basic details about your Stump server instance",
 					"build": {
-						"label": "Build",
-						"description": "Details about the version and build",
+						"label": "构建",
+						"description": "关于版本和构建的细节",
 						"version": {
-							"semver": "Version",
-							"commitHash": "Exact commit",
-							"date": "Build date"
+							"semver": "版本",
+							"commitHash": "确切提交",
+							"date": "编译日期"
 						}
 					}
 				}
 			}
 		},
 		"server/logs": {
-			"helmet": "Logs",
-			"title": "Logs",
+			"helmet": "日志",
+			"title": "日志",
 			"description": "The logs generated by your Stump server instance",
 			"sections": {
 				"persistedLogs": {
@@ -436,23 +436,23 @@
 					"description": "These logs have been manually persisted to the database, typically associated with a specific job or event",
 					"table": {
 						"columns": {
-							"level": "Level",
-							"message": "Message",
-							"timestamp": "Timestamp"
+							"level": "级别",
+							"message": "消息",
+							"timestamp": "时间戳"
 						},
-						"emptyHeading": "No logs to display",
-						"emptySubtitle": "Your server is either very healthy or very unhealthy"
+						"emptyHeading": "没有可显示的日志",
+						"emptySubtitle": "您的服务器非常健康或很不健康"
 					}
 				},
 				"liveLogs": {
-					"title": "Live logs feed",
+					"title": "实时日志",
 					"description": "Streamed directly from your Stump server instance in real-time"
 				}
 			}
 		},
 		"server/jobs": {
-			"helmet": "Jobs",
-			"title": "Jobs",
+			"helmet": "任务",
+			"title": "任务",
 			"description": "Background jobs that run on your Stump server instance",
 			"sections": {
 				"scheduling": {
@@ -607,96 +607,96 @@
 		}
 	},
 	"jobOverlay": {
-		"backupHeading": "Job in Progress"
+		"backupHeading": "正在执行的任务"
 	},
 	"libraryStats": {
-		"seriesCount": "Total Series",
-		"bookCount": "Total Books",
-		"diskUsage": "Disk Usage"
+		"seriesCount": "总系列数",
+		"bookCount": "书籍总数",
+		"diskUsage": "磁盘使用量"
 	},
 	"pagination": {
 		"buttons": {
-			"next": "Next",
-			"previous": "Previous"
+			"next": "下一页",
+			"previous": "上一页"
 		},
 		"popover": {
-			"heading": "Go to page",
+			"heading": "转到页面",
 			"buttons": {
-				"confirm": "Go",
-				"cancel": "Cancel"
+				"confirm": "跳转",
+				"cancel": "取消"
 			}
 		}
 	},
 	"signOutModal": {
-		"title": "Sign out",
-		"message": "Are you sure you want to sign out?",
+		"title": "退出登录",
+		"message": "您确定要退出登陆吗？",
 		"buttons": {
-			"cancel": "Cancel",
-			"signOut": "Sign out"
+			"cancel": "取消",
+			"signOut": "退出登录"
 		}
 	},
 	"sidebar": {
 		"buttons": {
-			"home": "Home",
+			"home": "首页",
 			"libraries": "Libraries",
-			"books": "Explore",
+			"books": "浏览",
 			"bookClubs": "Book clubs",
 			"createLibrary": "Create library",
 			"noLibraries": "No libraries",
 			"createBookClub": "Create book club",
 			"noBookClubs": "No book clubs",
-			"settings": "Settings",
-			"themeToggle": "Toggle Theme",
-			"goForward": "Go Forward",
-			"goBack": "Go Back",
+			"settings": "设置",
+			"themeToggle": "切换主题",
+			"goForward": "向前",
+			"goBack": "后退",
 			"smartlists": "Smart lists",
 			"noSmartlists": "No smart lists",
 			"createSmartlist": "Create smart list"
 		},
 		"libraryOptions": {
-			"scanLibrary": "Scan",
-			"fileExplorer": "File Explorer",
-			"manageLibrary": "Settings",
-			"deleteLibrary": "Delete"
+			"scanLibrary": "扫描",
+			"fileExplorer": "文件管理器",
+			"manageLibrary": "设置",
+			"deleteLibrary": "删除"
 		},
 		"versionInformation": {
-			"heading": "Version Information",
-			"semVer": "Semantic Version",
-			"commitHash": "Commit Hash",
-			"buildDate": "Build Date"
+			"heading": "版本信息",
+			"semVer": "语义化版本",
+			"commitHash": "提交哈希",
+			"buildDate": "构建日期"
 		}
 	},
 	"search": {
-		"placeholder": "Search"
+		"placeholder": "搜索"
 	},
 	"serverSOS": {
-		"heading": "Server Unavailable",
+		"heading": "服务器不可用",
 		"desktop": {
 			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device.\nIf your server URL has changed, you can update it using the form below"
 		},
 		"web": {
 			"message": "A network error occurred that suggests your Stump server is currently unavailable. Please ensure that it is running and accessible from this device"
 		},
-		"reconnected": "Reconnected to server! Redirecting...",
-		"reconnectionFailed": "Something went wrong!"
+		"reconnected": "重连到服务器！正在重定向...",
+		"reconnectionFailed": "出了些问题"
 	},
 	"serverStatusOverlay": {
-		"heading": "Server isn't connected",
+		"heading": "服务器未连接",
 		"message": [
-			"Please check your internet connection",
-			"Click here",
-			"to change your server URL"
+			"请检查您的网络连接",
+			"点击此处",
+			"更改您的服务器 URL"
 		]
 	},
 	"slidingList": {
-		"empty": "No items to display",
+		"empty": "没有可显示的项目",
 		"buttons": {
 			"next": "Seek Ahead",
 			"previous": "Seek Backwards"
 		}
 	},
 	"tagSelect": {
-		"placholder": "Select or create tag",
+		"placholder": "选择或创建标签",
 		"placeholderNoTags": "No tags available"
 	},
 	"thumbnailDropdown": {
@@ -713,12 +713,12 @@
 	},
 	"common": {
 		"cancel": "Cancel",
-		"confirm": "Confirm",
-		"save": "Save",
-		"saveChanges": "Save changes",
-		"create": "Create",
-		"edit": "Edit",
-		"unimplemented": "This functionality is not yet implemented! Check back later",
-		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
+		"confirm": "确认",
+		"save": "保存",
+		"saveChanges": "保存更改",
+		"create": "创建",
+		"edit": "编辑",
+		"unimplemented": "此功能尚未实现！稍后再试",
+		"limitedFunctionality": "这尚未完全实现，并且缺少一些功能。请稍后再试"
 	}
 }

@@ -85,53 +85,53 @@
 					"description": "The name of the admin role for your book club"
 				},
 				"creator": {
-					"label": "Creator",
-					"placeholder": "Creator",
-					"description": "The name of the creator role for your book club. This is you!"
+					"label": "创建者",
+					"placeholder": "创建者",
+					"description": "您的读书俱乐部创建者角色的名称。就您！"
 				}
 			},
 			"creator_preferences": {
-				"heading": "Membership",
+				"heading": "成员",
 				"subtitle": "Preferences for your own membership in the book club",
 				"creator_display_name": {
-					"label": "Display Name",
+					"label": "显示名",
 					"placeholder": "oromei",
 					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
 				},
 				"creator_hide_progress": {
-					"label": "Hide Progress",
-					"description": "If enabled, your read progress will be hidden from other members of the book club"
+					"label": "隐藏进度",
+					"description": "如果启用，您的阅读进度将对读书俱乐部的其他成员隐藏"
 				}
 			},
-			"submit": "Create Book Club"
+			"submit": "创建读书俱乐部"
 		}
 	},
 	"createLibraryScene": {
-		"heading": "Create library",
+		"heading": "创建库",
 		"subtitle": "Libraries are used to group your books together. If you're wanting a refresh on how they work, check out the",
-		"subtitleLink": "relevant documentation",
-		"form": {
-			"labels": {
-				"libraryName": "Name",
-				"libraryPath": "Path",
-				"libraryPathDescription": "The path to the library as it exists on your server",
-				"libraryDescription": "Description",
-				"libraryTags": "标签"
-			},
-			"buttons": {
-				"confirm": "Create Library"
-			}
-		}
-	},
-	"librarySettingsScene": {
-		"heading": "设置",
-		"subtitle": "Manage your library here. If you're wanting a refresh on these settings, check out the",
 		"subtitleLink": "相关文档",
 		"form": {
 			"labels": {
 				"libraryName": "名称",
 				"libraryPath": "路径",
-				"libraryPathDescription": "The path to the library as it exists on your server",
+				"libraryPathDescription": "您服务器上的书库路径",
+				"libraryDescription": "描述",
+				"libraryTags": "标签"
+			},
+			"buttons": {
+				"confirm": "新建书库"
+			}
+		}
+	},
+	"librarySettingsScene": {
+		"heading": "设置",
+		"subtitle": "在此管理您的书库。如果您想要更新这些设置，请查看",
+		"subtitleLink": "相关文档",
+		"form": {
+			"labels": {
+				"libraryName": "名称",
+				"libraryPath": "路径",
+				"libraryPathDescription": "您服务器上的书库路径",
 				"libraryDescription": "描述",
 				"libraryTags": "标签"
 			},
@@ -161,7 +161,7 @@
 			"title": "最近添加的系列",
 			"emptyState": {
 				"heading": "没有要显示的系列",
-				"message": "Any series you add to your libraries will show up here"
+				"message": "您添加到书库的任何系列都会在此显示"
 			}
 		},
 		"recentlyAddedBooks": {
@@ -175,21 +175,21 @@
 	"seriesOverviewScene": {
 		"buttons": {
 			"continueReading": "继续阅读",
-			"downloadSeries": "Download Series"
+			"downloadSeries": "下载系列"
 		}
 	},
 	"userSmartListsScene": {
 		"heading": "智能清单",
-		"subtitle": "Your favorite searches and filters saved for easy access",
-		"searchPlaceholder": "Filter smart lists",
+		"subtitle": "保存您喜欢的搜索和过滤器以便于访问",
+		"searchPlaceholder": "筛选智能列表",
 		"buttons": {
-			"createSmartList": "Create smart list"
+			"createSmartList": "创建智能列表"
 		},
 		"list": {
 			"emptyState": {
-				"heading": "No smart lists to display",
-				"noListsMessage": "Create a smart list to get started",
-				"noMatchesMessage": "Try changing your search query"
+				"heading": "没有要显示的智能列表",
+				"noListsMessage": "创建一个智能列表以开始",
+				"noMatchesMessage": "尝试更改您的搜索参数"
 			},
 			"card": {
 				"meta": {
@@ -205,32 +205,32 @@
 	},
 	"userSmartListScene": {
 		"navigation": {
-			"items": "Items",
+			"items": "项目",
 			"settings": "设置"
 		},
 		"layout": {
-			"missingIdError": "This scene requires an ID in the URL",
-			"smartListNotFound": "Smart list not found",
-			"viewCreateError": "Failed to create view",
+			"missingIdError": "此场景需要 URL 中的 ID",
+			"smartListNotFound": "未找到智能列表",
+			"viewCreateError": "创建视图失败",
 			"viewSaveError": "Failed to save view"
 		},
 		"header": {
 			"backLink": "列表"
 		},
 		"itemsScene": {
-			"smartListNotFound": "Smart list not found",
+			"smartListNotFound": "未找到智能列表",
 			"actionHeader": {
 				"viewSelector": {
-					"customView": "Custom view",
-					"defaultView": "Default view",
-					"noViewsSaved": "No views saved",
-					"selectView": "Select a saved view"
+					"customView": "自定义视图",
+					"defaultView": "默认视图",
+					"noViewsSaved": "没有保存的视图",
+					"selectView": "选择一个已保存视图"
 				},
 				"filterDrawer": {
-					"heading": "Smart list filters",
-					"description": "Change the filters for this viewing session",
+					"heading": "智能列表筛选器",
+					"description": "更改此视图会话的过滤器",
 					"rawData": {
-						"heading": "Raw filter data",
+						"heading": "原始过滤器数据",
 						"description": "This is how Stump will process the filters"
 					},
 					"buttons": {
@@ -474,106 +474,106 @@
 						"emptyHeading": "There are no jobs to display",
 						"emptySubtitle": "You can't have a job if you don't have a job",
 						"deleteAllMessage": "Job history and statistics may be deleted from the database at any time. This action cannot be undone",
-						"deleteAllConfirmButton": "Clear history",
-						"deleteAllConfirmButtonTitle": "Clear all job history",
-						"deleteAllConfirmButtonTitleNoJobs": "No jobs to clear"
+						"deleteAllConfirmButton": "清除历史记录",
+						"deleteAllConfirmButtonTitle": "清除所有任务历史",
+						"deleteAllConfirmButtonTitleNoJobs": "没有要清除的任务"
 					}
 				}
 			}
 		},
 		"server/users": {
-			"helmet": "User management",
-			"title": "Users",
-			"description": "Manage the users on this server",
+			"helmet": "用户管理",
+			"title": "用户",
+			"description": "管理此服务器上的用户",
 			"createUser": {
-				"helmet": "Create user",
-				"title": "Create user",
-				"description": "Create a new user on this server"
+				"helmet": "创建用户",
+				"title": "创建用户",
+				"description": "在此服务器上创建新用户"
 			},
 			"updateUser": {
-				"helmet": "Update user",
-				"title": "Update user",
-				"description": "Update the details of this user"
+				"helmet": "更新用户",
+				"title": "更新用户",
+				"description": "更新此用户的详细信息"
 			},
 			"createOrUpdateForm": {
 				"accessControl": {
-					"heading": "Access control and restrictions",
+					"heading": "访问控制和限制",
 					"subtitle": [
-						"Configure any restrictions you want to apply to this user. For more information about access control, see the",
-						"documentation"
+						"配置您想要对此用户应用的任何限制。欲了解更多有关访问控制的信息，请参阅",
+						"文档"
 					],
 					"ageRestriction": {
-						"label": "Age restriction",
-						"description": "Restricts the user from accessing content above the set age rating threshold",
+						"label": "年龄限制",
+						"description": "限制用户访问设定年龄分级阈值以上的内容",
 						"placeholder": "13",
 						"enforceUnset": {
-							"label": "Enforce on unset",
-							"description": "If enabled, users will be restricted from accessing content with no age rating available"
+							"label": "在未设置时生效",
+							"description": "如果启用此选项，用户将被限制访问没有年龄评级的内容"
 						}
 					},
 					"tagRestriction": {
-						"label": "Tag restrictions",
-						"description": "Restricts the user from accessing content with the selected tags",
-						"placeholder": "Adult, Gore"
+						"label": "标签限制",
+						"description": "限制用户访问选中标签的内容",
+						"placeholder": "成人, 血腥"
 					}
 				},
 				"permissions": {
-					"heading": "Permissions",
+					"heading": "权限",
 					"subtitle": [
-						"Select the permissions you want to grant to this user. For more information on what each permission does, see the",
-						"documentation"
+						"选择您想要授予此用户的权限。欲了解更多关于每个权限的信息，请查看",
+						"文档"
 					],
 					"bookclub": {
-						"label": "Book Clubs",
+						"label": "读书俱乐部",
 						"read": {
-							"label": "Access book club features",
-							"description": "Allows the user to access book club features, including viewing and joining book clubs"
+							"label": "读书俱乐部功能访问",
+							"description": "允许用户访问读书俱乐部功能，包括查看和加入读书俱乐部"
 						},
 						"create": {
-							"label": "Create book clubs",
-							"description": "Allows the user to create new book clubs"
+							"label": "创建读书俱乐部",
+							"description": "允许用户创建新的读书俱乐部"
 						}
 					},
 					"file": {
-						"label": "File Management",
+						"label": "文件管理",
 						"explorer": {
-							"label": "File explorer",
-							"description": "Allows the user to access the various file explorers.\nContent restriction cannot be guaranteed when this feature is granted"
+							"label": "文件浏览器",
+							"description": "允许用户访问各种文件浏览器。若启用此功能则无法保证内容限制。"
 						},
 						"download": {
-							"label": "Download files",
-							"description": "Allows the user to download files from the server"
+							"label": "下载文件",
+							"description": "允许用户从服务器下载文件"
 						},
 						"upload": {
-							"label": "Upload files",
-							"description": "Allows the user to upload files to the server"
+							"label": "上传文件",
+							"description": "允许用户上传文件到服务器"
 						}
 					},
 					"library": {
-						"label": "Library Management",
+						"label": "书库管理",
 						"create": {
-							"label": "Create libraries",
-							"description": "Allows the user to create new libraries.\nIncludes permissions to edit and scan"
+							"label": "新建书库",
+							"description": "允许用户创建新的书库。\n包括扫描和编辑的权限"
 						},
 						"scan": {
-							"label": "Scan libraries",
-							"description": "Allows the user to initiate scans for existing libraries"
+							"label": "扫描书库",
+							"description": "允许用户对现有书库启动扫描"
 						},
 						"edit": {
-							"label": "Edit libraries",
-							"description": "Allows the user to edit basic details for existing libraries"
+							"label": "编辑书库",
+							"description": "允许用户编辑现有书库的基本信息"
 						},
 						"manage": {
-							"label": "Manage libraries",
-							"description": "Allows the user to manage advanced settings for existing libraries.\nIncludes permissions to edit and scan"
+							"label": "管理书库",
+							"description": "允许用户管理现有书库的高级设置。\n包括扫描和编辑的权限"
 						},
 						"delete": {
-							"label": "Delete libraries",
-							"description": "Allows the user to delete existing libraries.\nIncludes permissions to edit, manage, and scan"
+							"label": "删除书库",
+							"description": "允许用户删除现有的书库。\n包括扫描、管理和编辑的权限"
 						}
 					},
 					"server": {
-						"label": "Server Management",
+						"label": "服务器管理",
 						"manage": {
 							"label": "Manage server",
 							"description": "Allows the user to manage the server.\nIncludes *many* other permissions"

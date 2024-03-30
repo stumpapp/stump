@@ -29,8 +29,8 @@
 	"adminLibrarySidebar": {
 		"libraryConfiguration": {
 			"heading": "媒体库配置",
-			"subtitleCreating": "A preview of your new library will be shown below",
-			"subtitleEditing": "A preview of your library edits will be shown below"
+			"subtitleCreating": "您的新书库预览将在下面显示",
+			"subtitleEditing": "您书库编辑的预览将在下方显示"
 		}
 	},
 	"bookOverviewScene": {
@@ -66,23 +66,23 @@
 			"member_role_spec": {
 				"heading": "自定义角色映射",
 				"subtitle": [
-					"You can create custom names for the roles in your book club if you'd like. For more information, refer to the",
+					"如果您喜欢，您可以在读书俱乐部创建自定义角色名称。欲了解更多信息，请参阅",
 					"文档"
 				],
 				"member": {
 					"label": "成员",
 					"placeholder": "成员",
-					"description": "The name of the default role for your book club"
+					"description": "您的读书俱乐部默认角色的名称"
 				},
 				"moderator": {
-					"label": "Moderator",
-					"placeholder": "Moderator",
-					"description": "The name of the moderator role for your book club"
+					"label": "版主",
+					"placeholder": "版主",
+					"description": "您的读书俱乐部版主的名称"
 				},
 				"admin": {
 					"label": "管理员",
 					"placeholder": "管理员",
-					"description": "The name of the admin role for your book club"
+					"description": "您的读书俱乐部管理员角色的名称"
 				},
 				"creator": {
 					"label": "创建者",
@@ -92,11 +92,11 @@
 			},
 			"creator_preferences": {
 				"heading": "成员",
-				"subtitle": "Preferences for your own membership in the book club",
+				"subtitle": "您自己在书俱乐部中的会员设置",
 				"creator_display_name": {
 					"label": "显示名",
 					"placeholder": "oromei",
-					"description": "An optional display name for your membership in the book club. If set, this takes precedence over your username"
+					"description": "您在读书俱乐部的会员可选显示名称。如果设置，它优先于您的用户名"
 				},
 				"creator_hide_progress": {
 					"label": "隐藏进度",
@@ -231,7 +231,7 @@
 					"description": "更改此视图会话的过滤器",
 					"rawData": {
 						"heading": "原始过滤器数据",
-						"description": "This is how Stump will process the filters"
+						"description": "Stump 将如何处理过滤器"
 					},
 					"buttons": {
 						"save": "保存",
@@ -257,14 +257,14 @@
 							"name": {
 								"label": "名称",
 								"placeholder": "我的视图",
-								"description": "A friendly name to uniquely identify this view"
+								"description": "识别此视图的友好唯一名称"
 							}
 						},
 						"updateForm": {
 							"name": {
 								"label": "名称",
-								"placeholder": "My view",
-								"description": "The updated name for this view, if desired"
+								"placeholder": "我的视图",
+								"description": "此视图的更新名称（如果需要）"
 							}
 						}
 					}
@@ -301,35 +301,35 @@
 		},
 		"app/account": {
 			"helmet": "账户设置",
-			"title": "Account settings",
-			"description": "Settings related to your account",
+			"title": "账户设置",
+			"description": "与您的帐户相关的设置",
 			"sections": {
 				"account": {
 					"validation": {
-						"invalidUrl": "Please enter a valid URL",
-						"missingUsername": "Username is required"
+						"invalidUrl": "请输入有效的 URL 地址",
+						"missingUsername": "用户名为必填项"
 					},
 					"labels": {
-						"username": "Username",
-						"password": "Password",
-						"activeChangesPrompt": "You have unsaved changes"
+						"username": "用户名",
+						"password": "密码",
+						"activeChangesPrompt": "您有未保存的更改"
 					},
 					"errors": {
-						"updateFailed": "A server error occurred while updating your profile. Please try again."
+						"updateFailed": "更新您的个人资料时服务器发生错误。请重试。"
 					},
 					"avatarPicker": {
-						"heading": "Set your Avatar Image",
-						"subtitle": "Stump supports custom avatars, which can be set by providing a URL to an image. Image uploads are not supported in order to reduce the amount of data stored on the server.",
-						"preview": "A preview will appear here once you have entered a URL.",
+						"heading": "设置您的头像",
+						"subtitle": "Stump 支持自定义头像，头像可以通过提供图片的 URL 来设置。 为减少服务器上存储的数据，不支持图像上传。",
+						"preview": "当您输入了一个URL，预览将会在这里显示。",
 						"labels": {
-							"imageUrl": "Image URL",
-							"customAvatar": "Custom Avatar"
+							"imageUrl": "图片URL",
+							"customAvatar": "自定义头像"
 						},
 						"buttons": {
-							"confirm": "Confirm Image",
-							"cancel": "Cancel",
-							"edit": "Edit",
-							"changeImage": "Change Image",
+							"confirm": "确认图片",
+							"cancel": "取消",
+							"edit": "编辑",
+							"changeImage": "更改图片",
 							"removeImage": "Remove Image"
 						}
 					},

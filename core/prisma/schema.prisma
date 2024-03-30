@@ -752,6 +752,7 @@ model Emailer {
   smtp_port                 Int
   // smtp_secure         Boolean
   max_attachment_size_bytes Int? // null = unlimited
+  max_num_attachments       Int? // null = unlimited
 
   last_used_at DateTime?
 

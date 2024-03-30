@@ -641,6 +641,29 @@
 				"devices": {
 					"title": "Email devices",
 					"description": "The device aliases you have configured for recieving emails from your Stump server instance",
+					"addDevice": "Add device alias",
+					"addOrUpdateDevice": {
+						"title": {
+							"create": "Create device alias",
+							"update": "Update device alias"
+						},
+						"name": {
+							"label": "Name",
+							"description": "A friendly name to uniquely identify this device alias"
+						},
+						"email": {
+							"label": "Email",
+							"description": "The email address this alias will be associated with"
+						},
+						"forbidden": {
+							"label": "Forbidden",
+							"description": "When enabled, no user may send emails to the address associated with this alias"
+						},
+						"submit": {
+							"create": "Create device alias",
+							"update": "Update device alias"
+						}
+					},
 					"table": {
 						"emptyHeading": "No devices registered",
 						"emptySubtitle": "Create a new device alias for future use"
@@ -820,6 +843,7 @@
 		"saveChanges": "Save changes",
 		"create": "Create",
 		"edit": "Edit",
+		"update": "Update",
 		"unimplemented": "This functionality is not yet implemented! Check back later",
 		"limitedFunctionality": "This is not yet fully implemented and is lacking some features. Check back later"
 	}

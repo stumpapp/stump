@@ -32,6 +32,10 @@ pub use context::Ctx;
 pub use error::{CoreError, CoreResult};
 pub use event::CoreEvent;
 
+pub use email::{
+	AttachmentPayload, EmailContentType, EmailerClient, EmailerClientConfig,
+};
+
 /// A type alias strictly for explicitness in the return type of `init_journal_mode`.
 type JournalModeChanged = bool;
 /// A type alias strictly for explicitness in the return type of `init_encryption`.

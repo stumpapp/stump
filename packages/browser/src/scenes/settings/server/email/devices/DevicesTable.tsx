@@ -5,14 +5,12 @@ import { useLocaleContext } from '@stump/i18n'
 import { RegisteredEmailDevice } from '@stump/types'
 import { createColumnHelper } from '@tanstack/react-table'
 import { CircleSlash2 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { Table } from '@/components/table'
 
-import CreateOrUpdateDeviceModal from './CreateOrUpdateDeviceModal'
-
 const columnHelper = createColumnHelper<RegisteredEmailDevice>()
-const columns = [
+const baseColumns = [
 	columnHelper.accessor('name', {
 		cell: ({ getValue }) => <Text size="sm">{getValue()}</Text>,
 		header: () => (
@@ -48,7 +46,11 @@ const columns = [
 	}),
 ]
 
-export default function DevicesTable() {
+type Props = {
+	onSelectForUpdate: (device: RegisteredEmailDevice | null) => void
+}
+
+export default function DevicesTable({ onSelectForUpdate }: Props) {
 	const { t } = useLocaleContext()
 	const { data } = useQuery(
 		[emailerQueryKeys.getEmailDevices],
@@ -64,7 +66,16 @@ export default function DevicesTable() {
 
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 
-	const [updatingDevice, setUpdatingDevice] = useState<RegisteredEmailDevice | null>(null)
+	const columns = useMemo(
+		() => [
+			...baseColumns,
+			columnHelper.display({
+				cell: () => null,
+				id: 'actions',
+			}),
+		],
+		[onSelectForUpdate, t],
+	)
 
 	return (
 		<Card className="bg-background-200 p-1">
@@ -91,12 +102,6 @@ export default function DevicesTable() {
 					</div>
 				)}
 				isZeroBasedPagination
-			/>
-
-			<CreateOrUpdateDeviceModal
-				isOpen={!!updatingDevice}
-				updatingDevice={updatingDevice}
-				onClose={() => setUpdatingDevice(null)}
 			/>
 		</Card>
 	)

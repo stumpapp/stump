@@ -27,6 +27,8 @@ pub struct EmailerConfig {
 	pub smtp_port: u16,
 	/// The maximum size of an attachment in bytes
 	pub max_attachment_size_bytes: Option<i32>,
+	/// The maximum number of attachments that can be sent in a single email
+	pub max_num_attachments: Option<i32>,
 }
 
 impl EmailerConfig {
@@ -41,6 +43,7 @@ impl EmailerConfig {
 			host: self.smtp_host,
 			port: self.smtp_port,
 			max_attachment_size_bytes: self.max_attachment_size_bytes,
+			max_num_attachments: self.max_num_attachments,
 		})
 	}
 
@@ -57,6 +60,7 @@ impl EmailerConfig {
 			smtp_host: config.host,
 			smtp_port: config.port,
 			max_attachment_size_bytes: config.max_attachment_size_bytes,
+			max_num_attachments: config.max_num_attachments,
 		})
 	}
 }
@@ -111,6 +115,7 @@ impl TryFrom<emailer::Data> for SMTPEmailer {
 				smtp_host: data.smtp_host,
 				smtp_port: data.smtp_port as u16,
 				max_attachment_size_bytes: data.max_attachment_size_bytes,
+				max_num_attachments: data.max_num_attachments,
 			},
 			last_used_at: data.last_used_at.map(|t| t.to_rfc3339()),
 		})

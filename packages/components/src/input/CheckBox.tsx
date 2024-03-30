@@ -12,6 +12,7 @@ export type CheckBoxProps = {
 	description?: string
 } & RawCheckBoxProps
 
+// TODO: Wrap checkbox in label if provided
 // TODO: fix ring bg color on dark mode
 export const CheckBox = React.forwardRef<RawCheckBoxRef, CheckBoxProps>(
 	({ label, description, ...props }, ref) => {

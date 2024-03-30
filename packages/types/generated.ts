@@ -71,7 +71,7 @@ export type LoginActivity = { id: string; ip_address: string; user_agent: string
 /**
  * The config for an SMTP emailer
  */
-export type EmailerConfig = { sender_email: string; sender_display_name: string; username: string; smtp_host: string; smtp_port: number; max_attachment_size_bytes: number | null }
+export type EmailerConfig = { sender_email: string; sender_display_name: string; username: string; smtp_host: string; smtp_port: number; max_attachment_size_bytes: number | null; max_num_attachments: number | null }
 
 /**
  * An SMTP emailer entity, which stores SMTP configuration data to be used for sending emails.
@@ -273,6 +273,10 @@ export type UpdateUser = { username: string; password: string | null; avatar_url
 export type UpdateUserPreferences = { id: string; locale: string; preferred_layout_mode: string; primary_navigation_mode: string; layout_max_width_px: number | null; app_theme: string; show_query_indicator: boolean; enable_live_refetch: boolean; enable_discord_presence: boolean; enable_compact_display: boolean; enable_double_sidebar: boolean; enable_replace_primary_sidebar: boolean; enable_hide_scrollbar: boolean; prefer_accent_color: boolean; show_thumbnails_in_headers: boolean }
 
 export type DeleteUser = { hard_delete: boolean | null }
+
+export type SendAttachmentEmailsPayload = { media_ids: string[]; send_to: EmailerSendTo[] }
+
+export type SendAttachmentEmailResponse = { sent_emails_count: number; errors: string[] }
 
 /**
  * Input object for creating or updating an emailer

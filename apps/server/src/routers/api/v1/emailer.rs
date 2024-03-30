@@ -16,6 +16,7 @@ use stump_core::{
 	},
 	filesystem::{read_entire_file, ContentType, FileParts, PathUtils},
 	prisma::{emailer, emailer_send_record, registered_email_device, user, PrismaClient},
+	AttachmentPayload, EmailContentType,
 };
 use tower_sessions::Session;
 use utoipa::ToSchema;
@@ -470,12 +471,8 @@ async fn send_attachment_email(
 		Vec::<(i32, String, Vec<emailer_send_record::SetParam>)>::new();
 	let mut errors = Vec::new();
 
-	// TODO: I am not sure if reading devices (e.g. Kobo/Kindle) accept multiple attachments
-	// in a single email. I'm implementing this on this assumption it cannot, however testing
-	// and/or clarification is needed.
-	//
-	// If I CAN send multiple attachments, this will be SIGNIFICANTLY less complex in the logic
-	// below.
+	// TODO: Refactor this to chunk the books and send them in batches according to
+	// the max attachments per email limit
 
 	for book in books {
 		let FileParts {
@@ -499,20 +496,39 @@ async fn send_attachment_email(
 		}
 
 		let content_type =
-			ContentType::from_bytes_with_fallback(&content[..5], &extension);
+			ContentType::from_bytes_with_fallback(&content[..5], &extension)
+				.mime_type()
+				.parse::<EmailContentType>()
+				.map_err(|_| {
+					APIError::InternalServerError(
+						"Failed to parse content type".to_string(),
+					)
+				})?;
+
+		let attachment_meta = AttachmentMeta::new(
+			file_name.clone(),
+			Some(book.id.clone()),
+			content.len() as i32,
+		)
+		.into_data()
+		.map_or_else(
+			|e| {
+				tracing::error!(?e, "Failed to serialize attachment meta");
+				None
+			},
+			Some,
+		);
 
 		for recipient in recipients.iter() {
 			let send_result = emailer_client
 				.send_attachment(
 					"Attachment from Stump",
 					&recipient,
-					&file_name,
-					content.clone(),
-					content_type.mime_type().parse().map_err(|_| {
-						APIError::InternalServerError(
-							"Failed to parse content type".to_string(),
-						)
-					})?,
+					AttachmentPayload {
+						name: file_name.clone(),
+						content: content.clone(),
+						content_type: content_type.clone(),
+					},
 				)
 				.await;
 
@@ -526,22 +542,7 @@ async fn send_attachment_email(
 								by_user.id.clone(),
 							)),
 							emailer_send_record::attachment_meta::set(
-								AttachmentMeta::new(
-									file_name.clone(),
-									Some(book.id.clone()),
-									content.len() as i32,
-								)
-								.into_data()
-								.map_or_else(
-									|e| {
-										tracing::error!(
-											?e,
-											"Failed to serialize attachment meta"
-										);
-										None
-									},
-									Some,
-								),
+								attachment_meta.clone(),
 							),
 						],
 					));

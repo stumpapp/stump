@@ -31,8 +31,17 @@ pub struct EmailerClientConfig {
 	pub port: u16,
 	/// The maximum size of an attachment in bytes
 	pub max_attachment_size_bytes: Option<i32>,
+	/// The maximum number of attachments that can be sent in a single email
+	pub max_num_attachments: Option<i32>,
 }
 
+pub struct AttachmentPayload {
+	pub name: String,
+	pub content: Vec<u8>,
+	pub content_type: ContentType,
+}
+
+/// A client for sending emails
 pub struct EmailerClient {
 	config: EmailerClientConfig,
 	template_dir: PathBuf,
@@ -50,9 +59,7 @@ impl EmailerClient {
 		&self,
 		subject: &str,
 		recipient: &str,
-		name: &str,
-		content: Vec<u8>,
-		content_type: ContentType,
+		payload: AttachmentPayload,
 	) -> EmailResult<()> {
 		let from = self
 			.config
@@ -70,7 +77,8 @@ impl EmailerClient {
 			self.template_dir.clone(),
 		)?;
 
-		let attachment = Attachment::new(name.to_string()).body(content, content_type);
+		let attachment =
+			Attachment::new(payload.name).body(payload.content, payload.content_type);
 		let email = Message::builder()
 			.from(from)
 			.to(to)
@@ -102,6 +110,66 @@ impl EmailerClient {
 			},
 			Err(e) => {
 				tracing::error!(error = ?e, "Failed to send email with attachment");
+				Err(e.into())
+			},
+		}
+	}
+
+	pub async fn send_attachments(
+		&self,
+		subject: &str,
+		recipient: &str,
+		payloads: Vec<AttachmentPayload>,
+	) -> EmailResult<()> {
+		let from = self
+			.config
+			.sender_email
+			.parse()
+			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
+
+		let to = recipient
+			.parse()
+			.map_err(|e: AddressError| EmailError::InvalidEmail(e.to_string()))?;
+
+		let html = render_template(
+			EmailTemplate::Attachment,
+			&json!({}),
+			self.template_dir.clone(),
+		)?;
+
+		let mut multipart_builder = MultiPart::mixed().singlepart(
+			SinglePart::builder()
+				.header(header::ContentType::TEXT_HTML)
+				.body(String::from(html)),
+		);
+
+		for payload in payloads {
+			let attachment =
+				Attachment::new(payload.name).body(payload.content, payload.content_type);
+			multipart_builder = multipart_builder.singlepart(attachment);
+		}
+
+		let email = Message::builder()
+			.from(from)
+			.to(to)
+			.subject(subject)
+			.multipart(multipart_builder)?;
+
+		let creds =
+			Credentials::new(self.config.username.clone(), self.config.password.clone());
+
+		let transport = SmtpTransport::relay(&self.config.host)?
+			.port(self.config.port)
+			.credentials(creds)
+			.build();
+
+		match transport.send(&email) {
+			Ok(res) => {
+				tracing::trace!(?res, "Email with attachments was sent");
+				Ok(())
+			},
+			Err(e) => {
+				tracing::error!(error = ?e, "Failed to send email with attachments");
 				Err(e.into())
 			},
 		}

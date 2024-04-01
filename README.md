@@ -71,7 +71,7 @@ Feel free to reach out if you have anything else you'd like to see!
 
 ## Getting Started 🚀
 
-Stump isn't ready for normal usage yet. To give it a spin, it is reccommended to try the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump). If you're interested in development, or trying it from source, you can follow the [developer guide](#developer-guide-).
+Stump isn't ready for normal usage yet. To give it a spin, it is recommended to try the nightly [Docker image](https://hub.docker.com/r/aaronleopold/stump). If you're interested in development, or trying it from source, you can follow the [developer guide](#developer-guide-).
 
 For more information about getting started, check out the [guides](https://stumpapp.dev/guides) available on the Stump website.
 

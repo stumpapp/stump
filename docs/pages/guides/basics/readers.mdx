@@ -1,0 +1,38 @@
+import { Callout } from 'nextra-theme-docs'
+
+# Built-in Readers
+
+Stump has a few different built-in readers that you can use to read your books. Each reader is designed to be used with a specific type of book, and they all have their own unique features.
+
+## Ebook Reader
+
+A reader for reading ebooks, such as `.epub` files.
+
+<Callout emoji="🚧">
+	At the time of writing, ebooks are eagarly loaded for the reader, meaning your server will send
+	the entire book to your client. This is far from ideal, and a [streamable ebook
+	reader](https://github.com/stumpapp/stump/issues/62) is planned for a future release so ebook
+	reading sessions can be more network friendly.
+</Callout>
+
+> Wow, such empty. Much sad.
+
+## Image-based Reader
+
+A reader for reading image based books. These are valid archive files, such as `.cbz`/`zip` and `.cbr`/`rar` files.
+
+### Page-based Reader
+
+A reader that displays each page one at a time.
+
+> Wow, such empty. Much sad.
+
+### Continuous scroll Reader
+
+A reader that displays the entire book as one long page, allowing you to scroll through it either vertically or horizontally. Images are virtualized, so you can scroll through a book with hundreds of pages without any performance issues.
+
+> Coming soon!
+
+## PDF Reader
+
+> Wow, such empty. Much sad.

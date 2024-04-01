@@ -1,5 +1,5 @@
+import { StumpWebClient } from '@stump/browser'
 import { Platform } from '@stump/client'
-import StumpInterface from '@stump/interface'
 import { invoke, os } from '@tauri-apps/api'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -54,13 +54,13 @@ export default function App() {
 		}
 	}, [platform])
 
-	// I want to wait until platform is properly set before rendering the interface
+	// I want to wait until platform is properly set before rendering the app
 	if (!mounted) {
 		return null
 	}
 
 	return (
-		<StumpInterface
+		<StumpWebClient
 			platform={platform}
 			setUseDiscordPresence={setUseDiscordPresence}
 			setDiscordPresence={setDiscordPresence}

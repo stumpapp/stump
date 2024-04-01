@@ -1,4 +1,5 @@
 // TODO: Update this config... https://typescript-eslint.io/blog/announcing-typescript-eslint-v6/
+// TODO: Please I already forgot :sob:
 module.exports = {
 	env: {
 		browser: true,

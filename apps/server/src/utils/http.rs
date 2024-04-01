@@ -57,8 +57,8 @@ impl IntoResponse for ImageResponse {
 		);
 		base_response.headers_mut().insert(
 			header::CACHE_CONTROL,
-			// 10 minutes
-			HeaderValue::from_static("private,max-age=600"),
+			// 1 year
+			HeaderValue::from_static("private,max-age=31536000"),
 		);
 
 		base_response
@@ -136,7 +136,7 @@ impl IntoResponse for UnknownBufferResponse {
 				.insert(header::CONTENT_TYPE, header);
 			base_response
 		} else {
-			unexpected_error(header_result.err().unwrap()).into_response()
+			unexpected_error(header_result.unwrap_err()).into_response()
 		}
 	}
 }

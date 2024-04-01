@@ -1,9 +1,20 @@
 import { filesystemApi, filesystemQueryKeys } from '@stump/api'
-import type { DirectoryListing } from '@stump/types'
 import { AxiosError } from 'axios'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useQuery } from '../client'
+import { queryClient, useQuery } from '../client'
+
+export const prefetchLibraryFiles = (path: string) =>
+	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
+		const { data } = await filesystemApi.listDirectory({ page: 1, path })
+		return data
+	})
+
+export const prefetchFiles = (path: string) =>
+	queryClient.prefetchQuery([filesystemQueryKeys.listDirectory, path, 1], async () => {
+		const { data } = await filesystemApi.listDirectory({ page: 1, path })
+		return data
+	})
 
 export type DirectoryListingQueryParams = {
 	enabled: boolean
@@ -43,22 +54,22 @@ export function useDirectoryListing({
 	const [history, setHistory] = useState(currentPath ? [currentPath] : [])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
-	const [directoryListing, setDirectoryListing] = useState<DirectoryListing>()
-	const parent = directoryListing?.parent
-
-	const { isLoading, error } = useQuery(
+	const { isLoading, error, data } = useQuery(
 		[filesystemQueryKeys.listDirectory, currentPath, page],
-		() => filesystemApi.listDirectory({ page, path: currentPath }),
+		async () => {
+			const { data } = await filesystemApi.listDirectory({ page, path: currentPath })
+			return data
+		},
 		{
 			// Do not run query until `enabled` aka modal is opened.
 			enabled,
 			keepPreviousData: true,
-			onSuccess(res) {
-				setDirectoryListing(res.data.data)
-			},
 			suspense: false,
 		},
 	)
+
+	const directoryListing = data?.data
+	const parent = directoryListing?.parent
 
 	useEffect(() => {
 		if (initialPath) {

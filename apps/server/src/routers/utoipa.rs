@@ -7,13 +7,13 @@ use stump_core::db::query::{ordering::*, pagination::*};
 use stump_core::filesystem::{
 	DirectoryListing, DirectoryListingFile, DirectoryListingInput,
 };
-use stump_core::job::{JobDetail, JobStatus};
+use stump_core::job::JobStatus;
 
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::config::state::AppState;
-use crate::errors::ApiError;
+use crate::errors::APIError;
 use crate::filter::{
 	FilterableLibraryQuery, FilterableMediaQuery, FilterableSeriesQuery, LibraryFilter,
 	MediaFilter, SeriesFilter, SeriesQueryRelation,
@@ -139,8 +139,8 @@ use super::api::{
             DirectoryListingFile, CursorInfo, PageInfo, PageableLibraries,
             PageableMedia, PageableSeries, LoginOrRegisterArgs, DirectoryListingInput,
             PageQuery, FilterableLibraryQuery, PaginationQuery, QueryOrder, LibraryFilter,
-            Direction, CreateLibrary, UpdateLibrary, ApiError, MediaFilter, SeriesFilter,
-            FilterableMediaQuery, FilterableSeriesQuery, JobDetail, LibrariesStats, ScanQueryParam,
+            Direction, CreateLibrary, UpdateLibrary, APIError, MediaFilter, SeriesFilter,
+            FilterableMediaQuery, FilterableSeriesQuery, LibraryStats,
             JobStatus, SeriesQueryRelation, CreateReadingList, UpdateUserPreferences, UpdateUser,
             CreateTags, CleanLibraryResponse, MediaIsComplete, SeriesIsComplete, PutMediaCompletionStatus,
             SmartList, SmartListMeta, SmartListItems, SmartListView, CreateOrUpdateSmartList,

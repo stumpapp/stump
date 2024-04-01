@@ -1,11 +1,8 @@
 use std::path::Path;
 
 use serde::Serialize;
-use tracing::{trace, warn};
 
 use super::image::ImageFormat;
-
-// TODO: move this into fs crate
 
 /// [`ContentType`] is an enum that represents the HTTP content type. This is a smaller
 /// subset of the full list of content types, mostly focusing on types supported by Stump.
@@ -25,6 +22,7 @@ pub enum ContentType {
 	JPEG,
 	WEBP,
 	GIF,
+	TXT,
 	#[default]
 	UNKNOWN,
 }
@@ -44,11 +42,11 @@ fn infer_mime_from_bytes(bytes: &[u8]) -> Option<String> {
 fn infer_mime(path: &Path) -> Option<String> {
 	match infer::get_from_path(path) {
 		Ok(result) => {
-			trace!(?path, ?result, "infered mime");
+			tracing::trace!(?path, ?result, "infered mime");
 			result.map(|infer_type| infer_type.mime_type().to_string())
 		},
 		Err(e) => {
-			trace!(error = ?e, ?path, "infer failed");
+			tracing::trace!(error = ?e, ?path, "infer failed");
 			None
 		},
 	}
@@ -80,6 +78,7 @@ impl ContentType {
 			"jpeg" => ContentType::JPEG,
 			"webp" => ContentType::WEBP,
 			"gif" => ContentType::GIF,
+			"txt" => ContentType::TXT,
 			_ => temporary_content_workarounds(extension),
 		}
 	}
@@ -134,7 +133,7 @@ impl ContentType {
 			.unwrap_or_else(|| {
 				// NOTE: I am logging at warn level because inference from bytes is a little more
 				// accurate, so if it fails it may be indicative of a problem.
-				warn!(
+				tracing::warn!(
 					?bytes,
 					?extension,
 					"failed to infer content type, falling back to extension"
@@ -265,6 +264,7 @@ impl ContentType {
 			ContentType::JPEG => "jpg",
 			ContentType::WEBP => "webp",
 			ContentType::GIF => "gif",
+			ContentType::TXT => "txt",
 			ContentType::UNKNOWN => "",
 		}
 	}
@@ -311,6 +311,7 @@ impl std::fmt::Display for ContentType {
 			ContentType::JPEG => write!(f, "image/jpeg"),
 			ContentType::WEBP => write!(f, "image/webp"),
 			ContentType::GIF => write!(f, "image/gif"),
+			ContentType::TXT => write!(f, "text/plain"),
 			ContentType::UNKNOWN => write!(f, "unknown"),
 		}
 	}

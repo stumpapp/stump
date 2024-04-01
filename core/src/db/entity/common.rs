@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use utoipa::ToSchema;
 
+// TODO: this isn't ideal for all ID types, e.g. i32
 pub trait Cursor {
 	fn cursor(&self) -> String;
 }

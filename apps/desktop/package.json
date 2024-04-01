@@ -8,16 +8,16 @@
 		"format": "cargo fmt --package stump_desktop",
 		"tauri": "tauri",
 		"start": "tauri dev --no-watch",
-		"start-bundled": "pnpm tauri dev  --no-watch -- --features bundled-server",
+		"start-bundled": "yarn tauri dev  --no-watch -- --features bundled-server",
 		"vite": "vite --",
 		"dev": "tauri dev",
 		"build": "vite build && tauri build",
 		"build:mac": "vite build && tauri build --target universal-apple-darwin",
-		"nuke": "pnpm exec rimraf -rf node_modules"
+		"nuke": "yarn exec rimraf -rf node_modules"
 	},
 	"dependencies": {
-		"@stump/client": "workspace:*",
-		"@stump/interface": "workspace:*",
+		"@stump/client": "*",
+		"@stump/browser": "*",
 		"@tanstack/react-query": "^4.28.0",
 		"@tauri-apps/api": "^1.2.0",
 		"react": "^18.2.0",

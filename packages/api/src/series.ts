@@ -2,10 +2,10 @@ import type { Media, PatchSeriesThumbnail, Series } from '@stump/types'
 
 import { API } from './axios'
 import { mediaApi } from './media'
-import { ApiResult, CursorQueryParams, PageableApiResult, PagedQueryParams } from './types'
+import { APIResult, CursorQueryParams, PageableAPIResult, PagedQueryParams } from './types'
 import { mergeCursorParams, mergePageParams, toUrlParams, urlWithParams } from './utils'
 
-export function getSeries(filters?: Record<string, unknown>): Promise<PageableApiResult<Series[]>> {
+export function getSeries(filters?: Record<string, unknown>): Promise<PageableAPIResult<Series[]>> {
 	const params = toUrlParams(filters)
 	return API.get(urlWithParams('/series', params))
 }
@@ -13,13 +13,13 @@ export function getSeries(filters?: Record<string, unknown>): Promise<PageableAp
 export function getSeriesById(
 	id: string,
 	params?: Record<string, unknown>,
-): Promise<ApiResult<Series>> {
+): Promise<APIResult<Series>> {
 	return API.get(urlWithParams(`/series/${id}`, toUrlParams(params)))
 }
 
 export function getSeriesWithCursor(
 	params: CursorQueryParams,
-): Promise<PageableApiResult<Series[]>> {
+): Promise<PageableAPIResult<Series[]>> {
 	const searchParams = mergeCursorParams(params)
 	return API.get(urlWithParams('/series', searchParams))
 }
@@ -27,7 +27,7 @@ export function getSeriesWithCursor(
 export function getSeriesMedia(
 	id: string,
 	{ page, page_size, params }: PagedQueryParams,
-): Promise<PageableApiResult<Media[]>> {
+): Promise<PageableAPIResult<Media[]>> {
 	const searchParams = mergePageParams({ page, page_size, params })
 	return API.get(urlWithParams(`/series/${id}/media`, searchParams))
 }
@@ -35,7 +35,7 @@ export function getSeriesMedia(
 export function getRecentlyAddedSeries(
 	page: number,
 	params?: URLSearchParams,
-): Promise<PageableApiResult<Series[]>> {
+): Promise<PageableAPIResult<Series[]>> {
 	if (params) {
 		params.set('page', page.toString())
 		return API.get(`/series/recently-added?${params.toString()}`)
@@ -44,7 +44,7 @@ export function getRecentlyAddedSeries(
 	return API.get(`/series/recently-added?page=${page}`)
 }
 
-export function getNextInSeries(id: string): Promise<ApiResult<Media | undefined>> {
+export function getNextInSeries(id: string): Promise<APIResult<Media | undefined>> {
 	return API.get(`/series/${id}/media/next`)
 }
 
@@ -55,7 +55,7 @@ export function getNextMediaInSeries(
 	series_id: string,
 	media_id: string,
 	limit = 25,
-): Promise<PageableApiResult<Media[]>> {
+): Promise<PageableAPIResult<Media[]>> {
 	return mediaApi.getMedia({
 		cursor: media_id,
 		limit: limit.toString(),

@@ -139,8 +139,15 @@ export function useUpdatePreferences(params: UseUpdatePreferencesParams = {}) {
 		params,
 	)
 
+	// TODO: This ~should~ be safe, but the type generation is misleading. Any field with a default
+	// serde attribute is being marked as optional, which largely makes sense but causes issues here.
+	// The solution at this point would probably be to actually implement a patch for user preferences
+	const unsafePatch = async (input: Partial<UpdateUserPreferences>) =>
+		update(input as UpdateUserPreferences)
+
 	return {
 		isLoading,
+		unsafePatch,
 		update,
 	}
 }

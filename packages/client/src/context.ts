@@ -1,39 +1,37 @@
-import { JobUpdate } from '@stump/types'
 import { QueryClient } from '@tanstack/react-query'
 import { createContext, useContext } from 'react'
 
-export const AppPropsContext = createContext<AppProps | null>(null)
 export const QueryClientContext = createContext<QueryClient | undefined>(undefined)
 
-export type StumpClientContextProps = {
+export type IStumpClientContext = {
 	onRedirect?: (url: string) => void
+	onUnauthenticatedResponse?: (redirectUrl?: string) => void
+	onConnectionWithServerChanged?: (isConnected: boolean) => void
+	setUseDiscordPresence?: (connect: boolean) => void
+	setDiscordPresence?: (status?: string, details?: string) => void
 }
-export const StumpClientContext = createContext<StumpClientContextProps | undefined>(undefined)
+export const StumpClientContext = createContext<IStumpClientContext | undefined>(undefined)
 
-export type Platform = 'browser' | 'macOS' | 'windows' | 'linux' | 'unknown'
+// TODO: 'android' | 'ios' --> https://reactnative.dev/docs/platform
+/**
+ * The platform that the application is running on
+ */
+export type Platform = 'browser' | 'macOS' | 'windows' | 'linux' | 'mobile' | 'unknown'
 
-export interface AppProps {
+/**
+ * The props that are passed to the root of the application
+ */
+export interface StumpClientProps {
 	platform: Platform
 	baseUrl?: string
-	demoMode?: boolean
-
-	setBaseUrl?: (baseUrl: string) => void
 	setUseDiscordPresence?: (connect: boolean) => void
 	setDiscordPresence?: (status?: string, details?: string) => void
 }
 
-export interface IJobContext {
-	activeJobs: Record<string, JobUpdate>
-
-	addJob(job: JobUpdate): void
-	updateJob(job: JobUpdate): void
-	removeJob(runnerId: string): void
-}
-export const JobContext = createContext<IJobContext | null>(null)
-export const useAppProps = () => {
-	const context = useContext(AppPropsContext)
-	if (!context) throw new Error('AppPropsContext not found')
+export const useClientContext = () => {
+	const context = useContext(StumpClientContext)
+	if (!context) {
+		throw new Error('StumpContext not found')
+	}
 	return context
 }
-export const useJobContext = () => useContext(JobContext)
-export const useClientContext = () => useContext(StumpClientContext)

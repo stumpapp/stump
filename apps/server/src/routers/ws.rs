@@ -14,9 +14,8 @@ use stump_core::Ctx;
 
 use crate::config::state::AppState;
 
-// TODO: do I need auth middleware here? I think so, but I think the ws:// is
-// throwing if off and making it not think there is a session when there is.
-pub(crate) fn mount() -> Router<AppState> {
+// FIXME: Auth guard this WS! I think TBH this might something for https://github.com/stumpapp/stump/issues/219
+pub(crate) fn mount(_: AppState) -> Router<AppState> {
 	Router::new().route("/ws", get(ws_handler))
 	// .layer(from_extractor_with_state::<Auth, AppState>(app_state))
 }

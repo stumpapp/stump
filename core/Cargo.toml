@@ -11,8 +11,9 @@ specta = { workspace = true }
 
 ### Async Utils ###
 rayon = "1.8.0"
-futures = "0.3.29"
+futures = { workspace = true }
 async-trait = { workspace = true }
+async-channel = "2.1.0"
 
 ### Filesystem Utils ###
 walkdir = "2.4.0"
@@ -52,9 +53,14 @@ alphanumeric-sort = "1.5.3"
 
 [dev-dependencies]
 tempfile = { workspace = true }
+criterion = { version = "0.5.1", features = ["html_reports", "async_tokio"] }
 
 [build-dependencies]
 chrono = "0.4.31"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2.152"
+
+[[bench]]
+name    = "bench_main"
+harness = false

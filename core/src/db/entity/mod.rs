@@ -1,6 +1,7 @@
 mod book_club;
 pub(crate) mod common;
 mod epub;
+mod job;
 mod library;
 mod log;
 mod media;
@@ -17,6 +18,7 @@ pub use self::epub::*;
 pub use self::log::*;
 
 pub use book_club::*;
+pub use job::*;
 pub use library::*;
 pub use media::*;
 pub use metadata::*;
@@ -32,6 +34,7 @@ pub use common::{AccessRole, Cursor, EntityVisibility, FileStatus, LayoutMode};
 
 pub mod macros {
 	pub use super::book_club::prisma_macros::*;
+	pub use super::media::prisma_macros::*;
 	pub use super::metadata::prisma_macros::*;
 	pub use super::smart_list::prisma_macros::*;
 }

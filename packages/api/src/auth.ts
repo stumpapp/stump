@@ -1,23 +1,23 @@
 import type { LoginOrRegisterArgs, User } from '@stump/types'
 
 import { API } from './axios'
-import { ApiResult } from './types'
+import { APIResult } from './types'
 
 // TODO: types
 
-export function me(): Promise<ApiResult<User>> {
+export function me(): Promise<APIResult<User>> {
 	return API.get('/auth/me')
 }
 
-export function login(input: LoginOrRegisterArgs): Promise<ApiResult<User>> {
+export function login(input: LoginOrRegisterArgs): Promise<APIResult<User>> {
 	return API.post('/auth/login', input)
 }
 
-export function register(payload: LoginOrRegisterArgs) {
+export function register(payload: LoginOrRegisterArgs): Promise<APIResult<User>> {
 	return API.post('/auth/register', payload)
 }
 
-export function logout(): Promise<ApiResult<never>> {
+export function logout(): Promise<APIResult<never>> {
 	return API.post('/auth/logout')
 }
 

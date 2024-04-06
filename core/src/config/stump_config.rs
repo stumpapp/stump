@@ -73,6 +73,8 @@ pub struct StumpConfig {
 	pub db_path: Option<String>,
 	/// The client directory.
 	pub client_dir: String,
+	/// An optional custom path for the templates directory.
+	pub custom_templates_dir: Option<String>,
 	/// The configuration root for the Stump application, cotains thumbnails, cache, and logs.
 	pub config_dir: String,
 	/// A list of origins for CORS.
@@ -105,6 +107,7 @@ impl StumpConfig {
 			db_path: None,
 			client_dir: String::from("./dist"),
 			config_dir,
+			custom_templates_dir: None,
 			allowed_origins: vec![],
 			pdfium_path: None,
 			disable_swagger: false,
@@ -127,6 +130,7 @@ impl StumpConfig {
 			db_path: None,
 			client_dir: env!("CARGO_MANIFEST_DIR").to_string() + "/../web/dist",
 			config_dir: super::get_default_config_dir(),
+			custom_templates_dir: None,
 			allowed_origins: vec![],
 			pdfium_path: None,
 			disable_swagger: false,
@@ -230,6 +234,10 @@ impl StumpConfig {
 
 		if let Ok(pdfium_path) = env::var(PDFIUM_KEY) {
 			env_configs.pdfium_path = Some(pdfium_path);
+		}
+
+		if let Ok(custom_templates_dir) = env::var("EMAIL_TEMPLATES_DIR") {
+			self.custom_templates_dir = Some(custom_templates_dir);
 		}
 
 		if let Ok(hash_cost) = env::var(HASH_COST_KEY) {
@@ -355,7 +363,10 @@ impl StumpConfig {
 
 	/// Returns a `PathBuf` to the Stump templates directory.
 	pub fn get_templates_dir(&self) -> PathBuf {
-		PathBuf::from(&self.config_dir).join("templates")
+		self.custom_templates_dir.clone().map_or_else(
+			|| PathBuf::from(&self.config_dir).join("templates"),
+			PathBuf::from,
+		)
 	}
 
 	/// Returns a `PathBuf` to the Stump avatars directory
@@ -515,6 +526,7 @@ mod tests {
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
+				custom_templates_dir: None,
 				allowed_origins: vec![
 					"origin1".to_string(),
 					"origin2".to_string(),
@@ -560,6 +572,7 @@ mod tests {
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
+				custom_templates_dir: None,
 				allowed_origins: vec![],
 				pdfium_path: None,
 				disable_swagger: true,
@@ -594,6 +607,7 @@ mod tests {
 				db_path: Some("not_a_real_path".to_string()),
 				client_dir: "not_a_real_dir".to_string(),
 				config_dir: "also_not_a_real_dir".to_string(),
+				custom_templates_dir: None,
 				allowed_origins: vec!["origin1".to_string(), "origin2".to_string()],
 				pdfium_path: Some("not_a_path_to_pdfium".to_string()),
 				disable_swagger: false,

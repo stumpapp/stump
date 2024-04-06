@@ -560,19 +560,19 @@ async fn send_attachment_email(
 	}
 
 	let sent_emails_count = record_creates.len();
-	let affected_rows = client
-		.emailer_send_record()
-		.create_many(record_creates)
-		.exec()
-		.await?;
-
-	if affected_rows != sent_emails_count as i64 {
-		tracing::warn!(
-			created_records = ?affected_rows,
-			expected = ?sent_emails_count,
-			"Failed to create all emailer send records",
-		);
-		errors.push("Failed to create all emailer send records".to_string());
+	// Note: create_many threw a strange error...
+	let audit_result = client
+		._batch(record_creates.into_iter().map(|(eid, recipient, params)| {
+			client.emailer_send_record().create(
+				emailer::id::equals(eid),
+				recipient,
+				params,
+			)
+		}))
+		.await;
+	if let Err(error) = audit_result {
+		tracing::error!(?error, "Failed to create emailer send records!");
+		errors.push(format!("Failed to create emailer send records: {}", error));
 	}
 
 	Ok(Json(SendAttachmentEmailResponse {

@@ -12,6 +12,8 @@ pub enum EmailError {
 	SendFailed(#[from] smtp::Error),
 	#[error("Failed to register template: {0}")]
 	TemplateRegistrationFailed(#[from] handlebars::TemplateError),
+	#[error("Template not found")]
+	TempalateNotFound,
 	#[error("Failed to render template: {0}")]
 	TemplateRenderFailed(#[from] handlebars::RenderError),
 }

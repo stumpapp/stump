@@ -35,6 +35,7 @@ pub struct EmailerClientConfig {
 	pub max_num_attachments: Option<i32>,
 }
 
+#[derive(Debug)]
 pub struct AttachmentPayload {
 	pub name: String,
 	pub content: Vec<u8>,
@@ -61,6 +62,14 @@ impl EmailerClient {
 		recipient: &str,
 		payload: AttachmentPayload,
 	) -> EmailResult<()> {
+		dbg!(
+			&subject,
+			&recipient,
+			&payload.name,
+			payload.content.len(),
+			&payload.content_type
+		);
+
 		let from = self
 			.config
 			.sender_email
@@ -73,7 +82,9 @@ impl EmailerClient {
 
 		let html = render_template(
 			EmailTemplate::Attachment,
-			&json!({}),
+			&json!({
+				"title": "Stump Attachment",
+			}),
 			self.template_dir.clone(),
 		)?;
 
@@ -133,7 +144,9 @@ impl EmailerClient {
 
 		let html = render_template(
 			EmailTemplate::Attachment,
-			&json!({}),
+			&json!({
+				"title": "Stump Attachment",
+			}),
 			self.template_dir.clone(),
 		)?;
 
